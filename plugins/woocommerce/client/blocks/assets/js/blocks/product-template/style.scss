@@ -132,4 +132,65 @@ $min-product-width: 150px;
 			min-width: 15%;
 		}
 	}
+
+	// Fixed column count. These match the responsive widths above, so the next
+	// product still peeks into view. Blocks without a columns class are unchanged.
+	// Keep the 1–6 range in sync with MIN_CAROUSEL_COLUMNS / MAX_CAROUSEL_COLUMNS.
+	$carousel-column-widths: (
+		1: calc(85% / 1),
+		2: calc(85% / 2),
+		3: calc(85.5% / 3),
+		4: calc(88% / 4),
+		5: calc(90% / 5),
+		6: calc(90% / 6),
+	);
+	// Same widths as the container queries above: breakpoint, columns, min-width.
+	$carousel-shrink-steps: (
+		600px 3 28.5%,
+		782px 3 29%,
+		960px 4 22%,
+		1280px 5 18%,
+		1440px 6 15%,
+	);
+
+	@each $columns, $width in $carousel-column-widths {
+		&.columns-#{ $columns } {
+			// The responsive carousel centers a product inside an inset snap
+			// area. A fixed count aligns to the product edge so a full column
+			// stays in view instead of being cut off.
+			scroll-padding-inline: 0;
+
+			.wc-block-product {
+				flex-basis: $width;
+				flex-grow: 0;
+				flex-shrink: 0;
+				min-width: $width;
+				max-width: $width;
+				scroll-snap-align: start;
+
+				&:last-child {
+					scroll-snap-align: end;
+				}
+			}
+
+			// Not enough room for every column: use the responsive widths above,
+			// and skip steps that would show more products than this setting.
+			@if $columns > 1 {
+				&.is-shrink-columns .wc-block-product {
+					flex-basis: 0;
+					flex-shrink: 1;
+					min-width: 42.5%;
+					max-width: 400px;
+
+					@each $breakpoint, $step-columns, $step-width in $carousel-shrink-steps {
+						@if $step-columns <= $columns {
+							@container carousel (min-width: #{$breakpoint}) {
+								min-width: $step-width;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }

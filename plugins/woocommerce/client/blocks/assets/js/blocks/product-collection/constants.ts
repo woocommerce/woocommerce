@@ -27,6 +27,30 @@ import {
 
 export const PRODUCT_COLLECTION_BLOCK_NAME = blockJson.name;
 
+/**
+ * Carousel column classes in product-template/style.scss cover this range.
+ * ProductTemplate.php uses the same bounds.
+ */
+const MIN_CAROUSEL_COLUMNS = 1;
+const MAX_CAROUSEL_COLUMNS = 6;
+
+/**
+ * Returns a carousel column count in the supported range.
+ * An invalid value keeps the responsive carousel widths.
+ */
+export const getCarouselColumns = ( value: unknown ): number | undefined => {
+	if ( typeof value !== 'number' || ! Number.isFinite( value ) ) {
+		return undefined;
+	}
+
+	const columns = Math.trunc( value );
+	if ( columns < MIN_CAROUSEL_COLUMNS || columns > MAX_CAROUSEL_COLUMNS ) {
+		return undefined;
+	}
+
+	return columns;
+};
+
 export const STOCK_STATUS_OPTIONS = getSetting< Record< string, string > >(
 	'stockStatusOptions',
 	[]

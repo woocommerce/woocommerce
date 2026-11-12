@@ -12,6 +12,7 @@ import {
 /**
  * Internal dependencies
  */
+import { getCarouselColumns } from '../../constants';
 import { DisplayLayoutControlProps, LayoutOptions } from '../../types';
 import { getDefaultDisplayLayout, sanitizeDisplayLayout } from '../../utils';
 
@@ -29,22 +30,48 @@ interface ColumnsControlProps extends DisplayLayoutControlProps {
 
 const ColumnsControl = ( props: ColumnsControlProps ) => {
 	const { maxColumns, hideResponsiveToggle } = props;
-	const { type, columns, shrinkColumns } = props.displayLayout;
-	const showColumnsControl = type === LayoutOptions.GRID;
+	const { type, columns, shrinkColumns, carouselColumns } =
+		props.displayLayout;
+	const isGridLayout = type === LayoutOptions.GRID;
+	const isCarouselLayout = type === LayoutOptions.CAROUSEL;
+	const showColumnsControl = isGridLayout || isCarouselLayout;
 
 	const defaultLayout = getDefaultDisplayLayout();
-	const columnCount = columns ?? defaultLayout.columns;
+	const savedCarouselColumns = getCarouselColumns( carouselColumns );
+	const defaultMaxColumns = 6;
+	const effectiveMaxColumns = maxColumns ?? defaultMaxColumns;
+	// Unset carouselColumns keeps the responsive widths. The slider still needs a number.
+	const columnCount = isCarouselLayout
+		? ( savedCarouselColumns ??
+			Math.min( defaultLayout.columns, effectiveMaxColumns ) )
+		: ( columns ?? defaultLayout.columns );
 
 	const onShrinkColumnsToggleChange = ( value: boolean ) => {
 		props.setAttributes( {
 			displayLayout: sanitizeDisplayLayout( {
 				...props.displayLayout,
 				shrinkColumns: value,
+				// The carousel maximum has to be saved before shrinking can apply.
+				...( isCarouselLayout &&
+					value &&
+					savedCarouselColumns === undefined && {
+						carouselColumns: columnCount,
+					} ),
 			} ),
 		} );
 	};
 
 	const onPanelDeselect = () => {
+		if ( isCarouselLayout ) {
+			props.setAttributes( {
+				displayLayout: sanitizeDisplayLayout( {
+					...props.displayLayout,
+					carouselColumns: undefined,
+				} ),
+			} );
+			return;
+		}
+
 		props.setAttributes( {
 			displayLayout: sanitizeDisplayLayout( defaultLayout ),
 		} );
@@ -57,19 +84,42 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 		props.setAttributes( {
 			displayLayout: sanitizeDisplayLayout( {
 				...props.displayLayout,
-				columns: value,
+				...( isCarouselLayout
+					? { carouselColumns: value }
+					: { columns: value } ),
 			} ),
 		} );
 	};
 
-	const defaultMaxColumns = 6;
-	const effectiveMaxColumns = maxColumns ?? defaultMaxColumns;
+	const hasCustomColumnCount = () =>
+		isCarouselLayout
+			? savedCarouselColumns !== undefined
+			: defaultLayout.columns !== columnCount;
+
+	const hasCustomShrinkColumns = () =>
+		isCarouselLayout
+			? !! shrinkColumns
+			: defaultLayout?.shrinkColumns !== shrinkColumns;
+
+	const onShrinkColumnsDeselect = () => {
+		if ( ! isCarouselLayout ) {
+			onPanelDeselect();
+			return;
+		}
+
+		props.setAttributes( {
+			displayLayout: sanitizeDisplayLayout( {
+				...props.displayLayout,
+				shrinkColumns: false,
+			} ),
+		} );
+	};
 
 	return showColumnsControl ? (
 		<>
 			<ToolsPanelItem
 				label={ columnsLabel }
-				hasValue={ () => defaultLayout.columns !== columnCount }
+				hasValue={ hasCustomColumnCount }
 				isShownByDefault
 				onDeselect={ onPanelDeselect }
 			>
@@ -86,11 +136,9 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 			{ ! hideResponsiveToggle && (
 				<ToolsPanelItem
 					label={ toggleLabel }
-					hasValue={ () =>
-						defaultLayout?.shrinkColumns !== shrinkColumns
-					}
+					hasValue={ hasCustomShrinkColumns }
 					isShownByDefault
-					onDeselect={ onPanelDeselect }
+					onDeselect={ onShrinkColumnsDeselect }
 				>
 					<ToggleControl
 						__nextHasNoMarginBottom
