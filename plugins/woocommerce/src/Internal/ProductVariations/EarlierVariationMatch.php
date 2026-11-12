@@ -71,25 +71,42 @@ class EarlierVariationMatch {
 		}
 
 		foreach ( $earlier_ids as $earlier_id ) {
-			$earlier = wc_get_product( $earlier_id );
-			if ( ! $earlier instanceof WC_Product_Variation || ! $this->is_available( $earlier, $parent, $hide_out_of_stock ) ) {
+			// Attribute meta is already primed, so skip loading variations that cannot match.
+			if ( ! $this->attributes_match( $earlier_id, $selected ) ) {
 				continue;
 			}
 
-			$matches = true;
-			foreach ( $earlier->get_attributes( 'edit' ) as $name => $value ) {
-				$value = (string) $value;
-				if ( '' !== $value && ( $selected[ $name ] ?? null ) !== $value ) {
-					$matches = false;
-					break;
-				}
-			}
-			if ( $matches ) {
+			$earlier = wc_get_product( $earlier_id );
+			if ( $earlier instanceof WC_Product_Variation && $this->is_available( $earlier, $parent, $hide_out_of_stock ) ) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	/**
+	 * Whether the variation's stored attributes match the selection.
+	 *
+	 * Empty attribute values are "any" and match every selection.
+	 *
+	 * @param int                   $variation_id Variation ID.
+	 * @param array<string, string> $selected     Selected attribute values, without the attribute_ prefix.
+	 * @return bool
+	 */
+	private function attributes_match( int $variation_id, array $selected ): bool {
+		foreach ( wc_get_product_variation_attributes( $variation_id ) as $name => $value ) {
+			$name = (string) $name;
+			if ( 0 === strpos( $name, 'attribute_' ) ) {
+				$name = substr( $name, 10 );
+			}
+			$value = (string) $value;
+			if ( '' !== $value && ( $selected[ $name ] ?? null ) !== $value ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
