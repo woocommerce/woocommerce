@@ -59,7 +59,6 @@ class EarlierVariationMatch {
 				return false;
 			}
 
-			// Attribute meta is already primed, so skip loading variations that cannot match.
 			if ( ! $this->attributes_match( $child_id, $selected_attributes ) ) {
 				continue;
 			}
@@ -84,13 +83,12 @@ class EarlierVariationMatch {
 	 */
 	private function attributes_match( int $variation_id, array $selected ): bool {
 		foreach ( wc_get_product_variation_attributes( $variation_id ) as $name => $value ) {
-			$value = (string) $value;
 			if ( '' === $value ) {
 				continue;
 			}
 
 			$selected_value = $selected[ $name ] ?? null;
-			if ( ! is_scalar( $selected_value ) || (string) $selected_value !== $value ) {
+			if ( ! is_scalar( $selected_value ) || (string) $selected_value !== (string) $value ) {
 				return false;
 			}
 		}
@@ -106,8 +104,12 @@ class EarlierVariationMatch {
 	 * @return bool
 	 */
 	private function is_available( WC_Product_Variation $variation, WC_Product_Variable $parent_product ): bool {
+		if ( ! $variation->exists() ) {
+			return false;
+		}
+
 		$hide_out_of_stock = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
-		if ( ! $variation->exists() || ( $hide_out_of_stock && ! $variation->is_in_stock() ) ) {
+		if ( $hide_out_of_stock && ! $variation->is_in_stock() ) {
 			return false;
 		}
 
