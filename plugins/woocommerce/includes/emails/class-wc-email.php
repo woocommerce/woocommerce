@@ -596,15 +596,30 @@ class WC_Email extends WC_Settings_API {
 		 */
 		$subject = apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option_or_transient( 'subject', $this->get_default_subject() ) ), $this->object, $this );
 		if ( $this->block_email_editor_enabled ) {
-			// The new email editor edits the subject as rich text, so convert it to plain text before filling in the
-			// tags; tag values are then never parsed as HTML again. Unlike wp_strip_all_tags(), this keeps the text
-			// after a "<" that does not start a tag and decodes entities.
-			$subject = $this->personalizer->personalize_transactional_content( Html_Processing_Helper::get_plain_text( $subject, true ), $this, Personalizer::RENDERING_CONTEXT_TEXT );
+			$subject = $this->get_block_editor_plain_text( $subject );
 		}
 		return $subject;
 	}
 
 
+
+	/**
+	 * Convert a field the block email editor edits as rich text, such as the subject, to personalized plain text.
+	 * Each tag is filled in on its own while the text is read, so neither the merchant's text nor a tag value is
+	 * parsed as HTML a second time. Unlike wp_strip_all_tags(), a "<" that does not start a tag keeps the text
+	 * after it, and entities are decoded.
+	 *
+	 * @param string $rich_text The field as stored by the editor.
+	 * @return string Plain text.
+	 */
+	private function get_block_editor_plain_text( string $rich_text ): string {
+		return Html_Processing_Helper::get_plain_text(
+			$rich_text,
+			function ( string $tag_token ): string {
+				return $this->personalizer->personalize_transactional_content( $tag_token, $this, Personalizer::RENDERING_CONTEXT_TEXT );
+			}
+		);
+	}
 
 	/**
 	 * Get email preheader.
@@ -623,8 +638,7 @@ class WC_Email extends WC_Settings_API {
 		 */
 		$preheader = apply_filters( 'woocommerce_email_preheader' . $this->id, $this->format_string( $this->get_option_or_transient( 'preheader', '' ) ), $this->object, $this );
 		if ( $this->block_email_editor_enabled ) {
-			// Same as the subject: plain text first, then the tags.
-			$preheader = $this->personalizer->personalize_transactional_content( Html_Processing_Helper::get_plain_text( $preheader, true ), $this, Personalizer::RENDERING_CONTEXT_TEXT );
+			$preheader = $this->get_block_editor_plain_text( $preheader );
 		}
 		return $preheader;
 	}
