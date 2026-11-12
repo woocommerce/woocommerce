@@ -179,6 +179,20 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox set_current_gateway() should leave no gateway current for an empty answer, also when one was marked current earlier in the request.
+	 */
+	public function test_set_current_gateway_clears_an_earlier_selection_for_an_empty_answer(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_COD::ID ) );
+		add_filter( 'woocommerce_default_payment_method', '__return_empty_string' );
+		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+		$gateways[ WC_Gateway_COD::ID ]->set_current();
+
+		$this->sut->set_current_gateway( $gateways );
+
+		$this->assertSame( array(), $this->get_current_gateways( $gateways ) );
+	}
+
+	/**
 	 * @testdox set_current_gateway() should keep the session choice over a default payment method callback that returns nothing.
 	 */
 	public function test_set_current_gateway_keeps_the_session_choice_over_the_callback(): void {
