@@ -10,7 +10,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join( dirname( fileURLToPath( import.meta.url ) ), '..' );
-const source = join( root, '.ai', 'skills' );
+const source = join( root, '.agents', 'skills' );
 const destination = join( root, '.github', 'coderabbit', 'skills' );
 
 // Skills authored in this repo are real directories; the ones pnpm links are symlinks.
@@ -21,7 +21,7 @@ const linkedSkills = existsSync( source )
 	: [];
 
 if ( ! linkedSkills.length ) {
-	console.log( 'No linked skills found in .ai/skills. Run `pnpm install` first.' );
+	console.log( 'No linked skills found in .agents/skills. Run `pnpm install` first.' );
 	process.exit( 0 );
 }
 

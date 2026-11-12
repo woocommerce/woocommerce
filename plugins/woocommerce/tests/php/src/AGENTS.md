@@ -269,6 +269,6 @@ tests/php/src/
 ## Related Docs
 
 - [`plugins/woocommerce/tests/README.md`](../../README.md) - Test environment, fixture lifecycle, and performance
-- [`woocommerce-backend-dev/unit-tests.md`](../../../../../.ai/skills/woocommerce-backend-dev/unit-tests.md) - Unit-test conventions
+- [`woocommerce-backend-dev/unit-tests.md`](../../../../../.agents/skills/woocommerce-backend-dev/unit-tests.md) - Unit-test conventions
 - `src/Internal/Admin/Settings/CLAUDE.md` - Settings backend patterns
 - PHPUnit: <https://phpunit.de/manual/9.6/en/index.html>
