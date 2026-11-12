@@ -215,6 +215,98 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Store output checks that see the given WooCommerce llms.txt status, as woocommerce #70741 reports it.
+	 *
+	 * @param string|null $status  Status, or null without the fallback.
+	 * @param string      $section Guidance WooCommerce adds.
+	 */
+	private static function with_llms_status( ?string $status, string $section = '' ): StoreOutputChecks {
+		$sut         = new class() extends StoreOutputChecks {
+			/**
+			 * The status to report.
+			 *
+			 * @var array{status:string,section:string}|null
+			 */
+			public $status;
+
+			/**
+			 * The status set by the test.
+			 */
+			protected function llms_txt_status(): ?array {
+				return $this->status;
+			}
+		};
+		$sut->status = null === $status ? null : array(
+			'status'  => $status,
+			'section' => $section,
+		);
+		$sut->init( new \Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper() );
+		return $sut;
+	}
+
+	/**
+	 * The llms_txt_present result.
+	 *
+	 * @param StoreOutputChecks $sut Checks.
+	 * @return array<string, mixed>
+	 */
+	private static function llms_present( StoreOutputChecks $sut ): array {
+		return array_column( $sut->all(), null, 'id' )['llms_txt_present'];
+	}
+
+	/**
+	 * @testdox llms.txt names its source: WooCommerce's guidance first, even in a file on disk, then a file in the site root, then another provider.
+	 */
+	public function test_llms_txt_source_when_served(): void {
+		$section                = "## Agentic capabilities\n\n- [WooCommerce Store API](" . home_url( '/wp-json/wc/store/v1' ) . ')';
+		$responses              = $this->good_store();
+		$responses['/llms.txt'] = array( 200, "# Shop\n\n" . $section . "\n" );
+		$this->serve( $responses );
+
+		$this->assertSame( 'woocommerce', self::llms_present( self::with_llms_status( 'unknown', $section . "\n" ) )['source'] );
+		$this->assertSame( 'woocommerce', self::llms_present( self::with_llms_status( 'physical_file', $section ) )['source'], 'A file WooCommerce wrote is still WooCommerce\'s' );
+
+		$responses['/llms.txt'] = array( 200, "# Shop\n\n- [About](" . home_url( '/about/' ) . ")\n" );
+		$this->serve( $responses );
+		$this->assertSame( 'file', self::llms_present( self::with_llms_status( 'physical_file', $section ) )['source'] );
+		$this->assertSame( 'other', self::llms_present( self::with_llms_status( 'unknown', $section ) )['source'] );
+		$this->assertSame( 'other', self::llms_present( self::with_llms_status( 'disabled' ) )['source'], 'Served while WooCommerce\'s is off' );
+		$this->assertSame( '', self::llms_present( self::with_llms_status( null ) )['source'], 'Without the fallback, no source' );
+	}
+
+	/**
+	 * @testdox A missing llms.txt says whether WooCommerce's is turned off or doesn't reach the store, and its fix follows; couldn't check has no source.
+	 */
+	public function test_llms_txt_source_when_missing(): void {
+		$responses = $this->good_store();
+		unset( $responses['/llms.txt'] );
+		$this->serve( $responses );
+		$default = self::llms_present( self::with_llms_status( null ) );
+		$this->assertSame( '', $default['source'] );
+
+		$disabled = self::llms_present( self::with_llms_status( 'disabled' ) );
+		$this->assertFalse( $disabled['ok'] );
+		$this->assertSame( 'disabled', $disabled['source'] );
+		$this->assertStringContainsString( 'woocommerce_enable_llms_txt', $disabled['fix'] );
+
+		$not_reached = self::llms_present( self::with_llms_status( 'unknown', '## Agentic capabilities' ) );
+		$this->assertSame( 'not_reached', $not_reached['source'] );
+		$this->assertStringContainsString( 'Ask your host', $not_reached['fix'] );
+		$this->assertNotSame( $default['fix'], $not_reached['fix'] );
+		$this->assertSame( '', self::llms_present( self::with_llms_status( 'no_rewrite', '## Agentic capabilities' ) )['source'], 'A status it doesn\'t know claims no cause' );
+
+		$subdirectory = static fn( string $url ): string => (string) preg_replace( '#^(https?://[^/]+)#', '$1/shop', $url );
+		add_filter( 'home_url', $subdirectory );
+		$this->assertSame( '', self::llms_present( self::with_llms_status( 'unknown', '## Agentic capabilities' ) )['source'], 'In a subdirectory WooCommerce serves it elsewhere' );
+		remove_filter( 'home_url', $subdirectory );
+
+		$responses              = $this->good_store();
+		$responses['/llms.txt'] = array( 403, 'Blocked' );
+		$this->serve( $responses );
+		$this->assertSame( '', self::llms_present( self::with_llms_status( 'disabled' ) )['source'] );
+	}
+
+	/**
 	 * @testdox A nosnippet rule for one crawler, or a max-snippet limit in the X-Robots-Tag header, fails the snippet check.
 	 */
 	public function test_snippet_directives(): void {
