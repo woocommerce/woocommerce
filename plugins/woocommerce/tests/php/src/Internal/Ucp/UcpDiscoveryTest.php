@@ -46,11 +46,9 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		remove_filter( 'query_vars', array( $this->sut, 'add_query_var' ), 0 );
 		remove_action( 'parse_request', array( $this->sut, 'maybe_render' ), 0 );
 		remove_action( 'admin_init', array( $this->sut, 'maybe_sync_file' ) );
-		remove_action( 'admin_notices', array( $this->sut, 'maybe_render_notice' ) );
 		remove_action( 'deactivate_' . plugin_basename( WC_PLUGIN_FILE ), array( $this->sut, 'delete_file' ) );
 		delete_option( 'woocommerce_queue_flush_rewrite_rules' );
 		if ( is_file( $this->file ) ) {
-			chmod( dirname( $this->file ), 0755 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
 			wp_delete_file( $this->file );
 		}
 		parent::tearDown();
@@ -175,40 +173,6 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		$this->sut->maybe_sync_file();
 
 		$this->assertFileDoesNotExist( $this->file );
-	}
-
-	/**
-	 * @testdox The notice shows when the endpoint is unreachable under plain permalinks or shadowed by an undeletable file under pretty ones.
-	 * @testWith ["", null, true, true]
-	 *           ["", 493, true, false]
-	 *           ["/%postname%/", 365, true, true]
-	 *           ["/%postname%/", 493, true, false]
-	 *           ["/%postname%/", null, true, false]
-	 *           ["/%postname%/", 493, false, true]
-	 *           ["", 493, false, true]
-	 *
-	 * @param string   $structure Permalink structure.
-	 * @param int|null $mode      Mode of the static file's directory, or null when the file is missing.
-	 * @param bool     $owned     Whether the static file carries the WooCommerce marker.
-	 * @param bool     $expected  Whether the notice should show.
-	 */
-	public function test_notice( string $structure, ?int $mode, bool $owned, bool $expected ): void {
-		$this->set_permalink_structure( $structure );
-		if ( null !== $mode ) {
-			wp_mkdir_p( dirname( $this->file ) );
-			file_put_contents( $this->file, $owned ? '{"links":[{"rel":"woocommerce"}]}' : '{}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			chmod( dirname( $this->file ), $mode ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
-		}
-
-		if ( '' !== $structure ) {
-			$this->sut->maybe_sync_file();
-		}
-
-		ob_start();
-		$this->sut->maybe_render_notice();
-		$output = (string) ob_get_clean();
-
-		$this->assertSame( $expected, str_contains( $output, 'notice-warning' ) );
 	}
 
 	/**

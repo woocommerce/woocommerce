@@ -35,13 +35,6 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	private const LINK_HREF = 'https://developer.woocommerce.com/docs/';
 
 	/**
-	 * Whether this request's write of the static file failed or came up short.
-	 *
-	 * @var bool
-	 */
-	private bool $write_failed = false;
-
-	/**
 	 * Register hooks.
 	 */
 	public function register(): void {
@@ -61,7 +54,6 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		if ( $enabled ) {
 			add_action( 'parse_request', array( $this, 'maybe_render' ), 0 );
 			add_action( 'admin_init', array( $this, 'maybe_sync_file' ) );
-			add_action( 'admin_notices', array( $this, 'maybe_render_notice' ) );
 			register_deactivation_hook( WC_PLUGIN_FILE, array( $this, 'delete_file' ) );
 		}
 
@@ -117,6 +109,8 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	/**
 	 * Keep the static discovery file in sync on admin screens: write it under plain permalinks, delete it under pretty ones.
 	 * The file only refreshes on admin page loads.
+	 *
+	 * Failures are silent here: the Agentic Readiness checks report an unreachable or invalid discovery endpoint.
 	 */
 	public function maybe_sync_file(): void {
 		global $wp_rewrite;
@@ -127,6 +121,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		}
 
 		if ( $wp_rewrite->using_permalinks() ) {
+			// A file that cannot be deleted keeps overriding the profile WooCommerce serves, as the web server answers first.
 			$this->delete_file();
 			return;
 		}
@@ -136,6 +131,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 			return;
 		}
 
+		// A file WooCommerce did not write is left in place, so it is served instead of the WooCommerce profile.
 		$path = $this->get_file_path();
 		if ( is_file( $path ) && ! $this->is_owned( $path ) ) {
 			return;
@@ -144,54 +140,14 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		// phpcs:disable WordPress.WP.AlternativeFunctions
 		$content  = (string) wp_json_encode( $this->get_profile(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		$dir      = dirname( $path );
+		// Without write access no file is written, and /.well-known/ucp is unreachable unless the server routes it to index.php.
 		$writable = is_file( $path ) ? is_writable( $path ) : wp_mkdir_p( $dir ) && is_writable( $dir );
 		if ( $writable && ! ( is_file( $path ) && file_get_contents( $path ) === $content ) ) {
-			// A full disk can leave a truncated file behind while the path stays writable.
-			$this->write_failed = strlen( $content ) !== file_put_contents( $path, $content );
+			// A full disk can leave a truncated file behind, which is then served as an invalid profile.
+			// It also loses the ownership marker, so it is no longer rewritten or removed.
+			file_put_contents( $path, $content );
 		}
 		// phpcs:enable WordPress.WP.AlternativeFunctions
-	}
-
-	/**
-	 * Warn store managers when the discovery endpoint is unreachable, shadowed by a stale static file, or served from a failed write.
-	 */
-	public function maybe_render_notice(): void {
-		global $wp_rewrite;
-
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return;
-		}
-
-		$path   = $this->get_file_path();
-		$exists = is_file( $path );
-		// Checked first: a truncated file no longer carries the ownership marker.
-		if ( $this->write_failed ) {
-			/* translators: %1$s: discovery file path. */
-			$message = __( 'The UCP discovery file %1$s could not be written completely, so /.well-known/ucp may return an invalid profile. Check the available disk space on the server.', 'woocommerce' );
-		} elseif ( $exists && ! $this->is_owned( $path ) ) {
-			/* translators: %1$s: discovery file path. */
-			$message = __( 'A %1$s file not created by WooCommerce is overriding the UCP discovery endpoint served by WooCommerce.', 'woocommerce' );
-		} elseif ( $wp_rewrite->using_permalinks() ) {
-			// maybe_sync_file() has already tried to delete it, so a file still here is one the cleanup could not remove.
-			if ( ! $exists ) {
-				return;
-			}
-			/* translators: %1$s: discovery file path. */
-			$message = __( 'A static %1$s file is overriding the UCP discovery endpoint. Delete it or make its directory writable by the web server.', 'woocommerce' );
-		} else {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
-			if ( is_multisite() || is_writable( $path ) ) {
-				return;
-			}
-			/* translators: %1$s: discovery file path, %2$s: opening link tag, %3$s: closing link tag. */
-			$message = __( 'The UCP discovery endpoint /.well-known/ucp may not be reachable. %2$sEnable pretty permalinks%3$s, or make %1$s writable by the web server.', 'woocommerce' );
-		}
-
-		echo wp_kses_post(
-			'<div class="notice notice-warning"><p>'
-			. sprintf( $message, '<code>' . esc_html( $path ) . '</code>', '<a href="' . esc_url( admin_url( 'options-permalink.php' ) ) . '">', '</a>' )
-			. '</p></div>'
-		);
 	}
 
 	/**
