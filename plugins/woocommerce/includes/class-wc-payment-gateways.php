@@ -405,10 +405,10 @@ class WC_Payment_Gateways {
 	 *
 	 * The shopper's session choice wins while it is in `$gateways`; otherwise the default from
 	 * PaymentUtils::get_checkout_payment_method(), which runs the `woocommerce_default_payment_method`
-	 * filter. An empty answer leaves no gateway current. WooCommerce's own answer can name a gateway
-	 * that isn't in `$gateways`, for example the first enabled one when it isn't available for this
-	 * cart; the first of `$gateways` is current then, as before. Without a session the first of
-	 * `$gateways` is current and the filter isn't asked, as before.
+	 * filter and falls back to the first of `$gateways`. An empty answer leaves no gateway current.
+	 * WooCommerce's own answer can name a gateway that isn't in `$gateways`, for example a saved card's
+	 * gateway that isn't available for this cart; the first of `$gateways` is current then, as before.
+	 * Without a session the first of `$gateways` is current and the filter isn't asked, as before.
 	 *
 	 * @param array $gateways Available payment gateways.
 	 */
@@ -421,7 +421,7 @@ class WC_Payment_Gateways {
 		$current_gateway = false;
 
 		if ( WC()->session ) {
-			$current = PaymentUtils::get_checkout_payment_method();
+			$current = PaymentUtils::get_checkout_payment_method( $gateways );
 
 			if ( '' === $current ) {
 				return;

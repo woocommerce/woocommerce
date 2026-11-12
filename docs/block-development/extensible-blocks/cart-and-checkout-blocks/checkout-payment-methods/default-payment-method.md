@@ -6,7 +6,7 @@ sidebar_label: Default payment method
 
 # Choosing the default payment method
 
-By default, the checkout loads with a payment method already selected. WooCommerce picks the first of these that exists: the customer's default saved card, the method they picked earlier in the same session, or the first enabled gateway. Some stores have requirements on whether a method may be preselected, or on which kind: for example, that the shopper must choose one themselves, or that a card is never selected for them.
+By default, the checkout loads with a payment method already selected. WooCommerce picks the first of these that exists: the customer's default saved card, the method they picked earlier in the same session, or the first gateway the checkout lists. Some stores have requirements on whether a method may be preselected, or on which kind: for example, that the shopper must choose one themselves, or that a card is never selected for them.
 
 The `woocommerce_default_payment_method` filter lets a store decide what the checkout starts with when the shopper hasn't picked a method yet. The Checkout block, the classic checkout shortcode and the pay-for-order page all ask it. It works with gateway ids. It is not the default saved card a customer picks in My Account: that card only decides which gateway WooCommerce would otherwise preselect.
 
@@ -18,7 +18,7 @@ apply_filters( 'woocommerce_default_payment_method', $payment_method, $available
 
 | Argument | Type | Description |
 | --- | --- | --- |
-| `$payment_method` | `string` | The gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first enabled gateway, or `''` when there is none. |
+| `$payment_method` | `string` | The gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first gateway the checkout lists, or `''` when there is none. |
 | `$available_gateways` | `array` | The gateways available for the current cart, keyed by gateway id. |
 
 Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing. Any other value selects nothing. Returning `$payment_method` unchanged keeps WooCommerce's answer as it is.

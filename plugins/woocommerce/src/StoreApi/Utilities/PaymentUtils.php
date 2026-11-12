@@ -89,27 +89,34 @@ class PaymentUtils {
 	 * is available for the cart, otherwise the default from get_default_payment_method(). The draft
 	 * response and the draft order sync both use this, so they agree.
 	 *
+	 * @param array|null $listed_gateways Optional. The gateways the caller lists, keyed by id and in display order. See get_default_payment_method().
 	 * @return string
 	 */
-	public static function get_checkout_payment_method(): string {
+	public static function get_checkout_payment_method( ?array $listed_gateways = null ): string {
 		$chosen_payment_method = self::get_session_payment_method();
 
 		if ( '' !== $chosen_payment_method && isset( WC()->payment_gateways()->get_available_payment_gateways()[ $chosen_payment_method ] ) ) {
 			return $chosen_payment_method;
 		}
 
-		return (string) self::get_default_payment_method();
+		return (string) self::get_default_payment_method( $listed_gateways );
 	}
 
 	/**
 	 * Returns the default payment method for a customer: the default saved card, then the method
-	 * remembered in the session, then the first enabled gateway. The `woocommerce_default_payment_method`
+	 * remembered in the session, then the first gateway. The `woocommerce_default_payment_method`
 	 * filter runs last and can replace that answer.
 	 *
+	 * "The first gateway" depends on what the shopper sees. The Checkout block lists the enabled gateways
+	 * in their saved order, so without `$listed_gateways` it is the first enabled one. The classic checkout
+	 * and the pay-for-order page list the available gateways in the order their filter leaves them, and
+	 * pass that list.
+	 *
+	 * @param array|null $listed_gateways Optional. The gateways the caller lists, keyed by id and in display order.
 	 * @return string
 	 */
-	public static function get_default_payment_method() {
-		$payment_method     = self::get_unfiltered_default_payment_method();
+	public static function get_default_payment_method( ?array $listed_gateways = null ) {
+		$payment_method     = self::get_unfiltered_default_payment_method( $listed_gateways );
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
 		/**
@@ -123,7 +130,7 @@ class PaymentUtils {
 		 *
 		 * @param string $payment_method     Gateway id WooCommerce would preselect: the customer's default saved
 		 *                                   card's gateway, the method remembered in the session, or the first
-		 *                                   enabled gateway; '' when there is none.
+		 *                                   gateway the checkout lists; '' when there is none.
 		 * @param array  $available_gateways Gateways available for this cart, keyed by id.
 		 */
 		$filtered = apply_filters( 'woocommerce_default_payment_method', $payment_method, $available_gateways );
@@ -138,11 +145,13 @@ class PaymentUtils {
 	}
 
 	/**
-	 * The default payment method before the filter: saved card, session, then the first enabled gateway.
+	 * The default payment method before the filter: saved card, session, then the first listed gateway,
+	 * or the first enabled one when the caller lists none.
 	 *
+	 * @param array|null $listed_gateways The gateways the caller lists, keyed by id and in display order.
 	 * @return string
 	 */
-	private static function get_unfiltered_default_payment_method() {
+	private static function get_unfiltered_default_payment_method( ?array $listed_gateways = null ) {
 		$saved_payment_methods = self::get_saved_payment_methods();
 		// A saved payment method exists, set as default.
 		if ( $saved_payment_methods && ! empty( $saved_payment_methods['default'] ) ) {
@@ -154,6 +163,10 @@ class PaymentUtils {
 		// If payment method is already stored in session, use it.
 		if ( '' !== $chosen_payment_method ) {
 			return $chosen_payment_method;
+		}
+
+		if ( null !== $listed_gateways ) {
+			return (string) ( array_key_first( $listed_gateways ) ?? '' );
 		}
 
 		// If no saved payment method exists, use the first enabled payment method.
