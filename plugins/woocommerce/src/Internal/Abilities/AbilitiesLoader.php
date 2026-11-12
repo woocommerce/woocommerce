@@ -64,9 +64,9 @@ class AbilitiesLoader {
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
+		ReportAbility::class,
 		ShippingZonesQuery::class,
 		TaxRatesQuery::class,
-		ReportAbility::class,
 	);
 
 	/**
