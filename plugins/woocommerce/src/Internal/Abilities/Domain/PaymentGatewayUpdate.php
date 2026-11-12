@@ -205,8 +205,9 @@ class PaymentGatewayUpdate extends AbstractDomainAbility implements AbilityDefin
 	 * suggestions and offline methods in the map keep their place.
 	 *
 	 * Offline methods always follow the offline group entry, so an offline method
-	 * only moves within that block, and any other gateway lands just before or
-	 * just after it.
+	 * only moves within that block, and any other gateway sent inside it lands at
+	 * the nearer edge. The edge depends only on the target, so a repeated call
+	 * leaves the order as it is.
 	 *
 	 * @param PaymentsProviders  $providers Payment providers.
 	 * @param array<int, string> $ids       Gateway IDs in checkout order.
@@ -215,21 +216,31 @@ class PaymentGatewayUpdate extends AbstractDomainAbility implements AbilityDefin
 	 * @return int The saved position, which can differ when offline methods stay grouped.
 	 */
 	private static function move_in_checkout_order( PaymentsProviders $providers, array $ids, string $id, int $position ): int {
-		$order_map = $providers->get_order_map();
-		$offline   = array_keys( array_filter( $ids, array( $providers, 'is_offline_payment_method' ) ) );
+		$order_map  = $providers->get_order_map();
+		$current    = (int) array_search( $id, $ids, true );
+		$is_offline = $providers->is_offline_payment_method( $id );
+		$others     = array_values( array_diff( $ids, array( $id ) ) );
+		$offline    = array_keys( array_filter( $others, array( $providers, 'is_offline_payment_method' ) ) );
 
-		if ( $offline && $providers->is_offline_payment_method( $id ) ) {
-			$position = max( min( $offline ), min( $position, max( $offline ) ) );
+		// The gateway lands before $others[ $position ], so a position from $first + 1 to $last splits the offline block.
+		if ( $offline ) {
+			$first = min( $offline );
+			$last  = max( $offline );
+
+			if ( $is_offline ) {
+				$position = max( $first, min( $position, $last + 1 ) );
+			} elseif ( $position > $first && $position <= $last ) {
+				$position = $position - $first <= $last + 1 - $position ? $first : $last + 1;
+			}
 		}
 
 		$target = $ids[ $position ];
 
-		if ( $offline && $target !== $id && $providers->is_offline_payment_method( $target ) && ! $providers->is_offline_payment_method( $id ) ) {
-			$moving_up = $position < (int) array_search( $id, $ids, true );
-			$target    = $moving_up ? PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP : $ids[ max( $offline ) ];
+		if ( ! $is_offline && $position < $current && $providers->is_offline_payment_method( $target ) ) {
+			$target = PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP;
 		}
 
-		if ( $target !== $id && isset( $order_map[ $target ] ) ) {
+		if ( $position !== $current && isset( $order_map[ $target ] ) ) {
 			$order_map = PaymentsSettingsUtils::order_map_apply_mappings( $order_map, array( $id => $order_map[ $target ] ) );
 			$providers->save_order_map( $providers->enhance_order_map( $order_map ) );
 		}

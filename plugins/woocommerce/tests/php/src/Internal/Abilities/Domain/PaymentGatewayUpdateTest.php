@@ -343,6 +343,23 @@ class PaymentGatewayUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave the checkout order unchanged when the same move into the offline methods is sent again.
+	 */
+	public function test_repeats_a_move_into_the_offline_methods_without_changing_the_order(): void {
+		$this->register_online_gateway();
+		$this->move_gateway( 'online_test_gateway', 99 );
+		$target = $this->get_saved_positions()['cheque'];
+
+		$first = $this->move_gateway( 'online_test_gateway', $target );
+		$once  = $this->get_saved_positions();
+
+		$second = $this->move_gateway( 'online_test_gateway', $target );
+
+		$this->assertSame( $once, $this->get_saved_positions() );
+		$this->assertSame( $first['payment_gateway']['order'], $second['payment_gateway']['order'] );
+	}
+
+	/**
 	 * @testdox Should refuse a title that is empty once markup and whitespace are removed, and keep the saved title.
 	 *
 	 * @testWith ["   "]
