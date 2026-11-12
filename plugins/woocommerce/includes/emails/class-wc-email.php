@@ -596,9 +596,10 @@ class WC_Email extends WC_Settings_API {
 		 */
 		$subject = apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option_or_transient( 'subject', $this->get_default_subject() ) ), $this->object, $this );
 		if ( $this->block_email_editor_enabled ) {
-			// The new email editor edits the subject as rich text, so convert it to plain text. Unlike wp_strip_all_tags(),
-			// this keeps the text after a "<" that does not start a tag and decodes entities.
-			$subject = Html_Processing_Helper::get_plain_text( $this->personalizer->personalize_transactional_content( $subject, $this, Personalizer::RENDERING_CONTEXT_TEXT ) );
+			// The new email editor edits the subject as rich text, so convert it to plain text before filling in the
+			// tags; tag values are then never parsed as HTML again. Unlike wp_strip_all_tags(), this keeps the text
+			// after a "<" that does not start a tag and decodes entities.
+			$subject = $this->personalizer->personalize_transactional_content( Html_Processing_Helper::get_plain_text( $subject, true ), $this, Personalizer::RENDERING_CONTEXT_TEXT );
 		}
 		return $subject;
 	}
@@ -622,7 +623,8 @@ class WC_Email extends WC_Settings_API {
 		 */
 		$preheader = apply_filters( 'woocommerce_email_preheader' . $this->id, $this->format_string( $this->get_option_or_transient( 'preheader', '' ) ), $this->object, $this );
 		if ( $this->block_email_editor_enabled ) {
-			$preheader = $this->personalizer->personalize_transactional_content( $preheader, $this, Personalizer::RENDERING_CONTEXT_TEXT );
+			// Same as the subject: plain text first, then the tags.
+			$preheader = $this->personalizer->personalize_transactional_content( Html_Processing_Helper::get_plain_text( $preheader, true ), $this, Personalizer::RENDERING_CONTEXT_TEXT );
 		}
 		return $preheader;
 	}

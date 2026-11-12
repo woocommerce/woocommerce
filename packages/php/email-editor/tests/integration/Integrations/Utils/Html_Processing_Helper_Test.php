@@ -46,6 +46,15 @@ class Html_Processing_Helper_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Plain text can keep personalization tag comments so tags are filled in after the HTML is gone.
+	 */
+	public function test_get_plain_text_keeps_tag_tokens_when_asked(): void {
+		$html = '<strong>Big</strong> <!--[test/sale note="x"]--> deal<!-- note -->';
+		$this->assertSame( 'Big <!--[test/sale note="x"]--> deal', Html_Processing_Helper::get_plain_text( $html, true ) );
+		$this->assertSame( 'Big  deal', Html_Processing_Helper::get_plain_text( $html ) );
+	}
+
+	/**
 	 * Dangerous caption markup must be neutralized against the real HTML API.
 	 *
 	 * @dataProvider caption_xss_provider
