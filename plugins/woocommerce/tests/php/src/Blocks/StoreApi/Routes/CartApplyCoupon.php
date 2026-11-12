@@ -278,6 +278,35 @@ class CartApplyCoupon extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Applying a coupon whose code contains a backslash keeps the backslash.
+	 */
+	public function test_apply_coupon_with_backslash_in_code(): void {
+		wc()->cart->remove_coupons();
+
+		$fixtures = new FixtureData();
+		$fixtures->get_coupon(
+			array(
+				'code'          => 'save\\10',
+				'discount_type' => 'fixed_cart',
+				'amount'        => 1,
+			)
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'code' => 'save\\10',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'The coupon should be applied.' );
+		$this->assertSame( 'save\\10', $response->get_data()['coupons'][0]['code'], 'The applied code should keep its backslash.' );
+	}
+
+	/**
 	 * Test applying invalid coupon.
 	 */
 	public function test_apply_invalid_coupon() {

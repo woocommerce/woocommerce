@@ -86,6 +86,11 @@ class ExtensibleAbilities {
 	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'include_ids', 'exclude_ids' );
 
 	/**
+	 * Type names that the REST schema check knows. It accepts any value for another name.
+	 */
+	private const JSON_TYPES = array( 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string' );
+
+	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
@@ -148,11 +153,15 @@ class ExtensibleAbilities {
 	 *                                  a UTC offset: the schema check accepts them, and a strict client refuses
 	 *                                  the whole result.
 	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. It needs
-	 *                                  a `type`. Core publishes it as declared. A value can be null only where it
-	 *                                  declares null. Required with `set_callback`.
+	 *                                  one `type` name, or an `anyOf` where each branch has one `type` name. A
+	 *                                  list of types is refused at the top level, because some clients refuse it:
+	 *                                  a nullable field uses `[{"type":"string"},{"type":"null"}]` as its `anyOf`.
+	 *                                  Core publishes it as declared. A value can be null only where it declares
+	 *                                  null. Required with `set_callback`.
 	 *     @type callable $set_callback Optional. Receives the object and the value, and changes the object
 	 *                                  in memory, when an ability creates or updates the object. It returns a
-	 *                                  WP_Error to reject the value, and then nothing is saved. A field without
+	 *                                  WP_Error to reject the value, and then nothing is saved. It also runs
+	 *                                  after Core refuses another value of the primary object. A field without
 	 *                                  it cannot be written. Required with `input_schema`. Rules:
 	 *                                  1. It only sets values in memory. It does not save, send email
 	 *                                     or make HTTP requests.
@@ -225,8 +234,8 @@ class ExtensibleAbilities {
 				wc_doing_it_wrong( __METHOD__, 'The "set_callback" argument must be callable, and a field with an "input_schema" needs it.', '11.4.0' );
 				return;
 			}
-			if ( ! is_array( $args['input_schema'] ?? null ) || ! isset( $args['input_schema']['type'] ) ) {
-				wc_doing_it_wrong( __METHOD__, 'The "input_schema" argument must be an array with a "type".', '11.4.0' );
+			if ( ! is_array( $args['input_schema'] ?? null ) || ! self::input_schema_has_type( $args['input_schema'] ) ) {
+				wc_doing_it_wrong( __METHOD__, 'The "input_schema" argument must be an array with one "type" name, or with an "anyOf" where each branch has one "type" name. For a nullable field, use an "anyOf" with a {"type":"null"} branch instead of a list of types.', '11.4.0' );
 				return;
 			}
 		}
@@ -252,6 +261,30 @@ class ExtensibleAbilities {
 	}
 
 	/**
+	 * Whether a field input schema has one top-level JSON type name, or a non-empty
+	 * `anyOf` list where each branch has one JSON type name. The REST schema check
+	 * needs a known type for every branch that a value can match.
+	 *
+	 * @param array<string, mixed> $schema Field input schema.
+	 * @return bool
+	 */
+	private static function input_schema_has_type( array $schema ): bool {
+		if ( isset( $schema['type'] ) ) {
+			return in_array( $schema['type'], self::JSON_TYPES, true );
+		}
+		$branches = $schema['anyOf'] ?? null;
+		if ( ! is_array( $branches ) || empty( $branches ) || array_values( $branches ) !== $branches ) {
+			return false;
+		}
+		foreach ( $branches as $branch ) {
+			if ( ! is_array( $branch ) || ! in_array( $branch['type'] ?? null, self::JSON_TYPES, true ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Register a filter that the list ability of a resource accepts under `filters.extensions.<namespace>.<filter>`.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_init` action. A call after that action is refused.
@@ -262,8 +295,9 @@ class ExtensibleAbilities {
 	 * @param array $args {
 	 *     Filter arguments.
 	 *
-	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query` and
-	 *                               `orders-query` apply the filters of `product` and `order`. The list ability
+	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query`,
+	 *                               `orders-query` and `customers-query` apply the filters of `product`, `order`
+	 *                               and `customer`. A `meta_query` for `customer` matches user meta. The list ability
 	 *                               of another resource must call `get_query_args()` and `add_query_filters_schema()` itself.
 	 *     @type string   $namespace Slug of the extension that owns the filter, such as `subscriptions`.
 	 *     @type string   $filter    Filter name inside the namespace, such as `subscribable`.
@@ -380,7 +414,7 @@ class ExtensibleAbilities {
 	/**
 	 * Get the query arguments of the filters in the input of a list ability.
 	 * Each key holds one clause for each filter, so `array_merge_recursive()`
-	 * adds them to WP_Query or wc_get_orders() arguments with AND. `post__in`
+	 * adds them to WP_Query, wc_get_orders() or WP_User_Query arguments with AND. `post__in`
 	 * holds the IDs that every `include_ids` filter returned, without the IDs
 	 * that any `exclude_ids` filter returned, or `0` when none remain, because
 	 * an empty `post__in` does not filter. Without `include_ids`, the excluded
@@ -558,8 +592,10 @@ class ExtensibleAbilities {
 	 *                               already used gets a numeric suffix, as `<namespace>:<code>:2`. The error
 	 *                               gets the namespace in its data, and the 400 status when it has no status.
 	 *                               Its message can name the ability or screen to use instead. Validators also
-	 *                               run after a field callback refuses a value, so the client gets the field
-	 *                               refusals and the validator refusals together. Rules:
+	 *                               run after a field callback or Core refuses a value, so the client gets every
+	 *                               refusal together, with all messages in the first one. After a Core refusal
+	 *                               they run on the primary object only, which keeps the values Core refused at
+	 *                               their old values. Rules:
 	 *                               1. It only reads. It does not change the object, save, send email or
 	 *                                  make HTTP requests.
 	 *                               2. It checks the ability name when the extension's own abilities

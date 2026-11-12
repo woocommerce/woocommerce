@@ -136,7 +136,8 @@ class OrderUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Change the order in memory.
+	 * Change the order in memory. A refused address or line does not stop the
+	 * others, and every refusal comes back in one error.
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
@@ -149,10 +150,11 @@ class OrderUpdate extends ActionableAbility {
 		$this->recalculate_after_save = null;
 		$this->products_to_add        = array();
 
+		$refused = new \WP_Error();
 		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
 			$error = isset( $input[ $address_type ] ) ? self::set_address( $subject, $address_type, $input[ $address_type ] ) : null;
 			if ( is_wp_error( $error ) ) {
-				return $error;
+				$refused->merge_from( $error );
 			}
 		}
 
@@ -161,11 +163,11 @@ class OrderUpdate extends ActionableAbility {
 		}
 
 		if ( empty( $input['remove_items'] ) && empty( $input['shipping_lines'] ) && empty( $input['line_items'] ) ) {
-			return null;
+			return $refused->has_errors() ? $refused : null;
 		}
 
 		if ( ! $subject->is_editable() ) {
-			return new \WP_Error(
+			$refused->add(
 				'woocommerce_ability_order_not_editable',
 				sprintf(
 					/* translators: %s: order status slug. */
@@ -174,9 +176,15 @@ class OrderUpdate extends ActionableAbility {
 				),
 				array( 'status' => 400 )
 			);
+			return $refused;
 		}
 
-		return $this->change_lines( $subject, $input );
+		$error = $this->change_lines( $subject, $input );
+		if ( is_wp_error( $error ) ) {
+			$refused->merge_from( $error );
+		}
+
+		return $refused->has_errors() ? $refused : null;
 	}
 
 	/**
@@ -253,7 +261,7 @@ class OrderUpdate extends ActionableAbility {
 	 * @return array|\WP_Error
 	 */
 	public function prepare_response( $subject ) {
-		$order = self::format_order_for_response( $subject, true );
+		$order = self::format_order_for_response( $subject, array( 'line_items', 'lines' ) );
 		if ( is_wp_error( $order ) ) {
 			return $order;
 		}
@@ -262,7 +270,9 @@ class OrderUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Set the sent fields of an address, then check the resulting address.
+	 * Check the sent fields of an address against the order, then set the fields
+	 * that pass. A bad country keeps the saved country, state and postcode, because
+	 * the state and postcode checks depend on the country.
 	 *
 	 * @param \WC_Order $order   Order.
 	 * @param string    $type    Address type: billing or shipping.
@@ -270,56 +280,70 @@ class OrderUpdate extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	private static function set_address( \WC_Order $order, string $type, array $address ): ?\WP_Error {
+		$address = wc_clean( $address );
+		$refused = new \WP_Error();
 		if ( ! empty( $address['email'] ) && ! is_email( $address['email'] ) ) {
-			return self::address_error(
-				$type,
-				'email',
-				__( 'The billing email is not a valid email address. Send a valid address.', 'woocommerce' )
+			$refused->merge_from(
+				self::address_error(
+					$type,
+					'email',
+					__( 'The billing email is not a valid email address. Send a valid address.', 'woocommerce' )
+				)
 			);
+			unset( $address['email'] );
+		}
+
+		$country  = $address['country'] ?? $order->{"get_{$type}_country"}();
+		$state    = $address['state'] ?? $order->{"get_{$type}_state"}();
+		$postcode = $address['postcode'] ?? $order->{"get_{$type}_postcode"}();
+
+		if ( '' !== $country && ! array_key_exists( $country, WC()->countries->get_countries() ) ) {
+			$refused->merge_from(
+				self::address_error(
+					$type,
+					'country',
+					/* translators: %s: country sent by the client. */
+					sprintf( __( '"%s" is not a valid country. Send an ISO 3166-1 alpha-2 country code, such as PT.', 'woocommerce' ), $country )
+				)
+			);
+			unset( $address['country'], $address['state'], $address['postcode'] );
+		} else {
+			$states = WC()->countries->get_states( $country );
+
+			if ( '' !== $state && ! empty( $states ) && ! array_key_exists( $state, $states ) ) {
+				$refused->merge_from(
+					self::address_error(
+						$type,
+						'state',
+						/* translators: 1: state sent by the client or kept from the order, 2: country code, 3: comma-separated state codes. */
+						sprintf( __( '"%1$s" is not a state of %2$s. Send the state with one of these codes: %3$s.', 'woocommerce' ), $state, $country, implode( ', ', array_keys( $states ) ) )
+					)
+				);
+				unset( $address['state'] );
+			}
+
+			if ( '' !== $postcode && '' !== $country ) {
+				if ( ! \WC_Validation::is_postcode( $postcode, $country ) ) {
+					$refused->merge_from(
+						self::address_error(
+							$type,
+							'postcode',
+							/* translators: 1: postcode sent by the client or kept from the order, 2: country code. */
+							sprintf( __( '"%1$s" is not a valid postcode for %2$s. Send a postcode in the format of that country.', 'woocommerce' ), $postcode, $country )
+						)
+					);
+					unset( $address['postcode'] );
+				} elseif ( isset( $address['postcode'] ) ) {
+					$address['postcode'] = wc_format_postcode( $postcode, $country );
+				}
+			}
 		}
 
 		foreach ( $address as $key => $value ) {
-			$order->{"set_{$type}_{$key}"}( wc_clean( $value ) );
+			$order->{"set_{$type}_{$key}"}( $value );
 		}
 
-		$country  = $order->{"get_{$type}_country"}();
-		$state    = $order->{"get_{$type}_state"}();
-		$postcode = $order->{"get_{$type}_postcode"}();
-
-		if ( '' !== $country && ! array_key_exists( $country, WC()->countries->get_countries() ) ) {
-			return self::address_error(
-				$type,
-				'country',
-				/* translators: %s: country sent by the client. */
-				sprintf( __( '"%s" is not a valid country. Send an ISO 3166-1 alpha-2 country code, such as PT.', 'woocommerce' ), $country )
-			);
-		}
-
-		$states = WC()->countries->get_states( $country );
-
-		if ( '' !== $state && ! empty( $states ) && ! array_key_exists( $state, $states ) ) {
-			return self::address_error(
-				$type,
-				'state',
-				/* translators: 1: state sent by the client or kept from the order, 2: country code, 3: comma-separated state codes. */
-				sprintf( __( '"%1$s" is not a state of %2$s. Send the state with one of these codes: %3$s.', 'woocommerce' ), $state, $country, implode( ', ', array_keys( $states ) ) )
-			);
-		}
-
-		if ( '' !== $postcode && '' !== $country ) {
-			if ( ! \WC_Validation::is_postcode( $postcode, $country ) ) {
-				return self::address_error(
-					$type,
-					'postcode',
-					/* translators: 1: postcode sent by the client or kept from the order, 2: country code. */
-					sprintf( __( '"%1$s" is not a valid postcode for %2$s. Send a postcode in the format of that country.', 'woocommerce' ), $postcode, $country )
-				);
-			}
-
-			$order->{"set_{$type}_postcode"}( wc_format_postcode( $postcode, $country ) );
-		}
-
-		return null;
+		return $refused->has_errors() ? $refused : null;
 	}
 
 	/**
@@ -337,7 +361,8 @@ class OrderUpdate extends ActionableAbility {
 	/**
 	 * Remove, change and add lines in memory, then recalculate the totals
 	 * without saving. Coupons apply again after a product is added, because
-	 * they were applied before the new line existed.
+	 * they were applied before the new line existed. Every refused line comes
+	 * back in one error, and then nothing is recalculated.
 	 *
 	 * @param \WC_Order $order Order.
 	 * @param array     $input Ability input.
@@ -345,11 +370,13 @@ class OrderUpdate extends ActionableAbility {
 	 * @throws \WC_Data_Exception When the order class has not adopted a stage method.
 	 */
 	private function change_lines( \WC_Order $order, array $input ): ?\WP_Error {
+		$refused = new \WP_Error();
 		foreach ( $input['remove_items'] ?? array() as $item_id ) {
 			$item = $order->get_item( $item_id, false );
 
 			if ( ! $item instanceof \WC_Order_Item_Product && ! $item instanceof \WC_Order_Item_Shipping ) {
-				return self::line_not_found( $item_id );
+				$refused->merge_from( self::line_not_found( $item_id ) );
+				continue;
 			}
 
 			if ( $item instanceof \WC_Order_Item_Product ) {
@@ -362,7 +389,7 @@ class OrderUpdate extends ActionableAbility {
 		foreach ( $input['shipping_lines'] ?? array() as $line ) {
 			$error = self::set_shipping_line( $order, $line );
 			if ( is_wp_error( $error ) ) {
-				return $error;
+				$refused->merge_from( $error );
 			}
 		}
 
@@ -370,19 +397,25 @@ class OrderUpdate extends ActionableAbility {
 
 		foreach ( $input['line_items'] ?? array() as $line ) {
 			if ( empty( $line['id'] ) === empty( $line['product_id'] ) ) {
-				return new \WP_Error(
+				$refused->add(
 					'woocommerce_ability_order_line_item_target_invalid',
 					__( 'Each entry in line_items needs exactly one target. Send id to change a line, or product_id to add a line.', 'woocommerce' ),
 					array( 'status' => 400 )
 				);
+				continue;
 			}
 
 			$error = empty( $line['id'] ) ? $this->add_product_line( $order, $line ) : $this->change_product_line( $order, $line );
 			if ( is_wp_error( $error ) ) {
-				return $error;
+				$refused->merge_from( $error );
+				continue;
 			}
 
 			$product_added = $product_added || empty( $line['id'] );
+		}
+
+		if ( $refused->has_errors() ) {
+			return $refused;
 		}
 
 		$recalculate_coupons = $product_added && ! empty( $order->get_items( 'coupon' ) );
@@ -563,7 +596,7 @@ class OrderUpdate extends ActionableAbility {
 		return new \WP_Error(
 			'woocommerce_ability_order_line_not_found',
 			/* translators: %d: order item ID. */
-			sprintf( __( 'Item %d is not a line of this order that this ability can change. Use the woocommerce/orders-query ability with include_line_items to read the IDs of the product and shipping lines.', 'woocommerce' ), $item_id ),
+			sprintf( __( 'Item %d is not a line of this order that this ability can change. Use the woocommerce/orders-query ability with include_line_items and include_lines to read the IDs of the product and shipping lines.', 'woocommerce' ), $item_id ),
 			array( 'status' => 400 )
 		);
 	}

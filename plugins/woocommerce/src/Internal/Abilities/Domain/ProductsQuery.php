@@ -118,19 +118,27 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
-		$page     = (int) ( $input['page'] ?? 1 );
-		$per_page = (int) ( $input['per_page'] ?? 10 );
+		$page     = $input['page'] ?? 1;
+		$per_page = $input['per_page'] ?? 10;
 		$args     = array(
 			'limit'    => $per_page,
 			'page'     => $page,
 			'paginate' => true,
 			'return'   => 'objects',
+			'orderby'  => array(
+				'date' => 'DESC',
+				'ID'   => 'DESC',
+			),
 		);
 
-		foreach ( array( 'status', 'sku', 'stock_status' ) as $field ) {
+		foreach ( array( 'status', 'stock_status' ) as $field ) {
 			if ( ! empty( $input[ $field ] ) ) {
-				$args[ $field ] = wc_clean( $input[ $field ] );
+				$args[ $field ] = $input[ $field ];
 			}
+		}
+
+		if ( ! empty( $input['sku'] ) ) {
+			$args['sku'] = wc_clean( $input['sku'] );
 		}
 
 		if ( isset( $input['type'] ) ) {
@@ -144,13 +152,13 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		}
 
 		if ( ! empty( $input['parent_id'] ) ) {
-			$args['parent'] = (int) $input['parent_id'];
+			$args['parent'] = $input['parent_id'];
 			$args['type']   = $args['type'] ?? ProductType::VARIATION;
 		}
 
 		foreach ( array( 'virtual', 'downloadable' ) as $field ) {
 			if ( isset( $input[ $field ] ) ) {
-				$args[ $field ] = wc_string_to_bool( $input[ $field ] );
+				$args[ $field ] = $input[ $field ];
 			}
 		}
 
@@ -164,11 +172,11 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		}
 
 		foreach ( self::TERM_FILTERS as $field => $taxonomy ) {
-			if ( ! empty( $input[ $field ] ) && is_array( $input[ $field ] ) ) {
+			if ( ! empty( $input[ $field ] ) ) {
 				$extension_args['tax_query'][] = array(
 					'taxonomy' => $taxonomy,
 					'field'    => 'term_id',
-					'terms'    => array_map( 'absint', $input[ $field ] ),
+					'terms'    => $input[ $field ],
 				);
 			}
 		}
