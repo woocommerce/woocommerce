@@ -14,6 +14,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Templates\Utils;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
+use Automattic\WooCommerce\EmailEditor\TemplateNotFoundException;
 
 /**
  * Integration test for Renderer
@@ -417,20 +418,48 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test the documented contract: a resolvable template slug is required.
-	 *
-	 * Pins the current failure mode so a behavior change (e.g. a graceful
-	 * fallback) is a conscious API decision, not an accident.
+	 * Test render_from_content throws a template not found exception for an unknown template slug.
 	 */
-	public function testItRequiresResolvableTemplateSlug(): void {
-		$this->expectException( \TypeError::class );
+	public function testRenderFromContentThrowsForUnknownTemplateSlug(): void {
+		try {
+			$this->renderer->render_from_content(
+				'<!-- wp:paragraph --><p>Content</p><!-- /wp:paragraph -->',
+				'this-template-slug-is-not-registered',
+				'Subject',
+				'Preheader content'
+			);
+			$this->fail( 'Expected TemplateNotFoundException was not thrown.' );
+		} catch ( TemplateNotFoundException $e ) {
+			$this->assertSame( 'this-template-slug-is-not-registered', $e->getTemplateSlug() );
+			$this->assertStringContainsString( 'this-template-slug-is-not-registered', $e->getMessage() );
+		}
+	}
 
-		$this->renderer->render_from_content(
-			'<!-- wp:paragraph --><p>Content</p><!-- /wp:paragraph -->',
-			'this-template-slug-is-not-registered',
-			'Subject',
-			'Preheader content'
+	/**
+	 * Test render throws a template not found exception and keeps the previous rendering context.
+	 */
+	public function testRenderThrowsForUnknownTemplateSlugAndKeepsRenderingContext(): void {
+		$content_renderer_property = new \ReflectionProperty( Renderer::class, 'content_renderer' );
+		$content_renderer_property->setAccessible( true );
+		$content_renderer = $content_renderer_property->getValue( $this->renderer );
+		$this->assertInstanceOf( \Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer::class, $content_renderer );
+
+		$previous_context = new \Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context(
+			$this->createMock( \WP_Theme_JSON::class ),
+			array( 'is_rtl' => true ),
+			'ar_SA'
 		);
+		$content_renderer->set_rendering_context( $previous_context );
+
+		try {
+			$this->renderer->render( $this->email_post, 'Subject', '', 'en', '', 'does-not-exist' );
+			$this->fail( 'Expected TemplateNotFoundException was not thrown.' );
+		} catch ( TemplateNotFoundException $e ) {
+			$this->assertSame( 'does-not-exist', $e->getTemplateSlug() );
+			$this->assertSame( $previous_context, $content_renderer->get_current_rendering_context() );
+		} finally {
+			$content_renderer->restore_rendering_context( null );
+		}
 	}
 
 	/**

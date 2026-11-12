@@ -15,6 +15,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\TemplateNotFoundException;
 use WP_Style_Engine;
 
 /**
@@ -107,13 +108,18 @@ class Renderer {
 	 * @param string   $meta_robots Optional string. Can be left empty for sending, but you can provide a value (e.g. noindex, nofollow) when you want to display email html in a browser.
 	 * @param string   $template_slug Optional block template slug used for cases when email doesn't have associated template.
 	 * @return array
+	 * @throws TemplateNotFoundException When the block template does not exist.
 	 */
 	public function render( \WP_Post $post, string $subject, string $pre_header, string $language, string $meta_robots = '', string $template_slug = '' ): array {
 		if ( ! $template_slug ) {
 			$template_slug = get_page_template_slug( $post ) ? get_page_template_slug( $post ) : 'email-general';
 		}
-		/** @var \WP_Block_Template $template */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 		$template = $this->templates->get_block_template( $template_slug );
+		if ( ! $template ) {
+			throw TemplateNotFoundException::create()
+				->withMessage( sprintf( 'Email template "%s" not found.', esc_html( $template_slug ) ) )
+				->withTemplateSlug( $template_slug );
+		}
 
 		$previous_rendering_context = $this->content_renderer->get_current_rendering_context();
 		try {
@@ -195,6 +201,7 @@ class Renderer {
 	 * @param string $language Email language.
 	 * @param string $meta_robots Optional string. Can be left empty for sending, but you can provide a value (e.g. noindex, nofollow) when you want to display email html in a browser.
 	 * @return array
+	 * @throws TemplateNotFoundException When the block template does not exist.
 	 *
 	 * @since 2.16.0
 	 */

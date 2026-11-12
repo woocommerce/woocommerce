@@ -120,4 +120,24 @@ class ConflictException extends UnexpectedValueException implements HttpAwareExc
  */
 class InvalidStateException extends RuntimeException {}
 
+
+/**
+ * USE: When the block template an email is rendered with doesn't exist.
+ * API: 500 Server Error (not HTTP-aware)
+ */
+class TemplateNotFoundException extends RuntimeException {
+  /** @var string */
+  private $templateSlug = '';
+
+  /** @return static */
+  public function withTemplateSlug(string $templateSlug) {
+    $this->templateSlug = $templateSlug;
+    return $this;
+  }
+
+  public function getTemplateSlug(): string {
+    return $this->templateSlug;
+  }
+}
+
 class NewsletterProcessingException extends Exception {}

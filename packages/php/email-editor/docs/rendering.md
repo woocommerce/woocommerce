@@ -92,6 +92,8 @@ public function render(
 -   `html`: The complete HTML email content
 -   `text`: The plain text version of the email. Personalization tag tokens, including those of tags not registered yet, stay in it as comments, and links whose URL is a tag keep the tag as their target. Bold text is marked as `*text*`. Personalize it with `Personalizer::RENDERING_CONTEXT_TEXT`.
 
+**Throws:** `Automattic\WooCommerce\EmailEditor\TemplateNotFoundException` when the block template slug does not resolve to a registered template. `getTemplateSlug()` returns the slug. The renderer does not fall back to another template.
+
 **Example Usage:**
 
 ```php
@@ -157,6 +159,8 @@ $rendered_email = $renderer->render_from_content(
 ```
 
 Internally the renderer wraps the markup in a synthetic `WP_Post` with `ID === 0`; the rendering pipeline treats that ID as "no database record" and reads everything from the post object.
+
+Like `render()`, it throws `TemplateNotFoundException` when the template slug does not resolve.
 
 ### Content_Renderer
 
