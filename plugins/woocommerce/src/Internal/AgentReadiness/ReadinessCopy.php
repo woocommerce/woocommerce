@@ -289,8 +289,8 @@ final class ReadinessCopy {
 			'product_brand_jsonld'           => array(
 				__( 'Product details have the brand', 'woocommerce' ),
 				__( 'Check why product details have no brand', 'woocommerce' ),
-				__( 'ChatGPT lists a product only with its brand.', 'woocommerce' ),
-				__( 'ChatGPT lists a product only with its brand. Your product has one, but we found none in its structured data.', 'woocommerce' ),
+				__( 'AI assistants use the brand to match and compare products.', 'woocommerce' ),
+				__( 'AI assistants use the brand to match and compare products. Your product has one, but we found none in its structured data.', 'woocommerce' ),
 				__( 'Look at the schema settings in your SEO plugin or theme.', 'woocommerce' ),
 			),
 			'content_in_raw_html'            => array(

@@ -790,6 +790,62 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox In Fix first, a store-wide listing issue ranks above product issues in the same tier, whatever their share of sales.
+	 */
+	public function test_output_fix_first_store_wide_issue_ranks_first(): void {
+		$this->make_every_step_pass();
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'products'     => 40,
+				'store_checks' => array(
+					array(
+						'id'       => 'store_wide',
+						'ok'       => false,
+						'blocks'   => 'listing',
+						'group'    => 'understand',
+						'level'    => 'recommended',
+						'name'     => 'store_wide name',
+						'label'    => 'store_wide label',
+						'why'      => 'store_wide why.',
+						'fix'      => 'store_wide fix.',
+						'fix_url'  => '',
+						'conflict' => false,
+					),
+				),
+				'channels'     => array( 'chatgpt' => array( 'name' => 'ChatGPT' ) ),
+				'checks'       => array(
+					array(
+						'id'          => 'missing_images',
+						'label'       => 'missing_images label',
+						'why'         => 'missing_images why.',
+						'fix'         => 'missing_images fix.',
+						'channels'    => array(
+							'chatgpt' => array(
+								'field'  => 'field',
+								'effect' => ReadinessRule::EFFECT_NOT_LISTABLE,
+							),
+						),
+						'count'       => 30,
+						'product_ids' => array(),
+						'sales_share' => 0.9,
+					),
+				),
+				'sales'        => array(
+					'days'   => 90,
+					'orders' => 30,
+				),
+			)
+		);
+
+		$items = $this->view()['fix_first']['items'];
+		$this->assertSame( 'store_wide label', $items[0]['title'], 'It keeps every product off, so it ranks as all sales' );
+		$this->assertSame( 'All products', $items[0]['impact']['text'] );
+		$this->assertSame( '90% of sales', $items[1]['impact']['text'] );
+	}
+
+	/**
 	 * @testdox Fix first is left out when nothing fails.
 	 */
 	public function test_output_fix_first_hidden_when_nothing_fails(): void {

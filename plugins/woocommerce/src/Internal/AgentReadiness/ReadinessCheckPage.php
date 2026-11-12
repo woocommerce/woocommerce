@@ -593,8 +593,10 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'count'  => $count,
 			);
 		}
-		// Tier first, then the larger share of sales, then more products.
-		usort( $issues, static fn( array $a, array $b ): int => array( $a['tier'], $b['share'] ?? 0.0, $b['count'] ) <=> array( $b['tier'], $a['share'] ?? 0.0, $a['count'] ) );
+		// Tier first, then the larger share of sales, then more products. A store-wide issue affects
+		// every product, so it ranks as all sales.
+		$share = static fn( array $item ): float => $item['share'] ?? ( PHP_INT_MAX === $item['count'] ? 1.0 : 0.0 );
+		usort( $issues, static fn( array $a, array $b ): int => array( $a['tier'], $share( $b ), $b['count'] ) <=> array( $b['tier'], $share( $a ), $a['count'] ) );
 		return array_merge( $required, array_slice( $issues, 0, self::FIX_FIRST_ISSUES ) );
 	}
 
