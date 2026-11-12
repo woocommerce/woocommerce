@@ -3,7 +3,7 @@
 **Source:**
 
 - No shipped regression traced. Fixed after the fact: #66603 (N-query product ordering), #68043, #65558 (tax rate queries), #68300 (widgets ordered by lookup table).
-- Rules from `.agents/skills/woocommerce-performance`.
+- Rules from `.ai/skills/woocommerce-performance`.
 
 **What broke:** These query shapes were found and fixed in WC after they reached stores. The aim is to stop new ones.
 

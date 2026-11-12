@@ -20,7 +20,7 @@ WooCommerce is a WordPress e-commerce plugin organized as a monorepo with:
 
 ## Available Skills
 
-The `.agents/skills/` directory contains procedural HOW-TO instructions:
+The `.ai/skills/` directory contains procedural HOW-TO instructions:
 
 - **`woocommerce-backend-dev`** - Backend PHP conventions and unit tests. **Invoke before writing any PHP test files.**
 - **`woocommerce-dev-cycle`** - Testing and linting workflows (PHP, JS, markdown)
@@ -371,7 +371,7 @@ This is part of the WooCommerce monorepo:
 - Root-level scripts coordinate across packages
 - Some dependencies shared across packages
 
-**Dependency changes and `pnpm-lock.yaml`.** Adding, updating or removing a dependency can make pnpm rewrite unrelated lockfile lines. Before committing a lockfile change, follow "Dependency Changes" in `.agents/skills/woocommerce-dev-cycle/code-quality.md`; it says when to trim the diff to your entries and when to commit pnpm's output as written.
+**Dependency changes and `pnpm-lock.yaml`.** Adding, updating or removing a dependency can make pnpm rewrite unrelated lockfile lines. Before committing a lockfile change, follow "Dependency Changes" in `.ai/skills/woocommerce-dev-cycle/code-quality.md`; it says when to trim the diff to your entries and when to commit pnpm's output as written.
 
 ## Historical Context
 
