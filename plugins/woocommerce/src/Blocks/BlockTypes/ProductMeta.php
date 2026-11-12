@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  */
 class ProductMeta extends AbstractBlock {
 	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *

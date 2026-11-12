@@ -273,7 +273,6 @@ final class BlockTypesLazyController {
 			'product-rating'                            => \Automattic\WooCommerce\Blocks\BlockTypes\ProductRating::class,
 			'product-rating-counter'                    => \Automattic\WooCommerce\Blocks\BlockTypes\ProductRatingCounter::class,
 			'product-rating-stars'                      => \Automattic\WooCommerce\Blocks\BlockTypes\ProductRatingStars::class,
-			'product-stock-indicator'                   => \Automattic\WooCommerce\Blocks\BlockTypes\ProductStockIndicator::class,
 			'product-description'                       => \Automattic\WooCommerce\Blocks\BlockTypes\ProductDescription::class,
 			'product-specifications'                    => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSpecifications::class,
 			'product-image-gallery'                     => \Automattic\WooCommerce\Blocks\BlockTypes\ProductImageGallery::class,
@@ -284,6 +283,8 @@ final class BlockTypesLazyController {
 		if ( ! is_admin() ) {
 			// ProductImage: overrides enqueue_data() with editor-visible placeholder and thumbnail aspect ratio, hence load eager in admin.
 			$list['product-image'] = \Automattic\WooCommerce\Blocks\BlockTypes\ProductImage::class;
+			// ProductStockIndicator: overrides enqueue_data() with editor-visible product types without stock indicator, hence load eager in admin.
+			$list['product-stock-indicator'] = \Automattic\WooCommerce\Blocks\BlockTypes\ProductStockIndicator::class;
 		}
 
 		return $list;

@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Utils\ProductDescriptionUtils;
  */
 class ProductDescription extends AbstractBlock {
 	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *

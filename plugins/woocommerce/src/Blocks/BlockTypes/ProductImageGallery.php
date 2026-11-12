@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  */
 class ProductImageGallery extends AbstractBlock {
 	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
