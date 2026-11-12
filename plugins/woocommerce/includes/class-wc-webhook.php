@@ -116,52 +116,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$this->enqueued_blog_id = get_current_blog_id();
 
 			foreach ( $hooks as $hook ) {
-				if ( 'remove_user_from_blog' === $hook ) {
-					add_action( $hook, array( $this, 'process_user_removed_from_blog' ), 10, 2 );
-				} elseif ( 'delete_user' === $hook ) {
-					add_action( $hook, array( $this, 'process_user_deleted' ) );
-				} else {
-					add_action( $hook, array( $this, 'process' ) );
-				}
+				add_action( $hook, array( $this, 'process' ) );
 			}
 		}
-	}
-
-	/**
-	 * Process a user being removed from a site, which is how users are deleted on multisite.
-	 *
-	 * Only the site this webhook belongs to counts, since a network admin can remove a user from any site.
-	 *
-	 * @since 11.4.0
-	 * @param int $user_id User ID.
-	 * @param int $blog_id ID of the site the user was removed from.
-	 */
-	public function process_user_removed_from_blog( $user_id, $blog_id ): void {
-		// WordPress passes 0 when the caller omits the site ID, meaning the current site.
-		$blog_id = 0 === (int) $blog_id ? get_current_blog_id() : (int) $blog_id;
-
-		// WordPress fires this hook even when the user isn't a member of the site.
-		if ( $blog_id !== $this->enqueued_blog_id || ! is_user_member_of_blog( absint( $user_id ), $blog_id ) ) {
-			return;
-		}
-
-		$this->process( $user_id );
-	}
-
-	/**
-	 * Process a user being deleted, only while the site this webhook belongs to is the current site.
-	 *
-	 * Code that switches to another site and deletes a user there must not notify this site's webhook.
-	 *
-	 * @since 11.4.0
-	 * @param int $user_id User ID.
-	 */
-	public function process_user_deleted( $user_id ): void {
-		if ( get_current_blog_id() !== $this->enqueued_blog_id ) {
-			return;
-		}
-
-		$this->process( $user_id );
 	}
 
 	/**
@@ -329,8 +286,15 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_user_action( $arg ) {
+		// Both user hooks fire on the affected site, so skip users deleted from or removed from another site.
+		if ( $this->enqueued_blog_id && get_current_blog_id() !== $this->enqueued_blog_id ) {
+			return false;
+		}
+
 		// Deliver for users of any role, like the customer.created and customer.updated topics.
-		return false !== get_userdata( absint( $arg ) );
+		$user_id = absint( $arg );
+
+		return $user_id > 0 && is_user_member_of_blog( $user_id );
 	}
 
 	/**

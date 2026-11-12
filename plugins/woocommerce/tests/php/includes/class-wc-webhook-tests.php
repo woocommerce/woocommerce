@@ -878,40 +878,36 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Only members removed from the webhook site trigger it, including when the site ID is omitted.
+	 * @testdox customer.deleted skips users deleted from or removed from a site other than the webhook's own.
 	 */
-	public function test_process_user_removed_from_blog_only_processes_the_webhook_site(): void {
+	public function test_is_valid_user_action_rejects_other_sites(): void {
 		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
-		$webhook = $this->getMockBuilder( WC_Webhook::class )->onlyMethods( array( 'process' ) )->getMock();
-		$webhook->set_topic( 'customer.deleted' );
-		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook = $this->create_active_webhook( 'customer.deleted' );
 		$webhook->enqueue();
 
-		$webhook->expects( $this->exactly( 2 ) )->method( 'process' )->with( $user_id );
-
-		$webhook->process_user_removed_from_blog( $user_id, get_current_blog_id() + 1 );
-		$webhook->process_user_removed_from_blog( $user_id, get_current_blog_id() );
-		$webhook->process_user_removed_from_blog( $user_id, 0 );
-		$webhook->process_user_removed_from_blog( PHP_INT_MAX, get_current_blog_id() );
-	}
-
-	/**
-	 * @testdox A deleted user only triggers the webhook while its own site is the current site.
-	 */
-	public function test_process_user_deleted_only_processes_on_the_webhook_site(): void {
-		$webhook = $this->getMockBuilder( WC_Webhook::class )->onlyMethods( array( 'process' ) )->getMock();
-		$webhook->set_topic( 'customer.deleted' );
-		$webhook->set_delivery_url( 'https://example.com/webhook' );
-		$webhook->enqueue();
-
-		$webhook->expects( $this->once() )->method( 'process' )->with( 123 );
-		$webhook->process_user_deleted( 123 );
+		$is_valid = function ( $arg ) {
+			return $this->is_valid_user_action( $arg );
+		};
+		$this->assertTrue( $is_valid->call( $webhook, $user_id ) );
 
 		$set_blog_id = function ( int $blog_id ) {
 			$this->enqueued_blog_id = $blog_id;
 		};
 		$set_blog_id->call( $webhook, get_current_blog_id() + 1 );
-		$webhook->process_user_deleted( 123 );
+		$this->assertFalse( $is_valid->call( $webhook, $user_id ) );
+	}
+
+	/**
+	 * @testdox Deleting a subscriber delivers customer.deleted exactly once, even on multisite where both user hooks fire.
+	 */
+	public function test_deleting_a_user_delivers_customer_deleted_once(): void {
+		$user_id       = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$delivered_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'customer.deleted' ), $delivered_ids );
+
+		wp_delete_user( $user_id );
+
+		$this->assertSame( array( $user_id ), $delivered_ids );
 	}
 
 	/**
