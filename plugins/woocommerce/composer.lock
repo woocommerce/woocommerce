@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3d2aab352543dade8fac919263db0017",
+    "content-hash": "f0e8a17de0be2b5097d0b4e7c74fbfb8",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1114,16 +1114,16 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "4.1.0",
+            "version": "4.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "40a3df93a251590c58717b91b1049a13410e2ac4"
+                "reference": "9e2c6b02e89652bade4445ea2ca5fb12e0fa7242"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/40a3df93a251590c58717b91b1049a13410e2ac4",
-                "reference": "40a3df93a251590c58717b91b1049a13410e2ac4",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/9e2c6b02e89652bade4445ea2ca5fb12e0fa7242",
+                "reference": "9e2c6b02e89652bade4445ea2ca5fb12e0fa7242",
                 "shasum": ""
             },
             "require": {
@@ -1155,9 +1155,9 @@
             "homepage": "https://actionscheduler.org/",
             "support": {
                 "issues": "https://github.com/woocommerce/action-scheduler/issues",
-                "source": "https://github.com/woocommerce/action-scheduler/tree/4.1.0"
+                "source": "https://github.com/woocommerce/action-scheduler/tree/4.2.0"
             },
-            "time": "2026-08-05T21:19:48+00:00"
+            "time": "2026-09-16T21:40:40+00:00"
         },
         {
             "name": "woocommerce/blueprint",
@@ -1226,11 +1226,11 @@
         },
         {
             "name": "woocommerce/email-editor",
-            "version": "2.19.0",
+            "version": "2.20.1",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
-                "reference": "d56c5aa62e559efd687c523e1d665b6c39ba23ea"
+                "reference": "489a567f94beaee54eeb8832593a343293e5e33b"
             },
             "require": {
                 "php": ">=7.4"
@@ -2341,11 +2341,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.32",
+            "version": "2.3.4",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/e126cad1e30a99b137b8ed75a85a676450ebb227",
-                "reference": "e126cad1e30a99b137b8ed75a85a676450ebb227",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/f20ce6f3c82556cfcfc086b152445a12d1d64fff",
+                "reference": "f20ce6f3c82556cfcfc086b152445a12d1d64fff",
                 "shasum": ""
             },
             "require": {
@@ -2367,6 +2367,17 @@
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ondřej Mirtes"
+                },
+                {
+                    "name": "Markus Staab"
+                },
+                {
+                    "name": "Vincent Langlet"
+                }
             ],
             "description": "PHPStan - PHP Static Analysis Tool",
             "keywords": [
@@ -2390,7 +2401,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-11-11T15:18:17+00:00"
+            "time": "2026-10-28T22:38:53+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -5044,16 +5055,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v5.4.53",
+            "version": "v5.4.54",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "ae0bbb46f77ff56591d0a0259c7f458f4b3e1f77"
+                "reference": "f27a7131106e8cb792d434e8faea7f3ffb615263"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/ae0bbb46f77ff56591d0a0259c7f458f4b3e1f77",
-                "reference": "ae0bbb46f77ff56591d0a0259c7f458f4b3e1f77",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/f27a7131106e8cb792d434e8faea7f3ffb615263",
+                "reference": "f27a7131106e8cb792d434e8faea7f3ffb615263",
                 "shasum": ""
             },
             "require": {
@@ -5099,7 +5110,7 @@
             "description": "Loads and dumps YAML files",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/yaml/tree/v5.4.53"
+                "source": "https://github.com/symfony/yaml/tree/v5.4.54"
             },
             "funding": [
                 {
@@ -5119,7 +5130,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-20T17:13:41+00:00"
+            "time": "2026-08-30T06:09:20+00:00"
         },
         {
             "name": "szepeviktor/phpstan-wordpress",
@@ -5540,5 +5551,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.11.0"
 }

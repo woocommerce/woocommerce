@@ -12,6 +12,13 @@
 		"interactivity": true,
 		"html": false
 	},
-	"usesContext": [ "query", "filterParams" ],
+	"usesContext": [
+		"query",
+		"queryId",
+		"collection",
+		"productCollectionLocation",
+		"filterParams",
+		"productFiltersKey"
+	],
 	"viewScriptModule": "woocommerce/product-filter-price"
 }

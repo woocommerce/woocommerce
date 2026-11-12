@@ -553,6 +553,29 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_starting_sales() returns a started sale only when the cron can apply its price: '$sale_price'.
+	 *
+	 * @testWith ["", false]
+	 *           ["0", false]
+	 *           ["0.00", true]
+	 *
+	 * @param string $sale_price Stored `_sale_price` value.
+	 * @param bool   $expected   Whether the product should be queued.
+	 */
+	public function test_get_starting_sales_only_returns_sale_prices_the_cron_applies( string $sale_price, bool $expected ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 100 );
+		update_post_meta( $product->get_id(), '_sale_price', $sale_price );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+
+		$queued = in_array( (string) $product->get_id(), WC_Data_Store::load( 'product' )->get_starting_sales(), true );
+
+		$this->assertSame( $expected, $queued, 'The cron skips falsy sale prices, so queuing them repeats every run. \'0.00\' is applied and must stay queued.' );
+	}
+
+	/**
 	 * @testdox A product left at an expired sale price is repaired once and then goes inert.
 	 */
 	public function test_wc_scheduled_sales_repairs_expired_price_once(): void {
@@ -1670,6 +1693,88 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Unchanged related queries do not reorder the cache or renew its expiry.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $external_cache Whether transients use the object cache.
+	 */
+	public function test_unchanged_related_queries_do_not_rewrite_cache( bool $external_cache ): void {
+		$product_id = $this->factory->post->create( array( 'post_type' => 'product' ) );
+		$key        = 'wc_related_' . $product_id;
+		$previous   = wp_using_ext_object_cache();
+		wp_using_ext_object_cache( $external_cache );
+		try {
+			wc_get_related_products( $product_id, 5 );
+			wc_get_related_products( $product_id, 10 );
+			$cached = get_transient( $key );
+			$writes = did_action( 'set_transient_' . $key );
+
+			wc_get_related_products( $product_id, 5 );
+			$this->assertSame( $cached, get_transient( $key ), 'Unchanged results must preserve query order.' );
+			wc_get_related_products( $product_id, 10 );
+			$this->assertSame( $writes, did_action( 'set_transient_' . $key ), 'Unchanged results must not renew the cache expiry.' );
+		} finally {
+			wp_using_ext_object_cache( $previous );
+		}
+	}
+
+	/**
+	 * @testdox Related caches trim old variants and keep two large alternating queries cacheable.
+	 * @testWith [false, 8192]
+	 *           [true, 65536]
+	 *
+	 * @param bool $external_cache Whether transients use the object cache.
+	 * @param int  $budget         Cache size target.
+	 */
+	public function test_related_product_cache_has_size_limit( bool $external_cache, int $budget ): void {
+		$product_id = $this->factory->post->create( array( 'post_type' => 'product' ) );
+		$related_id = $this->factory->post->create( array( 'post_type' => 'product' ) );
+		$category   = $this->factory->term->create( array( 'taxonomy' => 'product_cat' ) );
+		wp_set_object_terms( $product_id, $category, 'product_cat' );
+		wp_set_object_terms( $related_id, $category, 'product_cat' );
+		$key      = 'wc_related_' . $product_id;
+		$previous = wp_using_ext_object_cache();
+		wp_using_ext_object_cache( $external_cache );
+		try {
+			$legacy = array();
+			for ( $context = 0; $context < 20000; ++$context ) {
+				$legacy[ "legacy=$context" ] = array( $context );
+			}
+			set_transient( $key, $legacy, DAY_IN_SECONDS );
+			wc_get_related_products( $product_id, 5 );
+			$cached = get_transient( $key );
+			$this->assertLessThanOrEqual( $budget, strlen( maybe_serialize( $cached ) ), 'An oversized pre-upgrade cache must be trimmed.' );
+			$this->assertArrayHasKey( 'legacy=19999', $cached, 'The newest pre-upgrade queries should remain cached.' );
+
+			$min_count = PHP_INT_MAX;
+			for ( $context = 0; $context < 1000; ++$context ) {
+				wc_get_related_products( $product_id, 5, array( 100000 + $context ) );
+				if ( $context >= 500 ) {
+					$min_count = min( $min_count, count( get_transient( $key ) ) );
+				}
+			}
+			$this->assertLessThanOrEqual( $budget, strlen( maybe_serialize( get_transient( $key ) ) ) );
+			$this->assertGreaterThan( 2, $min_count, 'Only the oldest queries should be evicted.' );
+			foreach ( array( 100000, 200000 ) as $exclude_start ) {
+				wc_get_related_products( $product_id, 1, range( $exclude_start, $exclude_start + 10000 ) );
+			}
+			$cached = get_transient( $key );
+			$this->assertCount( 2, $cached );
+			$this->assertEquals( array( $related_id ), wc_get_related_products( $product_id, 1, range( 100000, 110000 ) ) );
+			$this->assertSame( $cached, get_transient( $key ), 'Repeating a large query must use its retained entry.' );
+			$old_query            = array_key_first( $cached );
+			$cached[ $old_query ] = array();
+			set_transient( $key, $cached, DAY_IN_SECONDS );
+			wc_get_related_products( $product_id, 1, range( 100000, 110000 ) );
+			wc_get_related_products( $product_id, 1 );
+			$this->assertArrayHasKey( $old_query, get_transient( $key ), 'A refreshed query must survive the next eviction.' );
+		} finally {
+			wp_using_ext_object_cache( $previous );
+		}
+	}
+
+	/**
 	 * @testdox Product category list preserves WordPress term-list order by default.
 	 */
 	public function test_wc_get_product_category_list_preserves_default_order(): void {
@@ -1736,9 +1841,18 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product category list warns about an unsupported ordering mode and still falls back to WordPress order.
+	 * @testdox Product category list warns in English about an unsupported ordering mode and still falls back to WordPress order.
 	 */
 	public function test_wc_get_product_category_list_warns_on_unsupported_orderby(): void {
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			function ( $function_name, $message ) use ( &$messages ) {
+				$messages[ $function_name ] = $message;
+			},
+			10,
+			2
+		);
 		$suffix   = wp_unique_id();
 		$category = wp_insert_term( 'Unsupported orderby ' . $suffix, 'product_cat' );
 		$product  = WC_Helper_Product::create_simple_product();
@@ -1749,12 +1863,22 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			$expected = get_the_term_list( $product->get_id(), 'product_cat', '', ', ', '' );
 
 			$this->setExpectedIncorrectUsage( 'wc_get_product_category_list' );
+			add_filter(
+				'gettext',
+				function ( $translation, $text, $domain ) {
+					return 'woocommerce' === $domain ? 'Übersetzt: ' . $text : $translation;
+				},
+				10,
+				3
+			);
 
 			$this->assertSame(
 				$expected,
 				wc_get_product_category_list( $product->get_id(), ', ', '', '', 'menu_order' ),
 				'An unsupported ordering mode should still return the WordPress term-list output.'
 			);
+			$this->assertArrayHasKey( 'wc_get_product_category_list', $messages, 'An unsupported ordering mode should raise a notice.' );
+			$this->assertStringStartsWith( 'Unsupported $orderby value "menu_order". Use "name", "breadcrumb", or an empty string for WordPress term-list order.', $messages['wc_get_product_category_list'], 'The notice should be the English message.' );
 		} finally {
 			WC_Helper_Product::delete_product( $product->get_id() );
 			wp_delete_term( $category['term_id'], 'product_cat' );

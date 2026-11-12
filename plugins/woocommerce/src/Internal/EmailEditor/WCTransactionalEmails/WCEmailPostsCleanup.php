@@ -82,10 +82,11 @@ class WCEmailPostsCleanup {
 				}
 
 				// A trashed copy no longer affects rendering; treat it as "revert to
-				// default". The email editor UI never trashes woo_email posts (its
-				// delete action permanently deletes via the
+				// default". The email editor's delete action permanently deletes
+				// woo_email posts (via the
 				// `woocommerce_email_editor_trash_modal_should_permanently_delete`
-				// filter), so a trashed post slipped past that guard out-of-band.
+				// filter), so a trashed post was trashed elsewhere, e.g. by core's
+				// "Trash…" action that earlier versions showed on WordPress 7.2.
 				if ( 'trash' === $post->post_status ) {
 					if ( wp_delete_post( $post->ID, true ) ) {
 						delete_option( $option_name );

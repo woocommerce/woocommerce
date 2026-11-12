@@ -76,6 +76,7 @@ export const Edit = ( { clientId, className, attributes, setAttributes } ) => {
 				<BlockSettings
 					attributes={ attributes }
 					setAttributes={ setAttributes }
+					blockType="cart"
 				/>
 			</InspectorControls>
 			<BlockErrorBoundary

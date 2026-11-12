@@ -2267,10 +2267,16 @@ function wc_update_450_sanitize_coupons_code() {
 	);
 
 	$codes_changed = false;
+	$encode_emoji  = in_array( $wpdb->get_col_charset( $wpdb->posts, 'post_title' ), array( 'utf8', 'utf8mb3' ), true );
 
 	foreach ( $coupons as $key => $data ) {
 		$coupon_id = intval( $data['ID'] );
-		$code      = trim( wp_filter_kses( $data['post_title'] ) );
+		$code      = wc_sanitize_coupon_code( $data['post_title'] );
+
+		// Like coupon saves, keep emoji encoded when the column can't store them.
+		if ( $encode_emoji ) {
+			$code = wp_encode_emoji( $code );
+		}
 
 		if ( ! empty( $code ) && $data['post_title'] !== $code ) {
 			$wpdb->update(
@@ -2368,7 +2374,7 @@ function wc_update_500_fix_product_review_count() {
 		$current_review_count = intval( $product_data['meta_value'] );
 
 		if ( intval( $actual_review_counts[ $product_id ] ) !== $current_review_count ) {
-			WC_Comments::clear_transients( $product_id );
+			WC_Comments::maybe_update_product_average_rating( $product_id );
 		}
 	}
 
@@ -4218,4 +4224,123 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 	wp_cache_delete( OrdersDataStore::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' );
 
 	return false;
+}
+
+/**
+ * Autoload frequently read options that existing stores may still have as autoload off.
+ *
+ * @since 11.4.0
+ */
+function wc_update_1140_re_enable_autoload_options(): void {
+	wp_set_option_autoload_values(
+		array(
+			'woocommerce_cart_page_id'                    => true,
+			'woocommerce_checkout_page_id'                => true,
+			'woocommerce_myaccount_page_id'               => true,
+			'woocommerce_terms_page_id'                   => true,
+			'woocommerce_show_marketplace_suggestions'    => true,
+			'woocommerce_enable_delayed_account_creation' => true,
+			'woocommerce_logs_logging_enabled'            => true,
+			'woocommerce_catalog_columns'                 => true,
+			'woocommerce_catalog_rows'                    => true,
+			'woocommerce_default_catalog_orderby'         => true,
+			'woocommerce_custom_orders_table_data_sync_enabled' => true,
+			'woocommerce_custom_orders_table_background_sync_mode' => true,
+		)
+	);
+}
+
+/**
+ * Add the MPN lookup column and index for existing stores.
+ *
+ * @since 11.4.0
+ */
+function wc_update_1140_add_mpn_to_product_lookup_table(): void {
+	global $wpdb;
+
+	if ( ! $wpdb->get_var( "SHOW COLUMNS FROM {$wpdb->wc_product_meta_lookup} LIKE 'mpn'" ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD COLUMN mpn varchar(100) NOT NULL DEFAULT '' AFTER global_unique_id" );
+	}
+
+	if ( ! $wpdb->get_var( "SHOW INDEX FROM {$wpdb->wc_product_meta_lookup} WHERE Key_name = 'mpn'" ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD INDEX mpn (mpn(50))" );
+	}
+}
+
+/**
+ * Remove PHP objects from product default attributes, where WooCommerce only stores strings.
+ *
+ * Rows are decoded without allowing classes and written directly, so a stored object is never created. A row holding an object that
+ * can't be decoded is deleted; that product's default form values need to be set again.
+ *
+ * @since 11.2.2
+ */
+function wc_update_1122_remove_objects_from_default_attributes(): void {
+	global $wpdb;
+
+	// Objects serialize as O: or C:, so only matching rows are decoded. Each one is checked again below. LIKE rather than REGEXP, because
+	// MySQL 5.7's REGEXP stops reading at a NUL byte, which a custom default value can contain.
+	$meta_ids = $wpdb->get_col( "SELECT meta_id FROM {$wpdb->postmeta} WHERE meta_key = '_default_attributes' AND ( meta_value LIKE '%O:%' OR meta_value LIKE '%C:%' )" );
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Could not check product default attributes for PHP objects: %s', $wpdb->last_error ),
+			array( 'source' => 'wc-updater' )
+		);
+		return;
+	}
+
+	$product_ids = array();
+
+	foreach ( array_chunk( array_map( 'intval', $meta_ids ), 500 ) as $chunk ) {
+		$rows = $wpdb->get_results( "SELECT meta_id, post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_id IN (" . implode( ',', $chunk ) . ')' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Integer IDs.
+
+		foreach ( $rows as $row ) {
+			$raw   = trim( $row->meta_value );
+			$value = @unserialize( $raw, array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- Same as maybe_unserialize(), without objects.
+
+			// WooCommerce stores a flat array of strings here. An object, an array holding non-scalars, or a row that can't be decoded is cleaned
+			// when it contains object notation: the LIKE above also matches text such as "Info:" on case-insensitive collations, and the decoded
+			// value isn't walked because it can reference itself. Object text inside the strings of a flat array is plain text, and stays.
+			$may_hold_object = is_object( $value ) || false === $value || ( is_array( $value ) && array_filter( $value, 'is_scalar' ) !== $value );
+			if ( ! $may_hold_object || ! preg_match( '/[OC]:\d+:"/', $raw ) ) {
+				continue;
+			}
+
+			// Matched on the value read as well, so a row saved again in the meantime is left to that save.
+			$where = array(
+				'meta_id'    => $row->meta_id,
+				'meta_value' => $row->meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Matches the row by its primary key.
+			);
+			$done  = is_array( $value )
+				? $wpdb->update( $wpdb->postmeta, array( 'meta_value' => serialize( array_filter( $value, 'is_scalar' ) ) ), $where ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value, WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Update data, stored in the same format WordPress uses.
+				: $wpdb->delete( $wpdb->postmeta, $where );
+
+			if ( false === $done ) {
+				wc_get_logger()->error(
+					sprintf( 'Could not remove PHP objects from the default attributes of product %d: %s', $row->post_id, $wpdb->last_error ),
+					array( 'source' => 'wc-updater' )
+				);
+				continue;
+			}
+
+			// Nothing matched: the row was saved again after it was read.
+			if ( ! $done ) {
+				continue;
+			}
+
+			wp_cache_delete( (int) $row->post_id, 'post_meta' );
+			$product_ids[] = (int) $row->post_id;
+		}
+	}
+
+	if ( $product_ids ) {
+		wc_get_logger()->warning(
+			sprintf(
+				'Removed PHP objects or other non-string values from the default attributes of these products. WooCommerce only stores strings there, so check these products\' default form values: %s',
+				implode( ', ', array_unique( $product_ids ) )
+			),
+			array( 'source' => 'wc-updater' )
+		);
+	}
 }

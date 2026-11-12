@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Send an empty extension field object as `{}`, and return Core ability amount fields as strings to match their output schema. An extension field value that does not match its schema, or a field callback that throws, now fails the ability call with a named error instead of being left out.

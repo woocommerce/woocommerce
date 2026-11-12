@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
@@ -250,6 +251,128 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox GMT date filters should treat a date with an explicit offset as the same instant on a non-UTC site.
+	 *
+	 * @dataProvider data_provider_gmt_date_filters_with_offset
+	 *
+	 * @param bool   $hpos_enabled   Whether HPOS is the authoritative order storage.
+	 * @param string $param          The date filter parameter.
+	 * @param string $value          The date filter value.
+	 * @param bool   $expect_matched Whether the order should be returned.
+	 */
+	public function test_orders_gmt_date_filters_respect_explicit_offsets( bool $hpos_enabled, string $param, string $value, bool $expect_matched ): void {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		update_option( 'timezone_string', 'Europe/Athens' );
+
+		$utc_date = '2026-09-24 14:40:20';
+		$order    = new WC_Order();
+		$order->set_date_created( strtotime( $utc_date . ' UTC' ) );
+		$order->save();
+
+		// Saving stamps the current time as the modification date, so pin it in storage.
+		if ( $hpos_enabled ) {
+			$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'date_updated_gmt' => $utc_date ), array( 'id' => $order->get_id() ) );
+		} else {
+			$wpdb->update( $wpdb->posts, array( 'post_modified_gmt' => $utc_date ), array( 'ID' => $order->get_id() ) );
+		}
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'include', array( $order->get_id() ) );
+		$request->set_param( 'dates_are_gmt', true );
+		$request->set_param( $param, $value );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame(
+			$expect_matched ? array( $order->get_id() ) : array(),
+			wp_list_pluck( $response->get_data(), 'id' ),
+			"Order modified and created at {$utc_date} UTC should " . ( $expect_matched ? '' : 'not ' ) . "match {$param}={$value}."
+		);
+	}
+
+	/**
+	 * Data provider for test_orders_gmt_date_filters_respect_explicit_offsets.
+	 *
+	 * @return array
+	 */
+	public function data_provider_gmt_date_filters_with_offset(): array {
+		$cases = array(
+			'after, Z'                   => array( 'after', '2026-09-24T14:39:52Z', true ),
+			'before, Z'                  => array( 'before', '2026-09-24T14:39:52Z', false ),
+			'modified_after, Z'          => array( 'modified_after', '2026-09-24T14:39:52Z', true ),
+			'modified_before, Z'         => array( 'modified_before', '2026-09-24T14:39:52Z', false ),
+			'modified_after, +02:00'     => array( 'modified_after', '2026-09-24T16:00:00+02:00', true ),
+			'modified_before, +02:00'    => array( 'modified_before', '2026-09-24T16:00:00+02:00', false ),
+			'modified_after, no offset'  => array( 'modified_after', '2026-09-24T14:39:52', true ),
+			'modified_before, no offset' => array( 'modified_before', '2026-09-24T14:39:52', false ),
+			// Boundaries between the order's UTC and local times only match when the GMT columns are compared.
+			'after, Z, later'            => array( 'after', '2026-09-24T15:00:00Z', false ),
+			'before, Z, later'           => array( 'before', '2026-09-24T15:00:00Z', true ),
+			'modified_after, Z, later'   => array( 'modified_after', '2026-09-24T15:00:00Z', false ),
+			'modified_before, Z, later'  => array( 'modified_before', '2026-09-24T15:00:00Z', true ),
+		);
+
+		$storage_modes = array(
+			'HPOS'  => true,
+			'posts' => false,
+		);
+
+		$data = array();
+		foreach ( $storage_modes as $storage => $hpos_enabled ) {
+			foreach ( $cases as $label => $case ) {
+				$data[ "{$storage}: {$label}" ] = array_merge( array( $hpos_enabled ), $case );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * @testdox GMT date filters should pass offset dates to the object query filter as UTC, and other dates unchanged.
+	 *
+	 * @testWith ["2026-09-24T14:39:52Z", "2026-09-24 14:39:52"]
+	 *           ["2026-09-24T16:39:52+02:00", "2026-09-24 14:39:52"]
+	 *           ["2026-09-24T16:39:52+02", "2026-09-24 14:39:52"]
+	 *           ["2026-09-24T09:09:52-05:30", "2026-09-24 14:39:52"]
+	 *           ["2026-09-24T14:39:52.750Z", "2026-09-24 14:39:52"]
+	 *           ["2026-09-25T00:30:00+03:00", "2026-09-24 21:30:00"]
+	 *           ["2026-09-24T14:39:52", "2026-09-24T14:39:52"]
+	 *           ["2026-09-24 14:39:52", "2026-09-24 14:39:52"]
+	 *           ["2026-09-24T14:39:52.123", "2026-09-24T14:39:52.123"]
+	 *
+	 * @param string $value    The date filter value.
+	 * @param string $expected The value expected in the object query.
+	 */
+	public function test_orders_gmt_date_filters_pass_utc_values_to_object_query( string $value, string $expected ): void {
+		update_option( 'timezone_string', 'Europe/Athens' );
+
+		$date_query = null;
+		add_filter(
+			'woocommerce_rest_shop_order_object_query',
+			function ( $args ) use ( &$date_query ) {
+				$date_query = $args['date_query'] ?? null;
+				return $args;
+			}
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'dates_are_gmt', true );
+		$request->set_param( 'after', $value );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertContains(
+			array(
+				'column' => 'post_date_gmt',
+				'after'  => $expected,
+			),
+			$date_query
+		);
+	}
+
+	/**
 	 * Tests creating an order.
 	 */
 	public function test_orders_create(): void {
@@ -301,6 +424,98 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		foreach ( array_keys( $order_params['billing'] ) as $address_key ) {
 			$this->assertEquals( $order_params['billing'][ $address_key ], $order->{"get_billing_{$address_key}"}( 'edit' ) );
 		}
+	}
+
+	/**
+	 * @testdox Creating an order keeps the entered tax-inclusive price when non-base price adjustment is off.
+	 * @dataProvider orders_create_non_base_location_cases
+	 *
+	 * @param array $extra_params  Extra order params to send.
+	 * @param bool  $has_customer  Whether the order has a customer with a saved base-country address.
+	 * @param float $expected_rate Tax rate the line price should exclude.
+	 */
+	public function test_orders_create_keeps_tax_inclusive_price_when_non_base_prices_are_not_adjusted( array $extra_params, bool $has_customer, float $expected_rate ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_default_country', 'BE' );
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		$rates = array(
+			'BE' => '6.0000',
+			'NL' => '9.0000',
+		);
+		foreach ( $rates as $country => $rate ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => $country,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => "$country VAT",
+					'tax_rate_priority' => 1,
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+
+		$product      = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '24',
+				'price'         => '24',
+			)
+		);
+		$order_params = array(
+			'billing'    => array( 'country' => 'NL' ),
+			'line_items' => array(
+				array(
+					'product_id' => $product->get_id(),
+					'quantity'   => 1,
+				),
+			),
+		) + $extra_params;
+
+		if ( $has_customer ) {
+			$customer = WC_Helper_Customer::create_customer( 'rest-tax-location-customer', wp_generate_password(), 'rest-tax-location@example.com' );
+			$customer->set_billing_country( 'BE' );
+			$customer->save();
+			$order_params['customer_id'] = $customer->get_id();
+		}
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( $order_params );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status(), 'Creating the order should return HTTP 201.' );
+
+		$order = wc_get_order( $response->get_data()['id'] );
+		$item  = current( $order->get_items() );
+		$this->assertEqualsWithDelta( 24 / ( 1 + $expected_rate ), (float) $item->get_subtotal(), 0.0001, 'The line price should exclude the tax rate for the order location.' );
+		$this->assertEquals( 24, (float) $order->get_total(), 'The order total should match the entered tax-inclusive price.' );
+	}
+
+	/**
+	 * Cases for the non-base location price test. Billing is NL (9%), the store base is BE (6%).
+	 *
+	 * @return array
+	 */
+	public function orders_create_non_base_location_cases(): array {
+		return array(
+			'guest'                  => array( array(), false, 0.09 ),
+			'customer saved in BE'   => array( array(), true, 0.09 ),
+			'local pickup uses base' => array(
+				array(
+					'shipping_lines' => array(
+						array(
+							'method_id'    => 'local_pickup',
+							'method_title' => 'Local pickup',
+							'total'        => '0',
+						),
+					),
+				),
+				false,
+				0.06,
+			),
+		);
 	}
 
 	/**
@@ -388,6 +603,88 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$persisted_order = wc_get_order( $order_id );
 		$this->assertInstanceOf( WC_Order::class, $persisted_order, 'The updated order should remain persisted.' );
 		$this->assertSame( $requested_status, $persisted_order->get_status(), 'The updated order should persist the requested status.' );
+	}
+
+	/**
+	 * Create an auto-draft order the same way the admin "Add order" screen does.
+	 *
+	 * @return int Order ID.
+	 */
+	private function create_admin_auto_draft_order(): int {
+		$order = new WC_Order();
+		$order->set_object_read( false );
+		$order->set_status( OrderStatus::AUTO_DRAFT );
+		$order->set_created_via( 'admin' );
+
+		return $order->save();
+	}
+
+	/**
+	 * Update an order's status through the V3 route and record the status changes it fires.
+	 *
+	 * @param int    $order_id         Order ID.
+	 * @param string $requested_status Status supplied in the request.
+	 * @return array<int, array{string, string}> The from and to statuses of each `woocommerce_order_status_changed` call.
+	 */
+	private function update_order_status_and_record_changes( int $order_id, string $requested_status ): array {
+		$status_changes = array();
+		add_action(
+			'woocommerce_order_status_changed',
+			function ( $changed_order_id, $from, $to ) use ( &$status_changes ) {
+				$status_changes[] = array( $from, $to );
+			},
+			10,
+			3
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_body_params( array( 'status' => $requested_status ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Updating the order should return HTTP 200.' );
+		$this->assertSame( $requested_status, $response->get_data()['status'], 'The update response should contain the requested order status.' );
+
+		return $status_changes;
+	}
+
+	/**
+	 * @testdox Saving an auto-draft order as auto-draft again through the V3 route adds no order note and fires no status change.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled True to store orders in the HPOS tables, false to store them as posts.
+	 */
+	public function test_orders_update_auto_draft_order_as_auto_draft_records_no_status_change( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_id = $this->create_admin_auto_draft_order();
+
+		$status_changes = $this->update_order_status_and_record_changes( $order_id, OrderStatus::AUTO_DRAFT );
+
+		$this->assertSame( array(), $status_changes, 'An auto-draft order saved as auto-draft should not fire woocommerce_order_status_changed.' );
+		$this->assertSame( array(), wc_get_order_notes( array( 'order_id' => $order_id ) ), 'An auto-draft order saved as auto-draft should not get a status change note.' );
+	}
+
+	/**
+	 * @testdox Moving an auto-draft order to processing through the V3 route records the change as coming from pending.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled True to store orders in the HPOS tables, false to store them as posts.
+	 */
+	public function test_orders_update_auto_draft_order_to_processing_records_change_from_pending( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_id = $this->create_admin_auto_draft_order();
+
+		$status_changes = $this->update_order_status_and_record_changes( $order_id, OrderStatus::PROCESSING );
+
+		$this->assertSame( array( array( OrderStatus::PENDING, OrderStatus::PROCESSING ) ), $status_changes, 'An auto-draft order should move to processing as if it were pending.' );
+		$this->assertContains(
+			'Order status changed from Pending payment to Processing.',
+			wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order_id ) ), 'content' ),
+			'The status change note should name pending as the old status.'
+		);
 	}
 
 	/**
@@ -1580,6 +1877,177 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Line items that point to a missing product.
+	 *
+	 * @return array<string, array{callable(): array<string, int|string>}>
+	 */
+	public function provide_line_items_with_missing_product(): array {
+		return array(
+			'deleted variation' => array(
+				static function (): array {
+					$variable  = WC_Helper_Product::create_variation_product();
+					$variation = wc_get_product( $variable->get_children()[0] );
+					$line_item = array(
+						'product_id'   => $variable->get_id(),
+						'variation_id' => $variation->get_id(),
+					);
+					$variation->delete( true );
+
+					return $line_item;
+				},
+			),
+			'unknown SKU'       => array(
+				static function (): array {
+					return array( 'sku' => 'missing-sku' );
+				},
+			),
+		);
+	}
+
+	/**
+	 * @testdox POST /orders rejects a line item for a missing product ($_dataName), and creates no order.
+	 * @dataProvider provide_line_items_with_missing_product
+	 *
+	 * @param callable $build_line_item Builds the line item payload.
+	 */
+	public function test_create_order_rejects_line_item_with_missing_product( callable $build_line_item ): void {
+		$line_item   = $build_line_item();
+		$query_args  = array(
+			'return' => 'ids',
+			'limit'  => -1,
+		);
+		$order_count = count( wc_get_orders( $query_args ) );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'line_items' => array( $line_item ) ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'], 'The error should name the invalid product.' );
+		$this->assertCount( $order_count, wc_get_orders( $query_args ), 'No order should be created.' );
+	}
+
+	/**
+	 * @testdox POST /orders adds a custom line item that has a name and total but no product.
+	 */
+	public function test_create_order_with_custom_line_item(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'line_items' => array(
+						array(
+							'name'     => 'Gift wrap',
+							'quantity' => 2,
+							'total'    => '5.00',
+						),
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status(), 'The order should be created.' );
+		$item = current( wc_get_order( $response->get_data()['id'] )->get_items() );
+		$this->assertSame( 0, $item->get_product_id(), 'The item should have no product.' );
+		$this->assertSame( 'Gift wrap', $item->get_name(), 'The item should keep its name.' );
+		$this->assertSame( 2, $item->get_quantity(), 'The item should keep its quantity.' );
+		$this->assertSame( 5.0, (float) $item->get_total(), 'The item should keep its total.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with a deleted product leaves earlier new items and their stock unchanged.
+	 */
+	public function test_update_order_with_deleted_product_saves_no_earlier_items(): void {
+		list( $order ) = $this->create_order_with_line_item();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+		$stocked = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+
+		$deleted    = WC_Helper_Product::create_simple_product();
+		$deleted_id = $deleted->get_id();
+		$deleted->delete( true );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'line_items' => array(
+						array(
+							'product_id' => $stocked->get_id(),
+							'quantity'   => 2,
+						),
+						array( 'product_id' => $deleted_id ),
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'], 'The error should name the invalid product.' );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items(), 'The order should keep only its original line item.' );
+		$this->assertSame( 10, wc_get_product( $stocked->get_id() )->get_stock_quantity(), 'The stock should not change.' );
+	}
+
+	/**
+	 * @testdox PUT /orders still updates an existing line item whose product was deleted.
+	 */
+	public function test_update_existing_line_item_with_deleted_product_succeeds(): void {
+		list( $order, $item_id ) = $this->create_order_with_line_item();
+		$product_id              = ( new WC_Order_Item_Product( $item_id ) )->get_product_id();
+		wc_get_product( $product_id )->delete( true );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $product_id,
+				'quantity'   => 2,
+			)
+		);
+
+		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
+		$this->assertSame( 2, ( new WC_Order_Item_Product( $item_id ) )->get_quantity(), 'The quantity should be updated.' );
+	}
+
+	/**
+	 * @testdox prepare_line_items() rejects a new line item for a deleted product, for subclasses that skip the up-front check.
+	 */
+	public function test_prepare_line_items_rejects_new_line_item_with_deleted_product(): void {
+		$deleted    = WC_Helper_Product::create_simple_product();
+		$deleted_id = $deleted->get_id();
+		$deleted->delete( true );
+
+		$controller = new class() extends WC_REST_Orders_Controller {
+			/**
+			 * Public wrapper for prepare_line_items().
+			 *
+			 * @param array $posted Line item data.
+			 * @return WC_Order_Item_Product
+			 */
+			public function call_prepare_line_items( array $posted ) {
+				return $this->prepare_line_items( $posted );
+			}
+		};
+
+		$this->expectException( WC_REST_Exception::class );
+		$this->expectExceptionMessage( 'Invalid product ID.' );
+		$this->expectExceptionCode( 400 );
+
+		$controller->call_prepare_line_items( array( 'product_id' => $deleted_id ) );
+	}
+
+	/**
 	 * Builds a variable product with a single variation carrying a real "color" attribute.
 	 *
 	 * @return array Two-element array: the WC_Product_Variable parent and its WC_Product_Variation.
@@ -2417,5 +2885,40 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Sending the coupons an order already counts must not change their usage counts.
+	 */
+	public function test_update_order_with_same_coupons_keeps_usage_counts() {
+		wp_set_current_user( $this->user );
+
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		CouponHelper::create_coupon( 'usage-coupon-a' );
+		CouponHelper::create_coupon( 'usage-coupon-b' );
+		$order->apply_coupon( 'usage-coupon-a' );
+		$order->apply_coupon( 'usage-coupon-b' );
+		$this->assertEquals( 1, ( new WC_Coupon( 'usage-coupon-a' ) )->get_usage_count() );
+		$this->assertEquals( 1, ( new WC_Coupon( 'usage-coupon-b' ) )->get_usage_count() );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'coupon_lines' => array(
+					array( 'code' => 'usage-coupon-a' ),
+					array( 'code' => 'usage-coupon-b' ),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( 2, $order->get_items( 'coupon' ) );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( 'usage-coupon-a' ) )->get_usage_count() );
+		$this->assertEquals( 1, ( new WC_Coupon( 'usage-coupon-b' ) )->get_usage_count() );
 	}
 }
