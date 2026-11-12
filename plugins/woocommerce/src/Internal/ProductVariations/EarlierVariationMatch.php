@@ -45,7 +45,7 @@ class EarlierVariationMatch {
 			return false;
 		}
 
-		$child_ids      = array_map( 'absint', $parent->get_children() );
+		$child_ids      = array_values( array_map( 'absint', $parent->get_children() ) );
 		$selected_index = array_search( $variation->get_id(), $child_ids, true );
 		if ( ! is_int( $selected_index ) || 0 === $selected_index ) {
 			return false;
