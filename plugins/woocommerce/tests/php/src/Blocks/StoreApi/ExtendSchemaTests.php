@@ -8,6 +8,7 @@ use Automattic\WooCommerce\StoreApi\Formatters;
 use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
+use Automattic\WooCommerce\StoreApi\StoreApiRequestContext;
 
 /**
  * Tests Extend Schema Functionality and helpers.
@@ -21,6 +22,13 @@ class ExtendSchemaTests extends TestCase {
 	 * @var ExtendSchema
 	 */
 	private $mock_extend;
+
+	/**
+	 * Request context passed to the ExtendSchema instance.
+	 *
+	 * @var StoreApiRequestContext
+	 */
+	private $request_context;
 
 	/**
 	 * Dummy function to ensure API gives the same function back.
@@ -37,8 +45,9 @@ class ExtendSchemaTests extends TestCase {
 		$formatters->register( 'money', MoneyFormatter::class );
 		$formatters->register( 'html', HtmlFormatter::class );
 		$formatters->register( 'currency', CurrencyFormatter::class );
-		$this->mock_extend = new ExtendSchema( $formatters );
-		$this->dummy       = function () {
+		$this->request_context = new StoreApiRequestContext();
+		$this->mock_extend     = new ExtendSchema( $formatters, $this->request_context );
+		$this->dummy           = function () {
 			return null;
 		};
 
@@ -211,10 +220,13 @@ class ExtendSchemaTests extends TestCase {
 		);
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/cart' );
 
-		$previous_request = $this->mock_extend->set_request( $request );
-		$this->mock_extend->get_endpoint_data( 'cart', array( 'cart-item' ) );
+		$this->request_context->run_with_request(
+			$request,
+			function () {
+				$this->mock_extend->get_endpoint_data( 'cart', array( 'cart-item' ) );
+			}
+		);
 
-		$this->assertNull( $previous_request );
 		$this->assertSame( array( 'cart-item', $request ), $received_args );
 	}
 

@@ -6,6 +6,8 @@ use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema;
 use Automattic\WooCommerce\StoreApi\Formatters;
+use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\StoreApi\StoreApiRequestContext;
 
 /**
  * Provides utility functions to extend Store API schemas.
@@ -59,19 +61,21 @@ final class ExtendSchema {
 	private $payment_requirements = [];
 
 	/**
-	 * The Store API request being responded to, passed to data callbacks.
+	 * Tracks the Store API request being responded to, which is passed to data callbacks.
 	 *
-	 * @var \WP_REST_Request<array<string, mixed>>|null
+	 * @var StoreApiRequestContext
 	 */
-	private $request = null;
+	private $request_context;
 
 	/**
 	 * Constructor
 	 *
-	 * @param Formatters $formatters An instance of the formatters class.
+	 * @param Formatters                  $formatters      An instance of the formatters class.
+	 * @param StoreApiRequestContext|null $request_context Request context, defaults to the shared Store API instance.
 	 */
-	public function __construct( Formatters $formatters ) {
-		$this->formatters = $formatters;
+	public function __construct( Formatters $formatters, ?StoreApiRequestContext $request_context = null ) {
+		$this->formatters      = $formatters;
+		$this->request_context = $request_context ?? StoreApi::container()->get( StoreApiRequestContext::class );
 	}
 
 	/**
@@ -193,21 +197,6 @@ final class ExtendSchema {
 	}
 
 	/**
-	 * Sets the Store API request being responded to, so data callbacks can receive it.
-	 *
-	 * @internal
-	 *
-	 * @param \WP_REST_Request<array<string, mixed>>|null $request Request object, or null when no request is being responded to.
-	 * @return \WP_REST_Request<array<string, mixed>>|null The previously set request.
-	 */
-	public function set_request( ?\WP_REST_Request $request ) {
-		$previous_request = $this->request;
-		$this->request    = $request;
-
-		return $previous_request;
-	}
-
-	/**
 	 * Get callback for a specific endpoint and namespace.
 	 *
 	 * @param string $namespace The namespace to get callbacks for.
@@ -243,7 +232,7 @@ final class ExtendSchema {
 	 */
 	public function get_endpoint_data( $endpoint, array $passed_args = [] ) {
 		$registered_data = [];
-		$passed_args[]   = $this->request;
+		$passed_args[]   = $this->request_context->get_current_request();
 
 		if ( isset( $this->extend_data[ $endpoint ] ) ) {
 			foreach ( $this->extend_data[ $endpoint ] as $namespace => $callbacks ) {

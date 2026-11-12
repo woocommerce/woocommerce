@@ -3,6 +3,8 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Utilities\UnexpectedErrorResponse;
 use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\StoreApi\StoreApiRequestContext;
 use Automattic\WooCommerce\StoreApi\Routes\RouteInterface;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
@@ -117,23 +119,21 @@ abstract class AbstractRoute implements RouteInterface {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_response_by_request_method( \WP_REST_Request $request ) {
-		// Restore the previous request afterwards, since a Store API request can be dispatched while another is being responded to.
-		$previous_request = $this->schema_controller->set_request( $request );
-
-		try {
-			switch ( $request->get_method() ) {
-				case 'POST':
-					return $this->get_route_post_response( $request );
-				case 'PUT':
-				case 'PATCH':
-					return $this->get_route_update_response( $request );
-				case 'DELETE':
-					return $this->get_route_delete_response( $request );
+		return StoreApi::container()->get( StoreApiRequestContext::class )->run_with_request(
+			$request,
+			function () use ( $request ) {
+				switch ( $request->get_method() ) {
+					case 'POST':
+						return $this->get_route_post_response( $request );
+					case 'PUT':
+					case 'PATCH':
+						return $this->get_route_update_response( $request );
+					case 'DELETE':
+						return $this->get_route_delete_response( $request );
+				}
+				return $this->get_route_response( $request );
 			}
-			return $this->get_route_response( $request );
-		} finally {
-			$this->schema_controller->set_request( $previous_request );
-		}
+		);
 	}
 
 	/**

@@ -10,6 +10,7 @@ use Automattic\WooCommerce\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\StoreApiRequestContext;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 
 /**
@@ -123,8 +124,15 @@ final class StoreApi {
 			ExtendSchema::class,
 			function ( $container ) {
 				return new ExtendSchema(
-					$container->get( Formatters::class )
+					$container->get( Formatters::class ),
+					$container->get( StoreApiRequestContext::class )
 				);
+			}
+		);
+		$container->register(
+			StoreApiRequestContext::class,
+			function () {
+				return new StoreApiRequestContext();
 			}
 		);
 		$container->register(

@@ -88,7 +88,7 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Product data callbacks receive the dispatched request, and the previous request is restored afterwards.
+	 * @testdox Product data callbacks receive the dispatched request, and the outer request is current again afterwards.
 	 */
 	public function test_data_callback_receives_the_dispatched_request(): void {
 		$received_request = null;
@@ -107,14 +107,23 @@ class Products extends ControllerTestCase {
 		$route   = new \Automattic\WooCommerce\StoreApi\Routes\V1\ProductsById( $schemas, $schemas->get( 'product' ) );
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $this->products[0]->get_id() );
 		$request->set_param( 'id', $this->products[0]->get_id() );
-		$previous_request = new \WP_REST_Request( 'GET', '/wc/store/v1/cart' );
-		$this->mock_extend->set_request( $previous_request );
+		$outer_request   = new \WP_REST_Request( 'GET', '/wc/store/v1/cart' );
+		$request_context = \Automattic\WooCommerce\StoreApi\StoreApi::container()->get( \Automattic\WooCommerce\StoreApi\StoreApiRequestContext::class );
 
-		$response = $route->get_response( $request );
+		$current_request_after_dispatch = null;
+		$response                       = $request_context->run_with_request(
+			$outer_request,
+			function () use ( $route, $request, $request_context, &$current_request_after_dispatch ) {
+				$response                       = $route->get_response( $request );
+				$current_request_after_dispatch = $request_context->get_current_request();
+				return $response;
+			}
+		);
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( $request, $received_request, 'The data callback should receive the dispatched request.' );
-		$this->assertSame( $previous_request, $this->mock_extend->set_request( null ), 'The previous request should be restored after the response.' );
+		$this->assertSame( $outer_request, $current_request_after_dispatch, 'The outer request should be current again after the nested dispatch.' );
+		$this->assertNull( $request_context->get_current_request(), 'No request should be current once all requests have been responded to.' );
 	}
 
 	/**
