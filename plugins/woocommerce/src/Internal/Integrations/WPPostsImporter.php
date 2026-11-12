@@ -50,7 +50,7 @@ class WPPostsImporter {
 
 				$attribute_name = wc_attribute_taxonomy_slug( $term['domain'] );
 
-				// Creating the attribute also registers its taxonomy, so the importer can add its terms.
+				// Creating the attribute also registers its taxonomy.
 				if ( ! in_array( $attribute_name, wc_get_attribute_taxonomies(), true ) ) {
 					wc_create_attribute(
 						array(

@@ -699,7 +699,7 @@ function wc_create_attribute( $args ) {
 				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_slug ) ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- This one-time attribute migration matches an indexed postmeta key.
 			);
 
-			// The terms now belong to the new taxonomy, so drop the old one as wc_delete_attribute() does.
+			// The terms moved to the new taxonomy, so drop the old one.
 			global $wc_product_attributes;
 			unset( $wc_product_attributes[ $old_taxonomy_name ] );
 			if ( taxonomy_exists( $old_taxonomy_name ) ) {
