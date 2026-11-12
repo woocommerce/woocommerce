@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: update
 
 Use Stack, Text, Card and Link from @wordpress/ui in the email editor’s Styles sidebar and dialogs, and the @wordpress/components Notice on the template picker’s Recent tab.
