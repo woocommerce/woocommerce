@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
  * Class WC_Stock_Functions_Tests.
@@ -399,6 +400,377 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 			$minutes,
 			'Core checkout stock reservation should use the configured hold duration.'
 		);
+	}
+
+	/**
+	 * @testdox Available stock stays constant while a paid order's hold is swapped for a stock reduction.
+	 */
+	public function test_stock_hold_counts_until_stock_is_reduced_on_payment() {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+
+		$this->assert_available_stock_constant_through_payment( $product, $product, 1, 9 );
+	}
+
+	/**
+	 * @testdox Available parent stock stays constant while a parent-managed variation order is paid.
+	 */
+	public function test_parent_managed_variation_hold_counts_until_stock_is_reduced_on_payment() {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_manage_stock( true );
+		$parent->set_stock_quantity( 10 );
+		$parent->save();
+
+		// The cart needs every attribute chosen, so use a variation that sets all of them.
+		$variation = null;
+		foreach ( $parent->get_children() as $child_id ) {
+			$child = wc_get_product( $child_id );
+			if ( ! in_array( '', $child->get_variation_attributes(), true ) ) {
+				$variation = $child;
+				break;
+			}
+		}
+		$this->assertNotNull( $variation, 'The helper should create a fully specified variation.' );
+		$variation->set_manage_stock( false );
+		$variation->save();
+
+		$this->assertSame( $parent->get_id(), $variation->get_stock_managed_by_id(), 'The parent should manage the variation stock.' );
+
+		$this->assert_available_stock_constant_through_payment( $variation, $parent, 2, 8 );
+	}
+
+	/**
+	 * @testdox Available parent stock stays constant after each item when two variations share one hold.
+	 */
+	public function test_shared_hold_is_lowered_item_by_item_on_payment() {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_manage_stock( true );
+		$parent->set_stock_quantity( 10 );
+		$parent->save();
+
+		// The cart needs every attribute chosen, so use variations that set all of them.
+		$variations = array();
+		foreach ( $parent->get_children() as $child_id ) {
+			$child = wc_get_product( $child_id );
+			if ( count( $variations ) < 2 && ! in_array( '', $child->get_variation_attributes(), true ) ) {
+				$child->set_manage_stock( false );
+				$child->save();
+				$variations[] = $child;
+			}
+		}
+		$this->assertCount( 2, $variations, 'The helper should create two fully specified variations.' );
+
+		// Two items of two units each share the parent's hold of four.
+		$this->assert_available_stock_constant_through_payment( $variations, $parent, 2, 6 );
+	}
+
+	/**
+	 * Pay for an order of $quantity units of each product and check available stock never moves.
+	 *
+	 * @param WC_Product|WC_Product[] $products           Product or products added to the cart.
+	 * @param WC_Product              $stock_product      Product whose stock is managed.
+	 * @param int                     $quantity           Units ordered of each product.
+	 * @param int                     $expected_available Stock minus the order's units.
+	 */
+	private function assert_available_stock_constant_through_payment( $products, $stock_product, $quantity, $expected_available ) {
+		$products = is_array( $products ) ? $products : array( $products );
+		$observed = $this->with_stock_reservation_options(
+			'60',
+			function () use ( $products, $stock_product, $quantity, $expected_available ) {
+				WC()->cart->empty_cart();
+				foreach ( $products as $product ) {
+					if ( $product->is_type( 'variation' ) ) {
+						$cart_item_key = WC()->cart->add_to_cart( $product->get_parent_id(), $quantity, $product->get_id(), $product->get_variation_attributes() );
+					} else {
+						$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), $quantity );
+					}
+					$this->assertNotFalse( $cart_item_key, 'The product should be added to the cart: ' . wc_print_notices( true ) );
+				}
+				WC()->cart->calculate_totals();
+
+				$checkout = WC_Checkout::instance();
+				$order    = new WC_Order();
+				$checkout->set_data_from_cart( $order );
+				$order->set_status( OrderInternalStatus::PENDING );
+				$order->save();
+				wc_reserve_stock_for_order( $order );
+
+				$this->assertSame( $expected_available, $this->get_available_stock( $stock_product->get_id() ), 'The pending order should hold its units.' );
+
+				$observed = array();
+				foreach ( array( 9, 10, 11 ) as $priority ) {
+					add_action(
+						'woocommerce_order_status_processing',
+						function () use ( &$observed, $stock_product, $priority ) {
+							$observed[ $priority ] = $this->get_available_stock( $stock_product->get_id() );
+						},
+						$priority
+					);
+				}
+
+				// Fires inside the reduction loop, once per item, after its stock is reduced and its share of the hold lowered.
+				add_action(
+					'woocommerce_reduce_order_item_stock',
+					function () use ( &$observed, $stock_product ) {
+						$observed['item'][] = $this->get_available_stock( $stock_product->get_id() );
+					}
+				);
+
+				$order->update_status( OrderInternalStatus::PROCESSING );
+
+				return $observed;
+			}
+		);
+
+		$this->assertSame(
+			array(
+				9      => $expected_available,
+				'item' => array_fill( 0, count( $products ), $expected_available ),
+				10     => $expected_available,
+				11     => $expected_available,
+			),
+			$observed,
+			'Available stock should neither jump after the status is written nor drop while the hold and the reduction overlap.'
+		);
+		$this->assertSame( $expected_available, $this->get_available_stock( $stock_product->get_id() ), 'The reduced stock should be the only thing counted after the transition.' );
+	}
+
+	/**
+	 * @testdox Stock holds count for orders in status $status: $expected.
+	 *
+	 * @dataProvider stock_hold_status_provider
+	 *
+	 * @param string $status   Internal order status.
+	 * @param bool   $expected Whether the hold should count.
+	 */
+	public function test_stock_hold_counts_by_order_status( $status, $expected ) {
+		$this->assertSame( $expected ? 2 : 0, $this->get_held_quantity_for_order_in_status( $status ), "A hold for a $status order should " . ( $expected ? '' : 'not ' ) . 'count.' );
+	}
+
+	/**
+	 * Held stock as seen by wc_get_held_stock_quantity() for a two-unit hold on an order in $status.
+	 *
+	 * @param string $status Internal order status, registered on the fly if unknown.
+	 * @return int
+	 */
+	private function get_held_quantity_for_order_in_status( $status ) {
+		global $wpdb;
+
+		return (int) $this->with_stock_reservation_options(
+			'60',
+			function () use ( $status, $wpdb ) {
+				// Register the status the way an extension would, so it is stored with its prefix.
+				$is_custom_status = null === get_post_status_object( $status );
+				if ( $is_custom_status ) {
+					register_post_status( $status, array( 'label' => $status ) );
+					add_filter(
+						'wc_order_statuses',
+						function ( $statuses ) use ( $status ) {
+							return $statuses + array( $status => $status );
+						}
+					);
+				}
+
+				try {
+					$order   = $this->create_order_from_cart_with_status( $status );
+					$product = $this->stock_product;
+
+					$wpdb->delete( $wpdb->wc_reserved_stock, array( 'order_id' => $order->get_id() ) );
+					// Expiry is compared against the database's NOW(), so write it there too.
+					$wpdb->query(
+						$wpdb->prepare(
+							"INSERT INTO {$wpdb->wc_reserved_stock} ( `order_id`, `product_id`, `stock_quantity`, `timestamp`, `expires` ) VALUES ( %d, %d, 2, NOW(), NOW() + INTERVAL 1 HOUR )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+							$order->get_id(),
+							$product->get_id()
+						)
+					);
+
+					return wc_get_held_stock_quantity( $product );
+				} finally {
+					if ( $is_custom_status ) {
+						_unregister_post_status( $status );
+					}
+				}
+			}
+		);
+	}
+
+	/**
+	 * @testdox Failing an order releases its stock hold.
+	 */
+	public function test_failing_an_order_releases_its_hold() {
+		$held = $this->with_stock_reservation_options(
+			'60',
+			function () {
+				$order = $this->create_order_from_cart_with_status( OrderInternalStatus::PENDING );
+				wc_reserve_stock_for_order( $order );
+				$this->assertSame( 1, (int) wc_get_held_stock_quantity( $this->stock_product ), 'The pending order should hold its units.' );
+
+				$order->update_status( OrderStatus::FAILED );
+
+				return (int) wc_get_held_stock_quantity( $this->stock_product );
+			}
+		);
+
+		$this->assertSame( 0, $held );
+	}
+
+	/**
+	 * @testdox Reducing an order's stock releases its hold even when woocommerce_hold_stock_for_checkout is false.
+	 */
+	public function test_reducing_stock_releases_hold_regardless_of_hold_stock_filter() {
+		$held = $this->with_stock_reservation_options(
+			'60',
+			function () {
+				$order = $this->create_order_from_cart_with_status( OrderInternalStatus::PENDING );
+				wc_reserve_stock_for_order( $order );
+				$this->assertSame( 1, (int) wc_get_held_stock_quantity( $this->stock_product ), 'The pending order should hold its units.' );
+
+				add_filter( 'woocommerce_hold_stock_for_checkout', '__return_false' );
+				try {
+					wc_reduce_stock_levels( $order );
+				} finally {
+					remove_filter( 'woocommerce_hold_stock_for_checkout', '__return_false' );
+				}
+
+				return (int) wc_get_held_stock_quantity( $this->stock_product );
+			}
+		);
+
+		$this->assertSame( 0, $held );
+	}
+
+	/**
+	 * @testdox A custom status added through woocommerce_reserved_stock_order_statuses counts its holds.
+	 */
+	public function test_stock_hold_counts_for_status_added_by_filter() {
+		$add_status = function ( $statuses ) {
+			$statuses[] = 'wc-awaiting-shipment';
+			return $statuses;
+		};
+		add_filter( 'woocommerce_reserved_stock_order_statuses', $add_status );
+
+		try {
+			$held = $this->get_held_quantity_for_order_in_status( 'wc-awaiting-shipment' );
+		} finally {
+			remove_filter( 'woocommerce_reserved_stock_order_statuses', $add_status );
+		}
+
+		$this->assertSame( 2, $held, 'A status added through the filter should count its holds.' );
+	}
+
+	/**
+	 * @testdox An unprefixed status added through woocommerce_reserved_stock_order_statuses counts its holds.
+	 */
+	public function test_stock_hold_counts_for_unprefixed_status_added_by_filter() {
+		$add_status = function ( $statuses ) {
+			$statuses[] = 'awaiting-shipment';
+			return $statuses;
+		};
+		add_filter( 'woocommerce_reserved_stock_order_statuses', $add_status );
+
+		try {
+			$held = $this->get_held_quantity_for_order_in_status( 'wc-awaiting-shipment' );
+		} finally {
+			remove_filter( 'woocommerce_reserved_stock_order_statuses', $add_status );
+		}
+
+		$this->assertSame( 2, $held, 'An unprefixed status added through the filter should count its holds.' );
+	}
+
+	/**
+	 * @testdox A woocommerce_query_for_reserved_stock callback that string-replaces the pre-11.3.1 status literal still works.
+	 */
+	public function test_stock_hold_counts_for_status_added_by_replacing_legacy_query_literal() {
+		$replace_literal = function ( $query ) {
+			return str_replace(
+				"IN ( 'wc-checkout-draft', 'wc-pending' )",
+				"IN ( 'wc-checkout-draft', 'wc-pending', 'wc-quote-open' )",
+				$query
+			);
+		};
+		add_filter( 'woocommerce_query_for_reserved_stock', $replace_literal );
+
+		try {
+			$held = $this->get_held_quantity_for_order_in_status( 'wc-quote-open' );
+		} finally {
+			remove_filter( 'woocommerce_query_for_reserved_stock', $replace_literal );
+		}
+
+		$this->assertSame( 2, $held, 'A status added by replacing the legacy status literal should count its holds.' );
+	}
+
+	/**
+	 * @testdox An unusable return from woocommerce_reserved_stock_order_statuses falls back to the default list.
+	 *
+	 * @dataProvider invalid_stock_hold_statuses_provider
+	 *
+	 * @param callable $callback Filter callback returning an unusable value.
+	 */
+	public function test_stock_hold_statuses_filter_ignores_invalid_return( $callback ) {
+		add_filter( 'woocommerce_reserved_stock_order_statuses', $callback );
+
+		try {
+			$held = $this->get_held_quantity_for_order_in_status( OrderInternalStatus::PROCESSING );
+		} finally {
+			remove_filter( 'woocommerce_reserved_stock_order_statuses', $callback );
+		}
+
+		$this->assertSame( 2, $held, 'An unusable filter return should leave the default statuses counted.' );
+	}
+
+	/**
+	 * Filter returns that must not change which holds are counted.
+	 *
+	 * @return array[]
+	 */
+	public function invalid_stock_hold_statuses_provider() {
+		return array(
+			'non-array'        => array( '__return_false' ),
+			'empty array'      => array( '__return_empty_array' ),
+			'non-scalars only' => array(
+				function () {
+					return array( array(), new stdClass() );
+				},
+			),
+		);
+	}
+
+	/**
+	 * Statuses whose holds must count, and those whose holds must not.
+	 *
+	 * @return array[]
+	 */
+	public function stock_hold_status_provider() {
+		return array(
+			'checkout-draft' => array( 'wc-checkout-draft', true ),
+			'pending'        => array( OrderInternalStatus::PENDING, true ),
+			'processing'     => array( OrderInternalStatus::PROCESSING, true ),
+			'on-hold'        => array( OrderInternalStatus::ON_HOLD, true ),
+			'completed'      => array( OrderInternalStatus::COMPLETED, true ),
+			'cancelled'      => array( OrderInternalStatus::CANCELLED, false ),
+			'failed'         => array( OrderInternalStatus::FAILED, true ),
+			'refunded'       => array( OrderInternalStatus::REFUNDED, false ),
+			'trash'          => array( OrderStatus::TRASH, false ),
+			'custom'         => array( 'wc-awaiting-shipment', false ),
+		);
+	}
+
+	/**
+	 * Stock on hand minus held stock, read fresh from the database.
+	 *
+	 * @param int $product_id Product ID.
+	 * @return int
+	 */
+	private function get_available_stock( $product_id ) {
+		$product = wc_get_product( $product_id );
+
+		return (int) ( $product->get_stock_quantity() - wc_get_held_stock_quantity( $product ) );
 	}
 
 	/**
