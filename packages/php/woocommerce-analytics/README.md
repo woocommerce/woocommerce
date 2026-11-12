@@ -299,7 +299,7 @@ When proxy tracking is enabled:
 
 **Server-Side Optimizations:**
 
-The package includes an optional MU plugin (`woocommerce-analytics-proxy-speed-module.php`) that significantly improves proxy performance by only loading WooCommerce, WooCommerce Analytics, and Jetpack for proxy requests. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route, which applies the consent check.
+The package includes an optional MU plugin (`woocommerce-analytics-proxy-speed-module.php`) that significantly improves proxy performance by only loading WooCommerce, WooCommerce Analytics, and Jetpack for proxy requests. A request from a shopper whose statistics consent cookie stores a deny is left to the REST route, which applies the consent check. The module runs before regular plugins, so it only reads the default `wp_consent` cookie prefix or one set by an earlier MU-plugin.
 
 ### Debugging
 
