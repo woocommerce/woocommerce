@@ -4241,6 +4241,11 @@ function wc_update_1140_re_enable_autoload_options(): void {
 			'woocommerce_show_marketplace_suggestions'    => true,
 			'woocommerce_enable_delayed_account_creation' => true,
 			'woocommerce_logs_logging_enabled'            => true,
+			'woocommerce_catalog_columns'                 => true,
+			'woocommerce_catalog_rows'                    => true,
+			'woocommerce_default_catalog_orderby'         => true,
+			'woocommerce_custom_orders_table_data_sync_enabled' => true,
+			'woocommerce_custom_orders_table_background_sync_mode' => true,
 		)
 	);
 }
