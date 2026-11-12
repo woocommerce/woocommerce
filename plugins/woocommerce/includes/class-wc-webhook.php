@@ -118,6 +118,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			foreach ( $hooks as $hook ) {
 				if ( 'remove_user_from_blog' === $hook ) {
 					add_action( $hook, array( $this, 'process_user_removed_from_blog' ), 10, 2 );
+				} elseif ( 'delete_user' === $hook ) {
+					add_action( $hook, array( $this, 'process_user_deleted' ) );
 				} else {
 					add_action( $hook, array( $this, 'process' ) );
 				}
@@ -138,7 +140,24 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		// WordPress passes 0 when the caller omits the site ID, meaning the current site.
 		$blog_id = 0 === (int) $blog_id ? get_current_blog_id() : (int) $blog_id;
 
-		if ( $blog_id !== $this->enqueued_blog_id ) {
+		// WordPress fires this hook even when the user isn't a member of the site.
+		if ( $blog_id !== $this->enqueued_blog_id || ! is_user_member_of_blog( absint( $user_id ), $blog_id ) ) {
+			return;
+		}
+
+		$this->process( $user_id );
+	}
+
+	/**
+	 * Process a user being deleted, only while the site this webhook belongs to is the current site.
+	 *
+	 * Code that switches to another site and deletes a user there must not notify this site's webhook.
+	 *
+	 * @since 11.4.0
+	 * @param int $user_id User ID.
+	 */
+	public function process_user_deleted( $user_id ): void {
+		if ( get_current_blog_id() !== $this->enqueued_blog_id ) {
 			return;
 		}
 
