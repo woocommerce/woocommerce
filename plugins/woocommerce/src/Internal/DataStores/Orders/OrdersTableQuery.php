@@ -1452,7 +1452,7 @@ class OrdersTableQuery {
 	 */
 	private function process_limit(): void {
 		$row_count = ( $this->arg_isset( 'limit' ) ? (int) $this->args['limit'] : false );
-		$page      = ( $this->arg_isset( 'page' ) ? absint( $this->args['page'] ) : 1 );
+		$page      = ( $this->arg_isset( 'page' ) ? max( 1, absint( $this->args['page'] ) ) : 1 );
 		$offset    = ( $this->arg_isset( 'offset' ) ? absint( $this->args['offset'] ) : false );
 
 		// Bool false indicates no limit was specified; less than -1 means an invalid value was passed (such as -3).

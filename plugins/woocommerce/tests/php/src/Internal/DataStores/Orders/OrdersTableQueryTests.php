@@ -555,6 +555,35 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Page zero returns the first page of orders.
+	 * @testWith ["page"]
+	 *           ["paged"]
+	 *
+	 * @param string $page_arg The page query argument.
+	 */
+	public function test_zero_page_returns_first_page( string $page_arg ): void {
+		$first_order = new WC_Order();
+		$first_order->save();
+
+		$second_order = new WC_Order();
+		$second_order->save();
+
+		$query = new OrdersTableQuery(
+			array(
+				'limit'    => 1,
+				'paginate' => true,
+				'orderby'  => 'id',
+				'order'    => 'ASC',
+				$page_arg  => 0,
+			)
+		);
+
+		$this->assertSame( array( $first_order->get_id() ), $query->orders );
+		$this->assertSame( 2, $query->found_orders );
+		$this->assertSame( 2, $query->max_num_pages );
+	}
+
+	/**
 	 * @testdox First-page totals remain correct with full-text search enabled or disabled.
 	 * @dataProvider provider_first_search_page_sizes
 	 *
