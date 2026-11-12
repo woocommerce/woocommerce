@@ -42,6 +42,16 @@ class ProductUtil {
 	);
 
 	/**
+	 * Number of products whose persistent transients are deleted per scheduled cleanup batch.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @var int
+	 */
+	public const TRANSIENT_CLEANUP_BATCH_SIZE = 500;
+
+	/**
 	 * Register hooks.
 	 *
 	 * @since 11.4.0
@@ -91,8 +101,9 @@ class ProductUtil {
 		global $wpdb;
 		$products = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT ID, post_type FROM {$wpdb->posts} WHERE post_type IN ('product', 'product_variation') AND ID > %d ORDER BY ID LIMIT 100",
-				absint( $last_id )
+				"SELECT ID, post_type FROM {$wpdb->posts} WHERE post_type IN ('product', 'product_variation') AND ID > %d ORDER BY ID LIMIT %d",
+				absint( $last_id ),
+				self::TRANSIENT_CLEANUP_BATCH_SIZE
 			)
 		);
 		if ( $wpdb->last_error ) {
@@ -111,7 +122,7 @@ class ProductUtil {
 		if ( $keys ) {
 			wp_cache_delete_multiple( $keys, 'transient' );
 		}
-		if ( 100 === count( $products ) && ! $this->schedule_product_transient_cleanup( $last_id ) ) {
+		if ( self::TRANSIENT_CLEANUP_BATCH_SIZE === count( $products ) && ! $this->schedule_product_transient_cleanup( $last_id ) ) {
 			throw new \RuntimeException( 'Unable to schedule the next product transient cleanup batch.' );
 		}
 	}

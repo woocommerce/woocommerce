@@ -42,7 +42,7 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 	 * @testdox A product transient cleanup batch fails when it cannot schedule the next batch.
 	 */
 	public function test_cleanup_batch_fails_when_next_batch_cannot_be_scheduled(): void {
-		$this->factory->post->create_many( 100, array( 'post_type' => 'product' ) );
+		$this->factory->post->create_many( ProductUtil::TRANSIENT_CLEANUP_BATCH_SIZE, array( 'post_type' => 'product' ) );
 		$previous = wp_using_ext_object_cache();
 		wp_using_ext_object_cache( true );
 		add_filter( 'pre_as_enqueue_async_action', '__return_zero' );
