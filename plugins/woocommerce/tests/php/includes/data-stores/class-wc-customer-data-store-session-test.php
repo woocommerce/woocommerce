@@ -492,6 +492,45 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox After the Checkout block saves an order shipping to "$session_street" and payment fails, the reload ships to "$expected_street" and the account keeps "$expected_saved_street".
+	 *
+	 * @testWith [ "Stationsplein 23", "Stationsplein 23", "Brandarisstraat 2" ]
+	 *           [ "Keizersgracht 100", "Keizersgracht 100", "Keizersgracht 100" ]
+	 *
+	 * @param string $session_street        Shipping street the session uses when the order is placed; "Stationsplein 23" is the billing street.
+	 * @param string $expected_street       Shipping street expected in the session after the reload.
+	 * @param string $expected_saved_street Shipping street expected on the account.
+	 */
+	public function test_shipping_destination_survives_a_failed_block_checkout_payment( string $session_street, string $expected_street, string $expected_saved_street ): void {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+		$customer_id = $this->create_customer_with_different_addresses( 'session_failed_payment_' . sanitize_key( $session_street ) );
+
+		$session_customer = new WC_Customer( $customer_id, true );
+		$session_customer->set_shipping_address_1( $session_street );
+		$session_customer->save();
+
+		// What the Store API does before taking payment: copy the session addresses to the order, then save them to the account.
+		$order = new WC_Order();
+		$order->set_customer_id( $customer_id );
+		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
+			foreach ( $session_customer->{"get_{$address_type}"}( 'edit' ) as $field => $value ) {
+				if ( is_callable( array( $order, "set_{$address_type}_{$field}" ) ) ) {
+					$order->{"set_{$address_type}_{$field}"}( $value );
+				}
+			}
+		}
+		$order->save();
+		( new \Automattic\WooCommerce\StoreApi\Utilities\OrderController() )->sync_customer_data_with_order( $order );
+		// The save can land in the same second as the session snapshot, so move the modified date on explicitly.
+		update_user_meta( $customer_id, 'last_update', (string) ( time() + 60 ) );
+
+		$reloaded_customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( $expected_street, $reloaded_customer->get_shipping_address_1(), 'The reload should keep the destination the order was placed with' );
+		$this->assertSame( $expected_saved_street, get_user_meta( $customer_id, 'shipping_address_1', true ), 'The account should only take the shipping address of an order shipped elsewhere' );
+	}
+
+	/**
 	 * @testdox Should ship to "$expected_street" after the account changed, when the session's shipping entrance code was "$shipping_code" and the billing one "B-1234".
 	 *
 	 * @testWith [ "B-1234", "Stationsplein 23" ]
