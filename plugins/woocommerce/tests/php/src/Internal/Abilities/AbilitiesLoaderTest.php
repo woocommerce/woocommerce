@@ -1152,6 +1152,50 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should grant access when woocommerce_rest_check_permissions returns a truthy non-boolean, as REST does.
+	 *
+	 * @dataProvider provider_abilities_checking_rest_permissions
+	 *
+	 * @param string $ability_id Ability ID.
+	 * @param array  $input      Input that reaches the REST permission check.
+	 */
+	public function test_abilities_accept_truthy_rest_permission( string $ability_id, array $input ): void {
+		add_filter( 'woocommerce_rest_check_permissions', fn() => 1 );
+
+		$this->assertTrue( wp_get_ability( $ability_id )->check_permissions( $input ) );
+	}
+
+	/**
+	 * Provides one input per path through which an ability returns a REST permission check.
+	 *
+	 * @return array<string, array{0: string, 1: array}>
+	 */
+	public function provider_abilities_checking_rest_permissions(): array {
+		$missing_id = array( 'id' => PHP_INT_MAX );
+
+		return array(
+			'products-query'                 => array( 'woocommerce/products-query', $missing_id ),
+			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
+			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),
+			'payment-gateways-query'         => array( 'woocommerce/payment-gateways-query', array() ),
+			'shipping-zones-query'           => array( 'woocommerce/shipping-zones-query', array() ),
+			'tax-rates-query'                => array( 'woocommerce/tax-rates-query', array() ),
+			'product-attributes-query'       => array( 'woocommerce/product-attributes-query', array() ),
+			'product-attribute-create'       => array( 'woocommerce/product-attribute-create', array( 'name' => 'Size' ) ),
+			'product-terms-query'            => array( 'woocommerce/product-terms-query', array( 'taxonomy' => 'product_cat' ) ),
+			'product-terms-query of unknown' => array( 'woocommerce/product-terms-query', array( 'taxonomy' => 'pa_missing' ) ),
+			'product-review-update'          => array(
+				'woocommerce/product-review-update',
+				$missing_id + array( 'status' => 'approved' ),
+			),
+			'product-review-reply'           => array(
+				'woocommerce/product-review-reply',
+				$missing_id + array( 'content' => 'Thanks!' ),
+			),
+		);
+	}
+
+	/**
 	 * @testdox Should require object edit and delete permissions for product mutations.
 	 */
 	public function test_product_mutations_require_object_permissions(): void {
