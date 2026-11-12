@@ -61,6 +61,20 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox GET reads setup checks now, so a setting changed after the scan shows its current state.
+	 */
+	public function test_get_reads_store_checks_now(): void {
+		StoreConditionsTest::make_store_ready( $this );
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness' ) );
+		$checks   = array_column( $response->get_data()['report']['store_checks'], 'ok', 'id' );
+
+		$this->assertFalse( $checks['guest_checkout'] );
+	}
+
+	/**
 	 * @testdox POST scan queues a background scan and answers 202 with scan_pending.
 	 */
 	public function test_post_queues_scan(): void {
