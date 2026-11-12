@@ -95,19 +95,22 @@ abstract class AbstractRoute implements RouteInterface {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$response = null;
-
-		try {
-			$response = $this->get_response_by_request_method( $request );
-		} catch ( RouteException $error ) {
-			$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
-		} catch ( InvalidCartException $error ) {
-			$response = $this->get_route_error_response_from_object( $error->getError(), $error->getCode(), $error->getAdditionalData() );
-		} catch ( \Exception $error ) {
-			$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
-		} catch ( \Throwable $error ) {
-			$response = UnexpectedErrorResponse::create( $error, static::class );
-		}
+		$response = StoreApi::container()->get( StoreApiRequestContext::class )->run_with_request(
+			$request,
+			function () use ( $request ) {
+				try {
+					return $this->get_response_by_request_method( $request );
+				} catch ( RouteException $error ) {
+					return $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
+				} catch ( InvalidCartException $error ) {
+					return $this->get_route_error_response_from_object( $error->getError(), $error->getCode(), $error->getAdditionalData() );
+				} catch ( \Exception $error ) {
+					return $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
+				} catch ( \Throwable $error ) {
+					return UnexpectedErrorResponse::create( $error, static::class );
+				}
+			}
+		);
 
 		return is_wp_error( $response ) ? $this->error_to_response( $response ) : $response;
 	}
@@ -119,21 +122,16 @@ abstract class AbstractRoute implements RouteInterface {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_response_by_request_method( \WP_REST_Request $request ) {
-		return StoreApi::container()->get( StoreApiRequestContext::class )->run_with_request(
-			$request,
-			function () use ( $request ) {
-				switch ( $request->get_method() ) {
-					case 'POST':
-						return $this->get_route_post_response( $request );
-					case 'PUT':
-					case 'PATCH':
-						return $this->get_route_update_response( $request );
-					case 'DELETE':
-						return $this->get_route_delete_response( $request );
-				}
-				return $this->get_route_response( $request );
-			}
-		);
+		switch ( $request->get_method() ) {
+			case 'POST':
+				return $this->get_route_post_response( $request );
+			case 'PUT':
+			case 'PATCH':
+				return $this->get_route_update_response( $request );
+			case 'DELETE':
+				return $this->get_route_delete_response( $request );
+		}
+		return $this->get_route_response( $request );
 	}
 
 	/**
