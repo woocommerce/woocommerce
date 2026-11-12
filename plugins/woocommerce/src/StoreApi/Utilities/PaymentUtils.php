@@ -108,9 +108,9 @@ class PaymentUtils {
 	 * filter runs last and can replace that answer.
 	 *
 	 * "The first gateway" depends on what the shopper sees. The Checkout block lists the enabled gateways
-	 * in their saved order, so without `$listed_gateways` it is the first enabled one. The classic checkout
-	 * and the pay-for-order page list the available gateways in the order their filter leaves them, and
-	 * pass that list.
+	 * in their saved order, so without `$listed_gateways` it is the first enabled one, which may not be
+	 * available for the cart. The classic checkout and the pay-for-order page list the available gateways
+	 * in the order their filter leaves them, and pass that list.
 	 *
 	 * @param array|null $listed_gateways Optional. The gateways the caller lists, keyed by id and in display order.
 	 * @return string
@@ -121,16 +121,16 @@ class PaymentUtils {
 
 		/**
 		 * Filters the payment method the checkout starts with: the Checkout block, the classic checkout
-		 * shortcode and the pay-for-order page all ask it.
+		 * shortcode and the pay-for-order page all ask it. On the checkout it runs only when the shopper
+		 * has no session choice that is still available for the cart.
 		 *
 		 * Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing;
 		 * any other value selects nothing. Attach the callback by `init` at the latest.
 		 *
 		 * @since 11.4.0
 		 *
-		 * @param string $payment_method     Gateway id WooCommerce would preselect: the customer's default saved
-		 *                                   card's gateway, the method remembered in the session, or the first
-		 *                                   gateway the checkout lists; '' when there is none.
+		 * @param string $payment_method     Gateway id WooCommerce would preselect, or '' when there is none.
+		 *                                   See PaymentUtils::get_default_payment_method() for how it is picked.
 		 * @param array  $available_gateways Gateways available for this cart, keyed by id.
 		 */
 		$filtered = apply_filters( 'woocommerce_default_payment_method', $payment_method, $available_gateways );

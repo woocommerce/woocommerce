@@ -18,7 +18,7 @@ apply_filters( 'woocommerce_default_payment_method', $payment_method, $available
 
 | Argument | Type | Description |
 | --- | --- | --- |
-| `$payment_method` | `string` | The gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first gateway the checkout lists, or `''` when there is none. |
+| `$payment_method` | `string` | The gateway id WooCommerce would preselect, picked in the order described above, or `''` when there is none. |
 | `$available_gateways` | `array` | The gateways available for the current cart, keyed by gateway id. |
 
 Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing. Any other value selects nothing. Returning `$payment_method` unchanged keeps WooCommerce's answer as it is.
