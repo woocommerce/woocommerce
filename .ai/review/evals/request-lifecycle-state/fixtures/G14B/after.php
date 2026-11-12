@@ -1,6 +1,10 @@
 <?php
 /* Request bootstrap. register_sender receives the mailer type list. */
 $email_types = array();
+$registered_email_types = array();
+$register_sender = static function ( $types ) use ( &$registered_email_types ) {
+    $registered_email_types = $types;
+};
 $build_mailer = static function () use ( &$email_types ) {
     static $snapshot;
     if ( null === $snapshot ) { $snapshot = $email_types; }

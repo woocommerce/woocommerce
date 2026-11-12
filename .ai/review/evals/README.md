@@ -136,7 +136,7 @@ These cases exercise review behavior on selected changes. They do not measure pr
 | [migration-upgrade-state](migration-upgrade-state/cases.json) | G11A-v3, G11B-v3 | G11C-v3, G11D-v3 |
 | [proxy-predicate-inference](proxy-predicate-inference/cases.json) | G12A-v4, G12B-v3 | G12C-v3, G12D-v8 |
 | [wc-query-shop-front-page](wc-query-shop-front-page/cases.json) | G13A-v3, G13B-v3 | G13C-v4, G13D-v3 |
-| [request-lifecycle-state](request-lifecycle-state/cases.json) | G14A-v3, G14B-v4 | G14C-v3, G14D-v3 |
+| [request-lifecycle-state](request-lifecycle-state/cases.json) | G14A-v3, G14B-v5 | G14C-v3, G14D-v4 |
 | [template-and-js-default](template-and-js-default/cases.json) | G15A-v3, G15B-v3 | G15C-v3, G15D-v3 |
 | [rest-response-contract](rest-response-contract/cases.json) | G16A-v3, G16B-v3 | G16C-v4, G16D-v3 |
 | [session-cart-persistence](session-cart-persistence/cases.json) | G17A-v3, G17B-v3 | G17C-v3, G17D-v3 |
@@ -163,4 +163,4 @@ These cases exercise review behavior on selected changes. They do not measure pr
 | [sec-order-cart-ownership](sec-order-cart-ownership/cases.json) | G38B-v3, G38A-v5 | G38C-v3, G38D-v3 |
 | [sec-sanitize-and-escape](sec-sanitize-and-escape/cases.json) | G39B-v3, G39A-v6 | G39C-v3, G39D-v3 |
 | [sec-auth-tokens-and-cookies](sec-auth-tokens-and-cookies/cases.json) | G40A-v3, G40B-v4 | G40C-v3, G40D-v3 |
-| [hook-callback-reentrancy](hook-callback-reentrancy/cases.json) | G41A-v1, G41B-v1 | G41C-v1, G41D-v1 |
+| [hook-callback-reentrancy](hook-callback-reentrancy/cases.json) | G41A-v2, G41B-v2 | G41C-v2, G41D-v1 |

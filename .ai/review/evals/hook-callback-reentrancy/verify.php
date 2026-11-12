@@ -93,6 +93,19 @@ function get_post_meta( $id, $key, $single = false ) {
     return $single ? $stored : array( $stored );
 }
 
+if ( 'G41D' !== $case ) {
+    // A media plugin resolves virtual attachments while filtering the stored file path.
+    add_filter( 'get_post_metadata', static function ( $value, $object_id, $meta_key, $single ) {
+        if ( '_wp_attached_file' === $meta_key && $single ) {
+            $guid = get_the_guid( $object_id );
+            if ( is_string( $guid ) && 0 === strpos( $guid, 'rml://' ) ) {
+                return 'shared/library-file.jpg';
+            }
+        }
+        return $value;
+    }, 10, 4 );
+}
+
 require __DIR__ . '/fixtures/' . $case . '/' . $side . '.php';
 
 $should_recurse = ( 'G41A' === $case && 'after' === $side ) || ( 'G41C' === $case && 'before' === $side );

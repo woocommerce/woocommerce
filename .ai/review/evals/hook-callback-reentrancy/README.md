@@ -2,9 +2,9 @@
 
 These reduced cases follow the GUID and attachment-metadata cycle introduced in [#70198](https://github.com/woocommerce/woocommerce/pull/70198), fixed in [#70782](https://github.com/woocommerce/woocommerce/pull/70782), and covered by the guideline from [#70788](https://github.com/woocommerce/woocommerce/pull/70788).
 
-- G41A-v1 adds an unguarded metadata read to a GUID callback. The included media-plugin callback fires the GUID hook again.
-- G41B-v1 removes `finally` cleanup from a guard. A caught metadata-provider exception leaves later GUID reads bypassing the download check.
-- G41C-v1 adds a guard with `finally` cleanup. Nested calls preserve the supplied GUID, and the outer call still hides downloadable attachments.
+- G41A-v2 adds an unguarded metadata read to a GUID callback. The behavior harness supplies an external media-plugin callback that fires the GUID hook again; it is not included in the reviewer fixture.
+- G41B-v2 removes `finally` cleanup from a guard. A caught metadata-provider exception leaves later GUID reads bypassing the download check.
+- G41C-v2 adds a guard with `finally` cleanup. Nested calls preserve the supplied GUID, and the outer call still hides downloadable attachments.
 - G41D-v1 refactors an argument-only callback without adding filtered reads.
 
 Run the bounded behavior check without WordPress or model calls:

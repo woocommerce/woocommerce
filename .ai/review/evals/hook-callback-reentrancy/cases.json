@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G41A-v1",
+			"id": "G41A-v2",
 			"path": "plugins/woocommerce/src/Internal/ProductDownloads/DownloadableFileAttachments.php",
 			"before": {
 				"file": "fixtures/G41A/before.php"
@@ -25,7 +25,7 @@
 			}
 		},
 		{
-			"id": "G41B-v1",
+			"id": "G41B-v2",
 			"path": "plugins/woocommerce/src/Internal/ProductDownloads/DownloadableFileAttachments.php",
 			"before": {
 				"file": "fixtures/G41B/before.php"
@@ -39,8 +39,8 @@
 					{
 						"file": "plugins/woocommerce/src/Internal/ProductDownloads/DownloadableFileAttachments.php",
 						"lines": [
-							14,
-							15
+							13,
+							16
 						],
 						"anchor": "        $path = get_post_meta( $attachment_id, '_wp_attached_file', true );"
 					}
@@ -48,7 +48,7 @@
 			}
 		},
 		{
-			"id": "G41C-v1",
+			"id": "G41C-v2",
 			"path": "plugins/woocommerce/src/Internal/ProductDownloads/DownloadableFileAttachments.php",
 			"before": {
 				"file": "fixtures/G41C/before.php"
