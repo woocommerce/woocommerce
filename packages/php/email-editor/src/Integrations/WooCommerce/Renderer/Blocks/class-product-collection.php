@@ -350,7 +350,8 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		}
 
 		// Leave out products hidden from the shop catalog, as the shop's Product Collection does.
-		if ( ! empty( $visibility_terms['exclude-from-catalog'] ) ) {
+		// Cart contents keep them: the shop's cart lists every cart item, hidden or not.
+		if ( 'woocommerce/product-collection/cart-contents' !== $collection && ! empty( $visibility_terms['exclude-from-catalog'] ) ) {
 			$query_args['tax_query'][] = array(
 				'taxonomy' => 'product_visibility',
 				'field'    => 'term_taxonomy_id',
