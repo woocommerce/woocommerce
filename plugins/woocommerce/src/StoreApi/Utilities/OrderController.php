@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Internal\Customers\SearchService as CustomerSearchService;
+use Automattic\WooCommerce\Internal\Customers\ShippingDestination;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Enums\OrderItemType;
@@ -109,38 +110,67 @@ class OrderController {
 	/**
 	 * Copies order data to customer object (not the session), so values persist for future checkouts.
 	 *
+	 * An order shipped to the billing address doesn't replace a different saved shipping address while the "Shipping
+	 * destination" setting defaults to billing.
+	 *
 	 * @param \WC_Order $order Order object.
 	 */
 	public function sync_customer_data_with_order( \WC_Order $order ) {
 		$customer_id = $order->get_customer_id();
 		if ( $customer_id ) {
-			$customer = new \WC_Customer( $customer_id );
+			$customer              = new \WC_Customer( $customer_id );
+			$shipping_destination  = wc_get_container()->get( ShippingDestination::class );
+			$keep_saved_shipping   = $shipping_destination->keeps_saved_shipping_address(
+				$shipping_destination->get_address( $order, 'billing' ) + $this->additional_fields_controller->get_all_fields_from_object( $order, 'billing' ),
+				$shipping_destination->get_address( $order, 'shipping' ) + $this->additional_fields_controller->get_all_fields_from_object( $order, 'shipping' ),
+				$customer
+			);
+			$saved_shipping_fields = $keep_saved_shipping ? $this->additional_fields_controller->get_all_fields_from_object( $customer, 'shipping', true ) : array();
+
 			$customer->set_props(
 				array(
-					'billing_first_name'  => $order->get_billing_first_name(),
-					'billing_last_name'   => $order->get_billing_last_name(),
-					'billing_company'     => $order->get_billing_company(),
-					'billing_address_1'   => $order->get_billing_address_1(),
-					'billing_address_2'   => $order->get_billing_address_2(),
-					'billing_city'        => $order->get_billing_city(),
-					'billing_state'       => $order->get_billing_state(),
-					'billing_postcode'    => $order->get_billing_postcode(),
-					'billing_country'     => $order->get_billing_country(),
-					'billing_email'       => $order->get_billing_email(),
-					'billing_phone'       => $order->get_billing_phone(),
-					'shipping_first_name' => $order->get_shipping_first_name(),
-					'shipping_last_name'  => $order->get_shipping_last_name(),
-					'shipping_company'    => $order->get_shipping_company(),
-					'shipping_address_1'  => $order->get_shipping_address_1(),
-					'shipping_address_2'  => $order->get_shipping_address_2(),
-					'shipping_city'       => $order->get_shipping_city(),
-					'shipping_state'      => $order->get_shipping_state(),
-					'shipping_postcode'   => $order->get_shipping_postcode(),
-					'shipping_country'    => $order->get_shipping_country(),
-					'shipping_phone'      => $order->get_shipping_phone(),
+					'billing_first_name' => $order->get_billing_first_name(),
+					'billing_last_name'  => $order->get_billing_last_name(),
+					'billing_company'    => $order->get_billing_company(),
+					'billing_address_1'  => $order->get_billing_address_1(),
+					'billing_address_2'  => $order->get_billing_address_2(),
+					'billing_city'       => $order->get_billing_city(),
+					'billing_state'      => $order->get_billing_state(),
+					'billing_postcode'   => $order->get_billing_postcode(),
+					'billing_country'    => $order->get_billing_country(),
+					'billing_email'      => $order->get_billing_email(),
+					'billing_phone'      => $order->get_billing_phone(),
 				)
 			);
+
+			if ( ! $keep_saved_shipping ) {
+				$customer->set_props(
+					array(
+						'shipping_first_name' => $order->get_shipping_first_name(),
+						'shipping_last_name'  => $order->get_shipping_last_name(),
+						'shipping_company'    => $order->get_shipping_company(),
+						'shipping_address_1'  => $order->get_shipping_address_1(),
+						'shipping_address_2'  => $order->get_shipping_address_2(),
+						'shipping_city'       => $order->get_shipping_city(),
+						'shipping_state'      => $order->get_shipping_state(),
+						'shipping_postcode'   => $order->get_shipping_postcode(),
+						'shipping_country'    => $order->get_shipping_country(),
+						'shipping_phone'      => $order->get_shipping_phone(),
+					)
+				);
+			}
+
 			$this->additional_fields_controller->sync_customer_additional_fields_with_order( $order, $customer );
+
+			if ( $keep_saved_shipping ) {
+				// The sync above also copied the order's shipping fields, so put the saved ones back.
+				$synced_shipping_fields = $this->additional_fields_controller->get_all_fields_from_object( $customer, 'shipping', true );
+
+				foreach ( array_keys( $saved_shipping_fields + $synced_shipping_fields ) as $field_key ) {
+					$this->additional_fields_controller->persist_field_for_customer( (string) $field_key, $saved_shipping_fields[ $field_key ] ?? '', $customer, 'shipping' );
+				}
+			}
+
 			$customer->save();
 		}
 	}

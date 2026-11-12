@@ -592,6 +592,78 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox sync_customer_data_with_order saves "$expected_street" as the account's shipping street, with the setting on "$ship_to_destination" and the order shipping to $order_first_name at "$order_street", entrance code "$order_code".
+	 *
+	 * @testWith [ "billing", "1 Billing Street", "Pat", "B-1234", "2 Shipping Avenue", "S-9999" ]
+	 *           [ "billing_only", "1 Billing Street", "Pat", "B-1234", "2 Shipping Avenue", "S-9999" ]
+	 *           [ "billing", "3 Seattle Road", "Pat", "B-1234", "3 Seattle Road", "B-1234" ]
+	 *           [ "billing", "1 Billing Street", "Gift", "B-1234", "1 Billing Street", "B-1234" ]
+	 *           [ "billing", "1 Billing Street", "Pat", "GATE-2", "1 Billing Street", "GATE-2" ]
+	 *           [ "shipping", "1 Billing Street", "Pat", "B-1234", "1 Billing Street", "B-1234" ]
+	 *
+	 * @param string $ship_to_destination Value of the "Shipping destination" setting.
+	 * @param string $order_street        Order shipping street; "1 Billing Street" is the billing street.
+	 * @param string $order_first_name    Order shipping first name; "Pat" is the billing first name.
+	 * @param string $order_code          Order shipping entrance code; "B-1234" is the billing entrance code.
+	 * @param string $expected_street     Shipping street expected on the account afterwards.
+	 * @param string $expected_code       Additional shipping field value expected on the account afterwards.
+	 */
+	public function test_sync_customer_data_with_order_keeps_saved_shipping_address_when_shipping_to_billing( string $ship_to_destination, string $order_street, string $order_first_name, string $order_code, string $expected_street, string $expected_code ): void {
+		update_option( 'woocommerce_ship_to_destination', $ship_to_destination );
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/entrance-code',
+				'label'    => 'Entrance code',
+				'location' => 'address',
+			)
+		);
+
+		try {
+			$customer = new \WC_Customer();
+			$customer->set_email( 'sync-' . md5( $ship_to_destination . $order_street . $order_first_name . $order_code ) . '@example.com' );
+			$customer->set_billing_address_1( '1 Billing Street' );
+			$customer->set_billing_city( 'San Francisco' );
+			$customer->set_billing_postcode( '94103' );
+			$customer->set_billing_state( 'CA' );
+			$customer->set_billing_country( 'US' );
+			$customer->set_shipping_address_1( '2 Shipping Avenue' );
+			$customer->set_shipping_city( 'Brooklyn' );
+			$customer->set_shipping_postcode( '11201' );
+			$customer->set_shipping_state( 'NY' );
+			$customer->set_shipping_country( 'US' );
+			$customer->update_meta_data( '_wc_shipping/plugin-namespace/entrance-code', 'S-9999' );
+			$customer->save();
+
+			$order = new \WC_Order();
+			$order->set_customer_id( $customer->get_id() );
+			$order->set_billing_first_name( 'Pat' );
+			$order->set_shipping_first_name( $order_first_name );
+			$order->set_billing_address_1( '1 Billing Street' );
+			$order->set_billing_city( 'San Francisco' );
+			$order->set_billing_postcode( '94103' );
+			$order->set_billing_state( 'CA' );
+			$order->set_billing_country( 'US' );
+			$order->set_shipping_address_1( $order_street );
+			$order->set_shipping_city( 'San Francisco' );
+			$order->set_shipping_postcode( '94103' );
+			$order->set_shipping_state( 'CA' );
+			$order->set_shipping_country( 'US' );
+			$order->update_meta_data( '_wc_billing/plugin-namespace/entrance-code', 'B-1234' );
+			$order->update_meta_data( '_wc_shipping/plugin-namespace/entrance-code', $order_code );
+			$order->save();
+
+			$this->sut->sync_customer_data_with_order( $order );
+		} finally {
+			__internal_woocommerce_blocks_deregister_checkout_field( 'plugin-namespace/entrance-code' );
+		}
+
+		$saved_customer = new \WC_Customer( $customer->get_id() );
+		$this->assertSame( $expected_street, $saved_customer->get_shipping_address_1() );
+		$this->assertSame( $expected_code, $saved_customer->get_meta( '_wc_shipping/plugin-namespace/entrance-code' ), 'Additional shipping fields should follow the shipping address.' );
+		$this->assertSame( 'San Francisco', $saved_customer->get_billing_city(), 'The billing address should always be saved.' );
+	}
+
+	/**
 	 * Helper method to set shipping address on an order.
 	 *
 	 * @param \WC_Order $order Order object.

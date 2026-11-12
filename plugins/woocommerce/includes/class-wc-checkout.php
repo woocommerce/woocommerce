@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\Customers\ShippingDestination;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
@@ -525,6 +526,37 @@ class WC_Checkout {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Checks whether saving the posted checkout data to the account should leave the saved shipping address as it is.
+	 *
+	 * With "Ship to a different address?" unchecked, the posted shipping fields hold a copy of the billing address.
+	 *
+	 * @param array       $data     Posted checkout data.
+	 * @param WC_Customer $customer The customer as saved to their account.
+	 * @return bool
+	 */
+	private function keeps_saved_shipping_address( array $data, WC_Customer $customer ): bool {
+		$billing  = array();
+		$shipping = array();
+
+		foreach ( ShippingDestination::LOCATION_FIELDS as $field ) {
+			$billing[ $field ]  = $data[ "billing_{$field}" ] ?? '';
+			$shipping[ $field ] = $data[ "shipping_{$field}" ] ?? '';
+		}
+
+		// Other shipping fields, such as names or fields added by extensions, are compared when billing has the same field.
+		foreach ( $data as $key => $value ) {
+			$field = 0 === strpos( (string) $key, 'shipping_' ) ? substr( (string) $key, 9 ) : '';
+
+			if ( '' !== $field && ! isset( $shipping[ $field ] ) && array_key_exists( "billing_{$field}", $data ) ) {
+				$billing[ $field ]  = $data[ "billing_{$field}" ];
+				$shipping[ $field ] = $value;
+			}
+		}
+
+		return wc_get_container()->get( ShippingDestination::class )->keeps_saved_shipping_address( $billing, $shipping, $customer );
 	}
 
 	/**
@@ -1824,7 +1856,13 @@ class WC_Checkout {
 				$customer->set_display_name( $customer->get_first_name() . ' ' . $customer->get_last_name() );
 			}
 
+			$keep_saved_shipping = $this->keeps_saved_shipping_address( $data, $customer );
+
 			foreach ( $data as $key => $value ) {
+				if ( $keep_saved_shipping && 0 === stripos( $key, 'shipping_' ) ) {
+					continue;
+				}
+
 				// Use setters where available.
 				if ( is_callable( array( $customer, "set_{$key}" ) ) ) {
 					$customer->{"set_{$key}"}( $value );

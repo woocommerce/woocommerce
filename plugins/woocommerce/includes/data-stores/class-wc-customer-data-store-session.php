@@ -5,6 +5,9 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Internal\Customers\ShippingDestination;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -153,9 +156,12 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 					}
 				}
 			}
+
+			if ( ! $is_current ) {
+				$this->maybe_restore_shipping_to_billing( $customer, $data );
+			}
 		} else {
-			// Only for a new session or a login. When the account changed during this session, for example after placing
-			// an order whose payment then failed, the account already holds the shipping address the shopper chose.
+			// Only for a new session or a login, so an address the shopper set during the session is kept.
 			$this->maybe_default_shipping_to_billing( $customer );
 		}
 		$this->set_defaults( $customer );
@@ -171,10 +177,64 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * @return void
 	 */
 	private function maybe_default_shipping_to_billing( $customer ): void {
-		if ( 'shipping' === get_option( 'woocommerce_ship_to_destination', 'billing' ) || ! $this->billing_address_can_replace_shipping( $customer ) ) {
+		// The billing check comes first: it returns early for guests without reading the setting, which isn't autoloaded.
+		if ( ! $this->billing_address_can_replace_shipping( $customer ) || ! wc_get_container()->get( ShippingDestination::class )->defaults_to_billing() ) {
 			return;
 		}
 
+		$this->copy_billing_to_shipping( $customer );
+	}
+
+	/**
+	 * Copies the billing address over the shipping address again when the account changed during the session.
+	 *
+	 * Checkout saves the order's addresses to the account, but keeps the saved shipping address when the order ships to
+	 * billing. So when the session was shipping to billing, for example before a failed payment, the account's shipping
+	 * address isn't the one the shopper was using.
+	 *
+	 * @param WC_Customer $customer Customer object, loaded from the account.
+	 * @param array       $data     The out-of-date session data.
+	 * @return void
+	 */
+	private function maybe_restore_shipping_to_billing( $customer, array $data ): void {
+		$shipping_destination = wc_get_container()->get( ShippingDestination::class );
+		$session_billing      = array();
+		$session_shipping     = array();
+
+		foreach ( array_merge( ShippingDestination::RECIPIENT_FIELDS, ShippingDestination::LOCATION_FIELDS ) as $field ) {
+			$session_billing[ $field ]  = $data[ $field ] ?? '';
+			$session_shipping[ $field ] = $data[ "shipping_{$field}" ] ?? '';
+		}
+
+		// Additional address checkout fields are kept in the session as meta data.
+		foreach ( is_array( $data['meta_data'] ?? null ) ? $data['meta_data'] : array() as $meta ) {
+			$meta_key = isset( $meta['key'] ) ? (string) $meta['key'] : '';
+
+			if ( 0 === strpos( $meta_key, CheckoutFields::BILLING_FIELDS_PREFIX ) ) {
+				$session_billing[ substr( $meta_key, strlen( CheckoutFields::BILLING_FIELDS_PREFIX ) ) ] = $meta['value'] ?? '';
+			} elseif ( 0 === strpos( $meta_key, CheckoutFields::SHIPPING_FIELDS_PREFIX ) ) {
+				$session_shipping[ substr( $meta_key, strlen( CheckoutFields::SHIPPING_FIELDS_PREFIX ) ) ] = $meta['value'] ?? '';
+			}
+		}
+
+		if (
+			! $shipping_destination->is_same_address( $session_billing, $session_shipping )
+			|| ! $this->billing_address_can_replace_shipping( $customer )
+			|| ! $shipping_destination->defaults_to_billing()
+		) {
+			return;
+		}
+
+		$this->copy_billing_to_shipping( $customer );
+	}
+
+	/**
+	 * Copies the billing address, including additional address checkout fields, over the shipping address.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return void
+	 */
+	private function copy_billing_to_shipping( WC_Customer $customer ): void {
 		foreach ( $customer->get_billing( 'edit' ) as $field => $value ) {
 			if ( is_callable( array( $customer, "set_shipping_{$field}" ) ) ) {
 				$customer->{"set_shipping_{$field}"}( $value );

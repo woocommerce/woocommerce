@@ -458,6 +458,126 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should ship to "$expected_street" again when the account changed while the session shipped to billing, with the setting on "$ship_to_destination".
+	 *
+	 * @testWith [ "billing", "Stationsplein 23" ]
+	 *           [ "billing_only", "Stationsplein 23" ]
+	 *           [ "shipping", "Brandarisstraat 2" ]
+	 *
+	 * @param string $ship_to_destination Value of the "Shipping destination" setting.
+	 * @param string $expected_street     Shipping street expected after the reload.
+	 */
+	public function test_session_shipping_to_billing_is_restored_when_account_changed_during_the_session( string $ship_to_destination, string $expected_street ): void {
+		update_option( 'woocommerce_ship_to_destination', $ship_to_destination );
+		$customer_id = $this->create_customer_with_different_addresses( 'session_restore_billing_' . $ship_to_destination );
+
+		$session_customer = new WC_Customer( $customer_id, true );
+		foreach ( $session_customer->get_billing( 'edit' ) as $field => $value ) {
+			if ( is_callable( array( $session_customer, "set_shipping_{$field}" ) ) ) {
+				$session_customer->{"set_shipping_{$field}"}( $value );
+			}
+		}
+		$session_customer->save();
+
+		// Placing an order shipped to billing saves the account, which keeps its saved shipping address.
+		$account_customer = new WC_Customer( $customer_id );
+		$account_customer->set_billing_phone( '020-000000000' );
+		$account_customer->save();
+		update_user_meta( $customer_id, 'last_update', (string) ( time() + 60 ) );
+
+		$reloaded_customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( $expected_street, $reloaded_customer->get_shipping_address_1(), 'The reload should keep the destination the session was using' );
+		$this->assertSame( 'Brandarisstraat 2', get_user_meta( $customer_id, 'shipping_address_1', true ), 'The saved shipping address should be unchanged' );
+	}
+
+	/**
+	 * @testdox Should ship to "$expected_street" after the account changed, when the session's shipping entrance code was "$shipping_code" and the billing one "B-1234".
+	 *
+	 * @testWith [ "B-1234", "Stationsplein 23" ]
+	 *           [ "S-5678", "Brandarisstraat 2" ]
+	 *
+	 * @param string $shipping_code   Shipping entrance code in the session snapshot.
+	 * @param string $expected_street Shipping street expected after the reload.
+	 */
+	public function test_session_restore_compares_additional_address_fields( string $shipping_code, string $expected_street ): void {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/entrance-code',
+				'label'    => 'Entrance code',
+				'location' => 'address',
+			)
+		);
+		$customer_id = $this->create_customer_with_different_addresses( 'session_restore_additional_' . $shipping_code );
+		$address     = array(
+			'first_name' => 'Issue',
+			'last_name'  => 'Tester',
+			'address_1'  => 'Stationsplein 23',
+			'city'       => 'Amsterdam',
+			'postcode'   => '1010 AA',
+			'country'    => 'NL',
+			'phone'      => '020-123456789',
+		);
+		$snapshot    = array(
+			'id'            => (string) $customer_id,
+			'date_modified' => 'stale-date',
+			'meta_data'     => array(
+				array(
+					'key'   => '_wc_billing/plugin-namespace/entrance-code',
+					'value' => 'B-1234',
+				),
+				array(
+					'key'   => '_wc_shipping/plugin-namespace/entrance-code',
+					'value' => $shipping_code,
+				),
+			),
+		);
+		foreach ( $address as $field => $value ) {
+			$snapshot[ $field ]              = $value;
+			$snapshot[ "shipping_{$field}" ] = $value;
+		}
+		WC()->session->set( 'customer', $snapshot );
+
+		try {
+			$reloaded_customer = new WC_Customer( $customer_id, true );
+		} finally {
+			__internal_woocommerce_blocks_deregister_checkout_field( 'plugin-namespace/entrance-code' );
+		}
+
+		$this->assertSame( $expected_street, $reloaded_customer->get_shipping_address_1() );
+	}
+
+	/**
+	 * @testdox Should not copy the billing address over a recipient the session ships to at the billing location, when the account changed during the session.
+	 */
+	public function test_session_recipient_at_billing_location_is_not_replaced_when_account_changed_during_the_session(): void {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+		$customer_id = $this->create_customer_with_different_addresses( 'session_restore_billing_recipient' );
+
+		$session_customer = new WC_Customer( $customer_id, true );
+		$session_customer->set_shipping_first_name( 'Gift' );
+		$session_customer->save();
+
+		// An order to someone else at the billing location saves that address to the account.
+		$account_customer = new WC_Customer( $customer_id );
+		foreach ( $account_customer->get_billing( 'edit' ) as $field => $value ) {
+			if ( is_callable( array( $account_customer, "set_shipping_{$field}" ) ) ) {
+				$account_customer->{"set_shipping_{$field}"}( $value );
+			}
+		}
+		$account_customer->set_shipping_first_name( 'Gift' );
+		$account_customer->set_shipping_phone( '020-000000000' );
+		$account_customer->save();
+		update_user_meta( $customer_id, 'last_update', (string) ( time() + 60 ) );
+
+		$reloaded_customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( 'Gift', $reloaded_customer->get_shipping_first_name(), 'The recipient should not be replaced with the billing name' );
+		$this->assertSame( '020-000000000', $reloaded_customer->get_shipping_phone(), 'The recipient phone should not be replaced with the billing phone' );
+	}
+
+	/**
 	 * @testdox Should default the shipping address to the billing address when a guest session logs in.
 	 */
 	public function test_shipping_address_defaults_to_billing_address_when_a_guest_session_logs_in(): void {

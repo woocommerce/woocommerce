@@ -305,6 +305,46 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'process_customer' saves "$expected_street" as the account's shipping street, with the setting on "$ship_to_destination" and the posted shipping street "$posted_street".
+	 *
+	 * @testWith [ "billing", "1 Billing Street", "2 Shipping Avenue" ]
+	 *           [ "billing_only", "1 Billing Street", "2 Shipping Avenue" ]
+	 *           [ "billing", "3 Seattle Road", "3 Seattle Road" ]
+	 *           [ "shipping", "1 Billing Street", "1 Billing Street" ]
+	 *
+	 * @param string $ship_to_destination Value of the "Shipping destination" setting.
+	 * @param string $posted_street       Posted shipping street; "1 Billing Street" is the billing copy sent while "Ship to a different address?" is unchecked.
+	 * @param string $expected_street     Shipping street expected on the account afterwards.
+	 */
+	public function test_process_customer_keeps_saved_shipping_address_when_shipping_to_billing( string $ship_to_destination, string $posted_street, string $expected_street ): void {
+		update_option( 'woocommerce_ship_to_destination', $ship_to_destination );
+		$this->log_in_customer( self::SAVED_SHIPPING_ADDRESS );
+		$customer_id = get_current_user_id();
+
+		$billing = array(
+			'first_name' => 'John',
+			'country'    => 'US',
+			'state'      => 'CA',
+			'postcode'   => '94103',
+			'city'       => 'San Francisco',
+			'address_1'  => '1 Billing Street',
+			'address_2'  => 'Apt 1',
+		);
+		$data    = array( 'billing_email' => 'john@example.com' );
+		foreach ( $billing as $field => $value ) {
+			$data[ "billing_{$field}" ]  = $value;
+			$data[ "shipping_{$field}" ] = $value;
+		}
+		$data['shipping_address_1'] = $posted_street;
+
+		$this->sut->process_customer( $data );
+
+		$saved_customer = new WC_Customer( $customer_id );
+		$this->assertSame( $expected_street, $saved_customer->get_shipping_address_1() );
+		$this->assertSame( '1 Billing Street', $saved_customer->get_billing_address_1(), 'The billing address should always be saved.' );
+	}
+
+	/**
 	 * @testdox the customer notes can have linebreaks.
 	 */
 	public function test_order_notes_linebreaks() {
