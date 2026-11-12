@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Refuse checkout when the billing country is missing or outside the store's selling locations.

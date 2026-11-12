@@ -1028,10 +1028,51 @@ class WC_Checkout {
 			$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ), array( 'id' => 'terms' ) );
 		}
 
+		// With nothing to ship the billing country is the taxable address, so a value that isn't a country the
+		// store sells to is refused here rather than skipped. A field filter can remove or re-type
+		// billing_country, which is the case validate_posted_data() doesn't reach.
+		$billing_country = $this->get_fieldset_country( 'billing', $data );
+
+		if ( ! $errors->get_error_messages( 'billing_country_validation' ) && ! $errors->get_error_messages( 'billing_country_required' ) ) {
+			if ( ! is_string( $billing_country ) || '' === $billing_country ) {
+				// An empty value is copied onto the customer by update_session(), which leaves the order with no
+				// taxable country, so it is refused even where the store made the field optional or hidden.
+				$country_field = $this->get_checkout_fields( 'billing' )['billing_country'] ?? null;
+				$can_be_edited = is_array( $country_field )
+					&& true !== ( $country_field['hidden'] ?? false )
+					&& 'hidden' !== ( $country_field['type'] ?? '' );
+
+				// Only ask for the country where the form still has a field to enter it in.
+				$message = $can_be_edited
+					? __( 'Please enter a billing country.', 'woocommerce' )
+					: __( 'This store cannot accept your order without a billing country.', 'woocommerce' );
+
+				$errors->add( 'billing_country_validation', $message, array( 'id' => 'billing_country' ) );
+			} elseif ( ! WC()->countries->country_exists( $billing_country ) ) {
+				$errors->add(
+					'billing_country_validation',
+					/* translators: ISO 3166-1 alpha-2 country code */
+					sprintf( __( "'%s' is not a valid country code.", 'woocommerce' ), $billing_country ),
+					array( 'id' => 'billing_country' )
+				);
+			} elseif ( ! array_key_exists( $billing_country, (array) WC()->countries->get_allowed_countries() ) ) {
+				$countries = WC()->countries->get_countries();
+				$errors->add(
+					'billing_country_not_allowed',
+					sprintf(
+						/* translators: %s: billing country name */
+						__( 'Sorry, we do not allow orders from the provided country (%s)', 'woocommerce' ),
+						$countries[ $billing_country ]
+					),
+					array( 'id' => 'billing_country' )
+				);
+			}
+		}
+
 		if ( WC()->cart->needs_shipping() ) {
 			$shipping_country = isset( $data['shipping_country'] ) ? $data['shipping_country'] : WC()->customer->get_shipping_country();
 
-			if ( empty( $shipping_country ) && ! $errors->get_error_data( 'billing_country_required' ) ) {
+			if ( empty( $shipping_country ) && ! $errors->get_error_data( 'billing_country_required' ) && ! $errors->get_error_data( 'billing_country_validation' ) ) {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
 			} elseif ( ! in_array( $shipping_country, array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
 				if ( WC()->countries->country_exists( $shipping_country ) ) {
