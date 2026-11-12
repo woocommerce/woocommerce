@@ -87,6 +87,28 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox set_current_gateway() should mark the gateway of the customer's default saved card when the session holds no choice.
+	 */
+	public function test_set_current_gateway_marks_the_default_saved_card_gateway(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_COD::ID ) );
+		$token = new WC_Payment_Token_CC();
+		$token->set_gateway_id( WC_Gateway_COD::ID );
+		$token->set_user_id( $this->login_as_role( 'customer' ) );
+		$token->set_token( 'tok_test' );
+		$token->set_last4( '4242' );
+		$token->set_expiry_month( '12' );
+		$token->set_expiry_year( (string) ( (int) gmdate( 'Y' ) + 2 ) );
+		$token->set_card_type( 'visa' );
+		$token->set_default( true );
+		$token->save();
+		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+		$this->sut->set_current_gateway( $gateways );
+
+		$this->assertSame( array( WC_Gateway_COD::ID ), $this->get_current_gateways( $gateways ) );
+	}
+
+	/**
 	 * @testdox set_current_gateway() should mark the first available gateway when WooCommerce's own answer is enabled but not available for the cart, as before.
 	 */
 	public function test_set_current_gateway_falls_back_to_the_first_available_gateway_without_a_callback(): void {
