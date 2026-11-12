@@ -7,6 +7,8 @@ declare( strict_types = 1 );
  * @package WooCommerce\Tests\Shortcodes
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * Class WC_Shortcode_Checkout_Test.
  */
@@ -247,22 +249,96 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Rendering the order received page should leave the cart alone, as wc_clear_cart_after_payment() decides whether to empty it.
+	 * @testdox The receipt should respect the cart clearing decision made before rendering.
+	 *
+	 * @testWith [true, true, null, 0]
+	 *           [false, true, null, 1]
+	 *           [true, false, null, 1]
+	 *           [false, false, null, 1]
+	 *           [true, true, false, 1]
+	 *           [false, true, true, 0]
+	 *
+	 * @param bool      $matching_cart Whether the order belongs to the current cart.
+	 * @param bool      $valid_key     Whether the receipt has a valid order key.
+	 * @param bool|null $override      Optional cart clearing filter override.
+	 * @param int       $expected      Expected cart quantity after rendering.
 	 */
-	public function test_order_received_does_not_empty_the_cart(): void {
+	public function test_order_received_respects_cart_clearing_decision( bool $matching_cart, bool $valid_key, ?bool $override, int $expected ): void {
 		global $wp;
 
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+
 		$order = WC_Helper_Order::create_order( 0 );
-		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->set_cart_hash( $matching_cart ? WC()->cart->get_cart_hash() : 'previous-cart-hash' );
+		$order->save();
 
 		$wp->query_vars['order-received'] = $order->get_id();
-		$_GET['key']                      = $order->get_order_key();
+		$_GET['key']                      = $valid_key ? $order->get_order_key() : 'invalid-order-key';
+
+		if ( null !== $override ) {
+			add_filter(
+				'woocommerce_should_clear_cart_after_payment',
+				static function () use ( $override ) {
+					return $override;
+				}
+			);
+		}
+
+		// Cart clearing runs on template_redirect, before the checkout shortcode renders.
+		wc_clear_cart_after_payment();
+		$this->assertSame( $expected, WC()->cart->get_cart_contents_count(), 'The pre-render cart clearing decision should match the requested scenario.' );
 
 		ob_start();
-		WC_Shortcode_Checkout::output( array() );
-		ob_end_clean();
+		try {
+			WC_Shortcode_Checkout::output( array() );
+		} finally {
+			ob_end_clean();
+		}
 
-		$this->assertSame( 1, WC()->cart->get_cart_contents_count(), 'An unrelated cart, or one the woocommerce_should_clear_cart_after_payment filter kept, should survive the page.' );
+		$this->assertSame( $expected, WC()->cart->get_cart_contents_count(), 'Rendering a receipt must not override the earlier cart clearing decision.' );
+	}
+
+	/**
+	 * @testdox The receipt should retain the awaiting-payment cart clearing behavior.
+	 *
+	 * @testWith ["processing", 0]
+	 *           ["pending", 1]
+	 *           ["failed", 1]
+	 *           ["cancelled", 1]
+	 *
+	 * @param string $status   Awaiting order status.
+	 * @param int    $expected Expected cart quantity after rendering.
+	 */
+	public function test_order_received_respects_awaiting_payment_cart( string $status, int $expected ): void {
+		global $wp;
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_status( $status );
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
+		WC()->session->set( 'order_awaiting_payment', $order->get_id() );
+
+		$wp->query_vars['order-received'] = $order->get_id();
+		$_GET['key']                      = 'invalid-order-key';
+
+		wc_clear_cart_after_payment();
+
+		ob_start();
+		try {
+			WC_Shortcode_Checkout::output( array() );
+		} finally {
+			ob_end_clean();
+		}
+
+		$this->assertSame( $expected, WC()->cart->get_cart_contents_count(), 'Only an awaiting order that went through should clear its matching cart.' );
+		$this->assertNull( WC()->session->get( 'order_awaiting_payment' ), 'The receipt should still reset the awaiting-payment session.' );
 	}
 
 	/**
