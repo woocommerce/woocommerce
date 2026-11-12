@@ -262,9 +262,8 @@ final class BlockTypesLazyController {
 	 */
 	private function get_product_display_element_blocks(): array {
 		// ProductGalleryLargeImage: excluded — overrides initialize() with block_type_metadata_settings filter.
-		return array(
+		$list = array(
 			'product-price'              => \Automattic\WooCommerce\Blocks\BlockTypes\ProductPrice::class,
-			'product-image'              => \Automattic\WooCommerce\Blocks\BlockTypes\ProductImage::class,
 			'product-title'              => \Automattic\WooCommerce\Blocks\BlockTypes\ProductTitle::class,
 			'product-sku'                => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSKU::class,
 			'product-sale-badge'         => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSaleBadge::class,
@@ -282,5 +281,11 @@ final class BlockTypesLazyController {
 			'product-gallery-thumbnails' => \Automattic\WooCommerce\Blocks\BlockTypes\ProductGalleryThumbnails::class,
 			'product-gallery-large-image-next-previous' => \Automattic\WooCommerce\Blocks\BlockTypes\NextPreviousButtons::class,
 		);
+		if ( ! is_admin() ) {
+			// ProductImage: overrides enqueue_data() with editor-visible placeholder and thumbnail aspect ratio, hence load eager in admin.
+			$list['product-image'] = \Automattic\WooCommerce\Blocks\BlockTypes\ProductImage::class;
+		}
+
+		return $list;
 	}
 }

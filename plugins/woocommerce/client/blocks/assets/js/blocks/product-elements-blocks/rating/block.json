@@ -43,6 +43,10 @@
 		"core/post-template"
 	],
 	"usesContext": [ "query", "queryId", "postId" ],
+	"style": [
+		"wc-blocks-style",
+		"wc-blocks-packages-style"
+	],
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,

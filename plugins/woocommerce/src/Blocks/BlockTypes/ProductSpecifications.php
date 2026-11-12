@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Enums\ProductType;
  * ProductSpecifications class.
  */
 class ProductSpecifications extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 	/**
 	 * Block name.
 	 *
