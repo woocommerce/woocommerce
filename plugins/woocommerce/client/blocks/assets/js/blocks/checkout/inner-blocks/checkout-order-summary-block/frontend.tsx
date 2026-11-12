@@ -4,6 +4,7 @@
 import { TotalsFooterItem } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
+import { animateCollapse, whenAnimationsEnd } from '@woocommerce/base-utils';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import {
@@ -32,6 +33,7 @@ const FrontendBlock = ( {
 	const { cartTotals } = useStoreCart();
 	const {
 		isOpen,
+		isClickToggle,
 		hasContainerWidth,
 		isLarge,
 		closeSummary,
@@ -61,7 +63,21 @@ const FrontendBlock = ( {
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const totalPrice = parseInt( cartTotals.total_price, 10 );
-	const showInline = ! hasContainerWidth || isLarge || isOpen;
+	const isToggleShown = hasContainerWidth && ! isLarge;
+
+	// After a tap, the content collapses inline before it moves to the checkout actions. Closing because the shopper
+	// scrolled past the summary applies immediately, as its scroll correction expects. So does a resize that hides
+	// the toggle.
+	const [ isClosing, setIsClosing ] = useState( false );
+	const [ previousIsOpen, setPreviousIsOpen ] = useState( isOpen );
+	if ( isOpen !== previousIsOpen ) {
+		setPreviousIsOpen( isOpen );
+		setIsClosing( ! isOpen && isClickToggle && isToggleShown );
+	}
+	if ( isClosing && ! isToggleShown ) {
+		setIsClosing( false );
+	}
+	const showInline = ! isToggleShown || isOpen || isClosing;
 
 	useEffect( () => {
 		if (
@@ -140,6 +156,27 @@ const FrontendBlock = ( {
 		showInline,
 	] );
 
+	// Runs after the effect above has moved the content in or out. A tap grows the content open, or collapses it, and
+	// turns around if the motion still runs. Any other change applies immediately and leaves no collapse behind, such
+	// as a resize in the middle of the motion.
+	const wasOpenRef = useRef( isOpen );
+	useLayoutEffect( () => {
+		const wasOpen = wasOpenRef.current;
+		wasOpenRef.current = isOpen;
+		if ( ! inlineHost ) {
+			return;
+		}
+		if ( isClosing ) {
+			animateCollapse( inlineHost, false );
+			return whenAnimationsEnd( inlineHost, () => setIsClosing( false ) );
+		}
+		animateCollapse(
+			inlineHost,
+			true,
+			isOpen && ! wasOpen && isClickToggle && isToggleShown
+		);
+	}, [ inlineHost, isClosing, isOpen, isClickToggle, isToggleShown ] );
+
 	useLayoutEffect( () => {
 		return () => contentContainer.remove();
 	}, [ contentContainer ] );
@@ -178,10 +215,12 @@ const FrontendBlock = ( {
 					className={ clsx(
 						'wc-block-components-checkout-order-summary__content',
 						{
-							'is-open': isOpen,
+							'is-open': isOpen || isClosing,
 						}
 					) }
 					id={ ariaControlsId }
+					// Closing content is already gone for the shopper. React 18 has no `inert` prop.
+					{ ...( isClosing && { inert: '' } ) }
 				/>
 			</div>
 			<CheckoutOrderSummaryFill>

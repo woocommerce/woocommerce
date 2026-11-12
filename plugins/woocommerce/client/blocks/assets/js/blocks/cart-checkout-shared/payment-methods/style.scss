@@ -81,3 +81,15 @@
 		display: none;
 	}
 }
+
+// The fields of the selected payment method grow in, and the space of the fields of the last one collapses, as an empty
+// box at the same timing, so the content below moves one way. `flow-root` keeps a first child's top margin, such as a
+// gateway's `<p>`, inside the content, so that it collapses with it.
+:where(.wp-block-woocommerce-checkout) .wc-block-components-radio-control-accordion-content {
+	display: flow-root;
+	@include motion-collapse;
+}
+
+:where(.wp-block-woocommerce-checkout) .wc-block-components-radio-control-accordion-option > [data-wc-collapse-copy] {
+	@include motion-collapse($out: lg);
+}

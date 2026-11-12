@@ -128,6 +128,8 @@
 
 		.wc-block-components-checkout-order-summary__content {
 			display: none;
+			// A tap on the title grows the content open and collapses it shut.
+			@include motion-collapse;
 
 			&.is-open {
 				border-bottom: 1px solid $universal-border-light;
