@@ -275,6 +275,20 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fall back to the first of the gateways the caller lists, instead of the first enabled gateway.
+	 */
+	public function test_checkout_payment_method_falls_back_to_the_first_listed_gateway(): void {
+		WC()->session->set( 'chosen_payment_method', null );
+		$available = WC()->payment_gateways()->get_available_payment_gateways();
+		$listed    = array(
+			'cod'  => $available['cod'],
+			'bacs' => $available['bacs'],
+		);
+
+		$this->assertSame( 'cod', PaymentUtils::get_checkout_payment_method( $listed ) );
+	}
+
+	/**
 	 * @testdox Should fall back to the default without a session, as in WP-CLI or cron, instead of failing.
 	 */
 	public function test_checkout_payment_method_falls_back_to_the_default_without_a_session(): void {

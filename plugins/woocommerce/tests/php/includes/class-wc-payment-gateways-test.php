@@ -100,6 +100,40 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox set_current_gateway() should mark the first gateway of the list when the available gateways are reordered, as before.
+	 */
+	public function test_set_current_gateway_marks_the_first_listed_gateway_when_the_list_is_reordered(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_COD::ID ) );
+		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'list_cod_first' ) );
+		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+		$this->sut->set_current_gateway( $gateways );
+
+		$this->assertSame( array( WC_Gateway_COD::ID ), $this->get_current_gateways( $gateways ) );
+	}
+
+	/**
+	 * @testdox set_current_gateway() should hand the first gateway of the list to the default payment method callback as WooCommerce's answer.
+	 */
+	public function test_set_current_gateway_passes_the_first_listed_gateway_to_the_callback(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_COD::ID ) );
+		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'list_cod_first' ) );
+		$received = null;
+		add_filter(
+			'woocommerce_default_payment_method',
+			function ( $payment_method ) use ( &$received ) {
+				$received = $payment_method;
+				return $payment_method;
+			}
+		);
+		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+		$this->sut->set_current_gateway( $gateways );
+
+		$this->assertSame( WC_Gateway_COD::ID, $received );
+	}
+
+	/**
 	 * @testdox set_current_gateway() should mark the gateway the default payment method callback picks, or nothing for an empty answer.
 	 * @testWith ["cod", ["cod"]]
 	 *           ["", []]
@@ -160,6 +194,16 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	public function hide_bacs( $gateways ) {
 		unset( $gateways[ WC_Gateway_BACS::ID ] );
 		return $gateways;
+	}
+
+	/**
+	 * List COD before the other available gateways, as a store that reorders them per cart would.
+	 *
+	 * @param array $gateways Available gateways keyed by ID.
+	 * @return array
+	 */
+	public function list_cod_first( $gateways ) {
+		return isset( $gateways[ WC_Gateway_COD::ID ] ) ? array( WC_Gateway_COD::ID => $gateways[ WC_Gateway_COD::ID ] ) + $gateways : $gateways;
 	}
 
 	/**

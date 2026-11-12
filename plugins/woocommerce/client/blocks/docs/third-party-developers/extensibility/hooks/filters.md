@@ -907,7 +907,7 @@ Return a gateway id from `$available_gateways` to preselect it, or an empty stri
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $payment_method | string | Gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first enabled gateway; '' when there is none. |
+| $payment_method | string | Gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first gateway the checkout lists; '' when there is none. |
 | $available_gateways | array | Gateways available for this cart, keyed by id. |
 
 ### Source
