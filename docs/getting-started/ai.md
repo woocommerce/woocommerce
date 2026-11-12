@@ -41,7 +41,7 @@ On every page of the Developer Docs, you'll see a Clipboard icon in the upper-ri
 
 ### Agent Skills for Contributors
 
-The WooCommerce monorepo includes [agent skills](https://agentskills.io/home) that provide AI assistants with procedural guidance for common development tasks. These skills are located in the `.ai/skills/` directory at the root of the repository.
+The WooCommerce monorepo includes [agent skills](https://agentskills.io/home) that provide AI assistants with procedural guidance for common development tasks. These skills are located in the `.agents/skills/` directory at the root of the repository.
 
 Each skill contains a `SKILL.md` file with step-by-step instructions for tasks like:
 
@@ -51,7 +51,7 @@ Each skill contains a `SKILL.md` file with step-by-step instructions for tasks l
 - Build and linting processes
 - UI copy and documentation guidelines
 
-Skills are designed to be tool-agnostic and can be used with various AI coding assistants. To explore available skills, browse the [`.ai/skills/` directory](https://github.com/woocommerce/woocommerce/tree/trunk/.ai/skills) in the repository.
+Skills are designed to be tool-agnostic and can be used with various AI coding assistants. To explore available skills, browse the [`.agents/skills/` directory](https://github.com/woocommerce/woocommerce/tree/trunk/.agents/skills) in the repository.
 
 ### Agent Skills for Extending
 

@@ -115,7 +115,7 @@ What to actually write in each field — who reads it, the length targets, and t
 
 Do not confuse `Comment:` with the pull request template's "Comment required below" field. That one belongs to the PR form and is unrelated to the changelog file.
 
-Changes that touch no package (for example `.ai/skills/` or `AGENTS.md`) need no entry at all.
+Changes that touch no package (for example `.agents/skills/` or `AGENTS.md`) need no entry at all.
 
 ## Constraints
 
