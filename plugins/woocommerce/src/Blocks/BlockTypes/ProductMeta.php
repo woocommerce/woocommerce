@@ -45,5 +45,4 @@ class ProductMeta extends AbstractBlock {
 	protected function get_block_type_script( $key = null ) {
 		return null;
 	}
-
 }
