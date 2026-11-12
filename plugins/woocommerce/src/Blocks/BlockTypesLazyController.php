@@ -282,8 +282,8 @@ final class BlockTypesLazyController {
 		);
 		if ( ! is_admin() ) {
 			// ProductImage: overrides enqueue_data() with editor-visible placeholder and thumbnail aspect ratio, hence load eager in admin.
-			$list['product-image'] = \Automattic\WooCommerce\Blocks\BlockTypes\ProductImage::class;
 			// ProductStockIndicator: overrides enqueue_data() with editor-visible product types without stock indicator, hence load eager in admin.
+			$list['product-image']           = \Automattic\WooCommerce\Blocks\BlockTypes\ProductImage::class;
 			$list['product-stock-indicator'] = \Automattic\WooCommerce\Blocks\BlockTypes\ProductStockIndicator::class;
 		}
 
