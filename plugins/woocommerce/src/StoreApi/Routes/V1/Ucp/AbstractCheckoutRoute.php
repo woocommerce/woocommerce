@@ -201,6 +201,7 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	 * Build a successful checkout response.
 	 *
 	 * A paid checkout is read from its order: the cart session lives on and follows later price and stock changes.
+	 * A cart changed behind a hand-off voids it for the read too, until an update or complete cancels the order.
 	 *
 	 * @param string               $checkout_id Checkout identifier.
 	 * @param array<string, mixed> $state Checkout state.
@@ -213,6 +214,9 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 
 		if ( $order instanceof \WC_Order ) {
 			$cart = $this->order_as_cart( $order );
+		} elseif ( ! empty( $state['continue_url'] ) && ( $state['fingerprint'] ?? '' ) !== $this->hand_off_fingerprint() && ! $this->awaits_confirmation( $state ) ) {
+			// Not when the order awaits confirmation: that checkout is locked, so it must not read as ready.
+			unset( $state['status'], $state['continue_url'] );
 		}
 
 		return new \WP_REST_Response(

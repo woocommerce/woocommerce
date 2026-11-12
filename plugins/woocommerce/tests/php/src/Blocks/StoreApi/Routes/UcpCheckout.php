@@ -595,6 +595,12 @@ class UcpCheckout extends ControllerTestCase {
 		$cart = WC()->cart;
 		$cart->set_quantity( (string) array_key_first( $cart->get_cart() ), 2 );
 
+		// Until then a read shows the changed cart without the payment URL of the order it no longer matches.
+		$read = $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data();
+		$this->assertArrayNotHasKey( 'continue_url', $read );
+		$this->assertSame( 'ready_for_complete', $read['status'] );
+		$this->assertSame( 2, $read['line_items'][0]['quantity'] );
+
 		$second = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
 
 		$this->assertSame( 'requires_escalation', $second['status'] );
