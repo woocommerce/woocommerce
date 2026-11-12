@@ -51,6 +51,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		'exclude_sale_items',
 		'minimum_amount',
 		'maximum_amount',
+		'maximum_discount',
 		'customer_email',
 		'_used_by',
 		'_edit_lock',
@@ -160,6 +161,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'exclude_sale_items'          => 'yes' === get_post_meta( $coupon_id, 'exclude_sale_items', true ),
 				'minimum_amount'              => get_post_meta( $coupon_id, 'minimum_amount', true ),
 				'maximum_amount'              => get_post_meta( $coupon_id, 'maximum_amount', true ),
+				'maximum_discount'            => get_post_meta( $coupon_id, 'maximum_discount', true ),
 				'email_restrictions'          => array_filter( (array) get_post_meta( $coupon_id, 'customer_email', true ) ),
 			)
 		);
@@ -324,6 +326,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'exclude_sale_items'         => 'exclude_sale_items',
 			'minimum_amount'             => 'minimum_amount',
 			'maximum_amount'             => 'maximum_amount',
+			'maximum_discount'           => 'maximum_discount',
 			'customer_email'             => 'email_restrictions',
 		);
 
