@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Shared cart links now copy only the cart and coupons, not the sharer's checkout details or in-progress order.
