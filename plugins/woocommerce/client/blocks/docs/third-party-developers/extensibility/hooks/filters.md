@@ -973,7 +973,7 @@ apply_filters( 'woocommerce_disable_compatibility_layer', bool $is_disabled_comp
 
 ### Description
 
-This hook allows to disable the compatibility layer for the blockified.
+This hook allows to disable the compatibility layer for the blockified templates.
 
 ### Parameters
 
@@ -983,9 +983,9 @@ This hook allows to disable the compatibility layer for the blockified.
 
 ### Source
 
+- [Blocks/Templates/AbstractTemplateCompatibility.php](../../../../../../src/Blocks/Templates/AbstractTemplateCompatibility.php)
 - [Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php](../../../../../../src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php)
 - [Blocks/BlockTypes/ProductDetails.php](../../../../../../src/Blocks/BlockTypes/ProductDetails.php)
-- [Blocks/Templates/AbstractTemplateCompatibility.php](../../../../../../src/Blocks/Templates/AbstractTemplateCompatibility.php)
 
 ---
 
@@ -1853,7 +1853,7 @@ This does not run when a product is first added to the cart; use the woocommerce
 ## woocommerce_store_api_disable_nonce_check
 
 
-Filters whether to disable the Store API nonce check.
+Filters the Store API nonce check.
 
 ```php
 apply_filters( 'woocommerce_store_api_disable_nonce_check', bool $disable_nonce_check )
@@ -1861,7 +1861,7 @@ apply_filters( 'woocommerce_store_api_disable_nonce_check', bool $disable_nonce_
 
 ### Description
 
-This filter is documented in src/StoreApi/Routes/V1/AbstractCartRoute.php.
+This can be used to disable the nonce check when testing API endpoints via a REST API client.
 
 ### Parameters
 
@@ -1869,10 +1869,15 @@ This filter is documented in src/StoreApi/Routes/V1/AbstractCartRoute.php.
 | -------- | ---- | ----------- |
 | $disable_nonce_check | bool | If true, nonce checks will be disabled. |
 
+### Returns
+
+
+`bool`
+
 ### Source
 
-- [StoreApi/Routes/V1/ShopperListsNonceCheck.php](../../../../../../src/StoreApi/Routes/V1/ShopperListsNonceCheck.php)
 - [StoreApi/Routes/V1/AbstractCartRoute.php](../../../../../../src/StoreApi/Routes/V1/AbstractCartRoute.php)
+- [StoreApi/Routes/V1/ShopperListsNonceCheck.php](../../../../../../src/StoreApi/Routes/V1/ShopperListsNonceCheck.php)
 
 ---
 
@@ -2065,7 +2070,7 @@ apply_filters( 'woocommerce_ucp_idempotency_retention_seconds', int $seconds )
 
 ### Description
 
-The UCP spec requires at least 24 hours.
+How long a retry carrying the same key is answered from storage. The [UCP spec](https://ucp.dev/2026-04-08/specification/checkout-rest/) requires at least 24 hours.
 
 ### Parameters
 
@@ -2090,7 +2095,7 @@ apply_filters( 'woocommerce_ucp_idempotency_strict', bool $strict )
 
 ### Description
 
-True, the default, matches the UCP specs, and returns 400 for a missing or malformed key. False honors a key when one is sent and lets a keyless write through.
+True, the default, matches the UCP OpenAPI document, which declares the header required on every mutating cart operation: a missing or malformed key is refused at 400. False honours a key when one is sent and lets a keyless write through.
 
 ### Parameters
 
