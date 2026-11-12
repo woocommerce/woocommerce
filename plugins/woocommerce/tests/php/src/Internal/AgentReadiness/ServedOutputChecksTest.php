@@ -297,13 +297,28 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 
 		$subdirectory = static fn( string $url ): string => (string) preg_replace( '#^(https?://[^/]+)#', '$1/shop', $url );
 		add_filter( 'home_url', $subdirectory );
-		$this->assertSame( '', self::llms_present( self::with_llms_status( 'unknown', '## Agentic capabilities' ) )['source'], 'In a subdirectory WooCommerce serves it elsewhere' );
-		remove_filter( 'home_url', $subdirectory );
+		try {
+			$this->assertSame( '', self::llms_present( self::with_llms_status( 'unknown', '## Agentic capabilities' ) )['source'], 'In a subdirectory WooCommerce serves it elsewhere' );
+			$subdir_off = self::llms_present( self::with_llms_status( 'disabled' ) );
+			$this->assertSame( '', $subdir_off['source'], 'Turned off in a subdirectory still is not this URL' );
+			$this->assertSame( $default['fix'], $subdir_off['fix'] );
+		} finally {
+			remove_filter( 'home_url', $subdirectory );
+		}
 
 		$responses              = $this->good_store();
 		$responses['/llms.txt'] = array( 403, 'Blocked' );
 		$this->serve( $responses );
 		$this->assertSame( '', self::llms_present( self::with_llms_status( 'disabled' ) )['source'] );
+
+		$responses['/llms.txt'] = array( 200, self::page( '', '', false ) );
+		$this->serve( $responses );
+		$page = self::llms_present( self::with_llms_status( 'unknown', '## Agentic capabilities' ) );
+		$this->assertSame( '', $page['source'], 'A page at /llms.txt reached the store' );
+		$this->assertSame( $default['fix'], $page['fix'] );
+		$page_off = self::llms_present( self::with_llms_status( 'disabled' ) );
+		$this->assertSame( '', $page_off['source'] );
+		$this->assertSame( $default['fix'], $page_off['fix'] );
 	}
 
 	/**

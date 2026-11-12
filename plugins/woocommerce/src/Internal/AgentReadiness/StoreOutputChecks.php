@@ -856,9 +856,11 @@ class StoreOutputChecks {
 
 	/**
 	 * Where the served llms.txt comes from, from WooCommerce's own fallback (woocommerce #70741).
-	 * '' without that fallback, for a status it doesn't know, or when llms.txt couldn't be loaded. When served: 'woocommerce' when it
-	 * holds WooCommerce's guidance, even as a file on disk; then 'file' for a file in the site root;
-	 * else 'other'. When not served: 'disabled' when the fallback is turned off, else 'not_reached' ('' in a subdirectory).
+	 * '' without that fallback, for a status it doesn't know, when llms.txt couldn't be loaded, when the
+	 * host returned a page or an empty 200, or in a subdirectory (WooCommerce serves it under the home path,
+	 * not at the host root read here). When served: 'woocommerce' when it holds WooCommerce's guidance, even
+	 * as a file on disk; then 'file' for a file in the site root; else 'other'. When missing: 'disabled'
+	 * when the fallback is turned off, else 'not_reached'.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 * @param bool|null      $served    Whether llms.txt is served, null when it couldn't be loaded.
@@ -869,11 +871,15 @@ class StoreOutputChecks {
 			return '';
 		}
 		if ( false === $served ) {
-			if ( 'disabled' === $status['status'] ) {
-				return 'disabled';
-			}
 			// In a subdirectory WooCommerce serves it under the home path, not at the host root read here.
-			return '' === trim( (string) wp_parse_url( home_url(), PHP_URL_PATH ), '/' ) ? 'not_reached' : '';
+			if ( '' !== trim( (string) wp_parse_url( home_url(), PHP_URL_PATH ), '/' ) ) {
+				return '';
+			}
+			// A 200 reached the store (a page, or an empty body). A miss is a non-200.
+			if ( 200 === (int) ( $responses->get( self::host_root( '/llms.txt' ) )['status'] ?? 0 ) ) {
+				return '';
+			}
+			return 'disabled' === $status['status'] ? 'disabled' : 'not_reached';
 		}
 		$section = trim( $status['section'] );
 		$body    = (string) ( $responses->get( self::host_root( '/llms.txt' ) )['body'] ?? '' );
