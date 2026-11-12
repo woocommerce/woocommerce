@@ -9,8 +9,9 @@ namespace Automattic\WooCommerce\Internal\Admin\ImportExport\Product;
  *
  * The admin product importer and the `wp wc product import` CLI command both run cleanup of
  * placeholder products at the end of an import, and that cleanup is site-wide rather than scoped
- * to the run that created the placeholders. Both entry points must hold this lock for the
- * duration of their run so their cleanup passes cannot collide.
+ * to the run that created the placeholders. Both entry points hold this lock for the duration
+ * of their run to keep their cleanup passes apart. This is best-effort: the lock has no owner
+ * check, so a run that loses it to a stale takeover can still touch the new run's state.
  *
  * @since 11.4.0
  */
@@ -54,7 +55,7 @@ final class ProductImportLock {
 	 * `IMPORT_LOCK_STALE_AFTER` seconds so a crashed run cannot block imports forever.
 	 * An admin import takes over another admin import's lock after only `ADMIN_LOCK_STALE_AFTER`
 	 * seconds, because closing the browser tab leaves no way to release it. A running import
-	 * keeps refreshing the lock, so it stays protected.
+	 * refreshes the lock before each row, so a single row that outlasts the timeout can still lose it.
 	 *
 	 * @param string $holder Who is taking the lock, one of the `HOLDER_*` constants.
 	 * @return bool Whether the lock was acquired.

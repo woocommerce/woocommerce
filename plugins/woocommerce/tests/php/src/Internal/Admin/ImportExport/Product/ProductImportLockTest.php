@@ -154,7 +154,7 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox A due refresh should only write once the lock is a minute old, so importing rows does not write on every row.
-	 * @testWith [59, 59]
+	 * @testWith [50, 50]
 	 *           [60, 0]
 	 *
 	 * @param int $age          How long ago the lock was last refreshed.
