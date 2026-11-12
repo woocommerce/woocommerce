@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the Order Custom Field personalization tag as text, also for field keys with apostrophes.

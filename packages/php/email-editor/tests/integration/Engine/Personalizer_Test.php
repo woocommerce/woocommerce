@@ -846,6 +846,28 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that an html value type tag still gets decoded argument values in link targets.
+	 */
+	public function testHtmlValueTypeTagGetsDecodedArgumentsInLinks(): void {
+		$received = array();
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'link',
+				'test/link',
+				'Test',
+				function ( $context, $args ) use ( &$received ) {
+					unset( $context );
+					$received[] = $args['note'] ?? '';
+					return 'https://example.com/value';
+				}
+			)
+		);
+
+		$this->personalizer->personalize_content( '<a data-link-href="[test/link note=&quot;O&amp;#039;Brien &amp;amp; co&quot;]">Link</a>' );
+		$this->assertSame( array( "O'Brien & co" ), $received );
+	}
+
+	/**
 	 * Test that an html value type tag gets its argument values escaped for HTML in HTML content,
 	 * so a callback that outputs an argument as it is shows it as text, and decoded elsewhere.
 	 */
