@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
-use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
@@ -136,24 +135,28 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A fetched rules file keeps a bundled check no channel asks for, such as image alt text.
+	 * @testdox A check no channel asks for, such as image alt text, runs when the file names it with an empty channel map, and not when the file leaves it out.
 	 */
-	public function test_fetched_rules_keep_check_with_no_channels(): void {
+	public function test_check_with_no_channels_follows_the_file(): void {
+		$brand = array(
+			'google' => array(
+				'field'  => 'brand',
+				'effect' => 'not_listable',
+			),
+		);
+		$this->serve( array( 'missing_brand' => $brand ) );
+		$this->assertTrue( $this->sut->refresh() );
+		$this->assertArrayNotHasKey( 'image_alt_text', $this->agent_readiness()->get_channel_rules(), 'Left out of the file, it does not run' );
+
 		$this->serve(
 			array(
-				'missing_brand' => array(
-					'google' => array(
-						'field'  => 'brand',
-						'effect' => 'not_listable',
-					),
-				),
+				'missing_brand'  => $brand,
+				'image_alt_text' => new \stdClass(),
 			)
 		);
 		$this->assertTrue( $this->sut->refresh() );
-
 		$rules = $this->agent_readiness()->get_channel_rules();
-
-		$this->assertSame( array(), $rules['image_alt_text'] );
+		$this->assertSame( array(), $rules['image_alt_text'], 'Named with "channels": {}, it runs' );
 		$this->assertArrayNotHasKey( 'missing_images', $rules, 'A channel check the file leaves out still does not run' );
 	}
 
@@ -264,7 +267,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		unset( $rules['missing_gtin'], $rules['missing_images'] );
 		$ids = array_keys( $rules );
 		sort( $ids );
-		$this->assertSame( array( 'image_alt_text', 'image_too_small', 'missing_brand', 'title_too_long' ), $ids, 'Only the file\'s checks run, and the image alt text check, which has no channels' );
+		$this->assertSame( array( 'image_too_small', 'missing_brand', 'title_too_long' ), $ids, 'Only the file\'s checks run' );
 		$this->assertSame( $defaults['missing_brand']->channels(), $rules['missing_brand'], 'A bad effect runs the bundled channels' );
 		$this->assertSame( $defaults['image_too_small']->channels(), $rules['image_too_small'], 'A bad date runs the bundled channels' );
 		$this->assertSame( array( 'google' ), array_keys( $rules['title_too_long'] ), 'The valid entry still applies' );
@@ -539,7 +542,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		);
 		$this->assertTrue( $this->sut->refresh() );
 		$before = $this->agent_readiness()->get_channel_rules();
-		$this->assertSame( array( 'missing_brand', 'image_alt_text' ), array_keys( $before ), 'The image alt text check has no channels, so it always runs' );
+		$this->assertSame( array( 'missing_brand' ), array_keys( $before ), 'Only the file\'s check runs' );
 
 		foreach (
 			array(
@@ -647,16 +650,22 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $file['checks'] );
 
 		$rules  = ( new AgentReadiness() )->get_default_rules();
-		$known  = array_keys( array_filter( $rules, static fn( ReadinessRule $rule ): bool => array() !== $rule->channels() ) );
+		$known  = array_keys( $rules );
 		$checks = array();
 		foreach ( $file['checks'] as $id => $check ) {
 			$this->assertContains( $id, $known, 'The file names a check the code does not have' );
 			$checks[ $id ] = $check['channels'];
 		}
-		$this->assertSame( $known, array_keys( $checks ), 'A check in code that is missing from rules.json would not run once a store has fetched the file' );
+		$expected = $known;
+		$listed   = array_keys( $checks );
+		sort( $expected );
+		sort( $listed );
+		$this->assertSame( $expected, $listed, 'A check in code that is missing from rules.json would not run once a store has fetched the file' );
 
 		$this->serve( $checks );
 		$this->sut->refresh();
-		$this->assertSame( array_keys( $rules ), array_keys( $this->agent_readiness()->get_channel_rules() ), 'A check no channel asks for runs too' );
+		$running = array_keys( $this->agent_readiness()->get_channel_rules() );
+		sort( $running );
+		$this->assertSame( $expected, $running, 'Every check runs, including one no channel asks for' );
 	}
 }

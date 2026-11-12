@@ -114,7 +114,8 @@ class AgentReadiness {
 	 * Field and effect per channel for each check that runs. With a stored
 	 * rules file, the file is the list: an id it leaves out does not run, an
 	 * id code does not know is dropped, and an id whose entry is malformed
-	 * runs with its bundled channels. With no file, the bundled checks
+	 * runs with its bundled channels. A check no channel asks for is named
+	 * with an empty channel map. With no file, the bundled checks
 	 * run. The woocommerce_agent_readiness_rules filter runs last, and a check
 	 * whose id is missing from the filtered array does not run.
 	 *
@@ -132,8 +133,6 @@ class AgentReadiness {
 			}
 			// A file with no check this code can run does not turn the bundled checks off.
 			$defaults = array() !== $from_file ? $from_file : $bundled;
-			// The file lists channel requirements, so a check no channel asks for stays.
-			$defaults += array_filter( $bundled, static fn( array $channels ): bool => array() === $channels );
 		} else {
 			$defaults = $bundled;
 		}
