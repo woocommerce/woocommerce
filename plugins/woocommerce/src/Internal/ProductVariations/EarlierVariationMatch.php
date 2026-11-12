@@ -26,7 +26,7 @@ class EarlierVariationMatch {
 	/**
 	 * Whether an earlier available variation matches this selection.
 	 *
-	 * Fully specified variations return false, so they can still be added by their own ID. Disabled and unpriced variations are ignored. Out-of-stock variations are ignored when out-of-stock products are hidden from the catalog.
+	 * Fully specified variations return false, so they can still be added by their own ID. Disabled and unpriced variations are ignored, as are variations removed by woocommerce_available_variation. Out-of-stock variations are ignored when out-of-stock products are hidden from the catalog.
 	 *
 	 * @since 11.4.0
 	 *
@@ -129,6 +129,10 @@ class EarlierVariationMatch {
 		 */
 		$hide_invisible = apply_filters( 'woocommerce_hide_invisible_variations', true, $parent_product->get_id(), $variation );
 
-		return ! $hide_invisible || $variation->variation_is_visible();
+		if ( $hide_invisible && ! $variation->variation_is_visible() ) {
+			return false;
+		}
+
+		return (bool) $parent_product->get_available_variation( $variation );
 	}
 }

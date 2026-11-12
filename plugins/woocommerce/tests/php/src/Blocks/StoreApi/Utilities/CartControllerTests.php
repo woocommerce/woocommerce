@@ -644,4 +644,61 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( $any->get_id(), $cart_item['variation_id'], 'The in-stock Any variation should be added.' );
 		$this->assertSame( 'Red', $cart_item['variation']['attribute_color'], 'The posted color should be kept.' );
 	}
+
+	/**
+	 * @testdox Add to cart accepts an Any variation when an earlier match is hidden by woocommerce_available_variation.
+	 */
+	public function test_add_to_cart_accepts_any_variation_when_earlier_match_is_hidden_by_available_variation_filter(): void {
+		$product   = new \WC_Product_Variable();
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Blue' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$blue = new \WC_Product_Variation();
+		$blue->set_parent_id( $product->get_id() );
+		$blue->set_attributes( array( 'color' => 'Blue' ) );
+		$blue->set_regular_price( '50' );
+		$blue->set_menu_order( 0 );
+		$blue->save();
+
+		$any = new \WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '40' );
+		$any->set_menu_order( 1 );
+		$any->save();
+
+		add_filter(
+			'woocommerce_available_variation',
+			static function ( $data, $variable_product, $variation ) use ( $blue ) {
+				unset( $variable_product );
+				if ( $variation instanceof \WC_Product_Variation && $blue->get_id() === $variation->get_id() ) {
+					return false;
+				}
+				return $data;
+			},
+			10,
+			3
+		);
+
+		$cart_id   = ( new CartController() )->add_to_cart(
+			array(
+				'id'        => $any->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'Color',
+						'value'     => 'Blue',
+					),
+				),
+			)
+		);
+		$cart_item = wc()->cart->get_cart_item( $cart_id );
+
+		$this->assertSame( $any->get_id(), $cart_item['variation_id'], 'An Any variation should be added when the earlier match is hidden by woocommerce_available_variation.' );
+		$this->assertSame( 'Blue', $cart_item['variation']['attribute_color'], 'The posted color should be kept.' );
+	}
 }

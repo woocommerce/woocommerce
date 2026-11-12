@@ -3176,4 +3176,57 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( $any_added, 'A broader variation ordered after a closer match should be rejected.' );
 		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
 	}
+
+	/**
+	 * @testdox Add to cart accepts an Any variation when an earlier match is hidden by woocommerce_available_variation.
+	 */
+	public function test_add_to_cart_accepts_any_variation_when_earlier_match_is_hidden_by_available_variation_filter(): void {
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Blue' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$blue = new WC_Product_Variation();
+		$blue->set_parent_id( $product->get_id() );
+		$blue->set_attributes( array( 'color' => 'Blue' ) );
+		$blue->set_regular_price( '50' );
+		$blue->set_menu_order( 0 );
+		$blue->save();
+
+		$any = new WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '40' );
+		$any->set_menu_order( 1 );
+		$any->save();
+
+		add_filter(
+			'woocommerce_available_variation',
+			static function ( $data, $variable_product, $variation ) use ( $blue ) {
+				unset( $variable_product );
+				if ( $variation instanceof WC_Product_Variation && $blue->get_id() === $variation->get_id() ) {
+					return false;
+				}
+				return $data;
+			},
+			10,
+			3
+		);
+
+		$cart_item_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$any->get_id(),
+			array(
+				'attribute_color' => 'Blue',
+			)
+		);
+
+		$this->assertNotFalse( $cart_item_key, 'An Any variation should be added when the earlier match is hidden by woocommerce_available_variation.' );
+		$this->assertSame( $any->get_id(), WC()->cart->get_cart_item( (string) $cart_item_key )['variation_id'] );
+		$this->assertSame( 'Blue', WC()->cart->get_cart_item( (string) $cart_item_key )['variation']['attribute_color'] );
+	}
 }
