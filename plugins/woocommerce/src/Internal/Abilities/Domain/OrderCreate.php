@@ -56,7 +56,7 @@ class OrderCreate extends ActionableAbility {
 		return array(
 			'label'               => __( 'Create order', 'woocommerce' ),
 			'description'         => __(
-				'Create an order, as the order screen does, for example for a phone order or a free replacement. Without customer_id, the order is a guest order. Without status, the order gets the default status of the store, which is pending payment unless an extension changes it. A processing, on-hold or completed status reduces the stock of the products and sends the order emails to the store and the customer, so confirm the status before you send it.',
+				'Create an order, as the order screen does, for example for a phone order. Without customer_id, the order is a guest order. Without status, the order gets the default status of the store, which is pending payment unless an extension changes it. A processing, on-hold or completed status reduces the stock of the products and sends the order emails to the store and the customer, so confirm the status before you send it.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
