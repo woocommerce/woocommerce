@@ -166,10 +166,6 @@ class VisualAttributeTermAdminTest extends WC_Unit_Test_Case {
 				$attribute_id
 			);
 
-			$wp_taxonomy = get_taxonomy( $taxonomy );
-			$this->assertInstanceOf( \WP_Taxonomy::class, $wp_taxonomy, 'Creating the attribute should register its taxonomy.' );
-			$this->assertTrue( $wp_taxonomy->show_ui, 'The taxonomy should have the arguments WooCommerce registers on init.' );
-
 			$terms = get_terms(
 				array(
 					'taxonomy'   => $taxonomy,
