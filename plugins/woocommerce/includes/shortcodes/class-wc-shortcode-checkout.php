@@ -245,6 +245,7 @@ class WC_Shortcode_Checkout {
 					array(
 						'order'              => $order,
 						'available_gateways' => $available_gateways,
+						'has_chosen_gateway' => ! empty( wp_list_filter( $available_gateways, array( 'chosen' => true ) ) ),
 						'order_button_text'  => $order_button_text,
 					)
 				);
