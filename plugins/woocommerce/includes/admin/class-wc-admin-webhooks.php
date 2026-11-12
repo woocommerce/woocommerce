@@ -58,10 +58,33 @@ class WC_Admin_Webhooks {
 			wp_die( esc_html__( 'You do not have permission to update Webhooks', 'woocommerce' ) );
 		}
 
-		$errors = array();
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$webhook_id = isset( $_POST['webhook_id'] ) ? absint( $_POST['webhook_id'] ) : 0;
 		$webhook    = new WC_Webhook( $webhook_id );
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$status = ! empty( $_POST['webhook_status'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_status'] ) ) : 'disabled';
+		$topic  = '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_POST['webhook_topic'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$selection = sanitize_text_field( wp_unslash( $_POST['webhook_topic'] ) );
+			if ( 'action' === $selection ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$event = isset( $_POST['webhook_action_event'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_action_event'] ) ) : '';
+				$topic = 'action.' . $event;
+			} else {
+				$parts = explode( '.', $selection, 3 );
+				$topic = $parts[0] . '.' . ( $parts[1] ?? '' );
+			}
+		}
+
+		// Inactive webhooks can be saved before a topic is selected.
+		if ( ( '' !== $topic || 'active' === $status ) && ! wc_is_webhook_valid_topic( $topic ) ) {
+			$error = __( 'Webhook topic unknown. Please select a valid topic.', 'woocommerce' );
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&edit-webhook=' . $webhook->get_id() . '&error=' . rawurlencode( $error ) ) );
+			exit();
+		}
 
 		// Name.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -84,9 +107,7 @@ class WC_Admin_Webhooks {
 			$webhook->set_user_id( get_current_user_id() );
 		}
 
-		// Status.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$webhook->set_status( ! empty( $_POST['webhook_status'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_status'] ) ) : 'disabled' );
+		$webhook->set_status( $status );
 
 		// Delivery URL.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -101,33 +122,8 @@ class WC_Admin_Webhooks {
 		$secret = ! empty( $_POST['webhook_secret'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_secret'] ) ) : wp_generate_password( 50, true, true );
 		$webhook->set_secret( $secret );
 
-		// Topic.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! empty( $_POST['webhook_topic'] ) ) {
-			$resource = '';
-			$event    = '';
-
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			switch ( $_POST['webhook_topic'] ) {
-				case 'action':
-					$resource = 'action';
-					// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					$event = ! empty( $_POST['webhook_action_event'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_action_event'] ) ) : '';
-					break;
-
-				default:
-					// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					list( $resource, $event ) = explode( '.', sanitize_text_field( wp_unslash( $_POST['webhook_topic'] ) ) );
-					break;
-			}
-
-			$topic = $resource . '.' . $event;
-
-			if ( wc_is_webhook_valid_topic( $topic ) ) {
-				$webhook->set_topic( $topic );
-			} else {
-				$errors[] = __( 'Webhook topic unknown. Please select a valid topic.', 'woocommerce' );
-			}
+		if ( '' !== $topic ) {
+			$webhook->set_topic( $topic );
 		}
 
 		// API version.
@@ -139,12 +135,8 @@ class WC_Admin_Webhooks {
 
 		// Run actions.
 		do_action( 'woocommerce_webhook_options_save', $webhook->get_id() );
-		if ( $errors ) {
-			// Redirect to webhook edit page to avoid settings save actions.
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&edit-webhook=' . $webhook->get_id() . '&error=' . rawurlencode( implode( '|', $errors ) ) ) );
-			exit();
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		} elseif ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $webhook->get_pending_delivery() ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_POST['webhook_status'] ) && 'active' === $_POST['webhook_status'] && $webhook->get_pending_delivery() ) {
 			// Ping the webhook at the first time that is activated.
 			$result = $webhook->deliver_ping();
 
