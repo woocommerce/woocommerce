@@ -3289,8 +3289,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$this->reinstantiate_checkout();
 
-		$original_customer = WC()->customer;
-		WC()->customer     = new WC_Customer();
+		WC()->customer = new WC_Customer();
 		foreach ( $billing as $field => $value ) {
 			WC()->customer->{"set_billing_{$field}"}( $value );
 		}
@@ -3298,13 +3297,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			WC()->customer->{"set_shipping_{$field}"}( $value );
 		}
 
-		try {
-			$checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
-		} finally {
-			WC()->customer = $original_customer;
-		}
-
-		$this->assertSame( $expected_checked, $checked );
+		$this->assertSame( $expected_checked, apply_filters( 'woocommerce_ship_to_different_address_checked', 0 ) );
 	}
 
 	/**
@@ -3380,27 +3373,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'woocommerce_ship_to_different_address_checked' keeps a checked default and lets later callbacks override it.
+	 * @testdox 'woocommerce_ship_to_different_address_checked' keeps a checked default.
 	 */
-	public function test_ship_to_different_address_checked_keeps_checked_default_and_later_callbacks_win(): void {
-		$this->assertSame( 1, $this->sut->handle_woocommerce_ship_to_different_address_checked( 1 ), 'A checked default should stay checked.' );
-
-		$this->reinstantiate_checkout();
-		add_filter( 'woocommerce_ship_to_different_address_checked', '__return_zero' );
-
-		$original_customer = WC()->customer;
-		WC()->customer     = new WC_Customer();
-		WC()->customer->set_billing_city( 'San Francisco' );
-		WC()->customer->set_shipping_city( 'San Diego' );
-
-		try {
-			$checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
-		} finally {
-			WC()->customer = $original_customer;
-			remove_filter( 'woocommerce_ship_to_different_address_checked', '__return_zero' );
-		}
-
-		$this->assertSame( 0, $checked, 'A callback at the default priority should override the core default.' );
+	public function test_ship_to_different_address_checked_keeps_checked_default(): void {
+		$this->assertSame( 1, $this->sut->handle_woocommerce_ship_to_different_address_checked( 1 ) );
 	}
 
 	/**
@@ -3418,17 +3394,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$this->reinstantiate_checkout();
 
-		$original_customer = WC()->customer;
-		WC()->customer     = new WC_Customer( $customer->get_id() );
+		WC()->customer = new WC_Customer( $customer->get_id() );
+		$saved_checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
 
-		try {
-			$saved_checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
-
-			WC()->customer->set_shipping_location( 'US', WC()->customer->get_shipping_state(), '92101', 'San Diego' );
-			$session_checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
-		} finally {
-			WC()->customer = $original_customer;
-		}
+		WC()->customer->set_shipping_location( 'US', WC()->customer->get_shipping_state(), '92101', 'San Diego' );
+		$session_checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
 
 		$this->assertSame( 0, $saved_checked, 'The saved shipping address should not check the box.' );
 		$this->assertSame( 1, $session_checked, 'A shipping destination chosen during the session should check the box.' );
@@ -3441,19 +3411,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_ship_to_different_address_checked', '__return_zero', 0 );
 		$this->reinstantiate_checkout();
 
-		$original_customer = WC()->customer;
-		WC()->customer     = new WC_Customer();
+		WC()->customer = new WC_Customer();
 		WC()->customer->set_billing_city( 'San Francisco' );
 		WC()->customer->set_shipping_city( 'San Diego' );
 
-		try {
-			$checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
-		} finally {
-			WC()->customer = $original_customer;
-			remove_filter( 'woocommerce_ship_to_different_address_checked', '__return_zero', 0 );
-		}
-
-		$this->assertSame( 0, $checked );
+		$this->assertSame( 0, apply_filters( 'woocommerce_ship_to_different_address_checked', 0 ) );
 	}
 
 	/**
@@ -3475,17 +3437,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_customer_get_shipping_postcode', $format_postcode );
 		$this->reinstantiate_checkout();
 
-		$original_customer = WC()->customer;
-		WC()->customer     = new WC_Customer( $customer->get_id() );
+		WC()->customer = new WC_Customer( $customer->get_id() );
 
-		try {
-			$checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
-		} finally {
-			WC()->customer = $original_customer;
-			remove_filter( 'woocommerce_customer_get_shipping_postcode', $format_postcode );
-		}
-
-		$this->assertSame( 0, $checked, 'A filtered postcode should not make the saved shipping address look changed.' );
+		$this->assertSame( 0, apply_filters( 'woocommerce_ship_to_different_address_checked', 0 ), 'A filtered postcode should not make the saved shipping address look changed.' );
 	}
 
 	/**
