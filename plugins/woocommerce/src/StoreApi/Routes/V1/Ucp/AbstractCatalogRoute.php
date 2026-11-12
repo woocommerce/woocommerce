@@ -179,8 +179,8 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 			$product      = wc_get_product( $product->get_parent_id() );
 		}
 
-		// Catalog visibility as the storefront applies it: published, not hidden
-		// from the catalog, and in stock when the store hides out-of-stock items.
+		// Visibility as catalog search applies it: published, not "Hidden", and in
+		// stock when the store hides out-of-stock items.
 		if ( ! $product instanceof \WC_Product || ! self::is_reachable( $product ) ) {
 			return null;
 		}
@@ -205,7 +205,8 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	/**
 	 * Whether an agent can open the product by its ID. is_visible() accepts "Search results
 	 * only" products only on a storefront search page, but catalog search returns them, so
-	 * they are checked as if shown everywhere, keeping the other rules and the filter.
+	 * they are checked as if shown everywhere, keeping the other rules and the filter. The
+	 * filter gets the ID, so a callback that reloads the product sees its saved setting.
 	 *
 	 * @param \WC_Product $product Product, not a variation.
 	 * @return bool

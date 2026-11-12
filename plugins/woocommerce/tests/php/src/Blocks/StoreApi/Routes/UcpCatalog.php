@@ -199,29 +199,54 @@ class UcpCatalog extends ControllerTestCase {
 	 * hidden one, including "Search results only", which is_visible() refuses outside a
 	 * storefront search.
 	 *
-	 * @testWith ["visible", true, true]
-	 *           ["search", true, true]
-	 *           ["catalog", false, true]
-	 *           ["hidden", false, false]
+	 * @testWith ["visible", true, true, true]
+	 *           ["search", true, false, true]
+	 *           ["catalog", false, true, true]
+	 *           ["hidden", false, false, false]
 	 *
-	 * @param string $visibility Catalog visibility.
-	 * @param bool   $searchable Whether a search by name returns it.
-	 * @param bool   $opens      Whether lookup and product details return it.
+	 * @param string $visibility    Catalog visibility.
+	 * @param bool   $found_by_name Whether a search by name returns it.
+	 * @param bool   $browsable     Whether a category search with no query returns it.
+	 * @param bool   $opens         Whether lookup and product details return it.
 	 */
-	public function test_lookup_and_details_open_what_search_can_return( string $visibility, bool $searchable, bool $opens ): void {
+	public function test_lookup_and_details_open_what_search_can_return( string $visibility, bool $found_by_name, bool $browsable, bool $opens ): void {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'UCP Zebra ' . $visibility ) );
 		$product->set_catalog_visibility( $visibility );
 		$product->save();
-		$id = (string) $product->get_id();
+		$id   = (string) $product->get_id();
+		$term = wp_insert_term( 'UCP Zebras ' . $visibility, 'product_cat' );
+		wp_set_object_terms( $product->get_id(), (int) $term['term_id'], 'product_cat' );
 
 		$found = wp_list_pluck( $this->post( '/catalog/search', array( 'query' => 'UCP Zebra ' . $visibility ) )->get_data()['products'], 'id' );
-		$this->assertSame( $searchable, in_array( $id, $found, true ), 'Search' );
+		$this->assertSame( $found_by_name, in_array( $id, $found, true ), 'Search by name' );
+
+		$browsed = wp_list_pluck( $this->post( '/catalog/search', array( 'filters' => array( 'categories' => array( (string) $term['term_id'] ) ) ) )->get_data()['products'], 'id' );
+		$this->assertSame( $browsable, in_array( $id, $browsed, true ), 'Search by category with no query' );
 
 		$lookup = $this->post( '/catalog/lookup', array( 'ids' => array( $id ) ) )->get_data();
 		$this->assertSame( $opens ? array( $id ) : array(), wp_list_pluck( $lookup['products'], 'id' ), 'Lookup' );
 
 		$detail = $this->post( '/catalog/product', array( 'id' => $id ) )->get_data();
 		$this->assertSame( $opens ? $id : null, $detail['product']['id'] ?? null, 'Product details' );
+	}
+
+	/**
+	 * A variation ID opens in lookup and product details when its parent is "Search results only".
+	 */
+	public function test_lookup_and_details_open_a_variation_of_a_search_only_product(): void {
+		$product = \WC_Helper_Product::create_variation_product();
+		$product->set_catalog_visibility( 'search' );
+		$product->save();
+		$children     = $product->get_children();
+		$variation_id = (string) end( $children );
+
+		$data = $this->post( '/catalog/lookup', array( 'ids' => array( $variation_id ) ) )->get_data();
+
+		$this->assertSame( array( (string) $product->get_id() ), wp_list_pluck( $data['products'], 'id' ) );
+		$this->assertContains( $variation_id, wp_list_pluck( $data['products'][0]['variants'], 'id' ) );
+
+		$detail = $this->post( '/catalog/product', array( 'id' => $variation_id ) )->get_data();
+		$this->assertSame( $variation_id, $detail['product']['variants'][0]['id'] ?? null, 'Product details' );
 	}
 
 	/**
