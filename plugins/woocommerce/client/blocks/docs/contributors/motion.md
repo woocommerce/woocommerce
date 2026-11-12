@@ -12,7 +12,8 @@ This guide uses these terms:
 
 ## Rules
 
-- **Animate what the shopper does.** A click or a tap animates. Content that loads with the page appears immediately. A later change that the shopper's action causes can animate, such as a totals row, a notice, or an error.
+- **Animate what the shopper does.** A click or a tap animates. Content that loads with the page appears immediately, apart from the lists in the next rule. A later change that the shopper's action causes can animate, such as a totals row, a notice, or an error.
+- **Where appropriate, list items stagger on first load.** The items of a list, such as cart items, order summary items, or the order confirmation sections, can rise in 50ms apart when the page first shows them. They do not stagger again, such as after an update, a new item, or a key press. Lists of options, such as shipping or payment methods, appear immediately.
 - **Keyboard changes apply immediately.** A shopper can press keys quickly, for example to move through options. After a key press, content that shows, hides, or swaps does not animate.
 - **Content moves to make space.** Content that appears grows from nothing, and the content below moves down. Content that goes collapses, and the content below moves up. Nothing jumps.
 - **One change, one movement.** When one action changes many things, the content below moves one time, in one direction.
@@ -121,6 +122,7 @@ Do these tests for each change, also with reduced motion:
 - **Interruption.** Reverse the change 80–150ms after it starts. The motion turns around from its current position.
 - **Keyboard.** Use Tab, Space, Enter, or the arrow keys. The change applies immediately.
 - **Late content.** Content that loads after the change, such as rates or totals, does not jump.
+- **First time.** Open the element for the first time on the page, with the smallest input that opens it. It must stay open. Motion makes an existing flicker easy to see, so fix the cause.
 - **Settled.** About 1 second after each change, the blocks have no attributes, inline styles, copies of content, or running animations that the motion added, and no console errors.
 - **Complete an order.** Place an order after the tests. Motion must not leave a field invalid or a button that does not work.
 
