@@ -355,7 +355,7 @@ trait Woo_Analytics_Trait {
 		// Only a numeric price is sent: get_price() is '' for a product without one, and a filter can return a label.
 		$price = $product->get_price();
 		if ( is_numeric( $price ) ) {
-			$details['pp'] = wc_float_to_string( $price );
+			$details['pp'] = (string) wc_float_to_string( $price );
 		}
 
 		return $details;

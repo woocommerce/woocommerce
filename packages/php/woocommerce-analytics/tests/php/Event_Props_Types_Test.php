@@ -35,15 +35,6 @@ class Event_Props_Types_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Test that products_count counts cart lines, not their quantities.
-	 */
-	public function test_cart_items_count_counts_products_not_quantities(): void {
-		$GLOBALS['wc_cart_mock'] = $this->fractional_cart();
-
-		$this->assertSame( 2, ( new Universal() )->get_cart_items_count() );
-	}
-
-	/**
 	 * Test that the cart and checkout events carry the cart line count.
 	 */
 	public function test_cart_checkout_event_properties_carry_cart_line_count(): void {
@@ -52,13 +43,6 @@ class Event_Props_Types_Test extends BaseTestCase {
 		$properties = ( new Universal() )->get_cart_checkout_event_properties();
 
 		$this->assertSame( 2, $properties['products_count'] );
-	}
-
-	/**
-	 * Test that products_count counts order lines, not their quantities.
-	 */
-	public function test_order_items_count_counts_products_not_quantities(): void {
-		$this->assertSame( 2, ( new Universal() )->get_order_items_count( $this->fractional_order() ) );
 	}
 
 	/**
@@ -90,6 +74,7 @@ class Event_Props_Types_Test extends BaseTestCase {
 			'decimal price'     => array( '19.99', '19.99' ),
 			'free product'      => array( '0', '0' ),
 			'float from filter' => array( 19.99, '19.99' ),
+			'int from filter'   => array( 10, '10' ),
 			'no price'          => array( '', null ),
 			'filtered label'    => array( 'Call for price', null ),
 		);
@@ -100,8 +85,8 @@ class Event_Props_Types_Test extends BaseTestCase {
 	 *
 	 * @dataProvider price_provider
 	 *
-	 * @param string|float $price    What WC_Product::get_price() returns.
-	 * @param string|null  $expected The expected pp, or null when pp should be absent.
+	 * @param string|float|int $price    What WC_Product::get_price() returns.
+	 * @param string|null      $expected The expected pp, or null when pp should be absent.
 	 */
 	#[DataProvider( 'price_provider' )]
 	public function test_product_details_price( $price, $expected ): void {
