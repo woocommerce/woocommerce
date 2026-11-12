@@ -13,19 +13,13 @@ test.describe( 'Patterns in block theme', () => {
 		admin,
 		editor,
 		requestUtils,
+		cleanup,
 	} ) => {
 		const patternName = `Woo Blocks Synced Pattern ${
 			test.info().repeatEachIndex
 		}`;
 
-		try {
-			await admin.createNewPattern( patternName );
-			const { productTitles, productPrices } =
-				await addTestingBlocks( editor );
-
-			await expect( productTitles ).toHaveText( expectedTitles );
-			await expect( productPrices ).toHaveText( expectedPrices );
-		} finally {
+		cleanup( async () => {
 			const patterns: { id: number; title: { raw: string } }[] =
 				await requestUtils.rest( {
 					path: '/wp/v2/blocks',
@@ -45,6 +39,13 @@ test.describe( 'Patterns in block theme', () => {
 					params: { force: true },
 				} );
 			}
-		}
+		} );
+
+		await admin.createNewPattern( patternName );
+		const { productTitles, productPrices } =
+			await addTestingBlocks( editor );
+
+		await expect( productTitles ).toHaveText( expectedTitles );
+		await expect( productPrices ).toHaveText( expectedPrices );
 	} );
 } );

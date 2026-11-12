@@ -90,7 +90,7 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 		// Confirm default message is visible
 		await expect(
 			page.getByText(
-				'Great news! Your order has been received, and a confirmation will be sent to your email address. Have an account with us?'
+				'A confirmation will be sent to your email address. Have an account with us?'
 			)
 		).toBeVisible();
 		// Confirm order details are not visible

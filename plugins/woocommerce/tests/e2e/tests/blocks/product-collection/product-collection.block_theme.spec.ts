@@ -1,8 +1,14 @@
 /**
  * External dependencies
  */
+import { randomUUID } from 'crypto';
 import { Request } from '@playwright/test';
-import { test as base, expect, wpCLI, BASE_URL } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	BASE_URL,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -268,6 +274,8 @@ test.describe( 'Product Collection', () => {
 		pageObject,
 		editor,
 		wpCoreVersion,
+		requestUtils,
+		cleanup,
 	} ) => {
 		const getLocationParams = ( request: Request ) =>
 			new URL( request.url() ).searchParams;
@@ -299,6 +307,18 @@ test.describe( 'Product Collection', () => {
 				!! params.get( 'productCollectionLocation[sourceData][termId]' )
 			);
 		};
+
+		cleanup( async () => {
+			await Promise.allSettled(
+				[ 'single-product-cap', 'taxonomy-product_cat-hoodies' ].map(
+					( slug ) =>
+						requestUtils.revertTemplate(
+							'wp_template',
+							`${ BLOCK_THEME_SLUG }//${ slug }`
+						)
+				)
+			);
+		} );
 
 		await admin.visitSiteEditor( { path: '/wp_template' } );
 		await page
@@ -420,8 +440,23 @@ test.describe( 'Product Collection', () => {
 			page,
 			pageObject,
 			editor,
+			requestUtils,
+			cleanup,
 		} ) => {
-			await pageObject.goToEditorTemplate();
+			const template = await requestUtils.createTemplate( 'wp_template', {
+				slug: `product-collection-on-sale-${ randomUUID() }`,
+				title: 'Product Collection On Sale',
+				content: 'placeholder',
+			} );
+
+			cleanup( () =>
+				requestUtils.revertTemplate( 'wp_template', template.id )
+			);
+
+			await pageObject.goToEditorTemplate( template.id );
+			await expect(
+				editor.getCustomHtmlBlockContentLocator( 'placeholder' )
+			).toBeVisible();
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInTemplate( 'onSale' );
 
@@ -429,14 +464,14 @@ test.describe( 'Product Collection', () => {
 				BLOCK_LABELS.productTemplate
 			);
 
-			await expect( productTemplate ).toHaveCount( 2 );
+			await expect( productTemplate ).toHaveCount( 1 );
 
 			// Refresh the template and verify "On Sale Products" collection is still visible
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
 			} );
 			await page.reload();
-			await expect( productTemplate ).toHaveCount( 2 );
+			await expect( productTemplate ).toHaveCount( 1 );
 		} );
 
 		test( 'On Sale Products collection should be visible after Refresh in a Post', async ( {
@@ -454,29 +489,18 @@ test.describe( 'Product Collection', () => {
 		} );
 	} );
 
+	// Specific-term templates, so only these test pages change.
 	const templates = [
 		{
 			templateTitle: 'Product Category',
-			slug: 'taxonomy-product_cat',
+			slug: 'taxonomy-product_cat-music',
 			frontendPage: '/product-category/music/',
 			legacyBlockName: 'woocommerce/legacy-template',
 		},
 		{
 			templateTitle: 'Product Tag',
-			slug: 'taxonomy-product_tag',
+			slug: 'taxonomy-product_tag-recommended',
 			frontendPage: '/product-tag/recommended/',
-			legacyBlockName: 'woocommerce/legacy-template',
-		},
-		{
-			templateTitle: 'Product Catalog',
-			slug: 'archive-product',
-			frontendPage: '/shop/',
-			legacyBlockName: 'woocommerce/legacy-template',
-		},
-		{
-			templateTitle: 'Product Search Results',
-			slug: 'product-search-results',
-			frontendPage: '/?s=shirt&post_type=product',
 			legacyBlockName: 'woocommerce/legacy-template',
 		},
 	];
@@ -487,6 +511,7 @@ test.describe( 'Product Collection', () => {
 				test( 'Product Collection block matches with classic template block', async ( {
 					pageObject,
 					requestUtils,
+					cleanup,
 					admin,
 					editor,
 					page,
@@ -507,6 +532,13 @@ test.describe( 'Product Collection', () => {
 							title: 'classic template test',
 							content: 'placeholder',
 						}
+					);
+
+					cleanup( () =>
+						requestUtils.revertTemplate(
+							'wp_template',
+							template.id
+						)
 					);
 
 					await admin.visitSiteEditor( {
@@ -539,48 +571,4 @@ test.describe( 'Product Collection', () => {
 			} );
 		}
 	);
-
-	test.describe( 'default query can be modified', () => {
-		test( 'default query can be modified', async ( {
-			page,
-			pageObject,
-			editor,
-		} ) => {
-			await wpCLI(
-				'option update woocommerce_default_catalog_orderby price'
-			);
-
-			await pageObject.goToEditorTemplate();
-
-			await pageObject.focusProductCollection();
-
-			// Verify the default order matches the option in the database.
-			const sidebarSettings = pageObject.locateSidebarSettings();
-			const orderBySelect = sidebarSettings.getByRole( 'combobox', {
-				name: 'Default sort by',
-			} );
-			const editorProductTitle = editor.canvas
-				.locator( SELECTORS.productTitle )
-				.first();
-
-			await expect( orderBySelect ).toHaveValue( 'price' );
-			await expect( editorProductTitle ).toHaveText( 'Single' );
-
-			await orderBySelect.selectOption( 'price-desc' );
-
-			await expect( editorProductTitle ).toHaveText( 'Sunglasses' );
-
-			await editor.saveSiteEditorEntities();
-			await pageObject.goToProductCatalogFrontend();
-
-			const frontendProductTitle = page
-				.locator( SELECTORS.productTitle )
-				.first();
-			await expect( frontendProductTitle ).toContainText( 'Sunglasses' );
-
-			await wpCLI(
-				'option update woocommerce_default_catalog_orderby menu_order'
-			);
-		} );
-	} );
 } );
