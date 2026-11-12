@@ -139,6 +139,25 @@ class WC_Email_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox With the block email editor, emails that build their own subject also get it as plain text.
+	 */
+	public function test_block_editor_invoice_subject_is_plain_text(): void {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$was_enabled         = $features_controller->feature_is_enabled( 'block_email_editor' );
+		$features_controller->change_feature_enable( 'block_email_editor', true );
+		update_option( 'woocommerce_customer_invoice_settings', array( 'subject' => '<strong>Invoice</strong> a&lt;b' ) );
+		$email         = new WC_Email_Customer_Invoice();
+		$email->object = WC_Helper_Order::create_order();
+
+		try {
+			$this->assertSame( 'Invoice a<b', $email->get_subject() );
+		} finally {
+			delete_option( 'woocommerce_customer_invoice_settings' );
+			$features_controller->change_feature_enable( 'block_email_editor', $was_enabled );
+		}
+	}
+
+	/**
 	 * @testdox Emails that do not support Cc/Bcc hide the fields and ignore stored or directly set values.
 	 */
 	public function test_cc_bcc_are_ignored_when_email_does_not_support_them(): void {

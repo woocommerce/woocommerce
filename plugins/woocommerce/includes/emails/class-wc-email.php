@@ -5,7 +5,6 @@
  * @package WooCommerce\Emails
  */
 
-use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Html2Text;
 use Automattic\WooCommerce\Internal\Email\EmailHeaders;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
