@@ -6,7 +6,7 @@ sidebar_label: Default payment method
 
 # Choosing the default payment method
 
-By default, the checkout loads with a payment method already selected. WooCommerce picks the first of these that exists: the customer's default saved card, the method they picked earlier in the same session, or the first gateway the checkout lists. Some stores have requirements on whether a method may be preselected, or on which kind: for example, that the shopper must choose one themselves, or that a card is never selected for them.
+By default, the checkout loads with a payment method already selected. WooCommerce picks the first of these that exists: the method selected earlier in the same session, while it is still available for the cart; the customer's default saved card; or the first gateway the checkout lists. Some stores have requirements on whether a method may be preselected, or on which kind: for example, that the shopper must choose one themselves, or that a card is never selected for them.
 
 The `woocommerce_default_payment_method` filter lets a store decide what the checkout starts with when the shopper hasn't picked a method yet. The Checkout block, the classic checkout shortcode and the pay-for-order page all ask it. It works with gateway ids. It is not the default saved card a customer picks in My Account: that card only decides which gateway WooCommerce would otherwise preselect.
 
