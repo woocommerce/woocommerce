@@ -75,6 +75,13 @@ class StoreOutputChecks {
 
 	private const MAX_LISTED_SITEMAPS = 5;
 
+	private const MAX_CHILD_SITEMAPS = 5;
+
+	/**
+	 * Statuses that answer whether a file exists. Anything else (a firewall's 403, a 5xx) is couldn't check.
+	 */
+	private const ANSWER_STATUSES = array( 200, 404, 410 );
+
 	/**
 	 * The checks, each with a test that returns true, false, or null for couldn't check.
 	 *
@@ -106,7 +113,7 @@ class StoreOutputChecks {
 	private function robots_txt( StoreResponses $responses ): ?string {
 		$home     = (array) wp_parse_url( home_url() );
 		$response = $responses->get( ( $home['scheme'] ?? 'http' ) . '://' . ( $home['host'] ?? '' ) . ( isset( $home['port'] ) ? ':' . $home['port'] : '' ) . '/robots.txt' );
-		if ( null === $response || ! in_array( $response['status'], array( 200, 404, 410 ), true ) ) {
+		if ( null === $response || ! in_array( $response['status'], self::ANSWER_STATUSES, true ) ) {
 			return null;
 		}
 		if ( in_array( $response['status'], array( 404, 410 ), true ) ) {
@@ -118,29 +125,29 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether a sitemap the store serves names products. An index that does not
-	 * is opened one level: up to five child sitemaps on this host. A child that
-	 * is itself an index is not opened. Null when robots.txt or one of those
-	 * sitemaps could not be loaded and none named products.
+	 * has its child sitemaps on this host opened, at any depth, up to five child
+	 * requests in all. Null when robots.txt or one of those sitemaps could not
+	 * be loaded and none named products.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private function sitemap_lists_products( StoreResponses $responses ): ?bool {
 		$robots   = $this->robots_txt( $responses );
-		$listed   = null === $robots ? array() : array_values(
-			array_filter(
-				array_slice( ( new RobotsTxt( $robots ) )->sitemaps(), 0, self::MAX_LISTED_SITEMAPS ),
-				array( StoreResponses::class, 'is_store_url' )
-			)
+		$listed   = null === $robots ? array() : array_slice(
+			array_values( array_filter( ( new RobotsTxt( $robots ) )->sitemaps(), array( StoreResponses::class, 'is_store_url' ) ) ),
+			0,
+			self::MAX_LISTED_SITEMAPS
 		);
 		$defaults = array( '/sitemap_index.xml', '/sitemap.xml' );
 		if ( function_exists( 'wp_sitemaps_get_server' ) && wp_sitemaps_get_server()->sitemaps_enabled() ) {
 			$defaults[] = '/wp-sitemap.xml';
 		}
-		$candidates = array_unique( array_merge( $listed, $defaults ) );
-		$unknown    = null === $robots;
-		$children   = array();
-		foreach ( $candidates as $url ) {
-			$body = $this->sitemap_body( $responses, $url, $unknown );
+		$queue   = array_values( array_unique( array_map( array( self::class, 'absolute_url' ), array_merge( $listed, $defaults ) ) ) );
+		$seen    = array_fill_keys( $queue, true );
+		$budget  = count( $queue ) + self::MAX_CHILD_SITEMAPS;
+		$unknown = null === $robots;
+		for ( $i = 0; isset( $queue[ $i ] ) && $i < $budget; $i++ ) {
+			$body = $this->sitemap_body( $responses, $queue[ $i ], $unknown );
 			if ( null === $body ) {
 				continue;
 			}
@@ -148,22 +155,31 @@ class StoreOutputChecks {
 				return true;
 			}
 			foreach ( self::index_child_urls( $body ) as $child ) {
-				if ( StoreResponses::is_store_url( $child ) ) {
-					$children[] = $child;
+				if ( ! StoreResponses::is_store_url( $child ) ) {
+					continue;
 				}
-			}
-		}
-		foreach ( array_slice( array_values( array_unique( $children ) ), 0, self::MAX_LISTED_SITEMAPS ) as $child ) {
-			$body = $this->sitemap_body( $responses, $child, $unknown );
-			if ( null !== $body && self::names_products( $body ) ) {
-				return true;
+				$child = self::absolute_url( $child );
+				if ( ! isset( $seen[ $child ] ) ) {
+					$seen[ $child ] = true;
+					$queue[]        = $child;
+				}
 			}
 		}
 		return $unknown ? null : false;
 	}
 
 	/**
-	 * Body of a sitemap response with status 200, or null. A failed request marks the check unknown.
+	 * A path from the home URL as a full URL, so one sitemap is one queue entry however it was written.
+	 *
+	 * @param string $url URL or path.
+	 */
+	private static function absolute_url( string $url ): string {
+		return str_starts_with( $url, '/' ) ? home_url( $url ) : $url;
+	}
+
+	/**
+	 * Body of a sitemap response with status 200, or null. A failed request, or
+	 * any status other than 200, 404 or 410 (a firewall's 403, a 5xx), marks the check unknown.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 * @param string         $url       URL or path.
@@ -172,7 +188,7 @@ class StoreOutputChecks {
 	 */
 	private function sitemap_body( StoreResponses $responses, string $url, bool &$unknown ): ?string {
 		$response = $responses->get( $url );
-		if ( null === $response ) {
+		if ( null === $response || ! in_array( $response['status'], self::ANSWER_STATUSES, true ) ) {
 			$unknown = true;
 			return null;
 		}

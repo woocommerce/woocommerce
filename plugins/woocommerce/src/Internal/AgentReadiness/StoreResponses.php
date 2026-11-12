@@ -102,7 +102,8 @@ class StoreResponses {
 	}
 
 	/**
-	 * Whether a path or URL is on the store's host. Paths from the home URL are.
+	 * Whether a path or URL is on the store's host. Paths from the home URL are;
+	 * a //host/path reference is not, since a sitemap location must be a full URL.
 	 * Used so a robots.txt Sitemap line on another host is skipped, not treated
 	 * as a failed load of the store's own pages.
 	 *
@@ -110,7 +111,7 @@ class StoreResponses {
 	 */
 	public static function is_store_url( string $url ): bool {
 		if ( str_starts_with( $url, '/' ) ) {
-			return true;
+			return ! str_starts_with( $url, '//' );
 		}
 		$store = self::origin( home_url() );
 		return null !== $store && self::origin( $url ) === $store;

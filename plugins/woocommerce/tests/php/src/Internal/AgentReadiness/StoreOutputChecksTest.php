@@ -180,9 +180,9 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A child index is not opened, and only the first five child sitemaps are loaded.
+	 * @testdox A nested index is opened, as Jetpack serves past 1,000 URLs, and only five child sitemaps are loaded in all.
 	 */
-	public function test_child_sitemaps_capped_at_one_level(): void {
+	public function test_child_sitemaps_capped_by_requests(): void {
 		add_filter( 'wp_sitemaps_enabled', '__return_false' );
 		$product = '<urlset><url><loc>' . home_url( '/product/beanie/' ) . '</loc></url></urlset>';
 		$this->serve(
@@ -194,7 +194,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 				'/sitemap_index.xml'   => array( 404, '' ),
 			)
 		);
-		$this->assertFalse( $this->results()['sitemap_lists_products'], 'A nested index is not opened' );
+		$this->assertTrue( $this->results()['sitemap_lists_products'], 'A nested index is opened' );
 
 		remove_all_filters( 'pre_http_request' );
 		$locs   = '';
@@ -223,7 +223,8 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertFalse( $this->results()['sitemap_lists_products'] );
-		$this->assertNotContains( home_url( '/child-6.xml' ), $requested );
+		$this->assertContains( home_url( '/child-5.xml' ), $requested, 'Five child sitemaps are opened' );
+		$this->assertNotContains( home_url( '/child-6.xml' ), $requested, 'The sixth is past the cap' );
 	}
 
 	/**
@@ -240,6 +241,46 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertFalse( $this->results()['sitemap_lists_products'] );
+	}
+
+	/**
+	 * @testdox Sitemaps robots.txt lists on another host, or as //host references, do not use up the five slots.
+	 */
+	public function test_off_host_listed_sitemaps_do_not_use_the_cap(): void {
+		add_filter( 'wp_sitemaps_enabled', '__return_false' );
+		$robots = "User-agent: *\nDisallow:\n";
+		for ( $i = 1; $i <= 5; $i++ ) {
+			$robots .= ( 1 === $i % 2 ? "Sitemap: https://cdn.example/s$i.xml\n" : "Sitemap: //cdn.example/s$i.xml\n" );
+		}
+		$robots .= 'Sitemap: ' . home_url( '/seo/product-list.xml' ) . "\n";
+		$this->serve(
+			array(
+				'/robots.txt'           => array( 200, $robots ),
+				'/seo/product-list.xml' => array( 200, '<sitemapindex><sitemap><loc>' . home_url( '/product-sitemap.xml' ) . '</loc></sitemap></sitemapindex>' ),
+				'/sitemap_index.xml'    => array( 404, '' ),
+				'/sitemap.xml'          => array( 404, '' ),
+			)
+		);
+
+		$this->assertTrue( $this->results()['sitemap_lists_products'] );
+	}
+
+	/**
+	 * @testdox A sitemap that answers 403 or 5xx is couldn't check, not a missing sitemap.
+	 */
+	public function test_blocked_sitemap_is_unknown(): void {
+		add_filter( 'wp_sitemaps_enabled', '__return_false' );
+		foreach ( array( 403, 503 ) as $status ) {
+			remove_all_filters( 'pre_http_request' );
+			$this->serve(
+				array(
+					'/robots.txt'        => array( 404, '' ),
+					'/sitemap_index.xml' => array( 404, '' ),
+					'/sitemap.xml'       => array( $status, '<html>Blocked</html>' ),
+				)
+			);
+			$this->assertNull( $this->results()['sitemap_lists_products'], "Status $status" );
+		}
 	}
 
 	/**
