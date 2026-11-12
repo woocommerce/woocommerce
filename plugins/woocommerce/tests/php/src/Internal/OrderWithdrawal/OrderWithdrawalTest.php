@@ -48,34 +48,6 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	private array $original_post = array();
 
 	/**
-	 * Original REQUEST_METHOD value.
-	 *
-	 * @var string|null
-	 */
-	private ?string $original_request_method = null;
-
-	/**
-	 * Whether REQUEST_METHOD existed before the test.
-	 *
-	 * @var bool
-	 */
-	private bool $had_request_method = false;
-
-	/**
-	 * Original REMOTE_ADDR value.
-	 *
-	 * @var string|null
-	 */
-	private ?string $original_remote_addr = null;
-
-	/**
-	 * Whether REMOTE_ADDR existed before the test.
-	 *
-	 * @var bool
-	 */
-	private bool $had_remote_addr = false;
-
-	/**
 	 * Original WooCommerce session.
 	 *
 	 * @var \WC_Session|null
@@ -122,10 +94,6 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 		$this->sut                         = new OrderWithdrawalFormProcessor();
 		$this->original_post               = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$this->had_request_method          = filter_has_var( INPUT_SERVER, 'REQUEST_METHOD' );
-		$this->original_request_method     = $this->had_request_method ? filter_input( INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) : null;
-		$this->had_remote_addr             = array_key_exists( 'REMOTE_ADDR', $_SERVER );
-		$this->original_remote_addr        = $this->had_remote_addr ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : null;
 		$this->original_session            = WC()->session;
 		$this->original_feature_option     = get_option( self::FEATURE_OPTION, self::MISSING_OPTION_MARK );
 		$this->original_endpoint_option    = get_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION, self::MISSING_OPTION_MARK );
@@ -151,22 +119,9 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$_POST = $this->original_post;
 
-		if ( $this->had_request_method ) {
-			$_SERVER['REQUEST_METHOD'] = (string) $this->original_request_method;
-		} else {
-			unset( $_SERVER['REQUEST_METHOD'] );
-		}
-
-		if ( $this->had_remote_addr ) {
-			$_SERVER['REMOTE_ADDR'] = (string) $this->original_remote_addr;
-		} else {
-			unset( $_SERVER['REMOTE_ADDR'] );
-		}
-
 		$this->restore_option( self::FEATURE_OPTION, $this->original_feature_option );
 		$this->restore_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION, $this->original_endpoint_option );
 		$this->restore_option( self::FLUSH_QUEUE_OPTION, $this->original_flush_queue_option );
-		wc_clear_notices();
 		$this->clear_order_withdrawal_rate_limits();
 		$this->delete_created_inbox_notes();
 		$this->delete_created_orders();

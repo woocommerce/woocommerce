@@ -75,11 +75,11 @@ class AbilitiesLoader {
 	private const LOG_SOURCE = 'woocommerce-abilities';
 
 	/**
-	 * Core ability instances registered by this loader in the current request.
+	 * Ability instances registered by this loader in the current request.
 	 *
 	 * @var array<string, object>
 	 */
-	private static array $registered_core_abilities = array();
+	private static array $registered_abilities = array();
 
 	/**
 	 * Query var that holds the extension filter clauses of a list ability.
@@ -214,8 +214,8 @@ class AbilitiesLoader {
 
 				if (
 					$is_core_ability
-					&& isset( self::$registered_core_abilities[ $ability_name ] )
-					&& $existing_ability === self::$registered_core_abilities[ $ability_name ]
+					&& isset( self::$registered_abilities[ $ability_name ] )
+					&& $existing_ability === self::$registered_abilities[ $ability_name ]
 				) {
 					continue;
 				}
@@ -225,7 +225,7 @@ class AbilitiesLoader {
 				}
 
 				// Drop stale instance tracking before replacing a shadowed registration.
-				unset( self::$registered_core_abilities[ $ability_name ] );
+				unset( self::$registered_abilities[ $ability_name ] );
 				wp_unregister_ability( $ability_name );
 				self::log_replaced_reserved_ability( $ability_name, $class_name );
 			}
@@ -239,10 +239,30 @@ class AbilitiesLoader {
 
 			$registered_ability = wp_register_ability( $ability_name, $args );
 
-			if ( $is_core_ability && null !== $registered_ability ) {
-				self::$registered_core_abilities[ $ability_name ] = $registered_ability;
+			if ( null !== $registered_ability ) {
+				self::$registered_abilities[ $ability_name ] = $registered_ability;
 			}
 		}
+	}
+
+	/**
+	 * Whether the current ability instance was registered by this loader.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 *
+	 * @param string $ability_name Ability name.
+	 * @return bool
+	 */
+	public static function is_registered_ability( string $ability_name ): bool {
+		if ( ! isset( self::$registered_abilities[ $ability_name ] ) ) {
+			return false;
+		}
+		if ( ! wp_has_ability( $ability_name ) ) {
+			return false;
+		}
+
+		return wp_get_ability( $ability_name ) === self::$registered_abilities[ $ability_name ];
 	}
 
 	/**
@@ -303,6 +323,7 @@ class AbilitiesLoader {
 		 * core classes are always retained.
 		 *
 		 * @since 10.9.0
+		 * @since 11.4.0 Calls to abilities registered through this filter are recorded in usage tracking when the store allows it.
 		 *
 		 * @param array<int, class-string> $classes Ability definition class names.
 		 */
