@@ -35,20 +35,6 @@ class ExtensibleAbilities {
 	public const FEATURE_ID = 'extensible_abilities';
 
 	/**
-	 * Fields keyed by resource, then namespace, then field name.
-	 *
-	 * @var array<string, array<string, array<string, array<string, mixed>>>>
-	 */
-	private static array $fields = array();
-
-	/**
-	 * Registered resources, keyed by resource name.
-	 *
-	 * @var array<string, bool>
-	 */
-	private static array $resources = array();
-
-	/**
 	 * Validators keyed by resource.
 	 *
 	 * @var array<string, array<int, array<string, mixed>>>
@@ -86,11 +72,6 @@ class ExtensibleAbilities {
 	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'include_ids', 'exclude_ids' );
 
 	/**
-	 * Type names that the REST schema check knows. It accepts any value for another name.
-	 */
-	private const JSON_TYPES = array( 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string' );
-
-	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
@@ -104,16 +85,7 @@ class ExtensibleAbilities {
 	 * @param string $resource_name Slug of the resource, such as `ticket`.
 	 */
 	public static function register_resource( string $resource_name ): void {
-		if ( did_action( 'woocommerce_extensible_abilities_resources_init' ) && ! doing_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, 'Register a resource inside the woocommerce_extensible_abilities_resources_init action, before the fields are registered.', '11.3.0' );
-			return;
-		}
-		if ( '' === $resource_name || sanitize_key( $resource_name ) !== $resource_name || ctype_digit( $resource_name ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The resource name must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.', '11.3.0' );
-			return;
-		}
-
-		self::$resources[ $resource_name ] = true;
+		AbilityResources::register_resource( $resource_name );
 	}
 
 	/**
@@ -132,6 +104,7 @@ class ExtensibleAbilities {
 	 *     @type string   $resource     Resource that an ability formats, for example `product`, `order` or `order_item`.
 	 *     @type string   $namespace    Slug of the extension that owns the field, such as `subscriptions`.
 	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
+	 *     @type bool     $personal_data Optional. Remove the field from output and output schema when sharing is disabled. Defaults to false.
 	 *     @type array    $output_schema Optional. JSON schema of the value that `get_callback` returns. Required
 	 *                                  with `get_callback`. It needs one `type` other than null, because clients
 	 *                                  expect one type for each field. Core publishes it as declared. Its
@@ -177,111 +150,7 @@ class ExtensibleAbilities {
 	 * }
 	 */
 	public static function register_field( array $args ): void {
-		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, 'Register a field inside the woocommerce_extensible_abilities_init action, before the abilities build their schemas.', '11.3.0' );
-			return;
-		}
-		foreach ( array( 'resource', 'namespace', 'field' ) as $key ) {
-			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] || ctype_digit( $args[ $key ] ) ) {
-				wc_doing_it_wrong(
-					__METHOD__,
-					sprintf(
-						'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.',
-						$key
-					),
-					'11.3.0'
-				);
-				return;
-			}
-		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) && ! did_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, 'Register a field inside the woocommerce_extensible_abilities_init action. The resources are not registered yet.', '11.3.0' );
-			return;
-		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
-			wc_doing_it_wrong(
-				__METHOD__,
-				sprintf(
-					'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.',
-					$args['resource']
-				),
-				'11.3.0'
-			);
-			return;
-		}
-		$readable = isset( $args['get_callback'] ) || isset( $args['output_schema'] );
-		$writable = isset( $args['set_callback'] ) || isset( $args['input_schema'] );
-		if ( ! $readable && ! $writable ) {
-			wc_doing_it_wrong( __METHOD__, 'A field needs "get_callback" and "output_schema", "set_callback" and "input_schema", or both pairs.', '11.4.0' );
-			return;
-		}
-		if ( $readable ) {
-			if ( ! is_callable( $args['get_callback'] ?? null ) ) {
-				wc_doing_it_wrong( __METHOD__, 'The "get_callback" argument must be callable, and a field with an "output_schema" needs it.', '11.3.0' );
-				return;
-			}
-			if ( ! is_array( $args['output_schema'] ?? null ) || ! isset( $args['output_schema']['type'] ) ) {
-				wc_doing_it_wrong( __METHOD__, 'The "output_schema" argument must be an array with a "type".', '11.4.0' );
-				return;
-			}
-			if ( ! is_string( $args['output_schema']['type'] ) || 'null' === $args['output_schema']['type'] ) {
-				wc_doing_it_wrong( __METHOD__, 'The "type" of the "output_schema" argument must be one type name other than "null". Return null to leave the field out.', '11.4.0' );
-				return;
-			}
-		}
-		if ( $writable ) {
-			if ( ! is_callable( $args['set_callback'] ?? null ) ) {
-				wc_doing_it_wrong( __METHOD__, 'The "set_callback" argument must be callable, and a field with an "input_schema" needs it.', '11.4.0' );
-				return;
-			}
-			if ( ! is_array( $args['input_schema'] ?? null ) || ! self::input_schema_has_type( $args['input_schema'] ) ) {
-				wc_doing_it_wrong( __METHOD__, 'The "input_schema" argument must be an array with one "type" name, or with an "anyOf" where each branch has one "type" name. For a nullable field, use an "anyOf" with a {"type":"null"} branch instead of a list of types.', '11.4.0' );
-				return;
-			}
-		}
-		if ( isset( $args['object_types'] ) && ( ! is_array( $args['object_types'] ) || empty( $args['object_types'] ) || array_filter( $args['object_types'], static fn( $type ) => ! is_string( $type ) ) ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "object_types" argument must be a list of object types.', '11.4.0' );
-			return;
-		}
-		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
-			wc_doing_it_wrong(
-				__METHOD__,
-				sprintf(
-					'The field "%1$s.%2$s" of "%3$s" is already registered.',
-					$args['namespace'],
-					$args['field'],
-					$args['resource']
-				),
-				'11.3.0'
-			);
-			return;
-		}
-
-		self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] = $args;
-	}
-
-	/**
-	 * Whether a field input schema has one top-level JSON type name, or a non-empty
-	 * `anyOf` list where each branch has one JSON type name. The REST schema check
-	 * needs a known type for every branch that a value can match.
-	 *
-	 * @param array<string, mixed> $schema Field input schema.
-	 * @return bool
-	 */
-	private static function input_schema_has_type( array $schema ): bool {
-		if ( isset( $schema['type'] ) ) {
-			return in_array( $schema['type'], self::JSON_TYPES, true );
-		}
-		$branches = $schema['anyOf'] ?? null;
-		if ( ! is_array( $branches ) || empty( $branches ) || array_values( $branches ) !== $branches ) {
-			return false;
-		}
-		foreach ( $branches as $branch ) {
-			if ( ! is_array( $branch ) || ! in_array( $branch['type'] ?? null, self::JSON_TYPES, true ) ) {
-				return false;
-			}
-		}
-		return true;
+		AbilityResources::register_extension_field( $args );
 	}
 
 	/**
@@ -331,7 +200,7 @@ class ExtensibleAbilities {
 				return;
 			}
 		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+		if ( ! AbilityResources::is_registered( $args['resource'] ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
@@ -680,7 +549,7 @@ class ExtensibleAbilities {
 			wc_doing_it_wrong( $method, 'The "callback" argument must be callable.', $version );
 			return false;
 		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+		if ( ! AbilityResources::is_registered( $args['resource'] ) ) {
 			wc_doing_it_wrong( $method, sprintf( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.', $args['resource'] ), $version );
 			return false;
 		}
@@ -706,12 +575,12 @@ class ExtensibleAbilities {
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public static function add_fields_to_object( array $output, string $resource_name, $subject ) {
-		if ( empty( self::$fields[ $resource_name ] ) || ! self::is_enabled() ) {
+		if ( empty( self::get_fields( $resource_name ) ) || ! self::is_enabled() ) {
 			return $output;
 		}
 
 		$extensions = array();
-		foreach ( self::$fields[ $resource_name ] as $namespace => $fields ) {
+		foreach ( AbilityResources::get_output_extension_fields( $resource_name ) as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
 				if ( ! isset( $args['get_callback'] ) || ! self::field_applies_to( $args, $subject ) ) {
 					continue;
@@ -788,7 +657,7 @@ class ExtensibleAbilities {
 			'description'          => __( 'Values that extensions add, keyed by extension namespace, then field.', 'woocommerce' ),
 			'additionalProperties' => false,
 		);
-		foreach ( self::$fields[ $resource_name ] ?? array() as $namespace => $fields ) {
+		foreach ( AbilityResources::get_output_extension_fields( $resource_name ) as $namespace => $fields ) {
 			$listed = array_filter(
 				$fields,
 				static function ( array $args ): bool {
@@ -879,7 +748,7 @@ class ExtensibleAbilities {
 	 * @return array<string, array<string, array<string, mixed>>>
 	 */
 	public static function get_fields( string $resource_name ): array {
-		return self::$fields[ $resource_name ] ?? array();
+		return AbilityResources::get_extension_fields( $resource_name );
 	}
 
 	/**
@@ -905,7 +774,7 @@ class ExtensibleAbilities {
 	 * @return bool
 	 */
 	public static function is_resource_registered( string $resource_name ): bool {
-		return isset( self::$resources[ $resource_name ] );
+		return AbilityResources::is_registered( $resource_name );
 	}
 
 	/**

@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Abilities\AbilityResources;
 
 /**
  * Tests product term reads through the registered ability.
@@ -30,12 +31,13 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		foreach ( array( 'resources', 'fields' ) as $name ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+		foreach ( array( 'resources', 'fields', 'output_fields' ) as $name ) {
+			$property = new \ReflectionProperty( AbilityResources::class, $name );
 			$property->setAccessible( true );
 			$this->saved_state[ $name ] = $property->getValue();
 			$property->setValue( null, array() );
 		}
+		AbilitiesLoader::register_core_resources();
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 	}
@@ -45,7 +47,7 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		foreach ( $this->saved_state as $name => $value ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property = new \ReflectionProperty( AbilityResources::class, $name );
 			$property->setAccessible( true );
 			$property->setValue( null, $value );
 		}

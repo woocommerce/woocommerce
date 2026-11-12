@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Move resources out of the experimental ExtensibleAbilities API into the new AbilityResources registry.

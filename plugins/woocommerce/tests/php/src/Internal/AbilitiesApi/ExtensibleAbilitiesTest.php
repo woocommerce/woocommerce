@@ -21,6 +21,8 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  */
 class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
+	use \Automattic\WooCommerce\Tests\Abilities\AbilityRegistriesTrait;
+
 	use HPOSToggleTrait;
 
 	private const CODE_SCHEMA = array(
@@ -1106,12 +1108,12 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should refuse a resource that is registered after the resources action.
 	 */
 	public function test_a_resource_registered_after_the_resources_action_is_refused(): void {
-		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
+		$this->setExpectedIncorrectUsage( \Automattic\WooCommerce\Abilities\AbilityResources::class . '::register_resource' );
 		$this->get_output_schema( 'woocommerce/products-query' );
 
 		ExtensibleAbilities::register_resource( 'late_resource' );
 
-		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
+		$resources = new \ReflectionProperty( \Automattic\WooCommerce\Abilities\AbilityResources::class, 'resources' );
 		$resources->setAccessible( true );
 		$this->assertSame( array( 'product', 'order', 'order_item', 'product_term', 'product_review' ), array_keys( $resources->getValue() ) );
 	}
@@ -1120,11 +1122,17 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should refuse a resource name made only of digits.
 	 */
 	public function test_a_resource_name_of_only_digits_is_refused(): void {
-		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
+		$this->setExpectedIncorrectUsage( \Automattic\WooCommerce\Abilities\AbilityResources::class . '::register_resource' );
 
-		ExtensibleAbilities::register_resource( '42' );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_resources_init',
+			static function () {
+				ExtensibleAbilities::register_resource( '42' );
+			}
+		);
+		do_action( 'woocommerce_extensible_abilities_resources_init' );
 
-		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
+		$resources = new \ReflectionProperty( \Automattic\WooCommerce\Abilities\AbilityResources::class, 'resources' );
 		$resources->setAccessible( true );
 		$this->assertSame( array(), $resources->getValue() );
 	}
@@ -5937,31 +5945,5 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	private function set_feature( bool $enabled ): void {
 		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', $enabled ? 'yes' : 'no' );
-	}
-
-	/**
-	 * Drop every registered field and ability, so the next read fires the init actions again.
-	 */
-	private function reset_registries(): void {
-		global $wp_actions;
-
-		foreach ( array( 'fields', 'validators', 'syncs', 'filters' ) as $property ) {
-			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
-			$reflection->setAccessible( true );
-			$reflection->setValue( null, array() );
-		}
-
-		$reflection = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
-		$reflection->setAccessible( true );
-		$reflection->setValue( null, array() );
-
-		foreach ( array( 'WP_Abilities_Registry', 'WP_Ability_Categories_Registry' ) as $registry ) {
-			if ( class_exists( $registry ) ) {
-				$instance = new \ReflectionProperty( $registry, 'instance' );
-				$instance->setAccessible( true );
-				$instance->setValue( null, null );
-			}
-		}
-		unset( $wp_actions['wp_abilities_api_init'], $wp_actions['wp_abilities_api_categories_init'], $wp_actions['woocommerce_extensible_abilities_resources_init'], $wp_actions['woocommerce_extensible_abilities_init'] );
 	}
 }
