@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix client-side validation schema check for additional checkout fields registered in the contact section.
+Ensure additional checkout fields in the Contact Information section display inline validation errors.

@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { renderHook } from '@testing-library/react';
-import type { FormFieldProps } from '@woocommerce/settings';
-import { useSchemaParser } from '@woocommerce/base-hooks';
+import type { KeyedFormFields } from '@woocommerce/settings';
+import { useSchemaParser, type DocumentObject } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -28,8 +28,8 @@ describe( 'useFormValidation', () => {
 		jest.clearAllMocks();
 	} );
 
-	it( 'validates additional fields for contact formType using customer.additional_fields', () => {
-		const formFields: FormFieldProps[] = [
+	it( 'validates required additional fields for contact formType using customer.additional_fields', () => {
+		const formFields = [
 			{
 				key: 'repro/digits-contact',
 				label: 'Member number',
@@ -40,7 +40,7 @@ describe( 'useFormValidation', () => {
 					errorMessage: 'Use digits only.',
 				},
 			},
-		];
+		] as unknown as KeyedFormFields;
 
 		mockUseSchemaParser.mockReturnValue( {
 			parser: schemaParser,
@@ -52,7 +52,7 @@ describe( 'useFormValidation', () => {
 						'repro/digits-contact': 'invalid-abc',
 					},
 				},
-			} as never,
+			} as unknown as DocumentObject< 'contact' >,
 		} );
 
 		const { result } = renderHook( () =>
@@ -64,8 +64,78 @@ describe( 'useFormValidation', () => {
 		} );
 	} );
 
+	it( 'validates optional additional fields for contact formType when a value is provided', () => {
+		const formFields = [
+			{
+				key: 'repro/digits-contact',
+				label: 'Member number',
+				required: false,
+				validation: {
+					type: 'string',
+					pattern: '^[0-9]+$',
+					errorMessage: 'Use digits only.',
+				},
+			},
+		] as unknown as KeyedFormFields;
+
+		mockUseSchemaParser.mockReturnValue( {
+			parser: schemaParser,
+			data: {
+				cart: {},
+				checkout: {},
+				customer: {
+					additional_fields: {
+						'repro/digits-contact': 'invalid-abc',
+					},
+				},
+			} as unknown as DocumentObject< 'contact' >,
+		} );
+
+		const { result } = renderHook( () =>
+			useFormValidation( formFields, 'contact' )
+		);
+
+		expect( result.current.errors ).toEqual( {
+			'repro/digits-contact': 'Use digits only.',
+		} );
+	} );
+
+	it( 'does not validate optional additional fields for contact formType when empty', () => {
+		const formFields = [
+			{
+				key: 'repro/digits-contact',
+				label: 'Member number',
+				required: false,
+				validation: {
+					type: 'string',
+					pattern: '^[0-9]+$',
+					errorMessage: 'Use digits only.',
+				},
+			},
+		] as unknown as KeyedFormFields;
+
+		mockUseSchemaParser.mockReturnValue( {
+			parser: schemaParser,
+			data: {
+				cart: {},
+				checkout: {},
+				customer: {
+					additional_fields: {
+						'repro/digits-contact': '',
+					},
+				},
+			} as unknown as DocumentObject< 'contact' >,
+		} );
+
+		const { result } = renderHook( () =>
+			useFormValidation( formFields, 'contact' )
+		);
+
+		expect( result.current.errors ).toEqual( {} );
+	} );
+
 	it( 'validates additional fields for order formType using checkout.additional_fields', () => {
-		const formFields: FormFieldProps[] = [
+		const formFields = [
 			{
 				key: 'repro/digits-order',
 				label: 'PO number',
@@ -76,7 +146,7 @@ describe( 'useFormValidation', () => {
 					errorMessage: 'Use digits only.',
 				},
 			},
-		];
+		] as unknown as KeyedFormFields;
 
 		mockUseSchemaParser.mockReturnValue( {
 			parser: schemaParser,
@@ -88,7 +158,7 @@ describe( 'useFormValidation', () => {
 					},
 				},
 				customer: {},
-			} as never,
+			} as unknown as DocumentObject< 'order' >,
 		} );
 
 		const { result } = renderHook( () =>
@@ -101,7 +171,7 @@ describe( 'useFormValidation', () => {
 	} );
 
 	it( 'returns no errors when contact additional field is valid', () => {
-		const formFields: FormFieldProps[] = [
+		const formFields = [
 			{
 				key: 'repro/digits-contact',
 				label: 'Member number',
@@ -112,7 +182,7 @@ describe( 'useFormValidation', () => {
 					errorMessage: 'Use digits only.',
 				},
 			},
-		];
+		] as unknown as KeyedFormFields;
 
 		mockUseSchemaParser.mockReturnValue( {
 			parser: schemaParser,
@@ -124,7 +194,7 @@ describe( 'useFormValidation', () => {
 						'repro/digits-contact': '12345',
 					},
 				},
-			} as never,
+			} as unknown as DocumentObject< 'contact' >,
 		} );
 
 		const { result } = renderHook( () =>
