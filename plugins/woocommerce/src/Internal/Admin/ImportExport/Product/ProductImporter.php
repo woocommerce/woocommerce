@@ -107,15 +107,6 @@ final class ProductImporter {
 	}
 
 	/**
-	 * Count placeholder products left behind by a previous, possibly interrupted import.
-	 *
-	 * @return int
-	 */
-	public function count_pending_placeholders(): int {
-		return $this->cleanup->count_pending_placeholders();
-	}
-
-	/**
 	 * Read the raw headers and a sample row from a CSV file.
 	 *
 	 * @param string $file      Path to the CSV file.
@@ -148,12 +139,14 @@ final class ProductImporter {
 	 * @param string        $file     Path to the CSV file.
 	 * @param array         $options  Options: mapping, update_existing, delimiter, character_encoding, batch_size.
 	 * @param callable|null $on_batch Optional callback invoked as `$on_batch( int $position, array $batch_results )` after each batch.
+	 * @param callable|null $on_pending_placeholders Optional callback invoked as `$on_pending_placeholders( int $count )` while the lock is held,
+	 *                                               when placeholders from an earlier run would be cleaned up. It can throw to abort the import.
 	 *
 	 * @return ImportResult
 	 *
 	 * @throws ImportLockedException When another import already holds the site-wide import lock.
 	 */
-	public function run( string $file, array $options, ?callable $on_batch = null ): array {
+	public function run( string $file, array $options, ?callable $on_batch = null, ?callable $on_pending_placeholders = null ): array {
 		$this->load_importer();
 		$this->validate_mapping( (array) ( $options['mapping'] ?? array() ) );
 
@@ -163,6 +156,12 @@ final class ProductImporter {
 
 		try {
 			$this->cleanup->release_stranded_cleanup_claims();
+
+			$pending_placeholders = null === $on_pending_placeholders ? 0 : $this->cleanup->count_pending_placeholders();
+
+			if ( $pending_placeholders > 0 ) {
+				$on_pending_placeholders( $pending_placeholders );
+			}
 
 			$totals = array(
 				'imported'               => 0,

@@ -161,6 +161,72 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report leftover placeholders while it holds the lock.
+	 */
+	public function test_run_reports_pending_placeholders_while_holding_the_lock(): void {
+		$this->create_placeholder();
+
+		$reported_count = null;
+		$lock_age       = null;
+
+		$this->sut->run(
+			$this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-PENDING,Pending Product\n" ),
+			array( 'mapping' => $this->get_simple_mapping() ),
+			null,
+			function ( int $count ) use ( &$reported_count, &$lock_age ): void {
+				$reported_count = $count;
+				$lock_age       = $this->import_lock->get_age();
+			}
+		);
+
+		$this->assertSame( 1, $reported_count );
+		$this->assertNotNull( $lock_age );
+	}
+
+	/**
+	 * @testdox Should not report placeholders when none were left behind.
+	 */
+	public function test_run_does_not_report_pending_placeholders_when_there_are_none(): void {
+		$reported = false;
+
+		$this->sut->run(
+			$this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-NONE,No Placeholders\n" ),
+			array( 'mapping' => $this->get_simple_mapping() ),
+			null,
+			static function () use ( &$reported ): void {
+				$reported = true;
+			}
+		);
+
+		$this->assertFalse( $reported );
+	}
+
+	/**
+	 * @testdox Should release the lock and keep the placeholders when the placeholder callback aborts the run.
+	 */
+	public function test_run_releases_the_lock_when_the_placeholder_callback_aborts(): void {
+		$placeholder_id = $this->create_placeholder();
+
+		try {
+			$this->sut->run(
+				$this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-ABORT,Aborted\n" ),
+				array( 'mapping' => $this->get_simple_mapping() ),
+				null,
+				static function (): void {
+					throw new \InvalidArgumentException( 'Aborted' );
+				}
+			);
+			$this->fail( 'Expected the callback to abort the run.' );
+		} catch ( \InvalidArgumentException $exception ) {
+			$this->assertSame( 'Aborted', $exception->getMessage() );
+		}
+
+		$this->assertNull( $this->import_lock->get_age() );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-RUNNER-ABORT' ) );
+		$this->assertNotNull( get_post( $placeholder_id ) );
+	}
+
+	/**
 	 * @testdox Should leave no placeholder-status posts behind after a variation's forward parent SKU reference resolves.
 	 */
 	public function test_run_leaves_no_placeholders_for_a_forward_parent_reference(): void {
@@ -353,6 +419,21 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 		}
 
 		return $age;
+	}
+
+	/**
+	 * Create a placeholder product, as an interrupted import would leave behind.
+	 *
+	 * @return int The placeholder's post ID.
+	 */
+	private function create_placeholder(): int {
+		return (int) wp_insert_post(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'importing',
+				'post_title'  => 'Leftover placeholder',
+			)
+		);
 	}
 
 	/**
