@@ -17,6 +17,7 @@ This guide uses these terms:
 - **Keyboard changes apply immediately.** A shopper can press keys quickly, for example to move through options. After a key press, content that shows, hides, or swaps does not animate.
 - **Content moves to make space.** Content that appears grows from nothing, and the content below moves down. Content that goes collapses, and the content below moves up. Nothing jumps.
 - **One change, one movement.** When one action changes many things, the content below moves one time, in one direction.
+- **Motion follows the selection.** When the shopper picks another option in a row of options, such as Ship or Pickup, the selection slides to the new option. Content that the choice swaps moves the same way: the old content leaves in that direction, and the new content follows from the other side.
 - **Exits are shorter than entrances.** Movement in takes 300ms. Movement out takes 200ms.
 - **Interrupted motion turns around.** When the direction changes during motion, the motion continues from its current position. For example, a panel can close while it opens.
 - **Nothing blocks.** Clicks and typing work while motion runs.
