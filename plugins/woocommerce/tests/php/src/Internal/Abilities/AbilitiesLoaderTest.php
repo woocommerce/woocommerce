@@ -338,7 +338,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/customers-query'        => array(
+			'woocommerce/customers-query'          => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
