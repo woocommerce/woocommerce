@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/product-reviews-query",
 	"label": "Query product reviews",
-	"description": "Read product reviews, ratings and moderation status. Search matches review text only, never reviewer identity. Summary and per-product ranking cover all reviews in the requested product/status scope, ignoring search, rating range and include. Unrated reviews have rating zero and do not affect averages. Ranking is worst first; above 200 products it keeps the 100 worst and 100 best rated. Text searches omit the ranking. Requested products without reviews and unknown product IDs are reported separately. Reviewer identity is withheld.",
+	"description": "Read product reviews, ratings and moderation status. Search matches review text only, never reviewer identity. Summary and per-product ranking cover all reviews in the requested product/status scope, ignoring search, rating range and include. Unrated reviews have rating zero and do not affect averages. Ranking is worst first; above 200 products it keeps the 100 worst and 100 best rated. Text searches omit the ranking. Requested products without reviews and unknown product IDs are reported separately. store_reply_count counts replies from store staff only, so a review with only customer replies has 0. Reviewer identity is withheld.",
 	"input_schema": {
 		"type": "object",
 		"properties": {
@@ -170,6 +170,10 @@
 						},
 						"review": {
 							"type": "string"
+						},
+						"store_reply_count": {
+							"type": "integer",
+							"description": "Approved and held replies from store staff. Replies from customers are not counted."
 						}
 					}
 				}

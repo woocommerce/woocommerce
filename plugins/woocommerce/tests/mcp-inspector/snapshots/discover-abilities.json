@@ -47,7 +47,17 @@
 	{
 		"name": "woocommerce/product-reviews-query",
 		"label": "Query product reviews",
-		"description": "Read product reviews, ratings and moderation status. Search matches review text only, never reviewer identity. Summary and per-product ranking cover all reviews in the requested product/status scope, ignoring search, rating range and include. Unrated reviews have rating zero and do not affect averages. Ranking is worst first; above 200 products it keeps the 100 worst and 100 best rated. Text searches omit the ranking. Requested products without reviews and unknown product IDs are reported separately. Reviewer identity is withheld."
+		"description": "Read product reviews, ratings and moderation status. Search matches review text only, never reviewer identity. Summary and per-product ranking cover all reviews in the requested product/status scope, ignoring search, rating range and include. Unrated reviews have rating zero and do not affect averages. Ranking is worst first; above 200 products it keeps the 100 worst and 100 best rated. Text searches omit the ranking. Requested products without reviews and unknown product IDs are reported separately. store_reply_count counts replies from store staff only, so a review with only customer replies has 0. Reviewer identity is withheld."
+	},
+	{
+		"name": "woocommerce/product-review-update",
+		"label": "Update product review",
+		"description": "Moderate a product review, or a reply to one: approve it, hold it for moderation (shown as Pending in wp-admin), mark it as spam or move it to the trash. Moderate for spam, abuse or off-topic content, never to hide negative reviews. Requesting the status a review already has changes nothing and returns changed false. Reviewer identity is withheld."
+	},
+	{
+		"name": "woocommerce/product-review-reply",
+		"label": "Reply to product review",
+		"description": "Publish a reply to an approved product review, as the current user and under their display name. Approve a held review with woocommerce/product-review-update first. Check the review's store_reply_count first, so the store does not answer it twice. A reply can be held or trashed with woocommerce/product-review-update. Replies to replies are not supported."
 	},
 	{
 		"name": "woocommerce/product-attributes-query",
@@ -83,5 +93,10 @@
 		"name": "woocommerce/tax-rates-query",
 		"label": "Query tax rates",
 		"description": "List the tax rates of every tax class, in the order of the tax settings."
+	},
+	{
+		"name": "woocommerce/customers-query",
+		"label": "Query customers",
+		"description": "Find registered customers by ID or role, with their order count and total spent. Names, usernames, emails, phone numbers and addresses are withheld. Guest customers are not included."
 	}
 ]

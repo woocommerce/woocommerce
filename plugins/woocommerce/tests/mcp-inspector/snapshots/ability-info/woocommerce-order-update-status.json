@@ -42,6 +42,20 @@
 					"id": {
 						"type": "integer"
 					},
+					"number": {
+						"type": "string",
+						"description": "Order number shown to the customer. Extensions can make it differ from id."
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"shop_order"
+						]
+					},
+					"parent_id": {
+						"type": "integer",
+						"description": "ID of the parent order, or 0 when the order has none."
+					},
 					"status": {
 						"type": "string",
 						"enum": [
@@ -234,6 +248,15 @@
 					"total": {
 						"type": "string"
 					},
+					"discount_total": {
+						"type": "string"
+					},
+					"shipping_total": {
+						"type": "string"
+					},
+					"total_tax": {
+						"type": "string"
+					},
 					"customer_id": {
 						"type": "integer"
 					},
@@ -268,6 +291,26 @@
 						"format": "date-time",
 						"description": "Order modification date in UTC. Omitted when no modification date is available."
 					},
+					"date_paid": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Payment date in the store timezone. Kept after a later status change, such as a refund. Omitted when never paid."
+					},
+					"date_paid_gmt": {
+						"type": "string",
+						"format": "date-time",
+						"description": "date_paid in UTC."
+					},
+					"date_completed": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Completion date in the store timezone. Kept after a later status change, such as a refund. Omitted when never completed."
+					},
+					"date_completed_gmt": {
+						"type": "string",
+						"format": "date-time",
+						"description": "date_completed in UTC."
+					},
 					"line_items": {
 						"type": "array",
 						"description": "Order line items. Only present when include_line_items is true.",
@@ -286,13 +329,30 @@
 								"variation_id": {
 									"type": "integer"
 								},
+								"sku": {
+									"type": "string",
+									"description": "Omitted when the product no longer exists."
+								},
 								"quantity": {
 									"type": "number"
+								},
+								"price": {
+									"type": "string",
+									"description": "Line total divided by quantity, after discounts and before tax."
+								},
+								"tax_class": {
+									"type": "string"
 								},
 								"subtotal": {
 									"type": "string"
 								},
+								"subtotal_tax": {
+									"type": "string"
+								},
 								"total": {
+									"type": "string"
+								},
+								"total_tax": {
 									"type": "string"
 								}
 							},
@@ -338,20 +398,107 @@
 					},
 					"shipping_lines": {
 						"type": "array",
-						"description": "Order shipping lines. Present together with line_items.",
 						"items": {
 							"type": "object",
 							"properties": {
 								"id": {
 									"type": "integer"
 								},
-								"method_id": {
-									"type": "string"
-								},
 								"method_title": {
 									"type": "string"
 								},
+								"method_id": {
+									"type": "string"
+								},
+								"instance_id": {
+									"type": "string"
+								},
 								"total": {
+									"type": "string"
+								},
+								"total_tax": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"fee_lines": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer"
+								},
+								"name": {
+									"type": "string"
+								},
+								"tax_class": {
+									"type": "string"
+								},
+								"tax_status": {
+									"type": "string",
+									"enum": [
+										"taxable",
+										"none"
+									]
+								},
+								"total": {
+									"type": "string"
+								},
+								"total_tax": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"coupon_lines": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer"
+								},
+								"code": {
+									"type": "string"
+								},
+								"discount": {
+									"type": "string"
+								},
+								"discount_tax": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"tax_lines": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer"
+								},
+								"rate_code": {
+									"type": "string"
+								},
+								"rate_id": {
+									"type": "integer"
+								},
+								"label": {
+									"type": "string"
+								},
+								"compound": {
+									"type": "boolean"
+								},
+								"tax_total": {
+									"type": "string"
+								},
+								"shipping_tax_total": {
 									"type": "string"
 								}
 							},

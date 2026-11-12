@@ -1,0 +1,139 @@
+{
+	"name": "woocommerce/customers-query",
+	"label": "Query customers",
+	"description": "Find registered customers by ID or role, with their order count and total spent. Names, usernames, emails, phone numbers and addresses are withheld. Guest customers are not included.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"include": {
+				"type": "array",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				},
+				"description": "Return only these customer IDs, up to 100. Without per_page, they come back in one page.",
+				"maxItems": 100
+			},
+			"exclude": {
+				"type": "array",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				},
+				"description": "Leave out these customer IDs."
+			},
+			"role": {
+				"type": "string",
+				"description": "User role to list. Use all for every registered user. Defaults to customer.",
+				"enum": [
+					"all",
+					"administrator",
+					"editor",
+					"author",
+					"contributor",
+					"subscriber",
+					"customer",
+					"shop_manager"
+				],
+				"default": "customer"
+			},
+			"orderby": {
+				"type": "string",
+				"enum": [
+					"registered_date",
+					"id"
+				],
+				"default": "registered_date"
+			},
+			"order": {
+				"type": "string",
+				"enum": [
+					"asc",
+					"desc"
+				],
+				"default": "desc"
+			},
+			"page": {
+				"type": "integer",
+				"default": 1,
+				"minimum": 1
+			},
+			"per_page": {
+				"type": "integer",
+				"description": "Customers per page. Defaults to 10, or to the number of IDs in include.",
+				"minimum": 1,
+				"maximum": 100
+			}
+		},
+		"additionalProperties": false,
+		"default": []
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"customers": {
+				"type": "array",
+				"description": "Returned customers for the current page.",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer"
+						},
+						"role": {
+							"type": "string"
+						},
+						"is_paying_customer": {
+							"type": "boolean"
+						},
+						"order_count": {
+							"type": "integer"
+						},
+						"total_spent": {
+							"type": "string",
+							"description": "Decimal amount in the store currency, from paid orders."
+						},
+						"date_created": {
+							"type": "string",
+							"format": "date-time"
+						},
+						"date_modified": {
+							"type": "string",
+							"format": "date-time"
+						}
+					}
+				}
+			},
+			"total_pages": {
+				"type": "integer",
+				"description": "Total number of result pages available for the current query."
+			},
+			"page": {
+				"type": "integer",
+				"description": "Current result page."
+			},
+			"per_page": {
+				"type": "integer",
+				"description": "Maximum number of items requested per page."
+			},
+			"total": {
+				"type": "integer",
+				"description": "Number of customers that match the query."
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

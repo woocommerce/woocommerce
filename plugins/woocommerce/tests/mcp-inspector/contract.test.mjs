@@ -202,6 +202,7 @@ describe(
 
 const order = await seed( 'order', { key: 'contract' } );
 const product = await seed( 'product', { sku: 'mcp-contract' } );
+const review = await seed( 'review', { sku: 'mcp-contract-review' } );
 
 // Input is validated before the permission check, and a check that reads a record refuses everyone without one,
 // so this input is valid and names a real record.
@@ -213,6 +214,14 @@ const PERMISSION_INPUT = {
 	'woocommerce/order-update-status': { id: order.id, status: 'processing' },
 	'woocommerce/product-attribute-create': { name: 'MCP permission check' },
 	'woocommerce/product-delete': { id: product.id },
+	'woocommerce/product-review-reply': {
+		id: review.approved,
+		content: 'Contract',
+	},
+	'woocommerce/product-review-update': {
+		id: review.approved,
+		status: 'hold',
+	},
 	'woocommerce/product-terms-query': { taxonomy: 'product_cat' },
 	'woocommerce/product-update': { id: product.id },
 };
