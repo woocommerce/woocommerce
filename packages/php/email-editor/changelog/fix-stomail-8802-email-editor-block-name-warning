@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop a PHP warning when block settings without a block name reach the email editor's block settings filter.

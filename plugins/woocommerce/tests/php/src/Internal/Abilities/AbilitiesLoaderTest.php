@@ -47,6 +47,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/order-add-note',
 		'woocommerce/order-notes-query',
 		'woocommerce/payment-gateways-query',
+		'woocommerce/customers-query',
+		'woocommerce/product-review-update',
+		'woocommerce/product-review-reply',
 	);
 
 	/**
@@ -335,6 +338,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'idempotent'  => true,
 				'destructive' => false,
 			),
+			'woocommerce/customers-query'          => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/product-review-update'    => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/product-review-reply'     => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
 		);
 
 		foreach ( $expectations as $ability_id => $annotations ) {
@@ -537,6 +555,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertSame( 'array', $input['status']['type'] );
 			$this->assertContains( 'test-active', $input['status']['items']['enum'] );
 			$this->assertContains( 'test-active', $output['status']['enum'] );
+			$this->assertContains( 'shop_test_contract', $output['type']['enum'], 'An order of a registered type should pass the output schema.' );
 
 			$query_args = $this->capture_order_query_args(
 				array(
@@ -1003,6 +1022,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'status' => 'processing',
 				),
 			),
+			'product-review-update'  => array(
+				'woocommerce/product-review-update',
+				array(
+					'id'     => 1,
+					'status' => 'approved',
+				),
+			),
+			'product-review-reply'   => array(
+				'woocommerce/product-review-reply',
+				array(
+					'id'      => 1,
+					'content' => 'denied',
+				),
+			),
 			'order-add-note'         => array(
 				'woocommerce/order-add-note',
 				array(
@@ -1018,6 +1051,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			),
 			'payment-gateways-query' => array(
 				'woocommerce/payment-gateways-query',
+				array(),
+			),
+			'customers-query'        => array(
+				'woocommerce/customers-query',
 				array(),
 			),
 		);
@@ -1585,54 +1622,68 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function provider_negative_entity_id_inputs(): array {
 		return array(
-			'products-query'      => array(
+			'products-query'        => array(
 				'woocommerce/products-query',
 				array( 'id' => -123 ),
 			),
-			'product-update'      => array(
+			'product-update'        => array(
 				'woocommerce/product-update',
 				array(
 					'id'   => -123,
 					'name' => 'Invalid',
 				),
 			),
-			'product-delete'      => array(
+			'product-delete'        => array(
 				'woocommerce/product-delete',
 				array( 'id' => -123 ),
 			),
-			'orders-query'        => array(
+			'orders-query'          => array(
 				'woocommerce/orders-query',
 				array( 'id' => -123 ),
 			),
-			'order-send-email'    => array(
+			'order-send-email'      => array(
 				'woocommerce/order-send-email',
 				array(
 					'id'    => -123,
 					'email' => 'invoice',
 				),
 			),
-			'order-update'        => array(
+			'order-update'          => array(
 				'woocommerce/order-update',
 				array(
 					'id'       => -123,
 					'shipping' => array( 'city' => 'Invalid' ),
 				),
 			),
-			'order-update-status' => array(
+			'order-update-status'   => array(
 				'woocommerce/order-update-status',
 				array(
 					'id'     => -123,
 					'status' => 'processing',
 				),
 			),
-			'order-add-note'      => array(
+			'product-review-update' => array(
+				'woocommerce/product-review-update',
+				array(
+					'id'     => -123,
+					'status' => 'approved',
+				),
+			),
+			'product-review-reply'  => array(
+				'woocommerce/product-review-reply',
+				array(
+					'id'      => -123,
+					'content' => 'Invalid',
+				),
+			),
+			'order-add-note'        => array(
 				'woocommerce/order-add-note',
 				array(
 					'id'   => -123,
 					'note' => 'Invalid',
 				),
 			),
-			'order-notes-query'   => array(
+			'order-notes-query'     => array(
 				'woocommerce/order-notes-query',
 				array( 'id' => -123 ),
 			),
@@ -4625,8 +4676,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$query = wp_get_ability( 'woocommerce/orders-query' )->execute(
 			array(
-				'id'                 => $order->get_id(),
-				'include_line_items' => true,
+				'id'            => $order->get_id(),
+				'include_lines' => true,
 			)
 		);
 		$this->assertSame( 'Pickup', $query['orders'][0]['shipping_lines'][1]['method_title'] );

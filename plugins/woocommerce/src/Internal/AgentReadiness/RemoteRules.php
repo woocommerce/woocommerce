@@ -12,7 +12,9 @@ defined( 'ABSPATH' ) || exit;
  * The file is the list of checks that run. Each id has to match a check in
  * code; an id the file leaves out does not run, and an id code does not know
  * is ignored. A check whose entry has a malformed channel runs with its
- * bundled channels instead.
+ * bundled channels instead. A check no channel asks for, such as image alt
+ * text, is named with an empty channel map ("channels": {}). A file is only
+ * stored when at least one check in it has a valid channel.
  *
  * The file is fetched before each background scan: the daily run and any
  * scan that is asked for. Only a GET is made; the request's user agent
