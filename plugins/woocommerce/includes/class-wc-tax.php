@@ -578,11 +578,8 @@ class WC_Tax {
 	 * 4. Returns only rates that have shipping tax enabled for the determined tax class
 	 *    - If no shipping rates exist for the tax class, returns empty array (no fallback to standard rates)
 	 *    - This ensures tax class inheritance works correctly - if a tax class doesn't apply to shipping, no shipping tax is charged
-	 * 5. Matches rates against the customer's location (see get_tax_location()). Without a customer, which is also the case
-	 *    outside front-end requests, the location falls back to the store base address or to no location at all, depending
-	 *    on the tax settings (prices entered with tax, "Calculate tax based on", "Default customer location").
-	 *    With no location, no rates match and an empty array is returned.
-	 *    Pass a customer with the destination address to get rates for that destination.
+	 * 5. Matches rates against the customer's location (see get_tax_location()). Pass a customer to get rates for a
+	 *    specific destination; without one the location can come back empty, and then no rates match.
 	 *
 	 * @param string|null      $tax_class Optional. Specific tax class slug to get rates for. If null, determines from cart contents.
 	 * @param WC_Customer|null $customer Optional. Customer object to get location from. Uses current customer if null.
