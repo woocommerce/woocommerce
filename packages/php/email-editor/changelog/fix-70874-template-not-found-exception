@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Throw TemplateNotFoundException, naming the slug, instead of a TypeError when an email's template does not exist.
+Report which template is missing when an email's template does not exist. Code that catches TypeError around a render should catch TemplateNotFoundException.
