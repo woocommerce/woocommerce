@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Pass HTML-escaped argument values to personalization tags that return HTML in email content.
