@@ -14,6 +14,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\HTML_Tag_Proce
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Html2Text;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 
 /**
  * Class for replacing personalization tags with their values in the email content.
@@ -236,6 +237,32 @@ class Personalizer {
 			$content = $this->personalize_text_link_targets( $content );
 		}
 
+		return $this->replace_tags( $content, $rendering_context, false );
+	}
+
+	/**
+	 * Personalize rich text, such as a subject or preheader edited in the editor, and return it as plain text.
+	 *
+	 * Tags get the text rendering context, and each value is escaped as it goes into the rich text, so the
+	 * field stays HTML until a single conversion to plain text at the end. Neither the author's text nor a
+	 * tag value is read as HTML twice. Unresolved tags and other comments are dropped.
+	 *
+	 * @param string $rich_text The rich text as stored by the editor.
+	 * @return string The personalized plain text.
+	 */
+	public function personalize_rich_text_as_plain_text( string $rich_text ): string {
+		return Html_Processing_Helper::get_plain_text( $this->replace_tags( $rich_text, self::RENDERING_CONTEXT_TEXT, true ) );
+	}
+
+	/**
+	 * Replace the personalization tags in the content with their values.
+	 *
+	 * @param string $content           The content to personalize.
+	 * @param string $rendering_context One of the RENDERING_CONTEXT_HTML or RENDERING_CONTEXT_TEXT constants.
+	 * @param bool   $escape_values     Whether to escape tag values for HTML as they are inserted.
+	 * @return string The personalized content.
+	 */
+	private function replace_tags( string $content, string $rendering_context, bool $escape_values ): string {
 		$content_processor = new HTML_Tag_Processor( $content );
 		while ( $content_processor->next_token() ) {
 			if ( $content_processor->get_token_type() === '#comment' ) {
@@ -262,7 +289,7 @@ class Personalizer {
 					$value = $this->convert_html_value_to_text( $value );
 				}
 				$value = $this->intercept_value( (string) $value, trim( $modifiable_text ), $rendering_context );
-				$content_processor->replace_token( $value );
+				$content_processor->replace_token( $escape_values ? htmlspecialchars( $value, ENT_QUOTES, 'UTF-8' ) : $value );
 
 			} elseif ( $content_processor->get_token_type() === '#tag' && $content_processor->get_tag() === 'TITLE' ) {
 				// The title tag contains the subject of the email which should be personalized. HTML_Tag_Processor does parse the header tags.

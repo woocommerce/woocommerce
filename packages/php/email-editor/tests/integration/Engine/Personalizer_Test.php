@@ -1055,6 +1055,53 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that rich text such as a subject is personalized and converted to plain text in one pass,
+	 * so neither the author's text nor a tag value is read as HTML twice.
+	 */
+	public function testPersonalizeRichTextAsPlainText(): void {
+		$received = array();
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Sale',
+				'test/sale',
+				'Test',
+				function ( $context ) use ( &$received ) {
+					$received[] = $context[ Personalizer::RENDERING_CONTEXT_KEY ];
+					return '&lt;em&gt;Sale&lt;/em&gt;';
+				}
+			)
+		);
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Shop',
+				'test/shop',
+				'Test',
+				function () {
+					return 'Tom & Jerry <3';
+				},
+				array(),
+				null,
+				array(),
+				Personalization_Tag::VALUE_TYPE_TEXT
+			)
+		);
+		$intercepted = array();
+		$this->personalizer->set_value_interceptor(
+			function ( string $value ) use ( &$intercepted ): string {
+				$intercepted[] = $value;
+				return $value;
+			}
+		);
+
+		$this->assertSame(
+			'Big a<b <em>Sale</em> at Tom & Jerry <3 now',
+			$this->personalizer->personalize_rich_text_as_plain_text( '<strong>Big</strong> a&lt;b <!--[test/sale]--> at <!--[test/shop]--> <!--[other-plugin/x]--><!-- note -->now' )
+		);
+		$this->assertSame( array( Personalizer::RENDERING_CONTEXT_TEXT ), $received );
+		$this->assertSame( array( '<em>Sale</em>', 'Tom & Jerry <3' ), $intercepted );
+	}
+
+	/**
 	 * Test that the reserved rendering context key cannot be injected via set_context().
 	 */
 	public function testRenderingContextKeyIsReserved(): void {

@@ -46,25 +46,6 @@ class Html_Processing_Helper_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Tag comments are handed to the callback one at a time and its value is used in place; other comments are dropped.
-	 */
-	public function test_get_plain_text_fills_tag_tokens_through_callback(): void {
-		$html     = '<strong>Big</strong> a&lt;b <!-- [test/sale note="x"] --> deal<!-- note -->';
-		$received = array();
-		$text     = Html_Processing_Helper::get_plain_text(
-			$html,
-			function ( string $token ) use ( &$received ): string {
-				$received[] = $token;
-				return '<em>Sale</em>';
-			}
-		);
-
-		$this->assertSame( 'Big a<b <em>Sale</em> deal', $text );
-		$this->assertSame( array( '<!-- [test/sale note="x"] -->' ), $received );
-		$this->assertSame( 'Big a<b  deal', Html_Processing_Helper::get_plain_text( $html ) );
-	}
-
-	/**
 	 * Dangerous caption markup must be neutralized against the real HTML API.
 	 *
 	 * @dataProvider caption_xss_provider
