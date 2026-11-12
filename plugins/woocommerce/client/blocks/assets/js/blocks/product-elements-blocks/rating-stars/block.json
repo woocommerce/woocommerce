@@ -39,6 +39,10 @@
 		"root": ".wp-block-woocommerce-product-rating-stars.wc-block-components-product-rating, .wp-block-woocommerce-product-rating-stars .wc-block-components-product-rating"
 	},
 	"ancestor": [ "woocommerce/single-product" ],
+	"style": [
+		"wc-blocks-style",
+		"file:../product-rating-stars.css"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

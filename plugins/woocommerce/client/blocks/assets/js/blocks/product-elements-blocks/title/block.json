@@ -32,6 +32,10 @@
 	"selectors": {
 		"root": ".wp-block-woocommerce-product-title .wc-block-components-product-title"
 	},
+	"style": [
+		"wc-blocks-style",
+		"file:../product-title.css"
+	],
 	"textdomain": "woocommerce",
 	"attributes": {
 		"headingLevel": {

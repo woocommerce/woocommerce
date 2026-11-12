@@ -13,6 +13,10 @@
 	},
 	"keywords": [ "WooCommerce" ],
 	"usesContext": [ "postId", "postType", "queryId" ],
+	"style": [
+		"wc-blocks-style",
+		"file:../product-image-gallery.css"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
