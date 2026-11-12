@@ -18,6 +18,13 @@ class ProductDetails extends AbstractBlock {
 	private const UPSELLS_MIGRATED_OPTION = 'woocommerce_product_upsells_migrated_to_block';
 
 	/**
+	 * Option that hides the editor controls for switching product upsells.
+	 *
+	 * Stores with no saved value keep those controls visible.
+	 */
+	private const HIDE_UPSELLS_MIGRATION_UI_OPTION = 'woocommerce_hide_product_upsells_migration_ui';
+
+	/**
 	 * Block name.
 	 *
 	 * @var string
@@ -61,36 +68,7 @@ class ProductDetails extends AbstractBlock {
 	}
 
 	/**
-	 * Data passed through from server to client for block.
-	 *
-	 * @param array $attributes Any attributes that currently are available from the block.
-	 */
-	protected function enqueue_data( array $attributes = array() ): void {
-		parent::enqueue_data( $attributes );
-
-		if ( $this->asset_data_registry->exists( 'showProductUpsellsMigrationUI' ) ) {
-			return;
-		}
-
-		/**
-		 * Filters whether the editor shows the controls for switching product upsells between the classic display and the Upsells block.
-		 *
-		 * Themes that remove classic upsells with `remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_upsell_display', 15 )` can return false so those controls stay hidden.
-		 *
-		 * @hook woocommerce_show_product_upsells_migration_ui
-		 *
-		 * @since 11.4.0
-		 *
-		 * @param bool $enabled Whether the controls are shown. Default true.
-		 * @return bool Whether the controls are shown.
-		 */
-		$enabled = (bool) apply_filters( 'woocommerce_show_product_upsells_migration_ui', true );
-
-		$this->asset_data_registry->add( 'showProductUpsellsMigrationUI', $enabled );
-	}
-
-	/**
-	 * Register the option that records an upsells migration.
+	 * Register the options for the product upsells migration.
 	 *
 	 * @since 11.4.0
 	 *
@@ -105,6 +83,26 @@ class ProductDetails extends AbstractBlock {
 				'type'              => 'string',
 				'label'             => __( 'Product upsells migration', 'woocommerce' ),
 				'description'       => __( 'Whether product upsells should be displayed as a separate block and not inside the Product Details block.', 'woocommerce' ),
+				'default'           => 'no',
+				'show_in_rest'      => array(
+					'schema' => array(
+						'type' => 'string',
+						'enum' => array( 'yes', 'no' ),
+					),
+				),
+				'sanitize_callback' => static function ( $value ) {
+					return 'yes' === $value ? 'yes' : 'no';
+				},
+			)
+		);
+
+		register_setting(
+			'options',
+			self::HIDE_UPSELLS_MIGRATION_UI_OPTION,
+			array(
+				'type'              => 'string',
+				'label'             => __( 'Hide product upsells migration UI', 'woocommerce' ),
+				'description'       => __( 'Hide the editor controls for switching product upsells between the classic display and the Upsells block.', 'woocommerce' ),
 				'default'           => 'no',
 				'show_in_rest'      => array(
 					'schema' => array(

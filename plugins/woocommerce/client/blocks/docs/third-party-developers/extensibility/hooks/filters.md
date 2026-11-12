@@ -69,7 +69,6 @@
 - [woocommerce_shared_settings](#woocommerce_shared_settings)
 - [woocommerce_should_register_blocks](#woocommerce_should_register_blocks)
 - [woocommerce_show_page_title](#woocommerce_show_page_title)
-- [woocommerce_show_product_upsells_migration_ui](#woocommerce_show_product_upsells_migration_ui)
 - [woocommerce_sortable_taxonomies](#woocommerce_sortable_taxonomies)
 - [woocommerce_store_api_add_to_cart_data](#woocommerce_store_api_add_to_cart_data)
 - [woocommerce_store_api_cart_item_images](#woocommerce_store_api_cart_item_images)
@@ -1688,36 +1687,6 @@ Allows controlling the display of the page title.
 ### Source
 
 - [Blocks/BlockTypes/ClassicTemplate.php](../../../../../../src/Blocks/BlockTypes/ClassicTemplate.php)
-
----
-
-## woocommerce_show_product_upsells_migration_ui
-
-
-Filters whether the editor shows the controls for switching product upsells between the classic display and the Upsells block.
-
-```php
-apply_filters( 'woocommerce_show_product_upsells_migration_ui', bool $enabled )
-```
-
-### Description
-
-Themes that remove classic upsells with `remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_upsell_display', 15 )` can return false so those controls stay hidden.
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $enabled | bool | Whether the controls are shown. Default true. |
-
-### Returns
-
-
-`bool` Whether the controls are shown.
-
-### Source
-
-- [Blocks/BlockTypes/ProductDetails.php](../../../../../../src/Blocks/BlockTypes/ProductDetails.php)
 
 ---
 

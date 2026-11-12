@@ -186,19 +186,19 @@ endif;
 
 add_action( 'init', 'purple_remove_upsells' );
 
-if ( ! function_exists( 'purple_show_upsells_migration_ui' ) ) :
+if ( ! function_exists( 'purple_hide_upsells_migration_ui' ) ) :
 	/**
 	 * Hides the editor controls for switching between classic upsells and the Upsells block.
 	 *
 	 * @internal
 	 * @since purple 1.0.4
 	 *
-	 * @return bool
+	 * @return string
 	 */
-	function purple_show_upsells_migration_ui(): bool {
-		return false;
+	function purple_hide_upsells_migration_ui(): string {
+		return 'yes';
 	}
 
 endif;
 
-add_filter( 'woocommerce_show_product_upsells_migration_ui', 'purple_show_upsells_migration_ui' );
+add_filter( 'pre_option_woocommerce_hide_product_upsells_migration_ui', 'purple_hide_upsells_migration_ui' );
