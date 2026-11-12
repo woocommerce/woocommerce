@@ -673,16 +673,22 @@ class Html_Processing_Helper {
 	/**
 	 * Convert HTML to plain text for single-line fields such as a subject or preheader. Unlike
 	 * wp_strip_all_tags(), a "<" that does not start a tag keeps the text after it, and entities are decoded.
+	 * With $keep_tag_tokens, personalization tag comments stay, so tags can be filled in afterwards
+	 * without their values being parsed as HTML again.
 	 *
-	 * @param string $html HTML or text.
+	 * @param string $html            HTML or text.
+	 * @param bool   $keep_tag_tokens Whether to keep personalization tag comments such as <!--[tag]-->.
 	 * @return string Plain text.
 	 */
-	public static function get_plain_text( string $html ): string {
+	public static function get_plain_text( string $html, bool $keep_tag_tokens = false ): string {
 		$processor = new \WP_HTML_Tag_Processor( $html );
 		$text      = '';
 		while ( $processor->next_token() ) {
-			if ( '#text' === $processor->get_token_type() ) {
+			$token_type = $processor->get_token_type();
+			if ( '#text' === $token_type ) {
 				$text .= $processor->get_modifiable_text();
+			} elseif ( $keep_tag_tokens && '#comment' === $token_type && '[' === substr( $processor->get_modifiable_text(), 0, 1 ) ) {
+				$text .= '<!--' . $processor->get_modifiable_text() . '-->';
 			}
 		}
 		return trim( $text );

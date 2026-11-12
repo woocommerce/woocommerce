@@ -1,6 +1,9 @@
 <?php
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
@@ -56,6 +59,42 @@ class WC_Email_Test extends \WC_Unit_Test_Case {
 			$this->assertSame( 'I <3 Shoes & more', $email->get_subject() );
 		} finally {
 			remove_filter( 'woocommerce_email_subject_' . $email->id, $filter );
+			$features_controller->change_feature_enable( 'block_email_editor', $was_enabled );
+		}
+	}
+
+	/**
+	 * @testdox With the block email editor, tag values in the subject and preheader are not parsed as HTML a second time.
+	 */
+	public function test_block_editor_subject_and_preheader_keep_literal_tag_text_from_values(): void {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$was_enabled         = $features_controller->feature_is_enabled( 'block_email_editor' );
+		$features_controller->change_feature_enable( 'block_email_editor', true );
+		$registry = Email_Editor_Container::container()->get( Personalization_Tags_Registry::class );
+		$registry->register(
+			new Personalization_Tag(
+				'Sale',
+				'[wc-email-test/sale]',
+				'Test',
+				function () {
+					return '&lt;em&gt;Sale&lt;/em&gt;';
+				}
+			)
+		);
+		$email  = new WC_Email_Customer_Processing_Order();
+		$filter = function () {
+			return '<strong>Big</strong> <!--[wc-email-test/sale]-->';
+		};
+		add_filter( 'woocommerce_email_subject_' . $email->id, $filter );
+		add_filter( 'woocommerce_email_preheader' . $email->id, $filter );
+
+		try {
+			$this->assertSame( 'Big <em>Sale</em>', $email->get_subject() );
+			$this->assertSame( 'Big <em>Sale</em>', $email->get_preheader() );
+		} finally {
+			remove_filter( 'woocommerce_email_subject_' . $email->id, $filter );
+			remove_filter( 'woocommerce_email_preheader' . $email->id, $filter );
+			$registry->unregister( '[wc-email-test/sale]' );
 			$features_controller->change_feature_enable( 'block_email_editor', $was_enabled );
 		}
 	}
