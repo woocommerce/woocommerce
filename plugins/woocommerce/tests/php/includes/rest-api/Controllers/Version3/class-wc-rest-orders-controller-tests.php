@@ -3022,9 +3022,14 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A batch update does not remove a fee line sent with a non-numeric quantity.
+	 * @testdox A batch update does not remove a fee line sent with a non-integer quantity.
+	 * @testWith ["invalid"]
+	 *           ["0"]
+	 *           [0.0]
+	 *
+	 * @param mixed $quantity Posted fee quantity.
 	 */
-	public function test_batch_update_keeps_fee_line_with_non_numeric_quantity(): void {
+	public function test_batch_update_keeps_fee_line_with_non_integer_quantity( $quantity ): void {
 		$order = WC_Helper_Order::create_order();
 		$fee   = new WC_Order_Item_Fee();
 		$fee->set_name( 'Handling' );
@@ -3041,7 +3046,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 						'fee_lines' => array(
 							array(
 								'id'       => $fee->get_id(),
-								'quantity' => 'invalid',
+								'quantity' => $quantity,
 							),
 						),
 					),

@@ -827,7 +827,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 			foreach ( $request[ $key ] as $item ) {
 				if ( is_array( $item ) ) {
-					if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && is_numeric( $item['quantity'] ) && 0.0 === (float) $item['quantity'] ) ) {
+					if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && ( 0 === $item['quantity'] || ( 'line_items' === $key && is_numeric( $item['quantity'] ) && 0.0 === (float) $item['quantity'] ) ) ) ) {
 						$order->remove_item( $item['id'] );
 					} else {
 						$this->set_item( $order, $key, $item );
