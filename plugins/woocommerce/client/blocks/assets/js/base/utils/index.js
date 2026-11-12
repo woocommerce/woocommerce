@@ -21,3 +21,4 @@ export * from './use-return-focus';
 export * from './when-animations-end';
 export * from './animate-collapse';
 export * from './input-modality';
+export * from './swap-sections';
