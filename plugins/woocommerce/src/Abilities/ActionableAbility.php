@@ -51,7 +51,11 @@ defined( 'ABSPATH' ) || exit;
  * object caches of the objects the call saved or deleted. It does not undo what a sync
  * did outside the database, such as an HTTP request, and it does nothing on a
  * table engine without transactions. The other steps must not save, send email
- * or make HTTP requests.
+ * or make HTTP requests, except after_commit(), which runs after the commit and
+ * before prepare_response().
+ *
+ * When is_dry_run() is true for the input, the call stops after the validators,
+ * saves nothing and returns prepare_preview().
  *
  * The API is experimental while the `extensible_abilities` feature exists.
  *
@@ -136,6 +140,49 @@ abstract class ActionableAbility extends Ability {
 		}
 
 		return $subject->get_id() > 0 ? null : self::save_failed();
+	}
+
+	/**
+	 * Whether the call only checks the change. A dry run runs every step up to
+	 * the validators, saves nothing, and returns prepare_preview().
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $input Ability input.
+	 * @return bool
+	 */
+	protected function is_dry_run( array $input ): bool {
+		return false;
+	}
+
+	/**
+	 * The ability output for a dry run. The object is changed in memory and was
+	 * never saved, so it can have no ID.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param \WC_Data $subject Changed object, not saved.
+	 * @param array    $input   Ability input.
+	 * @return mixed|\WP_Error
+	 */
+	protected function prepare_preview( $subject, array $input ) {
+		return $this->prepare_response( $subject );
+	}
+
+	/**
+	 * Work that a rollback could not undo, such as a request to a payment
+	 * gateway. It runs after the commit, so a failure here leaves the change
+	 * saved unless this method undoes it. Inside a transaction that a caller
+	 * opened, the caller's commit still decides whether the rows stay.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param \WC_Data $subject Saved object.
+	 * @param array    $input   Ability input.
+	 * @return null|\WP_Error A WP_Error fails the call as it is.
+	 */
+	protected function after_commit( $subject, array $input ): ?\WP_Error {
+		return null;
 	}
 
 	/**
@@ -286,6 +333,10 @@ abstract class ActionableAbility extends Ability {
 			return self::join_refusals( $refused );
 		}
 
+		if ( $this->is_dry_run( $input ) ) {
+			return $this->prepare_preview( $subject, $input );
+		}
+
 		try {
 			$saved = DatabaseTransaction::run(
 				function () use ( $subject, $objects, $input, $enabled ) {
@@ -300,6 +351,11 @@ abstract class ActionableAbility extends Ability {
 		if ( is_wp_error( $saved ) ) {
 			self::forget_rolled_back_objects( $objects, array_merge( $this->get_deleted_objects(), $this->get_trashed_objects() ) );
 			return $saved;
+		}
+
+		$finished = $this->after_commit( $subject, $input );
+		if ( is_wp_error( $finished ) ) {
+			return $finished;
 		}
 
 		$response = $this->prepare_response( $subject );
