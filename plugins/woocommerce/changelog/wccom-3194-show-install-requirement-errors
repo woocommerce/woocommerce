@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Explain when a WooCommerce.com extension can't be installed because it needs a newer WordPress or PHP, and don't leave it on disk.
