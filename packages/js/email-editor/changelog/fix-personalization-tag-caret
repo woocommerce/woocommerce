@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep the cursor after a personalization tag typed by hand in the email editor.
