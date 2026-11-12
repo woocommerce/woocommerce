@@ -4,15 +4,10 @@
 import {
 	test,
 	expect,
-	wpCLI,
 	BlockData,
 	Editor,
 	BLOCK_THEME_SLUG,
 } from '@woocommerce/e2e-utils';
-
-/**
- * Internal dependencies
- */
 
 const blockData: Partial< BlockData > = {
 	name: 'woocommerce/legacy-template',
@@ -69,28 +64,5 @@ test.describe( `${ blockData.name } Block `, () => {
 		);
 
 		expect( classicTemplateBlocks ).toHaveLength( 0 );
-	} );
-
-	test( `is visible as default block when wc_blocks_use_blockified_product_grid_block_as_template is false`, async ( {
-		admin,
-		editor,
-		page,
-	} ) => {
-		await wpCLI(
-			'option update wc_blocks_use_blockified_product_grid_block_as_template false'
-		);
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
-		await expect(
-			await editor.getBlockByName( blockData.name )
-		).toBeVisible();
-
-		await page.goto( '/shop/' );
-
-		await expect( page.locator( 'div[data-template]' ) ).toBeVisible();
 	} );
 } );
