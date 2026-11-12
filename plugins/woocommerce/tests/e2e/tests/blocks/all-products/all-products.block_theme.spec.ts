@@ -30,6 +30,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		admin,
 		page,
 		requestUtils,
+		cleanup,
 	} ) => {
 		// WordPress uses `single-post-<slug>` for this post only. It has no
 		// header, so the page has no Mini-Cart block.
@@ -39,46 +40,42 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 			title: 'All Products without header',
 			content: '<!-- wp:post-content /-->',
 		} );
-		let postId: number | undefined;
+		cleanup( () =>
+			requestUtils.revertTemplate( 'wp_template', template.id )
+		);
 
-		try {
-			const post = await requestUtils.rest< { id: number } >( {
-				method: 'POST',
-				path: 'wp/v2/posts',
-				data: {
-					title: 'All Products without Mini-Cart',
-					slug: postSlug,
-					status: 'draft',
-				},
-			} );
-			postId = post.id;
+		const post = await requestUtils.rest< { id: number } >( {
+			method: 'POST',
+			path: 'wp/v2/posts',
+			data: {
+				title: 'All Products without Mini-Cart',
+				slug: postSlug,
+				status: 'draft',
+			},
+		} );
+		cleanup( () =>
+			requestUtils.rest( {
+				method: 'DELETE',
+				path: `wp/v2/posts/${ post.id }`,
+				params: { force: true },
+			} )
+		);
 
-			await admin.editPost( post.id );
-			await editor.insertBlock( { name: BLOCK_NAME } );
-			await editor.publishAndVisitPost();
-			await page.waitForResponse(
-				( response ) =>
-					response.url().includes( 'wp-json/wc/store/v1/products' ) &&
-					response.status() === 200
-			);
+		await admin.editPost( post.id );
+		await editor.insertBlock( { name: BLOCK_NAME } );
+		await editor.publishAndVisitPost();
+		await page.waitForResponse(
+			( response ) =>
+				response.url().includes( 'wp-json/wc/store/v1/products' ) &&
+				response.status() === 200
+		);
 
-			await expect(
-				page.locator( '[data-block-name="woocommerce/mini-cart"]' )
-			).toHaveCount( 0 );
-			await expect(
-				page.locator( '.wc-block-grid__product.wc-block-layout' )
-			).toHaveCount( 9 );
-		} finally {
-			await Promise.allSettled( [
-				postId &&
-					requestUtils.rest( {
-						method: 'DELETE',
-						path: `wp/v2/posts/${ postId }`,
-						params: { force: true },
-					} ),
-				requestUtils.revertTemplate( 'wp_template', template.id ),
-			] );
-		}
+		await expect(
+			page.locator( '[data-block-name="woocommerce/mini-cart"]' )
+		).toHaveCount( 0 );
+		await expect(
+			page.locator( '.wc-block-grid__product.wc-block-layout' )
+		).toHaveCount( 9 );
 	} );
 
 	// Regression coverage for legacy filter markup:
