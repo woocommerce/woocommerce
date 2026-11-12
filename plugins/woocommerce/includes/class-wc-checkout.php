@@ -546,14 +546,26 @@ class WC_Checkout {
 			$shipping[ $field ] = $data[ "shipping_{$field}" ] ?? '';
 		}
 
-		// Other shipping fields, such as names or fields added by extensions, are compared when billing has the same field.
+		// Other shipping fields, such as names or fields added by extensions, are compared too. A shipping-only field
+		// counts as a difference when it has a value, since the order then carries details billing doesn't have.
 		foreach ( $data as $key => $value ) {
-			$field = 0 === strpos( (string) $key, 'shipping_' ) ? substr( (string) $key, 9 ) : '';
+			$key = (string) $key;
 
-			if ( '' !== $field && ! isset( $shipping[ $field ] ) && array_key_exists( "billing_{$field}", $data ) ) {
-				$billing[ $field ]  = $data[ "billing_{$field}" ];
-				$shipping[ $field ] = $value;
+			if ( 0 !== strpos( $key, 'shipping_' ) || in_array( $key, self::SHIPPING_FIELDS_EXCLUDED_FROM_META, true ) ) {
+				continue;
 			}
+
+			$field = substr( $key, 9 );
+
+			if ( isset( $shipping[ $field ] ) ) {
+				continue;
+			}
+
+			if ( array_key_exists( "billing_{$field}", $data ) ) {
+				$billing[ $field ] = $data[ "billing_{$field}" ];
+			}
+
+			$shipping[ $field ] = $value;
 		}
 
 		return wc_get_container()->get( ShippingDestination::class )->keeps_saved_shipping_address( $billing, $shipping, $customer );

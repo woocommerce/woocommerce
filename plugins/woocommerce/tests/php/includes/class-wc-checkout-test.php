@@ -305,18 +305,20 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'process_customer' saves "$expected_street" as the account's shipping street, with the setting on "$ship_to_destination" and the posted shipping street "$posted_street".
+	 * @testdox 'process_customer' saves "$expected_street" as the account's shipping street, with the setting on "$ship_to_destination", the posted shipping street "$posted_street" and the shipping-only gate code "$posted_gate_code".
 	 *
-	 * @testWith [ "billing", "1 Billing Street", "2 Shipping Avenue" ]
-	 *           [ "billing_only", "1 Billing Street", "2 Shipping Avenue" ]
-	 *           [ "billing", "3 Seattle Road", "3 Seattle Road" ]
-	 *           [ "shipping", "1 Billing Street", "1 Billing Street" ]
+	 * @testWith [ "billing", "1 Billing Street", "", "2 Shipping Avenue" ]
+	 *           [ "billing_only", "1 Billing Street", "", "2 Shipping Avenue" ]
+	 *           [ "billing", "3 Seattle Road", "", "3 Seattle Road" ]
+	 *           [ "billing", "1 Billing Street", "G-42", "1 Billing Street" ]
+	 *           [ "shipping", "1 Billing Street", "", "1 Billing Street" ]
 	 *
 	 * @param string $ship_to_destination Value of the "Shipping destination" setting.
 	 * @param string $posted_street       Posted shipping street; "1 Billing Street" is the billing copy sent while "Ship to a different address?" is unchecked.
+	 * @param string $posted_gate_code    Posted value of a shipping field with no billing counterpart; empty while the box is unchecked.
 	 * @param string $expected_street     Shipping street expected on the account afterwards.
 	 */
-	public function test_process_customer_keeps_saved_shipping_address_when_shipping_to_billing( string $ship_to_destination, string $posted_street, string $expected_street ): void {
+	public function test_process_customer_keeps_saved_shipping_address_when_shipping_to_billing( string $ship_to_destination, string $posted_street, string $posted_gate_code, string $expected_street ): void {
 		update_option( 'woocommerce_ship_to_destination', $ship_to_destination );
 		$this->log_in_customer( self::SAVED_SHIPPING_ADDRESS );
 		$customer_id = get_current_user_id();
@@ -336,6 +338,8 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$data[ "shipping_{$field}" ] = $value;
 		}
 		$data['shipping_address_1'] = $posted_street;
+		$data['shipping_gate_code'] = $posted_gate_code;
+		$data['shipping_method']    = array( 'flat_rate:1' );
 
 		$this->sut->process_customer( $data );
 
