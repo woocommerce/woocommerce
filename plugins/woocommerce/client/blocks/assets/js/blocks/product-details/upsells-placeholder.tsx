@@ -18,6 +18,8 @@ import upsellsCollection from '../product-collection/collections/upsells';
 
 const PRODUCT_COLLECTION_BLOCK_NAME = 'woocommerce/product-collection';
 const UPSELLS_MIGRATED_OPTION = 'woocommerce_product_upsells_migrated_to_block';
+const HIDE_UPSELLS_MIGRATION_UI_OPTION =
+	'woocommerce_hide_product_upsells_migration_ui';
 
 const UpsellsPlaceholder = ( { clientId }: { clientId: string } ) => {
 	const { insertBlock } = useDispatch( blockEditorStore );
@@ -42,7 +44,7 @@ const UpsellsPlaceholder = ( { clientId }: { clientId: string } ) => {
 		const site = getEditedEntityRecord( 'root', 'site' ) as
 			Record< string, unknown > | false | undefined;
 
-		if ( ! site ) {
+		if ( ! site || site[ HIDE_UPSELLS_MIGRATION_UI_OPTION ] === 'yes' ) {
 			return false;
 		}
 

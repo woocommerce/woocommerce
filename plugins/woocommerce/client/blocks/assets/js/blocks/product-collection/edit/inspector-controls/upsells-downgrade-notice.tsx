@@ -11,6 +11,8 @@ import { __ } from '@wordpress/i18n';
 
 const PRODUCT_DETAILS_BLOCK_NAME = 'woocommerce/product-details';
 const UPSELLS_MIGRATED_OPTION = 'woocommerce_product_upsells_migrated_to_block';
+const HIDE_UPSELLS_MIGRATION_UI_OPTION =
+	'woocommerce_hide_product_upsells_migration_ui';
 
 export const UpsellsDowngradeNotice = ( {
 	clientId,
@@ -39,7 +41,7 @@ export const UpsellsDowngradeNotice = ( {
 		const site = getEditedEntityRecord( 'root', 'site' ) as
 			Record< string, unknown > | false | undefined;
 
-		if ( ! site ) {
+		if ( ! site || site[ HIDE_UPSELLS_MIGRATION_UI_OPTION ] === 'yes' ) {
 			return false;
 		}
 
@@ -96,7 +98,6 @@ export const UpsellsDowngradeNotice = ( {
 
 	return (
 		<UpgradeDowngradeNotice
-			isDismissible={ true }
 			actionLabel={ buttonLabel }
 			onActionClick={ handleClick }
 		>
