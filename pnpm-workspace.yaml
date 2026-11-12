@@ -142,6 +142,23 @@ overrides:
     '@automattic/components>react-router-dom': ~7.18.5
     react-resize-aware: 3.1.1
     sass: 1.69.5
+    # TEMPORARY: install the skills from Gutenberg PR 86737 until a release ships them. Remove with the other TEMPORARY lines.
+    '@wordpress/theme': 'github:WordPress/gutenberg#simison/design-system-agent-files-842d60&path:packages/theme'
+    '@wordpress/ui': 'github:WordPress/gutenberg#simison/design-system-agent-files-842d60&path:packages/ui'
+    '@wordpress/theme>@wordpress/compose': '*'
+    '@wordpress/theme>@wordpress/deprecated': '*'
+    '@wordpress/theme>@wordpress/element': '*'
+    '@wordpress/theme>@wordpress/style-runtime': '*'
+    '@wordpress/ui>@wordpress/a11y': '*'
+    '@wordpress/ui>@wordpress/compose': '*'
+    '@wordpress/ui>@wordpress/element': '*'
+    '@wordpress/ui>@wordpress/i18n': '*'
+    '@wordpress/ui>@wordpress/icons': '*'
+    '@wordpress/ui>@wordpress/keycodes': '*'
+    '@wordpress/ui>@wordpress/primitives': '*'
+    '@wordpress/ui>@wordpress/react-inert-value': '*'
+    '@wordpress/ui>@wordpress/style-runtime': '*'
+    '@wordpress/ui>@wordpress/warning': '*'
 
 patchedDependencies:
     '@wordpress/edit-site@5.15.0': bin/patches/@wordpress__edit-site@5.15.0.patch
@@ -198,7 +215,8 @@ skills:
         - .ai/skills
 
 # Block odd protocols (git+ssh, etc.) in transitive dependencies.
-blockExoticSubdeps: true
+# TEMPORARY: allow the git dependencies above.
+blockExoticSubdeps: false
 
 # Prevent trust downgrades (e.g., replacing a signed version with unsigned).
 trustPolicy: no-downgrade
