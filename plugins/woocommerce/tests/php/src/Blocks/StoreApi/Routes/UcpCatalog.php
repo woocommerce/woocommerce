@@ -195,6 +195,51 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * Lookup and product details open what catalog search can return: every product but a
+	 * hidden one, including "Search results only", which is_visible() refuses outside a
+	 * storefront search.
+	 *
+	 * @testWith ["visible", true, true]
+	 *           ["search", true, true]
+	 *           ["catalog", false, true]
+	 *           ["hidden", false, false]
+	 *
+	 * @param string $visibility Catalog visibility.
+	 * @param bool   $searchable Whether a search by name returns it.
+	 * @param bool   $opens      Whether lookup and product details return it.
+	 */
+	public function test_lookup_and_details_open_what_search_can_return( string $visibility, bool $searchable, bool $opens ): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'UCP Zebra ' . $visibility ) );
+		$product->set_catalog_visibility( $visibility );
+		$product->save();
+		$id = (string) $product->get_id();
+
+		$found = wp_list_pluck( $this->post( '/catalog/search', array( 'query' => 'UCP Zebra ' . $visibility ) )->get_data()['products'], 'id' );
+		$this->assertSame( $searchable, in_array( $id, $found, true ), 'Search' );
+
+		$lookup = $this->post( '/catalog/lookup', array( 'ids' => array( $id ) ) )->get_data();
+		$this->assertSame( $opens ? array( $id ) : array(), wp_list_pluck( $lookup['products'], 'id' ), 'Lookup' );
+
+		$detail = $this->post( '/catalog/product', array( 'id' => $id ) )->get_data();
+		$this->assertSame( $opens ? $id : null, $detail['product']['id'] ?? null, 'Product details' );
+	}
+
+	/**
+	 * A "Search results only" product still follows the hide-out-of-stock setting.
+	 */
+	public function test_lookup_hides_out_of_stock_search_only_products_when_the_store_does(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'stock_status' => 'outofstock' ) );
+		$product->set_catalog_visibility( 'search' );
+		$product->save();
+
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$data = $this->post( '/catalog/lookup', array( 'ids' => array( (string) $product->get_id() ) ) )->get_data();
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+
+		$this->assertSame( array(), $data['products'] );
+	}
+
+	/**
 	 * A category list resolving to no existing term matches nothing rather than everything.
 	 */
 	public function test_search_unknown_category_returns_no_products(): void {
