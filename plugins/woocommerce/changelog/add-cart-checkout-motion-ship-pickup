@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Switching between Ship and Pickup in Checkout now slides the selection and swaps the delivery sections smoothly instead of jumping.

@@ -115,16 +115,12 @@ export const animateCollapse = (
 };
 
 /**
- * Collapses an inert copy of an element in its place, so that the element itself can unmount at once. Use it for a
- * form that goes, so that its fields stop counting immediately. The copy has no `id`, `name`, or `for` attributes, and
- * it is removed when the collapse ends. Call it just before the element unmounts, while it is still in the page.
+ * Copies an element as inert content that only shows, so that the element itself can unmount at once. The copy has no
+ * `id`, `name`, or `for` attributes, and assistive technology skips it. Its selects show the selected options.
  *
- * @param element The element that unmounts.
+ * @param element The element to copy. It can already be out of the page.
  */
-export const collapseCopy = ( element: HTMLElement | null ): void => {
-	if ( typeof element?.getAnimations !== 'function' ) {
-		return;
-	}
+export const inertCopy = ( element: HTMLElement ): HTMLElement => {
 	const copy = element.cloneNode( true ) as HTMLElement;
 	[
 		copy,
@@ -141,6 +137,21 @@ export const collapseCopy = ( element: HTMLElement | null ): void => {
 	} );
 	copy.setAttribute( 'inert', '' );
 	copy.setAttribute( 'aria-hidden', 'true' );
+	return copy;
+};
+
+/**
+ * Collapses an inert copy of an element in its place, so that the element itself can unmount at once. Use it for a
+ * form that goes, so that its fields stop counting immediately. The copy has no `id`, `name`, or `for` attributes, and
+ * it is removed when the collapse ends. Call it just before the element unmounts, while it is still in the page.
+ *
+ * @param element The element that unmounts.
+ */
+export const collapseCopy = ( element: HTMLElement | null ): void => {
+	if ( typeof element?.getAnimations !== 'function' ) {
+		return;
+	}
+	const copy = inertCopy( element );
 	copy.setAttribute( COPY, element.className );
 	// A motion that runs continues from its current position.
 	if ( element.hasAttribute( ATTRIBUTE ) ) {

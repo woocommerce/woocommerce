@@ -76,12 +76,13 @@ Use the helpers in `assets/css/abstracts/_motion.scss`. Do not write `transition
 | `@include motion-transition( $state, $move, $duration, $easing, $hold )` | A state change and movement. `$move` runs over `$duration` (default `lg`), only when motion is allowed. | `@include motion-transition( $state: opacity, $move: translate );` |
 | `motion-hold( … )` | Keeps a property, such as `visibility`, at its old value until a fade ends. | `transition: motion-state( opacity ), motion-hold( visibility );` |
 | `@include motion-enter( $keyframes, $duration, $delay )` | Content that appears. It fades in, and plays `$keyframes` (default `wc-rise`). | `@include motion-enter( wc-grow, md );` |
-| `@include motion-exit( $keyframes )` | Content that goes. It fades out over 200ms and keeps the end state until it unmounts. | `@include motion-exit( wc-shrink );` |
+| `@include motion-exit( $keyframes, $duration )` | Content that goes. It fades out over `$duration` (default `md`) and keeps the end state until it unmounts. | `@include motion-exit( wc-shrink );` |
 | `@include motion-stagger( $keyframes )` | Sibling rows that enter 50ms apart. | `@include motion-stagger;` |
 | `@include motion-fade-in` / `motion-fade-out` | A fade with no movement. | |
 | `@include motion-dim( $states )` | Dims the element while `$states` matches, such as `".is-disabled"`. | Cart rows, disabled radios |
 | `@include motion-spinner-swap` | A button that loads. The label fades out and the spinner grows in. | Place order, coupon Apply |
 | `@include motion-collapse` | The timing for `animateCollapse`. The content grows over 300ms and collapses over 200ms, and fades. With reduced motion, it only fades. | `Panel` content |
+| `@include motion-swap` | The timing for `playSwap`, on the element whose children are the sections. Old sections fade out over 100ms, and new sections fade in and slide in after them. With reduced motion, they only fade. Use it with `motion-collapse`. | The Checkout form |
 | `@include motion-safe { … }` | Movement that the other helpers do not cover. | |
 
 `assets/css/style.scss` has the shared keyframes. `wc-fade-in` and `wc-fade-out` only fade. `wc-rise`, `wc-grow`, and `wc-shrink` move with `translate`, `scale`, and `filter`, so they combine with a fade and with the resting `transform` of an element.
@@ -97,6 +98,7 @@ Motion that changes the layout runs in JavaScript, because it must measure sizes
 | `animateCollapse( element, isOpen, animate, from )` (`@woocommerce/base-utils`) | Grows `element` open or collapses it shut in the real layout, and turns around if it still moves. Give `element` the `motion-collapse` mixin. Use it through `usePresence` when the component owns the content. Pass `from`, such as `{ height: '20px' }`, to grow from the size of the content that `element` replaces, or to change the height of an element that stays. |
 | `collapseCopy( element )` (`@woocommerce/base-utils`) | Collapses an inert copy of `element` in its place, so that `element` can unmount at once. Call it just before `element` unmounts. If `element` grows again first, it grows from the copy. |
 | `useToggleCollapse( isShown, getElement, { growFromTrigger } )` (`@woocommerce/base-hooks`) | Content that a control shows and hides, such as a checkbox that reveals a field. Call the `onToggle` that it returns in the handler of the control, before the state changes. Pass it the click event if there is one, or else put `triggerRef` on the control. `getElement` must not return the copy, which keeps the element's classes: find the element by id, or skip `[data-wc-collapse-copy]`. After a click, the element grows in, or an inert copy of it collapses while the real element unmounts. After a key press, the change applies immediately. Pass `growFromTrigger: true` when the content replaces the control, to grow from the height of the control. |
+| `captureSwap( container, direction )` and `playSwap( snapshot )` (`@woocommerce/base-utils`) | Swap the group of sections that a choice changes as one movement. Call `captureSwap` in the event handler, before the change, with the way that the selection moved on the screen (1 to the right, -1 to the left). Call `playSwap` in a layout effect after the sections change. Inert copies of the old sections fade out, the sections after the group hold their place until the copies have gone, and then everything moves one time. A new swap continues from the current position. |
 | `useOrderSummaryRow( cart, isShown )` (`@woocommerce/base-context/hooks`) | An order summary row that only shows sometimes, such as Fees. The row appears and goes when the skeletons end, and grows and collapses through `usePresence`. Rows of the cart that loads with the page show immediately. It returns `{ cart, wrapperProps }`. Render the row from `cart` while it is not `null`, and spread `wrapperProps` on its `TotalsWrapper`. |
 
 ## Techniques
@@ -117,6 +119,8 @@ Find the change in this table, and use the helpers above.
 | A toast or snackbar appears and goes | It rises in and drops out. |
 | Content appears or goes and moves the content below, such as a panel, notice, field error, or section | It grows and collapses in the real layout. It stays mounted while it goes. |
 | A form or its fields go | The real form unmounts at once, so its fields stop counting. An inert copy collapses in its place. |
+| The selection moves to another option, such as Ship or Pickup | A copy of the selected style slides to the new option, and stretches a little on the way. |
+| A choice swaps a group of sections, such as Ship or Pickup | The old sections fade out and move 24px the way that the selection moved. Then the new sections fade in and slide in from the other side. The sections after them hold their place until the old sections have gone, then move one time. |
 | An element becomes a different view of itself, such as an address card that becomes its form | The two views crossfade while the height changes. |
 | A table row goes | It fades in place, and the rows below slide up. |
 
