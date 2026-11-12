@@ -342,7 +342,17 @@ class Personalizer {
 		}
 		// Encode a "<" that does not start a tag, or older libxml versions drop the text after it.
 		$value = (string) preg_replace( '/<(?![a-z!\/])/i', '&lt;', $value );
-		return Html2Text::convert( $value, array( 'ignore_errors' => true ) );
+		$text  = Html2Text::convert( $value, array( 'ignore_errors' => true ) );
+
+		// Html2Text trims its output, so keep a space where the value started or ended with one,
+		// otherwise a separator such as "&nbsp;" between two tags disappears.
+		$space    = '(?:\s|&nbsp;|&#160;|&#xa0;)';
+		$leading  = preg_match( '/^' . $space . '/i', $value ) ? ' ' : '';
+		$trailing = preg_match( '/' . $space . '$/i', $value ) ? ' ' : '';
+		if ( '' === $text ) {
+			return ( '' !== $leading . $trailing ) ? ' ' : '';
+		}
+		return $leading . $text . $trailing;
 	}
 
 	/**
