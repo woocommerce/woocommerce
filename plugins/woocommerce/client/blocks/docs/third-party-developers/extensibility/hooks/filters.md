@@ -893,7 +893,7 @@ apply_filters( 'woocommerce_checkout_must_be_logged_in_message', string $message
 ## woocommerce_default_payment_method
 
 
-Filters the payment method the checkout starts with: the Checkout block, the classic checkout shortcode and the pay-for-order page all ask it.
+Filters the payment method the checkout starts with: the Checkout block, the classic checkout shortcode and the pay-for-order page all ask it. On the checkout it runs only when the shopper has no session choice that is still available for the cart.
 
 ```php
 apply_filters( 'woocommerce_default_payment_method', string $payment_method, array $available_gateways )
@@ -907,7 +907,7 @@ Return a gateway id from `$available_gateways` to preselect it, or an empty stri
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $payment_method | string | Gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first gateway the checkout lists; '' when there is none. |
+| $payment_method | string | Gateway id WooCommerce would preselect, or '' when there is none. See PaymentUtils::get_default_payment_method() for how it is picked. |
 | $available_gateways | array | Gateways available for this cart, keyed by id. |
 
 ### Source
