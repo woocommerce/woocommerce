@@ -41,8 +41,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 		$other_costs_label  = $this->get_totals_item_description();
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'data-wp-interactive' => 'woocommerce/mini-cart-footer-block',
-				'class'               => 'wc-block-mini-cart__footer',
+				'class' => 'wc-block-mini-cart__footer',
 			)
 		);
 
@@ -75,21 +74,6 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 		</div>
 		<?php
 		return (string) ob_get_clean();
-	}
-
-	/**
-	 * Return the main instance of WC_Cart class.
-	 *
-	 * @return \WC_Cart CartController class instance.
-	 */
-	protected function get_cart_instance() {
-		$cart = WC()->cart;
-
-		if ( $cart && $cart instanceof \WC_Cart ) {
-			return $cart;
-		}
-
-		return null;
 	}
 
 	/**
