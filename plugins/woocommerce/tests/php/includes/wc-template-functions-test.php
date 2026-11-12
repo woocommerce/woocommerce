@@ -332,38 +332,6 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Loop button quantity arguments and filters can still override the default minimum.
-	 */
-	public function test_loop_button_preserves_quantity_overrides(): void {
-		$product        = WC_Helper_Product::create_simple_product();
-		$minimum_filter = static function () {
-			return 10;
-		};
-		$args_filter    = static function ( $args ) {
-			$args['quantity'] = 30;
-			return $args;
-		};
-
-		add_filter( 'woocommerce_quantity_input_min', $minimum_filter );
-		try {
-			$markup = $this->render_loop_add_to_cart( $product, array( 'quantity' => 20 ) );
-			$this->assertStringContainsString( 'data-quantity="20"', $markup, 'Explicit quantity arguments should be preserved.' );
-			$this->assertStringContainsString( '>Add 20 to cart</a>', $markup );
-			$this->assertStringContainsString( 'quantity=20', $markup );
-
-			add_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
-			$markup = $this->render_loop_add_to_cart( $product );
-			$this->assertStringContainsString( 'data-quantity="30"', $markup, 'Extensions should still be able to override the quantity.' );
-			$this->assertStringContainsString( '>Add 30 to cart</a>', $markup );
-			$this->assertStringContainsString( 'quantity=30', $markup );
-			$this->assertStringContainsString( 'aria-label="Add 30 to cart:', $markup );
-		} finally {
-			remove_filter( 'woocommerce_quantity_input_min', $minimum_filter );
-			remove_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
-		}
-	}
-
-	/**
 	 * @testdox Classic buttons preserve URL-filter quantities unless arguments or argument filters explicitly override them.
 	 */
 	public function test_loop_button_retains_filtered_url_quantity(): void {
@@ -386,12 +354,14 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 			$markup = $this->render_loop_add_to_cart( $product, array( 'quantity' => 10 ) );
 			$this->assertStringContainsString( 'data-quantity="10"', $markup );
 			$this->assertStringContainsString( '>Add 10 to cart</a>', $markup );
+			$this->assertStringContainsString( 'aria-label="Add 10 to cart:', $markup );
 			$this->assertStringContainsString( 'quantity=10', $markup );
 
 			add_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
 			$markup = $this->render_loop_add_to_cart( $product );
 			$this->assertStringContainsString( 'data-quantity="10"', $markup );
 			$this->assertStringContainsString( '>Add 10 to cart</a>', $markup );
+			$this->assertStringContainsString( 'aria-label="Add 10 to cart:', $markup );
 			$this->assertStringContainsString( 'quantity=10', $markup );
 		} finally {
 			remove_filter( 'woocommerce_quantity_input_min', $minimum );

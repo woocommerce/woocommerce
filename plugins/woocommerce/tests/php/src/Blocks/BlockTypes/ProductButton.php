@@ -275,23 +275,35 @@ class ProductButton extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox woocommerce_loop_add_to_cart_args sets the Product Button quantity.
+	 * @testdox Quantity filters keep Product Button quantities, text, accessible labels, and links consistent.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $ajax_enabled Whether AJAX is enabled.
 	 */
-	public function test_loop_add_to_cart_args_sets_initial_quantity(): void {
+	public function test_loop_add_to_cart_args_sets_initial_quantity( bool $ajax_enabled ): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', $ajax_enabled ? 'yes' : 'no' );
 		$product = WC_Helper_Product::create_simple_product();
-		$filter  = static function ( array $args ): array {
-			$args['quantity'] = 4;
+		$minimum = static fn() => 10;
+		$filter  = static function ( $args ) {
+			$args['quantity'] = 30;
 			return $args;
 		};
 
+		add_filter( 'woocommerce_quantity_input_min', $minimum );
 		add_filter( 'woocommerce_loop_add_to_cart_args', $filter );
 		try {
 			$markup = $this->render_product_button( $product );
 		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum );
 			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
 		}
 
-		$this->assertSame( 4, $this->get_quantity_to_add( $markup ) );
+		$this->assertSame( 30, $this->get_quantity_to_add( $markup ) );
+		$this->assertStringContainsString( '>Add 30 to cart</span>', $markup );
+		$this->assertStringContainsString( 'aria-label="Add 30 to cart:', $markup );
+		if ( ! $ajax_enabled ) {
+			$this->assertStringContainsString( 'quantity=30', $markup );
+		}
 	}
 
 	/**
@@ -312,36 +324,6 @@ class ProductButton extends \WP_UnitTestCase {
 		$this->assertArrayHasKey( 'quantityToAdd', $context );
 
 		return $context['quantityToAdd'];
-	}
-
-	/**
-	 * @testdox Quantity overrides keep catalog text, accessible labels, and non-AJAX links consistent.
-	 * @testWith [true]
-	 *           [false]
-	 * @param bool $ajax_enabled Whether AJAX is enabled.
-	 */
-	public function test_quantity_override_updates_button_data( bool $ajax_enabled ): void {
-		update_option( 'woocommerce_enable_ajax_add_to_cart', $ajax_enabled ? 'yes' : 'no' );
-		$product = WC_Helper_Product::create_simple_product();
-		$minimum = static fn() => 10;
-		$filter  = static function ( $args ) {
-			$args['quantity'] = 30;
-			return $args;
-		};
-		add_filter( 'woocommerce_quantity_input_min', $minimum );
-		add_filter( 'woocommerce_loop_add_to_cart_args', $filter );
-		try {
-			$markup = $this->render_product_button( $product );
-		} finally {
-			remove_filter( 'woocommerce_quantity_input_min', $minimum );
-			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
-		}
-		$this->assertSame( 30, $this->get_quantity_to_add( $markup ) );
-		$this->assertStringContainsString( '>Add 30 to cart</span>', $markup );
-		$this->assertStringContainsString( 'aria-label="Add 30 to cart:', $markup );
-		if ( ! $ajax_enabled ) {
-			$this->assertStringContainsString( 'quantity=30', $markup );
-		}
 	}
 
 	/**
