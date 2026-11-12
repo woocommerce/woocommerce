@@ -22,7 +22,7 @@ POST /wc/store/v1/checkout/{ORDER_ID}
 | `payment_method`   | string |   Yes    | The ID of the payment method being used to process the payment.     |
 | `payment_data`     | array  |    No    | Data to pass through to the payment method when processing payment. |
 
-When an order has no address yet and no shipping destination to preserve, its billing address is also used as its shipping address. Any `shipping_address` sent for such an order is ignored. A physical order with an existing shipping line keeps its submitted shipping address even when store shipping is unavailable.
+When an order has neither a billing nor a shipping address yet and is treated as not needing shipping, its billing address is also used as its shipping address, and any `shipping_address` sent is ignored. This includes an order whose items are all virtual. When shipping is disabled or no method is registered, it also includes a physical order without an existing shipping line; a physical order with a shipping line keeps the submitted shipping address. When methods are available, the `woocommerce_order_needs_shipping` filter can change whether the order is treated as needing shipping.
 
 ```sh
 curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/checkout/{ORDER_ID} -d '{"key":"wc_order_oFmQYREzh9Tfv","billing_email":"admin@example.com","payment_method":"cheque","billing_address":{...},"shipping_address":{...}'
