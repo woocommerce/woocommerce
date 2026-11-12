@@ -878,22 +878,40 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Only users removed from the webhook site trigger it, including when the site ID is omitted.
+	 * @testdox Only members removed from the webhook site trigger it, including when the site ID is omitted.
 	 */
 	public function test_process_user_removed_from_blog_only_processes_the_webhook_site(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
 		$webhook = $this->getMockBuilder( WC_Webhook::class )->onlyMethods( array( 'process' ) )->getMock();
 		$webhook->set_topic( 'customer.deleted' );
 		$webhook->set_delivery_url( 'https://example.com/webhook' );
 		$webhook->enqueue();
 
-		$webhook->expects( $this->exactly( 2 ) )->method( 'process' )->with( 123 );
+		$webhook->expects( $this->exactly( 2 ) )->method( 'process' )->with( $user_id );
 
-		$webhook->process_user_removed_from_blog( 123, get_current_blog_id() + 1 );
-		$webhook->process_user_removed_from_blog( 123, get_current_blog_id() );
-		$webhook->process_user_removed_from_blog( 123, 0 );
+		$webhook->process_user_removed_from_blog( $user_id, get_current_blog_id() + 1 );
+		$webhook->process_user_removed_from_blog( $user_id, get_current_blog_id() );
+		$webhook->process_user_removed_from_blog( $user_id, 0 );
+		$webhook->process_user_removed_from_blog( PHP_INT_MAX, get_current_blog_id() );
+	}
 
-		remove_all_actions( 'remove_user_from_blog' );
-		remove_all_actions( 'delete_user' );
+	/**
+	 * @testdox A deleted user only triggers the webhook while its own site is the current site.
+	 */
+	public function test_process_user_deleted_only_processes_on_the_webhook_site(): void {
+		$webhook = $this->getMockBuilder( WC_Webhook::class )->onlyMethods( array( 'process' ) )->getMock();
+		$webhook->set_topic( 'customer.deleted' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->enqueue();
+
+		$webhook->expects( $this->once() )->method( 'process' )->with( 123 );
+		$webhook->process_user_deleted( 123 );
+
+		$set_blog_id = function ( int $blog_id ) {
+			$this->enqueued_blog_id = $blog_id;
+		};
+		$set_blog_id->call( $webhook, get_current_blog_id() + 1 );
+		$webhook->process_user_deleted( 123 );
 	}
 
 	/**
