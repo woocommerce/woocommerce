@@ -332,6 +332,38 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The pay form template should print the preselection it is handed, and say a method is preselected when its loader doesn't pass the value.
+	 * @testWith [{"has_chosen_gateway": false}, "no"]
+	 *           [{"has_chosen_gateway": true}, "yes"]
+	 *           [{}, "yes"]
+	 *
+	 * @param array  $extra_args Template arguments on top of the order, the gateways and the button text.
+	 * @param string $expected   Expected value of the data-preselected attribute.
+	 */
+	public function test_pay_form_template_prints_the_preselection_it_is_handed( array $extra_args, string $expected ): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID ) );
+		$order    = $this->create_pending_order( 'checkout', WC_Gateway_Cheque::ID );
+		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+		// One gateway is current only in the "no" case, so the template can't get any case right by working the value out itself.
+		if ( 'no' === $expected ) {
+			$gateways[ WC_Gateway_BACS::ID ]->set_current();
+		}
+
+		ob_start();
+		wc_get_template(
+			'checkout/form-pay.php',
+			array(
+				'order'              => $order,
+				'available_gateways' => $gateways,
+				'order_button_text'  => 'Pay for order',
+			) + $extra_args
+		);
+		$output = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'data-preselected="' . $expected . '"', $output );
+	}
+
+	/**
 	 * @testdox The pay page should pre-select the method the default payment method callback picks for an order the shopper placed.
 	 */
 	public function test_order_pay_preselects_the_gateway_the_default_payment_method_callback_picks(): void {

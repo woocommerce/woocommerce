@@ -18,9 +18,6 @@
 defined( 'ABSPATH' ) || exit;
 
 $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-// Tells checkout.js whether the server selected a method, so it leaves the list alone when none was selected on purpose.
-$has_preselected_gateway = ! empty( wp_list_filter( (array) $available_gateways, array( 'chosen' => true ) ) );
 ?>
 <form id="order_review" method="post">
 
@@ -81,7 +78,8 @@ $has_preselected_gateway = ! empty( wp_list_filter( (array) $available_gateways,
 
 	<div id="payment">
 		<?php if ( $order->needs_payment() ) : ?>
-			<ul class="wc_payment_methods payment_methods methods" aria-label="<?php esc_attr_e( 'Payment methods', 'woocommerce' ); ?>" data-preselected="<?php echo esc_attr( $has_preselected_gateway ? 'yes' : 'no' ); ?>">
+			<?php // data-preselected tells checkout.js whether the server selected a method. A loader that doesn't pass $has_chosen_gateway gets "yes", so the script keeps selecting the first one. ?>
+			<ul class="wc_payment_methods payment_methods methods" aria-label="<?php esc_attr_e( 'Payment methods', 'woocommerce' ); ?>" data-preselected="<?php echo esc_attr( ( $has_chosen_gateway ?? true ) ? 'yes' : 'no' ); ?>">
 				<?php
 				if ( ! empty( $available_gateways ) ) {
 					foreach ( $available_gateways as $gateway ) {

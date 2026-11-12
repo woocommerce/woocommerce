@@ -2962,6 +2962,7 @@ if ( ! function_exists( 'woocommerce_checkout_payment' ) ) {
 			array(
 				'checkout'           => WC()->checkout(),
 				'available_gateways' => $available_gateways,
+				'has_chosen_gateway' => ! empty( wp_list_filter( $available_gateways, array( 'chosen' => true ) ) ),
 				'order_button_text'  => apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woocommerce' ) ),
 			)
 		);
