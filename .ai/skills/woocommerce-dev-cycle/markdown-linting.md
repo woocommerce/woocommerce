@@ -88,7 +88,7 @@ Use UTF-8 box-drawing characters, not spaces, tabs, or ASCII art:
 
 ```markdown
 ✅ CORRECT - UTF-8 box-drawing:
-.agents/skills/
+.ai/skills/
 ├── woocommerce-backend/
 │   ├── SKILL.md
 │   └── file-entities.md
@@ -96,7 +96,7 @@ Use UTF-8 box-drawing characters, not spaces, tabs, or ASCII art:
     └── SKILL.md
 
 ❌ WRONG - ASCII art or spaces:
-.agents/skills/
+.ai/skills/
 +-- woocommerce-backend/
 |   +-- SKILL.md
     +-- file-entities.md

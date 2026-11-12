@@ -202,7 +202,7 @@ allowBuilds:
     unrs-resolver: false
     yarn: false
 
-# Link the design system agent skills shipped by `@wordpress/theme` and `@wordpress/ui` into `.agents/skills`
+# Link the design system agent skills shipped by `@wordpress/theme` and `@wordpress/ui` into `.ai/skills`
 # (`.claude/skills` points there), where agents and CodeRabbit read them. Approved ahead of time so
 # `pnpm install` needs no prompt.
 permissions:
@@ -216,7 +216,7 @@ permissions:
       skills: true
 skills:
     dirs:
-        - .agents/skills
+        - .ai/skills
 
 # Block odd protocols (git+ssh, etc.) in transitive dependencies.
 # TEMPORARY: allow the git dependencies above.

@@ -223,7 +223,7 @@ describe( 'Config', () => {
 				expect( compiled.test( 'docs/features/foo.md' ) ).toBe( true );
 				// Unlike `changes` globs, ignore globs compile with `dot: true`
 				// so the policy also reaches files inside dot directories.
-				expect( compiled.test( '.agents/skills/foo/SKILL.md' ) ).toBe(
+				expect( compiled.test( '.ai/skills/foo/SKILL.md' ) ).toBe(
 					true
 				);
 				expect( compiled.test( 'changelog/foo.php' ) ).toBe( false );
