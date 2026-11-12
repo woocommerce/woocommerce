@@ -45,39 +45,27 @@ class EarlierVariationMatch {
 			return false;
 		}
 
-		$child_ids = array_map( 'absint', $parent->get_children() );
-		$offset    = array_search( $variation->get_id(), $child_ids, true );
-		if ( ! is_int( $offset ) || 0 === $offset ) {
+		$child_ids    = array_map( 'absint', $parent->get_children() );
+		$variation_id = $variation->get_id();
+		if ( ! in_array( $variation_id, $child_ids, true ) || $variation_id === $child_ids[0] ) {
 			return false;
 		}
 
-		$selected = array();
-		foreach ( $selected_attributes as $key => $value ) {
-			if ( ! is_scalar( $value ) ) {
-				continue;
-			}
-			$name = (string) $key;
-			if ( 0 === strpos( $name, 'attribute_' ) ) {
-				$name = substr( $name, 10 );
-			}
-			$selected[ $name ] = (string) $value;
-		}
+		// Prime caches to reduce future queries.
+		_prime_post_caches( $child_ids );
 
-		$earlier_ids       = array_slice( $child_ids, 0, $offset );
-		$hide_out_of_stock = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
-		if ( ! empty( $earlier_ids ) ) {
-			// Prime caches to reduce future queries.
-			_prime_post_caches( $earlier_ids );
-		}
+		foreach ( $child_ids as $child_id ) {
+			if ( $variation_id === $child_id ) {
+				return false;
+			}
 
-		foreach ( $earlier_ids as $earlier_id ) {
 			// Attribute meta is already primed, so skip loading variations that cannot match.
-			if ( ! $this->attributes_match( $earlier_id, $selected ) ) {
+			if ( ! $this->attributes_match( $child_id, $selected_attributes ) ) {
 				continue;
 			}
 
-			$earlier = wc_get_product( $earlier_id );
-			if ( $earlier instanceof WC_Product_Variation && $this->is_available( $earlier, $parent, $hide_out_of_stock ) ) {
+			$earlier = wc_get_product( $child_id );
+			if ( $earlier instanceof WC_Product_Variation && $this->is_available( $earlier, $parent ) ) {
 				return true;
 			}
 		}
@@ -90,18 +78,19 @@ class EarlierVariationMatch {
 	 *
 	 * Empty attribute values are "any" and match every selection.
 	 *
-	 * @param int                   $variation_id Variation ID.
-	 * @param array<string, string> $selected     Selected attribute values, without the attribute_ prefix.
+	 * @param int                  $variation_id Variation ID.
+	 * @param array<string, mixed> $selected     Selected attribute values, keyed by attribute meta key.
 	 * @return bool
 	 */
 	private function attributes_match( int $variation_id, array $selected ): bool {
 		foreach ( wc_get_product_variation_attributes( $variation_id ) as $name => $value ) {
-			$name = (string) $name;
-			if ( 0 === strpos( $name, 'attribute_' ) ) {
-				$name = substr( $name, 10 );
-			}
 			$value = (string) $value;
-			if ( '' !== $value && ( $selected[ $name ] ?? null ) !== $value ) {
+			if ( '' === $value ) {
+				continue;
+			}
+
+			$selected_value = $selected[ $name ] ?? null;
+			if ( ! is_scalar( $selected_value ) || (string) $selected_value !== $value ) {
 				return false;
 			}
 		}
@@ -112,12 +101,12 @@ class EarlierVariationMatch {
 	/**
 	 * Whether the variation can be selected from the catalog.
 	 *
-	 * @param WC_Product_Variation $variation         Variation to check.
-	 * @param WC_Product_Variable  $parent_product    Parent variable product.
-	 * @param bool                 $hide_out_of_stock Whether out-of-stock products are hidden.
+	 * @param WC_Product_Variation $variation      Variation to check.
+	 * @param WC_Product_Variable  $parent_product Parent variable product.
 	 * @return bool
 	 */
-	private function is_available( WC_Product_Variation $variation, WC_Product_Variable $parent_product, bool $hide_out_of_stock ): bool {
+	private function is_available( WC_Product_Variation $variation, WC_Product_Variable $parent_product ): bool {
+		$hide_out_of_stock = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
 		if ( ! $variation->exists() || ( $hide_out_of_stock && ! $variation->is_in_stock() ) ) {
 			return false;
 		}
