@@ -5,7 +5,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlocksWpQuery;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-use Automattic\WooCommerce\Internal\Utilities\CatalogProductButton;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 /**
  * AbstractProductGrid class.
@@ -682,7 +682,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		 * @return array Returns an associative array derived from the default array passed as an argument and added the extra HTML attributes.
 		 */
 		$attributes  = apply_filters( 'woocommerce_blocks_product_grid_add_to_cart_attributes', $attributes, $product );
-		$button_data = CatalogProductButton::get_data( $product, $attributes['data-quantity'] ?? 1 );
+		$button_data = wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_button_data( $product, $attributes['data-quantity'] ?? 1 );
 		if ( ( $attributes['aria-label'] ?? null ) === $button_data['original_description'] ) {
 			$attributes['aria-label'] = $button_data['description'];
 		}

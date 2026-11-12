@@ -15,7 +15,7 @@
  * @version     11.4.0
  */
 
-use Automattic\WooCommerce\Internal\Utilities\CatalogProductButton;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $product;
 
 $args        = $args ?? array();
-$button_data = CatalogProductButton::get_data( $product, $args['quantity'] ?? 1 );
+$button_data = wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_button_data( $product, $args['quantity'] ?? 1 );
 if ( ( $args['attributes']['aria-label'] ?? null ) === wp_strip_all_tags( $button_data['original_description'] ) ) {
 	$args['attributes']['aria-label'] = wp_strip_all_tags( $button_data['description'] );
 }

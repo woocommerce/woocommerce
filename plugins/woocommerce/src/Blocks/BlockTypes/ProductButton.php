@@ -8,8 +8,8 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\Utilities\CatalogProductButton;
 use Automattic\WooCommerce\Internal\Utilities\InCartQuantity;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 /**
  * ProductButton class.
@@ -175,7 +175,7 @@ class ProductButton extends AbstractBlock {
 		}
 
 		if ( ! $is_descendant_of_add_to_cart_form ) {
-			$button_data      = CatalogProductButton::get_data( $product, $default_quantity );
+			$button_data      = wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_button_data( $product, $default_quantity );
 			$add_to_cart_text = $button_data['text'];
 			if ( isset( $add_to_cart_url, $args['attributes']['href'] ) && esc_url( $add_to_cart_url ) === $args['attributes']['href'] ) {
 				$args['attributes']['href'] = esc_url( $button_data['url'] );
