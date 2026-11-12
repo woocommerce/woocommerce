@@ -14,6 +14,13 @@ use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
  */
 class ShippingWritesTest extends \WC_Unit_Test_Case {
 
+	private const GERMANY = array(
+		array(
+			'code' => 'DE',
+			'type' => 'country',
+		),
+	);
+
 	/**
 	 * Administrator used as the current user.
 	 *
@@ -286,6 +293,7 @@ class ShippingWritesTest extends \WC_Unit_Test_Case {
 	 * @testdox Should refuse settings the method rejects, and leave no method behind.
 	 * @testWith ["flat_rate", {"min_amount": "50"}, "woocommerce_ability_shipping_method_setting_unknown"]
 	 *           ["flat_rate", {"cost": "10 +"}, "woocommerce_ability_shipping_method_setting_invalid"]
+	 *           ["free_shipping", {"min_amount": "-5"}, "woocommerce_ability_shipping_method_setting_invalid"]
 	 *
 	 * @param string $method_id Method to add.
 	 * @param array  $settings  Settings to send.
@@ -306,6 +314,36 @@ class ShippingWritesTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( $code, $result->get_error_code() );
 		$this->assertSame( array(), ( new \WC_Shipping_Zone( $zone_id ) )->get_shipping_methods(), 'The method should be removed again.' );
+	}
+
+	/**
+	 * @testdox Should remove the method again when it cannot be read back after adding it.
+	 */
+	public function test_removes_a_method_it_cannot_read_back(): void {
+		$zone_id    = $this->create_germany_zone();
+		$unregister = static function ( array $methods ): array {
+			unset( $methods['flat_rate'] );
+			return $methods;
+		};
+		add_action(
+			'woocommerce_shipping_zone_method_added',
+			static function () use ( $unregister ): void {
+				add_filter( 'woocommerce_shipping_methods', $unregister );
+			}
+		);
+
+		$result = $this->run_ability(
+			'woocommerce/shipping-zone-method-create',
+			array(
+				'zone_id'   => $zone_id,
+				'method_id' => 'flat_rate',
+			)
+		);
+		remove_filter( 'woocommerce_shipping_methods', $unregister );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_shipping_method_create_failed', $result->get_error_code() );
+		$this->assertSame( array(), ( new \WC_Shipping_Zone( $zone_id ) )->get_shipping_methods( false, 'admin' ), 'The method should be removed again.' );
 	}
 
 	/**
@@ -401,10 +439,42 @@ class ShippingWritesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a zone without locations, which would match every address, or with a code longer than the column.
+	 * @testWith [[]]
+	 *           [[{"code": "%s", "type": "postcode"}]]
+	 *
+	 * @param array $locations Locations to send.
+	 */
+	public function test_refuses_zone_locations_that_cannot_be_saved( array $locations ): void {
+		$zone_count = count( \WC_Shipping_Zones::get_zones() );
+		if ( isset( $locations[0]['code'] ) ) {
+			$locations[0]['code'] = str_repeat( '1', 201 );
+		}
+
+		$result = $this->run_ability(
+			'woocommerce/shipping-zone-create',
+			array(
+				'name'      => 'Everywhere',
+				'locations' => $locations,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+		$this->assertCount( $zone_count, \WC_Shipping_Zones::get_zones(), 'No zone should be created.' );
+	}
+
+	/**
 	 * @testdox Should refuse a zone name with nothing left after cleaning.
 	 */
 	public function test_refuses_an_empty_zone_name(): void {
-		$result = $this->run_ability( 'woocommerce/shipping-zone-create', array( 'name' => '  <b></b> ' ) );
+		$result = $this->run_ability(
+			'woocommerce/shipping-zone-create',
+			array(
+				'name'      => '  <b></b> ',
+				'locations' => self::GERMANY,
+			)
+		);
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_ability_shipping_zone_name_empty', $result->get_error_code() );
@@ -419,7 +489,13 @@ class ShippingWritesTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_ship_to_countries', 'disabled' );
 
 		$results = array(
-			$this->run_ability( 'woocommerce/shipping-zone-create', array( 'name' => 'Refused' ) ),
+			$this->run_ability(
+				'woocommerce/shipping-zone-create',
+				array(
+					'name'      => 'Refused',
+					'locations' => self::GERMANY,
+				)
+			),
 			$this->run_ability(
 				'woocommerce/shipping-zone-method-create',
 				array(
@@ -450,7 +526,15 @@ class ShippingWritesTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_requires_settings_permission(): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
-		$this->assertWPError( $this->run_ability( 'woocommerce/shipping-zone-create', array( 'name' => 'Refused' ) ) );
+		$this->assertWPError(
+			$this->run_ability(
+				'woocommerce/shipping-zone-create',
+				array(
+					'name'      => 'Refused',
+					'locations' => self::GERMANY,
+				)
+			)
+		);
 		$this->assertWPError(
 			$this->run_ability(
 				'woocommerce/shipping-zone-method-create',

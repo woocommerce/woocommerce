@@ -110,6 +110,9 @@ class ShippingZoneMethodCreate extends AbstractDomainAbility implements AbilityD
 		$instance_id = $zone->add_shipping_method( $input['method_id'] );
 		$method      = $instance_id ? \WC_Shipping_Zones::get_shipping_method( $instance_id ) : false;
 		if ( ! $method instanceof \WC_Shipping_Method ) {
+			if ( $instance_id ) {
+				$zone->delete_shipping_method( $instance_id );
+			}
 			return new \WP_Error( 'woocommerce_ability_shipping_method_create_failed', __( 'The shipping method could not be added to the zone.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 

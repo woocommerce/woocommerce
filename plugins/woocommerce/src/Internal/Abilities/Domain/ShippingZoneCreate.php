@@ -53,7 +53,8 @@ class ShippingZoneCreate extends AbstractDomainAbility implements AbilityDefinit
 					),
 					'locations' => array(
 						'type'        => 'array',
-						'description' => __( 'Regions the zone covers. Without any, the zone matches no address.', 'woocommerce' ),
+						'description' => __( 'Regions the zone covers.', 'woocommerce' ),
+						'minItems'    => 1,
 						'items'       => array(
 							'type'                 => 'object',
 							'properties'           => array(
@@ -61,6 +62,7 @@ class ShippingZoneCreate extends AbstractDomainAbility implements AbilityDefinit
 									'type'        => 'string',
 									'description' => __( 'ISO country code such as DE, COUNTRY:STATE such as US:CA, continent code such as EU, or a postcode, a range such as 10000...19999, or a wildcard such as 10*.', 'woocommerce' ),
 									'minLength'   => 1,
+									'maxLength'   => 200,
 								),
 								'type' => array(
 									'type' => 'string',
@@ -77,7 +79,7 @@ class ShippingZoneCreate extends AbstractDomainAbility implements AbilityDefinit
 						'minimum'     => 0,
 					),
 				),
-				'required'             => array( 'name' ),
+				'required'             => array( 'name', 'locations' ),
 				'additionalProperties' => false,
 			),
 			'output_schema'       => self::get_entity_output_schema( 'zone', self::get_zone_output_schema() ),
