@@ -210,6 +210,28 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 
 	setCurrency( currencySetting );
 
+	/**
+	 * Format decimal values with the display formatter, without separators.
+	 * Locutus can return a non-numeric string when its exponent shift produces
+	 * scientific notation, so retain the previous result in those cases.
+	 */
+	function formatDecimalValue( number: number, precision: number ) {
+		if (
+			! Number.isInteger( precision ) ||
+			precision < 0 ||
+			precision > 100 ||
+			! Number.isFinite( number ) ||
+			Math.abs( number ) >= 1e21
+		) {
+			return undefined;
+		}
+		const formatted = numberFormat(
+			{ precision, decimalSeparator: '.', thousandSeparator: '' },
+			number
+		);
+		return Number.isFinite( Number( formatted ) ) ? formatted : undefined;
+	}
+
 	return {
 		getCurrencyConfig: () => {
 			return { ...currency };
@@ -235,10 +257,12 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 				return 0;
 			}
 			const { precision } = currency;
-			return (
-				Math.round( number * Math.pow( 10, precision ) ) /
-				Math.pow( 10, precision )
-			);
+			const formatted = formatDecimalValue( number, precision );
+			if ( formatted !== undefined ) {
+				return Number( formatted );
+			}
+			const exponent = Math.pow( 10, precision );
+			return Math.round( number * exponent ) / exponent;
 		},
 
 		/**
@@ -256,7 +280,10 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 				return '';
 			}
 			const { precision } = currency;
-			return number.toFixed( precision );
+			return (
+				formatDecimalValue( number, precision ) ??
+				number.toFixed( precision )
+			);
 		},
 
 		/**
