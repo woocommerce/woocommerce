@@ -972,6 +972,8 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 			'whitespace in plain text'  => array( "  Line one\nLine two ", "  Line one\nLine two " ),
 			'entity and bare less-than' => array( 'Tom &amp; Jerry <3 you', 'Tom & Jerry <3 you' ),
 			'markup and bare less-than' => array( '<em>a</em> < b', 'a < b' ),
+			'separator only'            => array( '&nbsp;', ' ' ),
+			'surrounding spaces kept'   => array( ' <b>x</b>&nbsp;', ' x ' ),
 		);
 	}
 
