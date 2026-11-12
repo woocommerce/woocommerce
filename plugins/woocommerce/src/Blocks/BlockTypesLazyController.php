@@ -86,6 +86,7 @@ final class BlockTypesLazyController {
 		$is_admin     = is_admin();
 		$block_groups = array(
 			$this->get_order_confirmation_blocks(),
+			$this->get_product_display_element_blocks(),
 		);
 		foreach ( $block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
@@ -249,6 +250,41 @@ final class BlockTypesLazyController {
 			$list['order-confirmation-shipping-address']          = \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\ShippingAddress::class;
 			$list['order-confirmation-downloads-wrapper']         = \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\DownloadsWrapper::class;
 			$list['order-confirmation-additional-fields-wrapper'] = \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\AdditionalFieldsWrapper::class;
+		}
+
+		return $list;
+	}
+
+	/**
+	 * Side effect free and stateless product display element blocks.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_product_display_element_blocks(): array {
+		// ProductGalleryLargeImage: excluded — overrides initialize() with block_type_metadata_settings filter.
+		$list = array(
+			'product-price'                             => \Automattic\WooCommerce\Blocks\BlockTypes\ProductPrice::class,
+			'product-title'                             => \Automattic\WooCommerce\Blocks\BlockTypes\ProductTitle::class,
+			'product-sku'                               => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSKU::class,
+			'product-sale-badge'                        => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSaleBadge::class,
+			'product-summary'                           => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSummary::class,
+			'product-meta'                              => \Automattic\WooCommerce\Blocks\BlockTypes\ProductMeta::class,
+			'product-average-rating'                    => \Automattic\WooCommerce\Blocks\BlockTypes\ProductAverageRating::class,
+			'product-rating'                            => \Automattic\WooCommerce\Blocks\BlockTypes\ProductRating::class,
+			'product-rating-counter'                    => \Automattic\WooCommerce\Blocks\BlockTypes\ProductRatingCounter::class,
+			'product-rating-stars'                      => \Automattic\WooCommerce\Blocks\BlockTypes\ProductRatingStars::class,
+			'product-description'                       => \Automattic\WooCommerce\Blocks\BlockTypes\ProductDescription::class,
+			'product-specifications'                    => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSpecifications::class,
+			'product-image-gallery'                     => \Automattic\WooCommerce\Blocks\BlockTypes\ProductImageGallery::class,
+			'product-gallery'                           => \Automattic\WooCommerce\Blocks\BlockTypes\ProductGallery::class,
+			'product-gallery-thumbnails'                => \Automattic\WooCommerce\Blocks\BlockTypes\ProductGalleryThumbnails::class,
+			'product-gallery-large-image-next-previous' => \Automattic\WooCommerce\Blocks\BlockTypes\NextPreviousButtons::class,
+		);
+		if ( ! is_admin() ) {
+			// ProductImage: overrides enqueue_data() with editor-visible placeholder and thumbnail aspect ratio, hence load eager in admin.
+			// ProductStockIndicator: overrides enqueue_data() with editor-visible product types without stock indicator, hence load eager in admin.
+			$list['product-image']           = \Automattic\WooCommerce\Blocks\BlockTypes\ProductImage::class;
+			$list['product-stock-indicator'] = \Automattic\WooCommerce\Blocks\BlockTypes\ProductStockIndicator::class;
 		}
 
 		return $list;

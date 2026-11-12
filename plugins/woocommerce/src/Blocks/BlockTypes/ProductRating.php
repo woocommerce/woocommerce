@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * ProductRating class.
  */
 class ProductRating extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -34,7 +35,7 @@ class ProductRating extends AbstractBlock {
 	/**
 	 * Get the frontend style handle for this block type.
 	 *
-	 * @return null
+	 * @return string[]
 	 */
 	protected function get_block_type_style() {
 		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );

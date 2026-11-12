@@ -8,6 +8,8 @@ use Automattic\WooCommerce\Enums\ProductType;
  * ProductSpecifications class.
  */
 class ProductSpecifications extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -134,7 +136,7 @@ class ProductSpecifications extends AbstractBlock {
 								<td class="wp-block-product-specifications-item__value" data-wp-interactive="woocommerce/products" data-wp-text="state.productInContext.<?php echo esc_attr( $product_attribute['api_field'] ); ?>">
 									<?php echo wp_kses_post( $product_attribute['value'] ); ?>
 								</td>
-							<?php else : ?>	
+							<?php else : ?>
 								<td class="wp-block-product-specifications-item__value">
 									<?php echo wp_kses_post( $product_attribute['value'] ); ?>
 								</td>

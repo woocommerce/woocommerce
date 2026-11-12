@@ -6,6 +6,10 @@
 	"description": "Display product weight, dimensions, and attributes.",
 	"category": "woocommerce",
 	"keywords": [ "attributes", "weight", "dimensions", "additional information" ],
+	"style": [
+		"wc-blocks-style",
+		"file:../product-specifications.css"
+	],
 	"textdomain": "woocommerce",
 	"ancestor": [
 		"woocommerce/single-product",

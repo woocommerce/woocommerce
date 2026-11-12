@@ -9,6 +9,7 @@ use WP_Block;
  * ProductSKU class.
  */
 class ProductSKU extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
