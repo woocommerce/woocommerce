@@ -49678,6 +49678,12 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductQuery.php
 
 		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRating\:\:get_block_type_style\(\) should return null but returns array\<mixed, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Blocks/BlockTypes/ProductRating.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRating\:\:get_block_type_uses_context\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -49686,6 +49692,12 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRating\:\:register_block_type_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: src/Blocks/BlockTypes/ProductRating.php
+
+		-
+			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
+			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductRating.php
 
