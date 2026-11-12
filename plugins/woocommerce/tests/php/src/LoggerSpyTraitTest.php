@@ -16,17 +16,17 @@ use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 abstract class LoggerSpyTraitTestBase extends \WC_Unit_Test_Case {
 
 	/**
-	 * Whether the spy filter was already in place when the base set-up started.
+	 * Whether woocommerce_logging_class had any callback when the base set-up started.
 	 *
 	 * @var bool
 	 */
-	protected $spy_filter_added_before_base_set_up;
+	protected $logging_class_filtered_before_base_set_up;
 
 	/**
-	 * Record whether the spy filter exists, then run the base set-up.
+	 * Record whether the logging class is filtered, then run the base set-up.
 	 */
 	public function set_up() {
-		$this->spy_filter_added_before_base_set_up = false !== has_filter( 'woocommerce_logging_class', array( $this, 'get_spy_logger' ) );
+		$this->logging_class_filtered_before_base_set_up = has_filter( 'woocommerce_logging_class' );
 		parent::set_up();
 	}
 }
@@ -60,7 +60,7 @@ class LoggerSpyTraitTest extends LoggerSpyTraitTestBase {
 	 * @testdox The spy logger is added after the base set-up, and is in place for the rest of setUp().
 	 */
 	public function test_spy_is_added_after_the_base_set_up(): void {
-		$this->assertFalse( $this->spy_filter_added_before_base_set_up, 'A filter added before the base set-up joins the hook snapshot and leaks into later tests' );
+		$this->assertFalse( $this->logging_class_filtered_before_base_set_up, 'A filter added before the base set-up joins the hook snapshot and leaks into later tests' );
 		$this->assertTrue( $this->spy_in_place_after_base_set_up, 'Classes that build their subject in setUp() need the spy by then' );
 	}
 }

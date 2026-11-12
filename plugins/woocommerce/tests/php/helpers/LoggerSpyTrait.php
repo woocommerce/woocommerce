@@ -35,6 +35,7 @@ trait LoggerSpyTrait {
 	 * WordPress snapshots the hooks in its first set_up() of the process and restores that snapshot
 	 * after every test. Adding the filter after it keeps the spy out of the snapshot, so the
 	 * restore removes it, while it is still in place for the rest of the test's own setUp().
+	 * A set_up() in the using class replaces this one, so override setUp() there instead.
 	 *
 	 * @return void
 	 */
@@ -69,6 +70,29 @@ trait LoggerSpyTrait {
 		}
 
 		add_filter( 'woocommerce_logging_class', array( $this, 'get_spy_logger' ) );
+	}
+
+	/**
+	 * Fail a test that passed without the spy in place.
+	 *
+	 * Tests that read $this->captured_logs directly would otherwise pass with nothing captured.
+	 *
+	 * @return void
+	 */
+	protected function assert_post_conditions() {
+		parent::assert_post_conditions();
+		$this->assert_spy_logger_installed();
+	}
+
+	/**
+	 * Fail when the trait's set_up() did not run, so no log was captured.
+	 *
+	 * @return void
+	 */
+	private function assert_spy_logger_installed(): void {
+		if ( null === $this->spy_logger ) {
+			$this->fail( 'LoggerSpyTrait installed no spy logger: a set_up() in the test class replaces the trait\'s. Override setUp() instead.' );
+		}
 	}
 
 	/**
@@ -137,6 +161,8 @@ trait LoggerSpyTrait {
 	 * @return array<array{level: string, message: string, context: array}>
 	 */
 	private function get_logs_by_level( string $level ): array {
+		$this->assert_spy_logger_installed();
+
 		return array_filter(
 			$this->captured_logs,
 			fn( $log ) => $log['level'] === $level
