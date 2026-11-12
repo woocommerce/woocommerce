@@ -18,15 +18,18 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
  */
 class ProductUtilTest extends \WC_Unit_Test_Case {
 	/**
-	 * @testdox Filtered URL quantities are retained unless a button quantity is explicitly supplied.
+	 * @testdox Filtered URL quantities respect explicit button quantities and sold-individually limits.
 	 * @testWith [null, 30]
 	 *           [10, 10]
 	 *           [30, 30]
+	 *           [null, 1, true]
 	 * @param int|null $quantity Explicit button quantity.
 	 * @param int      $expected Expected quantity.
+	 * @param bool     $sold_individually Whether the product is sold individually.
 	 */
-	public function test_catalog_button_preserves_filtered_url_quantity( ?int $quantity, int $expected ): void {
-		$product    = \WC_Helper_Product::create_simple_product();
+	public function test_catalog_button_preserves_filtered_url_quantity( ?int $quantity, int $expected, bool $sold_individually = false ): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_sold_individually( $sold_individually );
 		$sut        = wc_get_container()->get( ProductUtil::class );
 		$minimum    = static fn() => 10;
 		$url_filter = static fn( $url ) => add_query_arg(
@@ -46,8 +49,9 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
 		}
 		$this->assertSame( $expected, $data['quantity'] );
-		$this->assertSame( 'Add ' . $expected . ' to cart', $data['text'] );
-		$this->assertStringContainsString( 'Add ' . $expected . ' to cart:', $data['description'] );
+		$expected_text = $expected > 1 ? 'Add ' . $expected . ' to cart' : 'Add to cart';
+		$this->assertSame( $expected_text, $data['text'] );
+		$this->assertStringContainsString( $expected_text . ':', $data['description'] );
 		if ( 30 === $expected ) {
 			$this->assertSame( $url, $data['url'], 'An unchanged quantity must preserve the filtered URL exactly.' );
 		} else {

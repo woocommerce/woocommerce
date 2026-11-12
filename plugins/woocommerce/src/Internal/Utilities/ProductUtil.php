@@ -19,6 +19,10 @@ class ProductUtil {
 	 * @return int|float
 	 */
 	public function get_catalog_add_to_cart_quantity( \WC_Product $product, ?string $url = null ) {
+		if ( $product->is_sold_individually() ) {
+			return 1;
+		}
+
 		$url = $url ?? $product->add_to_cart_url();
 		parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
 		if ( ( $query['add-to-cart'] ?? null ) === (string) $product->get_id() && is_numeric( $query['quantity'] ?? null ) ) {
@@ -28,7 +32,7 @@ class ProductUtil {
 			}
 		}
 
-		return $product->is_sold_individually() ? 1 : max( 1, $product->get_min_purchase_quantity() );
+		return max( 1, $product->get_min_purchase_quantity() );
 	}
 
 	/**
