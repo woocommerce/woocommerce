@@ -359,7 +359,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Products hidden from the shop catalog and unsupported types are counted, not checked.
+	 * @testdox Hidden products and unsupported types are counted, not checked; search-only and shop-only products are checked.
 	 */
 	public function test_scan_counts_hidden_and_unsupported_products(): void {
 		WC_Helper_Product::create_simple_product();
@@ -382,11 +382,13 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$report = $this->sut->get_report();
 
-		$this->assertSame( 2, $report['products'], 'Only the shown simple product and the shop-only one are checked' );
-		$this->assertSame( 2, $report['hidden_from_catalog'], 'Hidden and search-only products are counted apart' );
-		$this->assertSame( 2, $report['available'], 'The catalog agents can see: the same products as checked when under the limit' );
+		$this->assertSame( 3, $report['products'], 'The shown simple product, the search-only one and the shop-only one are checked: agents can open all three' );
+		$this->assertSame( 1, $report['hidden_from_catalog'], 'Only the Hidden product is counted apart' );
+		$this->assertSame( 3, $report['available'], 'The catalog agents can see: the same products as checked when under the limit' );
 		$this->assertSame( 2, $report['unsupported_types'], 'External and the subscription are counted apart' );
-		$this->assertSame( 2, $report['channels']['chatgpt']['listable'] + $report['channels']['chatgpt']['not_listable'] );
+		$this->assertSame( 3, $report['channels']['chatgpt']['listable'] + $report['channels']['chatgpt']['not_listable'] );
+		$this->assertTrue( ProductScan::covers( $search_only ) );
+		$this->assertFalse( ProductScan::covers( $hidden_variable ) );
 		$this->assertNotContains( 'hidden_from_catalog', array_column( $report['checks'], 'id' ) );
 		$this->assertSame( array(), $this->sut->get_failing_check_ids( $hidden_variable ), 'A hidden product has no issues' );
 		$this->assertSame( array(), $this->sut->get_failing_check_ids( wc_get_product( $hidden_variable->get_children()[0] ) ), 'Nor do its variations' );

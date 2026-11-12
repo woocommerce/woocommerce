@@ -108,7 +108,7 @@ class ReportAbility implements AbilityDefinition {
 						),
 						'hidden_from_catalog' => array(
 							'type'        => 'integer',
-							'description' => __( 'Products not checked because the merchant hid them from the shop catalog.', 'woocommerce' ),
+							'description' => __( 'Products not checked because the merchant set them to Hidden.', 'woocommerce' ),
 						),
 						'unsupported_types'   => array(
 							'type'        => 'integer',

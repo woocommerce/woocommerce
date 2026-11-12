@@ -438,7 +438,7 @@ class AgentReadiness {
 	/**
 	 * Ids of the checks one product fails. A variation is judged by its parent,
 	 * as the scan counts it; other products the scan leaves out (other types,
-	 * hidden from the shop catalog, unpublished) have no issues.
+	 * set to Hidden, unpublished) have no issues.
 	 *
 	 * @param \WC_Product $product Product or variation.
 	 * @return array<int, string>

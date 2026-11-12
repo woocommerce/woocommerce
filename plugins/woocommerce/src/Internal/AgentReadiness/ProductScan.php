@@ -11,9 +11,10 @@ defined( 'ABSPATH' ) || exit;
  * Walks published simple and variable products in batches, most recently
  * modified first, tests each against every rule once and tallies product
  * statuses per channel. Stops after PRODUCT_LIMIT products so the scan stays
- * inside one request. Products hidden from the shop catalog are the merchant's
- * choice and agents can't buy other product types through UCP yet, so both are
- * counted, not checked.
+ * inside one request. Products set to Hidden are the merchant's choice and
+ * agents can't buy other product types through UCP yet, so both are counted,
+ * not checked. "Search results only" products are checked: agents find them
+ * by search.
  *
  * @since 11.4.0
  */
@@ -31,7 +32,7 @@ class ProductScan {
 	public const COUNT_AVAILABLE = 'available';
 
 	/**
-	 * Published products of a supported type with Catalog visibility set to Hidden or Search results only.
+	 * Published products of a supported type with Catalog visibility set to Hidden.
 	 */
 	public const COUNT_HIDDEN = 'hidden';
 
@@ -66,7 +67,7 @@ class ProductScan {
 	private int $products = 0;
 
 	/**
-	 * Published products of a supported type hidden from the shop catalog.
+	 * Published products of a supported type set to Hidden.
 	 *
 	 * @var int
 	 */
@@ -121,7 +122,7 @@ class ProductScan {
 		return 'publish' === $product->get_status()
 			&& ! $product instanceof \WC_Product_Variation
 			&& in_array( self::stored_type( $product ), self::SUPPORTED_TYPES, true )
-			&& ! in_array( $product->get_catalog_visibility(), array( 'search', 'hidden' ), true );
+			&& 'hidden' !== $product->get_catalog_visibility();
 	}
 
 	/**
@@ -226,7 +227,7 @@ class ProductScan {
 				),
 			);
 		}
-		return array( self::supported_type_query(), self::catalog_query( self::COUNT_HIDDEN === $count ? 'IN' : 'NOT IN' ) );
+		return array( self::supported_type_query(), self::catalog_query( self::COUNT_HIDDEN === $count ) );
 	}
 
 	/**
@@ -250,18 +251,23 @@ class ProductScan {
 	}
 
 	/**
-	 * Tax query on the shop catalog: "Search results only" and "Hidden" both
-	 * carry the exclude-from-catalog term.
+	 * Tax query on catalog visibility. Only "Hidden" carries both the
+	 * exclude-from-catalog and exclude-from-search terms.
 	 *
-	 * @param string $operator IN for hidden products, NOT IN for the rest.
-	 * @return array<string, mixed>
+	 * @param bool $hidden True for Hidden products, false for the rest.
+	 * @return array<string|int, mixed>
 	 */
-	private static function catalog_query( string $operator ): array {
-		return array(
+	private static function catalog_query( bool $hidden ): array {
+		$term = static fn( string $name ): array => array(
 			'taxonomy' => 'product_visibility',
 			'field'    => 'name',
-			'terms'    => array( 'exclude-from-catalog' ),
-			'operator' => $operator,
+			'terms'    => array( $name ),
+			'operator' => $hidden ? 'IN' : 'NOT IN',
+		);
+		return array(
+			'relation' => $hidden ? 'AND' : 'OR',
+			$term( 'exclude-from-catalog' ),
+			$term( 'exclude-from-search' ),
 		);
 	}
 
@@ -373,7 +379,7 @@ class ProductScan {
 	}
 
 	/**
-	 * Published products of a supported type hidden from the shop catalog, not checked.
+	 * Published products of a supported type set to Hidden, not checked.
 	 */
 	public function hidden_from_catalog(): int {
 		return $this->hidden_from_catalog;

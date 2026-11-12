@@ -49,7 +49,7 @@ Two Google exceptions, per product: `missing_brand` leaves Google out when Googl
 
 Only published simple and variable products are checked, the types agents can buy today. Agents find other types through the UCP catalog, but its cart sends only a product and a quantity: grouped and external products aren't purchasable, and subscriptions, bookings and bundles need a plan, a date or options it doesn't send. Two groups are counted instead of checked, so the merchant sees them without being asked to fix them:
 
-- Products hidden from the shop catalog (catalog visibility "Search results only" or "Hidden"). Agents see the products shoppers see in the shop, so hiding one is the merchant's choice, not a problem.
+- Products with catalog visibility "Hidden". Agents see the products shoppers see in the shop, so hiding one is the merchant's choice, not a problem. "Search results only" products are checked, since agents find them by search.
 - Products of any other type: grouped, external, subscription, booking, bundle and so on. A product keeps its stored type when its plugin is inactive, so it stays in this group.
 
 Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off and no HTTPS hide the catalog from UCP agents, and guest checkout off or no payment method turned on stops agents placing orders. Missing policy pages and order emails off weaken agent orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
@@ -128,7 +128,7 @@ Markdown is asked for on the product page, or the home page without a product: w
 array(
 	'generated_at' => '2026-10-28T12:00:00+00:00',
 	'products'            => 120,  // Published simple and variable products checked.
-	'hidden_from_catalog' => 4,    // Not checked: catalog visibility "Search results only" or "Hidden", the merchant's choice.
+	'hidden_from_catalog' => 4,    // Not checked: catalog visibility "Hidden", the merchant's choice.
 	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents can find but can't add to a cart yet.
 	'store_checks' => array(
 		// blocks: 'listing' (every product on every channel), 'discovery' (harder to find and read), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
@@ -190,7 +190,7 @@ On a store with 11,000 products, a scan (stopping at 5,000) took about 4 seconds
 
 The same shape is meant for every consumer: WooCommerce > Sales readiness and AI shopping, an outside scan of a store, and extensions that rank the findings by sales or offer fixes. Check and channel ids are stable keys.
 
-The scan walks published simple and variable products shown in the shop catalog in batches of 200, most recently modified first, primes meta, terms, images and variations per batch, and stops at 5,000 products.
+The scan walks published simple and variable products not set to Hidden in batches of 200, most recently modified first, primes meta, terms, images and variations per batch, and stops at 5,000 products.
 
 ## Abilities
 

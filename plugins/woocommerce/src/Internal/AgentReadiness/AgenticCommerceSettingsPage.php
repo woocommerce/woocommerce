@@ -259,7 +259,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$cards = array(
 			// The whole catalog, like the other two; `products` stops at PRODUCT_LIMIT. Reports from before `available` have only `products`.
 			array( __( 'Available to AI assistants', 'woocommerce' ), (int) ( $report['available'] ?? $report['products'] ?? 0 ), '', ProductScan::COUNT_AVAILABLE ),
-			array( __( 'Hidden from your catalog', 'woocommerce' ), (int) ( $report['hidden_from_catalog'] ?? 0 ), __( 'Products with Catalog visibility set to Hidden or Search results only. They\'re hidden from customers too.', 'woocommerce' ), ProductScan::COUNT_HIDDEN ),
+			array( __( 'Hidden from your catalog', 'woocommerce' ), (int) ( $report['hidden_from_catalog'] ?? 0 ), __( 'Products with Catalog visibility set to Hidden. They\'re hidden from customers too.', 'woocommerce' ), ProductScan::COUNT_HIDDEN ),
 			array( __( 'Product type not supported yet', 'woocommerce' ), (int) ( $report['unsupported_types'] ?? 0 ), __( 'AI assistants can find these products, but shoppers can\'t buy them through an assistant yet. This includes grouped, external, subscription, booking and bundle products.', 'woocommerce' ), ProductScan::COUNT_UNSUPPORTED ),
 		);
 
