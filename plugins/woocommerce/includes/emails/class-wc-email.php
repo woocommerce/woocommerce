@@ -613,6 +613,8 @@ class WC_Email extends WC_Settings_API {
 	 * @return string Plain text.
 	 */
 	private function get_block_editor_plain_text( string $rich_text ): string {
+		// Set the context even without tags here: the block email body is personalized with it afterwards.
+		$this->personalizer->configure_context_by_email( $this );
 		return Html_Processing_Helper::get_plain_text(
 			$rich_text,
 			function ( string $tag_token ): string {

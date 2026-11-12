@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
@@ -106,6 +107,33 @@ class WC_Email_Test extends \WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_email_subject_' . $email->id, $filter );
 			remove_filter( 'woocommerce_email_preheader' . $email->id, $filter );
 			$registry->unregister( '[wc-email-test/sale]' );
+			$features_controller->change_feature_enable( 'block_email_editor', $was_enabled );
+		}
+	}
+
+	/**
+	 * @testdox With the block email editor, getting a subject without tags still sets the personalization context the body uses.
+	 */
+	public function test_block_editor_subject_without_tags_sets_personalization_context(): void {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$was_enabled         = $features_controller->feature_is_enabled( 'block_email_editor' );
+		$features_controller->change_feature_enable( 'block_email_editor', true );
+		$personalizer = Email_Editor_Container::container()->get( Personalizer::class );
+		$personalizer->set_context( array() );
+		$order         = WC_Helper_Order::create_order();
+		$email         = new WC_Email_Customer_Processing_Order();
+		$email->object = $order;
+		$filter        = function () {
+			return 'Your order';
+		};
+		add_filter( 'woocommerce_email_subject_' . $email->id, $filter );
+
+		try {
+			$this->assertSame( 'Your order', $email->get_subject() );
+			$this->assertSame( $order, $personalizer->get_context()['order'] ?? null );
+		} finally {
+			remove_filter( 'woocommerce_email_subject_' . $email->id, $filter );
+			$personalizer->set_context( array() );
 			$features_controller->change_feature_enable( 'block_email_editor', $was_enabled );
 		}
 	}
