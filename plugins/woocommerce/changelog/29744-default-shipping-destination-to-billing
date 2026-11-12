@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Default the shipping address to billing in the cart and checkout when the store is set to, keep the address picked in the cart, and don't replace the saved shipping address.
+Follow the "Shipping destination" setting in the cart and Checkout block, and keep the customer's saved shipping address.
