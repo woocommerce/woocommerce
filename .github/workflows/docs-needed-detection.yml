@@ -6,7 +6,8 @@ on:
 
 concurrency:
   group: docs-needed-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  # Let an in-flight issue creation finish before a rerun checks for duplicates.
+  cancel-in-progress: false
 
 jobs:
   detect-docs-needed:
@@ -62,8 +63,9 @@ jobs:
             SKIP CONDITIONS (check these FIRST, before analyzing the diff)
             1. Get the PR metadata:
                gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json title,labels
-            2. If the "needs: documentation" label is already present, output
-               needs_docs=false, confidence="high", reason="Already labeled",
+            2. If the "needs: documentation" label is already present, still ensure a
+               Linear issue exists (a previous run may have failed after labeling). Output
+               needs_docs=true, confidence="high", reason="Already labeled",
                then stop.
             3. If the PR title starts with "Revert " (case-insensitive), output
                needs_docs=false, confidence="high", reason="Revert PR", then stop.
@@ -144,6 +146,44 @@ jobs:
                  confidence, set needs_docs=true with the highest confidence level found.
                - If ALL changes are developer-only or low confidence, set needs_docs=false.
 
+      - name: 'Setup Linear'
+        if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
+        # Install outside the workspace: the checkout put the monorepo root package.json there,
+        # whose workspace:* deps make a bare `npm install` abort (npm has no workspace: support).
+        run: npm install --prefix "${{ runner.temp }}/linear" @linear/sdk@71.0.0
+
+      - name: 'Create Linear Issue'
+        if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          # Resolve @linear/sdk from the isolated dir it was installed into in 'Setup Linear'.
+          NODE_PATH: ${{ runner.temp }}/linear/node_modules
+          STRUCTURED_OUTPUT: ${{ steps.analyze.outputs.structured_output }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_OAUTH_TOKEN }}
+          LINEAR_TEAM_ID: ${{ secrets.LINEAR_DOCS_TEAM_ID }}
+          LINEAR_LABEL_ID: ${{ secrets.LINEAR_DOCS_AUTO_LABEL }}
+        with:
+          script: |
+            try {
+              if ( ! process.env.LINEAR_API_KEY?.trim() ) {
+                throw new Error( 'LINEAR_OAUTH_TOKEN is not configured.' );
+              }
+              const { LinearClient } = require( '@linear/sdk' );
+              const ensureDocsIssue = require( './.github/workflows/scripts/ensure-docs-linear-issue.js' );
+              const { issue, reused } = await ensureDocsIssue( {
+                linearClient: new LinearClient( { apiKey: process.env.LINEAR_API_KEY.trim() } ),
+                teamId: process.env.LINEAR_TEAM_ID,
+                labelId: process.env.LINEAR_LABEL_ID,
+                pr: context.payload.pull_request,
+                repoFullName: context.payload.repository.full_name,
+                verdict: JSON.parse( process.env.STRUCTURED_OUTPUT ),
+              } );
+              console.log( `${ reused ? 'Reusing' : 'Created' } Linear issue: ${ issue.identifier } (${ issue.url })` );
+            } catch ( error ) {
+              core.setFailed( error.message );
+            }
+
+      # Only mark the PR after Linear confirms an issue exists.
       - name: 'Apply Label'
         if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
@@ -165,58 +205,4 @@ jobs:
                 issue_number: context.issue.number,
                 labels: [ 'needs: documentation' ],
               } );
-            }
-
-      - name: 'Setup Linear'
-        if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
-        # Install outside the workspace: the checkout put the monorepo root package.json there,
-        # whose workspace:* deps make a bare `npm install` abort (npm has no workspace: support).
-        run: npm install --prefix "${{ runner.temp }}/linear" @linear/sdk@71.0.0
-
-      - name: 'Create Linear Issue'
-        if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        env:
-          # Resolve @linear/sdk from the isolated dir it was installed into in 'Setup Linear'.
-          NODE_PATH: ${{ runner.temp }}/linear/node_modules
-          STRUCTURED_OUTPUT: ${{ steps.analyze.outputs.structured_output }}
-          LINEAR_API_KEY: ${{ secrets.LINEAR_OAUTH_TOKEN }}
-          LINEAR_TEAM_ID: ${{ secrets.LINEAR_DOCS_TEAM_ID }}
-          LINEAR_LABEL_ID: ${{ secrets.LINEAR_DOCS_AUTO_LABEL }}
-        with:
-          script: |
-            const verdict = JSON.parse( process.env.STRUCTURED_OUTPUT );
-            const prTitle = context.payload.pull_request.title;
-            const prUrl = context.payload.pull_request.html_url;
-            const repoFullName = context.payload.repository.full_name;
-
-            const { LinearClient } = require( '@linear/sdk' );
-            const linearClient = new LinearClient( {
-              apiKey: process.env.LINEAR_API_KEY,
-            } );
-
-            const title = `Docs update needed: ${ prTitle }`;
-            const description = [
-              'A pull request was flagged as containing user-facing changes that may require documentation updates.',
-              '',
-              `**Pull request:** ${ prUrl }`,
-              `**Repository:** ${ repoFullName }`,
-              `**Confidence:** ${ verdict.confidence }`,
-              `**AI reasoning:** ${ verdict.reason }`,
-            ].join( '\n' );
-
-            try {
-              const result = await linearClient.createIssue( {
-                teamId: process.env.LINEAR_TEAM_ID,
-                title,
-                description,
-                labelIds: [ process.env.LINEAR_LABEL_ID ],
-              } );
-
-              const issue = await result.issue;
-              if ( issue ) {
-                console.log( `Created Linear issue: ${ issue.identifier } (${ issue.url })` );
-              }
-            } catch ( error ) {
-              console.error( `Failed to create Linear issue: ${ error.message }` );
             }
