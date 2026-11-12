@@ -205,7 +205,10 @@ class OrderCreate extends ActionableAbility {
 			return $saved;
 		}
 
-		$this->recalculate_saved_order( $subject );
+		$recalculated = $this->recalculate_saved_order( $subject );
+		if ( is_wp_error( $recalculated ) ) {
+			return $recalculated;
+		}
 
 		if ( $subject->get_status() === $this->status ) {
 			return null;

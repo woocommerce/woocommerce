@@ -229,6 +229,34 @@ class OrderUpdateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse an added line whose recalculated totals cannot be saved, with the feature off.
+	 */
+	public function test_refuses_a_line_when_the_recalculation_does_not_save(): void {
+		$this->set_feature( false );
+		$order   = WC_Helper_Order::create_order();
+		$product = WC_Helper_Product::create_simple_product();
+		$saves   = 0;
+		add_action(
+			'woocommerce_before_order_object_save',
+			static function () use ( &$saves ): void {
+				if ( ++$saves > 1 ) {
+					throw new \Exception( 'Forced recalculation save failure' );
+				}
+			}
+		);
+
+		$error = $this->execute_error(
+			array(
+				'id'         => $order->get_id(),
+				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
+			)
+		);
+
+		$this->assertSame( 'woocommerce_ability_save_failed', $error->get_error_code() );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items() );
+	}
+
+	/**
 	 * @testdox Should refuse every bad product line in one error and save nothing.
 	 */
 	public function test_refuses_bad_product_lines(): void {

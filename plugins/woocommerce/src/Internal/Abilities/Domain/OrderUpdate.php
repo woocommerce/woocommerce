@@ -190,7 +190,10 @@ class OrderUpdate extends ActionableAbility {
 
 		$this->changed_product_lines = array_merge( $this->changed_product_lines, $added );
 
-		$this->recalculate_saved_order( $subject );
+		$recalculated = $this->recalculate_saved_order( $subject );
+		if ( is_wp_error( $recalculated ) ) {
+			return $recalculated;
+		}
 
 		if ( in_array( $subject->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true ) ) {
 			foreach ( $this->changed_product_lines as $item ) {

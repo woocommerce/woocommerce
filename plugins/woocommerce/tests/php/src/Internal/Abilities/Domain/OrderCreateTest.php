@@ -272,6 +272,52 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a shipping total in exponent notation, which formatting would save as another amount.
+	 */
+	public function test_refuses_a_shipping_total_with_an_exponent(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$error = $this->execute_error(
+			array(
+				'line_items'     => array( array( 'product_id' => $product->get_id() ) ),
+				'shipping_lines' => array(
+					array(
+						'method_title' => 'Express',
+						'total'        => '1e3',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( array( 'woocommerce_ability_order_shipping_line_total_invalid' ), $error->get_error_codes() );
+	}
+
+	/**
+	 * @testdox Should refuse and roll back a pending order whose recalculated totals cannot be saved, with the feature off.
+	 */
+	public function test_refuses_the_order_when_the_recalculation_does_not_save(): void {
+		$this->set_feature( false );
+		$before  = $this->get_order_ids();
+		$product = WC_Helper_Product::create_simple_product();
+		$saves   = 0;
+		add_action(
+			'woocommerce_before_order_object_save',
+			static function () use ( &$saves ): void {
+				if ( ++$saves > 1 ) {
+					throw new \Exception( 'Forced recalculation save failure' );
+				}
+			}
+		);
+
+		$error = $this->execute_error(
+			array( 'line_items' => array( array( 'product_id' => $product->get_id() ) ) )
+		);
+
+		$this->assertSame( 'woocommerce_ability_save_failed', $error->get_error_code() );
+		$this->assertEqualsCanonicalizing( $before, $this->get_order_ids() );
+	}
+
+	/**
 	 * @testdox Should refuse an input without a line item, a shipping line without a method title, and a line item without a product.
 	 *
 	 * @testWith [{}]

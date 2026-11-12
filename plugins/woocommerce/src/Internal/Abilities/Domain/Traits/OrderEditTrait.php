@@ -102,18 +102,39 @@ trait OrderEditTrait {
 
 	/**
 	 * Recalculate the saved order with the methods that save, when stage_line_totals() left it for later.
+	 * Each step is checked on its own, because the next save clears the error of a failed one.
 	 *
 	 * @param \WC_Order $order Saved order.
+	 * @return null|\WP_Error
 	 */
-	private function recalculate_saved_order( \WC_Order $order ): void {
+	private function recalculate_saved_order( \WC_Order $order ): ?\WP_Error {
+		$steps = array();
 		if ( 'coupons' === $this->recalculate_after_save ) {
 			if ( $order->get_prices_include_tax() ) {
-				$order->calculate_taxes();
+				$steps[] = array( $order, 'calculate_taxes' );
 			}
-			$order->recalculate_coupons();
+			$steps[] = array( $order, 'recalculate_coupons' );
 		} elseif ( 'totals' === $this->recalculate_after_save ) {
-			$order->calculate_totals();
+			$steps[] = array( $order, 'calculate_totals' );
 		}
+
+		foreach ( $steps as $step ) {
+			$step();
+			$error = $order->get_last_save_error();
+			if ( null !== $error ) {
+				wc_get_logger()->error(
+					sprintf( 'Ability "%s" failed to save the recalculated order: %s', $this->get_name(), $error->getMessage() ),
+					array( 'source' => 'woocommerce-abilities' )
+				);
+				return new \WP_Error(
+					'woocommerce_ability_save_failed',
+					__( 'The change could not be saved.', 'woocommerce' ),
+					array( 'status' => 500 )
+				);
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -213,7 +234,8 @@ trait OrderEditTrait {
 	 * @return null|\WP_Error
 	 */
 	private static function set_shipping_line( \WC_Order $order, array $line ): ?\WP_Error {
-		if ( isset( $line['total'] ) && ( ! is_numeric( $line['total'] ) || (float) $line['total'] < 0 ) ) {
+		// wc_format_decimal() drops the exponent of a number such as 1e3, so only a plain decimal keeps its value.
+		if ( isset( $line['total'] ) && 1 !== preg_match( '/^\d+(\.\d+)?$/', $line['total'] ) ) {
 			return new \WP_Error(
 				'woocommerce_ability_order_shipping_line_total_invalid',
 				/* translators: %s: shipping total sent by the client. */
