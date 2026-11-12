@@ -424,6 +424,13 @@ class WC_Payment_Gateways {
 			$current = PaymentUtils::get_checkout_payment_method( $gateways );
 
 			if ( '' === $current ) {
+				// A gateway that other code marked as current earlier in the request would still render as selected.
+				foreach ( $gateways as $gateway ) {
+					if ( $gateway instanceof WC_Payment_Gateway ) {
+						$gateway->chosen = false;
+					}
+				}
+
 				return;
 			}
 
