@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the first page of orders when a plugin requests page zero on stores using HPOS.
