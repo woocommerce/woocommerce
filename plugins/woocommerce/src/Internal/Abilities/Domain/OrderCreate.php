@@ -207,6 +207,9 @@ class OrderCreate extends ActionableAbility {
 
 		$recalculated = $this->recalculate_saved_order( $subject );
 		if ( is_wp_error( $recalculated ) ) {
+			foreach ( $added as $item ) {
+				$item->delete();
+			}
 			return $recalculated;
 		}
 
