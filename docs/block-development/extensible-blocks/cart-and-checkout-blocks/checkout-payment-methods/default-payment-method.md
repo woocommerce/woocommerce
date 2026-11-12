@@ -34,7 +34,7 @@ Once a callback is attached:
 - The pay-for-order page asks the filter too, except for an order created in admin with a payment method: that method stays preselected.
 - Placing an order with nothing selected shows "Please select a payment method." on every surface.
 
-Without a callback, nothing changes.
+Without a callback, the Checkout block is unchanged. One thing changes on the classic checkout and the pay-for-order page since WooCommerce 11.4: a logged-in customer with a default saved card starts on that card's gateway, if it is available for the cart, on their first visit to the checkout in a session, as on the Checkout block. Before, those pages started on the first method they listed. Once the classic checkout has been opened, the method selected there is remembered for the session and takes precedence, whether the shopper or the page selected it, and it follows a guest who then logs in.
 
 ## Examples
 
