@@ -194,7 +194,7 @@ final class ImportCommand {
 		}
 
 		// A mapping preview does not touch product data, so it needs neither the lock nor this check.
-		if ( ! $show_mapping && ! $this->check_for_concurrent_import( $assoc_args, $is_stdin ) ) {
+		if ( ! $show_mapping && ! $this->check_for_concurrent_import() ) {
 			return;
 		}
 
@@ -227,6 +227,8 @@ final class ImportCommand {
 					'porcelain'          => $porcelain,
 					'strict'             => $strict,
 					'show_mapping'       => $show_mapping,
+					'is_stdin'           => $is_stdin,
+					'yes'                => (bool) WP_CLI\Utils\get_flag_value( $assoc_args, 'yes', false ),
 				)
 			);
 		} catch ( ImportLockedException | InvalidArgumentException $e ) {
@@ -284,19 +286,15 @@ final class ImportCommand {
 	}
 
 	/**
-	 * Warn or fail before attempting an import that could collide with another one.
+	 * Fail before attempting an import that could collide with another one.
 	 *
 	 * Cleanup at the end of an import is site-wide, so this is a best-effort pre-flight
 	 * check: `ProductImporter::run()` still takes the actual lock and can throw
 	 * `ImportLockedException` if another run wins the race after this check passes.
 	 *
-	 * @param array $assoc_args Associative arguments, passed through to `WP_CLI::confirm()`
-	 *                          so `--yes` skips the prompt.
-	 * @param bool  $is_stdin   Whether the CSV is read from STDIN, which the prompt would consume.
-	 *
 	 * @return bool Whether the import may proceed.
 	 */
-	private function check_for_concurrent_import( array $assoc_args, bool $is_stdin ): bool {
+	private function check_for_concurrent_import(): bool {
 		$lock_age = $this->importer->get_import_lock_age();
 
 		if ( null !== $lock_age ) {
@@ -310,27 +308,41 @@ final class ImportCommand {
 			return false;
 		}
 
-		$pending_placeholders = $this->importer->count_pending_placeholders();
+		return true;
+	}
 
-		if ( $pending_placeholders > 0 ) {
-			WP_CLI::warning(
-				sprintf(
-					'%d placeholder product(s) left behind by a previous, possibly interrupted import were found. This import will clean them up.',
-					$pending_placeholders
-				)
-			);
+	/**
+	 * Warn about placeholders the import will clean up, and ask to continue unless `--yes` was passed.
+	 *
+	 * Runs while `ProductImporter::run()` holds the lock, so it throws to abort: `WP_CLI::confirm()`
+	 * and `WP_CLI::error()` exit, which would skip the lock's release.
+	 *
+	 * @param int   $count   Number of placeholders left behind by a previous, possibly interrupted import.
+	 * @param array $options Parsed command options, see `__invoke()`.
+	 *
+	 * @throws InvalidArgumentException When the import should not continue.
+	 */
+	private function confirm_placeholder_cleanup( int $count, array $options ): void {
+		WP_CLI::warning(
+			sprintf(
+				'%d placeholder product(s) left behind by a previous, possibly interrupted import were found. This import will clean them up.',
+				$count
+			)
+		);
 
-			$is_scripted_output = WP_CLI\Utils\get_flag_value( $assoc_args, 'porcelain', false ) || 'table' !== WP_CLI\Utils\get_flag_value( $assoc_args, 'format', 'table' );
-
-			if ( ( $is_stdin || $is_scripted_output ) && ! WP_CLI\Utils\get_flag_value( $assoc_args, 'yes', false ) ) {
-				WP_CLI::error( 'Re-run with --yes: the confirmation prompt cannot be used while the CSV is read from STDIN, or with --porcelain or a --format other than table.' );
-				return false;
-			}
-
-			WP_CLI::confirm( 'Continue with the import?', $assoc_args );
+		if ( $options['yes'] ) {
+			return;
 		}
 
-		return true;
+		if ( $options['is_stdin'] || $options['porcelain'] || 'table' !== $options['format'] ) {
+			throw new InvalidArgumentException( 'Re-run with --yes: the confirmation prompt cannot be used while the CSV is read from STDIN, or with --porcelain or a --format other than table.' );
+		}
+
+		fwrite( STDOUT, 'Continue with the import? [y/n] ' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Terminal prompt, WP_Filesystem does not apply.
+
+		if ( 'y' !== strtolower( trim( (string) fgets( STDIN ) ) ) ) {
+			throw new InvalidArgumentException( 'Import cancelled.' );
+		}
 	}
 
 	/**
@@ -414,6 +426,9 @@ final class ImportCommand {
 					$progress->tick( max( 0, $new_position - $position ) );
 				}
 				$position = $new_position;
+			},
+			function ( int $count ) use ( $options ): void {
+				$this->confirm_placeholder_cleanup( $count, $options );
 			}
 		);
 
