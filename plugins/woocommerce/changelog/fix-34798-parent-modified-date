@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update the order modified date every time an order is saved on stores using posts storage, including item and custom field changes, as HPOS does.
