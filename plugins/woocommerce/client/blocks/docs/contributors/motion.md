@@ -97,6 +97,7 @@ Motion that changes the layout runs in JavaScript, because it must measure sizes
 | `animateCollapse( element, isOpen, animate, from )` (`@woocommerce/base-utils`) | Grows `element` open or collapses it shut in the real layout, and turns around if it still moves. Give `element` the `motion-collapse` mixin. Use it through `usePresence` when the component owns the content. Pass `from`, such as `{ height: '20px' }`, to grow from the size of the content that `element` replaces, or to change the height of an element that stays. |
 | `collapseCopy( element )` (`@woocommerce/base-utils`) | Collapses an inert copy of `element` in its place, so that `element` can unmount at once. Call it just before `element` unmounts. If `element` grows again first, it grows from the copy. |
 | `useToggleCollapse( isShown, getElement, { growFromTrigger } )` (`@woocommerce/base-hooks`) | Content that a control shows and hides, such as a checkbox that reveals a field. Call the `onToggle` that it returns in the handler of the control, before the state changes. Pass it the click event if there is one, or else put `triggerRef` on the control. `getElement` must not return the copy, which keeps the element's classes: find the element by id, or skip `[data-wc-collapse-copy]`. After a click, the element grows in, or an inert copy of it collapses while the real element unmounts. After a key press, the change applies immediately. Pass `growFromTrigger: true` when the content replaces the control, to grow from the height of the control. |
+| `useOrderSummaryRow( cart, isShown )` (`@woocommerce/base-context/hooks`) | An order summary row that only shows sometimes, such as Fees. The row appears and goes when the skeletons end, and grows and collapses through `usePresence`. Rows of the cart that loads with the page show immediately. It returns `{ cart, wrapperProps }`. Render the row from `cart` while it is not `null`, and spread `wrapperProps` on its `TotalsWrapper`. |
 
 ## Techniques
 
@@ -119,7 +120,7 @@ Find the change in this table, and use the helpers above.
 | An element becomes a different view of itself, such as an address card that becomes its form | The two views crossfade while the height changes. |
 | A table row goes | It fades in place, and the rows below slide up. |
 
-Real layout means the element's height, padding, and margins change, so theme borders, spacing, and extension markup move with it. Use `transform` for everything else.
+Real layout means the element's height, padding, borders, and margins change, so theme spacing and extension markup move with it. Use `transform` for everything else.
 
 ## Test motion
 

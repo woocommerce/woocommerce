@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Discount, fee, and tax rows in the Cart and Checkout order summary now grow in and collapse out smoothly instead of jumping.

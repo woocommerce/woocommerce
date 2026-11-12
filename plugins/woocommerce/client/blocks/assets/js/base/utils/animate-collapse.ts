@@ -10,13 +10,15 @@ const ATTRIBUTE = 'data-wc-collapse';
 // Marks the copy that `collapseCopy` puts in the place of an element, with the class name of the element.
 const COPY = 'data-wc-collapse-copy';
 
-// The properties that make the space, and the fade.
+// The properties that make the space, and the fade. Borders count, so a bordered row leaves no line behind.
 const PROPERTIES = [
 	'height',
 	'paddingTop',
 	'paddingBottom',
 	'marginTop',
 	'marginBottom',
+	'borderTopWidth',
+	'borderBottomWidth',
 	'opacity',
 ] as const;
 
@@ -28,6 +30,8 @@ const CLOSED: Values = {
 	paddingBottom: '0px',
 	marginTop: '0px',
 	marginBottom: '0px',
+	borderTopWidth: '0px',
+	borderBottomWidth: '0px',
 	opacity: '0',
 };
 

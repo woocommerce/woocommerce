@@ -107,9 +107,9 @@ $wc-stagger-cap: 7;
 }
 
 // The timing for `animateCollapse` in base-utils. The space grows over `lg` and collapses over
-// `md`. The element always fades. With reduced motion, the space opens immediately, and closes after the fade.
-@mixin motion-collapse() {
-	$size: height, padding-top, padding-bottom, margin-top, margin-bottom;
+// `$out` (default `md`). The element always fades. With reduced motion, the space opens immediately, and closes after the fade.
+@mixin motion-collapse($out: md) {
+	$size: height, padding-top, padding-bottom, margin-top, margin-bottom, border-top-width, border-bottom-width;
 
 	&[data-wc-collapse] {
 		@include motion-transition($state: opacity, $move: $size, $easing: balanced);
@@ -125,7 +125,7 @@ $wc-stagger-cap: 7;
 		transition: motion-state(opacity), motion-hold($size...);
 
 		@include motion-safe {
-			transition: motion-move($size, md, balanced), motion-state(opacity);
+			transition: motion-move($size, $out, balanced), motion-state(opacity);
 		}
 	}
 }

@@ -9,6 +9,8 @@ const NATURAL: Record< string, string > = {
 	paddingBottom: '0px',
 	marginTop: '16px',
 	marginBottom: '0px',
+	borderTopWidth: '1px',
+	borderBottomWidth: '0px',
 	opacity: '1',
 };
 

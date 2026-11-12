@@ -6,6 +6,7 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	useStoreCart,
 	useOrderSummaryLoadingState,
+	useOrderSummaryRow,
 } from '@woocommerce/base-context';
 import { getSetting } from '@woocommerce/settings';
 
@@ -16,29 +17,26 @@ const Block = ( {
 	className: string;
 	showRateAfterTaxName: boolean;
 } ) => {
-	const { cartTotals } = useStoreCart();
 	const { isLoading } = useOrderSummaryLoadingState();
-
-	const displayCartPricesIncludingTax = getSetting(
-		'displayCartPricesIncludingTax',
-		false
+	const { cart, wrapperProps } = useOrderSummaryRow(
+		useStoreCart(),
+		( { cartTotals } ) =>
+			! getSetting( 'displayCartPricesIncludingTax', false ) &&
+			parseInt( cartTotals.total_tax, 10 ) > 0
 	);
 
-	if (
-		displayCartPricesIncludingTax ||
-		parseInt( cartTotals.total_tax, 10 ) <= 0
-	) {
+	if ( ! cart ) {
 		return null;
 	}
 
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
+	const totalsCurrency = getCurrencyFromPriceResponse( cart.cartTotals );
 
 	return (
-		<TotalsWrapper className={ className }>
+		<TotalsWrapper className={ className } { ...wrapperProps }>
 			<TotalsTaxes
 				showRateAfterTaxName={ showRateAfterTaxName }
 				currency={ totalsCurrency }
-				values={ cartTotals }
+				values={ cart.cartTotals }
 				showSkeleton={ isLoading }
 			/>
 		</TotalsWrapper>
