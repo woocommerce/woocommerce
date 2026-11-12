@@ -3039,7 +3039,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Add to cart accepts any variation in the increasing-specificity list, and rejects a broader variation ordered after a closer match.
+	 * @testdox Add to cart accepts variations by their menu order and rejects later matches.
 	 */
 	public function test_add_to_cart_accepts_any_variation_in_the_specificity_list(): void {
 		$product = new WC_Product_Variable();
@@ -3049,12 +3049,12 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$color->set_variation( true );
 		$size = new WC_Product_Attribute();
 		$size->set_name( 'Size' );
-		$size->set_options( array( 'Large' ) );
+		$size->set_options( array( 'Large', 'Small' ) );
 		$size->set_variation( true );
 		$product->set_attributes( array( $color, $size ) );
 		$product->save();
 
-		// Red/any size is first. Blue/Large has no price. Any is last.
+		// Red/Any size.
 		$red_any_size = new WC_Product_Variation();
 		$red_any_size->set_parent_id( $product->get_id() );
 		$red_any_size->set_attributes(
@@ -3067,6 +3067,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$red_any_size->set_menu_order( 0 );
 		$red_any_size->save();
 
+		// Blue/Large has no price.
 		$blue_large = new WC_Product_Variation();
 		$blue_large->set_parent_id( $product->get_id() );
 		$blue_large->set_attributes(
@@ -3078,6 +3079,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$blue_large->set_menu_order( 1 );
 		$blue_large->save();
 
+		// Red/Large.
 		$red_large = new WC_Product_Variation();
 		$red_large->set_parent_id( $product->get_id() );
 		$red_large->set_attributes(
@@ -3090,6 +3092,20 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$red_large->set_menu_order( 2 );
 		$red_large->save();
 
+		// Any color/Small.
+		$any_color_small = new WC_Product_Variation();
+		$any_color_small->set_parent_id( $product->get_id() );
+		$any_color_small->set_attributes(
+			array(
+				'color' => '',
+				'size'  => 'Small',
+			)
+		);
+		$any_color_small->set_regular_price( '6' );
+		$any_color_small->set_menu_order( 3 );
+		$any_color_small->save();
+
+		// Any color/Any size.
 		$any = new WC_Product_Variation();
 		$any->set_parent_id( $product->get_id() );
 		$any->set_attributes(
@@ -3099,9 +3115,10 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			)
 		);
 		$any->set_regular_price( '10' );
-		$any->set_menu_order( 3 );
+		$any->set_menu_order( 4 );
 		$any->save();
 
+		// Adding Red/Large without passing the attributes should be accepted.
 		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $red_large->get_id() );
 
 		$this->assertNotFalse( $cart_item_key, 'The variation should be added when no attributes are posted.' );
@@ -3112,6 +3129,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'Red', $cart_item['variation']['attribute_color'], 'The variation color should be kept.' );
 		$this->assertSame( 'Large', $cart_item['variation']['attribute_size'], 'The variation size should be kept.' );
 
+		// Adding Red/Large with the attributes should be accepted.
 		$red_large_key = WC()->cart->add_to_cart(
 			$product->get_id(),
 			1,
@@ -3125,6 +3143,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNotFalse( $red_large_key, 'The specific variation should be added when a broader variation is ordered first.' );
 		$this->assertSame( $red_large->get_id(), WC()->cart->get_cart_item( (string) $red_large_key )['variation_id'] );
 
+		// Adding Blue/Large using 'Any' ID should be accepted.
 		$any_cart_item_key = WC()->cart->add_to_cart(
 			$product->get_id(),
 			1,
@@ -3143,6 +3162,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'Blue', $any_cart_item['variation']['attribute_color'], 'The posted Any color should be kept.' );
 		$this->assertSame( 'Large', $any_cart_item['variation']['attribute_size'], 'The posted Any size should be kept.' );
 
+		// Adding Red/Large should be accepted.
 		$broader_key = WC()->cart->add_to_cart(
 			$product->get_id(),
 			1,
@@ -3163,6 +3183,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		wc_clear_notices();
 
+		// Adding Red/Large with 'Any' ID should be rejected.
 		$any_added = WC()->cart->add_to_cart(
 			$product->get_id(),
 			1,
@@ -3174,6 +3195,38 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertFalse( $any_added, 'A broader variation ordered after a closer match should be rejected.' );
+		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
+
+		// Adding Blue/Small with 'Any color' ID should be accepted.
+		$same_count_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$any_color_small->get_id(),
+			array(
+				'attribute_color' => 'Blue',
+				'attribute_size'  => 'Small',
+			)
+		);
+
+		$this->assertNotFalse( $same_count_key, 'A variation with the same number of Any attributes should be added when no earlier variation matches.' );
+		$same_count_item = WC()->cart->get_cart_item( (string) $same_count_key );
+		$this->assertSame( $any_color_small->get_id(), $same_count_item['variation_id'] );
+		$this->assertSame( 'Blue', $same_count_item['variation']['attribute_color'], 'The posted color should be kept.' );
+		$this->assertSame( 'Small', $same_count_item['variation']['attribute_size'], 'The posted size should be kept.' );
+
+		wc_clear_notices();
+
+		$same_count_added = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$any_color_small->get_id(),
+			array(
+				'attribute_color' => 'Red',
+				'attribute_size'  => 'Small',
+			)
+		);
+
+		$this->assertFalse( $same_count_added, 'A later variation with the same number of Any attributes should be rejected when an earlier one matches.' );
 		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
 	}
 
