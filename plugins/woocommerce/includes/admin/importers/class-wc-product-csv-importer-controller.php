@@ -381,6 +381,8 @@ class WC_Product_CSV_Importer_Controller {
 	public static function dispatch_ajax() {
 		check_ajax_referer( 'wc-product-import', 'security' );
 
+		$first_batch_lock = null;
+
 		try {
 			$position = wc_clean( wp_unslash( $_POST['position'] ?? '' ) );
 
@@ -410,7 +412,9 @@ class WC_Product_CSV_Importer_Controller {
 				);
 			}
 
-			if ( 0 !== $start_pos ) {
+			if ( 0 === $start_pos ) {
+				$first_batch_lock = $import_lock;
+			} else {
 				$import_lock->refresh();
 			}
 
@@ -480,6 +484,11 @@ class WC_Product_CSV_Importer_Controller {
 				)
 			);
 		} catch ( \Exception $e ) {
+			// The import screen stops on an error, so nothing else would release a lock taken by this request.
+			if ( null !== $first_batch_lock ) {
+				$first_batch_lock->release();
+			}
+
 			// Exception messages are HTML-escaped, and the import screen renders this one as plain text.
 			wp_send_json_error( array( 'message' => wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ) ) );
 		}

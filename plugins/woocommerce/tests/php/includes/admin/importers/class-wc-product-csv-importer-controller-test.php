@@ -657,6 +657,27 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		$this->assertFalse( $response['success'] );
 		$this->assertStringContainsString( 'Another product import is already running', $response['data']['message'] );
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'marker-parent' ) );
+		$this->assertNotNull( wc_get_container()->get( ProductImportLock::class )->get_age() );
+	}
+
+	/**
+	 * @testdox A first batch that fails should release the lock it took, so the merchant can retry straight away.
+	 */
+	public function test_failed_first_batch_releases_the_import_lock(): void {
+		$fail_batch = static function (): void {
+			throw new \Exception( 'Batch failed' );
+		};
+		add_action( 'woocommerce_product_import_before_import', $fail_batch );
+
+		try {
+			$response = $this->send_import_request( '0' );
+		} finally {
+			remove_action( 'woocommerce_product_import_before_import', $fail_batch );
+		}
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'Batch failed', $response['data']['message'] );
+		$this->assertNull( wc_get_container()->get( ProductImportLock::class )->get_age() );
 	}
 
 	/**
