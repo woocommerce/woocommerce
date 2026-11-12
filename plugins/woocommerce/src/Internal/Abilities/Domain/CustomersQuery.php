@@ -17,11 +17,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Queries registered customers. The output carries no name, username, email, phone number or address.
+ * Queries registered and guest customers from the Analytics customer lookup table. The query selects
+ * no column that holds a name, username, email, phone number or address.
  */
 class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 	private const DEFAULT_PER_PAGE = 10;
+
+	/**
+	 * Sort keys of the input, mapped to the columns of the query.
+	 */
+	private const ORDERBY_COLUMNS = array(
+		'last_active'     => 'date_last_active',
+		'last_order'      => 'date_last_order',
+		'registered_date' => 'date_registered',
+		'order_count'     => 'order_count',
+		'total_spent'     => 'total_spent',
+		'id'              => 'cl.customer_id',
+	);
 
 	/**
 	 * Get the ability name.
@@ -42,7 +55,7 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Query customers', 'woocommerce' ),
-			'description'         => __( 'Find registered customers by ID or role, with their order count and total spent. Names, usernames, emails, phone numbers and addresses are withheld. Guest customers are not included.', 'woocommerce' ),
+			'description'         => __( 'Find registered and guest customers by ID, with their order count, total spent and activity dates, as WooCommerce Analytics counts them. Guest orders with the same email count as one guest. Names, usernames, emails, phone numbers and addresses are withheld.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_output_schema(),
@@ -83,72 +96,67 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 	 * @return array|\WP_Error
 	 */
 	public static function execute( array $input = array() ) {
-		$exclude          = $input['exclude'] ?? array();
-		$default_per_page = empty( $input['include'] ) ? self::DEFAULT_PER_PAGE : max( 1, count( array_diff( array_unique( $input['include'] ), $exclude ) ) );
-		$page             = $input['page'] ?? 1;
-		$per_page         = $input['per_page'] ?? $default_per_page;
-		$role             = $input['role'] ?? 'customer';
-		$order            = strtoupper( $input['order'] ?? 'desc' );
-		$args             = array(
-			'number'  => $per_page,
-			'paged'   => $page,
-			// Registration dates have one-second precision, so ID keeps users registered in the same second in a stable order across pages.
-			'orderby' => 'id' === ( $input['orderby'] ?? 'registered_date' ) ? array( 'ID' => $order ) : array(
-				'registered' => $order,
-				'ID'         => $order,
-			),
-			'fields'  => 'ID',
-		);
-		if ( 'all' !== $role ) {
-			$args['role'] = $role;
+		$unavailable = CustomerLookup::get_unavailable_error();
+		if ( null !== $unavailable ) {
+			return $unavailable;
 		}
 
 		$extension_args = ExtensibleAbilities::get_query_args( 'customer', $input );
 		if ( is_wp_error( $extension_args ) ) {
 			return $extension_args;
 		}
-		if ( isset( $extension_args['meta_query'] ) ) {
-			$args['meta_query'] = $extension_args['meta_query']; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-		}
-		$exclude = array_merge( $exclude, $extension_args['post__not_in'] ?? array() );
-		$include = empty( $input['include'] ) ? null : $input['include'];
-		if ( isset( $extension_args['post__in'] ) ) {
-			$include = null === $include ? $extension_args['post__in'] : array_intersect( $include, $extension_args['post__in'] );
-		}
-		if ( null !== $include ) {
-			$include         = array_values( array_diff( $include, $exclude ) );
-			$args['include'] = empty( $include ) ? array( 0 ) : $include;
-		} elseif ( ! empty( $exclude ) ) {
-			$args['exclude'] = array_values( array_unique( $exclude ) );
-		}
 
-		$query    = new \WP_User_Query( $args );
-		$user_ids = array_map( 'intval', $query->get_results() );
+		global $wpdb;
+
+		$exclude          = $input['exclude'] ?? array();
+		$default_per_page = empty( $input['include'] ) ? self::DEFAULT_PER_PAGE : max( 1, count( array_diff( array_unique( $input['include'] ), $exclude ) ) );
+		$page             = $input['page'] ?? 1;
+		$per_page         = $input['per_page'] ?? $default_per_page;
+		$order            = 'asc' === ( $input['order'] ?? 'desc' ) ? 'ASC' : 'DESC';
+		$orderby          = self::ORDERBY_COLUMNS[ $input['orderby'] ?? 'last_active' ];
+		$lookup           = CustomerLookup::get_db_table_name();
+		$stats            = $wpdb->prefix . 'wc_order_stats';
+		$where            = self::get_where_sql( $input, $extension_args );
+		$order_count      = CustomerLookup::get_order_count_sql( 'os' );
+		$counted_status   = CustomerLookup::get_counted_status_sql( 'os' );
+		$offset           = ( $page - 1 ) * $per_page;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names, the sort column and the WHERE clause are built from fixed strings and escaped integers.
+		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$lookup} cl WHERE {$where}" );
+		$rows  = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT cl.customer_id, cl.user_id, cl.date_registered,
+					IF( cl.date_last_active <= '0000-00-00 00:00:00', NULL, cl.date_last_active ) AS date_last_active,
+					MAX( os.date_created_gmt ) AS date_last_order,
+					{$order_count} AS order_count,
+					COALESCE( SUM( os.total_sales ), 0 ) AS total_spent
+				FROM {$lookup} cl
+				LEFT JOIN {$stats} os ON os.customer_id = cl.customer_id {$counted_status}
+				WHERE {$where}
+				GROUP BY cl.customer_id, cl.user_id, cl.date_registered, cl.date_last_active
+				ORDER BY {$orderby} {$order}, cl.customer_id {$order}
+				LIMIT %d OFFSET %d",
+				$per_page,
+				$offset
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$user_ids = array_filter( array_map( 'intval', array_column( $rows, 'user_id' ) ) );
 		cache_users( $user_ids );
 
 		$customers = array();
-		foreach ( $user_ids as $user_id ) {
-			try {
-				$customer = new \WC_Customer( $user_id );
-			} catch ( \Exception $e ) {
-				wc_get_logger()->warning(
-					'The customers-query ability skipped a user that does not load as a customer, so total counts more customers than it returns.',
-					array(
-						'source'        => 'woocommerce-abilities',
-						'user_id'       => $user_id,
-						'error_message' => $e->getMessage(),
-					)
-				);
-				continue;
-			}
-			$formatted = self::format_customer( $customer );
+		foreach ( $rows as $row ) {
+			$formatted = self::format_customer( $row );
 			if ( is_wp_error( $formatted ) ) {
 				return $formatted;
 			}
-			$customers[] = $formatted;
+			if ( null !== $formatted ) {
+				$customers[] = $formatted;
+			}
 		}
 
-		$total = (int) $query->get_total();
 		return array(
 			'customers'   => $customers,
 			'total'       => $total,
@@ -159,26 +167,110 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 	}
 
 	/**
-	 * Format a customer. Every field here must stay free of personal data.
+	 * Build the WHERE clause. Extension filters describe WordPress users, so they match registered customers only.
 	 *
-	 * @param \WC_Customer $customer Customer.
-	 * @return array|\WP_Error
+	 * @param array $input          Ability input.
+	 * @param array $extension_args Query arguments of the extension filters.
+	 * @return string
 	 */
-	private static function format_customer( \WC_Customer $customer ) {
+	private static function get_where_sql( array $input, array $extension_args ): string {
+		global $wpdb;
+
+		$where = array( '1=1' );
+		$type  = $input['type'] ?? 'all';
+		if ( 'all' !== $type ) {
+			$where[] = 'registered' === $type ? 'cl.user_id IS NOT NULL' : 'cl.user_id IS NULL';
+		}
+
+		$exclude = $input['exclude'] ?? array();
+		if ( ! empty( $input['include'] ) ) {
+			$include = array_diff( $input['include'], $exclude );
+			$where[] = 'cl.customer_id IN (' . self::get_id_list_sql( empty( $include ) ? array( 0 ) : $include ) . ')';
+		} elseif ( ! empty( $exclude ) ) {
+			$where[] = 'cl.customer_id NOT IN (' . self::get_id_list_sql( $exclude ) . ')';
+		}
+
+		if ( isset( $extension_args['post__in'] ) ) {
+			$where[] = 'cl.user_id IN (' . self::get_id_list_sql( $extension_args['post__in'] ) . ')';
+		}
+		if ( isset( $extension_args['post__not_in'] ) ) {
+			$where[] = 'cl.user_id NOT IN (' . self::get_id_list_sql( $extension_args['post__not_in'] ) . ')';
+		}
+		if ( isset( $extension_args['meta_query'] ) ) {
+			$meta_query = new \WP_Meta_Query( $extension_args['meta_query'] );
+			$meta_sql   = $meta_query->get_sql( 'user', $wpdb->users, 'ID' );
+			if ( is_array( $meta_sql ) ) {
+				$where[] = "cl.user_id IN ( SELECT {$wpdb->users}.ID FROM {$wpdb->users} {$meta_sql['join']} WHERE 1=1 {$meta_sql['where']} )";
+			}
+		}
+
+		return implode( ' AND ', $where );
+	}
+
+	/**
+	 * Comma-separated IDs for an IN clause.
+	 *
+	 * @param array<int, int> $ids IDs.
+	 * @return string
+	 */
+	private static function get_id_list_sql( array $ids ): string {
+		return implode( ',', array_map( 'absint', array_values( array_unique( $ids ) ) ) );
+	}
+
+	/**
+	 * Format a customer row. Every field here must stay free of personal data. Only registered
+	 * customers have a role and extension fields, because extensions read them from WC_Customer.
+	 *
+	 * @param array{customer_id: string, user_id: ?string, date_registered: ?string, date_last_active: ?string, date_last_order: ?string, order_count: string, total_spent: string} $row Row of the customer query.
+	 * @return array|\WP_Error|null Null for a registered customer whose user no longer loads.
+	 */
+	private static function format_customer( array $row ) {
 		$output = array(
-			'id'                 => $customer->get_id(),
-			'role'               => $customer->get_role(),
-			'is_paying_customer' => (bool) $customer->get_is_paying_customer(),
-			'order_count'        => (int) $customer->get_order_count(),
-			'total_spent'        => self::format_amount_for_response( $customer->get_total_spent() ),
-			'date_created'       => self::format_date_for_response( $customer->get_date_created() ),
-			'date_modified'      => self::format_date_for_response( $customer->get_date_modified() ),
+			'id'               => (int) $row['customer_id'],
+			'order_count'      => (int) $row['order_count'],
+			'total_spent'      => wc_format_decimal( $row['total_spent'], wc_get_price_decimals() ),
+			'date_registered'  => self::format_lookup_date( $row['date_registered'], false ),
+			'date_last_active' => self::format_lookup_date( $row['date_last_active'], true ),
+			'date_last_order'  => self::format_lookup_date( $row['date_last_order'], true ),
 		);
-		return ExtensibleAbilities::add_fields_to_object(
-			array_filter( $output, static fn( $value ) => null !== $value ),
-			'customer',
-			$customer
-		);
+		$output = array_filter( $output, static fn( $value ) => null !== $value );
+
+		if ( null === $row['user_id'] ) {
+			return $output;
+		}
+
+		try {
+			$customer = new \WC_Customer( (int) $row['user_id'] );
+		} catch ( \Exception $e ) {
+			wc_get_logger()->warning(
+				'The customers-query ability skipped a user that does not load as a customer, so total counts more customers than it returns.',
+				array(
+					'source'        => 'woocommerce-abilities',
+					'user_id'       => (int) $row['user_id'],
+					'error_message' => $e->getMessage(),
+				)
+			);
+			return null;
+		}
+
+		$output['user_id'] = $customer->get_id();
+		$output['role']    = $customer->get_role();
+		return ExtensibleAbilities::add_fields_to_object( $output, 'customer', $customer );
+	}
+
+	/**
+	 * Format a date of the lookup or order stats table as UTC.
+	 *
+	 * @param string|null $date   MySQL date.
+	 * @param bool        $is_gmt Whether the column holds UTC rather than store time.
+	 * @return string|null
+	 */
+	private static function format_lookup_date( ?string $date, bool $is_gmt ): ?string {
+		if ( null === $date || '' === $date || 0 === strpos( $date, '0000-00-00' ) ) {
+			return null;
+		}
+
+		return self::format_date_for_response( $is_gmt ? new \WC_DateTime( $date, new \DateTimeZone( 'UTC' ) ) : new \WC_DateTime( $date, wp_timezone() ) );
 	}
 
 	/**
@@ -197,16 +289,26 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 				array(
 					'type'       => 'object',
 					'properties' => array(
-						'id'                 => array( 'type' => 'integer' ),
-						'role'               => array( 'type' => 'string' ),
-						'is_paying_customer' => array( 'type' => 'boolean' ),
-						'order_count'        => array( 'type' => 'integer' ),
-						'total_spent'        => array(
-							'type'        => 'string',
-							'description' => __( 'Decimal amount in the store currency, from paid orders.', 'woocommerce' ),
+						'id'               => array(
+							'type'        => 'integer',
+							'description' => __( 'Analytics customer ID. Guests have one too.', 'woocommerce' ),
 						),
-						'date_created'       => $date,
-						'date_modified'      => $date,
+						'user_id'          => array(
+							'type'        => 'integer',
+							'description' => __( 'WordPress user ID. Only registered customers have one.', 'woocommerce' ),
+						),
+						'role'             => array( 'type' => 'string' ),
+						'order_count'      => array(
+							'type'        => 'integer',
+							'description' => __( 'Orders in the statuses that Analytics counts.', 'woocommerce' ),
+						),
+						'total_spent'      => array(
+							'type'        => 'string',
+							'description' => __( 'Decimal amount of those orders after refunds, in the store currency.', 'woocommerce' ),
+						),
+						'date_registered'  => $date,
+						'date_last_active' => $date,
+						'date_last_order'  => $date,
 					),
 				),
 				'customer'
@@ -241,16 +343,15 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 					'maxItems'    => 100,
 				),
 				'exclude'  => $ids + array( 'description' => __( 'Leave out these customer IDs.', 'woocommerce' ) ),
-				'role'     => array(
-					'type'        => 'string',
-					'description' => __( 'User role to list. Use all for every registered user. Defaults to customer.', 'woocommerce' ),
-					'enum'        => array_merge( array( 'all' ), array_keys( wp_roles()->get_names() ) ),
-					'default'     => 'customer',
+				'type'     => array(
+					'type'    => 'string',
+					'enum'    => array( 'all', 'registered', 'guest' ),
+					'default' => 'all',
 				),
 				'orderby'  => array(
 					'type'    => 'string',
-					'enum'    => array( 'registered_date', 'id' ),
-					'default' => 'registered_date',
+					'enum'    => array_keys( self::ORDERBY_COLUMNS ),
+					'default' => 'last_active',
 				),
 				'order'    => array(
 					'type'    => 'string',

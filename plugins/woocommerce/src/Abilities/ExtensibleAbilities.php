@@ -297,7 +297,8 @@ class ExtensibleAbilities {
 	 *
 	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query`,
 	 *                               `orders-query` and `customers-query` apply the filters of `product`, `order`
-	 *                               and `customer`. A `meta_query` for `customer` matches user meta. The list ability
+	 *                               and `customer`. A `customer` filter matches registered customers only: its
+	 *                               `meta_query` matches user meta, and its IDs are user IDs. The list ability
 	 *                               of another resource must call `get_query_args()` and `add_query_filters_schema()` itself.
 	 *     @type string   $namespace Slug of the extension that owns the filter, such as `subscriptions`.
 	 *     @type string   $filter    Filter name inside the namespace, such as `subscribable`.

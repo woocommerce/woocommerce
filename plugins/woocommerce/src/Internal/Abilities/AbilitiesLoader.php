@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\OrderSendEmail;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CustomersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CustomerUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributeCreate;
@@ -79,6 +80,7 @@ class AbilitiesLoader {
 		ShippingZonesQuery::class,
 		TaxRatesQuery::class,
 		CustomersQuery::class,
+		CustomerUpdate::class,
 	);
 
 	/**
