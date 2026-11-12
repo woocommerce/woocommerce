@@ -22,6 +22,13 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 			isLoading: false,
 		};
 	} ),
+	// Shows the row at once, as without motion.
+	useOrderSummaryRow: jest.fn(
+		( cart: unknown, isShown: ( settledCart: unknown ) => boolean ) => ( {
+			cart: isShown( cart ) ? cart : null,
+			wrapperProps: {},
+		} )
+	),
 } ) );
 
 // Mock the ExperimentalDiscountsMeta to track when slot is rendered

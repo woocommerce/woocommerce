@@ -8,6 +8,7 @@ jest.mock( '../cart/use-store-cart-coupons', () => ( {
 } ) );
 
 jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
 } ) );
 
@@ -26,7 +27,10 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { useOrderSummaryLoadingState } from '../use-order-summary-loading-state';
+import {
+	useOrderSummaryLoadingState,
+	useOrderSummaryRow,
+} from '../use-order-summary-loading-state';
 import { useStoreCart } from '../cart/use-store-cart';
 import { useStoreCartCoupons } from '../cart/use-store-cart-coupons';
 
@@ -152,5 +156,59 @@ describe( 'useOrderSummaryLoadingState', () => {
 				name: 'wc/store/checkout',
 			} )
 		);
+	} );
+} );
+
+describe( 'useOrderSummaryRow', () => {
+	const mockCart = ( cartFees, isCalculating = false ) => {
+		useStoreCart.mockReturnValue( {
+			cartIsLoading: false,
+			isLoadingRates: false,
+			hasPendingItemsOperations: false,
+			cartFees,
+		} );
+		useSelect.mockReturnValue( isCalculating );
+	};
+	const renderRow = () =>
+		renderHook( () =>
+			useOrderSummaryRow(
+				useStoreCart(),
+				( { cartFees } ) => cartFees.length > 0
+			)
+		);
+
+	beforeEach( () => {
+		useStoreCartCoupons.mockReturnValue( {
+			isApplyingCoupon: false,
+			isRemovingCoupon: false,
+		} );
+	} );
+
+	afterEach( () => {
+		jest.clearAllMocks();
+	} );
+
+	it( 'returns the cart while the row shows, and null when it goes', () => {
+		mockCart( [ 'fee' ] );
+		const { result, rerender } = renderRow();
+		expect( result.current.cart.cartFees ).toEqual( [ 'fee' ] );
+
+		mockCart( [] );
+		rerender();
+		expect( result.current.cart ).toBeNull();
+		expect( result.current.wrapperProps.isExiting ).toBe( false );
+	} );
+
+	it( 'shows a new row when the skeletons end, not when the data arrives', () => {
+		mockCart( [] );
+		const { result, rerender } = renderRow();
+
+		mockCart( [ 'fee' ], true );
+		rerender();
+		expect( result.current.cart ).toBeNull();
+
+		mockCart( [ 'fee' ] );
+		rerender();
+		expect( result.current.cart.cartFees ).toEqual( [ 'fee' ] );
 	} );
 } );
