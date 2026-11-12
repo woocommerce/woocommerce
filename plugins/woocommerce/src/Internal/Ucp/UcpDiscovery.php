@@ -138,8 +138,9 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		}
 
 		// phpcs:disable WordPress.WP.AlternativeFunctions
-		$content  = (string) wp_json_encode( $this->get_profile(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
-		$dir      = dirname( $path );
+		$content = (string) wp_json_encode( $this->get_profile(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		$dir     = dirname( $path );
+
 		// Without write access no file is written, and /.well-known/ucp is unreachable unless the server routes it to index.php.
 		$writable = is_file( $path ) ? is_writable( $path ) : wp_mkdir_p( $dir ) && is_writable( $dir );
 		if ( $writable && ! ( is_file( $path ) && file_get_contents( $path ) === $content ) ) {
