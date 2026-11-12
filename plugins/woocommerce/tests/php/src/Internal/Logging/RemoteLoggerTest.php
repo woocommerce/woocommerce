@@ -316,9 +316,12 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			$this->assertSame( '[redacted_email]', $formatted_log['extra']['self']['email'], 'Values within the depth limit should be sanitized' );
 
 			$level = $formatted_log['extra'];
+			$depth = 0;
 			while ( is_array( $level['self'] ) ) {
 				$level = $level['self'];
+				++$depth;
 			}
+			$this->assertSame( 10, $depth, 'Nested arrays should be kept up to the depth limit' );
 			$this->assertSame( '[max_depth_reached]', $level['self'], 'Arrays past the depth limit should be replaced with a placeholder' );
 		}
 
