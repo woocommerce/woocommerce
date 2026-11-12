@@ -54,3 +54,15 @@
 	flex-direction: column;
 	position: relative;
 }
+
+// When a coupon applies, the form closes at the same moment as the totals rows grow. Closing at the same speed keeps
+// the content below moving in one direction.
+:where(.wp-block-woocommerce-cart, .wp-block-woocommerce-checkout) .wc-block-components-totals-coupon {
+	> .wc-block-components-panel__button[aria-expanded="false"] {
+		@include motion-transition($move: margin-bottom, $easing: balanced);
+	}
+
+	> .wc-block-components-panel__content {
+		@include motion-collapse($out: lg);
+	}
+}

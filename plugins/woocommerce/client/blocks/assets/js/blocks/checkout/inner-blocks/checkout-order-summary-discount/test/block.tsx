@@ -16,6 +16,13 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 		isRemovingCoupon: false,
 	} ) ),
 	useOrderSummaryLoadingState: jest.fn( () => ( { isLoading: false } ) ),
+	// Shows the row at once, as without motion.
+	useOrderSummaryRow: jest.fn(
+		( cart: unknown, isShown: ( settledCart: unknown ) => boolean ) => ( {
+			cart: isShown( cart ) ? cart : null,
+			wrapperProps: {},
+		} )
+	),
 } ) );
 
 const mockSlotRender = jest.fn( () => <div data-testid="discount-slot" /> );
