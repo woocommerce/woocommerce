@@ -91,7 +91,7 @@ class OrderTagsProviderTest extends WC_Unit_Test_Case {
 	 * @testdox The order custom field tag finds a field whose key has an apostrophe and shows its value as text.
 	 */
 	public function test_order_custom_field_tag_reads_key_with_apostrophe_and_shows_text(): void {
-		$order = WC_Helper_Order::create_order();
+		$order = wc_create_order();
 		$order->update_meta_data( "Customer's note", '<b>Leave</b> at the door' );
 		$order->save();
 		$personalizer = new Personalizer( $this->registry );
