@@ -91,6 +91,17 @@ class WC_Email_Test extends \WC_Unit_Test_Case {
 		try {
 			$this->assertSame( 'Big <em>Sale</em>', $email->get_subject() );
 			$this->assertSame( 'Big <em>Sale</em>', $email->get_preheader() );
+
+			// The merchant's own text is not parsed as HTML again either, so a "<" in it can't hide a tag.
+			$filter_text = function () {
+				return '<strong>Big</strong> a&lt;b <!-- [wc-email-test/sale] -->';
+			};
+			add_filter( 'woocommerce_email_subject_' . $email->id, $filter_text, 20 );
+			add_filter( 'woocommerce_email_preheader' . $email->id, $filter_text, 20 );
+			$this->assertSame( 'Big a<b <em>Sale</em>', $email->get_subject() );
+			$this->assertSame( 'Big a<b <em>Sale</em>', $email->get_preheader() );
+			remove_filter( 'woocommerce_email_subject_' . $email->id, $filter_text, 20 );
+			remove_filter( 'woocommerce_email_preheader' . $email->id, $filter_text, 20 );
 		} finally {
 			remove_filter( 'woocommerce_email_subject_' . $email->id, $filter );
 			remove_filter( 'woocommerce_email_preheader' . $email->id, $filter );

@@ -138,13 +138,13 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 		$wc_mail_mock->id = 'test_email';
 		$wc_mail_mock->method( 'get_recipient' )->willReturn( 'customer@test.com' );
 		$wc_mail_mock->method( 'get_subject' )->willReturn( 'Test Woo Email' );
-		$wc_mail_mock->method( 'get_preheader' )->willReturn( 'Big <em>Sale</em> & more' );
+		$wc_mail_mock->method( 'get_preheader' )->willReturn( 'Big <em>Sale</em> & more &lt;3' );
 		$wc_mail_mock->method( 'get_content_html' )->willReturn( 'Test Woo Content' );
 		$wc_mail_mock->method( 'get_block_editor_email_template_content' )->willReturn( 'Test Woo Content' );
 
 		$rendered_email = $this->block_email_renderer->maybe_render_block_email( $wc_mail_mock );
 
-		$this->assertStringContainsString( 'Big &lt;em&gt;Sale&lt;/em&gt; &amp; more', $rendered_email );
+		$this->assertStringContainsString( 'Big &lt;em&gt;Sale&lt;/em&gt; &amp; more &amp;lt;3', $rendered_email );
 	}
 
 	/**
