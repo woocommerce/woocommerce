@@ -145,7 +145,7 @@ class OrderCreate extends ActionableAbility {
 		}
 
 		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
-			$error = isset( $input[ $address_type ] ) ? self::set_address( $subject, $address_type, $input[ $address_type ] ) : null;
+			$error = isset( $input[ $address_type ] ) ? self::set_address( $subject, 'order', $address_type, $input[ $address_type ] ) : null;
 			if ( is_wp_error( $error ) ) {
 				$refused->merge_from( $error );
 			}
