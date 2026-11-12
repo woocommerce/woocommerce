@@ -90,13 +90,10 @@ class OrderDeleteTest extends WC_Unit_Test_Case {
 		$first  = $this->execute( array( 'id' => $order->get_id() ) );
 		$second = $this->execute( array( 'id' => $order->get_id() ) );
 
-		$this->assertSame(
-			array(
-				'id'     => $order->get_id(),
-				'status' => 'trash',
-			),
-			$first
-		);
+		$this->assertArrayHasKey( 'id', $first );
+		$this->assertSame( $order->get_id(), $first['id'] );
+		$this->assertArrayHasKey( 'status', $first );
+		$this->assertSame( 'trash', $first['status'] );
 		$this->assertSame( 'trash', $second['status'], 'Trashing a trashed order should succeed again.' );
 		$this->assertSame( OrderStatus::TRASH, wc_get_order( $order->get_id() )->get_status() );
 	}
@@ -124,15 +121,39 @@ class OrderDeleteTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame(
-			array(
-				'id'     => $order->get_id(),
-				'status' => 'deleted',
-			),
-			$result
-		);
+		$this->assertArrayHasKey( 'id', $result );
+		$this->assertSame( $order->get_id(), $result['id'] );
+		$this->assertArrayHasKey( 'status', $result );
+		$this->assertSame( 'deleted', $result['status'] );
 		$this->assertFalse( wc_get_order( $order->get_id() ) );
 		$this->assertFalse( wc_get_order( $refund->get_id() ), 'The refund of a deleted order should go with it.' );
+	}
+
+	/**
+	 * @testdox Should fail and keep the order when another plugin stops the delete of one of its refunds.
+	 */
+	public function test_fails_when_a_refund_survives_a_forced_delete(): void {
+		$this->use_storage( true );
+		$order  = OrderHelper::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+		add_filter( 'woocommerce_pre_delete_order_refund', '__return_false' );
+
+		$result = wp_get_ability( 'woocommerce/order-delete' )->execute(
+			array(
+				'id'    => $order->get_id(),
+				'force' => true,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_delete_failed', $result->get_error_code() );
+		$this->assertInstanceOf( \WC_Order::class, wc_get_order( $order->get_id() ), 'The rollback should restore the order.' );
+		$this->assertInstanceOf( \WC_Order_Refund::class, wc_get_order( $refund->get_id() ) );
 	}
 
 	/**
