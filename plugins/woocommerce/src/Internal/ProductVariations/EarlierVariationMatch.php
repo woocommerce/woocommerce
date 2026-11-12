@@ -47,7 +47,7 @@ class EarlierVariationMatch {
 
 		$child_ids    = array_map( 'absint', $parent->get_children() );
 		$variation_id = $variation->get_id();
-		if ( ! in_array( $variation_id, $child_ids, true ) || $variation_id === $child_ids[0] ) {
+		if ( ! in_array( $variation_id, $child_ids, true ) || $child_ids[0] === $variation_id ) {
 			return false;
 		}
 
@@ -55,7 +55,7 @@ class EarlierVariationMatch {
 		_prime_post_caches( $child_ids );
 
 		foreach ( $child_ids as $child_id ) {
-			if ( $variation_id === $child_id ) {
+			if ( $child_id === $variation_id ) {
 				return false;
 			}
 
