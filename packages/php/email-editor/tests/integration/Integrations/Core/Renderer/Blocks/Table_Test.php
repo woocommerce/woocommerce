@@ -738,6 +738,43 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a short column keeps a readable width beside a long one, instead of being squeezed
+	 * to the single character that word-break allows.
+	 */
+	public function testItKeepsAFloorUnderNarrowCells(): void {
+		$table = '
+		<figure class="wp-block-table">
+			<table>
+				<thead>
+					<tr>
+						<th>Code</th>
+						<th>Value</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>GR-1</td>
+						<td>EACMP_BREAKING_UNRECOVERABLE_INVARIANT_WITH_A_NAME_FAR_WIDER_THAN_THE_EMAIL</td>
+					</tr>
+				</tbody>
+			</table>
+		</figure>
+		';
+
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $table;
+
+		$rendered = $this->table_renderer->render( $table, $parsed_table, $this->rendering_context );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'TH' ) ) );
+		$this->assertStringContainsString( 'min-width: 4em;', (string) $html->get_attribute( 'style' ) );
+
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'TD' ) ) );
+		$this->assertStringContainsString( 'min-width: 4em;', (string) $html->get_attribute( 'style' ) );
+	}
+
+	/**
 	 * Test every cell wraps long unbreakable words, so a wide cell can't widen the email.
 	 */
 	public function testItWrapsLongWordsInCells(): void {
