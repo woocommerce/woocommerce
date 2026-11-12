@@ -45,20 +45,18 @@ class EarlierVariationMatch {
 			return false;
 		}
 
-		$child_ids    = array_map( 'absint', $parent->get_children() );
-		$variation_id = $variation->get_id();
-		if ( ! in_array( $variation_id, $child_ids, true ) || $child_ids[0] === $variation_id ) {
+		$child_ids      = array_map( 'absint', $parent->get_children() );
+		$selected_index = array_search( $variation->get_id(), $child_ids, true );
+		if ( ! is_int( $selected_index ) || 0 === $selected_index ) {
 			return false;
 		}
 
-		// Prime caches to reduce future queries.
-		_prime_post_caches( $child_ids );
+		$earlier_ids = array_slice( $child_ids, 0, $selected_index );
+		if ( ! empty( $earlier_ids ) ) {
+			_prime_post_caches( $earlier_ids );
+		}
 
-		foreach ( $child_ids as $child_id ) {
-			if ( $child_id === $variation_id ) {
-				return false;
-			}
-
+		foreach ( $earlier_ids as $child_id ) {
 			if ( ! $this->attributes_match( $child_id, $selected_attributes ) ) {
 				continue;
 			}
