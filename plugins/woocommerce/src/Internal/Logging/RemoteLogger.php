@@ -136,6 +136,8 @@ class RemoteLogger extends \WC_Log_Handler {
 		 * Filters the formatted log data before sending it to the remote logging service.
 		 * Returning a non-array value will prevent the log from being sent.
 		 *
+		 * Since 11.4.0, string values in `tags` and `extra` are already sanitized when this filter runs. In `extra`, arrays nested more than 10 levels deep are replaced with `[max_depth_reached]`, and after the first 1000 values a `[max_items_reached]` placeholder is added and the rest are dropped.
+		 *
 		 * @since 9.2.0
 		 *
 		 * @param array  $log_data The formatted log data.
@@ -447,6 +449,8 @@ class RemoteLogger extends \WC_Log_Handler {
 		/**
 		 * Filter the sanitized log content before it's sent to the remote logging service.
 		 *
+		 * Runs for the log message and backtrace and, since 11.4.0, for each string value in the caller's `tags` and in `extra`, including nested arrays. It does not run for the default tags.
+		 *
 		 * @since 9.5.0
 		 *
 		 * @param string $sanitized The sanitized content.
@@ -459,7 +463,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * Sanitize the string values of an array, including nested arrays.
 	 *
 	 * Returns a new array, so values the caller passed by reference are not changed.
-	 * Arrays nested deeper than MAX_SANITIZE_DEPTH, and values past MAX_SANITIZE_ITEMS in total, are replaced with a placeholder, so an array that references itself can't recurse forever or exhaust memory.
+	 * Arrays nested deeper than MAX_SANITIZE_DEPTH are replaced with a placeholder. After MAX_SANITIZE_ITEMS values in total, a placeholder is added and the remaining values are dropped. This way an array that references itself can't recurse forever or exhaust memory.
 	 *
 	 * @param array $data  The array to sanitize.
 	 * @param int   $depth The nesting level of $data.
