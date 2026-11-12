@@ -901,8 +901,8 @@ add_action( 'woocommerce_store_api_checkout_order_processed', 'my_function_callb
 
 ### Source
 
-- [StoreApi/Routes/V1/Checkout.php](../../../../../../src/StoreApi/Routes/V1/Checkout.php)
 - [StoreApi/Routes/V1/CheckoutOrder.php](../../../../../../src/StoreApi/Routes/V1/CheckoutOrder.php)
+- [StoreApi/Routes/V1/Checkout.php](../../../../../../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -924,8 +924,8 @@ do_action( 'woocommerce_store_api_checkout_update_customer_from_request', \WC_Cu
 
 ### Source
 
-- [StoreApi/Routes/V1/Checkout.php](../../../../../../src/StoreApi/Routes/V1/Checkout.php)
 - [StoreApi/Routes/V1/CheckoutOrder.php](../../../../../../src/StoreApi/Routes/V1/CheckoutOrder.php)
+- [StoreApi/Routes/V1/Checkout.php](../../../../../../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
