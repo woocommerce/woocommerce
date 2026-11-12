@@ -15,6 +15,8 @@ import {
 	Disabled,
 	PanelBody,
 	ToggleControl,
+	// `Link` from `@wordpress/ui` isn't available to this package yet.
+	// eslint-disable-next-line @wordpress/use-recommended-components
 	ExternalLink,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
