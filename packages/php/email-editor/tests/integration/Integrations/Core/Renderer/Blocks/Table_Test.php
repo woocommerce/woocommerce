@@ -768,10 +768,43 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 
 		$html = new \WP_HTML_Tag_Processor( $rendered );
 		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'TH' ) ) );
-		$this->assertStringContainsString( 'min-width: 4em;', (string) $html->get_attribute( 'style' ) );
+		$this->assertStringContainsString( 'min-width: 3em;', (string) $html->get_attribute( 'style' ) );
 
 		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'TD' ) ) );
-		$this->assertStringContainsString( 'min-width: 4em;', (string) $html->get_attribute( 'style' ) );
+		$this->assertStringContainsString( 'min-width: 3em;', (string) $html->get_attribute( 'style' ) );
+	}
+
+	/**
+	 * Test the floor every cell carries stays small enough that a table of short columns,
+	 * which fitted before the floor existed, still fits.
+	 */
+	public function testTheCellFloorLeavesRoomForSeveralColumns(): void {
+		$table = '
+		<figure class="wp-block-table">
+			<table>
+				<thead><tr><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr></thead>
+				<tbody><tr><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr></tbody>
+			</table>
+		</figure>
+		';
+
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $table;
+
+		$rendered = $this->table_renderer->render( $table, $parsed_table, $this->rendering_context );
+
+		// Five columns, each with 8px of padding either side, against the 612px content width.
+		preg_match_all( '/min-width: (\\d+)em;/', $rendered, $matches );
+		$this->assertCount( 10, $matches[1], 'Every cell should carry the floor.' );
+
+		$columns  = 5;
+		$floor_px = (int) $matches[1][0] * 16;
+		$padding  = 16;
+		$this->assertLessThanOrEqual(
+			612,
+			$columns * ( $floor_px + $padding ),
+			'The floor must leave a table of short columns inside the content width.'
+		);
 	}
 
 	/**
