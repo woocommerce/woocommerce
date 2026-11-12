@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Use the recommended Stack, Text, Card and Link components from @wordpress/ui in the email editor's Styles sidebar and dialogs.
