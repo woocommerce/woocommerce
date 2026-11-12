@@ -16,7 +16,7 @@ import type {
 	RunChunkResponse,
 } from '../data/types';
 
-export type ImporterStep = 'upload' | 'mapping' | 'import' | 'done';
+export type ImporterStep = 'upload' | 'mapping' | 'import' | 'summary';
 
 export interface ImporterState {
 	step: ImporterStep;
@@ -45,7 +45,7 @@ export interface ImporterState {
 		notified: number;
 	};
 	rows: ImporterRowResult[];
-	// Done step.
+	// Summary step.
 	summary: ImporterSummary | null;
 	// Ambient.
 	error: string | null;
@@ -192,6 +192,21 @@ function assignMappingForCol(
 	return next;
 }
 
+/**
+ * Add a chunk's row results, keyed by physical row number. A chunk the
+ * import loop sends again after a lost response reports the same rows, so a
+ * repeated row replaces the earlier entry instead of being listed twice.
+ */
+function mergeRowResults(
+	existing: ImporterRowResult[],
+	incoming: ImporterRowResult[]
+): ImporterRowResult[] {
+	const byRow = new Map< number, ImporterRowResult >();
+	existing.forEach( ( result ) => byRow.set( result.row, result ) );
+	incoming.forEach( ( result ) => byRow.set( result.row, result ) );
+	return Array.from( byRow.values() );
+}
+
 export function importerReducer(
 	state: ImporterState,
 	action: ImporterAction
@@ -204,6 +219,7 @@ export function importerReducer(
 				file: action.file,
 				fileText: null,
 				error: null,
+				sessionEnded: false,
 				isBusy: false,
 			};
 		case 'SET_FILE_TEXT':
@@ -249,7 +265,9 @@ export function importerReducer(
 					notified: 0,
 				},
 				rows: [],
+				summary: null,
 				error: null,
+				sessionEnded: false,
 				isBusy: false,
 			};
 		}
@@ -301,13 +319,13 @@ export function importerReducer(
 					failed: action.payload.counts.failed,
 					notified: action.payload.counts.notified,
 				},
-				rows: state.rows.concat( action.payload.rows ?? [] ),
+				rows: mergeRowResults( state.rows, action.payload.rows ?? [] ),
 				error: null,
 			};
 		case 'FINISH':
 			return {
 				...state,
-				step: 'done',
+				step: 'summary',
 				summary: {
 					...action.summary,
 					rows: state.rows,

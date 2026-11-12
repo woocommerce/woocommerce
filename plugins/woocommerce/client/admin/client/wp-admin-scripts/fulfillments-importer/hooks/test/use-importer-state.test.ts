@@ -44,7 +44,7 @@ const summary: ImporterSummary = {
 };
 
 describe( 'importerReducer', () => {
-	it( 'transitions upload → mapping → import → done on the happy path', () => {
+	it( 'transitions upload → mapping → import → summary on the happy path', () => {
 		let state = createInitialState();
 		expect( state.step ).toBe( 'upload' );
 
@@ -73,7 +73,7 @@ describe( 'importerReducer', () => {
 		expect( state.counts.created ).toBe( 8 );
 
 		state = importerReducer( state, { type: 'FINISH', summary } );
-		expect( state.step ).toBe( 'done' );
+		expect( state.step ).toBe( 'summary' );
 		expect( state.summary?.created ).toBe( 22 );
 	} );
 
@@ -125,6 +125,78 @@ describe( 'importerReducer', () => {
 
 		state = importerReducer( state, { type: 'BACK_TO_UPLOAD' } );
 		expect( state.generation ).toBe( 2 );
+	} );
+
+	it( 'a new file and a new session clear sessionEnded and the old summary', () => {
+		let state = importerReducer( createInitialState(), {
+			type: 'FINISH',
+			summary,
+		} );
+		state = importerReducer( state, {
+			type: 'ERROR',
+			message: 'The import session expired.',
+			sessionEnded: true,
+		} );
+
+		state = importerReducer( state, {
+			type: 'SET_FILE',
+			file: new File( [ 'a,b' ], 'a.csv' ),
+		} );
+		expect( state.sessionEnded ).toBe( false );
+
+		state = importerReducer( state, {
+			type: 'ERROR',
+			message: 'The import session expired.',
+			sessionEnded: true,
+		} );
+		state = importerReducer( state, {
+			type: 'PREPARE_OK',
+			payload: prepareResponse,
+		} );
+		expect( state.step ).toBe( 'mapping' );
+		expect( state.error ).toBeNull();
+		expect( state.sessionEnded ).toBe( false );
+		expect( state.summary ).toBeNull();
+	} );
+
+	it( 'CHUNK_OK lists a row only once when a chunk is sent again', () => {
+		const failedRow = {
+			row: 2,
+			status: 'failed' as const,
+			code: 'order_not_found',
+			message: 'Order not found.',
+		};
+		const createdRow = {
+			row: 3,
+			status: 'created' as const,
+			message: '',
+		};
+		const chunk: RunChunkResponse = {
+			...chunkResponse,
+			processed: 2,
+			total: 2,
+			counts: {
+				created: 1,
+				updated: 0,
+				skipped: 0,
+				failed: 1,
+				notified: 0,
+			},
+			rows: [ failedRow, createdRow ],
+		};
+
+		let state = importerReducer( createInitialState(), {
+			type: 'CHUNK_OK',
+			payload: chunk,
+		} );
+		state = importerReducer( state, { type: 'CHUNK_OK', payload: chunk } );
+		expect( state.rows ).toEqual( [ failedRow, createdRow ] );
+
+		state = importerReducer( state, {
+			type: 'FINISH',
+			summary: { ...summary, created: 1, failed: 1 },
+		} );
+		expect( state.summary?.rows ).toHaveLength( 2 );
 	} );
 
 	it( 'SET_FILE ends the busy state of a preparation in flight', () => {
