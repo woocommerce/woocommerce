@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Pass tag attribute values with quotes, ampersands or brackets correctly; tag callbacks now get them decoded and must escape them.
+Pass tag attribute values with quotes, ampersands or brackets correctly. HTML tags in HTML content still get them escaped for HTML.
