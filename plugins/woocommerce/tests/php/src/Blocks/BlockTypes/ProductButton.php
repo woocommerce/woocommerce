@@ -345,6 +345,43 @@ class ProductButton extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Catalog blocks retain URL-filter quantities unless button arguments override them.
+	 */
+	public function test_catalog_blocks_retain_filtered_url_quantity(): void {
+		$product     = WC_Helper_Product::create_simple_product();
+		$minimum     = static fn() => 10;
+		$url_filter  = static fn( $url ) => add_query_arg( 'quantity', 30, $url );
+		$args_filter = static function ( $args ) {
+			$args['quantity'] = 10;
+			return $args;
+		};
+		add_filter( 'woocommerce_quantity_input_min', $minimum );
+		add_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+		try {
+			$markup = $this->render_product_button( $product );
+			$this->assertSame( 30, $this->get_quantity_to_add( $markup ) );
+			$this->assertStringContainsString( '>Add 30 to cart</span>', $markup );
+			$this->assertStringContainsString( 'aria-label="Add 30 to cart:', $markup );
+			$this->assertStringContainsString( 'quantity=30', $markup );
+
+			$grid = do_blocks( '<!-- wp:woocommerce/handpicked-products {"products":[' . $product->get_id() . ']} /-->' );
+			$this->assertStringContainsString( 'data-quantity="30"', $grid );
+			$this->assertStringContainsString( '>Add 30 to cart</a>', $grid );
+			$this->assertStringContainsString( 'quantity=30', $grid );
+
+			add_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
+			$markup = $this->render_product_button( $product );
+			$this->assertSame( 10, $this->get_quantity_to_add( $markup ) );
+			$this->assertStringContainsString( '>Add 10 to cart</span>', $markup );
+			$this->assertStringContainsString( 'quantity=10', $markup );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum );
+			remove_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
+		}
+	}
+
+	/**
 	 * @testdox Buttons inside quantity forms retain their quantity-independent accessible name.
 	 */
 	public function test_form_button_retains_description(): void {

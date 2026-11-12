@@ -146,6 +146,8 @@ class ProductButton extends AbstractBlock {
 			}
 		}
 
+		$initial_quantity = $is_descendant_of_add_to_cart_form ? 1 : wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_quantity( $product );
+
 		/**
 		 * This filter is documented in includes/wc-template-functions.php.
 		 *
@@ -154,7 +156,7 @@ class ProductButton extends AbstractBlock {
 		$args = apply_filters(
 			'woocommerce_loop_add_to_cart_args',
 			array(
-				'quantity'   => $is_descendant_of_add_to_cart_form || $product->is_sold_individually() ? 1 : max( 1, $product->get_min_purchase_quantity() ),
+				'quantity'   => $initial_quantity,
 				'class'      => $html_classes,
 				'attributes' => array_merge(
 					$attributes,

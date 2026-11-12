@@ -364,6 +364,43 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Classic buttons preserve URL-filter quantities unless arguments or argument filters explicitly override them.
+	 */
+	public function test_loop_button_retains_filtered_url_quantity(): void {
+		$product     = WC_Helper_Product::create_simple_product();
+		$minimum     = static fn() => 10;
+		$url_filter  = static fn( $url ) => add_query_arg( 'quantity', 30, $url );
+		$args_filter = static function ( $args ) {
+			$args['quantity'] = 10;
+			return $args;
+		};
+		add_filter( 'woocommerce_quantity_input_min', $minimum );
+		add_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+		try {
+			$markup = $this->render_loop_add_to_cart( $product );
+			$this->assertStringContainsString( 'data-quantity="30"', $markup );
+			$this->assertStringContainsString( '>Add 30 to cart</a>', $markup );
+			$this->assertStringContainsString( 'aria-label="Add 30 to cart:', $markup );
+			$this->assertStringContainsString( 'quantity=30', $markup );
+
+			$markup = $this->render_loop_add_to_cart( $product, array( 'quantity' => 10 ) );
+			$this->assertStringContainsString( 'data-quantity="10"', $markup );
+			$this->assertStringContainsString( '>Add 10 to cart</a>', $markup );
+			$this->assertStringContainsString( 'quantity=10', $markup );
+
+			add_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
+			$markup = $this->render_loop_add_to_cart( $product );
+			$this->assertStringContainsString( 'data-quantity="10"', $markup );
+			$this->assertStringContainsString( '>Add 10 to cart</a>', $markup );
+			$this->assertStringContainsString( 'quantity=10', $markup );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum );
+			remove_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
+		}
+	}
+
+	/**
 	 * @testdox Add-to-cart URLs do not inherit another product's minimum quantity from the current request.
 	 */
 	public function test_loop_button_does_not_inherit_request_quantity(): void {

@@ -11,14 +11,35 @@ use Automattic\WooCommerce\Caches\ProductCountCache;
  */
 class ProductUtil {
 	/**
-	 * Get button data for the final catalog quantity, preserving custom product labels.
+	 * Get the default catalog quantity without changing a filtered add-to-cart URL.
 	 *
 	 * @since 11.4.0
 	 * @param \WC_Product $product Product to render.
-	 * @param mixed       $quantity Final quantity from button arguments.
-	 * @return array{url: string, text: string, description: string, original_description: string}
+	 * @param string|null $url Filtered URL, if already available.
+	 * @return int|float
 	 */
-	public function get_catalog_add_to_cart_button_data( \WC_Product $product, $quantity ): array {
+	public function get_catalog_add_to_cart_quantity( \WC_Product $product, ?string $url = null ) {
+		$url = $url ?? $product->add_to_cart_url();
+		parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+		if ( ( $query['add-to-cart'] ?? null ) === (string) $product->get_id() && is_numeric( $query['quantity'] ?? null ) ) {
+			$quantity = wc_stock_amount( (float) $query['quantity'] );
+			if ( $quantity > 0 ) {
+				return $quantity;
+			}
+		}
+
+		return $product->is_sold_individually() ? 1 : max( 1, $product->get_min_purchase_quantity() );
+	}
+
+	/**
+	 * Get catalog button data, using the filtered URL quantity unless explicitly overridden.
+	 *
+	 * @since 11.4.0
+	 * @param \WC_Product $product Product to render.
+	 * @param mixed       $quantity Explicit button quantity, or null to resolve the default from the URL and product minimum.
+	 * @return array{url: string, text: string, description: string, original_description: string, quantity: mixed}
+	 */
+	public function get_catalog_add_to_cart_button_data( \WC_Product $product, $quantity = null ): array {
 		$description = $product->add_to_cart_description();
 		$data        = array(
 			'url'                  => $product->add_to_cart_url(),
@@ -27,6 +48,9 @@ class ProductUtil {
 			'original_description' => $description,
 		);
 
+		$quantity         = $quantity ?? $this->get_catalog_add_to_cart_quantity( $product, $data['url'] );
+		$data['quantity'] = $quantity;
+
 		if ( ! $product instanceof \WC_Product_Simple || ! $product->is_purchasable() || ! $product->is_in_stock() || ! is_numeric( $quantity ) || $quantity <= 0 ) {
 			return $data;
 		}
@@ -34,8 +58,12 @@ class ProductUtil {
 		$quantity = wc_stock_amount( (float) $quantity );
 		parse_str( (string) wp_parse_url( $data['url'], PHP_URL_QUERY ), $query );
 		if ( ( $query['add-to-cart'] ?? null ) === (string) $product->get_id() ) {
-			$data['url'] = add_query_arg( 'quantity', $quantity, $data['url'] );
+			$url_quantity = $query['quantity'] ?? null;
+			if ( ! is_numeric( $url_quantity ) || wc_stock_amount( (float) $url_quantity ) !== $quantity ) {
+				$data['url'] = add_query_arg( 'quantity', $quantity, $data['url'] );
+			}
 		}
+		$data['quantity'] = $quantity;
 
 		if ( $quantity > 1 ) {
 			if ( __( 'Add to cart', 'woocommerce' ) === $data['text'] ) {
