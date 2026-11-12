@@ -135,6 +135,29 @@ table.wc-block-cart-items {
 	}
 }
 
+// A removed row: a copy fades out in its place, then the rows below slide up and the space at the bottom of the table
+// closes. See `use-row-removal-motion.ts`.
+.wp-block-woocommerce-cart table.wc-block-cart-items {
+	> [data-wc-row-copy] {
+		@include motion-fade-out;
+
+		// The copy does not replay the entrance of the rows.
+		> tr {
+			animation: none;
+		}
+	}
+
+	&[data-wc-row-removal] {
+		@include motion-safe {
+			transition: motion-move((padding-bottom, margin-bottom), lg, balanced);
+		}
+
+		> tbody > tr {
+			@include motion-transition($state: opacity, $move: translate, $easing: balanced);
+		}
+	}
+}
+
 @mixin cart-items-table-styles() {
 	table.wc-block-cart-items {
 		td {

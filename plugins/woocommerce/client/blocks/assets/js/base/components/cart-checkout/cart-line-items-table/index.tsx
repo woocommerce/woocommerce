@@ -13,6 +13,7 @@ import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed
  * Internal dependencies
  */
 import CartLineItemRow from './cart-line-item-row';
+import { useRowRemovalMotion } from './use-row-removal-motion';
 import './style.scss';
 
 interface CartLineItemsTableProps {
@@ -36,6 +37,10 @@ const CartLineItemsTable = ( {
 }: CartLineItemsTableProps ): JSX.Element => {
 	const tableRef = useRef< HTMLTableElement | null >( null );
 	const rowRefs = useRef( setRefs( lineItems ) );
+	const onClickCapture = useRowRemovalMotion(
+		tableRef,
+		lineItems.map( ( { key } ) => key )
+	);
 	useEffect( () => {
 		rowRefs.current = setRefs( lineItems );
 	}, [ lineItems ] );
@@ -86,6 +91,7 @@ const CartLineItemsTable = ( {
 			className={ clsx( 'wc-block-cart-items', className ) }
 			ref={ tableRef }
 			tabIndex={ -1 }
+			onClickCapture={ onClickCapture }
 		>
 			<caption className="screen-reader-text">
 				<h2>{ __( 'Products in cart', 'woocommerce' ) }</h2>
