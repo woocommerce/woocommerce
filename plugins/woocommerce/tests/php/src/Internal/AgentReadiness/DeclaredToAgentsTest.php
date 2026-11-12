@@ -430,4 +430,47 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 			$this->assertNull( $item['found'], $item['id'] );
 		}
 	}
+
+	/**
+	 * @testdox With WooCommerce's llms.txt fallback, its guidance is found when the served llms.txt holds it, from any provider; without the fallback the item isn't listed.
+	 */
+	public function test_llms_txt_guidance(): void {
+		$section = "## Agentic capabilities\n\n- [WooCommerce Store API](" . home_url( '/wp-json/wc/store/v1' ) . ')';
+		$sut     = new class() extends DeclaredToAgents {
+			/**
+			 * The status to report.
+			 *
+			 * @var array{status:string,section:string}|null
+			 */
+			public $status;
+
+			/**
+			 * The status set by the test.
+			 */
+			protected function llms_txt_status(): ?array {
+				return $this->status;
+			}
+		};
+		$found   = function ( array $responses ) use ( $sut ): array {
+			$this->results( $responses );
+			return array_column( $sut->all( wc_get_container()->get( StoreOutputChecks::class )->responses() ), 'found', 'id' );
+		};
+
+		$this->assertArrayNotHasKey( 'llms-txt-woocommerce-guidance', $found( array() ), 'Not listed without the fallback' );
+
+		$sut->status = array(
+			'status'  => 'unknown',
+			'section' => $section . "\n",
+		);
+		$this->assertTrue( $found( array( '/llms.txt' => array( 200, "# Shop\n\n" . $section . "\n" ) ) )['llms-txt-woocommerce-guidance'] );
+		$this->assertFalse( $found( array( '/llms.txt' => array( 200, "# Shop\n\n- [About](" . home_url( '/about/' ) . ')' ) ) )['llms-txt-woocommerce-guidance'], 'Another provider\'s file without it' );
+		$this->assertFalse( $found( array() )['llms-txt-woocommerce-guidance'], 'No llms.txt' );
+		$this->assertNull( $found( array( '/llms.txt' => array( 503, '' ) ) )['llms-txt-woocommerce-guidance'], 'Couldn\'t check' );
+
+		$sut->status = array(
+			'status'  => 'disabled',
+			'section' => '',
+		);
+		$this->assertArrayNotHasKey( 'llms-txt-woocommerce-guidance', $found( array() ), 'Not listed while WooCommerce adds no guidance' );
+	}
 }
