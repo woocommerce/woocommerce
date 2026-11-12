@@ -275,14 +275,12 @@ class WC_Post_Types {
 	 * WC_Post_Types::register_taxonomies() calls this for every attribute on init, and
 	 * refresh_attribute_taxonomy() calls it after an attribute is saved, so both use the same arguments.
 	 *
-	 * @internal
-	 *
 	 * @since 11.4.0
 	 * @param stdClass   $tax        Attribute row, in the shape wc_get_attribute_taxonomies() returns.
 	 * @param array|null $permalinks Permalink structure. Pass it when registering many attributes, to read it once.
 	 * @return void
 	 */
-	public static function register_attribute_taxonomy( $tax, ?array $permalinks = null ): void {
+	private static function register_attribute_taxonomy( $tax, ?array $permalinks = null ): void {
 		global $wc_product_attributes;
 
 		$name = wc_attribute_taxonomy_name( $tax->attribute_name );
