@@ -137,8 +137,17 @@ export const pluginInstallerMachine = createMachine(
 				},
 				states: {
 					installer: {
-						initial: 'installing',
+						initial: 'checkQueue',
 						states: {
+							checkQueue: {
+								always: [
+									{
+										target: 'installing',
+										guard: 'hasPluginsToInstall',
+									},
+									{ target: '#installation-finished' },
+								],
+							},
 							installing: {
 								invoke: {
 									systemId: 'installPlugin',
