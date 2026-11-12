@@ -19,7 +19,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * The delete runs on the write pipeline of ActionableAbility, so the
  * validators of the order resource can refuse it, the syncs see the deleted
- * or trashed order, and a failure rolls everything back.
+ * or trashed order, and a failure rolls everything back. A forced delete
+ * deletes the refunds of the order too, so they go through the same checks.
  */
 class OrderDelete extends ActionableAbility {
 
@@ -51,16 +52,16 @@ class OrderDelete extends ActionableAbility {
 	private bool $force = false;
 
 	/**
-	 * The order the call will delete or trash.
+	 * The order the call will delete or trash, and the refunds that a forced delete takes with it.
 	 *
-	 * @var \WC_Order[]
+	 * @var \WC_Abstract_Order[]
 	 */
 	private array $deleting = array();
 
 	/**
-	 * The order as it was before a forced delete.
+	 * The order and its refunds as they were before a forced delete.
 	 *
-	 * @var \WC_Order[]
+	 * @var \WC_Abstract_Order[]
 	 */
 	private array $deleted = array();
 
@@ -174,24 +175,25 @@ class OrderDelete extends ActionableAbility {
 	protected function change( $subject, array $input ) {
 		unset( $input );
 
-		$this->deleting = array( $subject );
+		$this->deleting = array_merge( array( $subject ), $this->force ? $subject->get_refunds() : array() );
 
 		return null;
 	}
 
 	/**
-	 * Delete or trash the order. A forced delete removes its refunds too.
+	 * Delete or trash the order. A refund that survives a forced delete fails the
+	 * call, because the order store ignores a plugin that stops a refund delete.
 	 *
 	 * @param \WC_Order $subject Order to delete.
 	 * @return null|\WP_Error
 	 */
 	protected function save( $subject ) {
-		$removed = array( clone $subject );
 		if ( $this->force ) {
-			$this->deleted = $removed;
+			$this->deleted = array_map( static fn( \WC_Abstract_Order $order ) => clone $order, $this->deleting );
 		} else {
-			$this->trashed = $removed;
+			$this->trashed = array( clone $subject );
 		}
+		$refund_ids = array_map( static fn( \WC_Abstract_Order $refund ) => $refund->get_id(), array_slice( $this->deleting, 1 ) );
 
 		$deleted = $subject->delete( $this->force );
 		$stored  = wc_get_order( $this->order_id );
@@ -200,6 +202,7 @@ class OrderDelete extends ActionableAbility {
 			! $deleted
 			|| ( $this->force && false !== $stored )
 			|| ( ! $this->force && ( ! $stored instanceof \WC_Order || OrderStatus::TRASH !== $stored->get_status( 'edit' ) ) )
+			|| array_filter( $refund_ids, static fn( int $refund_id ) => false !== wc_get_order( $refund_id ) )
 		) {
 			return new \WP_Error(
 				'woocommerce_ability_order_delete_failed',
@@ -212,18 +215,18 @@ class OrderDelete extends ActionableAbility {
 	}
 
 	/**
-	 * The order, for the validators.
+	 * The order and, for a forced delete, its refunds, for the validators.
 	 *
-	 * @return \WC_Order[]
+	 * @return \WC_Abstract_Order[]
 	 */
 	protected function get_objects_to_delete(): array {
 		return $this->deleting;
 	}
 
 	/**
-	 * The order as it was before a forced delete, which clears the ID of the live object.
+	 * The order and its refunds as they were before a forced delete, which clears the ID of the live objects.
 	 *
-	 * @return \WC_Order[]
+	 * @return \WC_Abstract_Order[]
 	 */
 	protected function get_deleted_objects(): array {
 		return $this->deleted;

@@ -3247,6 +3247,59 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should run validators on the refunds of a force-deleted order, delete nothing when one refuses, and give the syncs the deleted refunds.
+	 */
+	public function test_a_validator_can_refuse_deleting_the_refunds_of_an_order(): void {
+		$order     = \WC_Helper_Order::create_order();
+		$order_id  = $order->get_id();
+		$refund_id = wc_create_refund(
+			array(
+				'order_id' => $order_id,
+				'amount'   => 1,
+			)
+		)->get_id();
+		$refuse    = true;
+		$seen      = array();
+		$deleted   = array();
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Abstract_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $refund_id ) {
+				unset( $ability );
+				$seen[ $order->get_id() ] = $context['deleting'];
+				return $refuse && $refund_id === $order->get_id() ? new \WP_Error( 'test_keep_refund', 'Keep the refund.' ) : null;
+			}
+		);
+		$this->register_sync(
+			'order',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+				unset( $saved, $ability );
+				$deleted = array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $context['deleted'] );
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$input = array(
+			'id'    => $order_id,
+			'force' => true,
+		);
+
+		$refused = $this->run_ability_response( 'woocommerce/order-delete', $input );
+		$kept    = array( wc_get_order( $order_id ), wc_get_order( $refund_id ) );
+		$refuse  = false;
+		$result  = $this->run_ability( 'woocommerce/order-delete', $input );
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'test-ext:test_keep_refund', $refused->get_data()['code'] );
+		$this->assertInstanceOf( \WC_Order::class, $kept[0], 'A refused refund should keep the order.' );
+		$this->assertInstanceOf( \WC_Order_Refund::class, $kept[1] );
+		$this->assertTrue( $seen[ $refund_id ], 'The validators should see the refund as deleted.' );
+		$this->assertSame( 'deleted', $result['status'] );
+		$this->assertSame( array( $order_id, $refund_id ), $deleted );
+	}
+
+	/**
 	 * @testdox Should restore a trashed or deleted order and its refund when a sync refuses, with HPOS and with posts storage, with and without sync.
 	 * @testWith [true, false]
 	 *           [true, true]
