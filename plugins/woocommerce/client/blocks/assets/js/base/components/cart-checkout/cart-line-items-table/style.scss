@@ -281,3 +281,13 @@ table.wc-block-cart-items {
 		}
 	}
 }
+
+// Rows rise in, 50ms apart, the first time they show (`useListEntrance`). The cells animate, not the row, so the
+// movement works in table and grid layouts and does not override the row's dimmed opacity.
+.wp-block-woocommerce-cart [data-wc-list-entering] > .wc-block-cart-items__row {
+	@include motion-stagger-index;
+
+	> td {
+		@include motion-enter($delay: motion-stagger-delay());
+	}
+}

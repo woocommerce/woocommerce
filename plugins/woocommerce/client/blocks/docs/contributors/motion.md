@@ -93,7 +93,8 @@ Motion that changes the layout runs in JavaScript, because it must measure sizes
 
 | Helper | Use |
 |--------|-----|
-| `whenAnimationsEnd( element, callback )` (`@woocommerce/base-utils`) | Runs `callback` when the animations of `element` end, instead of after a fixed timeout. It waits again if a transition turns around. It returns a function that cancels the callback. `whenAllAnimationsEnd( elements, callback )` waits for all of `elements`. |
+| `whenAnimationsEnd( element, callback, { subtree } )` (`@woocommerce/base-utils`) | Runs `callback` when the animations of `element` end, instead of after a fixed timeout. With `subtree`, it also waits for the animations inside `element`. It waits again if a transition turns around. It returns a function that cancels the callback. `whenAllAnimationsEnd( elements, callback )` waits for all of `elements`. |
+| `useListEntrance( ref )` (`@woocommerce/base-hooks`) | Lets the items of a list stagger in once. Call the function it returns when the items first show, such as from the `onShow` of `DelayedContentWithSkeleton`. It sets `data-wc-list-entering` on `ref` until the entrances end. Style the items with `motion-stagger` under that attribute. |
 | `usePresence( value, { animate, collapse } )` (`@woocommerce/base-hooks`) | Keeps content mounted while it animates out. Pass the content, or `null` to remove it. It returns `{ value, isExiting, ref }`. Put `ref` on the element that animates. Pass `collapse: true` to grow and collapse `ref` in the real layout. Pass `animate: false` to apply the change immediately, for example after a key press. |
 | `animateCollapse( element, isOpen, animate, from )` (`@woocommerce/base-utils`) | Grows `element` open or collapses it shut in the real layout, and turns around if it still moves. Give `element` the `motion-collapse` mixin. Use it through `usePresence` when the component owns the content. Pass `from`, such as `{ height: '20px' }`, to grow from the size of the content that `element` replaces, or to change the height of an element that stays. |
 | `collapseCopy( element )` (`@woocommerce/base-utils`) | Collapses an inert copy of `element` in its place, so that `element` can unmount at once. Call it just before `element` unmounts. If `element` grows again first, it grows from the copy. |
@@ -113,7 +114,7 @@ Find the change in this table, and use the helpers above.
 | A button shows a spinner | The label fades out, and the spinner grows in. |
 | A small icon, dot, or tick changes | It grows from a smaller size and fades in. |
 | Content appears in place, such as an empty state | It rises in and fades in. |
-| The rows of a list appear | The same rise, 50ms apart. A section that enters as one unit does not stagger its rows. |
+| The items of a list first show, on page load or in place of a skeleton | The same rise, 50ms apart, through `useListEntrance`. Content rendered on the server, such as order confirmation, can use `motion-stagger-delay()` alone. A section that enters as one unit does not stagger its items. |
 | A small item goes, such as a chip | It fades and shrinks in place. Then it unmounts. |
 | A dropdown opens from a field | It slides 4px from the field and fades in. It slides back to close. |
 | A toast or snackbar appears and goes | It rises in and drops out. |

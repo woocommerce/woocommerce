@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useLayoutEffect } from '@wordpress/element';
 import { useReducedMotion } from '@wordpress/compose';
 import type { ReactNode } from 'react';
 
@@ -20,6 +20,11 @@ export interface DelayedContentWithSkeletonProps {
 	 * The skeleton component to show while loading
 	 */
 	skeleton: ReactNode;
+
+	/**
+	 * Runs after the content shows, in place of the skeleton or on mount
+	 */
+	onShow?: () => void;
 }
 
 /**
@@ -73,8 +78,17 @@ export const DelayedContentWithSkeleton = ( {
 	children,
 	isLoading,
 	skeleton,
+	onShow,
 }: DelayedContentWithSkeletonProps ): JSX.Element => {
 	const showSkeleton = useDelayedSkeleton( isLoading );
+
+	useLayoutEffect( () => {
+		if ( ! showSkeleton ) {
+			onShow?.();
+		}
+		// Only when the skeleton ends, not when the callback changes.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ showSkeleton ] );
 
 	return <>{ showSkeleton ? skeleton : children }</>;
 };

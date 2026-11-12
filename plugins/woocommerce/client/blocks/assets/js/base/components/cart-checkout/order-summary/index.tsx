@@ -7,6 +7,8 @@ import {
 } from '@woocommerce/base-context';
 import type { CartItem } from '@woocommerce/types';
 import clsx from 'clsx';
+import { useRef } from '@wordpress/element';
+import { useListEntrance } from '@woocommerce/base-hooks';
 import { CartLineItemsCheckoutSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
 import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 /**
@@ -27,6 +29,8 @@ const OrderSummary = ( {
 	const { isLarge } = useContainerWidthContext();
 	const { cartIsLoading, hasPendingItemsOperations } = useStoreCart();
 	const showSkeleton = cartIsLoading || hasPendingItemsOperations;
+	const contentRef = useRef< HTMLDivElement | null >( null );
+	const onItemsShow = useListEntrance( contentRef );
 
 	return (
 		<DelayedContentWithSkeleton
@@ -36,13 +40,17 @@ const OrderSummary = ( {
 					rows={ cartItems?.length || 2 }
 				/>
 			}
+			onShow={ onItemsShow }
 		>
 			<div
 				className={ clsx( 'wc-block-components-order-summary', {
 					'is-large': isLarge,
 				} ) }
 			>
-				<div className="wc-block-components-order-summary__content">
+				<div
+					className="wc-block-components-order-summary__content"
+					ref={ contentRef }
+				>
 					{ cartItems.map( ( cartItem ) => {
 						return (
 							<OrderSummaryItem

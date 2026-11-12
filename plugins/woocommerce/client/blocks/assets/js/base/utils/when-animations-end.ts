@@ -6,13 +6,16 @@
  * Call it after the style change that starts the motion. If a transition turns around while the script waits, the
  * script waits for the new one too.
  *
- * @param element  The element that animates.
- * @param callback Runs one time, when no animation of the element is in progress.
+ * @param element          The element that animates.
+ * @param callback         Runs one time, when no animation of the element is in progress.
+ * @param options          Options.
+ * @param options.subtree  Also wait for the animations of the element's descendants, such as rows that stagger in.
  * @return A function that cancels the callback.
  */
 export const whenAnimationsEnd = (
 	element: Element | null | undefined,
-	callback: () => void
+	callback: () => void,
+	{ subtree = false }: { subtree?: boolean } = {}
 ): ( () => void ) => {
 	let isCancelled = false;
 
@@ -25,7 +28,7 @@ export const whenAnimationsEnd = (
 		const animations =
 			typeof element?.getAnimations === 'function'
 				? element
-						.getAnimations()
+						.getAnimations( { subtree } )
 						.filter(
 							( animation ) =>
 								( animation.playState === 'running' ||
