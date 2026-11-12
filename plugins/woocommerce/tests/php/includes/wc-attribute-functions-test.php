@@ -607,6 +607,27 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_update_attribute() keeps object types that other code attached to the taxonomy.
+	 */
+	public function test_wc_update_attribute_keeps_attached_object_types(): void {
+		$slug     = $this->get_unique_attribute_slug( 'types' );
+		$taxonomy = wc_attribute_taxonomy_name( $slug );
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'Color',
+				'slug' => $slug,
+			)
+		);
+		register_taxonomy_for_object_type( $taxonomy, 'post' );
+
+		wc_update_attribute( $attribute_id, array( 'name' => 'Colour' ) );
+
+		$this->assertContains( 'post', get_taxonomy( $taxonomy )->object_type, 'The attached object type should stay.' );
+		$this->assertSame( 'Colour', get_taxonomy( $taxonomy )->labels->singular_name, 'The taxonomy should use the new name.' );
+	}
+
+	/**
 	 * @testdox wc_update_attribute() registers the new taxonomy and removes the old one when the slug changes.
 	 */
 	public function test_wc_update_attribute_slug_rename_registers_the_new_taxonomy(): void {

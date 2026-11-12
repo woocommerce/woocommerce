@@ -272,7 +272,6 @@ class WC_Post_Types {
 	/**
 	 * Register one attribute taxonomy. Init and refresh_attribute_taxonomy() both use this.
 	 *
-	 * @since 11.4.0
 	 * @param stdClass   $tax        Attribute row from wc_get_attribute_taxonomies().
 	 * @param array|null $permalinks Permalink structure, so a loop reads it only once.
 	 * @return void
@@ -391,12 +390,19 @@ class WC_Post_Types {
 		}
 
 		// Unregister first, or the old query var and rewrite rules stay.
-		$name = wc_attribute_taxonomy_name( $tax->attribute_name );
-		if ( taxonomy_exists( $name ) ) {
+		$name         = wc_attribute_taxonomy_name( $tax->attribute_name );
+		$existing     = get_taxonomy( $name );
+		$object_types = $existing ? $existing->object_type : array();
+		if ( $existing ) {
 			unregister_taxonomy( $name );
 		}
 
 		self::register_attribute_taxonomy( $tax );
+
+		// Keep object types that other code attached during this request.
+		foreach ( $object_types as $object_type ) {
+			register_taxonomy_for_object_type( $name, $object_type );
+		}
 	}
 
 	/**

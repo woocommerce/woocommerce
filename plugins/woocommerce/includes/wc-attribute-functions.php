@@ -703,6 +703,10 @@ function wc_create_attribute( $args ) {
 			global $wc_product_attributes;
 			unset( $wc_product_attributes[ $old_taxonomy_name ] );
 			if ( taxonomy_exists( $old_taxonomy_name ) ) {
+				// Flush queued term counts while the old taxonomy still exists, as wc_delete_attribute() does.
+				if ( wp_defer_term_counting() ) {
+					wp_update_term_count( array(), '', true );
+				}
 				unregister_taxonomy( $old_taxonomy_name );
 			}
 		}//end if
