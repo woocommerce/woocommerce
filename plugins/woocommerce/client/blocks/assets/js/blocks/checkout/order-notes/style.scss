@@ -1,5 +1,14 @@
 .wc-block-checkout__add-note {
 	display: flex;
 	flex-direction: column;
-	gap: $gap;
+
+	// A margin, not a gap, so that the space closes with the note when it collapses.
+	> .wc-block-components-textarea {
+		margin-top: $gap;
+	}
+}
+
+// The note grows in and collapses out with its checkbox.
+:where(.wp-block-woocommerce-checkout) .wc-block-checkout__add-note > .wc-block-components-textarea {
+	@include motion-collapse;
 }
