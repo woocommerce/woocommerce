@@ -102,6 +102,7 @@ class AgentReadiness {
 				$simple['variation_attributes_not_set'],
 				$simple['missing_variation_images'],
 				$simple['title_too_long'],
+				$simple['image_alt_text'],
 			) as $rule
 		) {
 			$rules[ $rule->id() ] = $rule;
@@ -113,7 +114,8 @@ class AgentReadiness {
 	 * Field and effect per channel for each check that runs. With a stored
 	 * rules file, the file is the list: an id it leaves out does not run, an
 	 * id code does not know is dropped, and an id whose entry is malformed
-	 * runs with its bundled channels. With no file, the bundled checks
+	 * runs with its bundled channels. A check no channel asks for is named
+	 * with an empty channel map. With no file, the bundled checks
 	 * run. The woocommerce_agent_readiness_rules filter runs last, and a check
 	 * whose id is missing from the filtered array does not run.
 	 *
@@ -150,7 +152,15 @@ class AgentReadiness {
 		 */
 		$filtered = apply_filters( 'woocommerce_agent_readiness_rules', $defaults );
 
-		return is_array( $filtered ) ? $this->without_empty( $this->sanitize_channel_rules( $filtered, $bundled ) ) : $defaults;
+		if ( ! is_array( $filtered ) ) {
+			return $defaults;
+		}
+		// A check left with no valid channel doesn't run, as if the filter had removed it, unless it never had one.
+		return array_filter(
+			$this->sanitize_channel_rules( $filtered, $bundled ),
+			static fn( array $channels, $id ): bool => ! empty( $channels ) || empty( $bundled[ $id ] ),
+			ARRAY_FILTER_USE_BOTH
+		);
 	}
 
 	/**
@@ -181,21 +191,6 @@ class AgentReadiness {
 			}
 		}
 		return $rules;
-	}
-
-	/**
-	 * Drop checks left with no valid channel.
-	 *
-	 * @param array<string, array<string, array{field:string,effect:string}>> $rules Channel map by check id.
-	 * @return array<string, array<string, array{field:string,effect:string}>>
-	 */
-	private function without_empty( array $rules ): array {
-		return array_filter(
-			$rules,
-			static function ( array $channels ): bool {
-				return array() !== $channels;
-			}
-		);
 	}
 
 	/**
