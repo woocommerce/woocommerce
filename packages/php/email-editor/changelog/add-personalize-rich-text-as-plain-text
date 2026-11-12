@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add Personalizer::personalize_rich_text_as_plain_text() to personalize a rich-text subject or preheader as plain text.

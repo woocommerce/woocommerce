@@ -287,6 +287,7 @@ Main engine for replacing tags with values in email content.
 -   `set_context(array $context)`: Set the personalization context
 -   `get_context()`: Get the current context
 -   `personalize_content(string $content, string $rendering_context = Personalizer::RENDERING_CONTEXT_HTML)`: Process and personalize content; pass `Personalizer::RENDERING_CONTEXT_TEXT` for plain-text content such as subjects or plain-text bodies
+-   `personalize_rich_text_as_plain_text(string $rich_text)`: Personalize a field the editor stores as rich text, such as a subject or preheader, and return it as plain text in one pass
 -   `set_value_interceptor(?callable $interceptor)`: Register a callback intercepting each resolved value before it is written, or clear it with `null`; returns the previously registered interceptor (see [Value Interceptor](#value-interceptor))
 
 **Example Usage:**
