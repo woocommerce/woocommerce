@@ -1,0 +1,56 @@
+.wc-create-shipping-label {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+	padding-block: 4px;
+
+	&__icon {
+		flex-shrink: 0;
+		fill: currentColor;
+	}
+
+	&__text {
+		flex: 1 1 auto;
+		margin: 0;
+		font-size: 14px;
+		font-weight: 600;
+		color: $gray-900;
+	}
+
+	&__button.button {
+		margin-inline-start: auto;
+	}
+}
+
+.woocommerce-create-shipping-label-modal {
+	max-width: 640px;
+
+	&__intro {
+		margin-block: 0 16px;
+		color: $gray-700;
+	}
+
+	.woocommerce-recommended-shipping-extensions {
+		border: 1px solid $gray-200;
+		border-radius: 2px;
+
+		.woocommerce-list {
+			margin: 0;
+		}
+
+		.woocommerce-list__item:not(:last-child) {
+			border-block-end: 1px solid $gray-200;
+		}
+	}
+
+	.components-notice {
+		margin-inline: 0;
+		margin-block-start: 16px;
+	}
+
+	&__marketplace-link {
+		margin-block: 16px 0;
+		color: $gray-700;
+	}
+}

@@ -16,7 +16,7 @@ import WooIcon from './woo-icon.svg';
 const WOOCOMMERCE_SHIPPING_PLUGIN_SLUG = 'woocommerce-shipping';
 
 export type ShippingPartnerTrackingProps = {
-	context: 'settings';
+	context: 'settings' | 'order';
 	country: string;
 	plugins: string;
 };
@@ -45,10 +45,12 @@ const WooCommerceShippingItem = ( {
 		};
 
 		recordEvent( 'shipping_partner_click', trackingBase );
-		recordEvent( 'settings_shipping_recommendation_setup_click', {
-			plugin: WOOCOMMERCE_SHIPPING_PLUGIN_SLUG,
-			action: isPluginInstalled ? 'activate' : 'install',
-		} );
+		if ( tracking?.context !== 'order' ) {
+			recordEvent( 'settings_shipping_recommendation_setup_click', {
+				plugin: WOOCOMMERCE_SHIPPING_PLUGIN_SLUG,
+				action: isPluginInstalled ? 'activate' : 'install',
+			} );
+		}
 
 		const action = isPluginInstalled ? onActivateClick : onInstallClick;
 		const eventName = isPluginInstalled
@@ -67,7 +69,7 @@ const WooCommerceShippingItem = ( {
 						: __(
 								'WooCommerce Shipping is installed!',
 								'woocommerce'
-							),
+						  ),
 					{}
 				);
 			},
