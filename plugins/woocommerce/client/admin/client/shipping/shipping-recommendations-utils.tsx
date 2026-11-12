@@ -3,7 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Children } from '@wordpress/element';
+import type { ReactNode } from 'react';
 import { Text } from '@woocommerce/experimental';
+// Keeps the existing Settings > Shipping card layout; migrating it away from CardFooter is a separate change.
+// eslint-disable-next-line @wordpress/use-recommended-components
 import { CardFooter } from '@wordpress/components';
 
 /**
@@ -26,7 +29,7 @@ export const ShippingRecommendationsList = ( {
 	children,
 	dismissState,
 }: {
-	children: React.ReactNode;
+	children: ReactNode;
 	dismissState: DismissState;
 } ) => {
 	const { isDismissed, onDismiss } = dismissState;

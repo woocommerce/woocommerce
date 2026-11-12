@@ -3,7 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
-import { Button, ExternalLink } from '@wordpress/components';
+import { Button } from '@wordpress/components';
+import { Link } from '@wordpress/ui';
 import { Pill } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -102,9 +103,12 @@ const WooCommerceShippingItem = ( {
 						'woocommerce'
 					) }
 					<br />
-					<ExternalLink href="https://woocommerce.com/woocommerce-shipping/">
+					<Link
+						openInNewTab
+						href="https://woocommerce.com/woocommerce-shipping/"
+					>
 						{ __( 'Learn more', 'woocommerce' ) }
-					</ExternalLink>
+					</Link>
 				</span>
 			</div>
 			<div className="woocommerce-list__item-after">

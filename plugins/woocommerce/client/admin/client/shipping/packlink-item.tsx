@@ -3,7 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
-import { Button, ExternalLink } from '@wordpress/components';
+import { Button } from '@wordpress/components';
+import { Link } from '@wordpress/ui';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -91,9 +92,12 @@ const PacklinkItem = ( {
 						'woocommerce'
 					) }
 					<br />
-					<ExternalLink href="https://woocommerce.com/products/packlink-pro/">
+					<Link
+						openInNewTab
+						href="https://woocommerce.com/products/packlink-pro/"
+					>
 						{ __( 'Learn more', 'woocommerce' ) }
-					</ExternalLink>
+					</Link>
 				</span>
 			</div>
 			<div className="woocommerce-list__item-after">
