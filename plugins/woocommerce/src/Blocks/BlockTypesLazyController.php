@@ -269,7 +269,6 @@ final class BlockTypesLazyController {
 			'product-sku'                => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSKU::class,
 			'product-sale-badge'         => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSaleBadge::class,
 			'product-summary'            => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSummary::class,
-			'product-tag'                => \Automattic\WooCommerce\Blocks\BlockTypes\ProductTag::class,
 			'product-meta'               => \Automattic\WooCommerce\Blocks\BlockTypes\ProductMeta::class,
 			'product-average-rating'     => \Automattic\WooCommerce\Blocks\BlockTypes\ProductAverageRating::class,
 			'product-rating'             => \Automattic\WooCommerce\Blocks\BlockTypes\ProductRating::class,
