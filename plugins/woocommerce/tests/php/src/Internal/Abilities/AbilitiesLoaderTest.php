@@ -47,6 +47,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/order-add-note',
 		'woocommerce/order-notes-query',
 		'woocommerce/payment-gateways-query',
+		'woocommerce/customers-query',
 	);
 
 	/**
@@ -331,6 +332,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'destructive' => false,
 			),
 			'woocommerce/payment-gateways-query'   => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/customers-query'        => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
@@ -1019,6 +1025,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			),
 			'payment-gateways-query' => array(
 				'woocommerce/payment-gateways-query',
+				array(),
+			),
+			'customers-query'        => array(
+				'woocommerce/customers-query',
 				array(),
 			),
 		);
