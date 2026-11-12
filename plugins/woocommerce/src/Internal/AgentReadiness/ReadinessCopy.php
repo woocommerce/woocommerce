@@ -50,6 +50,29 @@ final class ReadinessCopy {
 	}
 
 	/**
+	 * What Sales readiness says about where llms.txt comes from (StoreOutputChecks::llms_txt_source):
+	 * a line for a served file, or the fix for one that isn't served. Null for '' or an unknown source.
+	 *
+	 * @param string $source Source of the served llms.txt.
+	 * @return array{pass?:string,fix?:string}|null
+	 */
+	public static function llms_txt_source( string $source ): ?array {
+		switch ( $source ) {
+			case 'woocommerce':
+				return array( 'pass' => __( 'WooCommerce creates it from your store’s details.', 'woocommerce' ) );
+			case 'file':
+				return array( 'pass' => __( 'It’s a file in your site’s root folder, so WooCommerce doesn’t add its own.', 'woocommerce' ) );
+			case 'other':
+				return array( 'pass' => __( 'Another plugin or your host provides it, so WooCommerce doesn’t add its own.', 'woocommerce' ) );
+			case 'disabled':
+				return array( 'fix' => __( 'WooCommerce’s llms.txt is turned off by code on your store (the woocommerce_enable_llms_txt filter). Remove that code, or turn on llms.txt in your SEO plugin.', 'woocommerce' ) );
+			case 'not_reached':
+				return array( 'fix' => __( 'WooCommerce serves one when nothing else does, so something stops /llms.txt from reaching your store. Ask your host whether a server rule or cache blocks it.', 'woocommerce' ) );
+		}
+		return null;
+	}
+
+	/**
 	 * A failing product check's copy: what to do, why it matters, and the fix line. With up to three
 	 * products the title names them ("Add a brand to Blue hoodie and Red cap"); one product without a
 	 * known name is "a product".

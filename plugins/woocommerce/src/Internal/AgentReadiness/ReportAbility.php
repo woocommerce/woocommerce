@@ -156,7 +156,7 @@ class ReportAbility implements AbilityDefinition {
 									),
 									'source'   => array(
 										'type'        => 'string',
-										'description' => __( 'On a failed UCP version check: the version the store serves. On a failed UCP endpoint check: the status and content type catalog search answered with, such as 403 text/html. Otherwise empty.', 'woocommerce' ),
+										'description' => __( 'On a failed UCP version check: the version the store serves. On a failed UCP endpoint check: the status and content type catalog search answered with, such as 403 text/html. On the llms.txt check: woocommerce, file or other when served; disabled or not_reached when not. Otherwise empty.', 'woocommerce' ),
 									),
 								),
 							),
