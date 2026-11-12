@@ -4227,7 +4227,7 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 }
 
 /**
- * Re-enable autoloading for options whose settings definitions reverted it on save after the 10.5.0 migration.
+ * Autoload frequently read options that existing stores may still have as autoload off.
  *
  * @since 11.4.0
  */
