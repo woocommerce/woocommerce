@@ -69,8 +69,6 @@ class EarlierVariationMatch {
 				return true;
 			}
 		}
-
-		return false;
 	}
 
 	/**
