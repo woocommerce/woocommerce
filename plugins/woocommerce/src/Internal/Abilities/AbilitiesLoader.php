@@ -25,7 +25,9 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewReply;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
 
@@ -59,6 +61,8 @@ class AbilitiesLoader {
 		ProductsQuery::class,
 		ProductTermsQuery::class,
 		ProductReviewsQuery::class,
+		ProductReviewUpdate::class,
+		ProductReviewReply::class,
 		ProductAttributesQuery::class,
 		ProductAttributeCreate::class,
 		ProductCreate::class,
