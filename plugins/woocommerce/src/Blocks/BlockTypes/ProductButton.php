@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Utilities\CatalogProductButton;
 use Automattic\WooCommerce\Internal\Utilities\InCartQuantity;
 
 /**
@@ -171,6 +172,17 @@ class ProductButton extends AbstractBlock {
 		$default_quantity = 1;
 		if ( ! $is_descendant_of_add_to_cart_form && isset( $args['quantity'] ) && is_numeric( $args['quantity'] ) ) {
 			$default_quantity = wc_stock_amount( (float) $args['quantity'] );
+		}
+
+		if ( ! $is_descendant_of_add_to_cart_form ) {
+			$button_data      = CatalogProductButton::get_data( $product, $default_quantity );
+			$add_to_cart_text = $button_data['text'];
+			if ( isset( $add_to_cart_url, $args['attributes']['href'] ) && esc_url( $add_to_cart_url ) === $args['attributes']['href'] ) {
+				$args['attributes']['href'] = esc_url( $button_data['url'] );
+			}
+			if ( ( $args['attributes']['aria-label'] ?? null ) === $button_data['original_description'] ) {
+				$args['attributes']['aria-label'] = $button_data['description'];
+			}
 		}
 
 		$context = array(

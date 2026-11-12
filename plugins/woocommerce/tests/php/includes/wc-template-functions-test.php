@@ -348,10 +348,15 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		try {
 			$markup = $this->render_loop_add_to_cart( $product, array( 'quantity' => 20 ) );
 			$this->assertStringContainsString( 'data-quantity="20"', $markup, 'Explicit quantity arguments should be preserved.' );
+			$this->assertStringContainsString( '>Add 20 to cart</a>', $markup );
+			$this->assertStringContainsString( 'quantity=20', $markup );
 
 			add_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
 			$markup = $this->render_loop_add_to_cart( $product );
 			$this->assertStringContainsString( 'data-quantity="30"', $markup, 'Extensions should still be able to override the quantity.' );
+			$this->assertStringContainsString( '>Add 30 to cart</a>', $markup );
+			$this->assertStringContainsString( 'quantity=30', $markup );
+			$this->assertStringContainsString( 'aria-label="Add 30 to cart:', $markup );
 		} finally {
 			remove_filter( 'woocommerce_quantity_input_min', $minimum_filter );
 			remove_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );

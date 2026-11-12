@@ -65,14 +65,6 @@ class WC_Product_Simple extends WC_Product {
 	public function add_to_cart_text() {
 		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Add to cart', 'woocommerce' ) : __( 'Read more', 'woocommerce' );
 
-		if ( $this->is_purchasable() && $this->is_in_stock() && ! $this->is_sold_individually() ) {
-			$quantity = $this->get_min_purchase_quantity();
-			if ( $quantity > 1 ) {
-				/* translators: %s: Quantity of the product to add to the cart. */
-				$text = sprintf( __( 'Add %s to cart', 'woocommerce' ), $quantity );
-			}
-		}
-
 		return apply_filters( 'woocommerce_product_add_to_cart_text', $text, $this );
 	}
 
@@ -86,14 +78,6 @@ class WC_Product_Simple extends WC_Product {
 		/* translators: %s: Product title */
 		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Add to cart: &ldquo;%s&rdquo;', 'woocommerce' ) : __( 'Read more about &ldquo;%s&rdquo;', 'woocommerce' );
 		$text = sprintf( $text, $this->get_name() );
-
-		if ( $this->is_purchasable() && $this->is_in_stock() && ! $this->is_sold_individually() ) {
-			$quantity = $this->get_min_purchase_quantity();
-			if ( $quantity > 1 ) {
-				/* translators: 1: Quantity of the product to add to the cart, 2: Product title. */
-				$text = sprintf( __( 'Add %1$s to cart: &ldquo;%2$s&rdquo;', 'woocommerce' ), $quantity, $this->get_name() );
-			}
-		}
 
 		/**
 		 * Filters the add to cart button description used in accessible labels.

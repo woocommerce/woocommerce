@@ -313,4 +313,90 @@ class ProductButton extends \WP_UnitTestCase {
 
 		return $context['quantityToAdd'];
 	}
+
+	/**
+	 * @testdox Quantity overrides keep catalog text, accessible labels, and non-AJAX links consistent.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $ajax_enabled Whether AJAX is enabled.
+	 */
+	public function test_quantity_override_updates_button_data( bool $ajax_enabled ): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', $ajax_enabled ? 'yes' : 'no' );
+		$product = WC_Helper_Product::create_simple_product();
+		$minimum = static fn() => 10;
+		$filter  = static function ( $args ) {
+			$args['quantity'] = 30;
+			return $args;
+		};
+		add_filter( 'woocommerce_quantity_input_min', $minimum );
+		add_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		try {
+			$markup = $this->render_product_button( $product );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum );
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		}
+		$this->assertSame( 30, $this->get_quantity_to_add( $markup ) );
+		$this->assertStringContainsString( '>Add 30 to cart</span>', $markup );
+		$this->assertStringContainsString( 'aria-label="Add 30 to cart:', $markup );
+		if ( ! $ajax_enabled ) {
+			$this->assertStringContainsString( 'quantity=30', $markup );
+		}
+	}
+
+	/**
+	 * @testdox Buttons inside quantity forms retain their quantity-independent accessible name.
+	 */
+	public function test_form_button_retains_description(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$minimum = static fn() => 10;
+		add_filter( 'woocommerce_quantity_input_min', $minimum );
+		try {
+			$block  = new \WP_Block(
+				array(
+					'blockName' => 'woocommerce/product-button',
+					'attrs'     => array(),
+				),
+				array(
+					'postId' => $product->get_id(),
+					'woocommerce/isDescendantOfAddToCartWithOptions' => true,
+				)
+			);
+			$markup = $block->render();
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum );
+		}
+		$this->assertStringContainsString( '>Add to cart</span>', $markup );
+		$this->assertStringContainsString( 'Add to cart:', $this->get_button_aria_label( $markup ) );
+		$this->assertStringNotContainsString( 'Add 10 to cart', $markup );
+	}
+
+	/**
+	 * @testdox Legacy grids use their final quantity in both AJAX data and the button label and link.
+	 * @testWith [10]
+	 *           [30]
+	 * @param int $quantity Final grid quantity.
+	 */
+	public function test_legacy_grid_quantity( int $quantity ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$minimum = static fn() => 10;
+		$filter  = static function ( $attributes ) use ( $quantity ) {
+			$attributes['data-quantity'] = $quantity;
+			return $attributes;
+		};
+		add_filter( 'woocommerce_quantity_input_min', $minimum );
+		if ( 30 === $quantity ) {
+			add_filter( 'woocommerce_blocks_product_grid_add_to_cart_attributes', $filter );
+		}
+		try {
+			$markup = do_blocks( '<!-- wp:woocommerce/handpicked-products {"products":[' . $product->get_id() . ']} /-->' );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum );
+			remove_filter( 'woocommerce_blocks_product_grid_add_to_cart_attributes', $filter );
+		}
+		$this->assertStringContainsString( 'data-quantity="' . $quantity . '"', $markup );
+		$this->assertStringContainsString( '>Add ' . $quantity . ' to cart</a>', $markup );
+		$this->assertStringContainsString( 'quantity=' . $quantity, $markup );
+		$this->assertStringContainsString( 'aria-label="Add ' . $quantity . ' to cart:', $markup );
+	}
 }
