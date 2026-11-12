@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductFailures;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductsList;
+use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -337,6 +338,54 @@ class ProductsListTest extends WC_Unit_Test_Case {
 			$this->assertSame( '', $off->get( 'meta_query' ), 'The filter stays off with the feature flag' );
 		} finally {
 			// A failed assertion must not leave the next test on an admin products screen.
+			list( $pagenow, $wp_the_query ) = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			unset( $GLOBALS['current_screen'], $_GET[ ProductsList::FILTER_PARAM ] );
+		}
+	}
+
+	/**
+	 * @testdox The Available and Hidden filters list the products their counts count: only Hidden is hidden.
+	 */
+	public function test_visibility_filters(): void {
+		global $pagenow, $wp_the_query;
+		$previous = array( $pagenow, $wp_the_query );
+		$ids      = array();
+		foreach ( array( 'visible', 'catalog', 'search', 'hidden' ) as $visibility ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_catalog_visibility( $visibility );
+			$product->save();
+			$ids[ $visibility ] = $product->get_id();
+		}
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Only is_admin() reads it here.
+		$GLOBALS['current_screen'] = new class() {
+			/**
+			 * Whether this is an admin screen.
+			 */
+			public function in_admin(): bool {
+				return true;
+			}
+		};
+		$pagenow                   = 'edit.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$listed                    = function ( string $filter ) use ( &$wp_the_query ): array {
+			$_GET[ ProductsList::FILTER_PARAM ] = $filter;
+			$query                              = new \WP_Query();
+			$query->set( 'post_type', 'product' );
+			$query->set( 'post_status', 'publish' );
+			$query->set( 'fields', 'ids' );
+			$query->set( 'posts_per_page', -1 );
+			$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$this->sut->apply_filter( $query );
+			$found = array_map( 'intval', $query->get_posts() );
+			sort( $found );
+			return $found;
+		};
+
+		try {
+			$available = array( $ids['visible'], $ids['catalog'], $ids['search'] );
+			sort( $available );
+			$this->assertSame( $available, $listed( ProductScan::COUNT_AVAILABLE ) );
+			$this->assertSame( array( $ids['hidden'] ), $listed( ProductScan::COUNT_HIDDEN ) );
+		} finally {
 			list( $pagenow, $wp_the_query ) = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			unset( $GLOBALS['current_screen'], $_GET[ ProductsList::FILTER_PARAM ] );
 		}

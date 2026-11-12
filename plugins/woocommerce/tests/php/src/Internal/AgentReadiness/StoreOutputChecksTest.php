@@ -446,22 +446,27 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A shop-only product is sampled. A newer search-only product is not.
+	 * @testdox The sampled product is one the scan checks: a search-only product is sampled before an older shop-only one, a newer Hidden product is not.
 	 */
-	public function test_product_checks_include_shop_only_products(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_catalog_visibility( 'catalog' );
-		$product->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'image.jpg' ) ) );
-		$product->set_date_created( time() - HOUR_IN_SECONDS );
-		$product->save();
-		$product     = wc_get_product( $product->get_id() );
+	public function test_product_checks_sample_checked_products(): void {
+		$shop_only = WC_Helper_Product::create_simple_product();
+		$shop_only->set_catalog_visibility( 'catalog' );
+		$shop_only->set_date_created( time() - 2 * HOUR_IN_SECONDS );
+		$shop_only->save();
 		$search_only = WC_Helper_Product::create_simple_product();
 		$search_only->set_catalog_visibility( 'search' );
+		$search_only->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'image.jpg' ) ) );
+		$search_only->set_date_created( time() - HOUR_IN_SECONDS );
 		$search_only->save();
+		$search_only = wc_get_product( $search_only->get_id() );
+		$hidden      = WC_Helper_Product::create_simple_product();
+		$hidden->set_catalog_visibility( 'hidden' );
+		$hidden->save();
 		$this->serve(
 			array(
-				self::path_of( $product )     => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ),
-				self::path_of( $search_only ) => array( 200, self::page_with( array() ) ),
+				self::path_of( $shop_only )   => array( 200, self::page_with( array() ) ),
+				self::path_of( $search_only ) => array( 200, self::page_with( array( self::core_product_jsonld( $search_only ) ) ) ),
+				self::path_of( $hidden )      => array( 200, self::page_with( array() ) ),
 			)
 		);
 

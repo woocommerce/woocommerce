@@ -1474,7 +1474,8 @@ class StoreOutputChecks {
 		$product = null;
 		foreach ( $ids as $id ) {
 			$candidate = wc_get_product( (int) $id );
-			if ( $candidate instanceof \WC_Product && $candidate->is_visible() ) {
+			// A product the scan checks, "Search results only" included.
+			if ( $candidate instanceof \WC_Product && ProductScan::covers( $candidate ) ) {
 				$product = $candidate;
 				break;
 			}

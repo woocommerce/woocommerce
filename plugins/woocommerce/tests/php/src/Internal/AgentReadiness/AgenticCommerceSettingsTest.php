@@ -750,7 +750,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox In Fix first, store pages agents can't reach stop every sale; other listing checks, such as structured data, keep products off a channel.
+	 * @testdox In Fix first, store pages agents can't reach stop every sale; any other check that blocks listing keeps products off a channel.
 	 */
 	public function test_output_fix_first_tiers_store_checks(): void {
 		$this->make_every_step_pass();
@@ -772,7 +772,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			array(
 				'generated_at' => gmdate( 'c' ),
 				'products'     => 4,
-				'store_checks' => array( $output( 'product_shipping_schema', 'buy' ), $output( 'pages_public', 'access' ) ),
+				'store_checks' => array( $output( 'other_listing_check', 'understand' ), $output( 'pages_public', 'access' ) ),
 				'channels'     => array(),
 				'checks'       => array(),
 			)
@@ -782,7 +782,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				array( 'Stops every sale', 'Let visitors open store pages without signing in', 'Required' ),
-				array( 'Products that can\'t be listed', 'product_shipping_schema label', 'All products' ),
+				array( 'Products that can\'t be listed', 'other_listing_check label', 'All products' ),
 			),
 			array_map( static fn( array $item ): array => array( $item['tier'], $item['title'], $item['impact']['text'] ?? null ), $items ),
 			'Store pages AI assistants can\'t reach are a blocker, so Required; a check without copy keeps the report\'s title'
