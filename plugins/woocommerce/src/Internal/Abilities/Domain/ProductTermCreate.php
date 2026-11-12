@@ -80,7 +80,7 @@ class ProductTermCreate extends AbstractDomainAbility implements AbilityDefiniti
 	 */
 	public static function execute( array $input ) {
 		$taxonomy = $input['taxonomy'];
-		if ( ! taxonomy_exists( $taxonomy ) ) {
+		if ( ! self::is_writable_product_taxonomy( $taxonomy ) ) {
 			return self::get_unknown_taxonomy_error( $taxonomy );
 		}
 

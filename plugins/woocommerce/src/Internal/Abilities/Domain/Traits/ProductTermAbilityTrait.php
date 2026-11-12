@@ -62,6 +62,18 @@ trait ProductTermAbilityTrait {
 	}
 
 	/**
+	 * Check that a write targets a product taxonomy, where a `pa_` one must be a registered global attribute.
+	 *
+	 * Another plugin can register its own `pa_` taxonomy, which the input pattern alone would let through.
+	 *
+	 * @param string $taxonomy Taxonomy name.
+	 * @return bool
+	 */
+	private static function is_writable_product_taxonomy( string $taxonomy ): bool {
+		return 0 === strpos( $taxonomy, 'pa_' ) ? taxonomy_is_product_attribute( $taxonomy ) : taxonomy_exists( $taxonomy );
+	}
+
+	/**
 	 * Get the input schemas of the term fields that create and update both write.
 	 *
 	 * @return array

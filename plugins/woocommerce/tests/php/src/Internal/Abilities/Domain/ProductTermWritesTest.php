@@ -314,6 +314,40 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse to write a pa_ taxonomy that is not a global attribute, and leave its terms alone.
+	 */
+	public function test_refuses_pa_taxonomy_that_is_not_an_attribute(): void {
+		register_taxonomy( 'pa_other_plugin', 'product' );
+		$term = self::factory()->term->create_and_get(
+			array(
+				'taxonomy' => 'pa_other_plugin',
+				'name'     => 'Kept',
+			)
+		);
+
+		$create = $this->create(
+			array(
+				'taxonomy' => 'pa_other_plugin',
+				'name'     => 'Added',
+			)
+		);
+		$update = $this->update(
+			array(
+				'taxonomy' => 'pa_other_plugin',
+				'id'       => $term->term_id,
+				'name'     => 'Renamed',
+			)
+		);
+
+		foreach ( array( $create, $update ) as $result ) {
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_ability_product_term_taxonomy_unknown', $result->get_error_code() );
+		}
+		$this->assertFalse( get_term_by( 'name', 'Added', 'pa_other_plugin' ) );
+		$this->assertSame( 'Kept', get_term( $term->term_id, 'pa_other_plugin' )->name );
+	}
+
+	/**
 	 * @testdox Should rename, re-slug and move a category, and keep the fields it is not sent.
 	 */
 	public function test_updates_category(): void {
