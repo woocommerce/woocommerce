@@ -9,21 +9,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
-	 * The default URI.
-	 *
-	 * @var string
-	 */
-	private static $default_uri;
-
-	/**
-	 * Store the default URI.
-	 */
-	public static function setUpBeforeClass(): void {
-		parent::setUpBeforeClass();
-		self::$default_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-	}
-
-	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
@@ -31,14 +16,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->disable_cogs_feature();
 		remove_all_filters( 'woocommerce_load_cogs_value' );
 		remove_all_filters( 'woocommerce_save_cogs_value' );
-	}
-
-	/**
-	 * Restore the default URI.
-	 */
-	public static function tearDownAfterClass(): void {
-		parent::tearDownAfterClass();
-		$_SERVER['REQUEST_URI'] = self::$default_uri;
 	}
 
 	/**

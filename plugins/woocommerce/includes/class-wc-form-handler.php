@@ -392,6 +392,78 @@ class WC_Form_Handler {
 	}
 
 	/**
+	 * Get the address type to fill an empty edit address form from, after a copy that couldn't be saved as is.
+	 *
+	 * Nothing is saved until the customer submits the form, which has its own nonce, and it only shows the
+	 * current customer's own addresses, so this read-only request needs no nonce.
+	 *
+	 * @since 11.4.0
+	 * @internal For use by WooCommerce only.
+	 *
+	 * @param string $address_type Address type being edited; 'billing' or 'shipping'.
+	 * @return string The other address type, or an empty string when the form keeps its saved values.
+	 */
+	public static function get_copy_address_form_source( $address_type ) {
+		$source_type = isset( $_GET['copy-address-from'] ) ? sanitize_key( wp_unslash( $_GET['copy-address-from'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only, see the description above.
+
+		if ( '' === $source_type || self::get_copy_address_source_type( $address_type ) !== $source_type ) {
+			return '';
+		}
+
+		if ( ! self::can_copy_address( $address_type, $source_type, get_current_user_id() ) ) {
+			return '';
+		}
+
+		$source_country = ( new WC_Customer( get_current_user_id() ) )->{"get_{$source_type}_country"}( 'edit' );
+
+		if ( ! self::is_copy_address_country_allowed( $address_type, $source_country ) ) {
+			return '';
+		}
+
+		return $source_type;
+	}
+
+	/**
+	 * Check that a copied address's country is available for the address type it is copied into.
+	 *
+	 * @param string $target_type Address type being filled.
+	 * @param string $country     Country code of the copied address.
+	 * @return bool
+	 */
+	private static function is_copy_address_country_allowed( string $target_type, string $country ): bool {
+		$countries = 'shipping' === $target_type ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
+
+		return array_key_exists( $country, $countries );
+	}
+
+	/**
+	 * Get the address type that a copy into the given address type reads from.
+	 *
+	 * @param mixed $target_type Address type being filled.
+	 * @return string 'shipping' for 'billing', 'billing' for 'shipping', or an empty string for any other value.
+	 */
+	private static function get_copy_address_source_type( $target_type ): string {
+		$source_types = array(
+			'billing'  => 'shipping',
+			'shipping' => 'billing',
+		);
+
+		return is_string( $target_type ) ? ( $source_types[ $target_type ] ?? '' ) : '';
+	}
+
+	/**
+	 * Check that the target address is empty and the source address is saved, so a copy can't overwrite an address.
+	 *
+	 * @param string $target_type Address type being filled.
+	 * @param string $source_type Address type being copied.
+	 * @param int    $user_id     Customer ID.
+	 * @return bool
+	 */
+	private static function can_copy_address( string $target_type, string $source_type, int $user_id ): bool {
+		return ! wc_get_account_formatted_address( $target_type, $user_id ) && wc_get_account_formatted_address( $source_type, $user_id );
+	}
+
+	/**
 	 * Copy the saved billing address into an empty shipping address, or vice versa, from the My Account addresses page.
 	 *
 	 * The target address is only written when it has not been set up yet, so a stale link cannot overwrite an address.
@@ -421,14 +493,11 @@ class WC_Form_Handler {
 		}
 
 		$target_type  = sanitize_key( wp_unslash( $_GET['copy-address'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified below.
-		$source_types = array(
-			'billing'  => 'shipping',
-			'shipping' => 'billing',
-		);
+		$source_type  = self::get_copy_address_source_type( $target_type );
 		$redirect_url = wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) );
 		$nonce_value  = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
 
-		if ( ! isset( $source_types[ $target_type ] ) ) {
+		if ( '' === $source_type ) {
 			wc_add_notice( __( 'The address could not be copied. Please try again.', 'woocommerce' ), 'error' );
 			wp_safe_redirect( $redirect_url );
 			exit;
@@ -440,18 +509,15 @@ class WC_Form_Handler {
 			exit;
 		}
 
-		$source_type = $source_types[ $target_type ];
-
-		if ( wc_get_account_formatted_address( $target_type, $user_id ) || ! wc_get_account_formatted_address( $source_type, $user_id ) ) {
+		if ( ! self::can_copy_address( $target_type, $source_type, $user_id ) ) {
 			wp_safe_redirect( $redirect_url );
 			exit;
 		}
 
-		$customer         = new WC_Customer( $user_id );
-		$source_country   = 'billing' === $source_type ? $customer->get_billing_country( 'edit' ) : $customer->get_shipping_country( 'edit' );
-		$target_countries = 'shipping' === $target_type ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
+		$customer       = new WC_Customer( $user_id );
+		$source_country = 'billing' === $source_type ? $customer->get_billing_country( 'edit' ) : $customer->get_shipping_country( 'edit' );
 
-		if ( ! array_key_exists( $source_country, $target_countries ) ) {
+		if ( ! self::is_copy_address_country_allowed( $target_type, $source_country ) ) {
 			wc_add_notice( __( 'This address uses a country that is not available for the other address type. Please add the address manually.', 'woocommerce' ), 'error' );
 			wp_safe_redirect( $redirect_url );
 			exit;
@@ -465,6 +531,12 @@ class WC_Form_Handler {
 			$setter     = "set_{$target_key}";
 			// Read stored values, so getter filters are not saved into the other address.
 			$value = is_callable( array( $customer, $getter ) ) ? $customer->{$getter}( 'edit' ) : $customer->get_meta( $source_key, true, 'edit' );
+
+			// Keep what the target address already has, such as a billing email or phone, when the copied address has none.
+			if ( '' === $value ) {
+				$target_getter = "get_{$target_key}";
+				$value         = is_callable( array( $customer, $target_getter ) ) ? $customer->{$target_getter}( 'edit' ) : $customer->get_meta( $target_key, true, 'edit' );
+			}
 
 			// Shipping has no email field, so fall back to the account email like the edit address form does.
 			if ( 'billing_email' === $target_key && ! $value ) {
@@ -496,7 +568,8 @@ class WC_Form_Handler {
 		$field_values    = array();
 
 		foreach ( array_keys( $checkout_fields->get_fields_for_location( 'address' ) ) as $field_key ) {
-			$field_values[ $field_key ] = $checkout_fields->get_field_from_object( $field_key, $customer, $source_type, false );
+			$value                      = $checkout_fields->get_field_from_object( $field_key, $customer, $source_type, false );
+			$field_values[ $field_key ] = '' === $value ? $checkout_fields->get_field_from_object( $field_key, $customer, $target_type, false ) : $value;
 		}
 
 		// Validate the additional fields against the target address, like the edit address form does.
@@ -514,10 +587,10 @@ class WC_Form_Handler {
 		}
 
 		/**
-		 * Fires before a customer's copied address is saved, so extensions can reject it by adding an error notice.
+		 * Fires before a customer's copied address is saved, so extensions can stop the save by adding an error notice.
 		 *
-		 * Unlike woocommerce_after_save_address_validation, there's no submitted form, so read the copied values from
-		 * the customer instead of the request.
+		 * There's no submitted form, so read the copied values from the customer instead of the request. A stopped copy
+		 * opens the edit address form filled with the copied address, and saving it runs woocommerce_after_save_address_validation.
 		 *
 		 * @since 11.4.0
 		 *
@@ -528,8 +601,10 @@ class WC_Form_Handler {
 		 */
 		do_action( 'woocommerce_before_copy_address_save', $user_id, $target_type, $source_type, $customer );
 
+		// Open the edit form filled with the copied address instead, so the customer only fixes what the errors point to.
 		if ( 0 < wc_notice_count( 'error' ) ) {
-			wp_safe_redirect( $redirect_url );
+			wc_add_notice( __( 'Review the copied address below, then save it.', 'woocommerce' ), 'notice' );
+			wp_safe_redirect( add_query_arg( 'copy-address-from', $source_type, wc_get_endpoint_url( 'edit-address', $target_type, wc_get_page_permalink( 'myaccount' ) ) ) );
 			exit;
 		}
 

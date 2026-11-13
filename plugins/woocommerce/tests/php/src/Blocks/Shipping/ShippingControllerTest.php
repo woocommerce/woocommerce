@@ -812,16 +812,11 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 		$this->shopper_is_on_the_block_checkout();
 		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
 
-		$customer      = WC()->customer;
 		WC()->customer = null;
 
-		try {
-			$packages = $this->shipping_controller->remove_shipping_if_no_address(
-				array( $this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ) )
-			);
-		} finally {
-			WC()->customer = $customer;
-		}
+		$packages = $this->shipping_controller->remove_shipping_if_no_address(
+			array( $this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ) )
+		);
 
 		$this->assertSame(
 			array( 'pickup_location:0' ),
