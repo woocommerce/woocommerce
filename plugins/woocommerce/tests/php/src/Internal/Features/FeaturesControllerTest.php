@@ -3,12 +3,15 @@
  * FeaturesControllerTest class file.
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Tests\Internal\Features;
 
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Enums\FeaturePluginCompatibility;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 
@@ -240,6 +243,39 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'early_feature', $features, 'The early registration should remain available.' );
 		$this->assertSame( 'Early feature', $features['early_feature']['name'] );
 		$this->assertArrayHasKey( 'analytics', $features, 'Built-in features should still load on the first query.' );
+	}
+
+	/**
+	 * @testdox Built-in initialization preserves an early registration with the same feature ID.
+	 */
+	public function test_early_registration_of_builtin_feature_is_preserved(): void {
+		$option_key = 'extension_rate_limit_checkout_enabled';
+		delete_option( $option_key );
+
+		$controller = new FeaturesController();
+		$controller->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
+		$controller->add_feature_definition(
+			'rate_limit_checkout',
+			'Extension checkout rate limiting',
+			array(
+				'option_key'                   => $option_key,
+				'enabled_by_default'           => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			)
+		);
+
+		$features = $controller->get_features( true, true );
+
+		$this->assertArrayHasKey( 'rate_limit_checkout', $features );
+		$this->assertSame( 'Extension checkout rate limiting', $features['rate_limit_checkout']['name'] );
+		$this->assertSame( $option_key, $features['rate_limit_checkout']['option_key'] );
+		$this->assertTrue( $features['rate_limit_checkout']['enabled_by_default'] );
+		$this->assertTrue( $features['rate_limit_checkout']['is_enabled'], 'The original default should apply when the custom option is absent.' );
+		$this->assertSame( $option_key, $controller->feature_enable_option_name( 'rate_limit_checkout' ) );
+
+		update_option( $option_key, 'no' );
+
+		$this->assertFalse( $controller->feature_is_enabled( 'rate_limit_checkout' ), 'The original option key should still control the feature after listing.' );
 	}
 
 	/**

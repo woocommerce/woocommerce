@@ -758,6 +758,10 @@ class FeaturesController {
 		}
 
 		foreach ( $legacy_features as $slug => $definition ) {
+			if ( isset( $this->features[ $slug ] ) ) {
+				continue;
+			}
+
 			$this->add_feature_definition( $slug, $definition['name'], $definition );
 		}
 
