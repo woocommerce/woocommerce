@@ -102,25 +102,26 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 	 */
 	public function test_product_stored_during_scan_keeps_its_rows(): void {
 		$during_id = 0;
-		add_filter(
-			'posts_results',
-			static function ( $posts, $query ) use ( &$during_id ) {
-				if ( 0 !== $during_id || ProductScan::BATCH_SIZE !== (int) $query->get( 'posts_per_page' ) ) {
-					return $posts;
-				}
-				$during_id = -1;
-				$during_id = WC_Helper_Product::create_simple_product()->get_id();
-				add_post_meta( $during_id, ProductFailures::META_KEY, 'missing_images' );
+		$hook      = static function ( $posts, $query ) use ( &$during_id ) {
+			if ( 0 !== $during_id || ! $query instanceof \WP_Query || 'ids' !== $query->get( 'fields' ) ) {
 				return $posts;
-			},
-			10,
-			2
-		);
+			}
+			$orderby = $query->get( 'orderby' );
+			if ( ! is_array( $orderby ) || ! isset( $orderby['modified'] ) ) {
+				return $posts;
+			}
+			// The catalog query has already run, so this product is not one of its results.
+			$during_id = -1;
+			$during_id = WC_Helper_Product::create_simple_product()->get_id();
+			add_post_meta( $during_id, ProductFailures::META_KEY, 'missing_images' );
+			return $posts;
+		};
+		add_filter( 'the_posts', $hook, 10, 2 );
 
 		try {
 			$this->readiness->refresh_report();
 		} finally {
-			remove_all_filters( 'posts_results' );
+			remove_filter( 'the_posts', $hook, 10 );
 		}
 
 		$this->assertGreaterThan( 0, $during_id );

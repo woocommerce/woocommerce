@@ -163,13 +163,43 @@ class ProductsList {
 		if ( ! $this->agent_readiness->has_report() || ! $this->enabled() ) {
 			return;
 		}
-		$result     = $this->agent_readiness->check_product( $product );
 		$product_id = $product instanceof \WC_Product_Variation ? $product->get_parent_id() : $product->get_id();
+		$product    = $this->reload( $product_id, $product );
+		if ( null === $product ) {
+			ProductFailures::forget( $product_id );
+			return;
+		}
+		$result = $this->agent_readiness->check_product( $product );
 		if ( null === $result ) {
 			ProductFailures::forget( $product_id );
 			return;
 		}
 		ProductFailures::store( $product_id, $result['checks'] );
+	}
+
+	/**
+	 * Load the product from the database.
+	 * The instance already in memory keeps variations that were removed in this request.
+	 *
+	 * @param int         $product_id Product id.
+	 * @param \WC_Product $product    Product currently in memory.
+	 */
+	private function reload( int $product_id, \WC_Product $product ): ?\WC_Product {
+		if ( $product_id <= 0 ) {
+			return null;
+		}
+		$current = $product instanceof \WC_Product_Variation ? wc_get_product( $product_id ) : $product;
+		$ids     = array( $product_id );
+		if ( $current instanceof \WC_Product_Variable ) {
+			$ids = array_merge( $ids, $current->get_children() );
+		}
+		delete_transient( 'wc_product_children_' . $product_id );
+		$cache = wc_get_container()->get( \Automattic\WooCommerce\Internal\Caches\ProductCache::class );
+		foreach ( $ids as $id ) {
+			$cache->remove( (int) $id );
+		}
+		$fresh = wc_get_product( $product_id );
+		return $fresh instanceof \WC_Product ? $fresh : null;
 	}
 
 	/**
