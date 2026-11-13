@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix My Account login and registration silently failing when a shopper's session cookie can no longer be verified after the site's security keys change.

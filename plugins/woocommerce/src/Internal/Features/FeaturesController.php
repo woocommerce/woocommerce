@@ -665,7 +665,7 @@ class FeaturesController {
 			'agent_readiness'                      => array(
 				'name'                         => __( 'Agent readiness', 'woocommerce' ),
 				'description'                  => __(
-					'Check products against the product data specs of AI shopping channels under WooCommerce > Status.',
+					'Check products against the product data specs of AI shopping channels under WooCommerce > Status, and set up agentic commerce under WooCommerce > Settings.',
 					'woocommerce'
 				),
 				'enabled_by_default'           => false,

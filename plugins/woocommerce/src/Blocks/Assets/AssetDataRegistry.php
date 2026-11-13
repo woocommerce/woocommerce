@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
+use Automattic\WooCommerce\Internal\Utilities\CurrencySymbol;
 use Automattic\WooCommerce\Internal\Utilities\PriceSeparators;
 use Exception;
 use InvalidArgumentException;
@@ -120,8 +121,8 @@ class AssetDataRegistry {
 		return [
 			'code'              => $currency,
 			'precision'         => wc_get_price_decimals(),
-			'symbol'            => html_entity_decode( get_woocommerce_currency_symbol( $currency ) ),
-			'symbolPosition'    => get_option( 'woocommerce_currency_pos' ),
+			'symbol'            => CurrencySymbol::get_symbol(),
+			'symbolPosition'    => CurrencySymbol::get_position(),
 			'decimalSeparator'  => PriceSeparators::get_decimal(),
 			'thousandSeparator' => PriceSeparators::get_thousand(),
 			'priceFormat'       => html_entity_decode( get_woocommerce_price_format() ),

@@ -5,7 +5,10 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
+use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreResponses;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -27,10 +30,61 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Report tests stay offline: store output checks would load the test site's pages.
+		StoreOutputChecksTest::block_requests();
 		$store_conditions = new StoreConditions();
 		$store_conditions->init( new ComingSoonHelper() );
+		$output_checks = new StoreOutputChecks();
+		$output_checks->init( new ComingSoonHelper() );
 		$this->sut = new AgentReadiness();
-		$this->sut->init( $store_conditions );
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules() );
+	}
+
+	/**
+	 * @testdox Store output checks follow the store conditions in the report, recommended, with null for couldn't check or a check that throws.
+	 */
+	public function test_report_includes_store_output_checks(): void {
+		$output_checks = new class() extends StoreOutputChecks {
+			/**
+			 * Two checks: one the store couldn't load, one that throws.
+			 */
+			protected function checks(): array {
+				$check = static fn( string $id, callable $test ): array => array(
+					'id'      => $id,
+					'test'    => $test,
+					'blocks'  => 'listing',
+					'name'    => $id,
+					'label'   => $id,
+					'why'     => '',
+					'fix'     => '',
+					'fix_url' => '',
+				);
+				return array(
+					$check( 'unreachable', static fn( StoreResponses $responses ): ?bool => null === $responses->get( '/robots.txt' ) ? null : true ),
+					$check(
+						'throws',
+						static function (): bool {
+							throw new \RuntimeException( 'Broken plugin output' );
+						}
+					),
+				);
+			}
+		};
+		$output_checks->init( new ComingSoonHelper() );
+		$store_conditions = new StoreConditions();
+		$store_conditions->init( new ComingSoonHelper() );
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules() );
+		add_filter( 'pre_http_request', static fn() => new \WP_Error( 'http_request_failed', 'Timed out' ) );
+
+		$checks = array_column( $this->sut->get_report()['store_checks'], null, 'id' );
+
+		$this->assertSame( 'launched', array_key_first( $checks ) );
+		foreach ( array( 'unreachable', 'throws' ) as $id ) {
+			$this->assertArrayHasKey( 'ok', $checks[ $id ] );
+			$this->assertNull( $checks[ $id ]['ok'] );
+			$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks[ $id ]['level'] );
+		}
+		$this->assertNotContains( 'unreachable', $store_conditions->failing_required( array_values( $checks ) ) );
 	}
 
 	/**
@@ -43,7 +97,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'generated_at', 'products', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
 		$this->assertFalse( $report['truncated'] );
-		$this->assertSame( array( 'id', 'ok', 'blocks', 'label', 'why', 'fix' ), array_keys( $report['store_checks'][0] ) );
+		$this->assertSame( array( 'id', 'ok', 'blocks', 'level', 'name', 'label', 'why', 'fix', 'fix_url' ), array_keys( $report['store_checks'][0] ) );
 		$this->assertSame( array( 'chatgpt', 'google', 'copilot' ), array_keys( $report['channels'] ) );
 		$this->assertSame(
 			array( 'name', 'spec', 'url', 'listable', 'not_listable', 'with_gaps', 'complete' ),
@@ -95,6 +149,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'missing_brand', $checks );
 		$this->assertSame( ReadinessRule::EFFECT_NOT_LISTABLE, $checks['missing_gtin']['channels']['google']['effect'] );
 		$this->assertArrayNotHasKey( 'bing', $checks['missing_gtin']['channels'] );
+		$this->assertSame( array( 'chatgpt', 'copilot', 'google' ), array_values( array_intersect( array( 'chatgpt', 'copilot', 'google' ), array_keys( $checks['missing_gtin']['channels'] ) ) ), 'Channels the filter left alone are kept' );
 		$this->assertArrayNotHasKey( 'google', $checks['title_too_long']['channels'] );
 		$this->assertArrayNotHasKey( 'uncategorised', $checks, 'A check with no valid channel left does not run' );
 	}

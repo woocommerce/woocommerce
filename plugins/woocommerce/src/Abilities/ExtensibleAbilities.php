@@ -160,7 +160,8 @@ class ExtensibleAbilities {
 	 *                                  null. Required with `set_callback`.
 	 *     @type callable $set_callback Optional. Receives the object and the value, and changes the object
 	 *                                  in memory, when an ability creates or updates the object. It returns a
-	 *                                  WP_Error to reject the value, and then nothing is saved. A field without
+	 *                                  WP_Error to reject the value, and then nothing is saved. It also runs
+	 *                                  after Core refuses another value of the primary object. A field without
 	 *                                  it cannot be written. Required with `input_schema`. Rules:
 	 *                                  1. It only sets values in memory. It does not save, send email
 	 *                                     or make HTTP requests.
@@ -294,8 +295,9 @@ class ExtensibleAbilities {
 	 * @param array $args {
 	 *     Filter arguments.
 	 *
-	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query` and
-	 *                               `orders-query` apply the filters of `product` and `order`. The list ability
+	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query`,
+	 *                               `orders-query` and `customers-query` apply the filters of `product`, `order`
+	 *                               and `customer`. A `meta_query` for `customer` matches user meta. The list ability
 	 *                               of another resource must call `get_query_args()` and `add_query_filters_schema()` itself.
 	 *     @type string   $namespace Slug of the extension that owns the filter, such as `subscriptions`.
 	 *     @type string   $filter    Filter name inside the namespace, such as `subscribable`.
@@ -412,7 +414,7 @@ class ExtensibleAbilities {
 	/**
 	 * Get the query arguments of the filters in the input of a list ability.
 	 * Each key holds one clause for each filter, so `array_merge_recursive()`
-	 * adds them to WP_Query or wc_get_orders() arguments with AND. `post__in`
+	 * adds them to WP_Query, wc_get_orders() or WP_User_Query arguments with AND. `post__in`
 	 * holds the IDs that every `include_ids` filter returned, without the IDs
 	 * that any `exclude_ids` filter returned, or `0` when none remain, because
 	 * an empty `post__in` does not filter. Without `include_ids`, the excluded
@@ -590,8 +592,10 @@ class ExtensibleAbilities {
 	 *                               already used gets a numeric suffix, as `<namespace>:<code>:2`. The error
 	 *                               gets the namespace in its data, and the 400 status when it has no status.
 	 *                               Its message can name the ability or screen to use instead. Validators also
-	 *                               run after a field callback refuses a value, so the client gets the field
-	 *                               refusals and the validator refusals together. Rules:
+	 *                               run after a field callback or Core refuses a value, so the client gets every
+	 *                               refusal together, with all messages in the first one. After a Core refusal
+	 *                               they run on the primary object only, which keeps the values Core refused at
+	 *                               their old values. Rules:
 	 *                               1. It only reads. It does not change the object, save, send email or
 	 *                                  make HTTP requests.
 	 *                               2. It checks the ability name when the extension's own abilities

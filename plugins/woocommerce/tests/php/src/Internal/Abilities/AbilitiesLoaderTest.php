@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
+use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesCategories;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
@@ -34,6 +35,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 	private const CANONICAL_ABILITY_IDS = array(
 		'woocommerce/product-terms-query',
+		'woocommerce/product-term-create',
+		'woocommerce/product-term-update',
+		'woocommerce/product-attributes-query',
+		'woocommerce/product-attribute-create',
 		'woocommerce/products-query',
 		'woocommerce/product-create',
 		'woocommerce/product-update',
@@ -45,6 +50,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/order-add-note',
 		'woocommerce/order-notes-query',
 		'woocommerce/payment-gateways-query',
+		'woocommerce/customers-query',
+		'woocommerce/product-review-update',
+		'woocommerce/product-review-reply',
+		'woocommerce/product-reviews-query',
+		'woocommerce/shipping-zones-query',
+		'woocommerce/tax-rates-query',
 	);
 
 	/**
@@ -161,6 +172,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			}
 		}
 
+		$this->register_domain_abilities();
+
 		foreach ( $this->original_action_counts as $action => $original_count ) {
 			if ( null !== $original_count ) {
 				$wp_actions[ $action ] = $original_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -266,59 +279,109 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_canonical_ability_annotations_match_intent(): void {
 		$expectations = array(
-			'woocommerce/products-query'         => array(
+			'woocommerce/products-query'           => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/product-create'         => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => false,
-			),
-			'woocommerce/product-update'         => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => true,
-			),
-			'woocommerce/product-delete'         => array(
-				'readonly'    => false,
-				'idempotent'  => true,
-				'destructive' => true,
-			),
-			'woocommerce/orders-query'           => array(
+			'woocommerce/product-reviews-query'    => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/order-send-email'       => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => false,
-			),
-			'woocommerce/order-update'           => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => true,
-			),
-			'woocommerce/order-update-status'    => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => true,
-			),
-			'woocommerce/order-add-note'         => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => false,
-			),
-			'woocommerce/order-notes-query'      => array(
+			'woocommerce/shipping-zones-query'     => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/payment-gateways-query' => array(
+			'woocommerce/tax-rates-query'          => array(
 				'readonly'    => true,
 				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/product-attributes-query' => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/product-attribute-create' => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/product-term-create'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/product-term-update'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/product-create'           => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/product-update'           => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/product-delete'           => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => true,
+			),
+			'woocommerce/orders-query'             => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/order-send-email'         => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/order-update'             => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/order-update-status'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/order-add-note'           => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/order-notes-query'        => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/payment-gateways-query'   => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/customers-query'          => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/product-review-update'    => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/product-review-reply'     => array(
+				'readonly'    => false,
+				'idempotent'  => false,
 				'destructive' => false,
 			),
 		);
@@ -523,6 +586,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertSame( 'array', $input['status']['type'] );
 			$this->assertContains( 'test-active', $input['status']['items']['enum'] );
 			$this->assertContains( 'test-active', $output['status']['enum'] );
+			$this->assertContains( 'shop_test_contract', $output['type']['enum'], 'An order of a registered type should pass the output schema.' );
 
 			$query_args = $this->capture_order_query_args(
 				array(
@@ -930,6 +994,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should give every canonical ability an input in the permission refusal provider.
+	 */
+	public function test_permission_refusal_provider_covers_every_canonical_ability(): void {
+		$classes = ( new \ReflectionClassConstant( AbilitiesLoader::class, 'CORE_ABILITY_DEFINITION_CLASSES' ) )->getValue();
+		$core    = array_map(
+			static fn( string $class_name ): string => is_a( $class_name, ActionableAbility::class, true ) ? $class_name::ABILITY_NAME : $class_name::get_name(),
+			$classes
+		);
+		$covered = array_column( $this->provider_canonical_abilities_with_minimal_input(), 0 );
+
+		$this->assertEqualsCanonicalizing( $core, self::CANONICAL_ABILITY_IDS, 'CANONICAL_ABILITY_IDS should list every Core ability.' );
+		$this->assertEqualsCanonicalizing( $core, $covered, 'The permission refusal provider should cover every Core ability.' );
+	}
+
+	/**
 	 * Provides ability IDs and minimal valid-shape input for cap negative-path tests.
 	 *
 	 * @return array<string, array{0: string, 1: array}>
@@ -937,73 +1016,134 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
-			'products-query'         => array(
+			'product-terms-query'      => array(
+				'woocommerce/product-terms-query',
+				array(
+					'taxonomy' => 'product_cat',
+				),
+			),
+			'product-term-create'      => array(
+				'woocommerce/product-term-create',
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Forbidden',
+				),
+			),
+			'product-term-update'      => array(
+				'woocommerce/product-term-update',
+				array(
+					'taxonomy' => 'product_cat',
+					'id'       => 1,
+					'name'     => 'Forbidden',
+				),
+			),
+			'product-attributes-query' => array(
+				'woocommerce/product-attributes-query',
+				array(),
+			),
+			'product-attribute-create' => array(
+				'woocommerce/product-attribute-create',
+				array(
+					'name' => 'Forbidden',
+				),
+			),
+			'products-query'           => array(
 				'woocommerce/products-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'product-create'         => array(
+			'product-create'           => array(
 				'woocommerce/product-create',
 				array(
 					'name' => 'Forbidden',
 				),
 			),
-			'product-update'         => array(
+			'product-update'           => array(
 				'woocommerce/product-update',
 				array(
 					'id'   => 1,
 					'name' => 'Forbidden',
 				),
 			),
-			'product-delete'         => array(
+			'product-delete'           => array(
 				'woocommerce/product-delete',
 				array(
 					'id' => 1,
 				),
 			),
-			'orders-query'           => array(
+			'orders-query'             => array(
 				'woocommerce/orders-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'order-send-email'       => array(
+			'order-send-email'         => array(
 				'woocommerce/order-send-email',
 				array(
 					'id'    => 1,
 					'email' => 'invoice',
 				),
 			),
-			'order-update'           => array(
+			'order-update'             => array(
 				'woocommerce/order-update',
 				array(
 					'id'       => 1,
 					'shipping' => array( 'city' => 'Denied' ),
 				),
 			),
-			'order-update-status'    => array(
+			'order-update-status'      => array(
 				'woocommerce/order-update-status',
 				array(
 					'id'     => 1,
 					'status' => 'processing',
 				),
 			),
-			'order-add-note'         => array(
+			'product-review-update'    => array(
+				'woocommerce/product-review-update',
+				array(
+					'id'     => 1,
+					'status' => 'approved',
+				),
+			),
+			'product-review-reply'     => array(
+				'woocommerce/product-review-reply',
+				array(
+					'id'      => 1,
+					'content' => 'denied',
+				),
+			),
+			'order-add-note'           => array(
 				'woocommerce/order-add-note',
 				array(
 					'id'   => 1,
 					'note' => 'denied',
 				),
 			),
-			'order-notes-query'      => array(
+			'order-notes-query'        => array(
 				'woocommerce/order-notes-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'payment-gateways-query' => array(
+			'payment-gateways-query'   => array(
 				'woocommerce/payment-gateways-query',
+				array(),
+			),
+			'customers-query'          => array(
+				'woocommerce/customers-query',
+				array(),
+			),
+			'product-reviews-query'    => array(
+				'woocommerce/product-reviews-query',
+				array(),
+			),
+			'shipping-zones-query'     => array(
+				'woocommerce/shipping-zones-query',
+				array(),
+			),
+			'tax-rates-query'          => array(
+				'woocommerce/tax-rates-query',
 				array(),
 			),
 		);
@@ -1084,6 +1224,177 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertWPError( $result, "{$ability_id} should reject users without object-level access." );
 			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
 		}
+	}
+
+	/**
+	 * @testdox Should return a not-found error naming the ID when an order mutation receives an ID that is not an order.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_order_mutations_return_not_found_for_id_that_is_not_an_order( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		foreach ( array( 999999, $product->get_id() ) as $id ) {
+			foreach ( $this->get_order_mutation_inputs( $id ) as $ability_id => $input ) {
+				$result = wp_get_ability( $ability_id )->execute( $input );
+
+				$this->assertWPError( $result, "{$ability_id} should refuse ID {$id}." );
+				$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code(), "{$ability_id} should name missing order {$id}, not refuse permission." );
+				$this->assertStringContainsString( (string) $id, $result->get_error_message() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should refuse permission for an unknown order ID to users who cannot edit orders.
+	 *
+	 * @testWith ["customer"]
+	 *           ["read_private_shop_orders"]
+	 *
+	 * @param string $role_or_cap Role of the user, or the only capability added to a subscriber.
+	 */
+	public function test_order_mutations_refuse_unknown_id_to_users_who_cannot_edit_orders( string $role_or_cap ): void {
+		$user_id = 'customer' === $role_or_cap
+			? self::factory()->user->create( array( 'role' => 'customer' ) )
+			: $this->create_user_with_caps( array( $role_or_cap ) );
+		wp_set_current_user( $user_id );
+
+		foreach ( $this->get_order_mutation_inputs( 999999 ) as $ability_id => $input ) {
+			$result = wp_get_ability( $ability_id )->execute( $input );
+
+			$this->assertWPError( $result, "{$ability_id} should refuse a user who cannot edit orders." );
+			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		}
+	}
+
+	/**
+	 * @testdox Should refuse permission when an order mutation receives the ID of a refund.
+	 */
+	public function test_order_mutations_refuse_id_of_refund(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$refund                    = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		foreach ( $this->get_order_mutation_inputs( $refund->get_id() ) as $ability_id => $input ) {
+			$result = wp_get_ability( $ability_id )->execute( $input );
+
+			$this->assertWPError( $result, "{$ability_id} should refuse a refund ID." );
+			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		}
+	}
+
+	/**
+	 * @testdox Should refuse permission when an order mutation receives an order whose type the wc_order_types filter hides.
+	 */
+	public function test_order_mutations_refuse_order_of_type_hidden_by_filter(): void {
+		global $wc_order_types, $post_type_meta_caps, $wpdb;
+
+		// The posts data store refuses to read a type that the filter hides, so only HPOS can load the order.
+		$this->set_order_storage_for_test( true );
+		$meta_caps = $post_type_meta_caps;
+		wc_register_order_type(
+			'shop_test_hidden',
+			array(
+				'capability_type'          => 'shop_test_hidden',
+				'exclude_from_order_views' => true,
+				'add_order_meta_boxes'     => false,
+			)
+		);
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$wpdb->update( $wpdb->posts, array( 'post_type' => 'shop_test_hidden' ), array( 'ID' => $order->get_id() ) );
+		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_hidden' ), array( 'id' => $order->get_id() ) );
+		clean_post_cache( $order->get_id() );
+		wp_cache_flush();
+		add_filter(
+			'wc_order_types',
+			static function ( $types ) {
+				return array_values( array_diff( $types, array( 'shop_test_hidden' ) ) );
+			}
+		);
+
+		try {
+			$this->assertSame( 'shop_test_hidden', OrderUtil::get_order_type( $order->get_id() ) );
+			$this->assertInstanceOf( \WC_Order::class, wc_get_order( $order->get_id() ) );
+
+			foreach ( $this->get_order_mutation_inputs( $order->get_id() ) as $ability_id => $input ) {
+				$result = wp_get_ability( $ability_id )->execute( $input );
+
+				$this->assertWPError( $result, "{$ability_id} should refuse an order whose type is hidden." );
+				$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+			}
+		} finally {
+			unset( $wc_order_types['shop_test_hidden'] );
+			unregister_post_type( 'shop_test_hidden' );
+			$post_type_meta_caps = $meta_caps; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- unregister_post_type() removes the shop_order meta caps too.
+		}
+	}
+
+	/**
+	 * @testdox Should refuse permission when an order mutation receives an order whose unregistered type an extension gives an order class.
+	 */
+	public function test_order_mutations_refuse_order_of_unregistered_type_with_class(): void {
+		global $wpdb;
+
+		$this->set_order_storage_for_test( true );
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_unreg' ), array( 'id' => $order->get_id() ) );
+		wp_cache_flush();
+		add_filter(
+			'woocommerce_order_class',
+			static function ( $class_name, $order_type ) {
+				return 'shop_test_unreg' === $order_type ? \WC_Order::class : $class_name;
+			},
+			10,
+			2
+		);
+
+		$this->assertSame( 'shop_test_unreg', OrderUtil::get_order_type( $order->get_id() ) );
+		$this->assertInstanceOf( \WC_Order::class, wc_get_order( $order->get_id() ) );
+
+		foreach ( $this->get_order_mutation_inputs( $order->get_id() ) as $ability_id => $input ) {
+			$result = wp_get_ability( $ability_id )->execute( $input );
+
+			$this->assertWPError( $result, "{$ability_id} should refuse an order whose type is not registered." );
+			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		}
+	}
+
+	/**
+	 * Valid input for each order mutation ability, keyed by ability ID.
+	 *
+	 * @param int $order_id Order ID to send.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function get_order_mutation_inputs( int $order_id ): array {
+		return array(
+			'woocommerce/order-send-email'    => array(
+				'id'    => $order_id,
+				'email' => 'invoice',
+			),
+			'woocommerce/order-update'        => array(
+				'id'       => $order_id,
+				'shipping' => array( 'city' => 'Springfield' ),
+			),
+			'woocommerce/order-update-status' => array(
+				'id'     => $order_id,
+				'status' => 'processing',
+			),
+			'woocommerce/order-add-note'      => array(
+				'id'   => $order_id,
+				'note' => 'A note.',
+			),
+		);
 	}
 
 	/**
@@ -1400,54 +1711,68 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function provider_negative_entity_id_inputs(): array {
 		return array(
-			'products-query'      => array(
+			'products-query'        => array(
 				'woocommerce/products-query',
 				array( 'id' => -123 ),
 			),
-			'product-update'      => array(
+			'product-update'        => array(
 				'woocommerce/product-update',
 				array(
 					'id'   => -123,
 					'name' => 'Invalid',
 				),
 			),
-			'product-delete'      => array(
+			'product-delete'        => array(
 				'woocommerce/product-delete',
 				array( 'id' => -123 ),
 			),
-			'orders-query'        => array(
+			'orders-query'          => array(
 				'woocommerce/orders-query',
 				array( 'id' => -123 ),
 			),
-			'order-send-email'    => array(
+			'order-send-email'      => array(
 				'woocommerce/order-send-email',
 				array(
 					'id'    => -123,
 					'email' => 'invoice',
 				),
 			),
-			'order-update'        => array(
+			'order-update'          => array(
 				'woocommerce/order-update',
 				array(
 					'id'       => -123,
 					'shipping' => array( 'city' => 'Invalid' ),
 				),
 			),
-			'order-update-status' => array(
+			'order-update-status'   => array(
 				'woocommerce/order-update-status',
 				array(
 					'id'     => -123,
 					'status' => 'processing',
 				),
 			),
-			'order-add-note'      => array(
+			'product-review-update' => array(
+				'woocommerce/product-review-update',
+				array(
+					'id'     => -123,
+					'status' => 'approved',
+				),
+			),
+			'product-review-reply'  => array(
+				'woocommerce/product-review-reply',
+				array(
+					'id'      => -123,
+					'content' => 'Invalid',
+				),
+			),
+			'order-add-note'        => array(
 				'woocommerce/order-add-note',
 				array(
 					'id'   => -123,
 					'note' => 'Invalid',
 				),
 			),
-			'order-notes-query'   => array(
+			'order-notes-query'     => array(
 				'woocommerce/order-notes-query',
 				array( 'id' => -123 ),
 			),
@@ -4167,6 +4492,77 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return every address and line refusal of an order update in one message, and save nothing.
+	 */
+	public function test_order_update_returns_every_refusal_in_one_message(): void {
+		$order = $this->create_order_for_update( 'pending' );
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_city( 'Before' );
+		$order->save();
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'           => $order->get_id(),
+				'billing'      => array( 'email' => 'not-an-email' ),
+				'shipping'     => array(
+					'city'     => 'After',
+					'postcode' => 'not a zip',
+				),
+				'remove_items' => array( 999999 ),
+				'line_items'   => array( array( 'quantity' => 2 ), array( 'quantity' => 3 ) ),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame(
+			array(
+				'woocommerce_ability_order_billing_email_invalid',
+				'woocommerce_ability_order_shipping_postcode_invalid',
+				'woocommerce_ability_order_line_not_found',
+				'woocommerce_ability_order_line_item_target_invalid',
+			),
+			$result->get_error_codes()
+		);
+		$message = $result->get_error_message();
+		foreach ( array( 'valid address', 'format of that country', 'include_line_items', 'product_id' ) as $hint ) {
+			$this->assertStringContainsString( $hint, $message );
+		}
+		$this->assertSame( 1, substr_count( $message, 'Each entry in line_items' ), 'A repeated refusal shows once in the message.' );
+		$this->assertSame( 'Before', wc_get_order( $order->get_id() )->get_shipping_city() );
+	}
+
+	/**
+	 * @testdox Should format a sent postcode, and keep a saved postcode that the update does not send.
+	 */
+	public function test_order_update_formats_only_a_sent_postcode(): void {
+		$order = $this->create_order_for_update( 'pending' );
+		$order->set_shipping_country( 'GB' );
+		$order->set_shipping_postcode( 'sw1a1aa' );
+		$order->save();
+		$ability = wp_get_ability( 'woocommerce/order-update' );
+
+		$result = $ability->execute(
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array( 'city' => 'London' ),
+			)
+		);
+		$this->assertNotWPError( $result );
+		$saved = wc_get_order( $order->get_id() );
+		$kept  = $saved->get_shipping_postcode();
+		$this->assertSame( 'London', $saved->get_shipping_city() );
+		$ability->execute(
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array( 'postcode' => 'ec1a1bb' ),
+			)
+		);
+
+		$this->assertSame( 'sw1a1aa', $kept );
+		$this->assertSame( 'EC1A 1BB', wc_get_order( $order->get_id() )->get_shipping_postcode() );
+	}
+
+	/**
 	 * Invalid inputs for the order update ability.
 	 *
 	 * @return array<string, array{0: array, 1: string, 2: string}>
@@ -4369,8 +4765,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$query = wp_get_ability( 'woocommerce/orders-query' )->execute(
 			array(
-				'id'                 => $order->get_id(),
-				'include_line_items' => true,
+				'id'            => $order->get_id(),
+				'include_lines' => true,
 			)
 		);
 		$this->assertSame( 'Pickup', $query['orders'][0]['shipping_lines'][1]['method_title'] );
@@ -5163,21 +5559,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $result );
 		$this->assertTrue( $manual_update_observed );
-	}
-
-	/**
-	 * @testdox Should reject status updates against unknown order IDs without leaking existence.
-	 */
-	public function test_order_update_status_rejects_unknown_id(): void {
-		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
-			array(
-				'id'     => 999999,
-				'status' => 'processing',
-			)
-		);
-
-		$this->assertWPError( $result );
-		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
 	}
 
 	/**

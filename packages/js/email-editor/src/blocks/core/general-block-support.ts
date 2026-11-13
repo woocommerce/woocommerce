@@ -4,9 +4,9 @@
 import {
 	Block as WPBlock,
 	BlockSupports as WPBlockSupports,
-} from '@wordpress/blocks/index';
+	getBlockTypes,
+} from '@wordpress/blocks';
 import domReady from '@wordpress/dom-ready';
-import { getBlockTypes } from '@wordpress/blocks';
 import { select } from '@wordpress/data';
 
 /**
@@ -21,8 +21,11 @@ import { unregisterBlockStyleForEmail } from '../../config-tools/block-style';
 type BlockSupports = WPBlockSupports & { shadow: boolean };
 type Block = WPBlock & { supports?: BlockSupports };
 
-// List of blocks that we want to support.
-const BLOCK_STYLES_TO_PRESERVE = [ 'core/social-links' ];
+// Block styles the email renderer supports: a list of style names, or `true` for all of them.
+const BLOCK_STYLES_TO_PRESERVE: Record< string, string[] | true > = {
+	'core/separator': [ 'default', 'wide', 'dots' ],
+	'core/social-links': true,
+};
 
 /**
  * Disables Shadow Support for all blocks
@@ -43,7 +46,7 @@ function alterSupportConfiguration(): void {
 }
 
 /**
- * Remove block styles for all blocks that are not in the BLOCK_STYLES_TO_PRESERVE array
+ * Remove block styles the email renderer doesn’t support (see BLOCK_STYLES_TO_PRESERVE)
  * We are removing these block styles because they might contain CSS not supported in the email editor renderer (or email clients).
  *
  * Block styles removed:
@@ -55,9 +58,9 @@ function alterSupportConfiguration(): void {
 function removeBlockStyles() {
 	getBlockTypes().forEach( ( blockType ) => {
 		const blockName = blockType.name;
+		const preserved = BLOCK_STYLES_TO_PRESERVE[ blockName ];
 
-		if ( BLOCK_STYLES_TO_PRESERVE.includes( blockName ) ) {
-			// Skip block styles that are in the BLOCK_STYLES_TO_PRESERVE array
+		if ( preserved === true ) {
 			return;
 		}
 		const blockStyles = select( 'core/blocks' ).getBlockStyles( blockName );
@@ -65,9 +68,13 @@ function removeBlockStyles() {
 			return;
 		}
 
-		blockStyles.forEach( ( blockStyle ) => {
-			unregisterBlockStyleForEmail( blockName, blockStyle.name );
-		} );
+		blockStyles
+			.filter(
+				( blockStyle ) => ! preserved?.includes( blockStyle.name )
+			)
+			.forEach( ( blockStyle ) => {
+				unregisterBlockStyleForEmail( blockName, blockStyle.name );
+			} );
 	} );
 }
 

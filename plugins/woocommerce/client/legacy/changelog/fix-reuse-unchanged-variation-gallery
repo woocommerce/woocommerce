@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the selected image when switching between variations that share the same gallery.

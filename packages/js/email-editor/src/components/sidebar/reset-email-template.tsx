@@ -7,12 +7,8 @@ import { store as coreStore, type WpTemplate } from '@wordpress/core-data';
 import { backup } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import {
-	Button,
-	__experimentalText as Text,
-	__experimentalHStack as HStack,
-	__experimentalVStack as VStack,
-} from '@wordpress/components';
+import { Button } from '@wordpress/components';
+import { Stack, Text } from '@wordpress/ui';
 import { decodeEntities } from '@wordpress/html-entities';
 import { parse, serialize } from '@wordpress/blocks';
 import apiFetch from '@wordpress/api-fetch';
@@ -89,9 +85,9 @@ const getResetEmailTemplateAction = () => {
 			);
 
 			return (
-				<VStack spacing="5">
+				<Stack direction="column" gap="lg">
 					<Text>{ modalTitle }</Text>
-					<HStack justify="right">
+					<Stack direction="row" justify="flex-end" gap="sm">
 						<Button
 							variant="tertiary"
 							onClick={ () => {
@@ -208,8 +204,8 @@ const getResetEmailTemplateAction = () => {
 						>
 							{ __( 'Reset', __i18n_text_domain__ ) }
 						</Button>
-					</HStack>
-				</VStack>
+					</Stack>
+				</Stack>
 			);
 		},
 	};
