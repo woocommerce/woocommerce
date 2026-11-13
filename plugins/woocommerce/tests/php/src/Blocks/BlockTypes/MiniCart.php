@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\MiniCartMock;
  *
  * @since $VID:$
  */
-class MiniCart extends \WP_UnitTestCase {
+class MiniCart extends \WC_Unit_Test_Case {
 	use BlockTypeRegistryTrait;
 
 	/**
@@ -131,16 +131,6 @@ class MiniCart extends \WP_UnitTestCase {
 		);
 		WC()->cart->empty_cart();
 		add_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
-	}
-
-	/**
-	 * Tear down test. Called after every test.
-	 * @return void
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		WC()->cart->empty_cart();
-		remove_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
 	}
 
 	/**

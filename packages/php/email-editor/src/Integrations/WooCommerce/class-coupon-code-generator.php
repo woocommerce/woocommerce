@@ -32,7 +32,24 @@ class Coupon_Code_Generator {
 	 * Initialize the generator by registering the filter hook.
 	 */
 	public function init(): void {
-		add_filter( 'woocommerce_coupon_code_block_auto_generate', array( $this, 'generate_coupon' ), 10, 3 );
+		add_filter( 'woocommerce_coupon_code_block_auto_generate', array( $this, 'filter_coupon_code' ), 10, 3 );
+	}
+
+	/**
+	 * Filter callback: checks the types of the filter's arguments, then generates a coupon.
+	 *
+	 * @param mixed $coupon_code       The coupon code (empty if not yet generated).
+	 * @param mixed $attrs             Block attributes.
+	 * @param mixed $rendering_context The rendering context.
+	 * @return string The coupon code, or empty string on failure.
+	 */
+	public function filter_coupon_code( $coupon_code, $attrs, $rendering_context ): string {
+		$coupon_code = is_scalar( $coupon_code ) ? (string) $coupon_code : '';
+		if ( ! $rendering_context instanceof Rendering_Context ) {
+			return $coupon_code;
+		}
+
+		return $this->generate_coupon( $coupon_code, is_array( $attrs ) ? $attrs : array(), $rendering_context );
 	}
 
 	/**

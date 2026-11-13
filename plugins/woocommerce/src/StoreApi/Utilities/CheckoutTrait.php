@@ -287,7 +287,7 @@ trait CheckoutTrait {
 		if ( null !== $payment_method ) {
 			WC()->session->set( 'chosen_payment_method', $payment_method->id );
 			$order->set_payment_method( $payment_method->id );
-			$order->set_payment_method_title( $payment_method->title );
+			$order->set_payment_method_title( $payment_method->get_title() );
 		} else {
 			$order_needs_payment = $order->needs_payment();
 			if ( $order_needs_payment && 'POST' === $request->get_method() ) {

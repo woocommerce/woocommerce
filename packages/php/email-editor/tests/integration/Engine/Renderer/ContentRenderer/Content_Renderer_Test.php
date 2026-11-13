@@ -464,6 +464,66 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * The Gutenberg plugin replaces core's typography callback with its own; that one is removed during rendering too.
+	 */
+	public function testItRemovesGutenbergTypographySupportWhileRendering(): void {
+		require_once __DIR__ . '/gutenberg-typography-support-stub.php';
+		add_filter( 'render_block', 'gutenberg_render_typography_support', 10, 2 );
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+
+		try {
+			$content = $this->renderer->render( $this->email_post, $template );
+			$this->assertStringContainsString( 'Hello!', $content );
+			$this->assertStringNotContainsString( 'gutenberg-typography-support', $content );
+			$this->assertSame( 10, has_filter( 'render_block', 'gutenberg_render_typography_support' ) );
+		} finally {
+			remove_filter( 'render_block', 'gutenberg_render_typography_support', 10 );
+		}
+	}
+
+	/**
+	 * Fluid typography would turn font sizes into clamp(), which many email clients can’t read.
+	 * The email keeps the static px size.
+	 */
+	public function testItKeepsStaticFontSizesWhenFluidTypographyIsOn(): void {
+		$enable_fluid = static function ( $theme_json ) {
+			return $theme_json->update_with(
+				array(
+					'version'  => 3,
+					'settings' => array( 'typography' => array( 'fluid' => true ) ),
+				)
+			);
+		};
+		add_filter( 'wp_theme_json_data_theme', $enable_fluid );
+		wp_clean_theme_json_cache();
+
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:group {"style":{"typography":{"fontSize":"48px"}},"layout":{"type":"constrained"}} --><div class="wp-block-group" style="font-size:48px"><!-- wp:paragraph --><p>Big text</p><!-- /wp:paragraph --></div><!-- /wp:group -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+
+		try {
+			$content = $this->renderer->render( $email_post, $template );
+		} finally {
+			remove_filter( 'wp_theme_json_data_theme', $enable_fluid );
+			wp_clean_theme_json_cache();
+		}
+
+		$this->assertStringContainsString( 'Big text', $content );
+		$this->assertStringNotContainsString( 'clamp(', $content );
+		$this->assertNotFalse( has_filter( 'render_block', 'wp_render_typography_support' ) );
+	}
+
+	/**
 	 * Test it collects content styles without inlining them.
 	 */
 	public function testItCollectsContentStyles(): void {
@@ -1019,5 +1079,27 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			return is_string( $attribute ) ? $attribute : null;
 		}
 		return null;
+	}
+
+	/**
+	 * Test bold text gets an explicit weight, so it stays bold when the email's text weight is light.
+	 */
+	public function testItRendersBoldTextWithExplicitWeight(): void {
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:paragraph --><p>Plain <strong>Bold text</strong></p><!-- /wp:paragraph -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$content           = $this->renderer->render( $email_post, $template );
+
+		$this->assertSame( 1, preg_match( '/<strong[^>]*>Bold text<\/strong>/', $content, $strong ) );
+		$this->assertMatchesRegularExpression( '/style="[^"]*font-weight:\s*bold\s*(;|")/', $strong[0] );
 	}
 }

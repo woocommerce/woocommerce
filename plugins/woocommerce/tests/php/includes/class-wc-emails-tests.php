@@ -179,6 +179,33 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_store_address() shows the store's country, and leaves later addresses in that country without it.
+	 */
+	public function test_get_store_address_forces_the_country_only_for_the_store_address(): void {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_store_address', '123 Main Street' );
+		update_option( 'woocommerce_store_city', 'San Francisco' );
+		update_option( 'woocommerce_store_postcode', '94110' );
+
+		$store_address = WC()->mailer()->get_store_address();
+
+		$this->assertStringContainsString( 'United States (US)', $store_address, 'The store address should show the country.' );
+		$this->assertStringNotContainsString(
+			'United States (US)',
+			WC()->countries->get_formatted_address(
+				array(
+					'address_1' => '1 Other Street',
+					'city'      => 'Los Angeles',
+					'state'     => 'CA',
+					'postcode'  => '90001',
+					'country'   => 'US',
+				)
+			),
+			'Addresses formatted after the store address should leave out the store\'s country again.'
+		);
+	}
+
+	/**
 	 * @testdox backorder() sends a notification when the setting is enabled (default).
 	 */
 	public function test_backorder_sends_when_setting_enabled() {

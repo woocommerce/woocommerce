@@ -74,10 +74,6 @@
 			"type": "string",
 			"default": "woocommerce/product-filter-checkbox-list"
 		},
-		"isPreview": {
-			"type": "boolean",
-			"default": false
-		},
 		"sortOrder": {
 			"type": "string",
 			"default": "count-desc"
@@ -87,9 +83,5 @@
 			"default": true
 		}
 	},
-	"example": {
-		"attributes": {
-			"isPreview": true
-		}
-	}
+	"example": {}
 }

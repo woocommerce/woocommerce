@@ -32,10 +32,6 @@
 		"minRating": {
 			"type": "string",
 			"default": "0"
-		},
-		"isPreview": {
-			"type": "boolean",
-			"default": false
 		}
 	},
 	"textdomain": "woocommerce",
