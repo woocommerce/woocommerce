@@ -340,11 +340,11 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach ( $channels as $channel ) : ?>
+				<?php foreach ( $channels as $channel_id => $channel ) : ?>
 					<tr>
 						<td><a href="<?php echo esc_url( (string) $channel['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( (string) $channel['name'] ); ?></a><br /><span class="description"><?php echo esc_html( (string) $channel['spec'] ); ?></span></td>
 						<td><?php echo esc_html( number_format_i18n( (int) $channel['listable'] ) ); ?></td>
-						<td><?php echo esc_html( number_format_i18n( (int) $channel['not_listable'] ) ); ?></td>
+						<td><?php echo wp_kses_post( self::count_link( (int) $channel['not_listable'], ProductFailures::channel_value( ProductScan::NOT_LISTABLE, (string) $channel_id ), ! empty( $report['failures_stored'] ) ) ); ?></td>
 						<td><?php echo esc_html( number_format_i18n( (int) $channel['with_gaps'] ) ); ?></td>
 						<td><?php echo esc_html( number_format_i18n( (int) $channel['complete'] ) ); ?></td>
 					</tr>
@@ -375,7 +375,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 							<p><a href="<?php echo esc_url( (string) $check['fix_url'] ); ?>"><?php echo esc_html( (string) $check['fix'] ); ?></a></p>
 						</td>
 						<td><?php echo empty( $check['channels'] ) ? esc_html__( 'Product page only', 'woocommerce' ) : wp_kses_post( implode( '<br />', $this->channel_tags( (array) $check['channels'], $channels ) ) ); ?></td>
-						<td><?php echo esc_html( number_format_i18n( (int) $check['count'] ) ); ?></td>
+						<td><?php echo wp_kses_post( self::count_link( (int) $check['count'], (string) ( $check['id'] ?? '' ), ! empty( $report['failures_stored'] ) ) ); ?></td>
 						<td><?php echo wp_kses_post( implode( '<br />', $this->product_links( (array) ( $check['product_ids'] ?? array() ) ) ) ); ?></td>
 					</tr>
 				<?php endforeach; ?>
@@ -383,6 +383,19 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		</table>
 		</div>
 		<?php
+	}
+
+	/**
+	 * A count, linked to the Products list filtered to those products when each product's failures are stored.
+	 *
+	 * @param int    $count  Number of products.
+	 * @param string $value  Stored failure value.
+	 * @param bool   $linked Whether the list can be filtered.
+	 * @return string Escaped HTML.
+	 */
+	private static function count_link( int $count, string $value, bool $linked ): string {
+		$text = esc_html( number_format_i18n( $count ) );
+		return $linked && $count > 0 ? '<a href="' . esc_url( ProductsList::url( $value ) ) . '">' . $text . '</a>' : $text;
 	}
 
 	/**
@@ -551,6 +564,37 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			<?php endforeach; ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Protocols and files the store declares to agents, as information: found or not found, never pass or fail.
+	 *
+	 * @param array $items Items from the report.
+	 */
+	private function render_declared( array $items ): void {
+		$items = array_filter( $items, 'is_array' );
+		if ( array() === $items ) {
+			return;
+		}
+		$found   = count( array_filter( $items, static fn( array $item ): bool => true === ( $item['found'] ?? null ) ) );
+		$unknown = count( array_filter( $items, static fn( array $item ): bool => null === ( $item['found'] ?? null ) ) );
+		if ( count( $items ) === $unknown ) {
+			$summary = __( 'Not checked', 'woocommerce' );
+		} elseif ( $unknown > 0 ) {
+			/* translators: 1: number found, 2: number looked for, 3: number that could not be checked. */
+			$summary = sprintf( __( '%1$d of %2$d found, %3$d not checked', 'woocommerce' ), $found, count( $items ), $unknown );
+		} else {
+			/* translators: 1: number found, 2: number looked for. */
+			$summary = sprintf( __( '%1$d of %2$d found', 'woocommerce' ), $found, count( $items ) );
+		}
+		echo '<div class="wc-agentic-commerce-card__section wc-agentic-commerce-declared-section"><h3>' . esc_html__( 'What this store declares to agents', 'woocommerce' ) . '</h3>';
+		echo '<p>' . esc_html__( 'For information. Most stores don\'t need these, and none of them counts as a problem.', 'woocommerce' ) . '</p>';
+		echo '<details><summary>' . esc_html( $summary ) . '</summary><table class="widefat striped wc-agentic-commerce-declared"><tbody>';
+		foreach ( $items as $item ) {
+			$state = null !== ( $item['found'] ?? null ) ? ( $item['found'] ? __( 'Found', 'woocommerce' ) : __( 'Not found', 'woocommerce' ) ) : __( 'Not checked', 'woocommerce' );
+			echo '<tr><td>' . esc_html( (string) ( $item['name'] ?? '' ) ) . '</td><td>' . esc_html( $state ) . '</td></tr>';
+		}
+		echo '</tbody></table></details></div>';
 	}
 
 	/**
@@ -758,6 +802,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 					}
 					?>
 				<?php endforeach; ?>
+				<?php $this->render_declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ); ?>
 			<?php endif; ?>
 		</div>
 		<?php
