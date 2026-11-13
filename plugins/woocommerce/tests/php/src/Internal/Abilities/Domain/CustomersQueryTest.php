@@ -26,11 +26,27 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * An administrator that every test acts as.
+	 *
+	 * @var int
+	 */
+	private static $user_id;
+
+	/**
+	 * Create the fixtures that no test changes beyond its own transaction.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$user_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
 	 * Set up an authorized caller.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::$user_id );
 		$this->sut = new \WP_Ability( CustomersQuery::get_name(), CustomersQuery::get_registration_args() );
 	}
 
@@ -61,7 +77,8 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create an order and sync it to the Analytics tables.
+	 * Create an order without line items; the query reads only its Analytics rows. Call
+	 * sync_analytics() before querying.
 	 *
 	 * @param int    $user_id User ID, or 0 for a guest.
 	 * @param string $status  Order status.
@@ -69,27 +86,43 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	 * @return \WC_Order
 	 */
 	private function order( int $user_id, string $status = OrderStatus::COMPLETED, string $email = '' ): \WC_Order {
-		$order = \WC_Helper_Order::create_order( $user_id );
+		$order = wc_create_order(
+			array(
+				'customer_id' => $user_id,
+				'status'      => $status,
+			)
+		);
 		if ( '' !== $email ) {
 			$order->set_billing_email( $email );
 			$order->set_billing_first_name( 'Privateguest' );
 			$order->set_billing_phone( '555-0199' );
 		}
-		$order->set_status( $status );
+		$order->set_total( '10.00' );
 		$order->save();
-		\WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 		return $order;
 	}
 
 	/**
-	 * Create a guest with one completed order.
-	 *
-	 * @return int Analytics customer ID.
+	 * Run the Analytics import of every order created so far.
 	 */
-	private function guest_customer(): int {
-		$email = 'private-guest-' . wp_generate_password( 6, false ) . '@example.test';
-		$this->order( 0, OrderStatus::COMPLETED, $email );
-		return (int) CustomersDataStore::get_guest_id_by_email( $email );
+	private function sync_analytics(): void {
+		\WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+	}
+
+	/**
+	 * Create guests with one completed order each, in one Analytics import.
+	 *
+	 * @param int $count Number of guests.
+	 * @return array<int, int> Analytics customer IDs.
+	 */
+	private function guest_customers( int $count ): array {
+		$emails = array();
+		for ( $i = 0; $i < $count; $i++ ) {
+			$emails[] = 'private-guest-' . wp_generate_password( 6, false ) . '@example.test';
+			$this->order( 0, OrderStatus::COMPLETED, end( $emails ) );
+		}
+		$this->sync_analytics();
+		return array_map( static fn( string $email ) => (int) CustomersDataStore::get_guest_id_by_email( $email ), $emails );
 	}
 
 	/**
@@ -97,9 +130,11 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_returns_spend_without_personal_data(): void {
 		list( $id, $user_id ) = $this->registered_customer();
-		$completed            = $this->order( $user_id );
+		$completed            = \WC_Helper_Order::create_order( $user_id );
+		$completed->set_status( OrderStatus::COMPLETED );
+		$completed->save();
 		$this->order( $user_id, OrderStatus::FAILED );
-		$guest = $this->guest_customer();
+		list( $guest ) = $this->guest_customers( 1 );
 
 		$result = $this->sut->execute( array( 'include' => array( $id, $guest ) ) );
 
@@ -130,7 +165,7 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_type_filter(): void {
 		list( $registered ) = $this->registered_customer();
-		$guest              = $this->guest_customer();
+		list( $guest )      = $this->guest_customers( 1 );
 		$input              = array( 'include' => array( $registered, $guest ) );
 
 		$this->assertEqualsCanonicalizing( array( $registered, $guest ), array_column( $this->sut->execute( $input )['customers'], 'id' ) );
@@ -140,40 +175,41 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should page by customer ID in both directions and count all matches across pages.
-	 * @testWith ["asc"]
-	 *           ["desc"]
-	 * @param string $order Sort direction.
 	 */
-	public function test_paging( string $order ): void {
-		$ids = array( $this->registered_customer()[0], $this->guest_customer(), $this->registered_customer()[0] );
-		sort( $ids );
-		if ( 'desc' === $order ) {
-			$ids = array_reverse( $ids );
-		}
+	public function test_paging(): void {
+		$ascending = array_merge( array( $this->registered_customer()[0], $this->registered_customer()[0] ), $this->guest_customers( 1 ) );
+		sort( $ascending );
 
-		$pages = array();
-		for ( $page = 1; $page <= 2; $page++ ) {
-			$result = $this->sut->execute(
-				array(
-					'include'  => $ids,
-					'orderby'  => 'id',
-					'order'    => $order,
-					'per_page' => 2,
-					'page'     => $page,
-				)
-			);
-			$this->assertSame( 3, $result['total'] );
-			$this->assertSame( 2, $result['total_pages'] );
-			$pages = array_merge( $pages, array_column( $result['customers'], 'id' ) );
+		$directions = array(
+			'asc'  => $ascending,
+			'desc' => array_reverse( $ascending ),
+		);
+		foreach ( $directions as $order => $ids ) {
+			$pages = array();
+			for ( $page = 1; $page <= 2; $page++ ) {
+				$result = $this->sut->execute(
+					array(
+						'include'  => $ids,
+						'orderby'  => 'id',
+						'order'    => $order,
+						'per_page' => 2,
+						'page'     => $page,
+					)
+				);
+				$this->assertSame( 3, $result['total'], "Total, {$order}." );
+				$this->assertSame( 2, $result['total_pages'], "Total pages, {$order}." );
+				$pages = array_merge( $pages, array_column( $result['customers'], 'id' ) );
+			}
+			$this->assertSame( $ids, $pages, "Pages, {$order}." );
 		}
-		$this->assertSame( $ids, $pages );
 	}
 
 	/**
 	 * @testdox Should order customers with the same sort value by ID, so pages neither repeat nor skip them.
 	 */
 	public function test_ties_page_by_id(): void {
-		$ids = array( $this->guest_customer(), $this->guest_customer(), $this->guest_customer() );
+		$ids = $this->guest_customers( 3 );
+		rsort( $ids );
 
 		$pages = array();
 		for ( $page = 1; $page <= 3; $page++ ) {
@@ -187,7 +223,7 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 			);
 			$pages  = array_merge( $pages, array_column( $result['customers'], 'id' ) );
 		}
-		$this->assertSame( array_reverse( $ids ), $pages, 'Guests have no registration date, so the ID decides.' );
+		$this->assertSame( $ids, $pages, 'Guests have no registration date, so the ID decides.' );
 	}
 
 	/**
@@ -197,7 +233,7 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 		list( $big, $big_user ) = $this->registered_customer();
 		$this->order( $big_user );
 		$this->order( $big_user );
-		$small = $this->guest_customer();
+		list( $small ) = $this->guest_customers( 1 );
 
 		$result = $this->sut->execute(
 			array(
@@ -212,9 +248,9 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	 * @testdox Should return the IDs in include in one page, minus the IDs in exclude.
 	 */
 	public function test_include_and_exclude(): void {
-		$ids = array();
-		for ( $i = 0; $i < 12; $i++ ) {
-			$ids[] = 0 === $i % 2 ? $this->registered_customer()[0] : $this->guest_customer();
+		$ids = $this->guest_customers( 6 );
+		for ( $i = 0; $i < 6; $i++ ) {
+			$ids[] = $this->registered_customer()[0];
 		}
 
 		$result = $this->sut->execute( array( 'include' => $ids ) );
@@ -253,7 +289,7 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 		try {
 			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
 			$registered = array( $this->registered_customer(), $this->registered_customer() );
-			$guest      = $this->guest_customer();
+			$guest      = $this->guest_customers( 1 )[0];
 			$input      = array( 'include' => array( $registered[0][0], $registered[1][0], $guest ) );
 			$baseline   = CustomersQuery::execute( $input );
 			$schema     = CustomersQuery::get_registration_args()['output_schema'];
