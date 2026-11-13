@@ -395,6 +395,21 @@ class PaymentGatewayUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should move a gateway twice in one request, starting the second move from where the first left it.
+	 */
+	public function test_moves_a_gateway_twice_in_one_request(): void {
+		$offline = $this->get_offline_positions( $this->get_saved_positions() );
+		$input   = array( 'id' => 'bacs' );
+
+		$this->run_ability( 'woocommerce/payment-gateway-update', $input + array( 'order' => end( $offline ) ) );
+		$result = $this->run_ability( 'woocommerce/payment-gateway-update', $input + array( 'order' => $offline[0] ) );
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( $offline[0], $result['payment_gateway']['order'] );
+		$this->assertSame( $offline[0], $this->get_saved_positions()['bacs'] );
+	}
+
+	/**
 	 * @testdox Should refuse a title that is empty once markup and whitespace are removed, and keep the saved title.
 	 *
 	 * @testWith ["   "]
