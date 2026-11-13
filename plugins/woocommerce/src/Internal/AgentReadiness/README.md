@@ -56,14 +56,14 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 
 ## Store output checks
 
-`StoreOutputChecks` runs in the background scan only. It loads the store's own pages as a logged-out visitor (`StoreResponses`): only URLs on the store's host, redirects followed on that host only, a 5 second timeout and 512 KB per response, each URL once per scan, nothing at all in coming soon mode. Its results go into the report's `store_checks` with the same keys, with `ok` set to `null` when the store couldn't load its own page ("Couldn't check"). They are always `recommended`, so they never block the UCP switch.
+`StoreOutputChecks` runs in the background scan only. It loads the store's own pages as a logged-out visitor (`StoreResponses`): only URLs on the store's host, redirects followed on that host only, a 5 second timeout and 512 KB per response, each URL once per scan, nothing at all in coming soon mode. A product page is read up to 2 MB, because its JSON-LD is printed in the footer and the usual cap can cut it off. Its results go into the report's `store_checks` with the same keys, with `ok` set to `null` when the store couldn't load its own page ("Couldn't check"), or when that read was cut off before any Product JSON-LD. They are always `recommended`, so they never block the UCP switch.
 
 | Id | Passes when |
 | --- | --- |
 | `sitemap_lists_products` | A sitemap listed in robots.txt, or `/wp-sitemap.xml`, `/sitemap_index.xml` or `/sitemap.xml`, names a product sitemap or product pages. An index that does not has its child sitemaps opened, at any depth, up to five child requests. |
 | `product_jsonld_present` | The newest product page has Product (or ProductGroup) JSON-LD that parses, from WooCommerce, an SEO plugin or the theme. |
-| `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. Skipped when the page has no Product JSON-LD. |
-| `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification, as a number or with a currency) and an availability. Skipped when the page has no Product JSON-LD. |
+| `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. `null` when the page has no Product JSON-LD; the settings page hides it then. |
+| `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification, as a number or with a currency) and an availability. `null` when the page has no Product JSON-LD; the settings page hides it then. |
 | `llms_txt_present` | `/llms.txt` at the host root is served as text. |
 | `llms_txt_valid` | It starts with a `# Name` heading. |
 | `llms_txt_links_resolve` | The first five links in it to the store's own pages open (no 4xx). Links to other sites, or with a query string, aren't loaded. |
@@ -97,7 +97,7 @@ array(
 	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents can find but can't add to a cart yet.
 	'store_checks' => array(
 		// blocks: 'listing' (every product on every channel), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
-		// ok: true, false, or null when a store output check couldn't load the page.
+		// ok: true, false, or null. Null means the page could not be loaded, or a product field check found no Product JSON-LD (the settings page hides that).
 		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'level' => 'required', 'name' => '…', 'label' => '…', 'why' => '…', 'fix' => '…', 'fix_url' => '…' ),
 	),
 	'channels'     => array(

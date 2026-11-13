@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreResponses;
+use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
 /**
@@ -127,6 +128,50 @@ class StoreResponsesTest extends WC_Unit_Test_Case {
 
 		$this->assertNull( ( new StoreResponses( true ) )->get( '/loop' ) );
 		$this->assertCount( 3, $this->requested );
+	}
+
+	/**
+	 * @testdox A product page is read past the usual cap, so JSON-LD in the footer is still there.
+	 */
+	public function test_product_page_keeps_footer_past_the_byte_cap(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$marker  = '<script type="application/ld+json">{"@type":"Product","name":"Tail"}</script>';
+		$body    = str_repeat( 'x', StoreResponses::MAX_BYTES ) . $marker;
+		$limit   = null;
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args ) use ( &$limit ) {
+				$limit = $args['limit_response_size'];
+				return $pre;
+			},
+			9,
+			2
+		);
+		$this->serve( array( (string) $product->get_permalink() => self::response( 200, $body ) ) );
+
+		$page = ( new StoreResponses( true ) )->product_page();
+
+		$this->assertSame( StoreResponses::PRODUCT_PAGE_BYTES, $limit );
+		$this->assertNotNull( $page );
+		$this->assertStringContainsString( $marker, $page['body'] );
+		$this->assertFalse( $page['truncated'] );
+	}
+
+	/**
+	 * @testdox A product page whose response was cut short is marked truncated.
+	 */
+	public function test_product_page_cut_short_is_truncated(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->serve(
+			array(
+				(string) $product->get_permalink() => self::response( 200, '<html></html>', array( 'content-length' => '99999999' ) ),
+			)
+		);
+
+		$page = ( new StoreResponses( true ) )->product_page();
+
+		$this->assertNotNull( $page );
+		$this->assertTrue( $page['truncated'] );
 	}
 
 	/**
