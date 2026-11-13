@@ -408,6 +408,7 @@ jQuery( function ( $ ) {
 										security:
 											wc_enhanced_select_params.search_customers_nonce,
 										exclude: $( this ).data( 'exclude' ),
+										context: $( this ).data( 'context' ),
 									};
 								},
 								processResults: function ( data ) {
