@@ -22,6 +22,11 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstall
 class PlanMetaTest extends EngineIntegrationTestCase {
 
 	/**
+	 * Owning extension of the fixture plans.
+	 */
+	private const OWNER = 'acme-subs';
+
+	/**
 	 * The System Under Test.
 	 *
 	 * @var PlanRepository
@@ -42,7 +47,7 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 			Plan::create(
 				array(
 					'name'           => 'Meta plan',
-					'extension_slug' => 'acme-subs',
+					'extension_slug' => self::OWNER,
 				)
 			)
 		);
@@ -52,8 +57,8 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 * @testdox add_meta keeps every value under one key in order.
 	 */
 	public function test_add_meta_keeps_every_value_under_one_key_in_order(): void {
-		$first  = $this->sut->add_meta( $this->id, 'note', 'one' );
-		$second = $this->sut->add_meta( $this->id, 'note', 'two' );
+		$first  = $this->sut->add_meta( $this->id, self::OWNER, 'note', 'one' );
+		$second = $this->sut->add_meta( $this->id, self::OWNER, 'note', 'two' );
 
 		$this->assertIsInt( $first );
 		$this->assertIsInt( $second );
@@ -66,9 +71,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 * @testdox unique add on an existing key adds nothing.
 	 */
 	public function test_unique_add_on_an_existing_key_adds_nothing(): void {
-		$this->sut->add_meta( $this->id, 'note', 'one' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'one' );
 
-		$this->assertNull( $this->sut->add_meta( $this->id, 'note', 'two', true ) );
+		$this->assertNull( $this->sut->add_meta( $this->id, self::OWNER, 'note', 'two', true ) );
 		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
@@ -76,7 +81,7 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 * @testdox update_meta adds the key when absent.
 	 */
 	public function test_update_meta_adds_when_absent(): void {
-		$this->assertTrue( $this->sut->update_meta( $this->id, 'note', 'one' ) );
+		$this->assertTrue( $this->sut->update_meta( $this->id, self::OWNER, 'note', 'one' ) );
 		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
@@ -84,10 +89,10 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 * @testdox update_meta rewrites every row for the key.
 	 */
 	public function test_update_meta_rewrites_every_row_for_the_key(): void {
-		$this->sut->add_meta( $this->id, 'note', 'one' );
-		$this->sut->add_meta( $this->id, 'note', 'two' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'one' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'two' );
 
-		$this->assertTrue( $this->sut->update_meta( $this->id, 'note', 'three' ) );
+		$this->assertTrue( $this->sut->update_meta( $this->id, self::OWNER, 'note', 'three' ) );
 		$this->assertSame( array( 'three', 'three' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
@@ -95,21 +100,21 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 * @testdox update_meta with a previous value rewrites only matching rows.
 	 */
 	public function test_update_meta_with_a_previous_value_rewrites_only_matching_rows(): void {
-		$this->sut->add_meta( $this->id, 'note', 'one' );
-		$this->sut->add_meta( $this->id, 'note', 'two' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'one' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'two' );
 
-		$this->assertTrue( $this->sut->update_meta( $this->id, 'note', 'three', 'two' ) );
+		$this->assertTrue( $this->sut->update_meta( $this->id, self::OWNER, 'note', 'three', 'two' ) );
 		$this->assertSame( array( 'one', 'three' ), $this->sut->get_meta( $this->id, 'note' ) );
-		$this->assertFalse( $this->sut->update_meta( $this->id, 'note', 'four', 'missing' ) );
+		$this->assertFalse( $this->sut->update_meta( $this->id, self::OWNER, 'note', 'four', 'missing' ) );
 	}
 
 	/**
 	 * @testdox update_meta to the same value reports no change.
 	 */
 	public function test_update_meta_to_the_same_value_reports_no_change(): void {
-		$this->sut->add_meta( $this->id, 'note', 'one' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'one' );
 
-		$this->assertFalse( $this->sut->update_meta( $this->id, 'note', 'one' ) );
+		$this->assertFalse( $this->sut->update_meta( $this->id, self::OWNER, 'note', 'one' ) );
 		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
@@ -117,10 +122,10 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 * @testdox delete_meta with a value removes only that row.
 	 */
 	public function test_delete_meta_with_a_value_removes_only_that_row(): void {
-		$this->sut->add_meta( $this->id, 'note', 'one' );
-		$this->sut->add_meta( $this->id, 'note', 'two' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'one' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'two' );
 
-		$this->assertTrue( $this->sut->delete_meta( $this->id, 'note', 'one' ) );
+		$this->assertTrue( $this->sut->delete_meta( $this->id, self::OWNER, 'note', 'one' ) );
 		$this->assertSame( array( 'two' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
@@ -128,23 +133,23 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 * @testdox delete_meta without a value removes every row for the key.
 	 */
 	public function test_delete_meta_without_a_value_removes_every_row_for_the_key(): void {
-		$this->sut->add_meta( $this->id, 'note', 'one' );
-		$this->sut->add_meta( $this->id, 'note', 'two' );
-		$this->sut->add_meta( $this->id, 'other', 'kept' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'one' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'two' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'other', 'kept' );
 
-		$this->assertTrue( $this->sut->delete_meta( $this->id, 'note' ) );
+		$this->assertTrue( $this->sut->delete_meta( $this->id, self::OWNER, 'note' ) );
 		$this->assertSame( array(), $this->sut->get_meta( $this->id, 'note' ) );
 		$this->assertSame( array( 'kept' ), $this->sut->get_meta( $this->id, 'other' ) );
-		$this->assertFalse( $this->sut->delete_meta( $this->id, 'note' ) );
+		$this->assertFalse( $this->sut->delete_meta( $this->id, self::OWNER, 'note' ) );
 	}
 
 	/**
 	 * @testdox get_meta without a key groups every key.
 	 */
 	public function test_get_meta_without_a_key_groups_every_key(): void {
-		$this->sut->add_meta( $this->id, 'note', 'one' );
-		$this->sut->add_meta( $this->id, 'flag', 'yes' );
-		$this->sut->add_meta( $this->id, 'note', 'two' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'one' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'flag', 'yes' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'two' );
 
 		$this->assertSame(
 			array(
@@ -164,10 +169,10 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 			'b' => array( 'c' ),
 		);
 
-		$this->sut->add_meta( $this->id, 'payload', $value );
+		$this->sut->add_meta( $this->id, self::OWNER, 'payload', $value );
 
 		$this->assertSame( $value, $this->sut->get_meta( $this->id, 'payload', true ) );
-		$this->assertTrue( $this->sut->delete_meta( $this->id, 'payload', $value ) );
+		$this->assertTrue( $this->sut->delete_meta( $this->id, self::OWNER, 'payload', $value ) );
 	}
 
 	/**
@@ -186,11 +191,11 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$plan  = Plan::create(
 			array(
 				'name'           => 'Other',
-				'extension_slug' => 'acme-subs',
+				'extension_slug' => self::OWNER,
 			)
 		);
 		$other = $this->sut->insert( $plan );
-		$this->sut->add_meta( $other, 'note', 'theirs' );
+		$this->sut->add_meta( $other, self::OWNER, 'note', 'theirs' );
 
 		$this->assertSame( array(), $this->sut->get_meta( $this->id, 'note' ) );
 	}
@@ -199,7 +204,7 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 * @testdox meta survives a plan update.
 	 */
 	public function test_meta_survives_a_plan_update(): void {
-		$this->sut->add_meta( $this->id, 'note', 'kept' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'kept' );
 
 		$plan = $this->sut->find( $this->id );
 		$this->assertInstanceOf( Plan::class, $plan );
@@ -213,7 +218,7 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 * @testdox delete removes the plan's meta.
 	 */
 	public function test_delete_removes_the_plan_meta(): void {
-		$this->sut->add_meta( $this->id, 'note', 'gone' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'gone' );
 
 		$this->assertTrue( $this->sut->delete( $this->id ) );
 		$this->assertSame( array(), $this->sut->get_meta( $this->id ) );
@@ -236,7 +241,7 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 * @testdox delete throws when the plan row fails to delete, and keeps the plan and its meta.
 	 */
 	public function test_delete_throws_when_the_plan_row_delete_fails(): void {
-		$this->sut->add_meta( $this->id, 'note', 'kept' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'kept' );
 
 		$this->assert_write_throws_on_a_failed_query(
 			'DELETE FROM `' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ) . '`',
@@ -254,19 +259,19 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 * @testdox a failed meta write throws.
 	 * @dataProvider provide_failing_meta_writes
 	 *
-	 * @param string            $statement Start of the failing SQL statement.
+	 * @param string            $statement Start of the failing SQL statement, `%s` for the meta table.
 	 * @param string            $message   Expected message fragment.
 	 * @param string            $method    Repository method.
 	 * @param array<int, mixed> $args      Arguments after the plan id.
 	 */
 	public function test_a_failed_meta_write_throws( string $statement, string $message, string $method, array $args ): void {
-		$this->sut->add_meta( $this->id, 'existing', 'one' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'existing', 'one' );
 
 		$this->assert_write_throws_on_a_failed_query(
-			$statement . ' `' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ) . '`',
+			sprintf( $statement, SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ) ),
 			$message,
 			function () use ( $method, $args ): void {
-				$this->sut->{$method}( $this->id, ...$args );
+				$this->sut->{$method}( $this->id, self::OWNER, ...$args );
 			}
 		);
 	}
@@ -276,9 +281,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 */
 	public function provide_failing_meta_writes(): array {
 		return array(
-			'add'    => array( 'INSERT INTO', 'Failed to add plan meta', 'add_meta', array( 'note', 'x' ) ),
-			'update' => array( 'UPDATE', 'Failed to update plan meta', 'update_meta', array( 'existing', 'two' ) ),
-			'delete' => array( 'DELETE FROM', 'Failed to delete plan meta', 'delete_meta', array( 'existing' ) ),
+			'add'    => array( 'INSERT INTO %s ', 'Failed to add plan meta', 'add_meta', array( 'note', 'x' ) ),
+			'update' => array( 'UPDATE %s m ', 'Failed to update plan meta', 'update_meta', array( 'existing', 'two' ) ),
+			'delete' => array( 'DELETE m FROM %s ', 'Failed to delete plan meta', 'delete_meta', array( 'existing' ) ),
 		);
 	}
 
@@ -313,7 +318,7 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 * @testdox a delete under another extension slug keeps the plan and its meta.
 	 */
 	public function test_a_delete_under_another_extension_slug_keeps_the_plan_and_its_meta(): void {
-		$this->sut->add_meta( $this->id, 'note', 'kept' );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'kept' );
 
 		$this->assertFalse( $this->sut->delete( $this->id, 'another-extension' ) );
 		$this->assertNotNull( $this->sut->find( $this->id ) );
@@ -321,25 +326,48 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox an empty key is rejected on writes.
-	 * @dataProvider provide_write_methods
-	 *
-	 * @param string $method Write method name.
+	 * @testdox add_meta and update_meta on a missing plan or a plan of another extension throw and write no orphan row.
 	 */
-	public function test_an_empty_key_is_rejected_on_writes( string $method ): void {
-		$this->expectException( InvalidArgumentException::class );
-
-		$this->sut->{$method}( $this->id, '', 'value' );
+	public function test_writes_on_a_missing_or_foreign_plan_write_nothing(): void {
+		foreach ( array( array( 999999, self::OWNER ), array( $this->id, 'another-extension' ) ) as list( $plan_id, $owner ) ) {
+			foreach ( array( 'add_meta', 'update_meta' ) as $method ) {
+				try {
+					$this->sut->{$method}( $plan_id, $owner, 'note', 'orphan' );
+					$this->fail( "Expected {$method}() to refuse plan {$plan_id} of {$owner}." );
+				} catch ( InvalidArgumentException $e ) {
+					$this->assertSame( sprintf( 'No plan of extension &quot;%s&quot; has id %d.', $owner, $plan_id ), $e->getMessage() );
+				}
+			}
+			$this->assertSame( array(), $this->sut->get_meta( $plan_id ), 'No meta row is written.' );
+		}
 	}
 
 	/**
-	 * @return array<string, array{0: string}>
+	 * @testdox a unique add returns null for a taken key on an own plan and throws for a plan of another extension with that key.
 	 */
-	public function provide_write_methods(): array {
-		return array(
-			'add'    => array( 'add_meta' ),
-			'update' => array( 'update_meta' ),
-			'delete' => array( 'delete_meta' ),
-		);
+	public function test_a_unique_add_tells_a_taken_key_from_a_foreign_plan(): void {
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'one' );
+
+		$this->assertNull( $this->sut->add_meta( $this->id, self::OWNER, 'note', 'two', true ) );
+		$this->assertIsInt( $this->sut->add_meta( $this->id, self::OWNER, 'fresh', 'x', true ), 'An absent key is added by the NOT EXISTS insert.' );
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->sut->add_meta( $this->id, 'another-extension', 'note', 'theirs', true );
+	}
+
+	/**
+	 * @testdox update_meta and delete_meta on a plan of another extension change nothing.
+	 */
+	public function test_update_and_delete_on_a_foreign_plan_change_nothing(): void {
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'kept' );
+
+		try {
+			$this->sut->update_meta( $this->id, 'another-extension', 'note', 'theirs' );
+			$this->fail( 'Expected update_meta() to refuse a foreign plan.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertSame( array( 'kept' ), $this->sut->get_meta( $this->id, 'note' ) );
+		}
+		$this->assertFalse( $this->sut->delete_meta( $this->id, 'another-extension', 'note' ) );
+		$this->assertSame( array( 'kept' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 }
