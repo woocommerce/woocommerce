@@ -13,9 +13,9 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Creates one refund of an order in the two halves of wc_create_refund(), so the caller can check and save the
- * refund in between: stage() changes the refund in memory, and finish() does what follows the save. It mirrors
- * wc_create_refund(), so a change to one belongs in the other.
+ * Creates one refund of an order in the steps of wc_create_refund(), so the caller can check the refund before it
+ * is saved: stage() changes the refund in memory, before_save() fires the hook that precedes the save, and finish()
+ * does what follows it. It mirrors wc_create_refund(), so a change to one belongs in the other.
  *
  * @since 11.4.0
  */
@@ -86,7 +86,38 @@ class RefundCreator {
 	}
 
 	/**
-	 * Set the amount, lines and totals of the refund without saving it, then fire woocommerce_create_refund.
+	 * Fire woocommerce_create_refund right before the save. Callbacks can move money or take locks there, since a
+	 * save has always followed, so a dry run or a refused refund must not reach it.
+	 *
+	 * @param \WC_Order_Refund $refund Staged refund, not saved.
+	 * @return null|\WP_Error A WP_Error when a callback declined the refund by throwing.
+	 *
+	 * @since 11.4.0
+	 */
+	public function before_save( \WC_Order_Refund $refund ): ?\WP_Error {
+		$args = $this->args;
+
+		try {
+			/**
+			 * Fires before a new refund is saved, so a callback can change it.
+			 *
+			 * @since 3.0.0
+			 *
+			 * @param \WC_Order_Refund $refund Refund, not saved.
+			 * @param array            $args   Arguments in the format of wc_create_refund().
+			 *
+			 * @throws \Exception To decline the refund, with the message to show.
+			 */
+			do_action( 'woocommerce_create_refund', $refund, $args );
+		} catch ( \Exception $e ) {
+			return new \WP_Error( 'refund_declined', $e->getMessage(), array( 'status' => 400 ) );
+		}
+
+		return null;
+	}
+
+	/**
+	 * Set the amount, lines and totals of the refund without saving it, and without firing any hook.
 	 *
 	 * @param \WC_Order_Refund $refund New refund, not saved.
 	 * @return null|\WP_Error
@@ -124,22 +155,6 @@ class RefundCreator {
 		$refund->stage_tax_items();
 		$refund->stage_totals( false );
 		$refund->set_total( wc_format_decimal( $args['amount'] * -1 ) );
-
-		try {
-			/**
-			 * Fires before a new refund is saved, so a callback can change it.
-			 *
-			 * @since 3.0.0
-			 *
-			 * @param \WC_Order_Refund $refund Refund, not saved.
-			 * @param array            $args   Arguments in the format of wc_create_refund().
-			 *
-			 * @throws \Exception To decline the refund, with the message to show.
-			 */
-			do_action( 'woocommerce_create_refund', $refund, $args );
-		} catch ( \Exception $e ) {
-			return new \WP_Error( 'refund_declined', $e->getMessage(), array( 'status' => 400 ) );
-		}
 
 		return null;
 	}
