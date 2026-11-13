@@ -161,6 +161,29 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should date the last order by orders, not by a later refund.
+	 */
+	public function test_last_order_ignores_refunds(): void {
+		list( $id, $user_id ) = $this->registered_customer();
+		$order                = $this->order( $user_id );
+		$order->set_date_created( '2026-01-01T10:00:00+00:00' );
+		$order->save();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => '2.00',
+			)
+		);
+		$refund->set_date_created( '2026-03-01T10:00:00+00:00' );
+		$refund->save();
+		$this->sync_analytics();
+
+		$result = $this->sut->execute( array( 'include' => array( $id ) ) );
+
+		$this->assertStringStartsWith( '2026-01-01T10:00:00', $result['customers'][0]['date_last_order'] );
+	}
+
+	/**
 	 * @testdox Should list registered customers, guests or both by type.
 	 */
 	public function test_type_filter(): void {

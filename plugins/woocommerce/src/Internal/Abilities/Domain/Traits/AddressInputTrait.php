@@ -53,14 +53,19 @@ trait AddressInputTrait {
 		$state    = $address['state'] ?? $subject->{"get_{$type}_state"}();
 		$postcode = $address['postcode'] ?? $subject->{"get_{$type}_postcode"}();
 
+		$sent_fields = array_keys( (array) $address );
+		$sent        = static fn( string ...$fields ): bool => empty( array_diff( $fields, $sent_fields ) );
+
 		if ( '' !== $country && ! array_key_exists( $country, WC()->countries->get_countries() ) ) {
 			$refused->merge_from(
 				self::address_error(
 					$resource_name,
 					$type,
 					'country',
-					/* translators: %s: country sent by the client. */
-					sprintf( __( '"%s" is not a valid country. Send an ISO 3166-1 alpha-2 country code, such as PT.', 'woocommerce' ), $country )
+					$sent( 'country' )
+						/* translators: %s: country sent by the client. */
+						? sprintf( __( '"%s" is not a valid country. Send an ISO 3166-1 alpha-2 country code, such as PT.', 'woocommerce' ), $country )
+						: __( 'The saved country is not valid. Send an ISO 3166-1 alpha-2 country code, such as PT.', 'woocommerce' )
 				)
 			);
 			unset( $address['country'], $address['state'], $address['postcode'] );
@@ -73,8 +78,10 @@ trait AddressInputTrait {
 						$resource_name,
 						$type,
 						'state',
-						/* translators: 1: state sent by the client or already saved, 2: country code, 3: comma-separated state codes. */
-						sprintf( __( '"%1$s" is not a state of %2$s. Send the state with one of these codes: %3$s.', 'woocommerce' ), $state, $country, implode( ', ', array_keys( $states ) ) )
+						$sent( 'country', 'state' )
+							/* translators: 1: state sent by the client, 2: country code sent by the client, 3: comma-separated state codes. */
+							? sprintf( __( '"%1$s" is not a state of %2$s. Send the state with one of these codes: %3$s.', 'woocommerce' ), $state, $country, implode( ', ', array_keys( $states ) ) )
+							: __( 'The state does not belong to the country. Send the country and the state together.', 'woocommerce' )
 					)
 				);
 				unset( $address['state'] );
@@ -87,8 +94,10 @@ trait AddressInputTrait {
 							$resource_name,
 							$type,
 							'postcode',
-							/* translators: 1: postcode sent by the client or already saved, 2: country code. */
-							sprintf( __( '"%1$s" is not a valid postcode for %2$s. Send a postcode in the format of that country.', 'woocommerce' ), $postcode, $country )
+							$sent( 'country', 'postcode' )
+								/* translators: 1: postcode sent by the client, 2: country code sent by the client. */
+								? sprintf( __( '"%1$s" is not a valid postcode for %2$s. Send a postcode in the format of that country.', 'woocommerce' ), $postcode, $country )
+								: __( 'The postcode does not match the format of the country. Send the country and the postcode together.', 'woocommerce' )
 						)
 					);
 					unset( $address['postcode'] );

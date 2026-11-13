@@ -37,6 +37,15 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 	);
 
 	/**
+	 * Sorts that read the lookup table only, so the page can be picked before any order stats are joined.
+	 */
+	private const LOOKUP_SORT_SQL = array(
+		'last_active'     => "IF( cl.date_last_active <= '0000-00-00 00:00:00', NULL, cl.date_last_active )",
+		'registered_date' => 'cl.date_registered',
+		'id'              => 'cl.customer_id',
+	);
+
+	/**
 	 * Get the ability name.
 	 *
 	 * @since 11.4.0
@@ -113,32 +122,38 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 		$page             = $input['page'] ?? 1;
 		$per_page         = $input['per_page'] ?? $default_per_page;
 		$order            = 'asc' === ( $input['order'] ?? 'desc' ) ? 'ASC' : 'DESC';
-		$orderby          = self::ORDERBY_COLUMNS[ $input['orderby'] ?? 'last_active' ];
+		$orderby_key      = $input['orderby'] ?? 'last_active';
+		$orderby          = self::ORDERBY_COLUMNS[ $orderby_key ];
 		$lookup           = CustomerLookup::get_db_table_name();
 		$stats            = $wpdb->prefix . 'wc_order_stats';
 		$where            = self::get_where_sql( $input, $extension_args );
 		$order_count      = CustomerLookup::get_order_count_sql( 'os' );
 		$counted_status   = CustomerLookup::get_counted_status_sql( 'os' );
-		$offset           = ( $page - 1 ) * $per_page;
+		$last_order       = CustomerLookup::get_last_order_date_sql( 'os' );
+		$source           = "{$lookup} cl";
+		$outer_where      = $where;
+		$limit            = $wpdb->prepare( 'LIMIT %d OFFSET %d', $per_page, ( $page - 1 ) * $per_page );
+		if ( isset( self::LOOKUP_SORT_SQL[ $orderby_key ] ) ) {
+			$source      = "( SELECT cl.customer_id FROM {$lookup} cl WHERE {$where} ORDER BY " . self::LOOKUP_SORT_SQL[ $orderby_key ] . " {$order}, cl.customer_id {$order} {$limit} ) page_ids
+				INNER JOIN {$lookup} cl ON cl.customer_id = page_ids.customer_id";
+			$outer_where = '1=1';
+			$limit       = '';
+		}
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names, the sort column and the WHERE clause are built from fixed strings and escaped integers.
 		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$lookup} cl WHERE {$where}" );
 		$rows  = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT cl.customer_id, cl.user_id, cl.date_registered,
-					IF( cl.date_last_active <= '0000-00-00 00:00:00', NULL, cl.date_last_active ) AS date_last_active,
-					MAX( os.date_created_gmt ) AS date_last_order,
-					{$order_count} AS order_count,
-					COALESCE( SUM( os.total_sales ), 0 ) AS total_spent
-				FROM {$lookup} cl
-				LEFT JOIN {$stats} os ON os.customer_id = cl.customer_id {$counted_status}
-				WHERE {$where}
-				GROUP BY cl.customer_id, cl.user_id, cl.date_registered, cl.date_last_active
-				ORDER BY {$orderby} {$order}, cl.customer_id {$order}
-				LIMIT %d OFFSET %d",
-				$per_page,
-				$offset
-			),
+			"SELECT cl.customer_id, cl.user_id, cl.date_registered,
+				IF( cl.date_last_active <= '0000-00-00 00:00:00', NULL, cl.date_last_active ) AS date_last_active,
+				{$last_order} AS date_last_order,
+				{$order_count} AS order_count,
+				COALESCE( SUM( os.total_sales ), 0 ) AS total_spent
+			FROM {$source}
+			LEFT JOIN {$stats} os ON os.customer_id = cl.customer_id {$counted_status}
+			WHERE {$outer_where}
+			GROUP BY cl.customer_id, cl.user_id, cl.date_registered, cl.date_last_active
+			ORDER BY {$orderby} {$order}, cl.customer_id {$order}
+			{$limit}",
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared

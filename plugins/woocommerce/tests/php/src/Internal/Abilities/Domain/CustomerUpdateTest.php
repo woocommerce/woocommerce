@@ -128,6 +128,50 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not quote the saved state and postcode when they fail against a sent country.
+	 */
+	public function test_refusal_does_not_quote_saved_values(): void {
+		list( $id ) = $this->registered_customer();
+
+		$result = $this->execute(
+			array(
+				'id'      => $id,
+				'billing' => array( 'country' => 'CA' ),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertEqualsCanonicalizing( array( 'woocommerce_ability_customer_billing_state_invalid', 'woocommerce_ability_customer_billing_postcode_invalid' ), $result->get_error_codes() );
+		$messages = implode( ' ', $result->get_error_messages() );
+		$this->assertStringNotContainsString( '94110', $messages );
+		$this->assertStringNotContainsString( '"', $messages, 'Only sent values are quoted.' );
+	}
+
+	/**
+	 * @testdox Should report a lookup row whose user is gone as an unknown customer.
+	 */
+	public function test_stale_lookup_row_is_not_found(): void {
+		global $wpdb;
+		$wpdb->insert(
+			CustomersDataStore::get_db_table_name(),
+			array(
+				'user_id'         => self::$user_id + 100000,
+				'date_registered' => '2026-01-01 00:00:00',
+			)
+		);
+		$id = (int) $wpdb->insert_id;
+
+		$this->assertTrue( CustomerUpdate::can_edit_customer( array( 'id' => $id ) ) );
+		$result = $this->execute(
+			array(
+				'id'         => $id,
+				'first_name' => 'Ana',
+			)
+		);
+		$this->assertSame( 'woocommerce_ability_customer_not_found', $result->get_error_code() );
+	}
+
+	/**
 	 * @testdox Should refuse a guest, an unknown customer and a call with nothing to change.
 	 */
 	public function test_refuses_guests_unknown_ids_and_empty_changes(): void {
