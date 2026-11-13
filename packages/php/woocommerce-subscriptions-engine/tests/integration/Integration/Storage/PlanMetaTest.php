@@ -297,6 +297,47 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox a failed plan update or existence read throws.
+	 * @dataProvider provide_failing_plan_update_queries
+	 *
+	 * @param string $statement Start of the failing SQL statement, `{plans}` for the table.
+	 * @param string $message   Expected message fragment.
+	 */
+	public function test_a_failed_plan_update_throws( string $statement, string $message ): void {
+		$plans = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$plan  = $this->sut->find( $this->id );
+		$this->assertInstanceOf( Plan::class, $plan );
+
+		// The UPDATE changes no row, so update_fields() reads whether the plan exists.
+		$change_nothing = static function ( string $query ) use ( $plans ): string {
+			return 0 === strpos( $query, "UPDATE {$plans} p " ) ? $query . ' AND 0 = 1' : $query;
+		};
+		add_filter( 'query', $change_nothing );
+
+		try {
+			$this->assert_write_throws_on_a_failed_query(
+				str_replace( '{plans}', $plans, $statement ),
+				$message,
+				function () use ( $plan ): void {
+					$this->sut->update_fields( $plan, array( 'name' ) );
+				}
+			);
+		} finally {
+			remove_filter( 'query', $change_nothing );
+		}
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function provide_failing_plan_update_queries(): array {
+		return array(
+			'update'                  => array( 'UPDATE {plans} p ', 'Failed to update plan' ),
+			'existence read after it' => array( 'SELECT p.id FROM {plans} p ', 'Failed to read plan' ),
+		);
+	}
+
+	/**
 	 * Break the queries starting with `$statement` and assert `$write` throws.
 	 *
 	 * @param string   $statement Start of the SQL statement to break.

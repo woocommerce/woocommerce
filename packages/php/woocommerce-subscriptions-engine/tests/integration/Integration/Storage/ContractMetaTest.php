@@ -304,15 +304,32 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A meta write with a lock for another contract is refused.
+	 * @testdox A meta write with a lock for another contract of another extension is refused for the contract first.
 	 */
 	public function test_a_meta_write_with_another_contracts_lock_is_refused(): void {
-		$other = $this->insert_released( Contract::create( array( 'extension_slug' => self::OWNER ) ) );
-		$lock  = $this->sut->acquire_lock( $other, self::OWNER, 'hold' );
+		$other = $this->insert_released( Contract::create( array( 'extension_slug' => 'another-extension' ) ) );
+		$lock  = $this->sut->acquire_lock( $other, 'another-extension', 'hold' );
 		$this->assertInstanceOf( ContractLock::class, $lock );
 
-		$this->expectException( InvalidArgumentException::class );
-		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'one', false, $lock );
+		$writes = array(
+			'add_meta'    => function () use ( $lock ): void {
+				$this->sut->add_meta( $this->id, self::OWNER, 'note', 'one', false, $lock );
+			},
+			'update_meta' => function () use ( $lock ): void {
+				$this->sut->update_meta( $this->id, self::OWNER, 'note', 'one', null, $lock );
+			},
+			'delete_meta' => function () use ( $lock ): void {
+				$this->sut->delete_meta( $this->id, self::OWNER, 'note', null, $lock );
+			},
+		);
+		foreach ( $writes as $method => $write ) {
+			try {
+				$write();
+				$this->fail( "Expected {$method}() to refuse the lock." );
+			} catch ( InvalidArgumentException $e ) {
+				$this->assertStringContainsString( "The lock belongs to contract {$other}, not contract {$this->id}.", $e->getMessage(), $method );
+			}
+		}
 	}
 
 	/**

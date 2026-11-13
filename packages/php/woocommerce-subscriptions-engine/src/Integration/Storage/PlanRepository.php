@@ -21,10 +21,10 @@ defined( 'ABSPATH' ) || exit;
 final class PlanRepository {
 
 	/**
-	 * SQL condition on the `p` alias: the plan's owner is exactly the bound slug. `BINARY` makes the
-	 * match case-sensitive, as the engine's PHP comparisons of the owner are.
+	 * SQL condition on the `p` alias: the plan's owner is exactly the bound slug. The binary cast
+	 * makes the match case-sensitive, as the engine's PHP comparisons of the owner are.
 	 */
-	private const OWNER_MATCH = 'p.extension_slug = BINARY %s';
+	private const OWNER_MATCH = 'p.extension_slug = CAST(%s AS BINARY)';
 
 	/**
 	 * Policy columns stored as JSON.
@@ -208,7 +208,8 @@ final class PlanRepository {
 	 *                                   `pricing_policy`, `delivery_policy`.
 	 * @return bool False when no row of the plan's extension has its id (nothing is written).
 	 * @throws \InvalidArgumentException If a field is not a writable column.
-	 * @throws \RuntimeException If the plan has no id or no extension slug, or the update fails.
+	 * @throws \RuntimeException If the plan has no id or no extension slug, a value does not fit its
+	 *                           column, the update fails, or the existence read after a 0-row update fails.
 	 */
 	public function update_fields( Plan $plan, array $fields ): bool {
 		global $wpdb;
@@ -223,11 +224,17 @@ final class PlanRepository {
 			throw new \RuntimeException( 'Cannot update a plan that has no extension slug.' );
 		}
 
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 		$row     = $this->get_row_data( $plan );
 		$columns = array();
 		foreach ( $fields as $field ) {
 			if ( 'extension_slug' === $field || ! array_key_exists( $field, $row ) ) {
 				throw new \InvalidArgumentException( esc_html( sprintf( 'Cannot update plan field "%s".', $field ) ) );
+			}
+			// The raw query below skips the length and charset check `$wpdb->update()` makes, so make it here.
+			$checked = $wpdb->strip_invalid_text_for_column( $table, $field, $row[ $field ] );
+			if ( $checked !== $row[ $field ] ) {
+				throw new \RuntimeException( sprintf( 'Failed to update plan %d: the value of field "%s" is too long or contains invalid data.', (int) $id, esc_html( $field ) ) );
 			}
 			$columns[ $field ] = $row[ $field ];
 		}
@@ -247,10 +254,10 @@ final class PlanRepository {
 		$values[] = $id;
 		$values[] = $extension_slug;
 
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
-		$sql   = "UPDATE {$table} p SET " . implode( ', ', $set ) . ' WHERE p.id = %d AND ' . self::OWNER_MATCH;
+		$sql = "UPDATE {$table} p SET " . implode( ', ', $set ) . ' WHERE p.id = %d AND ' . self::OWNER_MATCH;
 
-		// Column names come from the plan's own row data; every value is a placeholder.
+		// Not `$wpdb->update()`: its WHERE cannot express the binary owner match. Column names come
+		// from the plan's own row data; every value is a placeholder.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 		$updated = $wpdb->query( $wpdb->prepare( $sql, $values ) );
 

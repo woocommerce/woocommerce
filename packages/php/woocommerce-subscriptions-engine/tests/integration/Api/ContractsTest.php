@@ -1242,7 +1242,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 			)
 		);
 		$this->assertNull( Contracts::update( $id, array( 'extension_slug' => $upper ) ), 'The fieldless path agrees.' );
+		Contracts::add_meta( $id, self::EXTENSION_SLUG, 'k', 'v' );
 		$this->assertFalse( Contracts::delete_meta( $id, $upper, 'k' ) );
+		$this->assertSame( 'v', Contracts::get_meta( $id, 'k', true ), 'The case variant deletes nothing.' );
 		$this->expectException( InvalidArgumentException::class );
 		Contracts::add_meta( $id, $upper, 'k', 'v' );
 	}
