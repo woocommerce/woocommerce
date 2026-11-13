@@ -86,16 +86,22 @@ class RefundCreator {
 	}
 
 	/**
-	 * Fire woocommerce_create_refund right before the save. Callbacks can move money or take locks there, since a
-	 * save has always followed, so a dry run or a refused refund must not reach it.
+	 * Save the refund, then fire woocommerce_create_refund. wc_create_refund() saves the refund before the hook too,
+	 * and callbacks use its ID, so the caller must run this inside a transaction it rolls back when this fails.
+	 * Callbacks can move money or take locks there, so a dry run or a refused refund must not reach it.
 	 *
 	 * @param \WC_Order_Refund $refund Staged refund, not saved.
-	 * @return null|\WP_Error A WP_Error when a callback declined the refund by throwing.
+	 * @return null|\WP_Error A WP_Error when the refund was not saved, or a callback declined it by throwing.
 	 *
 	 * @since 11.4.0
 	 */
 	public function before_save( \WC_Order_Refund $refund ): ?\WP_Error {
 		$args = $this->args;
+
+		$refund->save();
+		if ( $refund->get_id() <= 0 ) {
+			return new \WP_Error( 'refund_not_saved', __( 'The refund could not be saved.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
 
 		try {
 			/**
@@ -103,7 +109,7 @@ class RefundCreator {
 			 *
 			 * @since 3.0.0
 			 *
-			 * @param \WC_Order_Refund $refund Refund, not saved.
+			 * @param \WC_Order_Refund $refund Refund, saved once so it has an ID, before its final save.
 			 * @param array            $args   Arguments in the format of wc_create_refund().
 			 *
 			 * @throws \Exception To decline the refund, with the message to show.
