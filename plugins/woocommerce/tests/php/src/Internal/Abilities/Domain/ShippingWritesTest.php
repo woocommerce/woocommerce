@@ -233,6 +233,45 @@ class ShippingWritesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refresh cart rates when the settings are saved but the enabled state is not.
+	 */
+	public function test_saved_settings_reach_the_cart_when_the_rest_of_the_write_fails(): void {
+		global $wpdb;
+
+		$zone_id = $this->create_germany_zone();
+		$created = $this->run_ability(
+			'woocommerce/shipping-zone-method-create',
+			array(
+				'zone_id'   => $zone_id,
+				'method_id' => 'flat_rate',
+				'settings'  => array( 'cost' => '5' ),
+			)
+		);
+		$this->rates_for_cart_of( 40 );
+
+		$break_method_update = static function ( string $query ) use ( $wpdb ): string {
+			return 0 === strpos( $query, "UPDATE `{$wpdb->prefix}woocommerce_shipping_zone_methods`" ) ? 'UPDATE no_such_table SET x = 1' : $query;
+		};
+		add_filter( 'query', $break_method_update );
+		$suppress = $wpdb->suppress_errors( true );
+		$updated  = $this->run_ability(
+			'woocommerce/shipping-zone-method-update',
+			array(
+				'instance_id' => $created['method']['instance_id'],
+				'enabled'     => true,
+				'settings'    => array( 'cost' => '7' ),
+			)
+		);
+		$wpdb->suppress_errors( $suppress );
+		remove_filter( 'query', $break_method_update );
+
+		$this->assertWPError( $updated );
+		$this->assertSame( 'woocommerce_ability_shipping_method_update_failed', $updated->get_error_code() );
+		WC()->cart->calculate_totals();
+		$this->assertSame( '7', WC()->shipping()->get_packages()[0]['rates'][ 'flat_rate:' . $created['method']['instance_id'] ]->get_cost() );
+	}
+
+	/**
 	 * @testdox Should keep the free shipping requirement already stored when only the minimum changes.
 	 */
 	public function test_minimum_keeps_a_stored_requirement(): void {
@@ -294,6 +333,8 @@ class ShippingWritesTest extends \WC_Unit_Test_Case {
 	 * @testWith ["flat_rate", {"min_amount": "50"}, "woocommerce_ability_shipping_method_setting_unknown"]
 	 *           ["flat_rate", {"cost": "10 +"}, "woocommerce_ability_shipping_method_setting_invalid"]
 	 *           ["free_shipping", {"min_amount": "-5"}, "woocommerce_ability_shipping_method_setting_invalid"]
+	 *           ["free_shipping", {"min_amount": ","}, "woocommerce_ability_shipping_method_setting_invalid"]
+	 *           ["free_shipping", {"min_amount": ""}, "woocommerce_ability_shipping_method_setting_invalid"]
 	 *
 	 * @param string $method_id Method to add.
 	 * @param array  $settings  Settings to send.

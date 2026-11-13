@@ -163,13 +163,14 @@ trait ShippingZoneAbilityTrait {
 		}
 
 		$result = wc_get_container()->get( ShippingZoneMethodService::class )->update_shipping_zone_method( $method, $method->get_instance_id(), $data, $zone->get_id() );
+
+		// The service bumps the cache version only when the enabled state or order changes, and not when that fails after the settings were saved.
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+
 		if ( is_wp_error( $result ) ) {
 			$code = 'woocommerce_rest_shipping_method_invalid_setting' === $result->get_error_code() ? 'woocommerce_ability_shipping_method_setting_invalid' : 'woocommerce_ability_shipping_method_update_failed';
 			return new \WP_Error( $code, $result->get_error_message(), array( 'status' => 'woocommerce_ability_shipping_method_setting_invalid' === $code ? 400 : 500 ) );
 		}
-
-		// The service bumps the cache version only when the enabled state or order changes, which leaves stale rates in carts after a settings change.
-		\WC_Cache_Helper::get_transient_version( 'shipping', true );
 
 		return null;
 	}
@@ -193,8 +194,12 @@ trait ShippingZoneAbilityTrait {
 			);
 		}
 
-		if ( isset( $settings['min_amount'] ) && (float) wc_format_decimal( $settings['min_amount'] ) < 0 ) {
-			return new \WP_Error( 'woocommerce_ability_shipping_method_setting_invalid', __( 'The minimum order amount cannot be negative.', 'woocommerce' ), array( 'status' => 400 ) );
+		// The price validator turns text without digits into an empty minimum, which every cart meets.
+		if ( isset( $settings['min_amount'] ) ) {
+			$min_amount = wc_format_decimal( $settings['min_amount'] );
+			if ( ! is_numeric( $min_amount ) || (float) $min_amount < 0 ) {
+				return new \WP_Error( 'woocommerce_ability_shipping_method_setting_invalid', __( 'The minimum order amount must be a number of 0 or more.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
 		}
 
 		// Free shipping ignores the minimum unless it is required, and an agent that sets one means it to apply.
