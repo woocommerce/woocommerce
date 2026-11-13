@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep fixed font sizes in emails when the site theme uses fluid typography, which many email clients can’t read.

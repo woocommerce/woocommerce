@@ -15,6 +15,7 @@ import {
 import {
 	getCursorPosition,
 	insertPersonalizationTag,
+	getOffsetAfterTagReplacement,
 } from '../rich-text-utils';
 
 const TAG = '[woocommerce/customer-first-name]';
@@ -318,5 +319,20 @@ describe( 'getCursorPosition', () => {
 		const { el, ref } = makeField( 'abc <strong>bold</strong>' );
 		select( el.childNodes[ 0 ], 2 );
 		expect( getCursorPosition( ref ) ).toEqual( { start: 2, end: 2 } );
+	} );
+} );
+
+describe( 'getOffsetAfterTagReplacement', () => {
+	it( 'moves the offset back by the characters the tag no longer takes', () => {
+		const typed = 'Hello [woocommerce/customer-first-name]';
+		const replaced = 'Hello <!--[woocommerce/customer-first-name]-->';
+
+		expect(
+			getOffsetAfterTagReplacement( typed, replaced, typed.length )
+		).toBe( 'Hello '.length + 1 );
+	} );
+
+	it( 'keeps the offset when nothing was replaced', () => {
+		expect( getOffsetAfterTagReplacement( 'Hello', 'Hello', 3 ) ).toBe( 3 );
 	} );
 } );

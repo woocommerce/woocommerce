@@ -35,9 +35,11 @@ class Html2Text {
 	 */
 	public static function default_options(): array {
 		return array(
-			'ignore_errors' => false,
-			'drop_links'    => false,
-			'char_set'      => 'auto',
+			'ignore_errors'    => false,
+			'drop_links'       => false,
+			'char_set'         => 'auto',
+			'mark_bold'        => false,
+			'tag_link_targets' => false,
 		);
 	}
 
@@ -361,7 +363,7 @@ class Html2Text {
 			// Replace whitespace characters with a space (equivalent to \s).
 			if ( $in_pre ) {
 				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				$text = "\n" . trim( self::render_text( $node->wholeText ), "\n\r\t " ) . "\n";
+				$text = self::render_text( $node->wholeText );
 
 				// Remove trailing whitespace only.
 				$result = preg_replace( "/[ \t]*\n/im", "\n", $text );
@@ -418,9 +420,13 @@ class Html2Text {
 			case 'h6':
 			case 'ol':
 			case 'ul':
-			case 'pre':
 				// Add two newlines.
 				$output = "\n\n";
+				break;
+
+			case 'pre':
+				// Add two newlines. The second is armored like newlines inside pre, to keep the first line's indentation.
+				$output = "\n\r";
 				break;
 
 			case 'td':
@@ -535,8 +541,8 @@ class Html2Text {
 				break;
 
 			case 'br':
-				// Add one line.
-				$output .= "\n";
+				// Add one line. Inside pre it is armored like other newlines, to keep the next line's indentation.
+				$output .= $in_pre ? "\r" : "\n";
 				break;
 
 			case 'div':
@@ -561,6 +567,14 @@ class Html2Text {
 				// If there is no link text, but a title attr.
 				if ( ! $output && $node instanceof \DOMElement && $node->getAttribute( 'title' ) ) {
 					$output = $node->getAttribute( 'title' );
+				}
+
+				// With tag_link_targets, a personalization tag used as the whole URL is kept as the target so it can
+				// be personalized later. A link still without text after the title fallback above is dropped rather
+				// than leaving the bare tag behind.
+				$tag_href = $options['tag_link_targets'] && $node instanceof \DOMElement ? $node->getAttribute( 'data-link-href' ) : '';
+				if ( '' !== $tag_href ) {
+					$href = $output ? $tag_href : '';
 				}
 
 				if ( ! $href ) {
@@ -612,6 +626,16 @@ class Html2Text {
 
 			case 'li':
 				$output .= "\n";
+				break;
+
+			case 'b':
+			case 'strong':
+				// Mark bold text as *text*, keeping the whitespace around it outside the markers.
+				$bold_text = trim( $output );
+				if ( $options['mark_bold'] && '' !== $bold_text ) {
+					$leading = substr( $output, 0, strlen( $output ) - strlen( ltrim( $output ) ) );
+					$output  = $leading . '*' . $bold_text . '*' . substr( $output, strlen( rtrim( $output ) ) );
+				}
 				break;
 
 			case 'blockquote':
