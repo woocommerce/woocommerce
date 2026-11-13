@@ -2033,6 +2033,11 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				$_GET['context'] = 'admin_rest_api_keys';
 			}
 
+			// WC_Admin_API_Keys normally loads via WC_Admin::includes() on 'init', which only runs on
+			// a real admin request. The ajax test harness never flips is_admin() to true until after
+			// 'init' has already fired, so nothing hooks its search filter unless we load it here.
+			new WC_Admin_API_Keys();
+
 			$response = $this->do_ajax( 'woocommerce_json_search_customers' );
 
 			if ( $expect_visible ) {
