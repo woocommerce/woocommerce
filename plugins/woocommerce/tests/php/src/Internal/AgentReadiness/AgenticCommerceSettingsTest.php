@@ -328,6 +328,38 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Each draft policy page links to its editor with the policy's own link text.
+	 */
+	public function test_draft_policy_pages_name_their_edit_link(): void {
+		$this->make_every_step_pass();
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+			)
+		);
+		$pages = array(
+			AgenticCommerceSettings::PRIVACY_PAGE_OPTION => array( 'Publish your privacy policy page', 'Edit privacy policy' ),
+			AgenticCommerceSettings::TERMS_PAGE_OPTION   => array( 'Publish your terms and conditions page', 'Edit terms and conditions' ),
+			AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION => array( 'Publish your shipping policy page', 'Edit shipping policy' ),
+		);
+		foreach ( $pages as $option => $copy ) {
+			$draft = self::factory()->post->create(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'draft',
+				)
+			);
+			update_option( $option, $draft );
+			$sections = (string) wp_json_encode( $this->view()['sections'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+			$this->assertMatchesRegularExpression( '#"title":"' . preg_quote( $copy[0], '#' ) . '".{0,600}?"href":"[^"]*post=' . $draft . '&action=edit","text":"' . preg_quote( $copy[1], '#' ) . '"#', $sections, $copy[1] );
+			$this->assertStringContainsString( 'It\'s still a draft. AI assistants only link to published pages.', $sections, $copy[0] . ' keeps the default draft line' );
+			wp_publish_post( $draft );
+		}
+	}
+
+	/**
 	 * @testdox A scanned check that couldn't run is shown as such; a stale setup result in the report is not read.
 	 */
 	public function test_output_scanned_check_couldnt_check(): void {
@@ -648,7 +680,10 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'generated_at' => gmdate( 'c' ),
 			'products'     => 40,
 			'store_checks' => array(),
-			'channels'     => array( 'chatgpt' => array( 'name' => 'ChatGPT' ) ),
+			'channels'     => array(
+				'chatgpt' => array( 'name' => 'ChatGPT' ),
+				'broken'  => 'not an array',
+			),
 			'checks'       => array(
 				$check( 'missing_gtin', 30, 0.6, ReadinessRule::EFFECT_GAPS ),
 				$check( 'missing_brand', 2, 0.05, ReadinessRule::EFFECT_NOT_LISTABLE ),
@@ -664,6 +699,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$fix_first = $this->view()['fix_first'];
 		$this->assertSame( 'Start with the fixes that affect the most sales. Sales figures are from the last 90 days.', $fix_first['ranking'] );
+		update_option( AgentReadiness::REPORT_OPTION, array_replace_recursive( $report, array( 'sales' => array( 'days' => 1 ) ) ) );
+		$this->assertSame( 'Start with the fixes that affect the most sales. Sales figures are from the last 1 day.', $this->view()['fix_first']['ranking'], 'One day reads in the singular' );
+		update_option( AgentReadiness::REPORT_OPTION, $report );
 		$this->assertSame(
 			array( 'Use a secure connection (HTTPS)', 'Allow guest checkout', 'Add a main image to 5 products', 'Add a brand to 2 products' ),
 			array_column( $fix_first['items'], 'title' ),

@@ -392,10 +392,20 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Whether a failing store check blocks every sale, so it is marked Required: a required setup step,
-	 * or a scanned check that keeps AI assistants off the store's pages.
+	 * The stored report's channels, skipping entries that are not arrays.
 	 *
-	 * @param array{blocks:string,group?:string,level:string,conflict?:bool} $check Store check.
+	 * @param array<string, mixed> $report Stored report.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function stored_channels( array $report ): array {
+		return array_filter( is_array( $report['channels'] ?? null ) ? $report['channels'] : array(), 'is_array' );
+	}
+
+	/**
+	 * Whether a failing store check blocks every sale, so it is marked Required: a required setup step,
+	 * a scanned check that keeps AI assistants off the store's pages, or one in REQUIRED_SCANNED.
+	 *
+	 * @param array{id:string,blocks:string,group?:string,level:string,conflict?:bool} $check Store check.
 	 */
 	private static function is_required( array $check ): bool {
 		if ( self::is_setup_step( $check ) ) {
@@ -488,7 +498,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 */
 	private function product_section( array $report ): array {
 		$failing  = self::failing_product_checks( $report );
-		$channels = is_array( $report['channels'] ?? null ) ? $report['channels'] : array();
+		$channels = self::stored_channels( $report );
 		$linked   = ! empty( $report['failures_stored'] );
 		$rows     = array();
 		foreach ( $failing as $check ) {
@@ -581,7 +591,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			}
 		}
 		$linked   = ! empty( $report['failures_stored'] );
-		$channels = is_array( $report['channels'] ?? null ) ? $report['channels'] : array();
+		$channels = self::stored_channels( $report );
 		foreach ( self::failing_product_checks( $report ) as $check ) {
 			$blocks_listing = in_array( ReadinessRule::EFFECT_NOT_LISTABLE, array_column( (array) ( $check['channels'] ?? array() ), 'effect' ), true );
 			$share          = is_numeric( $check['sales_share'] ?? null ) ? (float) $check['sales_share'] : null;
