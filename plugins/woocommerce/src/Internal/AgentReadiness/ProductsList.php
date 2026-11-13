@@ -193,6 +193,7 @@ class ProductsList {
 		if ( $current instanceof \WC_Product_Variable ) {
 			$ids = array_merge( $ids, $current->get_children() );
 		}
+		ProductFields::forget_variations( $product_id );
 		delete_transient( 'wc_product_children_' . $product_id );
 		$cache = wc_get_container()->get( \Automattic\WooCommerce\Internal\Caches\ProductCache::class );
 		foreach ( $ids as $id ) {

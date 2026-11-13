@@ -106,8 +106,8 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 			if ( 0 !== $during_id || ! $query instanceof \WP_Query || 'ids' !== $query->get( 'fields' ) ) {
 				return $posts;
 			}
-			$orderby = $query->get( 'orderby' );
-			if ( ! is_array( $orderby ) || ! isset( $orderby['modified'] ) ) {
+			// The shop query replaces orderby, so the scan is recognized by its batch size.
+			if ( ProductScan::BATCH_SIZE !== (int) $query->get( 'posts_per_page' ) || 'product' !== $query->get( 'post_type' ) ) {
 				return $posts;
 			}
 			// The catalog query has already run, so this product is not one of its results.

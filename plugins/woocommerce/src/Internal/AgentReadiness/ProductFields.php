@@ -114,6 +114,20 @@ class ProductFields {
 	}
 
 	/**
+	 * Product id whose variations were last read. Cleared when that product changes.
+	 *
+	 * @var int
+	 */
+	private static int $cached_variation_product_id = 0;
+
+	/**
+	 * Published variations of the cached product id.
+	 *
+	 * @var array<int, \WC_Product_Variation>
+	 */
+	private static array $cached_variations = array();
+
+	/**
 	 * Published variations of a variable product; empty for other types. Kept
 	 * for the last product asked about, since every rule asks about the same
 	 * product in turn.
@@ -122,26 +136,50 @@ class ProductFields {
 	 * @return array<int, \WC_Product_Variation>
 	 */
 	public static function variations( \WC_Product $product ): array {
-		static $last_product    = null;
-		static $last_variations = array();
-
 		if ( ! $product instanceof \WC_Product_Variable ) {
 			return array();
 		}
-		if ( $product === $last_product ) {
-			return $last_variations;
+		if ( $product->get_id() === self::$cached_variation_product_id ) {
+			return self::$cached_variations;
 		}
 
 		$variations = array();
-		foreach ( $product->get_children() as $child_id ) {
-			$variation = wc_get_product( (int) $child_id );
+		foreach ( self::published_variation_ids( $product ) as $child_id ) {
+			$variation = wc_get_product( $child_id );
 			if ( $variation instanceof \WC_Product_Variation && 'publish' === $variation->get_status() ) {
 				$variations[] = $variation;
 			}
 		}
-		$last_product    = $product;
-		$last_variations = $variations;
+		self::$cached_variation_product_id = $product->get_id();
+		self::$cached_variations           = $variations;
 		return $variations;
+	}
+
+	/**
+	 * Drop the remembered variations of a product, so the next read sees a variation removed in this request.
+	 *
+	 * @param int $product_id Product id.
+	 */
+	public static function forget_variations( int $product_id ): void {
+		if ( self::$cached_variation_product_id === $product_id ) {
+			self::$cached_variation_product_id = 0;
+			self::$cached_variations           = array();
+		}
+	}
+
+	/**
+	 * Published and private variation ids, read from the database rather than the product's cached list.
+	 *
+	 * @param \WC_Product $product Variable product.
+	 * @return array<int, int>
+	 */
+	private static function published_variation_ids( \WC_Product $product ): array {
+		$data_store = $product->get_data_store();
+		if ( is_object( $data_store ) && is_callable( array( $data_store, 'read_children' ) ) ) {
+			$children = $data_store->read_children( $product, true );
+			return array_map( 'intval', (array) ( $children['all'] ?? array() ) );
+		}
+		return array_map( 'intval', $product->get_children() );
 	}
 
 	/**
