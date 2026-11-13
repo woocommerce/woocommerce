@@ -5,60 +5,41 @@ sidebar_label: Navigation
 
 # Navigation
 
-Place your product navigation elements within the existing WooCommerce menu structure.
+Place your extension where merchants already do the related work. Reuse WooCommerce's navigation and supported integration points before adding another destination.
 
-## Extension with its own menu item
+## Choose a location
 
-The two options to extend the WooCommerce menu structure are within the category menu or within the relevant settings areas.
+| Merchant task | Preferred location and integration |
+| --- | --- |
+| Work on an existing product, order or other WooCommerce object | Extend that object's supported editing surface. A feature does not need its own menu item just because it comes from an extension. |
+| Configure payments or shipping | Use the relevant [payment gateway](../../features/payments/payment-gateway-api.md) or [shipping method](../../features/shipping/shipping-method-api.md) settings integration. |
+| Configure options that fit an existing settings area | Add a [section under the relevant WooCommerce settings tab](../settings-and-config/adding-a-section-to-a-settings-tab.md). |
+| Configure a service integration | Use [integration settings](../settings-and-config/implementing-settings.md) when the Integrations area is the right home for the task. |
+| Configure options with no suitable existing settings area | Consider a [WooCommerce settings page](../settings-and-config/extend-wc-settings-page.md), which adds a tab under **WooCommerce > Settings**. Add this navigation weight only when an existing tab or section is unsuitable. |
+| Carry out a distinct workflow that needs its own screen | Place it within the relevant WooCommerce category and use the supported [admin page registration](../settings-and-config/working-with-woocommerce-admin-pages.md). |
 
-![Category Subnavigation Image](/img/doc_images/Category-Subnavigation.png)
+For example, a product customization feature belongs with product editing; a shipping method's configuration belongs with shipping settings. Distinguish configuration from everyday work rather than making merchants choose between duplicate settings destinations.
 
-## Category sub-navigation
+## Preserve the host's structure
 
-If your plugin is extending an area of WooCommerce, it should live directly within that category’s section.
+Inside **WooCommerce > Settings**, retain the host's top-level navigation, header and [save contract](../settings-and-config/settings-ui.md#page-header). Do not wrap an embedded settings section in a second page shell or repeat a generic "General" heading and introduction that add no context.
 
-For example, TikTok lives in Marketing and Product Add-Ons lives in Products.
+Use a page-layout component when your extension owns a standalone screen and needs that layout. Choosing a component does not change the screen's location or replace WooCommerce page registration. Follow the [admin component guidance](./README.md#admin-components) for controls and the host integration for navigation, permissions and saving. The React [Settings UI](../settings-and-config/settings-ui.md) is experimental and opt-in; it is not required to choose an appropriate settings location.
 
-![Category Setting Image](/img/doc_images/Category-Settings.png)
+Keep a single settings screen simple. Group related fields with clear headings. Do not add extension-level tabs by default: a small group such as "Booking form" can remain a section on the same screen. Separate destinations only when distinct merchant tasks justify them, using a supported host pattern. Preserve the host's existing settings tabs.
 
-## Settings
+Avoid a new top-level WordPress menu when the task fits WooCommerce's existing structure. Load application data through APIs instead of embedding another application's admin interface in an iframe.
 
-If your plugin adds a settings screen to set up the plugin, settings should be under an appropriate tab on the WooCommerce > Settings screen.
+## Labels and wayfinding
 
-For example, shipping and payments extensions will appear in their relevant Settings area. Only if necessary, create a top-level settings tab if your extension has settings that don’t fit under existing tabs and creating a sub-tab isn’t appropriate.
+Use short, descriptive labels in sentence case, such as "Shared space booking". Keep product names and acronyms in their official capitalization. Aim for a label that fits on one line without forcing line breaks, and check translations and narrow layouts.
 
-### Don’t: Add top-level navigation
+Use a functional, original extension name, such as "Appointments", rather than a vendor prefix or the name of an existing WooCommerce feature. Keep labels consistent across menus, page headings, settings and setup links. A setup action should open the relevant task or settings section directly, with a clear way back.
 
-If your product is extending WooCommerce, there’s a 99.9% chance your product navigation and settings should live within the WooCommerce nav structure—see the menu structure examples above.
+## Legacy examples
 
-### Don’t: No iframes, only APIs
+These screenshots illustrate placement in an older WooCommerce interface. Use the current host patterns and integration references above for implementation and styling.
 
-To create a cohesive experience, application data should be loaded via API instead of an iframe.
+![Legacy example of an extension placed within a WooCommerce category](/img/doc_images/Category-Subnavigation.png)
 
-### Do: Keep menu structure simple
-
-Keep menu structure simple. Use existing WooCommerce menu structures as much as possible to reduce redundancies.
-
-If your plugin must introduce multiple pages or areas, consider grouping them in tabs using existing components to remain consistent with WooCommerce structure.
-
-## Extension with no menu item
-
-Some extensions don’t require a menu item because they extend specific features within an existing product area.
-
-Integrated features include extensions that don't live in the navigation and simply add functionality to an existing system. For example, the Product Bundles plugin is limited to the product form.
-
-In this case, there’s no navigation item or extension home screen. The Plugins page can be used to share updates with your users.
-
-## Plugin name
-
-The plugin name represents a way for merchants to identify your plugin across multiple touchpoints in the WooCommerce admin.
-
-### Don’t: Use an existing feature or extension in the plugin title
-
-The plugin name should appear at all times in the UI as a functional and original name. e.g “Appointments” instead of “VendorXYZ Bookings Plugin for WooCommerce.”
-
-### Do: One-line navigation label
-
-Keep extension names short, ideally within 20 characters, to make it easier for merchants to read and understand.
-
-Keep all navigation labels on one line. Do not introduce a second line in any of the menu items.
+![Legacy example of extension settings within an existing category](/img/doc_images/Category-Settings.png)

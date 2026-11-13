@@ -5,26 +5,28 @@ sidebar_label: Onboarding
 
 # Onboarding
 
-The first experience your users have with your extension is crucial. A user activating your extension for the first time provides an opportunity to onboard new and reorient returning users the right way. Is it clear to the user how to get started? Keep in mind that the more difficult the setup, the more likely a user will abandon the product altogether so keep it simple and direct.
+Help merchants reach the first useful outcome with as little setup as possible. Make the next step clear, and let returning merchants resume without repeating completed work.
 
-**Use primary buttons as calls to action and keep secondary information deprioritized for clarity**. Guide merchants towards successful setup with a clear next step and/or step-by-step process with progress indicator if the extension isn't configured or if setup is not complete.
+## Choose the right starting point
 
-**If necessary, provide a dismissible notification in the plugin area**. Add a notification to communicate next steps if setup or connection is required to successfully enable the plugin.
+- **Setup is required:** show the next action in the extension's interface. Use an actionable [setup task](./task-list-and-inbox.md#task-list) when it belongs on WooCommerce Home, linking directly to the relevant step.
+- **No setup action is required:** let merchants start using the feature. Explain it in context; use an [Inbox note](./task-list-and-inbox.md#inbox) only when the information is timely, relevant and useful. Do not create a task simply to announce a feature.
+- **A post-activation notice is necessary:** provide one dismissible notice in the Plugins area, with a short explanation and a clear next step. Do not display it on the dashboard or unrelated screens. Follow the [notice guidance](./notices.md) for the host's PHP or React implementation.
 
-- Use the standard WordPress notice format and WooCommerce admin notices API.
-- Notices should be dismissible. Users should always have a clear way to close the notice.
-- Keep the post-activation notice with the WordPress plugin area in context of the plugin listing-do not display it on the dashboard, or any other parts of the platform.
-- Don't display more than one notice.
-- Try to keep the notice copy between 125 to 200 characters.
+Use the supported [setup task and Admin Notes integrations](../extension-onboarding/handling-merchant-onboarding.md), checking availability in the WooCommerce versions you support. These integrations place the task or note; choose controls using the shared [admin component guidance](./README.md#admin-components).
 
-If no action is required for setup it's best to rely on other onboarding aids such as the Task List (link to component) and Inbox (link to component) to help users discover features and use your plugin.
+## Guide the work
 
-**Get to the point and keep it instructional**. This is not a time to promote your brand or pitch the product. The user has bought your product and is ready to use it. Keep the information instructional and precise and avoid the use of branded colors, fonts, and illustrations in empty states and other onboarding aids. Help users with context on next steps.
+Use one clear primary action for the current step. If setup has several steps, show progress and distinguish required work from optional configuration. Explain what a connection or permission enables before asking the merchant to grant it.
 
-**Show helpful empty states**. Rely on the existing plugin UI, if any, to guide users towards successful setup and use of the plugin. Avoid onboarding emails, push notifications, and welcome tours.
+Keep copy instructional and in sentence case. Use the host's components and [semantic styling](./colors.md), without turning empty states or setup screens into brand promotions. An empty state should explain what belongs there and offer the next useful action.
 
-**Plugins should not redirect on activation from WordPress plugins area**. This can break bulk activation of plugins. Following the [dotorg plugin guideline 11](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#11-plugins-should-not-hijack-the-admin-dashboard), the extension shouldn't hijack the dashboard or hide functionality of core or other extensions.
+Preserve entered values and completed steps when a request fails. Explain what needs attention, provide a retry or correction step, and let merchants resume. Follow the [feedback and recovery guidance](./notices.md#announcements-dismissal-and-recovery). Mark a setup task complete when its required outcome is achieved, rather than when its link is opened.
 
-**Avoid dead end links and pages**. There should always be a way forward or back.
+## Keep merchants in control
 
-**Error Handling and Messaging**. If users encounter an error during setup, provide a clear and useful notification with clear and easily understood information on what went wrong and how to fix it.
+Do not redirect on activation from the WordPress Plugins area; this can break bulk activation. Follow [WordPress plugin guideline 11](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#11-plugins-should-not-hijack-the-admin-dashboard) and leave other admin functionality available.
+
+Provide a way forward or back from every step. Let merchants dismiss optional guidance and find it again from the relevant screen. Avoid onboarding emails, push notifications and welcome tours as substitutes for clear in-product guidance.
+
+Check the complete journey: activation, discovery, setup, interruption, retry, completion and return. Confirm setup links use the [chosen navigation location](./navigation.md), and follow the [Task List and Inbox rules](./task-list-and-inbox.md) so the same message is not repeated across several surfaces.

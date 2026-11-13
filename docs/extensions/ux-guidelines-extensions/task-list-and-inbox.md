@@ -3,49 +3,43 @@ post_title: Task list and inbox
 sidebar_label: Task list and inbox
 ---
 
-# Task List and Inbox
+# Task list and inbox
 
-Plugins should choose between implementing a Task or Inbox note based on the following guidelines. Avoid implementing both Task and Inbox note for the same message, which adds clutter and reduces the impact of the message.
+Choose the surface that matches the merchant's need. Do not publish the same message as both a task and an Inbox note. Use both sparingly, with concise, relevant content and sentence case; follow the [grammar, punctuation and capitalization guide](https://woocommerce.com/document/grammar-punctuation-style-guide/).
 
-Use the Task List and Inbox sparingly. Messages should be clear, concise, and maintain a consistent tone. Follow the [Grammar, Punctuation, and Capitalization guide](https://woocommerce.com/document/grammar-punctuation-style-guide/).
+| Merchant need | Surface |
+| --- | --- |
+| Complete a specific setup or store-management action | Task list, when the task belongs in the supported WooCommerce Home integration |
+| Read useful, non-critical information | Inbox |
+| Understand the result of an action or correct a field | Contextual feedback on the screen where the action happened; follow the [notice guidance](./notices.md) |
+| Address a critical condition affecting store operation | A suitably prominent notice or supported alert, scoped to the affected context; do not bury it in the Inbox or rely only on a task |
 
-## Task List
+## Task list
 
-![an example of a task in the task list](https://developer.woocommerce.com/wp-content/uploads/2023/12/task-list1.png)
+A task must describe actionable work with a clear destination and a meaningful completion state. Examples include connecting a service or configuring an extension. Store-management work may also qualify when the supported integration can represent the action and its state.
 
-Anything that **requires** action should go in the task list.
+Show the task only to merchants for whom it is relevant and available. Link directly to the next step, preserve progress when interrupted, and reflect the actual completion state. Opening a task is not the same as completing its setup outcome.
 
-- *What appears in the Things to Do Task List:*
+Do not use a task for a feature announcement, a tip, a routine success message or an extension that needs no setup. Keep urgent operational issues visible in their affected context.
 
-    - Tasks that will enable, connect, or configure an extension.
-    - Tasks that are critical to the business, such as capturing payment or responding to disputes.
-
-- *What doesn't appear in the Things to do Task List:*
-
-    - Any critical update that would impact or prevent the functioning of the store should appear as a top level notice using the standard WordPress component.
-    - Informational notices such as feature announcements or tips for using the plugin should appear in the Inbox as they are not critical and do not require action.
-    - Notifications from user activity should result in regular feedback notices (success, info, error, warning).
-
-Examples:
-
-![three tasks in the task list under the heading "Things to do next" with the option to expand at the bottom to "show 3 more tasks" ](https://developer.woocommerce.com/wp-content/uploads/2023/12/task-list-example.png)
+Use the [setup task integration guide](../extension-onboarding/handling-merchant-onboarding.md#using-setup-tasks) for registration and lifecycle details. Verify the task list and APIs available in your supported WooCommerce versions; do not build a replacement task list just to display an onboarding message.
 
 ## Inbox
 
-The Inbox provides informational, useful, and supplemental content to the user, while important notices and setup tasks have their separate and relevant locations.
+Use the Inbox for timely, useful information that does not require action to make the store or extension work. Examples include a relevant feature tip, an insight or milestone, and a considerate request for feedback.
 
-![an example of an inbox notification](https://developer.woocommerce.com/wp-content/uploads/2023/12/inbox1.png)
+Do not put required setup, critical operational problems or routine action feedback in the Inbox. Optional links may help a merchant explore, but reading or acting on a note must not be a prerequisite for using the extension.
 
-- *What appears in the Inbox*:
-    - Informational notices such as non-critical reminders.
-    - Requests for plugin reviews and feedback.
-    - Tips for using the plugin and introducing features.
-    - Insights such as inspirational messages or milestones.
+Use the [Admin Notes integration guide](../extension-onboarding/handling-merchant-onboarding.md#using-admin-notes) to manage note identity, relevance, duplicate prevention and lifecycle. Check the note type: some types appear as Store Alerts rather than Inbox notes. Respect dismissal and avoid recreating the same note on every visit or activation.
 
-- *What doesn't appear in the Inbox*:
+## Legacy examples
 
-    - Notices that require action, extension setup tasks, or regular feedback notices.
+These screenshots show older WooCommerce Home layouts. They illustrate the distinction between tasks and information; use the supported host integration for current layout and styling.
 
-Examples:
+![Legacy task list item with a setup action](https://developer.woocommerce.com/wp-content/uploads/2023/12/task-list1.png)
 
-![an example of two inbox notifications listed under the "Inbox" section of the admin](https://developer.woocommerce.com/wp-content/uploads/2023/12/inbox-examples.png)
+![Legacy task list with three tasks and an option to show more](https://developer.woocommerce.com/wp-content/uploads/2023/12/task-list-example.png)
+
+![Legacy informational Inbox note](https://developer.woocommerce.com/wp-content/uploads/2023/12/inbox1.png)
+
+![Legacy Inbox containing two notes](https://developer.woocommerce.com/wp-content/uploads/2023/12/inbox-examples.png)
