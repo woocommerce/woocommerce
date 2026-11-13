@@ -95,12 +95,12 @@ final class ProductImporter {
 	}
 
 	/**
-	 * Get how long the site-wide product import lock has been held.
+	 * Get how long ago the site-wide product import lock was taken or last refreshed.
 	 *
 	 * Lets a caller warn the operator before attempting a run that would otherwise fail
 	 * with `ImportLockedException` once batches are already underway.
 	 *
-	 * @return int|null Seconds since the lock was taken, or null when no import is running.
+	 * @return int|null Seconds since the lock was taken or last refreshed, or null when no import is running.
 	 */
 	public function get_import_lock_age(): ?int {
 		return $this->import_lock->get_age();
