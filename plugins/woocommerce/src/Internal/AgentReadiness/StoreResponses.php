@@ -260,8 +260,9 @@ class StoreResponses {
 		);
 		if ( is_wp_error( $response ) ) {
 			// When the home page can't be reached, other URLs would fail the same way, so a scan
-			// of a store that can't reach itself waits for one timeout, not one per URL.
-			if ( untrailingslashit( $url ) === untrailingslashit( home_url( '/' ) ) ) {
+			// of a store that can't reach itself waits for one timeout, not one per URL. Only the
+			// plain GET counts: a Markdown or POST request can fail where the page itself loads.
+			if ( array() === $args && untrailingslashit( $url ) === untrailingslashit( home_url( '/' ) ) ) {
 				$this->reachable = false;
 			}
 			return null;
