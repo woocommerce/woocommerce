@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Add email editor package tests for the validator, version check, fallback renderer and MailPoet contract; no production change.
+
