@@ -304,7 +304,7 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertSame( '20', $result['refund']['amount'] );
 		$this->assertArrayNotHasKey( 'id', $result['refund'] );
 		$this->assertSame( array(), $this->gateway->refunded, 'A dry run should not move money.' );
-		$this->assertSame( array( 'woocommerce_create_refund' ), $this->fired, 'Only the hook that adjusts the refund before the save should fire.' );
+		$this->assertSame( array(), $this->fired, 'No refund hook should fire in a dry run, since some callbacks move money.' );
 		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
 	}
 

@@ -158,6 +158,22 @@ class OrderRefundCreate extends ActionableAbility {
 	}
 
 	/**
+	 * Fire woocommerce_create_refund only now, after the validators and never in a dry run, as some callbacks
+	 * refund the payment through their own gateway there.
+	 *
+	 * @param \WC_Order_Refund $subject Staged refund.
+	 * @return null|\WP_Error
+	 */
+	protected function save( $subject ) {
+		$declined = $this->creator->before_save( $subject );
+		if ( is_wp_error( $declined ) ) {
+			return self::refund_error( $declined );
+		}
+
+		return parent::save( $subject );
+	}
+
+	/**
 	 * Whether the call only previews the refund.
 	 *
 	 * @param array $input Ability input.

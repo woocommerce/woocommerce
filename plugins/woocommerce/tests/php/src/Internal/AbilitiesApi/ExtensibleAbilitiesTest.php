@@ -5779,6 +5779,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$order->set_total( '50' );
 		$order->set_status( OrderStatus::PROCESSING );
 		$order->save();
+		$hook_runs = did_action( 'woocommerce_create_refund' );
 
 		$response = $this->run_ability_response(
 			'woocommerce/order-refund-create',
@@ -5791,6 +5792,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( array( array( 0, '5' ) ), $seen, 'The validator should run once, on a refund with no ID yet.' );
 		$this->assertSame( 'test-ext:test_refund_refused', $response->get_data()['code'] ?? null );
 		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+		$this->assertSame( $hook_runs, did_action( 'woocommerce_create_refund' ), 'A refused refund should not reach the hook that precedes the save.' );
 	}
 
 	/**
