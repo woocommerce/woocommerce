@@ -719,6 +719,15 @@ class Checkout extends AbstractCartRoute {
 			$this->process_without_payment( $request, $payment_result );
 		}
 
+		// Build the response before logging, so a failure here still gets logged.
+		$response = $this->prepare_item_for_response(
+			(object) [
+				'order'          => wc_get_order( $this->order ),
+				'payment_result' => $payment_result,
+			],
+			$request
+		);
+
 		wc_log_order_step(
 			'[Store API #9] Order processed',
 			array(
@@ -729,13 +738,7 @@ class Checkout extends AbstractCartRoute {
 			'error' !== $payment_result->status
 		);
 
-		return $this->prepare_item_for_response(
-			(object) [
-				'order'          => wc_get_order( $this->order ),
-				'payment_result' => $payment_result,
-			],
-			$request
-		);
+		return $response;
 	}
 
 	/**
