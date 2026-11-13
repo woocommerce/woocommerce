@@ -44,6 +44,20 @@ class ProductsList {
 	private array $stock_only_saves = array();
 
 	/**
+	 * Parent ids of variations being deleted, by variation id.
+	 *
+	 * @var array<int, int>
+	 */
+	private array $deleted_variation_parents = array();
+
+	/**
+	 * Parents to test again at the end of the request, as keys.
+	 *
+	 * @var array<int, true>
+	 */
+	private array $parents_to_retest = array();
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
@@ -64,6 +78,9 @@ class ProductsList {
 		add_action( 'woocommerce_after_product_object_save', array( $this, 'handle_after_save' ) );
 		add_action( 'wp_trash_post', array( $this, 'handle_trash' ) );
 		add_action( 'untrashed_post', array( $this, 'handle_untrash' ) );
+		add_action( 'woocommerce_trash_product_variation', array( $this, 'handle_variation_removed' ) );
+		add_action( 'woocommerce_before_delete_product_variation', array( $this, 'handle_before_variation_delete' ) );
+		add_action( 'woocommerce_delete_product_variation', array( $this, 'handle_variation_removed' ) );
 		add_action( 'pre_get_posts', array( $this, 'apply_filter' ) );
 	}
 
@@ -113,7 +130,18 @@ class ProductsList {
 		}
 		$stock_only = isset( $this->stock_only_saves[ $product->get_id() ] );
 		unset( $this->stock_only_saves[ $product->get_id() ] );
-		if ( $stock_only || ! $this->agent_readiness->has_report() || ! $this->enabled() ) {
+		if ( ! $stock_only ) {
+			$this->retest( $product );
+		}
+	}
+
+	/**
+	 * Store a product's failures again, once a scan has run. A variation updates its parent.
+	 *
+	 * @param \WC_Product $product Product.
+	 */
+	private function retest( \WC_Product $product ): void {
+		if ( ! $this->agent_readiness->has_report() || ! $this->enabled() ) {
 			return;
 		}
 		$result     = $this->agent_readiness->check_product( $product );
@@ -146,8 +174,63 @@ class ProductsList {
 	 * @param mixed $post_id Post id.
 	 */
 	public function handle_untrash( $post_id ): void {
-		if ( 'product' === get_post_type( $post_id ) ) {
+		$type = get_post_type( $post_id );
+		if ( 'product' === $type ) {
 			$this->handle_after_save( wc_get_product( (int) $post_id ) );
+		} elseif ( 'product_variation' === $type ) {
+			$this->handle_variation_removed( $post_id );
+		}
+	}
+
+	/**
+	 * Note a variation's parent before the variation is deleted, when it can still be read.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $variation_id Variation id.
+	 */
+	public function handle_before_variation_delete( $variation_id ): void {
+		$this->deleted_variation_parents[ (int) $variation_id ] = (int) wp_get_post_parent_id( (int) $variation_id );
+	}
+
+	/**
+	 * Note a parent to test again after one of its variations is trashed, restored or deleted.
+	 * Removing a variation doesn't save the parent. Removing many fires this once each, so the
+	 * parent is tested once, at the end of the request.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $variation_id Variation id.
+	 */
+	public function handle_variation_removed( $variation_id ): void {
+		$variation_id = (int) $variation_id;
+		$parent_id    = $this->deleted_variation_parents[ $variation_id ] ?? (int) wp_get_post_parent_id( $variation_id );
+		unset( $this->deleted_variation_parents[ $variation_id ] );
+		if ( $parent_id <= 0 ) {
+			return;
+		}
+		if ( array() === $this->parents_to_retest ) {
+			add_action( 'shutdown', array( $this, 'retest_parents' ) );
+		}
+		$this->parents_to_retest[ $parent_id ] = true;
+	}
+
+	/**
+	 * Test the noted parents again. A parent deleted in the same request has its rows removed,
+	 * so a deleted variable product doesn't keep counting.
+	 *
+	 * @internal
+	 */
+	public function retest_parents(): void {
+		$parent_ids              = array_keys( $this->parents_to_retest );
+		$this->parents_to_retest = array();
+		foreach ( $parent_ids as $parent_id ) {
+			$parent = 'product' === get_post_type( $parent_id ) ? wc_get_product( $parent_id ) : null;
+			if ( $parent instanceof \WC_Product ) {
+				$this->retest( $parent );
+			} else {
+				ProductFailures::forget( $parent_id );
+			}
 		}
 	}
 
@@ -164,12 +247,19 @@ class ProductsList {
 		if ( ! $query instanceof \WP_Query || ! is_admin() || 'edit.php' !== $pagenow || ! $query->is_main_query() || 'product' !== $query->get( 'post_type' ) || ! $this->enabled() || empty( $_GET[ self::FILTER_PARAM ] ) ) {
 			return;
 		}
-		$meta_query   = array_filter( (array) $query->get( 'meta_query' ) );
-		$meta_query[] = array(
-			'key'   => ProductFailures::META_KEY,
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- A list filter that changes nothing.
-			'value' => sanitize_text_field( wp_unslash( $_GET[ self::FILTER_PARAM ] ) ),
+		// The list's own meta query stays a group of its own, so an OR in it can't widen this filter.
+		$existing   = array_filter( (array) $query->get( 'meta_query' ) );
+		$meta_query = array(
+			'relation' => 'AND',
+			array(
+				'key'   => ProductFailures::META_KEY,
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- A list filter that changes nothing.
+				'value' => sanitize_text_field( wp_unslash( $_GET[ self::FILTER_PARAM ] ) ),
+			),
 		);
+		if ( array() !== $existing ) {
+			$meta_query[] = $existing;
+		}
 		$query->set( 'meta_query', $meta_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 	}
 

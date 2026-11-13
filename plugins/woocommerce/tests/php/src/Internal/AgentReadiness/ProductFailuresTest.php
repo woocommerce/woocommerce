@@ -98,6 +98,25 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The counts are read per site, so after switch_to_blog() they are the other site's.
+	 */
+	public function test_counts_per_site(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Requires multisite.' );
+		}
+		$other = self::factory()->blog->create();
+		ProductFailures::store( WC_Helper_Product::create_simple_product()->get_id(), array() );
+		$this->assertSame( 1, ProductFailures::counts()[ ProductFailures::CHECKED ] ?? 0 );
+
+		switch_to_blog( $other );
+		$on_other = ProductFailures::counts();
+		restore_current_blog();
+
+		$this->assertArrayNotHasKey( ProductFailures::CHECKED, $on_other );
+		$this->assertSame( 1, ProductFailures::counts()[ ProductFailures::CHECKED ] ?? 0, 'Back on the first site' );
+	}
+
+	/**
 	 * @testdox Every checked product has a checked row, passing or not, which for_product leaves out and the product total counts.
 	 */
 	public function test_checked_row_counts_products(): void {

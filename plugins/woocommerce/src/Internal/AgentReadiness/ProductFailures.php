@@ -23,11 +23,11 @@ class ProductFailures {
 	public const CHECKED = 'checked';
 
 	/**
-	 * Counts read in this request; cleared on every write.
+	 * Counts read in this request, by site id, so a switch_to_blog() reads the other site's; cleared on every write.
 	 *
-	 * @var array<string, int>|null
+	 * @var array<int, array<string, int>>
 	 */
-	private static ?array $counts = null;
+	private static array $counts = array();
 
 	/**
 	 * The value for a status on a channel.
@@ -52,8 +52,8 @@ class ProductFailures {
 				$values[] = self::channel_value( $status, $channel );
 			}
 		}
-		self::$counts = null;
-		$stored       = self::stored( $product_id );
+		unset( self::$counts[ get_current_blog_id() ] );
+		$stored = self::stored( $product_id );
 		foreach ( array_diff( $stored, $values ) as $value ) {
 			delete_post_meta( $product_id, self::META_KEY, $value );
 		}
@@ -78,7 +78,7 @@ class ProductFailures {
 	 * @param int $product_id Product id.
 	 */
 	public static function forget( int $product_id ): void {
-		self::$counts = null;
+		unset( self::$counts[ get_current_blog_id() ] );
 		delete_post_meta( $product_id, self::META_KEY );
 	}
 
@@ -99,7 +99,7 @@ class ProductFailures {
 	 */
 	public static function keep_only( array $tested ): void {
 		global $wpdb;
-		self::$counts = null;
+		unset( self::$counts[ get_current_blog_id() ] );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Only this query finds rows of products the scan didn't visit.
 		$stored = array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s", self::META_KEY ) ) );
 		foreach ( array_diff( $stored, $tested ) as $product_id ) {
@@ -108,21 +108,22 @@ class ProductFailures {
 	}
 
 	/**
-	 * How many products have each value. Read once per request: the settings page and the Products filter both ask.
+	 * How many products have each value. Read once per request per site: the report and the settings page both ask.
 	 *
 	 * @return array<string, int>
 	 */
 	public static function counts(): array {
 		global $wpdb;
-		if ( null !== self::$counts ) {
-			return self::$counts;
+		$site = get_current_blog_id();
+		if ( isset( self::$counts[ $site ] ) ) {
+			return self::$counts[ $site ];
 		}
 		$rows   = (array) $wpdb->get_results( $wpdb->prepare( "SELECT meta_value, COUNT(*) AS products FROM {$wpdb->postmeta} WHERE meta_key = %s GROUP BY meta_value", self::META_KEY ), ARRAY_A );
 		$counts = array();
 		foreach ( $rows as $row ) {
 			$counts[ (string) $row['meta_value'] ] = (int) $row['products'];
 		}
-		self::$counts = $counts;
+		self::$counts[ $site ] = $counts;
 		return $counts;
 	}
 }
