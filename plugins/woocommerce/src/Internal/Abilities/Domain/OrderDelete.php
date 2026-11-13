@@ -236,9 +236,9 @@ class OrderDelete extends ActionableAbility {
 	/**
 	 * IDs of the orders that the order store deletes with a forced delete of the order, sorted.
 	 *
-	 * The queries match the ones the order store runs: HPOS deletes every child
-	 * of an order type that is not hierarchical, and the posts storage deletes
-	 * the refunds of a shop order.
+	 * The queries match what the order store does. HPOS deletes every child of
+	 * an order type that is not hierarchical, and each deleted child deletes its
+	 * own children the same way. The posts storage deletes the refunds of a shop order.
 	 *
 	 * @param \WC_Order $order Order to delete.
 	 * @return int[]
@@ -246,20 +246,30 @@ class OrderDelete extends ActionableAbility {
 	private static function get_child_ids( \WC_Order $order ): array {
 		global $wpdb;
 
+		$ids = array();
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			if ( is_post_type_hierarchical( $order->get_type() ) ) {
-				return array();
-			}
 			$orders_table = OrdersTableDataStore::get_orders_table_name();
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name comes from the data store.
-			$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM $orders_table WHERE parent_order_id = %d", $order->get_id() ) );
+			$parents      = is_post_type_hierarchical( $order->get_type() ) ? array() : array( $order->get_id() );
+			while ( ! empty( $parents ) ) {
+				$placeholders = implode( ',', array_fill( 0, count( $parents ), '%d' ) );
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The table name comes from the data store, and the placeholders match the IDs.
+				$children = $wpdb->get_results( $wpdb->prepare( "SELECT id, type FROM $orders_table WHERE parent_order_id IN ( $placeholders )", $parents ) );
+				$parents  = array();
+				foreach ( $children as $child ) {
+					$child_id = (int) $child->id;
+					if ( in_array( $child_id, $ids, true ) || $order->get_id() === $child_id ) {
+						continue;
+					}
+					$ids[] = $child_id;
+					if ( ! is_post_type_hierarchical( $child->type ) ) {
+						$parents[] = $child_id;
+					}
+				}
+			}
 		} elseif ( 'shop_order' === $order->get_type() ) {
-			$ids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $order->get_id() ) );
-		} else {
-			$ids = array();
+			$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $order->get_id() ) ) );
 		}
 
-		$ids = array_map( 'intval', $ids );
 		sort( $ids );
 
 		return $ids;

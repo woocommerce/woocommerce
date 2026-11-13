@@ -3300,7 +3300,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should run validators on a child order that HPOS deletes with its parent, and delete nothing when one refuses.
+	 * @testdox Should run validators on a child order and its refund that HPOS deletes with the parent, and delete nothing when one refuses.
 	 */
 	public function test_a_validator_can_refuse_deleting_a_child_order(): void {
 		$original = OrderUtil::custom_orders_table_usage_is_enabled();
@@ -3312,17 +3312,23 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$child    = \WC_Helper_Order::create_order();
 			$child->set_parent_id( $order_id );
 			$child->save();
-			$child_id = $child->get_id();
-			$refuse   = true;
-			$seen     = array();
-			$deleted  = array();
+			$child_id      = $child->get_id();
+			$grandchild_id = wc_create_refund(
+				array(
+					'order_id' => $child_id,
+					'amount'   => 1,
+				)
+			)->get_id();
+			$refuse        = true;
+			$seen          = array();
+			$deleted       = array();
 			$this->register_validator(
 				'order',
 				'test-ext',
-				static function ( \WC_Abstract_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $child_id ) {
+				static function ( \WC_Abstract_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $grandchild_id ) {
 					unset( $ability );
 					$seen[ $order->get_id() ] = $context['deleting'];
-					return $refuse && $child_id === $order->get_id() ? new \WP_Error( 'test_keep_child', 'Keep the child.' ) : null;
+					return $refuse && $grandchild_id === $order->get_id() ? new \WP_Error( 'test_keep_child', 'Keep the refund of the child.' ) : null;
 				}
 			);
 			$this->register_sync(
@@ -3341,18 +3347,21 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			);
 
 			$refused = $this->run_ability_response( 'woocommerce/order-delete', $input );
-			$kept    = array( wc_get_order( $order_id ), wc_get_order( $child_id ) );
+			$kept    = array( wc_get_order( $order_id ), wc_get_order( $child_id ), wc_get_order( $grandchild_id ) );
 			$refuse  = false;
 			$result  = $this->run_ability( 'woocommerce/order-delete', $input );
 
 			$this->assertSame( 400, $refused->get_status() );
 			$this->assertSame( 'test-ext:test_keep_child', $refused->get_data()['code'] );
-			$this->assertInstanceOf( \WC_Order::class, $kept[0], 'A refused child should keep the parent.' );
+			$this->assertInstanceOf( \WC_Order::class, $kept[0], 'A refused refund of the child should keep the parent.' );
 			$this->assertInstanceOf( \WC_Order::class, $kept[1] );
+			$this->assertInstanceOf( \WC_Order_Refund::class, $kept[2] );
 			$this->assertTrue( $seen[ $child_id ], 'The validators should see the child as deleted.' );
+			$this->assertTrue( $seen[ $grandchild_id ], 'The validators should see the refund of the child as deleted.' );
 			$this->assertSame( 'deleted', $result['status'] );
 			$this->assertFalse( wc_get_order( $child_id ), 'HPOS should delete the child with its parent.' );
-			$this->assertSame( array( $order_id, $child_id ), $deleted );
+			$this->assertFalse( wc_get_order( $grandchild_id ), 'HPOS should delete the refund of the child too.' );
+			$this->assertSame( array( $order_id, $child_id, $grandchild_id ), $deleted );
 		} finally {
 			$this->toggle_cot_feature_and_usage( $original );
 			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
