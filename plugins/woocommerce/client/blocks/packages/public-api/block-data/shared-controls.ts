@@ -3,9 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import triggerFetch, { APIFetchOptions } from '@wordpress/api-fetch';
-import DataLoader from 'dataloader';
 import {
-	ApiResponse,
 	assertBatchResponseIsValid,
 	assertResponseIsValid,
 } from '@woocommerce/types';
@@ -90,28 +88,14 @@ const triggerBatchFetch = ( keys: readonly APIFetchOptions[] ) => {
 /**
  * In ms, how long we should wait for requests to batch.
  *
- * DataLoader collects all requests over this window of time (and as a consequence, adds this amount of latency).
+ * The queue collects all requests over this window of time (and as a consequence, adds this amount of latency).
  */
 const triggerBatchFetchDelay = 300;
 
 /**
- * DataLoader instance for triggerBatchFetch.
+ * The batch endpoint accepts at most 25 requests.
  */
-const triggerBatchFetchLoader = new DataLoader( triggerBatchFetch, {
-	batchScheduleFn: ( callback: () => void ) =>
-		setTimeout( callback, triggerBatchFetchDelay ),
-	cache: false,
-	maxBatchSize: 25,
-} );
-
-/**
- * Trigger a fetch from the API using the batch endpoint.
- *
- * @param {APIFetchOptions} request Request object containing API request.
- */
-const batchFetch = async ( request: APIFetchOptions ) => {
-	return await triggerBatchFetchLoader.load( request );
-};
+const maxBatchSize = 25;
 
 /**
  * Dispatched a control action for triggering an api fetch call with no parsing.
@@ -125,7 +109,7 @@ export const apiFetchWithHeadersControl = ( options: APIFetchOptions ) =>
 		options,
 	} ) as const;
 
-// List of paths which should not be batched.
+// Writes to these paths are sent on their own, not batched. They skip the batching window and can be aborted.
 const preventBatching = [
 	'/wc/store/v1/checkout',
 	'/wc/store/v1/checkout?__experimental_calc_totals=true',
@@ -135,92 +119,170 @@ const preventBatching = [
 	'/wc/store/v1/shopper-lists/saved-for-later/items',
 ];
 
+type Result = { response: unknown; headers: unknown };
+
+/**
+ * Sends a request on its own. Parse is disabled to get the headers as well as the body.
+ */
+const fetchUnbatched = async (
+	options: APIFetchOptions
+): Promise< Result > => {
+	// A synchronous throw (for example, in a middleware) happens before .catch() and rejects with the error itself.
+	const fetchResponse: unknown = await triggerFetch( {
+		...options,
+		parse: false,
+	} ).catch( async ( errorResponse ) => {
+		// Propagate AbortError directly so callers can detect cancelled requests.
+		if ( errorResponse?.name === 'AbortError' ) {
+			throw errorResponse;
+		}
+		if ( errorResponse?.headers ) {
+			processHeadersOnFetch( errorResponse.headers );
+		}
+		if ( typeof errorResponse?.json === 'function' ) {
+			throw await errorResponse.json().catch( () => invalidJsonError );
+		}
+		throw errorResponse?.message;
+	} );
+	if ( ! ( fetchResponse instanceof Response ) ) {
+		throw invalidJsonError;
+	}
+	const response = await fetchResponse.json().catch( () => {
+		throw invalidJsonError;
+	} );
+	processHeadersOnFetch( fetchResponse.headers );
+	return { response, headers: fetchResponse.headers };
+};
+
+/**
+ * Returns the result of one request from a batch response, or throws its error.
+ */
+const parseBatchedResponse = ( response: unknown ): Result => {
+	assertResponseIsValid( response );
+	if ( response.headers ) {
+		processHeadersOnFetch( response.headers );
+	}
+	if ( response.status >= 200 && response.status < 300 ) {
+		return { response: response.body, headers: response.headers };
+	}
+	throw response.body || response;
+};
+
+type Write = {
+	options: APIFetchOptions;
+	resolve: ( value: Result ) => void;
+	reject: ( reason?: unknown ) => void;
+};
+
+// Writes waiting to be sent, in the order they were made.
+let queue: Write[] = [];
+let isSending = false;
+let timer: ReturnType< typeof setTimeout > | null = null;
+
+const isUnbatched = ( write: Write ) =>
+	preventBatching.includes( write.options.path || '' );
+
+/**
+ * Sends one write on its own, or several writes in one batch. Resolves when the server has finished.
+ */
+const send = ( writes: Write[] ) => {
+	if ( isUnbatched( writes[ 0 ] ) ) {
+		return fetchUnbatched( writes[ 0 ].options ).then(
+			writes[ 0 ].resolve,
+			writes[ 0 ].reject
+		);
+	}
+	// Promise.resolve().then() turns a synchronous throw (for example, in a middleware) into a rejection.
+	return Promise.resolve()
+		.then( () =>
+			triggerBatchFetch( writes.map( ( write ) => write.options ) )
+		)
+		.then(
+			( responses ) => {
+				// Settle successful writes first, so a later cart response does not clear the error of a failed write.
+				const failures: Array< () => void > = [];
+				writes.forEach( ( write, index ) => {
+					try {
+						write.resolve(
+							parseBatchedResponse( responses[ index ] )
+						);
+					} catch ( error ) {
+						failures.push( () => write.reject( error ) );
+					}
+				} );
+				failures.forEach( ( fail ) => fail() );
+			},
+			( error ) => writes.forEach( ( write ) => write.reject( error ) )
+		);
+};
+
+/**
+ * Sends the next writes in the queue once the server has finished the previous ones.
+ */
+const sendNext = () => {
+	timer = null;
+	if ( isSending || queue.length === 0 ) {
+		return;
+	}
+	let count = 1;
+	if ( ! isUnbatched( queue[ 0 ] ) ) {
+		while (
+			count < queue.length &&
+			count < maxBatchSize &&
+			! isUnbatched( queue[ count ] )
+		) {
+			count++;
+		}
+	}
+	isSending = true;
+	void send( queue.splice( 0, count ) ).finally( () => {
+		isSending = false;
+		sendNext();
+	} );
+};
+
+/**
+ * Queues a write. Writes are sent one request at a time, because the server saves the whole session at the end
+ * of each request and the last request to finish overwrites the others.
+ *
+ * Aborting a write in preventBatching removes it from the queue, or rejects it straight away if it was already
+ * sent. Other writes ignore the signal, as they did when they were batched.
+ */
+const queueWrite = ( options: APIFetchOptions ) =>
+	new Promise< Result >( ( resolve, reject ) => {
+		const { signal, ...requestOptions } = options;
+		const write: Write = { options: requestOptions, resolve, reject };
+		const unbatched = isUnbatched( write );
+		if ( unbatched && signal ) {
+			const abort = () => {
+				queue = queue.filter( ( queued ) => queued !== write );
+				reject(
+					new DOMException( 'The request was aborted.', 'AbortError' )
+				);
+			};
+			if ( signal.aborted ) {
+				abort();
+				return;
+			}
+			signal.addEventListener( 'abort', abort, { once: true } );
+		}
+		queue.push( write );
+		if ( ! isSending && ! timer ) {
+			timer = setTimeout(
+				sendNext,
+				unbatched ? 0 : triggerBatchFetchDelay
+			);
+		}
+	} );
+
 /**
  * The underlying function that actually does the fetch. This is used by both the generator (control) version of
  * apiFetchWithHeadersControl and the async function apiFetchWithHeaders.
  */
 const doApiFetchWithHeaders = ( options: APIFetchOptions ) =>
-	new Promise( ( resolve, reject ) => {
-		// GET Requests cannot be batched.
-		if (
-			! options.method ||
-			options.method === 'GET' ||
-			preventBatching.includes( options.path || '' )
-		) {
-			// Parse is disabled here to avoid returning just the body--we also need headers.
-			triggerFetch( {
-				...options,
-				parse: false,
-			} )
-				.then( ( fetchResponse: unknown ) => {
-					if ( fetchResponse instanceof Response ) {
-						fetchResponse
-							.json()
-							.then( ( response: unknown ) => {
-								resolve( {
-									response,
-									headers: fetchResponse.headers,
-								} );
-								processHeadersOnFetch( fetchResponse.headers );
-							} )
-							.catch( () => {
-								reject( invalidJsonError );
-							} );
-					} else {
-						reject( invalidJsonError );
-					}
-				} )
-				.catch( ( errorResponse ) => {
-					// Propagate AbortError directly so callers can detect cancelled requests.
-					if ( errorResponse.name === 'AbortError' ) {
-						reject( errorResponse );
-						return;
-					}
-					if ( errorResponse.headers ) {
-						processHeadersOnFetch( errorResponse.headers );
-					}
-					if ( typeof errorResponse.json === 'function' ) {
-						// Parse error response before rejecting it.
-						errorResponse
-							.json()
-							.then( ( error: unknown ) => {
-								reject( error );
-							} )
-							.catch( () => {
-								reject( invalidJsonError );
-							} );
-					} else {
-						reject( errorResponse.message );
-					}
-				} );
-		} else {
-			batchFetch( options )
-				.then( ( response: ApiResponse< unknown > ) => {
-					assertResponseIsValid( response );
-
-					if ( response.status >= 200 && response.status < 300 ) {
-						resolve( {
-							response: response.body,
-							headers: response.headers,
-						} );
-						processHeadersOnFetch( response.headers );
-					}
-
-					// Status code indicates error.
-					throw response;
-				} )
-				.catch( ( errorResponse: ApiResponse< unknown > ) => {
-					if ( errorResponse.headers ) {
-						processHeadersOnFetch( errorResponse.headers );
-					}
-					if ( errorResponse.body ) {
-						reject( errorResponse.body );
-					} else {
-						reject( errorResponse );
-					}
-				} );
-		}
-	} );
+	! options.method || options.method === 'GET'
+		? fetchUnbatched( options )
+		: queueWrite( options );
 
 /**
  * Triggers an api fetch call with no parsing.

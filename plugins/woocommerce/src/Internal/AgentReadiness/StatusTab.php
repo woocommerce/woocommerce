@@ -171,12 +171,22 @@ class StatusTab implements RegisterHooksInterface {
 	 * @param array $store_checks Store checks from the report.
 	 */
 	private function render_store_checks( array $store_checks ): void {
-		$failing = array_filter(
-			$store_checks,
-			static function ( $check ) {
-				return empty( $check['ok'] );
+		$failing   = array();
+		$unchecked = array();
+		foreach ( $store_checks as $check ) {
+			if ( array_key_exists( 'ok', $check ) && null === $check['ok'] ) {
+				$unchecked[] = (string) $check['name'];
+			} elseif ( empty( $check['ok'] ) ) {
+				$failing[] = $check;
 			}
-		);
+		}
+		if ( ! empty( $unchecked ) ) {
+			printf(
+				'<div class="notice notice-warning inline"><p><strong>%1$s</strong> %2$s</p></div>',
+				esc_html__( 'Your store could not load its own pages, so these were not checked:', 'woocommerce' ),
+				esc_html( implode( ', ', $unchecked ) )
+			);
+		}
 		if ( empty( $failing ) ) {
 			return;
 		}
@@ -289,7 +299,7 @@ class StatusTab implements RegisterHooksInterface {
 							<p><?php echo esc_html( (string) $check['why'] ); ?></p>
 							<p><a href="<?php echo esc_url( (string) $check['fix_url'] ); ?>"><?php echo esc_html( (string) $check['fix'] ); ?></a></p>
 						</td>
-						<td><?php echo wp_kses_post( implode( '<br />', $this->channel_tags( (array) $check['channels'], $channels ) ) ); ?></td>
+						<td><?php echo empty( $check['channels'] ) ? esc_html__( 'Product page only', 'woocommerce' ) : wp_kses_post( implode( '<br />', $this->channel_tags( (array) $check['channels'], $channels ) ) ); ?></td>
 						<td><?php echo esc_html( (string) (int) $check['count'] ); ?></td>
 						<td><?php echo wp_kses_post( implode( '<br />', $this->product_links( (array) $check['product_ids'] ) ) ); ?></td>
 					</tr>

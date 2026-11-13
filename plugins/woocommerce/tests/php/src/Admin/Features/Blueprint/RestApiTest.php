@@ -243,4 +243,78 @@ class RestApiTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $response_data['messages'] );
 		$this->assertStringContainsString( 'woocommerce_store_address has been updated', $response_data['messages'][0]['message'] );
 	}
+
+	/**
+	 * @testdox Should continue an import after its steps change site visibility and flush the cache.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $external_object_cache Whether transients are stored in the object cache.
+	 */
+	public function test_import_continues_after_site_visibility_changes( bool $external_object_cache ): void {
+		$previous_external_object_cache = wp_using_ext_object_cache();
+		wp_using_ext_object_cache( $external_object_cache );
+
+		try {
+			update_option( 'woocommerce_coming_soon', 'yes' );
+			update_option( 'woocommerce_store_pages_only', 'no' );
+
+			$response = $this->rest_api->import_step(
+				$this->create_import_request( array( 'woocommerce_coming_soon' => 'no' ) )
+			);
+			$this->assertInstanceOf( \WP_REST_Response::class, $response );
+			$this->assertTrue( $response->get_data()['success'], 'The step that makes the site live should succeed.' );
+			$this->assertSame( 'no', get_option( 'woocommerce_coming_soon' ) );
+
+			$session_token = $response->get_headers()['X-Blueprint-Import-Session'];
+			$this->assertNotEmpty( $session_token, 'The first response should supply a session token.' );
+
+			$response = $this->rest_api->import_step(
+				$this->create_import_request( array( 'woocommerce_store_pages_only' => 'yes' ), $session_token )
+			);
+			$this->assertInstanceOf( \WP_REST_Response::class, $response, 'The existing session should continue on a live site.' );
+			$this->assertTrue( $response->get_data()['success'] );
+
+			$response = $this->rest_api->import_step(
+				$this->create_import_request( array( 'woocommerce_store_address' => 'Continued import' ), $session_token )
+			);
+			$this->assertInstanceOf( \WP_REST_Response::class, $response, 'The session should survive a cache flush in a later step.' );
+			$this->assertTrue( $response->get_data()['success'] );
+			$this->assertSame( 'Continued import', get_option( 'woocommerce_store_address' ) );
+
+			foreach ( array( '', wp_generate_uuid4() ) as $invalid_session_token ) {
+				$response = $this->rest_api->import_step(
+					$this->create_import_request( array( 'woocommerce_store_address' => 'Blocked import' ), $invalid_session_token )
+				);
+				$this->assertFalse( $response['success'], 'A missing or unknown session must not allow an import on a live site.' );
+				$this->assertSame( 'Continued import', get_option( 'woocommerce_store_address' ) );
+			}
+		} finally {
+			wp_using_ext_object_cache( $previous_external_object_cache );
+		}
+	}
+
+	/**
+	 * Create an import step request for site options.
+	 *
+	 * @param array  $options       Site options to import.
+	 * @param string $session_token Import session token.
+	 * @return WP_REST_Request
+	 */
+	private function create_import_request( array $options, string $session_token = '' ): WP_REST_Request {
+		$request = new WP_REST_Request( 'POST', '/wc-admin/blueprint/import-step' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_header( 'X-Blueprint-Import-Session', $session_token );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'step_definition' => array(
+						'step'    => 'setSiteOptions',
+						'options' => $options,
+					),
+				)
+			)
+		);
+		return $request;
+	}
 }

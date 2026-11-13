@@ -22,13 +22,6 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Customer shipping address before the test, restored at teardown.
-	 *
-	 * @var array<string, string>
-	 */
-	private $previous_shipping_address = array();
-
-	/**
 	 * Set up before test.
 	 *
 	 * @return void
@@ -43,9 +36,7 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 
 		// The invalid-address tests need a shipping rate, and the flat rate only offers one for a
-		// country the store ships to. The cart ships to WC()->customer, which outlives a test, so
-		// give it a US/CA location here rather than depend on the address it arrives with.
-		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
+		// country the store ships to. The cart ships to WC()->customer, so give it a US/CA location.
 		WC()->customer->set_shipping_location( 'US', 'CA' );
 
 		$this->sut = new class() extends OrderController {
@@ -60,19 +51,6 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 				parent::validate_address_fields( $order, $address_type, $errors );
 			}
 		};
-	}
-
-	/**
-	 * Put back the customer shipping location that setUp() replaced.
-	 */
-	public function tearDown(): void {
-		try {
-			foreach ( $this->previous_shipping_address as $key => $value ) {
-				WC()->customer->{"set_shipping_{$key}"}( $value );
-			}
-		} finally {
-			parent::tearDown();
-		}
 	}
 
 	/**
@@ -537,12 +515,47 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() sets the payment method title alongside the id, matching the gateway's own title.
+	 */
+	public function test_update_order_from_cart_sets_payment_method_title_with_the_session_choice(): void {
+		$order = $this->sync_order_from_cart_with_cod_enabled( 'cod' );
+
+		$this->assertSame( WC()->payment_gateways()->payment_gateways()['cod']->get_title(), $order->get_payment_method_title() );
+	}
+
+	/**
 	 * @testdox update_order_from_cart() writes the filtered default on the order when the shopper has not chosen a method.
 	 */
 	public function test_update_order_from_cart_writes_the_filtered_default_without_a_session_choice(): void {
 		$order = $this->sync_order_from_cart_with_cod_enabled( null );
 
 		$this->assertSame( '', $order->get_payment_method() );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() still pairs the title with the id when the chosen gateway is registered but disabled.
+	 */
+	public function test_update_order_from_cart_sets_payment_method_title_for_a_disabled_registered_gateway(): void {
+		$bacs                = WC()->payment_gateways()->payment_gateways()['bacs'];
+		$bacs_enabled_before = $bacs->enabled;
+		$bacs->enabled       = 'no';
+		WC()->session->set( 'chosen_payment_method', 'bacs' );
+
+		try {
+			WC()->cart->empty_cart();
+			WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+			$order = WC_Helper_Order::create_order();
+			$order->set_payment_method_title( 'Stale Title' );
+
+			$this->sut->update_order_from_cart( $order );
+
+			$this->assertSame( 'bacs', $order->get_payment_method() );
+			$this->assertSame( $bacs->get_title(), $order->get_payment_method_title() );
+		} finally {
+			WC()->cart->empty_cart();
+			$bacs->enabled = $bacs_enabled_before;
+			WC()->session->set( 'chosen_payment_method', null );
+		}
 	}
 
 	/**

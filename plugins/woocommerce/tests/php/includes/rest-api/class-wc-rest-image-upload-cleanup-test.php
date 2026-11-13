@@ -184,6 +184,127 @@ class WC_REST_Image_Upload_Cleanup_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An image error after a valid featured image does not create an unreported product, including in a batch.
+	 * @testWith [false, true]
+	 *           [true, true]
+	 *           [false, false]
+	 *           [true, false]
+	 *
+	 * @param bool $batch Whether to use the batch endpoint.
+	 * @param bool $upload_error Whether to fail an upload rather than reject an existing non-image ID.
+	 */
+	public function test_later_image_error_does_not_create_unreported_product( bool $batch, bool $upload_error ): void {
+		$invalid_image = $upload_error
+			? array( 'src' => 'https://example.org/rejected.php' )
+			: array( 'id' => self::factory()->post->create() );
+		$product_data  = array(
+			'name'   => 'Product with rejected image',
+			'sku'    => 'rejected-image-product',
+			'images' => array(
+				array( 'src' => 'https://example.org/featured.png' ),
+				$invalid_image,
+			),
+		);
+		$request       = new WP_REST_Request( 'POST', '/wc/v3/products' . ( $batch ? '/batch' : '' ) );
+		$request->set_body_params(
+			$batch ? array(
+				'create' => array(
+					array(
+						'name'   => 'Product before image error',
+						'sku'    => 'before-image-error',
+						'images' => array( array( 'src' => 'https://example.org/before.png' ) ),
+					),
+					$product_data,
+					array(
+						'name'   => 'Product after image error',
+						'sku'    => 'after-image-error',
+						'images' => array( array( 'src' => 'https://example.org/after.png' ) ),
+					),
+				),
+			) : $product_data
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertSame( $batch ? 200 : 400, $response->get_status() );
+
+		if ( $batch ) {
+			$this->assertCount( 3, $data['create'], 'Each batch item must have a response, even after an image error.' );
+			$this->assertSame( 0, $data['create'][1]['id'] );
+			foreach ( array( 0, 2 ) as $index ) {
+				$item = $data['create'][ $index ];
+				$this->assertArrayNotHasKey( 'error', $item );
+				$this->assertGreaterThan( 0, $item['id'] );
+				$this->assertSame( $item['id'], wc_get_product_id_by_sku( $item['sku'] ), 'Successful items must return the persisted product ID.' );
+				$this->assertInstanceOf( WP_Post::class, get_post( $item['images'][0]['id'] ), 'An image error must not delete another batch item\'s image.' );
+			}
+		}
+
+		$error = $batch ? $data['create'][1]['error'] : $data;
+		$this->assertSame( $upload_error ? 'woocommerce_product_image_upload_error' : 'woocommerce_product_invalid_image_id', $error['code'] );
+		$this->assertSame( 400, $error['data']['status'] );
+		$this->assertSame( 0, wc_get_product_id_by_sku( $product_data['sku'] ), 'An image error must not reserve the failed product\'s SKU.' );
+		$this->assertSame(
+			array(),
+			get_posts(
+				array(
+					'post_type'   => 'product',
+					'post_status' => 'any',
+					'title'       => $product_data['name'],
+					'fields'      => 'ids',
+				)
+			),
+			'An image error must not leave a product without its ID in the response.'
+		);
+		$this->assertCount( $batch ? 3 : 1, $this->uploads, 'The featured image must be uploaded before the later image fails.' );
+		$failed_image_index = $batch ? 1 : 0;
+		$this->assertFileDoesNotExist( $this->uploads[ $failed_image_index ]['file'] );
+		$this->assertNull( get_post( $this->attachment_ids[ $failed_image_index ] ), 'The failed product\'s new featured image must be deleted.' );
+	}
+
+	/**
+	 * @testdox Suppressing an image upload error still returns the created product ID and keeps its valid images in a batch.
+	 */
+	public function test_batch_suppressed_image_error_returns_created_product(): void {
+		add_filter( 'woocommerce_rest_suppress_image_upload_error', '__return_true' );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'create' => array(
+					array(
+						'name'   => 'Product with suppressed image error',
+						'sku'    => 'suppressed-image-error',
+						'images' => array(
+							array( 'src' => 'https://example.org/featured.png' ),
+							array( 'src' => 'https://example.org/rejected.php' ),
+						),
+					),
+					array(
+						'name'   => 'Product after suppressed image error',
+						'sku'    => 'after-suppressed-image-error',
+						'images' => array( array( 'src' => 'https://example.org/after.png' ) ),
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 2, $data['create'] );
+		$this->assertCount( 2, $this->uploads );
+		foreach ( $data['create'] as $index => $item ) {
+			$this->assertArrayNotHasKey( 'error', $item );
+			$this->assertGreaterThan( 0, $item['id'] );
+			$this->assertSame( $item['id'], wc_get_product_id_by_sku( $item['sku'] ) );
+			$this->assertCount( 1, $item['images'] );
+			$this->assertSame( $this->attachment_ids[ $index ], $item['images'][0]['id'] );
+			$this->assertFileExists( $this->uploads[ $index ]['file'] );
+		}
+	}
+
+	/**
 	 * @testdox Other image-helper callers also delete their rejected new downloads.
 	 * @testWith ["utility"]
 	 *           ["importer"]
