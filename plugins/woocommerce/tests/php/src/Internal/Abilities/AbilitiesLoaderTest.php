@@ -1186,6 +1186,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'product-attribute-create'       => array( 'woocommerce/product-attribute-create', array( 'name' => 'Size' ) ),
 			'product-terms-query'            => array( 'woocommerce/product-terms-query', array( 'taxonomy' => 'product_cat' ) ),
 			'product-terms-query of unknown' => array( 'woocommerce/product-terms-query', array( 'taxonomy' => 'pa_missing' ) ),
+			'product-term-create'            => array(
+				'woocommerce/product-term-create',
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Granted',
+				),
+			),
+			'product-term-update'            => array(
+				'woocommerce/product-term-update',
+				$missing_id + array( 'taxonomy' => 'product_cat' ),
+			),
 			'product-review-update'          => array(
 				'woocommerce/product-review-update',
 				$missing_id + array( 'status' => 'approved' ),
