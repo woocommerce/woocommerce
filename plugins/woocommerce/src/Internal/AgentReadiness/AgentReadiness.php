@@ -397,14 +397,16 @@ class AgentReadiness {
 	 * @return array<string, mixed>
 	 */
 	public function refresh_report(): array {
-		$tested = array();
-		$report = $this->build_report(
+		// Captured before the scan. A product saved while it runs is absent here, so its new rows stay.
+		$had_rows = ProductFailures::stored_product_ids();
+		$tested   = array();
+		$report   = $this->build_report(
 			static function ( int $product_id, array $failures ) use ( &$tested ): void {
 				$tested[] = $product_id;
 				ProductFailures::store( $product_id, $failures );
 			}
 		);
-		ProductFailures::keep_only( $tested );
+		ProductFailures::keep_only( $had_rows, $tested );
 		$report['failures_stored'] = true;
 		update_option( self::REPORT_OPTION, $report, false );
 		unset( $report['shared_gtins'] );

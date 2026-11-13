@@ -93,16 +93,26 @@ class ProductFailures {
 	}
 
 	/**
-	 * Remove the rows of products a scan didn't test, such as those now hidden from the catalog.
+	 * Product ids that have stored rows right now.
 	 *
-	 * @param array<int, int> $tested Product ids the scan tested.
+	 * @return array<int, int>
 	 */
-	public static function keep_only( array $tested ): void {
+	public static function stored_product_ids(): array {
 		global $wpdb;
-		unset( self::$counts[ get_current_blog_id() ] );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Only this query finds rows of products the scan didn't visit.
-		$stored = array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s", self::META_KEY ) ) );
-		foreach ( array_diff( $stored, $tested ) as $product_id ) {
+		return array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s", self::META_KEY ) ) );
+	}
+
+	/**
+	 * Remove the rows of products a scan didn't test, such as those now hidden from the catalog.
+	 * $had_rows is taken before the scan, so a product that stores rows during the scan keeps them.
+	 *
+	 * @param array<int, int> $had_rows Product ids that had rows when the scan started.
+	 * @param array<int, int> $tested   Product ids the scan tested.
+	 */
+	public static function keep_only( array $had_rows, array $tested ): void {
+		unset( self::$counts[ get_current_blog_id() ] );
+		foreach ( array_diff( $had_rows, $tested ) as $product_id ) {
 			self::forget( $product_id );
 		}
 	}

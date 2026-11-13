@@ -98,6 +98,36 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A product that stores rows while the scan runs keeps them.
+	 */
+	public function test_product_stored_during_scan_keeps_its_rows(): void {
+		$during_id = 0;
+		add_filter(
+			'posts_results',
+			static function ( $posts, $query ) use ( &$during_id ) {
+				if ( 0 !== $during_id || ProductScan::BATCH_SIZE !== (int) $query->get( 'posts_per_page' ) ) {
+					return $posts;
+				}
+				$during_id = -1;
+				$during_id = WC_Helper_Product::create_simple_product()->get_id();
+				add_post_meta( $during_id, ProductFailures::META_KEY, 'missing_images' );
+				return $posts;
+			},
+			10,
+			2
+		);
+
+		try {
+			$this->readiness->refresh_report();
+		} finally {
+			remove_all_filters( 'posts_results' );
+		}
+
+		$this->assertGreaterThan( 0, $during_id );
+		$this->assertContains( 'missing_images', ProductFailures::for_product( $during_id ) );
+	}
+
+	/**
 	 * @testdox Two rows for one value on one product count as one product.
 	 */
 	public function test_duplicate_rows_count_once(): void {
