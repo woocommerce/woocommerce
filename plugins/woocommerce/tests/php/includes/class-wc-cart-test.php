@@ -2680,7 +2680,16 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		add_action( 'internal_woocommerce_cart_item_removed_from_user_request', $callback, 10, 2 );
 
-		WC_Form_Handler::update_cart_action();
+		$intercept_redirect = static function () {
+			throw new RuntimeException( 'redirect' );
+		};
+		add_filter( 'wp_redirect', $intercept_redirect );
+		try {
+			WC_Form_Handler::update_cart_action();
+		} catch ( RuntimeException $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- The handler redirects and exits after removing; the intercept stops it there.
+		} finally {
+			remove_filter( 'wp_redirect', $intercept_redirect );
+		}
 
 		$this->assertNotEmpty( $captured_args, 'The remove item action should have been fired' );
 		$this->assertSame( $cart_item_key, $captured_args['cart_item_key'] );

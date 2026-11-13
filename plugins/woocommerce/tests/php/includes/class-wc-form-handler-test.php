@@ -1283,6 +1283,132 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_cart_action() removes the item and redirects to a clean URL, with or without a referer ("$referer_path").
+	 *
+	 * @testWith ["", ""]
+	 *           ["/shop/?remove_item=stale&add-to-cart=12", "/shop/"]
+	 *
+	 * @covers WC_Form_Handler::update_cart_action()
+	 *
+	 * @param string $referer_path  Referer path, or an empty string for no referer.
+	 * @param string $expected_path Expected redirect path, or an empty string for the cart page.
+	 */
+	public function test_update_cart_action_redirects_after_removing_item( string $referer_path, string $expected_path ): void {
+		$cart_page_url = $this->create_cart_page();
+		$product       = WC_Helper_Product::create_simple_product();
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id() );
+
+		unset( $_SERVER['HTTP_REFERER'], $_REQUEST['_wp_http_referer'] );
+		if ( '' !== $referer_path ) {
+			$_SERVER['HTTP_REFERER'] = home_url( $referer_path );
+		}
+		$_GET     = array( 'remove_item' => $cart_item_key );
+		$_REQUEST = array(
+			'remove_item' => $cart_item_key,
+			'_wpnonce'    => wp_create_nonce( 'woocommerce-cart' ),
+		);
+
+		$redirect = $this->dispatch_update_cart_action_expecting_redirect();
+
+		$expected_base = '' === $expected_path ? $cart_page_url : home_url( $expected_path );
+		$this->assertSame( add_query_arg( 'removed_item', '1', $expected_base ), $redirect, 'Removing an item should redirect to a URL without the remove link arguments.' );
+		$this->assertEmpty( WC()->cart->get_cart_item( $cart_item_key ), 'The item should be removed from the cart.' );
+		$this->assertStringContainsString( 'class="restore-item" rel="nofollow"', wc_get_notices( 'success' )[0]['notice'] ?? '', 'The undo link should tell crawlers not to follow it.' );
+	}
+
+	/**
+	 * @testdox update_cart_action() restores the item and redirects to the cart page when an undo link is followed without a referer.
+	 *
+	 * @covers WC_Form_Handler::update_cart_action()
+	 */
+	public function test_update_cart_action_redirects_after_undo_without_referer(): void {
+		$cart_page_url = $this->create_cart_page();
+		$product       = WC_Helper_Product::create_simple_product();
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->remove_cart_item( $cart_item_key );
+
+		unset( $_SERVER['HTTP_REFERER'], $_REQUEST['_wp_http_referer'] );
+		$_GET     = array(
+			'undo_item' => $cart_item_key,
+			'_wpnonce'  => wp_create_nonce( 'woocommerce-cart' ),
+		);
+		$_REQUEST = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Mirrors PHP building the request from the query string.
+
+		$redirect = $this->dispatch_update_cart_action_expecting_redirect();
+
+		$this->assertSame( $cart_page_url, $redirect, 'Undoing a removal without a referer should redirect to the cart page.' );
+		$this->assertNotEmpty( WC()->cart->get_cart_item( $cart_item_key ), 'The item should be back in the cart.' );
+	}
+
+	/**
+	 * @testdox A remove link with an invalid nonce is redirected to a clean URL on the cart page ($on_cart_page) and left alone elsewhere.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @covers WC_Form_Handler::update_cart_action()
+	 * @covers WC_Form_Handler::redirect_invalid_cart_item_link()
+	 *
+	 * @param bool $on_cart_page Whether the request is for the cart page.
+	 */
+	public function test_invalid_remove_link_is_redirected_only_on_cart_page( bool $on_cart_page ): void {
+		$cart_page_url = $this->create_cart_page();
+		$page_url      = $on_cart_page ? $cart_page_url : get_permalink( self::factory()->post->create( array( 'post_type' => 'page' ) ) );
+
+		$this->go_to(
+			add_query_arg(
+				array(
+					'remove_item' => 'stale',
+					'_wpnonce'    => 'invalid',
+					'add-to-cart' => '12',
+				),
+				$page_url
+			)
+		);
+		$_REQUEST = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Mirrors PHP building the request from the query string.
+
+		// Only the handler under test should react to template_redirect; the hook snapshot is restored on teardown.
+		remove_all_actions( 'template_redirect' );
+		WC_Form_Handler::update_cart_action();
+
+		$redirect = null;
+		try {
+			do_action( 'template_redirect' );
+		} catch ( RuntimeException $e ) {
+			$redirect = $e->getMessage();
+		}
+
+		$this->assertSame( $on_cart_page ? wp_make_link_relative( $cart_page_url ) : null, $redirect, 'Only cart page requests should be redirected to a URL without the link arguments.' );
+	}
+
+	/**
+	 * Creates a page and sets it as the cart page.
+	 *
+	 * @return string Cart page URL.
+	 */
+	private function create_cart_page(): string {
+		$page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_cart_page_id', $page_id );
+
+		return (string) get_permalink( $page_id );
+	}
+
+	/**
+	 * Runs update_cart_action() and returns the URL it redirects to.
+	 *
+	 * @return string Redirect URL.
+	 */
+	private function dispatch_update_cart_action_expecting_redirect(): string {
+		try {
+			WC_Form_Handler::update_cart_action();
+		} catch ( RuntimeException $e ) {
+			return $e->getMessage();
+		}
+
+		$this->fail( 'Expected update_cart_action() to redirect.' );
+	}
+
+	/**
 	 * Prepares request globals for the account details handler.
 	 *
 	 * @param array<string,string> $fields Account detail fields.

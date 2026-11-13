@@ -1075,7 +1075,7 @@ class WC_Form_Handler {
 				if ( $product && $product->is_in_stock() && $product->has_enough_stock( $cart_item['quantity'] ) ) {
 					/* Translators: %s Product title. */
 					$removed_notice  = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
-					$removed_notice .= ' <a href="' . esc_url( wc_get_cart_undo_url( $cart_item_key ) ) . '" class="restore-item">' . __( 'Undo?', 'woocommerce' ) . '</a>';
+					$removed_notice .= ' <a href="' . esc_url( wc_get_cart_undo_url( $cart_item_key ) ) . '" class="restore-item" rel="nofollow">' . __( 'Undo?', 'woocommerce' ) . '</a>';
 				} else {
 					/* Translators: %s Product title. */
 					$removed_notice = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
@@ -1084,10 +1084,9 @@ class WC_Form_Handler {
 				wc_add_notice( $removed_notice, apply_filters( 'woocommerce_cart_item_removed_notice_type', 'success' ) );
 			}
 
-			if ( wp_get_referer() ) {
-				wp_safe_redirect( remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) );
-				exit;
-			}
+			// Always redirect, so the action URL is never the page that renders (and never the base for links on it).
+			wp_safe_redirect( remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), add_query_arg( 'removed_item', '1', self::get_cart_action_redirect_base() ) ) );
+			exit;
 		} elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 
 			// Undo Cart Item.
@@ -1095,10 +1094,11 @@ class WC_Form_Handler {
 
 			WC()->cart->restore_cart_item( $cart_item_key );
 
-			if ( wp_get_referer() ) {
-				wp_safe_redirect( remove_query_arg( array( 'undo_item', '_wpnonce' ), wp_get_referer() ) );
-				exit;
-			}
+			wp_safe_redirect( remove_query_arg( array( 'undo_item', '_wpnonce' ), self::get_cart_action_redirect_base() ) );
+			exit;
+		} elseif ( ! empty( $_GET['remove_item'] ) || ! empty( $_GET['undo_item'] ) ) {
+			// The nonce is invalid or expired. Other code may use these query args, so only redirect once the request is known to be for the cart page.
+			add_action( 'template_redirect', array( __CLASS__, 'redirect_invalid_cart_item_link' ) );
 		}
 
 		// Update Cart - checks apply_coupon too because they are in the same form.
@@ -1173,6 +1173,40 @@ class WC_Form_Handler {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get the URL to return to after a cart item is removed or restored: the referring page, or the cart page when there is no referer.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return string
+	 */
+	private static function get_cart_action_redirect_base(): string {
+		$referer = wp_get_referer();
+
+		return $referer ? $referer : wc_get_cart_url();
+	}
+
+	/**
+	 * Redirect a cart page request that carries a remove or undo link with an invalid or expired nonce to the same URL without the link's arguments.
+	 *
+	 * Hooked to template_redirect by update_cart_action() only when it rejects such a link.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 */
+	public static function redirect_invalid_cart_item_link(): void {
+		$cart_page_id = wc_get_page_id( 'cart' );
+
+		// is_page() with an empty ID matches any page, so require a real cart page.
+		if ( $cart_page_id < 1 || ! is_page( $cart_page_id ) ) {
+			return;
+		}
+
+		wp_safe_redirect( remove_query_arg( array( 'remove_item', 'undo_item', '_wpnonce', 'add-to-cart', 'added-to-cart' ) ) );
+		exit;
 	}
 
 	/**
