@@ -186,6 +186,65 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report a refunded credit line with a negative total.
+	 */
+	public function test_reports_credit_line_as_negative(): void {
+		$order  = $this->create_order();
+		$credit = new \WC_Order_Item_Fee();
+		$credit->set_name( 'Store credit' );
+		$credit->set_total( '-5' );
+		$order->add_item( $credit );
+		$order->calculate_totals( false );
+		$order->save();
+
+		$result = $this->refund(
+			array(
+				'id'         => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $this->get_product_line_id( $order ),
+						'quantity'     => 1,
+					),
+					array(
+						'line_item_id' => $credit->get_id(),
+						'refund_total' => -5,
+					),
+				),
+			)
+		);
+
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$lines = array_column( $result['refund']['line_items'], 'total', 'refunded_item_id' );
+		$this->assertSame( -5.0, (float) $lines[ $credit->get_id() ] );
+		$this->assertSame( 10.0, (float) $lines[ $this->get_product_line_id( $order ) ] );
+	}
+
+	/**
+	 * @testdox Should return the message of an extension that declines the refund by throwing, and save nothing.
+	 */
+	public function test_returns_declined_refund_message(): void {
+		$order = $this->create_order_without_lines();
+		add_action(
+			'woocommerce_create_refund',
+			static function () {
+				throw new \Exception( 'Team seats are still in use.' );
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '5',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_declined', $result->get_error_code() );
+		$this->assertSame( 'Team seats are still in use.', $result->get_error_message() );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
 	 * @testdox Should refuse to refund more than the order can still refund, and save nothing.
 	 */
 	public function test_refuses_more_than_refundable(): void {
@@ -361,13 +420,17 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
 		$this->assertSame( $legacy_hooks, $this->fired, 'The hooks should fire in the same order.' );
 
+		$this->assertInstanceOf( \WC_Order_Refund::class, $legacy );
+		$legacy = wc_get_order( $legacy->get_id() );
 		$refund = wc_get_order( $result['refund']['id'] );
+		$this->assertInstanceOf( \WC_Order_Refund::class, $legacy );
+		$this->assertInstanceOf( \WC_Order_Refund::class, $refund );
 		$this->assertSame( $legacy->get_amount(), $refund->get_amount() );
 		$this->assertSame( $legacy->get_total(), $refund->get_total() );
 		$this->assertSame( $legacy->get_total_tax(), $refund->get_total_tax() );
 		$this->assertSame(
-			array_map( array( $this, 'describe_line' ), array_values( $legacy->get_items() ) ),
-			array_map( array( $this, 'describe_line' ), array_values( $refund->get_items() ) )
+			$this->describe_lines( $legacy, $legacy_order ),
+			$this->describe_lines( $refund, $order )
 		);
 		$this->assertSame( wc_get_order( $legacy_order->get_id() )->get_status(), wc_get_order( $order->get_id() )->get_status() );
 	}
@@ -463,19 +526,26 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Describe a refund line by what both refund paths must agree on.
+	 * Describe the lines of a refund by what both refund paths must agree on. The refunded line is named by
+	 * its position in the order, since the two refunds belong to different orders.
 	 *
-	 * @param \WC_Order_Item $item Refund line.
+	 * @param \WC_Order_Refund $refund Refund, loaded from the database.
+	 * @param \WC_Order        $order  Order the refund belongs to.
 	 * @return array
 	 */
-	private function describe_line( \WC_Order_Item $item ): array {
-		return array(
-			$item->get_type(),
-			$item->get_name(),
-			$item->get_meta( '_refunded_item_id' ),
-			is_callable( array( $item, 'get_quantity' ) ) ? $item->get_quantity() : null,
-			is_callable( array( $item, 'get_total' ) ) ? $item->get_total() : null,
-			is_callable( array( $item, 'get_total_tax' ) ) ? $item->get_total_tax() : null,
+	private function describe_lines( \WC_Order_Refund $refund, \WC_Order $order ): array {
+		$order_line_ids = array_keys( $order->get_items( array( 'line_item', 'fee', 'shipping' ) ) );
+
+		return array_map(
+			static fn( \WC_Order_Item $item ): array => array(
+				$item->get_type(),
+				$item->get_name(),
+				array_search( absint( $item->get_meta( '_refunded_item_id' ) ), $order_line_ids, true ),
+				is_callable( array( $item, 'get_quantity' ) ) ? $item->get_quantity() : null,
+				is_callable( array( $item, 'get_total' ) ) ? $item->get_total() : null,
+				is_callable( array( $item, 'get_total_tax' ) ) ? $item->get_total_tax() : null,
+			),
+			array_values( $refund->get_items() )
 		);
 	}
 }
