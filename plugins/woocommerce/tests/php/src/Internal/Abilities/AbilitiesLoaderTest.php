@@ -1257,6 +1257,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			),
 			'customers-query'                => array( 'woocommerce/customers-query', array() ),
 			'shipping-zones-query'           => array( 'woocommerce/shipping-zones-query', array() ),
+			'shipping-zone-method-update'    => array(
+				'woocommerce/shipping-zone-method-update',
+				array(
+					'instance_id' => 1,
+					'enabled'     => false,
+				),
+			),
 			'tax-rates-query'                => array( 'woocommerce/tax-rates-query', array() ),
 			'product-attributes-query'       => array( 'woocommerce/product-attributes-query', array() ),
 			'product-attribute-create'       => array( 'woocommerce/product-attribute-create', array( 'name' => 'Size' ) ),

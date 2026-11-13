@@ -45,7 +45,7 @@ trait ShippingZoneAbilityTrait {
 	 * @since 11.4.0
 	 */
 	public static function can_edit_shipping(): bool {
-		return wc_rest_check_manager_permissions( 'settings', 'edit' );
+		return (bool) wc_rest_check_manager_permissions( 'settings', 'edit' );
 	}
 
 	/**
