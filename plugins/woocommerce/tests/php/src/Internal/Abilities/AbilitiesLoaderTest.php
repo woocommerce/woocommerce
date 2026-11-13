@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
+use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesCategories;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
@@ -34,6 +35,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 	private const CANONICAL_ABILITY_IDS = array(
 		'woocommerce/product-terms-query',
+		'woocommerce/product-term-create',
+		'woocommerce/product-term-update',
 		'woocommerce/product-attributes-query',
 		'woocommerce/product-attribute-create',
 		'woocommerce/products-query',
@@ -50,6 +53,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/customers-query',
 		'woocommerce/product-review-update',
 		'woocommerce/product-review-reply',
+		'woocommerce/product-reviews-query',
+		'woocommerce/shipping-zones-query',
+		'woocommerce/tax-rates-query',
 	);
 
 	/**
@@ -278,6 +284,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'idempotent'  => true,
 				'destructive' => false,
 			),
+			'woocommerce/product-reviews-query'    => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/shipping-zones-query'     => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/tax-rates-query'          => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
 			'woocommerce/product-attributes-query' => array(
 				'readonly'    => true,
 				'idempotent'  => true,
@@ -287,6 +308,16 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
+			),
+			'woocommerce/product-term-create'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/product-term-update'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
 			),
 			'woocommerce/product-create'           => array(
 				'readonly'    => false,
@@ -963,6 +994,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should give every canonical ability an input in the permission refusal provider.
+	 */
+	public function test_permission_refusal_provider_covers_every_canonical_ability(): void {
+		$classes = ( new \ReflectionClassConstant( AbilitiesLoader::class, 'CORE_ABILITY_DEFINITION_CLASSES' ) )->getValue();
+		$core    = array_map(
+			static fn( string $class_name ): string => is_a( $class_name, ActionableAbility::class, true ) ? $class_name::ABILITY_NAME : $class_name::get_name(),
+			$classes
+		);
+		$covered = array_column( $this->provider_canonical_abilities_with_minimal_input(), 0 );
+
+		$this->assertEqualsCanonicalizing( $core, self::CANONICAL_ABILITY_IDS, 'CANONICAL_ABILITY_IDS should list every Core ability.' );
+		$this->assertEqualsCanonicalizing( $core, $covered, 'The permission refusal provider should cover every Core ability.' );
+	}
+
+	/**
 	 * Provides ability IDs and minimal valid-shape input for cap negative-path tests.
 	 *
 	 * @return array<string, array{0: string, 1: array}>
@@ -970,91 +1016,134 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
-			'products-query'         => array(
+			'product-terms-query'      => array(
+				'woocommerce/product-terms-query',
+				array(
+					'taxonomy' => 'product_cat',
+				),
+			),
+			'product-term-create'      => array(
+				'woocommerce/product-term-create',
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Forbidden',
+				),
+			),
+			'product-term-update'      => array(
+				'woocommerce/product-term-update',
+				array(
+					'taxonomy' => 'product_cat',
+					'id'       => 1,
+					'name'     => 'Forbidden',
+				),
+			),
+			'product-attributes-query' => array(
+				'woocommerce/product-attributes-query',
+				array(),
+			),
+			'product-attribute-create' => array(
+				'woocommerce/product-attribute-create',
+				array(
+					'name' => 'Forbidden',
+				),
+			),
+			'products-query'           => array(
 				'woocommerce/products-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'product-create'         => array(
+			'product-create'           => array(
 				'woocommerce/product-create',
 				array(
 					'name' => 'Forbidden',
 				),
 			),
-			'product-update'         => array(
+			'product-update'           => array(
 				'woocommerce/product-update',
 				array(
 					'id'   => 1,
 					'name' => 'Forbidden',
 				),
 			),
-			'product-delete'         => array(
+			'product-delete'           => array(
 				'woocommerce/product-delete',
 				array(
 					'id' => 1,
 				),
 			),
-			'orders-query'           => array(
+			'orders-query'             => array(
 				'woocommerce/orders-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'order-send-email'       => array(
+			'order-send-email'         => array(
 				'woocommerce/order-send-email',
 				array(
 					'id'    => 1,
 					'email' => 'invoice',
 				),
 			),
-			'order-update'           => array(
+			'order-update'             => array(
 				'woocommerce/order-update',
 				array(
 					'id'       => 1,
 					'shipping' => array( 'city' => 'Denied' ),
 				),
 			),
-			'order-update-status'    => array(
+			'order-update-status'      => array(
 				'woocommerce/order-update-status',
 				array(
 					'id'     => 1,
 					'status' => 'processing',
 				),
 			),
-			'product-review-update'  => array(
+			'product-review-update'    => array(
 				'woocommerce/product-review-update',
 				array(
 					'id'     => 1,
 					'status' => 'approved',
 				),
 			),
-			'product-review-reply'   => array(
+			'product-review-reply'     => array(
 				'woocommerce/product-review-reply',
 				array(
 					'id'      => 1,
 					'content' => 'denied',
 				),
 			),
-			'order-add-note'         => array(
+			'order-add-note'           => array(
 				'woocommerce/order-add-note',
 				array(
 					'id'   => 1,
 					'note' => 'denied',
 				),
 			),
-			'order-notes-query'      => array(
+			'order-notes-query'        => array(
 				'woocommerce/order-notes-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'payment-gateways-query' => array(
+			'payment-gateways-query'   => array(
 				'woocommerce/payment-gateways-query',
 				array(),
 			),
-			'customers-query'        => array(
+			'customers-query'          => array(
 				'woocommerce/customers-query',
+				array(),
+			),
+			'product-reviews-query'    => array(
+				'woocommerce/product-reviews-query',
+				array(),
+			),
+			'shipping-zones-query'     => array(
+				'woocommerce/shipping-zones-query',
+				array(),
+			),
+			'tax-rates-query'          => array(
+				'woocommerce/tax-rates-query',
 				array(),
 			),
 		);
