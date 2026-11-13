@@ -249,6 +249,21 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Turn on hook-driven transactional emails for the current test.
+	 *
+	 * The test bootstrap leaves them off. This adds the email dispatch hooks and makes the next use of the mailer
+	 * build a fresh one, so its listeners exist. The hook restore after the test removes both.
+	 *
+	 * @return void
+	 */
+	protected function enable_transactional_emails(): void {
+		$instance = new ReflectionProperty( WC_Emails::class, 'instance' );
+		$instance->setAccessible( true );
+		$instance->setValue( null, null );
+		WC_Emails::init_transactional_emails();
+	}
+
+	/**
 	 * Clear the WC() singleton state that survives the parent teardown.
 	 *
 	 * Kept separate from tearDown() so it can be asserted directly, without a test having to
