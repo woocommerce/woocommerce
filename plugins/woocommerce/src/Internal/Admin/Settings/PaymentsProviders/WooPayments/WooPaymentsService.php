@@ -163,16 +163,18 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding details for the Payments settings page.
 	 *
-	 * @param string      $location  The location for which we are onboarding.
-	 *                               This is an ISO 3166-1 alpha-2 country code.
-	 * @param string      $rest_path The REST API path to use for constructing REST API URLs.
-	 * @param string|null $source    Optional. The source for the onboarding flow.
+	 * @param string      $location                        The location for which we are onboarding.
+	 *                                                     This is an ISO 3166-1 alpha-2 country code.
+	 * @param string      $rest_path                       The REST API path to use for constructing REST API URLs.
+	 * @param string|null $source                          Optional. The source for the onboarding flow.
+	 * @param bool        $include_wpcom_authorization_url Optional. Whether to include the WPCOM connection authorization URL.
+	 *                                                     Only pass true for the current user's interactive admin session.
 	 *
 	 * @return array The onboarding details.
 	 * @throws ApiException If the onboarding action can not be performed due to the current state of the site.
 	 * @throws Exception If there were errors when generating the onboarding details.
 	 */
-	public function get_onboarding_details( string $location, string $rest_path, ?string $source = null ): array {
+	public function get_onboarding_details( string $location, string $rest_path, ?string $source = null, bool $include_wpcom_authorization_url = false ): array {
 		// Since getting the onboarding details is not idempotent, we will check it as an action.
 		$this->check_if_onboarding_action_is_acceptable();
 
@@ -199,7 +201,7 @@ class WooPaymentsService {
 			'messages' => array(
 				'not_supported' => ! $onboarding_supported ? $this->provider->get_onboarding_not_supported_message( $gateway, $location ) : null,
 			),
-			'steps'    => $this->get_onboarding_steps( $location, trailingslashit( $rest_path ) . 'step', $source ),
+			'steps'    => $this->get_onboarding_steps( $location, trailingslashit( $rest_path ) . 'step', $source, $include_wpcom_authorization_url ),
 			'context'  => array(
 				'urls' => array(
 					'overview_page' => $this->get_overview_page_url(),
@@ -2133,15 +2135,16 @@ class WooPaymentsService {
 	/**
 	 * Get the onboarding details for each step.
 	 *
-	 * @param string      $location  The location for which we are onboarding.
-	 *                               This is an ISO 3166-1 alpha-2 country code.
-	 * @param string      $rest_path The REST API path to use for constructing REST API URLs.
-	 * @param string|null $source    Optional. The source for the onboarding flow.
+	 * @param string      $location                        The location for which we are onboarding.
+	 *                                                     This is an ISO 3166-1 alpha-2 country code.
+	 * @param string      $rest_path                       The REST API path to use for constructing REST API URLs.
+	 * @param string|null $source                          Optional. The source for the onboarding flow.
+	 * @param bool        $include_wpcom_authorization_url Optional. Whether to include the WPCOM connection authorization URL.
 	 *
 	 * @return array[] The list of onboarding steps details.
 	 * @throws Exception If there was an error generating the onboarding steps details.
 	 */
-	private function get_onboarding_steps( string $location, string $rest_path, ?string $source = self::SESSION_ENTRY_DEFAULT ): array {
+	private function get_onboarding_steps( string $location, string $rest_path, ?string $source = self::SESSION_ENTRY_DEFAULT, bool $include_wpcom_authorization_url = false ): array {
 		$steps = array();
 
 		// Add the payment methods onboarding step details, but only if we have recommended payment methods.
@@ -2221,22 +2224,26 @@ class WooPaymentsService {
 				$return_url
 			);
 
-			// Try to generate the authorization URL.
-			$wpcom_connection = $this->get_wpcom_connection_authorization( $return_url );
-			if ( ! $wpcom_connection['success'] ) {
-				// In case of errors, make sure we work with a list of error messages.
-				$wpcom_step['errors'] = array_values( (array) ( $wpcom_connection['errors'] ?? array() ) );
-			}
 			$wpcom_step['actions'] = array(
 				'start' => array(
 					'type' => self::ACTION_TYPE_REST,
 					'href' => rest_url( trailingslashit( $rest_path ) . self::ONBOARDING_STEP_WPCOM_CONNECTION . '/start' ),
 				),
-				'auth'  => array(
+			);
+
+			// The authorization URL is only generated for callers that asked for it.
+			if ( $include_wpcom_authorization_url ) {
+				// Try to generate the authorization URL.
+				$wpcom_connection = $this->get_wpcom_connection_authorization( $return_url );
+				if ( ! $wpcom_connection['success'] ) {
+					// In case of errors, make sure we work with a list of error messages.
+					$wpcom_step['errors'] = array_values( (array) ( $wpcom_connection['errors'] ?? array() ) );
+				}
+				$wpcom_step['actions']['auth'] = array(
 					'type' => self::ACTION_TYPE_REDIRECT,
 					'href' => $wpcom_connection['url'],
-				),
-			);
+				);
+			}
 		}
 
 		$steps[] = $wpcom_step;
