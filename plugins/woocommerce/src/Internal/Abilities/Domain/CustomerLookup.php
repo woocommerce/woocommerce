@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * The customer abilities identify customers by their Analytics customer ID, which guests have too.
- * It extends the Analytics data store to count orders and spend with the same rules as the Customers report.
+ * customers-query reads through the get_data() of the Analytics data store, so its counts match the Customers report.
  */
 final class CustomerLookup extends CustomersDataStore {
 
@@ -59,40 +59,5 @@ final class CustomerLookup extends CustomersDataStore {
 		}
 
 		return get_userdata( (int) $row->user_id ) ? (int) $row->user_id : false;
-	}
-
-	/**
-	 * SQL that counts the orders of the joined order stats rows, without refunds.
-	 *
-	 * @param string $order_stats_table Order stats table name or alias.
-	 * @return string
-	 */
-	public static function get_order_count_sql( string $order_stats_table ): string {
-		return 'SUM( CASE WHEN ' . self::get_countable_customer_order_predicate( $order_stats_table ) . ' THEN 1 ELSE 0 END )';
-	}
-
-	/**
-	 * SQL for the date of the latest joined order stats row that is an order, not a refund.
-	 *
-	 * @param string $order_stats_table Order stats table name or alias.
-	 * @return string
-	 */
-	public static function get_last_order_date_sql( string $order_stats_table ): string {
-		return 'MAX( CASE WHEN ' . self::get_countable_customer_order_predicate( $order_stats_table ) . " THEN {$order_stats_table}.date_created_gmt END )";
-	}
-
-	/**
-	 * SQL condition that leaves out the order statuses the store excludes from Analytics.
-	 *
-	 * @param string $order_stats_table Order stats table name or alias.
-	 * @return string An `AND` condition, or an empty string.
-	 */
-	public static function get_counted_status_sql( string $order_stats_table ): string {
-		$excluded = array_map( array( __CLASS__, 'normalize_order_status' ), self::get_excluded_report_order_statuses() );
-		if ( empty( $excluded ) ) {
-			return '';
-		}
-
-		return "AND {$order_stats_table}.status NOT IN ( '" . implode( "','", array_map( 'esc_sql', $excluded ) ) . "' )";
 	}
 }

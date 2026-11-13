@@ -25,25 +25,21 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 	private const DEFAULT_PER_PAGE = 10;
 
 	/**
-	 * Sort keys of the input, mapped to the columns of the query.
+	 * Sort keys of the input, mapped to the sort keys of the Analytics customers data store.
 	 */
-	private const ORDERBY_COLUMNS = array(
+	private const ORDERBY = array(
 		'last_active'     => 'date_last_active',
 		'last_order'      => 'date_last_order',
 		'registered_date' => 'date_registered',
-		'order_count'     => 'order_count',
-		'total_spent'     => 'total_spent',
-		'id'              => 'cl.customer_id',
+		'order_count'     => 'orders_count',
+		'total_spent'     => 'total_spend',
+		'id'              => 'id',
 	);
 
 	/**
-	 * Sorts that read the lookup table only, so the page can be picked before any order stats are joined.
+	 * Data store columns without personal data.
 	 */
-	private const LOOKUP_SORT_SQL = array(
-		'last_active'     => "IF( cl.date_last_active <= '0000-00-00 00:00:00', NULL, cl.date_last_active )",
-		'registered_date' => 'cl.date_registered',
-		'id'              => 'cl.customer_id',
-	);
+	private const FIELDS = array( 'id', 'user_id', 'date_registered', 'date_last_active', 'date_last_order', 'orders_count', 'total_spend' );
 
 	/**
 	 * Get the ability name.
@@ -115,51 +111,37 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 			return $extension_args;
 		}
 
-		global $wpdb;
+		$exclude  = $input['exclude'] ?? array();
+		$include  = array_values( array_diff( array_unique( $input['include'] ?? array() ), $exclude ) );
+		$page     = $input['page'] ?? 1;
+		$per_page = $input['per_page'] ?? ( empty( $input['include'] ) ? self::DEFAULT_PER_PAGE : max( 1, count( $include ) ) );
 
-		$exclude          = $input['exclude'] ?? array();
-		$default_per_page = empty( $input['include'] ) ? self::DEFAULT_PER_PAGE : max( 1, count( array_diff( array_unique( $input['include'] ), $exclude ) ) );
-		$page             = $input['page'] ?? 1;
-		$per_page         = $input['per_page'] ?? $default_per_page;
-		$order            = 'asc' === ( $input['order'] ?? 'desc' ) ? 'ASC' : 'DESC';
-		$orderby_key      = $input['orderby'] ?? 'last_active';
-		$orderby          = self::ORDERBY_COLUMNS[ $orderby_key ];
-		$lookup           = CustomerLookup::get_db_table_name();
-		$stats            = $wpdb->prefix . 'wc_order_stats';
-		$where            = self::get_where_sql( $input, $extension_args );
-		$order_count      = CustomerLookup::get_order_count_sql( 'os' );
-		$counted_status   = CustomerLookup::get_counted_status_sql( 'os' );
-		$last_order       = CustomerLookup::get_last_order_date_sql( 'os' );
-		$source           = "{$lookup} cl";
-		$outer_where      = $where;
-		$limit            = $wpdb->prepare( 'LIMIT %d OFFSET %d', $per_page, ( $page - 1 ) * $per_page );
-		if ( isset( self::LOOKUP_SORT_SQL[ $orderby_key ] ) ) {
-			$source      = "( SELECT cl.customer_id FROM {$lookup} cl WHERE {$where} ORDER BY " . self::LOOKUP_SORT_SQL[ $orderby_key ] . " {$order}, cl.customer_id {$order} {$limit} ) page_ids
-				INNER JOIN {$lookup} cl ON cl.customer_id = page_ids.customer_id";
-			$outer_where = '1=1';
-			$limit       = '';
+		$query_args = array(
+			'fields'            => self::FIELDS,
+			'orderby'           => self::ORDERBY[ $input['orderby'] ?? 'last_active' ],
+			'order'             => $input['order'] ?? 'desc',
+			'page'              => $page,
+			'per_page'          => $per_page,
+			'user_type'         => $input['type'] ?? 'all',
+			'customers'         => empty( $input['include'] ) ? array() : ( empty( $include ) ? array( 0 ) : $include ),
+			'customers_exclude' => empty( $input['include'] ) ? $exclude : array(),
+			'users'             => $extension_args['post__in'] ?? array(),
+			'order_before'      => '',
+			'order_after'       => '',
+		);
+
+		/**
+		 * The parent docblock names these classes without their namespace.
+		 *
+		 * @var \stdClass|\WP_Error $data
+		 */
+		$data = ( new CustomerLookup() )->get_data( $query_args );
+		if ( is_wp_error( $data ) ) {
+			return $data;
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names, the sort column and the WHERE clause are built from fixed strings and escaped integers.
-		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$lookup} cl WHERE {$where}" );
-		$rows  = $wpdb->get_results(
-			"SELECT cl.customer_id, cl.user_id, cl.date_registered,
-				IF( cl.date_last_active <= '0000-00-00 00:00:00', NULL, cl.date_last_active ) AS date_last_active,
-				{$last_order} AS date_last_order,
-				{$order_count} AS order_count,
-				COALESCE( SUM( os.total_sales ), 0 ) AS total_spent
-			FROM {$source}
-			LEFT JOIN {$stats} os ON os.customer_id = cl.customer_id {$counted_status}
-			WHERE {$outer_where}
-			GROUP BY cl.customer_id, cl.user_id, cl.date_registered, cl.date_last_active
-			ORDER BY {$orderby} {$order}, cl.customer_id {$order}
-			{$limit}",
-			ARRAY_A
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		$user_ids = array_filter( array_map( 'intval', array_column( $rows, 'user_id' ) ) );
-		cache_users( $user_ids );
+		$rows = $data->data;
+		cache_users( array_filter( array_column( $rows, 'user_id' ) ) );
 
 		$customers = array();
 		foreach ( $rows as $row ) {
@@ -174,83 +156,32 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 
 		return array(
 			'customers'   => $customers,
-			'total'       => $total,
-			'total_pages' => (int) ceil( $total / $per_page ),
+			'total'       => (int) $data->total,
+			'total_pages' => (int) ceil( $data->total / $per_page ),
 			'page'        => $page,
 			'per_page'    => $per_page,
 		);
 	}
 
 	/**
-	 * Build the WHERE clause. Extension filters describe WordPress users, so they match registered customers only.
-	 *
-	 * @param array $input          Ability input.
-	 * @param array $extension_args Query arguments of the extension filters.
-	 * @return string
-	 */
-	private static function get_where_sql( array $input, array $extension_args ): string {
-		global $wpdb;
-
-		$where = array( '1=1' );
-		$type  = $input['type'] ?? 'all';
-		if ( 'all' !== $type ) {
-			$where[] = 'registered' === $type ? 'cl.user_id IS NOT NULL' : 'cl.user_id IS NULL';
-		}
-
-		$exclude = $input['exclude'] ?? array();
-		if ( ! empty( $input['include'] ) ) {
-			$include = array_diff( $input['include'], $exclude );
-			$where[] = 'cl.customer_id IN (' . self::get_id_list_sql( empty( $include ) ? array( 0 ) : $include ) . ')';
-		} elseif ( ! empty( $exclude ) ) {
-			$where[] = 'cl.customer_id NOT IN (' . self::get_id_list_sql( $exclude ) . ')';
-		}
-
-		if ( isset( $extension_args['post__in'] ) ) {
-			$where[] = 'cl.user_id IN (' . self::get_id_list_sql( $extension_args['post__in'] ) . ')';
-		}
-		if ( isset( $extension_args['post__not_in'] ) ) {
-			$where[] = 'cl.user_id NOT IN (' . self::get_id_list_sql( $extension_args['post__not_in'] ) . ')';
-		}
-		if ( isset( $extension_args['meta_query'] ) ) {
-			$meta_query = new \WP_Meta_Query( $extension_args['meta_query'] );
-			$meta_sql   = $meta_query->get_sql( 'user', $wpdb->users, 'ID' );
-			if ( is_array( $meta_sql ) ) {
-				$where[] = "cl.user_id IN ( SELECT {$wpdb->users}.ID FROM {$wpdb->users} {$meta_sql['join']} WHERE 1=1 {$meta_sql['where']} )";
-			}
-		}
-
-		return implode( ' AND ', $where );
-	}
-
-	/**
-	 * Comma-separated IDs for an IN clause.
-	 *
-	 * @param array<int, int> $ids IDs.
-	 * @return string
-	 */
-	private static function get_id_list_sql( array $ids ): string {
-		return implode( ',', array_map( 'absint', array_values( array_unique( $ids ) ) ) );
-	}
-
-	/**
 	 * Format a customer row. Every field here must stay free of personal data. Only registered
 	 * customers have a role and extension fields, because extensions read them from WC_Customer.
 	 *
-	 * @param array{customer_id: string, user_id: ?string, date_registered: ?string, date_last_active: ?string, date_last_order: ?string, order_count: string, total_spent: string} $row Row of the customer query.
+	 * @param array{id: int, user_id: int, date_registered: ?string, date_last_active: ?string, date_last_order: ?string, orders_count: int, total_spend: float} $row Row of the Analytics customers data store; a guest has user ID 0.
 	 * @return array|\WP_Error|null Null for a registered customer whose user no longer loads.
 	 */
 	private static function format_customer( array $row ) {
 		$output = array(
-			'id'               => (int) $row['customer_id'],
-			'order_count'      => (int) $row['order_count'],
-			'total_spent'      => wc_format_decimal( $row['total_spent'], wc_get_price_decimals() ),
+			'id'               => (int) $row['id'],
+			'order_count'      => (int) $row['orders_count'],
+			'total_spent'      => wc_format_decimal( $row['total_spend'], wc_get_price_decimals() ),
 			'date_registered'  => self::format_lookup_date( $row['date_registered'], false ),
 			'date_last_active' => self::format_lookup_date( $row['date_last_active'], true ),
-			'date_last_order'  => self::format_lookup_date( $row['date_last_order'], true ),
+			'date_last_order'  => self::format_lookup_date( $row['date_last_order'], false ),
 		);
 		$output = array_filter( $output, static fn( $value ) => null !== $value );
 
-		if ( null === $row['user_id'] ) {
+		if ( empty( $row['user_id'] ) ) {
 			return $output;
 		}
 
@@ -365,7 +296,7 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 				),
 				'orderby'  => array(
 					'type'    => 'string',
-					'enum'    => array_keys( self::ORDERBY_COLUMNS ),
+					'enum'    => array_keys( self::ORDERBY ),
 					'default' => 'last_active',
 				),
 				'order'    => array(

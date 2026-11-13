@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the Analytics Customers report from repeating or skipping customers across pages when they share a sort value.

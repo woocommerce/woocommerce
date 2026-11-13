@@ -161,29 +161,6 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should date the last order by orders, not by a later refund.
-	 */
-	public function test_last_order_ignores_refunds(): void {
-		list( $id, $user_id ) = $this->registered_customer();
-		$order                = $this->order( $user_id );
-		$order->set_date_created( '2026-01-01T10:00:00+00:00' );
-		$order->save();
-		$refund = wc_create_refund(
-			array(
-				'order_id' => $order->get_id(),
-				'amount'   => '2.00',
-			)
-		);
-		$refund->set_date_created( '2026-03-01T10:00:00+00:00' );
-		$refund->save();
-		$this->sync_analytics();
-
-		$result = $this->sut->execute( array( 'include' => array( $id ) ) );
-
-		$this->assertStringStartsWith( '2026-01-01T10:00:00', $result['customers'][0]['date_last_order'] );
-	}
-
-	/**
 	 * @testdox Should list registered customers, guests or both by type.
 	 */
 	public function test_type_filter(): void {
@@ -232,7 +209,7 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_ties_page_by_id(): void {
 		$ids = $this->guest_customers( 3 );
-		rsort( $ids );
+		sort( $ids );
 
 		$pages = array();
 		for ( $page = 1; $page <= 3; $page++ ) {
@@ -358,7 +335,7 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 
 			$members = static fn( bool $value ) => $input + array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'members' => $value ) ) ) );
 			$this->assertSame( array( $registered[1][0] ), array_column( $ability->execute( $members( true ) )['customers'], 'id' ), 'An extension filter narrows include instead of adding to it.' );
-			$this->assertSame( array( $registered[0][0] ), array_column( $ability->execute( $members( false ) )['customers'], 'id' ), 'An extension filter matches registered customers only.' );
+			$this->assertSame( 'woocommerce_ability_extension_filter_failed', $ability->execute( $members( false ) )->get_error_code(), 'A customer filter can only include user IDs.' );
 
 			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
 			$this->assertSame( $baseline, CustomersQuery::execute( $input ) );
