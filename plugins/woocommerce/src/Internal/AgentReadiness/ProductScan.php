@@ -65,6 +65,11 @@ class ProductScan {
 	private array $statuses = array();
 
 	/**
+	 * Most shared GTINs the stored report keeps.
+	 */
+	public const SHARED_GTINS_LIMIT = 5000;
+
+	/**
 	 * Normalised GTIN keys carried by more than one published product.
 	 *
 	 * @var array<string, true>|null
@@ -107,8 +112,9 @@ class ProductScan {
 	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
 	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
 	 * @param int                                                             $ids_limit     Product ids kept per rule.
+	 * @param callable|null                                                   $on_tested     Called with each product id and its failures.
 	 */
-	public function evaluate( array $rules, array $channel_rules, int $ids_limit ): void {
+	public function evaluate( array $rules, array $channel_rules, int $ids_limit, ?callable $on_tested = null ): void {
 		$this->results             = array_fill_keys(
 			array_keys( $rules ),
 			array(
@@ -172,7 +178,7 @@ class ProductScan {
 				}
 				$product = wc_get_product( $product_id );
 				if ( $product ) {
-					$this->record( $product, $rules, $channel_rules, $ids_limit );
+					$this->record( $product, $rules, $channel_rules, $ids_limit, $on_tested );
 				}
 			}
 
@@ -385,6 +391,35 @@ class ProductScan {
 	 * @param string $gtin Normalised GTIN.
 	 */
 	public function is_shared_gtin( string $gtin ): bool {
+		return isset( $this->shared_gtin_keys()[ ProductFields::gtin_key( $gtin ) ] );
+	}
+
+	/**
+	 * The GTIN keys more than one published product carries, for the scan to store.
+	 * Null past SHARED_GTINS_LIMIT, so the stored report stays small; checking one product then reads the catalog.
+	 *
+	 * @return array<int, string>|null
+	 */
+	public function shared_gtins(): ?array {
+		$keys = $this->shared_gtin_keys();
+		return count( $keys ) > self::SHARED_GTINS_LIMIT ? null : array_map( 'strval', array_keys( $keys ) );
+	}
+
+	/**
+	 * Use the shared GTIN keys a stored scan found, instead of reading every published product.
+	 *
+	 * @param array<int, mixed> $keys GTIN keys.
+	 */
+	public function use_shared_gtins( array $keys ): void {
+		$this->shared_gtins = array_fill_keys( array_map( 'strval', array_filter( $keys, 'is_scalar' ) ), true );
+	}
+
+	/**
+	 * Shared GTIN keys, read from the catalog the first time they're needed.
+	 *
+	 * @return array<string, bool>
+	 */
+	private function shared_gtin_keys(): array {
 		if ( null === $this->shared_gtins ) {
 			global $wpdb;
 
@@ -430,8 +465,7 @@ class ProductScan {
 
 			$this->shared_gtins = array_fill_keys( array_map( 'strval', $gtins ), true );
 		}
-
-		return isset( $this->shared_gtins[ ProductFields::gtin_key( $gtin ) ] );
+		return $this->shared_gtins;
 	}
 
 	/**
@@ -465,9 +499,13 @@ class ProductScan {
 	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
 	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
 	 * @param int                                                             $ids_limit     Product ids kept per rule.
+	 * @param callable|null                                                   $on_tested     Called with the product id and its failures.
 	 */
-	private function record( \WC_Product $product, array $rules, array $channel_rules, int $ids_limit ): void {
+	private function record( \WC_Product $product, array $rules, array $channel_rules, int $ids_limit, ?callable $on_tested ): void {
 		$failures = $this->failures( $product, $rules, $channel_rules );
+		if ( null !== $on_tested ) {
+			$on_tested( $product->get_id(), $failures );
+		}
 		foreach ( array_keys( $failures ) as $id ) {
 			$result = $this->result( $id );
 			++$result['count'];

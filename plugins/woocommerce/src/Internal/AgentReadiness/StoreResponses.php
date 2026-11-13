@@ -89,6 +89,21 @@ class StoreResponses {
 	}
 
 	/**
+	 * The response when a URL on the store's host is asked for as Markdown. Redirects are not followed.
+	 *
+	 * @param string $url URL or path.
+	 * @return array{status:int,body:string,headers:array<string,string>}|null Null when the store could not be reached.
+	 */
+	public function get_as_markdown( string $url ): ?array {
+		$url = self::absolute( $url );
+		$key = 'MARKDOWN ' . $url;
+		if ( ! array_key_exists( $key, $this->responses ) ) {
+			$this->responses[ $key ] = $this->site_live && $this->is_store_url( $url ) ? $this->request( $url, array( 'headers' => array( 'Accept' => 'text/markdown' ) ) ) : null;
+		}
+		return $this->responses[ $key ];
+	}
+
+	/**
 	 * The response to a JSON POST to a URL on the store's host, such as a UCP endpoint. Redirects are not followed.
 	 *
 	 * @param string               $url  URL or path.
@@ -245,14 +260,15 @@ class StoreResponses {
 		);
 		if ( is_wp_error( $response ) ) {
 			// When the home page can't be reached, other URLs would fail the same way, so a scan
-			// of a store that can't reach itself waits for one timeout, not one per URL.
-			if ( untrailingslashit( $url ) === untrailingslashit( home_url( '/' ) ) ) {
+			// of a store that can't reach itself waits for one timeout, not one per URL. Only the
+			// plain GET counts: a Markdown or POST request can fail where the page itself loads.
+			if ( array() === $args && untrailingslashit( $url ) === untrailingslashit( home_url( '/' ) ) ) {
 				$this->reachable = false;
 			}
 			return null;
 		}
 		$headers = array();
-		foreach ( array( 'location', 'x-robots-tag' ) as $name ) {
+		foreach ( array( 'location', 'x-robots-tag', 'content-type', 'vary' ) as $name ) {
 			$value = wp_remote_retrieve_header( $response, $name );
 			$value = is_array( $value ) ? implode( ', ', $value ) : (string) $value;
 			if ( '' !== $value ) {
