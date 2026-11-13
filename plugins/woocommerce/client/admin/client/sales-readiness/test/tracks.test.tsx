@@ -138,7 +138,7 @@ describe( 'Sales readiness tracking', () => {
 		} );
 	} );
 
-	it( 'records Run check, without a second viewed event after the reload', async () => {
+	it( 'records Run checks, without a second viewed event after the reload', async () => {
 		mockedApiFetch.mockImplementation( ( { method } ) =>
 			Promise.resolve(
 				method === 'POST'
@@ -284,7 +284,7 @@ describe( 'Sales readiness tracking', () => {
 			intro: 'Run a check.',
 			fix_first: null,
 			run: {
-				label: 'Run check',
+				label: 'Run checks',
 				pending: false,
 				stalled: false,
 				message: '',
@@ -297,7 +297,7 @@ describe( 'Sales readiness tracking', () => {
 		);
 		render( <SalesReadinessOverview /> );
 
-		const run = await screen.findByRole( 'button', { name: 'Run check' } );
+		const run = await screen.findByRole( 'button', { name: 'Run checks' } );
 		// eslint-disable-next-line testing-library/no-unnecessary-act -- the rejected scan settles after click returns
 		await act( async () => {
 			await userEvent.click( run );
@@ -313,7 +313,7 @@ describe( 'Sales readiness tracking', () => {
 		);
 		expect( screen.getByText( 'AI shopping' ) ).toBeTruthy();
 		expect(
-			screen.getByRole( 'button', { name: 'Run check' } )
+			screen.getByRole( 'button', { name: 'Run checks' } )
 		).toBeEnabled();
 	} );
 

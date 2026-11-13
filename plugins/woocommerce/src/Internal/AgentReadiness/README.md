@@ -226,7 +226,7 @@ The React views send Tracks events through `@woocommerce/tracks` (`client/admin/
 | Event | When | Properties |
 | --- | --- | --- |
 | `wcadmin_sales_readiness_viewed` | The view first loads, once per visit | `surface`, `checked`, `pending`, `fix_first_count`, `open_count`, `required_count`, `unknown_count`, `pass_count` |
-| `wcadmin_sales_readiness_run_check_click` | Run check or Check again | `surface`, `first_check` |
+| `wcadmin_sales_readiness_run_check_click` | Run checks or Check again | `surface`, `first_check` |
 | `wcadmin_sales_readiness_link_click` | A fix link, View all checks, or Manage | `surface`, `area` (`fix_first`, `section`, `view_all`, `shopping`); for fixes `check_id`, plus `position` in Fix first or `section` and `state` in a section card |
 | `wcadmin_sales_readiness_fold_toggle` | Show more checks or Hide | `section` (a section id, or `declared`), `open` |
 | `wcadmin_sales_readiness_error` | The view can't load, or a check can't start | `surface`, `action` (`load` or `run`) |
