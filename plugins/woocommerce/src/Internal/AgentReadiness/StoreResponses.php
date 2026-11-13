@@ -17,6 +17,9 @@ defined( 'ABSPATH' ) || exit;
  * on that host. A response is null when the store could not be reached or is in
  * coming soon mode, so a check reports "couldn't check" instead of "missing".
  *
+ * A product page is read further than other files. Product JSON-LD is printed in
+ * the footer, so a cap that keeps only the start of the page drops it.
+ *
  * @since 11.4.0
  */
 class StoreResponses {
@@ -24,6 +27,12 @@ class StoreResponses {
 	public const TIMEOUT = 5;
 
 	public const MAX_BYTES = 512 * KB_IN_BYTES;
+
+	/**
+	 * How much of a product page is downloaded. Product JSON-LD is printed in the
+	 * footer, so the usual cap can cut it off.
+	 */
+	public const PRODUCT_PAGE_BYTES = 2 * MB_IN_BYTES;
 
 	private const MAX_REDIRECTS = 2;
 
@@ -37,7 +46,7 @@ class StoreResponses {
 	/**
 	 * Responses by URL.
 	 *
-	 * @var array<string, array{status:int,body:string}|null>
+	 * @var array<string, array{status:int,body:string,truncated:bool}|null>
 	 */
 	private array $responses = array();
 
@@ -61,7 +70,7 @@ class StoreResponses {
 	 * The response for a URL on the store's host, or for a path from the home URL such as /llms.txt.
 	 *
 	 * @param string $url URL or path.
-	 * @return array{status:int,body:string}|null Null when the store could not be reached.
+	 * @return array{status:int,body:string,truncated:bool}|null Null when the store could not be reached.
 	 */
 	public function get( string $url ): ?array {
 		if ( str_starts_with( $url, '/' ) ) {
@@ -78,7 +87,10 @@ class StoreResponses {
 	 * none or it could not be loaded. Password protected products are skipped, since
 	 * their page shows a form instead of the product; only the five newest are looked at.
 	 *
-	 * @return array{status:int,body:string}|null
+	 * Read further than other files. Product JSON-LD is printed in the footer, so
+	 * the usual cap would drop it.
+	 *
+	 * @return array{status:int,body:string,truncated:bool}|null
 	 */
 	public function product_page(): ?array {
 		if ( null === $this->product_url ) {
@@ -102,17 +114,22 @@ class StoreResponses {
 		if ( '' === $this->product_url ) {
 			return null;
 		}
-		$response = $this->get( $this->product_url );
+		if ( ! array_key_exists( $this->product_url, $this->responses ) ) {
+			$this->responses[ $this->product_url ] = $this->site_live ? $this->fetch( $this->product_url, true ) : null;
+		}
+		$response = $this->responses[ $this->product_url ];
 		return null !== $response && 200 === $response['status'] ? $response : null;
 	}
 
 	/**
 	 * Request a URL, following redirects that stay on the store's host.
 	 *
-	 * @param string $url URL.
-	 * @return array{status:int,body:string}|null
+	 * @param string $url          URL.
+	 * @param bool   $product_page Whether this is the product page, whose footer has to survive the cap.
+	 * @return array{status:int,body:string,truncated:bool}|null
 	 */
-	private function fetch( string $url ): ?array {
+	private function fetch( string $url, bool $product_page = false ): ?array {
+		$limit = $product_page ? self::PRODUCT_PAGE_BYTES : self::MAX_BYTES;
 		$store = self::origin( home_url() );
 		for ( $redirects = 0; $redirects <= self::MAX_REDIRECTS; $redirects++ ) {
 			if ( null === $store || self::origin( $url ) !== $store ) {
@@ -123,7 +140,7 @@ class StoreResponses {
 				array(
 					'timeout'             => self::TIMEOUT,
 					'redirection'         => 0,
-					'limit_response_size' => self::MAX_BYTES,
+					'limit_response_size' => $limit,
 					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core's hook for requests a site makes to itself.
 					'sslverify'           => (bool) apply_filters( 'https_local_ssl_verify', false ),
 				)
@@ -134,14 +151,35 @@ class StoreResponses {
 			$status   = (int) wp_remote_retrieve_response_code( $response );
 			$location = wp_remote_retrieve_header( $response, 'location' );
 			if ( $status < 300 || $status >= 400 || ! is_string( $location ) || '' === $location ) {
-				return array(
-					'status' => $status,
-					'body'   => wp_remote_retrieve_body( $response ),
-				);
+				return $this->capped_response( $response, $status, $limit );
 			}
 			$url = \WP_Http::make_absolute_url( $location, $url );
 		}
 		return null;
+	}
+
+	/**
+	 * The response with its body held to the read limit. `truncated` means the
+	 * response stopped early, so a product page's footer may not be in the body.
+	 *
+	 * @param array $response HTTP response.
+	 * @param int   $status   Status code.
+	 * @param int   $limit    Bytes the request was allowed to read.
+	 * @return array{status:int,body:string,truncated:bool}
+	 */
+	private function capped_response( array $response, int $status, int $limit ): array {
+		$body     = (string) wp_remote_retrieve_body( $response );
+		$length   = wp_remote_retrieve_header( $response, 'content-length' );
+		$declared = is_string( $length ) && is_numeric( $length ) && (int) $length > strlen( $body );
+		$cut      = strlen( $body ) >= $limit || $declared;
+		if ( strlen( $body ) > $limit ) {
+			$body = substr( $body, 0, $limit );
+		}
+		return array(
+			'status'    => $status,
+			'body'      => $body,
+			'truncated' => $cut,
+		);
 	}
 
 	/**

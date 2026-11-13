@@ -56,14 +56,14 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 
 ## Store output checks
 
-`StoreOutputChecks` runs in the background scan only. It loads the store's own pages as a logged-out visitor (`StoreResponses`): only URLs on the store's host, redirects followed on that host only, a 5 second timeout and 512 KB per response, each URL once per scan, nothing at all in coming soon mode. Its results go into the report's `store_checks` with the same keys, with `ok` set to `null` when the store couldn't load its own page ("Couldn't check"). They are always `recommended`, so they never block the UCP switch.
+`StoreOutputChecks` runs in the background scan only. It loads the store's own pages as a logged-out visitor (`StoreResponses`): only URLs on the store's host, redirects followed on that host only, a 5 second timeout and 512 KB per response, each URL once per scan, nothing at all in coming soon mode. A product page is read up to 2 MB, because its JSON-LD is printed in the footer and the usual cap can cut it off. Its results go into the report's `store_checks` with the same keys, with `ok` set to `null` when the store couldn't load its own page ("Couldn't check"), or when that read was cut off before any Product JSON-LD. They are always `recommended`, so they never block the UCP switch.
 
 | Id | Passes when |
 | --- | --- |
 | `sitemap_lists_products` | A sitemap listed in robots.txt, or `/wp-sitemap.xml`, `/sitemap_index.xml` or `/sitemap.xml`, names a product sitemap or product pages. An index that does not has its child sitemaps opened, at any depth, up to five child requests. |
 | `product_jsonld_present` | The newest product page has Product (or ProductGroup) JSON-LD that parses, from WooCommerce, an SEO plugin or the theme. |
-| `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. Skipped when the page has no Product JSON-LD. |
-| `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification, as a number or with a currency) and an availability. Skipped when the page has no Product JSON-LD. |
+| `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. `null` when the page has no Product JSON-LD; the settings page hides it then. |
+| `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification, as a number or with a currency) and an availability. `null` when the page has no Product JSON-LD; the settings page hides it then. |
 
 robots.txt is loaded from the host root, only to find the sitemaps it lists. Its crawler rules aren't checked: a host or CDN can rewrite the file or block crawlers without it, and the store's request to itself skips both, so they wait for an outside view of the store (WOOPRD-3953). The sitemap check is "couldn't check" when robots.txt could not be read, or a candidate sitemap could not be loaded or answered other than 200, 404 or 410, and no fetched sitemap names products. A category sitemap does not count. When an index does not name products, its child sitemaps on this host are checked, nested indexes included (Jetpack serves one past 1,000 URLs), up to five child requests in all. Sitemap lines on another host, or written as `//host/path`, are skipped and do not use up the five listed slots. The product checks load one product page: the newest published, visible product without a password, among the five newest. With no such product, or when its page doesn't answer 200, they are "couldn't check".
 
@@ -79,7 +79,7 @@ array(
 	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents can find but can't add to a cart yet.
 	'store_checks' => array(
 		// blocks: 'listing' (every product on every channel), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
-		// ok: true, false, or null when a store output check couldn't load the page.
+		// ok: true, false, or null. Null means the page could not be loaded, or a product field check found no Product JSON-LD (the settings page hides that).
 		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'level' => 'required', 'name' => '…', 'label' => '…', 'why' => '…', 'fix' => '…', 'fix_url' => '…' ),
 	),
 	'channels'     => array(
