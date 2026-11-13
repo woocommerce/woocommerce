@@ -345,7 +345,21 @@ class DeclaredToAgents {
 		if ( null === $page ) {
 			return null;
 		}
-		$link = $page['headers']['link'] ?? '';
-		return 1 === preg_match( '/rel\s*=\s*"?[^";,]*\bapi-catalog\b/i', $link ) || false !== stripos( $link, '/llms.txt' );
+		// Each value is <target> followed by ;-separated parameters; rel holds space-separated tokens.
+		preg_match_all( '/<([^>]*)>((?:[^,"<]|"[^"]*")*)/', $page['headers']['link'] ?? '', $values, PREG_SET_ORDER );
+		foreach ( $values as $value ) {
+			$path = wp_parse_url( trim( $value[1] ), PHP_URL_PATH );
+			if ( is_string( $path ) && '/llms.txt' === $path ) {
+				return true;
+			}
+			// Parameters are read left to right, so a quoted value is taken whole, ; and rel= in it included.
+			preg_match_all( '/;\s*([^=;\s]+)\s*(?:=\s*(?:"([^"]*)"|([^;]*)))?/', $value[2], $params, PREG_SET_ORDER );
+			foreach ( $params as $param ) {
+				if ( 'rel' === strtolower( $param[1] ) && in_array( 'api-catalog', self::tokens( ( $param[2] ?? '' ) . ' ' . ( $param[3] ?? '' ) ), true ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

@@ -235,6 +235,19 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 		$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '</llms.txt>; rel="alternate"; type="text/plain"' ) ) ) );
 		$this->assertTrue( $results['link-header-agent-resources'], 'A link to llms.txt counts' );
+
+		foreach ( array( '</llms.txt.bak>; rel="preload"', '</docs/llms.txt>; rel="alternate"', '</.well-known/api-catalog>; rel="not-api-catalog"', '</a>; title="rel=api-catalog"', '</a>; title="x; rel=api-catalog"' ) as $header ) {
+			remove_all_filters( 'pre_http_request' );
+			$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => $header ) ) ) );
+			$this->assertFalse( $results['link-header-agent-resources'], $header );
+		}
+		remove_all_filters( 'pre_http_request' );
+		$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '<https://example.com/wp-json/>; rel="https://api.w.org/", </.well-known/api-catalog>; rel="service-desc api-catalog"' ) ) ) );
+		$this->assertTrue( $results['link-header-agent-resources'], 'The second of two values, with two rel tokens' );
+
+		remove_all_filters( 'pre_http_request' );
+		$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '</.well-known/api-catalog>; rel=api-catalog' ) ) ) );
+		$this->assertTrue( $results['link-header-agent-resources'], 'An unquoted rel' );
 	}
 
 	/**
