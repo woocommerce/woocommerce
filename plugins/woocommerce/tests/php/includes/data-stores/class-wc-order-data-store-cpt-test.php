@@ -336,6 +336,9 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order->delete();
 		$this->assertEquals( OrderStatus::TRASH, $order->get_status(), 'The order was successfully trashed.' );
 
+		// Without transactional emails the notification count below stays 0 whatever untrash() does.
+		$this->enable_transactional_emails();
+
 		$status_action_count       = 0;
 		$status_notification_count = 0;
 		$status_action             = function ( $id ) use ( $order_id, &$status_action_count ) {
