@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.1.0
+ * @version 11.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -47,7 +47,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 ?>
 
 <div class="woocommerce-order-withdrawal-content">
-	<?php wc_print_notices(); ?>
+	<?php woocommerce_output_all_notices(); ?>
 
 	<?php if ( 'confirmation' === $screen ) : ?>
 		<p><strong><?php esc_html_e( 'Your withdrawal has been submitted.', 'woocommerce' ); ?></strong></p>
@@ -102,7 +102,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 			</p>
 		</form>
 	<?php else : ?>
-		<p class="woocommerce-order-withdrawal-content__intro"><?php esc_html_e( 'Tell us you want to withdraw from an order placed on this store. You do not need to give a reason.', 'woocommerce' ); ?></p>
+		<p class="woocommerce-order-withdrawal-content__intro"><?php esc_html_e( 'Tell us if you want to withdraw from an order placed on this store. You do not need to give a reason.', 'woocommerce' ); ?></p>
 		<p class="woocommerce-order-withdrawal-content__note"><?php esc_html_e( 'Some items, like personalized products, may not be eligible. We review every request and reply by email.', 'woocommerce' ); ?></p>
 
 		<ol class="woocommerce-order-withdrawal-content__steps" aria-label="<?php esc_attr_e( 'Order withdrawal progress', 'woocommerce' ); ?>">

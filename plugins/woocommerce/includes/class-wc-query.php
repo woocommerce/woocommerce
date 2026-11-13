@@ -7,7 +7,10 @@
  */
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
+use Automattic\WooCommerce\Internal\ProductFilters\Params;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 defined( 'ABSPATH' ) || exit;
@@ -135,8 +138,12 @@ class WC_Query {
 				break;
 			case 'view-order':
 				$order = wc_get_order( $wp->query_vars['view-order'] );
-				/* translators: %s: order number */
-				$title = ( $order ) ? sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ) : '';
+				$title = '';
+				// Guest orders can pass the capability check for logged-out visitors because both use user ID 0.
+				if ( $order && is_user_logged_in() && current_user_can( 'view_order', $order->get_id() ) ) {
+					/* translators: %s: order number */
+					$title = sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() );
+				}
 				break;
 			case 'downloads':
 				$title = __( 'Downloads', 'woocommerce' );
@@ -314,7 +321,7 @@ class WC_Query {
 	 */
 	private function is_query_var_valid_on_front_page( $query_var ) {
 		return in_array( $query_var, array( 'preview', 'page', 'paged', 'cpage', 'orderby' ), true )
-			|| in_array( $query_var, array( 'min_price', 'max_price', 'rating_filter' ), true )
+			|| in_array( $query_var, wc_get_container()->get( Params::class )->get_param_keys(), true )
 			|| 0 === strpos( $query_var, 'filter_' )
 			|| 0 === strpos( $query_var, 'query_type_' );
 	}
@@ -473,6 +480,7 @@ class WC_Query {
 	 * queries during rendering.
 	 *
 	 * @since 10.8.0
+	 * @internal
 	 *
 	 * @param array    $posts Posts from WP Query.
 	 * @param WP_Query $query Current query.
@@ -482,6 +490,48 @@ class WC_Query {
 		if ( 'product_query' === $query->get( 'wc_query' ) ) {
 			update_post_thumbnail_cache( $query );
 		}
+		return $posts;
+	}
+
+	/**
+	 * Prime transient option caches for variable products in bulk to avoid per-product queries during rendering.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param array    $posts Posts from WP Query.
+	 * @param WP_Query $query Current query.
+	 * @return array
+	 */
+	public function prime_variable_products_transients( $posts, $query ) {
+		if ( 'product_query' === $query->get( 'wc_query' ) && ! wp_using_ext_object_cache() ) {
+			$options = array();
+			// Performance note: post caches has been already primed, hence the loop operates on in-memory data.
+			foreach ( $posts as $post ) {
+				$terms = $post instanceof \WP_Post ? get_object_term_cache( $post->ID, 'product_type' ) : null;
+				$terms = array_filter( is_array( $terms ) ? $terms : array(), static fn ( $term ) => $term instanceof \WP_Term );
+				if ( ! empty( $terms ) && ProductType::VARIABLE === current( $terms )->slug ) {
+					$product_id = $post->ID;
+
+					// See also \WC_Product_Variable_Data_Store_CPT::read_product_data and sync with it when necessary.
+					$options[] = '_transient_wc_var_prices_' . $product_id;
+					$options[] = '_transient_timeout_wc_var_prices_' . $product_id;
+					$options[] = '_transient_wc_product_children_' . $product_id;
+					$options[] = '_transient_timeout_wc_product_children_' . $product_id;
+					$options[] = '_transient_wc_child_has_weight_' . $product_id;
+					$options[] = '_transient_timeout_wc_child_has_weight_' . $product_id;
+					$options[] = '_transient_wc_child_has_dimensions_' . $product_id;
+					$options[] = '_transient_timeout_wc_child_has_dimensions_' . $product_id;
+					$options[] = '_transient_wc_related_' . $product_id;
+					$options[] = '_transient_timeout_wc_related_' . $product_id;
+				}
+			}
+
+			if ( ! empty( $options ) ) {
+				wp_prime_option_caches( $options );
+			}
+		}
+
 		return $posts;
 	}
 
@@ -579,6 +629,17 @@ class WC_Query {
 		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
 
 		// Work out how many products to query.
+		/**
+		 * Filters the number of products shown per page in a product loop.
+		 *
+		 * In WC_Query::product_query() this applies only when the query does not already
+		 * set posts_per_page. Other callers, such as the Product Collection block, apply it
+		 * unconditionally.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int $per_page Products per page. Defaults to the store's columns times its rows setting.
+		 */
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ) );
 
 		// Store reference to this query.
@@ -588,6 +649,7 @@ class WC_Query {
 		add_filter( 'posts_clauses', array( $this, 'product_query_post_clauses' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
+		add_filter( 'the_posts', array( $this, 'prime_variable_products_transients' ), 10, 2 );
 
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
@@ -786,15 +848,15 @@ class WC_Query {
 		 */
 		$enable_filtering = apply_filters( 'woocommerce_enable_post_clause_filtering', $wp_query->is_main_query(), $wp_query );
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! $enable_filtering || ( ! isset( $_GET['max_price'] ) && ! isset( $_GET['min_price'] ) ) ) {
+		$min_filter = self::get_price_filter( 'min_price' );
+		$max_filter = self::get_price_filter( 'max_price' );
+
+		if ( ! $enable_filtering || ( null === $min_filter && null === $max_filter ) ) {
 			return $args;
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$current_min_price = isset( $_GET['min_price'] ) ? floatval( wp_unslash( $_GET['min_price'] ) ) : 0;
-		$current_max_price = isset( $_GET['max_price'] ) ? floatval( wp_unslash( $_GET['max_price'] ) ) : PHP_INT_MAX;
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		$current_min_price = $min_filter ?? 0;
+		$current_max_price = $max_filter ?? PHP_INT_MAX;
 
 		/**
 		 * Adjust if the store taxes are not displayed how they are stored.
@@ -876,12 +938,7 @@ class WC_Query {
 	 * @return string
 	 */
 	private function append_product_sorting_table_join( $sql ) {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 
 	/**
@@ -1043,6 +1100,27 @@ class WC_Query {
 		}
 
 		return implode( ' AND ', $sql );
+	}
+
+	/**
+	 * Get a price filter from the query string. A blank value, as sent by an empty form field, means no limit.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $key Either 'min_price' or 'max_price'.
+	 * @return float|null The price, or null when there is no limit.
+	 */
+	public static function get_price_filter( $key ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only public catalog filter, converted to a number.
+		$value = isset( $_GET[ $key ] ) ? wp_unslash( $_GET[ $key ] ) : null;
+
+		if ( null === $value || ( is_scalar( $value ) && '' === trim( (string) $value ) ) ) {
+			return null;
+		}
+
+		return floatval( $value );
 	}
 
 	/**

@@ -9,12 +9,11 @@ use Automattic\WooCommerce\Blocks\Package;
 use Exception;
 use WC_Customer;
 use WP_Error;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * Test \Automattic\WooCommerce\Blocks\Domain\Services\Hydration class.
  */
-class CheckoutFieldsFrontendTest extends TestCase {
+class CheckoutFieldsFrontendTest extends \WC_Unit_Test_Case {
 	/**
 	 * System under test.
 	 *
@@ -53,11 +52,7 @@ class CheckoutFieldsFrontendTest extends TestCase {
 	/**
 	 * Tear down.
 	 */
-	protected function tearDown(): void {
-		remove_filter( 'woocommerce_add_notice', [ $this, 'capture_notice' ] );
-		remove_filter( 'woocommerce_add_error', [ $this, 'capture_error' ] );
-		remove_filter( 'woocommerce_add_success', [ $this, 'capture_success' ] );
-
+	public function tearDown(): void {
 		foreach ( $this->registered_fields as $field_id ) {
 			__internal_woocommerce_blocks_deregister_checkout_field( $field_id );
 		}
@@ -385,7 +380,6 @@ class CheckoutFieldsFrontendTest extends TestCase {
 		);
 
 		$order = \WC_Helper_Order::create_order();
-		$order->set_created_via( 'store-api' );
 		$this->controller->persist_field_for_order( 'mynamespace/billing_confirmation_field', 'secret value', $order, 'billing', false );
 		$order->save();
 
@@ -409,7 +403,6 @@ class CheckoutFieldsFrontendTest extends TestCase {
 		);
 
 		$order = \WC_Helper_Order::create_order();
-		$order->set_created_via( 'store-api' );
 		$this->controller->persist_field_for_order( 'mynamespace/billing_confirmation_field', 'visible value', $order, 'billing', false );
 		$order->save();
 

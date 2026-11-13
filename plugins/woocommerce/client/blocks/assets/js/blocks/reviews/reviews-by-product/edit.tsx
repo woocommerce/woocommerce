@@ -101,12 +101,15 @@ const ReviewsByProductEditor = ( {
 							showOrderby: true,
 							orderby: 'most-recent',
 							reviewsOnPageLoad: 10,
+							offset: 0,
 							showLoadMore: true,
 							reviewsOnLoadMore: 10,
 						} )
 					}
 				>
-					{ getSharedReviewListControls( attributes, setAttributes ) }
+					{ getSharedReviewListControls( attributes, setAttributes, {
+						showOffset: true,
+					} ) }
 				</ToolsPanel>
 				<ToolsPanel
 					label={ __( 'Product', 'woocommerce' ) }

@@ -75,4 +75,123 @@ class WC_Customer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( 'WC_Customer', $re_fetched_customer );
 	}
+
+	/**
+	 * @testdox has_full_shipping_address() still requires the default fields when the default locale entry is missing or not an array.
+	 *
+	 * @dataProvider provide_broken_default_locale_entries
+	 *
+	 * @param mixed $default_entry Value to put in the default locale entry, or null to remove the entry.
+	 */
+	public function test_has_full_shipping_address_requires_default_fields_without_a_default_locale_entry( $default_entry ): void {
+		$countries = WC()->countries;
+		$countries->get_country_locale();
+		if ( null === $default_entry ) {
+			unset( $countries->locale['default'] );
+		} else {
+			$countries->locale['default'] = $default_entry;
+		}
+		$sut = $this->get_customer_without_shipping_postcode();
+
+		$this->assertFalse( $sut->has_full_shipping_address(), 'A missing postcode should still make the shipping address incomplete.' );
+	}
+
+	/**
+	 * Broken values for the default entry of the country locale settings.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provide_broken_default_locale_entries(): array {
+		return array(
+			'entry removed'      => array( null ),
+			'entry not an array' => array( false ),
+		);
+	}
+
+	/**
+	 * @testdox has_full_shipping_address() still requires the default fields when it runs while the country locale settings are being built.
+	 */
+	public function test_has_full_shipping_address_requires_default_fields_while_country_locale_is_built(): void {
+		$sut    = $this->get_customer_without_shipping_postcode();
+		$nested = null;
+		add_filter(
+			'woocommerce_get_country_locale',
+			function ( $locale ) use ( $sut, &$nested ) {
+				$nested = $sut->has_full_shipping_address();
+				return $locale;
+			}
+		);
+		WC()->countries->locale = array();
+
+		WC()->countries->get_country_locale();
+
+		$this->assertFalse( $nested, 'A check made while the locale settings are built should still treat a missing postcode as incomplete.' );
+	}
+
+	/**
+	 * @testdox has_full_shipping_address() does not recurse when a default address fields callback calls it while the locale settings are being built.
+	 */
+	public function test_has_full_shipping_address_does_not_recurse_through_default_address_fields_callback(): void {
+		$sut    = $this->get_customer_without_shipping_postcode();
+		$calls  = 0;
+		$nested = null;
+		add_filter(
+			'woocommerce_default_address_fields',
+			function ( $fields ) use ( $sut, &$calls, &$nested ) {
+				++$calls;
+				// Stop a runaway recursion so a regression fails the assertion below instead of exhausting the process.
+				if ( $calls <= 10 ) {
+					// The outermost check finishes last, so its result is the one kept.
+					$nested = $sut->has_full_shipping_address();
+				}
+				return $fields;
+			}
+		);
+		WC()->countries->locale = array();
+
+		WC()->countries->get_country_locale();
+
+		$this->assertSame( 2, $calls, 'The default address fields filter should run once for the locale build and once for the nested shipping address check.' );
+		$this->assertFalse( $nested, 'The outermost nested check should still treat a missing postcode as incomplete.' );
+	}
+
+	/**
+	 * @testdox get_taxable_address uses the store address only for a pickup rate listed for a cart package.
+	 *
+	 * @testWith [ { "0": "local_pickup:2" }, { "0": [ "local_pickup:2", "flat_rate:1" ] }, "US" ]
+	 *           [ { "0": "local_pickup:2" }, { "0": [ "flat_rate:1" ] }, "GB" ]
+	 *           [ { "0": "flat_rate:1", "other": "local_pickup:2" }, { "0": [ "flat_rate:1" ], "other": [ "local_pickup:2" ] }, "GB" ]
+	 *
+	 * @param array  $chosen_methods   The `chosen_shipping_methods` session value.
+	 * @param array  $listed_rates     The `previous_shipping_methods` session value.
+	 * @param string $expected_country The expected taxable country.
+	 */
+	public function test_get_taxable_address_checks_chosen_pickup( array $chosen_methods, array $listed_rates, string $expected_country ): void {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
+		WC()->session->set( 'previous_shipping_methods', $listed_rates );
+
+		$customer = new WC_Customer();
+		$customer->set_shipping_country( 'GB' );
+		$customer->set_shipping_postcode( 'SW1A 2AA' );
+		$customer->set_shipping_city( 'London' );
+
+		$this->assertSame( $expected_country, $customer->get_taxable_address()[0] );
+	}
+
+	/**
+	 * Get a customer whose US shipping address has everything but a postcode.
+	 *
+	 * @return WC_Customer
+	 */
+	private function get_customer_without_shipping_postcode(): WC_Customer {
+		$customer = new WC_Customer();
+		$customer->set_shipping_country( 'US' );
+		$customer->set_shipping_state( 'CA' );
+		$customer->set_shipping_city( 'San Francisco' );
+		$customer->set_shipping_postcode( '' );
+
+		return $customer;
+	}
 }

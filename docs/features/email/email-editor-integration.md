@@ -122,13 +122,11 @@ add_filter( 'woocommerce_transactional_emails_for_block_editor', 'your_plugin_re
 
 **Important:** Without this step, your email may still appear in the email list, but it will not use the email editor, as explicit opt-in is required from third-party developers.
 
-**Note:** For third-party extensions, WooCommerce will not create an email post unless you opt-in using the `woocommerce_transactional_emails_for_block_editor` filter.
+**Note:** For third-party extensions, WooCommerce will not create an email post unless you opt-in using the `woocommerce_transactional_emails_for_block_editor` filter. Email posts are created lazily. A draft post is created only when the user opens the email in the editor. Until that draft is published, it is not the rendering source: the email renders directly from the file template, regardless of the draft's content.
 
-**Development tip:** WooCommerce caches email post-generation with a transient. When testing or developing, delete the transient `wc_email_editor_initial_templates_generated` to force post-generation.
+### Customizing email template post creation
 
-### Customizing email template post generation
-
-You can modify the email template post data before it's created using the `woocommerce_email_content_post_data` filter. This allows you to customize the post title, content, meta, or any other post data during template generation.
+You can modify the email post data before it's created using the `woocommerce_email_content_post_data` filter. This allows you to customize the post title, content, meta, or any other post data when the post is created (that is, when the user first opens the email in the editor). The filtered content is also what renders when no saved post exists yet. Note that `post_status` is system-owned and a value returned by the filter is ignored: posts are created as `draft` and only become the rendering source when published.
 
 **Filter details:**
 
@@ -183,7 +181,7 @@ add_filter( 'woocommerce_email_content_post_data', 'your_plugin_customize_email_
 
 **Important notes:**
 
--   You can modify any valid `wp_insert_post()` parameter (`post_title`, `post_content`, `post_excerpt`, `post_status`, `post_name`, `meta_input`, etc.).
+-   You can modify any valid `wp_insert_post()` parameter (`post_title`, `post_content`, `post_excerpt`, `post_name`, `meta_input`, etc.) — except `post_status`, which is system-owned and ignored.
 -   Always return the modified `$post_data` array.
 -   When modifying `post_content`, ensure valid block markup is maintained.
 -   The filter runs for all email types; check `$email_type` to target specific emails.

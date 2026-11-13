@@ -371,6 +371,8 @@ class UpdateUtils {
 			}
 		}
 
+		OrderLineMetaValidator::assert_no_serialized_meta_value( (array) ( $request_data['meta_data'] ?? array() ) );
+
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $request_data );
 		$this->maybe_set_item_meta_data( $item, $request_data );
 
@@ -402,6 +404,8 @@ class UpdateUtils {
 			throw new WC_REST_Exception( 'woocommerce_rest_invalid_shipping_item', esc_html__( 'Shipping method ID is required.', 'woocommerce' ), 400 );
 		}
 
+		OrderLineMetaValidator::assert_no_serialized_meta_value( (array) ( $request_data['meta_data'] ?? array() ) );
+
 		$this->maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total', 'instance_id' ), $request_data );
 		$this->maybe_set_item_meta_data( $item, $request_data );
 
@@ -423,6 +427,8 @@ class UpdateUtils {
 		if ( 'create' === $action && empty( $request_data['name'] ) ) {
 			throw new WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', esc_html__( 'Fee name is required.', 'woocommerce' ), 400 );
 		}
+
+		OrderLineMetaValidator::assert_no_serialized_meta_value( (array) ( $request_data['meta_data'] ?? array() ) );
 
 		$this->maybe_set_item_props( $item, array( 'name', 'tax_class', 'tax_status', 'total' ), $request_data );
 		$this->maybe_set_item_meta_data( $item, $request_data );

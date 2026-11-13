@@ -26,12 +26,20 @@ class CustomerAccountTest extends WP_UnitTestCase {
 	private $original_show_avatars;
 
 	/**
+	 * Original avatar_default option value.
+	 *
+	 * @var mixed
+	 */
+	private $original_avatar_default;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->user_id               = $this->factory->user->create();
-		$this->original_show_avatars = get_option( 'show_avatars' );
+		$this->user_id                 = $this->factory->user->create();
+		$this->original_show_avatars   = get_option( 'show_avatars' );
+		$this->original_avatar_default = get_option( 'avatar_default' );
 		update_option( 'show_avatars', 1 );
 	}
 
@@ -43,6 +51,7 @@ class CustomerAccountTest extends WP_UnitTestCase {
 		wp_set_current_user( 0 );
 		wp_delete_user( $this->user_id );
 		update_option( 'show_avatars', $this->original_show_avatars );
+		update_option( 'avatar_default', $this->original_avatar_default );
 		parent::tearDown();
 	}
 
@@ -116,6 +125,22 @@ class CustomerAccountTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should fall back to the mystery avatar when the WP default avatar is blank.
+	 */
+	public function test_falls_back_to_mystery_avatar_when_default_is_blank(): void {
+		wp_set_current_user( $this->user_id );
+		update_option( 'avatar_default', 'blank' );
+
+		$markup = $this->render_customer_account(
+			'{"iconClass":"wc-block-customer-account__account-icon"}'
+		);
+
+		$this->assertStringContainsString( 'wc-block-customer-account__avatar', $markup );
+		$this->assertStringContainsString( 'd=mm', $markup );
+		$this->assertStringNotContainsString( 'd=blank', $markup );
+	}
+
+	/**
 	 * Data provider for displayStyle attribute tests.
 	 *
 	 * @return array<string, array{string, bool, bool, bool}>
@@ -146,5 +171,47 @@ class CustomerAccountTest extends WP_UnitTestCase {
 		$this->assertSame( $has_icon, str_contains( $markup, '<svg' ) );
 		$this->assertSame( $has_label, str_contains( $markup, 'class="label"' ) );
 		$this->assertSame( $has_aria, str_contains( $markup, 'aria-label=' ) );
+	}
+
+	/**
+	 * Data provider for the account link's accessible name.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function provider_account_link_name(): array {
+		return array(
+			'icon only, named by aria-label' => array( 'icon_only', ' aria-label="My Account"' ),
+			'icon and text, named by label'  => array( 'icon_and_text', '<span class="label">My Account</span>' ),
+			'text only, named by label'      => array( 'text_only', '<span class="label">My Account</span>' ),
+		);
+	}
+
+	/**
+	 * @testdox Should name the account link "My Account" for a logged-in user, whichever display style is set.
+	 *
+	 * @dataProvider provider_account_link_name
+	 *
+	 * @param string $display_style Display style attribute.
+	 * @param string $expected      Markup fragment that carries the accessible name.
+	 */
+	public function test_account_link_is_named_for_a_logged_in_user( string $display_style, string $expected ): void {
+		wp_set_current_user( $this->user_id );
+
+		$markup = $this->render_customer_account(
+			'{"displayStyle":"' . $display_style . '","iconClass":"wc-block-customer-account__account-icon"}'
+		);
+
+		$this->assertStringContainsString( $expected, $markup );
+	}
+
+	/**
+	 * @testdox Should name the account link "Login" when nobody is logged in.
+	 */
+	public function test_account_link_is_named_for_a_logged_out_visitor(): void {
+		$markup = $this->render_customer_account(
+			'{"displayStyle":"icon_only","iconClass":"wc-block-customer-account__account-icon"}'
+		);
+
+		$this->assertStringContainsString( ' aria-label="Login"', $markup );
 	}
 }

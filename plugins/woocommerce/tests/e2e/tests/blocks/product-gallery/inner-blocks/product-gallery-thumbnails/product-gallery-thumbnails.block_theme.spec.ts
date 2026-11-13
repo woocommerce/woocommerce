@@ -1,18 +1,18 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-utils';
+import { test as base, expect, ProductTemplate } from '@woocommerce/e2e-utils';
+
+const test = base.extend< { beanieTemplate: ProductTemplate } >( {
+	beanieTemplate: async ( { createProductTemplate }, use ) => {
+		await use( await createProductTemplate( 'beanie' ) );
+	},
+} );
 
 test.describe( 'Product Gallery Thumbnails block', () => {
-	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
-		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug: 'single-product',
-			title: 'Custom Single Product',
-			content: 'placeholder',
-		} );
-
+	test.beforeEach( async ( { admin, editor, beanieTemplate } ) => {
 		await admin.visitSiteEditor( {
-			postId: template.id,
+			postId: beanieTemplate.template.id,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -30,7 +30,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 	} );
 
-	test( 'renders as expected', async ( { page, editor } ) => {
+	test( 'renders as expected', async ( { page, editor, beanieTemplate } ) => {
 		await test.step( 'in editor', async () => {
 			const productGalleryBlock = editor.canvas.locator(
 				'[data-type="woocommerce/product-gallery"]'
@@ -52,7 +52,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 
 		await test.step( 'in frontend', async () => {
-			await page.goto( '/product/beanie/' );
+			await page.goto( beanieTemplate.productUrl );
 
 			const productGalleryBlock = page.locator(
 				'[data-block-name="woocommerce/product-gallery"]'
@@ -83,6 +83,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 	test( 'thumbnail size settings work correctly', async ( {
 		page,
 		editor,
+		beanieTemplate,
 	} ) => {
 		await test.step( 'in editor', async () => {
 			const viewerBlock = editor.canvas.locator(
@@ -125,7 +126,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 
 		await test.step( 'in frontend', async () => {
-			await page.goto( '/product/beanie/' );
+			await page.goto( beanieTemplate.productUrl );
 
 			const thumbnailsBlock = page.locator(
 				'[data-block-name="woocommerce/product-gallery-thumbnails"]'
@@ -150,6 +151,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 	test( 'thumbnails are scrollable and last thumbnail is reachable', async ( {
 		page,
 		editor,
+		beanieTemplate,
 	} ) => {
 		await test.step( 'in editor', async () => {
 			const viewerBlock = editor.canvas.locator(
@@ -166,7 +168,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 
 			await expect( thumbnailsSizeInput ).toHaveValue( '25' );
 			await expect( async () => {
-				// Set size to 10%
+				// Set size to 50%
 				await thumbnailsSizeInput.fill( '50' );
 
 				const viewerBox = await viewerBlock.boundingBox();
@@ -183,7 +185,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 
 		await test.step( 'in frontend', async () => {
-			await page.goto( '/product/beanie/' );
+			await page.goto( beanieTemplate.productUrl );
 
 			const thumbnailsContainer = page.locator(
 				'[data-block-name="woocommerce/product-gallery-thumbnails"]'
@@ -197,27 +199,18 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 				'.wc-block-product-gallery-thumbnails__thumbnail'
 			);
 
-			// Get the last thumbnail
+			await expect( thumbnailsContainer ).toHaveClass(
+				/wc-block-product-gallery-thumbnails--overflow-bottom/
+			);
+
 			const lastThumbnail = thumbnails.last();
+			await lastThumbnail.scrollIntoViewIfNeeded();
 
-			await expect( async () => {
-				await page.reload();
-				// Check if overflow classes are present initially
-				await expect( thumbnailsContainer ).toHaveClass(
-					/wc-block-product-gallery-thumbnails--overflow-bottom/
-				);
+			await expect( lastThumbnail ).toBeVisible();
 
-				// Scroll to the last thumbnail
-				await lastThumbnail.scrollIntoViewIfNeeded();
-
-				// Verify the last thumbnail is visible
-				await expect( lastThumbnail ).toBeVisible();
-
-				// After scrolling to the end, the bottom overflow should be gone
-				await expect( thumbnailsContainer ).not.toHaveClass(
-					/wc-block-product-gallery-thumbnails--overflow-bottom/
-				);
-			} ).toPass( { timeout: 3_000 } );
+			await expect( thumbnailsContainer ).not.toHaveClass(
+				/wc-block-product-gallery-thumbnails--overflow-bottom/
+			);
 		} );
 	} );
 } );

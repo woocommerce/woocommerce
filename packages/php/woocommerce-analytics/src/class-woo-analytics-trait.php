@@ -266,15 +266,25 @@ trait Woo_Analytics_Trait {
 		/**
 		 * Allow defining custom event properties in WooCommerce Analytics.
 		 *
+		 * See `WC_Analytics_Tracking::get_properties()` for the full contract
+		 * around `$is_client_supplied`.
+		 *
 		 * @module woocommerce-analytics
 		 *
 		 * @since 12.5
+		 * @since 0.18.0 Added the `$is_client_supplied` parameter. This call site
+		 *               also began passing `$event_name`, which the hook already had.
 		 *
-		 * @param array $properties Array of event props to be filtered.
+		 * @param array  $properties Array of event props to be filtered.
+		 * @param string $event_name Event name. Empty string here: this call builds
+		 *                           common properties, not properties for a specific event.
+		 * @param bool   $is_client_supplied Whether the props came from an untrusted client.
 		 */
 		$properties = apply_filters(
 			'jetpack_woocommerce_analytics_event_props',
-			$common_properties
+			$common_properties,
+			'',
+			false
 		);
 
 		return $properties;
@@ -298,7 +308,9 @@ trait Woo_Analytics_Trait {
 		/** This filter is documented in src/class-woo-analytics-trait.php */
 		return apply_filters(
 			'jetpack_woocommerce_analytics_event_props',
-			$common_properties
+			$common_properties,
+			'',
+			false
 		);
 	}
 
@@ -333,17 +345,24 @@ trait Woo_Analytics_Trait {
 	 * @return array
 	 */
 	public function get_product_details( $product ) {
-		return array(
+		$details = array(
 			'pi' => $product->get_id(),
 			'pn' => $product->get_title(),
 			'pc' => $this->get_product_categories_concatenated( $product ),
-			'pp' => $product->get_price(),
 			'pt' => $product->get_type(),
 		);
+
+		// Only a numeric price is sent: get_price() is '' for a product without one, and a filter can return a label.
+		$price = $product->get_price();
+		if ( is_numeric( $price ) ) {
+			$details['pp'] = (string) wc_float_to_string( $price );
+		}
+
+		return $details;
 	}
 
 	/**
-	 * Gets product categories or varation attributes as a formatted concatenated string
+	 * Gets product categories or variation attributes as a formatted concatenated string
 	 *
 	 * @param object $product WC_Product.
 	 * @return string
@@ -608,7 +627,7 @@ trait Woo_Analytics_Trait {
 	}
 
 	/**
-	 * Get number of items in the cart
+	 * Get the number of products in the cart, not the sum of their quantities, which can be fractional.
 	 *
 	 * @return int
 	 */
@@ -617,7 +636,18 @@ trait Woo_Analytics_Trait {
 		if ( $cart === null ) {
 			return 0;
 		}
-		return $cart->get_cart_contents_count();
+		return count( $cart->get_cart() );
+	}
+
+	/**
+	 * Get the number of products in an order, counted the same way as get_cart_items_count().
+	 * Unlike WC_Order::get_item_count(), this does not sum quantities.
+	 *
+	 * @param \WC_Order $order Order.
+	 * @return int
+	 */
+	public function get_order_items_count( $order ) {
+		return count( $order->get_items() );
 	}
 
 	/**

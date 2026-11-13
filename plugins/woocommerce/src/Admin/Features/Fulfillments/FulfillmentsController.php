@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\ImportSession;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
@@ -22,16 +23,22 @@ class FulfillmentsController {
 		FulfillmentsRenderer::class,
 		FulfillmentsSettings::class,
 		OrderFulfillmentsRestController::class,
+		FulfillmentsPrivacy::class,
 	);
 
 	/**
 	 * Initialize the controller.
+	 *
+	 * The import session cleanup listener is attached regardless of the feature flag, so a
+	 * staged CSV left behind when the flag is turned off is still removed when its
+	 * scheduled cleanup fires.
 	 *
 	 * @return void
 	 */
 	public function register() {
 		add_filter( 'woocommerce_data_stores', array( $this, 'register_data_stores' ) );
 		add_action( 'init', array( $this, 'initialize_fulfillments' ), 10, 0 );
+		add_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ), 10, 4 );
 	}
 
 	/**
@@ -52,7 +59,11 @@ class FulfillmentsController {
 		// because the woocommerce_data_stores filter can fire before the 'init' action
 		// (e.g. from WC Payments during 'plugins_loaded'), and feature_is_enabled() would
 		// trigger translation loading too early, causing _load_textdomain_just_in_time warnings.
-		if ( 'yes' !== get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) ) {
+		$feature_enabled = 'yes' === get_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+
+		// A store that created fulfillments and then disabled the feature still holds that
+		// data, so the store stays registered for the privacy export and eraser to read it.
+		if ( ! $feature_enabled && ! get_option( 'woocommerce_fulfillments_db_tables_created', false ) ) {
 			return $data_stores;
 		}
 
@@ -69,6 +80,12 @@ class FulfillmentsController {
 
 		// If fulfillments feature is not enabled, do not add the DB tables, and don't register the controller.
 		if ( ! $features_controller->feature_is_enabled( 'fulfillments' ) ) {
+			// A store that created fulfillments before the feature was disabled still holds
+			// tracking data that can resolve to a delivery address, so both export and
+			// erasure keep working.
+			if ( get_option( 'woocommerce_fulfillments_db_tables_created', false ) ) {
+				$container->get( FulfillmentsPrivacy::class )->register();
+			}
 			return;
 		}
 

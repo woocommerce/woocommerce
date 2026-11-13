@@ -59,8 +59,7 @@ export interface ReviewObject {
 }
 
 export interface ReviewObjectUpdate
-	extends Partial< Omit< ReviewObject, 'id' > >,
-		Pick< ReviewObject, 'id' > {}
+	extends Partial< Omit< ReviewObject, 'id' > >, Pick< ReviewObject, 'id' > {}
 
 export interface ReviewsState {
 	reviews: {

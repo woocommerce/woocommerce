@@ -119,9 +119,9 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 					// Set this here so that old extensions still using billingData can set the billingAddress.
 					billingAddress = billingDataFromResponse as BillingAddress;
 					deprecated(
-						'returning billingData from an onPaymentProcessing observer in WooCommerce Blocks',
+						'returning billingData from an onPaymentProcessing observer',
 						{
-							version: '9.5.0',
+							version: '7.5.0',
 							alternative: 'billingAddress',
 							link: 'https://github.com/woocommerce/woocommerce-blocks/pull/6369',
 						}
@@ -136,9 +136,9 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 					shippingAddress =
 						shippingDataFromResponse.address as ShippingAddress;
 					deprecated(
-						'returning shippingData from an onPaymentProcessing observer in WooCommerce Blocks',
+						'returning shippingData from an onPaymentProcessing observer',
 						{
-							version: '9.5.0',
+							version: '7.5.0',
 							alternative: 'shippingAddress',
 							link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8163',
 						}

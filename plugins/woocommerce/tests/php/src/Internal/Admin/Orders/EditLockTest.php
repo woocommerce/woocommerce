@@ -13,6 +13,13 @@ class EditLockTest extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
 	 * @var EditLock
 	 */
 	private $sut;
@@ -46,7 +53,8 @@ class EditLockTest extends \WC_Unit_Test_Case {
 
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 
-		$this->setup_cot();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		$this->toggle_cot_feature_and_usage( true );
 
 		$order = new \WC_Order();
@@ -128,7 +136,7 @@ class EditLockTest extends \WC_Unit_Test_Case {
 		$this->sut->lock( $this->order );
 
 		// Simulate a heartbeat, which for user 1 should result in a renewed lock.
-		$response = apply_filters( 'heartbeat_received', array(), $request_data, 'woocommerce_page_wc-orders' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment,WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+		$response = apply_filters( 'heartbeat_received', array(), $request_data, 'woocommerce_page_wc-orders' );
 		$this->assertArrayHasKey( 'wc-refresh-order-lock', $response );
 		$this->assertArrayHasKey( 'lock', $response['wc-refresh-order-lock'] );
 
@@ -141,7 +149,7 @@ class EditLockTest extends \WC_Unit_Test_Case {
 
 		// user1 now gets the "taken over" message when the heartbeat attempts to renew the lock.
 		wp_set_current_user( $this->user1 );
-		$response = apply_filters( 'heartbeat_received', array(), $request_data, 'woocommerce_page_wc-orders' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment,WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+		$response = apply_filters( 'heartbeat_received', array(), $request_data, 'woocommerce_page_wc-orders' );
 		$this->assertArrayHasKey( 'wc-refresh-order-lock', $response );
 		$this->assertArrayHasKey( 'error', $response['wc-refresh-order-lock'] );
 

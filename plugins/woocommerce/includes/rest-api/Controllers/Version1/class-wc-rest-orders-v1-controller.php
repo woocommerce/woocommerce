@@ -10,6 +10,7 @@
  * @since    3.0.0
  */
 
+use Automattic\WooCommerce\Internal\RestApi\OrderLineItemValidationTrait;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
@@ -26,6 +27,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @extends WC_REST_Posts_Controller
  */
 class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
+
+	use OrderLineItemValidationTrait;
 
 	/**
 	 * Endpoint namespace.
@@ -453,7 +456,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare a single order for create.
 	 *
-	 * @throws WC_REST_Exception If the customer ID is invalid.
+	 * @throws WC_REST_Exception If the customer ID, or a new line item's product, is invalid.
 	 *
 	 * @param  WP_REST_Request $request Request object.
 	 * @return WP_Error|WC_Order $data Object.
@@ -463,6 +466,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		$order     = new WC_Order( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
+
+		$this->check_new_line_item_products( $request['line_items'] );
 
 		if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
 			if ( is_wp_error( Users::get_user_in_current_site( $request['customer_id'] ) ) ) {
@@ -552,7 +557,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		try {
 			$order = $this->prepare_item_for_database( $request );
 			$order->set_created_via( 'rest-api' );
-			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_prices_include_tax( wc_prices_include_tax() );
 			$order->calculate_totals();
 			$order->save();
 
@@ -628,10 +633,11 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$product_id = (int) $posted['product_id'];
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];
-		} elseif ( 'update' === $action ) {
+		} elseif ( 'update' === $action || $this->is_custom_line_item( $posted ) ) {
 			$product_id = 0;
 		} else {
-			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
+			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required. For a custom item, send a name and total instead.', 'woocommerce' ), 400 );
 		}
 		return $product_id;
 	}
@@ -660,6 +666,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		}
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- This method also throws WC_REST_Exception indirectly through get_product_id().
 	/**
 	 * Create or update a line item.
 	 *
@@ -667,6 +674,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 * @param string $action 'create' to add line item or 'update' to update it.
 	 *
 	 * @return WC_Order_Item_Product
+	 * @throws WC_Data_Exception Invalid product data.
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_items( $posted, $action = 'create' ) {
@@ -690,6 +698,12 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			&& array_key_exists( 'variation_id', $posted )
 			&& 0 === (int) $posted['variation_id'];
 
+		// Only new items are checked, so orders whose products were deleted later stay editable.
+		// prepare_item_for_database() already checks them up front, but subclasses that skip it, like Subscriptions, rely on this check.
+		if ( 'create' === $action ) {
+			$this->check_line_item_product( $posted, $product );
+		}
+
 		if ( $clear_variation_id && $product instanceof WC_Product_Variation ) {
 			$product = wc_get_product( $current_product_id );
 		}
@@ -697,7 +711,26 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		if ( $product && $product !== $item->get_product() ) {
 			$item->set_product( $product );
 			if ( $restore_variation_id ) {
-				$item->set_variation_id( $current_variation_id );
+				try {
+					$item->set_variation_id( $current_variation_id );
+				} catch ( WC_Data_Exception $e ) {
+					if ( 'order_item_product_invalid_variation_id' !== $e->getErrorCode() ) {
+						throw $e;
+					}
+					// The stored variation ID no longer identifies a variation. Keep set_product()'s parent demotion.
+					// Unlike v2, no get_post_type() recheck is needed: $item is always a base WC_Order_Item_Product
+					// (never a woocommerce_get_order_item_classname subclass), whose setter throws this code only
+					// when the post is not a product_variation.
+					wc_get_logger()->warning(
+						sprintf(
+							'Order item #%d (order #%d) referenced variation #%d, which no longer exists; the item was demoted to its parent product during a REST update.',
+							$item->get_id(),
+							$item->get_order_id(),
+							$current_variation_id
+						),
+						array( 'source' => 'rest-api' )
+					);
+				}
 			}
 
 			if ( 'create' === $action ) {
@@ -715,6 +748,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 		return $item;
 	}
+
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Create or update an order shipping method.

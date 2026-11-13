@@ -34,7 +34,7 @@ export const Edit = (): JSX.Element => {
 	const { cartTotals } = useStoreCart();
 	const subTotal = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( cartTotals.total_items, 10 ) +
-		  parseInt( cartTotals.total_items_tax, 10 )
+			parseInt( cartTotals.total_items_tax, 10 )
 		: parseInt( cartTotals.total_items, 10 );
 
 	const TEMPLATE = [

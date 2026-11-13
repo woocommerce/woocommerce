@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories;
 
+use ActionScheduler_Store;
 use Exception;
 use Automattic\WooCommerce\Internal\Utilities\URL;
 use WC_Admin_Notices;
@@ -35,6 +36,11 @@ class Synchronize {
 	 * @param int
 	 */
 	public const SYNC_TASK_PROGRESS = 'wc_product_download_dir_sync_progress';
+
+	/**
+	 * Used to prevent an active synchronization task from continuing after cancellation.
+	 */
+	private const SYNC_TASK_CANCELLED = 'wc_product_download_dir_sync_cancelled';
 
 	/**
 	 * Number of downloadable products to be processed in each atomic sync task.
@@ -118,11 +124,12 @@ class Synchronize {
 	 * @return bool
 	 */
 	public function start(): bool {
-		if ( null !== $this->queue->get_next( self::SYNC_TASK ) ) {
+		if ( $this->has_scheduled_task() ) {
 			wc_get_logger()->log( 'warning', __( 'Synchronization of approved product download directories is already in progress.', 'woocommerce' ) );
 			return false;
 		}
 
+		delete_option( self::SYNC_TASK_CANCELLED );
 		update_option( self::SYNC_TASK_PAGE, 1 );
 		$this->queue->schedule_single( time(), self::SYNC_TASK, array(), self::SYNC_TASK_GROUP );
 		wc_get_logger()->log( 'info', __( 'Approved Download Directories sync: new scan scheduled.', 'woocommerce' ) );
@@ -130,13 +137,45 @@ class Synchronize {
 	}
 
 	/**
+	 * Indicates whether a synchronization task is pending or running.
+	 */
+	private function has_scheduled_task(): bool {
+		foreach ( array( ActionScheduler_Store::STATUS_PENDING, ActionScheduler_Store::STATUS_RUNNING ) as $status ) {
+			$scheduled_tasks = $this->queue->search(
+				array(
+					'hook'     => self::SYNC_TASK,
+					'status'   => $status,
+					'per_page' => 1,
+				),
+				'ids'
+			);
+
+			if ( ! empty( $scheduled_tasks ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Runs the synchronization task.
 	 */
 	public function run() {
+		if ( $this->is_cancelled() ) {
+			$this->clean_up();
+			return;
+		}
+
 		$products = $this->get_next_set_of_downloadable_products();
 
 		foreach ( $products as $product ) {
 			$this->process_product( $product );
+		}
+
+		if ( $this->is_cancelled() ) {
+			$this->clean_up();
+			return;
 		}
 
 		// Detect if we have reached the end of the task.
@@ -158,10 +197,44 @@ class Synchronize {
 	}
 
 	/**
-	 * Stops/cancels the current synchronization task.
+	 * Completes the current synchronization task and marks its results for review.
+	 *
+	 * The persistent notice is also the acknowledgement state used by Site Health. Existing
+	 * sites can therefore keep a pending review across requests and WooCommerce updates.
 	 */
 	public function stop() {
+		if ( $this->is_cancelled() ) {
+			$this->clean_up();
+			return;
+		}
+
 		WC_Admin_Notices::add_notice( 'download_directories_sync_complete', true );
+		$this->clean_up();
+	}
+
+	/**
+	 * Cancels the current synchronization task without marking its results for review.
+	 *
+	 * @since 11.1.0
+	 */
+	public function cancel(): void {
+		update_option( self::SYNC_TASK_CANCELLED, true );
+		$this->clean_up();
+	}
+
+	/**
+	 * Indicates whether the current synchronization was cancelled.
+	 *
+	 * @phpstan-impure
+	 */
+	private function is_cancelled(): bool {
+		return (bool) get_option( self::SYNC_TASK_CANCELLED, false );
+	}
+
+	/**
+	 * Cleans up synchronization state and scheduled actions.
+	 */
+	private function clean_up(): void {
 		delete_option( self::SYNC_TASK_PAGE );
 		delete_option( self::SYNC_TASK_PROGRESS );
 		$this->queue->cancel( self::SYNC_TASK );

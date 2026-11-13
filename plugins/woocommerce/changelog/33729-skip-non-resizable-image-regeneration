@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Skip on-the-fly and background thumbnail regeneration for attachments no image editor supports (e.g. SVGs), preventing PHP notices and repeated doomed resize attempts.

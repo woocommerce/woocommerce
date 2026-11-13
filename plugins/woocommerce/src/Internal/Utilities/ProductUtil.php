@@ -24,6 +24,130 @@ class ProductUtil {
 	public const OUTOFSTOCK_COUNT_TRANSIENT = 'wc_outofstock_count';
 
 	/**
+	 * Name prefixes of the transients kept for each product, followed by the product ID.
+	 *
+	 * Exposed as a constant so the "Clear transients" tool, which deletes these transients for
+	 * every product, stays in sync with the per-product invalidation below.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @var string[]
+	 */
+	public const PRODUCT_SPECIFIC_TRANSIENT_PREFIXES = array(
+		'wc_product_children_',
+		'wc_var_prices_',
+		'wc_related_',
+		'wc_child_has_weight_',
+		'wc_child_has_dimensions_',
+	);
+
+	/**
+	 * Number of products whose persistent transients are deleted per scheduled cleanup batch.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @var int
+	 */
+	public const TRANSIENT_CLEANUP_BATCH_SIZE = 500;
+
+	/**
+	 * Register hooks.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 */
+	public function register(): void {
+		add_action( 'woocommerce_delete_product_transients_batch', array( $this, 'handle_woocommerce_delete_product_transients_batch' ) );
+	}
+
+	/**
+	 * Schedule cleanup of existing products' persistent transients for the current site.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int $last_id Last product ID processed, or zero to start cleanup.
+	 * @return bool False if cleanup could not be scheduled.
+	 */
+	public function schedule_product_transient_cleanup( int $last_id = 0 ): bool {
+		if ( ! wp_using_ext_object_cache() ) {
+			return true;
+		}
+
+		// A new cleanup replaces any queued one instead of running alongside it.
+		if ( 0 === $last_id ) {
+			as_unschedule_all_actions( 'woocommerce_delete_product_transients_batch' );
+		}
+
+		return (bool) ActionSchedulerUtil::enqueue_async( 'woocommerce_delete_product_transients_batch', array( $last_id ), 'woocommerce' );
+	}
+
+	/**
+	 * Delete one batch of persistent product transients, bypassing per-transient deletion actions.
+	 * The scheduled action retains the last processed ID for the next batch.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @param mixed $last_id Last product ID processed.
+	 * @return void
+	 * @throws \RuntimeException If the batch cannot be read or continued.
+	 */
+	public function handle_woocommerce_delete_product_transients_batch( $last_id ): void {
+		if ( ! wp_using_ext_object_cache() ) {
+			return;
+		}
+
+		global $wpdb;
+		$products = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT ID, post_type FROM {$wpdb->posts} WHERE post_type IN ('product', 'product_variation') AND ID > %d ORDER BY ID LIMIT %d",
+				absint( $last_id ),
+				self::TRANSIENT_CLEANUP_BATCH_SIZE
+			)
+		);
+		if ( $wpdb->last_error ) {
+			throw new \RuntimeException( 'Unable to read products for transient cleanup.' );
+		}
+
+		$keys = array();
+		foreach ( $products as $product ) {
+			$prefixes = 'product_variation' === $product->post_type ? array( 'wc_related_' ) : self::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES;
+			foreach ( $prefixes as $prefix ) {
+				$keys[] = $prefix . $product->ID;
+			}
+			$last_id = (int) $product->ID;
+		}
+
+		if ( $keys ) {
+			wp_cache_delete_multiple( $keys, 'transient' );
+		}
+		if ( self::TRANSIENT_CLEANUP_BATCH_SIZE === count( $products ) && ! $this->schedule_product_transient_cleanup( $last_id ) ) {
+			throw new \RuntimeException( 'Unable to schedule the next product transient cleanup batch.' );
+		}
+	}
+
+	/**
+	 * Get a product ID from a product, post, or numeric value.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed $product Product instance, post instance, or numeric ID.
+	 * @return int Product ID, or 0 when no ID is available.
+	 */
+	public function get_product_id( $product ): int {
+		if ( is_numeric( $product ) ) {
+			return (int) $product;
+		} elseif ( $product instanceof \WC_Product ) {
+			return (int) $product->get_id();
+		} elseif ( is_object( $product ) && ! empty( $product->ID ) ) {
+			return (int) $product->ID;
+		} else {
+			return 0;
+		}
+	}
+
+	/**
 	 * Delete all product transients for a set of products.
 	 *
 	 * Fixed-name transients are deleted once for the whole set, and the
@@ -54,6 +178,7 @@ class ProductUtil {
 
 		// Kept for compatibility, WooCommerce core doesn't use product transient versions anymore.
 		\WC_Cache_Helper::get_transient_version( 'product', true );
+		\WC_Cache_Helper::get_transient_version( 'product_query', true );
 
 		foreach ( $product_ids as $product_id ) {
 			/**
@@ -71,7 +196,7 @@ class ProductUtil {
 	 * Delete the transients related to a specific product.
 	 * If the product is a variation, delete the transients for the parent too.
 	 *
-	 * @param WC_Product|int $product_or_id The product or the product id.
+	 * @param \WC_Product|int $product_or_id The product or the product id.
 	 * @return void
 	 */
 	public function delete_product_specific_transients( $product_or_id ) {
@@ -110,16 +235,8 @@ class ProductUtil {
 
 		$product_ids = array_unique( array_filter( array_map( 'absint', $product_ids ) ) );
 
-		$product_specific_transient_names = array(
-			'wc_product_children_',
-			'wc_var_prices_',
-			'wc_related_',
-			'wc_child_has_weight_',
-			'wc_child_has_dimensions_',
-		);
-
 		foreach ( $product_ids as $product_id ) {
-			foreach ( $product_specific_transient_names as $transient ) {
+			foreach ( self::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES as $transient ) {
 				delete_transient( $transient . $product_id );
 			}
 		}
@@ -144,15 +261,52 @@ class ProductUtil {
 	}
 
 	/**
-	 * Counts per-status number of products.
+	 * Append the product meta lookup join unless the clause mentions wc_product_meta_lookup as a standalone token.
+	 * References, SQL literals and comments also count as mentions; this is not an SQL parser.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed $join SQL JOIN clause supplied by query filters.
+	 * @return string
+	 */
+	public function append_product_sorting_table_join( $join ): string {
+		global $wpdb;
+
+		// Preserve stringable clauses: discarding a join can break a WHERE clause that still references it.
+		if ( ! is_string( $join ) ) {
+			$stringable = is_object( $join ) && method_exists( $join, '__toString' );
+			$join       = $stringable ? (string) $join : '';
+		}
+
+		// A non-empty wpdb prefix prevents a table-name match. Empty prefixes retain the old guard's limitation.
+		if ( ! preg_match( '/\bwc_product_meta_lookup\b/', $join ) ) {
+			$join .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
+		}
+		return $join;
+	}
+
+	/**
+	 * Counts per-status number of products of a given post type.
 	 *
 	 * @since 11.0.0
 	 *
 	 * @param string $post_type Post type (e.g. 'product', 'product_variation').
-	 * @return array<string,int>
+	 * @return array<string|int,int>
 	 */
 	public function get_counts_for_type( string $post_type ): array {
-		// Until persistent counters reactivated, switch back to WordPress API for accessing post status counters.
-		return array_map( 'intval', (array) wp_count_posts( $post_type ) );
+		$product_count_cache = wc_get_container()->get( ProductCountCache::class );
+		$count_per_status    = $product_count_cache->get( $post_type );
+
+		if ( null === $count_per_status ) {
+			// Defensive perimeter: dirty product data (running/crushed product data import/migration/mocking utilities).
+			// We passed on adding wc_doing_it_wrong as it'll add asymmetric friction to already running customers fleet.
+			// Enforce strict typing to prevent PHP from silently casting numeric-string array keys to integers, and to normalize inconsistent types from WordPress APIs.
+			$count_per_status = (array) wp_count_posts( $post_type ) + array_fill_keys( array_keys( get_post_stati() ), 0 );
+			foreach ( $count_per_status as $status => $count ) {
+				$product_count_cache->set( $post_type, (string) $status, (int) $count );
+			}
+		}
+
+		return array_map( 'intval', $count_per_status );
 	}
 }

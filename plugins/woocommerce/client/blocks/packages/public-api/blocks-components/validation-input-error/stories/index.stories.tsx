@@ -1,14 +1,13 @@
 /**
  * External dependencies
  */
-import type { StoryFn, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 
 /**
  * Internal dependencies
  */
 import ValidationInputError, { type ValidationInputErrorProps } from '..';
 import '../style.scss';
-import '../../validation-input-error/style.scss';
 
 export default {
 	title: 'External Components/ValidationInputError',

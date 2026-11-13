@@ -29,6 +29,7 @@ import {
 } from './events';
 import { initContentValidationMiddleware } from './middleware/content-validation';
 import { initHacks } from './hacks';
+import { initEntityActions } from './entity-actions';
 import {
 	useContentValidation,
 	useFilterEditorContentStylesheets,
@@ -45,12 +46,14 @@ function Editor( {
 	isPreview = false,
 	contentRef = null,
 	customSavePanel,
+	customSaveButton,
 }: {
 	postId: number | string;
 	postType: string;
 	isPreview?: boolean;
 	contentRef?: React.Ref< HTMLDivElement > | null;
 	customSavePanel?: React.ReactElement;
+	customSaveButton?: React.ReactElement;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { settings } = useSelect(
@@ -79,6 +82,9 @@ function Editor( {
 			...settings,
 			allowedBlockTypes: getAllowedBlockNames(),
 			isPreviewMode: isPreview,
+			// WordPress 7.1 responsive styles produce media-query-based styles
+			// that the email renderer cannot inline, so keep the feature off.
+			responsiveEditingEnabled: false,
 		} ),
 		[ settings, isPreview ]
 	);
@@ -95,6 +101,7 @@ function Editor( {
 				settings={ editorSettings }
 				contentRef={ mergedContentRef }
 				customSavePanel={ customSavePanel }
+				customSaveButton={ customSaveButton }
 			/>
 		</StrictMode>
 	);
@@ -132,6 +139,7 @@ function onInit() {
 	initContentValidationMiddleware();
 	initBlocks();
 	initHacks();
+	initEntityActions();
 	initTextHooks();
 	initializeLayout();
 }
@@ -179,6 +187,7 @@ export function ExperimentalEmailEditor( {
 	contentRef = null,
 	config,
 	customSavePanel,
+	customSaveButton,
 }: {
 	postId: string;
 	postType: string;
@@ -186,6 +195,7 @@ export function ExperimentalEmailEditor( {
 	contentRef?: React.Ref< HTMLDivElement > | null;
 	config?: EmailEditorConfig;
 	customSavePanel?: React.ReactElement;
+	customSaveButton?: React.ReactElement;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
@@ -225,6 +235,7 @@ export function ExperimentalEmailEditor( {
 			isPreview={ isPreview }
 			contentRef={ contentRef }
 			customSavePanel={ customSavePanel }
+			customSaveButton={ customSaveButton }
 		/>
 	);
 }

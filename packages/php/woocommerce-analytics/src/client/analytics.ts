@@ -2,6 +2,7 @@
  * External dependencies
  */
 import debugFactory from 'debug';
+import { sanitizeUrl } from '@automattic/tracks-shared-utils';
 /**
  * Internal dependencies
  */
@@ -53,14 +54,13 @@ export class Analytics {
 			this.apiClient.init();
 		}
 
+		consentManager.addConsentChangeListener( this.handleConsentChange );
+
 		/*
 		 * Initialize the session manager and record the page_view event
 		 * only if the ClickHouse (ch) feature is enabled as these events are relevant exclusively when ClickHouse is active.
 		 */
 		if ( this.features.sessionTracking ) {
-			// Set up consent change listener
-			consentManager.addConsentChangeListener( this.handleConsentChange );
-
 			this.sessionManager.init();
 			const { sessionId, landingPage, isEngaged, isNewSession } = this.sessionManager;
 
@@ -202,10 +202,10 @@ export class Analytics {
 		eventProperties._sy = sy !== undefined ? sy : 0;
 
 		if ( document.location !== undefined ) {
-			eventProperties._dl = document.location.toString();
+			eventProperties._dl = sanitizeUrl( document.location.toString() );
 		}
 		if ( document.referrer !== undefined ) {
-			eventProperties._dr = document.referrer;
+			eventProperties._dr = sanitizeUrl( document.referrer );
 		}
 	};
 
@@ -248,8 +248,16 @@ export class Analytics {
 	handleConsentChange = ( hasConsent: boolean ): void => {
 		if ( ! hasConsent ) {
 			// Consent withdrawn - clear session data if session tracking is enabled
-			this.sessionManager.clearSession();
-		} else if ( ! this.sessionManager.sessionId ) {
+			if ( this.features.sessionTracking ) {
+				this.sessionManager.clearSession();
+			}
+			return;
+		}
+
+		// Withdrawing consent expired `tk_ai`, and init does not run again on this page.
+		this.maybeSetAnonId();
+
+		if ( this.features.sessionTracking && ! this.sessionManager.sessionId ) {
 			// Consent granted - reinitialize session if needed
 			this.sessionManager.init();
 		}
@@ -265,7 +273,8 @@ export class Analytics {
 			// Set a first-party cookie (same domain only, 1 year)
 			const randomToken = generateRandomToken( 18 ); // 18 * 4/3 = 24 (base64 encoded chars)
 			const expires = new Date( Date.now() + 1 * 365 * 24 * 60 * 60 * 1000 ).toUTCString();
-			document.cookie = `tk_ai=${ randomToken }; path=/; secure; samesite=strict; expires=${ expires }`;
+			const secure = window.location.protocol === 'https:' ? ' secure;' : '';
+			document.cookie = `tk_ai=${ randomToken }; path=/;${ secure } samesite=strict; expires=${ expires }`;
 		}
 	}
 }

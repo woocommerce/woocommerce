@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Audit the variable product datastore and extend transients priming within it.

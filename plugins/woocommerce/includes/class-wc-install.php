@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
@@ -344,6 +345,41 @@ class WC_Install {
 		),
 		'11.1.0'   => array(
 			'wc_update_1110_delete_dashboard_outofstock_count_transient',
+			'wc_update_1110_cleanup_block_email_posts',
+			'wc_update_1110_flush_product_count_cache',
+		),
+		'11.1.0-1' => array(
+			'wc_update_11101_remove_deprecated_variation_gallery_option',
+		),
+		'11.2.0'   => array(
+			'wc_update_1120_remove_abandoned_cart_recovery',
+			'wc_update_1120_migrate_stock_notifications_alpha_constant',
+			'wc_update_1120_delete_surface_cart_checkout_note',
+			'wc_update_1120_cleanup_inherited_variation_images',
+			'wc_update_11201_migrate_tax_lookup_order_items',
+			'wc_update_11201_invalidate_analytics_reports_cache',
+			'wc_update_11202_reset_refund_returning_customer_markers',
+			'wc_update_11203_normalize_stock_notification_emails',
+		),
+		'11.2.0-1' => array(
+			// Run again to cancel all pattern fetch jobs now that scheduling is disabled.
+			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
+		),
+		'11.2.2'   => array(
+			'wc_update_1122_remove_objects_from_default_attributes',
+		),
+		'11.3.0'   => array(
+			'wc_update_1130_set_legacy_variation_price_hash_option',
+			'wc_update_1130_delete_unpublished_variation_lookup_rows',
+			'wc_update_1130_split_tax_lookup_taxable_amount',
+			'wc_update_1130_delete_stock_notification_sync_notice_option',
+			'wc_update_1130_backfill_order_stats_payment_method',
+		),
+		'11.4.0'   => array(
+			'wc_update_1140_re_enable_autoload_options',
+			'wc_update_1140_add_mpn_to_product_lookup_table',
+			// Run again for stores whose database was already at 11.3.0 or later, as they skip the 11.2.2 key.
+			'wc_update_1122_remove_objects_from_default_attributes',
 		),
 	);
 
@@ -386,6 +422,7 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_analytics_scheduled_import' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_product_instance_caching_for_newly_installed' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'disable_legacy_variation_price_hash_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'woocommerce_update_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
@@ -597,7 +634,6 @@ class WC_Install {
 	 */
 	public static function install_actions() {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
-			// WPCS: input var ok.
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			wc_get_logger()->info( 'Manual database update triggered.', array( 'source' => 'wc-updater' ) );
 			self::update();
@@ -621,7 +657,6 @@ class WC_Install {
 
 				$return_url = esc_url_raw( wp_unslash( $return_url ) );
 				wp_safe_redirect( $return_url );
-				// WPCS: input var ok.
 				exit;
 			}
 		}
@@ -1247,11 +1282,11 @@ class WC_Install {
 
 			foreach ( $subsections as $subsection ) {
 				foreach ( $section->get_settings( $subsection ) as $value ) {
-					if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
-						$autoload          = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
-						$skip_initial_save = isset( $value['skip_initial_save'] ) ? (bool) $value['skip_initial_save'] : false;
+					if ( isset( $value['default'], $value['id'] ) ) {
+						$autoload          = (bool) ( $value['autoload'] ?? true );
+						$skip_initial_save = (bool) ( $value['skip_initial_save'] ?? false );
 						if ( ! $skip_initial_save ) {
-							add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
+							add_option( $value['id'], $value['default'], '', $autoload );
 						}
 					}
 				}
@@ -1259,10 +1294,13 @@ class WC_Install {
 		}
 
 		// Define other defaults if not in setting screens.
-		add_option( 'woocommerce_single_image_width', '600', '', 'yes' );
-		add_option( 'woocommerce_thumbnail_image_width', '300', '', 'yes' );
-		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
-		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
+		add_option( 'woocommerce_single_image_width', '600', '', true );
+		add_option( 'woocommerce_thumbnail_image_width', '300', '', true );
+		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', true );
+		add_option( 'woocommerce_demo_store', 'no', '', false );
+		add_option( 'woocommerce_catalog_columns', '4', '', true );
+		add_option( 'woocommerce_catalog_rows', '4', '', true );
+		add_option( 'woocommerce_default_catalog_orderby', 'menu_order', '', true );
 
 		if ( self::is_new_install() ) {
 			// Define initial tax classes.
@@ -1327,7 +1365,7 @@ class WC_Install {
 	 * @return void
 	 */
 	public static function enable_customer_stock_notifications_signups() {
-		update_option( 'woocommerce_back_in_stock_allow_signups', 'yes' );
+		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
 	}
 
 	/**
@@ -1358,6 +1396,17 @@ class WC_Install {
 	public static function enable_product_instance_caching_for_newly_installed(): void {
 		$feature_controller = wc_get_container()->get( FeaturesController::class );
 		$feature_controller->change_feature_enable( ProductCacheController::FEATURE_NAME, true );
+	}
+
+	/**
+	 * Disable the legacy variations price hash algorithm for new stores.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return void
+	 */
+	public static function disable_legacy_variation_price_hash_for_newly_installed(): void {
+		add_option( 'woocommerce_use_legacy_get_variations_price_hash', 'no', '', true );
 	}
 
 	/**
@@ -1452,7 +1501,8 @@ class WC_Install {
 	net_total double DEFAULT 0 NOT NULL,
 	returning_customer tinyint(1) DEFAULT NULL,
 	status varchar(20) NOT NULL,
-	customer_id bigint(20) unsigned NOT NULL" .
+	customer_id bigint(20) unsigned NOT NULL,
+	payment_method varchar(100) DEFAULT NULL" .
 		( $should_have_fulfillment_column ? ',
 	fulfillment_status varchar(50) DEFAULT NULL' : '' ) . ',
 	PRIMARY KEY (order_id),
@@ -1461,7 +1511,8 @@ class WC_Install {
 	KEY status (status)' .
 		( $should_have_fulfillment_column ? ',
 	KEY fulfillment_status (fulfillment_status)' : '' ) . ",
-	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
+	KEY idx_date_paid_status_parent (date_paid, status, parent_id),
+	KEY idx_payment_method_date_paid_status (payment_method, date_paid, status)
 ) $collate;";
 	}
 
@@ -1705,6 +1756,42 @@ class WC_Install {
 		}
 
 		/**
+		 * Re-key wc_order_tax_lookup by tax order item. The new column has to join the primary key,
+		 * which dbDelta cannot do, so both changes run here as one table rebuild. Rows already in
+		 * the table land on the column's zero default and keep reporting on their tax rate id alone
+		 * until OrderTaxLookupMigrator has been through them.
+		 */
+		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}wc_order_tax_lookup';" ) ) {
+			$tax_lookup_alterations = array();
+
+			if ( ! $wpdb->get_var( "SHOW COLUMNS FROM `{$wpdb->prefix}wc_order_tax_lookup` LIKE 'order_item_id';" ) ) {
+				$tax_lookup_alterations[] = 'ADD COLUMN order_item_id bigint(20) unsigned NOT NULL DEFAULT 0 AFTER tax_rate_id';
+			}
+
+			if ( 3 > $wpdb->get_var( "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$wpdb->prefix}wc_order_tax_lookup' AND INDEX_NAME = 'PRIMARY'" ) ) {
+				$tax_lookup_alterations[] = 'DROP PRIMARY KEY, ADD PRIMARY KEY (order_id, tax_rate_id, order_item_id)';
+			}
+
+			if ( $tax_lookup_alterations ) {
+				$tax_lookup_altered = $wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_tax_lookup " . implode( ', ', $tax_lookup_alterations ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input, the fragments are hardcoded above.
+
+				// A re-key that failed is otherwise invisible: the sync keeps writing rows in the
+				// released shape and the reports keep reading them, so the store quietly misses the
+				// fix. Leave a trace, and name the tool that retries the change.
+				if ( false === $tax_lookup_altered ) {
+					wc_get_logger()->error(
+						sprintf(
+							'Could not re-key %1$s by tax order item: %2$s. Analytics tax reports keep reading the way they did, and running "Verify base database tables" under WooCommerce > Status > Tools retries the change.',
+							$wpdb->prefix . 'wc_order_tax_lookup',
+							'' !== $wpdb->last_error ? $wpdb->last_error : 'unknown error'
+						),
+						array( 'source' => 'wc-order-tax-lookup-migration' )
+					);
+				}
+			}
+		}
+
+		/**
 		 * Change wp_woocommerce_sessions schema to use a bigint auto increment field instead of char(32) field as
 		 * the primary key as it is not a good practice to use a char(32) field as the primary key of a table and as
 		 * there were reports of issues with this table (see https://github.com/woocommerce/woocommerce/issues/20912).
@@ -1745,6 +1832,8 @@ class WC_Install {
 
 		// Clear table caches.
 		delete_transient( 'wc_attribute_taxonomies' );
+		TaxesDataStore::flush_lookup_columns_cache();
+		OrdersStatsDataStore::flush_payment_method_column_cache();
 
 		return $db_delta_result;
 	}
@@ -1787,9 +1876,7 @@ class WC_Install {
 		// Stock Notifications Table Schema.
 		$stock_notifications_table_schema = wc_get_container()->get( StockNotificationsDataStore::class )->get_database_schema();
 
-		// Email Unsubscribes table — generic across email types; each row pairs an email hash with an email-kind identifier.
-		$email_unsubscribes_table_schema = wc_get_container()->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class )->get_database_schema();
-		$order_stats_table_schema        = self::get_order_stats_table_schema( $collate );
+		$order_stats_table_schema = self::get_order_stats_table_schema( $collate );
 
 		$mysql_version = wc_get_server_database_version()['number'];
 		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
@@ -1981,6 +2068,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `product_id` bigint(20) NOT NULL,
   `sku` varchar(100) NULL default '',
   `global_unique_id` varchar(100) NULL default '',
+  `mpn` varchar(100) NOT NULL DEFAULT '',
   `virtual` tinyint(1) NULL default 0,
   `downloadable` tinyint(1) NULL default 0,
   `min_price` decimal(19,4) NULL default NULL,
@@ -2000,7 +2088,9 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `stock_quantity` (`stock_quantity`),
   KEY `onsale` (`onsale`),
   KEY min_max_price (`min_price`, `max_price`),
-  KEY sku (sku(50))
+  KEY sku (sku(50)),
+  KEY global_unique_id (global_unique_id(50)),
+  KEY mpn (mpn(50))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   tax_rate_class_id bigint(20) unsigned NOT NULL auto_increment,
@@ -2025,6 +2115,19 @@ CREATE TABLE {$wpdb->prefix}wc_rate_limits (
   rate_limit_remaining smallint(10) NOT NULL DEFAULT '0',
   PRIMARY KEY  (rate_limit_id),
   UNIQUE KEY rate_limit_key (rate_limit_key($max_index_length))
+) $collate;
+CREATE TABLE {$wpdb->prefix}wc_ucp_idempotency_keys (
+  idempotency_key_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  idempotency_key varchar(191) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  request_fingerprint char(64) NOT NULL,
+  state varchar(16) NOT NULL DEFAULT 'in_progress',
+  response_status smallint(5) unsigned NULL,
+  response_body longtext NULL,
+  created_at datetime NOT NULL,
+  completed_at datetime NULL,
+  PRIMARY KEY  (idempotency_key_id),
+  UNIQUE KEY idempotency_key (idempotency_key),
+  KEY created_at (created_at)
 ) $collate;
 $product_attributes_lookup_table_creation_sql
 CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
@@ -2059,11 +2162,15 @@ CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
 	order_id bigint(20) unsigned NOT NULL,
 	tax_rate_id bigint(20) unsigned NOT NULL,
+	order_item_id bigint(20) unsigned NOT NULL DEFAULT 0,
 	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 	shipping_tax double DEFAULT 0 NOT NULL,
 	order_tax double DEFAULT 0 NOT NULL,
 	total_tax double DEFAULT 0 NOT NULL,
-	PRIMARY KEY (order_id, tax_rate_id),
+	taxable_amount double DEFAULT 0 NOT NULL,
+	order_taxable_amount double DEFAULT NULL,
+	shipping_taxable_amount double DEFAULT NULL,
+	PRIMARY KEY (order_id, tax_rate_id, order_item_id),
 	KEY tax_rate_id (tax_rate_id),
 	KEY date_created (date_created)
 ) $collate;
@@ -2122,6 +2229,8 @@ CREATE TABLE {$wpdb->prefix}wc_customer_lookup (
 	postcode varchar(20) DEFAULT '' NOT NULL,
 	city varchar(100) DEFAULT '' NOT NULL,
 	state varchar(100) DEFAULT '' NOT NULL,
+	billing_phone varchar(100) DEFAULT '' NOT NULL,
+	shipping_phone varchar(100) DEFAULT '' NOT NULL,
 	PRIMARY KEY (customer_id),
 	UNIQUE KEY user_id (user_id),
 	KEY email (email)
@@ -2133,7 +2242,6 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 ) $collate;
 $hpos_table_schema;
 $stock_notifications_table_schema;
-$email_unsubscribes_table_schema;
 		";
 
 		return $tables;
@@ -2170,9 +2278,16 @@ $email_unsubscribes_table_schema;
 			"{$wpdb->prefix}woocommerce_tax_rates",
 			"{$wpdb->prefix}wc_reserved_stock",
 			"{$wpdb->prefix}wc_rate_limits",
+			"{$wpdb->prefix}wc_ucp_idempotency_keys",
 			"{$wpdb->prefix}wc_product_attributes_lookup",
 			"{$wpdb->prefix}wc_stock_notifications",
 			"{$wpdb->prefix}wc_stock_notificationmeta",
+
+			/*
+			 * No longer created: the abandoned cart recovery feature that owned this table was
+			 * removed in 11.2.0. It stays listed here so that a site which uninstalls before the
+			 * removal migration has run is not left with an orphaned table.
+			 */
 			"{$wpdb->prefix}wc_email_unsubscribes",
 
 			// WCA Tables.
@@ -3110,21 +3225,18 @@ EOT;
 <!-- /wp:woocommerce/cart-line-items-block -->
 
 <!-- wp:woocommerce/product-collection {"queryId":0,"query":{"perPage":3,"pages":1,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/cross-sells","hideControls":["filterable"],"queryContextIncludes":["collection"]} -->
-<div class="wp-block-woocommerce-product-collection"><!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} -->
-<h2 class="wp-block-heading has-text-align-left" style="margin-bottom:1rem">' . __( 'You may be interested in&hellip;', 'woocommerce' ) . '</h2>
-
-<!-- /wp:heading -->
+<div class="wp-block-woocommerce-product-collection"><!-- wp:pattern {"slug":"woocommerce/cart-cross-sells-message"} /-->
 
 <!-- wp:woocommerce/product-template -->
-<!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
+<!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail"} -->
 <!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
 <!-- /wp:woocommerce/product-image -->
 
-<!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-title"} /-->
 
-<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
+<!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small"} /-->
 
-<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+<!-- wp:woocommerce/product-button {"textAlign":"center","fontSize":"small"} /-->
 <!-- /wp:woocommerce/product-template --></div>
 <!-- /wp:woocommerce/product-collection --></div>
 
@@ -3176,17 +3288,13 @@ EOT;
 <!-- /wp:woocommerce/filled-cart-block -->
 
 <!-- wp:woocommerce/empty-cart-block -->
-<div class="wp-block-woocommerce-empty-cart-block"><!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} -->
-<h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . __( 'Your cart is currently empty!', 'woocommerce' ) . '</h2>
-<!-- /wp:heading -->
+<div class="wp-block-woocommerce-empty-cart-block"><!-- wp:pattern {"slug":"woocommerce/cart-empty-message"} /-->
 
-<!-- wp:separator {"className":"is-style-dots"} -->
-<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>
-<!-- /wp:separator -->
+<!-- wp:spacer {"height":"40px"} -->
+<div style="height:40px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
 
-<!-- wp:heading {"textAlign":"center"} -->
-<h2 class="wp-block-heading has-text-align-center">' . __( 'New in store', 'woocommerce' ) . '</h2>
-<!-- /wp:heading -->
+<!-- wp:pattern {"slug":"woocommerce/cart-new-in-store-message"} /-->
 
 <!-- wp:woocommerce/product-new {"columns":4,"rows":1} /--></div>
 <!-- /wp:woocommerce/empty-cart-block --></div>
@@ -3242,11 +3350,7 @@ EOT;
 <div class="wp-block-woocommerce-checkout-order-note-block"></div>
 <!-- /wp:woocommerce/checkout-order-note-block -->
 
-<!-- wp:woocommerce/checkout-terms-block -->
-<div class="wp-block-woocommerce-checkout-terms-block"></div>
-<!-- /wp:woocommerce/checkout-terms-block -->
-
-<!-- wp:woocommerce/checkout-actions-block -->
+<!-- wp:woocommerce/checkout-actions-block {"showTerms":true} -->
 <div class="wp-block-woocommerce-checkout-actions-block"></div>
 <!-- /wp:woocommerce/checkout-actions-block --></div>
 <!-- /wp:woocommerce/checkout-fields-block -->

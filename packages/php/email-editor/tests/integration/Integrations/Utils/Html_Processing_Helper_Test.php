@@ -195,4 +195,119 @@ class Html_Processing_Helper_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'data-id="5"', $attributed );
 		$this->assertStringNotContainsString( 'data-bad', $attributed );
 	}
+
+	/**
+	 * Background and border classes are dropped, everything else on the element is kept.
+	 *
+	 * @dataProvider wrapper_handled_class_provider
+	 * @param string        $class_attribute Class attribute to clean.
+	 * @param array<string> $expected        Class names that must remain, in order.
+	 */
+	public function test_remove_wrapper_handled_classes( string $class_attribute, array $expected ): void {
+		$html = new \WP_HTML_Tag_Processor( '<h3 class="' . $class_attribute . '">Heading</h3>' );
+		$this->assertTrue( $html->next_tag() );
+
+		Html_Processing_Helper::remove_wrapper_handled_classes( $html );
+
+		// Read back through the tag processor so the assertion sees the rewritten attribute.
+		$class_names = preg_split( '/\s+/', trim( (string) $html->get_attribute( 'class' ) ) );
+		$remaining   = array_values(
+			array_filter(
+				is_array( $class_names ) ? $class_names : array(),
+				function ( $class_name ) {
+					return '' !== $class_name;
+				}
+			)
+		);
+
+		$this->assertSame( $expected, $remaining );
+	}
+
+	/**
+	 * Class attributes that are not a plain space-separated list must be handled without warnings.
+	 *
+	 * The helper reads the attribute rather than the parsed class list, so it has to cope with the
+	 * shapes WP_HTML_Tag_Processor can hand back: null when the attribute is absent, and boolean
+	 * true for a valueless attribute. Neither is a string, and both would otherwise reach trim().
+	 */
+	public function test_remove_wrapper_handled_classes_handles_unusual_class_attributes(): void {
+		// No class attribute at all: nothing to do, and the tag is left exactly as it was.
+		$html = new \WP_HTML_Tag_Processor( '<h3>Heading</h3>' );
+		$this->assertTrue( $html->next_tag() );
+		Html_Processing_Helper::remove_wrapper_handled_classes( $html );
+		$this->assertSame( '<h3>Heading</h3>', $html->get_updated_html() );
+
+		// Valueless attribute: get_attribute() returns boolean true, not a string.
+		$html = new \WP_HTML_Tag_Processor( '<h3 class>Heading</h3>' );
+		$this->assertTrue( $html->next_tag() );
+		Html_Processing_Helper::remove_wrapper_handled_classes( $html );
+		$this->assertSame( '<h3 class>Heading</h3>', $html->get_updated_html() );
+
+		// Empty value: no class names to walk.
+		$html = new \WP_HTML_Tag_Processor( '<h3 class="">Heading</h3>' );
+		$this->assertTrue( $html->next_tag() );
+		Html_Processing_Helper::remove_wrapper_handled_classes( $html );
+		$this->assertStringContainsString( 'Heading', $html->get_updated_html() );
+
+		// Class names may be separated by any whitespace, not just single spaces.
+		$html = new \WP_HTML_Tag_Processor( "<h3 class=\"wp-block-heading\n\thas-background  has-tertiary-background-color\">Heading</h3>" );
+		$this->assertTrue( $html->next_tag() );
+		Html_Processing_Helper::remove_wrapper_handled_classes( $html );
+		$remaining = (string) $html->get_attribute( 'class' );
+		$this->assertStringContainsString( 'wp-block-heading', $remaining );
+		$this->assertStringNotContainsString( 'has-background', $remaining );
+		$this->assertStringNotContainsString( 'has-tertiary-background-color', $remaining );
+	}
+
+	/**
+	 * Data provider for wrapper-handled class removal.
+	 *
+	 * @return array<string, array{string, array<string>}>
+	 */
+	public function wrapper_handled_class_provider(): array {
+		return array(
+			// The reported bug: the preset background class survived on the inner element because it
+			// does not contain the literal "has-background", so the translucent color painted twice.
+			'preset background color'     => array(
+				'wp-block-heading has-tertiary-background-color has-background',
+				array( 'wp-block-heading' ),
+			),
+			'generic background only'     => array(
+				'wp-block-heading has-background',
+				array( 'wp-block-heading' ),
+			),
+			'multi word slug'             => array(
+				'has-vivid-red-background-color has-background',
+				array(),
+			),
+			'text color is kept'          => array(
+				'has-pale-cyan-blue-color has-text-color has-vivid-red-background-color has-background',
+				array( 'has-pale-cyan-blue-color', 'has-text-color' ),
+			),
+			'alignment class is kept'     => array(
+				'has-text-align-center has-tertiary-background-color',
+				array( 'has-text-align-center' ),
+			),
+			'border classes are dropped'  => array(
+				'wp-block-heading has-border-color has-accent-border-color',
+				array( 'wp-block-heading' ),
+			),
+			// A whole class name is removed rather than a substring of one, so a class that merely
+			// starts with "has-background" is left intact instead of being reduced to a fragment.
+			'unrelated background prefix' => array(
+				'has-background-dim wp-block-cover',
+				array( 'has-background-dim', 'wp-block-cover' ),
+			),
+			'nothing to remove'           => array(
+				'wp-block-heading has-large-font-size',
+				array( 'wp-block-heading', 'has-large-font-size' ),
+			),
+			// Matching is case-sensitive, mirroring how the CSS inliner matches these classes
+			// outside quirks mode. WordPress only ever emits them lowercase.
+			'uppercase is not matched'    => array(
+				'HAS-BACKGROUND wp-block-heading',
+				array( 'HAS-BACKGROUND', 'wp-block-heading' ),
+			),
+		);
+	}
 }

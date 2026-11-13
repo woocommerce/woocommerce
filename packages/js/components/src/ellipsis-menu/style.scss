@@ -22,7 +22,10 @@
 	}
 
 	.components-popover__content {
-		width: 182px;
+		inline-size: max-content;
+		// Leave room on either side because Popover flips but does not shift.
+		min-inline-size: min(182px, calc(50vw - $gap-smaller));
+		max-inline-size: min(320px, calc(50vw - $gap-smaller));
 		padding: 2px;
 	}
 
@@ -48,6 +51,11 @@
 			box-shadow: inset 0 0 0 1px #6c7781, inset 0 0 0 2px $studio-white;
 			outline: 2px solid transparent;
 			outline-offset: -2px;
+		}
+
+		&:focus:not(:focus-visible) {
+			box-shadow: none;
+			outline: none;
 		}
 
 		.components-form-toggle {

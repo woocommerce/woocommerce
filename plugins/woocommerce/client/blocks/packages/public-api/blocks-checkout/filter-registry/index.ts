@@ -49,7 +49,6 @@ export const registerCheckoutFilters = (
 	if ( Object.keys( filters ).includes( 'couponName' ) ) {
 		deprecated( 'couponName', {
 			alternative: 'coupons',
-			plugin: 'WooCommerce Blocks',
 			link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/bb921d21f42e21f38df2b1c87b48e07aa4cb0538/docs/extensibility/available-filters.md#coupons',
 		} );
 	}
@@ -71,9 +70,8 @@ export const __experimentalRegisterCheckoutFilters = (
 ) => {
 	deprecated( '__experimentalRegisterCheckoutFilters', {
 		alternative: 'registerCheckoutFilters',
-		plugin: 'WooCommerce Blocks',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8346',
-		since: '9.6.0',
+		since: '7.5.0',
 		hint: '__experimentalRegisterCheckoutFilters has graduated to stable and this experimental function will be removed.',
 	} );
 	registerCheckoutFilters( namespace, filters );
@@ -279,9 +277,8 @@ export const __experimentalApplyCheckoutFilter = < T >( {
 } ): T => {
 	deprecated( '__experimentalApplyCheckoutFilter', {
 		alternative: 'applyCheckoutFilter',
-		plugin: 'WooCommerce Blocks',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8346',
-		since: '9.6.0',
+		since: '7.5.0',
 		hint: '__experimentalApplyCheckoutFilter has graduated to stable and this experimental function will be removed.',
 	} );
 	return applyCheckoutFilter( {

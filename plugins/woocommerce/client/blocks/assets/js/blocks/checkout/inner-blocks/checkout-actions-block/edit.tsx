@@ -9,34 +9,51 @@ import {
 	RichText,
 	useBlockProps,
 } from '@wordpress/block-editor';
+import {
+	Disabled,
+	PanelBody,
+	TextControl,
+	ToggleControl,
+} from '@wordpress/components';
 import PageSelector from '@woocommerce/editor-components/page-selector';
-import { PanelBody, ToggleControl, TextControl } from '@wordpress/components';
 import { CHECKOUT_PAGE_ID } from '@woocommerce/block-settings';
 import {
 	PlaceOrderButton,
 	ReturnToCartButton,
 } from '@woocommerce/base-components/cart-checkout';
 import clsx from 'clsx';
+import { CheckboxControl } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies
  */
 import { BlockAttributes } from './block';
 import { defaultReturnToCartButtonLabel } from './constants';
+import { TermsNotices } from '../checkout-terms-block/edit';
+import { useCheckoutTermsBlocks } from '../checkout-terms-block/switch-to-actions-terms';
+import {
+	termsConsentDefaultText,
+	termsCheckboxDefaultText,
+} from '../checkout-terms-block/constants';
 
 export const Edit = ( {
+	clientId,
 	attributes,
 	setAttributes,
 }: {
+	clientId: string;
 	attributes: BlockAttributes;
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+} ) => {
 	const blockProps = useBlockProps();
 	const {
 		cartPageId = 0,
 		showReturnToCart = false,
 		placeOrderButtonLabel,
 		returnToCartButtonLabel,
+		showTerms = false,
+		termsCheckbox = false,
+		termsText = '',
 	} = attributes;
 	const { current: savedCartPageId } = useRef( cartPageId );
 	const currentPostId = useSelect(
@@ -51,6 +68,36 @@ export const Edit = ( {
 	);
 
 	const showPrice = blockProps.className.includes( 'is-style-with-price' );
+
+	// While the Terms and Conditions block is in the checkout, it owns the terms.
+	const { termsClientId } = useCheckoutTermsBlocks( clientId );
+
+	// Mirrors the frontend: a required checkbox goes above the button, consent text below it.
+	const terms = showTerms ? (
+		<div className="wc-block-checkout__terms">
+			{ termsCheckbox && (
+				<div className="wc-block-checkout__terms-checkbox-wrapper">
+					<Disabled>
+						<CheckboxControl
+							id="terms-and-conditions"
+							checked={ false }
+							onChange={ () => undefined }
+						/>
+					</Disabled>
+				</div>
+			) }
+			<RichText
+				tagName="span"
+				value={
+					termsText ||
+					( termsCheckbox
+						? termsCheckboxDefaultText
+						: termsConsentDefaultText )
+				}
+				onChange={ ( value ) => setAttributes( { termsText: value } ) }
+			/>
+		</div>
+	) : null;
 
 	return (
 		<div { ...blockProps }>
@@ -90,6 +137,48 @@ export const Edit = ( {
 					) }
 				</PanelBody>
 
+				{ ! termsClientId && (
+					<PanelBody
+						title={ __( 'Terms and Conditions', 'woocommerce' ) }
+					>
+						{ showTerms && (
+							<TermsNotices
+								text={ termsText }
+								checkbox={ termsCheckbox }
+								setText={ ( value ) =>
+									setAttributes( { termsText: value } )
+								}
+							/>
+						) }
+						<ToggleControl
+							__nextHasNoMarginBottom
+							label={ __(
+								'Show terms and conditions',
+								'woocommerce'
+							) }
+							checked={ showTerms }
+							onChange={ () =>
+								setAttributes( { showTerms: ! showTerms } )
+							}
+						/>
+						{ showTerms && (
+							<ToggleControl
+								__nextHasNoMarginBottom
+								label={ __(
+									'Require checkbox',
+									'woocommerce'
+								) }
+								checked={ termsCheckbox }
+								onChange={ () =>
+									setAttributes( {
+										termsCheckbox: ! termsCheckbox,
+									} )
+								}
+							/>
+						) }
+					</PanelBody>
+				) }
+
 				{ showReturnToCart &&
 					! (
 						currentPostId === CHECKOUT_PAGE_ID &&
@@ -114,10 +203,13 @@ export const Edit = ( {
 					) }
 			</InspectorControls>
 			<div className="wc-block-checkout__actions">
+				{ termsCheckbox && terms }
 				<div
 					className={ clsx( 'wc-block-checkout__actions_row', {
 						'wc-block-checkout__actions_row--justify-flex-end':
 							! showReturnToCart,
+						'wc-block-checkout__actions_row--with-return-to-cart':
+							showReturnToCart,
 					} ) }
 				>
 					{ showReturnToCart && (
@@ -148,10 +240,11 @@ export const Edit = ( {
 								} }
 							/>
 						}
-						fullWidth={ ! showReturnToCart }
+						fullWidth
 						showPrice={ showPrice }
 						priceSeparator={ attributes.priceSeparator }
 					/>
+					{ ! termsCheckbox && terms }
 				</div>
 			</div>
 		</div>

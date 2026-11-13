@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 
 /**
  * Internal dependencies
@@ -61,7 +61,7 @@ const LongText = (
 	</>
 );
 
-const Template: Story< ReadMoreProps > = ( args ) => <ReadMore { ...args } />;
+const Template: StoryFn< ReadMoreProps > = ( args ) => <ReadMore { ...args } />;
 
 export const Default = Template.bind( {} );
 Default.args = {

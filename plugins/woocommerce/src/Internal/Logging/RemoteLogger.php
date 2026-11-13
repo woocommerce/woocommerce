@@ -30,6 +30,21 @@ class RemoteLogger extends \WC_Log_Handler {
 	const WC_NEW_VERSION_TRANSIENT = 'woocommerce_new_version';
 
 	/**
+	 * Log sources whose entries carry an engine-error backtrace and go through the third-party error check.
+	 */
+	private const THIRD_PARTY_CHECK_SOURCES = array( 'fatal-errors', 'store-api' );
+
+	/**
+	 * How many levels of nested arrays in the log context are sanitized. Deeper arrays are replaced with a placeholder.
+	 */
+	private const MAX_SANITIZE_DEPTH = 10;
+
+	/**
+	 * How many values in the log context are sanitized in total. Values past the limit are replaced with a placeholder.
+	 */
+	private const MAX_SANITIZE_ITEMS = 1000;
+
+	/**
 	 * Handle a log entry.
 	 *
 	 * @param int    $timestamp Log timestamp.
@@ -101,7 +116,7 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		if ( isset( $context['tags'] ) && is_array( $context['tags'] ) ) {
-			$log_data['tags'] = array_merge( $log_data['tags'], $context['tags'] );
+			$log_data['tags'] = array_merge( $log_data['tags'], $this->sanitize_array( $context['tags'] ) );
 			unset( $context['tags'] );
 		}
 
@@ -115,11 +130,13 @@ class RemoteLogger extends \WC_Log_Handler {
 		unset( $context['remote-logging'] );
 
 		// Merge the extra attributes with the remaining context since we can't send arbitrary fields to Logstash.
-		$log_data['extra'] = array_merge( $extra_attrs, $context );
+		$log_data['extra'] = $this->sanitize_array( array_merge( $extra_attrs, $context ) );
 
 		/**
 		 * Filters the formatted log data before sending it to the remote logging service.
 		 * Returning a non-array value will prevent the log from being sent.
+		 *
+		 * Since 11.4.0, string values in `tags` and `extra` are already sanitized when this filter runs. In `extra`, arrays nested more than 10 levels deep are replaced with `[max_depth_reached]`, and after the first 1000 values a `[max_items_reached]` placeholder is added and the rest are dropped.
 		 *
 		 * @since 9.2.0
 		 *
@@ -182,8 +199,8 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		// Record fatal error stats.
-		if ( WC_Log_Levels::get_level_severity( $level ) >= WC_Log_Levels::get_level_severity( WC_Log_Levels::CRITICAL ) ) {
+		// Record fatal error stats. Caught Store API errors are not fatals, and the stats ping is a blocking request that would otherwise run once per error inside the shopper's request.
+		if ( 'fatal-errors' === ( $context['source'] ?? '' ) && WC_Log_Levels::get_level_severity( $level ) >= WC_Log_Levels::get_level_severity( WC_Log_Levels::CRITICAL ) ) {
 			try {
 				$mc_stats = wc_get_container()->get( McStats::class );
 				$mc_stats->add( 'error', 'critical-errors' );
@@ -310,7 +327,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	}
 
 	/**
-	 * Check if the error exclusively contains third-party stack frames for fatal-errors source context.
+	 * Check if the error exclusively contains third-party stack frames, for the sources that carry an engine-error backtrace.
 	 *
 	 * @param string $message The error message.
 	 * @param array  $context The error context.
@@ -318,8 +335,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return bool
 	 */
 	protected function is_third_party_error( string $message, array $context ): bool {
-		// Only check for fatal-errors source context.
-		if ( ! isset( $context['source'] ) || 'fatal-errors' !== $context['source'] ) {
+		if ( ! isset( $context['source'] ) || ! in_array( $context['source'], self::THIRD_PARTY_CHECK_SOURCES, true ) ) {
 			return false;
 		}
 
@@ -363,11 +379,13 @@ class RemoteLogger extends \WC_Log_Handler {
 		/**
 		 * Filter to allow other plugins to overwrite the result of the third-party error check for remote logging.
 		 *
+		 * Runs for `fatal-errors` entries from the shutdown handler and, since 11.3.0, for caught `store-api` errors. Both provide `error.type`, `error.file` and `error.line`; caught errors use the PHP error type they would produce if uncaught. Both also carry a `backtrace` list of `#N file(line): call` strings; `fatal-errors` entries carry `true` instead when PHP supplied no stack trace.
+		 *
 		 * @since 9.2.0
 		 *
 		 * @param bool   $is_third_party_error The result of the third-party error check.
 		 * @param string $message              The error message.
-		 * @param array  $context              The error context.
+		 * @param array  $context              The error context, including `source`.
 		 */
 		return apply_filters( 'woocommerce_remote_logging_is_third_party_error', true, $message, $context );
 	}
@@ -431,12 +449,47 @@ class RemoteLogger extends \WC_Log_Handler {
 		/**
 		 * Filter the sanitized log content before it's sent to the remote logging service.
 		 *
+		 * Runs for the log message and backtrace and, since 11.4.0, for each string value in the caller's `tags` and in `extra`, including nested arrays. It does not run for the default tags.
+		 *
 		 * @since 9.5.0
 		 *
 		 * @param string $sanitized The sanitized content.
 		 * @param string $content The original content.
 		 */
 		return apply_filters( 'woocommerce_remote_logger_sanitized_content', $sanitized, $content );
+	}
+
+	/**
+	 * Sanitize the string values of an array, including nested arrays.
+	 *
+	 * Returns a new array, so values the caller passed by reference are not changed.
+	 * Arrays nested deeper than MAX_SANITIZE_DEPTH are replaced with a placeholder. After MAX_SANITIZE_ITEMS values in total, a placeholder is added and the remaining values are dropped. This way an array that references itself can't recurse forever or exhaust memory.
+	 *
+	 * @param array $data  The array to sanitize.
+	 * @param int   $depth The nesting level of $data.
+	 * @param int   $count How many values have been sanitized so far, shared across the recursion.
+	 *
+	 * @return array The sanitized array.
+	 */
+	private function sanitize_array( array $data, int $depth = 0, int &$count = 0 ): array {
+		$sanitized = array();
+
+		foreach ( $data as $key => $value ) {
+			if ( ++$count > self::MAX_SANITIZE_ITEMS ) {
+				$sanitized[ $key ] = '[max_items_reached]';
+				break;
+			}
+
+			if ( ! is_array( $value ) ) {
+				$sanitized[ $key ] = $this->sanitize( $value );
+			} elseif ( $depth < self::MAX_SANITIZE_DEPTH ) {
+				$sanitized[ $key ] = $this->sanitize_array( $value, $depth + 1, $count );
+			} else {
+				$sanitized[ $key ] = '[max_depth_reached]';
+			}
+		}
+
+		return $sanitized;
 	}
 
 	/**

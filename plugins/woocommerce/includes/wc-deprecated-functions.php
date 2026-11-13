@@ -90,7 +90,7 @@ function wc_deprecated_hook( $hook, $version, $replacement = null, $message = nu
  * When catching an exception, this allows us to log it if unexpected.
  *
  * @since 3.3.0
- * @param Exception $exception_object The exception object.
+ * @param Throwable $exception_object The exception (or error) object.
  * @param string    $function The function which threw exception.
  * @param array     $args The args passed to the function.
  * @return void
@@ -1114,32 +1114,6 @@ function wc_get_core_supported_themes() {
 }
 
 /**
- * Get min/max price meta query args.
- *
- * @deprecated 3.6.0
- * @since 3.0.0
- * @param array $args Min price and max price arguments.
- * @return array
- */
-function wc_get_min_max_price_meta_query( $args ) {
-	wc_deprecated_function( 'wc_get_min_max_price_meta_query()', '3.6' );
-
-	$current_min_price = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
-	$current_max_price = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : PHP_INT_MAX;
-
-	return apply_filters(
-		'woocommerce_get_min_max_price_meta_query',
-		array(
-			'key'     => '_price',
-			'value'   => array( $current_min_price, $current_max_price ),
-			'compare' => 'BETWEEN',
-			'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
-		),
-		$args
-	);
-}
-
-/**
  * When a term is split, ensure meta data maintained.
  *
  * @deprecated 3.6.0
@@ -1429,3 +1403,14 @@ function get_woocommerce_api_url( $path ) {
 add_filter( 'pre_option_woocommerce_api_enabled', function() {
 	return WC()->legacy_rest_api_is_available() ? 'yes' : 'no';
 } );
+
+/**
+ * Legacy noindex output for transactional pages.
+ *
+ * @since 3.2.0
+ * @deprecated 11.4.0 Use wc_page_no_robots() to filter robots directives instead.
+ * @return void
+ */
+function wc_page_noindex() {
+	wc_deprecated_function( __FUNCTION__, '11.4.0', 'wc_page_no_robots' );
+}

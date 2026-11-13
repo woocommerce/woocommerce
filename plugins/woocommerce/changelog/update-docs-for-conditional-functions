@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Document that conditional functions simply return false when used before the main query is set up.

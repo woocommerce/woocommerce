@@ -9,11 +9,12 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
- * This renderer covers both core/paragraph, core/heading and core/site-title blocks.
+ * This renderer covers the core/paragraph, core/heading, core/preformatted and core/site-title blocks.
  */
 class Text extends Abstract_Block_Renderer {
 	/**
@@ -26,7 +27,7 @@ class Text extends Abstract_Block_Renderer {
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		// Do not render empty blocks.
-		if ( empty( trim( wp_strip_all_tags( $block_content ) ) ) ) {
+		if ( empty( trim( wp_strip_all_tags( $block_content ) ) ) && ! $this->has_personalization_tag( $block_content ) ) {
 			return '';
 		}
 
@@ -55,24 +56,29 @@ class Text extends Abstract_Block_Renderer {
 				$alignment_from_class = 'left';
 			}
 
-			// remove has-background to prevent double padding applied for wrapper and inner element.
-			$block_classes = str_replace( 'has-background', '', $block_classes );
-			// remove border related classes because we handle border on wrapping table cell.
-			$block_classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes );
-			/** @var string $block_classes */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
-			$html->set_attribute( 'class', trim( $block_classes ) );
+			// Remove the background and border classes because we render both on the wrapping table cell.
+			Html_Processing_Helper::remove_wrapper_handled_classes( $html );
 			$block_content = $html->get_updated_html();
 		}
 
 		$block_styles      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'border', 'background-color', 'color', 'typography' ) );
 		$additional_styles = array(
-			'min-width' => '100%', // prevent Gmail App from shrinking the table on mobile devices.
+			'min-width'  => '100%', // prevent Gmail App from shrinking the table on mobile devices.
+			'word-break' => 'break-word', // prevent long unbreakable words (e.g. URLs) from expanding the table and breaking the email layout.
 		);
 
 		// Add fallback text color when no custom text color or preset text color is set.
 		if ( empty( $block_styles['declarations']['color'] ) ) {
 			$email_styles               = $rendering_context->get_theme_styles();
 			$additional_styles['color'] = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000'; // Fallback for the text color.
+		}
+
+		// Use the font size inherited from a parent block (e.g. a Group) when the block sets none.
+		if ( empty( $block_styles['declarations']['font-size'] ) && is_string( $parsed_block['email_attrs']['font-size'] ?? null ) ) {
+			$inherited_font_size = Styles_Helper::get_static_font_size( $parsed_block['email_attrs']['font-size'] );
+			if ( null !== $inherited_font_size ) {
+				$additional_styles['font-size'] = $inherited_font_size;
+			}
 		}
 
 		$additional_styles['text-align'] = $rendering_context->get_default_text_align();
@@ -101,6 +107,21 @@ class Text extends Abstract_Block_Renderer {
 	}
 
 	/**
+	 * Checks whether the content contains a personalization tag, e.g. <!--[woocommerce/customer-first-name]-->.
+	 *
+	 * @param string $block_content Block content.
+	 */
+	private function has_personalization_tag( string $block_content ): bool {
+		$html = new \WP_HTML_Tag_Processor( $block_content );
+		while ( $html->next_token() ) {
+			if ( '#comment' === $html->get_token_type() && preg_match( '/^\[[a-zA-Z0-9\-\/]+(?:\s+.*)?\]$/s', trim( $html->get_modifiable_text() ) ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * 1) We need to remove padding because we render padding on wrapping table cell
 	 * 2) We also need to replace font-size to avoid clamp() because clamp() is not supported in many email clients.
 	 * The font size values is automatically converted to clamp() when WP site theme is configured to use fluid layouts.
@@ -122,6 +143,18 @@ class Text extends Abstract_Block_Renderer {
 
 			// Remove border styles. We apply border styles on the wrapping table cell.
 			$element_style = (string) preg_replace( '/border[^:]*:.?[0-9a-z-()#]+;?/', '', $element_style );
+
+			// Remove the background color for the same reason we remove the background classes: it is
+			// rendered on the wrapping table cell, and a translucent color left here paints twice.
+			// This assumes the cell gets the same color from the block attributes, which is true for
+			// anything the editor saves. Markup that carries an inline background without the matching
+			// attribute loses it, the same way padding, margin, and border above already behave.
+			// The lookbehind keeps the match anchored to the start of a property name, so a longer
+			// property that merely ends in "background-color" (a custom property, say) is not cut in
+			// half, which would leave its prefix fused to the following declaration. Property names
+			// are case-insensitive in CSS and a colon may be surrounded by whitespace, so both are
+			// matched — unlike the class names above, which the CSS inliner matches case-sensitively.
+			$element_style = (string) preg_replace( '/(?<![a-z-])background-color\s*:\s*[^;]+;?/i', '', $element_style );
 
 			// We define the font-size on the wrapper element, but we need to keep font-size definition here
 			// to prevent CSS Inliner from adding a default value and overriding the value set by user, which is on the wrapper element.

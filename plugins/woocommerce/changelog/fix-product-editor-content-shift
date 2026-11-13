@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent product editor content from shifting during initial page load.

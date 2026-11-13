@@ -11,8 +11,10 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Internal\Utilities\SiteLocale;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -50,9 +52,7 @@ add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
 /**
  * Short Description (excerpt).
  */
-if ( function_exists( 'do_blocks' ) ) {
-	add_filter( 'woocommerce_short_description', 'do_blocks', 9 );
-}
+add_filter( 'woocommerce_short_description', 'do_blocks', 9 );
 add_filter( 'woocommerce_short_description', 'wptexturize' );
 add_filter( 'woocommerce_short_description', 'convert_smilies' );
 add_filter( 'woocommerce_short_description', 'convert_chars' );
@@ -129,7 +129,7 @@ function wc_create_order( $args = array() ) {
 		// Set these fields when creating a new order but not when updating an existing order.
 		if ( ! $args['order_id'] ) {
 			$order->set_currency( get_woocommerce_currency() );
-			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_prices_include_tax( wc_prices_include_tax() );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
 		}
@@ -321,8 +321,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 
 	if ( $filter_template !== $template ) {
 		if ( ! file_exists( $filter_template ) ) {
-			/* translators: %s template */
-			wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $filter_template . '</code>' ), '2.1' );
+			wc_doing_it_wrong( __FUNCTION__, sprintf( '%s does not exist.', '<code>' . $filter_template . '</code>' ), '2.1' );
 			return;
 		}
 		$template = $filter_template;
@@ -339,7 +338,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 		if ( isset( $args['action_args'] ) ) {
 			wc_doing_it_wrong(
 				__FUNCTION__,
-				__( 'action_args should not be overwritten when calling wc_get_template.', 'woocommerce' ),
+				'action_args should not be overwritten when calling wc_get_template.',
 				'3.6.0'
 			);
 			unset( $args['action_args'] );
@@ -563,6 +562,7 @@ function get_woocommerce_currency_symbols() {
 			'CAD' => '&#36;',
 			'CDF' => 'Fr',
 			'CHF' => '&#67;&#72;&#70;',
+			'CHW' => 'CHW',
 			'CLP' => '&#36;',
 			'CNY' => '&yen;',
 			'COP' => '&#36;',
@@ -1011,6 +1011,8 @@ function wc_get_page_children( $page_id ) {
  * @return void
  */
 function flush_rewrite_rules_on_shop_page_save() {
+	global $wpdb;
+
 	$screen    = get_current_screen();
 	$screen_id = $screen ? $screen->id : '';
 
@@ -1024,10 +1026,13 @@ function flush_rewrite_rules_on_shop_page_save() {
 		return;
 	}
 
-	$post_id      = intval( $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	$shop_page_id = wc_get_page_id( 'shop' );
+	$post_id = intval( $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-	if ( $shop_page_id === $post_id || in_array( $post_id, wc_get_page_children( $shop_page_id ), true ) ) {
+	// Use the same Shop roots as wc_fix_rewrite_rules(), and walk up from the edited page so query filters cannot hide it.
+	$stored_shop_page_id = absint( $wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name = 'woocommerce_shop_page_id'" ) );
+	$shop_page_ids       = array( wc_get_page_id( 'shop' ), absint( get_option( 'woocommerce_shop_page_id' ) ), $stored_shop_page_id );
+
+	if ( $post_id > 0 && array_intersect( array_merge( array( $post_id ), get_post_ancestors( $post_id ) ), $shop_page_ids ) ) {
 		do_action( 'woocommerce_flush_rewrite_rules' );
 	}
 }
@@ -1041,7 +1046,7 @@ add_action( 'admin_footer', 'flush_rewrite_rules_on_shop_page_save' );
  * @return array
  */
 function wc_fix_rewrite_rules( $rules ) {
-	global $wp_rewrite;
+	global $wp_rewrite, $wpdb;
 
 	$permalinks = wc_get_permalink_structure();
 
@@ -1054,32 +1059,55 @@ function wc_fix_rewrite_rules( $rules ) {
 		}
 	}
 
-	// If the shop page is used as the base, we need to handle shop page subpages to avoid 404s.
-	if ( ! $permalinks['use_verbose_page_rules'] ) {
+	$shop_page_id = wc_get_page_id( 'shop' );
+	$product_base = trim( rawurldecode( $permalinks['product_base'] ), '/' );
+	$parent_ids   = array();
+
+	// The product base is site-wide, while multilingual extensions can filter the Shop page for the current request.
+	// Read the stored ID directly too: get_option() can already return a translated Shop page.
+	$stored_shop_page_id = absint( $wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name = 'woocommerce_shop_page_id'" ) );
+	$shop_page_ids       = array_unique( array( absint( get_option( 'woocommerce_shop_page_id' ) ), $shop_page_id, $stored_shop_page_id ) );
+	foreach ( $shop_page_ids as $candidate_shop_page_id ) {
+		$shop_page = $candidate_shop_page_id > 0 ? get_post( $candidate_shop_page_id ) : null;
+		$shop_base = $shop_page instanceof WP_Post && 'page' === $shop_page->post_type ? trim( rawurldecode( (string) get_page_uri( $candidate_shop_page_id ) ), '/' ) : '';
+
+		if ( '' !== $shop_base && ( $shop_base === $product_base || 0 === strpos( $product_base, $shop_base . '/' ) ) ) {
+			$parent_ids[] = $candidate_shop_page_id;
+		}
+	}
+
+	if ( empty( $parent_ids ) ) {
 		return $rules;
 	}
 
-	$shop_page_id = wc_get_page_id( 'shop' );
-	if ( $shop_page_id ) {
-		$page_rewrite_rules = array();
-		$subpages           = wc_get_page_children( $shop_page_id );
+	// Read descendants directly so query filters cannot change which pages get persisted rules.
+	$statuses           = get_post_stati( array( 'exclude_from_search' => false ) );
+	$status_format      = implode( ', ', array_fill( 0, count( $statuses ), '%s' ) );
+	$page_rewrite_rules = array();
+	$subpages           = array();
 
-		// Subpage rules.
-		foreach ( $subpages as $subpage ) {
-			$uri                                = get_page_uri( $subpage );
-			$page_rewrite_rules[ $uri . '/?$' ] = 'index.php?pagename=' . $uri;
-			$wp_generated_rewrite_rules         = $wp_rewrite->generate_rewrite_rules( $uri, EP_PAGES, true, true, false, false );
-			foreach ( $wp_generated_rewrite_rules as $key => $value ) {
-				$wp_generated_rewrite_rules[ $key ] = $value . '&pagename=' . $uri;
-			}
-			$page_rewrite_rules = array_merge( $page_rewrite_rules, $wp_generated_rewrite_rules );
-		}
-
-		// Merge with rules.
-		$rules = array_merge( $page_rewrite_rules, $rules );
+	// Start from the filtered Shop page and every root matching the persisted product base, one level per query.
+	$parent_ids = array_filter( array_unique( array_merge( array( $shop_page_id ), $parent_ids ) ), static fn( $page_id ) => $page_id > 0 );
+	while ( $parent_ids ) {
+		$parent_format = implode( ', ', array_fill( 0, count( $parent_ids ), '%d' ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The interpolated values are placeholder lists.
+		$page_ids   = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'page' AND post_parent IN ( {$parent_format} ) AND post_status IN ( {$status_format} )", array_merge( $parent_ids, $statuses ) ) );
+		$parent_ids = array_diff( array_map( 'absint', $page_ids ), $subpages );
+		$subpages   = array_merge( $subpages, $parent_ids );
 	}
 
-	return $rules;
+	// Subpage rules.
+	foreach ( $subpages as $subpage ) {
+		$uri                                = get_page_uri( $subpage );
+		$page_rewrite_rules[ $uri . '/?$' ] = 'index.php?pagename=' . $uri;
+		$wp_generated_rewrite_rules         = $wp_rewrite->generate_rewrite_rules( $uri, EP_PAGES, true, true, false, false );
+		foreach ( $wp_generated_rewrite_rules as $key => $value ) {
+			$wp_generated_rewrite_rules[ $key ] = $value . '&pagename=' . $uri;
+		}
+		$page_rewrite_rules = array_merge( $page_rewrite_rules, $wp_generated_rewrite_rules );
+	}
+
+	return array_merge( $page_rewrite_rules, $rules );
 }
 add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
 
@@ -1366,7 +1394,11 @@ function wc_array_cartesian( $input ) {
 /**
  * Run a MySQL transaction query, if supported.
  *
+ * Inside a transaction that DatabaseTransaction::run() owns, a start sets a
+ * savepoint, and the matching commit or rollback releases or rolls back to it.
+ *
  * @since 2.5.0
+ * @since 11.4.0 Sets savepoints inside a transaction that DatabaseTransaction::run() owns.
  * @param string $type Types: start (default), commit, rollback.
  * @param bool   $force use of transactions.
  * @return void
@@ -1379,6 +1411,16 @@ function wc_transaction_query( $type = 'start', $force = false ) {
 	wc_maybe_define_constant( 'WC_USE_TRANSACTIONS', true );
 
 	if ( Constants::is_true( 'WC_USE_TRANSACTIONS' ) || $force ) {
+		if ( DatabaseTransaction::is_open() ) {
+			if ( 'commit' === $type || 'rollback' === $type ) {
+				DatabaseTransaction::close_latest( 'commit' === $type );
+			} else {
+				DatabaseTransaction::start();
+			}
+			return;
+		}
+
+		DatabaseTransaction::track_caller( $type );
 		switch ( $type ) {
 			case 'commit':
 				$wpdb->query( 'COMMIT' );
@@ -1480,7 +1522,7 @@ function wc_get_credit_card_type_label( $type ) {
 	$labels = apply_filters(
 		'woocommerce_credit_card_type_labels',
 		array(
-			'mastercard'       => _x( 'MasterCard', 'Name of credit card', 'woocommerce' ),
+			'mastercard'       => _x( 'Mastercard', 'Name of credit card', 'woocommerce' ),
 			'visa'             => _x( 'Visa', 'Name of credit card', 'woocommerce' ),
 			'discover'         => _x( 'Discover', 'Name of credit card', 'woocommerce' ),
 			'american express' => _x( 'American Express', 'Name of credit card', 'woocommerce' ),
@@ -2001,8 +2043,7 @@ function wc_get_logger() {
 		wc_doing_it_wrong(
 			__FUNCTION__,
 			sprintf(
-				/* translators: 1: class name 2: woocommerce_logging_class 3: WC_Logger_Interface */
-				__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'woocommerce' ),
+				'The class %1$s provided by %2$s filter must implement %3$s.',
 				'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
 				'<code>woocommerce_logging_class</code>',
 				'<code>WC_Logger_Interface</code>'
@@ -2132,25 +2173,38 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
  * Get permalink settings for things like products and taxonomies.
  *
  * As of 3.3.0, the permalink settings are stored to the option instead of
- * being blank and inheritting from the locale. This speeds up page loading
+ * being blank and inheriting from the locale. This speeds up page loading
  * times by negating the need to switch locales on each page load.
  *
  * This is more inline with WP core behavior which does not localize slugs.
+ *
+ * The `use_verbose_page_rules` key is kept for backward compatibility only. WooCommerce no longer
+ * writes or reads it - wc_fix_rewrite_rules() derives Shop subpage rules from the current product
+ * base and Shop page path instead - so its stored value is whatever the last save left behind.
  *
  * @since  3.0.0
  * @return array
  */
 function wc_get_permalink_structure() {
-	$saved_permalinks = (array) get_option( 'woocommerce_permalinks', array() );
-	$permalinks       = wp_parse_args(
+	$saved_permalinks   = (array) get_option( 'woocommerce_permalinks', array() );
+	$default_permalinks = array(
+		'product_base'           => 'product',
+		'category_base'          => 'product-category',
+		'tag_base'               => 'product-tag',
+		'attribute_base'         => '',
+		'use_verbose_page_rules' => false,
+	);
+
+	foreach ( array( 'product_base', 'category_base', 'tag_base' ) as $permalink_key ) {
+		if ( empty( $saved_permalinks[ $permalink_key ] ) ) {
+			// These defaults are persisted site-wide, so translate them in the site locale rather than the request locale.
+			$default_permalinks[ $permalink_key ] = SiteLocale::translate_slug( $default_permalinks[ $permalink_key ] );
+		}
+	}
+
+	$permalinks = wp_parse_args(
 		array_filter( $saved_permalinks ),
-		array(
-			'product_base'           => _x( 'product', 'slug', 'woocommerce' ),
-			'category_base'          => _x( 'product-category', 'slug', 'woocommerce' ),
-			'tag_base'               => _x( 'product-tag', 'slug', 'woocommerce' ),
-			'attribute_base'         => '',
-			'use_verbose_page_rules' => false,
-		)
+		$default_permalinks
 	);
 
 	if ( $saved_permalinks !== $permalinks ) {
@@ -2519,8 +2573,7 @@ function wc_get_server_database_version() {
  */
 function wc_load_cart() {
 	if ( ! did_action( 'before_woocommerce_init' ) || doing_action( 'before_woocommerce_init' ) ) {
-		/* translators: 1: wc_load_cart 2: woocommerce_init */
-		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), 'wc_load_cart', 'woocommerce_init' ), '3.7' );
+		wc_doing_it_wrong( __FUNCTION__, sprintf( '%1$s should not be called before the %2$s action.', 'wc_load_cart', 'woocommerce_init' ), '3.7' );
 		return;
 	}
 

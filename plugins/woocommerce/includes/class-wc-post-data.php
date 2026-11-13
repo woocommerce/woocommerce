@@ -43,7 +43,6 @@ class WC_Post_Data {
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
 		add_action( 'set_object_terms', array( __CLASS__, 'delete_product_query_transients' ) );
-		add_action( 'set_object_terms', array( __CLASS__, 'recount_terms_for_product_visibility_change' ), 10, 6 );
 		add_action( 'deleted_term_relationships', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_stock_status', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_visibility', array( __CLASS__, 'delete_product_query_transients' ) );
@@ -53,7 +52,9 @@ class WC_Post_Data {
 		add_action( 'edited_term', array( __CLASS__, 'edited_term' ), 10, 3 );
 		add_filter( 'update_order_item_metadata', array( __CLASS__, 'update_order_item_metadata' ), 10, 5 );
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
+		add_filter( 'wp_insert_post_data', array( __CLASS__, 'sanitize_coupon_code_on_save' ), 5, 3 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
+		add_filter( 'edit_post_title', array( __CLASS__, 'decode_coupon_code_for_editing' ), 10, 2 );
 		add_filter( 'oembed_response_data', array( __CLASS__, 'filter_oembed_response_data' ), 10, 2 );
 		add_filter( 'wp_untrash_post_status', array( __CLASS__, 'wp_untrash_post_status' ), 10, 3 );
 
@@ -281,17 +282,85 @@ class WC_Post_Data {
 
 				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE meta_key = %s AND meta_value = %s;", $edited_term->slug, 'attribute_' . sanitize_title( $taxonomy ), self::$editing_term->slug ) );
 
-				$wpdb->query(
+				// Edit the decoded array, not the serialized text: a text replace also hits matching text inside other values and breaks their lengths.
+				$old_slug = self::$editing_term->slug;
+				$meta_ids = $wpdb->get_col(
 					$wpdb->prepare(
-						"UPDATE {$wpdb->postmeta} SET meta_value = REPLACE( meta_value, %s, %s ) WHERE meta_key = '_default_attributes'",
-						serialize( self::$editing_term->taxonomy ) . serialize( self::$editing_term->slug ),
-						serialize( $edited_term->taxonomy ) . serialize( $edited_term->slug )
+						"SELECT meta_id FROM {$wpdb->postmeta} WHERE meta_key = '_default_attributes' AND meta_value LIKE %s",
+						'%' . $wpdb->esc_like( serialize( $taxonomy ) . serialize( $old_slug ) ) . '%' // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Matches the stored serialized form.
 					)
 				);
+
+				foreach ( array_chunk( array_map( 'absint', $meta_ids ), 500 ) as $chunk ) {
+					$rows     = $wpdb->get_results( "SELECT meta_id, post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_id IN (" . implode( ',', $chunk ) . ')' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- IDs are absint'd.
+					$updates  = array();
+					$post_ids = array();
+
+					foreach ( $rows as $row ) {
+						$default_attributes = @unserialize( trim( $row->meta_value ), array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- Same as maybe_unserialize(), without objects.
+
+						// WooCommerce only stores strings here; leave rows holding anything else alone.
+						if ( ! is_array( $default_attributes ) || array_filter( $default_attributes, 'is_scalar' ) !== $default_attributes || ( $default_attributes[ $taxonomy ] ?? null ) !== $old_slug ) {
+							continue;
+						}
+
+						$default_attributes[ $taxonomy ] = $edited_term->slug;
+
+						$updates[ (int) $row->meta_id ] = array(
+							'old_value' => $row->meta_value,
+							'new_value' => serialize( $default_attributes ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Stored in the same format WordPress uses.
+						);
+						$post_ids[]                     = (int) $row->post_id;
+					}
+
+					if ( ! $updates ) {
+						continue;
+					}
+
+					$updated = self::update_post_meta_batch( $updates );
+
+					if ( false === $updated ) {
+						wc_get_logger()->error(
+							sprintf( 'Could not update the default attributes of products %1$s after a %2$s term was renamed: %3$s', implode( ', ', array_unique( $post_ids ) ), $taxonomy, $wpdb->last_error ),
+							array( 'source' => 'product-attributes' )
+						);
+					}
+
+					wp_cache_delete_multiple( array_unique( $post_ids ), 'post_meta' );
+				}
 			}
 		} else {
 			self::$editing_term = null;
 		}
+	}
+
+	/**
+	 * Update post metadata in one query, preserving concurrent edits.
+	 *
+	 * Each CASE branch assigns a replacement only when the row still holds its original value, compared under the column's collation; ELSE keeps newer values.
+	 * Writes bypass metadata hooks. The caller must invalidate the affected post meta caches.
+	 *
+	 * @param array<int, array{old_value: string, new_value: string}> $updates Original and replacement stored values, keyed by metadata ID.
+	 * @return bool Whether the query succeeded.
+	 */
+	private static function update_post_meta_batch( array $updates ): bool {
+		global $wpdb;
+
+		if ( ! $updates ) {
+			return true;
+		}
+
+		$cases = array();
+		foreach ( $updates as $meta_id => $values ) {
+			$cases[ (int) $meta_id ] = $wpdb->prepare(
+				'WHEN meta_id = %d AND meta_value = %s THEN %s',
+				$meta_id,
+				$values['old_value'],
+				$values['new_value']
+			);
+		}
+
+		return false !== $wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = CASE " . implode( ' ', $cases ) . ' ELSE meta_value END WHERE meta_id IN (' . implode( ',', array_keys( $cases ) ) . ')' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Built from prepared fragments and integer IDs.
 	}
 
 	/**
@@ -361,8 +430,8 @@ class WC_Post_Data {
 				$order_title .= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
 			}
 			$data['post_title'] = $order_title;
-		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) { // WPCS: input var ok, CSRF ok.
-			$product_type = wc_clean( wp_unslash( $_POST['product-type'] ) ); // WPCS: input var ok, CSRF ok.
+		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Cleaned input selects known product types only.
+			$product_type = wc_clean( wp_unslash( $_POST['product-type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Cleaned input selects known product types only.
 			switch ( $product_type ) {
 				case ProductType::GROUPED:
 				case ProductType::VARIABLE:
@@ -371,12 +440,61 @@ class WC_Post_Data {
 			}
 		} elseif ( 'product' === $data['post_type'] && ProductStatus::AUTO_DRAFT === $data['post_status'] ) {
 			$data['post_title'] = 'AUTO-DRAFT';
-		} elseif ( 'shop_coupon' === $data['post_type'] ) {
-			// Coupons should never allow unfiltered HTML.
-			$data['post_title'] = wp_filter_kses( $data['post_title'] );
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Sanitize coupon codes with wc_sanitize_coupon_code() when coupons are saved, so they're stored the same way for every user.
+	 *
+	 * Uses the title passed to wp_insert_post(), because WordPress has already run kses on `$data` for some users.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param array $data                An array of slashed, sanitized post data.
+	 * @param array $postarr             An array of sanitized post data.
+	 * @param array $unsanitized_postarr An array of slashed post data as passed to wp_insert_post().
+	 * @return array
+	 */
+	public static function sanitize_coupon_code_on_save( $data, $postarr, $unsanitized_postarr ) {
+		global $wpdb;
+
+		if ( ! is_array( $data ) || 'shop_coupon' !== ( $data['post_type'] ?? '' ) ) {
+			return $data;
+		}
+
+		$title = wc_sanitize_coupon_code( wp_unslash( $unsanitized_postarr['post_title'] ?? $data['post_title'] ) );
+
+		// Like wp_insert_post(), encode emoji when the column can't store them.
+		if ( in_array( $wpdb->get_col_charset( $wpdb->posts, 'post_title' ), array( 'utf8', 'utf8mb3' ), true ) ) {
+			$title = wp_encode_emoji( $title );
+		}
+
+		$data['post_title'] = wp_slash( $title );
+
+		return $data;
+	}
+
+	/**
+	 * Decode coupon codes for the title field on the coupon edit screen.
+	 *
+	 * WordPress encodes titles again for editing, so the field would otherwise show `&amp;` instead of `&`.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param string $title   Post title.
+	 * @param int    $post_id Post ID.
+	 * @return string
+	 */
+	public static function decode_coupon_code_for_editing( $title, $post_id ) {
+		if ( ! is_string( $title ) || 'shop_coupon' !== get_post_type( $post_id ) ) {
+			return $title;
+		}
+
+		return html_entity_decode( $title, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) );
 	}
 
 	/**
@@ -414,6 +532,7 @@ class WC_Post_Data {
 				$data_store->delete_variations( $id, true );
 				$data_store->delete_from_lookup_table( $id, 'wc_product_meta_lookup' );
 				$container->get( ProductAttributesLookupDataStore::class )->on_product_deleted( $id );
+				WC_Cache_Helper::invalidate_cache_group( 'product_' . $id );
 
 				$parent_id = wp_get_post_parent_id( $id );
 				if ( $parent_id ) {
@@ -426,6 +545,7 @@ class WC_Post_Data {
 				$data_store->delete_from_lookup_table( $id, 'wc_product_meta_lookup' );
 				wc_delete_product_transients( wp_get_post_parent_id( $id ) );
 				$container->get( ProductAttributesLookupDataStore::class )->on_product_deleted( $id );
+				WC_Cache_Helper::invalidate_cache_group( 'product_' . $id );
 
 				break;
 			case 'shop_order':
@@ -609,13 +729,16 @@ class WC_Post_Data {
 			do_action( 'woocommerce_delete_order_items', $postid );
 
 			$wpdb->query(
-				"
+				$wpdb->prepare(
+					"
 				DELETE {$wpdb->prefix}woocommerce_order_items, {$wpdb->prefix}woocommerce_order_itemmeta
 				FROM {$wpdb->prefix}woocommerce_order_items
 				JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_items.order_item_id = {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id
-				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = '{$postid}';
-				"
-			); // WPCS: unprepared SQL ok.
+				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = %d;
+					",
+					$postid
+				)
+			);
 
 			do_action( 'woocommerce_deleted_order_items', $postid );
 		}
@@ -687,10 +810,13 @@ class WC_Post_Data {
 	 * @param array  $old_tt_ids  The old array of term taxonomy IDs.
 	 *
 	 * @since 10.4.0
+	 * @deprecated 11.2.0 Product term-count consistency is now handled by the TermCount service.
 	 *
 	 * @return void
 	 */
 	public static function recount_terms_for_product_visibility_change( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
+		wc_deprecated_function( __FUNCTION__, '11.2.0' );
+
 		if ( 'product_visibility' !== $taxonomy ) {
 			return;
 		}

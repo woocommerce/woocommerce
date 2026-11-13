@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -27,7 +28,7 @@ defined( 'ABSPATH' ) || exit;
  * This function should be used for order retrieval so that when we move to
  * custom tables, functions still work.
  *
- * Args and usage: https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/
+ * Args and usage: https://developer.woocommerce.com/docs/features/orders/wc-get-orders/
  *
  * @since  2.6.0
  * @param  array $args Array of args (above).
@@ -182,7 +183,7 @@ function wc_get_order_status_name( $status ) {
 	if ( ! is_string( $status ) ) {
 		wc_doing_it_wrong(
 			__FUNCTION__,
-			__( 'An invalid order status slug was supplied.', 'woocommerce' ),
+			'An invalid order status slug was supplied.',
 			'9.6'
 		);
 	}
@@ -433,6 +434,9 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 	if ( is_numeric( $product ) ) {
 		$product = wc_get_product( $product );
 	}
+	if ( ! $product instanceof WC_Product ) {
+		return false;
+	}
 	$download = new WC_Customer_Download();
 	$download->set_download_id( $download_id );
 	$download->set_product_id( $product->get_id() );
@@ -465,7 +469,7 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 function wc_downloadable_product_permissions( $order_id, $force = false ) {
 	$order = wc_get_order( $order_id );
 
-	if ( ! $order || ( $order->get_data_store()->get_download_permissions_granted( $order ) && ! $force ) ) {
+	if ( ! $order instanceof WC_Order || ( $order->get_data_store()->get_download_permissions_granted( $order ) && ! $force ) ) {
 		return;
 	}
 
@@ -473,9 +477,20 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 		return;
 	}
 
+	$refunded_item_ids = array();
+	foreach ( $order->get_refunds() as $refund ) {
+		foreach ( $refund->get_items() as $refund_item ) {
+			$refunded_item_ids[] = absint( $refund_item->get_meta( '_refunded_item_id' ) );
+		}
+	}
+
 	$line_items = $order->get_items();
 	if ( count( $line_items ) > 0 ) {
 		foreach ( $line_items as $item ) {
+			if ( in_array( $item->get_id(), $refunded_item_ids, true ) ) {
+				continue;
+			}
+
 			$product = $item->get_product();
 
 			if ( $product && $product->exists() && $product->is_downloadable() ) {
@@ -588,7 +603,9 @@ function wc_create_refund( $args = array() ) {
 		$refund->set_currency( $order->get_currency() );
 		$refund->set_amount( $args['amount'] );
 		$refund->set_parent_id( absint( $args['order_id'] ) );
-		$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
+		// A refund can be created with nobody logged in (gateway webhook, REST, WP-CLI, cron). Record no
+		// user in that case; falling back to user 1 attributes the refund to whoever that happens to be.
+		$refund->set_refunded_by( get_current_user_id() );
 		$refund->set_prices_include_tax( $order->get_prices_include_tax() );
 
 		if ( ! is_null( $args['reason'] ) ) {
@@ -623,15 +640,25 @@ function wc_create_refund( $args = array() ) {
 				// later to be used for revoking download permission.
 				// checking if the item is a product, as we only need to revoke download permission for products.
 				if ( $item->is_type( 'line_item' ) ) {
+					$product_id = $item->get_product_id();
+					if ( $item instanceof WC_Order_Item_Product && $item->get_variation_id() ) {
+						$product_id = $item->get_variation_id();
+					}
 					$refunded_order_and_products[ $item_id ] = array(
 						'order_id'   => $order->get_id(),
-						'product_id' => $item->get_product_id(),
+						'product_id' => $product_id,
 					);
 				}
 
 				$class         = get_class( $item );
 				$refunded_item = new $class( $item );
 				$refunded_item->set_id( 0 );
+
+				// Copied metadata needs new IDs so refund changes cannot update or delete the original item's metadata.
+				foreach ( $refunded_item->get_meta_data() as $meta ) {
+					$meta->id = 0;
+				}
+
 				$refunded_item->add_meta_data( '_refunded_item_id', $item_id, true );
 				$refunded_item->set_total( wc_format_refund_total( $refund_total ) );
 				$refunded_item->set_taxes(
@@ -1018,10 +1045,24 @@ add_action( 'woocommerce_before_delete_order', 'wc_update_total_sales_counts' );
 function wc_update_coupon_usage_counts( $order_id ) {
 	$order = wc_get_order( $order_id );
 
-	if ( ! $order ) {
+	// Refunds never consume coupon usage.
+	if ( ! $order || $order instanceof WC_Order_Refund ) {
 		return;
 	}
 
+	/**
+	 * Data store wrapper.
+	 *
+	 * @var WC_Data_Store $data_store
+	 */
+	$data_store = $order->get_data_store();
+
+	// Only order data stores can record coupon usage.
+	if ( ! $data_store->has_callable( 'get_recorded_coupon_usage_counts' ) ) {
+		return;
+	}
+
+	$coupon_codes     = array_filter( $order->get_coupon_codes(), fn( $code ) => ! StringUtil::is_null_or_whitespace( $code ) );
 	$has_recorded     = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
 	$invalid_statuses = array( OrderStatus::CANCELLED, OrderStatus::FAILED, OrderStatus::TRASH );
 
@@ -1037,41 +1078,52 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		$invalid_statuses
 	);
 
-	if ( $order->has_status( $invalid_statuses ) && $has_recorded ) {
+	$is_invalid = $order->has_status( $invalid_statuses );
+
+	if ( $is_invalid && $has_recorded ) {
 		$action = 'reduce';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
-	} elseif ( ! $order->has_status( $invalid_statuses ) && ! $has_recorded ) {
+	} elseif ( ! $is_invalid && $coupon_codes && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
-	} elseif ( $order->has_status( $invalid_statuses ) ) {
+	} elseif ( $is_invalid ) {
 		wc_release_coupons_for_order( $order );
 		return;
 	} else {
 		return;
 	}
 
-	if ( count( $order->get_coupon_codes() ) > 0 ) {
-		foreach ( $order->get_coupon_codes() as $code ) {
-			if ( StringUtil::is_null_or_whitespace( $code ) ) {
-				continue;
-			}
+	if ( count( $coupon_codes ) > 0 ) {
+		$identities = $order->get_meta( '_coupon_usage_identities' );
+		$identities = is_array( $identities ) ? $identities : array();
 
+		foreach ( $coupon_codes as $code ) {
 			$coupon  = new WC_Coupon( $code );
 			$used_by = $order->get_user_id();
 
-			if ( ! $used_by ) {
+			if ( ! $used_by && is_callable( array( $order, 'get_billing_email' ) ) ) {
 				$used_by = $order->get_billing_email();
 			}
 
 			switch ( $action ) {
 				case 'reduce':
-					$coupon->decrease_usage_count( $used_by );
+					$coupon->decrease_usage_count( $identities[ $coupon->get_id() ] ?? $used_by );
 					break;
 				case 'increase':
 					$coupon->increase_usage_count( $used_by, $order );
+					if ( $coupon->get_id() ) {
+						$identities[ $coupon->get_id() ] = $used_by;
+					}
 					break;
 			}
 		}
+
+		if ( 'increase' === $action && $identities ) {
+			$order->update_meta_data( '_coupon_usage_identities', $identities );
+		} elseif ( 'reduce' === $action ) {
+			$order->delete_meta_data( '_coupon_usage_identities' );
+		}
+		$order->save_meta_data();
 		wc_release_coupons_for_order( $order );
 	}
 }
@@ -1116,8 +1168,9 @@ function wc_cancel_unpaid_orders() {
 	}
 
 	// Schedule the next event using Action Scheduler if available, otherwise fall back to WordPress cron.
+	// Not unique: this runs inside the action itself, and a unique check would see the in-progress run and schedule nothing.
 	if ( function_exists( 'as_schedule_single_action' ) ) {
-		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', false );
+		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
 	} else {
 		wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 	}
@@ -1149,7 +1202,7 @@ function wc_cancel_unpaid_orders() {
 			 * @param WC_Order $order          The unpaid order object.
 			 */
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', in_array( $order->get_created_via(), array( 'checkout', 'store-api' ), true ), $order ) ) {
-				$order->update_status( OrderStatus::CANCELLED, __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
+				wc_get_container()->get( UnpaidOrderTimeoutMarker::class )->cancel_unpaid_order( $order, __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
 			}
 		}
 	}
@@ -1190,7 +1243,8 @@ function wc_get_order_note( $data ) {
 		'woocommerce_get_order_note',
 		array(
 			'id'            => (int) $data->comment_ID,
-			'date_created'  => wc_string_to_datetime( $data->comment_date ),
+			// comment_date is frozen in the timezone the site had when the note was saved, so use the GMT date.
+			'date_created'  => wc_string_to_datetime( mysql_to_rfc3339( $data->comment_date_gmt ) . 'Z' ),
 			'content'       => $data->comment_content,
 			'customer_note' => (bool) get_comment_meta( $data->comment_ID, 'is_customer_note', true ),
 			'added_by'      => __( 'WooCommerce', 'woocommerce' ) === $data->comment_author ? 'system' : $data->comment_author,
@@ -1209,6 +1263,8 @@ function wc_get_order_note( $data ) {
  *
  *     @type string $limit         Maximum number of notes to retrieve.
  *                                 Default empty (no limit).
+ *     @type int    $page          Page of notes to retrieve (starting at 1). Use with limit.
+ *                                 Default 1.
  *     @type int    $order_id      Limit results to those affiliated with a given order ID.
  *                                 Default 0.
  *     @type array  $order__in     Array of order IDs to include affiliated notes for.
@@ -1230,6 +1286,7 @@ function wc_get_order_note( $data ) {
 function wc_get_order_notes( $args ) {
 	$key_mapping = array(
 		'limit'         => 'number',
+		'page'          => 'paged',
 		'order_id'      => 'post_id',
 		'order__in'     => 'post__in',
 		'order__not_in' => 'post__not_in',
@@ -1253,7 +1310,7 @@ function wc_get_order_notes( $args ) {
 
 	// Set WooCommerce order type.
 	if ( isset( $args['type'] ) && 'customer' === $args['type'] ) {
-		$args['meta_query'] = array( // WPCS: slow query ok.
+		$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Order notes live in wp_comments under both HPOS and legacy storage; the customer flag exists only as commentmeta, so a meta join is the only way to filter on it.
 			array(
 				'key'     => 'is_customer_note',
 				'value'   => 1,
@@ -1261,7 +1318,7 @@ function wc_get_order_notes( $args ) {
 			),
 		);
 	} elseif ( isset( $args['type'] ) && 'internal' === $args['type'] ) {
-		$args['meta_query'] = array( // WPCS: slow query ok.
+		$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Order notes live in wp_comments under both HPOS and legacy storage; internal notes are identified by the absence of the is_customer_note meta, so NOT EXISTS is the only way to filter on them.
 			array(
 				'key'     => 'is_customer_note',
 				'compare' => 'NOT EXISTS',

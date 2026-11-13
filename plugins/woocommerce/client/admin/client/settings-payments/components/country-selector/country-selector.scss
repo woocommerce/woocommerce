@@ -12,21 +12,26 @@
 
 	&__item {
 		padding: $gap-small;
-		margin: 0;
+		// Inset to the same width as the search field and the Apply button
+		// instead of running the full width of the popover. The left padding
+		// and the check mark below drop by the same 12px so the row's contents
+		// stay where they were.
+		margin: 0 12px;
 		line-height: initial;
 		cursor: pointer;
 		position: relative;
-		padding-left: 48px;
+		padding-left: 36px;
+		border-radius: 2px;
 
 		&.is-highlighted {
-			background: rgba(var(--wp-admin-theme-color-rgb, 0, 124, 186), 0.08);
+			background: rgba(var(--wp-admin-theme-color--rgb, 0, 124, 186), 0.08);
 			outline: 2px solid var(--wp-admin-theme-color, #007cba);
 			outline-offset: -2px;
 		}
 
 		svg {
 			position: absolute;
-			left: 20px;
+			left: 8px;
 			top: 50%;
 			-ms-transform: translateY(-50%);
 			transform: translateY(-50%);
@@ -40,7 +45,11 @@
 
 	&__button {
 		width: 100%;
-		margin: 0 1px;
+		// No margin: any here makes the button overhang its track, sliding it
+		// under the indicator's divider and leaving the focus ring 1px wider on
+		// the sides than on the top and bottom. The gap the divider needs is
+		// owned by the indicator, so it disappears when the indicator does.
+		margin: 0;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
@@ -149,10 +158,12 @@
 }
 
 .components-button.components-country-select-control__button {
+	// Inset far enough to sit clear of both the container border and the
+	// indicator's divider, rather than hugging them.
 	&:focus {
 		box-shadow: none !important;
 		outline: 2px solid var(--wp-admin-theme-color, #007cba) !important;
-		outline-offset: -2px;
+		outline-offset: -4px;
 	}
 
 	&:focus:not(:focus-visible) {
@@ -162,7 +173,7 @@
 	&:focus-visible {
 		box-shadow: none !important;
 		outline: 2px solid var(--wp-admin-theme-color, #007cba) !important;
-		outline-offset: -2px;
+		outline-offset: -4px;
 	}
 }
 

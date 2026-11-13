@@ -59,377 +59,93 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test for each country that we can generate and have the proper number of suggestions when the merchant is selling online.
-	 *
-	 * This guards against misconfigurations in the data.
-	 *
-	 * @dataProvider data_provider_get_country_extensions_count_with_merchant_selling_online
-	 *
-	 * @param string $country        The country code.
-	 * @param int    $expected_count The expected number of suggestions.
+	 * Test that the payment extension suggestions list is memoized per country and context.
 	 */
-	public function test_get_country_extensions_count_with_merchant_selling_online( string $country, int $expected_count ) {
-		// Merchant is selling online.
+	public function test_get_country_extensions_memoizes_per_country_and_context() {
 		// Arrange.
-		update_option(
-			OnboardingProfile::DATA_OPTION,
-			array(
-				'business_choice'       => 'im_already_selling',
-				'selling_online_answer' => 'yes_im_selling_online',
-			)
-		);
+		$incentives_calls = 0;
+		$this->suggestion_incentives
+			->method( 'get_incentives' )
+			->willReturnCallback(
+				function () use ( &$incentives_calls ) {
+					++$incentives_calls;
+					return array();
+				}
+			);
 
 		// Act.
-		$extensions = $this->sut->get_country_extensions( $country );
+		$first       = $this->sut->get_country_extensions( 'US' );
+		$build_calls = $incentives_calls;
+		$second      = $this->sut->get_country_extensions( 'US' );
 
 		// Assert.
-		$this->assertCount( $expected_count, $extensions, "For merchant selling online, the country $country should have $expected_count suggestions." );
-
-		// Merchant skipped the profiler. We assume they are selling only online.
-		// Arrange.
-		update_option(
-			OnboardingProfile::DATA_OPTION,
-			array()
-			// No data.
-		);
+		$this->assertGreaterThan( 0, $build_calls, 'Building the list should query incentives for each extension.' );
+		$this->assertSame( $build_calls, $incentives_calls, 'A repeated call should be served from the memo, without rebuilding the list.' );
+		$this->assertSame( $first, $second );
 
 		// Act.
-		$extensions = $this->sut->get_country_extensions( $country );
+		$this->sut->get_country_extensions( 'US', 'another_context' );
 
 		// Assert.
-		$this->assertCount( $expected_count, $extensions, "For merchant who skipped the profiler, the country $country should have $expected_count suggestions." );
-
-		// Merchant didn't answer the profiler questions fully. We assume they are selling only online.
-		// Arrange.
-		update_option(
-			OnboardingProfile::DATA_OPTION,
-			array(
-				'business_choice'       => 'im_already_selling',
-				'selling_online_answer' => '',
-			// No answer.
-			)
-		);
+		$this->assertGreaterThan( $build_calls, $incentives_calls, 'A different context should build its own list.' );
 
 		// Act.
-		$extensions = $this->sut->get_country_extensions( $country );
+		$calls_before_country_change = $incentives_calls;
+		$this->sut->get_country_extensions( 'GB' );
 
 		// Assert.
-		$this->assertCount( $expected_count, $extensions, "Country $country should have $expected_count suggestions." );
-
-		// Clean up.
-		delete_option( OnboardingProfile::DATA_OPTION );
+		$this->assertGreaterThan( $calls_before_country_change, $incentives_calls, 'A different country should build its own list.' );
 	}
 
 	/**
-	 * Data provider for test_get_country_extensions_count_with_merchant_selling_online.
-	 *
-	 * @return array
+	 * Test that the payment extension suggestions list is memoized per user, since incentive visibility and dismissals are user-specific.
 	 */
-	public function data_provider_get_country_extensions_count_with_merchant_selling_online(): array {
-		// The counts are based on the data in PaymentExtensionSuggestions::$country_extensions.
-		$country_suggestions_count = array(
-			'CA' => 11,
-			'US' => 12,
-			'GB' => 15,
-			'AT' => 13,
-			'BE' => 11,
-			'BG' => 7,
-			'HR' => 8,
-			'CY' => 9,
-			'CZ' => 8,
-			'DK' => 12,
-			'EE' => 7,
-			'FI' => 11,
-			'FO' => 3,
-			'FR' => 12,
-			'GI' => 4,
-			'DE' => 13,
-			'GR' => 8,
-			'GL' => 3,
-			'HU' => 9,
-			'IE' => 11,
-			'IT' => 10,
-			'LV' => 6,
-			'LI' => 5,
-			'LT' => 7,
-			'LU' => 8,
-			'MT' => 7,
-			'MD' => 3,
-			'NL' => 10,
-			'NO' => 9,
-			'PL' => 9,
-			'PT' => 10,
-			'RO' => 8,
-			'SM' => 3,
-			'SK' => 7,
-			'ES' => 12,
-			'SE' => 10,
-			'CH' => 8,
-			'AG' => 5,
-			'AI' => 3,
-			'AR' => 5,
-			'AW' => 3,
-			'BS' => 5,
-			'BB' => 5,
-			'BZ' => 5,
-			'BM' => 5,
-			'BO' => 2,
-			'BQ' => 3,
-			'BR' => 6,
-			'VG' => 3,
-			'KY' => 5,
-			'CL' => 5,
-			'CO' => 5,
-			'CR' => 5,
-			'CW' => 3,
-			'DM' => 5,
-			'DO' => 5,
-			'EC' => 4,
-			'SV' => 5,
-			'FK' => 2,
-			'GF' => 4,
-			'GD' => 5,
-			'GP' => 4,
-			'GT' => 5,
-			'GY' => 5,
-			'HN' => 5,
-			'JM' => 5,
-			'MQ' => 4,
-			'MX' => 7,
-			'NI' => 5,
-			'PA' => 5,
-			'PY' => 2,
-			'PE' => 5,
-			'KN' => 5,
-			'LC' => 5,
-			'SX' => 3,
-			'VC' => 3,
-			'SR' => 3,
-			'TT' => 5,
-			'TC' => 5,
-			'UY' => 5,
-			'VI' => 3,
-			'VE' => 3,
-			'AU' => 12,
-			'BD' => 2,
-			'CN' => 5,
-			'FJ' => 3,
-			'GU' => 1,
-			'HK' => 8,
-			'IN' => 7,
-			'ID' => 4,
-			'JP' => 9,
-			'MY' => 6,
-			'NC' => 3,
-			'NZ' => 9,
-			'PW' => 3,
-			'PH' => 4,
-			'SG' => 7,
-			'LK' => 2,
-			'KR' => 4,
-			'TH' => 5,
-			'VN' => 4,
-			'DZ' => 3,
-			'AO' => 1,
-			'BJ' => 1,
-			'BW' => 3,
-			'BF' => 1,
-			'BI' => 1,
-			'CM' => 1,
-			'CV' => 1,
-			'CF' => 1,
-			'TD' => 1,
-			'KM' => 1,
-			'CG' => 1,
-			'CI' => 1,
-			'EG' => 5,
-			'CD' => 1,
-			'DJ' => 1,
-			'GQ' => 1,
-			'ER' => 1,
-			'SZ' => 3,
-			'ET' => 1,
-			'GA' => 1,
-			'GH' => 2,
-			'GM' => 1,
-			'GN' => 1,
-			'GW' => 1,
-			'KE' => 3,
-			'LS' => 3,
-			'LR' => 1,
-			'LY' => 1,
-			'MG' => 1,
-			'MW' => 3,
-			'ML' => 1,
-			'MR' => 1,
-			'MU' => 3,
-			'YT' => 1,
-			'MA' => 4,
-			'MZ' => 3,
-			'NA' => 1,
-			'NE' => 1,
-			'NG' => 3,
-			'RE' => 3,
-			'RW' => 1,
-			'ST' => 1,
-			'SN' => 3,
-			'SC' => 3,
-			'SL' => 1,
-			'SO' => 1,
-			'ZA' => 6,
-			'SS' => 1,
-			'TZ' => 1,
-			'TG' => 1,
-			'TN' => 1,
-			'UG' => 1,
-			'EH' => 1,
-			'ZM' => 1,
-			'ZW' => 1,
-			'BH' => 4,
-			'IQ' => 1,
-			'IL' => 2,
-			'JO' => 5,
-			'KW' => 4,
-			'LB' => 1,
-			'OM' => 4,
-			'PK' => 4,
-			'QA' => 4,
-			'SA' => 6,
-			'AE' => 9,
-			'YE' => 1,
-			'AD' => 3,
-			'AF' => 1,
-			'AL' => 2,
-			'AM' => 1,
-			'AQ' => 1,
-			'AS' => 1,
-			'AX' => 1,
-			'AZ' => 1,
-			'BA' => 2,
-			'BL' => 2,
-			'BN' => 1,
-			'BT' => 1,
-			'BV' => 1,
-			'BY' => 1,
-			'CC' => 1,
-			'CK' => 1,
-			'CU' => 1,
-			'CX' => 1,
-			'FM' => 1,
-			'GE' => 2,
-			'GG' => 1,
-			'GS' => 1,
-			'HM' => 1,
-			'HT' => 1,
-			'IM' => 1,
-			'IO' => 1,
-			'IR' => 0,
-			'IS' => 3,
-			'JE' => 1,
-			'KG' => 1,
-			'KH' => 1,
-			'KI' => 1,
-			'KZ' => 2,
-			'LA' => 1,
-			'MC' => 2,
-			'ME' => 1,
-			'MF' => 1,
-			'MH' => 1,
-			'MK' => 1,
-			'MM' => 1,
-			'MN' => 1,
-			'MO' => 1,
-			'MP' => 1,
-			'MS' => 1,
-			'MV' => 1,
-			'NF' => 1,
-			'NP' => 1,
-			'NR' => 1,
-			'NU' => 1,
-			'PF' => 2,
-			'PG' => 1,
-			'PM' => 1,
-			'PN' => 1,
-			'PR' => 2,
-			'PS' => 1,
-			'RS' => 2,
-			'RU' => 1,
-			'SB' => 1,
-			'SD' => 1,
-			'SH' => 1,
-			'SI' => 6,
-			'SJ' => 1,
-			'TF' => 1,
-			'TJ' => 1,
-			'TK' => 1,
-			'TL' => 1,
-			'TM' => 1,
-			'TO' => 1,
-			'TR' => 1,
-			'TV' => 1,
-			'TW' => 2,
-			'UA' => 1,
-			'UM' => 1,
-			'UZ' => 1,
-			'VA' => 1,
-			'VU' => 1,
-			'WF' => 1,
-			'WS' => 1,
-		);
+	public function test_get_country_extensions_memoizes_per_user() {
+		// Arrange.
+		$incentives_calls = 0;
+		$this->suggestion_incentives
+			->method( 'get_incentives' )
+			->willReturnCallback(
+				function () use ( &$incentives_calls ) {
+					++$incentives_calls;
+					return array();
+				}
+			);
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$this->sut->get_country_extensions( 'US' );
+		$build_calls = $incentives_calls;
 
-		$data = array();
-		foreach ( $country_suggestions_count as $country => $count ) {
-			$data[] = array( $country, $count );
-		}
+		// Act.
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$this->sut->get_country_extensions( 'US' );
 
-		return $data;
+		// Assert.
+		$this->assertGreaterThan( $build_calls, $incentives_calls, 'A different user should build its own list.' );
 	}
 
 	/**
-	 * Test for each country that we can generate and have the proper number of suggestions when the merchant is selling offline.
-	 *
-	 * This guards against misconfigurations in the data.
-	 *
-	 * @dataProvider data_provider_get_country_extensions_count_with_merchant_selling_offline
-	 *
-	 * @param string $country        The country code.
-	 * @param int    $expected_count The expected number of suggestions.
+	 * Test that clear_cache forces the payment extension suggestions list to be rebuilt.
 	 */
-	public function test_get_country_extensions_count_with_merchant_selling_offline( string $country, int $expected_count ) {
-		// Merchant is selling offline.
+	public function test_clear_cache_forces_country_extensions_rebuild() {
 		// Arrange.
-		update_option(
-			OnboardingProfile::DATA_OPTION,
-			array(
-				'business_choice'       => 'im_already_selling',
-				'selling_online_answer' => 'no_im_selling_offline',
-			)
-		);
+		$incentives_calls = 0;
+		$this->suggestion_incentives
+			->method( 'get_incentives' )
+			->willReturnCallback(
+				function () use ( &$incentives_calls ) {
+					++$incentives_calls;
+					return array();
+				}
+			);
+		$this->sut->get_country_extensions( 'US' );
+		$build_calls = $incentives_calls;
 
 		// Act.
-		$extensions = $this->sut->get_country_extensions( $country );
+		$this->sut->clear_cache();
+		$this->sut->get_country_extensions( 'US' );
 
 		// Assert.
-		$this->assertCount( $expected_count, $extensions, "For merchant selling offline, the country $country should have $expected_count suggestions." );
-
-		// Merchant is selling both online and offline.
-		// Arrange.
-		update_option(
-			OnboardingProfile::DATA_OPTION,
-			array(
-				'business_choice'       => 'im_already_selling',
-				'selling_online_answer' => 'im_selling_both_online_and_offline',
-			)
-		);
-
-		// Act.
-		$extensions = $this->sut->get_country_extensions( $country );
-
-		// Assert.
-		$this->assertCount( $expected_count, $extensions, "For merchant selling both online and offline, the country $country should have $expected_count suggestions." );
-
-		// Clean up.
-		delete_option( OnboardingProfile::DATA_OPTION );
+		$this->assertGreaterThan( $build_calls, $incentives_calls, 'After clear_cache the list should be rebuilt.' );
 	}
 
 	/**
@@ -515,291 +231,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_get_country_extensions_count_with_merchant_selling_offline.
-	 *
-	 * @return array
-	 */
-	public function data_provider_get_country_extensions_count_with_merchant_selling_offline(): array {
-		// The counts are based on the data in PaymentExtensionSuggestions::$country_extensions.
-		$country_suggestions_count = array(
-			'CA' => 11,
-			'US' => 12,
-			'GB' => 15,
-			'AT' => 13,
-			'BE' => 11,
-			'BG' => 7,
-			'HR' => 8,
-			'CY' => 9,
-			'CZ' => 8,
-			'DK' => 12,
-			'EE' => 7,
-			'FI' => 11,
-			'FO' => 3,
-			'FR' => 12,
-			'GI' => 4,
-			'DE' => 13,
-			'GR' => 8,
-			'GL' => 3,
-			'HU' => 9,
-			'IE' => 11,
-			'IT' => 10,
-			'LV' => 6,
-			'LI' => 5,
-			'LT' => 7,
-			'LU' => 8,
-			'MT' => 7,
-			'MD' => 3,
-			'NL' => 10,
-			'NO' => 9,
-			'PL' => 9,
-			'PT' => 10,
-			'RO' => 8,
-			'SM' => 3,
-			'SK' => 7,
-			'ES' => 12,
-			'SE' => 10,
-			'CH' => 8,
-			'AG' => 5,
-			'AI' => 3,
-			'AR' => 5,
-			'AW' => 3,
-			'BS' => 5,
-			'BB' => 5,
-			'BZ' => 5,
-			'BM' => 5,
-			'BO' => 2,
-			'BQ' => 3,
-			'BR' => 6,
-			'VG' => 3,
-			'KY' => 5,
-			'CL' => 5,
-			'CO' => 5,
-			'CR' => 5,
-			'CW' => 3,
-			'DM' => 5,
-			'DO' => 5,
-			'EC' => 4,
-			'SV' => 5,
-			'FK' => 2,
-			'GF' => 4,
-			'GD' => 5,
-			'GP' => 4,
-			'GT' => 5,
-			'GY' => 5,
-			'HN' => 5,
-			'JM' => 5,
-			'MQ' => 4,
-			'MX' => 7,
-			'NI' => 5,
-			'PA' => 5,
-			'PY' => 2,
-			'PE' => 5,
-			'KN' => 5,
-			'LC' => 5,
-			'SX' => 3,
-			'VC' => 3,
-			'SR' => 3,
-			'TT' => 5,
-			'TC' => 5,
-			'UY' => 5,
-			'VI' => 3,
-			'VE' => 3,
-			'AU' => 12,
-			'BD' => 2,
-			'CN' => 5,
-			'FJ' => 3,
-			'GU' => 1,
-			'HK' => 8,
-			'IN' => 7,
-			'ID' => 4,
-			'JP' => 9,
-			'MY' => 6,
-			'NC' => 3,
-			'NZ' => 9,
-			'PW' => 3,
-			'PH' => 4,
-			'SG' => 7,
-			'LK' => 2,
-			'KR' => 4,
-			'TH' => 5,
-			'VN' => 4,
-			'DZ' => 3,
-			'AO' => 1,
-			'BJ' => 1,
-			'BW' => 3,
-			'BF' => 1,
-			'BI' => 1,
-			'CM' => 1,
-			'CV' => 1,
-			'CF' => 1,
-			'TD' => 1,
-			'KM' => 1,
-			'CG' => 1,
-			'CI' => 1,
-			'EG' => 5,
-			'CD' => 1,
-			'DJ' => 1,
-			'GQ' => 1,
-			'ER' => 1,
-			'SZ' => 3,
-			'ET' => 1,
-			'GA' => 1,
-			'GH' => 2,
-			'GM' => 1,
-			'GN' => 1,
-			'GW' => 1,
-			'KE' => 3,
-			'LS' => 3,
-			'LR' => 1,
-			'LY' => 1,
-			'MG' => 1,
-			'MW' => 3,
-			'ML' => 1,
-			'MR' => 1,
-			'MU' => 3,
-			'YT' => 1,
-			'MA' => 4,
-			'MZ' => 3,
-			'NA' => 1,
-			'NE' => 1,
-			'NG' => 3,
-			'RE' => 3,
-			'RW' => 1,
-			'ST' => 1,
-			'SN' => 3,
-			'SC' => 3,
-			'SL' => 1,
-			'SO' => 1,
-			'ZA' => 6,
-			'SS' => 1,
-			'TZ' => 1,
-			'TG' => 1,
-			'TN' => 1,
-			'UG' => 1,
-			'EH' => 1,
-			'ZM' => 1,
-			'ZW' => 1,
-			'BH' => 4,
-			'IQ' => 1,
-			'IL' => 2,
-			'JO' => 5,
-			'KW' => 4,
-			'LB' => 1,
-			'OM' => 4,
-			'PK' => 4,
-			'QA' => 4,
-			'SA' => 6,
-			'AE' => 9,
-			'YE' => 1,
-			'AD' => 3,
-			'AF' => 1,
-			'AL' => 2,
-			'AM' => 1,
-			'AQ' => 1,
-			'AS' => 1,
-			'AX' => 1,
-			'AZ' => 1,
-			'BA' => 2,
-			'BL' => 2,
-			'BN' => 1,
-			'BT' => 1,
-			'BV' => 1,
-			'BY' => 1,
-			'CC' => 1,
-			'CK' => 1,
-			'CU' => 1,
-			'CX' => 1,
-			'FM' => 1,
-			'GE' => 2,
-			'GG' => 1,
-			'GS' => 1,
-			'HM' => 1,
-			'HT' => 1,
-			'IM' => 1,
-			'IO' => 1,
-			'IR' => 0,
-			'IS' => 3,
-			'JE' => 1,
-			'KG' => 1,
-			'KH' => 1,
-			'KI' => 1,
-			'KZ' => 2,
-			'LA' => 1,
-			'MC' => 2,
-			'ME' => 1,
-			'MF' => 1,
-			'MH' => 1,
-			'MK' => 1,
-			'MM' => 1,
-			'MN' => 1,
-			'MO' => 1,
-			'MP' => 1,
-			'MS' => 1,
-			'MV' => 1,
-			'NF' => 1,
-			'NP' => 1,
-			'NR' => 1,
-			'NU' => 1,
-			'PF' => 2,
-			'PG' => 1,
-			'PM' => 1,
-			'PN' => 1,
-			'PR' => 2,
-			'PS' => 1,
-			'RS' => 2,
-			'RU' => 1,
-			'SB' => 1,
-			'SD' => 1,
-			'SH' => 1,
-			'SI' => 6,
-			'SJ' => 1,
-			'TF' => 1,
-			'TJ' => 1,
-			'TK' => 1,
-			'TL' => 1,
-			'TM' => 1,
-			'TO' => 1,
-			'TR' => 1,
-			'TV' => 1,
-			'TW' => 2,
-			'UA' => 1,
-			'UM' => 1,
-			'UZ' => 1,
-			'VA' => 1,
-			'VU' => 1,
-			'WF' => 1,
-			'WS' => 1,
-		);
-
-		$data = array();
-		foreach ( $country_suggestions_count as $country => $count ) {
-			$data[] = array( $country, $count );
-		}
-
-		return $data;
-	}
-
-	/**
-	 * Test that GoCardless is placed immediately after Klarna Checkout in the GB suggestions order.
-	 *
-	 * The order of entries in PaymentsExtensionSuggestions::$country_extensions determines the
-	 * suggestions' display priority, so this guards against accidental reordering.
-	 */
-	public function test_get_country_extensions_gb_gocardless_order() {
-		// Act.
-		$extensions = $this->sut->get_country_extensions( 'GB' );
-		$ids        = array_column( $extensions, 'id' );
-
-		// Assert.
-		$this->assertCount( 15, $ids );
-		$klarna_checkout_index = array_search( PaymentsExtensionSuggestions::KLARNA_CHECKOUT, $ids, true );
-		$gocardless_index      = array_search( PaymentsExtensionSuggestions::GOCARDLESS, $ids, true );
-		$this->assertNotFalse( $klarna_checkout_index, 'Klarna Checkout should be in the GB suggestions.' );
-		$this->assertNotFalse( $gocardless_index, 'GoCardless should be in the GB suggestions.' );
-		$this->assertSame( $klarna_checkout_index + 1, $gocardless_index, 'GoCardless should immediately follow Klarna Checkout in the GB suggestions.' );
-	}
-
-	/**
 	 * Test getting payment extension suggestions by country with per-country config that uses merges.
 	 */
 	public function test_get_country_extensions_with_per_country_merges() {
@@ -807,7 +238,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		$extensions = $this->sut->get_country_extensions( 'MX' );
 
 		// Assert.
-		$this->assertCount( 7, $extensions );
+		$this->assertCount( 6, $extensions );
 		$this->assertSame(
 			array(
 				PaymentsExtensionSuggestions::STRIPE,
@@ -816,7 +247,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				PaymentsExtensionSuggestions::VISA,
 				PaymentsExtensionSuggestions::PAYPAL_WALLET,
 				PaymentsExtensionSuggestions::KLARNA,
-				PaymentsExtensionSuggestions::HELIOPAY,
 			),
 			array_column( $extensions, 'id' )
 		);
@@ -906,7 +336,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
 				PaymentsExtensionSuggestions::VISA,
 				PaymentsExtensionSuggestions::PAYPAL_WALLET,
-				PaymentsExtensionSuggestions::HELIOPAY,
 			),
 			array_column( $extensions, 'id' ),
 			"Mercado Pago should be the first suggestion in {$country_code}, with Visa demoted."
@@ -987,7 +416,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
 				PaymentsExtensionSuggestions::VISA,
 				PaymentsExtensionSuggestions::PAYPAL_WALLET,
-				PaymentsExtensionSuggestions::HELIOPAY,
 			),
 			array_column( $extensions, 'id' )
 		);
@@ -1026,211 +454,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				),
 			),
 			$mercado_pago['links']
-		);
-	}
-
-	/**
-	 * @testdox Helcim is the last PSP suggestion in $country_code.
-	 *
-	 * @dataProvider data_provider_helcim_supported_countries
-	 *
-	 * @param string $country_code ISO 3166-1 alpha-2 country code.
-	 */
-	public function test_helcim_is_last_psp_suggestion_in_supported_countries( string $country_code ): void {
-		$extensions       = $this->sut->get_country_extensions( $country_code );
-		$extensions_by_id = array_column( $extensions, null, 'id' );
-		$psp_ids          = array_column(
-			array_filter(
-				$extensions,
-				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
-			),
-			'id'
-		);
-		$helcim           = $extensions_by_id[ PaymentsExtensionSuggestions::HELCIM ] ?? null;
-
-		$this->assertSame(
-			PaymentsExtensionSuggestions::HELCIM,
-			end( $psp_ids ),
-			"Helcim should be the final PSP suggestion in {$country_code}."
-		);
-		$this->assertIsArray( $helcim, "Helcim should be suggested in {$country_code}." );
-		if ( ! is_array( $helcim ) ) {
-			return;
-		}
-
-		$this->assertNotContains(
-			PaymentsExtensionSuggestions::TAG_PREFERRED,
-			$helcim['tags'],
-			"Helcim should remain in other payment options for {$country_code}."
-		);
-	}
-
-	/**
-	 * @testdox Visa is the last "other payment provider" in Japan.
-	 */
-	public function test_visa_is_last_other_payment_provider_in_jp(): void {
-		$extensions = $this->sut->get_country_extensions( 'JP' );
-		$psp_ids    = array_column(
-			array_filter(
-				$extensions,
-				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
-			),
-			'id'
-		);
-
-		$this->assertContains( PaymentsExtensionSuggestions::AIRWALLEX, $psp_ids, 'Airwallex should be suggested in JP.' );
-		$this->assertSame(
-			PaymentsExtensionSuggestions::VISA,
-			end( $psp_ids ),
-			'Visa should be the last PSP suggestion in JP.'
-		);
-	}
-
-	/**
-	 * @testdox KOMOJU is suggested between Square and Airwallex in Japan.
-	 */
-	public function test_komoju_is_suggested_between_square_and_airwallex_in_jp(): void {
-		$extensions       = $this->sut->get_country_extensions( 'JP' );
-		$extensions_by_id = array_column( $extensions, null, 'id' );
-		$psp_ids          = array_column(
-			array_filter(
-				$extensions,
-				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
-			),
-			'id'
-		);
-		$komoju           = $extensions_by_id[ PaymentsExtensionSuggestions::KOMOJU ] ?? null;
-
-		$this->assertContains( PaymentsExtensionSuggestions::KOMOJU, $psp_ids, 'KOMOJU should be suggested in JP.' );
-		$this->assertSame(
-			array_search( PaymentsExtensionSuggestions::SQUARE, $psp_ids, true ) + 1,
-			array_search( PaymentsExtensionSuggestions::KOMOJU, $psp_ids, true ),
-			'KOMOJU should immediately follow Square in JP.'
-		);
-		$this->assertSame(
-			array_search( PaymentsExtensionSuggestions::KOMOJU, $psp_ids, true ) + 1,
-			array_search( PaymentsExtensionSuggestions::AIRWALLEX, $psp_ids, true ),
-			'KOMOJU should immediately precede Airwallex in JP.'
-		);
-
-		$this->assertIsArray( $komoju, 'KOMOJU should be suggested in JP.' );
-		if ( ! is_array( $komoju ) ) {
-			return;
-		}
-
-		$this->assertNotContains(
-			PaymentsExtensionSuggestions::TAG_PREFERRED,
-			$komoju['tags'],
-			'KOMOJU should remain in other payment options for JP.'
-		);
-	}
-
-	/**
-	 * Data provider for Helcim's supported countries.
-	 *
-	 * @return array<string, array{string}>
-	 */
-	public function data_provider_helcim_supported_countries(): array {
-		return array(
-			'Canada'        => array( 'CA' ),
-			'United States' => array( 'US' ),
-		);
-	}
-
-	/**
-	 * @testdox Mastercard is the first, preferred PSP suggestion in $country_code.
-	 *
-	 * Guards the suggestion definition's default TAG_PREFERRED: the tag is declared once
-	 * on the definition rather than appended per country, so a regression there would be
-	 * invisible to the count-only assertions.
-	 *
-	 * @dataProvider data_provider_mastercard_preferred_countries
-	 *
-	 * @param string $country_code ISO 3166-1 alpha-2 country code.
-	 */
-	public function test_mastercard_is_first_and_preferred_in_supported_countries( string $country_code ): void {
-		$extensions       = $this->sut->get_country_extensions( $country_code );
-		$extensions_by_id = array_column( $extensions, null, 'id' );
-		$psp_ids          = array_column(
-			array_filter(
-				$extensions,
-				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
-			),
-			'id'
-		);
-		$mastercard       = $extensions_by_id[ PaymentsExtensionSuggestions::MASTERCARD ] ?? null;
-
-		$this->assertIsArray( $mastercard, "Mastercard should be suggested in {$country_code}." );
-		if ( ! is_array( $mastercard ) ) {
-			return;
-		}
-
-		$this->assertSame(
-			PaymentsExtensionSuggestions::MASTERCARD,
-			reset( $psp_ids ),
-			"Mastercard should be the first PSP suggestion in {$country_code}."
-		);
-
-		$this->assertContains(
-			PaymentsExtensionSuggestions::TAG_PREFERRED,
-			$mastercard['tags'],
-			"Mastercard should be a preferred suggestion in {$country_code}."
-		);
-	}
-
-	/**
-	 * Data provider for the countries where Mastercard is a preferred suggestion.
-	 *
-	 * @return array Test cases with country codes.
-	 */
-	public function data_provider_mastercard_preferred_countries(): array {
-		return array(
-			'Egypt'        => array( 'EG' ),
-			'Nigeria'      => array( 'NG' ),
-			'South Africa' => array( 'ZA' ),
-			'Bahrain'      => array( 'BH' ),
-			'Jordan'       => array( 'JO' ),
-			'Kuwait'       => array( 'KW' ),
-			'Pakistan'     => array( 'PK' ),
-			'Qatar'        => array( 'QA' ),
-			'Saudi Arabia' => array( 'SA' ),
-		);
-	}
-
-	/**
-	 * @testdox Mastercard is suggested but not preferred in the UAE.
-	 *
-	 * The UAE is the one market where Mastercard is deliberately not preferred, expressed
-	 * as a `_remove` of the definition's default tag. Without this the exclusion could be
-	 * dropped without any test noticing.
-	 */
-	public function test_mastercard_is_not_preferred_in_ae(): void {
-		$extensions       = $this->sut->get_country_extensions( 'AE' );
-		$extensions_by_id = array_column( $extensions, null, 'id' );
-		$psp_ids          = array_column(
-			array_filter(
-				$extensions,
-				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
-			),
-			'id'
-		);
-		$mastercard       = $extensions_by_id[ PaymentsExtensionSuggestions::MASTERCARD ] ?? null;
-
-		$this->assertIsArray( $mastercard, 'Mastercard should still be suggested in the UAE.' );
-		if ( ! is_array( $mastercard ) ) {
-			return;
-		}
-
-		$this->assertNotContains(
-			PaymentsExtensionSuggestions::TAG_PREFERRED,
-			$mastercard['tags'],
-			'Mastercard should remain in other payment options for the UAE.'
-		);
-
-		$this->assertNotSame(
-			PaymentsExtensionSuggestions::MASTERCARD,
-			reset( $psp_ids ),
-			'Mastercard should not lead the UAE PSP suggestions.'
 		);
 	}
 
@@ -1274,6 +497,51 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				array(
 					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=helcim-commerce-for-woocommerce',
+				),
+			),
+			$extension['links']
+		);
+		$this->assertNotEmpty( $extension['icon'] );
+		$this->assertNotEmpty( $extension['title'] );
+		$this->assertNotEmpty( $extension['description'] );
+	}
+
+	/**
+	 * @testdox Elavon has complete base suggestion details.
+	 */
+	public function test_elavon_has_complete_base_details(): void {
+		$extension = $this->sut->get_by_id( 'elavon' );
+
+		$this->assertIsArray( $extension );
+		if ( ! is_array( $extension ) ) {
+			return;
+		}
+
+		$this->assertSame( PaymentsExtensionSuggestions::TYPE_PSP, $extension['_type'] );
+		$this->assertSame(
+			array(
+				'_type' => PaymentsExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'elavon-payment-gateway-for-woocommerce',
+			),
+			$extension['plugin']
+		);
+		$this->assertEqualsCanonicalizing(
+			array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					'url'   => 'https://woocommerce.com/products/elavon-payment-gateway/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+					'url'   => 'https://developer.elavon.com/terms',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://woocommerce.com/document/elavon-payments/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=elavon-payment-gateway',
 				),
 			),
 			$extension['links']

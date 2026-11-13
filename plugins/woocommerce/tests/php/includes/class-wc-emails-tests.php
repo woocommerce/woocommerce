@@ -18,7 +18,6 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		// 10 is expected priority of the hook.
 		$this->assertEquals( 10, has_action( 'woocommerce_email_header', array( $email_object, 'email_header' ) ) );
 		ob_start();
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_email_header', 'header' );
 		$content = ob_get_contents();
 		ob_end_clean();
@@ -34,7 +33,6 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		// 10 is expected priority of the hook.
 		$this->assertEquals( 10, has_action( 'woocommerce_email_footer', array( $email_object, 'email_footer' ) ) );
 		ob_start();
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_email_footer' );
 		$content = ob_get_contents();
 		ob_end_clean();
@@ -177,6 +175,33 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 			'product'  => $product,
 			'quantity' => 2,
 			'order_id' => $order->get_id(),
+		);
+	}
+
+	/**
+	 * @testdox get_store_address() shows the store's country, and leaves later addresses in that country without it.
+	 */
+	public function test_get_store_address_forces_the_country_only_for_the_store_address(): void {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_store_address', '123 Main Street' );
+		update_option( 'woocommerce_store_city', 'San Francisco' );
+		update_option( 'woocommerce_store_postcode', '94110' );
+
+		$store_address = WC()->mailer()->get_store_address();
+
+		$this->assertStringContainsString( 'United States (US)', $store_address, 'The store address should show the country.' );
+		$this->assertStringNotContainsString(
+			'United States (US)',
+			WC()->countries->get_formatted_address(
+				array(
+					'address_1' => '1 Other Street',
+					'city'      => 'Los Angeles',
+					'state'     => 'CA',
+					'postcode'  => '90001',
+					'country'   => 'US',
+				)
+			),
+			'Addresses formatted after the store address should leave out the store\'s country again.'
 		);
 	}
 

@@ -26,9 +26,7 @@ const NullComponent = () => {
 	return null;
 };
 
-export default class PaymentMethodConfig
-	implements PaymentMethodConfigInstance
-{
+export default class PaymentMethodConfig implements PaymentMethodConfigInstance {
 	public name: string;
 	public content: ReactNode;
 	public edit: ReactNode;
@@ -159,7 +157,6 @@ export default class PaymentMethodConfig
 				'Passing savePaymentInfo when registering a payment method.',
 				{
 					alternative: 'Pass showSavedCards and showSaveOption',
-					plugin: 'woocommerce-gutenberg-products-block',
 					link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3686',
 				}
 			);

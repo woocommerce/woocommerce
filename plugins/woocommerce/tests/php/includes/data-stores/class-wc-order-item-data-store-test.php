@@ -212,4 +212,148 @@ class WC_Order_Item_Data_Store_Test extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 56.78, $item2->get_cogs_value() );
 	}
+
+	/**
+	 * @testdox The 'item-{id}' object cache entry has the same shape whether it was populated by the order data store or by the individual order item data store.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/31656
+	 */
+	public function test_cached_item_row_shape_is_identical_across_data_store_paths() {
+		$order    = WC_Helper_Order::create_order();
+		$item_id  = reset( $order->get_items() )->get_id();
+		$order_id = $order->get_id();
+
+		// Populate the cache via the order data store (bulk read of the order items).
+		wp_cache_delete( 'item-' . $item_id, 'order-items' );
+		wp_cache_delete( 'order-items-' . $order_id, 'orders' );
+		WC_Data_Store::load( 'order' )->read_items( wc_get_order( $order_id ), 'line_item' );
+		$from_order_store = wp_cache_get( 'item-' . $item_id, 'order-items' );
+
+		// Populate the cache via the individual order item data store.
+		wp_cache_delete( 'item-' . $item_id, 'order-items' );
+		wp_cache_delete( 'order-items-' . $order_id, 'orders' );
+		new WC_Order_Item_Product( $item_id );
+		$from_item_store = wp_cache_get( 'item-' . $item_id, 'order-items' );
+
+		$this->assertIsObject( $from_order_store );
+		$this->assertIsObject( $from_item_store );
+
+		$order_store_keys = array_keys( (array) $from_order_store );
+		$item_store_keys  = array_keys( (array) $from_item_store );
+		sort( $order_store_keys );
+		sort( $item_store_keys );
+
+		$this->assertSame( $order_store_keys, $item_store_keys );
+		$this->assertSame( array( 'order_id', 'order_item_id', 'order_item_name', 'order_item_type' ), $order_store_keys );
+	}
+
+	/**
+	 * @testdox A cached order item row that was populated by the individual order item data store can be converted back into an order item via WC_Order_Factory::get_order_item().
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/31656
+	 */
+	public function test_cached_order_item_row_from_item_store_is_factory_compatible() {
+		$order    = WC_Helper_Order::create_order();
+		$item_id  = reset( $order->get_items() )->get_id();
+		$order_id = $order->get_id();
+
+		wp_cache_delete( 'item-' . $item_id, 'order-items' );
+		wp_cache_delete( 'order-items-' . $order_id, 'orders' );
+		new WC_Order_Item_Product( $item_id );
+
+		$cached_row = wp_cache_get( 'item-' . $item_id, 'order-items' );
+
+		$this->assertIsObject( $cached_row );
+
+		$item = WC_Order_Factory::get_order_item( $cached_row );
+
+		$this->assertInstanceOf( WC_Order_Item_Product::class, $item );
+		$this->assertSame( (int) $item_id, $item->get_id() );
+	}
+
+	/**
+	 * @testdox Should keep a fee total saved by another copy when a stale copy saves without changing it.
+	 */
+	public function test_stale_fee_item_save_keeps_value_saved_by_another_copy(): void {
+		$order = new WC_Order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_name( 'Fee' );
+		$fee->set_total( 1 );
+		$order->add_item( $fee );
+		$order->save();
+
+		$source = new WC_Order( $order->get_id() );
+		$item   = current( $source->get_items( 'fee' ) );
+		$clone  = clone $source;
+		$item->set_total( 9 );
+		$item->save();
+		current( $clone->get_items( 'fee' ) )->set_tax_class( 'reduced-rate' );
+		$clone->save();
+
+		$reloaded = new WC_Order_Item_Fee( $item->get_id() );
+		$this->assertSame( '9', $reloaded->get_total() );
+		$this->assertSame( 'reduced-rate', $reloaded->get_tax_class() );
+	}
+
+	/**
+	 * @testdox Should keep a coupon discount saved by another copy when a stale copy saves without changing it.
+	 */
+	public function test_stale_coupon_item_save_keeps_value_saved_by_another_copy(): void {
+		$order  = new WC_Order();
+		$coupon = new WC_Order_Item_Coupon();
+		$coupon->set_code( 'code' );
+		$coupon->set_discount( 1 );
+		$coupon->set_discount_tax( 2 );
+		$order->add_item( $coupon );
+		$order->save();
+
+		$source = new WC_Order( $order->get_id() );
+		$item   = current( $source->get_items( 'coupon' ) );
+		$clone  = clone $source;
+		$item->set_discount( 9 );
+		$item->save();
+		current( $clone->get_items( 'coupon' ) )->set_discount_tax( 3 );
+		$clone->save();
+
+		$reloaded = new WC_Order_Item_Coupon( $item->get_id() );
+		$this->assertSame( '9', $reloaded->get_discount() );
+		$this->assertSame( '3', $reloaded->get_discount_tax() );
+	}
+
+	/**
+	 * @testdox Should write every fee and coupon field when a copied item is saved as a new row.
+	 */
+	public function test_copied_fee_and_coupon_items_write_all_fields_to_new_rows(): void {
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_name( 'Fee' );
+		$fee->set_amount( 4 );
+		$fee->set_total( 5 );
+		$fee->set_taxes( array( 'total' => array( 1 => '1' ) ) );
+		$fee->set_tax_class( 'reduced-rate' );
+		$fee->save();
+		$fee_copy = clone $fee;
+		$fee_copy->set_id( 0 );
+		$fee_copy->save();
+
+		$coupon = new WC_Order_Item_Coupon();
+		$coupon->set_code( 'code' );
+		$coupon->set_discount( 7 );
+		$coupon->set_discount_tax( 2 );
+		$coupon->save();
+		$coupon_copy = clone $coupon;
+		$coupon_copy->set_id( 0 );
+		$coupon_copy->save();
+
+		$this->assertNotSame( $fee->get_id(), $fee_copy->get_id() );
+		$reloaded_fee = new WC_Order_Item_Fee( $fee_copy->get_id() );
+		$this->assertSame( '4', $reloaded_fee->get_amount() );
+		$this->assertSame( '5', $reloaded_fee->get_total() );
+		$this->assertSame( '1', $reloaded_fee->get_total_tax() );
+		$this->assertSame( 'reduced-rate', $reloaded_fee->get_tax_class() );
+
+		$this->assertNotSame( $coupon->get_id(), $coupon_copy->get_id() );
+		$reloaded_coupon = new WC_Order_Item_Coupon( $coupon_copy->get_id() );
+		$this->assertSame( '7', $reloaded_coupon->get_discount() );
+		$this->assertSame( '2', $reloaded_coupon->get_discount_tax() );
+	}
 }

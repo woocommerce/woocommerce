@@ -9,19 +9,24 @@
 	height: auto;
 
 	&::after {
-		content: '';
+		content: "";
 		background: $gray-900;
 		mask: url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20%2F%3E%3C%2Fsvg%3E)
 			no-repeat right 0 top 55%;
 		position: absolute;
 		right: 14px;
-		width: 32px;
+		// Match the glyph width so the mask anchor can't skew the arrow's
+		// edge distance when rtlcss mirrors the box but not the mask.
+		width: 20px;
 		height: 48px;
 	}
 
 	&.is-open {
 		&::after {
-			transform: translateX(12px) translateY(2px) rotate(180deg);
+			// scaleY instead of rotate(180deg): the glyph is horizontally
+			// symmetric, and a purely vertical flip needs no translateX
+			// compensation, which rtlcss would flip the wrong way in RTL.
+			transform: translateY(2px) scaleY(-1);
 		}
 	}
 
@@ -52,7 +57,7 @@
 	width: 100%;
 	justify-content: space-around;
 
-	@include breakpoint( '<400px' ) {
+	@include breakpoint( "<400px" ) {
 		min-height: 46px;
 	}
 
@@ -70,7 +75,7 @@
 			font-weight: 600;
 		}
 
-		@include breakpoint( '<400px' ) {
+		@include breakpoint( "<400px" ) {
 			&:last-child {
 				@include font-size( 10 );
 			}

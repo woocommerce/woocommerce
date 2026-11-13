@@ -71,7 +71,6 @@ trait StoreApiRestTestCaseTrait {
 		\WC_Unit_Test_Case::with_rest_route_context(
 			'/wc/store/v1',
 			static function () use ( $wp_rest_server ) {
-				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 				do_action( 'rest_api_init', $wp_rest_server );
 			}
 		);

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Sanitize the single dismissible store notice before rendering so entity-encoded HTML in Store API error messages (e.g. a product name) cannot execute script on the Cart and Checkout blocks.
