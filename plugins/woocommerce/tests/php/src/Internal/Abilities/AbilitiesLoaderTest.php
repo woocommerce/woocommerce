@@ -51,6 +51,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/order-notes-query',
 		'woocommerce/payment-gateways-query',
 		'woocommerce/customers-query',
+		'woocommerce/customer-update',
 		'woocommerce/product-review-update',
 		'woocommerce/product-review-reply',
 		'woocommerce/product-reviews-query',
@@ -373,6 +374,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
+			),
+			'woocommerce/customer-update'          => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
 			),
 			'woocommerce/product-review-update'    => array(
 				'readonly'    => false,
@@ -1147,6 +1153,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'tax-rates-query'          => array(
 				'woocommerce/tax-rates-query',
 				array(),
+			),
+			'customer-update'          => array(
+				'woocommerce/customer-update',
+				array(
+					'id'         => 1,
+					'first_name' => 'Denied',
+				),
 			),
 		);
 	}
