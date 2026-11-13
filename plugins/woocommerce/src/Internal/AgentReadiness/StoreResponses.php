@@ -18,6 +18,9 @@ defined( 'ABSPATH' ) || exit;
  * coming soon mode, so a check reports "couldn't check" instead of "missing".
  * When the home page can't be reached, the rest of the scan makes no more requests.
  *
+ * A product page is read further than other files. Product JSON-LD is printed in
+ * the footer, so a cap that keeps only the start of the page drops it.
+ *
  * @since 11.4.0
  */
 class StoreResponses {
@@ -25,6 +28,12 @@ class StoreResponses {
 	public const TIMEOUT = 5;
 
 	public const MAX_BYTES = 512 * KB_IN_BYTES;
+
+	/**
+	 * How much of a product page is downloaded. Product JSON-LD is printed in the
+	 * footer, so the usual cap can cut it off.
+	 */
+	public const PRODUCT_PAGE_BYTES = 2 * MB_IN_BYTES;
 
 	private const MAX_REDIRECTS = 2;
 
@@ -45,7 +54,7 @@ class StoreResponses {
 	/**
 	 * Responses by request.
 	 *
-	 * @var array<string, array{status:int,body:string,headers:array<string,string>}|null>
+	 * @var array<string, array{status:int,body:string,headers:array<string,string>,truncated:bool}|null>
 	 */
 	private array $responses = array();
 
@@ -69,7 +78,7 @@ class StoreResponses {
 	 * The response for a URL on the store's host, or for a path from the home URL such as /llms.txt.
 	 *
 	 * @param string $url URL or path.
-	 * @return array{status:int,body:string,headers:array<string,string>}|null Null when the store could not be reached.
+	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null Null when the store could not be reached.
 	 */
 	public function get( string $url ): ?array {
 		$url = self::absolute( $url );
@@ -84,7 +93,7 @@ class StoreResponses {
 	 *
 	 * @param string               $url  URL or path.
 	 * @param array<string, mixed> $body Request body.
-	 * @return array{status:int,body:string,headers:array<string,string>}|null Null when the store could not be reached.
+	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null Null when the store could not be reached.
 	 */
 	public function post_json( string $url, array $body ): ?array {
 		$url  = self::absolute( $url );
@@ -140,18 +149,27 @@ class StoreResponses {
 
 	/**
 	 * The page of `product()`, or null when there is no product or its page didn't answer 200.
+	 * Read up to PRODUCT_PAGE_BYTES, so the footer JSON-LD survives the cap.
 	 *
-	 * @return array{status:int,body:string,headers:array<string,string>}|null
+	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null
 	 */
 	public function product_page(): ?array {
 		$product = $this->product();
-		return null === $product ? null : self::ok( $this->get( (string) $product->get_permalink() ) );
+		if ( null === $product ) {
+			return null;
+		}
+		$url = self::absolute( (string) $product->get_permalink() );
+		$key = 'PRODUCT ' . $url;
+		if ( ! array_key_exists( $key, $this->responses ) ) {
+			$this->responses[ $key ] = $this->site_live ? $this->fetch( $url, self::PRODUCT_PAGE_BYTES ) : null;
+		}
+		return self::ok( $this->responses[ $key ] );
 	}
 
 	/**
 	 * The home page, or null when it didn't answer 200.
 	 *
-	 * @return array{status:int,body:string,headers:array<string,string>}|null
+	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null
 	 */
 	public function home_page(): ?array {
 		return self::ok( $this->get( '/' ) );
@@ -176,15 +194,16 @@ class StoreResponses {
 	 * Request a URL, following redirects that stay on the store's host.
 	 * A redirect to a URL with a query string is not followed.
 	 *
-	 * @param string $url URL.
-	 * @return array{status:int,body:string,headers:array<string,string>}|null
+	 * @param string $url   URL.
+	 * @param int    $limit Bytes to read.
+	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null
 	 */
-	private function fetch( string $url ): ?array {
+	private function fetch( string $url, int $limit = self::MAX_BYTES ): ?array {
 		for ( $redirects = 0; $redirects <= self::MAX_REDIRECTS; $redirects++ ) {
 			if ( ! $this->is_store_url( $url ) ) {
 				return null;
 			}
-			$response = $this->request( $url );
+			$response = $this->request( $url, array(), $limit );
 			if ( null === $response ) {
 				return null;
 			}
@@ -202,12 +221,14 @@ class StoreResponses {
 
 	/**
 	 * One request, without following redirects. Only the headers checks read are kept.
+	 * `truncated` means the response stopped at the read limit, so the end of the body may be missing.
 	 *
-	 * @param string               $url  URL.
-	 * @param array<string, mixed> $args Extra request arguments.
-	 * @return array{status:int,body:string,headers:array<string,string>}|null
+	 * @param string               $url   URL.
+	 * @param array<string, mixed> $args  Extra request arguments.
+	 * @param int                  $limit Bytes to read.
+	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null
 	 */
-	private function request( string $url, array $args = array() ): ?array {
+	private function request( string $url, array $args = array(), int $limit = self::MAX_BYTES ): ?array {
 		if ( ! $this->reachable ) {
 			return null;
 		}
@@ -217,7 +238,7 @@ class StoreResponses {
 				'method'              => 'GET',
 				'timeout'             => self::TIMEOUT,
 				'redirection'         => 0,
-				'limit_response_size' => self::MAX_BYTES,
+				'limit_response_size' => $limit,
 				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core's hook for requests a site makes to itself.
 				'sslverify'           => (bool) apply_filters( 'https_local_ssl_verify', false ),
 			)
@@ -238,18 +259,22 @@ class StoreResponses {
 				$headers[ $name ] = $value;
 			}
 		}
+		$body     = (string) wp_remote_retrieve_body( $response );
+		$length   = wp_remote_retrieve_header( $response, 'content-length' );
+		$declared = is_string( $length ) && is_numeric( $length ) && (int) $length > strlen( $body );
 		return array(
-			'status'  => (int) wp_remote_retrieve_response_code( $response ),
-			'body'    => wp_remote_retrieve_body( $response ),
-			'headers' => $headers,
+			'status'    => (int) wp_remote_retrieve_response_code( $response ),
+			'body'      => strlen( $body ) > $limit ? substr( $body, 0, $limit ) : $body,
+			'headers'   => $headers,
+			'truncated' => strlen( $body ) >= $limit || $declared,
 		);
 	}
 
 	/**
 	 * A response that answered 200, else null.
 	 *
-	 * @param array{status:int,body:string,headers:array<string,string>}|null $response Response.
-	 * @return array{status:int,body:string,headers:array<string,string>}|null
+	 * @param array{status:int,body:string,headers:array<string,string>,truncated:bool}|null $response Response.
+	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null
 	 */
 	private static function ok( ?array $response ): ?array {
 		return null !== $response && 200 === $response['status'] ? $response : null;
