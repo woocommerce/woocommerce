@@ -62,11 +62,3 @@ Use this pattern for bulk or multi-item actions that can partly succeed. Keep co
 - Preserve entered values and successful changes after a failure. Offer a focused retry or correction step for the failed work, without requiring successful work to be repeated.
 
 Check the integrated screen with a keyboard and screen reader, including adding, updating, dismissing and acting on feedback.
-
-## Legacy examples
-
-These screenshots show legacy notice styling. Use them to understand message types and context; follow the current component references above for implementation and visual styling.
-
-![Legacy examples of success, error, warning and informational notices](https://developer.woocommerce.com/wp-content/uploads/2023/12/notices1.png)
-
-![Legacy informational notice providing context for the current screen](https://developer.woocommerce.com/wp-content/uploads/2023/12/informational-notice.png)
