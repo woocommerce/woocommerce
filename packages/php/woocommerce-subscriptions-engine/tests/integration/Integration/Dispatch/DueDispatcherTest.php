@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 use DateTimeImmutable;
 use DateTimeZone;
 use EngineIntegrationTestCase;
+use InvalidArgumentException;
 use RuntimeException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
@@ -105,7 +106,14 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 						$nested = ( new DueDispatcher() )->run_batch( $this->now() );
 					}
 					if ( $moved === $contract->get_id() ) {
-						Contracts::update( $moved, array( 'next_payment_gmt' => '2026-03-15 00:00:00' ), $context['lock'] );
+						Contracts::update(
+							$moved,
+							array(
+								'extension_slug'   => self::OWNER,
+								'next_payment_gmt' => '2026-03-15 00:00:00',
+							),
+							$context['lock']
+						);
 					}
 				},
 			)
@@ -114,6 +122,49 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$this->assertSame( 2, $this->sut->run_batch( $this->now() ), 'The outer tick notifies the first and the idle contract.' );
 		$this->assertSame( 2, $nested );
 		$this->assertSame( array( $first, $idle, $moved, $idle ), $this->notified_ids(), 'Only the contract left due is notified again.' );
+	}
+
+	/**
+	 * @testdox The handler's lock is taken for the scanned owner: a write naming that owner lands, one naming another is refused.
+	 */
+	public function test_the_handler_lock_carries_the_scanned_owner(): void {
+		$id      = $this->create_due_contract();
+		$refused = null;
+		ConsumerRegistry::register(
+			self::OWNER,
+			array(
+				'contract_due_handler' => static function ( ContractView $contract, array $context ) use ( &$refused ): void {
+					try {
+						Contracts::update(
+							$contract->get_id(),
+							array(
+								'extension_slug'   => 'other-ext',
+								'next_payment_gmt' => null,
+							),
+							$context['lock']
+						);
+					} catch ( InvalidArgumentException $e ) {
+						$refused = $e->getMessage();
+					}
+					Contracts::add_meta( $contract->get_id(), self::OWNER, '_handled', 'yes', false, $context['lock'] );
+					Contracts::update(
+						$contract->get_id(),
+						array(
+							'extension_slug'   => self::OWNER,
+							'next_payment_gmt' => null,
+						),
+						$context['lock']
+					);
+				},
+			)
+		);
+
+		$this->assertSame( 1, $this->sut->run_batch( $this->now() ) );
+		$this->assertSame( 'The lock is for a contract of another extension.', $refused );
+		$this->assertSame( array( 'yes' ), Contracts::get_meta( $id, '_handled' ) );
+		$view = Contracts::get( $id );
+		$this->assertInstanceOf( ContractView::class, $view );
+		$this->assertNull( $view->get_next_payment_gmt() );
 	}
 
 	/**
@@ -147,7 +198,13 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 					);
 					if ( $first === $contract->get_id() ) {
 						// Other writers act on the next contracts after the scan read them.
-						Contracts::update( $second, array( 'next_payment_gmt' => '2026-02-14 12:00:00' ) );
+						Contracts::update(
+							$second,
+							array(
+								'extension_slug'   => self::OWNER,
+								'next_payment_gmt' => '2026-02-14 12:00:00',
+							)
+						);
 						$this->take_lock( $third, 'cancel' );
 					}
 				},
@@ -187,7 +244,14 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 						'contract' => $contract,
 						'context'  => $context,
 					);
-					Contracts::update( $contract->get_id(), array( 'next_payment_gmt' => '2026-02-16 00:00:00' ), $context['lock'] );
+					Contracts::update(
+						$contract->get_id(),
+						array(
+							'extension_slug'   => self::OWNER,
+							'next_payment_gmt' => '2026-02-16 00:00:00',
+						),
+						$context['lock']
+					);
 				},
 			)
 		);
@@ -214,7 +278,14 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 						'contract' => $contract,
 						'context'  => $context,
 					);
-					Contracts::update( $contract->get_id(), array( 'next_payment_gmt' => null ), $context['lock'] );
+					Contracts::update(
+						$contract->get_id(),
+						array(
+							'extension_slug'   => self::OWNER,
+							'next_payment_gmt' => null,
+						),
+						$context['lock']
+					);
 				},
 			)
 		);
@@ -241,11 +312,24 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 					$this->assertSame( DueDispatcher::LOCK_OPERATION, $lock->get_operation() );
 
 					try {
-						Contracts::update( $contract->get_id(), array( 'status' => ContractStatus::CANCELLED ) );
+						Contracts::update(
+							$contract->get_id(),
+							array(
+								'extension_slug' => self::OWNER,
+								'status'         => ContractStatus::CANCELLED,
+							)
+						);
 					} catch ( ContractLockedException $e ) {
 						$refused = $e->get_operation();
 					}
-					Contracts::update( $contract->get_id(), array( 'status' => ContractStatus::ON_HOLD ), $lock );
+					Contracts::update(
+						$contract->get_id(),
+						array(
+							'extension_slug' => self::OWNER,
+							'status'         => ContractStatus::ON_HOLD,
+						),
+						$lock
+					);
 				},
 			)
 		);

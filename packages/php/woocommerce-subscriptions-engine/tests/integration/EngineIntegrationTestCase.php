@@ -72,16 +72,28 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Take a contract's lock through the facade, failing the test when the race is lost.
+	 * Take a contract's lock through the facade as its owner, failing the test when the race is lost.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $operation   Operation label.
 	 */
 	protected function take_lock( int $contract_id, string $operation ): ContractLock {
-		$lock = Contracts::lock( $contract_id, $operation );
+		$lock = Contracts::lock( $contract_id, $this->get_owner( $contract_id ), $operation );
 		$this->assertNotNull( $lock, 'Expected to take the lock.' );
 
 		return $lock;
+	}
+
+	/**
+	 * The stored owning extension of a contract, failing the test when it does not exist.
+	 *
+	 * @param int $contract_id Contract id.
+	 */
+	protected function get_owner( int $contract_id ): string {
+		$contract = Contracts::get( $contract_id );
+		$this->assertNotNull( $contract, 'Expected the contract to exist.' );
+
+		return (string) $contract->get_extension_slug();
 	}
 
 	/**
@@ -503,7 +515,14 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 			),
 			$lock
 		);
-		Contracts::update( $id, array( 'status' => $status ), $lock );
+		Contracts::update(
+			$id,
+			array(
+				'extension_slug' => (string) $plan->get_extension_slug(),
+				'status'         => $status,
+			),
+			$lock
+		);
 		$lock->release();
 
 		return $id;
