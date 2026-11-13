@@ -726,7 +726,7 @@ class Checkout extends AbstractCartRoute {
 				'processed_with_payment' => $this->order->needs_payment() ? 'yes' : 'no',
 				'payment_status'         => $payment_result->status,
 			),
-			true
+			'error' !== $payment_result->status
 		);
 
 		return $this->prepare_item_for_response(
