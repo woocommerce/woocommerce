@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide users that can't be assigned a REST API key from the key owner search.
