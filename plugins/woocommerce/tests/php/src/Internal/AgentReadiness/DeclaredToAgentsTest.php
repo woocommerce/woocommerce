@@ -182,6 +182,31 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Declarations inside an HTML comment or a script are not found: only real tags count.
+	 */
+	public function test_commented_out_declarations(): void {
+		$results = $this->results(
+			array(
+				'/' => array(
+					200,
+					'<html><head><!-- <link rel="alternate" type="text/markdown" href="/index.md"> --></head><body>'
+					. '<!-- <form toolname="search" tooldescription="Find"></form> -->'
+					. '<script>var a = \'<pre class="language-php">\';</script>'
+					. '<!-- <input type="search" name="s" role="combobox"> --></body></html>',
+				),
+			)
+		);
+		$this->assertFalse( $results['webmcp-forms-schema'] );
+		$this->assertFalse( $results['markdown-alternate-link'] );
+		$this->assertFalse( $results['code-block-language'] );
+		$this->assertFalse( $results['site-search-autocomplete'] );
+
+		remove_all_filters( 'pre_http_request' );
+		$results = $this->results( array( '/' => array( 200, '<form><input type="search" name="s" aria-autocomplete="none"></form>' ) ) );
+		$this->assertFalse( $results['site-search-autocomplete'], 'aria-autocomplete="none" turns it off' );
+	}
+
+	/**
 	 * @testdox lastmod is read from a sitemap or from the first sitemap an index lists.
 	 */
 	public function test_sitemap_lastmod(): void {
@@ -408,8 +433,8 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$found = array_column( $this->scan(), 'found' );
-
-		$this->assertSame( array( null ), array_values( array_unique( $found, SORT_REGULAR ) ) );
+		foreach ( $this->scan() as $item ) {
+			$this->assertNull( $item['found'], $item['id'] );
+		}
 	}
 }

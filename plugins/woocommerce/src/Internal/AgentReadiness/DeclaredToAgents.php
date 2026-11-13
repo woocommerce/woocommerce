@@ -46,15 +46,15 @@ class DeclaredToAgents {
 			'feed-present'             => array( __( 'RSS or Atom feed', 'woocommerce' ), null === $feed || $feed['status'] >= 500 ? null : 200 === $feed['status'] && 1 === preg_match( '/<(rss|feed)[\s>]/i', $feed['body'] ) ),
 			'sameas-links'             => array( __( 'sameAs links in structured data', 'woocommerce' ), self::json_ld_has( $home, 'sameAs' ) ),
 			'site-search-action'       => array( __( 'SearchAction for on-site search', 'woocommerce' ), self::has_search_action( $home ) ),
-			'webmcp-forms-schema'      => array( __( 'Forms that expose declarative WebMCP', 'woocommerce' ), self::has_webmcp_form( $home, $page ) ),
+			'webmcp-forms-schema'      => array( __( 'Forms that expose declarative WebMCP', 'woocommerce' ), self::page_has_tag( array( $home, $page ), array( 'FORM' ), static fn( \WP_HTML_Tag_Processor $tag ): bool => null !== $tag->get_attribute( 'toolname' ) && null !== $tag->get_attribute( 'tooldescription' ) ) ),
 			'sitemap-lastmod'          => array( __( 'Sitemap has lastmod dates', 'woocommerce' ), self::sitemap_has_lastmod( $responses, $robots ) ),
 			'markdown-pages'           => array( __( 'Markdown version of pages (Accept: text/markdown)', 'woocommerce' ), self::is_markdown( self::markdown_answer( $responses ) ) ),
-			'markdown-alternate-link'  => array( __( 'Pages link to their Markdown version', 'woocommerce' ), self::page_matches( array( $home, $page ), '/<link\b(?=[^>]*\brel\s*=\s*["\']?[^"\'>]*\balternate\b)(?=[^>]*\btype\s*=\s*["\']?text\/markdown)/i' ) ),
+			'markdown-alternate-link'  => array( __( 'Pages link to their Markdown version', 'woocommerce' ), self::page_has_tag( array( $home, $page ), array( 'LINK' ), static fn( \WP_HTML_Tag_Processor $tag ): bool => in_array( 'alternate', self::tokens( $tag->get_attribute( 'rel' ) ), true ) && 0 === stripos( trim( (string) $tag->get_attribute( 'type' ) ), 'text/markdown' ) ) ),
 			'markdown-frontmatter'     => array( __( 'Markdown versions start with frontmatter', 'woocommerce' ), self::has_frontmatter( self::markdown_answer( $responses ) ) ),
 			'product-review-schema'    => array( __( 'Product review markup', 'woocommerce' ), null === $page ? null : self::product_has_reviews( $page['body'] ) ),
-			'code-block-language'      => array( __( 'Code blocks tagged with their language', 'woocommerce' ), self::page_matches( array( $home, $page ), '/<(?:pre|code)\b[^>]*\bclass\s*=\s*["\'][^"\']*\b(?:language|lang)-[\w+#-]+/i' ) ),
+			'code-block-language'      => array( __( 'Code blocks tagged with their language', 'woocommerce' ), self::page_has_tag( array( $home, $page ), array( 'PRE', 'CODE' ), static fn( \WP_HTML_Tag_Processor $tag ): bool => 1 === preg_match( '/(?:^|\s)(?:language|lang)-[\w+#-]+/i', (string) $tag->get_attribute( 'class' ) ) ) ),
 			'editorial-metadata'       => array( __( 'Author and publish date', 'woocommerce' ), self::has_editorial_metadata( array( $home, $page ) ) ),
-			'site-search-autocomplete' => array( __( 'On-site search with autocomplete', 'woocommerce' ), self::page_matches( array( $home ), '/<input\b(?=[^>]*(?:\btype\s*=\s*["\']?search|\bname\s*=\s*["\']?s["\'\s\/>]))(?=[^>]*(?:\baria-autocomplete\s*=|\brole\s*=\s*["\']?combobox|\slist\s*=))/i' ) ),
+			'site-search-autocomplete' => array( __( 'On-site search with autocomplete', 'woocommerce' ), self::page_has_tag( array( $home ), array( 'INPUT' ), array( self::class, 'is_autocomplete_search' ) ) ),
 			'mcp-server-card'          => array( __( 'MCP server card', 'woocommerce' ), self::either( self::document_served( $responses, '/.well-known/mcp/server-card.json', array( self::class, 'is_mcp_server_card' ) ), self::document_served( $responses, '/.well-known/mcp.json', array( self::class, 'is_mcp_server_card' ) ) ) ),
 			// Not read yet: DNS-AID needs a DNS lookup, and a feed product sync is set up outside the store's pages.
 			'dns-aid'                  => array( __( 'DNS for AI Discovery (DNS-AID)', 'woocommerce' ), null ),
@@ -137,22 +137,47 @@ class DeclaredToAgents {
 	}
 
 	/**
-	 * Whether any of the pages that loaded matches a pattern. Null when none loaded.
+	 * Whether any of the pages that loaded has a tag that matches. Tags are read as the browser
+	 * reads them, so markup inside a comment or a script doesn't count. Null when none loaded.
 	 *
-	 * @param array<int, array{status:int,body:string,headers:array<string,string>}|null> $pages   Pages, null for one that didn't load.
-	 * @param string                                                                      $pattern Pattern.
+	 * @param array<int, array{status:int,body:string,headers:array<string,string>}|null> $pages     Pages, null for one that didn't load.
+	 * @param array<int, string>                                                          $tag_names Upper-case tag names.
+	 * @param callable(\WP_HTML_Tag_Processor): bool                                      $matches   Test for one tag.
 	 */
-	private static function page_matches( array $pages, string $pattern ): ?bool {
+	private static function page_has_tag( array $pages, array $tag_names, callable $matches ): ?bool {
 		$loaded = array_filter( $pages );
 		if ( array() === $loaded ) {
 			return null;
 		}
 		foreach ( $loaded as $page ) {
-			if ( 1 === preg_match( $pattern, $page['body'] ) ) {
-				return true;
+			$tags = new \WP_HTML_Tag_Processor( $page['body'] );
+			while ( $tags->next_tag() ) {
+				if ( in_array( $tags->get_tag(), $tag_names, true ) && ! $tags->is_tag_closer() && $matches( $tags ) ) {
+					return true;
+				}
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * The space-separated tokens of an attribute value, lower case.
+	 *
+	 * @param mixed $value Attribute value.
+	 * @return array<int, string>
+	 */
+	private static function tokens( $value ): array {
+		return is_string( $value ) ? array_values( array_filter( explode( ' ', strtolower( (string) preg_replace( '/\s+/', ' ', $value ) ) ) ) ) : array();
+	}
+
+	/**
+	 * Whether an input is a site search box with autocomplete.
+	 *
+	 * @param \WP_HTML_Tag_Processor $tag Input tag.
+	 */
+	private static function is_autocomplete_search( \WP_HTML_Tag_Processor $tag ): bool {
+		$search = 'search' === strtolower( trim( (string) $tag->get_attribute( 'type' ) ) ) || 's' === $tag->get_attribute( 'name' );
+		return $search && ( ! in_array( strtolower( trim( (string) $tag->get_attribute( 'aria-autocomplete' ) ) ), array( '', 'none' ), true ) || 'combobox' === strtolower( trim( (string) $tag->get_attribute( 'role' ) ) ) || null !== $tag->get_attribute( 'list' ) );
 	}
 
 	/**
@@ -161,7 +186,11 @@ class DeclaredToAgents {
 	 * @param array<int, array{status:int,body:string,headers:array<string,string>}|null> $pages Pages, null for one that didn't load.
 	 */
 	private static function has_editorial_metadata( array $pages ): ?bool {
-		$meta = self::page_matches( $pages, '/<meta\b[^>]*(?:property\s*=\s*["\']article:(?:published_time|author)|name\s*=\s*["\']author)["\']/i' );
+		$meta = self::page_has_tag(
+			$pages,
+			array( 'META' ),
+			static fn( \WP_HTML_Tag_Processor $tag ): bool => in_array( strtolower( trim( (string) $tag->get_attribute( 'property' ) ) ), array( 'article:published_time', 'article:author' ), true ) || 'author' === strtolower( trim( (string) $tag->get_attribute( 'name' ) ) )
+		);
 		if ( true !== $meta ) {
 			foreach ( array_filter( $pages ) as $page ) {
 				foreach ( JsonLd::items( $page['body'], 'Article', 'BlogPosting', 'NewsArticle', 'WebPage', 'ItemPage', 'CollectionPage' ) as $item ) {
@@ -195,24 +224,6 @@ class DeclaredToAgents {
 	private static function is_mcp_server_card( array $document ): bool {
 		$named = ! empty( $document['name'] ) || ! empty( $document['serverInfo']['name'] );
 		return $named && ( ! empty( $document['endpoint'] ) || ! empty( $document['url'] ) || ! empty( $document['remotes'] ) || ! empty( $document['transport'] ) );
-	}
-
-	/**
-	 * Whether the home or product page has a form named and described as a WebMCP tool.
-	 *
-	 * @param array{status:int,body:string,headers:array<string,string>}|null $home Home page.
-	 * @param array{status:int,body:string,headers:array<string,string>}|null $page Product page.
-	 */
-	private static function has_webmcp_form( ?array $home, ?array $page ): ?bool {
-		if ( null === $home && null === $page ) {
-			return null;
-		}
-		foreach ( array( $home, $page ) as $response ) {
-			if ( null !== $response && 1 === preg_match( '/<form\b(?=[^>]*\stoolname\s*=)(?=[^>]*\stooldescription\s*=)/i', $response['body'] ) ) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**
