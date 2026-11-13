@@ -17,11 +17,27 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\CustomerUpdate;
 class CustomerUpdateTest extends \WC_Unit_Test_Case {
 
 	/**
-	 * Log in as an administrator, who may edit users.
+	 * An administrator, who may edit users.
+	 *
+	 * @var int
+	 */
+	private static $user_id;
+
+	/**
+	 * Create the fixtures that no test changes beyond its own transaction.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$user_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
+	 * Log in as the administrator.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::$user_id );
 	}
 
 	/**
@@ -115,9 +131,8 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 	 * @testdox Should refuse a guest, an unknown customer and a call with nothing to change.
 	 */
 	public function test_refuses_guests_unknown_ids_and_empty_changes(): void {
-		$order = \WC_Helper_Order::create_order( 0 );
+		$order = wc_create_order( array( 'status' => OrderStatus::COMPLETED ) );
 		$order->set_billing_email( 'guest@example.test' );
-		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 		\WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 		$guest = (int) CustomersDataStore::get_guest_id_by_email( 'guest@example.test' );
