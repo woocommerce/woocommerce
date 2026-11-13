@@ -307,13 +307,26 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	protected function stage_uploaded_csv( WP_REST_Request $request ) {
 		$files = $request->get_file_params();
 		if ( empty( $files['file'] ) ) {
-			return new WP_Error(
-				'woocommerce_fulfillments_import_no_file',
-				__( 'No CSV file was uploaded.', 'woocommerce' ),
-				array( 'status' => WP_Http::BAD_REQUEST )
-			);
+			return $this->no_file_error();
 		}
 
+		$rejected = $this->check_uploaded_file( $files['file'] );
+		if ( $rejected instanceof WP_Error ) {
+			return $rejected;
+		}
+
+		return $this->store_uploaded_file( $files['file'] );
+	}
+
+	/**
+	 * Check an uploaded file against the site's upload limit and PHP's upload result.
+	 *
+	 * Nothing is stored yet, so a rejection here leaves nothing to clean up.
+	 *
+	 * @param array $file Multipart file entry, in the $_FILES format.
+	 * @return WP_Error|null The error to return, or null when the file can be stored.
+	 */
+	private function check_uploaded_file( array $file ): ?WP_Error {
 		// On multisite WordPress hooks fix_import_form_size() onto this filter on every request
 		// but defines it in wp-admin/includes/ms.php, which only wp-admin loads.
 		if ( is_multisite() && ! function_exists( 'fix_import_form_size' ) ) {
@@ -323,7 +336,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		/** This filter is documented in wp-admin/includes/import.php. */
 		$upload_limit = (int) apply_filters( 'import_upload_size_limit', wp_max_upload_size() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
-		// On multisite the limit is the site's remaining upload space, so 0 means no space left.
+		// On multisite the limit is the site's remaining upload space, so 0 means no space left
+		// and no file could be stored, whatever PHP reported for it.
 		if ( $upload_limit <= 0 ) {
 			return new WP_Error(
 				'woocommerce_fulfillments_import_file_too_large',
@@ -334,30 +348,22 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 
 		// PHP reports a file it refused for size with error 1 or 2 and size 0, so the error
 		// code is checked before the size, or the merchant would get the generic message.
-		$upload_error = (int) ( $files['file']['error'] ?? UPLOAD_ERR_OK );
+		$upload_error = (int) ( $file['error'] ?? UPLOAD_ERR_OK );
 		if ( UPLOAD_ERR_INI_SIZE === $upload_error || UPLOAD_ERR_FORM_SIZE === $upload_error ) {
 			return $this->file_too_large_error( $upload_limit );
 		}
 		if ( UPLOAD_ERR_NO_FILE === $upload_error ) {
-			return new WP_Error(
-				'woocommerce_fulfillments_import_no_file',
-				__( 'No CSV file was uploaded.', 'woocommerce' ),
-				array( 'status' => WP_Http::BAD_REQUEST )
-			);
+			return $this->no_file_error();
 		}
 		if ( UPLOAD_ERR_OK !== $upload_error ) {
 			wc_get_logger()->warning(
 				sprintf( 'Fulfillments importer upload rejected by PHP with upload error code %d.', $upload_error ),
 				array( 'source' => 'fulfillments-importer' )
 			);
-			return new WP_Error(
-				'woocommerce_fulfillments_import_upload_failed',
-				__( 'The file could not be uploaded.', 'woocommerce' ),
-				array( 'status' => WP_Http::BAD_REQUEST )
-			);
+			return $this->upload_failed_error();
 		}
 
-		$file_size = (int) ( $files['file']['size'] ?? 0 );
+		$file_size = (int) ( $file['size'] ?? 0 );
 		if ( 0 === $file_size ) {
 			return new WP_Error(
 				'woocommerce_fulfillments_csv_parse_error',
@@ -372,20 +378,55 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			return $this->file_too_large_error( $upload_limit );
 		}
 
+		return null;
+	}
+
+	/**
+	 * Store a checked file under wc-imports through CSVUploadHelper.
+	 *
+	 * Every failure removes whatever this call stored. CSVUploadHelper can throw after the
+	 * file and its attachment exist (when wc_is_file_valid_csv() rejects the stored file), and
+	 * its exception does not say what it stored, so the stored path and attachment are
+	 * recorded from the upload hooks while the helper runs.
+	 *
+	 * @param array $file Multipart file entry, in the $_FILES format.
+	 * @return array{file:string, id:int}|WP_Error Staged absolute path and the attachment post ID created for it.
+	 */
+	private function store_uploaded_file( array $file ) {
 		// CSVUploadHelper ultimately calls wp_handle_upload(), which is only loaded
 		// on wp-admin page loads; REST requests must pull it in explicitly.
 		if ( ! function_exists( 'wp_handle_upload' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}
 
+		$stored = array(
+			'file' => '',
+			'id'   => 0,
+		);
+
+		// Runs last, so it sees the path after any other filter changed it.
+		$record_file = static function ( $upload ) use ( &$stored ) {
+			if ( is_array( $upload ) && empty( $upload['error'] ) && isset( $upload['file'] ) && is_string( $upload['file'] ) ) {
+				$stored['file'] = $upload['file'];
+			}
+			return $upload;
+		};
+		// Runs first, so the attachment for the stored file is recorded before any other
+		// callback could insert one of its own.
+		$record_attachment = static function ( $post_id ) use ( &$stored ) {
+			if ( 0 === $stored['id'] && '' !== $stored['file'] ) {
+				$stored['id'] = (int) $post_id;
+			}
+		};
+
 		// CSVUploadHelper reads from $_FILES under a configurable key. Stage the REST file under
 		// that key and unset it again in finally so the assignment cannot outlive this call.
-		$_FILES['fulfillment_import_file'] = $files['file'];
-		$file_path                         = '';
-		$attachment_id                     = 0;
+		$_FILES['fulfillment_import_file'] = $file;
+		add_filter( 'wp_handle_upload', $record_file, PHP_INT_MAX );
+		add_action( 'add_attachment', $record_attachment, PHP_INT_MIN );
 		try {
 			try {
-				$upload        = $this->csv_upload_helper->handle_csv_upload(
+				$upload = $this->csv_upload_helper->handle_csv_upload(
 					'fulfillment',
 					'fulfillment_import_file',
 					array(
@@ -393,39 +434,33 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 						'txt' => 'text/plain',
 					)
 				);
-				$file_path     = (string) ( $upload['file'] ?? '' );
-				$attachment_id = (int) ( $upload['id'] ?? 0 );
+				$stored = array(
+					'file' => (string) ( $upload['file'] ?? '' ),
+					'id'   => (int) ( $upload['id'] ?? 0 ),
+				);
 
-				FilesystemUtil::validate_upload_file_path( $file_path );
+				FilesystemUtil::validate_upload_file_path( $stored['file'] );
 
 				// Every later delete of this path refuses anything outside wc-imports, so a file an
 				// upload_dir filter moved elsewhere is refused here, while it can still be discarded.
-				if ( ! ImportSession::is_staged_path( $file_path ) ) {
-					$this->discard_failed_upload( $file_path, $attachment_id );
+				if ( ! ImportSession::is_staged_path( $stored['file'] ) ) {
+					$this->discard_failed_upload( $stored['file'], $stored['id'] );
 					wc_get_logger()->warning(
-						sprintf( 'Fulfillments importer upload rejected: the staged file is outside the import directory: %s', $file_path ),
+						sprintf( 'Fulfillments importer upload rejected: the staged file is outside the import directory: %s', $stored['file'] ),
 						array( 'source' => 'fulfillments-importer' )
 					);
-					return new WP_Error(
-						'woocommerce_fulfillments_import_upload_failed',
-						__( 'The file could not be uploaded.', 'woocommerce' ),
-						array( 'status' => WP_Http::BAD_REQUEST )
-					);
+					return $this->upload_failed_error();
 				}
 			} catch ( \Exception $e ) {
 				// The upload handler's message can carry server paths, so it is logged, not returned.
-				$this->discard_failed_upload( $file_path, $attachment_id );
+				$this->discard_failed_upload( $stored['file'], $stored['id'] );
 				wc_get_logger()->warning(
 					'Fulfillments importer upload rejected: ' . html_entity_decode( $e->getMessage(), ENT_QUOTES, 'UTF-8' ),
 					array( 'source' => 'fulfillments-importer' )
 				);
-				return new WP_Error(
-					'woocommerce_fulfillments_import_upload_failed',
-					__( 'The file could not be uploaded.', 'woocommerce' ),
-					array( 'status' => WP_Http::BAD_REQUEST )
-				);
+				return $this->upload_failed_error();
 			} catch ( \Throwable $e ) {
-				$this->discard_failed_upload( $file_path, $attachment_id );
+				$this->discard_failed_upload( $stored['file'], $stored['id'] );
 				wc_get_logger()->error(
 					'Fulfillments importer upload failed: ' . html_entity_decode( $e->getMessage(), ENT_QUOTES, 'UTF-8' ),
 					array( 'source' => 'fulfillments-importer' )
@@ -437,12 +472,39 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				);
 			}
 		} finally {
+			remove_filter( 'wp_handle_upload', $record_file, PHP_INT_MAX );
+			remove_action( 'add_attachment', $record_attachment, PHP_INT_MIN );
 			unset( $_FILES['fulfillment_import_file'] );
 		}
 
-		return array(
-			'file' => $file_path,
-			'id'   => $attachment_id,
+		return $stored;
+	}
+
+	/**
+	 * Build the 400 error for a request without a file.
+	 *
+	 * @return WP_Error
+	 */
+	private function no_file_error(): WP_Error {
+		return new WP_Error(
+			'woocommerce_fulfillments_import_no_file',
+			__( 'No CSV file was uploaded.', 'woocommerce' ),
+			array( 'status' => WP_Http::BAD_REQUEST )
+		);
+	}
+
+	/**
+	 * Build the 400 error for a file that could not be uploaded or staged.
+	 *
+	 * The message is fixed because the underlying reason can carry server paths; the reason is logged instead.
+	 *
+	 * @return WP_Error
+	 */
+	private function upload_failed_error(): WP_Error {
+		return new WP_Error(
+			'woocommerce_fulfillments_import_upload_failed',
+			__( 'The file could not be uploaded.', 'woocommerce' ),
+			array( 'status' => WP_Http::BAD_REQUEST )
 		);
 	}
 
@@ -467,8 +529,9 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	/**
 	 * Remove a file this request just staged, including its attachment post.
 	 *
-	 * Only for the path stage_uploaded_csv() returned in this request: it is wherever the
-	 * upload handler wrote it, so no containment check applies and a misplaced file is
+	 * Only for a path the upload handler stored in this request, whether returned by
+	 * stage_uploaded_csv() or recorded by store_uploaded_file() before a throw: it is wherever
+	 * the upload handler wrote it, so no containment check applies and a misplaced file is
 	 * still removed. A path read back from a session goes through
 	 * ImportSession::delete_staged_file() instead.
 	 *

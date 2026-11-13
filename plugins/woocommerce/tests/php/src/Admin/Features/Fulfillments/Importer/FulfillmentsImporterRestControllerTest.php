@@ -309,6 +309,20 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Count the callbacks registered on a hook.
+	 *
+	 * @param string $hook_name Hook name.
+	 * @return int
+	 */
+	private function callback_count( string $hook_name ): int {
+		global $wp_filter;
+		if ( ! isset( $wp_filter[ $hook_name ] ) ) {
+			return 0;
+		}
+		return array_sum( array_map( 'count', $wp_filter[ $hook_name ]->callbacks ) );
+	}
+
+	/**
 	 * Build a CSV with the given number of data rows.
 	 *
 	 * @param int $rows Number of data rows.
@@ -731,6 +745,92 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A throw from the upload helper after it stored the file removes the file and its attachment.
+	 */
+	public function test_prepare_removes_the_stored_upload_when_the_helper_throws_after_storing_it(): void {
+		// CSVUploadHelper throws after storing when wc_is_file_valid_csv() rejects the stored
+		// file. is_uploaded_file() cannot pass in a test process, so this helper stores the file
+		// with wp_handle_sideload() (which fires the same hooks as wp_import_handle_upload()) and
+		// then throws the way the real helper does.
+		$helper = new class() extends CSVUploadHelper {
+			/**
+			 * Absolute path of the file stored before the throw.
+			 *
+			 * @var string
+			 */
+			public string $stored_file = '';
+
+			/**
+			 * Attachment created for the stored file before the throw.
+			 *
+			 * @var int
+			 */
+			public int $stored_id = 0;
+
+			// The stub always throws; the array return type is never reached.
+			// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
+			/**
+			 * Store the upload under wc-imports with its attachment, then fail the CSV check.
+			 *
+			 * @param string     $import_type        Unused.
+			 * @param string     $files_index        Unused.
+			 * @param array|null $allowed_mime_types Unused.
+			 * @return array
+			 * @throws \Exception Always, after the file and attachment exist.
+			 */
+			public function handle_csv_upload( string $import_type, string $files_index = 'import', ?array $allowed_mime_types = null ): array {
+				$tmp = wp_tempnam( 'fulfillment-sample.txt' );
+				file_put_contents( $tmp, "order_number,tracking_number,shipment_provider\n1,T-1,ups\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
+
+				$file = array(
+					'name'     => 'fulfillment-sample.txt',
+					'type'     => 'text/plain',
+					'tmp_name' => $tmp,
+					'error'    => UPLOAD_ERR_OK,
+					'size'     => (int) filesize( $tmp ),
+				);
+
+				$this->get_import_dir();
+				add_filter( 'upload_dir', array( $this, 'override_upload_dir' ) );
+				$upload = wp_handle_sideload( $file, array( 'test_form' => false ) );
+				remove_filter( 'upload_dir', array( $this, 'override_upload_dir' ) );
+
+				$this->stored_file = (string) ( $upload['file'] ?? '' );
+				$this->stored_id   = (int) wp_insert_attachment(
+					array(
+						'post_title'     => 'fulfillment-sample.txt',
+						'post_mime_type' => (string) ( $upload['type'] ?? 'text/plain' ),
+					),
+					$this->stored_file
+				);
+
+				throw new \Exception( 'Invalid file type for a CSV import.' );
+			}
+			// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn
+		};
+		$sut    = $this->controller_with_helper( $helper );
+
+		$request = $this->make_prepare_request();
+		$request->set_file_params( $this->file_params( 'sample.txt' ) );
+
+		$hooks_before = array( $this->callback_count( 'wp_handle_upload' ), $this->callback_count( 'add_attachment' ) );
+		$response     = $this->invoke( 'handle_prepare', $request, $sut );
+
+		$this->temp_files[] = $helper->stored_file;
+		$this->assertSame( $hooks_before, array( $this->callback_count( 'wp_handle_upload' ), $this->callback_count( 'add_attachment' ) ), 'The recording hooks are removed' );
+		$this->assertTrue( ImportSession::is_staged_path( $helper->stored_file ), 'The helper stored the file under wc-imports' );
+		$this->assertGreaterThan( 0, $helper->stored_id, 'The helper created an attachment' );
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'woocommerce_fulfillments_import_upload_failed', $response->get_error_code() );
+		$this->assertSame( 400, $response->get_error_data()['status'] );
+		$this->assertFileDoesNotExist( $helper->stored_file, 'The stored file is removed' );
+		$this->assertNull( get_post( $helper->stored_id ), 'The attachment is removed' );
+		$this->assertNull( ImportSession::active_for_user( get_current_user_id() ) );
+		$this->assertArrayNotHasKey( 'fulfillment_import_file', $_FILES ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Asserting the superglobal was restored, not reading input.
+	}
+
+	/**
 	 * @testdox An upload the helper rejects returns a fixed message instead of the helper's own.
 	 */
 	public function test_prepare_hides_upload_helper_error_message(): void {
@@ -877,6 +977,30 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'woocommerce_fulfillments_import_file_too_large', $response->get_error_code() );
 		$this->assertSame( 413, $response->get_error_data()['status'] );
 		$this->assertStringContainsString( 'no upload space', $response->get_error_message() );
+	}
+
+	/**
+	 * @testdox A site with no upload space left gets the no-space 413 even for a file PHP refused for its size.
+	 */
+	public function test_prepare_reports_no_upload_space_before_a_php_size_error(): void {
+		$no_space = static function () {
+			return 0;
+		};
+		add_filter( 'import_upload_size_limit', $no_space );
+
+		try {
+			$request = $this->make_prepare_request();
+			$request->set_file_params( $this->file_params( 'large.csv', UPLOAD_ERR_INI_SIZE, 0 ) );
+
+			$response = $this->invoke( 'handle_prepare', $request );
+		} finally {
+			remove_filter( 'import_upload_size_limit', $no_space );
+		}
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'woocommerce_fulfillments_import_file_too_large', $response->get_error_code() );
+		$this->assertSame( 413, $response->get_error_data()['status'] );
+		$this->assertSame( 'This site has no upload space left for the file.', $response->get_error_message() );
 	}
 
 	/**
