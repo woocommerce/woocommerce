@@ -1194,6 +1194,47 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox pay_action() names the payment problem: no method on offer, none selected, or one that isn't available.
+	 * @testWith [[], "", "Invalid payment method."]
+	 *           [["cod"], "", "Please select a payment method."]
+	 *           [["cod"], "bacs", "Invalid payment method."]
+	 *
+	 * @param string[] $available Gateway ids available for the order.
+	 * @param string   $posted    The payment method the shopper submitted.
+	 * @param string   $expected  Expected error notice.
+	 */
+	public function test_pay_action_names_the_payment_problem( array $available, string $posted, string $expected ): void {
+		global $wp;
+
+		$order = WC_Helper_Order::create_order();
+		add_filter(
+			'woocommerce_available_payment_gateways',
+			function () use ( $available ) {
+				return array_intersect_key( WC()->payment_gateways()->payment_gateways(), array_flip( $available ) );
+			}
+		);
+
+		$_POST['woocommerce_pay']          = '1';
+		$_POST['payment_method']           = $posted;
+		$_REQUEST['woocommerce-pay-nonce'] = wp_create_nonce( 'woocommerce-pay' );
+		$_GET['key']                       = $order->get_order_key();
+		$wp->query_vars['order-pay']       = $order->get_id();
+		$buffer_level                      = ob_get_level();
+
+		try {
+			WC_Form_Handler::pay_action();
+		} finally {
+			// pay_action() opens an output buffer and leaves it to the page render to close.
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			unset( $wp->query_vars['order-pay'] );
+		}
+
+		$this->assertSame( array( $expected ), wp_list_pluck( wc_get_notices( 'error' ), 'notice' ) );
+	}
+
+	/**
 	 * Asserts that a copy was refused: no success notice and the target address is still empty.
 	 *
 	 * @param int    $customer_id Customer ID.

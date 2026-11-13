@@ -777,14 +777,14 @@ class WC_Form_Handler {
 				// Update payment method.
 				if ( $order->needs_payment() ) {
 					try {
-						$payment_method_id = isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : false;
+						$payment_method_id  = isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : false;
+						$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
-						if ( ! $payment_method_id ) {
+						if ( ! $payment_method_id && ! empty( $available_gateways ) ) {
 							throw new Exception( __( 'Please select a payment method.', 'woocommerce' ) );
 						}
 
-						$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-						$payment_method     = isset( $available_gateways[ $payment_method_id ] ) ? $available_gateways[ $payment_method_id ] : false;
+						$payment_method = $payment_method_id && isset( $available_gateways[ $payment_method_id ] ) ? $available_gateways[ $payment_method_id ] : false;
 
 						if ( ! $payment_method ) {
 							throw new Exception( __( 'Invalid payment method.', 'woocommerce' ) );
