@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $product;
 
 $args        = $args ?? array();
-$button_data = wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_button_data( $product, $args['quantity'] ?? 1 );
+$button_data = wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_button_data( $product, $args['quantity'] ?? null );
 if ( ( $args['attributes']['aria-label'] ?? null ) === wp_strip_all_tags( $button_data['original_description'] ) ) {
 	$args['attributes']['aria-label'] = wp_strip_all_tags( $button_data['description'] );
 }
@@ -46,7 +46,7 @@ echo apply_filters( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEsc
 		'<a href="%s" %s data-quantity="%s" class="%s" %s>%s</a>',
 		esc_url( $button_data['url'] ),
 		$aria_describedby,
-		esc_attr( isset( $args['quantity'] ) ? $args['quantity'] : 1 ),
+		esc_attr( $button_data['quantity'] ),
 		esc_attr( isset( $args['class'] ) ? $args['class'] : 'button' ),
 		isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
 		esc_html( $button_data['text'] )

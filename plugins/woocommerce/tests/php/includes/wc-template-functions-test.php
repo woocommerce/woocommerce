@@ -371,6 +371,40 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Direct template rendering uses the resolved URL quantity unless an explicit quantity is supplied.
+	 */
+	public function test_loop_template_resolves_quantity_when_rendered_directly(): void {
+		global $product;
+
+		$previous_product = $product;
+		$product          = WC_Helper_Product::create_simple_product();
+		$product_id       = $product->get_id();
+		$url_filter       = static fn( $url ) => add_query_arg( 'quantity', 12, $url );
+		add_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+		try {
+			$markup          = wc_get_template_html( 'loop/add-to-cart.php' );
+			$explicit_markup = wc_get_template_html( 'loop/add-to-cart.php', array( 'quantity' => 1 ) );
+		} finally {
+			remove_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+			$product = $previous_product;
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue( $processor->next_tag( 'a' ), 'The template should render a link without quantity arguments.' );
+		$this->assertSame( '12', $processor->get_attribute( 'data-quantity' ), 'AJAX should use the quantity resolved from the filtered URL.' );
+		parse_str( wp_parse_url( $processor->get_attribute( 'href' ), PHP_URL_QUERY ), $query );
+		$this->assertSame( (string) $product_id, $query['add-to-cart'] );
+		$this->assertSame( '12', $query['quantity'], 'The filtered URL quantity should be retained.' );
+		$this->assertStringContainsString( '>Add 12 to cart</a>', $markup );
+		$processor = new WP_HTML_Tag_Processor( $explicit_markup );
+		$this->assertTrue( $processor->next_tag( 'a' ) );
+		$this->assertSame( '1', $processor->get_attribute( 'data-quantity' ), 'An explicit quantity of one should still override the URL.' );
+		parse_str( wp_parse_url( $processor->get_attribute( 'href' ), PHP_URL_QUERY ), $query );
+		$this->assertSame( '1', $query['quantity'] );
+		$this->assertStringContainsString( '>Add to cart</a>', $explicit_markup );
+	}
+
+	/**
 	 * @testdox Add-to-cart URLs do not inherit another product's minimum quantity from the current request.
 	 */
 	public function test_loop_button_does_not_inherit_request_quantity(): void {
