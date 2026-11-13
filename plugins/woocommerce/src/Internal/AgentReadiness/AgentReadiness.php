@@ -38,6 +38,13 @@ class AgentReadiness {
 	private StoreConditions $store_conditions;
 
 	/**
+	 * Store checks that read what the store returns.
+	 *
+	 * @var StoreOutputChecks
+	 */
+	private StoreOutputChecks $store_output_checks;
+
+	/**
 	 * Rules from the published rules file.
 	 *
 	 * @var RemoteRules
@@ -63,12 +70,14 @@ class AgentReadiness {
 	 *
 	 * @internal
 	 *
-	 * @param StoreConditions $store_conditions Store-wide conditions.
-	 * @param RemoteRules     $remote_rules     Rules from the published rules file.
+	 * @param StoreConditions   $store_conditions    Store-wide conditions.
+	 * @param StoreOutputChecks $store_output_checks Store checks that read what the store returns.
+	 * @param RemoteRules       $remote_rules        Rules from the published rules file.
 	 */
-	final public function init( StoreConditions $store_conditions, RemoteRules $remote_rules ): void {
-		$this->store_conditions = $store_conditions;
-		$this->remote_rules     = $remote_rules;
+	final public function init( StoreConditions $store_conditions, StoreOutputChecks $store_output_checks, RemoteRules $remote_rules ): void {
+		$this->store_conditions    = $store_conditions;
+		$this->store_output_checks = $store_output_checks;
+		$this->remote_rules        = $remote_rules;
 	}
 
 	/**
@@ -93,6 +102,7 @@ class AgentReadiness {
 				$simple['variation_attributes_not_set'],
 				$simple['missing_variation_images'],
 				$simple['title_too_long'],
+				$simple['image_alt_text'],
 			) as $rule
 		) {
 			$rules[ $rule->id() ] = $rule;
@@ -104,7 +114,8 @@ class AgentReadiness {
 	 * Field and effect per channel for each check that runs. With a stored
 	 * rules file, the file is the list: an id it leaves out does not run, an
 	 * id code does not know is dropped, and an id whose entry is malformed
-	 * runs with its bundled channels. With no file, the bundled checks
+	 * runs with its bundled channels. A check no channel asks for is named
+	 * with an empty channel map. With no file, the bundled checks
 	 * run. The woocommerce_agent_readiness_rules filter runs last, and a check
 	 * whose id is missing from the filtered array does not run.
 	 *
@@ -141,7 +152,15 @@ class AgentReadiness {
 		 */
 		$filtered = apply_filters( 'woocommerce_agent_readiness_rules', $defaults );
 
-		return is_array( $filtered ) ? $this->without_empty( $this->sanitize_channel_rules( $filtered, $bundled ) ) : $defaults;
+		if ( ! is_array( $filtered ) ) {
+			return $defaults;
+		}
+		// A check left with no valid channel doesn't run, as if the filter had removed it, unless it never had one.
+		return array_filter(
+			$this->sanitize_channel_rules( $filtered, $bundled ),
+			static fn( array $channels, $id ): bool => ! empty( $channels ) || empty( $bundled[ $id ] ),
+			ARRAY_FILTER_USE_BOTH
+		);
 	}
 
 	/**
@@ -172,21 +191,6 @@ class AgentReadiness {
 			}
 		}
 		return $rules;
-	}
-
-	/**
-	 * Drop checks left with no valid channel.
-	 *
-	 * @param array<string, array<string, array{field:string,effect:string}>> $rules Channel map by check id.
-	 * @return array<string, array<string, array{field:string,effect:string}>>
-	 */
-	private function without_empty( array $rules ): array {
-		return array_filter(
-			$rules,
-			static function ( array $channels ): bool {
-				return array() !== $channels;
-			}
-		);
 	}
 
 	/**
@@ -225,7 +229,7 @@ class AgentReadiness {
 			'products'            => $scan->products(),
 			'hidden_from_catalog' => $scan->hidden_from_catalog(),
 			'unsupported_types'   => $scan->unsupported_types(),
-			'store_checks'        => $this->store_conditions->all(),
+			'store_checks'        => array_merge( $this->store_conditions->all(), $this->store_output_checks->all() ),
 			'channels'            => $scan->channel_totals(),
 			'checks'              => $checks,
 			'truncated'           => $scan->truncated(),
@@ -240,6 +244,37 @@ class AgentReadiness {
 	public function get_cached_report(): ?array {
 		$report = get_option( self::REPORT_OPTION );
 		return is_array( $report ) ? $report : null;
+	}
+
+	/**
+	 * Store checks as they stand now: the store conditions read live, then the
+	 * store output checks from the stored report, since those run only in the scan.
+	 * Output checks are always recommended, whatever the stored report says.
+	 *
+	 * @param array<string, mixed>|null                                                                                                               $report Stored report.
+	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>|null $live   Store conditions already read, or null to read them.
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>
+	 */
+	public function get_store_checks( ?array $report, ?array $live = null ): array {
+		$checks   = $live ?? $this->store_conditions->all();
+		$live_ids = array_column( $checks, 'id' );
+		foreach ( is_array( $report['store_checks'] ?? null ) ? $report['store_checks'] : array() as $check ) {
+			if ( ! is_array( $check ) || ! isset( $check['id'], $check['name'] ) || in_array( $check['id'], $live_ids, true ) ) {
+				continue;
+			}
+			$checks[] = array(
+				'id'      => (string) $check['id'],
+				'ok'      => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
+				'blocks'  => (string) ( $check['blocks'] ?? '' ),
+				'level'   => StoreConditions::LEVEL_RECOMMENDED,
+				'name'    => (string) $check['name'],
+				'label'   => (string) ( $check['label'] ?? '' ),
+				'why'     => (string) ( $check['why'] ?? '' ),
+				'fix'     => (string) ( $check['fix'] ?? '' ),
+				'fix_url' => (string) ( $check['fix_url'] ?? '' ),
+			);
+		}
+		return $checks;
 	}
 
 	/**

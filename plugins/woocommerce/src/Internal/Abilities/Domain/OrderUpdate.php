@@ -261,7 +261,7 @@ class OrderUpdate extends ActionableAbility {
 	 * @return array|\WP_Error
 	 */
 	public function prepare_response( $subject ) {
-		$order = self::format_order_for_response( $subject, true );
+		$order = self::format_order_for_response( $subject, array( 'line_items', 'lines' ) );
 		if ( is_wp_error( $order ) ) {
 			return $order;
 		}
@@ -596,7 +596,7 @@ class OrderUpdate extends ActionableAbility {
 		return new \WP_Error(
 			'woocommerce_ability_order_line_not_found',
 			/* translators: %d: order item ID. */
-			sprintf( __( 'Item %d is not a line of this order that this ability can change. Use the woocommerce/orders-query ability with include_line_items to read the IDs of the product and shipping lines.', 'woocommerce' ), $item_id ),
+			sprintf( __( 'Item %d is not a line of this order that this ability can change. Use the woocommerce/orders-query ability with include_line_items and include_lines to read the IDs of the product and shipping lines.', 'woocommerce' ), $item_id ),
 			array( 'status' => 400 )
 		);
 	}

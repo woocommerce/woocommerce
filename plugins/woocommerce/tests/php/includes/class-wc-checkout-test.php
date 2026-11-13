@@ -58,16 +58,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	private $original_session;
 
 	/**
-	 * @var WC_Customer|null The customer the test base installed, put back after a test ran a full checkout into a fresh one.
-	 */
-	private $original_session_customer;
-
-	/**
-	 * @var array The customer's location and VAT exemption before each test, restored on tear down.
-	 */
-	private $original_customer = array();
-
-	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -106,9 +96,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		WC()->cart->empty_cart();
 
-		$customer                = WC()->customer;
-		$this->original_customer = array( $customer->get_billing_country(), $customer->get_billing_state(), $customer->get_shipping_country(), $customer->get_shipping_state(), $customer->get_is_vat_exempt() );
-
 		add_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 	}
 
@@ -118,7 +105,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 		delete_option( 'woocommerce_calc_taxes' );
-		WC()->countries->locale = array();
 
 		foreach ( $this->extra_field_filters as $extra_field_filter ) {
 			remove_filter( 'woocommerce_checkout_fields', $extra_field_filter );
@@ -127,20 +113,12 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->extra_field_filters = array();
 
 		if ( $this->original_session ) {
-			WC()->session                    = $this->original_session;
-			WC()->customer                   = $this->original_session_customer;
-			$this->original_session          = null;
-			$this->original_session_customer = null;
+			WC()->session           = $this->original_session;
+			$this->original_session = null;
 		}
 
 		wp_set_current_user( 0 );
 		WC()->session->set( 'customer', null );
-		WC()->customer = new WC_Customer( 0, true );
-
-		$customer = WC()->customer;
-		$customer->set_billing_location( $this->original_customer[0], $this->original_customer[1] );
-		$customer->set_shipping_location( $this->original_customer[2], $this->original_customer[3] );
-		$customer->set_is_vat_exempt( $this->original_customer[4] );
 		WC_Helper_Shipping::delete_simple_flat_rate();
 
 		parent::tearDown();
@@ -287,30 +265,24 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		wp_set_current_user( $customer_id );
 		WC()->session->init();
 
-		$original_customer = WC()->customer;
-		WC()->customer     = new WC_Customer( $customer_id, true );
+		WC()->customer = new WC_Customer( $customer_id, true );
+		WC()->customer->set_is_vat_exempt( true );
+		WC()->customer->save();
 
-		try {
-			WC()->customer->set_is_vat_exempt( true );
-			WC()->customer->save();
+		$this->sut->process_customer(
+			array(
+				'billing_first_name' => 'Classic',
+				'billing_address_1'  => '456 Classic Road',
+				'billing_email'      => 'classic-vat-exempt@example.com',
+			)
+		);
 
-			$this->sut->process_customer(
-				array(
-					'billing_first_name' => 'Classic',
-					'billing_address_1'  => '456 Classic Road',
-					'billing_email'      => 'classic-vat-exempt@example.com',
-				)
-			);
+		// The session customer is saved on shutdown in a real request.
+		WC()->customer->save();
 
-			// The session customer is saved on shutdown in a real request.
-			WC()->customer->save();
-
-			$reloaded_customer = new WC_Customer( $customer_id, true );
-			$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so a retry is not charged tax.' );
-			$this->assertSame( '456 Classic Road', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
-		} finally {
-			WC()->customer = $original_customer;
-		}
+		$reloaded_customer = new WC_Customer( $customer_id, true );
+		$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so a retry is not charged tax.' );
+		$this->assertSame( '456 Classic Road', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
 	}
 
 	/**
@@ -594,8 +566,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * country rules, so this also pins that no country is assumed when the customer can't supply one.
 	 */
 	public function test_validate_posted_data_does_not_throw_without_a_customer_object() {
-		$original_customer = WC()->customer;
-
 		WC()->customer = null;
 
 		$data = array(
@@ -605,11 +575,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$errors = new WP_Error();
 
-		try {
-			$this->sut->validate_posted_data( $data, $errors );
-		} finally {
-			WC()->customer = $original_customer;
-		}
+		$this->sut->validate_posted_data( $data, $errors );
 
 		$this->assertEmpty(
 			$errors->get_error_message( 'billing_postcode_validation' ),
@@ -621,8 +587,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @testdox 'validate_posted_data' prefers the posted country over the one stored on the customer.
 	 */
 	public function test_validate_posted_data_prefers_the_posted_country() {
-		$original_billing_country = WC()->customer->get_billing_country();
-
 		WC()->customer->set_billing_country( 'GB' );
 
 		$data = array(
@@ -633,11 +597,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$errors = new WP_Error();
 
-		try {
-			$this->sut->validate_posted_data( $data, $errors );
-		} finally {
-			WC()->customer->set_billing_country( $original_billing_country );
-		}
+		$this->sut->validate_posted_data( $data, $errors );
 
 		$this->assertEmpty(
 			$errors->get_error_message( 'billing_postcode_validation' ),
@@ -660,9 +620,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function test_validate_posted_data_falls_back_to_the_customer_country( $fieldset_key, $customer_country, $expect_error ) {
 		add_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
 
-		$original_billing_country  = WC()->customer->get_billing_country();
-		$original_shipping_country = WC()->customer->get_shipping_country();
-
 		WC()->customer->set_billing_country( $customer_country );
 		WC()->customer->set_shipping_country( $customer_country );
 
@@ -677,8 +634,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		try {
 			$this->sut->validate_posted_data( $data, $errors );
 		} finally {
-			WC()->customer->set_billing_country( $original_billing_country );
-			WC()->customer->set_shipping_country( $original_shipping_country );
 			remove_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
 		}
 
@@ -1208,12 +1163,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function test_get_value_no_error_on_null_customer() {
 		$sut = WC_Checkout::instance();
 
-		$orig_customer = WC()->customer;
 		WC()->customer = null;
 
 		$this->assertNull( $sut->get_value( 'billing_country' ) );
-
-		WC()->customer = $orig_customer;
 	}
 
 	/**
@@ -2997,11 +2949,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Swap the test base's in-memory session for a real handler, which is what process_order_payment() needs (it calls save_data()).
 	 *
-	 * The customer is swapped too, because a full checkout writes the posted address into it and nothing else resets that singleton.
+	 * The customer is swapped for a fresh one too, because a full checkout writes the posted address into it.
 	 */
 	private function use_real_session(): void {
-		$this->original_session          = WC()->session;
-		$this->original_session_customer = WC()->customer;
+		$this->original_session = WC()->session;
 
 		WC()->session = new WC_Session_Handler();
 		WC()->session->init();
