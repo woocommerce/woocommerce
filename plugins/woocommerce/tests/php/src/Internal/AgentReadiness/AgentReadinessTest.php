@@ -276,6 +276,35 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox After a stored scan, checking one product reads the scan's shared GTINs instead of every published product, and the report doesn't show them.
+	 */
+	public function test_check_product_reads_stored_shared_gtins(): void {
+		StoreOutputChecksTest::block_requests();
+		$first = WC_Helper_Product::create_simple_product();
+		$first->set_global_unique_id( '4006381333931' );
+		$first->save();
+		$second_id = WC_Helper_Product::create_simple_product()->get_id();
+		update_post_meta( $second_id, '_global_unique_id', '4006381333931' );
+		$this->sut->refresh_report();
+
+		$this->assertSame( array( '4006381333931' ), get_option( AgentReadiness::REPORT_OPTION )['shared_gtins'] );
+		$this->assertArrayNotHasKey( 'shared_gtins', $this->sut->get_cached_report() );
+
+		delete_post_meta( $second_id, '_global_unique_id' );
+		$queries = 0;
+		$count   = static function ( $query ) use ( &$queries ) {
+			$queries += false !== strpos( (string) $query, 'HAVING COUNT(*) > 1' ) ? 1 : 0;
+			return $query;
+		};
+		add_filter( 'query', $count );
+		$checks = $this->sut->check_product( $first )['checks'];
+		remove_filter( 'query', $count );
+
+		$this->assertArrayHasKey( 'duplicate_gtin', $checks, 'A GTIN change on another product waits for the next scan' );
+		$this->assertSame( 0, $queries );
+	}
+
+	/**
 	 * @testdox Products hidden from the shop catalog and unsupported types are counted, not checked.
 	 */
 	public function test_scan_counts_hidden_and_unsupported_products(): void {
