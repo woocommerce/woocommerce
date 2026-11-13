@@ -17,7 +17,9 @@ Use the supported [setup task and Admin Notes integrations](../extension-onboard
 
 ## Guide the work
 
-Use one clear primary action for the current step. If setup has several steps, show progress and distinguish required work from optional configuration. Explain what a connection or permission enables before asking the merchant to grant it.
+Use one clear primary action for the current step. If setup has several steps, show progress and distinguish required work from optional configuration.
+
+Before connecting a service, explain which account is being connected, its purpose, requested permissions and relevant data use. Make connection state clear: Not connected, Connecting, Connected or Reconnect required. Successful authorization may still leave required setup choices; return the merchant to the relevant task with completed work preserved.
 
 Keep copy instructional and in sentence case. Use the host's components and [semantic styling](./colors.md), without turning empty states or setup screens into brand promotions. An empty state should explain what belongs there and offer the next useful action.
 

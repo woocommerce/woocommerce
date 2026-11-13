@@ -24,9 +24,11 @@ For example, a product customization feature belongs with product editing; a shi
 
 Inside **WooCommerce > Settings**, retain the host's top-level navigation, header and [save contract](../settings-and-config/settings-ui.md#page-header). Do not wrap an embedded settings section in a second page shell or repeat a generic "General" heading and introduction that add no context.
 
-Use a page-layout component when your extension owns a standalone screen and needs that layout. Choosing a component does not change the screen's location or replace WooCommerce page registration. Follow the [admin component guidance](./README.md#admin-components) for controls and the host integration for navigation, permissions and saving. The React [Settings UI](../settings-and-config/settings-ui.md) is experimental and opt-in; it is not required to choose an appropriate settings location.
+Use [`Page` from `@wordpress/admin-ui`](https://wordpress.github.io/gutenberg/?path=/docs/admin-ui-page--docs) only when your extension owns a supported standalone page boundary and needs that layout. If the host already renders `Page`, add your content within that frame rather than nesting another instance. Verify API availability in the versions you support. Choosing a component does not change the screen's location or replace WooCommerce page registration. Follow the [admin component guidance](./README.md#admin-components) for controls and the host integration for navigation, permissions and saving. The React [Settings UI](../settings-and-config/settings-ui.md) is experimental and opt-in; it is not required to choose an appropriate settings location.
 
 Keep a single settings screen simple. Group related fields with clear headings. Do not add extension-level tabs by default: a small group such as "Booking form" can remain a section on the same screen. Separate destinations only when distinct merchant tasks justify them, using a supported host pattern. Preserve the host's existing settings tabs.
+
+Reuse the host's current WPDS-aligned navigation rather than copying legacy tabs or restyling global WooCommerce navigation. Keep the selected destination visible when navigation overflows. Preserve established entry points and deep links during an unrelated visual update.
 
 Avoid a new top-level WordPress menu when the task fits WooCommerce's existing structure. Load application data through APIs instead of embedding another application's admin interface in an iframe.
 
