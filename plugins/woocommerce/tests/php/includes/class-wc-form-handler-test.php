@@ -38,6 +38,13 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	private array $original_request = array();
 
 	/**
+	 * Original SERVER data.
+	 *
+	 * @var array<string,mixed>
+	 */
+	private array $original_server = array();
+
+	/**
 	 * Original WooCommerce session.
 	 *
 	 * @var WC_Session|null
@@ -60,6 +67,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$this->original_get     = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$this->original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->original_server  = $_SERVER;
 		$this->original_session = WC()->session;
 
 		if ( ! WC()->session ) {
@@ -80,6 +88,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$_GET     = $this->original_get;
 		$_POST    = $this->original_post;
 		$_REQUEST = $this->original_request;
+		$_SERVER  = $this->original_server;
 
 		wp_set_current_user( 0 );
 		WC()->session = $this->original_session;
@@ -1285,17 +1294,19 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	/**
 	 * The request is for a cart shortcode page other than the configured cart page, as remove links point at the page they are shown on.
 	 *
-	 * @testdox update_cart_action() removes the item and redirects to a clean URL, with or without a referer ("$referer_path").
+	 * @testdox update_cart_action() removes the item and redirects to a clean URL, with or without a referer ("$referer_path", "$request_path").
 	 *
-	 * @testWith ["", "/other-cart/?removed_item=1"]
-	 *           ["/shop/?remove_item=stale&add-to-cart=12", "/shop/?removed_item=1"]
+	 * @testWith ["", "/other-cart/", "/other-cart/?removed_item=1"]
+	 *           ["/shop/?remove_item=stale&add-to-cart=12", "/other-cart/", "/shop/?removed_item=1"]
+	 *           ["", "//example.net/other-cart/", "/example.net/other-cart/?removed_item=1"]
 	 *
 	 * @covers WC_Form_Handler::update_cart_action()
 	 *
 	 * @param string $referer_path  Referer path, or an empty string for no referer.
+	 * @param string $request_path  Path of the remove link that was followed.
 	 * @param string $expected_path Expected redirect path.
 	 */
-	public function test_update_cart_action_redirects_after_removing_item( string $referer_path, string $expected_path ): void {
+	public function test_update_cart_action_redirects_after_removing_item( string $referer_path, string $request_path, string $expected_path ): void {
 		$this->create_cart_page();
 		$product       = WC_Helper_Product::create_simple_product();
 		$cart_item_key = WC()->cart->add_to_cart( $product->get_id() );
@@ -1305,7 +1316,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		if ( '' !== $referer_path ) {
 			$_SERVER['HTTP_REFERER'] = home_url( $referer_path );
 		}
-		$_SERVER['REQUEST_URI'] = "/other-cart/?remove_item={$cart_item_key}&_wpnonce={$nonce}";
+		$_SERVER['REQUEST_URI'] = "{$request_path}?remove_item={$cart_item_key}&_wpnonce={$nonce}";
 		$_GET                   = array( 'remove_item' => $cart_item_key );
 		$_REQUEST               = array(
 			'remove_item' => $cart_item_key,
@@ -1348,24 +1359,26 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A remove link with an invalid nonce is redirected to a clean URL on the cart page ($on_cart_page) and left alone elsewhere.
+	 * @testdox A $link_arg link with an invalid nonce is redirected to a clean URL on the cart page ($on_cart_page) and left alone elsewhere.
 	 *
-	 * @testWith [true]
-	 *           [false]
+	 * @testWith ["remove_item", true]
+	 *           ["remove_item", false]
+	 *           ["undo_item", true]
 	 *
 	 * @covers WC_Form_Handler::update_cart_action()
 	 * @covers WC_Form_Handler::redirect_invalid_cart_item_link()
 	 *
-	 * @param bool $on_cart_page Whether the request is for the cart page.
+	 * @param string $link_arg     Query argument of the cart item link: remove_item or undo_item.
+	 * @param bool   $on_cart_page Whether the request is for the cart page.
 	 */
-	public function test_invalid_remove_link_is_redirected_only_on_cart_page( bool $on_cart_page ): void {
+	public function test_invalid_cart_item_link_is_redirected_only_on_cart_page( string $link_arg, bool $on_cart_page ): void {
 		$cart_page_url = $this->create_cart_page();
 		$page_url      = $on_cart_page ? $cart_page_url : get_permalink( self::factory()->post->create( array( 'post_type' => 'page' ) ) );
 
 		$this->go_to(
 			add_query_arg(
 				array(
-					'remove_item' => 'stale',
+					$link_arg     => 'stale',
 					'_wpnonce'    => 'invalid',
 					'add-to-cart' => '12',
 				),

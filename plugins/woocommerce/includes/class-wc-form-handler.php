@@ -1187,7 +1187,20 @@ class WC_Form_Handler {
 	private static function get_cart_action_redirect_base(): string {
 		$referer = wp_get_referer();
 
-		return $referer ? $referer : esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
+		return $referer ? $referer : self::get_requested_path();
+	}
+
+	/**
+	 * Get the requested path and query string, starting with a single slash.
+	 *
+	 * A request path such as //example.com/cart/ would otherwise read as a URL on another host. wp_safe_redirect() would reject it, but send the shopper to the admin URL instead of the page they asked for.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return string
+	 */
+	private static function get_requested_path(): string {
+		return '/' . ltrim( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/\\' );
 	}
 
 	/**
@@ -1202,12 +1215,12 @@ class WC_Form_Handler {
 	public static function redirect_invalid_cart_item_link(): void {
 		$cart_page_id = wc_get_page_id( 'cart' );
 
-		// is_page() with an empty ID matches any page, so require a real cart page.
+		// wc_get_page_id() returns -1 when no cart page is set.
 		if ( $cart_page_id < 1 || ! is_page( $cart_page_id ) ) {
 			return;
 		}
 
-		wp_safe_redirect( remove_query_arg( array( 'remove_item', 'undo_item', '_wpnonce', 'add-to-cart', 'added-to-cart' ) ) );
+		wp_safe_redirect( remove_query_arg( array( 'remove_item', 'undo_item', '_wpnonce', 'add-to-cart', 'added-to-cart' ), self::get_requested_path() ) );
 		exit;
 	}
 

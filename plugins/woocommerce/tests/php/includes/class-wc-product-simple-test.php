@@ -7,6 +7,29 @@ declare( strict_types = 1 );
 class WC_Product_Simple_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * Original SERVER data.
+	 *
+	 * @var array<string,mixed>
+	 */
+	private array $original_server = array();
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->original_server = $_SERVER;
+	}
+
+	/**
+	 * Clean up test fixtures.
+	 */
+	public function tearDown(): void {
+		$_SERVER = $this->original_server;
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox add_to_cart_url() builds on the product permalink, not on the current request's URL and query arguments.
 	 */
 	public function test_add_to_cart_url_ignores_current_request_url(): void {
