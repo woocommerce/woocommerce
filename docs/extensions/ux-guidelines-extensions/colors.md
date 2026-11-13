@@ -5,7 +5,7 @@ sidebar_label: Colors
 
 # Colors
 
-Admin interfaces should feel at home in WordPress. Follow the [admin component guidance](./README.md#admin-components): prefer `@wordpress/ui`, and use `@wordpress/components` only for verified coverage gaps in the supported version, with a documented reason. Preserve the host's theme and the user's WordPress admin color scheme rather than introducing an extension-specific palette for shared controls.
+Admin interfaces should feel at home in WordPress. Follow the [admin component guidance](./README.md#admin-components): prefer `@wordpress/ui`, and use `@wordpress/components` only for verified coverage gaps in the supported version, with a documented reason. Preserve the admin interface's theme and the user's WordPress admin color scheme rather than introducing an extension-specific palette for shared controls.
 
 ## Use components and semantic tokens
 
@@ -17,7 +17,7 @@ Verify the tokens and [theme setup](https://wordpress.github.io/gutenberg/?path=
 
 ## Check accessibility in context
 
-Meet the [WordPress accessibility standards](./accessibility.md) and check the rendered interface in the host's supported themes and color schemes:
+Meet the [WordPress accessibility standards](./accessibility.md) and check the rendered interface in the themes and admin color schemes your extension supports:
 
 - Normal text needs at least **4.5:1** contrast against its background; qualifying large text needs at least **3:1**. See [WCAG text contrast](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html).
 - Visual information needed to identify controls, their states and meaningful graphics needs at least **3:1** against adjacent colors, subject to the [WCAG non-text contrast requirements](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html).
@@ -30,4 +30,4 @@ The [partial-results example](./notices.md#partial-results) pairs semantic feedb
 
 ## Keep brand resources separate
 
-The [Woo brand and logo guidelines](https://woocommerce.com/brand-and-logo-guidelines/) cover product identity and brand assets. They are not a functional admin color palette. Use the host's components and semantic colors for controls, navigation, validation and notices.
+The [Woo brand and logo guidelines](https://woocommerce.com/brand-and-logo-guidelines/) cover product identity and brand assets. They are not a functional admin color palette. Use the shared WordPress UI components and semantic colors for controls, navigation, validation and notices.
