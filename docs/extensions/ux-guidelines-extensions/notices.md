@@ -42,17 +42,17 @@ Match severity to the actual outcome. For partial success, use one summary that 
 
 ![Settings form with an error notice above Store details, a Try again action, and the edited store name still present](/img/doc_images/wpds-settings-failed-save.png)
 
-Keep the merchant's draft and put the failure at the scope it affects. Here, one notice above the form explains that changes were not saved and offers **Try again**. Field validation still belongs beside the affected field. In an embedded WooCommerce settings section, retain the host's header and save action rather than copying this standalone page shell.
+This example shows a form-wide save failure. One notice above the fields explains that changes were not saved and offers **Try again**, while the edited store name remains available. Use this pattern when submitting a valid form fails; field validation still belongs beside the affected field.
 
-Captured from the **Failed save** story in the WordPress [Settings Page patterns proposal](https://github.com/WordPress/gutenberg/pull/86451) at commit `77b302dc9f1`. The story simulates a failed first save; its connection message is example copy, not a diagnosis of a real request. The pattern is an upstream preview, not a shipped WooCommerce screen.
+Preserve the draft so the merchant can correct or retry it. Explain the cause when known, and match the recovery action to the problem. In an embedded WooCommerce settings section, retain the host's header and save action rather than copying this standalone page shell.
 
 ### Partial results
 
 ![Bulk availability update with one summary saying 2 updated and 1 needs attention, Updated labels for Studio and Meeting room, and Not updated for Workshop](/img/doc_images/wpds-partial-results.png)
 
-One summary explains the outcome, while text labels identify each item's result without relying on color. Keep the completed updates and direct the merchant to the failed item. **Review failed space** takes the merchant to Workshop; do not make merchants repeat successful work.
+The summary says two spaces were updated and Workshop still needs attention. Text labels identify each item's outcome without relying on color, and **Review failed space** takes the merchant to Workshop.
 
-This illustrative WPDS composition uses sample data. Its review action focuses the failed item; it does not perform a service request or retry. In a working integration, connect the recovery action to the appropriate correction flow and announce dynamic results as described below.
+Use this pattern for bulk or multi-item actions that can partly succeed. Keep completed updates and offer a route to review or retry only the failed items. Connect the action to the appropriate correction flow and announce dynamic results as described below.
 
 ## Announcements, dismissal and recovery
 
