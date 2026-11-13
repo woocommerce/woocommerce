@@ -959,7 +959,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$map->setAccessible( true );
 		$this->assertSame( 'stable', $map->invoke( null, $badge->invoke( null, array( $row( true ) ) ) )['intent'], 'All passed is green, as in the design' );
 		$this->assertSame( 'low', $map->invoke( null, $badge->invoke( null, array( $row( false ) ) ) )['intent'], 'Issues are low' );
-		$this->assertSame( 'high', $map->invoke( null, array( 'fix', 'Required' ) )['intent'], 'Required is red, as in the design' );
+		$this->assertSame( 'low', $map->invoke( null, array( 'fix', 'Required' ) )['intent'], 'Required is yellow, as in the design' );
 		$this->assertSame( 'stable', $map->invoke( null, array( 'pass', 'Active' ) )['intent'] );
 	}
 

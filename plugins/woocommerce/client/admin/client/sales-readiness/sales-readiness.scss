@@ -9,6 +9,11 @@
 	.woocommerce-layout__main {
 		padding: 0;
 	}
+
+	// The page title is semibold in the design; the admin-ui Page header sets medium.
+	.wc-sales-readiness h1 {
+		font-weight: 600;
+	}
 }
 
 .wc-sales-readiness {
@@ -117,7 +122,10 @@
 	gap: var(--wpds-dimension-gap-sm);
 	padding: 0;
 	margin: var(--wpds-dimension-gap-lg) 0;
-	font-weight: 600;
+
+	> * {
+		font-weight: 600;
+	}
 
 	&:first-child {
 		margin-block-start: 0;
@@ -129,8 +137,40 @@
 	padding-block-start: 0;
 }
 
+// The prototype's buttons (WordPress UI minimal and outline): semibold, and a light background
+// on hover and focus that stays after a click until focus moves; the focus ring only for keyboard focus.
+@mixin sales-readiness-button($padding: var(--wpds-dimension-padding-md)) {
+	&.components-button {
+		padding-inline: $padding;
+		background: var(--wpds-color-background-interactive-brand-weak);
+		box-shadow: none;
+		color: var(--wpds-color-foreground-interactive-brand);
+		font-size: var(--wpds-typography-font-size-md);
+		font-weight: 600;
+
+		&:not(:disabled):is(:hover, :active, :focus, [aria-expanded="true"]) {
+			background: var(--wpds-color-background-interactive-brand-weak-active);
+			box-shadow: none;
+			color: var(--wpds-color-foreground-interactive-brand-active);
+		}
+
+		&:disabled {
+			color: var(--wpds-color-foreground-interactive-brand-disabled);
+		}
+
+		&:focus:not(:focus-visible) {
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: var(--wpds-border-width-focus) solid var(--wpds-color-stroke-focus);
+			outline-offset: 1px;
+		}
+	}
+}
+
 .wc-sales-readiness-row {
-	padding: var(--wpds-dimension-padding-lg) 0;
+	padding: var(--wpds-dimension-padding-md) 0;
 	margin: 0;
 
 	// Dark markers; grey only for a check that couldn't run.
@@ -144,22 +184,20 @@
 		}
 	}
 
+	// 2px from the title to the why line, 4px between the lines under it, as in the design.
 	&__body {
 		flex: 1;
 		min-width: 0;
 		gap: var(--wpds-dimension-gap-xs);
 	}
 
-	// body-md at 14px, as in the design; the scale has no 14px step.
 	&__title {
 		display: inline-flex;
 		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--wpds-dimension-gap-sm);
-		font-size: 14px;
-		font-weight: 500;
-		// 24px, the badge's height, so the title text sits at the same height with or without a badge.
-		line-height: var(--wpds-typography-line-height-md);
+		margin-block-end: -2px;
+		font-weight: 600;
 	}
 
 	// The fix line reads as an instruction, so it keeps the text color.
@@ -167,12 +205,18 @@
 		color: var(--wpds-color-foreground-content-neutral);
 	}
 
-	// 24px from the text, with the row's own 8px gap. Same size and line height as the title, so their tops align.
+	// Where to fix it: an outline button, or plain text when there is no link.
 	&__action {
 		flex: none;
-		margin-inline-start: var(--wpds-dimension-gap-lg);
-		font-size: 14px;
-		line-height: var(--wpds-typography-line-height-md);
+
+		> .components-button {
+			@include sales-readiness-button(var(--wpds-dimension-padding-sm));
+			border: 1px solid var(--wpds-color-stroke-interactive-brand);
+
+			&:is(:hover, :active, :focus) {
+				border-color: var(--wpds-color-stroke-interactive-brand-active);
+			}
+		}
 	}
 }
 
@@ -203,46 +247,14 @@
 	}
 }
 
-// The prototype's buttons (WordPress UI minimal and outline): medium weight, and a light background
-// on hover and focus that stays after a click until focus moves; the focus ring only for keyboard focus.
-@mixin sales-readiness-button {
-	&.components-button {
-		padding-inline: var(--wpds-dimension-padding-md);
-		background: var(--wpds-color-background-interactive-brand-weak);
-		box-shadow: none;
-		color: var(--wpds-color-foreground-interactive-brand);
-		font-size: var(--wpds-typography-font-size-md);
-		font-weight: var(--wpds-typography-font-weight-medium);
-
-		&:not(:disabled):is(:hover, :active, :focus, [aria-expanded="true"]) {
-			background: var(--wpds-color-background-interactive-brand-weak-active);
-			box-shadow: none;
-			color: var(--wpds-color-foreground-interactive-brand-active);
-		}
-
-		&:disabled {
-			color: var(--wpds-color-foreground-interactive-brand-disabled);
-		}
-
-		&:focus:not(:focus-visible) {
-			outline: none;
-		}
-
-		&:focus-visible {
-			outline: var(--wpds-border-width-focus) solid var(--wpds-color-stroke-focus);
-			outline-offset: 1px;
-		}
-	}
-}
-
 .wc-sales-readiness-fold {
 	padding-block-start: var(--wpds-dimension-padding-sm);
 
 	// "Show more" and "Hide": a minimal button whose text lines up with the card text, while its
 	// hover background reaches past it.
 	> .components-button {
-		@include sales-readiness-button;
-		margin-inline-start: calc(-1 * var(--wpds-dimension-padding-md));
+		@include sales-readiness-button(var(--wpds-dimension-padding-sm));
+		margin-inline-start: calc(-1 * var(--wpds-dimension-padding-sm));
 		border-color: transparent;
 
 		// Hide, while the checks are open, and either button after a click, until focus moves.

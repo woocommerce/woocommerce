@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Badge, Icon, Link, Stack, Text, VisuallyHidden } from '@wordpress/ui';
+import { Button } from '@wordpress/components';
 import { check } from '@wordpress/icons';
 import { Path, SVG } from '@wordpress/primitives';
 import { __ } from '@wordpress/i18n';
@@ -14,7 +15,7 @@ import type { CheckRow as CheckRowData, ViewBadge, ViewLink } from '../types';
 import { trackReadiness } from '../tracks';
 
 /**
- * A line that is a link when it has a URL, plain text otherwise.
+ * Where to fix it: an outline button when it has a URL, plain text otherwise.
  */
 export const RowLink = ( {
 	link,
@@ -24,9 +25,14 @@ export const RowLink = ( {
 	onClick?: () => void;
 } ) =>
 	link.href ? (
-		<Link href={ link.href } onClick={ onClick }>
+		<Button
+			variant="secondary"
+			size="compact"
+			href={ link.href }
+			onClick={ onClick }
+		>
 			{ link.text }
-		</Link>
+		</Button>
 	) : (
 		<Text variant="body-sm" className="wc-sales-readiness__muted">
 			{ link.text }
@@ -93,8 +99,8 @@ export const Row = ( {
 }: RowProps ) => (
 	<Stack
 		direction="row"
-		gap="sm"
-		align="flex-start"
+		gap="lg"
+		align="center"
 		render={ <li /> }
 		className="wc-sales-readiness-row"
 	>

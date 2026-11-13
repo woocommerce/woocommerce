@@ -79,7 +79,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		'info'  => 'stable',
 		'pass'  => 'stable',
 		'off'   => 'none',
-		'fix'   => 'high',
+		'fix'   => 'low',
 	);
 
 	/**
