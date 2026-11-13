@@ -2557,24 +2557,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( $coupon_discounts ) {
 			foreach ( $coupon_discounts as $coupon_code => $amount ) {
+				// Reuse a coupon line that has no ID yet, so recalculating doesn't add a second line.
 				$item_id       = isset( $coupon_code_to_id[ $coupon_code ] ) ? $coupon_code_to_id[ $coupon_code ] : 0;
-				$unsaved_item  = $item_id || $this->writing_through ? null : $this->get_unsaved_coupon_item( $coupon_code );
+				$unsaved_item  = $item_id ? null : $this->get_unsaved_coupon_item( $coupon_code );
 				$reuse_unsaved = null !== $unsaved_item;
 
-				if ( $reuse_unsaved ) {
-					$coupon_item = $unsaved_item;
-				} elseif ( ! $item_id ) {
-					$coupon_item = new WC_Order_Item_Coupon();
-					$coupon_item->set_code( $coupon_code );
-
-					// Add coupon data.
-					$coupon_id = wc_get_coupon_id_by_code( $coupon_code );
-					$coupon    = new WC_Coupon( $coupon_id );
-
-					$coupon_info = $coupon->get_short_info();
-					$coupon_item->add_meta_data( 'coupon_info', $coupon_info );
-				} else {
+				if ( $item_id ) {
 					$coupon_item = $this->get_item( $item_id, false );
+				} else {
+					$coupon_item = $unsaved_item;
+					if ( ! $coupon_item ) {
+						$coupon_item = new WC_Order_Item_Coupon();
+						$coupon_item->set_code( $coupon_code );
+					}
+
+					// Store the coupon definition so recalculation still works if the coupon is deleted later.
+					if ( ! $coupon_item->meta_exists( 'coupon_info' ) && ! $coupon_item->meta_exists( 'coupon_data' ) ) {
+						$coupon = new WC_Coupon( wc_get_coupon_id_by_code( $coupon_code ) );
+						$coupon_item->add_meta_data( 'coupon_info', $coupon->get_short_info() );
+					}
 				}
 
 				$discount_tax = 0;
