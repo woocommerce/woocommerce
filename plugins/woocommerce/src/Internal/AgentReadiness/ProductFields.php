@@ -114,14 +114,14 @@ class ProductFields {
 	}
 
 	/**
-	 * Product id whose variations were last read. Cleared when that product changes.
+	 * Product instance whose variations were last read.
 	 *
-	 * @var int
+	 * @var \WC_Product|null
 	 */
-	private static int $cached_variation_product_id = 0;
+	private static ?\WC_Product $cached_variation_product = null;
 
 	/**
-	 * Published variations of the cached product id.
+	 * Published variations of the cached product instance.
 	 *
 	 * @var array<int, \WC_Product_Variation>
 	 */
@@ -129,8 +129,8 @@ class ProductFields {
 
 	/**
 	 * Published variations of a variable product; empty for other types. Kept
-	 * for the last product asked about, since every rule asks about the same
-	 * product in turn.
+	 * for the last product instance asked about, since every rule asks about the
+	 * same instance in turn. Another instance of the same product is read again.
 	 *
 	 * @param \WC_Product $product Product.
 	 * @return array<int, \WC_Product_Variation>
@@ -139,19 +139,20 @@ class ProductFields {
 		if ( ! $product instanceof \WC_Product_Variable ) {
 			return array();
 		}
-		if ( $product->get_id() === self::$cached_variation_product_id ) {
+		if ( self::$cached_variation_product === $product ) {
 			return self::$cached_variations;
 		}
 
 		$variations = array();
 		foreach ( self::published_variation_ids( $product ) as $child_id ) {
-			$variation = wc_get_product( $child_id );
-			if ( $variation instanceof \WC_Product_Variation && 'publish' === $variation->get_status() ) {
+			// The product cache can still hold a variation as published after this request trashed it.
+			$variation = new \WC_Product_Variation( $child_id );
+			if ( $variation->get_id() > 0 && 'publish' === $variation->get_status() ) {
 				$variations[] = $variation;
 			}
 		}
-		self::$cached_variation_product_id = $product->get_id();
-		self::$cached_variations           = $variations;
+		self::$cached_variation_product = $product;
+		self::$cached_variations        = $variations;
 		return $variations;
 	}
 
@@ -161,9 +162,9 @@ class ProductFields {
 	 * @param int $product_id Product id.
 	 */
 	public static function forget_variations( int $product_id ): void {
-		if ( self::$cached_variation_product_id === $product_id ) {
-			self::$cached_variation_product_id = 0;
-			self::$cached_variations           = array();
+		if ( self::$cached_variation_product instanceof \WC_Product && self::$cached_variation_product->get_id() === $product_id ) {
+			self::$cached_variation_product = null;
+			self::$cached_variations        = array();
 		}
 	}
 
