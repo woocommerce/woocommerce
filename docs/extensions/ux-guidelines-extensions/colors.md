@@ -26,6 +26,8 @@ Meet the [WordPress accessibility standards](./accessibility.md) and check the r
 
 Use the [color contrast checker](https://webaim.org/resources/contrastchecker/) and the [WordPress accessibility coding standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/accessibility/) when reviewing your implementation.
 
+The [partial-results example](./notices.md#partial-results) pairs semantic feedback styling with text labels for each outcome. The message and labels explain what needs attention even without color.
+
 ## Keep brand resources separate
 
 The [Woo brand and logo guidelines](https://woocommerce.com/brand-and-logo-guidelines/) cover product identity and brand assets. They are not a functional admin color palette. Use the host's components and semantic colors for controls, navigation, validation and notices.
