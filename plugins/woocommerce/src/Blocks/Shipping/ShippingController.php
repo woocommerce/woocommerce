@@ -439,6 +439,9 @@ class ShippingController {
 	/**
 	 * Filter the location used for taxes based on the chosen pickup location.
 	 *
+	 * The filter's optional second argument, the WC_Customer, is read with func_get_args() so that the signature stays
+	 * compatible with subclasses and one-argument callers.
+	 *
 	 * @param array $address Location args.
 	 * @return array
 	 */
@@ -461,7 +464,6 @@ class ShippingController {
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
 		if ( 'pickup_location' === $chosen_method_id && true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) ) {
 			// The session keeps a pickup choice after the last shippable item is removed, so ignore it when the cart no longer needs shipping.
-			// Keep the one-argument method signature for subclasses while reading the filter's optional customer.
 			$customer = func_get_args()[1] ?? null;
 			if ( $customer instanceof WC_Customer && wc_get_container()->get( CartWithoutShipping::class )->should_use_billing_address( $customer ) ) {
 				return $address;

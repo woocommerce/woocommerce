@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Settings
  */
 
+use Automattic\WooCommerce\Enums\TaxBasedOn;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
@@ -75,7 +76,7 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 	 */
 	public function test_tax_based_on_description_explains_billing_fallback_and_keeps_estimate() {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		update_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING );
 		add_filter( 'woocommerce_show_shop_base_tax_estimate', '__return_true' );
 		add_filter(
 			'woocommerce_customer_default_location_array',
@@ -90,6 +91,20 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 
 		$this->assertStringStartsWith( '"Customer shipping address" uses the billing address when nothing in the cart needs shipping', $setting['desc'], 'The fallback sentence should come first.' );
 		$this->assertStringContainsString( 'wc-tax-base-location-estimate', $setting['desc'], 'The shop base estimate should follow the fallback sentence.' );
+	}
+
+	/**
+	 * @testDox The 'Calculate tax based on' description is only the billing address fallback when no shop base estimate is shown.
+	 */
+	public function test_tax_based_on_description_without_estimate() {
+		add_filter( 'woocommerce_show_shop_base_tax_estimate', '__return_false' );
+
+		$sut      = new WC_Settings_Tax();
+		$settings = $sut->get_settings_for_section( '' );
+		$setting  = current( wp_list_filter( $settings, array( 'id' => 'woocommerce_tax_based_on' ) ) );
+
+		$this->assertStringStartsWith( '"Customer shipping address" uses the billing address', $setting['desc'], 'The fallback sentence should be shown.' );
+		$this->assertStringNotContainsString( '<br/>', $setting['desc'], 'No line break should be added without an estimate.' );
 	}
 
 	/**

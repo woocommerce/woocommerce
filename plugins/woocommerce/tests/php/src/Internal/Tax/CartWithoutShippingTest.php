@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Tax;
 
 use Automattic\WooCommerce\Enums\TaxBasedOn;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\Tax\BaseLocationTaxEstimate;
 use Automattic\WooCommerce\Internal\Tax\CartWithoutShipping;
 
@@ -28,11 +29,11 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	private $customer;
 
 	/**
-	 * The customer in place before the test replaced WC()->customer, to be restored in tearDown().
+	 * Cart session load counters cleared by forget_cart_was_loaded(), to be restored in tearDown().
 	 *
-	 * @var \WC_Customer
+	 * @var array<string, int>
 	 */
-	private $original_customer;
+	private $saved_cart_load_actions = array();
 
 	/**
 	 * Set up test fixtures.
@@ -46,9 +47,9 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		$this->customer = new \WC_Customer();
 		$this->customer->set_billing_location( 'GB', 'LND', 'SW1A 1AA', 'London' );
 		$this->customer->set_shipping_location( 'US', 'CA', '90210', 'Beverly Hills' );
-		$this->original_customer = WC()->customer;
-		WC()->customer           = $this->customer;
+		WC()->customer = $this->customer;
 
+		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING );
 
 		// WC_Cart::needs_shipping() is false for every cart when no shipping method exists.
@@ -63,8 +64,11 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
+		global $wp_actions;
 		try {
-			WC()->customer = $this->original_customer;
+			foreach ( $this->saved_cart_load_actions as $action => $count ) {
+				$wp_actions[ $action ] = $count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restores counters cleared by the test.
+			}
 			$this->reset_container_replacements();
 		} finally {
 			parent::tearDown();
@@ -165,6 +169,112 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Does not use the billing address when taxes are disabled.
+	 */
+	public function test_does_not_use_billing_address_when_taxes_are_disabled(): void {
+		$this->add_product_to_cart( true );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		$this->assertFalse( $this->sut->should_use_billing_address( $this->customer ), 'The cart should not be checked when taxes are disabled.' );
+	}
+
+	/**
+	 * @testdox Does not use the billing address when there is no cart, as in admin, REST and cron requests.
+	 */
+	public function test_does_not_use_billing_address_without_cart(): void {
+		$this->add_product_to_cart( true );
+		$cart      = WC()->cart;
+		WC()->cart = null;
+
+		try {
+			$result = $this->sut->should_use_billing_address( $this->customer );
+		} finally {
+			WC()->cart = $cart;
+		}
+
+		$this->assertFalse( $result, 'The billing address should not be used without a cart.' );
+	}
+
+	/**
+	 * @testdox Stores billing-based totals when a taxable address lookup loads the cart from the session.
+	 */
+	public function test_cart_loaded_from_session_by_lookup_stores_billing_based_totals(): void {
+		$this->create_tax_rate( 'GB', '20.0000' );
+		$this->create_tax_rate( 'US', '10.0000' );
+		$this->seed_session_cart( array( 'virtual' => $this->create_product( true ) ) );
+		WC()->session->set( 'cart_totals', null );
+		$this->forget_cart_was_loaded();
+
+		$result = $this->customer->get_taxable_address();
+		$stored = WC()->session->get( 'cart_totals' );
+
+		$this->assertSame( 'GB', $result[0], 'The lookup should use the billing country for a cart without shipping.' );
+		$this->assertEquals( 2.0, $stored['total_tax'], 'Totals calculated while the cart loads should use the billing country rate.' );
+	}
+
+	/**
+	 * @testdox Keeps the shipping address while the cart is being loaded from the session.
+	 */
+	public function test_keeps_shipping_address_while_cart_is_loading_from_session(): void {
+		$this->seed_session_cart(
+			array(
+				'virtual'  => $this->create_product( true ),
+				'physical' => $this->create_product( false ),
+			)
+		);
+		WC()->session->set( 'cart_totals', array( 'total' => 0 ) );
+		$this->forget_cart_was_loaded();
+		$seen     = array();
+		$callback = function ( $session_data, $values, $key ) use ( &$seen ) {
+			unset( $values ); // Avoid parameter not used PHPCS errors.
+			$seen[ $key ] = $this->customer->get_taxable_address()[0];
+			return $session_data;
+		};
+		add_filter( 'woocommerce_get_cart_item_from_session', $callback, 10, 3 );
+
+		WC()->cart->get_cart();
+
+		$this->assertSame(
+			array(
+				'virtual'  => 'US',
+				'physical' => 'US',
+			),
+			$seen,
+			'Lookups during the load should not see a partly loaded cart as one without shipping.'
+		);
+	}
+
+	/**
+	 * @testdox Does not recurse when a cart contents callback resolves the taxable address and the cart is never loaded from the session.
+	 */
+	public function test_does_not_recurse_when_cart_contents_callback_resolves_taxable_address(): void {
+		$this->add_product_to_cart( true );
+		$this->forget_cart_was_loaded();
+		$depth     = 0;
+		$max_depth = 0;
+		$callback  = function ( $contents ) use ( &$depth, &$max_depth ) {
+			// Cap the nesting, so the test fails instead of overflowing the stack when the guard is missing.
+			if ( $depth < 5 ) {
+				++$depth;
+				$max_depth = max( $max_depth, $depth );
+				$this->customer->get_taxable_address();
+				--$depth;
+			}
+			return $contents;
+		};
+		add_filter( 'woocommerce_get_cart_contents', $callback );
+		\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, false );
+
+		try {
+			$this->customer->get_taxable_address();
+		} finally {
+			\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, true );
+		}
+
+		$this->assertLessThanOrEqual( 2, $max_depth, 'Loading the cart should not re-enter the cart load from a cart contents callback.' );
+	}
+
+	/**
 	 * @testdox Uses the billing address when no cart product needs shipping.
 	 */
 	public function test_uses_billing_address_for_cart_without_shipping(): void {
@@ -182,7 +292,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function test_displayed_price_follows_the_cart(): void {
 		$this->create_tax_rate( 'GB', '20.0000' );
 		$this->create_tax_rate( 'US', '10.0000' );
-		update_option( 'woocommerce_tax_display_shop', 'incl' );
+		update_option( 'woocommerce_tax_display_shop', TaxDisplayMode::INCLUSIVE );
 		$product = \WC_Helper_Product::create_simple_product();
 		$product->set_price( 100 );
 		$product->set_regular_price( 100 );
@@ -279,7 +389,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function test_does_not_recurse_when_needs_shipping_callback_resolves_taxable_address(): void {
 		$this->add_product_to_cart( true );
 
-		// WC_Cart::needs_shipping() only checks products when a shipping method exists, so count nesting rather than calls.
+		// needs_shipping callbacks can fire several times per lookup, so count nesting rather than calls.
 		$depth          = 0;
 		$max_depth      = 0;
 		$inner_address  = null;
@@ -354,6 +464,56 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 			$received_args,
 			'The filter should receive true, the customer whose taxable address is being resolved, and the customer\'s cart.'
 		);
+	}
+
+	/**
+	 * @testdox Keeps the shipping address when the opt-out filter returns $_dataName.
+	 *
+	 * @dataProvider provider_non_true_filter_values
+	 *
+	 * @param mixed $value Value returned by the filter.
+	 */
+	public function test_keeps_shipping_address_when_opt_out_filter_returns_non_true_value( $value ): void {
+		$this->add_product_to_cart( true );
+		add_filter( 'woocommerce_apply_billing_tax_for_cart_without_shipping', static fn() => $value );
+
+		$this->assertFalse( $this->sut->should_use_billing_address( $this->customer ), 'Only true should keep the billing address.' );
+	}
+
+	/**
+	 * Provides filter return values other than true.
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public function provider_non_true_filter_values(): array {
+		return array(
+			'false'        => array( false ),
+			'zero'         => array( 0 ),
+			'one'          => array( 1 ),
+			'yes string'   => array( 'yes' ),
+			'null'         => array( null ),
+			'empty string' => array( '' ),
+		);
+	}
+
+	/**
+	 * @testdox Resets the re-entry guard when a needs_shipping callback throws.
+	 */
+	public function test_resets_reentry_guard_when_needs_shipping_callback_throws(): void {
+		$this->add_product_to_cart( true );
+		$throwing = static function () {
+			throw new \RuntimeException( 'Callback failure.' );
+		};
+		add_filter( 'woocommerce_cart_needs_shipping', $throwing );
+
+		try {
+			$this->sut->should_use_billing_address( $this->customer );
+			$this->fail( 'The callback exception should reach the caller.' );
+		} catch ( \RuntimeException $e ) {
+			remove_filter( 'woocommerce_cart_needs_shipping', $throwing );
+		}
+
+		$this->assertTrue( $this->sut->should_use_billing_address( $this->customer ), 'The next lookup should not be blocked by the re-entry guard.' );
 	}
 
 	/**
@@ -445,6 +605,51 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array( 'US', 'CA', '90001', 'Los Angeles' ), $taxable_address, 'A cart product that needs shipping should keep the local pickup location as the taxable address.' );
 		// Shipping methods left enabled by other tests can add shipping tax, so check the item tax only.
 		$this->assertEquals( 1.0, WC()->cart->get_cart_contents_tax(), 'Cart item tax should use the local pickup location rate.' );
+	}
+
+	/**
+	 * Create a simple product.
+	 *
+	 * @param bool $virtual Whether the product is virtual.
+	 * @return \WC_Product The saved product.
+	 */
+	private function create_product( bool $virtual ): \WC_Product {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_virtual( $virtual );
+		$product->save();
+
+		return $product;
+	}
+
+	/**
+	 * Put products in the session cart without loading them into WC()->cart.
+	 *
+	 * @param array<string, \WC_Product> $products Products keyed by cart item key.
+	 */
+	private function seed_session_cart( array $products ): void {
+		WC()->cart->empty_cart();
+		$cart = array();
+		foreach ( $products as $key => $product ) {
+			$cart[ $key ] = array(
+				'key'          => $key,
+				'product_id'   => $product->get_id(),
+				'variation_id' => 0,
+				'variation'    => array(),
+				'quantity'     => 1,
+			);
+		}
+		WC()->session->set( 'cart', $cart );
+	}
+
+	/**
+	 * Make the cart look not yet loaded from the session, so the next cart read loads it. tearDown() restores the counters.
+	 */
+	private function forget_cart_was_loaded(): void {
+		global $wp_actions;
+		foreach ( array( 'woocommerce_load_cart_from_session', 'woocommerce_cart_loaded_from_session' ) as $action ) {
+			$this->saved_cart_load_actions[ $action ] = $wp_actions[ $action ] ?? 0;
+			unset( $wp_actions[ $action ] );
+		}
 	}
 
 	/**

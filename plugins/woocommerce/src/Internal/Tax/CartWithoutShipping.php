@@ -22,6 +22,13 @@ class CartWithoutShipping {
 	private $is_checking_shipping = false;
 
 	/**
+	 * Whether the cart is being loaded from the session, so re-entrant calls from cart contents filter callbacks are skipped.
+	 *
+	 * @var bool
+	 */
+	private $is_loading_cart = false;
+
+	/**
 	 * Determine whether the customer's billing address should be used for tax because tax is based on shipping and no product in their cart needs shipping.
 	 *
 	 * @since 11.4.0
@@ -30,7 +37,7 @@ class CartWithoutShipping {
 	 * @return bool True when the billing address should be used.
 	 */
 	public function should_use_billing_address( \WC_Customer $customer ): bool {
-		if ( TaxBasedOn::SHIPPING !== get_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING ) ) {
+		if ( ! wc_tax_enabled() || TaxBasedOn::SHIPPING !== get_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING ) ) {
 			return false;
 		}
 
@@ -38,7 +45,7 @@ class CartWithoutShipping {
 			return false;
 		}
 
-		// The cart exists from init, but reading it before wp_loaded is flagged as doing it wrong and loads the session early.
+		// The cart exists from init, but reading it before wp_loaded is flagged as doing it wrong.
 		if ( ! did_action( 'wp_loaded' ) ) {
 			return false;
 		}
@@ -48,8 +55,17 @@ class CartWithoutShipping {
 			return false;
 		}
 
+		// A cart still being loaded from the session holds only some of its items.
+		if ( did_action( 'woocommerce_load_cart_from_session' ) > did_action( 'woocommerce_cart_loaded_from_session' ) ) {
+			return false;
+		}
+
 		// needs_shipping filter callbacks may resolve the taxable address again (e.g. to price with tax).
 		if ( $this->is_checking_shipping ) {
+			return false;
+		}
+
+		if ( ! did_action( 'woocommerce_load_cart_from_session' ) && ! $this->load_cart( $cart ) ) {
 			return false;
 		}
 
@@ -75,5 +91,26 @@ class CartWithoutShipping {
 		} finally {
 			$this->is_checking_shipping = false;
 		}
+	}
+
+	/**
+	 * Load the cart from the session before the shipping check starts, so totals calculated while loading also use this rule.
+	 *
+	 * @param \WC_Cart $cart The customer's cart.
+	 * @return bool False when called again while the cart is loading.
+	 */
+	private function load_cart( \WC_Cart $cart ): bool {
+		if ( $this->is_loading_cart ) {
+			return false;
+		}
+
+		$this->is_loading_cart = true;
+		try {
+			$cart->get_cart();
+		} finally {
+			$this->is_loading_cart = false;
+		}
+
+		return true;
 	}
 }
