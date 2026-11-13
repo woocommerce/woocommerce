@@ -142,6 +142,7 @@ jQuery( function ( $ ) {
 		updateTimer: false,
 		dirtyInput: false,
 		selectedPaymentMethod: false,
+		keepPaymentMethodRadioVisible: false,
 		xhr: false,
 		$order_review: $( '#order_review' ),
 		$checkout_form: $( 'form.checkout' ),
@@ -247,8 +248,25 @@ jQuery( function ( $ ) {
 				'input[name="payment_method"]'
 			);
 
-			// If there is one method, we can hide the radio input
-			if ( 1 === $payment_methods.length ) {
+			// The server leaves the list without a selection on purpose when a
+			// woocommerce_default_payment_method callback returns nothing.
+			var serverSelectedNone =
+				'no' ===
+				$payment_methods
+					.closest( 'ul.wc_payment_methods' )
+					.attr( 'data-preselected' );
+
+			// The shopper has to select a method themselves, so its radio must be on screen. It then stays
+			// there for as long as the page is open, also after later updates report the method as selected.
+			if ( serverSelectedNone ) {
+				wc_checkout_form.keepPaymentMethodRadioVisible = true;
+			}
+
+			// If there is one method, we can hide the radio input, unless the shopper needs it.
+			if (
+				1 === $payment_methods.length &&
+				! wc_checkout_form.keepPaymentMethodRadioVisible
+			) {
 				$payment_methods.eq( 0 ).hide();
 			}
 
@@ -260,14 +278,10 @@ jQuery( function ( $ ) {
 				);
 			}
 
-			// If there are none selected, select the first, unless the server left the list
-			// without a selection on purpose (a woocommerce_default_payment_method callback).
+			// If there are none selected, select the first, unless the server selected none.
 			if (
 				0 === $payment_methods.filter( ':checked' ).length &&
-				'no' !==
-					$payment_methods
-						.closest( 'ul.wc_payment_methods' )
-						.attr( 'data-preselected' )
+				! serverSelectedNone
 			) {
 				$payment_methods.eq( 0 ).prop( 'checked', true );
 			}
