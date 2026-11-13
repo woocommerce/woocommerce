@@ -300,7 +300,7 @@ final class ImportCommand {
 		if ( null !== $lock_age ) {
 			WP_CLI::error(
 				sprintf(
-					'Another product import is already running (started %d minute(s) ago). Wait for it to finish, or if you are sure nothing is actually running, clear the lock with `wp option delete wc_product_importing`.',
+					'Another product import is already running (last active %d minute(s) ago). Wait for it to finish, or if you are sure nothing is actually running, clear the lock with `wp option delete wc_product_importing`.',
 					(int) ceil( $lock_age / MINUTE_IN_SECONDS )
 				)
 			);
