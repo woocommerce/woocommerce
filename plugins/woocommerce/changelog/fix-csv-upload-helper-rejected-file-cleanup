@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the uploaded file and its attachment when a CSV import upload is rejected as not a valid CSV.

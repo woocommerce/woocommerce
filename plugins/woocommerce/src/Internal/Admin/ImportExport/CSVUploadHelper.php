@@ -120,7 +120,12 @@ class CSVUploadHelper {
 		}
 
 		if ( ! wc_is_file_valid_csv( $upload['file'], false ) ) {
-			wp_delete_attachment( $file['id'], true );
+			if ( isset( $upload['id'] ) ) {
+				wp_delete_attachment( absint( $upload['id'] ), true );
+			}
+			if ( file_exists( $upload['file'] ) ) {
+				wp_delete_file( $upload['file'] );
+			}
 			throw new \Exception( esc_html__( 'Invalid file type for a CSV import.', 'woocommerce' ) );
 		}
 
