@@ -998,10 +998,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_permission_refusal_provider_covers_every_canonical_ability(): void {
 		$classes = ( new \ReflectionClassConstant( AbilitiesLoader::class, 'CORE_ABILITY_DEFINITION_CLASSES' ) )->getValue();
-		$core    = array_map(
+		$names   = array_map(
 			static fn( string $class_name ): string => is_a( $class_name, ActionableAbility::class, true ) ? $class_name::ABILITY_NAME : $class_name::get_name(),
 			$classes
 		);
+		// The loader skips an empty name, which a feature-gated ability reports while its feature is off.
+		$core    = array_values( array_filter( $names, static fn( string $name ): bool => '' !== $name ) );
 		$covered = array_column( $this->provider_canonical_abilities_with_minimal_input(), 0 );
 
 		$this->assertEqualsCanonicalizing( $core, self::CANONICAL_ABILITY_IDS, 'CANONICAL_ABILITY_IDS should list every Core ability.' );
