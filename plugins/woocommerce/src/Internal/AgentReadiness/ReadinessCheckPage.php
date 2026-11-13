@@ -360,7 +360,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * and where to fix it. A setup step is worded as in Status; a scanned check takes its copy from
 	 * ReadinessCopy, or from the report for a check that has none there.
 	 *
-	 * @param array{id:string,name:string,label?:string,why:string,fix?:string,fix_url:string,conflict?:bool} $check Store check.
+	 * @param array{id:string,name:string,label?:string,why:string,fix?:string,fix_url:string,conflict?:bool,source?:string} $check Store check.
 	 * @return array{title:string,text:string,fix:string,url:string,link?:string}
 	 */
 	private static function failing_copy( array $check ): array {
@@ -379,7 +379,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			return array(
 				'title' => $copy['action'],
 				'text'  => $copy['found'],
-				'fix'   => $copy['fix'],
+				'fix'   => ReadinessCopy::llms_txt_source( (string) ( $check['source'] ?? '' ) )['fix'] ?? $copy['fix'],
 				'url'   => '' !== $copy['url'] ? $copy['url'] : $check['fix_url'],
 			);
 		}
@@ -914,8 +914,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * that blocks every sale is marked Required. One that couldn't run says why; a passed one keeps its
 	 * passing title and why it matters.
 	 *
-	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,seen_at?:string}> $checks   Checks.
-	 * @param bool|null                                                                                                                                                          $launched Whether the store is launched.
+	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,seen_at?:string,source?:string}> $checks   Checks.
+	 * @param bool|null                                                                                                                                                                         $launched Whether the store is launched.
 	 * @return array<int, array<string, mixed>>
 	 */
 	private static function check_rows( array $checks, ?bool $launched ): array {
@@ -928,7 +928,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			}
 			if ( $check['ok'] ) {
 				// A setup step's why describes the failure, so a passed one shows only its name, as in Status.
-				$rows[] = self::row( $check['id'], 'pass', $copy['title'] ?? $check['name'], $copy['why'] ?? '' );
+				$source = ReadinessCopy::llms_txt_source( (string) ( $check['source'] ?? '' ) )['pass'] ?? '';
+				$rows[] = self::row( $check['id'], 'pass', $copy['title'] ?? $check['name'], trim( ( $copy['why'] ?? '' ) . ' ' . $source ) );
 				continue;
 			}
 			$failing  = self::failing_copy( $check );

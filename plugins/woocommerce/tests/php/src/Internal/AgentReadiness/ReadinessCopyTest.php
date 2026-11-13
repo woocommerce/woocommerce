@@ -79,4 +79,18 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 		$this->assertSame( '', ReadinessCopy::product_check( 'missing_brand', 1 )['why'], 'The channels say why a brand matters' );
 		$this->assertNull( ReadinessCopy::product_check( 'not_a_check', 1 ) );
 	}
+
+	/**
+	 * @testdox Each llms.txt source has a line for a served file or a fix for a missing one, and an unknown source has none.
+	 */
+	public function test_llms_txt_source_copy(): void {
+		foreach ( array( 'woocommerce', 'file', 'other' ) as $source ) {
+			$this->assertNotEmpty( ReadinessCopy::llms_txt_source( $source )['pass'] ?? '', "{$source} says where llms.txt comes from" );
+		}
+		foreach ( array( 'disabled', 'not_reached' ) as $source ) {
+			$this->assertNotEmpty( ReadinessCopy::llms_txt_source( $source )['fix'] ?? '', "{$source} has its own fix" );
+		}
+		$this->assertNull( ReadinessCopy::llms_txt_source( '' ) );
+		$this->assertNull( ReadinessCopy::llms_txt_source( 'plugin' ) );
+	}
 }

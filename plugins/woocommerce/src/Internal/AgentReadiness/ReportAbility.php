@@ -154,6 +154,10 @@ class ReportAbility implements AbilityDefinition {
 										'type'        => 'string',
 										'description' => __( 'On a likely conflict: the address where it was seen.', 'woocommerce' ),
 									),
+									'source'   => array(
+										'type'        => 'string',
+										'description' => __( 'On the llms.txt check: woocommerce, file or other when served; disabled or not_reached when not; empty when unknown.', 'woocommerce' ),
+									),
 								),
 							),
 						),

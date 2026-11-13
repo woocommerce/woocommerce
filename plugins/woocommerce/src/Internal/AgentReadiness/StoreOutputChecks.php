@@ -56,7 +56,7 @@ class StoreOutputChecks {
 	 * plugins goes stale, and several can change the same output.
 	 *
 	 * @param StoreResponses|null $responses Responses of the scan, or null for new ones.
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,seen_at:string}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,seen_at:string,source:string}>
 	 */
 	public function all( ?StoreResponses $responses = null ): array {
 		$responses = $responses ?? $this->responses();
@@ -76,6 +76,7 @@ class StoreOutputChecks {
 				);
 			}
 			$conflict  = false === $ok && ! empty( $check['conflict'] );
+			$source    = 'llms_txt_present' === $check['id'] ? $this->llms_txt_source( $responses, $ok ) : '';
 			$results[] = array(
 				'id'       => $check['id'],
 				'ok'       => $ok,
@@ -85,11 +86,12 @@ class StoreOutputChecks {
 				'name'     => $check['name'],
 				'label'    => $check['label'],
 				'why'      => $check['why'],
-				'fix'      => $check['fix'],
+				'fix'      => ReadinessCopy::llms_txt_source( $source )['fix'] ?? $check['fix'],
 				'fix_url'  => $check['fix_url'],
 				'conflict' => $conflict,
 				'pending'  => $pending,
 				'seen_at'  => $conflict ? self::seen_at( (string) ( $check['seen_at'] ?? '' ), $responses ) : '',
+				'source'   => $source,
 			);
 		}
 		return $results;
@@ -856,6 +858,63 @@ class StoreOutputChecks {
 			return false;
 		}
 		return (bool) $test( $body );
+	}
+
+	/**
+	 * Where the served llms.txt comes from, from WooCommerce's own fallback (woocommerce #70741).
+	 * '' without that fallback, for a status it doesn't know, when llms.txt couldn't be loaded, when the
+	 * host returned a page or an empty 200, or in a subdirectory (WooCommerce serves it under the home path,
+	 * not at the host root read here). When served: 'woocommerce' when it holds WooCommerce's guidance, even
+	 * as a file on disk; then 'file' for a file in the site root; else 'other'. When missing: 'disabled'
+	 * when the fallback is turned off, else 'not_reached'.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 * @param bool|null      $served    Whether llms.txt is served, null when it couldn't be loaded.
+	 */
+	private function llms_txt_source( StoreResponses $responses, ?bool $served ): string {
+		$status = null === $served ? null : $this->llms_txt_status();
+		if ( null === $status || ! in_array( $status['status'], array( 'disabled', 'physical_file', 'unknown' ), true ) ) {
+			return '';
+		}
+		if ( false === $served ) {
+			// In a subdirectory WooCommerce serves it under the home path, not at the host root read here.
+			if ( '' !== trim( (string) wp_parse_url( home_url(), PHP_URL_PATH ), '/' ) ) {
+				return '';
+			}
+			// A 200 reached the store (a page, or an empty body). A miss is a non-200.
+			if ( 200 === (int) ( $responses->get( self::host_root( '/llms.txt' ) )['status'] ?? 0 ) ) {
+				return '';
+			}
+			return 'disabled' === $status['status'] ? 'disabled' : 'not_reached';
+		}
+		$section = trim( $status['section'] );
+		$body    = (string) ( $responses->get( self::host_root( '/llms.txt' ) )['body'] ?? '' );
+		if ( '' !== $section && str_contains( $body, $section ) ) {
+			return 'woocommerce';
+		}
+		return 'physical_file' === $status['status'] ? 'file' : 'other';
+	}
+
+	/**
+	 * WooCommerce's llms.txt status: disabled, physical_file or unknown, with the guidance it adds.
+	 * Null when this WooCommerce has no llms.txt fallback, or it fails.
+	 *
+	 * @return array{status:string,section:string}|null
+	 */
+	protected function llms_txt_status(): ?array {
+		// Not in every WooCommerce version yet, so the class is named by string.
+		$class = 'Automattic\\WooCommerce\\Internal\\LlmsTxt\\LlmsTxt';
+		if ( ! class_exists( $class ) ) {
+			return null;
+		}
+		try {
+			$llms_txt = new $class();
+			$status   = is_object( $llms_txt ) && method_exists( $llms_txt, 'get_status' ) ? $llms_txt->get_status() : null;
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->warning( 'Agent readiness could not read the llms.txt status: ' . $e->getMessage(), array( 'source' => 'agent-readiness' ) );
+			return null;
+		}
+		return is_array( $status ) && is_string( $status['status'] ?? null ) && is_string( $status['section'] ?? null ) ? $status : null;
 	}
 
 	/**
