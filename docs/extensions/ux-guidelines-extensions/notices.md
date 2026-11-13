@@ -13,7 +13,7 @@ If a post-activation notice is required, keep it within the WordPress plugin are
 
 - **PHP admin screens:** use the [standard WordPress admin notice format and hook](https://developer.wordpress.org/reference/hooks/admin_notices/), with [`wp_admin_notice()`](https://developer.wordpress.org/reference/functions/wp_admin_notice/) where supported. When maintaining a WooCommerce admin notices integration, use the [`WC_Admin_Notices` API](https://woocommerce.github.io/code-reference/classes/WC-Admin-Notices.html) and verify its screen scope, persistence and dismissal behavior. These PHP APIs do not place feedback beside a field inside a React interface.
 - **React admin interfaces:** follow the [admin component guidance](./README.md#admin-components). Prefer [`Notice` from `@wordpress/ui`](https://wordpress.github.io/gutenberg/?path=/docs/design-system-components-notice--docs) for persistent, contextual feedback. Verify its exports, API and required theme setup in the supported version. Use a suitable `@wordpress/components` fallback only for a verified coverage gap and document the reason.
-- **Brief confirmations:** use the host's existing feedback region when available. [`Snackbar`](https://wordpress.github.io/gutenberg/?path=/docs/components-snackbar--docs) currently comes from `@wordpress/components`; it is a fallback when the supported `@wordpress/ui` version lacks that capability. Check placement and timing, and keep any snackbar action available elsewhere in the interface.
+- **Brief confirmations:** confirm success when the result is not otherwise visible. When a separate message is needed, use the host's existing feedback region where available, without duplicating inline confirmation. [`Snackbar`](https://wordpress.github.io/gutenberg/?path=/docs/components-snackbar--docs) currently comes from `@wordpress/components`; it is a fallback when the supported `@wordpress/ui` version lacks that capability. Check placement and timing, and keep any snackbar action available elsewhere in the interface.
 
 Use the component's semantic intent or status props and default styling. Follow the [color guidance](./colors.md) for custom styling rather than applying brand colors or copying values from a screenshot.
 
@@ -29,7 +29,7 @@ Place feedback close to the task it describes. Field validation belongs beside t
 
 | Message | When to use it |
 | --- | --- |
-| Success | Confirm that an action completed successfully. Keep routine confirmation brief. |
+| Success | Confirm a completed action when the result is not otherwise obvious. Keep confirmation brief and avoid duplicate feedback. |
 | Error | Explain an action that could not complete or a value that needs attention, with a recovery step. |
 | Warning | Explain a risk or limitation the merchant should review before proceeding. |
 | Information | Give context relevant to the current task, such as a setting that limits available actions. |
