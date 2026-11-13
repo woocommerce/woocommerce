@@ -60,6 +60,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/shipping-zone-create',
 		'woocommerce/shipping-zone-method-create',
 		'woocommerce/shipping-zone-method-update',
+		'woocommerce/system-status-get',
 		'woocommerce/tax-rates-query',
 		'woocommerce/system-status-tools-query',
 		'woocommerce/system-status-tool-run',
@@ -352,6 +353,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'destructive' => false,
 			),
 			'woocommerce/payment-gateways-query'      => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/system-status-get'           => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
@@ -1159,6 +1165,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'woocommerce/payment-gateways-query',
 				array(),
 			),
+			'system-status-get'           => array(
+				'woocommerce/system-status-get',
+				array(),
+			),
 			'customers-query'             => array(
 				'woocommerce/customers-query',
 				array(),
@@ -1255,6 +1265,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'enabled' => true,
 				),
 			),
+			'system-status-get'              => array( 'woocommerce/system-status-get', array() ),
 			'customers-query'                => array( 'woocommerce/customers-query', array() ),
 			'shipping-zones-query'           => array( 'woocommerce/shipping-zones-query', array() ),
 			'shipping-zone-method-update'    => array(

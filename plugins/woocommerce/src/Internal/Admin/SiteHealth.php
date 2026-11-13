@@ -851,9 +851,11 @@ class SiteHealth {
 	/**
 	 * Determine whether the active theme has outdated WooCommerce template overrides.
 	 *
+	 * @internal
+	 *
 	 * @return bool
 	 */
-	private function has_outdated_template_overrides() {
+	public function has_outdated_template_overrides() {
 		$core_templates = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates' );
 
 		foreach ( $core_templates as $file ) {
