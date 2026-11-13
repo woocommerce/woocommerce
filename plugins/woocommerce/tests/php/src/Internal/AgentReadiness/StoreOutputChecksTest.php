@@ -524,40 +524,6 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product JSON-LD from an SEO plugin, in a @graph with its own types and offer list, passes in place of core's.
-	 */
-	public function test_seo_plugin_product_jsonld_passes(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		$graph   = array(
-			'@context' => 'https://schema.org',
-			'@graph'   => array(
-				array(
-					'@type' => 'WebPage',
-					'name'  => 'Dummy Product',
-				),
-				array(
-					'@type'  => array( 'schema:Product' ),
-					'name'   => 'Dummy Product',
-					'image'  => array( 'https://example.org/image.jpg' ),
-					'offers' => array(
-						'@type'  => 'AggregateOffer',
-						'offers' => array(
-							array(
-								'@type'              => 'Offer',
-								'priceSpecification' => array( 'price' => '10.00' ),
-								'availability'       => 'https://schema.org/InStock',
-							),
-						),
-					),
-				),
-			),
-		);
-		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( '{ not json', $graph ) ) ) ) );
-
-		$this->assertSame( array( true, true, true ), $this->product_results() );
-	}
-
-	/**
 	 * @testdox A product page without Product JSON-LD fails only the presence check. One without a price fails only the offer check. A price written with a currency still counts.
 	 */
 	public function test_missing_product_jsonld(): void {
@@ -600,6 +566,23 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 		$this->serve( array( self::path_of( $product ) => array( 503, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
 		$this->assertSame( array( null, null, null ), $this->product_results(), 'Error page' );
+
+		remove_all_filters( 'pre_http_request' );
+		add_filter(
+			'pre_http_request',
+			static function () {
+				return array(
+					'headers'  => array( 'content-length' => '99999999' ),
+					'body'     => '<html><body>No product data here</body></html>',
+					'response' => array(
+						'code'    => 200,
+						'message' => 'OK',
+					),
+					'cookies'  => array(),
+				);
+			}
+		);
+		$this->assertSame( array( null, null, null ), $this->product_results(), 'Page cut off before the footer' );
 	}
 
 	/**

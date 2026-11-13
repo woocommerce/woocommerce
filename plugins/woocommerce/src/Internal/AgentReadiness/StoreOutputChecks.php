@@ -15,7 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * same shape as StoreConditions.
  *
  * `ok` is true when any source provides the item, false when none does, and null
- * when the store could not load its own page (couldn't check). These checks are
+ * when the store could not load its own page (couldn't check). The product field
+ * checks are also null when the page has no Product JSON-LD. These checks are
  * always recommended: a result that can be "couldn't check" never blocks UCP.
  *
  * @since 11.4.0
@@ -519,7 +520,12 @@ class StoreOutputChecks {
 		if ( null === $page ) {
 			return null;
 		}
-		$result = $test( JsonLd::items( $page['body'], 'Product', 'ProductGroup' ) );
+		$products = JsonLd::items( $page['body'], 'Product', 'ProductGroup' );
+		// A cut-off page can hide the footer JSON-LD. That is "couldn't check", not "missing".
+		if ( array() === $products && $page['truncated'] ) {
+			return null;
+		}
+		$result = $test( $products );
 		return null === $result ? null : (bool) $result;
 	}
 
