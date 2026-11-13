@@ -371,7 +371,7 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Direct template rendering uses the resolved URL quantity unless an explicit quantity is supplied.
+	 * @testdox Direct template rendering retains legacy defaults without requiring prepared button data.
 	 */
 	public function test_loop_template_resolves_quantity_when_rendered_directly(): void {
 		global $product;
@@ -391,17 +391,63 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$processor = new WP_HTML_Tag_Processor( $markup );
 		$this->assertTrue( $processor->next_tag( 'a' ), 'The template should render a link without quantity arguments.' );
-		$this->assertSame( '12', $processor->get_attribute( 'data-quantity' ), 'AJAX should use the quantity resolved from the filtered URL.' );
+		$this->assertSame( '1', $processor->get_attribute( 'data-quantity' ), 'Direct callers should retain the legacy default quantity.' );
 		parse_str( wp_parse_url( $processor->get_attribute( 'href' ), PHP_URL_QUERY ), $query );
 		$this->assertSame( (string) $product_id, $query['add-to-cart'] );
 		$this->assertSame( '12', $query['quantity'], 'The filtered URL quantity should be retained.' );
-		$this->assertStringContainsString( '>Add 12 to cart</a>', $markup );
+		$this->assertStringContainsString( '>Add to cart</a>', $markup );
 		$processor = new WP_HTML_Tag_Processor( $explicit_markup );
 		$this->assertTrue( $processor->next_tag( 'a' ) );
-		$this->assertSame( '1', $processor->get_attribute( 'data-quantity' ), 'An explicit quantity of one should still override the URL.' );
+		$this->assertSame( '1', $processor->get_attribute( 'data-quantity' ), 'Direct callers should retain their explicit quantity.' );
 		parse_str( wp_parse_url( $processor->get_attribute( 'href' ), PHP_URL_QUERY ), $query );
-		$this->assertSame( '1', $query['quantity'] );
+		$this->assertSame( '12', $query['quantity'], 'Direct callers should retain the filtered product URL.' );
 		$this->assertStringContainsString( '>Add to cart</a>', $explicit_markup );
+	}
+
+	/**
+	 * @testdox Loop rendering passes prepared button data alongside the existing template arguments.
+	 */
+	public function test_loop_button_passes_prepared_data_without_replacing_template_args(): void {
+		$product         = WC_Helper_Product::create_simple_product();
+		$template_args   = null;
+		$link_args       = null;
+		$template_filter = static function ( $template, $template_name, $args ) use ( &$template_args ) {
+			if ( 'loop/add-to-cart.php' === $template_name ) {
+				$template_args = $args;
+			}
+			return $template;
+		};
+		$link_filter     = static function ( $html, $product, $args ) use ( &$link_args ) {
+			$link_args = $args;
+			return $html;
+		};
+
+		add_filter( 'wc_get_template', $template_filter, 10, 3 );
+		add_filter( 'woocommerce_loop_add_to_cart_link', $link_filter, 10, 3 );
+		try {
+			$this->render_loop_add_to_cart(
+				$product,
+				array(
+					'quantity'   => '3',
+					'class'      => 'custom-button',
+					'custom_arg' => 'extension-value',
+					'attributes' => array( 'aria-label' => 'Custom accessible label' ),
+				)
+			);
+		} finally {
+			remove_filter( 'wc_get_template', $template_filter );
+			remove_filter( 'woocommerce_loop_add_to_cart_link', $link_filter );
+		}
+
+		$this->assertSame( '3', $template_args['quantity'], 'Existing overrides must retain the original quantity value and type.' );
+		$this->assertSame( 'custom-button', $template_args['class'] );
+		$this->assertSame( 'extension-value', $template_args['custom_arg'] );
+		$this->assertSame( 'Custom accessible label', $template_args['attributes']['aria-label'] );
+		$this->assertSame( 3, $template_args['button_data']['quantity'] );
+		$this->assertSame( 'Add 3 to cart', $template_args['button_data']['text'] );
+		$this->assertArrayNotHasKey( 'button_data', $link_args, 'Prepared template data must not change the link filter arguments.' );
+		unset( $template_args['button_data'] );
+		$this->assertSame( $template_args, $link_args, 'The template must retain all existing loop arguments.' );
 	}
 
 	/**

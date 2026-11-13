@@ -15,19 +15,21 @@
  * @version     11.4.0
  */
 
-use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 global $product;
 
-$args        = $args ?? array();
-$button_data = wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_button_data( $product, $args['quantity'] ?? null );
-if ( ( $args['attributes']['aria-label'] ?? null ) === wp_strip_all_tags( $button_data['original_description'] ) ) {
-	$args['attributes']['aria-label'] = wp_strip_all_tags( $button_data['description'] );
-}
+$args = $args ?? array();
+
+// Direct template callers may not supply the data prepared by woocommerce_template_loop_add_to_cart().
+$button_data = $button_data ?? array(
+	'url'      => $product->add_to_cart_url(),
+	'text'     => $product->add_to_cart_text(),
+	'quantity' => $args['quantity'] ?? 1,
+);
+unset( $args['button_data'] );
 
 $aria_describedby = isset( $args['aria-describedby_text'] ) ? sprintf( 'aria-describedby="woocommerce_loop_add_to_cart_link_describedby_%s"', esc_attr( $product->get_id() ) ) : '';
 
