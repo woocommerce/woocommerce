@@ -56,6 +56,8 @@ const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 					woocommerce_onboarding_profile: {
 						skipped: true,
 					},
+					// A store installed by a Blueprint starts on legacy order storage.
+					woocommerce_custom_orders_table_enabled: 'yes',
 				},
 			},
 			{

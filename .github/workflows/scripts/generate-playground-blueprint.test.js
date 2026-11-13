@@ -52,6 +52,15 @@ test( 'blueprint installs the build of the run and creates a sample product', ()
 	assert.match( blueprint.steps[ 3 ].code, /new WC_Product_Simple\(\)/ );
 } );
 
+test( 'blueprint skips the setup wizard and stores orders in HPOS tables', () => {
+	const blueprint = generateWordpressPlaygroundBlueprint( RUN_ID, PR_NUMBER );
+
+	assert.deepEqual( blueprint.steps[ 2 ].options, {
+		woocommerce_onboarding_profile: { skipped: true },
+		woocommerce_custom_orders_table_enabled: 'yes',
+	} );
+} );
+
 test( 'playground link cannot end a Markdown link early and decodes to the blueprint', () => {
 	const blueprint = generateWordpressPlaygroundBlueprint( RUN_ID, PR_NUMBER );
 	const url = generatePlaygroundUrl( blueprint );
