@@ -1202,6 +1202,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'products-query'                 => array( 'woocommerce/products-query', $missing_id ),
 			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
 			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),
+			'order-delete by missing order'  => array( 'woocommerce/order-delete', $missing_id ),
 			'payment-gateways-query'         => array( 'woocommerce/payment-gateways-query', array() ),
 			'customers-query'                => array( 'woocommerce/customers-query', array() ),
 			'shipping-zones-query'           => array( 'woocommerce/shipping-zones-query', array() ),
