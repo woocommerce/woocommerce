@@ -249,6 +249,8 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 					( ! response.done &&
 						response.processed === offsetRef.current )
 				) {
+					// The server answered, so it may have written the chunk.
+					outcomeUnknownRef.current = true;
 					fail(
 						__(
 							'The import stopped making progress. Please try again.',

@@ -568,6 +568,27 @@ describe( 'useChunkedImport', () => {
 		}
 	);
 
+	it( 'warns that the import may have finished after a response behind the confirmed offset', async () => {
+		mockedRunChunk
+			.mockResolvedValueOnce( buildResponse( 3, 6, false ) )
+			.mockResolvedValueOnce( buildResponse( 1, 6, true ) )
+			.mockRejectedValueOnce( TOKEN_INVALID );
+
+		const { result, onError } = renderImport( { total: 6 } );
+
+		await act( async () => {
+			await result.current.run();
+		} );
+		await act( async () => {
+			await result.current.run();
+		} );
+
+		expect( onError ).toHaveBeenLastCalledWith(
+			'The connection dropped near the end of the import, so it may have finished. Check your orders before you upload the file again.',
+			true
+		);
+	} );
+
 	it( 'warns that the import may have finished after an unexpected response', async () => {
 		mockedRunChunk
 			.mockResolvedValueOnce( {
