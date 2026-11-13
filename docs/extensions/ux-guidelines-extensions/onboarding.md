@@ -15,6 +15,8 @@ Help merchants reach the first useful outcome with as little setup as possible. 
 
 Use the supported [setup task and Admin Notes integrations](../extension-onboarding/handling-merchant-onboarding.md), checking availability in the WooCommerce versions you support. These integrations place the task or note; choose controls using the shared [admin component guidance](./README.md#admin-components).
 
+Compare the existing [task and Inbox screenshots](./task-list-and-inbox.md#legacy-examples): the task points to work to complete, while the Inbox note provides useful information. Their older layouts illustrate the distinction; use the current host integration for presentation.
+
 ## Guide the work
 
 Use one clear primary action for the current step. If setup has several steps, show progress and distinguish required work from optional configuration.

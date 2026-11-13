@@ -30,6 +30,8 @@ Keep a single settings screen simple. Group related fields with clear headings. 
 
 Reuse the host's current WPDS-aligned navigation rather than copying legacy tabs or restyling global WooCommerce navigation. Keep the selected destination visible when navigation overflows. Preserve established entry points and deep links during an unrelated visual update.
 
+The [settings composition example](./README.md#settings-composition-example) shows field grouping within one save scope. It depicts a standalone page; use its content structure within WooCommerce's existing frame when your extension is embedded in Settings.
+
 Avoid a new top-level WordPress menu when the task fits WooCommerce's existing structure. Load application data through APIs instead of embedding another application's admin interface in an iframe.
 
 ## Labels and wayfinding
