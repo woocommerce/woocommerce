@@ -89,6 +89,12 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$order->update_status( OrderStatus::PROCESSING );
 		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
 
+		$order->update_status( OrderStatus::FAILED );
+		$this->assertEquals( 0, wc_get_product( $product_id )->get_total_sales() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
+
 		$order->update_status( OrderStatus::CANCELLED );
 		$this->assertEquals( 0, wc_get_product( $product_id )->get_total_sales() );
 
