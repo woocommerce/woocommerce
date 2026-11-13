@@ -216,6 +216,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 					),
 					array(
 						'id'      => 'sitemap_xml',
+						'group'   => 'find',
 						'ok'      => null,
 						'level'   => 'recommended',
 						'name'    => 'Sitemap lists your products',
@@ -245,6 +246,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 				'store_checks' => array(
 					array(
 						'id'      => 'sitemap_xml',
+						'group'   => 'find',
 						'ok'      => null,
 						'level'   => 'recommended',
 						'name'    => 'Sitemap lists your products',
@@ -259,10 +261,10 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		$coming_soon = $this->render_page();
 
-		$this->assertStringContainsString( 'could not load its own page', $live );
+		$this->assertStringContainsString( 'This couldn&#039;t be checked.', $live );
 		$this->assertStringNotContainsString( 'Launch your store', $live );
 		$this->assertStringContainsString( 'Launch your store to run this check.', $coming_soon );
-		$this->assertStringNotContainsString( 'could not load its own page', $coming_soon );
+		$this->assertStringNotContainsString( 'This couldn&#039;t be checked.', $coming_soon );
 	}
 
 	/**
@@ -282,6 +284,91 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'aria-checked="true"', $html );
 		$this->assertStringContainsString( 'required setup checks below still need fixing.', $html );
 		$this->assertStringNotContainsString( 'AI agents can now find and shop your store.</p>', $html );
+	}
+
+	/**
+	 * @testdox The page answers each merchant question, marks a likely conflict, hides checks whose prerequisite failed, and folds passed checks away.
+	 */
+	public function test_output_groups_summary_and_conflict(): void {
+		$row = static fn( string $id, ?bool $ok, bool $conflict = false ): array => array(
+			'id'       => $id,
+			'ok'       => $ok,
+			'blocks'   => 'discovery',
+			'group'    => str_starts_with( $id, 'product_' ) ? 'understand' : 'find',
+			'name'     => $id . ' name',
+			'label'    => $id . ' label',
+			'why'      => $id . ' why',
+			'fix'      => $id . ' fix',
+			'fix_url'  => '',
+			'conflict' => $conflict,
+		);
+		update_option(
+			'woocommerce_agent_readiness_report',
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(
+					$row( 'product_jsonld_present', false, true ),
+					$row( 'product_offer_jsonld', null ),
+					$row( 'sitemap_lists_products', true ),
+				),
+			)
+		);
+
+		$html = $this->render_page();
+
+		foreach ( array( 'Can agents get in?', 'Can they find your store?', 'Do they understand your products?', 'Can they buy?' ) as $question ) {
+			$this->assertStringContainsString( $question, $html );
+		}
+		$this->assertStringContainsString( 'Agent shopping is off', $html, 'UCP is off in this test' );
+		$this->assertMatchesRegularExpression( '/data-on="(?![^"]*Agent shopping is off)[^"]*" data-off="Agent shopping is off/', $html, 'The switch script can show the line for UCP on without a reload' );
+		$this->assertStringContainsString( 'Likely conflict', $html );
+		$this->assertStringContainsString( 'Something on your store may be replacing this.', $html );
+		$this->assertStringNotContainsString( 'product_offer_jsonld name', $html, 'Its prerequisite failed' );
+		$this->assertMatchesRegularExpression( '#<details>.*sitemap_lists_products name.*</details>#s', $html );
+	}
+
+	/**
+	 * @testdox Every question reads the scan, so without one each asks for it; pending checks don't count as unchecked.
+	 */
+	public function test_groups_need_a_scan(): void {
+		$summary = new \ReflectionMethod( AgenticCommerceSettingsPage::class, 'group_summary' );
+		$summary->setAccessible( true );
+		$passed = array(
+			array(
+				'ok'    => true,
+				'level' => 'recommended',
+			),
+		);
+
+		$pending = array(
+			array(
+				'ok'      => null,
+				'level'   => 'recommended',
+				'pending' => true,
+			),
+		);
+
+		$this->assertSame( 'Run check to find out', $summary->invoke( null, 'buy', $passed, false, 0, false, true ) );
+		$this->assertSame( 'Yes', $summary->invoke( null, 'buy', $passed, true, 0, false, true ) );
+		$this->assertSame( 'Yes', $summary->invoke( null, 'buy', array_merge( $passed, $pending ), true, 0, false, true ) );
+		$this->assertSame( 'Coming soon', $summary->invoke( null, 'buy', $pending, true, 0, false, true ), 'Only pending checks answer nothing yet' );
+		$this->assertSame( 'Run check to find out', $summary->invoke( null, 'access', $passed, true, 0, false, true ), 'A scan from before UCP was on does not answer access' );
+		$this->assertSame( 'Yes', $summary->invoke( null, 'access', $passed, true, 0, true, true ) );
+	}
+
+	/**
+	 * @testdox Examples skip deleted products, so a deleted product doesn't leave the cell empty.
+	 */
+	public function test_examples_skip_deleted_products(): void {
+		$kept  = \WC_Helper_Product::create_simple_product();
+		$links = new \ReflectionMethod( AgenticCommerceSettingsPage::class, 'product_links' );
+		$links->setAccessible( true );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$result = $links->invoke( $this->page(), array( 999991, 999992, 999993, $kept->get_id() ) );
+
+		$this->assertCount( 1, $result );
+		$this->assertStringContainsString( (string) $kept->get_id(), $result[0] );
 	}
 
 	/**
