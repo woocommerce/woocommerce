@@ -967,7 +967,8 @@ class WC_Emails {
 		$result = preg_replace( '/<br\/?>/i', ', ', $result );
 		remove_filter(
 			'woocommerce_formatted_address_force_country_display',
-			array( $this, 'get_store_address_force_country_display' )
+			array( $this, 'get_store_address_force_country_display' ),
+			5
 		);
 		return $result;
 	}
