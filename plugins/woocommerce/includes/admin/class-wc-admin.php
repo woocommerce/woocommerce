@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
+use Automattic\WooCommerce\Internal\Admin\ImportExport\HposOrderExportHandler;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -117,6 +118,9 @@ class WC_Admin {
 		}
 
 		switch ( $screen->id ) {
+			case 'export':
+				wc_get_container()->get( HposOrderExportHandler::class );
+				break;
 			case 'dashboard':
 			case 'dashboard-network':
 				include __DIR__ . '/class-wc-admin-dashboard-setup.php';
