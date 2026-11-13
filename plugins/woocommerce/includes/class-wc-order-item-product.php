@@ -36,7 +36,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public $legacy_cart_item_key;
 
 	/**
-	 * The product's tax status when the line was created, or an empty string when it was not recorded.
+	 * The tax status of the line: the product's when the line was created or, for a line saved before statuses were
+	 * recorded, the one its charged tax shows. An empty string until it is recorded.
 	 *
 	 * Not a prop: the data store keeps it in the internal `_product_tax_status` item meta, out of the item's data and meta data.
 	 *
@@ -281,6 +282,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
 	 * Record the product's current tax status on the line, so later tax recalculations use the status it was sold with.
+	 * A line without a product is recorded as taxable.
 	 *
 	 * @since 11.4.0
 	 *
@@ -291,9 +293,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( ! $product instanceof WC_Product ) {
 			$product = $this->get_product();
 		}
-		if ( $product instanceof WC_Product ) {
-			$this->set_recorded_tax_status( $product->get_tax_status() );
-		}
+		// A line without a product has always been taxable.
+		$this->set_recorded_tax_status( $product instanceof WC_Product ? $product->get_tax_status() : ProductTaxStatus::TAXABLE );
 	}
 
 	/**
@@ -564,7 +565,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			return $this->recorded_tax_status;
 		}
 
-		// Lines saved before the status was recorded follow the product, as they always have.
+		// Only a line that is being created gets here, and it follows its product until it is saved. A saved line
+		// never reads the product: it has had a status since the data store read it.
 		$product = $this->get_product();
 		return $product ? $product->get_tax_status() : ProductTaxStatus::TAXABLE;
 	}

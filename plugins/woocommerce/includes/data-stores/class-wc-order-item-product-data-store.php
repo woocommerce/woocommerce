@@ -5,6 +5,8 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -46,8 +48,44 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 		);
 		if ( $item instanceof WC_Order_Item_Product ) {
 			$item->set_recorded_tax_status( get_metadata( 'order_item', $id, '_product_tax_status', true ) );
+			if ( '' === $item->get_recorded_tax_status() ) {
+				$item->set_recorded_tax_status( $this->get_tax_status_from_charged_tax( $item ) );
+			}
 		}
 		$item->set_object_read( true );
+	}
+
+	/**
+	 * Create a new order item in the database.
+	 *
+	 * A line built by code that sets its props itself records its tax status here, so that every line saved from now
+	 * on has one.
+	 *
+	 * @since 11.4.0
+	 * @param WC_Order_Item $item Order item object.
+	 * @return void
+	 */
+	public function create( &$item ) {
+		if ( $item instanceof WC_Order_Item_Product && '' === $item->get_recorded_tax_status() ) {
+			$item->record_tax_status();
+		}
+		parent::create( $item );
+	}
+
+	/**
+	 * The tax status of a line that was saved before statuses were recorded, from what the line was charged: taxable
+	 * when it carries a tax amount, none otherwise.
+	 *
+	 * The product is not read: its status may have changed since the sale, or the product may be gone. The status is
+	 * then saved with the line, so a later recalculation that brings its tax to zero does not change it.
+	 *
+	 * @param WC_Order_Item_Product $item Order item object, with its tax amounts read.
+	 * @return string
+	 */
+	private function get_tax_status_from_charged_tax( WC_Order_Item_Product $item ): string {
+		$was_charged_tax = 0.0 !== (float) $item->get_subtotal_tax( 'edit' ) || 0.0 !== (float) $item->get_total_tax( 'edit' );
+
+		return $was_charged_tax ? ProductTaxStatus::TAXABLE : ProductTaxStatus::NONE;
 	}
 
 	/**
