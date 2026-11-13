@@ -91,15 +91,12 @@ class SystemStatusToolsAbilitiesTest extends \WC_Unit_Test_Case {
 
 		$result = $this->query->execute( array( 'include' => array( 'extension_tool' ) ) );
 
-		$this->assertSame(
-			array(
-				'id'          => 'extension_tool',
-				'name'        => 'Extension tool',
-				'description' => 'Added by an extension.',
-				'runnable'    => false,
-			),
-			$result['tools'][0]
-		);
+		$tool = $result['tools'][0];
+		$this->assertSame( 'extension_tool', $tool['id'] );
+		$this->assertSame( 'Extension tool', $tool['name'] );
+		$this->assertSame( 'Added by an extension.', $tool['description'] );
+		$this->assertFalse( $tool['runnable'] );
+		$this->assertArrayNotHasKey( 'callback', $tool );
 	}
 
 	/**
@@ -132,6 +129,34 @@ class SystemStatusToolsAbilitiesTest extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $executed );
 		$this->assertSame( 'recount_terms', $executed[0]['id'] );
 		$this->assertTrue( $executed[0]['success'] );
+	}
+
+	/**
+	 * @testdox Should report a failure when the coupons lookup table to repair is missing.
+	 */
+	public function test_coupon_repair_without_lookup_table_fails(): void {
+		global $wpdb;
+
+		$table = $wpdb->prefix . 'wc_order_coupon_lookup';
+		// Pretends the table is missing without DDL, which would commit the test transaction.
+		add_filter(
+			'query',
+			static fn( string $query ): string => str_replace( "SHOW TABLES LIKE '{$table}'", "SHOW TABLES LIKE '{$table}_missing'", $query )
+		);
+		$executed = array();
+		add_action(
+			'woocommerce_system_status_tool_executed',
+			static function ( $tool ) use ( &$executed ): void {
+				$executed[] = $tool;
+			}
+		);
+
+		$result = $this->run->execute( array( 'id' => 'repair_coupons_lookup_table' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_system_status_tool_failed', $result->get_error_code() );
+		$this->assertSame( 'Coupons lookup table does not exist.', $result->get_error_message() );
+		$this->assertFalse( $executed[0]['success'] );
 	}
 
 	/**
