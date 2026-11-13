@@ -15,7 +15,7 @@ Test the complete merchant task inside WooCommerce, including the host navigatio
 
 | Area | What to check |
 | --- | --- |
-| Labels and structure | Every control has an accessible name and a useful visible label. Associate descriptions and errors with their field; placeholders are not labels. Use headings and group related controls so the page remains understandable without its visual layout. |
+| Labels and structure | Every control has an accessible name. Give form fields meaningful visible labels; use supported icon-only or visually hidden-label patterns where appropriate, with clear accessible names. Associate descriptions and errors with their field; placeholders are not labels. Use headings and group related controls so the page remains understandable without its visual layout. |
 | Keyboard and focus | Reach and operate every action without a mouse. Keep focus order logical and focus indicators visible and unobscured. Check menus, dialogs, dismissal controls and recovery actions; return focus to a sensible place when a dialog closes. |
 | Announcements | Dynamic saving, success, error and loading feedback is available to screen readers without unnecessary interruptions. Follow the [notice announcement guidance](./notices.md#announcements-dismissal-and-recovery), including `Notice.List` when using `@wordpress/ui`. Avoid announcing the same result twice. |
 | Validation and recovery | Explain errors beside the affected fields, make them discoverable after submission, and provide a next step. Preserve entered values and let merchants reach and correct the problem. |
