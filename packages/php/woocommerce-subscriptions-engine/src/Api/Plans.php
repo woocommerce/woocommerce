@@ -246,8 +246,8 @@ final class Plans {
 
 	/**
 	 * Delete the meta values for `$key` of a plan of the given extension, like
-	 * `delete_post_meta()`. Unlike `delete_post_meta()`, the owner comes second, so
-	 * `delete_meta( $id, $key, $value )` scopes to owner `$key` and returns false.
+	 * `delete_post_meta()`. Unlike `delete_post_meta()`, the owner comes second: an old-shape
+	 * call `delete_meta( $id, $key, $value )` reads as owner `$key`, key `$value`, and is not safe.
 	 *
 	 * @param int    $plan_id        Plan id.
 	 * @param string $extension_slug The expected owner (the plan's owning extension).

@@ -387,12 +387,18 @@ final class PlanRepository {
 	 * @param mixed  $value          Meta value; serialized when not scalar.
 	 * @param bool   $unique         Whether the key must be absent.
 	 * @return int|null The new meta row id, or null when nothing was inserted.
-	 * @throws \RuntimeException If the insert fails.
+	 * @throws \RuntimeException If the key does not fit the meta_key column, or the insert fails.
 	 */
 	private function insert_meta_row( int $plan_id, string $extension_slug, string $key, $value, bool $unique ): ?int {
 		global $wpdb;
 
-		$meta   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
+		$meta = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
+		// The raw insert skips the length and charset check `$wpdb->insert()` makes, so make it here.
+		$checked_key = $wpdb->strip_invalid_text_for_column( $meta, 'meta_key', $key );
+		if ( $checked_key !== $key ) {
+			throw new \RuntimeException( sprintf( 'Failed to add meta to plan %d: the meta key is too long or contains invalid data.', (int) $plan_id ) );
+		}
+
 		$plans  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 		$sql    = "INSERT INTO {$meta} ( plan_id, meta_key, meta_value ) SELECT p.id, %s, %s FROM {$plans} p WHERE p.id = %d AND " . self::OWNER_MATCH;
 		$values = array( $key, maybe_serialize( $value ), $plan_id, $extension_slug );

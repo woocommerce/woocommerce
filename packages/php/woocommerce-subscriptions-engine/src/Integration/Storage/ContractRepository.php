@@ -1408,14 +1408,20 @@ final class ContractRepository {
 	 * @return int|null The new meta row id, or null when nothing was inserted.
 	 * @throws \InvalidArgumentException If the lock is for another contract.
 	 * @throws ContractLockedException If the lock was lost.
-	 * @throws \RuntimeException If the insert fails.
+	 * @throws \RuntimeException If the key does not fit the meta_key column, or the insert fails.
 	 */
 	private function insert_meta_row( int $contract_id, string $key, $value, ContractLock $lock ): ?int {
 		global $wpdb;
 
+		$meta = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		// The raw insert skips the length and charset check `$wpdb->insert()` makes, so make it here.
+		$checked_key = $wpdb->strip_invalid_text_for_column( $meta, 'meta_key', $key );
+		if ( $checked_key !== $key ) {
+			throw new \RuntimeException( sprintf( 'Failed to add meta to contract %d: the meta key is too long or contains invalid data.', (int) $contract_id ) );
+		}
+
 		$this->fence_child_write( $lock, $contract_id );
 
-		$meta      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
 		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared

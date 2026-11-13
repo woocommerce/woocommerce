@@ -490,8 +490,8 @@ final class Contracts {
 
 	/**
 	 * Delete the meta values for `$key` of a contract of the given extension, like
-	 * `delete_post_meta()`. Unlike `delete_post_meta()`, the owner comes second, so
-	 * `delete_meta( $id, $key, $value )` scopes to owner `$key` and returns false.
+	 * `delete_post_meta()`. Unlike `delete_post_meta()`, the owner comes second: an old-shape
+	 * call `delete_meta( $id, $key, $value )` reads as owner `$key`, key `$value`, and is not safe.
 	 *
 	 * @param int               $contract_id    Contract id.
 	 * @param string            $extension_slug The expected owner (the contract's owning extension).

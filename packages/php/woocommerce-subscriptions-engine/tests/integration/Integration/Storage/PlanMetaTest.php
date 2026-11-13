@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 
 use EngineIntegrationTestCase;
 use InvalidArgumentException;
+use RuntimeException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
@@ -450,5 +451,27 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Plan::class, $plan );
 		$plan->set_name( 'Renamed' );
 		$this->assertTrue( $this->sut->update_fields( $plan, array( 'name' ) ), 'The exact owner still writes.' );
+	}
+
+	/**
+	 * @testdox a meta key longer than the 255-character column is refused and stores nothing; a 255-character key is stored.
+	 */
+	public function test_an_over_long_meta_key_is_refused(): void {
+		$too_long = str_repeat( 'k', 256 );
+		foreach ( array( 'add_meta', 'update_meta' ) as $method ) {
+			try {
+				$this->sut->{$method}( $this->id, self::OWNER, $too_long, 'value' );
+				$this->fail( "Expected {$method}() to refuse an over-long key." );
+			} catch ( RuntimeException $e ) {
+				$this->assertStringContainsString( "Failed to add meta to plan {$this->id}: the meta key is too long", $e->getMessage(), $method );
+			}
+		}
+		$this->assertSame( array(), $this->sut->get_meta( $this->id ) );
+
+		$longest = str_repeat( 'k', 255 );
+		$this->assertIsInt( $this->sut->add_meta( $this->id, self::OWNER, $longest, 'one' ) );
+		$this->sut->delete_meta( $this->id, self::OWNER, $longest );
+		$this->assertTrue( $this->sut->update_meta( $this->id, self::OWNER, $longest, 'two' ) );
+		$this->assertSame( array( $longest => array( 'two' ) ), $this->sut->get_meta( $this->id ) );
 	}
 }
