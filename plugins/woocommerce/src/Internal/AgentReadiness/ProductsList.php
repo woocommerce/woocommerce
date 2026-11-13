@@ -8,16 +8,14 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The Products list filter and column for readiness problems, and keeping each
- * product's stored failures current when it is saved.
+ * Keeping each product's stored failures current when it is saved, and the Products list
+ * filter behind Sales readiness' links to the products a check failed.
  *
  * @since 11.4.0
  */
 class ProductsList {
 
 	public const FILTER_PARAM = 'agent_readiness';
-
-	private const COLUMN = 'agent_readiness';
 
 	/**
 	 * What a save may change without changing a check's result. A checkout saves products with only these.
@@ -66,9 +64,6 @@ class ProductsList {
 		add_action( 'woocommerce_after_product_object_save', array( $this, 'handle_after_save' ) );
 		add_action( 'wp_trash_post', array( $this, 'handle_trash' ) );
 		add_action( 'untrashed_post', array( $this, 'handle_untrash' ) );
-		add_filter( 'manage_product_posts_columns', array( $this, 'add_column' ), 20 );
-		add_action( 'manage_product_posts_custom_column', array( $this, 'render_column' ), 10, 2 );
-		add_action( 'restrict_manage_posts', array( $this, 'render_filter' ) );
 		add_action( 'pre_get_posts', array( $this, 'apply_filter' ) );
 	}
 
@@ -157,72 +152,6 @@ class ProductsList {
 	}
 
 	/**
-	 * Add the column once a scan has run.
-	 *
-	 * @internal
-	 *
-	 * @param mixed $columns Columns.
-	 * @return mixed
-	 */
-	public function add_column( $columns ) {
-		if ( ! is_array( $columns ) || ! $this->agent_readiness->has_report() || ! $this->enabled() ) {
-			return $columns;
-		}
-		$columns[ self::COLUMN ] = __( 'Agents', 'woocommerce' );
-		return $columns;
-	}
-
-	/**
-	 * Show where a product stands.
-	 *
-	 * @internal
-	 *
-	 * @param mixed $column  Column id.
-	 * @param mixed $post_id Product id.
-	 */
-	public function render_column( $column, $post_id ): void {
-		if ( self::COLUMN !== $column ) {
-			return;
-		}
-		echo esc_html( $this->status_text( (int) $post_id ) );
-	}
-
-	/**
-	 * Add the filter once a scan has run. Only problems some product has are offered.
-	 *
-	 * @internal
-	 *
-	 * @param mixed $post_type Post type of the list.
-	 */
-	public function render_filter( $post_type ): void {
-		$report = 'product' === $post_type && $this->enabled() ? $this->agent_readiness->get_cached_report() : null;
-		if ( null === $report ) {
-			return;
-		}
-		$counts = ProductFailures::counts();
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- A list filter that changes nothing.
-		$current = isset( $_GET[ self::FILTER_PARAM ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::FILTER_PARAM ] ) ) : '';
-		$options = array();
-		foreach ( FeedChannels::all() as $id => $channel ) {
-			/* translators: %s: channel name. */
-			$options[ ProductFailures::channel_value( ProductScan::NOT_LISTABLE, $id ) ] = sprintf( __( 'Can\'t be listed on %s', 'woocommerce' ), $channel['name'] );
-		}
-		foreach ( is_array( $report['checks'] ?? null ) ? $report['checks'] : array() as $check ) {
-			if ( is_array( $check ) && isset( $check['id'], $check['label'] ) ) {
-				$options[ (string) $check['id'] ] = (string) $check['label'];
-			}
-		}
-		echo '<select name="' . esc_attr( self::FILTER_PARAM ) . '"><option value="">' . esc_html__( 'Filter by agent readiness', 'woocommerce' ) . '</option>';
-		foreach ( $options as $value => $label ) {
-			$value = (string) $value;
-			if ( isset( $counts[ $value ] ) || $current === $value ) {
-				echo '<option value="' . esc_attr( $value ) . '"' . selected( $current, $value, false ) . '>' . esc_html( $label . ' (' . number_format_i18n( $counts[ $value ] ?? 0 ) . ')' ) . '</option>';
-			}
-		}
-		echo '</select>';
-	}
-
-	/**
 	 * Limit the Products list to the chosen problem.
 	 *
 	 * @internal
@@ -242,41 +171,6 @@ class ProductsList {
 			'value' => sanitize_text_field( wp_unslash( $_GET[ self::FILTER_PARAM ] ) ),
 		);
 		$query->set( 'meta_query', $meta_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-	}
-
-	/**
-	 * One line on a product: which channels it can't list on or has gaps on, else whether it passed.
-	 *
-	 * @param int $product_id Product id.
-	 */
-	private function status_text( int $product_id ): string {
-		$stored = ProductFailures::stored( $product_id );
-		if ( ! in_array( ProductFailures::CHECKED, $stored, true ) ) {
-			$product = wc_get_product( $product_id );
-			return $product instanceof \WC_Product && ProductScan::covers( $product ) ? __( 'Not checked', 'woocommerce' ) : '–';
-		}
-		$values = array_diff( $stored, array( ProductFailures::CHECKED ) );
-		if ( array() === $values ) {
-			return __( 'Ready', 'woocommerce' );
-		}
-		$names = static fn( string $status ): array => array_column(
-			array_filter(
-				FeedChannels::all(),
-				static fn( string $id ): bool => in_array( ProductFailures::channel_value( $status, $id ), $values, true ),
-				ARRAY_FILTER_USE_KEY
-			),
-			'name'
-		);
-		$parts = array();
-		if ( array() !== $names( ProductScan::NOT_LISTABLE ) ) {
-			/* translators: %s: list of channel names. */
-			$parts[] = sprintf( __( 'Can\'t be listed: %s', 'woocommerce' ), implode( ', ', $names( ProductScan::NOT_LISTABLE ) ) );
-		}
-		if ( array() !== $names( ProductScan::WITH_GAPS ) ) {
-			/* translators: %s: list of channel names. */
-			$parts[] = sprintf( __( 'Gaps: %s', 'woocommerce' ), implode( ', ', $names( ProductScan::WITH_GAPS ) ) );
-		}
-		return array() === $parts ? __( 'Product page problem', 'woocommerce' ) : implode( '. ', $parts );
 	}
 
 	/**

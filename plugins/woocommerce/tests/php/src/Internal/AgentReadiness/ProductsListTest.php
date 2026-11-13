@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductFailures;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductsList;
-use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -231,42 +230,5 @@ class ProductsListTest extends WC_Unit_Test_Case {
 			list( $pagenow, $wp_the_query ) = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			unset( $GLOBALS['current_screen'], $_GET[ ProductsList::FILTER_PARAM ] );
 		}
-	}
-
-	/**
-	 * @testdox The column and filter appear after a scan and say where a product stands, including one the scan didn't test.
-	 */
-	public function test_column_and_filter(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		$this->assertSame( array(), $this->sut->add_column( array() ), 'No column before a scan' );
-
-		$this->readiness->refresh_report();
-		$this->assertArrayHasKey( 'agent_readiness', $this->sut->add_column( array() ) );
-
-		ob_start();
-		$this->sut->render_column( 'agent_readiness', $product->get_id() );
-		$this->assertStringContainsString( 'be listed:', (string) ob_get_clean() );
-
-		ob_start();
-		$this->sut->render_filter( 'product' );
-		$html = (string) ob_get_clean();
-		$this->assertStringContainsString( 'value="missing_images"', $html );
-		$this->assertStringContainsString( '(1)', $html );
-
-		delete_post_meta( $product->get_id(), ProductFailures::META_KEY );
-		ob_start();
-		$this->sut->render_column( 'agent_readiness', $product->get_id() );
-		$this->assertSame( 'Not checked', ob_get_clean(), 'No rows means the scan did not reach it' );
-
-		ProductFailures::store( $product->get_id(), array() );
-		ob_start();
-		$this->sut->render_column( 'agent_readiness', $product->get_id() );
-		$this->assertSame( 'Ready', ob_get_clean() );
-
-		$product->set_catalog_visibility( 'hidden' );
-		$product->save();
-		ob_start();
-		$this->sut->render_column( 'agent_readiness', $product->get_id() );
-		$this->assertSame( '–', ob_get_clean() );
 	}
 }
