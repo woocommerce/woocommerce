@@ -887,12 +887,30 @@ class StoreOutputChecks {
 			}
 			return 'disabled' === $status['status'] ? 'disabled' : 'not_reached';
 		}
-		$section = trim( $status['section'] );
-		$body    = (string) ( $responses->get( self::host_root( '/llms.txt' ) )['body'] ?? '' );
-		if ( '' !== $section && str_contains( $body, $section ) ) {
+		if ( self::has_llms_txt_guidance( (string) ( $responses->get( self::host_root( '/llms.txt' ) )['body'] ?? '' ), $status['section'] ) ) {
 			return 'woocommerce';
 		}
 		return 'physical_file' === $status['status'] ? 'file' : 'other';
+	}
+
+	/**
+	 * Whether a served llms.txt holds WooCommerce's guidance, as WooCommerce's own file does.
+	 *
+	 * @param string $body    Served llms.txt.
+	 * @param string $section Guidance WooCommerce adds, '' when it adds none.
+	 */
+	public static function has_llms_txt_guidance( string $body, string $section ): bool {
+		$section = trim( $section );
+		return '' !== $section && str_contains( $body, $section );
+	}
+
+	/**
+	 * WooCommerce's llms.txt status, from core_llms_txt_status().
+	 *
+	 * @return array{status:string,section:string}|null
+	 */
+	protected function llms_txt_status(): ?array {
+		return self::core_llms_txt_status();
 	}
 
 	/**
@@ -901,7 +919,7 @@ class StoreOutputChecks {
 	 *
 	 * @return array{status:string,section:string}|null
 	 */
-	protected function llms_txt_status(): ?array {
+	public static function core_llms_txt_status(): ?array {
 		// Not in every WooCommerce version yet, so the class is named by string.
 		$class = 'Automattic\\WooCommerce\\Internal\\LlmsTxt\\LlmsTxt';
 		if ( ! class_exists( $class ) ) {

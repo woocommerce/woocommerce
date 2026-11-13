@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Agent readiness: list whether the served llms.txt holds WooCommerce's store guidance; nothing ships to merchants.
