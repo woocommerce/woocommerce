@@ -59,7 +59,7 @@ class AgentReadiness {
 	private RemoteRules $remote_rules;
 
 	/**
-	 * Scan reused for single-product checks, so its shared GTIN lookup runs once per request.
+	 * Scan reused for single-product checks, with the shared GTINs the last stored scan found.
 	 *
 	 * @var ProductScan|null
 	 */
@@ -215,7 +215,7 @@ class AgentReadiness {
 	 * Run every check over the catalog.
 	 *
 	 * @param callable|null $on_tested Called with each product id and its failures.
-	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
+	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,shared_gtins?:array<int,string>}
 	 */
 	private function build_report( ?callable $on_tested = null ): array {
 		// Rebuild the rules and the scan for each report: a long-running process may have fetched a new rules file or changed GTINs since.
@@ -245,7 +245,7 @@ class AgentReadiness {
 
 		$responses = $this->store_output_checks->responses();
 
-		return array(
+		$report = array(
 			'generated_at'        => gmdate( 'c' ),
 			'products'            => $scan->products(),
 			'hidden_from_catalog' => $scan->hidden_from_catalog(),
@@ -256,6 +256,11 @@ class AgentReadiness {
 			'checks'              => $checks,
 			'truncated'           => $scan->truncated(),
 		);
+		if ( null !== $on_tested ) {
+			// Stored for checks of one product, so the editor and a save don't read every published product.
+			$report['shared_gtins'] = $scan->shared_gtins();
+		}
+		return $report;
 	}
 
 	/**
@@ -265,7 +270,11 @@ class AgentReadiness {
 	 */
 	public function get_cached_report(): ?array {
 		$report = get_option( self::REPORT_OPTION );
-		return is_array( $report ) ? self::with_saved_products( $report ) : null;
+		if ( ! is_array( $report ) ) {
+			return null;
+		}
+		unset( $report['shared_gtins'] );
+		return self::with_saved_products( $report );
 	}
 
 	/**
@@ -365,6 +374,20 @@ class AgentReadiness {
 	}
 
 	/**
+	 * The stored report with setup checks read now, or null when there is none.
+	 * Output checks stay as the scan stored them.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	public function get_served_report(): ?array {
+		$report = $this->get_cached_report();
+		if ( null !== $report ) {
+			$report['store_checks'] = $this->get_store_checks( $report );
+		}
+		return $report;
+	}
+
+	/**
 	 * Run the report and store it. Not autoloaded: only the readiness screens read it.
 	 *
 	 * @return array<string, mixed>
@@ -380,6 +403,7 @@ class AgentReadiness {
 		ProductFailures::keep_only( $tested );
 		$report['failures_stored'] = true;
 		update_option( self::REPORT_OPTION, $report, false );
+		unset( $report['shared_gtins'] );
 		return $report;
 	}
 
@@ -404,7 +428,8 @@ class AgentReadiness {
 	 *
 	 * For extensions that rank or fix products one at a time; the stored
 	 * report keeps only counts and a few example ids per check. Shared GTINs
-	 * are read once per report, so call get_report() again after changing GTINs.
+	 * come from the last stored scan, so a GTIN change on another product waits
+	 * for the next scan; before the first one, they're read from the catalog.
 	 *
 	 * @param \WC_Product $product Product or variation.
 	 * @return array{product_id:int,checks:array<string, array<string, array{field:string,effect:string}>>,statuses:array<string, string>}|null
@@ -422,6 +447,10 @@ class AgentReadiness {
 		}
 		if ( null === $this->product_scan ) {
 			$this->product_scan = new ProductScan();
+			$stored             = get_option( self::REPORT_OPTION );
+			if ( is_array( $stored ) && is_array( $stored['shared_gtins'] ?? null ) ) {
+				$this->product_scan->use_shared_gtins( $stored['shared_gtins'] );
+			}
 		}
 		$active = $this->get_active_rules();
 		$checks = $this->product_scan->failures( $product, $active['rules'], $active['channel_rules'] );
