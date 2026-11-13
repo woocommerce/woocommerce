@@ -220,6 +220,30 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should pass woocommerce_create_refund callbacks a refund that already has its ID, as wc_create_refund() does.
+	 */
+	public function test_create_refund_hook_gets_refund_id(): void {
+		$order   = $this->create_order_without_lines();
+		$hook_id = null;
+		add_action(
+			'woocommerce_create_refund',
+			static function ( $refund ) use ( &$hook_id ) {
+				$hook_id = $refund->get_id();
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '5',
+			)
+		);
+
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertSame( $result['refund']['id'], $hook_id );
+	}
+
+	/**
 	 * @testdox Should return the message of an extension that declines the refund by throwing, and save nothing.
 	 */
 	public function test_returns_declined_refund_message(): void {
