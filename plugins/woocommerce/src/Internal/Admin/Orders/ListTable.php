@@ -904,9 +904,9 @@ class ListTable extends WP_List_Table {
 			$wpdb->prepare(
 				"SELECT MIN(date_created_gmt) as min_date_gmt, MAX(date_created_gmt) as max_date_gmt
 				 FROM (
-					( SELECT date_created_gmt FROM {$table_name} WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt DESC LIMIT 1 )
+					( SELECT date_created_gmt FROM {$table_name} WHERE type = %s AND status != 'trash' AND date_created_gmt IS NOT NULL ORDER BY date_created_gmt DESC LIMIT 1 )
 					UNION ALL
-					( SELECT date_created_gmt FROM {$table_name} WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt ASC LIMIT 1 )
+					( SELECT date_created_gmt FROM {$table_name} WHERE type = %s AND status != 'trash' AND date_created_gmt IS NOT NULL ORDER BY date_created_gmt ASC LIMIT 1 )
 				 ) d",
 				$this->order_type,
 				$this->order_type

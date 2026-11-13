@@ -253,7 +253,7 @@ class ProductUtil {
 		$products  = array_filter( $products, static fn( $product ) => $product instanceof \WC_Product );
 		$featured  = array_map( static fn( $product ) => $product->get_image_id(), $products );
 		$gallery   = array_map( static fn( $product ) => $product->get_gallery_image_ids(), $products );
-		$image_ids = array_filter( array_unique( array_map( 'intval', array_merge( $featured, ...$gallery ) ) ) );
+		$image_ids = array_filter( array_unique( array_map( 'intval', array_merge( $featured, ...array_values( $gallery ) ) ) ) );
 		if ( ! empty( $image_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $image_ids );
