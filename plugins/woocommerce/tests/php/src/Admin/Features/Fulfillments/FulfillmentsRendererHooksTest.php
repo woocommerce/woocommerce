@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsRenderer;
-use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 
 /**
  * Tests for FulfillmentsRenderer hooks.
@@ -19,20 +18,13 @@ class FulfillmentsRendererHooksTest extends \WC_Unit_Test_Case {
 	private FulfillmentsRenderer $renderer;
 
 	/**
-	 * Set up the test environment.
-	 */
-	public static function setUpBeforeClass(): void {
-		parent::setUpBeforeClass();
-		FulfillmentsHelper::create_tables();
-	}
-
-	/**
 	 * Set up the test case.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		FulfillmentsHelper::enable_fulfillments();
-		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
+		// A fresh instance, not the container's: enabling fulfillments registers the container's renderer, and
+		// these tests must pass on the hooks they register themselves. They need neither the feature nor its tables.
+		$this->renderer = new FulfillmentsRenderer();
 	}
 
 	/**
