@@ -118,11 +118,151 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * `enabled` values the checkout payment tests switched on the shared gateway instances, keyed by gateway ID.
+	 *
+	 * @var array<string, string>
+	 */
+	private $original_gateway_enabled = array();
+
+	/**
 	 * Clean up cache between tests.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		wp_cache_flush();
+	}
+
+	/**
+	 * Restore the shared gateway instances, which the base class doesn't reset.
+	 */
+	public function tearDown(): void {
+		try {
+			parent::tearDown();
+		} finally {
+			foreach ( $this->original_gateway_enabled as $gateway_id => $enabled ) {
+				WC()->payment_gateways()->payment_gateways()[ $gateway_id ]->enabled = $enabled;
+			}
+			$this->original_gateway_enabled = array();
+
+			foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+				$gateway->chosen = false;
+			}
+		}
+	}
+
+	/**
+	 * Render the classic checkout payment section for a cart that needs payment, with BACS and COD enabled.
+	 *
+	 * @return string Rendered markup.
+	 */
+	private function render_checkout_payment(): string {
+		$this->prepare_checkout_payment();
+
+		ob_start();
+		woocommerce_checkout_payment();
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render the checkout/payment.php template directly, as code that loads it without woocommerce_checkout_payment() would.
+	 *
+	 * @param array $extra_args Template arguments on top of the checkout, the gateways and the button text.
+	 * @return string Rendered markup.
+	 */
+	private function render_payment_template( array $extra_args ): string {
+		$this->prepare_checkout_payment();
+
+		ob_start();
+		wc_get_template(
+			'checkout/payment.php',
+			array(
+				'checkout'           => WC()->checkout(),
+				'available_gateways' => WC()->payment_gateways()->get_available_payment_gateways(),
+				'order_button_text'  => 'Place order',
+			) + $extra_args
+		);
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Enable BACS and COD, make the cart need payment and start from no payment choice in the session.
+	 */
+	private function prepare_checkout_payment(): void {
+		foreach ( array( WC_Gateway_BACS::ID, WC_Gateway_COD::ID ) as $gateway_id ) {
+			$gateway = WC()->payment_gateways()->payment_gateways()[ $gateway_id ];
+			if ( ! isset( $this->original_gateway_enabled[ $gateway_id ] ) ) {
+				$this->original_gateway_enabled[ $gateway_id ] = $gateway->enabled;
+			}
+			$gateway->enabled = 'yes';
+		}
+		add_filter( 'woocommerce_cart_needs_payment', '__return_true' );
+		// The mock session is one object for the whole run and the base class never clears this key.
+		WC()->session->set( 'chosen_payment_method', null );
+	}
+
+	/**
+	 * Get the IDs of the payment method radios that are checked in rendered markup.
+	 *
+	 * @param string $output Rendered payment section.
+	 * @return string[]
+	 */
+	private function get_checked_gateways( string $output ): array {
+		preg_match_all( '/id="payment_method_([^"]+)"[^>]*\/>/', $output, $radios, PREG_SET_ORDER );
+		$checked = array();
+		foreach ( $radios as $radio ) {
+			if ( false !== strpos( $radio[0], 'checked=' ) ) {
+				$checked[] = $radio[1];
+			}
+		}
+
+		return $checked;
+	}
+
+	/**
+	 * @testdox The classic checkout should start with the first available gateway selected without a default payment method callback, as before.
+	 */
+	public function test_checkout_payment_selects_the_first_gateway_without_a_callback(): void {
+		$output = $this->render_checkout_payment();
+
+		$this->assertSame( array( WC_Gateway_BACS::ID ), $this->get_checked_gateways( $output ) );
+		$this->assertStringContainsString( 'data-preselected="yes"', $output, 'The list should tell checkout.js a method is selected.' );
+	}
+
+	/**
+	 * @testdox The classic checkout should start with nothing selected when the default payment method callback returns nothing.
+	 */
+	public function test_checkout_payment_selects_nothing_when_the_callback_returns_nothing(): void {
+		add_filter( 'woocommerce_default_payment_method', '__return_empty_string' );
+
+		$output = $this->render_checkout_payment();
+
+		$this->assertSame( array(), $this->get_checked_gateways( $output ) );
+		$this->assertStringContainsString( 'data-preselected="no"', $output, 'The list should tell checkout.js not to select the first method.' );
+		$this->assertStringContainsString( 'id="payment_method_' . WC_Gateway_COD::ID . '"', $output, 'The gateways should still be offered.' );
+	}
+
+	/**
+	 * @testdox The checkout payment template should print the preselection it is handed, without working it out from the gateways.
+	 */
+	public function test_payment_template_prints_the_preselection_it_is_handed(): void {
+		$with_none_selected = $this->render_payment_template( array( 'has_chosen_gateway' => true ) );
+		WC()->payment_gateways()->payment_gateways()[ WC_Gateway_BACS::ID ]->set_current();
+		$with_one_selected = $this->render_payment_template( array( 'has_chosen_gateway' => false ) );
+
+		$this->assertStringContainsString( 'data-preselected="yes"', $with_none_selected );
+		$this->assertStringContainsString( 'data-preselected="no"', $with_one_selected );
+	}
+
+	/**
+	 * @testdox The checkout payment template should say a method is preselected when its loader doesn't pass the value, so checkout.js keeps selecting the first one.
+	 */
+	public function test_payment_template_defaults_to_preselected_without_the_value(): void {
+		$output = $this->render_payment_template( array() );
+
+		$this->assertSame( array(), $this->get_checked_gateways( $output ), 'No gateway is marked as current in this test.' );
+		$this->assertStringContainsString( 'data-preselected="yes"', $output );
 	}
 
 	/**

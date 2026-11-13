@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.9.0
+ * @version 11.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -23,7 +23,8 @@ if ( ! wp_doing_ajax() ) {
 ?>
 <div id="payment" class="woocommerce-checkout-payment">
 	<?php if ( WC()->cart && WC()->cart->needs_payment() ) : ?>
-		<ul class="wc_payment_methods payment_methods methods" aria-label="<?php esc_attr_e( 'Payment methods', 'woocommerce' ); ?>">
+		<?php // data-preselected tells checkout.js whether the server selected a method. A loader that doesn't pass $has_chosen_gateway gets "yes", so the script keeps selecting the first one. ?>
+		<ul class="wc_payment_methods payment_methods methods" aria-label="<?php esc_attr_e( 'Payment methods', 'woocommerce' ); ?>" data-preselected="<?php echo esc_attr( ( $has_chosen_gateway ?? true ) ? 'yes' : 'no' ); ?>">
 			<?php
 			if ( ! empty( $available_gateways ) ) {
 				foreach ( $available_gateways as $gateway ) {
