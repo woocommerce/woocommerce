@@ -18,12 +18,12 @@ Include first use, everyday work and returning to an existing configuration. Rec
 | Scenario | Expected outcome |
 | --- | --- |
 | Find the feature | Merchants reach the task from the appropriate WooCommerce area, understand labels and can navigate back. Settings and setup links open the intended destination. |
-| Configure and save | Valid changes save through the host's save model. Reloading or returning shows the saved values. Untouched settings remain unchanged, and defaults behave as described. |
+| Configure and save | Valid changes save using the screen's existing saving behavior. Reloading or returning shows the saved values. Untouched settings remain unchanged, and defaults behave as described. |
 | Edit during an asynchronous save | Where editing remains available, change another value while a save is in progress. After the submitted version succeeds, newer edits remain available and unsaved; the response must not overwrite them or clear their pending state. |
 | Correct an error | Required, malformed and out-of-range values receive clear, associated feedback. Entered values remain available, and correcting the problem allows progress. |
 | Handle slow or failed requests | Loading and saving states are understandable. A failure offers recovery, preserves work and does not report success before persistence is confirmed. Retrying does not duplicate completed work. |
 | Handle partial results | If the feature supports bulk or multi-item actions, show what completed and what failed. Keep successful changes and let merchants review or retry the failed items. |
-| Leave and return | Completed setup stays complete. Interrupted work can be resumed where supported. Manual-save screens protect unsaved changes according to the host contract; feedback matches what is actually persisted. |
+| Leave and return | Completed setup stays complete. Interrupted work can be resumed where supported. Manual-save screens preserve the existing behavior for saving, discarding and warning about unsaved changes; feedback matches what is actually persisted. |
 | Use different layouts and input methods | The complete task works with a keyboard, screen reader, text enlargement and narrow layouts. Check long labels and translations as well as the default language. |
 
 Use the [accessibility checks](./accessibility.md) and [feedback and recovery guidance](./notices.md) during these scenarios. Test supported classic and React paths when both are provided; do not assume a component preview represents the integrated screen.

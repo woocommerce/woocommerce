@@ -11,7 +11,7 @@ Use the shared [admin component guidance](./README.md#admin-components) when cho
 
 ## Check the integrated screen
 
-Test the complete merchant task inside WooCommerce, including the host navigation and feedback. Check both supported PHP and React rendering paths when your extension provides them.
+Test the complete merchant task inside WooCommerce, including WooCommerce's navigation and feedback. Check both supported PHP and React rendering paths when your extension provides them.
 
 | Area | What to check |
 | --- | --- |
