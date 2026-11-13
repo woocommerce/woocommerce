@@ -106,6 +106,41 @@ class PaymentGatewayUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report the saved enabled state and title when a settings filter changes them.
+	 */
+	public function test_reports_the_saved_settings_when_a_filter_changes_them(): void {
+		update_option(
+			'woocommerce_bacs_settings',
+			array(
+				'enabled' => 'no',
+				'title'   => 'Direct bank transfer',
+			)
+		);
+		self::reload_payment_gateways();
+		add_filter(
+			'woocommerce_settings_api_sanitized_fields_bacs',
+			static function ( $settings ) {
+				$settings['enabled'] = 'no';
+				$settings['title']   = 'Bank transfer';
+				return $settings;
+			}
+		);
+
+		$result = $this->run_ability(
+			'woocommerce/payment-gateway-update',
+			array(
+				'id'      => 'bacs',
+				'enabled' => true,
+				'title'   => 'Pay by bank',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertFalse( $result['payment_gateway']['enabled'] );
+		$this->assertSame( 'Bank transfer', $result['payment_gateway']['title'] );
+	}
+
+	/**
 	 * @testdox Should turn off an enabled gateway.
 	 */
 	public function test_disables_a_gateway(): void {
