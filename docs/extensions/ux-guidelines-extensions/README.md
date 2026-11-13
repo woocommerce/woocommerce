@@ -14,12 +14,24 @@ We also recommend you review the [WordPress core guidelines](https://developer.w
 
 ## General
 
-Use existing WordPress/WooCommerce UI, built in components (text fields, checkboxes, etc) and existing menu structures.
+Use existing WordPress/WooCommerce UI, built-in components (text fields, checkboxes, etc) and existing menu structures.
 
 Plugins which draw on WordPress' core design aesthetic will benefit from future updates to this design as WordPress continues to evolve. If you need to make an exception for your product, be prepared to provide a valid use case.
 
--   [WordPress Components library](https://wordpress.github.io/gutenberg/?path=/story/docs-introduction--page)
--   [Figma for WordPress](https://make.wordpress.org/design/2018/11/19/figma-for-wordpress/) | ([WordPress Design Library Figma](https://www.figma.com/file/e4tLacmlPuZV47l7901FEs/WordPress-Design-Library))
+### Admin components
+
+For new WooCommerce extension admin interfaces and modernization work, prefer [`@wordpress/ui`](https://wordpress.github.io/gutenberg/?path=/docs/design-system-components-introduction--docs). When it does not cover a required component or capability in the supported version, use a suitable [`@wordpress/components`](https://wordpress.github.io/gutenberg/?path=/docs/components-introduction--docs) component as a fallback and document the reason.
+
+Check the documentation and exports for the package versions your extension supports. A coverage gap can be a missing control or a missing behavior needed for your task. Before adopting a fallback, verify its API, accessibility, styling and compatibility, and record the missing capability and why the fallback is appropriate.
+
+Reuse WooCommerce's supported page, settings and integration patterns. For settings, preserve the host's [header and save contract](../settings-and-config/settings-ui.md#page-header). When using the experimental, opt-in Settings UI, prefer [DataForm's built-in controls](../settings-and-config/registering-settings-ui-components.md) before registering custom components. Use [semantic design tokens](https://wordpress.github.io/gutenberg/?path=/docs/design-system-tokens-introduction--docs) for custom styling, and plan changes to existing PHP and React screens around their compatibility requirements.
+
+### Design resources
+
+-   [WordPress Design System components (`@wordpress/ui`)](https://wordpress.github.io/gutenberg/?path=/docs/design-system-components-introduction--docs)
+-   [WordPress Components reference (`@wordpress/components`, for verified coverage gaps)](https://wordpress.github.io/gutenberg/?path=/docs/components-introduction--docs)
+-   [WordPress Design System tokens](https://wordpress.github.io/gutenberg/?path=/docs/design-system-tokens-introduction--docs)
+-   [Figma for WordPress handbook](https://make.wordpress.org/design/handbook/get-involved/tools-figma/) | [WordPress Design System in Figma](https://www.figma.com/community/file/1436359662053949167/wordpress-design-system)
 -   [WooCommerce Component Library](https://woocommerce.github.io/woocommerce/)
 
 ## Component Library - Storybook

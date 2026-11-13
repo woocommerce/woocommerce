@@ -88,13 +88,21 @@ The `@wordpress/api-fetch` package is a utility that simplifies AJAX requests to
 
 ### Components
 
-#### [WooCommerce Components](https://www.npmjs.com/package/@woocommerce/components)
+For WooCommerce admin UI, follow the [admin component guidance](../extensions/ux-guidelines-extensions/README.md#admin-components): prefer `@wordpress/ui`, and use `@wordpress/components` as a fallback for verified coverage gaps in the supported version. Document the missing capability and the reason for each fallback.
 
-This package includes a library of React components that can be used to create pages in the WooCommerce admin area. To preview these components, review the [Woo Storybook](https://woocommerce.github.io/woocommerce/).
+Component selection is separate from WooCommerce integration. Continue to use the supported WooCommerce APIs for page registration, settings, data, navigation and saving.
+
+#### [WordPress UI](https://www.npmjs.com/package/@wordpress/ui)
+
+Start here for shared WordPress Design System components in new admin interfaces and modernization work. Review the [component documentation and examples](https://wordpress.github.io/gutenberg/?path=/docs/design-system-components-introduction--docs), including the supported APIs and theme setup for your target package versions.
 
 #### [WordPress Components](https://www.npmjs.com/package/@wordpress/components)
 
-This package includes a library of generic WordPress components that can be used for creating common UI elements shared between screens and features of the WordPress dashboard. To preview these components, review the [Gutenberg Storybook](https://wordpress.github.io/gutenberg/).
+This package supplies components used in existing WordPress interfaces. For new WooCommerce admin work, use it when `@wordpress/ui` lacks a required component or capability in the supported version. Verify the fallback's API, accessibility, styling and compatibility using the [component reference](https://wordpress.github.io/gutenberg/?path=/docs/components-introduction--docs).
+
+#### [WooCommerce Components](https://www.npmjs.com/package/@woocommerce/components)
+
+This package contains WooCommerce-specific components used in dashboard and report interfaces. Its [README](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/components/README.md) and [Woo Storybook](https://woocommerce.github.io/woocommerce/) document existing consumers and package usage. Use the admin component guidance above when choosing shared controls for new work.
 
 ### JavaScript Utility Packages
 
