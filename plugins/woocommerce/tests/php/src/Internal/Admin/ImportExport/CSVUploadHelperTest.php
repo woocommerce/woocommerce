@@ -189,4 +189,79 @@ class CSVUploadHelperTest extends WC_Unit_Test_Case {
 
 		$this->sut->handle_csv_upload( 'products', 'import' );
 	}
+
+	/**
+	 * Store a file in the import directory, optionally as an attachment, the way
+	 * wp_import_handle_upload() does.
+	 *
+	 * @param bool $with_attachment Whether to create an attachment for the file.
+	 * @return array{file: string, id?: int} The upload result.
+	 */
+	private function store_upload( bool $with_attachment ): array {
+		$file = trailingslashit( $this->sut->get_import_dir( true ) ) . 'product-rejected-' . wp_generate_password( 6, false ) . '.txt';
+		file_put_contents( $file, "sku,name\nT-1,Test\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$upload = array( 'file' => $file );
+		if ( $with_attachment ) {
+			$upload['id'] = wp_insert_attachment(
+				array(
+					'post_title'     => 'product-rejected.txt',
+					'post_mime_type' => 'text/plain',
+					'post_status'    => 'private',
+				),
+				$file
+			);
+		}
+		return $upload;
+	}
+
+	/**
+	 * Call the private cleanup run when an upload fails the CSV check.
+	 *
+	 * @param array $upload The upload result.
+	 */
+	private function discard_rejected_upload( array $upload ): void {
+		$method = new \ReflectionMethod( CSVUploadHelper::class, 'discard_rejected_upload' );
+		$method->setAccessible( true );
+		$method->invoke( $this->sut, $upload );
+	}
+
+	/**
+	 * @testdox Should delete the attachment and its file when an upload fails the CSV check.
+	 */
+	public function test_discard_rejected_upload_deletes_attachment_and_file(): void {
+		$upload = $this->store_upload( true );
+
+		$this->discard_rejected_upload( $upload );
+
+		$this->assertNull( get_post( $upload['id'] ), 'The attachment should be deleted' );
+		$this->assertFileDoesNotExist( $upload['file'], 'The stored file should be deleted with the attachment' );
+	}
+
+	/**
+	 * @testdox Should keep the attachment and its file when a pre_delete_attachment filter vetoes the delete.
+	 */
+	public function test_discard_rejected_upload_respects_a_delete_veto(): void {
+		$upload = $this->store_upload( true );
+		add_filter( 'pre_delete_attachment', '__return_false' );
+
+		try {
+			$this->discard_rejected_upload( $upload );
+		} finally {
+			remove_filter( 'pre_delete_attachment', '__return_false' );
+		}
+
+		$this->assertInstanceOf( \WP_Post::class, get_post( $upload['id'] ), 'A vetoed attachment should stay' );
+		$this->assertFileExists( $upload['file'], 'The file of a kept attachment should stay' );
+	}
+
+	/**
+	 * @testdox Should delete the file when an upload failing the CSV check has no attachment.
+	 */
+	public function test_discard_rejected_upload_deletes_a_file_without_attachment(): void {
+		$upload = $this->store_upload( false );
+
+		$this->discard_rejected_upload( $upload );
+
+		$this->assertFileDoesNotExist( $upload['file'], 'The stored file should be deleted' );
+	}
 }
