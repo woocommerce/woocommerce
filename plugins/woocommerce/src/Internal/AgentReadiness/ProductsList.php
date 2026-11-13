@@ -259,7 +259,7 @@ class ProductsList {
 		if ( $parent_id <= 0 ) {
 			return;
 		}
-		if ( array() === $this->parents_to_retest ) {
+		if ( false === has_action( 'shutdown', array( $this, 'retest_parents' ) ) ) {
 			add_action( 'shutdown', array( $this, 'retest_parents' ) );
 		}
 		$this->parents_to_retest[ $parent_id ] = true;

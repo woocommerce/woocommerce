@@ -204,6 +204,11 @@ class ProductsListTest extends WC_Unit_Test_Case {
 	 * @testdox Trashing or deleting the variations that lack a GTIN tests the parent again, though removing a variation doesn't save it.
 	 */
 	public function test_removed_variation_updates_parent(): void {
+		// A parent still noted after the shutdown callback was removed, as the test case does between tests.
+		$earlier = WC_Helper_Product::create_variation_product();
+		wc_get_product( $earlier->get_children()[0] )->delete( true );
+		remove_all_actions( 'shutdown' );
+
 		$trashed = WC_Helper_Product::create_variation_product();
 		$deleted = WC_Helper_Product::create_variation_product();
 		foreach ( array( $trashed, $deleted ) as $parent ) {
