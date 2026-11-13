@@ -85,21 +85,45 @@ class PaymentUtils {
 	}
 
 	/**
-	 * Returns the payment method the checkout carries: the shopper's session choice while that gateway
-	 * is available for the cart, otherwise the default from get_default_payment_method(). The draft
-	 * response and the draft order sync both use this, so they agree.
+	 * Returns the payment method the Checkout block carries: the shopper's session choice while that
+	 * gateway is available for the cart, otherwise the default from get_default_payment_method(). The
+	 * draft response and the draft order sync both use this, so they agree.
 	 *
-	 * @param array|null $listed_gateways Optional. The gateways the caller lists, keyed by id and in display order. See get_default_payment_method().
+	 * For the Checkout block only. The checkout shortcode and its pay-for-order page list the available
+	 * gateways themselves and use get_shortcode_checkout_payment_method().
+	 *
 	 * @return string
 	 */
-	public static function get_checkout_payment_method( ?array $listed_gateways = null ): string {
+	public static function get_checkout_payment_method(): string {
 		$chosen_payment_method = self::get_session_payment_method();
+		$available_gateways    = WC()->payment_gateways()->get_available_payment_gateways();
 
-		if ( '' !== $chosen_payment_method && isset( WC()->payment_gateways()->get_available_payment_gateways()[ $chosen_payment_method ] ) ) {
+		if ( '' !== $chosen_payment_method && isset( $available_gateways[ $chosen_payment_method ] ) ) {
 			return $chosen_payment_method;
 		}
 
-		return (string) self::get_default_payment_method( $listed_gateways );
+		return (string) self::filter_default_payment_method( self::get_unfiltered_default_payment_method(), $available_gateways );
+	}
+
+	/**
+	 * Returns the payment method the checkout shortcode and its pay-for-order page start on. Both list
+	 * `$gateways` themselves: the shopper's session choice wins while it is in the list, otherwise the
+	 * default saved card's gateway, then the first listed gateway. The `woocommerce_default_payment_method`
+	 * filter runs on that default, with `$gateways` as the available gateways.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $gateways The gateways available for the cart, keyed by id and in display order.
+	 * @return string
+	 */
+	public static function get_shortcode_checkout_payment_method( array $gateways ): string {
+		$chosen_payment_method = self::get_session_payment_method();
+
+		if ( '' !== $chosen_payment_method && isset( $gateways[ $chosen_payment_method ] ) ) {
+			return $chosen_payment_method;
+		}
+
+		return (string) self::filter_default_payment_method( self::get_unfiltered_default_payment_method( $gateways ), $gateways );
 	}
 
 	/**
@@ -117,21 +141,27 @@ class PaymentUtils {
 
 	/**
 	 * Returns the default payment method for a customer: the default saved card, then the method
-	 * remembered in the session, then the first gateway. The `woocommerce_default_payment_method`
+	 * remembered in the session, then the first enabled gateway. The `woocommerce_default_payment_method`
 	 * filter runs last and can replace that answer.
 	 *
-	 * "The first gateway" depends on what the shopper sees. The Checkout block lists the enabled gateways
-	 * in their saved order, so without `$listed_gateways` it is the first enabled one, which may not be
-	 * available for the cart. The classic checkout and the pay-for-order page list the available gateways
-	 * in the order their filter leaves them, and pass that list.
+	 * The Checkout block lists the enabled gateways in their saved order, so the first enabled one may not
+	 * be available for the cart. The checkout shortcode lists the available gateways and starts on the
+	 * first of those instead: see get_shortcode_checkout_payment_method().
 	 *
-	 * @param array|null $listed_gateways Optional. The gateways the caller lists, keyed by id and in display order.
 	 * @return string
 	 */
-	public static function get_default_payment_method( ?array $listed_gateways = null ) {
-		$payment_method     = self::get_unfiltered_default_payment_method( $listed_gateways );
-		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+	public static function get_default_payment_method() {
+		return self::filter_default_payment_method( self::get_unfiltered_default_payment_method(), WC()->payment_gateways()->get_available_payment_gateways() );
+	}
 
+	/**
+	 * Runs the `woocommerce_default_payment_method` filter on WooCommerce's own default and checks the answer.
+	 *
+	 * @param string $payment_method     Gateway id WooCommerce would preselect, or '' when there is none.
+	 * @param array  $available_gateways Gateways available for this cart, keyed by id.
+	 * @return string
+	 */
+	private static function filter_default_payment_method( $payment_method, array $available_gateways ) {
 		/**
 		 * Filters the payment method the checkout starts with: the Checkout block, the classic checkout
 		 * shortcode and the pay-for-order page all ask it. On the checkout it runs only when the shopper
@@ -159,9 +189,9 @@ class PaymentUtils {
 
 	/**
 	 * The default payment method before the filter: saved card, session, then the first listed gateway,
-	 * or the first enabled one when the caller lists none.
+	 * or the first enabled one when no list is given.
 	 *
-	 * @param array|null $listed_gateways The gateways the caller lists, keyed by id and in display order.
+	 * @param array|null $listed_gateways The gateways the checkout lists, keyed by id and in display order.
 	 * @return string
 	 */
 	private static function get_unfiltered_default_payment_method( ?array $listed_gateways = null ) {

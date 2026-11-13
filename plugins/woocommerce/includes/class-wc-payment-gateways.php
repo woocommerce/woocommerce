@@ -404,7 +404,7 @@ class WC_Payment_Gateways {
 	 * Set the current, active gateway.
 	 *
 	 * The shopper's session choice wins while it is in `$gateways`; otherwise the default from
-	 * PaymentUtils::get_checkout_payment_method(), which runs the `woocommerce_default_payment_method`
+	 * PaymentUtils::get_shortcode_checkout_payment_method(), which runs the `woocommerce_default_payment_method`
 	 * filter and falls back to the first of `$gateways`. An empty answer leaves no gateway current.
 	 * WooCommerce's own answer can name a gateway that isn't in `$gateways`, for example a saved card's
 	 * gateway that isn't available for this cart; the first of `$gateways` is current then, as before.
@@ -421,7 +421,7 @@ class WC_Payment_Gateways {
 		$current_gateway = false;
 
 		if ( WC()->session ) {
-			$current = PaymentUtils::get_checkout_payment_method( $gateways );
+			$current = PaymentUtils::get_shortcode_checkout_payment_method( $gateways );
 
 			if ( '' === $current ) {
 				// A gateway that other code marked as current earlier in the request would still render as selected.
