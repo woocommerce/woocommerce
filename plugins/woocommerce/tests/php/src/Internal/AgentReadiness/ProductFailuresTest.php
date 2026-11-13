@@ -98,6 +98,17 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Two rows for one value on one product count as one product.
+	 */
+	public function test_duplicate_rows_count_once(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		add_post_meta( $product->get_id(), ProductFailures::META_KEY, ProductFailures::CHECKED );
+		add_post_meta( $product->get_id(), ProductFailures::META_KEY, ProductFailures::CHECKED );
+
+		$this->assertSame( 1, ProductFailures::counts()[ ProductFailures::CHECKED ] );
+	}
+
+	/**
 	 * @testdox The counts are read per site, so after switch_to_blog() they are the other site's.
 	 */
 	public function test_counts_per_site(): void {

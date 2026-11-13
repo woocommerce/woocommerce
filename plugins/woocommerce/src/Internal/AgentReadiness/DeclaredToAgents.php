@@ -43,7 +43,7 @@ class DeclaredToAgents {
 		$page   = $responses->product_page();
 		$feed   = $responses->get( '/feed/' );
 		$lines  = array(
-			'feed-present'             => array( __( 'RSS or Atom feed', 'woocommerce' ), null === $feed || $feed['status'] >= 500 ? null : 200 === $feed['status'] && 1 === preg_match( '/<(rss|feed)[\s>]/i', $feed['body'] ) ),
+			'feed-present'             => array( __( 'RSS or Atom feed', 'woocommerce' ), null === $feed || StoreOutputChecks::blocked( $feed['status'] ) ? null : 200 === $feed['status'] && 1 === preg_match( '/<(rss|feed)[\s>]/i', $feed['body'] ) ),
 			'sameas-links'             => array( __( 'sameAs links in structured data', 'woocommerce' ), self::json_ld_has( $home, 'sameAs' ) ),
 			'site-search-action'       => array( __( 'SearchAction for on-site search', 'woocommerce' ), self::has_search_action( $home ) ),
 			'webmcp-forms-schema'      => array( __( 'Forms that expose declarative WebMCP', 'woocommerce' ), self::page_has_tag( array( $home, $page ), array( 'FORM' ), static fn( \WP_HTML_Tag_Processor $tag ): bool => null !== $tag->get_attribute( 'toolname' ) && null !== $tag->get_attribute( 'tooldescription' ) ) ),
@@ -237,7 +237,7 @@ class DeclaredToAgents {
 		$unknown = null === $robots || ( $robots['status'] >= 400 && 404 !== $robots['status'] );
 		foreach ( StoreOutputChecks::sitemap_urls( 200 === ( $robots['status'] ?? 0 ) ? $robots['body'] : '' ) as $url ) {
 			$response = $responses->get( $url );
-			if ( null === $response || $response['status'] >= 500 ) {
+			if ( null === $response || StoreOutputChecks::blocked( $response['status'] ) ) {
 				$unknown = true;
 				continue;
 			}
@@ -251,7 +251,7 @@ class DeclaredToAgents {
 				return false;
 			}
 			$child = $responses->get( html_entity_decode( $first[1], ENT_QUOTES | ENT_XML1 ) );
-			return null === $child || $child['status'] >= 500 ? null : 200 === $child['status'] && false !== stripos( $child['body'], '<lastmod' );
+			return null === $child || StoreOutputChecks::blocked( $child['status'] ) ? null : 200 === $child['status'] && false !== stripos( $child['body'], '<lastmod' );
 		}
 		return $unknown ? null : false;
 	}
@@ -273,7 +273,7 @@ class DeclaredToAgents {
 	 * @param array{status:int,body:string,headers:array<string,string>}|null $response Response, null when it couldn't be loaded.
 	 */
 	private static function is_markdown( ?array $response ): ?bool {
-		if ( null === $response || $response['status'] >= 500 ) {
+		if ( null === $response || StoreOutputChecks::blocked( $response['status'] ) ) {
 			return null;
 		}
 		$type = $response['headers']['content-type'] ?? '';
@@ -303,7 +303,7 @@ class DeclaredToAgents {
 	 */
 	private static function document_served( StoreResponses $responses, string $path, callable $test ): ?bool {
 		$response = $responses->get( StoreOutputChecks::host_root( $path ) );
-		if ( null === $response || $response['status'] >= 500 ) {
+		if ( null === $response || StoreOutputChecks::blocked( $response['status'] ) ) {
 			return null;
 		}
 		$document = 200 === $response['status'] ? json_decode( $response['body'], true ) : null;
@@ -319,7 +319,7 @@ class DeclaredToAgents {
 	 */
 	private static function file_served( StoreResponses $responses, string $path ): ?bool {
 		$response = $responses->get( StoreOutputChecks::host_root( $path ) );
-		if ( null === $response || $response['status'] >= 500 ) {
+		if ( null === $response || StoreOutputChecks::blocked( $response['status'] ) ) {
 			return null;
 		}
 		$body = ltrim( $response['body'], " \t\r\n\xEF\xBB\xBF" );

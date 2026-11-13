@@ -63,6 +63,27 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A 401 or 403 is not checked: a firewall can refuse a file that exists.
+	 */
+	public function test_blocked_response_is_not_checked(): void {
+		$results = $this->results(
+			array(
+				'/ai.txt'                      => array( 403, 'Forbidden' ),
+				'/.well-known/agent-card.json' => array( 401, '' ),
+				'/feed/'                       => array( 403, '' ),
+				'markdown /'                   => array( 403, '' ),
+				'/sitemap.xml'                 => array( 403, '' ),
+			)
+		);
+
+		$this->assertNull( $results['ai-txt'] );
+		$this->assertNull( $results['a2a-agent-card'] );
+		$this->assertNull( $results['feed-present'] );
+		$this->assertNull( $results['markdown-pages'] );
+		$this->assertNull( $results['sitemap-lastmod'] );
+	}
+
+	/**
 	 * @testdox A file counts as found; a 404, a page a theme answers with, or a 200 error a host answers with does not.
 	 */
 	public function test_files(): void {

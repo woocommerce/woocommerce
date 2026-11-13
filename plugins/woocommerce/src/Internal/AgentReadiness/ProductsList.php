@@ -23,6 +23,11 @@ class ProductsList {
 	private const STOCK_ONLY_CHANGES = array( 'stock_quantity', 'stock_status', 'total_sales', 'date_modified' );
 
 	/**
+	 * Meta the brand and MPN checks read. A save can change only these, and get_changes() lists properties.
+	 */
+	private const READINESS_META = array( '_wc_gla_brand', '_wc_gla_mpn' );
+
+	/**
 	 * Features controller.
 	 *
 	 * @var FeaturesController
@@ -112,9 +117,23 @@ class ProductsList {
 			return;
 		}
 		$changes = array_keys( $product->get_changes() );
-		if ( array() === array_diff( $changes, self::STOCK_ONLY_CHANGES ) ) {
+		if ( array() === array_diff( $changes, self::STOCK_ONLY_CHANGES ) && ! self::readiness_meta_changed( $product ) ) {
 			$this->stock_only_saves[ $product->get_id() ] = true;
 		}
+	}
+
+	/**
+	 * Whether this save changes the brand or MPN meta the checks read.
+	 *
+	 * @param \WC_Product $product Product being saved.
+	 */
+	private static function readiness_meta_changed( \WC_Product $product ): bool {
+		foreach ( self::READINESS_META as $key ) {
+			if ( $product->get_meta( $key ) !== get_post_meta( $product->get_id(), $key, true ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

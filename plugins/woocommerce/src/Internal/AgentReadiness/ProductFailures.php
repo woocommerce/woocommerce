@@ -118,7 +118,8 @@ class ProductFailures {
 		if ( isset( self::$counts[ $site ] ) ) {
 			return self::$counts[ $site ];
 		}
-		$rows   = (array) $wpdb->get_results( $wpdb->prepare( "SELECT meta_value, COUNT(*) AS products FROM {$wpdb->postmeta} WHERE meta_key = %s GROUP BY meta_value", self::META_KEY ), ARRAY_A );
+		// Two saves can both add a value before either sees it, so count products, not rows.
+		$rows   = (array) $wpdb->get_results( $wpdb->prepare( "SELECT meta_value, COUNT(DISTINCT post_id) AS products FROM {$wpdb->postmeta} WHERE meta_key = %s GROUP BY meta_value", self::META_KEY ), ARRAY_A );
 		$counts = array();
 		foreach ( $rows as $row ) {
 			$counts[ (string) $row['meta_value'] ] = (int) $row['products'];

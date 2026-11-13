@@ -77,15 +77,15 @@ class AgentReadiness {
 	 *
 	 * @internal
 	 *
-	 * @param StoreConditions   $store_conditions    Store-wide conditions.
-	 * @param StoreOutputChecks $store_output_checks Store checks that read what the store returns.
-	 * @param RemoteRules       $remote_rules        Rules from the published rules file.
-	 * @param DeclaredToAgents  $declared_to_agents  What the store declares to agents.
+	 * @param StoreConditions       $store_conditions    Store-wide conditions.
+	 * @param StoreOutputChecks     $store_output_checks Store checks that read what the store returns.
+	 * @param RemoteRules           $remote_rules        Rules from the published rules file.
+	 * @param DeclaredToAgents|null $declared_to_agents  What the store declares to agents, resolved from the container when omitted.
 	 */
-	final public function init( StoreConditions $store_conditions, StoreOutputChecks $store_output_checks, RemoteRules $remote_rules, DeclaredToAgents $declared_to_agents ): void {
+	final public function init( StoreConditions $store_conditions, StoreOutputChecks $store_output_checks, RemoteRules $remote_rules, ?DeclaredToAgents $declared_to_agents = null ): void {
 		$this->store_conditions    = $store_conditions;
 		$this->store_output_checks = $store_output_checks;
-		$this->declared_to_agents  = $declared_to_agents;
+		$this->declared_to_agents  = $declared_to_agents ?? wc_get_container()->get( DeclaredToAgents::class );
 		$this->remote_rules        = $remote_rules;
 	}
 
@@ -226,7 +226,11 @@ class AgentReadiness {
 		$channel_rules      = $active['channel_rules'];
 
 		$scan = new ProductScan();
-		$scan->evaluate( $rules, $channel_rules, self::PRODUCT_IDS_LIMIT, $on_tested );
+		if ( null === $on_tested ) {
+			$scan->evaluate( $rules, $channel_rules, self::PRODUCT_IDS_LIMIT );
+		} else {
+			$scan->evaluate_each( $rules, $channel_rules, self::PRODUCT_IDS_LIMIT, $on_tested );
+		}
 
 		$checks = array();
 		foreach ( $rules as $id => $rule ) {
@@ -250,7 +254,7 @@ class AgentReadiness {
 			'products'            => $scan->products(),
 			'hidden_from_catalog' => $scan->hidden_from_catalog(),
 			'unsupported_types'   => $scan->unsupported_types(),
-			'store_checks'        => array_merge( $this->store_conditions->all(), $this->store_output_checks->all( $responses ) ),
+			'store_checks'        => array_merge( $this->store_conditions->all(), $this->store_output_checks->all_for( $responses ) ),
 			'declared'            => $this->declared_to_agents->all( $responses ),
 			'channels'            => $scan->channel_totals(),
 			'checks'              => $checks,

@@ -84,6 +84,13 @@ class ProductScan {
 	private bool $truncated = false;
 
 	/**
+	 * Called with each product id and its failures during evaluate_each(). Cleared when that pass ends.
+	 *
+	 * @var callable|null
+	 */
+	private $tested_callback = null;
+
+	/**
 	 * Whether the readiness checks test this product.
 	 *
 	 * @param \WC_Product $product Product.
@@ -107,14 +114,32 @@ class ProductScan {
 	}
 
 	/**
+	 * Test every covered product, calling $on_tested with each product id and its failures.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
+	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
+	 * @param int                                                             $ids_limit     Product ids kept per rule.
+	 * @param callable                                                        $on_tested     Called with each product id and its failures.
+	 */
+	public function evaluate_each( array $rules, array $channel_rules, int $ids_limit, callable $on_tested ): void {
+		$this->tested_callback = $on_tested;
+		try {
+			$this->evaluate( $rules, $channel_rules, $ids_limit );
+		} finally {
+			$this->tested_callback = null;
+		}
+	}
+
+	/**
 	 * Test every covered product against the rules.
 	 *
 	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
 	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
 	 * @param int                                                             $ids_limit     Product ids kept per rule.
-	 * @param callable|null                                                   $on_tested     Called with each product id and its failures.
 	 */
-	public function evaluate( array $rules, array $channel_rules, int $ids_limit, ?callable $on_tested = null ): void {
+	public function evaluate( array $rules, array $channel_rules, int $ids_limit ): void {
 		$this->results             = array_fill_keys(
 			array_keys( $rules ),
 			array(
@@ -178,7 +203,7 @@ class ProductScan {
 				}
 				$product = wc_get_product( $product_id );
 				if ( $product ) {
-					$this->record( $product, $rules, $channel_rules, $ids_limit, $on_tested );
+					$this->record( $product, $rules, $channel_rules, $ids_limit );
 				}
 			}
 
@@ -188,6 +213,7 @@ class ProductScan {
 			}
 			++$page;
 		} while ( self::BATCH_SIZE === $batch_count );
+		$this->tested_callback = null;
 	}
 
 	/**
@@ -499,12 +525,11 @@ class ProductScan {
 	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
 	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
 	 * @param int                                                             $ids_limit     Product ids kept per rule.
-	 * @param callable|null                                                   $on_tested     Called with the product id and its failures.
 	 */
-	private function record( \WC_Product $product, array $rules, array $channel_rules, int $ids_limit, ?callable $on_tested ): void {
+	private function record( \WC_Product $product, array $rules, array $channel_rules, int $ids_limit ): void {
 		$failures = $this->failures( $product, $rules, $channel_rules );
-		if ( null !== $on_tested ) {
-			$on_tested( $product->get_id(), $failures );
+		if ( null !== $this->tested_callback ) {
+			( $this->tested_callback )( $product->get_id(), $failures );
 		}
 		foreach ( array_keys( $failures ) as $id ) {
 			$result = $this->result( $id );

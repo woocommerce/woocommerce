@@ -135,6 +135,27 @@ class ProductsListTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A save that changes only the Google brand or MPN tests the product again.
+	 */
+	public function test_brand_or_mpn_save_is_rechecked(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->readiness->refresh_report();
+		delete_post_meta( $product->get_id(), ProductFailures::META_KEY );
+
+		$product->update_meta_data( '_wc_gla_brand', 'Acme' );
+		$product->save();
+
+		$this->assertContains( 'missing_images', ProductFailures::for_product( $product->get_id() ) );
+
+		delete_post_meta( $product->get_id(), ProductFailures::META_KEY );
+		$product->set_stock_quantity( 4 );
+		$product->update_meta_data( '_wc_gla_mpn', 'MPN-1' );
+		$product->save();
+
+		$this->assertContains( 'missing_images', ProductFailures::for_product( $product->get_id() ), 'Stock plus MPN is not a stock-only save' );
+	}
+
+	/**
 	 * @testdox A save that changes nothing doesn't test the product again.
 	 */
 	public function test_unchanged_save_is_skipped(): void {
