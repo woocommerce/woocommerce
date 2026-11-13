@@ -39,11 +39,3 @@ Avoid a new top-level WordPress menu when the task fits WooCommerce's existing s
 Use short, descriptive labels in sentence case, such as "Shared space booking". Keep product names and acronyms in their official capitalization. Aim for a label that fits on one line without forcing line breaks, and check translations and narrow layouts.
 
 Use a functional, original extension name, such as "Appointments", rather than a vendor prefix or the name of an existing WooCommerce feature. Keep labels consistent across menus, page headings, settings and setup links. A setup action should open the relevant task or settings section directly, with a clear way back.
-
-## Legacy examples
-
-These screenshots illustrate placement in an older WooCommerce interface. Use the current host patterns and integration references above for implementation and styling.
-
-![Legacy example of an extension placed within a WooCommerce category](/img/doc_images/Category-Subnavigation.png)
-
-![Legacy example of extension settings within an existing category](/img/doc_images/Category-Settings.png)
