@@ -1333,12 +1333,13 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		WC()->cart->remove_cart_item( $cart_item_key );
 
 		unset( $_SERVER['HTTP_REFERER'], $_REQUEST['_wp_http_referer'] );
-		$_GET                   = array(
+		$query                  = array(
 			'undo_item' => $cart_item_key,
 			'_wpnonce'  => wp_create_nonce( 'woocommerce-cart' ),
 		);
-		$_REQUEST               = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Mirrors PHP building the request from the query string.
-		$_SERVER['REQUEST_URI'] = '/other-cart/?' . http_build_query( $_GET );
+		$_GET                   = $query;
+		$_REQUEST               = $query;
+		$_SERVER['REQUEST_URI'] = '/other-cart/?' . http_build_query( $query );
 
 		$redirect = $this->dispatch_update_cart_action_expecting_redirect();
 
