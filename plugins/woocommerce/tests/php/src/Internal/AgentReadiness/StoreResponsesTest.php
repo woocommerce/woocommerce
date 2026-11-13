@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreResponses;
+use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
 /**
