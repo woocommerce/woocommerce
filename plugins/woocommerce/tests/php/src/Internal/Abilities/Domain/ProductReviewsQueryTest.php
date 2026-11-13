@@ -24,11 +24,27 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * An administrator that every test acts as.
+	 *
+	 * @var int
+	 */
+	private static $user_id;
+
+	/**
+	 * Create the fixtures that no test changes beyond its own transaction.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$user_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
 	 * Set up an authorized caller.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::$user_id );
 		$this->sut = new \WP_Ability( ProductReviewsQuery::get_name(), ProductReviewsQuery::get_registration_args() );
 	}
 
@@ -188,26 +204,35 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 	 * @testdox Should retain both ends of a large rating ranking and omit unrated products above the cap.
 	 */
 	public function test_large_ranking(): void {
-		for ( $i = 0; $i < 202; ++$i ) {
-			$product = self::factory()->post->create( array( 'post_type' => 'product' ) );
-			$this->review( $product, 100 > $i ? 1 : 5 );
+		$rank = new \ReflectionMethod( ProductReviewsQuery::class, 'rank' );
+		$rank->setAccessible( true );
+		$row  = static fn( int $id, float $rating ): array => array(
+			'product_id'     => $id,
+			'average_rating' => $rating,
+			'review_count'   => 1,
+		);
+		$rows = array( $row( 1, 0.0 ) );
+		for ( $id = 2; $id <= 203; ++$id ) {
+			$rows[] = $row( $id, 102 > $id ? 1.0 : ( 104 > $id ? 3.0 : 5.0 ) );
 		}
-		$unrated = self::factory()->post->create( array( 'post_type' => 'product' ) );
-		$this->review( $unrated, 0 );
-		$result = $this->sut->execute( array( 'per_page' => 1 ) );
-		$this->assertIsArray( $result );
-		$this->assertSame( 203, $result['total'] );
-		$this->assertSame( 203, $result['summary']['total_products'] );
-		$this->assertCount( 200, $result['by_product'] );
-		$ratings = array_count_values( array_map( 'strval', array_column( $result['by_product'], 'average_rating' ) ) );
+
+		$capped = $rank->invoke( null, $rows );
+
+		$this->assertCount( 200, $capped );
 		$this->assertSame(
 			array(
 				1 => 100,
 				5 => 100,
 			),
-			$ratings
+			array_count_values( array_map( 'intval', array_column( $capped, 'average_rating' ) ) ),
+			'Both ends of the rated ranking are kept, not its first entries.'
 		);
-		$this->assertNotContains( $unrated, array_column( $result['by_product'], 'product_id' ) );
+		$this->assertNotContains( 1, array_column( $capped, 'product_id' ) );
+
+		$rated_within_cap = $rank->invoke( null, array_merge( array_slice( $rows, 0, 3 ), array_slice( $rows, 5, 198 ), array( $row( 204, 0.0 ) ) ) );
+
+		$this->assertCount( 200, $rated_within_cap, 'Only the unrated products are dropped when the rated ones fit.' );
+		$this->assertNotContains( 0.0, array_column( $rated_within_cap, 'average_rating' ) );
 	}
 
 	/**

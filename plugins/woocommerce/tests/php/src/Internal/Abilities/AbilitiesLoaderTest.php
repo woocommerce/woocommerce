@@ -687,7 +687,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should refuse a status that another order type registers, and keep the order status.
 	 */
 	public function test_order_update_status_refuses_status_of_another_order_type(): void {
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 		$status_before             = $order->get_status();
 
@@ -1311,7 +1311,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'add_order_meta_boxes'     => false,
 			)
 		);
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 		$wpdb->update( $wpdb->posts, array( 'post_type' => 'shop_test_hidden' ), array( 'ID' => $order->get_id() ) );
 		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_hidden' ), array( 'id' => $order->get_id() ) );
@@ -1348,7 +1348,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		global $wpdb;
 
 		$this->set_order_storage_for_test( true );
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_unreg' ), array( 'id' => $order->get_id() ) );
 		wp_cache_flush();
@@ -1477,7 +1477,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject order status updates with an unknown status slug.
 	 */
 	public function test_order_update_status_rejects_invalid_status_slug(): void {
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 
 		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
@@ -1641,7 +1641,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject whitespace-only order notes during schema validation.
 	 */
 	public function test_order_add_note_schema_rejects_whitespace_only_note(): void {
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 
 		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
@@ -1659,7 +1659,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should add a private order note when customer_note is the string false.
 	 */
 	public function test_order_add_note_reads_string_false_as_a_private_note(): void {
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 
 		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
@@ -3015,7 +3015,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should check the permissions of a direct call with a numeric string id or no input, as the MCP adapter sends them.
 	 */
 	public function test_check_permissions_converts_raw_input(): void {
-		$order   = \WC_Helper_Order::create_order();
+		$order   = wc_create_order();
 		$ability = wp_get_ability( 'woocommerce/orders-query' );
 
 		$this->assertTrue( $ability->check_permissions( array( 'id' => (string) $order->get_id() ) ), 'A numeric string id is converted.' );
@@ -3962,7 +3962,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @param mixed $date Filtered date.
 	 */
 	public function test_order_output_handles_filtered_dates( $date ): void {
-		$order  = \WC_Helper_Order::create_order();
+		$order  = wc_create_order();
 		$filter = static function () use ( $date ) {
 			return $date;
 		};
@@ -3989,7 +3989,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should omit an absent order note date while preserving false and empty strings.
 	 */
 	public function test_order_note_output_omits_absent_date(): void {
-		$order = \WC_Helper_Order::create_order();
+		$order = wc_create_order();
 		$order->add_order_note( 'Internal note.' );
 		$omit_date = static function ( $note ) {
 			$note['date_created'] = null;
@@ -4479,7 +4479,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @param string $hint  Text that the message must have.
 	 */
 	public function test_order_update_refuses_invalid_input( array $input, string $code, string $hint ): void {
-		$order = $this->create_order_for_update( 'pending' );
+		$order = wc_create_order();
 		$order->set_shipping_country( 'US' );
 		$order->set_shipping_state( 'CA' );
 		$order->set_shipping_city( 'Before' );
@@ -4497,7 +4497,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should return every address and line refusal of an order update in one message, and save nothing.
 	 */
 	public function test_order_update_returns_every_refusal_in_one_message(): void {
-		$order = $this->create_order_for_update( 'pending' );
+		$order = wc_create_order();
 		$order->set_shipping_country( 'US' );
 		$order->set_shipping_city( 'Before' );
 		$order->save();
@@ -5086,7 +5086,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_order_notes_query_lists_every_note( bool $hpos_enabled ): void {
 		$this->set_order_storage_for_test( $hpos_enabled );
 
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 
 		$newer_note_id = $order->add_order_note( 'Internal note.' );
@@ -5162,7 +5162,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'add_order_meta_boxes'     => false,
 			)
 		);
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 		$wpdb->update( $wpdb->posts, array( 'post_type' => 'shop_test_private' ), array( 'ID' => $order->get_id() ) );
 		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_private' ), array( 'id' => $order->get_id() ) );
@@ -5480,7 +5480,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should change order status and surface failure when status update fails.
 	 */
 	public function test_order_update_status_changes_status(): void {
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 
 		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
@@ -5499,7 +5499,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject unchanged order status updates without adding notes.
 	 */
 	public function test_order_update_status_rejects_unchanged_status_without_adding_notes(): void {
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 		$note_count_before         = count(
 			wc_get_order_notes(
@@ -5536,7 +5536,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should treat order status updates as manual status changes.
 	 */
 	public function test_order_update_status_uses_manual_status_update(): void {
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 		$manual_update_observed    = false;
 
@@ -5567,7 +5567,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should attribute order notes to the acting user.
 	 */
 	public function test_order_add_note_attributes_to_acting_user(): void {
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 
 		$user_id = $this->factory->user->create(
@@ -5596,7 +5596,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should preserve safe HTML in order notes.
 	 */
 	public function test_order_add_note_preserves_safe_html(): void {
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 
 		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
@@ -5617,7 +5617,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject whitespace-only order notes during execution.
 	 */
 	public function test_order_add_note_execute_rejects_whitespace_only_note(): void {
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 
 		$result = OrderAddNote::execute(
@@ -5635,7 +5635,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should mark notes as customer-facing when customer_note=true.
 	 */
 	public function test_order_add_note_persists_customer_note_flag(): void {
-		$order                     = \WC_Helper_Order::create_order();
+		$order                     = wc_create_order();
 		$this->created_order_ids[] = $order->get_id();
 
 		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
