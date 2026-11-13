@@ -1529,7 +1529,8 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 			$args['attributes']['role'] = 'button';
 		}
 
-		wc_get_template( 'loop/add-to-cart.php', array_merge( $args, array( 'button_data' => $button_data ) ) );
+		$args['button_data'] = $button_data;
+		wc_get_template( 'loop/add-to-cart.php', $args );
 	}
 }
 
