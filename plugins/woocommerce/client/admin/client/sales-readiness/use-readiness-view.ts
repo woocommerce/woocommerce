@@ -56,7 +56,7 @@ export function useReadinessView(
 			trackReadiness( 'error', { surface, action: 'load' } );
 			setError(
 				__(
-					'The check results could not be loaded. Reload the page and try again.',
+					'Your check results didn’t load. Reload the page to try again.',
 					'woocommerce'
 				)
 			);
@@ -102,7 +102,7 @@ export function useReadinessView(
 			trackReadiness( 'error', { surface, action: 'run' } );
 			setError(
 				__(
-					'The check could not be started. Reload the page and try again.',
+					'The check didn’t start. Reload the page to try again.',
 					'woocommerce'
 				)
 			);

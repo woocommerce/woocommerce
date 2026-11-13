@@ -105,13 +105,11 @@ describe( 'RunStatus', () => {
 		message,
 	} );
 
-	it( 'shows a spinner while a check runs, with its message for screen readers only', () => {
+	it( 'shows no spinner while a check runs, only its message for screen readers', () => {
 		const { container } = render(
 			<RunStatus run={ run( true, false, 'Checking your store.' ) } />
 		);
-		expect(
-			container.querySelector( '.components-spinner' )
-		).toBeInTheDocument();
+		expect( container.querySelector( '.components-spinner' ) ).toBeNull();
 		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
 			'Checking your store.'
 		);
@@ -120,7 +118,7 @@ describe( 'RunStatus', () => {
 		).toBeNull();
 	} );
 
-	it( 'shows the message, without a spinner, once the check is stuck', () => {
+	it( 'shows the message once the check is stuck', () => {
 		const { container } = render(
 			<RunStatus run={ run( true, true, 'Not started.' ) } />
 		);

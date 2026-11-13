@@ -17,6 +17,12 @@ defined( 'ABSPATH' ) || exit;
 final class ReadinessCopy {
 
 	/**
+	 * Up to how many failing products a fix title names; more are given as a count.
+	 */
+	public const NAMED_MAX = 3;
+
+
+	/**
 	 * A store check's copy.
 	 *
 	 * @param string $id Check id.
@@ -62,76 +68,91 @@ final class ReadinessCopy {
 	}
 
 	/**
-	 * A failing product check's copy: what to do with how many products, why it matters, and the fix line.
+	 * A failing product check's copy: what to do, why it matters, and the fix line. With up to three
+	 * products the title names them ("Add a brand to Blue hoodie and Red cap"); one product without a
+	 * known name is "a product".
 	 *
-	 * @param string $id    Check id.
-	 * @param int    $count Number of products.
-	 * @return array{action:string,why:string,fix:string}|null The why is '' when the channels the check affects say it. Null for a check without copy here.
+	 * @param string   $id    Check id.
+	 * @param int      $count Number of products.
+	 * @param string[] $names Names of the failing products when known, or none.
+	 * @return array{action:string,why:string,fix:string}|null Null for a check without copy here.
 	 */
-	public static function product_check( string $id, int $count ): ?array {
+	public static function product_check( string $id, int $count, array $names = array() ): ?array {
 		$n = number_format_i18n( $count );
 		switch ( $id ) {
 			case 'missing_brand':
-				/* translators: %s: number of products. */
-				return self::product( sprintf( _n( 'Add a brand to %s product', 'Add a brand to %s products', $count, 'woocommerce' ), $n ) );
+				return self::product(
+					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
+					self::title( $count, $names, _n( 'Add a brand to %s', 'Add a brand to %s', $count, 'woocommerce' ), __( 'Add a brand to a product', 'woocommerce' ), sprintf( _n( 'Add a brand to %s product', 'Add a brand to %s products', $count, 'woocommerce' ), $n ) ),
+					__( 'ChatGPT only lists products that have a brand. In Google and Copilot, a brand makes products easier to find.', 'woocommerce' )
+				);
 			case 'missing_gtin':
 				return self::product(
-					/* translators: %s: number of products. */
-					sprintf( _n( 'Add a barcode number to %s product', 'Add barcode numbers to %s products', $count, 'woocommerce' ), $n ),
+					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
+					self::title( $count, $names, _n( 'Add a barcode number to %s', 'Add barcode numbers to %s', $count, 'woocommerce' ), __( 'Add a barcode number to a product', 'woocommerce' ), sprintf( _n( 'Add a barcode number to %s product', 'Add barcode numbers to %s products', $count, 'woocommerce' ), $n ) ),
 					__( 'Barcode numbers, like a UPC, EAN, or ISBN, help AI assistants match your products to what shoppers search for.', 'woocommerce' ),
 					__( 'Use the number from the packaging or supplier. Never make one up.', 'woocommerce' )
 				);
 			case 'invalid_gtin':
 				return self::product(
-					/* translators: %s: number of products. */
-					sprintf( _n( 'Fix the barcode number of %s product', 'Fix the barcode numbers of %s products', $count, 'woocommerce' ), $n ),
-					'',
+					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
+					self::title( $count, $names, _n( 'Fix the barcode number of %s', 'Fix the barcode numbers of %s', $count, 'woocommerce' ), __( 'Fix the barcode number of a product', 'woocommerce' ), sprintf( _n( 'Fix the barcode number of %s product', 'Fix the barcode numbers of %s products', $count, 'woocommerce' ), $n ) ),
+					__( 'Google doesn’t list products with a barcode number that isn’t valid. In ChatGPT and Copilot, a valid one makes products easier to find.', 'woocommerce' ),
 					__( 'A barcode number has 8, 12, 13 or 14 digits. Use the number from the packaging or supplier.', 'woocommerce' )
 				);
 			case 'duplicate_gtin':
 				return self::product(
-					/* translators: %s: number of products. */
-					sprintf( _n( 'Give %s product its own barcode number', 'Give %s products their own barcode numbers', $count, 'woocommerce' ), $n ),
+					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
+					self::title( $count, $names, _n( 'Give %s its own barcode number', 'Give %s their own barcode numbers', $count, 'woocommerce' ), __( 'Give a product its own barcode number', 'woocommerce' ), sprintf( _n( 'Give %s product its own barcode number', 'Give %s products their own barcode numbers', $count, 'woocommerce' ), $n ) ),
 					__( 'Products that share a barcode number look like one product, so AI assistants may show the wrong one.', 'woocommerce' )
 				);
 			case 'missing_regular_price':
-				/* translators: %s: number of products. */
-				return self::product( sprintf( _n( 'Add a price to %s product', 'Add a price to %s products', $count, 'woocommerce' ), $n ) );
+				return self::product(
+					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
+					self::title( $count, $names, _n( 'Add a price to %s', 'Add a price to %s', $count, 'woocommerce' ), __( 'Add a price to a product', 'woocommerce' ), sprintf( _n( 'Add a price to %s product', 'Add a price to %s products', $count, 'woocommerce' ), $n ) ),
+					__( 'AI assistants only list products that have a price.', 'woocommerce' )
+				);
 			case 'missing_images':
-				/* translators: %s: number of products. */
-				return self::product( sprintf( _n( 'Add a main image to %s product', 'Add a main image to %s products', $count, 'woocommerce' ), $n ) );
+				return self::product(
+					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
+					self::title( $count, $names, _n( 'Add a main image to %s', 'Add a main image to %s', $count, 'woocommerce' ), __( 'Add a main image to a product', 'woocommerce' ), sprintf( _n( 'Add a main image to %s product', 'Add a main image to %s products', $count, 'woocommerce' ), $n ) ),
+					__( 'AI assistants only list products that have a main image.', 'woocommerce' )
+				);
 			case 'image_too_small':
 				return self::product(
-					/* translators: %s: number of products. */
-					sprintf( _n( 'Use a larger main image on %s product', 'Use a larger main image on %s products', $count, 'woocommerce' ), $n ),
-					__( 'AI shopping apps ask for images of at least 500 x 500 pixels.', 'woocommerce' )
+					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
+					self::title( $count, $names, _n( 'Use a larger main image on %s', 'Use a larger main image on %s', $count, 'woocommerce' ), __( 'Use a larger main image on a product', 'woocommerce' ), sprintf( _n( 'Use a larger main image on %s product', 'Use a larger main image on %s products', $count, 'woocommerce' ), $n ) ),
+					__( 'AI assistants ask for images of at least 500 x 500 pixels.', 'woocommerce' )
 				);
 			case 'missing_product_text':
-				/* translators: %s: number of products. */
-				return self::product( sprintf( _n( 'Add a description to %s product', 'Add a description to %s products', $count, 'woocommerce' ), $n ) );
+				return self::product(
+					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
+					self::title( $count, $names, _n( 'Add a description to %s', 'Add a description to %s', $count, 'woocommerce' ), __( 'Add a description to a product', 'woocommerce' ), sprintf( _n( 'Add a description to %s product', 'Add a description to %s products', $count, 'woocommerce' ), $n ) ),
+					__( 'ChatGPT only lists products that have a description. In Google and Copilot, a description makes products easier to find.', 'woocommerce' )
+				);
 			case 'uncategorised':
 				return self::product(
-					/* translators: %s: number of products. */
-					sprintf( _n( 'Choose a category for %s product', 'Choose a category for %s products', $count, 'woocommerce' ), $n ),
+					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
+					self::title( $count, $names, _n( 'Choose a category for %s', 'Choose a category for %s', $count, 'woocommerce' ), __( 'Choose a category for a product', 'woocommerce' ), sprintf( _n( 'Choose a category for %s product', 'Choose a category for %s products', $count, 'woocommerce' ), $n ) ),
 					__( 'AI assistants narrow a search by category first, so products with only the default category are harder to find.', 'woocommerce' )
 				);
 			case 'variation_attributes_not_set':
 				return self::product(
-					/* translators: %s: number of products. */
-					sprintf( _n( 'Choose an option for each variation of %s product', 'Choose an option for each variation of %s products', $count, 'woocommerce' ), $n ),
+					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
+					self::title( $count, $names, _n( 'Choose an option for each variation of %s', 'Choose an option for each variation of %s', $count, 'woocommerce' ), __( 'Choose an option for each variation of a product', 'woocommerce' ), sprintf( _n( 'Choose an option for each variation of %s product', 'Choose an option for each variation of %s products', $count, 'woocommerce' ), $n ) ),
 					__( 'Variations need a specific option, like “Small” instead of “Any size,” to be listed on their own.', 'woocommerce' )
 				);
 			case 'missing_variation_images':
 				return self::product(
-					/* translators: %s: number of products. */
-					sprintf( _n( 'Add an image to each variation of %s product', 'Add an image to each variation of %s products', $count, 'woocommerce' ), $n ),
+					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
+					self::title( $count, $names, _n( 'Add an image to each variation of %s', 'Add an image to each variation of %s', $count, 'woocommerce' ), __( 'Add an image to each variation of a product', 'woocommerce' ), sprintf( _n( 'Add an image to each variation of %s product', 'Add an image to each variation of %s products', $count, 'woocommerce' ), $n ) ),
 					__( 'Each variation is listed on its own. Without its own image, it shows the main image, which may not match its color.', 'woocommerce' )
 				);
 			case 'title_too_long':
 				return self::product(
-					/* translators: %s: number of products. */
-					sprintf( _n( 'Shorten the title of %s product', 'Shorten the titles of %s products', $count, 'woocommerce' ), $n ),
-					__( 'AI shopping apps cut titles over 150 characters.', 'woocommerce' ),
+					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
+					self::title( $count, $names, _n( 'Shorten the title of %s', 'Shorten the titles of %s', $count, 'woocommerce' ), __( 'Shorten the title of a product', 'woocommerce' ), sprintf( _n( 'Shorten the title of %s product', 'Shorten the titles of %s products', $count, 'woocommerce' ), $n ) ),
+					__( 'AI assistants cut titles over 150 characters.', 'woocommerce' ),
 					__( 'Keep the brand and product type first.', 'woocommerce' )
 				);
 		}
@@ -139,14 +160,31 @@ final class ReadinessCopy {
 	}
 
 	/**
+	 * A fix title: with the products' names when up to NAMED_MAX products fail and every name is
+	 * known, "a product" for one without a name, and the count otherwise.
+	 *
+	 * @param int      $count Number of products.
+	 * @param string[] $names Names of the failing products, or none.
+	 * @param string   $named Title with a %s for the names, singular or plural to match the count.
+	 * @param string   $any   Title for one product without its name.
+	 * @param string   $many  Title with the count.
+	 */
+	private static function title( int $count, array $names, string $named, string $any, string $many ): string {
+		if ( $count <= self::NAMED_MAX && count( $names ) === $count ) {
+			return sprintf( $named, wp_sprintf_l( '%l', $names ) );
+		}
+		return 1 === $count ? $any : $many;
+	}
+
+	/**
 	 * A product check's copy.
 	 *
 	 * @param string $action What to do.
-	 * @param string $why    Why it matters, or '' to say what the channels do.
+	 * @param string $why    Why it matters.
 	 * @param string $fix    Fix line, or ''.
 	 * @return array{action:string,why:string,fix:string}
 	 */
-	private static function product( string $action, string $why = '', string $fix = '' ): array {
+	private static function product( string $action, string $why, string $fix = '' ): array {
 		return array(
 			'action' => $action,
 			'why'    => $why,
@@ -172,7 +210,7 @@ final class ReadinessCopy {
 				admin_url( 'options-reading.php' ),
 			),
 			'pages_public'                   => array(
-				__( 'Store pages open without signing in', 'woocommerce' ),
+				__( 'Store pages open without logging in', 'woocommerce' ),
 				__( 'Let shoppers open store pages without logging in', 'woocommerce' ),
 				__( 'AI assistants don’t log in, so store pages need to be open to everyone.', 'woocommerce' ),
 				__( 'Your store asks everyone to log in before they can see its pages. AI assistants don’t log in, so they can’t see your products.', 'woocommerce' ),
@@ -252,7 +290,7 @@ final class ReadinessCopy {
 			'canonical_url'                  => array(
 				__( 'Store pages name their main address', 'woocommerce' ),
 				__( 'Tell AI assistants the main address of each page', 'woocommerce' ),
-				__( 'The canonical link tells AI assistants which URL to show.', 'woocommerce' ),
+				__( 'The canonical link tells AI assistants which address to show.', 'woocommerce' ),
 				__( 'When a page has several addresses, the canonical URL tells AI assistants which one to show. We found store pages without one.', 'woocommerce' ),
 				$plugin_settings,
 			),
@@ -312,8 +350,8 @@ final class ReadinessCopy {
 			'product_gtin_jsonld'            => array(
 				__( 'Product details have the barcode number', 'woocommerce' ),
 				__( 'Check why product details have no barcode number', 'woocommerce' ),
-				__( 'AI assistants match products by their barcode number (GTIN).', 'woocommerce' ),
-				__( 'AI assistants match products by their barcode number (GTIN). Your product has one, but we found none, or an invalid one, in its structured data.', 'woocommerce' ),
+				__( 'AI assistants match products by their barcode number.', 'woocommerce' ),
+				__( 'AI assistants match products by their barcode number. Your product has one, but we found none, or an invalid one, in its structured data.', 'woocommerce' ),
 				__( 'Look at the schema settings in your SEO plugin or theme.', 'woocommerce' ),
 			),
 			'product_brand_jsonld'           => array(

@@ -51,7 +51,7 @@ trait ReadinessMarkup {
 	}
 
 	/**
-	 * Open a fold: "Show …" while closed, "Hide" while open. The caller closes the details element.
+	 * Open a fold: "Show …" while closed, "Hide completed steps" while open. The caller closes the details element.
 	 *
 	 * @param string $show Text while closed.
 	 */
@@ -59,7 +59,7 @@ trait ReadinessMarkup {
 		printf(
 			'<details class="wc-agentic-commerce-more"><summary><span class="wc-agentic-commerce-more__show">%1$s</span><span class="wc-agentic-commerce-more__hide">%2$s</span></summary>',
 			esc_html( $show ),
-			esc_html__( 'Hide', 'woocommerce' )
+			esc_html__( 'Hide completed steps', 'woocommerce' )
 		);
 	}
 
@@ -115,7 +115,7 @@ trait ReadinessMarkup {
 			array(
 				'path' => '/wc/v3/agent-readiness/ucp',
 				'i18n' => array(
-					'error'  => __( 'The setting could not be changed. Reload the page and try again.', 'woocommerce' ),
+					'error'  => __( 'The setting didn’t save. Reload the page and try again.', 'woocommerce' ),
 					'copied' => __( 'Copied', 'woocommerce' ),
 				),
 			)

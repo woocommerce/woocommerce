@@ -203,12 +203,52 @@
 	}
 }
 
+// The prototype's buttons (WordPress UI minimal and outline): medium weight, and a light background
+// on hover and focus that stays after a click until focus moves; the focus ring only for keyboard focus.
+@mixin sales-readiness-button {
+	&.components-button {
+		padding-inline: var(--wpds-dimension-padding-md);
+		background: var(--wpds-color-background-interactive-brand-weak);
+		box-shadow: none;
+		color: var(--wpds-color-foreground-interactive-brand);
+		font-size: var(--wpds-typography-font-size-md);
+		font-weight: var(--wpds-typography-font-weight-medium);
+
+		&:not(:disabled):is(:hover, :active, :focus, [aria-expanded="true"]) {
+			background: var(--wpds-color-background-interactive-brand-weak-active);
+			box-shadow: none;
+			color: var(--wpds-color-foreground-interactive-brand-active);
+		}
+
+		&:disabled {
+			color: var(--wpds-color-foreground-interactive-brand-disabled);
+		}
+
+		&:focus:not(:focus-visible) {
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: var(--wpds-border-width-focus) solid var(--wpds-color-stroke-focus);
+			outline-offset: 1px;
+		}
+	}
+}
+
 .wc-sales-readiness-fold {
 	padding-block-start: var(--wpds-dimension-padding-sm);
 
-	// "Show more" and "Hide" line up with the card text.
+	// "Show more" and "Hide": a minimal button whose text lines up with the card text, while its
+	// hover background reaches past it.
 	> .components-button {
-		padding-inline: 0;
+		@include sales-readiness-button;
+		margin-inline-start: calc(-1 * var(--wpds-dimension-padding-md));
+		border-color: transparent;
+
+		// Hide, while the checks are open, and either button after a click, until focus moves.
+		&:not(:disabled):is(:focus, [aria-expanded="true"]) {
+			border-color: var(--wpds-color-stroke-interactive-brand);
+		}
 	}
 }
 
@@ -224,12 +264,22 @@
 		gap: 2px;
 	}
 
-	&__status .components-spinner {
-		margin: 0;
-	}
-
 	&__intro {
 		display: block;
 		margin-block-end: var(--wpds-dimension-gap-md);
+	}
+
+	// Check again: an outline button.
+	> .components-button {
+		@include sales-readiness-button;
+		border-color: var(--wpds-color-stroke-interactive-brand);
+
+		&:not(:disabled):is(:hover, :active, :focus) {
+			border-color: var(--wpds-color-stroke-interactive-brand-active);
+		}
+
+		&:disabled {
+			border-color: var(--wpds-color-stroke-interactive-brand-disabled);
+		}
 	}
 }

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Fragment } from '@wordpress/element';
-import { Badge, Card, Text } from '@wordpress/ui';
+import { Card, Text } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -35,11 +35,6 @@ export const FixFirstList = ( {
 								<Text variant="heading-sm" aria-hidden="true">
 									{ heading }
 								</Text>
-								{ item.tier_badge && (
-									<Badge intent={ item.tier_badge.intent }>
-										{ item.tier_badge.text }
-									</Badge>
-								) }
 							</li>
 						) }
 						<Row

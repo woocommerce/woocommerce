@@ -65,7 +65,6 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		parent::__construct();
 
 		add_filter( 'woocommerce_admin_settings_sanitize_option', array( $this, 'sanitize_page_option' ), 10, 3 );
-		add_action( 'woocommerce_settings_' . self::POLICIES_SECTION . '_after', array( $this, 'render_policies_footnote' ) );
 	}
 
 	/**
@@ -105,7 +104,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 */
 	protected function get_settings_for_shopping_section() {
 		$store_pages = StoreConditions::store_page_ids();
-		$pages       = array( '' => __( 'Select a page…', 'woocommerce' ) );
+		$pages       = array( '' => __( 'Choose a page', 'woocommerce' ) );
 		$published   = get_pages(
 			array(
 				'post_status' => 'publish',
@@ -142,11 +141,11 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			array(
 				'title' => __( 'Store policies', 'woocommerce' ),
 				'type'  => 'title',
-				'desc'  => __( 'AI assistants will be able to share these with customers before they buy. Changing a page here changes it everywhere in your store.', 'woocommerce' ),
+				'desc'  => __( 'AI assistants share these pages with shoppers. Your refund, privacy and terms pages are also used across the rest of your store.', 'woocommerce' ),
 				'id'    => self::POLICIES_SECTION,
 			),
 			$page_field( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Refund and returns', 'woocommerce' ) ),
-			$page_field( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Shipping policy', 'woocommerce' ) ),
+			$page_field( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Shipping policy', 'woocommerce' ), __( 'Optional.', 'woocommerce' ) ),
 			...( current_user_can( 'manage_privacy_options' ) ? array( $page_field( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Privacy policy', 'woocommerce' ) ) ) : array() ),
 			$page_field( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Terms and conditions', 'woocommerce' ) ),
 			$page_field( AgenticCommerceSettings::FAQ_PAGE_OPTION, __( 'FAQ', 'woocommerce' ), __( 'Optional.', 'woocommerce' ) ),
@@ -233,33 +232,24 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * Footnote under the store policy fields.
-	 *
-	 * @internal
-	 */
-	public function render_policies_footnote(): void {
-		echo '<p class="description">' . esc_html__( 'Refund and returns, privacy policy and terms and conditions are the pages your store already uses at checkout and in your footer. Changing a page here changes it everywhere in your store.', 'woocommerce' ) . '</p>';
-	}
-
-	/**
 	 * Product counts from the last stored readiness report.
 	 *
 	 * @param array<string, mixed>|null $report Stored report, or null before the first scan.
 	 */
 	private function render_visibility( ?array $report ): void {
 		echo '<div class="wc-agentic-commerce-card">';
-		echo '<div class="wc-agentic-commerce-card__header"><h2>' . esc_html__( 'What AI assistants can see', 'woocommerce' ) . '</h2>';
-		echo '<p>' . esc_html__( 'The same products your customers see in your catalog.', 'woocommerce' ) . '</p></div>';
+		echo '<div class="wc-agentic-commerce-card__header"><h2>' . esc_html__( 'Product visibility', 'woocommerce' ) . '</h2>';
+		echo '<p>' . esc_html__( 'AI assistants see the same products as shoppers. Shoppers can buy simple and variable products through them.', 'woocommerce' ) . '</p></div>';
 
 		if ( null === $report ) {
-			echo '<p class="wc-agentic-commerce-card__body">' . esc_html__( 'Product counts appear after the first readiness check.', 'woocommerce' ) . '</p></div>';
+			echo '<p class="wc-agentic-commerce-card__body">' . esc_html__( 'Product counts show after the first Sales readiness check.', 'woocommerce' ) . '</p></div>';
 			return;
 		}
 
 		$cards = array(
 			// The whole catalog, like the other two; `products` stops at PRODUCT_LIMIT. Reports from before `available` have only `products`.
 			array( __( 'Available to AI assistants', 'woocommerce' ), (int) ( $report['available'] ?? $report['products'] ?? 0 ), '', ProductScan::COUNT_AVAILABLE ),
-			array( __( 'Hidden from your catalog', 'woocommerce' ), (int) ( $report['hidden_from_catalog'] ?? 0 ), __( 'Products with Catalog visibility set to Hidden. They\'re hidden from customers too.', 'woocommerce' ), ProductScan::COUNT_HIDDEN ),
+			array( __( 'Hidden from your catalog', 'woocommerce' ), (int) ( $report['hidden_from_catalog'] ?? 0 ), __( 'Products set to Hidden in Catalog visibility.', 'woocommerce' ), ProductScan::COUNT_HIDDEN ),
 			array( __( 'Product type not supported yet', 'woocommerce' ), (int) ( $report['unsupported_types'] ?? 0 ), __( 'AI assistants can find these products, but shoppers can\'t buy them through an assistant yet. This includes grouped, external, subscription, booking and bundle products.', 'woocommerce' ), ProductScan::COUNT_UNSUPPORTED ),
 		);
 
@@ -297,15 +287,15 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				</button>
 				<div>
 					<h2 id="wc-agentic-commerce-ucp-title"><?php esc_html_e( 'Allow AI assistants to shop your store', 'woocommerce' ); ?></h2>
-					<p id="wc-agentic-commerce-ucp-desc"><?php esc_html_e( 'AI assistants find your products and build a cart. Customers pay on your checkout.', 'woocommerce' ); ?></p>
-					<p class="wc-agentic-commerce-ucp-message" role="status"><?php echo ( $enabled && array() === $failing ) ? esc_html__( 'AI assistants can now find and shop your store.', 'woocommerce' ) : ''; ?></p>
+					<p id="wc-agentic-commerce-ucp-desc"><?php esc_html_e( 'Your products can be found by AI assistants and added to a shopper’s cart. Orders come through your checkout as usual.', 'woocommerce' ); ?></p>
+					<p class="wc-agentic-commerce-ucp-message" role="status"><?php echo ( $enabled && array() === $failing ) ? esc_html__( 'AI shopping is on. AI assistants can now find and shop your store.', 'woocommerce' ) : ''; ?></p>
 				</div>
 			</div>
 			<?php if ( $launched && ! $launched['ok'] ) : ?>
 				<div class="wc-agentic-commerce-notice">
 					<span class="dashicons dashicons-warning" aria-hidden="true"></span>
-					<p><?php esc_html_e( 'Your store is in coming soon mode, so AI assistants can\'t shop it yet. Take it live to let them in.', 'woocommerce' ); ?></p>
-					<a class="button button-primary" href="<?php echo esc_url( $launched['fix_url'] ); ?>"><?php esc_html_e( 'Go to Site visibility', 'woocommerce' ); ?></a>
+					<p><?php esc_html_e( 'Your store is in coming soon mode, so AI assistants can’t shop it yet. Make your store live to let them in.', 'woocommerce' ); ?></p>
+					<a class="button button-primary" href="<?php echo esc_url( $launched['fix_url'] ); ?>"><?php esc_html_e( 'Change site visibility', 'woocommerce' ); ?></a>
 				</div>
 			<?php endif; ?>
 		</div>
@@ -385,13 +375,14 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * The store address AI assistants start from, with a copy button.
+	 * The connection URL AI assistants start from, with a copy button.
 	 */
 	private function render_address(): void {
 		?>
 		<div class="wc-agentic-commerce-card">
 			<div class="wc-agentic-commerce-card__header">
-				<h2><label for="wc-agentic-commerce-ucp-url"><?php esc_html_e( 'Store address for AI assistants', 'woocommerce' ); ?></label></h2>
+				<h2><label for="wc-agentic-commerce-ucp-url"><?php esc_html_e( 'Connection URL', 'woocommerce' ); ?></label></h2>
+				<p><?php esc_html_e( 'A separate address, just for AI assistants to connect to your store. It was created automatically.', 'woocommerce' ); ?></p>
 			</div>
 			<p class="wc-agentic-commerce-card__body wc-agentic-commerce-address">
 				<input type="text" id="wc-agentic-commerce-ucp-url" class="regular-text code" readonly value="<?php echo esc_attr( home_url( '/.well-known/ucp' ) ); ?>" />

@@ -306,7 +306,7 @@ class StoreOutputChecks {
 				'group'   => 'access',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->pages_public( $responses ),
 				'blocks'  => 'listing',
-				'name'    => __( 'Store pages open without signing in', 'woocommerce' ),
+				'name'    => __( 'Store pages open without logging in', 'woocommerce' ),
 				'label'   => __( 'Store pages ask visitors to sign in', 'woocommerce' ),
 				'why'     => __( 'Agents don\'t sign in, so they can\'t read your home, shop or product pages.', 'woocommerce' ),
 				'fix'     => __( 'Check the membership, private store or maintenance plugin that asks visitors to sign in.', 'woocommerce' ),

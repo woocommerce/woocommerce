@@ -253,7 +253,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		$stalled  = $pending && $this->scheduled_scan->is_stalled();
 		$message  = '';
 		if ( $stalled ) {
-			$message = __( 'The check has not started because scheduled actions do not seem to be running on this site. It runs once they do. See WooCommerce > Status > Scheduled Actions.', 'woocommerce' );
+			$message = __( 'The check hasn’t started because scheduled actions aren’t running on your store. It starts once they run. Check WooCommerce › Status › Scheduled Actions, or ask your host.', 'woocommerce' );
 		} elseif ( $pending ) {
 			$message = __( 'Checking your store.', 'woocommerce' );
 		}
@@ -262,9 +262,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$available = (int) ( $report['available'] ?? 0 );
 			$truncated = $available > ProductScan::PRODUCT_LIMIT
 				/* translators: 1: number of products checked, 2: number of products in the store. */
-				? sprintf( __( 'Checked your %1$s most recently changed products of %2$s.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ), number_format_i18n( $available ) )
+				? sprintf( __( 'Checked the %1$s products you changed most recently, out of %2$s.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ), number_format_i18n( $available ) )
 				/* translators: %s: number of products checked. Reports from before the total was stored. */
-				: sprintf( __( 'Checked your %s most recently changed products.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
+				: sprintf( __( 'Checked the %s products you changed most recently.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
 		}
 		return array(
 			'title'        => __( 'Sales readiness', 'woocommerce' ),
@@ -434,12 +434,13 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			return __( 'Not checked yet', 'woocommerce' );
 		}
 		if ( wp_date( 'Y-m-d', $time ) === wp_date( 'Y-m-d' ) ) {
-			/* translators: %s: time of day, such as 10:42. */
+			/* translators: %s: time of day, such as 10:42 am. */
 			return sprintf( __( 'Last checked today at %s', 'woocommerce' ), wp_date( (string) get_option( 'time_format' ), $time ) );
 		}
-		/* translators: %s: date and time, such as November 3, 2026 10:42. */
+		/* translators: %s: date and time, such as November 3, 2026 10:42 am. */
 		return sprintf( __( 'Last checked %s', 'woocommerce' ), wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $time ) );
 	}
+
 
 	/**
 	 * The store checks the page shows: the setup steps (UCP itself is the switch, so not a step),
@@ -502,7 +503,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		$linked   = ! empty( $report['failures_stored'] );
 		$rows     = array();
 		foreach ( $failing as $check ) {
-			$issue  = self::product_issue( $check, $channels );
+			$issue  = self::product_issue( $check, $linked );
 			$rows[] = self::row( (string) ( $check['id'] ?? '' ), 'open', $issue['title'], $issue['why'], $issue['fix'], self::products_link( (int) $check['count'], (string) ( $check['id'] ?? '' ), $linked ) );
 		}
 		$listed = array();
@@ -593,22 +594,22 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				$issues[] = $item;
 			}
 		}
-		$linked   = ! empty( $report['failures_stored'] );
-		$channels = self::stored_channels( $report );
+		$linked = ! empty( $report['failures_stored'] );
 		foreach ( self::failing_product_checks( $report ) as $check ) {
 			$blocks_listing = in_array( ReadinessRule::EFFECT_NOT_LISTABLE, array_column( (array) ( $check['channels'] ?? array() ), 'effect' ), true );
 			$share          = is_numeric( $check['sales_share'] ?? null ) ? (float) $check['sales_share'] : null;
 			$count          = (int) $check['count'];
-			$issue          = self::product_issue( $check, $channels );
+			$issue          = self::product_issue( $check, $linked );
 			$issues[]       = array(
 				'id'     => (string) ( $check['id'] ?? '' ),
 				'tier'   => $blocks_listing ? 2 : 3,
 				'title'  => $issue['title'],
 				'why'    => $issue['why'],
-				'impact' => null === $share
+				// A title that names the products already says how many, so only a share of sales gets a badge then.
+				'impact' => null !== $share
+					? array( 'off', self::share_badge( $share ) )
 					/* translators: %s: number of products. */
-					? array( 'off', sprintf( _n( '%s product', '%s products', $count, 'woocommerce' ), number_format_i18n( $count ) ) )
-					: array( 'off', self::share_badge( $share ) ),
+					: ( $issue['named'] ? null : array( 'off', sprintf( _n( '%s product', '%s products', $count, 'woocommerce' ), number_format_i18n( $count ) ) ) ),
 				'link'   => self::products_link( $count, (string) ( $check['id'] ?? '' ), $linked ),
 				'share'  => $share,
 				'count'  => $count,
@@ -628,7 +629,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks Store checks shown on the page.
 	 * @param array<string, mixed>                                                                                                                                                                           $report Stored report.
-	 * @return array{title:string,ranking:string,items:array<int, array{id:string,tier:string,tier_badge:array{intent:string,text:string}|null,title:string,why:string,impact:array{intent:string,text:string}|null,link:array{href:string,text:string}|null}>}|null
+	 * @return array{title:string,ranking:string,items:array<int, array{id:string,tier:string,title:string,why:string,impact:array{intent:string,text:string}|null,link:array{href:string,text:string}|null}>}|null
 	 */
 	private function fix_first( array $checks, array $report ): ?array {
 		$items = $this->fix_first_items( $checks, $report );
@@ -652,13 +653,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				$first = false;
 			}
 			$list[] = array(
-				'id'         => $item['id'],
-				'tier'       => $tiers[ $item['tier'] ],
-				'tier_badge' => 0 === $item['tier'] ? self::badge_data( self::required_badge() ) : null,
-				'title'      => $item['title'],
-				'why'        => $why,
-				'impact'     => null === $item['impact'] ? null : self::badge_data( $item['impact'] ),
-				'link'       => $item['link'],
+				'id'     => $item['id'],
+				'tier'   => $tiers[ $item['tier'] ],
+				'title'  => $item['title'],
+				'why'    => $why,
+				'impact' => null === $item['impact'] ? null : self::badge_data( $item['impact'] ),
+				'link'   => $item['link'],
 			);
 		}
 		return array(
@@ -733,6 +733,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		if ( 0.0 === $share ) {
 			return __( 'No sales', 'woocommerce' );
 		}
+		if ( $share < 0.005 ) {
+			return __( 'Under 1% of sales', 'woocommerce' );
+		}
 		/* translators: %s: share of sales, such as 18%. */
 		return sprintf( __( '%s of sales', 'woocommerce' ), self::percent( $share ) );
 	}
@@ -776,70 +779,58 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * A failing product check's copy: what to do ("Add a brand to 13 products"), why it matters, and the
-	 * fix line. A check whose copy leaves the why to the channels says which can't list the products and
-	 * which list them but make them harder to find. A check ReadinessCopy has no copy for keeps the report's.
+	 * fix line, and whether the title names the products. A check ReadinessCopy has no copy for keeps
+	 * the report's.
 	 *
-	 * @param array<string, mixed> $check    Failing product check from the report.
-	 * @param array<string, mixed> $channels Channels from the report.
-	 * @return array{title:string,why:string,fix:string}
+	 * @param array<string, mixed> $check  Failing product check from the report.
+	 * @param bool                 $linked Whether each product's failures are stored, so a few failing products can be named.
+	 * @return array{title:string,why:string,fix:string,named:bool}
 	 */
-	private static function product_issue( array $check, array $channels ): array {
+	private static function product_issue( array $check, bool $linked ): array {
 		$count = (int) ( $check['count'] ?? 0 );
-		$copy  = ReadinessCopy::product_check( (string) ( $check['id'] ?? '' ), $count );
+		$id    = (string) ( $check['id'] ?? '' );
+		$names = $count <= ReadinessCopy::NAMED_MAX && $linked ? self::failing_product_names( $id ) : array();
+		$copy  = ReadinessCopy::product_check( $id, $count, $names );
 		if ( null === $copy ) {
 			return array(
 				'title' => (string) ( $check['label'] ?? '' ),
 				'why'   => (string) ( $check['why'] ?? '' ),
 				'fix'   => (string) ( $check['fix'] ?? '' ),
+				'named' => false,
 			);
 		}
 		return array(
 			'title' => $copy['action'],
-			'why'   => '' !== $copy['why'] ? $copy['why'] : self::channels_text( $check, $channels, $count ),
+			'why'   => $copy['why'],
 			'fix'   => $copy['fix'],
+			'named' => $count > 0 && count( $names ) === $count,
 		);
 	}
 
 	/**
-	 * Which channels can't list a product check's products, and which still list them but make them
-	 * harder to find: "ChatGPT can't list them. Google and Microsoft Copilot still list them, but they're
-	 * harder to find."
+	 * Names of the products that fail a check, from their stored failures: up to one more than
+	 * ReadinessCopy::NAMED_MAX, so a count that changed since the scan doesn't match and the title
+	 * falls back to the count.
 	 *
-	 * @param array<string, mixed> $check    Failing product check from the report.
-	 * @param array<string, mixed> $channels Channels from the report.
-	 * @param int                  $count    Number of products.
+	 * @param string $check_id Check id.
+	 * @return string[]
 	 */
-	private static function channels_text( array $check, array $channels, int $count ): string {
-		$cant = array();
-		$warn = array();
-		foreach ( (array) ( $check['channels'] ?? array() ) as $channel_id => $spec ) {
-			$name = (string) ( $channels[ $channel_id ]['name'] ?? $channel_id );
-			if ( ReadinessRule::EFFECT_NOT_LISTABLE === ( $spec['effect'] ?? '' ) ) {
-				$cant[] = $name;
-			} else {
-				$warn[] = $name;
-			}
-		}
-		$text = array();
-		if ( array() !== $cant ) {
-			$text[] = array() === $warn
-				? _n( 'AI shopping apps can’t list it.', 'AI shopping apps can’t list them.', $count, 'woocommerce' )
-				/* translators: %s: channel names, such as ChatGPT. */
-				: sprintf( _n( '%s can’t list it.', '%s can’t list them.', $count, 'woocommerce' ), wp_sprintf( '%l', $cant ) );
-		}
-		if ( array() !== $warn ) {
-			$text[] = array() === $cant
-				? _n( 'AI shopping apps still list it, but it’s harder to find.', 'AI shopping apps still list them, but they’re harder to find.', $count, 'woocommerce' )
-				: sprintf(
-					1 === count( $warn )
-						/* translators: %s: channel name, such as Google. */
-						? _n( '%s still lists it, but it’s harder to find.', '%s still lists them, but they’re harder to find.', $count, 'woocommerce' )
-						/* translators: %s: channel names, such as Google and Microsoft Copilot. */
-						: _n( '%s still list it, but it’s harder to find.', '%s still list them, but they’re harder to find.', $count, 'woocommerce' ),
-					wp_sprintf( '%l', $warn )
-				);
-		}
-		return implode( ' ', $text );
+	private static function failing_product_names( string $check_id ): array {
+		$posts = get_posts(
+			array(
+				'post_type'        => 'product',
+				'post_status'      => 'any',
+				'posts_per_page'   => ReadinessCopy::NAMED_MAX + 1,
+				'no_found_rows'    => true,
+				'suppress_filters' => true,
+				'meta_key'         => ProductFailures::META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value'       => $check_id, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			)
+		);
+		return array_map(
+			static fn( \WP_Post $post ): string => html_entity_decode( wp_strip_all_tags( get_the_title( $post ) ), ENT_QUOTES, 'UTF-8' ),
+			$posts
+		);
 	}
 
 	/**
@@ -857,9 +848,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		return array(
 			'title' => self::declared_question(),
 			/* translators: %s: how many items were found, such as "4 of 33 found". */
-			'text'  => sprintf( __( 'Optional files some AI tools look for. Nothing to fix. %s.', 'woocommerce' ), self::declared_count( $items ) ),
+			'text'  => sprintf( __( 'Optional files that some AI assistants look for. You don’t need to fix anything. %s.', 'woocommerce' ), self::declared_count( $items ) ),
 			/* translators: %d: number of items. */
-			'more'  => sprintf( _n( 'Show the %d item', 'Show the %d items', count( $items ), 'woocommerce' ), count( $items ) ),
+			'more'  => sprintf( _n( 'Show %d item', 'Show all %d items', count( $items ), 'woocommerce' ), count( $items ) ),
 			'items' => array_map(
 				static fn( array $item ): array => array(
 					'name'  => (string) ( $item['name'] ?? '' ),
@@ -885,7 +876,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	private static function declared_count( array $items ): string {
 		$found = array_filter( $items, static fn( $item ): bool => is_array( $item ) && true === ( $item['found'] ?? null ) );
 		/* translators: 1: number of items found, 2: number of items looked for. */
-		return sprintf( __( '%1$s of %2$s found', 'woocommerce' ), number_format_i18n( count( $found ) ), number_format_i18n( count( array_filter( $items, 'is_array' ) ) ) );
+		return sprintf( __( 'Found %1$s of %2$s', 'woocommerce' ), number_format_i18n( count( $found ) ), number_format_i18n( count( array_filter( $items, 'is_array' ) ) ) );
 	}
 
 	/**
@@ -1029,7 +1020,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'id'       => $id,
 				'title'    => $group[0],
 				'badge'    => self::badge_data( self::group_badge( $group[1] ) ),
-				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? __( 'AI shopping is off, so the UCP checks don\'t run.', 'woocommerce' ) : null,
+				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? __( 'AI shopping is off, so we didn’t check your connection URL.', 'woocommerce' ) : null,
 				'channels' => array(),
 				'rows'     => self::check_rows( array_values( array_diff_key( $group[1], $folded ) ), $launched ),
 				'folded'   => self::check_rows( array_values( $folded ), $launched ),
@@ -1065,7 +1056,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * The product question's title.
 	 */
 	private static function products_question(): string {
-		return __( 'Can AI shopping apps list your products?', 'woocommerce' );
+		return __( 'Can AI assistants list your products?', 'woocommerce' );
 	}
 
 	/**

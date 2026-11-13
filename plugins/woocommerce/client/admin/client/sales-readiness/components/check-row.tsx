@@ -168,7 +168,7 @@ export const CheckRow = ( {
 			) }
 			{ row.seen_at && (
 				<Text variant="body-sm" className="wc-sales-readiness__muted">
-					{ __( 'Seen on:', 'woocommerce' ) }{ ' ' }
+					{ __( 'Found on', 'woocommerce' ) }{ ' ' }
 					<Link href={ row.seen_at.href }>{ row.seen_at.text }</Link>
 				</Text>
 			) }
