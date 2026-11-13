@@ -30,7 +30,7 @@ Reuse WooCommerce's supported page, settings and integration patterns. For setti
 
 ![Standalone settings page with Store details and Checkout field groups, labels and help text, and one page-level Save action](/img/doc_images/wpds-settings-page.png)
 
-This example from the WordPress [Settings Page patterns proposal](https://github.com/WordPress/gutenberg/pull/86451) shows related fields grouped into sections, help beside the relevant control and one save scope for the page. It is a preview of an upstream pattern, not a shipped WooCommerce settings screen. Check the proposal and component documentation for current API availability and recommendation status.
+This settings page groups related fields into **Store details** and **Checkout**, places help beside the relevant control and uses one save action for the form. Use this structure to make settings easy to scan without splitting a simple form across extra tabs. Choose controls using the [admin component guidance](#admin-components) and check their availability in the versions you support.
 
 Reuse the composition within your supported host. Inside WooCommerce Settings, keep the host's navigation, header and save action; do not add this standalone page shell inside an existing settings section. See the [settings header and save contract](../settings-and-config/settings-ui.md#page-header).
 
