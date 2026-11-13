@@ -103,6 +103,19 @@ class PaymentUtils {
 	}
 
 	/**
+	 * Tells whether one of the given gateways is marked as chosen, as
+	 * WC_Payment_Gateways::set_current_gateway() leaves the gateway the checkout starts on.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $gateways Payment gateways keyed by id.
+	 * @return bool
+	 */
+	public static function has_chosen_gateway( array $gateways ): bool {
+		return ! empty( wp_list_filter( $gateways, array( 'chosen' => true ) ) );
+	}
+
+	/**
 	 * Returns the default payment method for a customer: the default saved card, then the method
 	 * remembered in the session, then the first gateway. The `woocommerce_default_payment_method`
 	 * filter runs last and can replace that answer.

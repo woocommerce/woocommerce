@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
+use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -2962,7 +2963,7 @@ if ( ! function_exists( 'woocommerce_checkout_payment' ) ) {
 			array(
 				'checkout'           => WC()->checkout(),
 				'available_gateways' => $available_gateways,
-				'has_chosen_gateway' => ! empty( wp_list_filter( $available_gateways, array( 'chosen' => true ) ) ),
+				'has_chosen_gateway' => PaymentUtils::has_chosen_gateway( $available_gateways ),
 				'order_button_text'  => apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woocommerce' ) ),
 			)
 		);

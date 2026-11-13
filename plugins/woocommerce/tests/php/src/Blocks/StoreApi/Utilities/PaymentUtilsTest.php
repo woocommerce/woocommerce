@@ -310,6 +310,30 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should tell whether a listed gateway is marked as chosen, with none, one or several gateways listed.
+	 * @testWith [[], false]
+	 *           [[false], false]
+	 *           [[true], true]
+	 *           [[false, false], false]
+	 *           [[false, true], true]
+	 *
+	 * @param bool[] $chosen_flags The `chosen` value of each listed gateway, in order.
+	 * @param bool   $expected     Expected answer.
+	 */
+	public function test_has_chosen_gateway( array $chosen_flags, bool $expected ): void {
+		$gateways = array();
+
+		foreach ( $chosen_flags as $index => $chosen ) {
+			$gateway                  = new \WC_Gateway_COD();
+			$gateway->id              = 'gateway_' . $index;
+			$gateway->chosen          = $chosen;
+			$gateways[ $gateway->id ] = $gateway;
+		}
+
+		$this->assertSame( $expected, PaymentUtils::has_chosen_gateway( $gateways ) );
+	}
+
+	/**
 	 * Hide COD from the available gateways, as a shipping restriction would, while it stays enabled.
 	 *
 	 * @param array $gateways Available gateways keyed by id.
