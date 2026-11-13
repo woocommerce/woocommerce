@@ -102,11 +102,13 @@ final class Contracts {
 	private const CREATE_OPERATION = 'create';
 
 	/**
-	 * Keys accepted by {@see self::add_cycle()}, as a key map.
+	 * Keys accepted by {@see self::add_cycle()}, as a key map: the `extension_slug` that scopes the
+	 * write (not a cycle field) and the cycle fields.
 	 *
 	 * @var array<string, true>
 	 */
 	private const CYCLE_KEYS = array(
+		'extension_slug' => true,
 		'status'         => true,
 		'kind'           => true,
 		'sequence_no'    => true,
@@ -119,15 +121,17 @@ final class Contracts {
 	);
 
 	/**
-	 * Keys accepted by {@see self::transition_cycle()}, as a key map.
+	 * Keys accepted by {@see self::transition_cycle()}, as a key map: the `extension_slug` that
+	 * scopes the write and the transition fields.
 	 *
 	 * @var array<string, true>
 	 */
 	private const TRANSITION_KEYS = array(
-		'from_status' => true,
-		'to_status'   => true,
-		'order_id'    => true,
-		'reason'      => true,
+		'extension_slug' => true,
+		'from_status'    => true,
+		'to_status'      => true,
+		'order_id'       => true,
+		'reason'         => true,
 	);
 
 	/**
@@ -319,10 +323,12 @@ final class Contracts {
 	 * unique positions: a taken position or count is a lost race and returns null. A storage
 	 * failure throws a `RuntimeException` and writes nothing. The lock is the contract's
 	 * existence check: the engine deletes a contract only to discard a failed create, before its
-	 * lock is handed out. Unknown keys raise a `_doing_it_wrong()` notice.
+	 * lock is handed out. `extension_slug` names the expected owner, which must be the lock's;
+	 * it is not a cycle field. Unknown keys raise a `_doing_it_wrong()` notice.
 	 *
 	 * @param int                  $contract_id Contract id.
-	 * @param array<string, mixed> $args        Cycle fields: `starts_at_gmt`, `ends_at_gmt` and
+	 * @param array<string, mixed> $args        `extension_slug` (required, the expected owner) and the
+	 *                                          cycle fields: `starts_at_gmt`, `ends_at_gmt` and
 	 *                                          `currency` (required); `status` (registered, default
 	 *                                          `pending`); `kind` (default `billing`); `sequence_no`
 	 *                                          (null: the head's plus one); `count` (null: not
@@ -333,14 +339,15 @@ final class Contracts {
 	 * @return CycleView|null The appended cycle, or null when the position or count is already taken.
 	 * @throws ValidationException If a required key is missing or a value is invalid, with every
 	 *                             invalid value reported (ill-typed arguments before the cycle is built).
-	 * @throws InvalidArgumentException If the lock is for another contract.
+	 * @throws InvalidArgumentException If the lock is for another contract or another extension.
 	 * @throws ContractLockedException If `$lock` was lost.
 	 */
 	public static function add_cycle( int $contract_id, array $args, ContractLock $lock ): ?CycleView {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
 
-		$validator  = new ArgumentValidator();
-		$cycle_args = array(
+		$validator      = new ArgumentValidator();
+		$extension_slug = (string) $validator->get_non_empty_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		$cycle_args     = array(
 			'contract_id'    => $contract_id,
 			'kind'           => $filtered_args['kind'] ?? null,
 			'sequence_no'    => $validator->get_nullable_id( 'sequence_no', $filtered_args['sequence_no'] ?? null ),
@@ -357,6 +364,8 @@ final class Contracts {
 		} catch ( InvalidInputException $e ) {
 			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
 		}
+
+		ContractRepository::assert_lock_owner( $lock, $extension_slug );
 
 		try {
 			$cycle = Cycle::create( $cycle_args );
@@ -378,10 +387,13 @@ final class Contracts {
 	/**
 	 * Move a cycle between statuses as a compare-and-set: of concurrent callers that read
 	 * `from_status`, exactly one gets true. A same-status call returns true once the cycle
-	 * carries the status and the values. Unknown keys raise a `_doing_it_wrong()` notice.
+	 * carries the status and the values. `extension_slug` names the expected owner, which must be
+	 * the lock's; the cycle's contract is matched to the lock in the write itself, so no cycle is
+	 * read first. Unknown keys raise a `_doing_it_wrong()` notice.
 	 *
 	 * @param int                  $cycle_id Cycle id.
-	 * @param array<string, mixed> $args     `from_status` (required, the status the caller read),
+	 * @param array<string, mixed> $args     `extension_slug` (required, the expected owner),
+	 *                                       `from_status` (required, the status the caller read),
 	 *                                       `to_status` (required, registered), and `order_id`
 	 *                                       (?int) and `reason` (?string), written when present
 	 *                                       (null clears).
@@ -391,16 +403,18 @@ final class Contracts {
 	 *              cycle carries the status and the values.
 	 * @throws ValidationException If a status is missing or unregistered (field `to_status`), or a value is
 	 *                             invalid, with every invalid value reported.
-	 * @throws InvalidArgumentException If the cycle does not exist, or it belongs to another contract than the lock.
+	 * @throws InvalidArgumentException If the cycle does not exist, it belongs to another contract than the lock, or the
+	 *                                  lock is for another extension.
 	 * @throws ContractLockedException If `$lock` was lost.
 	 */
 	public static function transition_cycle( int $cycle_id, array $args, ContractLock $lock ): bool {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::TRANSITION_KEYS );
 
-		$validator   = new ArgumentValidator();
-		$from_status = $validator->get_non_empty_string( 'from_status', $filtered_args['from_status'] ?? null );
-		$to_status   = $validator->get_non_empty_string( 'to_status', $filtered_args['to_status'] ?? null );
-		$changes     = array();
+		$validator      = new ArgumentValidator();
+		$extension_slug = (string) $validator->get_non_empty_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		$from_status    = $validator->get_non_empty_string( 'from_status', $filtered_args['from_status'] ?? null );
+		$to_status      = $validator->get_non_empty_string( 'to_status', $filtered_args['to_status'] ?? null );
+		$changes        = array();
 		if ( array_key_exists( 'order_id', $filtered_args ) ) {
 			$changes['order_id'] = $validator->get_nullable_id( 'order_id', $filtered_args['order_id'] );
 		}
@@ -410,6 +424,7 @@ final class Contracts {
 
 		try {
 			$validator->throw_errors();
+			ContractRepository::assert_lock_owner( $lock, $extension_slug );
 
 			return ( new ContractRepository() )->transition_cycle( $cycle_id, (string) $from_status, (string) $to_status, $changes, $lock );
 		} catch ( InvalidInputException $e ) {

@@ -158,7 +158,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	protected function add_cycle_locked( int $contract_id, array $args ): ?CycleView {
 		$lock = $this->take_lock( $contract_id, 'test' );
 		try {
-			return Contracts::add_cycle( $contract_id, $args, $lock );
+			return Contracts::add_cycle( $contract_id, $args + array( 'extension_slug' => $this->get_owner( $contract_id ) ), $lock );
 		} finally {
 			$lock->release();
 		}
@@ -171,9 +171,10 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	 * @param array<string, mixed> $args     Transition fields.
 	 */
 	protected function transition_cycle_locked( int $cycle_id, array $args ): bool {
-		$lock = $this->take_lock( $this->get_cycle_contract_id( $cycle_id ), 'test' );
+		$contract_id = $this->get_cycle_contract_id( $cycle_id );
+		$lock        = $this->take_lock( $contract_id, 'test' );
 		try {
-			return Contracts::transition_cycle( $cycle_id, $args, $lock );
+			return Contracts::transition_cycle( $cycle_id, $args + array( 'extension_slug' => $this->get_owner( $contract_id ) ), $lock );
 		} finally {
 			$lock->release();
 		}
@@ -505,6 +506,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 		Contracts::add_cycle(
 			$id,
 			array(
+				'extension_slug' => (string) $plan->get_extension_slug(),
 				'status'         => CycleStatus::BILLED,
 				'count'          => 1,
 				'order_id'       => $order->get_id(),

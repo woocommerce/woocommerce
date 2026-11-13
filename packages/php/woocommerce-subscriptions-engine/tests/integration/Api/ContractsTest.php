@@ -1245,6 +1245,85 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox Cycle writes require the expected owner, reported with every other shape error.
+	 */
+	public function test_cycle_writes_require_the_owner(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = $this->add_cycle_locked( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+		$this->assertInstanceOf( CycleView::class, $cycle );
+		$cycle_id = (int) $cycle->get_id();
+		$lock     = $this->take_lock( $id, 'renew' );
+		try {
+			$this->assert_validation_errors(
+				function () use ( $id, $lock ): void {
+					$args = $this->cycle_args( array( 'currency' => 'usd' ) );
+					unset( $args['extension_slug'] );
+					Contracts::add_cycle( $id, $args, $lock );
+				},
+				array(
+					array( ValidationErrorCode::REQUIRED, 'extension_slug' ),
+					array( ValidationErrorCode::INVALID_VALUE, 'currency' ),
+				)
+			);
+			$this->assert_validation_errors(
+				static function () use ( $cycle_id, $lock ): void {
+					Contracts::transition_cycle(
+						$cycle_id,
+						array(
+							'extension_slug' => 5,
+							'from_status'    => CycleStatus::PENDING,
+							'to_status'      => CycleStatus::BILLED,
+						),
+						$lock
+					);
+				},
+				array( array( ValidationErrorCode::INVALID_TYPE, 'extension_slug' ) )
+			);
+			$this->assertSame( 1, $this->stored_cycle_count( $id ), 'No cycle is added.' );
+			$this->assertSame( CycleStatus::PENDING, $this->cycle( $id, $cycle_id )->get_status()->get_value(), 'No cycle is moved.' );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * @testdox Cycle writes with the owner's lock but another extension's slug add or move no cycle; with the owner's slug they land.
+	 */
+	public function test_cycle_writes_with_another_owner_are_refused(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = $this->add_cycle_locked( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+		$this->assertInstanceOf( CycleView::class, $cycle );
+		$cycle_id = (int) $cycle->get_id();
+		$lock     = $this->take_lock( $id, 'renew' );
+		try {
+			$writes = array(
+				'add_cycle'        => function () use ( $id, $lock ): void {
+					Contracts::add_cycle( $id, $this->cycle_args( array( 'extension_slug' => 'other' ) ), $lock );
+				},
+				'transition_cycle' => function () use ( $cycle_id, $lock ): void {
+					Contracts::transition_cycle( $cycle_id, $this->transition( CycleStatus::PENDING, CycleStatus::BILLED, array( 'extension_slug' => 'other' ) ), $lock );
+				},
+			);
+			foreach ( $writes as $method => $write ) {
+				try {
+					$write();
+					$this->fail( "Expected {$method}() to refuse the lock." );
+				} catch ( InvalidArgumentException $e ) {
+					$this->assertNotInstanceOf( ValidationException::class, $e, "{$method}() refuses the lock, not the arguments." );
+					$this->assertSame( 'The lock is for a contract of another extension.', $e->getMessage() );
+				}
+			}
+			$this->assertSame( 1, $this->stored_cycle_count( $id ), 'No cycle is added.' );
+			$this->assertSame( CycleStatus::PENDING, $this->cycle( $id, $cycle_id )->get_status()->get_value(), 'No cycle is moved.' );
+
+			$this->assertInstanceOf( CycleView::class, Contracts::add_cycle( $id, $this->cycle_args(), $lock ) );
+			$this->assertTrue( Contracts::transition_cycle( $cycle_id, $this->transition( CycleStatus::PENDING, CycleStatus::BILLED ), $lock ) );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
 	 * @testdox A write with the owner's lock but another extension's slug is refused before anything is written.
 	 */
 	public function test_a_lock_passed_with_another_owner_is_refused(): void {
@@ -1423,10 +1502,11 @@ class ContractsTest extends EngineIntegrationTestCase {
 	private function cycle_args( array $overrides = array() ): array {
 		return array_merge(
 			array(
-				'status'        => CycleStatus::BILLED,
-				'starts_at_gmt' => '2026-01-01 00:00:00',
-				'ends_at_gmt'   => '2026-02-01 00:00:00',
-				'currency'      => 'USD',
+				'extension_slug' => self::EXTENSION_SLUG,
+				'status'         => CycleStatus::BILLED,
+				'starts_at_gmt'  => '2026-01-01 00:00:00',
+				'ends_at_gmt'    => '2026-02-01 00:00:00',
+				'currency'       => 'USD',
 			),
 			$overrides
 		);
@@ -1863,8 +1943,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 	private function transition( string $from, string $to, array $extra = array() ): array {
 		return array_merge(
 			array(
-				'from_status' => $from,
-				'to_status'   => $to,
+				'extension_slug' => self::EXTENSION_SLUG,
+				'from_status'    => $from,
+				'to_status'      => $to,
 			),
 			$extra
 		);
