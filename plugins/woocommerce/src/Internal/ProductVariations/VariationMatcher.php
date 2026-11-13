@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since 11.4.0
  */
-class EarlierVariationMatch {
+class VariationMatcher {
 
 	/**
 	 * Whether an earlier available variation matches this selection.

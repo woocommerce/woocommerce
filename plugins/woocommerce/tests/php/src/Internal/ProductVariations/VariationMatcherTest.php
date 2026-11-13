@@ -4,21 +4,21 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\ProductVariations;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-use Automattic\WooCommerce\Internal\ProductVariations\EarlierVariationMatch;
+use Automattic\WooCommerce\Internal\ProductVariations\VariationMatcher;
 use WC_Product_Attribute;
 use WC_Product_Variable;
 use WC_Product_Variation;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for EarlierVariationMatch.
+ * Tests for VariationMatcher.
  */
-class EarlierVariationMatchTest extends WC_Unit_Test_Case {
+class VariationMatcherTest extends WC_Unit_Test_Case {
 
 	/**
 	 * The System Under Test.
 	 *
-	 * @var EarlierVariationMatch
+	 * @var VariationMatcher
 	 */
 	private $sut;
 
@@ -28,7 +28,7 @@ class EarlierVariationMatchTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut = new EarlierVariationMatch();
+		$this->sut = new VariationMatcher();
 	}
 
 	/**

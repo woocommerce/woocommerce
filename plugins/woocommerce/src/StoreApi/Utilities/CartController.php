@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\ProductVariations\EarlierVariationMatch;
+use Automattic\WooCommerce\Internal\ProductVariations\VariationMatcher;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\NotPurchasableException;
 use Automattic\WooCommerce\StoreApi\Exceptions\OutOfStockException;
@@ -1374,7 +1374,7 @@ class CartController {
 		$variation_product = wc_get_product( $request['id'] );
 		if (
 			$variation_product instanceof \WC_Product_Variation &&
-			wc_get_container()->get( EarlierVariationMatch::class )->has_earlier_match( $variation_product, $request['variation'] )
+			wc_get_container()->get( VariationMatcher::class )->has_earlier_match( $variation_product, $request['variation'] )
 		) {
 			throw new RouteException(
 				'woocommerce_rest_invalid_variation_data',
