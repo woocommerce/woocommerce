@@ -11,6 +11,8 @@ use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,7 +22,8 @@ defined( 'ABSPATH' ) || exit;
  * The delete runs on the write pipeline of ActionableAbility, so the
  * validators of the order resource can refuse it, the syncs see the deleted
  * or trashed order, and a failure rolls everything back. A forced delete
- * deletes the refunds of the order too, so they go through the same checks.
+ * also deletes the orders that the order store deletes with it, such as
+ * refunds and, with HPOS, subscriptions, so they go through the same checks.
  */
 class OrderDelete extends ActionableAbility {
 
@@ -52,14 +55,21 @@ class OrderDelete extends ActionableAbility {
 	private bool $force = false;
 
 	/**
-	 * The order the call will delete or trash, and the refunds that a forced delete takes with it.
+	 * IDs of the orders that the order store deletes with a forced delete, as the validators saw them.
+	 *
+	 * @var int[]
+	 */
+	private array $child_ids = array();
+
+	/**
+	 * The order the call will delete or trash, and the orders that a forced delete takes with it.
 	 *
 	 * @var \WC_Abstract_Order[]
 	 */
 	private array $deleting = array();
 
 	/**
-	 * The order and its refunds as they were before a forced delete.
+	 * The order and the orders deleted with it, as they were before a forced delete.
 	 *
 	 * @var \WC_Abstract_Order[]
 	 */
@@ -131,10 +141,11 @@ class OrderDelete extends ActionableAbility {
 	 */
 	protected function load( array $input ) {
 		$this->order_id = 0;
-		$this->force    = $input['force'] ?? false;
-		$this->deleting = array();
-		$this->deleted  = array();
-		$this->trashed  = array();
+		$this->force     = $input['force'] ?? false;
+		$this->child_ids = array();
+		$this->deleting  = array();
+		$this->deleted   = array();
+		$this->trashed   = array();
 
 		$order = self::get_order_from_input( $input );
 
@@ -175,25 +186,33 @@ class OrderDelete extends ActionableAbility {
 	protected function change( $subject, array $input ) {
 		unset( $input );
 
-		$this->deleting = array_merge( array( $subject ), $this->force ? $subject->get_refunds() : array() );
+		$this->child_ids = $this->force ? self::get_child_ids( $subject ) : array();
+		$this->deleting  = array_merge( array( $subject ), array_values( array_filter( array_map( 'wc_get_order', $this->child_ids ) ) ) );
 
 		return null;
 	}
 
 	/**
-	 * Delete or trash the order. A refund that survives a forced delete fails the
-	 * call, because the order store ignores a plugin that stops a refund delete.
+	 * Delete or trash the order. A child order that appeared after the validators
+	 * ran, or that survives the delete because a plugin stopped it, fails the call.
 	 *
 	 * @param \WC_Order $subject Order to delete.
 	 * @return null|\WP_Error
 	 */
 	protected function save( $subject ) {
+		if ( $this->force && self::get_child_ids( $subject ) !== $this->child_ids ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_children_changed',
+				__( 'The refunds or child orders of this order changed during the delete. Try again.', 'woocommerce' ),
+				array( 'status' => 409 )
+			);
+		}
+
 		if ( $this->force ) {
 			$this->deleted = array_map( static fn( \WC_Abstract_Order $order ) => clone $order, $this->deleting );
 		} else {
 			$this->trashed = array( clone $subject );
 		}
-		$refund_ids = array_map( static fn( \WC_Abstract_Order $refund ) => $refund->get_id(), array_slice( $this->deleting, 1 ) );
 
 		$deleted = $subject->delete( $this->force );
 		$stored  = wc_get_order( $this->order_id );
@@ -202,7 +221,7 @@ class OrderDelete extends ActionableAbility {
 			! $deleted
 			|| ( $this->force && false !== $stored )
 			|| ( ! $this->force && ( ! $stored instanceof \WC_Order || OrderStatus::TRASH !== $stored->get_status( 'edit' ) ) )
-			|| array_filter( $refund_ids, static fn( int $refund_id ) => false !== wc_get_order( $refund_id ) )
+			|| array_filter( $this->child_ids, static fn( int $child_id ) => false !== wc_get_order( $child_id ) )
 		) {
 			return new \WP_Error(
 				'woocommerce_ability_order_delete_failed',
@@ -215,7 +234,39 @@ class OrderDelete extends ActionableAbility {
 	}
 
 	/**
-	 * The order and, for a forced delete, its refunds, for the validators.
+	 * IDs of the orders that the order store deletes with a forced delete of the order, sorted.
+	 *
+	 * The queries match the ones the order store runs: HPOS deletes every child
+	 * of an order type that is not hierarchical, and the posts storage deletes
+	 * the refunds of a shop order.
+	 *
+	 * @param \WC_Order $order Order to delete.
+	 * @return int[]
+	 */
+	private static function get_child_ids( \WC_Order $order ): array {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			if ( is_post_type_hierarchical( $order->get_type() ) ) {
+				return array();
+			}
+			$orders_table = OrdersTableDataStore::get_orders_table_name();
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name comes from the data store.
+			$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM $orders_table WHERE parent_order_id = %d", $order->get_id() ) );
+		} elseif ( 'shop_order' === $order->get_type() ) {
+			$ids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $order->get_id() ) );
+		} else {
+			$ids = array();
+		}
+
+		$ids = array_map( 'intval', $ids );
+		sort( $ids );
+
+		return $ids;
+	}
+
+	/**
+	 * The order and, for a forced delete, the orders deleted with it, for the validators.
 	 *
 	 * @return \WC_Abstract_Order[]
 	 */
@@ -224,7 +275,7 @@ class OrderDelete extends ActionableAbility {
 	}
 
 	/**
-	 * The order and its refunds as they were before a forced delete, which clears the ID of the live objects.
+	 * The order and the orders deleted with it, as they were before a forced delete, which clears the ID of the live objects.
 	 *
 	 * @return \WC_Abstract_Order[]
 	 */
