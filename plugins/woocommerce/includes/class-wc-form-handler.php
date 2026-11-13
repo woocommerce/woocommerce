@@ -1176,7 +1176,9 @@ class WC_Form_Handler {
 	}
 
 	/**
-	 * Get the URL to return to after a cart item is removed or restored: the referring page, or the cart page when there is no referer.
+	 * Get the URL to return to after a cart item is removed or restored: the referring page, or the requested page when there is no referer.
+	 *
+	 * Callers strip the action arguments from it. The requested page can be a cart shortcode page other than the configured cart page.
 	 *
 	 * @since 11.4.0
 	 *
@@ -1185,7 +1187,7 @@ class WC_Form_Handler {
 	private static function get_cart_action_redirect_base(): string {
 		$referer = wp_get_referer();
 
-		return $referer ? $referer : wc_get_cart_url();
+		return $referer ? $referer : esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 	}
 
 	/**

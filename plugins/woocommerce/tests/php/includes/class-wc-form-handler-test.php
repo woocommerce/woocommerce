@@ -1283,61 +1283,66 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The request is for a cart shortcode page other than the configured cart page, as remove links point at the page they are shown on.
+	 *
 	 * @testdox update_cart_action() removes the item and redirects to a clean URL, with or without a referer ("$referer_path").
 	 *
-	 * @testWith ["", ""]
+	 * @testWith ["", "/other-cart/?removed_item=1"]
 	 *           ["/shop/?remove_item=stale&add-to-cart=12", "/shop/?removed_item=1"]
 	 *
 	 * @covers WC_Form_Handler::update_cart_action()
 	 *
 	 * @param string $referer_path  Referer path, or an empty string for no referer.
-	 * @param string $expected_path Expected redirect path, or an empty string for the cart page with removed_item=1.
+	 * @param string $expected_path Expected redirect path.
 	 */
 	public function test_update_cart_action_redirects_after_removing_item( string $referer_path, string $expected_path ): void {
-		$cart_page_url = $this->create_cart_page();
+		$this->create_cart_page();
 		$product       = WC_Helper_Product::create_simple_product();
 		$cart_item_key = WC()->cart->add_to_cart( $product->get_id() );
+		$nonce         = wp_create_nonce( 'woocommerce-cart' );
 
 		unset( $_SERVER['HTTP_REFERER'], $_REQUEST['_wp_http_referer'] );
 		if ( '' !== $referer_path ) {
 			$_SERVER['HTTP_REFERER'] = home_url( $referer_path );
 		}
-		$_GET     = array( 'remove_item' => $cart_item_key );
-		$_REQUEST = array(
+		$_SERVER['REQUEST_URI'] = "/other-cart/?remove_item={$cart_item_key}&_wpnonce={$nonce}";
+		$_GET                   = array( 'remove_item' => $cart_item_key );
+		$_REQUEST               = array(
 			'remove_item' => $cart_item_key,
-			'_wpnonce'    => wp_create_nonce( 'woocommerce-cart' ),
+			'_wpnonce'    => $nonce,
 		);
 
 		$redirect = $this->dispatch_update_cart_action_expecting_redirect();
 
-		// The cart page URL depends on the test site's permalink settings, so only that case is built from it.
-		$expected = '' === $expected_path ? add_query_arg( 'removed_item', '1', $cart_page_url ) : home_url( $expected_path );
+		// A referer is absolute, while the requested URI is relative to the host.
+		$expected = '' === $referer_path ? $expected_path : home_url( $expected_path );
 		$this->assertSame( $expected, $redirect, 'Removing an item should redirect to a URL without the remove link arguments.' );
 		$this->assertEmpty( WC()->cart->get_cart_item( $cart_item_key ), 'The item should be removed from the cart.' );
 		$this->assertStringContainsString( 'class="restore-item" rel="nofollow"', wc_get_notices( 'success' )[0]['notice'] ?? '', 'The undo link should tell crawlers not to follow it.' );
 	}
 
 	/**
-	 * @testdox update_cart_action() restores the item and redirects to the cart page when an undo link is followed without a referer.
+	 * @testdox update_cart_action() restores the item and redirects to the requested page without the undo link arguments when there is no referer.
 	 *
 	 * @covers WC_Form_Handler::update_cart_action()
 	 */
 	public function test_update_cart_action_redirects_after_undo_without_referer(): void {
-		$cart_page_url = $this->create_cart_page();
+		$this->create_cart_page();
 		$product       = WC_Helper_Product::create_simple_product();
 		$cart_item_key = WC()->cart->add_to_cart( $product->get_id() );
 		WC()->cart->remove_cart_item( $cart_item_key );
 
 		unset( $_SERVER['HTTP_REFERER'], $_REQUEST['_wp_http_referer'] );
-		$_GET     = array(
+		$_GET                   = array(
 			'undo_item' => $cart_item_key,
 			'_wpnonce'  => wp_create_nonce( 'woocommerce-cart' ),
 		);
-		$_REQUEST = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Mirrors PHP building the request from the query string.
+		$_REQUEST               = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Mirrors PHP building the request from the query string.
+		$_SERVER['REQUEST_URI'] = '/other-cart/?' . http_build_query( $_GET );
 
 		$redirect = $this->dispatch_update_cart_action_expecting_redirect();
 
-		$this->assertSame( $cart_page_url, $redirect, 'Undoing a removal without a referer should redirect to the cart page.' );
+		$this->assertSame( '/other-cart/', $redirect, 'Undoing a removal without a referer should return to the requested page, not the configured cart page.' );
 		$this->assertNotEmpty( WC()->cart->get_cart_item( $cart_item_key ), 'The item should be back in the cart.' );
 	}
 
