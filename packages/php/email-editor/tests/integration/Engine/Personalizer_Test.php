@@ -883,8 +883,9 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 			'<p>&lt;b&gt;x&lt;/b&gt; O&#039;Brien</p>',
 			$this->personalizer->personalize_content( '<p><!--[test/echo note="&lt;b&gt;x&lt;/b&gt;"]--> <!--[test/echo note="O&#039;Brien"]--></p>' )
 		);
+		// In plain text the decoded value is used, and the HTML tag's value is then converted to text.
 		$this->assertSame(
-			"<b>x</b> O'Brien",
+			"x O'Brien",
 			$this->personalizer->personalize_content( '<!--[test/echo note="&lt;b&gt;x&lt;/b&gt;"]--> <!--[test/echo note="O&#039;Brien"]-->', Personalizer::RENDERING_CONTEXT_TEXT )
 		);
 	}
