@@ -55,6 +55,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/product-review-reply',
 		'woocommerce/product-reviews-query',
 		'woocommerce/shipping-zones-query',
+		'woocommerce/system-status-get',
 		'woocommerce/tax-rates-query',
 	);
 
@@ -365,6 +366,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'destructive' => false,
 			),
 			'woocommerce/payment-gateways-query'   => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/system-status-get'        => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
@@ -1132,6 +1138,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'woocommerce/payment-gateways-query',
 				array(),
 			),
+			'system-status-get'        => array(
+				'woocommerce/system-status-get',
+				array(),
+			),
 			'customers-query'          => array(
 				'woocommerce/customers-query',
 				array(),
@@ -1179,6 +1189,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
 			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),
 			'payment-gateways-query'         => array( 'woocommerce/payment-gateways-query', array() ),
+			'system-status-get'              => array( 'woocommerce/system-status-get', array() ),
 			'customers-query'                => array( 'woocommerce/customers-query', array() ),
 			'shipping-zones-query'           => array( 'woocommerce/shipping-zones-query', array() ),
 			'tax-rates-query'                => array( 'woocommerce/tax-rates-query', array() ),
