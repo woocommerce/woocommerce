@@ -125,15 +125,21 @@ class RefundCreator {
 		$refund->stage_totals( false );
 		$refund->set_total( wc_format_decimal( $args['amount'] * -1 ) );
 
-		/**
-		 * Fires before a new refund is saved, so a callback can change it.
-		 *
-		 * @since 3.0.0
-		 *
-		 * @param \WC_Order_Refund $refund Refund, not saved.
-		 * @param array            $args   Arguments in the format of wc_create_refund().
-		 */
-		do_action( 'woocommerce_create_refund', $refund, $args );
+		try {
+			/**
+			 * Fires before a new refund is saved, so a callback can change it.
+			 *
+			 * @since 3.0.0
+			 *
+			 * @param \WC_Order_Refund $refund Refund, not saved.
+			 * @param array            $args   Arguments in the format of wc_create_refund().
+			 *
+			 * @throws \Exception To decline the refund, with the message to show.
+			 */
+			do_action( 'woocommerce_create_refund', $refund, $args );
+		} catch ( \Exception $e ) {
+			return new \WP_Error( 'refund_declined', $e->getMessage(), array( 'status' => 400 ) );
+		}
 
 		return null;
 	}

@@ -63,7 +63,7 @@ trait OrderRefundAbilityTrait {
 							'quantity'         => array( 'type' => 'number' ),
 							'total'            => array(
 								'type'        => 'string',
-								'description' => __( 'Amount refunded for the line, excluding tax.', 'woocommerce' ),
+								'description' => __( 'Amount refunded for the line, excluding tax. Negative for a discount or credit line.', 'woocommerce' ),
 							),
 							'total_tax'        => array( 'type' => 'string' ),
 						),
@@ -116,11 +116,23 @@ trait OrderRefundAbilityTrait {
 				'refunded_item_id' => (int) $item->get_meta( '_refunded_item_id' ),
 				'name'             => $item->get_name(),
 				'quantity'         => abs( (float) $item->get_quantity() ),
-				'total'            => self::format_amount_for_response( abs( (float) $item->get_total() ) ),
-				'total_tax'        => self::format_amount_for_response( abs( (float) $item->get_total_tax() ) ),
+				'total'            => self::format_refunded_amount( $item->get_total() ),
+				'total_tax'        => self::format_refunded_amount( $item->get_total_tax() ),
 			);
 		}
 
 		return ExtensibleAbilities::add_fields_to_object( $data, 'order_refund', $refund );
+	}
+
+	/**
+	 * Refund lines store the refunded amount negated, so a credit line, refunded with a negative amount, stays negative.
+	 *
+	 * @param string|float $stored Amount as stored on the refund line.
+	 * @return string
+	 */
+	private static function format_refunded_amount( $stored ): string {
+		$amount = (float) $stored;
+
+		return self::format_amount_for_response( 0.0 === $amount ? 0.0 : -$amount );
 	}
 }
