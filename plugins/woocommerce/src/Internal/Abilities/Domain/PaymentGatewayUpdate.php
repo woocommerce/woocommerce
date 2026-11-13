@@ -107,7 +107,7 @@ class PaymentGatewayUpdate extends AbstractDomainAbility implements AbilityDefin
 		}
 
 		if ( isset( $input['title'] ) || isset( $input['enabled'] ) ) {
-			self::reload_saved_settings( $gateway, $input );
+			self::reload_saved_settings( $gateway );
 		}
 
 		$ids   = self::get_checkout_order( array_map( 'strval', array_keys( $gateways ) ) );
@@ -251,21 +251,14 @@ class PaymentGatewayUpdate extends AbstractDomainAbility implements AbilityDefin
 
 	/**
 	 * A settings filter or a failed write can leave the stored values different
-	 * from the request, so the response reports what was saved.
+	 * from the request, so the response reports what was saved. The settings
+	 * filter receives every setting, so either write can change either field.
 	 *
 	 * @param \WC_Payment_Gateway $gateway Gateway just written.
-	 * @param array               $input   Ability input.
 	 */
-	private static function reload_saved_settings( \WC_Payment_Gateway $gateway, array $input ): void {
+	private static function reload_saved_settings( \WC_Payment_Gateway $gateway ): void {
 		$gateway->init_settings();
-
-		if ( isset( $input['title'] ) ) {
-			$gateway->title = (string) $gateway->get_option( 'title' );
-		}
-
-		if ( isset( $input['enabled'] ) ) {
-			$gateway->enabled = 'yes' === $gateway->get_option( 'enabled' ) ? 'yes' : 'no';
-		}
+		$gateway->title = (string) $gateway->get_option( 'title' );
 	}
 
 	/**
