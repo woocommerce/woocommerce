@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderEditTrait;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -131,11 +132,11 @@ class OrderCreate extends ActionableAbility {
 
 		$refused = new \WP_Error();
 		if ( isset( $input['customer_id'] ) ) {
-			if ( false === get_userdata( $input['customer_id'] ) ) {
+			if ( is_wp_error( Users::get_user_in_current_site( $input['customer_id'] ) ) ) {
 				$refused->add(
 					'woocommerce_ability_order_customer_not_found',
 					/* translators: %d: user ID. */
-					sprintf( __( 'User %d does not exist. Send the ID of an existing customer, or leave out customer_id for a guest order.', 'woocommerce' ), $input['customer_id'] ),
+					sprintf( __( 'User %d is not a user of this site. Send the ID of a customer of this site, or leave out customer_id for a guest order.', 'woocommerce' ), $input['customer_id'] ),
 					array( 'status' => 400 )
 				);
 			} else {

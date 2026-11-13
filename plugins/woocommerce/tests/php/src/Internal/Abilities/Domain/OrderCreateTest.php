@@ -272,6 +272,41 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept a customer from another site of a multisite network only for a user who can manage network users.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $network_admin Whether the current user can manage network users.
+	 */
+	public function test_accepts_a_customer_from_another_site_only_for_a_network_admin( bool $network_admin ): void {
+		$customer = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$product  = WC_Helper_Product::create_simple_product();
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'is_multisite'           => static fn() => true,
+				'is_user_member_of_blog' => static fn() => false,
+				'user_can'               => static fn() => $network_admin,
+			)
+		);
+
+		$result = wp_get_ability( OrderCreate::ABILITY_NAME )->execute(
+			array(
+				'customer_id' => $customer,
+				'line_items'  => array( array( 'product_id' => $product->get_id() ) ),
+			)
+		);
+
+		if ( $network_admin ) {
+			$this->assertIsArray( $result );
+			$this->assertSame( $customer, wc_get_order( $result['order']['id'] )->get_customer_id() );
+		} else {
+			$this->assertWPError( $result );
+			$this->assertSame( array( 'woocommerce_ability_order_customer_not_found' ), $result->get_error_codes() );
+		}
+	}
+
+	/**
 	 * @testdox Should refuse a shipping total in exponent notation, which formatting would save as another amount.
 	 */
 	public function test_refuses_a_shipping_total_with_an_exponent(): void {
