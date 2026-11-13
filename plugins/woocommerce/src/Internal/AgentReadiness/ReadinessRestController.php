@@ -14,8 +14,9 @@ defined( 'ABSPATH' ) || exit;
  * wc/v3/agent-readiness/scan queues a new scan. Both answer with the report
  * (null before the first scan) and whether a scan is pending, so a settings
  * page can show the last result and poll while a scan runs. POST
- * wc/v3/agent-readiness/ucp turns UCP on or off for the Agentic commerce
- * settings page.
+ * wc/v3/agent-readiness/ucp turns UCP on or off for the AI tools settings
+ * page, and GET wc/v3/agent-readiness/view gives the Sales readiness page and
+ * the AI tools Overview what they show.
  *
  * Registered only while the agent_readiness feature is enabled.
  *
@@ -52,6 +53,13 @@ class ReadinessRestController extends RestApiControllerBase {
 	private UcpSwitch $ucp_switch;
 
 	/**
+	 * Sales readiness, which builds the view.
+	 *
+	 * @var ReadinessCheckPage
+	 */
+	private ReadinessCheckPage $readiness_page;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
@@ -60,12 +68,14 @@ class ReadinessRestController extends RestApiControllerBase {
 	 * @param AgentReadiness     $agent_readiness     Readiness service.
 	 * @param ScheduledScan      $scheduled_scan      Background scan.
 	 * @param UcpSwitch          $ucp_switch          UCP switch.
+	 * @param ReadinessCheckPage $readiness_page      Sales readiness.
 	 */
-	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness, ScheduledScan $scheduled_scan, UcpSwitch $ucp_switch ): void {
+	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness, ScheduledScan $scheduled_scan, UcpSwitch $ucp_switch, ReadinessCheckPage $readiness_page ): void {
 		$this->features_controller = $features_controller;
 		$this->agent_readiness     = $agent_readiness;
 		$this->scheduled_scan      = $scheduled_scan;
 		$this->ucp_switch          = $ucp_switch;
+		$this->readiness_page      = $readiness_page;
 	}
 
 	/**
@@ -108,6 +118,18 @@ class ReadinessRestController extends RestApiControllerBase {
 		);
 		register_rest_route(
 			$this->route_namespace,
+			'/agent-readiness/view',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'get_view' ),
+					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'manage_woocommerce' ),
+				),
+				'schema' => array( $this, 'get_view_schema' ),
+			)
+		);
+		register_rest_route(
+			$this->route_namespace,
 			'/agent-readiness/ucp',
 			array(
 				array(
@@ -140,6 +162,19 @@ class ReadinessRestController extends RestApiControllerBase {
 			'scan_pending' => $pending,
 			'scan_stalled' => $pending && $this->scheduled_scan->is_stalled(),
 		);
+	}
+
+	/**
+	 * The Sales readiness page and the AI tools Overview as data: text, badges and links, built by
+	 * ReadinessCheckPage from the stored report and the store's settings.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return array<string, mixed>
+	 */
+	protected function get_view( WP_REST_Request $request ): array {
+		unset( $request );
+		return $this->readiness_page->view();
 	}
 
 	/**
@@ -182,6 +217,63 @@ class ReadinessRestController extends RestApiControllerBase {
 			);
 		}
 		return $result;
+	}
+
+	/**
+	 * Schema of the view: the keys ReadinessCheckPage::view() builds.
+	 *
+	 * @internal
+	 */
+	public function get_view_schema(): array {
+		$schema               = $this->get_base_schema();
+		$schema['title']      = 'agent_readiness_view';
+		$schema['properties'] = array(
+			'title'        => array(
+				'type'    => 'string',
+				'context' => array( 'view' ),
+			),
+			'description'  => array(
+				'type'    => 'string',
+				'context' => array( 'view' ),
+			),
+			'last_checked' => array(
+				'description' => __( 'When the store was last checked, as text.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => array( 'view' ),
+			),
+			'checked_note' => array(
+				'type'    => array( 'string', 'null' ),
+				'context' => array( 'view' ),
+			),
+			'intro'        => array(
+				'type'    => array( 'string', 'null' ),
+				'context' => array( 'view' ),
+			),
+			'run'          => array(
+				'description' => __( 'The check button: its label, whether a check is pending or stalled, and a status message.', 'woocommerce' ),
+				'type'        => 'object',
+				'context'     => array( 'view' ),
+			),
+			'fix_first'    => array(
+				'type'    => array( 'object', 'null' ),
+				'context' => array( 'view' ),
+			),
+			'sections'     => array(
+				'description' => __( 'One section per merchant question, with its badge and check rows.', 'woocommerce' ),
+				'type'        => 'array',
+				'context'     => array( 'view' ),
+			),
+			'declared'     => array(
+				'type'    => array( 'object', 'null' ),
+				'context' => array( 'view' ),
+			),
+			'overview'     => array(
+				'description' => __( 'The AI tools Overview: the AI shopping card and the link to every check.', 'woocommerce' ),
+				'type'        => 'object',
+				'context'     => array( 'view' ),
+			),
+		);
+		return $schema;
 	}
 
 	/**

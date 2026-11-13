@@ -393,7 +393,7 @@ class StoreOutputChecks {
 				'id'       => 'product_gtin_jsonld',
 				'group'    => 'understand',
 				'test'     => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::served_gtin_ok( $products, $responses->product() ) ),
-				'blocks'   => 'listing',
+				'blocks'   => 'discovery',
 				'name'     => __( 'Product structured data has a valid GTIN', 'woocommerce' ),
 				'label'    => __( 'Product structured data has no valid GTIN', 'woocommerce' ),
 				'why'      => __( 'Agents match products by GTIN, and the product page gives none or an invalid one.', 'woocommerce' ),
@@ -406,10 +406,10 @@ class StoreOutputChecks {
 				'id'       => 'product_brand_jsonld',
 				'group'    => 'understand',
 				'test'     => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::served_brand_ok( $products, $responses->product() ) ),
-				'blocks'   => 'listing',
+				'blocks'   => 'discovery',
 				'name'     => __( 'Product structured data has a brand', 'woocommerce' ),
 				'label'    => __( 'Product structured data has no brand', 'woocommerce' ),
-				'why'      => __( 'ChatGPT needs a brand to list a product. Your product has one, but the page gives agents none.', 'woocommerce' ),
+				'why'      => __( 'Agents use the brand to match and compare products. Your product has one, but the page gives agents none.', 'woocommerce' ),
 				'fix'      => __( 'WooCommerce adds the product\'s brand. Usually an SEO plugin or your theme replaces it: check its schema settings.', 'woocommerce' ),
 				'fix_url'  => '',
 				'conflict' => true,
@@ -441,7 +441,7 @@ class StoreOutputChecks {
 				'id'      => 'product_return_policy_schema',
 				'group'   => 'buy',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => self::offer_has( $products, 'hasMerchantReturnPolicy' ) ),
-				'blocks'  => 'listing',
+				'blocks'  => 'checkout',
 				'name'    => __( 'Product structured data links your returns policy', 'woocommerce' ),
 				'label'   => __( 'Product structured data has no returns policy', 'woocommerce' ),
 				'why'     => __( 'Agents tell shoppers whether they can return an item before they buy, and read it from the product\'s structured data.', 'woocommerce' ),
@@ -452,10 +452,10 @@ class StoreOutputChecks {
 				'id'      => 'product_shipping_schema',
 				'group'   => 'buy',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => self::ships( $responses ) ? self::offer_has( $products, 'shippingDetails' ) : null ),
-				'blocks'  => 'listing',
+				'blocks'  => 'checkout',
 				'name'    => __( 'Product structured data gives shipping details', 'woocommerce' ),
 				'label'   => __( 'Product structured data has no shipping details', 'woocommerce' ),
-				'why'     => __( 'Agents compare delivery options, and leave out products whose shipping they can\'t tell.', 'woocommerce' ),
+				'why'     => __( 'Agents tell shoppers the delivery options and cost before they buy.', 'woocommerce' ),
 				'fix'     => __( 'Set up shipping zones so WooCommerce can add shipping details to your products.', 'woocommerce' ),
 				'fix_url' => admin_url( 'admin.php?page=wc-settings&tab=shipping' ),
 			),
@@ -463,7 +463,7 @@ class StoreOutputChecks {
 				'id'      => 'product_buy_action_schema',
 				'group'   => 'buy',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => self::has_buy_action( $products, $responses->product() ) ),
-				'blocks'  => 'listing',
+				'blocks'  => 'checkout',
 				'name'    => __( 'Product structured data says how to buy', 'woocommerce' ),
 				'label'   => __( 'Product structured data has no buy action', 'woocommerce' ),
 				'why'     => __( 'A BuyAction tells agents where to send a shopper to buy the product.', 'woocommerce' ),
@@ -1480,7 +1480,8 @@ class StoreOutputChecks {
 		$product = null;
 		foreach ( $ids as $id ) {
 			$candidate = wc_get_product( (int) $id );
-			if ( $candidate instanceof \WC_Product && $candidate->is_visible() ) {
+			// A product the scan checks, "Search results only" included.
+			if ( $candidate instanceof \WC_Product && ProductScan::covers( $candidate ) ) {
 				$product = $candidate;
 				break;
 			}

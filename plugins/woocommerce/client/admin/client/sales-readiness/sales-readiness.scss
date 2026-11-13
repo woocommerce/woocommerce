@@ -1,0 +1,240 @@
+// Sales readiness page and the AI tools Overview. Tokens from the design system; the build injects their fallbacks.
+
+// The page header (admin-ui Page) runs edge to edge: drop wc-admin's margin and gutter around the page.
+.woocommerce-admin-page__sales-readiness {
+	.woocommerce-layout__primary {
+		margin: 0;
+	}
+
+	.woocommerce-layout__main {
+		padding: 0;
+	}
+}
+
+.wc-sales-readiness {
+	--wc-sr-muted: var(--wpds-color-foreground-content-neutral-weak);
+	--wc-sr-stroke: var(--wpds-color-stroke-surface-neutral-weak);
+	--wc-sr-link: var(--wpds-color-foreground-interactive-brand);
+
+	color: var(--wpds-color-foreground-content-neutral);
+
+	&__content {
+		box-sizing: border-box;
+		width: 100%;
+		// Cards are 632px wide, as in the design.
+		max-width: calc(632px + 2 * var(--wpds-dimension-padding-lg));
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: var(--wpds-dimension-gap-lg);
+		padding: var(--wpds-dimension-padding-2xl) var(--wpds-dimension-padding-lg);
+	}
+
+	&__muted {
+		color: var(--wc-sr-muted);
+	}
+
+	// AI tools Overview: centered in the settings panel, like the Sales readiness content.
+	&--overview {
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		gap: var(--wpds-dimension-gap-lg);
+		max-width: 632px;
+		margin: 0 auto;
+		// The settings form already leaves a gap under the tabs.
+		padding-block: 0 var(--wpds-dimension-padding-3xl);
+	}
+}
+
+.wc-sales-readiness-card {
+	border-color: var(--wpds-color-stroke-surface-neutral);
+
+	&__title {
+		font-weight: 600;
+	}
+
+	&__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--wpds-dimension-gap-md);
+		width: 100%;
+	}
+
+	&__actions {
+		margin-block-start: var(--wpds-dimension-gap-md);
+	}
+
+	// 24px from the last row's divider to "View all checks" on the Overview.
+	.wc-sales-readiness-list + &__actions {
+		margin-block-start: var(--wpds-dimension-gap-xl);
+	}
+
+	// 24px from a question card's description to its first row.
+	&__description {
+		display: block;
+		margin-block-end: var(--wpds-dimension-gap-xl);
+	}
+
+	// A list that opens the card starts at the content's edge, not a row's padding below it.
+	.components-card__body > .wc-sales-readiness-list:first-child > .wc-sales-readiness-row:first-child,
+	&__description + .wc-sales-readiness-list > .wc-sales-readiness-row:first-child {
+		padding-block-start: 0;
+	}
+
+	.wc-sales-readiness-channels + .wc-sales-readiness-list {
+		border-block-start: 1px solid var(--wc-sr-stroke);
+	}
+}
+
+.wc-sales-readiness-overview__heading {
+	display: block;
+	font-weight: 600;
+	margin-block-start: var(--wpds-dimension-padding-xl);
+}
+
+.wc-sales-readiness-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+
+	&__group {
+		margin: 0;
+	}
+
+	// A line under every row, the last one too. In Fix first each item is its own group.
+	> .wc-sales-readiness-row,
+	> .wc-sales-readiness-list__group .wc-sales-readiness-row {
+		border-block-end: 1px solid var(--wc-sr-stroke);
+	}
+}
+
+// 24px from the card description to Fix first's first heading. Padding, so the margins don't collapse.
+.wc-sales-readiness-list:has(.wc-sales-readiness-tier) {
+	padding-block-start: var(--wpds-dimension-gap-xl);
+}
+
+// A tier heading, then 16px to its first row. Required sits right after the first one.
+.wc-sales-readiness-tier {
+	display: flex;
+	align-items: center;
+	gap: var(--wpds-dimension-gap-sm);
+	padding: 0;
+	margin: var(--wpds-dimension-gap-lg) 0;
+	font-weight: 600;
+
+	.wc-sales-readiness-list__group:first-child > & {
+		margin-block-start: 0;
+	}
+}
+
+// The tier's margin is the space above the first row under it.
+.wc-sales-readiness-tier + .wc-sales-readiness-list > .wc-sales-readiness-row {
+	padding-block-start: 0;
+}
+
+.wc-sales-readiness-row {
+	padding: var(--wpds-dimension-padding-lg) 0;
+	margin: 0;
+
+	// Dark markers; grey only for a check that couldn't run.
+	&__marker {
+		flex: 0 0 auto;
+		color: var(--wpds-color-foreground-content-neutral);
+		fill: currentColor;
+
+		&--muted {
+			color: var(--wc-sr-muted);
+		}
+	}
+
+	&__body {
+		flex: 1;
+		min-width: 0;
+		gap: var(--wpds-dimension-gap-xs);
+	}
+
+	// body-md at 14px, as in the design; the scale has no 14px step.
+	&__title {
+		display: inline-flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-sm);
+		font-size: 14px;
+		font-weight: 500;
+		// 24px, the badge's height, so the title text sits at the same height with or without a badge.
+		line-height: var(--wpds-typography-line-height-md);
+	}
+
+	// The fix line reads as an instruction, so it keeps the text color.
+	&__fix {
+		color: var(--wpds-color-foreground-content-neutral);
+	}
+
+	// 24px from the text, with the row's own 8px gap. Same size and line height as the title, so their tops align.
+	&__action {
+		flex: none;
+		margin-inline-start: var(--wpds-dimension-gap-lg);
+		font-size: 14px;
+		line-height: var(--wpds-typography-line-height-md);
+	}
+}
+
+.wc-sales-readiness-channels {
+	list-style: none;
+	margin: 0 0 var(--wpds-dimension-gap-sm);
+	padding: var(--wpds-dimension-padding-xs) 0 var(--wpds-dimension-padding-lg);
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: var(--wpds-dimension-gap-lg);
+
+	li {
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__name {
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--wc-sr-muted);
+	}
+
+	&__count {
+		font-size: 20px;
+		font-weight: 500;
+	}
+}
+
+.wc-sales-readiness-fold {
+	padding-block-start: var(--wpds-dimension-padding-sm);
+
+	// "Show more" and "Hide" line up with the card text.
+	> .components-button {
+		padding-inline: 0;
+	}
+}
+
+.wc-sales-readiness-checked {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--wpds-dimension-gap-lg);
+
+	> div {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__status .components-spinner {
+		margin: 0;
+	}
+
+	&__intro {
+		display: block;
+		margin-block-end: var(--wpds-dimension-gap-md);
+	}
+}

@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
-use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\ProductStatus;
 
 defined( 'ABSPATH' ) || exit;
@@ -171,7 +170,7 @@ class StoreResponses {
 	}
 
 	/**
-	 * The newest published product of a type the report checks that is in the shop catalog, or null when there is none.
+	 * The newest product the scan checks (ProductScan::count_query()), or null when there is none.
 	 * Password protected products are left out, since their page shows a form instead of the product. A product with
 	 * a price comes first, so one unfinished product doesn't decide a check for the whole store; only the five newest
 	 * of the others are looked at.
@@ -179,18 +178,19 @@ class StoreResponses {
 	public function product(): ?\WC_Product {
 		if ( null === $this->product ) {
 			$this->product = false;
-			$products      = wc_get_products(
+			$ids           = get_posts(
 				array(
-					'status'       => ProductStatus::PUBLISH,
-					'visibility'   => CatalogVisibility::CATALOG,
-					'type'         => ProductScan::SUPPORTED_TYPES,
-					'has_password' => false,
-					'limit'        => 5,
-					'orderby'      => 'date',
-					'order'        => 'DESC',
+					'post_type'      => 'product',
+					'post_status'    => ProductStatus::PUBLISH,
+					'has_password'   => false,
+					'tax_query'      => ProductScan::count_query( ProductScan::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Five rows, once per background scan.
+					'posts_per_page' => 5,
+					'fields'         => 'ids',
+					'orderby'        => 'date',
+					'order'          => 'DESC',
 				)
 			);
-			foreach ( is_array( $products ) ? $products : array() as $product ) {
+			foreach ( array_map( 'wc_get_product', $ids ) as $product ) {
 				if ( ! $product instanceof \WC_Product ) {
 					continue;
 				}
