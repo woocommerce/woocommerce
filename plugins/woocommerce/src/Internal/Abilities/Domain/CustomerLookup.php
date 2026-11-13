@@ -54,7 +54,11 @@ final class CustomerLookup extends CustomersDataStore {
 			return false;
 		}
 
-		return null === $row->user_id ? null : (int) $row->user_id;
+		if ( null === $row->user_id ) {
+			return null;
+		}
+
+		return get_userdata( (int) $row->user_id ) ? (int) $row->user_id : false;
 	}
 
 	/**
@@ -65,6 +69,16 @@ final class CustomerLookup extends CustomersDataStore {
 	 */
 	public static function get_order_count_sql( string $order_stats_table ): string {
 		return 'SUM( CASE WHEN ' . self::get_countable_customer_order_predicate( $order_stats_table ) . ' THEN 1 ELSE 0 END )';
+	}
+
+	/**
+	 * SQL for the date of the latest joined order stats row that is an order, not a refund.
+	 *
+	 * @param string $order_stats_table Order stats table name or alias.
+	 * @return string
+	 */
+	public static function get_last_order_date_sql( string $order_stats_table ): string {
+		return 'MAX( CASE WHEN ' . self::get_countable_customer_order_predicate( $order_stats_table ) . " THEN {$order_stats_table}.date_created_gmt END )";
 	}
 
 	/**
