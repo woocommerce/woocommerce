@@ -1286,12 +1286,12 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * @testdox update_cart_action() removes the item and redirects to a clean URL, with or without a referer ("$referer_path").
 	 *
 	 * @testWith ["", ""]
-	 *           ["/shop/?remove_item=stale&add-to-cart=12", "/shop/"]
+	 *           ["/shop/?remove_item=stale&add-to-cart=12", "/shop/?removed_item=1"]
 	 *
 	 * @covers WC_Form_Handler::update_cart_action()
 	 *
 	 * @param string $referer_path  Referer path, or an empty string for no referer.
-	 * @param string $expected_path Expected redirect path, or an empty string for the cart page.
+	 * @param string $expected_path Expected redirect path, or an empty string for the cart page with removed_item=1.
 	 */
 	public function test_update_cart_action_redirects_after_removing_item( string $referer_path, string $expected_path ): void {
 		$cart_page_url = $this->create_cart_page();
@@ -1310,8 +1310,9 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 		$redirect = $this->dispatch_update_cart_action_expecting_redirect();
 
-		$expected_base = '' === $expected_path ? $cart_page_url : home_url( $expected_path );
-		$this->assertSame( add_query_arg( 'removed_item', '1', $expected_base ), $redirect, 'Removing an item should redirect to a URL without the remove link arguments.' );
+		// The cart page URL depends on the test site's permalink settings, so only that case is built from it.
+		$expected = '' === $expected_path ? add_query_arg( 'removed_item', '1', $cart_page_url ) : home_url( $expected_path );
+		$this->assertSame( $expected, $redirect, 'Removing an item should redirect to a URL without the remove link arguments.' );
 		$this->assertEmpty( WC()->cart->get_cart_item( $cart_item_key ), 'The item should be removed from the cart.' );
 		$this->assertStringContainsString( 'class="restore-item" rel="nofollow"', wc_get_notices( 'success' )[0]['notice'] ?? '', 'The undo link should tell crawlers not to follow it.' );
 	}
