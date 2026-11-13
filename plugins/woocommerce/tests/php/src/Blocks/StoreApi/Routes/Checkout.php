@@ -2756,12 +2756,18 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 * Both addresses default to the one the order already carries and the payment method to one the guard
 	 * accepts, so a test states only the fields it changes.
 	 *
-	 * @param \WC_Order  $order    Order being paid for.
-	 * @param array      $billing  Billing fields to override.
-	 * @param array|null $shipping Shipping fields to override, or null to leave the shipping address out.
+	 * @param \WC_Order  $order                  Order being paid for.
+	 * @param array      $billing                Billing fields to override.
+	 * @param array|null $shipping               Shipping fields to override, or null to leave the shipping address out.
+	 * @param bool       $merge_existing_billing Whether to merge the stored billing address into the request.
 	 * @return \WP_REST_Response
 	 */
-	private function dispatch_pay_for_order_request( \WC_Order $order, array $billing = array(), ?array $shipping = array() ) {
+	private function dispatch_pay_for_order_request(
+		\WC_Order $order,
+		array $billing = array(),
+		?array $shipping = array(),
+		bool $merge_existing_billing = true
+	) {
 		$address = $order->get_address( 'billing' );
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -2772,7 +2778,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 			)
 		);
 		$body = array(
-			'billing_address' => array_merge( $address, $billing ),
+			'billing_address' => $merge_existing_billing ? array_merge( $address, $billing ) : $billing,
 			'payment_method'  => WC_Gateway_BACS::ID,
 		);
 		if ( null !== $shipping ) {
@@ -2804,6 +2810,31 @@ class Checkout extends \WP_Test_REST_TestCase {
 	private function set_taxes_based_on( string $group ) {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_tax_based_on', $group );
+	}
+
+	/**
+	 * Makes shipping unavailable through the global setting or by removing every method.
+	 *
+	 * @param bool $disable_shipping Whether to disable shipping globally.
+	 * @return \Closure|null Shipping method count filter to remove, or null when shipping is disabled.
+	 */
+	private function make_shipping_unavailable( bool $disable_shipping ): ?\Closure {
+		if ( $disable_shipping ) {
+			update_option( 'woocommerce_ship_to_countries', 'disabled' );
+			return null;
+		}
+
+		$no_methods = static function () {
+			return array(
+				'version'  => \WC_Cache_Helper::get_transient_version( 'shipping' ),
+				'legacy'   => 0,
+				'enabled'  => 0,
+				'disabled' => 0,
+			);
+		};
+		add_filter( 'pre_transient_wc_shipping_method_count', $no_methods );
+
+		return $no_methods;
 	}
 
 	/**
@@ -2868,6 +2899,268 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
 		$this->assertEquals( 'GB', wc_get_order( $order->get_id() )->get_shipping_country() );
+	}
+
+	/**
+	 * @testdox Existing order payment should tax an order that ships nothing and holds no address at its billing address.
+	 */
+	public function test_checkout_order_taxes_virtual_order_without_address_at_billing() {
+		$this->set_taxes_based_on( 'shipping' );
+		$this->enable_taxes_with_us_ca_rate();
+
+		// A shipping extension may decide from the submitted address, so the hook must see billing after it is set.
+		add_filter(
+			'woocommerce_order_needs_shipping',
+			static function ( $needs_shipping, $filtered_order ) {
+				return 'US' !== $filtered_order->get_billing_country() || $needs_shipping;
+			},
+			10,
+			2
+		);
+
+		// A merchant-created order for a virtual product, awaiting the shopper's details.
+		$virtual_product = \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$order           = \WC_Helper_Order::create_order( 0, $virtual_product );
+		$order->set_billing_address(
+			array(
+				'city'     => '',
+				'state'    => 'CA',
+				'postcode' => '94103',
+				'country'  => '',
+			)
+		);
+		$order->save();
+
+		add_filter(
+			'woocommerce_get_order_address',
+			static function ( $address, $address_type ) {
+				if ( 'billing' === $address_type ) {
+					$address['postcode'] = 'FILTERED';
+				}
+				return $address;
+			},
+			10,
+			2
+		);
+
+		$billing = array(
+			'city'    => 'San Francisco',
+			'country' => 'US',
+			'email'   => $order->get_billing_email(),
+		);
+
+		// The shipping address of an order that ships nothing is not validated, so it must not set the tax.
+		$response = $this->dispatch_pay_for_order_request( $order, $billing, $this->get_different_destination(), false );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'US', $stored_order->get_shipping_country() );
+		$this->assertEquals( 'CA', $stored_order->get_shipping_state() );
+		$this->assertEquals( '94103', $stored_order->get_shipping_postcode() );
+		$this->assertEquals( 4.0, (float) $stored_order->get_total_tax() );
+	}
+
+	/**
+	 * @testdox Existing order address updates should re-check shipping needs after copying billing to shipping.
+	 */
+	public function test_existing_order_address_update_rechecks_shipping_needs_after_copying_billing() {
+		$virtual_product = \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$order           = \WC_Helper_Order::create_order( 0, $virtual_product );
+		$billing         = $order->get_address( 'billing' );
+		$shipping        = array_merge( $billing, $this->get_different_destination() );
+		$order->set_billing_country( '' );
+		$order->save();
+
+		$shipping_countries = array();
+		add_filter(
+			'woocommerce_order_needs_shipping',
+			static function ( $needs_shipping, $filtered_order ) use ( &$shipping_countries ) {
+				$shipping_countries[] = $filtered_order->get_shipping_country();
+				return 'US' === $filtered_order->get_shipping_country() || $needs_shipping;
+			},
+			10,
+			2
+		);
+
+		( new OrderController() )->update_existing_order_addresses( $order, $billing, $shipping );
+
+		$this->assertSame( array( 'GB', 'US' ), $shipping_countries );
+	}
+
+	/**
+	 * @testdox Existing order payment should keep the shipping address of a physical order with a shipping line when shipping is unavailable.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $disable_shipping Whether to disable shipping globally instead of removing every method.
+	 */
+	public function test_checkout_order_keeps_physical_order_shipping_with_shipping_line_when_shipping_is_unavailable( bool $disable_shipping ) {
+		$no_methods = $this->make_shipping_unavailable( $disable_shipping );
+
+		// A merchant-created order for a physical product with a manual shipping line and no address yet.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_country( '' );
+		$order->save();
+		$this->assertFalse( $order->needs_shipping() );
+
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'country' => 'US' ), $this->get_different_destination() );
+		if ( null !== $no_methods ) {
+			remove_filter( 'pre_transient_wc_shipping_method_count', $no_methods );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'GB', wc_get_order( $order->get_id() )->get_shipping_country() );
+	}
+
+	/**
+	 * @testdox Existing order payment should tax a physical order without a shipping line at billing when shipping is unavailable.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $disable_shipping Whether to disable shipping globally instead of removing every method.
+	 */
+	public function test_checkout_order_taxes_physical_order_without_shipping_line_at_billing_when_shipping_is_unavailable( bool $disable_shipping ) {
+		$this->set_taxes_based_on( 'shipping' );
+		$this->enable_taxes_with_us_ca_rate();
+		$no_methods = $this->make_shipping_unavailable( $disable_shipping );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->remove_order_items( 'shipping' );
+		$order->set_shipping_total( 0 );
+		$order->set_billing_country( '' );
+		$order->save();
+		$this->assertFalse( $order->needs_shipping() );
+		$this->assertCount( 0, $order->get_shipping_methods() );
+
+		$response = $this->dispatch_pay_for_order_request(
+			$order,
+			array(
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '94103',
+			),
+			$this->get_different_destination()
+		);
+		if ( null !== $no_methods ) {
+			remove_filter( 'pre_transient_wc_shipping_method_count', $no_methods );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'US', $stored_order->get_shipping_country() );
+		$this->assertEquals( 'CA', $stored_order->get_shipping_state() );
+		$this->assertEquals( '94103', $stored_order->get_shipping_postcode() );
+		$this->assertEquals( 4.0, (float) $stored_order->get_total_tax() );
+	}
+
+	/**
+	 * @testdox Existing order payment should tax a virtual order with a shipping line at billing when shipping is unavailable.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $disable_shipping Whether to disable shipping globally instead of removing every method.
+	 */
+	public function test_checkout_order_taxes_virtual_order_with_shipping_line_at_billing_when_shipping_is_unavailable( bool $disable_shipping ) {
+		$this->set_taxes_based_on( 'shipping' );
+		$this->enable_taxes_with_us_ca_rate();
+		$no_methods = $this->make_shipping_unavailable( $disable_shipping );
+
+		$virtual_product = \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$order           = \WC_Helper_Order::create_order( 0, $virtual_product );
+		$order->set_billing_country( '' );
+		$order->save();
+		$this->assertFalse( $order->needs_shipping() );
+		$this->assertCount( 1, $order->get_shipping_methods() );
+
+		$response = $this->dispatch_pay_for_order_request(
+			$order,
+			array(
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '94103',
+			),
+			$this->get_different_destination()
+		);
+		if ( null !== $no_methods ) {
+			remove_filter( 'pre_transient_wc_shipping_method_count', $no_methods );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'US', $stored_order->get_shipping_country() );
+		$this->assertEquals( 'CA', $stored_order->get_shipping_state() );
+		$this->assertEquals( '94103', $stored_order->get_shipping_postcode() );
+		$this->assertEquals( 4.0, (float) $stored_order->get_total_tax() );
+	}
+
+	/**
+	 * @testdox Existing order payment should keep the shipping address of a mixed order when shipping is unavailable.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $disable_shipping Whether to disable shipping globally instead of removing every method.
+	 */
+	public function test_checkout_order_keeps_mixed_order_shipping_when_shipping_is_unavailable( bool $disable_shipping ) {
+		$no_methods = $this->make_shipping_unavailable( $disable_shipping );
+
+		$virtual_product  = \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$physical_product = \WC_Helper_Product::create_simple_product();
+		$order            = \WC_Helper_Order::create_order( 0, $virtual_product );
+		$order->add_product( $physical_product );
+		$order->set_billing_country( '' );
+		$order->calculate_totals( false );
+
+		$items = array_values( $order->get_items() );
+		$this->assertCount( 2, $items );
+		$this->assertFalse( $items[0]->get_product()->needs_shipping() );
+		$this->assertTrue( $items[1]->get_product()->needs_shipping() );
+		$this->assertFalse( $order->needs_shipping() );
+		$this->assertCount( 1, $order->get_shipping_methods() );
+
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'country' => 'US' ), $this->get_different_destination() );
+		if ( null !== $no_methods ) {
+			remove_filter( 'pre_transient_wc_shipping_method_count', $no_methods );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'GB', wc_get_order( $order->get_id() )->get_shipping_country() );
+	}
+
+	/**
+	 * @testdox Existing order payment should ship a filtered physical order to billing when an enabled or disabled shipping method exists.
+	 * @testWith [1, 0]
+	 *           [0, 1]
+	 *
+	 * @param int $enabled_methods  Number of enabled shipping methods.
+	 * @param int $disabled_methods Number of disabled shipping methods.
+	 */
+	public function test_checkout_order_ships_filtered_physical_order_to_billing_with_shipping_methods( int $enabled_methods, int $disabled_methods ) {
+		$method_counts = static function () use ( $enabled_methods, $disabled_methods ) {
+			return array(
+				'version'  => \WC_Cache_Helper::get_transient_version( 'shipping' ),
+				'legacy'   => 0,
+				'enabled'  => $enabled_methods,
+				'disabled' => $disabled_methods,
+			);
+		};
+		add_filter( 'pre_transient_wc_shipping_method_count', $method_counts );
+
+		$this->assertSame( 1, wc_get_shipping_method_count( true ) );
+		$this->assertSame( $enabled_methods, wc_get_shipping_method_count( false, true ) );
+		add_filter( 'woocommerce_order_needs_shipping', '__return_false' );
+
+		// A merchant-created order for a physical product that an extension says ships nothing, with no address yet.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_country( '' );
+		$order->save();
+
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'country' => 'US' ), $this->get_different_destination() );
+		remove_filter( 'woocommerce_order_needs_shipping', '__return_false' );
+		remove_filter( 'pre_transient_wc_shipping_method_count', $method_counts );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'US', wc_get_order( $order->get_id() )->get_shipping_country() );
 	}
 
 	/**

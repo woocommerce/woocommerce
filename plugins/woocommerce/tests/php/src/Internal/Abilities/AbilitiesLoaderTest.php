@@ -998,10 +998,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_permission_refusal_provider_covers_every_canonical_ability(): void {
 		$classes = ( new \ReflectionClassConstant( AbilitiesLoader::class, 'CORE_ABILITY_DEFINITION_CLASSES' ) )->getValue();
-		$core    = array_map(
+		$names   = array_map(
 			static fn( string $class_name ): string => is_a( $class_name, ActionableAbility::class, true ) ? $class_name::ABILITY_NAME : $class_name::get_name(),
 			$classes
 		);
+		// The loader skips an empty name, which a feature-gated ability reports while its feature is off.
+		$core    = array_values( array_filter( $names, static fn( string $name ): bool => '' !== $name ) );
 		$covered = array_column( $this->provider_canonical_abilities_with_minimal_input(), 0 );
 
 		$this->assertEqualsCanonicalizing( $core, self::CANONICAL_ABILITY_IDS, 'CANONICAL_ABILITY_IDS should list every Core ability.' );
@@ -1145,6 +1147,63 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'tax-rates-query'          => array(
 				'woocommerce/tax-rates-query',
 				array(),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should grant a subscriber access when woocommerce_rest_check_permissions returns a truthy non-boolean, as REST does.
+	 *
+	 * @dataProvider provider_abilities_checking_rest_permissions
+	 *
+	 * @param string $ability_id Ability ID.
+	 * @param array  $input      Input that reaches the REST permission check.
+	 */
+	public function test_abilities_accept_truthy_rest_permission( string $ability_id, array $input ): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'subscriber' ) ) );
+		add_filter( 'woocommerce_rest_check_permissions', fn() => 1 );
+
+		$this->assertTrue( wp_get_ability( $ability_id )->check_permissions( $input ) );
+	}
+
+	/**
+	 * Provides one input per path through which an ability returns a REST permission check.
+	 *
+	 * @return array<string, array{0: string, 1: array}>
+	 */
+	public function provider_abilities_checking_rest_permissions(): array {
+		$missing_id = array( 'id' => PHP_INT_MAX );
+
+		return array(
+			'products-query'                 => array( 'woocommerce/products-query', $missing_id ),
+			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
+			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),
+			'payment-gateways-query'         => array( 'woocommerce/payment-gateways-query', array() ),
+			'customers-query'                => array( 'woocommerce/customers-query', array() ),
+			'shipping-zones-query'           => array( 'woocommerce/shipping-zones-query', array() ),
+			'tax-rates-query'                => array( 'woocommerce/tax-rates-query', array() ),
+			'product-attributes-query'       => array( 'woocommerce/product-attributes-query', array() ),
+			'product-attribute-create'       => array( 'woocommerce/product-attribute-create', array( 'name' => 'Size' ) ),
+			'product-terms-query'            => array( 'woocommerce/product-terms-query', array( 'taxonomy' => 'product_cat' ) ),
+			'product-terms-query of unknown' => array( 'woocommerce/product-terms-query', array( 'taxonomy' => 'pa_missing' ) ),
+			'product-term-create'            => array(
+				'woocommerce/product-term-create',
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Granted',
+				),
+			),
+			'product-term-update'            => array(
+				'woocommerce/product-term-update',
+				$missing_id + array( 'taxonomy' => 'product_cat' ),
+			),
+			'product-review-update'          => array(
+				'woocommerce/product-review-update',
+				$missing_id + array( 'status' => 'approved' ),
+			),
+			'product-review-reply'           => array(
+				'woocommerce/product-review-reply',
+				$missing_id + array( 'content' => 'Thanks!' ),
 			),
 		);
 	}
