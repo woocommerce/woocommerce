@@ -14,6 +14,7 @@ export type UserPreferences = {
 	dashboard_chart_interval?: string;
 	dashboard_chart_type?: string;
 	dashboard_leaderboard_rows?: string;
+	dashboard_performance_tour_shown?: 'yes' | 'no' | '';
 	dashboard_sections?: string;
 	homepage_layout?: string;
 	homepage_stats?: string;

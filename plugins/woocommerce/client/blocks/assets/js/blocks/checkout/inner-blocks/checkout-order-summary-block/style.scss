@@ -1,6 +1,10 @@
+.wc-block-components-checkout-order-summary__content-container {
+	display: contents;
+}
+
 .wp-block-woocommerce-checkout-order-summary-block {
 	border: 1px solid $universal-border-light;
-	border-radius: 5px;
+	border-radius: $universal-border-radius;
 	box-sizing: border-box;
 	@include font-small-locked;
 
@@ -20,7 +24,9 @@
 	}
 
 	.wc-block-components-checkout-order-summary__title {
-		margin-top: $gap;
+		@include breakpoint(">782px") {
+			margin-top: $gap;
+		}
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
@@ -39,7 +45,7 @@
 
 	.checkout-order-summary-block-fill {
 		border: 1px solid $universal-border-light;
-		border-radius: 5px;
+		border-radius: $universal-border-radius;
 
 		.wc-block-components-totals-wrapper:first-of-type {
 			border-top: 0;
@@ -92,6 +98,13 @@
 
 		&.checkout-order-summary-block-fill-wrapper {
 			padding-bottom: $gap-larger;
+
+			&.is-content-inline {
+				height: 1px;
+				overflow: hidden;
+				padding-bottom: 0;
+				visibility: hidden;
+			}
 		}
 
 		.wc-block-components-checkout-order-summary__title {

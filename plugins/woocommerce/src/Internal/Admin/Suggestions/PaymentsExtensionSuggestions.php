@@ -1500,9 +1500,7 @@ class PaymentsExtensionSuggestions {
 		),
 		'GY' => array(
 			self::TILOPAY,
-			self::PAYPAL_FULL_STACK,
 			self::VISA,
-			self::PAYPAL_WALLET,
 		),
 		'HT' => array(
 			self::VISA => array(
@@ -2136,7 +2134,9 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 		),
 		'KR' => array(
 			self::VISA => array(
@@ -2204,6 +2204,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'VN' => array(
 			self::PAYONEER => array(
@@ -2332,6 +2334,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'DJ' => array(
 			self::VISA => array(
@@ -2490,6 +2494,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'MA' => array(
 			self::PAYONEER => array(
@@ -2706,7 +2712,9 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 		),
 		'JO' => array(
 			self::MASTERCARD,
@@ -3989,7 +3997,7 @@ class PaymentsExtensionSuggestions {
 			self::KLARNA            => array(
 				'_type'       => self::TYPE_BNPL,
 				'title'       => esc_html__( 'Klarna Payments', 'woocommerce' ),
-				'description' => esc_html__( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.', 'woocommerce' ),
+				'description' => esc_html__( 'Offer flexible ways to pay: in full, later, or over time. Merchants get paid upfront; Klarna handles credit and fraud risk.', 'woocommerce' ),
 				'image'       => plugins_url( 'assets/images/onboarding/klarna-black.png', WC_PLUGIN_FILE ),
 				'icon'        => plugins_url( 'assets/images/onboarding/icons/klarna.svg', WC_PLUGIN_FILE ),
 				'plugin'      => array(
@@ -4258,7 +4266,7 @@ class PaymentsExtensionSuggestions {
 			),
 			self::EVERGREEN         => array(
 				'_type'  => self::TYPE_PSP,
-				// Evergreen does not have an icon on .org. Will be default for now.
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/evergreen.svg', WC_PLUGIN_FILE ),
 				'plugin' => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'evergreen-payments-northwest-gateway-wc',

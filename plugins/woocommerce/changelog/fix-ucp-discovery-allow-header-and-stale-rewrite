@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+UCP: Send an Allow header with 405 responses from /.well-known/ucp and recover the endpoint when the flag changes without a rewrite flush.

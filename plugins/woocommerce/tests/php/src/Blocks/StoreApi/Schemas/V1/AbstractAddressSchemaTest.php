@@ -13,15 +13,12 @@ use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use WC_Unit_Test_Case;
 
 /**
- * Tests that AbstractAddressSchema::sanitize_callback() does not strip
- * backslashes from address fields.
+ * Tests Store API address sanitization and response formatting.
  *
- * The Store API reads a JSON request body via json_decode(), which is never
- * subject to WordPress "magic quotes". Calling wp_unslash() on that data used
- * to silently drop real backslashes the user typed (e.g. "apt 4\"). These
- * tests guard against a regression of that behaviour.
+ * JSON address values are not magic-quoted, so literal backslashes must remain intact. Address fields are plain text and must not be HTML encoded during a cart or checkout round trip.
  *
  * @see https://github.com/woocommerce/woocommerce/issues/58214
+ * @see https://github.com/woocommerce/woocommerce/issues/68162
  */
 class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 
@@ -160,6 +157,27 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept a phone number up to 100 characters, the size of the order address phone column.
+	 */
+	public function test_accepts_phone_up_to_column_length(): void {
+		$address = $this->make_address( array( 'phone' => str_repeat( '1', 100 ) ) );
+
+		$this->assertTrue( $this->sut->validate_callback( $address, null, 'billing_address' ) );
+	}
+
+	/**
+	 * @testdox Should reject a phone number longer than 100 characters, which cannot be stored against the order.
+	 */
+	public function test_rejects_phone_longer_than_column_length(): void {
+		$address = $this->make_address( array( 'phone' => str_repeat( '1', 101 ) ) );
+
+		$result = $this->sut->validate_callback( $address, null, 'billing_address' );
+
+		$this->assertWPError( $result );
+		$this->assertContains( 'invalid_phone', $result->get_error_codes() );
+	}
+
+	/**
 	 * @testdox Should leave a phone number without invisible characters alone.
 	 */
 	public function test_does_not_alter_a_clean_phone(): void {
@@ -184,6 +202,29 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 
 			$this->assertIsString( $result['phone'] );
 		}
+	}
+
+	/**
+	 * @testdox Should sanitize address fields as plain text without encoding punctuation.
+	 */
+	public function test_sanitizes_address_fields_as_plain_text(): void {
+		$address = $this->make_address( array( 'company' => 'AT&T <b>Marketing</b>' ) );
+
+		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
+
+		$this->assertSame( 'AT&T Marketing', $result['company'] );
+	}
+
+	/**
+	 * @testdox Should return address fields as sanitized plain text without applying typography.
+	 */
+	public function test_get_item_response_returns_address_fields_as_plain_text(): void {
+		$customer = new \WC_Customer();
+		$customer->set_billing_company( 'AT&T <b>Marketing</b>' );
+
+		$result = $this->sut->get_item_response( $customer );
+
+		$this->assertSame( 'AT&T Marketing', $result['company'] );
 	}
 
 	/**
@@ -271,19 +312,14 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not run an additional address field through sanitize_text_field.
-	 *
-	 * Additional fields are sanitized by their own field type (sanitize_field()), not by the
-	 * core-field sanitization added to the default case of the switch above. A text field's
-	 * default sanitize() is a no-op, so a percent-encoded run untouched by wp_kses() is
-	 * evidence the new sanitize_text_field() call was skipped for this key.
+	 * @testdox Should preserve the existing sanitization of additional address fields.
 	 */
-	public function test_does_not_sanitize_additional_address_field_like_a_core_field(): void {
-		$address = $this->make_address( array( $this->field_id => 'Suite%20100' ) );
+	public function test_preserves_additional_address_field_sanitization(): void {
+		$address = $this->make_address( array( $this->field_id => 'Suite%20100 & <b>note</b>' ) );
 
 		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
 
-		$this->assertSame( 'Suite%20100', $result[ $this->field_id ] );
+		$this->assertSame( 'Suite%20100 &amp; note', $result[ $this->field_id ] );
 	}
 
 	/**

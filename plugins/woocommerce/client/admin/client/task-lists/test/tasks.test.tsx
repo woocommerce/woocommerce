@@ -80,13 +80,13 @@ describe( 'Task', () => {
 		cleanup();
 	} );
 
-	it( 'should render if no current task and finished resolving', () => {
+	it( 'should render if no current task and finished resolving', async () => {
 		const { queryByText } = render(
 			<div>
 				<TaskLists query={ {} } />
 			</div>
 		);
-		waitFor( () => {
+		await waitFor( () => {
 			expect( queryByText( 'task-list:main' ) ).toBeInTheDocument();
 			expect( queryByText( 'task-list:extended' ) ).toBeInTheDocument();
 			expect(
@@ -151,7 +151,7 @@ describe( 'Task', () => {
 	} );
 
 	describe( 'toggle list', () => {
-		it( 'should trigger hide track when clicking Show things to do next button', () => {
+		it( 'should trigger hide track when clicking Show things to do next button', async () => {
 			( useSelect as jest.Mock ).mockImplementation( () => ( {
 				isResolving: false,
 				taskLists: [
@@ -170,8 +170,8 @@ describe( 'Task', () => {
 					<TaskLists query={ {} } />
 				</div>
 			);
-			act( () => {
-				userEvent.click( getByText( 'Show things to do next' ) );
+			await act( async () => {
+				await userEvent.click( getByText( 'Show things to do next' ) );
 			} );
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'main_tasklist_hide',
@@ -180,7 +180,7 @@ describe( 'Task', () => {
 			expect( hideTaskList ).toHaveBeenCalledWith( 'main' );
 		} );
 
-		it( 'should trigger show track when toggling task list when isHidden was true', () => {
+		it( 'should trigger show track when toggling task list when isHidden was true', async () => {
 			( useSelect as jest.Mock ).mockImplementation( () => ( {
 				isResolving: false,
 				taskLists: [
@@ -199,8 +199,8 @@ describe( 'Task', () => {
 					<TaskLists query={ {} } />
 				</div>
 			);
-			act( () => {
-				userEvent.click( getByText( 'Show things to do next' ) );
+			await act( async () => {
+				await userEvent.click( getByText( 'Show things to do next' ) );
 			} );
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'main_tasklist_show',

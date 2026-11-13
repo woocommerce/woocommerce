@@ -154,7 +154,7 @@ describe( 'SettingsPaymentsCheque', () => {
 		} );
 	} );
 
-	it( 'supports keyboard navigation through the form fields', () => {
+	it( 'supports keyboard navigation through the form fields', async () => {
 		render( <SettingsPaymentsCheque /> );
 
 		// Make a change first so the Save button is enabled (and tabbable).
@@ -162,15 +162,15 @@ describe( 'SettingsPaymentsCheque', () => {
 			target: { value: 'Edited title' },
 		} );
 
-		userEvent.tab();
+		await userEvent.tab();
 		expect(
 			screen.getByLabelText( 'Enable check payments' )
 		).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect( screen.getByLabelText( 'Title' ) ).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect( screen.getByLabelText( 'Description' ) ).toHaveFocus();
-		userEvent.tab();
+		await userEvent.tab();
 		expect( screen.getByLabelText( 'Instructions' ) ).toHaveFocus();
 		// The shipping methods tree select and the virtual orders checkbox
 		// sit between Instructions and Save; tab until Save receives focus.
@@ -182,7 +182,7 @@ describe( 'SettingsPaymentsCheque', () => {
 			i < 6 && saveButton.ownerDocument.activeElement !== saveButton;
 			i++
 		) {
-			userEvent.tab();
+			await userEvent.tab();
 		}
 		expect( saveButton ).toHaveFocus();
 	} );

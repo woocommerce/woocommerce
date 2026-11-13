@@ -81,7 +81,7 @@ When selected from a modal, the tag is placed into a text block displayed in a s
 
 ## Format
 
-Personalization Tags use HTML comment syntax with a specific format: `<!--[token-name attributes]-->`. The token name follows a namespaced pattern (e.g., `my-plugin/tag-name`) and can include attributes for configuration. This format ensures safe fallback behavior in browsers and provides reliable parsing capabilities.
+Personalization Tags use HTML comment syntax with a specific format: `<!--[token-name attributes]-->`. The token name follows a namespaced pattern (e.g., `my-plugin/tag-name`) and can include attributes for configuration. Attribute values may be quoted with double or single quotes and may contain `]`. HTML entities in values (such as `&#039;`, which `esc_attr()` adds) are decoded before the callback receives them. In HTML content, a tag with the default `VALUE_TYPE_HTML` receives the values escaped for HTML instead, so it can output an argument as it is. A tag that uses an argument as data, such as a key, a date format or a URL, should declare `VALUE_TYPE_TEXT`, or decode the value itself. This format ensures safe fallback behavior in browsers and provides reliable parsing capabilities.
 
 **Example usage in a paragraph block:**
 
@@ -128,6 +128,10 @@ The Personalizer passes the context of each replacement to the tag callback unde
 | `Personalizer::RENDERING_CONTEXT_HTML` | HTML body content | An HTML fragment. Escape any dynamic data yourself (e.g. `esc_html()`) — unless the tag declares `VALUE_TYPE_TEXT`, in which case return raw text and the Personalizer escapes it (see [Value Type](#value-type)). |
 | `Personalizer::RENDERING_CONTEXT_TEXT` | Plain-text output (subject, preheader, plain-text body, `<title>`) | Raw plain text. No HTML markup, no entities, no escaping. |
 | `Personalizer::RENDERING_CONTEXT_HREF` | A link URL (`href`) | A raw, unescaped URL — do not pre-escape; URL escaping is applied when the attribute is written. |
+
+In the text rendering context the Personalizer also replaces tags in the `[text](url)` link targets of the Renderer's plain-text version (in the href rendering context), and removes a tag comment it cannot resolve, because the recipient would see it as text. A link whose whole target is a tag it cannot resolve loses the target and reads `[text]`.
+
+A tag callback that throws gives an empty value. The Personalizer logs the error through the package logger and carries on with the rest of the content.
 
 If the value is a URL *component* rather than a whole URL (e.g. an email address embedded in a query string), `rawurlencode()` it in the callback — the Personalizer cannot tell the difference.
 

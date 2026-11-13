@@ -25,8 +25,7 @@ let mockPaymentMethodsLoaded = true;
 // themselves, so a `woocommerce_shared_settings` callback that trims the
 // settings drops it and `getSetting` falls back to what the caller passed.
 let mockIncompatibleExtensions:
-	| Array< { id: string; title: string } >
-	| undefined = [];
+	Array< { id: string; title: string } > | undefined = [];
 
 const SITE_A = 1;
 const SITE_B = 2;

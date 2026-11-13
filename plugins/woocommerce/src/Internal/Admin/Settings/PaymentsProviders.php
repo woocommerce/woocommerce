@@ -408,8 +408,7 @@ class PaymentsProviders {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					/* translators: %s: Gateway ID. */
-					esc_html__( 'The provider class for gateway ID "%s" must extend the PaymentGateway class.', 'woocommerce' ),
+					esc_html( 'The provider class for gateway ID "%s" must extend the PaymentGateway class.' ),
 					$gateway_id
 				),
 				'10.4.0'
@@ -456,8 +455,7 @@ class PaymentsProviders {
 				wc_doing_it_wrong(
 					__METHOD__,
 					sprintf(
-						/* translators: %s: Payment extension suggestion ID. */
-						esc_html__( 'The provider class for payment extension suggestion ID "%s" must extend the PaymentGateway class.', 'woocommerce' ),
+						esc_html( 'The provider class for payment extension suggestion ID "%s" must extend the PaymentGateway class.' ),
 						$pes_id
 					),
 					'10.4.0'
@@ -895,10 +893,8 @@ class PaymentsProviders {
 		}
 
 		$payments_nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_KEY, array() );
-		if ( empty( $payments_nox_profile ) ) {
+		if ( ! is_array( $payments_nox_profile ) ) {
 			$payments_nox_profile = array();
-		} else {
-			$payments_nox_profile = maybe_unserialize( $payments_nox_profile );
 		}
 
 		// Check if it is already marked as attached.
@@ -962,10 +958,8 @@ class PaymentsProviders {
 		}
 
 		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::PAYMENTS_NOX_PROFILE_KEY, true );
-		if ( empty( $user_payments_nox_profile ) ) {
+		if ( ! is_array( $user_payments_nox_profile ) ) {
 			$user_payments_nox_profile = array();
-		} else {
-			$user_payments_nox_profile = maybe_unserialize( $user_payments_nox_profile );
 		}
 
 		// Mark the suggestion as hidden.
@@ -1388,6 +1382,7 @@ class PaymentsProviders {
 					ExtensionSuggestions::SQUARE,
 					ExtensionSuggestions::PAYONEER,
 					ExtensionSuggestions::AIRWALLEX,
+					ExtensionSuggestions::KOMOJU,
 					ExtensionSuggestions::COINBASE,         // We don't have suggestion details yet.
 					ExtensionSuggestions::AUTHORIZE_NET,    // We don't have suggestion details yet.
 					ExtensionSuggestions::BOLT,             // We don't have suggestion details yet.
@@ -1574,12 +1569,7 @@ class PaymentsProviders {
 	 */
 	private function is_payment_extension_suggestion_hidden( array $extension ): bool {
 		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::PAYMENTS_NOX_PROFILE_KEY, true );
-		if ( empty( $user_payments_nox_profile ) ) {
-			return false;
-		}
-		$user_payments_nox_profile = maybe_unserialize( $user_payments_nox_profile );
-
-		if ( empty( $user_payments_nox_profile['hidden_suggestions'] ) ) {
+		if ( ! is_array( $user_payments_nox_profile ) || empty( $user_payments_nox_profile['hidden_suggestions'] ) ) {
 			return false;
 		}
 

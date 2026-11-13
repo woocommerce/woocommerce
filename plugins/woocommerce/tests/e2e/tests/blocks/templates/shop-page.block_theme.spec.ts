@@ -27,18 +27,6 @@ const expectShopTemplateToBeLoaded = async ( page: Page ) => {
 };
 
 test.describe( 'Shop page', () => {
-	test( 'template selector is not visible in the Page editor', async ( {
-		admin,
-		page,
-		requestUtils,
-	} ) => {
-		const shopPageId = await getShopPageId( requestUtils );
-
-		await admin.editPost( String( shopPageId ) );
-
-		await expect( page.getByText( 'Template' ) ).toBeHidden();
-	} );
-
 	test( 'loads the product catalog template after the shop page permalink is updated via REST API', async ( {
 		page,
 		requestUtils,

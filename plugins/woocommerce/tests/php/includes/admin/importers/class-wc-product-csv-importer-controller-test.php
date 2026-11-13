@@ -24,6 +24,19 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The CSV importer automatically maps the MPN column.
+	 */
+	public function test_mpn_csv_header_mapping(): void {
+		$sut    = new WC_Product_CSV_Importer_Controller();
+		$method = new ReflectionMethod( $sut, 'auto_map_columns' );
+		$method->setAccessible( true );
+
+		$mapping = $method->invoke( $sut, array( 'ID', 'MPN' ), false );
+
+		$this->assertSame( 'mpn', $mapping['MPN'] );
+	}
+
+	/**
 	 * Tests that the automatic mapping is case insensitive so that columns can be matched more easily.
 	 */
 	public function test_that_auto_mapping_is_case_insensitive() {
@@ -61,6 +74,41 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			),
 			$columns
 		);
+	}
+
+	/**
+	 * @testdox Should map exported global unique ID headers in English and translated stores.
+	 * @testWith ["en_US", "GTIN, UPC, EAN, or ISBN"]
+	 *           ["es_ES", "GTIN, UPC, EAN o ISBN"]
+	 *           ["es_ES", "GTIN, UPC, EAN, or ISBN"]
+	 *
+	 * @param string $locale Store locale.
+	 * @param string $header CSV column header.
+	 */
+	public function test_auto_mapping_global_unique_id( string $locale, string $header ): void {
+		wp_set_current_user( 0 );
+		add_filter(
+			'locale',
+			static function () use ( $locale ) {
+				return $locale;
+			}
+		);
+		add_filter(
+			'gettext_woocommerce',
+			static function ( $translation, $text ) use ( $locale ) {
+				return 'es_ES' === $locale && 'GTIN, UPC, EAN, or ISBN' === $text ? 'GTIN, UPC, EAN o ISBN' : $translation;
+			},
+			10,
+			2
+		);
+
+		$sut = new WC_Product_CSV_Importer_Controller();
+		// Mappings are included once, but the test framework restores hooks between datasets.
+		add_filter( 'woocommerce_csv_product_import_mapping_default_columns', 'wc_importer_default_english_mappings', 100 );
+		$method = new ReflectionMethod( WC_Product_CSV_Importer_Controller::class, 'auto_map_columns' );
+		$method->setAccessible( true );
+
+		$this->assertSame( array( 'global_unique_id' ), $method->invoke( $sut, array( $header ) ), 'The exported identifier column should be selected for import.' );
 	}
 
 	/**
@@ -517,6 +565,46 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The import log shows warnings from earlier batches without counting the rows as skipped.
+	 */
+	public function test_import_log_shows_warnings_for_updated_products(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->assertIsInt( $user_id );
+		wp_set_current_user( $user_id );
+
+		$first  = WC_Helper_Product::create_simple_product();
+		$second = WC_Helper_Product::create_simple_product();
+		$csv    = "ID,Name,Upsells\n{$first->get_id()},First update,missing-upsell\n{$second->get_id()},Second update,\n";
+
+		add_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+		$response = $this->dispatch_import_request( '0', $csv, true );
+		$this->assertSame( 1, $response['data']['updated'] );
+		$this->assertSame( 0, $response['data']['skipped'] );
+
+		$response = $this->dispatch_import_request( (string) $response['data']['position'], $csv, true );
+		$this->assertSame( 'cleanup:0', $response['data']['position'] );
+		$this->assertSame( 1, $response['data']['updated'] );
+		$this->assertSame( 0, $response['data']['skipped'] );
+
+		$sut                  = new WC_Product_CSV_Importer_Controller();
+		$done                 = new ReflectionMethod( $sut, 'done' );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'woocommerce-csv-importer' );
+		$done->setAccessible( true );
+		ob_start();
+		try {
+			$done->invoke( $sut );
+		} finally {
+			$html = (string) ob_get_clean();
+			unset( $_REQUEST['_wpnonce'] );
+		}
+
+		$this->assertStringContainsString( 'Some linked product fields were skipped', $html );
+		$this->assertStringContainsString( 'View import log', $html );
+		$this->assertStringContainsString( 'First update, ID ' . $first->get_id(), $html );
+		$this->assertStringContainsString( 'missing-upsell', $html );
+	}
+
+	/**
 	 * @testdox Retrying an abandoned run with the same CSV should skip rows without a SKU that the abandoned run imported.
 	 */
 	public function test_retrying_an_abandoned_run_does_not_duplicate_rows_without_a_sku(): void {
@@ -562,21 +650,23 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	 *
 	 * The AJAX wp_die() handler throws an Error because dispatch_ajax() catches Exception.
 	 *
-	 * @param string $position Import position to request.
-	 * @param string $csv      CSV contents to import.
+	 * @param string $position        Import position to request.
+	 * @param string $csv             CSV contents to import.
+	 * @param bool   $update_existing Whether to update existing products.
 	 * @return array
 	 */
-	private function dispatch_import_request( string $position, string $csv = self::MARKER_CSV ): array {
+	private function dispatch_import_request( string $position, string $csv = self::MARKER_CSV, bool $update_existing = false ): array {
 		$nonce = wp_create_nonce( 'wc-product-import' );
 		$file  = $this->write_import_csv( $csv );
 
-		$_REQUEST['security'] = $nonce;
-		$_POST['security']    = $nonce;
-		$_POST['file']        = $file;
-		$_POST['position']    = $position;
-		$_POST['mapping']     = array(
-			'from' => array( 'ID', 'Type', 'SKU', 'Name', 'Parent' ),
-			'to'   => array( 'id', 'type', 'sku', 'name', 'parent_id' ),
+		$_REQUEST['security']     = $nonce;
+		$_POST['security']        = $nonce;
+		$_POST['file']            = $file;
+		$_POST['position']        = $position;
+		$_POST['update_existing'] = $update_existing;
+		$_POST['mapping']         = array(
+			'from' => array( 'ID', 'Type', 'SKU', 'Name', 'Parent', 'Upsells' ),
+			'to'   => array( 'id', 'type', 'sku', 'name', 'parent_id', 'upsell_ids' ),
 		);
 
 		add_filter( 'wp_doing_ajax', '__return_true' );
@@ -595,7 +685,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			remove_filter( 'wp_die_ajax_handler', array( $this, 'get_throwing_die_handler' ) );
 
 			wp_delete_file( $file );
-			unset( $_POST['file'], $_POST['position'], $_POST['mapping'], $_POST['security'], $_REQUEST['security'] );
+			unset( $_POST['file'], $_POST['position'], $_POST['mapping'], $_POST['security'], $_POST['update_existing'], $_REQUEST['security'] );
 		}
 
 		$decoded = json_decode( $response, true );
@@ -656,5 +746,131 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product_id ) );
+	}
+
+	/**
+	 * @testdox Customs CSV headers map to product properties regardless of case.
+	 */
+	public function test_customs_headers_are_mapped(): void {
+		$method = new ReflectionMethod( WC_Product_CSV_Importer_Controller::class, 'auto_map_columns' );
+		$method->setAccessible( true );
+		$sut = new WC_Product_CSV_Importer_Controller();
+
+		$expected = array( 'customs_commodity_code', 'customs_country_of_origin', 'customs_description' );
+
+		$this->assertSame(
+			$expected,
+			$method->invoke( $sut, array( 'Commodity code (HS code)', 'COUNTRY OF ORIGIN', 'Customs description' ) ),
+			'Exported customs labels should map to the customs setters.'
+		);
+		$this->assertSame(
+			$expected,
+			$method->invoke( $sut, array( 'CUSTOMS_COMMODITY_CODE', 'Customs_Country_Of_Origin', 'customs_description' ) ),
+			'Canonical customs headers should map to the customs setters.'
+		);
+
+		// The controller has loaded the mappings; an empty list skips the en_US early return.
+		$english = wc_importer_default_english_mappings( array() );
+		foreach ( array( 'Commodity code (HS code)', 'Country of origin', 'Customs description' ) as $index => $label ) {
+			$this->assertSame( $expected[ $index ], $english[ $label ] ?? null, "Translated stores should still map the English {$label} header." );
+		}
+	}
+
+	/**
+	 * @testdox Customs fields are available in the CSV mapping selector.
+	 */
+	public function test_customs_fields_are_mapping_options(): void {
+		$method = new ReflectionMethod( WC_Product_CSV_Importer_Controller::class, 'get_mapping_options' );
+		$method->setAccessible( true );
+		$options = $method->invoke( new WC_Product_CSV_Importer_Controller() );
+
+		foreach ( array( 'customs_commodity_code', 'customs_country_of_origin', 'customs_description' ) as $property ) {
+			$this->assertArrayHasKey( $property, $options, 'Merchants should be able to map each customs field manually.' );
+		}
+		$this->assertSame( 'Commodity code (HS code)', $options['customs_commodity_code'], 'The commodity code option should match the export label.' );
+	}
+
+	/**
+	 * Path to the sample CSV used by the server-path tests.
+	 *
+	 * @return string
+	 */
+	private function sample_csv(): string {
+		return WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/tests/php/includes/importer/sample.csv';
+	}
+
+	/**
+	 * Test importing a file located in the uploads directory by entering a path
+	 * relative to the uploads directory (e.g. on hosts where wp-content lives
+	 * outside of ABSPATH).
+	 *
+	 * @return void
+	 */
+	public function test_server_file_in_uploads_dir() {
+		$upload_dir = wp_get_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'sample-53676.csv';
+		self::file_copy( $this->sample_csv(), $file );
+
+		$_POST['file_url'] = 'sample-53676.csv';
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		try {
+			$this->assertEquals( $file, $import_controller->handle_upload() );
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
+	 * Test importing a file by entering its absolute path.
+	 *
+	 * @return void
+	 */
+	public function test_server_file_absolute_path() {
+		$upload_dir = wp_get_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'sample-53676-absolute.csv';
+		self::file_copy( $this->sample_csv(), $file );
+
+		$_POST['file_url'] = $file;
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		try {
+			$this->assertEquals( $file, $import_controller->handle_upload() );
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
+	 * Test that an absolute path outside of ABSPATH and the uploads directory is rejected.
+	 *
+	 * @return void
+	 */
+	public function test_server_file_absolute_path_outside_allowed_locations() {
+		$file = sys_get_temp_dir() . '/sample-53676-outside.csv';
+		self::file_copy( $this->sample_csv(), $file );
+
+		$_POST['file_url'] = $file;
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		try {
+			$import_result = $import_controller->handle_upload();
+
+			$this->assertTrue( is_wp_error( $import_result ) );
+			$this->assertEquals( 'woocommerce_product_csv_importer_upload_invalid_file', $import_result->get_error_code() );
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
+	 * Test that a non-string file_url value is treated as empty rather than resolved.
+	 *
+	 * @return void
+	 */
+	public function test_server_file_non_string_file_url() {
+		$_POST['file_url'] = array( 'sample.csv' );
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		$import_result     = $import_controller->handle_upload();
+
+		$this->assertTrue( is_wp_error( $import_result ) );
+		$this->assertEquals( 'woocommerce_product_csv_importer_upload_invalid_file', $import_result->get_error_code() );
 	}
 }

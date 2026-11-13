@@ -90,7 +90,8 @@ export const getScreenFromPath = ( path = getPath() ) => {
  * @return {Set<number>} List of IDs converted to a set of integers.
  */
 export function getSetOfIdsFromQuery( queryString = '' ) {
-	return new Set( // Return only unique ids.
+	return new Set(
+		// Return only unique ids.
 		queryString
 			.split( ',' )
 			.map( ( id ) => parseInt( id, 10 ) )
@@ -102,7 +103,7 @@ export function getSetOfIdsFromQuery( queryString = '' ) {
  * Updates the query parameters of the current page.
  *
  * @param {Object} query        object of params to be updated.
- * @param {string} path         Relative path (defaults to current path).
+ * @param {string} path         Admin page path, e.g. `/analytics/orders` (defaults to the current path). Used as-is for the `path` query arg; `./` and `../` segments are not resolved against the current path.
  * @param {Object} currentQuery object of current query params (defaults to current querystring).
  * @param {string} page         Page key (defaults to "wc-admin")
  */
@@ -234,8 +235,8 @@ export const useQuery = () => {
  * This function returns an event handler for the given `param`
  *
  * @param {string} param The parameter in the querystring which should be updated (ex `page`, `per_page`)
- * @param {string} path  Relative path (defaults to current path).
- * @param {string} query object of current query params (defaults to current querystring).
+ * @param {string} path  Admin page path, e.g. `/analytics/orders` (defaults to the current path). Used as-is for the `path` query arg; `./` and `../` segments are not resolved against the current path.
+ * @param {Object} query object of current query params (defaults to current querystring).
  * @return {Function} A callback which will update `param` to the passed value when called.
  */
 export function onQueryChange( param, path = getPath(), query = getQuery() ) {
@@ -275,7 +276,7 @@ export const isWCAdmin = ( url = window.location.href ) => {
  * or the router as appropriate.
  *
  * @param {Object} args     - All arguments.
- * @param {string} args.url - Relative path or absolute url to navigate to
+ * @param {string} args.url - Admin page path (written as-is into the `path` query arg, like getNewPath), an admin-relative URL such as `admin.php?page=wc-settings`, or an absolute URL.
  */
 export const navigateTo = ( { url } ) => {
 	const parsedUrl = parseAdminUrl( url );

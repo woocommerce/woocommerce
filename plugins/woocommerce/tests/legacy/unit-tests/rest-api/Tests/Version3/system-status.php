@@ -5,6 +5,8 @@
  * @package Automattic/WooCommerce/Tests
  */
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+
 /**
  * System Status REST Tests.
  *
@@ -153,7 +155,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$environment = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['environment'];
 
 		// Make sure all expected data is present.
-		$this->assertEquals( 35, count( $environment ) );
+		$this->assertEquals( 36, count( $environment ) );
 
 		// Test some responses to make sure they match up.
 		$this->assertEquals( get_option( 'home' ), $environment['home_url'] );
@@ -162,6 +164,15 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $store_id, $environment['store_id'] );
 		$this->assertEquals( WC()->version, $environment['version'] );
 		$this->assertEquals( wp_get_environment_type(), $environment['wp_environment_type'] );
+
+		// The test environment loads the Action Scheduler copy bundled with WooCommerce.
+		$action_scheduler = (array) $environment['action_scheduler'];
+		$this->assertSame( ActionSchedulerUtil::get_bundled_version(), $action_scheduler['loaded_version'] );
+		$this->assertSame( ActionSchedulerUtil::get_highest_registered_version(), $action_scheduler['registered_version'] );
+		$this->assertSame( 'woocommerce', $action_scheduler['source_type'] );
+		$this->assertSame( 'WooCommerce', $action_scheduler['source_name'] );
+		$this->assertSame( trailingslashit( wp_normalize_path( ActionScheduler::plugin_path( '' ) ) ), $action_scheduler['source_path'] );
+		$this->assertFalse( $action_scheduler['is_risky'] );
 	}
 
 	/**
@@ -251,7 +262,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test to make sure settings response is correct.
+	 * @testdox The system status settings response contains the expected values.
 	 *
 	 * @since 3.5.0
 	 */
@@ -264,7 +275,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		$settings = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['settings'];
 
-		$this->assertEquals( 17, count( $settings ) );
+		$this->assertEquals( 33, count( $settings ) );
 		$this->assertEquals( WC()->legacy_rest_api_is_available(), $settings['api_enabled'] );
 		$this->assertEquals( get_woocommerce_currency(), $settings['currency'] );
 		$this->assertEquals( $term_response, $settings['taxonomies'] );
@@ -552,6 +563,26 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		if ( in_array( $url, array( 'https://www.paypal.com/cgi-bin/webscr', 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=0' ), true ) ) {
 			$mocked_response = array(
+				'response' => array( 'code' => 200 ),
+			);
+		} elseif ( 'api.wordpress.org' === wp_parse_url( $url, PHP_URL_HOST ) && '/themes/info/1.2/' === wp_parse_url( $url, PHP_URL_PATH ) ) {
+			$mocked_response = array(
+				'body'     => wp_json_encode(
+					array(
+						'name'           => 'Default',
+						'slug'           => 'default',
+						'version'        => '1.7.2',
+						'preview_url'    => 'https://wp-themes.com/default',
+						'author'         => 'wordpressdotorg',
+						'screenshot_url' => '//ts.w.org/wp-content/themes/default/screenshot.png?ver=1.7.2',
+						'rating'         => 100,
+						'num_ratings'    => '3',
+						'downloaded'     => 296618,
+						'last_updated'   => '2010-06-14',
+						'homepage'       => 'https://wordpress.org/themes/default/',
+						'download_link'  => 'https://downloads.wordpress.org/theme/default.1.7.2.zip',
+					)
+				),
 				'response' => array( 'code' => 200 ),
 			);
 		} elseif ( 'https://api.wordpress.org/themes/info/1.0/' === $url ) {

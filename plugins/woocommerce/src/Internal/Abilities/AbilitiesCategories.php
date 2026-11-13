@@ -23,11 +23,6 @@ class AbilitiesCategories {
 	 * @internal
 	 */
 	final public static function init(): void {
-		/*
-		 * Register categories when Abilities API categories are ready.
-		 * Support both old (pre-6.9) and new (6.9+) action names.
-		 */
-		add_action( 'abilities_api_categories_init', array( __CLASS__, 'register_categories' ) );
 		add_action( 'wp_abilities_api_categories_init', array( __CLASS__, 'register_categories' ) );
 	}
 
@@ -37,12 +32,7 @@ class AbilitiesCategories {
 	 * @since 10.9.0
 	 */
 	public static function register_categories(): void {
-		// Only register if the function exists.
-		if ( ! function_exists( 'wp_register_ability_category' ) ) {
-			return;
-		}
-
-		if ( ! function_exists( 'wp_has_ability_category' ) || ! wp_has_ability_category( 'woocommerce' ) ) {
+		if ( ! wp_has_ability_category( 'woocommerce' ) ) {
 			wp_register_ability_category(
 				'woocommerce',
 				array(
@@ -52,7 +42,7 @@ class AbilitiesCategories {
 			);
 		}
 
-		if ( ! function_exists( 'wp_has_ability_category' ) || ! wp_has_ability_category( 'woocommerce-rest' ) ) {
+		if ( ! wp_has_ability_category( 'woocommerce-rest' ) ) {
 			wp_register_ability_category(
 				'woocommerce-rest',
 				array(

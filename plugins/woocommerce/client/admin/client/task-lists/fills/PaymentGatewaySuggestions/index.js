@@ -99,13 +99,13 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 											{ task: getQuery().task },
 											{},
 											'/'
-									  )
+										)
 									: getNewPath(
 											{ task: 'payments' },
 											{},
 											'/'
-									  ),
-						  }
+										),
+							}
 						: {}
 				);
 			} );

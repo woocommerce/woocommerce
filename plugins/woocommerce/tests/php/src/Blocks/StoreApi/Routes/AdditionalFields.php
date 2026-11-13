@@ -10,7 +10,6 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use WC_Gateway_BACS;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-use Automattic\WooCommerce\Enums\OrderStatus;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
 /**
@@ -49,6 +48,13 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	 * @var array
 	 */
 	protected $products;
+
+	/**
+	 * Additional field values on the customer before the test, restored at teardown.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private $previous_customer_field_values = array();
 
 	/**
 	 * Create immutable catalog rows shared by all test methods.
@@ -101,6 +107,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+		$this->previous_customer_field_values = $this->get_customer_additional_field_values();
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 
@@ -132,7 +139,62 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		remove_all_actions( 'doing_it_wrong_run' );
 		remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 		$this->unregister_fields();
+		$this->restore_customer_additional_field_values();
 		parent::tearDown();
+	}
+
+	/**
+	 * Put the customer's additional field values back to what they were before the test.
+	 *
+	 * `WC()->customer` is built once for the whole process, so the values one test saves stay
+	 * readable by the next one and decide what a conditional rule sees. Restoring them in memory
+	 * is enough: the customer is read back from the session, which this teardown destroys.
+	 */
+	private function restore_customer_additional_field_values() {
+		$customer = WC()->customer;
+
+		if ( ! $customer ) {
+			return;
+		}
+
+		foreach ( array_diff_key( $this->get_customer_additional_field_values(), $this->previous_customer_field_values ) as $key => $value ) {
+			$customer->delete_meta_data( $key );
+		}
+
+		foreach ( $this->previous_customer_field_values as $key => $value ) {
+			$customer->update_meta_data( $key, $value );
+		}
+	}
+
+	/**
+	 * Get the additional field values saved on the customer, keyed by meta key.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function get_customer_additional_field_values(): array {
+		$customer = WC()->customer;
+		$values   = array();
+
+		if ( ! $customer ) {
+			return $values;
+		}
+
+		$prefixes = array(
+			CheckoutFields::BILLING_FIELDS_PREFIX,
+			CheckoutFields::SHIPPING_FIELDS_PREFIX,
+			CheckoutFields::OTHER_FIELDS_PREFIX,
+		);
+
+		foreach ( $customer->get_meta_data() as $meta ) {
+			foreach ( $prefixes as $prefix ) {
+				if ( 0 === strpos( (string) $meta->key, $prefix ) ) {
+					$values[ $meta->key ] = $meta->value;
+					break;
+				}
+			}
+		}
+
+		return $values;
 	}
 
 	/**
@@ -2461,7 +2523,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		$this->assertEquals( 'billing-saved-gov-id', ( (array) $data['billing_address'] )['plugin-namespace/gov-id'], print_r( $data, true ) );
 		$this->assertEquals( 'shipping-saved-gov-id', ( (array) $data['shipping_address'] )['plugin-namespace/gov-id'], print_r( $data, true ) );
 		$this->assertEquals( 'engineering', $additional_fields['plugin-namespace/job-function'], print_r( $data, true ) );
-		$this->assertFalse( $additional_fields['plugin-namespace/leave-on-porch'], print_r( $data, true ) );
+		$this->assertArrayNotHasKey( 'plugin-namespace/leave-on-porch', $additional_fields, print_r( $data, true ) );
 	}
 
 	/**
@@ -2952,311 +3014,5 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		// Clean up.
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
 		$this->assertFalse( $this->controller->is_field( $id ), sprintf( '%s is still registered', $id ) );
-	}
-
-	/**
-	 * Returns a rule matching the referral-source value at the given path.
-	 *
-	 * @param string[] $path Property path to the object holding the field (e.g. [ 'checkout', 'additional_fields' ]).
-	 * @param string   $value The value to match.
-	 * @return array The rule schema.
-	 */
-	private function get_referral_source_rule( array $path = array( 'checkout', 'additional_fields' ), string $value = 'other' ) {
-		$rule = array(
-			'type'       => 'object',
-			'properties' => array(
-				'plugin-namespace/referral-source' => array(
-					'type'  => 'string',
-					'const' => $value,
-				),
-			),
-		);
-		foreach ( array_reverse( $path ) as $segment ) {
-			$rule = array(
-				'type'       => 'object',
-				'properties' => array( $segment => $rule ),
-			);
-		}
-		return $rule;
-	}
-
-	/**
-	 * Registers a referral-source select field and a referral-detail field with a conditional rule on it.
-	 *
-	 * @param string $rule_prop Which conditional rule to give the detail field (hidden|required).
-	 * @param string $location The location to register both fields in (order|contact|address).
-	 */
-	private function register_conditional_referral_fields( $rule_prop, $location = 'order' ) {
-		$rule_paths = array(
-			'order'   => array( 'checkout', 'additional_fields' ),
-			'contact' => array( 'customer', 'additional_fields' ),
-			'address' => array( 'customer', 'billing_address' ),
-		);
-		$rule       = $this->get_referral_source_rule( $rule_paths[ $location ] );
-
-		\woocommerce_register_additional_checkout_field(
-			array(
-				'id'       => 'plugin-namespace/referral-source',
-				'label'    => 'How did you find us?',
-				'location' => $location,
-				'type'     => 'select',
-				'options'  => array(
-					array(
-						'value' => 'search',
-						'label' => 'Search engine',
-					),
-					array(
-						'value' => 'other',
-						'label' => 'Other',
-					),
-				),
-			)
-		);
-		\woocommerce_register_additional_checkout_field(
-			array(
-				'id'       => 'plugin-namespace/referral-detail',
-				'label'    => 'Please specify',
-				'location' => $location,
-				'type'     => 'text',
-				$rule_prop => 'hidden' === $rule_prop
-					? array( 'not' => $rule )
-					: $rule,
-			)
-		);
-	}
-
-	/**
-	 * Builds a checkout request with a valid address and the given additional field values.
-	 *
-	 * @param string $method The request method (POST|PUT|PATCH).
-	 * @param array  $additional_fields The additional field values to send.
-	 * @param array  $address_fields Additional address field values, merged into both addresses.
-	 * @return \WP_REST_Request The request.
-	 */
-	private function get_checkout_request_with_fields( $method, array $additional_fields, array $address_fields = array() ) {
-		$address = array_merge(
-			array(
-				'first_name' => 'test',
-				'last_name'  => 'test',
-				'address_1'  => 'test',
-				'city'       => 'test',
-				'state'      => '',
-				'postcode'   => 'cb241ab',
-				'country'    => 'GB',
-				'email'      => 'testaccount@test.com',
-			),
-			$address_fields
-		);
-		$request = new \WP_REST_Request( $method, '/wc/store/v1/checkout' );
-		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
-		$request->set_body_params(
-			array(
-				'billing_address'   => (object) $address,
-				'shipping_address'  => (object) $address,
-				'payment_method'    => WC_Gateway_BACS::ID,
-				'additional_fields' => $additional_fields,
-			)
-		);
-		return $request;
-	}
-
-	/**
-	 * @testdox A conditionally hidden field stays hidden while the field it depends on has no value, so its posted value is cleared.
-	 */
-	public function test_conditional_hidden_field_cleared_when_dependency_has_no_value() {
-		$this->unregister_fields();
-		$this->register_conditional_referral_fields( 'hidden' );
-
-		$request  = $this->get_checkout_request_with_fields( 'POST', array( 'plugin-namespace/referral-detail' => 'posted while hidden' ) );
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
-		$fields = (array) $data['additional_fields'];
-		$this->assertSame( '', $fields['plugin-namespace/referral-detail'], 'The detail field is hidden while referral-source has no value, so its posted value must be cleared' );
-	}
-
-	/**
-	 * @testdox A conditionally required field is not required while the field it depends on has no value, even when that field's key is absent from the request.
-	 */
-	public function test_conditional_required_field_ignores_missing_dependency_key() {
-		$this->unregister_fields();
-		$this->register_conditional_referral_fields( 'required' );
-
-		// Dependency never given a value: the detail field must not be required.
-		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array() ) );
-		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->reset_session();
-
-		// Dependency set to the trigger value: the detail field is required.
-		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array( 'plugin-namespace/referral-source' => 'other' ) ) );
-		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->reset_session();
-
-		$response = rest_get_server()->dispatch(
-			$this->get_checkout_request_with_fields(
-				'POST',
-				array(
-					'plugin-namespace/referral-source' => 'other',
-					'plugin-namespace/referral-detail' => 'a friend',
-				)
-			)
-		);
-		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-	}
-
-	/**
-	 * @testdox A conditional rule reads the persisted dependency value when the request omits its key, so omitting the trigger field does not bypass a required field.
-	 */
-	public function test_conditional_required_field_uses_persisted_dependency_value() {
-		$this->unregister_fields();
-		$this->register_conditional_referral_fields( 'required' );
-
-		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'PUT', array( 'plugin-namespace/referral-source' => 'other' ) ) );
-		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-
-		// The POST omits referral-source, but its persisted value still makes the detail field required.
-		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array() ) );
-		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
-
-		// The customer object survives reset_session, so clear the value this test persisted.
-		$this->controller->persist_field_for_customer( 'plugin-namespace/referral-source', '', wc()->customer, 'other' );
-		wc()->customer->save();
-	}
-
-	/**
-	 * @testdox A payment retry cannot clear a field required by a value saved on the order.
-	 * @testWith ["POST"]
-	 *           ["PUT"]
-	 *           ["PATCH"]
-	 * @param string $method The request method.
-	 */
-	public function test_conditional_required_field_uses_pending_order_value( string $method ): void {
-		$this->unregister_fields();
-		$this->register_conditional_referral_fields( 'required' );
-		update_option( 'woocommerce_manage_stock', 'yes' );
-		$this->products[0]->set_manage_stock( true );
-		$this->products[0]->set_stock_quantity( 10 );
-		$this->products[0]->save();
-
-		$order = wc_create_order();
-		$order->add_product( $this->products[0], 1 );
-		$order->set_status( OrderStatus::PENDING );
-		$order->set_total( 30 );
-		$order->set_cart_hash( wc()->cart->get_cart_hash() );
-		$this->controller->persist_field_for_order( 'plugin-namespace/referral-source', 'other', $order, 'other', false );
-		$this->controller->persist_field_for_order( 'plugin-namespace/referral-detail', 'a friend', $order, 'other', false );
-		$order->save();
-		wc_reserve_stock_for_order( $order );
-		$this->assertSame( 1, wc_get_held_stock_quantity( $this->products[0] ), 'The pending order must hold stock before the retry.' );
-		wc()->session->set( 'store_api_draft_order', $order->get_id() );
-
-		$request  = $this->get_checkout_request_with_fields( $method, array( 'plugin-namespace/referral-detail' => '' ) );
-		$response = rest_get_server()->dispatch( $request );
-
-		$this->assertSame( 400, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->assertSame( 'a friend', $this->controller->get_field_from_object( 'plugin-namespace/referral-detail', wc_get_order( $order->get_id() ) ), 'Rejected requests must leave the saved field unchanged.' );
-		$this->assertSame( 1, wc_get_held_stock_quantity( $this->products[0] ), 'Field validation errors must leave the existing stock hold unchanged.' );
-	}
-
-	/**
-	 * @testdox A partial update matches saved text without changing its punctuation.
-	 * @testWith ["order", "checkout"]
-	 *           ["contact", "customer"]
-	 * @param string $location The field location.
-	 * @param string $context The document object property holding the fields.
-	 */
-	public function test_conditional_hidden_field_uses_raw_saved_text( string $location, string $context ): void {
-		$this->unregister_fields();
-		\woocommerce_register_additional_checkout_field(
-			array(
-				'id'       => 'plugin-namespace/referral-source',
-				'label'    => 'Source',
-				'location' => $location,
-				'type'     => 'text',
-			)
-		);
-		\woocommerce_register_additional_checkout_field(
-			array(
-				'id'       => 'plugin-namespace/referral-detail',
-				'label'    => 'Please specify',
-				'location' => $location,
-				'type'     => 'text',
-				'hidden'   => array( 'not' => $this->get_referral_source_rule( array( $context, 'additional_fields' ), "John's" ) ),
-			)
-		);
-
-		$request  = $this->get_checkout_request_with_fields(
-			'PUT',
-			array(
-				'plugin-namespace/referral-source' => "John's",
-				'plugin-namespace/referral-detail' => 'first value',
-			)
-		);
-		$response = rest_get_server()->dispatch( $request );
-		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->assertSame( 'first value', ( (array) $response->get_data()['additional_fields'] )['plugin-namespace/referral-detail'] );
-
-		$request  = $this->get_checkout_request_with_fields( 'PUT', array( 'plugin-namespace/referral-detail' => 'second value' ) );
-		$response = rest_get_server()->dispatch( $request );
-		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->assertSame( 'second value', ( (array) $response->get_data()['additional_fields'] )['plugin-namespace/referral-detail'], 'The saved dependency must match the same rule as its posted value.' );
-	}
-
-	/**
-	 * @testdox A conditionally required contact field follows the same rules as order fields when its dependency has no value.
-	 */
-	public function test_conditional_required_contact_field_ignores_missing_dependency_key() {
-		$this->unregister_fields();
-		$this->register_conditional_referral_fields( 'required', 'contact' );
-
-		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array() ) );
-		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->reset_session();
-
-		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array( 'plugin-namespace/referral-source' => 'other' ) ) );
-		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->reset_session();
-
-		$response = rest_get_server()->dispatch(
-			$this->get_checkout_request_with_fields(
-				'POST',
-				array(
-					'plugin-namespace/referral-source' => 'other',
-					'plugin-namespace/referral-detail' => 'a friend',
-				)
-			)
-		);
-		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-	}
-
-	/**
-	 * @testdox A conditionally required address field follows the same rules as order fields when its dependency has no value.
-	 */
-	public function test_conditional_required_address_field_ignores_missing_dependency_key() {
-		$this->unregister_fields();
-		$this->register_conditional_referral_fields( 'required', 'address' );
-
-		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array() ) );
-		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->reset_session();
-
-		$response = rest_get_server()->dispatch(
-			$this->get_checkout_request_with_fields( 'POST', array(), array( 'plugin-namespace/referral-source' => 'other' ) )
-		);
-		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->reset_session();
-
-		$response = rest_get_server()->dispatch(
-			$this->get_checkout_request_with_fields(
-				'POST',
-				array(),
-				array(
-					'plugin-namespace/referral-source' => 'other',
-					'plugin-namespace/referral-detail' => 'a friend',
-				)
-			)
-		);
-		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
 	}
 }

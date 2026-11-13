@@ -24,6 +24,130 @@ class ProductUtil {
 	public const OUTOFSTOCK_COUNT_TRANSIENT = 'wc_outofstock_count';
 
 	/**
+	 * Name prefixes of the transients kept for each product, followed by the product ID.
+	 *
+	 * Exposed as a constant so the "Clear transients" tool, which deletes these transients for
+	 * every product, stays in sync with the per-product invalidation below.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @var string[]
+	 */
+	public const PRODUCT_SPECIFIC_TRANSIENT_PREFIXES = array(
+		'wc_product_children_',
+		'wc_var_prices_',
+		'wc_related_',
+		'wc_child_has_weight_',
+		'wc_child_has_dimensions_',
+	);
+
+	/**
+	 * Number of products whose persistent transients are deleted per scheduled cleanup batch.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @var int
+	 */
+	public const TRANSIENT_CLEANUP_BATCH_SIZE = 500;
+
+	/**
+	 * Register hooks.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 */
+	public function register(): void {
+		add_action( 'woocommerce_delete_product_transients_batch', array( $this, 'handle_woocommerce_delete_product_transients_batch' ) );
+	}
+
+	/**
+	 * Schedule cleanup of existing products' persistent transients for the current site.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int $last_id Last product ID processed, or zero to start cleanup.
+	 * @return bool False if cleanup could not be scheduled.
+	 */
+	public function schedule_product_transient_cleanup( int $last_id = 0 ): bool {
+		if ( ! wp_using_ext_object_cache() ) {
+			return true;
+		}
+
+		// A new cleanup replaces any queued one instead of running alongside it.
+		if ( 0 === $last_id ) {
+			as_unschedule_all_actions( 'woocommerce_delete_product_transients_batch' );
+		}
+
+		return (bool) ActionSchedulerUtil::enqueue_async( 'woocommerce_delete_product_transients_batch', array( $last_id ), 'woocommerce' );
+	}
+
+	/**
+	 * Delete one batch of persistent product transients, bypassing per-transient deletion actions.
+	 * The scheduled action retains the last processed ID for the next batch.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @param mixed $last_id Last product ID processed.
+	 * @return void
+	 * @throws \RuntimeException If the batch cannot be read or continued.
+	 */
+	public function handle_woocommerce_delete_product_transients_batch( $last_id ): void {
+		if ( ! wp_using_ext_object_cache() ) {
+			return;
+		}
+
+		global $wpdb;
+		$products = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT ID, post_type FROM {$wpdb->posts} WHERE post_type IN ('product', 'product_variation') AND ID > %d ORDER BY ID LIMIT %d",
+				absint( $last_id ),
+				self::TRANSIENT_CLEANUP_BATCH_SIZE
+			)
+		);
+		if ( $wpdb->last_error ) {
+			throw new \RuntimeException( 'Unable to read products for transient cleanup.' );
+		}
+
+		$keys = array();
+		foreach ( $products as $product ) {
+			$prefixes = 'product_variation' === $product->post_type ? array( 'wc_related_' ) : self::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES;
+			foreach ( $prefixes as $prefix ) {
+				$keys[] = $prefix . $product->ID;
+			}
+			$last_id = (int) $product->ID;
+		}
+
+		if ( $keys ) {
+			wp_cache_delete_multiple( $keys, 'transient' );
+		}
+		if ( self::TRANSIENT_CLEANUP_BATCH_SIZE === count( $products ) && ! $this->schedule_product_transient_cleanup( $last_id ) ) {
+			throw new \RuntimeException( 'Unable to schedule the next product transient cleanup batch.' );
+		}
+	}
+
+	/**
+	 * Get a product ID from a product, post, or numeric value.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed $product Product instance, post instance, or numeric ID.
+	 * @return int Product ID, or 0 when no ID is available.
+	 */
+	public function get_product_id( $product ): int {
+		if ( is_numeric( $product ) ) {
+			return (int) $product;
+		} elseif ( $product instanceof \WC_Product ) {
+			return (int) $product->get_id();
+		} elseif ( is_object( $product ) && ! empty( $product->ID ) ) {
+			return (int) $product->ID;
+		} else {
+			return 0;
+		}
+	}
+
+	/**
 	 * Delete all product transients for a set of products.
 	 *
 	 * Fixed-name transients are deleted once for the whole set, and the
@@ -111,16 +235,8 @@ class ProductUtil {
 
 		$product_ids = array_unique( array_filter( array_map( 'absint', $product_ids ) ) );
 
-		$product_specific_transient_names = array(
-			'wc_product_children_',
-			'wc_var_prices_',
-			'wc_related_',
-			'wc_child_has_weight_',
-			'wc_child_has_dimensions_',
-		);
-
 		foreach ( $product_ids as $product_id ) {
-			foreach ( $product_specific_transient_names as $transient ) {
+			foreach ( self::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES as $transient ) {
 				delete_transient( $transient . $product_id );
 			}
 		}

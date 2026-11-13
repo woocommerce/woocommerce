@@ -36,7 +36,7 @@ export const getBusinessTypes = ( data: Country[] ): Country[] => {
 					description: businessTypeDescriptionStrings[ country.key ]
 						? businessTypeDescriptionStrings[ country.key ][
 								type.key
-						  ]
+							]
 						: businessTypeDescriptionStrings.generic[ type.key ],
 				} ) ),
 			} ) )

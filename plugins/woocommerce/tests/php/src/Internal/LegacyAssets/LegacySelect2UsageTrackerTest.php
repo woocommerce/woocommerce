@@ -32,21 +32,12 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	);
 
 	/**
-	 * Original request URI.
-	 *
-	 * @var string|null
-	 */
-	private ?string $original_request_uri = null;
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test fixture preserves the raw request URI for restoration.
-		$this->original_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : null;
-		$_SERVER['REQUEST_URI']     = '/';
+		$_SERVER['REQUEST_URI'] = '/';
 		$this->reset_scripts();
 		$this->register_legacy_select2_scripts();
 		$this->sut = new LegacySelect2UsageTracker();
@@ -58,12 +49,6 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->reset_scripts();
 		set_current_screen( 'front' );
-
-		if ( null === $this->original_request_uri ) {
-			unset( $_SERVER['REQUEST_URI'] );
-		} else {
-			$_SERVER['REQUEST_URI'] = $this->original_request_uri;
-		}
 
 		parent::tearDown();
 	}
@@ -284,7 +269,6 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	 * @testdox Should record each detected usage event only once per week.
 	 */
 	public function test_records_each_detected_usage_event_only_once_per_week(): void {
-		$original_request_uri   = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
 		$_SERVER['REQUEST_URI'] = '/shop/?filter=featured';
 		$event                  = array(
 			'context'            => 'frontend',
@@ -379,12 +363,6 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 2, $sut->usage_event_calls, 'Each detection should scan the script registry before rate limiting the exact usage event.' );
 
 		$this->delete_usage_event_transient( $event );
-
-		if ( null === $original_request_uri ) {
-			unset( $_SERVER['REQUEST_URI'] );
-		} else {
-			$_SERVER['REQUEST_URI'] = $original_request_uri;
-		}
 	}
 
 	/**
@@ -406,7 +384,8 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	private function reset_scripts(): void {
 		$wp_scripts = wp_scripts();
 
-		$wp_scripts->queue     = array();
+		// dequeue() also clears the cached dependency list that wp_script_is( ..., 'enqueued' ) reads.
+		$wp_scripts->dequeue( $wp_scripts->queue );
 		$wp_scripts->to_do     = array();
 		$wp_scripts->done      = array();
 		$wp_scripts->groups    = array();
@@ -448,14 +427,19 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	/**
 	 * Get the frontend page type expected for the current PHPUnit process.
 	 *
-	 * Some tests render cart flows that define WOOCOMMERCE_CART. Since PHP
-	 * constants cannot be undefined, this test must accept the inherited cart
-	 * page type when it runs later in the same process.
+	 * Some tests render cart or checkout flows that define WOOCOMMERCE_CART or
+	 * WOOCOMMERCE_CHECKOUT. Since PHP constants cannot be undefined, this test must
+	 * accept the inherited page type when it runs later in the same process. The
+	 * checks follow the tracker's own order: cart before checkout.
 	 *
 	 * @return string
 	 */
 	private function get_expected_frontend_page_type(): string {
-		return Constants::is_defined( 'WOOCOMMERCE_CART' ) ? 'cart' : 'other';
+		if ( Constants::is_defined( 'WOOCOMMERCE_CART' ) ) {
+			return 'cart';
+		}
+
+		return Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ? 'checkout' : 'other';
 	}
 
 	/**

@@ -638,6 +638,102 @@ class IntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox On WordPress 7.2+ WooCommerce emails get the reset content and permanent delete actions from the email editor script module.
+	 */
+	public function test_registers_email_entity_actions_for_woo_email(): void {
+		if ( ! function_exists( 'wp_register_entity_actions' ) ) {
+			$this->markTestSkipped( 'The entity actions API requires WordPress 7.2.' );
+		}
+		$this->skip_if_unsupported_environment();
+		$this->bootstrap_email_editor();
+
+		$registry = new \ReflectionProperty( \WP_Entity_Actions_Registry::class, 'instance' );
+		$registry->setAccessible( true );
+		$registry->setValue( null, null );
+
+		try {
+			$email_ids  = array_column( wp_get_registered_entity_actions( 'postType', Integration::EMAIL_POST_TYPE ), 'id' );
+			$module_ids = $this->get_script_module_action_ids( Integration::EMAIL_POST_TYPE );
+			$post_ids   = array_column( wp_get_registered_entity_actions( 'postType', 'post' ), 'id' );
+		} finally {
+			$registry->setValue( null, null );
+		}
+
+		$this->assertContains( 'reset-notification-email-content', $email_ids, 'WooCommerce emails must have the reset action' );
+		$this->assertContains( 'trash-email-post', $email_ids, 'WooCommerce emails must have the email editor\'s delete action' );
+		$this->assertNotContains( 'move-to-trash', $email_ids, 'Core\'s trash action must be replaced for WooCommerce emails' );
+		$this->assertEqualsCanonicalizing(
+			array( 'trash-email-post', 'reset-notification-email-content' ),
+			$module_ids,
+			'Both actions must take their JavaScript parts from the email editor script module'
+		);
+		$this->assertNotContains( 'reset-notification-email-content', $post_ids, 'Other post types must not get the reset action' );
+	}
+
+	/**
+	 * Returns the ids of the actions the email editor's script module provides for a post type.
+	 * WordPress 7.2 Beta 1 keys the modules by id, later builds list them as `id` and `actions` entries.
+	 *
+	 * @param string $post_type The post type.
+	 * @return array The action ids.
+	 */
+	private function get_script_module_action_ids( string $post_type ): array {
+		if ( ! function_exists( 'wp_get_registered_entity_action_modules' ) ) {
+			return array();
+		}
+		$module_id = \Automattic\WooCommerce\EmailEditor\Engine\Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID;
+		foreach ( wp_get_registered_entity_action_modules( 'postType', $post_type ) as $key => $module ) {
+			if ( isset( $module['id'], $module['actions'] ) ) {
+				if ( $module_id === $module['id'] ) {
+					return $module['actions'];
+				}
+			} elseif ( $module_id === (string) $key ) {
+				return $module;
+			}
+		}
+		return array();
+	}
+
+	/**
+	 * @testdox Initializing the integration does not build the WC_Emails mailer, so emails registered later on init are still listed.
+	 */
+	public function test_initialize_does_not_build_the_mailer(): void {
+		$instance_property = new \ReflectionProperty( \WC_Emails::class, 'instance' );
+		$instance_property->setAccessible( true );
+		$previous_instance = $instance_property->getValue();
+
+		try {
+			$instance_property->setValue( null, null );
+
+			$this->sut->initialize();
+
+			$this->assertNull(
+				$instance_property->getValue(),
+				'Integration::initialize() must not build WC_Emails: it runs on woocommerce_init, before features hooked on init register their emails'
+			);
+		} finally {
+			$instance_property->setValue( null, $previous_instance );
+		}
+	}
+
+	/**
+	 * @testdox Preview sends use the configured "From" address and name while wp_mail runs, and restore the defaults afterwards.
+	 */
+	public function test_preview_send_applies_and_restores_from_filters(): void {
+		$new_order = \WC_Emails::instance()->get_emails()['WC_Email_New_Order'];
+
+		$this->sut->send_preview_email_before_wp_mail();
+
+		$this->assertSame( $new_order->get_from_address(), apply_filters( 'wp_mail_from', 'placeholder@example.com' ) );
+		$this->assertSame( $new_order->get_from_name(), apply_filters( 'wp_mail_from_name', 'Placeholder' ) );
+
+		$this->sut->send_preview_email_after_wp_mail();
+
+		$this->assertSame( 'placeholder@example.com', apply_filters( 'wp_mail_from', 'placeholder@example.com' ) );
+		$this->assertSame( 'Placeholder', apply_filters( 'wp_mail_from_name', 'Placeholder' ) );
+	}
+
+	/**
 	 * Create a `woo_email` post carrying the email type meta.
 	 *
 	 * @param string $email_type  Email type to stamp into the meta.

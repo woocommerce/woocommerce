@@ -129,8 +129,7 @@ export type FormContextType< Values extends Record< string, any > = any > = {
 	resetForm: (
 		newInitialValues?: Values,
 		newTouchedFields?:
-			| { [ P in keyof Values ]?: boolean | undefined }
-			| undefined,
+			{ [ P in keyof Values ]?: boolean | undefined } | undefined,
 		newErrors?: FormErrors< Values >
 	) => void;
 };

@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\OrderWithdrawalEmailPreview;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalEndpoint;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormState;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormView;
@@ -25,7 +26,6 @@ use WC_Unit_Test_Case;
 class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 	private const FEATURE_OPTION                      = 'woocommerce_feature_order_withdrawal_enabled';
-	private const ENDPOINT_OPTION                     = 'woocommerce_myaccount_order_withdrawal_endpoint';
 	private const FLUSH_QUEUE_OPTION                  = 'woocommerce_queue_flush_rewrite_rules';
 	private const MISSING_OPTION_MARK                 = '__woocommerce_order_withdrawal_missing_option__';
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
@@ -46,34 +46,6 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 * @var array<string,mixed>
 	 */
 	private array $original_post = array();
-
-	/**
-	 * Original REQUEST_METHOD value.
-	 *
-	 * @var string|null
-	 */
-	private ?string $original_request_method = null;
-
-	/**
-	 * Whether REQUEST_METHOD existed before the test.
-	 *
-	 * @var bool
-	 */
-	private bool $had_request_method = false;
-
-	/**
-	 * Original REMOTE_ADDR value.
-	 *
-	 * @var string|null
-	 */
-	private ?string $original_remote_addr = null;
-
-	/**
-	 * Whether REMOTE_ADDR existed before the test.
-	 *
-	 * @var bool
-	 */
-	private bool $had_remote_addr = false;
 
 	/**
 	 * Original WooCommerce session.
@@ -122,13 +94,9 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 		$this->sut                         = new OrderWithdrawalFormProcessor();
 		$this->original_post               = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$this->had_request_method          = filter_has_var( INPUT_SERVER, 'REQUEST_METHOD' );
-		$this->original_request_method     = $this->had_request_method ? filter_input( INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) : null;
-		$this->had_remote_addr             = array_key_exists( 'REMOTE_ADDR', $_SERVER );
-		$this->original_remote_addr        = $this->had_remote_addr ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : null;
 		$this->original_session            = WC()->session;
 		$this->original_feature_option     = get_option( self::FEATURE_OPTION, self::MISSING_OPTION_MARK );
-		$this->original_endpoint_option    = get_option( self::ENDPOINT_OPTION, self::MISSING_OPTION_MARK );
+		$this->original_endpoint_option    = get_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION, self::MISSING_OPTION_MARK );
 		$this->original_flush_queue_option = get_option( self::FLUSH_QUEUE_OPTION, self::MISSING_OPTION_MARK );
 
 		if ( ! WC()->session ) {
@@ -140,7 +108,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$_SERVER['REMOTE_ADDR']    = '203.0.113.10';
 		$this->clear_order_withdrawal_rate_limits();
 		$this->disable_feature();
-		delete_option( self::ENDPOINT_OPTION );
+		delete_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION );
 		delete_option( self::FLUSH_QUEUE_OPTION );
 		wc_clear_notices();
 	}
@@ -151,22 +119,9 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$_POST = $this->original_post;
 
-		if ( $this->had_request_method ) {
-			$_SERVER['REQUEST_METHOD'] = (string) $this->original_request_method;
-		} else {
-			unset( $_SERVER['REQUEST_METHOD'] );
-		}
-
-		if ( $this->had_remote_addr ) {
-			$_SERVER['REMOTE_ADDR'] = (string) $this->original_remote_addr;
-		} else {
-			unset( $_SERVER['REMOTE_ADDR'] );
-		}
-
 		$this->restore_option( self::FEATURE_OPTION, $this->original_feature_option );
-		$this->restore_option( self::ENDPOINT_OPTION, $this->original_endpoint_option );
+		$this->restore_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION, $this->original_endpoint_option );
 		$this->restore_option( self::FLUSH_QUEUE_OPTION, $this->original_flush_queue_option );
-		wc_clear_notices();
 		$this->clear_order_withdrawal_rate_limits();
 		$this->delete_created_inbox_notes();
 		$this->delete_created_orders();
@@ -680,8 +635,11 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 */
 	public function test_controller_registers_order_deletion_cleanup_hooks(): void {
 		$controller    = new OrderWithdrawalController();
+		$notification  = new OrderWithdrawalFeatureHighlightNotification();
 		$email_preview = new OrderWithdrawalEmailPreview();
-		$controller->init( $this->sut, new OrderWithdrawalFormView(), new OrderWithdrawalFeatureHighlightNotification(), $email_preview );
+		$endpoint      = new OrderWithdrawalEndpoint();
+		$notification->init( $endpoint );
+		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification, $email_preview, $endpoint );
 
 		try {
 			$controller->register();
@@ -689,10 +647,12 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 			$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
 			$this->assertNotFalse( has_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
+			$this->assertNotFalse( has_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ) ) );
 			$this->assertFalse( has_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ) ) );
 		} finally {
 			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ), 10 );
 			remove_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ), 10 );
 			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
 			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
@@ -748,8 +708,10 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$controller    = new OrderWithdrawalController();
 		$notification  = new OrderWithdrawalFeatureHighlightNotification();
 		$email_preview = new OrderWithdrawalEmailPreview();
+		$endpoint      = new OrderWithdrawalEndpoint();
 
-		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification, $email_preview );
+		$notification->init( $endpoint );
+		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification, $email_preview, $endpoint );
 
 		try {
 			$controller->register();
@@ -764,6 +726,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		} finally {
 			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ), 10 );
 			remove_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ), 10 );
 			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
 			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
@@ -785,12 +748,15 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$controller    = new OrderWithdrawalController();
 		$notification  = new OrderWithdrawalFeatureHighlightNotification();
 		$email_preview = new OrderWithdrawalEmailPreview();
+		$endpoint      = new OrderWithdrawalEndpoint();
 
+		$notification->init( $endpoint );
 		$controller->init(
 			$this->sut,
 			new OrderWithdrawalFormView(),
 			$notification,
-			$email_preview
+			$email_preview,
+			$endpoint
 		);
 
 		try {
@@ -808,6 +774,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		} finally {
 			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ), 10 );
 			remove_action( 'update_option_woocommerce_coming_soon', array( $notification, 'maybe_add_note_when_store_goes_live' ), 10 );
 			remove_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ), 10 );
 			remove_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );

@@ -74,22 +74,24 @@ class WC_Helper_Admin {
 		$blog_name = get_bloginfo( 'name' );
 
 		$settings['wccomHelper'] = array(
-			'isConnected'                => WC_Helper::is_site_connected(),
-			'connectURL'                 => self::get_connection_url(),
-			'reConnectURL'               => self::get_connection_url( true ),
-			'userEmail'                  => $auth_user_email,
-			'userAvatar'                 => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
-			'storeCountry'               => wc_get_base_location()['country'],
-			'storeName'                  => $blog_name ? $blog_name : '',
-			'inAppPurchaseURLParams'     => WC_Admin_Addons::get_in_app_purchase_url_params(),
-			'installedProducts'          => $installed_products,
-			'mySubscriptionsTabLoaded'   => WC_Helper_Options::get( 'my_subscriptions_tab_loaded' ),
-			'wooUpdateManagerInstalled'  => WC_Woo_Update_Manager_Plugin::is_plugin_installed(),
-			'wooUpdateManagerActive'     => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
-			'wooUpdateManagerInstallUrl' => WC_Woo_Update_Manager_Plugin::generate_install_url(),
-			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
-			'dismissNoticeNonce'         => wp_create_nonce( 'dismiss_notice' ),
-			'trackingAllowed'            => 'yes' === get_option( 'woocommerce_allow_tracking' ),
+			'isConnected'                   => WC_Helper::is_site_connected(),
+			'connectURL'                    => self::get_connection_url(),
+			'reConnectURL'                  => self::get_connection_url( true ),
+			'userEmail'                     => $auth_user_email,
+			'userAvatar'                    => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
+			'storeCountry'                  => wc_get_base_location()['country'],
+			'storeName'                     => $blog_name ? $blog_name : '',
+			'inAppPurchaseURLParams'        => WC_Admin_Addons::get_in_app_purchase_url_params(),
+			'installedProducts'             => $installed_products,
+			'mySubscriptionsTabLoaded'      => WC_Helper_Options::get( 'my_subscriptions_tab_loaded' ),
+			'wooUpdateManagerInstalled'     => WC_Woo_Update_Manager_Plugin::is_plugin_installed(),
+			'wooUpdateManagerActive'        => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
+			'wooUpdateManagerInstallUrl'    => WC_Woo_Update_Manager_Plugin::generate_install_url(),
+			'wooUpdateManagerManualInstall' => WC_Woo_Update_Manager_Plugin::needs_manual_install(),
+			'wooUpdateManagerUploadUrl'     => current_user_can( 'install_plugins' ) ? network_admin_url( 'plugin-install.php?tab=upload' ) : '',
+			'wooUpdateManagerPluginSlug'    => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
+			'dismissNoticeNonce'            => wp_create_nonce( 'dismiss_notice' ),
+			'trackingAllowed'               => 'yes' === get_option( 'woocommerce_allow_tracking' ),
 		);
 
 		// This data is only used in the `Extensions` screen, so only populate it there.
@@ -99,6 +101,8 @@ class WC_Helper_Admin {
 			$settings['wccomHelper']['wooUpdateCount']          = WC_Helper_Updater::get_updates_count_based_on_site_status();
 			$settings['wccomHelper']['connected_notice']        = PluginsHelper::get_wccom_connected_notice( $auth_user_email );
 			$settings['wccomHelper']['woocomConnectNoticeType'] = WC_Helper_Updater::get_woo_connect_notice_type();
+			$settings['wccomHelper']['updateCoreUrl']           = current_user_can( 'update_core' ) ? network_admin_url( 'update-core.php' ) : '';
+			$settings['wccomHelper']['updatePhpUrl']            = esc_url_raw( wp_get_update_php_url() );
 
 			if ( WC_Helper::is_site_connected() ) {
 				$settings['wccomHelper']['subscription_expired_notice']  = PluginsHelper::get_expired_subscription_notice( false );

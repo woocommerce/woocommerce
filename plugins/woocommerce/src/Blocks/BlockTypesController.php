@@ -26,6 +26,13 @@ final class BlockTypesController {
 	private const DATA_ATTRIBUTES_PRIORITY = 10;
 
 	/**
+	 * Priority of the callback that ends the data attributes suspension. The lowest possible priority puts it ahead
+	 * of other callbacks on the render end action, so one of those throwing cannot leave the filter suspended for
+	 * the rest of the request.
+	 */
+	private const RESTORE_DATA_ATTRIBUTES_PRIORITY = PHP_INT_MIN;
+
+	/**
 	 * Instance of the asset API.
 	 *
 	 * @var AssetApi
@@ -38,6 +45,13 @@ final class BlockTypesController {
 	 * @var AssetDataRegistry
 	 */
 	protected $asset_data_registry;
+
+	/**
+	 * Controller for lazy-loaded blocks.
+	 *
+	 * @var BlockTypesLazyController
+	 */
+	private $lazy_blocks_controller;
 
 	/**
 	 * Holds the registered blocks that have WooCommerce blocks as their parents.
@@ -61,12 +75,15 @@ final class BlockTypesController {
 	/**
 	 * Constructor.
 	 *
-	 * @param AssetApi          $asset_api Instance of the asset API.
+	 * @param AssetApi          $asset_api           Instance of the asset API.
 	 * @param AssetDataRegistry $asset_data_registry Instance of the asset data registry.
 	 */
 	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry ) {
 		$this->asset_api           = $asset_api;
 		$this->asset_data_registry = $asset_data_registry;
+		// The lazy controller is not extensible as we are in rolling migration phase, hence no constructor injection.
+		$this->lazy_blocks_controller = new BlockTypesLazyController( $asset_api, $asset_data_registry );
+
 		$this->init();
 	}
 
@@ -79,11 +96,17 @@ final class BlockTypesController {
 		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 2 );
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), self::DATA_ATTRIBUTES_PRIORITY, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
+		add_action( 'woocommerce_register_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
-		add_filter( 'block_type_metadata_settings', array( $this, 'use_single_block_editor_style' ), 10, 2 );
 		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
 		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
 		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 1 );
+
+		// Hooks relevant to '\register_block_type_from_metadata' (blocks registration workflows).
+		add_filter( 'block_type_metadata', array( $this, 'handle_block_type_metadata' ) );
+		if ( is_admin() ) {
+			add_filter( 'block_type_metadata_settings', array( $this, 'use_single_block_editor_style' ), 10, 2 );
+		}
 	}
 
 	/**
@@ -127,6 +150,8 @@ final class BlockTypesController {
 
 	/**
 	 * Register blocks, hooking up assets and render functions as needed.
+	 *
+	 * @return void
 	 */
 	public function register_blocks() {
 		if ( self::$register_blocks_has_run ) {
@@ -136,11 +161,10 @@ final class BlockTypesController {
 		// Set before registering rather than after, so a registration failure is not retried on a later call.
 		self::$register_blocks_has_run = true;
 		$this->register_block_metadata();
-		$block_types = $this->get_block_types();
 
-		foreach ( $block_types as $block_type ) {
-			$block_type_class = __NAMESPACE__ . '\\BlockTypes\\' . $block_type;
-
+		$block_classes = array_map( static fn( $type ) => __NAMESPACE__ . '\\BlockTypes\\' . $type, $this->get_block_types() );
+		$block_classes = array_diff( $block_classes, $this->lazy_blocks_controller->register_blocks( $block_classes ) );
+		foreach ( $block_classes as $block_type_class ) {
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
 	}
@@ -179,19 +203,19 @@ final class BlockTypesController {
 		}
 
 		remove_filter( 'render_block', $data_attributes_callback, self::DATA_ATTRIBUTES_PRIORITY );
-		add_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ) );
+		add_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ), self::RESTORE_DATA_ATTRIBUTES_PRIORITY );
 	}
 
 	/**
 	 * Add the data- attributes filter back once the email render has ended.
 	 *
-	 * Only a suspension hooks this, so a render whose end action never reached it is repaired by the next one.
+	 * Only a suspension hooks this, and a render that never fired the end action is repaired by the next one.
 	 *
 	 * @internal
 	 */
 	public function restore_data_attributes_after_email_render(): void {
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), self::DATA_ATTRIBUTES_PRIORITY, 2 );
-		remove_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ) );
+		remove_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ), self::RESTORE_DATA_ATTRIBUTES_PRIORITY );
 	}
 
 	/**
@@ -222,12 +246,9 @@ final class BlockTypesController {
 	 */
 	public function register_block_metadata() {
 		$meta_file_path = WC_ABSPATH . 'assets/client/blocks/blocks-json.php';
-		if ( function_exists( 'wp_register_block_metadata_collection' ) && file_exists( $meta_file_path ) ) {
+		if ( file_exists( $meta_file_path ) ) {
 			add_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'bypass_block_metadata_doing_it_wrong' ), 10, 4 );
-			wp_register_block_metadata_collection(
-				WC_ABSPATH . 'assets/client/blocks/',
-				$meta_file_path
-			);
+			wp_register_block_metadata_collection( WC_ABSPATH . 'assets/client/blocks/', $meta_file_path );
 			remove_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'bypass_block_metadata_doing_it_wrong' ), 10 );
 		}
 	}
@@ -265,7 +286,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Order details', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Order details', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -273,7 +294,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Downloads', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Downloads', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -281,7 +302,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Shipping address', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Shipping address', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -289,7 +310,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Billing address', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Billing address', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -297,7 +318,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		// Referenced from the default Cart page content created at install; registration must not depend on the Cart block type being enabled, or the page renders nothing for the reference.
@@ -382,6 +403,9 @@ final class BlockTypesController {
 		 * @param array $allowed_namespaces List of namespaces.
 		 */
 		$allowed_namespaces = array_merge( array( 'woocommerce', 'woocommerce-checkout' ), (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_namespace', array() ) );
+		if ( in_array( $block_namespace, $allowed_namespaces, true ) ) {
+			return true;
+		}
 
 		/**
 		 * Filters the list of allowed Block Names
@@ -393,13 +417,11 @@ final class BlockTypesController {
 		 * @param array $allowed_namespaces List of namespaces.
 		 */
 		$allowed_blocks = (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_block', array() );
+		if ( ! empty( $allowed_blocks ) && in_array( $block_name, $allowed_blocks, true ) ) {
+			return true;
+		}
 
-		$blocks_with_woo_parents   = $this->get_registered_blocks_with_woocommerce_parent();
-		$block_has_woo_parent      = in_array( $block_name, array_keys( $blocks_with_woo_parents ), true );
-		$in_allowed_namespace_list = in_array( $block_namespace, $allowed_namespaces, true );
-		$in_allowed_block_list     = in_array( $block_name, $allowed_blocks, true );
-
-		return $block_has_woo_parent || $in_allowed_block_list || $in_allowed_namespace_list;
+		return ! empty( $block_name ) && isset( $this->get_registered_blocks_with_woocommerce_parent()[ $block_name ] );
 	}
 
 	/**
@@ -410,7 +432,6 @@ final class BlockTypesController {
 	 * @return string
 	 */
 	public function add_data_attributes( $content, $block ) {
-
 		if ( ! is_string( $content ) || ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
 			return $content;
 		}
@@ -450,7 +471,7 @@ final class BlockTypesController {
 	}
 
 	/**
-	 * Adds a redirect field to the login form so blocks can redirect users after login.
+	 * Adds a redirect field to the login and registration forms so blocks can redirect users after they log in or register.
 	 */
 	public function redirect_to_field() {
 		// phpcs:ignore WordPress.Security.NonceVerification
@@ -674,9 +695,9 @@ final class BlockTypesController {
 		if ( null === $should_enqueue_block_style_for_classic_themes ) {
 			$should_enqueue_block_style_for_classic_themes = ! (
 				is_admin() ||
-				wp_is_block_theme() ||
-				( function_exists( 'wp_should_load_block_assets_on_demand' ) && wp_should_load_block_assets_on_demand() ) ||
-				wp_should_load_separate_core_block_assets()
+				wp_should_load_separate_core_block_assets() ||
+				wp_should_load_block_assets_on_demand() ||
+				wp_is_block_theme()
 			);
 		}
 		if ( ! $should_enqueue_block_style_for_classic_themes ) {
@@ -712,6 +733,24 @@ final class BlockTypesController {
 	}
 
 	/**
+	 * Use the WooCommerce asset version when a bundled block.json omits one.
+	 *
+	 * WordPress otherwise adds the WordPress version to stylesheets registered from that file.
+	 *
+	 * @internal
+	 *
+	 * @param array $metadata Block metadata.
+	 * @return array Block metadata.
+	 */
+	public function handle_block_type_metadata( $metadata ) {
+		if ( is_array( $metadata ) && '' === ( $metadata['version'] ?? '' ) && $this->is_woocommerce_block_metadata( $metadata ) ) {
+			$metadata['version'] = $this->asset_api->wc_version;
+		}
+
+		return $metadata;
+	}
+
+	/**
 	 * Use one shared editor stylesheet for WooCommerce blocks.
 	 *
 	 * WordPress loads `style` handles in both the frontend and editor. WooCommerce
@@ -726,17 +765,12 @@ final class BlockTypesController {
 	 * @return array Block settings.
 	 */
 	public function use_single_block_editor_style( $settings, $metadata ) {
-		if (
-			! BlockEditorUnifiedAssets::is_enabled() ||
-			! is_admin() ||
-			! $this->is_woocommerce_block_metadata( $metadata ) ) {
-			return $settings;
+		if ( $this->is_woocommerce_block_metadata( $metadata ) && BlockEditorUnifiedAssets::is_enabled() ) {
+			$settings['style_handles']        = array();
+			$settings['style']                = array();
+			$settings['editor_style_handles'] = array( 'wc-block-library-style' );
+			$settings['editor_style']         = array( 'wc-block-library-style' );
 		}
-
-		$settings['style_handles']        = array();
-		$settings['style']                = array();
-		$settings['editor_style_handles'] = array( 'wc-block-library-style' );
-		$settings['editor_style']         = array( 'wc-block-library-style' );
 
 		return $settings;
 	}
@@ -750,22 +784,16 @@ final class BlockTypesController {
 	 */
 	private function is_woocommerce_block_metadata( $metadata ) {
 		static $blocks_path = null;
-
 		if ( null === $blocks_path ) {
 			$resolved_path = realpath( WC_ABSPATH . 'assets/client/blocks' );
-			$blocks_path   = false === $resolved_path
-				? ''
-				: trailingslashit( wp_normalize_path( $resolved_path ) );
+			$blocks_path   = false === $resolved_path ? '' : trailingslashit( wp_normalize_path( $resolved_path ) );
 		}
 
-		if ( '' === $blocks_path || empty( $metadata['file'] ) ) {
-			return false;
+		if ( '' !== $blocks_path && ! empty( $metadata['file'] ) ) {
+			return str_starts_with( wp_normalize_path( $metadata['file'] ), $blocks_path );
 		}
 
-		return str_starts_with(
-			wp_normalize_path( $metadata['file'] ),
-			$blocks_path
-		);
+		return false;
 	}
 
 	/**

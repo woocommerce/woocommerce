@@ -246,7 +246,7 @@ class Status extends AbstractOrderConfirmationBlock {
 		$my_account_page        = wc_get_page_permalink( 'myaccount' );
 
 		$content  = '<p>';
-		$content .= esc_html__( 'Great news! Your order has been received, and a confirmation will be sent to your email address.', 'woocommerce' );
+		$content .= esc_html__( 'A confirmation will be sent to your email address.', 'woocommerce' );
 		$content .= $my_account_page ? ' ' . sprintf(
 			/* translators: 1: opening a link tag 2: closing a link tag */
 			esc_html__( 'Have an account with us? %1$sLog in here%2$s to view your order.', 'woocommerce' ),

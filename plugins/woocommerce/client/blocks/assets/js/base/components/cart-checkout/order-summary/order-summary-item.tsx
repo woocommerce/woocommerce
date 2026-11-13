@@ -3,6 +3,8 @@
  */
 import clsx from 'clsx';
 import { sprintf, _n } from '@wordpress/i18n';
+// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
 import { Label } from '@woocommerce/blocks-components';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import ProductName from '@woocommerce/base-components/product-name';
@@ -57,7 +59,7 @@ const OrderSummaryItem = ( {
 
 	// Prepare props to pass to the applyCheckoutFilter filter.
 	// We need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
+
 	const { receiveCart, ...cart } = useStoreCart();
 
 	const arg = useMemo(
@@ -171,7 +173,8 @@ const OrderSummaryItem = ( {
 				case 'quantity':
 					return String( quantity );
 				case 'productName':
-					return name;
+					// `name` is HTML; stripHTML removes tags and decodes entities once, matching the visible name.
+					return stripHTML( name );
 				case 'price':
 					return formatPrice( subtotalPrice, totalsCurrency );
 			}
@@ -190,13 +193,13 @@ const OrderSummaryItem = ( {
 		? {
 				itemData,
 				variation,
-		  }
+			}
 		: {
 				itemData,
 				variation,
 				shortDescription,
 				fullDescription,
-		  };
+			};
 
 	return (
 		<div

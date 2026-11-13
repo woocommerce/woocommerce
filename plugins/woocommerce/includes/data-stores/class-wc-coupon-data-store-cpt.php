@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
+use Automattic\WooCommerce\Internal\DataStores\PostDataSlashing;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -82,22 +83,29 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$coupon->set_date_created( time() );
 		}
 
-		$coupon_id = wp_insert_post(
-			apply_filters(
-				'woocommerce_new_coupon_data',
-				array(
-					'post_type'     => 'shop_coupon',
-					'post_status'   => $coupon->get_status( 'edit' ) ? $coupon->get_status( 'edit' ) : 'publish',
-					'post_author'   => get_current_user_id(),
-					'post_title'    => $coupon->get_code( 'edit' ),
-					'post_content'  => '',
-					'post_excerpt'  => $coupon->get_description( 'edit' ),
-					'post_date'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getOffsetTimestamp() ),
-					'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getTimestamp() ),
-				)
-			),
-			true
+		/**
+		 * Filters the post data used to create a coupon.
+		 *
+		 * Values are unslashed. They are slashed before being passed to wp_insert_post().
+		 *
+		 * @since 3.0.0
+		 * @param array $data Post data for wp_insert_post().
+		 */
+		$post_data = apply_filters(
+			'woocommerce_new_coupon_data',
+			array(
+				'post_type'     => 'shop_coupon',
+				'post_status'   => $coupon->get_status( 'edit' ) ? $coupon->get_status( 'edit' ) : 'publish',
+				'post_author'   => get_current_user_id(),
+				'post_title'    => $coupon->get_code( 'edit' ),
+				'post_content'  => '',
+				'post_excerpt'  => $coupon->get_description( 'edit' ),
+				'post_date'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getOffsetTimestamp() ),
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getTimestamp() ),
+			)
 		);
+
+		$coupon_id = wp_insert_post( PostDataSlashing::slash( $post_data ), true );
 
 		if ( $coupon_id ) {
 			$coupon->set_id( $coupon_id );
@@ -186,6 +194,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 */
 	public function update( &$coupon ) {
 		$coupon->save_meta_data();
+
 		$changes = $coupon->get_changes();
 
 		if ( array_intersect( array( 'code', 'description', 'date_created', 'date_modified', 'status' ), array_keys( $changes ) ) ) {
@@ -193,11 +202,14 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'post_title'        => $coupon->get_code( 'edit' ),
 				'post_excerpt'      => $coupon->get_description( 'edit' ),
 				'post_status'       => $coupon->get_status( 'edit' ),
-				'post_date'         => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getOffsetTimestamp() ),
-				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getTimestamp() ),
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $coupon->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
 				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $coupon->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
 			);
+
+			if ( $coupon->get_date_created( 'edit' ) ) {
+				$post_data['post_date']     = gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getOffsetTimestamp() );
+				$post_data['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getTimestamp() );
+			}
 
 			/**
 			 * When updating this object, to prevent infinite loops, use $wpdb
@@ -211,7 +223,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $coupon->get_id() ) );
 				clean_post_cache( $coupon->get_id() );
 			} else {
-				wp_update_post( array_merge( array( 'ID' => $coupon->get_id() ), $post_data ) );
+				wp_update_post( PostDataSlashing::slash( array_merge( array( 'ID' => $coupon->get_id() ), $post_data ) ) );
 			}
 			$coupon->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}

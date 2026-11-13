@@ -11,16 +11,15 @@ use ReflectionClass;
 use ReflectionException;
 use Spy_REST_Server;
 use WP_REST_Server;
-use WP_Test_REST_TestCase;
 
 /**
  * ControllerTests
  */
-class RateLimitsTests extends WP_Test_REST_TestCase {
+class RateLimitsTests extends \WC_Unit_Test_Case {
 	/**
 	 * Setup Rest API server.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		/** @var WP_REST_Server $wp_rest_server */
@@ -264,34 +263,28 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 	 * @throws ReflectionException On failing invoked private method through reflection class.
 	 */
 	public function test_is_only_post_request_method( string $method, ?string $override, bool $expected ) {
-		$original_server = $_SERVER;
+		$authentication          = new ReflectionClass( Authentication::class );
+		$is_only_post_request    = $authentication->getMethod( 'is_only_post_request' );
+		$authentication_instance = $authentication->newInstance();
+		$is_only_post_request->setAccessible( true );
 
-		try {
-			$authentication          = new ReflectionClass( Authentication::class );
-			$is_only_post_request    = $authentication->getMethod( 'is_only_post_request' );
-			$authentication_instance = $authentication->newInstance();
-			$is_only_post_request->setAccessible( true );
+		$_SERVER['REQUEST_METHOD'] = $method;
 
-			$_SERVER['REQUEST_METHOD'] = $method;
-
-			if ( null === $override ) {
-				unset( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] );
-			} else {
-				$_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] = $override;
-			}
-
-			$this->assertSame(
-				$expected,
-				$is_only_post_request->invoke( $authentication_instance ),
-				sprintf(
-					'is_only_post_request() should return %s for REQUEST_METHOD=%s with override=%s',
-					$expected ? 'true' : 'false',
-					$method,
-					$override ?? 'null'
-				)
-			);
-		} finally {
-			$_SERVER = $original_server;
+		if ( null === $override ) {
+			unset( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] );
+		} else {
+			$_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] = $override;
 		}
+
+		$this->assertSame(
+			$expected,
+			$is_only_post_request->invoke( $authentication_instance ),
+			sprintf(
+				'is_only_post_request() should return %s for REQUEST_METHOD=%s with override=%s',
+				$expected ? 'true' : 'false',
+				$method,
+				$override ?? 'null'
+			)
+		);
 	}
 }

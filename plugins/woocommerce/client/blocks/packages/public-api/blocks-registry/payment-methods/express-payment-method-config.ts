@@ -15,9 +15,7 @@ import type {
 import { getCanMakePayment } from './payment-method-config-helper';
 import { assertConfigHasProperties, assertValidElement } from './assertions';
 
-export default class ExpressPaymentMethodConfig
-	implements ExpressPaymentMethodConfigInstance
-{
+export default class ExpressPaymentMethodConfig implements ExpressPaymentMethodConfigInstance {
 	public name: string;
 	public title: string;
 	public description: string;

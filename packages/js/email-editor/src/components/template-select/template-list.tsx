@@ -6,9 +6,10 @@ import { store as editorStore } from '@wordpress/editor';
 import { useSelect } from '@wordpress/data';
 import { blockDefault } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
-import { EmptyState, Notice, Stack } from '@wordpress/ui';
+import { Notice } from '@wordpress/components';
+import { EmptyState, Stack } from '@wordpress/ui';
 // @ts-expect-error No types available for this component
-// eslint-disable-next-line
+
 import { BlockPreview } from '@wordpress/block-editor';
 
 /**
@@ -51,7 +52,7 @@ function TemplateListBox( {
 		const editorSettings = getEditorSettings();
 		return {
 			// @ts-expect-error There are no types for the experimental features settings.
-			// eslint-disable-next-line no-underscore-dangle
+
 			layout: editorSettings?.__experimentalFeatures?.layout,
 		};
 	} );
@@ -143,7 +144,7 @@ export function TemplateList( {
 			selectedCategory !== null && selectedCategory !== undefined
 				? templates.filter(
 						( template ) => template.category === selectedCategory
-				  )
+					)
 				: templates,
 		[ selectedCategory, templates ]
 	);
@@ -155,14 +156,12 @@ export function TemplateList( {
 			className="email-editor-template-select__list"
 		>
 			{ selectedCategory === 'recent' && (
-				<Notice.Root intent="info">
-					<Notice.Description>
-						{ __(
-							'Templates created on the legacy editor will not appear here.',
-							__i18n_text_domain__
-						) }
-					</Notice.Description>
-				</Notice.Root>
+				<Notice status="info" isDismissible={ false }>
+					{ __(
+						'Templates created on the legacy editor will not appear here.',
+						__i18n_text_domain__
+					) }
+				</Notice>
 			) }
 
 			<MemorizedTemplateListBox

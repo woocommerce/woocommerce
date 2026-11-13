@@ -130,7 +130,7 @@ const useDocumentObject = < T extends FormType | 'global' >(
 								formType === 'billing'
 									? billingAddress
 									: shippingAddress,
-					  }
+						}
 					: {} ),
 			},
 		};
@@ -221,8 +221,8 @@ export interface DocumentObject< T extends FormType | 'global' > {
 				address: T extends 'billing'
 					? AddressFormValues
 					: T extends 'shipping'
-					? AddressFormValues
-					: null;
+						? AddressFormValues
+						: null;
 		  }
 		| Record< string, never >;
 }

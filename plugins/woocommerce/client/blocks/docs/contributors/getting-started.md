@@ -142,7 +142,7 @@ To use Prettier, you should install the [Prettier - Code formatter](https://mark
 },
 ```
 
-This will use the [`.prettierrc.js`](../../.prettierrc.js) file in the Blocks client and the version of Prettier installed in the monorepo.
+This will use the [`.prettierrc.js`](../../../../../../.prettierrc.js) file at the monorepo root and the version of Prettier installed in the monorepo.
 
 ## Testing
 

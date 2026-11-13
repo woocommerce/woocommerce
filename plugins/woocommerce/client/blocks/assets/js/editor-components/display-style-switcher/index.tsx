@@ -146,7 +146,9 @@ export const DisplayStyleSwitcher = ( {
 	const [ displayStyleBlocksAttributes, setDisplayStyleBlocksAttributes ] =
 		useState< Record< string, Record< string, unknown > > >( {} );
 
-	if ( displayStyleOptions.length === 0 ) return null;
+	if ( displayStyleOptions.length === 0 ) {
+		return null;
+	}
 
 	return (
 		<ToggleGroupControl
@@ -227,7 +229,9 @@ export function resetDisplayStyleBlock(
 	contextKey = SELECTABLE_ITEMS_CONTEXT
 ) {
 	const parentBlock = select( 'core/block-editor' ).getBlock( clientId );
-	if ( ! parentBlock ) return;
+	if ( ! parentBlock ) {
+		return;
+	}
 
 	const displayStyleOptions = getDisplayStyleOptions(
 		parentBlock.name,

@@ -120,6 +120,12 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	protected $ephemeral_meta_keys = array(
 		EditLock::META_KEY_NAME,
+		'_wp_trash_meta_status',
+		'_wp_trash_meta_time',
+		'_wp_trash_meta_comments_status',
+		'_debug_log_source',
+		'_debug_log_source_pending_deletion',
+		'_wc_push_notification_notifiable_at',
 	);
 
 	/**
@@ -859,6 +865,53 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			);
 		}
 		return $result;
+	}
+
+	/**
+	 * Throws before any order table is written when a value will not fit its column.
+	 *
+	 * Rows saved with $wpdb->insert() or $wpdb->update() (the ones with a `where` clause) are refused by wpdb when a
+	 * value is too long, which would otherwise happen after the order row was already written. The other rows use a
+	 * raw query, where MySQL truncates instead of failing, so they are not checked.
+	 *
+	 * @param array $db_updates Rows to persist, as returned by get_db_rows_for_order().
+	 * @return void
+	 * @throws \Exception When a value is longer than its column allows.
+	 */
+	private function validate_db_row_lengths( array $db_updates ): void {
+		global $wpdb;
+
+		foreach ( $db_updates as $update ) {
+			if ( ! isset( $update['where'] ) ) {
+				continue;
+			}
+
+			foreach ( $update['data'] as $column => $value ) {
+				if ( ! is_string( $value ) || in_array( $update['format'][ $column ] ?? '%s', array( '%d', '%f' ), true ) ) {
+					continue;
+				}
+
+				$column_length = $wpdb->get_col_length( $update['table'], $column );
+				if ( ! is_array( $column_length ) || empty( $column_length['length'] ) ) {
+					continue;
+				}
+
+				// Same measure wpdb uses: bytes for binary and text columns, characters for char and varchar.
+				$value_length = 'byte' === $column_length['type'] ? strlen( $value ) : mb_strlen( $value, 'UTF-8' );
+				if ( $value_length > $column_length['length'] ) {
+					throw new \Exception(
+						esc_html(
+							sprintf(
+								/* translators: 1: database table name, 2: column name. */
+								__( 'Could not persist order to database table "%1$s": the value for "%2$s" is too long.', 'woocommerce' ),
+								$update['table'],
+								$column
+							)
+						)
+					);
+				}
+			}
+		}
 	}
 
 	/**
@@ -2266,6 +2319,8 @@ FROM $order_meta_table
 		// Figure out what needs to be updated in the database.
 		$db_updates = $this->get_db_rows_for_order( $order, $context, $only_changes );
 
+		$this->validate_db_row_lengths( $db_updates );
+
 		// Persist changes.
 		foreach ( $db_updates as $update ) {
 			// Make sure 'data' and 'format' entries match before passing to $wpdb.
@@ -2425,8 +2480,7 @@ FROM $order_meta_table
 			$taxonomy_obj = get_taxonomy( $taxonomy );
 
 			if ( ! $taxonomy_obj ) {
-				/* translators: %s: Taxonomy name. */
-				_doing_it_wrong( __FUNCTION__, esc_html( sprintf( __( 'Invalid taxonomy: %s.', 'woocommerce' ), $taxonomy ) ), '7.9.0' );
+				_doing_it_wrong( __FUNCTION__, esc_html( sprintf( 'Invalid taxonomy: %s.', $taxonomy ) ), '7.9.0' );
 				continue;
 			}
 
@@ -2621,53 +2675,57 @@ FROM $order_meta_table
 		$do_filters = ! $args['suppress_filters'];
 
 		if ( $args['force_delete'] ) {
-
-			if ( $do_filters ) {
-				/**
-				 * Fires immediately before an order is deleted from the database.
-				 *
-				 * @since 7.1.0
-				 *
-				 * @param int      $order_id ID of the order about to be deleted.
-				 * @param WC_Order $order    Instance of the order that is about to be deleted.
-				 */
-				do_action( 'woocommerce_before_delete_order', $order_id, $order );
-			}
-
-			$this->upshift_or_delete_child_orders( $order );
-			$this->delete_order_data_from_custom_order_tables( $order_id );
-			$this->delete_items( $order );
-
-			$order->set_id( 0 );
-
-			/** We can delete the post data if:
-			 * 1. The HPOS table is authoritative and synchronization is enabled.
-			 * 2. The post record is of type `shop_order_placehold`, since this is created by the HPOS in the first place.
-			 *
-			 * In other words, we do not delete the post record when HPOS table is authoritative and synchronization is disabled but post record is a full record and not just a placeholder, because it implies that the order was created before HPOS was enabled.
-			 */
-			$orders_table_is_authoritative = $order->get_data_store()->get_current_class_name() === self::class;
-
-			if ( $orders_table_is_authoritative ) {
-				$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
-				if ( $data_synchronizer->data_sync_is_enabled() ) {
-					// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
-					// Once we stop creating posts for orders, we should do the cleanup here instead.
-					wp_delete_post( $order_id );
-				} else {
-					$this->handle_order_deletion_with_sync_disabled( $order_id );
+			self::$orders_being_deleted[ $order_id ] = true;
+			try {
+				if ( $do_filters ) {
+					/**
+					 * Fires immediately before an order is deleted from the database.
+					 *
+					 * @since 7.1.0
+					 *
+					 * @param int      $order_id ID of the order about to be deleted.
+					 * @param WC_Order $order    Instance of the order that is about to be deleted.
+					 */
+					do_action( 'woocommerce_before_delete_order', $order_id, $order );
 				}
-			}
 
-			if ( $do_filters ) {
-				/**
-				 * Fires immediately after an order is deleted.
+				$this->upshift_or_delete_child_orders( $order );
+				$this->delete_order_data_from_custom_order_tables( $order_id );
+				$this->delete_items( $order );
+
+				$order->set_id( 0 );
+
+				/** We can delete the post data if:
+				 * 1. The HPOS table is authoritative and synchronization is enabled.
+				 * 2. The post record is of type `shop_order_placehold`, since this is created by the HPOS in the first place.
 				 *
-				 * @since 2.7.0
-				 *
-				 * @param int $order_id ID of the order that has been deleted.
+				 * In other words, we do not delete the post record when HPOS table is authoritative and synchronization is disabled but post record is a full record and not just a placeholder, because it implies that the order was created before HPOS was enabled.
 				 */
-				do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+				$orders_table_is_authoritative = $order->get_data_store()->get_current_class_name() === self::class;
+
+				if ( $orders_table_is_authoritative ) {
+					$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+					if ( $data_synchronizer->data_sync_is_enabled() ) {
+						// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+						// Once we stop creating posts for orders, we should do the cleanup here instead.
+						wp_delete_post( $order_id );
+					} else {
+						$this->handle_order_deletion_with_sync_disabled( $order_id );
+					}
+				}
+
+				if ( $do_filters ) {
+					/**
+					 * Fires immediately after an order is deleted.
+					 *
+					 * @since 2.7.0
+					 *
+					 * @param int $order_id ID of the order that has been deleted.
+					 */
+					do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+				}
+			} finally {
+				unset( self::$orders_being_deleted[ $order_id ] );
 			}
 		} else {
 			if ( $do_filters ) {
@@ -2890,7 +2948,7 @@ FROM $order_meta_table
 				)
 			);
 
-			$previous_status = 'pending';
+			$previous_status = OrderInternalStatus::PENDING;
 		} elseif ( $previous_state_is_invalid ) {
 			// If we cannot restore to pending, we should probably stand back and let the merchant intervene some other way.
 			wc_get_logger()->warning(
@@ -3615,7 +3673,7 @@ CREATE TABLE $meta_table (
 		$delete_meta     = $this->data_store_meta->delete_meta( $object, $meta );
 		$changes_applied = $this->after_meta_change( $object, $meta );
 
-		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() && isset( $meta->key ) ) {
+		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && ! isset( self::$sync_on_read_order_ids[ $object->get_id() ] ) && $this->should_backfill_post_record() && isset( $meta->key ) ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			if ( is_object( $meta->value ) && '__PHP_Incomplete_Class' === get_class( $meta->value ) ) {
 				$meta_value = maybe_serialize( $meta->value );
@@ -3650,15 +3708,17 @@ CREATE TABLE $meta_table (
 	 * @return int|bool  meta ID or false on failure
 	 */
 	public function add_meta( &$object, $meta ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
-		$add_meta        = $this->data_store_meta->add_meta( $object, $meta );
-		$meta->id        = $add_meta;
-		$changes_applied = $this->after_meta_change( $object, $meta );
+		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
+		$meta->id = $add_meta;
 
-		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+		// Write the post meta before after_meta_change(): a full order save there would add any later meta first.
+		if ( $object instanceof WC_Abstract_Order && ! isset( self::$sync_on_read_order_ids[ $object->get_id() ] ) && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			add_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
+
+		$this->after_meta_change( $object, $meta );
 
 		return $add_meta;
 	}
@@ -3675,7 +3735,7 @@ CREATE TABLE $meta_table (
 		$update_meta     = $this->data_store_meta->update_meta( $object, $meta );
 		$changes_applied = $this->after_meta_change( $object, $meta );
 
-		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && ! isset( self::$sync_on_read_order_ids[ $object->get_id() ] ) && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			update_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );

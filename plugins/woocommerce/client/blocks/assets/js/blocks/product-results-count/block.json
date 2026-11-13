@@ -6,17 +6,29 @@
 	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"interactivity": {
+			"interactive": true,
 			"clientNavigation": true
 		},
 		"color": {
 			"text": true,
-			"background": false
+			"background": true,
+			"gradients": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
 		},
 		"typography": {
-			"fontSize": true
+			"fontSize": true,
+			"textAlign": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalLetterSpacing": true
 		}
 	},
 	"usesContext": [ "queryId" ],
+	"viewScriptModule": "woocommerce/product-results-count",
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
