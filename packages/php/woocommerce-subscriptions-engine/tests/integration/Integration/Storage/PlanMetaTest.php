@@ -259,7 +259,7 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 * @testdox a failed meta write throws.
 	 * @dataProvider provide_failing_meta_writes
 	 *
-	 * @param string            $statement Start of the failing SQL statement, `%s` for the meta table.
+	 * @param string            $statement Start of the failing SQL statement, `{meta}` / `{plans}` for the tables.
 	 * @param string            $message   Expected message fragment.
 	 * @param string            $method    Repository method.
 	 * @param array<int, mixed> $args      Arguments after the plan id.
@@ -268,7 +268,13 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->sut->add_meta( $this->id, self::OWNER, 'existing', 'one' );
 
 		$this->assert_write_throws_on_a_failed_query(
-			sprintf( $statement, SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ) ),
+			strtr(
+				$statement,
+				array(
+					'{meta}'  => SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ),
+					'{plans}' => SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
+				)
+			),
 			$message,
 			function () use ( $method, $args ): void {
 				$this->sut->{$method}( $this->id, self::OWNER, ...$args );
@@ -281,9 +287,12 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	 */
 	public function provide_failing_meta_writes(): array {
 		return array(
-			'add'    => array( 'INSERT INTO %s ', 'Failed to add plan meta', 'add_meta', array( 'note', 'x' ) ),
-			'update' => array( 'UPDATE %s m ', 'Failed to update plan meta', 'update_meta', array( 'existing', 'two' ) ),
-			'delete' => array( 'DELETE m FROM %s ', 'Failed to delete plan meta', 'delete_meta', array( 'existing' ) ),
+			'add'                       => array( 'INSERT INTO {meta} ', 'Failed to add plan meta', 'add_meta', array( 'note', 'x' ) ),
+			'update'                    => array( 'UPDATE {meta} m ', 'Failed to update plan meta', 'update_meta', array( 'existing', 'two' ) ),
+			'update classifying read'   => array( 'SELECT EXISTS ( SELECT 1 FROM {meta} m ', 'Failed to read plan meta', 'update_meta', array( 'absent', 'x' ) ),
+			'update add branch'         => array( 'INSERT INTO {meta} ', 'Failed to add plan meta', 'update_meta', array( 'absent', 'x' ) ),
+			'unique add existence read' => array( 'SELECT p.id FROM {plans} p ', 'Failed to read plan', 'add_meta', array( 'existing', 'x', true ) ),
+			'delete'                    => array( 'DELETE m FROM {meta} ', 'Failed to delete plan meta', 'delete_meta', array( 'existing' ) ),
 		);
 	}
 
@@ -352,8 +361,12 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertNull( $this->sut->add_meta( $this->id, self::OWNER, 'note', 'two', true ) );
 		$this->assertIsInt( $this->sut->add_meta( $this->id, self::OWNER, 'fresh', 'x', true ), 'An absent key is added by the NOT EXISTS insert.' );
 
-		$this->expectException( InvalidArgumentException::class );
-		$this->sut->add_meta( $this->id, 'another-extension', 'note', 'theirs', true );
+		try {
+			$this->sut->add_meta( $this->id, 'another-extension', 'note', 'theirs', true );
+			$this->fail( 'Expected a unique add on a foreign plan to throw.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ), 'Nothing is written.' );
+		}
 	}
 
 	/**

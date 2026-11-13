@@ -273,6 +273,7 @@ final class PlanRepository {
 	 *
 	 * @param int         $id             Plan id.
 	 * @param string|null $extension_slug Owning extension slug to scope the check to; null checks any extension.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a missing plan.
 	 */
 	public function exists( int $id, ?string $extension_slug = null ): bool {
 		global $wpdb;
@@ -290,6 +291,9 @@ final class PlanRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 		$found = $wpdb->get_var( $sql );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( sprintf( 'Failed to read plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
+		}
 
 		return null !== $found;
 	}
@@ -349,7 +353,7 @@ final class PlanRepository {
 	 *                               no unique index, so concurrent adds can both write.
 	 * @return int|null The new meta row id, or null when `$unique` and the key exists.
 	 * @throws \InvalidArgumentException If no plan of that extension has the id.
-	 * @throws \RuntimeException If the insert fails.
+	 * @throws \RuntimeException If the insert or the existence read fails.
 	 */
 	public function add_meta( int $plan_id, string $extension_slug, string $key, $value, bool $unique = false ): ?int {
 		$meta_id = $this->insert_meta_row( $plan_id, $extension_slug, $key, $value, $unique );
