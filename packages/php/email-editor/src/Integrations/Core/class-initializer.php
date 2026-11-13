@@ -194,6 +194,10 @@ class Initializer {
 	 * @return array Modified block settings.
 	 */
 	public function update_block_settings( array $settings ): array {
+		if ( ! isset( $settings['name'] ) ) {
+			return $settings;
+		}
+
 		// Enable blocks in email editor and set rendering callback.
 		if ( in_array( $settings['name'], self::ALLOWED_BLOCK_TYPES, true ) ) {
 			$settings['supports']['email']     = true;
