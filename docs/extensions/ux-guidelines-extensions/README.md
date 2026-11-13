@@ -26,6 +26,14 @@ Check the documentation and exports for the package versions your extension supp
 
 Reuse WooCommerce's supported page, settings and integration patterns. For settings, preserve the host's [header and save contract](../settings-and-config/settings-ui.md#page-header). When using the experimental, opt-in Settings UI, prefer [DataForm's built-in controls](../settings-and-config/registering-settings-ui-components.md) before registering custom components. Use [semantic design tokens](https://wordpress.github.io/gutenberg/?path=/docs/design-system-tokens-introduction--docs) for custom styling, and plan changes to existing PHP and React screens around their compatibility requirements.
 
+### Settings composition example
+
+![Standalone settings page with Store details and Checkout field groups, labels and help text, and one page-level Save action](/img/doc_images/wpds-settings-page.png)
+
+This example from the WordPress [Settings Page patterns proposal](https://github.com/WordPress/gutenberg/pull/86451) shows related fields grouped into sections, help beside the relevant control and one save scope for the page. It is a preview of an upstream pattern, not a shipped WooCommerce settings screen. Check the proposal and component documentation for current API availability and recommendation status.
+
+Reuse the composition within your supported host. Inside WooCommerce Settings, keep the host's navigation, header and save action; do not add this standalone page shell inside an existing settings section. See the [settings header and save contract](../settings-and-config/settings-ui.md#page-header).
+
 ### Design resources
 
 -   [WordPress Design System components (`@wordpress/ui`)](https://wordpress.github.io/gutenberg/?path=/docs/design-system-components-introduction--docs)
