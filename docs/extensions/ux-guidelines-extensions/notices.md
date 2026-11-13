@@ -36,6 +36,24 @@ Place feedback close to the task it describes. Field validation belongs beside t
 
 Match severity to the actual outcome. For partial success, use one summary that explains what completed and what still needs attention, with links or actions for the failed items. Do not stack contradictory success and error notices. Follow the host's save contract and the WPDS [save and submit feedback guidance](https://wordpress.github.io/gutenberg/?path=/docs/design-system-patterns-save-submit--docs).
 
+## Feedback examples
+
+### Failed save
+
+![Settings form with an error notice above Store details, a Try again action, and the edited store name still present](/img/doc_images/wpds-settings-failed-save.png)
+
+Keep the merchant's draft and put the failure at the scope it affects. Here, one notice above the form explains that changes were not saved and offers **Try again**. Field validation still belongs beside the affected field. In an embedded WooCommerce settings section, retain the host's header and save action rather than copying this standalone page shell.
+
+Captured from the **Failed save** story in the WordPress [Settings Page patterns proposal](https://github.com/WordPress/gutenberg/pull/86451) at commit `77b302dc9f1`. The story simulates a failed first save; its connection message is example copy, not a diagnosis of a real request. The pattern is an upstream preview, not a shipped WooCommerce screen.
+
+### Partial results
+
+![Bulk availability update with one summary saying 2 updated and 1 needs attention, Updated labels for Studio and Meeting room, and Not updated for Workshop](/img/doc_images/wpds-partial-results.png)
+
+One summary explains the outcome, while text labels identify each item's result without relying on color. Keep the completed updates and direct the merchant to the failed item. **Review failed space** takes the merchant to Workshop; do not make merchants repeat successful work.
+
+This illustrative WPDS composition uses sample data. Its review action focuses the failed item; it does not perform a service request or retry. In a working integration, connect the recovery action to the appropriate correction flow and announce dynamic results as described below.
+
 ## Announcements, dismissal and recovery
 
 - Announce dynamic feedback to assistive technology. With `@wordpress/ui`, render notices inside [`Notice.List`](https://wordpress.github.io/gutenberg/?path=/docs/design-system-components-notice-announcements--docs): a standalone `Notice.Root` does not announce its content. Use polite announcements by default and reserve assertive announcements for time-sensitive updates. Avoid duplicate live-region announcements.
