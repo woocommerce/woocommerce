@@ -888,6 +888,47 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Fix first items and check rows carry the check's id, so the views can track clicks without translated titles.
+	 */
+	public function test_view_items_carry_check_ids(): void {
+		$this->make_every_step_pass();
+		$output = static fn( string $id, string $group ): array => array(
+			'id'       => $id,
+			'ok'       => false,
+			'blocks'   => 'listing',
+			'group'    => $group,
+			'level'    => 'recommended',
+			'name'     => $id . ' name',
+			'label'    => $id . ' label',
+			'why'      => $id . ' why.',
+			'fix'      => $id . ' fix.',
+			'fix_url'  => '',
+			'conflict' => false,
+		);
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'products'     => 4,
+				'store_checks' => array( $output( 'product_shipping_schema', 'buy' ), $output( 'pages_public', 'access' ) ),
+				'channels'     => array(),
+				'checks'       => array(),
+			)
+		);
+
+		$view = $this->view();
+		$this->assertSame( array( 'pages_public', 'product_shipping_schema' ), array_column( $view['fix_first']['items'], 'id' ) );
+		$ids = array();
+		foreach ( $view['sections'] as $section ) {
+			foreach ( array_merge( $section['rows'], $section['folded'] ) as $row ) {
+				$this->assertNotSame( '', $row['id'], $row['title'] . ' has no id' );
+				$ids[] = $row['id'];
+			}
+		}
+		$this->assertContains( 'pages_public', $ids );
+	}
+
+	/**
 	 * @testdox Fix first is left out when nothing fails.
 	 */
 	public function test_output_fix_first_hidden_when_nothing_fails(): void {

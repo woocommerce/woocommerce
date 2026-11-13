@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { ReadinessView } from './types';
+import { trackReadiness, viewedProps, type Surface } from './tracks';
 
 export const VIEW_PATH = '/wc/v3/agent-readiness/view';
 export const SCAN_PATH = '/wc/v3/agent-readiness/scan';
@@ -28,18 +29,31 @@ export const POLL_FOR_MS = 10 * 60 * 1000;
  * queuing it the view is read again for the pending message, and then every
  * POLL_MS while the check is pending, so the results replace it when it finishes.
  * A view that came with the page is used as is, without loading it again.
+ * Records one viewed event per mount, the Run check click, and failures.
  */
-export function useReadinessView( initialView: ReadinessView | null = null ) {
+export function useReadinessView(
+	surface: Surface,
+	initialView: ReadinessView | null = null
+) {
 	const [ view, setView ] = useState< ReadinessView | null >( initialView );
 	const [ error, setError ] = useState< string | null >( null );
 	const [ running, setRunning ] = useState( false );
+	const viewed = useRef( false );
 	const pendingSince = useRef< number | null >( null );
 
 	const load = useCallback( async () => {
 		try {
-			setView( await apiFetch< ReadinessView >( { path: VIEW_PATH } ) );
+			const loaded = await apiFetch< ReadinessView >( {
+				path: VIEW_PATH,
+			} );
+			setView( loaded );
 			setError( null );
+			if ( ! viewed.current ) {
+				viewed.current = true;
+				trackReadiness( 'viewed', viewedProps( loaded, surface ) );
+			}
 		} catch {
+			trackReadiness( 'error', { surface, action: 'load' } );
 			setError(
 				__(
 					'The check results could not be loaded. Reload the page and try again.',
@@ -47,14 +61,20 @@ export function useReadinessView( initialView: ReadinessView | null = null ) {
 				)
 			);
 		}
-	}, [] );
+	}, [ surface ] );
 
-	const preloaded = useRef( initialView !== null );
+	const preloaded = useRef( initialView );
 	useEffect( () => {
 		if ( ! preloaded.current ) {
 			void load();
+		} else if ( ! viewed.current ) {
+			viewed.current = true;
+			trackReadiness(
+				'viewed',
+				viewedProps( preloaded.current, surface )
+			);
 		}
-	}, [ load ] );
+	}, [ load, surface ] );
 
 	useEffect( () => {
 		if ( ! view?.run.pending ) {
@@ -70,11 +90,16 @@ export function useReadinessView( initialView: ReadinessView | null = null ) {
 	}, [ view, load ] );
 
 	const runCheck = useCallback( async () => {
+		trackReadiness( 'run_check_click', {
+			surface,
+			first_check: !! view?.intro,
+		} );
 		setRunning( true );
 		try {
 			await apiFetch( { path: SCAN_PATH, method: 'POST' } );
 			await load();
 		} catch {
+			trackReadiness( 'error', { surface, action: 'run' } );
 			setError(
 				__(
 					'The check could not be started. Reload the page and try again.',
@@ -84,7 +109,7 @@ export function useReadinessView( initialView: ReadinessView | null = null ) {
 		} finally {
 			setRunning( false );
 		}
-	}, [ load ] );
+	}, [ load, surface, view?.intro ] );
 
 	return { view, error, running, runCheck };
 }

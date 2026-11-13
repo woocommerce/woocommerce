@@ -18,7 +18,7 @@ import { DeclaredCard, SectionCard } from './components/section-card';
  * merchant question with the checks from the last scan, and what the store shares with agents.
  */
 export default function SalesReadiness() {
-	const { view, error, running, runCheck } = useReadinessView();
+	const { view, error, running, runCheck } = useReadinessView( 'page' );
 
 	return (
 		<Page

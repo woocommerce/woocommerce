@@ -10,6 +10,7 @@ import { CheckRow } from '../components/check-row';
 import type { CheckRow as CheckRowData } from '../types';
 
 const row = ( fields: Partial< CheckRowData > ): CheckRowData => ( {
+	id: 'llms_txt',
 	state: 'open',
 	title: 'Add an llms.txt file',
 	badge: null,
@@ -23,7 +24,7 @@ const row = ( fields: Partial< CheckRowData > ): CheckRowData => ( {
 const renderRow = ( data: CheckRowData ) =>
 	render(
 		<ul>
-			<CheckRow row={ data } />
+			<CheckRow row={ data } section="find" />
 		</ul>
 	);
 

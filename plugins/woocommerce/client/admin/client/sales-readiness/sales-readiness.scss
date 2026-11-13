@@ -99,13 +99,8 @@
 	margin: 0;
 	padding: 0;
 
-	&__group {
-		margin: 0;
-	}
-
-	// A line under every row, the last one too. In Fix first each item is its own group.
-	> .wc-sales-readiness-row,
-	> .wc-sales-readiness-list__group .wc-sales-readiness-row {
+	// A line under every row, the last one too.
+	> .wc-sales-readiness-row {
 		border-block-end: 1px solid var(--wc-sr-stroke);
 	}
 }
@@ -124,13 +119,13 @@
 	margin: var(--wpds-dimension-gap-lg) 0;
 	font-weight: 600;
 
-	.wc-sales-readiness-list__group:first-child > & {
+	&:first-child {
 		margin-block-start: 0;
 	}
 }
 
 // The tier's margin is the space above the first row under it.
-.wc-sales-readiness-tier + .wc-sales-readiness-list > .wc-sales-readiness-row {
+.wc-sales-readiness-tier + .wc-sales-readiness-row {
 	padding-block-start: 0;
 }
 
