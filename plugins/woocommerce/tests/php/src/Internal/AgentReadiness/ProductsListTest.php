@@ -180,6 +180,116 @@ class ProductsListTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Trashing or deleting the variations that lack a GTIN tests the parent again, though removing a variation doesn't save it.
+	 */
+	public function test_removed_variation_updates_parent(): void {
+		$trashed = WC_Helper_Product::create_variation_product();
+		$deleted = WC_Helper_Product::create_variation_product();
+		foreach ( array( $trashed, $deleted ) as $parent ) {
+			update_post_meta( $parent->get_children()[0], '_global_unique_id', $parent === $trashed ? '4006381333931' : '9780306406157' );
+		}
+		$this->readiness->refresh_report();
+		$this->assertContains( 'missing_gtin', ProductFailures::for_product( $trashed->get_id() ) );
+		$this->assertContains( 'missing_gtin', ProductFailures::for_product( $deleted->get_id() ) );
+
+		foreach ( array_slice( $trashed->get_children(), 1 ) as $id ) {
+			wc_get_product( $id )->delete( false );
+		}
+		foreach ( array_slice( $deleted->get_children(), 1 ) as $id ) {
+			wc_get_product( $id )->delete( true );
+		}
+		$this->assertContains( 'missing_gtin', ProductFailures::for_product( $trashed->get_id() ), 'Tested at the end of the request, not per variation' );
+
+		$this->run_retest();
+
+		$this->assertNotContains( 'missing_gtin', ProductFailures::for_product( $trashed->get_id() ), 'Trashed' );
+		$this->assertNotContains( 'missing_gtin', ProductFailures::for_product( $deleted->get_id() ), 'Deleted' );
+	}
+
+	/**
+	 * @testdox Deleting a variable product leaves no rows behind, though deleting its variations notes it for a test.
+	 */
+	public function test_deleted_variable_product_leaves_no_rows(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$this->readiness->refresh_report();
+		$parent_id = $parent->get_id();
+		$this->assertNotSame( array(), ProductFailures::for_product( $parent_id ) );
+
+		$parent->delete( true );
+		$this->run_retest();
+
+		$this->assertSame( array(), ProductFailures::stored( $parent_id ) );
+	}
+
+	/**
+	 * @testdox The readiness condition is joined to the list's own meta query with AND, so an OR in it doesn't widen the filter.
+	 */
+	public function test_filter_keeps_or_meta_query_apart(): void {
+		global $pagenow, $wp_the_query;
+		$previous = array( $pagenow, $wp_the_query );
+		$failing  = WC_Helper_Product::create_simple_product();
+		$other    = WC_Helper_Product::create_simple_product();
+		ProductFailures::store( $failing->get_id(), array( 'missing_images' => array() ) );
+		ProductFailures::store( $other->get_id(), array() );
+		foreach ( array( $failing, $other ) as $product ) {
+			update_post_meta( $product->get_id(), '_test_flag', 'yes' );
+		}
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Only is_admin() reads it here.
+		$GLOBALS['current_screen']          = new class() {
+			/**
+			 * Whether this is an admin screen.
+			 */
+			public function in_admin(): bool {
+				return true;
+			}
+		};
+		$pagenow                            = 'edit.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$_GET[ ProductsList::FILTER_PARAM ] = 'missing_images';
+
+		try {
+			$query = new \WP_Query();
+			$query->set( 'post_type', 'product' );
+			$query->set( 'fields', 'ids' );
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- The list's own query in this test.
+			$query->set(
+				'meta_query',
+				array(
+					'relation' => 'OR',
+					array(
+						'key'   => '_test_flag',
+						'value' => 'yes',
+					),
+					array(
+						'key'   => '_test_other',
+						'value' => 'yes',
+					),
+				)
+			);
+			$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$this->sut->apply_filter( $query );
+
+			$this->assertSame( array( $failing->get_id() ), array_map( 'intval', $query->get_posts() ) );
+		} finally {
+			list( $pagenow, $wp_the_query ) = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			unset( $GLOBALS['current_screen'], $_GET[ ProductsList::FILTER_PARAM ] );
+		}
+	}
+
+	/**
+	 * Run the end-of-request test the hooks queued, as the shutdown action would.
+	 */
+	private function run_retest(): void {
+		global $wp_filter;
+		foreach ( $wp_filter['shutdown']->callbacks ?? array() as $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				if ( is_array( $callback['function'] ) && $callback['function'][0] instanceof ProductsList ) {
+					call_user_func( $callback['function'] );
+				}
+			}
+		}
+	}
+
+	/**
 	 * @testdox Saves store nothing before a scan.
 	 */
 	public function test_before_a_scan(): void {
