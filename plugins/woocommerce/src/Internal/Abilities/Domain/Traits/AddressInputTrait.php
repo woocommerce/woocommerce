@@ -78,10 +78,7 @@ trait AddressInputTrait {
 						$resource_name,
 						$type,
 						'state',
-						$sent( 'country', 'state' )
-							/* translators: 1: state sent by the client, 2: country code sent by the client, 3: comma-separated state codes. */
-							? sprintf( __( '"%1$s" is not a state of %2$s. Send the state with one of these codes: %3$s.', 'woocommerce' ), $state, $country, implode( ', ', array_keys( $states ) ) )
-							: __( 'The state does not belong to the country. Send the country and the state together.', 'woocommerce' )
+						self::get_state_message( $sent( 'state' ), $sent( 'country' ), $state, $country, array_keys( $states ) )
 					)
 				);
 				unset( $address['state'] );
@@ -94,10 +91,7 @@ trait AddressInputTrait {
 							$resource_name,
 							$type,
 							'postcode',
-							$sent( 'country', 'postcode' )
-								/* translators: 1: postcode sent by the client, 2: country code sent by the client. */
-								? sprintf( __( '"%1$s" is not a valid postcode for %2$s. Send a postcode in the format of that country.', 'woocommerce' ), $postcode, $country )
-								: __( 'The postcode does not match the format of the country. Send the country and the postcode together.', 'woocommerce' )
+							self::get_postcode_message( $sent( 'postcode' ), $sent( 'country' ), $postcode, $country )
 						)
 					);
 					unset( $address['postcode'] );
@@ -112,6 +106,57 @@ trait AddressInputTrait {
 		}
 
 		return $refused->has_errors() ? $refused : null;
+	}
+
+	/**
+	 * Explain a state that does not belong to the country, quoting only values the client sent.
+	 *
+	 * @param bool               $state_sent   Whether the client sent the state.
+	 * @param bool               $country_sent Whether the client sent the country.
+	 * @param string             $state        State code.
+	 * @param string             $country      Country code.
+	 * @param array<int, string> $state_codes  State codes of the country.
+	 * @return string
+	 */
+	private static function get_state_message( bool $state_sent, bool $country_sent, string $state, string $country, array $state_codes ): string {
+		if ( $state_sent && $country_sent ) {
+			/* translators: 1: state sent by the client, 2: country code sent by the client, 3: comma-separated state codes. */
+			return sprintf( __( '"%1$s" is not a state of %2$s. Send the state with one of these codes: %3$s.', 'woocommerce' ), $state, $country, implode( ', ', $state_codes ) );
+		}
+		if ( $country_sent ) {
+			/* translators: 1: country code sent by the client, 2: comma-separated state codes. */
+			return sprintf( __( 'The saved state is not a state of %1$s. Send the state with one of these codes: %2$s.', 'woocommerce' ), $country, implode( ', ', $state_codes ) );
+		}
+		if ( $state_sent ) {
+			/* translators: %s: state sent by the client. */
+			return sprintf( __( '"%s" is not a state of the saved country. Send the country and the state together.', 'woocommerce' ), $state );
+		}
+		return __( 'The saved state does not belong to the saved country. Send the country and the state together.', 'woocommerce' );
+	}
+
+	/**
+	 * Explain a postcode that does not match the country, quoting only values the client sent.
+	 *
+	 * @param bool   $postcode_sent Whether the client sent the postcode.
+	 * @param bool   $country_sent  Whether the client sent the country.
+	 * @param string $postcode      Postcode.
+	 * @param string $country       Country code.
+	 * @return string
+	 */
+	private static function get_postcode_message( bool $postcode_sent, bool $country_sent, string $postcode, string $country ): string {
+		if ( $postcode_sent && $country_sent ) {
+			/* translators: 1: postcode sent by the client, 2: country code sent by the client. */
+			return sprintf( __( '"%1$s" is not a valid postcode for %2$s. Send a postcode in the format of that country.', 'woocommerce' ), $postcode, $country );
+		}
+		if ( $country_sent ) {
+			/* translators: %s: country code sent by the client. */
+			return sprintf( __( 'The saved postcode is not valid for %s. Send a postcode in the format of that country.', 'woocommerce' ), $country );
+		}
+		if ( $postcode_sent ) {
+			/* translators: %s: postcode sent by the client. */
+			return sprintf( __( '"%s" is not a valid postcode for the saved country. Send a postcode in the format of that country.', 'woocommerce' ), $postcode );
+		}
+		return __( 'The saved postcode does not match the saved country. Send the country and the postcode together.', 'woocommerce' );
 	}
 
 	/**
