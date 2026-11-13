@@ -82,8 +82,6 @@
 					}
 				},
 				onSaveResponse: function( response, textStatus, snapshot ) {
-					setRunning( shippingMethod, false );
-
 					if (
 						'success' !== textStatus ||
 						! response ||
@@ -93,6 +91,8 @@
 						shippingMethod.onSaveFailure();
 						return;
 					}
+
+					setRunning( shippingMethod, false );
 
 					if ( response.data.zone_id !== data.zone_id ) {
 						data.zone_id = response.data.zone_id;
@@ -188,6 +188,11 @@
 					});
 				},
 				unblock: function() {
+					// Another operation is still running, so keep the rows blocked until it ends.
+					if ( this.model.isRunning ) {
+						return;
+					}
+
 					$( this.el ).unblock();
 				},
 				render: function() {
@@ -200,7 +205,7 @@
 
 					// Blank out the contents.
 					this.$el.empty();
-					this.unblock();
+					this.$el.unblock();
 
 					if ( _.size( methods ) ) {
 						// Sort methods
@@ -501,6 +506,8 @@
 
 									// Method was saved. Re-render.
 									if ( _.size( shippingMethodView.model.changes ) ) {
+										// save() takes its own lock, so hand this one back first.
+										setRunning( shippingMethod, false );
 										shippingMethodView.model.save();
 									} else {
 										shippingMethodView.model.onSaveResponse( response, textStatus );
@@ -733,7 +740,7 @@
 							// Avoid triggering a rerender here because we don't want to show the method
 							// in the table in case merchant doesn't finish flow.
 
-							shippingMethodView.model.set( 'methods', response.data.methods );
+							shippingMethodView.model.set( 'methods', withPendingEdits( shippingMethodView.model, response.data.methods ) );
 
 							// Close original modal
 							closeModal();
@@ -741,10 +748,10 @@
 							var instance_id = response.data.instance_id,
 							    method      = response.data.methods[ instance_id ];
 
-							shippingMethodView.unblock();
 							// The add request is done; any follow-up settings modal re-locks on its
 							// own submit, so release here to avoid a stuck lock if it is cancelled.
 							setRunning( shippingMethod, false );
+							shippingMethodView.unblock();
 
 							if ( method.settings_html ) {
 								method.settings_html = shippingMethodView.reformatSettingsHTML( method.settings_html );
@@ -773,6 +780,8 @@
 									shippingMethodView.block();
 									shippingMethodView.model.save();
 								} else {
+									// onSaveResponse releases a lock, so take one back for it.
+									setRunning( shippingMethod, true );
 									shippingMethodView.model.onSaveResponse( response, textStatus );
 								}
 							}
@@ -940,9 +949,28 @@
 				el:       $tbody
 			} );
 
-		// Apply a completed removal. The response is the truth for which methods exist; the
-		// merchant's unsaved edits stay the truth for how the surviving ones look.
+		// Index the server's methods and lay the merchant's unsaved edits over them. The server is
+		// the truth for which methods exist, except those already removed: a response that arrives
+		// late carries an older list that still has them. The edits stay the truth for how they look.
+		function withPendingEdits( model, methods ) {
+			var pending = _.omit( model.changes.methods || {}, 'methods' ),
+				fresh   = _.omit( _.indexBy( methods, 'instance_id' ), _.keys( model.removedIds || {} ) );
+
+			// Only these two are editable without a save, so only these may override the server.
+			_.each( pending, function( row, id ) {
+				if ( fresh[ id ] ) {
+					_.extend( fresh[ id ], _.pick( row, 'enabled', 'method_order' ) );
+				}
+			} );
+
+			return fresh;
+		}
+
+		// Apply a completed removal.
 		function applyMethodRemoval( model, view, response, instance_id ) {
+			model.removedIds = model.removedIds || {};
+			model.removedIds[ instance_id ] = true;
+
 			// The removed row's pending edits are moot. 'methods' is a key logChanges seeds,
 			// not a row, so it never counts as a pending edit.
 			if ( model.changes.methods ) {
@@ -952,17 +980,7 @@
 				}
 			}
 
-			var pending = _.omit( model.changes.methods || {}, 'methods' ),
-				fresh   = _.indexBy( response.data.methods, 'instance_id' );
-
-			// Only these two are editable without a save, so only these may override the server.
-			_.each( pending, function( row, id ) {
-				if ( fresh[ id ] ) {
-					_.extend( fresh[ id ], _.pick( row, 'enabled', 'method_order' ) );
-				}
-			} );
-
-			model.set( 'methods', fresh );
+			model.set( 'methods', withPendingEdits( model, response.data.methods ) );
 
 			if ( _.isEmpty( model.changes ) ) {
 				view.clearUnloadConfirmation();
@@ -976,12 +994,15 @@
 		// stay blocked (via render()) and Save, Add method, the add modal's method selector and
 		// its Continue button are disabled, so no second action can begin. Save re-enables through
 		// the unsaved-changes flow, Continue through the modal's own validation.
+		// Operations can overlap, so this counts them: the controls unlock only when the last one ends.
+		// Every setRunning( model, true ) needs exactly one matching false.
 		function setRunning( model, running ) {
-			model.isRunning = running;
-			$add_method_button.prop( 'disabled', running );
+			model.runningCount = Math.max( 0, ( model.runningCount || 0 ) + ( running ? 1 : -1 ) );
+			model.isRunning = model.runningCount > 0;
+			$add_method_button.prop( 'disabled', model.isRunning );
 			// Disabled controls fire no input events, so validation cannot re-enable Continue mid-run.
-			$( '.wc-shipping-zone-method-selector' ).prop( 'disabled', running );
-			if ( running ) {
+			$( '.wc-shipping-zone-method-selector' ).prop( 'disabled', model.isRunning );
+			if ( model.isRunning ) {
 				$save_button.prop( 'disabled', true );
 				$( '#btn-next' ).prop( 'disabled', true ).addClass( 'disabled' );
 			} else {
