@@ -93,27 +93,32 @@ final class OrderWithdrawalFormView {
 	 * Get rows for the review screen.
 	 *
 	 * @param array<string,string> $data Form data.
-	 * @return array<int,array{label:string,value:string}>
+	 * @return array<int,array{key:string,label:string,value:string}>
 	 */
 	private function get_review_rows( array $data ): array {
 		return array(
 			array(
+				'key'   => 'name',
 				'label' => __( 'Name', 'woocommerce' ),
 				'value' => $this->get_customer_name( $data ),
 			),
 			array(
+				'key'   => OrderWithdrawalFormProcessor::FIELD_EMAIL,
 				'label' => __( 'Email address', 'woocommerce' ),
 				'value' => $data[ OrderWithdrawalFormProcessor::FIELD_EMAIL ],
 			),
 			array(
+				'key'   => OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER,
 				'label' => __( 'Order number', 'woocommerce' ),
 				'value' => $data[ OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER ],
 			),
 			array(
+				'key'   => OrderWithdrawalFormProcessor::FIELD_WITHDRAWAL_TYPE,
 				'label' => __( 'Withdrawing', 'woocommerce' ),
 				'value' => $this->get_withdrawal_type_label( $data[ OrderWithdrawalFormProcessor::FIELD_WITHDRAWAL_TYPE ] ),
 			),
 			array(
+				'key'   => OrderWithdrawalFormProcessor::FIELD_ADDITIONAL_DETAILS,
 				'label' => __( 'Additional details', 'woocommerce' ),
 				'value' => '' === $data[ OrderWithdrawalFormProcessor::FIELD_ADDITIONAL_DETAILS ] ? __( 'None provided', 'woocommerce' ) : $data[ OrderWithdrawalFormProcessor::FIELD_ADDITIONAL_DETAILS ],
 			),
