@@ -34,14 +34,6 @@ class UnpaidOrderTimeoutMarkerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		remove_all_actions( 'woocommerce_order_status_cancelled' );
-		parent::tearDown();
-	}
-
-	/**
 	 * Load an order from the database, bypassing the order cache.
 	 *
 	 * @param int $order_id Order ID.

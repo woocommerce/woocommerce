@@ -31,14 +31,6 @@ class Patterns extends ControllerTestCase {
 	}
 
 	/**
-	 * Remove the scoped PTK HTTP mock.
-	 */
-	public function tearDown(): void {
-		remove_filter( 'pre_http_request', array( $this, 'mock_ptk_response' ), 10 );
-		parent::tearDown();
-	}
-
-	/**
 	 * Test the post endpoint when tracking is not allowed.
 	 *
 	 * @return void

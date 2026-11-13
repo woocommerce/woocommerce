@@ -39,14 +39,6 @@ class WC_Admin_Tests_OnboardingTasks_Task_WooCommerce_Payments extends WC_Unit_T
 	}
 
 	/**
-	 * Teardown after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		remove_filter( 'woocommerce_payment_gateways', array( $this, 'inject_fake_gateway' ) );
-	}
-
-	/**
 	 * Test is_connected method when WooCommerce Payments is connected.
 	 */
 	public function test_is_connected_when_wcpay_is_connected() {

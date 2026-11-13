@@ -71,7 +71,6 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		unregister_post_type( 'shop_test' );
 
 		$this->toggle_cot_feature_and_usage( $this->cot_state );
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 
 		parent::tearDown();
 	}

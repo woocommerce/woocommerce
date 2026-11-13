@@ -73,7 +73,6 @@ class WC_Admin_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case 
 		CustomersScheduler::set_queue( null );
 		OrdersScheduler::set_queue( null );
 		$this->queue->actions = array();
-		remove_filter( 'woocommerce_admin_scheduler_batch_size', array( $this, 'filter_batch_size' ), 10, 3 );
 	}
 
 	/**

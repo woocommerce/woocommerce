@@ -418,7 +418,6 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		remove_filter( 'woocommerce_transactional_emails_for_block_editor', array( $this, 'register_fake_block_editor_email_ids' ) );
 		WCTransactionalEmailPostsManager::get_instance()->clear_caches();
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 	}

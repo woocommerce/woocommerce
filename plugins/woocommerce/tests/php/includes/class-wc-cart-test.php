@@ -47,8 +47,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		foreach ( array( 'shipping_method_counts', 'previous_shipping_methods', 'shipping_for_package_0', 'shipping_for_package_1', 'chosen_shipping_methods' ) as $key ) {
 			WC()->session->set( $key, null );
 		}
-
-		remove_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10 );
 	}
 
 	/**

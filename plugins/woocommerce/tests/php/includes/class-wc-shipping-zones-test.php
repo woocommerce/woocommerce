@@ -27,7 +27,6 @@ class WC_Shipping_Zones_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		remove_filter( 'woocommerce_valid_location_types', array( $this, 'add_custom_location_type' ) );
 		WC_Helper_Shipping_Zones::remove_mock_zones();
 	}
 

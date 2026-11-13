@@ -32,8 +32,6 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->disable_cogs_feature();
-		remove_all_filters( 'woocommerce_load_product_cogs_is_additive_flag' );
-		remove_all_filters( 'woocommerce_save_product_cogs_is_additive_flag' );
 	}
 
 	/**

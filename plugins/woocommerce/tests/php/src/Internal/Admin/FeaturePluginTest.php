@@ -18,8 +18,6 @@ class FeaturePluginTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( Analytics::TOGGLE_OPTION_NAME );
-		remove_filter( 'woocommerce_admin_disabled', '__return_true', PHP_INT_MAX );
-		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_analytics_feature' ), PHP_INT_MAX );
 
 		parent::tearDown();
 	}

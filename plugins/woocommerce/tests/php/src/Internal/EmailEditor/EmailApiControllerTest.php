@@ -67,7 +67,6 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		parent::tearDown();
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 		delete_option( 'woocommerce_' . $this->email_type . '_settings' );
-		remove_all_filters( 'woocommerce_transactional_emails_for_block_editor' );
 		WCEmailTemplateSyncRegistry::reset_cache();
 	}
 

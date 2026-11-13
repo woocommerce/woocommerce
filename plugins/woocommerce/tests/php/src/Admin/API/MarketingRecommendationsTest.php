@@ -114,15 +114,6 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		remove_filter( 'pre_http_request', $this->response_mock_ref );
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Tests that the marketing channel recommendations are returned by the endpoint.
 	 */
 	public function test_returns_recommended_marketing_channels() {

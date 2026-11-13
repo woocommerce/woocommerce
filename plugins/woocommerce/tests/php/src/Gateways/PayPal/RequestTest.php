@@ -38,19 +38,6 @@ class RequestTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down the test environment.
-	 *
-	 * @return void
-	 */
-	public function tearDown(): void {
-		remove_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
-		remove_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
-		remove_all_filters( 'pre_http_request' );
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Test create_paypal_order when API returns error.
 	 *
 	 * @return void

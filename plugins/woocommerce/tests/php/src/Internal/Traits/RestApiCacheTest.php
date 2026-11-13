@@ -90,8 +90,6 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->clear_rest_server();
 
-		remove_all_filters( 'woocommerce_rest_api_not_modified_response' );
-
 		parent::tearDown();
 	}
 

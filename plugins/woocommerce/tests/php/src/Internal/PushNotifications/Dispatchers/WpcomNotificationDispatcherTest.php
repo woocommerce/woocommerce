@@ -71,16 +71,6 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		remove_filter( 'pre_option_jetpack_options', array( $this, 'filter_jetpack_options' ) );
-		remove_filter( 'pre_option_jetpack_private_options', array( $this, 'filter_jetpack_private_options' ) );
-		remove_filter( 'pre_http_request', array( $this, 'intercept_http_request' ), 10 );
-		parent::tearDown();
-	}
-
-	/**
 	 * Returns fake Jetpack options with a site ID.
 	 *
 	 * @return array

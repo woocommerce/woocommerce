@@ -28,14 +28,6 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		remove_filter( 'rest_pre_dispatch', array( $this, 'mock_rest_responses' ), 10 );
-	}
-
-	/**
 	 * Test: recent reviews widget placeholder.
 	 */
 	public function test_recent_reviews_widget_placeholder() {

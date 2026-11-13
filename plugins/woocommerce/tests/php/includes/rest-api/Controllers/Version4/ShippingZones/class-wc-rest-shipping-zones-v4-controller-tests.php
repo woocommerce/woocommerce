@@ -100,7 +100,6 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_Unit_Test_Case {
 		$this->zones = array();
 
 		$this->clear_rest_server();
-		remove_filter( 'woocommerce_admin_features', array( self::class, 'enable_rest_api_v4_feature' ) );
 		parent::tearDown();
 	}
 

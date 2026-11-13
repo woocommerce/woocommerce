@@ -36,7 +36,6 @@ class InitTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		MarketingRecommendationsDataSourcePoller::get_instance()->delete_specs_transient();
-		remove_all_filters( 'transient_woocommerce_admin_' . MarketingRecommendationsDataSourcePoller::ID . '_specs' );
 	}
 
 	/**

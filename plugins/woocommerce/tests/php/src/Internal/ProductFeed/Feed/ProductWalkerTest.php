@@ -38,7 +38,6 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		remove_all_filters( 'woocommerce_product_feed_args' );
 		$this->test_container->reset_all_replacements();
 	}
 

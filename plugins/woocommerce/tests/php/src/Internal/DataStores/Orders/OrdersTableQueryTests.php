@@ -93,7 +93,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->toggle_cot_feature_and_usage( $this->cot_state );
-		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		parent::tearDown();
 	}
 

@@ -62,7 +62,6 @@ class WC_Extensions_Tracking_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$_GET = $this->original_get;
-		remove_filter( 'woocommerce_tracks_event_properties', array( $this, 'record_event_properties' ), 10 );
 		parent::tearDown();
 	}
 

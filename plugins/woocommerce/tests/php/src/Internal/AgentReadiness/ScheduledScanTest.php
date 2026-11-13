@@ -43,7 +43,6 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
 		delete_option( 'woocommerce_feature_agent_readiness_enabled' );
-		remove_filter( 'woocommerce_agent_readiness_rules_url', '__return_empty_string' );
 		parent::tearDown();
 	}
 

@@ -41,14 +41,6 @@ class WebflowRealDataIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down the HTTP stub.
-	 */
-	public function tearDown(): void {
-		remove_filter( 'pre_http_request', array( $this, 'handle_request' ), 10 );
-		parent::tearDown();
-	}
-
-	/**
 	 * Route Webflow API requests to canned responses. The fetcher hits three endpoints:
 	 *   - /sites/{id}/products            → product list
 	 *   - /sites/{id}/collections         → discovers the Categories collection

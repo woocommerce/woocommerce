@@ -34,7 +34,6 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
-		remove_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
 		parent::tearDown();
 	}
 

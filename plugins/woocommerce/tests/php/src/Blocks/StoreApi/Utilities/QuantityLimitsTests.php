@@ -11,14 +11,6 @@ use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
  */
 class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	/**
-	 * Clean up filters registered by tests, even when a test fails mid-way.
-	 */
-	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_store_api_cart_item_quantity_validation' );
-		parent::tearDown();
-	}
-
-	/**
 	 * Enable float support for tests.
 	 */
 	private function enable_float_support() {

@@ -60,7 +60,6 @@ class ShopperListSchemaTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		wp_delete_user( $this->user_id );
 		$this->sut = null;
-		remove_filter( 'pre_option_woocommerce_cart_save_for_later_enabled', array( $this, 'filter_save_for_later_enabled' ) );
 		parent::tearDown();
 	}
 
