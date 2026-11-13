@@ -106,13 +106,19 @@ class PaymentGatewayUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should report the saved enabled state and title when a settings filter changes them.
+	 * @testdox Should report the saved enabled state and title when a settings filter changes them, whichever fields are sent.
+	 *
+	 * @testWith [{"enabled": true, "title": "Pay by bank"}]
+	 *           [{"enabled": true}]
+	 *           [{"title": "Pay by bank"}]
+	 *
+	 * @param array $changes Fields sent with the gateway ID.
 	 */
-	public function test_reports_the_saved_settings_when_a_filter_changes_them(): void {
+	public function test_reports_the_saved_settings_when_a_filter_changes_them( array $changes ): void {
 		update_option(
 			'woocommerce_bacs_settings',
 			array(
-				'enabled' => 'no',
+				'enabled' => 'yes',
 				'title'   => 'Direct bank transfer',
 			)
 		);
@@ -126,14 +132,7 @@ class PaymentGatewayUpdateTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		$result = $this->run_ability(
-			'woocommerce/payment-gateway-update',
-			array(
-				'id'      => 'bacs',
-				'enabled' => true,
-				'title'   => 'Pay by bank',
-			)
-		);
+		$result = $this->run_ability( 'woocommerce/payment-gateway-update', array( 'id' => 'bacs' ) + $changes );
 
 		$this->assertNotWPError( $result );
 		$this->assertFalse( $result['payment_gateway']['enabled'] );
