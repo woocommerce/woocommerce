@@ -46,12 +46,28 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	private $fired = array();
 
 	/**
+	 * A shop manager that every test acts as.
+	 *
+	 * @var int
+	 */
+	private static $user_id;
+
+	/**
+	 * Create the fixtures that no test changes beyond its own transaction.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$user_id = $factory->user->create( array( 'role' => 'shop_manager' ) );
+	}
+
+	/**
 	 * Log in as a shop manager and register a gateway that supports refunds.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+		wp_set_current_user( self::$user_id );
 
 		$this->gateway = new class() extends \WC_Payment_Gateway {
 			/**
@@ -173,7 +189,7 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	 * @testdox Should refuse to refund more than the order can still refund, and save nothing.
 	 */
 	public function test_refuses_more_than_refundable(): void {
-		$order = $this->create_order();
+		$order = $this->create_order_without_lines();
 
 		$result = $this->refund(
 			array(
@@ -192,7 +208,7 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	 * @testdox Should refuse a gateway refund when the gateway of the order cannot refund.
 	 */
 	public function test_refuses_gateway_refund_without_support(): void {
-		$order = $this->create_order( 'bacs' );
+		$order = $this->create_order_without_lines( 'bacs' );
 
 		$result = $this->refund(
 			array(
@@ -360,7 +376,7 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	 * @testdox Should list the refunds of an order newest first, and only those in include when it is sent.
 	 */
 	public function test_query_lists_refunds(): void {
-		$order  = $this->create_order();
+		$order  = $this->create_order_without_lines();
 		$first  = wc_create_refund(
 			array(
 				'order_id'     => $order->get_id(),
@@ -414,6 +430,22 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	private function create_order( string $payment_method = 'refunding_gateway' ): \WC_Order {
 		$order = WC_Helper_Order::create_order();
 		$order->set_payment_method( $payment_method );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Create a processing order with a total of 50 and no lines, for refunds of an amount only.
+	 *
+	 * @param string $payment_method Payment gateway ID.
+	 * @return \WC_Order
+	 */
+	private function create_order_without_lines( string $payment_method = 'refunding_gateway' ): \WC_Order {
+		$order = wc_create_order();
+		$order->set_payment_method( $payment_method );
+		$order->set_total( '50' );
 		$order->set_status( OrderStatus::PROCESSING );
 		$order->save();
 

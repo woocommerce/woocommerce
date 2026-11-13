@@ -5775,7 +5775,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				return new \WP_Error( 'test_refund_refused', 'No refunds today.' );
 			}
 		);
-		$order = \WC_Helper_Order::create_order();
+		$order = wc_create_order();
+		$order->set_total( '50' );
 		$order->set_status( OrderStatus::PROCESSING );
 		$order->save();
 
