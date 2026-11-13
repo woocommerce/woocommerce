@@ -236,6 +236,26 @@ class OrderDeleteTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should treat an unknown order ID like another user's order, so a user who may edit but not delete orders gets no hint that the ID is free.
+	 */
+	public function test_checks_delete_access_for_an_unknown_order_id(): void {
+		$order   = OrderHelper::create_order();
+		$ability = wp_get_ability( 'woocommerce/order-delete' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
+		wp_get_current_user()->add_cap( 'edit_shop_orders' );
+		wp_get_current_user()->add_cap( 'edit_others_shop_orders' );
+
+		$existing = $ability->check_permissions( array( 'id' => $order->get_id() ) );
+		$unknown  = $ability->check_permissions( array( 'id' => PHP_INT_MAX ) );
+		wp_get_current_user()->add_cap( 'delete_others_shop_orders' );
+		$unknown_with_delete = $ability->check_permissions( array( 'id' => PHP_INT_MAX ) );
+
+		$this->assertFalse( $existing );
+		$this->assertFalse( $unknown, 'Edit access alone should not pass for an unknown ID.' );
+		$this->assertTrue( $unknown_with_delete );
+	}
+
+	/**
 	 * Execute the ability and check it succeeded.
 	 *
 	 * @param array $input Ability input.

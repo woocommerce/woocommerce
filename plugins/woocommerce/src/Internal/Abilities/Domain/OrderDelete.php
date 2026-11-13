@@ -140,7 +140,7 @@ class OrderDelete extends ActionableAbility {
 	 * @return \WC_Order|\WP_Error
 	 */
 	protected function load( array $input ) {
-		$this->order_id = 0;
+		$this->order_id  = 0;
 		$this->force     = $input['force'] ?? false;
 		$this->child_ids = array();
 		$this->deleting  = array();
