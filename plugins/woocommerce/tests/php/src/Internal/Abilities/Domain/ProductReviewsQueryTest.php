@@ -236,6 +236,48 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should count every reviewed product in the summary when the ranking is capped.
+	 */
+	public function test_summary_counts_products_beyond_the_ranking_cap(): void {
+		global $wpdb;
+		$products = 201;
+		$marker   = wp_unique_id( 'ranking-cap-' );
+		$now      = current_time( 'mysql', true );
+
+		// Bulk rows keep this end-to-end check cheap; the factories cost seconds at this size.
+		$posts = array();
+		for ( $i = 0; $i < $products; ++$i ) {
+			$posts[] = $wpdb->prepare( "(%s, %s, '', '', '', '', '', 'publish', 'product', %s, %s, %s, %s)", $marker, '', $now, $now, $now, $now );
+		}
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery -- Every row is prepared above.
+		$wpdb->query( "INSERT INTO {$wpdb->posts} (post_title, post_content, post_excerpt, to_ping, pinged, post_content_filtered, post_password, post_status, post_type, post_date, post_date_gmt, post_modified, post_modified_gmt) VALUES " . implode( ', ', $posts ) );
+		$product_ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s", $marker ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+
+		$comments = array();
+		foreach ( $product_ids as $product_id ) {
+			$comments[] = $wpdb->prepare( "(%d, 'review', '1', 'Lovely item', 'Reviewer', '', '', '', %s, %s)", $product_id, $now, $now );
+		}
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery -- Every row is prepared above.
+		$wpdb->query( "INSERT INTO {$wpdb->comments} (comment_post_ID, comment_type, comment_approved, comment_content, comment_author, comment_author_email, comment_author_url, comment_author_IP, comment_date, comment_date_gmt) VALUES " . implode( ', ', $comments ) );
+		$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->commentmeta} (comment_id, meta_key, meta_value)
+				SELECT c.comment_ID, 'rating', '4' FROM {$wpdb->comments} c INNER JOIN {$wpdb->posts} p ON p.ID = c.comment_post_ID WHERE p.post_title = %s",
+				$marker
+			)
+		);
+		wp_cache_set_last_changed( 'posts' );
+		wp_cache_set_comments_last_changed();
+
+		$result = $this->sut->execute( array( 'per_page' => 1 ) );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( $products, $result['total'] );
+		$this->assertSame( $products, $result['summary']['total_products'], 'The summary counts the products the ranking leaves out.' );
+		$this->assertCount( 200, $result['by_product'] );
+	}
+
+	/**
 	 * @testdox Should break ranking ties by product ID, including at the output cap.
 	 */
 	public function test_ranking_ties_are_deterministic(): void {
