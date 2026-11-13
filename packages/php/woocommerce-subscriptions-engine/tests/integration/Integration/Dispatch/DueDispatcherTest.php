@@ -19,6 +19,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch\DueDispatcher;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
@@ -129,38 +130,77 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	 */
 	public function test_the_handler_lock_carries_the_scanned_owner(): void {
 		$id      = $this->create_due_contract();
-		$refused = null;
+		$refused = array();
 		ConsumerRegistry::register(
 			self::OWNER,
 			array(
 				'contract_due_handler' => static function ( ContractView $contract, array $context ) use ( &$refused ): void {
-					try {
-						Contracts::update(
-							$contract->get_id(),
-							array(
-								'extension_slug'   => 'other-ext',
-								'next_payment_gmt' => null,
-							),
-							$context['lock']
-						);
-					} catch ( InvalidArgumentException $e ) {
-						$refused = $e->getMessage();
+					$contract_id = (int) $contract->get_id();
+					$lock        = $context['lock'];
+					$cycle       = array(
+						'status'        => CycleStatus::PENDING,
+						'starts_at_gmt' => '2026-02-15 00:00:00',
+						'ends_at_gmt'   => '2026-03-15 00:00:00',
+						'currency'      => 'USD',
+					);
+					$foreign     = array(
+						'update'    => static function () use ( $contract_id, $lock ): void {
+							Contracts::update(
+								$contract_id,
+								array(
+									'extension_slug'   => 'other-ext',
+									'next_payment_gmt' => null,
+								),
+								$lock
+							);
+						},
+						'add_cycle' => static function () use ( $contract_id, $cycle, $lock ): void {
+							Contracts::add_cycle( $contract_id, array( 'extension_slug' => 'other-ext' ) + $cycle, $lock );
+						},
+					);
+					foreach ( $foreign as $method => $write ) {
+						try {
+							$write();
+						} catch ( InvalidArgumentException $e ) {
+							$refused[ $method ] = $e->getMessage();
+						}
 					}
-					Contracts::add_meta( $contract->get_id(), self::OWNER, '_handled', 'yes', false, $context['lock'] );
+
+					$added = Contracts::add_cycle( $contract_id, array( 'extension_slug' => self::OWNER ) + $cycle, $lock );
+					if ( null === $added ) {
+						return;
+					}
+					$transition = array(
+						'from_status' => CycleStatus::PENDING,
+						'to_status'   => CycleStatus::BILLED,
+					);
+					try {
+						Contracts::transition_cycle( (int) $added->get_id(), array( 'extension_slug' => 'other-ext' ) + $transition, $lock );
+					} catch ( InvalidArgumentException $e ) {
+						$refused['transition_cycle'] = $e->getMessage();
+					}
+					Contracts::transition_cycle( (int) $added->get_id(), array( 'extension_slug' => self::OWNER ) + $transition, $lock );
+					Contracts::add_meta( $contract_id, self::OWNER, '_handled', 'yes', false, $lock );
 					Contracts::update(
-						$contract->get_id(),
+						$contract_id,
 						array(
 							'extension_slug'   => self::OWNER,
 							'next_payment_gmt' => null,
 						),
-						$context['lock']
+						$lock
 					);
 				},
 			)
 		);
 
 		$this->assertSame( 1, $this->sut->run_batch( $this->now() ) );
-		$this->assertSame( 'The lock is for a contract of another extension.', $refused );
+		$this->assertSame( array( 'update', 'add_cycle', 'transition_cycle' ), array_keys( $refused ) );
+		foreach ( $refused as $message ) {
+			$this->assertStringContainsString( 'another extension', $message );
+		}
+		$cycles = Contracts::get_cycles( $id );
+		$this->assertCount( 1, $cycles, 'Only the owner\'s cycle is added.' );
+		$this->assertSame( CycleStatus::BILLED, $cycles[0]->get_status(), 'Only the owner\'s transition lands.' );
 		$this->assertSame( array( 'yes' ), Contracts::get_meta( $id, '_handled' ) );
 		$view = Contracts::get( $id );
 		$this->assertInstanceOf( ContractView::class, $view );

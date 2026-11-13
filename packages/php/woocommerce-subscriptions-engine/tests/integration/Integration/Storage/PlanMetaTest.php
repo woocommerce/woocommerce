@@ -335,7 +335,8 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 					$this->sut->{$method}( $plan_id, $owner, 'note', 'orphan' );
 					$this->fail( "Expected {$method}() to refuse plan {$plan_id} of {$owner}." );
 				} catch ( InvalidArgumentException $e ) {
-					$this->assertSame( sprintf( 'No plan of extension &quot;%s&quot; has id %d.', $owner, $plan_id ), $e->getMessage() );
+					$this->assertStringContainsString( sprintf( 'has id %d', $plan_id ), $e->getMessage() );
+					$this->assertStringContainsString( $owner, $e->getMessage() );
 				}
 			}
 			$this->assertSame( array(), $this->sut->get_meta( $plan_id ), 'No meta row is written.' );
@@ -369,5 +370,31 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		}
 		$this->assertFalse( $this->sut->delete_meta( $this->id, 'another-extension', 'note' ) );
 		$this->assertSame( array( 'kept' ), $this->sut->get_meta( $this->id, 'note' ) );
+	}
+
+	/**
+	 * @testdox the plan owner matches exactly: a slug differing only in case reads as another extension.
+	 */
+	public function test_the_plan_owner_match_is_case_sensitive(): void {
+		$upper = strtoupper( self::OWNER );
+		$this->sut->add_meta( $this->id, self::OWNER, 'note', 'kept' );
+
+		$this->assertNull( $this->sut->find( $this->id, $upper ) );
+		$this->assertFalse( $this->sut->exists( $this->id, $upper ) );
+		$this->assertFalse( $this->sut->delete_meta( $this->id, $upper, 'note' ) );
+		foreach ( array( 'add_meta', 'update_meta' ) as $method ) {
+			try {
+				$this->sut->{$method}( $this->id, $upper, 'note', 'theirs' );
+				$this->fail( "Expected {$method}() to refuse a case variant of the owner." );
+			} catch ( InvalidArgumentException $e ) {
+				$this->assertStringContainsString( $upper, $e->getMessage() );
+			}
+		}
+		$this->assertSame( array( 'kept' ), $this->sut->get_meta( $this->id, 'note' ) );
+
+		$plan = $this->sut->find( $this->id );
+		$this->assertInstanceOf( Plan::class, $plan );
+		$plan->set_name( 'Renamed' );
+		$this->assertTrue( $this->sut->update_fields( $plan, array( 'name' ) ), 'The exact owner still writes.' );
 	}
 }

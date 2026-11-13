@@ -547,6 +547,16 @@ class PlansTest extends EngineIntegrationTestCase {
 			)
 		);
 		$this->assertNull( Plans::update( $id, array( 'extension_slug' => 'other-extension' ) ), 'A fieldless update is scoped too.' );
+		$this->assertNull(
+			Plans::update(
+				$id,
+				array(
+					'extension_slug' => strtoupper( self::OWNER ),
+					'name'           => 'Hijacked',
+				)
+			),
+			'The owner matches exactly: a case variant is another extension.'
+		);
 
 		$this->assertSame( 0, $validated, 'The validate action never sees a plan of another extension.' );
 		$this->assertSame( $before, $this->stored( $id )->to_storage() );

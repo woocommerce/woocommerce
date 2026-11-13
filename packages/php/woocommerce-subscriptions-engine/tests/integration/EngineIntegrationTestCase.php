@@ -78,7 +78,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	 * @param string $operation   Operation label.
 	 */
 	protected function take_lock( int $contract_id, string $operation ): ContractLock {
-		$lock = Contracts::lock( $contract_id, $this->get_owner( $contract_id ), $operation );
+		$lock = Contracts::lock( $contract_id, $this->get_extension_slug( $contract_id ), $operation );
 		$this->assertNotNull( $lock, 'Expected to take the lock.' );
 
 		return $lock;
@@ -89,7 +89,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	 *
 	 * @param int $contract_id Contract id.
 	 */
-	protected function get_owner( int $contract_id ): string {
+	protected function get_extension_slug( int $contract_id ): string {
 		$contract = Contracts::get( $contract_id );
 		$this->assertNotNull( $contract, 'Expected the contract to exist.' );
 
@@ -158,7 +158,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	protected function add_cycle_locked( int $contract_id, array $args ): ?CycleView {
 		$lock = $this->take_lock( $contract_id, 'test' );
 		try {
-			return Contracts::add_cycle( $contract_id, $args + array( 'extension_slug' => $this->get_owner( $contract_id ) ), $lock );
+			return Contracts::add_cycle( $contract_id, $args + array( 'extension_slug' => $this->get_extension_slug( $contract_id ) ), $lock );
 		} finally {
 			$lock->release();
 		}
@@ -174,7 +174,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 		$contract_id = $this->get_cycle_contract_id( $cycle_id );
 		$lock        = $this->take_lock( $contract_id, 'test' );
 		try {
-			return Contracts::transition_cycle( $cycle_id, $args + array( 'extension_slug' => $this->get_owner( $contract_id ) ), $lock );
+			return Contracts::transition_cycle( $cycle_id, $args + array( 'extension_slug' => $this->get_extension_slug( $contract_id ) ), $lock );
 		} finally {
 			$lock->release();
 		}

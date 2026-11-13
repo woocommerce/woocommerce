@@ -302,7 +302,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_meta_survives_a_whole_entity_update(): void {
 		$id = $this->insert_released( $this->make_contract() );
-		$this->sut->add_meta( $id, $this->get_owner( $id ), 'source_channel', 'pdp' );
+		$this->sut->add_meta( $id, $this->get_extension_slug( $id ), 'source_channel', 'pdp' );
 
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
@@ -906,7 +906,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				Contracts::update(
 					$id,
 					array(
-						'extension_slug' => $this->get_owner( $id ),
+						'extension_slug' => $this->get_extension_slug( $id ),
 						'status'         => ContractStatus::ACTIVE,
 					)
 				)
@@ -1254,7 +1254,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_a_lost_contract_write_changes_neither_status_nor_due_moment(): void {
 		$id   = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$lock = $this->sut->acquire_lock( $id, $this->get_owner( $id ), 'test' );
+		$lock = $this->sut->acquire_lock( $id, $this->get_extension_slug( $id ), 'test' );
 		$this->assertNotNull( $lock );
 
 		$contract = $this->sut->find( $id );
@@ -1288,7 +1288,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_due_moment_writes_leave_the_lock_alone(): void {
 		$id   = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$lock = $this->sut->acquire_lock( $id, $this->get_owner( $id ), 'engine_due_dispatch' );
+		$lock = $this->sut->acquire_lock( $id, $this->get_extension_slug( $id ), 'engine_due_dispatch' );
 		$this->assertNotNull( $lock );
 		$before = $this->get_lock_holder( $id );
 
@@ -1976,7 +1976,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @param string $operation   Operation label.
 	 */
 	private function lock( int $contract_id, string $operation = 'test' ): ContractLock {
-		$lock = $this->sut->acquire_lock( $contract_id, $this->get_owner( $contract_id ), $operation );
+		$lock = $this->sut->acquire_lock( $contract_id, $this->get_extension_slug( $contract_id ), $operation );
 		$this->assertInstanceOf( ContractLock::class, $lock );
 
 		return $lock;
@@ -2068,7 +2068,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			Contracts::update(
 				$id,
 				array(
-					'extension_slug' => $this->get_owner( $id ),
+					'extension_slug' => $this->get_extension_slug( $id ),
 					'status'         => ContractStatus::CANCELLED,
 				)
 			);
@@ -2083,7 +2083,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			Contracts::update(
 				$id,
 				array(
-					'extension_slug' => $this->get_owner( $id ),
+					'extension_slug' => $this->get_extension_slug( $id ),
 					'status'         => ContractStatus::CANCELLED,
 				)
 			)
@@ -2158,7 +2158,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$lock  = $this->lock( $id, 'hold' );
 
 		$args = array(
-			'extension_slug' => $this->get_owner( $id ),
+			'extension_slug' => $this->get_extension_slug( $id ),
 			'status'         => ContractStatus::ON_HOLD,
 			'items'          => $this->two_items(),
 		);
@@ -2488,7 +2488,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 					Contracts::update(
 						$id,
 						array(
-							'extension_slug' => $this->get_owner( $id ),
+							'extension_slug' => $this->get_extension_slug( $id ),
 							'items'          => $this->two_items(),
 						)
 					),
@@ -2510,7 +2510,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 					Contracts::update(
 						$id,
 						array(
-							'extension_slug' => $this->get_owner( $id ),
+							'extension_slug' => $this->get_extension_slug( $id ),
 							'items'          => $this->two_items(),
 						)
 					);
@@ -2594,7 +2594,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			Contracts::update(
 				$id,
 				array(
-					'extension_slug' => $this->get_owner( $id ),
+					'extension_slug' => $this->get_extension_slug( $id ),
 					'status'         => ContractStatus::ON_HOLD,
 				)
 			);
@@ -2608,7 +2608,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			Contracts::update(
 				$id,
 				array(
-					'extension_slug' => $this->get_owner( $id ),
+					'extension_slug' => $this->get_extension_slug( $id ),
 					'status'         => ContractStatus::ON_HOLD,
 				)
 			)

@@ -401,7 +401,7 @@ final class Contracts {
 	 *                                       {@see self::create()} or the due handler's context.
 	 * @return bool True when this call made the transition, or for a same-status call when the
 	 *              cycle carries the status and the values.
-	 * @throws ValidationException If a status is missing or unregistered (field `to_status`), or a value is
+	 * @throws ValidationException If a required key is missing, `to_status` is unregistered, or a value is
 	 *                             invalid, with every invalid value reported.
 	 * @throws InvalidArgumentException If the cycle does not exist, it belongs to another contract than the lock, or the
 	 *                                  lock is for another extension.

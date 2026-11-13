@@ -21,6 +21,12 @@ defined( 'ABSPATH' ) || exit;
 final class PlanRepository {
 
 	/**
+	 * SQL condition on the `p` alias: the plan's owner is exactly the bound slug. `BINARY` makes the
+	 * match case-sensitive, as the engine's PHP comparisons of the owner are.
+	 */
+	private const OWNER_MATCH = 'p.extension_slug = BINARY %s';
+
+	/**
 	 * Policy columns stored as JSON.
 	 *
 	 * @var array<int, string>
@@ -96,8 +102,9 @@ final class PlanRepository {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$sql = $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id );
 		} else {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$sql = $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d AND extension_slug = %s", $id, $extension_slug );
+			$owner_match = self::OWNER_MATCH;
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the owner condition carries one placeholder.
+			$sql = $wpdb->prepare( "SELECT p.* FROM {$table} p WHERE p.id = %d AND {$owner_match}", $id, $extension_slug );
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -227,15 +234,25 @@ final class PlanRepository {
 
 		$now = gmdate( 'Y-m-d H:i:s' );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
-			array_merge( $columns, array( 'date_updated_gmt' => $now ) ),
-			array(
-				'id'             => $id,
-				'extension_slug' => $extension_slug,
-			)
-		);
+		$set    = array();
+		$values = array();
+		foreach ( array_merge( $columns, array( 'date_updated_gmt' => $now ) ) as $column => $value ) {
+			if ( null === $value ) {
+				$set[] = "`{$column}` = NULL";
+			} else {
+				$set[]    = "`{$column}` = %s";
+				$values[] = $value;
+			}
+		}
+		$values[] = $id;
+		$values[] = $extension_slug;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$sql   = "UPDATE {$table} p SET " . implode( ', ', $set ) . ' WHERE p.id = %d AND ' . self::OWNER_MATCH;
+
+		// Column names come from the plan's own row data; every value is a placeholder.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+		$updated = $wpdb->query( $wpdb->prepare( $sql, $values ) );
 
 		if ( false === $updated ) {
 			throw new \RuntimeException( sprintf( 'Failed to update plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
@@ -266,8 +283,9 @@ final class PlanRepository {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$sql = $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d", $id );
 		} else {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$sql = $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d AND extension_slug = %s", $id, $extension_slug );
+			$owner_match = self::OWNER_MATCH;
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the owner condition carries one placeholder.
+			$sql = $wpdb->prepare( "SELECT p.id FROM {$table} p WHERE p.id = %d AND {$owner_match}", $id, $extension_slug );
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -365,7 +383,7 @@ final class PlanRepository {
 
 		$meta   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
 		$plans  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
-		$sql    = "INSERT INTO {$meta} ( plan_id, meta_key, meta_value ) SELECT p.id, %s, %s FROM {$plans} p WHERE p.id = %d AND p.extension_slug = %s";
+		$sql    = "INSERT INTO {$meta} ( plan_id, meta_key, meta_value ) SELECT p.id, %s, %s FROM {$plans} p WHERE p.id = %d AND " . self::OWNER_MATCH;
 		$values = array( $key, maybe_serialize( $value ), $plan_id, $extension_slug );
 		if ( $unique ) {
 			$sql     .= " AND NOT EXISTS ( SELECT 1 FROM {$meta} m WHERE m.plan_id = p.id AND m.meta_key = %s )";
@@ -409,7 +427,7 @@ final class PlanRepository {
 		$meta   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
 		$plans  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 		$values = array( maybe_serialize( $value ), $plan_id, $extension_slug, $key );
-		$where  = 'm.plan_id = %d AND p.extension_slug = %s AND m.meta_key = %s';
+		$where  = 'm.plan_id = %d AND ' . self::OWNER_MATCH . ' AND m.meta_key = %s';
 		if ( null !== $prev_value ) {
 			$where   .= ' AND m.meta_value = %s';
 			$values[] = maybe_serialize( $prev_value );
@@ -458,8 +476,10 @@ final class PlanRepository {
 		$meta  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
 		$plans = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$has_key = $wpdb->get_var( $wpdb->prepare( "SELECT EXISTS ( SELECT 1 FROM {$meta} m WHERE m.plan_id = p.id AND m.meta_key = %s ) FROM {$plans} p WHERE p.id = %d AND p.extension_slug = %s", $key, $plan_id, $extension_slug ) );
+		$owner_match = self::OWNER_MATCH;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the owner condition carries one placeholder.
+		$has_key = $wpdb->get_var( $wpdb->prepare( "SELECT EXISTS ( SELECT 1 FROM {$meta} m WHERE m.plan_id = p.id AND m.meta_key = %s ) FROM {$plans} p WHERE p.id = %d AND {$owner_match}", $key, $plan_id, $extension_slug ) );
 		if ( '' !== $wpdb->last_error ) {
 			throw new \RuntimeException( sprintf( 'Failed to read plan meta "%s" for plan %d: %s', esc_html( $key ), (int) $plan_id, esc_html( $wpdb->last_error ) ) );
 		}
@@ -484,7 +504,7 @@ final class PlanRepository {
 		$meta   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
 		$plans  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 		$values = array( $plan_id, $extension_slug, $key );
-		$where  = 'm.plan_id = %d AND p.extension_slug = %s AND m.meta_key = %s';
+		$where  = 'm.plan_id = %d AND ' . self::OWNER_MATCH . ' AND m.meta_key = %s';
 		if ( null !== $value ) {
 			$where   .= ' AND m.meta_value = %s';
 			$values[] = maybe_serialize( $value );

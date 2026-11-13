@@ -1157,6 +1157,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			),
 			'A contract of another extension reads as missing.'
 		);
+		$this->assertSame( self::EXTENSION_SLUG, $this->view( $id )->get_extension_slug(), 'The extension slug is not rewritten.' );
 		$this->assertNull( $this->view( $id )->get_customer_id(), 'Nothing is written.' );
 		$this->assertNull( $this->get_lock_holder( $id )['operation'], 'The foreign contract is not locked.' );
 
@@ -1224,6 +1225,65 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox The owner matches exactly: a slug differing only in case reads as another extension.
+	 */
+	public function test_the_owner_match_is_case_sensitive(): void {
+		$id    = $this->contract_with_currency();
+		$upper = strtoupper( self::EXTENSION_SLUG );
+
+		$this->assertNull( Contracts::lock( $id, $upper, 'hold' ) );
+		$this->assertNull(
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => $upper,
+					'billing_total'  => '9',
+				)
+			)
+		);
+		$this->assertNull( Contracts::update( $id, array( 'extension_slug' => $upper ) ), 'The fieldless path agrees.' );
+		$this->assertFalse( Contracts::delete_meta( $id, $upper, 'k' ) );
+		$this->expectException( InvalidArgumentException::class );
+		Contracts::add_meta( $id, $upper, 'k', 'v' );
+	}
+
+	/**
+	 * @testdox update() reports argument errors before refusing a lock for another contract.
+	 */
+	public function test_update_reports_argument_errors_before_the_lock(): void {
+		$id    = $this->contract_with_currency();
+		$other = $this->contract_with_currency();
+		$lock  = $this->take_lock( $other, 'hold' );
+		try {
+			$this->assert_validation_errors(
+				static function () use ( $id, $lock ): void {
+					Contracts::update( $id, array( 'currency' => 'usd' ), $lock );
+				},
+				array(
+					array( ValidationErrorCode::REQUIRED, 'extension_slug' ),
+					array( ValidationErrorCode::INVALID_VALUE, 'currency' ),
+				)
+			);
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * @testdox lock() reports an empty owner alone; the label is refused in a second step.
+	 */
+	public function test_lock_reports_the_owner_before_the_label(): void {
+		$id = $this->contract_with_currency();
+
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::lock( $id, '', '' );
+			},
+			array( array( ValidationErrorCode::REQUIRED, 'extension_slug' ) )
+		);
+	}
+
+	/**
 	 * @testdox lock() takes only a contract of the named extension and refuses an empty owner.
 	 */
 	public function test_lock_is_scoped_to_the_owning_extension(): void {
@@ -1279,6 +1339,23 @@ class ContractsTest extends EngineIntegrationTestCase {
 				},
 				array( array( ValidationErrorCode::INVALID_TYPE, 'extension_slug' ) )
 			);
+			$this->assert_validation_errors(
+				static function () use ( $cycle_id, $lock ): void {
+					Contracts::transition_cycle(
+						$cycle_id,
+						array(
+							'from_status' => CycleStatus::PENDING,
+							'to_status'   => CycleStatus::BILLED,
+							'order_id'    => -1,
+						),
+						$lock
+					);
+				},
+				array(
+					array( ValidationErrorCode::REQUIRED, 'extension_slug' ),
+					array( ValidationErrorCode::OUT_OF_BOUNDS, 'order_id' ),
+				)
+			);
 			$this->assertSame( 1, $this->stored_cycle_count( $id ), 'No cycle is added.' );
 			$this->assertSame( CycleStatus::PENDING, $this->cycle( $id, $cycle_id )->get_status()->get_value(), 'No cycle is moved.' );
 		} finally {
@@ -1310,7 +1387,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 					$this->fail( "Expected {$method}() to refuse the lock." );
 				} catch ( InvalidArgumentException $e ) {
 					$this->assertNotInstanceOf( ValidationException::class, $e, "{$method}() refuses the lock, not the arguments." );
-					$this->assertSame( 'The lock is for a contract of another extension.', $e->getMessage() );
+					$this->assertStringContainsString( 'another extension', $e->getMessage() );
 				}
 			}
 			$this->assertSame( 1, $this->stored_cycle_count( $id ), 'No cycle is added.' );
@@ -1411,7 +1488,8 @@ class ContractsTest extends EngineIntegrationTestCase {
 						$write();
 						$this->fail( "Expected {$method}() to refuse a foreign contract." );
 					} catch ( InvalidArgumentException $e ) {
-						$this->assertSame( sprintf( 'No contract of extension &quot;other&quot; has id %d.', $id ), $e->getMessage() );
+						$this->assertStringContainsString( sprintf( 'has id %d', $id ), $e->getMessage() );
+						$this->assertStringContainsString( 'other', $e->getMessage() );
 					}
 				}
 				$this->assertFalse( Contracts::delete_meta( $id, 'other', 'k' ) );

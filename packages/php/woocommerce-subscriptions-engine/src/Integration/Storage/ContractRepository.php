@@ -76,6 +76,12 @@ final class ContractRepository {
 	private const HOLDS_LOCK = 'lock_token = %s AND locked_until_gmt > UTC_TIMESTAMP()';
 
 	/**
+	 * SQL condition: the row's owner is exactly the bound slug. `BINARY` makes the match
+	 * case-sensitive, as the engine's PHP comparisons of the owner are.
+	 */
+	private const OWNER_MATCH = 'extension_slug = BINARY %s';
+
+	/**
 	 * Contract columns a lock may be conditioned on ({@see self::acquire_lock()}), mapped to the
 	 * column name the SQL uses.
 	 */
@@ -810,11 +816,12 @@ final class ContractRepository {
 
 		$table        = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$no_live_lock = self::NO_LIVE_LOCK;
+		$owner_match  = self::OWNER_MATCH;
 		$token        = self::new_token();
 		$values       = array_merge( array( $token, ContractLock::TTL_SECONDS, $operation, $contract_id, $extension_slug ), $condition_values );
 
 		$sql = "UPDATE {$table} SET lock_token = %s, locked_until_gmt = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), lock_operation = %s
-			WHERE id = %d AND extension_slug = %s{$condition_sql} AND {$no_live_lock}";
+			WHERE id = %d AND {$owner_match}{$condition_sql} AND {$no_live_lock}";
 
 		// Fixed SQL fragments only; every value is a placeholder.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -848,7 +855,7 @@ final class ContractRepository {
 		$sql       = "SELECT {$lock_live} AS live, lock_operation FROM {$table} WHERE id = %d";
 		$values    = array( $contract_id );
 		if ( null !== $extension_slug ) {
-			$sql     .= ' AND extension_slug = %s';
+			$sql     .= ' AND ' . self::OWNER_MATCH;
 			$values[] = $extension_slug;
 		}
 
@@ -1348,6 +1355,7 @@ final class ContractRepository {
 	 */
 	public function add_meta( int $contract_id, string $extension_slug, string $key, $value, bool $unique = false, ?ContractLock $lock = null ): ?int {
 		if ( null !== $lock ) {
+			self::assert_lock_for( $lock, $contract_id );
 			self::assert_lock_owner( $lock, $extension_slug );
 			return $this->add_meta_row( $contract_id, $key, $value, $unique, $lock );
 		}
@@ -1467,6 +1475,7 @@ final class ContractRepository {
 	 */
 	public function update_meta( int $contract_id, string $extension_slug, string $key, $value, $prev_value = null, ?ContractLock $lock = null ): bool {
 		if ( null !== $lock ) {
+			self::assert_lock_for( $lock, $contract_id );
 			self::assert_lock_owner( $lock, $extension_slug );
 			return $this->update_meta_value( $contract_id, $key, $value, $prev_value, $lock );
 		}
@@ -1568,6 +1577,7 @@ final class ContractRepository {
 	 */
 	public function delete_meta( int $contract_id, string $extension_slug, string $key, $value = null, ?ContractLock $lock = null ): bool {
 		if ( null !== $lock ) {
+			self::assert_lock_for( $lock, $contract_id );
 			self::assert_lock_owner( $lock, $extension_slug );
 			$deleted = $this->delete_meta_rows( $contract_id, $key, $value, $lock );
 			return $deleted > 0;
