@@ -65,6 +65,11 @@ class ProductScan {
 	private array $statuses = array();
 
 	/**
+	 * Most shared GTINs the stored report keeps.
+	 */
+	public const SHARED_GTINS_LIMIT = 5000;
+
+	/**
 	 * Normalised GTIN keys carried by more than one published product.
 	 *
 	 * @var array<string, true>|null
@@ -391,11 +396,13 @@ class ProductScan {
 
 	/**
 	 * The GTIN keys more than one published product carries, for the scan to store.
+	 * Null past SHARED_GTINS_LIMIT, so the stored report stays small; checking one product then reads the catalog.
 	 *
-	 * @return array<int, string>
+	 * @return array<int, string>|null
 	 */
-	public function shared_gtins(): array {
-		return array_map( 'strval', array_keys( $this->shared_gtin_keys() ) );
+	public function shared_gtins(): ?array {
+		$keys = $this->shared_gtin_keys();
+		return count( $keys ) > self::SHARED_GTINS_LIMIT ? null : array_map( 'strval', array_keys( $keys ) );
 	}
 
 	/**

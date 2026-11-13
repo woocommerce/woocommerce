@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
@@ -273,6 +274,18 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->sut->get_report();
 
 		$this->assertArrayNotHasKey( 'duplicate_gtin', $this->sut->check_product( $first )['checks'] );
+	}
+
+	/**
+	 * @testdox Past the limit, the scan stores no shared GTINs, so checking one product reads the catalog.
+	 */
+	public function test_shared_gtins_past_the_limit(): void {
+		$scan = new ProductScan();
+		$scan->use_shared_gtins( range( 1, ProductScan::SHARED_GTINS_LIMIT ) );
+		$this->assertCount( ProductScan::SHARED_GTINS_LIMIT, $scan->shared_gtins() );
+
+		$scan->use_shared_gtins( range( 1, ProductScan::SHARED_GTINS_LIMIT + 1 ) );
+		$this->assertNull( $scan->shared_gtins() );
 	}
 
 	/**

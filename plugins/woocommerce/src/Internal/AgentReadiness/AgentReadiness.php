@@ -256,8 +256,8 @@ class AgentReadiness {
 			'checks'              => $checks,
 			'truncated'           => $scan->truncated(),
 		);
-		if ( null !== $on_tested ) {
-			// Stored for checks of one product, so the editor and a save don't read every published product.
+		if ( null !== $on_tested && null !== $scan->shared_gtins() ) {
+			// Stored for checks of one product, so a save doesn't read every published product.
 			$report['shared_gtins'] = $scan->shared_gtins();
 		}
 		return $report;
@@ -428,8 +428,11 @@ class AgentReadiness {
 	 *
 	 * For extensions that rank or fix products one at a time; the stored
 	 * report keeps only counts and a few example ids per check. Shared GTINs
-	 * come from the last stored scan, so a GTIN change on another product waits
-	 * for the next scan; before the first one, they're read from the catalog.
+	 * come from the last stored scan, so a GTIN shared since then, on this
+	 * product or another, is flagged at the next scan. Core refuses an exact
+	 * duplicate on save, so this is one that differs only by separators or
+	 * leading zeros, or a direct meta write. Before the first scan, or past
+	 * ProductScan::SHARED_GTINS_LIMIT, they're read from the catalog.
 	 *
 	 * @param \WC_Product $product Product or variation.
 	 * @return array{product_id:int,checks:array<string, array<string, array{field:string,effect:string}>>,statuses:array<string, string>}|null
