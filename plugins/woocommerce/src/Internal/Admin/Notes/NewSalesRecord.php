@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
+use Automattic\WooCommerce\Currency\ActiveCurrency;
 
 /**
  * New_Sales_Record
@@ -44,6 +45,7 @@ class NewSalesRecord {
 	 * @return floatval
 	 */
 	public static function sum_sales_for_date( $date ) {
+		$scope       = ActiveCurrency::scope( (string) get_option( 'woocommerce_currency' ), 'admin.new_sales_record' );
 		$order_query = new \WC_Order_Query( array( 'date_created' => $date ) );
 		$orders      = $order_query->get_orders();
 		$total       = 0;
@@ -59,6 +61,8 @@ class NewSalesRecord {
 	 * Possibly add a sales record note.
 	 */
 	public static function possibly_add_note() {
+		$scope = ActiveCurrency::scope( (string) get_option( 'woocommerce_currency' ), 'admin.new_sales_record' );
+
 		/**
 		 * Filter to allow for disabling sales record milestones.
 		 *

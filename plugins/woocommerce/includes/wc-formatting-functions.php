@@ -539,7 +539,7 @@ function get_woocommerce_price_format() {
 			break;
 	}
 
-	return apply_filters( 'woocommerce_price_format', $format, $currency_pos );
+	return apply_filters( 'woocommerce_price_format', $format, $currency_pos, ...\Automattic\WooCommerce\Currency\ActiveCurrency::formatting_args() );
 }
 
 /**
@@ -549,7 +549,7 @@ function get_woocommerce_price_format() {
  * @return string
  */
 function wc_get_price_thousand_separator() {
-	return stripslashes( apply_filters( 'wc_get_price_thousand_separator', get_option( 'woocommerce_price_thousand_sep' ) ) );
+	return stripslashes( apply_filters( 'wc_get_price_thousand_separator', get_option( 'woocommerce_price_thousand_sep' ), ...\Automattic\WooCommerce\Currency\ActiveCurrency::formatting_args() ) );
 }
 
 /**
@@ -559,7 +559,7 @@ function wc_get_price_thousand_separator() {
  * @return string
  */
 function wc_get_price_decimal_separator() {
-	$separator = apply_filters( 'wc_get_price_decimal_separator', get_option( 'woocommerce_price_decimal_sep' ) );
+	$separator = apply_filters( 'wc_get_price_decimal_separator', get_option( 'woocommerce_price_decimal_sep' ), ...\Automattic\WooCommerce\Currency\ActiveCurrency::formatting_args() );
 	return $separator ? stripslashes( $separator ) : '.';
 }
 
@@ -570,7 +570,7 @@ function wc_get_price_decimal_separator() {
  * @return int
  */
 function wc_get_price_decimals() {
-	return absint( apply_filters( 'wc_get_price_decimals', get_option( 'woocommerce_price_num_decimals', 2 ) ) );
+	return absint( apply_filters( 'wc_get_price_decimals', get_option( 'woocommerce_price_num_decimals', 2 ), ...\Automattic\WooCommerce\Currency\ActiveCurrency::formatting_args() ) );
 }
 
 /**
@@ -599,6 +599,8 @@ function wc_get_price_decimals() {
  * @return string
  */
 function wc_price( $price, $args = array() ) {
+	$price_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( is_array( $args ) && ! empty( $args['currency'] ) ? (string) $args['currency'] : '' );
+
 	$args = apply_filters(
 		'wc_price_args',
 		wp_parse_args(

@@ -307,6 +307,8 @@ class OrderSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( $order ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $order->get_currency(), null, $order );
+
 		$order_id                 = $order->get_id();
 		$errors                   = [];
 		$failed_order_stock_error = $this->order_controller->get_failed_order_stock_error( $order_id );
@@ -338,13 +340,13 @@ class OrderSchema extends AbstractSchema {
 	 */
 	protected function get_totals( $order ) {
 		return [
-			'subtotal'           => $this->prepare_money_response( $order->get_subtotal() ),
-			'total_discount'     => $this->prepare_money_response( $order->get_total_discount() ),
-			'total_shipping'     => $this->prepare_money_response( $order->get_total_shipping() ),
-			'total_fees'         => $this->prepare_money_response( $order->get_total_fees() ),
-			'total_tax'          => $this->prepare_money_response( $order->get_total_tax() ),
-			'total_refund'       => $this->prepare_money_response( $order->get_total_refunded() ),
-			'total_price'        => $this->prepare_money_response( $order->get_total() ),
+			'subtotal'           => $this->prepare_money_response( $order->get_subtotal(), wc_get_price_decimals() ),
+			'total_discount'     => $this->prepare_money_response( $order->get_total_discount(), wc_get_price_decimals() ),
+			'total_shipping'     => $this->prepare_money_response( $order->get_total_shipping(), wc_get_price_decimals() ),
+			'total_fees'         => $this->prepare_money_response( $order->get_total_fees(), wc_get_price_decimals() ),
+			'total_tax'          => $this->prepare_money_response( $order->get_total_tax(), wc_get_price_decimals() ),
+			'total_refund'       => $this->prepare_money_response( $order->get_total_refunded(), wc_get_price_decimals() ),
+			'total_price'        => $this->prepare_money_response( $order->get_total(), wc_get_price_decimals() ),
 			'total_items'        => $this->prepare_money_response(
 				array_sum(
 					array_map(
@@ -353,7 +355,8 @@ class OrderSchema extends AbstractSchema {
 						},
 						array_values( $order->get_items( OrderItemType::LINE_ITEM ) )
 					)
-				)
+				),
+				wc_get_price_decimals()
 			),
 			'total_items_tax'    => $this->prepare_money_response(
 				array_sum(
@@ -363,7 +366,8 @@ class OrderSchema extends AbstractSchema {
 						},
 						array_values( $order->get_items( OrderItemType::TAX ) )
 					)
-				)
+				),
+				wc_get_price_decimals()
 			),
 			'total_fees_tax'     => $this->prepare_money_response(
 				array_sum(
@@ -373,15 +377,16 @@ class OrderSchema extends AbstractSchema {
 						},
 						array_values( $order->get_items( OrderItemType::FEE ) )
 					)
-				)
+				),
+				wc_get_price_decimals()
 			),
-			'total_discount_tax' => $this->prepare_money_response( $order->get_discount_tax() ),
-			'total_shipping_tax' => $this->prepare_money_response( $order->get_shipping_tax() ),
+			'total_discount_tax' => $this->prepare_money_response( $order->get_discount_tax(), wc_get_price_decimals() ),
+			'total_shipping_tax' => $this->prepare_money_response( $order->get_shipping_tax(), wc_get_price_decimals() ),
 			'tax_lines'          => array_map(
 				function( $item ) {
 					return [
 						'name'  => $item->get_label(),
-						'price' => $this->prepare_money_response( $item->get_tax_total() ),
+						'price' => $this->prepare_money_response( $item->get_tax_total(), wc_get_price_decimals() ),
 						'rate'  => strval( $item->get_rate_percent() ),
 					];
 				},

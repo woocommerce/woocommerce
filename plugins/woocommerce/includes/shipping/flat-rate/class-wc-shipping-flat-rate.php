@@ -201,9 +201,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			$rate['cost'] = $this->evaluate_cost(
 				$cost,
 				array(
-					'qty'    => $this->get_package_item_qty( $package ),
-					'cost'   => $package['contents_cost'],
-					'weight' => $this->get_weight_placeholder()->get_for_package( $package ),
+					'qty'      => $this->get_package_item_qty( $package ),
+					'cost'     => $package['contents_cost'],
+					'currency' => $package['currency'] ?? get_option( 'woocommerce_currency' ),
+					'weight'   => $this->get_weight_placeholder()->get_for_package( $package ),
 				)
 			);
 		}
@@ -228,9 +229,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$class_cost = $this->evaluate_cost(
 					$class_cost_string,
 					array(
-						'qty'    => array_sum( wp_list_pluck( $products, 'quantity' ) ),
-						'cost'   => array_sum( wp_list_pluck( $products, 'line_total' ) ),
-						'weight' => $this->get_weight_placeholder()->get_for_items( $products ),
+						'qty'      => array_sum( wp_list_pluck( $products, 'quantity' ) ),
+						'cost'     => array_sum( wp_list_pluck( $products, 'line_total' ) ),
+						'currency' => $package['currency'] ?? get_option( 'woocommerce_currency' ),
+						'weight'   => $this->get_weight_placeholder()->get_for_items( $products ),
 					)
 				);
 

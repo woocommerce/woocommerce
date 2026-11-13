@@ -2955,6 +2955,8 @@ class WC_AJAX {
 		}
 
 		$order_id               = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
+		$order                  = wc_get_order( $order_id );
+		$refund_scope           = $order instanceof WC_Order ? \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $order->get_currency(), 'order', $order ) : null; // Held until the method ends.
 		$refund_amount          = isset( $_POST['refund_amount'] ) ? wc_format_decimal( sanitize_text_field( wp_unslash( $_POST['refund_amount'] ) ), wc_get_price_decimals() ) : 0;
 		$refunded_amount        = isset( $_POST['refunded_amount'] ) ? wc_format_decimal( sanitize_text_field( wp_unslash( $_POST['refunded_amount'] ) ), wc_get_price_decimals() ) : 0;
 		$refund_reason          = isset( $_POST['refund_reason'] ) ? sanitize_text_field( wp_unslash( $_POST['refund_reason'] ) ) : '';
@@ -2967,8 +2969,6 @@ class WC_AJAX {
 		$response               = array();
 
 		try {
-			$order = wc_get_order( $order_id );
-
 			if ( ! $order instanceof WC_Order ) {
 				throw new Exception( __( 'Invalid order ID.', 'woocommerce' ) );
 			}

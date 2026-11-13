@@ -582,6 +582,7 @@ function wc_create_refund( $args = array() ) {
 		'restock_items'  => false,
 	);
 
+	$refund_currency_scope = null;
 	try {
 		$args  = wp_parse_args( $args, $default_args );
 		$order = wc_get_order( $args['order_id'] );
@@ -589,6 +590,8 @@ function wc_create_refund( $args = array() ) {
 		if ( ! $order ) {
 			throw new Exception( __( 'Invalid order ID.', 'woocommerce' ) );
 		}
+
+		$refund_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $order->get_currency(), 'order', $order );
 
 		$remaining_refund_amount     = $order->get_remaining_refund_amount();
 		$remaining_refund_items      = $order->get_remaining_refund_items();
@@ -781,6 +784,8 @@ function wc_create_refund( $args = array() ) {
 			$refund->delete( true );
 		}
 		return new WP_Error( 'error', $e->getMessage() );
+	} finally {
+		$refund_currency_scope = null;
 	}
 
 	return $refund;

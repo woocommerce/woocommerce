@@ -404,6 +404,10 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int order ID
 	 */
 	public function save() {
+		if ( $this->data_store ) {
+			$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order', $this );
+		}
+
 		$deferred_actions = $this->take_deferred_actions();
 		$this->run_deferred_actions( $deferred_actions, false );
 

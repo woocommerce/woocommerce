@@ -1344,6 +1344,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function remove_order_items( $type = null ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order', $this );
+
 		$this->write_through(
 			function () use ( $type ) {
 				$this->stage_order_items_removal( $type );
@@ -1946,6 +1948,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return true|WP_Error True if applied, error if not.
 	 */
 	public function apply_coupon( $raw_coupon ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order', $this );
+
 		return $this->write_through(
 			function () use ( $raw_coupon ) {
 				return $this->stage_coupon( $raw_coupon );
@@ -2140,6 +2144,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return true|WP_Error True if applied, error if not.
 	 */
 	public function apply_coupon_using_edited_totals( $raw_coupon ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order', $this );
+
 		// With coupons already applied the subtotal/total difference also contains their
 		// discounts and the manual portion cannot be separated out, so it is left alone.
 		$original_subtotals = empty( $this->get_items( 'coupon' ) ) ? $this->sync_subtotals_with_manually_edited_totals() : array();
@@ -2245,6 +2251,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return bool TRUE if coupon was removed, FALSE otherwise.
 	 */
 	public function remove_coupon( $code ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order', $this );
+
 		return $this->write_through(
 			function () use ( $code ) {
 				return $this->stage_coupon_removal( $code );
@@ -2396,6 +2404,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function recalculate_coupons() {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order', $this );
+
 		$this->write_through(
 			function () {
 				$this->stage_recalculated_coupons();
@@ -2484,13 +2494,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	private function get_temporary_coupon( WC_Order_Item_Coupon $coupon_item ): WC_Coupon {
 		$coupon_object = new WC_Coupon();
-
 		// Since WooCommerce 8.7 a succinct 'coupon_info' line item meta entry is created
 		// whenever a coupon is applied to an order. Previously a more verbose 'coupon_data' was created.
 
 		$coupon_info = $coupon_item->get_meta( 'coupon_info', true );
 		if ( $coupon_info ) {
 			$coupon_object->set_short_info( $coupon_info );
+			// Amounts in `coupon_info` are in the order currency; legacy `coupon_data` amounts are in the store currency ('').
+			$coupon_object->set_amount_currency( (string) $this->get_currency() );
 			return $coupon_object;
 		}
 
@@ -2636,6 +2647,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return int
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order', $this );
+
 		return $this->write_through(
 			function () use ( $product, $qty, $args ) {
 				return $this->stage_product_item( $product, $qty, $args );
@@ -2788,6 +2801,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function calculate_shipping() {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order', $this );
+
 		$this->write_through(
 			function () {
 				$this->stage_shipping_total();
@@ -2950,6 +2965,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function calculate_taxes( $args = array() ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order', $this );
+
 		$this->write_through(
 			function () use ( $args ) {
 				$this->stage_taxes( $args );
@@ -3032,6 +3049,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function update_taxes() {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order', $this );
+
 		$this->write_through(
 			function () {
 				$this->stage_tax_items();
@@ -3161,6 +3180,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float calculated grand total.
 	 */
 	public function calculate_totals( $and_taxes = true ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order', $this );
+
 		return $this->write_through(
 			function () use ( $and_taxes ) {
 				return $this->stage_totals( $and_taxes );

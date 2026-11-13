@@ -156,6 +156,9 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			throw new Exception( esc_html__( 'Invalid order.', 'woocommerce' ) );
 		}
 
+		// Keep the order currency active for the whole read, including the legacy discount fix below.
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) get_post_meta( $order->get_id(), '_order_currency', true ), 'order', $order );
+
 		$this->set_order_props(
 			$order,
 			array(
@@ -178,6 +181,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
 			$order->set_discount_total( (float) get_post_meta( $order->get_id(), '_cart_discount', true ) - (float) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
 		}
+
+		unset( $active_currency_scope );
 	}
 
 	/**

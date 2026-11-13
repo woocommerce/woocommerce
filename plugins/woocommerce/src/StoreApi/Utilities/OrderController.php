@@ -91,9 +91,9 @@ class OrderController {
 		}
 
 		// Update the current order to match the current cart.
+		$order->set_currency( wc()->cart ? wc()->cart->get_currency() : get_woocommerce_currency() );
 		$this->update_line_items_from_cart( $order );
 		$this->update_addresses_from_cart( $order );
-		$order->set_currency( get_woocommerce_currency() );
 		$order->set_prices_include_tax( wc_prices_include_tax() );
 		$order->set_customer_id( get_current_user_id() );
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
