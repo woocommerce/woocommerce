@@ -96,6 +96,10 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			// An order handed off while the checkout was ready, for stock since taken say, must not stay payable.
 			$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session is no longer ready to complete.', 'woocommerce' ) );
 
+			if ( $this->hand_off_is_payable( $state ) ) {
+				return $this->refuse_kept_order();
+			}
+
 			return $this->checkout_response( $checkout_id, $this->checkout_state() ?? $state, 200, $cart );
 		}
 

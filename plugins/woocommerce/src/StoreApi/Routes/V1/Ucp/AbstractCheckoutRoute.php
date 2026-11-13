@@ -118,7 +118,7 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	 *
 	 * @param array<string, mixed> $state Checkout state.
 	 * @param string               $note Order note explaining the cancellation.
-	 * @return array<string, mixed> The state without the hand-off, or unchanged, `order_id` included, when the order was paid meanwhile.
+	 * @return array<string, mixed> The state without the hand-off, or unchanged, `order_id` included, when the order was paid meanwhile or could not be cancelled.
 	 */
 	protected function cancel_handed_off_order( array $state, string $note ): array {
 		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
@@ -130,7 +130,10 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 			}
 
 			// The payment page's own list, so a failed attempt the buyer could retry is closed too.
-			$order->update_status( OrderStatus::CANCELLED, $note );
+			// A cancellation that did not save leaves the order payable, so the checkout goes on tracking it.
+			if ( ! $order->update_status( OrderStatus::CANCELLED, $note ) ) {
+				return $state;
+			}
 
 			if ( (int) $this->get_draft_order_id() === $order->get_id() ) {
 				$this->set_draft_order_id( 0 );
@@ -144,14 +147,36 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	}
 
 	/**
+	 * Whether the handed-off order can still be paid, as it can after a cancellation that failed.
+	 *
+	 * @param array<string, mixed> $state Checkout state.
+	 * @return bool
+	 */
+	protected function hand_off_is_payable( array $state ): bool {
+		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
+
+		return $order instanceof \WC_Order && $order->has_status( $this->payable_statuses( $order ) );
+	}
+
+	/**
 	 * Refuse a request whose order was paid, or put on hold, while it ran, as if it had arrived a moment later.
+	 *
+	 * An order still payable is one that could not be cancelled, which a retry may yet do.
 	 *
 	 * @return \WP_REST_Response
 	 */
 	protected function refuse_kept_order(): \WP_REST_Response {
 		$refusal = $this->open_checkout( true );
 
-		return $refusal instanceof \WP_REST_Response ? $refusal : $this->ucp_conflict();
+		if ( $refusal instanceof \WP_REST_Response ) {
+			return $refusal;
+		}
+
+		if ( $this->hand_off_is_payable( $refusal ) ) {
+			return $this->ucp_error( 'TRANSPORT_ERROR', __( 'The order handed off earlier could not be canceled. Please try again.', 'woocommerce' ), 'recoverable', 500 );
+		}
+
+		return $this->ucp_conflict();
 	}
 
 	/**

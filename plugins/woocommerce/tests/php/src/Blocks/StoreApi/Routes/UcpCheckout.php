@@ -346,6 +346,46 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox An order that could not be cancelled stays the checkout's order, so no second one is handed off beside it.
+	 */
+	public function test_failed_cancellation_keeps_the_hand_off(): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'POST', $path . '/complete' );
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		WC()->cart->set_quantity( (string) array_key_first( WC()->cart->get_cart() ), 2 );
+
+		$fail = static function ( $order ) {
+			if ( $order->has_status( OrderStatus::CANCELLED ) ) {
+				throw new \Exception( 'Save failed.' );
+			}
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		$statuses = array(
+			$this->request( 'POST', $path . '/complete' )->get_status(),
+			$this->request( 'POST', $path . '/cancel' )->get_status(),
+		);
+		remove_action( 'woocommerce_before_order_object_save', $fail );
+
+		$this->assertSame( array( 500, 500 ), $statuses );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ) );
+		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
+		$this->assertCount(
+			1,
+			wc_get_orders(
+				array(
+					'status' => 'any',
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			)
+		);
+
+		$this->assertArrayHasKey( 'continue_url', $this->request( 'POST', $path . '/complete' )->get_data() );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::CANCELLED ), 'The retry cancels the order the failed attempt left payable.' );
+	}
+
+	/**
 	 * @testdox Completing a changed cart makes no second order when the first is paid while the request is under way.
 	 */
 	public function test_complete_stops_for_an_order_paid_mid_request(): void {
