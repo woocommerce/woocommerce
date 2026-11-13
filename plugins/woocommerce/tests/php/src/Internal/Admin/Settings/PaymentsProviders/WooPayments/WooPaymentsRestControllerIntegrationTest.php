@@ -337,6 +337,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		$this->run_cleanup_step( fn() => $this->restore_wcpay_version_override(), $cleanup_errors );
 		$this->run_cleanup_step( fn() => parent::tearDown(), $cleanup_errors );
 		$this->run_cleanup_step( fn() => self::invalidate_test_option_caches(), $cleanup_errors );
+		unset( $GLOBALS['wp_rest_auth_cookie'] );
 
 		if ( array() !== $cleanup_errors ) {
 			throw $cleanup_errors[0];
@@ -1258,6 +1259,54 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Includes the WPCOM authorization URL in the onboarding details only for an interactive session.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $interactive_session Whether the request comes from an interactive session.
+	 */
+	public function test_get_onboarding_details_wpcom_authorization_url_requires_interactive_session( bool $interactive_session ): void {
+		// The store is registered with WPCOM, but no user has connected their account yet.
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
+		$this->mock_wpcom_connection_manager->method( 'has_connected_owner' )->willReturn( false );
+		$authorization_requested = false;
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_wpcom_connection_authorization' => function () use ( &$authorization_requested ) {
+						$authorization_requested = true;
+						return array(
+							'success' => true,
+							'errors'  => array(),
+							'url'     => 'https://wordpress.com/auth?secret=some_secret',
+						);
+					},
+				),
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
+		$request->set_param( 'location', 'US' );
+		if ( $interactive_session ) {
+			$this->add_interactive_session( $request );
+		}
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::OK, $response->get_status() );
+		$steps      = array_column( $response->get_data()['steps'], null, 'id' );
+		$wpcom_step = $steps[ WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION ];
+		$this->assertSame( WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED, $wpcom_step['status'] );
+		$this->assertArrayHasKey( 'start', $wpcom_step['actions'], 'The other step actions should not depend on the session' );
+		$this->assertSame( $interactive_session, $authorization_requested );
+		if ( $interactive_session ) {
+			$this->assertSame( 'https://wordpress.com/auth?secret=some_secret', $wpcom_step['actions']['auth']['href'] );
+		} else {
+			$this->assertArrayNotHasKey( 'auth', $wpcom_step['actions'] );
+			$this->assertStringNotContainsString( 'some_secret', (string) wp_json_encode( $response->get_data() ) );
+		}
+	}
+
+	/**
 	 * Test onboarding reset.
 	 */
 	public function test_onboarding_reset() {
@@ -1639,5 +1688,20 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			'US' => 'United States (US)',
 			'PR' => 'Puerto Rico',
 		);
+	}
+
+	/**
+	 * Make the request look like it comes from the current user's browser session.
+	 *
+	 * @param WP_REST_Request $request The request to add the session to.
+	 */
+	private function add_interactive_session( WP_REST_Request $request ): void {
+		$user_id    = get_current_user_id();
+		$expiration = time() + DAY_IN_SECONDS;
+		$token      = \WP_Session_Tokens::get_instance( $user_id )->create( $expiration );
+
+		// Validating the cookie fires auth_cookie_valid, which core records in $wp_rest_auth_cookie.
+		wp_validate_auth_cookie( wp_generate_auth_cookie( $user_id, $expiration, 'logged_in', $token ), 'logged_in' );
+		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
 	}
 }

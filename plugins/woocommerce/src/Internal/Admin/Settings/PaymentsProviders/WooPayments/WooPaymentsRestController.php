@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPa
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
+use Automattic\WooCommerce\Internal\RestApi\InteractiveSessionCheck;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
 use Exception;
@@ -508,8 +509,11 @@ class WooPaymentsRestController extends RestApiControllerBase {
 
 		$source = $request->get_param( 'source' );
 
+		// The WPCOM authorization URL is only returned to an interactive admin session.
+		$is_interactive_session = ! is_wp_error( InteractiveSessionCheck::require_interactive_session( $request ) );
+
 		try {
-			$onboarding_details = $this->woopayments->get_onboarding_details( $location, $this->get_rest_url_path( 'onboarding' ), $source );
+			$onboarding_details = $this->woopayments->get_onboarding_details( $location, $this->get_rest_url_path( 'onboarding' ), $source, $is_interactive_session );
 		} catch ( ApiException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( Exception $e ) {

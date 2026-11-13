@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Require a logged-in browser session to get the WordPress.com connection link during WooPayments setup.
