@@ -145,9 +145,9 @@ final class ProductImportLock {
 	}
 
 	/**
-	 * Get how long the product import lock has been held.
+	 * Get how long ago the product import lock was taken or last refreshed.
 	 *
-	 * @return int|null Seconds since the lock was taken, or null when no import is running.
+	 * @return int|null Seconds since the lock was taken or last refreshed, or null when no import is running.
 	 */
 	public function get_age(): ?int {
 		$value = $this->get_value();
