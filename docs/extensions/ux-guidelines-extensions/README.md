@@ -24,7 +24,7 @@ For new WooCommerce extension admin interfaces and modernization work, prefer [`
 
 Check the documentation and exports for the package versions your extension supports. A coverage gap can be a missing control or a missing behavior needed for your task. Before adopting a fallback, verify its API, accessibility, styling and compatibility, and record the missing capability and why the fallback is appropriate.
 
-Reuse WooCommerce's supported page, settings and integration patterns. For settings, preserve the host's [header and save contract](../settings-and-config/settings-ui.md#page-header). When using the experimental, opt-in Settings UI, prefer [DataForm's built-in controls](../settings-and-config/registering-settings-ui-components.md) before registering custom components. Use [semantic design tokens](https://wordpress.github.io/gutenberg/?path=/docs/design-system-tokens-introduction--docs) for custom styling, and plan changes to existing PHP and React screens around their compatibility requirements.
+Reuse WooCommerce's supported page, settings and integration patterns. For settings, keep WooCommerce's [settings header and saving behavior](../settings-and-config/settings-ui.md#page-header). When using the experimental, opt-in Settings UI, prefer [DataForm's built-in controls](../settings-and-config/registering-settings-ui-components.md) before registering custom components. Use [semantic design tokens](https://wordpress.github.io/gutenberg/?path=/docs/design-system-tokens-introduction--docs) for custom styling, and plan changes to existing PHP and React screens around their compatibility requirements.
 
 ### Settings composition example
 
@@ -32,7 +32,7 @@ Reuse WooCommerce's supported page, settings and integration patterns. For setti
 
 This settings page groups related fields into **Store details** and **Checkout**, places help beside the relevant control and uses one save action for the form. Use this structure to make settings easy to scan without splitting a simple form across extra tabs. Choose controls using the [admin component guidance](#admin-components) and check their availability in the versions you support.
 
-Reuse the composition within your supported host. Inside WooCommerce Settings, keep the host's navigation, header and save action; do not add this standalone page shell inside an existing settings section. See the [settings header and save contract](../settings-and-config/settings-ui.md#page-header).
+Use these field groups within your extension's settings page. Inside WooCommerce Settings, keep the existing navigation, header and save action; do not add this standalone page shell inside an existing settings section. See the [settings header and saving behavior](../settings-and-config/settings-ui.md#page-header).
 
 ### Design resources
 
