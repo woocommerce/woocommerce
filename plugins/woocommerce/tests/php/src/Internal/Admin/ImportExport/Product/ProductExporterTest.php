@@ -110,6 +110,25 @@ class ProductExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should offer columns added through the `woocommerce_product_export_column_names` filter.
+	 */
+	public function test_get_available_columns_includes_filtered_column_names(): void {
+		$add_column = static function ( array $columns ): array {
+			$columns['custom_column'] = 'Custom column';
+			return $columns;
+		};
+		add_filter( 'woocommerce_product_export_column_names', $add_column );
+
+		try {
+			$columns = $this->sut->get_available_columns();
+		} finally {
+			remove_filter( 'woocommerce_product_export_column_names', $add_column );
+		}
+
+		$this->assertSame( 'Custom column', $columns['custom_column'] ?? null );
+	}
+
+	/**
 	 * @testdox Should export the numbered attribute columns when `attributes` is the only selected column.
 	 */
 	public function test_run_exports_the_attribute_group_when_selected_as_a_column(): void {

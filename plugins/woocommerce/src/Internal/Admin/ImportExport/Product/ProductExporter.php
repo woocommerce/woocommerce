@@ -53,6 +53,9 @@ final class ProductExporter {
 	/**
 	 * Return the exportable columns as key => label.
 	 *
+	 * Uses `get_column_names()`, so columns added through `woocommerce_product_export_column_names`
+	 * are listed and selectable, matching what an unfiltered export writes.
+	 *
 	 * `downloads` and `attributes` are not part of `get_default_column_names()` because they
 	 * expand into numbered columns (`downloads:url1`, `attributes:value1`, ...) as products are
 	 * read. `WC_CSV_Exporter::is_column_exporting()` matches them by their prefix, so they are
@@ -65,7 +68,7 @@ final class ProductExporter {
 		$this->load_exporter();
 
 		return array_merge(
-			( new WC_Product_CSV_Exporter() )->get_default_column_names(),
+			( new WC_Product_CSV_Exporter() )->get_column_names(),
 			array(
 				'downloads'  => __( 'Downloads', 'woocommerce' ),
 				'attributes' => __( 'Attributes', 'woocommerce' ),
