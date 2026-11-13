@@ -9960,6 +9960,7 @@ body.woocommerce-settings-payments-section_legacy {
 
 .wc-agentic-commerce-badge {
 	display: inline-block;
+	white-space: nowrap;
 	padding: 0 8px;
 	border-radius: 2px;
 	font-weight: 600;
@@ -9980,6 +9981,19 @@ body.woocommerce-settings-payments-section_legacy {
 		background: #fcf9e8;
 		color: #8a6100;
 	}
+}
+
+.wc-agentic-commerce-card__section {
+	padding: 16px 24px 24px;
+	border-block-start: 1px solid #f0f0f1;
+
+	h3 {
+		margin-block-end: 8px;
+	}
+}
+
+.wc-agentic-commerce-channels {
+	margin-block-end: 16px;
 }
 
 .wc-agentic-commerce-ucp-switch {
