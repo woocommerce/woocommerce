@@ -110,7 +110,7 @@ class PaymentGatewayUpdate extends AbstractDomainAbility implements AbilityDefin
 			self::reload_saved_settings( $gateway, $input );
 		}
 
-		$ids   = array_map( 'strval', array_keys( $gateways ) );
+		$ids   = self::get_checkout_order( array_map( 'strval', array_keys( $gateways ) ) );
 		$order = (int) array_search( $id, $ids, true );
 
 		if ( isset( $input['order'] ) ) {
@@ -246,7 +246,7 @@ class PaymentGatewayUpdate extends AbstractDomainAbility implements AbilityDefin
 			$providers->save_order_map( $providers->enhance_order_map( $order_map ) );
 		}
 
-		return self::get_checkout_position( $ids, $id );
+		return (int) array_search( $id, self::get_checkout_order( $ids ), true );
 	}
 
 	/**
@@ -270,13 +270,13 @@ class PaymentGatewayUpdate extends AbstractDomainAbility implements AbilityDefin
 
 	/**
 	 * Mirrors how WC_Payment_Gateways::init() sorts gateways: by their saved
-	 * order, with unordered gateways after them.
+	 * order, with unordered gateways after them. The loaded gateways keep the
+	 * order they had when they loaded, even after a move in the same request.
 	 *
 	 * @param array<int, string> $ids Gateway IDs.
-	 * @param string             $id  Gateway to find.
-	 * @return int
+	 * @return array<int, string>
 	 */
-	private static function get_checkout_position( array $ids, string $id ): int {
+	private static function get_checkout_order( array $ids ): array {
 		$saved     = (array) get_option( PaymentsProviders::PROVIDERS_ORDER_OPTION );
 		$positions = array();
 		$end       = PHP_INT_MAX - count( $ids );
@@ -287,7 +287,7 @@ class PaymentGatewayUpdate extends AbstractDomainAbility implements AbilityDefin
 
 		asort( $positions );
 
-		return (int) array_search( $id, array_map( 'strval', array_keys( $positions ) ), true );
+		return array_map( 'strval', array_keys( $positions ) );
 	}
 
 	/**
