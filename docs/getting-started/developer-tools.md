@@ -100,10 +100,6 @@ Start here for shared WordPress Design System components in new admin interfaces
 
 This package supplies components used in existing WordPress interfaces. For new WooCommerce admin work, use it when `@wordpress/ui` lacks a required component or capability in the supported version. Verify the fallback's API, accessibility, styling and compatibility using the [component reference](https://wordpress.github.io/gutenberg/?path=/docs/components-introduction--docs).
 
-#### [WooCommerce Components](https://www.npmjs.com/package/@woocommerce/components)
-
-This package contains WooCommerce-specific components used in dashboard and report interfaces. Its [README](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/components/README.md) and [Woo Storybook](https://woocommerce.github.io/woocommerce/) document existing consumers and package usage. Use the admin component guidance above when choosing shared controls for new work.
-
 ### JavaScript Utility Packages
 
 #### [CSV Export](https://www.npmjs.com/package/@woocommerce/csv-export)
