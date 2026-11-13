@@ -24,6 +24,8 @@ Test the complete merchant task inside WooCommerce, including the host navigatio
 
 See the WCAG explanations for [text resizing](https://www.w3.org/WAI/WCAG22/Understanding/resize-text.html) and [reflow](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html) for the full requirements and exceptions.
 
+Use the [failed-save screenshot](./notices.md#failed-save) to discuss notice placement, retained input and a named recovery action. The [partial-results screenshot](./notices.md#partial-results) shows outcomes labeled with text as well as color. These images illustrate composition; verify accessible names, associations, focus and live announcements in the working screen rather than inferring them from a screenshot.
+
 ## Combine automated and manual checks
 
 Run automated accessibility checks, then complete the workflow using only a keyboard and with a screen reader. Include empty, loading, populated, error and success states; an automated scan of the initial page does not cover these interactions.

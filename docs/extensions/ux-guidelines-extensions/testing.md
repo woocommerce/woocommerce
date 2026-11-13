@@ -28,6 +28,16 @@ Include first use, everyday work and returning to an existing configuration. Rec
 
 Use the [accessibility checks](./accessibility.md) and [feedback and recovery guidance](./notices.md) during these scenarios. Test supported classic and React paths when both are provided; do not assume a component preview represents the integrated screen.
 
+### Example: failed save and retry
+
+Use the [failed-save example](./notices.md#failed-save) as a visual reference for this sequence:
+
+1. Change a valid setting and submit it. Simulate a failed request; the error should explain what happened, keep the draft and offer recovery.
+2. Reach **Try again** with the keyboard and retry. Confirm the intended values are submitted and the error clears only after success.
+3. In your actual WooCommerce integration, reload or return to the screen and confirm the saved values persist. Repeat the relevant accessibility checks during the failure and recovery states.
+
+The upstream Storybook example simulates saving; it does not prove server persistence or your extension's integration. For bulk workflows, use the [partial-results example](./notices.md#partial-results) to check that recovery targets failed items without repeating completed work.
+
 ## Use automation where it protects behavior
 
 Add regression coverage for important behavior such as validation, permissions, saving and failure recovery. Choose checks that exercise the real integration rather than only asserting that a component or text string exists. Pair automated accessibility checks with manual interaction checks and observation of merchants using the feature.
