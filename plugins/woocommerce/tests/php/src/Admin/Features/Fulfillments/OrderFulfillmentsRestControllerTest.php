@@ -19,6 +19,14 @@ use WP_REST_Request;
  * @package Automattic\WooCommerce\Tests\Internal\Orders
  */
 class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
+
+	/**
+	 * Tests register their own controller's routes, which a reused server would keep serving from the first test.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
 	/**
 	 * @var OrderFulfillmentsRestController
 	 */

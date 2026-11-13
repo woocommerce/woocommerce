@@ -13,6 +13,13 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 class WC_Admin_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Each test mocks Jetpack modules before the reports routes are registered.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * Endpoints.
 	 *
 	 * @var string
