@@ -107,6 +107,80 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox serve_status reads the permalink setting and the static file: no file is fine with pretty permalinks and missing with Plain; a file must be WooCommerce's and current.
+	 * @testWith ["/%postname%/", null, "ok"]
+	 *           ["/%postname%/", "current", "ok"]
+	 *           ["/%postname%/", "foreign", "file_in_the_way"]
+	 *           ["/%postname%/", "outdated", "file_outdated"]
+	 *           ["", null, "no_file"]
+	 *           ["", "current", "ok"]
+	 *           ["", "current, other formatting", "ok"]
+	 *           ["", "foreign", "file_in_the_way"]
+	 *           ["", "not json", "file_in_the_way"]
+	 *           ["", "cut short", "file_in_the_way"]
+	 *           ["", "outdated", "file_outdated"]
+	 *
+	 * @param string      $structure Permalink structure.
+	 * @param string|null $file      The static file, or null for none.
+	 * @param string      $expected  Expected status.
+	 */
+	public function test_serve_status( string $structure, ?string $file, string $expected ): void {
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/.well-known/ucp';
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+		$this->set_permalink_structure( $structure );
+		if ( null !== $file ) {
+			$ours    = $this->sut->get_profile();
+			$old     = $ours;
+			$foreign = $ours;
+
+			$foreign['links'] = array( $ours['links'][0] );
+
+			$old['ucp']['services']['dev.ucp.shopping'][0]['endpoint'] = 'http://old.example/wp-json/wc/ucp/v1';
+
+			$current  = (string) wp_json_encode( $ours, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+			$contents = array(
+				'current'                   => $current,
+				'current, other formatting' => (string) wp_json_encode( $ours ),
+				'foreign'                   => (string) wp_json_encode( $foreign ),
+				'outdated'                  => (string) wp_json_encode( $old ),
+				'not json'                  => 'not json',
+				'cut short'                 => substr( $current, 0, (int) ( strlen( $current ) / 2 ) ),
+			);
+			wp_mkdir_p( dirname( $path ) );
+			file_put_contents( $path, $contents[ $file ] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		}
+
+		try {
+			$this->assertSame( $expected, UcpDiscovery::serve_status() );
+		} finally {
+			self::remove_ucp_file( $path );
+		}
+	}
+
+	/**
+	 * @testdox serve_status counts a file it can't read as in the way, even when it holds WooCommerce's current profile.
+	 */
+	public function test_serve_status_unreadable_file(): void {
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/.well-known/ucp';
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+		$this->set_permalink_structure( '' );
+
+		wp_mkdir_p( dirname( $path ) );
+		file_put_contents( $path, (string) wp_json_encode( $this->sut->get_profile() ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		chmod( $path, 0000 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+
+		try {
+			if ( is_readable( $path ) ) {
+				$this->markTestSkipped( 'The test runs as a user who can read any file (root).' );
+			}
+			$this->assertSame( 'file_in_the_way', UcpDiscovery::serve_status() );
+		} finally {
+			chmod( $path, 0644 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+			self::remove_ucp_file( $path );
+		}
+	}
+
+	/**
 	 * @testdox The static file is written under plain permalinks, removed under pretty ones, and removed when UCP is turned off or WooCommerce is deactivated.
 	 */
 	public function test_sync_file(): void {
@@ -241,5 +315,19 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_maybe_render_ignores_other_requests( string $matched_rule, string $query_var ): void {
 		$this->assertNull( $this->render( $matched_rule, $query_var ) );
+	}
+
+	/**
+	 * Delete a test discovery file and the two folders created for it.
+	 *
+	 * @param string $path File path under a `wc-ucp-*` temp folder.
+	 */
+	private static function remove_ucp_file( string $path ): void {
+		wp_delete_file( $path );
+		foreach ( array( dirname( $path ), dirname( $path, 2 ) ) as $dir ) {
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+			}
+		}
 	}
 }

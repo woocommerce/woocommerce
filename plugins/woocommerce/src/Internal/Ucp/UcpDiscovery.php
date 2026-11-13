@@ -43,6 +43,40 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Why `/.well-known/ucp` does or doesn't serve WooCommerce's current profile, read from the
+	 * permalink setting and the static file each call, so nothing is stored. The agent readiness
+	 * checks read this.
+	 *
+	 * - `ok`: no file and pretty permalinks (the rewrite rule answers), or WooCommerce's file with the current profile.
+	 * - `no_file`: Plain permalinks and no static file, so nothing answers the address.
+	 * - `file_in_the_way`: a file WooCommerce didn't write, or one it can't read (unreadable, not JSON, cut short).
+	 * - `file_outdated`: WooCommerce's file, but its profile isn't the current one (for example after a move to HTTPS).
+	 *
+	 * @return string One of `ok`, `no_file`, `file_in_the_way`, `file_outdated`.
+	 */
+	public static function serve_status(): string {
+		global $wp_rewrite;
+
+		$path = self::get_file_path();
+		if ( ! is_file( $path ) ) {
+			return $wp_rewrite->using_permalinks() ? 'ok' : 'no_file';
+		}
+
+		// The profile is a few KB; cap the read so a large file someone else put there isn't read whole.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$profile = is_readable( $path ) ? json_decode( (string) file_get_contents( $path, false, null, 0, 65536 ), true ) : null;
+		$links   = is_array( $profile ) ? ( $profile['links'] ?? null ) : null;
+		if ( ! is_array( $links ) || ! in_array( self::LINK_REL, array_column( $links, 'rel' ), true ) ) {
+			return 'file_in_the_way';
+		}
+
+		// Compare the decoded `ucp` part, not the raw text, so formatting and the ownership link don't matter.
+		// The current profile goes through the same JSON round trip, so objects and arrays compare alike.
+		$current = json_decode( (string) wp_json_encode( ( new self() )->get_profile()['ucp'] ), true );
+		return ( $profile['ucp'] ?? null ) === $current ? 'ok' : 'file_outdated';
+	}
+
+	/**
 	 * Register the renderer, plus the rewrite rule when pretty permalinks are on, when UCP is enabled.
 	 */
 	public function register_feature_hooks(): void {
@@ -180,7 +214,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	 *
 	 * @return string
 	 */
-	private function get_file_path(): string {
+	private static function get_file_path(): string {
 		/**
 		 * Filters the path of the static UCP discovery file written when plain permalinks are active.
 		 *

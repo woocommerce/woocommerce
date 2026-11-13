@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
+use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 defined( 'ABSPATH' ) || exit;
@@ -111,6 +112,7 @@ class StoreConditions {
 				'fix'     => __( 'Move the site to HTTPS; your host can usually turn it on.', 'woocommerce' ),
 				'fix_url' => wp_get_update_https_url(),
 			),
+			self::ucp_discovery( UcpDiscovery::serve_status() ),
 			$policy_page(
 				'privacy_page',
 				AgenticCommerceSettings::PRIVACY_PAGE_OPTION,
@@ -172,6 +174,31 @@ class StoreConditions {
 				'fix'     => __( 'Turn on the Processing or Completed order email under WooCommerce > Settings > Emails.', 'woocommerce' ),
 				'fix_url' => $settings_url( 'email&section=wc_email_customer_processing_order' ),
 			),
+		);
+	}
+
+	/**
+	 * The UCP address condition, with the fix for why the address doesn't serve the profile.
+	 *
+	 * @param string $status A status from UcpDiscovery::serve_status().
+	 * @return array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}
+	 */
+	private static function ucp_discovery( string $status ): array {
+		$fixes = array(
+			'no_file'         => __( 'Choose a permalink structure other than Plain under Settings > Permalinks.', 'woocommerce' ),
+			'file_in_the_way' => __( 'Remove the /.well-known/ucp file that WooCommerce didn\'t write from your WordPress folder. If permalinks are Plain, also choose another structure under Settings > Permalinks.', 'woocommerce' ),
+			'file_outdated'   => __( 'The /.well-known/ucp file in your WordPress folder has an old profile. Delete it, and if permalinks are Plain, choose another structure under Settings > Permalinks.', 'woocommerce' ),
+		);
+		return array(
+			'id'      => 'ucp_discovery',
+			'ok'      => 'ok' === $status,
+			'blocks'  => 'ucp',
+			'level'   => self::LEVEL_REQUIRED,
+			'name'    => __( 'Store serves the UCP address', 'woocommerce' ),
+			'label'   => __( 'Store can\'t serve the UCP address', 'woocommerce' ),
+			'why'     => __( 'Agents find your catalog at /.well-known/ucp, and that address doesn\'t return your store\'s current profile.', 'woocommerce' ),
+			'fix'     => $fixes[ $status ] ?? $fixes['no_file'],
+			'fix_url' => admin_url( 'options-permalink.php' ),
 		);
 	}
 

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
+use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use WC_Unit_Test_Case;
 
 /**
@@ -175,10 +176,65 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Make every required check pass: the store is launched and the home URL is HTTPS.
+	 * @testdox Plain permalinks are required to change, since the store can't serve /.well-known/ucp with them.
+	 */
+	public function test_plain_permalinks_required(): void {
+		global $wp_rewrite;
+		self::make_store_ready();
+		$wp_rewrite->set_permalink_structure( '' );
+
+		$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
+		$this->assertStringContainsString( 'Settings > Permalinks', $this->ucp_discovery_fix() );
+	}
+
+	/**
+	 * @testdox A /.well-known/ucp file in the way fails the UCP address check with the fix for its reason, and deleting it passes the check.
+	 * @testWith ["foreign", "Remove the /.well-known/ucp file"]
+	 *           ["outdated", "The /.well-known/ucp file in your WordPress folder has an old profile"]
+	 *
+	 * @param string $file   Someone else's file, or WooCommerce's file with an old profile.
+	 * @param string $prefix How the fix should start.
+	 */
+	public function test_ucp_file_fix( string $file, string $prefix ): void {
+		self::make_store_ready();
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/.well-known/ucp';
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+
+		$profile                   = ( new UcpDiscovery() )->get_profile();
+		$profile['ucp']['version'] = '1999-01-01';
+
+		wp_mkdir_p( dirname( $path ) );
+		file_put_contents( $path, 'foreign' === $file ? '{}' : (string) wp_json_encode( $profile ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+
+		try {
+			$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
+			$this->assertStringStartsWith( $prefix, $this->ucp_discovery_fix() );
+
+			// Following the fix passes the check: with the file gone and pretty permalinks, nothing is in the way.
+			wp_delete_file( $path );
+			$this->assertSame( array(), $this->sut->failing_required() );
+		} finally {
+			self::remove_ucp_file( $path );
+		}
+	}
+
+	/**
+	 * The fix text the UCP address check shows now.
+	 *
+	 * @return string
+	 */
+	private function ucp_discovery_fix(): string {
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		return $checks['ucp_discovery']['fix'];
+	}
+
+	/**
+	 * Make every required check pass: the store is launched, the home URL is HTTPS and permalinks aren't Plain.
 	 * Privacy, terms and the refund page are set so those checks count as done.
 	 */
 	public static function make_store_ready(): void {
+		global $wp_rewrite;
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
 		add_filter( 'pre_option_home', static fn() => 'https://example.org' );
 		update_option( 'woocommerce_coming_soon', 'no' );
 		$page = wp_insert_post(
@@ -190,6 +246,20 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 		);
 		foreach ( array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, AgenticCommerceSettings::TERMS_PAGE_OPTION, AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION ) as $option ) {
 			update_option( $option, $page );
+		}
+	}
+
+	/**
+	 * Delete a test discovery file and the two folders created for it.
+	 *
+	 * @param string $path File path under a `wc-ucp-*` temp folder.
+	 */
+	private static function remove_ucp_file( string $path ): void {
+		wp_delete_file( $path );
+		foreach ( array( dirname( $path ), dirname( $path, 2 ) ) as $dir ) {
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+			}
 		}
 	}
 }
