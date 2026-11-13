@@ -10,11 +10,12 @@ namespace Automattic\WooCommerce\StoreApi\Utilities\Ucp;
  * exactly like the cart it was promoted from. A paid checkout is handed its order in that shape.
  */
 class CheckoutMapper {
-	const STATUS_INCOMPLETE          = 'incomplete';
-	const STATUS_READY_FOR_COMPLETE  = 'ready_for_complete';
-	const STATUS_REQUIRES_ESCALATION = 'requires_escalation';
-	const STATUS_COMPLETED           = 'completed';
-	const STATUS_CANCELED            = 'canceled';
+	const STATUS_INCOMPLETE           = 'incomplete';
+	const STATUS_READY_FOR_COMPLETE   = 'ready_for_complete';
+	const STATUS_REQUIRES_ESCALATION  = 'requires_escalation';
+	const STATUS_COMPLETE_IN_PROGRESS = 'complete_in_progress';
+	const STATUS_COMPLETED            = 'completed';
+	const STATUS_CANCELED             = 'canceled';
 
 	/**
 	 * Build the UCP checkout payload, without the `ucp` envelope.
@@ -26,9 +27,10 @@ class CheckoutMapper {
 	 */
 	public function build_checkout( array $cart, string $checkout_id, array $state ): array {
 		$payload  = ( new CartMapper() )->build_cart( $cart, $checkout_id );
-		$missing  = empty( $state['order'] ) ? $this->missing_requirements( $cart ) : array();
-		$messages = array_merge( $payload['messages'] ?? array(), $missing );
 		$status   = (string) ( $state['status'] ?? '' );
+		$placed   = ! empty( $state['order'] ) || self::STATUS_COMPLETE_IN_PROGRESS === $status;
+		$missing  = $placed ? array() : $this->missing_requirements( $cart );
+		$messages = array_merge( $payload['messages'] ?? array(), $missing );
 
 		if ( '' === $status ) {
 			$status = empty( $cart['items'] ) || ! empty( $cart['errors'] ) || ! empty( $missing ) ? self::STATUS_INCOMPLETE : self::STATUS_READY_FOR_COMPLETE;

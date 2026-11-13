@@ -321,7 +321,7 @@ class UcpCheckout extends ControllerTestCase {
 	/**
 	 * @testdox An order paid, or put on hold, while an update is under way stays the checkout's order.
 	 * @testWith ["processing", "completed"]
-	 *           ["on-hold", "requires_escalation"]
+	 *           ["on-hold", "complete_in_progress"]
 	 *
 	 * @param string $order_status Status the order moves to mid-request.
 	 * @param string $expected     Checkout status afterwards.
@@ -339,9 +339,7 @@ class UcpCheckout extends ControllerTestCase {
 		$updated = $this->request( 'PUT', $path, array( 'line_items' => array( $this->line_item( 1, 1 ) ) ) )->get_data();
 		remove_action( 'woocommerce_add_to_cart', $pay );
 		$this->assertSame( $expected, $updated['status'] );
-		if ( 'completed' === $expected ) {
-			$this->assertSame( (string) self::$product_ids[0], $updated['line_items'][0]['item']['id'], 'A paid checkout lists what was paid for, not the late change.' );
-		}
+		$this->assertSame( (string) self::$product_ids[0], $updated['line_items'][0]['item']['id'], 'A paid checkout lists what was paid for, not the late change.' );
 
 		$this->assertSame( $expected, $this->request( 'GET', $path )->get_data()['status'] );
 		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
@@ -475,7 +473,10 @@ class UcpCheckout extends ControllerTestCase {
 			),
 			'No second order may be made for a payment already on its way.'
 		);
-		$this->assertSame( 'requires_escalation', $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data()['status'] );
+		$read = $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data();
+		$this->assertSame( 'complete_in_progress', $read['status'], 'A payment already made must not read as one still to make.' );
+		$this->assertArrayNotHasKey( 'continue_url', $read );
+		$this->assertNotContains( 'error', array_column( $read['messages'] ?? array(), 'type' ) );
 
 		$order->update_status( OrderStatus::PROCESSING );
 		$this->assertSame( 'completed', $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data()['status'] );

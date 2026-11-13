@@ -201,6 +201,7 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	 * Build a successful checkout response.
 	 *
 	 * A paid checkout is read from its order: the cart session lives on and follows later price and stock changes.
+	 * So is one whose payment awaits the store's confirmation, which reads as `complete_in_progress`.
 	 * A cart changed behind a hand-off voids it for the read too, until an update or complete cancels the order.
 	 *
 	 * @param string               $checkout_id Checkout identifier.
@@ -210,12 +211,20 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function checkout_response( string $checkout_id, array $state, int $http_status = 200, ?array $cart = null ): \WP_REST_Response {
-		$order = empty( $state['order']['id'] ) ? null : wc_get_order( (int) $state['order']['id'] );
+		$order_id = (int) ( $state['order']['id'] ?? 0 );
+
+		if ( ! $order_id && $this->awaits_confirmation( $state ) ) {
+			// The buyer has paid, so the payment page must not be offered again while the store confirms.
+			$order_id        = (int) $state['order_id'];
+			$state['status'] = CheckoutMapper::STATUS_COMPLETE_IN_PROGRESS;
+			unset( $state['continue_url'] );
+		}
+
+		$order = $order_id ? wc_get_order( $order_id ) : null;
 
 		if ( $order instanceof \WC_Order ) {
 			$cart = $this->order_as_cart( $order );
-		} elseif ( ! empty( $state['continue_url'] ) && ( $state['fingerprint'] ?? '' ) !== $this->hand_off_fingerprint() && ! $this->awaits_confirmation( $state ) ) {
-			// Not when the order awaits confirmation: that checkout is locked, so it must not read as ready.
+		} elseif ( ! empty( $state['continue_url'] ) && ( $state['fingerprint'] ?? '' ) !== $this->hand_off_fingerprint() ) {
 			unset( $state['status'], $state['continue_url'] );
 		}
 
@@ -234,7 +243,7 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	 * The order schema differs from the cart's where an order line is not a cart line: its ids,
 	 * its name, and a price that is the product's current one rather than the one paid.
 	 *
-	 * @param \WC_Order $order The paid order.
+	 * @param \WC_Order $order The paid or on-hold order.
 	 * @return array
 	 */
 	private function order_as_cart( \WC_Order $order ): array {
