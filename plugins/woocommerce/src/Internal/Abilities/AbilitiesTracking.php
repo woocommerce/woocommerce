@@ -14,7 +14,7 @@ use WP_REST_Request;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Records a Tracks event for each WooCommerce ability invocation.
+ * Records Tracks events for WooCommerce abilities, including extension abilities registered through its loader.
  *
  * Hooks only collect data in memory. Events are sent once per request on shutdown through the batched
  * Tracks client. Ability input and output are never recorded, except the name of a registered ability an agent
@@ -50,7 +50,7 @@ class AbilitiesTracking {
 	private const TRACKED_CHANNELS = array( 'mcp', 'rest', 'cli' );
 
 	/**
-	 * Only abilities in this namespace are tracked.
+	 * Abilities in this namespace are always tracked.
 	 *
 	 * @var string
 	 */
@@ -810,15 +810,19 @@ class AbilitiesTracking {
 	/**
 	 * Get the error code to record for an error.
 	 *
-	 * Codes are normally fixed slugs, but any filter can return an error whose code was built from input, so codes
-	 * that don't look like slugs are recorded as `other`.
+	 * Codes are normally fixed slugs, or slugs joined as `<namespace>:<code>`, but any filter can return an error whose
+	 * code was built from input, so other codes, and codes over 64 characters, are recorded as `other`.
 	 *
 	 * @param WP_Error $error The error.
 	 * @return string
 	 */
 	private static function get_error_code( WP_Error $error ): string {
 		$code = (string) $error->get_error_code();
-		return 1 === preg_match( '/^[A-Za-z0-9_-]{1,64}$/', $code ) ? self::normalize_value( $code ) : 'other';
+		if ( 1 !== preg_match( '/^[A-Za-z0-9_:-]{1,64}$/', $code ) ) {
+			return 'other';
+		}
+		$normalized = self::normalize_value( $code );
+		return self::NONE === $normalized ? 'other' : $normalized;
 	}
 
 	/**
@@ -918,13 +922,21 @@ class AbilitiesTracking {
 	}
 
 	/**
-	 * Whether an ability is in the tracked namespace.
+	 * Whether an ability uses WooCommerce's namespace or was registered through its loader.
 	 *
 	 * @param mixed $ability_name The ability name.
 	 * @return bool
 	 */
 	private static function is_tracked_ability( $ability_name ): bool {
-		return is_string( $ability_name ) && 0 === strpos( $ability_name, self::ABILITY_PREFIX );
+		if ( ! is_string( $ability_name ) ) {
+			return false;
+		}
+
+		if ( 0 === strpos( $ability_name, self::ABILITY_PREFIX ) ) {
+			return true;
+		}
+
+		return AbilitiesLoader::is_registered_ability( $ability_name );
 	}
 
 	/**

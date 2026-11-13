@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the site language for default product permalinks and the Default option on the Permalinks screen.

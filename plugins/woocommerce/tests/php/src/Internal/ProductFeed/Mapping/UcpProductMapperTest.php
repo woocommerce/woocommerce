@@ -322,4 +322,52 @@ class UcpProductMapperTest extends \WC_Unit_Test_Case {
 			$mapped['variants'][0]['options']
 		);
 	}
+
+	/**
+	 * Agents match offers across stores by GTIN, so a valid one must reach the
+	 * variant, normalized to digits, and an invalid one must not.
+	 *
+	 * @testdox A valid GTIN should be sent as a variant barcode and an invalid one should be left out.
+	 */
+	public function test_valid_gtin_is_sent_as_a_variant_barcode(): void {
+		$mapper = new UcpProductMapper( 'USD' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_global_unique_id( '4006-3813-3393-1' );
+		$product->save();
+
+		$this->assertSame(
+			array(
+				array(
+					'type'  => 'GTIN',
+					'value' => '4006381333931',
+				),
+			),
+			$mapper->map_product( $product )['variants'][0]['barcodes']
+		);
+
+		$product->set_global_unique_id( '12345' );
+		$product->save();
+
+		$this->assertArrayNotHasKey( 'barcodes', $mapper->map_product( $product )['variants'][0] );
+	}
+
+	/**
+	 * @testdox Each variation should send its own GTIN, not the parent's.
+	 */
+	public function test_variation_sends_its_own_gtin(): void {
+		$variable = WC_Helper_Product::create_variation_product();
+		$variable->set_global_unique_id( '96385074' );
+		$variable->save();
+
+		$children = $variable->get_children();
+		$own      = wc_get_product( $children[0] );
+		$own->set_global_unique_id( '4006381333931' );
+		$own->save();
+
+		$variants = array_column( ( new UcpProductMapper( 'USD' ) )->map_product( wc_get_product( $variable->get_id() ) )['variants'], null, 'id' );
+
+		$this->assertSame( '4006381333931', $variants[ (string) $children[0] ]['barcodes'][0]['value'] );
+		$this->assertArrayNotHasKey( 'barcodes', $variants[ (string) $children[1] ] );
+	}
 }

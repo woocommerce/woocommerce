@@ -87,6 +87,43 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The "Paid" totals section is shown for custom paid statuses and can be hidden with a filter.
+	 */
+	public function test_paid_totals_render_for_custom_paid_status_and_can_be_filtered(): void {
+		add_filter(
+			'wc_order_statuses',
+			static function ( $statuses ) {
+				$statuses['wc-ready-for-pickup'] = 'Ready for pickup';
+				return $statuses;
+			}
+		);
+		add_filter(
+			'woocommerce_order_is_paid_statuses',
+			static function ( $statuses ) {
+				$statuses[] = 'ready-for-pickup';
+				return $statuses;
+			}
+		);
+
+		$order = wc_create_order();
+		$order->set_status( 'ready-for-pickup' );
+		$order->set_date_paid( time() );
+		$order->save();
+
+		$render_order_items = function () use ( $order ): string {
+			ob_start();
+			include WC_ABSPATH . 'includes/admin/meta-boxes/views/html-order-items.php';
+			return (string) ob_get_clean();
+		};
+
+		$this->assertStringContainsString( 'Paid:', $render_order_items(), 'The "Paid" totals section should show for a custom paid status.' );
+
+		add_filter( 'woocommerce_admin_order_should_render_paid_totals', '__return_false' );
+
+		$this->assertStringNotContainsString( 'Paid:', $render_order_items(), 'The filter should be able to hide the "Paid" totals section.' );
+	}
+
+	/**
 	 * @testdox The refund quantity input's max excludes units that were already refunded.
 	 */
 	public function test_refund_quantity_max_excludes_refunded_units(): void {
@@ -158,6 +195,56 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( 1, $qty_inputs->length, 'The line item should have one refund quantity input.' );
 		$this->assertSame( '2.2', $qty_inputs->item( 0 )->getAttribute( 'max' ), 'The max should be the 2.3 ordered units less the 0.1 already refunded.' );
+	}
+
+	/**
+	 * @testdox Refund quantity inputs flag only the lines that refunding can return to stock.
+	 */
+	public function test_refund_quantity_inputs_flag_restockable_lines(): void {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		$reduced_product   = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+		$unmanaged_product = WC_Helper_Product::create_simple_product( true, array( 'manage_stock' => false ) );
+		$order             = wc_create_order();
+		$reduced_item_id   = $order->add_product( $reduced_product, 2 );
+		$unmanaged_item_id = $order->add_product( $unmanaged_product, 1 );
+		$order->calculate_totals();
+		$order->save();
+		wc_reduce_stock_levels( $order );
+
+		// Added after stock was reduced, so this line holds no stock to give back.
+		$not_reduced_item_id = $order->add_product( $reduced_product, 1 );
+		$order->save();
+		$order = wc_get_order( $order->get_id() );
+
+		ob_start();
+		include WC_ABSPATH . 'includes/admin/meta-boxes/views/html-order-items.php';
+		$order_items_html = ob_get_clean();
+
+		$xpath = $this->get_xpath_for_html( $order_items_html );
+
+		foreach (
+			array(
+				$reduced_item_id     => 'yes',
+				$unmanaged_item_id   => 'no',
+				$not_reduced_item_id => 'no',
+			) as $item_id => $expected
+		) {
+			$inputs = $xpath->query( "//input[@name='refund_order_item_qty[{$item_id}]']" );
+			$this->assertSame( 1, $inputs->length, "Line {$item_id} should render a refund quantity input." );
+			$this->assertSame( $expected, $inputs->item( 0 )->getAttribute( 'data-can-restock' ), "Line {$item_id} should flag whether it can be restocked." );
+		}
+
+		$checkbox = $xpath->query( "//input[@id='restock_refunded_items']" )->item( 0 );
+		$this->assertNotNull( $checkbox, 'The refund panel should render the restock checkbox.' );
+		$this->assertSame( 'restock_refunded_items_description', $checkbox->getAttribute( 'aria-describedby' ), 'The restock checkbox should point to its help text.' );
+		$this->assertSame( 1, $xpath->query( "//*[@id='restock_refunded_items_description']" )->length, 'The restock help text element should exist.' );
 	}
 
 	/**

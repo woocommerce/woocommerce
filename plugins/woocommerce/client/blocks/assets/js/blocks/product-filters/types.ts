@@ -31,6 +31,7 @@ export type ActiveFilterItem = {
 	type: string;
 	value: string;
 	attributeQueryType?: 'and' | 'or';
+	label?: string;
 	activeLabel: string;
 };
 
@@ -57,7 +58,6 @@ export type OverlayMode = 'off' | 'mobile' | 'always';
 
 export type BlockAttributes = {
 	productId?: string;
-	isPreview: boolean;
 	overlayMode?: OverlayMode;
 	overlayPosition?: 'left' | 'right';
 };

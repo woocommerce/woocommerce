@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Drop pre-WordPress 6.9 Abilities API action names; WooCommerce now requires WordPress 7.0.
+

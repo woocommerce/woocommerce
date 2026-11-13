@@ -1805,7 +1805,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 */
 	public static function provide_failed_order_item_delete_queries(): array {
 		return array(
-			'item metadata delete' => array( 'DELETE itemmeta FROM' ),
+			'item ID lookup'       => array( 'SELECT order_item_id FROM {prefix}woocommerce_order_items WHERE order_id' ),
+			'item metadata delete' => array( 'DELETE FROM {prefix}woocommerce_order_itemmeta' ),
 			'item row delete'      => array( 'DELETE FROM {prefix}woocommerce_order_items' ),
 		);
 	}
@@ -2922,5 +2923,64 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->save();
 
 		$this->assertSame( $status, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox save() records the exception when the order could not be persisted, and a later successful save() clears it.
+	 */
+	public function test_get_last_save_error_reports_a_failed_save_until_the_next_successful_one(): void {
+		$order = wc_create_order();
+		$this->assertNull( $order->get_last_save_error(), 'A successful save should report no error.' );
+
+		$fail = function () {
+			throw new Exception( 'Forced save failure' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		$order->set_total( '5.00' );
+		$order->save();
+		remove_action( 'woocommerce_before_order_object_save', $fail );
+
+		$this->assertInstanceOf( Exception::class, $order->get_last_save_error() );
+		$this->assertSame( 'Forced save failure', $order->get_last_save_error()->getMessage() );
+
+		$order->save();
+
+		$this->assertNull( $order->get_last_save_error(), 'A later successful save should clear the error.' );
+		$this->assertSame( '5.00', wc_get_order( $order->get_id() )->get_total() );
+	}
+
+	/**
+	 * @testdox save() does not report a failure when only a woocommerce_after_order_object_save callback throws, since the order was already persisted.
+	 */
+	public function test_get_last_save_error_ignores_exceptions_from_after_save_callbacks(): void {
+		$order = wc_create_order();
+
+		$fail = function () {
+			throw new Exception( 'After-save callback failure' );
+		};
+		add_action( 'woocommerce_after_order_object_save', $fail );
+		$order->set_total( '7.00' );
+		$order->save();
+		remove_action( 'woocommerce_after_order_object_save', $fail );
+
+		$this->assertNull( $order->get_last_save_error() );
+		$this->assertSame( '7.00', wc_get_order( $order->get_id() )->get_total() );
+	}
+
+	/**
+	 * @testdox update_status() returns false when the order could not be saved.
+	 */
+	public function test_update_status_returns_false_when_the_save_fails(): void {
+		$order = wc_create_order();
+
+		$fail = function () {
+			throw new Exception( 'Forced save failure' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		$result = $order->update_status( OrderStatus::PROCESSING );
+		remove_action( 'woocommerce_before_order_object_save', $fail );
+
+		$this->assertFalse( $result );
+		$this->assertTrue( $order->update_status( OrderStatus::PROCESSING ), 'update_status() should return true once the save succeeds.' );
 	}
 }

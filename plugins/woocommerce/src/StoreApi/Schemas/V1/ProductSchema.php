@@ -708,7 +708,7 @@ class ProductSchema extends AbstractSchema {
 				// Collect the chain of parent term IDs for cache priming below.
 				foreach ( $product_terms as $term ) {
 					$current = $term->term_id;
-					while ( isset( $parent_map[ $current ] ) ) {
+					while ( isset( $parent_map[ $current ] ) && ! in_array( $parent_map[ $current ], $term_hierarchy_ids, true ) ) {
 						$parent_id            = $parent_map[ $current ];
 						$term_hierarchy_ids[] = $parent_id;
 						$current              = $parent_id;
@@ -998,7 +998,7 @@ class ProductSchema extends AbstractSchema {
 			$sale_price    = $product->get_variation_sale_price();
 		} else {
 			$regular_price = $product->get_regular_price();
-			$sale_price    = $product->get_sale_price();
+			$sale_price    = $product->is_on_sale() ? $product->get_sale_price() : '';
 		}
 
 		$prices['price']         = $this->prepare_money_response( $price_function( $product ), $price_decimals );

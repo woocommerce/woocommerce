@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Stop installing a separate `@wordpress/core-data`; projects must install it as the peer dependency it already was.

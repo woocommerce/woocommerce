@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Run WooCommerce PHP and E2E tests for email editor PHP package changes; no production change.
+
