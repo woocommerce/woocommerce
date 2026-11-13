@@ -66,7 +66,23 @@
 		margin-block-start: var(--wpds-dimension-gap-md);
 	}
 
-	.wc-sales-readiness-list + .wc-sales-readiness-fold,
+	// 24px from the last row's divider to "View all checks" on the Overview.
+	.wc-sales-readiness-list + &__actions {
+		margin-block-start: var(--wpds-dimension-gap-xl);
+	}
+
+	// 24px from a question card's description to its first row.
+	&__description {
+		display: block;
+		margin-block-end: var(--wpds-dimension-gap-xl);
+	}
+
+	// A list that opens the card starts at the content's edge, not a row's padding below it.
+	.components-card__body > .wc-sales-readiness-list:first-child > .wc-sales-readiness-row:first-child,
+	&__description + .wc-sales-readiness-list > .wc-sales-readiness-row:first-child {
+		padding-block-start: 0;
+	}
+
 	.wc-sales-readiness-channels + .wc-sales-readiness-list {
 		border-block-start: 1px solid var(--wc-sr-stroke);
 	}
@@ -87,25 +103,29 @@
 		margin: 0;
 	}
 
-	// A line under every row but the list's last. In Fix first each item is its own group.
-	> .wc-sales-readiness-row:not(:last-child),
-	> .wc-sales-readiness-list__group:not(:last-child) .wc-sales-readiness-row {
+	// A line under every row, the last one too. In Fix first each item is its own group.
+	> .wc-sales-readiness-row,
+	> .wc-sales-readiness-list__group .wc-sales-readiness-row {
 		border-block-end: 1px solid var(--wc-sr-stroke);
 	}
 }
 
-// 24px above Fix first's list, plus the first tier's 8px. Padding, so the margins don't collapse.
+// 24px from the card description to Fix first's first heading. Padding, so the margins don't collapse.
 .wc-sales-readiness-list:has(.wc-sales-readiness-tier) {
 	padding-block-start: var(--wpds-dimension-gap-xl);
 }
 
+// A tier heading, then 16px to its first row. Required sits right after the first one.
 .wc-sales-readiness-tier {
-	display: block;
+	display: flex;
+	align-items: center;
+	gap: var(--wpds-dimension-gap-sm);
 	padding: 0;
 	margin: var(--wpds-dimension-gap-lg) 0;
+	font-weight: 600;
 
 	.wc-sales-readiness-list__group:first-child > & {
-		margin-block-start: var(--wpds-dimension-gap-sm);
+		margin-block-start: 0;
 	}
 }
 
@@ -118,12 +138,14 @@
 	padding: var(--wpds-dimension-padding-lg) 0;
 	margin: 0;
 
+	// Dark markers; grey only for a check that couldn't run.
 	&__marker {
 		flex: 0 0 auto;
-		color: var(--wc-sr-muted);
+		color: var(--wpds-color-foreground-content-neutral);
+		fill: currentColor;
 
-		&--done {
-			fill: var(--wpds-color-foreground-content-neutral);
+		&--muted {
+			color: var(--wc-sr-muted);
 		}
 	}
 
@@ -141,6 +163,8 @@
 		gap: var(--wpds-dimension-gap-sm);
 		font-size: 14px;
 		font-weight: 500;
+		// 24px, the badge's height, so the title text sits at the same height with or without a badge.
+		line-height: var(--wpds-typography-line-height-md);
 	}
 
 	// The fix line reads as an instruction, so it keeps the text color.
@@ -148,11 +172,12 @@
 		color: var(--wpds-color-foreground-content-neutral);
 	}
 
-	// 24px from the text, with the row's own 8px gap.
+	// 24px from the text, with the row's own 8px gap. Same size and line height as the title, so their tops align.
 	&__action {
 		flex: none;
 		margin-inline-start: var(--wpds-dimension-gap-lg);
-		line-height: var(--wpds-typography-line-height-sm);
+		font-size: 14px;
+		line-height: var(--wpds-typography-line-height-md);
 	}
 }
 
@@ -185,6 +210,11 @@
 
 .wc-sales-readiness-fold {
 	padding-block-start: var(--wpds-dimension-padding-sm);
+
+	// "Show more" and "Hide" line up with the card text.
+	> .components-button {
+		padding-inline: 0;
+	}
 }
 
 .wc-sales-readiness-checked {

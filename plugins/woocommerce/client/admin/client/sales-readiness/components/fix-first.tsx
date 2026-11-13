@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Card, Text } from '@wordpress/ui';
+import { Badge, Card, Text } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -10,8 +10,8 @@ import type { FixFirst as FixFirstData } from '../types';
 import { Row, RowLink } from './check-row';
 
 /**
- * The Fix first items under a heading per tier: what each group of issues stops. Each item ends
- * with what it is worth: Required, its share of sales, or how many products it affects.
+ * The Fix first items under a heading per tier: what each group of issues stops. Required shows
+ * once, on the first tier's heading; a product item shows its share of sales or how many products it affects.
  */
 export const FixFirstList = ( {
 	items,
@@ -30,13 +30,16 @@ export const FixFirstList = ( {
 						className="wc-sales-readiness-list__group"
 					>
 						{ heading && (
-							<Text
-								variant="heading-sm"
-								className="wc-sales-readiness-tier"
-								aria-hidden="true"
-							>
-								{ heading }
-							</Text>
+							<div className="wc-sales-readiness-tier">
+								<Text variant="heading-sm" aria-hidden="true">
+									{ heading }
+								</Text>
+								{ item.tier_badge && (
+									<Badge intent={ item.tier_badge.intent }>
+										{ item.tier_badge.text }
+									</Badge>
+								) }
+							</div>
 						) }
 						<ul className="wc-sales-readiness-list">
 							<Row

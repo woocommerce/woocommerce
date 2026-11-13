@@ -35,6 +35,8 @@ export interface CheckRow {
 
 export interface FixFirstItem {
 	tier: string;
+	/** Required, on the first tier's heading only. */
+	tier_badge: ViewBadge | null;
 	title: string;
 	why: string;
 	impact: ViewBadge | null;

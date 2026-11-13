@@ -68,7 +68,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertSame( 'Not checked yet', $data['last_checked'] );
-		$this->assertSame( 'Run check', $data['run']['label'] );
+		$this->assertSame( 'Run checks', $data['run']['label'] );
 		$this->assertNull( $data['fix_first'] );
 		$this->assertSame( array(), $data['sections'] );
 		$this->assertSame( 'AI shopping', $data['overview']['shopping']['title'] );

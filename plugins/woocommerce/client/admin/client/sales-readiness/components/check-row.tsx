@@ -41,20 +41,27 @@ const dashedCircle = (
 /**
  * The marker before a row: a dashed circle for something to do, a check for something passed.
  */
-export const RowMarker = ( { done }: { done: boolean } ) => (
+export const RowMarker = ( {
+	done,
+	muted = false,
+}: {
+	done: boolean;
+	muted?: boolean;
+} ) => (
 	<Icon
 		icon={ done ? check : dashedCircle }
 		size={ 24 }
 		className={
-			done
-				? 'wc-sales-readiness-row__marker wc-sales-readiness-row__marker--done'
-				: 'wc-sales-readiness-row__marker'
+			'wc-sales-readiness-row__marker' +
+			( muted ? ' wc-sales-readiness-row__marker--muted' : '' )
 		}
 	/>
 );
 
 interface RowProps {
 	done?: boolean;
+	/** A grey marker, for a check that couldn't run. */
+	muted?: boolean;
 	title: string;
 	badge?: ViewBadge | null;
 	/** Where to fix it, at the end of the row. */
@@ -68,6 +75,7 @@ interface RowProps {
  */
 export const Row = ( {
 	done = false,
+	muted = false,
 	title,
 	badge,
 	action,
@@ -81,7 +89,7 @@ export const Row = ( {
 		render={ <li /> }
 		className="wc-sales-readiness-row"
 	>
-		<RowMarker done={ done } />
+		<RowMarker done={ done } muted={ muted } />
 		<Stack direction="column" className="wc-sales-readiness-row__body">
 			<Text variant="body-md" className="wc-sales-readiness-row__title">
 				{ srState && <VisuallyHidden>{ srState } </VisuallyHidden> }
@@ -112,6 +120,7 @@ export const CheckRow = ( { row }: { row: CheckRowData } ) => {
 	return (
 		<Row
 			done={ row.state === 'pass' }
+			muted={ row.state === 'unknown' }
 			title={ row.title }
 			srState={ states[ row.state ] }
 			badge={ row.badge }

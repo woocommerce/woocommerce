@@ -311,7 +311,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$html = $this->render_page();
 
 		$this->assertStringContainsString( 'Publish your refund and returns policy page', $html );
-		$this->assertStringContainsString( 'It\'s still a draft. AI assistants only link to published pages.', $html );
+		$this->assertStringContainsString( 'A refund policy needs to be available for AI assistants to share with shoppers.', $html, 'The refund page says why it matters, as in the design' );
 		$this->assertStringContainsString( 'post=' . $draft . '&amp;action=edit">Publish your refund and returns policy page</a>', $html, 'The step links to the page editor' );
 
 		update_option(
@@ -323,7 +323,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 		$view = $this->view();
 		$this->assertNull( $view['fix_first'], 'A policy page is only recommended, so it stays out of Fix first' );
-		$this->assertMatchesRegularExpression( '#"title":"Publish your refund and returns policy page".{0,600}?"href":"[^"]*post=' . $draft . '&action=edit","text":"Edit page"#', (string) wp_json_encode( $view['sections'], JSON_UNESCAPED_SLASHES ), 'Readiness check links the step to the page editor' );
+		$this->assertMatchesRegularExpression( '#"title":"Publish your refund and returns policy page".{0,600}?"href":"[^"]*post=' . $draft . '&action=edit","text":"Edit refund policy"#', (string) wp_json_encode( $view['sections'], JSON_UNESCAPED_SLASHES ), 'Readiness check links the step to the page editor, named for the policy' );
+		$this->assertStringContainsString( 'A refund policy needs to be available for AI assistants to share with shoppers.', (string) wp_json_encode( $view['sections'], JSON_UNESCAPED_UNICODE ), 'The refund draft keeps its own line' );
 	}
 
 	/**
@@ -460,7 +461,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$json     = wp_json_encode( $view );
 
 		$this->assertSame(
-			array( 'Can AI assistants visit your store?', 'Can AI assistants find your store?', 'Can AI assistants read your product details?', 'Can AI shopping apps list your products?', 'Can shoppers buy through AI assistants?' ),
+			array( 'Store access', 'Can AI assistants find your store?', 'Can AI assistants read your product details?', 'Can AI shopping apps list your products?', 'Can shoppers buy through AI assistants?' ),
 			array_column( $view['sections'], 'title' ),
 			'Products come before Can shoppers buy through AI assistants?'
 		);
@@ -662,21 +663,24 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( AgentReadiness::REPORT_OPTION, $report );
 
 		$fix_first = $this->view()['fix_first'];
-		$this->assertSame( 'Ranked by what each fix is worth in sales.', $fix_first['ranking'] );
+		$this->assertSame( 'Start with the fixes that affect the most sales. Sales figures are from the last 90 days.', $fix_first['ranking'] );
 		$this->assertSame(
 			array( 'Use a secure connection (HTTPS)', 'Allow guest checkout', 'Add a main image to 5 products', 'Add a brand to 2 products' ),
 			array_column( $fix_first['items'], 'title' ),
 			'The required step, then 3 issues: guest checkout stops every sale, then the not listable checks by share; GTIN, a gap, is left out despite its larger share'
 		);
-		$this->assertSame( array( 'Stops every sale', 'Stops every sale', 'Products that can\'t be listed', 'Products that can\'t be listed' ), array_column( $fix_first['items'], 'tier' ) );
+		$this->assertSame( array( 'Required for AI shopping', 'Required for AI shopping', 'Needed to list products', 'Needed to list products' ), array_column( $fix_first['items'], 'tier' ) );
 		$this->assertSame(
 			array(
-				'intent' => 'low',
+				'intent' => 'high',
 				'text'   => 'Required',
 			),
-			$fix_first['items'][0]['impact']
+			$fix_first['items'][0]['tier_badge'],
+			'Required shows once, on the required tier\'s heading'
 		);
-		$this->assertNull( $fix_first['items'][1]['impact'], 'The tier heading already says guest checkout stops every sale' );
+		$this->assertNull( $fix_first['items'][0]['impact'], 'so the required row has no badge of its own' );
+		$this->assertNull( $fix_first['items'][1]['impact'], 'Guest checkout sits under the same heading, with no badge' );
+		$this->assertNull( $fix_first['items'][2]['tier_badge'], 'Other tiers have no badge on their heading' );
 		$this->assertSame(
 			array(
 				'intent' => 'none',
@@ -781,10 +785,10 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$items = $this->view()['fix_first']['items'];
 		$this->assertSame(
 			array(
-				array( 'Stops every sale', 'Let visitors open store pages without signing in', 'Required' ),
-				array( 'Products that can\'t be listed', 'other_listing_check label', 'All products' ),
+				array( 'Required for AI shopping', 'Let shoppers open store pages without logging in', 'Required' ),
+				array( 'Needed to list products', 'other_listing_check label', 'All products' ),
 			),
-			array_map( static fn( array $item ): array => array( $item['tier'], $item['title'], $item['impact']['text'] ?? null ), $items ),
+			array_map( static fn( array $item ): array => array( $item['tier'], $item['title'], $item['tier_badge']['text'] ?? $item['impact']['text'] ?? null ), $items ),
 			'Store pages AI assistants can\'t reach are a blocker, so Required; a check without copy keeps the report\'s title'
 		);
 	}
@@ -880,7 +884,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$map = new \ReflectionMethod( ReadinessCheckPage::class, 'badge_data' );
 		$map->setAccessible( true );
 		$this->assertSame( 'stable', $map->invoke( null, $badge->invoke( null, array( $row( true ) ) ) )['intent'], 'All passed is green, as in the design' );
-		$this->assertSame( 'low', $map->invoke( null, $badge->invoke( null, array( $row( false ) ) ) )['intent'], 'Issues are low, as Required is' );
+		$this->assertSame( 'low', $map->invoke( null, $badge->invoke( null, array( $row( false ) ) ) )['intent'], 'Issues are low' );
+		$this->assertSame( 'high', $map->invoke( null, array( 'fix', 'Required' ) )['intent'], 'Required is red, as in the design' );
 		$this->assertSame( 'stable', $map->invoke( null, array( 'pass', 'Active' ) )['intent'] );
 	}
 
@@ -1100,7 +1105,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$view = $this->view();
 		$this->assertSame( 'Not checked yet', $view['last_checked'], 'No check has run' );
-		$this->assertSame( 'Run check', $view['run']['label'], 'and the page offers to run one' );
+		$this->assertSame( 'Run checks', $view['run']['label'], 'and the page offers to run one' );
 		$this->assertFalse( $view['run']['pending'] );
 		$this->assertSame( 'Run a check to see what AI assistants get when they visit your store and read your products.', $view['intro'], 'No results before the first scan' );
 		$this->assertSame( array(), $view['sections'] );

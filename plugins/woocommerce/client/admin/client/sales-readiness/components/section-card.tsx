@@ -61,7 +61,10 @@ export const SectionCard = ( { section }: { section: Section } ) => (
 		</Card.Header>
 		<Card.Content>
 			{ section.note && (
-				<Text variant="body-sm" className="wc-sales-readiness__muted">
+				<Text
+					variant="body-sm"
+					className="wc-sales-readiness__muted wc-sales-readiness-card__description"
+				>
 					{ section.note }
 				</Text>
 			) }

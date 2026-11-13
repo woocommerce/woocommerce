@@ -55,7 +55,7 @@ final class ReadinessCopy {
 				return self::product(
 					/* translators: %s: number of products. */
 					sprintf( _n( 'Add a barcode number to %s product', 'Add barcode numbers to %s products', $count, 'woocommerce' ), $n ),
-					__( 'Barcode numbers (GTIN, UPC, EAN or ISBN) help AI assistants match your products, so products without one are harder to find.', 'woocommerce' ),
+					__( 'Barcode numbers, like a UPC, EAN, or ISBN, help AI assistants match your products to what shoppers search for.', 'woocommerce' ),
 					__( 'Use the number from the packaging or supplier. Never make one up.', 'woocommerce' )
 				);
 			case 'invalid_gtin':
@@ -95,8 +95,8 @@ final class ReadinessCopy {
 			case 'variation_attributes_not_set':
 				return self::product(
 					/* translators: %s: number of products. */
-					sprintf( _n( 'Pick the options for each variation of %s product', 'Pick the options for each variation of %s products', $count, 'woocommerce' ), $n ),
-					__( 'A variation set to “Any” (like “Any size”) can’t be listed with its own color or size.', 'woocommerce' )
+					sprintf( _n( 'Choose an option for each variation of %s product', 'Choose an option for each variation of %s products', $count, 'woocommerce' ), $n ),
+					__( 'Variations need a specific option, like “Small” instead of “Any size,” to be listed on their own.', 'woocommerce' )
 				);
 			case 'missing_variation_images':
 				return self::product(
@@ -143,36 +143,43 @@ final class ReadinessCopy {
 			'no_noindex_directives'          => array(
 				__( 'Search engines and AI assistants can show your pages', 'woocommerce' ),
 				__( 'Let search engines and AI assistants show your pages', 'woocommerce' ),
-				__( 'A noindex, noai or noimageai rule keeps your products out of AI answers.', 'woocommerce' ),
-				__( 'Your store asks search engines and AI assistants to skip your pages, so they can’t find it. We found a noindex, noai or noimageai rule on your store pages. This usually comes from “Discourage search engines from indexing this site”.', 'woocommerce' ),
+				__( 'AI assistants follow the same rules as search engines to decide which pages they can show.', 'woocommerce' ),
+				__( 'Your store is set to hide its pages from search engines, so AI assistants can’t find them. Check whether “Discourage search engines from indexing this site” is selected.', 'woocommerce' ),
 				'',
 				admin_url( 'options-reading.php' ),
 			),
 			'pages_public'                   => array(
 				__( 'Store pages open without signing in', 'woocommerce' ),
-				__( 'Let visitors open store pages without signing in', 'woocommerce' ),
-				__( 'AI assistants don’t sign in, so they can’t read pages behind a login.', 'woocommerce' ),
-				__( 'This affects everything: AI assistants don’t sign in, so they can’t read pages behind a login. We found store pages that ask visitors to sign in.', 'woocommerce' ),
+				__( 'Let shoppers open store pages without logging in', 'woocommerce' ),
+				__( 'AI assistants don’t log in, so store pages need to be open to everyone.', 'woocommerce' ),
+				__( 'Your store asks everyone to log in before they can see its pages. AI assistants don’t log in, so they can’t see your products.', 'woocommerce' ),
 				'',
 				admin_url( 'admin.php?page=wc-settings&tab=site-visibility' ),
 			),
 			'ucp_profile'                    => array(
-				__( 'Your AI shopping profile is available', 'woocommerce' ),
-				__( 'Check why your AI shopping profile isn’t available', 'woocommerce' ),
-				__( 'AI assistants read /.well-known/ucp to find your catalog.', 'woocommerce' ),
-				__( 'AI assistants read this profile (UCP, at /.well-known/ucp) to find your catalog. Without it, they can’t shop your store. We found no profile at that address.', 'woocommerce' ),
+				__( 'AI assistants can connect to your store', 'woocommerce' ),
+				__( 'Check why AI assistants can’t connect', 'woocommerce' ),
+				__( 'They use your connection URL to find your products.', 'woocommerce' ),
+				__( 'AI assistants can’t reach your connection URL, so they can’t find your products. Test it in UCP Playground, or ask your host.', 'woocommerce' ),
 			),
 			'ucp_profile_version'            => array(
-				__( 'Your AI shopping profile is up to date', 'woocommerce' ),
-				__( 'Update your AI shopping profile', 'woocommerce' ),
-				__( 'AI assistants use the version to know which requests your store accepts.', 'woocommerce' ),
-				__( 'AI assistants use its version to know which requests your store accepts. We found an older version than this WooCommerce serves.', 'woocommerce' ),
+				__( 'Your store’s connection is up to date', 'woocommerce' ),
+				__( 'Update your store’s connection', 'woocommerce' ),
+				__( 'AI assistants check its version to see what your store supports.', 'woocommerce' ),
+				__( 'Your store uses an older version of the Universal Commerce Protocol (UCP).', 'woocommerce' ),
 			),
 			'ucp_endpoints_live'             => array(
 				__( 'AI assistants can search your catalog', 'woocommerce' ),
 				__( 'Check why AI assistants can’t search your catalog', 'woocommerce' ),
-				__( 'AI assistants search your catalog and build carts through this endpoint.', 'woocommerce' ),
-				__( 'AI assistants search your catalog and build carts through your store’s UCP endpoint. We found it blocked, or it didn’t answer.', 'woocommerce' ),
+				__( 'This is how they find products and add them to a shopper’s cart.', 'woocommerce' ),
+				__( 'AI assistants can’t search your products or add them to carts. A firewall or security plugin can cause this, so check those first or ask your host.', 'woocommerce' ),
+			),
+			'ucp_checkout'                   => array(
+				__( 'AI assistants can send shoppers to your checkout', 'woocommerce' ),
+				__( 'Let AI assistants send shoppers to your checkout', 'woocommerce' ),
+				__( 'Shoppers who build a cart with an AI assistant finish buying on your checkout.', 'woocommerce' ),
+				__( 'Another plugin changed your store’s connection, so AI assistants can’t send shoppers to your checkout. Shoppers can still find your products.', 'woocommerce' ),
+				__( 'Turn off AI shopping (also called UCP or agentic commerce) in the other plugin, or deactivate it.', 'woocommerce' ),
 			),
 			// Can AI assistants find your store?
 			'sitemap_lists_products'         => array(
@@ -329,7 +336,7 @@ final class ReadinessCopy {
 				__( 'Product details match the product page', 'woocommerce' ),
 				__( 'Make product details match the product page', 'woocommerce' ),
 				__( 'Otherwise shoppers may see a price your store doesn’t charge.', 'woocommerce' ),
-				__( 'We found structured data with a different name or price than the product page, so shoppers may see a price you don’t charge.', 'woocommerce' ),
+				__( 'Your structured data shows a different name or price than the product page, so shoppers may see a price you don’t charge.', 'woocommerce' ),
 				__( 'Look for a plugin that changes WooCommerce structured data.', 'woocommerce' ),
 			),
 			'product_review_markup'          => array(
