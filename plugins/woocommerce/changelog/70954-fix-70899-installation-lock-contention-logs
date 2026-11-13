@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop logging duplicate-key database errors for `wc_installing` when a request loses the installation lock race during upgrades.
