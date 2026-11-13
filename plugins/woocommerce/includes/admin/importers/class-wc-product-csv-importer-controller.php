@@ -404,8 +404,8 @@ class WC_Product_CSV_Importer_Controller {
 				throw new \Exception(
 					esc_html(
 						sprintf(
-							/* translators: %d: Number of minutes since the other import started. */
-							__( 'Another product import is already running (started %d minute(s) ago). Please wait for it to finish before starting a new one.', 'woocommerce' ),
+							/* translators: %d: Number of minutes since the other import was last active. */
+							__( 'Another product import is already running (last active %d minute(s) ago). Please wait for it to finish before starting a new one.', 'woocommerce' ),
 							(int) ceil( ( $import_lock->get_age() ?? 0 ) / MINUTE_IN_SECONDS )
 						)
 					)
