@@ -102,30 +102,21 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 	 */
 	public function test_product_stored_during_scan_keeps_its_rows(): void {
 		$during_id = 0;
-		$hook      = static function ( $posts, $query ) use ( &$during_id ) {
-			if ( 0 !== $during_id || ! $query instanceof \WP_Query || 'ids' !== $query->get( 'fields' ) || ! $query->get( 'no_found_rows' ) ) {
-				return $posts;
+		$hook      = static function () use ( &$during_id ) {
+			if ( 0 !== $during_id ) {
+				return;
 			}
-			// Shop queries replace orderby and can replace posts_per_page. The scan is the product query that skips the found-rows count.
-			$post_type = $query->get( 'post_type' );
-			$types     = is_array( $post_type ) ? $post_type : array( $post_type );
-			if ( ! in_array( 'product', $types, true ) ) {
-				return $posts;
-			}
-			// The catalog query has already run, so this product is not one of its results.
+			// This batch is already loaded, so the new product is not one of its results.
 			$during_id = -1;
 			$during_id = WC_Helper_Product::create_simple_product()->get_id();
 			add_post_meta( $during_id, ProductFailures::META_KEY, 'missing_images' );
-			return $posts;
 		};
-		add_filter( 'posts_results', $hook, 10, 2 );
-		add_filter( 'the_posts', $hook, 10, 2 );
+		add_action( 'woocommerce_agent_readiness_scan_batch', $hook );
 
 		try {
 			$this->readiness->refresh_report();
 		} finally {
-			remove_filter( 'posts_results', $hook, 10 );
-			remove_filter( 'the_posts', $hook, 10 );
+			remove_action( 'woocommerce_agent_readiness_scan_batch', $hook );
 		}
 
 		$this->assertGreaterThan( 0, $during_id );

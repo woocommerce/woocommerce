@@ -195,6 +195,17 @@ class ProductScan {
 				$query->posts
 			);
 			$batch_count = count( $product_ids );
+			/**
+			 * Fires after one batch of product ids has been read, before those products are tested.
+			 * A product created here is not in this batch, so the scan does not replace its rows.
+			 *
+			 * An ids query returns before `posts_results` and `the_posts`, so those filters never see this query.
+			 *
+			 * @since 11.4.0
+			 *
+			 * @param int[] $product_ids Product ids in this batch.
+			 */
+			do_action( 'woocommerce_agent_readiness_scan_batch', $product_ids );
 			self::prime_related( $product_ids );
 			foreach ( $product_ids as $product_id ) {
 				if ( self::PRODUCT_LIMIT === $this->products ) {

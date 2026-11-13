@@ -145,7 +145,6 @@ class ProductFields {
 
 		$variations = array();
 		foreach ( self::published_variation_ids( $product ) as $child_id ) {
-			// The product cache can still hold a variation as published after this request trashed it.
 			$variation = new \WC_Product_Variation( $child_id );
 			if ( $variation->get_id() > 0 && 'publish' === $variation->get_status() ) {
 				$variations[] = $variation;
@@ -169,18 +168,22 @@ class ProductFields {
 	}
 
 	/**
-	 * Published and private variation ids, read from the database rather than the product's cached list.
+	 * Published variation ids, from the posts table. The children transient and the
+	 * posts query cache can still list a variation after this request trashed it.
 	 *
 	 * @param \WC_Product $product Variable product.
 	 * @return array<int, int>
 	 */
 	private static function published_variation_ids( \WC_Product $product ): array {
-		$data_store = $product->get_data_store();
-		if ( is_object( $data_store ) && is_callable( array( $data_store, 'read_children' ) ) ) {
-			$children = $data_store->read_children( $product, true );
-			return array_map( 'intval', (array) ( $children['all'] ?? array() ) );
-		}
-		return array_map( 'intval', $product->get_children() );
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The cached children query still returns a variation this request trashed.
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts} WHERE post_parent = %d AND post_type = 'product_variation' AND post_status = 'publish'",
+				$product->get_id()
+			)
+		);
+		return array_map( 'intval', (array) $ids );
 	}
 
 	/**
