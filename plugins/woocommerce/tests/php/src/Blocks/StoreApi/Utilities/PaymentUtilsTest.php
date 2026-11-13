@@ -275,9 +275,9 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fall back to the first of the gateways the caller lists, instead of the first enabled gateway.
+	 * @testdox Should start a checkout that lists its gateways on the first one listed, instead of the first enabled gateway.
 	 */
-	public function test_checkout_payment_method_falls_back_to_the_first_listed_gateway(): void {
+	public function test_shortcode_checkout_payment_method_starts_on_the_first_listed_gateway(): void {
 		WC()->session->set( 'chosen_payment_method', null );
 		$available = WC()->payment_gateways()->get_available_payment_gateways();
 		$listed    = array(
@@ -285,7 +285,49 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 			'bacs' => $available['bacs'],
 		);
 
-		$this->assertSame( 'cod', PaymentUtils::get_checkout_payment_method( $listed ) );
+		$this->assertSame( 'cod', PaymentUtils::get_shortcode_checkout_payment_method( $listed ) );
+	}
+
+	/**
+	 * @testdox Should keep a listed session choice even when the callback returns nothing.
+	 */
+	public function test_shortcode_checkout_payment_method_keeps_a_listed_session_choice(): void {
+		$listed = WC()->payment_gateways()->get_available_payment_gateways();
+		add_filter( self::FILTER, '__return_empty_string' );
+
+		$this->assertSame( 'cod', PaymentUtils::get_shortcode_checkout_payment_method( $listed ) );
+	}
+
+	/**
+	 * @testdox Should fall back to the default when the session choice is not one of the listed gateways.
+	 */
+	public function test_shortcode_checkout_payment_method_ignores_a_session_choice_that_is_not_listed(): void {
+		$available = WC()->payment_gateways()->get_available_payment_gateways();
+		add_filter( self::FILTER, '__return_empty_string' );
+
+		$this->assertSame( '', PaymentUtils::get_shortcode_checkout_payment_method( array( 'bacs' => $available['bacs'] ) ) );
+	}
+
+	/**
+	 * @testdox Should hand the listed gateways to the callback, and select nothing when it picks a gateway that is not listed.
+	 */
+	public function test_shortcode_checkout_payment_method_hands_the_listed_gateways_to_the_callback(): void {
+		WC()->session->set( 'chosen_payment_method', null );
+		$available = WC()->payment_gateways()->get_available_payment_gateways();
+		$received  = null;
+		add_filter(
+			self::FILTER,
+			function ( $payment_method, $gateways ) use ( &$received ) {
+				unset( $payment_method ); // Avoid parameter not used PHPCS errors.
+				$received = array_keys( $gateways );
+				return 'cod';
+			},
+			10,
+			2
+		);
+
+		$this->assertSame( '', PaymentUtils::get_shortcode_checkout_payment_method( array( 'bacs' => $available['bacs'] ) ) );
+		$this->assertSame( array( 'bacs' ), $received );
 	}
 
 	/**
