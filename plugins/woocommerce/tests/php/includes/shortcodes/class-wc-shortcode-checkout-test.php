@@ -1,11 +1,11 @@
 <?php
-declare( strict_types = 1 );
-
 /**
  * Tests for WC_Shortcode_Checkout.
  *
  * @package WooCommerce\Tests\Shortcodes
  */
+
+declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 
