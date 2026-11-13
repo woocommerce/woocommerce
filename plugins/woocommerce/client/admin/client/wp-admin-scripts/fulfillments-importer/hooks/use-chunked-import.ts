@@ -114,18 +114,29 @@ function isSessionEnded( error: unknown ): boolean {
 	return code !== null && SESSION_ENDED_CODES.includes( code );
 }
 
+function isCount( value: unknown ): value is number {
+	return typeof value === 'number' && Number.isInteger( value ) && value >= 0;
+}
+
+const COUNT_KEYS = [
+	'created',
+	'updated',
+	'skipped',
+	'failed',
+	'notified',
+] as const;
+
 function isChunkResponse( response: unknown ): response is RunChunkResponse {
 	if ( ! response || typeof response !== 'object' ) {
 		return false;
 	}
 	const { processed, done, counts } = response as Partial< RunChunkResponse >;
 	return (
-		typeof processed === 'number' &&
-		Number.isInteger( processed ) &&
-		processed >= 0 &&
+		isCount( processed ) &&
 		typeof done === 'boolean' &&
 		!! counts &&
-		typeof counts === 'object'
+		typeof counts === 'object' &&
+		COUNT_KEYS.every( ( key ) => isCount( counts[ key ] ) )
 	);
 }
 
@@ -221,6 +232,8 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 					return;
 				}
 				if ( ! isChunkResponse( response ) ) {
+					// The server answered, so it may have written the chunk.
+					outcomeUnknownRef.current = true;
 					fail(
 						__(
 							'The server sent an unexpected response. Please try again.',
@@ -229,11 +242,24 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 					);
 					return;
 				}
+				// A response behind the confirmed offset, or one that does not move it
+				// before the import is done, would rewind or loop; keep the offset.
+				if (
+					response.processed < offsetRef.current ||
+					( ! response.done &&
+						response.processed === offsetRef.current )
+				) {
+					fail(
+						__(
+							'The import stopped making progress. Please try again.',
+							'woocommerce'
+						)
+					);
+					return;
+				}
 				outcomeUnknownRef.current = false;
 
 				callbacksRef.current.onChunk?.( response );
-
-				const previousOffset = offsetRef.current;
 				offsetRef.current = response.processed;
 
 				if ( response.done ) {
@@ -249,17 +275,6 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 							true
 						);
 					}
-					return;
-				}
-
-				// A chunk that reports no progress would loop forever.
-				if ( offsetRef.current <= previousOffset ) {
-					fail(
-						__(
-							'The import stopped making progress. Please try again.',
-							'woocommerce'
-						)
-					);
 					return;
 				}
 
@@ -294,7 +309,10 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 				);
 				return;
 			}
-			outcomeUnknownRef.current = hasUnknownOutcome( error );
+			// Only a valid response settles an unknown outcome; another error does not.
+			if ( hasUnknownOutcome( error ) ) {
+				outcomeUnknownRef.current = true;
+			}
 			fail( errorMessage( error ), isSessionEnded( error ) );
 		} finally {
 			if ( abortRef.current === controller ) {

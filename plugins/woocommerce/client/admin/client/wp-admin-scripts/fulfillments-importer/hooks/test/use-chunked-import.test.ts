@@ -166,6 +166,19 @@ describe( 'useChunkedImport', () => {
 		[ 'a negative processed count', { processed: -1 } ],
 		[ 'a fractional processed count', { processed: 2.5 } ],
 		[ 'no counts', { counts: null } ],
+		[ 'empty counts', { counts: {} } ],
+		[
+			'a negative count',
+			{
+				counts: {
+					created: 1,
+					updated: 0,
+					skipped: 0,
+					failed: -1,
+					notified: 0,
+				},
+			},
+		],
 	] )(
 		'stops without advancing on a response with %s',
 		async ( _label, patch ) => {
@@ -465,6 +478,114 @@ describe( 'useChunkedImport', () => {
 
 		expect( onError ).toHaveBeenLastCalledWith(
 			TOKEN_INVALID.message,
+			true
+		);
+	} );
+
+	it( 'keeps the confirmed offset when a response goes backwards', async () => {
+		mockedRunChunk
+			.mockResolvedValueOnce( buildResponse( 3, 6, false ) )
+			.mockResolvedValueOnce( buildResponse( 1, 6, false ) )
+			.mockResolvedValueOnce( buildResponse( 6, 6, true ) );
+
+		const { result, onChunk, onError } = renderImport( { total: 6 } );
+
+		await act( async () => {
+			await result.current.run();
+		} );
+		expect( onChunk ).toHaveBeenCalledTimes( 1 );
+		expect( onError ).toHaveBeenCalledWith(
+			'The import stopped making progress. Please try again.',
+			false
+		);
+
+		await act( async () => {
+			await result.current.run();
+		} );
+		expect(
+			mockedRunChunk.mock.calls.map( ( c ) => c[ 0 ].offset )
+		).toEqual( [ 0, 3, 3 ] );
+	} );
+
+	it( 'finishes when the last chunk is done without moving the offset', async () => {
+		mockedRunChunk
+			.mockResolvedValueOnce( buildResponse( 4, 6, false ) )
+			.mockResolvedValueOnce( buildResponse( 4, 6, true ) );
+
+		const { result, onError, onFinish } = renderImport( { total: 6 } );
+
+		await act( async () => {
+			await result.current.run();
+		} );
+
+		expect( onError ).not.toHaveBeenCalled();
+		expect( onFinish ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it.each( [
+		[
+			'a refused resend',
+			{
+				code: 'rest_too_many_requests',
+				message: 'Too many requests.',
+				data: { status: 429 },
+			},
+			4,
+		],
+		[
+			'a 400',
+			{
+				code: 'woocommerce_fulfillments_import_mapping_invalid',
+				message: 'Mapping is missing required column(s).',
+				data: { status: 400 },
+			},
+			1,
+		],
+	] )(
+		'keeps the may-have-finished warning after %s',
+		async ( _label, error, attempts ) => {
+			jest.useFakeTimers();
+			mockedRunChunk.mockRejectedValueOnce(
+				new Error( 'Failed to fetch' )
+			);
+			for ( let i = 0; i < attempts; i++ ) {
+				mockedRunChunk.mockRejectedValueOnce( error );
+			}
+			mockedRunChunk.mockRejectedValueOnce( TOKEN_INVALID );
+
+			const { result, onError } = renderImport();
+
+			// Lost response, then the error, then the ended session.
+			await runToEnd( result );
+			await runToEnd( result );
+			await runToEnd( result );
+
+			expect( mockedRunChunk ).toHaveBeenCalledTimes( attempts + 2 );
+			expect( onError ).toHaveBeenLastCalledWith(
+				'The connection dropped near the end of the import, so it may have finished. Check your orders before you upload the file again.',
+				true
+			);
+		}
+	);
+
+	it( 'warns that the import may have finished after an unexpected response', async () => {
+		mockedRunChunk
+			.mockResolvedValueOnce( {
+				processed: 'x',
+			} as unknown as RunChunkResponse )
+			.mockRejectedValueOnce( TOKEN_INVALID );
+
+		const { result, onError } = renderImport();
+
+		await act( async () => {
+			await result.current.run();
+		} );
+		await act( async () => {
+			await result.current.run();
+		} );
+
+		expect( onError ).toHaveBeenLastCalledWith(
+			'The connection dropped near the end of the import, so it may have finished. Check your orders before you upload the file again.',
 			true
 		);
 	} );
