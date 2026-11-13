@@ -34,13 +34,22 @@ const context = {
 	payload: { pull_request: { head: { ref: BRANCH } } },
 };
 
-test( 'blueprint installs the build of the run', () => {
+test( 'blueprint installs the build of the run and creates a sample product', () => {
 	const blueprint = generateWordpressPlaygroundBlueprint( RUN_ID, PR_NUMBER );
 
 	assert.equal(
 		blueprint.steps[ 0 ].pluginData.url,
 		'https://playground.wordpress.net/plugin-proxy.php?org=woocommerce&repo=woocommerce&workflow=Build%20Live%20Branch&artifact=plugins-123456&pr=789'
 	);
+	const stepNames = blueprint.steps.map( ( step ) => step.step );
+	assert.deepEqual( stepNames, [
+		'installPlugin',
+		'installPlugin',
+		'setSiteOptions',
+		'runPHP',
+		'login',
+	] );
+	assert.match( blueprint.steps[ 3 ].code, /new WC_Product_Simple\(\)/ );
 } );
 
 test( 'playground link cannot end a Markdown link early and decodes to the blueprint', () => {

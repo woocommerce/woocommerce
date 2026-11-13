@@ -4,6 +4,18 @@ const COMMENT_HEADING = 'Test the build';
 // Heading of the comment this script posted before it listed more than Playground.
 const LEGACY_COMMENT_HEADING = 'Test using WordPress Playground';
 
+// A store with no products has little to review, and a preview has nobody to add one.
+const CREATE_SAMPLE_PRODUCT_PHP = `<?php
+require '/wordpress/wp-load.php';
+if ( ! wc_get_products( array( 'limit' => 1 ) ) ) {
+	$product = new WC_Product_Simple();
+	$product->set_name( 'Sample product' );
+	$product->set_regular_price( '10' );
+	$product->set_status( 'publish' );
+	$product->save();
+}
+`;
+
 const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 	const defaultSchema = {
 		landingPage: '/wp-admin/admin.php?page=wc-admin',
@@ -45,6 +57,10 @@ const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 						skipped: true,
 					},
 				},
+			},
+			{
+				step: 'runPHP',
+				code: CREATE_SAMPLE_PRODUCT_PHP,
 			},
 			{
 				step: 'login',
@@ -120,7 +136,7 @@ const generateCommentBody = ( { prNumber, branch, playgroundUrl } ) => `
 
 ### Option 3. WordPress Playground - runs in your browser
 
-:test_tube: [Test this pull request with WordPress Playground](${ playgroundUrl }): a store with the setup wizard skipped.
+:test_tube: [Test this pull request with WordPress Playground](${ playgroundUrl }): a store with the setup wizard skipped and a sample product.
 
 :information_source: [WordPress Playground](https://developer.wordpress.org/playground/) is an experimental project that creates a full WordPress instance entirely within the browser. The site runs on SQLite and has no public address, so webhooks and payment provider callbacks cannot reach it.
 
