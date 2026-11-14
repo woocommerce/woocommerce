@@ -19,9 +19,8 @@ export default [
 	/*
 	 * These only scope `eslint .` so it does not walk into trees that own a
 	 * config. They do not decide which rules a file gets: ESLint 10 resolves
-	 * the nearest eslint.config.* for each file, so bin/eslint-branch.sh,
-	 * which passes explicit paths, still lints a changed client/legacy or
-	 * client/admin file with that package's own config.
+	 * the nearest eslint.config.* for each file. The branch runner separately
+	 * excludes source paths covered by the dedicated admin and blocks lint jobs.
 	 *
 	 * node_modules is ignored by default.
 	 */
