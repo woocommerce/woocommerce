@@ -2020,19 +2020,8 @@ class WC_Countries {
 			$address_fields[ $type . $key ] = $value;
 		}
 
-		// Add email and phone fields.
+		// Add the email field.
 		if ( 'billing_' === $type ) {
-			if ( 'hidden' !== CartCheckoutUtils::get_phone_field_visibility() ) {
-				$address_fields['billing_phone'] = array(
-					'label'        => __( 'Phone', 'woocommerce' ),
-					'required'     => 'required' === CartCheckoutUtils::get_phone_field_visibility(),
-					'type'         => 'tel',
-					'class'        => array( 'form-row-wide' ),
-					'validate'     => array( 'phone' ),
-					'autocomplete' => 'section-' . $address_type . ' ' . $address_type . ' tel',
-					'priority'     => 100,
-				);
-			}
 			$address_fields['billing_email'] = array(
 				'label'        => __( 'Email address', 'woocommerce' ),
 				'required'     => true,

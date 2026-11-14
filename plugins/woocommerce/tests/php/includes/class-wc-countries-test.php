@@ -1025,6 +1025,86 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'get_address_fields' builds the billing phone from the phone setting, like the other address fields.
+	 *
+	 * @testWith ["required", true]
+	 *           ["optional", false]
+	 *
+	 * @param string $visibility Phone field setting.
+	 * @param bool   $required   Expected required state.
+	 */
+	public function test_get_address_fields_builds_billing_phone_from_the_phone_setting( string $visibility, bool $required ): void {
+		update_option( 'woocommerce_checkout_phone_field', $visibility );
+
+		$fields = ( new WC_Countries() )->get_address_fields( 'US', 'billing_' );
+
+		$this->assertSame(
+			array(
+				'label'        => 'Phone',
+				'required'     => $required,
+				'type'         => 'tel',
+				'class'        => array( 'form-row-wide' ),
+				'validate'     => array( 'phone' ),
+				'autocomplete' => 'section-billing billing tel',
+				'priority'     => 100,
+			),
+			$fields['billing_phone']
+		);
+	}
+
+	/**
+	 * @testdox 'get_address_fields' leaves out the billing phone when the phone setting is hidden.
+	 */
+	public function test_get_address_fields_leaves_out_billing_phone_when_the_phone_setting_is_hidden(): void {
+		update_option( 'woocommerce_checkout_phone_field', 'hidden' );
+
+		$fields = ( new WC_Countries() )->get_address_fields( 'US', 'billing_' );
+
+		$this->assertArrayNotHasKey( 'billing_phone', $fields );
+	}
+
+	/**
+	 * @testdox 'get_address_fields' applies 'woocommerce_default_address_fields' to the billing phone, as the address-i18n script does.
+	 */
+	public function test_get_address_fields_applies_default_address_fields_filter_to_billing_phone(): void {
+		update_option( 'woocommerce_checkout_phone_field', 'required' );
+		add_filter(
+			'woocommerce_default_address_fields',
+			function ( $fields ) {
+				$fields['phone']['required'] = false;
+				$fields['phone']['label']    = 'Mobile number';
+				return $fields;
+			}
+		);
+
+		$fields = ( new WC_Countries() )->get_address_fields( 'US', 'billing_' );
+
+		$this->assertFalse( $fields['billing_phone']['required'], 'The default address fields filter should make the billing phone optional.' );
+		$this->assertSame( 'Mobile number', $fields['billing_phone']['label'], 'The default address fields filter should rename the billing phone.' );
+	}
+
+	/**
+	 * @testdox 'get_address_fields' applies the country locale to the billing phone, as it does to the shipping phone.
+	 */
+	public function test_get_address_fields_applies_country_locale_to_billing_phone(): void {
+		update_option( 'woocommerce_checkout_phone_field', 'required' );
+		add_filter(
+			'woocommerce_get_country_locale',
+			function ( $locale ) {
+				$locale['AL']['phone'] = array( 'hidden' => true );
+				return $locale;
+			}
+		);
+		$countries = new WC_Countries();
+
+		$billing  = $countries->get_address_fields( 'AL', 'billing_' );
+		$shipping = $countries->get_address_fields( 'AL', 'shipping_' );
+
+		$this->assertTrue( $billing['billing_phone']['hidden'] ?? false, 'The locale should hide the billing phone.' );
+		$this->assertTrue( $shipping['shipping_phone']['hidden'] ?? false, 'The locale should hide the shipping phone.' );
+	}
+
+	/**
 	 * @testdox 'get_formatted_address' outputs translated state names stored as HTML entities as text, including in uppercase.
 	 */
 	public function test_get_formatted_address_decodes_entity_encoded_state_names(): void {

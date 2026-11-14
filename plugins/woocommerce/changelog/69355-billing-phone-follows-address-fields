@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the classic checkout from requiring a billing phone that address field customisations make optional or hide.
