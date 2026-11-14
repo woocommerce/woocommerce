@@ -212,4 +212,48 @@ class CartSelectShippingRate extends ControllerTestCase {
 		$this->assertSame( 404, $result['status'], 'With shipping disabled the route should refuse the selection.' );
 		$this->assertSame( 'woocommerce_rest_shipping_disabled', $result['data']['code'], 'And say why.' );
 	}
+
+	/**
+	 * @testdox Changing the selected shipping rate recalculates cart totals and fires the select action.
+	 */
+	public function test_changing_shipping_rate_updates_cart_totals_and_fires_action(): void {
+		$second = 'flat_rate:' . $this->instances[1];
+
+		$this->assertSame( 5.0, (float) WC()->cart->get_shipping_total() );
+		$this->assertSame( 15.0, (float) WC()->cart->get_total( 'edit' ) );
+
+		$action_fired        = false;
+		$captured_package_id = null;
+		$captured_rate_id    = null;
+		$captured_request    = null;
+
+		add_action(
+			'woocommerce_store_api_cart_select_shipping_rate',
+			function ( $package_id, $rate_id, $request ) use ( &$action_fired, &$captured_package_id, &$captured_rate_id, &$captured_request ) {
+				$action_fired        = true;
+				$captured_package_id = $package_id;
+				$captured_rate_id    = $rate_id;
+				$captured_request    = $request;
+			},
+			10,
+			3
+		);
+
+		$result = $this->select(
+			array(
+				'package_id' => 0,
+				'rate_id'    => $second,
+			)
+		);
+
+		$this->assertSame( 200, $result['status'] );
+		$this->assertTrue( $action_fired, 'woocommerce_store_api_cart_select_shipping_rate action should fire on rate selection.' );
+		$this->assertSame( '0', $captured_package_id );
+		$this->assertSame( $second, $captured_rate_id );
+		$this->assertInstanceOf( \WP_REST_Request::class, $captured_request );
+
+		$totals = (array) $result['data']['totals'];
+		$this->assertSame( '900', $totals['total_shipping'] );
+		$this->assertSame( '1900', $totals['total_price'] );
+	}
 }
