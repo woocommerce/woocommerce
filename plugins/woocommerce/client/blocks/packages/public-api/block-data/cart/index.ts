@@ -9,6 +9,7 @@ import {
 	select,
 } from '@wordpress/data';
 import { controls as dataControls } from '@wordpress/data-controls';
+import apiFetch from '@wordpress/api-fetch';
 import { getSetting } from '@woocommerce/settings';
 
 /**
@@ -30,7 +31,8 @@ import {
 	isAddingToCart,
 } from './persistence-layer';
 import { defaultCartState } from './default-state';
-import { getTriggerStoreSyncEvent } from './utils';
+import { getTriggerStoreSyncEvent, setTriggerStoreSyncEvent } from './utils';
+import { getPreloadedCartResponse } from './preloaded-cart';
 import type { QuantityChanges } from './notify-quantity-changes';
 import { isEditor } from '../utils';
 
@@ -140,5 +142,25 @@ const unsubscribeUpdatePaymentMethods = subscribe( async () => {
 		subscribe( debouncedUpdatePaymentMethods, store );
 	}
 }, store );
+
+// The Cart and Checkout blocks render before the getCartData resolver can read the preloaded cart (it reads it through
+// apiFetch, asynchronously), so their first render is the loading skeleton, which DelayedContentWithSkeleton then keeps
+// for its minimum display time. When the page preloaded the cart, receive it now, as the resolver would, so the first
+// render shows the cart. This runs after the subscriptions above, so they see the cart arrive.
+const preloadedCart = getPreloadedCartResponse();
+
+if ( preloadedCart && ! isEditor() ) {
+	if (
+		// @ts-expect-error setCartHash exists but is not typed
+		typeof apiFetch.setCartHash === 'function'
+	) {
+		// @ts-expect-error setCartHash exists but is not typed
+		apiFetch.setCartHash( preloadedCart.headers );
+	}
+	setTriggerStoreSyncEvent( false );
+	void wpDispatch( store ).receiveCart( preloadedCart.body );
+	setTriggerStoreSyncEvent( true );
+	void wpDispatch( store ).finishResolution( 'getCartData' );
+}
 
 export const CART_STORE_KEY = STORE_KEY;
