@@ -85,6 +85,7 @@ class StoreResponsesTest extends WC_Unit_Test_Case {
 		$this->assertSame( 404, $sut->get( '/missing' )['status'], 'One slow page does not stop the scan' );
 		$this->assertNull( $sut->home_page() );
 		$this->assertNull( $sut->get( '/other' ) );
+		$this->assertNull( $sut->post_json( '/missing-post', array() ) );
 		$this->assertSame( array( home_url( '/missing' ), home_url( '/timeout' ), home_url( '/' ) ), $this->requested );
 	}
 

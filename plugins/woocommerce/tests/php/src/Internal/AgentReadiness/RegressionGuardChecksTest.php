@@ -544,7 +544,13 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 		update_post_meta( $hidden->get_id(), '_wc_average_rating', '5.00' );
 
 		$store = $this->healthy_store();
-		$store[ self::path( $visible->get_permalink() ) ] = array( 200, '<script type="application/ld+json">{"@type":"Product","name":"Mug"}</script>' );
+		$json  = wp_json_encode(
+			array(
+				'@type' => 'Product',
+				'name'  => $visible->get_name(),
+			)
+		);
+		$store[ self::path( $visible->get_permalink() ) ] = array( 200, '<script type="application/ld+json">' . $json . '</script>' );
 
 		$this->assertFalse( $this->results( $store )['product_review_markup'] );
 	}
@@ -567,7 +573,13 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 		}
 
 		$store = $this->healthy_store();
-		$store[ self::path( $visible->get_permalink() ) ] = array( 200, '<script type="application/ld+json">{"@type":"Product","name":"Mug"}</script>' );
+		$json  = wp_json_encode(
+			array(
+				'@type' => 'Product',
+				'name'  => $visible->get_name(),
+			)
+		);
+		$store[ self::path( $visible->get_permalink() ) ] = array( 200, '<script type="application/ld+json">' . $json . '</script>' );
 
 		$this->assertFalse( $this->results( $store )['product_review_markup'] );
 	}
