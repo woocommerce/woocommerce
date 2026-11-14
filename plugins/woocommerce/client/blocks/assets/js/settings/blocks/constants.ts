@@ -11,6 +11,7 @@ import type {
 	OrderForm,
 	AddressForm,
 	ContactForm,
+	FieldLocaleOverrides,
 } from '@woocommerce/settings';
 
 export type WordCountType =
@@ -119,6 +120,10 @@ export const COUNTRY_LOCALE = Object.fromEntries(
 		return [ countryCode, countryData[ countryCode ].locale || {} ];
 	} )
 );
+
+export const DEFAULT_LOCALE = getSetting<
+	Record< string, FieldLocaleOverrides >
+>( 'defaultLocale', {} );
 
 const defaultFieldsLocations: FieldsLocations = {
 	address: [
