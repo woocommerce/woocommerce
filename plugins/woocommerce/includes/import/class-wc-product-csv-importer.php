@@ -35,6 +35,30 @@ if ( ! class_exists( 'WC_Product_CSV_Importer_Controller', false ) ) {
 class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
+	 * CSV relationship columns and their corresponding keys after expansion.
+	 */
+	private const RELATIONSHIP_FIELDS = array(
+		'parent_id'        => 'parent_id',
+		'grouped_products' => 'children',
+		'upsell_ids'       => 'upsell_ids',
+		'cross_sell_ids'   => 'cross_sell_ids',
+	);
+
+	/**
+	 * Product IDs and unresolved SKUs from the current update relationship cell.
+	 *
+	 * @var list<int|string>|null Null outside relationship formatting.
+	 */
+	private $relationship_references = null;
+
+	/**
+	 * Relationship values containing an unresolved SKU, keyed by parsed row index and field.
+	 *
+	 * @var array
+	 */
+	private $pending_relationships = array();
+
+	/**
 	 * Tracks current row being parsed.
 	 *
 	 * @var integer
@@ -254,14 +278,30 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * If mapping to an id: and the product ID does not exist, this link is not
 	 * valid.
 	 *
-	 * If mapping to a SKU and the product ID does not exist, a temporary object
-	 * will be created so it can be updated later.
+	 * An unresolved SKU in an update row returns an empty string until the row runs.
+	 * In a new-product import, an unresolved SKU creates a temporary product.
 	 *
 	 * @param string $value Field value.
 	 *
 	 * @return int|string
 	 */
 	public function parse_relative_field( $value ) {
+		$reference = $this->parse_relative_reference( $value );
+		if ( null === $this->relationship_references || '' === $reference ) {
+			return $reference;
+		}
+
+		$this->relationship_references[] = $reference;
+		return is_int( $reference ) ? $reference : '';
+	}
+
+	/**
+	 * Parse a relationship reference, retaining the SKU if an update needs to retry it.
+	 *
+	 * @param string $value Field value.
+	 * @return int|string Product ID, unresolved SKU, or an empty string.
+	 */
+	private function parse_relative_reference( $value ) {
 		global $wpdb;
 
 		if ( empty( $value ) ) {
@@ -303,6 +343,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return $id;
 		}
 
+		if ( null !== $this->relationship_references ) {
+			$id = $this->get_relationship_product_id_by_sku( $value );
+			return $id ? $id : $value;
+		}
+
 		$id = wc_get_product_id_by_sku( $value );
 
 		if ( $id ) {
@@ -324,6 +369,87 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Find the saved product for a relationship SKU, excluding temporary products.
+	 *
+	 * @param string $sku Product SKU.
+	 * @return int Product ID, or zero if the SKU is unavailable.
+	 */
+	private function get_relationship_product_id_by_sku( string $sku ): int {
+		$id     = wc_get_product_id_by_sku( $sku );
+		$status = $id ? get_post_status( $id ) : false;
+
+		return $status && ! in_array( $status, array( 'importing', 'importing-cleanup', ProductStatus::TRASH ), true ) ? $id : 0;
+	}
+
+	/**
+	 * Keep unresolved SKUs unless a formatting callback supplied a replacement.
+	 *
+	 * @param mixed $formatted Result of formatting the relationship cell.
+	 * @return list<int|string>|string|null References to resolve, or null if none are pending.
+	 */
+	private function get_pending_relationship( $formatted ) {
+		$references = $this->relationship_references;
+		if ( ! $references ) {
+			return null;
+		}
+
+		$resolved = array_filter( $references, 'is_int' );
+		if ( count( $resolved ) < count( $references ) && is_array( $formatted ) && array_values( $formatted ) === array_values( $resolved ) ) {
+			return $references;
+		}
+
+		return '' === $formatted && 1 === count( $references ) && is_string( $references[0] ) ? $references[0] : null;
+	}
+
+	/**
+	 * Retry unresolved SKUs before saving and omit optional fields that still cannot be resolved.
+	 *
+	 * @param array $row           Parsed product data.
+	 * @param array $relationships Pending relationship values keyed by product field.
+	 * @param array $warnings      Warnings for optional fields omitted from this row.
+	 * @return array|WP_Error Product data or an error if the parent SKU cannot be resolved.
+	 */
+	private function resolve_pending_relationships( array $row, array $relationships, array &$warnings ) {
+		foreach ( $relationships as $field => $value ) {
+			$references = (array) $value;
+			foreach ( $references as $index => $sku ) {
+				if ( ! is_string( $sku ) ) {
+					continue;
+				}
+
+				$id = $this->get_relationship_product_id_by_sku( $sku );
+				if ( ! $id ) {
+					if ( 'parent_id' === $field ) {
+						return new WP_Error(
+							'woocommerce_product_importer_variation_parent_not_variable',
+							/* translators: %s: SKU of the product referenced by the CSV row. */
+							sprintf( esc_html__( 'No product was found with the SKU "%s".', 'woocommerce' ), esc_html( $sku ) )
+						);
+					}
+
+					$labels     = array(
+						'children'       => __( 'Grouped products', 'woocommerce' ),
+						'upsell_ids'     => __( 'Upsells', 'woocommerce' ),
+						'cross_sell_ids' => __( 'Cross-sells', 'woocommerce' ),
+					);
+					$warnings[] = new WP_Error(
+						'woocommerce_product_importer_unresolved_relationship_sku',
+						/* translators: 1: CSV field name, 2: SKU of the product referenced by the CSV row. */
+						sprintf( esc_html__( 'Skipped the "%1$s" field because no product was found with the SKU "%2$s".', 'woocommerce' ), esc_html( $labels[ $field ] ), esc_html( $sku ) )
+					);
+					unset( $row[ $field ] );
+					continue 2;
+				}
+
+				$references[ $index ] = $id;
+			}
+			$row[ $field ] = is_array( $value ) ? $references : reset( $references );
+		}
+
+		return $row;
 	}
 
 	/**
@@ -1373,7 +1499,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			$this->parsing_raw_data_index = $row_index;
 
-			$data = array();
+			$data          = array();
+			$relationships = array();
 
 			do_action( 'woocommerce_product_importer_before_set_parsed_data', $row, $mapped_keys );
 
@@ -1383,8 +1510,29 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					continue;
 				}
 
-				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], self::convert_to_utf8( $value ) );
+				$field = $mapped_keys[ $id ];
+				$value = self::convert_to_utf8( $value );
+				if ( ! $this->params['update_existing'] || ! isset( self::RELATIONSHIP_FIELDS[ $field ] ) ) {
+					$data[ $field ] = call_user_func( $parse_functions[ $id ], $value );
+					continue;
+				}
+
+				$this->relationship_references = array();
+				try {
+					$data[ $field ] = call_user_func( $parse_functions[ $id ], $value );
+					$pending        = $this->get_pending_relationship( $data[ $field ] );
+				} finally {
+					$this->relationship_references = null;
+				}
+
+				if ( null === $pending ) {
+					unset( $relationships[ $field ] );
+				} else {
+					$relationships[ $field ] = $pending;
+				}
 			}
+
+			$row = $this->expand_data( $data );
 
 			/**
 			 * Filter product importer parsed data.
@@ -1392,9 +1540,18 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			 * @param array $parsed_data Parsed data.
 			 * @param WC_Product_Importer $importer Importer instance.
 			 *
-			 * @since
+			 * @since 3.1.0
 			 */
-			$this->parsed_data[] = apply_filters( 'woocommerce_product_importer_parsed_data', $this->expand_data( $data ), $this );
+			$parsed_row = apply_filters( 'woocommerce_product_importer_parsed_data', $row, $this );
+			foreach ( $relationships as $field => $value ) {
+				$product_field = self::RELATIONSHIP_FIELDS[ $field ];
+				$filtered      = is_array( $parsed_row ) ? ( $parsed_row[ $product_field ] ?? null ) : null;
+				// A filter may already have supplied a replacement relationship.
+				if ( $filtered === $data[ $field ] || ( is_array( $filtered ) && is_array( $data[ $field ] ) && array_values( $filtered ) === array_values( $data[ $field ] ) ) ) {
+					$this->pending_relationships[ count( $this->parsed_data ) ][ $product_field ] = $value;
+				}
+			}
+			$this->parsed_data[] = $parsed_row;
 		}
 	}
 
@@ -1578,7 +1735,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * update existing is false, and likewise, if updating products, do not
 	 * process rows which do not exist if an ID, SKU, or non-blank Global Unique ID is provided.
 	 *
-	 * @return array
+	 * @return array Import results, with a warnings list when a saved row skipped an optional field.
 	 */
 	public function import() {
 		$this->start_time = time();
@@ -1593,6 +1750,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
+			$row_warnings  = array();
+			$relationships = isset( $this->pending_relationships[ $parsed_data_key ] ) ? $this->resolve_pending_relationships( $parsed_data, $this->pending_relationships[ $parsed_data_key ], $row_warnings ) : $parsed_data;
+			if ( ! is_wp_error( $relationships ) ) {
+				$parsed_data = $relationships;
+			}
+
 			do_action( 'woocommerce_product_import_before_import', $parsed_data );
 
 			$id  = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
@@ -1659,7 +1822,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$refusal          = null;
 
 				if ( ProductType::VARIATION === ( $parsed_data['type'] ?? '' ) ) {
-					$can_create_variation = $this->can_create_variation( $parsed_data );
+					$can_create_variation = is_wp_error( $relationships ) ? $relationships : $this->can_create_variation( $parsed_data );
 
 					// Anything other than an explicit pass refuses, so an override still written against
 					// the previous boolean contract cannot turn a refusal into a creation.
@@ -1697,7 +1860,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				}
 			}
 
-			$result = $this->process_item( $parsed_data );
+			$result = is_wp_error( $relationships ) ? $relationships : $this->process_item( $parsed_data );
 
 			if ( is_wp_error( $result ) ) {
 				if ( $id_exists && $sku_exists && $id !== $id_from_sku ) {
@@ -1711,6 +1874,17 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					$data['imported_variations'][] = $result['id'];
 			} else {
 				$data['imported'][] = $result['id'];
+			}
+
+			if ( $row_warnings && ! $result instanceof WP_Error ) {
+				$warning_data = array(
+					'row'      => $this->get_row_id( $parsed_data ),
+					'severity' => 'warning',
+				);
+				foreach ( $row_warnings as $warning ) {
+					$warning->add_data( $warning_data );
+					$data['warnings'][] = $warning;
+				}
 			}
 
 			++$index;

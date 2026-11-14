@@ -565,6 +565,46 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The import log shows warnings from earlier batches without counting the rows as skipped.
+	 */
+	public function test_import_log_shows_warnings_for_updated_products(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->assertIsInt( $user_id );
+		wp_set_current_user( $user_id );
+
+		$first  = WC_Helper_Product::create_simple_product();
+		$second = WC_Helper_Product::create_simple_product();
+		$csv    = "ID,Name,Upsells\n{$first->get_id()},First update,missing-upsell\n{$second->get_id()},Second update,\n";
+
+		add_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+		$response = $this->dispatch_import_request( '0', $csv, true );
+		$this->assertSame( 1, $response['data']['updated'] );
+		$this->assertSame( 0, $response['data']['skipped'] );
+
+		$response = $this->dispatch_import_request( (string) $response['data']['position'], $csv, true );
+		$this->assertSame( 'cleanup:0', $response['data']['position'] );
+		$this->assertSame( 1, $response['data']['updated'] );
+		$this->assertSame( 0, $response['data']['skipped'] );
+
+		$sut                  = new WC_Product_CSV_Importer_Controller();
+		$done                 = new ReflectionMethod( $sut, 'done' );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'woocommerce-csv-importer' );
+		$done->setAccessible( true );
+		ob_start();
+		try {
+			$done->invoke( $sut );
+		} finally {
+			$html = (string) ob_get_clean();
+			unset( $_REQUEST['_wpnonce'] );
+		}
+
+		$this->assertStringContainsString( 'Some linked product fields were skipped', $html );
+		$this->assertStringContainsString( 'View import log', $html );
+		$this->assertStringContainsString( 'First update, ID ' . $first->get_id(), $html );
+		$this->assertStringContainsString( 'missing-upsell', $html );
+	}
+
+	/**
 	 * @testdox Retrying an abandoned run with the same CSV should skip rows without a SKU that the abandoned run imported.
 	 */
 	public function test_retrying_an_abandoned_run_does_not_duplicate_rows_without_a_sku(): void {
@@ -610,21 +650,23 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	 *
 	 * The AJAX wp_die() handler throws an Error because dispatch_ajax() catches Exception.
 	 *
-	 * @param string $position Import position to request.
-	 * @param string $csv      CSV contents to import.
+	 * @param string $position        Import position to request.
+	 * @param string $csv             CSV contents to import.
+	 * @param bool   $update_existing Whether to update existing products.
 	 * @return array
 	 */
-	private function dispatch_import_request( string $position, string $csv = self::MARKER_CSV ): array {
+	private function dispatch_import_request( string $position, string $csv = self::MARKER_CSV, bool $update_existing = false ): array {
 		$nonce = wp_create_nonce( 'wc-product-import' );
 		$file  = $this->write_import_csv( $csv );
 
-		$_REQUEST['security'] = $nonce;
-		$_POST['security']    = $nonce;
-		$_POST['file']        = $file;
-		$_POST['position']    = $position;
-		$_POST['mapping']     = array(
-			'from' => array( 'ID', 'Type', 'SKU', 'Name', 'Parent' ),
-			'to'   => array( 'id', 'type', 'sku', 'name', 'parent_id' ),
+		$_REQUEST['security']     = $nonce;
+		$_POST['security']        = $nonce;
+		$_POST['file']            = $file;
+		$_POST['position']        = $position;
+		$_POST['update_existing'] = $update_existing;
+		$_POST['mapping']         = array(
+			'from' => array( 'ID', 'Type', 'SKU', 'Name', 'Parent', 'Upsells' ),
+			'to'   => array( 'id', 'type', 'sku', 'name', 'parent_id', 'upsell_ids' ),
 		);
 
 		add_filter( 'wp_doing_ajax', '__return_true' );
@@ -643,7 +685,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			remove_filter( 'wp_die_ajax_handler', array( $this, 'get_throwing_die_handler' ) );
 
 			wp_delete_file( $file );
-			unset( $_POST['file'], $_POST['position'], $_POST['mapping'], $_POST['security'], $_REQUEST['security'] );
+			unset( $_POST['file'], $_POST['position'], $_POST['mapping'], $_POST['security'], $_POST['update_existing'], $_REQUEST['security'] );
 		}
 
 		$decoded = json_decode( $response, true );

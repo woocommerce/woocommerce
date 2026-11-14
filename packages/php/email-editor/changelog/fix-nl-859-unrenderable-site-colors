@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the email’s own colors when a site theme color is one email clients can’t show, such as Twenty Twenty-Five’s Accent 6.

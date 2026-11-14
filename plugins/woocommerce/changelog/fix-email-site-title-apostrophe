@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show apostrophes in the site title personalization tag of block emails on PHP 8.0 and older, instead of an HTML code.

@@ -2,6 +2,15 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.6.0) - 2026-11-11 
+
+-   Patch - Keep the cursor after a personalization tag typed by hand in the email editor. [#70784]
+-   Patch - Only offer font weights and styles in the email editor Appearance list that the selected font can show. [#70047]
+-   Minor - Show the email editor's delete action instead of core's "Trash…" on WordPress 7.2 for email post types that opt in. [#70177]
+-   Patch - Support WordPress 7.2: return to the email list after trashing an email and keep editor telemetry working. [#70140]
+-   Minor - Convert personalization tags typed into the Preformatted block in the email editor. [#70784]
+-   Minor - Keep the Separator block styles (Default, Wide Line, Dots) in the email editor. [#70573]
+
 ## [2.5.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.5.1) - 2026-10-22 
 
 -   Patch - Insert personalization tags at the cursor instead of the end of the text, and edit the tag you clicked, including in captions and button text. [#69794]

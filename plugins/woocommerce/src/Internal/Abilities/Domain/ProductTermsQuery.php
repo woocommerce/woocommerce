@@ -8,7 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductTermAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -16,6 +16,8 @@ defined( 'ABSPATH' ) || exit;
  * Queries product categories, tags, brands and the terms of global attributes.
  */
 class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefinition {
+
+	use ProductTermAbilityTrait;
 
 	/**
 	 * Get the ability name.
@@ -34,7 +36,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	 * @return array
 	 */
 	public static function get_registration_args(): array {
-		$output_schema                        = self::get_collection_output_schema( 'terms', ExtensibleAbilities::add_fields_schema( self::get_term_schema(), 'product_term' ) );
+		$output_schema                        = self::get_collection_output_schema( 'terms', self::get_product_term_output_schema() );
 		$output_schema['properties']['total'] = array(
 			'type'        => 'integer',
 			'description' => __( 'Total number of matching terms across all pages.', 'woocommerce' ),
@@ -71,12 +73,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	 * @return bool
 	 */
 	public static function can_query_terms( $input = array() ): bool {
-		$taxonomy = $input['taxonomy'];
-		if ( ! taxonomy_exists( $taxonomy ) ) {
-			// Let execute() tell a store manager that the attribute does not exist, rather than refuse access.
-			return wc_rest_check_manager_permissions( 'attributes', 'read' );
-		}
-		return wc_rest_check_product_term_permissions( $taxonomy, 'read' );
+		return self::can_manage_product_terms( $input['taxonomy'], 'read' );
 	}
 
 	/**
@@ -88,12 +85,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	 */
 	public static function execute( array $input ) {
 		if ( ! taxonomy_exists( $input['taxonomy'] ) ) {
-			return new \WP_Error(
-				'woocommerce_ability_product_term_taxonomy_unknown',
-				/* translators: %s: taxonomy name. */
-				sprintf( __( 'The taxonomy "%s" does not exist. Use product-attributes-query to list the global attributes.', 'woocommerce' ), $input['taxonomy'] ),
-				array( 'status' => 404 )
-			);
+			return self::get_unknown_taxonomy_error( $input['taxonomy'] );
 		}
 
 		$page     = $input['page'] ?? 1;
@@ -185,59 +177,6 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * Format a term with the fields of the WooCommerce term reads.
-	 *
-	 * @param \WP_Term $term Term to format.
-	 * @return array|\WP_Error A WP_Error when an extension field value does not match its schema.
-	 */
-	private static function format_term( \WP_Term $term ) {
-		$output = array(
-			'id'          => $term->term_id,
-			'name'        => html_entity_decode( $term->name, ENT_QUOTES | ENT_HTML5 ),
-			'slug'        => $term->slug,
-			'description' => $term->description,
-			'count'       => $term->count,
-		);
-		if ( taxonomy_is_product_attribute( $term->taxonomy ) ) {
-			$output['menu_order'] = (int) get_term_meta( $term->term_id, 'order', true );
-		} elseif ( 'product_tag' !== $term->taxonomy ) {
-			$output['parent']     = $term->parent;
-			$display              = get_term_meta( $term->term_id, 'display_type', true );
-			$output['display']    = $display ? $display : 'default';
-			$output['menu_order'] = (int) get_term_meta( $term->term_id, 'order', true );
-			$image_id             = (int) get_term_meta( $term->term_id, 'thumbnail_id', true );
-			$image                = $image_id ? get_post( $image_id ) : null;
-			$image_url            = $image ? wp_get_attachment_url( $image->ID ) : false;
-			if ( $image && 'attachment' === $image->post_type && $image_url ) {
-				$output['image'] = array(
-					'id'   => $image->ID,
-					'src'  => $image_url,
-					'name' => $image->post_title,
-					'alt'  => get_post_meta( $image->ID, '_wp_attachment_image_alt', true ),
-				);
-				foreach ( array(
-					'date_created'  => 'date',
-					'date_modified' => 'modified',
-				) as $field => $source ) {
-					foreach ( array(
-						''     => 'local',
-						'_gmt' => 'gmt',
-					) as $suffix => $timezone ) {
-						$date = get_post_datetime( $image, $source, $timezone );
-						if ( $date ) {
-							if ( 'gmt' === $timezone ) {
-								$date = $date->setTimezone( new \DateTimeZone( 'UTC' ) );
-							}
-							$output['image'][ $field . $suffix ] = $date->format( DATE_RFC3339 );
-						}
-					}
-				}
-			}
-		}
-		return ExtensibleAbilities::add_fields_to_object( $output, 'product_term', $term );
-	}
-
-	/**
 	 * Get the input schema.
 	 *
 	 * @return array
@@ -246,11 +185,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'taxonomy'   => array(
-					'description' => __( 'Product taxonomy to query: product_cat, product_tag, product_brand, or the slug of a global attribute from product-attributes-query.', 'woocommerce' ),
-					'type'        => 'string',
-					'pattern'     => '^(product_cat|product_tag|product_brand|pa_[^\\s]+)$',
-				),
+				'taxonomy'   => self::get_taxonomy_input_schema( __( 'Product taxonomy to query: product_cat, product_tag, product_brand, or the slug of a global attribute from product-attributes-query.', 'woocommerce' ) ),
 				'include'    => array(
 					'description' => __( 'Limit results to these term IDs. Use one ID to retrieve a single term.', 'woocommerce' ),
 					'type'        => 'array',
@@ -315,57 +250,6 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 				),
 			),
 			'required'             => array( 'taxonomy' ),
-			'additionalProperties' => false,
-		);
-	}
-
-	/**
-	 * Get the term output schema, including taxonomy-specific fields.
-	 *
-	 * @return array
-	 */
-	private static function get_term_schema(): array {
-		return array(
-			'type'                 => 'object',
-			'properties'           => array(
-				'id'          => array( 'type' => 'integer' ),
-				'name'        => array( 'type' => 'string' ),
-				'slug'        => array( 'type' => 'string' ),
-				'description' => array( 'type' => 'string' ),
-				'count'       => array(
-					'type'        => 'integer',
-					'description' => __( 'Number of published, catalog-visible products. hide_empty uses stored counts and also retains parents with non-empty children, so a returned term can have count zero.', 'woocommerce' ),
-				),
-				'parent'      => array( 'type' => 'integer' ),
-				'display'     => array( 'type' => 'string' ),
-				'menu_order'  => array( 'type' => 'integer' ),
-				'image'       => array(
-					'type'                 => 'object',
-					'properties'           => array(
-						'id'                => array( 'type' => 'integer' ),
-						'src'               => array( 'type' => 'string' ),
-						'name'              => array( 'type' => 'string' ),
-						'alt'               => array( 'type' => 'string' ),
-						'date_created'      => array(
-							'type'   => 'string',
-							'format' => 'date-time',
-						),
-						'date_created_gmt'  => array(
-							'type'   => 'string',
-							'format' => 'date-time',
-						),
-						'date_modified'     => array(
-							'type'   => 'string',
-							'format' => 'date-time',
-						),
-						'date_modified_gmt' => array(
-							'type'   => 'string',
-							'format' => 'date-time',
-						),
-					),
-					'additionalProperties' => false,
-				),
-			),
 			'additionalProperties' => false,
 		);
 	}

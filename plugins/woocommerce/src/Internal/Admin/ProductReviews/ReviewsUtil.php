@@ -38,13 +38,17 @@ class ReviewsUtil {
 	/**
 	 * Removes product reviews from the edit-comments page to fix the "Mine" tab counter.
 	 *
-	 * @param array|mixed       $clauses A compacted array of comment query clauses.
-	 * @param \WP_Comment_Query $comment_query The WP_Comment_Query instance being filtered.
+	 * @param array|mixed            $clauses       A compacted array of comment query clauses.
+	 * @param \WP_Comment_Query|null $comment_query The comment query being filtered, when provided.
 	 *
 	 * @return array|mixed
 	 */
-	public static function comments_clauses_without_product_reviews( $clauses, $comment_query ) {
+	public static function comments_clauses_without_product_reviews( $clauses, $comment_query = null ) {
 		global $wpdb;
+
+		if ( ! $comment_query instanceof \WP_Comment_Query ) {
+			return $clauses;
+		}
 
 		if ( ! empty( $comment_query->query_vars['post_type'] ) ) {
 			$post_type = $comment_query->query_vars['post_type'];

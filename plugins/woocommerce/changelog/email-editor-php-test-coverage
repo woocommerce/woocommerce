@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Add tests for the email editor product collection, renderers and integration; no production change.
+

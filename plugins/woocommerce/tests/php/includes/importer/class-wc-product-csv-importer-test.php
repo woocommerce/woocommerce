@@ -36,6 +36,180 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An update import resolves relationship SKUs saved by earlier rows in the same import.
+	 * @testWith [-1]
+	 *           [1]
+	 *
+	 * @param int $batch_size Rows per request, or -1 to read the entire file.
+	 */
+	public function test_import_updates_skus_and_relationships_together( int $batch_size ): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_sku( 'parent-before-import' );
+		$parent->save();
+		$variation = new WC_Product_Variation();
+		$variation->set_sku( 'variation-before-import' );
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->save();
+		$linked = WC_Helper_Product::create_simple_product();
+		$group  = new WC_Product_Grouped();
+		$group->save();
+
+		$csv = "id,type,sku,parent_id,grouped_products,upsell_ids,cross_sell_ids\n"
+			. "{$parent->get_id()},variable,parent-after-import,,,,\n"
+			. "{$variation->get_id()},variation,variation-after-import,parent-after-import,,,\n"
+			. "{$linked->get_id()},simple,linked-after-import,,,,\n"
+			. "{$group->get_id()},grouped,group-after-import,,linked-after-import,\"parent-after-import,id:{$linked->get_id()}\",linked-after-import\n";
+
+		add_filter(
+			'woocommerce_product_importer_parsed_data',
+			static function ( $row ) {
+				if ( isset( $row['upsell_ids'] ) ) {
+					$row['upsell_ids'] = array_values( array_map( 'absint', $row['upsell_ids'] ) );
+				}
+				return $row;
+			}
+		);
+
+		$result = $this->import_relationship_updates( $csv, $batch_size );
+
+		$this->assertEmpty( $result['failed'], wp_json_encode( $result['failed'] ) );
+		$this->assertSame( array( $parent->get_id(), $variation->get_id(), $linked->get_id(), $group->get_id() ), $result['updated'] );
+		$this->assertSame( 'parent-after-import', wc_get_product( $parent->get_id() )->get_sku() );
+		$updated_variation = wc_get_product( $variation->get_id() );
+		$this->assertSame( 'variation-after-import', $updated_variation->get_sku() );
+		$this->assertSame( $parent->get_id(), $updated_variation->get_parent_id() );
+		$updated_group = wc_get_product( $group->get_id() );
+		$this->assertSame( array( $linked->get_id() ), $updated_group->get_children() );
+		$this->assertSame( array( $parent->get_id(), $linked->get_id() ), $updated_group->get_upsell_ids() );
+		$this->assertSame( array( $linked->get_id() ), $updated_group->get_cross_sell_ids() );
+	}
+
+	/**
+	 * @testdox An update skips an unresolved relationship field and saves the rest of the row.
+	 * @testWith ["grouped_products", "children", "Grouped products"]
+	 *           ["upsell_ids", "upsell_ids", "Upsells"]
+	 *           ["cross_sell_ids", "cross_sell_ids", "Cross-sells"]
+	 *
+	 * @param string $column   Mapped CSV column.
+	 * @param string $property Product property written by that column.
+	 * @param string $label    Column label shown in the warning.
+	 */
+	public function test_import_preserves_relationships_when_linked_sku_is_unresolved( string $column, string $property, string $label ): void {
+		$original    = WC_Helper_Product::create_simple_product();
+		$replacement = WC_Helper_Product::create_simple_product();
+		$group       = new WC_Product_Grouped();
+		$group->set_props( array( $property => array( $original->get_id() ) ) );
+		$group->save();
+
+		$csv    = "id,sku,{$column}\n"
+			. "{$group->get_id()},group-after-import,\"id:{$replacement->get_id()},later-sku\"\n"
+			. "{$replacement->get_id()},later-sku,\n";
+		$result = $this->import_relationship_updates( $csv );
+
+		$this->assertEmpty( $result['failed'] );
+		$this->assertSame( array( $group->get_id(), $replacement->get_id() ), $result['updated'] );
+		$this->assertCount( 1, $result['warnings'] );
+		$this->assertStringContainsString( $label, $result['warnings'][0]->get_error_message() );
+		$this->assertStringContainsString( 'later-sku', $result['warnings'][0]->get_error_message() );
+		$this->assertSame( $replacement->get_id(), wc_get_product_id_by_sku( 'later-sku' ), 'An unresolved link must not take the SKU from the later row.' );
+		$updated_group = wc_get_product( $group->get_id() );
+		$this->assertInstanceOf( WC_Product_Grouped::class, $updated_group );
+		$this->assertSame( array( $original->get_id() ), $updated_group->{ 'get_' . $property }() );
+		$this->assertSame( 'group-after-import', $updated_group->get_sku() );
+	}
+
+	/**
+	 * @testdox An update saves a new price and keeps an existing upsell when its SKU is in the trash.
+	 */
+	public function test_import_updates_price_with_trashed_upsell_sku(): void {
+		$upsell = WC_Helper_Product::create_simple_product( true, array( 'sku' => 'trashed-upsell' ) );
+		$source = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '10',
+				'upsell_ids'    => array( $upsell->get_id() ),
+			)
+		);
+		wp_trash_post( $upsell->get_id() );
+		$this->assertSame( ProductStatus::TRASH, get_post_status( $upsell->get_id() ) );
+
+		$cross_sell = WC_Helper_Product::create_simple_product();
+		$result     = $this->import_relationship_updates( "id,regular_price,upsell_ids,cross_sell_ids\n{$source->get_id()},20,trashed-upsell,id:{$cross_sell->get_id()}\n" );
+
+		$this->assertSame( array( $source->get_id() ), $result['updated'] );
+		$this->assertEmpty( $result['failed'] );
+		$this->assertCount( 1, $result['warnings'] );
+		$this->assertStringContainsString( 'trashed-upsell', $result['warnings'][0]->get_error_message() );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'trashed-upsell' ), 'The import must not create a placeholder for the trashed SKU.' );
+		$updated_source = wc_get_product( $source->get_id() );
+		$this->assertInstanceOf( WC_Product_Simple::class, $updated_source );
+		$this->assertSame( array( $upsell->get_id() ), $updated_source->get_upsell_ids() );
+		$this->assertSame( array( $cross_sell->get_id() ), $updated_source->get_cross_sell_ids() );
+		$this->assertSame( '20', $updated_source->get_regular_price() );
+	}
+
+	/**
+	 * @testdox A parsed-data filter can supply a replacement for an unresolved relationship.
+	 */
+	public function test_import_respects_filtered_relationship(): void {
+		$source = WC_Helper_Product::create_simple_product();
+		$target = WC_Helper_Product::create_simple_product();
+		add_filter(
+			'woocommerce_product_importer_parsed_data',
+			static function ( $row ) use ( $target ) {
+				$row['upsell_ids'] = array( $target->get_id() );
+				return $row;
+			}
+		);
+
+		$result = $this->import_relationship_updates( "id,upsell_ids\n{$source->get_id()},missing-sku\n" );
+
+		$this->assertEmpty( $result['failed'] );
+		$this->assertSame( array( $source->get_id() ), $result['updated'] );
+		$this->assertSame( array( $target->get_id() ), wc_get_product( $source->get_id() )->get_upsell_ids() );
+	}
+
+	/**
+	 * Import a fixture using the same file cursor as the AJAX controller.
+	 *
+	 * @param string $csv        CSV contents with mapped column names.
+	 * @param int    $batch_size Rows per request, or -1 for an unlimited batch.
+	 * @return array Updated IDs, failed rows, and warnings.
+	 */
+	private function import_relationship_updates( string $csv, int $batch_size = -1 ): array {
+		$file = trailingslashit( get_temp_dir() ) . wp_generate_uuid4() . '.csv';
+		file_put_contents( $file, $csv ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Write a temporary CSV fixture.
+
+		try {
+			$results = array(
+				'updated'  => array(),
+				'failed'   => array(),
+				'warnings' => array(),
+			);
+			$args    = array(
+				'parse'            => true,
+				'update_existing'  => true,
+				'prevent_timeouts' => false,
+				'lines'            => $batch_size,
+				'start_pos'        => 0,
+			);
+			do {
+				$sut    = new WC_Product_CSV_Importer( $file, $args );
+				$result = $sut->import();
+				foreach ( $results as $key => $items ) {
+					$results[ $key ] = array_merge( $items, $result[ $key ] ?? array() );
+				}
+				$this->assertGreaterThan( $args['start_pos'], $sut->get_file_position(), 'Every batch should consume more of the CSV.' );
+				$args['start_pos'] = $sut->get_file_position();
+			} while ( 100 !== $sut->get_percent_complete() );
+
+			return $results;
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
 	 * @testdox CSV imports update MPNs and allow zero and explicit clearing.
 	 * @testWith ["simple", "PART-IMPORTED"]
 	 *           ["simple", "0"]
@@ -2780,7 +2954,8 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$csv    = "ID,Type,SKU,Name,Parent\n" .
 			"{$first->get_id()},variation,{$first->get_sku()},Unknown parent,IMPORT-40274-NO-SUCH-PARENT\n" .
 			"{$second->get_id()},variation,{$second->get_sku()},Simple parent,IMPORT-40274-SIMPLE-PARENT\n" .
-			"{$third->get_id()},variation,{$third->get_sku()},Importing parent,id:{$placeholder->get_id()}\n";
+			"{$third->get_id()},variation,{$third->get_sku()},Importing parent,id:{$placeholder->get_id()}\n" .
+			",variation,IMPORT-40274-NEW-VARIATION,New variation,IMPORT-40274-NO-SUCH-PARENT\n";
 
 		$data = $this->import_csv_rows(
 			$csv,
@@ -2795,9 +2970,11 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $data['updated'], 'No variation may be moved' );
 		$this->assertCount( 3, $data['failed'], 'Each row fails' );
-		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][0]->get_error_code(), 'An unknown parent SKU, resolved to a placeholder, is refused' );
+		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][0]->get_error_code(), 'An unknown parent SKU is refused' );
 		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][1]->get_error_code(), 'A simple parent is refused' );
 		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][2]->get_error_code(), 'A variable parent still being imported is refused' );
+		$this->assertCount( 1, $data['skipped'], 'A new variation with an unresolved parent SKU is skipped.' );
+		$this->assertStringContainsString( 'IMPORT-40274-NO-SUCH-PARENT', $data['skipped'][0]->get_error_message(), 'The reason names the unresolved SKU.' );
 		$this->assertSame( $parent->get_id(), wc_get_product( $first->get_id() )->get_parent_id(), 'The first variation keeps its parent' );
 		$this->assertSame( $parent->get_id(), wc_get_product( $second->get_id() )->get_parent_id(), 'The second variation keeps its parent' );
 		$this->assertSame( $parent->get_id(), wc_get_product( $third->get_id() )->get_parent_id(), 'The third variation keeps its parent' );

@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
+use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesCategories;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
@@ -34,6 +35,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 	private const CANONICAL_ABILITY_IDS = array(
 		'woocommerce/product-terms-query',
+		'woocommerce/product-term-create',
+		'woocommerce/product-term-update',
 		'woocommerce/product-attributes-query',
 		'woocommerce/product-attribute-create',
 		'woocommerce/products-query',
@@ -42,11 +45,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/product-delete',
 		'woocommerce/orders-query',
 		'woocommerce/order-send-email',
+		'woocommerce/order-create',
 		'woocommerce/order-update',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
 		'woocommerce/order-notes-query',
 		'woocommerce/payment-gateways-query',
+		'woocommerce/customers-query',
+		'woocommerce/product-review-update',
+		'woocommerce/product-review-reply',
+		'woocommerce/product-reviews-query',
+		'woocommerce/shipping-zones-query',
+		'woocommerce/tax-rates-query',
 	);
 
 	/**
@@ -275,6 +285,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'idempotent'  => true,
 				'destructive' => false,
 			),
+			'woocommerce/product-reviews-query'    => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/shipping-zones-query'     => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/tax-rates-query'          => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
 			'woocommerce/product-attributes-query' => array(
 				'readonly'    => true,
 				'idempotent'  => true,
@@ -284,6 +309,16 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
+			),
+			'woocommerce/product-term-create'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/product-term-update'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
 			),
 			'woocommerce/product-create'           => array(
 				'readonly'    => false,
@@ -306,6 +341,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'destructive' => false,
 			),
 			'woocommerce/order-send-email'         => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/order-create'             => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
@@ -333,6 +373,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'woocommerce/payment-gateways-query'   => array(
 				'readonly'    => true,
 				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/customers-query'          => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/product-review-update'    => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/product-review-reply'     => array(
+				'readonly'    => false,
+				'idempotent'  => false,
 				'destructive' => false,
 			),
 		);
@@ -480,9 +535,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_order_status_input_schemas_exclude_checkout_draft(): void {
 		$query_schema  = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/order-update-status' )->get_input_schema();
+		$create_schema = wp_get_ability( 'woocommerce/order-create' )->get_input_schema();
 
 		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['items']['enum'] );
 		$this->assertNotContains( 'checkout-draft', $update_schema['properties']['status']['enum'] ?? array() );
+		$this->assertNotContains( 'checkout-draft', $create_schema['properties']['status']['enum'] ?? array() );
 	}
 
 	/**
@@ -537,6 +594,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertSame( 'array', $input['status']['type'] );
 			$this->assertContains( 'test-active', $input['status']['items']['enum'] );
 			$this->assertContains( 'test-active', $output['status']['enum'] );
+			$this->assertContains( 'shop_test_contract', $output['type']['enum'], 'An order of a registered type should pass the output schema.' );
 
 			$query_args = $this->capture_order_query_args(
 				array(
@@ -944,6 +1002,23 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should give every canonical ability an input in the permission refusal provider.
+	 */
+	public function test_permission_refusal_provider_covers_every_canonical_ability(): void {
+		$classes = ( new \ReflectionClassConstant( AbilitiesLoader::class, 'CORE_ABILITY_DEFINITION_CLASSES' ) )->getValue();
+		$names   = array_map(
+			static fn( string $class_name ): string => is_a( $class_name, ActionableAbility::class, true ) ? $class_name::ABILITY_NAME : $class_name::get_name(),
+			$classes
+		);
+		// The loader skips an empty name, which a feature-gated ability reports while its feature is off.
+		$core    = array_values( array_filter( $names, static fn( string $name ): bool => '' !== $name ) );
+		$covered = array_column( $this->provider_canonical_abilities_with_minimal_input(), 0 );
+
+		$this->assertEqualsCanonicalizing( $core, self::CANONICAL_ABILITY_IDS, 'CANONICAL_ABILITY_IDS should list every Core ability.' );
+		$this->assertEqualsCanonicalizing( $core, $covered, 'The permission refusal provider should cover every Core ability.' );
+	}
+
+	/**
 	 * Provides ability IDs and minimal valid-shape input for cap negative-path tests.
 	 *
 	 * @return array<string, array{0: string, 1: array}>
@@ -951,74 +1026,196 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
-			'products-query'         => array(
+			'product-terms-query'      => array(
+				'woocommerce/product-terms-query',
+				array(
+					'taxonomy' => 'product_cat',
+				),
+			),
+			'product-term-create'      => array(
+				'woocommerce/product-term-create',
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Forbidden',
+				),
+			),
+			'product-term-update'      => array(
+				'woocommerce/product-term-update',
+				array(
+					'taxonomy' => 'product_cat',
+					'id'       => 1,
+					'name'     => 'Forbidden',
+				),
+			),
+			'product-attributes-query' => array(
+				'woocommerce/product-attributes-query',
+				array(),
+			),
+			'product-attribute-create' => array(
+				'woocommerce/product-attribute-create',
+				array(
+					'name' => 'Forbidden',
+				),
+			),
+			'products-query'           => array(
 				'woocommerce/products-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'product-create'         => array(
+			'product-create'           => array(
 				'woocommerce/product-create',
 				array(
 					'name' => 'Forbidden',
 				),
 			),
-			'product-update'         => array(
+			'product-update'           => array(
 				'woocommerce/product-update',
 				array(
 					'id'   => 1,
 					'name' => 'Forbidden',
 				),
 			),
-			'product-delete'         => array(
+			'product-delete'           => array(
 				'woocommerce/product-delete',
 				array(
 					'id' => 1,
 				),
 			),
-			'orders-query'           => array(
+			'orders-query'             => array(
 				'woocommerce/orders-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'order-send-email'       => array(
+			'order-send-email'         => array(
 				'woocommerce/order-send-email',
 				array(
 					'id'    => 1,
 					'email' => 'invoice',
 				),
 			),
-			'order-update'           => array(
+			'order-create'             => array(
+				'woocommerce/order-create',
+				array( 'line_items' => array( array( 'product_id' => 1 ) ) ),
+			),
+			'order-update'             => array(
 				'woocommerce/order-update',
 				array(
 					'id'       => 1,
 					'shipping' => array( 'city' => 'Denied' ),
 				),
 			),
-			'order-update-status'    => array(
+			'order-update-status'      => array(
 				'woocommerce/order-update-status',
 				array(
 					'id'     => 1,
 					'status' => 'processing',
 				),
 			),
-			'order-add-note'         => array(
+			'product-review-update'    => array(
+				'woocommerce/product-review-update',
+				array(
+					'id'     => 1,
+					'status' => 'approved',
+				),
+			),
+			'product-review-reply'     => array(
+				'woocommerce/product-review-reply',
+				array(
+					'id'      => 1,
+					'content' => 'denied',
+				),
+			),
+			'order-add-note'           => array(
 				'woocommerce/order-add-note',
 				array(
 					'id'   => 1,
 					'note' => 'denied',
 				),
 			),
-			'order-notes-query'      => array(
+			'order-notes-query'        => array(
 				'woocommerce/order-notes-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'payment-gateways-query' => array(
+			'payment-gateways-query'   => array(
 				'woocommerce/payment-gateways-query',
 				array(),
+			),
+			'customers-query'          => array(
+				'woocommerce/customers-query',
+				array(),
+			),
+			'product-reviews-query'    => array(
+				'woocommerce/product-reviews-query',
+				array(),
+			),
+			'shipping-zones-query'     => array(
+				'woocommerce/shipping-zones-query',
+				array(),
+			),
+			'tax-rates-query'          => array(
+				'woocommerce/tax-rates-query',
+				array(),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should grant a subscriber access when woocommerce_rest_check_permissions returns a truthy non-boolean, as REST does.
+	 *
+	 * @dataProvider provider_abilities_checking_rest_permissions
+	 *
+	 * @param string $ability_id Ability ID.
+	 * @param array  $input      Input that reaches the REST permission check.
+	 */
+	public function test_abilities_accept_truthy_rest_permission( string $ability_id, array $input ): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'subscriber' ) ) );
+		add_filter( 'woocommerce_rest_check_permissions', fn() => 1 );
+
+		$this->assertTrue( wp_get_ability( $ability_id )->check_permissions( $input ) );
+	}
+
+	/**
+	 * Provides one input per path through which an ability returns a REST permission check.
+	 *
+	 * @return array<string, array{0: string, 1: array}>
+	 */
+	public function provider_abilities_checking_rest_permissions(): array {
+		$missing_id = array( 'id' => PHP_INT_MAX );
+
+		return array(
+			'products-query'                 => array( 'woocommerce/products-query', $missing_id ),
+			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
+			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),
+			'payment-gateways-query'         => array( 'woocommerce/payment-gateways-query', array() ),
+			'customers-query'                => array( 'woocommerce/customers-query', array() ),
+			'shipping-zones-query'           => array( 'woocommerce/shipping-zones-query', array() ),
+			'tax-rates-query'                => array( 'woocommerce/tax-rates-query', array() ),
+			'product-attributes-query'       => array( 'woocommerce/product-attributes-query', array() ),
+			'product-attribute-create'       => array( 'woocommerce/product-attribute-create', array( 'name' => 'Size' ) ),
+			'product-terms-query'            => array( 'woocommerce/product-terms-query', array( 'taxonomy' => 'product_cat' ) ),
+			'product-terms-query of unknown' => array( 'woocommerce/product-terms-query', array( 'taxonomy' => 'pa_missing' ) ),
+			'product-term-create'            => array(
+				'woocommerce/product-term-create',
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Granted',
+				),
+			),
+			'product-term-update'            => array(
+				'woocommerce/product-term-update',
+				$missing_id + array( 'taxonomy' => 'product_cat' ),
+			),
+			'product-review-update'          => array(
+				'woocommerce/product-review-update',
+				$missing_id + array( 'status' => 'approved' ),
+			),
+			'product-review-reply'           => array(
+				'woocommerce/product-review-reply',
+				$missing_id + array( 'content' => 'Thanks!' ),
 			),
 		);
 	}
@@ -1585,54 +1782,68 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function provider_negative_entity_id_inputs(): array {
 		return array(
-			'products-query'      => array(
+			'products-query'        => array(
 				'woocommerce/products-query',
 				array( 'id' => -123 ),
 			),
-			'product-update'      => array(
+			'product-update'        => array(
 				'woocommerce/product-update',
 				array(
 					'id'   => -123,
 					'name' => 'Invalid',
 				),
 			),
-			'product-delete'      => array(
+			'product-delete'        => array(
 				'woocommerce/product-delete',
 				array( 'id' => -123 ),
 			),
-			'orders-query'        => array(
+			'orders-query'          => array(
 				'woocommerce/orders-query',
 				array( 'id' => -123 ),
 			),
-			'order-send-email'    => array(
+			'order-send-email'      => array(
 				'woocommerce/order-send-email',
 				array(
 					'id'    => -123,
 					'email' => 'invoice',
 				),
 			),
-			'order-update'        => array(
+			'order-update'          => array(
 				'woocommerce/order-update',
 				array(
 					'id'       => -123,
 					'shipping' => array( 'city' => 'Invalid' ),
 				),
 			),
-			'order-update-status' => array(
+			'order-update-status'   => array(
 				'woocommerce/order-update-status',
 				array(
 					'id'     => -123,
 					'status' => 'processing',
 				),
 			),
-			'order-add-note'      => array(
+			'product-review-update' => array(
+				'woocommerce/product-review-update',
+				array(
+					'id'     => -123,
+					'status' => 'approved',
+				),
+			),
+			'product-review-reply'  => array(
+				'woocommerce/product-review-reply',
+				array(
+					'id'      => -123,
+					'content' => 'Invalid',
+				),
+			),
+			'order-add-note'        => array(
 				'woocommerce/order-add-note',
 				array(
 					'id'   => -123,
 					'note' => 'Invalid',
 				),
 			),
-			'order-notes-query'   => array(
+			'order-notes-query'     => array(
 				'woocommerce/order-notes-query',
 				array( 'id' => -123 ),
 			),
@@ -4625,8 +4836,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$query = wp_get_ability( 'woocommerce/orders-query' )->execute(
 			array(
-				'id'                 => $order->get_id(),
-				'include_line_items' => true,
+				'id'            => $order->get_id(),
+				'include_lines' => true,
 			)
 		);
 		$this->assertSame( 'Pickup', $query['orders'][0]['shipping_lines'][1]['method_title'] );

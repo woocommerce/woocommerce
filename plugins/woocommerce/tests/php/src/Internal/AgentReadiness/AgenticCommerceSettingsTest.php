@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettingsPage;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use WC_Admin_Settings;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -27,6 +28,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Report tests stay offline: store output checks would load the test site's pages.
+		StoreOutputChecksTest::block_requests();
 		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-settings.php';
 		include_once WC_ABSPATH . 'includes/admin/settings/class-wc-settings-page.php';
 		set_current_screen( 'dashboard' );
@@ -196,6 +199,75 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A store check from the last scan that couldn't run shows "Couldn't check" and doesn't block the switch.
+	 */
+	public function test_output_scanned_check_couldnt_check(): void {
+		StoreConditionsTest::make_store_ready( $this );
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'store_checks' => array(
+					array(
+						'id'      => 'launched',
+						'ok'      => false,
+						'level'   => 'required',
+						'name'    => 'Stale launched result',
+						'fix_url' => '',
+					),
+					array(
+						'id'      => 'sitemap_xml',
+						'group'   => 'find',
+						'ok'      => null,
+						'level'   => 'recommended',
+						'name'    => 'Sitemap lists your products',
+						'fix_url' => '',
+					),
+				),
+			),
+			false
+		);
+
+		$html = $this->render_page();
+
+		$this->assertStringContainsString( 'Sitemap lists your products', $html );
+		$this->assertStringContainsString( 'Couldn&#039;t check', $html );
+		$this->assertStringNotContainsString( 'Stale launched result', $html, 'Live conditions are read now, not from the report' );
+		$this->assertStringNotContainsString( 'to turn this on.', $html );
+	}
+
+	/**
+	 * @testdox A check that couldn't run says why: launch the store in coming soon mode, otherwise the store couldn't load its page.
+	 */
+	public function test_output_couldnt_check_message_follows_coming_soon(): void {
+		StoreConditionsTest::make_store_ready( $this );
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'store_checks' => array(
+					array(
+						'id'      => 'sitemap_xml',
+						'group'   => 'find',
+						'ok'      => null,
+						'level'   => 'recommended',
+						'name'    => 'Sitemap lists your products',
+						'fix_url' => '',
+					),
+				),
+			),
+			false
+		);
+
+		$live = $this->render_page();
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		$coming_soon = $this->render_page();
+
+		$this->assertStringContainsString( 'This couldn&#039;t be checked.', $live );
+		$this->assertStringNotContainsString( 'Launch your store', $live );
+		$this->assertStringContainsString( 'Launch your store to run this check.', $coming_soon );
+		$this->assertStringNotContainsString( 'This couldn&#039;t be checked.', $coming_soon );
+	}
+
+	/**
 	 * @testdox With UCP already on and a required check failing, the switch says the checks still need fixing.
 	 */
 	public function test_output_switch_on_with_failing_checks(): void {
@@ -212,6 +284,199 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'aria-checked="true"', $html );
 		$this->assertStringContainsString( 'required setup checks below still need fixing.', $html );
 		$this->assertStringNotContainsString( 'AI agents can now find and shop your store.</p>', $html );
+	}
+
+	/**
+	 * @testdox The page answers each merchant question, marks a likely conflict, hides checks whose prerequisite failed, and folds passed checks away.
+	 */
+	public function test_output_groups_summary_and_conflict(): void {
+		$row = static fn( string $id, ?bool $ok, bool $conflict = false ): array => array(
+			'id'       => $id,
+			'ok'       => $ok,
+			'blocks'   => 'discovery',
+			'group'    => str_starts_with( $id, 'product_' ) ? 'understand' : 'find',
+			'name'     => $id . ' name',
+			'label'    => $id . ' label',
+			'why'      => $id . ' why',
+			'fix'      => $id . ' fix',
+			'fix_url'  => '',
+			'conflict' => $conflict,
+		);
+		update_option(
+			'woocommerce_agent_readiness_report',
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(
+					$row( 'product_jsonld_present', false, true ),
+					$row( 'product_offer_jsonld', null ),
+					$row( 'sitemap_lists_products', true ),
+				),
+			)
+		);
+
+		$html = $this->render_page();
+
+		foreach ( array( 'Can agents get in?', 'Can they find your store?', 'Do they understand your products?', 'Can they buy?' ) as $question ) {
+			$this->assertStringContainsString( $question, $html );
+		}
+		$this->assertStringContainsString( 'Agent shopping is off', $html, 'UCP is off in this test' );
+		$this->assertMatchesRegularExpression( '/data-on="(?![^"]*Agent shopping is off)[^"]*" data-off="Agent shopping is off/', $html, 'The switch script can show the line for UCP on without a reload' );
+		$this->assertStringContainsString( 'Likely conflict', $html );
+		$this->assertStringContainsString( 'Something on your store may be replacing this.', $html );
+		$this->assertStringNotContainsString( 'product_offer_jsonld name', $html, 'Its prerequisite failed' );
+		$this->assertMatchesRegularExpression( '#<details>.*sitemap_lists_products name.*</details>#s', $html );
+	}
+
+	/**
+	 * @testdox The declared list shows found and not found as information, and isn't counted in the summary.
+	 */
+	public function test_output_declared_block(): void {
+		update_option(
+			'woocommerce_agent_readiness_report',
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+				'declared'     => array(
+					array(
+						'id'    => 'ai-txt',
+						'name'  => 'ai.txt usage file',
+						'found' => true,
+					),
+					array(
+						'id'    => 'agents-md',
+						'name'  => 'AGENTS.md',
+						'found' => false,
+					),
+				),
+			)
+		);
+
+		$html = $this->render_page();
+
+		$this->assertStringContainsString( '1 of 2 found', $html );
+		$this->assertStringContainsString( 'Not found', $html );
+		$this->assertStringNotContainsString( 'AGENTS.md</td><td>Fix', $html );
+		$this->assertMatchesRegularExpression( '#Can they find your store\?</a>\s*Run check to find out#', $html, 'Not counted as a result' );
+	}
+
+	/**
+	 * @testdox The declared summary says what couldn't be checked, and a bad stored entry doesn't break the page.
+	 */
+	public function test_output_declared_unknown_and_bad_entries(): void {
+		$report = static fn( array $declared ): array => array(
+			'generated_at' => gmdate( 'c' ),
+			'store_checks' => array(),
+			'declared'     => $declared,
+		);
+		$item   = static fn( ?bool $found ): array => array(
+			'id'    => 'ai-txt',
+			'name'  => 'ai.txt usage file',
+			'found' => $found,
+		);
+
+		update_option( 'woocommerce_agent_readiness_report', $report( array( $item( null ), $item( null ), 'not an array' ) ) );
+		$html = $this->render_page();
+		$this->assertStringContainsString( '<summary>Not checked</summary>', $html );
+		$this->assertStringNotContainsString( '0 of', $html );
+
+		update_option( 'woocommerce_agent_readiness_report', $report( array( $item( true ), $item( false ), $item( null ) ) ) );
+		$this->assertStringContainsString( '1 of 3 found, 1 not checked', $this->render_page() );
+	}
+
+	/**
+	 * @testdox Every question reads the scan, so without one each asks for it; pending checks don't count as unchecked.
+	 */
+	public function test_groups_need_a_scan(): void {
+		$summary = new \ReflectionMethod( AgenticCommerceSettingsPage::class, 'group_summary' );
+		$summary->setAccessible( true );
+		$passed = array(
+			array(
+				'ok'    => true,
+				'level' => 'recommended',
+			),
+		);
+
+		$pending = array(
+			array(
+				'ok'      => null,
+				'level'   => 'recommended',
+				'pending' => true,
+			),
+		);
+
+		$this->assertSame( 'Run check to find out', $summary->invoke( null, 'buy', $passed, false, 0, false, true ) );
+		$this->assertSame( 'Yes', $summary->invoke( null, 'buy', $passed, true, 0, false, true ) );
+		$this->assertSame( 'Yes', $summary->invoke( null, 'buy', array_merge( $passed, $pending ), true, 0, false, true ) );
+		$this->assertSame( 'Coming soon', $summary->invoke( null, 'buy', $pending, true, 0, false, true ), 'Only pending checks answer nothing yet' );
+		$this->assertSame( 'Run check to find out', $summary->invoke( null, 'access', $passed, true, 0, false, true ), 'A scan from before UCP was on does not answer access' );
+		$this->assertSame( 'Yes', $summary->invoke( null, 'access', $passed, true, 0, true, true ) );
+	}
+
+	/**
+	 * @testdox Examples skip deleted products, so a deleted product doesn't leave the cell empty.
+	 */
+	public function test_examples_skip_deleted_products(): void {
+		$kept  = \WC_Helper_Product::create_simple_product();
+		$links = new \ReflectionMethod( AgenticCommerceSettingsPage::class, 'product_links' );
+		$links->setAccessible( true );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$result = $links->invoke( $this->page(), array( 999991, 999992, 999993, $kept->get_id() ) );
+
+		$this->assertCount( 1, $result );
+		$this->assertStringContainsString( (string) $kept->get_id(), $result[0] );
+	}
+
+	/**
+	 * @testdox The page shows each failing product check with its channel tags and example products, and a failing setup check says what to do.
+	 */
+	public function test_output_product_checks_and_store_check_detail(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		update_option( 'blog_public', '0' );
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+
+		$html = $this->render_page();
+
+		$this->assertStringContainsString( 'Product checks', $html );
+		$this->assertStringContainsString( 'Required by ChatGPT', $html );
+		$this->assertStringContainsString( 'Harder to find on Google', $html );
+		$this->assertStringContainsString( 'post=' . $product->get_id(), $html );
+		$this->assertStringContainsString( 'Let search engines index your store', $html, 'Hidden from search engines is a Recommended setup step' );
+		$this->assertStringContainsString( 'Last checked', $html );
+	}
+
+	/**
+	 * @testdox While a scan waits, Run check is disabled and the page says so; once it stalls, the button stays disabled and the page says scheduled actions aren't running.
+	 */
+	public function test_output_run_pending_and_stalled(): void {
+		delete_option( AgentReadiness::REPORT_OPTION );
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
+
+		$html = $this->render_page();
+		$this->assertDoesNotMatchRegularExpression( '/wc-agentic-commerce-run"[^>]*disabled/', $html );
+		$this->assertStringNotContainsString( 'Product checks', $html, 'No product checks before the first scan' );
+
+		wc_get_container()->get( ScheduledScan::class )->queue();
+		$html = $this->render_page();
+		$this->assertStringContainsString( 'Checking your store in the background.', $html );
+		$this->assertMatchesRegularExpression( '/wc-agentic-commerce-run"[^>]*disabled/', $html );
+
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
+		$this->age_finished_actions();
+		as_schedule_single_action( time() - ScheduledScan::STALLED_AFTER - 60, ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP );
+		$html = $this->render_page();
+		$this->assertStringContainsString( 'The check has not started because scheduled actions', $html );
+		$this->assertMatchesRegularExpression( '/wc-agentic-commerce-run"[^>]*disabled/', $html );
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
+	}
+
+	/**
+	 * Date every finished action an hour back, so only what the test does next
+	 * counts as recent queue activity.
+	 */
+	private function age_finished_actions(): void {
+		global $wpdb;
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}actionscheduler_actions SET last_attempt_gmt = %s WHERE status IN ( 'complete', 'failed', 'in-progress' )", gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ) );
 	}
 
 	/**

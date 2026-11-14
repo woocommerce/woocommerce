@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Round `formatDecimal()` and `formatDecimalString()` the same way as displayed amounts, so exported values match the screen.

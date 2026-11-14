@@ -134,6 +134,7 @@ const test = base.extend<
 		localPickupUtils: LocalPickupUtils;
 		miniCartUtils: MiniCartUtils;
 		resetDatabaseAfterEachTest: boolean;
+		cleanup: ( callback: () => Promise< unknown > ) => void;
 		createProductTemplate: (
 			sourceProductSlug: string,
 			options?: { content?: string }
@@ -210,6 +211,26 @@ const test = base.extend<
 	},
 	miniCartUtils: async ( { page, frontendUtils }, use ) => {
 		await use( new MiniCartUtils( page, frontendUtils ) );
+	},
+	// Registers a callback that runs after the test, even after a timeout,
+	// when code after the timed-out step in the test body does not run.
+	// The page may already be closed then, so use `requestUtils` or `wpCLI`.
+	cleanup: async ( {}, use ) => {
+		const callbacks: ( () => Promise< unknown > )[] = [];
+
+		await use( ( callback ) => {
+			callbacks.push( callback );
+		} );
+
+		const results = await Promise.allSettled(
+			callbacks.map( ( callback ) => Promise.resolve().then( callback ) )
+		);
+		for ( const result of results ) {
+			if ( result.status === 'rejected' ) {
+				// eslint-disable-next-line no-console
+				console.warn( 'Test cleanup failed:', result.reason );
+			}
+		}
 	},
 	// Copies a sample product and creates a `single-product-<slug>` template
 	// for the copy, so a spec can save a Single Product template without

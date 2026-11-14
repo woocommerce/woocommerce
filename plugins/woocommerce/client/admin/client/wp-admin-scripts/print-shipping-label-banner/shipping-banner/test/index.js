@@ -913,7 +913,7 @@ describe( 'The message in the banner', () => {
 		);
 
 	const notActivatedMessage =
-		'By clicking "Create shipping label", WooCommerce Shipping↗ will be installed and you agree to its Terms of Service↗.';
+		'By clicking "Create shipping label", WooCommerce Shipping will be installed and you agree to its Terms of Service.';
 
 	it( 'should show install text "By clicking "Create shipping label"..." when first loaded.', () => {
 		const { container } = createShippingBannerWrapper( {

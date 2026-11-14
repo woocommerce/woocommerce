@@ -84,7 +84,7 @@ function add_email_support_to_blocks( $settings, $metadata ) {
         'my-plugin/another-block',
     );
 
-    if ( in_array( $settings['name'], $email_supported_blocks, true ) ) {
+    if ( isset( $settings['name'] ) && in_array( $settings['name'], $email_supported_blocks, true ) ) {
         // Enable email support
         $settings['supports']['email'] = true;
         

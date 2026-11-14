@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Count each product once in the products_count analytics property, regardless of quantity, and omit the price property for products without a price.

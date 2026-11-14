@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Support WordPress 7.2: return to the email list after trashing an email and keep editor telemetry working.

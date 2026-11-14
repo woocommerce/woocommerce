@@ -262,6 +262,33 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The Export screen registers the HPOS order export handler.
+	 */
+	public function test_export_screen_registers_hpos_order_export_handler(): void {
+		remove_all_actions( 'export_wp' );
+		wc_get_container()->reset_all_resolved();
+
+		try {
+			set_current_screen( 'export' );
+
+			// Read the hook table directly: resolving the handler here would register the hook by itself.
+			global $wp_filter;
+			$callbacks = isset( $wp_filter['export_wp'] ) ? ( $wp_filter['export_wp']->callbacks[ PHP_INT_MAX ] ?? array() ) : array();
+			$handlers  = array_filter(
+				$callbacks,
+				static function ( $callback ) {
+					return is_array( $callback['function'] )
+						&& $callback['function'][0] instanceof \Automattic\WooCommerce\Internal\Admin\ImportExport\HposOrderExportHandler
+						&& 'handle_export_wp' === $callback['function'][1];
+				}
+			);
+			$this->assertCount( 1, $handlers, 'The Export screen should hook the HPOS order export handler on export_wp.' );
+		} finally {
+			set_current_screen( 'front' );
+		}
+	}
+
+	/**
 	 * Invokes prevent_admin_access() with a synthetic request and returns its redirect location.
 	 *
 	 * @param int                 $user_id         Current user ID.

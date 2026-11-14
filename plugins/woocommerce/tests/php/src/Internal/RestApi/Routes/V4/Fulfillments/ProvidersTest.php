@@ -83,6 +83,11 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 		FulfillmentsHelper::enable_fulfillments();
 
+		// Hooks added in setUpBeforeClass() are removed after the first test, so add them per test.
+		$fulfillments = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
+		$fulfillments->register();
+		$fulfillments->initialize_fulfillments();
+
 		$this->controller = new FulfillmentsController();
 		$this->controller->init( new FulfillmentSchema(), new OrderFulfillmentsRestController() );
 		$this->controller->register_routes();
