@@ -59,11 +59,25 @@ class StoreResponses {
 	private array $responses = array();
 
 	/**
+	 * How `get()` reached each URL: the redirects it followed, where it stopped when it didn't follow one, and the URL it landed on.
+	 *
+	 * @var array<string, array{count:int,stopped_at:string,final_url:string}>
+	 */
+	private array $redirects = array();
+
+	/**
 	 * The product whose page checks read, false when there is none, null until looked up.
 	 *
 	 * @var \WC_Product|false|null
 	 */
 	private $product = null;
+
+	/**
+	 * The category page's URL once looked up; '' when there is none.
+	 *
+	 * @var string|null
+	 */
+	private ?string $category_url = null;
 
 	/**
 	 * Constructor.
@@ -83,7 +97,13 @@ class StoreResponses {
 	public function get( string $url ): ?array {
 		$url = self::absolute( $url );
 		if ( ! array_key_exists( $url, $this->responses ) ) {
-			$this->responses[ $url ] = $this->site_live ? $this->fetch( $url ) : null;
+			// product_page() already loaded this URL, under its own key and with a larger cap.
+			$product_key = 'PRODUCT ' . $url;
+			if ( array_key_exists( $product_key, $this->responses ) ) {
+				$this->responses[ $url ] = $this->responses[ $product_key ];
+			} else {
+				$this->responses[ $url ] = $this->site_live ? $this->fetch( $url ) : null;
+			}
 		}
 		return $this->responses[ $url ];
 	}
@@ -92,7 +112,7 @@ class StoreResponses {
 	 * The response when a URL on the store's host is asked for as Markdown. Redirects are not followed.
 	 *
 	 * @param string $url URL or path.
-	 * @return array{status:int,body:string,headers:array<string,string>}|null Null when the store could not be reached.
+	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null Null when the store could not be reached.
 	 */
 	public function get_as_markdown( string $url ): ?array {
 		$url = self::absolute( $url );
@@ -104,50 +124,81 @@ class StoreResponses {
 	}
 
 	/**
-	 * The response to a JSON POST to a URL on the store's host, such as a UCP endpoint. Redirects are not followed.
+	 * How many redirects `get()` followed for a URL, the URL of a redirect it didn't follow ('' when none), and the URL it landed on.
 	 *
-	 * @param string               $url  URL or path.
-	 * @param array<string, mixed> $body Request body.
-	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null Null when the store could not be reached.
+	 * @param string $url URL or path, as given to `get()`.
+	 * @return array{count:int,stopped_at:string,final_url:string}
 	 */
-	public function post_json( string $url, array $body ): ?array {
-		$url  = self::absolute( $url );
-		$json = (string) wp_json_encode( $body );
-		$key  = 'POST ' . $url . ' ' . $json;
-		if ( ! array_key_exists( $key, $this->responses ) ) {
-			$this->responses[ $key ] = $this->site_live && $this->is_store_url( $url ) ? $this->request(
-				$url,
-				array(
-					'method'  => 'POST',
-					'headers' => array( 'Content-Type' => 'application/json' ),
-					'body'    => $json,
+	public function redirects( string $url ): array {
+		return $this->redirects[ self::absolute( $url ) ] ?? array(
+			'count'      => 0,
+			'stopped_at' => '',
+			'final_url'  => '',
+		);
+	}
+
+	/**
+	 * The shop page, or null when there is none or it didn't answer 200.
+	 *
+	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null
+	 */
+	public function shop_page(): ?array {
+		$url = wc_get_page_permalink( 'shop', '' );
+		return '' === $url ? null : self::ok( $this->get( $url ) );
+	}
+
+	/**
+	 * The page of a product category with products: one of `product()`'s, else the store's largest. Null when
+	 * there is none or it didn't answer 200.
+	 *
+	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null
+	 */
+	public function category_page(): ?array {
+		if ( null === $this->category_url ) {
+			$product            = $this->product();
+			$ids                = null === $product ? array() : $product->get_category_ids();
+			$terms              = get_terms(
+				array_merge(
+					array(
+						'taxonomy'   => 'product_cat',
+						'hide_empty' => true,
+						'number'     => 1,
+					),
+					array() === $ids ? array(
+						'orderby' => 'count',
+						'order'   => 'DESC',
+					) : array( 'include' => $ids )
 				)
-			) : null;
+			);
+			$term               = is_array( $terms ) ? reset( $terms ) : false;
+			$url                = $term instanceof \WP_Term ? get_term_link( $term ) : '';
+			$this->category_url = is_string( $url ) ? $url : '';
 		}
-		return $this->responses[ $key ];
+		return '' === $this->category_url ? null : self::ok( $this->get( $this->category_url ) );
 	}
 
 	/**
 	 * The newest published product of a type the report checks that is in the shop catalog, or null when there is none.
-	 * Password protected products are skipped, since their page shows a form instead of the product. A product with
+	 * Password protected products are left out, since their page shows a form instead of the product. A product with
 	 * a price comes first, so one unfinished product doesn't decide a check for the whole store; only the five newest
-	 * are looked at.
+	 * of the others are looked at.
 	 */
 	public function product(): ?\WC_Product {
 		if ( null === $this->product ) {
 			$this->product = false;
 			$products      = wc_get_products(
 				array(
-					'status'     => ProductStatus::PUBLISH,
-					'visibility' => CatalogVisibility::CATALOG,
-					'type'       => ProductScan::SUPPORTED_TYPES,
-					'limit'      => 5,
-					'orderby'    => 'date',
-					'order'      => 'DESC',
+					'status'       => ProductStatus::PUBLISH,
+					'visibility'   => CatalogVisibility::CATALOG,
+					'type'         => ProductScan::SUPPORTED_TYPES,
+					'has_password' => false,
+					'limit'        => 5,
+					'orderby'      => 'date',
+					'order'        => 'DESC',
 				)
 			);
 			foreach ( is_array( $products ) ? $products : array() as $product ) {
-				if ( ! $product instanceof \WC_Product || '' !== $product->get_post_password() ) {
+				if ( ! $product instanceof \WC_Product ) {
 					continue;
 				}
 				if ( false === $this->product ) {
@@ -214,20 +265,34 @@ class StoreResponses {
 	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null
 	 */
 	private function fetch( string $url, int $limit = self::MAX_BYTES ): ?array {
+		$asked = $url;
 		for ( $redirects = 0; $redirects <= self::MAX_REDIRECTS; $redirects++ ) {
+			$this->redirects[ $asked ] = array(
+				'count'      => $redirects,
+				'stopped_at' => '',
+				'final_url'  => '',
+			);
 			if ( ! $this->is_store_url( $url ) ) {
+				$this->redirects[ $asked ]['stopped_at'] = $url;
 				return null;
 			}
 			$response = $this->request( $url, array(), $limit );
 			if ( null === $response ) {
+				// When the home page can't be reached, other URLs would fail the same way, so a scan
+				// of a store that can't reach itself waits for one timeout, not one per URL.
+				if ( untrailingslashit( $asked ) === untrailingslashit( home_url( '/' ) ) ) {
+					$this->reachable = false;
+				}
 				return null;
 			}
 			$location = $response['headers']['location'] ?? '';
 			if ( $response['status'] < 300 || $response['status'] >= 400 || '' === $location ) {
+				$this->redirects[ $asked ]['final_url'] = $url;
 				return $response;
 			}
 			$url = \WP_Http::make_absolute_url( $location, $url );
-			if ( is_string( wp_parse_url( $url, PHP_URL_QUERY ) ) ) {
+			if ( is_string( wp_parse_url( $url, PHP_URL_QUERY ) ) || $redirects >= self::MAX_REDIRECTS ) {
+				$this->redirects[ $asked ]['stopped_at'] = $url;
 				return null;
 			}
 		}
@@ -259,16 +324,10 @@ class StoreResponses {
 			)
 		);
 		if ( is_wp_error( $response ) ) {
-			// When the home page can't be reached, other URLs would fail the same way, so a scan
-			// of a store that can't reach itself waits for one timeout, not one per URL. Only the
-			// plain GET counts: a Markdown or POST request can fail where the page itself loads.
-			if ( array() === $args && untrailingslashit( $url ) === untrailingslashit( home_url( '/' ) ) ) {
-				$this->reachable = false;
-			}
 			return null;
 		}
 		$headers = array();
-		foreach ( array( 'location', 'x-robots-tag', 'content-type', 'vary' ) as $name ) {
+		foreach ( array( 'location', 'x-robots-tag', 'content-type', 'vary', 'link' ) as $name ) {
 			$value = wp_remote_retrieve_header( $response, $name );
 			$value = is_array( $value ) ? implode( ', ', $value ) : (string) $value;
 			if ( '' !== $value ) {

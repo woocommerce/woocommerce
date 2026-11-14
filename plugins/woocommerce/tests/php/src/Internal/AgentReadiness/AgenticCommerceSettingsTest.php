@@ -287,7 +287,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The page answers each merchant question, marks a likely conflict, hides checks whose prerequisite failed, and folds passed checks away.
+	 * @testdox The page answers each merchant question, marks a likely conflict with the page but names no plugin, hides checks whose prerequisite failed, and folds passed checks away.
 	 */
 	public function test_output_groups_summary_and_conflict(): void {
 		$row = static fn( string $id, ?bool $ok, bool $conflict = false ): array => array(
@@ -307,7 +307,14 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			array(
 				'generated_at' => gmdate( 'c' ),
 				'store_checks' => array(
-					$row( 'product_jsonld_present', false, true ),
+					array_merge(
+						$row( 'product_jsonld_present', false, true ),
+						array(
+							'seen_at' => 'https://example.org/product/mug/',
+							// A report stored before plugin names were dropped.
+							'plugins' => array( 'Yoast SEO', 'Rank Math SEO' ),
+						)
+					),
 					$row( 'product_offer_jsonld', null ),
 					$row( 'sitemap_lists_products', true ),
 				),
@@ -323,6 +330,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertMatchesRegularExpression( '/data-on="(?![^"]*Agent shopping is off)[^"]*" data-off="Agent shopping is off/', $html, 'The switch script can show the line for UCP on without a reload' );
 		$this->assertStringContainsString( 'Likely conflict', $html );
 		$this->assertStringContainsString( 'Something on your store may be replacing this.', $html );
+		$this->assertStringContainsString( 'Seen on: <a href="https://example.org/product/mug/">https://example.org/product/mug/</a>', $html, 'A conflict names the page' );
+		$this->assertStringNotContainsString( 'Yoast SEO', $html, 'No plugin is named, even from an older stored report' );
 		$this->assertStringNotContainsString( 'product_offer_jsonld name', $html, 'Its prerequisite failed' );
 		$this->assertMatchesRegularExpression( '#<details>.*sitemap_lists_products name.*</details>#s', $html );
 	}
