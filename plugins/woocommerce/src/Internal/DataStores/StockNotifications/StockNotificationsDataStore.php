@@ -97,6 +97,7 @@ CREATE TABLE $table_name (
 	cancellation_source varchar(30) NULL,
 	PRIMARY KEY  (id),
 	KEY product_status_attempt (product_id, status, date_last_attempt_gmt, id),
+	KEY status_product_created (status, product_id, date_created_gmt),
 	KEY user_lookup (user_id, product_id, status),
 	KEY email_lookup (user_email, product_id, status)
 ) $collate;

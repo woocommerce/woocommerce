@@ -16,8 +16,12 @@ import { CurrencyContext } from '@woocommerce/currency';
 import ReportTable from '../../components/report-table';
 import { isLowStock } from './utils';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { isFeatureEnabled } from '~/utils/features';
 
 const stockStatuses = getAdminSetting( 'stockStatuses', {} );
+const showStockNotifications = isFeatureEnabled(
+	'customer_stock_notifications'
+);
 
 class StockReportTable extends Component {
 	constructor() {
@@ -29,7 +33,7 @@ class StockReportTable extends Component {
 	}
 
 	getHeadersContent() {
-		return [
+		const headers = [
 			{
 				label: __( 'Product / Variation', 'woocommerce' ),
 				key: 'title',
@@ -54,6 +58,29 @@ class StockReportTable extends Component {
 				isSortable: true,
 			},
 		];
+
+		if ( showStockNotifications ) {
+			headers.push(
+				{
+					label: _x(
+						'Waiting',
+						'number of customers waiting for stock',
+						'woocommerce'
+					),
+					key: 'active_signups',
+					isSortable: true,
+					isNumeric: true,
+				},
+				{
+					label: __( 'Days waiting', 'woocommerce' ),
+					key: 'days_waiting',
+					isSortable: true,
+					isNumeric: true,
+				}
+			);
+		}
+
+		return headers;
 	}
 
 	getRowsContent( products = [] ) {
@@ -69,6 +96,8 @@ class StockReportTable extends Component {
 				stock_quantity: stockQuantity,
 				stock_status: stockStatus,
 				low_stock_amount: lowStockAmount,
+				active_signups: activeSignups = 0,
+				days_waiting: daysWaiting = null,
 			} = product;
 
 			const name = decodeEntities( product.name );
@@ -109,7 +138,7 @@ class StockReportTable extends Component {
 				</Link>
 			);
 
-			return [
+			const row = [
 				{
 					display: nameLink,
 					value: name,
@@ -133,6 +162,33 @@ class StockReportTable extends Component {
 					value: stockQuantity,
 				},
 			];
+
+			if ( showStockNotifications ) {
+				const currency = this.context.getCurrencyConfig();
+				row.push(
+					{
+						display: formatValue(
+							currency,
+							'number',
+							activeSignups
+						),
+						value: activeSignups,
+					},
+					{
+						display:
+							daysWaiting === null
+								? '—'
+								: formatValue(
+										currency,
+										'number',
+										daysWaiting
+									),
+						value: daysWaiting,
+					}
+				);
+			}
+
+			return row;
 		} );
 	}
 
