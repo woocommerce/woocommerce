@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Block session-less payment completion for frontend checkout orders to prevent unauthorized state transitions via webhooks. A new filter (`woocommerce_allow_sessionless_payment_complete`) is provided for cryptographically secure gateways to bypass this check.
