@@ -209,14 +209,15 @@ class Checkout extends AbstractCartRoute {
 			}
 
 			if ( $request->get_method() === \WP_REST_Server::CREATABLE ) {
-				// Step logs the exception. If nothing abnormal occurred during the place order POST request, flow the log is removed.
+				// Step logs the exception. If nothing abnormal occurred (a 4xx failure, like a validation error or a decline), the log is removed.
+				// If something unexpected happened (a 5xx failure), the log is kept so it can be debugged.
 				wc_log_order_step(
 					'[Store API #FAIL] Placing Order failed',
 					array(
 						'status' => $response->get_status(),
 						'data'   => $response->get_data(),
 					),
-					true
+					$response->get_status() < 500
 				);
 			}
 		}
@@ -745,6 +746,15 @@ class Checkout extends AbstractCartRoute {
 			$this->process_without_payment( $request, $payment_result );
 		}
 
+		// Build the response before logging, so a failure here still gets logged.
+		$response = $this->prepare_item_for_response(
+			(object) [
+				'order'          => wc_get_order( $order ),
+				'payment_result' => $payment_result,
+			],
+			$request
+		);
+
 		wc_log_order_step(
 			'[Store API #9] Order processed',
 			array(
@@ -752,16 +762,10 @@ class Checkout extends AbstractCartRoute {
 				'processed_with_payment' => $order->needs_payment() ? 'yes' : 'no',
 				'payment_status'         => $payment_result->status,
 			),
-			true
+			'error' !== $payment_result->get_status()
 		);
 
-		return $this->prepare_item_for_response(
-			(object) [
-				'order'          => wc_get_order( $order ),
-				'payment_result' => $payment_result,
-			],
-			$request
-		);
+		return $response;
 	}
 
 	/**
