@@ -3177,6 +3177,320 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should let an order validator refuse a trash and a permanent delete, and give the syncs the removed order.
+	 */
+	public function test_a_validator_can_refuse_deleting_an_order(): void {
+		$order    = \WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+		$refuse   = true;
+		$seen     = array();
+		$synced   = array();
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse ) {
+				$seen[] = array( $order->get_id(), $ability->get_name(), $context['deleting'] );
+				return $refuse ? new \WP_Error( 'test_cancel_first', 'Cancel it first.' ) : null;
+			}
+		);
+		$this->register_sync(
+			'order',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$synced ) {
+				unset( $ability );
+				$synced[] = array(
+					count( $saved ),
+					array_map( static fn( \WC_Order $order ) => $order->get_id(), $context['trashed'] ),
+					array_map( static fn( \WC_Order $order ) => $order->get_id(), $context['deleted'] ),
+				);
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$refused_trash  = $this->run_ability_response( 'woocommerce/order-delete', array( 'id' => $order_id ) );
+		$refused_delete = $this->run_ability_response(
+			'woocommerce/order-delete',
+			array(
+				'id'    => $order_id,
+				'force' => true,
+			)
+		);
+		$after_refusals = wc_get_order( $order_id )->get_status();
+		$refuse         = false;
+		$trashed        = $this->run_ability( 'woocommerce/order-delete', array( 'id' => $order_id ) );
+		$deleted        = $this->run_ability(
+			'woocommerce/order-delete',
+			array(
+				'id'    => $order_id,
+				'force' => true,
+			)
+		);
+
+		foreach ( array( $refused_trash, $refused_delete ) as $refused ) {
+			$this->assertSame( 400, $refused->get_status() );
+			$this->assertSame( 'test-ext:test_cancel_first', $refused->get_data()['code'] );
+		}
+		$this->assertNotSame( 'trash', $after_refusals, 'A refused call should leave the order where it was.' );
+		$this->assertSame( array( $order_id, 'woocommerce/order-delete', true ), $seen[0] );
+		$this->assertSame( 'trash', $trashed['status'] );
+		$this->assertSame( 'deleted', $deleted['status'] );
+		$this->assertFalse( wc_get_order( $order_id ) );
+		$this->assertSame(
+			array(
+				array( 0, array( $order_id ), array() ),
+				array( 0, array(), array( $order_id ) ),
+			),
+			$synced,
+			'The syncs should see the removed order, with its ID, and no saved object.'
+		);
+	}
+
+	/**
+	 * @testdox Should run validators on the refunds of a force-deleted order, delete nothing when one refuses, and give the syncs the deleted refunds.
+	 */
+	public function test_a_validator_can_refuse_deleting_the_refunds_of_an_order(): void {
+		$order     = \WC_Helper_Order::create_order();
+		$order_id  = $order->get_id();
+		$refund_id = wc_create_refund(
+			array(
+				'order_id' => $order_id,
+				'amount'   => 1,
+			)
+		)->get_id();
+		$refuse    = true;
+		$seen      = array();
+		$deleted   = array();
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Abstract_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $refund_id ) {
+				unset( $ability );
+				$seen[ $order->get_id() ] = $context['deleting'];
+				return $refuse && $refund_id === $order->get_id() ? new \WP_Error( 'test_keep_refund', 'Keep the refund.' ) : null;
+			}
+		);
+		$this->register_sync(
+			'order',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+				unset( $saved, $ability );
+				$deleted = array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $context['deleted'] );
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$input = array(
+			'id'    => $order_id,
+			'force' => true,
+		);
+
+		$refused = $this->run_ability_response( 'woocommerce/order-delete', $input );
+		$kept    = array( wc_get_order( $order_id ), wc_get_order( $refund_id ) );
+		$refuse  = false;
+		$result  = $this->run_ability( 'woocommerce/order-delete', $input );
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'test-ext:test_keep_refund', $refused->get_data()['code'] );
+		$this->assertInstanceOf( \WC_Order::class, $kept[0], 'A refused refund should keep the order.' );
+		$this->assertInstanceOf( \WC_Order_Refund::class, $kept[1] );
+		$this->assertTrue( $seen[ $refund_id ], 'The validators should see the refund as deleted.' );
+		$this->assertSame( 'deleted', $result['status'] );
+		$this->assertSame( array( $order_id, $refund_id ), $deleted );
+	}
+
+	/**
+	 * @testdox Should run validators on a child order and its refund that HPOS deletes with the parent, and delete nothing when one refuses.
+	 */
+	public function test_a_validator_can_refuse_deleting_a_child_order(): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( true );
+
+		try {
+			$order_id = \WC_Helper_Order::create_order()->get_id();
+			$child    = \WC_Helper_Order::create_order();
+			$child->set_parent_id( $order_id );
+			$child->save();
+			$child_id      = $child->get_id();
+			$grandchild_id = wc_create_refund(
+				array(
+					'order_id' => $child_id,
+					'amount'   => 1,
+				)
+			)->get_id();
+			$refuse        = true;
+			$seen          = array();
+			$deleted       = array();
+			$this->register_validator(
+				'order',
+				'test-ext',
+				static function ( \WC_Abstract_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $grandchild_id ) {
+					unset( $ability );
+					$seen[ $order->get_id() ] = $context['deleting'];
+					return $refuse && $grandchild_id === $order->get_id() ? new \WP_Error( 'test_keep_child', 'Keep the refund of the child.' ) : null;
+				}
+			);
+			$this->register_sync(
+				'order',
+				'test-ext',
+				static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+					unset( $saved, $ability );
+					$deleted = array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $context['deleted'] );
+				}
+			);
+			$this->reset_registries();
+			AbilitiesLoader::init_extensions();
+			$input = array(
+				'id'    => $order_id,
+				'force' => true,
+			);
+
+			$refused = $this->run_ability_response( 'woocommerce/order-delete', $input );
+			$kept    = array( wc_get_order( $order_id ), wc_get_order( $child_id ), wc_get_order( $grandchild_id ) );
+			$refuse  = false;
+			$result  = $this->run_ability( 'woocommerce/order-delete', $input );
+
+			$this->assertSame( 400, $refused->get_status() );
+			$this->assertSame( 'test-ext:test_keep_child', $refused->get_data()['code'] );
+			$this->assertInstanceOf( \WC_Order::class, $kept[0], 'A refused refund of the child should keep the parent.' );
+			$this->assertInstanceOf( \WC_Order::class, $kept[1] );
+			$this->assertInstanceOf( \WC_Order_Refund::class, $kept[2] );
+			$this->assertTrue( $seen[ $child_id ], 'The validators should see the child as deleted.' );
+			$this->assertTrue( $seen[ $grandchild_id ], 'The validators should see the refund of the child as deleted.' );
+			$this->assertSame( 'deleted', $result['status'] );
+			$this->assertFalse( wc_get_order( $child_id ), 'HPOS should delete the child with its parent.' );
+			$this->assertFalse( wc_get_order( $grandchild_id ), 'HPOS should delete the refund of the child too.' );
+			$this->assertSame( array( $order_id, $child_id, $grandchild_id ), $deleted );
+		} finally {
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * @testdox Should refuse a forced delete and keep everything when a refund appears after the validators ran.
+	 *
+	 * @dataProvider provider_order_storage
+	 *
+	 * @param bool $hpos Whether to use the custom orders table.
+	 */
+	public function test_a_refund_added_after_validation_stops_a_forced_delete( bool $hpos ): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( $hpos );
+
+		try {
+			$order_id  = \WC_Helper_Order::create_order()->get_id();
+			$refund_id = 0;
+			$this->register_validator(
+				'order',
+				'test-ext',
+				static function ( \WC_Abstract_Order $order ) use ( &$refund_id, $order_id ) {
+					if ( 0 === $refund_id && $order_id === $order->get_id() ) {
+						$refund_id = wc_create_refund(
+							array(
+								'order_id' => $order_id,
+								'amount'   => 1,
+							)
+						)->get_id();
+					}
+					return null;
+				}
+			);
+			$this->reset_registries();
+			AbilitiesLoader::init_extensions();
+
+			$result = $this->run_ability_response(
+				'woocommerce/order-delete',
+				array(
+					'id'    => $order_id,
+					'force' => true,
+				)
+			);
+
+			$this->assertSame( 409, $result->get_status() );
+			$this->assertSame( 'woocommerce_ability_order_children_changed', $result->get_data()['code'] );
+			$this->assertInstanceOf( \WC_Order::class, wc_get_order( $order_id ) );
+			$this->assertInstanceOf( \WC_Order_Refund::class, wc_get_order( $refund_id ) );
+		} finally {
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * Order storage modes.
+	 *
+	 * @return array<string, array{0: bool}>
+	 */
+	public function provider_order_storage(): array {
+		return array(
+			'posts storage' => array( false ),
+			'HPOS storage'  => array( true ),
+		);
+	}
+
+	/**
+	 * @testdox Should restore a trashed or deleted order and its refund when a sync refuses, with HPOS and with posts storage, with and without sync.
+	 * @testWith [true, false]
+	 *           [true, true]
+	 *           [false, false]
+	 *           [false, true]
+	 *
+	 * @param bool $hpos Whether HPOS is on.
+	 * @param bool $sync Whether HPOS and posts storage sync.
+	 */
+	public function test_a_sync_refusal_restores_a_removed_order( bool $hpos, bool $sync ): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( $hpos );
+		if ( $sync ) {
+			$this->enable_cot_sync();
+		} else {
+			$this->disable_cot_sync();
+		}
+
+		try {
+			$order  = \WC_Helper_Order::create_order();
+			$status = $order->get_status();
+			$refund = wc_create_refund(
+				array(
+					'order_id' => $order->get_id(),
+					'amount'   => 1,
+				)
+			);
+			$this->register_sync(
+				'order',
+				'test-ext',
+				static fn() => new \WP_Error( 'test_ledger_down', 'Ledger is down.' )
+			);
+			$this->reset_registries();
+			AbilitiesLoader::init_extensions();
+
+			$trash = $this->run_ability_response( 'woocommerce/order-delete', array( 'id' => $order->get_id() ) );
+			$after = wc_get_order( $order->get_id() );
+			$force = $this->run_ability_response(
+				'woocommerce/order-delete',
+				array(
+					'id'    => $order->get_id(),
+					'force' => true,
+				)
+			);
+
+			$this->assertSame( 400, $trash->get_status() );
+			$this->assertSame( $status, $after->get_status(), 'A refused trash should leave the order out of the trash.' );
+			$this->assertSame( 400, $force->get_status() );
+			$this->assertInstanceOf( \WC_Order::class, wc_get_order( $order->get_id() ), 'A refused delete should keep the order.' );
+			$this->assertInstanceOf( \WC_Order_Refund::class, wc_get_order( $refund->get_id() ), 'A refused delete should keep the refund.' );
+		} finally {
+			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
 	 * @testdox Should return the stored slug from product-create, for the product and its variations.
 	 */
 	public function test_product_create_returns_the_stored_slug(): void {

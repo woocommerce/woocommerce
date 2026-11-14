@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderSendEmail;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CustomersQuery;
@@ -61,6 +62,7 @@ class AbilitiesLoader {
 		OrderCreate::class,
 		OrderNotesQuery::class,
 		OrderSendEmail::class,
+		OrderDelete::class,
 		OrderUpdate::class,
 		OrderUpdateStatus::class,
 		PaymentGatewaysQuery::class,
