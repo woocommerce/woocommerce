@@ -136,6 +136,10 @@ class UcpIdempotency extends UcpCartTestCase {
 		$this->assertSame( 400, $response->get_status() );
 		$this->assertSame( array( 'IDEMPOTENCY_KEY_REQUIRED' ), $this->message_codes( $response ) );
 		$this->assertSame( 0, $this->stored_record_count() );
+		$this->assertSame( array( 'dev.ucp.shopping.cart' ), array_keys( $response->get_data()['ucp']['capabilities'] ) );
+
+		$checkout = $this->request( 'POST', '/checkout-sessions', $this->cart_body( 0 ) );
+		$this->assertSame( array( 'dev.ucp.shopping.checkout' ), array_keys( $checkout->get_data()['ucp']['capabilities'] ), 'The refusal names the capability of the route it came from.' );
 	}
 
 	/**

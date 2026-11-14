@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add UCP checkout endpoints so AI agents can start a checkout and hand the buyer a link to pay on the store.
