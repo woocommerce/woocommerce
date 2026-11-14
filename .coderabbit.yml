@@ -29,3 +29,8 @@ reviews:
         sufficient checks in place to prevent accidental data loss. As an example, if deleting a draft order, check that
         the order status is indeed `draft` or `checkout-draft`. Also think about whether race conditions could occur and
         delete orders that don't belong to the current customer. When in doubt, ask for clarification in the PR comments.
+knowledge_base:
+    code_guidelines:
+        filePatterns:
+        - files: '.github/coderabbit/skills/**/*.md'
+          applyTo: '**/*.{js,jsx,ts,tsx,css,scss}'

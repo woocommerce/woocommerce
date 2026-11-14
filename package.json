@@ -3,9 +3,16 @@
 	"title": "WooCommerce Monorepo",
 	"description": "Monorepo for the WooCommerce ecosystem",
 	"homepage": "https://woocommerce.com/",
-	"packageManager": "pnpm@10.33.0",
+	"packageManager": "pnpm@12.19.0",
 	"engines": {
 		"node": "^24.15.0"
+	},
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": "24.15.0",
+			"onFail": "error"
+		}
 	},
 	"private": true,
 	"repository": {
@@ -19,6 +26,7 @@
 	},
 	"scripts": {
 		"build": "pnpm -r --workspace-concurrency=Infinity --stream '/^build:project:.*$/'",
+		"sync:coderabbit-skills": "node bin/sync-coderabbit-skills.mjs",
 		"test": "pnpm -r test",
 		"test:js:ci": "bash bin/test-js-ci.sh",
 		"test:php:ci": "bash bin/test-php-ci.sh",

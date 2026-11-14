@@ -1,0 +1,4 @@
+# Dependency build scripts this docs site doesn't need; denied explicitly so pnpm doesn't fail on them.
+allowBuilds:
+    '@swc/core': false
+    core-js: false
