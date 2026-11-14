@@ -70,13 +70,13 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `llms_txt_links_resolve` | The first five links in it to the store's own pages open (no 4xx). Links to other sites, or with a query string, aren't loaded. |
 | `open_graph_tags` | The home and product page have `og:title` and `og:image`. |
 | `meta_description` | The home, product, shop and category page have a meta description, of those that loaded. |
-| `canonical_url` | The product, shop and category page have a canonical link, of those that loaded. WordPress prints one on product pages only, so a stock store fails on the shop and category page until WooCommerce adds them. |
+| `canonical_url` | The product page has a canonical link. Shop and category archives are not checked: WordPress does not print one there, and WooCommerce does not add one yet. |
 | `organization_schema` | The home page's JSON-LD has an Organization, or a type stores use for themselves such as OnlineStore. |
 | `ai_snippet_directives` | No robots meta tag or `X-Robots-Tag` header on the home or product page sets `nosnippet` or a `max-snippet` limit. |
 | `content_in_raw_html` | The product page's text, without scripts or comments, has the product's name and its price as a whole amount. |
 | `no_noindex_directives` | No robots meta tag or `X-Robots-Tag` header on the home or product page sets `noindex`, `none`, `noai` or `noimageai`. |
-| `pages_public` | The home, shop and product page don't answer 401 or 403, or redirect to `wp-login.php` or My account. |
-| `sitemap_lastmod` | A sitemap robots.txt names or at a default path, or the first one a sitemap index lists, has `lastmod` dates; every candidate is tried before it fails. |
+| `pages_public` | The home, shop and product page don't redirect to `wp-login.php` or My account. A 401 or 403 is "couldn't check": a firewall can refuse the store's request to itself. |
+| `sitemap_lastmod` | A sitemap listed in robots.txt, or `/wp-sitemap.xml`, `/sitemap_index.xml` or `/sitemap.xml`, has `lastmod` dates. An index that does not has its child sitemaps on this host opened, at any depth, up to five child requests. |
 | `rss_feed` | The home page links to an RSS or Atom feed. |
 | `viewport_meta` | The home page has a viewport meta tag. |
 | `html_lang_and_charset` | The home page's `html` element has `lang`, and a meta tag or the `Content-Type` header gives a charset. |
@@ -88,7 +88,7 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `product_review_markup` | The newest visible published product with reviews (of the five newest with reviews) has `aggregateRating` or `review` in its JSON-LD. Passes when reviews are off or no product has any. |
 | `policy_pages_linked` | The home page links to the privacy policy and refund and returns pages the store set. Skipped when neither is set. |
 | `ucp_profile` | With UCP on: `/.well-known/ucp` is served and names a REST endpoint. |
-| `ucp_endpoints_live` | With UCP on: a plain GET to the endpoint the profile names, or WooCommerce's when there is no profile, answers 200 with JSON. Nothing is searched, so it isn't counted as agent traffic. |
+| `ucp_endpoints_live` | With UCP on: a POST to `{endpoint}/catalog/search`, the route agents call, answers 200 with JSON. The endpoint is the one the profile names, or WooCommerce's when there is no profile. The body is empty. |
 | `ucp_profile_version` | With UCP on: the served profile declares the UCP version WooCommerce implements (`UcpUtils::VERSION`). A different version usually means another plugin serves its own profile. |
 | `ucp_checkout` | With UCP on: the served profile declares `dev.ucp.shopping.checkout`. Pending (WOOAI-1435). |
 | `product_return_policy_schema` | A product offer in the product page's JSON-LD has `hasMerchantReturnPolicy`. Pending (WOOPRD-3912). |

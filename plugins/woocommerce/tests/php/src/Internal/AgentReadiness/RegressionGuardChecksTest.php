@@ -187,13 +187,13 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A 403 or a redirect to the sign-in page is a login wall; other failures are couldn't check.
+	 * @testdox A redirect to the sign-in page is a login wall. A 403 or another failure is couldn't check.
 	 */
 	public function test_login_wall(): void {
 		$path           = self::path( $this->product->get_permalink() );
 		$store          = $this->healthy_store();
 		$store[ $path ] = array( 403, 'Members only' );
-		$this->assertFalse( $this->results( $store )['pages_public'] );
+		$this->assertNull( $this->results( $store )['pages_public'], 'A 403 can be a firewall refusing the store its own page' );
 
 		remove_all_filters( 'pre_http_request' );
 		$store[ $path ] = array( 302, '', array( 'location' => site_url( '/wp-login.php?redirect_to=x' ) ) );
@@ -292,6 +292,14 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 		$store[ $path ]            = array( 200, '<html><script type="application/ld+json">' . wp_json_encode( $jsonld ) . '</script><h1>' . $this->product->get_name() . '</h1></html>' );
 		$this->assertFalse( $this->results( $store )['schema_matches_product'], 'A price with a currency code' );
 
+		foreach ( array( 'R$ 10,00', 'US$10', 'S/. 10', 'EUR 10,-' ) as $price ) {
+			remove_all_filters( 'pre_http_request' );
+			$jsonld['name']            = $this->product->get_name();
+			$jsonld['offers']['price'] = $price;
+			$store[ $path ]            = array( 200, '<html><script type="application/ld+json">' . wp_json_encode( $jsonld ) . '</script><h1>' . $this->product->get_name() . '</h1></html>' );
+			$this->assertTrue( $this->results( $store )['schema_matches_product'], $price );
+		}
+
 		remove_all_filters( 'pre_http_request' );
 		$jsonld['offers']['price'] = $this->product->get_price();
 		$jsonld['name']            = 'Another product';
@@ -335,6 +343,37 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 		);
 		$store[ $path ]   = array( 200, '<html><script type="application/ld+json">' . wp_json_encode( $jsonld ) . '</script><h1>' . $this->product->get_name() . '</h1></html>' );
 		$this->assertFalse( $this->results( $store )['schema_matches_product'], 'A list price is not the current price' );
+	}
+
+	/**
+	 * @testdox A price WooCommerce prints rounded to the store's decimals matches. A different amount does not.
+	 */
+	public function test_schema_price_rounded_to_store_decimals(): void {
+		update_option( 'woocommerce_price_num_decimals', '0' );
+		$this->product->set_regular_price( '9.99' );
+		$this->product->set_price( '9.99' );
+		$this->product->save();
+
+		$path           = self::path( $this->product->get_permalink() );
+		$jsonld         = array(
+			'@type'  => 'Product',
+			'@id'    => $this->product->get_permalink() . '#product',
+			'name'   => $this->product->get_name(),
+			'offers' => array(
+				'@type'         => 'Offer',
+				'price'         => '10',
+				'priceCurrency' => 'USD',
+				'availability'  => 'https://schema.org/InStock',
+			),
+		);
+		$store          = $this->healthy_store();
+		$store[ $path ] = array( 200, '<html><script type="application/ld+json">' . wp_json_encode( $jsonld ) . '</script><h1>' . $this->product->get_name() . '</h1></html>' );
+		$this->assertTrue( $this->results( $store )['schema_matches_product'], '9.99 printed with 0 decimals is 10' );
+
+		remove_all_filters( 'pre_http_request' );
+		$jsonld['offers']['price'] = '12';
+		$store[ $path ]            = array( 200, '<html><script type="application/ld+json">' . wp_json_encode( $jsonld ) . '</script><h1>' . $this->product->get_name() . '</h1></html>' );
+		$this->assertFalse( $this->results( $store )['schema_matches_product'], 'A different rounded price is still a conflict' );
 	}
 
 	/**
@@ -562,6 +601,22 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 		$store['/sitemap.xml'] = array( 200, '<urlset><url><loc>a</loc><lastmod>2026-01-01</lastmod></url></urlset>' );
 		$this->assertTrue( $this->results( $store )['sitemap_lastmod'], 'The listed sitemap has no dates, a default one has' );
+
+		remove_all_filters( 'pre_http_request' );
+		unset( $store['/sitemap.xml'] );
+		$store['/wp-sitemap.xml'] = array( 200, '<sitemapindex><sitemap><loc>https://cdn.example/products.xml</loc></sitemap><sitemap><loc>' . $child . '</loc></sitemap></sitemapindex>' );
+		$store['/products.xml']   = array( 200, '<urlset><url><loc>a</loc><lastmod>2026-01-01</lastmod></url></urlset>' );
+		$this->assertTrue( $this->results( $store )['sitemap_lastmod'], 'An off-host first child is skipped and the next child is read' );
+
+		remove_all_filters( 'pre_http_request' );
+		$store['/wp-sitemap.xml'] = array( 200, '<sitemapindex><sitemap><loc>' . home_url( '/nested.xml' ) . '</loc></sitemap></sitemapindex>' );
+		$store['/nested.xml']     = array( 200, '<sitemapindex><sitemap><loc>' . $child . '</loc></sitemap></sitemapindex>' );
+		$this->assertTrue( $this->results( $store )['sitemap_lastmod'], 'A nested index is opened' );
+
+		remove_all_filters( 'pre_http_request' );
+		unset( $store['/nested.xml'], $store['/products.xml'] );
+		$store['/wp-sitemap.xml'] = array( 200, '<sitemapindex><sitemap><loc>https://cdn.example/products.xml</loc></sitemap></sitemapindex>' );
+		$this->assertFalse( $this->results( $store )['sitemap_lastmod'], 'A CDN-hosted child is skipped, not left unchecked' );
 	}
 
 	/**
@@ -589,7 +644,7 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The shop and a category page need a canonical link and a meta description too; a stock shop page without them fails.
+	 * @testdox The shop and a category page need a meta description. A stock archive without a canonical link does not fail that check.
 	 */
 	public function test_shop_and_category_pages(): void {
 		$shop = self::factory()->post->create(
@@ -613,7 +668,7 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 		$store[ self::path( (string) get_permalink( $shop ) ) ] = array( 200, '<html><head></head></html>' );
 		$store[ self::path( $category ) ]                       = array( 200, $tagged( $category ) );
 		$results = $this->results( $store );
-		$this->assertFalse( $results['canonical_url'], 'Shop page without a canonical link' );
+		$this->assertTrue( $results['canonical_url'], 'A shop page without a canonical link does not fail: WordPress does not print one on an archive' );
 		$this->assertFalse( $results['meta_description'], 'Shop page without a meta description' );
 
 		remove_all_filters( 'pre_http_request' );
@@ -621,5 +676,9 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 		$results = $this->results( $store );
 		$this->assertTrue( $results['canonical_url'] );
 		$this->assertTrue( $results['meta_description'] );
+
+		remove_all_filters( 'pre_http_request' );
+		$store[ $path ][1] = str_replace( '<link rel="canonical" href="' . $this->product->get_permalink() . '">', '', $store[ $path ][1] );
+		$this->assertFalse( $this->results( $store )['canonical_url'], 'The product page is missing the canonical link WordPress prints' );
 	}
 }

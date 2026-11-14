@@ -769,7 +769,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );
 		$this->assertSame( array( true, true, true ), $this->product_results(), 'A price with a currency code counts' );
 
-		foreach ( array( '$10.00', '€10', '10,00 kr.', "10\u{202F}000.00" ) as $text ) {
+		foreach ( array( '$10.00', '€10', '10,00 kr.', "10\u{202F}000.00", 'R$ 10,00', 'US$10', 'S/. 10', 'EUR 10,-' ) as $text ) {
 			remove_all_filters( 'pre_http_request' );
 			$no_price['offers']['price'] = $text;
 			$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );

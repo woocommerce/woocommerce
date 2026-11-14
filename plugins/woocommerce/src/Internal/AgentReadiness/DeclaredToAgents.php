@@ -348,7 +348,7 @@ class DeclaredToAgents {
 		// Each value is <target> followed by ;-separated parameters; rel holds space-separated tokens.
 		preg_match_all( '/<([^>]*)>((?:[^,"<]|"[^"]*")*)/', $page['headers']['link'] ?? '', $values, PREG_SET_ORDER );
 		foreach ( $values as $value ) {
-			if ( '/llms.txt' === self::link_target_path( trim( $value[1] ) ) ) {
+			if ( self::is_host_root_llms_txt( trim( $value[1] ) ) ) {
 				return true;
 			}
 			// Parameters are read left to right, so a quoted value is taken whole, ; and rel= in it included.
@@ -363,15 +363,20 @@ class DeclaredToAgents {
 	}
 
 	/**
-	 * Path of a Link target resolved against the home page. `llms.txt` and `./llms.txt` there are `/llms.txt`.
+	 * Whether a Link target is this store's `/llms.txt` at the host root, where the file is read.
+	 * A relative target is resolved there, including when WordPress lives in a subdirectory.
+	 * A link to another site's llms.txt does not count.
 	 *
 	 * @param string $target Target from the Link header.
 	 */
-	private static function link_target_path( string $target ): string {
+	private static function is_host_root_llms_txt( string $target ): bool {
 		while ( str_starts_with( $target, './' ) ) {
 			$target = substr( $target, 2 );
 		}
-		$path = wp_parse_url( \WP_Http::make_absolute_url( $target, home_url( '/' ) ), PHP_URL_PATH );
-		return is_string( $path ) ? $path : '';
+		$absolute = \WP_Http::make_absolute_url( $target, StoreOutputChecks::host_root( '/' ) );
+		$path     = wp_parse_url( $absolute, PHP_URL_PATH );
+		$host     = wp_parse_url( $absolute, PHP_URL_HOST );
+		$store    = wp_parse_url( home_url(), PHP_URL_HOST );
+		return '/llms.txt' === $path && is_string( $host ) && is_string( $store ) && 0 === strcasecmp( $host, $store );
 	}
 }

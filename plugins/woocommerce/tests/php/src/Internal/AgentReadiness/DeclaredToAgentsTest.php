@@ -253,13 +253,14 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 		$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '</llms.txt>; rel="alternate"; type="text/plain"' ) ) ) );
 		$this->assertTrue( $results['link-header-agent-resources'], 'A link to llms.txt counts' );
 
-		foreach ( array( '<llms.txt>; rel="alternate"', '<./llms.txt>; rel="alternate"' ) as $header ) {
+		$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+		foreach ( array( '<llms.txt>; rel="alternate"', '<./llms.txt>; rel="alternate"', '<https://' . $host . '/llms.txt>; rel="alternate"' ) as $header ) {
 			remove_all_filters( 'pre_http_request' );
 			$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => $header ) ) ) );
 			$this->assertTrue( $results['link-header-agent-resources'], $header );
 		}
 
-		foreach ( array( '</llms.txt.bak>; rel="preload"', '</docs/llms.txt>; rel="alternate"', '</.well-known/api-catalog>; rel="not-api-catalog"', '</a>; title="rel=api-catalog"', '</a>; title="x; rel=api-catalog"' ) as $header ) {
+		foreach ( array( '</llms.txt.bak>; rel="preload"', '</docs/llms.txt>; rel="alternate"', '<https://other.example/llms.txt>; rel="alternate"', '</.well-known/api-catalog>; rel="not-api-catalog"', '</a>; title="rel=api-catalog"', '</a>; title="x; rel=api-catalog"' ) as $header ) {
 			remove_all_filters( 'pre_http_request' );
 			$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => $header ) ) ) );
 			$this->assertFalse( $results['link-header-agent-resources'], $header );
@@ -271,6 +272,40 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 		$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '</.well-known/api-catalog>; rel=api-catalog' ) ) ) );
 		$this->assertTrue( $results['link-header-agent-resources'], 'An unquoted rel' );
+	}
+
+	/**
+	 * @testdox A relative llms.txt link is the file at the host root when WordPress is in a subdirectory.
+	 */
+	public function test_llms_txt_link_in_a_subdirectory(): void {
+		add_filter(
+			'home_url',
+			static function ( $url ) {
+				$parts = wp_parse_url( (string) $url );
+				if ( ! is_array( $parts ) || empty( $parts['host'] ) ) {
+					return $url;
+				}
+				$path = $parts['path'] ?? '';
+				if ( '/shop' === $path || str_starts_with( $path, '/shop/' ) ) {
+					return $url;
+				}
+				$built = ( $parts['scheme'] ?? 'http' ) . '://' . $parts['host'];
+				if ( isset( $parts['port'] ) ) {
+					$built .= ':' . $parts['port'];
+				}
+				$built .= '/shop' . $path;
+				if ( isset( $parts['query'] ) ) {
+					$built .= '?' . $parts['query'];
+				}
+				return $built;
+			}
+		);
+		try {
+			$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '<llms.txt>; rel="alternate"' ) ) ) );
+			$this->assertTrue( $results['link-header-agent-resources'], 'llms.txt is at the host root, not under /shop' );
+		} finally {
+			remove_all_filters( 'home_url' );
+		}
 	}
 
 	/**

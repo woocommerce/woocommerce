@@ -298,7 +298,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With UCP on, the profile check reads the served profile, and the endpoint check asks the endpoint it names with a plain GET.
+	 * @testdox With UCP on, the profile check reads the served profile, and the endpoint check POSTs to catalog search.
 	 */
 	public function test_ucp_checks(): void {
 		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
@@ -317,29 +317,37 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$responses                     = $this->good_store();
-		$responses['/.well-known/ucp'] = array( 200, (string) $profile );
-		$responses[ $path ]            = array( 200, '{"namespace":"wc/ucp/v1","routes":{}}' );
+		$search                         = $path . '/catalog/search';
+		$responses                      = $this->good_store();
+		$responses['/.well-known/ucp']  = array( 200, (string) $profile );
+		$responses[ $path ]             = array( 404, '' );
+		$responses[ 'POST ' . $search ] = array( 200, '{"ucp":{"status":"success"},"products":[]}' );
 		$this->serve( $responses );
 		$results = $this->results();
 		$this->assertTrue( $results['ucp_profile'] );
 		$this->assertTrue( $results['ucp_profile_version'] );
-		$this->assertTrue( $results['ucp_endpoints_live'] );
+		$this->assertTrue( $results['ucp_endpoints_live'], 'Catalog search answers even when a GET of the endpoint base does not' );
+		$this->assertContains( 'POST ' . $search, $this->requested );
 
 		$responses['/.well-known/ucp'] = array( 200, (string) str_replace( UcpUtils::VERSION, '2025-01-01', (string) $profile ) );
 		$this->serve( $responses );
 		$this->assertFalse( $this->results()['ucp_profile_version'], 'A profile for another UCP version is likely another plugin\'s' );
 
-		$responses['/.well-known/ucp'] = array( 404, '' );
-		$responses[ $path ]            = array( 403, '<html>Blocked</html>' );
+		$responses['/.well-known/ucp']  = array( 404, '' );
+		$responses[ 'POST ' . $search ] = array( 403, '<html>Blocked</html>' );
 		$this->serve( $responses );
 		$results = $this->results();
 		$this->assertFalse( $results['ucp_profile'] );
 		$this->assertNull( $results['ucp_profile_version'], 'No profile is reported by ucp_profile alone' );
-		$this->assertFalse( $results['ucp_endpoints_live'], 'Without a profile, WooCommerce\'s endpoint is tried' );
-		$this->assertNotContains( 'POST', array_map( static fn( string $request ): string => strtok( $request, ' ' ), $this->requested ), 'Nothing is searched' );
+		$this->assertFalse( $results['ucp_endpoints_live'], 'Without a profile, WooCommerce\'s catalog search is tried' );
+		$this->assertContains( 'POST ' . $search, $this->requested );
 
-		$responses[ $path ] = array( 200, '<html>Checking your browser</html>' );
+		$responses[ $path ]             = array( 200, '{"namespace":"wc/ucp/v1","routes":{}}' );
+		$responses[ 'POST ' . $search ] = array( 404, '' );
+		$this->serve( $responses );
+		$this->assertFalse( $this->results()['ucp_endpoints_live'], 'A JSON index is not catalog search' );
+
+		$responses[ 'POST ' . $search ] = array( 200, '<html>Checking your browser</html>' );
 		$this->serve( $responses );
 		$this->assertFalse( $this->results()['ucp_endpoints_live'], 'A challenge page is not the endpoint' );
 	}

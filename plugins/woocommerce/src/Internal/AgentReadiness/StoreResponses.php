@@ -61,7 +61,7 @@ class StoreResponses {
 	/**
 	 * How `get()` reached each URL: the redirects it followed, where it stopped when it didn't follow one, and the URL it landed on.
 	 *
-	 * @var array<string, array{count:int,stopped_at:string,final_url:string}>
+	 * @var array<string, array{stopped_at:string,final_url:string}>
 	 */
 	private array $redirects = array();
 
@@ -124,17 +124,40 @@ class StoreResponses {
 	}
 
 	/**
-	 * How many redirects `get()` followed for a URL, the URL of a redirect it didn't follow ('' when none), and the URL it landed on.
+	 * The URL of a redirect `get()` did not follow for a URL ('' when none), and the URL it landed on.
 	 *
 	 * @param string $url URL or path, as given to `get()`.
-	 * @return array{count:int,stopped_at:string,final_url:string}
+	 * @return array{stopped_at:string,final_url:string}
 	 */
 	public function redirects( string $url ): array {
 		return $this->redirects[ self::absolute( $url ) ] ?? array(
-			'count'      => 0,
 			'stopped_at' => '',
 			'final_url'  => '',
 		);
+	}
+
+	/**
+	 * The response to a POST of a JSON object, without following redirects.
+	 * Only a URL on the store's host is requested.
+	 *
+	 * @param string               $url  URL or path.
+	 * @param array<string, mixed> $body JSON object. An empty array is sent as {}.
+	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null Null when the store could not be reached.
+	 */
+	public function post_json( string $url, array $body ): ?array {
+		$url = self::absolute( $url );
+		$key = 'POST ' . $url;
+		if ( ! array_key_exists( $key, $this->responses ) ) {
+			$this->responses[ $key ] = $this->site_live && $this->is_store_url( $url ) ? $this->request(
+				$url,
+				array(
+					'method'  => 'POST',
+					'headers' => array( 'Content-Type' => 'application/json' ),
+					'body'    => (string) wp_json_encode( (object) $body ),
+				)
+			) : null;
+		}
+		return $this->responses[ $key ];
 	}
 
 	/**
@@ -268,7 +291,6 @@ class StoreResponses {
 		$asked = $url;
 		for ( $redirects = 0; $redirects <= self::MAX_REDIRECTS; $redirects++ ) {
 			$this->redirects[ $asked ] = array(
-				'count'      => $redirects,
 				'stopped_at' => '',
 				'final_url'  => '',
 			);

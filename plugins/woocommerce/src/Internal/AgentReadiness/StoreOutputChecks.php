@@ -257,12 +257,12 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'canonical_url',
 				'group'   => 'find',
-				'test'    => fn( StoreResponses $responses ): ?bool => self::on_loaded( array( $responses->product_page(), $responses->shop_page(), $responses->category_page() ), static fn( string $html ): bool => '' !== PageMarkup::canonical( $html ) ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_product_page( $responses, static fn( string $html ): bool => '' !== PageMarkup::canonical( $html ) ),
 				'blocks'  => 'discovery',
-				'name'    => __( 'Product, shop and category pages name their canonical URL', 'woocommerce' ),
-				'label'   => __( 'Some store pages don\'t name a canonical URL', 'woocommerce' ),
-				'why'     => __( 'A page can be reached by several URLs, such as the shop sorted by price; the canonical link tells agents which one to show.', 'woocommerce' ),
-				'fix'     => __( 'Turn on canonical URLs in your SEO plugin. WordPress adds them to product pages only.', 'woocommerce' ),
+				'name'    => __( 'Product pages name their canonical URL', 'woocommerce' ),
+				'label'   => __( 'Product pages don\'t name a canonical URL', 'woocommerce' ),
+				'why'     => __( 'A product can be reached by several URLs; the canonical link tells agents which one to show.', 'woocommerce' ),
+				'fix'     => __( 'WordPress adds a canonical link to product pages. If it\'s missing, a plugin or your theme is removing it.', 'woocommerce' ),
 				'fix_url' => '',
 			),
 			array(
@@ -632,6 +632,18 @@ class StoreOutputChecks {
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private function sitemap_lists_products( StoreResponses $responses ): ?bool {
+		return $this->sitemap_matches( $responses, array( self::class, 'names_products' ) );
+	}
+
+	/**
+	 * Whether a test passes for a sitemap the store serves. Child sitemaps on this host are opened
+	 * at any depth, up to five child requests. A child on another host is skipped. Null when
+	 * robots.txt or one of those sitemaps could not be loaded and the test never passed.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 * @param callable       $test      Test, given a sitemap body.
+	 */
+	private function sitemap_matches( StoreResponses $responses, callable $test ): ?bool {
 		$robots  = $this->robots_txt( $responses );
 		$queue   = array_values( array_unique( array_map( array( self::class, 'absolute_url' ), self::sitemap_urls( (string) $robots ) ) ) );
 		$seen    = array_fill_keys( $queue, true );
@@ -642,7 +654,7 @@ class StoreOutputChecks {
 			if ( null === $body ) {
 				continue;
 			}
-			if ( self::names_products( $body ) ) {
+			if ( $test( $body ) ) {
 				return true;
 			}
 			foreach ( self::index_child_urls( $body ) as $child ) {
@@ -1177,14 +1189,15 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Whether the UCP endpoint the served profile names, or WooCommerce's when the profile isn't served,
-	 * answers a plain GET with JSON. Nothing is searched, so the check doesn't count as agent traffic;
-	 * a firewall or plugin that blocks agents blocks this request too.
+	 * Whether catalog search, the route agents call, answers with JSON. The endpoint is the one the
+	 * served profile names, or WooCommerce's when the profile isn't served. The body is empty.
+	 * A firewall or plugin that blocks the route blocks this request too.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private static function ucp_endpoint_answers( StoreResponses $responses ): ?bool {
-		$response = $responses->get( untrailingslashit( self::ucp_endpoint( $responses ) ?? rest_url( 'wc/ucp/v1' ) ) );
+		$endpoint = untrailingslashit( self::ucp_endpoint( $responses ) ?? rest_url( 'wc/ucp/v1' ) );
+		$response = $responses->post_json( $endpoint . '/catalog/search', array() );
 		if ( null === $response || $response['status'] >= 500 ) {
 			return null;
 		}
@@ -1192,7 +1205,8 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * The number in a JSON-LD price, or null when it isn't one. `10,00` and `99.00 USD` count.
+	 * The number in a JSON-LD price, or null when it isn't one. `10,00`, `99.00 USD`, `R$ 10,00` and `EUR 10,-` count.
+	 * A dot or slash in the currency, as in `S/.` or `kr.`, is not part of the number.
 	 *
 	 * @param mixed $value Price value.
 	 */
@@ -1200,17 +1214,19 @@ class StoreOutputChecks {
 		if ( is_int( $value ) || is_float( $value ) ) {
 			return is_finite( $value ) ? (float) $value : null;
 		}
-		if ( ! is_string( $value ) || ! self::has_price_amount( $value ) ) {
+		if ( ! is_string( $value ) ) {
 			return null;
 		}
-		$kept   = '';
-		$length = strlen( $value );
-		for ( $i = 0; $i < $length; $i++ ) {
-			$char = $value[ $i ];
-			if ( ctype_digit( $char ) || ',' === $char || '.' === $char || '-' === $char ) {
-				$kept .= $char;
-			}
+		$chars = self::amount_characters( $value );
+		if ( null === $chars ) {
+			return null;
 		}
+		// "10,-" and "10.-" are zero cents. The dash is not a minus sign.
+		$count = count( $chars );
+		if ( $count >= 2 && '-' === $chars[ $count - 1 ] && ( ',' === $chars[ $count - 2 ] || '.' === $chars[ $count - 2 ] ) ) {
+			array_pop( $chars );
+		}
+		$kept  = str_replace( "'", '', implode( '', $chars ) );
 		$comma = strrpos( $kept, ',' );
 		$dot   = strrpos( $kept, '.' );
 		if ( false !== $comma && false !== $dot ) {
@@ -1227,7 +1243,8 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether a JSON-LD price is a number, or text that is one with an optional currency symbol or code
-	 * (`10.00`, `10,00`, `$10`, `10,00 kr.`, `10.00 USD`). Text such as `call 555` is not.
+	 * (`10.00`, `10,00`, `$10`, `R$ 10,00`, `US$10`, `S/. 10`, `EUR 10,-`, `10,00 kr.`). A trailing
+	 * `,-` or `.-` means zero cents. Text such as `call 555` is not a price.
 	 *
 	 * @param mixed $value Price value.
 	 */
@@ -1235,12 +1252,131 @@ class StoreOutputChecks {
 		if ( is_int( $value ) || is_float( $value ) ) {
 			return is_finite( $value );
 		}
-		if ( ! is_string( $value ) ) {
+		return is_string( $value ) && null !== self::amount_characters( $value );
+	}
+
+	/**
+	 * The amount characters of a price, currency removed from either end. Null when it isn't a price.
+	 *
+	 * @param string $value Price text.
+	 * @return array<int, string>|null
+	 */
+	private static function amount_characters( string $value ): ?array {
+		$chars = self::price_characters( $value );
+		if ( array() === $chars ) {
+			return null;
+		}
+		$chars = self::without_leading_currency( $chars );
+		$chars = array_reverse( self::without_leading_currency( array_reverse( $chars ) ) );
+		return self::characters_are_amount( $chars ) ? $chars : null;
+	}
+
+	/**
+	 * Characters of a price, without the spaces a store uses between the amount and the currency.
+	 *
+	 * @param string $value Price text.
+	 * @return array<int, string>
+	 */
+	private static function price_characters( string $value ): array {
+		$chars = mb_str_split( $value );
+		if ( ! is_array( $chars ) ) {
+			return array();
+		}
+		$kept = array();
+		foreach ( $chars as $char ) {
+			if ( ' ' === $char || "\t" === $char || "\n" === $char || "\r" === $char || "\u{00A0}" === $char || "\u{2009}" === $char || "\u{202F}" === $char ) {
+				continue;
+			}
+			$kept[] = $char;
+		}
+		return $kept;
+	}
+
+	/**
+	 * Drop one currency token from the front. A token is currency symbols and up to three letters,
+	 * plus the "." and "/" in abbreviations such as "kr." and "S/.". A longer word, such as "call", stays.
+	 *
+	 * @param array<int, string> $chars Characters.
+	 * @return array<int, string>
+	 */
+	private static function without_leading_currency( array $chars ): array {
+		$letters = 0;
+		$marked  = false;
+		$taken   = 0;
+		foreach ( $chars as $char ) {
+			$kind = self::price_char_kind( $char );
+			if ( 'letter' === $kind ) {
+				++$letters;
+				if ( $letters > 3 ) {
+					return $chars;
+				}
+				$marked = true;
+				++$taken;
+				continue;
+			}
+			if ( 'symbol' === $kind ) {
+				$marked = true;
+				++$taken;
+				continue;
+			}
+			// "." and "/" only belong to a token that also has a letter or a symbol, so "10.00" is left whole.
+			if ( 'mark' === $kind ) {
+				++$taken;
+				continue;
+			}
+			break;
+		}
+		return $marked ? array_slice( $chars, $taken ) : $chars;
+	}
+
+	/**
+	 * Whether a character is part of a currency token: a letter, a currency symbol, or "." or "/".
+	 *
+	 * Currency symbols have no other test than Unicode's Sc category.
+	 *
+	 * @param string $char One character.
+	 * @return string 'letter', 'symbol', 'mark' or ''.
+	 */
+	private static function price_char_kind( string $char ): string {
+		if ( '.' === $char || '/' === $char ) {
+			return 'mark';
+		}
+		if ( 1 === strlen( $char ) ) {
+			$byte = ord( $char );
+			if ( ( $byte >= 65 && $byte <= 90 ) || ( $byte >= 97 && $byte <= 122 ) ) {
+				return 'letter';
+			}
+			return '$' === $char ? 'symbol' : '';
+		}
+		return 1 === preg_match( '/^\p{Sc}$/u', $char ) ? 'symbol' : '';
+	}
+
+	/**
+	 * Whether the characters are a number, with "," or "." as a separator and an optional leading minus.
+	 * A trailing ",-" or ".-" means zero cents. A dash anywhere else is not an amount.
+	 *
+	 * @param array<int, string> $chars Characters.
+	 * @return bool
+	 */
+	private static function characters_are_amount( array $chars ): bool {
+		if ( array() !== $chars && '-' === $chars[0] ) {
+			array_shift( $chars );
+		}
+		$count = count( $chars );
+		if ( $count >= 2 && '-' === $chars[ $count - 1 ] && ( ',' === $chars[ $count - 2 ] || '.' === $chars[ $count - 2 ] ) ) {
+			array_pop( $chars );
+			array_pop( $chars );
+		}
+		if ( array() === $chars ) {
 			return false;
 		}
-		$currency   = '(?:\p{Sc}|\p{L}{1,3}\.?)?';
-		$normalized = (string) preg_replace( '/[\s\x{00A0}\x{2009}\x{202F}]+/u', '', $value );
-		return 1 === preg_match( '/^' . $currency . '-?\d(?:[\d.,\']*\d)?' . $currency . '$/u', $normalized );
+		foreach ( $chars as $char ) {
+			if ( ! ctype_digit( $char ) && '.' !== $char && ',' !== $char && "'" !== $char ) {
+				return false;
+			}
+		}
+		$last = count( $chars ) - 1;
+		return ctype_digit( $chars[0] ) && ctype_digit( $chars[ $last ] );
 	}
 
 	/**
@@ -1346,8 +1482,10 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Whether the home, shop and product page open without signing in. False on a 401 or 403, or a
-	 * redirect to the sign-in page. Null when one couldn't be loaded and none asked to sign in.
+	 * Whether the home, shop and product page open without sending the visitor to sign in.
+	 * False when one redirects to wp-login.php or My account. A 401 or 403 is couldn't check:
+	 * a firewall or security plugin can refuse the store's request to itself. Null when one
+	 * couldn't be loaded and none redirected to sign in.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
@@ -1360,10 +1498,8 @@ class StoreOutputChecks {
 			if ( self::sign_in_path( $followed['stopped_at'], $account ) || self::sign_in_path( $followed['final_url'], $account ) ) {
 				return false;
 			}
-			if ( null === $response || $response['status'] >= 500 ) {
+			if ( null === $response || self::blocked( $response['status'] ) ) {
 				$unknown = true;
-			} elseif ( in_array( $response['status'], array( 401, 403 ), true ) ) {
-				return false;
 			}
 		}
 		return $unknown ? null : true;
@@ -1381,40 +1517,15 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Whether the store's first sitemap has lastmod dates, in a sitemap index or in the first sitemap it lists.
+	 * Whether a sitemap the store serves has lastmod dates, in the index or in a child sitemap on this host.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private function sitemap_has_lastmod( StoreResponses $responses ): ?bool {
-		$robots = $this->robots_txt( $responses );
-		// Without robots.txt the store's own sitemap list isn't known.
-		$unknown = null === $robots;
-		foreach ( self::sitemap_urls( (string) $robots ) as $url ) {
-			$response = $responses->get( $url );
-			if ( null === $response || self::blocked( $response['status'] ) ) {
-				$unknown = true;
-				continue;
-			}
-			if ( 200 !== $response['status'] || 1 !== preg_match( '/<(urlset|sitemapindex)[\s>]/i', $response['body'] ) ) {
-				continue;
-			}
-			if ( false !== stripos( $response['body'], '<lastmod' ) ) {
-				return true;
-			}
-			$children = self::index_child_urls( $response['body'] );
-			if ( array() === $children ) {
-				continue;
-			}
-			$child = $responses->get( $children[0] );
-			if ( null === $child || self::blocked( $child['status'] ) ) {
-				$unknown = true;
-				continue;
-			}
-			if ( 200 === $child['status'] && false !== stripos( $child['body'], '<lastmod' ) ) {
-				return true;
-			}
-		}
-		return $unknown ? null : false;
+		return $this->sitemap_matches(
+			$responses,
+			static fn( string $xml ): bool => false !== stripos( $xml, '<lastmod' )
+		);
 	}
 
 	/**
@@ -1526,7 +1637,8 @@ class StoreOutputChecks {
 	 */
 	private static function served_gtins( array $products ): array {
 		$gtins = array();
-		foreach ( array_merge( self::with_variants( $products ), self::offers( $products ) ) as $item ) {
+		// The caller already included variants. Expanding hasVariant again only repeats them.
+		foreach ( array_merge( $products, self::offers_of( $products ) ) as $item ) {
 			foreach ( array( 'gtin', 'gtin8', 'gtin12', 'gtin13', 'gtin14' ) as $key ) {
 				foreach ( self::values( $item[ $key ] ?? null ) as $value ) {
 					$gtin = is_string( $value ) || is_int( $value ) ? (string) preg_replace( '/\D/', '', (string) $value ) : '';
@@ -1692,6 +1804,13 @@ class StoreOutputChecks {
 		foreach ( $rates as $rate ) {
 			$expected[] = $excl * ( 1 + (float) $rate->tax_rate / 100 );
 		}
+		// WooCommerce prints the JSON-LD price rounded with wc_format_decimal(). With 0 decimals, 9.99 is served as 10.
+		$decimals = wc_get_price_decimals();
+		$printed  = array();
+		foreach ( $expected as $amount ) {
+			$printed[] = (float) wc_format_decimal( $amount, $decimals );
+		}
+		$expected = array_merge( $expected, $printed );
 		foreach ( $prices as $price ) {
 			foreach ( $expected as $amount ) {
 				if ( abs( $price - $amount ) < 0.01 ) {
@@ -1818,9 +1937,20 @@ class StoreOutputChecks {
 	 * @return array<int, array<string, mixed>>
 	 */
 	private static function offers( array $products ): array {
+		return self::offers_of( self::with_variants( $products ) );
+	}
+
+	/**
+	 * The offers of these items, with those an AggregateOffer lists, one level down.
+	 * Variants are not expanded: the caller includes them when it has them.
+	 *
+	 * @param array<int, array<string, mixed>> $items Product items.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function offers_of( array $items ): array {
 		$offers = array();
-		foreach ( self::with_variants( $products ) as $product ) {
-			array_push( $offers, ...self::as_list( $product['offers'] ?? null ) );
+		foreach ( $items as $item ) {
+			array_push( $offers, ...self::as_list( $item['offers'] ?? null ) );
 		}
 		$nested = array();
 		foreach ( $offers as $offer ) {
