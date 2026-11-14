@@ -23,6 +23,7 @@
 		</testsuite>
 	</testsuites>
 	<listeners>
+		<listener class="WC_PHPUnit_Annotation_Cache_Cleanup" file="tests/legacy/framework/class-wc-phpunit-annotation-cache-cleanup.php" />
 		<listener class="JohnKary\PHPUnit\Listener\SpeedTrapListener">
 			<arguments>
                 <array>
