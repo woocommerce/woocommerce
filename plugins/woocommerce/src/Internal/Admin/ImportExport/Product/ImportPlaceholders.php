@@ -9,7 +9,9 @@ namespace Automattic\WooCommerce\Internal\Admin\ImportExport\Product;
  * (for example a variation whose parent has not been imported yet) once the import that
  * created them has finished.
  *
- * The cleanup covers every placeholder on the site, not just the ones the current run created.
+ * Shared by the admin product importer and the `wp wc product import` CLI command, both of
+ * which run this cleanup over every placeholder on the site rather than just the ones their
+ * own run created.
  *
  * @since 11.4.0
  */
@@ -113,6 +115,25 @@ final class ImportPlaceholders {
 		);
 
 		wp_cache_delete_multiple( array_map( 'absint', $post_ids ), 'posts' );
+	}
+
+	/**
+	 * Count placeholder products an import left behind, whether still pending deletion
+	 * or claimed by a cleanup pass that did not finish.
+	 *
+	 * @return int
+	 */
+	public function count_pending_placeholders(): int {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' ) AND post_status IN ( %s, %s )",
+				self::CLEANUP_PLACEHOLDER_STATUS,
+				self::CLEANUP_CLAIMED_STATUS
+			)
+		);
 	}
 
 	/**

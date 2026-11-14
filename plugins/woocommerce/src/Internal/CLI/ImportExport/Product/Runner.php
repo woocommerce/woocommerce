@@ -7,11 +7,18 @@ namespace Automattic\WooCommerce\Internal\CLI\ImportExport\Product;
 use WP_CLI;
 
 /**
- * Registers the `wp wc product export` WP-CLI command.
+ * Registers the `wp wc product import` and `wp wc product export` WP-CLI commands.
  *
  * @since 11.4.0
  */
 final class Runner {
+
+	/**
+	 * The import command.
+	 *
+	 * @var ImportCommand
+	 */
+	private ImportCommand $import_command;
 
 	/**
 	 * The export command.
@@ -25,9 +32,11 @@ final class Runner {
 	 *
 	 * @internal
 	 *
+	 * @param ImportCommand $import_command The import command.
 	 * @param ExportCommand $export_command The export command.
 	 */
-	final public function init( ExportCommand $export_command ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules
+	final public function init( ImportCommand $import_command, ExportCommand $export_command ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules
+		$this->import_command = $import_command;
 		$this->export_command = $export_command;
 	}
 
@@ -38,6 +47,12 @@ final class Runner {
 		if ( ! class_exists( 'WP_CLI' ) ) {
 			return;
 		}
+
+		WP_CLI::add_command(
+			'wc product import',
+			$this->import_command,
+			array( 'shortdesc' => 'Import products from a CSV file.' )
+		);
 
 		WP_CLI::add_command(
 			'wc product export',

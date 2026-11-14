@@ -94,6 +94,7 @@ parameters:
 		-
 			message: '#unknown class WP_CLI|Function WP_CLI\\Utils\\\w+ not found#'
 			paths:
+				- src/Internal/CLI/ImportExport/Product/ImportCommand.php
 				- src/Internal/CLI/ImportExport/Product/ExportCommand.php
 	parallel:
 		maximumNumberOfProcesses: 4
