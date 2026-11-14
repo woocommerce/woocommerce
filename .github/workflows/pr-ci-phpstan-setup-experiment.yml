@@ -1,0 +1,349 @@
+name: 'PR experiment: PHPStan setup'
+
+on:
+  pull_request:
+    types: [opened]
+    paths:
+      - '.github/workflows/pr-ci-phpstan-setup-experiment.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-phpstan-setup-experiment-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  SOURCE_SHA: b9cfe5fb160c4c261e442e0bc118dac70293d657
+  CI: 'true'
+  FORCE_COLOR: '1'
+
+jobs:
+  setup:
+    name: 'PHPStan setup: ${{ matrix.arm }}'
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        arm: [baseline, composer-only]
+    steps:
+      - name: 'Checkout identical source'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: 'Prepare pinned command scripts and start setup timer'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/phpstan-setup"
+          python3 - <<'PY'
+          import json, os, pathlib, re, time
+          evidence = pathlib.Path(os.environ['RUNNER_TEMP']) / 'phpstan-setup'
+          source = pathlib.Path('.github/workflows/phpstan.yml').read_text()
+          def script(name):
+              lines = source.splitlines()
+              header = "- name: '" + name + "'"
+              index = next(i for i, line in enumerate(lines) if line.strip() == header)
+              block = next(i for i in range(index + 1, len(lines)) if lines[i].strip() == 'run: |')
+              indent = len(lines[block]) - len(lines[block].lstrip()) + 4
+              body = []
+              for line in lines[block + 1:]:
+                  if line.strip() and len(line) - len(line.lstrip()) < indent:
+                      break
+                  body.append(line[indent:] if line.strip() else '')
+              result = '\n'.join(body) + '\n'
+              if not result.strip():
+                  raise RuntimeError('Pinned workflow script is empty: ' + name)
+              return result
+          analyzer = script('Run PHPStan')
+          expected = "pnpm --filter='@woocommerce/plugin-woocommerce' phpstan 2>&1"
+          if expected not in analyzer:
+              raise RuntimeError('Pinned analyzer command changed')
+          analyzer = analyzer.replace('/tmp/phpstan-output.txt', '"$RUNNER_TEMP/phpstan-setup/phpstan-output.txt"')
+          baseline = script('Check baseline changes')
+          placeholder = chr(36) + '{{ github.event.pull_request.base.sha }}'
+          if not re.fullmatch('[0-9a-f]{40}', os.environ['BASE_SHA']) or placeholder not in baseline:
+              raise RuntimeError('Invalid baseline comparison SHA or script')
+          baseline = baseline.replace(placeholder, os.environ['BASE_SHA'])
+          (evidence / 'phpstan.sh').write_text(analyzer)
+          (evidence / 'baseline.sh').write_text(baseline)
+          (evidence / 'setup-start.json').write_text(json.dumps({'monotonic_ns': time.monotonic_ns()}))
+          PY
+
+      - name: 'Setup pnpm (CLI only in candidate)'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          cache: false
+
+      - name: 'Read pnpm version as in the composite'
+        run: echo "PNPM_VERSION=$(pnpm --version)" >> "$GITHUB_ENV"
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+          package-manager-cache: false
+
+      - name: 'Setup PHP as in the PHPStan job'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: ''
+
+      - name: 'Identify pnpm store'
+        if: ${{ matrix.arm == 'baseline' }}
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: 'Restore pnpm downloads (no save)'
+        if: ${{ matrix.arm == 'baseline' }}
+        id: pnpm-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Node build cache (no save)'
+        if: ${{ matrix.arm == 'baseline' }}
+        id: node-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./node_modules/.cache
+          key: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Composer downloads (no save)'
+        id: composer-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Parse original project filters'
+        if: ${{ matrix.arm == 'baseline' }}
+        run: node .github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '@woocommerce/plugin-woocommerce...'
+
+      - name: 'Install original full filtered dependencies'
+        if: ${{ matrix.arm == 'baseline' }}
+        id: baseline-install
+        run: pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
+
+      - name: 'Install the same PHP dependencies and Composer scripts'
+        if: ${{ matrix.arm == 'composer-only' }}
+        id: candidate-install
+        working-directory: plugins/woocommerce
+        # This checkout has no installed vendor directories to remove. Keep all Composer scripts.
+        run: XDEBUG_MODE=off composer install --quiet
+
+      - name: 'Record setup time and runtime identity'
+        id: setup-evidence
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess, time
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'phpstan-setup'
+          start = json.loads((root / 'setup-start.json').read_text())['monotonic_ns']
+          def output(*command):
+              return subprocess.check_output(command, text=True).strip()
+          data = {
+              'source': output('git', 'rev-parse', 'HEAD'),
+              'php': output('php', '-r', 'echo PHP_VERSION;'),
+              'composer': output('composer', '--version', '--no-ansi'),
+              'node': output('node', '--version'),
+              'pnpm': output('pnpm', '--version'),
+          }
+          (root / 'identity.json').write_text(json.dumps(data, indent=2) + '\n')
+          (root / 'setup-timing.json').write_text(json.dumps({'seconds': (time.monotonic_ns() - start) / 1e9}) + '\n')
+          PY
+
+      - name: 'Create tmp directory as in normal PHPStan'
+        working-directory: plugins/woocommerce
+        run: mkdir -p tmp
+
+      - name: 'Restore PHPStan result cache (no save)'
+        id: result-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: plugins/woocommerce/tmp
+          key: phpstan-result-cache-${{ github.run_id }}
+          restore-keys: phpstan-result-cache-
+
+      - name: 'Run unchanged PHPStan command'
+        id: analyzer
+        continue-on-error: true
+        working-directory: plugins/woocommerce
+        run: |
+          start=$SECONDS
+          set +e
+          bash -e -o pipefail "$RUNNER_TEMP/phpstan-setup/phpstan.sh"
+          status=$?
+          printf '{"exit":%s,"seconds":%s}\n' "$status" "$((SECONDS - start))" > "$RUNNER_TEMP/phpstan-setup/analyzer-status.json"
+          exit "$status"
+
+      - name: 'Run unchanged baseline guard'
+        id: baseline
+        continue-on-error: true
+        working-directory: plugins/woocommerce
+        run: |
+          set +e
+          bash -e -o pipefail "$RUNNER_TEMP/phpstan-setup/baseline.sh" 2>&1 | tee "$RUNNER_TEMP/phpstan-setup/baseline-output.txt"
+          status=${PIPESTATUS[0]}
+          printf '{"exit":%s}\n' "$status" > "$RUNNER_TEMP/phpstan-setup/baseline-status.json"
+          exit "$status"
+
+      - name: 'Capture complete JSON diagnostics outside the measured command'
+        id: diagnostics
+        working-directory: plugins/woocommerce
+        run: |
+          set +e
+          vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=4G --error-format=json --no-progress > "$RUNNER_TEMP/phpstan-setup/diagnostics-raw.json" 2> "$RUNNER_TEMP/phpstan-setup/diagnostics-stderr.txt"
+          status=$?
+          set -e
+          printf '{"exit":%s}\n' "$status" > "$RUNNER_TEMP/phpstan-setup/diagnostics-status.json"
+          python3 - <<'PY'
+          import json, os, pathlib
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'phpstan-setup'
+          data = json.loads((root / 'diagnostics-raw.json').read_text())
+          def canonical(value):
+              if isinstance(value, str):
+                  return value.replace(os.environ['GITHUB_WORKSPACE'], '<workspace>')
+              if isinstance(value, dict):
+                  return {canonical(key): canonical(item) for key, item in value.items()}
+              if isinstance(value, list):
+                  return sorted((canonical(item) for item in value), key=lambda item: json.dumps(item, sort_keys=True))
+              return value
+          if not {'totals', 'files', 'errors'} <= data.keys():
+              raise RuntimeError('PHPStan diagnostic report is incomplete')
+          (root / 'diagnostics.json').write_text(json.dumps(canonical(data), sort_keys=True, indent=2) + '\n')
+          PY
+
+      - name: 'Capture installed package and semantic autoload metadata'
+        run: |
+          php <<'PHP' > "$RUNNER_TEMP/phpstan-setup/composer-metadata.json"
+          <?php
+          $workspace = getcwd();
+          $plugin = $workspace . '/plugins/woocommerce';
+          $normalize = function ($value) use (&$normalize, $workspace) {
+              if (is_string($value)) {
+                  return str_replace($workspace, '<workspace>', $value);
+              }
+              if (is_array($value)) {
+                  $result = [];
+                  foreach ($value as $key => $item) {
+                      $result[is_string($key) ? str_replace($workspace, '<workspace>', $key) : $key] = $normalize($item);
+                  }
+                  return $result;
+              }
+              return $value;
+          };
+          $metadata = [];
+          $roots = array_merge([$plugin], glob($plugin . '/bin/composer/*', GLOB_ONLYDIR));
+          foreach ($roots as $root) {
+              $directory = $root . '/vendor/composer';
+              if (!is_file($directory . '/installed.json')) {
+                  throw new RuntimeException('Missing installed metadata: ' . $directory);
+              }
+              $installed = json_decode(file_get_contents($directory . '/installed.json'), true, 512, JSON_THROW_ON_ERROR);
+              usort($installed['packages'], static function ($a, $b) { return strcmp($a['name'], $b['name']); });
+              $maps = [];
+              foreach (['psr4', 'namespaces', 'classmap', 'files'] as $name) {
+                  $file = $directory . '/autoload_' . $name . '.php';
+                  $maps[$name] = is_file($file) ? require $file : [];
+                  ksort($maps[$name]);
+              }
+              $metadata[substr($root, strlen($workspace) + 1)] = ['installed' => $installed, 'autoload' => $maps];
+          }
+          ksort($metadata);
+          echo json_encode($normalize($metadata), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR), "\n";
+          PHP
+
+      - name: 'Record outcome and exact restored cache keys'
+        if: ${{ always() }}
+        env:
+          ARM: ${{ matrix.arm }}
+          SETUP_RESULT: ${{ steps.setup-evidence.outcome }}
+          ANALYZER_RESULT: ${{ steps.analyzer.outcome }}
+          BASELINE_RESULT: ${{ steps.baseline.outcome }}
+          DIAGNOSTICS_RESULT: ${{ steps.diagnostics.outcome }}
+          PNPM_KEY: ${{ steps.pnpm-cache.outputs.cache-matched-key }}
+          NODE_KEY: ${{ steps.node-cache.outputs.cache-matched-key }}
+          COMPOSER_KEY: ${{ steps.composer-cache.outputs.cache-matched-key }}
+          RESULT_KEY: ${{ steps.result-cache.outputs.cache-matched-key }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/phpstan-setup"
+          python3 - <<'PY'
+          import json, os, pathlib
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'phpstan-setup'
+          keys = ['ARM', 'SETUP_RESULT', 'ANALYZER_RESULT', 'BASELINE_RESULT', 'DIAGNOSTICS_RESULT', 'PNPM_KEY', 'NODE_KEY', 'COMPOSER_KEY', 'RESULT_KEY']
+          data = {key: os.environ[key] for key in keys}
+          (root / 'outcome.json').write_text(json.dumps(data, sort_keys=True, indent=2) + '\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('```json\n' + json.dumps(data, indent=2) + '\n```\n')
+              for name in ['setup-timing.json', 'analyzer-status.json']:
+                  if (root / name).is_file():
+                      summary.write(name + ': ' + (root / name).read_text() + '\n')
+          PY
+
+      - name: 'Upload small PHPStan evidence'
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: phpstan-setup-${{ matrix.arm }}
+          path: ${{ runner.temp }}/phpstan-setup
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
+
+  compare:
+    name: 'Require PHPStan dependency and diagnostic parity'
+    needs: setup
+    if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 'Download this run’s arm evidence'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: phpstan-setup-*
+          path: ${{ runner.temp }}/phpstan-compare
+
+      - name: 'Require identical dependencies, diagnostics, guards and cache inputs'
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'phpstan-compare'
+          def read(arm, filename):
+              return json.loads((root / ('phpstan-setup-' + arm) / filename).read_text())
+          baseline = read('baseline', 'outcome.json')
+          candidate = read('composer-only', 'outcome.json')
+          for arm in ['baseline', 'composer-only']:
+              outcome = read(arm, 'outcome.json')
+              for key in ['SETUP_RESULT', 'ANALYZER_RESULT', 'BASELINE_RESULT', 'DIAGNOSTICS_RESULT']:
+                  if outcome[key] != 'success':
+                      raise RuntimeError(arm + ' did not pass ' + key)
+              if read(arm, 'identity.json')['source'] != os.environ['SOURCE_SHA']:
+                  raise RuntimeError('Unexpected source identity')
+              for filename in ['analyzer-status.json', 'baseline-status.json', 'diagnostics-status.json']:
+                  if read(arm, filename)['exit'] != 0:
+                      raise RuntimeError(arm + ' returned a nonzero status in ' + filename)
+          for key in ['COMPOSER_KEY', 'RESULT_KEY']:
+              if baseline[key] != candidate[key]:
+                  raise RuntimeError('Unequal restored ' + key + '; timing comparison is inconclusive')
+          for filename in ['identity.json', 'composer-metadata.json', 'diagnostics.json', 'baseline-status.json', 'diagnostics-status.json']:
+              if read('baseline', filename) != read('composer-only', filename):
+                  raise RuntimeError('Parity mismatch: ' + filename)
+          timings = {arm: read(arm, 'setup-timing.json')['seconds'] for arm in ['baseline', 'composer-only']}
+          reduction = timings['baseline'] - timings['composer-only']
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('PHP package/autoload metadata, complete diagnostics, analyzer status and baseline guard match.\n\n')
+              summary.write(f"Setup including toolchains/cache restores: baseline {timings['baseline']:.2f}s; Composer-only {timings['composer-only']:.2f}s; reduction {reduction:.2f}s.\n\n")
+              summary.write('One pair is a screening result. Repeat with matching cache inputs before proposing a normal CI change.\n')
+          print(json.dumps({'parity': True, 'setup_seconds': timings, 'reduction_seconds': reduction}, indent=2))
+          PY

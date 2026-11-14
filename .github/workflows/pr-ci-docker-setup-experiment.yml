@@ -1,0 +1,482 @@
+name: 'PR experiment: Docker E2E setup'
+
+on:
+  pull_request:
+    types: [opened]
+    paths:
+      - '.github/workflows/pr-ci-docker-setup-experiment.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-docker-setup-experiment-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  SOURCE_SHA: b9cfe5fb160c4c261e442e0bc118dac70293d657
+  WP_ENV_CORE: https://downloads.wordpress.org/release/wordpress-7.1.4.zip
+  WP_VERSION: '7.1.4'
+  WP_ENV_PHP_VERSION: '8.3'
+  CI: 'true'
+  BASE_URL: http://localhost:8086
+  FORCE_COLOR: '1'
+
+jobs:
+  plugin-build:
+    name: 'Build shared ZIP and reference test manifest'
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 'Checkout identical source'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: 'Setup pnpm'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          cache: false
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+          package-manager-cache: false
+
+      - name: 'Setup PHP (normal build host)'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '7.4'
+          coverage: none
+
+      - name: 'Identify pnpm store'
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: 'Restore pnpm downloads (no save)'
+        id: pnpm-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Node build cache (no save)'
+        id: node-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./node_modules/.cache
+          key: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Composer downloads (no save)'
+        id: composer-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Install normal full-build dependencies'
+        run: pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
+
+      - &discover-shard
+        name: 'Discover the unchanged Blocks shard'
+        id: discovery
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/docker-setup/discovery-raw.json
+          DISCOVERY_DIRECTORY: ${{ runner.temp }}/docker-setup
+        shell: bash
+        run: |
+          mkdir -p "$DISCOVERY_DIRECTORY"
+          NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=wc-source" pnpm --filter='@woocommerce/plugin-woocommerce' exec playwright test --config=tests/e2e/playwright.config.ts --project=blocks-parallel --shard=1/2 --list --reporter=json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const report = JSON.parse(fs.readFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE, 'utf8'));
+          if (report.errors?.length) throw new Error(JSON.stringify(report.errors));
+          const tests = [];
+          function visit(suites, parents = []) {
+            for (const suite of suites || []) {
+              const titles = [...parents, suite.title];
+              for (const spec of suite.specs || []) {
+                for (const test of spec.tests || []) {
+                  tests.push({
+                    title: [...titles, spec.title], file: spec.file,
+                    line: spec.line, column: spec.column,
+                    projectName: test.projectName, projectId: test.projectId,
+                  });
+                }
+              }
+              visit(suite.suites, titles);
+            }
+          }
+          visit(report.suites);
+          if (!tests.length) throw new Error('No tests were discovered');
+          tests.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+          const manifest = {
+            workers: report.config.workers,
+            projects: report.config.projects.map(({name, retries, repeatEach}) => ({name, retries, repeatEach})),
+            tests,
+          };
+          fs.writeFileSync(path.join(process.env.DISCOVERY_DIRECTORY, 'discovery.json'), JSON.stringify(manifest, null, 2) + '\n');
+          console.log(`Discovered ${tests.length} tests with ${manifest.workers} configured workers`);
+          NODE
+
+      - name: 'Build the real WooCommerce plugin ZIP'
+        env:
+          BUILD_ZIP_WITH_MAKEPOT: '0'
+          SKIP_INSTALL: '1'
+          ZIP_COMPRESSION_LEVEL: '1'
+        run: |
+          pnpm --filter='@woocommerce/plugin-woocommerce' build:zip
+          test -s plugins/woocommerce/woocommerce.zip
+          mkdir -p "$RUNNER_TEMP/e2e-plugin-artifact"
+          cp plugins/woocommerce/woocommerce.zip "$RUNNER_TEMP/e2e-plugin-artifact/"
+          cp "$RUNNER_TEMP/docker-setup/discovery.json" "$RUNNER_TEMP/e2e-plugin-artifact/reference-discovery.json"
+
+      - name: 'Upload ZIP and reference within this run'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: docker-setup-plugin-${{ github.run_id }}
+          path: ${{ runner.temp }}/e2e-plugin-artifact/
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+          overwrite: true
+
+  e2e:
+    name: 'Blocks shard 1/2: ${{ matrix.arm }}'
+    needs: plugin-build
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        arm: [pinned-action, runner-daemon]
+    env:
+      DOCKER_SETUP_ARM: ${{ matrix.arm }}
+    steps:
+      - name: 'Checkout identical source'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: 'Setup pnpm'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          cache: false
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+          package-manager-cache: false
+
+      - name: 'Setup PHP (normal build host)'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '7.4'
+          coverage: none
+
+      - name: 'Identify pnpm store'
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: 'Restore pnpm downloads (no save)'
+        id: pnpm-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Node build cache (no save)'
+        id: node-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./node_modules/.cache
+          key: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Composer downloads (no save)'
+        id: composer-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore browser downloads (no save)'
+        id: browser-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright/
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-playwright-
+
+      - name: 'Install the same full browser dependencies'
+        run: pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
+
+      - name: 'Download the identical shared ZIP and reference'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: docker-setup-plugin-${{ github.run_id }}
+          path: ${{ github.workspace }}/woocommerce-plugin-artifact
+
+      - *discover-shard
+
+      - name: 'Require identical discovery and execution settings'
+        run: |
+          cmp "$RUNNER_TEMP/docker-setup/discovery.json" "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/reference-discovery.json"
+          sha256sum "$RUNNER_TEMP/docker-setup/discovery.json"
+
+      - name: 'Prepare WooCommerce plugin artifact'
+        run: |
+          unzip -q "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce.zip" -d "$GITHUB_WORKSPACE/woocommerce-plugin-artifact"
+          test -f "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce/woocommerce.php"
+
+      - name: 'Use WooCommerce plugin artifact in wp-env'
+        env:
+          PLUGIN_PATH: ${{ github.workspace }}/woocommerce-plugin-artifact/woocommerce
+          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/plugins/woocommerce
+        run: |
+          node .github/workflows/scripts/override-wp-env-plugins.js
+          echo "WC_SHARED_PLUGIN_BUILD_PATH=$PLUGIN_PATH" >> "$GITHUB_ENV"
+
+      - name: 'Prepare daemon evidence and record the original runner'
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/docker-setup"
+          cat > "$RUNNER_TEMP/docker-setup/daemon-trial.py" <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+          import time
+
+          ROOT = Path(os.environ['RUNNER_TEMP']) / 'docker-setup'
+          ROOT.mkdir(parents=True, exist_ok=True)
+          ARM = os.environ['DOCKER_SETUP_ARM']
+          EXPECTED = {'max-download-attempts': '10', 'max-concurrent-downloads': '3'}
+
+
+          def run(*args):
+              return subprocess.check_output(args, text=True).strip()
+
+
+          def save(name, value):
+              (ROOT / name).write_text(json.dumps(value, indent=2, sort_keys=True) + '\n')
+
+
+          def process_args(pid):
+              return Path(f'/proc/{pid}/cmdline').read_bytes().decode().rstrip('\0').split('\0')
+
+
+          def option(args, name, default=None):
+              values = []
+              for i, arg in enumerate(args):
+                  if arg == name:
+                      if i + 1 == len(args):
+                          raise RuntimeError(f'Missing argument for {name}')
+                      values.append(args[i + 1])
+                  elif arg.startswith(name + '='):
+                      values.append(arg.split('=', 1)[1])
+              if len(values) > 1:
+                  raise RuntimeError(f'Duplicate {name}')
+              return values[0] if values else default
+
+
+          def snapshot():
+              if os.environ.get('DOCKER_HOST') or os.environ.get('DOCKER_CONTEXT'):
+                  raise RuntimeError('Explicit Docker host/context is outside this trial')
+              context = run('docker', 'context', 'show')
+              endpoint = json.loads(run('docker', 'context', 'inspect', context))[0]['Endpoints']['docker']['Host']
+              if context == 'default' and endpoint in ('unix:///var/run/docker.sock', 'unix:///run/docker.sock'):
+                  pid = int(run('systemctl', 'show', 'docker.service', '--property=MainPID', '--value'))
+              elif context == 'setup-docker-action' and endpoint.startswith('unix:///home/runner/setup-docker-action/run-'):
+                  pid = int(Path(endpoint.removeprefix('unix://')).with_name('docker.pid').read_text())
+              else:
+                  raise RuntimeError(f'Unexpected daemon context/endpoint: {context} {endpoint}')
+              if pid < 2:
+                  raise RuntimeError('Docker daemon PID is unavailable')
+              args = process_args(pid)
+              executable = run('sudo', 'readlink', '-f', f'/proc/{pid}/exe')
+              if Path(executable).name != 'dockerd':
+                  raise RuntimeError('MainPID is not dockerd')
+              info = json.loads(run('docker', 'info', '--format', '{{json .}}'))
+              keys = ('ID', 'Name', 'ServerVersion', 'DockerRootDir', 'Driver', 'DriverStatus', 'OSType', 'Architecture')
+              image_rows = run('docker', 'image', 'ls', '--no-trunc', '--digests', '--format', '{{json .}}').splitlines()
+              images = sorted(
+                  json.dumps({k: json.loads(row)[k] for k in ('Repository', 'Tag', 'Digest', 'ID')}, sort_keys=True)
+                  for row in image_rows
+              )
+              return {
+                  'context': context, 'endpoint': endpoint, 'pid': pid,
+                  'executable': executable, 'info': {k: info.get(k) for k in keys},
+                  'images': images,
+                  'config_path': option(args, '--config-file', '/etc/docker/daemon.json'),
+                  'cli_download_flags': {name: option(args, '--' + name) for name in EXPECTED},
+                  'versions': {
+                      'docker': run('docker', 'version', '--format', '{{json .}}'),
+                      'compose': run('docker', 'compose', 'version'),
+                      'buildx': run('docker', 'buildx', 'version'),
+                  },
+              }
+
+
+          def matching_reload(events, pid, earliest_ns):
+              for line in events.splitlines(keepends=True):
+                  if not line.endswith("\n"):
+                      continue
+                  event = json.loads(line)
+                  if int(event.get("timeNano", 0)) < earliest_ns:
+                      continue
+                  if event.get('Type') != 'daemon' or event.get('Action') != 'reload':
+                      continue
+                  attributes = event.get('Actor', {}).get('Attributes', {})
+                  if all(str(attributes.get(k)) == value for k, value in EXPECTED.items()):
+                      return {'daemon_pid': pid, 'event': event, 'effective': EXPECTED}
+              return None
+
+
+          if sys.argv[1] == 'before':
+              before = snapshot()
+              if before['context'] != 'default':
+                  raise RuntimeError('Trial must begin on the runner default daemon')
+              save('daemon-before.json', before)
+              save('setup-start.json', {'monotonic_ns': time.monotonic_ns()})
+              sys.exit(0)
+
+          selected = snapshot()
+          save("daemon-selected.json", selected)
+          if any(value is not None for value in selected['cli_download_flags'].values()):
+              raise RuntimeError('Download startup flags conflict with config reload')
+          config_path = Path(selected['config_path'])
+          if ARM == 'runner-daemon' and str(config_path) != '/etc/docker/daemon.json':
+              raise RuntimeError('Runner daemon uses an unexpected configuration file')
+          if ARM == 'pinned-action' and config_path != Path(selected['endpoint'].removeprefix('unix://')).with_name('daemon.json'):
+              raise RuntimeError('Action daemon configuration is not beside its socket')
+          config = json.loads(run('sudo', 'cat', str(config_path))) if config_path.exists() else {}
+          if ARM == 'runner-daemon':
+              config.update({key: int(value) for key, value in EXPECTED.items()})
+          elif ARM != 'pinned-action' or any(config.get(k) != int(v) for k, v in EXPECTED.items()):
+              raise RuntimeError('Pinned action did not write the expected settings')
+          candidate = ROOT / 'daemon-candidate.json'
+          candidate.write_text(json.dumps(config, indent=2) + '\n')
+          subprocess.run(['sudo', selected['executable'], '--validate', '--config-file', str(candidate)], check=True)
+          if ARM == 'runner-daemon':
+              subprocess.run(['sudo', 'mkdir', '-p', str(config_path.parent)], check=True)
+              subprocess.run(['sudo', 'install', '-m', '0644', str(candidate), str(config_path)], check=True)
+          # Configuration may contain registry details; only selected daemon evidence is retained.
+          candidate.unlink()
+          reload_since = str(int(time.time()) - 1)
+          events_path = ROOT / 'reload-events.jsonl'
+          with events_path.open('w') as output:
+              watcher = subprocess.Popen([
+                  'docker', 'events', '--since', reload_since, '--filter', 'type=daemon',
+                  '--filter', 'event=reload', '--format', '{{json .}}',
+              ], stdout=output)
+              try:
+                  signal_ns = time.time_ns()
+                  subprocess.run(['sudo', 'kill', '-s', 'HUP', str(selected['pid'])], check=True)
+                  deadline = time.monotonic() + 15
+                  verified = None
+                  while time.monotonic() < deadline:
+                      if watcher.poll() is not None:
+                          raise RuntimeError('Docker event stream stopped before reload verification')
+                      verified = matching_reload(events_path.read_text(), selected['pid'], signal_ns)
+                      if verified:
+                          break
+                      time.sleep(0.1)
+                  if not verified:
+                      raise RuntimeError('No daemon reload event confirms both effective download settings')
+              finally:
+                  watcher.terminate()
+                  watcher.wait(timeout=5)
+          after = snapshot()
+          for key in ('context', 'endpoint', 'pid', 'info', 'images'):
+              if after[key] != selected[key]:
+                  raise RuntimeError(f'Reload changed daemon {key}')
+          if ARM == 'runner-daemon':
+              before = json.loads((ROOT / 'daemon-before.json').read_text())
+              for key in ('context', 'endpoint', 'pid', 'info', 'images'):
+                  if after[key] != before[key]:
+                      raise RuntimeError(f'Runner daemon setup changed original {key}')
+          start = json.loads((ROOT / 'setup-start.json').read_text())['monotonic_ns']
+          after['setup_seconds_with_evidence'] = (time.monotonic_ns() - start) / 1e9
+          after['reload_verification'] = verified
+          save('daemon-after.json', after)
+          print(json.dumps({
+              'arm': ARM, 'effective': EXPECTED, 'pid': after['pid'], 'endpoint': after['endpoint'],
+              'setup_seconds_with_evidence': after['setup_seconds_with_evidence'],
+          }, indent=2))
+          PY
+          python3 "$RUNNER_TEMP/docker-setup/daemon-trial.py" before
+
+      - name: 'Configure Docker as in CI'
+        if: ${{ matrix.arm == 'pinned-action' }}
+        uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
+        with:
+          daemon-config: |
+            {
+              "max-download-attempts": 10,
+              "max-concurrent-downloads": 3
+            }
+
+      - name: 'Validate, reload and require effective daemon settings'
+        id: docker
+        shell: bash
+        run: python3 "$RUNNER_TEMP/docker-setup/daemon-trial.py" configure
+
+      - name: 'Start the normal Blocks environment, seeds and browser installation'
+        id: environment
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' env:start:blocks
+
+      - name: 'Run the unchanged full Blocks parallel shard'
+        id: tests
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' test:e2e:blocks:parallel --shard=1/2
+
+      - name: 'Record arm outcome'
+        if: ${{ always() }}
+        env:
+          ARM: ${{ matrix.arm }}
+          RESULT: ${{ job.status }}
+          DISCOVERY_RESULT: ${{ steps.discovery.outcome }}
+          ENVIRONMENT_RESULT: ${{ steps.environment.outcome }}
+          TEST_RESULT: ${{ steps.tests.outcome }}
+          PNPM_HIT: ${{ steps.pnpm-cache.outputs.cache-hit }}
+          NODE_HIT: ${{ steps.node-cache.outputs.cache-hit }}
+          COMPOSER_HIT: ${{ steps.composer-cache.outputs.cache-hit }}
+          BROWSER_HIT: ${{ steps.browser-cache.outputs.cache-hit }}
+        run: |
+          {
+            echo "Arm: $ARM; result: $RESULT; source: $SOURCE_SHA"
+            echo "PHP: $WP_ENV_PHP_VERSION; WordPress: $WP_VERSION; Docker setup: $DOCKER_SETUP_ARM"
+            echo "Discovery: $DISCOVERY_RESULT; environment: $ENVIRONMENT_RESULT; tests: $TEST_RESULT"
+            echo "Exact cache hits: pnpm=$PNPM_HIT node=$NODE_HIT composer=$COMPOSER_HIT browser=$BROWSER_HIT"
+            echo 'Project blocks-parallel; shard 1/2; worker/retry configuration unchanged.'
+            if [[ -f "$RUNNER_TEMP/docker-setup/daemon-after.json" ]]; then cat "$RUNNER_TEMP/docker-setup/daemon-after.json"; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 'Upload small discovery and daemon evidence'
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: docker-setup-discovery-${{ matrix.arm }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/docker-setup/discovery.json
+            ${{ runner.temp }}/docker-setup/daemon-before.json
+            ${{ runner.temp }}/docker-setup/daemon-selected.json
+            ${{ runner.temp }}/docker-setup/daemon-after.json
+            ${{ runner.temp }}/docker-setup/reload-events.jsonl
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true

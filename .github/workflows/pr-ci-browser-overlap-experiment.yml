@@ -1,0 +1,473 @@
+name: 'PR experiment: browser setup overlaps ZIP build'
+
+on:
+  pull_request:
+    # Repeat measurements through the original Actions runs when needed.
+    types: [opened]
+    paths:
+      - '.github/workflows/pr-ci-browser-overlap-experiment.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-browser-overlap-experiment-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  SOURCE_SHA: b9cfe5fb160c4c261e442e0bc118dac70293d657
+  WP_ENV_CORE: https://downloads.wordpress.org/release/wordpress-7.1.4.zip
+  WP_VERSION: '7.1.4'
+  WP_ENV_PHP_VERSION: '8.3'
+  CI: 'true'
+  BASE_URL: http://localhost:8086
+  FORCE_COLOR: '1'
+
+jobs:
+  plugin-build:
+    name: 'Build shared ZIP and reference test manifest'
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 'Checkout identical source'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: 'Setup pnpm'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          cache: false
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+          package-manager-cache: false
+
+      - name: 'Setup PHP (normal build host)'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '7.4'
+          coverage: none
+
+      - name: 'Identify pnpm store'
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: 'Restore pnpm downloads (no save)'
+        id: pnpm-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Node build cache (no save)'
+        id: node-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./node_modules/.cache
+          key: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Composer downloads (no save)'
+        id: composer-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Install normal full-build dependencies'
+        run: pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
+
+      - &discover-shard
+        name: 'Discover the unchanged Blocks shard'
+        id: discovery
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/browser-overlap/discovery-raw.json
+          DISCOVERY_DIRECTORY: ${{ runner.temp }}/browser-overlap
+        shell: bash
+        run: |
+          mkdir -p "$DISCOVERY_DIRECTORY"
+          NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=wc-source" pnpm --filter='@woocommerce/plugin-woocommerce' exec playwright test --config=tests/e2e/playwright.config.ts --project=blocks-parallel --shard=1/2 --list --reporter=json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const report = JSON.parse(fs.readFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE, 'utf8'));
+          if (report.errors?.length) throw new Error(JSON.stringify(report.errors));
+          const tests = [];
+          function visit(suites, parents = []) {
+            for (const suite of suites || []) {
+              const titles = [...parents, suite.title];
+              for (const spec of suite.specs || []) {
+                for (const test of spec.tests || []) {
+                  tests.push({
+                    title: [...titles, spec.title], file: spec.file,
+                    line: spec.line, column: spec.column,
+                    projectName: test.projectName, projectId: test.projectId,
+                  });
+                }
+              }
+              visit(suite.suites, titles);
+            }
+          }
+          visit(report.suites);
+          if (!tests.length) throw new Error('No tests were discovered');
+          tests.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+          const manifest = {
+            workers: report.config.workers,
+            projects: report.config.projects.map(({name, retries, repeatEach}) => ({name, retries, repeatEach})),
+            tests,
+          };
+          fs.writeFileSync(path.join(process.env.DISCOVERY_DIRECTORY, 'discovery.json'), JSON.stringify(manifest, null, 2) + '\n');
+          console.log(`Discovered ${tests.length} tests with ${manifest.workers} configured workers`);
+          NODE
+
+      - name: 'Build the real WooCommerce plugin ZIP'
+        env:
+          BUILD_ZIP_WITH_MAKEPOT: '0'
+          SKIP_INSTALL: '1'
+          ZIP_COMPRESSION_LEVEL: '1'
+        run: |
+          pnpm --filter='@woocommerce/plugin-woocommerce' build:zip
+          test -s plugins/woocommerce/woocommerce.zip
+          mkdir -p "$RUNNER_TEMP/e2e-plugin-artifact"
+          cp plugins/woocommerce/woocommerce.zip "$RUNNER_TEMP/e2e-plugin-artifact/"
+          cp "$RUNNER_TEMP/browser-overlap/discovery.json" "$RUNNER_TEMP/e2e-plugin-artifact/reference-discovery.json"
+          git rev-parse HEAD > "$RUNNER_TEMP/e2e-plugin-artifact/source-sha.txt"
+          test "$(cat "$RUNNER_TEMP/e2e-plugin-artifact/source-sha.txt")" = "$SOURCE_SHA"
+
+      - name: 'Upload ZIP and reference within this run'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-overlap-plugin-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/e2e-plugin-artifact/
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+          overwrite: true
+
+  browser-overlap:
+    name: 'Blocks shard 1/2: prepare before ZIP'
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+    steps: &browser-steps
+      - name: 'Check producer allocation before reserving setup work'
+        id: preflight
+        timeout-minutes: 1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          CHECK_MODE: preflight
+          PRODUCER_NAME: Build shared ZIP and reference test manifest
+          ARTIFACT_NAME: browser-overlap-plugin-${{ github.run_id }}-${{ github.run_attempt }}
+        with:
+          retries: 0
+          script: &producer-check-script |
+            const fs = require('node:fs');
+            const path = require('node:path');
+            const { performance } = require('node:perf_hooks');
+            const directory = path.join(process.env.RUNNER_TEMP, 'browser-overlap');
+            fs.mkdirSync(directory, { recursive: true });
+            const filename = path.join(directory, 'timing.json');
+            const mode = process.env.CHECK_MODE;
+            const evidence = fs.existsSync(filename) ? JSON.parse(fs.readFileSync(filename, 'utf8')) : {
+              job: process.env.GITHUB_JOB,
+              run_id: context.runId,
+              attempt: Number(process.env.GITHUB_RUN_ATTEMPT),
+              source_sha: process.env.SOURCE_SHA,
+              artifact_name: process.env.ARTIFACT_NAME,
+              polls: [],
+            };
+            const started = performance.now();
+            const budget = mode === 'preflight' ? 15000 : 180000;
+            const remaining = () => Math.max(0, budget - (performance.now() - started));
+            const now = () => new Date().toISOString();
+            const save = () => fs.writeFileSync(filename, JSON.stringify(evidence, null, 2) + '\n');
+            const describe = (job) => ({
+              id: job.id, run_id: job.run_id, status: job.status, conclusion: job.conclusion,
+              runner_id: job.runner_id, runner_name: job.runner_name,
+              started_at: job.started_at, completed_at: job.completed_at,
+            });
+            async function request(route, parameters) {
+              const available = remaining();
+              if (available <= 0) throw new Error('deadline-exceeded');
+              const controller = new AbortController();
+              const timer = setTimeout(() => controller.abort(), Math.min(15000, available));
+              try {
+                return await github.request(route, {
+                  ...context.repo, ...parameters,
+                  request: { signal: controller.signal },
+                });
+              } finally {
+                clearTimeout(timer);
+              }
+            }
+            async function producer() {
+              const response = await request('GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/jobs', {
+                run_id: context.runId, attempt_number: evidence.attempt, per_page: 100,
+              });
+              if (response.data.total_count > 100) throw new Error('unexpected-job-count');
+              const matches = response.data.jobs.filter(job => job.name === process.env.PRODUCER_NAME);
+              if (matches.length !== 1) throw new Error('producer-not-uniquely-visible');
+              const job = matches[0];
+              if (job.run_id !== context.runId) throw new Error('producer-run-mismatch');
+              return job;
+            }
+            function checkProducer(job) {
+              if (job.status === 'completed') {
+                if (job.conclusion !== 'success') throw new Error('producer-completed-' + job.conclusion);
+                return;
+              }
+              if (job.status !== 'in_progress' || !(job.runner_id > 0)) {
+                throw new Error('inconclusive-producer-' + job.status + '-runner-' + job.runner_id);
+              }
+            }
+            try {
+              if (mode === 'preflight') {
+                evidence.preflight_started_at = now();
+                save();
+                const job = await producer();
+                evidence.preflight_producer = describe(job);
+                evidence.preflight_checked_at = now();
+                checkProducer(job);
+                evidence.preflight_accepted = true;
+                evidence.overlap_eligible = job.status === 'in_progress';
+                core.info('Producer preflight: ' + JSON.stringify(evidence.preflight_producer));
+              } else {
+                if (!evidence.preflight_accepted) throw new Error('preflight-not-accepted');
+                evidence.preparation_finished_at = now();
+                evidence.preparation_seconds = (Date.parse(evidence.preparation_finished_at) - Date.parse(evidence.preflight_checked_at)) / 1000;
+                evidence.wait_started_at = evidence.preparation_finished_at;
+                save();
+                let accepted = false;
+                while (remaining() > 0) {
+                  const poll = { observed_at: now(), elapsed_seconds: (performance.now() - started) / 1000 };
+                  evidence.polls.push(poll);
+                  try {
+                    const job = await producer();
+                    poll.producer = describe(job);
+                    if (job.id !== evidence.preflight_producer.id) throw new Error('producer-job-changed');
+                    checkProducer(job);
+                    if (job.status === 'completed') {
+                      const response = await request('GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts', {
+                        run_id: context.runId, per_page: 100,
+                      });
+                      if (response.data.total_count > 100) throw new Error('unexpected-artifact-count');
+                      const matches = response.data.artifacts.filter(artifact => artifact.name === process.env.ARTIFACT_NAME && !artifact.expired);
+                      if (matches.length > 1) throw new Error('artifact-not-unique');
+                      const artifact = matches[0];
+                      if (artifact) {
+                        if (remaining() <= 0) throw new Error('deadline-exceeded');
+                        if (!(artifact.size_in_bytes > 0) || (artifact.workflow_run && artifact.workflow_run.id !== context.runId)) {
+                          throw new Error('invalid-artifact');
+                        }
+                        evidence.artifact = { id: artifact.id, name: artifact.name, created_at: artifact.created_at, size_in_bytes: artifact.size_in_bytes, digest: artifact.digest };
+                        evidence.producer_completed_at = job.completed_at;
+                        evidence.barrier_accepted_at = now();
+                        core.setOutput('artifact_id', artifact.id);
+                        accepted = true;
+                      }
+                    }
+                  } catch (error) {
+                    poll.error = { name: error.name, status: error.status, message: error.message };
+                    const transient = error.status === 429 || error.status >= 500 || error.name === 'AbortError';
+                    save();
+                    if (!transient) throw error;
+                  }
+                  save();
+                  if (accepted) break;
+                  if (remaining() > 0) await new Promise(resolve => setTimeout(resolve, Math.min(10000, remaining())));
+                }
+                evidence.allocated_wait_seconds = (performance.now() - started) / 1000;
+                evidence.wait_finished_at = now();
+                if (!accepted) throw new Error('inconclusive-artifact-barrier-deadline-exceeded');
+                evidence.barrier_accepted = true;
+                core.info('Allocated artifact wait: ' + evidence.allocated_wait_seconds.toFixed(3) + ' seconds');
+              }
+            } catch (error) {
+              evidence.failure = { mode, observed_at: now(), name: error.name, status: error.status, message: error.message };
+              if (mode !== 'preflight') {
+                evidence.allocated_wait_seconds = (performance.now() - started) / 1000;
+                evidence.wait_finished_at = now();
+              }
+              core.setFailed('Producer/artifact check failed or is inconclusive: ' + error.message);
+            } finally {
+              save();
+            }
+
+      - name: 'Checkout identical source'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: 'Assert pinned source'
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+
+      - name: 'Setup pnpm'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          cache: false
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+          package-manager-cache: false
+
+      - name: 'Setup PHP (normal build host)'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '7.4'
+          coverage: none
+
+      - name: 'Identify pnpm store'
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: 'Restore pnpm downloads (no save)'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Node build cache (no save)'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./node_modules/.cache
+          key: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Composer downloads (no save)'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore browser downloads (no save)'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright/
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-playwright-
+
+      - name: 'Install the same full browser dependencies'
+        run: pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
+
+      - *discover-shard
+
+      - name: 'Configure Docker as in CI before the ZIP barrier'
+        uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
+        with:
+          daemon-config: |
+            {
+              "max-download-attempts": 10,
+              "max-concurrent-downloads": 3
+            }
+
+      - name: 'Require producer success and the attempt-specific artifact'
+        id: barrier
+        timeout-minutes: 4
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          CHECK_MODE: barrier
+          PRODUCER_NAME: Build shared ZIP and reference test manifest
+          ARTIFACT_NAME: browser-overlap-plugin-${{ github.run_id }}-${{ github.run_attempt }}
+        with:
+          retries: 0
+          script: *producer-check-script
+
+      - name: 'Download the identical shared ZIP and reference'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          artifact-ids: ${{ steps.barrier.outputs.artifact_id }}
+          digest-mismatch: error
+          path: ${{ github.workspace }}/woocommerce-plugin-artifact
+
+      - name: 'Assert artifact source and identical test discovery'
+        run: |
+          test "$(cat "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/source-sha.txt")" = "$SOURCE_SHA"
+          cmp "$RUNNER_TEMP/browser-overlap/discovery.json" "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/reference-discovery.json"
+          sha256sum "$RUNNER_TEMP/browser-overlap/discovery.json"
+
+      - name: 'Prepare WooCommerce plugin artifact'
+        run: |
+          unzip -q "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce.zip" -d "$GITHUB_WORKSPACE/woocommerce-plugin-artifact"
+          test -f "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce/woocommerce.php"
+
+      - name: 'Use WooCommerce plugin artifact in wp-env'
+        env:
+          PLUGIN_PATH: ${{ github.workspace }}/woocommerce-plugin-artifact/woocommerce
+          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/plugins/woocommerce
+        run: |
+          node .github/workflows/scripts/override-wp-env-plugins.js
+          echo "WC_SHARED_PLUGIN_BUILD_PATH=$PLUGIN_PATH" >> "$GITHUB_ENV"
+
+      - name: 'Start the unmodified Blocks environment, seeds and browser installation'
+        id: environment
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' env:start:blocks
+
+      - name: 'Run the unchanged full Blocks parallel shard'
+        id: tests
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' test:e2e:blocks:parallel --shard=1/2
+
+      - name: 'Record measured overlap and allocated waiting cost'
+        if: ${{ always() }}
+        env:
+          JOB_RESULT: ${{ job.status }}
+          TEST_RESULT: ${{ steps.tests.outcome }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const filename = path.join(process.env.RUNNER_TEMP, 'browser-overlap/timing.json');
+          const evidence = fs.existsSync(filename) ? JSON.parse(fs.readFileSync(filename, 'utf8')) : {};
+          evidence.browser_finished_at = new Date().toISOString();
+          evidence.job_result = process.env.JOB_RESULT;
+          evidence.test_result = process.env.TEST_RESULT;
+          fs.mkdirSync(path.dirname(filename), {recursive:true});
+          fs.writeFileSync(filename, JSON.stringify(evidence, null, 2) + '\n');
+          const lines = [
+            `Job: ${process.env.GITHUB_JOB}; result: ${process.env.JOB_RESULT}; tests: ${process.env.TEST_RESULT}`,
+            `Producer at preflight: ${evidence.preflight_producer?.status}/${evidence.preflight_producer?.conclusion}; allocated runner ${evidence.preflight_producer?.runner_id}`,
+            `Overlap eligible at preflight: ${evidence.overlap_eligible}; preparation: ${evidence.preparation_seconds} seconds`,
+            `Allocated artifact waiting cost: ${evidence.allocated_wait_seconds} seconds`,
+            'Compare run/job/step API timestamps to separate queue delay, useful preparation, artifact waiting and test time.',
+            'Early allocation adds idle runner cost and can worsen shared queues. This pair does not authorize full-matrix rollout.',
+          ];
+          if (evidence.failure) lines.push('Failed/inconclusive: ' + evidence.failure.message);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n\n') + '\n');
+          NODE
+
+      - name: 'Upload only small run-local timing and discovery evidence'
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-overlap-evidence-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/browser-overlap/timing.json
+            ${{ runner.temp }}/browser-overlap/discovery.json
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
+
+  browser-baseline:
+    name: 'Blocks shard 1/2: prepare after ZIP'
+    needs: plugin-build
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+    steps: *browser-steps

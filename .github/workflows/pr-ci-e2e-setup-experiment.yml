@@ -1,0 +1,353 @@
+name: 'PR experiment: Blocks E2E setup'
+
+on:
+  pull_request:
+    # Repeat measurements through the original Actions runs when needed.
+    types: [opened]
+    paths:
+      - '.github/workflows/pr-ci-e2e-setup-experiment.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-e2e-setup-experiment-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  SOURCE_SHA: b9cfe5fb160c4c261e442e0bc118dac70293d657
+  WP_ENV_CORE: https://downloads.wordpress.org/release/wordpress-7.1.4.zip
+  WP_VERSION: '7.1.4'
+  WP_ENV_PHP_VERSION: '8.3'
+  CI: 'true'
+  BASE_URL: http://localhost:8086
+  FORCE_COLOR: '1'
+
+jobs:
+  plugin-build:
+    name: 'Build shared ZIP and reference test manifest'
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 'Checkout identical source'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: 'Setup pnpm'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          cache: false
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+          package-manager-cache: false
+
+      - name: 'Setup PHP (normal build host)'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '7.4'
+          coverage: none
+
+      - name: 'Identify pnpm store'
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: 'Restore pnpm downloads (no save)'
+        id: pnpm-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Node build cache (no save)'
+        id: node-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./node_modules/.cache
+          key: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Composer downloads (no save)'
+        id: composer-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Install normal full-build dependencies'
+        run: pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
+
+      - &discover-shard
+        name: 'Discover the unchanged Blocks shard'
+        id: discovery
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/e2e-setup/discovery-raw.json
+          DISCOVERY_DIRECTORY: ${{ runner.temp }}/e2e-setup
+        shell: bash
+        run: |
+          mkdir -p "$DISCOVERY_DIRECTORY"
+          NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=wc-source" pnpm --filter='@woocommerce/plugin-woocommerce' exec playwright test --config=tests/e2e/playwright.config.ts --project=blocks-parallel --shard=1/2 --list --reporter=json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const report = JSON.parse(fs.readFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE, 'utf8'));
+          if (report.errors?.length) throw new Error(JSON.stringify(report.errors));
+          const tests = [];
+          function visit(suites, parents = []) {
+            for (const suite of suites || []) {
+              const titles = [...parents, suite.title];
+              for (const spec of suite.specs || []) {
+                for (const test of spec.tests || []) {
+                  tests.push({
+                    title: [...titles, spec.title], file: spec.file,
+                    line: spec.line, column: spec.column,
+                    projectName: test.projectName, projectId: test.projectId,
+                  });
+                }
+              }
+              visit(suite.suites, titles);
+            }
+          }
+          visit(report.suites);
+          if (!tests.length) throw new Error('No tests were discovered');
+          tests.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+          const manifest = {
+            workers: report.config.workers,
+            projects: report.config.projects.map(({name, retries, repeatEach}) => ({name, retries, repeatEach})),
+            tests,
+          };
+          fs.writeFileSync(path.join(process.env.DISCOVERY_DIRECTORY, 'discovery.json'), JSON.stringify(manifest, null, 2) + '\n');
+          console.log(`Discovered ${tests.length} tests with ${manifest.workers} configured workers`);
+          NODE
+
+      - name: 'Build the real WooCommerce plugin ZIP'
+        env:
+          BUILD_ZIP_WITH_MAKEPOT: '0'
+          SKIP_INSTALL: '1'
+          ZIP_COMPRESSION_LEVEL: '1'
+        run: |
+          pnpm --filter='@woocommerce/plugin-woocommerce' build:zip
+          test -s plugins/woocommerce/woocommerce.zip
+          mkdir -p "$RUNNER_TEMP/e2e-plugin-artifact"
+          cp plugins/woocommerce/woocommerce.zip "$RUNNER_TEMP/e2e-plugin-artifact/"
+          cp "$RUNNER_TEMP/e2e-setup/discovery.json" "$RUNNER_TEMP/e2e-plugin-artifact/reference-discovery.json"
+
+      - name: 'Upload ZIP and reference within this run'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-setup-plugin-${{ github.run_id }}
+          path: ${{ runner.temp }}/e2e-plugin-artifact/
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+          overwrite: true
+
+  e2e:
+    name: 'Blocks shard 1/2: ${{ matrix.arm }}'
+    needs: plugin-build
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - arm: baseline
+            flush: default
+          - arm: flush2
+            flush: '2'
+    env:
+      FLUSH_POLICY: ${{ matrix.flush }}
+    steps:
+      - name: 'Checkout identical source'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: 'Setup pnpm'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          cache: false
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+          package-manager-cache: false
+
+      - name: 'Setup PHP (normal build host)'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '7.4'
+          coverage: none
+
+      - name: 'Identify pnpm store'
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: 'Restore pnpm downloads (no save)'
+        id: pnpm-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Node build cache (no save)'
+        id: node-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./node_modules/.cache
+          key: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Composer downloads (no save)'
+        id: composer-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore browser downloads (no save)'
+        id: browser-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright/
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-playwright-
+
+      - name: 'Install the same full browser dependencies'
+        run: pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
+
+      - name: 'Download the identical shared ZIP and reference'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: e2e-setup-plugin-${{ github.run_id }}
+          path: ${{ github.workspace }}/woocommerce-plugin-artifact
+
+      - *discover-shard
+
+      - name: 'Require identical discovery and execution settings'
+        run: |
+          cmp "$RUNNER_TEMP/e2e-setup/discovery.json" "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/reference-discovery.json"
+          sha256sum "$RUNNER_TEMP/e2e-setup/discovery.json"
+
+      - name: 'Prepare WooCommerce plugin artifact'
+        run: |
+          unzip -q "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce.zip" -d "$GITHUB_WORKSPACE/woocommerce-plugin-artifact"
+          test -f "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce/woocommerce.php"
+
+      - name: 'Use WooCommerce plugin artifact in wp-env'
+        env:
+          PLUGIN_PATH: ${{ github.workspace }}/woocommerce-plugin-artifact/woocommerce
+          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/plugins/woocommerce
+        run: |
+          node .github/workflows/scripts/override-wp-env-plugins.js
+          echo "WC_SHARED_PLUGIN_BUILD_PATH=$PLUGIN_PATH" >> "$GITHUB_ENV"
+
+      - name: 'Wrap the original lifecycle to observe the disposable DB policy'
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/e2e-after-start.sh" <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          exec > >(tee "$RUNNER_TEMP/e2e-db-policy.log") 2>&1
+          pnpm wp-env:e2e run cli wp db query 'SELECT @@GLOBAL.innodb_flush_log_at_trx_commit AS flush_before'
+          expected=''
+          if [[ "$FLUSH_POLICY" == '2' ]]; then
+            pnpm wp-env:e2e run cli wp db query 'SET GLOBAL innodb_flush_log_at_trx_commit=2'
+            expected=2
+          fi
+          pnpm wp-env:e2e run cli env EXPECTED_FLUSH="$expected" wp eval '
+          global $wpdb;
+          $value = (string) $wpdb->get_var("SELECT @@GLOBAL.innodb_flush_log_at_trx_commit");
+          echo "flush_after=$value\n";
+          if (getenv("EXPECTED_FLUSH") !== "" && $value !== getenv("EXPECTED_FLUSH")) { exit(1); }
+          '
+          ./tests/e2e/bin/test-env-setup.sh
+          SH
+          chmod +x "$RUNNER_TEMP/e2e-after-start.sh"
+          node <<'NODE'
+          const fs = require('node:fs');
+          const root = process.env.GITHUB_WORKSPACE + '/plugins/woocommerce/';
+          const original = JSON.parse(fs.readFileSync(root + '.wp-env.e2e.json', 'utf8'));
+          if (original.lifecycleScripts.afterStart !== './tests/e2e/bin/test-env-setup.sh') {
+            throw new Error('The original afterStart changed; update the trial wrapper explicitly');
+          }
+          const target = root + '.wp-env.e2e.override.json';
+          const override = JSON.parse(fs.readFileSync(target, 'utf8'));
+          override.lifecycleScripts = {
+            ...original.lifecycleScripts,
+            ...override.lifecycleScripts,
+            afterStart: process.env.RUNNER_TEMP + '/e2e-after-start.sh',
+          };
+          fs.writeFileSync(target, JSON.stringify(override, null, 2) + '\n');
+          NODE
+
+      - name: 'Configure Docker as in CI'
+        uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
+        with:
+          daemon-config: |
+            {
+              "max-download-attempts": 10,
+              "max-concurrent-downloads": 3
+            }
+
+      - name: 'Start the normal Blocks environment, seeds and browser installation'
+        id: environment
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' env:start:blocks
+
+      - name: 'Verify the measured database policy before tests'
+        run: |
+          cat "$RUNNER_TEMP/e2e-db-policy.log"
+          expected=1
+          if [[ "$FLUSH_POLICY" == '2' ]]; then expected=2; fi
+          grep -Fx "flush_after=$expected" "$RUNNER_TEMP/e2e-db-policy.log"
+
+      - name: 'Run the unchanged full Blocks parallel shard'
+        id: tests
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' test:e2e:blocks:parallel --shard=1/2
+
+      - name: 'Record arm outcome'
+        if: ${{ always() }}
+        env:
+          ARM: ${{ matrix.arm }}
+          RESULT: ${{ job.status }}
+          DISCOVERY_RESULT: ${{ steps.discovery.outcome }}
+          ENVIRONMENT_RESULT: ${{ steps.environment.outcome }}
+          TEST_RESULT: ${{ steps.tests.outcome }}
+          PNPM_HIT: ${{ steps.pnpm-cache.outputs.cache-hit }}
+          NODE_HIT: ${{ steps.node-cache.outputs.cache-hit }}
+          COMPOSER_HIT: ${{ steps.composer-cache.outputs.cache-hit }}
+          BROWSER_HIT: ${{ steps.browser-cache.outputs.cache-hit }}
+        run: |
+          {
+            echo "Arm: $ARM; result: $RESULT; source: $SOURCE_SHA"
+            echo "PHP: $WP_ENV_PHP_VERSION; WordPress: $WP_VERSION; flush policy: $FLUSH_POLICY"
+            echo "Discovery: $DISCOVERY_RESULT; environment: $ENVIRONMENT_RESULT; tests: $TEST_RESULT"
+            echo "Exact cache hits: pnpm=$PNPM_HIT node=$NODE_HIT composer=$COMPOSER_HIT browser=$BROWSER_HIT"
+            echo 'Project blocks-parallel; shard 1/2; worker/retry configuration unchanged.'
+            echo 'flush2 changes crash durability on a disposable database; SQL transaction/isolation/rollback semantics remain.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 'Upload only the small discovery manifest'
+        if: ${{ !cancelled() && steps.discovery.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-setup-discovery-${{ matrix.arm }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/e2e-setup/discovery.json
+            ${{ runner.temp }}/e2e-db-policy.log
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true

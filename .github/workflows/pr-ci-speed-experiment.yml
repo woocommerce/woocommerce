@@ -1,0 +1,91 @@
+name: '[WIP] PR CI speed experiment'
+
+on:
+  pull_request:
+    # Repeat this trial through Actions reruns, not later experiment commits.
+    types: [opened]
+    paths:
+      - '.github/workflows/pr-ci-speed-experiment.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-speed-experiment-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  checkout:
+    if: github.repository == 'woocommerce/woocommerce' && github.head_ref == 'research/pr-ci-speedups' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        repeat: [1, 2, 3]
+        variant: [full, blobless]
+    env:
+      SOURCE_SHA: b9cfe5fb160c4c261e442e0bc118dac70293d657
+      BASE_SHA: 46f3bf9f1d6
+      VARIANT: ${{ matrix.variant }}
+      REPEAT: ${{ matrix.repeat }}
+    steps:
+      - name: Start measurement
+        run: echo "CHECKOUT_START=$(date +%s%N)" >> "$GITHUB_ENV"
+
+      - name: Checkout pinned source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 0
+          filter: ${{ matrix.variant == 'blobless' && 'blob:none' || '' }}
+          persist-credentials: false
+
+      - name: Verify history and measure diff consumption
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import subprocess
+          import time
+
+          checkout_end = time.time_ns()
+          def git(*args):
+              return subprocess.check_output(['git', *args])
+
+          assert git('rev-parse', 'HEAD').decode().strip() == os.environ['SOURCE_SHA']
+          assert git('rev-parse', '--is-shallow-repository').strip() == b'false'
+          base = git('rev-parse', os.environ['BASE_SHA']).decode().strip()
+          merge_base = git('merge-base', 'HEAD', base).decode().strip()
+          assert merge_base == base
+          names = git('diff', '--name-only', '--diff-filter=d', merge_base, 'HEAD')
+          patch = git('diff', '--binary', merge_base, 'HEAD')
+          result = {
+              'variant': os.environ['VARIANT'],
+              'repeat': int(os.environ['REPEAT']),
+              'source': os.environ['SOURCE_SHA'],
+              'merge_base': merge_base,
+              'tree': git('rev-parse', 'HEAD^{tree}').decode().strip(),
+              'changed_paths_sha256': hashlib.sha256(names).hexdigest(),
+              'patch_sha256': hashlib.sha256(patch).hexdigest(),
+              'checkout_seconds': (checkout_end - int(os.environ['CHECKOUT_START'])) / 1e9,
+              'total_seconds': (time.time_ns() - int(os.environ['CHECKOUT_START'])) / 1e9,
+              'object_stats': git('count-objects', '-v').decode(),
+          }
+          path = os.path.join(os.environ['RUNNER_TEMP'], 'checkout-result.json')
+          with open(path, 'w') as output:
+              json.dump(result, output, indent=2)
+          print(json.dumps(result, indent=2))
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('```json\n' + json.dumps(result, indent=2) + '\n```\n')
+          PY
+
+      - name: Save measurement
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: checkout-${{ matrix.variant }}-${{ matrix.repeat }}
+          path: ${{ runner.temp }}/checkout-result.json
+          retention-days: 3
