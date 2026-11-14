@@ -7,5 +7,7 @@ export type {
 	InputProps,
 	CheckboxProps,
 	SelectControlProps,
+	TextControlProps,
+	RadioControlProps,
 	ConsumerInputProps,
 } from './types';

@@ -33,6 +33,8 @@ import {
 	InputProps,
 	PropsWithChildrenFunction,
 	SelectControlProps,
+	TextControlProps,
+	RadioControlProps,
 	FormContextType,
 	FormErrors,
 } from './types';
@@ -352,13 +354,37 @@ function FormComponent< Values extends Record< string, any > = any >(
 		] );
 	}
 
+	function getTextControlProps< P extends keyof Values >(
+		name: P,
+		inputProps: ConsumerInputProps< Values > = {}
+	): TextControlProps< Values, Values[ P ] > {
+		return _omit( getInputProps( name, inputProps ), [
+			'checked',
+			'selected',
+		] );
+	}
+
+	function getRadioControlProps< P extends keyof Values >(
+		name: P,
+		inputProps: ConsumerInputProps< Values > = {}
+	): RadioControlProps< Values, Values[ P ] > {
+		const radioControlProps = getInputProps( name, inputProps );
+		return {
+			..._omit( radioControlProps, [ 'value', 'checked', 'selected' ] ),
+			selected:
+				radioControlProps.value === undefined
+					? undefined
+					: String( radioControlProps.value ),
+		};
+	}
+
 	function getSelectControlProps< P extends keyof Values >(
 		name: P,
 		inputProps: ConsumerInputProps< Values > = {}
 	): SelectControlProps< Values, Values[ P ] > {
 		const selectControlProps = getInputProps( name, inputProps );
 		return {
-			...selectControlProps,
+			..._omit( selectControlProps, [ 'checked', 'selected', 'value' ] ),
 			value:
 				selectControlProps.value === undefined
 					? undefined
@@ -384,6 +410,8 @@ function FormComponent< Values extends Record< string, any > = any >(
 			getCheckboxControlProps,
 			getInputProps,
 			getSelectControlProps,
+			getTextControlProps,
+			getRadioControlProps,
 			isValidForm: ! Object.keys( errors ).length,
 			resetForm,
 		};
