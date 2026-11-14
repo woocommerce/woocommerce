@@ -25,6 +25,7 @@ import fastDeepEqual from 'fast-deep-equal/es6';
 /**
  * Internal dependencies
  */
+import { compileSchema, hasUncompilablePattern } from './compile-schema';
 import { hasSchemaRules } from './utils';
 
 type FormErrors = Partial< {
@@ -89,6 +90,7 @@ const getErrorsMap = (
 };
 
 const EMPTY_OBJECT: FormErrors = {};
+
 /**
  * Combines address fields, including fields from the locale, and sorts them by index.
  */
@@ -156,9 +158,23 @@ export const useFormValidation = (
 		return acc;
 	}, {} );
 
+	// A field whose pattern the browser rejects is left out rather than allowed
+	// to fail the compile, which would turn off browser validation for every
+	// other field in the form. Dropping just that field keeps the rest in
+	// browser validation and leaves the one field to server-side validation.
+	const compilableSchema = Object.entries( partialSchema ).reduce<
+		typeof partialSchema
+	>( ( acc, [ fieldKey, fieldSchema ] ) => {
+		if ( ! hasUncompilablePattern( fieldSchema ) && fieldSchema ) {
+			acc[ fieldKey as keyof FormFields ] = fieldSchema;
+		}
+
+		return acc;
+	}, {} );
+
 	let schemaErrorsMap = EMPTY_OBJECT;
 
-	if ( Object.keys( partialSchema ).length > 0 && parser ) {
+	if ( Object.keys( compilableSchema ).length > 0 && parser ) {
 		const schema = {
 			type: 'object',
 			properties: {},
@@ -171,7 +187,7 @@ export const useFormValidation = (
 						properties: {
 							shipping_address: {
 								type: 'object',
-								properties: partialSchema,
+								properties: compilableSchema,
 							},
 						},
 					},
@@ -184,7 +200,7 @@ export const useFormValidation = (
 						properties: {
 							billing_address: {
 								type: 'object',
-								properties: partialSchema,
+								properties: compilableSchema,
 							},
 						},
 					},
@@ -197,18 +213,18 @@ export const useFormValidation = (
 						properties: {
 							additional_fields: {
 								type: 'object',
-								properties: partialSchema,
+								properties: compilableSchema,
 							},
 						},
 					},
 				};
 				break;
 		}
-		const validate = parser.compile( schema );
+		const validate = compileSchema( parser, schema );
 		// AJV mutates validate function and errors to it, so we reach from it. Result only has a boolean value if errors are present.
-		const result = validate( data );
+		const result = validate ? validate( data ) : true;
 
-		if ( ! result && validate.errors ) {
+		if ( ! result && validate?.errors ) {
 			schemaErrorsMap = getErrorsMap( validate.errors, formFields );
 		} else {
 			schemaErrorsMap = EMPTY_OBJECT;

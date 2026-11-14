@@ -431,6 +431,116 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox A field whose pattern JavaScript cannot compile is registered with a warning and keeps its rules.
+	 *
+	 * @testWith ["^[0-9]{3}\\-[0-9]{4}$"]
+	 *           ["(?i)^abc$"]
+	 *           ["^\\@x$"]
+	 *           ["\\Aabc\\z"]
+	 *           ["^a++$"]
+	 *           ["^[[:alpha:]]+$"]
+	 *           ["^A\\-", "required"]
+	 *           ["^A\\-", "hidden"]
+	 *
+	 * @param string $pattern    The pattern the browser cannot compile.
+	 * @param string $rule_field The field option containing the pattern.
+	 */
+	public function test_field_with_pattern_javascript_rejects_is_registered( string $pattern, string $rule_field = 'validation' ): void {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+		$rules = array(
+			'type'    => 'string',
+			'pattern' => $pattern,
+		);
+		if ( 'validation' !== $rule_field ) {
+			$rules = array(
+				'checkout' => array(
+					'properties' => array(
+						'customer_note' => $rules,
+					),
+				),
+			);
+		}
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'        => 'plugin-namespace/unsupported-pattern',
+				'label'     => 'Unsupported pattern',
+				'location'  => 'order',
+				$rule_field => $rules,
+			)
+		);
+
+		$fields = $this->controller->get_additional_fields();
+		$this->assertArrayHasKey( 'plugin-namespace/unsupported-pattern', $fields, 'A pattern the browser cannot compile must not block registration.' );
+		$registered_pattern = 'validation' === $rule_field
+			? $fields['plugin-namespace/unsupported-pattern']['validation']['pattern']
+			: $fields['plugin-namespace/unsupported-pattern'][ $rule_field ]['checkout']['properties']['customer_note']['pattern'];
+		$this->assertSame( $pattern, $registered_pattern, 'The original pattern must remain available for server-side validation.' );
+	}
+
+	/**
+	 * @testdox A pattern both engines accept does not block registration.
+	 */
+	public function test_field_with_pattern_both_engines_accept_is_registered(): void {
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'plugin-namespace/supported-pattern',
+				'label'      => 'Supported pattern',
+				'location'   => 'order',
+				'validation' => array(
+					'type'    => 'string',
+					'pattern' => '^[A-Z]{2}[0-9]{8,12}$',
+				),
+			)
+		);
+
+		$this->assertArrayHasKey( 'plugin-namespace/supported-pattern', $this->controller->get_additional_fields(), 'A pattern both engines accept must remain registered.' );
+	}
+
+	/**
+	 * @testdox An unsupported pattern in a $data reference is not read as a pattern.
+	 */
+	public function test_unsupported_pattern_behind_data_reference_is_ignored(): void {
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'plugin-namespace/pattern-from-field',
+				'label'      => 'Pattern from another field',
+				'location'   => 'order',
+				'validation' => array(
+					'type'    => 'string',
+					'pattern' => array( '$data' => '1/plugin~1other-field' ),
+				),
+			)
+		);
+
+		$this->assertArrayHasKey( 'plugin-namespace/pattern-from-field', $this->controller->get_additional_fields(), 'A $data pointer must not be checked as a literal pattern.' );
+	}
+
+	/**
+	 * @testdox Schema instance data with a property named pattern does not block registration.
+	 */
+	public function test_pattern_in_instance_data_does_not_block_registration(): void {
+		$value = array( 'pattern' => '\\@' );
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'plugin-namespace/pattern-in-data',
+				'label'      => 'Pattern in data',
+				'location'   => 'order',
+				'validation' => array(
+					'type'     => 'object',
+					'const'    => $value,
+					'enum'     => array( $value ),
+					'default'  => $value,
+					'examples' => array( $value ),
+				),
+			)
+		);
+
+		$this->assertArrayHasKey( 'plugin-namespace/pattern-in-data', $this->controller->get_additional_fields(), 'Instance data must not be checked as a regular expression.' );
+	}
+
+	/**
 	 * @testdox Date comparison schemas default to date strings and keep supplied keywords.
 	 *
 	 * @testWith [[], "string"]

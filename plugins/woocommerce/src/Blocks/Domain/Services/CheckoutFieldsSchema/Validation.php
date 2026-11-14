@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use Automattic\WooCommerce\Internal\Checkout\DateFormatLimitParser;
+use Automattic\WooCommerce\Internal\Checkout\JavaScriptPattern;
 use Opis\JsonSchema\Errors\ErrorFormatter;
 use Opis\JsonSchema\Errors\ValidationError;
 use Opis\JsonSchema\Parsers\DefaultVocabulary;
@@ -220,6 +221,85 @@ class Validation {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Reports the first `pattern` value or `patternProperties` key the browser cannot compile.
+	 *
+	 * This check is separate from meta-schema validation so PHP-valid rules can
+	 * remain registered and enforced on the server.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed  $rules The rules to walk.
+	 * @param string $path  The path to the rules, for the error message.
+	 * @return WP_Error|null An error describing the pattern, or null when every pattern is usable.
+	 */
+	public static function find_unsupported_pattern( $rules, string $path = '' ) {
+		if ( ! is_array( $rules ) ) {
+			return null;
+		}
+
+		if ( '' === $path && self::schema_is_unwrapped( $rules ) ) {
+			$rules = [
+				'type'       => 'object',
+				'properties' => $rules,
+			];
+		}
+
+		foreach ( $rules as $keyword => $value ) {
+			$child_path = $path . '/' . $keyword;
+			$patterns   = [];
+
+			if ( 'pattern' === $keyword && is_string( $value ) ) {
+				$patterns[] = $value;
+			} elseif ( 'patternProperties' === $keyword && is_array( $value ) ) {
+				$patterns = array_map( 'strval', array_keys( $value ) );
+			}
+
+			foreach ( $patterns as $pattern ) {
+				$unsupported = JavaScriptPattern::find_unsupported_construct( $pattern );
+
+				if ( null !== $unsupported ) {
+					return new WP_Error(
+						'woocommerce_rest_checkout_invalid_field_schema',
+						sprintf(
+							'At "%s": The pattern "%s" is not a valid JavaScript regular expression, %s. Patterns are compiled in the browser with the JavaScript `u` flag, so they must be valid ECMA-262.',
+							rawurldecode( $child_path ),
+							$pattern,
+							$unsupported
+						)
+					);
+				}
+			}
+
+			if ( ! is_array( $value ) ) {
+				continue;
+			}
+
+			// Only schema keywords contain rules; const, enum and annotations hold data.
+			$subschemas = [];
+			if (
+				in_array( $keyword, [ 'properties', 'patternProperties', 'definitions', '$defs', 'dependencies', 'allOf', 'anyOf', 'oneOf' ], true ) ||
+				( 'items' === $keyword && isset( $value[0] ) )
+			) {
+				foreach ( $value as $key => $subschema ) {
+					$subschemas[ $child_path . '/' . $key ] = $subschema;
+				}
+			} elseif ( in_array( $keyword, [ 'items', 'additionalItems', 'additionalProperties', 'contains', 'propertyNames', 'not', 'if', 'then', 'else' ], true ) ) {
+				$subschemas[ $child_path ] = $value;
+			}
+
+			foreach ( $subschemas as $subschema_path => $subschema ) {
+				$nested = self::find_unsupported_pattern( $subschema, $subschema_path );
+
+				if ( null !== $nested ) {
+					return $nested;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**
