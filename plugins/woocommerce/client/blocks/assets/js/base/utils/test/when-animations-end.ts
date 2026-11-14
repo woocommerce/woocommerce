@@ -1,7 +1,10 @@
 /**
  * Internal dependencies
  */
-import { whenAnimationsEnd } from '../when-animations-end';
+import {
+	whenAnimationsEnd,
+	whenAllAnimationsEnd,
+} from '../when-animations-end';
 
 // Jest has no Web Animations API. Like a browser animation, this fake reports `finished` or `idle` when it ends.
 const createAnimation = (
@@ -116,6 +119,49 @@ describe( 'whenAnimationsEnd', () => {
 		const animation = createAnimation();
 		const cancel = whenAnimationsEnd(
 			createElement( [ animation.animation ] ),
+			callback
+		);
+
+		cancel();
+		animation.finish();
+		await flushPromises();
+		expect( callback ).not.toHaveBeenCalled();
+	} );
+} );
+
+describe( 'whenAllAnimationsEnd', () => {
+	it( 'calls back immediately when there are no elements', () => {
+		const callback = jest.fn();
+		whenAllAnimationsEnd( [], callback );
+		expect( callback ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'waits for the animations of every element to end', async () => {
+		const callback = jest.fn();
+		const first = createAnimation();
+		const second = createAnimation();
+		whenAllAnimationsEnd(
+			[
+				createElement( [ first.animation ] ),
+				createElement( [ second.animation ] ),
+			],
+			callback
+		);
+
+		first.finish();
+		await flushPromises();
+		expect( callback ).not.toHaveBeenCalled();
+
+		second.finish();
+		await flushPromises();
+		expect( callback ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'does not call back after it is cancelled', async () => {
+		const callback = jest.fn();
+		const animation = createAnimation();
+		const cancel = whenAllAnimationsEnd(
+			[ createElement( [ animation.animation ] ) ],
 			callback
 		);
 
