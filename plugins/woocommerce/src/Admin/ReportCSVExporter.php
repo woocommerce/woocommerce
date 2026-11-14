@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 
 /**
  * Include dependencies.
@@ -270,27 +271,30 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 * @return array Report type to report controller class map.
 	 */
 	private static function get_report_controller_map() {
+		$controller_map = array(
+			'products'   => 'Automattic\WooCommerce\Admin\API\Reports\Products\Controller',
+			'variations' => 'Automattic\WooCommerce\Admin\API\Reports\Variations\Controller',
+			'orders'     => 'Automattic\WooCommerce\Admin\API\Reports\Orders\Controller',
+			'categories' => 'Automattic\WooCommerce\Admin\API\Reports\Categories\Controller',
+			'taxes'      => 'Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller',
+			'coupons'    => 'Automattic\WooCommerce\Admin\API\Reports\Coupons\Controller',
+			'stock'      => 'Automattic\WooCommerce\Admin\API\Reports\Stock\Controller',
+			'downloads'  => 'Automattic\WooCommerce\Admin\API\Reports\Downloads\Controller',
+			'customers'  => 'Automattic\WooCommerce\Admin\API\Reports\Customers\Controller',
+			'revenue'    => 'Automattic\WooCommerce\Admin\API\Reports\Revenue\Stats\Controller',
+		);
+
+		if ( StockNotifications::is_enabled_before_init() ) {
+			$controller_map['stock-notifications'] = 'Automattic\WooCommerce\Admin\API\Reports\StockNotifications\Controller';
+		}
+
 		/**
 		 * Used to add custom report controllers.
 		 *
 		 * @since 9.8.0
 		 * @param array $controller_map A report type to report controller class map.
 		 */
-		return apply_filters(
-			'woocommerce_export_report_controller_map',
-			array(
-				'products'   => 'Automattic\WooCommerce\Admin\API\Reports\Products\Controller',
-				'variations' => 'Automattic\WooCommerce\Admin\API\Reports\Variations\Controller',
-				'orders'     => 'Automattic\WooCommerce\Admin\API\Reports\Orders\Controller',
-				'categories' => 'Automattic\WooCommerce\Admin\API\Reports\Categories\Controller',
-				'taxes'      => 'Automattic\WooCommerce\Admin\API\Reports\Taxes\Controller',
-				'coupons'    => 'Automattic\WooCommerce\Admin\API\Reports\Coupons\Controller',
-				'stock'      => 'Automattic\WooCommerce\Admin\API\Reports\Stock\Controller',
-				'downloads'  => 'Automattic\WooCommerce\Admin\API\Reports\Downloads\Controller',
-				'customers'  => 'Automattic\WooCommerce\Admin\API\Reports\Customers\Controller',
-				'revenue'    => 'Automattic\WooCommerce\Admin\API\Reports\Revenue\Stats\Controller',
-			)
-		);
+		return apply_filters( 'woocommerce_export_report_controller_map', $controller_map );
 	}
 
 	/**
