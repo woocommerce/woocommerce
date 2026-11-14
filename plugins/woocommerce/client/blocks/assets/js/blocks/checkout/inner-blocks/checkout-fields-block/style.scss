@@ -105,4 +105,24 @@
 	.wc-block-components-address-form__address_2 {
 		@include motion-collapse;
 	}
+
+	// The sections that Ship or Pickup changes swap as one group, and the form height changes once.
+	.wc-block-checkout__form {
+		// Keeps the margin of the last section inside the form. Otherwise it collapses through the form at rest, but
+		// not while the form has a set height, and the content below jumps by that margin.
+		display: flow-root;
+		@include motion-collapse;
+		@include motion-swap;
+
+		// The sections after the group slide with the height, so nothing needs a clip. Content that loads while
+		// the height changes stays visible.
+		&[data-wc-collapse] {
+			clip-path: none;
+		}
+
+		// A copy is after all the sections, so its step number counts on from the last one.
+		> [data-wc-swap-copy] .wc-block-components-checkout-step__title::before {
+			visibility: hidden;
+		}
+	}
 }

@@ -53,6 +53,58 @@ $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 	}
 }
 
+// While the selection slides, the indicator shows the selected style, behind the content of the options.
+:where(.wp-block-woocommerce-checkout) {
+	.wc-block-checkout__shipping-method-container:has(> .wc-block-checkout__shipping-method-indicator) {
+		position: relative;
+		isolation: isolate;
+
+		.wc-block-checkout__shipping-method-option--selected {
+			border-color: transparent;
+			background: transparent;
+		}
+	}
+
+	.wc-block-checkout__shipping-method-indicator {
+		// It stretches a little along its path, and keeps its area.
+		$stretch: 1.12;
+		--wc-shipping-method-indicator-stretch: #{$stretch} calc(1 / #{$stretch});
+		position: absolute;
+		z-index: -1;
+		box-sizing: border-box;
+		border: 2px solid currentColor;
+		border-radius: $universal-border-radius;
+		background: $input-background-light;
+		pointer-events: none;
+
+		@include motion-safe {
+			animation:
+				wc-shipping-method-indicator-move motion-duration(lg) motion-easing(balanced),
+				wc-shipping-method-indicator-stretch motion-duration(lg) motion-easing(balanced);
+		}
+
+		&--vertical {
+			--wc-shipping-method-indicator-stretch: calc(1 / #{$stretch}) #{$stretch};
+		}
+	}
+}
+
+.has-dark-controls .wc-block-checkout__shipping-method-indicator {
+	background: $input-background-dark;
+}
+
+@keyframes wc-shipping-method-indicator-move {
+	from {
+		translate: var(--wc-shipping-method-indicator-offset);
+	}
+}
+
+@keyframes wc-shipping-method-indicator-stretch {
+	50% {
+		scale: var(--wc-shipping-method-indicator-stretch);
+	}
+}
+
 .wc-block-checkout__shipping-method-option-title-wrapper {
 	display: flex;
 	flex-direction: row;

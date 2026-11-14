@@ -5,10 +5,19 @@ import { __ } from '@wordpress/i18n';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import clsx from 'clsx';
 import { Icon, store, shipping } from '@wordpress/icons';
-import { useEffect } from '@wordpress/element';
+import {
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
+import type { CSSProperties, MouseEvent } from 'react';
 import { cartStore, validationStore } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { isPackageRateCollectable } from '@woocommerce/base-utils';
+import {
+	isPackageRateCollectable,
+	whenAnimationsEnd,
+} from '@woocommerce/base-utils';
 import { getSetting } from '@woocommerce/settings';
 import { Button } from '@ariakit/react';
 import { shippingAddressHasValidationErrors } from '@woocommerce/block-data/cart/utils';
@@ -40,7 +49,7 @@ const LocalPickupSelector = ( {
 	showIcon: boolean;
 	toggleText: string;
 	multiple: boolean;
-	onClick: () => void;
+	onClick: ( event: MouseEvent ) => void;
 } ) => {
 	return (
 		<Button
@@ -90,7 +99,7 @@ const ShippingSelector = ( {
 	showPrice: boolean;
 	showIcon: boolean;
 	shippingCostRequiresAddress: boolean;
-	onClick: () => void;
+	onClick: ( event: MouseEvent ) => void;
 	toggleText: string;
 } ) => {
 	const hasShippableRates = useSelect( ( select ) => {
@@ -168,7 +177,11 @@ const Block = ( {
 	shippingText,
 }: {
 	checked: string;
-	onChange: ( value: string ) => void;
+	/**
+	 * Called when the shopper chooses an option. `direction` is the way that the selection slides on the screen: 1 to
+	 * the right, -1 to the left. It is 0 when the change applies immediately, such as after a key press.
+	 */
+	onChange: ( value: string, direction: number ) => void;
 	showPrice: boolean;
 	showIcon: boolean;
 	localPickupText: string;
@@ -184,8 +197,74 @@ const Block = ( {
 		localPickupText || defaultLocalPickupText
 	);
 
+	const containerRef = useRef< HTMLDivElement >( null );
+	const indicatorRef = useRef< HTMLSpanElement >( null );
+	const [ indicator, setIndicator ] = useState< {
+		key: number;
+		isVertical: boolean;
+		style: CSSProperties;
+	} | null >( null );
+
+	// The indicator only exists while it slides. Without motion, it goes before paint.
+	useLayoutEffect(
+		() =>
+			indicator
+				? whenAnimationsEnd( indicatorRef.current, () =>
+						setIndicator( null )
+					)
+				: undefined,
+		[ indicator ]
+	);
+
+	// The selected style slides from the old option to the new one, or from where it is if it still slides. A click
+	// that a key press starts has no click count, and applies immediately.
+	const select = ( value: string, event: MouseEvent ) => {
+		if ( value === checked ) {
+			onChange( value, 0 );
+			return;
+		}
+		const container = containerRef.current;
+		// Ship renders first, then Pickup.
+		const options = container?.querySelectorAll(
+			'.wc-block-checkout__shipping-method-option'
+		);
+		const to = options?.[ value === 'pickup' ? 1 : 0 ];
+		const from =
+			indicatorRef.current ?? options?.[ value === 'pickup' ? 0 : 1 ];
+		if ( event.detail === 0 || ! container || ! to || ! from ) {
+			setIndicator( null );
+			onChange( value, 0 );
+			return;
+		}
+		const box = container.getBoundingClientRect();
+		const toRect = to.getBoundingClientRect();
+		const fromRect = from.getBoundingClientRect();
+		const x =
+			fromRect.left + fromRect.width / 2 - toRect.left - toRect.width / 2;
+		const y =
+			fromRect.top + fromRect.height / 2 - toRect.top - toRect.height / 2;
+		setIndicator( ( current ) => ( {
+			key: ( current?.key ?? 0 ) + 1,
+			isVertical: Math.abs( y ) > Math.abs( x ),
+			style: {
+				left: toRect.left - box.left - container.clientLeft,
+				top: toRect.top - box.top - container.clientTop,
+				width: toRect.width,
+				height: toRect.height,
+				'--wc-shipping-method-indicator-offset': `${ x }px ${ y }px`,
+			} as CSSProperties,
+		} ) );
+		// The way the selection moves. When the options stack, Pickup counts as to the right of Ship.
+		const stackedDirection = value === 'pickup' ? 1 : -1;
+		onChange(
+			value,
+			Math.abs( x ) >= 1 ? Math.sign( -x ) : stackedDirection
+		);
+	};
+
 	return (
 		<div
+			ref={ containerRef }
 			id="shipping-method"
 			// components-button-group is here for backwards compatibility, in case themes or plugins rely on it.
 			className="components-button-group wc-block-checkout__shipping-method-container"
@@ -194,9 +273,7 @@ const Block = ( {
 		>
 			<ShippingSelector
 				checked={ checked }
-				onClick={ () => {
-					onChange( 'shipping' );
-				} }
+				onClick={ ( event ) => select( 'shipping', event ) }
 				rate={ getShippingPrices( shippingRates[ 0 ]?.shipping_rates ) }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
@@ -205,9 +282,7 @@ const Block = ( {
 			/>
 			<LocalPickupSelector
 				checked={ checked }
-				onClick={ () => {
-					onChange( 'pickup' );
-				} }
+				onClick={ ( event ) => select( 'pickup', event ) }
 				rate={ getLocalPickupPrices(
 					shippingRates[ 0 ]?.shipping_rates
 				) }
@@ -216,6 +291,21 @@ const Block = ( {
 				showIcon={ showIcon }
 				toggleText={ localPickupTextFromSettings }
 			/>
+			{ indicator && (
+				<span
+					key={ indicator.key }
+					ref={ indicatorRef }
+					aria-hidden="true"
+					className={ clsx(
+						'wc-block-checkout__shipping-method-indicator',
+						{
+							'wc-block-checkout__shipping-method-indicator--vertical':
+								indicator.isVertical,
+						}
+					) }
+					style={ indicator.style }
+				/>
+			) }
 		</div>
 	);
 };

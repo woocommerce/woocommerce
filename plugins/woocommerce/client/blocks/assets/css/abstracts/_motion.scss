@@ -9,6 +9,8 @@ $wc-scale-press: 0.97;
 $wc-scale-pulse-peak: 1.05;
 $wc-scale-icon-from: 0.8;
 $wc-blur-icon: 4px;
+// How far sections move when a choice swaps them, such as Ship or Pickup.
+$wc-swap-distance: 24px;
 
 // Rows after this number share the last stagger step, so long lists do not wait.
 $wc-stagger-cap: 7;
@@ -81,8 +83,8 @@ $wc-stagger-cap: 7;
 }
 
 // Fades content out and keeps it hidden until it unmounts.
-@mixin motion-fade-out() {
-	animation: wc-fade-out motion-duration(md) motion-easing(subtle) forwards;
+@mixin motion-fade-out($duration: md) {
+	animation: wc-fade-out motion-duration($duration) motion-easing(subtle) forwards;
 }
 
 // Content that appears. It fades in. When motion is allowed, it also plays $keyframes over $duration.
@@ -95,14 +97,14 @@ $wc-stagger-cap: 7;
 	}
 }
 
-// Content that goes. It fades out. When motion is allowed, it also plays $keyframes. It keeps the end state until it
-// unmounts.
-@mixin motion-exit($keyframes) {
-	@include motion-fade-out;
+// Content that goes. It fades out over $duration. When motion is allowed, it also plays $keyframes. It keeps the end
+// state until it unmounts.
+@mixin motion-exit($keyframes, $duration: md) {
+	@include motion-fade-out($duration);
 	@include motion-safe {
 		animation:
-			wc-fade-out motion-duration(md) motion-easing(subtle) forwards,
-			$keyframes motion-duration(md) motion-easing(expressive) forwards;
+			wc-fade-out motion-duration($duration) motion-easing(subtle) forwards,
+			$keyframes motion-duration($duration) motion-easing(expressive) forwards;
 	}
 }
 
@@ -126,6 +128,40 @@ $wc-stagger-cap: 7;
 
 		@include motion-safe {
 			transition: motion-move($size, $out, balanced), motion-state(opacity);
+		}
+	}
+}
+
+// The timing for `playSwap` in base-utils, on the element whose children are the sections. Copies of the old
+// sections fade out over `sm` and move the way the selection moved. Then the new sections fade in and slide in from the
+// other side, and the sections after them slide to their new position. With reduced motion, the sections only fade.
+// Give the element `motion-collapse` too, for its height.
+@mixin motion-swap() {
+	&[data-wc-swapping] {
+		position: relative;
+	}
+
+	> [data-wc-swap-copy],
+	> [data-wc-swap-in] {
+		--wc-swap-distance: #{$wc-swap-distance};
+	}
+
+	> [data-wc-swap-copy="left"],
+	> [data-wc-swap-in="left"] {
+		--wc-swap-distance: -#{$wc-swap-distance};
+	}
+
+	> [data-wc-swap-copy] {
+		@include motion-exit(wc-swap-out, sm);
+	}
+
+	> [data-wc-swap-in] {
+		@include motion-enter(wc-swap-in, lg, motion-duration(sm));
+	}
+
+	> [data-wc-swap-after] {
+		@include motion-safe {
+			transition: motion-move(translate, lg, balanced);
 		}
 	}
 }

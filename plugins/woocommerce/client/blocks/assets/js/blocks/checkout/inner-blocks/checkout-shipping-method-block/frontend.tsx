@@ -10,13 +10,20 @@ import {
 	cartStore,
 } from '@woocommerce/block-data';
 import { useShippingData } from '@woocommerce/base-context/hooks';
-import { hasCollectableRate } from '@woocommerce/base-utils';
+import {
+	captureSwap,
+	hasCollectableRate,
+	playSwap,
+	stopSwap,
+	type SwapSnapshot,
+} from '@woocommerce/base-utils';
 import {
 	LOCAL_PICKUP_ENABLED,
 	SHIPPING_METHODS_EXIST,
 	SHIPPING_ENABLED,
 } from '@woocommerce/block-settings';
 import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
+import { useLayoutEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -58,6 +65,15 @@ const FrontendBlock = ( {
 	const { selectShippingRate } = useDispatch( cartStore );
 	const { needsShipping, isCollectable, shippingRates } = useShippingData();
 
+	// The sections below the toggle swap as one movement, the way that the selection moved, before paint.
+	const swapRef = useRef< SwapSnapshot | null >( null );
+	useLayoutEffect( () => {
+		if ( swapRef.current ) {
+			playSwap( swapRef.current );
+			swapRef.current = null;
+		}
+	}, [ prefersCollection ] );
+
 	// Note that display logic is also found in plugins/woocommerce/client/blocks/assets/js/blocks/checkout/inner-blocks/register-components.ts
 	// where the block is not registered if the conditions are not met.
 	if (
@@ -70,7 +86,16 @@ const FrontendBlock = ( {
 		return null;
 	}
 
-	const onChange = ( method: string ) => {
+	const onChange = ( method: string, direction: number ) => {
+		// The form, whose children are the sections.
+		const sections =
+			document.getElementById( 'shipping-method' )?.parentElement ?? null;
+		const isChange = ( method === 'pickup' ) !== prefersCollection;
+		swapRef.current =
+			isChange && direction ? captureSwap( sections, direction ) : null;
+		if ( isChange && ! direction ) {
+			stopSwap( sections );
+		}
 		if ( method === 'pickup' ) {
 			void setPrefersCollection( true );
 		} else {

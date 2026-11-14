@@ -53,6 +53,19 @@
 	}
 }
 
+// Sections that a choice swaps move the way the selection moved. `motion-swap` sets the distance.
+@keyframes wc-swap-out {
+	to {
+		translate: var(--wc-swap-distance) 0;
+	}
+}
+
+@keyframes wc-swap-in {
+	from {
+		translate: calc(-1 * var(--wc-swap-distance)) 0;
+	}
+}
+
 body.wc-modal--open {
 	overflow: hidden;
 }
