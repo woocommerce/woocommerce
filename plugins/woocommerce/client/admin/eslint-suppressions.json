@@ -224,26 +224,6 @@
       "count": 2
     }
   },
-  "client/shipping/packlink-item.tsx": {
-    "@wordpress/use-recommended-components": {
-      "count": 1
-    }
-  },
-  "client/shipping/shipping-recommendations-utils.tsx": {
-    "@wordpress/use-recommended-components": {
-      "count": 1
-    }
-  },
-  "client/shipping/shipstation-item.tsx": {
-    "@wordpress/use-recommended-components": {
-      "count": 1
-    }
-  },
-  "client/shipping/woocommerce-shipping-item.tsx": {
-    "@wordpress/use-recommended-components": {
-      "count": 1
-    }
-  },
   "client/store-management-links/index.js": {
     "@wordpress/use-recommended-components": {
       "count": 3

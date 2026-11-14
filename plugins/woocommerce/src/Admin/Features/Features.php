@@ -269,6 +269,7 @@ class Features {
 			\Automattic\WooCommerce\Internal\Admin\RemoteInboxNotifications::class,
 			\Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init::class,
 			\Automattic\WooCommerce\Internal\Admin\ShippingLabelBanner::class,
+			\Automattic\WooCommerce\Internal\Admin\ShippingLabelButton::class,
 			\Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init::class,
 			\Automattic\WooCommerce\Admin\Features\TransientNotices::class,
 			\Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init::class,

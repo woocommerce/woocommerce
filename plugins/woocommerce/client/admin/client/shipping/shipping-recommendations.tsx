@@ -15,9 +15,11 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { getCountryCode } from '~/dashboard/utils';
 import { useOptionDismiss } from '~/hooks/use-option-dismiss';
-import WooCommerceShippingItem from './woocommerce-shipping-item';
-import ShipStationItem from './shipstation-item';
-import PacklinkItem from './packlink-item';
+import { ShippingExtensionItem } from './shipping-extension-item';
+import {
+	EXTENSION_PLUGIN_SLUGS,
+	getShippingExtensionsForCountry,
+} from './shipping-extensions';
 import {
 	SHIPPING_RECOMMENDATIONS_DISMISS_OPTION,
 	ShippingRecommendationsList,
@@ -26,31 +28,6 @@ import {
 } from './shipping-recommendations-utils';
 import './shipping-recommendations.scss';
 import { ShippingTour } from '~/guided-tours/shipping-tour';
-
-type ExtensionId = 'woocommerce-shipping' | 'shipstation' | 'packlink';
-
-const COUNTRY_EXTENSIONS_MAP: Record< string, ExtensionId[] > = {
-	US: [ 'woocommerce-shipping', 'shipstation' ],
-	CA: [ 'shipstation' ],
-	FR: [ 'packlink' ],
-	ES: [ 'packlink' ],
-	IT: [ 'packlink' ],
-	DE: [ 'packlink' ],
-	GB: [ 'shipstation' ],
-	NL: [ 'packlink' ],
-	AT: [ 'packlink' ],
-	BE: [ 'packlink' ],
-	AU: [ 'shipstation' ],
-	NZ: [ 'shipstation' ],
-	IE: [ 'packlink' ],
-	PT: [ 'packlink' ],
-};
-
-const EXTENSION_PLUGIN_SLUGS: Record< ExtensionId, string > = {
-	'woocommerce-shipping': 'woocommerce-shipping',
-	shipstation: 'woocommerce-shipstation-integration',
-	packlink: 'packlink-pro-shipping',
-};
 
 const ShippingRecommendations = () => {
 	const [ pluginsBeingSetup, handleInstall, handleActivate ] =
@@ -102,7 +79,7 @@ const ShippingRecommendations = () => {
 	const normalizedCountry = countryCode ?? '';
 
 	const extensionsForCountry =
-		COUNTRY_EXTENSIONS_MAP[ normalizedCountry ] ?? [];
+		getShippingExtensionsForCountry( normalizedCountry );
 
 	// Render every country-mapped recommendation regardless of which partner
 	// is already installed: the settings page is meant to surface alternatives
@@ -200,46 +177,18 @@ const ShippingRecommendations = () => {
 							country: normalizedCountry,
 							plugins: visiblePluginSlugs,
 						};
-						switch ( ext ) {
-							case 'woocommerce-shipping':
-								return (
-									<WooCommerceShippingItem
-										key={ ext }
-										isPluginInstalled={ isPluginInstalled }
-										isPluginActive={ isPluginActive }
-										pluginsBeingSetup={ pluginsBeingSetup }
-										onInstallClick={ handleInstall }
-										onActivateClick={ handleActivate }
-										tracking={ trackingProps }
-									/>
-								);
-							case 'shipstation':
-								return (
-									<ShipStationItem
-										key={ ext }
-										isPluginInstalled={ isPluginInstalled }
-										isPluginActive={ isPluginActive }
-										pluginsBeingSetup={ pluginsBeingSetup }
-										onInstallClick={ handleInstall }
-										onActivateClick={ handleActivate }
-										tracking={ trackingProps }
-									/>
-								);
-							case 'packlink':
-								return (
-									<PacklinkItem
-										key={ ext }
-										isPluginInstalled={ isPluginInstalled }
-										isPluginActive={ isPluginActive }
-										pluginsBeingSetup={ pluginsBeingSetup }
-										onInstallClick={ handleInstall }
-										onActivateClick={ handleActivate }
-										tracking={ trackingProps }
-									/>
-								);
-							default:
-								return null;
-						}
+						return (
+							<ShippingExtensionItem
+								key={ ext }
+								extension={ ext }
+								isPluginInstalled={ isPluginInstalled }
+								isPluginActive={ isPluginActive }
+								pluginsBeingSetup={ pluginsBeingSetup }
+								onInstallClick={ handleInstall }
+								onActivateClick={ handleActivate }
+								tracking={ trackingProps }
+							/>
+						);
 					} ) }
 				</ShippingRecommendationsList>
 			</div>
