@@ -19,6 +19,7 @@ class WCAdminUser {
 	 */
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_user_data' ) );
+		add_filter( 'rest_prepare_user', array( $this, 'handle_rest_prepare_user' ), 10, 3 );
 	}
 
 	/**
@@ -42,19 +43,11 @@ class WCAdminUser {
 			'is_super_admin',
 			array(
 				'get_callback' => function ( $user, $attr, $request ) {
-					if ( 'edit' !== ( $request['context'] ?? null ) ) {
-						return false;
-					}
-
-					if ( ! $this->current_user_can_read_user_data( $user['id'] ?? 0 ) ) {
-						return false;
-					}
-
-					return is_super_admin( $user['id'] );
+					return $this->current_user_can_read_user_data( $user['id'] ?? 0, $request ) && is_super_admin( $user['id'] );
 				},
 				'schema'       => array(
 					'type'     => 'boolean',
-					'context'  => array( 'edit' ),
+					'context'  => array( 'view', 'edit' ),
 					'readonly' => true,
 				),
 			)
@@ -67,18 +60,45 @@ class WCAdminUser {
 				'update_callback' => array( $this, 'update_user_data_values' ),
 				'schema'          => array(
 					'type'    => 'object',
-					'context' => array( 'edit' ),
+					'context' => array( 'view', 'edit' ),
 				),
 			)
 		);
 	}
 
 	/**
+	 * Handle the rest_prepare_user filter.
+	 *
+	 * Removes the WooCommerce user fields from responses the current user isn't allowed to read them in,
+	 * so that they show up as missing instead of as false or empty values.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $response The response for the user.
+	 * @param mixed $user     The user the response is for.
+	 * @param mixed $request  The current request.
+	 * @return mixed The response, without the WooCommerce user fields if the current user can't read them.
+	 */
+	public function handle_rest_prepare_user( $response, $user, $request ) {
+		if ( ! $response instanceof \WP_REST_Response || ! $user instanceof \WP_User ) {
+			return $response;
+		}
+
+		$data = $response->get_data();
+		if ( ! is_array( $data ) || $this->current_user_can_read_user_data( $user->ID, $request ) ) {
+			return $response;
+		}
+
+		unset( $data['is_super_admin'], $data['woocommerce_meta'] );
+		$response->set_data( $data );
+		return $response;
+	}
+
+	/**
 	 * For all the registered user data fields (  Loader::get_user_data_fields ), fetch the data
 	 * for returning via the REST API.
 	 *
-	 * Returns an empty array unless the request has the 'edit' context and the current user
-	 * is either the requested user or has the 'list_users' capability.
+	 * Returns an empty array if the current user isn't allowed to read the data of the requested user.
 	 *
 	 * @param array                  $user The prepared user data from the users endpoint response.
 	 * @param mixed                  $attr The name of the requested field.
@@ -87,11 +107,7 @@ class WCAdminUser {
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>>|array $request
 	 */
 	public function get_user_data_values( $user, $attr = null, $request = array() ) {
-		if ( 'edit' !== ( $request['context'] ?? null ) ) {
-			return array();
-		}
-
-		if ( ! $this->current_user_can_read_user_data( $user['id'] ?? 0 ) ) {
+		if ( ! $this->current_user_can_read_user_data( $user['id'] ?? 0, $request ) ) {
 			return array();
 		}
 
@@ -106,16 +122,25 @@ class WCAdminUser {
 	 * Checks whether the current user is allowed to read the extra data registered by
 	 * WooCommerce for a given user.
 	 *
-	 * @param int $user_id The id of the user whose data is being read.
+	 * Users can always read their own data. Reading another user's data requires the 'edit' context
+	 * and the same capabilities WordPress requires for that context in the users endpoint.
+	 *
+	 * @param int   $user_id The id of the user whose data is being read.
+	 * @param mixed $request The current request.
 	 * @return bool True if the current user can read the extra data for the given user.
 	 */
-	private function current_user_can_read_user_data( $user_id ) {
+	private function current_user_can_read_user_data( $user_id, $request ): bool {
 		$user_id = (int) $user_id;
 		if ( 0 === $user_id ) {
 			return false;
 		}
 
-		return get_current_user_id() === $user_id || current_user_can( 'list_users' );
+		if ( get_current_user_id() === $user_id ) {
+			return true;
+		}
+
+		$context = ( is_array( $request ) || $request instanceof \ArrayAccess ) ? ( $request['context'] ?? null ) : null;
+		return 'edit' === $context && ( current_user_can( 'edit_user', $user_id ) || current_user_can( 'list_users' ) );
 	}
 
 	/**
