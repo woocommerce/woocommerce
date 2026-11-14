@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Register the experimental settings screen's fields on the server for WordPress 7.2; flag-gated, no merchant change.
+

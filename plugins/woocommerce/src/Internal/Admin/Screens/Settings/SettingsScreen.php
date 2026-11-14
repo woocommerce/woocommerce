@@ -57,14 +57,15 @@ final class SettingsScreen {
 	/**
 	 * Whether the screen can be used on this site.
 	 *
-	 * It needs the admin screens feature flag.
+	 * It needs the admin screens feature flag and the Entity fields API, which WordPress 7.2 and
+	 * Gutenberg 24.3 provide.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @return bool
 	 */
 	public function is_available(): bool {
-		return Features::is_enabled( AdminScreens::FEATURE_FLAG );
+		return Features::is_enabled( AdminScreens::FEATURE_FLAG ) && function_exists( 'wp_register_entity_field_collection' );
 	}
 
 	/**

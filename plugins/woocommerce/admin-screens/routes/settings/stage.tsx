@@ -19,10 +19,10 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
-import type { SettingsRecord } from '../../entity-fields/types';
+import type { SettingsRecord } from '../../packages/entity-fields/src/types';
 import { ENTITY_KIND } from './entities';
 import type { SettingsEntityConfig } from './entities';
-import { getEntityFields } from './entity-fields';
+import { getEntityFields, getEntityFieldsStatus } from './entity-fields';
 import './style.scss';
 
 const EMPTY_FORM: Form = { fields: [] };
@@ -53,17 +53,21 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 		status: 'success' | 'error';
 		message: string;
 	} >();
-	const { fields, isSaving, loadError } = useSelect(
+	const { fields, hasFields, isSaving, loadError } = useSelect(
 		( select ) => {
 			const core = select( coreStore );
+			const editor = select( editorStore );
+			const fieldsStatus = getEntityFieldsStatus( editor, kind, name );
 			return {
-				fields: getEntityFields( select( editorStore ), kind, name ),
+				fields: getEntityFields( editor, kind, name ),
+				hasFields: fieldsStatus.hasLoaded,
 				isSaving: core.isSavingEntityRecord( kind, name, name ),
-				loadError: core.getResolutionError( 'getEntityRecord', [
-					kind,
-					name,
-					name,
-				] ),
+				loadError:
+					core.getResolutionError( 'getEntityRecord', [
+						kind,
+						name,
+						name,
+					] ) ?? fieldsStatus.error,
 			};
 		},
 		[ kind, name ]
@@ -96,7 +100,7 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 		}
 	};
 	const hasLoadError = !! loadError;
-	const isReady = ! hasLoadError && !! data && !! form;
+	const isReady = ! hasLoadError && !! data && !! form && hasFields;
 	// Breadcrumbs link through the router, which only leaves the screen for an absolute URL.
 	const paymentsUrl = new URL(
 		'admin.php?page=wc-settings&tab=checkout',

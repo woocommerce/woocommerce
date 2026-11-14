@@ -7,7 +7,7 @@ export const ENTITY_KIND = 'woo_settings_payments';
 
 /**
  * A core-data entity config for a settings page. The page's URL segment is the entity name and
- * its record ID, and its fields are registered separately in `entity-fields/`.
+ * its record ID, and its fields are registered on the server from `packages/entity-fields/`.
  */
 export interface SettingsEntityConfig {
 	kind: string;
