@@ -373,10 +373,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$class  = new ReflectionClass( WC_Product_CSV_Importer_Controller::class );
-		$method = $class->getMethod( 'release_stranded_cleanup_claims' );
-		$method->setAccessible( true );
-		$method->invoke( null );
+		( new \Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ImportPlaceholders() )->release_stranded_cleanup_claims();
 
 		// The importer only treats the placeholder status as absent, so the row has to read that way again.
 		$this->assertSame( 'importing', get_post_status( $stranded_id ) );
@@ -729,11 +726,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	 * @return int|null ID to resume from, or null once no placeholders are left.
 	 */
 	private function invoke_cleanup_after_import( int $cursor = 0 ): ?int {
-		$class  = new ReflectionClass( WC_Product_CSV_Importer_Controller::class );
-		$method = $class->getMethod( 'cleanup_after_import' );
-		$method->setAccessible( true );
-
-		return $method->invoke( null, $cursor );
+		return ( new \Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ImportPlaceholders() )->cleanup_after_import( $cursor );
 	}
 
 	/**

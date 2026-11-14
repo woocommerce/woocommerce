@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Move product import placeholder cleanup into its own class; no behaviour change.
