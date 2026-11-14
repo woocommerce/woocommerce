@@ -35,6 +35,67 @@ export function getFulfillmentItems(
 	) as Array< FulfillmentItem >;
 }
 
+/**
+ * Show an order status that changed on the server (for example, completed once every item is
+ * fulfilled) on the page, so a later Update on the Edit Order page does not save the old status.
+ *
+ * @param orderId The order ID.
+ * @param status  The order status from the API, without the "wc-" prefix.
+ */
+function refreshOrderStatus( orderId: number, status: string | undefined ) {
+	if ( ! status ) {
+		return;
+	}
+	const select = document.querySelector< HTMLSelectElement >(
+		'select#order_status'
+	);
+	const postId = document.querySelector< HTMLInputElement >(
+		'input#post_ID, input#order_id'
+	);
+	if (
+		select &&
+		postId &&
+		Number( postId.value ) === orderId &&
+		select.value !== 'wc-' + status &&
+		select.querySelector( `option[value="wc-${ status }"]` )
+	) {
+		select.value = 'wc-' + status;
+		select.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+		// The select is enhanced with selectWoo/select2, which listens through jQuery.
+		const jq = (
+			window as unknown as {
+				jQuery?: ( el: Element ) => { trigger: ( e: string ) => void };
+			}
+		 ).jQuery;
+		jq?.( select ).trigger( 'change.select2' );
+	}
+
+	const label =
+		document.querySelector< HTMLOptionElement >(
+			`select#order_status option[value="wc-${ status }"]`
+		)?.textContent ??
+		(
+			window as unknown as {
+				wcSettings?: { orderStatuses?: Record< string, string > };
+			}
+		 ).wcSettings?.orderStatuses?.[ status ] ??
+		null;
+	document
+		.querySelectorAll(
+			`.order-${ orderId } td.order_status mark.order-status, .wc-order-fulfillment-badges mark.order-status`
+		)
+		.forEach( ( marker ) => {
+			if ( marker.classList.contains( `status-${ status }` ) ) {
+				return;
+			}
+			marker.className = `order-status status-${ status }`;
+			const span = marker.querySelector( 'span' );
+			if ( span && label ) {
+				span.textContent = label;
+			}
+		} );
+}
+
 export async function refreshOrderFulfillmentStatus( orderId: number ) {
 	void dispatch( FulfillmentStore ).invalidateResolution( 'getOrder', [
 		orderId,
@@ -46,10 +107,12 @@ export async function refreshOrderFulfillmentStatus( orderId: number ) {
 			( order.meta_data.find(
 				( meta ) => meta.key === '_fulfillment_status'
 			)?.value as string ) ?? 'no_fulfillments';
-		const marker = document.querySelector(
-			`.order-${ orderId } td.fulfillment_status mark`
+		refreshOrderStatus( orderId, order.status );
+		// The badge sits in the orders list row and on the Edit Order page.
+		const markers = document.querySelectorAll(
+			`.order-${ orderId } td.fulfillment_status mark, mark.fulfillment-status[data-order-id="${ orderId }"]`
 		);
-		if ( marker ) {
+		markers.forEach( ( marker ) => {
 			const status = window.wcFulfillmentSettings
 				.order_fulfillment_statuses[ order_status ] || {
 				label: __( 'Unknown', 'woocommerce' ),
@@ -71,7 +134,7 @@ export async function refreshOrderFulfillmentStatus( orderId: number ) {
 				'style',
 				`background-color: ${ status.background_color }; color: ${ status.text_color };`
 			);
-		}
+		} );
 	}
 }
 

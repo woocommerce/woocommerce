@@ -12,6 +12,35 @@ use WC_Order;
 class FulfillmentsSettings {
 
 	/**
+	 * Option that completes a processing order once all of its items are fulfilled.
+	 *
+	 * @since 11.3.0
+	 */
+	public const COMPLETE_ORDER_OPTION = 'woocommerce_fulfillments_complete_order';
+
+	/**
+	 * Whether a processing order should be completed once all of its items are fulfilled.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param WC_Order $order The order.
+	 * @return bool
+	 */
+	public static function should_complete_fulfilled_order( WC_Order $order ): bool {
+		$enabled = 'yes' === get_option( self::COMPLETE_ORDER_OPTION, 'no' );
+
+		/**
+		 * Filters whether a processing order is completed once all of its items are fulfilled.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param bool     $enabled Whether to complete the order. Defaults to the Complete orders setting.
+		 * @param WC_Order $order   The order.
+		 */
+		return (bool) apply_filters( 'woocommerce_fulfillments_complete_fulfilled_order', $enabled, $order );
+	}
+
+	/**
 	 * Registers the hooks related to fulfillments settings.
 	 */
 	public function register() {
@@ -80,6 +109,13 @@ class FulfillmentsSettings {
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
 				'default'       => 'no',
+			),
+			array(
+				'title'   => __( 'Complete orders', 'woocommerce' ),
+				'desc'    => __( 'Mark a processing order completed once all of its items are fulfilled.', 'woocommerce' ),
+				'id'      => self::COMPLETE_ORDER_OPTION,
+				'type'    => 'checkbox',
+				'default' => 'no',
 			),
 			array(
 				'type' => 'sectionend',
