@@ -118,8 +118,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 			unset( $GLOBALS['wp_post_statuses']['wc-competition-completed'] );
 			$this->add_long_status_callback = null;
 		}
-		remove_filter( 'woocommerce_order_class', array( AdminOrder::class, 'order_class_name' ) );
-		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		parent::tearDown();
 	}
 

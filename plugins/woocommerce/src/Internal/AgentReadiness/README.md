@@ -4,7 +4,7 @@ Checks published simple and variable products against the product data specs of 
 
 ## What the checks read
 
-The checks read product data and store settings, because most gaps are empty fields only the merchant can fill, and a check can name the product and field. When data is filled in but a store output (UCP catalog, product structured data) doesn't send it, that is a bug fixed in that output's code, not a check. What a store can't see from its own data, such as crawler blocks at a CDN, `llms.txt` or page markup from themes and plugins, is left to an outside scan of the store's public pages.
+The checks read product data and store settings, because most gaps are empty fields only the merchant can fill, and a check can name the product and field. When data is filled in but a store output (UCP catalog, product structured data) doesn't send it, that is a bug fixed in that output's code, not a check. Where a plugin can add or replace what core builds (robots.txt, sitemaps, `llms.txt`, page markup), store checks read what the store returns instead (`StoreOutputChecks`), and pass when any source provides the item. What the store can't see from inside, such as crawler blocks at a CDN, is left to an outside scan of the store's public pages.
 
 ## Channels
 
@@ -37,6 +37,9 @@ A channel whose spec does not ask for the field is left out of the check's map.
 | `variation_attributes_not_set` | variant_dict, gaps | color, size, gaps | color, sizes, gaps |
 | `missing_variation_images` | image_url, gaps | image_link, gaps | imageLink, gaps |
 | `title_too_long` | title, gaps | title, gaps | title, gaps |
+| `image_alt_text` | | | |
+
+`image_alt_text` (the main image has no alt text) is about the product page, not a feed: no channel's spec asks for it. A check with no channel map lists its products but doesn't change the channel totals. Like every check, it runs once a rules file is stored only when the file names it, here with an empty channel map (`"image_alt_text": { "channels": {} }`), so removing it from the file turns it off. The rules filter can still remove it; a check whose channels the filter empties doesn't run.
 
 A variable product with some priced variations fails `missing_regular_price` but counts as `gaps`, not `not_listable`, in the channel totals, since its priced variations still list.
 
@@ -49,7 +52,49 @@ Only published simple and variable products are checked, the types agents suppor
 - Products hidden from the shop catalog (catalog visibility "Search results only" or "Hidden"). Agents see the products shoppers see in the shop, so hiding one is the merchant's choice, not a problem.
 - Products of any other type: grouped, external, subscription, booking, bundle and so on. A product keeps its stored type when its plugin is inactive, so it stays in this group.
 
-Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off and no HTTPS hide the catalog from UCP agents, and guest checkout off stops agents placing orders. Missing policy pages and order emails off weaken agent orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
+Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off and no HTTPS hide the catalog from UCP agents, and guest checkout off or no payment method turned on stops agents placing orders. Missing policy pages and order emails off weaken agent orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
+
+## Store output checks
+
+`StoreOutputChecks` runs in the background scan only. It loads the store's own pages as a logged-out visitor (`StoreResponses`): only URLs on the store's host, redirects followed on that host only, a 5 second timeout and 512 KB per response, each URL once per scan, nothing at all in coming soon mode. A product page is read up to 2 MB, because its JSON-LD is printed in the footer and the usual cap can cut it off. Its results go into the report's `store_checks` with the same keys, with `ok` set to `null` when the check could not run ("Couldn't check"), or when that read was cut off before any Product JSON-LD. They are always `recommended`, so they never block the UCP switch.
+
+| Id | Passes when |
+| --- | --- |
+| `sitemap_lists_products` | A sitemap listed in robots.txt, or `/wp-sitemap.xml`, `/sitemap_index.xml` or `/sitemap.xml`, names a product sitemap or product pages. An index that does not has its child sitemaps opened, at any depth, up to five child requests. |
+| `product_jsonld_from_core` | The product's JSON-LD is WooCommerce's own and isn't repeated; a failure shows as a likely conflict. |
+| `product_jsonld_present` | A recent product page has Product (or ProductGroup) JSON-LD that parses, from WooCommerce, an SEO plugin or the theme. |
+| `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. `null` when the page has no Product JSON-LD; the settings page hides it then. |
+| `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification, as a number or with a currency) and an availability. `null` when the page has no Product JSON-LD; the settings page hides it then. |
+| `llms_txt_present` | `/llms.txt` at the host root is served as text. |
+| `llms_txt_valid` | It starts with a `# Name` heading. |
+| `llms_txt_links_resolve` | The first five links in it to the store's own pages open (no 4xx). Links to other sites, or with a query string, aren't loaded. |
+| `open_graph_tags` | The home and product page have `og:title` and `og:image`. |
+| `meta_description` | The home and product page have a meta description. |
+| `canonical_url` | The product page has a canonical link. |
+| `organization_schema` | The home page's JSON-LD has an Organization, or a type stores use for themselves such as OnlineStore. |
+| `ai_snippet_directives` | No robots meta tag or `X-Robots-Tag` header on the home or product page sets `nosnippet` or a `max-snippet` limit. |
+| `content_in_raw_html` | The product page's text, without scripts or comments, has the product's name and its price as a whole amount. |
+| `ucp_profile` | With UCP on: `/.well-known/ucp` is served and names a REST endpoint. |
+| `ucp_endpoints_live` | With UCP on: a catalog search POSTed to that endpoint, or WooCommerce's when there is no profile, answers with a product list. |
+| `ucp_profile_version` | With UCP on: the served profile declares the UCP version WooCommerce implements (`UcpUtils::VERSION`). A different version usually means another plugin serves its own profile. |
+| `ucp_checkout` | With UCP on: the served profile declares `dev.ucp.shopping.checkout`. Pending (WOOAI-1435). |
+| `product_return_policy_schema` | A product offer in the product page's JSON-LD has `hasMerchantReturnPolicy`. Pending (WOOPRD-3912). |
+| `product_shipping_schema` | A product offer has `shippingDetails`. Pending (WOOPRD-3908). |
+| `product_buy_action_schema` | The product or an offer has a `BuyAction` in `potentialAction`. Pending (WOOPRD-3918). |
+
+A check listed in `StoreOutputChecks::PENDING` tests output WooCommerce doesn't build yet. It doesn't run: it's reported with `ok` null and `pending` true, so it reads as coming soon, not as failed or couldn't check. Remove its entry when that output ships; the issues that build the output are in the comment on the list.
+
+robots.txt is loaded from the host root, only to find the sitemaps it lists. Its crawler rules aren't checked: a host or CDN can rewrite the file or block crawlers without it, and the store's request to itself skips both, so they wait for an outside view of the store (WOOPRD-3953). The sitemap check is "couldn't check" when robots.txt could not be read, or a candidate sitemap could not be loaded or answered other than 200, 404 or 410, and no fetched sitemap names products. A category sitemap does not count. When an index does not name products, its child sitemaps on this host are checked, nested indexes included (Jetpack serves one past 1,000 URLs), up to five child requests in all. Sitemap lines on another host, or written as `//host/path`, are skipped and do not use up the five listed slots. Checks on the home and product page read the ones that loaded. The home page loads first; when it can't be reached, the scan makes no more requests, so a store that can't reach itself waits for one timeout. The product checks load one product page: among the five newest published simple or variable products in the shop catalog, the newest with a price and no password, or the newest without a password when none of them has a price. With no such product, or when its page doesn't answer 200, they are "couldn't check".
+
+## Failures per product
+
+`refresh_report()` stores what each product fails in product meta (`ProductFailures`), one row per check and per channel status, plus a `checked` row on every product the checks cover, passing ones included. `ProductsList` updates a product's rows when it is saved, except for a save that changes only stock or nothing, removes them when it is trashed, tests the parent again when a variation is trashed, restored or deleted, and filters the Products list on them for the links from the readiness pages (`?agent_readiness=<value>`); there is no column or dropdown on the list. A covered product without rows was not tested, by the scan's product limit. The stored report's product counts are read from these rows, the total from the `checked` rows, so a product fixed, added or removed since the scan counts now. The example products per check can be out of date; the count links to the filtered Products list. The scan stores the GTINs more than one product shares in the report (`shared_gtins`, not returned by the report readers, up to `ProductScan::SHARED_GTINS_LIMIT`), so checking one product on save or with the run ability doesn't read every published product. Past the limit, nothing is stored and a check of one product reads the catalog. A GTIN shared since the scan, on the saved product or another, is flagged at the next scan. Core refuses an exact duplicate on save, so this is one that differs only by separators or leading zeros, or a direct meta write.
+
+## What the store declares to agents
+
+`DeclaredToAgents` lists protocols and files as found or not found, for information. Each has a path or signal from its spec, and a JSON document has to have the fields its spec requires. Its results go into the report's `declared` and never count as a problem.
+
+Markdown is asked for on the product page, or the home page without a product: with `Accept: text/markdown`. An HTML answer doesn't count. A copy at the page's `.md` address isn't requested: each declared item reads a response the scan already loads. `Vary: Accept` isn't listed: hosts and CDNs set it, and the store's request to itself skips them.
 
 ## Report format
 
@@ -62,8 +107,13 @@ array(
 	'hidden_from_catalog' => 4,    // Not checked: catalog visibility "Search results only" or "Hidden", the merchant's choice.
 	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents can find but can't add to a cart yet.
 	'store_checks' => array(
-		// blocks: 'listing' (every product on every channel), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
+		// blocks: 'listing' (every product on every channel), 'discovery' (harder to find and read), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
+		// ok: true, false, or null. Null means the page could not be loaded, or a product field check found no Product JSON-LD (the settings page hides that).
 		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'level' => 'required', 'name' => '…', 'label' => '…', 'why' => '…', 'fix' => '…', 'fix_url' => '…' ),
+	),
+	// What the store declares to agents, for information: found is true, false, or null when it couldn't be checked.
+	'declared' => array(
+		array( 'id' => 'security-txt', 'name' => '…', 'found' => false ),
 	),
 	'channels'     => array(
 		'chatgpt' => array(
@@ -108,15 +158,22 @@ Per check, `channels` maps a channel id to the feed field and the effect, the sa
 
 ## Background scan and REST
 
-"Run check" on the tab, or `POST wc/v3/agent-readiness/scan`, queues the scan in Action Scheduler (`ScheduledScan`). The report is stored in the `woocommerce_agent_readiness_report` option (not autoloaded). Each run schedules the next one a day later, before scanning, so a failed scan doesn't stop the daily refresh; a run that finds the feature disabled does. If a queued scan still hasn't started 10 minutes after it was due and no other scheduled action has finished, failed or started in that time (Action Scheduler isn't running), the tab says so and the scan stays queued. The scan never runs in a page or REST request; splitting the product pass into one action per batch is WOOAI-1661.
+"Run check" on the Agentic commerce settings page, or `POST wc/v3/agent-readiness/scan`, queues the scan in Action Scheduler (`ScheduledScan`). The report is stored in the `woocommerce_agent_readiness_report` option (not autoloaded). Each run schedules the next one a day later, before scanning, so a failed scan doesn't stop the daily refresh; a run that finds the feature disabled does. If a queued scan still hasn't started 10 minutes after it was due and no other scheduled action has finished, failed or started in that time (Action Scheduler isn't running), the settings page says so and the scan stays queued. The scan never runs in a page or REST request; splitting the product pass into one action per batch is WOOAI-1661.
 
-Product changes don't update the stored report: a fixed product leaves it at the next daily scan or "Run check". On a store with 11,000 products, a scan (stopping at 5,000) took about 4 seconds and 144 MB.
+On a store with 11,000 products, a scan (stopping at 5,000) took about 4 seconds and 144 MB. A product saved since the scan is already reflected in the counts, as described under Failures per product.
 
-`GET wc/v3/agent-readiness` returns `{ "report": <report or null>, "scan_pending": <bool>, "scan_stalled": <bool> }`; `scan_stalled` is true while a queued scan waits on a stalled Action Scheduler. Both routes need `manage_woocommerce` and exist only while the feature is enabled.
+`GET wc/v3/agent-readiness` returns `{ "report": <report or null>, "scan_pending": <bool>, "scan_stalled": <bool> }` from `AgentReadiness::get_served_report()`, so `store_checks` are read now; `scan_stalled` is true while a queued scan waits on a stalled Action Scheduler. Both routes need `manage_woocommerce` and exist only while the feature is enabled.
 
-The same shape is meant for every consumer: this Status tab, an outside scan of a store, and extensions that rank the findings by sales or offer fixes. Check and channel ids are stable keys.
+The same shape is meant for every consumer: the Agentic commerce settings page, an outside scan of a store, and extensions that rank the findings by sales or offer fixes. Check and channel ids are stable keys.
 
 The scan walks published simple and variable products shown in the shop catalog in batches of 200, most recently modified first, primes meta, terms, images and variations per batch, and stops at 5,000 products.
+
+## Abilities
+
+While the feature is enabled, `AbilitiesLoader` registers these abilities in the WordPress Abilities API with the `Ability` class, which converts their input to the schema types. Each definition class in this directory owns its arguments. They show in REST and to MCP clients, for users with `manage_woocommerce`:
+
+- `woocommerce/get-agent-readiness` and `GET wc/v3/agent-readiness` both return `{ report, scan_pending, scan_stalled }` from `AgentReadiness::get_served_report()`: settings changed since the scan show their current state, and store output checks come from the stored report.
+- `woocommerce/run-agent-readiness-check` with `product_id` checks that product now (`check_product()`) and returns its failing checks with label and fix, and its status per channel. Without one it queues the background scan, like `POST wc/v3/agent-readiness/scan`, and returns `scan_pending`, `scan_stalled` and `report_generated_at`, so the agent knows when to read the report again, or that it won't change until scheduled actions run.
 
 ## Agentic commerce settings page
 
@@ -125,6 +182,7 @@ WooCommerce > Settings > Agentic commerce (`AgenticCommerceSettings`, `AgenticCo
 - The UCP switch, first. It saves through `POST wc/v3/agent-readiness/ucp` (`{ "enabled": true }`). A failing required check keeps it from being turned on, and that POST answers 409; turning it off still works. In coming soon mode the card says agents can't shop the store yet and links to Site visibility.
 - Product counts from the stored report (`products`, `hidden_from_catalog`, `unsupported_types`), each linking to a filtered product list.
 - Status: the store conditions from `StoreConditions`, the same list the readiness report shows, in three groups. Required lists failing `required` conditions (coming soon mode and HTTPS) and puts the status at Action needed; Recommended lists failing `recommended` ones, such as a missing privacy, terms, refund and returns, or shipping policy page (policy pages are not required by the UCP spec); Done lists the passing ones by their passing state (`name`). Each open condition says what to do and links to it; a chosen policy page that isn't published links to its editor.
+- Agent readiness: the store output checks from the stored report, since they only run in the scan. Each check names the question it answers in `group` (`access`, `find`, `understand` or `buy`), and the card shows the checks under those four questions. They are never required, so they don't affect the switch or Status. A failing row adds why it matters and what it affects (`blocks`). The card has "Run check" with the time of the last run, and the product checks from the stored report: per-channel counts, and each failing check with its channels and up to 3 example products. The stored report still keeps up to 10 ids per check.
 - Store policy pages. Refund and returns, privacy and terms are the existing options, so they stay in sync with Advanced > Page setup and Settings > Privacy; shipping policy, FAQ and warranty are new. They are for the policy links a UCP checkout can carry (`links`); the UCP endpoints don't send them yet. The dropdowns list published pages other than the cart, checkout, shop and My account pages, and saving leaves a stored page in place even when it's a draft or one of those store pages, which then fails its check.
 - The store address agents start from (`/.well-known/ucp`), with Copy.
 - Placeholders for parts that aren't built yet: Test your setup (WOOAI-1619) and Security (WOOAI-1620).
@@ -147,4 +205,4 @@ Core's UCP catalog mapper (`src/Internal/ProductFeed/Mapping/UcpProductMapper.ph
 wp option update woocommerce_feature_agent_readiness_enabled yes
 ```
 
-Then open WooCommerce > Status > Agent readiness and select "Run check".
+Then open WooCommerce > Settings > Agentic commerce and select "Run check".

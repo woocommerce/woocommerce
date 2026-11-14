@@ -19,16 +19,12 @@
 		width: 100%;
 	}
 
-	.woocommerce-email-editor-styles-header {
-		margin-bottom: 0;
-	}
-
 	.woocommerce-email-editor-styles-header-description {
 		padding: 0 16px;
 	}
 
-	h3.edit-site-global-styles-subtitle {
-		margin-bottom: 0;
+	.woocommerce-email-editor-styles-screen-body {
+		padding: 16px;
 	}
 
 	.single-column {
@@ -57,10 +53,5 @@
 	// This style hides it.
 	.interface-complementary-area-header__small {
 		display: none;
-	}
-
-	// Hide border around styles screen root.
-	.edit-site-global-styles-screen-root {
-		box-shadow: none;
 	}
 }

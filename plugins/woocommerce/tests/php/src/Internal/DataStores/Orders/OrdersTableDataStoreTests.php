@@ -116,9 +116,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->clean_up_cot_setup();
 		$this->disable_cogs_feature();
 
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
-		remove_all_filters( 'woocommerce_load_order_cogs_value' );
-		remove_all_filters( 'woocommerce_save_order_cogs_value' );
 		parent::tearDown();
 	}
 
@@ -4413,6 +4410,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		};
 
 		add_action( 'woocommerce_new_order', $callback );
+		// The new order email saves the order again while it is being saved, which this test is not about.
+		add_filter( 'woocommerce_email_enabled_new_order', '__return_false' );
 
 		$order = new WC_Order();
 		$order->set_status( OrderStatus::PROCESSING );

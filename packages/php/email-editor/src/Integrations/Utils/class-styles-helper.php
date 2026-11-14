@@ -90,6 +90,31 @@ class Styles_Helper {
 	}
 
 	/**
+	 * Whether email clients can render a color value.
+	 *
+	 * Hex, a color keyword, and rgb() or hsl() with plain arguments are safe. Any other CSS function,
+	 * such as color-mix(), light-dark() or var(), is not: clients drop the whole declaration.
+	 *
+	 * @param mixed $color CSS color value. Untyped, because theme data arrives through filters.
+	 * @return bool
+	 */
+	public static function is_email_safe_color( $color ): bool {
+		if ( ! is_string( $color ) ) {
+			return false;
+		}
+
+		$color = strtolower( trim( $color ) );
+
+		if ( false !== strpos( $color, '(' ) ) {
+			// Nothing nested: rgb(var(--red), 0, 0) is as unusable as var() alone.
+			return 1 === preg_match( '/^(rgb|hsl)a?\([^()]+\)$/', $color );
+		}
+
+		// Hex, or a keyword such as `white`. Keywords are not checked against the CSS color names.
+		return self::is_color_literal( $color ) || 1 === preg_match( '/^[a-z]+$/', $color );
+	}
+
+	/**
 	 * Every color the palette defines, one entry per slug, highest priority origin first.
 	 *
 	 * `WP_Theme_JSON` layers origins so a later one wins, so they are read in reverse of that order.

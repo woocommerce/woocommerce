@@ -142,6 +142,7 @@ test.describe( 'ProductButton in-cart count', () => {
 	test( 'does not count a child cart line in the add to cart button', async ( {
 		page,
 		requestUtils,
+		cleanup,
 		addToCartWithOptionsPage,
 	} ) => {
 		await addToCartWithOptionsPage.createPostWithProductBlock(
@@ -155,75 +156,72 @@ test.describe( 'ProductButton in-cart count', () => {
 			)?.[ 1 ]
 		);
 		expect( postId ).toBeGreaterThan( 0 );
-
-		// All workers share the admin cart, so the cart steps run as a guest.
-		await page.context().clearCookies();
-
-		try {
-			const variationId = await getSinglePostId(
-				'post list --post_type=product_variation --field=ID --name="Hoodie - Blue, Yes" --format=ids'
-			);
-
-			const capId = await getProductIdBySlug( 'cap' );
-			await page.goto( `/?add-to-cart=${ capId }` );
-			const parentCartItems = await readCartItems( page );
-			expect( parentCartItems ).toHaveLength( 1 );
-			const parentLine = parentCartItems.find(
-				( item ) => item.id === capId
-			);
-			expect( parentLine ).toBeDefined();
-			const parentItemKey = ( parentLine as StoreApiCartItem ).key;
-
-			await seedDeclaredChildLine( page, variationId, parentItemKey );
-			const cartItems = await readCartItems( page );
-			expect( cartItems ).toHaveLength( 2 );
-			expect(
-				cartItems.find( ( item ) => item.id === variationId )
-					?.parent_item_key
-			).toBe( parentItemKey );
-			expect(
-				cartItems.find( ( item ) => item.key === parentItemKey )
-					?.parent_item_key
-			).toBeNull();
-
-			// Reads the server-rendered HTML without running scripts.
-			const readServerRenderedButtonText = async () => {
-				const response = await page.request.get( postUrl );
-				const button = ( await response.text() ).match(
-					/<button\b[^>]*class="[^"]*\bsingle_add_to_cart_button\b[^"]*"[^>]*>([\s\S]*?)<\/button>/
-				);
-				expect( button ).not.toBeNull();
-
-				return button?.[ 1 ]?.replace( /<[^>]*>/g, '' ).trim();
-			};
-
-			const addToCartButton = page
-				.locator( '.wp-block-add-to-cart-with-options' )
-				.locator( '.single_add_to_cart_button' );
-
-			expect( await readServerRenderedButtonText() ).toBe(
-				'Add to cart'
-			);
-			await page.goto( postUrl );
-			// The server renders the button hidden and the client store reveals it, so
-			// waiting for it to be visible makes the next text check read the hydrated count.
-			await expect( addToCartButton ).toBeVisible();
-			await expect( addToCartButton ).toHaveText( 'Add to cart' );
-
-			await addToCartButton.click();
-			await expect( addToCartButton ).toHaveText( '1 in cart' );
-
-			expect( await readServerRenderedButtonText() ).toBe( '1 in cart' );
-			await page.reload();
-			await expect( addToCartButton ).toBeVisible();
-			await expect( addToCartButton ).toHaveText( '1 in cart' );
-		} finally {
+		cleanup( async () => {
 			await requestUtils.rest( {
 				method: 'DELETE',
 				path: `/wp/v2/posts/${ postId }`,
 				params: { force: true },
 			} );
-		}
+		} );
+
+		// All workers share the admin cart, so the cart steps run as a guest.
+		await page.context().clearCookies();
+
+		const variationId = await getSinglePostId(
+			'post list --post_type=product_variation --field=ID --name="Hoodie - Blue, Yes" --format=ids'
+		);
+
+		const capId = await getProductIdBySlug( 'cap' );
+		await page.goto( `/?add-to-cart=${ capId }` );
+		const parentCartItems = await readCartItems( page );
+		expect( parentCartItems ).toHaveLength( 1 );
+		const parentLine = parentCartItems.find(
+			( item ) => item.id === capId
+		);
+		expect( parentLine ).toBeDefined();
+		const parentItemKey = ( parentLine as StoreApiCartItem ).key;
+
+		await seedDeclaredChildLine( page, variationId, parentItemKey );
+		const cartItems = await readCartItems( page );
+		expect( cartItems ).toHaveLength( 2 );
+		expect(
+			cartItems.find( ( item ) => item.id === variationId )
+				?.parent_item_key
+		).toBe( parentItemKey );
+		expect(
+			cartItems.find( ( item ) => item.key === parentItemKey )
+				?.parent_item_key
+		).toBeNull();
+
+		// Reads the server-rendered HTML without running scripts.
+		const readServerRenderedButtonText = async () => {
+			const response = await page.request.get( postUrl );
+			const button = ( await response.text() ).match(
+				/<button\b[^>]*class="[^"]*\bsingle_add_to_cart_button\b[^"]*"[^>]*>([\s\S]*?)<\/button>/
+			);
+			expect( button ).not.toBeNull();
+
+			return button?.[ 1 ]?.replace( /<[^>]*>/g, '' ).trim();
+		};
+
+		const addToCartButton = page
+			.locator( '.wp-block-add-to-cart-with-options' )
+			.locator( '.single_add_to_cart_button' );
+
+		expect( await readServerRenderedButtonText() ).toBe( 'Add to cart' );
+		await page.goto( postUrl );
+		// The server renders the button hidden and the client store reveals it, so
+		// waiting for it to be visible makes the next text check read the hydrated count.
+		await expect( addToCartButton ).toBeVisible();
+		await expect( addToCartButton ).toHaveText( 'Add to cart' );
+
+		await addToCartButton.click();
+		await expect( addToCartButton ).toHaveText( '1 in cart' );
+
+		expect( await readServerRenderedButtonText() ).toBe( '1 in cart' );
+		await page.reload();
+		await expect( addToCartButton ).toBeVisible();
+		await expect( addToCartButton ).toHaveText( '1 in cart' );
 	} );
 
 	test.describe( 'as a guest', () => {
@@ -299,6 +297,7 @@ test.describe( 'ProductButton in-cart count', () => {
 		test( 'counts a child when its declared parent product is drafted', async ( {
 			page,
 			requestUtils,
+			cleanup,
 		} ) => {
 			// Other specs read the sample catalog, so the parent is a product
 			// of its own. Hidden and dated in the past, it stays out of the
@@ -316,41 +315,38 @@ test.describe( 'ProductButton in-cart count', () => {
 				},
 			} );
 
-			try {
-				await seedBeanieAsChildOf( page, parentId );
-				await wpCLI( `post update ${ parentId } --post_status=draft` );
-
-				const items = await readCartItems( page );
-				expect(
-					items.find( ( item ) => item.id === parentId )
-				).toBeUndefined();
-				const childLine = items.find(
-					( item ) => item.id === PRODUCT_X.id
-				);
-				expect( childLine ).toBeDefined();
-				expect( childLine?.parent_item_key ).toBeNull();
-
-				expect(
-					await readServerRenderedProductButtonText(
-						page,
-						PRODUCT_X.id
-					)
-				).toBe( '1 in cart' );
-
-				await page.goto( '/shop/' );
-				await expectHydratedProductButton(
-					page,
-					PRODUCT_X.id,
-					'1 in cart',
-					'2 in cart'
-				);
-			} finally {
+			cleanup( async () => {
 				await requestUtils.rest( {
 					method: 'DELETE',
 					path: `wc/v3/products/${ parentId }`,
 					params: { force: true },
 				} );
-			}
+			} );
+
+			await seedBeanieAsChildOf( page, parentId );
+			await wpCLI( `post update ${ parentId } --post_status=draft` );
+
+			const items = await readCartItems( page );
+			expect(
+				items.find( ( item ) => item.id === parentId )
+			).toBeUndefined();
+			const childLine = items.find(
+				( item ) => item.id === PRODUCT_X.id
+			);
+			expect( childLine ).toBeDefined();
+			expect( childLine?.parent_item_key ).toBeNull();
+
+			expect(
+				await readServerRenderedProductButtonText( page, PRODUCT_X.id )
+			).toBe( '1 in cart' );
+
+			await page.goto( '/shop/' );
+			await expectHydratedProductButton(
+				page,
+				PRODUCT_X.id,
+				'1 in cart',
+				'2 in cart'
+			);
 		} );
 	} );
 } );

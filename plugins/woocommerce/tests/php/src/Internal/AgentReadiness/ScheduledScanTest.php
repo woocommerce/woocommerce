@@ -26,6 +26,8 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Report tests stay offline: store output checks would load the test site's pages.
+		StoreOutputChecksTest::block_requests();
 		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		add_filter( 'woocommerce_agent_readiness_rules_url', '__return_empty_string' );
 		delete_option( AgentReadiness::REPORT_OPTION );
@@ -41,7 +43,6 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
 		delete_option( 'woocommerce_feature_agent_readiness_enabled' );
-		remove_filter( 'woocommerce_agent_readiness_rules_url', '__return_empty_string' );
 		parent::tearDown();
 	}
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Apply remote logging sanitization to tags and additional context, not only to the message and backtrace.

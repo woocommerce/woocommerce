@@ -295,8 +295,9 @@ class ExtensibleAbilities {
 	 * @param array $args {
 	 *     Filter arguments.
 	 *
-	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query` and
-	 *                               `orders-query` apply the filters of `product` and `order`. The list ability
+	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query`,
+	 *                               `orders-query` and `customers-query` apply the filters of `product`, `order`
+	 *                               and `customer`. A `meta_query` for `customer` matches user meta. The list ability
 	 *                               of another resource must call `get_query_args()` and `add_query_filters_schema()` itself.
 	 *     @type string   $namespace Slug of the extension that owns the filter, such as `subscriptions`.
 	 *     @type string   $filter    Filter name inside the namespace, such as `subscribable`.
@@ -413,7 +414,7 @@ class ExtensibleAbilities {
 	/**
 	 * Get the query arguments of the filters in the input of a list ability.
 	 * Each key holds one clause for each filter, so `array_merge_recursive()`
-	 * adds them to WP_Query or wc_get_orders() arguments with AND. `post__in`
+	 * adds them to WP_Query, wc_get_orders() or WP_User_Query arguments with AND. `post__in`
 	 * holds the IDs that every `include_ids` filter returned, without the IDs
 	 * that any `exclude_ids` filter returned, or `0` when none remain, because
 	 * an empty `post__in` does not filter. Without `include_ids`, the excluded

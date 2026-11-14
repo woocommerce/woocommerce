@@ -33,6 +33,7 @@ use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
@@ -453,18 +454,20 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\ProductSales::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\TexturizeExclusions::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Ucp\UcpDiscovery::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\StatusTab::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ProductsList::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductDownloads\DownloadableFileAttachments::class )->register();
+		$container->get( ProductUtil::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
