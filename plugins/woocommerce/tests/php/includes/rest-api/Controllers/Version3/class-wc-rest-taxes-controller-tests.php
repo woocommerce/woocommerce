@@ -7,6 +7,13 @@
 class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Route args list the tax classes that exist at registration, and tests create new ones.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * Runs before any test.
 	 */
 	public function setUp(): void {

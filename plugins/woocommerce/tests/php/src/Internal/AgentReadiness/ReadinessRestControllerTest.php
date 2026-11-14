@@ -15,6 +15,13 @@ use WP_REST_Request;
 class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Tests fire rest_api_init with the feature both on and off.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * Enable the feature after parent::setUp(), so the filter stays out of the hook
 	 * snapshot WordPress takes in the first test. Routes register on first dispatch.
 	 */

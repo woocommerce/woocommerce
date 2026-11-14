@@ -13,6 +13,13 @@ declare( strict_types = 1 );
 class WC_Lazy_REST_Server_Test extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Tests exercise route initialization on a pristine server.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * Filter callback currently enabling the rest-api-v4 feature, if any.
 	 *
 	 * @var callable|null

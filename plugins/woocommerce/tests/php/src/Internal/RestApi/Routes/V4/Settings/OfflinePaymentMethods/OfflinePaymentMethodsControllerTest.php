@@ -16,6 +16,14 @@ use WP_REST_Request;
  * @class OfflinePaymentMethodsControllerTest
  */
 class OfflinePaymentMethodsControllerTest extends WC_REST_Unit_Test_Case {
+
+	/**
+	 * Each test registers a controller wired to its own payments service mock.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
 	/**
 	 * Endpoint.
 	 *

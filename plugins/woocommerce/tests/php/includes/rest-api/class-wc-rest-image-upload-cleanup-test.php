@@ -7,6 +7,10 @@ declare( strict_types = 1 );
  * @package WooCommerce\Tests\RestApi
  */
 class WC_REST_Image_Upload_Cleanup_Test extends WC_REST_Unit_Test_Case {
+
+	/** @var bool Tests register their own controller's routes, which a reused server would keep serving from the first test. */
+	protected static $reuse_rest_server = false;
+
 	/** @var array Downloaded files, including files with no attachment. */
 	private $uploads = array();
 
