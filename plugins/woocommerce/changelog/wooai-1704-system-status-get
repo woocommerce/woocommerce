@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an ability that reads the store's system status without server paths or database details.

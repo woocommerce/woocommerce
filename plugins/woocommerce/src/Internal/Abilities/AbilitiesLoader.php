@@ -32,6 +32,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusGet;
 use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
 use Automattic\WooCommerce\Internal\AgentReadiness\RunCheckAbility;
@@ -79,6 +80,7 @@ class AbilitiesLoader {
 		ReportAbility::class,
 		RunCheckAbility::class,
 		ShippingZonesQuery::class,
+		SystemStatusGet::class,
 		TaxRatesQuery::class,
 		CustomersQuery::class,
 	);
