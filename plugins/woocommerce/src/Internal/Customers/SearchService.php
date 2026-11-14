@@ -25,12 +25,12 @@ final class SearchService {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			global $wpdb;
 
-			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 			$placeholders     = implode( ', ', array_fill( 0, count( $emails ), '%s' ) );
+			$orders_table     = OrdersTableDataStore::get_orders_table_name();
 			$include_user_ids = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT DISTINCT customer_id FROM %i WHERE billing_email IN ($placeholders)",
-					OrdersTableDataStore::get_orders_table_name(),
+					"SELECT DISTINCT customer_id FROM {$orders_table} WHERE billing_email IN ($placeholders)",
 					...$emails
 				)
 			);
