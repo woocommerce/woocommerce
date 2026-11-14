@@ -92,7 +92,8 @@ class ExportWCSettingsTax extends ExportWCSettings {
 		$prefixed_table = $wpdb->prefix . $table;
 		return array_map(
 			fn( $record ) => RunSql::from_table_row( $record, $table ),
-			$wpdb->get_results( $wpdb->prepare( 'SELECT * FROM %i', $prefixed_table ), ARRAY_A ),
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+			$wpdb->get_results( "SELECT * FROM {$prefixed_table}", ARRAY_A ),
 		);
 	}
 }
