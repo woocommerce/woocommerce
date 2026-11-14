@@ -1218,6 +1218,109 @@ class WC_Discounts {
 	}
 
 	/**
+	 * Ensure coupon does not conflict with individual-use coupons already applied to the cart.
+	 *
+	 * Limited to carts — order coupons may still stack. Coupons that are not yet applied are
+	 * skipped so apply_coupon() can replace existing codes when adding a new individual-use coupon.
+	 * The last-applied individual-use coupon wins; both individual-use filters are honoured.
+	 *
+	 * @since  11.4.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
+	 */
+	protected function validate_coupon_individual_use( $coupon ) {
+		if ( ! is_a( $this->object, 'WC_Cart' ) ) {
+			return true;
+		}
+
+		$applied_coupons = $this->object->get_applied_coupons();
+		if ( empty( $applied_coupons ) ) {
+			return true;
+		}
+
+		$coupon_code    = $coupon->get_code();
+		$coupon_applied = false;
+		foreach ( $applied_coupons as $applied_code ) {
+			if ( wc_is_same_coupon( $applied_code, $coupon_code ) ) {
+				$coupon_applied = true;
+				break;
+			}
+		}
+
+		// Not applied yet — apply_coupon() handles individual-use replacement/rejection.
+		if ( ! $coupon_applied ) {
+			return true;
+		}
+
+		// Last-applied individual-use coupon wins (same as apply_coupon / #31728).
+		$individual_use_coupon = null;
+		foreach ( $applied_coupons as $applied_code ) {
+			$applied_coupon = new WC_Coupon( $applied_code );
+			if ( $applied_coupon->get_individual_use() ) {
+				$individual_use_coupon = $applied_coupon;
+			}
+		}
+
+		if ( ! $individual_use_coupon ) {
+			return true;
+		}
+
+		if ( wc_is_same_coupon( $coupon_code, $individual_use_coupon->get_code() ) ) {
+			return true;
+		}
+
+		$other_applied_codes = array_values(
+			array_filter(
+				$applied_coupons,
+				static function ( $applied_code ) use ( $individual_use_coupon ) {
+					return ! wc_is_same_coupon( $applied_code, $individual_use_coupon->get_code() );
+				}
+			)
+		);
+
+		/**
+		 * Filters which coupons to keep when an individual use coupon is applied.
+		 *
+		 * @since 2.6.0
+		 * @param array     $coupons_to_keep       Coupon codes to keep.
+		 * @param WC_Coupon $individual_use_coupon Individual use coupon.
+		 * @param array     $applied_coupons       Other applied coupon codes.
+		 */
+		$coupons_to_keep = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $individual_use_coupon, $other_applied_codes );
+
+		foreach ( (array) $coupons_to_keep as $keep_code ) {
+			if ( ! wc_is_same_coupon( (string) $keep_code, $coupon_code ) ) {
+				continue;
+			}
+
+			// Retained ordinary coupons stay. If a retained coupon later becomes
+			// individual-use, fall through so woocommerce_apply_with_individual_use_coupon
+			// decides — same as apply_coupon() when an existing IU coupon is present.
+			if ( ! $coupon->get_individual_use() ) {
+				return true;
+			}
+
+			break;
+		}
+
+		/**
+		 * Filters whether a coupon can remain applied alongside an individual use coupon.
+		 *
+		 * @since 2.6.0
+		 * @param bool      $apply_with_individual_use_coupon Defaults to false.
+		 * @param WC_Coupon $coupon                           Coupon applied alongside the individual use coupon.
+		 * @param WC_Coupon $individual_use_coupon            Individual use coupon already applied to the cart.
+		 * @param array     $applied_coupons                  Applied coupon codes.
+		 */
+		if ( false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $coupon, $individual_use_coupon, $applied_coupons ) ) {
+			throw new Exception( $individual_use_coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY ), WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
+		return true;
+	}
+
+	/**
 	 * Check if a coupon is valid.
 	 *
 	 * Error Codes:
@@ -1256,6 +1359,7 @@ class WC_Discounts {
 			$this->validate_coupon_excluded_items( $coupon );
 			$this->validate_coupon_eligible_items( $coupon );
 			$this->validate_coupon_allowed_emails( $coupon );
+			$this->validate_coupon_individual_use( $coupon );
 
 			if ( ! apply_filters( 'woocommerce_coupon_is_valid', true, $coupon, $this ) ) {
 				throw new Exception( __( 'Coupon is not valid.', 'woocommerce' ), WC_Coupon::E_WC_COUPON_INVALID_FILTERED );
