@@ -175,7 +175,7 @@
 						if ( ! $okButton.prop( 'disabled' ) ) {
 							this.addButton( e );
 						}
-					}	else if ( $( '#btn-next' ).length ) {
+					}	else if ( this.$( '#btn-next' ).length && ! this.$( '#btn-next' ).prop( 'disabled' ) ) {
 						this.nextButton( e );
 					}
 				}
