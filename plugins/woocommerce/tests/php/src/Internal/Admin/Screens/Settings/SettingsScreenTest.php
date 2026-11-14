@@ -59,4 +59,22 @@ class SettingsScreenTest extends WC_Unit_Test_Case {
 		$this->assertNotFalse( has_action( 'admin_notices', '__return_null' ), 'admin_notices callbacks should stay' );
 		$this->assertNotFalse( has_action( 'all_admin_notices', '__return_null' ), 'all_admin_notices callbacks should stay' );
 	}
+
+	/**
+	 * @testdox Should keep WooCommerce's admin header bar off the settings screen.
+	 */
+	public function test_is_not_a_connected_page_on_the_screen(): void {
+		$_GET['page'] = 'wc-settings-screen-wp-admin';
+
+		$this->assertFalse( $this->sut->handle_is_connected_page( true ) );
+	}
+
+	/**
+	 * @testdox Should leave the header bar decision unchanged on other admin pages.
+	 */
+	public function test_keeps_connected_page_value_on_other_pages(): void {
+		$_GET['page'] = 'wc-settings';
+
+		$this->assertTrue( $this->sut->handle_is_connected_page( true ) );
+	}
 }
