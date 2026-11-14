@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Order again now keeps the chosen options of variations with non-Latin or long attribute names.

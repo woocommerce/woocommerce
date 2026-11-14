@@ -623,6 +623,43 @@ final class WC_Cart_Session {
 	}
 
 	/**
+	 * Get the attributes of an ordered variation, keyed like a cart item's variation data.
+	 *
+	 * Attributes the variation sets come from the variation itself. "Any" attributes come from the order item
+	 * meta, which checkout stores under the attribute key without its `attribute_` prefix. Matching the meta
+	 * against attribute names instead missed multibyte and long global attribute names.
+	 *
+	 * Returns null when the order recorded a value that the variation no longer allows, for example after an
+	 * "Any" attribute was changed to a fixed value, so the item isn't silently replaced with a different one.
+	 *
+	 * @param WC_Product_Variation $variation Ordered variation.
+	 * @param WC_Order_Item        $item      Order item.
+	 * @return array|null
+	 */
+	private function get_order_again_variation_attributes( WC_Product_Variation $variation, WC_Order_Item $item ): ?array {
+		$attributes = array();
+
+		foreach ( $variation->get_variation_attributes() as $attribute_key => $value ) {
+			$meta_key    = substr( $attribute_key, strlen( 'attribute_' ) );
+			$is_taxonomy = taxonomy_is_product_attribute( $meta_key );
+			$normalize   = static function ( string $raw ) use ( $is_taxonomy ): string {
+				return $is_taxonomy ? sanitize_title( $raw ) : wp_strip_all_tags( html_entity_decode( $raw, ENT_QUOTES, get_bloginfo( 'charset' ) ) );
+			};
+			$ordered     = $normalize( (string) $item->get_meta( $meta_key ) );
+
+			if ( '' === $value ) {
+				$value = $ordered;
+			} elseif ( '' !== $ordered && $ordered !== $normalize( (string) $value ) ) {
+				return null;
+			}
+
+			$attributes[ $attribute_key ] = $value;
+		}
+
+		return $attributes;
+	}
+
+	/**
 	 * Get a cart from an order, if user has permission.
 	 *
 	 * @since  3.5.0
@@ -676,14 +713,23 @@ final class WC_Cart_Session {
 				continue;
 			}
 
-			foreach ( $item->get_meta_data() as $meta ) {
-				if ( taxonomy_is_product_attribute( $meta->key ) || meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
-					$attribute_key = 'attribute_' . sanitize_title( $meta->key );
-					if ( taxonomy_is_product_attribute( $meta->key ) ) {
-						$variations[ $attribute_key ] = sanitize_title( $meta->value );
-					} else {
-						// Preserve literal percent escapes, matching custom values added through the cart and Store API.
-						$variations[ $attribute_key ] = wp_strip_all_tags( html_entity_decode( $meta->value, ENT_QUOTES, get_bloginfo( 'charset' ) ) );
+			$variation = $variation_id ? wc_get_product( $variation_id ) : null;
+
+			if ( $variation instanceof WC_Product_Variation ) {
+				$variations = $this->get_order_again_variation_attributes( $variation, $item );
+				if ( null === $variations ) {
+					continue;
+				}
+			} else {
+				foreach ( $item->get_meta_data() as $meta ) {
+					if ( taxonomy_is_product_attribute( $meta->key ) || meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
+						$attribute_key = 'attribute_' . sanitize_title( $meta->key );
+						if ( taxonomy_is_product_attribute( $meta->key ) ) {
+							$variations[ $attribute_key ] = sanitize_title( $meta->value );
+						} else {
+							// Preserve literal percent escapes, matching custom values added through the cart and Store API.
+							$variations[ $attribute_key ] = wp_strip_all_tags( html_entity_decode( $meta->value, ENT_QUOTES, get_bloginfo( 'charset' ) ) );
+						}
 					}
 				}
 			}
