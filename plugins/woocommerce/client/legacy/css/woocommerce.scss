@@ -737,13 +737,13 @@ p.demo_store,
 
 		h2 small {
 			float: right;
-			color: $subtext;
+			color: #757575;
 			font-size: 15px;
 			margin: 10px 0 0;
 
 			a {
 				text-decoration: none;
-				color: $subtext;
+				color: #757575;
 			}
 		}
 
@@ -1399,6 +1399,96 @@ p.demo_store,
 		font-weight: 700;
 	}
 
+	.woocommerce-fulfillment-progress {
+		margin-bottom: 2em;
+
+		&__steps {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 1em 0;
+			list-style: none;
+			margin: 0 0 0.5em;
+			padding: 0;
+			counter-reset: none;
+		}
+
+		&__step {
+			display: flex;
+			flex: 1 1 25%;
+			flex-direction: column;
+			align-items: center;
+			min-width: 6em;
+			margin: 0;
+			padding: 0 0.25em;
+			position: relative;
+			text-align: center;
+			color: #757575;
+
+			&::before {
+				content: "";
+				position: absolute;
+				top: 0.9em;
+				left: -50%;
+				width: 100%;
+				height: 2px;
+				background: #e0e0e0;
+			}
+
+			&:first-child::before {
+				display: none;
+			}
+
+			&--done {
+				color: inherit;
+
+				&::before,
+				.woocommerce-fulfillment-progress__marker {
+					background: #13550f;
+				}
+
+				.woocommerce-fulfillment-progress__marker {
+					border-color: #13550f;
+					color: #fff;
+				}
+			}
+
+			&--current {
+				color: inherit;
+				font-weight: 700;
+
+				&::before {
+					background: #13550f;
+				}
+
+				.woocommerce-fulfillment-progress__marker {
+					border-color: #13550f;
+					color: #13550f;
+				}
+			}
+		}
+
+		&__marker {
+			box-sizing: border-box;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 1.8em;
+			height: 1.8em;
+			margin-bottom: 0.4em;
+			border: 2px solid #e0e0e0;
+			border-radius: 50%;
+			background: #fff;
+			font-size: 0.9em;
+			line-height: 1;
+			position: relative;
+			z-index: 1;
+		}
+
+		&__summary {
+			margin: 0;
+		}
+	}
+
 	.woocommerce-order-downloads,
 	.woocommerce-customer-details,
 	.woocommerce-order-details {
@@ -1837,7 +1927,7 @@ p.demo_store,
 		color: $subtext;
 
 		a {
-			color: $subtext;
+			color: #757575;
 		}
 	}
 
@@ -2093,7 +2183,7 @@ p.demo_store,
 		.cart_totals {
 
 			p small {
-				color: $subtext;
+				color: #757575;
 				font-size: 0.83em;
 			}
 
@@ -2123,7 +2213,7 @@ p.demo_store,
 				}
 
 				small {
-					color: $subtext;
+					color: #757575;
 				}
 
 				select {
@@ -2170,7 +2260,7 @@ p.demo_store,
 
 		.create-account small {
 			font-size: 11px;
-			color: $subtext;
+			color: #757575;
 			font-weight: 400;
 		}
 
@@ -2352,7 +2442,7 @@ p.demo_store,
 
 			span.help {
 				font-size: 0.857em;
-				color: $subtext;
+				color: #757575;
 				font-weight: 400;
 			}
 
@@ -2509,7 +2599,7 @@ p.demo_store,
 		}
 
 		dt {
-			color: $subtext;
+			color: #757575;
 			font-size: 0.875em;
 			margin-bottom: 0.25em;
 		}
