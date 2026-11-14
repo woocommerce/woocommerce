@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
+use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\ProductFeed\Mapping\UcpProductMapper;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Ucp\UcpProductSchema;
@@ -178,9 +179,9 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 			$product      = wc_get_product( $product->get_parent_id() );
 		}
 
-		// Catalog visibility as the storefront applies it: published, not hidden
-		// from the catalog, and in stock when the store hides out-of-stock items.
-		if ( ! $product instanceof \WC_Product || ! $product->is_visible() ) {
+		// Visibility as catalog search applies it: published, not "Hidden", and in
+		// stock when the store hides out-of-stock items.
+		if ( ! $product instanceof \WC_Product || ! self::is_reachable( $product ) ) {
 			return null;
 		}
 
@@ -199,6 +200,24 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 			'product'      => $product,
 			'variation_id' => $variation_id,
 		);
+	}
+
+	/**
+	 * Whether an agent can open the product by its ID. is_visible() accepts "Search results
+	 * only" products only on a storefront search page, but catalog search returns them, so
+	 * they are checked as if shown everywhere, keeping the other rules and the filter. The
+	 * filter gets the ID, so a callback that reloads the product sees its saved setting.
+	 *
+	 * @param \WC_Product $product Product, not a variation.
+	 * @return bool
+	 */
+	private static function is_reachable( \WC_Product $product ): bool {
+		if ( CatalogVisibility::SEARCH !== $product->get_catalog_visibility() ) {
+			return $product->is_visible();
+		}
+		$shown = clone $product;
+		$shown->set_catalog_visibility( CatalogVisibility::VISIBLE );
+		return $shown->is_visible();
 	}
 
 	/**
