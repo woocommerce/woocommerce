@@ -454,6 +454,50 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
+	 * Throws when a line item quantity has decimals but the store only allows whole quantities.
+	 *
+	 * Runs before any item is saved, so an invalid quantity rejects the whole request.
+	 *
+	 * @since 11.4.0
+	 * @param mixed $line_items Posted line items.
+	 * @throws WC_REST_Exception When a quantity is invalid.
+	 */
+	protected function validate_line_item_quantities( $line_items ): void {
+		if ( ! is_array( $line_items ) ) {
+			return;
+		}
+
+		foreach ( $line_items as $item ) {
+			if ( ! is_array( $item ) || ! isset( $item['quantity'] ) ) {
+				continue;
+			}
+
+			// Batch requests skip schema validation, so a non-numeric value must not be cast to 0 and remove the item.
+			if ( ! is_numeric( $item['quantity'] ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_quantity', esc_html__( 'Quantity must be a number.', 'woocommerce' ), 400 );
+			}
+
+			$quantity = (float) $item['quantity'];
+			if ( (float) wc_stock_amount( $quantity ) !== round( $quantity, WC_ROUNDING_PRECISION ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_quantity', esc_html__( 'Quantity must be a whole number unless the store allows decimal quantities.', 'woocommerce' ), 400 );
+			}
+		}
+	}
+
+	/**
+	 * Schema type for line item quantities.
+	 *
+	 * Whole-quantity stores keep `integer`. Stores that allow decimal quantities also accept `number`,
+	 * listed second so whole numbers are still sanitized to integers for subclasses that compare `0 === $quantity`.
+	 *
+	 * @since 11.4.0
+	 * @return string|string[]
+	 */
+	private function get_line_item_quantity_schema_type() {
+		return 1.5 === (float) wc_stock_amount( 1.5 ) ? array( 'integer', 'number' ) : 'integer';
+	}
+
+	/**
 	 * Prepare a single order for create.
 	 *
 	 * @throws WC_REST_Exception If the customer ID, or a new line item's product, is invalid.
@@ -466,6 +510,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		$order     = new WC_Order( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
+
+		$this->validate_line_item_quantities( $request['line_items'] );
 
 		$this->check_new_line_item_products( $request['line_items'] );
 
@@ -498,7 +544,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 						if ( is_array( $value ) ) {
 							foreach ( $value as $item ) {
 								if ( is_array( $item ) ) {
-									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
+									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && ( 0 === $item['quantity'] || ( 'line_items' === $key && is_numeric( $item['quantity'] ) && 0.0 === (float) $item['quantity'] ) ) ) ) {
 										$order->remove_item( $item['id'] );
 									} else {
 										$this->set_item( $order, $key, $item );
@@ -1365,7 +1411,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							),
 							'quantity' => array(
 								'description' => __( 'Quantity ordered.', 'woocommerce' ),
-								'type'        => 'integer',
+								'type'        => $this->get_line_item_quantity_schema_type(),
 								'context'     => array( 'view', 'edit' ),
 							),
 							'tax_class' => array(
