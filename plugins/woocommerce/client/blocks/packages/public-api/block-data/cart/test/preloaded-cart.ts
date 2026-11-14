@@ -10,9 +10,13 @@ import type { CartResponse } from '@woocommerce/types';
 import { getPreloadedCartResponse } from '../preloaded-cart';
 
 jest.mock( '@wordpress/data' );
-jest.mock( '@woocommerce/settings', () => ( {
-	getSetting: jest.fn(),
-} ) );
+jest.mock( '@woocommerce/settings', () => {
+	const actual = jest.requireActual( '@woocommerce/settings' );
+	return {
+		...actual,
+		getSetting: jest.fn( actual.getSetting ),
+	};
+} );
 jest.mock( '../../utils', () => ( {
 	...jest.requireActual( '../../utils' ),
 	isEditor: jest.fn().mockReturnValue( false ),
@@ -82,15 +86,20 @@ describe( 'Cart store with a preloaded cart', () => {
 		const setCartHash = jest.fn();
 
 		jest.isolateModules( () => {
-			jest.requireMock< { dispatch: jest.Mock } >(
-				'@wordpress/data'
-			).dispatch.mockReturnValue( { receiveCart, finishResolution } );
+			const { getSetting: actualGetSetting } = jest.requireActual< {
+				getSetting: ( name: string, fallback: unknown ) => unknown;
+			} >( '@woocommerce/settings' );
 			jest.requireMock< { getSetting: jest.Mock } >(
 				'@woocommerce/settings'
 			).getSetting.mockImplementation(
 				( name: string, fallback: unknown ) =>
-					name === 'preloadedApiRequests' ? preloaded : fallback
+					name === 'preloadedApiRequests'
+						? preloaded
+						: actualGetSetting( name, fallback )
 			);
+			jest.requireMock< { dispatch: jest.Mock } >(
+				'@wordpress/data'
+			).dispatch.mockReturnValue( { receiveCart, finishResolution } );
 			jest.requireMock< { isEditor: jest.Mock } >(
 				'../../utils'
 			).isEditor.mockReturnValue( editor );
