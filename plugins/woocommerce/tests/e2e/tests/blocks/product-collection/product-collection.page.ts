@@ -3,7 +3,6 @@
  */
 import { FrameLocator, Locator, Page } from '@playwright/test';
 import { Editor, Admin, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
-import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
 export const BLOCK_LABELS = {
 	productTemplate: 'Block: Product Template',
@@ -263,31 +262,6 @@ class ProductCollectionPage {
 		await this.editor.openDocumentSettingsSidebar();
 	}
 
-	async setupAndFetchQueryContextURL( {
-		collection,
-	}: {
-		collection: Collections;
-	} ) {
-		await this.admin.createNewPost();
-		await this.insertProductCollection();
-
-		const productResponsePromise = this.page.waitForResponse(
-			( response ) => {
-				return (
-					response.url().includes( '/wp/v2/product' ) &&
-					response
-						.url()
-						.includes( 'productCollectionQueryContext' ) &&
-					response.status() === 200
-				);
-			}
-		);
-
-		await this.chooseCollectionInPost( collection );
-		const productResponse = await productResponsePromise;
-
-		return new URL( productResponse.url() );
-	}
 	async insertProductElements() {
 		// By default there are inner blocks:
 		// - woocommerce/product-image
@@ -328,33 +302,6 @@ class ProductCollectionPage {
 		await this.refreshLocators( 'frontend' );
 	}
 
-	async replaceBlockByBlockName( name: string, nameToInsert: string ) {
-		await this.page.evaluate(
-			( { name: _name, nameToInsert: _nameToInsert } ) => {
-				const blocks = window.wp.data
-					.select( 'core/block-editor' )
-					.getBlocks();
-				const firstMatchingBlock = blocks
-					.flatMap(
-						( {
-							innerBlocks,
-						}: {
-							innerBlocks: BlockRepresentation[];
-						} ) => innerBlocks
-					)
-					.find(
-						( block: BlockRepresentation ) => block.name === _name
-					);
-				const { clientId } = firstMatchingBlock;
-				const block = window.wp.blocks.createBlock( _nameToInsert );
-				window.wp.data
-					.dispatch( 'core/block-editor' )
-					.replaceBlock( clientId, block );
-			},
-			{ name, nameToInsert }
-		);
-	}
-
 	// Going to Product Catalog by default
 	async goToEditorTemplate(
 		template = `${ BLOCK_THEME_SLUG }//archive-product`
@@ -379,11 +326,6 @@ class ProductCollectionPage {
 		await this.refreshLocators( 'frontend' );
 	}
 
-	async goToHomePageFrontend() {
-		await this.page.goto( `/` );
-		await this.refreshLocators( 'frontend' );
-	}
-
 	async insertProductCollection() {
 		await this.editor.insertBlockUsingGlobalInserter( this.BLOCK_NAME );
 	}
@@ -405,20 +347,6 @@ class ProductCollectionPage {
 			this.editor.canvas
 		);
 		await this.refreshLocators( 'editor' );
-	}
-
-	async goToHomePageAndInsertCollection( collection?: Collections ) {
-		await this.goToTemplateAndInsertCollection(
-			`${ BLOCK_THEME_SLUG }//home`,
-			collection
-		);
-	}
-
-	async searchProducts( phrase: string ) {
-		await this.page
-			.getByLabel( SELECTORS.productSearchLabel )
-			.fill( phrase );
-		await this.page.locator( SELECTORS.productSearchButton ).click();
 	}
 
 	async addFilter(
@@ -477,11 +405,6 @@ class ProductCollectionPage {
 		return sidebarSettings.getByRole( 'combobox', {
 			name: 'Order by',
 		} );
-	}
-
-	async getOrderBy() {
-		const orderByComboBox = await this.getOrderByElement();
-		return await orderByComboBox.inputValue();
 	}
 
 	async setShowOnlyProductsOnSale(
@@ -733,18 +656,6 @@ class ProductCollectionPage {
 		await this.refreshLocators( 'editor' );
 	}
 
-	async setInheritQueryFromTemplate( inheritQueryFromTemplate: boolean ) {
-		const sidebarSettings = this.locateSidebarSettings();
-		const queryTypeLocator = sidebarSettings.locator(
-			SELECTORS.usePageContextControl
-		);
-		if ( inheritQueryFromTemplate ) {
-			await queryTypeLocator.getByLabel( 'Default' ).click();
-		} else {
-			await queryTypeLocator.getByLabel( 'Custom' ).click();
-		}
-	}
-
 	async setViewportSize( {
 		width,
 		height,
@@ -798,10 +709,6 @@ class ProductCollectionPage {
 
 	locateByTestId( testId: string ) {
 		return this.page.getByTestId( testId );
-	}
-
-	async getCollectionHeading() {
-		return this.page.getByRole( 'heading' );
 	}
 
 	async getProductNames() {
