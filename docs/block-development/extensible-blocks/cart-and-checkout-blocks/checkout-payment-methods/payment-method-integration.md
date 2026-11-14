@@ -328,7 +328,7 @@ final class MyPaymentMethodType extends AbstractPaymentMethodType {
 	/**
 	 * This should return whether the payment method is active or not. 
 	 * 
-	 * If false, the scripts will not be enqueued.
+	 * If false, the scripts and styles will not be enqueued.
 	 *
 	 * @return boolean
 	 */
@@ -368,6 +368,32 @@ final class MyPaymentMethodType extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_script_handles_for_admin() {
 		return $this->get_payment_method_script_handles();
+	}
+
+	/**
+	 * Returns an array of style handles to be enqueued for this payment method on the frontend.
+	 *
+	 * Register your payment method styles with `wp_register_style` before returning their handles. The styles will be
+	 * loaded when the Cart or Checkout block is rendered.
+	 */
+	public function get_payment_method_style_handles() {
+		wp_register_style(
+			'my-payment-method',
+			'path/to/your/styles/my-payment-method.css',
+			[],
+			'1.0.0'
+		);
+		return [ 'my-payment-method' ];
+	}
+
+	/**
+	 * Returns an array of style handles to be enqueued for the admin.
+	 *
+	 * Override this method when the payment method needs different styles in the editor. By default, the handles from
+	 * `get_payment_method_style_handles` are used.
+	 */
+	public function get_payment_method_style_handles_for_admin() {
+		return $this->get_payment_method_style_handles();
 	}
 
 	/**
