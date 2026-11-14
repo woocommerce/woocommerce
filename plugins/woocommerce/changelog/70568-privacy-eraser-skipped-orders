@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Erase personal data from all of a customer's orders on an erasure request, not only some of them when they have more than 10.

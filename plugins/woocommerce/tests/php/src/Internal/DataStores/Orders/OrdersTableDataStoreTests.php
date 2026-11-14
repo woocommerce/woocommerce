@@ -1137,6 +1137,38 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox A NOT EXISTS meta query keeps a meta key that contains "INNER JOIN" unchanged.
+	 */
+	public function test_cot_query_meta_not_exists_with_join_in_key() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order1 = new \WC_Order();
+		$order1->add_meta_data( 'key INNER JOIN', 'yes' );
+		$order1->add_meta_data( 'color', 'red' );
+		$order1->save();
+
+		$order2 = new \WC_Order();
+		$order2->add_meta_data( 'color', 'red' );
+		$order2->save();
+
+		$query = new OrdersTableQuery(
+			array(
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'   => 'color',
+						'value' => 'red',
+					),
+					array(
+						'key'     => 'key INNER JOIN',
+						'compare' => 'NOT EXISTS',
+					),
+				),
+			)
+		);
+		$this->assertEquals( array( $order2->get_id() ), $query->orders );
+	}
+
+	/**
 	 * @testDox Tests queries involving 'orderby' and meta queries.
 	 */
 	public function test_cot_query_meta_orderby() {
