@@ -34,3 +34,8 @@
 		}
 	}
 }
+
+// Only the blocks that use motion animate the rows that appear and go.
+:where(.wp-block-woocommerce-cart, .wp-block-woocommerce-checkout) .wc-block-components-totals-wrapper {
+	@include motion-collapse;
+}
