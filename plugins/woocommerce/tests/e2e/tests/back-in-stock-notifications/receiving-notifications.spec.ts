@@ -135,12 +135,18 @@ test.describe(
 			await expect( body ).toContainText( BIS_EMAIL_FOOTER.loggedIn );
 			await expect( body ).not.toContainText( BIS_EMAIL_FOOTER.guest );
 
-			// The wording changes; the link it wraps still has to be there.
-			await expect(
-				bisEmailBody( page ).locator(
-					`a${ BIS_EMAIL_LINKS.unsubscribe }`
-				)
-			).toHaveAttribute( 'href', /email_link_action=unsubscribe/ );
+			// Account management must not cancel the notification.
+			const accountLink = bisEmailBody( page ).locator(
+				`a${ BIS_EMAIL_LINKS.unsubscribe }`
+			);
+			await expect( accountLink ).toHaveAttribute(
+				'href',
+				/\/my-account\/stock-notifications\//
+			);
+			await expect( accountLink ).not.toHaveAttribute(
+				'href',
+				/email_link_action=unsubscribe/
+			);
 		} );
 
 		test( 'unsubscribe link in the back-in-stock email leaves the sent notification unchanged', async ( {
