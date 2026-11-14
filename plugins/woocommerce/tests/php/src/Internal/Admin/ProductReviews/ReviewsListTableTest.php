@@ -516,7 +516,31 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			'4 stars'                 => array( '4', '<span aria-label="4 out of 5">&#9733;&#9733;&#9733;&#9733;&#9734;</span>' ),
 			'5 stars'                 => array( '5', '<span aria-label="5 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>' ),
 			'2.5 stars (rounds down)' => array( '2.5', '<span aria-label="2 out of 5">&#9733;&#9733;&#9734;&#9734;&#9734;</span>' ),
+			'negative rating'         => array( '-1', '<span aria-label="0 out of 5">&#9734;&#9734;&#9734;&#9734;&#9734;</span>' ),
 		);
+	}
+
+	/**
+	 * @testdox `column_rating` clamps a stored rating above 5 to 5 stars instead of failing.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_rating()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method does not exist.
+	 */
+	public function test_column_rating_clamps_rating_above_maximum(): void {
+		$list_table = $this->get_reviews_list_table();
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'column_rating' );
+		$method->setAccessible( true );
+
+		$review = $this->factory()->comment->create_and_get();
+		update_comment_meta( $review->comment_ID, 'rating', '6' );
+
+		ob_start();
+		$method->invokeArgs( $list_table, array( $review ) );
+		$output = trim( ob_get_clean() );
+
+		$this->assertSame( '<span aria-label="5 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>', $output );
 	}
 
 	/**
