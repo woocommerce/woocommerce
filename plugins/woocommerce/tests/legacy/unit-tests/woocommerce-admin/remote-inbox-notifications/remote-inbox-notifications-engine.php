@@ -64,7 +64,6 @@ class WC_Admin_Tests_RemoteInboxNotifications_RemoteInboxNotificationsEngine ext
 	public function tearDown(): void {
 		parent::tearDown();
 		delete_transient( 'woocommerce_admin_' . RemoteInboxNotificationsDataSourcePoller::ID . '_specs' );
-		remove_all_filters( 'transient_woocommerce_admin_' . RemoteInboxNotificationsDataSourcePoller::ID . '_specs' );
 	}
 
 

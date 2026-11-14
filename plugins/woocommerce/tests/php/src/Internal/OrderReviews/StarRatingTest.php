@@ -12,14 +12,6 @@ use WC_Unit_Test_Case;
 class StarRatingTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Reset filter state between tests.
-	 */
-	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_review_order_rating_labels' );
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox render() emits a radiogroup, five radios, and a caption span.
 	 */
 	public function test_render_emits_complete_markup(): void {

@@ -35,21 +35,6 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_email_log_enabled' );
-		remove_all_filters( 'woocommerce_email_log_context' );
-		remove_all_filters( 'woocommerce_email_log_add_order_note' );
-		remove_all_filters( 'woocommerce_mail_callback' );
-		remove_all_actions( 'woocommerce_email_disabled' );
-		remove_all_actions( 'woocommerce_email_skipped' );
-		remove_action( 'woocommerce_email_sent', array( $this->sut, 'handle_woocommerce_email_sent' ) );
-		remove_action( 'wp_mail_failed', array( $this->sut, 'capture_mail_error' ) );
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox Register method adds hooks for woocommerce_email_sent, wp_mail_failed, woocommerce_email_disabled, and woocommerce_email_skipped.
 	 */
 	public function test_register_adds_hook(): void {

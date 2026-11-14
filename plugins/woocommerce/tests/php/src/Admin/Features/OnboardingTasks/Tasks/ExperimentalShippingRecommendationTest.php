@@ -47,7 +47,6 @@ class ExperimentalShippingRecommendationTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		remove_filter( 'pre_option_active_plugins', array( $this, 'get_mocked_active_plugins' ), self::HOOK_PRIORITY );
 		wp_cache_delete( 'plugins', 'plugins' );
 	}
 
