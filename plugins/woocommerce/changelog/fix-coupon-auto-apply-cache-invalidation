@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Invalidate the auto-apply coupon cache when a coupon is published, unpublished, deleted, or has its auto-apply flag written outside the coupon CRUD, so the change takes effect immediately instead of when the cache expires.

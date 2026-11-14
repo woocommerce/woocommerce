@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make auto-apply coupon processing unwind its notice-silencing filters and reentrancy guard even when a third-party hook callback throws.

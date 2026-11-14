@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Read the auto-apply flag of a coupon supplied through woocommerce_get_shop_coupon_data as a boolean, so a legacy 'no' string is no longer treated as auto-applied.

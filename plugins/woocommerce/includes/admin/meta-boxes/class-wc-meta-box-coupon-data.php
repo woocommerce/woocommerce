@@ -162,12 +162,23 @@ class WC_Meta_Box_Coupon_Data {
 					)
 				);
 
+				// Auto apply. Sits with the restrictions because they are what decides which carts
+				// it lands on: with none set, it applies to every cart in the store.
+				woocommerce_wp_checkbox(
+					array(
+						'id'          => 'auto_apply',
+						'label'       => __( 'Apply automatically', 'woocommerce' ),
+						'description' => __( 'Applies to any cart that meets usage restrictions, or to all carts if no restrictions are set. Customers can’t remove it.', 'woocommerce' ),
+						'value'       => wc_bool_to_string( $coupon->get_auto_apply( 'edit' ) ),
+					)
+				);
+
 				// Individual use.
 				woocommerce_wp_checkbox(
 					array(
 						'id'          => 'individual_use',
 						'label'       => __( 'Individual use only', 'woocommerce' ),
-						'description' => __( 'Check this box if the coupon cannot be used in conjunction with other coupons.', 'woocommerce' ),
+						'description' => __( 'Can’t be combined with other coupons.', 'woocommerce' ),
 						'value'       => wc_bool_to_string( $coupon->get_individual_use( 'edit' ) ),
 					)
 				);
@@ -177,7 +188,7 @@ class WC_Meta_Box_Coupon_Data {
 					array(
 						'id'          => 'exclude_sale_items',
 						'label'       => __( 'Exclude sale items', 'woocommerce' ),
-						'description' => __( 'Check this box if the coupon should not apply to items on sale. Per-item coupons will only work if the item is not on sale. Per-cart coupons will only work if there are items in the cart that are not on sale.', 'woocommerce' ),
+						'description' => __( 'Won’t discount items on sale. Cart discounts apply only if the cart has at least one item that’s not on sale.', 'woocommerce' ),
 						'value'       => wc_bool_to_string( $coupon->get_exclude_sale_items( 'edit' ) ),
 					)
 				);
@@ -386,6 +397,7 @@ class WC_Meta_Box_Coupon_Data {
 				'minimum_amount'              => wc_format_decimal( $_POST['minimum_amount'] ),
 				'maximum_amount'              => wc_format_decimal( $_POST['maximum_amount'] ),
 				'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) ),
+				'auto_apply'                  => isset( $_POST['auto_apply'] ), // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The coupon nonce is verified before this method is called.
 			)
 		);
 

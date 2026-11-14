@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Let checkout validation remove an auto-apply coupon the customer turns out not to be entitled to, instead of reporting it removed while it stays applied.
