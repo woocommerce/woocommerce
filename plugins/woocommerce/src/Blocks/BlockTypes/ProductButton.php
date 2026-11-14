@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Utilities\InCartQuantity;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 /**
  * ProductButton class.
@@ -145,6 +146,8 @@ class ProductButton extends AbstractBlock {
 			}
 		}
 
+		$initial_quantity = $is_descendant_of_add_to_cart_form ? 1 : wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_quantity( $product );
+
 		/**
 		 * This filter is documented in includes/wc-template-functions.php.
 		 *
@@ -153,7 +156,7 @@ class ProductButton extends AbstractBlock {
 		$args = apply_filters(
 			'woocommerce_loop_add_to_cart_args',
 			array(
-				'quantity'   => 1,
+				'quantity'   => $initial_quantity,
 				'class'      => $html_classes,
 				'attributes' => array_merge(
 					$attributes,
@@ -171,6 +174,17 @@ class ProductButton extends AbstractBlock {
 		$default_quantity = 1;
 		if ( ! $is_descendant_of_add_to_cart_form && isset( $args['quantity'] ) && is_numeric( $args['quantity'] ) ) {
 			$default_quantity = wc_stock_amount( (float) $args['quantity'] );
+		}
+
+		if ( ! $is_descendant_of_add_to_cart_form ) {
+			$button_data      = wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_button_data( $product, $default_quantity );
+			$add_to_cart_text = $button_data['text'] ?? $add_to_cart_text;
+			if ( isset( $add_to_cart_url, $args['attributes']['href'] ) && esc_url( $add_to_cart_url ) === $args['attributes']['href'] ) {
+				$args['attributes']['href'] = esc_url( $button_data['url'] );
+			}
+			if ( ( $args['attributes']['aria-label'] ?? null ) === $button_data['original_description'] ) {
+				$args['attributes']['aria-label'] = $button_data['description'];
+			}
 		}
 
 		$context = array(

@@ -11,6 +11,80 @@ use Automattic\WooCommerce\Caches\ProductCountCache;
  */
 class ProductUtil {
 	/**
+	 * Get the default catalog quantity without changing a filtered add-to-cart URL.
+	 *
+	 * @since 11.4.0
+	 * @param \WC_Product $product Product to render.
+	 * @param string|null $url Filtered URL, if already available.
+	 * @return int|float
+	 */
+	public function get_catalog_add_to_cart_quantity( \WC_Product $product, ?string $url = null ) {
+		if ( $product->is_sold_individually() ) {
+			return 1;
+		}
+
+		$url = $url ?? $product->add_to_cart_url();
+		parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+		if ( ( $query['add-to-cart'] ?? null ) === (string) $product->get_id() && is_numeric( $query['quantity'] ?? null ) ) {
+			$quantity = wc_stock_amount( (float) $query['quantity'] );
+			if ( $quantity > 0 ) {
+				return $quantity;
+			}
+		}
+
+		return max( 1, $product->get_min_purchase_quantity() );
+	}
+
+	/**
+	 * Get catalog button data, using the filtered URL quantity unless explicitly overridden.
+	 *
+	 * @since 11.4.0
+	 * @param \WC_Product $product Product to render.
+	 * @param mixed       $quantity Explicit button quantity, or null to resolve the default from the URL and product minimum.
+	 * @return array{url: string, text: string, description: string, original_description: string, quantity: mixed}
+	 */
+	public function get_catalog_add_to_cart_button_data( \WC_Product $product, $quantity = null ): array {
+		$description = $product->add_to_cart_description();
+		$data        = array(
+			'url'                  => $product->add_to_cart_url(),
+			'text'                 => $product->add_to_cart_text(),
+			'description'          => $description,
+			'original_description' => $description,
+		);
+
+		$quantity         = $quantity ?? $this->get_catalog_add_to_cart_quantity( $product, $data['url'] );
+		$data['quantity'] = $quantity;
+
+		if ( ! $product instanceof \WC_Product_Simple || ! $product->is_purchasable() || ! $product->is_in_stock() || ! is_numeric( $quantity ) || $quantity <= 0 ) {
+			return $data;
+		}
+
+		$quantity = wc_stock_amount( (float) $quantity );
+		parse_str( (string) wp_parse_url( $data['url'], PHP_URL_QUERY ), $query );
+		if ( ( $query['add-to-cart'] ?? null ) === (string) $product->get_id() ) {
+			$url_quantity = $query['quantity'] ?? null;
+			if ( ! is_numeric( $url_quantity ) || wc_stock_amount( (float) $url_quantity ) !== $quantity ) {
+				$data['url'] = add_query_arg( 'quantity', $quantity, $data['url'] );
+			}
+		}
+		$data['quantity'] = $quantity;
+
+		if ( $quantity > 1 ) {
+			if ( __( 'Add to cart', 'woocommerce' ) === $data['text'] ) {
+				/* translators: %s: Quantity of the product to add to the cart. */
+				$data['text'] = sprintf( __( 'Add %s to cart', 'woocommerce' ), $quantity );
+			}
+			/* translators: %s: Product title. */
+			if ( sprintf( __( 'Add to cart: &ldquo;%s&rdquo;', 'woocommerce' ), $product->get_name() ) === $description ) {
+				/* translators: 1: Quantity of the product to add to the cart, 2: Product title. */
+				$data['description'] = sprintf( __( 'Add %1$s to cart: &ldquo;%2$s&rdquo;', 'woocommerce' ), $quantity, $product->get_name() );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
 	 * Transient name for the cached dashboard "out of stock" product count.
 	 *
 	 * Exposed as a constant so the one-time DB update that clears this transient
