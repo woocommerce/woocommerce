@@ -304,6 +304,13 @@ class CartShippingRateSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_rate_response( $rate, $selected_rate = '' ) {
+		$taxes = (array) $this->get_rate_prop( $rate, 'taxes' );
+		if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+			foreach ( $taxes as $rate_id => $tax ) {
+				$taxes[ $rate_id ] = wc_remove_number_precision( wc_round_tax_total( wc_add_number_precision( (float) $tax, false ), 0 ) );
+			}
+		}
+
 		return $this->prepare_currency_response(
 			[
 				'rate_id'       => $this->get_rate_prop( $rate, 'id' ),
@@ -311,7 +318,7 @@ class CartShippingRateSchema extends AbstractSchema {
 				'description'   => $this->prepare_html_response( $this->get_rate_prop( $rate, 'description' ) ),
 				'delivery_time' => $this->prepare_html_response( $this->get_rate_prop( $rate, 'delivery_time' ) ),
 				'price'         => $this->prepare_money_response( $this->get_rate_prop( $rate, 'cost' ), wc_get_price_decimals() ),
-				'taxes'         => $this->prepare_money_response( array_sum( (array) $this->get_rate_prop( $rate, 'taxes' ) ), wc_get_price_decimals() ),
+				'taxes'         => $this->prepare_money_response( array_sum( $taxes ), wc_get_price_decimals() ),
 				'instance_id'   => $this->get_rate_prop( $rate, 'instance_id' ),
 				'method_id'     => $this->get_rate_prop( $rate, 'method_id' ),
 				'meta_data'     => $this->get_rate_meta_data( $rate ),

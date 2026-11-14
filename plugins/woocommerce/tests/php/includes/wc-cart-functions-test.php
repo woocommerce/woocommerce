@@ -11,6 +11,91 @@ declare( strict_types = 1 );
  * Tests for coupon discount formatting in cart totals.
  */
 class WC_Cart_Functions_Test extends WC_Unit_Test_Case {
+	/**
+	 * @testdox Taxless shipping labels can render before the customer is initialized.
+	 */
+	public function test_taxless_shipping_label_without_customer(): void {
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		add_filter( 'woocommerce_cart_display_prices_including_tax', '__return_true' );
+		$rate     = new WC_Shipping_Rate( 'flat_rate:1', 'Flat rate', 70, array(), 'flat_rate' );
+		$customer = WC()->customer;
+
+		try {
+			WC()->customer = null;
+			$this->assertSame( 'Flat rate: ' . wc_price( 70 ), wc_cart_totals_shipping_method_label( $rate ) );
+		} finally {
+			WC()->customer = $customer;
+		}
+	}
+
+	/**
+	 * @testdox Shipping labels use per-rate tax rounding without changing the stored rate.
+	 * @testWith ["no", [10.5], 80, false, false]
+	 *           ["yes", [10.5], 81, false, false]
+	 *           ["no", [5.5, 5.5], 80, false, false]
+	 *           ["yes", [5.5, 5.5], 81, false, false]
+	 *           ["no", [10.5], 70, true, false]
+	 *           ["no", [10.5], 81, false, true]
+	 *           ["no", [10.5], 70, false, false, false]
+	 *
+	 * @param string $round_at_subtotal Whether tax rounds at subtotal.
+	 * @param array  $taxes             Raw rate taxes.
+	 * @param float  $expected          Displayed gross shipping cost.
+	 * @param bool   $exempt            Whether the customer is exempt.
+	 * @param bool   $round_up          Whether a tax filter selects half up.
+	 * @param bool   $display_tax       Whether prices display tax-inclusive.
+	 */
+	public function test_shipping_label_rounds_each_tax( string $round_at_subtotal, array $taxes, float $expected, bool $exempt, bool $round_up, bool $display_tax = true ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_display_cart', $display_tax ? 'incl' : 'excl' );
+		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal );
+		update_option( 'woocommerce_price_num_decimals', 0 );
+		WC()->customer->set_is_vat_exempt( $exempt );
+		if ( $round_up ) {
+			add_filter(
+				'wc_round_tax_total',
+				static function ( $rounded, $value, $precision ) {
+					return round( $value, $precision, PHP_ROUND_HALF_UP );
+				},
+				10,
+				3
+			);
+		}
+		$rate = new WC_Shipping_Rate( 'flat_rate:1', 'Flat rate', 70, $taxes, 'flat_rate' );
+
+		$this->assertStringStartsWith( 'Flat rate: ' . wc_price( $expected ), wc_cart_totals_shipping_method_label( $rate ) );
+		$this->assertSame( $taxes, $rate->get_taxes(), 'Formatting must not change cached rate taxes.' );
+	}
+
+	/**
+	 * @testdox Shipping tax filters retain their raw input and any overridden amount.
+	 * @testWith [10.5, 80]
+	 *           [12.5, 83]
+	 *
+	 * @param float $filtered_tax Tax returned by the shipping filter.
+	 * @param float $expected     Displayed gross shipping cost.
+	 */
+	public function test_shipping_label_preserves_filtered_tax( float $filtered_tax, float $expected ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		update_option( 'woocommerce_price_num_decimals', 0 );
+		$rate = new WC_Shipping_Rate( 'flat_rate:1', 'Flat rate', 70, array( 10.5 ), 'flat_rate' );
+		add_filter(
+			'woocommerce_get_shipping_tax',
+			function ( $tax, $filtered_rate ) use ( $rate, $filtered_tax ) {
+				$this->assertSame( 10.5, $tax, 'The shipping tax filter must still receive the unrounded amount.' );
+				$this->assertSame( $rate, $filtered_rate );
+				return $filtered_tax;
+			},
+			10,
+			2
+		);
+
+		$this->assertSame( 'Flat rate: ' . wc_price( $expected ), wc_cart_totals_shipping_method_label( $rate ) );
+	}
 
 	/**
 	 * @testdox A password-protected variable product cannot be added by passing its variation ID to cart validation.
