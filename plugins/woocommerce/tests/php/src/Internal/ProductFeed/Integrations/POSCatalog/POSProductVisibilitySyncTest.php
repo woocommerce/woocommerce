@@ -200,7 +200,6 @@ class POSProductVisibilitySyncTest extends \WC_Unit_Test_Case {
 		// Try to set hidden again (no change).
 		add_action( 'woocommerce_update_product_variation', array( $mock_callback, 'save' ) );
 		$this->sut->set_product_pos_visibility( $product->get_id(), false );
-		remove_action( 'woocommerce_update_product_variation', array( $mock_callback, 'save' ) );
 	}
 
 	/**

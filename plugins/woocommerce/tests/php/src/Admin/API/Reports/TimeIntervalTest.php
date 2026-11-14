@@ -45,29 +45,24 @@ class TimeIntervalTest extends WC_Unit_Test_Case {
 	 * production-path guarantee lives in TotalPaymentsVolumeProcessorTest.
 	 */
 	public function test_timeframes_default_to_site_timezone_now(): void {
-		$timeframes        = array( 'last_week', 'last_month', 'last_quarter', 'last_6_months', 'last_year' );
-		$original_timezone = get_option( 'timezone_string' );
+		$timeframes = array( 'last_week', 'last_month', 'last_quarter', 'last_6_months', 'last_year' );
 
-		try {
-			// Extreme offsets on both sides of UTC maximize the window where the site-local date differs from the UTC date.
-			foreach ( array( 'Pacific/Kiritimati', 'Pacific/Midway' ) as $timezone ) {
-				update_option( 'timezone_string', $timezone );
+		// Extreme offsets on both sides of UTC maximize the window where the site-local date differs from the UTC date.
+		foreach ( array( 'Pacific/Kiritimati', 'Pacific/Midway' ) as $timezone ) {
+			update_option( 'timezone_string', $timezone );
 
-				foreach ( $timeframes as $timeframe ) {
-					// Compute the expectation before and after the call so the assertion also holds if midnight passes mid-test.
-					$expected_before = TimeInterval::get_timeframe_dates( $timeframe, new DateTime( 'now', wp_timezone() ) );
-					$actual          = TimeInterval::get_timeframe_dates( $timeframe );
-					$expected_after  = TimeInterval::get_timeframe_dates( $timeframe, new DateTime( 'now', wp_timezone() ) );
+			foreach ( $timeframes as $timeframe ) {
+				// Compute the expectation before and after the call so the assertion also holds if midnight passes mid-test.
+				$expected_before = TimeInterval::get_timeframe_dates( $timeframe, new DateTime( 'now', wp_timezone() ) );
+				$actual          = TimeInterval::get_timeframe_dates( $timeframe );
+				$expected_after  = TimeInterval::get_timeframe_dates( $timeframe, new DateTime( 'now', wp_timezone() ) );
 
-					$this->assertContains(
-						$actual,
-						array( $expected_before, $expected_after ),
-						"Default \"$timeframe\" dates should be based on the current date in the $timezone site timezone"
-					);
-				}
+				$this->assertContains(
+					$actual,
+					array( $expected_before, $expected_after ),
+					"Default \"$timeframe\" dates should be based on the current date in the $timezone site timezone"
+				);
 			}
-		} finally {
-			update_option( 'timezone_string', $original_timezone );
 		}
 	}
 }

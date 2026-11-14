@@ -834,9 +834,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Should return default per_page (10), not 0.
 		$this->assertEquals( 10, count( $response_data ), 'number=-5 should fall back to default (10)' );
-
-		// Clean up filter.
-		remove_all_filters( 'woocommerce_customer_query_args' );
 	}
 
 	/**

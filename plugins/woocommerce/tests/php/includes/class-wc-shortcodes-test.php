@@ -220,8 +220,6 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$this->enable_deprecation_notice();
 
 		$this->assertNotEmpty( $product_page );
-
-		remove_filter( 'woocommerce_shortcode_product_page_invalid_statuses', '__return_empty_array' );
 	}
 
 	/**
@@ -374,8 +372,6 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEmpty( $product_page );
-
-		remove_filter( 'woocommerce_shortcode_product_page_force_rendering', '__return_null' );
 	}
 
 	/**
@@ -408,8 +404,6 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEmpty( $product_page );
-
-		remove_filter( 'woocommerce_shortcode_product_page_force_rendering', '__return_false' );
 	}
 
 	/**

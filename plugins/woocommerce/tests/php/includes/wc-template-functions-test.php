@@ -200,8 +200,6 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertFalse( wp_cache_get( $cache_key, 'product_cat' ) );
 		// Result should be empty too (query with empty taxonomy returns nothing).
 		$this->assertEmpty( $result );
-
-		remove_filter( 'woocommerce_product_subcategories_args', $filter );
 	}
 
 	/**
@@ -221,8 +219,6 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 
 		// Cache should remain empty because taxonomy was removed.
 		$this->assertFalse( wp_cache_get( $cache_key, 'product_cat' ) );
-
-		remove_filter( 'woocommerce_product_subcategories_args', $filter );
 	}
 
 	/**

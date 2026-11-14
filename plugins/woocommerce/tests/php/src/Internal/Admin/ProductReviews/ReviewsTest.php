@@ -63,8 +63,6 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_product_reviews_page_capability', $callback );
 
 		$this->assertEquals( 'manage_woocommerce', Reviews::get_capability() );
-
-		remove_filter( 'woocommerce_product_reviews_page_capability', $callback );
 	}
 
 	/**
@@ -803,8 +801,6 @@ test2</p></div>',
 		add_filter( 'woocommerce_product_reviews_is_product_review_or_reply', $callback );
 
 		$this->assertTrue( $method->invoke( $reviews, new stdClass() ) );
-
-		remove_filter( 'woocommerce_product_reviews_is_product_review_or_reply', $callback );
 	}
 
 	/**

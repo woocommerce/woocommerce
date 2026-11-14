@@ -260,9 +260,6 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 			has_action( 'admin_print_footer_scripts', array( $this->sut, 'handle_admin_print_footer_scripts' ) ),
 			'Admin tracking should remain disabled when core Tracks is disabled.'
 		);
-
-		remove_action( 'wp_print_footer_scripts', array( $this->sut, 'handle_wp_print_footer_scripts' ), PHP_INT_MAX );
-		remove_filter( 'woocommerce_apply_user_tracking', '__return_false' );
 	}
 
 	/**

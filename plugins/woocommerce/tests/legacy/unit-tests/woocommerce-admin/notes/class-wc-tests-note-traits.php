@@ -42,7 +42,6 @@ class WC_Admin_Tests_NoteTraits extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_data_stores', '__return_empty_array' );
 		$this->expectException( NotesUnavailableException::class );
 		$callback();
-		remove_filter( 'woocommerce_data_stores', '__return_empty_array' );
 	}
 
 	/**
@@ -54,7 +53,6 @@ class WC_Admin_Tests_NoteTraits extends WC_Unit_Test_Case {
 	public function test_no_exception_is_thrown_even_if_data_store_cannot_be_loaded( $callback ) {
 		add_filter( 'woocommerce_data_stores', '__return_empty_array' );
 		$callback();
-		remove_filter( 'woocommerce_data_stores', '__return_empty_array' );
 	}
 
 	/**

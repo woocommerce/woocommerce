@@ -1027,8 +1027,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertStringContainsString( 'Payment complete event failed', $note->content );
-
-		remove_action( 'woocommerce_payment_complete', array( $this, 'throwAnException' ) );
 	}
 
 	/**
@@ -2325,8 +2323,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertStringContainsString( 'Update status event failed', $note->content );
-
-		remove_filter( 'woocommerce_payment_complete_order_status', array( $this, 'throwAnException' ) );
 	}
 
 	/**
@@ -3318,8 +3314,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertStringContainsString( 'Error saving order', $note->content );
-
-		remove_action( 'woocommerce_before_order_object_save', array( $this, 'throwAnException' ) );
 	}
 
 	/**

@@ -194,7 +194,6 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		$log->critical( 'critical' );
 		$log->alert( 'alert' );
 		$log->emergency( 'emergency' );
-		remove_filter( 'woocommerce_register_log_handlers', array( $this, 'return_assertion_handlers' ) );
 	}
 
 	/**

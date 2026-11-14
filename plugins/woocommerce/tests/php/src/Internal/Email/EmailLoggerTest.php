@@ -1068,7 +1068,5 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 
 		$this->assertIsBool( $received_return, 'woocommerce_email_sent should receive a bool even when the mail callback returns a non-bool' );
 		$this->assertFalse( $received_return );
-
-		remove_all_actions( 'woocommerce_email_sent' );
 	}
 }

@@ -565,8 +565,6 @@ class RequestTest extends \WC_Unit_Test_Case {
 		// Second call: should not hit order details again because flag is set.
 		$request->capture_authorized_payment( $order );
 		$this->assertEquals( 1, $order_details_call_count, 'Expected no additional order details request after 404 (flag prevents retry)' );
-
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**

@@ -213,8 +213,6 @@ class CheckoutFieldsFrontendTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'error', $mocked_messages[0]['type'] );
 		$value = $this->controller->get_field_from_object( 'mynamespace/required_field', new WC_Customer( 1 ) );
 		$this->assertEquals( '', $value );
-
-		remove_action( 'woocommerce_blocks_validate_location_contact_fields', $e_thrower );
 	}
 
 	/**

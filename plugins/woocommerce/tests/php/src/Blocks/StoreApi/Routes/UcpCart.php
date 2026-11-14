@@ -254,14 +254,10 @@ class UcpCart extends UcpCartTestCase {
 		$bind->setAccessible( true );
 		$bind->invoke( $route, new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts' ) );
 
-		try {
-			$this->assertSame(
-				SessionHandler::class,
-				apply_filters( 'woocommerce_session_handler', \WC_Session_Handler::class )
-			);
-		} finally {
-			remove_filter( 'woocommerce_session_handler', array( AbstractCartRoute::class, 'session_handler_class' ) );
-		}
+		$this->assertSame(
+			SessionHandler::class,
+			apply_filters( 'woocommerce_session_handler', \WC_Session_Handler::class )
+		);
 	}
 
 	/**

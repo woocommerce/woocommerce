@@ -265,8 +265,6 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 
 		$this->assertSame( 0, $field['value'] );
 		$this->assertSame( 0, $field['custom_attributes']['min'] );
-
-		delete_option( $option_id );
 	}
 
 	/**

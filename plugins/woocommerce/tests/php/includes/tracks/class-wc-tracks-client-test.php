@@ -304,9 +304,6 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		// Queue should be empty since batching is disabled.
 		$queue = $this->get_batch_queue();
 		$this->assertEmpty( $queue, 'Queue should be empty when batching is disabled via filter.' );
-
-		// Clean up filter.
-		remove_filter( 'wc_tracks_use_batch_requests', '__return_false' );
 	}
 
 	/**
@@ -329,9 +326,6 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		// Queue should have the pixel.
 		$queue = $this->get_batch_queue();
 		$this->assertCount( 1, $queue );
-
-		// Clean up filter.
-		remove_filter( 'wc_tracks_use_batch_requests', '__return_true' );
 	}
 
 	/**
@@ -514,8 +508,5 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		// Verify that HTTP request was intercepted.
 		$this->assertCount( 1, $this->intercepted_requests, 'Should have intercepted 1 HTTP request.' );
 		$this->assertStringContainsString( '_en=fallback_event', $this->intercepted_requests[0]['url'] );
-
-		// Clean up filter.
-		remove_filter( 'wc_tracks_use_batch_requests', '__return_false' );
 	}
 }

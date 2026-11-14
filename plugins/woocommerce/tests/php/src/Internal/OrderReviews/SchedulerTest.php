@@ -309,21 +309,17 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_review_order_eligible_statuses', $widen );
 
-		try {
-			$order = $this->create_pending_order();
-			$order->update_status( 'completed' );
-			$this->assertTrue( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+		$order = $this->create_pending_order();
+		$order->update_status( 'completed' );
+		$this->assertTrue( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
 
-			// `processing` is eligible per the filter, so the pending action stays.
-			$order->update_status( 'processing' );
-			$this->assertTrue( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+		// `processing` is eligible per the filter, so the pending action stays.
+		$order->update_status( 'processing' );
+		$this->assertTrue( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
 
-			// `on-hold` is NOT in the filter's eligible set, so the action is now unscheduled.
-			$order->update_status( 'on-hold' );
-			$this->assertFalse( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
-		} finally {
-			remove_filter( 'woocommerce_review_order_eligible_statuses', $widen );
-		}
+		// `on-hold` is NOT in the filter's eligible set, so the action is now unscheduled.
+		$order->update_status( 'on-hold' );
+		$this->assertFalse( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
 	}
 
 	/**

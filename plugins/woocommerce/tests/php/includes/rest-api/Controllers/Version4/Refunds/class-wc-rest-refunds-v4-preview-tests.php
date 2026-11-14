@@ -1618,27 +1618,23 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		// Switch to a zero-decimal currency for the request only.
 		add_filter( 'wc_get_price_decimals', '__return_zero' );
 
-		try {
-			$response = $this->do_preview_request(
-				$order->get_id(),
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
 				array(
-					array(
-						'line_item_id' => $item_id,
-						'refund_total' => 55.4,
-					),
-				)
-			);
+					'line_item_id' => $item_id,
+					'refund_total' => 55.4,
+				),
+			)
+		);
 
-			$this->assertEquals( 200, $response->get_status() );
-			$item = $response->get_data()['breakdown']['products']['items'][0];
+		$this->assertEquals( 200, $response->get_status() );
+		$item = $response->get_data()['breakdown']['products']['items'][0];
 
-			// 55.4 rounds to 55 at 0dp; the 10% split gives whole-unit 50 net / 5 tax.
-			$this->assertEquals( '55', $item['total'], 'Total should round to a whole unit.' );
-			$this->assertEquals( '5', $item['tax'] );
-			$this->assertEquals( '50', $item['subtotal'] );
-		} finally {
-			remove_filter( 'wc_get_price_decimals', '__return_zero' );
-		}
+		// 55.4 rounds to 55 at 0dp; the 10% split gives whole-unit 50 net / 5 tax.
+		$this->assertEquals( '55', $item['total'], 'Total should round to a whole unit.' );
+		$this->assertEquals( '5', $item['tax'] );
+		$this->assertEquals( '50', $item['subtotal'] );
 	}
 
 	/**

@@ -101,7 +101,6 @@ class WC_Breadcrumb_Test extends \WC_Unit_Test_Case {
 		$this->assertNotEquals( $breadcrumbs[1][0], $breadcrumbs[2][0] );
 
 		wp_delete_post( $my_account_page_id, true );
-		delete_option( 'woocommerce_myaccount_page_id' );
 	}
 
 	/**
@@ -167,7 +166,6 @@ class WC_Breadcrumb_Test extends \WC_Unit_Test_Case {
 		$this->assertNotEquals( $breadcrumbs[1][0], $breadcrumbs[2][0] );
 
 		wp_delete_post( $my_account_page_id, true );
-		delete_option( 'woocommerce_myaccount_page_id' );
 	}
 
 	/**

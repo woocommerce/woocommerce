@@ -547,14 +547,10 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_fulfillment_shipping_providers', $register_known );
 
-		try {
-			$this->seed_fulfillment( 201, 'amazon-logistics' );
-			$this->seed_fulfillment( 202, 'ghost-provider' );
+		$this->seed_fulfillment( 201, 'amazon-logistics' );
+		$this->seed_fulfillment( 202, 'ghost-provider' );
 
-			$this->assertSame( array( 202 ), $this->get_order_ids( '__other__' ) );
-		} finally {
-			remove_filter( 'woocommerce_fulfillment_shipping_providers', $register_known );
-		}
+		$this->assertSame( array( 202 ), $this->get_order_ids( '__other__' ) );
 	}
 
 	/**
@@ -744,19 +740,15 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$this->seed_fulfillment( 972, 'acme-couriers' );
 
 		add_filter( 'woocommerce_hpos_pre_query', '__return_null' );
-		try {
-			$this->with_provider_param(
-				'acme-couriers',
-				function () {
-					// The query remaps p onto id, so a single-order query must not widen to the whole set.
-					$args = $this->renderer->filter_orders_by_shipping_provider( array( 'p' => 972 ) );
+		$this->with_provider_param(
+			'acme-couriers',
+			function () {
+				// The query remaps p onto id, so a single-order query must not widen to the whole set.
+				$args = $this->renderer->filter_orders_by_shipping_provider( array( 'p' => 972 ) );
 
-					$this->assertSame( array( 972 ), $args['post__in'] );
-				}
-			);
-		} finally {
-			remove_filter( 'woocommerce_hpos_pre_query', '__return_null' );
-		}
+				$this->assertSame( array( 972 ), $args['post__in'] );
+			}
+		);
 	}
 
 	/**
@@ -804,24 +796,20 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 
 		// Only the callback's presence matters here, not what it returns.
 		add_filter( 'woocommerce_hpos_pre_query', '__return_null' );
-		try {
-			$this->with_provider_param(
-				'acme-couriers',
-				function () {
-					$args = $this->renderer->filter_orders_by_shipping_provider( array() );
+		$this->with_provider_param(
+			'acme-couriers',
+			function () {
+				$args = $this->renderer->filter_orders_by_shipping_provider( array() );
 
-					$this->assertArrayHasKey( 'post__in', $args );
-					$this->assertEqualsCanonicalizing( array( 901, 902 ), $args['post__in'] );
-					$this->assertArrayNotHasKey(
-						'fulfillment_shipping_provider',
-						$args,
-						'The marker would be ignored by a callback that discards the built SQL.'
-					);
-				}
-			);
-		} finally {
-			remove_filter( 'woocommerce_hpos_pre_query', '__return_null' );
-		}
+				$this->assertArrayHasKey( 'post__in', $args );
+				$this->assertEqualsCanonicalizing( array( 901, 902 ), $args['post__in'] );
+				$this->assertArrayNotHasKey(
+					'fulfillment_shipping_provider',
+					$args,
+					'The marker would be ignored by a callback that discards the built SQL.'
+				);
+			}
+		);
 	}
 
 	/**
@@ -832,18 +820,14 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$this->seed_fulfillment( 912, 'acme-couriers' );
 
 		add_filter( 'woocommerce_hpos_pre_query', '__return_null' );
-		try {
-			$this->with_provider_param(
-				'acme-couriers',
-				function () {
-					$args = $this->renderer->filter_orders_by_shipping_provider( array( 'post__in' => array( 911, 999 ) ) );
+		$this->with_provider_param(
+			'acme-couriers',
+			function () {
+				$args = $this->renderer->filter_orders_by_shipping_provider( array( 'post__in' => array( 911, 999 ) ) );
 
-					$this->assertSame( array( 911 ), $args['post__in'] );
-				}
-			);
-		} finally {
-			remove_filter( 'woocommerce_hpos_pre_query', '__return_null' );
-		}
+				$this->assertSame( array( 911 ), $args['post__in'] );
+			}
+		);
 	}
 
 	/**
@@ -854,19 +838,15 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$this->seed_fulfillment( 962, 'acme-couriers' );
 
 		add_filter( 'woocommerce_hpos_pre_query', '__return_null' );
-		try {
-			$this->with_provider_param(
-				'acme-couriers',
-				function () {
-					// The query remaps post__in onto id, so an existing id must survive the fallback.
-					$args = $this->renderer->filter_orders_by_shipping_provider( array( 'id' => array( 962, 999 ) ) );
+		$this->with_provider_param(
+			'acme-couriers',
+			function () {
+				// The query remaps post__in onto id, so an existing id must survive the fallback.
+				$args = $this->renderer->filter_orders_by_shipping_provider( array( 'id' => array( 962, 999 ) ) );
 
-					$this->assertSame( array( 962 ), $args['post__in'] );
-				}
-			);
-		} finally {
-			remove_filter( 'woocommerce_hpos_pre_query', '__return_null' );
-		}
+				$this->assertSame( array( 962 ), $args['post__in'] );
+			}
+		);
 	}
 
 	/**
@@ -876,18 +856,14 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$this->seed_fulfillment( 921, 'acme-couriers' );
 
 		add_filter( 'woocommerce_hpos_pre_query', '__return_null' );
-		try {
-			$this->with_provider_param(
-				'nobody-ships-with-this',
-				function () {
-					$args = $this->renderer->filter_orders_by_shipping_provider( array() );
+		$this->with_provider_param(
+			'nobody-ships-with-this',
+			function () {
+				$args = $this->renderer->filter_orders_by_shipping_provider( array() );
 
-					$this->assertSame( array( 0 ), $args['post__in'], 'An empty post__in would drop the filter instead of applying it.' );
-				}
-			);
-		} finally {
-			remove_filter( 'woocommerce_hpos_pre_query', '__return_null' );
-		}
+				$this->assertSame( array( 0 ), $args['post__in'], 'An empty post__in would drop the filter instead of applying it.' );
+			}
+		);
 	}
 
 	/**
@@ -902,27 +878,23 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 
 		// Only the callback's presence matters here, not what it returns.
 		add_filter( 'posts_pre_query', '__return_null' );
-		try {
-			$this->with_main_query(
-				$query,
-				function () use ( $query ) {
-					$this->with_provider_param(
-						'acme-couriers',
-						function () use ( $query ) {
-							$this->renderer->filter_legacy_orders_by_shipping_provider( $query );
+		$this->with_main_query(
+			$query,
+			function () use ( $query ) {
+				$this->with_provider_param(
+					'acme-couriers',
+					function () use ( $query ) {
+						$this->renderer->filter_legacy_orders_by_shipping_provider( $query );
 
-							$this->assertSame( array( 931 ), $query->get( 'post__in' ) );
-							$this->assertEmpty(
-								$query->get( 'fulfillment_shipping_provider' ),
-								'The marker would be ignored by a callback that discards the built SQL.'
-							);
-						}
-					);
-				}
-			);
-		} finally {
-			remove_filter( 'posts_pre_query', '__return_null' );
-		}
+						$this->assertSame( array( 931 ), $query->get( 'post__in' ) );
+						$this->assertEmpty(
+							$query->get( 'fulfillment_shipping_provider' ),
+							'The marker would be ignored by a callback that discards the built SQL.'
+						);
+					}
+				);
+			}
+		);
 	}
 
 	/**

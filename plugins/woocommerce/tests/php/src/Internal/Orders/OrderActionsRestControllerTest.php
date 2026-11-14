@@ -728,8 +728,6 @@ class OrderActionsRestControllerTest extends WC_Unit_Test_Case {
 
 		$data = $response->get_data();
 		$this->assertStringContainsString( 'Order details sent to', $data['message'] );
-
-		remove_filter( 'woocommerce_rest_order_actions_email_preferred_template_ids', $override_preferred_ids );
 	}
 
 	/**

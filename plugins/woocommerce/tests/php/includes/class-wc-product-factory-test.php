@@ -48,14 +48,10 @@ class WC_Product_Factory_Test extends WC_Unit_Test_Case {
 		$variation_id = $parent->get_children()[0];
 		update_option( 'woocommerce_attribute_lookup_direct_updates', 'yes' );
 
-		try {
-			$this->assertInstanceOf( WC_Product_Variation::class, wc_get_product( $variation_id ) );
+		$this->assertInstanceOf( WC_Product_Variation::class, wc_get_product( $variation_id ) );
 
-			$parent->delete( true );
+		$parent->delete( true );
 
-			$this->assertFalse( wc_get_product( $variation_id ) );
-		} finally {
-			delete_option( 'woocommerce_attribute_lookup_direct_updates' );
-		}
+		$this->assertFalse( wc_get_product( $variation_id ) );
 	}
 }

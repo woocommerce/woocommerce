@@ -815,8 +815,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		$expected_net = 10.00 / 1.20;
 		$net          = 10.00 - array_sum( $taxes_inclusive );
 		$this->assertEqualsWithDelta( $expected_net, $net, 0.01, 'Net cost should equal gross divided by (1 + rate)' );
-
-		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 	}
 
 	/**
@@ -854,7 +852,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 		$taxes_inclusive = WC_Tax::calc_shipping_tax( 10.00, $tax_rates );
 		$this->assertEquals( 0.00, array_sum( $taxes_inclusive ), 'Zero tax: inclusive should be 0' );
-		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 	}
 
 	/**
@@ -867,7 +864,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 		$taxes = WC_Tax::calc_shipping_tax( 10.00, array() );
 		$this->assertEmpty( $taxes, 'No tax rates with filter should return empty array' );
-		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 	}
 
 	/**
@@ -918,8 +914,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		$expected_tax = 15.00 - ( 15.00 / 1.10 );
 		$this->assertEqualsWithDelta( $expected_tax, array_sum( $taxes_with_filter ), 0.01, 'Filter return value should be used for inclusive calculation' );
-
-		remove_all_filters( 'woocommerce_shipping_prices_include_tax' );
 	}
 
 	/**
@@ -1005,7 +999,5 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		$this->assertEqualsWithDelta( 2.00, $total_tax, 0.02, 'Tax taken from 12.00 should be about 2.00' );
 		$this->assertEqualsWithDelta( 10.00, $net_cost, 0.02, 'Net cost should be 10.00' );
-
-		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 	}
 }

@@ -45,14 +45,10 @@ class FeatureEnabledTest extends WC_Unit_Test_Case {
 	public function test_should_be_disabled_when_removed_from_legacy_admin_features(): void {
 		add_filter( 'woocommerce_admin_features', array( $this, 'disable_analytics_feature' ), PHP_INT_MAX );
 
-		try {
-			$this->assertFalse(
-				FeaturesUtil::feature_is_enabled( 'analytics' ),
-				'Analytics should be disabled when removed from the legacy admin feature list.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_admin_features', array( $this, 'disable_analytics_feature' ), PHP_INT_MAX );
-		}
+		$this->assertFalse(
+			FeaturesUtil::feature_is_enabled( 'analytics' ),
+			'Analytics should be disabled when removed from the legacy admin feature list.'
+		);
 	}
 
 	/**
@@ -61,14 +57,10 @@ class FeatureEnabledTest extends WC_Unit_Test_Case {
 	public function test_should_be_disabled_when_woocommerce_admin_is_disabled(): void {
 		add_filter( 'woocommerce_admin_disabled', '__return_true', PHP_INT_MAX );
 
-		try {
-			$this->assertFalse(
-				FeaturesUtil::feature_is_enabled( 'analytics' ),
-				'Analytics should be disabled when WooCommerce Admin is disabled.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_admin_disabled', '__return_true', PHP_INT_MAX );
-		}
+		$this->assertFalse(
+			FeaturesUtil::feature_is_enabled( 'analytics' ),
+			'Analytics should be disabled when WooCommerce Admin is disabled.'
+		);
 	}
 
 	/**
@@ -79,14 +71,10 @@ class FeatureEnabledTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_analytics_enabled', 'no' );
 		$this->setExpectedDeprecated( "Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'analytics' )" );
 
-		try {
-			$this->assertFalse(
-				Features::is_enabled( 'analytics' ),
-				'Analytics should be unavailable in legacy admin features when the feature option is disabled.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_admin_features', array( $this, 'enable_analytics_feature' ) );
-		}
+		$this->assertFalse(
+			Features::is_enabled( 'analytics' ),
+			'Analytics should be unavailable in legacy admin features when the feature option is disabled.'
+		);
 	}
 
 	/**
@@ -120,14 +108,10 @@ class FeatureEnabledTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_admin_features', array( $this, 'disable_launch_your_store_feature' ) );
 		$this->setExpectedDeprecated( "Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' )" );
 
-		try {
-			$this->assertFalse(
-				Features::is_enabled( 'launch-your-store' ),
-				'Retired feature flags should respect the filtered feature list through the compatibility shim.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_admin_features', array( $this, 'disable_launch_your_store_feature' ) );
-		}
+		$this->assertFalse(
+			Features::is_enabled( 'launch-your-store' ),
+			'Retired feature flags should respect the filtered feature list through the compatibility shim.'
+		);
 	}
 
 	/**
@@ -137,14 +121,10 @@ class FeatureEnabledTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_admin_features', array( $this, 'disable_customize_store_feature' ) );
 		$this->setExpectedDeprecated( "Automattic\WooCommerce\Admin\Features\Features::exists( 'customize-store' )" );
 
-		try {
-			$this->assertFalse(
-				Features::exists( 'customize-store' ),
-				'Retired feature flags should respect the filtered feature list through the compatibility shim.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_admin_features', array( $this, 'disable_customize_store_feature' ) );
-		}
+		$this->assertFalse(
+			Features::exists( 'customize-store' ),
+			'Retired feature flags should respect the filtered feature list through the compatibility shim.'
+		);
 	}
 
 	/**

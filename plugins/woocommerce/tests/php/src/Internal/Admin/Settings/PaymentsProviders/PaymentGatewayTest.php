@@ -2542,9 +2542,6 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$this->assertEmpty( $fake_logger->warning_calls, 'Warning logging should NOT be triggered for empty country code' );
 		$this->assertEmpty( $fake_logger->error_calls, 'Error logging should NOT be triggered for empty country code' );
 		$this->assertFalse( $fake_logger->has_any_logs(), 'No logging should occur for empty country code' );
-
-		// Clean up - Remove filter.
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -2590,9 +2587,6 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$this->assertEmpty( $fake_logger->warning_calls, "Warning logging should NOT be triggered for valid country code: {$country_code}" );
 		$this->assertEmpty( $fake_logger->error_calls, "Error logging should NOT be triggered for valid country code: {$country_code}" );
 		$this->assertFalse( $fake_logger->has_any_logs(), "No logging should occur for valid country code: {$country_code}" );
-
-		// Clean up - Remove filter.
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -2661,9 +2655,6 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'gateway', $debug_call['context'] );
 		$this->assertEquals( 'gateway1', $debug_call['context']['gateway'] );
 		$this->assertArrayHasKey( 'country', $debug_call['context'] );
-
-		// Clean up - Remove filter.
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -2800,9 +2791,6 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'gateway', $debug_call['context'] );
 		$this->assertEquals( 'throwing_gateway', $debug_call['context']['gateway'] );
 		$this->assertArrayHasKey( 'exception', $debug_call['context'] );
-
-		// Clean up.
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**

@@ -312,14 +312,10 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		};
 		add_filter( 'upload_dir', $upload_dir_filter );
 
-		try {
-			$this->assertSame(
-				'https://current.example/uploads/product-feeds/feed%20name.json',
-				JsonFileFeed::get_file_url_for_identifier( 'feed name.json' )
-			);
-		} finally {
-			remove_filter( 'upload_dir', $upload_dir_filter );
-		}
+		$this->assertSame(
+			'https://current.example/uploads/product-feeds/feed%20name.json',
+			JsonFileFeed::get_file_url_for_identifier( 'feed name.json' )
+		);
 	}
 
 	/**
@@ -354,14 +350,10 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		};
 		add_filter( 'upload_dir', $response_upload_dir_filter );
 
-		try {
-			$this->assertStringStartsWith(
-				'https://generation.example/uploads/product-feeds/',
-				(string) $feed->get_file_url()
-			);
-		} finally {
-			remove_filter( 'upload_dir', $response_upload_dir_filter );
-		}
+		$this->assertStringStartsWith(
+			'https://generation.example/uploads/product-feeds/',
+			(string) $feed->get_file_url()
+		);
 	}
 
 	/**
@@ -450,20 +442,16 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		$broken_method = fn() => 'this-method-does-not-exist';
 		add_filter( 'filesystem_method', $broken_method );
 
-		try {
-			$feed = new JsonFileFeed( 'test-feed' );
-			$feed->start();
-			$feed->end();
-			$feed->get_file_url();
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->start();
+		$feed->end();
+		$feed->get_file_url();
 
-			$this->assertSame(
-				'Options -Indexes',
-				trim( (string) file_get_contents( $directory . '/.htaccess' ) ),
-				'The .htaccess refresh must succeed without a usable WP_Filesystem.'
-			);
-		} finally {
-			remove_filter( 'filesystem_method', $broken_method );
-		}
+		$this->assertSame(
+			'Options -Indexes',
+			trim( (string) file_get_contents( $directory . '/.htaccess' ) ),
+			'The .htaccess refresh must succeed without a usable WP_Filesystem.'
+		);
 	}
 
 	/**

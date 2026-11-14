@@ -87,7 +87,6 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 2, $limits['minimum'], 'Minimum quantity should be 2' );
 		$this->assertEquals( 10, $limits['maximum'], 'Maximum quantity should be 10 to match stock quantity' );
 		$this->assertEquals( 2, $limits['multiple_of'], 'Multiple of should be 2' );
-		remove_all_filters( 'woocommerce_quantity_input_args' );
 	}
 
 	/**

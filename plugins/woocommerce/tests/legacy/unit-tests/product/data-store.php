@@ -86,11 +86,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$product->save();
 
 		$this->assertEquals( ProductStatus::DRAFT, $product->get_status() );
-
-		remove_filter(
-			'woocommerce_new_product_data',
-			$force_draft_status_fn
-		);
 	}
 
 	/**
@@ -797,8 +792,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( 'world', $test2 ); // this would be 'default' without the force meta refresh in WC_Product_Data_Store::update().
 		$this->assertEquals( 'world', $product->get_meta( '_test2' ) );
 		$this->assertEquals( 'Test Product_', $product->get_name() );
-
-		remove_action( 'save_post', array( 'WC_Helper_Product', 'save_post_test_update_meta_data_direct' ) );
 	}
 
 	/**

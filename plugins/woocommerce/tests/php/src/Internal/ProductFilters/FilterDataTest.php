@@ -206,7 +206,6 @@ class FilterDataTest extends AbstractProductFiltersTest {
 
 		update_option( 'woocommerce_product_lookup_table_is_generating', '1' );
 		$this->test_get_stock_status_counts_with( new \WP_Query( array( 'post_type' => 'product' ) ) );
-		delete_option( 'woocommerce_product_lookup_table_is_generating' );
 	}
 
 	/**

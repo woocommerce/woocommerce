@@ -244,9 +244,6 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertTrue( $result );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -287,9 +284,6 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertFalse( $result );
-
-		// Clean up.
-		delete_option( 'wcpay_account_data' );
 	}
 
 	/**

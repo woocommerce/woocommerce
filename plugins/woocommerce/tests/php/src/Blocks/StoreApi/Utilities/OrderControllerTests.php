@@ -446,7 +446,6 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		$errors = new \WP_Error();
 		$this->sut->validate_address_fields( $order, 'shipping', $errors );
 		$this->assertEmpty( $errors->get_error_messages() );
-		remove_filter( 'woocommerce_get_country_locale', $hide_postcode );
 	}
 
 	/**

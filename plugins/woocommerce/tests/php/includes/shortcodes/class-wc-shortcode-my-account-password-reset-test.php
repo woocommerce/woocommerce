@@ -199,11 +199,7 @@ class WC_Shortcode_My_Account_Password_Reset_Test extends WC_Unit_Test_Case {
 		$token = $this->create_exchanged_form_token();
 
 		add_filter( 'password_reset_expiration', '__return_zero' );
-		try {
-			$this->assertFalse( WC_Shortcode_My_Account::check_password_reset_key( $token, $this->user->user_login ) );
-		} finally {
-			remove_filter( 'password_reset_expiration', '__return_zero' );
-		}
+		$this->assertFalse( WC_Shortcode_My_Account::check_password_reset_key( $token, $this->user->user_login ) );
 	}
 
 	/**

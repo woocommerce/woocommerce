@@ -255,8 +255,6 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $result );
 		$this->assertSame( 'GB', $result[0]['address']['country'] );
 		$this->assertSame( 'LND', $result[0]['address']['state'] );
-
-		remove_all_filters( 'pre_option_woocommerce_default_country' );
 	}
 
 	/**

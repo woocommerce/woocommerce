@@ -171,8 +171,6 @@ class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_default_country', 'ZA' );
 		ShippingPartnerSuggestions::get_suggestions();
-
-		remove_filter( 'woocommerce_admin_remote_specs_evaluator_should_log', '__return_true' );
 	}
 
 	/**

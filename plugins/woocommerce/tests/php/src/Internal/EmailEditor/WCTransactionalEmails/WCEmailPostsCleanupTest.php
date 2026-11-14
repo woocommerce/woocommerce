@@ -398,8 +398,6 @@ class WCEmailPostsCleanupTest extends \WC_Unit_Test_Case {
 			(int) get_option( $lookalike_option ),
 			'Options merely matching the LIKE pattern must never be deleted'
 		);
-
-		delete_option( $lookalike_option );
 	}
 
 	/**

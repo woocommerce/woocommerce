@@ -753,14 +753,10 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'site_url', $downgrade_site_url );
 
-		try {
-			$response = $this->dispatch_generate();
+		$response = $this->dispatch_generate();
 
-			$this->assertSame( 500, $response->get_status() );
-			$this->assertSame( 'insecure_site_url', $response->get_data()['code'] );
-		} finally {
-			remove_filter( 'site_url', $downgrade_site_url );
-		}
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'insecure_site_url', $response->get_data()['code'] );
 	}
 
 	/**
@@ -805,14 +801,10 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 
 		add_filter( 'wp_is_application_passwords_available', '__return_false' );
 
-		try {
-			$response = $this->dispatch_generate();
+		$response = $this->dispatch_generate();
 
-			$this->assertSame( 501, $response->get_status() );
-			$this->assertSame( 'application_passwords_unavailable', $response->get_data()['code'] );
-		} finally {
-			remove_filter( 'wp_is_application_passwords_available', '__return_false' );
-		}
+		$this->assertSame( 501, $response->get_status() );
+		$this->assertSame( 'application_passwords_unavailable', $response->get_data()['code'] );
 	}
 
 	/**
@@ -825,20 +817,16 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		// Disable APs only for the exchange itself.
 		add_filter( 'wp_is_application_passwords_available', '__return_false' );
 
-		try {
-			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
-			$this->assertSame( 501, $response->get_status() );
-			$this->assertSame( 'application_passwords_unavailable', $response->get_data()['code'] );
-			$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
-			$this->assertSame(
-				MobileAppQRLogin::STATE_APPROVED,
-				get_transient( $this->token_transient_key( $prep['plaintext'] ) )['state']
-			);
-			$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
-		} finally {
-			remove_filter( 'wp_is_application_passwords_available', '__return_false' );
-		}
+		$this->assertSame( 501, $response->get_status() );
+		$this->assertSame( 'application_passwords_unavailable', $response->get_data()['code'] );
+		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
+		$this->assertSame(
+			MobileAppQRLogin::STATE_APPROVED,
+			get_transient( $this->token_transient_key( $prep['plaintext'] ) )['state']
+		);
+		$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
 	}
 
 	/**
@@ -855,18 +843,14 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'map_meta_cap', $deny_create_app_password, 10, 2 );
 
-		try {
-			wp_set_current_user( 0 );
-			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
+		wp_set_current_user( 0 );
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
-			$this->assertSame( rest_authorization_required_code(), $response->get_status() );
-			$this->assertSame( 'rest_cannot_create_application_passwords', $response->get_data()['code'] );
-			$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
-			$this->assertIsArray( get_transient( $this->token_transient_key( $prep['plaintext'] ) ) );
-			$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
-		} finally {
-			remove_filter( 'map_meta_cap', $deny_create_app_password, 10 );
-		}
+		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
+		$this->assertSame( 'rest_cannot_create_application_passwords', $response->get_data()['code'] );
+		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
+		$this->assertIsArray( get_transient( $this->token_transient_key( $prep['plaintext'] ) ) );
+		$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
 	}
 
 	/**
@@ -1224,28 +1208,24 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 
 		add_filter( 'wp_is_application_passwords_available', '__return_false' );
 
-		try {
-			for ( $i = 1; $i <= MobileAppQRLogin::MAX_EXCHANGE_ATTEMPTS; $i++ ) {
-				$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
-				$this->assertSame(
-					501,
-					$response->get_status(),
-					sprintf( 'Application Passwords unavailable response expected before the valid-token cap, got %d on attempt %d.', $response->get_status(), $i )
-				);
-			}
-
+		for ( $i = 1; $i <= MobileAppQRLogin::MAX_EXCHANGE_ATTEMPTS; $i++ ) {
 			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
-
-			$this->assertSame( 429, $response->get_status() );
-			$this->assertSame( 'rate_limit_exceeded', $response->get_data()['code'] );
 			$this->assertSame(
-				MobileAppQRLogin::STATE_APPROVED,
-				get_transient( $this->token_transient_key( $prep['plaintext'] ) )['state']
+				501,
+				$response->get_status(),
+				sprintf( 'Application Passwords unavailable response expected before the valid-token cap, got %d on attempt %d.', $response->get_status(), $i )
 			);
-			$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
-		} finally {
-			remove_filter( 'wp_is_application_passwords_available', '__return_false' );
-		}//end try
+		}
+
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
+
+		$this->assertSame( 429, $response->get_status() );
+		$this->assertSame( 'rate_limit_exceeded', $response->get_data()['code'] );
+		$this->assertSame(
+			MobileAppQRLogin::STATE_APPROVED,
+			get_transient( $this->token_transient_key( $prep['plaintext'] ) )['state']
+		);
+		$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
 	}
 
 	// -----------------------------------------------------------------------
@@ -2295,8 +2275,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 			get_option( $claim_key ),
 			'A rejected second scan must not release another request\'s claim.'
 		);
-
-		delete_option( $claim_key );
 	}
 
 	/**
@@ -2317,8 +2295,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $method->invoke( $controller, $claim_key, $stale_claim_value ) );
 		$this->assertSame( $fresh_claim_value, get_option( $claim_key ) );
-
-		delete_option( $claim_key );
 	}
 
 	/**
@@ -2354,8 +2330,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 			get_option( $claim_key ),
 			'A rejected concurrent approval must not release another request\'s claim.'
 		);
-
-		delete_option( $claim_key );
 	}
 
 	/**

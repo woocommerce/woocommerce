@@ -59,14 +59,10 @@ class PaymentRecoveryTest extends WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_valid_order_statuses_for_payment', $declare_on_hold_payable );
 
-		try {
-			$this->assertFalse(
-				PaymentRecovery::order_moved_past_payment( $order ),
-				'A status the site declares payable is still awaiting payment.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_valid_order_statuses_for_payment', $declare_on_hold_payable );
-		}
+		$this->assertFalse(
+			PaymentRecovery::order_moved_past_payment( $order ),
+			'A status the site declares payable is still awaiting payment.'
+		);
 	}
 
 	/**

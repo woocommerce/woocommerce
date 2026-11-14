@@ -457,7 +457,6 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			}
 			add_filter( 'query', array( $this, '_create_temporary_tables' ) );
 			add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
 	}
 

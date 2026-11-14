@@ -758,7 +758,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$expect_we_dont_ship_error ? 'Unfortunately, <strong>we do not ship to Japan</strong>. Please enter an alternative shipping address.' : '',
 			$errors->get_error_message( 'shipping' )
 		);
-		remove_all_filters( 'woocommerce_countries_allowed_countries' );
 	}
 
 	/**

@@ -162,20 +162,15 @@ class WebflowMapperTest extends \WC_Unit_Test_Case {
 	 * Test SKU passes through and weight is converted to the store unit.
 	 */
 	public function test_simple_product_sku_and_weight(): void {
-		$original_unit = get_option( 'woocommerce_weight_unit' );
 		update_option( 'woocommerce_weight_unit', 'kg' );
 
-		try {
-			$result = $this->mapper->map_product_data( MockWebflowData::simple_product_item() );
+		$result = $this->mapper->map_product_data( MockWebflowData::simple_product_item() );
 
-			$this->assertSame( 'PLAIN-001', $result['sku'] );
+		$this->assertSame( 'PLAIN-001', $result['sku'] );
 
-			// Fixture weight is 0.5 lb; converting to the store's kg unit pins the conversion
-			// (0.5 lb ≈ 0.2268 kg) rather than accepting any positive float.
-			$this->assertEqualsWithDelta( 0.2268, $result['weight'], 0.0005 );
-		} finally {
-			update_option( 'woocommerce_weight_unit', $original_unit );
-		}
+		// Fixture weight is 0.5 lb; converting to the store's kg unit pins the conversion
+		// (0.5 lb ≈ 0.2268 kg) rather than accepting any positive float.
+		$this->assertEqualsWithDelta( 0.2268, $result['weight'], 0.0005 );
 	}
 
 	/**

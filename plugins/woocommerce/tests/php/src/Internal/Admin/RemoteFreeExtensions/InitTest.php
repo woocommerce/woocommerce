@@ -278,13 +278,9 @@ class InitTest extends WC_Unit_Test_Case {
 			return array();
 		};
 		add_filter( DataSourcePoller::FILTER_NAME, $data_sources_filter );
-		try {
-			$specs    = RemoteFreeExtensions::get_specs();
-			$defaults = DefaultFreeExtensions::get_all();
-			$this->assertEquals( $defaults, $specs );
-		} finally {
-			remove_filter( DataSourcePoller::FILTER_NAME, $data_sources_filter );
-		}
+		$specs    = RemoteFreeExtensions::get_specs();
+		$defaults = DefaultFreeExtensions::get_all();
+		$this->assertEquals( $defaults, $specs );
 	}
 
 	/**

@@ -509,8 +509,6 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( $response_products[0]['sku'], 'pancake-2' );
 		$this->assertEquals( $response_products[1]['name'], 'Waffle 3' );
 		$this->assertEquals( $response_products[1]['sku'], 'waffle-3' );
-
-		remove_filter( 'wc_product_sku_enabled', '__return_false' );
 	}
 
 	/**
