@@ -135,6 +135,9 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		// {order_number} placeholder
 		$this->assertStringContainsString( '12345', $subject );
 
+		// Only the customer note's subject without email improvements has {order_date}, and the shared
+		// mailer keeps whichever subject it was built with, so set the one the preview reads.
+		set_transient( 'woocommerce_customer_note_subject', 'Note added to your {site_title} order from {order_date}' );
 		$this->sut->set_email_type( 'WC_Email_Customer_Note' );
 		$subject = $this->sut->get_subject();
 		// {order_date} placeholder
