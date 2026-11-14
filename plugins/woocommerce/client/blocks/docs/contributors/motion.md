@@ -94,7 +94,9 @@ Motion that changes the layout runs in JavaScript, because it must measure sizes
 |--------|-----|
 | `whenAnimationsEnd( element, callback )` (`@woocommerce/base-utils`) | Runs `callback` when the animations of `element` end, instead of after a fixed timeout. It waits again if a transition turns around. It returns a function that cancels the callback. |
 | `usePresence( value, { animate, collapse } )` (`@woocommerce/base-hooks`) | Keeps content mounted while it animates out. Pass the content, or `null` to remove it. It returns `{ value, isExiting, ref }`. Put `ref` on the element that animates. Pass `collapse: true` to grow and collapse `ref` in the real layout. Pass `animate: false` to apply the change immediately, for example after a key press. |
-| `animateCollapse( element, isOpen, animate )` (`@woocommerce/base-utils`) | Grows `element` open or collapses it shut in the real layout, and turns around if it still moves. Give `element` the `motion-collapse` mixin. Use it through `usePresence`. |
+| `animateCollapse( element, isOpen, animate, from )` (`@woocommerce/base-utils`) | Grows `element` open or collapses it shut in the real layout, and turns around if it still moves. Give `element` the `motion-collapse` mixin. Use it through `usePresence` when the component owns the content. Pass `from`, such as `{ height: '20px' }`, to grow from the size of the content that `element` replaces, or to change the height of an element that stays. |
+| `collapseCopy( element )` (`@woocommerce/base-utils`) | Collapses an inert copy of `element` in its place, so that `element` can unmount at once. Call it just before `element` unmounts. If `element` grows again first, it grows from the copy. |
+| `useToggleCollapse( isShown, getElement, { growFromTrigger } )` (`@woocommerce/base-hooks`) | Content that a control shows and hides, such as a checkbox that reveals a field. Call the `onToggle` that it returns in the handler of the control, before the state changes. Pass it the click event if there is one, or else put `triggerRef` on the control. `getElement` must not return the copy, which keeps the element's classes: find the element by id, or skip `[data-wc-collapse-copy]`. After a click, the element grows in, or an inert copy of it collapses while the real element unmounts. After a key press, the change applies immediately. Pass `growFromTrigger: true` when the content replaces the control, to grow from the height of the control. |
 
 ## Techniques
 
@@ -113,6 +115,7 @@ Find the change in this table, and use the helpers above.
 | A dropdown opens from a field | It slides 4px from the field and fades in. It slides back to close. |
 | A toast or snackbar appears and goes | It rises in and drops out. |
 | Content appears or goes and moves the content below, such as a panel, notice, field error, or section | It grows and collapses in the real layout. It stays mounted while it goes. |
+| A form or its fields go | The real form unmounts at once, so its fields stop counting. An inert copy collapses in its place. |
 | An element becomes a different view of itself, such as an address card that becomes its form | The two views crossfade while the height changes. |
 | A table row goes | It fades in place, and the rows below slide up. |
 

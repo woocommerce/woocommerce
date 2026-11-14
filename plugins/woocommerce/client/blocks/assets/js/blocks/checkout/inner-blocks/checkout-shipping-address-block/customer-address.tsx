@@ -12,6 +12,7 @@ import type { ShippingAddress } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
 import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
+import type { MouseEvent } from 'react';
 
 /**
  * Internal dependencies
@@ -86,10 +87,14 @@ const CustomerAddress = () => {
 		]
 	);
 
-	const handleEditClick = useCallback( () => {
-		setShouldAnimate( true );
-		setEditingShippingAddress( true );
-	}, [ setEditingShippingAddress ] );
+	const handleEditClick = useCallback(
+		( event: MouseEvent ) => {
+			// A click that a key press starts has no click count, and applies immediately.
+			setShouldAnimate( event.detail !== 0 );
+			setEditingShippingAddress( true );
+		},
+		[ setEditingShippingAddress ]
+	);
 
 	return (
 		<AddressWrapper

@@ -17,6 +17,7 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { BillingAddress } from '@woocommerce/settings';
 import { getSetting } from '@woocommerce/settings';
 import { emptyAddressFields } from '@woocommerce/base-utils';
+import { useToggleCollapse } from '@woocommerce/base-hooks';
 import type { CartResponseBillingAddress } from '@woocommerce/types';
 
 /**
@@ -85,6 +86,11 @@ const Block = (): JSX.Element => {
 		}
 	} );
 
+	// The checkbox collapses the billing section out and grows it in.
+	const billingCollapse = useToggleCollapse( ! useShippingAsBilling, () =>
+		document.getElementById( 'billing-fields' )
+	);
+
 	const WrapperComponent = isEditor ? Noninteractive : Fragment;
 	const noticeContext = useShippingAsBilling
 		? [ noticeContexts.SHIPPING_ADDRESS, noticeContexts.BILLING_ADDRESS ]
@@ -97,10 +103,12 @@ const Block = (): JSX.Element => {
 				<CustomerAddress />
 			</WrapperComponent>
 			<CheckboxControl
+				ref={ billingCollapse.triggerRef }
 				className="wc-block-checkout__use-address-for-billing"
 				label={ __( 'Use same address for billing', 'woocommerce' ) }
 				checked={ useShippingAsBilling }
 				onChange={ ( checked: boolean ) => {
+					billingCollapse.onToggle();
 					setUseShippingAsBilling( checked );
 					if ( checked ) {
 						syncBillingWithShipping();

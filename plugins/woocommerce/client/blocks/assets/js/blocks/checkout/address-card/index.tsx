@@ -15,6 +15,7 @@ import { Button } from '@ariakit/react';
 import { decodeEntities } from '@wordpress/html-entities';
 import clsx from 'clsx';
 import { useMemo } from '@wordpress/element';
+import type { MouseEvent } from 'react';
 
 /**
  * Internal dependencies
@@ -23,7 +24,7 @@ import './style.scss';
 
 type Props = {
 	address: CartShippingAddress | CartBillingAddress;
-	onEdit: () => void;
+	onEdit: ( event: MouseEvent ) => void;
 	target: string;
 	isExpanded: boolean;
 };
@@ -96,7 +97,7 @@ const AddressCard = ( { address, onEdit, target, isExpanded }: Props ) => {
 					aria-label={ label }
 					onClick={ ( e ) => {
 						e.preventDefault();
-						onEdit();
+						onEdit( e );
 					} }
 					type="button"
 				>
