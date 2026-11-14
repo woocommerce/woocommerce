@@ -1190,8 +1190,9 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether catalog search, the route agents call, answers with JSON. The endpoint is the one the
-	 * served profile names, or WooCommerce's when the profile isn't served. The body is empty.
-	 * A firewall or plugin that blocks the route blocks this request too.
+	 * served profile names, or WooCommerce's when the profile isn't served. The body is empty, so
+	 * WooCommerce refuses it with a JSON 400: a query or a filter is required. That 400 means the
+	 * route answered. A firewall or plugin that blocks the route blocks this request too.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
@@ -1201,7 +1202,8 @@ class StoreOutputChecks {
 		if ( null === $response || $response['status'] >= 500 ) {
 			return null;
 		}
-		return 200 === $response['status'] && is_array( json_decode( $response['body'], true ) );
+		$json = is_array( json_decode( $response['body'], true ) );
+		return $json && ( 200 === $response['status'] || 400 === $response['status'] );
 	}
 
 	/**

@@ -329,6 +329,14 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $results['ucp_endpoints_live'], 'Catalog search answers even when a GET of the endpoint base does not' );
 		$this->assertContains( 'POST ' . $search, $this->requested );
 
+		$responses[ 'POST ' . $search ] = array( 400, '{"ucp":{"status":"error"},"messages":[{"code":"VALIDATION_ERROR","content":"A query or at least one supported filter is required."}]}' );
+		$this->serve( $responses );
+		$this->assertTrue( $this->results()['ucp_endpoints_live'], 'An empty search is a JSON 400, which means the route answered' );
+
+		$responses[ 'POST ' . $search ] = array( 400, '<html>Bad request</html>' );
+		$this->serve( $responses );
+		$this->assertFalse( $this->results()['ucp_endpoints_live'], 'A 400 page is not the endpoint' );
+
 		$responses['/.well-known/ucp'] = array( 200, (string) str_replace( UcpUtils::VERSION, '2025-01-01', (string) $profile ) );
 		$this->serve( $responses );
 		$this->assertFalse( $this->results()['ucp_profile_version'], 'A profile for another UCP version is likely another plugin\'s' );

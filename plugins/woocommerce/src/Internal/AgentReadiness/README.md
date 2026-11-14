@@ -88,7 +88,7 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `product_review_markup` | The newest visible published product with reviews (of the five newest with reviews) has `aggregateRating` or `review` in its JSON-LD. Passes when reviews are off or no product has any. |
 | `policy_pages_linked` | The home page links to the privacy policy and refund and returns pages the store set. Skipped when neither is set. |
 | `ucp_profile` | With UCP on: `/.well-known/ucp` is served and names a REST endpoint. |
-| `ucp_endpoints_live` | With UCP on: a POST to `{endpoint}/catalog/search`, the route agents call, answers 200 with JSON. The endpoint is the one the profile names, or WooCommerce's when there is no profile. The body is empty. |
+| `ucp_endpoints_live` | With UCP on: a POST to `{endpoint}/catalog/search`, the route agents call, answers with JSON. A 200 or a 400 both count: an empty body is refused because a query or a filter is required. The endpoint is the one the profile names, or WooCommerce's when there is no profile. |
 | `ucp_profile_version` | With UCP on: the served profile declares the UCP version WooCommerce implements (`UcpUtils::VERSION`). A different version usually means another plugin serves its own profile. |
 | `ucp_checkout` | With UCP on: the served profile declares `dev.ucp.shopping.checkout`. Pending (WOOAI-1435). |
 | `product_return_policy_schema` | A product offer in the product page's JSON-LD has `hasMerchantReturnPolicy`. Pending (WOOPRD-3912). |
