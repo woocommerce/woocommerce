@@ -74,20 +74,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private $registered_category_ids = array();
 
 	/**
-	 * Product IDs created by these tests.
-	 *
-	 * @var array
-	 */
-	private $created_product_ids = array();
-
-	/**
-	 * Order IDs created by these tests.
-	 *
-	 * @var array
-	 */
-	private $created_order_ids = array();
-
-	/**
 	 * Original action counts captured for restoration in tearDown.
 	 *
 	 * @var array<string, int|null>
@@ -144,22 +130,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		global $wp_actions;
-
-		foreach ( $this->created_order_ids as $order_id ) {
-			$order = wc_get_order( $order_id );
-
-			if ( $order ) {
-				$order->delete( true );
-			}
-		}
-
-		foreach ( $this->created_product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
-
-			if ( $product ) {
-				$product->delete( true );
-			}
-		}
 
 		foreach ( $this->registered_ability_ids as $ability_id ) {
 			if ( wp_has_ability( $ability_id ) ) {
@@ -695,9 +665,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should refuse a status that another order type registers, and keep the order status.
 	 */
 	public function test_order_update_status_refuses_status_of_another_order_type(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
-		$status_before             = $order->get_status();
+		$order         = wc_create_order();
+		$status_before = $order->get_status();
 
 		$this->unregister_domain_abilities();
 		register_post_status(
@@ -746,9 +715,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should check the permission against the actual type of the order ID.
 	 */
 	public function test_orders_query_refuses_id_of_unsupported_order_type(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
-		$refund                    = wc_create_refund(
+		$order  = \WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
 			array(
 				'order_id' => $order->get_id(),
 				'amount'   => 1,
@@ -1224,11 +1192,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should require object edit and delete permissions for product mutations.
 	 */
 	public function test_product_mutations_require_object_permissions(): void {
-		$product_to_update           = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Owned by another user' ) );
-		$product_to_delete           = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Also owned by another user' ) );
-		$this->created_product_ids[] = $product_to_update->get_id();
-		$this->created_product_ids[] = $product_to_delete->get_id();
-		$limited_product_manager_id  = $this->create_user_with_caps(
+		$product_to_update          = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Owned by another user' ) );
+		$product_to_delete          = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Also owned by another user' ) );
+		$limited_product_manager_id = $this->create_user_with_caps(
 			array(
 				'edit_products',
 				'edit_published_products',
@@ -1260,9 +1226,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should require object edit permissions for order mutations.
 	 */
 	public function test_order_mutations_require_object_edit_permissions(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
-		$limited_order_manager_id  = $this->create_user_with_caps(
+		$order                    = \WC_Helper_Order::create_order();
+		$limited_order_manager_id = $this->create_user_with_caps(
 			array(
 				'edit_shop_orders',
 				'edit_published_shop_orders',
@@ -1306,8 +1271,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_order_mutations_return_not_found_for_id_that_is_not_an_order( bool $hpos_enabled ): void {
 		$this->set_order_storage_for_test( $hpos_enabled );
-		$product                     = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $product->get_id();
+		$product = \WC_Helper_Product::create_simple_product();
 
 		foreach ( array( 999999, $product->get_id() ) as $id ) {
 			foreach ( $this->get_order_mutation_inputs( $id ) as $ability_id => $input ) {
@@ -1346,9 +1310,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should refuse permission when an order mutation receives the ID of a refund.
 	 */
 	public function test_order_mutations_refuse_id_of_refund(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
-		$refund                    = wc_create_refund(
+		$order  = \WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
 			array(
 				'order_id' => $order->get_id(),
 				'amount'   => 1,
@@ -1380,8 +1343,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'add_order_meta_boxes'     => false,
 			)
 		);
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
+		$order = wc_create_order();
 		$wpdb->update( $wpdb->posts, array( 'post_type' => 'shop_test_hidden' ), array( 'ID' => $order->get_id() ) );
 		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_hidden' ), array( 'id' => $order->get_id() ) );
 		clean_post_cache( $order->get_id() );
@@ -1417,8 +1379,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		global $wpdb;
 
 		$this->set_order_storage_for_test( true );
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
+		$order = wc_create_order();
 		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_unreg' ), array( 'id' => $order->get_id() ) );
 		wp_cache_flush();
 		add_filter(
@@ -1476,8 +1437,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @param string $status Product status.
 	 */
 	public function test_product_update_publish_transition_requires_publish_cap( string $status ): void {
-		$product                     = \WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) );
-		$this->created_product_ids[] = $product->get_id();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) );
 
 		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
 		$user    = get_user_by( 'id', $user_id );
@@ -1501,8 +1461,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should allow non-status updates to published products without publish_products.
 	 */
 	public function test_product_update_allows_published_product_edits_without_publish_cap_when_status_is_unchanged(): void {
-		$product                     = \WC_Helper_Product::create_simple_product( true, array( 'status' => 'publish' ) );
-		$this->created_product_ids[] = $product->get_id();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'status' => 'publish' ) );
 
 		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
 		$user    = get_user_by( 'id', $user_id );
@@ -1546,8 +1505,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject order status updates with an unknown status slug.
 	 */
 	public function test_order_update_status_rejects_invalid_status_slug(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
+		$order = wc_create_order();
 
 		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
 			array(
@@ -1585,7 +1543,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$result = wp_get_ability( 'woocommerce/product-create' )->execute( array( 'name' => 'Default category product' ) );
 
 		$this->assertIsArray( $result );
-		$this->created_product_ids[] = $result['product']['id'];
 		$this->assertSame( array( $default ), array_column( $result['product']['categories'], 'id' ) );
 	}
 
@@ -1702,7 +1659,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 		$this->assertSame( '10.99', $created['product']['regular_price'] );
 	}
 
@@ -1710,8 +1666,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject whitespace-only order notes during schema validation.
 	 */
 	public function test_order_add_note_schema_rejects_whitespace_only_note(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
+		$order = wc_create_order();
 
 		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
 			array(
@@ -1728,8 +1683,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should add a private order note when customer_note is the string false.
 	 */
 	public function test_order_add_note_reads_string_false_as_a_private_note(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
+		$order = wc_create_order();
 
 		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
 			array(
@@ -1889,7 +1843,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$order->set_customer_id( 0 );
 		$order->set_billing_email( $email );
 		$order->save();
-		$this->created_order_ids[] = $order->get_id();
 
 		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
 			array(
@@ -1924,20 +1877,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should not force products-query to published products by default.
 	 */
 	public function test_products_query_does_not_force_publish_status_by_default(): void {
-		$published                   = \WC_Helper_Product::create_simple_product(
+		$published = \WC_Helper_Product::create_simple_product(
 			true,
 			array( 'name' => 'Public Item' )
 		);
-		$this->created_product_ids[] = $published->get_id();
 
-		$draft                       = \WC_Helper_Product::create_simple_product(
+		$draft = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
 				'name'   => 'Draft Item',
 				'status' => 'draft',
 			)
 		);
-		$this->created_product_ids[] = $draft->get_id();
 
 		$result = wp_get_ability( 'woocommerce/products-query' )->execute( array() );
 
@@ -1951,7 +1902,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should return drafts when explicitly filtered by status=draft.
 	 */
 	public function test_products_query_returns_drafts_when_explicitly_requested(): void {
-		$draft                       = \WC_Helper_Product::create_simple_product(
+		$draft = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
 				'name'   => 'Hidden Draft',
@@ -1959,7 +1910,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'sku'    => 'hidden-draft-sku',
 			)
 		);
-		$this->created_product_ids[] = $draft->get_id();
 
 		$result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
@@ -1985,7 +1935,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 
 		$this->assertSame( get_woocommerce_currency(), $created['product']['currency'] );
 		$this->assertNotEmpty( $created['product']['currency_symbol'] );
@@ -2007,7 +1956,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 		$this->assertSame( 'simple', $created['product']['type'] );
 		$this->assertTrue( $created['product']['virtual'] );
 		$this->assertTrue( $created['product']['downloadable'] );
@@ -2027,7 +1975,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 		$this->assertSame( 'simple', $created['product']['type'] );
 		$this->assertTrue( $created['product']['virtual'] );
 		$this->assertFalse( $created['product']['downloadable'] );
@@ -2051,7 +1998,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $physical );
-		$this->created_product_ids[] = $physical['product']['id'];
 
 		$virtual = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
@@ -2063,7 +2009,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $virtual );
-		$this->created_product_ids[] = $virtual['product']['id'];
 
 		$digital = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
@@ -2076,14 +2021,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $digital );
-		$this->created_product_ids[] = $digital['product']['id'];
 
 		$hybrid = \WC_Helper_Product::create_simple_product();
 		$hybrid->set_sku( $hybrid_sku );
 		$hybrid->set_virtual( false );
 		$hybrid->set_downloadable( true );
 		$hybrid->save();
-		$this->created_product_ids[] = $hybrid->get_id();
 
 		$physical_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
@@ -2184,7 +2127,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 		$this->assertSame( 'external', $created['product']['type'] );
 		$this->assertSame( 'https://example.com/buy', $created['product']['external_url'] );
 		$this->assertSame( 'Buy elsewhere', $created['product']['button_text'] );
@@ -2194,8 +2136,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should create grouped products with children.
 	 */
 	public function test_product_create_creates_grouped_product(): void {
-		$child                       = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $child->get_id();
+		$child = \WC_Helper_Product::create_simple_product();
 
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
@@ -2206,7 +2147,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 		$this->assertSame( 'grouped', $created['product']['type'] );
 		$this->assertSame( array( $child->get_id() ), $created['product']['grouped_products'] );
 	}
@@ -2254,9 +2194,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertNotWPError( $bundle );
-		$this->created_product_ids[] = $bundle['product']['id'];
 		$this->assertNotWPError( $subscription );
-		$this->created_product_ids[] = $subscription['product']['id'];
 
 		$this->assertContains( 'test-bundle', $create_schema['properties']['type']['enum'] );
 		$this->assertNotContains( 'test-missing', $create_schema['properties']['type']['enum'] );
@@ -2277,8 +2215,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should change a product to a type that an extension registers, and query by the type.
 	 */
 	public function test_product_update_changes_the_type_to_a_registered_product_type(): void {
-		$product                     = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $product->get_id();
+		$product = \WC_Helper_Product::create_simple_product();
 
 		$this->unregister_domain_abilities();
 		add_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
@@ -2309,7 +2246,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertNotWPError( $bundle );
-		$this->created_product_ids[] = $bundle['product']['id'];
 
 		$this->assertNotWPError( $subscription );
 		$this->assertSame( 'test-subscription', $subscription['product']['type'] );
@@ -2346,7 +2282,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertNotWPError( $bundle );
-		$this->created_product_ids[] = $bundle['product']['id'];
 
 		$this->assertSame( '9.00', $bundle['product']['regular_price'] );
 	}
@@ -2374,7 +2309,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
 
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 
 		$parent = wc_get_product( $created['product']['id'] );
 		$this->assertInstanceOf( \WC_Product_Variable::class, $parent );
@@ -2489,8 +2423,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_product_create_checks_a_new_variation_against_its_siblings(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
-		$parent_id                   = $created['product']['id'];
+		$parent_id = $created['product']['id'];
 
 		$resized = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
@@ -2544,9 +2477,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_variations_are_products_in_the_other_abilities(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
-		$parent_id                   = $created['product']['id'];
-		$small_id                    = $created['product']['variation_ids'][0];
+		$parent_id = $created['product']['id'];
+		$small_id  = $created['product']['variation_ids'][0];
 
 		$updated = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
@@ -2689,7 +2621,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_product_update_changes_adds_and_deletes_variations(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[]  = $created['product']['id'];
 		$parent_id                    = $created['product']['id'];
 		list( $small_id, $medium_id ) = $created['product']['variation_ids'];
 
@@ -2745,12 +2676,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array(), $deleted['variations'] );
 		$this->assertNull( get_post( $medium_id ) );
 
-		$other                       = \WC_Helper_Product::create_variation_product();
-		$this->created_product_ids[] = $other->get_id();
-		$foreign                     = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+		$foreign = wp_get_ability( 'woocommerce/product-update' )->execute_change(
 			array(
 				'id'         => $parent_id,
-				'variations' => array( array( 'id' => $other->get_children()[0] ) ),
+				'variations' => array( array( 'id' => $this->create_variation_product_id_for_test() ) ),
 			)
 		);
 		$this->assertWPError( $foreign );
@@ -2774,9 +2703,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $duplicate );
 		$this->assertSame( 'woocommerce_product_variation_duplicate', $duplicate->get_error_code() );
 
-		$simple                      = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $simple->get_id();
-		$not_variable                = wp_get_ability( 'woocommerce/product-update' )->execute(
+		$simple       = \WC_Helper_Product::create_simple_product();
+		$not_variable = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
 				'id'         => $simple->get_id(),
 				'variations' => array( array( 'regular_price' => '1.00' ) ),
@@ -2792,8 +2720,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_product_update_rolls_back_every_save_when_a_variation_fails(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
-		$small_id                    = $created['product']['variation_ids'][0];
+		$small_id = $created['product']['variation_ids'][0];
 
 		$fail = static function ( $product ) {
 			if ( $product instanceof \WC_Product_Variation && 'shirt-l' === $product->get_sku( 'edit' ) ) {
@@ -2847,9 +2774,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_variation_permissions_follow_the_parent(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
-		$parent_id                   = $created['product']['id'];
-		$small_id                    = $created['product']['variation_ids'][0];
+		$parent_id = $created['product']['id'];
+		$small_id  = $created['product']['variation_ids'][0];
 
 		$checked = array();
 		$capture = static function ( $caps, $cap, $user_id, $args ) use ( &$checked ) {
@@ -2877,8 +2803,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_variation_delete_through_the_parent_requires_the_delete_permission(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
-		$update                      = array(
+		$update = array(
 			'id'         => $created['product']['id'],
 			'variations' => array(
 				array(
@@ -2887,7 +2812,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				),
 			),
 		);
-		$delete                      = array(
+		$delete = array(
 			'id'         => $created['product']['id'],
 			'variations' => array(
 				array(
@@ -2915,9 +2840,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_variation_publish_through_the_parent_requires_publish_cap(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
-		$variation_id                = $created['product']['variation_ids'][0];
-		$variation                   = wc_get_product( $variation_id );
+		$variation_id = $created['product']['variation_ids'][0];
+		$variation    = wc_get_product( $variation_id );
 		$variation->set_status( 'private' );
 		$variation->save();
 
@@ -2969,7 +2893,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		array_pop( $input['variations'] );
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $input );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 
 		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
 		$user    = get_user_by( 'id', $user_id );
@@ -3026,8 +2949,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_a_variation_item_with_a_false_delete_flag_is_a_change( $flag ): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
-		$variation_id                = $created['product']['variation_ids'][0];
+		$variation_id = $created['product']['variation_ids'][0];
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
@@ -3066,8 +2988,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should move a product to the trash when force is the string false.
 	 */
 	public function test_product_delete_with_force_string_false_trashes(): void {
-		$product                     = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $product->get_id();
+		$product = \WC_Helper_Product::create_simple_product();
 
 		$result = wp_get_ability( 'woocommerce/product-delete' )->execute(
 			array(
@@ -3084,7 +3005,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should check the permissions of a direct call with a numeric string id or no input, as the MCP adapter sends them.
 	 */
 	public function test_check_permissions_converts_raw_input(): void {
-		$order   = \WC_Helper_Order::create_order();
+		$order   = wc_create_order();
 		$ability = wp_get_ability( 'woocommerce/orders-query' );
 
 		$this->assertTrue( $ability->check_permissions( array( 'id' => (string) $order->get_id() ) ), 'A numeric string id is converted.' );
@@ -3104,8 +3025,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $input );
 
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
-		$attribute                   = $created['product']['attributes'][0];
+		$attribute = $created['product']['attributes'][0];
 		$this->assertFalse( $attribute['visible'] );
 		$this->assertFalse( $attribute['variation'] );
 		$this->assertSame( 0, $attribute['id'] );
@@ -3117,9 +3037,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_a_blocked_variation_delete_through_the_parent_fails(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
-		$variation_id                = $created['product']['variation_ids'][0];
-		$block                       = static fn( $check, $post ) => 'product_variation' === $post->post_type ? false : $check;
+		$variation_id = $created['product']['variation_ids'][0];
+		$block        = static fn( $check, $post ) => 'product_variation' === $post->post_type ? false : $check;
 
 		add_filter( 'pre_delete_post', $block, 10, 2 );
 		try {
@@ -3165,9 +3084,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_variation_items_follow_the_product_type_fields_filter(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
-		$variation_id                = $created['product']['variation_ids'][0];
-		$drop                        = static fn( array $fields, string $type ) => 'variation' === $type ? array_values( array_diff( $fields, array( 'regular_price' ) ) ) : $fields;
+		$variation_id = $created['product']['variation_ids'][0];
+		$drop         = static fn( array $fields, string $type ) => 'variation' === $type ? array_values( array_diff( $fields, array( 'regular_price' ) ) ) : $fields;
 
 		add_filter( 'woocommerce_ability_product_type_fields', $drop, 10, 2 );
 		try {
@@ -3212,7 +3130,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$unknown                          = wp_get_ability( 'woocommerce/product-create' )->execute_change( $input );
 
 		$this->assertNotWPError( $local );
-		$this->created_product_ids[] = $local['product']['id'];
 		$this->assertSame( 0, $local['product']['attributes'][0]['id'] );
 		$this->assertArrayHasKey( 'size', wc_get_product( $local['product']['id'] )->get_attributes() );
 		$this->assertWPError( $unknown );
@@ -3238,7 +3155,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $input );
 
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 		$this->assertSame( '', wc_get_product( $created['product']['variation_ids'][0] )->get_attributes()['color'] );
 	}
 
@@ -3259,7 +3175,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $input );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 
 		$small = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $created['product']['variation_ids'][0] ) );
 		$this->assertNotWPError( $small );
@@ -3299,7 +3214,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $input );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 
 		$this->assertCount( 2, $created['product']['variation_ids'] );
 		$this->assertSame( array( true, false ), array_column( $created['product']['attributes'], 'variation' ) );
@@ -3312,7 +3226,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_variation_checks_ignore_the_get_children_filter(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 
 		add_filter( 'woocommerce_get_children', '__return_empty_array' );
 		try {
@@ -3346,7 +3259,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$attribute = \WC_Helper_Product::create_attribute( 'size', array( 'small', 'large' ) );
 		$created   = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_global_size_shirt_input( $attribute['attribute_id'], 'large' ) );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 
 		$product = wc_get_product( $created['product']['id'] );
 		$stored  = $product->get_attributes()['pa_size'] ?? null;
@@ -3384,7 +3296,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$attribute = \WC_Helper_Product::create_attribute( 'size', array( 'small', 'large' ) );
 		$created   = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_global_size_shirt_input( $attribute['attribute_id'], 'large' ) );
 		$this->assertNotWPError( $created );
-		$this->created_product_ids[] = $created['product']['id'];
 
 		$parent     = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $created['product']['id'] ) );
 		$variations = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'parent_id' => $created['product']['id'] ) );
@@ -3535,7 +3446,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $sku_product );
-		$this->created_product_ids[] = $sku_product['product']['id'];
 
 		$no_sku_product = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
@@ -3544,7 +3454,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $no_sku_product );
-		$this->created_product_ids[] = $no_sku_product['product']['id'];
 
 		$result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
@@ -3642,7 +3551,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			);
 
 			$this->assertNotWPError( $created );
-			$this->created_product_ids[] = $created['product']['id'];
 			$this->assertSame( 1.5, $created['product']['stock_quantity'] );
 		} finally {
 			remove_filter( 'woocommerce_stock_amount', array( $this, 'preserve_fractional_stock_amount' ) );
@@ -3663,9 +3571,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_product_output_handles_filtered_dates( $date ): void {
 		update_option( 'timezone_string', 'Europe/Amsterdam' );
-		$product                     = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $product->get_id();
-		$filter                      = static function () use ( $date ) {
+		$product = \WC_Helper_Product::create_simple_product();
+		$filter  = static function () use ( $date ) {
 			return $date;
 		};
 		add_filter( 'woocommerce_product_get_date_created', $filter );
@@ -3693,10 +3600,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_order_output_preserves_filtered_date_object(): void {
 		update_option( 'timezone_string', 'Europe/Amsterdam' );
-		$order                     = wc_create_order();
-		$this->created_order_ids[] = $order->get_id();
-		$date                      = new \WC_DateTime( '2026-07-15T12:00:00', new \DateTimeZone( 'Asia/Kathmandu' ) );
-		$timestamp                 = $date->getTimestamp();
+		$order     = wc_create_order();
+		$date      = new \WC_DateTime( '2026-07-15T12:00:00', new \DateTimeZone( 'Asia/Kathmandu' ) );
+		$timestamp = $date->getTimestamp();
 		add_filter(
 			'woocommerce_order_get_date_created',
 			static function () use ( $date ) {
@@ -3727,8 +3633,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$product = \WC_Helper_Product::create_simple_product();
 		$product->set_date_created( $created );
 		$product->save();
-		$this->created_product_ids[] = $product->get_id();
-		$modified                    = new \WC_DateTime( $created, wp_timezone() );
+		$modified = new \WC_DateTime( $created, wp_timezone() );
 		add_filter(
 			'woocommerce_product_get_date_modified',
 			static function () use ( $modified ) {
@@ -3777,7 +3682,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$order->set_date_created( $created );
 		$order->set_date_modified( $created );
 		$order->save();
-		$this->created_order_ids[] = $order->get_id();
 		$this->set_order_modified_date_for_query_test( $order, $created );
 
 		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => $order->get_id() ) );
@@ -3821,8 +3725,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		try {
 			$this->register_domain_abilities();
-			$order                     = \WC_Helper_Order::create_order();
-			$this->created_order_ids[] = $order->get_id();
+			$order = \WC_Helper_Order::create_order();
 			foreach ( $order->get_items() as $item ) {
 				$item->set_quantity( 1.5 );
 				$item->save();
@@ -3849,7 +3752,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$product = new \WC_Product_External();
 		$product->set_name( 'External product' );
 		$product->save();
-		$this->created_product_ids[] = $product->get_id();
 
 		$result = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) );
 		$this->assertNotWPError( $result );
@@ -4031,7 +3933,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @param mixed $date Filtered date.
 	 */
 	public function test_order_output_handles_filtered_dates( $date ): void {
-		$order  = \WC_Helper_Order::create_order();
+		$order  = wc_create_order();
 		$filter = static function () use ( $date ) {
 			return $date;
 		};
@@ -4058,7 +3960,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should omit an absent order note date while preserving false and empty strings.
 	 */
 	public function test_order_note_output_omits_absent_date(): void {
-		$order = \WC_Helper_Order::create_order();
+		$order = wc_create_order();
 		$order->add_order_note( 'Internal note.' );
 		$omit_date = static function ( $note ) {
 			$note['date_created'] = null;
@@ -4117,8 +4019,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should update a per-type field such as regular_price without a type in the input.
 	 */
 	public function test_product_update_changes_props_and_returns_updated_response(): void {
-		$product                     = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $product->get_id();
+		$product = \WC_Helper_Product::create_simple_product();
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
@@ -4137,8 +4038,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should refuse an update field that the type of the loaded product does not support.
 	 */
 	public function test_product_update_rejects_fields_not_supported_by_loaded_product_type(): void {
-		$product                     = \WC_Helper_Product::create_grouped_product();
-		$this->created_product_ids[] = $product->get_id();
+		$product = \WC_Helper_Product::create_grouped_product();
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
@@ -4156,13 +4056,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should return a structured error when product updates throw during save.
 	 */
 	public function test_product_update_returns_error_when_save_throws_exception(): void {
-		$product                     = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $product->get_id();
-		$throw_on_update             = static function (): void {
+		$product         = \WC_Helper_Product::create_simple_product();
+		$throw_on_update = static function (): void {
 			throw new \Exception( 'Generic product save failure.' );
 		};
-		$logger                      = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
-		$logger_filter               = static function () use ( $logger ) {
+		$logger          = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger_filter   = static function () use ( $logger ) {
 			return $logger;
 		};
 
@@ -4208,8 +4107,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should apply product type configuration when updating a product type.
 	 */
 	public function test_product_update_applies_product_type_configuration(): void {
-		$product                     = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $product->get_id();
+		$product = \WC_Helper_Product::create_simple_product();
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
@@ -4235,10 +4133,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$grouped->set_manage_stock( true );
 		$grouped->set_stock_quantity( 5 );
 		$grouped->save();
-		$this->created_product_ids[] = $grouped->get_id();
 
-		$simple                      = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $simple->get_id();
+		$simple = \WC_Helper_Product::create_simple_product();
 		$simple->set_manage_stock( true );
 		$simple->set_stock_quantity( 5 );
 		$simple->save();
@@ -4269,8 +4165,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject product updates that include no changed fields.
 	 */
 	public function test_product_update_requires_at_least_one_mutation_field(): void {
-		$product                     = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $product->get_id();
+		$product = \WC_Helper_Product::create_simple_product();
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
@@ -4323,8 +4218,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should trash a product by default.
 	 */
 	public function test_product_delete_defaults_to_trash(): void {
-		$product                     = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $product->get_id();
+		$product = \WC_Helper_Product::create_simple_product();
 
 		$result = wp_get_ability( 'woocommerce/product-delete' )->execute(
 			array(
@@ -4341,8 +4235,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject soft deletes when product trashing is not supported.
 	 */
 	public function test_product_delete_rejects_soft_delete_when_trash_not_supported(): void {
-		$product                     = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $product->get_id();
+		$product = \WC_Helper_Product::create_simple_product();
 
 		add_filter( 'woocommerce_product_object_trashable', '__return_false' );
 
@@ -4365,8 +4258,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should return an error when product deletion is blocked.
 	 */
 	public function test_product_delete_returns_error_when_delete_is_blocked(): void {
-		$product                     = \WC_Helper_Product::create_simple_product();
-		$this->created_product_ids[] = $product->get_id();
+		$product = \WC_Helper_Product::create_simple_product();
 
 		$callback = static function () {
 			return false;
@@ -4459,7 +4351,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$product = \WC_Helper_Product::create_simple_product();
 		$product->set_status( 'auto-draft' );
 		$product->save();
-		$this->created_product_ids[] = $product->get_id();
 
 		$filter_permalink = static function ( $permalink, $post ) use ( $product ) {
 			return $post instanceof \WP_Post && $post->ID === $product->get_id() ? false : $permalink;
@@ -4548,7 +4439,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @param string $hint  Text that the message must have.
 	 */
 	public function test_order_update_refuses_invalid_input( array $input, string $code, string $hint ): void {
-		$order = $this->create_order_for_update( 'pending' );
+		$order = wc_create_order();
 		$order->set_shipping_country( 'US' );
 		$order->set_shipping_state( 'CA' );
 		$order->set_shipping_city( 'Before' );
@@ -4566,7 +4457,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should return every address and line refusal of an order update in one message, and save nothing.
 	 */
 	public function test_order_update_returns_every_refusal_in_one_message(): void {
-		$order = $this->create_order_for_update( 'pending' );
+		$order = wc_create_order();
 		$order->set_shipping_country( 'US' );
 		$order->set_shipping_city( 'Before' );
 		$order->save();
@@ -5117,7 +5008,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$order = \WC_Helper_Order::create_order();
 		$order->set_status( $status );
 		$order->save();
-		$this->created_order_ids[] = $order->get_id();
 
 		return wc_get_order( $order->get_id() );
 	}
@@ -5129,7 +5019,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$order = \WC_Helper_Order::create_order();
 		$order->set_billing_email( 'domain-order-query@example.com' );
 		$order->save();
-		$this->created_order_ids[] = $order->get_id();
 
 		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
 			array(
@@ -5155,8 +5044,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_order_notes_query_lists_every_note( bool $hpos_enabled ): void {
 		$this->set_order_storage_for_test( $hpos_enabled );
 
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
+		$order = wc_create_order();
 
 		$newer_note_id = $order->add_order_note( 'Internal note.' );
 		$order->add_order_note( 'Customer note.', true );
@@ -5201,9 +5089,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should check the order-notes-query permission against the actual type of the order ID.
 	 */
 	public function test_order_notes_query_refuses_id_of_unsupported_order_type(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
-		$refund                    = wc_create_refund(
+		$order  = \WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
 			array(
 				'order_id' => $order->get_id(),
 				'amount'   => 1,
@@ -5231,8 +5118,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'add_order_meta_boxes'     => false,
 			)
 		);
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
+		$order = wc_create_order();
 		$wpdb->update( $wpdb->posts, array( 'post_type' => 'shop_test_private' ), array( 'ID' => $order->get_id() ) );
 		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_private' ), array( 'id' => $order->get_id() ) );
 		clean_post_cache( $order->get_id() );
@@ -5270,17 +5156,15 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$email = wp_unique_id( 'abilities-checkout-draft-' ) . '@example.com';
 
-		$processing_order = \WC_Helper_Order::create_order();
+		$processing_order = wc_create_order();
 		$processing_order->set_billing_email( $email );
 		$processing_order->set_status( 'processing' );
 		$processing_order->save();
-		$this->created_order_ids[] = $processing_order->get_id();
 
-		$checkout_draft = \WC_Helper_Order::create_order();
+		$checkout_draft = wc_create_order();
 		$checkout_draft->set_billing_email( $email );
 		$checkout_draft->set_status( 'checkout-draft' );
 		$checkout_draft->save();
-		$this->created_order_ids[] = $checkout_draft->get_id();
 
 		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
 			array(
@@ -5362,7 +5246,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$order = wc_create_order();
 		$this->assertNotWPError( $order );
 		$order->save();
-		$this->created_order_ids[] = $order->get_id();
 
 		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
 			array(
@@ -5378,17 +5261,15 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should narrow orders-query results by date range.
 	 */
 	public function test_orders_query_filters_by_date_range(): void {
-		$old_order = \WC_Helper_Order::create_order();
+		$old_order = wc_create_order();
 		$old_order->set_date_created( '2020-01-15T00:00:00' );
 		$old_order->set_billing_email( 'date-range@example.com' );
 		$old_order->save();
-		$this->created_order_ids[] = $old_order->get_id();
 
-		$new_order = \WC_Helper_Order::create_order();
+		$new_order = wc_create_order();
 		$new_order->set_date_created( '2025-01-15T00:00:00' );
 		$new_order->set_billing_email( 'date-range@example.com' );
 		$new_order->save();
-		$this->created_order_ids[] = $new_order->get_id();
 
 		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
 			array(
@@ -5549,8 +5430,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should change order status and surface failure when status update fails.
 	 */
 	public function test_order_update_status_changes_status(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
+		$order = wc_create_order();
 
 		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
 			array(
@@ -5568,9 +5448,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject unchanged order status updates without adding notes.
 	 */
 	public function test_order_update_status_rejects_unchanged_status_without_adding_notes(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
-		$note_count_before         = count(
+		$order             = wc_create_order();
+		$note_count_before = count(
 			wc_get_order_notes(
 				array(
 					'order_id' => $order->get_id(),
@@ -5605,9 +5484,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should treat order status updates as manual status changes.
 	 */
 	public function test_order_update_status_uses_manual_status_update(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
-		$manual_update_observed    = false;
+		$order                  = wc_create_order();
+		$manual_update_observed = false;
 
 		$callback = static function ( $order_id, $status ) use ( $order, &$manual_update_observed ) {
 			if ( $order->get_id() === $order_id && 'processing' === $status ) {
@@ -5636,8 +5514,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should attribute order notes to the acting user.
 	 */
 	public function test_order_add_note_attributes_to_acting_user(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
+		$order = wc_create_order();
 
 		$user_id = $this->factory->user->create(
 			array(
@@ -5665,8 +5542,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should preserve safe HTML in order notes.
 	 */
 	public function test_order_add_note_preserves_safe_html(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
+		$order = wc_create_order();
 
 		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
 			array(
@@ -5686,8 +5562,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject whitespace-only order notes during execution.
 	 */
 	public function test_order_add_note_execute_rejects_whitespace_only_note(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
+		$order = wc_create_order();
 
 		$result = OrderAddNote::execute(
 			array(
@@ -5704,8 +5579,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should mark notes as customer-facing when customer_note=true.
 	 */
 	public function test_order_add_note_persists_customer_note_flag(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
+		$order = wc_create_order();
 
 		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
 			array(
@@ -6078,18 +5952,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a product variation and track it for cleanup.
+	 * Create one variation of a variable product with a single global attribute.
 	 *
 	 * @return int Variation product ID.
 	 */
 	private function create_variation_product_id_for_test(): int {
-		$parent       = \WC_Helper_Product::create_variation_product();
-		$variation_id = $parent->get_children()[0];
+		list( , $variation ) = \WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Variable product',
+			array( 'pa_size' => 'small' ),
+			array( 'size' => array( 'small' ) )
+		);
 
-		$this->created_product_ids[] = $variation_id;
-		$this->created_product_ids[] = $parent->get_id();
-
-		return $variation_id;
+		return $variation->get_id();
 	}
 
 	/**
@@ -6123,13 +5997,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @return \WC_Order
 	 */
 	private function create_order_for_query_sorting( string $billing_email, string $date_created, string $date_modified ): \WC_Order {
-		$order = \WC_Helper_Order::create_order();
+		$order = wc_create_order();
 		$order->set_billing_email( $billing_email );
 		$order->set_date_created( $date_created );
 		$order->set_date_modified( $date_modified );
 		$order->save();
 
-		$this->created_order_ids[] = $order->get_id();
 		$this->set_order_modified_date_for_query_test( $order, $date_modified );
 
 		return $order;

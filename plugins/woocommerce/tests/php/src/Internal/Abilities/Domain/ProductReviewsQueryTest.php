@@ -24,11 +24,27 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * An administrator that every test acts as.
+	 *
+	 * @var int
+	 */
+	private static $user_id;
+
+	/**
+	 * Create the fixtures that no test changes beyond its own transaction.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$user_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
 	 * Set up an authorized caller.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::$user_id );
 		$this->sut = new \WP_Ability( ProductReviewsQuery::get_name(), ProductReviewsQuery::get_registration_args() );
 	}
 
@@ -188,26 +204,77 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 	 * @testdox Should retain both ends of a large rating ranking and omit unrated products above the cap.
 	 */
 	public function test_large_ranking(): void {
-		for ( $i = 0; $i < 202; ++$i ) {
-			$product = self::factory()->post->create( array( 'post_type' => 'product' ) );
-			$this->review( $product, 100 > $i ? 1 : 5 );
+		$rank = new \ReflectionMethod( ProductReviewsQuery::class, 'rank' );
+		$rank->setAccessible( true );
+		$row  = static fn( int $id, float $rating ): array => array(
+			'product_id'     => $id,
+			'average_rating' => $rating,
+			'review_count'   => 1,
+		);
+		$rows = array( $row( 1, 0.0 ) );
+		for ( $id = 2; $id <= 203; ++$id ) {
+			$rows[] = $row( $id, 102 > $id ? 1.0 : ( 104 > $id ? 3.0 : 5.0 ) );
 		}
-		$unrated = self::factory()->post->create( array( 'post_type' => 'product' ) );
-		$this->review( $unrated, 0 );
-		$result = $this->sut->execute( array( 'per_page' => 1 ) );
-		$this->assertIsArray( $result );
-		$this->assertSame( 203, $result['total'] );
-		$this->assertSame( 203, $result['summary']['total_products'] );
-		$this->assertCount( 200, $result['by_product'] );
-		$ratings = array_count_values( array_map( 'strval', array_column( $result['by_product'], 'average_rating' ) ) );
+
+		$capped = $rank->invoke( null, $rows );
+
+		$this->assertCount( 200, $capped );
 		$this->assertSame(
 			array(
 				1 => 100,
 				5 => 100,
 			),
-			$ratings
+			array_count_values( array_map( 'intval', array_column( $capped, 'average_rating' ) ) ),
+			'Both ends of the rated ranking are kept, not its first entries.'
 		);
-		$this->assertNotContains( $unrated, array_column( $result['by_product'], 'product_id' ) );
+		$this->assertNotContains( 1, array_column( $capped, 'product_id' ) );
+
+		$rated_within_cap = $rank->invoke( null, array_merge( array_slice( $rows, 0, 3 ), array_slice( $rows, 5, 198 ), array( $row( 204, 0.0 ) ) ) );
+
+		$this->assertCount( 200, $rated_within_cap, 'Only the unrated products are dropped when the rated ones fit.' );
+		$this->assertNotContains( 0.0, array_column( $rated_within_cap, 'average_rating' ) );
+	}
+
+	/**
+	 * @testdox Should count every reviewed product in the summary when the ranking is capped.
+	 */
+	public function test_summary_counts_products_beyond_the_ranking_cap(): void {
+		global $wpdb;
+		$products = 201;
+		$marker   = wp_unique_id( 'ranking-cap-' );
+		$now      = current_time( 'mysql', true );
+
+		// Bulk rows keep this end-to-end check cheap; the factories cost seconds at this size.
+		$posts = array();
+		for ( $i = 0; $i < $products; ++$i ) {
+			$posts[] = $wpdb->prepare( "(%s, %s, '', '', '', '', '', 'publish', 'product', %s, %s, %s, %s)", $marker, '', $now, $now, $now, $now );
+		}
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery -- Every row is prepared above.
+		$wpdb->query( "INSERT INTO {$wpdb->posts} (post_title, post_content, post_excerpt, to_ping, pinged, post_content_filtered, post_password, post_status, post_type, post_date, post_date_gmt, post_modified, post_modified_gmt) VALUES " . implode( ', ', $posts ) );
+		$product_ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s", $marker ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+
+		$comments = array();
+		foreach ( $product_ids as $product_id ) {
+			$comments[] = $wpdb->prepare( "(%d, 'review', '1', 'Lovely item', 'Reviewer', '', '', '', %s, %s)", $product_id, $now, $now );
+		}
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery -- Every row is prepared above.
+		$wpdb->query( "INSERT INTO {$wpdb->comments} (comment_post_ID, comment_type, comment_approved, comment_content, comment_author, comment_author_email, comment_author_url, comment_author_IP, comment_date, comment_date_gmt) VALUES " . implode( ', ', $comments ) );
+		$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->commentmeta} (comment_id, meta_key, meta_value)
+				SELECT c.comment_ID, 'rating', '4' FROM {$wpdb->comments} c INNER JOIN {$wpdb->posts} p ON p.ID = c.comment_post_ID WHERE p.post_title = %s",
+				$marker
+			)
+		);
+		wp_cache_set_last_changed( 'posts' );
+		wp_cache_set_comments_last_changed();
+
+		$result = $this->sut->execute( array( 'per_page' => 1 ) );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( $products, $result['total'] );
+		$this->assertSame( $products, $result['summary']['total_products'], 'The summary counts the products the ranking leaves out.' );
+		$this->assertCount( 200, $result['by_product'] );
 	}
 
 	/**

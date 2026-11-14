@@ -26,6 +26,22 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	private $saved_state = array();
 
 	/**
+	 * An administrator that every test acts as.
+	 *
+	 * @var int
+	 */
+	private static $user_id;
+
+	/**
+	 * Create the fixtures that no test changes beyond its own transaction.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$user_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
 	 * Set up ability registration.
 	 */
 	public function setUp(): void {
@@ -37,7 +53,7 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 			$property->setValue( null, array() );
 		}
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::$user_id );
 	}
 
 	/**

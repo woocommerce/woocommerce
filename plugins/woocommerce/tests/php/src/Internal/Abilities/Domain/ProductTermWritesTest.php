@@ -36,6 +36,22 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 	private array $taxonomies_before;
 
 	/**
+	 * An administrator that every test acts as.
+	 *
+	 * @var int
+	 */
+	private static $user_id;
+
+	/**
+	 * Create the fixtures that no test changes beyond its own transaction.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$user_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
 	 * Set up an administrator with extension fields switched off.
 	 */
 	public function setUp(): void {
@@ -48,7 +64,7 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 		}
 		$this->taxonomies_before = get_taxonomies();
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::$user_id );
 	}
 
 	/**

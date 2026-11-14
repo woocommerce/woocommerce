@@ -29,13 +29,44 @@ class ProductReviewReplyTest extends \WC_Unit_Test_Case {
 	private $product_id;
 
 	/**
+	 * A shop manager that every test acts as.
+	 *
+	 * @var int
+	 */
+	private static $user_id;
+
+	/**
+	 * The product every test reviews; each test's changes to it roll back.
+	 *
+	 * @var int
+	 */
+	private static $shared_product_id;
+
+	/**
+	 * Create the fixtures that no test changes beyond its own transaction.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$user_id           = $factory->user->create( array( 'role' => 'shop_manager' ) );
+		self::$shared_product_id = \WC_Helper_Product::create_simple_product()->get_id();
+	}
+
+	/**
+	 * Delete the shared product, whose lookup rows the WordPress class cleanup leaves behind.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		wc_get_product( self::$shared_product_id )->delete( true );
+	}
+
+	/**
 	 * Set up a shop manager and a product.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+		wp_set_current_user( self::$user_id );
 		$this->sut        = new \WP_Ability( ProductReviewReply::get_name(), ProductReviewReply::get_registration_args() );
-		$this->product_id = \WC_Helper_Product::create_simple_product()->get_id();
+		$this->product_id = self::$shared_product_id;
 	}
 
 	/**

@@ -126,8 +126,8 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	public function test_include_without_per_page_returns_one_page(): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$order_ids = array();
-		foreach ( range( 1, 15 ) as $unused ) {
-			$order_ids[] = OrderHelper::create_order()->get_id();
+		foreach ( range( 1, 11 ) as $unused ) {
+			$order_ids[] = wc_create_order()->get_id();
 		}
 
 		$all_ids = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'include' => $order_ids ) );
@@ -164,12 +164,10 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	 * @testdox Should refuse an id together with include.
 	 */
 	public function test_refuses_id_with_include(): void {
-		$order = OrderHelper::create_order();
-
 		$result = OrdersQuery::execute(
 			array(
-				'id'      => $order->get_id(),
-				'include' => array( $order->get_id() ),
+				'id'      => 1,
+				'include' => array( 1 ),
 			)
 		);
 
@@ -179,11 +177,15 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Search terms that each match one detail of the order that create_detailed_order() builds, on both storages.
+	 * @testdox Should find an order by each customer and item detail the search input describes.
 	 *
-	 * @return array<string, array{0: bool, 1: string}>
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
 	 */
-	public function search_terms(): array {
+	public function test_search_matches_order_details( bool $hpos ): void {
+		$this->use_storage( $hpos );
+		$order = $this->create_detailed_order();
+		$this->create_customer_order( 'John', 'Smith', 'john@example.com' );
 		$terms = array(
 			'first name'         => 'Jane',
 			'last name'          => 'doe',
@@ -198,30 +200,11 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 			'padded term'        => ' Enamel ',
 		);
 
-		$cases = array();
-		foreach ( $this->storage_modes() as $storage => list( $hpos ) ) {
-			foreach ( $terms as $detail => $term ) {
-				$cases[ "$detail, $storage" ] = array( $hpos, $term );
-			}
+		foreach ( $terms as $detail => $search ) {
+			$result = OrdersQuery::execute( array( 'search' => $search ) );
+
+			$this->assertSame( array( $order ), array_column( $result['orders'], 'id' ), "Search by $detail." );
 		}
-		return $cases;
-	}
-
-	/**
-	 * @testdox Should find an order by each customer and item detail the search input describes.
-	 *
-	 * @dataProvider search_terms
-	 * @param bool   $hpos   Whether to use the custom orders table.
-	 * @param string $search Search text.
-	 */
-	public function test_search_matches_order_details( bool $hpos, string $search ): void {
-		$this->use_storage( $hpos );
-		$order = $this->create_detailed_order();
-		$this->create_customer_order( 'John', 'Smith', 'john@example.com' );
-
-		$result = OrdersQuery::execute( array( 'search' => $search ) );
-
-		$this->assertSame( array( $order ), array_column( $result['orders'], 'id' ) );
 	}
 
 	/**
@@ -246,11 +229,9 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	 * @testdox Should refuse an id together with search.
 	 */
 	public function test_refuses_id_with_search(): void {
-		$order = OrderHelper::create_order();
-
 		$result = OrdersQuery::execute(
 			array(
-				'id'     => $order->get_id(),
+				'id'     => 1,
 				'search' => 'Jane',
 			)
 		);
@@ -335,28 +316,12 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return each order exactly once across pages when orders tie on $orderby $order, with HPOS $hpos.
-	 * @testWith [true, "date", "asc"]
-	 *           [true, "date", "desc"]
-	 *           [true, "date_modified", "asc"]
-	 *           [true, "date_modified", "desc"]
-	 *           [true, "total", "asc"]
-	 *           [true, "total", "desc"]
-	 *           [true, "id", "asc"]
-	 *           [true, "id", "desc"]
-	 *           [false, "date", "asc"]
-	 *           [false, "date", "desc"]
-	 *           [false, "date_modified", "asc"]
-	 *           [false, "date_modified", "desc"]
-	 *           [false, "total", "asc"]
-	 *           [false, "total", "desc"]
-	 *           [false, "id", "asc"]
-	 *           [false, "id", "desc"]
-	 * @param bool   $hpos    Whether to use the custom orders table.
-	 * @param string $orderby Sort field.
-	 * @param string $order   Sort direction.
+	 * @testdox Should return each order exactly once across pages when orders tie on every sort field.
+	 *
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
 	 */
-	public function test_pages_tied_orders_once_each( bool $hpos, string $orderby, string $order ): void {
+	public function test_pages_tied_orders_once_each( bool $hpos ): void {
 		$this->use_storage( $hpos );
 		$ids = array();
 		for ( $i = 0; $i < 7; $i++ ) {
@@ -364,24 +329,29 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 		}
 		$this->set_modified_date( $ids, $hpos );
 
-		$paged = array();
-		for ( $page = 1; $page <= 3; $page++ ) {
-			$result = OrdersQuery::execute(
-				array(
-					'orderby'  => $orderby,
-					'order'    => $order,
-					'page'     => $page,
-					'per_page' => 3,
-				)
-			);
-			$this->assertIsArray( $result );
-			$paged = array_merge( $paged, array_column( $result['orders'], 'id' ) );
-		}
+		foreach ( array( 'date', 'date_modified', 'total', 'id' ) as $orderby ) {
+			foreach ( array( 'asc', 'desc' ) as $order ) {
+				$paged = array();
+				for ( $page = 1; $page <= 3; $page++ ) {
+					$result = OrdersQuery::execute(
+						array(
+							'orderby'  => $orderby,
+							'order'    => $order,
+							'page'     => $page,
+							'per_page' => 3,
+						)
+					);
+					$this->assertIsArray( $result );
+					$paged = array_merge( $paged, array_column( $result['orders'], 'id' ) );
+				}
 
-		if ( 'desc' === $order ) {
-			rsort( $ids );
+				$expected = $ids;
+				if ( 'desc' === $order ) {
+					rsort( $expected );
+				}
+				$this->assertSame( $expected, $paged, "Tied orders should be sorted by ID when sorting by $orderby $order." );
+			}
 		}
-		$this->assertSame( $ids, $paged, 'Tied orders should be sorted by ID in the requested direction.' );
 	}
 
 	/**
