@@ -2488,6 +2488,47 @@ body.woocommerce_page_wc-customer-stock-notifications {
 		margin-inline: auto;
 	}
 
+	.wrap:has(.woocommerce-order-navigation) {
+		position: relative;
+	}
+
+	.woocommerce-order-navigation {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		position: absolute;
+		inset-inline-end: 20px;
+		top: 24px;
+		transform: translateY(-50%);
+
+		@media screen and (max-width: 782px) {
+			inset-inline-end: 0;
+		}
+	}
+
+	.woocommerce-order-navigation__button {
+		text-decoration: none;
+
+		// Below WP admin's mobile breakpoint only chevrons fit beside the title; aria-label keeps the name.
+		@media screen and (max-width: 782px) {
+
+			&.components-button.has-icon.has-text {
+				justify-content: center;
+				height: 40px;
+				min-width: 40px;
+				padding: 0;
+			}
+
+			> span {
+				display: none;
+			}
+		}
+	}
+
+	html[dir="rtl"] & .woocommerce-order-navigation__button svg {
+		transform: scaleX(-1);
+	}
+
 	.tablenav .one-page .displaying-num {
 		display: none;
 	}
