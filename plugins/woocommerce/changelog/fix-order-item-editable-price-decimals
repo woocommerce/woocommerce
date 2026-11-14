@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep trailing currency decimals in editable order item prices without rounding stored amounts.
