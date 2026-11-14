@@ -163,3 +163,90 @@ If you're looking to add _new routes and endpoints_, rather than extending the S
 
 * [`register_rest_route()`](https://developer.wordpress.org/reference/functions/register_rest_route/)
 * [Rest API Permissions Callbacks](https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/#permissions-callback)
+
+### Accessing the customer's cart from a custom route
+
+WooCommerce doesn't load the cart for REST requests outside the Store API, so `WC()->cart` is `null` in a route registered with `register_rest_route()`. Load it in your callback before using it:
+
+```php
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'my-extension/v1',
+			'/cart-summary',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => function () {
+					if ( ! is_user_logged_in() && wp_validate_auth_cookie( '', 'logged_in' ) ) {
+						return new WP_Error( 'rest_cookie_invalid_nonce', 'Send a valid X-WP-Nonce header.', array( 'status' => 403 ) );
+					}
+
+					return true;
+				},
+				'callback'            => function () {
+					if ( ! function_exists( 'wc_load_cart' ) ) {
+						return new WP_Error( 'cart_unavailable', 'WooCommerce is not active.', array( 'status' => 503 ) );
+					}
+
+					wc_load_cart();
+					WC()->cart->get_cart();
+					WC()->cart->calculate_totals();
+
+					$response = new WP_REST_Response(
+						array(
+							'items_count' => WC()->cart->get_cart_contents_count(),
+							'total'       => WC()->cart->get_total( 'edit' ),
+						)
+					);
+					$response->header( 'Cache-Control', 'no-store, private' );
+
+					return $response;
+				},
+			)
+		);
+	}
+);
+```
+
+`wc_load_cart()` sets up the session and an empty cart. It doesn't read the cart items, so call `WC()->cart->get_cart()` next, which loads the items and totals from the session. Then call `calculate_totals()`, because the stored totals can be out of date, for example when a product in the cart was deleted. After that, other cart methods such as `get_cart_contents()` and `get_total()` return the customer's cart.
+
+The response is different for every customer, so the example sends `Cache-Control: no-store, private`. WordPress only sends no-cache headers for logged-in users, and a page cache could otherwise serve one guest's cart to another.
+
+The session is read from the customer's cookies, so call the route from the browser with `credentials: 'same-origin'`. Also send an `X-WP-Nonce` header created with `wp_create_nonce( 'wp_rest' )`. WordPress handles the nonce in two ways:
+
+* If the nonce is invalid, WordPress rejects the request with a `rest_cookie_invalid_nonce` error before your callbacks run.
+* If no nonce is sent, WordPress runs the request as a guest, even when the customer is logged in. Loading the cart as a guest would discard the customer's session, so the example's permission callback rejects a request that has a logged-in cookie but no nonce. Guests don't need a nonce.
+
+The Store API `Nonce` and `Cart-Token` headers only work on Store API routes. A guest [Cart Token](/docs/apis/store-api/cart-tokens) passed in the `session` query parameter is still honored, because `wc_load_cart()` checks for it on any request.
+
+Pass the route URL and the initial nonce to your script from PHP, so the URL works on any install layout:
+
+```php
+wp_add_inline_script(
+	'my-extension-script',
+	'const myExtension = ' . wp_json_encode(
+		array(
+			'cartSummaryUrl' => esc_url_raw( rest_url( 'my-extension/v1/cart-summary' ) ),
+			'restNonce'      => wp_create_nonce( 'wp_rest' ),
+		)
+	) . ';',
+	'before'
+);
+```
+
+```js
+let restNonce = myExtension.restNonce;
+
+async function getCartSummary() {
+	const response = await fetch( myExtension.cartSummaryUrl, {
+		credentials: 'same-origin',
+		headers: { 'X-WP-Nonce': restNonce },
+	} );
+
+	// Each response carries a refreshed nonce. Use it for the next request instead of the initial one.
+	restNonce = response.headers.get( 'X-WP-Nonce' ) || restNonce;
+
+	return response.json();
+}
+```
