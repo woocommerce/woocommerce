@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 
 /**
  * Tests the state cleanup in WC_Unit_Test_Case: the WC() singleton, $_SERVER, Constants and
@@ -222,6 +223,34 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $replaced_type, $registry->get_registered( $replaced_name ), 'A block type the test replaced should be the original again.' );
 		$this->assertSame( $types_at_setup[ $removed_name ], $registry->get_registered( $removed_name ), 'A block type the test removed should be back.' );
 		$this->assertEqualsCanonicalizing( array_keys( $types_at_setup ), array_keys( $registry->get_all_registered() ), 'The registered names should match setUp().' );
+	}
+
+	/**
+	 * @testdox The flag that makes the next settings save redirect and exit, set by changing the Analytics option, is cleared.
+	 */
+	public function test_reset_analytics_reload_flag_clears_the_flag_an_option_change_sets(): void {
+		update_option( Analytics::TOGGLE_OPTION_NAME, 'yes' );
+		update_option( Analytics::TOGGLE_OPTION_NAME, 'no' );
+		$this->assertTrue( self::analytics_reload_flag(), 'Changing the Analytics option should set the flag, or this test covers nothing.' );
+
+		$this->reset_analytics_reload_flag();
+
+		$this->assertFalse( self::analytics_reload_flag(), 'The flag should be clear.' );
+	}
+
+	/**
+	 * Read the static flag Analytics::maybe_reload_page() checks before it redirects and exits.
+	 *
+	 * @return bool
+	 */
+	private static function analytics_reload_flag(): bool {
+		return \Closure::bind(
+			static function (): bool {
+				return self::$is_updated;
+			},
+			null,
+			Analytics::class
+		)();
 	}
 
 	/**
