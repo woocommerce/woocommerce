@@ -38,23 +38,32 @@
 	}
 }
 
-.notice-transition-enter {
-	max-height: 0;
+// Snackbars rise 8px in and drop 4px out. They only move with `translate`, so the fade comes from the motion helpers.
+@keyframes wc-snackbar-rise {
+	from {
+		translate: 0 8px;
+	}
 }
-.notice-transition-enter.notice-transition-enter-active {
-	max-height: 99em;
-	transition: max-height 0.5s ease-in;
+
+@keyframes wc-snackbar-drop {
+	to {
+		translate: 0 4px;
+	}
 }
-.notice-transition-enter-done {
-	max-height: auto;
-}
-.notice-transition-exit {
-	opacity: 1;
-}
-.notice-transition-exit.notice-transition-exit-active {
-	opacity: 0;
-	transition: opacity 0.5s ease-in;
-}
-.notice-transition-exit-done {
-	opacity: 0;
+
+.wc-block-components-notice-snackbar {
+	// A new snackbar rises in over `lg` and fades in over `md`.
+	&.notice-transition-enter {
+		@include motion-enter(wc-snackbar-rise);
+	}
+
+	// It goes faster than it came, over `md`, and keeps its end state until it unmounts.
+	&.notice-transition-exit {
+		@include motion-exit(wc-snackbar-drop);
+	}
+
+	// Stays hidden between the end of the exit and the unmount.
+	&.notice-transition-exit-done {
+		opacity: 0;
+	}
 }
