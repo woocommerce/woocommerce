@@ -4249,6 +4249,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `update_order_meta_from_object` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
 
 		// Test deleting meta data containing an object of a non-existent class.
+		// Skip the full order save after each deletion, which otherwise depends on the clock crossing a second boundary.
+		add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
 		$meta_data = $this->sut->read_meta( $order );
 		foreach ( $meta_data as $meta ) {
 			$this->sut->delete_meta( $order, (object) array( 'id' => $meta->meta_id ) );
@@ -4260,6 +4262,35 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		// Check that the log entry was created.
 		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
+	}
+
+	/**
+	 * @testdox Saving an order with posts sync removes stale post meta holding an object of a non-existent class.
+	 */
+	public function test_backfill_removes_stale_post_meta_with_nonexistent_class(): void {
+		global $wpdb;
+		$meta_key = 'test_stale_post_meta_with_nonexistent_class';
+
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
+		$wpdb->insert(
+			$wpdb->postmeta,
+			array(
+				'post_id'    => $order->get_id(),
+				'meta_key'   => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => 'O:11:"geoiprecord":1:{s:4:"city";s:8:"Brussels";}', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			)
+		);
+		wp_cache_delete( $order->get_id(), 'post_meta' );
+
+		$order->set_billing_city( 'Brussels' );
+		$order->save();
+
+		$this->assertSame( '', get_post_meta( $order->get_id(), $meta_key, true ), 'Stale post meta should be removed when the order is backfilled.' );
 	}
 
 	/**
