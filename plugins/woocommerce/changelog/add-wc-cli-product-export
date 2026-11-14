@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a `wp wc product export` WP-CLI command that reuses the existing product CSV exporter.
