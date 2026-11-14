@@ -230,4 +230,28 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 
 		$this->assertSame( array(), $this->registry->get()['preloadedApiRequestPaths'] );
 	}
+
+	/**
+	 * @testdox `preloadedApiRequests` holds each preloaded response under its path, for the preloading middleware and the cart data store.
+	 */
+	public function test_preloaded_api_requests_holds_hydrated_responses() {
+		$this->registry->hydrate_api_request( '/wc/store/v1/cart' );
+
+		$this->registry->initialize_core_data();
+
+		$preloaded = (array) $this->registry->get()['preloadedApiRequests'];
+		$this->assertSame( array( '/wc/store/v1/cart' ), array_keys( $preloaded ) );
+		$this->assertArrayHasKey( 'body', $preloaded['/wc/store/v1/cart'] );
+		$this->assertArrayHasKey( 'headers', $preloaded['/wc/store/v1/cart'] );
+		$this->assertArrayHasKey( 'items', $preloaded['/wc/store/v1/cart']['body'] );
+	}
+
+	/**
+	 * @testdox `preloadedApiRequests` is an empty object when nothing was preloaded, so it prints as `{}`.
+	 */
+	public function test_preloaded_api_requests_is_an_empty_object_without_hydration() {
+		$this->registry->initialize_core_data();
+
+		$this->assertSame( '{}', wp_json_encode( $this->registry->get()['preloadedApiRequests'] ) );
+	}
 }

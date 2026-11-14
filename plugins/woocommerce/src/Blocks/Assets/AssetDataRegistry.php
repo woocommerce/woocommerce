@@ -261,6 +261,7 @@ class AssetDataRegistry {
 		$core_data['experimentalWcRestApiV4']      = Features::is_enabled( 'rest-api-v4' );
 		$core_data['experimentalCartSaveForLater'] = FeaturesUtil::feature_is_enabled( 'cart_save_for_later' );
 		$core_data['preloadedApiRequestPaths']     = array_keys( $this->preloaded_api_requests );
+		$core_data['preloadedApiRequests']         = (object) $this->preloaded_api_requests;
 		// note this WILL wipe any data already registered to these keys because they are protected.
 		$this->data = array_replace_recursive( $settings, $core_data );
 	}
@@ -407,9 +408,10 @@ class AssetDataRegistry {
 			$wc_settings_script            = "var wcSettings = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
 			$preloaded_api_requests_script = '';
 
+			// The preloaded responses are printed once, in wcSettings: the middleware reads them from there, and so does
+			// the cart data store, which receives the preloaded cart before the first render.
 			if ( count( $this->preloaded_api_requests ) > 0 ) {
-				$preloaded_api_requests        = rawurlencode( wp_json_encode( $this->preloaded_api_requests ) );
-				$preloaded_api_requests_script = "wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( JSON.parse( decodeURIComponent( '" . esc_js( $preloaded_api_requests ) . "' ) ) ) );";
+				$preloaded_api_requests_script = 'wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( wcSettings.preloadedApiRequests ) );';
 			}
 
 			wp_add_inline_script(

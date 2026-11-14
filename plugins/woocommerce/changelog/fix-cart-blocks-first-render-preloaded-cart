@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Cart and Checkout blocks: render the preloaded cart on first load instead of a loading skeleton that stayed for two seconds and then shifted the layout.
