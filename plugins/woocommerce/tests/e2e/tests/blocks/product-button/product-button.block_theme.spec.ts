@@ -88,10 +88,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		const productName =
 			( await productNameLocator.textContent() ) as string;
 
+		// Without AJAX, the button links to the product page, which adds the product.
 		await block.click();
 
 		await expect(
-			page.locator( `a[href*="cart=${ productId }"]` )
+			page.getByText( `“${ productName }” has been added to your cart.` )
 		).toBeVisible();
 
 		await frontendUtils.goToCheckout();

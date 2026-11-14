@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop crawlers looping through endless unique classic cart URLs; product list add to cart links now point to the product page.
