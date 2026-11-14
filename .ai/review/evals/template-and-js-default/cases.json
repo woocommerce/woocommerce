@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G15A-v3",
+			"path": "plugins/woocommerce/templates/single-product/add-to-cart/simple.php",
+			"before": {
+				"file": "fixtures/G15A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G15A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/templates/single-product/add-to-cart/simple.php",
+						"lines": [
+							7,
+							7
+						],
+						"anchor": "    <button type=\"submit\" disabled class=\"single_add_to_cart_button\">Add to cart</button>"
+					}
+				]
+			}
+		},
+		{
+			"id": "G15B-v3",
+			"path": "plugins/woocommerce/templates/single-product/add-to-cart/simple.php",
+			"before": {
+				"file": "fixtures/G15B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G15B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/templates/single-product/add-to-cart/simple.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "<form method=\"post\" hidden>"
+					}
+				]
+			}
+		},
+		{
+			"id": "G15C-v3",
+			"path": "plugins/woocommerce/templates/single-product/add-to-cart/simple.php",
+			"before": {
+				"file": "fixtures/G15C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G15C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G15D-v3",
+			"path": "plugins/woocommerce/templates/single-product/add-to-cart/simple.php",
+			"before": {
+				"file": "fixtures/G15D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G15D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

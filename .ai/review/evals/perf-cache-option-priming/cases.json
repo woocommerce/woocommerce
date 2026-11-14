@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G26A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-26.php",
+			"before": {
+				"file": "fixtures/G26A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G26A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-26.php",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "function wc_render_listing_names( $ids ) { $names = array(); foreach ( $ids as $id ) { $p = wc_get_product( $id ); if ( $p ) { $names[] = $p->get_name(); } } return $names; }"
+					}
+				]
+			}
+		},
+		{
+			"id": "G26C-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-26.php",
+			"before": {
+				"file": "fixtures/G26C-v2/before.php"
+			},
+			"after": {
+				"file": "fixtures/G26C-v2/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G26D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-26.php",
+			"before": {
+				"file": "fixtures/G26D-v2/before.php"
+			},
+			"after": {
+				"file": "fixtures/G26D-v2/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G26B-v6",
+			"path": "plugins/woocommerce/includes/class-wc-eval-26.php",
+			"before": {
+				"code": "<?php\n/* Checkout on a new store: gateway settings have not been saved; object cache and notoptions start empty. */\nfunction wc_checkout_gateway_settings( $gateway_ids ) { $keys = array_map( static function( $id ) { return 'woocommerce_' . $id . '_settings'; }, $gateway_ids ); wp_prime_option_caches( $keys ); $settings = array(); foreach ( $keys as $key ) { $settings[$key] = get_option( $key, array() ); } return $settings; }\n"
+			},
+			"after": {
+				"code": "<?php\n/* Checkout on a new store: gateway settings have not been saved; object cache and notoptions start empty. */\nfunction wc_checkout_gateway_settings( $gateway_ids ) { $keys = array_map( static function( $id ) { return 'woocommerce_' . $id . '_settings'; }, $gateway_ids ); $settings = array(); foreach ( $keys as $key ) { $settings[$key] = get_option( $key, array() ); } return $settings; }\n"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-26.php",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "function wc_checkout_gateway_settings( $gateway_ids ) { $keys = array_map( static function( $id ) { return 'woocommerce_' . $id . '_settings'; }, $gateway_ids ); $settings = array(); foreach ( $keys as $key ) { $settings[$key] = get_option( $key, array() ); } return $settings; }"
+					}
+				]
+			}
+		}
+	]
+}

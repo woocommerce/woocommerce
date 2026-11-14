@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G35A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-cross-sells-assets.php",
+			"before": {
+				"file": "fixtures/G35A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G35A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-cross-sells-assets.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    wp_set_script_translations( 'wc-cross-sell', 'woocommerce' );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G35B-v3",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/product-cross-sells/heading.js",
+			"before": {
+				"file": "fixtures/G35B/before.js"
+			},
+			"after": {
+				"file": "fixtures/G35B/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/client/blocks/assets/js/blocks/product-cross-sells/heading.js",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "export const getHeading = () => __( 'You may also like\u2026', 'woocommerce-extra' );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G35C-v3",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/product-cross-sells/heading.js",
+			"before": {
+				"file": "fixtures/G35C/before.js"
+			},
+			"after": {
+				"file": "fixtures/G35C/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G35D-v3",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/product-cross-sells/heading.js",
+			"before": {
+				"file": "fixtures/G35D/before.js"
+			},
+			"after": {
+				"file": "fixtures/G35D/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

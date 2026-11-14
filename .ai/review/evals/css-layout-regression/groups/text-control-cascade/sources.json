@@ -1,0 +1,15 @@
+{
+  "base": "587df95622697a3772e9386f6b97b755c5f02379",
+  "head": "e9eb08b2b3ee00a0adbbb136e0ed35ddd74e9ae1",
+  "patch_sha256": {
+    "original.patch": "3fa79a9ecd43f93bd38f33d268609dd60916456d6e3726c490803351a585a74f",
+    "control.patch": "c38579789d403e77bca6458dbc994ed6597e59d0ccd579b8613ce88fe333e012"
+  },
+  "upstream_dependency": {
+    "name": "@wordpress/components",
+    "version": "30.6.5",
+    "url": "https://registry.npmjs.org/@wordpress/components/-/components-30.6.5.tgz",
+    "integrity": "sha512-jSDpUz1BBQvpWUGwqZUlI22PMGMtiN5ooKS4GlQqjUmEBJH4llwiRblkZBKgdznv+5KDYyDiRNIGCz/hLSdwZw==",
+    "stylesheet": "package/build-style/style.css"
+  }
+}

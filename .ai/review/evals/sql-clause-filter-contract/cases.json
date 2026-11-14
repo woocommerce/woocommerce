@@ -1,0 +1,85 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G21A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-21.php",
+			"before": {
+				"file": "fixtures/G21A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G21A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-21.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    $clauses['join'] .= \" LEFT JOIN {$wpdb->prefix}wc_product_meta_lookup lookup ON {$wpdb->posts}.ID = lookup.product_id\";"
+					},
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-21.php",
+						"lines": [
+							10,
+							10
+						],
+						"anchor": "    $clauses['orderby'] = 'wc_product_meta_lookup.stock_quantity DESC';"
+					}
+				]
+			}
+		},
+		{
+			"id": "G21B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-21.php",
+			"before": {
+				"file": "fixtures/G21B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G21B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-21.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    $clauses['join'] = \" LEFT JOIN {$wpdb->prefix}wc_product_meta_lookup wc_product_meta_lookup ON {$wpdb->posts}.ID = wc_product_meta_lookup.product_id\";"
+					}
+				]
+			}
+		},
+		{
+			"id": "G21C-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-21.php",
+			"before": {
+				"file": "fixtures/G21C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G21C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G21D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-21.php",
+			"before": {
+				"file": "fixtures/G21D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G21D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

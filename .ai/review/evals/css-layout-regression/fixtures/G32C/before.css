@@ -1,0 +1,2 @@
+/* The new help block is introduced in this release; existing Cart markup is unchanged. */
+.wc-block-cart .wc-block-cart__coupon button { min-height: 44px; }

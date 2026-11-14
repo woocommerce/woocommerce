@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G05A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-upgrade-time-class-load.php",
+			"before": {
+				"file": "fixtures/G05A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G05A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-upgrade-time-class-load.php",
+						"lines": [
+							9,
+							9
+						],
+						"anchor": "    return array( 'default_customer_address' => \\Automattic\\WooCommerce\\Enums\\DefaultCustomerAddress::BASE );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G05B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-upgrade-time-class-load.php",
+			"before": {
+				"file": "fixtures/G05B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G05B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-upgrade-time-class-load.php",
+						"lines": [
+							9,
+							9
+						],
+						"anchor": "    $controller = new WC_New_Export_Controller();"
+					}
+				]
+			}
+		},
+		{
+			"id": "G05C-v3",
+			"path": "plugins/woocommerce/includes/class-wc-upgrade-time-class-load.php",
+			"before": {
+				"file": "fixtures/G05C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G05C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G05D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-upgrade-time-class-load.php",
+			"before": {
+				"file": "fixtures/G05D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G05D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}
