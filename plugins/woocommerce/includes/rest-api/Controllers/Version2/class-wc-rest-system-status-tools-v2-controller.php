@@ -630,6 +630,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 
 			case 'repair_coupons_lookup_table':
 				$result  = wc_repair_zero_discount_coupons_lookup_table();
+				$ran     = $result['success'];
 				$message = $result['message'];
 				break;
 			case 'reset_roles':
