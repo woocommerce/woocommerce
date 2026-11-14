@@ -79,6 +79,14 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private $constant_overrides_at_setup = null;
 
 	/**
+	 * Whether WordPress used an external object cache at setUp(), wrapped so that WordPress's own
+	 * null (never set) can be saved too, or null until setUp() saves it.
+	 *
+	 * @var array{using: bool|null}|null
+	 */
+	private $object_cache_mode_at_setup = null;
+
+	/**
 	 * The registered block types at setUp(), by name, or null until setUp() saves them.
 	 *
 	 * @var array<string, WP_Block_Type>|null
@@ -189,6 +197,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		$this->server_at_setup             = $_SERVER;
 		$this->constant_overrides_at_setup = Constants::$set_constants;
+		$this->object_cache_mode_at_setup  = array( 'using' => $GLOBALS['_wp_using_ext_object_cache'] ?? null );
 		$this->block_types_at_setup        = WP_Block_Type_Registry::get_instance()->get_all_registered();
 	}
 
@@ -233,6 +242,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// Each restore then finds no saved state and leaves the current one alone.
 			$this->restore_server_superglobal();
 			$this->restore_constant_overrides();
+			$this->restore_object_cache_mode();
 			$this->restore_block_type_registry();
 
 			// Function and static-method mocks are process-wide. Reset them here so the test
@@ -357,6 +367,19 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		}
 
 		Constants::$set_constants = $this->constant_overrides_at_setup;
+	}
+
+	/**
+	 * Put back whether WordPress uses an external object cache, as it was at setUp(). Tests switch it with
+	 * wp_using_ext_object_cache() to exercise transients in the object cache, and putting the old value
+	 * back through that function does nothing when it was null, so the switch would outlive the test.
+	 */
+	protected function restore_object_cache_mode(): void {
+		if ( null === $this->object_cache_mode_at_setup ) {
+			return;
+		}
+
+		$GLOBALS['_wp_using_ext_object_cache'] = $this->object_cache_mode_at_setup['using']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restores the value saved at setUp().
 	}
 
 	/**
