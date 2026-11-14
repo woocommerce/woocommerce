@@ -22,6 +22,10 @@ If you have questions about testing, reach out to the developer community in our
 
 [API tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e/tests/api-tests) are part of the Playwright suite and use the same `wp-env` test environment as end-to-end tests.
 
+## MCP abilities testing
+
+Use the [MCP abilities testing guide](/docs/contribution/testing/mcp-abilities-testing/) to run your local `wp-env` site as an MCP server and exercise WooCommerce abilities through MCP Inspector.
+
 ## PHP version coverage
 
 Use the [PHP version guidelines](/docs/contribution/testing/php-version-coverage/) to understand how to choose representative, minimum, and latest PHP versions, and where each belongs in E2E and PHP unit testing.
