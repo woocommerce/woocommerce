@@ -48364,18 +48364,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartFooterBlock\:\:get_cart_instance\(\) should return WC_Cart but returns null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
-
-		-
-			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''bdi'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
