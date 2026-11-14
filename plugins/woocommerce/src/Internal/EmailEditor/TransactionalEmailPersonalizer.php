@@ -47,6 +47,19 @@ class TransactionalEmailPersonalizer {
 	}
 
 	/**
+	 * Personalize rich text edited in the block email editor, such as the subject or preheader, as plain text.
+	 *
+	 * @since 11.4.0
+	 * @param string    $rich_text The rich text as stored by the editor.
+	 * @param \WC_Email $email     The WooCommerce email object.
+	 * @return string The personalized plain text.
+	 */
+	public function personalize_transactional_rich_text_as_plain_text( string $rich_text, \WC_Email $email ): string {
+		$this->configure_context_by_email( $email );
+		return $this->personalizer->personalize_rich_text_as_plain_text( $rich_text );
+	}
+
+	/**
 	 * Configure personalization context based on WooCommerce email object.
 	 *
 	 * @param \WC_Email $email The WooCommerce email object.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show personalization tags that return HTML as plain text in plain-text emails, subjects and preheaders. Value interceptors receive the converted text.

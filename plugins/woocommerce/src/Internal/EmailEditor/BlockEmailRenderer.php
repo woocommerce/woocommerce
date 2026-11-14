@@ -135,8 +135,9 @@ class BlockEmailRenderer {
 			};
 			add_filter( 'woocommerce_email_editor_rendering_email_context', $filter_callback, 10, 1 );
 
-			$subject   = $wc_email->get_subject();
-			$preheader = $wc_email->get_preheader();
+			$subject = $wc_email->get_subject();
+			// The renderer takes the preheader as HTML, and get_preheader() returns plain text.
+			$preheader = htmlspecialchars( $wc_email->get_preheader(), ENT_QUOTES, 'UTF-8' );
 
 			if ( $email_post ) {
 				$rendered_email_data = $this->renderer->render( $email_post, $subject, $preheader, get_bloginfo( 'language' ) );

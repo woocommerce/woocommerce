@@ -126,7 +126,7 @@ The Personalizer passes the context of each replacement to the tag callback unde
 | Rendering context | Where the value lands | What the callback must return |
 | --- | --- | --- |
 | `Personalizer::RENDERING_CONTEXT_HTML` | HTML body content | An HTML fragment. Escape any dynamic data yourself (e.g. `esc_html()`) — unless the tag declares `VALUE_TYPE_TEXT`, in which case return raw text and the Personalizer escapes it (see [Value Type](#value-type)). |
-| `Personalizer::RENDERING_CONTEXT_TEXT` | Plain-text output (subject, preheader, plain-text body, `<title>`) | Raw plain text. No HTML markup, no entities, no escaping. |
+| `Personalizer::RENDERING_CONTEXT_TEXT` | Plain-text output (subject, preheader, plain-text body, `<title>`) | For `VALUE_TYPE_TEXT` tags, raw plain text. For `VALUE_TYPE_HTML` tags, HTML: the Personalizer converts it to plain text (see [Value Type](#value-type)). |
 | `Personalizer::RENDERING_CONTEXT_HREF` | A link URL (`href`) | A raw, unescaped URL — do not pre-escape; URL escaping is applied when the attribute is written. |
 
 In the text rendering context the Personalizer also replaces tags in the `[text](url)` link targets of the Renderer's plain-text version (in the href rendering context), and removes a tag comment it cannot resolve, because the recipient would see it as text. A link whose whole target is a tag it cannot resolve loses the target and reads `[text]`.
@@ -171,7 +171,9 @@ $registry->register(
 
 Note: the `esc_html()` call does not double-encode existing entities, so a raw text value that itself contains an entity-shaped sequence (e.g. a literal `&amp;`) renders as the decoded character (`&`). Always return genuinely raw text.
 
-The default, `Personalization_Tag::VALUE_TYPE_HTML`, inserts the value untouched in every rendering context — including plain-text output; the callback owns escaping and any per-context differences (in the `text` rendering context it must return raw plain text without markup or entities).
+The default, `Personalization_Tag::VALUE_TYPE_HTML`, inserts the value untouched in the `html` rendering context; the callback owns escaping and any per-context differences. In the `text` rendering context, a value that contains markup or HTML entities is converted to plain text with the same Html2Text conversion the Renderer uses for the plain-text body: links become `[text](url)`, line breaks and list items become lines, and entities are decoded. A value without markup or entities is inserted as it is.
+
+An HTML-typed value is HTML in every rendering context. A callback that returns plain text should escape it with `esc_html()` or declare `VALUE_TYPE_TEXT`; raw text such as `x<y` can otherwise read as markup and lose content.
 
 ## Value Interceptor
 
@@ -188,7 +190,7 @@ $previous = $personalizer->set_value_interceptor(
 
 The interceptor receives:
 
--   `$value` — the resolved value, after any context-driven escaping (e.g. `esc_html()` for `VALUE_TYPE_TEXT` tags in HTML content).
+-   `$value` — the resolved value, after any context-driven escaping or plain-text conversion (e.g. `esc_html()` for `VALUE_TYPE_TEXT` tags in HTML content, or the conversion of `VALUE_TYPE_HTML` values in the `text` rendering context).
 -   `$source` — the raw source text being replaced: the trimmed tag token including arguments, the raw `data-link-href` attribute value, or the tag token found inside a plain `href`.
 -   `$rendering_context` — the `RENDERING_CONTEXT_*` constant of the replacement site.
 
@@ -285,6 +287,7 @@ Main engine for replacing tags with values in email content.
 -   `set_context(array $context)`: Set the personalization context
 -   `get_context()`: Get the current context
 -   `personalize_content(string $content, string $rendering_context = Personalizer::RENDERING_CONTEXT_HTML)`: Process and personalize content; pass `Personalizer::RENDERING_CONTEXT_TEXT` for plain-text content such as subjects or plain-text bodies
+-   `personalize_rich_text_as_plain_text(string $rich_text)`: Personalize a field the editor stores as rich text, such as a subject or preheader, and return it as plain text in one pass
 -   `set_value_interceptor(?callable $interceptor)`: Register a callback intercepting each resolved value before it is written, or clear it with `null`; returns the previously registered interceptor (see [Value Interceptor](#value-interceptor))
 
 **Example Usage:**

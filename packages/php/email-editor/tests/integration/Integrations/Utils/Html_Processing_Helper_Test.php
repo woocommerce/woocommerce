@@ -19,6 +19,33 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper
  */
 class Html_Processing_Helper_Test extends \Email_Editor_Integration_Test_Case {
 	/**
+	 * Plain text keeps a bare "<", drops real tags and decodes entities.
+	 *
+	 * @dataProvider plain_text_provider
+	 * @param string $html     Input HTML.
+	 * @param string $expected Expected plain text.
+	 */
+	public function test_get_plain_text( string $html, string $expected ): void {
+		$this->assertSame( $expected, Html_Processing_Helper::get_plain_text( $html ) );
+	}
+
+	/**
+	 * Data provider for plain text conversion.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function plain_text_provider(): array {
+		return array(
+			'bare less-than'     => array( 'I <3 Shoes', 'I <3 Shoes' ),
+			'entities'           => array( 'Order&nbsp;#42 &euro; 1<2', "Order\u{00A0}#42 € 1<2" ),
+			'encoded less-than'  => array( 'I &lt;3 Shoes', 'I <3 Shoes' ),
+			'tags removed'       => array( '<strong>Order</strong> <em>#42</em> shipped', 'Order #42 shipped' ),
+			'comment removed'    => array( 'Hi <!-- note -->there', 'Hi there' ),
+			'surrounding spaces' => array( '  Plain value ', 'Plain value' ),
+		);
+	}
+
+	/**
 	 * Dangerous caption markup must be neutralized against the real HTML API.
 	 *
 	 * @dataProvider caption_xss_provider

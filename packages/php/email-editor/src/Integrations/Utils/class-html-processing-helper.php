@@ -671,6 +671,24 @@ class Html_Processing_Helper {
 	}
 
 	/**
+	 * Convert HTML to plain text for single-line fields such as a subject or preheader. Unlike
+	 * wp_strip_all_tags(), a "<" that does not start a tag keeps the text after it, and entities are decoded.
+	 *
+	 * @param string $html HTML or text.
+	 * @return string Plain text.
+	 */
+	public static function get_plain_text( string $html ): string {
+		$processor = new \WP_HTML_Tag_Processor( $html );
+		$text      = '';
+		while ( $processor->next_token() ) {
+			if ( '#text' === $processor->get_token_type() ) {
+				$text .= $processor->get_modifiable_text();
+			}
+		}
+		return trim( $text );
+	}
+
+	/**
 	 * Sanitize inline styles for image elements - only allow safe properties for email rendering.
 	 *
 	 * @param string $style_value Raw style value.

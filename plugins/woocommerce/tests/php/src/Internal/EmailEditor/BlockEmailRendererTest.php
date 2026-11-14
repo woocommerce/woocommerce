@@ -129,6 +129,25 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The plain-text preheader is passed to the renderer escaped, so tag-shaped text in it stays visible.
+	 */
+	public function testItEscapesThePlainTextPreheader(): void {
+		$this->skip_if_unsupported_environment();
+
+		$wc_mail_mock     = $this->createMock( \WC_Email::class );
+		$wc_mail_mock->id = 'test_email';
+		$wc_mail_mock->method( 'get_recipient' )->willReturn( 'customer@test.com' );
+		$wc_mail_mock->method( 'get_subject' )->willReturn( 'Test Woo Email' );
+		$wc_mail_mock->method( 'get_preheader' )->willReturn( 'Big <em>Sale</em> & more &lt;3' );
+		$wc_mail_mock->method( 'get_content_html' )->willReturn( 'Test Woo Content' );
+		$wc_mail_mock->method( 'get_block_editor_email_template_content' )->willReturn( 'Test Woo Content' );
+
+		$rendered_email = $this->block_email_renderer->maybe_render_block_email( $wc_mail_mock );
+
+		$this->assertStringContainsString( 'Big &lt;em&gt;Sale&lt;/em&gt; &amp; more &amp;lt;3', $rendered_email );
+	}
+
+	/**
 	 * @testdox Should render non-null HTML from the file template when no post mapping exists.
 	 */
 	public function testItRendersFromFileTemplateWhenNoPostMappingExists(): void {

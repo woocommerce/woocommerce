@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the text after a “<” in email preheaders.

@@ -5,7 +5,6 @@
  * @package WooCommerce\Emails
  */
 
-use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Html2Text;
 use Automattic\WooCommerce\Internal\Email\EmailHeaders;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -595,8 +594,8 @@ class WC_Email extends WC_Settings_API {
 		 */
 		$subject = apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option_or_transient( 'subject', $this->get_default_subject() ) ), $this->object, $this );
 		if ( $this->block_email_editor_enabled ) {
-			// Because the new email editor uses rich-text component for subject editing, to be ensure that the subject is always in plain text, we need to strip all tags.
-			$subject = wp_strip_all_tags( $this->personalizer->personalize_transactional_content( $subject, $this, Personalizer::RENDERING_CONTEXT_TEXT ) );
+			// The block email editor edits the subject as rich text, so convert it to personalized plain text.
+			$subject = $this->personalizer->personalize_transactional_rich_text_as_plain_text( $subject, $this );
 		}
 		return $subject;
 	}
@@ -620,7 +619,7 @@ class WC_Email extends WC_Settings_API {
 		 */
 		$preheader = apply_filters( 'woocommerce_email_preheader' . $this->id, $this->format_string( $this->get_option_or_transient( 'preheader', '' ) ), $this->object, $this );
 		if ( $this->block_email_editor_enabled ) {
-			$preheader = $this->personalizer->personalize_transactional_content( $preheader, $this, Personalizer::RENDERING_CONTEXT_TEXT );
+			$preheader = $this->personalizer->personalize_transactional_rich_text_as_plain_text( $preheader, $this );
 		}
 		return $preheader;
 	}

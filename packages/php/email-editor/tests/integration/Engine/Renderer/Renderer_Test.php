@@ -817,4 +817,12 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		list( , $text ) = $this->render_with_link_tag( '<!-- wp:paragraph --><p>Username: <strong><!--[other-plugin/username]--></strong>, <strong>Bold</strong></p><!-- /wp:paragraph -->' );
 		$this->assertStringContainsString( 'Username: <!--[other-plugin/username]-->, *Bold*', $text );
 	}
+
+	/**
+	 * Test that a preheader with a bare "<" keeps its text in the HTML email.
+	 */
+	public function testItKeepsPreheaderTextAfterLessThanSign(): void {
+		$rendered = $this->renderer->render( $this->email_post, 'Subject', 'I <3 Shoes &amp; more', 'en' );
+		$this->assertStringContainsString( 'I &lt;3 Shoes &amp; more', $rendered['html'] );
+	}
 }
