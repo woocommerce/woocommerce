@@ -241,7 +241,7 @@ This event emitter subscriber can be obtained via the checkout context using the
 _For internal development:_
 
 ```jsx
-import { useCheckoutEventsContext } from '@woocommerce/base-contexts';
+import { useCheckoutEventsContext } from '@woocommerce/base-context';
 import { useEffect } from '@wordpress/element';
 
 const Component = () => {
@@ -346,7 +346,7 @@ This event emitter subscriber can be obtained via the checkout context using the
 _For internal development:_
 
 ```jsx
-import { usePaymentEventsContext } from '@woocommerce/base-contexts';
+import { usePaymentEventsContext } from '@woocommerce/base-context';
 import { useEffect } from '@wordpress/element';
 
 const Component = () => {
@@ -419,7 +419,7 @@ This event emitter subscriber can be obtained via the checkout context using the
 _For internal development:_
 
 ```jsx
-import { useCheckoutEventsContext } from '@woocommerce/base-contexts';
+import { useCheckoutEventsContext } from '@woocommerce/base-context';
 import { useEffect } from '@wordpress/element';
 
 const Component = () => {
@@ -472,7 +472,7 @@ This event emitter subscriber can be obtained via the checkout context using the
 _For internal development:_
 
 ```jsx
-import { useCheckoutEventsContext } from '@woocommerce/base-contexts';
+import { useCheckoutEventsContext } from '@woocommerce/base-context';
 import { useEffect } from '@wordpress/element';
 
 const Component = () => {
