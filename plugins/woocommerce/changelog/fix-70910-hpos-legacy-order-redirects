@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore redirects from HPOS order links to legacy order screens on WordPress 7.2.

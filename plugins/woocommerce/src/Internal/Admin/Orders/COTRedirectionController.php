@@ -12,6 +12,10 @@ namespace Automattic\WooCommerce\Internal\Admin\Orders;
  *         'admin_page_access_denied',
  *         array( wc_get_container()->get( COTRedirectionController::class ), 'handle_hpos_admin_requests' )
  *     );
+ *     remove_action(
+ *         'wp_admin_page_not_found',
+ *         array( wc_get_container()->get( COTRedirectionController::class ), 'handle_hpos_admin_requests' )
+ *     );
  */
 class COTRedirectionController {
 
@@ -19,12 +23,13 @@ class COTRedirectionController {
 	 * Add hooks needed to perform our magic.
 	 */
 	public function setup(): void {
-		// Only take action in cases where access to the admin screen would otherwise be denied.
+		// WordPress 7.2+ uses a separate hook for unregistered admin pages.
+		add_action( 'wp_admin_page_not_found', array( $this, 'handle_hpos_admin_requests' ) );
 		add_action( 'admin_page_access_denied', array( $this, 'handle_hpos_admin_requests' ) );
 	}
 
 	/**
-	 * Listen for denied admin requests and, if they appear to relate to HPOS admin screens, potentially
+	 * Listen for missing or denied admin requests and, if they appear to relate to HPOS admin screens, potentially
 	 * redirect the user to the equivalent CPT-driven screens.
 	 *
 	 * @param array|null $query_params The query parameters to use when determining the redirect. If not provided, the $_GET superglobal will be used.
