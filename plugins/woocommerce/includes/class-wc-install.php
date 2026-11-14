@@ -753,17 +753,33 @@ class WC_Install {
 
 		// Insert will fail if it already exists so this functions as a mutex.
 		// Duplicate-key failures are expected contention, so suppress them but report anything else.
-		$suppress     = $wpdb->suppress_errors( true );
-		$created_lock = $wpdb->query(
-			$wpdb->prepare(
-				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_installing', %d, 'no')",
-				time()
-			)
-		);
-		$wpdb->suppress_errors( $suppress );
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			$created_lock = $wpdb->query(
+				$wpdb->prepare(
+					"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_installing', %d, 'no')",
+					time()
+				)
+			);
+		} finally {
+			$wpdb->suppress_errors( $suppress );
+		}
 
-		if ( ! $created_lock && $wpdb->last_error && false === stripos( $wpdb->last_error, 'duplicate entry' ) ) {
-			$wpdb->print_error();
+		if ( ! $created_lock && $wpdb->last_error ) {
+			$is_duplicate = false;
+
+			if ( isset( $wpdb->dbh ) && $wpdb->dbh instanceof \mysqli ) {
+				// Reading the error code of the query $wpdb just ran; there is no $wpdb API for it.
+				$is_duplicate = 1062 === mysqli_errno( $wpdb->dbh ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_errno
+			}
+
+			if ( ! $is_duplicate ) {
+				$is_duplicate = false !== stripos( $wpdb->last_error, 'duplicate entry' ) || false !== stripos( $wpdb->last_error, 'unique constraint' );
+			}
+
+			if ( ! $is_duplicate ) {
+				$wpdb->print_error();
+			}
 		}
 
 		// Take over the lock if it's stale (older than 10 minutes).

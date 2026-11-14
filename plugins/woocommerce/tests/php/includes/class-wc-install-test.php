@@ -963,6 +963,40 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An unexpected database error while taking the installation lock is still reported.
+	 */
+	public function test_create_lock_still_reports_unexpected_errors(): void {
+		global $wpdb;
+
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name = 'wc_installing'" );
+
+		$rewrite = function ( $query ) use ( $wpdb ) {
+			if ( false !== strpos( $query, "INSERT INTO {$wpdb->options}" ) && false !== strpos( $query, "'wc_installing'" ) ) {
+				return "INSERT INTO {$wpdb->options}_missing_table (option_name, option_value, autoload) VALUES ('wc_installing', 1, 'no')";
+			}
+			return $query;
+		};
+		add_filter( 'query', $rewrite );
+
+		$previous_show   = $wpdb->show_errors( true );
+		$previous_silent = $wpdb->suppress_errors( false );
+
+		$create_lock = new \ReflectionMethod( WC_Install::class, 'create_lock' );
+		$create_lock->setAccessible( true );
+
+		ob_start();
+		$create_lock->invoke( null );
+		$output = ob_get_clean();
+
+		$wpdb->suppress_errors( $previous_silent );
+		$wpdb->show_errors( $previous_show );
+		remove_filter( 'query', $rewrite );
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name = 'wc_installing'" );
+
+		$this->assertStringContainsString( 'WordPress database error', $output, 'Unexpected database errors should still be reported.' );
+	}
+
+	/**
 	 * Rebuilds the patterns through the real registration, so the test exercises the content
 	 * BlockTypesController ships rather than a copy of it that could drift. Registering a pattern that
 	 * is already live replaces it, so the siblings this also rebuilds just get their own content back.
