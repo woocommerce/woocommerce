@@ -187,6 +187,43 @@ class TransactAccountManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Explicit onboarding should replace cached lookup failures with created accounts.
+	 */
+	public function test_onboarding_recovers_from_cached_lookup_failures(): void {
+		$jetpack_manager = $this->getMockBuilder( 'stdClass' )
+			->addMethods( array( 'is_connected' ) )
+			->getMock();
+		$jetpack_manager->method( 'is_connected' )->willReturn( true );
+		$this->gateway->method( 'get_jetpack_connection_manager' )->willReturn( $jetpack_manager );
+		$this->gateway->expects( $this->once() )->method( 'set_transact_onboarding_complete' );
+		add_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
+		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
+		add_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
+		$this->assertNull( $this->account_manager->get_transact_account_data( 'merchant' ) );
+		$this->assertNull( $this->account_manager->get_transact_account_data( 'provider' ) );
+		remove_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
+
+		$methods = array();
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args ) use ( &$methods ) {
+				unset( $preempt );
+				$methods[] = $args['method'];
+				return $this->return_merchant_account_api_success();
+			},
+			10,
+			2
+		);
+
+		$this->account_manager->do_onboarding();
+
+		$merchant_account = $this->account_manager->get_transact_account_data( 'merchant' );
+		$this->assertSame( 'test_public_id', $merchant_account['public_id'] );
+		$this->assertTrue( $this->account_manager->get_transact_account_data( 'provider' ) );
+		$this->assertSame( array( 'POST', 'POST' ), $methods );
+	}
+
+	/**
 	 * Test get_merchant_account_data returns cached data when available.
 	 *
 	 * @return void
@@ -359,6 +396,73 @@ class TransactAccountManagerTest extends \WC_Unit_Test_Case {
 		wp_cache_delete( 'woocommerce_paypal_transact_provider_account_test', 'options' );
 		$cached_data = get_option( 'woocommerce_paypal_transact_provider_account_test' );
 		$this->assertTrue( $cached_data['account'] );
+	}
+
+	/**
+	 * @testdox Failed lookups should not be repeated by the same or another account manager.
+	 *
+	 * @testWith ["merchant", 401, false]
+	 *           ["merchant", 403, true]
+	 *           ["merchant", 200, true]
+	 *           ["provider", 404, false]
+	 *           ["provider", 500, true]
+	 *           ["provider", 0, true]
+	 *
+	 * @param string $account_type Account to fetch.
+	 * @param int    $response_code HTTP status, or zero for a network error.
+	 * @param bool   $testmode Whether to use sandbox mode.
+	 */
+	public function test_failed_lookups_are_cached( string $account_type, int $response_code, bool $testmode ): void {
+		$this->gateway->testmode = $testmode;
+		add_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
+		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
+
+		$calls    = 0;
+		$response = $response_code ? array( 'response' => array( 'code' => $response_code ) ) : new \WP_Error( 'http_request_failed', 'Connection timed out' );
+		add_filter(
+			'pre_http_request',
+			static function () use ( &$calls, &$response ) {
+				++$calls;
+				return $response;
+			}
+		);
+
+		$this->assertNull( $this->account_manager->get_transact_account_data( $account_type ) );
+		$this->assertNull( $this->account_manager->get_transact_account_data( $account_type ) );
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
+		$this->assertNull( $account_manager->get_transact_account_data( $account_type ) );
+		$this->assertSame( 1, $calls, 'A failed account lookup should be remembered.' );
+
+		$cache_key   = 'woocommerce_paypal_transact_' . $account_type . '_account_' . ( $testmode ? 'test' : 'live' );
+		$cached_data = get_option( $cache_key );
+		$retry_delay = 401 === $response_code ? DAY_IN_SECONDS : 5 * MINUTE_IN_SECONDS;
+		$this->assertEqualsWithDelta( time() + $retry_delay, $cached_data['expiry'], 2 );
+
+		// Retrying an expired failure increases the delay, up to the cap.
+		foreach ( array( 600, 1200, 2400, 3600, 3600 ) as $next_delay ) {
+			$cached_data['expiry'] = time() - 1;
+			update_option( $cache_key, $cached_data );
+			$this->assertNull( $account_manager->get_transact_account_data( $account_type ) );
+			$cached_data = get_option( $cache_key );
+			$this->assertEqualsWithDelta( time() + ( 401 === $response_code ? DAY_IN_SECONDS : $next_delay ), $cached_data['expiry'], 2 );
+		}
+		$this->assertSame( 6, $calls );
+
+		// A successful retry restores the regular cache and clears the failure history.
+		$cached_data['expiry'] = time() - 1;
+		update_option( $cache_key, $cached_data );
+		$response = $this->return_merchant_account_api_success();
+		$account  = $account_manager->get_transact_account_data( $account_type );
+		if ( 'merchant' === $account_type ) {
+			$this->assertSame( 'test_public_id', $account['public_id'] );
+		} else {
+			$this->assertTrue( $account );
+		}
+		$this->assertSame( $account, $account_manager->get_transact_account_data( $account_type ) );
+		$this->assertSame( 7, $calls );
+		$cached_data = get_option( $cache_key );
+		$this->assertEqualsWithDelta( time() + DAY_IN_SECONDS, $cached_data['expiry'], 2 );
+		$this->assertArrayNotHasKey( 'retry_delay', $cached_data );
 	}
 
 	/**
