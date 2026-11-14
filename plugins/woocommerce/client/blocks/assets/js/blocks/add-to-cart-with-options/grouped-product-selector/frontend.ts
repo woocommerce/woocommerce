@@ -5,7 +5,7 @@ import { store, getContext, getConfig } from '@wordpress/interactivity';
 import type {
 	ClientCartItem,
 	Store as WooCommerce,
-} from '@woocommerce/stores/woocommerce/cart';
+} from '@woocommerce/stores/woocommerce';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
@@ -92,7 +92,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 			*batchAddToCart() {
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
-				yield import( '@woocommerce/stores/woocommerce/cart' );
+				yield import( '@woocommerce/stores/woocommerce' );
 
 				const { quantity, selectedAttributes, groupedProductIds } =
 					getContext< AddToCartWithOptionsStoreContext >();

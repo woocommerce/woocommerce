@@ -5,7 +5,7 @@ import { store } from '@wordpress/interactivity';
 import type {
 	OptimisticCartItem,
 	SelectedAttributes,
-} from '@woocommerce/stores/woocommerce/cart';
+} from '@woocommerce/stores/woocommerce';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 

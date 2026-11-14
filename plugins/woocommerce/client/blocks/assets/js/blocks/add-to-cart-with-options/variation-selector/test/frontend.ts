@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import type { SelectedAttributes } from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies

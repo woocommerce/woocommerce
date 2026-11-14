@@ -7,7 +7,7 @@
 		"baseUrl": ".",
 		"paths": {
 			"@woocommerce/e2e-utils": [ "./utils/blocks" ],
-			"@woocommerce/stores/woocommerce/cart": [
+			"@woocommerce/stores/woocommerce": [
 				"../../client/blocks/assets/js/base/stores/woocommerce/cart"
 			]
 		},

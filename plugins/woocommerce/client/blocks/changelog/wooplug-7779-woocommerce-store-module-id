@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Load the `woocommerce` Interactivity API store from the `@woocommerce/stores/woocommerce` script module, which replaces `@woocommerce/stores/woocommerce/cart`.
