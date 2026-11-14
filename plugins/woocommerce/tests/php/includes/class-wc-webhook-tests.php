@@ -852,6 +852,65 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox customer.deleted accepts users of any role, and rejects user IDs that don't exist.
+	 */
+	public function test_is_valid_user_action_accepts_any_role(): void {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$customer_id   = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$webhook  = new WC_Webhook();
+		$is_valid = function ( $arg ) {
+			return $this->is_valid_user_action( $arg );
+		};
+
+		$this->assertTrue( $is_valid->call( $webhook, $subscriber_id ) );
+		$this->assertTrue( $is_valid->call( $webhook, $customer_id ) );
+		$this->assertFalse( $is_valid->call( $webhook, PHP_INT_MAX ) );
+	}
+
+	/**
+	 * @testdox customer.deleted listens to users being removed from a site, which is how multisite deletes users.
+	 */
+	public function test_customer_deleted_topic_includes_remove_user_from_blog(): void {
+		$topic_hooks = WC_Webhook::get_default_topic_hooks();
+
+		$this->assertContains( 'remove_user_from_blog', $topic_hooks['customer.deleted'] );
+	}
+
+	/**
+	 * @testdox customer.deleted skips users deleted from or removed from a site other than the webhook's own.
+	 */
+	public function test_is_valid_user_action_rejects_other_sites(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$webhook = $this->create_active_webhook( 'customer.deleted' );
+		$webhook->enqueue();
+
+		$is_valid = function ( $arg ) {
+			return $this->is_valid_user_action( $arg );
+		};
+		$this->assertTrue( $is_valid->call( $webhook, $user_id ) );
+
+		$set_blog_id = function ( int $blog_id ) {
+			$this->enqueued_blog_id = $blog_id;
+		};
+		$set_blog_id->call( $webhook, get_current_blog_id() + 1 );
+		$this->assertFalse( $is_valid->call( $webhook, $user_id ) );
+	}
+
+	/**
+	 * @testdox Deleting a subscriber delivers customer.deleted exactly once, even on multisite where both user hooks fire.
+	 */
+	public function test_deleting_a_user_delivers_customer_deleted_once(): void {
+		$user_id       = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$delivered_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'customer.deleted' ), $delivered_ids );
+
+		wp_delete_user( $user_id );
+
+		$this->assertSame( array( $user_id ), $delivered_ids );
+	}
+
+	/**
 	 * @testdox A class that overrides the saving delivery methods keeps working through them, and the stage methods refuse it.
 	 */
 	public function test_stage_delivery_methods_refuse_a_class_that_has_not_adopted_them() {

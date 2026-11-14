@@ -37,6 +37,13 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	protected $processed = array();
 
 	/**
+	 * ID of the site that was current when the webhook's hooks were added.
+	 *
+	 * @var int
+	 */
+	protected $enqueued_blog_id = 0;
+
+	/**
 	 * Whether stage_delivery_result() disabled the webhook since the last save. The next save() fires
 	 * woocommerce_webhook_disabled_due_delivery_failures after it writes.
 	 *
@@ -106,6 +113,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$url   = $this->get_delivery_url();
 
 		if ( is_array( $hooks ) && ! empty( $url ) ) {
+			$this->enqueued_blog_id = get_current_blog_id();
+
 			foreach ( $hooks as $hook ) {
 				add_action( $hook, array( $this, 'process' ) );
 			}
@@ -200,6 +209,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				$return = $this->is_valid_post_action( $arg );
 				break;
 			case 'delete_user':
+			case 'remove_user_from_blog':
 				$return = $this->is_valid_user_action( $arg );
 				break;
 			case 'before_delete_post':
@@ -276,14 +286,15 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_user_action( $arg ) {
-		$user = get_userdata( absint( $arg ) );
-
-		// Only deliver deleted customer event for users with customer role.
-		if ( ! $user || ! in_array( 'customer', (array) $user->roles, true ) ) {
+		// Both user hooks fire on the affected site, so skip users deleted from or removed from another site.
+		if ( $this->enqueued_blog_id && get_current_blog_id() !== $this->enqueued_blog_id ) {
 			return false;
 		}
 
-		return true;
+		// Deliver for users of any role, like the customer.created and customer.updated topics.
+		$user_id = absint( $arg );
+
+		return $user_id > 0 && is_user_member_of_blog( $user_id );
 	}
 
 	/**
@@ -1124,6 +1135,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			),
 			'customer.deleted'  => array(
 				'delete_user',
+				'remove_user_from_blog',
 			),
 			'order.created'     => array(
 				'woocommerce_new_order',
