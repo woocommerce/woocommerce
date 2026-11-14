@@ -45,6 +45,13 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	private $original_session;
 
 	/**
+	 * Original query vars of the global WP object.
+	 *
+	 * @var array<string,mixed>
+	 */
+	private array $original_query_vars = array();
+
+	/**
 	 * IDs of additional checkout fields registered by the current test.
 	 *
 	 * @var string[]
@@ -52,15 +59,33 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	private array $registered_checkout_fields = array();
 
 	/**
+	 * Billing props of `WC()->customer` before the test, since pay_action() copies the order's address onto it.
+	 *
+	 * @var array<string, string>
+	 */
+	private array $original_customer_billing = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
+		$this->original_customer_billing = array(
+			'billing_country'  => WC()->customer->get_billing_country(),
+			'billing_state'    => WC()->customer->get_billing_state(),
+			'billing_postcode' => WC()->customer->get_billing_postcode(),
+			'billing_city'     => WC()->customer->get_billing_city(),
+		);
+
+		$this->original_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_url( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
+
 		$this->original_get     = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$this->original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->original_session = WC()->session;
+
+		$this->original_query_vars = isset( $GLOBALS['wp']->query_vars ) ? $GLOBALS['wp']->query_vars : array();
 
 		if ( ! WC()->session ) {
 			WC()->initialize_session();
@@ -81,8 +106,13 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$_POST    = $this->original_post;
 		$_REQUEST = $this->original_request;
 
+		$GLOBALS['wp']->query_vars = $this->original_query_vars;
+
 		wp_set_current_user( 0 );
 		WC()->session = $this->original_session;
+
+		WC()->customer->set_props( $this->original_customer_billing );
+		WC()->customer->save();
 
 		foreach ( $this->registered_checkout_fields as $field_id ) {
 			__internal_woocommerce_blocks_deregister_checkout_field( $field_id );
@@ -1539,5 +1569,169 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	private function register_checkout_field( array $args ): void {
 		woocommerce_register_additional_checkout_field( $args );
 		$this->registered_checkout_fields[] = $args['id'];
+	}
+
+	/**
+	 * @testdox pay_action() refuses a failed order whose items sold out before any pay hook runs.
+	 */
+	public function test_pay_action_refuses_failed_order_without_stock(): void {
+		$product = $this->create_stock_managed_product( 1 );
+		$order   = $this->create_failed_order( $product, 1 );
+		$product->set_stock_quantity( 0 );
+		$product->save();
+		$before_pay_actions = did_action( 'woocommerce_before_pay_action' );
+
+		$this->prepare_pay_request( $order, WC_Gateway_BACS::ID );
+		$this->dispatch_pay_action();
+
+		$this->assertStringContainsString( 'is no longer in stock so this order cannot be paid for', $this->get_error_notice_text() );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::FAILED ) );
+		$this->assertSame( 0, wc_get_product( $product->get_id() )->get_stock_quantity() );
+		$this->assertSame( $before_pay_actions, did_action( 'woocommerce_before_pay_action' ), 'The pay hooks should not run for a refused order.' );
+	}
+
+	/**
+	 * @testdox pay_action() releases the hold when the shopper did not accept the terms.
+	 */
+	public function test_pay_action_releases_hold_when_terms_not_accepted(): void {
+		$product = $this->create_stock_managed_product( 5 );
+		$order   = $this->create_failed_order( $product, 2 );
+		$this->prepare_pay_request( $order, WC_Gateway_BACS::ID );
+		$hold_rows_at_pay_action = $this->count_hold_rows_at_before_pay_action( $order );
+
+		$_POST['terms-field'] = '1';
+		$this->dispatch_pay_action();
+
+		$this->assertStringContainsString( 'accept the terms and conditions', $this->get_error_notice_text() );
+		$this->assertSame( 1, $hold_rows_at_pay_action->rows, 'The order should hold its stock while the pay form is processed.' );
+		$this->assertSame( 0, $this->count_hold_rows( $order->get_id() ) );
+	}
+
+	/**
+	 * @testdox pay_action() releases the hold when the payment method is invalid.
+	 */
+	public function test_pay_action_releases_hold_on_invalid_gateway(): void {
+		$product = $this->create_stock_managed_product( 5 );
+		$order   = $this->create_failed_order( $product, 2 );
+		$this->prepare_pay_request( $order, 'nope' );
+		$hold_rows_at_pay_action = $this->count_hold_rows_at_before_pay_action( $order );
+
+		$this->dispatch_pay_action();
+
+		$this->assertStringContainsString( 'Invalid payment method.', $this->get_error_notice_text() );
+		$this->assertSame( 1, $hold_rows_at_pay_action->rows, 'The order should hold its stock while the pay form is processed.' );
+		$this->assertSame( 0, $this->count_hold_rows( $order->get_id() ) );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::FAILED ) );
+	}
+
+	/**
+	 * A product that manages a fixed stock with backorders off, on a store that holds stock.
+	 *
+	 * @param int $stock Stock quantity.
+	 * @return WC_Product
+	 */
+	private function create_stock_managed_product( int $stock ): WC_Product {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_hold_stock_minutes', '60' );
+
+		return WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => $stock,
+				'backorders'     => 'no',
+			)
+		);
+	}
+
+	/**
+	 * A guest failed order with one line item.
+	 *
+	 * @param WC_Product $product  Product to add.
+	 * @param int        $quantity Line quantity.
+	 * @return WC_Order
+	 */
+	private function create_failed_order( WC_Product $product, int $quantity ): WC_Order {
+		$order = WC_Helper_Order::create_order( 0, $product );
+		$order->remove_order_items( 'line_item' );
+		$order->save();
+		$order->add_product( wc_get_product( $product->get_id() ), $quantity );
+		$order->set_status( OrderStatus::FAILED );
+		$order->calculate_totals();
+		$order->save();
+
+		return wc_get_order( $order->get_id() );
+	}
+
+	/**
+	 * Builds a signed pay form submission for an order.
+	 *
+	 * @param WC_Order $order          Order to pay for.
+	 * @param string   $payment_method Gateway ID submitted with the form.
+	 */
+	private function prepare_pay_request( WC_Order $order, string $payment_method ): void {
+		$GLOBALS['wp']->query_vars['order-pay'] = $order->get_id();
+
+		$_GET['key']                       = $order->get_order_key();
+		$_POST['woocommerce_pay']          = '1';
+		$_POST['payment_method']           = $payment_method;
+		$_REQUEST['woocommerce-pay-nonce'] = wp_create_nonce( 'woocommerce-pay' );
+	}
+
+	/**
+	 * Runs the pay form handler and closes the output buffer it opens.
+	 */
+	private function dispatch_pay_action(): void {
+		$buffer_level = ob_get_level();
+
+		try {
+			WC_Form_Handler::pay_action();
+		} finally {
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+		}
+	}
+
+	/**
+	 * Records the hold rows of an order at the moment woocommerce_before_pay_action fires.
+	 *
+	 * @param WC_Order $order Order being paid for.
+	 * @return stdClass Object whose `rows` property holds the count, null until the action fires.
+	 */
+	private function count_hold_rows_at_before_pay_action( WC_Order $order ): stdClass {
+		$recorded       = new stdClass();
+		$recorded->rows = null;
+
+		add_action(
+			'woocommerce_before_pay_action',
+			function () use ( $order, $recorded ) {
+				$recorded->rows = $this->count_hold_rows( $order->get_id() );
+			}
+		);
+
+		return $recorded;
+	}
+
+	/**
+	 * Number of hold rows of an order.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return int
+	 */
+	private function count_hold_rows( int $order_id ): int {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->wc_reserved_stock} WHERE order_id = %d", $order_id ) );
+	}
+
+	/**
+	 * The text of all error notices of the session.
+	 *
+	 * @return string
+	 */
+	private function get_error_notice_text(): string {
+		return implode( ' ', array_column( wc_get_notices( 'error' ), 'notice' ) );
 	}
 }

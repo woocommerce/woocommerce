@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop shoppers from paying for a failed order when its items are no longer in stock.

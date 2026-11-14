@@ -18,6 +18,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
@@ -5724,5 +5725,227 @@ class Checkout extends \WP_Test_REST_TestCase {
 		);
 		$this->assertArrayHasKey( 'payment_result', $data );
 		$this->assertSame( 'success', $data['payment_result']['payment_status'], 'Recovery must still report success on the result the response uses.' );
+	}
+
+	/**
+	 * @testdox Reading a failed order reports the stock error once its items sold out.
+	 */
+	public function test_get_order_reports_stock_error_for_failed_order(): void {
+		$product = $this->create_stock_managed_product( 1 );
+		$order   = $this->create_failed_order( $product, 1 );
+		$this->set_product_stock( $product, 0 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/order/' . $order->get_id() );
+		$request->set_param( 'key', $order->get_order_key() );
+		$request->set_param( 'billing_email', $order->get_billing_email() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$errors = $response->get_data()['errors'];
+		$this->assertCount( 1, $errors );
+		$this->assertSame( 'woocommerce_rest_out_of_stock', $errors[0]['code'] );
+	}
+
+	/**
+	 * @testdox Paying a failed order after its items sold out is refused before anything is saved.
+	 */
+	public function test_pay_failed_order_after_sell_out_is_refused(): void {
+		$product = $this->create_stock_managed_product( 1 );
+		$order   = $this->create_failed_order( $product, 1 );
+		$this->set_product_stock( $product, 0 );
+		$original_address_1 = $order->get_billing_address_1();
+
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'address_1' => '99 Changed Street' ) );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_out_of_stock', $response->get_data()['code'] );
+
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $stored_order->has_status( OrderStatus::FAILED ) );
+		$this->assertSame( $original_address_1, $stored_order->get_billing_address_1() );
+		$this->assertSame( 0, wc_get_product( $product->get_id() )->get_stock_quantity() );
+	}
+
+	/**
+	 * @testdox Only the first of several failed orders on the same limited stock can be paid.
+	 */
+	public function test_pay_failed_orders_on_limited_stock(): void {
+		$product = $this->create_stock_managed_product( 5 );
+		$orders  = array(
+			$this->create_failed_order( $product, 5 ),
+			$this->create_failed_order( $product, 5 ),
+			$this->create_failed_order( $product, 5 ),
+		);
+
+		$response = $this->dispatch_pay_for_order_request( $orders[0] );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 0, wc_get_product( $product->get_id() )->get_stock_quantity() );
+
+		foreach ( array_slice( $orders, 1 ) as $order ) {
+			$response = $this->dispatch_pay_for_order_request( $order );
+			$this->assertSame( 400, $response->get_status() );
+			$this->assertSame( 'woocommerce_rest_out_of_stock', $response->get_data()['code'] );
+		}
+		$this->assertSame( 0, wc_get_product( $product->get_id() )->get_stock_quantity() );
+	}
+
+	/**
+	 * @testdox Paying a failed order is refused while another failed order holds the stock.
+	 */
+	public function test_pay_failed_order_refused_while_other_failed_order_holds_stock(): void {
+		$product = $this->create_stock_managed_product( 5 );
+		$order_a = $this->create_failed_order( $product, 5 );
+		$order_b = $this->create_failed_order( $product, 5 );
+		( new ReserveStock() )->reserve_stock_for_failed_order( $order_a );
+
+		$response = $this->dispatch_pay_for_order_request( $order_b );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_out_of_stock', $response->get_data()['code'] );
+		$this->assertSame( 1, $this->count_hold_rows( $order_a->get_id() ) );
+		$this->assertSame( 0, $this->count_hold_rows( $order_b->get_id() ) );
+	}
+
+	/**
+	 * @testdox A failure result from the gateway releases the hold of the failed order.
+	 */
+	public function test_failed_gateway_result_releases_hold(): void {
+		$product = $this->create_stock_managed_product( 5 );
+		$order   = $this->create_failed_order( $product, 2 );
+
+		$hold_rows_at_gateway = null;
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context, $payment_result ) use ( $order, &$hold_rows_at_gateway ) {
+				unset( $context );
+				$hold_rows_at_gateway = $this->count_hold_rows( $order->get_id() );
+				$payment_result->set_status( 'failure' );
+			},
+			10,
+			2
+		);
+
+		$response = $this->dispatch_pay_for_order_request( $order );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 1, $hold_rows_at_gateway, 'The order should hold its stock while the gateway runs.' );
+		$this->assertSame( 0, $this->count_hold_rows( $order->get_id() ) );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::FAILED ) );
+	}
+
+	/**
+	 * @testdox An exception from the gateway releases the hold of the failed order.
+	 */
+	public function test_gateway_exception_releases_hold(): void {
+		$product = $this->create_stock_managed_product( 5 );
+		$order   = $this->create_failed_order( $product, 2 );
+
+		$hold_rows_at_gateway = null;
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function () use ( $order, &$hold_rows_at_gateway ) {
+				$hold_rows_at_gateway = $this->count_hold_rows( $order->get_id() );
+				throw new \Exception( 'Declined' );
+			}
+		);
+
+		$response = $this->dispatch_pay_for_order_request( $order );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 1, $hold_rows_at_gateway, 'The order should hold its stock while the gateway runs.' );
+		$this->assertSame( 0, $this->count_hold_rows( $order->get_id() ) );
+	}
+
+	/**
+	 * @testdox A success result with a redirect keeps the hold of the failed order.
+	 */
+	public function test_redirect_result_keeps_hold(): void {
+		$product = $this->create_stock_managed_product( 5 );
+		$order   = $this->create_failed_order( $product, 2 );
+
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context, $payment_result ) {
+				unset( $context );
+				$payment_result->set_status( 'success' );
+				$payment_result->set_redirect_url( 'https://gateway.example.com/pay' );
+			},
+			10,
+			2
+		);
+
+		$response = $this->dispatch_pay_for_order_request( $order );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 1, $this->count_hold_rows( $order->get_id() ) );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::FAILED ) );
+	}
+
+	/**
+	 * A product that manages a fixed stock with backorders off, on a store that holds stock.
+	 *
+	 * @param int $stock Stock quantity.
+	 * @return \WC_Product
+	 */
+	private function create_stock_managed_product( int $stock ): \WC_Product {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_hold_stock_minutes', '60' );
+
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Limited Stock Product',
+				'regular_price' => 10,
+			)
+		);
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( $stock );
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		return wc_get_product( $product->get_id() );
+	}
+
+	/**
+	 * Sets a new stock quantity on a product.
+	 *
+	 * @param \WC_Product $product Product to update.
+	 * @param int         $stock   New stock quantity.
+	 */
+	private function set_product_stock( \WC_Product $product, int $stock ): void {
+		$product->set_stock_quantity( $stock );
+		$product->save();
+	}
+
+	/**
+	 * A guest failed order with one line item.
+	 *
+	 * @param \WC_Product $product  Product to add.
+	 * @param int         $quantity Line quantity.
+	 * @return \WC_Order
+	 */
+	private function create_failed_order( \WC_Product $product, int $quantity ): \WC_Order {
+		$order = \WC_Helper_Order::create_order( 0, $product );
+		$order->remove_order_items( 'line_item' );
+		$order->save();
+		$order->add_product( wc_get_product( $product->get_id() ), $quantity );
+		$order->set_status( OrderStatus::FAILED );
+		$order->calculate_totals();
+		$order->save();
+
+		return wc_get_order( $order->get_id() );
+	}
+
+	/**
+	 * Number of hold rows of an order.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return int
+	 */
+	private function count_hold_rows( int $order_id ): int {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->wc_reserved_stock} WHERE order_id = %d", $order_id ) );
 	}
 }

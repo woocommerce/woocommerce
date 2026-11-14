@@ -98,6 +98,187 @@ final class ReserveStock {
 	 * @param int       $minutes How long to reserve stock in minutes. Defaults to 60.
 	 */
 	public function reserve_stock_for_order( $order, $minutes = 60 ) {
+		$this->reserve_stock_for_order_items( $order, (int) $minutes, array() );
+	}
+
+	/**
+	 * Tells whether a shopper can still pay an order that holds no stock.
+	 *
+	 * A pending order or an order with reduced stock always passes. Holds of other orders count against the stock.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return array{code: string, message: string}|null Null when the order can be paid, else the error.
+	 */
+	public function get_pay_order_stock_error( \WC_Order $order ): ?array {
+		return $this->check_pay_order_stock( $order )['error'];
+	}
+
+	/**
+	 * Holds the stock of a failed order while the shopper pays it.
+	 *
+	 * The check runs for every non-pending payable status. Only a failed order gets the hold, and its status does not change.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @throws ReserveStockException Code `woocommerce_rest_out_of_stock`, HTTP 400, when the stock is gone or cannot be held.
+	 *
+	 * @param \WC_Order $order Order object.
+	 */
+	public function reserve_stock_for_failed_order( \WC_Order $order ): void {
+		$check = $this->check_pay_order_stock( $order );
+
+		if ( null !== $check['error'] ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Callers escape the message when they output it.
+			throw new ReserveStockException( $check['error']['code'], $check['error']['message'], 400 );
+		}
+
+		if ( ! $check['applies'] || ! $order->has_status( OrderStatus::FAILED ) || ! $this->is_enabled() ) {
+			return;
+		}
+
+		/**
+		 * This filter is documented in woocommerce/includes/wc-stock-functions.php
+		 *
+		 * @since 4.1.0
+		 */
+		if ( ! apply_filters( 'woocommerce_hold_stock_for_checkout', wc_string_to_bool( get_option( 'woocommerce_manage_stock', 'yes' ) ) ) ) {
+			return;
+		}
+
+		$minutes = (int) get_option( 'woocommerce_hold_stock_minutes', 60 );
+		if ( $minutes <= 0 ) {
+			return;
+		}
+
+		try {
+			$this->reserve_stock_for_order_items( $order, $minutes, $check['skip_managed_ids'] );
+		} catch ( ReserveStockException $e ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Callers escape the message when they output it.
+			throw new ReserveStockException( 'woocommerce_rest_out_of_stock', $e->getMessage(), 400, $e->getErrorData() );
+		}
+	}
+
+	/**
+	 * Applies the stock rule that the two pay routes and the order read share.
+	 *
+	 * The woocommerce_pay_order_product_in_stock and woocommerce_pay_order_product_has_enough_stock filters win over the raw count.
+	 * Products they let through go into skip_managed_ids, so the reservation leaves them out.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return array{applies: bool, error: array{code: string, message: string}|null, skip_managed_ids: int[]}
+	 */
+	private function check_pay_order_stock( \WC_Order $order ): array {
+		$result = array(
+			'applies'          => true,
+			'error'            => null,
+			'skip_managed_ids' => array(),
+		);
+
+		if ( $order->has_status( wc_get_is_pending_statuses() ) || $order->get_order_stock_reduced() ) {
+			$result['applies'] = false;
+			return $result;
+		}
+
+		$products   = array();
+		$quantities = array();
+
+		foreach ( $order->get_items() as $item ) {
+			if ( ! $item || ! is_callable( array( $item, 'get_product' ) ) ) {
+				continue;
+			}
+
+			$product = $item->get_product();
+			if ( ! $product ) {
+				continue;
+			}
+
+			$managed_by_id = $product->get_stock_managed_by_id();
+
+			$products[]                   = $product;
+			$quantities[ $managed_by_id ] = $item->get_quantity() + ( $quantities[ $managed_by_id ] ?? 0 );
+		}
+
+		$held_stock_by_id = array();
+
+		foreach ( $products as $product ) {
+			$managed_by_id = $product->get_stock_managed_by_id();
+			$is_in_stock   = $product->is_in_stock();
+
+			/**
+			 * Filters whether or not the product is in stock for this pay for order.
+			 *
+			 * @param boolean $is_in_stock True if in stock.
+			 * @param \WC_Product $product Product.
+			 * @param \WC_Order $order Order.
+			 *
+			 * @since 8.1.0
+			 */
+			if ( ! apply_filters( 'woocommerce_pay_order_product_in_stock', $is_in_stock, $product, $order ) ) {
+				$result['error'] = array(
+					'code'    => 'woocommerce_rest_out_of_stock',
+					/* translators: %s: product name */
+					'message' => sprintf( __( 'Sorry, "%s" is no longer in stock so this order cannot be paid for. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ),
+				);
+				return $result;
+			}
+
+			if ( ! $is_in_stock ) {
+				$result['skip_managed_ids'][] = $managed_by_id;
+			}
+
+			if ( ! $product->managing_stock() || $product->backorders_allowed() ) {
+				continue;
+			}
+
+			if ( ! isset( $held_stock_by_id[ $managed_by_id ] ) ) {
+				$held_stock_by_id[ $managed_by_id ] = wc_get_held_stock_quantity( $product, $order->get_id() );
+			}
+			$held_stock       = $held_stock_by_id[ $managed_by_id ];
+			$required_stock   = $quantities[ $managed_by_id ];
+			$has_enough_stock = $product->get_stock_quantity() >= ( $held_stock + $required_stock );
+
+			/**
+			 * Filters whether or not the product has enough stock.
+			 *
+			 * @param boolean $has_enough_stock True if has enough stock.
+			 * @param \WC_Product $product Product.
+			 * @param \WC_Order $order Order.
+			 *
+			 * @since 8.1.0
+			 */
+			if ( ! apply_filters( 'woocommerce_pay_order_product_has_enough_stock', $has_enough_stock, $product, $order ) ) {
+				$result['error'] = array(
+					'code'    => 'woocommerce_rest_out_of_stock',
+					/* translators: 1: product name 2: quantity in stock */
+					'message' => sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity() - $held_stock, $product ) ),
+				);
+				return $result;
+			}
+
+			if ( ! $has_enough_stock ) {
+				$result['skip_managed_ids'][] = $managed_by_id;
+			}
+		}
+
+		$result['skip_managed_ids'] = array_values( array_unique( $result['skip_managed_ids'] ) );
+
+		return $result;
+	}
+
+	/**
+	 * Holds stock for the line items of an order, one row per stock-managing product.
+	 *
+	 * When one product cannot be held, every hold of the order is released before the throw.
+	 *
+	 * @throws ReserveStockException If stock cannot be reserved.
+	 *
+	 * @param \WC_Order $order            Order object.
+	 * @param int       $minutes          How long to reserve stock in minutes.
+	 * @param int[]     $skip_managed_ids Stock-managing product ids that get no hold.
+	 */
+	private function reserve_stock_for_order_items( \WC_Order $order, int $minutes, array $skip_managed_ids ): void {
 		if ( ! $this->is_enabled() ) {
 			return;
 		}
@@ -130,6 +311,10 @@ final class ReserveStock {
 				/** @var \WC_Order_Item_Product $item */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$product = $item->get_product();
 				if ( ! $product instanceof \WC_Product ) {
+					continue;
+				}
+
+				if ( in_array( $product->get_stock_managed_by_id(), $skip_managed_ids, true ) ) {
 					continue;
 				}
 
@@ -274,6 +459,11 @@ final class ReserveStock {
 			}
 		}
 
+		// MySQL reports zero affected rows when a retry writes the values the order's row already has.
+		if ( 0 === $result && $this->order_holds_stock_for_product( $order->get_id(), $product_id, $stock_quantity ) ) {
+			return;
+		}
+
 		if ( ! $result ) {
 			$product = wc_get_product( $product_id );
 			throw new ReserveStockException(
@@ -289,6 +479,30 @@ final class ReserveStock {
 	}
 
 	/**
+	 * Tells whether a retry found its own hold row already in place.
+	 *
+	 * Only an unexpired row with the exact quantity counts.
+	 *
+	 * @param int $order_id       Order ID.
+	 * @param int $product_id     Product ID whose stock is managed.
+	 * @param int $stock_quantity Held quantity to match.
+	 * @return bool
+	 */
+	private function order_holds_stock_for_product( $order_id, $product_id, $stock_quantity ): bool {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name from $wpdb.
+		return (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT 1 FROM {$wpdb->wc_reserved_stock} WHERE `order_id` = %d AND `product_id` = %d AND `stock_quantity` = %d AND `expires` > NOW()",
+				$order_id,
+				$product_id,
+				$stock_quantity
+			)
+		);
+	}
+
+	/**
 	 * Returns query statement for getting reserved stock of a product.
 	 *
 	 * @param int $product_id       Product ID.
@@ -299,12 +513,13 @@ final class ReserveStock {
 		global $wpdb;
 
 		$pending = OrderInternalStatus::PENDING;
+		$failed  = OrderInternalStatus::FAILED;
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$join         = "{$wpdb->prefix}wc_orders orders ON stock_table.`order_id` = orders.id";
-			$where_status = "orders.status IN ( 'wc-checkout-draft', '$pending' )";
+			$where_status = "orders.status IN ( 'wc-checkout-draft', '$pending', '$failed' )";
 		} else {
 			$join         = "{$wpdb->posts} posts ON stock_table.`order_id` = posts.ID";
-			$where_status = "posts.post_status IN ( 'wc-checkout-draft', '$pending' )";
+			$where_status = "posts.post_status IN ( 'wc-checkout-draft', '$pending', '$failed' )";
 		}
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared

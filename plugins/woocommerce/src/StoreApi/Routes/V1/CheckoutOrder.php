@@ -1,8 +1,11 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
-use Automattic\WooCommerce\StoreApi\Exceptions\InvalidStockLevelsInCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderAuthorizationTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
@@ -99,7 +102,7 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * 4. Process Payment
 	 *
 	 * @throws RouteException On error.
-	 * @throws InvalidStockLevelsInCartException On error.
+	 * @throws \Throwable Rethrown after the stock hold of a failed order is released.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -117,63 +120,79 @@ class CheckoutOrder extends AbstractCartRoute {
 		}
 		$this->order = $order;
 
-		/**
-		 * Process request data.
-		 *
-		 * The order address is validated before anything is persisted, so a rejected request
-		 * cannot mutate the existing order or the customer record.
-		 */
-		$this->update_billing_address( $request );
-		$this->update_order_from_request( $request );
+		try {
+			( new ReserveStock() )->reserve_stock_for_failed_order( $order );
+		} catch ( ReserveStockException $e ) {
+			throw new RouteException( esc_html( $e->getErrorCode() ), esc_html( $e->getMessage() ), (int) $e->getCode() );
+		}
 
-		/**
-		 * Process customer data.
-		 *
-		 * Update order with customer details, and sign up a user account as necessary.
-		 */
-		$this->process_customer( $request );
-
-		/**
-		 * Validate order.
-		 *
-		 * This logic ensures the order is valid before payment is attempted.
-		 */
-		$this->order_controller->validate_existing_order_before_payment( $this->order );
-
-		/**
-		 * Fires after the Checkout Block/Store API request has populated and validated the order.
-		 *
-		 * The action runs before payment is processed, so callbacks can still act on the order
-		 * on its way to the gateway. Do not use this action for payment-completion logic or to
-		 * call WC_Order::payment_complete(). Use woocommerce_payment_complete or
-		 * woocommerce_order_status_completed instead.
-		 *
-		 * This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:
-		 * - To keep the interface focused (only pass $order, not passing request data).
-		 * - This also explicitly indicates these orders are from checkout block/StoreAPI.
-		 *
-		 * @since 7.2.0
-		 *
-		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
-		 * @example docs/examples/checkout-order-processed.md
-		 *
-		 * @param \WC_Order $order Order object.
-		 */
-		do_action( 'woocommerce_store_api_checkout_order_processed', $this->order );
-
-		/**
-		 * Process the payment and return the results.
-		 */
 		$payment_result = new PaymentResult();
-		$needs_payment  = $this->order->needs_payment();
 
-		// Callbacks on the action above, or on the needs_payment() filters, may have saved the order.
-		$this->validate_order_was_saved();
+		try {
+			/**
+			 * Process request data.
+			 *
+			 * The order address is validated before anything is persisted, so a rejected request
+			 * cannot mutate the existing order or the customer record.
+			 */
+			$this->update_billing_address( $request );
+			$this->update_order_from_request( $request );
 
-		if ( $needs_payment ) {
-			$this->process_payment( $request, $payment_result );
-		} else {
-			$this->process_without_payment( $request, $payment_result );
+			/**
+			 * Process customer data.
+			 *
+			 * Update order with customer details, and sign up a user account as necessary.
+			 */
+			$this->process_customer( $request );
+
+			/**
+			 * Validate order.
+			 *
+			 * This logic ensures the order is valid before payment is attempted.
+			 */
+			$this->order_controller->validate_existing_order_before_payment( $this->order );
+
+			/**
+			 * Fires after the Checkout Block/Store API request has populated and validated the order.
+			 *
+			 * The action runs before payment is processed, so callbacks can still act on the order
+			 * on its way to the gateway. Do not use this action for payment-completion logic or to
+			 * call WC_Order::payment_complete(). Use woocommerce_payment_complete or
+			 * woocommerce_order_status_completed instead.
+			 *
+			 * This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:
+			 * - To keep the interface focused (only pass $order, not passing request data).
+			 * - This also explicitly indicates these orders are from checkout block/StoreAPI.
+			 *
+			 * @since 7.2.0
+			 *
+			 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
+			 * @example docs/examples/checkout-order-processed.md
+			 *
+			 * @param \WC_Order $order Order object.
+			 */
+			do_action( 'woocommerce_store_api_checkout_order_processed', $this->order );
+
+			/**
+			 * Process the payment and return the results.
+			 */
+			$needs_payment = $this->order->needs_payment();
+
+			// Callbacks on the action above, or on the needs_payment() filters, may have saved the order.
+			$this->validate_order_was_saved();
+
+			if ( $needs_payment ) {
+				$this->process_payment( $request, $payment_result );
+			} else {
+				$this->process_without_payment( $request, $payment_result );
+			}
+		} catch ( \Throwable $e ) {
+			$this->release_stock_of_failed_order();
+			throw $e;
+		}
+
+		if ( in_array( $payment_result->get_status(), array( 'failure', 'error' ), true ) ) {
+			$this->release_stock_of_failed_order();
 		}
 
 		return $this->prepare_item_for_response(
@@ -183,6 +202,19 @@ class CheckoutOrder extends AbstractCartRoute {
 			],
 			$request
 		);
+	}
+
+	/**
+	 * Frees the hold when the payment attempt did not succeed.
+	 *
+	 * The status comes from a fresh read, because a gateway may have moved the order on through its own instance.
+	 */
+	private function release_stock_of_failed_order(): void {
+		$order = PaymentRecovery::refresh_order( $this->order );
+
+		if ( $order->has_status( OrderStatus::FAILED ) ) {
+			wc_release_stock_for_order( $order );
+		}
 	}
 
 	/**
