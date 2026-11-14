@@ -293,8 +293,6 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $signatures[20] );
 		$this->assertContains( DummyCallbackClass::class . '::static_method', $signatures[20] );
-
-		remove_all_actions( $hook_name );
 	}
 
 	/**
@@ -322,8 +320,6 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 		foreach ( $signatures[10] as $signature ) {
 			$this->assertStringStartsWith( 'Closure@', $signature );
 		}
-
-		remove_all_actions( $hook_name );
 	}
 
 	/**
@@ -345,8 +341,6 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 			DummyInvokableClass::class . '::__invoke',
 			$signatures[10][0]
 		);
-
-		remove_all_actions( $hook_name );
 	}
 
 	/**
@@ -373,8 +367,6 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 			DummyCallbackClassWithDynamicProps::class . '::my_method',
 			$signatures1[10][0]
 		);
-
-		remove_all_actions( $hook_name );
 	}
 
 	/**
@@ -406,8 +398,6 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $first, $second );
 		$this->assertSame( '__return_true', $first[10][0] );
-
-		remove_all_actions( $hook_name );
 	}
 
 	/**
@@ -425,8 +415,6 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 30, $before );
 		$this->assertArrayHasKey( 30, $after );
 		$this->assertSame( '__return_false', $after[30][0] );
-
-		remove_all_actions( $hook_name );
 	}
 
 	/**
@@ -444,8 +432,6 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 10, $after );
 		$this->assertArrayNotHasKey( 30, $after );
-
-		remove_all_actions( $hook_name );
 	}
 
 	/**
@@ -466,8 +452,6 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( DummyCallbackClass::class . '::my_method', $before[10][0] );
 		$this->assertSame( AnotherDummyCallbackClass::class . '::my_method', $after[10][0] );
-
-		remove_all_actions( $hook_name );
 	}
 
 	/**
@@ -504,8 +488,6 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 		$this->assertSame( CallbackUtil::get_callback_signature( $first ), $before[10][0] );
 		$this->assertSame( CallbackUtil::get_callback_signature( $second ), $after[10][0] );
 		$this->assertNotSame( $before[10][0], $after[10][0] );
-
-		remove_all_actions( $hook_name );
 	}
 
 	/**
@@ -536,8 +518,6 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 		$this->assertStringStartsWith( 'Closure@', $before[10][0] );
 		$this->assertStringStartsWith( 'Closure@', $after[10][0] );
 		$this->assertNotSame( $before[10][0], $after[10][0] );
-
-		remove_all_actions( $hook_name );
 	}
 
 	/**
@@ -566,7 +546,5 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 		$this->assertCount( 2, $signatures[10] );
 		$this->assertNotSame( $signatures[10][0], $signatures[10][1] );
 		$this->assertSame( $signatures, CallbackUtil::get_hook_callback_signatures( $hook_name ) );
-
-		remove_all_actions( $hook_name );
 	}
 }

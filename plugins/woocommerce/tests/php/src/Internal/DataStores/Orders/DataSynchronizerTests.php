@@ -823,7 +823,6 @@ class DataSynchronizerTests extends \HposTestCase {
 			'',
 			'Meta data deleted from the CPT datastore should also be deleted from the HPOS datastore.'
 		);
-		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -869,8 +868,6 @@ class DataSynchronizerTests extends \HposTestCase {
 
 		$hpos_order = $legacy_handler->get_order_from_datastore( $legacy_order->get_id(), 'hpos' );
 		$this->assertEquals( $hpos_order->get_meta( 'quux' ), '' );
-
-		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -905,9 +902,6 @@ class DataSynchronizerTests extends \HposTestCase {
 
 		// Confirm placeholder has been updated.
 		$this->assertNotEquals( $this->sut::PLACEHOLDER_ORDER_POST_TYPE, get_post_type( $order->get_id() ) );
-
-		remove_all_filters( 'pre_option_' . $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION );
-		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**

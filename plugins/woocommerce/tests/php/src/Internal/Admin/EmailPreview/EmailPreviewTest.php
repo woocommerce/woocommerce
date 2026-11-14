@@ -163,7 +163,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$product = $this->sut->get_dummy_product_when_not_set( null );
 		$this->assertEquals( 'Filtered Product', $product->get_name() );
 		$this->assertEquals( '99', $product->get_price() );
-		remove_filter( 'woocommerce_email_preview_dummy_product', $product_filter, 10 );
 	}
 
 	/**
@@ -179,8 +178,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$content = $this->sut->render();
 		$this->assertStringContainsString( '500.00', $content );
 		$this->assertStringNotContainsString( '100.00', $content );
-
-		remove_filter( 'woocommerce_email_preview_dummy_order', $order_filter, 10 );
 	}
 
 	/**
@@ -228,8 +225,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$content = $this->sut->render();
 		$this->assertStringContainsString( 'Jane Smith', $content );
 		$this->assertStringNotContainsString( 'John Doe', $content );
-
-		remove_filter( 'woocommerce_email_preview_dummy_address', $address_filter, 10 );
 	}
 
 	/**
@@ -246,8 +241,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$subject = $this->sut->get_subject();
 		$this->assertStringContainsString( '98765', $subject );
 		$this->assertStringNotContainsString( '12345', $subject );
-
-		remove_filter( 'woocommerce_email_preview_placeholders', $placeholders_filter, 10 );
 	}
 
 	/**
@@ -265,8 +258,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$subject = $this->sut->get_subject();
 		$this->assertStringContainsString( 'Filtered Subject 12345', $subject );
 		$this->assertStringNotContainsString( 'Your ' . self::SITE_TITLE . ' order has been received!', $subject );
-
-		remove_filter( 'woocommerce_prepare_email_for_preview', $email_filter, 10 );
 	}
 
 	/**
@@ -348,8 +339,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$this->sut->set_email_type( 'WC_Email_Customer_Completed_Order' );
 		$content = $this->sut->render();
 		$this->assertStringContainsString( 'Filtered Downloadable Product', $content );
-
-		remove_filter( 'woocommerce_email_preview_dummy_downloadable_product', $downloadable_product_filter, 10 );
 	}
 
 	/**

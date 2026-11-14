@@ -158,7 +158,6 @@ class PickupIdentityTest extends WC_Unit_Test_Case {
 			$order->needs_shipping_address(),
 			'Running after the controller, the same filter does have the last word.'
 		);
-		remove_filter( 'woocommerce_order_hide_shipping_address', $empty_it, 20 );
 	}
 
 	/**

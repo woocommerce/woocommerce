@@ -121,8 +121,6 @@ class WC_Email_Admin_Payment_Gateway_Enabled_Test extends WC_Unit_Test_Case {
 		$this->sut->trigger( $gateway );
 
 		$this->assertTrue( $email_sent, 'Email should be sent when trigger is called with a valid gateway' );
-
-		remove_filter( 'wp_mail', $watcher );
 	}
 
 	/**
@@ -136,8 +134,6 @@ class WC_Email_Admin_Payment_Gateway_Enabled_Test extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $gateway->get_method_title(), $this->sut->gateway_title );
 		$this->assertEquals( $gateway->get_method_title(), $this->sut->placeholders['{gateway_title}'] );
-
-		remove_filter( 'wp_mail', '__return_empty_array' );
 	}
 
 	/**
@@ -150,8 +146,6 @@ class WC_Email_Admin_Payment_Gateway_Enabled_Test extends WC_Unit_Test_Case {
 		$this->sut->trigger( $gateway );
 
 		$this->assertStringContainsString( 'page=wc-settings&tab=checkout&section=bacs', $this->sut->gateway_settings_url );
-
-		remove_filter( 'wp_mail', '__return_empty_array' );
 	}
 
 	/**
@@ -192,8 +186,6 @@ class WC_Email_Admin_Payment_Gateway_Enabled_Test extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( $gateway->get_method_title(), $subject );
 		$this->assertStringNotContainsString( '{gateway_title}', $subject );
-
-		remove_filter( 'wp_mail', '__return_empty_array' );
 	}
 
 	/**
@@ -212,8 +204,6 @@ class WC_Email_Admin_Payment_Gateway_Enabled_Test extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'extra@example.com', $recipient );
 		$this->assertStringContainsString( get_option( 'admin_email' ), $recipient );
-
-		remove_filter( 'wc_payment_gateway_enabled_notification_email_addresses', $extra_watcher );
 	}
 
 	/**

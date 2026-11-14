@@ -149,9 +149,6 @@ class TaxControllerTest extends WC_Unit_Test_Case {
 	 * Test updating tax settings successfully.
 	 */
 	public function test_update_tax_settings_success() {
-		// Arrange.
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
-
 		// Act.
 		$request = new WP_REST_Request( 'PUT', self::ENDPOINT );
 		$request->set_body(
@@ -187,19 +184,12 @@ class TaxControllerTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame( 'yes', $data['values']['woocommerce_prices_include_tax'] );
 		$this->assertSame( 'yes', get_option( 'woocommerce_prices_include_tax' ) );
-
-		// Reset to original value.
-		update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
 	}
 
 	/**
 	 * Test updating multiple tax settings at once.
 	 */
 	public function test_update_multiple_tax_settings() {
-		// Arrange.
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
-		$original_tax_based_on       = get_option( 'woocommerce_tax_based_on', 'shipping' );
-
 		// Act.
 		$request = new WP_REST_Request( 'PUT', self::ENDPOINT );
 		$request->set_body(
@@ -245,19 +235,12 @@ class TaxControllerTest extends WC_Unit_Test_Case {
 		// Verify in the database.
 		$this->assertSame( 'yes', get_option( 'woocommerce_prices_include_tax' ) );
 		$this->assertSame( 'billing', get_option( 'woocommerce_tax_based_on' ) );
-
-		// Reset to original values.
-		update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
-		update_option( 'woocommerce_tax_based_on', $original_tax_based_on );
 	}
 
 	/**
 	 * Test updating tax settings with the old format (backward compatibility).
 	 */
 	public function test_update_tax_settings_old_format() {
-		// Arrange.
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
-
 		// Act - Use old format without 'values' wrapper.
 		$request = new WP_REST_Request( 'PUT', self::ENDPOINT );
 		$request->set_body(
@@ -291,9 +274,6 @@ class TaxControllerTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame( 'yes', $data['values']['woocommerce_prices_include_tax'] );
 		$this->assertSame( 'yes', get_option( 'woocommerce_prices_include_tax' ) );
-
-		// Reset to original value.
-		update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
 	}
 
 	/**
@@ -392,9 +372,6 @@ class TaxControllerTest extends WC_Unit_Test_Case {
 	 * Test that POST requests are accepted for updating tax settings (WP_REST_Server::EDITABLE).
 	 */
 	public function test_update_tax_settings_accepts_post() {
-		// Arrange.
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
-
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT );
 		$request->set_body(
@@ -430,9 +407,6 @@ class TaxControllerTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame( 'yes', $data['values']['woocommerce_prices_include_tax'] );
 		$this->assertSame( 'yes', get_option( 'woocommerce_prices_include_tax' ) );
-
-		// Reset to original value.
-		update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
 	}
 
 	/**
@@ -532,8 +506,6 @@ class TaxControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_update_tax_settings_sanitizes_malicious_payloads() {
 		// Arrange.
-		$original_suffix = get_option( 'woocommerce_price_display_suffix', '' );
-
 		// Test data with various malicious payloads using a text field that accepts any input.
 		$malicious_payloads = array(
 			'woocommerce_price_display_suffix' => '<script>alert("xss")</script> {price_including_tax} javascript:alert("xss") \' OR \'1\'=\'1 <img src=x onerror=alert("xss")>',
@@ -628,17 +600,13 @@ class TaxControllerTest extends WC_Unit_Test_Case {
 				);
 			}
 		}
-
-		// Reset to original value.
-		update_option( 'woocommerce_price_display_suffix', $original_suffix );
 	}
 
 	/**
 	 * @testdox Should accept a valid value when a plugin filters options into the structured format.
 	 */
 	public function test_update_tax_settings_structured_options_accepts_valid_value() {
-		$original = get_option( 'woocommerce_tax_based_on', 'shipping' );
-		$callback = $this->filter_tax_based_on_options(
+		$this->filter_tax_based_on_options(
 			array(
 				array(
 					'value' => 'shipping',
@@ -670,9 +638,6 @@ class TaxControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 200, $response->get_status(), 'Valid values should pass validation when options are in the structured format' );
 		$this->assertSame( 'base', get_option( 'woocommerce_tax_based_on' ) );
-
-		remove_filter( 'woocommerce_tax_settings', $callback );
-		update_option( 'woocommerce_tax_based_on', $original );
 	}
 
 	/**
@@ -680,7 +645,7 @@ class TaxControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_update_tax_settings_structured_options_rejects_numeric_index() {
 		$original = get_option( 'woocommerce_tax_based_on', 'shipping' );
-		$callback = $this->filter_tax_based_on_options(
+		$this->filter_tax_based_on_options(
 			array(
 				array(
 					'value' => 'shipping',
@@ -715,16 +680,13 @@ class TaxControllerTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'invalid_param', $data['code'] );
 		$this->assertStringContainsString( 'shipping, billing, base', $data['message'], 'Error message should list the real option values, not numeric indexes' );
 		$this->assertSame( $original, get_option( 'woocommerce_tax_based_on', 'shipping' ) );
-
-		remove_filter( 'woocommerce_tax_settings', $callback );
 	}
 
 	/**
 	 * @testdox Should validate each option entry by its own format when formats are mixed.
 	 */
 	public function test_update_tax_settings_mixed_format_options() {
-		$original = get_option( 'woocommerce_tax_based_on', 'shipping' );
-		$callback = $this->filter_tax_based_on_options(
+		$this->filter_tax_based_on_options(
 			array(
 				array(
 					'value' => 'shipping',
@@ -751,9 +713,6 @@ class TaxControllerTest extends WC_Unit_Test_Case {
 			$this->assertSame( 200, $response->get_status(), "Value '$value' should pass validation with mixed format options" );
 			$this->assertSame( $value, get_option( 'woocommerce_tax_based_on' ) );
 		}
-
-		remove_filter( 'woocommerce_tax_settings', $callback );
-		update_option( 'woocommerce_tax_based_on', $original );
 	}
 
 	/**
@@ -761,7 +720,7 @@ class TaxControllerTest extends WC_Unit_Test_Case {
 	 * filtering 'woocommerce_tax_settings' can do.
 	 *
 	 * @param array $options Replacement options for the setting.
-	 * @return callable The registered filter callback, so tests can remove it.
+	 * @return callable The registered filter callback.
 	 */
 	private function filter_tax_based_on_options( array $options ): callable {
 		$callback = function ( $settings ) use ( $options ) {

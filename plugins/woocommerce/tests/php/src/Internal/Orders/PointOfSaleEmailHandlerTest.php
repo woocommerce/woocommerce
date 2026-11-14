@@ -137,12 +137,5 @@ class PointOfSaleEmailHandlerTest extends WC_Unit_Test_Case {
 		$this->assertNotFalse(
 			has_filter( 'woocommerce_email_enabled_customer_partially_refunded_order', array( $handler, 'maybe_suppress_email' ) )
 		);
-
-		remove_all_filters( 'woocommerce_email_enabled_customer_completed_order' );
-		remove_all_filters( 'woocommerce_email_enabled_customer_processing_order' );
-		remove_all_filters( 'woocommerce_email_enabled_customer_on_hold_order' );
-		remove_all_filters( 'woocommerce_email_enabled_customer_refunded_order' );
-		remove_all_filters( 'woocommerce_email_enabled_customer_partially_refunded_order' );
-		remove_all_filters( 'woocommerce_email_enabled_new_order' );
 	}
 }

@@ -294,7 +294,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 				$order1->get_id(),
 			)
 		);
-		remove_all_filters( 'woocommerce_orders_table_query_clauses' );
 	}
 
 	/**
@@ -334,8 +333,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		$orders = wc_get_orders( array() );
 		$this->assertCount( 1, $orders );
 		$this->assertEquals( $order1->get_id(), $orders[0]->get_id() );
-
-		remove_all_filters( 'woocommerce_hpos_pre_query' );
 	}
 
 	/**
@@ -377,8 +374,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		$orders = wc_get_orders( array() );
 		$this->assertCount( 1, $orders );
 		$this->assertEquals( $order1->get_id(), $orders[0]->get_id() );
-
-		remove_all_filters( 'woocommerce_hpos_pre_query' );
 	}
 
 	/**
@@ -404,8 +399,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $query->orders );
 		$this->assertEquals( 10, $query->found_orders );
 		$this->assertEquals( 2, $query->max_num_pages );
-
-		remove_all_filters( 'woocommerce_hpos_pre_query' );
 	}
 
 	/**
@@ -432,8 +425,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $query->orders );
 		$this->assertEquals( 1, $query->found_orders );
 		$this->assertEquals( null, $query->max_num_pages );
-
-		remove_all_filters( 'woocommerce_hpos_pre_query' );
 	}
 
 	/**
@@ -458,8 +449,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $query->orders );
 		$this->assertEquals( 1, $query->found_orders );
 		$this->assertEquals( 1, $query->max_num_pages );
-
-		remove_all_filters( 'woocommerce_hpos_pre_query' );
 	}
 
 	/**

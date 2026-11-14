@@ -105,7 +105,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	 * Test: recent reviews widget content (legacy).
 	 */
 	public function test_recent_reviews_widget_content_legacy_version() {
-		add_filter( 'woocommerce_report_recent_reviews_query_from', $legacy_filter = fn( string $sql ) => $sql );
+		add_filter( 'woocommerce_report_recent_reviews_query_from', fn( string $sql ) => $sql );
 		$this->expected_deprecated = array_merge( $this->expected_deprecated, array( 'woocommerce_report_recent_reviews_query_from' ) );
 
 		$product     = WC_Helper_Product::create_simple_product();
@@ -123,7 +123,6 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$this->expectOutputRegex( '/reviewed by/' );
 
 		$product->delete();
-		remove_filter( 'woocommerce_report_recent_reviews_query_from', $legacy_filter );
 	}
 
 	/**

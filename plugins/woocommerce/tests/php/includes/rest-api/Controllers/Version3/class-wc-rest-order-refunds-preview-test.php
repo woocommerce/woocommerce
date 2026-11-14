@@ -730,27 +730,23 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 
 		add_filter( 'wc_get_price_decimals', '__return_zero' );
 
-		try {
-			$response = $this->do_preview_request(
-				$order->get_id(),
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
 				array(
-					array(
-						'line_item_id' => $item_id,
-						'refund_total' => 55.4,
-					),
-				)
-			);
+					'line_item_id' => $item_id,
+					'refund_total' => 55.4,
+				),
+			)
+		);
 
-			$this->assertEquals( 200, $response->get_status() );
-			$item = $response->get_data()['breakdown']['products']['items'][0];
+		$this->assertEquals( 200, $response->get_status() );
+		$item = $response->get_data()['breakdown']['products']['items'][0];
 
-			// 55.4 rounds to 55 at 0dp; the 10% split gives whole-unit 50 net / 5 tax.
-			$this->assertEquals( '55', $item['total'], 'Total should round to a whole unit.' );
-			$this->assertEquals( '5', $item['tax'] );
-			$this->assertEquals( '50', $item['subtotal'] );
-		} finally {
-			remove_filter( 'wc_get_price_decimals', '__return_zero' );
-		}
+		// 55.4 rounds to 55 at 0dp; the 10% split gives whole-unit 50 net / 5 tax.
+		$this->assertEquals( '55', $item['total'], 'Total should round to a whole unit.' );
+		$this->assertEquals( '5', $item['tax'] );
+		$this->assertEquals( '50', $item['subtotal'] );
 	}
 
 	/**
@@ -762,25 +758,21 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 		};
 		add_filter( 'wc_get_price_decimals', $three_decimals );
 
-		try {
-			$order   = $this->create_order_with_product( 10.555, 1 );
-			$item_id = $this->get_first_line_item_id( $order );
+		$order   = $this->create_order_with_product( 10.555, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
 
-			$response = $this->do_preview_request(
-				$order->get_id(),
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
 				array(
-					array(
-						'line_item_id' => $item_id,
-						'quantity'     => 1,
-					),
-				)
-			);
+					'line_item_id' => $item_id,
+					'quantity'     => 1,
+				),
+			)
+		);
 
-			$this->assertEquals( 200, $response->get_status() );
-			$this->assertEquals( '10.555', $response->get_data()['total'], 'Three-decimal precision should be preserved.' );
-		} finally {
-			remove_filter( 'wc_get_price_decimals', $three_decimals );
-		}
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( '10.555', $response->get_data()['total'], 'Three-decimal precision should be preserved.' );
 	}
 
 	/**

@@ -401,8 +401,6 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_Unit_Test_Case {
 
 		// Should be denied because delete permission is blocked.
 		$this->assertInstanceOf( WP_Error::class, $result );
-
-		remove_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10 );
 	}
 
 	/**
@@ -423,8 +421,6 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_Unit_Test_Case {
 
 		// Should be denied because read permission is blocked.
 		$this->assertInstanceOf( WP_Error::class, $result );
-
-		remove_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10 );
 	}
 
 	/**
@@ -627,9 +623,6 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_disabled', $data['code'] );
 		$this->assertArrayHasKey( 'message', $data );
 		$this->assertEquals( 'Shipping is disabled.', $data['message'] );
-
-		// Re-enable shipping.
-		remove_filter( 'wc_shipping_enabled', '__return_false' );
 	}
 
 	/**
@@ -744,9 +737,6 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_disabled', $data['code'] );
 		$this->assertArrayHasKey( 'message', $data );
 		$this->assertEquals( 'Shipping is disabled.', $data['message'] );
-
-		// Re-enable shipping.
-		remove_filter( 'wc_shipping_enabled', '__return_false' );
 	}
 
 	/**
@@ -1082,9 +1072,6 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( 503, $response->get_status() );
 		$this->assertArrayHasKey( 'code', $data );
 		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_disabled', $data['code'] );
-
-		// Re-enable shipping.
-		remove_filter( 'wc_shipping_enabled', '__return_false' );
 	}
 
 	/**
@@ -1684,9 +1671,6 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( 503, $response->get_status() );
 		$this->assertArrayHasKey( 'code', $data );
 		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_disabled', $data['code'] );
-
-		// Re-enable shipping.
-		remove_filter( 'wc_shipping_enabled', '__return_false' );
 	}
 
 	/**

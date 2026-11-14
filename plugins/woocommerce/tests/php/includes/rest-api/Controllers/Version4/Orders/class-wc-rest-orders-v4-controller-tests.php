@@ -868,8 +868,6 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test edge case: created_via filtering when COT is enabled.
 	 */
 	public function test_created_via_filtering_with_cot_enabled(): void {
-		$original_cot_setting = get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
-
 		// Skip test if COT cannot be safely enabled/disabled.
 		try {
 			update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
@@ -896,10 +894,9 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $response_data );
 		$this->assertEquals( 'checkout', $response_data[0]['created_via'] );
 
-		// Clean up orders first, then restore setting.
+		// Clean up orders.
 		$order1->delete( true );
 		$order2->delete( true );
-		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $original_cot_setting );
 	}
 
 	/**

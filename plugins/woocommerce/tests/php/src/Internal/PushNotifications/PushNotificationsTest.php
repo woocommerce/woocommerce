@@ -101,8 +101,6 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$push_notifications = new PushNotifications();
 
 		$this->assertFalse( $push_notifications->should_be_enabled() );
-
-		remove_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
 	}
 
 	/**

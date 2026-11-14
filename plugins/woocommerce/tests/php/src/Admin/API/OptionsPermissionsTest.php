@@ -99,17 +99,13 @@ class OptionsPermissionsTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'woocommerce_rest_api_option_permissions', $grant_permission );
 		$this->setExpectedDeprecated( 'woocommerce_rest_api_option_permissions' );
 
-		try {
-			$read_response = $this->get_options( array( self::UNLISTED_OPTION ) );
-			$this->assertSame( 200, $read_response->get_status(), 'A filtered option should be readable.' );
-			$this->assertSame( 'original', $read_response->get_data()[ self::UNLISTED_OPTION ], 'The filtered option should return its stored value.' );
+		$read_response = $this->get_options( array( self::UNLISTED_OPTION ) );
+		$this->assertSame( 200, $read_response->get_status(), 'A filtered option should be readable.' );
+		$this->assertSame( 'original', $read_response->get_data()[ self::UNLISTED_OPTION ], 'The filtered option should return its stored value.' );
 
-			$write_response = $this->post_options( array( self::UNLISTED_OPTION => 'changed' ) );
-			$this->assertSame( 200, $write_response->get_status(), 'A filtered option should be writable.' );
-			$this->assertSame( 'changed', get_option( self::UNLISTED_OPTION ), 'The filtered option should be updated.' );
-		} finally {
-			remove_filter( 'woocommerce_rest_api_option_permissions', $grant_permission );
-		}
+		$write_response = $this->post_options( array( self::UNLISTED_OPTION => 'changed' ) );
+		$this->assertSame( 200, $write_response->get_status(), 'A filtered option should be writable.' );
+		$this->assertSame( 'changed', get_option( self::UNLISTED_OPTION ), 'The filtered option should be updated.' );
 	}
 
 	/**

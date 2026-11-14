@@ -763,8 +763,6 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_analytics_is_test_order', '__return_true' );
 
 		$this->assertTrue( OrdersScheduler::is_test_order( $order ) );
-
-		remove_filter( 'woocommerce_analytics_is_test_order', '__return_true' );
 	}
 
 	/**
@@ -782,8 +780,6 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_analytics_is_test_order', '__return_false' );
 
 		$this->assertFalse( OrdersScheduler::is_test_order( $order ) );
-
-		remove_filter( 'woocommerce_analytics_is_test_order', '__return_false' );
 	}
 
 	/**
@@ -834,8 +830,6 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 
 		$this->assertNotNull( $received_order );
 		$this->assertEquals( $order->get_id(), $received_order->get_id() );
-
-		remove_filter( 'woocommerce_analytics_is_test_order', $filter_callback );
 	}
 
 	/**
@@ -1115,32 +1109,28 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 			);
 		};
 
-		try {
-			$order = \WC_Helper_Order::create_order();
-			$order->set_status( 'completed' );
-			$order->save();
-			$order_id = $order->get_id();
-			OrdersScheduler::import( $order_id );
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order_id = $order->get_id();
+		OrdersScheduler::import( $order_id );
 
-			// Trash. woocommerce_trash_order fires after the status is persisted, so the
-			// synchronous import records it correctly without any queue run.
-			$order->delete( false );
-			$this->assertSame( 'wc-trash', $read_status( $order_id ), 'Trashing should sync wc-trash synchronously.' );
+		// Trash. woocommerce_trash_order fires after the status is persisted, so the
+		// synchronous import records it correctly without any queue run.
+		$order->delete( false );
+		$this->assertSame( 'wc-trash', $read_status( $order_id ), 'Trashing should sync wc-trash synchronously.' );
 
-			// Restore. Note delete() cleared the in-memory ID, so reload first.
-			$order = wc_get_order( $order_id );
-			$order->get_data_store()->untrash_order( $order );
+		// Restore. Note delete() cleared the in-memory ID, so reload first.
+		$order = wc_get_order( $order_id );
+		$order->get_data_store()->untrash_order( $order );
 
-			// Deliberately no queue run: the import already ran inline, and it must have
-			// seen the restored status rather than the trashed one.
-			$this->assertSame(
-				'wc-completed',
-				$read_status( $order_id ),
-				'Untrashing should sync the restored status, not wc-trash, on the synchronous path.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
-		}
+		// Deliberately no queue run: the import already ran inline, and it must have
+		// seen the restored status rather than the trashed one.
+		$this->assertSame(
+			'wc-completed',
+			$read_status( $order_id ),
+			'Untrashing should sync the restored status, not wc-trash, on the synchronous path.'
+		);
 	}
 
 	/**
@@ -1207,17 +1197,12 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		};
 		add_action( 'woocommerce_order_scheduler_after_import_order', $callback );
 
-		try {
-			$order->delete( false );
-			$this->assertSame( 1, $imports, 'Trashing a CPT order should schedule exactly one import.' );
+		$order->delete( false );
+		$this->assertSame( 1, $imports, 'Trashing a CPT order should schedule exactly one import.' );
 
-			$imports = 0;
-			wp_untrash_post( $order_id );
-			$this->assertSame( 1, $imports, 'Restoring a CPT order should schedule exactly one import.' );
-		} finally {
-			remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
-			remove_action( 'woocommerce_order_scheduler_after_import_order', $callback );
-		}
+		$imports = 0;
+		wp_untrash_post( $order_id );
+		$this->assertSame( 1, $imports, 'Restoring a CPT order should schedule exactly one import.' );
 	}
 
 	/**
@@ -1243,25 +1228,21 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 			);
 		};
 
-		try {
-			$order = \WC_Helper_Order::create_order();
-			$order->set_status( 'completed' );
-			$order->save();
-			$order_id = $order->get_id();
-			OrdersScheduler::import( $order_id );
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order_id = $order->get_id();
+		OrdersScheduler::import( $order_id );
 
-			$order->delete( false );
-			$this->assertSame( 'wc-trash', $read_status( $order_id ), 'Trashing should sync wc-trash synchronously under CPT.' );
+		$order->delete( false );
+		$this->assertSame( 'wc-trash', $read_status( $order_id ), 'Trashing should sync wc-trash synchronously under CPT.' );
 
-			wp_untrash_post( $order_id );
-			$this->assertSame(
-				'wc-completed',
-				$read_status( $order_id ),
-				'Restoring should sync the restored status under CPT on the synchronous path.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
-		}
+		wp_untrash_post( $order_id );
+		$this->assertSame(
+			'wc-completed',
+			$read_status( $order_id ),
+			'Restoring should sync the restored status under CPT on the synchronous path.'
+		);
 	}
 
 	/**

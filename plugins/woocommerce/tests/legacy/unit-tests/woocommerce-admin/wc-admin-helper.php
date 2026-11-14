@@ -429,8 +429,6 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 
 		$this->go_to( home_url( '/?post_type=product' ) );
 		$this->assertTrue( WCAdminHelper::is_current_page_store_page(), 'Failed to identify product archive as store page' );
-
-		remove_filter( 'woocommerce_get_shop_page_id', '__return_false' );
 	}
 
 	/**

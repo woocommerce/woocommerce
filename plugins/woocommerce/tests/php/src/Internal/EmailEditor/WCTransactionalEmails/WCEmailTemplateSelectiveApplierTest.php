@@ -803,31 +803,27 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 		};
 		add_filter( 'content_save_pre', $mutator, 99 );
 
-		try {
-			$result = WCEmailTemplateSelectiveApplier::apply_selectively(
-				$post_id,
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively(
+			$post_id,
+			array(
 				array(
-					array(
-						'path'     => array( 0 ),
-						'decision' => 'use_core',
-					),
-				)
-			);
-			$this->assertIsArray( $result );
+					'path'     => array( 0 ),
+					'decision' => 'use_core',
+				),
+			)
+		);
+		$this->assertIsArray( $result );
 
-			$persisted   = get_post( $post_id );
-			$stored_hash = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true );
+		$persisted   = get_post( $post_id );
+		$stored_hash = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true );
 
-			$this->assertInstanceOf( \WP_Post::class, $persisted );
-			$this->assertStringContainsString( '<!-- filter mutated -->', (string) $persisted->post_content );
-			$this->assertSame(
-				sha1( (string) $persisted->post_content ),
-				$stored_hash,
-				'use_core apply must stamp sha1(persisted post_content), not sha1(in-memory merged).'
-			);
-		} finally {
-			remove_filter( 'content_save_pre', $mutator, 99 );
-		}//end try
+		$this->assertInstanceOf( \WP_Post::class, $persisted );
+		$this->assertStringContainsString( '<!-- filter mutated -->', (string) $persisted->post_content );
+		$this->assertSame(
+			sha1( (string) $persisted->post_content ),
+			$stored_hash,
+			'use_core apply must stamp sha1(persisted post_content), not sha1(in-memory merged).'
+		);
 	}
 
 	/**

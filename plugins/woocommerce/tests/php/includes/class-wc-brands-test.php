@@ -252,9 +252,6 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 		// Test that the count is cached correctly.
 		$cached_count = get_term_meta( $brand_term->term_id, 'product_count_product_brand', true );
 		$this->assertEquals( '0', $cached_count, 'Brand count should be cached as 0 when product is out of stock' );
-
-		// Reset the setting.
-		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
 	}
 
 	/**
@@ -305,9 +302,6 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 
 		// Test that the count is 1 (ignores out of stock setting in admin context).
 		$this->assertEquals( 1, $brand_term->count, 'Brand count should be 1 in admin context, ignoring out of stock setting' );
-
-		// Reset the setting.
-		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
 	}
 
 	/**

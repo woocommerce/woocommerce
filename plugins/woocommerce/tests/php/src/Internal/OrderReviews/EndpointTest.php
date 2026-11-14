@@ -194,8 +194,6 @@ class EndpointTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_review_order_url', $override );
 
 		$this->assertSame( 'https://example.test/custom', wc_get_review_order_url( $order ) );
-
-		remove_filter( 'woocommerce_review_order_url', $override );
 	}
 
 	/**
@@ -445,9 +443,6 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$this->assertNotFalse(
 			has_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ) )
 		);
-
-		remove_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ), 10 );
-		remove_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ), 10 );
 	}
 
 	/**
@@ -1538,9 +1533,6 @@ class EndpointTest extends WC_Unit_Test_Case {
 
 		$this->assertNotFalse( has_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ) ) );
 		$this->assertNotFalse( has_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ) ) );
-
-		remove_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ), 10 );
-		remove_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ), 10 );
 	}
 
 	/**

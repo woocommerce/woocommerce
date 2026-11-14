@@ -314,8 +314,6 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 		switch_theme( 'twentytwentytwo' );
 		check_theme_switched();
 		$this->assertFalse( BlockTemplateUtils::should_use_blockified_product_grid_templates() );
-
-		delete_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );
 	}
 
 	/**

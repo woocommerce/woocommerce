@@ -509,7 +509,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		} finally {
 			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 			$this->toggle_cot_feature_and_usage( $original );
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
 	}
 
@@ -578,7 +577,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
 			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 			$this->toggle_cot_feature_and_usage( $original );
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
 	}
 
@@ -621,7 +619,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		} finally {
 			remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
 			$this->toggle_cot_feature_and_usage( $original );
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
 	}
 
@@ -3541,8 +3538,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
 			}
 		}
-
-		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
 	}
 
 	/**

@@ -775,8 +775,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_product_get_price', $callback, 50, 2 );
 
 		$this->assertEquals( 50, wc_get_product( $product_id )->get_price(), 'A deliberate third-party price is respected, not reverted to the sale price.' );
-
-		remove_filter( 'woocommerce_product_get_price', $callback, 50 );
 	}
 
 	/**
@@ -808,8 +806,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			wc_get_product( $product_id )->get_price(),
 			'The third-party price wins over the scheduled-sale heal (which would otherwise return 20).'
 		);
-
-		remove_filter( 'woocommerce_product_get_price', $callback, 50 );
 	}
 
 	/**
@@ -1575,8 +1571,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testdox Assigned-customer orders apply matched rates for the editor tax location and pass the order customer to the filter.
 	 */
 	public function test_wc_get_price_excluding_tax_editor_location_filters_customer_rates(): void {
-		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 
@@ -1640,8 +1634,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			WC_Tax::_delete_tax_rate( $french_tax_rate_id );
 			$order->delete( true );
 			wp_delete_user( $customer->get_id() );
-			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
 		}
 	}
 
@@ -3055,7 +3047,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			wp_delete_attachment( $attachment_id, true );
 			WC_Helper_Product::delete_product( $product->get_id() );
 			wp_delete_user( $subscriber_id );
-			delete_option( 'woocommerce_product_match_featured_image_by_sku' );
 		}
 	}
 

@@ -2007,86 +2007,76 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		// Capture original option values so we can restore them in finally —
-		// tearDown doesn't reset these globally and leakage breaks subsequent
-		// tests that assume the default tax config.
-		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes', 'no' );
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 
-		try {
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_regular_price( 100.00 );
-			$product->set_tax_status( 'taxable' );
-			$product->save();
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
 
-			$order = wc_create_order();
-			$item  = new WC_Order_Item_Product();
-			$item->set_props(
-				array(
-					'product'  => $product,
-					'quantity' => 1,
-					'subtotal' => 100.00,
-					'total'    => 100.00,
-				)
-			);
-			$item->set_taxes(
-				array(
-					'total'    => array( $tax_rate_id => 10.00 ),
-					'subtotal' => array( $tax_rate_id => 10.00 ),
-				)
-			);
-			$item->save();
-			$order->add_item( $item );
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 10.00 ),
+				'subtotal' => array( $tax_rate_id => 10.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
 
-			$tax_item = new \WC_Order_Item_Tax();
-			$tax_item->set_rate( $tax_rate_id );
-			$tax_item->set_tax_total( 10.00 );
-			$tax_item->save();
-			$order->add_item( $tax_item );
+		$tax_item = new \WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 10.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
 
-			$order->set_billing_country( 'US' );
-			// calculate_totals( false ) is not reliable in the test environment when
-			// taxes are involved — set_total() explicitly so get_remaining_refund_amount()
-			// matches the line + tax sum.
-			$order->set_total( 110.00 );
-			$order->set_status( OrderStatus::COMPLETED );
-			$order->save();
-			$this->created_orders[] = $order->get_id();
+		$order->set_billing_country( 'US' );
+		// calculate_totals( false ) is not reliable in the test environment when
+		// taxes are involved — set_total() explicitly so get_remaining_refund_amount()
+		// matches the line + tax sum.
+		$order->set_total( 110.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
 
-			// Refund the line — refund_total OMITTED.
-			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
-			$request->set_body_params(
-				array(
-					'order_id'   => $order->get_id(),
-					'line_items' => array(
-						array(
-							'line_item_id' => $item->get_id(),
-							'quantity'     => 1,
-						),
+		// Refund the line — refund_total OMITTED.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'quantity'     => 1,
 					),
-				)
-			);
-			$response = $this->server->dispatch( $request );
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
 
-			$this->assertEquals( 201, $response->get_status() );
-			$data = $response->get_data();
-			$this->assertEquals( '110.00', $data['total'], 'Auto-computed amount should include tax ($100 + 10% = $110)' );
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( '110.00', $data['total'], 'Auto-computed amount should include tax ($100 + 10% = $110)' );
 
-			// Verify the per-line refund_tax was extracted (not 0).
-			$this->assertNotEmpty( $data['line_items'] );
-			$line_item_response = $data['line_items'][0];
-			$this->assertEquals( '100.00', $line_item_response['refund_total'], 'Per-line refund_total should be tax-exclusive after extraction' );
-			$this->assertNotEmpty( $line_item_response['refund_tax'], 'refund_tax should be populated from extraction' );
-			$this->assertEquals( '10.00', $line_item_response['refund_tax'][0]['refund_total'] );
+		// Verify the per-line refund_tax was extracted (not 0).
+		$this->assertNotEmpty( $data['line_items'] );
+		$line_item_response = $data['line_items'][0];
+		$this->assertEquals( '100.00', $line_item_response['refund_total'], 'Per-line refund_total should be tax-exclusive after extraction' );
+		$this->assertNotEmpty( $line_item_response['refund_tax'], 'refund_tax should be populated from extraction' );
+		$this->assertEquals( '10.00', $line_item_response['refund_tax'][0]['refund_total'] );
 
-			$this->created_refunds[] = $data['id'];
-			$product->delete( true );
-		} finally {
-			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
-		}
+		$this->created_refunds[] = $data['id'];
+		$product->delete( true );
 	}
 
 	/**
@@ -2191,106 +2181,99 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes', 'no' );
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		// Actually exercise a tax-inclusive store (the test name now matches reality).
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 
-		try {
-			$dispatch_refund = function ( array $line_item_overrides ) use ( $tax_rate_id ): array {
-				$product = WC_Helper_Product::create_simple_product();
-				// Tax-inclusive store: regular_price entered with tax baked in.
-				$product->set_regular_price( 110.00 );
-				$product->set_tax_status( 'taxable' );
-				$product->save();
+		$dispatch_refund = function ( array $line_item_overrides ) use ( $tax_rate_id ): array {
+			$product = WC_Helper_Product::create_simple_product();
+			// Tax-inclusive store: regular_price entered with tax baked in.
+			$product->set_regular_price( 110.00 );
+			$product->set_tax_status( 'taxable' );
+			$product->save();
 
-				$order = wc_create_order();
-				$item  = new WC_Order_Item_Product();
-				$item->set_props(
-					array(
-						'product'  => $product,
-						'quantity' => 1,
-						'subtotal' => 100.00,
-						'total'    => 100.00,
-					)
-				);
-				$item->set_taxes(
-					array(
-						'total'    => array( $tax_rate_id => 10.00 ),
-						'subtotal' => array( $tax_rate_id => 10.00 ),
-					)
-				);
-				$item->save();
-				$order->add_item( $item );
-
-				$tax_item = new \WC_Order_Item_Tax();
-				$tax_item->set_rate( $tax_rate_id );
-				$tax_item->set_tax_total( 10.00 );
-				$tax_item->save();
-				$order->add_item( $tax_item );
-
-				$order->set_billing_country( 'US' );
-				$order->set_total( 110.00 );
-				$order->set_status( OrderStatus::COMPLETED );
-				$order->save();
-				$this->created_orders[] = $order->get_id();
-
-				$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
-				$request->set_body_params(
-					array(
-						'order_id'   => $order->get_id(),
-						'line_items' => array(
-							array_merge( array( 'line_item_id' => $item->get_id() ), $line_item_overrides ),
-						),
-					)
-				);
-				$response = $this->server->dispatch( $request );
-
-				$this->assertEquals( 201, $response->get_status() );
-				$data                    = $response->get_data();
-				$this->created_refunds[] = $data['id'];
-				$product->delete( true );
-
-				return $data;
-			};
-
-			// Path A: simplified form — no refund_total, backend auto-computes via compute_line_item_refund_total.
-			$data_simplified = $dispatch_refund( array( 'quantity' => 1 ) );
-			// Path B: explicit form — client supplies the tax-inclusive refund_total.
-			$data_explicit = $dispatch_refund(
+			$order = wc_create_order();
+			$item  = new WC_Order_Item_Product();
+			$item->set_props(
 				array(
-					'quantity'     => 1,
-					'refund_total' => 110.00,
+					'product'  => $product,
+					'quantity' => 1,
+					'subtotal' => 100.00,
+					'total'    => 100.00,
 				)
 			);
-
-			$this->assertEquals(
-				$data_explicit['total'],
-				$data_simplified['total'],
-				'Tax-inclusive store: simplified and explicit forms must produce the same amount.'
+			$item->set_taxes(
+				array(
+					'total'    => array( $tax_rate_id => 10.00 ),
+					'subtotal' => array( $tax_rate_id => 10.00 ),
+				)
 			);
-			$this->assertEquals( '110.00', $data_simplified['total'] );
+			$item->save();
+			$order->add_item( $item );
 
-			// The per-line refund_total / refund_tax must round-trip identically too.
-			$this->assertEquals(
-				$data_explicit['line_items'][0]['refund_total'],
-				$data_simplified['line_items'][0]['refund_total'],
-				'Per-line refund_total must match (tax-exclusive after extraction).'
-			);
-			$this->assertEquals( '100.00', $data_simplified['line_items'][0]['refund_total'] );
+			$tax_item = new \WC_Order_Item_Tax();
+			$tax_item->set_rate( $tax_rate_id );
+			$tax_item->set_tax_total( 10.00 );
+			$tax_item->save();
+			$order->add_item( $tax_item );
 
-			$this->assertNotEmpty( $data_simplified['line_items'][0]['refund_tax'] );
-			$this->assertEquals(
-				$data_explicit['line_items'][0]['refund_tax'][0]['refund_total'],
-				$data_simplified['line_items'][0]['refund_tax'][0]['refund_total'],
-				'Extracted refund_tax must match between paths.'
+			$order->set_billing_country( 'US' );
+			$order->set_total( 110.00 );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->save();
+			$this->created_orders[] = $order->get_id();
+
+			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+			$request->set_body_params(
+				array(
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						array_merge( array( 'line_item_id' => $item->get_id() ), $line_item_overrides ),
+					),
+				)
 			);
-			$this->assertEquals( '10.00', $data_simplified['line_items'][0]['refund_tax'][0]['refund_total'] );
-		} finally {
-			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
-		}
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 201, $response->get_status() );
+			$data                    = $response->get_data();
+			$this->created_refunds[] = $data['id'];
+			$product->delete( true );
+
+			return $data;
+		};
+
+		// Path A: simplified form — no refund_total, backend auto-computes via compute_line_item_refund_total.
+		$data_simplified = $dispatch_refund( array( 'quantity' => 1 ) );
+		// Path B: explicit form — client supplies the tax-inclusive refund_total.
+		$data_explicit = $dispatch_refund(
+			array(
+				'quantity'     => 1,
+				'refund_total' => 110.00,
+			)
+		);
+
+		$this->assertEquals(
+			$data_explicit['total'],
+			$data_simplified['total'],
+			'Tax-inclusive store: simplified and explicit forms must produce the same amount.'
+		);
+		$this->assertEquals( '110.00', $data_simplified['total'] );
+
+		// The per-line refund_total / refund_tax must round-trip identically too.
+		$this->assertEquals(
+			$data_explicit['line_items'][0]['refund_total'],
+			$data_simplified['line_items'][0]['refund_total'],
+			'Per-line refund_total must match (tax-exclusive after extraction).'
+		);
+		$this->assertEquals( '100.00', $data_simplified['line_items'][0]['refund_total'] );
+
+		$this->assertNotEmpty( $data_simplified['line_items'][0]['refund_tax'] );
+		$this->assertEquals(
+			$data_explicit['line_items'][0]['refund_tax'][0]['refund_total'],
+			$data_simplified['line_items'][0]['refund_tax'][0]['refund_total'],
+			'Extracted refund_tax must match between paths.'
+		);
+		$this->assertEquals( '10.00', $data_simplified['line_items'][0]['refund_tax'][0]['refund_total'] );
 	}
 
 	/**
@@ -2665,81 +2648,75 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 
-		try {
-			// Product price $110 entered tax-inclusive; tax-exclusive total is $100, tax is $10.
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_regular_price( 110.00 );
-			$product->set_tax_status( 'taxable' );
-			$product->save();
+		// Product price $110 entered tax-inclusive; tax-exclusive total is $100, tax is $10.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 110.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
 
-			$order = wc_create_order();
-			$item  = new WC_Order_Item_Product();
-			$item->set_props(
-				array(
-					'product'  => $product,
-					'quantity' => 1,
-					'subtotal' => 100.00,
-					'total'    => 100.00,
-				)
-			);
-			$item->set_taxes(
-				array(
-					'total'    => array( $tax_rate_id => 10.00 ),
-					'subtotal' => array( $tax_rate_id => 10.00 ),
-				)
-			);
-			$item->save();
-			$order->add_item( $item );
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 10.00 ),
+				'subtotal' => array( $tax_rate_id => 10.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
 
-			$tax_item = new \WC_Order_Item_Tax();
-			$tax_item->set_rate( $tax_rate_id );
-			$tax_item->set_tax_total( 10.00 );
-			$tax_item->save();
-			$order->add_item( $tax_item );
+		$tax_item = new \WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 10.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
 
-			$order->set_billing_country( 'US' );
-			$order->set_total( 110.00 );
-			$order->set_status( OrderStatus::COMPLETED );
-			$order->save();
-			$this->created_orders[] = $order->get_id();
+		$order->set_billing_country( 'US' );
+		$order->set_total( 110.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
 
-			// Refund via the simplified form (no refund_total).
-			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
-			$request->set_body_params(
-				array(
-					'order_id'   => $order->get_id(),
-					'line_items' => array(
-						array(
-							'line_item_id' => $item->get_id(),
-							'quantity'     => 1,
-						),
+		// Refund via the simplified form (no refund_total).
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'quantity'     => 1,
 					),
-				)
-			);
-			$response = $this->server->dispatch( $request );
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
 
-			$this->assertEquals( 201, $response->get_status() );
-			$data = $response->get_data();
-			// Tax-inclusive store: refund amount must still be $110 ($100 + $10 tax),
-			// confirming the auto-compute round-trip works under prices_include_tax=yes.
-			$this->assertEquals( '110.00', $data['total'], 'Tax-inclusive store: auto-computed amount must equal the tax-inclusive line total.' );
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+		// Tax-inclusive store: refund amount must still be $110 ($100 + $10 tax),
+		// confirming the auto-compute round-trip works under prices_include_tax=yes.
+		$this->assertEquals( '110.00', $data['total'], 'Tax-inclusive store: auto-computed amount must equal the tax-inclusive line total.' );
 
-			$this->assertNotEmpty( $data['line_items'] );
-			$line_item_response = $data['line_items'][0];
-			$this->assertEquals( '100.00', $line_item_response['refund_total'], 'Per-line refund_total should be tax-exclusive after extraction.' );
-			$this->assertNotEmpty( $line_item_response['refund_tax'] );
-			$this->assertEquals( '10.00', $line_item_response['refund_tax'][0]['refund_total'] );
+		$this->assertNotEmpty( $data['line_items'] );
+		$line_item_response = $data['line_items'][0];
+		$this->assertEquals( '100.00', $line_item_response['refund_total'], 'Per-line refund_total should be tax-exclusive after extraction.' );
+		$this->assertNotEmpty( $line_item_response['refund_tax'] );
+		$this->assertEquals( '10.00', $line_item_response['refund_tax'][0]['refund_total'] );
 
-			$this->created_refunds[] = $data['id'];
-			$product->delete( true );
-		} finally {
-			// Restore the option so a failing assertion above can't leak state into other tests.
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
-		}
+		$this->created_refunds[] = $data['id'];
+		$product->delete( true );
 	}
 
 	/**
@@ -2945,80 +2922,73 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes', 'no' );
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 
-		try {
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_regular_price( 110.00 );
-			$product->set_tax_status( 'taxable' );
-			$product->save();
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 110.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
 
-			$order = wc_create_order();
-			$item  = new WC_Order_Item_Product();
-			$item->set_props(
-				array(
-					'product'  => $product,
-					'quantity' => 1,
-					'subtotal' => 100.00,
-					'total'    => 100.00,
-				)
-			);
-			$item->set_taxes(
-				array(
-					'total'    => array( $tax_rate_id => 10.00 ),
-					'subtotal' => array( $tax_rate_id => 10.00 ),
-				)
-			);
-			$item->save();
-			$order->add_item( $item );
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 10.00 ),
+				'subtotal' => array( $tax_rate_id => 10.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
 
-			$tax_item = new \WC_Order_Item_Tax();
-			$tax_item->set_rate( $tax_rate_id );
-			$tax_item->set_tax_total( 10.00 );
-			$tax_item->save();
-			$order->add_item( $tax_item );
+		$tax_item = new \WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 10.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
 
-			$order->set_billing_country( 'US' );
-			$order->set_total( 110.00 );
-			$order->set_status( OrderStatus::COMPLETED );
-			$order->save();
-			$this->created_orders[] = $order->get_id();
+		$order->set_billing_country( 'US' );
+		$order->set_total( 110.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
 
-			// Legacy form: client supplies the tax-inclusive refund_total ($110)
-			// and omits quantity. Converter must extract the $10 tax portion the
-			// same way it does for the simplified/explicit-with-quantity paths.
-			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
-			$request->set_body_params(
-				array(
-					'order_id'   => $order->get_id(),
-					'line_items' => array(
-						array(
-							'line_item_id' => $item->get_id(),
-							'refund_total' => 110.00,
-						),
+		// Legacy form: client supplies the tax-inclusive refund_total ($110)
+		// and omits quantity. Converter must extract the $10 tax portion the
+		// same way it does for the simplified/explicit-with-quantity paths.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'refund_total' => 110.00,
 					),
-				)
-			);
-			$response = $this->server->dispatch( $request );
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
 
-			$this->assertEquals( 201, $response->get_status() );
-			$data                    = $response->get_data();
-			$this->created_refunds[] = $data['id'];
+		$this->assertEquals( 201, $response->get_status() );
+		$data                    = $response->get_data();
+		$this->created_refunds[] = $data['id'];
 
-			$this->assertEquals( '110.00', $data['total'] );
-			$this->assertNotEmpty( $data['line_items'] );
-			$this->assertEquals( '100.00', $data['line_items'][0]['refund_total'], 'Per-line refund_total should be tax-exclusive after extraction.' );
-			$this->assertNotEmpty( $data['line_items'][0]['refund_tax'], 'refund_tax must be extracted on the tax-inclusive legacy path.' );
-			$this->assertEquals( '10.00', $data['line_items'][0]['refund_tax'][0]['refund_total'] );
+		$this->assertEquals( '110.00', $data['total'] );
+		$this->assertNotEmpty( $data['line_items'] );
+		$this->assertEquals( '100.00', $data['line_items'][0]['refund_total'], 'Per-line refund_total should be tax-exclusive after extraction.' );
+		$this->assertNotEmpty( $data['line_items'][0]['refund_tax'], 'refund_tax must be extracted on the tax-inclusive legacy path.' );
+		$this->assertEquals( '10.00', $data['line_items'][0]['refund_tax'][0]['refund_total'] );
 
-			$product->delete( true );
-		} finally {
-			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
-		}
+		$product->delete( true );
 	}
 
 	/**
@@ -3239,79 +3209,72 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes', 'no' );
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 
-		try {
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_regular_price( 100.00 );
-			$product->set_tax_status( 'taxable' );
-			$product->save();
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
 
-			$order = wc_create_order();
-			$item  = new WC_Order_Item_Product();
-			$item->set_props(
-				array(
-					'product'  => $product,
-					'quantity' => 1,
-					'subtotal' => 100.00,
-					'total'    => 100.00,
-				)
-			);
-			$item->set_taxes(
-				array(
-					'total'    => array( $tax_rate_id => 10.00 ),
-					'subtotal' => array( $tax_rate_id => 10.00 ),
-				)
-			);
-			$item->save();
-			$order->add_item( $item );
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 10.00 ),
+				'subtotal' => array( $tax_rate_id => 10.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
 
-			$tax_item = new \WC_Order_Item_Tax();
-			$tax_item->set_rate( $tax_rate_id );
-			$tax_item->set_tax_total( 10.00 );
-			$tax_item->save();
-			$order->add_item( $tax_item );
+		$tax_item = new \WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 10.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
 
-			$order->set_billing_country( 'US' );
-			$order->set_total( 110.00 );
-			$order->set_status( OrderStatus::COMPLETED );
-			$order->save();
-			$this->created_orders[] = $order->get_id();
+		$order->set_billing_country( 'US' );
+		$order->set_total( 110.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
 
-			// Auto-compute (no refund_total) + explicit refund_tax.
-			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
-			$request->set_body_params(
-				array(
-					'order_id'   => $order->get_id(),
-					'line_items' => array(
-						array(
-							'line_item_id' => $item->get_id(),
-							'quantity'     => 1,
-							'refund_tax'   => array(
-								array(
-									'id'           => $tax_rate_id,
-									'refund_total' => 10.00,
-								),
+		// Auto-compute (no refund_total) + explicit refund_tax.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'quantity'     => 1,
+						'refund_tax'   => array(
+							array(
+								'id'           => $tax_rate_id,
+								'refund_total' => 10.00,
 							),
 						),
 					),
-				)
-			);
-			$response = $this->server->dispatch( $request );
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
 
-			$this->assertEquals( 400, $response->get_status() );
-			$data = $response->get_data();
-			$this->assertEquals( 'invalid_line_item', $data['code'] );
-			$this->assertStringContainsString( 'refund_tax cannot be combined', $data['message'] );
+		$this->assertEquals( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'invalid_line_item', $data['code'] );
+		$this->assertStringContainsString( 'refund_tax cannot be combined', $data['message'] );
 
-			$product->delete( true );
-		} finally {
-			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
-		}
+		$product->delete( true );
 	}
 
 	/**
@@ -4003,58 +3966,53 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox Auto-compute follows the store's zero-decimal price setting and the final unit refund absorbs the rounding remainder.
 	 */
 	public function test_refunds_create_auto_compute_zero_decimal_currency(): void {
-		$original_decimals = get_option( 'woocommerce_price_num_decimals', '2' );
 		update_option( 'woocommerce_price_num_decimals', '0' );
 
-		try {
-			list( $order, $item ) = $this->create_order_with_exact_line( 3, 1000.00, 1000.00, 1000.00 );
+		list( $order, $item ) = $this->create_order_with_exact_line( 3, 1000.00, 1000.00, 1000.00 );
 
-			$response = $this->dispatch_refund_request(
-				$order->get_id(),
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
 				array(
-					array(
-						'line_item_id' => $item->get_id(),
-						'quantity'     => 2,
-					),
-				)
-			);
-			$this->assertEquals( 201, $response->get_status() );
-			$this->assertEqualsWithDelta( 667.0, (float) $response->get_data()['total'], 0.001, 'Qty-2 refund of a 1000/3 line rounds to 667 at zero decimals' );
-			$this->created_refunds[] = $response->get_data()['id'];
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 2,
+				),
+			)
+		);
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEqualsWithDelta( 667.0, (float) $response->get_data()['total'], 0.001, 'Qty-2 refund of a 1000/3 line rounds to 667 at zero decimals' );
+		$this->created_refunds[] = $response->get_data()['id'];
 
-			$response = $this->dispatch_refund_request(
-				$order->get_id(),
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
 				array(
-					array(
-						'line_item_id' => $item->get_id(),
-						'quantity'     => 1,
-					),
-				)
-			);
-			$this->assertEquals( 201, $response->get_status() );
-			$this->assertEqualsWithDelta( 333.0, (float) $response->get_data()['total'], 0.001, '667 + 333 consumes the 1000 line exactly' );
-			$this->created_refunds[] = $response->get_data()['id'];
-
-			list( $order_b, $item_b ) = $this->create_order_with_exact_line( 3, 1000.00, 1000.00, 1000.00 );
-
-			$unit_refund = array(
-				array(
-					'line_item_id' => $item_b->get_id(),
+					'line_item_id' => $item->get_id(),
 					'quantity'     => 1,
 				),
-			);
-			foreach ( array( 333.0, 333.0, 334.0 ) as $refund_number => $expected_total ) {
-				$response = $this->dispatch_refund_request( $order_b->get_id(), $unit_refund );
-				$this->assertEquals( 201, $response->get_status() );
-				$this->assertEqualsWithDelta( $expected_total, (float) $response->get_data()['total'], 0.001, "Unit refund {$refund_number} of the 1000/3 line: the final unit absorbs the rounding remainder" );
-				$this->created_refunds[] = $response->get_data()['id'];
-			}
+			)
+		);
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEqualsWithDelta( 333.0, (float) $response->get_data()['total'], 0.001, '667 + 333 consumes the 1000 line exactly' );
+		$this->created_refunds[] = $response->get_data()['id'];
 
-			$order_b = wc_get_order( $order_b->get_id() );
-			$this->assertEqualsWithDelta( 0.0, (float) $order_b->get_remaining_refund_amount(), 0.001, 'The final 334 refund consumes the 1000 line exactly — no stranded currency unit' );
-		} finally {
-			update_option( 'woocommerce_price_num_decimals', $original_decimals );
+		list( $order_b, $item_b ) = $this->create_order_with_exact_line( 3, 1000.00, 1000.00, 1000.00 );
+
+		$unit_refund = array(
+			array(
+				'line_item_id' => $item_b->get_id(),
+				'quantity'     => 1,
+			),
+		);
+		foreach ( array( 333.0, 333.0, 334.0 ) as $refund_number => $expected_total ) {
+			$response = $this->dispatch_refund_request( $order_b->get_id(), $unit_refund );
+			$this->assertEquals( 201, $response->get_status() );
+			$this->assertEqualsWithDelta( $expected_total, (float) $response->get_data()['total'], 0.001, "Unit refund {$refund_number} of the 1000/3 line: the final unit absorbs the rounding remainder" );
+			$this->created_refunds[] = $response->get_data()['id'];
 		}
+
+		$order_b = wc_get_order( $order_b->get_id() );
+		$this->assertEqualsWithDelta( 0.0, (float) $order_b->get_remaining_refund_amount(), 0.001, 'The final 334 refund consumes the 1000 line exactly — no stranded currency unit' );
 	}
 
 	/**
@@ -4075,70 +4033,63 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes', 'no' );
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 
-		try {
-			// 3 × 9.99 = 29.97, tax at 8.875% = 2.66, grand total 32.63.
-			list( $one_shot_order, $one_shot_item ) = $this->create_order_with_exact_line( 3, 29.97, 29.97, 32.63, array( $tax_rate_id => 2.66 ) );
+		// 3 × 9.99 = 29.97, tax at 8.875% = 2.66, grand total 32.63.
+		list( $one_shot_order, $one_shot_item ) = $this->create_order_with_exact_line( 3, 29.97, 29.97, 32.63, array( $tax_rate_id => 2.66 ) );
 
-			$response = $this->dispatch_refund_request(
-				$one_shot_order->get_id(),
+		$response = $this->dispatch_refund_request(
+			$one_shot_order->get_id(),
+			array(
 				array(
-					array(
-						'line_item_id' => $one_shot_item->get_id(),
-						'quantity'     => 3,
-					),
-				)
-			);
-			$this->assertEquals( 201, $response->get_status() );
-			$this->assertEqualsWithDelta( 32.63, (float) $response->get_data()['total'], 0.001, 'Full-quantity refund must equal line total + line tax exactly' );
-			$this->created_refunds[] = $response->get_data()['id'];
+					'line_item_id' => $one_shot_item->get_id(),
+					'quantity'     => 3,
+				),
+			)
+		);
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEqualsWithDelta( 32.63, (float) $response->get_data()['total'], 0.001, 'Full-quantity refund must equal line total + line tax exactly' );
+		$this->created_refunds[] = $response->get_data()['id'];
 
-			list( $order, $item ) = $this->create_order_with_exact_line( 3, 29.97, 29.97, 32.63, array( $tax_rate_id => 2.66 ) );
+		list( $order, $item ) = $this->create_order_with_exact_line( 3, 29.97, 29.97, 32.63, array( $tax_rate_id => 2.66 ) );
 
-			$response = $this->dispatch_refund_request(
-				$order->get_id(),
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
 				array(
-					array(
-						'line_item_id' => $item->get_id(),
-						'quantity'     => 2,
-					),
-				)
-			);
-			$this->assertEquals( 201, $response->get_status() );
-			$data = $response->get_data();
-			$this->assertEqualsWithDelta( 21.75, (float) $data['total'], 0.001, 'Qty-2 refund of the 32.63 line rounds 21.7533 to 21.75' );
-			$this->created_refunds[] = $data['id'];
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 2,
+				),
+			)
+		);
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEqualsWithDelta( 21.75, (float) $data['total'], 0.001, 'Qty-2 refund of the 32.63 line rounds 21.7533 to 21.75' );
+		$this->created_refunds[] = $data['id'];
 
-			$line    = $data['line_items'][0];
-			$tax_sum = 0.0;
-			foreach ( $line['refund_tax'] as $tax ) {
-				$tax_sum += (float) $tax['refund_total'];
-			}
-			$this->assertEqualsWithDelta( 21.75, (float) $line['refund_total'] + $tax_sum, 0.001, 'Extracted net + tax must reassemble the tax-inclusive amount' );
-
-			$response = $this->dispatch_refund_request(
-				$order->get_id(),
-				array(
-					array(
-						'line_item_id' => $item->get_id(),
-						'quantity'     => 1,
-					),
-				)
-			);
-			$this->assertEquals( 201, $response->get_status() );
-			$this->assertEqualsWithDelta( 10.88, (float) $response->get_data()['total'], 0.001, '21.75 + 10.88 consumes the 32.63 line exactly' );
-			$this->created_refunds[] = $response->get_data()['id'];
-
-			$order = wc_get_order( $order->get_id() );
-			$this->assertEqualsWithDelta( 0.0, (float) $order->get_remaining_refund_amount(), 0.001, 'Qty-2 then qty-1 must leave nothing unrefunded' );
-		} finally {
-			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
+		$line    = $data['line_items'][0];
+		$tax_sum = 0.0;
+		foreach ( $line['refund_tax'] as $tax ) {
+			$tax_sum += (float) $tax['refund_total'];
 		}
+		$this->assertEqualsWithDelta( 21.75, (float) $line['refund_total'] + $tax_sum, 0.001, 'Extracted net + tax must reassemble the tax-inclusive amount' );
+
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			)
+		);
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEqualsWithDelta( 10.88, (float) $response->get_data()['total'], 0.001, '21.75 + 10.88 consumes the 32.63 line exactly' );
+		$this->created_refunds[] = $response->get_data()['id'];
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEqualsWithDelta( 0.0, (float) $order->get_remaining_refund_amount(), 0.001, 'Qty-2 then qty-1 must leave nothing unrefunded' );
 	}
 
 	/**
@@ -4159,46 +4110,39 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes', 'no' );
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 
-		try {
-			// 5 × 9.99 displayed (tax-inclusive) = 49.95; stored net 40.61 + 9.34 tax.
-			list( $order, $item ) = $this->create_order_with_exact_line( 5, 40.61, 40.61, 49.95, array( $tax_rate_id => 9.34 ) );
+		// 5 × 9.99 displayed (tax-inclusive) = 49.95; stored net 40.61 + 9.34 tax.
+		list( $order, $item ) = $this->create_order_with_exact_line( 5, 40.61, 40.61, 49.95, array( $tax_rate_id => 9.34 ) );
 
-			$response = $this->dispatch_refund_request(
-				$order->get_id(),
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
 				array(
-					array(
-						'line_item_id' => $item->get_id(),
-						'quantity'     => 5,
-					),
-				)
-			);
-			$this->assertEquals( 201, $response->get_status() );
-			$this->assertEqualsWithDelta( 49.95, (float) $response->get_data()['total'], 0.001, 'Full-quantity refund must equal 5 × the displayed 9.99 price' );
-			$this->created_refunds[] = $response->get_data()['id'];
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 5,
+				),
+			)
+		);
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEqualsWithDelta( 49.95, (float) $response->get_data()['total'], 0.001, 'Full-quantity refund must equal 5 × the displayed 9.99 price' );
+		$this->created_refunds[] = $response->get_data()['id'];
 
-			list( $order_b, $item_b ) = $this->create_order_with_exact_line( 5, 40.61, 40.61, 49.95, array( $tax_rate_id => 9.34 ) );
+		list( $order_b, $item_b ) = $this->create_order_with_exact_line( 5, 40.61, 40.61, 49.95, array( $tax_rate_id => 9.34 ) );
 
-			$response = $this->dispatch_refund_request(
-				$order_b->get_id(),
+		$response = $this->dispatch_refund_request(
+			$order_b->get_id(),
+			array(
 				array(
-					array(
-						'line_item_id' => $item_b->get_id(),
-						'quantity'     => 2,
-					),
-				)
-			);
-			$this->assertEquals( 201, $response->get_status() );
-			$this->assertEqualsWithDelta( 19.98, (float) $response->get_data()['total'], 0.001, 'Qty-2 refund must equal 2 × the displayed 9.99 price' );
-			$this->created_refunds[] = $response->get_data()['id'];
-		} finally {
-			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
-		}
+					'line_item_id' => $item_b->get_id(),
+					'quantity'     => 2,
+				),
+			)
+		);
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEqualsWithDelta( 19.98, (float) $response->get_data()['total'], 0.001, 'Qty-2 refund must equal 2 × the displayed 9.99 price' );
+		$this->created_refunds[] = $response->get_data()['id'];
 	}
 
 	/**
@@ -4232,51 +4176,44 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes', 'no' );
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 
-		try {
-			// 3 × 50 = 150; GST 5% = 7.50; compound PST 7% of 157.50 = 11.03; grand total 168.53.
-			list( $order, $item ) = $this->create_order_with_exact_line(
-				3,
-				150.00,
-				150.00,
-				168.53,
-				array(
-					$gst_rate_id => 7.50,
-					$pst_rate_id => 11.03,
-				)
-			);
+		// 3 × 50 = 150; GST 5% = 7.50; compound PST 7% of 157.50 = 11.03; grand total 168.53.
+		list( $order, $item ) = $this->create_order_with_exact_line(
+			3,
+			150.00,
+			150.00,
+			168.53,
+			array(
+				$gst_rate_id => 7.50,
+				$pst_rate_id => 11.03,
+			)
+		);
 
-			$line_items = array(
-				array(
-					'line_item_id' => $item->get_id(),
-					'quantity'     => 2,
-				),
-			);
+		$line_items = array(
+			array(
+				'line_item_id' => $item->get_id(),
+				'quantity'     => 2,
+			),
+		);
 
-			$data_utils = wc_get_container()->get( DataUtils::class );
-			$preview    = $data_utils->build_refund_preview( $order, $line_items );
+		$data_utils = wc_get_container()->get( DataUtils::class );
+		$preview    = $data_utils->build_refund_preview( $order, $line_items );
 
-			$response = $this->dispatch_refund_request( $order->get_id(), $line_items );
-			$this->assertEquals( 201, $response->get_status() );
-			$data = $response->get_data();
-			$this->assertEqualsWithDelta( 112.35, (float) $data['total'], 0.001, 'Qty-2 refund of the 168.53 line rounds 112.3533 to 112.35' );
-			$this->assertEquals( $preview['total'], $data['total'], 'Create amount must match build_refund_preview total exactly' );
-			$this->created_refunds[] = $data['id'];
+		$response = $this->dispatch_refund_request( $order->get_id(), $line_items );
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEqualsWithDelta( 112.35, (float) $data['total'], 0.001, 'Qty-2 refund of the 168.53 line rounds 112.3533 to 112.35' );
+		$this->assertEquals( $preview['total'], $data['total'], 'Create amount must match build_refund_preview total exactly' );
+		$this->created_refunds[] = $data['id'];
 
-			$line    = $data['line_items'][0];
-			$tax_sum = 0.0;
-			foreach ( $line['refund_tax'] as $tax ) {
-				$tax_sum += (float) $tax['refund_total'];
-			}
-			$this->assertEqualsWithDelta( 112.35, (float) $line['refund_total'] + $tax_sum, 0.001, 'Net + per-rate taxes must reassemble the tax-inclusive amount' );
-		} finally {
-			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
+		$line    = $data['line_items'][0];
+		$tax_sum = 0.0;
+		foreach ( $line['refund_tax'] as $tax ) {
+			$tax_sum += (float) $tax['refund_total'];
 		}
+		$this->assertEqualsWithDelta( 112.35, (float) $line['refund_total'] + $tax_sum, 0.001, 'Net + per-rate taxes must reassemble the tax-inclusive amount' );
 	}
 
 	/**
@@ -4595,78 +4532,74 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		};
 		add_filter( 'wc_get_price_decimals', $zero_decimals );
 
-		try {
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_regular_price( 1000.00 );
-			$product->set_tax_status( 'taxable' );
-			$product->save();
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 1000.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
 
-			$order = wc_create_order();
-			$item  = new WC_Order_Item_Product();
-			$item->set_props(
-				array(
-					'product'  => $product,
-					'quantity' => 1,
-					'subtotal' => 1000.00,
-					'total'    => 1000.00,
-				)
-			);
-			$item->set_taxes(
-				array(
-					'total'    => array( $tax_rate_id => 100.00 ),
-					'subtotal' => array( $tax_rate_id => 100.00 ),
-				)
-			);
-			$item->save();
-			$order->add_item( $item );
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 1000.00,
+				'total'    => 1000.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 100.00 ),
+				'subtotal' => array( $tax_rate_id => 100.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
 
-			$tax_item = new WC_Order_Item_Tax();
-			$tax_item->set_rate( $tax_rate_id );
-			$tax_item->set_tax_total( 100.00 );
-			$tax_item->save();
-			$order->add_item( $tax_item );
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 100.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
 
-			$order->set_billing_country( 'US' );
-			$order->set_total( 1100.00 );
-			$order->set_status( OrderStatus::COMPLETED );
-			$order->save();
-			$this->created_orders[] = $order->get_id();
+		$order->set_billing_country( 'US' );
+		$order->set_total( 1100.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
 
-			// Refund 549 of the 1100 tax-inclusive line. The stored ratio gives
-			// 549 * 100/1100 = 49.909..., which rounds to 50 at zero decimals (it would
-			// be 49.91 at two), and the net subtotal becomes 549 - 50 = 499. Asserting
-			// these whole numbers proves the split honours the currency precision.
-			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
-			$request->set_body_params(
-				array(
-					'order_id'   => $order->get_id(),
-					'line_items' => array(
-						array(
-							'line_item_id' => $item->get_id(),
-							'refund_total' => 549,
-						),
+		// Refund 549 of the 1100 tax-inclusive line. The stored ratio gives
+		// 549 * 100/1100 = 49.909..., which rounds to 50 at zero decimals (it would
+		// be 49.91 at two), and the net subtotal becomes 549 - 50 = 499. Asserting
+		// these whole numbers proves the split honours the currency precision.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'refund_total' => 549,
 					),
-				)
-			);
-			$response = $this->server->dispatch( $request );
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
 
-			$this->assertEquals( 201, $response->get_status() );
-			$data                    = $response->get_data();
-			$this->created_refunds[] = $data['id'];
+		$this->assertEquals( 201, $response->get_status() );
+		$data                    = $response->get_data();
+		$this->created_refunds[] = $data['id'];
 
-			$refund           = wc_get_order( $data['id'] );
-			$refund_items     = $refund->get_items( 'line_item' );
-			$refund_line_item = reset( $refund_items );
-			$refund_taxes     = $refund_line_item->get_taxes();
+		$refund           = wc_get_order( $data['id'] );
+		$refund_items     = $refund->get_items( 'line_item' );
+		$refund_line_item = reset( $refund_items );
+		$refund_taxes     = $refund_line_item->get_taxes();
 
-			$this->assertEquals( -499.0, (float) $refund_line_item->get_total(), 'Net subtotal rounds to a whole number at zero decimals.' );
-			$this->assertEquals( -50.0, (float) $refund_taxes['total'][ $tax_rate_id ], 'Tax rounds to a whole number at zero decimals.' );
-			$this->assertEquals( 549.0, (float) $data['total'], 'Net + tax must reconstitute the requested amount.' );
+		$this->assertEquals( -499.0, (float) $refund_line_item->get_total(), 'Net subtotal rounds to a whole number at zero decimals.' );
+		$this->assertEquals( -50.0, (float) $refund_taxes['total'][ $tax_rate_id ], 'Tax rounds to a whole number at zero decimals.' );
+		$this->assertEquals( 549.0, (float) $data['total'], 'Net + tax must reconstitute the requested amount.' );
 
-			$product->delete( true );
-		} finally {
-			remove_filter( 'wc_get_price_decimals', $zero_decimals );
-		}
+		$product->delete( true );
 	}
 
 	/**
@@ -4821,80 +4754,75 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 
-		try {
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_regular_price( 110.00 );
-			$product->set_tax_status( 'taxable' );
-			$product->save();
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 110.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
 
-			$order = wc_create_order();
-			$item  = new WC_Order_Item_Product();
-			$item->set_props(
-				array(
-					'product'  => $product,
-					'quantity' => 1,
-					'subtotal' => 100.00,
-					'total'    => 100.00,
-				)
-			);
-			$item->set_taxes(
-				array(
-					'total'    => array( $tax_rate_id => 10.00 ),
-					'subtotal' => array( $tax_rate_id => 10.00 ),
-				)
-			);
-			$item->save();
-			$order->add_item( $item );
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 10.00 ),
+				'subtotal' => array( $tax_rate_id => 10.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
 
-			$tax_item = new WC_Order_Item_Tax();
-			$tax_item->set_rate( $tax_rate_id );
-			$tax_item->set_tax_total( 10.00 );
-			$tax_item->save();
-			$order->add_item( $tax_item );
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 10.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
 
-			$order->set_billing_country( 'US' );
-			$order->set_total( 110.00 );
-			$order->set_status( OrderStatus::COMPLETED );
-			$order->save();
-			$this->created_orders[] = $order->get_id();
+		$order->set_billing_country( 'US' );
+		$order->set_total( 110.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$this->created_orders[] = $order->get_id();
 
-			// Refund $55 of the $110 tax-inclusive line → $50 net, $5 tax, same split as a tax-exclusive store.
-			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
-			$request->set_body_params(
-				array(
-					'order_id'   => $order->get_id(),
-					'line_items' => array(
-						array(
-							'line_item_id' => $item->get_id(),
-							'refund_total' => 55.00,
-						),
+		// Refund $55 of the $110 tax-inclusive line → $50 net, $5 tax, same split as a tax-exclusive store.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item->get_id(),
+						'refund_total' => 55.00,
 					),
-				)
-			);
-			$response = $this->server->dispatch( $request );
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
 
-			$this->assertEquals( 201, $response->get_status() );
-			$data                    = $response->get_data();
-			$this->created_refunds[] = $data['id'];
+		$this->assertEquals( 201, $response->get_status() );
+		$data                    = $response->get_data();
+		$this->created_refunds[] = $data['id'];
 
-			$this->assertEquals( '55.00', $data['total'], 'Tax-inclusive store: amount equals the requested tax-inclusive partial.' );
+		$this->assertEquals( '55.00', $data['total'], 'Tax-inclusive store: amount equals the requested tax-inclusive partial.' );
 
-			$refund           = wc_get_order( $data['id'] );
-			$refund_items     = $refund->get_items( 'line_item' );
-			$refund_line_item = reset( $refund_items );
-			$refund_taxes     = $refund_line_item->get_taxes();
+		$refund           = wc_get_order( $data['id'] );
+		$refund_items     = $refund->get_items( 'line_item' );
+		$refund_line_item = reset( $refund_items );
+		$refund_taxes     = $refund_line_item->get_taxes();
 
-			$this->assertEquals( -50.00, (float) $refund_line_item->get_total(), 'Stored net total should be half of $100.' );
-			$this->assertEquals( -5.00, (float) $refund_taxes['total'][ $tax_rate_id ], 'Stored tax should be half of $10, not re-extracted.' );
+		$this->assertEquals( -50.00, (float) $refund_line_item->get_total(), 'Stored net total should be half of $100.' );
+		$this->assertEquals( -5.00, (float) $refund_taxes['total'][ $tax_rate_id ], 'Stored tax should be half of $10, not re-extracted.' );
 
-			$product->delete( true );
-		} finally {
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
-		}
+		$product->delete( true );
 	}
 
 	/**

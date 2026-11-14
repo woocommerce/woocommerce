@@ -159,9 +159,6 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 		if ( $post_id ) {
 			wp_delete_post( $post_id, true );
 		}
-
-		// Remove the filter.
-		remove_all_filters( 'admin_url' );
 	}
 
 	/** @see test_modify_product_review_moderation_urls */
@@ -205,8 +202,5 @@ class ReviewsUtilTest extends WC_Unit_Test_Case {
 
 		$result = ReviewsUtil::modify_product_review_moderation_urls( $original_message, 999999 ); // Non-existent comment ID.
 		$this->assertEquals( $original_message, $result );
-
-		// Remove the filter.
-		remove_all_filters( 'admin_url' );
 	}
 }
