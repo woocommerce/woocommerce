@@ -16,7 +16,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		$this->disable_cogs_feature();
 		self::disable_direct_product_attribute_lookup_updates();
 	}
 

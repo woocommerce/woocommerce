@@ -49,14 +49,6 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		update_option( 'woocommerce_feature_email_improvements_enabled', 'no' );
-	}
-
-	/**
 	 * Tests that it returns processing order email preview.
 	 */
 	public function test_it_returns_order_email_preview() {
