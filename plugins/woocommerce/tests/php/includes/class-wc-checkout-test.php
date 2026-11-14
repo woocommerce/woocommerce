@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
@@ -1965,6 +1966,21 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( $order_id, $resumed_id, 'The order should still be resumed.' );
 		$this->assert_line_items_match_cart( $order_id );
 		$this->assertNotSame( $before['line_item'], $this->get_order_item_ids_by_type( $order_id )['line_item'], 'The line item should be replaced.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order replaces line items whose product tax status changed, even when no cart amount changed.
+	 */
+	public function test_create_order_resume_replaces_line_items_when_a_product_tax_status_changed(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		WC()->cart->get_cart_item( array_key_first( WC()->cart->get_cart() ) )['data']->set_tax_status( ProductTaxStatus::NONE );
+
+		$this->resume_order( $order_id );
+
+		$line_items = wc_get_order( $order_id )->get_items();
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array( 'line_item' ) );
+		$this->assertSame( ProductTaxStatus::NONE, current( $line_items )->get_recorded_tax_status(), 'The new line item should record the current tax status.' );
 	}
 
 	/**

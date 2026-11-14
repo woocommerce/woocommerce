@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Recalculating an order no longer changes the tax of a product line when the product's tax status has changed or the product was deleted since the sale. A line on an order placed before this change keeps what it was charged.

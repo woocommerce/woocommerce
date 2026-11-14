@@ -724,8 +724,9 @@ class WC_Checkout {
 
 	/**
 	 * Hashes each cart section that creates an order item type, using the Store API's cart hashes for fees, taxes and
-	 * coupons. Line items hash the cart's contents instead of the filterable cart hash, and shipping hashes the filtered
-	 * rate values that create_order_shipping_lines() copies, so filters can't hide a change to either.
+	 * coupons. Line items hash the cart's contents instead of the filterable cart hash, plus the tax status each line
+	 * records, and shipping hashes the filtered rate values that create_order_shipping_lines() copies, so filters can't
+	 * hide a change to either.
 	 *
 	 * @return array<string, string> Hashes keyed by order item type.
 	 */
@@ -736,8 +737,13 @@ class WC_Checkout {
 			(array) WC()->cart->get_shipping_methods()
 		);
 
+		$product_tax_statuses = array_map(
+			fn( $cart_item ) => ( $cart_item['data'] ?? null ) instanceof WC_Product ? $cart_item['data']->get_tax_status() : '',
+			WC()->cart->get_cart()
+		);
+
 		return array(
-			OrderItemType::LINE_ITEM => md5( (string) wp_json_encode( WC()->cart->get_cart_for_session() ) ),
+			OrderItemType::LINE_ITEM => md5( (string) wp_json_encode( array( WC()->cart->get_cart_for_session(), $product_tax_statuses ) ) ),
 			OrderItemType::FEE       => $hashes['fees'],
 			OrderItemType::SHIPPING  => md5( (string) wp_json_encode( array( $shipping_rates, WC()->session->get( 'chosen_shipping_methods' ) ) ) ),
 			OrderItemType::TAX       => $hashes['taxes'],
@@ -916,6 +922,7 @@ class WC_Checkout {
 			}
 
 			$item->set_backorder_meta();
+			$item->record_tax_status( $product );
 
 			/**
 			 * Action hook to adjust item before save.
