@@ -61,17 +61,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	private static array $created_fulfillment_ids = array();
 
 	/**
-	 * Original value of the fulfillments feature flag.
-	 *
-	 * @var mixed
-	 */
-	private static $original_fulfillments_flag;
-
-	/**
 	 * Setup test case.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		FulfillmentsHelper::enable_fulfillments();
 
 		$this->controller = new OrderFulfillmentsRestController();
 		$this->controller->register_routes();
@@ -84,11 +78,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		parent::setupBeforeClass();
 		self::enable_direct_product_attribute_lookup_updates();
 
-		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
+		FulfillmentsHelper::create_tables();
 
 		self::$created_user_id = wp_create_user( 'test_user', 'password', 'nonadmin@example.com' );
 		add_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
@@ -159,23 +149,14 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			wp_delete_user( self::$created_user_id );
 		} finally {
 			try {
-				if ( false === self::$original_fulfillments_flag ) {
-					delete_option( 'woocommerce_feature_fulfillments_enabled' );
-				} else {
-					update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
-				}
+				parent::tearDownAfterClass();
 			} finally {
-				try {
-					parent::tearDownAfterClass();
-				} finally {
-					self::$created_order_ids          = array();
-					self::$created_import_action_ids  = array();
-					self::$created_fulfillment_ids    = array();
-					self::$created_user_id            = -1;
-					self::$customer_order_id          = -1;
-					self::$original_fulfillments_flag = null;
-					self::disable_direct_product_attribute_lookup_updates();
-				}
+				self::$created_order_ids         = array();
+				self::$created_import_action_ids = array();
+				self::$created_fulfillment_ids   = array();
+				self::$created_user_id           = -1;
+				self::$customer_order_id         = -1;
+				self::disable_direct_product_attribute_lookup_updates();
 			}
 		}
 	}

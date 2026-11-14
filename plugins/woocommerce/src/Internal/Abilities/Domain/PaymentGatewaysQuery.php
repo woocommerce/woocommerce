@@ -116,7 +116,7 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 	 * @since 11.4.0
 	 */
 	public static function can_query_payment_gateways(): bool {
-		return wc_rest_check_manager_permissions( 'payment_gateways', 'read' );
+		return (bool) wc_rest_check_manager_permissions( 'payment_gateways', 'read' );
 	}
 
 	/**

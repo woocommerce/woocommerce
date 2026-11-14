@@ -46,9 +46,6 @@ class SubmissionHandlerRoutingTest extends WC_Unit_Test_Case {
 		delete_option( 'comment_moderation' );
 		$_POST = array();
 		ItemEligibility::reset_cache();
-		remove_all_filters( 'wp_die_ajax_handler' );
-		remove_all_filters( 'wp_doing_ajax' );
-		remove_all_filters( 'wp_send_json_handler' );
 		parent::tearDown();
 	}
 

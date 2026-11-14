@@ -14,8 +14,14 @@ use Automattic\WooCommerce\Tests\Helpers\InterleavedStatusOrdersTrait;
  * @group order-query-tests
  */
 class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
+
 	use CogsAwareUnitTestSuiteTrait;
 	use InterleavedStatusOrdersTrait;
+
+	/**
+	 * A modified date in the past, used to check that saving an order moves it.
+	 */
+	private const PAST_MODIFIED_GMT = '2020-01-01 00:00:00';
 
 	/**
 	 * Store the COT state before the test class.
@@ -1725,6 +1731,112 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		foreach ( $items as $item ) {
 			$this->assertGreaterThan( 0, $item->get_product_id(), 'Item should have a product ID from cached meta' );
 		}
+	}
+
+	/**
+	 * Create an order whose stored modified date is in 2020.
+	 *
+	 * @return WC_Order The order, read back from the database.
+	 */
+	private function create_order_modified_in_the_past(): WC_Order {
+		$order = OrderHelper::create_order();
+		$GLOBALS['wpdb']->update(
+			$GLOBALS['wpdb']->posts,
+			array(
+				'post_modified'     => get_date_from_gmt( self::PAST_MODIFIED_GMT ),
+				'post_modified_gmt' => self::PAST_MODIFIED_GMT,
+			),
+			array( 'ID' => $order->get_id() )
+		);
+		clean_post_cache( $order->get_id() );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( strtotime( self::PAST_MODIFIED_GMT ), $order->get_date_modified()->getTimestamp(), 'The order should start with the backdated modified date.' );
+
+		return $order;
+	}
+
+	/**
+	 * Assert that both the order object and the stored order have a modified date after the backdated one.
+	 *
+	 * @param WC_Order $order The saved order.
+	 */
+	private function assert_date_modified_moved( WC_Order $order ): void {
+		$this->assertGreaterThan( strtotime( self::PAST_MODIFIED_GMT ), $order->get_date_modified()->getTimestamp(), 'The order object should have the new modified date.' );
+
+		$stored = wc_get_order( $order->get_id() );
+		$this->assertGreaterThan( strtotime( self::PAST_MODIFIED_GMT ), $stored->get_date_modified()->getTimestamp(), 'The stored order should have the new modified date.' );
+		$this->assertSame(
+			$stored->get_date_modified()->getTimestamp(),
+			strtotime( get_post_field( 'post_modified_gmt', $order->get_id(), 'raw' ) . ' UTC' ),
+			'post_modified_gmt should match the order modified date.'
+		);
+	}
+
+	/**
+	 * @testdox Saving an order whose changes are all stored in meta, like new totals, updates its modified date.
+	 */
+	public function test_update_with_meta_only_changes_updates_date_modified(): void {
+		$order = $this->create_order_modified_in_the_past();
+
+		$order->set_total( (float) $order->get_total() + 5 );
+		$order->save();
+
+		$this->assert_date_modified_moved( $order );
+	}
+
+	/**
+	 * @testdox Saving an order after changing only custom meta updates its modified date.
+	 */
+	public function test_update_with_custom_meta_only_updates_date_modified(): void {
+		$order = $this->create_order_modified_in_the_past();
+
+		$order->update_meta_data( '_test_custom_meta', 'value' );
+		$order->save();
+
+		$this->assert_date_modified_moved( $order );
+		$this->assertSame( 'value', wc_get_order( $order->get_id() )->get_meta( '_test_custom_meta' ), 'The custom meta should be saved.' );
+	}
+
+	/**
+	 * @testdox Saving an order after renaming one of its items updates its modified date.
+	 */
+	public function test_update_after_item_rename_updates_date_modified(): void {
+		$order = $this->create_order_modified_in_the_past();
+
+		$items = $order->get_items();
+		$item  = reset( $items );
+		$item->set_name( 'Renamed item' );
+		$order->save();
+
+		$this->assert_date_modified_moved( $order );
+		$this->assertSame( 'Renamed item', WC_Order_Factory::get_order_item( $item->get_id() )->get_name(), 'The item rename should be saved.' );
+	}
+
+	/**
+	 * @testdox Saving an order after adding a zero-amount fee updates its modified date.
+	 */
+	public function test_update_after_adding_zero_fee_updates_date_modified(): void {
+		$order = $this->create_order_modified_in_the_past();
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_name( 'Free gift wrap' );
+		$fee->set_total( '0' );
+		$order->add_item( $fee );
+		$order->save();
+
+		$this->assert_date_modified_moved( $order );
+	}
+
+	/**
+	 * @testdox Saving an order without changes updates its modified date, as the HPOS data store does.
+	 */
+	public function test_update_without_changes_updates_date_modified(): void {
+		$order = $this->create_order_modified_in_the_past();
+
+		$order->save();
+
+		$this->assert_date_modified_moved( $order );
 	}
 
 	/**

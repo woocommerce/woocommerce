@@ -5,14 +5,10 @@ import { __, sprintf } from '@wordpress/i18n';
 import {
 	__experimentalItemGroup as ItemGroup,
 	__experimentalItem as Item,
-	__experimentalVStack as VStack,
-	__experimentalHStack as HStack,
-	__experimentalHeading as Heading,
 	__experimentalNavigatorButton as NavigatorButton,
 	FlexItem,
-	Card,
-	CardBody,
 } from '@wordpress/components';
+import { Stack, Text } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -58,7 +54,7 @@ function ElementItem( { element, label }: { element: string; label: string } ) {
 					)
 				}
 			>
-				<HStack justify="flex-start">
+				<Stack direction="row" align="center" gap="sm">
 					<FlexItem
 						className="edit-site-global-styles-screen-typography__indicator"
 						style={ {
@@ -77,7 +73,7 @@ function ElementItem( { element, label }: { element: string; label: string } ) {
 						Aa
 					</FlexItem>
 					<FlexItem>{ label }</FlexItem>
-				</HStack>
+				</Stack>
 			</NavigatorButton>
 		</Item>
 	);
@@ -85,36 +81,33 @@ function ElementItem( { element, label }: { element: string; label: string } ) {
 
 export function TypographyPanel() {
 	return (
-		<Card size="small" variant="primary" isBorderless>
-			<CardBody>
-				<VStack spacing={ 3 }>
-					<Heading
-						level={ 3 }
-						className="edit-site-global-styles-subtitle"
-					>
-						{ __( 'Elements', __i18n_text_domain__ ) }
-					</Heading>
-					<ItemGroup isBordered isSeparated size="small">
-						<ElementItem
-							element="text"
-							label={ __( 'Text', __i18n_text_domain__ ) }
-						/>
-						<ElementItem
-							element="link"
-							label={ __( 'Links', __i18n_text_domain__ ) }
-						/>
-						<ElementItem
-							element="heading"
-							label={ __( 'Headings', __i18n_text_domain__ ) }
-						/>
-						<ElementItem
-							element="button"
-							label={ __( 'Buttons', __i18n_text_domain__ ) }
-						/>
-					</ItemGroup>
-				</VStack>
-			</CardBody>
-		</Card>
+		<Stack
+			direction="column"
+			gap="md"
+			className="woocommerce-email-editor-styles-screen-body"
+		>
+			<Text variant="heading-sm" render={ <h3 /> }>
+				{ __( 'Elements', __i18n_text_domain__ ) }
+			</Text>
+			<ItemGroup isBordered isSeparated size="small">
+				<ElementItem
+					element="text"
+					label={ __( 'Text', __i18n_text_domain__ ) }
+				/>
+				<ElementItem
+					element="link"
+					label={ __( 'Links', __i18n_text_domain__ ) }
+				/>
+				<ElementItem
+					element="heading"
+					label={ __( 'Headings', __i18n_text_domain__ ) }
+				/>
+				<ElementItem
+					element="button"
+					label={ __( 'Buttons', __i18n_text_domain__ ) }
+				/>
+			</ItemGroup>
+		</Stack>
 	);
 }
 

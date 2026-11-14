@@ -114,34 +114,76 @@ class ProductFields {
 	}
 
 	/**
+	 * Product instance whose variations were last read.
+	 *
+	 * @var \WC_Product|null
+	 */
+	private static ?\WC_Product $cached_variation_product = null;
+
+	/**
+	 * Published variations of the cached product instance.
+	 *
+	 * @var array<int, \WC_Product_Variation>
+	 */
+	private static array $cached_variations = array();
+
+	/**
 	 * Published variations of a variable product; empty for other types. Kept
-	 * for the last product asked about, since every rule asks about the same
-	 * product in turn.
+	 * for the last product instance asked about, since every rule asks about the
+	 * same instance in turn. Another instance of the same product is read again.
 	 *
 	 * @param \WC_Product $product Product.
 	 * @return array<int, \WC_Product_Variation>
 	 */
 	public static function variations( \WC_Product $product ): array {
-		static $last_product    = null;
-		static $last_variations = array();
-
 		if ( ! $product instanceof \WC_Product_Variable ) {
 			return array();
 		}
-		if ( $product === $last_product ) {
-			return $last_variations;
+		if ( self::$cached_variation_product === $product ) {
+			return self::$cached_variations;
 		}
 
 		$variations = array();
-		foreach ( $product->get_children() as $child_id ) {
-			$variation = wc_get_product( (int) $child_id );
-			if ( $variation instanceof \WC_Product_Variation && 'publish' === $variation->get_status() ) {
+		foreach ( self::published_variation_ids( $product ) as $child_id ) {
+			$variation = new \WC_Product_Variation( $child_id );
+			if ( $variation->get_id() > 0 && 'publish' === $variation->get_status() ) {
 				$variations[] = $variation;
 			}
 		}
-		$last_product    = $product;
-		$last_variations = $variations;
+		self::$cached_variation_product = $product;
+		self::$cached_variations        = $variations;
 		return $variations;
+	}
+
+	/**
+	 * Drop the remembered variations of a product, so the next read sees a variation removed in this request.
+	 *
+	 * @param int $product_id Product id.
+	 */
+	public static function forget_variations( int $product_id ): void {
+		if ( self::$cached_variation_product instanceof \WC_Product && self::$cached_variation_product->get_id() === $product_id ) {
+			self::$cached_variation_product = null;
+			self::$cached_variations        = array();
+		}
+	}
+
+	/**
+	 * Published variation ids, from the posts table. The children transient and the
+	 * posts query cache can still list a variation after this request trashed it.
+	 *
+	 * @param \WC_Product $product Variable product.
+	 * @return array<int, int>
+	 */
+	private static function published_variation_ids( \WC_Product $product ): array {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The cached children query still returns a variation this request trashed.
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts} WHERE post_parent = %d AND post_type = 'product_variation' AND post_status = 'publish'",
+				$product->get_id()
+			)
+		);
+		return array_map( 'intval', (array) $ids );
 	}
 
 	/**

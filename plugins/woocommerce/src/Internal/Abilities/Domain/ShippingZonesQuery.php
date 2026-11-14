@@ -119,7 +119,7 @@ class ShippingZonesQuery extends AbstractDomainAbility implements AbilityDefinit
 	 * @since 11.4.0
 	 */
 	public static function can_query_shipping(): bool {
-		return wc_rest_check_manager_permissions( 'settings', 'read' );
+		return (bool) wc_rest_check_manager_permissions( 'settings', 'read' );
 	}
 
 	/**

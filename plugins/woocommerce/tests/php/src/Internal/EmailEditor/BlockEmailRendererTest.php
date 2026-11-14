@@ -418,7 +418,6 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		remove_filter( 'woocommerce_transactional_emails_for_block_editor', array( $this, 'register_fake_block_editor_email_ids' ) );
 		WCTransactionalEmailPostsManager::get_instance()->clear_caches();
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 	}
@@ -530,6 +529,68 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 		}
 
 		return '';
+	}
+
+	/**
+	 * @testdox Gives blocks the first valid recipient and the order's customer while rendering.
+	 */
+	public function testItPassesRecipientAndOrderCustomerToBlocks(): void {
+		$this->skip_if_unsupported_environment();
+		$customer_id          = $this->factory()->user->create();
+		$order                = wc_create_order( array( 'customer_id' => $customer_id ) );
+		$wc_mail_mock         = $this->create_test_email_mock( 'not-an-email, buyer@test.com, other@test.com' );
+		$wc_mail_mock->object = $order;
+		$seen_context         = null;
+		add_filter(
+			'woocommerce_email_editor_rendering_email_context',
+			function ( $context ) use ( &$seen_context ) {
+				$seen_context = $context;
+				return $context;
+			},
+			20
+		);
+
+		$this->block_email_renderer->maybe_render_block_email( $wc_mail_mock );
+
+		$this->assertSame( 'buyer@test.com', $seen_context['recipient_email'] ?? null );
+		$this->assertSame( $customer_id, $seen_context['user_id'] ?? null );
+	}
+
+	/**
+	 * @testdox Falls back to the classic email and removes its context filter when rendering fails.
+	 */
+	public function testItFallsBackAndCleansUpWhenRenderingFails(): void {
+		$this->skip_if_unsupported_environment();
+		$thrown = false;
+		$throw  = function () use ( &$thrown ) {
+			$thrown = true;
+			throw new \RuntimeException( 'Render failed.' );
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $throw, 20 );
+		$filters_before = count( $GLOBALS['wp_filter']['woocommerce_email_editor_rendering_email_context']->callbacks[10] ?? array() );
+
+		$rendered_email = $this->block_email_renderer->maybe_render_block_email( $this->create_test_email_mock( 'customer@test.com' ) );
+
+		$this->assertTrue( $thrown, 'The render should reach the failing filter.' );
+		$this->assertNull( $rendered_email );
+		$this->assertCount( $filters_before, $GLOBALS['wp_filter']['woocommerce_email_editor_rendering_email_context']->callbacks[10] ?? array() );
+	}
+
+	/**
+	 * Mock of the test email with the given recipient.
+	 *
+	 * @param string $recipient Recipient list.
+	 * @return \WC_Email&\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private function create_test_email_mock( string $recipient ) {
+		$wc_mail_mock     = $this->createMock( \WC_Email::class );
+		$wc_mail_mock->id = 'test_email';
+		$wc_mail_mock->method( 'get_recipient' )->willReturn( $recipient );
+		$wc_mail_mock->method( 'get_subject' )->willReturn( 'Test Woo Email' );
+		$wc_mail_mock->method( 'get_preheader' )->willReturn( 'Test Woo Preheader' );
+		$wc_mail_mock->method( 'get_content_html' )->willReturn( 'Woo content' );
+		$wc_mail_mock->method( 'get_block_editor_email_template_content' )->willReturn( 'Woo content' );
+		return $wc_mail_mock;
 	}
 
 	/**

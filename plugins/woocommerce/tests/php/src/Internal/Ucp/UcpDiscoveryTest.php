@@ -20,11 +20,21 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	private UcpDiscovery $sut;
 
 	/**
+	 * Static discovery file path, inside a per-test temp dir.
+	 *
+	 * @var string
+	 */
+	private string $file;
+
+	/**
 	 * Set up the system under test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = new UcpDiscovery();
+		$this->sut  = new UcpDiscovery();
+		$this->file = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/.well-known/ucp';
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $this->file );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 	}
 
 	/**
@@ -35,7 +45,12 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		unset( $wp_rewrite->extra_rules_top[ self::RULE ] );
 		remove_filter( 'query_vars', array( $this->sut, 'add_query_var' ), 0 );
 		remove_action( 'parse_request', array( $this->sut, 'maybe_render' ), 0 );
+		remove_action( 'admin_init', array( $this->sut, 'maybe_sync_file' ) );
+		remove_action( 'deactivate_' . plugin_basename( WC_PLUGIN_FILE ), array( $this->sut, 'delete_file' ) );
 		delete_option( 'woocommerce_queue_flush_rewrite_rules' );
+		if ( is_file( $this->file ) ) {
+			wp_delete_file( $this->file );
+		}
 		parent::tearDown();
 	}
 
@@ -57,7 +72,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The rewrite rule is registered only when UCP is enabled and pretty permalinks are on.
+	 * @testdox The rewrite rule is registered only when UCP is enabled and pretty permalinks are on; the renderer whenever UCP is enabled.
 	 * @testWith ["yes", "/%postname%/", true]
 	 *           ["no", "/%postname%/", false]
 	 *           ["yes", "", false]
@@ -75,33 +90,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $expected ? 'index.php?' . UcpDiscovery::QUERY_VAR . '=1' : null, $wp_rewrite->extra_rules_top[ self::RULE ] ?? null );
 		$this->assertSame( $expected, in_array( UcpDiscovery::QUERY_VAR, apply_filters( 'query_vars', array() ), true ) );
-		$this->assertSame( $expected ? 0 : false, has_action( 'parse_request', array( $this->sut, 'maybe_render' ) ) );
-	}
-
-	/**
-	 * @testdox register_feature_hooks queues a rewrite flush when the stored rules disagree with the feature flag.
-	 * @testWith ["yes", "present", false]
-	 *           ["yes", "missing", true]
-	 *           ["yes", "empty", false]
-	 *           ["no", "present", true]
-	 *
-	 * @param string $enabled  Feature option value.
-	 * @param string $stored   Whether the stored rules contain the rule, lack it, or are empty.
-	 * @param bool   $expected Whether a flush should be queued.
-	 */
-	public function test_register_feature_hooks_heals_stale_rewrite_rules( string $enabled, string $stored, bool $expected ): void {
-		update_option( 'woocommerce_feature_ucp_enabled', $enabled );
-		$this->set_permalink_structure( '/%postname%/' );
-		$rules = array( '^shop/?$' => 'index.php?post_type=product' );
-		if ( 'present' === $stored ) {
-			$rules[ self::RULE ] = 'index.php?' . UcpDiscovery::QUERY_VAR . '=1';
-		}
-		update_option( 'rewrite_rules', 'empty' === $stored ? array() : $rules );
-		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
-
-		$this->sut->register_feature_hooks();
-
-		$this->assertSame( $expected ? 'yes' : 'no', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
+		$this->assertSame( 'yes' === $enabled ? 0 : false, has_action( 'parse_request', array( $this->sut, 'maybe_render' ) ) );
 	}
 
 	/**
@@ -118,18 +107,89 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The static file is written under plain permalinks, removed under pretty ones, and removed when UCP is turned off or WooCommerce is deactivated.
+	 */
+	public function test_sync_file(): void {
+		$this->set_permalink_structure( '' );
+		$this->sut->maybe_sync_file();
+		$this->assertSame( wp_json_encode( $this->sut->get_profile(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ), file_get_contents( $this->file ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		$this->set_permalink_structure( '/%postname%/' );
+		$this->sut->maybe_sync_file();
+		$this->assertFileDoesNotExist( $this->file );
+
+		$this->set_permalink_structure( '' );
+		$this->sut->maybe_sync_file();
+		$this->sut->maybe_flush_rewrite_rules( Utils::FEATURE_ID, false );
+		$this->assertFileDoesNotExist( $this->file );
+
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+		$this->sut->register_feature_hooks();
+		$this->sut->maybe_sync_file();
+		do_action( 'deactivate_' . plugin_basename( WC_PLUGIN_FILE ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$this->assertFileDoesNotExist( $this->file );
+	}
+
+	/**
+	 * @testdox A stale file WooCommerce wrote is rewritten and removed; a file it did not write is never touched.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $owned Whether the existing file carries the WooCommerce marker.
+	 */
+	public function test_sync_file_only_touches_owned_file( bool $owned ): void {
+		$stale = (string) wp_json_encode( array( 'links' => array( array( 'rel' => $owned ? UcpDiscovery::LINK_REL : 'other' ) ) ) );
+		wp_mkdir_p( dirname( $this->file ) );
+		// phpcs:disable WordPress.WP.AlternativeFunctions
+		file_put_contents( $this->file, $stale );
+
+		$this->set_permalink_structure( '' );
+		$this->sut->maybe_sync_file();
+		$this->assertSame( ! $owned, file_get_contents( $this->file ) === $stale );
+
+		$this->sut->maybe_flush_rewrite_rules( Utils::FEATURE_ID, false );
+		$this->assertSame( ! $owned, is_file( $this->file ) );
+
+		file_put_contents( $this->file, $stale );
+		$this->set_permalink_structure( '/%postname%/' );
+		$this->sut->maybe_sync_file();
+		$this->assertSame( ! $owned, is_file( $this->file ) );
+		// phpcs:enable WordPress.WP.AlternativeFunctions
+	}
+
+	/**
+	 * @testdox The static file is not written for ajax requests or users who cannot manage the store.
+	 * @testWith [true, "administrator"]
+	 *           [false, "subscriber"]
+	 *
+	 * @param bool   $ajax Whether the request is an ajax request.
+	 * @param string $role Current user role.
+	 */
+	public function test_sync_file_is_gated( bool $ajax, string $role ): void {
+		$this->set_permalink_structure( '' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => $role ) ) );
+		add_filter( 'wp_doing_ajax', $ajax ? '__return_true' : '__return_false' );
+
+		$this->sut->maybe_sync_file();
+
+		$this->assertFileDoesNotExist( $this->file );
+	}
+
+	/**
 	 * Run maybe_render() for a request, capturing output and treating wp_send_json()'s exit as an exception.
 	 *
 	 * @param string $matched_rule Value of WP::$matched_rule.
 	 * @param string $query_var    Value of the discovery query var.
+	 * @param string $uri          Request URI.
 	 * @return string|null Captured output, or null when the renderer returned without sending.
 	 */
-	private function render( string $matched_rule, string $query_var ): ?string {
+	private function render( string $matched_rule, string $query_var, string $uri = '/?wc_ucp_discovery=1' ): ?string {
 		$wp               = new \WP();
 		$wp->matched_rule = $matched_rule;
 		$wp->query_vars   = array( UcpDiscovery::QUERY_VAR => $query_var );
 
 		$_SERVER['REQUEST_METHOD'] = 'GET';
+		$_SERVER['REQUEST_URI']    = $uri;
 		$die_handler               = function () {
 			return function () {
 				throw new \WPDieException();
@@ -158,6 +218,15 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		$output = $this->render( self::RULE, '1' );
 
 		$this->assertNotNull( $output );
+		$this->assertSame( $this->sut->get_profile(), json_decode( (string) $output, true ) );
+	}
+
+	/**
+	 * @testdox maybe_render sends the profile for a /.well-known/ucp request URI when no rewrite rule matched.
+	 */
+	public function test_maybe_render_request_uri_fallback(): void {
+		$output = $this->render( '', '', '/.well-known/ucp/' );
+
 		$this->assertSame( $this->sut->get_profile(), json_decode( (string) $output, true ) );
 	}
 
