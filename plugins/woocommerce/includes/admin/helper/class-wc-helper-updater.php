@@ -38,6 +38,8 @@ class WC_Helper_Updater {
 		add_action( 'pre_set_site_transient_update_themes', array( __CLASS__, 'transient_update_themes' ), 21, 1 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'upgrader_process_complete' ) );
 		add_action( 'upgrader_pre_download', array( __CLASS__, 'block_expired_updates' ), 10, 2 );
+		add_filter( 'auto_update_plugin', array( __CLASS__, 'skip_auto_update_without_package' ), PHP_INT_MAX, 2 );
+		add_filter( 'auto_update_theme', array( __CLASS__, 'skip_auto_update_without_package' ), PHP_INT_MAX, 2 );
 		add_action( 'admin_init', array( __CLASS__, 'add_hook_for_modifying_update_notices' ) );
 	}
 
@@ -1127,6 +1129,8 @@ class WC_Helper_Updater {
 	 *
 	 * Used while backing off and when the update check fails. The server-side `autoupdate`
 	 * decisions are kept only when the cache is fresh and was made for the current payload.
+	 * Package links are blanked once the cache is stale, since they expire. The key stays set
+	 * because Woo Update Manager reads it without checking.
 	 *
 	 * @param mixed  $data The data retrieved from the transient, of any shape.
 	 * @param string $hash The hash of the current payload.
@@ -1138,13 +1142,20 @@ class WC_Helper_Updater {
 		}
 
 		$products = $data['products'];
-		if ( isset( $data['hash'] ) && is_string( $data['hash'] ) && hash_equals( $hash, $data['hash'] ) && self::is_fresh_update_data( $data ) ) {
+		$is_fresh = self::is_fresh_update_data( $data );
+		if ( $is_fresh && isset( $data['hash'] ) && is_string( $data['hash'] ) && hash_equals( $hash, $data['hash'] ) ) {
 			return $products;
 		}
 
 		foreach ( $products as $product_id => $product ) {
-			if ( is_array( $product ) ) {
-				unset( $products[ $product_id ]['autoupdate'] );
+			if ( ! is_array( $product ) ) {
+				continue;
+			}
+
+			unset( $products[ $product_id ]['autoupdate'] );
+
+			if ( ! $is_fresh && isset( $product['package'] ) ) {
+				$products[ $product_id ]['package'] = '';
 			}
 		}
 
@@ -1422,6 +1433,31 @@ class WC_Helper_Updater {
 	public static function upgrader_process_complete() {
 		delete_transient( '_woocommerce_helper_updates_count' );
 		WC_Helper::flush_local_woo_products_cache();
+	}
+
+	/**
+	 * Stops WordPress auto-updating a WooCommerce.com plugin or theme that has no package to download.
+	 *
+	 * Without this, the attempt fails with no_package and emails a failed update notice to the admin.
+	 * Only applies during the auto-update run, so the auto-update toggles on the Plugins and Themes
+	 * screens aren't shown as disabled. Runs last so another filter can't turn the update back on.
+	 *
+	 * @since 11.4.0
+	 * @param bool|null $update Whether to update the item.
+	 * @param object    $item   The update offer.
+	 * @return bool|null False when the item can't be updated, otherwise the value passed in.
+	 */
+	public static function skip_auto_update_without_package( $update, $item ) {
+		if ( ! $update || ! is_object( $item ) || ! empty( $item->package ) || ! doing_action( 'wp_maybe_auto_update' ) ) {
+			return $update;
+		}
+
+		$woo_items = array_merge(
+			wp_list_pluck( WC_Helper::get_local_woo_plugins(), '_filename' ),
+			wp_list_pluck( WC_Helper::get_local_woo_themes(), '_stylesheet' )
+		);
+
+		return in_array( $item->plugin ?? $item->theme ?? null, $woo_items, true ) ? false : $update;
 	}
 
 	/**
