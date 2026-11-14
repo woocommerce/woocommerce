@@ -18,10 +18,9 @@ jQuery( function ( $ ) {
 		fieldHeroImg: '.wc-variation-gallery-field__hero-img',
 		fieldHeroBroken: '.wc-variation-gallery-field__hero-broken',
 		fieldHeroEmptyCta: '.wc-variation-gallery-field__empty-cta',
-		fieldHint: '.wc-variation-gallery-field__hint',
-		fieldCount: '.wc-variation-gallery-field__count',
 		fieldImageIdsInput: '.wc-variation-gallery-image-ids',
 		thumb: '.wc-variation-gallery-thumb',
+		addTile: '.wc-variation-gallery-add',
 		thumbButton: '.wc-variation-gallery-thumb__button',
 		thumbRemove: '.wc-variation-gallery-thumb__remove',
 		manageTrigger: '.wc-variation-gallery-manage',
@@ -84,22 +83,6 @@ jQuery( function ( $ ) {
 			attachmentJson.url ||
 			''
 		);
-	};
-
-	/**
-	 * Map an image count to the i18n template key used to label the field.
-	 *
-	 * @param {number} count
-	 * @return {string}
-	 */
-	const getCountTemplateKey = ( count ) => {
-		if ( count === 0 ) {
-			return 'countZero';
-		}
-		if ( count === 1 ) {
-			return 'countSingular';
-		}
-		return 'countPlural';
 	};
 
 	/**
@@ -212,6 +195,7 @@ jQuery( function ( $ ) {
 					stop( _event, ui ) {
 						ui.item.removeClass( 'is-dragging' );
 						$list.removeClass( 'is-sorting' );
+						variationGallery.ensureAddTileLast( $list );
 					},
 					update() {
 						const wasPrimary =
@@ -283,9 +267,9 @@ jQuery( function ( $ ) {
 		},
 
 		/**
-		 * "Manage" button: open the WP media frame in multi-select mode,
-		 * preselect the variation's current gallery, and rewrite the
-		 * gallery from whatever the merchant selects.
+		 * Add tile (or the empty-state CTA): open the WP media frame in
+		 * multi-select mode, preselect the variation's current gallery, and
+		 * rewrite the gallery from whatever the merchant selects.
 		 *
 		 * @param {jQuery.Event} event
 		 */
@@ -539,16 +523,64 @@ jQuery( function ( $ ) {
 				)
 			);
 
-			$list.empty();
+			$list.find( SELECTORS.thumb ).remove();
 
 			ids.forEach( ( id, index ) => {
-				$list.append(
-					this.buildThumbMarkup( id, urls[ index ], index === 0 )
+				this.buildThumbMarkup( id, urls[ index ], index === 0 ).insertBefore(
+					this.getOrCreateAddTile( $list )
 				);
 			} );
 
+			this.ensureAddTileLast( $list );
+
 			if ( $list.data( 'wc-variation-gallery-sortable' ) ) {
 				$list.sortable( 'refresh' );
+			}
+		},
+
+		/**
+		 * Return the list's trailing add tile, creating it when the
+		 * server-rendered one is missing.
+		 *
+		 * @param {jQuery} $list
+		 * @return {jQuery}
+		 */
+		getOrCreateAddTile( $list ) {
+			const $existing = $list.find( SELECTORS.addTile );
+			if ( $existing.length ) {
+				return $existing;
+			}
+
+			const $icon = $( '<span></span>' )
+				.addClass( 'dashicons dashicons-plus-alt2' )
+				.attr( 'aria-hidden', 'true' );
+			const $button = $( '<button type="button"></button>' )
+				.addClass(
+					'wc-variation-gallery-add__button wc-variation-gallery-manage'
+				)
+				.attr(
+					'aria-label',
+					l10n.addTileLabel || 'Add images to variation gallery'
+				)
+				.append( $icon );
+			const $tile = $( '<li></li>' )
+				.addClass( 'wc-variation-gallery-add' )
+				.append( $button );
+
+			$list.append( $tile );
+			return $tile;
+		},
+
+		/**
+		 * Keep the add tile as the last item in the list, after any
+		 * thumbnails that were appended or reordered.
+		 *
+		 * @param {jQuery} $list
+		 */
+		ensureAddTileLast( $list ) {
+			const $tile = this.getOrCreateAddTile( $list );
+			if ( ! $tile.is( ':last-child' ) ) {
+				$list.append( $tile );
 			}
 		},
 
@@ -918,9 +950,8 @@ jQuery( function ( $ ) {
 		},
 
 		/**
-		 * Refresh the count label, the empty-state class, and the hint
-		 * visibility from the field's current image count. Pass an
-		 * explicit count to skip the DOM lookup.
+		 * Refresh the empty-state class from the field's current image
+		 * count. Pass an explicit count to skip the DOM lookup.
 		 *
 		 * @param {jQuery}      $field
 		 * @param {number|null} [precomputedCount=null]
@@ -930,12 +961,8 @@ jQuery( function ( $ ) {
 				precomputedCount === null
 					? this.getFieldIds( $field ).length
 					: precomputedCount;
-			const template = l10n[ getCountTemplateKey( count ) ] || '%d';
-			const label = template.replace( '%d', count );
 
 			$field.toggleClass( CLASSES.isEmpty, count === 0 );
-			$field.find( SELECTORS.fieldCount ).text( label );
-			$field.find( SELECTORS.fieldHint ).prop( 'hidden', count === 0 );
 		},
 
 		restoreMediaPostId() {

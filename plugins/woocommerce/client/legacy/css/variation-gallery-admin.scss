@@ -32,7 +32,6 @@
 
 	/* Colors (WP admin palette). */
 	--wc-vg-link: #2271b1;
-	--wc-vg-link-hover: #135e96;
 	--wc-vg-surface: #f0f0f1;
 	--wc-vg-surface-hover: #f6f7f7;
 	--wc-vg-surface-strong: #1d2327;
@@ -43,7 +42,6 @@
 	--wc-vg-border-hover: #8c8f94;
 	--wc-vg-text-strong: #1d2327;
 	--wc-vg-text-muted: #50575e;
-	--wc-vg-text-subtle: #787c82;
 	--wc-vg-text-placeholder: #a7aaad;
 	--wc-vg-focus-ring: rgba(34, 113, 177, 0.4);
 
@@ -56,7 +54,7 @@
 	--wc-vg-space-6: 24px;
 
 	/* Sizing tokens. */
-	--wc-vg-thumb-size: 40px;
+	--wc-vg-thumbs-per-row: 4;
 	--wc-vg-icon-sm: 14px;
 	--wc-vg-icon-md: 20px;
 	--wc-vg-icon-lg: 28px;
@@ -77,6 +75,7 @@
 	/* Typography. */
 	--wc-vg-font-size-xs: 12px;
 	--wc-vg-font-size-sm: 13px;
+	--wc-vg-font-weight-regular: 400;
 	--wc-vg-font-weight-medium: 500;
 	--wc-vg-font-weight-semibold: 600;
 
@@ -127,54 +126,35 @@
 	width: 100%;
 	box-sizing: border-box;
 
+	/* Mirrors the 1em top margin of the next form row so the gallery has
+	 * the same breathing room below as above. */
+	margin-block-end: 1em;
+
+	/* Matches the <p class="form-row"><label> rendered by
+	 * woocommerce_wp_text_input() in the neighbouring SKU column (1em top
+	 * margin, 1.5 line-height), so the two row headings line up. */
 	.wc-variation-gallery-field__header {
 		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: var(--wc-vg-space-4);
-	}
+		align-items: center;
+		gap: var(--wc-vg-space-1);
+		margin-block-start: 1em;
+		line-height: 1.5;
 
-	.wc-variation-gallery-field__title-block {
-		display: flex;
-		align-items: baseline;
-		gap: var(--wc-vg-space-2);
-		flex-wrap: wrap;
+		.woocommerce-help-tip {
+			float: none;
+			margin: 0;
+		}
 	}
 
 	.wc-variation-gallery-field__title {
 		font-size: var(--wc-vg-font-size-sm);
-		font-weight: var(--wc-vg-font-weight-semibold);
+		font-weight: var(--wc-vg-font-weight-regular);
 		margin: 0;
-	}
-
-	.wc-variation-gallery-field__count {
-		color: var(--wc-vg-text-subtle);
-		font-size: var(--wc-vg-font-size-xs);
-
-		&::before {
-			content: "·";
-			margin-right: var(--wc-vg-space-1);
-		}
-	}
-
-	.wc-variation-gallery-manage {
-		color: var(--wc-vg-link);
-		background: transparent;
-		border: none;
-		padding: 0;
-		cursor: pointer;
-		font-size: var(--wc-vg-font-size-sm);
-		text-decoration: none;
-
-		&:hover,
-		&:focus {
-			color: var(--wc-vg-link-hover);
-			text-decoration: underline;
-		}
 	}
 
 	.wc-variation-gallery-field__hero {
 		position: relative;
+		box-sizing: border-box;
 		width: 100%;
 		aspect-ratio: 1 / 1;
 		border-radius: var(--wc-vg-radius-md);
@@ -285,9 +265,11 @@
 		}
 	}
 
+	/* Fixed column count so every row spans the same width as the hero
+	 * image above it; the add tile wraps with the thumbnails. */
 	.wc-variation-gallery-field__thumbs {
-		display: flex;
-		flex-wrap: wrap;
+		display: grid;
+		grid-template-columns: repeat(var(--wc-vg-thumbs-per-row), minmax(0, 1fr));
 		gap: var(--wc-vg-space-3);
 		margin: 0;
 		padding: 0;
@@ -295,9 +277,11 @@
 		min-height: 0;
 
 		.wc-variation-gallery-thumb,
+		.wc-variation-gallery-add,
 		.wc-metabox-sortable-placeholder {
-			width: var(--wc-vg-thumb-size);
-			height: var(--wc-vg-thumb-size);
+			width: auto;
+			height: auto;
+			aspect-ratio: 1 / 1;
 			margin: 0;
 			padding: 0;
 			list-style: none;
@@ -305,20 +289,65 @@
 			box-sizing: border-box;
 		}
 
+		.wc-variation-gallery-thumb__remove {
+			position: absolute;
+			top: -4px;
+			right: -4px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 18px;
+			height: 18px;
+			padding: 0;
+			border: 0;
+			border-radius: 50%;
+			background: var(--wc-vg-surface-strong);
+			color: var(--wc-vg-on-surface);
+			cursor: pointer;
+			opacity: 0;
+			transition: opacity var(--wc-vg-transition-fast), background-color var(--wc-vg-transition-fast), box-shadow var(--wc-vg-transition-fast);
+
+			/* Same hover/focus treatment as the hero's Replace button. */
+			&:hover,
+			&:focus-visible {
+				background: var(--wc-vg-surface-strongest);
+				box-shadow: var(--wc-vg-elevation-3-hover);
+				outline: none;
+			}
+
+			.dashicons {
+				font-size: 14px;
+				width: 14px;
+				height: 14px;
+				line-height: 1;
+			}
+
+			@media (hover: none) {
+				opacity: 1;
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				transition: none;
+			}
+		}
+
+		/* The active/hover ring is an inset outline rather than a border: it
+		 * follows the radius and paints over the image, so there is a single
+		 * curve with no inner-radius mismatch or anti-aliased gap. */
 		.wc-variation-gallery-thumb {
 			position: relative;
-			border: 2px solid transparent;
+			border: 0;
+			outline: 2px solid transparent;
+			outline-offset: -2px;
 			cursor: grab;
-			transition:
-				border-color var(--wc-vg-transition-fast),
-				box-shadow var(--wc-vg-transition-fast);
+			transition: outline-color var(--wc-vg-transition-fast);
 
 			&.is-active {
-				border-color: var(--wc-vg-link);
+				outline-color: var(--wc-vg-link);
 			}
 
 			&:not(.is-active):hover {
-				border-color: var(--wc-vg-border-hover);
+				outline-color: var(--wc-vg-border-hover);
 			}
 
 			&.is-dragging {
@@ -334,7 +363,6 @@
 			&.is-broken {
 
 				@include center-content;
-				background: var(--wc-vg-surface);
 				color: var(--wc-vg-text-placeholder);
 			}
 
@@ -344,6 +372,7 @@
 			}
 		}
 
+		/* Clipped to the thumb's radius so image corners follow it. */
 		.wc-variation-gallery-thumb__button {
 			display: block;
 			width: 100%;
@@ -351,6 +380,8 @@
 			padding: 0;
 			margin: 0;
 			border: 0;
+			border-radius: var(--wc-vg-radius-sm);
+			overflow: hidden;
 			background: var(--wc-vg-surface);
 			cursor: inherit;
 
@@ -370,41 +401,43 @@
 			height: var(--wc-vg-icon-md);
 		}
 
-		.wc-variation-gallery-thumb__remove {
-			position: absolute;
-			top: -4px;
-			right: -4px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			width: 18px;
-			height: 18px;
-			border-radius: 50%;
-			background: var(--wc-vg-surface-strong);
-			color: var(--wc-vg-on-surface);
-			cursor: pointer;
-			opacity: 0;
-			transition: opacity var(--wc-vg-transition-fast), background-color var(--wc-vg-transition-fast);
+		.wc-metabox-sortable-placeholder {
+			border: 2px dashed var(--wc-vg-border-dashed);
+			background: transparent;
+		}
 
-			.dashicons {
-				font-size: 14px;
-				width: 14px;
-				height: 14px;
-				line-height: 1;
+		.wc-variation-gallery-add__button {
+
+			@include center-content;
+			width: 100%;
+			height: 100%;
+			padding: 0;
+			margin: 0;
+			background: transparent;
+			border: 2px dashed var(--wc-vg-border-dashed);
+			border-radius: var(--wc-vg-radius-sm);
+			color: var(--wc-vg-text-muted);
+			cursor: pointer;
+			transition: background-color var(--wc-vg-transition-fast), border-color var(--wc-vg-transition-fast), color var(--wc-vg-transition-fast);
+
+			&:hover,
+			&:focus-visible {
+				background: var(--wc-vg-surface-hover);
+				border-color: var(--wc-vg-link);
+				color: var(--wc-vg-link);
+				outline: none;
 			}
 
-			@media (hover: none) {
-				opacity: 1;
+			.dashicons {
+				font-size: var(--wc-vg-icon-md);
+				width: var(--wc-vg-icon-md);
+				height: var(--wc-vg-icon-md);
+				line-height: 1;
 			}
 
 			@media (prefers-reduced-motion: reduce) {
 				transition: none;
 			}
-		}
-
-		.wc-metabox-sortable-placeholder {
-			border: 2px dashed var(--wc-vg-border-dashed);
-			background: transparent;
 		}
 
 		&.is-sorting .wc-variation-gallery-thumb:hover .wc-variation-gallery-thumb__remove,
@@ -414,18 +447,13 @@
 		}
 	}
 
+	/* The empty-state CTA draws its own dashed border, so drop the hero's
+	 * solid one to avoid a double outline. */
+	&.is-empty .wc-variation-gallery-field__hero {
+		border-color: transparent;
+	}
+
 	&.is-empty .wc-variation-gallery-field__thumbs {
-		display: none;
-	}
-
-	.wc-variation-gallery-field__hint {
-		margin: 0;
-		color: var(--wc-vg-text-muted);
-		font-size: var(--wc-vg-font-size-xs);
-		line-height: 1.4;
-	}
-
-	&.is-empty .wc-variation-gallery-field__hint {
 		display: none;
 	}
 }
