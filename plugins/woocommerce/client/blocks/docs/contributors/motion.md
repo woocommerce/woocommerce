@@ -87,7 +87,12 @@ Use the helpers in `assets/css/abstracts/_motion.scss`. Do not write `transition
 
 Use `@starting-style` with transitions for an element that is new on the page, such as a dropdown. Then all of its motion is a transition, and a transition turns around by itself.
 
-Motion that changes the layout runs in JavaScript, because it must measure sizes. JavaScript helpers end immediately when nothing animates, and in Jest. This section lists the JavaScript helpers when they are added.
+Motion that changes the layout runs in JavaScript, because it must measure sizes. JavaScript helpers end immediately when nothing animates, and in Jest.
+
+| Helper | Use |
+|--------|-----|
+| `whenAnimationsEnd( element, callback )` (`@woocommerce/base-utils`) | Runs `callback` when the animations of `element` end, instead of after a fixed timeout. It waits again if a transition turns around. It returns a function that cancels the callback. |
+| `usePresence( value, { exit } )` (`@woocommerce/base-hooks`) | Keeps content mounted while it animates out. Pass the content, or `null` to remove it. It returns `{ value, isExiting, ref }`. Put `ref` on the element that animates. Pass `exit: false` to remove the content immediately, for example after a key press. |
 
 ## Techniques
 

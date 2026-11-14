@@ -44,6 +44,30 @@ This file is part of the WooCommerce Blocks autocomplete. If editing shortcode, 
 	border-radius: $universal-border-radius;
 	box-sizing: border-box;
 
+	// The list slides 4px from the field over `lg` and fades in over `md`. It is new on the page, so it starts
+	// from `@starting-style`. All of its motion is a transition, so it turns around if it opens again while it closes.
+	@include motion-transition($state: opacity, $move: translate);
+
+	@starting-style {
+		opacity: 0;
+	}
+
+	@include motion-safe {
+		@starting-style {
+			translate: 0 -4px;
+		}
+	}
+
+	// The list stays mounted until it has slid back to the field. Exits are shorter: it goes over `md`, faster than it came.
+	&[data-wc-exiting] {
+		opacity: 0;
+		@include motion-transition($state: opacity, $move: translate, $duration: md);
+
+		@include motion-safe {
+			translate: 0 -4px;
+		}
+	}
+
 	.suggestions-list {
 		list-style: none;
 		margin: 0;

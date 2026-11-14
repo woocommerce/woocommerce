@@ -67,12 +67,17 @@ export const Suggestions = ( {
 	selectedSuggestion,
 	addressType,
 	onSuggestionClick,
+	isExiting = false,
+	containerRef,
 }: {
 	suggestions: AddressAutocompleteResult[];
 	branding?: string;
 	selectedSuggestion: number;
 	addressType: string;
 	onSuggestionClick: ( suggestionId: string ) => void;
+	// The list stays mounted while it animates out after it closes.
+	isExiting?: boolean;
+	containerRef?: React.Ref< HTMLDivElement >;
 } ) => {
 	if ( ! suggestions ) {
 		return null;
@@ -82,9 +87,17 @@ export const Suggestions = ( {
 
 	return (
 		<div
+			ref={ containerRef }
 			className="wc-block-components-address-autocomplete-suggestions"
 			role="region"
 			aria-live="polite"
+			// A closing list is already gone for the shopper, so it must not take clicks or be read out. React 18 has
+			// no `inert` prop.
+			{ ...( isExiting && {
+				inert: '',
+				'aria-hidden': true,
+				'data-wc-exiting': '',
+			} ) }
 		>
 			<ul
 				className="suggestions-list"
