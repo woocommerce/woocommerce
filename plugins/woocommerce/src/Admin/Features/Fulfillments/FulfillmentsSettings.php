@@ -15,7 +15,8 @@ class FulfillmentsSettings {
 	 * Registers the hooks related to fulfillments settings.
 	 */
 	public function register() {
-		add_filter( 'admin_init', array( $this, 'init_settings_auto_fulfill' ) );
+		// Not on admin_init: settings are saved on wp_loaded, which runs first, so fields added later never save.
+		$this->init_settings_auto_fulfill();
 		add_action( 'woocommerce_order_status_processing', array( $this, 'auto_fulfill_items_on_processing' ), 10, 2 );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'auto_fulfill_items_on_completed' ), 10, 2 );
 	}
