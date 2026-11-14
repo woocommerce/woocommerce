@@ -651,4 +651,33 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 'ZZ', $sut->get_customs_country_of_origin( 'edit' ), 'An invalid stored country should be read without throwing.' );
 		$this->assertSame( $description, $sut->get_customs_description( 'edit' ), 'An over-long stored description should be read without throwing.' );
 	}
+
+	/**
+	 * @testdox Should pass the changeset to woocommerce_after_product_object_save: null on create, the changed props on update.
+	 */
+	public function test_after_save_action_receives_changeset(): void {
+		$changesets = array();
+		$capture    = function ( $product, $data_store, $changeset ) use ( &$changesets ) {
+			$changesets[] = $changeset;
+		};
+		add_action( 'woocommerce_after_product_object_save', $capture, 10, 3 );
+
+		try {
+			$sut = new WC_Product_Simple();
+			$sut->set_name( 'Original name' );
+			$sut->save();
+
+			$sut->set_name( 'New name' );
+			$sut->set_regular_price( '12' );
+			$sut->save();
+		} finally {
+			remove_action( 'woocommerce_after_product_object_save', $capture, 10 );
+		}
+
+		$this->assertCount( 2, $changesets, 'The action should fire once per save.' );
+		$this->assertNull( $changesets[0], 'A newly created product has no changeset.' );
+		$this->assertSame( 'New name', $changesets[1]['name'] ?? null, 'The changeset should contain the changed name.' );
+		$this->assertSame( '12', $changesets[1]['regular_price'] ?? null, 'The changeset should contain the changed price.' );
+		$this->assertSame( array(), $sut->get_changes(), 'Changes are already applied by the time the action fires, so the changeset is the only record.' );
+	}
 }

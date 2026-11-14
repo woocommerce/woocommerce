@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Let extensions see which product fields changed in a save, via a new third argument on the woocommerce_after_product_object_save action.
