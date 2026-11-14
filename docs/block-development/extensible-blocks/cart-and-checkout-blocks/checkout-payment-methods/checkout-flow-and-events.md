@@ -236,16 +236,16 @@ This event is emitted when the checkout status is `BEFORE_PROCESSING` (which hap
 
 If all observers return `true` for this event, then the checkout status will be changed to `PROCESSING`.
 
-This event emitter subscriber can be obtained via the checkout context using the `useCheckoutContext` hook or to payment method extensions as a prop on their registered component:
+This event emitter subscriber can be obtained via the checkout context using the `useCheckoutEventsContext` hook or to payment method extensions as a prop on their registered component:
 
 _For internal development:_
 
 ```jsx
-import { useCheckoutContext } from '@woocommerce/base-contexts';
+import { useCheckoutEventsContext } from '@woocommerce/base-contexts';
 import { useEffect } from '@wordpress/element';
 
 const Component = () => {
-	const { onCheckoutValidation } = useCheckoutContext();
+	const { onCheckoutValidation } = useCheckoutEventsContext();
 	useEffect( () => {
 		const unsubscribe = onCheckoutValidation( () => true );
 		return unsubscribe;
@@ -414,16 +414,16 @@ In all cases, if there are the following properties in the response, additional 
 
 If all observers return `true`, then the checkout status will just be set to `COMPLETE`.
 
-This event emitter subscriber can be obtained via the checkout context using the `useCheckoutContext` hook or to payment method extensions as a prop on their registered component:
+This event emitter subscriber can be obtained via the checkout context using the `useCheckoutEventsContext` hook or to payment method extensions as a prop on their registered component:
 
 _For internal development:_
 
 ```jsx
-import { useCheckoutContext } from '@woocommerce/base-contexts';
+import { useCheckoutEventsContext } from '@woocommerce/base-contexts';
 import { useEffect } from '@wordpress/element';
 
 const Component = () => {
-	const { onCheckoutSuccess } = useCheckoutContext();
+	const { onCheckoutSuccess } = useCheckoutEventsContext();
 	useEffect( () => {
 		const unsubscribe = onCheckoutSuccess( () => true );
 		return unsubscribe;
@@ -467,16 +467,16 @@ The response from the first observer returning a value that does not `===` true 
 
 If all observers return `true`, then the checkout status will just be set to `IDLE` and a default error notice will be shown in the checkout context.
 
-This event emitter subscriber can be obtained via the checkout context using the `useCheckoutContext` hook or to payment method extensions as a prop on their registered component:
+This event emitter subscriber can be obtained via the checkout context using the `useCheckoutEventsContext` hook or to payment method extensions as a prop on their registered component:
 
 _For internal development:_
 
 ```jsx
-import { useCheckoutContext } from '@woocommerce/base-contexts';
+import { useCheckoutEventsContext } from '@woocommerce/base-contexts';
 import { useEffect } from '@wordpress/element';
 
 const Component = () => {
-	const { onCheckoutFail } = useCheckoutContext();
+	const { onCheckoutFail } = useCheckoutEventsContext();
 	useEffect( () => {
 		const unsubscribe = onCheckoutFail( () => true );
 		return unsubscribe;
