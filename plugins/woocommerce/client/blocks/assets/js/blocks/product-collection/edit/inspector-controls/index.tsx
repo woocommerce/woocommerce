@@ -16,6 +16,7 @@ import {
  * Internal dependencies
  */
 import { useTracksLocation } from '../../tracks-utils';
+import { useIsDescendentOfSingleProductTemplate } from '../../../product-elements-blocks/shared/use-is-descendent-of-single-product-template';
 import {
 	ProductCollectionContentProps,
 	CoreFilterNames,
@@ -50,6 +51,7 @@ import RelatedByControl from './related-by-control';
 import ProductsPerPageControl from './products-per-page-control';
 import OffsetControl from './offset-control';
 import MaxPagesToShowControl from './max-pages-to-show-control';
+import { UpsellsDowngradeNotice } from './upsells-downgrade-notice';
 
 const prepareShouldShowFilter =
 	( hideControls: FilterName[] ) => ( filter: FilterName ) => {
@@ -78,6 +80,8 @@ const ProductCollectionInspectorControls = (
 	const isArchiveTemplate =
 		tracksLocation === 'product-catalog' ||
 		tracksLocation === 'product-archive';
+	const { isDescendentOfSingleProductTemplate } =
+		useIsDescendentOfSingleProductTemplate();
 
 	// Carousel layout influences the visibility and behavior of some controls.
 	const isCarouselLayout = displayLayout?.type === LayoutOptions.CAROUSEL;
@@ -177,6 +181,10 @@ const ProductCollectionInspectorControls = (
 
 	return (
 		<InspectorControls>
+			{ isDescendentOfSingleProductTemplate &&
+				collection === CoreCollectionNames.UPSELLS && (
+					<UpsellsDowngradeNotice clientId={ clientId } />
+				) }
 			<LinkedProductControl
 				query={ props.attributes.query }
 				setAttributes={ props.setAttributes }

@@ -173,6 +173,7 @@ if ( ! function_exists( 'purple_remove_upsells' ) ) :
 	/**
 	 * Remove upsells from product description.
 	 *
+	 * @internal
 	 * @since purple 1.0
 	 *
 	 * @return void
@@ -184,3 +185,20 @@ if ( ! function_exists( 'purple_remove_upsells' ) ) :
 endif;
 
 add_action( 'init', 'purple_remove_upsells' );
+
+if ( ! function_exists( 'purple_hide_upsells_migration_ui' ) ) :
+	/**
+	 * Hides the editor controls for switching between classic upsells and the Upsells block.
+	 *
+	 * @internal
+	 * @since purple 1.0.4
+	 *
+	 * @return string
+	 */
+	function purple_hide_upsells_migration_ui(): string {
+		return 'yes';
+	}
+
+endif;
+
+add_filter( 'pre_option_woocommerce_hide_product_upsells_migration_ui', 'purple_hide_upsells_migration_ui' );

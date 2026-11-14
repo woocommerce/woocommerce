@@ -13,6 +13,18 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  */
 class ProductDetails extends AbstractBlock {
 	/**
+	 * Option that records a migration from automatic upsells to the Upsells block.
+	 */
+	private const UPSELLS_MIGRATED_OPTION = 'woocommerce_product_upsells_migrated_to_block';
+
+	/**
+	 * Option that hides the editor controls for switching product upsells.
+	 *
+	 * Stores with no saved value keep those controls visible.
+	 */
+	private const HIDE_UPSELLS_MIGRATION_UI_OPTION = 'woocommerce_hide_product_upsells_migration_ui';
+
+	/**
 	 * Block name.
 	 *
 	 * @var string
@@ -26,6 +38,7 @@ class ProductDetails extends AbstractBlock {
 	 */
 	protected function initialize() {
 		parent::initialize();
+		add_action( 'rest_api_init', array( $this, 'register_upsell_migration_setting' ) );
 
 		/**
 		 * Filter the blocks that are hooked into the Product Details block.
@@ -52,6 +65,56 @@ class ProductDetails extends AbstractBlock {
 	 */
 	protected function get_block_type_script( $key = null ) {
 		return null;
+	}
+
+	/**
+	 * Register the options for the product upsells migration.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function register_upsell_migration_setting() {
+		register_setting(
+			'options',
+			self::UPSELLS_MIGRATED_OPTION,
+			array(
+				'type'              => 'string',
+				'label'             => __( 'Product upsells migration', 'woocommerce' ),
+				'description'       => __( 'Whether product upsells should be displayed as a separate block and not inside the Product Details block.', 'woocommerce' ),
+				'default'           => 'no',
+				'show_in_rest'      => array(
+					'schema' => array(
+						'type' => 'string',
+						'enum' => array( 'yes', 'no' ),
+					),
+				),
+				'sanitize_callback' => static function ( $value ) {
+					return 'yes' === $value ? 'yes' : 'no';
+				},
+			)
+		);
+
+		register_setting(
+			'options',
+			self::HIDE_UPSELLS_MIGRATION_UI_OPTION,
+			array(
+				'type'              => 'string',
+				'label'             => __( 'Hide product upsells migration UI', 'woocommerce' ),
+				'description'       => __( 'Hide the editor controls for switching product upsells between the classic display and the Upsells block.', 'woocommerce' ),
+				'default'           => 'no',
+				'show_in_rest'      => array(
+					'schema' => array(
+						'type' => 'string',
+						'enum' => array( 'yes', 'no' ),
+					),
+				),
+				'sanitize_callback' => static function ( $value ) {
+					return 'yes' === $value ? 'yes' : 'no';
+				},
+			)
+		);
 	}
 
 	/**
