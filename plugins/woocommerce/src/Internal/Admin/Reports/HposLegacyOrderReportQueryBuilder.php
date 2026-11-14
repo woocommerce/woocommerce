@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Reports;
 
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -871,65 +872,15 @@ class HposLegacyOrderReportQueryBuilder {
 	/**
 	 * Build a MySQL expression that converts `orders.date_created_gmt` into site-local time.
 	 *
-	 * For sites configured with a named timezone (e.g. `Europe/Berlin`) the conversion is done
-	 * per row with `CONVERT_TZ()` so DST is honoured and rows near midnight bucket into the
-	 * correct day/month. `CONVERT_TZ()` returns NULL when the server's timezone tables are not
-	 * loaded, so it falls back to {@see self::build_transition_fallback_expr()}. Sites using a
-	 * manual UTC offset have no DST, so a fixed-offset shift is exact and is used directly.
+	 * Delegates to {@see TimeInterval::local_datetime_sql()}, which honours DST per row. Without a
+	 * caller-supplied range (e.g. the sparklines) the window covers the last year, which spans any
+	 * window such callers use.
 	 *
 	 * @return string SQL fragment that produces a local DATETIME.
 	 */
 	private function hpos_local_date_expr(): string {
-		$timezone_string = get_option( 'timezone_string' );
-		if ( '' === $timezone_string ) {
-			$schema = $this->get_report_schema();
-			return "DATE_ADD(orders.date_created_gmt, INTERVAL {$schema['gmt_offset']} SECOND)";
-		}
-
-		global $wpdb;
-		$convert = $wpdb->prepare( 'CONVERT_TZ(orders.date_created_gmt, %s, %s)', '+00:00', $timezone_string );
-
-		return "IFNULL({$convert}, {$this->build_transition_fallback_expr()})";
-	}
-
-	/**
-	 * Build the fallback used when `CONVERT_TZ()` can't resolve the named timezone
-	 * (MySQL timezone tables not loaded).
-	 *
-	 * A single shift by the current `gmt_offset` would be wrong for rows created in a
-	 * different DST period, so the site timezone's DST transitions inside the report
-	 * window are baked into a CASE expression and each row is shifted by the offset in
-	 * effect when it was created. Without a caller-supplied range (e.g. the sparklines)
-	 * the window covers the last year, which spans any window such callers use.
-	 *
-	 * @return string SQL fragment that produces a local DATETIME.
-	 */
-	private function build_transition_fallback_expr(): string {
 		list( $window_start, $window_end ) = $this->report_range ?? array( time() - YEAR_IN_SECONDS, time() + DAY_IN_SECONDS );
 
-		$transitions = wp_timezone()->getTransitions( $window_start, $window_end );
-		if ( ! is_array( $transitions ) || array() === $transitions ) {
-			$schema = $this->get_report_schema();
-			return "DATE_ADD(orders.date_created_gmt, INTERVAL {$schema['gmt_offset']} SECOND)";
-		}
-
-		// The first entry describes the offset already in effect at the window start;
-		// each later entry is a transition inside the window.
-		$case  = '';
-		$count = count( $transitions );
-		for ( $i = 0; $i < $count - 1; $i++ ) {
-			$boundary = gmdate( 'Y-m-d H:i:s', $transitions[ $i + 1 ]['ts'] );
-			$offset   = (int) $transitions[ $i ]['offset'];
-			$case    .= "WHEN orders.date_created_gmt < '{$boundary}' THEN DATE_ADD(orders.date_created_gmt, INTERVAL {$offset} SECOND) ";
-		}
-
-		$last_offset = (int) $transitions[ $count - 1 ]['offset'];
-		$last_shift  = "DATE_ADD(orders.date_created_gmt, INTERVAL {$last_offset} SECOND)";
-
-		if ( '' === $case ) {
-			return $last_shift;
-		}
-
-		return "CASE {$case}ELSE {$last_shift} END";
+		return TimeInterval::local_datetime_sql( 'orders.date_created_gmt', (int) $window_start, (int) $window_end );
 	}
 }
