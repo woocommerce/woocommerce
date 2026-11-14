@@ -27,6 +27,28 @@ describe( 'pluginInstallerMachine', () => {
 		jest.resetAllMocks();
 	} );
 
+	it( 'reports success immediately without installing when the selection is empty', () => {
+		const installPlugin = jest.fn();
+		const service = createActor(
+			pluginInstallerMachine.provide( {
+				...mockConfig,
+				actors: { installPlugin: fromPromise( installPlugin ) },
+			} ),
+			{ input: { selectedPlugins: [], pluginsAvailable: [] } }
+		).start();
+
+		expect( service.getSnapshot().matches( 'reportSuccess' ) ).toBe( true );
+		expect( service.getSnapshot().context.installedPlugins ).toEqual( [] );
+		expect( installPlugin ).not.toHaveBeenCalled();
+		expect(
+			mockConfig.actions.updateParentWithInstallationSuccess
+		).toHaveBeenCalledTimes( 1 );
+		expect(
+			mockConfig.actions.updateParentWithPluginProgress
+		).not.toHaveBeenCalled();
+		service.stop();
+	} );
+
 	it.each< [ string, string, number, number ] >( [
 		[ 'woocommerce-services:tax', 'woocommerce-services', 4000, 4000 ],
 		[ 'woocommerce-services', 'woocommerce-services', 4000, 4000 ],
