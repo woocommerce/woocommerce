@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Store API: merge a guest cart token into the logged-in user's cart on first authenticated request, so headless/token logins (JWT, OAuth) get the same cart merge that cookie logins do.
