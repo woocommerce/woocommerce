@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Stop two product CSV imports overlapping, and show the error on the import screen instead of a frozen progress bar.
