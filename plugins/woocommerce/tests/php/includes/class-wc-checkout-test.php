@@ -1377,9 +1377,13 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Resuming a pending order keeps every original item when checkout fails before the order is saved.
+	 * @testdox Resuming a pending order in a later request keeps every original item when checkout fails before the order is saved, with $keep_items keeping unchanged items.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $keep_items The woocommerce_checkout_keep_order_items_on_resume value.
 	 */
-	public function test_create_order_resume_keeps_original_items_when_checkout_fails(): void {
+	public function test_create_order_resume_keeps_original_items_when_checkout_fails( bool $keep_items ): void {
 		$order_id = $this->create_order_with_line_item_and_fee();
 		$this->change_cart_section( $order_id, 'fee' );
 		wc_add_order_item(
@@ -1389,7 +1393,69 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				'order_item_type' => 'line_item',
 			)
 		);
+		$this->set_order_modified_an_hour_ago( $order_id );
 		$before = $this->get_order_item_ids_by_type( $order_id );
+		add_filter( 'woocommerce_checkout_keep_order_items_on_resume', $keep_items ? '__return_true' : '__return_false' );
+		$fail = function () {
+			throw new Exception( 'Simulated checkout failure' );
+		};
+		add_action( 'woocommerce_checkout_create_order', $fail );
+
+		$result = $this->resume_order( $order_id );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Simulated checkout failure', $result->get_error_message() );
+		$this->assertCount( 2, $before['line_item'], 'The extension line item should be on the order before resuming.' );
+		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ), 'The order should keep its items and their IDs.' );
+
+		remove_action( 'woocommerce_checkout_create_order', $fail );
+		$this->assertSame( $order_id, $this->resume_order( $order_id ), 'A later retry should resume the same order.' );
+		$this->assert_line_items_match_cart( $order_id );
+	}
+
+	/**
+	 * @testdox Resuming a pending order keeps every original item when its coupon can no longer be held, with $keep_items keeping unchanged items.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $keep_items The woocommerce_checkout_keep_order_items_on_resume value.
+	 */
+	public function test_create_order_resume_keeps_original_items_when_coupon_cannot_be_held( bool $keep_items ): void {
+		$coupon   = $this->create_coupon_with_usage_limit( 1 );
+		$data     = array( 'billing_email' => 'shopper@example.com' );
+		$order_id = $this->create_order_with_line_item_and_coupon( $coupon, $data );
+		wc_add_order_item(
+			$order_id,
+			array(
+				'order_item_name' => 'Extension gift',
+				'order_item_type' => 'line_item',
+			)
+		);
+		// Another order uses the coupon's last use before the shopper retries.
+		$coupon->set_usage_count( 1 );
+		$coupon->save();
+		$this->set_order_modified_an_hour_ago( $order_id );
+		$before = $this->get_order_item_ids_by_type( $order_id );
+		add_filter( 'woocommerce_checkout_keep_order_items_on_resume', $keep_items ? '__return_true' : '__return_false' );
+
+		$result = $this->resume_order( $order_id, $data );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertStringContainsString( 'coupon usage limit is reached', $result->get_error_message() );
+		$this->assertSame( array( 'coupon', 'line_item' ), array_keys( $before ), 'The order should have a coupon and line items before resuming.' );
+		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ), 'The order should keep its items and their IDs.' );
+	}
+
+	/**
+	 * @testdox A failed retry of a pending order releases the coupon hold it took.
+	 */
+	public function test_create_order_resume_failure_releases_coupon_hold(): void {
+		$coupon   = $this->create_coupon_with_usage_limit( 5 );
+		$data     = array( 'billing_email' => 'shopper@example.com' );
+		$order_id = $this->create_order_with_line_item_and_coupon( $coupon, $data );
+		$this->set_order_modified_an_hour_ago( $order_id );
+		$holds = $this->get_coupon_hold_keys( $coupon->get_id() );
+		$this->assertCount( 1, $holds, 'The first checkout should hold the coupon.' );
 		add_action(
 			'woocommerce_checkout_create_order',
 			function () {
@@ -1397,12 +1463,31 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			}
 		);
 
-		$result = $this->resume_order( $order_id );
+		$this->assertInstanceOf( WP_Error::class, $this->resume_order( $order_id, $data ) );
+
+		$this->assertSame( $holds, $this->get_coupon_hold_keys( $coupon->get_id() ), 'The retry should release the hold it took.' );
+	}
+
+	/**
+	 * @testdox Checkout that fails after saving a new order removes the released coupon holds from the order.
+	 */
+	public function test_create_order_failure_after_save_removes_coupon_holds_from_order(): void {
+		$coupon   = $this->create_coupon_with_usage_limit( 5 );
+		$order_id = 0;
+		add_action(
+			'woocommerce_checkout_order_created',
+			function ( WC_Order $order ) use ( &$order_id ) {
+				$order_id = $order->get_id();
+				throw new Exception( 'Simulated failure after save' );
+			}
+		);
+
+		$result = $this->create_order_with_line_item_and_coupon( $coupon, array( 'billing_email' => 'shopper@example.com' ), false );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertSame( 'Simulated checkout failure', $result->get_error_message() );
-		$this->assertCount( 2, $before['line_item'], 'The extension line item should be on the order before resuming.' );
-		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ), 'The changed fee and the extension line item should not be deleted.' );
+		$this->assertGreaterThan( 0, $order_id, 'The order should have been saved before the failure.' );
+		$this->assertSame( array(), $this->get_coupon_hold_keys( $coupon->get_id() ), 'The coupon hold should be released.' );
+		$this->assertSame( '', wc_get_order( $order_id )->get_meta( '_coupon_held_keys' ), 'The stored order should no longer list the released hold.' );
 	}
 
 	/**
@@ -2034,6 +2119,71 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertIsInt( $order_id );
 
 		return $order_id;
+	}
+
+	/**
+	 * Creates a coupon with a usage limit, so checkout holds a use of it for each order.
+	 *
+	 * @param int $usage_limit The coupon's usage limit.
+	 * @return WC_Coupon
+	 */
+	private function create_coupon_with_usage_limit( int $usage_limit ): WC_Coupon {
+		$coupon = WC_Helper_Coupon::create_coupon( 'limited-coupon' );
+		$coupon->set_usage_limit( $usage_limit );
+		$coupon->save();
+
+		return $coupon;
+	}
+
+	/**
+	 * Creates an order from a cart with one product and the given coupon.
+	 *
+	 * @param WC_Coupon $coupon      The coupon to apply.
+	 * @param array     $data        Posted checkout data to add.
+	 * @param bool      $must_create Whether to assert that the order was created.
+	 * @return int|WP_Error The order ID, or the checkout error.
+	 */
+	private function create_order_with_line_item_and_coupon( WC_Coupon $coupon, array $data, bool $must_create = true ) {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$order_id = $this->sut->create_order( array_merge( array( 'payment_method' => WC_Gateway_BACS::ID ), $data ) );
+		if ( $must_create ) {
+			$this->assertIsInt( $order_id );
+		}
+
+		return $order_id;
+	}
+
+	/**
+	 * Moves an order's modified date an hour back, as when the shopper retries checkout in a later request.
+	 *
+	 * @param int $order_id The order ID.
+	 */
+	private function set_order_modified_an_hour_ago( int $order_id ): void {
+		$order = wc_get_order( $order_id );
+		$order->set_date_modified( time() - HOUR_IN_SECONDS );
+		$order->save();
+	}
+
+	/**
+	 * Reads the meta keys of a coupon's held uses.
+	 *
+	 * @param int $coupon_id The coupon ID.
+	 * @return string[]
+	 */
+	private function get_coupon_hold_keys( int $coupon_id ): array {
+		global $wpdb;
+
+		return $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT meta_key FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key LIKE %s ORDER BY meta_key",
+				$coupon_id,
+				$wpdb->esc_like( '_coupon_held_' ) . '%'
+			)
+		);
 	}
 
 	/**
