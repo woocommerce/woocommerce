@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep keyboard focus in Product Filters after updating or clearing filters.
