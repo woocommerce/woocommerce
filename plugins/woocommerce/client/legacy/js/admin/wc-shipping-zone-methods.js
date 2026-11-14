@@ -73,14 +73,19 @@
 					// Nothing was saved, so redraw from the model, which releases the table.
 					shippingMethod.trigger( 'rerender' );
 
-					// A row delete leaves a methods entry behind while marking the form clean, so
-					// ignore methods here exactly as the response does.
-					if ( _.isEmpty( _.omit( shippingMethod.changes, 'methods' ) ) ) {
+					// A delete leaves a methods entry on a clean form and a toggle leaves the same
+					// entry on a dirty one, so take either signal, but never an empty change set.
+					var retryable = ! _.isEmpty( shippingMethod.changes ) && (
+						! _.isEmpty( _.omit( shippingMethod.changes, 'methods' ) ) ||
+						shippingMethodView.needsUnloadConfirm
+					);
+
+					if ( retryable ) {
+						shippingMethod.trigger( 'change:methods' );
+					} else {
 						// Saving an empty change set would just fail again, so clear the busy
 						// state without marking the form dirty.
 						$save_button.removeClass( 'is-busy' );
-					} else {
-						shippingMethod.trigger( 'change:methods' );
 					}
 				},
 				onSaveResponse: function( response, textStatus, snapshot ) {
@@ -697,7 +702,23 @@
 							// Avoid triggering a rerender here because we don't want to show the method
 							// in the table in case merchant doesn't finish flow.
 
+							// The server list replaces the rows, so lay the unsaved toggles and order back over it;
+							// they stay pending and are saved with the next save.
+							_.each( _.omit( shippingMethodView.model.changes.methods, 'methods' ), function( row, id ) {
+								if ( response.data.methods[ id ] ) {
+									_.extend( response.data.methods[ id ], _.pick( row, 'enabled', 'method_order' ) );
+								}
+							} );
+
 							shippingMethodView.model.set( 'methods', response.data.methods );
+
+							// Setting 'methods' above marks the form dirty, which on the modal branch below
+							// still has to warn about navigating away from unfinished settings, so only
+							// the button is disabled here: an empty change set posts nothing and the
+							// endpoint rejects it. A completed save clears the flag via 'saved:methods'.
+							if ( _.isEmpty( shippingMethodView.model.changes ) ) {
+								$save_button.attr( 'disabled', 'disabled' );
+							}
 
 							// Close original modal
 							closeModal();
@@ -843,7 +864,6 @@
 							var view    = shippingMethodView,
 								model   = view.model,
 								methods   = _.indexBy( model.get( 'methods' ), 'instance_id' ),
-								changes = {},
 								instance_id = post_data.instance_id;
 
 							// Remove method to zone via ajax call
@@ -854,12 +874,22 @@
 									instance_id: instance_id,
 									zone_id: data.zone_id,
 								},
-								success: function( { data } ) {
+								success: function() {
 									delete methods[instance_id];
-									changes.methods = changes.methods || data.methods;
 									model.set('methods', methods);
-									model.logChanges( changes );
-									view.clearUnloadConfirmation();
+
+									// Keep the merchant's pending edits: writing the server's rows over them
+									// would revert a toggle the table still shows.
+									if ( model.changes.methods ) {
+										delete model.changes.methods[ instance_id ];
+										if ( _.isEmpty( _.omit( model.changes.methods, 'methods' ) ) ) {
+											delete model.changes.methods;
+										}
+									}
+
+									if ( _.isEmpty( model.changes ) ) {
+										view.clearUnloadConfirmation();
+									}
 									view.render();
 									shippingMethodView.unblock();
 								},
