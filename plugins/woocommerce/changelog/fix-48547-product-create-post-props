@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the slug and default category on a product after saving, so editing it again no longer changes its permalink.
