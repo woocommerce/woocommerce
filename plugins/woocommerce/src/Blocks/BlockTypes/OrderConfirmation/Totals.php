@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Enums\OrderItemType;
 
@@ -9,6 +10,7 @@ use Automattic\WooCommerce\Enums\OrderItemType;
  * Totals class.
  */
 class Totals extends AbstractOrderConfirmationBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
