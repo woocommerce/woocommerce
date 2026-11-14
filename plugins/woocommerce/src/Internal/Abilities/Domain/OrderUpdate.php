@@ -8,11 +8,10 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
-use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderEditTrait;
 use Automattic\WooCommerce\Internal\Admin\Orders\ItemQuantityLimits;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
@@ -27,6 +26,7 @@ class OrderUpdate extends ActionableAbility {
 
 	use DomainAbilityHelpers;
 	use OrderAbilityTrait;
+	use OrderEditTrait;
 
 	/**
 	 * Ability name.
@@ -34,40 +34,11 @@ class OrderUpdate extends ActionableAbility {
 	public const ABILITY_NAME = 'woocommerce/order-update';
 
 	/**
-	 * Address fields that the shipping address has. The billing address also has `email`.
-	 */
-	private const ADDRESS_FIELDS = array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' );
-
-	/**
 	 * Product lines that change() removed, for the stock change in save().
 	 *
 	 * @var array<int, \WC_Order_Item_Product>
 	 */
 	private array $removed_product_lines = array();
-
-	/**
-	 * Product lines that change() added or gave a new quantity, for the stock change in save().
-	 *
-	 * @var array<int, \WC_Order_Item_Product>
-	 */
-	private array $changed_product_lines = array();
-
-	/**
-	 * Whether save() recalculates the order with the methods that save, and which ones.
-	 * Only with the feature off, when no validator needs to see the new totals.
-	 *
-	 * @var string|null `coupons`, `totals` or null.
-	 */
-	private ?string $recalculate_after_save = null;
-
-	/**
-	 * Product lines to add with WC_Order::add_product() in save(), with the feature off. The saving method
-	 * runs the rules of an order class that has not adopted stage_product_item(), as order-update-status does
-	 * with update_status().
-	 *
-	 * @var array<int, array{0: \WC_Product, 1: int}>
-	 */
-	private array $products_to_add = array();
 
 	/**
 	 * Get the ability registration arguments.
@@ -145,10 +116,8 @@ class OrderUpdate extends ActionableAbility {
 	 * @throws \WC_Data_Exception When the order class has not adopted a stage method.
 	 */
 	public function change( $subject, array $input ) {
-		$this->removed_product_lines  = array();
-		$this->changed_product_lines  = array();
-		$this->recalculate_after_save = null;
-		$this->products_to_add        = array();
+		$this->removed_product_lines = array();
+		$this->reset_line_changes();
 
 		$refused = new \WP_Error();
 		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
@@ -208,13 +177,7 @@ class OrderUpdate extends ActionableAbility {
 			}
 		}
 
-		$added = array();
-		foreach ( $this->products_to_add as list( $product, $quantity ) ) {
-			$item = $subject->get_item( $subject->add_product( $product, $quantity, array( 'order' => $subject ) ), false );
-			if ( $item instanceof \WC_Order_Item_Product ) {
-				$added[] = $item;
-			}
-		}
+		$added = $this->add_queued_products( $subject );
 
 		$saved = parent::save( $subject );
 
@@ -227,13 +190,12 @@ class OrderUpdate extends ActionableAbility {
 
 		$this->changed_product_lines = array_merge( $this->changed_product_lines, $added );
 
-		if ( 'coupons' === $this->recalculate_after_save ) {
-			if ( $subject->get_prices_include_tax() ) {
-				$subject->calculate_taxes();
+		$recalculated = $this->recalculate_saved_order( $subject );
+		if ( is_wp_error( $recalculated ) ) {
+			foreach ( $added as $item ) {
+				$item->delete();
 			}
-			$subject->recalculate_coupons();
-		} elseif ( 'totals' === $this->recalculate_after_save ) {
-			$subject->calculate_totals();
+			return $recalculated;
 		}
 
 		if ( in_array( $subject->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true ) ) {
@@ -267,95 +229,6 @@ class OrderUpdate extends ActionableAbility {
 		}
 
 		return array( 'order' => $order );
-	}
-
-	/**
-	 * Check the sent fields of an address against the order, then set the fields
-	 * that pass. A bad country keeps the saved country, state and postcode, because
-	 * the state and postcode checks depend on the country.
-	 *
-	 * @param \WC_Order $order   Order.
-	 * @param string    $type    Address type: billing or shipping.
-	 * @param array     $address Address fields to change.
-	 * @return null|\WP_Error
-	 */
-	private static function set_address( \WC_Order $order, string $type, array $address ): ?\WP_Error {
-		$address = wc_clean( $address );
-		$refused = new \WP_Error();
-		if ( ! empty( $address['email'] ) && ! is_email( $address['email'] ) ) {
-			$refused->merge_from(
-				self::address_error(
-					$type,
-					'email',
-					__( 'The billing email is not a valid email address. Send a valid address.', 'woocommerce' )
-				)
-			);
-			unset( $address['email'] );
-		}
-
-		$country  = $address['country'] ?? $order->{"get_{$type}_country"}();
-		$state    = $address['state'] ?? $order->{"get_{$type}_state"}();
-		$postcode = $address['postcode'] ?? $order->{"get_{$type}_postcode"}();
-
-		if ( '' !== $country && ! array_key_exists( $country, WC()->countries->get_countries() ) ) {
-			$refused->merge_from(
-				self::address_error(
-					$type,
-					'country',
-					/* translators: %s: country sent by the client. */
-					sprintf( __( '"%s" is not a valid country. Send an ISO 3166-1 alpha-2 country code, such as PT.', 'woocommerce' ), $country )
-				)
-			);
-			unset( $address['country'], $address['state'], $address['postcode'] );
-		} else {
-			$states = WC()->countries->get_states( $country );
-
-			if ( '' !== $state && ! empty( $states ) && ! array_key_exists( $state, $states ) ) {
-				$refused->merge_from(
-					self::address_error(
-						$type,
-						'state',
-						/* translators: 1: state sent by the client or kept from the order, 2: country code, 3: comma-separated state codes. */
-						sprintf( __( '"%1$s" is not a state of %2$s. Send the state with one of these codes: %3$s.', 'woocommerce' ), $state, $country, implode( ', ', array_keys( $states ) ) )
-					)
-				);
-				unset( $address['state'] );
-			}
-
-			if ( '' !== $postcode && '' !== $country ) {
-				if ( ! \WC_Validation::is_postcode( $postcode, $country ) ) {
-					$refused->merge_from(
-						self::address_error(
-							$type,
-							'postcode',
-							/* translators: 1: postcode sent by the client or kept from the order, 2: country code. */
-							sprintf( __( '"%1$s" is not a valid postcode for %2$s. Send a postcode in the format of that country.', 'woocommerce' ), $postcode, $country )
-						)
-					);
-					unset( $address['postcode'] );
-				} elseif ( isset( $address['postcode'] ) ) {
-					$address['postcode'] = wc_format_postcode( $postcode, $country );
-				}
-			}
-		}
-
-		foreach ( $address as $key => $value ) {
-			$order->{"set_{$type}_{$key}"}( $value );
-		}
-
-		return $refused->has_errors() ? $refused : null;
-	}
-
-	/**
-	 * Build the error for an address field.
-	 *
-	 * @param string $type    Address type: billing or shipping.
-	 * @param string $field   Address field.
-	 * @param string $message What is wrong and what to send.
-	 * @return \WP_Error
-	 */
-	private static function address_error( string $type, string $field, string $message ): \WP_Error {
-		return new \WP_Error( "woocommerce_ability_order_{$type}_{$field}_invalid", $message, array( 'status' => 400 ) );
 	}
 
 	/**
@@ -418,125 +291,7 @@ class OrderUpdate extends ActionableAbility {
 			return $refused;
 		}
 
-		$recalculate_coupons = $product_added && ! empty( $order->get_items( 'coupon' ) );
-
-		if ( ! ExtensibleAbilities::is_enabled() ) {
-			$this->recalculate_after_save = $recalculate_coupons ? 'coupons' : 'totals';
-			return null;
-		}
-
-		if ( $recalculate_coupons ) {
-			if ( $order->get_prices_include_tax() ) {
-				$order->stage_taxes();
-			}
-
-			$order->stage_recalculated_coupons();
-
-			return null;
-		}
-
-		$order->stage_totals();
-
-		return null;
-	}
-
-	/**
-	 * Change a shipping line in memory, or add a new one when the line has no ID.
-	 *
-	 * @param \WC_Order $order Order.
-	 * @param array     $line  Shipping line input.
-	 * @return null|\WP_Error
-	 */
-	private static function set_shipping_line( \WC_Order $order, array $line ): ?\WP_Error {
-		if ( isset( $line['total'] ) && ( ! is_numeric( $line['total'] ) || (float) $line['total'] < 0 ) ) {
-			return new \WP_Error(
-				'woocommerce_ability_order_shipping_line_total_invalid',
-				/* translators: %s: shipping total sent by the client. */
-				sprintf( __( '"%s" is not a valid shipping total. Send a decimal number that is not negative, such as 9.99.', 'woocommerce' ), $line['total'] ),
-				array( 'status' => 400 )
-			);
-		}
-
-		if ( empty( $line['id'] ) ) {
-			if ( empty( $line['method_title'] ) ) {
-				return new \WP_Error(
-					'woocommerce_ability_order_shipping_line_method_title_required',
-					__( 'A new shipping line needs a method_title. Send method_title, or send the id of the shipping line to change.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
-			}
-
-			$item = new \WC_Order_Item_Shipping();
-		} else {
-			$item = $order->get_item( $line['id'], false );
-
-			if ( ! $item instanceof \WC_Order_Item_Shipping ) {
-				return self::line_not_found( $line['id'] );
-			}
-		}
-
-		if ( isset( $line['method_id'] ) ) {
-			$item->set_method_id( sanitize_text_field( $line['method_id'] ) );
-		}
-
-		if ( isset( $line['method_title'] ) ) {
-			$item->set_method_title( sanitize_text_field( $line['method_title'] ) );
-		}
-
-		if ( isset( $line['total'] ) ) {
-			$item->set_total( wc_format_decimal( $line['total'] ) );
-		}
-
-		if ( empty( $line['id'] ) ) {
-			$order->add_item( $item );
-		}
-
-		return null;
-	}
-
-	/**
-	 * Add a product line in memory. save() reduces its stock. With the feature off, save() adds the line with
-	 * WC_Order::add_product(), so an order class that has not adopted stage_product_item() keeps working.
-	 *
-	 * @param \WC_Order $order Order.
-	 * @param array     $line  Product line input.
-	 * @return null|\WP_Error
-	 * @throws \WC_Data_Exception With the feature on, when the order class has not adopted stage_product_item().
-	 */
-	private function add_product_line( \WC_Order $order, array $line ): ?\WP_Error {
-		$product  = wc_get_product( $line['product_id'] );
-		$quantity = $line['quantity'] ?? 1;
-
-		if ( ! $product instanceof \WC_Product ) {
-			return new \WP_Error(
-				'woocommerce_ability_order_product_not_found',
-				/* translators: %d: product ID. */
-				sprintf( __( 'Product %d does not exist. Use the woocommerce/products-query ability to find the product ID.', 'woocommerce' ), $line['product_id'] ),
-				array( 'status' => 400 )
-			);
-		}
-
-		if ( $product->is_type( ProductType::VARIABLE ) ) {
-			return new \WP_Error(
-				'woocommerce_ability_order_product_variable',
-				/* translators: %d: product ID. */
-				sprintf( __( 'Product %d is a variable product and cannot be added. Send the ID of one of its variations as product_id.', 'woocommerce' ), $line['product_id'] ),
-				array( 'status' => 400 )
-			);
-		}
-
-		try {
-			wc_get_container()->get( ItemQuantityLimits::class )->validate_new_item_quantity( $quantity, $product );
-		} catch ( \Exception $exception ) {
-			return self::quantity_error( $exception );
-		}
-
-		if ( ! ExtensibleAbilities::is_enabled() ) {
-			$this->products_to_add[] = array( $product, $quantity );
-			return null;
-		}
-
-		$this->changed_product_lines[] = $order->stage_product_item( $product, $quantity, array( 'order' => $order ) );
+		$this->stage_line_totals( $order, $product_added );
 
 		return null;
 	}
@@ -587,31 +342,6 @@ class OrderUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Build the error for a line that the order does not have.
-	 *
-	 * @param int $item_id Order item ID sent by the client.
-	 * @return \WP_Error
-	 */
-	private static function line_not_found( int $item_id ): \WP_Error {
-		return new \WP_Error(
-			'woocommerce_ability_order_line_not_found',
-			/* translators: %d: order item ID. */
-			sprintf( __( 'Item %d is not a line of this order that this ability can change. Use the woocommerce/orders-query ability with include_line_items and include_lines to read the IDs of the product and shipping lines.', 'woocommerce' ), $item_id ),
-			array( 'status' => 400 )
-		);
-	}
-
-	/**
-	 * Build the error for a quantity below the minimum of a product.
-	 *
-	 * @param \Exception $exception The refusal of ItemQuantityLimits, which names the product and the minimum.
-	 * @return \WP_Error
-	 */
-	private static function quantity_error( \Exception $exception ): \WP_Error {
-		return new \WP_Error( 'woocommerce_ability_order_line_item_quantity_invalid', $exception->getMessage(), array( 'status' => 400 ) );
-	}
-
-	/**
 	 * Get the ability input schema.
 	 *
 	 * @return array
@@ -624,8 +354,8 @@ class OrderUpdate extends ActionableAbility {
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'billing'        => self::get_address_input_schema( array_merge( self::ADDRESS_FIELDS, array( 'email' ) ) ),
-				'shipping'       => self::get_address_input_schema( self::ADDRESS_FIELDS ),
+				'billing'        => self::get_address_input_schema( array_merge( self::shipping_address_fields(), array( 'email' ) ) ),
+				'shipping'       => self::get_address_input_schema( self::shipping_address_fields() ),
 				'customer_note'  => array( 'type' => 'string' ),
 				'line_items'     => array(
 					'type'        => 'array',
@@ -680,22 +410,6 @@ class OrderUpdate extends ActionableAbility {
 			),
 			'required'             => array( 'id' ),
 			'additionalProperties' => false,
-		);
-	}
-
-	/**
-	 * Get the input schema of an address.
-	 *
-	 * @param array<int, string> $fields Address fields.
-	 * @return array
-	 */
-	private static function get_address_input_schema( array $fields ): array {
-		return array(
-			'type'                 => 'object',
-			'description'          => __( 'Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.', 'woocommerce' ),
-			'properties'           => array_fill_keys( $fields, array( 'type' => 'string' ) ),
-			'additionalProperties' => false,
-			'minProperties'        => 1,
 		);
 	}
 }

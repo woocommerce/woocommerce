@@ -79,7 +79,7 @@ class ReadinessRestController extends RestApiControllerBase {
 	 * Register the routes.
 	 */
 	public function register_routes(): void {
-		if ( ! $this->features_controller->feature_is_enabled( StatusTab::FEATURE_ID ) ) {
+		if ( ! $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ) {
 			return;
 		}
 		register_rest_route(
@@ -134,13 +134,9 @@ class ReadinessRestController extends RestApiControllerBase {
 	 * @return array{report:array<string,mixed>|null,scan_pending:bool,scan_stalled:bool}
 	 */
 	protected function get_status( WP_REST_Request $request ): array {
-		$report = $this->agent_readiness->get_cached_report();
-		if ( null !== $report ) {
-			$report['store_checks'] = $this->agent_readiness->get_store_checks( $report );
-		}
 		$pending = $this->scheduled_scan->is_pending();
 		return array(
-			'report'       => $report,
+			'report'       => $this->agent_readiness->get_served_report(),
 			'scan_pending' => $pending,
 			'scan_stalled' => $pending && $this->scheduled_scan->is_stalled(),
 		);

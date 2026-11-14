@@ -17,7 +17,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->disable_cogs_feature();
-		remove_all_filters( 'woocommerce_get_cogs_total_value' );
 		self::disable_direct_product_attribute_lookup_updates();
 	}
 

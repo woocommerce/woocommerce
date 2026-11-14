@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Scope the unreleased subscriptions engine contract, cycle and meta writes by the expected owning extension; no changelog entry needed.
+

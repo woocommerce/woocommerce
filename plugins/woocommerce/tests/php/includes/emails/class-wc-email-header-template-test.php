@@ -15,7 +15,6 @@ class WC_Email_Header_Template_Test extends \WC_Unit_Test_Case {
 		parent::tearDown();
 		delete_option( 'woocommerce_email_header_image' );
 		update_option( 'woocommerce_feature_email_improvements_enabled', 'no' );
-		remove_all_filters( 'woocommerce_email_header_image_url' );
 	}
 
 	/**

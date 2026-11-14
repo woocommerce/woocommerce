@@ -368,7 +368,7 @@ trait OrderAbilityTrait {
 		$class_names = \WC_Order_Factory::get_class_names_for_order_ids( array( $order_id ) );
 
 		if ( empty( $class_names[ $order_id ] ) ) {
-			return wc_rest_check_post_permissions( 'shop_order', 'edit' === $context ? 'batch' : $context );
+			return (bool) wc_rest_check_post_permissions( 'shop_order', 'edit' === $context ? 'batch' : $context );
 		}
 
 		$type = OrderUtil::get_order_type( $order_id );

@@ -45,8 +45,6 @@ class WC_Helper_Subscriptions_API_Test extends \WC_Unit_Test_Case {
 		deactivate_plugins( self::INACTIVE_PLUGIN_SLUG . '/' . self::INACTIVE_PLUGIN_SLUG . '.php' );
 		switch_theme( $this->original_stylesheet );
 		wp_set_current_user( 0 );
-		remove_all_filters( 'wp_die_ajax_handler' );
-		remove_all_filters( 'wp_doing_ajax' );
 		parent::tearDown();
 	}
 

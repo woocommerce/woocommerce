@@ -265,7 +265,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		$type = self::get_order_type_from_input( $input );
 
-		return wc_rest_check_post_permissions( $type, 'read' );
+		return (bool) wc_rest_check_post_permissions( $type, 'read' );
 	}
 
 	/**

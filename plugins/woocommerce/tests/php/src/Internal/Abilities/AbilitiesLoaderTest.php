@@ -45,6 +45,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/product-delete',
 		'woocommerce/orders-query',
 		'woocommerce/order-send-email',
+		'woocommerce/order-create',
 		'woocommerce/order-update',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
@@ -344,6 +345,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'idempotent'  => false,
 				'destructive' => false,
 			),
+			'woocommerce/order-create'             => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
 			'woocommerce/order-update'             => array(
 				'readonly'    => false,
 				'idempotent'  => false,
@@ -529,9 +535,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_order_status_input_schemas_exclude_checkout_draft(): void {
 		$query_schema  = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/order-update-status' )->get_input_schema();
+		$create_schema = wp_get_ability( 'woocommerce/order-create' )->get_input_schema();
 
 		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['items']['enum'] );
 		$this->assertNotContains( 'checkout-draft', $update_schema['properties']['status']['enum'] ?? array() );
+		$this->assertNotContains( 'checkout-draft', $create_schema['properties']['status']['enum'] ?? array() );
 	}
 
 	/**
@@ -1087,6 +1095,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'email' => 'invoice',
 				),
 			),
+			'order-create'             => array(
+				'woocommerce/order-create',
+				array( 'line_items' => array( array( 'product_id' => 1 ) ) ),
+			),
 			'order-update'             => array(
 				'woocommerce/order-update',
 				array(
@@ -1147,6 +1159,63 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'tax-rates-query'          => array(
 				'woocommerce/tax-rates-query',
 				array(),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should grant a subscriber access when woocommerce_rest_check_permissions returns a truthy non-boolean, as REST does.
+	 *
+	 * @dataProvider provider_abilities_checking_rest_permissions
+	 *
+	 * @param string $ability_id Ability ID.
+	 * @param array  $input      Input that reaches the REST permission check.
+	 */
+	public function test_abilities_accept_truthy_rest_permission( string $ability_id, array $input ): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'subscriber' ) ) );
+		add_filter( 'woocommerce_rest_check_permissions', fn() => 1 );
+
+		$this->assertTrue( wp_get_ability( $ability_id )->check_permissions( $input ) );
+	}
+
+	/**
+	 * Provides one input per path through which an ability returns a REST permission check.
+	 *
+	 * @return array<string, array{0: string, 1: array}>
+	 */
+	public function provider_abilities_checking_rest_permissions(): array {
+		$missing_id = array( 'id' => PHP_INT_MAX );
+
+		return array(
+			'products-query'                 => array( 'woocommerce/products-query', $missing_id ),
+			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
+			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),
+			'payment-gateways-query'         => array( 'woocommerce/payment-gateways-query', array() ),
+			'customers-query'                => array( 'woocommerce/customers-query', array() ),
+			'shipping-zones-query'           => array( 'woocommerce/shipping-zones-query', array() ),
+			'tax-rates-query'                => array( 'woocommerce/tax-rates-query', array() ),
+			'product-attributes-query'       => array( 'woocommerce/product-attributes-query', array() ),
+			'product-attribute-create'       => array( 'woocommerce/product-attribute-create', array( 'name' => 'Size' ) ),
+			'product-terms-query'            => array( 'woocommerce/product-terms-query', array( 'taxonomy' => 'product_cat' ) ),
+			'product-terms-query of unknown' => array( 'woocommerce/product-terms-query', array( 'taxonomy' => 'pa_missing' ) ),
+			'product-term-create'            => array(
+				'woocommerce/product-term-create',
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Granted',
+				),
+			),
+			'product-term-update'            => array(
+				'woocommerce/product-term-update',
+				$missing_id + array( 'taxonomy' => 'product_cat' ),
+			),
+			'product-review-update'          => array(
+				'woocommerce/product-review-update',
+				$missing_id + array( 'status' => 'approved' ),
+			),
+			'product-review-reply'           => array(
+				'woocommerce/product-review-reply',
+				$missing_id + array( 'content' => 'Thanks!' ),
 			),
 		);
 	}
@@ -4989,13 +5058,16 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			++$mails;
 			return true;
 		};
+
+		$ability          = wp_get_ability( 'woocommerce/order-send-email' );
+		$pending_order    = $this->create_order_for_update( 'pending' );
+		$processing_order = $this->create_order_for_update( 'processing' );
+		// Count only what the ability sends: moving the second order to processing can send its own emails.
 		add_filter( 'pre_wp_mail', $capture );
-		$ability = wp_get_ability( 'woocommerce/order-send-email' );
-		$order   = $this->create_order_for_update( 'pending' );
 
 		$mismatch = $ability->execute(
 			array(
-				'id'    => $order->get_id(),
+				'id'    => $pending_order->get_id(),
 				'email' => 'completed',
 			)
 		);
@@ -5003,18 +5075,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_order_get_billing_email', '__return_empty_string' );
 		$no_recipient = $ability->execute(
 			array(
-				'id'    => $order->get_id(),
+				'id'    => $pending_order->get_id(),
 				'email' => 'invoice',
 			)
 		);
 
 		remove_filter( 'woocommerce_order_get_billing_email', '__return_empty_string' );
 
-		$order = $this->create_order_for_update( 'processing' );
 		add_filter( 'woocommerce_email_enabled_customer_processing_order', '__return_false' );
 		$disabled = $ability->execute(
 			array(
-				'id'    => $order->get_id(),
+				'id'    => $processing_order->get_id(),
 				'email' => 'processing',
 			)
 		);
@@ -5029,7 +5100,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		add_filter( 'pre_wp_mail', '__return_false' );
 		$failed = $ability->execute(
 			array(
-				'id'    => $order->get_id(),
+				'id'    => $processing_order->get_id(),
 				'email' => 'invoice',
 			)
 		);
