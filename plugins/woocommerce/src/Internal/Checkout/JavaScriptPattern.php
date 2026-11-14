@@ -6,16 +6,9 @@ namespace Automattic\WooCommerce\Internal\Checkout;
 /**
  * Finds constructs in a JSON Schema `pattern` that JavaScript rejects.
  *
- * PHP checks patterns with PCRE, but the checkout block compiles the same
- * pattern with AJV as a JavaScript `RegExp` with the `u` flag. PCRE accepts
- * constructs `u` mode rejects, so a pattern can pass registration and then throw
- * when a shopper reaches the form, which unmounts the whole section. This
- * reports those constructs so they are caught at registration instead.
- *
- * This is a deny-list, and it only reports constructs it is certain about, so a
- * valid pattern is never turned away. A pattern that slips through is still
- * contained by the checkout form, which skips schema validation when a schema
- * fails to compile.
+ * PHP validates patterns with PCRE, while checkout uses JavaScript `u` mode.
+ * This conservative check identifies known incompatibilities for registration
+ * notices. The frontend falls back to server validation for affected fields.
  *
  * @internal
  */

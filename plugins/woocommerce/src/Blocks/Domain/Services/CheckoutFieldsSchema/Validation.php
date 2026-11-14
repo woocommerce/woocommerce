@@ -220,29 +220,31 @@ class Validation {
 			return new WP_Error( 'woocommerce_rest_checkout_invalid_field_schema', self::format_schema_error( $error ) );
 		}
 
-		$unsupported_pattern = self::find_unsupported_pattern( $rules );
-		if ( null !== $unsupported_pattern ) {
-			return $unsupported_pattern;
-		}
-
 		return true;
 	}
 
 	/**
 	 * Reports the first `pattern` value or `patternProperties` key the browser cannot compile.
 	 *
-	 * The meta schema only checks that Opis compiles the pattern as PCRE, but the
-	 * checkout block compiles it with AJV as a JavaScript `RegExp` with the `u`
-	 * flag, which is stricter. A pattern the browser rejects would otherwise
-	 * register silently and throw when a shopper fills the field in.
+	 * This check is separate from meta-schema validation so PHP-valid rules can
+	 * remain registered and enforced on the server.
+	 *
+	 * @since 11.4.0
 	 *
 	 * @param mixed  $rules The rules to walk.
 	 * @param string $path  The path to the rules, for the error message.
 	 * @return WP_Error|null An error describing the pattern, or null when every pattern is usable.
 	 */
-	private static function find_unsupported_pattern( $rules, string $path = '' ) {
+	public static function find_unsupported_pattern( $rules, string $path = '' ) {
 		if ( ! is_array( $rules ) ) {
 			return null;
+		}
+
+		if ( '' === $path && self::schema_is_unwrapped( $rules ) ) {
+			$rules = [
+				'type'       => 'object',
+				'properties' => $rules,
+			];
 		}
 
 		foreach ( $rules as $keyword => $value ) {

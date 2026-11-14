@@ -1036,11 +1036,13 @@ In the example above, we used [format keyword](https://github.com/ajv-validator/
 
 ##### The `pattern` keyword
 
-`pattern` is compiled in the browser as a JavaScript `RegExp` with the `u` flag, and on the server as a PCRE pattern with the `u` modifier. Both engines have to accept the pattern: a pattern the browser cannot compile would otherwise throw when a shopper fills the field in.
+`pattern` is compiled in the browser as a JavaScript `RegExp` with the `u` flag, and on the server as a PCRE pattern with the `u` modifier. Use a pattern that both engines accept so the rule can run in both places.
 
 Write patterns in [ECMA-262](https://tc39.es/ecma262/#sec-patterns) syntax. Draft-07 also recommends limiting yourself to a small set of tokens ([§6.3.3](https://json-schema.org/draft-07/draft-handrews-json-schema-validation-01#name-regular-expressions)), which is a good rule of thumb because those behave the same in both engines.
 
-PCRE accepts constructs JavaScript rejects in `u` mode. WooCommerce treats these as a registration error, so the field is not registered and `_doing_it_wrong()` reports the pattern:
+PCRE accepts constructs JavaScript rejects in `u` mode. WooCommerce reports known incompatibilities through `_doing_it_wrong()` during registration for `required`, `hidden` and `validation` rules, including `patternProperties` keys. The field remains registered with its original rules so the server can continue applying them. If the browser cannot compile a rule, it skips that rule for the affected field while valid fields keep their browser validation.
+
+Avoid these constructs:
 
 | Construct | Example |
 | --- | --- |

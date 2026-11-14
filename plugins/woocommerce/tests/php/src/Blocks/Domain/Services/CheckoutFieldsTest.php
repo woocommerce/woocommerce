@@ -431,7 +431,7 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox A field whose pattern JavaScript cannot compile is not registered.
+	 * @testdox A field whose pattern JavaScript cannot compile is registered with a warning and keeps its rules.
 	 *
 	 * @testWith ["^[0-9]{3}\\-[0-9]{4}$"]
 	 *           ["(?i)^abc$"]
@@ -439,25 +439,43 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	 *           ["\\Aabc\\z"]
 	 *           ["^a++$"]
 	 *           ["^[[:alpha:]]+$"]
+	 *           ["^A\\-", "required"]
+	 *           ["^A\\-", "hidden"]
 	 *
-	 * @param string $pattern The pattern the browser cannot compile.
+	 * @param string $pattern    The pattern the browser cannot compile.
+	 * @param string $rule_field The field option containing the pattern.
 	 */
-	public function test_field_with_pattern_javascript_rejects_is_not_registered( string $pattern ): void {
+	public function test_field_with_pattern_javascript_rejects_is_registered( string $pattern, string $rule_field = 'validation' ): void {
 		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+		$rules = array(
+			'type'    => 'string',
+			'pattern' => $pattern,
+		);
+		if ( 'validation' !== $rule_field ) {
+			$rules = array(
+				'checkout' => array(
+					'properties' => array(
+						'customer_note' => $rules,
+					),
+				),
+			);
+		}
 
 		woocommerce_register_additional_checkout_field(
 			array(
-				'id'         => 'plugin-namespace/unsupported-pattern',
-				'label'      => 'Unsupported pattern',
-				'location'   => 'order',
-				'validation' => array(
-					'type'    => 'string',
-					'pattern' => $pattern,
-				),
+				'id'        => 'plugin-namespace/unsupported-pattern',
+				'label'     => 'Unsupported pattern',
+				'location'  => 'order',
+				$rule_field => $rules,
 			)
 		);
 
-		$this->assertArrayNotHasKey( 'plugin-namespace/unsupported-pattern', $this->controller->get_additional_fields(), 'A pattern the browser cannot compile must block registration.' );
+		$fields = $this->controller->get_additional_fields();
+		$this->assertArrayHasKey( 'plugin-namespace/unsupported-pattern', $fields, 'A pattern the browser cannot compile must not block registration.' );
+		$registered_pattern = 'validation' === $rule_field
+			? $fields['plugin-namespace/unsupported-pattern']['validation']['pattern']
+			: $fields['plugin-namespace/unsupported-pattern'][ $rule_field ]['checkout']['properties']['customer_note']['pattern'];
+		$this->assertSame( $pattern, $registered_pattern, 'The original pattern must remain available for server-side validation.' );
 	}
 
 	/**

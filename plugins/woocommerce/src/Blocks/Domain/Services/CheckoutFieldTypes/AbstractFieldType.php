@@ -66,6 +66,19 @@ abstract class AbstractFieldType {
 			if ( is_wp_error( $valid ) ) {
 				return $this->registration_error( $id, $rule_field . ': ' . $valid->get_error_message(), '8.6.0' );
 			}
+
+			$unsupported_pattern = Validation::find_unsupported_pattern( $options[ $rule_field ] );
+			if ( null !== $unsupported_pattern ) {
+				$this->doing_it_wrong(
+					sprintf(
+						'Field with id: "%s" has a %s rule that is not compatible with JavaScript. %s The field will still be registered and the rule evaluated on the server.',
+						$id,
+						$rule_field,
+						$unsupported_pattern->get_error_message()
+					),
+					'11.4.0'
+				);
+			}
 		}
 
 		return true;
