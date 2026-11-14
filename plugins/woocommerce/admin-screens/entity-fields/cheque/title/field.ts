@@ -17,4 +17,5 @@ export const field: Field< ChequeSettings > = {
 		'Payment method name that the customer will see during checkout.',
 		'woocommerce'
 	),
+	placeholder: __( 'Check payments', 'woocommerce' ),
 };

@@ -42,7 +42,7 @@ use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\MenuIcons;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
 use Automattic\WooCommerce\Internal\Admin\Screens\AdminScreens;
-use Automattic\WooCommerce\Internal\Admin\Screens\Settings\ChequeSettings;
+use Automattic\WooCommerce\Internal\Admin\Screens\Settings\OfflinePaymentMethodSettings;
 use Automattic\WooCommerce\Internal\Admin\Screens\Settings\SettingsScreen;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
@@ -423,7 +423,7 @@ final class WooCommerce {
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
 		$container->get( AdminScreens::class );
-		$container->get( ChequeSettings::class );
+		$container->get( OfflinePaymentMethodSettings::class );
 		$container->get( SettingsScreen::class );
 		$container->get( AbilitiesTracking::class );
 		$container->get( OpenGraph::class );
@@ -475,6 +475,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\Screens\Settings\BacsAccountsRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Emails\EmailListingRestController::class )->register();
 
