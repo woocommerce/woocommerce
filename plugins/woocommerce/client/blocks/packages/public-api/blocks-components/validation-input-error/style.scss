@@ -30,3 +30,13 @@
 .wc-block-components-select + .wc-block-components-validation-error {
 	margin-bottom: $gap-large;
 }
+
+// Only the blocks that use motion animate the error.
+:where(.wp-block-woocommerce-cart, .wp-block-woocommerce-checkout) .wc-block-components-validation-error {
+	@include motion-collapse;
+
+	// Lets the height reach zero.
+	&[data-wc-collapse] {
+		min-height: 0;
+	}
+}

@@ -61,9 +61,8 @@ const PaymentMethodRequiredError = ( {
 			<div className={ visibleMessage ? 'has-error' : undefined }>
 				{ children }
 			</div>
-			{ visibleMessage && (
-				<ValidationInputError errorMessage={ visibleMessage } />
-			) }
+			{ /* Always there, so the message can collapse when it goes. */ }
+			<ValidationInputError errorMessage={ visibleMessage } />
 		</>
 	);
 };
