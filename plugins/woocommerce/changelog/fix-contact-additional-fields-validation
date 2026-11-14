@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure additional checkout fields in the Contact Information section display inline validation errors.
