@@ -548,6 +548,108 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_create_attribute() registers the taxonomy before woocommerce_attribute_added fires.
+	 */
+	public function test_wc_create_attribute_registers_the_taxonomy_before_the_added_hook(): void {
+		$slug     = $this->get_unique_attribute_slug( 'new' );
+		$taxonomy = wc_attribute_taxonomy_name( $slug );
+		$term     = null;
+		add_action(
+			'woocommerce_attribute_added',
+			function () use ( $taxonomy, &$term ) {
+				$term = wp_insert_term( 'Red', $taxonomy );
+			}
+		);
+
+		wc_create_attribute(
+			array(
+				'name' => 'Color',
+				'slug' => $slug,
+			)
+		);
+
+		$this->assertIsArray( $term, 'A hook listener should be able to add a term.' );
+		$this->assertSame( 'manage_product_terms', get_taxonomy( $taxonomy )->cap->manage_terms, 'The taxonomy should have the init arguments.' );
+	}
+
+	/**
+	 * @testdox wc_create_attribute() rejects a slug that was already created in the same request.
+	 */
+	public function test_wc_create_attribute_rejects_the_same_slug_twice_in_one_request(): void {
+		$slug = $this->get_unique_attribute_slug( 'dup' );
+
+		$first  = wc_create_attribute(
+			array(
+				'name' => 'First',
+				'slug' => $slug,
+			)
+		);
+		$second = wc_create_attribute(
+			array(
+				'name' => 'Second',
+				'slug' => $slug,
+			)
+		);
+
+		$this->assertIsInt( $first );
+		$this->assertWPError( $second );
+		$this->assertSame( 'invalid_product_attribute_slug_already_exists', $second->get_error_code() );
+	}
+
+	/**
+	 * @testdox wc_update_attribute() keeps object types that other code attached to the taxonomy.
+	 */
+	public function test_wc_update_attribute_keeps_attached_object_types(): void {
+		$slug     = $this->get_unique_attribute_slug( 'types' );
+		$taxonomy = wc_attribute_taxonomy_name( $slug );
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'Color',
+				'slug' => $slug,
+			)
+		);
+		register_taxonomy_for_object_type( $taxonomy, 'post' );
+
+		wc_update_attribute( $attribute_id, array( 'name' => 'Colour' ) );
+
+		$this->assertContains( 'post', get_taxonomy( $taxonomy )->object_type, 'The attached object type should stay.' );
+		$this->assertSame( 'Colour', get_taxonomy( $taxonomy )->labels->singular_name, 'The taxonomy should use the new name.' );
+	}
+
+	/**
+	 * @testdox wc_update_attribute() registers the new taxonomy and removes the old one when the slug changes.
+	 */
+	public function test_wc_update_attribute_slug_rename_registers_the_new_taxonomy(): void {
+		$old_slug     = $this->get_unique_attribute_slug( 'old' );
+		$new_slug     = $this->get_unique_attribute_slug( 'new' );
+		$old_taxonomy = wc_attribute_taxonomy_name( $old_slug );
+		$new_taxonomy = wc_attribute_taxonomy_name( $new_slug );
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'Color',
+				'slug' => $old_slug,
+			)
+		);
+		wp_insert_term( 'Red', $old_taxonomy );
+
+		wc_update_attribute(
+			$attribute_id,
+			array(
+				'name' => 'Color',
+				'slug' => $new_slug,
+			)
+		);
+
+		$this->assertFalse( taxonomy_exists( $old_taxonomy ), 'The old taxonomy should be gone.' );
+		$this->assertTrue( taxonomy_exists( $new_taxonomy ), 'The new taxonomy should be registered.' );
+		// A copy of the old taxonomy object under the new name would keep the old name.
+		$this->assertSame( $new_taxonomy, get_taxonomy( $new_taxonomy )->name, 'The new taxonomy should be its own registration.' );
+		$this->assertNotEmpty( term_exists( 'red', $new_taxonomy ), 'The term should move to the new taxonomy.' );
+	}
+
+	/**
 	 * Test visual attribute type registration and persistence.
 	 *
 	 * @testdox Should have the `wc-visual` attribute type registered in block themes.

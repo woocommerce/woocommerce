@@ -614,6 +614,9 @@ function wc_create_attribute( $args ) {
 
 		$id = $wpdb->insert_id;
 
+		// Register now so hook listeners can add terms.
+		WC_Post_Types::refresh_attribute_taxonomy( $id );
+
 		/**
 		 * Attribute added.
 		 *
@@ -636,6 +639,8 @@ function wc_create_attribute( $args ) {
 
 		// Set old slug to check for database changes.
 		$old_slug = ! empty( $args['old_slug'] ) ? wc_sanitize_taxonomy_name( $args['old_slug'] ) : $slug;
+
+		WC_Post_Types::refresh_attribute_taxonomy( $id );
 
 		/**
 		 * Attribute updated.
@@ -694,15 +699,15 @@ function wc_create_attribute( $args ) {
 				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_slug ) ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- This one-time attribute migration matches an indexed postmeta key.
 			);
 
-			// Update global vars to reflect migration. This ensures any functions dealing with terms later in this request
-			// use the correct info.
+			// The terms moved to the new taxonomy, so drop the old one.
 			global $wc_product_attributes;
-			if ( isset( $wc_product_attributes[ $old_taxonomy_name ] ) && ! isset( $wc_product_attributes[ $new_taxonomy_name ] ) ) {
-				$wc_product_attributes[ $new_taxonomy_name ] = $wc_product_attributes[ $old_taxonomy_name ];
-			}
-			global $wp_taxonomies;
-			if ( isset( $wp_taxonomies[ $old_taxonomy_name ] ) && ! isset( $wp_taxonomies[ $new_taxonomy_name ] ) ) {
-				$wp_taxonomies[ $new_taxonomy_name ] = $wp_taxonomies[ $old_taxonomy_name ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			unset( $wc_product_attributes[ $old_taxonomy_name ] );
+			if ( taxonomy_exists( $old_taxonomy_name ) ) {
+				// Flush queued term counts while the old taxonomy still exists, as wc_delete_attribute() does.
+				if ( wp_defer_term_counting() ) {
+					wp_update_term_count( array(), '', true );
+				}
+				unregister_taxonomy( $old_taxonomy_name );
 			}
 		}//end if
 	}//end if

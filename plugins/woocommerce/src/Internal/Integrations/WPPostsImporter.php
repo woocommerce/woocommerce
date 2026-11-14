@@ -50,7 +50,7 @@ class WPPostsImporter {
 
 				$attribute_name = wc_attribute_taxonomy_slug( $term['domain'] );
 
-				// Create the taxonomy.
+				// Creating the attribute also registers its taxonomy.
 				if ( ! in_array( $attribute_name, wc_get_attribute_taxonomies(), true ) ) {
 					wc_create_attribute(
 						array(
@@ -62,23 +62,6 @@ class WPPostsImporter {
 						)
 					);
 				}
-
-				// Register the taxonomy so that the import works.
-				register_taxonomy(
-					$term['domain'],
-					// phpcs:ignore
-					apply_filters( 'woocommerce_taxonomy_objects_' . $term['domain'], array( 'product' ) ),
-					// phpcs:ignore
-					apply_filters(
-						'woocommerce_taxonomy_args_' . $term['domain'],
-						array(
-							'hierarchical' => true,
-							'show_ui'      => false,
-							'query_var'    => true,
-							'rewrite'      => false,
-						)
-					)
-				);
 			}
 		}
 
