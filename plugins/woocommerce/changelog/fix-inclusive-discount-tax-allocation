@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a rounding error in tax-inclusive checkout totals with multiple tax rates.
