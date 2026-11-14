@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { useRef, useState } from '@wordpress/element';
 import clsx from 'clsx';
 import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 import type { ReactNode, ReactElement } from 'react';
 import { Button } from '@ariakit/react';
 import deprecated from '@wordpress/deprecated';
+import { usePresence } from '@woocommerce/base-hooks';
 /**
  * Internal dependencies
  */
@@ -49,6 +50,12 @@ const Panel = ( {
 		} );
 	}
 
+	// The open state that the last key press on the button set. A key press applies immediately.
+	const keyStateRef = useRef< boolean | null >( null );
+	const animate = keyStateRef.current !== isOpen;
+	// The content grows and collapses, so the content below moves with it.
+	const content = usePresence( isOpen || null, { animate, collapse: true } );
+
 	return (
 		<div
 			role={ headingLevel ? 'heading' : undefined }
@@ -60,8 +67,15 @@ const Panel = ( {
 			<Button
 				render={ <div /> }
 				aria-expanded={ isOpen }
+				// Stops the gap under the button from animating after a key press. Set in the same render as
+				// `aria-expanded`, so the browser sees both together.
+				{ ...( ! animate && { 'data-wc-instant': '' } ) }
 				className="wc-block-components-panel__button"
-				onClick={ () => setIsOpen( ! isOpen ) }
+				onClick={ ( event ) => {
+					// A click that a key press starts has no click count.
+					keyStateRef.current = event.detail === 0 ? ! isOpen : null;
+					setIsOpen( ! isOpen );
+				} }
 			>
 				<Icon
 					aria-hidden="true"
@@ -70,8 +84,13 @@ const Panel = ( {
 				/>
 				{ title }
 			</Button>
-			{ isOpen && (
-				<div className="wc-block-components-panel__content">
+			{ content.value && (
+				<div
+					ref={ content.ref }
+					className="wc-block-components-panel__content"
+					// Closing content is already gone for the shopper. React 18 has no `inert` prop.
+					{ ...( content.isExiting && { inert: '' } ) }
+				>
 					{ children }
 				</div>
 			) }

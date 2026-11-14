@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useLayoutEffect, useRef, useState } from '@wordpress/element';
-import { whenAnimationsEnd } from '@woocommerce/base-utils';
+import { animateCollapse, whenAnimationsEnd } from '@woocommerce/base-utils';
 
 /**
  * Keeps content mounted while it animates out, such as a dropdown that closes.
@@ -12,24 +12,39 @@ import { whenAnimationsEnd } from '@woocommerce/base-utils';
  * `isExiting` is unset again, so a transition turns around from its current position. Nothing is kept when nothing
  * animates, such as in Jest.
  *
- * @param value        The content to show, or `null` when there is none.
+ * @param value            The content to show, or `null` when there is none.
  * @param options
- * @param options.exit Set to `false` to remove the content immediately, for example after a key press.
+ * @param options.animate  Set to `false` to apply the change immediately, for example after a key press.
+ * @param options.collapse Set to `true` to grow `ref` when content arrives and collapse it when it goes.
+ *                         Content that is there on the first render does not grow.
  * @return The content to render, whether it is exiting, and the ref for the element that animates.
  */
-export function usePresence< T, E extends Element = HTMLDivElement >(
+export function usePresence< T, E extends HTMLElement = HTMLDivElement >(
 	value: T | null,
-	{ exit = true }: { exit?: boolean } = {}
+	{
+		animate = true,
+		collapse = false,
+	}: { animate?: boolean; collapse?: boolean } = {}
 ) {
 	const ref = useRef< E | null >( null );
 	const [ previousValue, setPreviousValue ] = useState( value );
 	const [ exitingValue, setExitingValue ] = useState< T | null >( null );
+	const isPresent = value !== null;
+	const wasPresentRef = useRef( isPresent );
 
 	// Adjust state while rendering, so the exiting content never unmounts for a frame.
 	if ( value !== previousValue ) {
 		setPreviousValue( value );
-		setExitingValue( value === null && exit ? previousValue : null );
+		setExitingValue( value === null && animate ? previousValue : null );
 	}
+
+	// Grow before paint, so the content never shows at its full size first. This also turns around a collapse.
+	useLayoutEffect( () => {
+		if ( collapse && isPresent && ! wasPresentRef.current ) {
+			animateCollapse( ref.current, true, animate );
+		}
+		wasPresentRef.current = isPresent;
+	}, [ isPresent, collapse, animate ] );
 
 	// A layout effect runs after the exit style is in the DOM, so its transitions have started, and before paint, so
 	// content that does not animate is removed without a visible frame.
@@ -37,8 +52,11 @@ export function usePresence< T, E extends Element = HTMLDivElement >(
 		if ( exitingValue === null ) {
 			return;
 		}
+		if ( collapse ) {
+			animateCollapse( ref.current, false );
+		}
 		return whenAnimationsEnd( ref.current, () => setExitingValue( null ) );
-	}, [ exitingValue ] );
+	}, [ exitingValue, collapse ] );
 
 	return {
 		value: value ?? exitingValue,
