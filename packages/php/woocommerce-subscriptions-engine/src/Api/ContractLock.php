@@ -56,18 +56,19 @@ final class ContractLock implements Serializable {
 	 * by any caller but the engine repository gets `_doing_it_wrong()`: it would bypass the
 	 * lock lifetime.
 	 *
-	 * @param int    $contract_id Contract id.
-	 * @param string $operation   Operation label.
-	 * @param string $token       The stored token.
+	 * @param int    $contract_id    Contract id.
+	 * @param string $extension_slug The contract's owning extension, matched when the lock was taken.
+	 * @param string $operation      Operation label.
+	 * @param string $token          The stored token.
 	 */
-	public function __construct( int $contract_id, string $operation, string $token ) {
+	public function __construct( int $contract_id, string $extension_slug, string $operation, string $token ) {
 		if ( ! self::is_called_by_repository() ) {
 			_doing_it_wrong( __METHOD__, esc_html__( 'Take a contract lock with Contracts::lock() or Contracts::create(); a lock built from a stored token bypasses the lock lifetime.', 'woocommerce' ), '0.0.1' );
 		}
 
 		$this->contract_id = $contract_id;
 		$this->operation   = $operation;
-		$this->state       = new ContractLockState( $token );
+		$this->state       = new ContractLockState( $token, $extension_slug );
 	}
 
 	/**

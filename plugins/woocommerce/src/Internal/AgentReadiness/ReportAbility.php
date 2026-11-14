@@ -72,13 +72,9 @@ class ReportAbility implements AbilityDefinition {
 		unset( $input );
 		$readiness = wc_get_container()->get( AgentReadiness::class );
 		$scan      = wc_get_container()->get( ScheduledScan::class );
-		$report    = $readiness->get_cached_report();
-		if ( null !== $report ) {
-			$report['store_checks'] = $readiness->get_store_checks( $report );
-		}
-		$pending = $scan->is_pending();
+		$pending   = $scan->is_pending();
 		return array(
-			'report'       => $report,
+			'report'       => $readiness->get_served_report(),
 			'scan_pending' => $pending,
 			'scan_stalled' => $pending && $scan->is_stalled(),
 		);
@@ -119,24 +115,32 @@ class ReportAbility implements AbilityDefinition {
 							'items' => array(
 								'type'       => 'object',
 								'properties' => array(
-									'id'      => array( 'type' => 'string' ),
-									'ok'      => array(
+									'id'       => array( 'type' => 'string' ),
+									'ok'       => array(
 										'type'        => array( 'boolean', 'null' ),
 										'description' => __( 'True when the store passes, false when it fails, null when the check could not run.', 'woocommerce' ),
 									),
-									'blocks'  => array(
+									'blocks'   => array(
 										'type'        => 'string',
-										'description' => __( 'What a failure stops: listing (every product everywhere), ucp (agents using UCP) or checkout (agent orders).', 'woocommerce' ),
+										'description' => __( 'What a failure stops: listing (every product everywhere), discovery (harder for agents to find and read the store), ucp (agents using UCP) or checkout (agent orders).', 'woocommerce' ),
 									),
-									'level'   => array(
+									'level'    => array(
 										'type' => 'string',
 										'enum' => array( StoreConditions::LEVEL_REQUIRED, StoreConditions::LEVEL_RECOMMENDED ),
 									),
-									'name'    => array( 'type' => 'string' ),
-									'label'   => array( 'type' => 'string' ),
-									'why'     => array( 'type' => 'string' ),
-									'fix'     => array( 'type' => 'string' ),
-									'fix_url' => array( 'type' => 'string' ),
+									'name'     => array( 'type' => 'string' ),
+									'label'    => array( 'type' => 'string' ),
+									'why'      => array( 'type' => 'string' ),
+									'fix'      => array( 'type' => 'string' ),
+									'fix_url'  => array( 'type' => 'string' ),
+									'conflict' => array(
+										'type'        => 'boolean',
+										'description' => __( 'On output checks: true only when the check failed and the store is set to send this, so something else is likely replacing it.', 'woocommerce' ),
+									),
+									'pending'  => array(
+										'type'        => 'boolean',
+										'description' => __( 'On output checks: true for a check of output a coming WooCommerce update builds; it does not run yet.', 'woocommerce' ),
+									),
 								),
 							),
 						),
@@ -170,6 +174,18 @@ class ReportAbility implements AbilityDefinition {
 										'items'       => array( 'type' => 'integer' ),
 									),
 									'fix_url'     => array( 'type' => 'string' ),
+								),
+							),
+						),
+						'declared'            => array(
+							'type'        => 'array',
+							'description' => __( 'Protocols and files the store declares to agents. Information only: found or not found, never a problem.', 'woocommerce' ),
+							'items'       => array(
+								'type'       => 'object',
+								'properties' => array(
+									'id'    => array( 'type' => 'string' ),
+									'name'  => array( 'type' => 'string' ),
+									'found' => array( 'type' => array( 'boolean', 'null' ) ),
 								),
 							),
 						),

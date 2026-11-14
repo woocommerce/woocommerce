@@ -18,16 +18,6 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
  */
 class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
-	 * Tear down the test class.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		remove_all_filters( 'wc_get_price_thousand_separator' );
-		remove_all_filters( 'wc_get_price_decimal_separator' );
-	}
-
-	/**
 	 * Test: get_type
 	 */
 	public function test_get_type() {

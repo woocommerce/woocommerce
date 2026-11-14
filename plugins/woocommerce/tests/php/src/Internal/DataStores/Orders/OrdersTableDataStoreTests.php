@@ -116,9 +116,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->clean_up_cot_setup();
 		$this->disable_cogs_feature();
 
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
-		remove_all_filters( 'woocommerce_load_order_cogs_value' );
-		remove_all_filters( 'woocommerce_save_order_cogs_value' );
 		parent::tearDown();
 	}
 
