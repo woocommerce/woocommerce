@@ -752,12 +752,26 @@ class WC_Install {
 		global $wpdb;
 
 		// Insert will fail if it already exists so this functions as a mutex.
-		$created_lock = $wpdb->query(
-			$wpdb->prepare(
-				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_installing', %d, 'no')",
-				time()
-			)
-		);
+		// Duplicate-key failures are expected contention, so suppress them but report anything else.
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			$created_lock = $wpdb->query(
+				$wpdb->prepare(
+					"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_installing', %d, 'no')",
+					time()
+				)
+			);
+		} finally {
+			$wpdb->suppress_errors( $suppress );
+		}
+
+		if ( ! $created_lock && $wpdb->last_error ) {
+			$is_duplicate = false !== stripos( $wpdb->last_error, 'duplicate entry' ) || false !== stripos( $wpdb->last_error, 'unique constraint' );
+
+			if ( ! $is_duplicate ) {
+				$wpdb->print_error();
+			}
+		}
 
 		// Take over the lock if it's stale (older than 10 minutes).
 		if ( ! $created_lock ) {

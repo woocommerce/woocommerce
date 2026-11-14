@@ -930,6 +930,73 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A contended installation lock fails quietly instead of printing a duplicate-entry database error.
+	 */
+	public function test_create_lock_does_not_report_duplicate_key_contention(): void {
+		global $wpdb;
+
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name = 'wc_installing'" );
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_installing', %d, 'no')",
+				time()
+			)
+		);
+
+		$previous_show   = $wpdb->show_errors( true );
+		$previous_silent = $wpdb->suppress_errors( false );
+
+		$create_lock = new \ReflectionMethod( WC_Install::class, 'create_lock' );
+		$create_lock->setAccessible( true );
+
+		ob_start();
+		$acquired = $create_lock->invoke( null );
+		$output   = ob_get_clean();
+
+		$silent_after = $wpdb->suppress_errors( $previous_silent );
+		$wpdb->show_errors( $previous_show );
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name = 'wc_installing'" );
+
+		$this->assertFalse( $acquired, 'A fresh lock held elsewhere should not be acquired.' );
+		$this->assertStringNotContainsString( 'WordPress database error', $output, 'Duplicate-key contention should not be reported.' );
+		$this->assertFalse( $silent_after, 'The previous error suppression state should be restored.' );
+	}
+
+	/**
+	 * @testdox An unexpected database error while taking the installation lock is still reported.
+	 */
+	public function test_create_lock_still_reports_unexpected_errors(): void {
+		global $wpdb;
+
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name = 'wc_installing'" );
+
+		$rewrite = function ( $query ) use ( $wpdb ) {
+			if ( false !== strpos( $query, "INSERT INTO {$wpdb->options}" ) && false !== strpos( $query, "'wc_installing'" ) ) {
+				return "INSERT INTO {$wpdb->options}_missing_table (option_name, option_value, autoload) VALUES ('wc_installing', 1, 'no')";
+			}
+			return $query;
+		};
+		add_filter( 'query', $rewrite );
+
+		$previous_show   = $wpdb->show_errors( true );
+		$previous_silent = $wpdb->suppress_errors( false );
+
+		$create_lock = new \ReflectionMethod( WC_Install::class, 'create_lock' );
+		$create_lock->setAccessible( true );
+
+		ob_start();
+		$create_lock->invoke( null );
+		$output = ob_get_clean();
+
+		$wpdb->suppress_errors( $previous_silent );
+		$wpdb->show_errors( $previous_show );
+		remove_filter( 'query', $rewrite );
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name = 'wc_installing'" );
+
+		$this->assertStringContainsString( 'WordPress database error', $output, 'Unexpected database errors should still be reported.' );
+	}
+
+	/**
 	 * Rebuilds the patterns through the real registration, so the test exercises the content
 	 * BlockTypesController ships rather than a copy of it that could drift. Registering a pattern that
 	 * is already live replaces it, so the siblings this also rebuilds just get their own content back.
