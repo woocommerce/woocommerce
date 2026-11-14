@@ -2008,6 +2008,50 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should only hide users from the REST API key owner search for a shop manager tagging the request with the API Keys context.
+	 * @param string $current_role Role of the user performing the search.
+	 * @param bool   $with_context Whether the request is tagged with the API Keys search context.
+	 * @param string $target_role Role of the user being searched for.
+	 * @param bool   $expect_visible Whether the target user should appear in the results.
+	 * @testWith ["administrator", true, "shop_manager", true]
+	 *           ["administrator", false, "shop_manager", true]
+	 *           ["shop_manager", true, "customer", true]
+	 *           ["shop_manager", true, "shop_manager", false]
+	 *           ["shop_manager", false, "shop_manager", true]
+	 */
+	public function test_json_search_api_key_users_filters_by_role_and_context( string $current_role, bool $with_context, string $target_role, bool $expect_visible ): void {
+		$current_user_id = self::factory()->user->create( array( 'role' => $current_role ) );
+		$target_id       = 'customer' === $target_role
+			? WC_Helper_Customer::create_customer( 'api-key-target', 'pass1', 'api-key-target@example.com' )->get_id()
+			: self::factory()->user->create( array( 'role' => $target_role ) );
+
+		try {
+			wp_set_current_user( $current_user_id );
+			$_GET['security'] = wp_create_nonce( 'search-customers' );
+			$_GET['term']     = (string) $target_id;
+			if ( $with_context ) {
+				$_GET['context'] = 'admin_rest_api_keys';
+			}
+
+			// WC_Admin_API_Keys normally loads via WC_Admin::includes() on 'init', which only runs on
+			// a real admin request. The ajax test harness never flips is_admin() to true until after
+			// 'init' has already fired, so nothing hooks its search filter unless we load it here.
+			new WC_Admin_API_Keys();
+
+			$response = $this->do_ajax( 'woocommerce_json_search_customers' );
+
+			if ( $expect_visible ) {
+				$this->assertArrayHasKey( $target_id, $response );
+			} else {
+				$this->assertArrayNotHasKey( $target_id, $response );
+			}
+		} finally {
+			unset( $_GET['security'], $_GET['term'], $_GET['context'] );
+			wp_set_current_user( 0 );
+		}
+	}
+
+	/**
 	 * Describes the behavior of the `get_customer_details` ajax endpoint, particularly in relation to
 	 * permissions of the requesting user.
 	 *
