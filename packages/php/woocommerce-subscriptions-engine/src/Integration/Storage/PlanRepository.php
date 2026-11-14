@@ -21,6 +21,12 @@ defined( 'ABSPATH' ) || exit;
 final class PlanRepository {
 
 	/**
+	 * SQL condition on the `p` alias: the plan's owner is exactly the bound slug. The binary cast
+	 * makes the match case-sensitive, as the engine's PHP comparisons of the owner are.
+	 */
+	private const OWNER_MATCH = 'p.extension_slug = CAST(%s AS BINARY)';
+
+	/**
 	 * Policy columns stored as JSON.
 	 *
 	 * @var array<int, string>
@@ -96,8 +102,9 @@ final class PlanRepository {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$sql = $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id );
 		} else {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$sql = $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d AND extension_slug = %s", $id, $extension_slug );
+			$owner_match = self::OWNER_MATCH;
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the owner condition carries one placeholder.
+			$sql = $wpdb->prepare( "SELECT p.* FROM {$table} p WHERE p.id = %d AND {$owner_match}", $id, $extension_slug );
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -201,7 +208,8 @@ final class PlanRepository {
 	 *                                   `pricing_policy`, `delivery_policy`.
 	 * @return bool False when no row of the plan's extension has its id (nothing is written).
 	 * @throws \InvalidArgumentException If a field is not a writable column.
-	 * @throws \RuntimeException If the plan has no id or no extension slug, or the update fails.
+	 * @throws \RuntimeException If the plan has no id or no extension slug, a value does not fit its
+	 *                           column, the update fails, or the existence read after a 0-row update fails.
 	 */
 	public function update_fields( Plan $plan, array $fields ): bool {
 		global $wpdb;
@@ -216,26 +224,40 @@ final class PlanRepository {
 			throw new \RuntimeException( 'Cannot update a plan that has no extension slug.' );
 		}
 
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 		$row     = $this->get_row_data( $plan );
 		$columns = array();
 		foreach ( $fields as $field ) {
 			if ( 'extension_slug' === $field || ! array_key_exists( $field, $row ) ) {
 				throw new \InvalidArgumentException( esc_html( sprintf( 'Cannot update plan field "%s".', $field ) ) );
 			}
+			if ( is_string( $row[ $field ] ) ) {
+				ColumnFit::assert_fits_column( $table, $field, $row[ $field ] );
+			}
 			$columns[ $field ] = $row[ $field ];
 		}
 
 		$now = gmdate( 'Y-m-d H:i:s' );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
-			array_merge( $columns, array( 'date_updated_gmt' => $now ) ),
-			array(
-				'id'             => $id,
-				'extension_slug' => $extension_slug,
-			)
-		);
+		$set    = array();
+		$values = array();
+		foreach ( array_merge( $columns, array( 'date_updated_gmt' => $now ) ) as $column => $value ) {
+			if ( null === $value ) {
+				$set[] = "`{$column}` = NULL";
+			} else {
+				$set[]    = "`{$column}` = %s";
+				$values[] = $value;
+			}
+		}
+		$values[] = $id;
+		$values[] = $extension_slug;
+
+		$sql = "UPDATE {$table} p SET " . implode( ', ', $set ) . ' WHERE p.id = %d AND ' . self::OWNER_MATCH;
+
+		// Not `$wpdb->update()`: its WHERE cannot express the binary owner match. Column names come
+		// from the plan's own row data; every value is a placeholder.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+		$updated = $wpdb->query( $wpdb->prepare( $sql, $values ) );
 
 		if ( false === $updated ) {
 			throw new \RuntimeException( sprintf( 'Failed to update plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
@@ -256,6 +278,7 @@ final class PlanRepository {
 	 *
 	 * @param int         $id             Plan id.
 	 * @param string|null $extension_slug Owning extension slug to scope the check to; null checks any extension.
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a missing plan.
 	 */
 	public function exists( int $id, ?string $extension_slug = null ): bool {
 		global $wpdb;
@@ -266,12 +289,16 @@ final class PlanRepository {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$sql = $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d", $id );
 		} else {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$sql = $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d AND extension_slug = %s", $id, $extension_slug );
+			$owner_match = self::OWNER_MATCH;
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the owner condition carries one placeholder.
+			$sql = $wpdb->prepare( "SELECT p.id FROM {$table} p WHERE p.id = %d AND {$owner_match}", $id, $extension_slug );
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 		$found = $wpdb->get_var( $sql );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( sprintf( 'Failed to read plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
+		}
 
 		return null !== $found;
 	}
@@ -319,127 +346,202 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Add a meta row for a plan, like `add_post_meta()`.
+	 * Add a meta row for a plan of `$extension_slug`, like `add_post_meta()`, as one
+	 * `INSERT ... SELECT` from the plan row, so no row is written for a missing plan or a plan of
+	 * another extension. With `$unique` the same statement checks that the key is absent.
 	 *
-	 * @param int    $plan_id Plan id.
-	 * @param string $key     Meta key.
-	 * @param mixed  $value   Meta value; serialized when not scalar.
-	 * @param bool   $unique  When true, add nothing if the key already exists. Advisory:
-	 *                        checked before the insert with no unique index.
+	 * @param int    $plan_id        Plan id.
+	 * @param string $extension_slug The expected owning extension.
+	 * @param string $key            Meta key.
+	 * @param mixed  $value          Meta value; serialized when not scalar.
+	 * @param bool   $unique         When true, add nothing if the key already exists. Advisory:
+	 *                               no unique index, so concurrent adds can both write.
 	 * @return int|null The new meta row id, or null when `$unique` and the key exists.
-	 * @throws \InvalidArgumentException If `$key` is empty.
-	 * @throws \RuntimeException If the insert fails.
+	 * @throws \InvalidArgumentException If no plan of that extension has the id.
+	 * @throws \RuntimeException If the key is longer than the meta_key column (255 characters), or the insert or the existence read fails.
 	 */
-	public function add_meta( int $plan_id, string $key, $value, bool $unique = false ): ?int {
+	public function add_meta( int $plan_id, string $extension_slug, string $key, $value, bool $unique = false ): ?int {
+		$meta_id = $this->insert_meta_row( $plan_id, $extension_slug, $key, $value, $unique );
+		if ( null !== $meta_id ) {
+			return $meta_id;
+		}
+
+		// Zero rows: the key is taken (unique only) or no plan of that extension has the id.
+		$owned = $unique && $this->exists( $plan_id, $extension_slug );
+		if ( ! $owned ) {
+			self::throw_not_found( $plan_id, $extension_slug );
+		}
+
+		return null;
+	}
+
+	/**
+	 * Insert one meta row selected from the plan row of `$extension_slug`; with `$unique`, only
+	 * while the plan has no row for `$key`.
+	 *
+	 * @param int    $plan_id        Plan id.
+	 * @param string $extension_slug The expected owning extension.
+	 * @param string $key            Meta key.
+	 * @param mixed  $value          Meta value; serialized when not scalar.
+	 * @param bool   $unique         Whether the key must be absent.
+	 * @return int|null The new meta row id, or null when nothing was inserted.
+	 * @throws \RuntimeException If the key does not fit the meta_key column, or the insert fails.
+	 */
+	private function insert_meta_row( int $plan_id, string $extension_slug, string $key, $value, bool $unique ): ?int {
 		global $wpdb;
 
-		if ( '' === $key ) {
-			throw new \InvalidArgumentException( 'Plan meta key must not be empty.' );
+		$meta = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
+		ColumnFit::assert_fits_column( $meta, 'meta_key', $key );
+
+		$plans  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$sql    = "INSERT INTO {$meta} ( plan_id, meta_key, meta_value ) SELECT p.id, %s, %s FROM {$plans} p WHERE p.id = %d AND " . self::OWNER_MATCH;
+		$values = array( $key, maybe_serialize( $value ), $plan_id, $extension_slug );
+		if ( $unique ) {
+			$sql     .= " AND NOT EXISTS ( SELECT 1 FROM {$meta} m WHERE m.plan_id = p.id AND m.meta_key = %s )";
+			$values[] = $key;
 		}
 
-		if ( $unique && array() !== $this->find_meta_values( $plan_id, $key ) ) {
-			return null;
-		}
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-		$inserted = $wpdb->insert(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ),
-			array(
-				'plan_id'    => $plan_id,
-				'meta_key'   => $key,
-				'meta_value' => maybe_serialize( $value ),
-			)
-		);
+		// Fixed SQL fragments only; every value is a placeholder.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+		$inserted = $wpdb->query( $wpdb->prepare( $sql, $values ) );
 
 		if ( false === $inserted ) {
 			throw new \RuntimeException( sprintf( 'Failed to add plan meta "%s" for plan %d: %s', esc_html( $key ), (int) $plan_id, esc_html( $wpdb->last_error ) ) );
+		}
+		if ( 1 !== (int) $inserted ) {
+			return null;
 		}
 
 		return (int) $wpdb->insert_id;
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Update a plan's meta rows for `$key`, like `update_post_meta()`: adds a row when
-	 * the key is absent, else rewrites every row for the key, or only the rows holding
-	 * `$prev_value`. The absent-key check runs before the write with no unique index.
+	 * Update the meta rows for `$key` of a plan of `$extension_slug`, like `update_post_meta()`:
+	 * rewrites every row for the key, or only the rows holding `$prev_value`, and adds the key when
+	 * the plan has no row for it. The rows are written first; the plan and key are read only after
+	 * a write that changed nothing.
 	 *
-	 * @param int    $plan_id    Plan id.
-	 * @param string $key        Meta key.
-	 * @param mixed  $value      New value; serialized when not scalar.
-	 * @param mixed  $prev_value Only update rows holding this value; null updates all rows for the key.
-	 *                           Any other value ('' and false included) matches literally.
+	 * @param int    $plan_id        Plan id.
+	 * @param string $extension_slug The expected owning extension.
+	 * @param string $key            Meta key.
+	 * @param mixed  $value          New value; serialized when not scalar.
+	 * @param mixed  $prev_value     Only update rows holding this value; null updates all rows for the key.
+	 *                               Any other value ('' and false included) matches literally.
 	 * @return bool True when a row was added or at least one row changed.
-	 * @throws \InvalidArgumentException If `$key` is empty.
-	 * @throws \RuntimeException If a write fails.
+	 * @throws \InvalidArgumentException If no plan of that extension has the id.
+	 * @throws \RuntimeException If the key is longer than the meta_key column (255 characters), or a write or the classifying read fails.
 	 */
-	public function update_meta( int $plan_id, string $key, $value, $prev_value = null ): bool {
+	public function update_meta( int $plan_id, string $extension_slug, string $key, $value, $prev_value = null ): bool {
 		global $wpdb;
 
-		if ( '' === $key ) {
-			throw new \InvalidArgumentException( 'Plan meta key must not be empty.' );
-		}
-
-		if ( array() === $this->find_meta_values( $plan_id, $key ) ) {
-			$this->add_meta( $plan_id, $key, $value );
-			return true;
-		}
-
-		$where = array(
-			'plan_id'  => $plan_id,
-			'meta_key' => $key,
-		);
+		$meta   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
+		$plans  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$values = array( maybe_serialize( $value ), $plan_id, $extension_slug, $key );
+		$where  = 'm.plan_id = %d AND ' . self::OWNER_MATCH . ' AND m.meta_key = %s';
 		if ( null !== $prev_value ) {
-			$where['meta_value'] = maybe_serialize( $prev_value );
+			$where   .= ' AND m.meta_value = %s';
+			$values[] = maybe_serialize( $prev_value );
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ),
-			array( 'meta_value' => maybe_serialize( $value ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-			$where
-		);
+		// The WHERE clause is built from fixed fragments above; every value is a placeholder.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$updated = $wpdb->query( $wpdb->prepare( "UPDATE {$meta} m JOIN {$plans} p ON p.id = m.plan_id SET m.meta_value = %s WHERE {$where}", $values ) );
 
 		if ( false === $updated ) {
 			throw new \RuntimeException( sprintf( 'Failed to update plan meta "%s" for plan %d: %s', esc_html( $key ), (int) $plan_id, esc_html( $wpdb->last_error ) ) );
 		}
+		if ( $updated > 0 ) {
+			return true;
+		}
 
-		return $updated > 0;
+		$has_key = $this->get_meta_key_presence( $plan_id, $extension_slug, $key );
+		if ( null === $has_key ) {
+			self::throw_not_found( $plan_id, $extension_slug );
+		}
+		if ( $has_key ) {
+			return false;
+		}
+
+		$meta_id = $this->insert_meta_row( $plan_id, $extension_slug, $key, $value, false );
+		if ( null === $meta_id ) {
+			self::throw_not_found( $plan_id, $extension_slug );
+		}
+
+		return true;
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * Whether a plan of `$extension_slug` has a meta row for `$key`, read in one statement.
+	 *
+	 * @param int    $plan_id        Plan id.
+	 * @param string $extension_slug The expected owning extension.
+	 * @param string $key            Meta key.
+	 * @return bool|null Whether the key has a row; null when no plan of that extension has the id.
+	 * @throws \RuntimeException If the read fails.
+	 */
+	private function get_meta_key_presence( int $plan_id, string $extension_slug, string $key ): ?bool {
+		global $wpdb;
+
+		$meta  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
+		$plans = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+
+		$owner_match = self::OWNER_MATCH;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the owner condition carries one placeholder.
+		$has_key = $wpdb->get_var( $wpdb->prepare( "SELECT EXISTS ( SELECT 1 FROM {$meta} m WHERE m.plan_id = p.id AND m.meta_key = %s ) FROM {$plans} p WHERE p.id = %d AND {$owner_match}", $key, $plan_id, $extension_slug ) );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( sprintf( 'Failed to read plan meta "%s" for plan %d: %s', esc_html( $key ), (int) $plan_id, esc_html( $wpdb->last_error ) ) );
+		}
+
+		return null === $has_key ? null : '1' === (string) $has_key;
 	}
 
 	/**
-	 * Delete a plan's meta rows for `$key`, like `delete_post_meta()`.
+	 * Delete the meta rows for `$key` of a plan of `$extension_slug`, like `delete_post_meta()`.
 	 *
-	 * @param int    $plan_id Plan id.
-	 * @param string $key     Meta key.
-	 * @param mixed  $value   Only delete rows holding this value; null deletes every row for the key.
-	 *                        Any other value ('' and false included) matches literally.
-	 * @return bool True when at least one row was deleted.
-	 * @throws \InvalidArgumentException If `$key` is empty.
+	 * @param int    $plan_id        Plan id.
+	 * @param string $extension_slug The expected owning extension.
+	 * @param string $key            Meta key.
+	 * @param mixed  $value          Only delete rows holding this value; null deletes every row for the key.
+	 *                               Any other value ('' and false included) matches literally.
+	 * @return bool True when at least one row was deleted (false when no plan of that extension has the id).
 	 * @throws \RuntimeException If the delete fails.
 	 */
-	public function delete_meta( int $plan_id, string $key, $value = null ): bool {
+	public function delete_meta( int $plan_id, string $extension_slug, string $key, $value = null ): bool {
 		global $wpdb;
 
-		if ( '' === $key ) {
-			throw new \InvalidArgumentException( 'Plan meta key must not be empty.' );
-		}
-
-		$where = array(
-			'plan_id'  => $plan_id,
-			'meta_key' => $key,
-		);
+		$meta   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
+		$plans  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$values = array( $plan_id, $extension_slug, $key );
+		$where  = 'm.plan_id = %d AND ' . self::OWNER_MATCH . ' AND m.meta_key = %s';
 		if ( null !== $value ) {
-			$where['meta_value'] = maybe_serialize( $value );
+			$where   .= ' AND m.meta_value = %s';
+			$values[] = maybe_serialize( $value );
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ), $where );
+		// The WHERE clause is built from fixed fragments above; every value is a placeholder.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$deleted = $wpdb->query( $wpdb->prepare( "DELETE m FROM {$meta} m JOIN {$plans} p ON p.id = m.plan_id WHERE {$where}", $values ) );
 
 		if ( false === $deleted ) {
 			throw new \RuntimeException( sprintf( 'Failed to delete plan meta "%s" for plan %d: %s', esc_html( $key ), (int) $plan_id, esc_html( $wpdb->last_error ) ) );
 		}
 
 		return $deleted > 0;
+	}
+
+	/**
+	 * Refuse a meta write for a plan id no plan of `$extension_slug` has.
+	 *
+	 * @param int    $plan_id        Plan id.
+	 * @param string $extension_slug The expected owning extension.
+	 * @return never
+	 * @throws \InvalidArgumentException Always.
+	 */
+	private static function throw_not_found( int $plan_id, string $extension_slug ): void {
+		throw new \InvalidArgumentException( esc_html( sprintf( 'No plan of extension "%s" has id %d.', $extension_slug, $plan_id ) ) );
 	}
 
 	/**

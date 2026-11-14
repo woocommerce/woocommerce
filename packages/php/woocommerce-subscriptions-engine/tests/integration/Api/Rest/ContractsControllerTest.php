@@ -619,7 +619,13 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 			array(
 				'callback'   => function ( ContractView $contract, array $action_args ) use ( $action ): ?ContractView {
 					$this->calls[] = array( $action, $contract->get_id(), $action_args );
-					return Contracts::update( $contract->get_id(), array( 'status' => 'on-hold' ) );
+					return Contracts::update(
+						$contract->get_id(),
+						array(
+							'extension_slug' => self::EXTENSION_SLUG,
+							'status'         => 'on-hold',
+						)
+					);
 				},
 				'permission' => $permission,
 			) + $extra
