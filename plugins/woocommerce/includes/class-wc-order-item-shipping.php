@@ -307,12 +307,19 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * Get tax status for the shipping method.
 	 *
 	 * This looks up the tax status for the shipping method based on the instance ID, and falls back to the default tax status.
+	 * Local pickup has no instance ID, so its tax status is read from the registered `pickup_location` method instead.
 	 *
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_tax_status( $context = 'view' ) {
-		$shipping_method = \WC_Shipping_Zones::get_shipping_method( $this->get_instance_id() );
+		// Local pickup is registered outside shipping zones, so it has no instance ID to look up.
+		if ( ! $this->get_instance_id() && 'pickup_location' === $this->get_method_id() ) {
+			$shipping_methods = WC()->shipping()->get_shipping_methods();
+			$shipping_method  = $shipping_methods['pickup_location'] ?? null;
+		} else {
+			$shipping_method = \WC_Shipping_Zones::get_shipping_method( $this->get_instance_id() );
+		}
 		return $shipping_method instanceof \WC_Shipping_Method ? $shipping_method->tax_status : ProductTaxStatus::TAXABLE;
 	}
 

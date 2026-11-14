@@ -7,10 +7,35 @@
 
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\Blocks\Shipping\PickupLocation;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+
 /**
  * WC_Order_Item_Shipping unit tests.
  */
 class WC_Order_Item_Shipping_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * Filter that makes local pickup taxable, if a test added one.
+	 *
+	 * @var callable|null
+	 */
+	private $make_pickup_taxable = null;
+
+	/**
+	 * Restore the shipping methods a test registered by hand.
+	 */
+	public function tearDown(): void {
+		try {
+			if ( $this->make_pickup_taxable ) {
+				remove_filter( 'woocommerce_shipping_pickup_location_option', $this->make_pickup_taxable, 10 );
+				$this->make_pickup_taxable = null;
+			}
+			WC()->shipping()->load_shipping_methods();
+		} finally {
+			parent::tearDown();
+		}
+	}
 
 	/**
 	 * @testdox set_taxes handles valid array format correctly.
@@ -322,5 +347,65 @@ class WC_Order_Item_Shipping_Test extends WC_Unit_Test_Case {
 		$item->set_taxes( false );
 		$taxes = $item->get_taxes();
 		$this->assertIsArray( $taxes );
+	}
+
+	/**
+	 * @testdox Local pickup shipping lines honor the "Not taxable" setting and are not taxed on recalculation.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/69198
+	 */
+	public function test_pickup_location_not_taxable_is_not_taxed() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_pickup_location_settings', array( 'tax_status' => ProductTaxStatus::NONE ) );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'TAX',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		WC()->shipping()->register_shipping_method( new PickupLocation() );
+
+		$item = new WC_Order_Item_Shipping();
+		$item->set_method_id( 'pickup_location' );
+		$item->set_total( '5.00' );
+
+		$this->assertSame( ProductTaxStatus::NONE, $item->get_tax_status() );
+
+		$item->calculate_taxes(
+			array(
+				'country'   => 'US',
+				'state'     => 'CA',
+				'postcode'  => '90210',
+				'city'      => 'Beverly Hills',
+				'tax_class' => '',
+			)
+		);
+		$this->assertEqualsWithDelta( 0.0, (float) $item->get_total_tax(), 0.001 );
+		$this->assertNotSame( '', $item->get_total_tax(), 'The pickup line should carry a calculated tax total.' );
+
+		$this->make_pickup_taxable = function ( $value, $key ) {
+			return 'tax_status' === $key ? ProductTaxStatus::TAXABLE : $value;
+		};
+		add_filter( 'woocommerce_shipping_pickup_location_option', $this->make_pickup_taxable, 10, 2 );
+		WC()->shipping()->register_shipping_method( new PickupLocation() );
+		$this->assertSame( ProductTaxStatus::TAXABLE, $item->get_tax_status(), 'A filtered tax status should be used, as it is at checkout.' );
+		$item->calculate_taxes(
+			array(
+				'country'   => 'US',
+				'state'     => 'CA',
+				'postcode'  => '90210',
+				'city'      => 'Beverly Hills',
+				'tax_class' => '',
+			)
+		);
+		$this->assertEqualsWithDelta( 0.5, (float) $item->get_total_tax(), 0.001 );
 	}
 }

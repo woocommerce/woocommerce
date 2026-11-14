@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Charge no tax on local pickup costs set to "Not taxable", so the order total matches what checkout quoted.
