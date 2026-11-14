@@ -967,12 +967,19 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Parse dates from a CSV.
 	 * Dates can be Unix timestamps or in any format supported by strtotime().
+	 * An empty value returns an empty string, so the import clears the date.
 	 *
 	 * @param string $value Field value.
 	 *
 	 * @return string|null
 	 */
 	public function parse_datetime_field( $value ) {
+		// An empty cell clears the date. set_props() skips null values, so return an empty string instead.
+		// Spreadsheets often leave a non-breaking space in a cell that looks empty.
+		if ( '' === trim( str_replace( "\xc2\xa0", ' ', (string) $value ) ) ) {
+			return '';
+		}
+
 		try {
 			// If value is a Unix timestamp, convert it to a datetime string.
 			if ( is_numeric( $value ) ) {
@@ -1004,13 +1011,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 *
 	 * @param string $value Field value.
 	 *
-	 * @return string|null
+	 * @return string|null Null for an invalid date, an empty string for an empty value.
 	 */
 	public function parse_date_on_sale_to_field( $value ) {
 		$parsed = $this->parse_datetime_field( $value );
 
-		if ( null === $parsed ) {
-			return null;
+		// Null for an invalid date, or an empty string that clears the date.
+		if ( null === $parsed || '' === $parsed ) {
+			return $parsed;
 		}
 
 		// date_parse() reports hour=0 for "Monday, January 26, 2099", so strip the weekday before probing.

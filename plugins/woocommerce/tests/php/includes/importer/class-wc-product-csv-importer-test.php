@@ -2146,13 +2146,13 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Empty / invalid "date on sale to" values are returned as null.
+	 * @testdox An empty "date on sale to" value is returned as an empty string, so it clears the date, and an invalid one as null.
 	 */
 	public function test_parse_date_on_sale_to_field_empty_and_invalid() {
 		$csv_file = __DIR__ . '/sample.csv';
 		$importer = new WC_Product_CSV_Importer( $csv_file );
 
-		$this->assertNull( $importer->parse_date_on_sale_to_field( '' ) );
+		$this->assertSame( '', $importer->parse_date_on_sale_to_field( '' ) );
 		$this->assertNull( $importer->parse_date_on_sale_to_field( 'not-a-date' ) );
 	}
 
@@ -3463,5 +3463,88 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'Cable 1\\2 inch', $post->post_title, 'The name should keep its backslash.' );
 		$this->assertSame( 'Path C:\\temp\\nliteral', $post->post_content, 'The description should keep its backslash and the literal \\n text.' );
 		$this->assertSame( "Line one\nLine two", $post->post_excerpt, 'An escaped newline should become a line break.' );
+	}
+
+	/**
+	 * @testdox Empty sale date cells clear the sale schedule, while invalid dates leave it unchanged.
+	 */
+	public function test_import_clears_sale_dates_from_empty_cells(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sale_price( 5 );
+		$product->set_date_on_sale_from( '2099-01-01' );
+		$product->set_date_on_sale_to( '2099-02-01' );
+		$product->save();
+
+		$original_start = $product->get_date_on_sale_from( 'edit' )->getTimestamp();
+
+		$this->import_sale_dates_row( $product->get_id() . ',not-a-date,' );
+		$product = wc_get_product( $product->get_id() );
+		$this->assertSame( $original_start, $product->get_date_on_sale_from( 'edit' )->getTimestamp(), 'An invalid date should leave the start date unchanged.' );
+		$this->assertNull( $product->get_date_on_sale_to( 'edit' ), 'An empty cell should clear the end date.' );
+
+		$this->import_sale_dates_row( $product->get_id() . ', ,' );
+		$this->assertNull( wc_get_product( $product->get_id() )->get_date_on_sale_from( 'edit' ), 'A blank cell should clear the start date.' );
+	}
+
+	/**
+	 * @testdox Clearing the end date of a sale that already ended also clears the leftover sale price.
+	 * @testWith ["2020-02-01", ""]
+	 *           ["2099-02-01", "5"]
+	 *
+	 * @param string $sale_ends           Stored sale end date.
+	 * @param string $expected_sale_price Sale price after the import.
+	 */
+	public function test_import_clearing_sale_end_date_clears_expired_sale_price( string $sale_ends, string $expected_sale_price ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->set_sale_price( 5 );
+		$product->set_date_on_sale_from( '2020-01-01' );
+		$product->set_date_on_sale_to( $sale_ends );
+		$product->save();
+
+		$this->import_sale_dates_row( $product->get_id() . ',,' );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertNull( $product->get_date_on_sale_to( 'edit' ), 'The empty cell should clear the end date.' );
+		$this->assertSame( $expected_sale_price, $product->get_sale_price( 'edit' ), 'Only an expired sale price should be cleared.' );
+	}
+
+	/**
+	 * @testdox parse_datetime_field returns an empty string for empty values and null for invalid ones.
+	 */
+	public function test_parse_datetime_field_empty_and_invalid_values(): void {
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv', array( 'parse' => false ) );
+
+		$this->assertSame( '', $importer->parse_datetime_field( '' ) );
+		$this->assertSame( '', $importer->parse_datetime_field( '  ' ) );
+		$this->assertSame( '', $importer->parse_datetime_field( " \xc2\xa0 " ), 'A cell with only non-breaking spaces is blank.' );
+		$this->assertNull( $importer->parse_datetime_field( 'not-a-date' ) );
+		$this->assertSame( '2099-01-26', $importer->parse_datetime_field( '2099-01-26' ) );
+	}
+
+	/**
+	 * Imports one row that updates a product's sale dates.
+	 *
+	 * @param string $csv_row CSV row after the header.
+	 */
+	private function import_sale_dates_row( string $csv_row ): void {
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-sale-dates.csv';
+		file_put_contents( $csv_file, "ID,Date sale price starts,Date sale price ends\n" . $csv_row . "\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'ID'                     => 'id',
+					'Date sale price starts' => 'date_on_sale_from',
+					'Date sale price ends'   => 'date_on_sale_to',
+				),
+			)
+		);
+		$importer->import();
+
+		wp_delete_file( $csv_file );
 	}
 }
