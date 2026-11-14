@@ -44,7 +44,9 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		add_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
+		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
+		// Build the mailer with the editor on, so it loads the emails the editor adds.
+		$this->rebuild_mailer();
 		$this->email_generator  = new WCTransactionalEmailPostsGenerator();
 		$this->template_manager = WCTransactionalEmailPostsManager::get_instance();
 		$this->fixtures_base    = __DIR__ . '/fixtures/';
@@ -438,6 +440,5 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 		WCEmailTemplateSyncRegistry::reset_cache();
 
 		parent::tearDown();
-		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 	}
 }

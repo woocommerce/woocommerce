@@ -45,6 +45,17 @@
 			"type": "string"
 		}
 	},
+	"styles": [
+		{
+			"name": "without-price",
+			"label": "Hide Price",
+			"isDefault": true
+		},
+		{
+			"name": "with-price",
+			"label": "Show Price"
+		}
+	],
 	"parent": [ "woocommerce/checkout-fields-block" ],
 	"textdomain": "woocommerce",
 	"$schema": "https://schemas.wp.org/trunk/block.json",

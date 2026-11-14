@@ -121,17 +121,9 @@ class Product_Price extends Abstract_Product_Block_Renderer {
 		}
 
 		if ( $product->is_on_sale() && '' !== $sale_price ) {
-			return sprintf(
-				'<del style="text-decoration: line-through; font-size: 0.9em; margin-right: 0.5em;">%s</del><span>%s</span>',
-				wc_price( $regular_price, array( 'in_span' => false ) ),
-				wc_price( $sale_price, array( 'in_span' => false ) )
-			);
-		} else {
-			return sprintf(
-				'<span>%s</span>',
-				wc_price( $regular_price, array( 'in_span' => false ) )
-			);
+			return $this->format_sale_price( (float) $regular_price, (float) $sale_price );
 		}
+		return $this->format_price( (float) $regular_price );
 	}
 
 	/**
@@ -145,11 +137,19 @@ class Product_Price extends Abstract_Product_Block_Renderer {
 		$min_price = $product->get_variation_price( 'min', true );
 		$max_price = $product->get_variation_price( 'max', true );
 
-		return sprintf(
-			'<span>%s — %s</span>',
-			wc_price( (float) $min_price, array( 'in_span' => false ) ),
-			wc_price( (float) $max_price, array( 'in_span' => false ) )
-		);
+		if ( '' === $min_price || false === $min_price ) {
+			return '';
+		}
+
+		$min_regular_price = $product->get_variation_regular_price( 'min', true );
+		$max_regular_price = $product->get_variation_regular_price( 'max', true );
+		$one_price         = is_numeric( $max_price ) && (float) $min_price === (float) $max_price;
+		$one_regular_price = is_numeric( $min_regular_price ) && is_numeric( $max_regular_price ) && (float) $min_regular_price === (float) $max_regular_price;
+		if ( $product->is_on_sale() && $one_price && $one_regular_price ) {
+			return $this->format_sale_price( (float) $min_regular_price, (float) $min_price );
+		}
+
+		return $this->format_price_range( (float) $min_price, (float) $max_price );
 	}
 
 	/**
@@ -159,16 +159,10 @@ class Product_Price extends Abstract_Product_Block_Renderer {
 	 * @return string
 	 */
 	private function build_grouped_product_price( \WC_Product_Grouped $product ): string {
-		$children = $product->get_children();
-
-		if ( empty( $children ) ) {
-			return '';
-		}
-
 		$prices = array();
-		foreach ( $children as $child_id ) {
+		foreach ( $product->get_children() as $child_id ) {
 			$child = wc_get_product( $child_id );
-			if ( $child && $child->get_price() !== '' ) {
+			if ( $child && 'publish' === $child->get_status() && $child->get_price() !== '' ) {
 				$prices[] = wc_get_price_to_display( $child, array( 'price' => (float) $child->get_price() ) );
 			}
 		}
@@ -177,13 +171,50 @@ class Product_Price extends Abstract_Product_Block_Renderer {
 			return '';
 		}
 
-		$min_price = min( $prices );
-		$max_price = max( $prices );
+		return $this->format_price_range( (float) min( $prices ), (float) max( $prices ) );
+	}
+
+	/**
+	 * Format a regular price struck through, followed by the sale price.
+	 *
+	 * @param float $regular_price Regular price.
+	 * @param float $sale_price    Sale price.
+	 * @return string
+	 */
+	private function format_sale_price( float $regular_price, float $sale_price ): string {
+		return sprintf(
+			'<del style="text-decoration: line-through; font-size: 0.9em; margin-right: 0.5em;">%s</del><span>%s</span>',
+			wc_price( $regular_price, array( 'in_span' => false ) ),
+			wc_price( $sale_price, array( 'in_span' => false ) )
+		);
+	}
+
+	/**
+	 * Format a single price.
+	 *
+	 * @param float $price Price.
+	 * @return string
+	 */
+	private function format_price( float $price ): string {
+		return sprintf( '<span>%s</span>', wc_price( $price, array( 'in_span' => false ) ) );
+	}
+
+	/**
+	 * Format a price range, or a single price when both ends are equal, as the shop does.
+	 *
+	 * @param float $min_price Lowest price.
+	 * @param float $max_price Highest price.
+	 * @return string
+	 */
+	private function format_price_range( float $min_price, float $max_price ): string {
+		if ( $min_price === $max_price ) {
+			return $this->format_price( $min_price );
+		}
 
 		return sprintf(
 			'<span>%s — %s</span>',
-			wc_price( (float) $min_price, array( 'in_span' => false ) ),
-			wc_price( (float) $max_price, array( 'in_span' => false ) )
+			wc_price( $min_price, array( 'in_span' => false ) ),
+			wc_price( $max_price, array( 'in_span' => false ) )
 		);
 	}
 

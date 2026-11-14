@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return a 404 error instead of a fatal error when a product variation is deleted while the REST API is updating it.

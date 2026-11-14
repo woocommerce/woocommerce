@@ -14,7 +14,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 /**
  * Tests for the /wc/ucp/v1/carts endpoints.
  */
-class UcpCart extends ControllerTestCase {
+class UcpCart extends UcpCartTestCase {
 	/**
 	 * Published product IDs shared by the class, oldest first.
 	 *
@@ -38,11 +38,6 @@ class UcpCart extends ControllerTestCase {
 		'parent'    => 0,
 		'variation' => 0,
 	);
-
-	/**
-	 * Option behind the `ucp` feature.
-	 */
-	private const FEATURE_OPTION = 'woocommerce_feature_ucp_enabled';
 
 	/**
 	 * Create immutable fixtures before route registration starts.
@@ -118,69 +113,12 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
-	 * The session, customer and cart the harness set up, so `simulate_new_request()`
-	 * can swap them for a test and tearDown can put them back.
-	 *
-	 * @var array{session: \WC_Session|null, customer: \WC_Customer|null, cart: \WC_Cart|null, loaded: int|null, totals: int|null}
-	 */
-	private $wc_globals_backup = array();
-
-	/**
-	 * Enable the UCP routes and rebuild the REST server so they register.
+	 * Start every test from a fresh request, as a UCP client would.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
 
-		// Inside the per-test transaction, so the rollback turns the flag off again;
-		// the routes register on the rebuilt server.
-		update_option( self::FEATURE_OPTION, 'yes' );
-		$this->initialize_store_api_server();
-
-		// A per-test DB transaction rolls back rows but not the WC() singletons, so a test
-		// that swaps them would leak into the next one. Keep the originals to restore.
-		$this->wc_globals_backup = array(
-			'session'  => WC()->session,
-			'customer' => WC()->customer,
-			'cart'     => WC()->cart,
-			'loaded'   => $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null,
-			'totals'   => $GLOBALS['wp_actions']['woocommerce_after_calculate_totals'] ?? null,
-		);
-
 		$this->simulate_new_request();
-	}
-
-	/**
-	 * Restore the cancellation marker and the WC() singletons.
-	 */
-	protected function tearDown(): void {
-		unset( $_SERVER['HTTP_CART_TOKEN'] );
-
-		if ( WC()->session ) {
-			WC()->session->set( AbstractCartRoute::CANCELLED_SESSION_KEY, null );
-		}
-
-		if ( WC()->cart instanceof \WC_Cart ) {
-			\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, true );
-		}
-
-		// Undo any `simulate_new_request()` swap so the next test gets the cart, session and
-		// customer the harness built, not a bare one left behind here.
-		WC()->session  = $this->wc_globals_backup['session'];
-		WC()->customer = $this->wc_globals_backup['customer'];
-		WC()->cart     = $this->wc_globals_backup['cart'];
-		$markers       = array(
-			'woocommerce_load_cart_from_session' => 'loaded',
-			'woocommerce_after_calculate_totals' => 'totals',
-		);
-		foreach ( $markers as $action => $key ) {
-			if ( null === $this->wc_globals_backup[ $key ] ) {
-				unset( $GLOBALS['wp_actions'][ $action ] );
-			} else {
-				$GLOBALS['wp_actions'][ $action ] = $this->wc_globals_backup[ $key ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restores the per-process markers the harness cleared.
-			}
-		}
-
-		parent::tearDown();
 	}
 
 	/**
@@ -194,6 +132,9 @@ class UcpCart extends ControllerTestCase {
 	private function request( string $method, string $path, array $body = array() ) {
 		$request = new \WP_REST_Request( $method, '/wc/ucp/v1' . $path );
 		$request->set_header( 'content-type', 'application/json' );
+		// A write needs a key of its own, since idempotency is enforced by default. The
+		// key is what these tests are not about: see the UcpIdempotency suite for that.
+		$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
 		$request->set_body( wp_json_encode( $body ) );
 
 		return rest_get_server()->dispatch( $request );
@@ -478,6 +419,7 @@ class UcpCart extends ControllerTestCase {
 	public function test_line_items_in_the_query_string_are_ignored(): void {
 		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts' );
 		$request->set_header( 'content-type', 'application/json' );
+		$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
 		$request->set_query_params( array( 'line_items' => array( $this->line_item( 0, 2 ) ) ) );
 		$request->set_body( '{}' );
 

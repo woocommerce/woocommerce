@@ -35,6 +35,7 @@
                 </array>
             </arguments>
 		</listener>
+		<listener class="WC_External_HTTP_Guard_Listener" file="./tests/legacy/framework/class-wc-external-http-guard-listener.php" />
 	</listeners>
 	<coverage includeUncoveredFiles="true">
 		<include>

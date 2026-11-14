@@ -487,7 +487,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		 * review can change the aggregates.
 		 */
 		if ( ! empty( $request['rating'] ) && $review instanceof WP_Comment && '1' === $review->comment_approved ) {
-			WC_Comments::clear_transients( (int) $review->comment_post_ID );
+			WC_Comments::maybe_update_product_average_rating( (int) $review->comment_post_ID );
 		}
 
 		/**

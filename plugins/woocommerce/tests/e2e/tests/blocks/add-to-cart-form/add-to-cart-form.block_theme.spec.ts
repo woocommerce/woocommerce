@@ -145,6 +145,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		admin,
 		editor,
 		requestUtils,
+		cleanup,
 		blockUtils,
 	} ) => {
 		// Add to Cart with Options in the Site Editor is only available as
@@ -155,35 +156,34 @@ test.describe( `${ blockData.name } Block`, () => {
 			title: `Add to Cart Form Test ${ test.info().repeatEachIndex }`,
 			content: 'placeholder',
 		} );
+		cleanup( () =>
+			requestUtils.revertTemplate( 'wp_template', template.id )
+		);
 
-		try {
-			await admin.visitSiteEditor( {
-				postId: template.id,
-				postType: 'wp_template',
-				canvas: 'edit',
-			} );
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
 
-			await expect(
-				editor.getCustomHtmlBlockContentLocator( 'placeholder' )
-			).toBeVisible();
+		await expect(
+			editor.getCustomHtmlBlockContentLocator( 'placeholder' )
+		).toBeVisible();
 
-			await editor.insertBlock( { name: 'woocommerce/single-product' } );
+		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
-			await blockUtils.configureSingleProductBlock();
+		await blockUtils.configureSingleProductBlock();
 
-			await expect(
-				await editor.getBlockByName( blockData.slug )
-			).toBeVisible();
+		await expect(
+			await editor.getBlockByName( blockData.slug )
+		).toBeVisible();
 
-			// When the block is registered as ancestor, the function doesn't throw an error, but the block is not added.
-			// So we check that only one instance of the block is present.
-			await editor.insertBlock( { name: blockData.slug } );
-			await expect(
-				await editor.getBlockByName( blockData.slug )
-			).toBeVisible();
-		} finally {
-			await requestUtils.revertTemplate( 'wp_template', template.id );
-		}
+		// When the block is registered as ancestor, the function doesn't throw an error, but the block is not added.
+		// So we check that only one instance of the block is present.
+		await editor.insertBlock( { name: blockData.slug } );
+		await expect(
+			await editor.getBlockByName( blockData.slug )
+		).toBeVisible();
 	} );
 
 	test( 'can be added in the Post Editor - Single Product Template', async ( {

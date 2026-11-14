@@ -49,7 +49,6 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
-		wc_clear_notices();
 		$this->restore_option( 'woocommerce_enable_guest_checkout', $this->previous_guest_checkout_option );
 		parent::tearDown();
 	}

@@ -214,6 +214,23 @@
 			]
 		},
 		{
+			"name": "hook-callback-reentrancy",
+			"file": ".ai/review/guidelines/hook-callback-reentrancy.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/woocommerce.php"
+			],
+			"signals": [
+				"add_filter",
+				"add_action"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
 			"name": "php-loose-type-juggling",
 			"file": ".ai/review/guidelines/php-loose-type-juggling.md",
 			"path": [

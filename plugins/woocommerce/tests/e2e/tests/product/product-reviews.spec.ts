@@ -361,7 +361,7 @@ test.describe( 'Product Reviews', () => {
 				page.locator( '.comment_container' ).first()
 			).toContainText( updatedReview );
 			await expect(
-				page.getByLabel( `${ updatedRating } out of 5` )
+				page.getByLabel( `${ updatedRating } out of 5` ).first()
 			).toBeVisible();
 		} );
 	} );

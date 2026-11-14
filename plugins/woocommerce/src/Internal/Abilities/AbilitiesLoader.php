@@ -11,20 +11,30 @@ use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderSendEmail;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CustomersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributeCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewReply;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
+use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
+use Automattic\WooCommerce\Internal\AgentReadiness\RunCheckAbility;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -48,6 +58,7 @@ class AbilitiesLoader {
 	private const CORE_ABILITY_DEFINITION_CLASSES = array(
 		OrdersQuery::class,
 		OrderAddNote::class,
+		OrderCreate::class,
 		OrderNotesQuery::class,
 		OrderSendEmail::class,
 		OrderUpdate::class,
@@ -55,12 +66,21 @@ class AbilitiesLoader {
 		PaymentGatewaysQuery::class,
 		ProductsQuery::class,
 		ProductTermsQuery::class,
+		ProductTermCreate::class,
+		ProductTermUpdate::class,
 		ProductReviewsQuery::class,
+		ProductReviewUpdate::class,
+		ProductReviewReply::class,
+		ProductAttributesQuery::class,
+		ProductAttributeCreate::class,
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
+		ReportAbility::class,
+		RunCheckAbility::class,
 		ShippingZonesQuery::class,
 		TaxRatesQuery::class,
+		CustomersQuery::class,
 	);
 
 	/**
@@ -71,11 +91,11 @@ class AbilitiesLoader {
 	private const LOG_SOURCE = 'woocommerce-abilities';
 
 	/**
-	 * Core ability instances registered by this loader in the current request.
+	 * Ability instances registered by this loader in the current request.
 	 *
 	 * @var array<string, object>
 	 */
-	private static array $registered_core_abilities = array();
+	private static array $registered_abilities = array();
 
 	/**
 	 * Query var that holds the extension filter clauses of a list ability.
@@ -114,7 +134,7 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function register_core_resources(): void {
-		foreach ( array( 'product', 'order', 'order_item', 'product_term', 'product_review' ) as $resource_name ) {
+		foreach ( array( 'product', 'order', 'order_item', 'product_term', 'product_review', 'customer' ) as $resource_name ) {
 			ExtensibleAbilities::register_resource( $resource_name );
 		}
 	}
@@ -210,8 +230,8 @@ class AbilitiesLoader {
 
 				if (
 					$is_core_ability
-					&& isset( self::$registered_core_abilities[ $ability_name ] )
-					&& $existing_ability === self::$registered_core_abilities[ $ability_name ]
+					&& isset( self::$registered_abilities[ $ability_name ] )
+					&& $existing_ability === self::$registered_abilities[ $ability_name ]
 				) {
 					continue;
 				}
@@ -221,7 +241,7 @@ class AbilitiesLoader {
 				}
 
 				// Drop stale instance tracking before replacing a shadowed registration.
-				unset( self::$registered_core_abilities[ $ability_name ] );
+				unset( self::$registered_abilities[ $ability_name ] );
 				wp_unregister_ability( $ability_name );
 				self::log_replaced_reserved_ability( $ability_name, $class_name );
 			}
@@ -235,10 +255,30 @@ class AbilitiesLoader {
 
 			$registered_ability = wp_register_ability( $ability_name, $args );
 
-			if ( $is_core_ability && null !== $registered_ability ) {
-				self::$registered_core_abilities[ $ability_name ] = $registered_ability;
+			if ( null !== $registered_ability ) {
+				self::$registered_abilities[ $ability_name ] = $registered_ability;
 			}
 		}
+	}
+
+	/**
+	 * Whether the current ability instance was registered by this loader.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 *
+	 * @param string $ability_name Ability name.
+	 * @return bool
+	 */
+	public static function is_registered_ability( string $ability_name ): bool {
+		if ( ! isset( self::$registered_abilities[ $ability_name ] ) ) {
+			return false;
+		}
+		if ( ! wp_has_ability( $ability_name ) ) {
+			return false;
+		}
+
+		return wp_get_ability( $ability_name ) === self::$registered_abilities[ $ability_name ];
 	}
 
 	/**
@@ -299,6 +339,7 @@ class AbilitiesLoader {
 		 * core classes are always retained.
 		 *
 		 * @since 10.9.0
+		 * @since 11.4.0 Calls to abilities registered through this filter are recorded in usage tracking when the store allows it.
 		 *
 		 * @param array<int, class-string> $classes Ability definition class names.
 		 */

@@ -102,6 +102,9 @@ don't reach those sites. Page builders and app SDKs often render Woo UI without 
   callbacks.
 - A hook on a hot path (per order read, per meta update) feeds Jetpack Sync, webhooks, and indexers.
   Firing it more often causes runaway downstream traffic.
+- A callback that reads filtered data (meta, options, permalinks, GUIDs, capabilities) can be re-entered
+  when another plugin's callback on that read fires the same hook. Without a re-entrancy guard, the two
+  recurse until PHP runs out of memory on every request that reaches the hook.
 
 **Data, meta, and equality.**
 

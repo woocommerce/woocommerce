@@ -1,25 +1,19 @@
 /**
- * External dependencies
- */
-
-import type { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import TYPES from './action-types';
 import { Action } from './actions';
 import { NoteState, Note } from './types';
 
-const reducer: Reducer< NoteState, Action > = (
-	state = {
+const reducer = (
+	state: NoteState = {
 		errors: {},
 		noteQueries: {},
 		notes: {},
 		requesting: {},
 	},
-	action
-) => {
+	action: Action
+): NoteState => {
 	switch ( action.type ) {
 		case TYPES.SET_NOTES:
 			state = {

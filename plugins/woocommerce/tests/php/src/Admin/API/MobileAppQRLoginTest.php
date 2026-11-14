@@ -137,40 +137,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	private $subscriber_id;
 
 	/**
-	 * Original value of $_SERVER['HTTPS'] (if any) before each test.
-	 *
-	 * @var string|null
-	 */
-	private $original_https;
-
-	/**
-	 * Original value of $_SERVER['SERVER_PORT'] (if any) before each test.
-	 *
-	 * Captured alongside HTTPS because `is_ssl()` returns true when
-	 * SERVER_PORT === '443', regardless of the HTTPS header.
-	 *
-	 * @var string|null
-	 */
-	private $original_server_port;
-
-	/**
-	 * Original value of $_SERVER['HTTP_X_FORWARDED_PROTO'] (if any) before each test.
-	 *
-	 * Some hosts and reverse-proxy plugins use this header to derive scheme,
-	 * so we normalize it across tests to keep `is_ssl()` deterministic.
-	 *
-	 * @var string|null
-	 */
-	private $original_http_x_forwarded_proto;
-
-	/**
-	 * Original value of $_SERVER['REMOTE_ADDR'] (if any) before each test.
-	 *
-	 * @var string|null
-	 */
-	private $original_remote_addr;
-
-	/**
 	 * Filters registered via force_site_url() so tearDown() can remove them.
 	 *
 	 * @var array<int, callable>
@@ -204,14 +170,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		$this->shop_manager_id = self::$fixture_shop_manager_id;
 		$this->subscriber_id   = self::$fixture_subscriber_id;
 
-		// Remember existing $_SERVER values so we can restore them in tearDown.
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Unit-test fixture: values are captured for restoration only, never used for processing.
-		$this->original_https                  = isset( $_SERVER['HTTPS'] ) ? (string) $_SERVER['HTTPS'] : null;
-		$this->original_server_port            = isset( $_SERVER['SERVER_PORT'] ) ? (string) $_SERVER['SERVER_PORT'] : null;
-		$this->original_http_x_forwarded_proto = isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) ? (string) $_SERVER['HTTP_X_FORWARDED_PROTO'] : null;
-		$this->original_remote_addr            = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : null;
-		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
 		// Default to HTTPS on for most tests; disable explicitly where needed.
 		$this->force_https( true );
 
@@ -238,33 +196,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 
 		// Clear any QR login data the tests may have written.
 		$this->delete_all_qr_login_data();
-
-		// Restore $_SERVER state.
-		if ( null === $this->original_https ) {
-			unset( $_SERVER['HTTPS'] );
-		} else {
-			$_SERVER['HTTPS'] = $this->original_https;
-		}
-
-		if ( null === $this->original_server_port ) {
-			unset( $_SERVER['SERVER_PORT'] );
-		} else {
-			$_SERVER['SERVER_PORT'] = $this->original_server_port;
-		}
-
-		if ( null === $this->original_http_x_forwarded_proto ) {
-			unset( $_SERVER['HTTP_X_FORWARDED_PROTO'] );
-		} else {
-			$_SERVER['HTTP_X_FORWARDED_PROTO'] = $this->original_http_x_forwarded_proto;
-		}
-
-		if ( null === $this->original_remote_addr ) {
-			unset( $_SERVER['REMOTE_ADDR'] );
-		} else {
-			$_SERVER['REMOTE_ADDR'] = $this->original_remote_addr;
-		}
-
-		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
 
 		// Remove any pre_option_siteurl filters force_site_url() registered.
 		foreach ( $this->site_url_filters as $priority => $filter ) {

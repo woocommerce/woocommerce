@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { ExternalLink, Modal, SearchControl } from '@wordpress/components';
+import { Modal, SearchControl } from '@wordpress/components';
+import { Link } from '@wordpress/ui';
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
@@ -88,8 +89,10 @@ const PersonalizationTagsModal = ( {
 					'Insert personalization tags to dynamically fill in information and personalize your emails.',
 					__i18n_text_domain__
 				) }{ ' ' }
-				<ExternalLink
+				<Link
 					href="https://kb.mailpoet.com/article/435-a-guide-to-personalisation-tags-for-tailored-newsletters#list"
+					openInNewTab
+					rel="external noreferrer noopener"
 					onClick={ () =>
 						recordEvent(
 							'personalization_tags_modal_learn_more_link_clicked',
@@ -98,7 +101,7 @@ const PersonalizationTagsModal = ( {
 					}
 				>
 					{ __( 'Learn more', __i18n_text_domain__ ) }
-				</ExternalLink>
+				</Link>
 			</p>
 			<SearchControl
 				onChange={ ( theSearchQuery ) => {

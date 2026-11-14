@@ -82,10 +82,6 @@
 			"type": "string",
 			"default": "multiple"
 		},
-		"isPreview": {
-			"type": "boolean",
-			"default": false
-		},
 		"sortOrder": {
 			"type": "string",
 			"default": "count-desc"
@@ -95,10 +91,6 @@
 			"default": true
 		}
 	},
-	"example": {
-		"attributes": {
-			"isPreview": true
-		}
-	},
+	"example": {},
 	"style": "woocommerce/product-filter-attribute-view-style"
 }

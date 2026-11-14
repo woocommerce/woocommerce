@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid a fatal error when combining translation files made with `wp i18n make-json`, which keep their strings under the "messages" domain.

@@ -19,13 +19,6 @@ class BlockRegistrationContextTest extends WC_Unit_Test_Case {
 	private BlockRegistrationContext $sut;
 
 	/**
-	 * The original REQUEST_URI, restored after each test.
-	 *
-	 * @var string
-	 */
-	private string $original_uri;
-
-	/**
 	 * The original $pagenow, restored after each test.
 	 *
 	 * @var string
@@ -38,7 +31,6 @@ class BlockRegistrationContextTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut              = new BlockRegistrationContext();
-		$this->original_uri     = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$this->original_pagenow = $GLOBALS['pagenow'] ?? '';
 	}
 
@@ -46,8 +38,7 @@ class BlockRegistrationContextTest extends WC_Unit_Test_Case {
 	 * Restore the request globals after each test.
 	 */
 	public function tearDown(): void {
-		$_SERVER['REQUEST_URI'] = $this->original_uri;
-		$GLOBALS['pagenow']     = $this->original_pagenow; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$GLOBALS['pagenow'] = $this->original_pagenow; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		unset( $_GET['rest_route'], $_GET['wc-ajax'], $_GET['page'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		set_current_screen( 'front' );
 		parent::tearDown();

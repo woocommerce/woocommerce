@@ -30,6 +30,29 @@ class Html2Text_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test inline formatting does not split a preformatted line, and later lines keep their indentation
+	 */
+	public function test_preformatted_text_keeps_lines_and_indentation(): void {
+		$html = "<p>Before</p><pre>one <a href=\"https://example.com\">link</a> <em>two</em> three\n\tfour</pre>";
+
+		$this->assertEquals( "Before\n\none [link](https://example.com) two three\n\tfour", Html2Text::convert( $html ) );
+	}
+
+	/**
+	 * Test a line break tag inside preformatted text keeps the next line's indentation
+	 */
+	public function test_preformatted_line_break_tag_keeps_indentation(): void {
+		$this->assertEquals( "one\n    two", Html2Text::convert( '<pre>one<br>    two</pre>' ) );
+	}
+
+	/**
+	 * Test the first preformatted line keeps its indentation too
+	 */
+	public function test_preformatted_first_line_keeps_indentation(): void {
+		$this->assertEquals( "Before\n\n  first\n  second\n\nAfter", Html2Text::convert( "<p>Before</p><pre>  first\n  second</pre><p>After</p>" ) );
+	}
+
+	/**
 	 * Test anchor links with drop_links option
 	 */
 	public function test_anchors_drop_links(): void {
@@ -62,28 +85,56 @@ class Html2Text_Test extends \Email_Editor_Unit_Test {
 	 */
 	public function html_conversion_provider(): array {
 		return array(
-			'horizontal_rule'     => array(
+			'horizontal_rule'             => array(
 				'Before<hr>After',
 				"Before\n---------------------------------------------------------------\nAfter",
 			),
-			'same_url_link'       => array(
+			'same_url_link'               => array(
 				'<a href="http://example.com">http://example.com</a>',
 				'http://example.com',
 			),
-			'mailto_link'         => array(
+			'mailto_link'                 => array(
 				'<a href="mailto:test@example.com">test@example.com</a>',
 				'test@example.com',
 			),
-			'image_without_alt'   => array(
+			'image_without_alt'           => array(
 				'<img src="image.jpg">',
 				'',
 			),
-			'drop_links_option'   => array(
+			'drop_links_option'           => array(
 				'<a href="http://example.com">Click here</a>',
 				'Click here',
 				array( 'drop_links' => true ),
 			),
-			'nested_divs_complex' => array(
+			'bold_unmarked_by_default'    => array(
+				'<p>A <strong>bold</strong> word</p>',
+				'A bold word',
+			),
+			'bold_marked'                 => array(
+				'<p>A <strong>bold</strong> and <b> two words </b>, <strong> </strong>end</p>',
+				'A *bold* and  *two words* , end',
+				array( 'mark_bold' => true ),
+			),
+			'tag_link_target'             => array(
+				'<a href="#" data-link-href="[woocommerce/store-url]">Shop</a>',
+				'[Shop]([woocommerce/store-url])',
+				array( 'tag_link_targets' => true ),
+			),
+			'tag_link_without_text'       => array(
+				'<a href="#" data-link-href="[woocommerce/store-url]"><img src="logo.png"></a>',
+				'',
+				array( 'tag_link_targets' => true ),
+			),
+			'tag_link_with_title_label'   => array(
+				'<a title="Shop" data-link-href="[woocommerce/store-url]"><img src="logo.png"></a>',
+				'[Shop]([woocommerce/store-url])',
+				array( 'tag_link_targets' => true ),
+			),
+			'tag_link_ignored_by_default' => array(
+				'<a href="#" data-link-href="[woocommerce/store-url]">Shop</a> and <a data-link-href="[other/x]">here</a>',
+				'[Shop](#) and here',
+			),
+			'nested_divs_complex'         => array(
 				'<div>Outer<div>Middle<div>Inner</div></div></div>',
 				"Outer\nMiddle\nInner",
 			),
@@ -255,13 +306,34 @@ class Html2Text_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * An element with the separator attribute becomes a row of dashes.
+	 */
+	public function test_separator_attribute_renders_dashes(): void {
+		$result = Html2Text::convert( '<p>Above</p><table data-email-separator="1"><tr><td>&nbsp;</td></tr></table><p>Below</p>' );
+
+		$this->assertMatchesRegularExpression( '/Above\s+-{20,}\s+Below/', $result );
+	}
+
+	/**
+	 * A separator-like class name is not the marker, so the block keeps its text.
+	 */
+	public function test_separator_class_name_keeps_content(): void {
+		$result = Html2Text::convert( '<div class="email-block-separator"><p>Hello</p></div>' );
+
+		$this->assertStringContainsString( 'Hello', $result );
+		$this->assertStringNotContainsString( '-----', $result );
+	}
+
+	/**
 	 * Test default options
 	 */
 	public function test_default_options(): void {
 		$expected_defaults = array(
-			'ignore_errors' => false,
-			'drop_links'    => false,
-			'char_set'      => 'auto',
+			'ignore_errors'    => false,
+			'drop_links'       => false,
+			'char_set'         => 'auto',
+			'mark_bold'        => false,
+			'tag_link_targets' => false,
 		);
 
 		$this->assertEquals( $expected_defaults, Html2Text::default_options() );

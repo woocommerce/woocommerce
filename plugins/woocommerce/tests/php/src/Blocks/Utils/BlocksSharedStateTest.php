@@ -75,6 +75,25 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Currency symbol position follows the filtered price format.
+	 */
+	public function test_currency_data_symbol_position_uses_filtered_price_format(): void {
+		update_option( 'woocommerce_currency_pos', 'left' );
+		add_filter(
+			'woocommerce_price_format',
+			function () {
+				return '%2$s&nbsp;%1$s';
+			}
+		);
+
+		$method = new \ReflectionMethod( BlocksSharedState::class, 'get_currency_data' );
+		$method->setAccessible( true );
+		$currency_data = $method->invoke( null );
+
+		$this->assertSame( 'right_space', $currency_data['currency']['symbolPosition'] );
+	}
+
+	/**
 	 * @testdox nonOptimisticProperties is empty when no filter is registered.
 	 */
 	public function test_no_filter_returns_empty_non_optimistic_properties(): void {

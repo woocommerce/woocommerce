@@ -3,7 +3,11 @@
  */
 import { controls as dataControls } from '@wordpress/data-controls';
 import apiFetch, { APIFetchOptions } from '@wordpress/api-fetch';
-import { AnyAction } from 'redux';
+
+/**
+ * Internal dependencies
+ */
+import type { AnyAction } from './crud/types';
 
 export const fetchWithHeaders = (
 	options: APIFetchOptions

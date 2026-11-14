@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Let AI agents read order numbers, tax and discount totals, and shipping, fee, coupon and tax lines with the woocommerce/orders-query ability.

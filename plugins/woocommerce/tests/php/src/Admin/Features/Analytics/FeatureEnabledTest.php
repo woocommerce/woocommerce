@@ -18,11 +18,6 @@ class FeatureEnabledTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		delete_option( 'woocommerce_analytics_enabled' );
 		delete_option( RemoteInboxNotifications::TOGGLE_OPTION_NAME );
-		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_analytics_feature' ) );
-		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_analytics_feature' ), PHP_INT_MAX );
-		remove_filter( 'woocommerce_admin_disabled', '__return_true', PHP_INT_MAX );
-		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_launch_your_store_feature' ) );
-		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_customize_store_feature' ) );
 
 		parent::tearDown();
 	}

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the content edited in the block email editor in the plain text version of multipart emails.

@@ -25,6 +25,11 @@ p {
 	margin: 0;
 }
 
+pre {
+	margin: 0;
+	white-space: pre-wrap;
+}
+
 h1,
 h2,
 h3,

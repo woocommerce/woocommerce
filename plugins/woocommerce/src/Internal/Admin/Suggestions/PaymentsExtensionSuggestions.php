@@ -3997,7 +3997,7 @@ class PaymentsExtensionSuggestions {
 			self::KLARNA            => array(
 				'_type'       => self::TYPE_BNPL,
 				'title'       => esc_html__( 'Klarna Payments', 'woocommerce' ),
-				'description' => esc_html__( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.', 'woocommerce' ),
+				'description' => esc_html__( 'Offer flexible ways to pay: in full, later, or over time. Merchants get paid upfront; Klarna handles credit and fraud risk.', 'woocommerce' ),
 				'image'       => plugins_url( 'assets/images/onboarding/klarna-black.png', WC_PLUGIN_FILE ),
 				'icon'        => plugins_url( 'assets/images/onboarding/icons/klarna.svg', WC_PLUGIN_FILE ),
 				'plugin'      => array(

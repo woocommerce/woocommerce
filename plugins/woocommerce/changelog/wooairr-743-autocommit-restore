@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Restore autocommit when unreleased ability transaction code fails to start; nothing shipped is affected.
+

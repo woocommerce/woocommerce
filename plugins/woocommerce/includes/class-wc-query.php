@@ -612,15 +612,6 @@ class WC_Query {
 	 * @param WP_Query $q Query instance.
 	 */
 	public function product_query( $q ) {
-		// Prime caches to reduce future queries.
-		wp_prime_option_caches(
-			array(
-				'woocommerce_default_catalog_orderby',
-				'woocommerce_catalog_columns',
-				'woocommerce_catalog_rows',
-			)
-		);
-
 		if ( ! is_feed() ) {
 			$ordering = $this->get_catalog_ordering_args();
 			$q->set( 'orderby', $ordering['orderby'] );
@@ -857,15 +848,15 @@ class WC_Query {
 		 */
 		$enable_filtering = apply_filters( 'woocommerce_enable_post_clause_filtering', $wp_query->is_main_query(), $wp_query );
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! $enable_filtering || ( ! isset( $_GET['max_price'] ) && ! isset( $_GET['min_price'] ) ) ) {
+		$min_filter = self::get_price_filter( 'min_price' );
+		$max_filter = self::get_price_filter( 'max_price' );
+
+		if ( ! $enable_filtering || ( null === $min_filter && null === $max_filter ) ) {
 			return $args;
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$current_min_price = isset( $_GET['min_price'] ) ? floatval( wp_unslash( $_GET['min_price'] ) ) : 0;
-		$current_max_price = isset( $_GET['max_price'] ) ? floatval( wp_unslash( $_GET['max_price'] ) ) : PHP_INT_MAX;
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		$current_min_price = $min_filter ?? 0;
+		$current_max_price = $max_filter ?? PHP_INT_MAX;
 
 		/**
 		 * Adjust if the store taxes are not displayed how they are stored.
@@ -1109,6 +1100,27 @@ class WC_Query {
 		}
 
 		return implode( ' AND ', $sql );
+	}
+
+	/**
+	 * Get a price filter from the query string. A blank value, as sent by an empty form field, means no limit.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $key Either 'min_price' or 'max_price'.
+	 * @return float|null The price, or null when there is no limit.
+	 */
+	public static function get_price_filter( $key ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only public catalog filter, converted to a number.
+		$value = isset( $_GET[ $key ] ) ? wp_unslash( $_GET[ $key ] ) : null;
+
+		if ( null === $value || ( is_scalar( $value ) && '' === trim( (string) $value ) ) ) {
+			return null;
+		}
+
+		return floatval( $value );
 	}
 
 	/**

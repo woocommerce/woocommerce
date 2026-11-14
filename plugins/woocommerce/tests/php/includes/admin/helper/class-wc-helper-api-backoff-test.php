@@ -13,20 +13,11 @@ declare(strict_types=1);
 class WC_Helper_API_Backoff_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * The REQUEST_URI value present before the test ran, restored on tear down.
-	 *
-	 * @var string|null
-	 */
-	private $original_request_uri;
-
-	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		// Saved raw to restore verbatim on tear down; not used for any logic.
-		$this->original_request_uri = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 		// Default to a non-refresh request so is_rate_limited() is not bypassed.
 		$_SERVER['REQUEST_URI'] = '/wp-admin/admin.php?page=wc-admin';
 
@@ -38,12 +29,6 @@ class WC_Helper_API_Backoff_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->cleanup_transients();
-
-		if ( null === $this->original_request_uri ) {
-			unset( $_SERVER['REQUEST_URI'] );
-		} else {
-			$_SERVER['REQUEST_URI'] = $this->original_request_uri;
-		}
 
 		parent::tearDown();
 	}

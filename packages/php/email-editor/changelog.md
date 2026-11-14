@@ -2,12 +2,34 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.20.1](https://github.com/woocommerce/email-editor/releases/tag/2.20.1) - 2026-11-11 
+
+-   Patch - Keep an image's aspect ratio in Outlook when the email shrinks it to fit the content width. [#70867]
+-   Patch - Keep personalization tags in plain-text emails, including links, mark bold text, and leave a failing tag empty. [#70819]
+
+## [2.20.0](https://github.com/woocommerce/email-editor/releases/tag/2.20.0) - 2026-11-11 
+
+-   Patch - Apply a caption color chosen in the email design to image, gallery, table and embed captions in the sent email. [#70339]
+-   Patch - Fix link colors set for individual email blocks, including colors selected from the theme palette. [#70571]
+-   Patch - Keep fixed font sizes in emails when the site theme uses fluid typography, which many email clients can’t read. [#70573]
+-   Patch - Keep paragraphs and headings in emails when their only content is a personalization tag. [#70454]
+-   Patch - Prevent block emails with a coupon from failing or showing a wrong code when another plugin changes the coupon code filter value. [#70807]
+-   Patch - Remove web-only image attributes such as lazy loading from emails, so images load in Apple Mail. [#70774]
+-   Patch - Show bold text as bold in the email editor and in sent emails when the email uses a light text weight. [#70784]
+-   Patch - Show serif, monospace and cursive site fonts in emails as Georgia, Courier New and Comic Sans MS instead of Arial, and stop the Tahoma, Verdana and Arvo fonts falling back to the mail app's default font. [#70096]
+-   Patch - Show the right prices in block emails for grouped products, variable products on sale, and unpriced products. [#70807]
+-   Patch - Use a parent Group’s font size for paragraphs in the sent email, as the editor does. [#70573]
+-   Patch - List the font weights each email font can show in the email theme.json, under `settings.custom.fontWeights`. [#70047]
+-   Minor - Show the email editor's delete action instead of core's "Trash…" on WordPress 7.2 for email post types that opt in with the woocommerce_email_editor_replace_trash_action filter. [#70177]
+-   Minor - Add the Preformatted block to the email editor, keeping line breaks and indentation in sent emails. [#70784]
+-   Minor - Add the Separator block to the email editor, with its Default, Wide Line and Dots styles and color. [#70573]
+
 ## [2.19.0](https://github.com/woocommerce/email-editor/releases/tag/2.19.0) - 2026-10-14 
 
 -   Patch - Fall back to the email's theme color when a block's saved color is not in the email's palette, instead of showing no color. Where a theme and WordPress both define a palette color with the same name, the theme's color now applies. [#69617]
--   Minor - translate_slug_to_color() on Theme_Controller, Settings_Controller and Rendering_Context now returns an empty string for a slug the palette does not define, rather than the slug itself. Callers should treat an empty string as "omit the declaration". [#69766]
 -   Patch - Fix the plain-text version of emails corrupting every personalization tag after the tenth. [#69006]
 -   Patch - Match personalization tag chips in the email editor canvas to the admin color scheme, as in the sidebar. [#69604]
+-   Minor - translate_slug_to_color() on Theme_Controller, Settings_Controller and Rendering_Context now returns an empty string for a slug the palette does not define, rather than the slug itself. Callers should treat an empty string as "omit the declaration". [#69766]
 
 ## [2.18.0](https://github.com/woocommerce/email-editor/releases/tag/2.18.0) - 2026-10-05 
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the customer's address the same way in every email sent together, instead of adding the store's country after the first.

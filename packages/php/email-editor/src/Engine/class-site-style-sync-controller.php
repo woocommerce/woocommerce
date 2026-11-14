@@ -177,9 +177,16 @@ class Site_Style_Sync_Controller {
 	private function sync_settings_data( array $site_settings ): array {
 		$email_settings = array();
 
-		// Sync color palette.
+		// Sync color palette, without the colors email clients can’t render.
 		if ( isset( $site_settings['color']['palette'] ) ) {
-			$email_settings['color']['palette'] = $site_settings['color']['palette'];
+			$email_settings['color']['palette'] = array_values(
+				array_filter(
+					$site_settings['color']['palette'],
+					function ( $preset ) {
+						return $this->is_usable_color( $preset['color'] ?? null );
+					}
+				)
+			);
 		}
 
 		return $email_settings;
@@ -244,6 +251,9 @@ class Site_Style_Sync_Controller {
 	/**
 	 * Convert site color styles to email format
 	 *
+	 * Returns nothing when email clients can’t render one of the colors, so the email theme’s own
+	 * text and background apply together. One site color on the other default can be unreadable.
+	 *
 	 * @param array $color_styles Site color styles.
 	 * @return array Email-compatible color styles.
 	 */
@@ -253,7 +263,30 @@ class Site_Style_Sync_Controller {
 		$this->resolve_and_assign( $color_styles, 'background', $email_colors );
 		$this->resolve_and_assign( $color_styles, 'text', $email_colors );
 
+		foreach ( $email_colors as $color ) {
+			if ( ! $this->is_usable_color( $color ) ) {
+				return array();
+			}
+		}
+
 		return $email_colors;
+	}
+
+	/**
+	 * Whether the email can use a site color.
+	 *
+	 * Either email clients can render it, or it points at a palette color. Only the renderer sees
+	 * the whole email palette, so it swaps such a reference for its color or leaves it out.
+	 *
+	 * @param mixed $color Color value from the site theme.
+	 * @return bool
+	 */
+	private function is_usable_color( $color ): bool {
+		if ( is_string( $color ) && 1 === preg_match( '/^var\(--wp--preset--color--[\w-]+\)$/', trim( $color ) ) ) {
+			return true;
+		}
+
+		return Styles_Helper::is_email_safe_color( $color );
 	}
 
 	/**

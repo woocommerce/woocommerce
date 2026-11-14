@@ -1,20 +1,14 @@
 /**
- * External dependencies
- */
-
-import type { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import TYPES from './action-types';
 import { Action } from './actions';
 import { OptionsState } from './types';
 
-const optionsReducer: Reducer< OptionsState, Action > = (
-	state = { isUpdating: false, requestingErrors: {} },
-	action
-) => {
+const optionsReducer = (
+	state: OptionsState = { isUpdating: false, requestingErrors: {} },
+	action: Action
+): OptionsState => {
 	switch ( action.type ) {
 		case TYPES.RECEIVE_OPTIONS:
 			state = {

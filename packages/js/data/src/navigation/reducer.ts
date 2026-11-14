@@ -1,25 +1,20 @@
 /**
- * External dependencies
- */
-import type { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import TYPES from './action-types';
 import { Action } from './actions';
 import { NavigationState } from './types';
 
-const reducer: Reducer< NavigationState, Action > = (
-	state = {
+const reducer = (
+	state: NavigationState = {
 		error: null,
 		menuItems: [],
 		favorites: [],
 		requesting: {},
 		persistedQuery: {},
 	},
-	action
-) => {
+	action: Action
+): NavigationState => {
 	switch ( action.type ) {
 		case TYPES.SET_MENU_ITEMS:
 			state = {

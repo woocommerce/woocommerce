@@ -7,7 +7,6 @@ export type BlockAttributes = {
 	classname?: string;
 	showCounts: boolean;
 	displayStyle: string;
-	isPreview: boolean;
 	hideEmpty: boolean;
 };
 

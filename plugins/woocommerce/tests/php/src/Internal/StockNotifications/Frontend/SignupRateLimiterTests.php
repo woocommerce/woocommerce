@@ -13,21 +13,10 @@ use WC_Unit_Test_Case;
 class SignupRateLimiterTests extends WC_Unit_Test_Case {
 
 	/**
-	 * The server values seen before the test replaced them.
-	 *
-	 * @var array<string, string|null>
-	 */
-	private $original_server = array();
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-
-		foreach ( array( 'REMOTE_ADDR', 'HTTP_X_FORWARDED_FOR' ) as $key ) {
-			$this->original_server[ $key ] = isset( $_SERVER[ $key ] ) ? sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) ) : null;
-		}
 
 		$_SERVER['REMOTE_ADDR'] = '192.0.2.10';
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
@@ -38,14 +27,6 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
-			foreach ( $this->original_server as $key => $value ) {
-				if ( null === $value ) {
-					unset( $_SERVER[ $key ] );
-				} else {
-					$_SERVER[ $key ] = $value;
-				}
-			}
-
 			wp_set_current_user( 0 );
 		} finally {
 			parent::tearDown();

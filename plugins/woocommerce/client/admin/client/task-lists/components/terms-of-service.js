@@ -16,7 +16,7 @@ export const TermsOfService = ( { buttonText } ) => (
 	>
 		{ interpolateComponents( {
 			mixedString: sprintf(
-				/* translators: button text, most likely something like 'Install and Enable' or Continue setup' */
+				/* translators: %s: button text, most likely something like 'Install and Enable' or 'Continue setup' */
 				__(
 					'By clicking "%s," you agree to our {{tosLink}}Terms of Service{{/tosLink}} and have read our {{privacyPolicyLink}}Privacy Policy{{/privacyPolicyLink}}.',
 					'woocommerce'
@@ -26,7 +26,7 @@ export const TermsOfService = ( { buttonText } ) => (
 			components: {
 				tosLink: (
 					<Link
-						href={ 'https://wordpress.com/tos/' }
+						href={ 'https://automattic.com/tos/' }
 						target="_blank"
 						type="external"
 					>

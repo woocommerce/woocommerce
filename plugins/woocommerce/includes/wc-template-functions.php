@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Internal\SearchEngineVisibility;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -437,10 +438,10 @@ function wc_get_default_products_per_row() {
 
 	if ( $min_columns && $columns < $min_columns ) {
 		$columns = $min_columns;
-		update_option( 'woocommerce_catalog_columns', $columns );
+		update_option( 'woocommerce_catalog_columns', $columns, true );
 	} elseif ( $max_columns && $columns > $max_columns ) {
 		$columns = $max_columns;
-		update_option( 'woocommerce_catalog_columns', $columns );
+		update_option( 'woocommerce_catalog_columns', $columns, true );
 	}
 
 	if ( has_filter( 'loop_shop_columns' ) ) { // Legacy filter handling.
@@ -466,10 +467,10 @@ function wc_get_default_product_rows_per_page() {
 
 	if ( $min_rows && $rows < $min_rows ) {
 		$rows = $min_rows;
-		update_option( 'woocommerce_catalog_rows', $rows );
+		update_option( 'woocommerce_catalog_rows', $rows, true );
 	} elseif ( $max_rows && $rows > $max_rows ) {
 		$rows = $max_rows;
-		update_option( 'woocommerce_catalog_rows', $rows );
+		update_option( 'woocommerce_catalog_rows', $rows, true );
 	}
 
 	return $rows;
@@ -485,11 +486,11 @@ function wc_reset_product_grid_settings() {
 	$product_grid = wc_get_theme_support( 'product_grid' );
 
 	if ( ! empty( $product_grid['default_rows'] ) ) {
-		update_option( 'woocommerce_catalog_rows', absint( $product_grid['default_rows'] ) );
+		update_option( 'woocommerce_catalog_rows', absint( $product_grid['default_rows'] ), true );
 	}
 
 	if ( ! empty( $product_grid['default_columns'] ) ) {
-		update_option( 'woocommerce_catalog_columns', absint( $product_grid['default_columns'] ) );
+		update_option( 'woocommerce_catalog_columns', absint( $product_grid['default_columns'] ), true );
 	}
 
 	wp_cache_flush(); // Flush any caches which could impact settings or templates.
@@ -4521,25 +4522,6 @@ function wc_empty_cart_message() {
 
 /**
  * Disable search engines indexing core, dynamic, cart/checkout pages.
- *
- * @todo Deprecated this function after dropping support for WP 5.6.
- * @since 3.2.0
- * @return void
- */
-function wc_page_noindex() {
-	// wp_no_robots is deprecated since WP 5.7.
-	if ( function_exists( 'wp_robots_no_robots' ) ) {
-		return;
-	}
-
-	if ( is_page( wc_get_page_id( 'cart' ) ) || is_page( wc_get_page_id( 'checkout' ) ) || is_page( wc_get_page_id( 'myaccount' ) ) ) {
-		wp_no_robots();
-	}
-}
-add_action( 'wp_head', 'wc_page_noindex' );
-
-/**
- * Disable search engines indexing core, dynamic, cart/checkout pages.
  * Uses "wp_robots" filter introduced in WP 5.7.
  *
  * @since 5.0.0
@@ -4547,11 +4529,7 @@ add_action( 'wp_head', 'wc_page_noindex' );
  * @return array Filtered robots directives.
  */
 function wc_page_no_robots( $robots ) {
-	if ( is_page( wc_get_page_id( 'cart' ) ) || is_page( wc_get_page_id( 'checkout' ) ) || is_page( wc_get_page_id( 'myaccount' ) ) ) {
-		return wp_robots_no_robots( $robots );
-	}
-
-	return $robots;
+	return wc_get_container()->get( SearchEngineVisibility::class )->handle_wp_robots( $robots );
 }
 add_filter( 'wp_robots', 'wc_page_no_robots' );
 

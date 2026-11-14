@@ -33,6 +33,7 @@ use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
@@ -54,7 +55,9 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyStore;
 use Automattic\WooCommerce\Internal\StructuredData\OpenGraph;
+use Automattic\WooCommerce\Internal\SearchEngineVisibility;
 
 /**
  * Main WooCommerce Class.
@@ -375,6 +378,7 @@ final class WooCommerce {
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'get_tracking_history' ), 10, 2 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'handle_tracking_setting_change' ), 10, 2 );
+		add_action( IdempotencyStore::CLEANUP_HOOK, array( IdempotencyStore::class, 'cleanup' ) );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'register_recurring_actions' ) );
 		ActionSchedulerUtil::when_ready( array( $this, 'add_recurring_action_wrappers' ) );
 
@@ -423,6 +427,7 @@ final class WooCommerce {
 		$container->get( SettingsScreen::class );
 		$container->get( AbilitiesTracking::class );
 		$container->get( OpenGraph::class );
+		$container->get( SearchEngineVisibility::class );
 		$container->get( MenuIcons::class );
 
 		/**
@@ -449,15 +454,20 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\ProductSales::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\TexturizeExclusions::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Ucp\UcpDiscovery::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\StatusTab::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRestController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ProductsList::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductDownloads\DownloadableFileAttachments::class )->register();
+		$container->get( ProductUtil::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
@@ -1823,6 +1833,8 @@ final class WooCommerce {
 		$this->schedule_tracking_action();
 
 		ActionSchedulerUtil::schedule_recurring( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
+
+		ActionSchedulerUtil::schedule_recurring( $tomorrow_3am, DAY_IN_SECONDS, IdempotencyStore::CLEANUP_HOOK, array(), 'woocommerce', true );
 
 		ActionSchedulerUtil::schedule_recurring( $tomorrow_3am, DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
 

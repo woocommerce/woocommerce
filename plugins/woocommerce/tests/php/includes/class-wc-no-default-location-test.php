@@ -19,13 +19,6 @@ use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 class WC_No_Default_Location_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * The session customer to restore, since the tests replace it.
-	 *
-	 * @var WC_Customer
-	 */
-	private $original_customer;
-
-	/**
 	 * Turn taxes on, put a US rate in place, and a cart with a taxable product, so "no tax quoted"
 	 * is a real outcome rather than the result of taxes being off or an empty cart.
 	 */
@@ -55,9 +48,8 @@ class WC_No_Default_Location_Test extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// new WC_Customer( 0, true ) in the tests reads the shared session, so an address a
-		// previous test left there would decide the result. Save the customer to restore it, and
-		// start from an empty session customer so the outcome is the setting's doing.
-		$this->original_customer = WC()->customer;
+		// previous test left there would decide the result. Start from an empty session
+		// customer so the outcome is the setting's doing.
 		WC()->session->set( 'customer', null );
 	}
 
@@ -66,7 +58,6 @@ class WC_No_Default_Location_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		WC()->session->set( 'customer', null );
-		WC()->customer = $this->original_customer;
 		parent::tearDown();
 	}
 

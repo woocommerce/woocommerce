@@ -24,13 +24,6 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	private array $original_get = array();
 
 	/**
-	 * Original request URI.
-	 *
-	 * @var string|null
-	 */
-	private ?string $original_request_uri = null;
-
-	/**
 	 * Original POST data.
 	 *
 	 * @var array<string,mixed>
@@ -64,8 +57,6 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->original_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_url( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
-
 		$this->original_get     = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$this->original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -86,17 +77,11 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 		$this->reset_cancel_order_handled_flag();
 
-		$_GET = $this->original_get;
-		if ( null === $this->original_request_uri ) {
-			unset( $_SERVER['REQUEST_URI'] );
-		} else {
-			$_SERVER['REQUEST_URI'] = $this->original_request_uri;
-		}
+		$_GET     = $this->original_get;
 		$_POST    = $this->original_post;
 		$_REQUEST = $this->original_request;
 
 		wp_set_current_user( 0 );
-		wc_clear_notices();
 		WC()->session = $this->original_session;
 
 		foreach ( $this->registered_checkout_fields as $field_id ) {
@@ -584,7 +569,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->prepare_copy_address_request( 'shipping' );
-		$this->dispatch_copy_address_expecting_redirect();
+		$this->dispatch_copy_address_expecting_redirect( $this->get_copy_address_form_url( 'shipping', 'billing' ) );
 
 		$this->assertSame( 'Extension rejected the address.', wc_get_notices( 'error' )[0]['notice'] ?? null );
 		$this->assertEmpty( wc_get_notices( 'success' ), 'A rejected copy should not show a success notice.' );
@@ -603,6 +588,27 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$this->dispatch_copy_address_expecting_redirect();
 
 		$this->assertSame( 'copy-address-customer@example.test', ( new WC_Customer( $customer->get_id() ) )->get_billing_email() );
+	}
+
+	/**
+	 * @testdox copy_address() keeps the billing email and phone already saved on an empty billing address when the shipping address has none.
+	 *
+	 * @covers WC_Form_Handler::copy_address()
+	 */
+	public function test_copy_address_keeps_target_email_and_phone(): void {
+		$customer = $this->create_customer_with_address( 'shipping' );
+		$customer->set_shipping_phone( '' );
+		$customer->set_billing_email( 'invoices@example.test' );
+		$customer->set_billing_phone( '4155550199' );
+		$customer->save();
+
+		$this->prepare_copy_address_request( 'billing' );
+		$this->dispatch_copy_address_expecting_redirect();
+
+		$saved = new WC_Customer( $customer->get_id() );
+		$this->assertSame( '456 Madison Avenue', $saved->get_billing_address_1(), 'The shipping address should be copied.' );
+		$this->assertSame( 'invoices@example.test', $saved->get_billing_email(), 'The saved billing email should not be replaced by the account email.' );
+		$this->assertSame( '4155550199', $saved->get_billing_phone(), 'The saved billing phone should not be cleared.' );
 	}
 
 	/**
@@ -704,8 +710,6 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 			$this->fail( 'Expected copy_address() to stop a prefetch request.' );
 		} catch ( WPDieException $e ) {
 			$this->assertSame( '', ( new WC_Customer( $customer->get_id() ) )->get_shipping_address_1(), 'A prefetch request should not copy the address.' );
-		} finally {
-			unset( $_SERVER[ $header ] );
 		}
 	}
 
@@ -771,7 +775,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->prepare_copy_address_request( 'billing' );
-		$this->dispatch_copy_address_expecting_redirect();
+		$this->dispatch_copy_address_expecting_redirect( $this->get_copy_address_form_url( 'billing', 'shipping' ) );
 
 		$this->assertSame( 'Phone is a required field.', wc_get_notices( 'error' )[0]['notice'] ?? null );
 		$this->assert_copy_address_rejected( $customer->get_id(), 'billing' );
@@ -788,7 +792,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$customer->save();
 
 		$this->prepare_copy_address_request( 'shipping' );
-		$this->dispatch_copy_address_expecting_redirect();
+		$this->dispatch_copy_address_expecting_redirect( $this->get_copy_address_form_url( 'shipping', 'billing' ) );
 
 		$this->assertSame( 'Please enter a valid postcode / ZIP.', wc_get_notices( 'error' )[0]['notice'] ?? null );
 		$this->assert_copy_address_rejected( $customer->get_id(), 'shipping' );
@@ -820,6 +824,30 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox copy_address() keeps a Checkout block address field already saved on the empty target address when the copied address has no value.
+	 *
+	 * @covers WC_Form_Handler::copy_address()
+	 */
+	public function test_copy_address_keeps_target_additional_checkout_field(): void {
+		$this->register_checkout_field(
+			array(
+				'id'       => 'test-namespace/gate-code',
+				'label'    => 'Gate code',
+				'location' => 'address',
+			)
+		);
+		$customer        = $this->create_customer_with_address( 'billing' );
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+		$checkout_fields->persist_field_for_customer( 'test-namespace/gate-code', '5678', $customer, 'shipping' );
+		$customer->save();
+
+		$this->prepare_copy_address_request( 'shipping' );
+		$this->dispatch_copy_address_expecting_redirect();
+
+		$this->assertSame( '5678', $checkout_fields->get_field_from_object( 'test-namespace/gate-code', new WC_Customer( $customer->get_id() ), 'shipping' ), 'The saved shipping gate code should not be cleared.' );
+	}
+
+	/**
 	 * @testdox copy_address() refuses to copy when a required Checkout block address field is empty.
 	 *
 	 * @covers WC_Form_Handler::copy_address()
@@ -836,10 +864,202 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$customer = $this->create_customer_with_address( 'billing' );
 
 		$this->prepare_copy_address_request( 'shipping' );
-		$this->dispatch_copy_address_expecting_redirect();
+		$this->dispatch_copy_address_expecting_redirect( $this->get_copy_address_form_url( 'shipping', 'billing' ) );
 
 		$this->assertSame( '<strong>Gate code</strong> is required', wc_get_notices( 'error' )[0]['notice'] ?? null );
 		$this->assert_copy_address_rejected( $customer->get_id(), 'shipping' );
+	}
+
+	/**
+	 * @testdox The edit address form for an empty billing address is filled from the shipping address after a refused copy.
+	 *
+	 * @covers WC_Shortcode_My_Account::edit_address()
+	 * @covers WC_Form_Handler::get_copy_address_form_source()
+	 */
+	public function test_edit_address_form_is_filled_from_copy_source(): void {
+		$customer = $this->create_customer_with_address( 'shipping' );
+		$customer->set_shipping_phone( '' );
+		$customer->save();
+
+		$fields = $this->get_edit_address_form_fields( 'billing', 'shipping' );
+
+		foreach ( array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country' ) as $field ) {
+			$this->assertSame( $customer->{"get_shipping_{$field}"}(), $fields[ "billing_{$field}" ]['value'] ?? null, "billing_{$field} should be filled from the shipping address." );
+		}
+		$this->assertSame( '', $fields['billing_phone']['value'] ?? null, 'The missing phone should stay empty for the customer to fill in.' );
+		$this->assertSame( 'copy-address-customer@example.test', $fields['billing_email']['value'] ?? null, 'The email should fall back to the account email.' );
+		$this->assertSame( '', ( new WC_Customer( $customer->get_id() ) )->get_billing_address_1(), 'Filling the form should not save the billing address.' );
+	}
+
+	/**
+	 * @testdox The edit address form keeps the billing email and phone already saved on an empty billing address when the shipping address has none.
+	 *
+	 * @covers WC_Shortcode_My_Account::edit_address()
+	 */
+	public function test_edit_address_form_keeps_edited_address_email_and_phone(): void {
+		$customer = $this->create_customer_with_address( 'shipping' );
+		$customer->set_shipping_phone( '' );
+		$customer->set_billing_email( 'invoices@example.test' );
+		$customer->set_billing_phone( '4155550199' );
+		$customer->save();
+
+		$fields = $this->get_edit_address_form_fields( 'billing', 'shipping' );
+
+		$this->assertSame( '456 Madison Avenue', $fields['billing_address_1']['value'] ?? null, 'The form should be filled from the shipping address.' );
+		$this->assertSame( 'invoices@example.test', $fields['billing_email']['value'] ?? null, 'The saved billing email should be shown, not the account email.' );
+		$this->assertSame( '4155550199', $fields['billing_phone']['value'] ?? null, 'The saved billing phone should be shown.' );
+	}
+
+	/**
+	 * @testdox The edit address form keeps its saved values when $scenario.
+	 *
+	 * @testWith ["the copy-address-from arg is missing", ""]
+	 *           ["the copy-address-from arg names the edited address type", "billing"]
+	 *           ["the copy-address-from arg is unknown", "contact"]
+	 * @covers WC_Form_Handler::get_copy_address_form_source()
+	 *
+	 * @param string $scenario    Scenario description.
+	 * @param string $source_type Value of the copy-address-from query arg.
+	 */
+	public function test_edit_address_form_ignores_invalid_copy_source( string $scenario, string $source_type ): void {
+		$this->create_customer_with_address( 'shipping' );
+
+		$fields = $this->get_edit_address_form_fields( 'billing', $source_type );
+
+		$this->assertSame( '', $fields['billing_address_1']['value'] ?? null, "The billing form should not be filled when {$scenario}." );
+	}
+
+	/**
+	 * @testdox The edit address form isn't filled from the other address when the edited address is already saved.
+	 *
+	 * @covers WC_Form_Handler::get_copy_address_form_source()
+	 */
+	public function test_edit_address_form_is_not_filled_over_a_saved_address(): void {
+		$customer = $this->create_customer_with_address( 'shipping' );
+		foreach ( self::provide_address_types()['billing'][1] as $field => $value ) {
+			$customer->{"set_billing_{$field}"}( $value );
+		}
+		$customer->save();
+
+		$fields = $this->get_edit_address_form_fields( 'billing', 'shipping' );
+
+		$this->assertSame( '123 Market Street', $fields['billing_address_1']['value'] ?? null, 'A saved billing address should be shown as is.' );
+	}
+
+	/**
+	 * @testdox The edit address form isn't filled from the other address when its country isn't available for the edited address type.
+	 *
+	 * @covers WC_Form_Handler::get_copy_address_form_source()
+	 */
+	public function test_edit_address_form_is_not_filled_from_country_not_available(): void {
+		$this->create_customer_with_address( 'billing' );
+		add_filter(
+			'woocommerce_countries_shipping_countries',
+			function () {
+				return array( 'CA' => 'Canada' );
+			}
+		);
+
+		$fields = $this->get_edit_address_form_fields( 'shipping', 'billing' );
+
+		$this->assertSame( '', $fields['shipping_address_1']['value'] ?? null, 'A billing address in a country the store does not ship to should not fill the shipping form.' );
+	}
+
+	/**
+	 * @testdox The edit address form fills Checkout block address fields from the other address after a refused copy.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend::edit_address_fields()
+	 */
+	public function test_edit_address_form_fills_additional_checkout_fields_from_copy_source(): void {
+		$this->register_checkout_field(
+			array(
+				'id'       => 'test-namespace/gate-code',
+				'label'    => 'Gate code',
+				'location' => 'address',
+			)
+		);
+		$customer        = $this->create_customer_with_address( 'billing' );
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+		$checkout_fields->persist_field_for_customer( 'test-namespace/gate-code', '1234', $customer, 'billing' );
+		$customer->save();
+
+		$fields = $this->get_edit_address_form_fields( 'shipping', 'billing' );
+
+		$this->assertSame( '1234', $fields['_wc_shipping/test-namespace/gate-code']['value'] ?? null, 'The additional field should be filled from the billing address.' );
+	}
+
+	/**
+	 * @testdox The copied edit form evaluates conditional fields against its displayed values in the destination context.
+	 *
+	 * @testWith ["shipping", "billing", "country", "US"]
+	 *           ["billing", "shipping", "country", "US"]
+	 *           ["shipping", "billing", "test-namespace/gate-code", "1234"]
+	 *           ["billing", "shipping", "test-namespace/gate-code", "1234"]
+	 * @covers \Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend::edit_address_fields()
+	 *
+	 * @param string $source_type Address type copied from.
+	 * @param string $target_type Address type being edited.
+	 * @param string $condition_field Field controlling visibility and whether the field is required.
+	 * @param string $condition_value Value that makes the field visible and required.
+	 */
+	public function test_edit_address_form_evaluates_conditions_against_copied_values( string $source_type, string $target_type, string $condition_field, string $condition_value ): void {
+		$this->register_checkout_field(
+			array(
+				'id'       => 'test-namespace/gate-code',
+				'label'    => 'Gate code',
+				'location' => 'address',
+			)
+		);
+		$condition = array( 'properties' => array( $condition_field => array( 'const' => $condition_value ) ) );
+		$this->register_checkout_field(
+			array(
+				'id'       => 'test-namespace/tax-id',
+				'label'    => 'Tax ID',
+				'location' => 'address',
+				'hidden'   => array( 'customer' => array( 'properties' => array( 'address' => array( 'not' => $condition ) ) ) ),
+				'required' => array( 'customer' => array( 'properties' => array( $target_type . '_address' => $condition ) ) ),
+			)
+		);
+		$customer        = $this->create_customer_with_address( $source_type );
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+		$checkout_fields->persist_field_for_customer( 'test-namespace/gate-code', '1234', $customer, $source_type );
+		$customer->save();
+
+		$fields    = $this->get_edit_address_form_fields( $target_type, $source_type );
+		$field_key = CheckoutFields::get_group_key( $target_type ) . 'test-namespace/tax-id';
+
+		$this->assertArrayHasKey( $field_key, $fields, 'A conditional field matching the copied values should be visible.' );
+		$this->assertTrue( $fields[ $field_key ]['required'], 'Required rules should use the copied values in the destination address context.' );
+		$this->assertSame( '', $fields[ $field_key ]['value'], 'The missing value should be left for the customer to fill in.' );
+		$this->assertSame( '', ( new WC_Customer( $customer->get_id() ) )->{"get_{$target_type}_country"}(), 'Rendering the copied form should not save the destination address.' );
+	}
+
+	/**
+	 * @testdox The edit address form gives a Checkout block address field the edited address's default when the copied address has no value.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend::edit_address_fields()
+	 */
+	public function test_edit_address_form_uses_edited_address_default_for_empty_copied_field(): void {
+		$this->register_checkout_field(
+			array(
+				'id'       => 'test-namespace/gate-code',
+				'label'    => 'Gate code',
+				'location' => 'address',
+			)
+		);
+		add_filter(
+			'woocommerce_get_default_value_for_test-namespace/gate-code',
+			function ( $value, $group ) {
+				return "{$group} default";
+			},
+			10,
+			2
+		);
+		$this->create_customer_with_address( 'billing' );
+
+		$fields = $this->get_edit_address_form_fields( 'shipping', 'billing' );
+
+		$this->assertSame( 'shipping default', $fields['_wc_shipping/test-namespace/gate-code']['value'] ?? null, 'The default should be computed for the shipping address being edited.' );
 	}
 
 	/**
@@ -1243,21 +1463,60 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Dispatches the copy address handler and expects a redirect back to Addresses.
+	 * Dispatches the copy address handler and expects a redirect, by default back to Addresses.
+	 *
+	 * @param string $expected_url Expected redirect URL; Addresses when empty.
 	 */
-	private function dispatch_copy_address_expecting_redirect(): void {
+	private function dispatch_copy_address_expecting_redirect( string $expected_url = '' ): void {
 		try {
 			WC_Form_Handler::copy_address();
 		} catch ( RuntimeException $e ) {
 			$this->assertSame(
-				wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ),
+				esc_url_raw( $expected_url ? $expected_url : wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) ),
 				$e->getMessage(),
-				'Copying an address should redirect to Addresses.'
+				'Copying an address should redirect to the expected page.'
 			);
 			return;
 		}
 
 		$this->fail( 'Expected copy_address() to redirect. Notices: ' . wp_json_encode( wc_get_notices() ) );
+	}
+
+	/**
+	 * Gets the edit address form URL that a refused copy redirects to.
+	 *
+	 * @param string $target_type Address type the copy targeted.
+	 * @param string $source_type Address type the copy read from.
+	 * @return string
+	 */
+	private function get_copy_address_form_url( string $target_type, string $source_type ): string {
+		return add_query_arg( 'copy-address-from', $source_type, wc_get_endpoint_url( 'edit-address', $target_type, wc_get_page_permalink( 'myaccount' ) ) );
+	}
+
+	/**
+	 * Renders the edit address form and returns the fields it was given.
+	 *
+	 * @param string $address_type Address type to edit.
+	 * @param string $source_type  Value of the copy-address-from query arg, or an empty string to leave it out.
+	 * @return array<string,array<string,mixed>>
+	 */
+	private function get_edit_address_form_fields( string $address_type, string $source_type ): array {
+		$_GET   = $source_type ? array( 'copy-address-from' => $source_type ) : array();
+		$fields = array();
+		add_filter(
+			'woocommerce_address_to_edit',
+			function ( $address ) use ( &$fields ) {
+				$fields = $address;
+				return $address;
+			},
+			PHP_INT_MAX
+		);
+
+		ob_start();
+		WC_Shortcode_My_Account::edit_address( $address_type );
+		ob_end_clean();
+
+		return $fields;
 	}
 
 	/**
@@ -1267,6 +1526,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * @param string $target_type Address type the copy targeted.
 	 */
 	private function assert_copy_address_rejected( int $customer_id, string $target_type ): void {
+		$this->assertSame( 'Review the copied address below, then save it.', wc_get_notices( 'notice' )[0]['notice'] ?? null, 'A refused copy should ask the customer to review the edit form.' );
 		$this->assertEmpty( wc_get_notices( 'success' ), 'A refused copy should not show a success notice.' );
 		$this->assertSame( '', ( new WC_Customer( $customer_id ) )->{"get_{$target_type}_address_1"}(), "The {$target_type} address should not be saved." );
 	}

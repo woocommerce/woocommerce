@@ -7,6 +7,7 @@
 
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 require_once WC_ABSPATH . 'includes/admin/list-tables/class-wc-admin-list-table-products.php';
@@ -710,6 +711,41 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			'first OR group' => array( '%s OR Missing Lantern' ),
 			'later OR group' => array( 'Missing Lantern OR %s' ),
 		);
+	}
+
+	/**
+	 * @testdox Products list catalog visibility filter lists only products with exactly the chosen visibility.
+	 */
+	public function test_catalog_visibility_filter_matches_exact_visibility(): void {
+		$visibilities = array( CatalogVisibility::VISIBLE, CatalogVisibility::CATALOG, CatalogVisibility::SEARCH, CatalogVisibility::HIDDEN );
+		$product_ids  = array();
+		foreach ( $visibilities as $visibility ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_catalog_visibility( $visibility );
+			$product_ids[ $visibility ] = $product->save();
+		}
+
+		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+
+		try {
+			foreach ( $visibilities as $visibility ) {
+				$_GET['catalog_visibility'] = $visibility;
+
+				$query_vars = $this->sut->request_query(
+					array(
+						'post_type'      => 'product',
+						'post_status'    => 'any',
+						'posts_per_page' => -1,
+						'fields'         => 'ids',
+					)
+				);
+				$results    = array_map( 'intval', ( new WP_Query( $query_vars ) )->get_posts() );
+
+				$this->assertSame( array( $product_ids[ $visibility ] ), $results, "Filtering by \"{$visibility}\" lists the wrong products." );
+			}
+		} finally {
+			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
 	}
 
 	/**

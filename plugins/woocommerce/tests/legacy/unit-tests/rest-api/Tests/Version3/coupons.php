@@ -69,7 +69,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$matching_coupon_data = current(
 			array_filter(
 				$coupons,
-				function( $coupon ) use ( $coupon_1 ) {
+				function ( $coupon ) use ( $coupon_1 ) {
 					return $coupon['id'] === $coupon_1->get_id();
 				}
 			)
@@ -317,8 +317,11 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/coupons/' . $coupon->get_id() );
 		$request->set_body_params(
 			array(
-				'amount'      => '10.00',
-				'description' => 'New description',
+				'amount'               => '10.00',
+				'description'          => 'New description',
+				'maximum_amount'       => '500.00',
+				'usage_limit_per_user' => 1,
+				'free_shipping'        => true,
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -327,6 +330,14 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '10.00', $data['amount'] );
 		$this->assertEquals( 'New description', $data['description'] );
 		$this->assertEquals( 'fixed_cart', $data['discount_type'] );
+		$this->assertSame( '500.00', $data['maximum_amount'] );
+		$this->assertSame( 1, $data['usage_limit_per_user'] );
+		$this->assertTrue( $data['free_shipping'] );
+
+		// The response formats decimals; the stored values are the trimmed amounts.
+		$persisted_coupon = new WC_Coupon( $coupon->get_id() );
+		$this->assertSame( '10', $persisted_coupon->get_amount() );
+		$this->assertSame( '500', $persisted_coupon->get_maximum_amount() );
 	}
 
 	/**
@@ -382,6 +393,10 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/coupons/' . $coupon->get_id() ) );
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_shop_coupon_invalid_id', $response->get_data()['code'] );
 	}
 
 	/**
@@ -427,8 +442,14 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 			array(
 				'update' => array(
 					array(
-						'id'     => $coupon_1->get_id(),
-						'amount' => '5.15',
+						'id'          => $coupon_1->get_id(),
+						'amount'      => '5.15',
+						'description' => 'Updated first coupon',
+					),
+					array(
+						'id'                   => $coupon_4->get_id(),
+						'free_shipping'        => true,
+						'usage_limit_per_user' => 2,
 					),
 				),
 				'delete' => array(
@@ -437,8 +458,14 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 				),
 				'create' => array(
 					array(
-						'code'   => 'new-coupon',
-						'amount' => '11.00',
+						'code'   => 'new-coupon-one',
+						// A single decimal so the response's 2-decimal formatting is observable.
+						'amount' => '11.5',
+					),
+					array(
+						'code'          => 'new-coupon-two',
+						'amount'        => '12.00',
+						'free_shipping' => true,
 					),
 				),
 			)
@@ -446,17 +473,79 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( '5.15', $data['update'][0]['amount'] );
-		$this->assertEquals( '11.00', $data['create'][0]['amount'] );
-		$this->assertEquals( 'new-coupon', $data['create'][0]['code'] );
-		$this->assertEquals( $coupon_2->get_id(), $data['delete'][0]['id'] );
-		$this->assertEquals( $coupon_3->get_id(), $data['delete'][1]['id'] );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array( $coupon_1->get_id(), $coupon_4->get_id() ), wp_list_pluck( $data['update'], 'id' ) );
+		$this->assertSame( array( $coupon_2->get_id(), $coupon_3->get_id() ), wp_list_pluck( $data['delete'], 'id' ) );
+		$this->assertSame( array( 'new-coupon-one', 'new-coupon-two' ), wp_list_pluck( $data['create'], 'code' ) );
+		$this->assertContainsOnly( 'int', wp_list_pluck( $data['create'], 'id' ) );
+		$this->assertSame( '5.15', $data['update'][0]['amount'] );
+		$this->assertSame( 'Updated first coupon', $data['update'][0]['description'] );
+		$this->assertTrue( $data['update'][1]['free_shipping'] );
+		$this->assertSame( 2, $data['update'][1]['usage_limit_per_user'] );
+		$this->assertSame( '11.50', $data['create'][0]['amount'] );
+		$this->assertSame( '12.00', $data['create'][1]['amount'] );
+		$this->assertTrue( $data['create'][1]['free_shipping'] );
 
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/coupons' );
+		foreach ( array( $coupon_2->get_id(), $coupon_3->get_id() ) as $deleted_coupon_id ) {
+			$this->assertSame( 404, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/coupons/' . $deleted_coupon_id ) )->get_status() );
+		}
+
+		$response     = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/coupons' ) );
+		$expected_ids = array( $coupon_1->get_id(), $coupon_4->get_id(), $data['create'][0]['id'], $data['create'][1]['id'] );
+		$actual_ids   = wp_list_pluck( $response->get_data(), 'id' );
+		sort( $expected_ids );
+		sort( $actual_ids );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected_ids, $actual_ids );
+	}
+
+	/**
+	 * @testdox The coupon collection filters by code and search and paginates in ID order.
+	 */
+	public function test_collection_filters_and_pagination() {
+		wp_set_current_user( $this->user );
+
+		$descriptions = array(
+			'alpha' => 'red signal',
+			'beta'  => 'blue signal',
+			'gamma' => 'green needle',
+		);
+		$coupons      = array();
+		foreach ( $descriptions as $code => $description ) {
+			$coupon = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'filter-' . $code );
+			$coupon->set_description( $description );
+			$coupon->save();
+			$coupons[ $code ] = $coupon->get_id();
+		}
+		$ids = array_values( $coupons );
+		sort( $ids );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/coupons' );
+		$request->set_param( 'code', 'filter-beta' );
 		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array( $coupons['beta'] ), wp_list_pluck( $response->get_data(), 'id' ) );
 
-		$this->assertEquals( 3, count( $data ) );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/coupons' );
+		$request->set_param( 'search', 'green needle' );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array( $coupons['gamma'] ), wp_list_pluck( $response->get_data(), 'id' ) );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/coupons' );
+		$request->set_param( 'include', $ids );
+		$request->set_param( 'orderby', 'id' );
+		$request->set_param( 'order', 'asc' );
+		$request->set_param( 'per_page', 2 );
+		$request->set_param( 'page', 1 );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array_slice( $ids, 0, 2 ), wp_list_pluck( $response->get_data(), 'id' ) );
+
+		$request->set_param( 'page', 2 );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array_slice( $ids, 2 ), wp_list_pluck( $response->get_data(), 'id' ) );
 	}
 
 	/**

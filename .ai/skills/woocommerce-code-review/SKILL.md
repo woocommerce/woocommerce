@@ -31,6 +31,10 @@ Consult the `woocommerce-backend-dev` skill for detailed standards. Using these 
 - ❌ **Missing docblocks** - Required for all hooks and methods ([code-entities.md](../woocommerce-backend-dev/code-entities.md))
 - ❌ **Verbose docblocks** - Keep concise, one line is ideal ([code-entities.md](../woocommerce-backend-dev/code-entities.md))
 
+**Hooks:**
+
+- ❌ **Callbacks that can recurse** - A callback on a frequently run hook that reads filtered data (meta, options, permalinks, capabilities) without a re-entrancy guard ([hooks.md](../woocommerce-backend-dev/hooks.md#recursion-through-other-plugins-callbacks))
+
 **Data Integrity:**
 
 - ❌ **Missing validation** - Must verify state before deletion/modification ([data-integrity.md](../woocommerce-backend-dev/data-integrity.md))

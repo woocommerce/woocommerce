@@ -21,7 +21,6 @@ class WC_Session_Concurrency_Test extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		unset( $_SERVER['HTTP_CART_TOKEN'] );
 		wp_set_current_user( 0 );
 		parent::tearDown();
 	}
@@ -145,6 +144,78 @@ class WC_Session_Concurrency_Test extends WC_Unit_Test_Case {
 			),
 			$this->get_stored_session( (string) get_current_user_id() )
 		);
+	}
+
+	/**
+	 * @testdox A session cookie that fails verification is dropped from the request, so the visitor has no session.
+	 */
+	public function test_unverifiable_session_cookie_is_not_treated_as_a_session(): void {
+		$cookie_name             = 'wp_woocommerce_session_' . COOKIEHASH;
+		$_COOKIE[ $cookie_name ] = 't_0123456789abcdef0123456789abcd|' . ( time() + DAY_IN_SECONDS ) . '|' . ( time() + HOUR_IN_SECONDS ) . '|invalidhash';
+
+		// Avoid sending headers from the test process.
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		try {
+			$handler = new WC_Session_Handler();
+			$handler->init_session_cookie();
+
+			$this->assertArrayNotHasKey( $cookie_name, $_COOKIE, 'The unverifiable cookie should be removed from the request' );
+			$this->assertFalse( $handler->has_session(), 'An unverifiable cookie should not count as a session' );
+		} finally {
+			remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+			unset( $_COOKIE[ $cookie_name ] );
+		}
+	}
+
+	/**
+	 * @testdox A validly signed session cookie is kept in the request and counts as a session.
+	 */
+	public function test_verifiable_session_cookie_is_kept_as_a_session(): void {
+		$cookie_name = 'wp_woocommerce_session_' . COOKIEHASH;
+		$customer_id = 't_0123456789abcdef0123456789abcd';
+		$expiration  = time() + DAY_IN_SECONDS;
+		$expiring    = time() + HOUR_IN_SECONDS;
+		$message     = $customer_id . '|' . $expiration;
+		$hash        = hash_hmac( 'md5', $message, wp_hash( $message ) );
+
+		$_COOKIE[ $cookie_name ] = $message . '|' . $expiring . '|' . $hash;
+
+		// Avoid sending headers from the test process.
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		try {
+			$handler = new WC_Session_Handler();
+			$handler->init_session_cookie();
+
+			$this->assertArrayHasKey( $cookie_name, $_COOKIE, 'A verifiable cookie should stay in the request' );
+			$this->assertTrue( $handler->has_session(), 'A verifiable cookie should count as a session' );
+		} finally {
+			remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+			unset( $_COOKIE[ $cookie_name ] );
+		}
+	}
+
+	/**
+	 * @testdox A session cookie with the wrong number of parts is dropped from the request, so the visitor has no session.
+	 */
+	public function test_malformed_session_cookie_is_not_treated_as_a_session(): void {
+		$cookie_name             = 'wp_woocommerce_session_' . COOKIEHASH;
+		$_COOKIE[ $cookie_name ] = 't_0123456789abcdef0123456789abcd|' . ( time() + DAY_IN_SECONDS );
+
+		// Avoid sending headers from the test process.
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		try {
+			$handler = new WC_Session_Handler();
+			$handler->init_session_cookie();
+
+			$this->assertArrayNotHasKey( $cookie_name, $_COOKIE, 'The malformed cookie should be removed from the request' );
+			$this->assertFalse( $handler->has_session(), 'A malformed cookie should not count as a session' );
+		} finally {
+			remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+			unset( $_COOKIE[ $cookie_name ] );
+		}
 	}
 
 	/**

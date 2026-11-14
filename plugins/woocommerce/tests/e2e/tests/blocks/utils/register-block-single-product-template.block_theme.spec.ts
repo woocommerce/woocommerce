@@ -41,7 +41,7 @@ test.describe( 'registerProductBlockType registers', () => {
 
 			await searchInput.fill( 'Single Product' );
 			const templateOption = page.getByRole( 'option', {
-				name: /Single Product/i,
+				name: /^Single Product( Edit)?$/,
 			} );
 			await expect( templateOption ).toBeVisible();
 			await templateOption.click();

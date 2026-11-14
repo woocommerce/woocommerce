@@ -46,7 +46,6 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		PaymentGatewaySuggestions::delete_specs_transient();
-		remove_all_filters( 'transient_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
 
 		parent::tearDown();
 	}

@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\SiteHealth;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use WC_Admin_Notices;
 use WC_Unit_Test_Case;
@@ -90,6 +92,160 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'good', $result['status'], 'No completed synchronization should require review.' );
 		$this->assertSame( 'WooCommerce approved download directories do not require review', $result['label'], 'The result should confirm that synchronized directories do not require review.' );
 		$this->assertSame( '<p>There is no completed approved download directory synchronization waiting for review.</p>', $result['description'], 'The result should confirm that no synchronization review is pending.' );
+	}
+
+	/**
+	 * @testdox Order metadata table size check runs during scheduled Site Health checks.
+	 */
+	public function test_order_meta_table_size_check_runs_during_cron(): void {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$tests = $this->sut->handle_site_status_tests( array() );
+
+		$this->assertFalse( $tests['direct']['woocommerce_order_meta_table_size']['skip_cron'], 'The order metadata table size check should run during scheduled Site Health checks.' );
+		$this->assertTrue( $tests['direct']['woocommerce_template_overrides']['skip_cron'], 'Existing direct checks should remain excluded from scheduled Site Health checks.' );
+	}
+
+	/**
+	 * @testdox Order metadata table size check uses both the absolute and per-order limits.
+	 * @testWith [0, 1000000, "recommended"]
+	 *           [5000, 1000000, "recommended"]
+	 *           [5000, 4000000, "recommended"]
+	 *           [1, 999999, "good"]
+	 *           [5001, 1000000, "good"]
+	 *           [0, 0, "good"]
+	 *
+	 * @param int    $order_rows     Estimated rows in the orders table.
+	 * @param int    $meta_rows      Estimated rows in the order metadata table.
+	 * @param string $expected_status Expected Site Health status.
+	 */
+	public function test_order_meta_table_size_check_thresholds( int $order_rows, int $meta_rows, string $expected_status ): void {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		$this->use_hpos_table_statistics( $order_rows, $meta_rows );
+
+		$result = $this->sut->run_test( 'woocommerce_order_meta_table_size' );
+
+		$this->assertSame( $expected_status, $result['status'], 'The estimated table row counts should determine the Site Health status.' );
+	}
+
+	/**
+	 * @testdox Order metadata table size check explains an unusually large table without recommending deletion.
+	 */
+	public function test_order_meta_table_size_check_explains_unusual_size(): void {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		$this->use_hpos_table_statistics( 44, 49800000 );
+
+		$result = $this->sut->run_test( 'woocommerce_order_meta_table_size' );
+
+		$this->assertSame( 'WooCommerce order metadata table is unusually large', $result['label'], 'The result should describe the table size without claiming duplicate metadata.' );
+		$this->assertSame( 'Performance', $result['badge']['label'], 'The result should use the performance badge.' );
+		$this->assertSame( '<p>The row counts are 49,800,000 for the order metadata table and 44 for the orders table. These are estimates and may be out of date. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.</p>', $result['description'], 'The result should explain the risk and recommend investigation rather than deletion.' );
+		$this->assertSame( '', $result['actions'], 'The result should not link to an unsafe generic cleanup action.' );
+	}
+
+	/**
+	 * @testdox Order metadata table size check is omitted when HPOS is disabled.
+	 */
+	public function test_order_meta_table_size_check_is_omitted_without_hpos(): void {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		$statistics_queries = 0;
+		$query_filter       = static function ( $query ) use ( &$statistics_queries ) {
+			if ( false !== strpos( $query, 'SHOW TABLE STATUS' ) ) {
+				++$statistics_queries;
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $query_filter );
+
+		try {
+			$tests  = $this->sut->handle_site_status_tests( array() );
+			$result = $this->sut->run_test( 'woocommerce_order_meta_table_size' );
+		} finally {
+			remove_filter( 'query', $query_filter );
+		}
+
+		$this->assertArrayNotHasKey( 'woocommerce_order_meta_table_size', $tests['direct'], 'The HPOS-specific check should be omitted when HPOS is disabled.' );
+		$this->assertSame( array(), $result, 'Running the HPOS-specific check should return no result when HPOS is disabled.' );
+		$this->assertSame( 0, $statistics_queries, 'The HPOS table statistics query should not run when HPOS is disabled.' );
+	}
+
+	/**
+	 * @testdox Order metadata table size check is inconclusive when either table's statistics are unavailable.
+	 * @testWith [null, null]
+	 *           [null, 1000000]
+	 *           [1000, null]
+	 *
+	 * @param int|null $order_rows Estimated rows in the orders table.
+	 * @param int|null $meta_rows  Estimated rows in the order metadata table.
+	 */
+	public function test_order_meta_table_size_check_is_inconclusive_without_statistics( ?int $order_rows, ?int $meta_rows ): void {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		$this->use_hpos_table_statistics( $order_rows, $meta_rows );
+
+		$result = $this->sut->run_test( 'woocommerce_order_meta_table_size' );
+
+		$this->assertSame( 'recommended', $result['status'], 'Unavailable table statistics should be reported as inconclusive.' );
+		$this->assertSame( 'WooCommerce could not check the order metadata table size', $result['label'], 'The result should not claim that unavailable statistics were verified.' );
+		$this->assertSame( '<p>The database did not return row estimates for the order tables, so WooCommerce could not check the order metadata table size.</p>', $result['description'], 'The result should explain why the table size could not be checked.' );
+	}
+
+	/**
+	 * @testdox Order metadata table size check is inconclusive when the database returns no status row.
+	 */
+	public function test_order_meta_table_size_check_is_inconclusive_without_status_row(): void {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		add_filter(
+			'query',
+			static fn( $query ) => false === strpos( $query, 'SHOW TABLE STATUS' ) ? $query : 'SELECT 1 AS `Rows` FROM DUAL WHERE 1 = 0'
+		);
+
+		$result = $this->sut->run_test( 'woocommerce_order_meta_table_size' );
+
+		$this->assertSame( 'recommended', $result['status'], 'A missing status row should be reported as inconclusive.' );
+		$this->assertSame( 'WooCommerce could not check the order metadata table size', $result['label'], 'The result should not claim that a missing status row was verified.' );
+	}
+
+	/**
+	 * @testdox Order metadata table size check ignores other tables matched by the LIKE wildcard.
+	 */
+	public function test_order_meta_table_size_check_ignores_wildcard_matches(): void {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$meta_table   = OrdersTableDataStore::get_meta_table_name();
+		$decoy_table  = str_replace( 'wc_orders_meta', 'wc1orders_meta', $meta_table );
+		add_filter(
+			'query',
+			static function ( $query ) use ( $orders_table, $meta_table, $decoy_table ) {
+				if ( false === strpos( $query, 'SHOW TABLE STATUS' ) ) {
+					return $query;
+				}
+
+				if ( false === strpos( $query, 'wc_orders_meta' ) ) {
+					return "SELECT '{$orders_table}' AS `Name`, 10 AS `Rows`";
+				}
+
+				return "SELECT '{$decoy_table}' AS `Name`, 50000000 AS `Rows` UNION ALL SELECT '{$meta_table}' AS `Name`, 10 AS `Rows`";
+			}
+		);
+
+		$result = $this->sut->run_test( 'woocommerce_order_meta_table_size' );
+
+		$this->assertSame( 'good', $result['status'], 'Only the row for the exact metadata table should be used.' );
+	}
+
+	/**
+	 * @testdox Order metadata table size check can read real table statistics.
+	 */
+	public function test_order_meta_table_size_check_can_read_table_statistics(): void {
+		global $wpdb;
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$result = $this->sut->run_test( 'woocommerce_order_meta_table_size' );
+
+		$this->assertSame( '', $wpdb->last_error, 'The table statistics query should be valid for the test database.' );
+		$this->assertSame( 'good', $result['status'], 'Real row estimates should be returned and stay under the limits; missing estimates would be reported as inconclusive.' );
 	}
 
 	/**
@@ -375,5 +531,28 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 			remove_filter( 'pre_http_request', $http_callback );
 			remove_filter( 'upload_dir', $upload_dir_callback );
 		}
+	}
+
+	/**
+	 * Replace HPOS table statistics with predictable estimates.
+	 *
+	 * @param int|null $order_rows Estimated rows in the orders table.
+	 * @param int|null $meta_rows  Estimated rows in the order metadata table.
+	 */
+	private function use_hpos_table_statistics( ?int $order_rows, ?int $meta_rows ): void {
+		$order_rows_sql = null === $order_rows ? 'NULL' : (string) $order_rows;
+		$meta_rows_sql  = null === $meta_rows ? 'NULL' : (string) $meta_rows;
+		$query_filter   = static function ( $query ) use ( $order_rows_sql, $meta_rows_sql ) {
+			if ( false === strpos( $query, 'SHOW TABLE STATUS' ) ) {
+				return $query;
+			}
+
+			$is_meta_query = false !== strpos( $query, 'wc_orders_meta' );
+			$table         = $is_meta_query ? OrdersTableDataStore::get_meta_table_name() : OrdersTableDataStore::get_orders_table_name();
+
+			return "SELECT '{$table}' AS `Name`, " . ( $is_meta_query ? $meta_rows_sql : $order_rows_sql ) . ' AS `Rows`';
+		};
+
+		add_filter( 'query', $query_filter );
 	}
 }

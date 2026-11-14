@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Optimized \WC_Post_Types::register_post_types performance on front-end.

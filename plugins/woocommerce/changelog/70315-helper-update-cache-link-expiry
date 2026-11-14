@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Shorten how long the Helper reuses cached update data, so extension auto-updates are less likely to fail on expired package links.

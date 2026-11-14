@@ -47,7 +47,7 @@ class TestExtensionAbilityDefinition implements AbilityDefinition {
 				),
 				'additionalProperties' => false,
 			),
-			'permission_callback' => '__return_true',
+			'permission_callback' => static fn() => current_user_can( 'manage_woocommerce' ),
 			'meta'                => array(
 				'show_in_rest' => true,
 				'mcp'          => array(

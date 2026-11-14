@@ -77,7 +77,8 @@ final class SimpleCheck extends AbstractReadinessCheck {
 					'fix'   => __( 'Add a main product image.', 'woocommerce' ),
 				),
 				self::fields( array( 'image_url', 'image_link', 'imageLink' ), self::EFFECT_NOT_LISTABLE ),
-				static fn( \WC_Product $product ): bool => 0 === ProductFields::image_id( $product )
+				// Each variation lists as its own item with its own image, so one image on a variation is enough.
+				static fn( \WC_Product $product ): bool => array() === ProductFields::listing_image_ids( $product )
 			),
 			new self(
 				'missing_product_text',
@@ -124,7 +125,7 @@ final class SimpleCheck extends AbstractReadinessCheck {
 				'missing_variation_images',
 				array(
 					'label' => __( 'Variable products with variations missing images', 'woocommerce' ),
-					'why'   => __( 'Each variation lists as its own item; without its own image it shows the parent image, which may not match the color or finish.', 'woocommerce' ),
+					'why'   => __( 'Each variation lists as its own item; without its own image it shows the parent image, which may not match the color or finish, or no image when the product has none.', 'woocommerce' ),
 					'fix'   => __( 'Add an image to each variation.', 'woocommerce' ),
 				),
 				self::fields( array( 'image_url', 'image_link', 'imageLink' ), self::EFFECT_GAPS ),
@@ -147,8 +148,21 @@ final class SimpleCheck extends AbstractReadinessCheck {
 				self::on_every_channel( 'title', self::EFFECT_GAPS ),
 				static fn( \WC_Product $product ): bool => mb_strlen( $product->get_name() ) > self::TITLE_MAX_LENGTH
 			),
+			new self(
+				'image_alt_text',
+				array(
+					'label' => __( 'Products whose main image has no alt text', 'woocommerce' ),
+					'why'   => __( 'AI agents and screen readers read alt text to tell what an image shows. No channel\'s feed asks for it, so it doesn\'t change the channel counts.', 'woocommerce' ),
+					'fix'   => __( 'Describe the main image in its Alternative text field in the media library.', 'woocommerce' ),
+				),
+				array(),
+				static function ( \WC_Product $product ): bool {
+					$image_id = ProductFields::image_id( $product );
+					return $image_id > 0 && '' === trim( (string) get_post_meta( $image_id, '_wp_attachment_image_alt', true ) );
+				}
+			),
 		);
-		$by_id  = array();
+		$by_id = array();
 		foreach ( $checks as $check ) {
 			$by_id[ $check->id() ] = $check;
 		}

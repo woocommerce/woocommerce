@@ -1174,10 +1174,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'pa_size'   => array( 'small', 'large', 'huge' ),
-				'pa_colour' => array(
-					0 => 'red',
-					2 => 'blue',
-				),
+				'pa_colour' => array( 'blue', 'red' ),
 				'pa_number' => array( '0', '1', '2' ),
 			),
 			$attributes
@@ -1306,6 +1303,44 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// The slug 'small' must be resolved back to the full display value 'Small'.
 		$this->assertSame( array( 'Small' ), $attributes['Size'] );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox read_variation_attributes treats a variation with no meta row for an attribute as "any" value.
+	 */
+	public function test_read_variation_attributes_treats_missing_meta_row_as_any_value(): void {
+		$product = new WC_Product_Variable();
+		$product->set_attributes(
+			array(
+				WC_Helper_Product::create_product_attribute_object( 'shade', array( 'blue', 'green', 'red' ) ),
+				WC_Helper_Product::create_product_attribute_object( 'fabric', array( 'cotton', 'silk', 'wool' ) ),
+			)
+		);
+		$product->save();
+		$product_id = $product->get_id();
+
+		$blue_cotton = WC_Helper_Product::create_product_variation_object(
+			$product_id,
+			'DUMMY SKU BLUE COTTON',
+			10,
+			array(
+				'pa_shade'  => 'blue',
+				'pa_fabric' => 'cotton',
+			)
+		);
+		// A duplicate row must not stand in for the shade row the silk variation lacks.
+		add_post_meta( $blue_cotton->get_id(), 'attribute_pa_shade', 'blue' );
+		WC_Helper_Product::create_product_variation_object( $product_id, 'DUMMY SKU ANY SILK', 15, array( 'pa_fabric' => 'silk' ) );
+
+		$product = wc_get_product( $product_id );
+		wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_' . $product_id, 'products' );
+
+		$attributes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product );
+
+		$this->assertSame( array( 'blue', 'green', 'red' ), $attributes['pa_shade'], 'The silk variation has no shade row, so every shade is available.' );
+		$this->assertSame( array( 'cotton', 'silk' ), $attributes['pa_fabric'], 'Every variation pins a fabric, so only those fabrics are available.' );
 
 		$product->delete();
 	}

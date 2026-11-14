@@ -456,6 +456,35 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox GMT date filters should pass dates with an explicit offset to the query as the equivalent UTC time.
+	 */
+	public function test_get_query_args_converts_offset_dates_for_gmt_filters(): void {
+		update_option( 'timezone_string', 'Europe/Athens' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/refunds' );
+		$request->set_param( 'dates_are_gmt', true );
+		$request->set_param( 'after', '2026-09-24T16:39:52+02:00' );
+		$request->set_param( 'before', '2026-09-24T14:39:52Z' );
+
+		$date_query = ( new CollectionQuery() )->get_query_args( $request )['date_query'];
+
+		$this->assertContains(
+			array(
+				'column' => 'post_date_gmt',
+				'after'  => '2026-09-24 14:39:52',
+			),
+			$date_query
+		);
+		$this->assertContains(
+			array(
+				'column' => 'post_date_gmt',
+				'before' => '2026-09-24 14:39:52',
+			),
+			$date_query
+		);
+	}
+
+	/**
 	 * Test refund creation with line items.
 	 */
 	public function test_refunds_create_with_line_items(): void {

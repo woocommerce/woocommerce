@@ -49,11 +49,6 @@
       "count": 1
     }
   },
-  "assets/js/blocks/order-confirmation/create-account/edit.tsx": {
-    "@wordpress/use-recommended-components": {
-      "count": 1
-    }
-  },
   "assets/js/blocks/product-collection/edit/collection-chooser.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1

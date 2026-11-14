@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revoke downloadable product permissions when a product variation line item is refunded.

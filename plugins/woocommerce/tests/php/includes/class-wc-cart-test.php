@@ -23,22 +23,12 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	protected $add_to_cart_quantity_filter_args = array();
 
 	/**
-	 * Customer shipping address before the test, restored at teardown.
-	 *
-	 * @var array<string, string>
-	 */
-	private $previous_shipping_address = array();
-
-	/**
 	 * Called before every test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
-
-		// Several tests change the shipping address on WC()->customer, which outlives a test.
-		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 	}
 
 	/**
@@ -46,12 +36,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-
-		WC()->customer->set_is_vat_exempt( false );
-		foreach ( $this->previous_shipping_address as $key => $value ) {
-			WC()->customer->{"set_shipping_{$key}"}( $value );
-		}
-		WC()->session->set( 'wc_notices', null );
 
 		// The checkout fields may have been built while a test's filters were attached.
 		$this->clear_checkout_fields();
@@ -63,8 +47,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		foreach ( array( 'shipping_method_counts', 'previous_shipping_methods', 'shipping_for_package_0', 'shipping_for_package_1', 'chosen_shipping_methods' ) as $key ) {
 			WC()->session->set( $key, null );
 		}
-
-		remove_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10 );
 	}
 
 	/**
@@ -1151,7 +1133,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
 		} finally {
 			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
-			WC()->customer->set_shipping_location( '', '', '', '' );
 		}
 	}
 
@@ -1555,13 +1536,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$customer                        = WC()->cart->get_customer();
-		$this->original_shipping_address = array(
-			'shipping_country'  => $customer->get_shipping_country(),
-			'shipping_state'    => $customer->get_shipping_state(),
-			'shipping_city'     => $customer->get_shipping_city(),
-			'shipping_postcode' => $customer->get_shipping_postcode(),
-		);
+		$customer = WC()->cart->get_customer();
 		$customer->set_shipping_country( 'GB' );
 		$customer->set_shipping_state( '' );
 		$customer->set_shipping_city( '' );
@@ -1704,54 +1679,48 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
-		// Rates are only ever found for a customer with a country, and the customer object
-		// carries whatever address the test before this one left on it.
-		$previous_billing_country = WC()->customer->get_billing_country();
+		// Rates are only ever found for a customer with a country.
 		WC()->customer->set_shipping_country( 'GB' );
 		WC()->customer->set_billing_country( 'GB' );
 
-		try {
-			// Create a product to add to cart.
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_regular_price( 100 );
-			$product->save();
+		// Create a product to add to cart.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
 
-			// Create a coupon with uppercase code.
-			$coupon = WC_Helper_Coupon::create_coupon( 'TESTCOUPON123' );
-			$coupon->set_discount_type( 'fixed_cart' );
-			$coupon->set_amount( 10 );
-			$coupon->save();
+		// Create a coupon with uppercase code.
+		$coupon = WC_Helper_Coupon::create_coupon( 'TESTCOUPON123' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
 
-			// Add product to cart.
-			WC()->cart->add_to_cart( $product->get_id(), 1 );
-			WC()->cart->calculate_totals();
+		// Add product to cart.
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
 
-			// Apply the coupon using lowercase code.
-			$applied = WC()->cart->apply_coupon( 'testcoupon123' );
-			$this->assertTrue( $applied, 'Coupon should be applied successfully with lowercase code' );
+		// Apply the coupon using lowercase code.
+		$applied = WC()->cart->apply_coupon( 'testcoupon123' );
+		$this->assertTrue( $applied, 'Coupon should be applied successfully with lowercase code' );
 
-			// Verify the coupon is in applied coupons (should be stored in original case).
-			$applied_coupons = WC()->cart->get_applied_coupons();
-			$this->assertContains( 'testcoupon123', $applied_coupons, 'Coupon should be stored in provided case' );
+		// Verify the coupon is in applied coupons (should be stored in original case).
+		$applied_coupons = WC()->cart->get_applied_coupons();
+		$this->assertContains( 'testcoupon123', $applied_coupons, 'Coupon should be stored in provided case' );
 
-			// Test get_coupon_discount_amount with lowercase code.
-			$discount_amount = WC()->cart->get_coupon_discount_amount( 'testcoupon123' );
-			$this->assertEquals( 10.00, $discount_amount, 'get_coupon_discount_amount should return correct value with lowercase code' );
+		// Test get_coupon_discount_amount with lowercase code.
+		$discount_amount = WC()->cart->get_coupon_discount_amount( 'testcoupon123' );
+		$this->assertEquals( 10.00, $discount_amount, 'get_coupon_discount_amount should return correct value with lowercase code' );
 
-			// Test get_coupon_discount_amount with uppercase code.
-			$discount_amount_upper = WC()->cart->get_coupon_discount_amount( 'TESTCOUPON123' );
-			$this->assertEquals( 10.00, $discount_amount_upper, 'get_coupon_discount_amount should return correct value with uppercase code' );
+		// Test get_coupon_discount_amount with uppercase code.
+		$discount_amount_upper = WC()->cart->get_coupon_discount_amount( 'TESTCOUPON123' );
+		$this->assertEquals( 10.00, $discount_amount_upper, 'get_coupon_discount_amount should return correct value with uppercase code' );
 
-			// Test get_coupon_discount_tax_amount with lowercase code.
-			$tax_amount = WC()->cart->get_coupon_discount_tax_amount( 'testcoupon123' );
-			$this->assertEquals( 2.00, $tax_amount, 'get_coupon_discount_tax_amount should return correct value with lowercase code' );
+		// Test get_coupon_discount_tax_amount with lowercase code.
+		$tax_amount = WC()->cart->get_coupon_discount_tax_amount( 'testcoupon123' );
+		$this->assertEquals( 2.00, $tax_amount, 'get_coupon_discount_tax_amount should return correct value with lowercase code' );
 
-			// Test get_coupon_discount_tax_amount with uppercase code.
-			$tax_amount_upper = WC()->cart->get_coupon_discount_tax_amount( 'TESTCOUPON123' );
-			$this->assertEquals( 2.00, $tax_amount_upper, 'get_coupon_discount_tax_amount should return correct value with uppercase code' );
-		} finally {
-			WC()->customer->set_billing_country( $previous_billing_country );
-		}
+		// Test get_coupon_discount_tax_amount with uppercase code.
+		$tax_amount_upper = WC()->cart->get_coupon_discount_tax_amount( 'TESTCOUPON123' );
+		$this->assertEquals( 2.00, $tax_amount_upper, 'get_coupon_discount_tax_amount should return correct value with uppercase code' );
 	}
 
 		/**

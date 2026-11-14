@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the Order Date personalization tag in emails as plain text, also when its date format contains markup.

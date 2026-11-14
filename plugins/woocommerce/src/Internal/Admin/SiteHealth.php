@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
@@ -32,6 +33,16 @@ class SiteHealth {
 	 * REST API namespace for tests that Site Health runs asynchronously.
 	 */
 	private const REST_NAMESPACE = 'wc-site-health/v1';
+
+	/**
+	 * Minimum order metadata rows before the table size check can recommend investigation.
+	 */
+	private const ORDER_META_ROW_COUNT_THRESHOLD = 1000000;
+
+	/**
+	 * Minimum metadata rows per order before the table size check can recommend investigation.
+	 */
+	private const ORDER_META_ROWS_PER_ORDER_THRESHOLD = 200;
 
 	/**
 	 * Class instance.
@@ -80,7 +91,7 @@ class SiteHealth {
 				$tests['direct'][ $test_id ] = array(
 					'label'     => $test['label'],
 					'test'      => $run,
-					'skip_cron' => true,
+					'skip_cron' => $test['skip_cron'] ?? true,
 				);
 				continue;
 			}
@@ -206,6 +217,7 @@ class SiteHealth {
 	 *   - badge: 'security' or 'performance'.
 	 *   - async: optional; true to run the test after the page loads, for checks that make loopback requests.
 	 *   - check: callable returning bool (true = good) or array (empty = good, otherwise context for description/actions).
+	 *   - skip_cron: whether to exclude a direct test from scheduled checks (defaults to true).
 	 *   - good: result data when the check passes (label, description).
 	 *   - fail: result data when the check fails (status defaults to 'recommended', label, description, optional actions).
 	 *     Label, status, and description may be callables that receive the check context.
@@ -213,7 +225,7 @@ class SiteHealth {
 	 * @return array<string, array>
 	 */
 	protected function get_woocommerce_site_health_tests(): array {
-		return array(
+		$tests = array(
 			'woocommerce_secure_connection'            => array(
 				'label' => __( 'WooCommerce secure connection', 'woocommerce' ),
 				'badge' => 'security',
@@ -520,6 +532,100 @@ class SiteHealth {
 				),
 			),
 		);
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$tests['woocommerce_order_meta_table_size'] = array(
+				'label'     => __( 'WooCommerce order metadata table size', 'woocommerce' ),
+				'badge'     => 'performance',
+				'skip_cron' => false,
+				'check'     => fn() => $this->get_order_meta_table_size_issue(),
+				'good'      => array(
+					'label'       => __( 'WooCommerce order metadata table passed the size check', 'woocommerce' ),
+					'description' => __( 'WooCommerce did not detect an unusually large order metadata table.', 'woocommerce' ),
+				),
+				'fail'      => array(
+					'label'       => static fn( array $context ) => ! empty( $context['unverified'] )
+						? __( 'WooCommerce could not check the order metadata table size', 'woocommerce' )
+						: __( 'WooCommerce order metadata table is unusually large', 'woocommerce' ),
+					'description' => static fn( array $context ) => ! empty( $context['unverified'] )
+						? __( 'The database did not return row estimates for the order tables, so WooCommerce could not check the order metadata table size.', 'woocommerce' )
+						: sprintf(
+							/* translators: 1: Estimated number of order metadata rows. 2: Estimated number of order rows. */
+							__( 'The row counts are %1$s for the order metadata table and %2$s for the orders table. These are estimates and may be out of date. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.', 'woocommerce' ),
+							number_format_i18n( $context['meta_rows'] ),
+							number_format_i18n( $context['order_rows'] )
+						),
+				),
+			);
+		}
+
+		return $tests;
+	}
+
+	/**
+	 * Get estimated row counts for the HPOS orders and metadata tables.
+	 *
+	 * @return array{order_rows: int, meta_rows: int}|null
+	 */
+	private function get_hpos_table_statistics(): ?array {
+		global $wpdb;
+
+		$tables     = array(
+			'order_rows' => OrdersTableDataStore::get_orders_table_name(),
+			'meta_rows'  => OrdersTableDataStore::get_meta_table_name(),
+		);
+		$row_counts = array();
+
+		foreach ( $tables as $key => $table ) {
+			// LIKE limits the lookup to the named table, unlike WHERE, which reads every table in the schema on MySQL 5.7 and MariaDB.
+			// Naming the table also lets a database drop-in route the query to the server that holds it. The name is not passed
+			// through esc_like() because drop-ins would then read it with a leftover backslash (see WordPress core ticket #57149).
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- This reads database-maintained table statistics during Site Health checks.
+			$statuses = $wpdb->get_results( $wpdb->prepare( 'SHOW TABLE STATUS LIKE %s', $table ), ARRAY_A );
+			$status   = null;
+
+			// LIKE treats `_` as a wildcard, so only use the row for this exact table.
+			foreach ( (array) $statuses as $row ) {
+				if ( isset( $row['Name'] ) && 0 === strcasecmp( $row['Name'], $table ) ) {
+					$status = $row;
+					break;
+				}
+			}
+
+			if ( ! is_array( $status ) || ! isset( $status['Rows'] ) || ! is_numeric( $status['Rows'] ) ) {
+				return null;
+			}
+
+			$row_counts[ $key ] = (int) $status['Rows'];
+		}
+
+		return array(
+			'order_rows' => $row_counts['order_rows'],
+			'meta_rows'  => $row_counts['meta_rows'],
+		);
+	}
+
+	/**
+	 * Get context when the order metadata table is unusually large, or when its size could not be checked.
+	 *
+	 * @return array{order_rows: int, meta_rows: int}|array{unverified: true}|array{}
+	 */
+	private function get_order_meta_table_size_issue(): array {
+		$table_statistics = $this->get_hpos_table_statistics();
+
+		if ( null === $table_statistics ) {
+			return array( 'unverified' => true );
+		}
+
+		if ( $table_statistics['meta_rows'] < self::ORDER_META_ROW_COUNT_THRESHOLD ) {
+			return array();
+		}
+
+		if ( 0 !== $table_statistics['order_rows'] && intdiv( $table_statistics['meta_rows'], $table_statistics['order_rows'] ) < self::ORDER_META_ROWS_PER_ORDER_THRESHOLD ) {
+			return array();
+		}
+
+		return $table_statistics;
 	}
 
 	/**

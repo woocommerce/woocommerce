@@ -1,10 +1,4 @@
 /**
- * External dependencies
- */
-
-import type { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import TYPES from './action-types';
@@ -19,10 +13,10 @@ const initialState: ItemsState = {
 	data: {},
 };
 
-const reducer: Reducer< ItemsState, Action > = (
-	state = initialState,
-	action
-) => {
+const reducer = (
+	state: ItemsState = initialState,
+	action: Action
+): ItemsState => {
 	switch ( action.type ) {
 		case TYPES.SET_ITEM: {
 			const itemData = state.data[ action.itemType ] || {};

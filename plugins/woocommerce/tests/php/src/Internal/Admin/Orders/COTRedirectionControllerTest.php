@@ -37,16 +37,6 @@ class COTRedirectionControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Remove our redirect listener.
-	 *
-	 * @return void
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		remove_filter( 'wp_redirect', array( $this, 'watch_and_annul_redirects' ) );
-	}
-
-	/**
 	 * Captures the attempted redirect location, and stops the redirect from taking place.
 	 *
 	 * @param string $url Redirect location.

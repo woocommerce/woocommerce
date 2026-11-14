@@ -64,6 +64,89 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests translation updates with malformed installed or remote revision dates.
+	 *
+	 * @dataProvider translation_revision_dates
+	 * @param string|null $installed_revision Date in the installed PO file, or null when the locale is not installed.
+	 * @param string      $remote_revision    Date reported by the update service.
+	 * @param bool        $expect_update      Whether the update should be offered.
+	 */
+	public function test_translation_update_revision_dates( ?string $installed_revision, string $remote_revision, bool $expect_update ): void {
+		$plugin   = $this->mock_local_woo_plugin();
+		$lang_dir = WP_LANG_DIR . '/plugins/';
+		$pack     = $lang_dir . 'woo-test-plugin-fr_FR';
+		wp_mkdir_p( $lang_dir );
+		wp_delete_file( $pack . '.po' );
+		if ( null !== $installed_revision ) {
+			file_put_contents( $pack . '.po', "\"PO-Revision-Date: {$installed_revision}\\n\"\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture.
+		}
+
+		$files   = static fn( $files, $path ) => $lang_dir === $path ? array( $pack . '.mo' ) : $files;
+		$active  = static fn() => array( $plugin );
+		$locales = static fn() => array( 'fr_FR' );
+		$opt_in  = static fn() => true;
+		$mock    = static function ( $response, $args, $url ) use ( $remote_revision ) {
+			if ( 'https://translate.wordpress.com/api/translations-updates/woocommerce' !== $url ) {
+				return $response;
+			}
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode(
+					array(
+						'data' => array(
+							'woo-test-plugin' => array(
+								array(
+									'wp_locale'     => 'fr_FR',
+									'last_modified' => $remote_revision,
+									'version'       => '1.0.0',
+									'package'       => 'https://example.test/fr_FR.zip',
+								),
+							),
+						),
+					)
+				),
+			);
+		};
+
+		add_filter( 'pre_get_language_files_from_path', $files, 10, 2 );
+		add_filter( 'pre_option_active_plugins', $active );
+		add_filter( 'plugins_update_check_locales', $locales );
+		add_filter( 'woocommerce_translations_updates_for_woo-test-plugin', $opt_in );
+		add_filter( 'pre_http_request', $mock, 10, 3 );
+
+		try {
+			$this->assertSame( $installed_revision, wp_get_installed_translations( 'plugins' )['woo-test-plugin']['fr_FR']['PO-Revision-Date'] ?? null );
+			$updates = WC_Helper_Updater::get_translations_update_data();
+			$this->assertSame( $expect_update ? array( 'fr_FR' ) : array(), array_column( $updates, 'language' ) );
+		} finally {
+			remove_filter( 'pre_get_language_files_from_path', $files );
+			remove_filter( 'pre_option_active_plugins', $active );
+			remove_filter( 'plugins_update_check_locales', $locales );
+			remove_filter( 'woocommerce_translations_updates_for_woo-test-plugin', $opt_in );
+			remove_filter( 'pre_http_request', $mock );
+			wp_delete_file( $pack . '.po' );
+		}
+	}
+
+	/**
+	 * Supplies installed and remote translation revision dates.
+	 *
+	 * @return array
+	 */
+	public function translation_revision_dates(): array {
+		return array(
+			'replace invalid installed date' => array( '2018-MO-DA HO:MI+ZONE', '2026-02-01 00:00+0000', true ),
+			'skip invalid remote date'       => array( '2026-01-01 00:00+0000', 'invalid', false ),
+			'offer newer update'             => array( '2026-01-01 00:00+0000', '2026-02-01 00:00+0000', true ),
+			'keep newer installed pack'      => array( '2026-02-01 00:00+0000', '2026-01-01 00:00+0000', false ),
+			'replace empty installed date'   => array( '', '2026-02-01 00:00+0000', true ),
+			'skip empty remote date'         => array( '2026-01-01 00:00+0000', '', false ),
+			'install without remote date'    => array( null, '', true ),
+			'install with invalid remote'    => array( null, 'invalid', true ),
+		);
+	}
+
+	/**
 	 * Unregister and delete the fixture theme, when one was created.
 	 */
 	private function cleanup_theme_fixture() {
@@ -271,6 +354,58 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cached update data should be reused only while its presigned package links are still valid.
+	 *
+	 * @testWith [10, 0]
+	 *           [11.5, 1]
+	 *
+	 * @param float $age_in_hours      How long ago the cached update check was made.
+	 * @param int   $expected_requests How many update-check requests are expected.
+	 */
+	public function test_update_check_reuses_cache_only_within_package_link_lifetime( float $age_in_hours, int $expected_requests ): void {
+		$payload = array(
+			123 => array(
+				'product_id' => 123,
+				'file_id'    => 'abc123',
+			),
+		);
+
+		ksort( $payload );
+
+		set_transient(
+			'_woocommerce_helper_updates',
+			array(
+				'hash'     => md5( wp_json_encode( $payload ) ),
+				'updated'  => time() - (int) ( $age_in_hours * HOUR_IN_SECONDS ),
+				'products' => array( 123 => array( 'version' => '1.2.3' ) ),
+				'errors'   => array(),
+			),
+			WEEK_IN_SECONDS
+		);
+
+		$requests  = 0;
+		$http_mock = static function () use ( &$requests ) {
+			++$requests;
+			return array(
+				'response' => array(
+					'code'    => 200,
+					'message' => 'OK',
+				),
+				'body'     => wp_json_encode( array( 123 => array( 'version' => '1.3.0' ) ) ),
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$this->call_update_check( $payload );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertSame( $expected_requests, $requests );
+	}
+
+	/**
 	 * @testdox A rate-limited update check should keep the cached products instead of caching the empty result.
 	 */
 	public function test_update_check_preserves_cache_when_rate_limited(): void {
@@ -401,6 +536,60 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $requests, 'A check inside the backoff window should not call the API, even after the installed version changed' );
 		$this->assertGreaterThan( time(), $backoff_until, 'A failed check should record a backoff window' );
 		$this->assertLessThanOrEqual( time() + 15 * MINUTE_IN_SECONDS, $backoff_until, 'The backoff after a failed check should be short' );
+	}
+
+	/**
+	 * @testdox A failed update check should keep the forced auto-update only while the cached data is fresh, as the flag and the package links come from the same response.
+	 *
+	 * @testWith [10, true]
+	 *           [11.5, false]
+	 *
+	 * @param float $age_in_hours       How long ago the cached update check was made.
+	 * @param bool  $expect_autoupdate Whether the forced auto-update is expected to be kept.
+	 */
+	public function test_update_check_failure_keeps_forced_autoupdate_only_while_cache_is_fresh( float $age_in_hours, bool $expect_autoupdate ): void {
+		$payload = array(
+			123 => array(
+				'product_id' => 123,
+				'file_id'    => 'abc123',
+			),
+		);
+
+		ksort( $payload );
+
+		set_transient(
+			'_woocommerce_helper_updates',
+			array(
+				'hash'     => md5( wp_json_encode( $payload ) ),
+				'updated'  => time() - (int) ( $age_in_hours * HOUR_IN_SECONDS ),
+				'products' => array(
+					123 => array(
+						'version'    => '1.2.3',
+						'autoupdate' => true,
+					),
+				),
+				'errors'   => array(),
+			),
+			WEEK_IN_SECONDS
+		);
+
+		$http_mock = static function () {
+			return new WP_Error( 'http_request_failed', 'cURL error 28: Operation timed out' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = $this->call_update_check( $payload );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$expected = array( 123 => array( 'version' => '1.2.3' ) );
+		if ( $expect_autoupdate ) {
+			$expected[123]['autoupdate'] = true;
+		}
+
+		$this->assertSame( $expected, $result );
 	}
 
 	/**

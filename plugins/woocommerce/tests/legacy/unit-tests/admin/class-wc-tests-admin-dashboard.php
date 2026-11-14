@@ -25,16 +25,6 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 
 		// Mock http request to performance endpoint.
 		add_filter( 'rest_pre_dispatch', array( $this, 'mock_rest_responses' ), 10, 3 );
-		add_filter( 'woocommerce_dashboard_status_widget_reports', array( $this, 'mock_replace_dashboard_status_widget_reports' ) );
-	}
-
-	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		remove_filter( 'rest_pre_dispatch', array( $this, 'mock_rest_responses' ), 10 );
-		remove_filter( 'woocommerce_dashboard_status_widget_reports', array( $this, 'mock_replace_dashboard_status_widget_reports' ) );
 	}
 
 	/**
@@ -162,7 +152,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Ways Analytics can be turned off, each of which must bring back the legacy report links.
+	 * Ways Analytics can be turned off.
 	 *
 	 * @return array<string, array{callable}>
 	 */
@@ -183,30 +173,77 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should use the legacy status widget reports filter when Analytics is disabled.
+	 * @testdox Should hide the sales rows, but keep the order and stock rows, when Analytics is disabled.
 	 * @dataProvider provide_analytics_disabled_setups
 	 *
 	 * @param callable $disable_analytics Turns Analytics off.
 	 */
-	public function test_status_widget_with_analytics_disabled( callable $disable_analytics ) {
-		$this->skip_if_hpos_enabled( 'We don\'t support legacy reports on HPOS' );
+	public function test_status_widget_hides_sales_rows_with_analytics_disabled( callable $disable_analytics ) {
 		wp_set_current_user( $this->user );
+		update_option( 'woocommerce_manage_stock', 'yes' );
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
 		$disable_analytics();
 
-		$this->expectOutputRegex( '/50\.00 worth in the/' );
-
+		ob_start();
 		( new WC_Admin_Dashboard() )->status_widget_content();
+		$widget_output = ob_get_clean();
 
-		$widget_output = $this->getActualOutput();
-		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;range\=month/', $widget_output );
-		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;report\=sales_by_product/', $widget_output );
-		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=low_in_stock/', $widget_output );
-		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=out_of_stock/', $widget_output );
-		$this->assertDoesNotMatchRegularExpression( '/page\=wc-admin/', $widget_output, 'No status widget link should point to Analytics while it is disabled.' );
+		$this->assertStringNotContainsString( 'sales-this-month', $widget_output, 'Net sales row should be hidden without Analytics.' );
+		$this->assertStringNotContainsString( 'best-seller-this-month', $widget_output, 'Top seller row should be hidden without Analytics.' );
+		$this->assertStringContainsString( 'processing-orders', $widget_output );
+		$this->assertStringContainsString( 'on-hold-orders', $widget_output );
+		$this->assertStringContainsString( 'page=wc-reports&#038;tab=stock&#038;report=low_in_stock', $widget_output );
+		$this->assertStringContainsString( 'page=wc-reports&#038;tab=stock&#038;report=out_of_stock', $widget_output );
+		$this->assertStringNotContainsString( 'path=%2Fanalytics', $widget_output, 'No status widget link should point to Analytics while it is disabled.' );
+	}
+
+	/**
+	 * @testdox Should show sales rows, linked to legacy Reports, when a filter supplies only sales data while Analytics is disabled.
+	 */
+	public function test_status_widget_reports_filter_still_supplies_sales_rows_with_analytics_disabled() {
+		wp_set_current_user( $this->user );
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		add_filter( 'woocommerce_admin_disabled', '__return_true' );
+		add_filter( 'woocommerce_dashboard_status_widget_reports', array( $this, 'mock_replace_dashboard_status_widget_reports' ) );
+
+		ob_start();
+		( new WC_Admin_Dashboard() )->status_widget_content();
+		$widget_output = ob_get_clean();
+
+		$this->assertStringContainsString( '50.00 worth in the', $widget_output );
+		$this->assertStringContainsString( 'page=wc-reports&#038;tab=orders&#038;range=month', $widget_output );
+		$this->assertStringContainsString( 'page=wc-reports&#038;tab=orders&#038;report=sales_by_product', $widget_output );
+	}
+
+	/**
+	 * @testdox Should show legacy sales data adjusted by a reports filter callback when Analytics is disabled.
+	 */
+	public function test_status_widget_reports_filter_can_adjust_legacy_net_sales_with_analytics_disabled() {
+		wp_set_current_user( $this->user );
+		add_filter( 'woocommerce_admin_disabled', '__return_true' );
+		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-reports.php';
+		WC_Admin_Reports::register_hook_handlers();
+		add_filter(
+			'woocommerce_dashboard_status_widget_reports',
+			function ( $reports ) {
+				$reports['report_data']->net_sales = 4321;
+				return $reports;
+			},
+			20
+		);
+
+		ob_start();
+		( new WC_Admin_Dashboard() )->status_widget_content();
+		$widget_output = ob_get_clean();
+
+		$this->assertStringContainsString( 'sales-this-month', $widget_output );
+		$this->assertStringContainsString( '4,321.00', $widget_output );
 	}
 
 	/**
@@ -258,10 +295,6 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$report_data            = new stdClass();
 		$report_data->net_sales = 123;
 
-		$status_widget_reports['net_sales_link']      = 'admin.php?page=wc-reports&tab=orders&range=month';
-		$status_widget_reports['top_seller_link']     = 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=';
-		$status_widget_reports['lowstock_link']       = 'admin.php?page=wc-reports&tab=stock&report=low_in_stock';
-		$status_widget_reports['outofstock_link']     = 'admin.php?page=wc-reports&tab=stock&report=out_of_stock';
 		$status_widget_reports['report_data']         = $report_data;
 		$status_widget_reports['get_sales_sparkline'] = function () {
 			return array(

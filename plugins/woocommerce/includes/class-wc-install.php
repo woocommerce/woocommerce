@@ -1282,11 +1282,11 @@ class WC_Install {
 
 			foreach ( $subsections as $subsection ) {
 				foreach ( $section->get_settings( $subsection ) as $value ) {
-					if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
-						$autoload          = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
-						$skip_initial_save = isset( $value['skip_initial_save'] ) ? (bool) $value['skip_initial_save'] : false;
+					if ( isset( $value['default'], $value['id'] ) ) {
+						$autoload          = (bool) ( $value['autoload'] ?? true );
+						$skip_initial_save = (bool) ( $value['skip_initial_save'] ?? false );
 						if ( ! $skip_initial_save ) {
-							add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
+							add_option( $value['id'], $value['default'], '', $autoload );
 						}
 					}
 				}
@@ -1294,10 +1294,13 @@ class WC_Install {
 		}
 
 		// Define other defaults if not in setting screens.
-		add_option( 'woocommerce_single_image_width', '600', '', 'yes' );
-		add_option( 'woocommerce_thumbnail_image_width', '300', '', 'yes' );
-		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
-		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
+		add_option( 'woocommerce_single_image_width', '600', '', true );
+		add_option( 'woocommerce_thumbnail_image_width', '300', '', true );
+		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', true );
+		add_option( 'woocommerce_demo_store', 'no', '', false );
+		add_option( 'woocommerce_catalog_columns', '4', '', true );
+		add_option( 'woocommerce_catalog_rows', '4', '', true );
+		add_option( 'woocommerce_default_catalog_orderby', 'menu_order', '', true );
 
 		if ( self::is_new_install() ) {
 			// Define initial tax classes.
@@ -2113,6 +2116,19 @@ CREATE TABLE {$wpdb->prefix}wc_rate_limits (
   PRIMARY KEY  (rate_limit_id),
   UNIQUE KEY rate_limit_key (rate_limit_key($max_index_length))
 ) $collate;
+CREATE TABLE {$wpdb->prefix}wc_ucp_idempotency_keys (
+  idempotency_key_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  idempotency_key varchar(191) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  request_fingerprint char(64) NOT NULL,
+  state varchar(16) NOT NULL DEFAULT 'in_progress',
+  response_status smallint(5) unsigned NULL,
+  response_body longtext NULL,
+  created_at datetime NOT NULL,
+  completed_at datetime NULL,
+  PRIMARY KEY  (idempotency_key_id),
+  UNIQUE KEY idempotency_key (idempotency_key),
+  KEY created_at (created_at)
+) $collate;
 $product_attributes_lookup_table_creation_sql
 CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
 	url_id bigint(20) unsigned NOT NULL auto_increment,
@@ -2262,6 +2278,7 @@ $stock_notifications_table_schema;
 			"{$wpdb->prefix}woocommerce_tax_rates",
 			"{$wpdb->prefix}wc_reserved_stock",
 			"{$wpdb->prefix}wc_rate_limits",
+			"{$wpdb->prefix}wc_ucp_idempotency_keys",
 			"{$wpdb->prefix}wc_product_attributes_lookup",
 			"{$wpdb->prefix}wc_stock_notifications",
 			"{$wpdb->prefix}wc_stock_notificationmeta",
