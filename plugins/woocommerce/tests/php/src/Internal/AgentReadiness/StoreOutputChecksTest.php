@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Internal\AgentReadiness\JsonLd;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
 use WC_Helper_Product;
 use WC_Structured_Data;
@@ -524,6 +525,224 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Results and conflict flags of the GTIN and brand checks after serving one product page.
+	 *
+	 * @param \WC_Product              $product Product whose page is served.
+	 * @param array<int, array|string> $blocks  JSON-LD blocks on the page.
+	 * @return array<string, bool|string|null>
+	 */
+	private function served_identifiers( \WC_Product $product, array $blocks ): array {
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( $blocks ) ) ) );
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		return array(
+			'gtin'           => $checks['product_gtin_jsonld']['ok'],
+			'gtin_conflict'  => $checks['product_gtin_jsonld']['conflict'],
+			'brand'          => $checks['product_brand_jsonld']['ok'],
+			'brand_conflict' => $checks['product_brand_jsonld']['conflict'],
+			'brand_seen_at'  => $checks['product_brand_jsonld']['seen_at'],
+		);
+	}
+
+	/**
+	 * @testdox The GTIN check passes when the page gives a valid GTIN from any source, and flags a likely conflict only when the product's own valid GTIN is missing or replaced.
+	 */
+	public function test_served_gtin(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_global_unique_id( '4006381333931' );
+		$product->save();
+		$plugin = array(
+			'@type' => 'Product',
+			'name'  => $product->get_name(),
+		);
+
+		$this->assertTrue( $this->served_identifiers( $product, array( self::core_product_jsonld( $product ) ) )['gtin'], 'WooCommerce prints the GTIN' );
+
+		$result = $this->served_identifiers( $product, array( $plugin ) );
+		$this->assertFalse( $result['gtin'], 'A plugin replaced the JSON-LD without the GTIN' );
+		$this->assertTrue( $result['gtin_conflict'] );
+
+		$this->assertFalse( $this->served_identifiers( $product, array( $plugin + array( 'gtin13' => '4006381333932' ) ) )['gtin'], 'Another, invalid GTIN' );
+		$this->assertTrue( $this->served_identifiers( $product, array( $plugin + array( 'gtin13' => '4006381-333931' ) ) )['gtin'], 'Formatting alone is no conflict' );
+		$this->assertTrue( $this->served_identifiers( $product, array( $plugin + array( 'offers' => array( 'gtin' => 4006381333931 ) ) ) )['gtin'], 'A GTIN on the offer, as a number' );
+		$this->assertTrue( $this->served_identifiers( $product, array( $plugin + array( 'gtin13' => array( '4006381333931' ) ) ) )['gtin'], 'A GTIN given as a list' );
+		$upsell = array(
+			'@type'  => 'Product',
+			'name'   => 'Another product',
+			'gtin13' => '9780306406157',
+		);
+		$this->assertFalse( $this->served_identifiers( $product, array( $plugin, $upsell ) )['gtin'], 'Another product\'s GTIN on the page doesn\'t count' );
+		$this->assertFalse( $this->served_identifiers( $product, array( $upsell ) )['gtin'], 'An upsell alone is not this product' );
+		$permalink = (string) $product->get_permalink();
+		$flipped   = str_starts_with( $permalink, 'https:' ) ? 'http:' . substr( $permalink, strlen( 'https:' ) ) : 'https:' . substr( $permalink, strlen( 'http:' ) );
+		$this->assertTrue(
+			$this->served_identifiers(
+				$product,
+				array(
+					array(
+						'@type'  => 'Product',
+						'name'   => 'Sold as something else',
+						'url'    => $flipped . '#product',
+						'gtin13' => '4006381333931',
+					),
+				)
+			)['gtin'],
+			'A different name still counts when the url is this product'
+		);
+		$this->assertTrue(
+			$this->served_identifiers(
+				$product,
+				array(
+					array(
+						'@type'  => 'Product',
+						'name'   => 'Sold as something else',
+						'@id'    => $permalink . '#product',
+						'gtin13' => '4006381333931',
+					),
+				)
+			)['gtin'],
+			'An @id of this product counts too'
+		);
+		$group = $product->get_permalink() . '#group';
+		$this->assertTrue(
+			$this->served_identifiers(
+				$product,
+				array(
+					array(
+						'@type' => 'ProductGroup',
+						'name'  => $product->get_name(),
+						'@id'   => $group,
+					),
+					array(
+						'@type'       => 'Product',
+						'name'        => 'Red',
+						'isVariantOf' => array( '@id' => $group ),
+						'gtin13'      => '4006381333931',
+					),
+				)
+			)['gtin'],
+			'A variant linked with isVariantOf counts'
+		);
+		$this->assertTrue(
+			$this->served_identifiers(
+				$product,
+				array(
+					array(
+						'@type'      => 'ProductGroup',
+						'name'       => $product->get_name(),
+						'hasVariant' => array( array( '@id' => '#red' ) ),
+					),
+					array(
+						'@type'  => 'Product',
+						'name'   => 'Mug - Red',
+						'@id'    => '#red',
+						'gtin13' => '4006381333931',
+					),
+				)
+			)['gtin'],
+			'A variant named only by hasVariant @id counts'
+		);
+
+		$product->set_global_unique_id( '' );
+		$product->save();
+		$this->assertTrue( $this->served_identifiers( $product, array( $plugin + array( 'gtin' => '4006381333931' ) ) )['gtin'], 'A plugin provides the GTIN the product lacks' );
+		$this->assertNull( $this->served_identifiers( $product, array( $plugin ) )['gtin'], 'Neither has one: missing_gtin reports it' );
+		$this->assertNull( $this->served_identifiers( $product, array( $plugin + array( 'gtin' => '123' ) ) )['gtin'], 'An invalid GTIN from elsewhere isn\'t a conflict when WooCommerce has none to print' );
+
+		$product->set_global_unique_id( '4006381333932' );
+		$product->save();
+		$this->assertNull( $this->served_identifiers( $product, array( self::core_product_jsonld( $product ) ) )['gtin'], 'The product\'s own invalid GTIN: invalid_gtin reports it' );
+
+		$product->set_virtual( true );
+		$product->save();
+		$this->assertNull( $this->served_identifiers( $product, array( $plugin ) )['gtin'], 'A virtual product needs no GTIN' );
+	}
+
+	/**
+	 * @testdox The brand check passes when the page gives a brand from any source, and fails only when the product has a WooCommerce brand the page doesn't give.
+	 */
+	public function test_served_brand(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$plugin  = array(
+			'@type' => 'Product',
+			'name'  => $product->get_name(),
+		);
+
+		$this->assertNull( $this->served_identifiers( $product, array( $plugin ) )['brand'], 'No brand anywhere: missing_brand reports it' );
+		$this->assertTrue( $this->served_identifiers( $product, array( $plugin + array( 'brand' => 'Acme' ) ) )['brand'], 'A plugin provides the brand, as text' );
+
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Brand' );
+		$attribute->set_options( array( 'Acme' ) );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+		$this->assertNull( $this->served_identifiers( $product, array( $plugin ) )['brand'], 'WooCommerce doesn\'t print a brand attribute, so it isn\'t a conflict' );
+
+		wp_set_object_terms( $product->get_id(), 'Acme', 'product_brand' );
+		$result = $this->served_identifiers( $product, array( $plugin ) );
+		$this->assertFalse( $result['brand'], 'The WooCommerce brand is missing from the page' );
+		$this->assertTrue( $result['brand_conflict'] );
+		$this->assertSame( (string) $product->get_permalink(), $result['brand_seen_at'] );
+		$upsell = array(
+			'@type' => 'Product',
+			'name'  => 'Another product',
+			'brand' => 'Other',
+		);
+		$this->assertFalse( $this->served_identifiers( $product, array( $plugin, $upsell ) )['brand'], 'Another product\'s brand on the page doesn\'t count' );
+		$this->assertTrue( $this->served_identifiers( $product, array( self::core_product_jsonld( wc_get_product( $product->get_id() ) ) ) )['brand'], 'WooCommerce prints its brand' );
+		$this->assertTrue(
+			$this->served_identifiers(
+				$product,
+				array(
+					$plugin + array(
+						'brand' => array(
+							array(
+								'@type' => 'Brand',
+								'name'  => 'Acme',
+							),
+						),
+					),
+				)
+			)['brand'],
+			'A list of Brand items'
+		);
+		$this->assertFalse( $this->served_identifiers( $product, array( $plugin + array( 'brand' => array( 'name' => ' ' ) ) ) )['brand'], 'An empty brand name' );
+	}
+
+	/**
+	 * @testdox A ProductGroup whose offers sit on its variants passes the product checks. One whose variants have no offer fails the required fields and offer checks.
+	 */
+	public function test_product_group_offers_on_variants(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$path    = self::path_of( $product );
+		$group   = array(
+			'@context'   => 'https://schema.org',
+			'@type'      => 'ProductGroup',
+			'name'       => 'Dummy Product',
+			'image'      => 'https://example.org/image.jpg',
+			'variesBy'   => 'https://schema.org/color',
+			'hasVariant' => array(
+				array(
+					'@type'  => 'Product',
+					'name'   => 'Dummy Product - Red',
+					'offers' => array(
+						'@type'        => 'Offer',
+						'price'        => '10.00',
+						'availability' => 'https://schema.org/InStock',
+					),
+				),
+			),
+		);
+		$this->serve( array( $path => array( 200, self::page_with( array( $group ) ) ) ) );
+		$this->assertSame( array( true, true, true ), $this->product_results() );
+
+		remove_all_filters( 'pre_http_request' );
+		unset( $group['hasVariant'][0]['offers'] );
+		$this->serve( array( $path => array( 200, self::page_with( array( $group ) ) ) ) );
+		$this->assertSame( array( true, false, false ), $this->product_results() );
+	}
+
+	/**
 	 * @testdox A product page without Product JSON-LD fails only the presence check. One without a price fails only the offer check. A price written with a currency still counts.
 	 */
 	public function test_missing_product_jsonld(): void {
@@ -549,6 +768,29 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$no_price['offers']['price'] = '10.00 USD';
 		$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );
 		$this->assertSame( array( true, true, true ), $this->product_results(), 'A price with a currency code counts' );
+
+		foreach ( array( '$10.00', '€10', '10,00 kr.', "10\u{202F}000.00", 'R$ 10,00', 'US$10', 'S/. 10', 'EUR 10,-' ) as $text ) {
+			remove_all_filters( 'pre_http_request' );
+			$no_price['offers']['price'] = $text;
+			$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );
+			$this->assertSame( array( true, true, true ), $this->product_results(), "A price with a symbol or spaces counts: $text" );
+		}
+
+		foreach ( array( 'call 555', 'Free 2 day' ) as $text ) {
+			remove_all_filters( 'pre_http_request' );
+			$no_price['offers']['price'] = $text;
+			$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );
+			$this->assertSame( array( true, true, false ), $this->product_results(), "Text with a number in it is not a price: $text" );
+		}
+	}
+
+	/**
+	 * @testdox JSON-LD is read from a script whose type attribute names it, also when another attribute holds a >; a data-type attribute does not count.
+	 */
+	public function test_jsonld_script_tag(): void {
+		$block = '{"@type":"Product","name":"Mug"}';
+		$this->assertCount( 1, JsonLd::items( '<script data-x="a>b" type="application/ld+json">' . $block . '</script>', 'Product' ) );
+		$this->assertCount( 0, JsonLd::items( '<script data-type="application/ld+json">' . $block . '</script>', 'Product' ) );
 	}
 
 	/**
@@ -593,15 +835,15 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$open->set_date_created( time() - HOUR_IN_SECONDS );
 		$open->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'image.jpg' ) ) );
 		$open->save();
-		$locked = WC_Helper_Product::create_simple_product();
-		$locked->set_post_password( 'secret' );
-		$locked->save();
-		$this->serve(
-			array(
-				self::path_of( $open )   => array( 200, self::page_with( array( self::core_product_jsonld( $open ) ) ) ),
-				self::path_of( $locked ) => array( 200, self::page_with( array() ) ),
-			)
-		);
+		$responses = array( self::path_of( $open ) => array( 200, self::page_with( array( self::core_product_jsonld( $open ) ) ) ) );
+		// More locked products than the five newest that are looked at.
+		for ( $i = 0; $i < 6; $i++ ) {
+			$locked = WC_Helper_Product::create_simple_product();
+			$locked->set_post_password( 'secret' );
+			$locked->save();
+			$responses[ self::path_of( $locked ) ] = array( 200, self::page_with( array() ) );
+		}
+		$this->serve( $responses );
 
 		$this->assertSame( array( true, true, true ), $this->product_results() );
 	}

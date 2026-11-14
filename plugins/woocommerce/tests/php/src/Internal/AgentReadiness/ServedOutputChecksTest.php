@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreResponses;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils as UcpUtils;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -196,6 +197,11 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertContains( '/llms.txt', $this->requested );
 		$this->assertTrue( $this->results()['open_graph_tags'], 'A slow link does not stop the other checks' );
 
+		$responses['/llms.txt'] = array( 200, "# Shop\n" . implode( '', array_map( static fn( int $i ): string => "- [Part $i](" . home_url( "/about/#part-$i" ) . ")\n", range( 1, 5 ) ) ) . '- [Old](' . home_url( '/old/' ) . ")\n" );
+		$responses['/old/']     = array( 404, '' );
+		$this->serve( $responses );
+		$this->assertFalse( $this->results()['llms_txt_links_resolve'], 'Links to anchors on one page are one link' );
+
 		$responses['/old/'] = array( 403, 'Blocked' );
 		$this->serve( $responses );
 		$this->assertNull( $this->results()['llms_txt_links_resolve'], 'A firewall refusing the store its own page is not a broken link' );
@@ -250,22 +256,49 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox When the home page times out, nothing else is loaded and every served check is couldn't check; with only the home page, the page checks read it alone.
+	 * @testdox A price with a currency symbol after it that ends in a period (10,00 kr.) is found in the page.
+	 */
+	public function test_price_with_symbol_ending_in_period(): void {
+		update_option( 'woocommerce_currency', 'DKK' );
+		update_option( 'woocommerce_currency_pos', 'right_space' );
+		update_option( 'woocommerce_price_decimal_sep', ',' );
+		update_option( 'woocommerce_price_thousand_sep', '.' );
+		$responses                          = $this->good_store();
+		$responses[ $this->product_path() ] = array( 200, self::page( '', '<h1>Blue &amp; Gold Mug</h1><p class="price">10,00&nbsp;kr.</p>' ) );
+		$this->serve( $responses );
+
+		$this->assertTrue( $this->results()['content_in_raw_html'] );
+	}
+
+	/**
+	 * @testdox When the home page times out, also after a redirect, nothing else is loaded and every served check is couldn't check. A product page that doesn't load leaves the page checks couldn't check; with no product, they read the home page alone.
 	 */
 	public function test_couldnt_check(): void {
 		$this->serve( array( '/' => null ) );
 		$this->assertSame( array_fill_keys( self::SERVED_CHECKS, null ), $this->results() );
 		$this->assertSame( array( '/' ), $this->requested, 'Nothing else is requested when the home page times out' );
 
+		$this->serve(
+			array(
+				'/'    => array( 301, '', array( 'location' => home_url( '/en/' ) ) ),
+				'/en/' => null,
+			)
+		);
+		$this->assertSame( array_fill_keys( self::SERVED_CHECKS, null ), $this->results() );
+		$this->assertSame( array( '/', '/en/' ), $this->requested, 'Nothing else is requested when the redirected home page times out' );
+
 		$this->serve( array( '/' => $this->good_store()['/'] ) );
 		$results = $this->results();
-		$this->assertTrue( $results['open_graph_tags'] );
+		$this->assertNull( $results['open_graph_tags'], 'The product page did not load' );
 		$this->assertNull( $results['canonical_url'] );
 		$this->assertNull( $results['content_in_raw_html'] );
+
+		$this->product->delete( true );
+		$this->assertTrue( $this->results()['open_graph_tags'], 'With no product, the home page alone' );
 	}
 
 	/**
-	 * @testdox With UCP on, the profile and catalog search checks read the served profile and POST to the endpoint it names.
+	 * @testdox With UCP on, the profile check reads the served profile, and the endpoint check POSTs to catalog search.
 	 */
 	public function test_ucp_checks(): void {
 		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
@@ -283,28 +316,48 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 				),
 			)
 		);
-		$search   = 'POST ' . $path . '/catalog/search';
 
-		$responses                     = $this->good_store();
-		$responses['/.well-known/ucp'] = array( 200, (string) $profile );
-		$responses[ $search ]          = array( 200, '{"ucp":{},"products":[]}' );
+		$search                         = $path . '/catalog/search';
+		$responses                      = $this->good_store();
+		$responses['/.well-known/ucp']  = array( 200, (string) $profile );
+		$responses[ $path ]             = array( 404, '' );
+		$responses[ 'POST ' . $search ] = array( 200, '{"ucp":{"status":"success"},"products":[]}' );
 		$this->serve( $responses );
 		$results = $this->results();
 		$this->assertTrue( $results['ucp_profile'] );
 		$this->assertTrue( $results['ucp_profile_version'] );
-		$this->assertTrue( $results['ucp_endpoints_live'] );
+		$this->assertTrue( $results['ucp_endpoints_live'], 'Catalog search answers even when a GET of the endpoint base does not' );
+		$this->assertContains( 'POST ' . $search, $this->requested );
+
+		$responses[ 'POST ' . $search ] = array( 400, '{"ucp":{"status":"error"},"messages":[{"code":"VALIDATION_ERROR","content":"A query or at least one supported filter is required."}]}' );
+		$this->serve( $responses );
+		$this->assertTrue( $this->results()['ucp_endpoints_live'], 'An empty search is a JSON 400, which means the route answered' );
+
+		$responses[ 'POST ' . $search ] = array( 400, '<html>Bad request</html>' );
+		$this->serve( $responses );
+		$this->assertFalse( $this->results()['ucp_endpoints_live'], 'A 400 page is not the endpoint' );
 
 		$responses['/.well-known/ucp'] = array( 200, (string) str_replace( UcpUtils::VERSION, '2025-01-01', (string) $profile ) );
 		$this->serve( $responses );
 		$this->assertFalse( $this->results()['ucp_profile_version'], 'A profile for another UCP version is likely another plugin\'s' );
 
-		$responses['/.well-known/ucp'] = array( 404, '' );
-		$responses[ $search ]          = array( 403, '<html>Blocked</html>' );
+		$responses['/.well-known/ucp']  = array( 404, '' );
+		$responses[ 'POST ' . $search ] = array( 403, '<html>Blocked</html>' );
 		$this->serve( $responses );
 		$results = $this->results();
 		$this->assertFalse( $results['ucp_profile'] );
 		$this->assertNull( $results['ucp_profile_version'], 'No profile is reported by ucp_profile alone' );
-		$this->assertFalse( $results['ucp_endpoints_live'], 'Without a profile, WooCommerce\'s endpoint is tried' );
+		$this->assertFalse( $results['ucp_endpoints_live'], 'Without a profile, WooCommerce\'s catalog search is tried' );
+		$this->assertContains( 'POST ' . $search, $this->requested );
+
+		$responses[ $path ]             = array( 200, '{"namespace":"wc/ucp/v1","routes":{}}' );
+		$responses[ 'POST ' . $search ] = array( 404, '' );
+		$this->serve( $responses );
+		$this->assertFalse( $this->results()['ucp_endpoints_live'], 'A JSON index is not catalog search' );
+
+		$responses[ 'POST ' . $search ] = array( 200, '<html>Checking your browser</html>' );
+		$this->serve( $responses );
+		$this->assertFalse( $this->results()['ucp_endpoints_live'], 'A challenge page is not the endpoint' );
 	}
 
 	/**
@@ -360,5 +413,72 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		foreach ( $checks as $check ) {
 			$this->assertContains( $check['group'], array( 'access', 'find', 'understand', 'buy' ), $check['id'] );
 		}
+	}
+
+	/**
+	 * @testdox The pending product checks read the variants of a ProductGroup, and don't fail a variable product, which WooCommerce gives no buy action, or a product that doesn't ship.
+	 */
+	public function test_pending_product_detectors_read_variants(): void {
+		$offer_has  = new \ReflectionMethod( StoreOutputChecks::class, 'offer_has' );
+		$buy_action = new \ReflectionMethod( StoreOutputChecks::class, 'has_buy_action' );
+		$ships      = new \ReflectionMethod( StoreOutputChecks::class, 'ships' );
+		$offer_has->setAccessible( true );
+		$buy_action->setAccessible( true );
+		$ships->setAccessible( true );
+		$group       = array(
+			'@type'      => 'ProductGroup',
+			'hasVariant' => array(
+				array(
+					'@type'           => 'Product',
+					'offers'          => array(
+						'@type'           => 'Offer',
+						'shippingDetails' => array( '@type' => 'OfferShippingDetails' ),
+					),
+					'potentialAction' => array( '@type' => 'BuyAction' ),
+				),
+			),
+		);
+		$empty_group = array(
+			'@type'      => 'ProductGroup',
+			'hasVariant' => array( array( '@type' => 'Product' ) ),
+		);
+		$variable    = WC_Helper_Product::create_variation_product();
+
+		$this->assertTrue( $offer_has->invoke( null, array( $group ), 'shippingDetails' ), 'Shipping details on a variant\'s offer' );
+		$this->assertFalse( $offer_has->invoke( null, array( $group ), 'hasMerchantReturnPolicy' ) );
+		$this->assertTrue( $buy_action->invoke( null, array( $group ), $variable ), 'A BuyAction on a variant' );
+		$this->assertNull( $buy_action->invoke( null, array( $empty_group ), $variable ), 'A variable product without one' );
+		$this->assertFalse( $buy_action->invoke( null, array( $empty_group ), $this->product ), 'A simple product without one' );
+
+		$this->assertTrue( $ships->invoke( null, new StoreResponses( true ) ) );
+		$this->product->set_virtual( true );
+		$this->product->save();
+		$variable->delete( true );
+		$this->assertFalse( $ships->invoke( null, new StoreResponses( true ) ), 'A virtual product has no shipping details to give' );
+	}
+
+	/**
+	 * @testdox When something strips WooCommerce's Open Graph tags from the product page, the check flags a likely conflict, names the page but no plugin, even with an SEO plugin active; with WooCommerce's tags turned off, the check isn't run.
+	 */
+	public function test_open_graph_conflict(): void {
+		$responses                          = $this->good_store();
+		$responses[ $this->product_path() ] = array( 200, self::page( '', '<h1>Blue &amp; Gold Mug</h1>', false ) );
+		$this->serve( $responses );
+		update_option( 'active_plugins', array( 'wordpress-seo/wp-seo.php', 'hello.php' ) );
+
+		$checks = array_column( $this->sut->all(), null, 'id' );
+
+		$this->assertFalse( $checks['open_graph_from_core']['ok'] );
+		$this->assertTrue( $checks['open_graph_from_core']['conflict'] );
+		$this->assertSame( (string) $this->product->get_permalink(), $checks['open_graph_from_core']['seen_at'] );
+		$this->assertArrayNotHasKey( 'plugins', $checks['open_graph_from_core'], 'No plugin is named: a list of plugins goes stale' );
+		$this->assertSame( '', $checks['open_graph_tags']['seen_at'], 'Checks that are not conflicts carry no address' );
+
+		$this->serve( $this->good_store() );
+		$this->assertTrue( array_column( $this->sut->all(), 'ok', 'id' )['open_graph_from_core'] );
+
+		add_filter( 'woocommerce_enable_open_graph', '__return_false' );
+		$this->assertArrayNotHasKey( 'open_graph_from_core', array_column( $this->sut->all(), 'ok', 'id' ) );
+		remove_filter( 'woocommerce_enable_open_graph', '__return_false' );
 	}
 }

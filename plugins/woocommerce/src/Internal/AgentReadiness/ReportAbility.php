@@ -120,6 +120,11 @@ class ReportAbility implements AbilityDefinition {
 										'type'        => array( 'boolean', 'null' ),
 										'description' => __( 'True when the store passes, false when it fails, null when the check could not run.', 'woocommerce' ),
 									),
+									'group'    => array(
+										'type'        => 'string',
+										'enum'        => array( 'access', 'find', 'understand', 'buy', '' ),
+										'description' => __( 'The question the check answers: access (can agents get in), find (can they find the store), understand (do they understand the products) or buy (can they buy). Empty in a report from before checks had a group.', 'woocommerce' ),
+									),
 									'blocks'   => array(
 										'type'        => 'string',
 										'description' => __( 'What a failure stops: listing (every product everywhere), discovery (harder for agents to find and read the store), ucp (agents using UCP) or checkout (agent orders).', 'woocommerce' ),
@@ -140,6 +145,10 @@ class ReportAbility implements AbilityDefinition {
 									'pending'  => array(
 										'type'        => 'boolean',
 										'description' => __( 'On output checks: true for a check of output a coming WooCommerce update builds; it does not run yet.', 'woocommerce' ),
+									),
+									'seen_at'  => array(
+										'type'        => 'string',
+										'description' => __( 'On a likely conflict: the address where it was seen.', 'woocommerce' ),
 									),
 								),
 							),
