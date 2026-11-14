@@ -1,0 +1,150 @@
+// Motion helpers for WooCommerce blocks. See docs/contributors/motion.md.
+// Each helper writes the state change (color, opacity: 200ms, subtle) so that it always runs. It adds movement only
+// inside `motion-safe`, so movement stops with reduced motion. The shared keyframes are in `assets/css/style.scss`.
+@use "sass:list";
+@use "sass:selector";
+
+// Woo motion constants that WPDS does not have.
+$wc-scale-press: 0.97;
+$wc-scale-pulse-peak: 1.05;
+$wc-scale-icon-from: 0.8;
+$wc-blur-icon: 4px;
+
+// Rows after this number share the last stagger step, so long lists do not wait.
+$wc-stagger-cap: 7;
+
+@mixin motion-safe() {
+	@media not (prefers-reduced-motion) {
+		@content;
+	}
+}
+
+@function motion-duration($step) {
+	@return var(--wpds-motion-duration-#{$step});
+}
+
+@function motion-easing($name) {
+	@return var(--wpds-motion-easing-#{$name});
+}
+
+// A comma-separated transition list: each property with the same duration and timing function.
+@function -motion-list($properties, $duration, $timing) {
+	$list: ();
+	@each $property in $properties {
+		$list: list.append($list, $property $duration $timing, $separator: comma);
+	}
+	@return $list;
+}
+
+// State changes: 200ms, subtle, both ways.
+@function motion-state($properties...) {
+	@return -motion-list($properties, motion-duration(md), motion-easing(subtle));
+}
+
+// Keeps each property at its old value until a 200ms fade ends, for example `visibility` while an element fades out.
+@function motion-hold($properties...) {
+	@return -motion-list($properties, motion-duration(md), step-end);
+}
+
+// Movement: `lg` for movement in, `md` for movement out or in place, `sm` for the press.
+@function motion-move($properties, $duration: lg, $easing: expressive) {
+	@return -motion-list($properties, motion-duration($duration), motion-easing($easing));
+}
+
+// Transitions $state as a state change. When motion is allowed, also transitions $move as movement over $duration.
+// $hold keeps properties at their old value until the fade ends. Empty lists are not written.
+@mixin motion-transition($state: (), $move: (), $duration: lg, $easing: expressive, $hold: ()) {
+	@if list.length($state) > 0 or list.length($hold) > 0 {
+		transition: motion-state($state...), motion-hold($hold...);
+	}
+	@if list.length($move) > 0 {
+		@include motion-safe {
+			transition: motion-move($move, $duration, $easing), motion-state($state...), motion-hold($hold...);
+		}
+	}
+}
+
+// Dims the element to half opacity while it matches $states, for example `".is-disabled"`. The transition is on the
+// element, not on the state, so the element also fades back. @content adds declarations to the dimmed state.
+@mixin motion-dim($states) {
+	transition: motion-state(opacity);
+
+	@at-root #{selector.append(&, $states)} {
+		opacity: 0.5;
+		@content;
+	}
+}
+
+// Fades content in when it mounts: 200ms, subtle. Runs with reduced motion.
+@mixin motion-fade-in($delay: null) {
+	animation: wc-fade-in motion-duration(md) motion-easing(subtle) $delay backwards;
+}
+
+// Fades content out and keeps it hidden until it unmounts.
+@mixin motion-fade-out() {
+	animation: wc-fade-out motion-duration(md) motion-easing(subtle) forwards;
+}
+
+// Content that appears. It fades in. When motion is allowed, it also plays $keyframes over $duration.
+@mixin motion-enter($keyframes: wc-rise, $duration: lg, $delay: null) {
+	@include motion-fade-in($delay);
+	@include motion-safe {
+		animation:
+			wc-fade-in motion-duration(md) motion-easing(subtle) $delay backwards,
+			$keyframes motion-duration($duration) motion-easing(expressive) $delay backwards;
+	}
+}
+
+// Content that goes. It fades out. When motion is allowed, it also plays $keyframes. It keeps the end state until it
+// unmounts.
+@mixin motion-exit($keyframes) {
+	@include motion-fade-out;
+	@include motion-safe {
+		animation:
+			wc-fade-out motion-duration(md) motion-easing(subtle) forwards,
+			$keyframes motion-duration(md) motion-easing(expressive) forwards;
+	}
+}
+
+// A button that loads. The label text fades out, and the spinner grows in. The spinner is inside the
+// label, so only the text fill fades, and the label stays visible until the fade ends.
+@mixin motion-spinner-swap() {
+	.wc-block-components-button__text {
+		animation:
+			wc-fade-text-out motion-duration(md) motion-easing(subtle) forwards,
+			wc-hold-visible motion-duration(md);
+	}
+
+	.wc-block-components-spinner {
+		@include motion-enter(wc-grow, md);
+	}
+}
+
+// Sets --wc-motion-index on sibling rows. Rows after $wc-stagger-cap share the last index.
+@mixin motion-stagger-index() {
+	@for $i from 1 to $wc-stagger-cap {
+		&:nth-child(#{$i}) {
+			--wc-motion-index: #{$i - 1};
+		}
+	}
+	&:nth-child(n + #{$wc-stagger-cap}) {
+		--wc-motion-index: #{$wc-stagger-cap - 1};
+	}
+}
+
+// The delay for a row: its index, plus $extra steps, times 50ms.
+@function motion-stagger-delay($extra: 0) {
+	@return calc((var(--wc-motion-index) + #{$extra}) * var(--wpds-motion-duration-xs));
+}
+
+// Sibling rows enter in sequence, 50ms apart.
+@mixin motion-stagger($keyframes: wc-rise) {
+	@include motion-stagger-index;
+	@include motion-enter($keyframes, $delay: motion-stagger-delay());
+
+	// When a section enters as one unit, its rows enter with it and do not stagger. The motion that moves the section
+	// sets one of these attributes.
+	:where([data-wc-entering], [data-wc-swapping]) & {
+		animation: none;
+	}
+}

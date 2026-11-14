@@ -1,7 +1,8 @@
 {
 	"extends": "@wordpress/stylelint-config/scss-stylistic",
 	"plugins": [
-		"@wordpress/theme/stylelint-plugins/no-token-fallback-values"
+		"@wordpress/theme/stylelint-plugins/no-token-fallback-values",
+		"./bin/stylelint-plugins/motion.js"
 	],
 	"reportNeedlessDisables": true,
 	"rules": {
@@ -24,5 +25,30 @@
 			true,
 			{ "ignoreFunctions": [ "calc", "var" ] }
 		]
-	}
+	},
+	"overrides": [
+		{
+			"files": [
+				"assets/js/blocks/{cart,checkout,cart-checkout-shared,order-confirmation}/**/*.scss",
+				"assets/js/base/components/{button,notice-banner,loading-mask,rolling-price,cart-checkout,skeleton,quantity-selector}/**/*.scss",
+				"packages/public-api/blocks-components/**/*.scss",
+				"assets/css/abstracts/_mixins.scss",
+				"assets/css/abstracts/_motion.scss"
+			],
+			"rules": {
+				"woocommerce/motion-safe": true,
+				"declaration-property-value-disallowed-list": [
+					{
+						"/^(transition|animation)/": [
+							"/^(?![\\s\\S]*infinite)([\\s\\S]*[\\s,(])?[\\d.]*[1-9][\\d.]*m?s\\b/"
+						],
+						"/^transition/": [ "/(^|,)\\s*all\\b/" ]
+					},
+					{
+						"message": "Use WPDS motion duration tokens instead of literal times (loops excepted), and list transitioned properties instead of \"all\". See docs/contributors/motion.md."
+					}
+				]
+			}
+		}
+	]
 }

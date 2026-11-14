@@ -20,18 +20,16 @@
 		left: $gap-smaller * 1.25;
 		top: 25px;
 		transform-origin: top left;
-		transition: all 200ms ease;
 		margin: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		max-width: calc(100% - #{2 * $gap-small});
 		cursor: text;
+		// Themes and extensions position the label with `top`, so `top` also animates.
+		@include motion-transition($state: color, $move: (top, transform), $duration: md, $easing: balanced);
 
 		.has-dark-controls & {
 			color: $input-placeholder-dark;
-		}
-		@media screen and (prefers-reduced-motion: reduce) {
-			transition: none;
 		}
 	}
 
@@ -88,13 +86,11 @@
 	}
 
 	// We delay the reveal so the mask doesn't sit behind the label while it floats up.
+	// With reduced motion, the label moves immediately, so there is no delay.
 	input[type="date"]::-webkit-datetime-edit {
-		transition: opacity 150ms ease 150ms;
-	}
-
-	@media screen and (prefers-reduced-motion: reduce) {
-		input[type="date"]::-webkit-datetime-edit {
-			transition: none;
+		transition: motion-state(opacity);
+		@include motion-safe {
+			transition-delay: motion-duration(md);
 		}
 	}
 

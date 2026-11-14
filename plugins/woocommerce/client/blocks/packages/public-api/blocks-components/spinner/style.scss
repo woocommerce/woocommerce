@@ -18,12 +18,15 @@
 		height: 1em;
 		box-sizing: border-box;
 		transform-origin: 50% 50%;
-		transform: translateZ(0) scale(0.5);
+		// Halfway through a turn. With reduced motion, the spinner stops in this position.
+		transform: rotate(180deg);
 		backface-visibility: hidden;
 		border-radius: 50%;
 		border: 0.2em solid currentColor;
 		border-left-color: transparent;
 		@include spinner-animation();
-		animation: spinner__animation 1s infinite linear;
+		@include motion-safe {
+			animation: spinner__animation 1s infinite linear;
+		}
 	}
 }

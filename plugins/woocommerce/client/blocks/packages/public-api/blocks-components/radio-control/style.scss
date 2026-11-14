@@ -238,11 +238,8 @@ $content-padding-left: calc($gap + 24px + $gap-smaller);
 			}
 		}
 
-		&[aria-disabled="true"],
-		&[disabled] {
+		@include motion-dim('[aria-disabled="true"], [disabled]') {
 			cursor: not-allowed;
-			opacity: 0.5;
-			transition: opacity 200ms ease;
 		}
 	}
 }

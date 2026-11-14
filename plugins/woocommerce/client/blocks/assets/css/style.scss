@@ -2,6 +2,57 @@
 	--wc-separator-color: color-mix(in srgb, currentColor 20%, transparent);
 }
 
+// Shared motion keyframes. Use them through the motion mixins. Fades and movement are separate keyframes, so opacity
+// always uses the state change timing. Movement uses `translate`, `scale`, and `filter`, so it combines with the
+// resting `transform` of an element.
+@keyframes wc-fade-in {
+	from {
+		opacity: 0;
+	}
+}
+
+@keyframes wc-fade-out {
+	to {
+		opacity: 0;
+	}
+}
+
+// Fades the text only. A spinner inside it, drawn with `color`, stays visible.
+@keyframes wc-fade-text-out {
+	to {
+		-webkit-text-fill-color: transparent;
+	}
+}
+
+// Keeps content visible while it fades out, after its parent hides it.
+@keyframes wc-hold-visible {
+	from,
+	to {
+		visibility: visible;
+	}
+}
+
+@keyframes wc-rise {
+	from {
+		translate: 0 4px;
+	}
+}
+
+// Icons and small items grow in with scale and blur.
+@keyframes wc-grow {
+	from {
+		scale: $wc-scale-icon-from;
+		filter: blur($wc-blur-icon);
+	}
+}
+
+@keyframes wc-shrink {
+	to {
+		scale: $wc-scale-icon-from;
+		filter: blur($wc-blur-icon);
+	}
+}
+
 body.wc-modal--open {
 	overflow: hidden;
 }
