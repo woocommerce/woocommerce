@@ -80,6 +80,7 @@ class WC_Admin {
 		include_once __DIR__ . '/class-wc-admin-pointers.php';
 		include_once __DIR__ . '/class-wc-admin-importers.php';
 		include_once __DIR__ . '/class-wc-admin-exporters.php';
+		include_once __DIR__ . '/class-wc-admin-pos-staff.php';
 
 		// Help Tabs.
 		/**
