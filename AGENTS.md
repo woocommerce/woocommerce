@@ -78,6 +78,14 @@ plugins/woocommerce/
 
 - Prefer vanilla JavaScript/TypeScript over jQuery for new or modified code. Keep existing jQuery when a rewrite is out of scope.
 
+**Displayed numbers:**
+
+- Format displayed counts and quantities (cards, table cells, filters, tooltips, notices) with `formatValue( getCurrencyConfig(), 'number', value )` from `@woocommerce/number`, not by interpolating the raw number. It uses the store's separators, so don't hardcode comma separators or rely on the browser locale.
+- Use `%s`, not `%d`, for formatted values in `sprintf()` (`%d` drops the separators). Keep the raw count numeric for plural selection: pass it to `_n()` and format only the displayed value.
+- `'number'` keeps the value's own decimal places; use `numberFormat()` with an explicit `precision` for fixed-precision measurements and rates. Use `@woocommerce/currency` for monetary amounts.
+- Leave identifiers, versions, years, HTTP status codes and port numbers unformatted.
+- Check large counts (e.g. `1234567`), zero and singular values, and a store with non-default separators (e.g. `.` thousands, `,` decimals).
+
 **CSS:**
 
 - Prefer logical CSS properties that work well in LTR and RTL languages like `margin-inline-start`, or `inset-inline-end`, instead of physical properties like `margin-left` or `right`.

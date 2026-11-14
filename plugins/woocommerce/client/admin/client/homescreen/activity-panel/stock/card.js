@@ -9,6 +9,8 @@ import { ESCAPE } from '@wordpress/keycodes';
 import { get } from 'lodash';
 import { Link, ProductImage } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { CurrencyContext } from '@woocommerce/currency';
+import { formatValue } from '@woocommerce/number';
 import moment from 'moment';
 
 /**
@@ -18,6 +20,8 @@ import { ActivityCard } from '~/activity-panel/activity-card';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 export class ProductStockCard extends Component {
+	static contextType = CurrencyContext;
+
 	constructor( props ) {
 		super( props );
 		this.state = {
@@ -183,9 +187,13 @@ export class ProductStockCard extends Component {
 				) }
 			>
 				{ sprintf(
-					/* translators: %d = stock quantity of the product being updated */
-					__( '%d in stock', 'woocommerce' ),
-					product.stock_quantity
+					/* translators: %s = formatted stock quantity of the product being updated */
+					__( '%s in stock', 'woocommerce' ),
+					formatValue(
+						this.context.getCurrencyConfig(),
+						'number',
+						product.stock_quantity
+					)
 				) }
 			</span>
 		);
