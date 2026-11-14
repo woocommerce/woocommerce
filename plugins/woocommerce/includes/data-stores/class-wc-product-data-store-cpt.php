@@ -2624,7 +2624,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'date_on_sale_to'   => '_sale_price_dates_to',
 		);
 		foreach ( $date_queries as $query_var_key => $db_key ) {
-			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
+			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] && array() !== $query_vars[ $query_var_key ] ) {
 
 				// Remove any existing meta queries for the same keys to prevent conflicts.
 				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );

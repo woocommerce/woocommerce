@@ -521,7 +521,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					return $query_part;
 				}
 				$meta_query[] = $query_part;
-			} elseif ( is_email( $value ) ) {
+			} elseif ( is_string( $value ) && is_email( $value ) ) {
 				$meta_query['customer_emails']['value'][] = sanitize_email( $value );
 			} elseif ( is_numeric( $value ) ) {
 				$meta_query['customer_ids']['value'][] = strval( absint( $value ) );
@@ -985,7 +985,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'date_paid'      => '_date_paid',
 		);
 		foreach ( $date_queries as $query_var_key => $db_key ) {
-			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
+			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] && array() !== $query_vars[ $query_var_key ] ) {
 
 				// Remove any existing meta queries for the same keys to prevent conflicts.
 				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );

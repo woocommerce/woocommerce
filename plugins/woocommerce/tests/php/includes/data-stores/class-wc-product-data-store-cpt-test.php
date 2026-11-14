@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
 /**
@@ -870,6 +871,75 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Malformed date args return no products instead of a fatal error.
+	 *
+	 * @dataProvider malformed_date_arg_provider
+	 * @param string $date_key   The date query var.
+	 * @param mixed  $date_value The malformed value.
+	 */
+	public function test_malformed_date_arg_returns_no_products( string $date_key, $date_value ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_date_created( '2000-01-01T10:00:00' );
+		$product->set_date_on_sale_from( '2000-01-01T10:00:00' );
+		$product->save();
+
+		$this->assertSame(
+			array( $product->get_id() ),
+			wc_get_products(
+				array(
+					$date_key => '2000-01-01',
+					'return'  => 'ids',
+				)
+			),
+			'A valid date should match the product'
+		);
+
+		$queried_products = wc_get_products(
+			array(
+				$date_key => $date_value,
+				'return'  => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_products, 'A malformed date should not match any product' );
+	}
+
+	/**
+	 * Data provider for test_malformed_date_arg_returns_no_products.
+	 *
+	 * @return array
+	 */
+	public function malformed_date_arg_provider(): array {
+		return array(
+			'post column, array'      => array( 'date_created', array( '2000-01-01' ) ),
+			'post column, object'     => array( 'date_created', new stdClass() ),
+			'post column, Stringable' => array( 'date_created', new WC_Product_Data_Store_CPT_Test_Stringable( '2000-01-01' ) ),
+			'sale date, array'        => array( 'date_on_sale_from', array( '2000-01-01' ) ),
+		);
+	}
+
+	/**
+	 * @testdox An empty date array applies no date filter and keeps the other filters, like an unset date arg.
+	 */
+	public function test_empty_date_array_applies_no_date_filter(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_date_created( '2000-01-01T10:00:00' );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$product->save();
+		WC_Helper_Product::create_simple_product();
+
+		$queried_products = wc_get_products(
+			array(
+				'date_created' => array(),
+				'stock_status' => ProductStockStatus::OUT_OF_STOCK,
+				'return'       => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $product->get_id() ), $queried_products );
+	}
+
+	/**
 	 * @testdox Creating and updating a product keeps backslashes and quotes in its name and descriptions.
 	 */
 	public function test_create_and_update_keep_backslashes_in_post_fields(): void {
@@ -951,5 +1021,34 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product->save();
 
 		$this->assertSame( 'Men\'s 1\\2 inch', get_post( $product->get_id() )->post_title );
+	}
+}
+
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound -- Test double.
+/**
+ * A Stringable value for date query tests.
+ */
+class WC_Product_Data_Store_CPT_Test_Stringable {
+	/**
+	 * The string value.
+	 *
+	 * @var string
+	 */
+	private $value;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $value The string value.
+	 */
+	public function __construct( string $value ) {
+		$this->value = $value;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function __toString(): string {
+		return $this->value;
 	}
 }
