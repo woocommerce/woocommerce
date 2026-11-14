@@ -171,14 +171,6 @@ class CartItems extends ControllerTestCase {
 	}
 
 	/**
-	 * Tear down.
-	 */
-	protected function tearDown(): void {
-		parent::tearDown();
-		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
-	}
-
-	/**
 	 * Test getting cart.
 	 */
 	public function test_get_items() {

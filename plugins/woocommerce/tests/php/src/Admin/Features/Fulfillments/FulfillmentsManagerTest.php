@@ -20,34 +20,11 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	private FulfillmentsManager $manager;
 
 	/**
-	 * Original value of the fulfillments feature flag.
-	 *
-	 * @var mixed
-	 */
-	private static $original_fulfillments_flag;
-
-	/**
 	 * Set up the test environment.
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
-	}
-
-	/**
-	 * Tear down the test environment.
-	 */
-	public static function tearDownAfterClass(): void {
-		if ( false === self::$original_fulfillments_flag ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
-		}
-		parent::tearDownAfterClass();
+		FulfillmentsHelper::create_tables();
 	}
 
 	/**
@@ -55,8 +32,8 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		FulfillmentsHelper::enable_fulfillments();
 		$this->manager = wc_get_container()->get( FulfillmentsManager::class );
-		$this->manager->register();
 	}
 
 	/**

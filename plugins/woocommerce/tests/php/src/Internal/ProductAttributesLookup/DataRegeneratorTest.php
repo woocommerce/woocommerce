@@ -265,8 +265,6 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
-		remove_all_filters( ' woocommerce_attribute_lookup_regeneration_step_size' );
-
 		$expected_limit_value = $set_filter ? $filtered_size : DataRegenerator::PRODUCTS_PER_GENERATION_STEP;
 		$this->assertEquals( array( $expected_limit_value ), $requested_step_sizes );
 	}

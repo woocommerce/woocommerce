@@ -17,14 +17,6 @@ use Automattic\WooCommerce\Internal\CLI\Migrator\Core\PlatformRegistry;
 class PlatformRegistryTest extends \WC_Unit_Test_Case {
 
 	/**
-	 * Clean up filters after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		remove_all_filters( 'woocommerce_migrator_platforms' );
-	}
-
-	/**
 	 * Test platform registration and retrieval.
 	 */
 	public function test_platform_registration() {

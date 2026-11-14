@@ -41,7 +41,6 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->reset_batch_state();
-		remove_filter( 'pre_http_request', array( $this, 'intercept_http_requests' ), 10 );
 		parent::tearDown();
 	}
 

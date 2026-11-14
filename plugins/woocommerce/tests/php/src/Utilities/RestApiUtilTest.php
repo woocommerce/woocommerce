@@ -35,7 +35,6 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		// Clear any filters that may have been added during tests.
 		remove_all_filters( 'woocommerce_rest_should_lazy_load_namespace' );
-		remove_all_filters( 'rest_pre_dispatch' );
 
 		// Clear global wp query vars.
 		if ( isset( $GLOBALS['wp'] ) ) {

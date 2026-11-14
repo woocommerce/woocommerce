@@ -86,6 +86,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private $block_types_at_setup = null;
 
 	/**
+	 * The mailer to put back after the test, or false when the test did not rebuild it.
+	 *
+	 * @var WC_Emails|null|false
+	 */
+	private $mailer_before_rebuild = false;
+
+	/**
 	 * Enable synchronous product attribute lookup updates for test fixtures.
 	 *
 	 * Calls can be nested; the filter is removed once every enable has been
@@ -234,6 +241,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			$this->restore_server_superglobal();
 			$this->restore_constant_overrides();
 			$this->restore_block_type_registry();
+			$this->restore_mailer();
 
 			// Function and static-method mocks are process-wide. Reset them here so the test
 			// that installs one is the last to see it, including when the next test extends a
@@ -248,6 +256,52 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// test that runs after this one.
 			parent::tearDown();
 		}
+	}
+
+	/**
+	 * Turn on hook-driven transactional emails for the current test.
+	 *
+	 * The test bootstrap leaves them off. This adds the email dispatch hooks and makes the next use of the mailer
+	 * build a fresh one, so its listeners exist. The hook restore after the test removes the hooks, and the previous
+	 * mailer is put back.
+	 *
+	 * @return void
+	 */
+	protected function enable_transactional_emails(): void {
+		$this->rebuild_mailer();
+		WC_Emails::init_transactional_emails();
+	}
+
+	/**
+	 * Make the next use of the mailer build a fresh one inside the current test.
+	 *
+	 * The emails the mailer loads depend on the features enabled when it is built, and the shared one is otherwise
+	 * built in whichever earlier test needed it first. The previous mailer is put back after the test.
+	 *
+	 * @return void
+	 */
+	protected function rebuild_mailer(): void {
+		$instance = new ReflectionProperty( WC_Emails::class, 'instance' );
+		$instance->setAccessible( true );
+		if ( false === $this->mailer_before_rebuild ) {
+			$this->mailer_before_rebuild = $instance->getValue();
+		}
+		$instance->setValue( null, null );
+	}
+
+	/**
+	 * Put back the mailer that was in place before rebuild_mailer(), if the test rebuilt it.
+	 *
+	 * @return void
+	 */
+	private function restore_mailer(): void {
+		if ( false === $this->mailer_before_rebuild ) {
+			return;
+		}
+		$instance = new ReflectionProperty( WC_Emails::class, 'instance' );
+		$instance->setAccessible( true );
+		$instance->setValue( null, $this->mailer_before_rebuild );
+		$this->mailer_before_rebuild = false;
 	}
 
 	/**
