@@ -103,6 +103,9 @@ The system status API allows you to view all system status items.
 | `decimal_separator`   | string  | Decimal separator. `READ-ONLY`                         |
 | `number_of_decimals`  | integer | Number of decimals. `READ-ONLY`                        |
 | `geolocation_enabled` | boolean | Geolocation enabled? `READ-ONLY`                       |
+| `store_base_postcode` | string | Store base postcode. `READ-ONLY` |
+| `store_base_city` | string | Store base city. `READ-ONLY` |
+| `default_customer_location` | string | Default customer location. `READ-ONLY` |
 | `taxonomies`          | array   | Taxonomy terms for product/order statuses. `READ-ONLY` |
 
 ### System status - Security properties
@@ -263,6 +266,9 @@ woocommerce.get("system_status").parsed_response
     "decimal_separator": ".",
     "number_of_decimals": 2,
     "geolocation_enabled": false,
+    "store_base_postcode": "",
+    "store_base_city": "",
+    "default_customer_location": "base",
     "taxonomies": {
       "external": "external",
       "grouped": "grouped",
