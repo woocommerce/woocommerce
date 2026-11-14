@@ -77,6 +77,13 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The image size line names Google, the only AI app with the rule, and no date: rules.json moves it to can't be listed when the rule starts.
+	 */
+	public function test_image_size_line_names_google(): void {
+		$this->assertSame( 'Google asks for images of at least 500 x 500 pixels.', ReadinessCopy::product_check( 'image_too_small', 2 )['why'] );
+	}
+
+	/**
 	 * @testdox The UCP version message names the version the store serves, when the scan found one.
 	 */
 	public function test_ucp_version_message_names_served_version(): void {

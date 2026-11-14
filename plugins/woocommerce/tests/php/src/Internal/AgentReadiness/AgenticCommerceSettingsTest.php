@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessCheckPage;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessCopy;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
 use WC_Admin_Settings;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -200,7 +201,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 * @testdox With every required check passing, open checks are only Recommended and passing ones are Done.
 	 */
 	public function test_output_on_a_ready_store(): void {
-		StoreConditionsTest::make_store_ready();
+		$this->make_every_step_pass();
 
 		$html = $this->render_page();
 
@@ -274,7 +275,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 * @testdox A missing policy page is recommended, so it does not block the switch or the required group.
 	 */
 	public function test_missing_policy_page_is_recommended(): void {
-		StoreConditionsTest::make_store_ready();
+		$this->make_every_step_pass();
 		delete_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION );
 
 		$html = $this->render_page();
@@ -325,8 +326,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 		$view = $this->view();
 		$this->assertNull( $view['fix_first'], 'A policy page is only recommended, so it stays out of Fix first' );
-		$this->assertMatchesRegularExpression( '#"title":"Publish your refund and returns policy page".{0,600}?"href":"[^"]*post=' . $draft . '&action=edit","text":"Edit refund policy"#', (string) wp_json_encode( $view['sections'], JSON_UNESCAPED_SLASHES ), 'Readiness check links the step to the page editor, named for the policy' );
-		$this->assertStringContainsString( 'A refund policy needs to be available for AI assistants to share with shoppers.', (string) wp_json_encode( $view['sections'], JSON_UNESCAPED_UNICODE ), 'The refund draft keeps its own line' );
+		$this->assertStringNotContainsString( 'Publish your refund and returns policy page', (string) wp_json_encode( $view['sections'] ), 'Setup steps stay in the Setup checklist' );
+		$copy = $this->step_copy( 'refund_returns_page' );
+		$this->assertStringContainsString( 'post=' . $draft . '&action=edit', $copy['url'], 'Readiness check links the step to the page editor' );
+		$this->assertSame( 'Edit refund policy', $copy['link'], 'named for the policy' );
+		$this->assertSame( 'A refund policy needs to be available for AI assistants to share with shoppers.', $copy['text'], 'The refund draft keeps its own line' );
 	}
 
 	/**
@@ -342,9 +346,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			)
 		);
 		$pages = array(
-			AgenticCommerceSettings::PRIVACY_PAGE_OPTION => array( 'Publish your privacy policy page', 'Edit privacy policy' ),
-			AgenticCommerceSettings::TERMS_PAGE_OPTION   => array( 'Publish your terms and conditions page', 'Edit terms and conditions' ),
-			AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION => array( 'Publish your shipping policy page', 'Edit shipping policy' ),
+			AgenticCommerceSettings::PRIVACY_PAGE_OPTION => array( 'Publish your privacy policy page', 'Edit privacy policy', 'privacy_page' ),
+			AgenticCommerceSettings::TERMS_PAGE_OPTION   => array( 'Publish your terms and conditions page', 'Edit terms and conditions', 'terms_page' ),
+			AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION => array( 'Publish your shipping policy page', 'Edit shipping policy', 'shipping_policy_page' ),
 		);
 		foreach ( $pages as $option => $copy ) {
 			$draft = self::factory()->post->create(
@@ -354,9 +358,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 				)
 			);
 			update_option( $option, $draft );
-			$sections = (string) wp_json_encode( $this->view()['sections'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-			$this->assertMatchesRegularExpression( '#"title":"' . preg_quote( $copy[0], '#' ) . '".{0,600}?"href":"[^"]*post=' . $draft . '&action=edit","text":"' . preg_quote( $copy[1], '#' ) . '"#', $sections, $copy[1] );
-			$this->assertStringContainsString( 'It\'s still a draft. AI assistants only link to published pages.', $sections, $copy[0] . ' keeps the default draft line' );
+			$step = $this->step_copy( $copy[2] );
+			$this->assertSame( $copy[0], $step['title'] );
+			$this->assertStringContainsString( 'post=' . $draft . '&action=edit', $step['url'], $copy[1] );
+			$this->assertSame( $copy[1], $step['link'] );
+			$this->assertSame( 'It\'s still a draft. AI assistants only link to published pages.', $step['text'], $copy[0] . ' keeps the default draft line' );
 			wp_publish_post( $draft );
 		}
 	}
@@ -554,7 +560,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertNotNull( $passed, 'Passed checks are folded, under their passing title' );
 		$this->assertSame( 'Crawlers use the sitemap to find new and changed products.', $passed['text'], 'with why it matters' );
 		$this->assertStringNotContainsString( 'sitemap_lists_products why', $json, 'A passed scanned check drops the report\'s failure-worded why' );
-		$this->assertStringContainsString( 'Order confirmation emails are on', $json );
+		$this->assertStringNotContainsString( 'Order confirmation emails are on', (string) wp_json_encode( $sections ), 'Setup steps stay in the Setup checklist' );
 		$this->assertStringNotContainsString( 'Shoppers who buy through an agent get no confirmation from your store.', $json, 'A passed setup step drops its failure-worded why, as in Status' );
 	}
 
@@ -614,11 +620,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame(
 			array(
-				'intent' => 'stable',
-				'text'   => 'All passed',
+				'intent' => 'none',
+				'text'   => 'Not checked yet',
 			),
 			array_column( $view['sections'], 'badge', 'id' )['find'],
-			'Not counted as a result; the passing search engine step is'
+			'Not counted as a result; the search engine step is in the Setup checklist, so the card has no checks'
 		);
 	}
 
@@ -1122,10 +1128,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( '1 issue', $badges['find']['text'] );
 		$this->assertSame(
 			array(
-				'intent' => 'stable',
-				'text'   => 'All passed',
+				'intent' => 'none',
+				'text'   => 'Not checked yet',
 			),
-			$badges['access']
+			$badges['access'],
+			'With AI shopping off and setup steps in the Setup checklist, the fixture has no access check'
 		);
 		$this->assertSame( '1 issue', $badges['products']['text'] );
 		$this->assertNull( $view['declared'], 'No card when the report lists no declared items' );
@@ -1175,6 +1182,78 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertMatchesRegularExpression( '#Sales readiness</a> <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--off">No issues</mark>#', $this->render_page() );
+	}
+
+	/**
+	 * @testdox "Discourage search engines" and a missing payment method are Required in Fix first and the Setup checklist, but don't keep AI shopping from being turned on.
+	 */
+	public function test_search_and_payments_are_shown_required_without_blocking(): void {
+		$this->make_every_step_pass();
+		update_option( 'blog_public', '0' );
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			$this->restore[]  = array( $gateway, $gateway->enabled );
+			$gateway->enabled = 'no';
+		}
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+			),
+			false
+		);
+
+		$items = array_column( $this->view()['fix_first']['items'], null, 'id' );
+		$this->assertTrue( $items['search_visible']['required'] );
+		$this->assertTrue( $items['payment_method']['required'] );
+		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'Neither blocks the switch' );
+
+		$html = $this->render_page();
+		$this->assertMatchesRegularExpression( '#Finish 2 required steps#', $html );
+		$this->assertLessThan( strpos( $html, 'wc-agentic-commerce-item--open' ), strrpos( $html, 'wc-agentic-commerce-item--required' ), 'They come before the optional guest checkout step' );
+		$this->assertMatchesRegularExpression( '#Sales readiness</a> <mark[^>]*>3 issues</mark>#', $html, 'Status counts what Sales readiness shows: both, and guest checkout in Fix first' );
+
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+		delete_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION );
+		$this->assertMatchesRegularExpression( '#Sales readiness</a> <mark[^>]*>2 issues</mark>#', $this->render_page(), 'A missing policy page is only in the Setup checklist, so not counted' );
+		$this->assertDoesNotMatchRegularExpression( '/<button[^>]*wc-agentic-commerce-ucp-switch[^>]*disabled=([\'"])disabled\\1/', $html );
+	}
+
+	/**
+	 * @testdox With AI shopping on, a connection URL or catalog search that fails is Required and in Fix first.
+	 */
+	public function test_failing_ucp_profile_and_endpoint_are_required(): void {
+		$this->make_every_step_pass();
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+		$row = static fn( string $id ): array => array(
+			'id'       => $id,
+			'ok'       => false,
+			'blocks'   => 'ucp',
+			'group'    => 'access',
+			'name'     => 'name',
+			'label'    => 'label',
+			'why'      => 'why',
+			'fix'      => 'fix',
+			'fix_url'  => '',
+			'conflict' => false,
+			'pending'  => false,
+		);
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array( $row( 'ucp_profile' ), $row( 'ucp_endpoints_live' ), $row( 'ucp_profile_version' ) ),
+			),
+			false
+		);
+
+		$view  = $this->view();
+		$items = array_column( $view['fix_first']['items'], 'required', 'id' );
+		$this->assertTrue( $items['ucp_profile'] );
+		$this->assertTrue( $items['ucp_endpoints_live'] );
+		$this->assertArrayNotHasKey( 'ucp_profile_version', $items, 'A different version is likely another plugin, not a blocker' );
+		$this->assertSame( 'Required', array_column( array_column( $view['sections'], null, 'id' )['access']['rows'], 'badge', 'id' )['ucp_profile']['text'] );
 	}
 
 	/**
@@ -1457,6 +1536,20 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		StoreConditionsTest::make_store_ready();
 		$ready = $this->render_page();
 		$this->assertDoesNotMatchRegularExpression( '/<button[^>]*wc-agentic-commerce-ucp-switch[^>]*disabled=([\'"])disabled\\1/', $ready );
+	}
+
+	/**
+	 * What Sales readiness says about a failing setup step, as Fix first would show it.
+	 *
+	 * @param string $id Setup step id.
+	 * @return array<string, string>
+	 */
+	private function step_copy( string $id ): array {
+		$step = current( wp_list_filter( wc_get_container()->get( StoreConditions::class )->all(), array( 'id' => $id ) ) );
+		$this->assertIsArray( $step, 'No setup step with id ' . $id );
+		$failing = new \ReflectionMethod( ReadinessCheckPage::class, 'failing_copy' );
+		$failing->setAccessible( true );
+		return $failing->invoke( null, $step );
 	}
 
 	/**

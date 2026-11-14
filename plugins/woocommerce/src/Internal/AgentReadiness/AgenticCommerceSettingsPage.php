@@ -313,7 +313,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	private function render_status( array $checks, ?array $report ): void {
 		$done     = array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] && $check['ok'] );
 		$open     = ReadinessCheckPage::open_steps( $checks );
-		$required = count( array_filter( $open, static fn( array $check ): bool => StoreConditions::LEVEL_REQUIRED === $check['level'] ) );
+		$required = count( array_filter( $open, array( StoreConditions::class, 'shows_required' ) ) );
 		if ( $required > 0 ) {
 			/* translators: %d: number of failing required setup steps. */
 			$summary = sprintf( _n( 'Finish %d required step to get your store ready for AI shopping.', 'Finish %d required steps to get your store ready for AI shopping.', $required, 'woocommerce' ), $required );
@@ -346,7 +346,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				echo '<ul class="wc-agentic-commerce-items wc-agentic-commerce-steps">';
 				foreach ( $open as $check ) {
 					$action   = self::check_action( $check );
-					$required = StoreConditions::LEVEL_REQUIRED === $check['level'];
+					$required = StoreConditions::shows_required( $check );
 					$review   = '' === $action[2] ? '' : '<a class="button wc-agentic-commerce-review" href="' . esc_url( $action[2] ) . '">' . esc_html__( 'Review', 'woocommerce' ) . '</a>';
 					self::render_item( $required ? 'required' : 'open', esc_html( $action[0] ) . ( $required ? ' ' . self::required_badge() : '' ), array( esc_html( $action[1] ) ), $review );
 				}

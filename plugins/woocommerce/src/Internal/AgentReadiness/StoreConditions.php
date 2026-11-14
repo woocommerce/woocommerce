@@ -28,6 +28,13 @@ class StoreConditions {
 
 	public const LEVEL_REQUIRED = 'required';
 
+	/**
+	 * Recommended conditions shown as Required, which don't keep AI shopping from being turned on:
+	 * AI assistants read the catalog through the API whatever search engines are told, and with no
+	 * payment method no sale goes through.
+	 */
+	public const SHOWN_REQUIRED = array( 'search_visible', 'payment_method' );
+
 	public const LEVEL_RECOMMENDED = 'recommended';
 
 	/**
@@ -182,6 +189,15 @@ class StoreConditions {
 				'fix_url' => $settings_url( 'email&section=wc_email_customer_processing_order' ),
 			),
 		);
+	}
+
+	/**
+	 * Whether a condition is shown as Required: a required one, or one in SHOWN_REQUIRED.
+	 *
+	 * @param array{id:string,level:string} $condition Condition.
+	 */
+	public static function shows_required( array $condition ): bool {
+		return self::LEVEL_REQUIRED === $condition['level'] || in_array( $condition['id'], self::SHOWN_REQUIRED, true );
 	}
 
 	/**

@@ -43,14 +43,16 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * Recommended setup steps that stop every agent order, so Fix first ranks them above product problems.
+	 * A missing payment method stops every sale too; it is shown as Required (StoreConditions::SHOWN_REQUIRED).
 	 */
-	private const STOPS_EVERY_SALE = array( 'payment_method', 'guest_checkout' );
+	private const STOPS_EVERY_SALE = array( 'guest_checkout' );
 
 	/**
 	 * Scanned checks that are Required although they don't keep AI assistants off the store's pages:
-	 * without checkout, AI assistants find products but can't sell them.
+	 * with AI shopping on, AI assistants can't connect, search or check out without them. These checks
+	 * are only shown while AI shopping is on.
 	 */
-	private const REQUIRED_SCANNED = array( 'ucp_checkout' );
+	private const REQUIRED_SCANNED = array( 'ucp_profile', 'ucp_endpoints_live', 'ucp_checkout' );
 
 	/**
 	 * Checks that can only run when the check they name passed, so aren't shown when it failed.
@@ -196,7 +198,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		if ( null === $report ) {
 			return array( 'off', __( 'Not checked yet', 'woocommerce' ) );
 		}
-		return self::group_badge( array_merge( $this->visible_store_checks( $report, $checks ), array_fill( 0, count( self::failing_product_checks( $report ) ), array( 'ok' => false ) ) ) );
+		// Only what the page shows: setup steps that don't join Fix first live in the Setup checklist.
+		$shown = array_filter( $this->visible_store_checks( $report, $checks ), static fn( array $check ): bool => ! self::is_setup_step( $check ) || self::joins_fix_first( $check ) );
+		return self::group_badge( array_merge( $shown, array_fill( 0, count( self::failing_product_checks( $report ) ), array( 'ok' => false ) ) ) );
 	}
 
 	/**
@@ -221,7 +225,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 */
 	public static function open_steps( array $checks ): array {
 		$open     = self::setup_order( array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] && ! $check['ok'] ) );
-		$required = static fn( array $check ): bool => StoreConditions::LEVEL_REQUIRED === $check['level'];
+		$required = array( StoreConditions::class, 'shows_required' );
 		return array_merge( array_values( array_filter( $open, $required ) ), array_values( array_filter( $open, static fn( array $check ): bool => ! $required( $check ) ) ) );
 	}
 
@@ -286,7 +290,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				) : null,
 			),
 			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
-			'sections'     => null === $report ? array() : $this->sections( $visible, $launched, $report ),
+			// Setup steps belong to the Setup checklist, so the question cards show only scanned checks.
+			'sections'     => null === $report ? array() : $this->sections( array_values( array_filter( $visible, static fn( array $check ): bool => ! self::is_setup_step( $check ) ) ), $launched, $report ),
 			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ),
 			'overview'     => array(
 				'shopping' => $this->shopping_card( $checks ),
@@ -422,9 +427,20 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 */
 	private static function is_required( array $check ): bool {
 		if ( self::is_setup_step( $check ) ) {
-			return StoreConditions::LEVEL_REQUIRED === $check['level'];
+			return StoreConditions::shows_required( $check );
 		}
 		return in_array( $check['id'], self::REQUIRED_SCANNED, true ) || ( 'listing' === $check['blocks'] && 'access' === ( $check['group'] ?? '' ) );
+	}
+
+	/**
+	 * Whether a store check joins Fix first when it fails: it is Required, stops every sale (AI
+	 * assistants can't buy without it) or keeps products from being listed. The rest are store-wide
+	 * problems with no sales to rank by.
+	 *
+	 * @param array{id:string,blocks:string,group?:string,level:string,conflict?:bool} $check Store check.
+	 */
+	private static function joins_fix_first( array $check ): bool {
+		return self::is_required( $check ) || in_array( $check['id'], self::STOPS_EVERY_SALE, true ) || 'listing' === $check['blocks'];
 	}
 
 	/**
@@ -614,15 +630,13 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			if ( false !== $check['ok'] ) {
 				continue;
 			}
-			$copy        = self::failing_copy( $check );
-			$is_required = self::is_required( $check );
-			// AI assistants can't buy without these.
-			$every_sale = in_array( $check['id'], self::STOPS_EVERY_SALE, true );
-			// Only store-wide problems join Fix first; the rest have no sales to rank by.
-			if ( ! $is_required && ! $every_sale && 'listing' !== $check['blocks'] ) {
+			if ( ! self::joins_fix_first( $check ) ) {
 				continue;
 			}
-			$item = array(
+			$copy        = self::failing_copy( $check );
+			$is_required = self::is_required( $check );
+			$every_sale  = in_array( $check['id'], self::STOPS_EVERY_SALE, true );
+			$item        = array(
 				'id'    => $check['id'],
 				'tier'  => $is_required ? 0 : ( $every_sale ? 1 : 2 ),
 				'title' => $copy['title'],

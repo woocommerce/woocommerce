@@ -127,7 +127,7 @@ final class ReadinessCopy {
 				return self::product(
 					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
 					self::title( $count, $names, _n( 'Use a larger main image on %s', 'Use a larger main image on %s', $count, 'woocommerce' ), __( 'Use a larger main image on a product', 'woocommerce' ), sprintf( _n( 'Use a larger main image on %s product', 'Use a larger main image on %s products', $count, 'woocommerce' ), $n ) ),
-					__( 'AI assistants ask for images of at least 500 x 500 pixels.', 'woocommerce' )
+					__( 'Google asks for images of at least 500 x 500 pixels.', 'woocommerce' )
 				);
 			case 'missing_product_text':
 				return self::product(
