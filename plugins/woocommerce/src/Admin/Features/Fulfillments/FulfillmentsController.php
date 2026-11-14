@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsImporterRestController;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\ImportSession;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
@@ -24,6 +25,7 @@ class FulfillmentsController {
 		FulfillmentsSettings::class,
 		OrderFulfillmentsRestController::class,
 		FulfillmentsPrivacy::class,
+		FulfillmentsImporterRestController::class,
 	);
 
 	/**
