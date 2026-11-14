@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Drop removed elements from numeric-keyed product/array properties (such as upsell_ids and cross_sell_ids) after save, so the in-memory object matches the stored data instead of retaining stale values.

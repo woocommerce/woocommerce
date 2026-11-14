@@ -182,8 +182,7 @@ class ActivityPanelCountsTest extends WC_REST_Unit_Test_Case {
 		$this->assertNull( $data['products_low_in_stock_count'] );
 		$this->assertEquals( 1, $data['orders_to_fulfill_count'] );
 	}
-
-	/**
+/**
 	 * Re-register REST routes on a fresh server. The endpoint's order_statuses default is
 	 * computed at registration time (which setUp() has already run), so tests that change
 	 * the actionable statuses option must re-register routes for the default to pick it up,
