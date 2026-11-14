@@ -270,6 +270,35 @@ test.describe(
 			// stays a merge: it is harmless, and removing it would be a behavior
 			// change in a title this batch does not otherwise touch.
 			await enableEmailEditor( baseURL );
+
+			// WooCommerce's own categories fit on one row, so mock extra ones in the
+			// REST response, as if extensions had registered them.
+			const extraCategories = [
+				'Subscriber',
+				'Subscription',
+				'Membership',
+				'Booking',
+				'Coupon',
+				'Affiliate',
+			];
+			await page.route(
+				/v1(\/|%2F)personalization_tags/,
+				async ( route ) => {
+					const response = await route.fetch();
+					const tags = await response.json();
+					const extraTags = extraCategories.map( ( category ) => ( {
+						...tags[ 0 ],
+						name: `${ category } tag`,
+						token: `[e2e/${ category.toLowerCase() }-tag]`,
+						category,
+					} ) );
+					await route.fulfill( {
+						response,
+						json: [ ...tags, ...extraTags ],
+					} );
+				}
+			);
+
 			await accessAndTrackEmailPost( page );
 			const canvas = page
 				.locator( 'iframe[name="editor-canvas"]' )
@@ -302,11 +331,31 @@ test.describe(
 				.getByRole( 'button', { name: 'Personalization Tags' } );
 			await expect( personalizationTagsButton ).toBeVisible();
 
-			// Set a URL personalization tag as the button link.
 			await personalizationTagsButton.click();
 			await expect(
 				page.getByRole( 'heading', { name: 'Personalization Tags' } )
 			).toBeVisible();
+
+			// Every category stays visible, with no sideways scrolling.
+			const modal = page.locator(
+				'.woocommerce-personalization-tags-modal'
+			);
+			for ( const category of [ 'All', ...extraCategories ] ) {
+				await expect(
+					modal.getByRole( 'menuitem', {
+						name: category,
+						exact: true,
+					} )
+				).toBeInViewport( { ratio: 1 } );
+			}
+			const horizontalOverflow = await modal
+				.locator( '.components-modal__content' )
+				.evaluate(
+					( element ) => element.scrollWidth - element.clientWidth
+				);
+			expect( horizontalOverflow ).toBeLessThanOrEqual( 0 );
+
+			// Set a URL personalization tag as the button link.
 			await page
 				.locator(
 					'.woocommerce-personalization-tags-modal-category-group-item'
