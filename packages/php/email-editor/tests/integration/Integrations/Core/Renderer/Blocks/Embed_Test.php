@@ -18,6 +18,13 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Embed;
  */
 class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	/**
+	 * Host used for mocked oEmbed thumbnail URLs.
+	 * The renderer validates thumbnails with wp_http_validate_url(), which does a DNS lookup for hostnames.
+	 * An IP literal (TEST-NET-3) skips that lookup, so these tests don't fail when DNS is unavailable in CI.
+	 */
+	private const MOCK_THUMBNAIL_HOST = 'https://203.0.113.10';
+
+	/**
 	 * Embed renderer instance
 	 *
 	 * @var Embed
@@ -561,7 +568,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test that YouTube URLs without an extractable video ID fall back to the oEmbed thumbnail lookup
 	 */
 	public function test_youtube_embed_falls_back_to_oembed_thumbnail_for_playlists(): void {
-		$mock_thumbnail_url   = 'https://i.ytimg.com/vi/abc/hqdefault.jpg';
+		$mock_thumbnail_url   = self::MOCK_THUMBNAIL_HOST . '/vi/abc/hqdefault.jpg';
 		$mock_oembed_response = wp_json_encode(
 			array(
 				'type'          => 'video',
@@ -732,7 +739,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	public function test_renders_videopress_embed(): void {
 		// Mock the oEmbed HTTP response to avoid external calls in CI.
 		// Return a thumbnail URL with query parameters to test the URL encoding fix.
-		$mock_thumbnail_url   = 'https://videos.files.wordpress.com/BZHMfMfN/thumbnail.jpg?w=500&h=281';
+		$mock_thumbnail_url   = self::MOCK_THUMBNAIL_HOST . '/BZHMfMfN/thumbnail.jpg?w=500&h=281';
 		$mock_oembed_response = wp_json_encode(
 			array(
 				'type'          => 'video',
@@ -830,7 +837,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function test_videopress_embed_detects_videopress_by_url_in_attributes(): void {
 		// Mock the oEmbed HTTP response to avoid external calls in CI.
-		$mock_thumbnail_url   = 'https://videos.files.wordpress.com/BZHMfMfN/thumbnail.jpg';
+		$mock_thumbnail_url   = self::MOCK_THUMBNAIL_HOST . '/BZHMfMfN/thumbnail.jpg';
 		$mock_oembed_response = wp_json_encode(
 			array(
 				'type'          => 'video',
@@ -876,7 +883,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function test_videopress_embed_detects_video_wordpress_com_domain(): void {
 		// Mock the oEmbed HTTP response to avoid external calls in CI.
-		$mock_thumbnail_url   = 'https://videos.files.wordpress.com/BZHMfMfN/thumbnail.jpg';
+		$mock_thumbnail_url   = self::MOCK_THUMBNAIL_HOST . '/BZHMfMfN/thumbnail.jpg';
 		$mock_oembed_response = wp_json_encode(
 			array(
 				'type'          => 'video',
@@ -963,7 +970,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 					'providerNameSlug' => 'vimeo',
 				),
 				'vimeo.com/api/oembed',
-				'https://i.vimeocdn.com/video/123456789.jpg?w=500&h=281',
+				self::MOCK_THUMBNAIL_HOST . '/video/123456789.jpg?w=500&h=281',
 				array( 'w=500', 'h=281' ),
 			),
 			'tiktok'             => array(
@@ -972,14 +979,14 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 					'providerNameSlug' => 'tiktok',
 				),
 				'tiktok.com/oembed',
-				'https://p16-sign.tiktokcdn-us.com/obj/tos-useast5-p-0068-tx/thumbnail.jpg',
+				self::MOCK_THUMBNAIL_HOST . '/obj/tos-useast5-p-0068-tx/thumbnail.jpg',
 				array(),
 			),
 			// No providerNameSlug, so the dai.ly short URL exercises domain-based detection.
 			'dailymotion dai.ly' => array(
 				array( 'url' => 'https://dai.ly/x8x9abc' ),
 				'dailymotion.com/services/oembed',
-				'https://s1.dmcdn.net/v/X8x9abc/x720-thumbnail.jpg',
+				self::MOCK_THUMBNAIL_HOST . '/v/X8x9abc/x720-thumbnail.jpg',
 				array(),
 			),
 		);
@@ -1033,7 +1040,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 					'body'     => wp_json_encode(
 						array(
 							'type'          => 'video',
-							'thumbnail_url' => 'https://i.vimeocdn.com/video/123456789.jpg',
+							'thumbnail_url' => self::MOCK_THUMBNAIL_HOST . '/video/123456789.jpg',
 						)
 					),
 				);
