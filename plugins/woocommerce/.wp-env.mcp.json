@@ -1,0 +1,19 @@
+{
+	"core": "https://downloads.wordpress.org/release/wordpress-7.1.4.zip",
+	"phpVersion": "8.1",
+	"testsEnvironment": false,
+	"port": 8087,
+	"plugins": [ ".", "https://downloads.wordpress.org/plugin/mcp-adapter.0.7.1.zip" ],
+	"mappings": {
+		"wp-content/mu-plugins/mcp-inspector-accept-mail.php": "./tests/mcp-inspector/env/accept-mail.php"
+	},
+	"config": {
+		"JETPACK_AUTOLOAD_DEV": true,
+		"WP_DEBUG_LOG": true,
+		"WP_DEBUG_DISPLAY": false,
+		"WP_MEMORY_LIMIT": "1G"
+	},
+	"lifecycleScripts": {
+		"afterStart": "./tests/mcp-inspector/bin/env-setup.sh"
+	}
+}

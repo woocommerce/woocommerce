@@ -1,0 +1,110 @@
+{
+	"name": "woocommerce/shipping-zones-query",
+	"label": "Query shipping zones",
+	"description": "List shipping zones in matching order, with the regions each covers and its shipping methods. Zone 0 covers every location no other zone matches.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"include": {
+				"type": "array",
+				"description": "Return only these zone IDs.",
+				"items": {
+					"type": "integer",
+					"minimum": 0
+				}
+			}
+		},
+		"additionalProperties": false,
+		"default": []
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"zones": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer"
+						},
+						"name": {
+							"type": "string"
+						},
+						"order": {
+							"type": "integer"
+						},
+						"locations": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"code": {
+										"type": "string",
+										"description": "Country code, COUNTRY:STATE, postcode pattern or continent code, by type."
+									},
+									"type": {
+										"type": "string",
+										"enum": [
+											"country",
+											"state",
+											"postcode",
+											"continent"
+										]
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"methods": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"instance_id": {
+										"type": "integer"
+									},
+									"method_id": {
+										"type": "string"
+									},
+									"title": {
+										"type": "string"
+									},
+									"enabled": {
+										"type": "boolean"
+									},
+									"order": {
+										"type": "integer"
+									},
+									"settings": {
+										"type": "object",
+										"description": "Settings such as cost or min_amount, as stored. Only for the flat rate, free shipping and local pickup methods.",
+										"additionalProperties": {
+											"type": "string"
+										}
+									}
+								},
+								"additionalProperties": false
+							}
+						}
+					},
+					"additionalProperties": false
+				}
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

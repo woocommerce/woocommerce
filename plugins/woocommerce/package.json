@@ -37,6 +37,10 @@
 		"env:e2e:start": "pnpm wp-env:e2e start --update",
 		"env:e2e:stop": "pnpm wp-env:e2e stop",
 		"env:e2e:tracking": "ENABLE_TRACKING=1 pnpm env:e2e:start",
+		"env:mcp": "pnpm env:mcp:start",
+		"env:mcp:destroy": "pnpm wp-env:mcp destroy",
+		"env:mcp:start": "pnpm wp-env:mcp start --update",
+		"env:mcp:stop": "pnpm wp-env:mcp stop",
 		"env:performance-init": "./tests/performance/bin/init-environment.sh",
 		"env:perf": "pnpm env:e2e:start && pnpm env:performance-init",
 		"env:restart": "pnpm env:dev:restart",
@@ -99,6 +103,7 @@
 		"test:php": "sh ./client/blocks/bin/copy-blocks-json.sh && ./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && DISABLE_HPOS=1 ./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:watch": "sh ./client/blocks/bin/copy-blocks-json.sh && ./vendor/bin/phpunit-watcher watch",
+		"test:mcp-inspector": "node --test --test-global-setup=tests/mcp-inspector/lib/global-setup.mjs --test-concurrency=4 'tests/mcp-inspector/**/*.test.mjs'",
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
 		"test:metrics:ci": "../../.github/workflows/scripts/run-metrics.sh",
 		"test:metrics:ci:unified-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes && pnpm test:metrics:ci",
@@ -125,6 +130,7 @@
 		"watch:build:project:packages": "node ./bin/watch-packages.mjs",
 		"wp-env": "wp-env",
 		"wp-env:e2e": "wp-env --config .wp-env.e2e.json",
+		"wp-env:mcp": "wp-env --config .wp-env.mcp.json",
 		"wp-env:test": "wp-env --config \"${WC_TEST_ENV_CONFIG:-.wp-env.test.json}\""
 	},
 	"lint-staged": {
@@ -748,6 +754,30 @@
 						"resultsPath": "tests/e2e/test-results",
 						"publish": true
 					}
+				},
+				{
+					"name": "Abilities MCP contract tests",
+					"testType": "api",
+					"command": "test:mcp-inspector",
+					"optional": false,
+					"changes": [
+						"src/Abilities/**/*.php",
+						"src/Internal/Abilities/**/*.php",
+						"includes/wc-core-functions.php",
+						"includes/wc-order-functions.php",
+						"includes/wc-product-functions.php",
+						"tests/mcp-inspector/**",
+						".wp-env.mcp.json"
+					],
+					"onlyForDependencies": [],
+					"testEnv": {
+						"start": "env:mcp --debug"
+					},
+					"events": [
+						"pull_request",
+						"push",
+						"core-abilities-mcp"
+					]
 				},
 				{
 					"name": "Core API tests (tracking enabled)",
@@ -1544,6 +1574,7 @@
 		"@babel/core": "catalog:tooling",
 		"@babel/preset-env": "catalog:tooling",
 		"@faker-js/faker": "^10.6.0",
+		"@modelcontextprotocol/inspector": "2.13.0",
 		"@playwright/test": "^1.63.0",
 		"@typescript-eslint/eslint-plugin": "^8.63.0",
 		"@typescript-eslint/parser": "^8.63.0",

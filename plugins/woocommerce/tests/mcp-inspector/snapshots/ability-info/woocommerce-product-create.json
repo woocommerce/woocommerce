@@ -1,0 +1,1358 @@
+{
+	"name": "woocommerce/product-create",
+	"label": "Create product",
+	"description": "Create a product using supported catalog fields.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"type": {
+				"type": "string",
+				"description": "Product type, from the product types that WooCommerce and extensions register. Fields each type takes. simple: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, virtual, downloadable, weight, dimensions, shipping_class, regular_price, sale_price, date_on_sale_from, date_on_sale_to, tax_status, manage_stock, stock_quantity, stock_status, sold_individually; grouped: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, grouped_products; external: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, regular_price, sale_price, date_on_sale_from, date_on_sale_to, tax_status, external_url, button_text; variable: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, attributes, variations, tax_status, sold_individually, weight, dimensions, shipping_class; variation: sku, description, status, virtual, downloadable, attributes, regular_price, sale_price, manage_stock, stock_quantity, stock_status, parent_id. A product without a type is simple.",
+				"enum": [
+					"simple",
+					"grouped",
+					"external",
+					"variable",
+					"variation"
+				],
+				"default": "simple"
+			},
+			"name": {
+				"type": "string",
+				"description": "Required, except on a variation, which takes its name from its parent. Applies to: simple, grouped, external, variable."
+			},
+			"parent_id": {
+				"type": "integer",
+				"description": "ID of the variable product this variation belongs to. Applies to: variation.",
+				"minimum": 1
+			},
+			"attributes": {
+				"type": "array",
+				"description": "On a variable product, the attributes with their options. On a variation, the option it picks for each attribute of its parent. Applies to: variable, variation.",
+				"items": {
+					"anyOf": [
+						{
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer",
+									"description": "ID of a global attribute. 0 or absent for an attribute of this product only.",
+									"minimum": 0
+								},
+								"name": {
+									"type": "string"
+								},
+								"global": {
+									"type": "boolean",
+									"description": "Use the global attribute with this name. The input is refused when there is none. Defaults to false."
+								},
+								"options": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									},
+									"minItems": 1
+								},
+								"visible": {
+									"type": "boolean",
+									"description": "Whether the attribute shows on the product page. Defaults to true."
+								},
+								"variation": {
+									"type": "boolean",
+									"description": "Whether the variations pick an option of this attribute. Defaults to true. An attribute that is not for variations only shows on the product page."
+								}
+							},
+							"required": [
+								"options"
+							],
+							"additionalProperties": false
+						},
+						{
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer",
+									"description": "ID of a global attribute. 0 or absent for an attribute of this product only.",
+									"minimum": 0
+								},
+								"name": {
+									"type": "string"
+								},
+								"option": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					]
+				}
+			},
+			"variations": {
+				"type": "array",
+				"description": "Variations to create with the product. Each one picks one option of every attribute, and no two pick the same options. Applies to: variable.",
+				"maxItems": 100,
+				"items": {
+					"type": "object",
+					"properties": {
+						"attributes": {
+							"type": "array",
+							"description": "The option this variation picks for each attribute of its parent, by attribute name or global attribute id. For a global attribute the option is the term slug. An attribute with no option matches any option of the attribute.",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer",
+										"description": "ID of a global attribute. 0 or absent for an attribute of this product only.",
+										"minimum": 0
+									},
+									"name": {
+										"type": "string"
+									},
+									"option": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"sku": {
+							"type": "string"
+						},
+						"regular_price": {
+							"type": "string",
+							"description": "Decimal price as a string, without a currency symbol or thousand separators.",
+							"pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+						},
+						"sale_price": {
+							"type": "string",
+							"description": "Decimal price as a string, without a currency symbol or thousand separators.",
+							"pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+						},
+						"description": {
+							"type": "string",
+							"description": "Product description content. Safe HTML is allowed."
+						},
+						"status": {
+							"type": "string",
+							"enum": [
+								"publish",
+								"private"
+							]
+						},
+						"virtual": {
+							"type": "boolean",
+							"description": "Whether the product is not shipped."
+						},
+						"downloadable": {
+							"type": "boolean",
+							"description": "Whether the product gives the customer files to download."
+						},
+						"manage_stock": {
+							"type": "boolean"
+						},
+						"stock_quantity": {
+							"type": "integer",
+							"description": "Available stock quantity when product-level stock management is used."
+						},
+						"stock_status": {
+							"type": "string",
+							"enum": [
+								"instock",
+								"outofstock",
+								"onbackorder"
+							]
+						}
+					},
+					"required": [
+						"attributes"
+					],
+					"additionalProperties": false
+				}
+			},
+			"sku": {
+				"type": "string"
+			},
+			"regular_price": {
+				"type": "string",
+				"description": "Decimal price as a string, without a currency symbol or thousand separators. Applies to: simple, external, variation.",
+				"pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+			},
+			"sale_price": {
+				"type": "string",
+				"description": "Decimal price as a string, without a currency symbol or thousand separators. Applies to: simple, external, variation.",
+				"pattern": "^(?:-?(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+)|)$"
+			},
+			"description": {
+				"type": "string",
+				"description": "Product description content. Safe HTML is allowed."
+			},
+			"short_description": {
+				"type": "string",
+				"description": "Short product description content. Safe HTML is allowed. Applies to: simple, grouped, external, variable."
+			},
+			"status": {
+				"type": "string",
+				"enum": [
+					"draft",
+					"pending",
+					"private",
+					"publish",
+					"future"
+				]
+			},
+			"virtual": {
+				"type": "boolean",
+				"description": "Whether the product is not shipped. Applies to: simple, variation."
+			},
+			"downloadable": {
+				"type": "boolean",
+				"description": "Whether the product gives the customer files to download. Applies to: simple, variation."
+			},
+			"manage_stock": {
+				"type": "boolean",
+				"description": "Applies to: simple, variation."
+			},
+			"stock_quantity": {
+				"type": "integer",
+				"description": "Available stock quantity when product-level stock management is used. Applies to: simple, variation."
+			},
+			"stock_status": {
+				"type": "string",
+				"enum": [
+					"instock",
+					"outofstock",
+					"onbackorder"
+				],
+				"description": "Applies to: simple, variation."
+			},
+			"external_url": {
+				"type": "string",
+				"description": "External destination URL for external products. Applies to: external.",
+				"format": "uri"
+			},
+			"button_text": {
+				"type": "string",
+				"description": "Button text for external products. Applies to: external."
+			},
+			"grouped_products": {
+				"type": "array",
+				"description": "Product IDs to include as children of a grouped product. Applies to: grouped.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"categories": {
+				"type": "array",
+				"description": "Category IDs, replacing the current ones. Empty means the default category. Applies to: simple, grouped, external, variable.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"tags": {
+				"type": "array",
+				"description": "Tag IDs, replacing the current ones. Applies to: simple, grouped, external, variable.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"brands": {
+				"type": "array",
+				"description": "Brand IDs, replacing the current ones. Applies to: simple, grouped, external, variable.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"images": {
+				"type": "array",
+				"description": "Image attachment IDs, replacing the current ones. The first is the featured image. Applies to: simple, grouped, external, variable.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"catalog_visibility": {
+				"type": "string",
+				"enum": [
+					"visible",
+					"catalog",
+					"search",
+					"hidden"
+				],
+				"description": "Applies to: simple, grouped, external, variable."
+			},
+			"featured": {
+				"type": "boolean",
+				"description": "Applies to: simple, grouped, external, variable."
+			},
+			"date_on_sale_from": {
+				"type": "string",
+				"description": "Store time, YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS. Empty removes it. Applies to: simple, external.",
+				"pattern": "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}(?:[T ](?:[01][0-9]|2[0-3]):[0-5][0-9](?::[0-5][0-9])?)?)?$"
+			},
+			"date_on_sale_to": {
+				"type": "string",
+				"description": "Store time, YYYY-MM-DD to end with that day or YYYY-MM-DDTHH:MM:SS. Empty removes it. Applies to: simple, external.",
+				"pattern": "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}(?:[T ](?:[01][0-9]|2[0-3]):[0-5][0-9](?::[0-5][0-9])?)?)?$"
+			},
+			"tax_status": {
+				"type": "string",
+				"enum": [
+					"taxable",
+					"shipping",
+					"none"
+				],
+				"description": "Applies to: simple, external, variable."
+			},
+			"sold_individually": {
+				"type": "boolean",
+				"description": "Limit to one per order. Applies to: simple, variable."
+			},
+			"weight": {
+				"type": "string",
+				"description": "Decimal in lbs. Empty removes it. Applies to: simple, variable.",
+				"pattern": "^(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+|)$"
+			},
+			"dimensions": {
+				"type": "object",
+				"description": "Decimals in in. Only the keys sent change. Applies to: simple, variable.",
+				"properties": {
+					"length": {
+						"type": "string",
+						"pattern": "^(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+|)$"
+					},
+					"width": {
+						"type": "string",
+						"pattern": "^(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+|)$"
+					},
+					"height": {
+						"type": "string",
+						"pattern": "^(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+|)$"
+					}
+				},
+				"additionalProperties": false
+			},
+			"shipping_class": {
+				"type": "string",
+				"description": "Shipping class slug. Empty removes it. Applies to: simple, variable."
+			}
+		},
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"product": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"name": {
+						"type": "string"
+					},
+					"slug": {
+						"type": "string"
+					},
+					"permalink": {
+						"type": "string",
+						"description": "Product permalink. Omitted when no public permalink is available.",
+						"format": "uri"
+					},
+					"type": {
+						"type": "string",
+						"description": "Internal product type slug, such as simple, external, grouped, variable or variation."
+					},
+					"status": {
+						"type": "string",
+						"enum": [
+							"draft",
+							"pending",
+							"private",
+							"publish",
+							"future",
+							"auto-draft",
+							"trash"
+						]
+					},
+					"sku": {
+						"type": "string"
+					},
+					"currency": {
+						"type": "string",
+						"enum": [
+							"AED",
+							"AFN",
+							"ALL",
+							"AMD",
+							"ANG",
+							"AOA",
+							"ARS",
+							"AUD",
+							"AWG",
+							"AZN",
+							"BAM",
+							"BBD",
+							"BDT",
+							"BGN",
+							"BHD",
+							"BIF",
+							"BMD",
+							"BND",
+							"BOB",
+							"BRL",
+							"BSD",
+							"BTC",
+							"BTN",
+							"BWP",
+							"BYR",
+							"BYN",
+							"BZD",
+							"CAD",
+							"CDF",
+							"CHF",
+							"CHW",
+							"CLP",
+							"CNY",
+							"COP",
+							"CRC",
+							"CUC",
+							"CUP",
+							"CVE",
+							"CZK",
+							"DJF",
+							"DKK",
+							"DOP",
+							"DZD",
+							"EGP",
+							"ERN",
+							"ETB",
+							"EUR",
+							"FJD",
+							"FKP",
+							"GBP",
+							"GEL",
+							"GGP",
+							"GHS",
+							"GIP",
+							"GMD",
+							"GNF",
+							"GTQ",
+							"GYD",
+							"HKD",
+							"HNL",
+							"HRK",
+							"HTG",
+							"HUF",
+							"IDR",
+							"ILS",
+							"IMP",
+							"INR",
+							"IQD",
+							"IRR",
+							"IRT",
+							"ISK",
+							"JEP",
+							"JMD",
+							"JOD",
+							"JPY",
+							"KES",
+							"KGS",
+							"KHR",
+							"KMF",
+							"KPW",
+							"KRW",
+							"KWD",
+							"KYD",
+							"KZT",
+							"LAK",
+							"LBP",
+							"LKR",
+							"LRD",
+							"LSL",
+							"LYD",
+							"MAD",
+							"MDL",
+							"MGA",
+							"MKD",
+							"MMK",
+							"MNT",
+							"MOP",
+							"MRU",
+							"MUR",
+							"MVR",
+							"MWK",
+							"MXN",
+							"MYR",
+							"MZN",
+							"NAD",
+							"NGN",
+							"NIO",
+							"NOK",
+							"NPR",
+							"NZD",
+							"OMR",
+							"PAB",
+							"PEN",
+							"PGK",
+							"PHP",
+							"PKR",
+							"PLN",
+							"PRB",
+							"PYG",
+							"QAR",
+							"RON",
+							"RSD",
+							"RUB",
+							"RWF",
+							"SAR",
+							"SBD",
+							"SCR",
+							"SDG",
+							"SEK",
+							"SGD",
+							"SHP",
+							"SLL",
+							"SOS",
+							"SRD",
+							"SSP",
+							"STN",
+							"SYP",
+							"SZL",
+							"THB",
+							"TJS",
+							"TMT",
+							"TND",
+							"TOP",
+							"TRY",
+							"TTD",
+							"TWD",
+							"TZS",
+							"UAH",
+							"UGX",
+							"USD",
+							"UYU",
+							"UZS",
+							"VEF",
+							"VES",
+							"VND",
+							"VUV",
+							"WST",
+							"XAF",
+							"XCD",
+							"XOF",
+							"XPF",
+							"YER",
+							"ZAR",
+							"ZMW"
+						]
+					},
+					"currency_symbol": {
+						"type": "string"
+					},
+					"price": {
+						"type": "string",
+						"description": "Decimal price as a string, without a currency symbol."
+					},
+					"regular_price": {
+						"type": "string",
+						"description": "Decimal price as a string, without a currency symbol."
+					},
+					"sale_price": {
+						"type": "string",
+						"description": "Decimal price as a string, without a currency symbol."
+					},
+					"on_sale": {
+						"type": "boolean",
+						"description": "Whether the sale price applies now, taking the sale dates into account."
+					},
+					"date_on_sale_from": {
+						"type": "string",
+						"description": "Start of the sale in the store timezone. Omitted when the sale has no start date.",
+						"format": "date-time"
+					},
+					"date_on_sale_to": {
+						"type": "string",
+						"description": "End of the sale in the store timezone. Omitted when the sale has no end date.",
+						"format": "date-time"
+					},
+					"stock_status": {
+						"type": "string",
+						"enum": [
+							"instock",
+							"outofstock",
+							"onbackorder"
+						]
+					},
+					"stock_quantity": {
+						"type": "integer",
+						"description": "Current stock quantity. Omitted when no stock quantity is set."
+					},
+					"manage_stock": {
+						"type": "boolean"
+					},
+					"sold_individually": {
+						"type": "boolean"
+					},
+					"virtual": {
+						"type": "boolean"
+					},
+					"downloadable": {
+						"type": "boolean"
+					},
+					"external_url": {
+						"type": "string",
+						"description": "External product URL. Omitted when the product is not external or no URL is set.",
+						"format": "uri"
+					},
+					"button_text": {
+						"type": "string",
+						"description": "Button text. Omitted when the product is not external or no button text is set."
+					},
+					"grouped_products": {
+						"type": "array",
+						"description": "Product IDs included as children of a grouped product.",
+						"items": {
+							"type": "integer"
+						}
+					},
+					"parent_id": {
+						"type": "integer",
+						"description": "ID of the variable product of a variation, or 0."
+					},
+					"attributes": {
+						"type": "array",
+						"description": "Attributes with their options on a product, or the option each attribute picks on a variation. For a global attribute the options are term slugs.",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer",
+									"description": "ID of the global attribute, or 0 for an attribute of this product only."
+								},
+								"name": {
+									"type": "string"
+								},
+								"options": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								},
+								"option": {
+									"type": "string",
+									"description": "The option a variation picks. Omitted when the variation matches any option."
+								},
+								"visible": {
+									"type": "boolean"
+								},
+								"variation": {
+									"type": "boolean",
+									"description": "Whether the variations pick an option of this attribute."
+								}
+							},
+							"required": [
+								"name"
+							],
+							"additionalProperties": false
+						}
+					},
+					"categories": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer"
+								},
+								"name": {
+									"type": "string"
+								},
+								"slug": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"tags": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer"
+								},
+								"name": {
+									"type": "string"
+								},
+								"slug": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"brands": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer"
+								},
+								"name": {
+									"type": "string"
+								},
+								"slug": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"catalog_visibility": {
+						"type": "string",
+						"enum": [
+							"visible",
+							"catalog",
+							"search",
+							"hidden"
+						]
+					},
+					"featured": {
+						"type": "boolean"
+					},
+					"description": {
+						"type": "string"
+					},
+					"short_description": {
+						"type": "string"
+					},
+					"images": {
+						"type": "array",
+						"description": "Featured image first, then the gallery.",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer"
+								},
+								"src": {
+									"type": "string",
+									"format": "uri"
+								},
+								"name": {
+									"type": "string"
+								},
+								"alt": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"weight": {
+						"type": "string",
+						"description": "Decimal string in lbs, or empty when not set."
+					},
+					"dimensions": {
+						"type": "object",
+						"description": "Decimal strings in in, each empty when not set.",
+						"properties": {
+							"length": {
+								"type": "string"
+							},
+							"width": {
+								"type": "string"
+							},
+							"height": {
+								"type": "string"
+							}
+						},
+						"additionalProperties": false
+					},
+					"shipping_required": {
+						"type": "boolean"
+					},
+					"shipping_class": {
+						"type": "string",
+						"description": "Shipping class slug, or empty when the product has none."
+					},
+					"shipping_class_id": {
+						"type": "integer",
+						"description": "Shipping class term ID, or 0 when the product has none."
+					},
+					"tax_status": {
+						"type": "string",
+						"enum": [
+							"taxable",
+							"shipping",
+							"none"
+						]
+					},
+					"tax_class": {
+						"type": "string",
+						"description": "Tax class slug, or empty for the standard rate."
+					},
+					"backorders": {
+						"type": "string",
+						"enum": [
+							"no",
+							"notify",
+							"yes"
+						]
+					},
+					"low_stock_amount": {
+						"type": "integer",
+						"description": "Low stock threshold of the product. Omitted when the store-wide threshold applies."
+					},
+					"variation_ids": {
+						"type": "array",
+						"description": "IDs of the variations of a variable product.",
+						"items": {
+							"type": "integer"
+						}
+					},
+					"date_created": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Product creation date in the store timezone. Omitted when no creation date is available."
+					},
+					"date_created_gmt": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Product creation date in UTC. Omitted when no creation date is available."
+					},
+					"date_modified": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Product modification date in the store timezone. Omitted when no modification date is available."
+					},
+					"date_modified_gmt": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Product modification date in UTC. Omitted when no modification date is available."
+					}
+				},
+				"additionalProperties": false
+			},
+			"variations": {
+				"type": "array",
+				"description": "The variations the call created or changed, in input order. Deleted variations are not listed.",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer"
+						},
+						"name": {
+							"type": "string"
+						},
+						"slug": {
+							"type": "string"
+						},
+						"permalink": {
+							"type": "string",
+							"description": "Product permalink. Omitted when no public permalink is available.",
+							"format": "uri"
+						},
+						"type": {
+							"type": "string",
+							"description": "Internal product type slug, such as simple, external, grouped, variable or variation."
+						},
+						"status": {
+							"type": "string",
+							"enum": [
+								"draft",
+								"pending",
+								"private",
+								"publish",
+								"future",
+								"auto-draft",
+								"trash"
+							]
+						},
+						"sku": {
+							"type": "string"
+						},
+						"currency": {
+							"type": "string",
+							"enum": [
+								"AED",
+								"AFN",
+								"ALL",
+								"AMD",
+								"ANG",
+								"AOA",
+								"ARS",
+								"AUD",
+								"AWG",
+								"AZN",
+								"BAM",
+								"BBD",
+								"BDT",
+								"BGN",
+								"BHD",
+								"BIF",
+								"BMD",
+								"BND",
+								"BOB",
+								"BRL",
+								"BSD",
+								"BTC",
+								"BTN",
+								"BWP",
+								"BYR",
+								"BYN",
+								"BZD",
+								"CAD",
+								"CDF",
+								"CHF",
+								"CHW",
+								"CLP",
+								"CNY",
+								"COP",
+								"CRC",
+								"CUC",
+								"CUP",
+								"CVE",
+								"CZK",
+								"DJF",
+								"DKK",
+								"DOP",
+								"DZD",
+								"EGP",
+								"ERN",
+								"ETB",
+								"EUR",
+								"FJD",
+								"FKP",
+								"GBP",
+								"GEL",
+								"GGP",
+								"GHS",
+								"GIP",
+								"GMD",
+								"GNF",
+								"GTQ",
+								"GYD",
+								"HKD",
+								"HNL",
+								"HRK",
+								"HTG",
+								"HUF",
+								"IDR",
+								"ILS",
+								"IMP",
+								"INR",
+								"IQD",
+								"IRR",
+								"IRT",
+								"ISK",
+								"JEP",
+								"JMD",
+								"JOD",
+								"JPY",
+								"KES",
+								"KGS",
+								"KHR",
+								"KMF",
+								"KPW",
+								"KRW",
+								"KWD",
+								"KYD",
+								"KZT",
+								"LAK",
+								"LBP",
+								"LKR",
+								"LRD",
+								"LSL",
+								"LYD",
+								"MAD",
+								"MDL",
+								"MGA",
+								"MKD",
+								"MMK",
+								"MNT",
+								"MOP",
+								"MRU",
+								"MUR",
+								"MVR",
+								"MWK",
+								"MXN",
+								"MYR",
+								"MZN",
+								"NAD",
+								"NGN",
+								"NIO",
+								"NOK",
+								"NPR",
+								"NZD",
+								"OMR",
+								"PAB",
+								"PEN",
+								"PGK",
+								"PHP",
+								"PKR",
+								"PLN",
+								"PRB",
+								"PYG",
+								"QAR",
+								"RON",
+								"RSD",
+								"RUB",
+								"RWF",
+								"SAR",
+								"SBD",
+								"SCR",
+								"SDG",
+								"SEK",
+								"SGD",
+								"SHP",
+								"SLL",
+								"SOS",
+								"SRD",
+								"SSP",
+								"STN",
+								"SYP",
+								"SZL",
+								"THB",
+								"TJS",
+								"TMT",
+								"TND",
+								"TOP",
+								"TRY",
+								"TTD",
+								"TWD",
+								"TZS",
+								"UAH",
+								"UGX",
+								"USD",
+								"UYU",
+								"UZS",
+								"VEF",
+								"VES",
+								"VND",
+								"VUV",
+								"WST",
+								"XAF",
+								"XCD",
+								"XOF",
+								"XPF",
+								"YER",
+								"ZAR",
+								"ZMW"
+							]
+						},
+						"currency_symbol": {
+							"type": "string"
+						},
+						"price": {
+							"type": "string",
+							"description": "Decimal price as a string, without a currency symbol."
+						},
+						"regular_price": {
+							"type": "string",
+							"description": "Decimal price as a string, without a currency symbol."
+						},
+						"sale_price": {
+							"type": "string",
+							"description": "Decimal price as a string, without a currency symbol."
+						},
+						"on_sale": {
+							"type": "boolean",
+							"description": "Whether the sale price applies now, taking the sale dates into account."
+						},
+						"date_on_sale_from": {
+							"type": "string",
+							"description": "Start of the sale in the store timezone. Omitted when the sale has no start date.",
+							"format": "date-time"
+						},
+						"date_on_sale_to": {
+							"type": "string",
+							"description": "End of the sale in the store timezone. Omitted when the sale has no end date.",
+							"format": "date-time"
+						},
+						"stock_status": {
+							"type": "string",
+							"enum": [
+								"instock",
+								"outofstock",
+								"onbackorder"
+							]
+						},
+						"stock_quantity": {
+							"type": "integer",
+							"description": "Current stock quantity. Omitted when no stock quantity is set."
+						},
+						"manage_stock": {
+							"type": "boolean"
+						},
+						"sold_individually": {
+							"type": "boolean"
+						},
+						"virtual": {
+							"type": "boolean"
+						},
+						"downloadable": {
+							"type": "boolean"
+						},
+						"external_url": {
+							"type": "string",
+							"description": "External product URL. Omitted when the product is not external or no URL is set.",
+							"format": "uri"
+						},
+						"button_text": {
+							"type": "string",
+							"description": "Button text. Omitted when the product is not external or no button text is set."
+						},
+						"grouped_products": {
+							"type": "array",
+							"description": "Product IDs included as children of a grouped product.",
+							"items": {
+								"type": "integer"
+							}
+						},
+						"parent_id": {
+							"type": "integer",
+							"description": "ID of the variable product of a variation, or 0."
+						},
+						"attributes": {
+							"type": "array",
+							"description": "Attributes with their options on a product, or the option each attribute picks on a variation. For a global attribute the options are term slugs.",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer",
+										"description": "ID of the global attribute, or 0 for an attribute of this product only."
+									},
+									"name": {
+										"type": "string"
+									},
+									"options": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									},
+									"option": {
+										"type": "string",
+										"description": "The option a variation picks. Omitted when the variation matches any option."
+									},
+									"visible": {
+										"type": "boolean"
+									},
+									"variation": {
+										"type": "boolean",
+										"description": "Whether the variations pick an option of this attribute."
+									}
+								},
+								"required": [
+									"name"
+								],
+								"additionalProperties": false
+							}
+						},
+						"categories": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"name": {
+										"type": "string"
+									},
+									"slug": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"tags": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"name": {
+										"type": "string"
+									},
+									"slug": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"brands": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"name": {
+										"type": "string"
+									},
+									"slug": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"catalog_visibility": {
+							"type": "string",
+							"enum": [
+								"visible",
+								"catalog",
+								"search",
+								"hidden"
+							]
+						},
+						"featured": {
+							"type": "boolean"
+						},
+						"description": {
+							"type": "string"
+						},
+						"short_description": {
+							"type": "string"
+						},
+						"images": {
+							"type": "array",
+							"description": "Featured image first, then the gallery.",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"src": {
+										"type": "string",
+										"format": "uri"
+									},
+									"name": {
+										"type": "string"
+									},
+									"alt": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"weight": {
+							"type": "string",
+							"description": "Decimal string in lbs, or empty when not set."
+						},
+						"dimensions": {
+							"type": "object",
+							"description": "Decimal strings in in, each empty when not set.",
+							"properties": {
+								"length": {
+									"type": "string"
+								},
+								"width": {
+									"type": "string"
+								},
+								"height": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						},
+						"shipping_required": {
+							"type": "boolean"
+						},
+						"shipping_class": {
+							"type": "string",
+							"description": "Shipping class slug, or empty when the product has none."
+						},
+						"shipping_class_id": {
+							"type": "integer",
+							"description": "Shipping class term ID, or 0 when the product has none."
+						},
+						"tax_status": {
+							"type": "string",
+							"enum": [
+								"taxable",
+								"shipping",
+								"none"
+							]
+						},
+						"tax_class": {
+							"type": "string",
+							"description": "Tax class slug, or empty for the standard rate."
+						},
+						"backorders": {
+							"type": "string",
+							"enum": [
+								"no",
+								"notify",
+								"yes"
+							]
+						},
+						"low_stock_amount": {
+							"type": "integer",
+							"description": "Low stock threshold of the product. Omitted when the store-wide threshold applies."
+						},
+						"variation_ids": {
+							"type": "array",
+							"description": "IDs of the variations of a variable product.",
+							"items": {
+								"type": "integer"
+							}
+						},
+						"date_created": {
+							"type": "string",
+							"format": "date-time",
+							"description": "Product creation date in the store timezone. Omitted when no creation date is available."
+						},
+						"date_created_gmt": {
+							"type": "string",
+							"format": "date-time",
+							"description": "Product creation date in UTC. Omitted when no creation date is available."
+						},
+						"date_modified": {
+							"type": "string",
+							"format": "date-time",
+							"description": "Product modification date in the store timezone. Omitted when no modification date is available."
+						},
+						"date_modified_gmt": {
+							"type": "string",
+							"format": "date-time",
+							"description": "Product modification date in UTC. Omitted when no modification date is available."
+						}
+					},
+					"additionalProperties": false
+				}
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": false,
+			"idempotent": false
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

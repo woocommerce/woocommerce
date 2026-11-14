@@ -1,0 +1,87 @@
+[
+	{
+		"name": "woocommerce/orders-query",
+		"label": "Query orders",
+		"description": "Find orders by ID or common order filters."
+	},
+	{
+		"name": "woocommerce/order-add-note",
+		"label": "Add order note",
+		"description": "Add a note to an order."
+	},
+	{
+		"name": "woocommerce/order-notes-query",
+		"label": "Query order notes",
+		"description": "List every note of an order, newest first."
+	},
+	{
+		"name": "woocommerce/order-send-email",
+		"label": "Send order email",
+		"description": "Send an order email to the customer again."
+	},
+	{
+		"name": "woocommerce/order-update",
+		"label": "Update order",
+		"description": "Update the addresses, customer note, product lines and shipping lines of an order. Fields that are not sent keep their value. Changing lines recalculates the totals and needs an order status that allows editing. Use the woocommerce/order-update-status ability to change the status."
+	},
+	{
+		"name": "woocommerce/order-update-status",
+		"label": "Update order status",
+		"description": "Update an order status."
+	},
+	{
+		"name": "woocommerce/payment-gateways-query",
+		"label": "Query payment gateways",
+		"description": "List the payment gateways in checkout order, enabled or not, or get one by ID."
+	},
+	{
+		"name": "woocommerce/products-query",
+		"label": "Query products",
+		"description": "Find products by ID or common catalog filters."
+	},
+	{
+		"name": "woocommerce/product-terms-query",
+		"label": "Query product terms",
+		"description": "Find product categories, tags, brands or the terms of a global attribute, such as pa_color. Use include to retrieve specific term IDs."
+	},
+	{
+		"name": "woocommerce/product-reviews-query",
+		"label": "Query product reviews",
+		"description": "Read product reviews, ratings and moderation status. Search matches review text only, never reviewer identity. Summary and per-product ranking cover all reviews in the requested product/status scope, ignoring search, rating range and include. Unrated reviews have rating zero and do not affect averages. Ranking is worst first; above 200 products it keeps the 100 worst and 100 best rated. Text searches omit the ranking. Requested products without reviews and unknown product IDs are reported separately. Reviewer identity is withheld."
+	},
+	{
+		"name": "woocommerce/product-attributes-query",
+		"label": "Query product attributes",
+		"description": "Find the global product attributes, such as Color or Size, with their terms. Use include to retrieve specific attribute IDs."
+	},
+	{
+		"name": "woocommerce/product-attribute-create",
+		"label": "Create product attribute",
+		"description": "Create a global product attribute, such as Color or Size. Product writes then use it by ID or name, with global set to true, and create its terms from the options they send."
+	},
+	{
+		"name": "woocommerce/product-create",
+		"label": "Create product",
+		"description": "Create a product using supported catalog fields."
+	},
+	{
+		"name": "woocommerce/product-delete",
+		"label": "Delete product",
+		"description": "Move a product to the trash, or delete it permanently."
+	},
+	{
+		"name": "woocommerce/product-update",
+		"label": "Update product",
+		"description": "Update an existing product using supported catalog fields."
+	},
+	{
+		"name": "woocommerce/shipping-zones-query",
+		"label": "Query shipping zones",
+		"description": "List shipping zones in matching order, with the regions each covers and its shipping methods. Zone 0 covers every location no other zone matches."
+	},
+	{
+		"name": "woocommerce/tax-rates-query",
+		"label": "Query tax rates",
+		"description": "List the tax rates of every tax class, in the order of the tax settings."
+	}
+]

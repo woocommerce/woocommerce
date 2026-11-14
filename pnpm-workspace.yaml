@@ -178,6 +178,7 @@ allowBuilds:
     fs-ext-extra-prebuilt: true
     msw: true
     # Explicitly denied — these deps have build scripts we don't need.
+    '@modelcontextprotocol/inspector': false
     '@swc/core': false
     aws-sdk: false
     core-js: false
@@ -209,6 +210,8 @@ trustPolicyExclude:
     - 'eslint-config-prettier@8.10.2'
     # Backported without provenance
     - 'hosted-git-info@6.1.3'
+    # Backported without provenance, unlike 9.13.1 and 10.1.0
+    - 'pino@9.14.0'
     # Backported without provenance (https://github.com/reduxjs/reselect/issues/752)
     - 'reselect@5.1.1'
     # Backported security fixes (https://github.com/advisories/GHSA-c2qf-rxjj-qqgw)
