@@ -156,7 +156,7 @@ class ReportAbility implements AbilityDefinition {
 									),
 									'source'   => array(
 										'type'        => 'string',
-										'description' => __( 'On the llms.txt check: woocommerce, file or other when served; disabled or not_reached when not; empty when unknown.', 'woocommerce' ),
+										'description' => __( 'On the llms.txt check: woocommerce, file or other when served; disabled or not_reached when not; empty when unknown. On a failed UCP version check: the version the store serves, or empty.', 'woocommerce' ),
 									),
 								),
 							),

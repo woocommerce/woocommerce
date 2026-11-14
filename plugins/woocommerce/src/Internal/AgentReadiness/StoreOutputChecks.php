@@ -75,8 +75,11 @@ class StoreOutputChecks {
 					array( 'source' => 'agent-readiness' )
 				);
 			}
-			$conflict  = false === $ok && ! empty( $check['conflict'] );
-			$source    = 'llms_txt_present' === $check['id'] ? $this->llms_txt_source( $responses, $ok ) : '';
+			$conflict = false === $ok && ! empty( $check['conflict'] );
+			$source   = 'llms_txt_present' === $check['id'] ? $this->llms_txt_source( $responses, $ok ) : '';
+			if ( 'ucp_profile_version' === $check['id'] && false === $ok ) {
+				$source = self::served_version( $responses );
+			}
 			$results[] = array(
 				'id'       => $check['id'],
 				'ok'       => $ok,
@@ -1055,6 +1058,17 @@ class StoreOutputChecks {
 		$response = $responses->get( '/.well-known/ucp' );
 		$profile  = null !== $response && 200 === $response['status'] ? json_decode( $response['body'], true ) : null;
 		return is_array( $profile ) && is_array( $profile['ucp'] ?? null ) ? $profile : null;
+	}
+
+	/**
+	 * The UCP version the served profile declares when it is older than WooCommerce's, or '' when it
+	 * isn't a date like 2026-04-08 or isn't older, so the message never calls a newer version older.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private static function served_version( StoreResponses $responses ): string {
+		$version = self::served_profile( $responses )['ucp']['version'] ?? '';
+		return is_string( $version ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $version ) && strcmp( $version, UcpUtils::VERSION ) < 0 ? $version : '';
 	}
 
 	/**

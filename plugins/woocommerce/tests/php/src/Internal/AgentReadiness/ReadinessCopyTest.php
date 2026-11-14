@@ -61,6 +61,15 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The UCP version message names the version the store serves, when the scan found one.
+	 */
+	public function test_ucp_version_message_names_served_version(): void {
+		$this->assertStringContainsString( '(UCP 2025-01-01)', ReadinessCopy::store_check( 'ucp_profile_version', '2025-01-01' )['found'] );
+		$this->assertStringContainsString( '(UCP).', ReadinessCopy::store_check( 'ucp_profile_version' )['found'] );
+		$this->assertSame( ReadinessCopy::store_check( 'ucp_profile' )['found'], ReadinessCopy::store_check( 'ucp_profile', '2025-01-01' )['found'], 'Other checks ignore the source' );
+	}
+
+	/**
 	 * @testdox Every product check in the rules file has copy that says what to do and to how many products.
 	 */
 	public function test_every_product_check_has_copy(): void {

@@ -141,7 +141,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			array(
 				'title' => __( 'Store policies', 'woocommerce' ),
 				'type'  => 'title',
-				'desc'  => __( 'AI assistants share these pages with shoppers. Your refund, privacy and terms pages are also used across the rest of your store.', 'woocommerce' ),
+				'desc'  => __( 'AI assistants share these pages with shoppers. The pages you choose here are also used across the rest of your store.', 'woocommerce' ),
 				'id'    => self::POLICIES_SECTION,
 			),
 			$page_field( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Refund and returns', 'woocommerce' ) ),

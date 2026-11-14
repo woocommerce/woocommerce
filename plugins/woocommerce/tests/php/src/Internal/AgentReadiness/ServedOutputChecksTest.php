@@ -432,10 +432,22 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $results['ucp_profile'] );
 		$this->assertTrue( $results['ucp_profile_version'] );
 		$this->assertTrue( $results['ucp_endpoints_live'] );
+		$this->assertSame( '', array_column( $this->sut->all(), 'source', 'id' )['ucp_profile_version'], 'A matching version names none' );
 
 		$responses['/.well-known/ucp'] = array( 200, (string) str_replace( UcpUtils::VERSION, '2025-01-01', (string) $profile ) );
 		$this->serve( $responses );
 		$this->assertFalse( $this->results()['ucp_profile_version'], 'A profile for another UCP version is likely another plugin\'s' );
+		$this->assertSame( '2025-01-01', array_column( $this->sut->all(), 'source', 'id' )['ucp_profile_version'], 'The served version is kept for the message' );
+
+		$responses['/.well-known/ucp'] = array( 200, (string) str_replace( '"' . UcpUtils::VERSION . '"', '"<b>x</b>"', (string) $profile ) );
+		$this->serve( $responses );
+		$this->assertFalse( $this->results()['ucp_profile_version'] );
+		$this->assertSame( '', array_column( $this->sut->all(), 'source', 'id' )['ucp_profile_version'], 'A version that isn\'t a date is not shown' );
+
+		$responses['/.well-known/ucp'] = array( 200, (string) str_replace( UcpUtils::VERSION, '2099-01-01', (string) $profile ) );
+		$this->serve( $responses );
+		$this->assertFalse( $this->results()['ucp_profile_version'] );
+		$this->assertSame( '', array_column( $this->sut->all(), 'source', 'id' )['ucp_profile_version'], 'A newer version is not called older' );
 
 		$responses['/.well-known/ucp'] = array( 404, '' );
 		$responses[ $path ]            = array( 403, '<html>Blocked</html>' );

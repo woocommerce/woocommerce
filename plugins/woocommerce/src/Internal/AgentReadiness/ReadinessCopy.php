@@ -25,15 +25,20 @@ final class ReadinessCopy {
 	/**
 	 * A store check's copy.
 	 *
-	 * @param string $id Check id.
+	 * @param string $id     Check id.
+	 * @param string $source What the store serves for the check (the report's source), or ''.
 	 * @return array{title:string,action:string,why:string,found:string,fix:string,url:string}|null Passed title, failing title, why it matters (shown when passed), why and what was found (shown when failing), the fix line or '', and where to fix it or ''. Null for a check without copy here.
 	 */
-	public static function store_check( string $id ): ?array {
+	public static function store_check( string $id, string $source = '' ): ?array {
 		$checks = self::store_checks();
 		if ( ! isset( $checks[ $id ] ) ) {
 			return null;
 		}
 		$check = $checks[ $id ];
+		if ( 'ucp_profile_version' === $id && '' !== $source ) {
+			/* translators: %s: UCP version the store serves, a date such as 2026-04-08. */
+			$check[3] = sprintf( __( 'Your store uses an older version of the Universal Commerce Protocol (UCP %s).', 'woocommerce' ), $source );
+		}
 		return array(
 			'title'  => $check[0],
 			'action' => $check[1],
