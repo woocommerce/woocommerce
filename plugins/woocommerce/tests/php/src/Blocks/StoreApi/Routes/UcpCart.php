@@ -994,6 +994,64 @@ class UcpCart extends UcpCartTestCase {
 	}
 
 	/**
+	 * @testdox A registered customer cart id is not found, and no session changes, unless that customer is logged in.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $log_in_other_user Whether another customer is logged in when the id is used.
+	 */
+	public function test_customer_cart_id_is_not_found_for_another_user( bool $log_in_other_user ): void {
+		global $wpdb;
+
+		$customer_id  = (string) self::factory()->user->create( array( 'role' => 'customer' ) );
+		$other_id     = $log_in_other_user ? (string) self::factory()->user->create( array( 'role' => 'customer' ) ) : '';
+		$session_keys = array_filter( array( $customer_id, $other_id ) );
+		$stored       = maybe_serialize( array( 'cart' => array( 'keep-me' => array( 'quantity' => 3 ) ) ) );
+
+		foreach ( $session_keys as $session_key ) {
+			$wpdb->insert(
+				$wpdb->prefix . 'woocommerce_sessions',
+				array(
+					'session_key'    => $session_key,
+					'session_value'  => $stored,
+					'session_expiry' => time() + DAY_IN_SECONDS,
+				)
+			);
+		}
+
+		$cart_id = CartTokenUtils::get_cart_token( $customer_id );
+		wp_set_current_user( (int) $other_id );
+
+		try {
+			$requests = array(
+				array( 'GET', '' ),
+				array( 'PUT', '' ),
+				array( 'POST', '/cancel' ),
+			);
+			foreach ( $requests as list( $method, $suffix ) ) {
+				$this->simulate_new_request();
+				$body     = 'PUT' === $method ? array( 'line_items' => array( $this->line_item( 0, 1 ) ) ) : array();
+				$response = $this->request( $method, '/carts/' . $cart_id . $suffix, $body );
+
+				$this->assertSame( 'not_found', $response->get_data()['messages'][0]['code'] ?? null, $method . $suffix );
+			}
+
+			// What shutdown would write.
+			$this->simulate_new_request();
+		} finally {
+			wp_set_current_user( 0 );
+		}
+
+		foreach ( $session_keys as $session_key ) {
+			$this->assertSame(
+				$stored,
+				$wpdb->get_var( $wpdb->prepare( "SELECT session_value FROM {$wpdb->prefix}woocommerce_sessions WHERE session_key = %s", $session_key ) ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				'Session ' . $session_key . ' should be untouched'
+			);
+		}
+	}
+
+	/**
 	 * A cancelled cart id stays dead on a later request.
 	 *
 	 * Covers what the single-process checks cannot: the marker is written to the

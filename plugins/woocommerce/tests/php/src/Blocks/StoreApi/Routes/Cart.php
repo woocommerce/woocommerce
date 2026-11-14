@@ -772,6 +772,121 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A registered customer Cart-Token neither selects the Store API session handler nor waives the nonce unless that customer is logged in.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $log_in_other_user Whether another customer is logged in when the token is used.
+	 */
+	public function test_customer_cart_token_only_applies_to_that_customer( bool $log_in_other_user ): void {
+		$customer_id = (string) $this->factory->user->create( array( 'role' => 'customer' ) );
+		$token       = CartTokenUtils::get_cart_token( $customer_id );
+
+		wp_set_current_user( $log_in_other_user ? $this->factory->user->create( array( 'role' => 'customer' ) ) : 0 );
+
+		$old_server = $_SERVER;
+
+		try {
+			$_SERVER['REQUEST_URI']     = '/' . rest_get_url_prefix() . '/wc/store/v1/cart/add-item';
+			$_SERVER['HTTP_CART_TOKEN'] = $token;
+
+			$authentication = new Authentication();
+			$this->assertSame( 'WC_Session_Handler', $authentication->maybe_use_store_api_session_handler( 'WC_Session_Handler' ), 'The token should not select the Store API session handler' );
+
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+			$request->set_body_params(
+				array(
+					'id'       => $this->products[2]->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$response = rest_get_server()->dispatch( $request );
+
+			$this->assertSame( 401, $response->get_status(), 'The token should not waive the nonce check' );
+			$this->assertSame( 'woocommerce_rest_missing_nonce', $response->get_data()['code'] ?? null, 'The request should fail the nonce check' );
+		} finally {
+			$_SERVER = $old_server;
+		}
+	}
+
+	/**
+	 * @testdox A registered customer Cart-Token loads that customer's cart and session data without a nonce, even if a guest cart was loaded before they were authenticated.
+	 */
+	public function test_customer_cart_token_replaces_a_cart_loaded_before_authentication(): void {
+		global $wpdb;
+
+		$customer_id = (string) $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$draft_order = new \WC_Order();
+		$draft_order->set_customer_id( (int) $customer_id );
+		$draft_order->set_status( 'checkout-draft' );
+		$draft_order->save();
+		$product  = $this->products[0];
+		$item_key = WC()->cart->generate_cart_id( $product->get_id() );
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_sessions',
+			array(
+				'session_key'    => $customer_id,
+				'session_value'  => maybe_serialize(
+					array(
+						'cart'                  => maybe_serialize(
+							array(
+								$item_key => array(
+									'key'          => $item_key,
+									'product_id'   => $product->get_id(),
+									'variation_id' => 0,
+									'variation'    => array(),
+									'quantity'     => 1,
+									'data_hash'    => wc_get_cart_item_data_hash( $product ),
+								),
+							)
+						),
+						'store_api_draft_order' => $draft_order->get_id(),
+					)
+				),
+				'session_expiry' => time() + DAY_IN_SECONDS,
+			)
+		);
+
+		// The harness already loaded a guest cart, as an extension calling wc_load_cart() on init would before an
+		// application password sets the current user. A guest calling the Store API headlessly has an empty one.
+		$this->assertNotSame( $customer_id, (string) WC()->session->get_customer_id(), 'The preloaded cart should belong to a guest' );
+		wc_empty_cart();
+
+		$old_server   = $_SERVER;
+		$old_session  = WC()->session;
+		$old_customer = WC()->customer;
+		$old_cart     = WC()->cart;
+		wp_set_current_user( (int) $customer_id );
+
+		try {
+			$_SERVER['REQUEST_URI']     = '/' . rest_get_url_prefix() . '/wc/store/v1/cart/add-item';
+			$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_token( $customer_id );
+
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+			$request->set_body_params(
+				array(
+					'id'       => $this->products[2]->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$response = rest_get_server()->dispatch( $request );
+
+			$this->assertSame( 201, $response->get_status(), 'The token should waive the nonce check' );
+			$this->assertInstanceOf( SessionHandler::class, WC()->session, 'The cart should load through the token session handler' );
+			$this->assertSame( $customer_id, (string) WC()->session->get_customer_id(), 'The cart should be the session the token names' );
+			$this->assertCount( 2, $response->get_data()['items'], 'The new item should join the customer cart' );
+			$this->assertSame( $draft_order->get_id(), WC()->session->get( 'store_api_draft_order' ), 'The discarded guest cart should not write into the customer session' );
+		} finally {
+			$_SERVER = $old_server;
+			\WC_Cart_Session::set_updates_enabled_for_cart( $old_cart, true );
+			WC()->session  = $old_session;
+			WC()->customer = $old_customer;
+			WC()->cart     = $old_cart;
+		}
+	}
+
+	/**
 	 * Nested Cart-Token should be ignored in a batch request.
 	 */
 	public function test_batch_sub_request_cart_token_does_not_waive_nonce() {

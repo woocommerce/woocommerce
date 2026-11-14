@@ -194,20 +194,6 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Reset to the cart state a REST request starts from, before anything called wc_load_cart().
-	 *
-	 * Clearing the session, cart, customer and the one-time load marker lets load_cart()
-	 * rebuild through the forced token handler, whatever ran earlier in the request.
-	 */
-	private function discard_preloaded_cart_session(): void {
-		WC()->session  = null; // @phpstan-ignore assign.propertyType (Defaults to null; reset so load_cart() rebuilds it.)
-		WC()->customer = null; // @phpstan-ignore assign.propertyType (Same.)
-		WC()->cart     = null; // @phpstan-ignore assign.propertyType (Same.)
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Clears the per-process marker so load_cart() reloads.
-		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
-	}
-
-	/**
 	 * The session handler a UCP cart route binds to.
 	 *
 	 * Token-keyed, so an id this store signed is the only way to reach a cart. Without a
@@ -220,7 +206,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * The request's cart id when its signature checks out, or '' when it does not.
+	 * The request's cart id when it is a valid token the current user can use, or '' when it is not.
 	 *
 	 * Read from the request every time: the route instance outlives a request, so a
 	 * cached id would bind the next dispatch in the same process to this cart.
@@ -234,7 +220,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	protected function validated_cart_id( \WP_REST_Request $request ): string {
 		$cart_id = $this->route_cart_id( $request );
 
-		return CartTokenUtils::validate_cart_token( $cart_id ) ? $cart_id : '';
+		return CartTokenUtils::validate_cart_token_for_current_user( $cart_id ) ? $cart_id : '';
 	}
 
 	/**

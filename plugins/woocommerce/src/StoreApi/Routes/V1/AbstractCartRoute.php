@@ -212,6 +212,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 						return SessionHandler::class;
 					}
 				);
+				$this->discard_session_not_named_by_cart_token();
 			}
 			$this->cart_controller->load_cart();
 		} catch ( \Throwable $error ) {
@@ -223,6 +224,44 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		}
 
 		$this->cart_controller->normalize_cart();
+	}
+
+	/**
+	 * Drop a session loaded earlier in the request when it isn't the one the cart token names.
+	 *
+	 * An extension that calls wc_load_cart() on init loads the cart before REST authentication runs. A customer's token
+	 * sent with an application password isn't accepted yet at that point, so a guest session is loaded instead.
+	 */
+	private function discard_session_not_named_by_cart_token(): void {
+		$session = WC()->session;
+		if ( ! $session instanceof \WC_Session ) {
+			return;
+		}
+
+		$token_customer_id = CartTokenUtils::get_cart_token_payload( CartTokenUtils::get_request_cart_token() )['user_id'];
+		if ( (string) $session->get_customer_id() !== (string) $token_customer_id ) {
+			$this->discard_preloaded_cart_session();
+		}
+	}
+
+	/**
+	 * Reset to the cart state a REST request starts from, before anything called wc_load_cart().
+	 *
+	 * Clearing the session, cart, customer and the one-time load marker lets load_cart()
+	 * rebuild through the token handler, whatever ran earlier in the request. The dropped
+	 * cart stays hooked, so its session writes are turned off first: an empty cart would
+	 * otherwise clear data such as the draft order from the session that replaces it.
+	 */
+	protected function discard_preloaded_cart_session(): void {
+		if ( WC()->cart instanceof \WC_Cart ) {
+			\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, false );
+		}
+
+		WC()->session  = null; // @phpstan-ignore assign.propertyType (Defaults to null; reset so load_cart() rebuilds it.)
+		WC()->customer = null; // @phpstan-ignore assign.propertyType (Same.)
+		WC()->cart     = null; // @phpstan-ignore assign.propertyType (Same.)
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Clears the per-process marker so load_cart() reloads.
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 	}
 
 	/**
@@ -245,7 +284,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	}
 
 	/**
-	 * Checks if the request has a valid cart token.
+	 * Checks if the request has a valid cart token the current user can use.
 	 *
 	 * Reads the outer HTTP header, not `$request` one, to avoid conflicting cart tokens on a batch request.
 	 *
@@ -254,7 +293,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 */
 	protected function has_cart_token( \WP_REST_Request $request ) {
 		if ( is_null( $this->has_cart_token ) ) {
-			$this->has_cart_token = CartTokenUtils::validate_cart_token( CartTokenUtils::get_request_cart_token() );
+			$this->has_cart_token = CartTokenUtils::validate_cart_token_for_current_user( CartTokenUtils::get_request_cart_token() );
 		}
 		return $this->has_cart_token;
 	}
