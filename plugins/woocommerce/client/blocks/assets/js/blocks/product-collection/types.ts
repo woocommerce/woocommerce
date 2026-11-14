@@ -61,7 +61,13 @@ export interface ProductCollectionDisplayLayout {
 	 */
 	columns?: number;
 	/**
-	 * Whether Grid columns shrink on smaller screens. Omitted for Stack and Carousel.
+	 * Visible product count for the Carousel layout.
+	 * When omitted, the carousel keeps its responsive widths.
+	 * Omitted for Stack and Grid.
+	 */
+	carouselColumns?: number;
+	/**
+	 * Whether columns shrink on smaller screens. Omitted for Stack.
 	 */
 	shrinkColumns?: boolean;
 }

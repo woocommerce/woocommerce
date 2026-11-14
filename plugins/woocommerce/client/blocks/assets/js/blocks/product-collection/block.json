@@ -36,6 +36,9 @@
 				},
 				"shrinkColumns": {
 					"type": "boolean"
+				},
+				"carouselColumns": {
+					"type": "number"
 				}
 			}
 		},

@@ -73,6 +73,16 @@ class ProductTemplate extends AbstractBlock {
 					$classnames = "is-flex-container columns-{$columns}";
 				}
 			}
+
+			// Classes exist for 1 through 6. Other values keep the responsive carousel.
+			$carousel_columns = absint( $block->context['displayLayout']['carouselColumns'] ?? 0 );
+			if ( 'carousel' === $type && $carousel_columns >= 1 && $carousel_columns <= 6 ) {
+				$classnames .= 'columns-' . $carousel_columns;
+
+				if ( ! empty( $block->context['displayLayout']['shrinkColumns'] ) ) {
+					$classnames .= ' is-shrink-columns';
+				}
+			}
 		}
 
 		if ( isset( $attributes['style']['elements']['link']['color']['text'] ) ) {
