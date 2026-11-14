@@ -337,8 +337,5 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_hold_stock_minutes', $this->original_hold_stock_minutes );
 		update_option( 'woocommerce_manage_stock', $this->original_manage_stock_option );
-
-		// Remove any filters that might have been added.
-		remove_all_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes' );
 	}
 }

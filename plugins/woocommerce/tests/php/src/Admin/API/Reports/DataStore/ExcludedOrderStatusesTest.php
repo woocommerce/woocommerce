@@ -12,20 +12,9 @@ use WC_Unit_Test_Case;
 class ExcludedOrderStatusesTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Filter hooks added during a test, as [ tag, callback ] pairs, removed again in tearDown().
-	 *
-	 * @var array[]
-	 */
-	private $added_filters = array();
-
-	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		foreach ( $this->added_filters as $added_filter ) {
-			remove_filter( $added_filter[0], $added_filter[1] );
-		}
-		$this->added_filters = array();
 		delete_option( 'woocommerce_excluded_report_order_statuses' );
 		parent::tearDown();
 	}
@@ -65,7 +54,6 @@ class ExcludedOrderStatusesTest extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_excluded_report_order_statuses' );
 		$callback = array( $this, 'add_custom_excluded_status' );
 		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', $callback );
-		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', $callback );
 
 		$statuses = $this->invoke_get_excluded_report_order_statuses();
 

@@ -75,8 +75,6 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->set_review_email_enabled( false );
-		remove_all_filters( 'woocommerce_should_send_review_request' );
-		remove_all_filters( 'woocommerce_review_request_delay_seconds' );
 		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 
 		parent::tearDown();

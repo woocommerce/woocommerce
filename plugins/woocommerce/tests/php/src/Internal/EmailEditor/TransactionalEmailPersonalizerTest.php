@@ -34,7 +34,6 @@ class TransactionalEmailPersonalizerTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_email_editor_integration_personalizer_context_data' );
 		Email_Editor_Container::container()->get( Personalization_Tags_Registry::class )->unregister( '[test/text-tag]' );
 		parent::tearDown();
 	}

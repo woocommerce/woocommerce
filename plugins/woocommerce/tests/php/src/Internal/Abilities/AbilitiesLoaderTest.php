@@ -189,7 +189,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			}
 
 			$this->toggle_cot_feature_and_usage( $this->original_cot_state );
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
 
 		wp_set_current_user( 0 );

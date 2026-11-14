@@ -13,13 +13,6 @@ declare( strict_types=1 );
 class WC_Frontend_Scripts_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * Gateways filter callback reference for cleanup.
-	 *
-	 * @var callable|null
-	 */
-	private $gateways_filter_callback = null;
-
-	/**
 	 * Setup test fixtures.
 	 */
 	public function setUp(): void {
@@ -34,12 +27,6 @@ class WC_Frontend_Scripts_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-
-		// Remove the gateways filter if it was added.
-		if ( null !== $this->gateways_filter_callback ) {
-			remove_filter( 'woocommerce_payment_gateways', $this->gateways_filter_callback );
-			$this->gateways_filter_callback = null;
-		}
 
 		// Reinitialize payment gateways to clean state.
 		WC()->payment_gateways()->init();
@@ -109,10 +96,12 @@ class WC_Frontend_Scripts_Test extends WC_Unit_Test_Case {
 	 * @param array $gateway_instances Array of gateway instances to register.
 	 */
 	private function register_test_gateways( array $gateway_instances ): void {
-		$this->gateways_filter_callback = function ( $gateways ) use ( $gateway_instances ) {
-			return array_merge( $gateways, $gateway_instances );
-		};
-		add_filter( 'woocommerce_payment_gateways', $this->gateways_filter_callback );
+		add_filter(
+			'woocommerce_payment_gateways',
+			function ( $gateways ) use ( $gateway_instances ) {
+				return array_merge( $gateways, $gateway_instances );
+			}
+		);
 		WC()->payment_gateways()->init();
 	}
 

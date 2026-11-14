@@ -62,11 +62,9 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Remove owned upload files and HTTP interception.
+	 * Remove owned upload files.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'pre_http_request', array( $this, 'provide_local_image_response' ), 10 );
-
 		try {
 			try {
 				global $wpdb;

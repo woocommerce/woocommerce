@@ -54,7 +54,6 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 				$this->original_hpos = null;
 			}
 		} finally {
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 			parent::tearDown();
 		}
 	}

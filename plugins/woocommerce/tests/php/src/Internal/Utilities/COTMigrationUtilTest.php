@@ -48,7 +48,6 @@ class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		$GLOBALS['theorder'] = $this->prev_theorder;
 		parent::tearDown();
 	}

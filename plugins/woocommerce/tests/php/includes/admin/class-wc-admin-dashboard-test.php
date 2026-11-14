@@ -77,8 +77,6 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_task_list_hidden' );
 		delete_option( 'woocommerce_task_list_hidden_lists' );
 		delete_option( 'woocommerce_task_list_complete' );
-		remove_all_filters( 'pre_option_woocommerce_task_list_complete' );
-		remove_all_filters( 'pre_option_woocommerce_task_list_hidden' );
 		delete_option( 'woocommerce_enable_reviews' );
 		delete_transient( 'wc_low_stock_count' );
 		delete_transient( 'wc_outofstock_count' );

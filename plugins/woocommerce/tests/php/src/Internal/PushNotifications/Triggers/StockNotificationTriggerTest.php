@@ -57,11 +57,6 @@ class StockNotificationTriggerTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_action( 'woocommerce_low_stock', array( $this->trigger, 'on_low_stock' ) );
-		remove_action( 'woocommerce_no_stock', array( $this->trigger, 'on_no_stock' ) );
-		remove_action( 'woocommerce_product_on_backorder', array( $this->trigger, 'on_backorder' ) );
-		remove_action( 'shutdown', array( $this->store, 'dispatch_all' ) );
-
 		$this->reset_container_replacements();
 		wc_get_container()->reset_all_resolved();
 

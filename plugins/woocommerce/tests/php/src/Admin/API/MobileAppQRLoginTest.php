@@ -137,7 +137,7 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	private $subscriber_id;
 
 	/**
-	 * Filters registered via force_site_url() so tearDown() can remove them.
+	 * Filters registered via force_site_url(), counted to give each a higher priority.
 	 *
 	 * @var array<int, callable>
 	 */
@@ -197,10 +197,7 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		// Clear any QR login data the tests may have written.
 		$this->delete_all_qr_login_data();
 
-		// Remove any pre_option_siteurl filters force_site_url() registered.
-		foreach ( $this->site_url_filters as $priority => $filter ) {
-			remove_filter( 'pre_option_siteurl', $filter, $priority );
-		}
+		// Reset the filters registered by force_site_url().
 		$this->site_url_filters = array();
 		$this->clear_rest_server();
 		unset( $this->server, $this->controller );
@@ -236,8 +233,7 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	 * Uses the `pre_option_siteurl` filter so we do not have to mutate and restore
 	 * the real `siteurl` option. Filters stack — the last one registered with the
 	 * highest priority wins — so callers can override an earlier setUp() default
-	 * by calling this method again. All registered filters are removed in
-	 * tearDown().
+	 * by calling this method again.
 	 *
 	 * @param string $url The URL to return from `get_site_url()`.
 	 */

@@ -61,7 +61,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		$this->disable_cogs_feature();
 		parent::tearDown();
 	}

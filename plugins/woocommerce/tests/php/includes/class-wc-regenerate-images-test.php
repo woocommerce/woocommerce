@@ -11,22 +11,10 @@ class WC_Regenerate_Images_Test extends WC_Unit_Test_Case {
 	use ImageAttachmentTrait;
 
 	/**
-	 * Metadata filter callback added by a test, removed on teardown.
-	 *
-	 * @var callable|null
-	 */
-	private $metadata_filter = null;
-
-	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
 		$this->remove_added_uploads();
-
-		if ( $this->metadata_filter ) {
-			remove_filter( 'wp_get_attachment_metadata', $this->metadata_filter );
-			$this->metadata_filter = null;
-		}
 
 		parent::tearDown();
 	}
@@ -41,14 +29,14 @@ class WC_Regenerate_Images_Test extends WC_Unit_Test_Case {
 		$this->add_custom_attachment_metadata( $attachment_id, array( 'test_api_meta' => array( 'last_modified' => 1708332626 ) ) );
 
 		// A co-installed plugin hides its own key from readers.
-		$this->metadata_filter = function ( $data ) {
+		$metadata_filter = function ( $data ) {
 			if ( is_array( $data ) ) {
 				unset( $data['test_api_meta'] );
 			}
 
 			return $data;
 		};
-		add_filter( 'wp_get_attachment_metadata', $this->metadata_filter );
+		add_filter( 'wp_get_attachment_metadata', $metadata_filter );
 
 		$this->assertArrayNotHasKey( 'test_api_meta', wp_get_attachment_metadata( $attachment_id ), 'The filter should hide the key from readers' );
 		$this->assertArrayHasKey( 'test_api_meta', wp_get_attachment_metadata( $attachment_id, true ), 'The stored value should keep the key' );
