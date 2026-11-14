@@ -9,6 +9,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Shipping\FlatRate\WeightPlaceholder;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 /**
  * WC_Shipping_Flat_Rate class.
@@ -152,9 +153,13 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 		if ( $atts['percent'] ) {
 			$calculated_fee = $this->fee_cost * ( floatval( $atts['percent'] ) / 100 );
-			// Fix: Round to display decimals to prevent floating-point precision drift.
-			// @see https://github.com/woocommerce/woocommerce/issues/62692.
-			$calculated_fee = round( $calculated_fee, wc_get_price_decimals() );
+			// Round at the store's price decimals first, as cart totals do, so a fee stored just below a half (15% of 16.90 is 2.53499…) still rounds up.
+			// @see https://github.com/woocommerce/woocommerce/issues/70187.
+			$calculated_fee = wc_remove_number_precision(
+				NumberUtil::round(
+					wc_add_number_precision( $calculated_fee )
+				)
+			);
 		}
 
 		if ( $atts['min_fee'] && $calculated_fee < $atts['min_fee'] ) {
