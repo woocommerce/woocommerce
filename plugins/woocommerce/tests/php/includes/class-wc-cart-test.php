@@ -2150,6 +2150,54 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should clear the cart of the order this session sent to the gateway, even when its totals changed after checkout.
+	 */
+	public function test_clear_cart_after_payment_ignores_totals_for_the_order_sent_to_gateway(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$coupon  = WC_Helper_Coupon::create_coupon( 'sent-to-gateway' );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::PENDING ) );
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
+
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+		$order->payment_complete( 'txn_paid_offsite' );
+
+		// The shopper comes back from the gateway without the coupon, say because it hit its usage limit, so the totals no longer match the order.
+		WC()->cart->remove_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$this->assertFalse( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The test needs a cart whose hash no longer matches the order.' );
+
+		wc_clear_cart_after_payment();
+
+		$this->assertTrue( WC()->cart->is_empty(), 'The order came from this cart, so a coupon dropped since checkout should not keep it.' );
+	}
+
+	/**
+	 * @testdox Should keep items added after checkout, even for the order this session sent to the gateway.
+	 */
+	public function test_clear_cart_after_payment_keeps_items_added_after_the_order_sent_to_gateway(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::PENDING ) );
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
+
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+		$order->payment_complete( 'txn_paid_offsite' );
+
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id(), 1 );
+
+		wc_clear_cart_after_payment();
+
+		$this->assertSame( 2, WC()->cart->get_cart_contents_count(), 'Items added in another tab after checkout are a new purchase.' );
+	}
+
+	/**
 	 * @testdox Should allow woocommerce_should_clear_cart_after_payment to override the final clear cart value.
 	 */
 	public function test_clear_cart_after_payment_filter_can_override_final_value(): void {

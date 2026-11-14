@@ -341,9 +341,6 @@ class WC_Shortcode_Checkout {
 			$order->save();
 		}
 
-		// Empty current cart.
-		wc_empty_cart();
-
 		// If the specified order ID was invalid, we still render the default order received page (which will simply
 		// state that the order was received, but will not output any other details: this makes it harder to probe for
 		// valid order IDs than if we state that the order ID was not recognized).
