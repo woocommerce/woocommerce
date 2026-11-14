@@ -34,7 +34,8 @@ class WC_Breadcrumb_Test extends \WC_Unit_Test_Case {
 		parent::tearDown();
 		$this->sut->reset();
 		// Put back the main query the tests replace, rather than leaving later tests without one.
-		wp_reset_query();
+		// wp_reset_postdata() would only reset $post from the replaced query, not restore $wp_query.
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query
 	}
 
 	/**
