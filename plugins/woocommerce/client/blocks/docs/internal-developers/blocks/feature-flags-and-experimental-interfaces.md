@@ -93,31 +93,25 @@ See the [available SlotFills](https://github.com/woocommerce/woocommerce/blob/tr
 
 ### Store events
 
-[`useStoreEvents`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/base/context/hooks/use-store-events.ts) emits actions through `@wordpress/hooks`. Store events use the `experimental__woocommerce_blocks-` prefix.
+The Cart block emits actions through `@wordpress/hooks` using [`useStoreEvents`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/base/context/hooks/use-store-events.ts). Store events use the `experimental__woocommerce_blocks-` prefix.
 
 | Action | Parameters |
 | --- | --- |
-| `experimental__woocommerce_blocks-cart-add-item` | `product` |
-| `experimental__woocommerce_blocks-cart-view-link` | `product` |
 | `experimental__woocommerce_blocks-cart-remove-item` | `product`, `quantity` |
 | `experimental__woocommerce_blocks-cart-set-item-quantity` | `product`, `quantity` |
 | `experimental__woocommerce_blocks-cart-updated` | `storeCart`, `previousStoreCart` |
-| `experimental__woocommerce_blocks-product-view-link` | `product` |
-| `experimental__woocommerce_blocks-product-list-render` | `products`, `listName` |
 
 `experimental__woocommerce_blocks-cart-updated` is emitted by the `wc/store/cart` data store instead of `useStoreEvents`. It fires each time a cart from a Store API response is applied to the store, after cart notices are shown and items that left the cart are no longer marked as pending delete.
 
-Examples:
+#### Interactivity API events
+
+For native DOM events emitted by Interactivity API blocks, see the [Cart and Checkout DOM events](https://github.com/woocommerce/woocommerce/blob/trunk/docs/block-development/extensible-blocks/cart-and-checkout-blocks/dom-events.md) and [Product Collection DOM events](https://github.com/woocommerce/woocommerce/blob/trunk/docs/block-development/extensible-blocks/product-collection-block/dom-events.md) documentation. The underlying Interactivity API stores are private; use the documented DOM events rather than accessing their state or actions from extensions.
+
+#### `@wordpress/hooks` examples
+
+The following examples listen to the Cart block actions and cart data store updates described above.
 
 ```js
-wp.hooks.addAction(
-	'experimental__woocommerce_blocks-cart-add-item',
-	'plugin/namespace',
-	( { product } ) => {
-		console.log( `${ product.name } was added to the cart` );
-	}
-);
-
 wp.hooks.addAction(
 	'experimental__woocommerce_blocks-cart-set-item-quantity',
 	'plugin/namespace',
@@ -141,14 +135,6 @@ wp.hooks.addAction(
 		console.log(
 			`The cart went from ${ previousStoreCart.itemsCount } to ${ storeCart.itemsCount } items`
 		);
-	}
-);
-
-wp.hooks.addAction(
-	'experimental__woocommerce_blocks-product-view-link',
-	'plugin/namespace',
-	( { product } ) => {
-		console.log( `${ product.name } view link was selected` );
 	}
 );
 ```
