@@ -5058,13 +5058,16 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			++$mails;
 			return true;
 		};
+
+		$ability          = wp_get_ability( 'woocommerce/order-send-email' );
+		$pending_order    = $this->create_order_for_update( 'pending' );
+		$processing_order = $this->create_order_for_update( 'processing' );
+		// Count only what the ability sends: moving the second order to processing can send its own emails.
 		add_filter( 'pre_wp_mail', $capture );
-		$ability = wp_get_ability( 'woocommerce/order-send-email' );
-		$order   = $this->create_order_for_update( 'pending' );
 
 		$mismatch = $ability->execute(
 			array(
-				'id'    => $order->get_id(),
+				'id'    => $pending_order->get_id(),
 				'email' => 'completed',
 			)
 		);
@@ -5072,18 +5075,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_order_get_billing_email', '__return_empty_string' );
 		$no_recipient = $ability->execute(
 			array(
-				'id'    => $order->get_id(),
+				'id'    => $pending_order->get_id(),
 				'email' => 'invoice',
 			)
 		);
 
 		remove_filter( 'woocommerce_order_get_billing_email', '__return_empty_string' );
 
-		$order = $this->create_order_for_update( 'processing' );
 		add_filter( 'woocommerce_email_enabled_customer_processing_order', '__return_false' );
 		$disabled = $ability->execute(
 			array(
-				'id'    => $order->get_id(),
+				'id'    => $processing_order->get_id(),
 				'email' => 'processing',
 			)
 		);
@@ -5098,7 +5100,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		add_filter( 'pre_wp_mail', '__return_false' );
 		$failed = $ability->execute(
 			array(
-				'id'    => $order->get_id(),
+				'id'    => $processing_order->get_id(),
 				'email' => 'invoice',
 			)
 		);

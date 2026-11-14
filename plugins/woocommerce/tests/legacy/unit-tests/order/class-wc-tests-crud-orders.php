@@ -1196,7 +1196,12 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertFalse( WC()->session->get( 'order_awaiting_payment' ) );
 		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $object->get_id() )->get_status() );
 		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );
-		$this->assertCount( $notes + 1, wc_get_order_notes( array( 'order_id' => $object->get_id() ) ) );
+		// Count the payment note only: the status change can also send emails, which add notes of their own.
+		$payment_notes = array_filter(
+			wc_get_order_notes( array( 'order_id' => $object->get_id() ) ),
+			fn( $note ) => 'Payment complete.' === $note->content
+		);
+		$this->assertCount( 1, $payment_notes );
 
 		$object->save();
 		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );

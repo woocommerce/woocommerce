@@ -4410,6 +4410,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		};
 
 		add_action( 'woocommerce_new_order', $callback );
+		// The new order email saves the order again while it is being saved, which this test is not about.
+		add_filter( 'woocommerce_email_enabled_new_order', '__return_false' );
 
 		$order = new WC_Order();
 		$order->set_status( OrderStatus::PROCESSING );
