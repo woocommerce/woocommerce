@@ -17383,12 +17383,6 @@ parameters:
 			path: includes/data-stores/class-wc-product-data-store-cpt.php
 
 		-
-			message: '#^Parameter \#3 \$index_key of function wp_list_pluck expects int\|string\|null, true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/data-stores/class-wc-product-data-store-cpt.php
-
-		-
 			message: '#^Method WC_Product\:\:get_children\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
