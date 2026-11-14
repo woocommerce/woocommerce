@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Let AI agents turn payment gateways on or off, rename them for checkout, and reorder them, without access to credentials.
