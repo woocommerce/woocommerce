@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Add the woocommerce_order_search_limit filter so order searches can cap how many matching orders are loaded.

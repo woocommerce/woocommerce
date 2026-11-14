@@ -1277,10 +1277,28 @@ WHERE
 	 * @return int[] Array of order IDs.
 	 */
 	public function search_orders( $term ) {
+		/**
+		 * Filters the maximum number of order IDs returned by an order search.
+		 *
+		 * The limit is applied before the search results filter runs, so that filter can still add or remove IDs.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param int    $limit Maximum number of order IDs to return. Any negative value means no limit. Default -1.
+		 * @param string $term  Search term.
+		 */
+		$limit = apply_filters( 'woocommerce_order_search_limit', -1, $term );
+		$limit = is_numeric( $limit ) ? max( -1, (int) $limit ) : -1;
+
 		$order_ids = wc_get_orders(
 			array(
-				's'      => $term,
-				'return' => 'ids',
+				's'       => $term,
+				'limit'   => $limit,
+				'orderby' => array(
+					'date' => 'DESC',
+					'ID'   => 'DESC',
+				),
+				'return'  => 'ids',
 			)
 		);
 

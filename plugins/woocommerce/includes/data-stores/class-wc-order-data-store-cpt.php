@@ -578,61 +578,92 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		global $wpdb;
 
 		/**
+		 * Filters the maximum number of order IDs returned by an order search.
+		 *
+		 * The limit is applied before the search results filter runs, so that filter can still add or remove IDs.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param int    $limit Maximum number of order IDs to return. Any negative value means no limit. Default -1.
+		 * @param string $term  Search term.
+		 */
+		$limit       = apply_filters( 'woocommerce_order_search_limit', -1, $term );
+		$limit       = is_numeric( $limit ) ? max( -1, (int) $limit ) : -1;
+		$order_types = array_values( wc_get_order_types( 'view-orders' ) );
+
+		/**
 		 * Searches on meta data can be slow - this lets you choose what fields to search.
 		 * 3.0.0 added _billing_address and _shipping_address meta which contains all address data to make this faster.
 		 * This however won't work on older orders unless updated, so search a few others (expand this using the filter if needed).
 		 *
+		 * @since 1.5.6
+		 *
 		 * @var array
 		 */
-		$search_fields = array_map(
-			'wc_clean',
-			apply_filters(
-				'woocommerce_shop_order_search_fields',
-				array(
-					'_billing_address_index',
-					'_shipping_address_index',
-					'_billing_last_name',
-					'_billing_email',
-					'_billing_phone',
-				)
+		$search_fields = apply_filters(
+			'woocommerce_shop_order_search_fields',
+			array(
+				'_billing_address_index',
+				'_shipping_address_index',
+				'_billing_last_name',
+				'_billing_email',
+				'_billing_phone',
 			)
 		);
+		$search_fields = array_values( array_filter( array_map( 'wc_clean', (array) $search_fields ) ) );
 		$order_ids     = array();
 
 		if ( is_numeric( $term ) ) {
 			$order_ids[] = absint( $term );
 		}
 
-		if ( ! empty( $search_fields ) ) {
-			$order_ids = array_unique(
-				array_merge(
-					$order_ids,
-					$wpdb->get_col(
-						$wpdb->prepare(
-							"SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_value LIKE %s AND p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "')", // @codingStandardsIgnoreLine
-							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
-						)
-					),
-					$wpdb->get_col(
-						$wpdb->prepare(
-							"SELECT order_id
-							FROM {$wpdb->prefix}woocommerce_order_items as order_items
-							WHERE order_item_name LIKE %s",
-							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
-						)
-					),
-					$wpdb->get_col(
-						$wpdb->prepare(
-							"SELECT DISTINCT os.order_id FROM {$wpdb->prefix}wc_order_stats os
-							INNER JOIN {$wpdb->prefix}wc_customer_lookup cl ON os.customer_id = cl.customer_id
-							INNER JOIN {$wpdb->usermeta} um ON cl.user_id = um.user_id
-							WHERE (um.meta_key = 'billing_phone' OR um.meta_key = 'shipping_phone')
-							AND um.meta_value = %s",
-							wc_clean( $term )
-						)
-					)
-				)
+		if ( 0 !== $limit && ! empty( $search_fields ) && ! empty( $order_types ) ) {
+			$term_like                 = '%' . $wpdb->esc_like( wc_clean( $term ) ) . '%';
+			$search_fields_placeholder = implode( ', ', array_fill( 0, count( $search_fields ), '%s' ) );
+			$order_types_placeholder   = implode( ', ', array_fill( 0, count( $order_types ), '%s' ) );
+
+			$sql = "SELECT p.ID
+				FROM (
+					SELECT p1.post_id AS order_id
+					FROM {$wpdb->postmeta} p1
+					WHERE p1.meta_value LIKE %s
+					AND p1.meta_key IN ($search_fields_placeholder)
+					UNION
+					SELECT order_items.order_id
+					FROM {$wpdb->prefix}woocommerce_order_items AS order_items
+					WHERE order_items.order_item_name LIKE %s
+					UNION
+					SELECT os.order_id
+					FROM {$wpdb->prefix}wc_order_stats os
+					INNER JOIN {$wpdb->prefix}wc_customer_lookup cl ON os.customer_id = cl.customer_id
+					INNER JOIN {$wpdb->usermeta} um ON cl.user_id = um.user_id
+					WHERE (um.meta_key = 'billing_phone' OR um.meta_key = 'shipping_phone')
+					AND um.meta_value = %s
+				) AS matches
+				INNER JOIN {$wpdb->posts} p ON p.ID = matches.order_id
+				WHERE p.post_type IN ($order_types_placeholder)
+				ORDER BY p.post_date DESC, p.ID DESC";
+
+			$sql_args = array_merge(
+				array( $term_like ),
+				$search_fields,
+				array( $term_like, wc_clean( $term ) ),
+				$order_types
 			);
+
+			if ( $limit > 0 ) {
+				$sql       .= ' LIMIT %d';
+				$sql_args[] = $limit;
+			}
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The only interpolated parts are table names and generated placeholders.
+			$order_ids = array_merge( $order_ids, $wpdb->get_col( $wpdb->prepare( $sql, $sql_args ) ) );
+		}
+
+		$order_ids = array_values( array_unique( array_map( 'absint', $order_ids ) ) );
+
+		if ( $limit >= 0 ) {
+			$order_ids = array_slice( $order_ids, 0, $limit );
 		}
 
 		/**
@@ -646,7 +677,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 */
 		$order_ids = apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term, $search_fields );
 
-		return array_map( 'absint', $order_ids );
+		return array_map( 'absint', (array) $order_ids );
 	}
 
 	/**
