@@ -2,3 +2,8 @@
 	margin-left: auto !important;
 	margin-right: auto !important;
 }
+
+// Rises in when it replaces the cart after the shopper removes the last item.
+.wp-block-woocommerce-cart .wp-block-woocommerce-empty-cart-block[data-wc-entering] {
+	@include motion-enter;
+}

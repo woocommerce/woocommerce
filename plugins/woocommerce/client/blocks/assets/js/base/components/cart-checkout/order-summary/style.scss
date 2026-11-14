@@ -77,9 +77,14 @@
 		border-radius: 20px;
 		right: 0;
 		top: 0;
-		transform: translate(50%, -50%);
+		// `translate`, not `transform`, so the badge grows in about its own centre. RTL styles do not flip it.
+		translate: 50% -50%;
 		white-space: nowrap;
 		z-index: 1;
+
+		&:dir(rtl) {
+			translate: -50% -50%;
+		}
 
 		// The span containing the text should be padded, not the quantity container itself.
 		span {
@@ -138,5 +143,15 @@
 	}
 	.wc-block-components-totals-item__description.wc-block-components-totals-shipping__via {
 		padding-top: $gap-smallest;
+	}
+}
+
+// Items rise in, 50ms apart, the first time they show (`useListEntrance`). Each quantity badge grows in one step
+// after its item.
+.wp-block-woocommerce-checkout [data-wc-list-entering] > .wc-block-components-order-summary-item {
+	@include motion-stagger;
+
+	.wc-block-components-order-summary-item__quantity {
+		@include motion-enter(wc-grow, $delay: motion-stagger-delay(1));
 	}
 }
