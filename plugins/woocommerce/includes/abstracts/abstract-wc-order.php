@@ -1135,7 +1135,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				! in_array( 'wc-' . $new_status, $this->get_valid_statuses(), true )
 				&& ! in_array( $new_status, $status_exceptions, true )
 			) {
-				$new_status = OrderStatus::PENDING;
+				// Keep the stored status, even one whose plugin is no longer active. Use the stored value so a filter on the displayed status can't decide what is kept.
+				$stored_status = $this->get_status( 'edit' );
+
+				if ( $stored_status && ! in_array( $stored_status, array( OrderStatus::AUTO_DRAFT, OrderStatus::DRAFT, OrderStatus::TRASH ), true ) ) {
+					wc_doing_it_wrong(
+						__METHOD__,
+						sprintf(
+							'Order %d: "%s" is not a registered order status; status left as "%s".',
+							$this->get_id(),
+							$new_status,
+							$stored_status
+						),
+						'11.4.0'
+					);
+					$new_status = $stored_status;
+					$old_status = $stored_status;
+				} else {
+					$new_status = OrderStatus::PENDING;
+				}
 			}
 
 			// If the status is changing from auto-draft or an unknown status (e.g. draft), assume it was pending for action usage.
