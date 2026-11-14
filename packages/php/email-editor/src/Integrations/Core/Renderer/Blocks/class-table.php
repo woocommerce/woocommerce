@@ -228,7 +228,16 @@ class Table extends Abstract_Block_Renderer {
 				// Extract cell-specific text alignment.
 				$cell_text_align = $this->get_cell_text_alignment( $html, $rendering_context );
 
-				$email_cell_styles = "vertical-align: top; border: {$border_width} {$border_style} {$border_color}; padding: 8px; text-align: {$cell_text_align};";
+				// word-break keeps a long unbreakable word (an identifier, a URL) from widening the
+				// cell past the email's width, which an auto-layout table would otherwise do. It also
+				// drops the cell's minimum width to a single character, so min-width puts a floor
+				// under a short column sharing a row with a long one, which would otherwise be
+				// squeezed until its label read one letter per line.
+				//
+				// The floor is 3em because every cell carries it: five columns at 3em plus padding
+				// still fit the content width on a phone, where 4em did not and pushed a table that
+				// fitted before this change into a sideways scroll.
+				$email_cell_styles = "vertical-align: top; border: {$border_width} {$border_style} {$border_color}; padding: 8px; text-align: {$cell_text_align}; word-break: break-word; min-width: 3em;";
 
 				// Add thicker borders for header and footer cells when no custom border is set.
 				$email_cell_styles = $this->add_header_footer_borders( $html, $email_cell_styles, $border_color, $current_section, $custom_border_width );
