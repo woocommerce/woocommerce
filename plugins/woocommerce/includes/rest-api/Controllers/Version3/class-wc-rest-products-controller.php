@@ -926,7 +926,20 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 				if ( $attribute_id ) {
 
-					if ( isset( $attribute['options'] ) ) {
+					if ( isset( $attribute['term_ids'] ) && is_array( $attribute['term_ids'] ) ) {
+						// Term IDs identify terms exactly, even when several terms share a name.
+						$values = array();
+						foreach ( $attribute['term_ids'] as $posted_term_id ) {
+							// Batch requests skip schema validation, and absint() would turn -42 into term 42.
+							$term_id = is_numeric( $posted_term_id ) ? (int) $posted_term_id : 0;
+							$term    = $term_id > 0 ? get_term( $term_id, wc_attribute_taxonomy_name_by_id( $attribute_id ) ) : null;
+							if ( ! $term instanceof WP_Term ) {
+								/* translators: %d: term ID */
+								throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_term_id', esc_html( sprintf( __( '#%d is not a term of this attribute.', 'woocommerce' ), $term_id ) ), 400 );
+							}
+							$values[] = $term_id;
+						}
+					} elseif ( isset( $attribute['options'] ) ) {
 						$options = $attribute['options'];
 
 						if ( ! is_array( $attribute['options'] ) ) {
@@ -1819,6 +1832,15 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 									'type' => 'string',
 								),
 								'context'     => array( 'view', 'edit' ),
+							),
+							'term_ids'  => array(
+								'description' => __( 'List of term IDs of a global attribute. When set, it is used instead of options.', 'woocommerce' ),
+								'type'        => 'array',
+								'items'       => array(
+									'type'    => 'integer',
+									'minimum' => 1,
+								),
+								'context'     => array( 'edit' ),
 							),
 						),
 					),

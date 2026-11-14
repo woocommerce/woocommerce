@@ -428,8 +428,18 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				$attribute_value = isset( $attribute['option'] ) ? wc_clean( rawurldecode( stripslashes( $attribute['option'] ) ) ) : '';
 
 				if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
-					// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-					$term = get_term_by( 'name', $attribute_value, $parent_attributes[ $attribute_name ]->get_name() );
+					// A term ID identifies the term exactly; otherwise get the slug from the name posted to the API.
+					if ( isset( $attribute['term_id'] ) ) {
+						// Batch requests skip schema validation, so 0 or -42 must be rejected here instead of falling back to the name or to term 42.
+						$term_id = is_numeric( $attribute['term_id'] ) ? (int) $attribute['term_id'] : 0;
+						$term    = $term_id > 0 ? get_term_by( 'id', $term_id, $parent_attributes[ $attribute_name ]->get_name() ) : false;
+						if ( ! $term instanceof WP_Term ) {
+							/* translators: %d: term ID */
+							throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_term_id', esc_html( sprintf( __( '#%d is not a term of this attribute.', 'woocommerce' ), $term_id ) ), 400 );
+						}
+					} else {
+						$term = get_term_by( 'name', $attribute_value, $parent_attributes[ $attribute_name ]->get_name() );
+					}
 
 					if ( $term && ! is_wp_error( $term ) ) {
 						$attribute_value = $term->slug;
@@ -912,20 +922,26 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
-							'id'     => array(
+							'id'      => array(
 								'description' => __( 'Attribute ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'name'   => array(
+							'name'    => array(
 								'description' => __( 'Attribute name.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'option' => array(
+							'option'  => array(
 								'description' => __( 'Selected attribute term name.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
+							),
+							'term_id' => array(
+								'description' => __( 'Selected term ID of a global attribute. When set, it is used instead of option.', 'woocommerce' ),
+								'type'        => 'integer',
+								'minimum'     => 1,
+								'context'     => array( 'edit' ),
 							),
 						),
 					),

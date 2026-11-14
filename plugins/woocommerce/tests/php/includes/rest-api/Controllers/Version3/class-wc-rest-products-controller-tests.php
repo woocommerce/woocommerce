@@ -2964,4 +2964,104 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertSame( $fields['description'], $post->post_content, 'The stored description should keep its backslash.' );
 		$this->assertSame( $fields['short_description'], $post->post_excerpt, 'The stored short description should keep its backslash.' );
 	}
+
+	/**
+	 * @testdox Global attribute terms can be set by ID, so terms that share a name are not mixed up.
+	 */
+	public function test_create_product_with_attribute_term_ids(): void {
+		list( $attribute, , $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params(
+			array(
+				'name'       => 'Trousers',
+				'attributes' => array(
+					array(
+						'id'       => $attribute['attribute_id'],
+						'term_ids' => array( $second_term_id ),
+						'options'  => array( 'Green' ),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$terms = wc_get_product_terms( $response->get_data()['id'], $attribute['attribute_taxonomy'], array( 'fields' => 'slugs' ) );
+		$this->assertSame( array( 'trousers-green' ), $terms );
+	}
+
+	/**
+	 * @testdox An unknown attribute term ID is rejected instead of clearing the product's terms.
+	 */
+	public function test_create_product_with_unknown_attribute_term_id_fails(): void {
+		list( $attribute ) = $this->create_attribute_with_duplicate_term_names();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params(
+			array(
+				'name'       => 'Trousers',
+				'attributes' => array(
+					array(
+						'id'       => $attribute['attribute_id'],
+						'term_ids' => array( PHP_INT_MAX ),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_attribute_term_id', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox A negative attribute term ID is rejected instead of selecting the term with the matching positive ID.
+	 */
+	public function test_batch_update_product_rejects_negative_attribute_term_id(): void {
+		list( $attribute, $first_term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+		$taxonomy = $attribute['attribute_taxonomy'];
+
+		$product_attribute = new WC_Product_Attribute();
+		$product_attribute->set_id( $attribute['attribute_id'] );
+		$product_attribute->set_name( $taxonomy );
+		$product_attribute->set_options( array( $second_term_id ) );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_attributes( array( $product_attribute ) );
+		$product->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'         => $product->get_id(),
+						'attributes' => array(
+							array(
+								'id'       => $attribute['attribute_id'],
+								'term_ids' => array( -$first_term_id ),
+							),
+						),
+					),
+				),
+			)
+		);
+		$data = $this->server->dispatch( $request )->get_data();
+
+		$this->assertSame( 'woocommerce_rest_invalid_attribute_term_id', $data['update'][0]['error']['code'] ?? null, 'The negative term ID should be rejected.' );
+		$this->assertSame( array( $second_term_id ), wc_get_product_terms( $product->get_id(), $taxonomy, array( 'fields' => 'ids' ) ), 'The product terms should not change.' );
+	}
+
+	/**
+	 * Creates a global attribute with two terms that share the name "Green" but have different slugs.
+	 *
+	 * @return array{0: array, 1: int, 2: int} Attribute data, first term ID, second term ID.
+	 */
+	private function create_attribute_with_duplicate_term_names(): array {
+		$attribute = WC_Helper_Product::create_attribute( 'color', array() );
+		$first     = wp_insert_term( 'Green', $attribute['attribute_taxonomy'], array( 'slug' => 'shirts-green' ) );
+		$second    = wp_insert_term( 'Green', $attribute['attribute_taxonomy'], array( 'slug' => 'trousers-green' ) );
+
+		return array( $attribute, $first['term_id'], $second['term_id'] );
+	}
 }
