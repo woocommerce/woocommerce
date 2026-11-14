@@ -74,14 +74,6 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		delete_option( $this->get_cache_option_name() );
 		delete_option( $this->get_complete_option_name() );
-		remove_action( 'admin_enqueue_scripts', array( $this->sut, 'handle_admin_enqueue_scripts' ) );
-		remove_action( 'wp_ajax_wc_egg_dismiss', array( $this->sut, 'handle_ajax_dismiss' ) );
-		remove_action( 'wp_ajax_wc_egg_opt_out', array( $this->sut, 'handle_ajax_opt_out' ) );
-		remove_action( 'woocommerce_new_order', array( $this->sut, 'clear_milestone_cache' ) );
-		remove_action( 'woocommerce_update_order', array( $this->sut, 'clear_milestone_cache' ) );
-		remove_action( 'woocommerce_delete_order', array( $this->sut, 'clear_milestone_cache' ) );
-		remove_action( 'woocommerce_trash_order', array( $this->sut, 'clear_milestone_cache' ) );
-		remove_all_filters( 'wc_order_milestone_egg_map' );
 
 		wp_set_current_user( 0 );
 		parent::tearDown();

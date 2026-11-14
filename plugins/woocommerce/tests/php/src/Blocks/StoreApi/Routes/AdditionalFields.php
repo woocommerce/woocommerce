@@ -135,9 +135,6 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		unset( WC()->countries->locale );
 		WC()->cart->empty_cart();
 		WC()->session->destroy_session();
-		remove_all_filters( 'woocommerce_get_country_locale' );
-		remove_all_actions( 'doing_it_wrong_run' );
-		remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 		$this->unregister_fields();
 		$this->restore_customer_additional_field_values();
 		parent::tearDown();

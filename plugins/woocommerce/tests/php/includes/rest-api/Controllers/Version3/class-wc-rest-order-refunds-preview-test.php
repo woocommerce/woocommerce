@@ -62,8 +62,6 @@ class WC_REST_Order_Refunds_Preview_Test extends WC_REST_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_rest_prepare_order_refund_preview' );
-
 		global $wp_rest_additional_fields;
 		unset( $wp_rest_additional_fields['order_refund_preview'] );
 

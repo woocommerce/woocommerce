@@ -70,7 +70,6 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'pre_wp_mail', array( $this, 'capture_pre_wp_mail' ), 10 );
 		$this->sent_to        = array();
 		$this->sent_messages  = array();
 		$this->wp_mail_result = true;

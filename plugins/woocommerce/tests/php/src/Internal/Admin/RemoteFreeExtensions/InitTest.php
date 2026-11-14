@@ -96,9 +96,6 @@ class InitTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			if ( $this->fixture_setup_started ) {
-				if ( null !== $this->specs_transient_filter ) {
-					remove_filter( 'transient_' . $this->get_specs_transient_name(), $this->specs_transient_filter );
-				}
 				RemoteFreeExtensions::delete_specs_transient();
 			}
 		} finally {

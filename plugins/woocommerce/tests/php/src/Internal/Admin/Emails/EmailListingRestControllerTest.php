@@ -84,8 +84,6 @@ class EmailListingRestControllerTest extends WC_Unit_Test_Case {
 			$this->injected_email_keys = array();
 		}
 
-		remove_all_filters( 'woocommerce_email_block_template_html' );
-		remove_all_filters( 'woocommerce_transactional_emails_for_block_editor' );
 		$this->posts_manager->clear_caches();
 		WCEmailTemplateSyncRegistry::reset_cache();
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );

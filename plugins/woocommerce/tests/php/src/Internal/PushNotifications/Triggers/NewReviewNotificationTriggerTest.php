@@ -65,9 +65,6 @@ class NewReviewNotificationTriggerTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_action( 'comment_post', array( $this->trigger, 'on_comment_post' ) );
-		remove_action( 'shutdown', array( $this->store, 'dispatch_all' ) );
-
 		$this->reset_container_replacements();
 		wc_get_container()->reset_all_resolved();
 

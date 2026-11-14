@@ -47,7 +47,6 @@ class InitTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		WCPayPromotion::delete_specs_transient();
-		remove_all_filters( 'transient_woocommerce_admin_' . WCPayPromotionDataSourcePoller::ID . '_specs' );
 		update_option( 'woocommerce_default_country', 'US' );
 
 		parent::tearDown();

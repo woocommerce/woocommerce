@@ -57,8 +57,6 @@ class WCEmailTemplateSyncRegistryTest extends \WC_Unit_Test_Case {
 		WCEmailTemplateSyncRegistry::reset_cache();
 		WCEmailTemplateSyncRegistry::set_logger( null );
 
-		remove_all_filters( 'woocommerce_transactional_emails_for_block_editor' );
-
 		$emails_container = \WC_Emails::instance();
 		$reflection       = new \ReflectionClass( $emails_container );
 		$property         = $reflection->getProperty( 'emails' );

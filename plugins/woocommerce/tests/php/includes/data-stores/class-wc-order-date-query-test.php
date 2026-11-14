@@ -65,7 +65,6 @@ class WC_Order_Date_Query_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		OrderHelper::toggle_cot_feature_and_usage( $this->previous_cot_state );
-		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		update_option( 'timezone_string', '' );
 
 		parent::tearDown();
