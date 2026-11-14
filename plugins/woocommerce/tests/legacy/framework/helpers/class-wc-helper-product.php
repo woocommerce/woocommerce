@@ -498,4 +498,18 @@ class WC_Helper_Product {
 
 		return array( $product, wc_get_product( $variation->get_id() ) );
 	}
+
+	/**
+	 * Create a simple product with stock management enabled.
+	 *
+	 * @since 11.4.0
+	 * @param int   $quantity Stock quantity.
+	 * @param array $props Additional product properties.
+	 * @return WC_Product_Simple Product.
+	 */
+	public static function create_stock_managed_product( int $quantity = 1, array $props = array() ): WC_Product_Simple {
+		$props['manage_stock']   = true;
+		$props['stock_quantity'] = $quantity;
+		return self::create_simple_product( true, $props );
+	}
 }

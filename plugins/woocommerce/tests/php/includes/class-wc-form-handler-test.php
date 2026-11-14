@@ -1540,4 +1540,60 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		woocommerce_register_additional_checkout_field( $args );
 		$this->registered_checkout_fields[] = $args['id'];
 	}
+
+	/** @testdox Submitting an old payment form never calls the gateway when stock is unavailable. */
+	public function test_pay_action_checks_stock_before_gateway(): void {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		$order   = WC_Helper_Order::create_unpaid_order( WC_Helper_Product::create_stock_managed_product( 0 ) );
+		$gateway = $this->make_payment_gateway_available();
+		$gateway->expects( $this->never() )->method( 'process_payment' );
+
+		$this->submit_payment_form( $order, $gateway );
+
+		$this->assertNotEmpty( wc_get_notices( 'error' ) );
+		$this->assertNull( wc_get_order( $order->get_id() )->get_date_paid() );
+		$this->assertSame( '', wc_get_order( $order->get_id() )->get_transaction_id() );
+	}
+
+	/**
+	 * Make a gateway available while allowing payment calls to be asserted.
+	 *
+	 * @return WC_Gateway_BACS&\PHPUnit\Framework\MockObject\MockObject Gateway mock.
+	 */
+	private function make_payment_gateway_available(): WC_Gateway_BACS {
+		$gateway          = $this->getMockBuilder( WC_Gateway_BACS::class )->onlyMethods( array( 'process_payment' ) )->getMock();
+		$gateway->enabled = 'yes';
+		add_filter(
+			'woocommerce_available_payment_gateways',
+			static function () use ( $gateway ) {
+				return array( $gateway->id => $gateway );
+			}
+		);
+		return $gateway;
+	}
+
+	/**
+	 * Submit a valid payment form and restore the query and output buffer afterward.
+	 *
+	 * @param WC_Order           $order Order to pay for.
+	 * @param WC_Payment_Gateway $gateway Selected gateway.
+	 */
+	private function submit_payment_form( WC_Order $order, WC_Payment_Gateway $gateway ): void {
+		global $wp;
+		$_GET['key']                       = $order->get_order_key();
+		$_POST['woocommerce_pay']          = '1';
+		$_POST['payment_method']           = $gateway->id;
+		$_REQUEST['woocommerce-pay-nonce'] = wp_create_nonce( 'woocommerce-pay' );
+		$previous_order_pay                = $wp->query_vars['order-pay'] ?? null;
+		$wp->query_vars['order-pay']       = $order->get_id();
+		$buffer_level                      = ob_get_level();
+		try {
+			WC_Form_Handler::pay_action();
+		} finally {
+			$wp->query_vars['order-pay'] = $previous_order_pay;
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+		}
+	}
 }

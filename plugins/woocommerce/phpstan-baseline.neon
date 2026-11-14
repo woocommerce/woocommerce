@@ -8647,12 +8647,6 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Parameter \#1 \$stock_quantity of function wc_format_stock_quantity_for_display expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Parameter \#1 \$str of function trim expects string, array\|int\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -10063,12 +10057,6 @@ parameters:
 			path: includes/class-wc-cart.php
 
 		-
-			message: '#^Parameter \#1 \$stock_quantity of function wc_format_stock_quantity_for_display expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: includes/class-wc-cart.php
-
-		-
 			message: '#^Parameter \#1 \$value of function wc_round_tax_total expects float, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -11439,13 +11427,13 @@ parameters:
 		-
 			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/class-wc-form-handler.php
 
 		-
 			message: '#^Cannot call method get_order_key\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: includes/class-wc-form-handler.php
 
 		-
@@ -33343,12 +33331,6 @@ parameters:
 			message: '#^Parameter \#1 \$price of function wc_price expects float, string given\.$#'
 			identifier: argument.type
 			count: 6
-			path: includes/wc-formatting-functions.php
-
-		-
-			message: '#^Parameter \#1 \$stock_quantity of function wc_format_stock_quantity_for_display expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 2
 			path: includes/wc-formatting-functions.php
 
 		-

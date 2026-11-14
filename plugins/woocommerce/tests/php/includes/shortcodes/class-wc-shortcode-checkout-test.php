@@ -316,4 +316,23 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 		$this->assertNotContains( WC_Gateway_Cheque::ID, $checked );
 		$this->assertStringNotContainsString( 'id="payment_method_' . WC_Gateway_Cheque::ID . '"', $output );
 	}
+
+	/** @testdox Pending orders with expired reservations cannot show a payment form after stock is sold. */
+	public function test_order_pay_rejects_expired_pending_stock(): void {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_schema_version', 430 );
+		$product = WC_Helper_Product::create_stock_managed_product();
+		$order   = WC_Helper_Order::create_unpaid_order( $product );
+		wc_reserve_stock_for_order( $order );
+		WC_Helper_Order::expire_stock_hold( $order );
+		wc_update_product_stock( $product, 0, 'set' );
+
+		$output = $this->render_pay_page( $order );
+
+		$errors = new WP_HTML_Tag_Processor( $output );
+		$forms  = new WP_HTML_Tag_Processor( $output );
+		$this->assertTrue( $errors->next_tag( array( 'class_name' => 'woocommerce-error' ) ) );
+		$this->assertFalse( $forms->next_tag( 'FORM' ), 'An unavailable order must not show a payment form.' );
+		$this->assertNull( wc_get_order( $order->get_id() )->get_date_paid() );
+	}
 }

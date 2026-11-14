@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Check and reserve available stock before customers start payment on an unpaid order.

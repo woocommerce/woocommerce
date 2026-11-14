@@ -5725,4 +5725,23 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertArrayHasKey( 'payment_result', $data );
 		$this->assertSame( 'success', $data['payment_result']['payment_status'], 'Recovery must still report success on the result the response uses.' );
 	}
+	/** @testdox Existing pending orders with no available stock cannot reach the Store API payment integration. */
+	public function test_existing_order_payment_rejects_unavailable_stock(): void {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		$product = \WC_Helper_Product::create_stock_managed_product( 0, array( 'virtual' => true ) );
+		$order   = \WC_Helper_Order::create_order( 0, $product );
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			static function () {
+				self::fail( 'An unavailable-stock order must not reach the payment integration.' );
+			},
+			1
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_pay_for_order_request( $order ) );
+
+		$this->assertSame( 403, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_out_of_stock', $response->get_data()['code'] );
+		$this->assertNull( wc_get_order( $order->get_id() )->get_date_paid() );
+	}
 }

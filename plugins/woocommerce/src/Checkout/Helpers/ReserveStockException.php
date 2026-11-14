@@ -57,4 +57,14 @@ class ReserveStockException extends \Exception {
 	public function getErrorData() {
 		return $this->error_data;
 	}
+
+	/**
+	 * Create an error when stock availability cannot be checked.
+	 *
+	 * @since 11.4.0
+	 * @return self
+	 */
+	public static function stock_check_failed(): self {
+		return new self( 'woocommerce_product_stock_unavailable', esc_html__( 'Stock availability could not be checked. Please try again.', 'woocommerce' ), 500 );
+	}
 }
