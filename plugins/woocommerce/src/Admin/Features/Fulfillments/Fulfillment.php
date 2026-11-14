@@ -399,6 +399,11 @@ class Fulfillment extends \WC_Data {
 	public function set_props_from_storage( array $props ): void {
 		foreach ( $props as $key => $value ) {
 			if ( array_key_exists( $key, $this->data ) ) {
+				// The database returns is_fulfilled as "0" or "1". Keep it a boolean so REST responses
+				// say false for an unfulfilled fulfillment (the side panel reads "0" as true).
+				if ( 'is_fulfilled' === $key ) {
+					$value = (bool) $value;
+				}
 				$this->set_prop( $key, $value );
 			}
 		}
