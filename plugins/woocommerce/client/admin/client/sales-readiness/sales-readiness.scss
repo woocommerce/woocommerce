@@ -1,5 +1,37 @@
 // Sales readiness page and the AI tools Overview. Tokens from the design system; the build injects their fallbacks.
 
+// The prototype's buttons (WordPress UI minimal and outline): semibold, and a light background
+// on hover and focus that stays after a click until focus moves; the focus ring only for keyboard focus.
+@mixin sales-readiness-button($padding: var(--wpds-dimension-padding-md)) {
+	&.components-button {
+		padding-inline: $padding;
+		background: var(--wpds-color-background-interactive-brand-weak);
+		box-shadow: none;
+		color: var(--wpds-color-foreground-interactive-brand);
+		font-size: var(--wpds-typography-font-size-md);
+		font-weight: 600;
+
+		&:not(:disabled):is(:hover, :active, :focus, [aria-expanded="true"]) {
+			background: var(--wpds-color-background-interactive-brand-weak-active);
+			box-shadow: none;
+			color: var(--wpds-color-foreground-interactive-brand-active);
+		}
+
+		&:disabled {
+			color: var(--wpds-color-foreground-interactive-brand-disabled);
+		}
+
+		&:focus:not(:focus-visible) {
+			outline: none;
+		}
+
+		&:focus-visible {
+			outline: var(--wpds-border-width-focus) solid var(--wpds-color-stroke-focus);
+			outline-offset: 1px;
+		}
+	}
+}
+
 // The page header (admin-ui Page) runs edge to edge: drop wc-admin's margin and gutter around the page.
 .woocommerce-admin-page__sales-readiness {
 	.woocommerce-layout__primary {
@@ -39,6 +71,15 @@
 		color: var(--wc-sr-muted);
 	}
 
+	// No orphans: balance the last line of text, and keep an external link on one line.
+	:is(p, .components-text, [class*="__body-"]) {
+		text-wrap: pretty;
+	}
+
+	a[target="_blank"] {
+		white-space: nowrap;
+	}
+
 	// AI tools Overview: centered in the settings panel, like the Sales readiness content.
 	&--overview {
 		box-sizing: border-box;
@@ -76,6 +117,12 @@
 		margin-block-start: var(--wpds-dimension-gap-xl);
 	}
 
+	// "View all checks": a minimal button, like Show more, its text in line with the card text.
+	&__actions--link > .components-button {
+		@include sales-readiness-button(var(--wpds-dimension-padding-sm));
+		margin-inline-start: calc(-1 * var(--wpds-dimension-padding-sm));
+	}
+
 	// 24px from a question card's description to its first row.
 	&__description {
 		display: block;
@@ -93,20 +140,47 @@
 	}
 }
 
-.wc-sales-readiness-overview__heading {
-	display: block;
-	font-weight: 600;
-	margin-block-start: var(--wpds-dimension-padding-xl);
-}
-
 .wc-sales-readiness-list {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 
-	// A line under every row, the last one too.
+	// A line between rows: none under the last row of a Fix first group or of a closed list.
 	> .wc-sales-readiness-row {
 		border-block-end: 1px solid var(--wc-sr-stroke);
+	}
+
+	> .wc-sales-readiness-row:has(+ .wc-sales-readiness-tier) {
+		border-block-end: 0;
+	}
+}
+
+// A list that ends the card (Fix first, an open fold, a passed card) has no line under its last row.
+.wc-sales-readiness-card .wc-sales-readiness-list:last-child > .wc-sales-readiness-row:last-child {
+	border-block-end: 0;
+}
+
+// When some rows have a button, the buttons share a column, so every row's text stops at the same place.
+@media (min-width: 601px) {
+	.wc-sales-readiness-list:has(.wc-sales-readiness-row__action) {
+		display: grid;
+		grid-template-columns: 24px minmax(0, 1fr) auto;
+		column-gap: var(--wpds-dimension-gap-lg);
+
+		> * {
+			grid-column: 1 / -1;
+		}
+
+		> .wc-sales-readiness-row {
+			display: grid;
+			grid-template-columns: subgrid;
+			align-items: center;
+		}
+
+		.wc-sales-readiness-row__action {
+			grid-column: 3;
+			justify-self: end;
+		}
 	}
 }
 
@@ -137,47 +211,15 @@
 	padding-block-start: 0;
 }
 
-// The prototype's buttons (WordPress UI minimal and outline): semibold, and a light background
-// on hover and focus that stays after a click until focus moves; the focus ring only for keyboard focus.
-@mixin sales-readiness-button($padding: var(--wpds-dimension-padding-md)) {
-	&.components-button {
-		padding-inline: $padding;
-		background: var(--wpds-color-background-interactive-brand-weak);
-		box-shadow: none;
-		color: var(--wpds-color-foreground-interactive-brand);
-		font-size: var(--wpds-typography-font-size-md);
-		font-weight: 600;
-
-		&:not(:disabled):is(:hover, :active, :focus, [aria-expanded="true"]) {
-			background: var(--wpds-color-background-interactive-brand-weak-active);
-			box-shadow: none;
-			color: var(--wpds-color-foreground-interactive-brand-active);
-		}
-
-		&:disabled {
-			color: var(--wpds-color-foreground-interactive-brand-disabled);
-		}
-
-		&:focus:not(:focus-visible) {
-			outline: none;
-		}
-
-		&:focus-visible {
-			outline: var(--wpds-border-width-focus) solid var(--wpds-color-stroke-focus);
-			outline-offset: 1px;
-		}
-	}
-}
-
 .wc-sales-readiness-row {
 	padding: var(--wpds-dimension-padding-md) 0;
 	margin: 0;
 
-	// Dark markers; grey only for a check that couldn't run.
+	// Dark line icons; grey only for a check that couldn't run.
 	&__marker {
 		flex: 0 0 auto;
 		color: var(--wpds-color-foreground-content-neutral);
-		fill: currentColor;
+		fill: none;
 
 		&--muted {
 			color: var(--wc-sr-muted);
@@ -262,6 +304,31 @@
 			border-color: var(--wpds-color-stroke-interactive-brand);
 		}
 	}
+}
+
+// No products: the title, a line under it, then Add a product.
+.wc-sales-readiness-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
+
+	&__title {
+		font-weight: 600;
+	}
+
+	.wc-sales-readiness-row__action {
+		margin-block-start: var(--wpds-dimension-gap-md);
+	}
+}
+
+// Check can't start: the message, then Go to Scheduled Actions.
+.wc-sales-readiness-run-status {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--wpds-dimension-gap-md);
+	margin-block-start: var(--wpds-dimension-gap-md);
 }
 
 .wc-sales-readiness-checked {

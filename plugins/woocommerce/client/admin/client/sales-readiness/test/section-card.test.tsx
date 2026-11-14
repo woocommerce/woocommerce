@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -73,16 +74,49 @@ describe( 'SectionCard', () => {
 			screen.getByRole( 'button', { name: 'Show 1 more check' } )
 		).toBeInTheDocument();
 	} );
-	it( 'lists nothing when every check passed', () => {
+	it( 'starts closed when every check passed, and lists them all once opened', async () => {
 		render(
 			<SectionCard
 				section={ section(
 					[],
-					[ row( 'a', 'pass' ), row( 'b', 'pass' ) ]
+					[
+						row( 'a', 'pass' ),
+						row( 'b', 'pass' ),
+						row( 'c', 'pass' ),
+					]
 				) }
 			/>
 		);
-		expect( screen.queryByText( 'a' ) ).toBeNull();
-		expect( screen.queryByRole( 'button' ) ).toBeNull();
+		expect( screen.queryByText( 'a' ) ).not.toBeVisible();
+		await userEvent.click(
+			screen.getByRole( 'button', {
+				name: /Can AI assistants find your store\?/,
+			} )
+		);
+		for ( const passed of [ 'a', 'b', 'c' ] ) {
+			expect( screen.getByText( passed ) ).toBeVisible();
+		}
+		expect( screen.queryByText( /more check/ ) ).toBeNull();
+	} );
+
+	it( 'shows the no products state with a way to add one', () => {
+		render(
+			<SectionCard
+				section={ {
+					...section( [], [] ),
+					empty: {
+						title: 'You don’t have any products yet',
+						text: 'Product checks start once you add products.',
+						link: { href: '#new', text: 'Add a product' },
+					},
+				} }
+			/>
+		);
+		expect(
+			screen.getByText( 'You don’t have any products yet' )
+		).toBeVisible();
+		expect(
+			screen.getByRole( 'link', { name: 'Add a product' } )
+		).toHaveAttribute( 'href', '#new' );
 	} );
 } );

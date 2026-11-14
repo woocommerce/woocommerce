@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { Fragment } from '@wordpress/element';
-import { Card, Text } from '@wordpress/ui';
+import { Badge, Card, Text } from '@wordpress/ui';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -12,8 +13,8 @@ import { trackReadiness, type Surface } from '../tracks';
 import { Row, RowLink } from './check-row';
 
 /**
- * The Fix first items under a heading per tier: what each group of issues stops. Required shows
- * once, on the first tier's heading; a product item shows its share of sales or how many products it affects.
+ * The Fix first items under a heading per tier: what each group of issues stops. The Required for
+ * AI shopping heading carries a Required badge; a product item's line starts with its share of sales.
  */
 export const FixFirstList = ( {
 	items,
@@ -35,11 +36,15 @@ export const FixFirstList = ( {
 								<Text variant="heading-sm" aria-hidden="true">
 									{ heading }
 								</Text>
+								{ item.required && (
+									<Badge intent="low" aria-hidden="true">
+										{ __( 'Required', 'woocommerce' ) }
+									</Badge>
+								) }
 							</li>
 						) }
 						<Row
 							title={ item.title }
-							badge={ item.impact }
 							action={
 								item.link && (
 									<RowLink

@@ -3,7 +3,6 @@
  */
 import { Badge, Icon, Link, Stack, Text, VisuallyHidden } from '@wordpress/ui';
 import { Button } from '@wordpress/components';
-import { check } from '@wordpress/icons';
 import { Path, SVG } from '@wordpress/primitives';
 import { __ } from '@wordpress/i18n';
 import type { ReactNode } from 'react';
@@ -53,8 +52,25 @@ const dashedCircle = (
 	</SVG>
 );
 
+// The circled check, as in the design: a passed check or a found item.
+const circledCheck = (
+	<SVG
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+	>
+		<Path
+			d="M12 19.25C16.0041 19.25 19.25 16.0041 19.25 12C19.25 7.99594 16.0041 4.75 12 4.75C7.99594 4.75 4.75 7.99594 4.75 12C4.75 16.0041 7.99594 19.25 12 19.25Z"
+			strokeLinejoin="round"
+		/>
+		<Path d="M9 12L11 14L15 10" />
+	</SVG>
+);
+
 /**
- * The marker before a row: a dashed circle for something to do, a check for something passed.
+ * The marker before a row: a dashed circle for something to do, a circled check for something passed.
  */
 export const RowMarker = ( {
 	done,
@@ -64,7 +80,7 @@ export const RowMarker = ( {
 	muted?: boolean;
 } ) => (
 	<Icon
-		icon={ done ? check : dashedCircle }
+		icon={ done ? circledCheck : dashedCircle }
 		size={ 24 }
 		className={
 			'wc-sales-readiness-row__marker' +

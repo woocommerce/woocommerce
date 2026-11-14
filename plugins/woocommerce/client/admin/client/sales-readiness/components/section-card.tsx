@@ -3,7 +3,7 @@
  */
 import { useState } from '@wordpress/element';
 import type { ReactNode } from 'react';
-import { Badge, Card, Collapsible, Text } from '@wordpress/ui';
+import { Badge, Card, Collapsible, CollapsibleCard, Text } from '@wordpress/ui';
 import { Button } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
@@ -11,7 +11,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { Declared, Section } from '../types';
-import { CheckRow, Row } from './check-row';
+import { CheckRow, Row, RowLink } from './check-row';
 import { trackReadiness } from '../tracks';
 
 /**
@@ -86,39 +86,71 @@ const SHOWN = 2;
 
 /**
  * A question card: its badge, a note, how many products each channel can list, the first
- * two checks, open ones first, then the rest behind a fold.
+ * two checks, open ones first, then the rest behind a fold. A card where every check passed
+ * starts closed, and opens on its header to list them.
  */
 export const SectionCard = ( { section }: { section: Section } ) => {
 	// Open checks first, then passed ones; the first SHOWN rows stay open, the rest fold.
-	// A card where every check passed says so in its badge and lists nothing.
 	const checks = [ ...section.rows, ...section.folded ];
-	const all = checks.some( ( row ) => row.state !== 'pass' ) ? checks : [];
-	const shown = all.slice( 0, SHOWN );
-	const more = all.slice( SHOWN );
+	const passed =
+		checks.length > 0 && checks.every( ( row ) => row.state === 'pass' );
+	const shown = checks.slice( 0, SHOWN );
+	const more = checks.slice( SHOWN );
+	const head = (
+		<div className="wc-sales-readiness-card__head">
+			<Card.Title className="wc-sales-readiness-card__title">
+				{ section.title }
+			</Card.Title>
+			<Badge intent={ section.badge.intent }>
+				{ section.badge.text }
+			</Badge>
+		</div>
+	);
+	const note = section.note && (
+		<Text
+			variant="body-sm"
+			className="wc-sales-readiness__muted wc-sales-readiness-card__description"
+		>
+			{ section.note }
+		</Text>
+	);
+	const list = ( rows: Section[ 'rows' ] ) => (
+		<ul className="wc-sales-readiness-list">
+			{ rows.map( ( row ) => (
+				<CheckRow key={ row.id } row={ row } section={ section.id } />
+			) ) }
+		</ul>
+	);
+
+	if ( passed ) {
+		return (
+			<CollapsibleCard.Root
+				className="wc-sales-readiness-card"
+				id={ 'wc-sales-readiness-' + section.id }
+				onOpenChange={ ( open: boolean ) =>
+					trackReadiness( 'fold_toggle', {
+						section: section.id,
+						open,
+					} )
+				}
+			>
+				<CollapsibleCard.Header>{ head }</CollapsibleCard.Header>
+				<CollapsibleCard.Content>
+					{ note }
+					{ list( checks ) }
+				</CollapsibleCard.Content>
+			</CollapsibleCard.Root>
+		);
+	}
+
 	return (
 		<Card.Root
 			className="wc-sales-readiness-card"
 			id={ 'wc-sales-readiness-' + section.id }
 		>
-			<Card.Header>
-				<div className="wc-sales-readiness-card__head">
-					<Card.Title className="wc-sales-readiness-card__title">
-						{ section.title }
-					</Card.Title>
-					<Badge intent={ section.badge.intent }>
-						{ section.badge.text }
-					</Badge>
-				</div>
-			</Card.Header>
+			<Card.Header>{ head }</Card.Header>
 			<Card.Content>
-				{ section.note && (
-					<Text
-						variant="body-sm"
-						className="wc-sales-readiness__muted wc-sales-readiness-card__description"
-					>
-						{ section.note }
-					</Text>
-				) }
+				{ note }
 				{ section.channels.length > 0 && (
 					<ul className="wc-sales-readiness-channels">
 						{ section.channels.map( ( channel ) => (
@@ -142,34 +174,40 @@ export const SectionCard = ( { section }: { section: Section } ) => {
 					</ul>
 				) }
 				{ section.empty && (
-					<Text variant="body-md">{ section.empty }</Text>
+					<div className="wc-sales-readiness-empty">
+						<Text
+							variant="body-md"
+							className={
+								section.empty.text
+									? 'wc-sales-readiness-empty__title'
+									: undefined
+							}
+						>
+							{ section.empty.title }
+						</Text>
+						{ section.empty.text && (
+							<Text
+								variant="body-sm"
+								className="wc-sales-readiness__muted"
+							>
+								{ section.empty.text }
+							</Text>
+						) }
+						{ section.empty.link && (
+							<div className="wc-sales-readiness-row__action">
+								<RowLink link={ section.empty.link } />
+							</div>
+						) }
+					</div>
 				) }
-				{ shown.length > 0 && (
-					<ul className="wc-sales-readiness-list">
-						{ shown.map( ( row ) => (
-							<CheckRow
-								key={ row.id }
-								row={ row }
-								section={ section.id }
-							/>
-						) ) }
-					</ul>
-				) }
+				{ shown.length > 0 && list( shown ) }
 				{ more.length > 0 && (
 					<Fold
 						section={ section.id }
 						hideLabel={ __( 'Hide', 'woocommerce' ) }
 						label={ foldLabel( more ) }
 					>
-						<ul className="wc-sales-readiness-list">
-							{ more.map( ( row ) => (
-								<CheckRow
-									key={ row.id }
-									row={ row }
-									section={ section.id }
-								/>
-							) ) }
-						</ul>
+						{ list( more ) }
 					</Fold>
 				) }
 			</Card.Content>

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Badge, Card, Stack, Text } from '@wordpress/ui';
+import { Badge, Card, Text } from '@wordpress/ui';
 import { Button, Notice, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -91,22 +91,14 @@ export default function SalesReadinessOverview( {
 					</Card.Title>
 				</Card.Header>
 				<Card.Content>
-					<Stack direction="column" gap="xs">
-						<Text
-							variant="body-md"
-							className="wc-sales-readiness__muted"
-						>
-							{ view.description }
-						</Text>
-						{ view.checked_note && (
-							<Text
-								variant="body-sm"
-								className="wc-sales-readiness__muted"
-							>
-								{ view.checked_note }
-							</Text>
-						) }
-					</Stack>
+					<Text
+						variant="body-md"
+						className="wc-sales-readiness__muted"
+					>
+						{ view.description }
+						{ view.overview.based_on &&
+							' ' + view.overview.based_on }
+					</Text>
 					{ view.intro ? (
 						<>
 							<Text
@@ -131,18 +123,10 @@ export default function SalesReadinessOverview( {
 					) : (
 						<>
 							{ view.fix_first ? (
-								<>
-									<Text
-										variant="body-md"
-										className="wc-sales-readiness-overview__heading"
-									>
-										{ view.fix_first.title }
-									</Text>
-									<FixFirstList
-										items={ view.fix_first.items }
-										surface="overview"
-									/>
-								</>
+								<FixFirstList
+									items={ view.fix_first.items }
+									surface="overview"
+								/>
 							) : (
 								<Text variant="body-md">
 									{ __(
@@ -151,10 +135,10 @@ export default function SalesReadinessOverview( {
 									) }
 								</Text>
 							) }
-							<div className="wc-sales-readiness-card__actions">
+							<div className="wc-sales-readiness-card__actions wc-sales-readiness-card__actions--link">
 								<Button
-									__next40pxDefaultSize
-									variant="secondary"
+									variant="tertiary"
+									size="compact"
 									href={ viewAll.href }
 									onClick={ () =>
 										trackReadiness( 'link_click', {

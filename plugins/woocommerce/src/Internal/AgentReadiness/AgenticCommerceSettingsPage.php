@@ -304,7 +304,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 
 	/**
 	 * The Setup checklist: how many steps are left, then the open setup checks in one list, required ones first and
-	 * marked Required. Each says why it matters and links to where to fix it. Completed checks fold
+	 * marked Required. Each says why it matters, with a Review button to where to fix it. Completed checks fold
 	 * behind "Show N completed steps". UCP itself is the switch, so it is not listed.
 	 *
 	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks           Store conditions.
@@ -328,7 +328,17 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		?>
 		<div class="wc-agentic-commerce-card wc-agentic-commerce-status-card" id="wc-agentic-commerce-status">
 			<div class="wc-agentic-commerce-card__header">
-				<h2><?php esc_html_e( 'Setup checklist', 'woocommerce' ); ?></h2>
+				<div class="wc-agentic-commerce-card__title">
+					<h2><?php esc_html_e( 'Setup checklist', 'woocommerce' ); ?></h2>
+					<?php if ( array() !== $open ) : ?>
+						<mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--info">
+							<?php
+							/* translators: %d: number of setup steps left. */
+							echo esc_html( sprintf( _n( '%d step left', '%d steps left', count( $open ), 'woocommerce' ), count( $open ) ) );
+							?>
+						</mark>
+					<?php endif; ?>
+				</div>
 				<p><?php echo esc_html( $summary ); ?></p>
 			</div>
 			<?php
@@ -337,8 +347,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				foreach ( $open as $check ) {
 					$action   = self::check_action( $check );
 					$required = StoreConditions::LEVEL_REQUIRED === $check['level'];
-					$title    = '' === $action[2] ? esc_html( $action[0] ) : '<a href="' . esc_url( $action[2] ) . '">' . esc_html( $action[0] ) . '</a>';
-					self::render_item( $required ? 'required' : 'open', $title . ( $required ? ' ' . self::required_badge() : '' ), array( esc_html( $action[1] ) ) );
+					$review   = '' === $action[2] ? '' : '<a class="button wc-agentic-commerce-review" href="' . esc_url( $action[2] ) . '">' . esc_html__( 'Review', 'woocommerce' ) . '</a>';
+					self::render_item( $required ? 'required' : 'open', esc_html( $action[0] ) . ( $required ? ' ' . self::required_badge() : '' ), array( esc_html( $action[1] ) ), $review );
 				}
 				echo '</ul>';
 			}

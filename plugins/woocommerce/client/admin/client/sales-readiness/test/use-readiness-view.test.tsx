@@ -22,7 +22,7 @@ const mockFetch = apiFetch as unknown as jest.Mock;
 const view = ( pending: boolean, label = 'Run check' ) => ( {
 	sections: [],
 	fix_first: null,
-	run: { label, pending, stalled: false, message: '' },
+	run: { label, pending, stalled: false, message: '', link: null },
 } );
 
 const viewCalls = () =>

@@ -39,10 +39,10 @@ export interface FixFirstItem {
 	/** The check's id, for tracking. */
 	id: string;
 	tier: string;
-	/** Required, on the first tier's heading only. */
+	/** Under the Required for AI shopping heading, which carries a Required badge. */
+	required: boolean;
 	title: string;
 	why: string;
-	impact: ViewBadge | null;
 	link: ViewLink | null;
 }
 
@@ -67,7 +67,8 @@ export interface Section {
 	channels: Channel[];
 	rows: CheckRow[];
 	folded: CheckRow[];
-	empty: string | null;
+	/** What the card says instead of checks: every product passed, or there are no products yet. */
+	empty: { title: string; text: string; link: ViewLink | null } | null;
 }
 
 export interface Declared {
@@ -95,6 +96,8 @@ export interface ReadinessView {
 		pending: boolean;
 		stalled: boolean;
 		message: string;
+		/** Scheduled Actions, when the check can't start. */
+		link: ViewLink | null;
 	};
 	fix_first: FixFirst | null;
 	sections: Section[];
@@ -102,5 +105,7 @@ export interface ReadinessView {
 	overview: {
 		shopping: ShoppingCard;
 		view_all: ViewLink;
+		/** "Based on your 5,000 most recently changed products.", when the check stopped at the limit. */
+		based_on: string | null;
 	};
 }

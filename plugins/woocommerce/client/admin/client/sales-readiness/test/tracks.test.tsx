@@ -24,7 +24,13 @@ const checkedView: ReadinessView = {
 	last_checked: 'Last checked today',
 	checked_note: null,
 	intro: null,
-	run: { label: 'Check again', pending: false, stalled: false, message: '' },
+	run: {
+		label: 'Check again',
+		pending: false,
+		stalled: false,
+		message: '',
+		link: null,
+	},
 	fix_first: {
 		title: 'Fix first',
 		ranking: 'Ranked by products.',
@@ -32,17 +38,17 @@ const checkedView: ReadinessView = {
 			{
 				id: 'refund_policy',
 				tier: 'Stops every sale',
+				required: true,
 				title: 'Publish your refund policy',
 				why: 'It is a draft.',
-				impact: null,
 				link: link( 'Edit page' ),
 			},
 			{
 				id: 'image',
 				tier: "Products that can't be listed",
+				required: false,
 				title: '3 products have no main image',
 				why: 'Add an image.',
-				impact: null,
 				link: link( 'View 3 products' ),
 			},
 		],
@@ -106,6 +112,7 @@ const checkedView: ReadinessView = {
 			button: link( 'Manage' ),
 		},
 		view_all: link( 'View all checks' ),
+		based_on: null,
 	},
 };
 
@@ -288,6 +295,7 @@ describe( 'Sales readiness tracking', () => {
 				pending: false,
 				stalled: false,
 				message: '',
+				link: null,
 			},
 		};
 		mockedApiFetch.mockImplementation( ( { method } ) =>

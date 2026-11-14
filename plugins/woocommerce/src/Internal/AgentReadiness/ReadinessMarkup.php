@@ -19,13 +19,14 @@ trait ReadinessMarkup {
 	use ScriptDebug;
 
 	/**
-	 * One row: an icon for its state, the title, then the lines under it.
+	 * One row: an icon for its state, the title, the lines under it, then a button when there is one.
 	 *
-	 * @param string             $state open, required, unknown, pass or off.
-	 * @param string             $title Escaped title HTML.
-	 * @param array<int, string> $lines Escaped HTML lines; empty ones are skipped.
+	 * @param string             $state  open, required, unknown, pass or off.
+	 * @param string             $title  Escaped title HTML.
+	 * @param array<int, string> $lines  Escaped HTML lines; empty ones are skipped.
+	 * @param string             $action Escaped HTML at the end of the row, such as a Review button.
 	 */
-	private static function render_item( string $state, string $title, array $lines ): void {
+	private static function render_item( string $state, string $title, array $lines, string $action = '' ): void {
 		$states = array(
 			'open'     => __( 'Issue:', 'woocommerce' ),
 			'required' => __( 'Issue:', 'woocommerce' ),
@@ -38,7 +39,7 @@ trait ReadinessMarkup {
 		foreach ( array_filter( $lines, static fn( string $line ): bool => '' !== trim( $line ) ) as $line ) {
 			echo '<p class="description">' . wp_kses_post( $line ) . '</p>';
 		}
-		echo '</div></li>';
+		echo '</div>' . wp_kses_post( $action ) . '</li>';
 	}
 
 	/**

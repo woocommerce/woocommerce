@@ -253,7 +253,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		$stalled  = $pending && $this->scheduled_scan->is_stalled();
 		$message  = '';
 		if ( $stalled ) {
-			$message = __( 'The check hasn’t started because scheduled actions aren’t running on your store. It starts once they run. Check WooCommerce › Status › Scheduled Actions, or ask your host.', 'woocommerce' );
+			$message = __( 'The check can’t start because scheduled actions aren’t running on this site.', 'woocommerce' );
 		} elseif ( $pending ) {
 			$message = __( 'Checking your store.', 'woocommerce' );
 		}
@@ -277,12 +277,22 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'pending' => $pending,
 				'stalled' => $stalled,
 				'message' => $message,
+				'link'    => $stalled ? array(
+					'href' => admin_url( 'admin.php?page=wc-status&tab=action-scheduler&status=pending' ),
+					'text' => __( 'Go to Scheduled Actions', 'woocommerce' ),
+				) : null,
 			),
 			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
 			'sections'     => null === $report ? array() : $this->sections( $visible, $launched, $report ),
 			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ),
 			'overview'     => array(
 				'shopping' => $this->shopping_card( $checks ),
+				// After the description, when the last check stopped at the product limit.
+				'based_on' => null === $truncated ? null : sprintf(
+					/* translators: %s: number of products checked. */
+					__( 'Based on your %s most recently changed products.', 'woocommerce' ),
+					number_format_i18n( ProductScan::PRODUCT_LIMIT )
+				),
 				'view_all' => array(
 					'href' => self::url(),
 					'text' => __( 'View all checks', 'woocommerce' ),
@@ -523,7 +533,39 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'channels' => $listed,
 			'rows'     => $rows,
 			'folded'   => array(),
-			'empty'    => array() === $failing ? __( 'Every product passed every check.', 'woocommerce' ) : null,
+			'empty'    => array() === $failing ? array(
+				'title' => __( 'Every product passed every check.', 'woocommerce' ),
+				'text'  => '',
+				'link'  => null,
+			) : null,
+		);
+	}
+
+	/**
+	 * A product card on a store with no products: a No products badge and a way to add one, instead
+	 * of checks that have nothing to look at.
+	 *
+	 * @param string $id    Section id.
+	 * @param string $title Section title.
+	 * @return array<string, mixed>
+	 */
+	private static function no_products_section( string $id, string $title ): array {
+		return array(
+			'id'       => $id,
+			'title'    => $title,
+			'badge'    => self::badge_data( array( 'off', __( 'No products', 'woocommerce' ) ) ),
+			'note'     => null,
+			'channels' => array(),
+			'rows'     => array(),
+			'folded'   => array(),
+			'empty'    => array(
+				'title' => __( 'You don’t have any products yet', 'woocommerce' ),
+				'text'  => __( 'Product checks start once you add products.', 'woocommerce' ),
+				'link'  => array(
+					'href' => admin_url( 'post-new.php?post_type=product' ),
+					'text' => __( 'Add a product', 'woocommerce' ),
+				),
+			),
 		);
 	}
 
@@ -560,7 +602,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks Store checks shown on the page.
 	 * @param array<string, mixed>                                                                                                                                                                           $report Stored report.
-	 * @return array<int, array{id:string,tier:int,title:string,why:string,impact:array{0:string,1:string}|null,link:array{href:string,text:string}|null,share:float|null,count:int}>
+	 * @return array<int, array{id:string,tier:int,title:string,why:string,link:array{href:string,text:string}|null,share:float|null,count:int}>
 	 */
 	private function fix_first_items( array $checks, array $report ): array {
 		$required = array();
@@ -578,15 +620,13 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				continue;
 			}
 			$item = array(
-				'id'     => $check['id'],
-				'tier'   => $is_required ? 0 : ( $every_sale ? 1 : 2 ),
-				'title'  => $copy['title'],
-				'why'    => $copy['text'],
-				// The tier heading carries Required once, so its rows have no badge of their own.
-				'impact' => $is_required || $every_sale ? null : array( 'off', __( 'All products', 'woocommerce' ) ),
-				'link'   => self::fix_link( $copy['url'], $copy['link'] ?? '' ),
-				'share'  => null,
-				'count'  => PHP_INT_MAX,
+				'id'    => $check['id'],
+				'tier'  => $is_required ? 0 : ( $every_sale ? 1 : 2 ),
+				'title' => $copy['title'],
+				'why'   => $copy['text'],
+				'link'  => self::fix_link( $copy['url'], $copy['link'] ?? '' ),
+				'share' => null,
+				'count' => PHP_INT_MAX,
 			);
 			if ( $is_required ) {
 				$required[] = $item;
@@ -601,18 +641,13 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$count          = (int) $check['count'];
 			$issue          = self::product_issue( $check, $linked );
 			$issues[]       = array(
-				'id'     => (string) ( $check['id'] ?? '' ),
-				'tier'   => $blocks_listing ? 2 : 3,
-				'title'  => $issue['title'],
-				'why'    => $issue['why'],
-				// A title that names the products already says how many, so only a share of sales gets a badge then.
-				'impact' => null !== $share
-					? array( 'off', self::share_badge( $share ) )
-					/* translators: %s: number of products. */
-					: ( $issue['named'] ? null : array( 'off', sprintf( _n( '%s product', '%s products', $count, 'woocommerce' ), number_format_i18n( $count ) ) ) ),
-				'link'   => self::products_link( $count, (string) ( $check['id'] ?? '' ), $linked ),
-				'share'  => $share,
-				'count'  => $count,
+				'id'    => (string) ( $check['id'] ?? '' ),
+				'tier'  => $blocks_listing ? 2 : 3,
+				'title' => $issue['title'],
+				'why'   => $issue['why'],
+				'link'  => self::products_link( $count, (string) ( $check['id'] ?? '' ), $linked ),
+				'share' => $share,
+				'count' => $count,
 			);
 		}
 		// Tier first, then the larger share of sales, then more products. A store-wide issue affects
@@ -624,12 +659,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * The Fix first card: items under a heading for what each group of issues stops, with a line on
-	 * how it is ranked. A product issue's line starts with its share of sales. Null when there is
-	 * nothing to fix.
+	 * how it is ranked. A product issue's line starts with its share of sales. The heading over the
+	 * required items carries a Required badge. Null when there is nothing to fix.
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks Store checks shown on the page.
 	 * @param array<string, mixed>                                                                                                                                                                           $report Stored report.
-	 * @return array{title:string,ranking:string,items:array<int, array{id:string,tier:string,title:string,why:string,impact:array{intent:string,text:string}|null,link:array{href:string,text:string}|null}>}|null
+	 * @return array{title:string,ranking:string,items:array<int, array{id:string,tier:string,required:bool,title:string,why:string,link:array{href:string,text:string}|null}>}|null
 	 */
 	private function fix_first( array $checks, array $report ): ?array {
 		$items = $this->fix_first_items( $checks, $report );
@@ -653,12 +688,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				$first = false;
 			}
 			$list[] = array(
-				'id'     => $item['id'],
-				'tier'   => $tiers[ $item['tier'] ],
-				'title'  => $item['title'],
-				'why'    => $why,
-				'impact' => null === $item['impact'] ? null : self::badge_data( $item['impact'] ),
-				'link'   => $item['link'],
+				'id'       => $item['id'],
+				'tier'     => $tiers[ $item['tier'] ],
+				'required' => $item['tier'] < 2,
+				'title'    => $item['title'],
+				'why'      => $why,
+				'link'     => $item['link'],
 			);
 		}
 		return array(
@@ -723,22 +758,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		return sprintf( __( '%s of your sales.', 'woocommerce' ), self::percent( $share ) );
 	}
 
-	/**
-	 * The badge on a product issue with a share of sales: "18% of sales", or "No sales" when the
-	 * affected products sold nothing in the period.
-	 *
-	 * @param float $share Share from 0 to 1.
-	 */
-	private static function share_badge( float $share ): string {
-		if ( 0.0 === $share ) {
-			return __( 'No sales', 'woocommerce' );
-		}
-		if ( $share < 0.005 ) {
-			return __( 'Under 1% of sales', 'woocommerce' );
-		}
-		/* translators: %s: share of sales, such as 18%. */
-		return sprintf( __( '%s of sales', 'woocommerce' ), self::percent( $share ) );
-	}
 
 	/**
 	 * A share as a whole percentage; under 1% but above none reads "under 1%".
@@ -779,12 +798,11 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * A failing product check's copy: what to do ("Add a brand to 13 products"), why it matters, and the
-	 * fix line, and whether the title names the products. A check ReadinessCopy has no copy for keeps
-	 * the report's.
+	 * fix line. A check ReadinessCopy has no copy for keeps the report's.
 	 *
 	 * @param array<string, mixed> $check  Failing product check from the report.
 	 * @param bool                 $linked Whether each product's failures are stored, so a few failing products can be named.
-	 * @return array{title:string,why:string,fix:string,named:bool}
+	 * @return array{title:string,why:string,fix:string}
 	 */
 	private static function product_issue( array $check, bool $linked ): array {
 		$count = (int) ( $check['count'] ?? 0 );
@@ -796,14 +814,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'title' => (string) ( $check['label'] ?? '' ),
 				'why'   => (string) ( $check['why'] ?? '' ),
 				'fix'   => (string) ( $check['fix'] ?? '' ),
-				'named' => false,
 			);
 		}
 		return array(
 			'title' => $copy['action'],
 			'why'   => $copy['why'],
 			'fix'   => $copy['fix'],
-			'named' => $count > 0 && count( $names ) === $count,
 		);
 	}
 
@@ -1010,10 +1026,15 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @return array<int, array<string, mixed>>
 	 */
 	private function sections( array $checks, bool $launched, array $report ): array {
-		$sections = array();
+		$sections    = array();
+		$no_products = isset( $report['products'] ) && 0 === (int) $report['products'];
 		foreach ( self::question_groups( $checks ) as $id => $group ) {
 			if ( 'buy' === $id ) {
-				$sections[] = $this->product_section( $report );
+				$sections[] = $no_products ? self::no_products_section( 'products', self::products_question() ) : $this->product_section( $report );
+			}
+			if ( $no_products && 'understand' === $id ) {
+				$sections[] = self::no_products_section( $id, $group[0] );
+				continue;
 			}
 			$folded     = array_filter( $group[1], static fn( array $check ): bool => true === $check['ok'] );
 			$sections[] = array(
