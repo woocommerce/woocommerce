@@ -59,16 +59,19 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		'product_jsonld_from_core'       => 'product_jsonld_present',
 		'product_jsonld_required_fields' => 'product_jsonld_present',
 		'product_offer_jsonld'           => 'product_jsonld_present',
+		'product_return_policy_schema'   => 'product_jsonld_present',
 		'llms_txt_valid'                 => 'llms_txt_present',
 		'llms_txt_links_resolve'         => 'llms_txt_present',
 	);
 
 	/**
 	 * Scanned checks left out while a setup step with the same cause fails, so it shows once: WordPress
-	 * prints noindex while "Discourage search engines" is on.
+	 * prints noindex while "Discourage search engines" is on, and WooCommerce adds no returns policy
+	 * to product pages until a refund and returns page is chosen.
 	 */
 	private const SAME_CAUSE = array(
-		'no_noindex_directives' => 'search_visible',
+		'no_noindex_directives'        => 'search_visible',
+		'product_return_policy_schema' => 'refund_returns_page',
 	);
 
 	/**

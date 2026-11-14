@@ -103,11 +103,10 @@ class StoreOutputChecks {
 	/**
 	 * Checks for output WooCommerce doesn't build yet. They don't run and are reported as
 	 * pending, not failed; remove the entry when the output ships. The output is built by
-	 * WOOPRD-3912 (returns policy), WOOPRD-3908 (shipping), WOOPRD-3918 (buy action) and
+	 * WOOPRD-3908 (shipping), WOOPRD-3918 (buy action) and
 	 * WOOAI-1435 (UCP checkout).
 	 */
 	private const PENDING = array(
-		'product_return_policy_schema',
 		'product_shipping_schema',
 		'product_buy_action_schema',
 		'ucp_checkout',
@@ -445,7 +444,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'product_return_policy_schema',
 				'group'   => 'buy',
-				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => self::offer_has( $products, 'hasMerchantReturnPolicy' ) ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::offer_has( $products, 'hasMerchantReturnPolicy' ) || self::store_has_return_policy( $responses ) ),
 				'blocks'  => 'checkout',
 				'name'    => __( 'Product structured data links your returns policy', 'woocommerce' ),
 				'label'   => __( 'Product structured data has no returns policy', 'woocommerce' ),
@@ -1105,6 +1104,26 @@ class StoreOutputChecks {
 				if ( ! empty( $offer[ $property ] ) ) {
 					return true;
 				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Whether the product page names a returns policy for the whole store: WooCommerce adds it to an
+	 * OnlineStore item there once a refund and returns page is chosen, and SEO plugins may add it to
+	 * their Organization item.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private static function store_has_return_policy( StoreResponses $responses ): bool {
+		$page = $responses->product_page();
+		if ( null === $page ) {
+			return false;
+		}
+		foreach ( JsonLd::items( $page['body'], ...self::ORGANIZATION_TYPES ) as $store ) {
+			if ( ! empty( $store['hasMerchantReturnPolicy'] ) ) {
+				return true;
 			}
 		}
 		return false;

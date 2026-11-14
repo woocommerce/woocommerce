@@ -15,8 +15,13 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Checks that wait for output WooCommerce doesn't build yet, so Sales readiness doesn't show them.
+	 *
+	 * @return array<int, string>
 	 */
-	private const PENDING = array( 'product_return_policy_schema', 'product_shipping_schema', 'product_buy_action_schema', 'ucp_checkout' );
+	private static function pending(): array {
+		return ( new \ReflectionClassConstant( StoreOutputChecks::class, 'PENDING' ) )->getValue();
+	}
+
 
 	/**
 	 * @testdox Every store check Sales readiness shows has copy, headed by what to do and saying what the scan found.
@@ -24,7 +29,7 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 	public function test_every_store_check_has_copy(): void {
 		$checks = new \ReflectionMethod( StoreOutputChecks::class, 'checks' );
 		$checks->setAccessible( true );
-		$ids = array_diff( array_column( $checks->invoke( wc_get_container()->get( StoreOutputChecks::class ) ), 'id' ), self::PENDING );
+		$ids = array_diff( array_column( $checks->invoke( wc_get_container()->get( StoreOutputChecks::class ) ), 'id' ), self::pending() );
 
 		$this->assertNotEmpty( $ids );
 		foreach ( $ids as $id ) {
@@ -58,6 +63,17 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 		);
 		$this->assertTrue( $required->invoke( null, $check ), 'Without checkout, AI assistants find products but can\'t sell them' );
 		$this->assertFalse( $required->invoke( null, array( 'id' => 'ucp_profile_version' ) + $check ), 'Other UCP checks stay recommended' );
+	}
+
+	/**
+	 * @testdox Every store check Sales readiness shows has a fix line, so a failed row always names a next step.
+	 */
+	public function test_every_store_check_has_a_fix_line(): void {
+		$checks = new \ReflectionMethod( StoreOutputChecks::class, 'checks' );
+		$checks->setAccessible( true );
+		foreach ( array_diff( array_column( $checks->invoke( wc_get_container()->get( StoreOutputChecks::class ) ), 'id' ), self::pending() ) as $id ) {
+			$this->assertNotSame( '', ReadinessCopy::store_check( $id )['fix'] ?? '', $id );
+		}
 	}
 
 	/**

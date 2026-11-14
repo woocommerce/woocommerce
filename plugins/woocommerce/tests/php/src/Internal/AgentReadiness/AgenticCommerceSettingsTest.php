@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettingsPage;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessCheckPage;
+use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessCopy;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use WC_Admin_Settings;
@@ -542,7 +543,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertNull( $row['link'], 'nor is a stored fix URL' );
 		$sitemap = $this->view_with_check( 'sitemap_lists_products' )['sections'][1]['rows'][0];
 		$this->assertSame( 'Add a sitemap that lists your products', $sitemap['title'] );
-		$this->assertSame( '', $sitemap['fix'], 'No fix line when the title already says what to do' );
+		$this->assertStringContainsString( 'SEO plugin', $sitemap['fix'], 'A failed row says where to fix it' );
 		$this->assertNull( $sitemap['badge'], 'Only a blocker is Required' );
 		$this->assertStringNotContainsString( 'Yoast SEO', $json, 'No plugin is named, even from an older stored report' );
 		$this->assertStringNotContainsString( 'product_offer_jsonld name', $json, 'Its prerequisite failed' );
@@ -1177,6 +1178,41 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A missing returns policy in the product details shows once, as the refund and returns page step, while no page is chosen.
+	 */
+	public function test_returns_policy_shows_once_with_the_refund_page_step(): void {
+		$this->make_every_step_pass();
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(
+					array(
+						'id'       => 'product_return_policy_schema',
+						'ok'       => false,
+						'blocks'   => 'checkout',
+						'group'    => 'buy',
+						'name'     => 'name',
+						'label'    => 'label',
+						'why'      => 'why',
+						'fix'      => 'fix',
+						'fix_url'  => '',
+						'conflict' => false,
+						'pending'  => false,
+					),
+				),
+			),
+			false
+		);
+		$title = ReadinessCopy::store_check( 'product_return_policy_schema' )['action'];
+
+		$this->assertStringContainsString( $title, (string) wp_json_encode( $this->view() ), 'Shown while a refund and returns page is chosen' );
+
+		delete_option( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION );
+		$this->assertStringNotContainsString( $title, (string) wp_json_encode( $this->view() ), 'Left out while the step fails' );
+	}
+
+	/**
 	 * @testdox Checks coming in a later update aren't shown or counted, and an open check names its fix and links to it.
 	 */
 	public function test_readiness_hides_pending_checks(): void {
@@ -1210,7 +1246,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertMatchesRegularExpression( '#Sales readiness</a> <mark[^>]*>1 issue</mark>#', $this->render_page(), 'Status counts the same checks' );
 		$this->assertSame( '1 issue', array_column( $view['sections'], 'badge', 'id' )['buy']['text'] );
 		$row = $this->row( 'Link to your privacy and returns pages from your home page' );
-		$this->assertSame( '', $row['fix'], 'The title says what to do, so the report\'s fix line is left out' );
+		$this->assertSame( ReadinessCopy::store_check( 'policy_pages_linked' )['fix'], $row['fix'], 'The fix line comes from the copy, not the report' );
 		$this->assertSame( 'Go to Media library', $row['link']['text'], 'A fix in the media library says where it goes' );
 		$this->assertSame( 'Check again', $view['run']['label'], 'Once a check has run, the button runs it again' );
 	}

@@ -472,11 +472,32 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 
 		$checks = array_column( $this->sut->all(), null, 'id' );
 
-		foreach ( array( 'product_return_policy_schema', 'product_shipping_schema', 'product_buy_action_schema', 'ucp_checkout' ) as $id ) {
+		foreach ( ( new \ReflectionClassConstant( StoreOutputChecks::class, 'PENDING' ) )->getValue() as $id ) {
 			$this->assertNull( $checks[ $id ]['ok'], $id );
 			$this->assertTrue( $checks[ $id ]['pending'], $id );
 		}
 		$this->assertFalse( $checks['open_graph_tags']['pending'] );
+		$this->assertFalse( $checks['product_return_policy_schema']['pending'], 'WooCommerce adds the returns policy since 11.3' );
+		$this->assertContains( 'product_shipping_schema', ( new \ReflectionClassConstant( StoreOutputChecks::class, 'PENDING' ) )->getValue(), 'The list is not empty' );
+	}
+
+	/**
+	 * @testdox The returns policy check passes for a policy on an offer or on the store's item, as WooCommerce adds it, fails without one, and couldn't check without product details.
+	 */
+	public function test_return_policy_on_offer_or_store(): void {
+		$returns   = '{"@type":"MerchantReturnPolicy","merchantReturnLink":"' . home_url( '/refund_returns/' ) . '"}';
+		$ld        = static fn( string $graph ): string => '<script type="application/ld+json">{"@context":"https://schema.org","@graph":[' . $graph . ']}</script>';
+		$responses = $this->good_store();
+		$result    = function ( string $graph ) use ( $responses, $ld ): ?bool {
+			$responses[ $this->product_path() ] = array( 200, self::page( $ld( $graph ) ) );
+			$this->serve( $responses );
+			return array_column( $this->sut->all(), 'ok', 'id' )['product_return_policy_schema'];
+		};
+
+		$this->assertTrue( $result( '{"@type":"Product","name":"Mug","offers":{"@type":"Offer","price":"10"}},{"@type":"OnlineStore","name":"Shop","hasMerchantReturnPolicy":' . $returns . '}' ), 'WooCommerce adds it to the OnlineStore item' );
+		$this->assertTrue( $result( '{"@type":"Product","name":"Mug","offers":{"@type":"Offer","price":"10","hasMerchantReturnPolicy":' . $returns . '}}' ), 'On the offer' );
+		$this->assertFalse( $result( '{"@type":"Product","name":"Mug","offers":{"@type":"Offer","price":"10"}},{"@type":"OnlineStore","name":"Shop"}' ) );
+		$this->assertNull( $result( '{"@type":"OnlineStore","name":"Shop"}' ), 'Without product details it couldn\'t check, as the other product details checks' );
 	}
 
 	/**
