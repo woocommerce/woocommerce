@@ -71,6 +71,28 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox The 'Calculate tax based on' description explains the billing address fallback and keeps the shop base estimate.
+	 */
+	public function test_tax_based_on_description_explains_billing_fallback_and_keeps_estimate() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		add_filter( 'woocommerce_show_shop_base_tax_estimate', '__return_true' );
+		add_filter(
+			'woocommerce_customer_default_location_array',
+			static function () {
+				return array( 'country' => 'US' );
+			}
+		);
+
+		$sut      = new WC_Settings_Tax();
+		$settings = $sut->get_settings_for_section( '' );
+		$setting  = current( wp_list_filter( $settings, array( 'id' => 'woocommerce_tax_based_on' ) ) );
+
+		$this->assertStringStartsWith( '"Customer shipping address" uses the billing address when nothing in the cart needs shipping', $setting['desc'], 'The fallback sentence should come first.' );
+		$this->assertStringContainsString( 'wc-tax-base-location-estimate', $setting['desc'], 'The shop base estimate should follow the fallback sentence.' );
+	}
+
+	/**
 	 * @testDox 'output' invokes 'output_tax_rates' for the 'standard' section and for sections named as a tax class.
 	 *
 	 * @testWith ["standard"]
