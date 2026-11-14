@@ -855,6 +855,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$fixed_variation->set_parent_id( $product->get_id() );
 		$fixed_variation->set_attributes( array( 'finish' => 'Black%20White' ) );
 		$fixed_variation->set_regular_price( '10' );
+		$fixed_variation->set_menu_order( 1 );
 		$fixed_variation->save();
 
 		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $fixed_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
@@ -864,10 +865,12 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		WC()->cart->empty_cart();
 
+		// Ordered before the fixed variation so that variation does not claim this selection.
 		$any_variation = new WC_Product_Variation();
 		$any_variation->set_parent_id( $product->get_id() );
 		$any_variation->set_attributes( array( 'finish' => '' ) );
 		$any_variation->set_regular_price( '10' );
+		$any_variation->set_menu_order( 0 );
 		$any_variation->save();
 
 		$any_cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $any_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
@@ -3033,5 +3036,45 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$skipped_child->delete( true );
 			$first_child->delete( true );
 		}
+	}
+
+	/**
+	 * @testdox Add to cart rejects a variation when an earlier variation matches.
+	 */
+	public function test_add_to_cart_rejects_a_variation_when_an_earlier_variation_matches(): void {
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$red = new WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '10' );
+		$red->set_menu_order( 0 );
+		$red->save();
+
+		$any = new WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '5' );
+		$any->set_menu_order( 1 );
+		$any->save();
+
+		wc_clear_notices();
+		$cart_item_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$any->get_id(),
+			array(
+				'attribute_color' => 'Red',
+			)
+		);
+
+		$this->assertFalse( $cart_item_key, 'Add to cart should reject a variation when an earlier variation matches.' );
+		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
 	}
 }
