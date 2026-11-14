@@ -504,6 +504,52 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Shipping tax for a cart with several tax classes uses tax classes created after an earlier calculation.
+	 */
+	public function test_get_shipping_tax_rates_sees_tax_classes_created_after_an_earlier_calculation() {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		// An earlier calculation for a cart with several tax classes, as another request or test would make first.
+		WC()->cart->add_to_cart( $this->create_product_with_tax_class( 'reduced-rate' )->get_id(), 1 );
+		WC()->cart->add_to_cart( $this->create_product_with_tax_class( 'zero-rate' )->get_id(), 1 );
+		WC_Tax::get_shipping_tax_rates();
+		WC()->cart->empty_cart();
+
+		WC_Tax::create_tax_class( 'Alpha shipping', 'alpha-shipping' );
+		WC_Tax::create_tax_class( 'Beta shipping', 'beta-shipping' );
+		$alpha_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '7.0000',
+				'tax_rate_name'     => 'Alpha',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => 'alpha-shipping',
+			)
+		);
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '9.0000',
+				'tax_rate_name'     => 'Beta',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => 'beta-shipping',
+			)
+		);
+		WC()->cart->add_to_cart( $this->create_product_with_tax_class( 'alpha-shipping' )->get_id(), 1 );
+		WC()->cart->add_to_cart( $this->create_product_with_tax_class( 'beta-shipping' )->get_id(), 1 );
+
+		$shipping_rates = WC_Tax::get_shipping_tax_rates();
+
+		$this->assertSame( array( $alpha_rate_id ), array_keys( $shipping_rates ), 'Shipping should use the first of the new tax classes in settings order.' );
+	}
+
+	/**
 	 * Test woocommerce_shipping_tax_class filter fires with correct parameters.
 	 */
 	public function test_shipping_tax_class_filter_fires_with_correct_parameters() {
