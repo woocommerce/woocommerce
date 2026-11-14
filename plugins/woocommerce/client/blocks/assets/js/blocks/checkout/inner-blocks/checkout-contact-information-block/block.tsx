@@ -16,6 +16,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { checkoutStore } from '@woocommerce/block-data';
 import { CONTACT_FORM_KEYS } from '@woocommerce/block-settings';
 import { Form } from '@woocommerce/base-components/cart-checkout';
+import { useToggleCollapse } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -44,6 +45,13 @@ const CreateAccountUI = (): React.ReactElement | null => {
 		: ( showCreateAccountCheckbox && shouldCreateAccount ) ||
 			! allowGuestCheckout;
 
+	// The checkbox grows the password field in and collapses it out.
+	const passwordCollapse = useToggleCollapse( showCreateAccountPassword, () =>
+		document.querySelector< HTMLElement >(
+			'.wc-block-components-address-form__password:not([data-wc-collapse-copy])'
+		)
+	);
+
 	if (
 		! allowGuestCheckout &&
 		! showCreateAccountCheckbox &&
@@ -67,6 +75,7 @@ const CreateAccountUI = (): React.ReactElement | null => {
 			) }
 			{ showCreateAccountCheckbox && (
 				<CheckboxControl
+					ref={ passwordCollapse.triggerRef }
 					className="wc-block-checkout__create-account"
 					label={ sprintf(
 						/* translators: Store name */
@@ -75,6 +84,7 @@ const CreateAccountUI = (): React.ReactElement | null => {
 					) }
 					checked={ shouldCreateAccount }
 					onChange={ ( value ) => {
+						passwordCollapse.onToggle();
 						void __internalSetShouldCreateAccount( value );
 						void __internalSetCustomerPassword( '' );
 					} }

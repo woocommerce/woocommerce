@@ -3,10 +3,12 @@
  */
 import { useContainerWidthContext } from '@woocommerce/base-context';
 import { useCallback, useId, useState } from '@wordpress/element';
-import type { HTMLAttributes, KeyboardEvent } from 'react';
+import type { HTMLAttributes, KeyboardEvent, MouseEvent } from 'react';
 
 export type OrderSummaryToggle = {
 	isOpen: boolean;
+	// Whether a click or tap made the last change of `isOpen`. Key presses and closing in code apply immediately.
+	isClickToggle: boolean;
 	hasContainerWidth: boolean;
 	isLarge: boolean;
 	closeSummary: () => void;
@@ -29,14 +31,25 @@ export type OrderSummaryToggle = {
  */
 export const useOrderSummaryToggle = (): OrderSummaryToggle => {
 	const { hasContainerWidth, isLarge } = useContainerWidthContext();
-	const [ isOpen, setIsOpen ] = useState( false );
+	const [ { isOpen, isClickToggle }, setToggle ] = useState( {
+		isOpen: false,
+		isClickToggle: false,
+	} );
 	const ariaControlsId = useId();
-	const closeSummary = useCallback( () => setIsOpen( false ), [] );
+	const closeSummary = useCallback(
+		() => setToggle( { isOpen: false, isClickToggle: false } ),
+		[]
+	);
 
 	const toggleProps = ! isLarge
 		? {
 				role: 'button',
-				onClick: () => setIsOpen( ! isOpen ),
+				// A click that a key press or assistive technology starts has no click count.
+				onClick: ( event: MouseEvent ) =>
+					setToggle( {
+						isOpen: ! isOpen,
+						isClickToggle: event.detail !== 0,
+					} ),
 				'aria-expanded': isOpen,
 				'aria-controls': ariaControlsId,
 				tabIndex: 0,
@@ -46,7 +59,7 @@ export const useOrderSummaryToggle = (): OrderSummaryToggle => {
 						// surrounding checkout form. A real button would
 						// suppress both for us.
 						event.preventDefault();
-						setIsOpen( ! isOpen );
+						setToggle( { isOpen: ! isOpen, isClickToggle: false } );
 					}
 				},
 			}
@@ -54,6 +67,7 @@ export const useOrderSummaryToggle = (): OrderSummaryToggle => {
 
 	return {
 		isOpen,
+		isClickToggle,
 		hasContainerWidth,
 		isLarge,
 		closeSummary,
