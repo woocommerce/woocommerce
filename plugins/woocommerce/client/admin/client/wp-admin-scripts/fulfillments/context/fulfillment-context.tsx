@@ -7,10 +7,14 @@ import React, { createContext, useEffect, useMemo, useState } from 'react';
  * Internal dependencies
  */
 import { Fulfillment, Order } from '../data/types';
-import { ItemSelection } from '../utils/order-utils';
+import { ItemSelection, getOrderPickupLocation } from '../utils/order-utils';
+import { getFulfillmentPickupLocation } from '../utils/fulfillment-utils';
 import { useShipmentFormContext } from './shipment-form-context';
 import {
 	ITEMS_META_KEY,
+	PICKUP_ADDRESS_META_KEY,
+	PICKUP_DETAILS_META_KEY,
+	PICKUP_LOCATION_META_KEY,
 	PROVIDER_NAME_META_KEY,
 	SHIPMENT_OPTION_NO_INFO,
 	SHIPMENT_PROVIDER_META_KEY,
@@ -96,65 +100,90 @@ export const FulfillmentProvider = ( {
 			_setFulfillment( null );
 			return;
 		}
+		const itemsMeta = [
+			{
+				id: 0,
+				key: ITEMS_META_KEY,
+				value: selectedItems
+					.map( ( item ) => {
+						return {
+							item_id: item.item_id,
+							qty: item.selection.filter(
+								( selection ) => selection.checked
+							).length,
+						};
+					} )
+					.filter( ( item ) => item.qty > 0 ),
+			},
+		];
+		// A local pickup fulfillment records where the customer picks up, not a shipment.
+		const pickupLocation =
+			getFulfillmentPickupLocation( fulfillment ?? null ) ??
+			getOrderPickupLocation( order );
+		const detailsMeta = pickupLocation
+			? [
+					{
+						id: 0,
+						key: PICKUP_LOCATION_META_KEY,
+						value: pickupLocation.name,
+					},
+					{
+						id: 0,
+						key: PICKUP_ADDRESS_META_KEY,
+						value: pickupLocation.address,
+					},
+					{
+						id: 0,
+						key: PICKUP_DETAILS_META_KEY,
+						value: pickupLocation.details,
+					},
+			  ]
+			: [
+					{
+						id: 0,
+						key: SHIPPING_OPTION_META_KEY,
+						value: selectedOption,
+					},
+					{
+						id: 0,
+						key: TRACKING_NUMBER_META_KEY,
+						value:
+							selectedOption === SHIPMENT_OPTION_NO_INFO
+								? ''
+								: trackingNumber,
+					},
+					{
+						id: 0,
+						key: TRACKING_URL_META_KEY,
+						value:
+							selectedOption === SHIPMENT_OPTION_NO_INFO
+								? ''
+								: trackingUrl,
+					},
+					{
+						id: 0,
+						key: SHIPMENT_PROVIDER_META_KEY,
+						value:
+							selectedOption === SHIPMENT_OPTION_NO_INFO
+								? ''
+								: shipmentProvider,
+					},
+					{
+						id: 0,
+						key: PROVIDER_NAME_META_KEY,
+						value:
+							selectedOption === SHIPMENT_OPTION_NO_INFO
+								? ''
+								: providerName,
+					},
+			  ];
 		_setFulfillment( {
 			id: fulfillment?.id ?? undefined,
 			entity_id: String( order.id ),
 			entity_type: WC_ORDER_CLASS,
 			is_fulfilled: fulfillment?.is_fulfilled ?? false,
 			status: fulfillment?.status ?? 'unfulfilled',
-			meta_data: [
-				{
-					id: 0,
-					key: SHIPPING_OPTION_META_KEY,
-					value: selectedOption,
-				},
-				{
-					id: 0,
-					key: TRACKING_NUMBER_META_KEY,
-					value:
-						selectedOption === SHIPMENT_OPTION_NO_INFO
-							? ''
-							: trackingNumber,
-				},
-				{
-					id: 0,
-					key: TRACKING_URL_META_KEY,
-					value:
-						selectedOption === SHIPMENT_OPTION_NO_INFO
-							? ''
-							: trackingUrl,
-				},
-				{
-					id: 0,
-					key: SHIPMENT_PROVIDER_META_KEY,
-					value:
-						selectedOption === SHIPMENT_OPTION_NO_INFO
-							? ''
-							: shipmentProvider,
-				},
-				{
-					id: 0,
-					key: PROVIDER_NAME_META_KEY,
-					value:
-						selectedOption === SHIPMENT_OPTION_NO_INFO
-							? ''
-							: providerName,
-				},
-				{
-					id: 0,
-					key: ITEMS_META_KEY,
-					value: selectedItems
-						.map( ( item ) => {
-							return {
-								item_id: item.item_id,
-								qty: item.selection.filter(
-									( selection ) => selection.checked
-								).length,
-							};
-						} )
-						.filter( ( item ) => item.qty > 0 ),
-				},
-			],
+			meta_data: [ ...detailsMeta, ...itemsMeta ],
 		} as Fulfillment );
 	}, [
 		order,
