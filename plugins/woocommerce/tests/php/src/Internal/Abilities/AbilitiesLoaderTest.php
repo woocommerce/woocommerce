@@ -50,6 +50,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
 		'woocommerce/order-notes-query',
+		'woocommerce/order-refunds-query',
+		'woocommerce/order-refund-create',
 		'woocommerce/payment-gateways-query',
 		'woocommerce/customers-query',
 		'woocommerce/product-review-update',
@@ -369,6 +371,16 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
+			),
+			'woocommerce/order-refunds-query'      => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/order-refund-create'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
 			),
 			'woocommerce/payment-gateways-query'   => array(
 				'readonly'    => true,
@@ -1140,6 +1152,19 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id' => 1,
 				),
 			),
+			'order-refunds-query'      => array(
+				'woocommerce/order-refunds-query',
+				array(
+					'id' => 1,
+				),
+			),
+			'order-refund-create'      => array(
+				'woocommerce/order-refund-create',
+				array(
+					'id'     => 1,
+					'amount' => '1',
+				),
+			),
 			'payment-gateways-query'   => array(
 				'woocommerce/payment-gateways-query',
 				array(),
@@ -1846,6 +1871,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'order-notes-query'     => array(
 				'woocommerce/order-notes-query',
 				array( 'id' => -123 ),
+			),
+			'order-refunds-query'   => array(
+				'woocommerce/order-refunds-query',
+				array( 'id' => -123 ),
+			),
+			'order-refund-create'   => array(
+				'woocommerce/order-refund-create',
+				array(
+					'id'     => -123,
+					'amount' => '1',
+				),
 			),
 		);
 	}
