@@ -3794,10 +3794,12 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 */
 	public function test_update_order_review_skips_reload_without_session(): void {
 		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+		$original_cookies = $_COOKIE;
 		$original_session = WC()->session;
 
 		try {
 			wp_set_current_user( 0 );
+			$_COOKIE      = array();
 			WC()->session = new WC_Session_Handler();
 			WC()->session->init_session_cookie();
 
@@ -3816,6 +3818,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		} finally {
 			WC()->session = $original_session;
 			$_POST        = $original_post;
+			$_COOKIE      = $original_cookies;
 		}
 	}
 

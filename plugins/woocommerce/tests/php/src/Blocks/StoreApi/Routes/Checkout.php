@@ -64,6 +64,14 @@ class Checkout extends \WP_Test_REST_TestCase {
 	private $paypal_gateway_before_test;
 
 	/**
+	 * $_COOKIE before the test. filter_woocommerce_set_cookie_enabled() writes the cookies the
+	 * checkout sets, such as the session and login cookies, into it.
+	 *
+	 * @var array<string, string>
+	 */
+	private $cookies_before_test = array();
+
+	/**
 	 * Tax rate IDs inserted by the current test, removed in tearDown().
 	 *
 	 * @var int[]
@@ -126,6 +134,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
+		$this->cookies_before_test = $_COOKIE;
 		add_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4 );
 
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
@@ -220,6 +229,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 				$this->invalidate_checkout_option_caches();
 				WC()->payment_gateways()->payment_gateways = $this->payment_gateways_before_test;
 				\WC_Gateway_Paypal::set_instance( $this->paypal_gateway_before_test );
+				$_COOKIE = $this->cookies_before_test;
 			}
 		}
 	}
