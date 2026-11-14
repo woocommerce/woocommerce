@@ -40,6 +40,13 @@ class UcpCart extends UcpCartTestCase {
 	);
 
 	/**
+	 * The global size attribute the class fixtures created, or 0 when one already existed.
+	 *
+	 * @var int
+	 */
+	private static $size_attribute_id = 0;
+
+	/**
 	 * Create immutable fixtures before route registration starts.
 	 */
 	public static function wpSetUpBeforeClass(): void {
@@ -81,9 +88,12 @@ class UcpCart extends UcpCartTestCase {
 
 		self::$limited_stock_id = $limited[0]->get_id();
 
-		$fixtures  = new \Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData();
-		$parent    = $fixtures->get_variable_product( array( 'name' => 'UCP Cart Tee' ), array( $fixtures->get_product_attribute( 'size', array( 'small', 'large' ) ) ) );
-		$variation = $fixtures->get_variation_product(
+		$fixtures                = new \Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData();
+		$size_existed            = (bool) wc_attribute_taxonomy_id_by_name( 'size' );
+		$size                    = $fixtures->get_product_attribute( 'size', array( 'small', 'large' ) );
+		self::$size_attribute_id = $size_existed ? 0 : $size['attribute_id'];
+		$parent                  = $fixtures->get_variable_product( array( 'name' => 'UCP Cart Tee' ), array( $size ) );
+		$variation               = $fixtures->get_variation_product(
 			$parent->get_id(),
 			array( 'pa_size' => 'small' ),
 			array( 'regular_price' => '12.00' )
@@ -110,6 +120,13 @@ class UcpCart extends UcpCartTestCase {
 				array( self::$limited_stock_id, self::$variable['variation'], self::$variable['parent'] )
 			)
 		);
+
+		// Class fixtures are committed, so a created attribute would outlive the class, and a later
+		// fixture asking for a "Size" attribute would get this one with its lowercase label.
+		if ( self::$size_attribute_id ) {
+			wc_delete_attribute( self::$size_attribute_id );
+			self::$size_attribute_id = 0;
+		}
 	}
 
 	/**
