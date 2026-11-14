@@ -3659,8 +3659,6 @@ CREATE TABLE $meta_table (
 	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
-		global $wpdb;
-
 		if ( $this->should_backfill_post_record() && isset( $meta->id ) ) {
 			// Let's get the actual meta key before its deleted for backfilling. We cannot delete just by ID because meta IDs are different in HPOS and posts tables.
 			$db_meta = $this->data_store_meta->get_metadata_by_id( $meta->id );
@@ -3677,16 +3675,7 @@ CREATE TABLE $meta_table (
 			self::$backfilling_order_ids[] = $object->get_id();
 			if ( is_object( $meta->value ) && '__PHP_Incomplete_Class' === get_class( $meta->value ) ) {
 				$meta_value = maybe_serialize( $meta->value );
-				$wpdb->delete(
-					_get_meta_table( 'post' ),
-					array(
-						'post_id'    => $object->get_id(),
-						'meta_key'   => $meta->key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-						'meta_value' => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-					),
-					array( '%d', '%s', '%s' )
-				);
-				wp_cache_delete( $object->get_id(), 'post_meta' );
+				$this->delete_incomplete_class_post_meta( $object->get_id(), $meta->key, $meta_value );
 				/** @var \WC_Logger_Interface $logger */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
 				$logger->warning( sprintf( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID %d: "%s"', $object->get_id(), var_export( $meta_value, true ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export

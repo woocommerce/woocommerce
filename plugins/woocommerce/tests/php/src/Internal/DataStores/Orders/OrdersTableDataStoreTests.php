@@ -4192,9 +4192,25 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * Tests that unserializing meta that contains a non-existent class doesn't cause a fatal error.
+	 * Data provider for test_unserialize_meta_with_nonexistent_class.
+	 *
+	 * @return array
 	 */
-	public function test_unserialize_meta_with_nonexistent_class() {
+	public function data_provider_delete_meta_triggers_full_save(): array {
+		return array(
+			'delete without full save' => array( false ),
+			'delete with full save'    => array( true ),
+		);
+	}
+
+	/**
+	 * Tests that unserializing meta that contains a non-existent class doesn't cause a fatal error.
+	 *
+	 * @dataProvider data_provider_delete_meta_triggers_full_save
+	 *
+	 * @param bool $full_save Whether delete_meta() triggers a full order save, which syncs the deletion through update_order_meta_from_object().
+	 */
+	public function test_unserialize_meta_with_nonexistent_class( bool $full_save ) {
 		global $wpdb;
 		$meta_key   = 'test_unserialize_meta_with_nonexistent_class';
 		$meta_value = 'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.833300000000001;s:9:"longitude";d:4.3333000000000004;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}}';
@@ -4248,6 +4264,13 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		// Check that the log entry was created.
 		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `update_order_meta_from_object` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
 
+		add_filter(
+			'woocommerce_orders_table_datastore_should_save_after_meta_change',
+			function () use ( $full_save ) {
+				return $full_save;
+			}
+		);
+
 		// Test deleting meta data containing an object of a non-existent class.
 		$meta_data = $this->sut->read_meta( $order );
 		foreach ( $meta_data as $meta ) {
@@ -4257,6 +4280,10 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertEmpty( $fetched_order->get_meta_data() );
 		$this->assertEquals( '', get_post_meta( $order->get_id(), $meta_key, true ) );
+
+		if ( $full_save ) {
+			return;
+		}
 
 		// Check that the log entry was created.
 		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );

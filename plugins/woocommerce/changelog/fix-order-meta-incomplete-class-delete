@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid a fatal error when syncing orders whose meta holds an object of a class that no longer exists.
