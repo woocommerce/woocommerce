@@ -2,6 +2,8 @@
 declare( strict_types=1 );
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\StoreApi\StoreApiRequestContext;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Utilities\UnexpectedErrorResponse;
@@ -144,15 +146,20 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		}
 
 		if ( ! $response ) {
-			try {
-				$response = $this->get_response_by_request_method( $request );
-			} catch ( RouteException $error ) {
-				$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
-			} catch ( \Exception $error ) {
-				$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
-			} catch ( \Throwable $error ) {
-				$response = UnexpectedErrorResponse::create( $error, static::class );
-			}
+			$response = StoreApi::container()->get( StoreApiRequestContext::class )->run_with_request(
+				$request,
+				function () use ( $request ) {
+					try {
+						return $this->get_response_by_request_method( $request );
+					} catch ( RouteException $error ) {
+						return $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
+					} catch ( \Exception $error ) {
+						return $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
+					} catch ( \Throwable $error ) {
+						return UnexpectedErrorResponse::create( $error, static::class );
+					}
+				}
+			);
 		}
 
 		// For successful update requests, recalculate cart totals and sync draft orders with the current cart.

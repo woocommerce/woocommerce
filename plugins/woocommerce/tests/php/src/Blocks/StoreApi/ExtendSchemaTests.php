@@ -8,6 +8,7 @@ use Automattic\WooCommerce\StoreApi\Formatters;
 use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
+use Automattic\WooCommerce\StoreApi\StoreApiRequestContext;
 
 /**
  * Tests Extend Schema Functionality and helpers.
@@ -21,6 +22,13 @@ class ExtendSchemaTests extends TestCase {
 	 * @var ExtendSchema
 	 */
 	private $mock_extend;
+
+	/**
+	 * Request context passed to the ExtendSchema instance.
+	 *
+	 * @var StoreApiRequestContext
+	 */
+	private $request_context;
 
 	/**
 	 * Dummy function to ensure API gives the same function back.
@@ -37,8 +45,9 @@ class ExtendSchemaTests extends TestCase {
 		$formatters->register( 'money', MoneyFormatter::class );
 		$formatters->register( 'html', HtmlFormatter::class );
 		$formatters->register( 'currency', CurrencyFormatter::class );
-		$this->mock_extend = new ExtendSchema( $formatters );
-		$this->dummy       = function () {
+		$this->request_context = new StoreApiRequestContext();
+		$this->mock_extend     = new ExtendSchema( $formatters, $this->request_context );
+		$this->dummy           = function () {
 			return null;
 		};
 
@@ -195,6 +204,48 @@ class ExtendSchemaTests extends TestCase {
 
 		$this->assertSame( array(), $schema->{'first-plugin'}['properties'] );
 		$this->assertSame( array( 'token' => array( 'type' => 'string' ) ), $schema->{'second-plugin'}['properties'] );
+	}
+
+	/**
+	 * @testdox Data callbacks receive the current request after the schema's own arguments.
+	 */
+	public function test_get_endpoint_data_passes_the_current_request_to_data_callbacks() {
+		$received_args = null;
+		$this->register_endpoint_data(
+			'test-plugin',
+			function ( ...$args ) use ( &$received_args ) {
+				$received_args = $args;
+				return array();
+			}
+		);
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/cart' );
+
+		$this->request_context->run_with_request(
+			$request,
+			function () {
+				$this->mock_extend->get_endpoint_data( 'cart', array( 'cart-item' ) );
+			}
+		);
+
+		$this->assertSame( array( 'cart-item', $request ), $received_args );
+	}
+
+	/**
+	 * @testdox Data callbacks receive null for the request when no Store API request is being responded to.
+	 */
+	public function test_get_endpoint_data_passes_null_when_there_is_no_request() {
+		$received_args = null;
+		$this->register_endpoint_data(
+			'test-plugin',
+			function ( ...$args ) use ( &$received_args ) {
+				$received_args = $args;
+				return array();
+			}
+		);
+
+		$this->mock_extend->get_endpoint_data( 'cart' );
+
+		$this->assertSame( array( null ), $received_args );
 	}
 
 	/**
