@@ -14,7 +14,8 @@ use PHPUnit\Framework\TestSuite;
  * WC_Early_Exit_Guard_Listener_Test class.
  *
  * Drives a listener that registers no shutdown check against a separate, never-run test and
- * suites, so its state is independent of the run this test is part of.
+ * suites, so its state is independent of the run this test is part of. The shutdown check itself
+ * exits the process, so it is tested in a separate PHP process.
  */
 class WC_Early_Exit_Guard_Listener_Test extends WC_Unit_Test_Case {
 
@@ -117,5 +118,52 @@ class WC_Early_Exit_Guard_Listener_Test extends WC_Unit_Test_Case {
 		$this->sut->endTestSuite( $this->observed_suite );
 
 		$this->assertNotNull( $this->sut->early_exit_message() );
+	}
+
+	/**
+	 * @testdox A process that ends before the run finishes exits with status 1 and names the test; one that ends after keeps status 0 and prints nothing.
+	 *
+	 * @dataProvider provider_process_endings
+	 *
+	 * @param string $scenario        Whether the process ends during a test or after the run finished.
+	 * @param int    $expected_status Exit status the process should end with.
+	 * @param string $expected_stderr What the process should write to stderr, or a part of it.
+	 */
+	public function test_shutdown_check_sets_the_exit_status( string $scenario, int $expected_status, string $expected_stderr ): void {
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_proc_open -- Runs the PHP CLI on a fixed script with no user input.
+		$process = proc_open(
+			array( PHP_BINARY, '-d', 'display_errors=stderr', dirname( __DIR__ ) . '/helpers/early-exit-guard-runner.php', $scenario ),
+			array(
+				1 => array( 'pipe', 'w' ),
+				2 => array( 'pipe', 'w' ),
+			),
+			$pipes
+		);
+		$this->assertIsResource( $process, 'The PHP CLI should start the runner script.' );
+		$stdout = stream_get_contents( $pipes[1] );
+		$stderr = stream_get_contents( $pipes[2] );
+		fclose( $pipes[1] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		fclose( $pipes[2] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		$status = proc_close( $process );
+
+		$this->assertSame( '', $stdout, 'The runner script should print nothing to stdout.' );
+		$this->assertSame( $expected_status, $status, "The process should exit with status $expected_status. Its stderr: $stderr" );
+		if ( '' === $expected_stderr ) {
+			$this->assertSame( '', $stderr, 'A finished run should print nothing.' );
+		} else {
+			$this->assertStringContainsString( $expected_stderr, $stderr );
+		}
+	}
+
+	/**
+	 * Ways the runner script's process can end.
+	 *
+	 * @return array<string, array{0: string, 1: int, 2: string}>
+	 */
+	public function provider_process_endings(): array {
+		return array(
+			'exit during a test' => array( 'unfinished', 1, 'PHPUnit did not finish: the PHP process ended while running WC_Early_Exit_Guard_Runner_Test::test_noop.' ),
+			'exit after the run' => array( 'finished', 0, '' ),
+		);
 	}
 }
