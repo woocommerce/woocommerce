@@ -535,7 +535,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 						$attribute_object->set_options( $options );
 						$attribute_object->set_position( $position );
 						$attribute_object->set_visible( $is_visible );
-						$attribute_object->set_variation( $is_variation );
+						$attribute_object->set_variation( isset( $attribute['variation'] ) ? (int) $attribute['variation'] : $is_variation );
 
 						/**
 						 * Filter product attribute after initialization.
@@ -560,7 +560,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					$attribute_object->set_options( $attribute['value'] );
 					$attribute_object->set_position( $position );
 					$attribute_object->set_visible( $is_visible );
-					$attribute_object->set_variation( $is_variation );
+					$attribute_object->set_variation( isset( $attribute['variation'] ) ? (int) $attribute['variation'] : $is_variation );
 
 					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- see same filter in the 'if' block.
 					$attributes[] = apply_filters( 'woocommerce_product_importer_read_attribute', $attribute_object, $attribute, $product );
@@ -671,6 +671,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 	/**
 	 * Get variation parent attributes and set "is_variation".
+	 *
+	 * A variation row that uses an attribute turns "Used for variations" on for it, even when the parent row
+	 * set it to 0, because a variation can only use attributes that are enabled for variations.
 	 *
 	 * @param  array      $attributes Attributes list.
 	 * @param  WC_Product $parent     Parent product data.

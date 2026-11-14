@@ -741,6 +741,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 					$this->column_names[ 'attributes:visible' . $i ] = sprintf( __( 'Attribute %d visible', 'woocommerce' ), $i );
 					/* translators: %s: attribute number */
 					$this->column_names[ 'attributes:taxonomy' . $i ] = sprintf( __( 'Attribute %d global', 'woocommerce' ), $i );
+					/* translators: %s: attribute number */
+					$this->column_names[ 'attributes:variation' . $i ] = sprintf( __( 'Attribute %d used for variations', 'woocommerce' ), $i );
 
 					if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
 						$row[ 'attributes:name' . $i ] = html_entity_decode( wc_attribute_label( $attribute->get_name(), $product ), ENT_QUOTES );
@@ -760,7 +762,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 							$row[ 'attributes:taxonomy' . $i ] = 0;
 						}
 
-						$row[ 'attributes:visible' . $i ] = $attribute->get_visible();
+						$row[ 'attributes:visible' . $i ]   = $attribute->get_visible();
+						$row[ 'attributes:variation' . $i ] = $attribute->get_variation();
 					} else {
 						$row[ 'attributes:name' . $i ] = html_entity_decode( wc_attribute_label( $attribute_name, $product ), ENT_QUOTES );
 
@@ -773,7 +776,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 							$row[ 'attributes:taxonomy' . $i ] = 0;
 						}
 
-						$row[ 'attributes:visible' . $i ] = '';
+						$row[ 'attributes:visible' . $i ]   = '';
+						$row[ 'attributes:variation' . $i ] = '';
 					}
 
 					if ( $product->is_type( ProductType::VARIABLE ) && isset( $default_attributes[ sanitize_title( $attribute_name ) ] ) ) {
