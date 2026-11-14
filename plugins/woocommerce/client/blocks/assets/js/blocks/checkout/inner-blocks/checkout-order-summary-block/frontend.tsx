@@ -3,7 +3,10 @@
  */
 import { TotalsFooterItem } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import {
+	useSettledOrderSummaryValue,
+	useStoreCart,
+} from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import {
@@ -60,7 +63,10 @@ const FrontendBlock = ( {
 	} );
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
-	const totalPrice = parseInt( cartTotals.total_price, 10 );
+	// The total changes when the totals skeletons end, not before.
+	const totalPrice = useSettledOrderSummaryValue(
+		parseInt( cartTotals.total_price, 10 )
+	);
 	const showInline = ! hasContainerWidth || isLarge || isOpen;
 
 	useEffect( () => {

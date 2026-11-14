@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Show loading placeholders in the Cart and Checkout blocks for less time, and update cart line totals as soon as quantities change.
