@@ -54,20 +54,35 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
-			'tax_options'                       => array( 'title', 'sectionend' ),
-			'woocommerce_prices_include_tax'    => 'radio',
-			'woocommerce_tax_based_on'          => 'select',
-			'woocommerce_shipping_tax_class'    => 'select',
-			'woocommerce_tax_round_at_subtotal' => 'checkbox',
-			'woocommerce_tax_classes'           => 'textarea',
-			'woocommerce_tax_display_shop'      => 'select',
-			'woocommerce_tax_display_cart'      => 'select',
-			'woocommerce_price_display_suffix'  => 'text',
-			'woocommerce_tax_total_display'     => 'select',
-			''                                  => array( 'conflict_error', 'add_settings_slot' ),
+			'tax_options'                                  => array( 'title', 'sectionend' ),
+			'woocommerce_prices_include_tax'               => 'radio',
+			'woocommerce_tax_based_on'                     => 'select',
+			'woocommerce_shipping_tax_class'               => 'select',
+			'woocommerce_split_shipping_tax_by_item_value' => 'checkbox',
+			'woocommerce_tax_round_at_subtotal'            => 'checkbox',
+			'woocommerce_tax_classes'                      => 'textarea',
+			'woocommerce_tax_display_shop'                 => 'select',
+			'woocommerce_tax_display_cart'                 => 'select',
+			'woocommerce_price_display_suffix'             => 'text',
+			'woocommerce_tax_total_display'                => 'select',
+			''                                             => array( 'conflict_error', 'add_settings_slot' ),
 		);
 
 		$this->assertEquals( $expected, $setting_ids_and_types );
+	}
+
+	/**
+	 * @testDox 'get_settings' leaves out the shipping tax class and the split checkbox when shipping is disabled.
+	 */
+	public function test_get_settings_for_default_section_without_shipping() {
+		add_filter( 'wc_shipping_enabled', '__return_false' );
+
+		$settings = ( new WC_Settings_Tax() )->get_settings_for_section( '' );
+
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
+
+		$this->assertArrayNotHasKey( 'woocommerce_shipping_tax_class', $setting_ids_and_types );
+		$this->assertArrayNotHasKey( 'woocommerce_split_shipping_tax_by_item_value', $setting_ids_and_types );
 	}
 
 	/**

@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Enums\OrderItemType;
+use Automattic\WooCommerce\Internal\Tax\ShippingTaxSplit;
 
 /**
  * API\Reports\Taxes\DataStore.
@@ -968,6 +969,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 */
 		$items = $order->get_items( array( OrderItemType::LINE_ITEM, OrderItemType::FEE, OrderItemType::SHIPPING ) );
 
+		$shipping_tax_split = wc_get_container()->get( ShippingTaxSplit::class );
+		$rate_classes       = array();
+
 		foreach ( $items as $item ) {
 			$taxes = $item->get_taxes();
 			if ( empty( $taxes['total'] ) || ! is_array( $taxes['total'] ) ) {
@@ -976,10 +980,36 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$part = OrderItemType::SHIPPING === $item->get_type() ? 'shipping' : 'order';
 
-			$non_compound_tax = 0.0;
+			// A shipping line split across tax classes was taxed on each class's part of its cost, so each rate's
+			// base is the part of its own class. Rates of a class missing from the split fall back to the full total.
+			$class_costs = $item instanceof \WC_Order_Item_Shipping ? $shipping_tax_split->get_charged_costs( $item ) : null;
+			$rate_bases  = array();
+			$rate_groups = array();
+
+			foreach ( array_keys( $taxes['total'] ) as $rate_id ) {
+				$rate_bases[ $rate_id ]  = (float) $item->get_total();
+				$rate_groups[ $rate_id ] = '';
+
+				if ( null !== $class_costs ) {
+					if ( ! array_key_exists( $rate_id, $rate_classes ) ) {
+						$rate                     = \WC_Tax::_get_tax_rate( (int) $rate_id );
+						$rate_classes[ $rate_id ] = is_array( $rate ) && isset( $rate['tax_rate_class'] ) ? (string) $rate['tax_rate_class'] : null;
+					}
+
+					$tax_class = $rate_classes[ $rate_id ];
+
+					if ( null !== $tax_class && isset( $class_costs[ $tax_class ] ) ) {
+						$rate_bases[ $rate_id ]  = $class_costs[ $tax_class ];
+						$rate_groups[ $rate_id ] = 'class:' . $tax_class;
+					}
+				}
+			}
+
+			// A compound rate only compounds over the taxes charged on the same base.
+			$non_compound_tax = array();
 			foreach ( $taxes['total'] as $rate_id => $tax ) {
 				if ( is_numeric( $tax ) && ! in_array( (int) $rate_id, $compound_rate_ids, true ) ) {
-					$non_compound_tax += (float) $tax;
+					$non_compound_tax[ $rate_groups[ $rate_id ] ] = ( $non_compound_tax[ $rate_groups[ $rate_id ] ] ?? 0.0 ) + (float) $tax;
 				}
 			}
 
@@ -988,7 +1018,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			// Assumes the item tax data keeps core's rate order (compound rates after the
 			// rates they compound over); a third-party engine writing another order would
 			// only mis-split the base between multiple compound rates, not the total.
-			$compound_running_tax = 0.0;
+			$compound_running_tax = array();
 			foreach ( $taxes['total'] as $rate_id => $tax ) {
 				// Admin saves without recalculating store '' for rates that never applied
 				// to the item. Numeric zero still counts (zero-rated sales).
@@ -996,10 +1026,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					continue;
 				}
 
-				$base = (float) $item->get_total();
+				$group = $rate_groups[ $rate_id ];
+				$base  = $rate_bases[ $rate_id ];
 				if ( in_array( (int) $rate_id, $compound_rate_ids, true ) ) {
-					$base                 += $non_compound_tax + $compound_running_tax;
-					$compound_running_tax += (float) $tax;
+					$base                          += ( $non_compound_tax[ $group ] ?? 0.0 ) + ( $compound_running_tax[ $group ] ?? 0.0 );
+					$compound_running_tax[ $group ] = ( $compound_running_tax[ $group ] ?? 0.0 ) + (float) $tax;
 				}
 
 				if ( ! isset( $amounts[ $rate_id ] ) ) {
