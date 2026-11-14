@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent the HPOS partial backfill (`wp wc hpos backfill --meta_keys`) from duplicating meta rows in `wp_postmeta` when compatibility sync is on.

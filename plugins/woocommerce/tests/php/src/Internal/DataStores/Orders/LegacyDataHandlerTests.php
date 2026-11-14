@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -279,4 +280,48 @@ class LegacyDataHandlerTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( $order_cpt->get_meta( 'other_meta', true, 'edit' ), $order_hpos->get_meta( 'other_meta', true, 'edit' ) );
 	}
 
+	/**
+	 * @testdox Partial backfill of meta from posts to HPOS with sync enabled doesn't duplicate the meta in the posts table.
+	 */
+	public function test_backfill_meta_to_hpos_with_sync_does_not_duplicate_post_meta() {
+		$this->enable_cot_sync();
+		$order = new \WC_Order();
+		$order->save();
+
+		add_post_meta( $order->get_id(), 'backfill_meta', 'value' );
+
+		$this->sut->backfill_order_to_datastore( $order->get_id(), 'posts', 'hpos', array( 'meta_keys' => array( 'backfill_meta' ) ) );
+
+		$this->assertSame( array( 'value' ), get_post_meta( $order->get_id(), 'backfill_meta', false ) );
+
+		$order_hpos = $this->sut->get_order_from_datastore( $order->get_id(), 'hpos' );
+		$this->assertCount( 1, $order_hpos->get_meta( 'backfill_meta', false, 'edit' ) );
+		$this->assertSame( 'value', $order_hpos->get_meta( 'backfill_meta', true, 'edit' ) );
+
+		$this->disable_cot_sync();
+	}
+
+	/**
+	 * @testdox update_order_from_object() keeps the sync-on-read marker of an outer call for the same order.
+	 */
+	public function test_update_order_from_object_preserves_outer_sync_on_read_marker() {
+		$this->enable_cot_sync();
+		$order = new \WC_Order();
+		$order->save();
+
+		$property = new \ReflectionProperty( OrdersTableDataStore::class, 'sync_on_read_order_ids' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$property->setAccessible( true );
+		}
+		$original = $property->getValue();
+		$property->setValue( null, array( $order->get_id() => true ) );
+
+		try {
+			wc_get_container()->get( OrdersTableDataStore::class )->update_order_from_object( $order );
+			$this->assertArrayHasKey( $order->get_id(), $property->getValue() );
+		} finally {
+			$property->setValue( null, $original );
+			$this->disable_cot_sync();
+		}
+	}
 }
