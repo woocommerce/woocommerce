@@ -299,12 +299,15 @@ final class ReserveStock {
 		global $wpdb;
 
 		$pending = OrderInternalStatus::PENDING;
+		// A hold also counts after the order became paid or on-hold, until wc_release_stock_for_order() (priority 11)
+		// deletes it right after wc_maybe_reduce_stock_levels() (priority 10) took the stock.
+		$held = "'wc-checkout-draft', '$pending', 'wc-on-hold', 'wc-processing', 'wc-completed'";
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$join         = "{$wpdb->prefix}wc_orders orders ON stock_table.`order_id` = orders.id";
-			$where_status = "orders.status IN ( 'wc-checkout-draft', '$pending' )";
+			$where_status = "orders.status IN ( $held )";
 		} else {
 			$join         = "{$wpdb->posts} posts ON stock_table.`order_id` = posts.ID";
-			$where_status = "posts.post_status IN ( 'wc-checkout-draft', '$pending' )";
+			$where_status = "posts.post_status IN ( $held )";
 		}
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared

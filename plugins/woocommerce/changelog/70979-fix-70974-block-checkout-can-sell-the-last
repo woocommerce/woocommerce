@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix block checkout selling the last unit twice by counting stock holds on on-hold, processing and completed orders until the stock is reduced.
