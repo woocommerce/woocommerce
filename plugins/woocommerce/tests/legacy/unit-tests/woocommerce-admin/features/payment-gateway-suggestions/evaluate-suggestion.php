@@ -326,6 +326,9 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 	 * Test that the memo is set correctly.
 	 */
 	public function test_memo_set_correctly() {
+		// Other tests evaluate specs through the same static memo.
+		TestableEvaluateSuggestion::reset_memo();
+
 		$specs = array(
 			array(
 				'id'         => 'test-gateway-1',

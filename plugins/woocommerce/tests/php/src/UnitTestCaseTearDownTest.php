@@ -254,26 +254,42 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Whether WordPress uses an external object cache is put back as it was at setUp(), even when that was unset.
+	 */
+	public function test_restore_object_cache_mode_undoes_a_switch(): void {
+		$mode_at_setup = $GLOBALS['_wp_using_ext_object_cache'] ?? null;
+		wp_using_ext_object_cache( true !== $mode_at_setup );
+
+		$this->restore_object_cache_mode();
+
+		$this->assertSame( $mode_at_setup, $GLOBALS['_wp_using_ext_object_cache'] ?? null, 'The object cache mode should be back to what it was at setUp().' );
+	}
+
+	/**
 	 * @testdox The restores leave state alone for a test whose setUp() never reached the base class.
 	 */
 	public function test_restores_leave_state_alone_when_setup_did_not_run(): void {
 		// Like a test that skips in setUp() before calling parent::setUp(): PHPUnit still runs its tearDown().
 		$case = new class( 'placeholder' ) extends \WC_Unit_Test_Case {
 			/**
-			 * Run the three restores on a case that saved no state.
+			 * Run the restores on a case that saved no state.
 			 */
 			public function restore_without_setup(): void {
 				$this->restore_server_superglobal();
 				$this->restore_constant_overrides();
 				$this->restore_block_type_registry();
+				$this->restore_object_cache_mode();
 			}
 		};
 		Constants::set_constant( 'WC_TEARDOWN_TEST_KEPT', 'kept' );
 		$server      = $_SERVER;
 		$overrides   = Constants::$set_constants;
 		$block_types = \WP_Block_Type_Registry::get_instance()->get_all_registered();
+		wp_using_ext_object_cache( true );
 
 		$case->restore_without_setup();
+
+		$this->assertTrue( wp_using_ext_object_cache(), 'The object cache mode should be left as it was.' );
 
 		$this->assertSame( $server, $_SERVER, '$_SERVER should be left as it was.' );
 		$this->assertSame( $overrides, Constants::$set_constants, 'Constants overrides should be left as they were.' );

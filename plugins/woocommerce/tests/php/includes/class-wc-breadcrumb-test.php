@@ -33,9 +33,9 @@ class WC_Breadcrumb_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->sut->reset();
-		global $wp_query, $post;
-		$wp_query = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$post     = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		// Put back the main query the tests replace, rather than leaving later tests without one.
+		// wp_reset_postdata() would only reset $post from the replaced query, not restore $wp_query.
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query
 	}
 
 	/**
