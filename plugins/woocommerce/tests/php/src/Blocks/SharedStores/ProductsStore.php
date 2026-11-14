@@ -93,7 +93,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'products', $state );
 		$this->assertArrayHasKey( $product->get_id(), $state['products'] );
-		$this->assertSame( $product->get_name(), $state['products'][ $product->get_id() ]['name'] );
+		$this->assertSame( $product->get_id(), $state['products'][ $product->get_id() ]['id'] );
 		$this->assertSame( $product->get_name(), $result['name'], 'Return value should contain the product data.' );
 
 		$product->delete( true );
@@ -364,7 +364,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$resolved = $closure();
 
 		$this->assertIsArray( $resolved );
-		$this->assertSame( $product->get_name(), $resolved['name'] );
+		$this->assertSame( $product->get_id(), $resolved['id'] );
 
 		$product->delete( true );
 	}
@@ -427,7 +427,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 			$resolved,
 			'productInContext should unwrap the closures and fall through to the product branch when no variation is selected.'
 		);
-		$this->assertSame( $product->get_name(), $resolved['name'] );
+		$this->assertSame( $product->get_id(), $resolved['id'] );
 
 		$product->delete( true );
 	}

@@ -173,7 +173,7 @@ $interactive_attributes = $is_interactive
     : '';
 ```
 
-Any `ProductResponseItem` field can be bound the same way, e.g. `state.productInContext.price_html`, `state.productInContext.stock_availability.text`, `state.mainProductInContext.name`.
+Bindings can read only the fields listed for that state key in `ProductsStore::CLIENT_STATE_FIELDS`, e.g. `state.productInContext.price_html` or `state.productInContext.stock_availability.text`. The client re-evaluates bindings on hydration, so an unlisted field renders empty. Add it to the list to bind it.
 
 #### From JS (client)
 

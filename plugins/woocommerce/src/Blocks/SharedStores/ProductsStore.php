@@ -157,6 +157,122 @@ class ProductsStore {
 	}
 
 	/**
+	 * Store API fields that first-party blocks read from client state, per state key.
+	 *
+	 * `true` keeps a field whole; an array keeps only the listed keys of an object, or of each item in a list.
+	 * A field a directive binding reads must be listed for every kind it can resolve to; the client
+	 * re-evaluates bindings on hydration and blanks values missing from state.
+	 *
+	 * @var array<string, array>
+	 */
+	private const CLIENT_STATE_FIELDS = array(
+		'products'          => array(
+			'id'                   => true,
+			'type'                 => true,
+			'is_purchasable'       => true,
+			'is_in_stock'          => true,
+			'sold_individually'    => true,
+			'add_to_cart'          => array(
+				'minimum'     => true,
+				'maximum'     => true,
+				'multiple_of' => true,
+			),
+			'variations'           => array(
+				'id'         => true,
+				'attributes' => array(
+					'name'  => true,
+					'value' => true,
+				),
+			),
+			'attributes'           => array(
+				'name'     => true,
+				'taxonomy' => true,
+				'terms'    => array(
+					'name' => true,
+					'slug' => true,
+				),
+			),
+			'price_html'           => true,
+			'sku'                  => true,
+			'stock_availability'   => array( 'text' => true ),
+			'formatted_weight'     => true,
+			'formatted_dimensions' => true,
+		),
+		'productVariations' => array(
+			'id'                   => true,
+			'type'                 => true,
+			'parent'               => true,
+			'is_purchasable'       => true,
+			'is_in_stock'          => true,
+			'sold_individually'    => true,
+			'add_to_cart'          => array(
+				'minimum'     => true,
+				'maximum'     => true,
+				'multiple_of' => true,
+			),
+			'price_html'           => true,
+			'description'          => true,
+			'sku'                  => true,
+			'stock_availability'   => array( 'text' => true ),
+			'formatted_weight'     => true,
+			'formatted_dimensions' => true,
+			'on_sale'              => true,
+			'prices'               => array(
+				'price'                       => true,
+				'regular_price'               => true,
+				'currency_code'               => true,
+				'currency_symbol'             => true,
+				'currency_minor_unit'         => true,
+				'currency_decimal_separator'  => true,
+				'currency_thousand_separator' => true,
+				'currency_prefix'             => true,
+				'currency_suffix'             => true,
+			),
+		),
+	);
+
+	/**
+	 * Reduce products or variations to the fields client state needs.
+	 *
+	 * Loader return values keep the full Store API response; only the state write is reduced.
+	 *
+	 * @param array  $items Products or variations keyed by ID.
+	 * @param string $kind  State key: 'products' or 'productVariations'.
+	 * @return array Items keyed by ID with only CLIENT_STATE_FIELDS[ $kind ].
+	 */
+	private static function to_client_state( array $items, string $kind ): array {
+		return array_map(
+			static fn( array $item ): array => self::pick_fields( $item, self::CLIENT_STATE_FIELDS[ $kind ] ),
+			$items
+		);
+	}
+
+	/**
+	 * Keep only the listed keys of $data, recursing into objects and lists of objects.
+	 *
+	 * @param array $data   Store API object.
+	 * @param array $fields Field spec, see CLIENT_STATE_FIELDS.
+	 * @return array
+	 */
+	private static function pick_fields( array $data, array $fields ): array {
+		$picked = array();
+		foreach ( array_intersect_key( $data, $fields ) as $key => $value ) {
+			$nested = $fields[ $key ];
+			if ( true === $nested || ! is_array( $value ) ) {
+				$picked[ $key ] = $value;
+			} elseif ( array_values( $value ) === $value ) {
+				$picked[ $key ] = array_map(
+					static fn( $entry ) => is_array( $entry ) ? self::pick_fields( $entry, $nested ) : $entry,
+					$value
+				);
+			} else {
+				$picked[ $key ] = self::pick_fields( $value, $nested );
+			}
+		}
+		return $picked;
+	}
+
+	/**
 	 * Load a product into state.
 	 *
 	 * @param string $consent_statement The consent statement string.
@@ -178,7 +294,7 @@ class ProductsStore {
 		self::register_getters();
 		wp_interactivity_state(
 			self::$store_namespace,
-			array( 'products' => array( $product_id => self::$products[ $product_id ] ) )
+			array( 'products' => self::to_client_state( array( $product_id => self::$products[ $product_id ] ), 'products' ) )
 		);
 
 		return self::$products[ $product_id ];
@@ -235,7 +351,7 @@ class ProductsStore {
 		self::register_getters();
 		wp_interactivity_state(
 			self::$store_namespace,
-			array( 'products' => $keyed_products )
+			array( 'products' => self::to_client_state( $keyed_products, 'products' ) )
 		);
 
 		return $keyed_products;
@@ -275,7 +391,7 @@ class ProductsStore {
 		self::register_getters();
 		wp_interactivity_state(
 			self::$store_namespace,
-			array( 'productVariations' => $keyed_variations )
+			array( 'productVariations' => self::to_client_state( $keyed_variations, 'productVariations' ) )
 		);
 
 		return $keyed_variations;
