@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop auto-updates installing WooCommerce.com extension versions that need a newer WordPress, and say which version an update needs.
