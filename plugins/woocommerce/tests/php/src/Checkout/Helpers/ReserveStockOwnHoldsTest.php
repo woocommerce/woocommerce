@@ -339,6 +339,24 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	}
 
 	// ---------------------------------------------------------------------
+	// 6. Holds on orders that are paid but not yet released.
+	// ---------------------------------------------------------------------
+
+	/**
+	 * @testdox A hold keeps counting while its order is on-hold, processing or completed, until it is released.
+	 */
+	public function test_hold_counts_for_on_hold_processing_and_completed_orders(): void {
+		foreach ( array( OrderStatus::ON_HOLD, OrderStatus::PROCESSING, OrderStatus::COMPLETED ) as $status ) {
+			$product = $this->create_stock_managed_product( 1 );
+			$order   = $this->create_unpaid_order_for( 0, $product, $status );
+
+			$this->hold_stock( $order, $product->get_id(), 1, 1 );
+
+			$this->assertSame( 1, wc_get_held_stock_quantity( $product, 0 ), "A hold on a '$status' order is counted." );
+		}
+	}
+
+	// ---------------------------------------------------------------------
 	// Helpers.
 	// ---------------------------------------------------------------------
 
