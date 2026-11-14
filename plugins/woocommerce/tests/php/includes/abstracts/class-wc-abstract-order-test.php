@@ -9,6 +9,8 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
@@ -3042,18 +3044,148 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should warn when an order is saved with a status that exceeds the storage limit.
+	 * Data provider for order storage engines.
+	 *
+	 * @return array<string, array{bool}>
 	 */
-	public function test_saving_an_order_with_a_too_long_status_warns() {
-		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
+	public function order_storage_provider(): array {
+		return array(
+			'HPOS storage' => array( true ),
+			'CPT storage'  => array( false ),
+		);
+	}
 
-		// 'wc-' + 18 characters = 21, one over the 20-character storage limit.
-		$status = str_repeat( 'a', 18 );
-		$this->register_custom_order_status( $status );
+	/**
+	 * @dataProvider order_storage_provider
+	 * @testdox Initial order creation with a status exceeding the storage limit falls back to pending and warns.
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_initial_order_creation_with_too_long_status_falls_back_to_pending( bool $hpos_enabled ): void {
+		$prev_hpos = OrderUtil::custom_orders_table_usage_is_enabled();
+		OrderHelper::toggle_cot_feature_and_usage( $hpos_enabled );
 
-		$order = WC_Helper_Order::create_order();
-		$order->set_status( $status );
-		$order->save();
+		try {
+			// 'wc-' + 23 characters = 26, well over the 20-character storage limit.
+			$too_long_status = 'awaiting-carrier-pickup';
+			$this->register_custom_order_status( $too_long_status );
+
+			// 1. Direct instantiation: new WC_Order() before read.
+			$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::set_status' );
+			$order = new WC_Order();
+			$order->set_status( $too_long_status );
+			$order->save();
+
+			$this->assertSame( OrderStatus::PENDING, $order->get_status() );
+			$this->assertSame( OrderStatus::PENDING, wc_get_order( $order->get_id() )->get_status() );
+
+			// 2. Factory creation via wc_create_order().
+			$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::set_status' );
+			$order_from_factory = wc_create_order( array( 'status' => $too_long_status ) );
+			$this->assertInstanceOf( WC_Order::class, $order_from_factory );
+			$this->assertSame( OrderStatus::PENDING, $order_from_factory->get_status() );
+			$this->assertSame( OrderStatus::PENDING, wc_get_order( $order_from_factory->get_id() )->get_status() );
+		} finally {
+			OrderHelper::toggle_cot_feature_and_usage( $prev_hpos );
+		}
+	}
+
+	/**
+	 * @dataProvider order_storage_provider
+	 * @testdox Updating an existing order in an exception status to a status exceeding storage limit preserves exception status.
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_updating_existing_order_in_exception_status_preserves_status( bool $hpos_enabled ): void {
+		$prev_hpos = OrderUtil::custom_orders_table_usage_is_enabled();
+		OrderHelper::toggle_cot_feature_and_usage( $hpos_enabled );
+
+		try {
+			// 'wc-' + 23 characters = 26, well over the 20-character storage limit.
+			$too_long_status = 'awaiting-carrier-pickup';
+			$this->register_custom_order_status( $too_long_status );
+
+			foreach ( array( OrderStatus::TRASH, OrderStatus::AUTO_DRAFT ) as $exception_status ) {
+				$order = WC_Helper_Order::create_order();
+				$order->set_status( $exception_status );
+				$order->save();
+
+				$this->assertSame( $exception_status, $order->get_status() );
+
+				// Direct set_status() should preserve the exception status and warn.
+				$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::set_status' );
+				$order->set_status( $too_long_status );
+				$this->assertSame( $exception_status, $order->get_status() );
+				$order->save();
+				$this->assertSame( $exception_status, wc_get_order( $order->get_id() )->get_status() );
+
+				// update_status() should return false, warn, and preserve the exception status.
+				$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::set_status' );
+				$result = $order->update_status( $too_long_status );
+				$this->assertFalse( $result, 'update_status() must return false when the requested status could not be applied.' );
+				$this->assertSame( $exception_status, $order->get_status() );
+				$this->assertSame( $exception_status, wc_get_order( $order->get_id() )->get_status() );
+			}
+		} finally {
+			OrderHelper::toggle_cot_feature_and_usage( $prev_hpos );
+		}
+	}
+
+	/**
+	 * @dataProvider order_storage_provider
+	 * @testdox Updating an existing order to a status exceeding storage limit preserves status, warns, and update_status() returns false.
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_updating_an_existing_order_to_a_too_long_status_preserves_status( bool $hpos_enabled ): void {
+		$prev_hpos = OrderUtil::custom_orders_table_usage_is_enabled();
+		OrderHelper::toggle_cot_feature_and_usage( $hpos_enabled );
+
+		try {
+			// 'wc-' + 23 characters = 26, well over the 20-character storage limit.
+			$too_long_status = 'awaiting-carrier-pickup';
+			$this->register_custom_order_status( $too_long_status );
+
+			$order = WC_Helper_Order::create_order();
+			$order->set_status( OrderStatus::PROCESSING );
+			$order->save();
+
+			$this->assertSame( OrderStatus::PROCESSING, $order->get_status() );
+
+			// Direct set_status() should preserve existing status and warn.
+			$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::set_status' );
+			$order->set_status( $too_long_status );
+			$this->assertSame( OrderStatus::PROCESSING, $order->get_status() );
+			$order->save();
+			$this->assertSame( OrderStatus::PROCESSING, wc_get_order( $order->get_id() )->get_status() );
+
+			// update_status() should return false, warn, and preserve existing status.
+			$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::set_status' );
+			$result = $order->update_status( $too_long_status );
+			$this->assertFalse( $result, 'update_status() must return false when the requested status could not be applied.' );
+			$this->assertSame( OrderStatus::PROCESSING, $order->get_status() );
+			$this->assertSame( OrderStatus::PROCESSING, wc_get_order( $order->get_id() )->get_status() );
+		} finally {
+			OrderHelper::toggle_cot_feature_and_usage( $prev_hpos );
+		}
+	}
+
+	/**
+	 * @testdox is_valid_status should reject statuses exceeding the storage limit.
+	 */
+	public function test_is_valid_status_rejects_statuses_exceeding_storage_limit(): void {
+		$valid_limit_status = str_repeat( 'a', 17 );
+		$too_long_status    = str_repeat( 'b', 18 );
+
+		$this->register_custom_order_status( $valid_limit_status );
+		$this->register_custom_order_status( $too_long_status );
+
+		$order = new WC_Order();
+
+		$this->assertTrue( $order->is_valid_status( $valid_limit_status ) );
+		$this->assertTrue( $order->is_valid_status( 'wc-' . $valid_limit_status ) );
+		$this->assertFalse( $order->is_valid_status( $too_long_status ) );
+		$this->assertFalse( $order->is_valid_status( 'wc-' . $too_long_status ) );
 	}
 
 	/**

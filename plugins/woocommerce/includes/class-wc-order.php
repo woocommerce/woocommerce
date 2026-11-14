@@ -9,6 +9,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
@@ -578,10 +579,14 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 
+		$status_accepted = false;
+
 		try {
 			$this->write_through(
-				function () use ( $new_status, $note, $manual ) {
-					return $this->stage_status( $new_status, $note, $manual );
+				function () use ( $new_status, $note, $manual, &$status_accepted ) {
+					$transition      = $this->stage_status( $new_status, $note, $manual );
+					$status_accepted = ( $transition['to'] ?? '' ) === OrderUtil::remove_status_prefix( (string) $new_status );
+					return $transition;
 				}
 			);
 			$this->save();
@@ -602,7 +607,11 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		// save() swallows its own exceptions, so check whether it could persist the order.
-		return null === $this->get_last_save_error();
+		if ( null !== $this->get_last_save_error() ) {
+			return false;
+		}
+
+		return $status_accepted;
 	}
 
 	/**

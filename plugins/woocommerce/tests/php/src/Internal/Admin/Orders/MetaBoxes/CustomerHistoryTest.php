@@ -294,9 +294,7 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @return array{0: \WC_Order, 1: string} The completed order and the custom status slug.
 	 */
 	private function create_orders_with_long_custom_status(): array {
-		// Core warns when saving a status longer than the 20-char column; that
-		// truncated storage is the exact scenario under test.
-		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
+		global $wpdb;
 
 		$long_status = 'competition-completed';
 		register_post_status( 'wc-' . $long_status, array( 'public' => true ) );
@@ -314,9 +312,30 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$order_good->save();
 
 		$order_custom = WC_Helper_Order::create_order( $customer_id );
-		$order_custom->set_status( $long_status );
 		$order_custom->set_total( 50 );
 		$order_custom->save();
+
+		// Truncated status representing legacy storage before validation.
+		$truncated_status = mb_substr( 'wc-' . $long_status, 0, 20 );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->update(
+				$wpdb->prefix . 'wc_orders',
+				array( 'status' => $truncated_status ),
+				array( 'id' => $order_custom->get_id() ),
+				array( '%s' ),
+				array( '%d' )
+			);
+			wc_get_container()->get( OrdersTableDataStore::class )->clear_cached_data( array( $order_custom->get_id() ) );
+		} else {
+			$wpdb->update(
+				$wpdb->posts,
+				array( 'post_status' => $truncated_status ),
+				array( 'ID' => $order_custom->get_id() ),
+				array( '%s' ),
+				array( '%d' )
+			);
+			clean_post_cache( $order_custom->get_id() );
+		}
 
 		return array( $order_good, $long_status );
 	}
