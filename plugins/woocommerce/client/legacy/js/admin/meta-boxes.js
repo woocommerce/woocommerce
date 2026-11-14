@@ -287,7 +287,7 @@ jQuery( function ( $ ) {
 
 						e.preventDefault();
 						const $target = $visible_tabs.eq( target_index );
-						activate_tab( $target );
+						$target.trigger( 'click' );
 						$target.trigger( 'focus' );
 					}
 				);
