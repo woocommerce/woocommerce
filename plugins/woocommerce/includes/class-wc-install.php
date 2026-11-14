@@ -766,16 +766,7 @@ class WC_Install {
 		}
 
 		if ( ! $created_lock && $wpdb->last_error ) {
-			$is_duplicate = false;
-
-			if ( isset( $wpdb->dbh ) && $wpdb->dbh instanceof \mysqli ) {
-				// Reading the error code of the query $wpdb just ran; there is no $wpdb API for it.
-				$is_duplicate = 1062 === mysqli_errno( $wpdb->dbh ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_errno
-			}
-
-			if ( ! $is_duplicate ) {
-				$is_duplicate = false !== stripos( $wpdb->last_error, 'duplicate entry' ) || false !== stripos( $wpdb->last_error, 'unique constraint' );
-			}
+			$is_duplicate = false !== stripos( $wpdb->last_error, 'duplicate entry' ) || false !== stripos( $wpdb->last_error, 'unique constraint' );
 
 			if ( ! $is_duplicate ) {
 				$wpdb->print_error();
