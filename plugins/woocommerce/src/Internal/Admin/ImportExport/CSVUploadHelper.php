@@ -120,11 +120,28 @@ class CSVUploadHelper {
 		}
 
 		if ( ! wc_is_file_valid_csv( $upload['file'], false ) ) {
-			wp_delete_attachment( $file['id'], true );
+			$this->discard_rejected_upload( $upload );
 			throw new \Exception( esc_html__( 'Invalid file type for a CSV import.', 'woocommerce' ) );
 		}
 
 		return $upload;
+	}
+
+	/**
+	 * Remove an upload that failed the CSV check: its attachment, which takes
+	 * the file with it, or the file alone when no attachment was created.
+	 *
+	 * @param array $upload Result of wp_import_handle_upload().
+	 */
+	private function discard_rejected_upload( array $upload ): void {
+		if ( ! empty( $upload['id'] ) ) {
+			// A pre_delete_attachment veto keeps the attachment, and its file with it.
+			wp_delete_attachment( absint( $upload['id'] ), true );
+			return;
+		}
+		if ( ! empty( $upload['file'] ) && file_exists( $upload['file'] ) ) {
+			wp_delete_file( $upload['file'] );
+		}
 	}
 
 	/**
