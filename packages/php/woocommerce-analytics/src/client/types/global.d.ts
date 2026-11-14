@@ -13,6 +13,7 @@ declare global {
 			breadcrumbs?: string[];
 			assets_url: string;
 			consentManaged?: boolean;
+			statisticsConsentCookie?: string;
 		};
 		_wca?: {
 			push: ( props: Record< string, unknown > ) => void;
