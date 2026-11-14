@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Enums\DimensionUnit;
 use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\StructuredData\ShippingDestinations;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -506,6 +507,13 @@ class WC_Structured_Data {
 				)
 			) {
 				$markup_offer['priceCurrency'] = $currency;
+			}
+
+			if ( ( ! $product->is_type( array( ProductType::VARIABLE, ProductType::GROUPED ) ) || $selected_variation ) && ! $offer_source->is_type( ProductType::EXTERNAL ) && $offer_source->needs_shipping() ) {
+				$shipping_details = wc_get_container()->get( ShippingDestinations::class )->get_shipping_details();
+				if ( $shipping_details ) {
+					$markup_offer['shippingDetails'] = $shipping_details;
+				}
 			}
 
 			if ( ( ! $product->is_type( array( ProductType::VARIABLE, ProductType::GROUPED ) ) || $selected_variation ) && $offer_source->is_on_sale() ) {
