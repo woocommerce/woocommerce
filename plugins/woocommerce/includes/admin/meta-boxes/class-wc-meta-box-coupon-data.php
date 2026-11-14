@@ -395,6 +395,10 @@ class WC_Meta_Box_Coupon_Data {
 			}
 		}
 
+		if ( '' === trim( $coupon_code ) ) {
+			WC_Admin_Meta_Boxes::add_error( __( 'A coupon code is required before the coupon can be published.', 'woocommerce' ) );
+		}
+
 		$coupon->save();
 		do_action( 'woocommerce_coupon_options_save', $post_id, $coupon );
 	}

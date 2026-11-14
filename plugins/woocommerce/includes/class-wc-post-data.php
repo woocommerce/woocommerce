@@ -54,6 +54,7 @@ class WC_Post_Data {
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'sanitize_coupon_code_on_save' ), 5, 3 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
+		add_filter( 'wp_insert_post_data', array( __CLASS__, 'save_edited_coupon_without_code_as_draft' ), 10, 2 );
 		add_filter( 'edit_post_title', array( __CLASS__, 'decode_coupon_code_for_editing' ), 10, 2 );
 		add_filter( 'oembed_response_data', array( __CLASS__, 'filter_oembed_response_data' ), 10, 2 );
 		add_filter( 'wp_untrash_post_status', array( __CLASS__, 'wp_untrash_post_status' ), 10, 3 );
@@ -441,6 +442,41 @@ class WC_Post_Data {
 		} elseif ( 'product' === $data['post_type'] && ProductStatus::AUTO_DRAFT === $data['post_status'] ) {
 			$data['post_title'] = 'AUTO-DRAFT';
 		}
+
+		return $data;
+	}
+
+	/**
+	 * Saves a coupon as a draft instead of publishing it when its code is left empty on the coupon edit screen.
+	 *
+	 * @since 11.4.0
+	 * @param array $data    An array of slashed post data.
+	 * @param array $postarr An array of sanitized, but otherwise unmodified post data.
+	 * @return array
+	 */
+	public static function save_edited_coupon_without_code_as_draft( $data, $postarr ) {
+		if (
+			! is_array( $data )
+			|| ! is_array( $postarr )
+			|| 'shop_coupon' !== ( $data['post_type'] ?? '' )
+			|| ! in_array( $data['post_status'] ?? '', array( 'publish', 'future', 'private' ), true )
+			|| '' !== trim( wc_format_coupon_code( wp_unslash( (string) ( $data['post_title'] ?? '' ) ) ) )
+		) {
+			return $data;
+		}
+
+		// Only the coupon submitted from the edit screen, not other coupons saved during the same request.
+		$edited_post_id = isset( $_POST['post_ID'] ) ? absint( wp_unslash( $_POST['post_ID'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The nonce is verified below.
+		if (
+			0 === $edited_post_id
+			|| absint( $postarr['ID'] ?? 0 ) !== $edited_post_id
+			|| empty( $_POST['woocommerce_meta_nonce'] )
+			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['woocommerce_meta_nonce'] ) ), 'woocommerce_save_data' )
+		) {
+			return $data;
+		}
+
+		$data['post_status'] = 'draft';
 
 		return $data;
 	}

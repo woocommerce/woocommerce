@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Save a coupon as a draft instead of publishing it when its coupon code is left empty, and show an error.

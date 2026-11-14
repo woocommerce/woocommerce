@@ -277,6 +277,136 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A coupon saved from the edit screen without a code is saved as a draft.
+	 * @testWith ["publish", "", "draft"]
+	 *           ["future", "", "draft"]
+	 *           ["private", "", "draft"]
+	 *           ["publish", "   ", "draft"]
+	 *           ["pending", "", "pending"]
+	 *           ["draft", "", "draft"]
+	 *           ["publish", "has-code", "publish"]
+	 *
+	 * @param string $requested_status Status the edit screen asks for.
+	 * @param string $coupon_code      Coupon code entered on the edit screen.
+	 * @param string $expected_status  Status that should be saved.
+	 */
+	public function test_coupon_edit_screen_saves_coupon_without_code_as_draft( string $requested_status, string $coupon_code, string $expected_status ): void {
+		$post_id = $this->create_auto_draft_coupon();
+		$postarr = array(
+			'ID'          => $post_id,
+			'post_title'  => $coupon_code,
+			'post_status' => $requested_status,
+		);
+		if ( 'future' === $requested_status ) {
+			$postarr['post_date'] = gmdate( 'Y-m-d H:i:s', strtotime( '+1 week' ) );
+		}
+
+		$this->submit_coupon_edit_screen( $post_id, $postarr );
+
+		$this->assertSame( $expected_status, get_post_status( $post_id ) );
+	}
+
+	/**
+	 * @testdox Clearing the code of a published coupon on the edit screen unpublishes it through the normal status transition.
+	 */
+	public function test_coupon_edit_screen_unpublishes_coupon_when_code_is_cleared(): void {
+		$coupon      = WC_Helper_Coupon::create_coupon( 'clear-me' );
+		$transitions = array();
+		$listener    = function ( $new_status, $old_status, $post ) use ( &$transitions, $coupon ) {
+			if ( $post->ID === $coupon->get_id() ) {
+				$transitions[] = $old_status . '>' . $new_status;
+			}
+		};
+
+		add_action( 'transition_post_status', $listener, 10, 3 );
+
+		try {
+			$this->submit_coupon_edit_screen(
+				$coupon->get_id(),
+				array(
+					'ID'          => $coupon->get_id(),
+					'post_title'  => '',
+					'post_status' => 'publish',
+				)
+			);
+		} finally {
+			remove_action( 'transition_post_status', $listener, 10 );
+		}
+
+		$this->assertSame( 'draft', get_post_status( $coupon->get_id() ) );
+		$this->assertSame( '', get_post_field( 'post_title', $coupon->get_id() ) );
+		$this->assertSame( array( 'publish>draft' ), $transitions );
+	}
+
+	/**
+	 * @testdox Other coupons without a code saved during a coupon edit screen request keep their status.
+	 */
+	public function test_coupon_edit_screen_does_not_change_other_coupons_without_code(): void {
+		$edited_post_id = $this->create_auto_draft_coupon();
+		$other_post_id  = $this->create_auto_draft_coupon();
+
+		$this->submit_coupon_edit_screen(
+			$edited_post_id,
+			array(
+				'ID'          => $other_post_id,
+				'post_title'  => '',
+				'post_status' => 'publish',
+			)
+		);
+
+		$this->assertSame( 'publish', get_post_status( $other_post_id ) );
+	}
+
+	/**
+	 * @testdox A coupon without a code saved outside the edit screen keeps its status.
+	 */
+	public function test_coupon_without_code_saved_outside_edit_screen_keeps_status(): void {
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => '',
+				'post_type'   => 'shop_coupon',
+				'post_status' => 'publish',
+			)
+		);
+
+		$this->assertSame( 'publish', get_post_status( $post_id ) );
+	}
+
+	/**
+	 * Create an auto-draft coupon, like the one WordPress creates when the new coupon screen opens.
+	 *
+	 * @return int
+	 */
+	private function create_auto_draft_coupon(): int {
+		return wp_insert_post(
+			array(
+				'post_title'  => 'Auto Draft',
+				'post_type'   => 'shop_coupon',
+				'post_status' => 'auto-draft',
+			)
+		);
+	}
+
+	/**
+	 * Save a post while simulating a coupon edit screen submission for a coupon.
+	 *
+	 * @param int   $edited_post_id ID of the coupon open on the edit screen.
+	 * @param array $postarr        Post data to save.
+	 */
+	private function submit_coupon_edit_screen( int $edited_post_id, array $postarr ): void {
+		$previous_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the save.
+		$this->login_as_administrator();
+		$_POST['post_ID']                = (string) $edited_post_id;
+		$_POST['woocommerce_meta_nonce'] = wp_create_nonce( 'woocommerce_save_data' );
+
+		try {
+			wp_update_post( $postarr );
+		} finally {
+			$_POST = $previous_post;
+		}
+	}
+
+	/**
 	 * @testdox Should remove order items when permanently deleting an order.
 	 * @testWith [false]
 	 *           [true]
