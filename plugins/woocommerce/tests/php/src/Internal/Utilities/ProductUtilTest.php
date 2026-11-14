@@ -56,6 +56,26 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox prime_image_caches accepts a collection with string keys.
+	 */
+	public function test_prime_image_caches_accepts_string_keyed_collection(): void {
+		$featured_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$gallery_id  = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$product     = \WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured_id );
+		$product->set_gallery_image_ids( array( $gallery_id ) );
+		$product->save();
+		clean_post_cache( $featured_id );
+		clean_post_cache( $gallery_id );
+		$sut = wc_get_container()->get( ProductUtil::class );
+
+		$sut->prime_image_caches( array( 'first' => $product ) );
+
+		$this->assertNotFalse( wp_cache_get( $featured_id, 'posts' ), 'The featured image post should be cached' );
+		$this->assertNotFalse( wp_cache_get( $gallery_id, 'posts' ), 'The gallery image post should be cached' );
+	}
+
+	/**
 	 * @testdox get_product_id extracts IDs from the product references accepted by the factory.
 	 */
 	public function test_get_product_id_extracts_product_references(): void {

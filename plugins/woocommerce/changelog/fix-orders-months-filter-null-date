@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show every month in the orders list date filter when an order has no creation date.
