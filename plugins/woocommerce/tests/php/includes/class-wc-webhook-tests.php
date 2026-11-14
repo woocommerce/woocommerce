@@ -1061,4 +1061,59 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
 		$this->assertSame( 'disabled', wc_get_webhook( $webhook->get_id() )->get_status() );
 	}
+
+	/**
+	 * @testdox Each delivery gets its own delivery ID, even when deliveries are sent in the same second.
+	 */
+	public function test_each_delivery_gets_a_unique_delivery_id(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$webhook = $this->create_active_webhook( 'product.updated' );
+		$webhook->set_user_id( 1 );
+		$webhook->save();
+
+		add_filter(
+			'pre_http_request',
+			function () {
+				return array(
+					'response' => array(
+						'code'    => 200,
+						'message' => 'OK',
+					),
+					'headers'  => array(),
+					'body'     => '',
+				);
+			}
+		);
+
+		$delivery_ids = array();
+		add_action(
+			'woocommerce_webhook_delivery',
+			function ( $http_args ) use ( &$delivery_ids ) {
+				$delivery_ids[] = $http_args['headers']['X-WC-Webhook-Delivery-ID'];
+			}
+		);
+
+		// The old delivery ID came from the current second, so this only proves something when
+		// both deliveries are sent within the same second. Try again if the clock ticks over.
+		$attempts = 0;
+		do {
+			$delivery_ids = array();
+			$started      = time();
+			$webhook->deliver( $product->get_id() );
+			$webhook->deliver( $product->get_id() );
+			$same_second = time() === $started;
+			++$attempts;
+		} while ( ! $same_second && $attempts < 5 );
+
+		$this->assertCount( 2, $delivery_ids, 'Both deliveries should have been sent.' );
+		$this->assertNotSame( $delivery_ids[0], $delivery_ids[1], 'Two deliveries must not share a delivery ID.' );
+		foreach ( $delivery_ids as $delivery_id ) {
+			$this->assertSame( 32, strlen( $delivery_id ), 'The delivery ID should be 32 characters long.' );
+			$this->assertSame( 32, strspn( $delivery_id, '0123456789abcdef' ), 'The delivery ID should contain only lowercase hex characters.' );
+		}
+
+		if ( ! $same_second ) {
+			$this->markTestSkipped( 'Could not send both deliveries within the same second, so the same-second case was not covered.' );
+		}
+	}
 }
