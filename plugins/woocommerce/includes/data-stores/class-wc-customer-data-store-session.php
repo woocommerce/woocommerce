@@ -5,6 +5,9 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Internal\Customers\ShippingDestination;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -123,7 +126,9 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 		 * Empty session values must be applied too (hence isset and not empty below): the session snapshot always contains all the keys,
 		 * so an empty value means the field was explicitly cleared and must override the value loaded from the database.
 		 */
-		if ( isset( $data['id'] ) && $data['id'] === (string) $customer->get_id() ) {
+		$is_same_customer = isset( $data['id'] ) && $data['id'] === (string) $customer->get_id();
+
+		if ( $is_same_customer ) {
 			// If the user was saved after this session was (e.g. by checkout), the session's copies of saved fields such as
 			// addresses are out of date, so only apply the session-only values. The user has no copy of those to fall back on.
 			$is_current = isset( $data['date_modified'] ) && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' );
@@ -151,9 +156,154 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 					}
 				}
 			}
+
+			if ( ! $is_current ) {
+				$this->maybe_restore_shipping_to_billing( $customer, $data );
+			}
+		} else {
+			// Only for a new session or a login, so an address the shopper set during the session is kept.
+			$this->maybe_default_shipping_to_billing( $customer );
 		}
 		$this->set_defaults( $customer );
 		$customer->set_object_read( true );
+	}
+
+	/**
+	 * Copies the billing address over the shipping address when the "Shipping destination" setting defaults to billing.
+	 *
+	 * Only called when the session doesn't belong to this customer yet, so an address the shopper set during the session is kept.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return void
+	 */
+	private function maybe_default_shipping_to_billing( $customer ): void {
+		// The billing check comes first: it returns early for guests without reading the setting, which isn't autoloaded.
+		if ( ! $this->billing_address_can_replace_shipping( $customer ) || ! wc_get_container()->get( ShippingDestination::class )->defaults_to_billing() ) {
+			return;
+		}
+
+		$this->copy_billing_to_shipping( $customer );
+	}
+
+	/**
+	 * Copies the billing address over the shipping address again when the account changed during the session.
+	 *
+	 * Checkout saves the order's addresses to the account, but keeps the saved shipping address when the order ships to
+	 * billing. So when the session was shipping to billing, for example before a failed payment, the account's shipping
+	 * address isn't the one the shopper was using.
+	 *
+	 * @param WC_Customer $customer Customer object, loaded from the account.
+	 * @param array       $data     The out-of-date session data.
+	 * @return void
+	 */
+	private function maybe_restore_shipping_to_billing( $customer, array $data ): void {
+		$shipping_destination = wc_get_container()->get( ShippingDestination::class );
+		$session_billing      = array();
+		$session_shipping     = array();
+
+		foreach ( array_merge( ShippingDestination::RECIPIENT_FIELDS, ShippingDestination::LOCATION_FIELDS ) as $field ) {
+			$session_billing[ $field ]  = $data[ $field ] ?? '';
+			$session_shipping[ $field ] = $data[ "shipping_{$field}" ] ?? '';
+		}
+
+		// Additional address checkout fields are kept in the session as meta data.
+		foreach ( is_array( $data['meta_data'] ?? null ) ? $data['meta_data'] : array() as $meta ) {
+			$meta_key = isset( $meta['key'] ) ? (string) $meta['key'] : '';
+
+			if ( 0 === strpos( $meta_key, CheckoutFields::BILLING_FIELDS_PREFIX ) ) {
+				$session_billing[ substr( $meta_key, strlen( CheckoutFields::BILLING_FIELDS_PREFIX ) ) ] = $meta['value'] ?? '';
+			} elseif ( 0 === strpos( $meta_key, CheckoutFields::SHIPPING_FIELDS_PREFIX ) ) {
+				$session_shipping[ substr( $meta_key, strlen( CheckoutFields::SHIPPING_FIELDS_PREFIX ) ) ] = $meta['value'] ?? '';
+			}
+		}
+
+		if (
+			! $shipping_destination->is_same_address( $session_billing, $session_shipping )
+			|| ! $this->billing_address_can_replace_shipping( $customer )
+			|| ! $shipping_destination->defaults_to_billing()
+		) {
+			return;
+		}
+
+		$this->copy_billing_to_shipping( $customer );
+	}
+
+	/**
+	 * Copies the billing address, including additional address checkout fields, over the shipping address.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return void
+	 */
+	private function copy_billing_to_shipping( WC_Customer $customer ): void {
+		foreach ( $customer->get_billing( 'edit' ) as $field => $value ) {
+			if ( is_callable( array( $customer, "set_shipping_{$field}" ) ) ) {
+				$customer->{"set_shipping_{$field}"}( $value );
+			}
+		}
+
+		$this->copy_additional_billing_fields_to_shipping( $customer );
+	}
+
+	/**
+	 * Copies the values of additional address checkout fields from billing to shipping.
+	 *
+	 * Works from the stored values rather than the registered fields: the session customer is loaded before
+	 * woocommerce_init, which is where extensions usually register their fields.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return void
+	 */
+	private function copy_additional_billing_fields_to_shipping( WC_Customer $customer ): void {
+		$checkout_fields = \Automattic\WooCommerce\Blocks\Package::container()->get( \Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields::class );
+		$billing_fields  = $checkout_fields->get_all_fields_from_object( $customer, 'billing', true );
+		$shipping_fields = $checkout_fields->get_all_fields_from_object( $customer, 'shipping', true );
+
+		foreach ( array_keys( $billing_fields + $shipping_fields ) as $field_key ) {
+			$checkout_fields->persist_field_for_customer( (string) $field_key, $billing_fields[ $field_key ] ?? '', $customer, 'shipping' );
+		}
+	}
+
+	/**
+	 * Checks whether the billing address can replace the shipping address.
+	 *
+	 * When there is a saved shipping address, the billing address needs a street, city or postcode, plus a postcode if
+	 * its country requires one. Otherwise copying it would clear the fields that shipping zones match against.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return bool
+	 */
+	private function billing_address_can_replace_shipping( $customer ): bool {
+		$country = $customer->get_billing_country( 'edit' );
+
+		if ( ! $country ) {
+			return false;
+		}
+
+		if ( ! $customer->has_shipping_address() || $customer->get_billing_postcode( 'edit' ) ) {
+			return true;
+		}
+
+		if ( ! $customer->get_billing_address_1( 'edit' ) && ! $customer->get_billing_city( 'edit' ) ) {
+			return false;
+		}
+
+		return ! $this->is_postcode_required( $country );
+	}
+
+	/**
+	 * Checks whether addresses in a country require a postcode, based on the store's country locale settings.
+	 *
+	 * @param string $country Country code.
+	 * @return bool
+	 */
+	private function is_postcode_required( string $country ): bool {
+		if ( ! WC()->countries instanceof WC_Countries ) {
+			return true;
+		}
+
+		$locale = WC()->countries->get_country_locale();
+
+		return (bool) ( $locale[ $country ]['postcode']['required'] ?? $locale['default']['postcode']['required'] ?? true );
 	}
 
 	/**
@@ -168,14 +318,16 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 
 			if ( ! $customer->get_billing_country() ) {
 				$customer->set_billing_country( $default['country'] );
+
+				// The default state only makes sense together with the default country: a saved address in a country
+				// without states must not pick up the store's base state.
+				if ( ! $customer->get_billing_state() ) {
+					$customer->set_billing_state( $default['state'] );
+				}
 			}
 
 			if ( ! $customer->get_shipping_country() && ! $has_shipping_address ) {
 				$customer->set_shipping_country( $customer->get_billing_country() );
-			}
-
-			if ( ! $customer->get_billing_state() ) {
-				$customer->set_billing_state( $default['state'] );
 			}
 
 			if ( ! $customer->get_shipping_state() && ! $has_shipping_address ) {
