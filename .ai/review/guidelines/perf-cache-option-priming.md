@@ -20,6 +20,6 @@
 - Removing an effective prime.
 - Dead priming: after a full-post `WP_Query`, on order line items, or behind `is_callable` guards.
 
-**How to confirm:** See where the IDs come from (`'fields' => 'ids'` or full posts). Check whether the options are autoloaded (WC settings API options are). Check transient names are only primed under `! wp_using_ext_object_cache()`.
+**How to confirm:** See where the IDs come from (`'fields' => 'ids'` or full posts). Check whether the options are autoloaded (WC settings API options are). Check transient names are only primed under `! wp_using_ext_object_cache() && ! wp_installing()`.
 
-**Don't flag when:** Autoloaded options. Loads through order `get_items()`. Tests and fixtures.
+**Don't flag when:** Autoloaded options. Loads through order `get_items()`, except the parent of a variation and filter-added items. Tests and fixtures.

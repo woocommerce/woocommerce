@@ -39,9 +39,10 @@ This controls false positives. Follow it strictly.
   term_taxonomy_id IN (...))`.
 - **N queries in a loop** varying one parameter (status, term, attribute) collapse into one
   `GROUP BY` query.
-- **`OR` across two differently indexed columns** forces an index_merge sort_union. When one branch
-  is strictly more selective (a resolved `customer_id` vs `billing_email`), evaluate it first in PHP
-  and build the `OR` fallback only when it is unavailable.
+- **`OR` across two differently indexed columns** typically runs as an index_merge sort_union. When
+  one branch alone can answer the question, evaluate it first in PHP and build the `OR` only when it
+  cannot. Don't flag an `OR` the result needs: a known `customer_id` does not cover guest orders
+  matched by `billing_email`.
 - **`meta_key IN (...) AND meta_value IN (...)`** cross-products keys and values: it matches invalid
   pairs and range-scans the `meta_key` index. Split into per-key `(meta_key = X AND meta_value = Y)`
   branches. When a postmeta result drives a join into a second fan-out table (order_items →
@@ -70,13 +71,16 @@ This controls false positives. Follow it strictly.
   resolves to `get_post()` per raw ID, with no preceding `_prime_post_caches( $ids )` or native
   batching argument (e.g. `get_comments( [ 'update_comment_post_cache' => true ] )`), runs per-item
   queries instead of two batched ones. Flag the introduction. Flag REMOVAL of effective priming as a
-  straight regression.
+  straight regression. `_prime_post_caches()` does not load HPOS orders: for `wc_get_order()` loops
+  the fix is `WC_Order_Factory::get_orders()`.
 - Exempt: product and variation loads reached through order `get_items()`. The order data store's
-  batch prime and the lazy `get_items()` path already warm those caches.
+  batch prime and the lazy `get_items()` path already warm those caches. Not exempt: the parent of a
+  variation (the lazy path primes the variation only) and items added through the
+  `woocommerce_order_get_items` filter.
 - Priming that is dead or wrong is a finding the other way (and removing it is the fix, not a
   finding):
     - after a WP_Query that loaded full post objects (no `fields` argument): it already primed post,
-    meta, and term caches, and `_prime_post_caches()` silently intvals its `WP_Post[]` to `1`. A
+    meta, and term caches, and `_prime_post_caches()` expects IDs, not `WP_Post[]`. A
     `'fields' => 'ids'` query primes nothing, so priming its IDs afterward is CORRECT; don't flag it;
     - on product or variation IDs collected from order `get_items()`
     (`prime_product_post_caches_for_order_items` and the lazy path already primed them);
@@ -87,7 +91,7 @@ This controls false positives. Follow it strictly.
   `Automattic\WooCommerce\Internal\Utilities\ProductUtil::prime_image_caches()` does this (featured
   and gallery IDs, dedup, empty guard) and is the preferred form. Only flag when the render path
   actually reads attachment posts; code returning raw gallery IDs needs no attachment prime.
-- `is_callable( '_prime_post_caches' )` guards are dead code (WP 4.1+, below WC's minimum). Same for
+- `is_callable( '_prime_post_caches' )` guards are dead code (WP 3.4+, below WC's minimum). Same for
   guarding `wp_prime_option_caches` (WP 6.4+).
 
 ## Option and transient priming
@@ -97,13 +101,14 @@ This controls false positives. Follow it strictly.
   patterns, or keys pulled from a settings or registry structure).
 - **Autoload guard** (the false-positive control for this subsection): options saved through the WC
   settings API autoload by default (`WC_Admin_Settings::save_fields`, `WC_Settings_API`). Endpoint
-  options, feature toggles, and general store settings come from `alloptions` at boot, so a
+  options, settings toggles, and general store settings come from `alloptions` at boot, so a
   missing-priming finding on autoloaded, already-saved options is a no-op. DO NOT flag it. Priming
   such keys is justified only for options that may never have been saved (e.g. fresh-install email,
-  gateway, or shipping `*_settings` loops).
+  gateway, or shipping `*_settings` loops, and `woocommerce_feature_*_enabled` keys).
 - Transient-prefixed names (`_transient_*`, `_transient_timeout_*`, `_site_transient_*`) passed to
-  `wp_prime_option_caches()` without a `! wp_using_ext_object_cache()` guard: on persistent-object-cache
-  sites those rows never exist in `wp_options`, so every call grows the `notoptions` cache for good. A
+  `wp_prime_option_caches()` without a `! wp_using_ext_object_cache() && ! wp_installing()` guard: on
+  persistent-object-cache sites and during installation transients are not read from `wp_options`,
+  so every new name grows the `notoptions` cache. A
   mixed list must be SPLIT (regular names primed always, transient names under the guard), never
   wrapped whole. Check the guard's direction.
 

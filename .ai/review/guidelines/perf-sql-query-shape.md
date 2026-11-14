@@ -12,7 +12,7 @@
 - a redundant `wp_posts` join when upstream already enforced type and status;
 - `term_relationships` joined without `term_taxonomy_id`;
 - per-item queries that could be one GROUP BY;
-- OR across two indexes;
+- OR across two indexes where one branch alone would answer;
 - `meta_key IN` crossed with `meta_value IN`;
 - posts + postmeta where `wc_product_meta_lookup` / `wc_product_attributes_lookup` (with correct gates) would do;
 - MIN/MAX as a full scan.
