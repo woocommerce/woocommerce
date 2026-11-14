@@ -373,7 +373,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$id = $this->contract_with_currency();
 		$this->assert_validation_errors(
 			static function () use ( $id ): void {
-				Contracts::update( $id, array( 'addresses' => array( 'home' => array( 'first_name' => 'Ada' ) ) ) );
+				Contracts::update(
+					$id,
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'addresses'      => array( 'home' => array( 'first_name' => 'Ada' ) ),
+					)
+				);
 			},
 			array( array( ValidationErrorCode::NOT_IN_ENUM, 'addresses.home' ) )
 		);
@@ -479,6 +485,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				Contracts::update(
 					$id,
 					array(
+						'extension_slug'  => self::EXTENSION_SLUG,
 						'status'          => 'never-registered',
 						'schedule_source' => 'Not a slug',
 					)
@@ -498,11 +505,25 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_update_checks_its_arguments_before_reading(): void {
 		$this->assert_validation_errors(
 			static function (): void {
-				Contracts::update( 999999, array( 'customer_id' => 0 ) );
+				Contracts::update(
+					999999,
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'customer_id'    => 0,
+					)
+				);
 			},
 			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'customer_id' ) )
 		);
-		$this->assertNull( Contracts::update( 999999, array( 'customer_id' => 5 ) ) );
+		$this->assertNull(
+			Contracts::update(
+				999999,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'customer_id'    => 5,
+				)
+			)
+		);
 	}
 
 	/**
@@ -643,6 +664,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				$id,
 				array_merge(
 					array(
+						'extension_slug' => self::EXTENSION_SLUG,
 						'payment_method' => 'other',
 						'billing_total'  => '25',
 					),
@@ -672,13 +694,28 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		$this->expectException( InvalidArgumentException::class );
 
-		Contracts::update( $id, array( 'billing_total' => '10' ) );
+		Contracts::update(
+			$id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'billing_total'  => '10',
+			)
+		);
 	}
 
 	public function test_a_null_money_value_resets_to_zero_without_a_currency(): void {
 		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
-		$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'billing_total' => null ) ) );
+		$this->assertInstanceOf(
+			ContractView::class,
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'billing_total'  => null,
+				)
+			)
+		);
 		$this->assertSame( '0.00000000', $this->view( $id )->get_billing_total() );
 	}
 
@@ -691,9 +728,21 @@ class ContractsTest extends EngineIntegrationTestCase {
 			)
 		)->get_id();
 
-		Contracts::update( $id, array( 'billing_total' => '10' ) );
+		Contracts::update(
+			$id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'billing_total'  => '10',
+			)
+		);
 		try {
-			Contracts::update( $id, array( 'currency' => null ) );
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'currency'       => null,
+				)
+			);
 			$this->fail( 'Expected an InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
 			$this->assertSame( 'USD', $this->view( $id )->get_currency() );
@@ -705,8 +754,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 			Contracts::update(
 				$id,
 				array(
-					'currency'      => null,
-					'billing_total' => null,
+					'extension_slug' => self::EXTENSION_SLUG,
+					'currency'       => null,
+					'billing_total'  => null,
 				)
 			)
 		);
@@ -719,18 +769,34 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
-		$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'customer_id' => $customer ) ) );
 		$this->assertInstanceOf(
 			ContractView::class,
 			Contracts::update(
 				$id,
 				array(
-					'currency'      => 'USD',
-					'billing_total' => '19.99',
+					'extension_slug' => self::EXTENSION_SLUG,
+					'customer_id'    => $customer,
 				)
 			)
 		);
-		$updated = Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ) );
+		$this->assertInstanceOf(
+			ContractView::class,
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'currency'       => 'USD',
+					'billing_total'  => '19.99',
+				)
+			)
+		);
+		$updated = Contracts::update(
+			$id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'status'         => ContractStatus::ACTIVE,
+			)
+		);
 		$this->assertInstanceOf( ContractView::class, $updated );
 		$this->assertEquals( $this->view( $id ), $updated, 'The returned view matches a fresh read.' );
 
@@ -752,7 +818,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 			)
 		)->get_id();
 
-		Contracts::update( $id, array( 'payment_token_id' => 6 ) );
+		Contracts::update(
+			$id,
+			array(
+				'extension_slug'   => self::EXTENSION_SLUG,
+				'payment_token_id' => 6,
+			)
+		);
 
 		$view = $this->view( $id );
 		$this->assertSame( 'dummy', $view->get_payment_method() );
@@ -763,7 +835,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_update_with_no_fields_returns_the_view(): void {
 		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
-		$updated = Contracts::update( $id, array() );
+		$updated = Contracts::update( $id, array( 'extension_slug' => self::EXTENSION_SLUG ) );
 
 		$this->assertInstanceOf( ContractView::class, $updated );
 		$this->assertSame( $id, $updated->get_id() );
@@ -789,7 +861,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 		add_filter( 'query', $race );
 
 		try {
-			$updated = Contracts::update( $id, array( 'payment_method_title' => 'X' ) );
+			$updated = Contracts::update(
+				$id,
+				array(
+					'extension_slug'       => self::EXTENSION_SLUG,
+					'payment_method_title' => 'X',
+				)
+			);
 		} finally {
 			remove_filter( 'query', $race );
 		}
@@ -832,7 +910,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 		add_filter( 'query', $race );
 
 		try {
-			$updated = Contracts::update( $id, array( 'payment_method_title' => 'X' ) );
+			$updated = Contracts::update(
+				$id,
+				array(
+					'extension_slug'       => self::EXTENSION_SLUG,
+					'payment_method_title' => 'X',
+				)
+			);
 		} finally {
 			remove_filter( 'query', $race );
 		}
@@ -862,8 +946,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$updated = Contracts::update(
 			$id,
 			array(
-				'items'     => array( array( 'item_name' => 'Cocoa' ) ),
-				'addresses' => array( 'billing' => array( 'city' => 'Faro' ) ),
+				'extension_slug' => self::EXTENSION_SLUG,
+				'items'          => array( array( 'item_name' => 'Cocoa' ) ),
+				'addresses'      => array( 'billing' => array( 'city' => 'Faro' ) ),
 			)
 		);
 		$this->assertInstanceOf( ContractView::class, $updated );
@@ -949,7 +1034,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assert_write_throws_when_child_inserts_fail(
 			SchemaInstaller::TABLE_CONTRACT_ITEMS,
 			static function () use ( $id ) {
-				return Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
+				return Contracts::update(
+					$id,
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'items'          => array( array( 'item_name' => 'Cocoa' ) ),
+					)
+				);
 			}
 		);
 
@@ -972,7 +1063,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assert_write_throws_when_child_inserts_fail(
 			SchemaInstaller::TABLE_CONTRACT_ADDRESSES,
 			static function () use ( $id ) {
-				return Contracts::update( $id, array( 'addresses' => array( 'billing' => array( 'city' => 'Faro' ) ) ) );
+				return Contracts::update(
+					$id,
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'addresses'      => array( 'billing' => array( 'city' => 'Faro' ) ),
+					)
+				);
 			}
 		);
 
@@ -992,6 +1089,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		Contracts::update(
 			$id,
 			array(
+				'extension_slug'   => self::EXTENSION_SLUG,
 				'selling_plan_id'  => null,
 				'next_payment_gmt' => null,
 			)
@@ -1003,7 +1101,15 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_update_on_an_unknown_contract_returns_null(): void {
-		$this->assertNull( Contracts::update( 999999, array( 'status' => ContractStatus::ACTIVE ) ) );
+		$this->assertNull(
+			Contracts::update(
+				999999,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'status'         => ContractStatus::ACTIVE,
+				)
+			)
+		);
 	}
 
 	public function test_an_unknown_update_key_is_ignored_with_a_notice(): void {
@@ -1016,6 +1122,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			Contracts::update(
 				$id,
 				array(
+					'extension_slug' => self::EXTENSION_SLUG,
 					'nonsense'       => 1,
 					'payment_method' => 'dummy',
 					'items'          => array(
@@ -1034,21 +1141,367 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertArrayNotHasKey( 'price', $items[0] );
 	}
 
-	public function test_extension_slug_is_not_an_update_key(): void {
+	/**
+	 * @testdox update() writes only a contract of the named extension and never rewrites its extension.
+	 */
+	public function test_update_is_scoped_to_the_owning_extension(): void {
 		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
-		$this->setExpectedIncorrectUsage( Contracts::class . '::update' );
 
-		Contracts::update(
+		$this->assertNull(
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => 'other',
+					'customer_id'    => 7,
+				)
+			),
+			'A contract of another extension reads as missing.'
+		);
+		$this->assertSame( self::EXTENSION_SLUG, $this->view( $id )->get_extension_slug(), 'The extension slug is not rewritten.' );
+		$this->assertNull( $this->view( $id )->get_customer_id(), 'Nothing is written.' );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'], 'The foreign contract is not locked.' );
+
+		$updated = Contracts::update(
 			$id,
 			array(
-				'extension_slug' => 'other',
+				'extension_slug' => self::EXTENSION_SLUG,
 				'customer_id'    => 7,
 			)
 		);
-
+		$this->assertNotNull( $updated );
 		$view = $this->view( $id );
 		$this->assertSame( self::EXTENSION_SLUG, $view->get_extension_slug(), 'The extension slug is not rewritten.' );
 		$this->assertSame( 7, $view->get_customer_id() );
+	}
+
+	/**
+	 * @testdox update() requires the expected owner and reports its absence with every other shape error.
+	 */
+	public function test_update_requires_the_owner(): void {
+		$id = $this->contract_with_currency();
+
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::update( $id, array( 'currency' => 'usd' ) );
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'extension_slug' ),
+				array( ValidationErrorCode::INVALID_VALUE, 'currency' ),
+			)
+		);
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::update( $id, array( 'extension_slug' => 5 ) );
+			},
+			array( array( ValidationErrorCode::INVALID_TYPE, 'extension_slug' ) )
+		);
+	}
+
+	/**
+	 * @testdox A contract of another extension reads as missing to update(): also with no fields, and while another operation holds its lock.
+	 */
+	public function test_a_foreign_contract_reads_as_missing_to_update(): void {
+		$id = $this->contract_with_currency();
+
+		$this->assertNull( Contracts::update( $id, array( 'extension_slug' => 'other' ) ), 'A fieldless update is scoped too.' );
+		$this->assertNotNull( Contracts::update( $id, array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
+
+		$lock = $this->take_lock( $id, 'hold' );
+		try {
+			$this->assertNull(
+				Contracts::update(
+					$id,
+					array(
+						'extension_slug' => 'other',
+						'billing_total'  => '9',
+					)
+				),
+				'No ContractLockedException for a foreign row.'
+			);
+			$this->assertSame( '0.00000000', (string) $this->view( $id )->get_billing_total(), 'Nothing is written.' );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * @testdox The owner matches exactly: a slug differing only in case reads as another extension.
+	 */
+	public function test_the_owner_match_is_case_sensitive(): void {
+		$id    = $this->contract_with_currency();
+		$upper = strtoupper( self::EXTENSION_SLUG );
+
+		$this->assertNull( Contracts::lock( $id, $upper, 'hold' ) );
+		$this->assertNull(
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => $upper,
+					'billing_total'  => '9',
+				)
+			)
+		);
+		$this->assertNull( Contracts::update( $id, array( 'extension_slug' => $upper ) ), 'The fieldless path agrees.' );
+		Contracts::add_meta( $id, self::EXTENSION_SLUG, 'k', 'v' );
+		$this->assertFalse( Contracts::delete_meta( $id, $upper, 'k' ) );
+		$this->assertSame( 'v', Contracts::get_meta( $id, 'k', true ), 'The case variant deletes nothing.' );
+		$this->expectException( InvalidArgumentException::class );
+		Contracts::add_meta( $id, $upper, 'k', 'v' );
+	}
+
+	/**
+	 * @testdox update() reports argument errors before refusing a lock for another contract.
+	 */
+	public function test_update_reports_argument_errors_before_the_lock(): void {
+		$id    = $this->contract_with_currency();
+		$other = $this->contract_with_currency();
+		$lock  = $this->take_lock( $other, 'hold' );
+		try {
+			$this->assert_validation_errors(
+				static function () use ( $id, $lock ): void {
+					Contracts::update( $id, array( 'currency' => 'usd' ), $lock );
+				},
+				array(
+					array( ValidationErrorCode::REQUIRED, 'extension_slug' ),
+					array( ValidationErrorCode::INVALID_VALUE, 'currency' ),
+				)
+			);
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * @testdox lock() reports an empty owner alone; the label is refused in a second step.
+	 */
+	public function test_lock_reports_the_owner_before_the_label(): void {
+		$id = $this->contract_with_currency();
+
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::lock( $id, '', '' );
+			},
+			array( array( ValidationErrorCode::REQUIRED, 'extension_slug' ) )
+		);
+	}
+
+	/**
+	 * @testdox lock() takes only a contract of the named extension and refuses an empty owner.
+	 */
+	public function test_lock_is_scoped_to_the_owning_extension(): void {
+		$id = $this->contract_with_currency();
+
+		$this->assertNull( Contracts::lock( $id, 'other', 'hold' ), 'A contract of another extension reads as missing.' );
+		$this->assertNull( $this->view( $id )->get_lock_state(), 'The foreign contract is not locked.' );
+
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::lock( $id, '', 'hold' );
+			},
+			array( array( ValidationErrorCode::REQUIRED, 'extension_slug' ) )
+		);
+
+		$lock = Contracts::lock( $id, self::EXTENSION_SLUG, 'hold' );
+		$this->assertNotNull( $lock );
+		$lock->release();
+	}
+
+	/**
+	 * @testdox Cycle writes require the expected owner, reported with every other shape error.
+	 */
+	public function test_cycle_writes_require_the_owner(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = $this->add_cycle_locked( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+		$this->assertInstanceOf( CycleView::class, $cycle );
+		$cycle_id = (int) $cycle->get_id();
+		$lock     = $this->take_lock( $id, 'renew' );
+		try {
+			$this->assert_validation_errors(
+				function () use ( $id, $lock ): void {
+					$args = $this->cycle_args( array( 'currency' => 'usd' ) );
+					unset( $args['extension_slug'] );
+					Contracts::add_cycle( $id, $args, $lock );
+				},
+				array(
+					array( ValidationErrorCode::REQUIRED, 'extension_slug' ),
+					array( ValidationErrorCode::INVALID_VALUE, 'currency' ),
+				)
+			);
+			$this->assert_validation_errors(
+				static function () use ( $cycle_id, $lock ): void {
+					Contracts::transition_cycle(
+						$cycle_id,
+						array(
+							'extension_slug' => 5,
+							'from_status'    => CycleStatus::PENDING,
+							'to_status'      => CycleStatus::BILLED,
+						),
+						$lock
+					);
+				},
+				array( array( ValidationErrorCode::INVALID_TYPE, 'extension_slug' ) )
+			);
+			$this->assert_validation_errors(
+				static function () use ( $cycle_id, $lock ): void {
+					Contracts::transition_cycle(
+						$cycle_id,
+						array(
+							'from_status' => CycleStatus::PENDING,
+							'to_status'   => CycleStatus::BILLED,
+							'order_id'    => -1,
+						),
+						$lock
+					);
+				},
+				array(
+					array( ValidationErrorCode::REQUIRED, 'extension_slug' ),
+					array( ValidationErrorCode::OUT_OF_BOUNDS, 'order_id' ),
+				)
+			);
+			$this->assertSame( 1, $this->stored_cycle_count( $id ), 'No cycle is added.' );
+			$this->assertSame( CycleStatus::PENDING, $this->cycle( $id, $cycle_id )->get_status()->get_value(), 'No cycle is moved.' );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * @testdox Cycle writes with the owner's lock but another extension's slug add or move no cycle; with the owner's slug they land.
+	 */
+	public function test_cycle_writes_with_another_owner_are_refused(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = $this->add_cycle_locked( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+		$this->assertInstanceOf( CycleView::class, $cycle );
+		$cycle_id = (int) $cycle->get_id();
+		$lock     = $this->take_lock( $id, 'renew' );
+		try {
+			$writes = array(
+				'add_cycle'        => function () use ( $id, $lock ): void {
+					Contracts::add_cycle( $id, $this->cycle_args( array( 'extension_slug' => 'other' ) ), $lock );
+				},
+				'transition_cycle' => function () use ( $cycle_id, $lock ): void {
+					Contracts::transition_cycle( $cycle_id, $this->transition( CycleStatus::PENDING, CycleStatus::BILLED, array( 'extension_slug' => 'other' ) ), $lock );
+				},
+			);
+			foreach ( $writes as $method => $write ) {
+				try {
+					$write();
+					$this->fail( "Expected {$method}() to refuse the lock." );
+				} catch ( InvalidArgumentException $e ) {
+					$this->assertNotInstanceOf( ValidationException::class, $e, "{$method}() refuses the lock, not the arguments." );
+					$this->assertStringContainsString( 'another extension', $e->getMessage() );
+				}
+			}
+			$this->assertSame( 1, $this->stored_cycle_count( $id ), 'No cycle is added.' );
+			$this->assertSame( CycleStatus::PENDING, $this->cycle( $id, $cycle_id )->get_status()->get_value(), 'No cycle is moved.' );
+
+			$this->assertInstanceOf( CycleView::class, Contracts::add_cycle( $id, $this->cycle_args(), $lock ) );
+			$this->assertTrue( Contracts::transition_cycle( $cycle_id, $this->transition( CycleStatus::PENDING, CycleStatus::BILLED ), $lock ) );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * @testdox A write with the owner's lock but another extension's slug is refused before anything is written.
+	 */
+	public function test_a_lock_passed_with_another_owner_is_refused(): void {
+		$id   = $this->contract_with_currency();
+		$lock = $this->take_lock( $id, 'hold' );
+
+		$writes = array(
+			'update'      => static function () use ( $id, $lock ): void {
+				Contracts::update(
+					$id,
+					array(
+						'extension_slug' => 'other',
+						'billing_total'  => '9',
+					),
+					$lock
+				);
+			},
+			'add_meta'    => static function () use ( $id, $lock ): void {
+				Contracts::add_meta( $id, 'other', 'k', 'v', false, $lock );
+			},
+			'update_meta' => static function () use ( $id, $lock ): void {
+				Contracts::update_meta( $id, 'other', 'k', 'v', null, $lock );
+			},
+			'delete_meta' => static function () use ( $id, $lock ): void {
+				Contracts::delete_meta( $id, 'other', 'k', null, $lock );
+			},
+		);
+		try {
+			Contracts::add_meta( $id, self::EXTENSION_SLUG, 'k', 'kept', false, $lock );
+			foreach ( $writes as $method => $write ) {
+				try {
+					$write();
+					$this->fail( "Expected {$method}() to refuse the lock." );
+				} catch ( InvalidArgumentException $e ) {
+					$this->assertNotInstanceOf( ValidationException::class, $e, "{$method}() refuses the lock, not the arguments." );
+					$this->assertStringContainsString( 'another extension', $e->getMessage() );
+				}
+			}
+			$this->assertSame( '0.00000000', (string) $this->view( $id )->get_billing_total() );
+			$this->assertSame( array( 'kept' ), Contracts::get_meta( $id, 'k' ) );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * @testdox Meta writes check the owner and the key in one pass, reporting both errors at once.
+	 */
+	public function test_meta_writes_report_owner_and_key_errors_together(): void {
+		$id = $this->contract_with_currency();
+
+		foreach ( array( 'add_meta', 'update_meta', 'delete_meta' ) as $method ) {
+			$this->assert_validation_errors(
+				static function () use ( $id, $method ): void {
+					Contracts::{$method}( $id, '', '', 'v' );
+				},
+				array(
+					array( ValidationErrorCode::REQUIRED, 'extension_slug' ),
+					array( ValidationErrorCode::REQUIRED, 'key' ),
+				)
+			);
+		}
+	}
+
+	/**
+	 * @testdox Unlocked meta writes on a contract of another extension write nothing: add and update throw, delete returns false, also while its lock is held.
+	 */
+	public function test_unlocked_meta_writes_on_a_foreign_contract_write_nothing(): void {
+		$id = $this->contract_with_currency();
+		Contracts::add_meta( $id, self::EXTENSION_SLUG, 'k', 'kept' );
+
+		foreach ( array( false, true ) as $locked ) {
+			$lock = $locked ? $this->take_lock( $id, 'hold' ) : null;
+			try {
+				$writes = array(
+					'add_meta'    => static function () use ( $id ): void {
+						Contracts::add_meta( $id, 'other', 'k', 'theirs' );
+					},
+					'update_meta' => static function () use ( $id ): void {
+						Contracts::update_meta( $id, 'other', 'k', 'theirs' );
+					},
+				);
+				foreach ( $writes as $method => $write ) {
+					try {
+						$write();
+						$this->fail( "Expected {$method}() to refuse a foreign contract." );
+					} catch ( InvalidArgumentException $e ) {
+						$this->assertStringContainsString( sprintf( 'has id %d', $id ), $e->getMessage() );
+						$this->assertStringContainsString( 'other', $e->getMessage() );
+					}
+				}
+				$this->assertFalse( Contracts::delete_meta( $id, 'other', 'k' ) );
+				$this->assertSame( array( 'kept' ), Contracts::get_meta( $id, 'k' ) );
+			} finally {
+				if ( null !== $lock ) {
+					$lock->release();
+				}
+			}
+		}
 	}
 
 	public function test_snapshot_keys_are_ignored_with_a_notice(): void {
@@ -1129,10 +1582,11 @@ class ContractsTest extends EngineIntegrationTestCase {
 	private function cycle_args( array $overrides = array() ): array {
 		return array_merge(
 			array(
-				'status'        => CycleStatus::BILLED,
-				'starts_at_gmt' => '2026-01-01 00:00:00',
-				'ends_at_gmt'   => '2026-02-01 00:00:00',
-				'currency'      => 'USD',
+				'extension_slug' => self::EXTENSION_SLUG,
+				'status'         => CycleStatus::BILLED,
+				'starts_at_gmt'  => '2026-01-01 00:00:00',
+				'ends_at_gmt'    => '2026-02-01 00:00:00',
+				'currency'       => 'USD',
 			),
 			$overrides
 		);
@@ -1569,8 +2023,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 	private function transition( string $from, string $to, array $extra = array() ): array {
 		return array_merge(
 			array(
-				'from_status' => $from,
-				'to_status'   => $to,
+				'extension_slug' => self::EXTENSION_SLUG,
+				'from_status'    => $from,
+				'to_status'      => $to,
 			),
 			$extra
 		);
@@ -1585,8 +2040,8 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$lock = $this->take_lock( $id, 'hold' );
 		$this->assertSame( $id, $lock->get_contract_id() );
 
-		$this->assertNull( Contracts::lock( $id, 'cancel' ), 'A held lock is a lost race.' );
-		$this->assertNull( Contracts::lock( 999999, 'hold' ), 'An unknown contract has no lock to take.' );
+		$this->assertNull( Contracts::lock( $id, self::EXTENSION_SLUG, 'cancel' ), 'A held lock is a lost race.' );
+		$this->assertNull( Contracts::lock( 999999, self::EXTENSION_SLUG, 'hold' ), 'An unknown contract has no lock to take.' );
 
 		$lock_state = $this->view( $id )->get_lock_state();
 		$this->assertNotNull( $lock_state );
@@ -1595,7 +2050,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		foreach ( array( '', str_repeat( 'x', 65 ) ) as $label ) {
 			try {
-				Contracts::lock( $id, $label );
+				Contracts::lock( $id, self::EXTENSION_SLUG, $label );
 				$this->fail( 'Expected an InvalidArgumentException.' );
 			} catch ( InvalidArgumentException $e ) {
 				$this->assertStringNotContainsString( 'lock_token', $e->getMessage() );
@@ -1614,7 +2069,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertNotNull( $lock_state );
 		$this->assertSame( 'create', $lock_state['operation'] );
 		try {
-			Contracts::update( $default['contract']->get_id(), array( 'currency' => 'USD' ) );
+			Contracts::update(
+				$default['contract']->get_id(),
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'currency'       => 'USD',
+				)
+			);
 			$this->fail( 'Expected an unlocked write to be refused.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'create', $e->get_operation() );
@@ -1637,17 +2098,42 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'USD', $created['contract']->get_currency() );
 		$this->assertSame( ContractStatus::DRAFT, $this->view( $id )->get_status() );
 		$this->assertInstanceOf( CycleView::class, Contracts::add_cycle( $id, $this->cycle_args(), $lock ) );
-		$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ), $lock ) );
+		$this->assertInstanceOf(
+			ContractView::class,
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'status'         => ContractStatus::ACTIVE,
+				),
+				$lock
+			)
+		);
 
 		try {
-			Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ) );
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'status'         => ContractStatus::ON_HOLD,
+				)
+			);
 			$this->fail( 'Expected an unlocked write to be refused.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'checkout', $e->get_operation() );
 		}
 
 		$lock->release();
-		$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ) ) );
+		$this->assertInstanceOf(
+			ContractView::class,
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'status'         => ContractStatus::ON_HOLD,
+				)
+			)
+		);
 	}
 
 	/**
@@ -1786,7 +2272,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$lock = $this->take_lock( $id, 'renewal' );
 
 		try {
-			Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'items'          => array( array( 'item_name' => 'Cocoa' ) ),
+				)
+			);
 			$this->fail( 'Expected a conflict.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'renewal', $e->get_operation() );
@@ -1794,7 +2286,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'Coffee' ), array_column( (array) $this->view( $id )->get_items(), 'item_name' ) );
 
 		$lock->release();
-		Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
+		Contracts::update(
+			$id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'items'          => array( array( 'item_name' => 'Cocoa' ) ),
+			)
+		);
 		$this->assertSame( array( 'Cocoa' ), array_column( (array) $this->view( $id )->get_items(), 'item_name' ) );
 		$this->assertSame( $id, $this->take_lock( $id, 'next' )->get_contract_id(), 'The internal lock was released.' );
 	}
@@ -1804,10 +2302,22 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function test_a_refused_unlocked_update_releases_the_internal_lock(): void {
 		$id = $this->contract_with_currency();
-		Contracts::update( $id, array( 'billing_total' => '10' ) );
+		Contracts::update(
+			$id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'billing_total'  => '10',
+			)
+		);
 
 		try {
-			Contracts::update( $id, array( 'currency' => null ) );
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'currency'       => null,
+				)
+			);
 			$this->fail( 'Expected totals without a currency to be refused.' );
 		} catch ( InvalidArgumentException $e ) {
 			$this->assertNull( $this->view( $id )->get_lock_state(), 'The internal lock is released.' );
@@ -1828,7 +2338,16 @@ class ContractsTest extends EngineIntegrationTestCase {
 		};
 		add_filter( 'query', $record );
 		try {
-			$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ) ) );
+			$this->assertInstanceOf(
+				ContractView::class,
+				Contracts::update(
+					$id,
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'status'         => ContractStatus::ON_HOLD,
+					)
+				)
+			);
 		} finally {
 			remove_filter( 'query', $record );
 		}
@@ -1846,14 +2365,28 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		$this->take_lock( $id, 'renewal' );
 		try {
-			Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ) );
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'status'         => ContractStatus::ACTIVE,
+				)
+			);
 			$this->fail( 'Expected a conflict.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'renewal', $e->get_operation() );
 		}
 		$this->assertSame( ContractStatus::ON_HOLD, $this->view( $id )->get_status() );
 
-		$this->assertNull( Contracts::update( 999999, array( 'status' => ContractStatus::ACTIVE ) ) );
+		$this->assertNull(
+			Contracts::update(
+				999999,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'status'         => ContractStatus::ACTIVE,
+				)
+			)
+		);
 	}
 
 	/**
@@ -1870,7 +2403,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 		};
 		add_filter( 'query', $record );
 		try {
-			Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'items'          => array( array( 'item_name' => 'Cocoa' ) ),
+				)
+			);
 			$this->fail( 'Expected a conflict.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'renewal', $e->get_operation() );
@@ -1894,7 +2433,14 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		$writes = array(
 			'update'           => static function () use ( $id, $lock ): void {
-				Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ), $lock );
+				Contracts::update(
+					$id,
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'status'         => ContractStatus::ON_HOLD,
+					),
+					$lock
+				);
 			},
 			'add_cycle'        => function () use ( $id, $lock ): void {
 				Contracts::add_cycle( $id, $this->cycle_args(), $lock );
@@ -1903,13 +2449,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 				Contracts::transition_cycle( $cycle_id, $this->transition( CycleStatus::PENDING, CycleStatus::BILLED ), $lock );
 			},
 			'add_meta'         => static function () use ( $id, $lock ): void {
-				Contracts::add_meta( $id, 'k', 'v', false, $lock );
+				Contracts::add_meta( $id, self::EXTENSION_SLUG, 'k', 'v', false, $lock );
 			},
 			'update_meta'      => static function () use ( $id, $lock ): void {
-				Contracts::update_meta( $id, 'k', 'v', null, $lock );
+				Contracts::update_meta( $id, self::EXTENSION_SLUG, 'k', 'v', null, $lock );
 			},
 			'delete_meta'      => static function () use ( $id, $lock ): void {
-				Contracts::delete_meta( $id, 'k', null, $lock );
+				Contracts::delete_meta( $id, self::EXTENSION_SLUG, 'k', null, $lock );
 			},
 		);
 
@@ -1944,10 +2490,10 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		$writes = array(
 			'add_meta'        => static function () use ( $id, $lock ): void {
-				Contracts::add_meta( $id, 'k', 'v', false, $lock );
+				Contracts::add_meta( $id, self::EXTENSION_SLUG, 'k', 'v', false, $lock );
 			},
 			'add_meta unique' => static function () use ( $id, $lock ): void {
-				Contracts::add_meta( $id, 'k', 'v', true, $lock );
+				Contracts::add_meta( $id, self::EXTENSION_SLUG, 'k', 'v', true, $lock );
 			},
 			'add_cycle'       => function () use ( $id, $lock ): void {
 				Contracts::add_cycle( $id, $this->cycle_args(), $lock );
@@ -1972,7 +2518,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		$this->fail_next_query( '/^\s*INSERT INTO \S*contract_meta .* FROM \S*subscription_contracts c WHERE c\.id = \d+/s' );
 		try {
-			Contracts::add_meta( $id, 'k', 'v', true );
+			Contracts::add_meta( $id, self::EXTENSION_SLUG, 'k', 'v', true );
 			$this->fail( 'Expected the failed insert to throw.' );
 		} catch ( ContractLockedException $e ) {
 			$this->fail( 'The internal lock is still held, so the failure is not a lock conflict.' );
@@ -2053,8 +2599,8 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_meta_keeps_several_values_under_one_key(): void {
 		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
-		$this->assertIsInt( Contracts::add_meta( $id, 'note', 'one' ) );
-		$this->assertIsInt( Contracts::add_meta( $id, 'note', array( 'two' ) ) );
+		$this->assertIsInt( Contracts::add_meta( $id, self::EXTENSION_SLUG, 'note', 'one' ) );
+		$this->assertIsInt( Contracts::add_meta( $id, self::EXTENSION_SLUG, 'note', array( 'two' ) ) );
 
 		$this->assertSame( array( 'one', array( 'two' ) ), Contracts::get_meta( $id, 'note' ) );
 		$this->assertSame( 'one', Contracts::get_meta( $id, 'note', true ) );
@@ -2063,48 +2609,48 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 	public function test_a_unique_meta_add_refuses_an_existing_key(): void {
 		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
-		Contracts::add_meta( $id, 'note', 'one' );
+		Contracts::add_meta( $id, self::EXTENSION_SLUG, 'note', 'one' );
 
-		$this->assertNull( Contracts::add_meta( $id, 'note', 'two', true ) );
+		$this->assertNull( Contracts::add_meta( $id, self::EXTENSION_SLUG, 'note', 'two', true ) );
 		$this->assertSame( array( 'one' ), Contracts::get_meta( $id, 'note' ) );
 	}
 
 	public function test_update_meta_with_a_previous_value_and_delete_one_value(): void {
 		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
-		Contracts::add_meta( $id, 'note', 'one' );
-		Contracts::add_meta( $id, 'note', 'two' );
+		Contracts::add_meta( $id, self::EXTENSION_SLUG, 'note', 'one' );
+		Contracts::add_meta( $id, self::EXTENSION_SLUG, 'note', 'two' );
 
-		$this->assertTrue( Contracts::update_meta( $id, 'note', 'three', 'two' ) );
+		$this->assertTrue( Contracts::update_meta( $id, self::EXTENSION_SLUG, 'note', 'three', 'two' ) );
 		$this->assertSame( array( 'one', 'three' ), Contracts::get_meta( $id, 'note' ) );
 
-		$this->assertTrue( Contracts::delete_meta( $id, 'note', 'one' ) );
+		$this->assertTrue( Contracts::delete_meta( $id, self::EXTENSION_SLUG, 'note', 'one' ) );
 		$this->assertSame( array( 'three' ), Contracts::get_meta( $id, 'note' ) );
 	}
 
 	public function test_only_null_matches_any_meta_value(): void {
 		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
-		Contracts::add_meta( $id, 'note', 'one' );
-		Contracts::add_meta( $id, 'note', '' );
+		Contracts::add_meta( $id, self::EXTENSION_SLUG, 'note', 'one' );
+		Contracts::add_meta( $id, self::EXTENSION_SLUG, 'note', '' );
 
-		$this->assertTrue( Contracts::update_meta( $id, 'note', 'blank', '' ) );
+		$this->assertTrue( Contracts::update_meta( $id, self::EXTENSION_SLUG, 'note', 'blank', '' ) );
 		$this->assertSame( array( 'one', 'blank' ), Contracts::get_meta( $id, 'note' ), 'An empty previous value matches literally.' );
 
-		$this->assertFalse( Contracts::delete_meta( $id, 'note', '' ) );
+		$this->assertFalse( Contracts::delete_meta( $id, self::EXTENSION_SLUG, 'note', '' ) );
 		$this->assertSame( array( 'one', 'blank' ), Contracts::get_meta( $id, 'note' ), 'An empty value deletes only empty values.' );
 
-		$this->assertTrue( Contracts::delete_meta( $id, 'note' ) );
+		$this->assertTrue( Contracts::delete_meta( $id, self::EXTENSION_SLUG, 'note' ) );
 		$this->assertSame( array(), Contracts::get_meta( $id, 'note' ) );
 	}
 
 	public function test_meta_reads_for_an_unknown_contract_are_empty(): void {
-		$this->assertFalse( Contracts::delete_meta( 999999, 'note' ) );
+		$this->assertFalse( Contracts::delete_meta( 999999, self::EXTENSION_SLUG, 'note' ) );
 		$this->assertSame( '', Contracts::get_meta( 999999, 'note', true ) );
 		$this->assertSame( array(), Contracts::get_meta( 999999, 'note' ) );
 	}
 
 	public function test_deleting_a_contract_removes_its_meta(): void {
 		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
-		Contracts::add_meta( $id, 'note', 'one' );
+		Contracts::add_meta( $id, self::EXTENSION_SLUG, 'note', 'one' );
 
 		$this->assertTrue( ( new ContractRepository() )->delete( $id ) );
 
@@ -2116,18 +2662,19 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		$this->expectException( InvalidArgumentException::class );
 
-		Contracts::add_meta( $id, '', 'one' );
+		Contracts::add_meta( $id, self::EXTENSION_SLUG, '', 'one' );
 	}
 
 	public function test_meta_survives_a_contract_update(): void {
 		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
-		Contracts::add_meta( $id, 'note', 'kept' );
+		Contracts::add_meta( $id, self::EXTENSION_SLUG, 'note', 'kept' );
 
 		Contracts::update(
 			$id,
 			array(
-				'status' => ContractStatus::ACTIVE,
-				'items'  => array( array( 'item_name' => 'Coffee' ) ),
+				'extension_slug' => self::EXTENSION_SLUG,
+				'status'         => ContractStatus::ACTIVE,
+				'items'          => array( array( 'item_name' => 'Coffee' ) ),
 			)
 		);
 

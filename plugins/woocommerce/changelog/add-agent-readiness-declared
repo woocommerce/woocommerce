@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Agent readiness: list the protocols and files a store declares to agents, as information only.

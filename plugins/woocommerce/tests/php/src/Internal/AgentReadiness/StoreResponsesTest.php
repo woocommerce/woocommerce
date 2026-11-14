@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreResponses;
+use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
 /**
@@ -73,14 +74,39 @@ class StoreResponsesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A failed request is null, so the check says couldn't check; a 404 is a response.
+	 * @testdox A failed request is null, so the check says couldn't check; a 404 is a response. After the home page fails no more requests are made.
 	 */
 	public function test_failed_request_is_null(): void {
 		$this->serve( array( home_url( '/missing' ) => self::response( 404 ) ) );
 		$sut = new StoreResponses( true );
 
-		$this->assertNull( $sut->get( '/timeout' ) );
 		$this->assertSame( 404, $sut->get( '/missing' )['status'] );
+		$this->assertNull( $sut->get( '/timeout' ) );
+		$this->assertSame( 404, $sut->get( '/missing' )['status'], 'One slow page does not stop the scan' );
+		$this->assertNull( $sut->home_page() );
+		$this->assertNull( $sut->get( '/other' ) );
+		$this->assertNull( $sut->post_json( '/missing-post', array() ) );
+		$this->assertSame( array( home_url( '/missing' ), home_url( '/timeout' ), home_url( '/' ) ), $this->requested );
+	}
+
+	/**
+	 * @testdox A failed Markdown request to the home page doesn't stop the scan when the page itself loads.
+	 */
+	public function test_failed_markdown_request_keeps_the_scan_going(): void {
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args ) {
+				unset( $pre );
+				return 'text/markdown' === ( $args['headers']['Accept'] ?? '' ) ? new \WP_Error( 'http_request_failed', 'Timed out' ) : self::response( 200, '<html></html>' );
+			},
+			10,
+			2
+		);
+		$sut = new StoreResponses( true );
+
+		$this->assertNull( $sut->get_as_markdown( '/' ) );
+		$this->assertSame( 200, $sut->home_page()['status'] );
+		$this->assertSame( 200, $sut->get( '/other' )['status'] );
 	}
 
 	/**
@@ -105,6 +131,16 @@ class StoreResponsesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A redirect to a query string on the store host is not requested.
+	 */
+	public function test_redirect_with_query_string_is_not_followed(): void {
+		$this->serve( array( home_url( '/go' ) => self::response( 302, '', array( 'Location' => '/?add-to-cart=12' ) ) ) );
+
+		$this->assertNull( ( new StoreResponses( true ) )->get( '/go' ) );
+		$this->assertSame( array( home_url( '/go' ) ), $this->requested );
+	}
+
+	/**
 	 * @testdox A redirect loop on the store's host gives up after two redirects.
 	 */
 	public function test_redirect_loop_gives_up(): void {
@@ -112,6 +148,50 @@ class StoreResponsesTest extends WC_Unit_Test_Case {
 
 		$this->assertNull( ( new StoreResponses( true ) )->get( '/loop' ) );
 		$this->assertCount( 3, $this->requested );
+	}
+
+	/**
+	 * @testdox A product page is read past the usual cap, so JSON-LD in the footer is still there.
+	 */
+	public function test_product_page_keeps_footer_past_the_byte_cap(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$marker  = '<script type="application/ld+json">{"@type":"Product","name":"Tail"}</script>';
+		$body    = str_repeat( 'x', StoreResponses::MAX_BYTES ) . $marker;
+		$limit   = null;
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args ) use ( &$limit ) {
+				$limit = $args['limit_response_size'];
+				return $pre;
+			},
+			9,
+			2
+		);
+		$this->serve( array( (string) $product->get_permalink() => self::response( 200, $body ) ) );
+
+		$page = ( new StoreResponses( true ) )->product_page();
+
+		$this->assertSame( StoreResponses::PRODUCT_PAGE_BYTES, $limit );
+		$this->assertNotNull( $page );
+		$this->assertStringContainsString( $marker, $page['body'] );
+		$this->assertFalse( $page['truncated'] );
+	}
+
+	/**
+	 * @testdox A product page whose response was cut short is marked truncated.
+	 */
+	public function test_product_page_cut_short_is_truncated(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->serve(
+			array(
+				(string) $product->get_permalink() => self::response( 200, '<html></html>', array( 'content-length' => '99999999' ) ),
+			)
+		);
+
+		$page = ( new StoreResponses( true ) )->product_page();
+
+		$this->assertNotNull( $page );
+		$this->assertTrue( $page['truncated'] );
 	}
 
 	/**

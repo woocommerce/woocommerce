@@ -104,6 +104,11 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		// Hooks added in setUpBeforeClass() are removed after the first test, so add them per test.
+		$fulfillments = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
+		$fulfillments->register();
+		$fulfillments->initialize_fulfillments();
+
 		$this->controller = new FulfillmentsController();
 		$this->controller->init( new FulfillmentSchema(), new OrderFulfillmentsRestController() );
 		$this->controller->register_routes();
@@ -237,8 +242,8 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
+		$this->assertNotEmpty( $data, 'The built-in shipping providers should be listed' );
 
-		// Each provider should have the expected structure if any exist.
 		foreach ( $data as $key => $provider ) {
 			$this->assertIsString( $key );
 			$this->assertIsArray( $provider );

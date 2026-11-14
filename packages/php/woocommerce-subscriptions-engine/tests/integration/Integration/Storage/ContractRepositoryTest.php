@@ -302,7 +302,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_meta_survives_a_whole_entity_update(): void {
 		$id = $this->insert_released( $this->make_contract() );
-		$this->sut->add_meta( $id, 'source_channel', 'pdp' );
+		$this->sut->add_meta( $id, $this->get_extension_slug( $id ), 'source_channel', 'pdp' );
 
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
@@ -902,7 +902,15 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id = $this->insert_released( $this->make_contract() );
 
 		for ( $i = 0; $i < 2; $i++ ) {
-			$this->assertNotNull( Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ) ) );
+			$this->assertNotNull(
+				Contracts::update(
+					$id,
+					array(
+						'extension_slug' => $this->get_extension_slug( $id ),
+						'status'         => ContractStatus::ACTIVE,
+					)
+				)
+			);
 		}
 
 		$stored = $this->sut->find( $id );
@@ -1246,7 +1254,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_a_lost_contract_write_changes_neither_status_nor_due_moment(): void {
 		$id   = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$lock = $this->sut->acquire_lock( $id, 'test' );
+		$lock = $this->sut->acquire_lock( $id, $this->get_extension_slug( $id ), 'test' );
 		$this->assertNotNull( $lock );
 
 		$contract = $this->sut->find( $id );
@@ -1280,7 +1288,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_due_moment_writes_leave_the_lock_alone(): void {
 		$id   = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$lock = $this->sut->acquire_lock( $id, 'engine_due_dispatch' );
+		$lock = $this->sut->acquire_lock( $id, $this->get_extension_slug( $id ), 'engine_due_dispatch' );
 		$this->assertNotNull( $lock );
 		$before = $this->get_lock_holder( $id );
 
@@ -1968,7 +1976,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @param string $operation   Operation label.
 	 */
 	private function lock( int $contract_id, string $operation = 'test' ): ContractLock {
-		$lock = $this->sut->acquire_lock( $contract_id, $operation );
+		$lock = $this->sut->acquire_lock( $contract_id, $this->get_extension_slug( $contract_id ), $operation );
 		$this->assertInstanceOf( ContractLock::class, $lock );
 
 		return $lock;
@@ -2057,7 +2065,13 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( ContractStatus::ON_HOLD, $this->stored_status( $id ) );
 
 		try {
-			Contracts::update( $id, array( 'status' => ContractStatus::CANCELLED ) );
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => $this->get_extension_slug( $id ),
+					'status'         => ContractStatus::CANCELLED,
+				)
+			);
 			$this->fail( 'Expected an unlocked write to be refused while the lock lives.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'hold', $e->get_operation() );
@@ -2065,7 +2079,15 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( ContractStatus::ON_HOLD, $this->stored_status( $id ) );
 
 		$this->pin_db_clock( '2035-01-01 00:10:00' );
-		$this->assertNotNull( Contracts::update( $id, array( 'status' => ContractStatus::CANCELLED ) ) );
+		$this->assertNotNull(
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => $this->get_extension_slug( $id ),
+					'status'         => ContractStatus::CANCELLED,
+				)
+			)
+		);
 		$this->assertSame( ContractStatus::CANCELLED, $this->stored_status( $id ) );
 
 		try {
@@ -2115,7 +2137,16 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->sut->delete( $id );
 
 		$this->assertFalse( $this->sut->update_fields( $contract, array( 'status' ), $lock ) );
-		$this->assertNull( Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ) ), 'Unlocked, the update reads the contract as missing.' );
+		$this->assertNull(
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => 'lite',
+					'status'         => ContractStatus::ON_HOLD,
+				)
+			),
+			'Unlocked, the update reads the contract as missing.'
+		);
 	}
 
 	/**
@@ -2127,8 +2158,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$lock  = $this->lock( $id, 'hold' );
 
 		$args = array(
-			'status' => ContractStatus::ON_HOLD,
-			'items'  => $this->two_items(),
+			'extension_slug' => $this->get_extension_slug( $id ),
+			'status'         => ContractStatus::ON_HOLD,
+			'items'          => $this->two_items(),
 		);
 		try {
 			Contracts::update( $id, $args );
@@ -2201,7 +2233,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->sut->delete( $id );
 
 		try {
-			$this->sut->add_meta( $id, 'note', 'x', true, $lock );
+			$this->sut->add_meta( $id, 'lite', 'note', 'x', true, $lock );
 			$this->fail( 'Expected the add to a missing contract to throw.' );
 		} catch ( \InvalidArgumentException $e ) {
 			$this->assertStringContainsString( (string) $id, $e->getMessage() );
@@ -2452,7 +2484,16 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			array( 'contract_id' => $id ),
 			function () use ( $id, $release ): void {
 				$this->fail_next_query( $release );
-				$this->assertNotNull( Contracts::update( $id, array( 'items' => $this->two_items() ) ), 'The landed write is reported.' );
+				$this->assertNotNull(
+					Contracts::update(
+						$id,
+						array(
+							'extension_slug' => $this->get_extension_slug( $id ),
+							'items'          => $this->two_items(),
+						)
+					),
+					'The landed write is reported.'
+				);
 			}
 		);
 		$this->assertNotSame( array(), $logs, 'The failed release is logged.' );
@@ -2466,7 +2507,13 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				$this->fail_next_query( '/^\s*INSERT\s+INTO\s+\S*contract_items/i' );
 				$this->fail_next_query( $release );
 				try {
-					Contracts::update( $id, array( 'items' => $this->two_items() ) );
+					Contracts::update(
+						$id,
+						array(
+							'extension_slug' => $this->get_extension_slug( $id ),
+							'items'          => $this->two_items(),
+						)
+					);
 					$this->fail( 'Expected the failed item insert to throw.' );
 				} catch ( \RuntimeException $e ) {
 					$this->assertStringContainsString( 'item', $e->getMessage(), 'The write failure surfaces, not the release failure.' );
@@ -2544,14 +2591,28 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertCount( 1, $this->item_ids( $id ), 'Items are written under the lock.' );
 
 		try {
-			Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ) );
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => $this->get_extension_slug( $id ),
+					'status'         => ContractStatus::ON_HOLD,
+				)
+			);
 			$this->fail( 'Expected an unlocked write to be refused.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'checkout', $e->get_operation() );
 		}
 
 		$lock->release();
-		$this->assertNotNull( Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ) ) );
+		$this->assertNotNull(
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => $this->get_extension_slug( $id ),
+					'status'         => ContractStatus::ON_HOLD,
+				)
+			)
+		);
 	}
 
 	/**
