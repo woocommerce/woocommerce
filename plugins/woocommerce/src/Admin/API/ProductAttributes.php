@@ -136,22 +136,40 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 	/**
 	 * Get all attributes, with support for searching (which includes custom attributes).
 	 *
-	 * @param WP_REST_Request $request The API request.
-	 * @return WP_REST_Response
+	 * @param \WP_REST_Request<array<string, mixed>> $request The API request.
+	 * @return \WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		if ( empty( $request['search'] ) ) {
 			return parent::get_items( $request );
 		}
 
-		$search_string       = $request['search'];
-		$custom_attributes   = $this->get_custom_attributes( array( 'name' => $search_string ) );
+		$search_string     = $request['search'];
+		$taxonomy_names    = $this->get_requested_taxonomy_names( $request );
+		$custom_attributes = $this->get_custom_attributes( array( 'name' => $search_string ) );
+
+		if ( ! empty( $taxonomy_names ) ) {
+			$custom_slugs      = array_map( 'sanitize_title', (array) $request['slug'] );
+			$custom_attributes = array_filter(
+				$custom_attributes,
+				static function ( $slug ) use ( $custom_slugs ) {
+					$slug = (string) $slug;
+					return 0 !== strpos( $slug, 'pa_' ) && in_array( $slug, $custom_slugs, true );
+				},
+				ARRAY_FILTER_USE_KEY
+			);
+		}
+
 		$matching_attributes = $this->format_custom_attribute_items_for_response( $custom_attributes );
 		$taxonomy_attributes = wc_get_attribute_taxonomies();
 
 		foreach ( $taxonomy_attributes as $attribute_obj ) {
 			// Skip taxonomy attributes that didn't match the query.
 			if ( false === stripos( $attribute_obj->attribute_label, $search_string ) ) {
+				continue;
+			}
+
+			if ( ! empty( $taxonomy_names ) && ! in_array( wc_attribute_taxonomy_name( $attribute_obj->attribute_name ), $taxonomy_names, true ) ) {
 				continue;
 			}
 

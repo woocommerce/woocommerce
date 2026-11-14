@@ -53,6 +53,91 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Product_Attributes_V
 	}
 
 	/**
+	 * Get all attributes, limited to the requested slugs when the `slug` parameter is set.
+	 *
+	 * @since 11.4.0 Supports the `slug` parameter.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request The request to get the attributes from.
+	 * @return WP_REST_Response
+	 */
+	public function get_items( $request ) {
+		$attributes     = wc_get_attribute_taxonomies();
+		$taxonomy_names = $this->get_requested_taxonomy_names( $request );
+
+		if ( ! empty( $taxonomy_names ) ) {
+			$attributes = array_filter(
+				$attributes,
+				static function ( $attribute ) use ( $taxonomy_names ) {
+					return in_array( wc_attribute_taxonomy_name( $attribute->attribute_name ), $taxonomy_names, true );
+				}
+			);
+		}
+
+		$data = array();
+		foreach ( $attributes as $attribute_obj ) {
+			$attribute = $this->prepare_item_for_response( $attribute_obj, $request );
+			$data[]    = $this->prepare_response_for_collection( $attribute );
+		}
+
+		$response = rest_ensure_response( $data );
+
+		// All matching attributes are returned at once, so there is only ever one page.
+		$response->header( 'X-WP-Total', (string) count( $data ) );
+		$response->header( 'X-WP-TotalPages', '1' );
+
+		return $response;
+	}
+
+	/**
+	 * Get the attribute taxonomy names (the `slug` field of the response) requested in the `slug` parameter.
+	 *
+	 * Slugs are normalized the same way as on create, so `pa_color`, `color` and `Color` all become `pa_color`.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return string[] Taxonomy names, or an empty array when no slug was requested.
+	 */
+	protected function get_requested_taxonomy_names( $request ) {
+		$taxonomy_names = array();
+
+		foreach ( (array) $request['slug'] as $slug ) {
+			if ( '' !== $slug ) {
+				$taxonomy_names[] = wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $slug ) );
+			}
+		}
+
+		return array_unique( $taxonomy_names );
+	}
+
+	/**
+	 * Get the query params for collections.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params         = parent::get_collection_params();
+		$params['slug'] = array(
+			'description'       => __( 'Limit result set to attributes with a specific slug. The "pa_" prefix is optional.', 'woocommerce' ),
+			'type'              => array( 'string', 'array' ),
+			'items'             => array(
+				'type' => 'string',
+			),
+			'validate_callback' => static function ( $value, $request, $param ) {
+				if ( ! is_string( $value ) && ! is_array( $value ) ) {
+					return false;
+				}
+
+				return rest_validate_request_arg( $value, $request, $param );
+			},
+		);
+
+		return $params;
+	}
+
+	/**
 	 * Create a single attribute.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
