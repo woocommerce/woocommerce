@@ -1,0 +1,64 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace {
+	&__product-list-header {
+		display: flex;
+		flex-direction: column;
+		gap: $small-gap;
+		align-self: stretch;
+
+		@media screen and (min-width: $breakpoint-medium) {
+			flex-direction: row;
+			flex-wrap: wrap;
+		}
+	}
+
+	&__product-list-title {
+		flex: 1 0 100%;
+		font-size: 20px;
+		font-style: normal;
+		font-weight: 400;
+		line-height: 28px;
+		margin: 0;
+
+		&.is-loading {
+			background: $skeleton-loader-color;
+			height: 26px;
+			margin: 0;
+			width: min(100%, 12em);
+		}
+	}
+
+	&__product-list-title--extensions,
+	&__product-list-title--themes {
+		margin-bottom: 0;
+	}
+
+	&__product-list-description {
+		flex: 1 0 100%;
+		margin: 0;
+
+		@media screen and (min-width: $breakpoint-medium) {
+			flex: 1;
+		}
+	}
+
+	&__product-list-link {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+		margin-left: 0;
+
+		@media screen and (min-width: $breakpoint-medium) {
+			margin-left: auto;
+			align-items: center;
+		}
+	}
+
+	&__product-list-link a {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		text-decoration: none;
+	}
+}

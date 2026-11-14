@@ -1,0 +1,43 @@
+.highlight-tooltip__container {
+	position: absolute;
+	width: 0;
+	height: 0;
+	&.highlight-tooltip__show {
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+	}
+}
+.highlight-tooltip__portal {
+	width: 100%;
+	height: 100%;
+	position: relative;
+
+	.highlight-tooltip__overlay {
+		position: fixed;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background-color: rgba($black, 0.35);
+		z-index: z-index(".components-modal__screen-overlay");
+
+		@include edit-post__fade-in-animation();
+	}
+}
+
+.highlight-tooltip__popover {
+	.components-card {
+		min-width: 360px;
+	}
+	.components-card__header {
+		@include font-size( 16 );
+		font-weight: 600;
+		box-sizing: border-box;
+	}
+	.components-card__footer {
+		justify-content: flex-end;
+		box-sizing: border-box;
+	}
+}

@@ -1,0 +1,13 @@
+$base-color: #5c4c40;
+
+@use "../_admin.scss" with (
+	$scheme-name: "coffee",
+	$base-color: $base-color,
+	$highlight-color: #916745,
+	$notification-color: #9ea476,
+	$menu-highlight-text: #fff,
+	$menu-highlight-icon: #fff,
+	$menu-bubble-text: #1e1e1e,
+	$menu-submenu-focus-text: #fff,
+	$form-checked: $base-color,
+);
