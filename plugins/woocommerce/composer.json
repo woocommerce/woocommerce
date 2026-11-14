@@ -63,7 +63,6 @@
 		"php-stubs/wordpress-stubs": "^6.8",
 		"phpstan/phpstan": "^2.3.4",
 		"phpunit/phpunit": "^9.6",
-		"sebastian/comparator": "^4.0",
 		"spatie/phpunit-watcher": "^1.23",
 		"szepeviktor/phpstan-wordpress": "^2.0",
 		"woocommerce/monorepo-plugin": "*",
