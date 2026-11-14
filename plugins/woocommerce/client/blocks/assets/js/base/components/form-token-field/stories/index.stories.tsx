@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 import { useState } from '@wordpress/element';
 
 /**
@@ -15,7 +15,7 @@ export default {
 	component: FormTokenField,
 } as Meta< Props >;
 
-const Template: Story< Props > = ( args ) => {
+const Template: StoryFn< Props > = ( args ) => {
 	const [ selected, setSelected ] = useState< string[] >( [] );
 
 	return (

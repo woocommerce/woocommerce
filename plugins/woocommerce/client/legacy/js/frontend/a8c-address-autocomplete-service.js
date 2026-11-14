@@ -308,7 +308,8 @@
 					try {
 						const startTime = performance.now();
 						const response = await fetch(
-							`${ searchUrl }?${ params.toString() }`
+							`${ searchUrl }?${ params.toString() }`,
+							{ referrerPolicy: 'origin-when-cross-origin' }
 						);
 						const endTime = performance.now();
 						requestDurations.push( endTime - startTime );
@@ -316,6 +317,10 @@
 
 						// Handle errors using shared function
 						handleApiError( data, response );
+
+						if ( ! response.ok ) {
+							return [];
+						}
 
 						if ( Array.isArray( data ) ) {
 							data = data.map( ( item ) => ( {
@@ -328,6 +333,7 @@
 							cacheResult( inputValue, country, data );
 							return data;
 						}
+						return [];
 					} catch ( e ) {
 						if ( e.name === 'AbortError' ) {
 							// Ignore abort errors from cancelled requests
@@ -402,7 +408,8 @@
 					} );
 
 					const response = await fetch(
-						`${ selectUrl }?${ params.toString() }`
+						`${ selectUrl }?${ params.toString() }`,
+						{ referrerPolicy: 'origin-when-cross-origin' }
 					);
 
 					let data = await response.json();

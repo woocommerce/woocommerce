@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
@@ -106,45 +107,70 @@ class NotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Default `should_send_to_user` should:
-	 *  - treat `null` (no stored value) as opt-in,
-	 *  - read `enabled` from the array shape today's storage produces,
-	 *  - default to `true` when the array shape is missing the `enabled`
-	 *    key (so newly-added notification types are opt-in by default),
-	 *  - and fall back to a defensive bool cast for unexpected scalars.
-	 *
-	 * @return array<string, array<mixed>>
+	 * @testdox should_send_to_user should answer from the reason, for code that loaded before an update.
 	 */
-	public function provider_should_send_to_user_default(): array {
-		return array(
-			'null pref means opt-in by default'         => array( null, true ),
-			'array with enabled true'                   => array( array( 'enabled' => true ), true ),
-			'array with enabled false'                  => array( array( 'enabled' => false ), false ),
-			'array missing enabled defaults to true'    => array( array( 'min_value' => 500 ), true ),
-			'empty array defaults to true'              => array( array(), true ),
-			'array with truthy enabled (1) is true'     => array( array( 'enabled' => 1 ), true ),
-			'array with falsy enabled (0) is false'     => array( array( 'enabled' => 0 ), false ),
-			'scalar bool true (defensive fallback)'     => array( true, true ),
-			'scalar bool false (defensive fallback)'    => array( false, false ),
-			'scalar truthy string (defensive fallback)' => array( '1', true ),
-			'scalar empty string (defensive fallback)'  => array( '', false ),
-		);
-	}
-
-	/**
-	 * @testdox Default should_send_to_user with $_dataName returns $expected.
-	 * @dataProvider provider_should_send_to_user_default
-	 *
-	 * @param mixed $pref_value The stored preference value.
-	 * @param bool  $expected   The expected decision.
-	 */
-	public function test_should_send_to_user_default_behavior( $pref_value, bool $expected ): void {
+	public function test_should_send_to_user_answers_from_the_reason(): void {
 		$notification = $this->getMockBuilder( NewOrderNotification::class )
 			->setConstructorArgs( array( 1 ) )
 			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta', 'delete_meta' ) )
 			->getMock();
 
-		$this->assertSame( $expected, $notification->should_send_to_user( $pref_value ) );
+		$this->assertTrue( $notification->should_send_to_user( array( 'enabled' => true ) ) );
+		$this->assertFalse( $notification->should_send_to_user( array( 'enabled' => false ) ) );
+	}
+
+	/**
+	 * Default `get_suppression_reason` should:
+	 *  - treat `null` (no stored value) as opt-in,
+	 *  - read `enabled` from the array shape today's storage produces,
+	 *  - return null when the array shape is missing the `enabled`
+	 *    key (so newly-added notification types are opt-in by default),
+	 *  - and fall back to a defensive bool cast for unexpected scalars.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provider_suppression_reason_default(): array {
+		return array(
+			'null pref means opt-in by default'         => array( null, null ),
+			'array with enabled true'                   => array( array( 'enabled' => true ), null ),
+			'array with enabled false'                  => array( array( 'enabled' => false ), SuppressionReason::NOTIFICATIONS_OFF ),
+			'array missing enabled defaults to true'    => array( array( 'min_value' => 500 ), null ),
+			'empty array defaults to true'              => array( array(), null ),
+			'array with truthy enabled (1) is true'     => array( array( 'enabled' => 1 ), null ),
+			'array with falsy enabled (0) is false'     => array( array( 'enabled' => 0 ), SuppressionReason::NOTIFICATIONS_OFF ),
+			'scalar bool true (defensive fallback)'     => array( true, null ),
+			'scalar bool false (defensive fallback)'    => array( false, SuppressionReason::NOTIFICATIONS_OFF ),
+			'scalar truthy string (defensive fallback)' => array( '1', null ),
+			'scalar empty string (defensive fallback)'  => array( '', SuppressionReason::NOTIFICATIONS_OFF ),
+		);
+	}
+
+	/**
+	 * @testdox Default get_suppression_reason with $_dataName returns $expected.
+	 * @dataProvider provider_suppression_reason_default
+	 *
+	 * @param mixed       $pref_value The stored preference value.
+	 * @param string|null $expected   The expected reason, or null to send.
+	 */
+	public function test_suppression_reason_default_behavior( $pref_value, ?string $expected ): void {
+		$notification = $this->getMockBuilder( NewOrderNotification::class )
+			->setConstructorArgs( array( 1 ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta', 'delete_meta' ) )
+			->getMock();
+
+		$this->assertSame( $expected, $notification->get_suppression_reason( $pref_value ) );
+	}
+
+	/**
+	 * @testdox Default get_suppression_reason reports the type as disabled.
+	 */
+	public function test_get_suppression_reason_default_is_type_disabled(): void {
+		$notification = $this->getMockBuilder( NewOrderNotification::class )
+			->setConstructorArgs( array( 1 ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta', 'delete_meta' ) )
+			->getMock();
+
+		$this->assertSame( SuppressionReason::NOTIFICATIONS_OFF, $notification->get_suppression_reason( array( 'enabled' => false ) ) );
 	}
 
 	/**
@@ -177,5 +203,79 @@ class NotificationTest extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( NewOrderNotification::class, $notification );
 		$this->assertSame( 42, $notification->get_resource_id() );
+	}
+
+	/**
+	 * Action Scheduler matches the safety-net cancel call and the retry dedupe
+	 * guard on the exact serialized arguments, and both derive from
+	 * get_identity_data(). A subclass that returns anything varying between two
+	 * instances of the same notification would stop those matching, which leaves
+	 * an uncancelled safety net to re-send and a row per trigger in
+	 * wp_actionscheduler_actions.
+	 *
+	 * @testdox Should return identity data that does not vary with volatile constructor state.
+	 * @dataProvider provider_notification_identity_pairs
+	 *
+	 * @param callable $build              Builds a notification from a volatile value.
+	 * @param bool     $has_volatile_state Whether this subclass has volatile state for $build to vary.
+	 */
+	public function test_get_identity_data_ignores_volatile_state( callable $build, bool $has_volatile_state ): void {
+		$one   = $build( 1 );
+		$other = $build( 999 );
+
+		if ( $has_volatile_state ) {
+			$this->assertNotSame(
+				$one->to_array(),
+				$other->to_array(),
+				'The provider case has to vary the volatile state, or the assertion below proves nothing.'
+			);
+		}
+
+		$this->assertSame( $one->get_identity_data(), $other->get_identity_data() );
+	}
+
+	/**
+	 * Action Scheduler matches a scheduled action on its serialized arguments, so
+	 * the schedule and cancel paths agreeing is not enough. Both derive from
+	 * get_safety_net_args(), so a change there moves them together and stays
+	 * green while silently dropping the event type from every stock safety net.
+	 * These are the literal arguments that have to be stored.
+	 *
+	 * @testdox Should build the expected safety-net arguments for each notification subclass.
+	 * @dataProvider provider_notification_identity_pairs
+	 *
+	 * @param callable          $build              Builds a notification from a volatile value.
+	 * @param bool              $has_volatile_state Unused here; see the identity data test.
+	 * @param array<int, mixed> $expected_args      The safety-net arguments this subclass must produce.
+	 */
+	public function test_get_safety_net_args( callable $build, bool $has_volatile_state, array $expected_args ): void {
+		$this->assertSame( $expected_args, $build( 1 )->get_safety_net_args() );
+	}
+
+	/**
+	 * @testdox Should have an identity data case for every notification subclass.
+	 */
+	public function test_identity_data_provider_covers_every_subclass(): void {
+		$this->assertEqualsCanonicalizing(
+			array_keys( Notification::NOTIFICATION_CLASSES ),
+			array_keys( $this->provider_notification_identity_pairs() ),
+			'A new Notification subclass needs a case in the provider, so its identity data is checked too.'
+		);
+	}
+
+	/**
+	 * One entry per Notification subclass: a callable that builds the same
+	 * notification from a volatile value, a flag saying whether the subclass has
+	 * any volatile state for the callable to vary, and the exact safety-net
+	 * arguments Action Scheduler has to store for it.
+	 *
+	 * @return array<string, array{callable, bool, array<int, mixed>}>
+	 */
+	public function provider_notification_identity_pairs(): array {
+		return array(
+			'store_order'  => array( fn() => new NewOrderNotification( 42 ), false, array( 'store_order', 42 ) ),
+			'store_review' => array( fn() => new NewReviewNotification( 42 ), false, array( 'store_review', 42 ) ),
+			'store_stock'  => array( fn( int $volatile ) => new StockNotification( 42, StockNotification::EVENT_LOW_STOCK, $volatile ), true, array( 'store_stock', 42, array( 'event_type' => StockNotification::EVENT_LOW_STOCK ) ) ),
+		);
 	}
 }

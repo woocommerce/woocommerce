@@ -21,7 +21,7 @@ WP-CLI is a powerful set of command-line tools for managing WordPress installati
 
 To begin using WC-CLI, ensure that you have WP-CLI installed and that you are running WooCommerce 3.0.0 or later. The CLI commands are accessed through the `wp wc` command. For a full list of available commands, type `wp wc` in your command-line interface.
 
-For specific details on commands and their usage, refer to the Command Reference section. The How-to Guide provides a practical approach to common tasks, ideal for those new to WC-CLI or looking for quick solutions.
+For specific details on commands and their usage, refer to the [command reference](/docs/wc-cli/wc-cli-commands/). The [how-to guide](/docs/wc-cli/using-wc-cli/) provides a practical approach to common tasks, ideal for those new to WC-CLI or looking for quick solutions.
 
 ## Additional Resources
 

@@ -344,7 +344,7 @@ test.describe( 'Customers API tests: CRUD', () => {
 	test.describe( 'Delete a customer', () => {
 		test( 'can permanently delete an customer', async ( { request } ) => {
 			test.skip(
-				process.env.IS_MULTISITE === 'true',
+				!! process.env.IS_MULTISITE,
 				'Skip tests on deleting a customer on multisites until bug #384 in private repo is resolved.'
 			);
 
@@ -518,7 +518,7 @@ test.describe( 'Customers API tests: CRUD', () => {
 
 		test( 'can batch delete customers', async ( { request } ) => {
 			test.skip(
-				process.env.IS_MULTISITE === 'true',
+				!! process.env.IS_MULTISITE,
 				'Skip tests on deleting a customer on multisites until bug #384 in private repo is resolved.'
 			);
 

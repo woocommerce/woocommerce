@@ -4,20 +4,14 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockHooksTestBlock;
-use WP_UnitTestCase;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockHooksLowerVersionTestBlock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockHooksNoVersionTestBlock;
+use WC_Unit_Test_Case;
 
 /**
  * Tests Block Hooks logic.
- *
  */
-class BlockHooksTests extends WP_UnitTestCase {
-	/**
-	 * This variable holds our Product Query object.
-	 *
-	 * @var TestBlock
-	 */
-	protected static $block_instance;
-
+class BlockHooksTests extends WC_Unit_Test_Case {
 	/**
 	 * Option name for storing the block hooks version.
 	 *
@@ -26,21 +20,11 @@ class BlockHooksTests extends WP_UnitTestCase {
 	protected static $option_name = 'woocommerce_hooked_blocks_version';
 
 	/**
-	 * Initiate the mock object.
+	 * @testdox Should hook the mock block when the configured version meets the placement requirement.
 	 */
-	public static function setUpBeforeClass(): void {
-		delete_option( self::$option_name );
-		self::$block_instance = new BlockHooksTestBlock();
-	}
-
-	/**
-	 * Test block gets hooked with correct version
-	 *
-	 * @return void
-	 */
-	public function test_mocked_block_gets_hooked_with_correct_version() {
+	public function test_mocked_block_gets_hooked_with_correct_version(): void {
+		new BlockHooksTestBlock();
 		update_option( self::$option_name, '8.4.0', false );
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
 		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'after', 'core/navigation', array( 'mock-context' ) );
 		$this->assertContains(
 			'woocommerce/test-block',
@@ -51,13 +35,11 @@ class BlockHooksTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test block does not get hooked because no version is set.
-	 *
-	 * @return void
+	 * @testdox Should not hook the mock block when no version is configured.
 	 */
-	public function test_mocked_block_does_not_get_hooked() {
+	public function test_mocked_block_does_not_get_hooked(): void {
+		new BlockHooksNoVersionTestBlock();
 		delete_option( self::$option_name );
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
 		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'after', 'core/navigation', array( 'mock-context' ) );
 		$this->assertNotContains(
 			'woocommerce/test-block',
@@ -67,13 +49,11 @@ class BlockHooksTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test block does not get hooked with lower version
-	 *
-	 * @return void
+	 * @testdox Should not hook the mock block when the configured version is lower than required.
 	 */
-	public function test_mocked_block_does_not_get_hooked_with_lower_version() {
+	public function test_mocked_block_does_not_get_hooked_with_lower_version(): void {
+		new BlockHooksLowerVersionTestBlock();
 		update_option( self::$option_name, '8.3.0', false );
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
 		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'after', 'core/navigation', array( 'mock-context' ) );
 		$this->assertNotContains(
 			'woocommerce/test-block',

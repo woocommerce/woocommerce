@@ -7,6 +7,12 @@ declare(strict_types=1);
  * Author: WooCommerce
  * @package woocommerce-blocks-test-additional-checkout-fields
  */
+
+// Only requests from specs that enable this plugin send the cookie.
+if ( ! isset( $_COOKIE['woocommerce-blocks-test-additional-checkout-fields'] ) ) {
+	return;
+}
+
 class Additional_Checkout_Fields_Test_Helper {
 	/**
 	 * Constructor.
@@ -14,7 +20,7 @@ class Additional_Checkout_Fields_Test_Helper {
 	public function __construct() {
 		add_action( 'plugins_loaded', array( $this, 'enable_custom_checkout_fields' ) );
 		add_action( 'plugins_loaded', array( $this, 'disable_custom_checkout_fields' ) );
-		add_action( 'woocommerce_loaded', array( $this, 'register_custom_checkout_fields' ) );
+		add_action( 'woocommerce_init', array( $this, 'register_custom_checkout_fields' ) );
 	}
 
 	/**

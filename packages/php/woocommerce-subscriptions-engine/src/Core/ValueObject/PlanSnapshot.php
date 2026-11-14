@@ -16,8 +16,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
-use DomainException;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use LogicException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,8 +28,6 @@ defined( 'ABSPATH' ) || exit;
  * {@see self::from_payload()} (a serialized payload).
  */
 final class PlanSnapshot {
-
-	use ScalarCoercion;
 
 	/**
 	 * The plan terms payload, as stored on the snapshot row.
@@ -51,11 +49,11 @@ final class PlanSnapshot {
 	 *
 	 * @param array<string, mixed> $data           Plan terms payload.
 	 * @param int                  $schema_version Payload-format version.
-	 * @throws DomainException If the schema version is not positive.
+	 * @throws LogicException If the schema version is not positive.
 	 */
 	private function __construct( array $data, int $schema_version ) {
 		if ( $schema_version < 1 ) {
-			throw new DomainException(
+			throw new LogicException(
 				sprintf( 'PlanSnapshot: schema_version must be 1 or greater, got %d.', $schema_version )
 			);
 		}
@@ -69,7 +67,7 @@ final class PlanSnapshot {
 	 *
 	 * @param array<string, mixed> $data           Plan terms payload.
 	 * @param int                  $schema_version Payload-format version. Defaults to 1.
-	 * @throws DomainException If the schema version is not positive.
+	 * @throws LogicException If the schema version is not positive.
 	 */
 	public static function from_array( array $data, int $schema_version = 1 ): self {
 		return new self( $data, $schema_version );
@@ -81,7 +79,7 @@ final class PlanSnapshot {
 	 *
 	 * @param array<string, mixed> $payload        Serialized plan terms payload.
 	 * @param int                  $schema_version Payload-format version the payload was written in.
-	 * @throws DomainException If the schema version is not positive.
+	 * @throws LogicException If the schema version is not positive.
 	 */
 	public static function from_payload( array $payload, int $schema_version = 1 ): self {
 		return new self( $payload, $schema_version );
@@ -99,7 +97,20 @@ final class PlanSnapshot {
 	 * A weak link back to the source plan; a missing key surfaces here as null.
 	 */
 	public function get_selling_plan_id(): ?int {
-		return isset( $this->data['selling_plan_id'] ) ? self::coerce_int( $this->data['selling_plan_id'] ) : null;
+		return isset( $this->data['selling_plan_id'] ) ? Coercion::coerce_int( $this->data['selling_plan_id'] ) : null;
+	}
+
+	/**
+	 * The frozen pricing payload captured at signup, returned as captured. The
+	 * owning extension interprets it. Null when absent, explicitly null, or not an
+	 * array.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	public function get_pricing_policy(): ?array {
+		$policy = $this->data['pricing_policy'] ?? null;
+
+		return is_array( $policy ) ? Coercion::coerce_string_keyed( $policy ) : null;
 	}
 
 	/**

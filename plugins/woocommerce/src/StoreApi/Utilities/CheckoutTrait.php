@@ -8,6 +8,8 @@ use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use WC_Customer;
 
 /**
@@ -60,9 +62,34 @@ trait CheckoutTrait {
 	}
 
 	/**
+	 * Stops the request when the order could not be saved, removing a draft order from the session so a later
+	 * request does not resume it.
+	 *
+	 * @throws RouteException When the order is missing or its last save failed.
+	 */
+	private function validate_order_was_saved(): void {
+		$order = $this->get_order_or_throw();
+		$this->forget_draft_order_if_not_saved( $order );
+
+		if ( null === $order->get_last_save_error() ) {
+			return;
+		}
+
+		throw new RouteException(
+			'woocommerce_rest_checkout_order_not_saved',
+			esc_html__( 'Your order could not be saved. Please try again.', 'woocommerce' ),
+			500
+		);
+	}
+
+	/**
 	 * For orders which do not require payment, just update status.
 	 *
-	 * @throws RouteException If the order is missing.
+	 * Deliberately no recovery of the kind process_payment() does: nothing was charged, so a
+	 * failure costs the shopper only a retry, and claiming success would be the worse outcome.
+	 *
+	 * @throws RouteException If the order is missing, a cancelled unpaid order would be marked paid, or the order
+	 *                        could not be saved.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @param PaymentResult    $payment_result Payment result object.
@@ -70,7 +97,17 @@ trait CheckoutTrait {
 	private function process_without_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
 		$order = $this->get_order_or_throw();
 
+		// A cancelled order can reach this path after a stale cache read; never revive it without payment.
+		if ( 0 < $order->get_total() && ! $order->is_paid() && $order->has_status( OrderStatus::CANCELLED ) ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_payment_required',
+				esc_html__( 'This order cannot be completed without payment. Please try again.', 'woocommerce' ),
+				400
+			);
+		}
+
 		$order->payment_complete();
+		$this->validate_order_was_saved();
 
 		// Mark the payment as successful.
 		$payment_result->set_status( 'success' );
@@ -81,12 +118,28 @@ trait CheckoutTrait {
 	 * Fires an action hook instructing active payment gateways to process the payment for an order and provide a result.
 	 *
 	 * @throws RouteException If the order is missing, or on payment error.
+	 * @throws \Throwable If a gateway raised an Error before payment was taken.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @param PaymentResult    $payment_result Payment result object.
 	 */
 	private function process_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
 		$order = $this->get_order_or_throw();
+
+		$session = WC()->session;
+		$session->set( 'order_awaiting_payment', $order->get_id() );
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+		// Persist before invoking gateways because redirects or stalled requests may prevent the session from being saved on shutdown.
+		if ( is_callable( array( $session, 'save_data' ) ) ) {
+			$session->save_data();
+		}
+
+		/*
+		 * The hook below takes the result by reference and can replace it, with anything at all.
+		 * The caller keeps this instance either way, and it is the one serialised into the
+		 * response, so recovery has to write onto it rather than onto whatever the hook left.
+		 */
+		$result_for_recovery = $payment_result;
 
 		try {
 			// Prepare the payment context object to pass through payment hooks.
@@ -110,14 +163,33 @@ trait CheckoutTrait {
 			if ( ! $payment_result instanceof PaymentResult ) {
 				throw new RouteException( 'woocommerce_rest_checkout_invalid_payment_result', __( 'Invalid payment result received from payment method.', 'woocommerce' ), 500 );
 			}
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
+			/*
+			 * The gateway may already have taken payment, for example when a post-payment
+			 * integration throws during the status transition. Reporting a failure would send the
+			 * shopper back to place the order again, and every retry pays for another order.
+			 *
+			 * Re-read first: a gateway that advanced the order may have done so on its own
+			 * instance, leaving the one held above reporting a stale status.
+			 */
+			$order = PaymentRecovery::refresh_order( $order );
+
+			if ( PaymentRecovery::order_moved_past_payment( $order ) ) {
+				$this->recover_order_that_took_payment( $order, $e, $result_for_recovery );
+				return;
+			}
+
+			if ( ! $e instanceof \Exception ) {
+				throw $e;
+			}
+
 			$additional_data = [];
 
 			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			/**
 			 * Allows to check if WP_DEBUG mode is enabled before returning previous Exception.
 			 *
-			 * @param bool The WP_DEBUG mode.
+			 * @param bool $return_previous_exceptions Whether to include the previous exception. Defaults to the WP_DEBUG value.
 			 */
 			if ( apply_filters( 'woocommerce_return_previous_exceptions', Constants::is_true( 'WP_DEBUG' ) ) && $e->getPrevious() ) {
 				$additional_data = [
@@ -126,6 +198,43 @@ trait CheckoutTrait {
 			}
 
 			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ), 400, array_map( 'esc_attr', $additional_data ) );
+		}
+	}
+
+	/**
+	 * Records a failure that happened after payment was taken and reports the checkout as
+	 * successful, so the shopper is sent to the order confirmation rather than back to retry.
+	 *
+	 * @param \WC_Order     $order          Order object.
+	 * @param \Throwable    $error          The failure raised after payment was taken.
+	 * @param PaymentResult $payment_result Payment result object.
+	 */
+	private function recover_order_that_took_payment( \WC_Order $order, \Throwable $error, PaymentResult $payment_result ): void {
+		PaymentRecovery::record_failure_after_payment( $order, $error, 'store-api' );
+
+		$payment_result->set_status( 'success' );
+
+		/*
+		 * Keep a redirect the gateway set before it threw. An order can reach here still needing
+		 * the shopper to act, say one parked on-hold awaiting a 3DS challenge, and overwriting it
+		 * would walk them past that step. Order confirmation is the fallback.
+		 */
+		if ( '' === $payment_result->get_redirect_url() ) {
+			$payment_result->set_redirect_url( $order->get_checkout_order_received_url() );
+		}
+
+		/*
+		 * Keep both redirect fields in sync, as Legacy::process_legacy_payment does on the normal
+		 * path. Setting only one leaves a success result core would never otherwise emit, and
+		 * gateway client code reads the redirect from the payment details rather than from
+		 * redirect_url: WooPayments and WooCommerce Stripe both call String.match() on it
+		 * unguarded, stranding the shopper on the checkout of an order that was in fact paid.
+		 */
+		$payment_details = $payment_result->get_payment_details();
+
+		if ( ! isset( $payment_details['redirect'] ) ) {
+			$payment_details['redirect'] = $payment_result->get_redirect_url();
+			$payment_result->set_payment_details( $payment_details );
 		}
 	}
 
@@ -148,10 +257,7 @@ trait CheckoutTrait {
 	 * @return array
 	 */
 	private function get_request_payment_data( \WP_REST_Request $request ) {
-		static $payment_data = [];
-		if ( ! empty( $payment_data ) ) {
-			return $payment_data;
-		}
+		$payment_data = [];
 		if ( ! empty( $request['payment_data'] ) ) {
 			foreach ( $request['payment_data'] as $data ) {
 				$payment_data[ sanitize_key( $data['key'] ) ] = wc_clean( $data['value'] );
@@ -181,7 +287,7 @@ trait CheckoutTrait {
 		if ( null !== $payment_method ) {
 			WC()->session->set( 'chosen_payment_method', $payment_method->id );
 			$order->set_payment_method( $payment_method->id );
-			$order->set_payment_method_title( $payment_method->title );
+			$order->set_payment_method_title( $payment_method->get_title() );
 		} else {
 			$order_needs_payment = $order->needs_payment();
 			if ( $order_needs_payment && 'POST' === $request->get_method() ) {
@@ -248,6 +354,7 @@ trait CheckoutTrait {
 
 		if ( $persist ) {
 			$order->save();
+			$this->validate_order_was_saved();
 		}
 	}
 

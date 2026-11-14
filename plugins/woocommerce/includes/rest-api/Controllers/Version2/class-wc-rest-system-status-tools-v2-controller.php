@@ -9,8 +9,11 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -236,11 +239,14 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 		);
 		if ( method_exists( 'WC_Install', 'verify_base_tables' ) ) {
 			$tools['verify_db_tables'] = array(
-				'name'   => __( 'Verify base database tables', 'woocommerce' ),
-				'button' => __( 'Verify database', 'woocommerce' ),
-				'desc'   => sprintf(
+				'name'             => __( 'Verify base database tables', 'woocommerce' ),
+				'button'           => __( 'Verify database', 'woocommerce' ),
+				'desc'             => sprintf(
 					__( 'Verify if all base database tables are present.', 'woocommerce' )
 				),
+				// Re-creating tables changes what schema-dependent tools can offer, so re-render
+				// the list this tool is part of.
+				'requires_refresh' => true,
 			);
 		}
 
@@ -535,6 +541,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 			case 'clear_transients':
 				wc_delete_product_transients();
 				wc_delete_shop_order_transients();
+				ReportsCache::invalidate();
 				delete_transient( 'wc_count_comments' );
 				delete_transient( 'as_comment_count' );
 
@@ -554,7 +561,19 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 
 				wc_get_container()->get( CacheController::class )->delete_filter_data_transients();
 
-				$message = __( 'Product transients cleared', 'woocommerce' );
+				// These names end in a product ID or a hash, so they can only be found by prefix.
+				wc_get_container()->get( DatabaseUtil::class )->delete_transients_by_prefix(
+					array_merge( ProductUtil::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES, array( 'wc_product_loop_', 'wc_report_' ) )
+				);
+				if ( ! wc_get_container()->get( ProductUtil::class )->schedule_product_transient_cleanup() ) {
+					$ran     = false;
+					$message = __( 'Could not schedule product cache cleanup. Try again.', 'woocommerce' );
+					break;
+				}
+
+				$message = wp_using_ext_object_cache()
+					? __( 'Product cache cleanup has been scheduled.', 'woocommerce' )
+					: __( 'Product transients cleared', 'woocommerce' );
 				break;
 
 			case 'clear_expired_transients':
@@ -628,7 +647,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 			case 'clear_sessions':
 				$wpdb->query( "TRUNCATE {$wpdb->prefix}woocommerce_sessions" );
 				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				$result = absint( $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key='_woocommerce_persistent_cart_" . get_current_blog_id() . "';" ) ); // WPCS: unprepared SQL ok.
+				$result = absint( $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key='_woocommerce_persistent_cart_" . get_current_blog_id() . "';" ) );
 				wp_cache_flush();
 				/* translators: %d: number of saved carts */
 				$message = sprintf( __( 'Deleted all active sessions, and %d saved carts.', 'woocommerce' ), absint( $result ) );

@@ -34,6 +34,10 @@ jest.mock( '../../lib/notices', () => ( {
 	createNoticesFromResponse: () => null,
 } ) );
 
+jest.mock( '~/hooks/use-endpoint-dismiss', () => ( {
+	useEndpointDismiss: () => ( { isDismissed: false, onDismiss: jest.fn() } ),
+} ) );
+
 const clickAndFlush = async ( element: Element ) => {
 	await act( async () => {
 		await userEvent.click( element );

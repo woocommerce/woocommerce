@@ -49,9 +49,14 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_products() {
 		wp_set_current_user( $this->user );
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_external_product();
-		sleep( 1 ); // So both products have different timestamps.
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$external_product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_external_product();
+		$external_product->set_date_created( '2020-01-01 00:00:00' );
+		$external_product->save();
+
+		$simple_product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$simple_product->set_date_created( '2020-01-02 00:00:00' );
+		$simple_product->save();
+
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$products = $response->get_data();
 
@@ -527,7 +532,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test product schema.
+	 * @testdox The product schema includes MPN.
 	 *
 	 * @since 3.0.0
 	 */
@@ -538,6 +543,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 65, count( $properties ) );
+		$this->assertEquals( 66, count( $properties ) );
+		$this->assertArrayHasKey( 'mpn', $properties );
 	}
 }

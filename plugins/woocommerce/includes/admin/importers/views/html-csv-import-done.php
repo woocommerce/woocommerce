@@ -54,7 +54,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 			);
 		}
 
-		if ( 0 < $failed || 0 < $skipped ) {
+		foreach ( $errors as $entry ) {
+			$error_data = $entry instanceof WP_Error ? $entry->get_error_data() : null;
+			if ( is_array( $error_data ) && 'warning' === ( $error_data['severity'] ?? '' ) ) {
+				$results[] = __( 'Some linked product fields were skipped', 'woocommerce' );
+				break;
+			}
+		}
+
+		if ( 0 < $failed || 0 < $skipped || $errors ) {
 			$results[] = '<a href="#" class="woocommerce-importer-done-view-errors">' . __( 'View import log', 'woocommerce' ) . '</a>';
 		}
 
@@ -75,7 +83,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<thead>
 				<tr>
 					<th><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
-					<th><?php esc_html_e( 'Reason for failure', 'woocommerce' ); ?></th>
+					<th><?php esc_html_e( 'Details', 'woocommerce' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>

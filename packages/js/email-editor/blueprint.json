@@ -1,5 +1,5 @@
 {
-	"landingPage": "/wp-admin/edit.php?post_type=woo_email",
+	"landingPage": "/wp-admin/admin.php?page=wc-settings&tab=email",
 	"preferredVersions": {
 		"php": "8.2",
 		"wp": "latest"

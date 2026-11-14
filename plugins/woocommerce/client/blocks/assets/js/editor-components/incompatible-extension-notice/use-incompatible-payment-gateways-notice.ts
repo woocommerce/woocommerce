@@ -7,7 +7,7 @@ import { paymentStore } from '@woocommerce/block-data';
 export const useIncompatiblePaymentGatewaysNotice = (): [
 	{ [ k: string ]: string },
 	string[],
-	number
+	number,
 ] => {
 	const { incompatiblePaymentMethods } = useSelect( ( select ) => {
 		const { getIncompatiblePaymentMethods } = select( paymentStore );

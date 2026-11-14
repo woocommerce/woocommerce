@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-tests: move coupons test coverage from e2e to php unit

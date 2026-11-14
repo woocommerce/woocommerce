@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Trigger the JavaScript CI job on block.json manifests and .jsx test files

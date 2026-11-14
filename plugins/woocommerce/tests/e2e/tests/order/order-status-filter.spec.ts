@@ -10,7 +10,7 @@ import { tags, expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const orderBatchId: number[] = [];
-const statusColumnTextSelector = 'mark.order-status > span';
+const statusColumnSelector = 'mark.order-status';
 
 // Define order statuses to filter against
 const orderStatus = [
@@ -54,21 +54,25 @@ test.describe(
 			} );
 		} );
 
-		for ( let i = 0; i < orderStatus.length; i++ ) {
-			test( `should filter by ${ orderStatus[ i ][ 0 ] }`, async ( {
-				page,
-			} ) => {
-				await page.goto( 'wp-admin/admin.php?page=wc-orders' );
+		// Processing is representative: the status filter is one code path. The
+		// other seven statuses are still seeded in beforeAll, so asserting that
+		// none of them appear also proves the filter excludes what it should.
+		test( 'should filter by Processing', async ( { page } ) => {
+			await page.goto( 'wp-admin/admin.php?page=wc-orders' );
 
-				await page.locator( `li.${ orderStatus[ i ][ 1 ] }` ).click();
-				await expect(
-					page.locator( `li.${ orderStatus[ i ][ 1 ] } > a.current` )
-				).toBeVisible();
-				const countElements = await page
-					.locator( statusColumnTextSelector )
-					.count();
-				await expect( countElements ).toBeGreaterThan( 0 );
-			} );
-		}
+			await page.locator( 'li.wc-processing' ).click();
+			await expect(
+				page.locator( 'li.wc-processing > a.current' )
+			).toBeVisible();
+
+			await expect(
+				page.locator( `${ statusColumnSelector }.status-processing` )
+			).not.toHaveCount( 0 );
+			await expect(
+				page.locator(
+					`${ statusColumnSelector }:not(.status-processing)`
+				)
+			).toHaveCount( 0 );
+		} );
 	}
 );

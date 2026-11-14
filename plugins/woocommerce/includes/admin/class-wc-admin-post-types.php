@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Utilities\TimeUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -61,7 +62,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
-		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
+		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ), 5 );
 
 		include_once __DIR__ . '/class-wc-admin-upload-downloadable-product.php';
 
@@ -377,7 +378,7 @@ class WC_Admin_Post_Types {
 		// Get the product and save.
 		$product = wc_get_product( $post );
 
-		if ( ! empty( $request_data['woocommerce_quick_edit'] ) ) { // WPCS: input var ok.
+		if ( ! empty( $request_data['woocommerce_quick_edit'] ) ) {
 			$this->quick_edit_save( $post_id, $product );
 		} else {
 			$this->bulk_edit_save( $post_id, $product );
@@ -395,10 +396,8 @@ class WC_Admin_Post_Types {
 	private function quick_edit_save( $post_id, $product ) {
 		$request_data = $this->request_data();
 
-		$data_store        = $product->get_data_store();
-		$old_regular_price = $product->get_regular_price();
-		$old_sale_price    = $product->get_sale_price();
-		$input_to_props    = array(
+		$data_store     = $product->get_data_store();
+		$input_to_props = array(
 			'_weight'     => 'weight',
 			'_length'     => 'length',
 			'_width'      => 'width',
@@ -455,32 +454,53 @@ class WC_Admin_Post_Types {
 
 			if ( isset( $request_data['_regular_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-				$new_regular_price = ( '' === $request_data['_regular_price'] ) ? '' : wc_format_decimal( $request_data['_regular_price'] );
-				$product->set_regular_price( $new_regular_price );
-			} else {
-				$new_regular_price = null;
+				$regular_price = ( '' === $request_data['_regular_price'] ) ? '' : wc_format_decimal( $request_data['_regular_price'] );
+				$product->set_regular_price( $regular_price );
 			}
 
 			if ( isset( $request_data['_sale_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-				$new_sale_price = ( '' === $request_data['_sale_price'] ) ? '' : wc_format_decimal( $request_data['_sale_price'] );
-				$product->set_sale_price( $new_sale_price );
-			} else {
-				$new_sale_price = null;
+				$sale_price = ( '' === $request_data['_sale_price'] ) ? '' : wc_format_decimal( $request_data['_sale_price'] );
+				$product->set_sale_price( $sale_price );
 			}
 
-			// Handle price - remove dates and set to lowest.
-			$price_changed = false;
+			// Parse valid dates using the full product editor's site-timezone behavior.
+			$submitted_sale_date_from = $request_data['_sale_price_dates_from'] ?? null;
+			if ( is_string( $submitted_sale_date_from ) ) {
+				/**
+				 * Submitted sale start date.
+				 *
+				 * @var string $date_on_sale_from
+				 */
+				$date_on_sale_from = wp_unslash( $submitted_sale_date_from );
 
-			if ( ! is_null( $new_regular_price ) && $new_regular_price !== $old_regular_price ) {
-				$price_changed = true;
-			} elseif ( ! is_null( $new_sale_price ) && $new_sale_price !== $old_sale_price ) {
-				$price_changed = true;
+				if ( '' === $date_on_sale_from ) {
+					$product->set_date_on_sale_from( '' );
+				} elseif ( TimeUtil::is_valid_date( $date_on_sale_from, 'Y-m-d' ) ) {
+					$timestamp = strtotime( $date_on_sale_from );
+					if ( false !== $timestamp ) {
+						$product->set_date_on_sale_from( date( 'Y-m-d 00:00:00', $timestamp ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+					}
+				}
 			}
 
-			if ( $price_changed ) {
-				$product->set_date_on_sale_to( '' );
-				$product->set_date_on_sale_from( '' );
+			$submitted_sale_date_to = $request_data['_sale_price_dates_to'] ?? null;
+			if ( is_string( $submitted_sale_date_to ) ) {
+				/**
+				 * Submitted sale end date.
+				 *
+				 * @var string $date_on_sale_to
+				 */
+				$date_on_sale_to = wp_unslash( $submitted_sale_date_to );
+
+				if ( '' === $date_on_sale_to ) {
+					$product->set_date_on_sale_to( '' );
+				} elseif ( TimeUtil::is_valid_date( $date_on_sale_to, 'Y-m-d' ) ) {
+					$timestamp = strtotime( $date_on_sale_to );
+					if ( false !== $timestamp ) {
+						$product->set_date_on_sale_to( date( 'Y-m-d 23:59:59', $timestamp ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+					}
+				}
 			}
 		}
 
@@ -508,7 +528,12 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-			$stock_amount = 'yes' === $manage_stock && isset( $request_data['_stock'] ) && is_numeric( wp_unslash( $request_data['_stock'] ) ) ? wc_stock_amount( wp_unslash( $request_data['_stock'] ) ) : '';
+			if ( 'yes' === $manage_stock && isset( $request_data['_stock'] ) ) {
+				$stock_value  = wp_unslash( $request_data['_stock'] );
+				$stock_amount = is_numeric( $stock_value ) ? wc_stock_amount( $stock_value ) : 0;
+			} else {
+				$stock_amount = '';
+			}
 			$product->set_stock_quantity( $stock_amount );
 		}
 
@@ -531,6 +556,8 @@ class WC_Admin_Post_Types {
 		$request_data = $this->request_data();
 
 		$data_store = $product->get_data_store();
+
+		$this->apply_bulk_edit_taxonomy_changes( $product, $request_data );
 
 		if ( ! empty( $request_data['change_weight'] ) && isset( $request_data['_weight'] ) ) {
 			$product->set_weight( wc_clean( wp_unslash( $request_data['_weight'] ) ) );
@@ -726,13 +753,18 @@ class WC_Admin_Post_Types {
 	/**
 	 * Hidden default Meta-Boxes.
 	 *
-	 * @param  array  $hidden Hidden boxes.
-	 * @param  object $screen Current screen.
+	 * @param  array     $hidden Hidden boxes.
+	 * @param  WP_Screen $screen Current screen.
 	 * @return array
 	 */
 	public function hidden_meta_boxes( $hidden, $screen ) {
 		if ( 'product' === $screen->post_type && 'post' === $screen->base ) {
 			$hidden = array_merge( $hidden, array( 'postcustom' ) );
+		}
+
+		// Download permissions are granted automatically, so hide the box by default on order screens (HPOS and legacy CPT). Merchants can re-enable it via Screen Options.
+		if ( wc_get_page_screen_id( 'shop-order' ) === $screen->id ) {
+			$hidden = array_merge( $hidden, array( 'woocommerce-order-downloads' ) );
 		}
 
 		return $hidden;
@@ -754,7 +786,7 @@ class WC_Admin_Post_Types {
 		$current_featured   = wc_bool_to_string( $product_object->get_featured() );
 		$visibility_options = wc_get_product_visibility_options();
 		?>
-		<div class="misc-pub-section" id="catalog-visibility">
+		<div class="misc-pub-section misc-pub-catalog-visibility" id="catalog-visibility">
 			<?php esc_html_e( 'Catalog visibility:', 'woocommerce' ); ?>
 			<strong id="catalog-visibility-display">
 				<?php
@@ -781,7 +813,7 @@ class WC_Admin_Post_Types {
 					echo '<input type="radio" name="_visibility" id="_visibility_' . esc_attr( $name ) . '" value="' . esc_attr( $name ) . '" ' . checked( $current_visibility, $name, false ) . ' data-label="' . esc_attr( $label ) . '" /> <label for="_visibility_' . esc_attr( $name ) . '" class="selectit">' . esc_html( $label ) . '</label><br />';
 				}
 
-				echo '<br /><input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . esc_html__( 'This is a featured product', 'woocommerce' ) . '</label><br />';
+				echo '<input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . esc_html__( 'This is a featured product', 'woocommerce' ) . '</label><br />';
 				?>
 				<p>
 					<a href="#catalog-visibility" class="save-post-visibility hide-if-no-js button"><?php esc_html_e( 'OK', 'woocommerce' ); ?></a>
@@ -865,6 +897,10 @@ class WC_Admin_Post_Types {
 
 		if ( wc_get_page_id( 'terms' ) === $post->ID ) {
 			$post_states['wc_page_for_terms'] = __( 'Terms and Conditions Page', 'woocommerce' );
+		}
+
+		if ( wc_get_page_id( 'refund_returns' ) === $post->ID ) {
+			$post_states['wc_page_for_refund_returns'] = __( 'Refund and Returns Policy Page', 'woocommerce' );
 		}
 
 		return $post_states;
@@ -985,6 +1021,54 @@ class WC_Admin_Post_Types {
 	 */
 	protected function request_data() {
 		return $_REQUEST;
+	}
+
+	/**
+	 * Apply category and brand changes through the product's CRUD properties.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param WC_Product $product Product being edited.
+	 * @param array      $request_data Bulk edit request fields.
+	 * @return void
+	 */
+	private function apply_bulk_edit_taxonomy_changes( WC_Product $product, array $request_data ): void {
+		$taxonomies = $request_data['wc_bulk_edit_taxonomies'] ?? array();
+		$tax_input  = $request_data['tax_input'] ?? array();
+		$mixed      = $request_data['wc_bulk_edit_indeterminate'] ?? array();
+		if ( ! is_array( $taxonomies ) || ! is_array( $tax_input ) || ! is_array( $mixed ) ) {
+			return;
+		}
+
+		// Taxonomy names differ from CRUD property names; setters keep the product object in sync.
+		$taxonomy_properties = array(
+			'product_cat'   => 'category_ids',
+			'product_brand' => 'brand_ids',
+		);
+		foreach ( $taxonomy_properties as $taxonomy_name => $property ) {
+			$taxonomy      = get_taxonomy( $taxonomy_name );
+			$seen          = $taxonomies[ $taxonomy_name ] ?? null;
+			$checked       = $tax_input[ $taxonomy_name ] ?? array();
+			$indeterminate = $mixed[ $taxonomy_name ] ?? array();
+			if ( ! $taxonomy || ! is_string( $seen ) || ! is_array( $checked ) || ! is_array( $indeterminate ) || ! $taxonomy->hierarchical || ! $taxonomy->show_in_quick_edit || ! current_user_can( $taxonomy->cap->assign_terms ) ) {
+				continue;
+			}
+
+			$seen          = wp_parse_id_list( wp_unslash( $seen ) );
+			$checked       = wp_parse_id_list( array_filter( wp_unslash( $checked ), 'is_scalar' ) );
+			$indeterminate = wp_parse_id_list( array_filter( wp_unslash( $indeterminate ), 'is_scalar' ) );
+			$current       = $product->{"get_$property"}( 'edit' );
+
+			// Match Core's mixed-state handling while preserving terms omitted from the checklist.
+			$editable  = array_diff( $seen, $indeterminate );
+			$preserved = array_diff( $current, $editable );
+			$terms     = array_values( array_unique( array_merge( $preserved, array_intersect( $checked, $editable ) ) ) );
+			if ( ! array_diff( $current, $terms ) && ! array_diff( $terms, $current ) ) {
+				continue;
+			}
+
+			$product->{"set_$property"}( $terms );
+		}
 	}
 
 	/**

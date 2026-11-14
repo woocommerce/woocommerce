@@ -9,8 +9,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 	use Automattic\Jetpack\Constants;
 	use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 	use Automattic\WooCommerce\Utilities\StringUtil;
-	use WC_Rate_Limiter;
 	use WC_Cache_Helper;
+	use WC_Rate_Limiter;
 	/**
 	 * Class RemoteLoggerTest.
 	 */
@@ -22,6 +22,9 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		private $sut;
 
+		/** @var array<string, array{exists: bool, value: mixed}> Namespace mock globals before the test. */
+		private array $initial_mock_globals = array();
+
 		/**
 		 * Set up test
 		 *
@@ -29,6 +32,12 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		public function setUp(): void {
 			parent::setUp();
+			foreach ( array( 'mock_filter_input', 'mock_return' ) as $global_name ) {
+				$this->initial_mock_globals[ $global_name ] = array(
+					'exists' => array_key_exists( $global_name, $GLOBALS ),
+					'value'  => $GLOBALS[ $global_name ] ?? null,
+				);
+			}
 			$this->sut = wc_get_container()->get( RemoteLogger::class );
 		}
 
@@ -38,33 +47,35 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 * @return void
 		 */
 		public function tearDown(): void {
-			$this->cleanup_filters();
-			delete_option( 'woocommerce_feature_remote_logging_enabled' );
-			delete_transient( RemoteLogger::WC_NEW_VERSION_TRANSIENT );
-			global $wpdb;
-			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_rate_limits" );
-			WC_Cache_Helper::invalidate_cache_group( WC_Rate_Limiter::CACHE_GROUP );
-			Constants::clear_constants();
-		}
+			try {
+				foreach ( $this->initial_mock_globals as $global_name => $state ) {
+					if ( $state['exists'] ) {
+						$GLOBALS[ $global_name ] = $state['value'];
+					} else {
+						unset( $GLOBALS[ $global_name ] );
+					}
+				}
+			} finally {
+				try {
+					parent::tearDown();
+				} finally {
+					wp_cache_delete( 'woocommerce_feature_remote_logging_enabled', 'options' );
+					wp_cache_delete( 'alloptions', 'options' );
+					wp_cache_delete( 'notoptions', 'options' );
 
-		/**
-		 * Cleanup filters used in tests.
-		 *
-		 * @return void
-		 */
-		private function cleanup_filters() {
-			$filters = array(
-				'option_woocommerce_admin_remote_feature_enabled',
-				'option_woocommerce_allow_tracking',
-				'option_woocommerce_version',
-				'plugins_api',
-				'pre_http_request',
-				'woocommerce_remote_logger_formatted_log_data',
-				'pre_site_transient_update_plugins',
-				'woocommerce_remote_logger_request_uri_whitelist',
-			);
-			foreach ( $filters as $filter ) {
-				remove_all_filters( $filter );
+					$transient_name = RemoteLogger::WC_NEW_VERSION_TRANSIENT;
+					$network_id     = get_current_network_id();
+					wp_cache_delete( $transient_name, 'site-transient' );
+					wp_cache_delete( '_site_transient_' . $transient_name, 'options' );
+					wp_cache_delete( '_site_transient_timeout_' . $transient_name, 'options' );
+					wp_cache_delete( $network_id . ':_site_transient_' . $transient_name, 'site-options' );
+					wp_cache_delete( $network_id . ':_site_transient_timeout_' . $transient_name, 'site-options' );
+					wp_cache_delete( $network_id . ':notoptions', 'site-options' );
+					wp_cache_delete(
+						WC_Cache_Helper::get_cache_prefix( 'rate_limit' . RemoteLogger::RATE_LIMIT_ID ),
+						WC_Rate_Limiter::CACHE_GROUP
+					);
+				}
 			}
 		}
 
@@ -252,6 +263,93 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 
 
 		/**
+		 * @testdox get_formatted_log sanitizes string values in extra, nested arrays and remaining context.
+		 */
+		public function test_get_formatted_log_sanitizes_extra_context(): void {
+			$formatted_log = $this->sut->get_formatted_log(
+				'error',
+				'Test error message',
+				array(
+					'extra'    => array(
+						'email'  => 'Contact john@example.com',
+						'nested' => array( 'file' => ABSPATH . 'wp-content/file.php' ),
+						'count'  => 5,
+					),
+					'customer' => 'jane@example.com',
+				)
+			);
+
+			$extra = $formatted_log['extra'];
+			$this->assertSame( 'Contact [redacted_email]', $extra['email'], 'Extra values should be sanitized' );
+			$this->assertSame( './wp-content/file.php', $extra['nested']['file'], 'Nested extra values should be sanitized' );
+			$this->assertSame( 5, $extra['count'], 'Non-string values should be left unchanged' );
+			$this->assertSame( '[redacted_email]', $extra['customer'], 'Remaining context values should be sanitized' );
+		}
+
+		/**
+		 * @testdox get_formatted_log does not change values the caller passed by reference.
+		 */
+		public function test_get_formatted_log_keeps_referenced_context_values(): void {
+			$email   = 'john@example.com';
+			$context = array( 'extra' => array( 'nested' => array( 'email' => &$email ) ) );
+
+			$formatted_log = $this->sut->get_formatted_log( 'error', 'Test error message', $context );
+
+			$this->assertSame( '[redacted_email]', $formatted_log['extra']['nested']['email'], 'The logged value should be sanitized' );
+			$this->assertSame( 'john@example.com', $email, 'The caller variable should be left unchanged' );
+		}
+
+		/**
+		 * @testdox get_formatted_log stops sanitizing at the maximum depth when the context references itself.
+		 */
+		public function test_get_formatted_log_handles_self_referencing_context(): void {
+			$extra         = array( 'email' => 'john@example.com' );
+			$extra['self'] = &$extra;
+
+			$formatted_log = $this->sut->get_formatted_log( 'error', 'Test error message', array( 'extra' => $extra ) );
+
+			$this->assertSame( '[redacted_email]', $formatted_log['extra']['self']['email'], 'Values within the depth limit should be sanitized' );
+
+			$level = $formatted_log['extra'];
+			$depth = 0;
+			while ( is_array( $level['self'] ) ) {
+				$level = $level['self'];
+				++$depth;
+			}
+			$this->assertSame( 10, $depth, 'Nested arrays should be kept up to the depth limit' );
+			$this->assertSame( '[max_depth_reached]', $level['self'], 'Arrays past the depth limit should be replaced with a placeholder' );
+		}
+
+		/**
+		 * @testdox get_formatted_log stops sanitizing at the maximum item count when the context references itself many times.
+		 */
+		public function test_get_formatted_log_handles_context_with_many_self_references(): void {
+			$extra = array( 'email' => 'john@example.com' );
+			for ( $i = 1; $i <= 4; $i++ ) {
+				$extra[ 'self' . $i ] = &$extra;
+			}
+
+			$formatted_log = $this->sut->get_formatted_log( 'error', 'Test error message', array( 'extra' => $extra ) );
+
+			$this->assertSame( '[redacted_email]', $formatted_log['extra']['email'], 'Values within the limits should be sanitized' );
+
+			$encoded = wp_json_encode( $formatted_log['extra'] );
+			$this->assertIsString( $encoded, 'The sanitized context should be JSON encodable' );
+			$this->assertStringContainsString( '[max_items_reached]', $encoded, 'Values past the item limit should be replaced with a placeholder' );
+		}
+
+		/**
+		 * @testdox get_formatted_log sanitizes tags from the context but not the default tags.
+		 */
+		public function test_get_formatted_log_sanitizes_context_tags_only(): void {
+			add_filter( 'woocommerce_remote_logger_sanitized_content', 'strtoupper' );
+
+			$formatted_log = $this->sut->get_formatted_log( 'error', 'Test error message', array( 'tags' => array( 'john@example.com' ) ) );
+
+			$this->assertSame( array( 'woocommerce', 'php', '[REDACTED_EMAIL]' ), $formatted_log['tags'] );
+		}
+
+		/**
 		 * @testdox get_formatted_log method correctly sanitizes request URI
 		 */
 		public function test_get_formatted_log_sanitizes_request_uri() {
@@ -409,7 +507,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		}
 
 		/**
-		 * @testdox handle method successfully sends log
+		 * @testdox handle method successfully sends log.
 		 */
 		public function test_handle_successful() {
 			$this->sut = $this->getMockBuilder( RemoteLoggerWithEnvironmentOverride::class )
@@ -418,10 +516,15 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 
 			$this->sut->set_is_dev_or_local( false );
 			$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+			$request_count = 0;
+			$request_url   = null;
+			add_filter( 'option_woocommerce_allow_tracking', fn() => 'yes' );
 
 			add_filter(
 				'pre_http_request',
-				function ( $preempt, $args ) {
+				function ( $preempt, $args, $url ) use ( &$request_count, &$request_url ) {
+					++$request_count;
+					$request_url = $url;
 					$this->assertArrayHasKey( 'body', $args );
 					$this->assertArrayHasKey( 'headers', $args );
 					return array(
@@ -436,8 +539,10 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				3
 			);
 
-			$this->assertTrue( $this->sut->handle( time(), 'critical', 'Test message', array( 'remote-logging' => true ) ) );
+			$this->assertTrue( $this->sut->handle( time(), 'error', 'Test message', array( 'remote-logging' => true ) ) );
+			$this->assertSame( 'https://public-api.wordpress.com/rest/v1.1/logstash', $request_url );
 			$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
+			$this->assertSame( 1, $request_count );
 		}
 
 		/**
@@ -490,7 +595,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			$wp_admin_dir    = StringUtil::normalize_local_path_slashes( ABSPATH . 'wp-admin' );
 
 			return array(
-				'WooCommerce error message' => array(
+				'WooCommerce error message'           => array(
 					'Error in ' . $wc_plugin_dir . 'includes/class-wc-cart.php',
 					array(
 						'source'    => 'fatal-errors',
@@ -498,7 +603,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					),
 					false,
 				),
-				'Third-party error message' => array(
+				'Third-party error message'           => array(
 					'Error in /plugins/some-other-plugin/file.php',
 					array(
 						'source'    => 'fatal-errors',
@@ -506,7 +611,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					),
 					true,
 				),
-				'WooCommerce backtrace'     => array(
+				'WooCommerce backtrace'               => array(
 					'Some error message',
 					array(
 						'source'    => 'fatal-errors',
@@ -518,7 +623,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					),
 					false,
 				),
-				'Third-party backtrace'     => array(
+				'Third-party backtrace'               => array(
 					'Some error message',
 					array(
 						'source'    => 'fatal-errors',
@@ -530,7 +635,39 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					),
 					true,
 				),
-				'Non-fatal-errors source'   => array(
+				'Store API WooCommerce error message' => array(
+					'Store API request failed in Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Cart: TypeError: Some error message in ' . $wc_plugin_dir . 'src/Utilities/NumberUtil.php:54',
+					array(
+						'source'    => 'store-api',
+						'backtrace' => array( '#0 /plugins/some-other-plugin/file.php(24): Automattic\\WooCommerce\\Utilities\\NumberUtil::round(1.5, \'x\')' ),
+					),
+					false,
+				),
+				'Store API WooCommerce backtrace'     => array(
+					'Store API request failed in Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Cart: TypeError: Some error message in /plugins/some-other-plugin/file.php:10',
+					array(
+						'source'    => 'store-api',
+						'backtrace' => array(
+							'#0 ' . $wp_includes_dir . 'class-wp-hook.php(353): {closure}(Object(WC_Cart))',
+							'#1 ' . $wc_plugin_dir . 'includes/class-wc-cart.php(2269): do_action(\'woocommerce_cart_calculate_fees\')',
+							'#2 /plugins/some-other-plugin/file.php(10): WC_Cart->calculate_fees()',
+						),
+					),
+					false,
+				),
+				'Store API third-party backtrace'     => array(
+					'Store API request failed in Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Cart: TypeError: Some error message in /plugins/some-other-plugin/file.php:10',
+					array(
+						'source'    => 'store-api',
+						'backtrace' => array(
+							'/plugins/some-other-plugin/other-file.php',
+							$wp_includes_dir . 'class-wp-hook.php',
+							$wc_plugin_dir . 'includes/class-wc-cart.php',
+						),
+					),
+					true,
+				),
+				'Non-fatal-errors source'             => array(
 					'Some error message',
 					array(
 						'source'    => 'other-source',
@@ -538,7 +675,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					),
 					false,
 				),
-				'Missing backtrace'         => array(
+				'Missing backtrace'                   => array(
 					'Some error message',
 					array( 'source' => 'fatal-errors' ),
 					true,

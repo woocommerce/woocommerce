@@ -664,7 +664,7 @@ setTimeout handler*@https://store.local/wp-content/plugins/wc-dependency-test/ba
 			);
 
 			// Access blocksCheckout which internally accesses wcSettings
-			// eslint-disable-next-line no-unused-expressions
+
 			proxy.blocksCheckout;
 
 			// checkDependency should only be called once (for blocksCheckout),
@@ -696,10 +696,10 @@ setTimeout handler*@https://store.local/wp-content/plugins/wc-dependency-test/ba
 			);
 
 			// First access
-			// eslint-disable-next-line no-unused-expressions
+
 			proxy.blocksCheckout;
 			// Second independent access should also trigger check
-			// eslint-disable-next-line no-unused-expressions
+
 			proxy.wcSettings;
 
 			expect( checkDependency ).toHaveBeenCalledTimes( 2 );

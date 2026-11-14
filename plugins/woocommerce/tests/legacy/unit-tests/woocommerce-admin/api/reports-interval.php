@@ -24,6 +24,8 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	 * Set current local timezone.
 	 */
 	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
 		self::$local_tz = new DateTimeZone( wc_timezone_string() );
 	}
 
@@ -1080,7 +1082,44 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		$dates    = TimeInterval::get_timeframe_dates( 'last_quarter', $datetime );
 
 		$this->assertEquals( '2022-07-01 00:00:00', $dates['start'] );
-		$this->assertEquals( '2022-09-31 23:59:59', $dates['end'] );
+		$this->assertEquals( '2022-09-30 23:59:59', $dates['end'] );
+	}
+
+	/**
+	 * @testdox Every "last_quarter" end date should be a real calendar date that does not roll over into the next month.
+	 *
+	 * @dataProvider provider_last_quarter_end_dates
+	 *
+	 * @param string $current_date Date the timeframe is evaluated on.
+	 * @param string $expected_end Expected end of the preceding quarter.
+	 */
+	public function test_timeframes_last_quarter_end_dates_are_valid_calendar_dates( $current_date, $expected_end ) {
+		$dates = TimeInterval::get_timeframe_dates( 'last_quarter', new DateTime( $current_date ) );
+
+		$this->assertEquals( $expected_end, $dates['end'] );
+
+		// String equality alone passes for invalid dates such as "-09-31", so assert the value survives parsing.
+		$parsed = new DateTime( $dates['end'] );
+
+		$this->assertEquals(
+			$expected_end,
+			$parsed->format( 'Y-m-d H:i:s' ),
+			"{$dates['end']} is not a valid calendar date and rolls over to {$parsed->format( 'Y-m-d H:i:s' )}."
+		);
+	}
+
+	/**
+	 * Data provider for test_timeframes_last_quarter_end_dates_are_valid_calendar_dates.
+	 *
+	 * @return array
+	 */
+	public function provider_last_quarter_end_dates() {
+		return array(
+			'Q4 of the preceding year' => array( '2022-01-12', '2021-12-31 23:59:59' ),
+			'Q1'                       => array( '2022-05-26', '2022-03-31 23:59:59' ),
+			'Q2'                       => array( '2022-07-18', '2022-06-30 23:59:59' ),
+			'Q3'                       => array( '2022-11-07', '2022-09-30 23:59:59' ),
+		);
 	}
 
 	/**

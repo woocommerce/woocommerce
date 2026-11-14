@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Replace PanelBody with ToolsPanel in the PageSelector component.

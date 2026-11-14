@@ -26,7 +26,7 @@ final class Package {
 	/**
 	 * Package version.
 	 */
-	const VERSION = '0.0.1';
+	protected const VERSION = '0.0.1';
 
 	/**
 	 * Boot the package's integration layer.

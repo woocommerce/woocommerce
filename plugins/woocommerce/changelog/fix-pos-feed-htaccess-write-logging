@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Log when the POS product feed directory's .htaccess cannot be updated, and avoid overwriting an unreadable or custom file during the legacy upgrade.

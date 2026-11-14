@@ -1,10 +1,4 @@
 /**
- * External dependencies
- */
-
-import type { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import TYPES from './action-types';
@@ -44,9 +38,20 @@ export const defaultState: OnboardingState = {
 
 const getUpdatedTaskLists = (
 	taskLists: Record< string, TaskListType >,
-	args: Partial< TaskType >
+	args: Partial< TaskType >,
+	// When supplied, only this task list is updated. The same task ID can exist
+	// in more than one list, so an unscoped update would also change the task
+	// in every other list that happens to share the ID.
+	scopedTaskListId?: string
 ) => {
-	return Object.keys( taskLists ).reduce(
+	const taskListIds =
+		scopedTaskListId === undefined
+			? Object.keys( taskLists )
+			: Object.keys( taskLists ).filter(
+					( taskListId ) => taskListId === scopedTaskListId
+				);
+
+	return taskListIds.reduce(
 		( lists, taskListId ) => {
 			return {
 				...lists,
@@ -68,10 +73,10 @@ const getUpdatedTaskLists = (
 	);
 };
 
-const reducer: Reducer< OnboardingState, Action > = (
-	state = defaultState,
-	action
-) => {
+const reducer = (
+	state: OnboardingState = defaultState,
+	action: Action
+): OnboardingState => {
 	switch ( action.type ) {
 		case TYPES.SET_PROFILE_ITEMS:
 			return {
@@ -162,10 +167,14 @@ const reducer: Reducer< OnboardingState, Action > = (
 					...state.errors,
 					dismissTask: action.error,
 				},
-				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: action.taskId,
-					isDismissed: false,
-				} ),
+				taskLists: getUpdatedTaskLists(
+					state.taskLists,
+					{
+						id: action.taskId,
+						isDismissed: false,
+					},
+					action.taskListId
+				),
 			};
 		case TYPES.DISMISS_TASK_REQUEST:
 			return {
@@ -174,10 +183,14 @@ const reducer: Reducer< OnboardingState, Action > = (
 					...state.requesting,
 					dismissTask: true,
 				},
-				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: action.taskId,
-					isDismissed: true,
-				} ),
+				taskLists: getUpdatedTaskLists(
+					state.taskLists,
+					{
+						id: action.taskId,
+						isDismissed: true,
+					},
+					action.taskListId
+				),
 			};
 		case TYPES.DISMISS_TASK_SUCCESS:
 			return {
@@ -186,7 +199,11 @@ const reducer: Reducer< OnboardingState, Action > = (
 					...state.requesting,
 					dismissTask: false,
 				},
-				taskLists: getUpdatedTaskLists( state.taskLists, action.task ),
+				taskLists: getUpdatedTaskLists(
+					state.taskLists,
+					action.task,
+					action.taskListId
+				),
 			};
 		case TYPES.UNDO_DISMISS_TASK_ERROR:
 			return {
@@ -195,10 +212,14 @@ const reducer: Reducer< OnboardingState, Action > = (
 					...state.errors,
 					undoDismissTask: action.error,
 				},
-				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: action.taskId,
-					isDismissed: true,
-				} ),
+				taskLists: getUpdatedTaskLists(
+					state.taskLists,
+					{
+						id: action.taskId,
+						isDismissed: true,
+					},
+					action.taskListId
+				),
 			};
 		case TYPES.UNDO_DISMISS_TASK_REQUEST:
 			return {
@@ -207,10 +228,14 @@ const reducer: Reducer< OnboardingState, Action > = (
 					...state.requesting,
 					undoDismissTask: true,
 				},
-				taskLists: getUpdatedTaskLists( state.taskLists, {
-					id: action.taskId,
-					isDismissed: false,
-				} ),
+				taskLists: getUpdatedTaskLists(
+					state.taskLists,
+					{
+						id: action.taskId,
+						isDismissed: false,
+					},
+					action.taskListId
+				),
 			};
 		case TYPES.UNDO_DISMISS_TASK_SUCCESS:
 			return {
@@ -219,7 +244,11 @@ const reducer: Reducer< OnboardingState, Action > = (
 					...state.requesting,
 					undoDismissTask: false,
 				},
-				taskLists: getUpdatedTaskLists( state.taskLists, action.task ),
+				taskLists: getUpdatedTaskLists(
+					state.taskLists,
+					action.task,
+					action.taskListId
+				),
 			};
 		case TYPES.SNOOZE_TASK_ERROR:
 			return {

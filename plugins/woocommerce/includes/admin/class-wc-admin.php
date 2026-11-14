@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
+use Automattic\WooCommerce\Internal\Admin\ImportExport\HposOrderExportHandler;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -117,6 +118,9 @@ class WC_Admin {
 		}
 
 		switch ( $screen->id ) {
+			case 'export':
+				wc_get_container()->get( HposOrderExportHandler::class );
+				break;
 			case 'dashboard':
 			case 'dashboard-network':
 				include __DIR__ . '/class-wc-admin-dashboard-setup.php';
@@ -152,12 +156,12 @@ class WC_Admin {
 			return;
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// Nonced plugin install redirects.
 		if ( ! empty( $_GET['wc-install-plugin-redirect'] ) ) {
-			$plugin_slug = wc_clean( wp_unslash( $_GET['wc-install-plugin-redirect'] ) );
+			$plugin_slug    = is_string( $_GET['wc-install-plugin-redirect'] ) ? sanitize_text_field( wp_unslash( $_GET['wc-install-plugin-redirect'] ) ) : '';
+			$redirect_nonce = isset( $_GET['_wpnonce'] ) && is_string( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 
-			if ( current_user_can( 'install_plugins' ) && in_array( $plugin_slug, array( 'woocommerce-gateway-stripe' ), true ) ) {
+			if ( wp_verify_nonce( $redirect_nonce, 'wc-install-plugin-redirect_' . $plugin_slug ) && current_user_can( 'install_plugins' ) && in_array( $plugin_slug, array( 'woocommerce-gateway-stripe' ), true ) ) {
 				$nonce = wp_create_nonce( 'install-plugin_' . $plugin_slug );
 				$url   = self_admin_url( 'update.php?action=install-plugin&plugin=' . $plugin_slug . '&_wpnonce=' . $nonce );
 			} else {
@@ -167,7 +171,6 @@ class WC_Admin {
 			wp_safe_redirect( $url );
 			exit;
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**

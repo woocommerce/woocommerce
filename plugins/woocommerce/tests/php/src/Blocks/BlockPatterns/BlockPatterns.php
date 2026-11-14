@@ -76,7 +76,6 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'keywords'      => '',
 						'blockTypes'    => 'core/template-part/footer',
 						'inserter'      => '',
-						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-footer.php',
 						'filePath'      => __DIR__ . '/patterns/mock-footer.php',
@@ -93,7 +92,6 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'keywords'      => '',
 						'blockTypes'    => 'core/template-part/header',
 						'inserter'      => '',
-						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-header.php',
 						'filePath'      => __DIR__ . '/patterns/mock-header.php',
@@ -137,31 +135,6 @@ class BlockPatterns extends \WP_UnitTestCase {
 				__DIR__ . '/patterns/mock-header.php',
 				$expected_pattern,
 			);
-
-		$this->block_patterns->register_block_patterns();
-	}
-
-	/**
-	 * Tests that a cached pattern whose source file no longer exists on disk is
-	 * skipped, so core is never asked to lazily load a missing file.
-	 */
-	public function test_cached_pattern_with_missing_file_is_skipped() {
-		$pattern_data = array(
-			'version'  => WOOCOMMERCE_VERSION,
-			'patterns' => array(
-				array(
-					'title'   => 'Mock Missing',
-					'source'  => 'does-not-exist.php',
-					'content' => '',
-				),
-			),
-		);
-
-		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
-
-		$this->pattern_registry
-			->expects( $this->never() )
-			->method( 'register_block_pattern' );
 
 		$this->block_patterns->register_block_patterns();
 	}
@@ -229,7 +202,6 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'keywords'      => '',
 						'blockTypes'    => 'core/template-part/footer',
 						'inserter'      => '',
-						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-footer.php',
 						'filePath'      => __DIR__ . '/patterns/mock-footer.php',
@@ -246,7 +218,6 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'keywords'      => '',
 						'blockTypes'    => 'core/template-part/header',
 						'inserter'      => '',
-						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-header.php',
 						'filePath'      => __DIR__ . '/patterns/mock-header.php',

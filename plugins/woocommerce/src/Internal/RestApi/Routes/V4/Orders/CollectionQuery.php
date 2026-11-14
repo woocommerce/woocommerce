@@ -209,28 +209,28 @@ class CollectionQuery extends AbstractCollectionQuery {
 		if ( isset( $request['before'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_date_gmt' : 'post_date',
-				'before' => $request['before'],
+				'before' => $use_gmt ? self::to_gmt_date_query_value( $request['before'] ) : $request['before'],
 			);
 		}
 
 		if ( isset( $request['after'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_date_gmt' : 'post_date',
-				'after'  => $request['after'],
+				'after'  => $use_gmt ? self::to_gmt_date_query_value( $request['after'] ) : $request['after'],
 			);
 		}
 
 		if ( isset( $request['modified_before'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_modified_gmt' : 'post_modified',
-				'before' => $request['modified_before'],
+				'before' => $use_gmt ? self::to_gmt_date_query_value( $request['modified_before'] ) : $request['modified_before'],
 			);
 		}
 
 		if ( isset( $request['modified_after'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_modified_gmt' : 'post_modified',
-				'after'  => $request['modified_after'],
+				'after'  => $use_gmt ? self::to_gmt_date_query_value( $request['modified_after'] ) : $request['modified_after'],
 			);
 		}
 
@@ -243,11 +243,12 @@ class CollectionQuery extends AbstractCollectionQuery {
 		if ( ! empty( $request['product'] ) ) {
 			global $wpdb;
 
-			$order_ids = $wpdb->get_col(
+			$order_items    = $wpdb->prefix . 'woocommerce_order_items';
+			$order_itemmeta = $wpdb->prefix . 'woocommerce_order_itemmeta';
+			$order_ids      = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT order_id FROM %i WHERE order_item_id IN ( SELECT order_item_id FROM %i WHERE meta_key = '_product_id' AND meta_value = %d ) AND order_item_type = %s",
-					$wpdb->prefix . 'woocommerce_order_items',
-					$wpdb->prefix . 'woocommerce_order_itemmeta',
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table names.
+					"SELECT order_id FROM {$order_items} WHERE order_item_id IN ( SELECT order_item_id FROM {$order_itemmeta} WHERE meta_key = '_product_id' AND meta_value = %d ) AND order_item_type = %s",
 					$request['product'],
 					OrderItemType::LINE_ITEM
 				)

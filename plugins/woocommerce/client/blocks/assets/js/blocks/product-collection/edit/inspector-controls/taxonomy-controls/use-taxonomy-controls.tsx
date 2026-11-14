@@ -6,7 +6,7 @@ import { useMemo } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { useTaxonomies } from './index';
+import { useTaxonomies } from './use-taxonomies';
 import {
 	QueryControlProps,
 	CoreFilterNames,
@@ -67,7 +67,6 @@ function useTaxonomyControls( {
 	const createHandleChange = ( slug: string ) => ( newTermIds: number[] ) => {
 		setQueryAttribute( {
 			taxQuery: {
-				...taxQuery,
 				[ slug ]: newTermIds,
 			},
 		} );

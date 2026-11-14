@@ -342,7 +342,12 @@ class WC_Shortcodes {
 
 		$product = is_object( $product_data ) && in_array( $product_data->post_type, array( 'product', 'product_variation' ), true ) ? wc_setup_product_data( $product_data ) : false;
 
-		if ( ! $product ) {
+		if ( ! $product instanceof WC_Product ) {
+			return '';
+		}
+
+		if ( ! $product->is_viewable() ) {
+			wc_setup_product_data( $post );
 			return '';
 		}
 
@@ -392,7 +397,7 @@ class WC_Shortcodes {
 
 		$product = is_object( $product_data ) && in_array( $product_data->post_type, array( 'product', 'product_variation' ), true ) ? wc_setup_product_data( $product_data ) : false;
 
-		if ( ! $product ) {
+		if ( ! $product || ! $product->is_viewable() ) {
 			return '';
 		}
 
@@ -575,13 +580,12 @@ class WC_Shortcodes {
 
 		$single_product = new WP_Query( $args );
 
-		if (
-			! isset( $force_rendering ) &&
-			$single_product->have_posts() &&
-			ProductStatus::PUBLISH !== $single_product->post->post_status &&
-			! current_user_can( 'read_product', $single_product->post->ID )
-		) {
-			return '';
+		if ( ! isset( $force_rendering ) && $single_product->have_posts() ) {
+			$queried_product = wc_get_product( $single_product->post->ID );
+
+			if ( $queried_product && ! $queried_product->is_viewable() ) {
+				return '';
+			}
 		}
 
 		$preselected_id = '0';
@@ -668,7 +672,7 @@ class WC_Shortcodes {
 		if ( ! function_exists( 'wc_print_notices' ) ) {
 			return '';
 		}
-		return '<div class="woocommerce">' . wc_print_notices( true ) . '</div>';
+		return '<div class="woocommerce woocommerce-notices-wrapper">' . wc_print_notices( true ) . '</div>';
 	}
 
 	/**

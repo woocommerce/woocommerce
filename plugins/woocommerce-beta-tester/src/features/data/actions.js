@@ -10,6 +10,20 @@ import { controls } from '@wordpress/data';
 import TYPES from './action-types';
 import { API_NAMESPACE, STORE_KEY } from './constants';
 
+export function setFeatures( features ) {
+	return {
+		type: TYPES.SET_FEATURES,
+		features,
+	};
+}
+
+export function setModifiedFeatures( modifiedFeatures ) {
+	return {
+		type: TYPES.SET_MODIFIED_FEATURES,
+		modifiedFeatures,
+	};
+}
+
 export function* resetModifiedFeatures() {
 	try {
 		const response = yield apiFetch( {
@@ -40,18 +54,4 @@ export function* toggleFeature( featureName ) {
 	} catch ( error ) {
 		throw new Error();
 	}
-}
-
-export function setFeatures( features ) {
-	return {
-		type: TYPES.SET_FEATURES,
-		features,
-	};
-}
-
-export function setModifiedFeatures( modifiedFeatures ) {
-	return {
-		type: TYPES.SET_MODIFIED_FEATURES,
-		modifiedFeatures,
-	};
 }

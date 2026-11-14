@@ -1,10 +1,7 @@
-// We need to disable the following eslint check as it's only applicable
-// to testing-library/react not `react-test-renderer` used here
-/* eslint-disable testing-library/await-async-query */
 /**
  * External dependencies
  */
-import TestRenderer from 'react-test-renderer';
+import { renderHook } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -13,77 +10,62 @@ import { usePriceConstraint } from '../use-price-constraints';
 import { ROUND_UP, ROUND_DOWN } from '../constants';
 
 describe( 'usePriceConstraints', () => {
-	const TestComponent = ( { price } ) => {
-		const maxPriceConstraint = usePriceConstraint( price, 2, ROUND_UP );
-		const minPriceConstraint = usePriceConstraint( price, 2, ROUND_DOWN );
-		return (
-			<div
-				data-minPriceConstraint={ minPriceConstraint }
-				data-maxPriceConstraint={ maxPriceConstraint }
-			/>
+	const renderPriceConstraints = ( price ) =>
+		renderHook(
+			( { price: currentPrice } ) => ( {
+				max: usePriceConstraint( currentPrice, 2, ROUND_UP ),
+				min: usePriceConstraint( currentPrice, 2, ROUND_DOWN ),
+			} ),
+			{ initialProps: { price } }
 		);
-	};
 
 	it( 'max price constraint should be updated when new price is set', () => {
-		const renderer = TestRenderer.create(
-			<TestComponent price={ 1000 } />
-		);
-		const container = renderer.root.findByType( 'div' );
+		const { result, rerender } = renderPriceConstraints( 1000 );
 
-		expect( container.props[ 'data-maxPriceConstraint' ] ).toBe( 1000 );
+		expect( result.current.max ).toBe( 1000 );
 
-		renderer.update( <TestComponent price={ 2000 } /> );
+		rerender( { price: 2000 } );
 
-		expect( container.props[ 'data-maxPriceConstraint' ] ).toBe( 2000 );
+		expect( result.current.max ).toBe( 2000 );
 	} );
 
 	it( 'min price constraint should be updated when new price is set', () => {
-		const renderer = TestRenderer.create(
-			<TestComponent price={ 1000 } />
-		);
-		const container = renderer.root.findByType( 'div' );
+		const { result, rerender } = renderPriceConstraints( 1000 );
 
-		expect( container.props[ 'data-minPriceConstraint' ] ).toBe( 1000 );
+		expect( result.current.min ).toBe( 1000 );
 
-		renderer.update( <TestComponent price={ 2000 } /> );
+		rerender( { price: 2000 } );
 
-		expect( container.props[ 'data-minPriceConstraint' ] ).toBe( 2000 );
+		expect( result.current.min ).toBe( 2000 );
 	} );
 
 	it( 'previous price constraint should be preserved when new price is not an infinite number', () => {
-		const renderer = TestRenderer.create(
-			<TestComponent price={ 1000 } />
-		);
-		const container = renderer.root.findByType( 'div' );
+		const { result, rerender } = renderPriceConstraints( 1000 );
 
-		expect( container.props[ 'data-maxPriceConstraint' ] ).toBe( 1000 );
+		expect( result.current.max ).toBe( 1000 );
 
-		renderer.update( <TestComponent price={ Infinity } /> );
+		rerender( { price: Infinity } );
 
-		expect( container.props[ 'data-maxPriceConstraint' ] ).toBe( 1000 );
+		expect( result.current.max ).toBe( 1000 );
 	} );
 
 	it( 'max price constraint should be higher if the price is decimal', () => {
-		const renderer = TestRenderer.create(
-			<TestComponent price={ 1099 } />
-		);
-		const container = renderer.root.findByType( 'div' );
+		const { result, rerender } = renderPriceConstraints( 1099 );
 
-		expect( container.props[ 'data-maxPriceConstraint' ] ).toBe( 1100 );
+		expect( result.current.max ).toBe( 1100 );
 
-		renderer.update( <TestComponent price={ 1999 } /> );
+		rerender( { price: 1999 } );
 
-		expect( container.props[ 'data-maxPriceConstraint' ] ).toBe( 2000 );
+		expect( result.current.max ).toBe( 2000 );
 	} );
 
 	it( 'min price constraint should be lower if the price is decimal', () => {
-		const renderer = TestRenderer.create( <TestComponent price={ 999 } /> );
-		const container = renderer.root.findByType( 'div' );
+		const { result, rerender } = renderPriceConstraints( 999 );
 
-		expect( container.props[ 'data-minPriceConstraint' ] ).toBe( 900 );
+		expect( result.current.min ).toBe( 900 );
 
-		renderer.update( <TestComponent price={ 1999 } /> );
+		rerender( { price: 1999 } );
 
-		expect( container.props[ 'data-minPriceConstraint' ] ).toBe( 1900 );
+		expect( result.current.min ).toBe( 1900 );
 	} );
 } );

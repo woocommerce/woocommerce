@@ -1,4 +1,9 @@
 {
     "position": 3,
-    "label": "Security"
+    "label": "Security",
+    "link": {
+        "type": "generated-index",
+        "title": "Security",
+        "slug": "/best-practices/security"
+    }
 }

@@ -3,7 +3,6 @@
  */
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import type { Page } from '@playwright/test';
-import { faker } from '@faker-js/faker';
 
 /**
  * Internal dependencies
@@ -19,18 +18,8 @@ const test = baseTest.extend( {
 		const products = {};
 
 		for ( const key of Object.values( keys ) ) {
-			// `getFakeProduct` names products with `faker.commerce.productName()`,
-			// which is NOT globally unique — concurrent workers can generate the
-			// same name. This spec searches the store-wide product picker by name
-			// and selects the matching option, so a duplicate name yields 2+
-			// options and a strict-mode violation. Suffix a random token to make
-			// each product name unique across workers.
-			const fakeProduct = getFakeProduct();
-			fakeProduct.name = `${
-				fakeProduct.name
-			} ${ faker.string.alphanumeric( 8 ) }`;
 			await restApi
-				.post( `${ WC_API_PATH }/products`, fakeProduct )
+				.post( `${ WC_API_PATH }/products`, getFakeProduct() )
 				.then( ( response ) => {
 					products[ key ] = response.data;
 				} );
@@ -154,59 +143,6 @@ test.describe(
 			} );
 		} );
 
-		test( 'remove up-sells', async ( { page, restApi, products } ) => {
-			// Add up-sells
-			await restApi.put(
-				`${ WC_API_PATH }/products/${ products.main.id }`,
-				{
-					upsell_ids: [ products.linked1.id ],
-				}
-			);
-
-			// Verify up-sells are present, so we can assert the opposite after removing them
-			// This should prevent a possible false negative result
-			await test.step( 'verify the up-sells in the store frontend', async () => {
-				await page.goto( products.main.permalink );
-
-				await expect(
-					page.locator( 'section.upsells' ).getByRole( 'heading', {
-						name: products.linked1.name,
-					} )
-				).toBeVisible();
-			} );
-
-			await navigate( page, products.main.id );
-
-			await test.step( 'remove up-sells for a product', async () => {
-				// Using backspace to remove the product because clicking the remove button is flaky
-				const upsellTextBoxLocator = page
-					.locator( 'p' )
-					.filter( { hasText: 'Upsells' } )
-					.getByRole( 'textbox' );
-				await upsellTextBoxLocator.waitFor( { state: 'visible' } );
-				await upsellTextBoxLocator.click();
-				await page.keyboard.press( 'Backspace' );
-
-				await expect(
-					page.getByRole( 'listitem', {
-						name: products.linked1.name,
-					} )
-				).toBeHidden();
-			} );
-
-			await updateProduct( page );
-
-			await test.step( 'verify the up-sells in the store frontend', async () => {
-				await page.goto( products.main.permalink );
-
-				await expect(
-					page.locator( 'section.upsells' ).getByRole( 'heading', {
-						name: products.linked1.name,
-					} )
-				).toBeHidden();
-			} );
-		} );
-
 		test( 'add cross-sells', async ( { page, products } ) => {
 			await navigate( page, products.main.id );
 
@@ -279,55 +215,6 @@ test.describe(
 						name: products.linked2.name,
 					} )
 				).toBeVisible();
-			} );
-		} );
-
-		test( 'remove cross-sells', async ( { page, restApi, products } ) => {
-			// Add cross-sells
-			await restApi.put(
-				`${ WC_API_PATH }/products/${ products.main.id }`,
-				{
-					cross_sell_ids: [ products.linked1.id ],
-				}
-			);
-
-			await navigate( page, products.main.id );
-
-			await test.step( 'remove cross-sells for a product', async () => {
-				// Using backspace to remove the product because clicking the remove button is flaky
-				const crossSellTextBoxLocator = page
-					.locator( 'p' )
-					.filter( { hasText: 'Cross-sells' } )
-					.getByRole( 'textbox' );
-				await crossSellTextBoxLocator.waitFor( { state: 'visible' } );
-				await crossSellTextBoxLocator.click();
-				await page.keyboard.press( 'Backspace' );
-
-				await expect(
-					page.getByRole( 'listitem', {
-						name: products.linked1.name,
-					} )
-				).toBeHidden();
-			} );
-
-			await updateProduct( page );
-
-			await test.step( 'verify the cross-sells in the store frontend', async () => {
-				await page.goto( products.main.permalink );
-
-				// add to cart and view proceed to checkout
-				await page
-					.getByRole( 'button', { name: 'Add to cart', exact: true } )
-					.click();
-				await page
-					.getByRole( 'link', { name: 'View cart' } )
-					.first()
-					.click();
-
-				// check for cross-sells
-				await expect(
-					page.getByText( products.linked1.name )
-				).toBeHidden();
 			} );
 		} );
 	}

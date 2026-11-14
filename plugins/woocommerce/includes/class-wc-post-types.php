@@ -208,6 +208,7 @@ class WC_Post_Types {
 						'add_new_item'      => __( 'Add new shipping class', 'woocommerce' ),
 						'new_item_name'     => __( 'New shipping class Name', 'woocommerce' ),
 					),
+					'public'                => false,
 					'show_ui'               => false,
 					'show_in_quick_edit'    => false,
 					'show_in_nav_menus'     => false,
@@ -336,26 +337,31 @@ class WC_Post_Types {
 
 		do_action( 'woocommerce_register_post_type' );
 
+		$is_installing_wp = wp_installing();
+		$is_cli           = defined( 'WP_CLI' ) && WP_CLI;
+		$is_admin         = is_admin();
+
 		$permalinks = wc_get_permalink_structure();
 		$supports   = array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'publicize', 'wpcom-markdown' );
-
 		if ( 'yes' === get_option( 'woocommerce_enable_reviews', 'yes' ) ) {
 			$supports[] = 'comments';
 		}
 
-		$shop_page_id = wc_get_page_id( 'shop' );
-
-		if ( wc_current_theme_supports_woocommerce_or_fse() ) {
-			$has_archive = $shop_page_id && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop';
+		$theme_support     = wc_current_theme_supports_woocommerce_or_fse();
+		$theme_unavailable = $is_installing_wp || ( $is_cli && self::wp_cli_skips_active_theme() );
+		if ( self::should_register_product_archive( $theme_support, $theme_unavailable ) ) {
+			$shop_page_id = wc_get_page_id( 'shop' );
+			$shop_page    = $shop_page_id > 0 ? get_post( $shop_page_id ) : false;
+			$has_archive  = $shop_page ? urldecode( get_page_uri( $shop_page ) ) : 'shop';
 		} else {
 			$has_archive = false;
 		}
 
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
-		// Skip this check in WP-CLI and cron contexts: themes may not be loaded (e.g. --skip-themes),
-		// which would incorrectly record theme support as "no" and corrupt rewrite rules on the frontend.
-		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! wp_doing_cron() ) {
-			$theme_support = wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
+		// Skip this check in contexts where themes may not be loaded, which would incorrectly record
+		// theme support as "no" and corrupt rewrite rules on the frontend.
+		if ( ! $is_installing_wp && ! $is_cli && ! wp_doing_cron() ) {
+			$theme_support = $theme_support ? 'yes' : 'no';
 			if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
 				update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 			}
@@ -462,7 +468,7 @@ class WC_Post_Types {
 					'map_meta_cap'        => true,
 					'publicly_queryable'  => false,
 					'exclude_from_search' => true,
-					'show_in_menu'        => current_user_can( 'edit_others_shop_orders' ) ? 'woocommerce' : true,
+					'show_in_menu'        => ( $is_admin && current_user_can( 'edit_others_shop_orders' ) ) ? 'woocommerce' : true,
 					'hierarchical'        => false,
 					'show_in_nav_menus'   => false,
 					'rewrite'             => false,
@@ -525,7 +531,7 @@ class WC_Post_Types {
 						'map_meta_cap'        => true,
 						'publicly_queryable'  => false,
 						'exclude_from_search' => true,
-						'show_in_menu'        => current_user_can( 'edit_others_shop_orders' ) ? 'woocommerce' : true,
+						'show_in_menu'        => ( $is_admin && current_user_can( 'edit_others_shop_orders' ) ) ? 'woocommerce' : true,
 						'hierarchical'        => false,
 						'rewrite'             => false,
 						'query_var'           => false,
@@ -538,6 +544,46 @@ class WC_Post_Types {
 		}
 
 		do_action( 'woocommerce_after_register_post_type' );
+	}
+
+	/**
+	 * Resolve theme support used to register the product archive.
+	 *
+	 * @param bool $theme_support     Whether the current request reports theme support.
+	 * @param bool $theme_unavailable Whether the active theme may not be loaded on this request.
+	 * @return bool
+	 */
+	private static function should_register_product_archive( bool $theme_support, bool $theme_unavailable ): bool {
+		if ( $theme_support || ! $theme_unavailable ) {
+			return $theme_support;
+		}
+
+		return 'yes' === get_option( 'current_theme_supports_woocommerce' );
+	}
+
+	/**
+	 * Determine whether WP-CLI skipped the active theme.
+	 *
+	 * @return bool
+	 */
+	private static function wp_cli_skips_active_theme(): bool {
+		$get_wp_cli_config = array( 'WP_CLI', 'get_config' );
+
+		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) || ! is_callable( $get_wp_cli_config ) ) {
+			return false;
+		}
+
+		$skipped_themes = $get_wp_cli_config( 'skip-themes' );
+
+		if ( true === $skipped_themes ) {
+			return true;
+		}
+
+		if ( ! is_array( $skipped_themes ) ) {
+			$skipped_themes = explode( ',', (string) $skipped_themes );
+		}
+
+		return in_array( get_stylesheet(), $skipped_themes, true );
 	}
 
 	/**
@@ -682,9 +728,18 @@ class WC_Post_Types {
 	/**
 	 * Flush rules if the event is queued.
 	 *
+	 * Consuming the queue regenerates and persists the whole rewrite graph. A request that skips
+	 * the active theme would write the theme's rules away with nothing left to retry, so it
+	 * leaves the queue for the next normal request. This mirrors the `$theme_unavailable` check
+	 * in register_post_types().
+	 *
 	 * @since 3.3.0
 	 */
 	public static function maybe_flush_rewrite_rules() {
+		if ( wp_installing() || self::wp_cli_skips_active_theme() ) {
+			return;
+		}
+
 		if ( 'yes' === get_option( 'woocommerce_queue_flush_rewrite_rules' ) ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
 			self::flush_rewrite_rules();
@@ -720,8 +775,28 @@ class WC_Post_Types {
 
 	/**
 	 * Flush rewrite rules.
+	 *
+	 * While WordPress is installing, the registration graph can be incomplete because themes and
+	 * regular plugins may not be loaded, so flushing now would persist rules that are missing
+	 * third-party post types, taxonomies, and the product archive. Queue the flush instead and let
+	 * the next normal request regenerate the rules from a complete graph.
 	 */
 	public static function flush_rewrite_rules() {
+		if ( wp_installing() ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+
+			/*
+			 * While WordPress is installing, update_option() writes the row but skips every cache
+			 * update, so a persistent object cache keeps serving the previous value and the next
+			 * request never sees the queued flush. Evict both places the option can be cached: on
+			 * its own key, and inside the autoloaded bundle.
+			 */
+			wp_cache_delete( 'woocommerce_queue_flush_rewrite_rules', 'options' );
+			wp_cache_delete( 'alloptions', 'options' );
+
+			return;
+		}
+
 		flush_rewrite_rules();
 	}
 

@@ -35,8 +35,7 @@ const focusTrigger = () => {
 	trigger?.focus();
 };
 
-// Set the background color from body so it's reliable. Pattern used in other blocks too
-// e.g. Mini Cart (see mini-cart/utils/set-styles.ts).
+// Set the background color from body so it's reliable.
 const getBodyBackgroundColor = (): string => {
 	const color = getComputedStyle( document.body ).backgroundColor;
 	if ( ! color || color === 'rgba(0, 0, 0, 0)' || color === 'transparent' ) {

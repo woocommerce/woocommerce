@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.8.0
+ * @version 11.3.0
  */
 
 use Automattic\WooCommerce\Internal\Email\EmailFont;
@@ -274,7 +274,7 @@ body {
 #body_content .order-item-data td {
 	border: 0 !important;
 	padding: 0 !important;
-	vertical-align: top;
+	vertical-align: middle;
 }
 
 #body_content .email-order-details .order-totals td,
@@ -361,7 +361,27 @@ body {
 		color: <?php echo esc_attr( $text_lighter_20 ); ?>;
 		border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
 	<?php } ?>
+	/*
+	 * Break a word only when it is too long for the cell, so it can't squash the other address column.
+	 * "anywhere" is used because "overflow-wrap: break-word" still lets a long word widen a table cell.
+	 * "word-break: break-word" does the same as "anywhere" and is needed because Gmail removes "overflow-wrap".
+	 */
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+/*
+ * Some clients, like Outlook on Windows, support neither value above, so a long email address would still widen the cell there.
+ * "break-all" works in those clients, and it is safe for an email address because it has no words to keep whole.
+ * The email is a block element because Outlook on Windows ignores "word-break" on inline elements like a span.
+ */
+.address-email {
 	word-break: break-all;
+}
+
+/* Hook output after the email usually starts with a <br>, which would leave an empty line after the block element. */
+.address-email + br {
+	display: none;
 }
 
 <?php if ( $email_improvements_enabled ) : ?>
@@ -386,6 +406,14 @@ body {
 .order-item-data {
 	color: <?php echo esc_attr( $text ); ?>;
 	font-family: <?php echo $safe_font_family; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
+}
+
+.order-item-data {
+	width: 100%;
+}
+
+.order-item-data h3 {
+	margin: 0;
 }
 
 .link {

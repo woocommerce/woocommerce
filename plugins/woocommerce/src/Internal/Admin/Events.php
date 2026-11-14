@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizeStoreWithBlocks;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
@@ -15,6 +14,7 @@ use Automattic\WooCommerce\Internal\Admin\Notes\EditProductsOnTheMove;
 use Automattic\WooCommerce\Internal\Admin\Notes\EmailImprovements;
 use Automattic\WooCommerce\Internal\Admin\Notes\EUVATNumber;
 use Automattic\WooCommerce\Internal\Admin\Notes\FirstProduct;
+use Automattic\WooCommerce\Internal\Admin\Notes\FullRefundFixDataToolNotice;
 use Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
 use Automattic\WooCommerce\Internal\Admin\Notes\LaunchChecklist;
 use Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
@@ -31,6 +31,7 @@ use Automattic\WooCommerce\Internal\Admin\Notes\PaymentsRemindMeLater;
 use Automattic\WooCommerce\Internal\Admin\Notes\PerformanceOnMobile;
 use Automattic\WooCommerce\Internal\Admin\Notes\PersonalizeStore;
 use Automattic\WooCommerce\Internal\Admin\Notes\RealTimeOrderAlerts;
+use Automattic\WooCommerce\Internal\Admin\Notes\RefundDoubleCountToolNotice;
 use Automattic\WooCommerce\Internal\Admin\Notes\ScheduledUpdatesPromotion;
 use Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
 use Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
@@ -73,6 +74,7 @@ class Events {
 		EmailImprovements::class,
 		EUVATNumber::class,
 		FirstProduct::class,
+		FullRefundFixDataToolNotice::class,
 		LaunchChecklist::class,
 		MagentoMigration::class,
 		ManageOrdersOnTheGo::class,
@@ -87,6 +89,7 @@ class Events {
 		PerformanceOnMobile::class,
 		PersonalizeStore::class,
 		RealTimeOrderAlerts::class,
+		RefundDoubleCountToolNotice::class,
 		ScheduledUpdatesPromotion::class,
 		TrackingOptIn::class,
 		WooCommercePayments::class,
@@ -145,9 +148,7 @@ class Events {
 			RemoteInboxNotificationsEngine::run();
 		}
 
-		if ( Features::is_enabled( 'core-profiler' ) ) {
-			( new MailchimpScheduler() )->run();
-		}
+		( new MailchimpScheduler() )->run();
 	}
 
 	/**
@@ -202,6 +203,8 @@ class Events {
 	protected function possibly_delete_notes() {
 		PaymentsRemindMeLater::delete_if_not_applicable();
 		PaymentsMoreInfoNeeded::delete_if_not_applicable();
+		FullRefundFixDataToolNotice::delete_if_not_applicable();
+		RefundDoubleCountToolNotice::delete_if_not_applicable();
 	}
 
 	/**
@@ -221,11 +224,6 @@ class Events {
 	 * @return bool Whether remote inbox notifications are enabled.
 	 */
 	protected function is_remote_inbox_notifications_enabled() {
-		// Check if the feature flag is disabled.
-		if ( ! Features::is_enabled( 'remote-inbox-notifications' ) ) {
-			return false;
-		}
-
 		// Check if the site has opted out of marketplace suggestions.
 		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) !== 'yes' ) {
 			return false;

@@ -14,8 +14,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration;
 
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\ContractsController;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch\DueDispatcher;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ContractCapabilities;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 defined( 'ABSPATH' ) || exit;
@@ -43,24 +45,26 @@ final class Bootstrap {
 
 		self::$initialized = true;
 
-		CapabilityRegistry::init();
+		ContractCapabilities::register_hooks();
+		PlansController::register_hooks();
+		ContractsController::register_hooks();
+		( new DueDispatcher() )->register_hooks();
 
-		// Register the Action Scheduler callback that dispatches a due renewal
-		// back into the engine. Must run on every boot (not just activation) so
-		// AS can fire scheduled renewals.
-		RenewalEngine::register_hooks();
-
+		// Deferred boot work, each on the moment it needs: the schema install reads options
+		// and runs dbDelta, so it waits for `init`; the recurring-scan check waits for
+		// `wp_loaded`, when Action Scheduler is up and consumers registering on `init` have
+		// registered their due handlers (one registered later schedules the scan itself).
+		// Run immediately when a consumer boots the engine after a hook already fired.
 		if ( did_action( 'init' ) ) {
-			self::maybe_install_schema();
+			SchemaInstaller::maybe_install();
 		} else {
-			add_action( 'init', array( __CLASS__, 'maybe_install_schema' ) );
+			add_action( 'init', array( SchemaInstaller::class, 'maybe_install' ) );
 		}
-	}
 
-	/**
-	 * Install or upgrade the engine schema when it is missing or behind.
-	 */
-	public static function maybe_install_schema(): void {
-		SchemaInstaller::maybe_install();
+		if ( did_action( 'wp_loaded' ) ) {
+			DueDispatcher::ensure_scheduled();
+		} else {
+			add_action( 'wp_loaded', array( DueDispatcher::class, 'ensure_scheduled' ) );
+		}
 	}
 }

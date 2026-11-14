@@ -296,6 +296,67 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_version_and_type clears any product_type term when present, skips wp_set_object_terms() when absent, and always writes _product_version.
+	 */
+	public function test_update_version_and_type_clears_type_term_when_present_skips_when_absent(): void {
+		$store = new class() extends WC_Product_Variation_Data_Store_CPT {
+			public function update_version_and_type( &$product ): void { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found, Squiz.Commenting.FunctionComment.Missing
+				parent::update_version_and_type( $product );
+			}
+		};
+
+		$variation    = $this->get_variation();
+		$variation_id = $variation->get_id();
+
+		// Variations must not carry a product_type term — gate must skip wp_set_object_terms().
+		$this->assertEmpty( get_the_terms( $variation_id, 'product_type' ) );
+		update_post_meta( $variation_id, '_product_version', '1.0.0-stale' );
+
+		$store->update_version_and_type( $variation );
+
+		$this->assertEmpty( get_the_terms( $variation_id, 'product_type' ) );
+		$this->assertSame( WC_VERSION, get_post_meta( $variation_id, '_product_version', true ) );
+
+		// If a product_type term exists (e.g. left over from a type conversion), the gate must clear it.
+		wp_set_object_terms( $variation_id, 'simple', 'product_type' );
+		$this->assertNotEmpty( get_the_terms( $variation_id, 'product_type' ) );
+
+		$store->update_version_and_type( $variation );
+
+		$this->assertEmpty( get_the_terms( $variation_id, 'product_type' ) );
+	}
+
+	/**
+	 * @testdox Creating and updating a variation keeps backslashes from the parent name in its title.
+	 */
+	public function test_create_and_update_keep_backslashes_in_variation_title(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_name( 'Cable 1\\2 inch' );
+		$parent->save();
+
+		// Record the title WordPress stores, before read() repairs a mismatched title.
+		$stored_titles = array();
+		add_filter(
+			'wp_insert_post_data',
+			function ( $data ) use ( &$stored_titles ) {
+				if ( 'product_variation' === $data['post_type'] ) {
+					$stored_titles[] = wp_unslash( $data['post_title'] );
+				}
+				return $data;
+			},
+			PHP_INT_MAX
+		);
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->save();
+		$variation->set_menu_order( 5 );
+		$variation->save();
+
+		$this->assertSame( array( 'Cable 1\\2 inch', 'Cable 1\\2 inch' ), $stored_titles, 'Creating and updating the variation should both store the backslash from the parent name.' );
+	}
+
+	/**
 	 * Create a variable product and return one of its variations.
 	 *
 	 * @return WC_Product_Variation The variation created.

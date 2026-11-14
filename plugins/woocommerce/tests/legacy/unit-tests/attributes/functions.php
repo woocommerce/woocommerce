@@ -58,6 +58,49 @@ class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 		$err = wc_create_attribute( array( 'name' => 'This is a big name for a product attribute!' ) );
 		$this->assertEquals( 'invalid_product_attribute_slug_too_long', $err->get_error_code() );
 
+		// Multibyte boundary cases. The slug byte budget is 29 (pa_ + 29 = 32). A pure
+		// Cyrillic/CJK slug can't measure exactly 29 bytes — Cyrillic is 2 bytes/char and
+		// these CJK characters are 3 bytes/char — so these cover the closest reachable values
+		// on either side (the exact 29-byte boundary is covered by the ASCII case in the
+		// modern tests/php/includes/wc-attribute-functions-test.php suite).
+		// 14-char Cyrillic slug = 28 bytes; with 'pa_' prefix = 31 bytes (under WP's 32-byte taxonomy limit).
+		$cyrillic_ok = wc_create_attribute(
+			array(
+				'slug' => 'абвгдежзиклмно',
+				'name' => 'OK Cyrillic',
+			)
+		);
+		$this->assertIsInt( $cyrillic_ok );
+		wc_delete_attribute( $cyrillic_ok );
+
+		// 15-char Cyrillic slug = 30 bytes; with 'pa_' prefix = 33 bytes — must be rejected.
+		$err = wc_create_attribute(
+			array(
+				'slug' => 'абвгдежзиклмноп',
+				'name' => 'Too long Cyrillic',
+			)
+		);
+		$this->assertEquals( 'invalid_product_attribute_slug_too_long', $err->get_error_code() );
+
+		// 9-char Chinese slug = 27 bytes; with 'pa_' prefix = 30 bytes — under the limit.
+		$chinese_ok = wc_create_attribute(
+			array(
+				'slug' => '尺寸大小颜色品牌型',
+				'name' => 'OK Chinese',
+			)
+		);
+		$this->assertIsInt( $chinese_ok );
+		wc_delete_attribute( $chinese_ok );
+
+		// 10-char Chinese slug = 30 bytes; with 'pa_' prefix = 33 bytes — must be rejected.
+		$err = wc_create_attribute(
+			array(
+				'slug' => '尺寸大小颜色品牌型号',
+				'name' => 'Too long Chinese',
+			)
+		);
+		$this->assertEquals( 'invalid_product_attribute_slug_too_long', $err->get_error_code() );
+
 		$err = wc_create_attribute( array( 'name' => 'Cat' ) );
 		$this->assertEquals( 'invalid_product_attribute_slug_reserved_name', $err->get_error_code() );
 

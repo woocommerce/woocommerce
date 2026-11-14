@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix product-reviews "can delete a product review" E2E flake by waiting for the trash AJAX to commit before navigating to the Trash view.

@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { createReduxStore, register } from '@wordpress/data';
-import { AnyAction } from 'redux';
 
 /**
  * Internal dependencies
  */
+import type { AnyAction } from './types';
 import { createSelectors } from './selectors';
 import { createDispatchActions } from './actions';
 import defaultControls from '../controls';
@@ -28,7 +28,7 @@ interface CrudStoreParams<
 	) => ResourceState = (
 		state: ResourceState | undefined,
 		action: AnyAction
-	) => ResourceState
+	) => ResourceState,
 > {
 	storeName: string;
 	resourceName: string;
@@ -44,11 +44,9 @@ interface CrudStoreParams<
 }
 
 export const createCrudDataStore = <
-	Actions extends Record<
-		string,
-		( ...args: AnyArguments ) => unknown
-	> = Record< string, ( ...args: AnyArguments ) => unknown >,
-	Selectors = unknown
+	Actions extends Record< string, ( ...args: AnyArguments ) => unknown > =
+		Record< string, ( ...args: AnyArguments ) => unknown >,
+	Selectors = unknown,
 >( {
 	storeName,
 	resourceName,

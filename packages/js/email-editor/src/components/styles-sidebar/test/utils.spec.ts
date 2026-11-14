@@ -2,7 +2,12 @@
  * Internal dependencies
  */
 import { EmailStyles } from '../../../store';
-import { getElementStyles, getHeadingElementStyles } from '../utils';
+import {
+	getElementStyles,
+	getFontAppearanceValue,
+	getFontFamilyFaces,
+	getHeadingElementStyles,
+} from '../utils';
 
 describe( 'getElementStyles', () => {
 	it( 'always returns typography and color objects, even when missing', () => {
@@ -76,5 +81,178 @@ describe( 'getHeadingElementStyles', () => {
 			fontWeight: '700',
 			fontSize: '32px',
 		} );
+	} );
+} );
+
+describe( 'getFontAppearanceValue', () => {
+	it.each( [
+		[ {}, { fontStyle: undefined, fontWeight: undefined } ],
+		[ { fontWeight: 700 }, { fontStyle: 'normal', fontWeight: '700' } ],
+		[ { fontStyle: 'italic' }, { fontStyle: 'italic', fontWeight: '400' } ],
+		[
+			{ fontStyle: 'italic', fontWeight: '300' },
+			{ fontStyle: 'italic', fontWeight: '300' },
+		],
+		[
+			{ fontStyle: 'inherit', fontWeight: 'inherit' },
+			{ fontStyle: undefined, fontWeight: undefined },
+		],
+		[
+			{ fontStyle: 'inherit', fontWeight: '700' },
+			{ fontStyle: 'normal', fontWeight: '700' },
+		],
+	] )( 'turns %j into %j', ( current, expected ) => {
+		expect( getFontAppearanceValue( current ) ).toEqual( expected );
+	} );
+} );
+
+describe( 'getFontFamilyFaces', () => {
+	const arial = {
+		name: 'Arial',
+		slug: 'arial',
+		fontFamily: "Arial, 'Helvetica Neue', Helvetica, sans-serif",
+	};
+	const openSans = {
+		name: 'Open Sans',
+		slug: 'open-sans',
+		fontFamily:
+			"'open sans', 'helvetica neue', helvetica, arial, sans-serif",
+	};
+	const inter = {
+		name: 'Inter',
+		slug: 'inter',
+		fontFamily: 'Inter, sans-serif',
+		fontFace: [
+			{ fontFamily: 'Inter', fontStyle: 'normal', fontWeight: '300' },
+			{ fontFamily: 'Inter', fontStyle: 'normal', fontWeight: '600' },
+		],
+	};
+	const fontFamilies = [ arial, openSans, inter ];
+	const fontWeights = {
+		arial: '400, 700',
+		'open-sans': '300,400, 500 ,700',
+		inter: '400, 700',
+	};
+	const regularAndBold = [
+		{ fontStyle: 'normal', fontWeight: '400' },
+		{ fontStyle: 'italic', fontWeight: '400' },
+		{ fontStyle: 'normal', fontWeight: '700' },
+		{ fontStyle: 'italic', fontWeight: '700' },
+	];
+
+	it( 'offers the weights the theme lists for the font, each with italic', () => {
+		expect(
+			getFontFamilyFaces(
+				fontFamilies,
+				fontWeights,
+				arial.fontFamily,
+				{}
+			)
+		).toEqual( regularAndBold );
+		expect(
+			getFontFamilyFaces(
+				fontFamilies,
+				fontWeights,
+				openSans.fontFamily,
+				{}
+			)?.map( ( face ) => face.fontWeight )
+		).toEqual( [ '300', '300', '400', '400', '500', '500', '700', '700' ] );
+	} );
+
+	it( 'prefers the font faces of a font that has them', () => {
+		expect(
+			getFontFamilyFaces(
+				fontFamilies,
+				fontWeights,
+				inter.fontFamily,
+				{}
+			)
+		).toEqual( inter.fontFace );
+	} );
+
+	it.each( [
+		'var:preset|font-family|open-sans',
+		'var(--wp--preset--font-family--open-sans)',
+	] )( 'finds the font from a preset reference: %s', ( fontFamily ) => {
+		expect(
+			getFontFamilyFaces( fontFamilies, fontWeights, fontFamily, {} )
+		).toHaveLength( 8 );
+	} );
+
+	it( 'matches the font value before reading a preset slug from it', () => {
+		const custom = {
+			slug: 'custom',
+			fontFamily: 'my-font-family--arial',
+		};
+		expect(
+			getFontFamilyFaces(
+				[ ...fontFamilies, custom ],
+				{ ...fontWeights, custom: '300' },
+				custom.fontFamily,
+				{}
+			)
+		).toEqual( [
+			{ fontStyle: 'normal', fontWeight: '300' },
+			{ fontStyle: 'italic', fontWeight: '300' },
+		] );
+	} );
+
+	it.each( [
+		[ 'the font is not in the list', undefined, fontWeights ],
+		[ 'the theme lists no weights for the font', arial.fontFamily, {} ],
+		[ 'the theme lists no weights at all', arial.fontFamily, undefined ],
+	] )( 'leaves the list to core when %s', ( _, fontFamily, weights ) => {
+		expect(
+			getFontFamilyFaces( fontFamilies, weights, fontFamily, {
+				fontWeight: '300',
+			} )
+		).toBeUndefined();
+	} );
+
+	it( 'keeps a saved weight that the font does not offer', () => {
+		expect(
+			getFontFamilyFaces( fontFamilies, fontWeights, arial.fontFamily, {
+				fontStyle: 'normal',
+				fontWeight: '300',
+			} )
+		).toEqual( [
+			{ fontStyle: 'normal', fontWeight: '300' },
+			...regularAndBold,
+		] );
+	} );
+
+	it( 'puts a saved weight before a variable weight range', () => {
+		const variable = {
+			slug: 'variable',
+			fontFamily: 'Variable, sans-serif',
+			fontFace: [ { fontStyle: 'normal', fontWeight: '300 700' } ],
+		};
+		expect(
+			getFontFamilyFaces( [ variable ], {}, variable.fontFamily, {
+				fontStyle: 'normal',
+				fontWeight: '900',
+			} )
+		).toEqual( [
+			{ fontStyle: 'normal', fontWeight: '900' },
+			...variable.fontFace,
+		] );
+	} );
+
+	it( 'does not add an inherited style and weight', () => {
+		expect(
+			getFontFamilyFaces( fontFamilies, fontWeights, arial.fontFamily, {
+				fontStyle: 'inherit',
+				fontWeight: 'inherit',
+			} )
+		).toEqual( regularAndBold );
+	} );
+
+	it( 'does not add a saved value the font already offers', () => {
+		expect(
+			getFontFamilyFaces( fontFamilies, fontWeights, arial.fontFamily, {
+				fontStyle: 'italic',
+				fontWeight: 700,
+			} )
+		).toEqual( regularAndBold );
 	} );
 } );

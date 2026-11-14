@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix: Improve color contrast for delete link in .wc-metabox to meet WCAG 2.2 AA requirements (SC 1.4.3)

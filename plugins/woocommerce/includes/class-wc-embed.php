@@ -76,9 +76,9 @@ class WC_Embed {
 
 		// Make sure we're only affecting embedded products.
 		if ( self::is_embedded_product() ) {
-			echo '<p><span class="wc-embed-price">' . $_product->get_price_html() . '</span></p>'; // WPCS: XSS ok.
+			echo '<p><span class="wc-embed-price">' . $_product->get_price_html() . '</span></p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_price_html() returns HTML, including output from the public product price filter.
 
-			if ( ! empty( $post->post_excerpt ) ) {
+			if ( ! post_password_required( $post ) && ! empty( $post->post_excerpt ) ) {
 				ob_start();
 				woocommerce_template_single_excerpt();
 				$excerpt = ob_get_clean();

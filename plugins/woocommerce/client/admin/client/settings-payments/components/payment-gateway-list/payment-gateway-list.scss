@@ -1,5 +1,6 @@
 .settings-payment-gateways__list {
-	border-top: 1px solid $gray-200;
+	// No border-top: the header above closes itself off with its own
+	// border-bottom, in every loading state.
 	// Without this, the window.innerWidth is not calculated correctly when elements are pushed outside the container.
 	overflow: hidden;
 

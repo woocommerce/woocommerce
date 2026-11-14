@@ -33,30 +33,59 @@ final class SchemaInstaller {
 	 *         references, totals, stamps); immutable cycle records keyed on
 	 *         `(contract_id, kind)`; per-contract snapshots deduped by copy-forward.
 	 * 2.1.0 - rename `app_id` to `extension_slug` in plan_groups table.
+	 * 2.1.1 - add `status` and `sort_order` columns to plans table.
+	 * 2.2.0 - dispatcher columns: cycle `claimed_until` (crash-recovery claim) and
+	 *         reserved `retry_at`; a `due_contract (status, next_payment_gmt)` index on
+	 *         contracts for the batch due scan.
+	 * 2.3.0 - catalog flatten: drop the plan_groups table; plans lose group_id and
+	 *         options, gain merchant_code (UNIQUE).
+	 * 2.4.0 - owner-scoped due scan: `due_owner (extension_slug, next_payment_gmt)` replaces
+	 *         `due_contract (status, next_payment_gmt)` and makes the contracts
+	 *         `extension_slug` index redundant (dropped); pre-freeze, existing tables must be
+	 *         recreated to drop the old indexes.
+	 * 2.5.0 - contracts `customer_id`, `currency`, `selling_plan_id`, `start_gmt` nullable;
+	 *         contract_meta indexes `meta_key_value` and `contract_meta_key_value` (HPOS
+	 *         shape) replace `contract_key`; pre-freeze, recreate the tables.
+	 * 2.6.0 - plans drop `description`, `category`, `sort_order`, `merchant_code`,
+	 *         `inventory_policy` and their indexes; `billing_policy` nullable; an
+	 *         `extension_status (extension_slug, status)` index; new selling_plan_meta
+	 *         table (HPOS-style indexes); pre-freeze, recreate the tables.
+	 * 2.7.0 - due dispatch: contracts gain a nullable `claimed_until` (the
+	 *         due-dispatch claim); contracts `schedule_source` is VARCHAR(64) (it holds
+	 *         extension and gateway slugs) and defaults to 'subscriptions_engine' (was
+	 *         'primitive'); cycles drop the `due (kind, status, starts_at_gmt)` index (the
+	 *         due dispatcher scans contracts, and no cycle read filters on those columns).
+	 *         dbDelta adds the column and widens `schedule_source` in place, but does not
+	 *         drop the index or rename stored 'primitive' rows (which the due scan skips):
+	 *         pre-freeze, recreate the tables.
+	 * 2.8.0 - contract lock: contracts gain `lock_token`, `locked_until_gmt`, `lock_operation`,
+	 *         a `write_seq` counter bumped by every row write, and a binary-collated
+	 *         `creation_key` with a `creation (extension_slug, creation_key)` UNIQUE index;
+	 *         contracts and cycles drop `claimed_until`. Pre-freeze, recreate the tables.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	const VERSION = '2.1.0';
+	private const VERSION = '2.8.0';
 
 	/**
 	 * Option key tracking the installed schema version.
 	 */
-	const VERSION_OPTION = 'wc_subscriptions_engine_db_version';
+	private const VERSION_OPTION = 'wc_subscriptions_engine_db_version';
 
 	/**
 	 * Logical table identifiers - keys map to unprefixed table names.
 	 */
-	const TABLE_PLAN_GROUPS        = 'plan_groups';
-	const TABLE_PLANS              = 'plans';
-	const TABLE_CONTRACTS          = 'contracts';
-	const TABLE_CONTRACT_ITEMS     = 'contract_items';
-	const TABLE_CONTRACT_ADDRESSES = 'contract_addresses';
-	const TABLE_CONTRACT_META      = 'contract_meta';
-	const TABLE_CYCLES             = 'cycles';
-	const TABLE_SNAPSHOTS          = 'snapshots';
+	public const TABLE_PLANS              = 'plans';
+	public const TABLE_PLAN_META          = 'plan_meta';
+	public const TABLE_CONTRACTS          = 'contracts';
+	public const TABLE_CONTRACT_ITEMS     = 'contract_items';
+	public const TABLE_CONTRACT_ADDRESSES = 'contract_addresses';
+	public const TABLE_CONTRACT_META      = 'contract_meta';
+	public const TABLE_CYCLES             = 'cycles';
+	public const TABLE_SNAPSHOTS          = 'snapshots';
 
 	/**
 	 * Resolve a logical identifier to its prefixed table name.
@@ -103,7 +132,7 @@ final class SchemaInstaller {
 		$collate = $wpdb->get_charset_collate();
 		$names   = self::get_table_names( $wpdb->prefix );
 
-		foreach ( self::get_table_definitions( $names, $collate ) as $sql ) {
+		foreach ( self::get_table_definitions( $names, $collate, $wpdb->charset ) as $sql ) {
 			dbDelta( $sql );
 		}
 
@@ -118,16 +147,34 @@ final class SchemaInstaller {
 	public static function uninstall(): void {
 		global $wpdb;
 
-		// TODO: Determine what we should do with the tables when uninstalling - WOOSUBS-1718.
+		// TODO: Decide what happens to the tables on uninstall (keep or drop the data).
 
 		delete_option( self::VERSION_OPTION );
 	}
 
 	/**
-	 * Whether the installed schema version matches SchemaInstaller::VERSION.
+	 * Whether the installed schema version matches SchemaInstaller::get_version().
 	 */
 	public static function is_current(): bool {
-		return self::VERSION === get_option( self::VERSION_OPTION );
+		return self::get_version() === self::get_database_version();
+	}
+
+	/**
+	 * Get the schema version for this class.
+	 */
+	public static function get_version(): string {
+		return self::VERSION;
+	}
+
+	/**
+	 * Get the installed schema version from the database.
+	 */
+	public static function get_database_version(): ?string {
+		$database_version = get_option( self::VERSION_OPTION );
+		if ( ! is_string( $database_version ) ) {
+			return null;
+		}
+		return $database_version;
 	}
 
 	/**
@@ -140,8 +187,8 @@ final class SchemaInstaller {
 	 */
 	private static function get_table_names( string $prefix ): array {
 		return array(
-			self::TABLE_PLAN_GROUPS        => $prefix . 'wc_selling_plan_groups',
 			self::TABLE_PLANS              => $prefix . 'wc_selling_plans',
+			self::TABLE_PLAN_META          => $prefix . 'wc_selling_plan_meta',
 			self::TABLE_CONTRACTS          => $prefix . 'wc_subscription_contracts',
 			self::TABLE_CONTRACT_ITEMS     => $prefix . 'wc_subscription_contract_items',
 			self::TABLE_CONTRACT_ADDRESSES => $prefix . 'wc_subscription_contract_addresses',
@@ -160,11 +207,12 @@ final class SchemaInstaller {
 	 *
 	 * @param array<string, string> $names   Map of logical => prefixed table names.
 	 * @param string                $collate Charset/collate clause from $wpdb.
+	 * @param string                $charset Table charset from $wpdb, or '' for the server default.
 	 * @return array<int, string>
 	 */
-	private static function get_table_definitions( array $names, string $collate ): array {
-		$plan_groups        = $names[ self::TABLE_PLAN_GROUPS ];
+	private static function get_table_definitions( array $names, string $collate, string $charset ): array {
 		$plans              = $names[ self::TABLE_PLANS ];
+		$plan_meta          = $names[ self::TABLE_PLAN_META ];
 		$contracts          = $names[ self::TABLE_CONTRACTS ];
 		$contract_items     = $names[ self::TABLE_CONTRACT_ITEMS ];
 		$contract_addresses = $names[ self::TABLE_CONTRACT_ADDRESSES ];
@@ -172,65 +220,74 @@ final class SchemaInstaller {
 		$cycles             = $names[ self::TABLE_CYCLES ];
 		$snapshots          = $names[ self::TABLE_SNAPSHOTS ];
 
-		// `merchant_code` is UNIQUE (not KEY) for DB-enforced idempotency on
-		// consumer-supplied codes; NULLs are treated as distinct, so consumers that do
-		// not use merchant codes are unaffected.
-		$plan_groups_sql = "CREATE TABLE {$plan_groups} (
-  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR(255) NOT NULL,
-  merchant_code VARCHAR(64) NULL,
-  options_display JSON NULL,
-  extension_slug VARCHAR(64) NULL,
-  date_created_gmt DATETIME NOT NULL,
-  date_updated_gmt DATETIME NOT NULL,
-  PRIMARY KEY  (id),
-  UNIQUE KEY merchant_code (merchant_code),
-  KEY extension_slug (extension_slug)
-) {$collate};";
+		// Mirrors the HPOS orders meta table indexes, including its meta_value prefix length.
+		$meta_value_index_length = max( min( absint( apply_filters( 'woocommerce_database_max_index_length', 191 ) ), 767 ) - 8 - 100 - 1, 20 );
 
-		// `extension_slug` records the creating extension's registered slug. Nullable
-		// while owner identifier/registration semantics are still open; tightened
-		// additively once decided.
+		// The three policies are opaque JSON payloads of the owning extension; the engine
+		// checks their shape only. `extension_slug` is the owner (nullable while owner
+		// registration semantics are still open). `extension_status` keys owner-scoped
+		// reads filtered by status.
 		$plans_sql = "CREATE TABLE {$plans} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  group_id BIGINT UNSIGNED NOT NULL,
   name VARCHAR(255) NOT NULL,
-  description TEXT NULL,
-  options JSON NOT NULL,
-  billing_policy JSON NOT NULL,
+  billing_policy JSON NULL,
   delivery_policy JSON NULL,
-  inventory_policy JSON NULL,
   pricing_policy JSON NULL,
-  category VARCHAR(32) NOT NULL DEFAULT 'SUBSCRIPTION',
+  status VARCHAR(20) NOT NULL DEFAULT 'active',
   extension_slug VARCHAR(64) NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
-  KEY group_id (group_id),
-  KEY category (category),
-  KEY extension_slug (extension_slug)
+  KEY extension_status (extension_slug, status)
+) {$collate};";
+
+		$plan_meta_sql = "CREATE TABLE {$plan_meta} (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  plan_id BIGINT UNSIGNED NOT NULL,
+  meta_key VARCHAR(255) NOT NULL,
+  meta_value LONGTEXT NULL,
+  PRIMARY KEY  (id),
+  KEY meta_key_value (meta_key(50), meta_value(20)),
+  KEY plan_meta_key_value (plan_id, meta_key(100), meta_value({$meta_value_index_length}))
 ) {$collate};";
 
 		// The contract row is the live source of truth: the totals and stamps are live
-		// values, not caches of cycles. The `due` index keys the renewal scan off
-		// `next_payment_gmt`. `origin_order_id` is NULLABLE (a manual/admin contract has
-		// no origin order). There is no generic `cycle_count` - counters are per-chain,
-		// derived as `MAX(count)` over `(contract_id, kind)`. `currency` is first-class
-		// (forward-compat for multi-currency recurring; today the store base currency).
-		// `schedule_source` distinguishes engine-owned renewals from gateway-owned schedules.
-		$contracts_sql = "CREATE TABLE {$contracts} (
+		// values, not caches of cycles. The `due_owner (extension_slug, next_payment_gmt)` index
+		// keys the batch dispatcher's scan (owner equality, then a range on the due date);
+		// `due` is retained for next-bill-cache lookups keyed the other way. `origin_order_id`
+		// is NULLABLE (a manual/admin contract has no origin order); `customer_id`, `currency`,
+		// `selling_plan_id` and `start_gmt` are NULLABLE until the extension supplies them. There is no generic
+		// `cycle_count` - counters are per-chain, derived as `MAX(count)` over
+		// `(contract_id, kind)`. `currency` is first-class (forward-compat for multi-currency
+		// recurring; today the store base currency). `schedule_source` records
+		// who keeps the payment schedule: the engine ('subscriptions_engine', the only
+		// source the due scan dispatches) or a gateway or extension that keeps its own.
+		// `lock_token` / `locked_until_gmt` / `lock_operation` hold the per-contract lock (live
+		// while `locked_until_gmt` is ahead of the DB clock). `write_seq` is bumped by every row
+		// write, so a write that matches the row always changes it (zero rows = not matched).
+		// `creation` makes an extension's optional `creation_key` unique (NULL keys never
+		// collide); 64 + 100 characters stay within the 767-byte key limit of older InnoDB
+		// row formats. The key is opaque, so it compares binary: keys differing only in case
+		// or accents are distinct. The collation ignores trailing spaces, so the entity trims keys.
+		$creation_key_collate = '' === $charset ? '' : " COLLATE {$charset}_bin";
+		$contracts_sql        = "CREATE TABLE {$contracts} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   status VARCHAR(20) NOT NULL,
-  customer_id BIGINT UNSIGNED NOT NULL,
-  currency CHAR(3) NOT NULL,
-  selling_plan_id BIGINT UNSIGNED NOT NULL,
+  customer_id BIGINT UNSIGNED NULL,
+  currency CHAR(3) NULL,
+  selling_plan_id BIGINT UNSIGNED NULL,
   origin_order_id BIGINT UNSIGNED NULL,
   extension_slug VARCHAR(64) NULL,
   payment_method VARCHAR(100) NULL,
   payment_method_title VARCHAR(200) NULL,
   payment_token_id BIGINT UNSIGNED NULL,
-  start_gmt DATETIME NOT NULL,
+  start_gmt DATETIME NULL,
   next_payment_gmt DATETIME NULL,
+  lock_token CHAR(32) NULL,
+  locked_until_gmt DATETIME NULL,
+  lock_operation VARCHAR(64) NULL,
+  write_seq BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  creation_key VARCHAR(100){$creation_key_collate} NULL,
   plan_snapshot_id BIGINT UNSIGNED NULL,
   items_snapshot_id BIGINT UNSIGNED NULL,
   billing_total DECIMAL(26,8) NOT NULL DEFAULT 0,
@@ -241,14 +298,15 @@ final class SchemaInstaller {
   last_attempt_gmt DATETIME NULL,
   trial_end_gmt DATETIME NULL,
   end_gmt DATETIME NULL,
-  schedule_source VARCHAR(20) NOT NULL DEFAULT 'primitive',
+  schedule_source VARCHAR(64) NOT NULL DEFAULT 'subscriptions_engine',
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
   KEY customer_status (customer_id, status),
   KEY due (next_payment_gmt, status),
+  KEY due_owner (extension_slug, next_payment_gmt),
   KEY origin_order (origin_order_id),
-  KEY extension_slug (extension_slug)
+  UNIQUE KEY creation (extension_slug, creation_key)
 ) {$collate};";
 
 		$contract_items_sql = "CREATE TABLE {$contract_items} (
@@ -291,7 +349,8 @@ final class SchemaInstaller {
   meta_key VARCHAR(255) NOT NULL,
   meta_value LONGTEXT NULL,
   PRIMARY KEY  (id),
-  KEY contract_key (contract_id, meta_key(100))
+  KEY meta_key_value (meta_key(50), meta_value(20)),
+  KEY contract_meta_key_value (contract_id, meta_key(100), meta_value({$meta_value_index_length}))
 ) {$collate};";
 
 		// Immutable billing records. A chain is the pair `(contract_id, kind)` - there is
@@ -299,10 +358,9 @@ final class SchemaInstaller {
 		// chain from holding two cycles at one position; `chain_count` (UNIQUE) is the
 		// per-charge idempotency anchor, with `count` nullable so non-counting cycles
 		// (e.g. future trial periods) coexist freely under MySQL's NULL-distinct rule.
-		// The `due` index keys the dispatcher's due-scan in (kind, status, starts_at_gmt)
-		// order, since billing-in-advance fires at `starts_at_gmt`. `order_id` is non-1:1
-		// (an aggregate order may serve many cycles); `contract_kind` serves targeted
-		// per-chain reads (MAX(count), head).
+		// `order_id` is non-1:1 (an aggregate order may serve many cycles); `contract_kind`
+		// serves targeted per-chain reads (MAX(count), head).
+		// `retry_at` is reserved (additive) for a later retry/dunning pass - not wired yet.
 		$cycles_sql = "CREATE TABLE {$cycles} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   contract_id BIGINT UNSIGNED NOT NULL,
@@ -319,12 +377,12 @@ final class SchemaInstaller {
   items_snapshot_id BIGINT UNSIGNED NULL,
   order_id BIGINT UNSIGNED NULL,
   extension_slug VARCHAR(64) NULL,
+  retry_at DATETIME NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
   UNIQUE KEY chain_seq (contract_id, kind, sequence_no),
   UNIQUE KEY chain_count (contract_id, kind, count),
-  KEY due (kind, status, starts_at_gmt),
   KEY order_id (order_id),
   KEY contract_kind (contract_id, kind)
 ) {$collate};";
@@ -348,8 +406,8 @@ final class SchemaInstaller {
 ) {$collate};";
 
 		return array(
-			$plan_groups_sql,
 			$plans_sql,
+			$plan_meta_sql,
 			$contracts_sql,
 			$contract_items_sql,
 			$contract_addresses_sql,

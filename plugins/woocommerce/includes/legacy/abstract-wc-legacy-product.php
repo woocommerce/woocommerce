@@ -72,7 +72,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 			return $this->post_type;
 		}
 
-		wc_doing_it_wrong( $key, __( 'Product properties should not be accessed directly.', 'woocommerce' ), '3.0' );
+		wc_doing_it_wrong( $key, 'Product properties should not be accessed directly.', '3.0' );
 
 		switch ( $key ) {
 			case 'id' :
@@ -370,7 +370,11 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 * @param string $sep (default: ', ').
 	 * @param string $before (default: '').
 	 * @param string $after (default: '').
-	 * @return string
+	 * @return string|false|WP_Error Category list HTML on success. False when the product has no
+	 *                               categories, and also when an ordering mode is selected and a
+	 *                               `term_links-product_cat` callback returns a non-array; the default
+	 *                               path passes that value to implode() the way core does. WP_Error if
+	 *                               the terms or a term link cannot be resolved.
 	 */
 	public function get_categories( $sep = ', ', $before = '', $after = '' ) {
 		wc_deprecated_function( 'WC_Product::get_categories', '3.0', 'wc_get_product_category_list' );

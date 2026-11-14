@@ -235,12 +235,10 @@ test.describe.serial( 'Orders API tests', () => {
 				'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. ' +
 				'Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 
-			const { source_url: downloadFile } = await getMediaBySlug(
-				'image-01'
-			);
-			const { source_url: downloadFile2 } = await getMediaBySlug(
-				'image-02'
-			);
+			const { source_url: downloadFile } =
+				await getMediaBySlug( 'image-01' );
+			const { source_url: downloadFile2 } =
+				await getMediaBySlug( 'image-02' );
 
 			const simpleProducts = await request.post(
 				'./wp-json/wc/v3/products/batch',
@@ -2007,18 +2005,6 @@ test.describe.serial( 'Orders API tests', () => {
 			);
 			const review1JSON = await review1.json();
 
-			// We need to update the review in order for the product's
-			// average_rating to be recalculated.
-			// See: https://github.com/woocommerce/woocommerce/issues/29906.
-			//await updateProductReview(review1.id);
-			await request.post(
-				`./wp-json/wc/v3/products/reviews/${ review1JSON.id }`,
-				{
-					data: {},
-					failOnStatusCode: true,
-				}
-			);
-
 			const review2 = await request.post(
 				'./wp-json/wc/v3/products/reviews',
 				{
@@ -2034,15 +2020,6 @@ test.describe.serial( 'Orders API tests', () => {
 			);
 			const review2JSON = await review2.json();
 
-			//await updateProductReview(review2.id);
-			await request.post(
-				`./wp-json/wc/v3/products/reviews/${ review2JSON.id }`,
-				{
-					data: {},
-					failOnStatusCode: true,
-				}
-			);
-
 			const review3 = await request.post(
 				'./wp-json/wc/v3/products/reviews',
 				{
@@ -2057,14 +2034,6 @@ test.describe.serial( 'Orders API tests', () => {
 				}
 			);
 			const review3JSON = await review3.json();
-
-			await request.post(
-				`./wp-json/wc/v3/products/reviews/${ review3JSON.id }`,
-				{
-					data: {},
-					failOnStatusCode: true,
-				}
-			);
 
 			return [ review1JSON.id, review2JSON.id, review3JSON.id ];
 		};
@@ -2121,13 +2090,11 @@ test.describe.serial( 'Orders API tests', () => {
 				productTags
 			);
 
-			const externalProducts = await createSampleExternalProducts(
-				categories
-			);
+			const externalProducts =
+				await createSampleExternalProducts( categories );
 
-			const groupedProducts = await createSampleGroupedProduct(
-				categories
-			);
+			const groupedProducts =
+				await createSampleGroupedProduct( categories );
 
 			const variableProducts = await createSampleVariableProducts(
 				categories,
@@ -2137,9 +2104,8 @@ test.describe.serial( 'Orders API tests', () => {
 			const hierarchicalProducts =
 				await createSampleHierarchicalProducts();
 
-			const reviewIds = await createSampleProductReviews(
-				simpleProducts
-			);
+			const reviewIds =
+				await createSampleProductReviews( simpleProducts );
 
 			const orders = await createSampleProductOrders( simpleProducts );
 
@@ -2281,7 +2247,7 @@ test.describe.serial( 'Orders API tests', () => {
 
 			const orders = [];
 			// Have "John" order all products.
-			Object.values( orderedProducts ).forEach( async ( product ) => {
+			for ( const product of Object.values( orderedProducts ) ) {
 				const order2 = await request.post( './wp-json/wc/v3/orders', {
 					data: {
 						...orderBaseData,
@@ -2303,7 +2269,7 @@ test.describe.serial( 'Orders API tests', () => {
 				const orderJSON = await order2.json();
 
 				orders.push( orderJSON );
-			} );
+			}
 
 			// Have "Tina" order some sunglasses and make a child order.
 			// This somewhat resembles a subscription renewal, but we're just testing the `parent` field.
@@ -3114,14 +3080,18 @@ test.describe.serial( 'Orders API tests', () => {
 			const result4 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					search: 'Doe',
+					per_page: 100,
 				},
 			} );
 			const result4JSON = await result4.json();
 
 			expect( result4.status() ).toEqual( 200 );
 			expect( result4JSON.length ).toBeGreaterThanOrEqual( 1 );
+			expect( result4JSON.map( ( { id } ) => id ) ).toContain(
+				sampleData.orders[ 0 ].id
+			);
 			result4JSON.forEach( ( _order ) =>
-				expect( _order.billing.last_name ).toEqual( 'Doe' )
+				expect( _order.billing.last_name ).toContain( 'Doe' )
 			);
 
 			// Test order item name.

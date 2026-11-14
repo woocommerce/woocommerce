@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the WooPayments test account activation flow requiring a second click when switching to live payments.

@@ -1,14 +1,16 @@
 ---
-post_title: Cart and Checkout blocks theming 
-sidebar_label: Cart and Checkout blocks theming 
-
+post_title: Cart and Checkout blocks theming
+sidebar_label: Cart and Checkout blocks theming
+sidebar_position: 6
 ---
 
-# Cart and checkout blocks theming 
+# Cart and checkout blocks theming
 
-> [!IMPORTANT]
-> We strongly discourage writing CSS code based on existing block class names and prioritize using global styles when possible. We especially discourage writing CSS selectors that rely on a specific block being a descendant of another one, as users can move blocks around freely, so they are prone to breaking. Similar to WordPress itself, we consider the HTML structure within components, blocks, and block templates to be "private", and subject to further change in the future, so using CSS to target the internals of a block or a block template is _not recommended or supported_.
+:::warning
+We strongly discourage writing CSS code based on existing block class names and prioritize using global styles when possible. We especially discourage writing CSS selectors that rely on a specific block being a descendant of another one, as users can move blocks around freely, so they are prone to breaking. Similar to WordPress itself, we consider the HTML structure within components, blocks, and block templates to be "private", and subject to further change in the future, so using CSS to target the internals of a block or a block template is _not recommended or supported_.
+:::
 
+If your theme overrides `page-cart.html` or `page-checkout.html`, keep the Cart and Checkout blocks in the assigned page content and render that content from the template with `core/post-content`. See [Cart, Checkout, and Order Confirmation](/docs/theming/block-theme-development/template-hierarchy/#cart-checkout-and-order-confirmation) for the recommended template structure.
 
 ## Buttons
 
@@ -81,6 +83,3 @@ By default, it uses a combination of black and white borders and shadows so it h
 ```
 
 ![Order summary screenshot with custom styles for the item quantity badge](https://user-images.githubusercontent.com/3616980/83863109-2e421c80-a723-11ea-9bf7-2033a96cf5b2.png)
-
-
-

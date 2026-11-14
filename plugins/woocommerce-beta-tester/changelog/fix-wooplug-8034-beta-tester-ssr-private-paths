@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Leave server paths out of the System Status Report in the "Submit bug report" link, as the Status page copy does.

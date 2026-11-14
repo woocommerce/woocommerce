@@ -31,6 +31,8 @@ export type SearchAPIProductType = {
 	currency: string;
 	is_on_sale: boolean;
 	regular_price: number;
+	has_quality_badge?: boolean;
+	free_trial_length_days?: number | null;
 };
 
 export interface Product {
@@ -64,6 +66,8 @@ export interface Product {
 	currency: string;
 	isOnSale: boolean;
 	regularPrice: number;
+	hasQualityBadge?: boolean;
+	freeTrialLengthDays?: number | null;
 }
 
 export interface ProductTracksData {

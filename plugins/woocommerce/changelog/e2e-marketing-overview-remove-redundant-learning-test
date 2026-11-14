@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Remove redundant marketing learning section E2E test (covered by unit tests) and harden the introduction dismissal test using addLocatorHandler.

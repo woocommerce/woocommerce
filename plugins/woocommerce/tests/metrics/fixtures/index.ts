@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import type { Page } from '@playwright/test';
-import { readFile } from '../utils.js';
 import { expect } from '@wordpress/e2e-test-utils-playwright';
+import { readFile } from '../utils.js';
 
 type PerfUtilsConstructorProps = {
 	page: Page;
