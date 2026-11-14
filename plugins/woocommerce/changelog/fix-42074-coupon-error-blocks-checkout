@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep a rejected coupon from blocking Place Order in the Checkout block.
