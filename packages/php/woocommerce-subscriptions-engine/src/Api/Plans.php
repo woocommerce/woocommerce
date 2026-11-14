@@ -216,6 +216,7 @@ final class Plans {
 	 * @return int|null The meta row id; null when `$unique` and the key exists.
 	 * @throws ValidationException If `$extension_slug` or `$key` is empty, with both reported.
 	 * @throws InvalidArgumentException If no plan of that extension has the id.
+	 * @throws RuntimeException If the key is longer than the meta_key column (255 characters).
 	 */
 	public static function add_meta( int $plan_id, string $extension_slug, string $key, $value, bool $unique = false ): ?int {
 		self::assert_scope( $extension_slug, $key );
@@ -237,6 +238,7 @@ final class Plans {
 	 * @return bool True when a value was added or changed; false when nothing changed.
 	 * @throws ValidationException If `$extension_slug` or `$key` is empty, with both reported.
 	 * @throws InvalidArgumentException If no plan of that extension has the id.
+	 * @throws RuntimeException If the key is longer than the meta_key column (255 characters).
 	 */
 	public static function update_meta( int $plan_id, string $extension_slug, string $key, $value, $prev_value = null ): bool {
 		self::assert_scope( $extension_slug, $key );

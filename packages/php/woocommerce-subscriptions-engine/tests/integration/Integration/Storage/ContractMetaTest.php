@@ -361,25 +361,29 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A meta key longer than the 255-character column is refused and stores nothing; a 255-character key is stored.
+	 * @testdox A meta key longer than the 255-character column is refused and stores nothing, in ASCII or multibyte characters; a 255-character key is stored.
 	 */
 	public function test_an_over_long_meta_key_is_refused(): void {
-		$too_long = str_repeat( 'k', 256 );
-		foreach ( array( 'add_meta', 'update_meta' ) as $method ) {
-			try {
-				$this->sut->{$method}( $this->id, self::OWNER, $too_long, 'value' );
-				$this->fail( "Expected {$method}() to refuse an over-long key." );
-			} catch ( RuntimeException $e ) {
-				$this->assertStringContainsString( "Failed to add meta to contract {$this->id}: the meta key is too long", $e->getMessage(), $method );
+		foreach ( array( 'k', 'é' ) as $char ) {
+			$too_long = str_repeat( $char, 256 );
+			foreach ( array( 'add_meta', 'update_meta' ) as $method ) {
+				try {
+					$this->sut->{$method}( $this->id, self::OWNER, $too_long, 'value' );
+					$this->fail( "Expected {$method}() to refuse an over-long key of '{$char}'." );
+				} catch ( RuntimeException $e ) {
+					// The message tells this refusal apart from a ContractLockedException, also a RuntimeException.
+					$this->assertStringContainsString( 'is longer than the column allows', $e->getMessage(), $method );
+				}
 			}
-		}
-		$this->assertSame( array(), $this->sut->get_meta( $this->id ) );
+			$this->assertSame( array(), $this->sut->get_meta( $this->id ) );
 
-		$longest = str_repeat( 'k', 255 );
-		$this->assertIsInt( $this->sut->add_meta( $this->id, self::OWNER, $longest, 'one' ) );
-		$this->sut->delete_meta( $this->id, self::OWNER, $longest );
-		$this->assertTrue( $this->sut->update_meta( $this->id, self::OWNER, $longest, 'two' ) );
-		$this->assertSame( array( $longest => array( 'two' ) ), $this->sut->get_meta( $this->id ) );
+			$longest = str_repeat( $char, 255 );
+			$this->assertIsInt( $this->sut->add_meta( $this->id, self::OWNER, $longest, 'one' ) );
+			$this->sut->delete_meta( $this->id, self::OWNER, $longest );
+			$this->assertTrue( $this->sut->update_meta( $this->id, self::OWNER, $longest, 'two' ) );
+			$this->assertSame( array( $longest => array( 'two' ) ), $this->sut->get_meta( $this->id ) );
+			$this->sut->delete_meta( $this->id, self::OWNER, $longest );
+		}
 	}
 
 	private function lock(): ContractLock {

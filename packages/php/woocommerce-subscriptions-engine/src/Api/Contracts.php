@@ -458,6 +458,7 @@ final class Contracts {
 	 * @throws ValidationException If `$extension_slug` or `$key` is empty, with both reported.
 	 * @throws InvalidArgumentException If no contract of that extension has the id, or the lock is for another contract or extension.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
+	 * @throws \RuntimeException If the key is longer than the meta_key column (255 characters).
 	 */
 	public static function add_meta( int $contract_id, string $extension_slug, string $key, $value, bool $unique = false, ?ContractLock $lock = null ): ?int {
 		self::assert_scope( $extension_slug, $key );
@@ -481,6 +482,7 @@ final class Contracts {
 	 * @throws ValidationException If `$extension_slug` or `$key` is empty, with both reported.
 	 * @throws InvalidArgumentException If no contract of that extension has the id, or the lock is for another contract or extension.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
+	 * @throws \RuntimeException If the key is longer than the meta_key column (255 characters).
 	 */
 	public static function update_meta( int $contract_id, string $extension_slug, string $key, $value, $prev_value = null, ?ContractLock $lock = null ): bool {
 		self::assert_scope( $extension_slug, $key );

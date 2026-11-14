@@ -191,7 +191,7 @@ final class ContractRepository {
 				continue;
 			}
 			if ( is_string( $value ) ) {
-				self::assert_fits_column( $table, $column, $value );
+				ColumnFit::assert_fits_column( $table, $column, $value );
 			}
 			$placeholders[] = '%s';
 			$values[]       = (string) $value;
@@ -1351,7 +1351,7 @@ final class ContractRepository {
 	 * @return int|null The new meta row id, or null when `$unique` and the key exists.
 	 * @throws \InvalidArgumentException If no contract of that extension has the id, or the lock is for another contract or extension.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
-	 * @throws \RuntimeException If the insert fails.
+	 * @throws \RuntimeException If the key is longer than the meta_key column (255 characters), or the insert fails.
 	 */
 	public function add_meta( int $contract_id, string $extension_slug, string $key, $value, bool $unique = false, ?ContractLock $lock = null ): ?int {
 		if ( null !== $lock ) {
@@ -1414,11 +1414,7 @@ final class ContractRepository {
 		global $wpdb;
 
 		$meta = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
-		// The raw insert skips the length and charset check `$wpdb->insert()` makes, so make it here.
-		$checked_key = $wpdb->strip_invalid_text_for_column( $meta, 'meta_key', $key );
-		if ( $checked_key !== $key ) {
-			throw new \RuntimeException( sprintf( 'Failed to add meta to contract %d: the meta key is too long or contains invalid data.', (int) $contract_id ) );
-		}
+		ColumnFit::assert_fits_column( $meta, 'meta_key', $key );
 
 		$this->fence_child_write( $lock, $contract_id );
 
@@ -1477,7 +1473,7 @@ final class ContractRepository {
 	 * @return bool True when a row was added or at least one row changed.
 	 * @throws \InvalidArgumentException If no contract of that extension has the id, or the lock is for another contract or extension.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
-	 * @throws \RuntimeException If a write fails.
+	 * @throws \RuntimeException If the key is longer than the meta_key column (255 characters), or a write fails.
 	 */
 	public function update_meta( int $contract_id, string $extension_slug, string $key, $value, $prev_value = null, ?ContractLock $lock = null ): bool {
 		if ( null !== $lock ) {
@@ -1702,7 +1698,7 @@ final class ContractRepository {
 		// Checked first so an over-long value is refused with its column named.
 		foreach ( $columns as $column => $value ) {
 			if ( is_string( $value ) ) {
-				self::assert_fits_column( $table, $column, $value );
+				ColumnFit::assert_fits_column( $table, $column, $value );
 			}
 		}
 
@@ -2205,7 +2201,7 @@ final class ContractRepository {
 
 		foreach ( $columns as $column => $value ) {
 			if ( is_string( $value ) ) {
-				self::assert_fits_column( $table, $column, $value );
+				ColumnFit::assert_fits_column( $table, $column, $value );
 			}
 		}
 
@@ -2236,33 +2232,6 @@ final class ContractRepository {
 		}
 
 		return (int) $updated;
-	}
-
-	/**
-	 * Refuse a string longer than its column, measured the way `$wpdb` measures it
-	 * (characters for CHAR/VARCHAR, bytes for TEXT/BLOB types). A column whose length
-	 * `$wpdb` cannot read (non-MySQL, or a non-string type such as DATETIME) is not checked.
-	 *
-	 * @param string $table  Prefixed table name.
-	 * @param string $column Column name.
-	 * @param string $value  Value about to be written.
-	 * @throws \RuntimeException If the value is longer than the column.
-	 */
-	private static function assert_fits_column( string $table, string $column, string $value ): void {
-		global $wpdb;
-
-		$length = $wpdb->get_col_length( $table, $column );
-		if ( ! is_array( $length ) ) {
-			return;
-		}
-
-		$max  = Coercion::coerce_int( $length['length'] ?? 0 );
-		$size = 'byte' === ( $length['type'] ?? '' ) ? strlen( $value ) : mb_strlen( $value, 'UTF-8' );
-		if ( $max > 0 && $size > $max ) {
-			throw new \RuntimeException(
-				esc_html( sprintf( 'Failed to write %s: the value for "%s" is longer than the column allows (%d).', $table, $column, $max ) )
-			);
-		}
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
@@ -2339,7 +2308,7 @@ final class ContractRepository {
 					continue;
 				}
 				if ( is_string( $value ) ) {
-					self::assert_fits_column( $table, $column, $value );
+					ColumnFit::assert_fits_column( $table, $column, $value );
 				}
 				$placeholders[] = '%s';
 				$values[]       = (string) $value;

@@ -260,7 +260,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 			$repo->update_fields( $plan, array( 'name' ) );
 			$this->fail( 'Expected update_fields to refuse the name.' );
 		} catch ( \RuntimeException $e ) {
-			$this->assertStringContainsString( 'Failed to update plan', $e->getMessage() );
+			$this->assertStringContainsString( 'longer than the column allows', $e->getMessage() );
 		}
 
 		$stored = $repo->find( $id );

@@ -231,10 +231,8 @@ final class PlanRepository {
 			if ( 'extension_slug' === $field || ! array_key_exists( $field, $row ) ) {
 				throw new \InvalidArgumentException( esc_html( sprintf( 'Cannot update plan field "%s".', $field ) ) );
 			}
-			// The raw query below skips the length and charset check `$wpdb->update()` makes, so make it here.
-			$checked = $wpdb->strip_invalid_text_for_column( $table, $field, $row[ $field ] );
-			if ( $checked !== $row[ $field ] ) {
-				throw new \RuntimeException( sprintf( 'Failed to update plan %d: the value of field "%s" is too long or contains invalid data.', (int) $id, esc_html( $field ) ) );
+			if ( is_string( $row[ $field ] ) ) {
+				ColumnFit::assert_fits_column( $table, $field, $row[ $field ] );
 			}
 			$columns[ $field ] = $row[ $field ];
 		}
@@ -360,7 +358,7 @@ final class PlanRepository {
 	 *                               no unique index, so concurrent adds can both write.
 	 * @return int|null The new meta row id, or null when `$unique` and the key exists.
 	 * @throws \InvalidArgumentException If no plan of that extension has the id.
-	 * @throws \RuntimeException If the insert or the existence read fails.
+	 * @throws \RuntimeException If the key is longer than the meta_key column (255 characters), or the insert or the existence read fails.
 	 */
 	public function add_meta( int $plan_id, string $extension_slug, string $key, $value, bool $unique = false ): ?int {
 		$meta_id = $this->insert_meta_row( $plan_id, $extension_slug, $key, $value, $unique );
@@ -393,11 +391,7 @@ final class PlanRepository {
 		global $wpdb;
 
 		$meta = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
-		// The raw insert skips the length and charset check `$wpdb->insert()` makes, so make it here.
-		$checked_key = $wpdb->strip_invalid_text_for_column( $meta, 'meta_key', $key );
-		if ( $checked_key !== $key ) {
-			throw new \RuntimeException( sprintf( 'Failed to add meta to plan %d: the meta key is too long or contains invalid data.', (int) $plan_id ) );
-		}
+		ColumnFit::assert_fits_column( $meta, 'meta_key', $key );
 
 		$plans  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 		$sql    = "INSERT INTO {$meta} ( plan_id, meta_key, meta_value ) SELECT p.id, %s, %s FROM {$plans} p WHERE p.id = %d AND " . self::OWNER_MATCH;
@@ -436,7 +430,7 @@ final class PlanRepository {
 	 *                               Any other value ('' and false included) matches literally.
 	 * @return bool True when a row was added or at least one row changed.
 	 * @throws \InvalidArgumentException If no plan of that extension has the id.
-	 * @throws \RuntimeException If a write or the classifying read fails.
+	 * @throws \RuntimeException If the key is longer than the meta_key column (255 characters), or a write or the classifying read fails.
 	 */
 	public function update_meta( int $plan_id, string $extension_slug, string $key, $value, $prev_value = null ): bool {
 		global $wpdb;
