@@ -27,11 +27,6 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	protected static $user_id;
 
 	/**
-	 * @var callable
-	 */
-	private $feature_filter;
-
-	/**
 	 * Previous option values to restore after tests.
 	 *
 	 * @var array<string, mixed>
@@ -52,12 +47,12 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		// Enable the v4 REST API feature before bootstrapping.
-		$this->feature_filter = function ( $features ) {
+		$feature_filter = function ( $features ) {
 			$features[] = 'rest-api-v4';
 			return $features;
 		};
 
-		add_filter( 'woocommerce_admin_features', $this->feature_filter );
+		add_filter( 'woocommerce_admin_features', $feature_filter );
 
 		parent::setUp();
 		// Enable block email editor feature to test reply-to fields.
@@ -80,10 +75,6 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		if ( isset( $this->feature_filter ) ) {
-			remove_filter( 'woocommerce_admin_features', $this->feature_filter );
-		}
-
 		// Restore previous option values.
 		foreach ( $this->prev_options as $id => $value ) {
 			if ( null === $value ) {

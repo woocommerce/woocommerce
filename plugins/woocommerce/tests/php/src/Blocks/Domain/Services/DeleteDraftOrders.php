@@ -121,7 +121,6 @@ class DeleteDraftOrders extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->draft_orders_instance = null;
-		remove_action( 'woocommerce_caught_exception', array( $this, 'capture_exception' ) );
 		//restore original logging destination
 		ini_set('error_log', $this->original_logging_destination);
 		OrderHelper::toggle_cot_feature_and_usage( $this->previous_hpos_state );

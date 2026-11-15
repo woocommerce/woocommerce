@@ -67,9 +67,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		remove_all_filters( 'woocommerce_shipping_tax_class' );
-		remove_all_filters( 'woocommerce_shipping_prices_include_tax' );
-
 		// Clean up created products.
 		foreach ( $this->created_products as $product_id ) {
 			wp_delete_post( $product_id, true );
