@@ -141,8 +141,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
-		$this->enable_rest_api_v4_feature();
 		parent::setUp();
+		$this->enable_rest_api_v4_feature();
 		self::enable_direct_product_attribute_lookup_updates();
 
 		// Create schema instances with dependency injection.
