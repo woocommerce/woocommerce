@@ -84,13 +84,6 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		$attribute_ids_by_name = wc_get_attribute_taxonomy_ids();
-		foreach ( array_keys( $attribute_ids_by_name ) as $attribute_name ) {
-			$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
-			$taxonomy_name  = wc_attribute_taxonomy_name( $attribute_name );
-			unregister_taxonomy( $taxonomy_name );
-		}
-
 		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 		\WC_Query::reset_chosen_attributes();
 		parent::tearDown();
