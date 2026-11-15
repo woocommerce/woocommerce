@@ -5,6 +5,8 @@ import { Component } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { getBlockType } from '@wordpress/blocks';
 import { addFilter } from '@wordpress/hooks';
+import { withDispatch } from '@wordpress/data';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 
 /**
  * withDefaultAttributes HOC for editor.BlockListBlock.
@@ -17,10 +19,23 @@ const withDefaultAttributes = createHigherOrderComponent(
 			mounted = false;
 
 			componentDidMount() {
-				const { block, setAttributes } = this.props;
+				const { block, attributes, clientId, updateBlockAttributes } =
+					this.props;
 
 				if ( block.name.startsWith( 'woocommerce/' ) ) {
-					setAttributes( this.getAttributesWithDefaults() );
+					const missingDefaults = Object.fromEntries(
+						Object.entries(
+							this.getAttributesWithDefaults()
+						).filter(
+							( [ key, value ] ) =>
+								typeof attributes[ key ] === 'undefined' &&
+								typeof value !== 'undefined'
+						)
+					);
+
+					if ( Object.keys( missingDefaults ).length ) {
+						updateBlockAttributes( clientId, missingDefaults );
+					}
 				}
 			}
 
@@ -61,15 +76,20 @@ const withDefaultAttributes = createHigherOrderComponent(
 			}
 
 			render() {
+				const { updateBlockAttributes, ...props } = this.props;
+
 				return (
 					<BlockListBlock
-						{ ...this.props }
+						{ ...props }
 						attributes={ this.getAttributesWithDefaults() }
 					/>
 				);
 			}
 		}
-		return WrappedComponent;
+		return withDispatch( ( dispatch ) => ( {
+			updateBlockAttributes:
+				dispatch( blockEditorStore ).updateBlockAttributes,
+		} ) )( WrappedComponent );
 	},
 	'withDefaultAttributes'
 );
