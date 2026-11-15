@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the matching order's download permissions and reject download links for missing orders.
