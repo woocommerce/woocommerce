@@ -449,7 +449,7 @@ test( 'surfaces a failed zone save and releases the methods table', async ( {
 		.toContain( 'Your changes were not saved. Please retry.' );
 
 	// Releasing the table and clearing the busy state are what regress; Save is re-enabled
-	// here because this change set is not methods-only.
+	// here because the change set is still pending.
 	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
 	await expect( page.locator( '#submit' ) ).toBeEnabled();
 	await expect( page.locator( '#submit' ) ).not.toHaveClass( /is-busy/ );
@@ -517,13 +517,13 @@ test( 'keeps a zone edit made while an earlier save is in flight', async ( {
 
 	// Keyboard activation reaches the row links through the overlay, so prove the guard
 	// refuses the action rather than trusting the overlay.
-	const methodRow = page
+	const firstRow = page
 		.locator( '.wc-shipping-zone-method-rows tr[data-id]' )
 		.first();
-	await expect( methodRow ).toHaveAttribute( 'data-enabled', 'yes' );
-	await methodRow.locator( '.wc-shipping-zone-method-enabled a' ).focus();
+	await expect( firstRow ).toHaveAttribute( 'data-enabled', 'yes' );
+	await firstRow.locator( '.wc-shipping-zone-method-enabled a' ).focus();
 	await page.keyboard.press( 'Enter' );
-	await expect( methodRow ).toHaveAttribute( 'data-enabled', 'yes' );
+	await expect( firstRow ).toHaveAttribute( 'data-enabled', 'yes' );
 
 	// The zone fields stay editable while the table is blocked, so type again mid-request.
 	await page.getByLabel( 'Zone name' ).fill( secondName );
@@ -862,8 +862,8 @@ test( 'keeps a switched-off method off when removing an abandoned new method fai
 
 // Regression: the lock is released before the settings step opens, so a row behind it can be
 // deleted and the step then closed, leaving two removals in flight. The first to finish must
-// not unlock the table while the second is still running.
-test( 'keeps the table locked until overlapping removals have both finished', async ( {
+// not unlock the table or turn Save back on while the second is still running.
+test( 'keeps the table locked and Save off until overlapping removals have both finished', async ( {
 	page,
 	restApi,
 	zone,
@@ -876,6 +876,12 @@ test( 'keeps the table locked until overlapping removals have both finished', as
 	);
 	await openZone( page, zone.name );
 	page.on( 'dialog', ( dialog ) => dialog.accept() );
+
+	// Switch a method off so the form is dirty: Save is then what the removals must leave alone.
+	const flatRate = methodRow( page, 'Flat rate' );
+	await flatRate.locator( '.wc-shipping-zone-method-enabled a' ).click();
+	await expect( flatRate ).toHaveAttribute( 'data-enabled', 'no' );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
 
 	// Hold each response, not the request: the server handles the removals in order while the
 	// browser receives them the other way round, so the older method list lands last.
@@ -940,6 +946,7 @@ test( 'keeps the table locked until overlapping removals have both finished', as
 		page.locator( '.wc-shipping-zone-add-method' )
 	).toBeDisabled();
 	await expect( page.locator( '.blockOverlay' ).first() ).toBeVisible();
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
 
 	releases[ 0 ]();
 	await removalsHandled( 2 );
@@ -947,8 +954,11 @@ test( 'keeps the table locked until overlapping removals have both finished', as
 		page.locator( '.wc-shipping-zone-add-method' )
 	).toBeEnabled();
 	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+	// The switch is still pending, so the last removal to finish hands Save back.
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
 
-	// Both removals succeeded, so only the original method is left.
+	// Both removals succeeded, so only the original method is left, still switched off.
 	await expect( methodRow( page, 'Free shipping' ) ).toHaveCount( 0 );
 	await expect( methodRow( page, 'Flat rate' ) ).toHaveCount( 1 );
+	await expect( flatRate ).toHaveAttribute( 'data-enabled', 'no' );
 } );

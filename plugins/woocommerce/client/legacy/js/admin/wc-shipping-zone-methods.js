@@ -258,10 +258,17 @@
 					$( '.tips' ).tipTip({ 'attribute': 'data-tip', 'fadeIn': 50, 'fadeOut': 50, 'delay': 50 });
 				},
 				onSubmit: function( event ) {
+					event.preventDefault();
+
+					// Save is disabled while an operation runs, but a click queued just before that
+					// can still arrive.
+					if ( event.data.view.model.isRunning ) {
+						return;
+					}
+
 					$save_button.addClass( 'is-busy' );
 					event.data.view.block();
 					event.data.view.model.save();
-					event.preventDefault();
 				},
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
@@ -284,8 +291,9 @@
 							setRunning( model, false );
 							window.alert( data.strings.remove_method_failed );
 							shippingMethodView.unblock();
-							// The delete failed; restore Save if the form was dirty before it.
-							if ( shippingMethodView.needsUnloadConfirm ) {
+							// The delete failed; restore Save if the form was dirty before it and no
+							// other operation is still running.
+							if ( shippingMethodView.needsUnloadConfirm && ! model.isRunning ) {
 								$save_button.prop( 'disabled', false );
 							}
 						};
@@ -901,8 +909,9 @@
 								// skipped rendering it, so draw it now or the merchant cannot reach it. The
 								// delete handler's failure path must not render, as it never touched the model.
 								shippingMethodView.render();
-								// The cleanup failed; restore Save if the form was dirty before it.
-								if ( shippingMethodView.needsUnloadConfirm ) {
+								// The cleanup failed; restore Save if the form was dirty before it and no
+								// other operation is still running.
+								if ( shippingMethodView.needsUnloadConfirm && ! shippingMethod.isRunning ) {
 									$save_button.prop( 'disabled', false );
 								}
 							};
@@ -982,9 +991,10 @@
 
 			model.set( 'methods', withPendingEdits( model, response.data.methods ) );
 
+			// Save stays off while another operation runs; whichever finishes last restores it.
 			if ( _.isEmpty( model.changes ) ) {
 				view.clearUnloadConfirmation();
-			} else {
+			} else if ( ! model.isRunning ) {
 				$save_button.prop( 'disabled', false );
 			}
 			view.render();
