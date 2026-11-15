@@ -1748,13 +1748,16 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			$this->assertLessThanOrEqual( $budget, strlen( maybe_serialize( $cached ) ), 'An oversized pre-upgrade cache must be trimmed.' );
 			$this->assertArrayHasKey( 'legacy=19999', $cached, 'The newest pre-upgrade queries should remain cached.' );
 
-			$min_count = PHP_INT_MAX;
+			$min_count   = PHP_INT_MAX;
+			$first_query = null;
 			for ( $context = 0; $context < $queries; ++$context ) {
 				wc_get_related_products( $product_id, 5, array( 100000 + $context ) );
+				$first_query = $first_query ?? array_key_last( get_transient( $key ) );
 				if ( $context >= $queries / 2 ) {
 					$min_count = min( $min_count, count( get_transient( $key ) ) );
 				}
 			}
+			$this->assertArrayNotHasKey( $first_query, get_transient( $key ), 'The loop must run past the budget so its own oldest query is evicted.' );
 			$this->assertLessThanOrEqual( $budget, strlen( maybe_serialize( get_transient( $key ) ) ) );
 			$this->assertGreaterThan( 2, $min_count, 'Only the oldest queries should be evicted.' );
 			foreach ( array( 100000, 200000 ) as $exclude_start ) {
