@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent duplicate `wc_installing` database errors from being logged when upgrade requests compete for the installation lock.
