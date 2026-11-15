@@ -350,6 +350,7 @@ class CartController {
 		 * @param integer $quantity Quantity added to the cart.
 		 * @param integer $variation_id Variation ID being added to the cart.
 		 * @param array $variation Variation data.
+		 * @param array $cart_item_data Extra cart item data being added to the cart.
 		 * @return boolean
 		 */
 		$passed_validation = apply_filters(

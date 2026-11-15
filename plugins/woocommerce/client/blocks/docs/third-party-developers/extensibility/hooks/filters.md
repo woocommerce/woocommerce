@@ -427,7 +427,7 @@ apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', int $sold_i
 Filters if an item being added to the cart passed validation checks.
 
 ```php
-apply_filters( 'woocommerce_add_to_cart_validation', bool $passed_validation, int $product_id, int $quantity, int $variation_id, array $variation )
+apply_filters( 'woocommerce_add_to_cart_validation', bool $passed_validation, int $product_id, int $quantity, int $variation_id, array $variation, array $cart_item_data )
 ```
 
 
@@ -446,6 +446,7 @@ Allow 3rd parties to validate if an item can be added to the cart. This is a leg
 | $quantity | int | Quantity added to the cart. |
 | $variation_id | int | Variation ID being added to the cart. |
 | $variation | array | Variation data. |
+| $cart_item_data | array | Extra cart item data being added to the cart. |
 
 ### Returns
 
@@ -1726,7 +1727,7 @@ First instance in plugins/woocommerce/includes/admin/class-wc-admin-assets.php.
 Filters cart item data sent via the API before it is passed to the cart controller.
 
 ```php
-apply_filters( 'woocommerce_store_api_add_to_cart_data', array $add_to_cart_data )
+apply_filters( 'woocommerce_store_api_add_to_cart_data', array $add_to_cart_data, \WP_REST_Request $request )
 ```
 
 ### Description
@@ -1740,6 +1741,7 @@ CartController::add_to_cart only expects the keys id, quantity, variation, and c
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
 | $add_to_cart_data | array | An array of cart item data. |
+| $request | \WP_REST_Request | Full details about the request. |
 
 ### Returns
 
