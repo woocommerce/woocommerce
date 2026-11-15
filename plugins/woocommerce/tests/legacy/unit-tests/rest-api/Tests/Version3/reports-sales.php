@@ -8,7 +8,6 @@
 declare( strict_types=1 );
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -69,9 +68,7 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 	 * Restore HPOS state and clear report caches.
 	 */
 	public function tearDown(): void {
-		remove_all_actions( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 		OrderHelper::toggle_cot_feature_and_usage( $this->original_hpos_usage );
-		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 
 		$this->clear_sales_report_cache();
 		parent::tearDown();

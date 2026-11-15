@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -76,6 +77,14 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @var array<string, mixed>|null
 	 */
 	private $constant_overrides_at_setup = null;
+
+	/**
+	 * Whether WordPress used an external object cache at setUp(), wrapped so that WordPress's own
+	 * null (never set) can be saved too, or null until setUp() saves it.
+	 *
+	 * @var array{using: bool|null}|null
+	 */
+	private $object_cache_mode_at_setup = null;
 
 	/**
 	 * The registered block types at setUp(), by name, or null until setUp() saves them.
@@ -195,6 +204,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		$this->server_at_setup             = $_SERVER;
 		$this->constant_overrides_at_setup = Constants::$set_constants;
+		$this->object_cache_mode_at_setup  = array( 'using' => $GLOBALS['_wp_using_ext_object_cache'] ?? null );
 		$this->block_types_at_setup        = WP_Block_Type_Registry::get_instance()->get_all_registered();
 	}
 
@@ -239,6 +249,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// Each restore then finds no saved state and leaves the current one alone.
 			$this->restore_server_superglobal();
 			$this->restore_constant_overrides();
+			$this->restore_object_cache_mode();
 			$this->restore_block_type_registry();
 			$this->restore_mailer();
 
@@ -247,6 +258,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// WordPress base class that never runs setUp() on this hierarchy.
 			CodeHacker::reset_hacks();
 
+			$this->reset_analytics_reload_flag();
 			$this->clear_wc_singleton_state();
 		} finally {
 			// The parent teardown must always run: it rolls back the database
@@ -412,6 +424,19 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Put back whether WordPress uses an external object cache, as it was at setUp(). Tests switch it with
+	 * wp_using_ext_object_cache() to exercise transients in the object cache, and putting the old value
+	 * back through that function does nothing when it was null, so the switch would outlive the test.
+	 */
+	protected function restore_object_cache_mode(): void {
+		if ( null === $this->object_cache_mode_at_setup ) {
+			return;
+		}
+
+		$GLOBALS['_wp_using_ext_object_cache'] = $this->object_cache_mode_at_setup['using']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restores the value saved at setUp().
+	}
+
+	/**
 	 * Put back the block types from setUp(): unregister the ones a test added or replaced, and
 	 * register again the ones it removed. The registry is a singleton that outlives the test.
 	 */
@@ -433,6 +458,21 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 				$registry->register( $block_type );
 			}
 		}
+	}
+
+	/**
+	 * Clear the flag that makes Analytics redirect and exit() on the next settings save. Changing the
+	 * Analytics option sets it, and it is static, so a later test that saves settings would end the
+	 * PHPUnit process and every test after it would silently not run.
+	 */
+	protected function reset_analytics_reload_flag(): void {
+		Closure::bind(
+			static function (): void {
+				self::$is_updated = false;
+			},
+			null,
+			Analytics::class
+		)();
 	}
 
 	/**

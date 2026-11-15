@@ -40,7 +40,6 @@ class FilterDataCacheCapTest extends AbstractProductFiltersTest {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_product_filter_cache_max_entries' );
 		delete_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT );
 		parent::tearDown();
 	}

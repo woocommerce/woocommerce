@@ -79,13 +79,6 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 	protected static $user_id;
 
 	/**
-	 * Feature filter callback.
-	 *
-	 * @var callable
-	 */
-	private $feature_filter;
-
-	/**
 	 * Previous option values to restore after tests.
 	 *
 	 * @var array<string, mixed>
@@ -122,12 +115,12 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		// Enable the v4 REST API feature.
-		$this->feature_filter = function ( $features ) {
+		$feature_filter = function ( $features ) {
 			$features[] = 'rest-api-v4';
 			return $features;
 		};
 
-		add_filter( 'woocommerce_admin_features', $this->feature_filter );
+		add_filter( 'woocommerce_admin_features', $feature_filter );
 
 		// Enable block email editor feature.
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
@@ -179,10 +172,6 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 		unset( $this->prev_options['woocommerce_feature_block_email_editor_enabled'] );
 
 		try {
-			if ( isset( $this->feature_filter ) ) {
-				remove_filter( 'woocommerce_admin_features', $this->feature_filter );
-			}
-
 			// Restore previous option values.
 			foreach ( $this->prev_options as $key => $value ) {
 				if ( null === $value ) {
