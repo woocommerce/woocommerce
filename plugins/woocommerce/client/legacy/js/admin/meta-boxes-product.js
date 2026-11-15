@@ -440,7 +440,15 @@ jQuery( function ( $ ) {
 			$( this ).hide();
 			$wrap.find( '.sale_schedule' ).show();
 			$wrap.find( '.sale_price_dates_fields' ).hide();
-			$wrap.find( '.sale_price_dates_fields' ).find( 'input' ).val( '' ).trigger( 'change' );
+			// Only fire change for dates that had a value, so cancelling an empty schedule does not mark the variation as changed.
+			$wrap
+				.find( '.sale_price_dates_fields' )
+				.find( 'input' )
+				.filter( function () {
+					return this.value !== '';
+				} )
+				.val( '' )
+				.trigger( 'change' );
 
 			return false;
 		}
