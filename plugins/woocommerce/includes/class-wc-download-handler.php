@@ -83,6 +83,10 @@ class WC_Download_Handler {
 		$order_id = wc_get_order_id_by_order_key( $order_key );
 		$order    = wc_get_order( $order_id );
 
+		if ( ! $order_id || ! $order ) {
+			self::download_error( __( 'Invalid order.', 'woocommerce' ), '', 403 );
+		}
+
 		if ( isset( $_GET['email'] ) ) {
 			$email_address = wp_unslash( $_GET['email'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The raw value is needed so spaces can be restored to "+" below; sanitize_email() is applied before the lookup.
 		} else {
@@ -107,6 +111,7 @@ class WC_Download_Handler {
 			array(
 				'user_email'  => $user_email,
 				'order_key'   => $order_key,
+				'order_id'    => $order_id,
 				'product_id'  => $product_id,
 				'download_id' => wc_clean( preg_replace( '/\s+/', ' ', wp_unslash( $_GET['key'] ) ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The key is matched against the product's download list above and wc_clean() normalizes it before the lookup.
 				'orderby'     => 'downloads_remaining',
