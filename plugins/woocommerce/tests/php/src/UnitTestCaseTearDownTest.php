@@ -8,15 +8,16 @@ use Automattic\WooCommerce\Internal\Admin\Analytics;
 
 /**
  * Tests the state cleanup in WC_Unit_Test_Case: the WC() singleton, $_SERVER, Constants and
- * block type state that survives the parent teardown, and the attribute taxonomies the
- * rollback leaves registered.
+ * block type state that survives the parent teardown, the Analytics reload flag, and the
+ * attribute taxonomies the rollback leaves registered.
  *
  * This drives the cleanup methods directly rather than dirtying state in one test and
  * asserting it is gone in the next. A pair like that only holds under declaration order: run
  * the suite with --order-by=random or reverse and the assertion half runs first, passes
  * against state nothing has dirtied yet, and stops covering anything without ever going red.
- * The one exception stages a leftover taxonomy before parent::setUp() in the same test, so it
- * covers the setup call itself.
+ * Two tests cover the base class's own calls within a single test instead: one stages a
+ * leftover taxonomy before parent::setUp(), and one has tearDown() check the Analytics reload
+ * flag after the base teardown ran.
  */
 class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 
@@ -46,7 +47,14 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Drop the staged leftover in case setup did not.
+	 * Whether tearDown() checks that the base teardown cleared the Analytics reload flag.
+	 *
+	 * @var bool
+	 */
+	private $check_analytics_reload_flag_after_teardown = false;
+
+	/**
+	 * Drop the staged leftover in case setup did not, and run the Analytics flag check when a test asked for it.
 	 */
 	public function tearDown(): void {
 		global $wc_product_attributes;
@@ -55,6 +63,13 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 		unset( $wc_product_attributes[ self::STALE_TAXONOMY ] );
 
 		parent::tearDown();
+
+		if ( $this->check_analytics_reload_flag_after_teardown ) {
+			$flag_after_teardown = self::analytics_reload_flag();
+			// Clear it before asserting, so a failure here does not end the process at a later settings save.
+			$this->reset_analytics_reload_flag();
+			$this->assertFalse( $flag_after_teardown, 'The base teardown should clear the Analytics reload flag.' );
+		}
 	}
 
 	/**
@@ -226,16 +241,15 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The flag that makes the next settings save redirect and exit, set by changing the Analytics option, is cleared.
+	 * @testdox The base teardown clears the flag that makes the next settings save redirect and exit, set by changing the Analytics option.
 	 */
-	public function test_reset_analytics_reload_flag_clears_the_flag_an_option_change_sets(): void {
+	public function test_teardown_clears_the_analytics_reload_flag_an_option_change_sets(): void {
 		update_option( Analytics::TOGGLE_OPTION_NAME, 'yes' );
 		update_option( Analytics::TOGGLE_OPTION_NAME, 'no' );
 		$this->assertTrue( self::analytics_reload_flag(), 'Changing the Analytics option should set the flag, or this test covers nothing.' );
 
-		$this->reset_analytics_reload_flag();
-
-		$this->assertFalse( self::analytics_reload_flag(), 'The flag should be clear.' );
+		// The assertion runs in this class's tearDown(), after WC_Unit_Test_Case::tearDown().
+		$this->check_analytics_reload_flag_after_teardown = true;
 	}
 
 	/**
