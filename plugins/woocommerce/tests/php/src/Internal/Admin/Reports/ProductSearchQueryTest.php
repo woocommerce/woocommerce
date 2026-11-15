@@ -13,14 +13,6 @@ use WC_Unit_Test_Case;
 class ProductSearchQueryTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		remove_filter( 'wc_product_sku_enabled', '__return_false' );
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox Should split a comma separated string into terms.
 	 */
 	public function test_parse_terms_splits_a_comma_separated_string(): void {

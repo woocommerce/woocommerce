@@ -122,15 +122,16 @@ final class WC_Early_Exit_Guard_Listener implements TestListener {
 		}
 
 		return sprintf(
-			'PHPUnit did not finish: the PHP process ended %s. The tests after it did not run. If no fatal error is shown above, look for an exit() or die() reached by the code under test, often after a redirect, and stop the test from reaching it.',
+			'PHPUnit did not finish: the PHP process ended %s. The tests after it did not run. If no fatal error or exception message is shown above, look for an exit() or die() reached by the code under test, often after a redirect, and stop the test from reaching it.',
 			$where
 		);
 	}
 
 	/**
-	 * Report a run that ended early and fail it. A fatal error lands here too; it already shows its
-	 * own message, and this exit status replaces PHP's 255. error_get_last() cannot tell the two
-	 * apart: WordPress's fatal error handler runs first and can raise a warning that replaces it.
+	 * Report a run that ended early and fail it. A fatal error lands here too, and so does an exception
+	 * that escapes PHPUnit while a suite is running. Both already show their own message, and this exit
+	 * status replaces PHP's 255 or PHPUnit's 2. error_get_last() cannot tell a fatal error from exit():
+	 * WordPress's fatal error handler runs first and can raise a warning that replaces it.
 	 */
 	public function check_on_shutdown(): void {
 		$message = $this->early_exit_message();

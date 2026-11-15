@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G38B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-order-preview.php",
+			"before": {
+				"file": "fixtures/G38B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G38B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-order-preview.php",
+						"lines": [
+							10,
+							10
+						],
+						"anchor": "    if ( (int) $order->get_customer_id() !== get_current_user_id() ) { wp_send_json_error( array(), 403 ); return; }"
+					}
+				]
+			}
+		},
+		{
+			"id": "G38C-v3",
+			"path": "plugins/woocommerce/includes/class-wc-order-preview.php",
+			"before": {
+				"file": "fixtures/G38C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G38C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G38D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-order-preview.php",
+			"before": {
+				"file": "fixtures/G38D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G38D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G38A-v5",
+			"path": "plugins/woocommerce/includes/class-wc-order-preview.php",
+			"before": {
+				"code": "<?php\n/* Customer order-email lookup through admin-ajax. */\nadd_action( 'wp_ajax_wc_private_order_email', 'wc_private_order_email' );\nfunction wc_private_order_email() {\n    $id = isset( $_GET['order_id'] ) && is_scalar( $_GET['order_id'] ) ? absint( $_GET['order_id'] ) : 0;\n    $order = wc_get_order( $id );\n    if ( ! $order instanceof WC_Order ) { wp_send_json_error( array(), 404 ); return; }\n    if ( ! current_user_can( 'view_order', $id ) ) { wp_send_json_error( array(), 403 ); return; }\n    wp_send_json( array( 'billing_email' => $order->get_billing_email() ) );\n}\n"
+			},
+			"after": {
+				"code": "<?php\n/* Customer order-email lookup through admin-ajax. */\nadd_action( 'wp_ajax_wc_private_order_email', 'wc_private_order_email' );\nfunction wc_private_order_email() {\n    $id = isset( $_GET['order_id'] ) && is_scalar( $_GET['order_id'] ) ? absint( $_GET['order_id'] ) : 0;\n    $order = wc_get_order( $id );\n    if ( ! $order instanceof WC_Order ) { wp_send_json_error( array(), 404 ); return; }\n    if ( ! is_user_logged_in() ) { wp_send_json_error( array(), 403 ); return; }\n    wp_send_json( array( 'billing_email' => $order->get_billing_email() ) );\n}\n"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-order-preview.php",
+						"lines": [
+							8,
+							8
+						],
+						"anchor": "    if ( ! is_user_logged_in() ) { wp_send_json_error( array(), 403 ); return; }"
+					}
+				]
+			}
+		}
+	]
+}
