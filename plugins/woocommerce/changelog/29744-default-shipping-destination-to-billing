@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Follow the "Shipping destination" setting in the cart and Checkout block, and keep the customer's saved shipping address.

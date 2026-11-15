@@ -53,6 +53,16 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	private $extra_field_filters = array();
 
 	/**
+	 * @var WC_Checkout|null The checkout singleton replaced by reinstantiate_checkout(), restored on tear down.
+	 */
+	private $original_checkout_instance;
+
+	/**
+	 * @var bool Whether reinstantiate_checkout() replaced the checkout singleton in this test.
+	 */
+	private $original_checkout_instance_saved = false;
+
+	/**
 	 * @var WC_Session|null The session the test base installed, put back after a test swapped in a real handler.
 	 */
 	private $original_session;
@@ -111,6 +121,15 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		}
 
 		$this->extra_field_filters = array();
+
+		if ( $this->original_checkout_instance_saved ) {
+			$instance = new ReflectionProperty( WC_Checkout::class, 'instance' );
+			$instance->setAccessible( true );
+			$instance->setValue( null, $this->original_checkout_instance );
+
+			$this->original_checkout_instance       = null;
+			$this->original_checkout_instance_saved = false;
+		}
 
 		if ( $this->original_session ) {
 			WC()->session           = $this->original_session;
@@ -283,6 +302,50 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$reloaded_customer = new WC_Customer( $customer_id, true );
 		$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so a retry is not charged tax.' );
 		$this->assertSame( '456 Classic Road', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
+	}
+
+	/**
+	 * @testdox 'process_customer' saves "$expected_street" as the account's shipping street, with the setting on "$ship_to_destination", the posted shipping street "$posted_street" and the shipping-only gate code "$posted_gate_code".
+	 *
+	 * @testWith [ "billing", "1 Billing Street", "", "2 Shipping Avenue" ]
+	 *           [ "billing_only", "1 Billing Street", "", "2 Shipping Avenue" ]
+	 *           [ "billing", "3 Seattle Road", "", "3 Seattle Road" ]
+	 *           [ "billing", "1 Billing Street", "G-42", "1 Billing Street" ]
+	 *           [ "shipping", "1 Billing Street", "", "1 Billing Street" ]
+	 *
+	 * @param string $ship_to_destination Value of the "Shipping destination" setting.
+	 * @param string $posted_street       Posted shipping street; "1 Billing Street" is the billing copy sent while "Ship to a different address?" is unchecked.
+	 * @param string $posted_gate_code    Posted value of a shipping field with no billing counterpart; empty while the box is unchecked.
+	 * @param string $expected_street     Shipping street expected on the account afterwards.
+	 */
+	public function test_process_customer_keeps_saved_shipping_address_when_shipping_to_billing( string $ship_to_destination, string $posted_street, string $posted_gate_code, string $expected_street ): void {
+		update_option( 'woocommerce_ship_to_destination', $ship_to_destination );
+		$this->log_in_customer( self::SAVED_SHIPPING_ADDRESS );
+		$customer_id = get_current_user_id();
+
+		$billing = array(
+			'first_name' => 'John',
+			'country'    => 'US',
+			'state'      => 'CA',
+			'postcode'   => '94103',
+			'city'       => 'San Francisco',
+			'address_1'  => '1 Billing Street',
+			'address_2'  => 'Apt 1',
+		);
+		$data    = array( 'billing_email' => 'john@example.com' );
+		foreach ( $billing as $field => $value ) {
+			$data[ "billing_{$field}" ]  = $value;
+			$data[ "shipping_{$field}" ] = $value;
+		}
+		$data['shipping_address_1'] = $posted_street;
+		$data['shipping_gate_code'] = $posted_gate_code;
+		$data['shipping_method']    = array( 'flat_rate:1' );
+
+		$this->sut->process_customer( $data );
+
+		$saved_customer = new WC_Customer( $customer_id );
+		$this->assertSame( $expected_street, $saved_customer->get_shipping_address_1() );
+		$this->assertSame( '1 Billing Street', $saved_customer->get_billing_address_1(), 'The billing address should always be saved.' );
 	}
 
 	/**
@@ -1249,12 +1312,13 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function test_get_value_keeps_shipping_address_entered_in_session(): void {
 		$this->log_in_customer( self::SAVED_SHIPPING_ADDRESS );
 		// What the cart shipping calculator stores for a customer with a billing name. It clears the street lines.
+		// The name stays the billing one: the session's shipping address starts as the billing copy.
 		WC()->customer->set_shipping_location( 'US', 'WA', '98101', 'Seattle' );
 		WC()->customer->save();
 
 		$this->assertSame(
 			array(
-				'first_name' => 'Jane',
+				'first_name' => 'John',
 				'country'    => 'US',
 				'state'      => 'WA',
 				'postcode'   => '98101',
@@ -3201,5 +3265,198 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $variation->get_id(), $attributes );
 		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
 		WC()->cart->calculate_totals();
+	}
+
+	/**
+	 * @testdox 'woocommerce_ship_to_different_address_checked' is checked only when the session shipping destination differs from billing.
+	 *
+	 * @dataProvider ship_to_different_address_checked_provider
+	 *
+	 * @param array $shipping         Shipping address fields that override the billing address.
+	 * @param int   $expected_checked Expected checkbox value.
+	 */
+	public function test_ship_to_different_address_checked_follows_session_shipping_destination( array $shipping, int $expected_checked ): void {
+		$billing = array(
+			'first_name' => 'Pat',
+			'last_name'  => 'Tester',
+			'address_1'  => '60 29th Street #343',
+			'address_2'  => '',
+			'city'       => 'San Francisco',
+			'state'      => 'CA',
+			'postcode'   => '94110',
+			'country'    => 'US',
+		);
+
+		$this->reinstantiate_checkout();
+
+		WC()->customer = new WC_Customer();
+		foreach ( $billing as $field => $value ) {
+			WC()->customer->{"set_billing_{$field}"}( $value );
+		}
+		foreach ( array_merge( $billing, $shipping ) as $field => $value ) {
+			WC()->customer->{"set_shipping_{$field}"}( $value );
+		}
+
+		$this->assertSame( $expected_checked, apply_filters( 'woocommerce_ship_to_different_address_checked', 0 ) );
+	}
+
+	/**
+	 * Provides shipping address overrides and the expected "Ship to a different address?" checkbox value.
+	 *
+	 * @return array<string, array{array, int}>
+	 */
+	public static function ship_to_different_address_checked_provider(): array {
+		return array(
+			'same as billing'                    => array( array(), 0 ),
+			'only the name differs'              => array(
+				array(
+					'first_name' => 'Sam',
+					'last_name'  => 'Other',
+				),
+				0,
+			),
+			'shipping calculator destination'    => array(
+				array(
+					'address_1' => '',
+					'city'      => 'San Diego',
+					'postcode'  => '92101',
+				),
+				1,
+			),
+			'saved shipping address'             => array(
+				array(
+					'address_1' => '500 Castro Street',
+					'city'      => 'Mountain View',
+					'postcode'  => '94041',
+				),
+				1,
+			),
+			'different country, no street'       => array(
+				array(
+					'address_1' => '',
+					'city'      => '',
+					'state'     => 'ON',
+					'postcode'  => '',
+					'country'   => 'CA',
+				),
+				1,
+			),
+			'never entered, same country, state' => array(
+				array(
+					'address_1' => '',
+					'city'      => '',
+					'postcode'  => '',
+				),
+				0,
+			),
+			'calculator updated unchanged'       => array(
+				array(
+					'address_1' => '',
+				),
+				0,
+			),
+			'calculator without a city field'    => array(
+				array(
+					'address_1' => '',
+					'city'      => '',
+				),
+				0,
+			),
+			'postcode formatted differently'     => array(
+				array(
+					'address_1' => '',
+					'postcode'  => ' 94110 ',
+				),
+				0,
+			),
+		);
+	}
+
+	/**
+	 * @testdox 'woocommerce_ship_to_different_address_checked' keeps a checked default.
+	 */
+	public function test_ship_to_different_address_checked_keeps_checked_default(): void {
+		$this->assertSame( 1, $this->sut->handle_woocommerce_ship_to_different_address_checked( 1 ) );
+	}
+
+	/**
+	 * @testdox 'woocommerce_ship_to_different_address_checked' is left unchecked when the session still holds the account's saved shipping address.
+	 */
+	public function test_ship_to_different_address_checked_ignores_saved_shipping_address(): void {
+		$customer = WC_Helper_Customer::create_customer();
+		$customer->set_billing_address_1( '60 29th Street #343' );
+		$customer->set_billing_city( 'San Francisco' );
+		$customer->set_billing_postcode( '94110' );
+		$customer->set_shipping_address_1( '500 Castro Street' );
+		$customer->set_shipping_city( 'Mountain View' );
+		$customer->set_shipping_postcode( '94041' );
+		$customer->save();
+
+		$this->reinstantiate_checkout();
+
+		WC()->customer = new WC_Customer( $customer->get_id() );
+		$saved_checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
+
+		WC()->customer->set_shipping_location( 'US', WC()->customer->get_shipping_state(), '92101', 'San Diego' );
+		$session_checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
+
+		$this->assertSame( 0, $saved_checked, 'The saved shipping address should not check the box.' );
+		$this->assertSame( 1, $session_checked, 'A shipping destination chosen during the session should check the box.' );
+	}
+
+	/**
+	 * @testdox 'woocommerce_ship_to_different_address_checked' lets a priority 0 callback added before the checkout is created override the core default.
+	 */
+	public function test_ship_to_different_address_checked_lets_priority_zero_callbacks_override_it(): void {
+		add_filter( 'woocommerce_ship_to_different_address_checked', '__return_zero', 0 );
+		$this->reinstantiate_checkout();
+
+		WC()->customer = new WC_Customer();
+		WC()->customer->set_billing_city( 'San Francisco' );
+		WC()->customer->set_shipping_city( 'San Diego' );
+
+		$this->assertSame( 0, apply_filters( 'woocommerce_ship_to_different_address_checked', 0 ) );
+	}
+
+	/**
+	 * @testdox 'woocommerce_ship_to_different_address_checked' compares the saved shipping address without the customer getter filters.
+	 */
+	public function test_ship_to_different_address_checked_ignores_filtered_address_values(): void {
+		$customer = WC_Helper_Customer::create_customer();
+		$customer->set_billing_address_1( '60 29th Street #343' );
+		$customer->set_billing_city( 'San Francisco' );
+		$customer->set_billing_postcode( '94110' );
+		$customer->set_shipping_address_1( '500 Castro Street' );
+		$customer->set_shipping_city( 'Mountain View' );
+		$customer->set_shipping_postcode( '94041' );
+		$customer->save();
+
+		$format_postcode = function ( $postcode ) {
+			return $postcode . '-0000';
+		};
+		add_filter( 'woocommerce_customer_get_shipping_postcode', $format_postcode );
+		$this->reinstantiate_checkout();
+
+		WC()->customer = new WC_Customer( $customer->get_id() );
+
+		$this->assertSame( 0, apply_filters( 'woocommerce_ship_to_different_address_checked', 0 ), 'A filtered postcode should not make the saved shipping address look changed.' );
+	}
+
+	/**
+	 * Creates a fresh checkout singleton, so the hooks it registers on first instantiation are in place for this test.
+	 * The original singleton is restored on tear down.
+	 */
+	private function reinstantiate_checkout(): void {
+		$instance = new ReflectionProperty( WC_Checkout::class, 'instance' );
+		$instance->setAccessible( true );
+
+		if ( ! $this->original_checkout_instance_saved ) {
+			$this->original_checkout_instance       = $instance->getValue();
+			$this->original_checkout_instance_saved = true;
+		}
+
+		$instance->setValue( null, null );
+
+		WC_Checkout::instance();
 	}
 }

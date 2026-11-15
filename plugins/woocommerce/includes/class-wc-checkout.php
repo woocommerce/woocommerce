@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\Customers\ShippingDestination;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
@@ -132,6 +133,9 @@ class WC_Checkout {
 			// Hook in actions once.
 			add_action( 'woocommerce_checkout_billing', array( self::$instance, 'checkout_form_billing' ) );
 			add_action( 'woocommerce_checkout_shipping', array( self::$instance, 'checkout_form_shipping' ) );
+
+			// Lowest priority, so every callback from themes and extensions runs after this one, even those at priority 0.
+			add_filter( 'woocommerce_ship_to_different_address_checked', array( self::$instance, 'handle_woocommerce_ship_to_different_address_checked' ), PHP_INT_MIN );
 
 			/**
 			 * Runs once when the WC_Checkout class is first instantiated.
@@ -434,6 +438,137 @@ class WC_Checkout {
 	 */
 	public function checkout_form_shipping() {
 		wc_get_template( 'checkout/form-shipping.php', array( 'checkout' => $this ) );
+	}
+
+	/**
+	 * Handle the woocommerce_ship_to_different_address_checked filter.
+	 *
+	 * Checks "Ship to a different address?" when the shopper picked a shipping destination during the session, for example
+	 * in the cart's shipping calculator, so the checkout keeps the address and rates the cart showed.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $checked Whether the checkbox is checked, 1 or 0 by default.
+	 * @return mixed
+	 */
+	public function handle_woocommerce_ship_to_different_address_checked( $checked ) {
+		if ( $checked || ! WC()->customer instanceof WC_Customer ) {
+			return $checked;
+		}
+
+		$customer = WC()->customer;
+
+		if ( ! $this->customer_has_different_shipping_destination( $customer ) || $this->customer_shipping_matches_saved_address( $customer ) ) {
+			return $checked;
+		}
+
+		return 1;
+	}
+
+	/**
+	 * Checks whether the customer's shipping destination differs from their billing address.
+	 *
+	 * Compares unfiltered values. Names and company are ignored. When the shipping address has no street, as after using the cart's shipping
+	 * calculator, empty shipping fields are skipped, so fields the calculator hides don't count as a difference.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return bool
+	 */
+	private function customer_has_different_shipping_destination( WC_Customer $customer ): bool {
+		if ( $customer->get_shipping_country( 'edit' ) !== $customer->get_billing_country( 'edit' ) || $customer->get_shipping_state( 'edit' ) !== $customer->get_billing_state( 'edit' ) ) {
+			return true;
+		}
+
+		$is_location_only = '' === trim( (string) $customer->get_shipping_address_1( 'edit' ) );
+		$fields           = $is_location_only ? array( 'city', 'postcode' ) : array( 'address_1', 'address_2', 'city', 'postcode' );
+
+		foreach ( $fields as $field ) {
+			$shipping_value = trim( (string) $customer->{"get_shipping_{$field}"}( 'edit' ) );
+			$billing_value  = trim( (string) $customer->{"get_billing_{$field}"}( 'edit' ) );
+
+			if ( $is_location_only && '' === $shipping_value ) {
+				continue;
+			}
+
+			if ( 'postcode' === $field ) {
+				$shipping_value = wc_normalize_postcode( $shipping_value );
+				$billing_value  = wc_normalize_postcode( $billing_value );
+			}
+
+			if ( $shipping_value !== $billing_value ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks whether a logged-in customer's session shipping address is still the one saved on their account.
+	 *
+	 * That address wasn't chosen in this session, so it shouldn't override the "Shipping destination" setting. Reads the
+	 * stored user meta directly, since the session customer can't tell where its address came from.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return bool
+	 */
+	private function customer_shipping_matches_saved_address( WC_Customer $customer ): bool {
+		if ( ! $customer->get_id() ) {
+			return false;
+		}
+
+		foreach ( array( 'address_1', 'address_2', 'city', 'state', 'postcode', 'country' ) as $field ) {
+			$saved_value = (string) get_user_meta( $customer->get_id(), "shipping_{$field}", true );
+
+			if ( (string) $customer->{"get_shipping_{$field}"}( 'edit' ) !== $saved_value ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks whether saving the posted checkout data to the account should leave the saved shipping address as it is.
+	 *
+	 * With "Ship to a different address?" unchecked, the posted shipping fields hold a copy of the billing address.
+	 *
+	 * @param array       $data     Posted checkout data.
+	 * @param WC_Customer $customer The customer as saved to their account.
+	 * @return bool
+	 */
+	private function keeps_saved_shipping_address( array $data, WC_Customer $customer ): bool {
+		$billing  = array();
+		$shipping = array();
+
+		foreach ( ShippingDestination::LOCATION_FIELDS as $field ) {
+			$billing[ $field ]  = $data[ "billing_{$field}" ] ?? '';
+			$shipping[ $field ] = $data[ "shipping_{$field}" ] ?? '';
+		}
+
+		// Other shipping fields, such as names or fields added by extensions, are compared too. A shipping-only field
+		// counts as a difference when it has a value, since the order then carries details billing doesn't have.
+		foreach ( $data as $key => $value ) {
+			$key = (string) $key;
+
+			if ( 0 !== strpos( $key, 'shipping_' ) || in_array( $key, self::SHIPPING_FIELDS_EXCLUDED_FROM_META, true ) ) {
+				continue;
+			}
+
+			$field = substr( $key, 9 );
+
+			if ( isset( $shipping[ $field ] ) ) {
+				continue;
+			}
+
+			if ( array_key_exists( "billing_{$field}", $data ) ) {
+				$billing[ $field ] = $data[ "billing_{$field}" ];
+			}
+
+			$shipping[ $field ] = $value;
+		}
+
+		return wc_get_container()->get( ShippingDestination::class )->keeps_saved_shipping_address( $billing, $shipping, $customer );
 	}
 
 	/**
@@ -1733,7 +1868,13 @@ class WC_Checkout {
 				$customer->set_display_name( $customer->get_first_name() . ' ' . $customer->get_last_name() );
 			}
 
+			$keep_saved_shipping = $this->keeps_saved_shipping_address( $data, $customer );
+
 			foreach ( $data as $key => $value ) {
+				if ( $keep_saved_shipping && 0 === stripos( $key, 'shipping_' ) ) {
+					continue;
+				}
+
 				// Use setters where available.
 				if ( is_callable( array( $customer, "set_{$key}" ) ) ) {
 					$customer->{"set_{$key}"}( $value );
