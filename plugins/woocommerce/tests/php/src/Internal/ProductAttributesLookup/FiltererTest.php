@@ -84,8 +84,6 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_layered_nav_count_cache_max_entries' );
-
 		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 		\WC_Query::reset_chosen_attributes();
 		parent::tearDown();

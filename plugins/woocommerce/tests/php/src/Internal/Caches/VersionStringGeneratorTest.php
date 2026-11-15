@@ -45,7 +45,6 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->restore_object_cache();
-		remove_all_filters( 'woocommerce_version_string_generator_ttl' );
 		$this->sut = null;
 		parent::tearDown();
 	}

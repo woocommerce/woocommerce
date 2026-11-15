@@ -52,14 +52,10 @@ class WC_Email_Cancelled_Order_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up the option, hooks and deferred queue.
+	 * Clean up the option and deferred queue.
 	 */
 	public function tearDown(): void {
 		delete_option( self::OPTION_KEY );
-		remove_action( 'woocommerce_email_skipped', array( $this, 'capture_skipped' ), 10 );
-		remove_action( 'woocommerce_email_disabled', array( $this, 'capture_disabled' ) );
-		remove_all_filters( 'woocommerce_queue_class' );
-		remove_action( 'woocommerce_order_status_pending_to_cancelled', array( \WC_Emails::class, 'queue_transactional_email' ), 10 );
 		$this->set_wc_emails_deferred_queue( null );
 		$this->reset_queue_singleton();
 		parent::tearDown();
