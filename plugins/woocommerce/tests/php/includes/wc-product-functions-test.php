@@ -1721,13 +1721,14 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Related caches trim old variants and keep two large alternating queries cacheable.
-	 * @testWith [false, 8192]
-	 *           [true, 65536]
+	 * @testWith [false, 8192, 150]
+	 *           [true, 65536, 1000]
 	 *
 	 * @param bool $external_cache Whether transients use the object cache.
 	 * @param int  $budget         Cache size target.
+	 * @param int  $queries        Distinct queries to cache, enough to run past the budget (85 and 682 entries fit).
 	 */
-	public function test_related_product_cache_has_size_limit( bool $external_cache, int $budget ): void {
+	public function test_related_product_cache_has_size_limit( bool $external_cache, int $budget, int $queries ): void {
 		$product_id = $this->factory->post->create( array( 'post_type' => 'product' ) );
 		$related_id = $this->factory->post->create( array( 'post_type' => 'product' ) );
 		$category   = $this->factory->term->create( array( 'taxonomy' => 'product_cat' ) );
@@ -1748,9 +1749,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			$this->assertArrayHasKey( 'legacy=19999', $cached, 'The newest pre-upgrade queries should remain cached.' );
 
 			$min_count = PHP_INT_MAX;
-			for ( $context = 0; $context < 1000; ++$context ) {
+			for ( $context = 0; $context < $queries; ++$context ) {
 				wc_get_related_products( $product_id, 5, array( 100000 + $context ) );
-				if ( $context >= 500 ) {
+				if ( $context >= $queries / 2 ) {
 					$min_count = min( $min_count, count( get_transient( $key ) ) );
 				}
 			}
