@@ -598,7 +598,7 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 		$order_count = OrderLogsCleanupHelper::MAX_ORDERS_PER_RUN + $extra;
 
 		for ( $i = 0; $i < $order_count; $i++ ) {
-			$order = wc_create_order();
+			$order = new \WC_Order();
 			$order->set_date_created( strtotime( '-5 days' ) );
 			$order->add_meta_data( '_debug_log_source', 'place-order-debug-drain-' . $i, true );
 			$order->save();
@@ -645,7 +645,7 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 
 		// Two full batches, so the second run still has a batch left to hand over.
 		for ( $i = 0; $i < 2 * OrderLogsCleanupHelper::MAX_ORDERS_PER_RUN; $i++ ) {
-			$order = wc_create_order();
+			$order = new \WC_Order();
 			$order->set_date_created( strtotime( '-5 days' ) );
 			$order->add_meta_data( '_debug_log_source', 'place-order-debug-running-' . $i, true );
 			$order->save();
