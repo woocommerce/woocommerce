@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Admin\API\Reports\Stock\Controller as StockController;
 use Automattic\WooCommerce\Caches\ProductCountCache;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
@@ -16,6 +17,44 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
  * Tests for the internal ProductUtil class.
  */
 class ProductUtilTest extends \WC_Unit_Test_Case {
+	/**
+	 * @testdox Product cache cleanup can be scheduled when the loaded Action Scheduler lacks async actions.
+	 */
+	public function test_cleanup_supports_action_scheduler_without_async_actions(): void {
+		$previous = wp_using_ext_object_cache();
+		wp_using_ext_object_cache( true );
+		ActionSchedulerUtil::reset_cache();
+		$this->register_legacy_proxy_function_mocks(
+			array( 'function_exists' => static fn( $name ) => 'as_enqueue_async_action' !== $name && function_exists( $name ) )
+		);
+		add_filter( 'pre_as_enqueue_async_action', '__return_zero' );
+
+		try {
+			$this->assertTrue( wc_get_container()->get( ProductUtil::class )->schedule_product_transient_cleanup() );
+			$this->assertTrue( as_has_scheduled_action( 'woocommerce_delete_product_transients_batch', array( 0 ), 'woocommerce' ) );
+		} finally {
+			ActionSchedulerUtil::reset_cache();
+			wp_using_ext_object_cache( $previous );
+		}
+	}
+
+	/**
+	 * @testdox A product transient cleanup batch fails when it cannot schedule the next batch.
+	 */
+	public function test_cleanup_batch_fails_when_next_batch_cannot_be_scheduled(): void {
+		$this->factory->post->create_many( ProductUtil::TRANSIENT_CLEANUP_BATCH_SIZE, array( 'post_type' => 'product' ) );
+		$previous = wp_using_ext_object_cache();
+		wp_using_ext_object_cache( true );
+		add_filter( 'pre_as_enqueue_async_action', '__return_zero' );
+
+		try {
+			$this->expectException( \RuntimeException::class );
+			wc_get_container()->get( ProductUtil::class )->handle_woocommerce_delete_product_transients_batch( 0 );
+		} finally {
+			wp_using_ext_object_cache( $previous );
+		}
+	}
+
 	/**
 	 * @testdox get_product_id extracts IDs from the product references accepted by the factory.
 	 */

@@ -93,6 +93,8 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	 * Test clear_transients with valid product ID.
 	 */
 	public function test_clear_transients_with_valid_product() {
+		$this->setExpectedDeprecated( 'WC_Comments::clear_transients' );
+
 		$product    = WC_Helper_Product::create_simple_product();
 		$product_id = $product->get_id();
 
@@ -112,13 +114,47 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox maybe_update_product_average_rating updates review count and rating data when a new review is added.
+	 */
+	public function test_maybe_update_product_average_rating_with_valid_product(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+		$review_id  = ProductHelper::create_product_review( $product_id, 'Great product!' );
+
+		update_comment_meta( $review_id, 'rating', 5 );
+		WC_Comments::maybe_update_product_average_rating( $product_id );
+
+		$this->assertSame( 1, wc_get_product( $product_id )->get_review_count() );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox maybe_update_product_average_rating skips product save when review count has not changed.
+	 */
+	public function test_maybe_update_product_average_rating_skips_save_when_review_count_unchanged(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+		$review_id  = ProductHelper::create_product_review( $product_id, 'Great product!' );
+
+		update_comment_meta( $review_id, 'rating', 5 );
+		WC_Comments::maybe_update_product_average_rating( $product_id );
+
+		$save_count = did_action( 'woocommerce_update_product' );
+		WC_Comments::maybe_update_product_average_rating( $product_id );
+		$this->assertSame( $save_count, did_action( 'woocommerce_update_product' ), 'Product save should not fire when review count is unchanged.' );
+
+		$product->delete( true );
+	}
+
+	/**
 	 * Test clear_transients with invalid product ID.
 	 */
 	public function test_clear_transients_with_invalid_product_id() {
+		$this->setExpectedDeprecated( 'WC_Comments::clear_transients' );
+
 		$invalid_product_id = 99999;
 
-		// This should not cause any errors or exceptions.
-		$this->expectNotToPerformAssertions();
 		WC_Comments::clear_transients( $invalid_product_id );
 	}
 
@@ -126,6 +162,8 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	 * Test clear_transients with non-product post ID.
 	 */
 	public function test_clear_transients_with_non_product_post() {
+		$this->setExpectedDeprecated( 'WC_Comments::clear_transients' );
+
 		// Create a regular post (not a product).
 		$post_id = wp_insert_post(
 			array(
@@ -136,8 +174,6 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		// This should not cause any errors or exceptions.
-		$this->expectNotToPerformAssertions();
 		WC_Comments::clear_transients( $post_id );
 
 		// Clean up.
@@ -158,6 +194,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	 * @testWith ["action_log"]
 	 *           ["note"]
 	 *           ["order_note"]
+	 *           ["reaction"]
 	 *           ["webhook_delivery"]
 	 *
 	 * @param string $comment_type Comment type that should be excluded from the counts.

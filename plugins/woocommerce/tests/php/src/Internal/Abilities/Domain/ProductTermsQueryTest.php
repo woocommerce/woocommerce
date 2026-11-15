@@ -596,4 +596,126 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 
 		return $result['terms'];
 	}
+
+	/**
+	 * @testdox Should return the terms of a global attribute with their menu order and no category fields.
+	 */
+	public function test_queries_global_attribute_terms(): void {
+		$attribute = \WC_Helper_Product::create_attribute( 'Color', array( 'Red' ) );
+		update_term_meta( $attribute['term_ids'][0], 'order', 3 );
+		$ability = new Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+
+		$result = $ability->execute( array( 'taxonomy' => 'pa_color' ) );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 'Red', $result['terms'][0]['name'] );
+		$this->assertSame( 3, $result['terms'][0]['menu_order'] );
+		$this->assertArrayNotHasKey( 'parent', $result['terms'][0] );
+		$this->assertArrayNotHasKey( 'display', $result['terms'][0] );
+	}
+
+	/**
+	 * @testdox Should page through global attribute terms in the order set on the attribute, as product-attributes-query lists them.
+	 */
+	public function test_pages_global_attribute_terms_in_attribute_order(): void {
+		$attribute = \WC_Helper_Product::create_attribute( 'Test Shade', array( 'Amber', 'Bronze', 'Coral' ) );
+		foreach ( $attribute['term_ids'] as $index => $term_id ) {
+			update_term_meta( $term_id, 'order', 3 - $index );
+		}
+		$ability = new Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+
+		$first  = $ability->execute(
+			array(
+				'taxonomy' => 'pa_test-shade',
+				'per_page' => 2,
+			)
+		);
+		$second = $ability->execute(
+			array(
+				'taxonomy' => 'pa_test-shade',
+				'per_page' => 2,
+				'page'     => 2,
+			)
+		);
+		$named  = $ability->execute(
+			array(
+				'taxonomy' => 'pa_test-shade',
+				'orderby'  => 'name',
+			)
+		);
+
+		$this->assertSame( array( 'Coral', 'Bronze' ), wp_list_pluck( $first['terms'], 'name' ) );
+		$this->assertSame( array( 'Amber' ), wp_list_pluck( $second['terms'], 'name' ) );
+		$this->assertSame( array( 'Amber', 'Bronze', 'Coral' ), wp_list_pluck( $named['terms'], 'name' ), 'An explicit orderby still applies.' );
+	}
+
+	/**
+	 * @testdox Should tell a store manager that a global attribute taxonomy does not exist.
+	 */
+	public function test_refuses_unknown_global_attribute_taxonomy(): void {
+		$ability = new Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+
+		$result = $ability->execute( array( 'taxonomy' => 'pa_missing' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_product_term_taxonomy_unknown', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should refuse a taxonomy that is neither a product taxonomy nor a global attribute.
+	 */
+	public function test_refuses_other_taxonomy(): void {
+		$ability = new Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+
+		$result = $ability->execute( array( 'taxonomy' => 'category' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should return each term exactly once across pages when terms share a name, paging by $paging in $order order.
+	 * @testWith ["page", "asc"]
+	 *           ["page", "desc"]
+	 *           ["offset", "asc"]
+	 * @param string $paging Paging input.
+	 * @param string $order  Sort direction.
+	 */
+	public function test_pages_terms_with_the_same_name_once_each( string $paging, string $order ): void {
+		$ids = array();
+		for ( $i = 0; $i < 5; $i++ ) {
+			$parent = self::factory()->term->create(
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Parent ' . $i,
+				)
+			);
+			$ids[]  = self::factory()->term->create(
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Twin',
+					'parent'   => $parent,
+				)
+			);
+		}
+
+		$paged = array();
+		for ( $page = 1; $page <= 3; $page++ ) {
+			$input  = array(
+				'taxonomy' => 'product_cat',
+				'search'   => 'Twin',
+				'order'    => $order,
+				'per_page' => 2,
+			);
+			$input += 'page' === $paging ? array( 'page' => $page ) : array( 'offset' => ( $page - 1 ) * 2 );
+			$result = ProductTermsQuery::execute( $input );
+			$paged  = array_merge( $paged, array_column( $result['terms'], 'id' ) );
+		}
+
+		if ( 'desc' === $order ) {
+			rsort( $ids );
+		}
+		$this->assertSame( $ids, $paged, 'Terms with the same name should be sorted by ID in the requested direction.' );
+	}
 }

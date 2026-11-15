@@ -12,7 +12,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering
 /**
  * Tests for the CouponCode block type.
  */
-class CouponCodeTest extends \WP_UnitTestCase {
+class CouponCodeTest extends \WC_Unit_Test_Case {
 	use BlockTypeRegistryTrait;
 
 	/**

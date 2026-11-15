@@ -31,9 +31,11 @@ async function saveAndVerifyAssignments(
 		.locator( '#bulk-edit' )
 		.getByRole( 'button', { name: 'Update' } )
 		.click();
-	await expect( page.locator( '#message' ) ).toContainText(
-		'2 products updated'
-	);
+	await expect(
+		page.locator( '#message.notice', {
+			hasText: '2 products updated',
+		} )
+	).toBeVisible();
 	await page.reload();
 
 	for ( const [ index, product ] of products.entries() ) {

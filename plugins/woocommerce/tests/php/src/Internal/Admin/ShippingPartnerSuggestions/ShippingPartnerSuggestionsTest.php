@@ -82,7 +82,6 @@ class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 		ShippingPartnerSuggestionsDataSourcePoller::get_instance()->delete_specs_transient();
 		remove_all_filters( 'transient_woocommerce_admin_' . ShippingPartnerSuggestionsDataSourcePoller::ID . '_specs' );
 		update_option( 'woocommerce_default_country', 'US' );
-		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
 
 		parent::tearDown();
 	}

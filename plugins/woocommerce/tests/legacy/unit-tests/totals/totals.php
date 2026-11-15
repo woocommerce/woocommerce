@@ -120,8 +120,6 @@ class WC_Tests_Totals extends WC_Unit_Test_Case {
 		WC_Helper_Shipping::delete_simple_flat_rate();
 		remove_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_cart_fees_callback' ) );
 
-		WC()->customer->set_is_vat_exempt( false );
-
 		parent::tearDown();
 	}
 

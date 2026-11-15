@@ -84,6 +84,9 @@
 				"google": { "field": "title", "effect": "gaps" },
 				"copilot": { "field": "title", "effect": "gaps" }
 			}
+		},
+		"image_alt_text": {
+			"channels": {}
 		}
 	}
 }

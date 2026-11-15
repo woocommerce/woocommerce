@@ -84,8 +84,6 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 
 		// Remove any filters that might have been added.
 		remove_all_filters( 'woocommerce_is_checkout' );
-		remove_all_filters( 'woocommerce_is_cart' );
-		remove_all_filters( 'woocommerce_is_product' );
 
 		parent::tearDown();
 	}

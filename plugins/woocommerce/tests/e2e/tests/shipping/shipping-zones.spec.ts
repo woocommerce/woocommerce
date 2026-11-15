@@ -192,7 +192,7 @@ test( 'saves an unsaved shipping zone when adding a method', async ( {
 		await page
 			.getByRole( 'button', { name: 'Add shipping method' } )
 			.click();
-		await page.getByText( 'Flat rate' ).click();
+		await page.getByText( 'Flat rate', { exact: true } ).click();
 		const addMethodResponsePromise = page.waitForResponse( ( response ) => {
 			return response
 				.url()

@@ -11,6 +11,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\Package;
+use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 /**
  * Tests for the BlockEmailRenderer class.
@@ -417,9 +418,179 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		remove_filter( 'woocommerce_transactional_emails_for_block_editor', array( $this, 'register_fake_block_editor_email_ids' ) );
 		WCTransactionalEmailPostsManager::get_instance()->clear_caches();
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
+	}
+
+	/**
+	 * @testdox Multipart emails take their plain text part from the block email, not the legacy plain template.
+	 */
+	public function testMultipartPlainTextComesFromTheBlockEmail(): void {
+		$this->skip_if_unsupported_environment();
+
+		$alt_body = $this->send_multipart_test_email( true );
+
+		$this->assertStringContainsString( 'Test Paragraph.', $alt_body );
+		$this->assertStringContainsString( 'Order details', $alt_body );
+		$this->assertStringNotContainsString( 'Legacy plain content', $alt_body );
+	}
+
+	/**
+	 * @testdox The multipart plain text includes content added by the woocommerce_mail_content and wp_mail filters.
+	 */
+	public function testMultipartPlainTextIncludesFilteredContent(): void {
+		$this->skip_if_unsupported_environment();
+		$add_content = static function ( $content ) {
+			return str_replace( '</body>', '<p>Added by filter</p></body>', $content );
+		};
+		$add_to_mail = static function ( $atts ) {
+			$atts['message'] = str_replace( '</body>', '<p>Added by wp_mail</p></body>', $atts['message'] );
+			return $atts;
+		};
+		add_filter( 'woocommerce_mail_content', $add_content );
+		add_filter( 'wp_mail', $add_to_mail );
+
+		$alt_body = $this->send_multipart_test_email( true );
+		remove_filter( 'woocommerce_mail_content', $add_content );
+		remove_filter( 'wp_mail', $add_to_mail );
+
+		$this->assertStringContainsString( 'Added by filter', $alt_body );
+		$this->assertStringContainsString( 'Added by wp_mail', $alt_body );
+	}
+
+	/**
+	 * @testdox Multipart emails keep the legacy plain template when the block email editor is off.
+	 */
+	public function testMultipartPlainTextUsesLegacyTemplateWithoutBlockEmails(): void {
+		$alt_body = $this->send_multipart_test_email( false );
+
+		$this->assertStringContainsString( 'Legacy plain content', $alt_body );
+		$this->assertStringNotContainsString( 'Test Paragraph.', $alt_body );
+	}
+
+	/**
+	 * Send the test email as a multipart email and return its plain text part.
+	 *
+	 * @param bool $block_email_editor_enabled Whether the email uses the block email editor.
+	 */
+	private function send_multipart_test_email( bool $block_email_editor_enabled ): string {
+		$email = new class() extends \WC_Email {
+			/**
+			 * Set up the test email.
+			 */
+			public function __construct() {
+				$this->id             = 'test_email';
+				$this->template_block = 'emails/block/default-block-content.php';
+				parent::__construct();
+				$this->email_type = 'multipart';
+			}
+
+			/**
+			 * Legacy plain template content.
+			 */
+			public function get_content_plain() {
+				return 'Legacy plain content';
+			}
+
+			/**
+			 * Legacy HTML template content.
+			 */
+			public function get_content_html() {
+				return 'Legacy HTML content';
+			}
+
+			/**
+			 * Order details the block email shows.
+			 */
+			public function get_block_editor_email_template_content() {
+				return 'Order details';
+			}
+		};
+		// The feature flag is read when the email is built, so set what the constructor would.
+		$email->block_email_editor_enabled = $block_email_editor_enabled;
+		$email->personalizer               = wc_get_container()->get( TransactionalEmailPersonalizer::class );
+		$this->personalizer->set_context(
+			array(
+				'wc_email'        => $email,
+				'recipient_email' => 'customer@test.com',
+			)
+		);
+
+		reset_phpmailer_instance();
+		$email->send( 'customer@test.com', 'Test subject', $email->get_content(), '', array() );
+
+		// The plain text part is cleared after sending, so read it from the sent message.
+		$sent  = tests_retrieve_phpmailer_instance()->get_sent();
+		$parts = preg_split( '/^--b\d=_\S+\r?$/m', $sent->body );
+		foreach ( $parts as $part ) {
+			if ( false !== stripos( $part, 'Content-Type: text/plain' ) ) {
+				return quoted_printable_decode( $part );
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * @testdox Gives blocks the first valid recipient and the order's customer while rendering.
+	 */
+	public function testItPassesRecipientAndOrderCustomerToBlocks(): void {
+		$this->skip_if_unsupported_environment();
+		$customer_id          = $this->factory()->user->create();
+		$order                = wc_create_order( array( 'customer_id' => $customer_id ) );
+		$wc_mail_mock         = $this->create_test_email_mock( 'not-an-email, buyer@test.com, other@test.com' );
+		$wc_mail_mock->object = $order;
+		$seen_context         = null;
+		add_filter(
+			'woocommerce_email_editor_rendering_email_context',
+			function ( $context ) use ( &$seen_context ) {
+				$seen_context = $context;
+				return $context;
+			},
+			20
+		);
+
+		$this->block_email_renderer->maybe_render_block_email( $wc_mail_mock );
+
+		$this->assertSame( 'buyer@test.com', $seen_context['recipient_email'] ?? null );
+		$this->assertSame( $customer_id, $seen_context['user_id'] ?? null );
+	}
+
+	/**
+	 * @testdox Falls back to the classic email and removes its context filter when rendering fails.
+	 */
+	public function testItFallsBackAndCleansUpWhenRenderingFails(): void {
+		$this->skip_if_unsupported_environment();
+		$thrown = false;
+		$throw  = function () use ( &$thrown ) {
+			$thrown = true;
+			throw new \RuntimeException( 'Render failed.' );
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $throw, 20 );
+		$filters_before = count( $GLOBALS['wp_filter']['woocommerce_email_editor_rendering_email_context']->callbacks[10] ?? array() );
+
+		$rendered_email = $this->block_email_renderer->maybe_render_block_email( $this->create_test_email_mock( 'customer@test.com' ) );
+
+		$this->assertTrue( $thrown, 'The render should reach the failing filter.' );
+		$this->assertNull( $rendered_email );
+		$this->assertCount( $filters_before, $GLOBALS['wp_filter']['woocommerce_email_editor_rendering_email_context']->callbacks[10] ?? array() );
+	}
+
+	/**
+	 * Mock of the test email with the given recipient.
+	 *
+	 * @param string $recipient Recipient list.
+	 * @return \WC_Email&\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private function create_test_email_mock( string $recipient ) {
+		$wc_mail_mock     = $this->createMock( \WC_Email::class );
+		$wc_mail_mock->id = 'test_email';
+		$wc_mail_mock->method( 'get_recipient' )->willReturn( $recipient );
+		$wc_mail_mock->method( 'get_subject' )->willReturn( 'Test Woo Email' );
+		$wc_mail_mock->method( 'get_preheader' )->willReturn( 'Test Woo Preheader' );
+		$wc_mail_mock->method( 'get_content_html' )->willReturn( 'Woo content' );
+		$wc_mail_mock->method( 'get_block_editor_email_template_content' )->willReturn( 'Woo content' );
+		return $wc_mail_mock;
 	}
 
 	/**
