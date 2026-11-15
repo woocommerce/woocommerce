@@ -55,8 +55,6 @@ class WC_Tests_Base_Order_Item extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->disable_cogs_feature();
-
-		remove_all_filters( 'woocommerce_calculated_order_item_cogs_value' );
 	}
 
 	/**
