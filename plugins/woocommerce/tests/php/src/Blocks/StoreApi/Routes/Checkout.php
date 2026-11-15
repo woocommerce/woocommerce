@@ -185,13 +185,6 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 			remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 
-			remove_all_filters( 'woocommerce_get_country_locale' );
-			remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
-			remove_all_filters( 'wc_order_statuses' );
-			remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
-			remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
-			remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
-
 			update_option( 'woocommerce_ship_to_countries', 'all' );
 			update_option( 'woocommerce_allowed_countries', 'all' );
 			update_option( 'woocommerce_enable_guest_checkout', 'yes' );

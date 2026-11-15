@@ -48,11 +48,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * @var callable[] Callbacks registering extra checkout fields, all removed on tear down.
-	 */
-	private $extra_field_filters = array();
-
-	/**
 	 * @var WC_Session|null The session the test base installed, put back after a test swapped in a real handler.
 	 */
 	private $original_session;
@@ -103,14 +98,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 		delete_option( 'woocommerce_calc_taxes' );
-
-		foreach ( $this->extra_field_filters as $extra_field_filter ) {
-			remove_filter( 'woocommerce_checkout_fields', $extra_field_filter );
-		}
-
-		$this->extra_field_filters = array();
 
 		if ( $this->original_session ) {
 			WC()->session           = $this->original_session;
@@ -127,7 +115,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Register an extra checkout field in an arbitrary fieldset, the way checkout field editor plugins do.
 	 *
-	 * Can be called more than once per test: each callback is tracked and removed on tear down.
+	 * Can be called more than once per test.
 	 *
 	 * @param string $fieldset_key Fieldset the field belongs to.
 	 * @param string $key          Field key.
@@ -139,8 +127,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 			return $fields;
 		};
-
-		$this->extra_field_filters[] = $extra_field_filter;
 
 		add_filter( 'woocommerce_checkout_fields', $extra_field_filter );
 	}

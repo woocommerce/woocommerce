@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -247,6 +248,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// WordPress base class that never runs setUp() on this hierarchy.
 			CodeHacker::reset_hacks();
 
+			$this->reset_analytics_reload_flag();
 			$this->clear_wc_singleton_state();
 		} finally {
 			// The parent teardown must always run: it rolls back the database
@@ -433,6 +435,21 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 				$registry->register( $block_type );
 			}
 		}
+	}
+
+	/**
+	 * Clear the flag that makes Analytics redirect and exit() on the next settings save. Changing the
+	 * Analytics option sets it, and it is static, so a later test that saves settings would end the
+	 * PHPUnit process and every test after it would silently not run.
+	 */
+	protected function reset_analytics_reload_flag(): void {
+		Closure::bind(
+			static function (): void {
+				self::$is_updated = false;
+			},
+			null,
+			Analytics::class
+		)();
 	}
 
 	/**
