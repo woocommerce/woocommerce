@@ -148,6 +148,42 @@ class Universal_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Universal consumes Woo_Analytics_Trait, whose get_common_properties()
+	 * and get_page_common_properties() both fire
+	 * jetpack_woocommerce_analytics_event_props with three arguments. A
+	 * callback registered with accepted_args = 3 used to fatal with an
+	 * ArgumentCountError because both call sites passed only one argument;
+	 * this pins the fix and the exact values passed ('' for the event name,
+	 * since neither call builds properties for a specific event, and false
+	 * for is_client_supplied, since neither is on the proxy path).
+	 */
+	public function test_trait_filter_call_sites_pass_empty_event_name_and_false_client_flag(): void {
+		$seen     = array();
+		$callback = function ( $props, $event_name, $is_client_supplied ) use ( &$seen ) {
+			$seen[] = array( $event_name, $is_client_supplied );
+			return $props;
+		};
+		add_filter( 'jetpack_woocommerce_analytics_event_props', $callback, 10, 3 );
+
+		try {
+			$universal = new Universal();
+			$universal->get_common_properties();
+			$universal->get_page_common_properties();
+		} finally {
+			remove_filter( 'jetpack_woocommerce_analytics_event_props', $callback, 10 );
+		}
+
+		$this->assertSame(
+			array(
+				array( '', false ),
+				array( '', false ),
+			),
+			$seen,
+			'Both trait call sites must invoke the filter with an empty-string event name and a false client-supplied flag, without fataling.'
+		);
+	}
+
+	/**
 	 * Reset the WC_Analytics_Tracking::$pixel_batch_queue static so each
 	 * test starts from a known-empty state.
 	 */

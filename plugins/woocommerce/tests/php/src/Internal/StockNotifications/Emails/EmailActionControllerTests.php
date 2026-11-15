@@ -3,18 +3,22 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Emails;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailActionController;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Helper_Product;
 
 /**
  * EmailActionControllerTests tests.
  */
 class EmailActionControllerTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The System Under Test.
@@ -35,6 +39,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 
 		// Intercept redirects so headers aren't emitted, and throw so the trailing `exit;`
 		// in production code never runs during the test.
@@ -50,6 +55,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 	}
 
@@ -81,6 +87,22 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		$notification->set_user_email( 'test@example.com' );
 		$notification->update_meta_data( $meta_key, $stored_key );
 		return $notification->save();
+	}
+
+	/**
+	 * Run an email action request and assert it ends in a redirect.
+	 *
+	 * @param int    $id     Notification id.
+	 * @param string $key    Action key sent with the request.
+	 * @param string $action Email action: 'verify' or 'unsubscribe'.
+	 */
+	private function assert_request_redirects( int $id, string $key, string $action ): void {
+		try {
+			$this->sut->validate_and_maybe_process_request( $id, $key, $action );
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'wp_redirect intercepted', $e->getMessage() );
+		}
 	}
 
 	/**
@@ -146,7 +168,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 			->expects( $this->never() )
 			->method( 'send_verified_email' );
 
-		$this->sut->validate_and_maybe_process_request( $id, 'wrong-key', 'verify' );
+		$this->assert_request_redirects( $id, 'wrong-key', 'verify' );
 	}
 
 	/**
@@ -176,15 +198,18 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		}
 
 		// Second hit (double-click, email prefetch, bot) must short-circuit without re-dispatch.
-		$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+		$this->assert_request_redirects( $id, 'test', 'verify' );
 	}
 
 	/**
-	 * @testdox Should set notification status to cancelled and cancellation source to user on unsubscribe.
+	 * @testdox Should set notification status to cancelled and cancellation source to user on unsubscribe from $status.
+	 * @dataProvider provide_cancellable_statuses
+	 *
+	 * @param string $status Initial notification status.
 	 */
-	public function test_process_unsubscribe_action_sets_status_cancelled() {
+	public function test_process_unsubscribe_action_sets_status_cancelled( $status ) {
 		$id = $this->arrange_notification(
-			NotificationStatus::ACTIVE,
+			$status,
 			'unsubscribe_action_key',
 			wp_fast_hash( 'test' )
 		);
@@ -202,8 +227,68 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A verification request with a key that doesn't match the stored one must
-	 * leave the notification untouched.
+	 * Statuses an unsubscribe link can cancel.
+	 *
+	 * @return array
+	 */
+	public function provide_cancellable_statuses() {
+		return array(
+			'active'  => array( NotificationStatus::ACTIVE ),
+			'pending' => array( NotificationStatus::PENDING ),
+		);
+	}
+
+	/**
+	 * @testdox Should leave a sent notification unchanged and show a neutral notice on unsubscribe.
+	 */
+	public function test_process_unsubscribe_action_leaves_sent_notification_unchanged() {
+		$id           = $this->arrange_notification( NotificationStatus::SENT, 'unsubscribe_action_key', wp_fast_hash( 'test' ) );
+		$notification = Factory::get_notification( $id );
+		$notification->set_date_notified( time() - DAY_IN_SECONDS );
+		$notification->save();
+		$date_notified = Factory::get_notification( $id )->get_date_notified();
+
+		try {
+			$this->sut->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'wp_redirect intercepted', $e->getMessage() );
+		}
+
+		$updated = Factory::get_notification( $id );
+		$this->assertEquals( NotificationStatus::SENT, $updated->get_status() );
+		$this->assertNotNull( $date_notified );
+		$this->assertEquals( $date_notified->getTimestamp(), $updated->get_date_notified()->getTimestamp() );
+		$this->assertNull( $updated->get_date_cancelled() );
+		$this->assertSame( 1, wc_notice_count( 'notice' ) );
+		$this->assertSame( 0, wc_notice_count( 'success' ) );
+	}
+
+	/**
+	 * @testdox Should leave a cancelled notification unchanged and show a neutral notice on unsubscribe.
+	 */
+	public function test_process_unsubscribe_action_leaves_cancelled_notification_unchanged() {
+		$id           = $this->arrange_notification( NotificationStatus::CANCELLED, 'unsubscribe_action_key', wp_fast_hash( 'test' ) );
+		$notification = Factory::get_notification( $id );
+		$notification->set_cancellation_source( NotificationCancellationSource::ADMIN );
+		$notification->save();
+
+		try {
+			$this->sut->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'wp_redirect intercepted', $e->getMessage() );
+		}
+
+		$updated = Factory::get_notification( $id );
+		$this->assertEquals( NotificationStatus::CANCELLED, $updated->get_status() );
+		$this->assertEquals( NotificationCancellationSource::ADMIN, $updated->get_cancellation_source() );
+		$this->assertSame( 1, wc_notice_count( 'notice' ) );
+		$this->assertSame( 0, wc_notice_count( 'success' ) );
+	}
+
+	/**
+	 * @testdox Should show an error notice and leave the notification pending when the verification key is garbage.
 	 */
 	public function test_process_verification_action_with_invalid_key_leaves_status_pending() {
 		$id = $this->arrange_notification(
@@ -212,9 +297,137 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 			time() . ':' . wp_fast_hash( 'real-key' )
 		);
 
-		$this->sut->validate_and_maybe_process_request( $id, 'wrong-key', 'verify' );
+		$this->assert_request_redirects( $id, 'wrong-key', 'verify' );
 
 		$this->assertEquals( NotificationStatus::PENDING, Factory::get_notification( $id )->get_status() );
+		$this->assertSame( 1, wc_notice_count( 'error' ) );
+		$this->assertSame( 0, wc_notice_count( 'success' ) );
+	}
+
+	/**
+	 * @testdox Should show an error notice and leave the notification pending when the link was superseded by a resend.
+	 */
+	public function test_process_verification_action_with_superseded_key_leaves_status_pending() {
+		$id = $this->arrange_notification(
+			NotificationStatus::PENDING,
+			'verification_action_key',
+			time() . ':' . wp_fast_hash( 'first-email-key' )
+		);
+		// Resending the verification email rotates the stored key.
+		Factory::get_notification( $id )->get_verification_key( true );
+
+		$this->assert_request_redirects( $id, 'first-email-key', 'verify' );
+
+		$this->assertEquals( NotificationStatus::PENDING, Factory::get_notification( $id )->get_status() );
+		$this->assertSame( 1, wc_notice_count( 'error' ) );
+		$this->assertSame( 0, wc_notice_count( 'success' ) );
+	}
+
+	/**
+	 * @testdox Should show an error notice and leave the notification pending when the verification link has expired.
+	 */
+	public function test_process_verification_action_with_expired_key_leaves_status_pending() {
+		$id = $this->arrange_notification(
+			NotificationStatus::PENDING,
+			'verification_action_key',
+			( time() - Config::get_verification_expiration_time_threshold() - MINUTE_IN_SECONDS ) . ':' . wp_fast_hash( 'test' )
+		);
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verified_email' );
+
+		$this->assert_request_redirects( $id, 'test', 'verify' );
+
+		$this->assertEquals( NotificationStatus::PENDING, Factory::get_notification( $id )->get_status() );
+		$this->assertSame( 1, wc_notice_count( 'error' ) );
+		$this->assertSame( 0, wc_notice_count( 'success' ) );
+	}
+
+	/**
+	 * @testdox Should show a neutral notice and leave the notification unchanged when it is already verified.
+	 */
+	public function test_process_verification_action_on_already_verified_notification_leaves_it_unchanged() {
+		$id           = $this->arrange_notification( NotificationStatus::ACTIVE, 'verification_action_key', time() . ':' . wp_fast_hash( 'test' ) );
+		$notification = Factory::get_notification( $id );
+		$notification->set_date_confirmed( time() - DAY_IN_SECONDS );
+		$notification->save();
+		$date_confirmed = Factory::get_notification( $id )->get_date_confirmed();
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verified_email' );
+
+		$this->assert_request_redirects( $id, 'test', 'verify' );
+
+		$updated = Factory::get_notification( $id );
+		$this->assertEquals( NotificationStatus::ACTIVE, $updated->get_status() );
+		$this->assertNotNull( $date_confirmed );
+		$this->assertEquals( $date_confirmed->getTimestamp(), $updated->get_date_confirmed()->getTimestamp() );
+		$this->assertSame( 1, wc_notice_count( 'notice' ) );
+		$this->assertSame( 0, wc_notice_count( 'success' ) );
+		$this->assertSame( 0, wc_notice_count( 'error' ) );
+	}
+
+	/**
+	 * @testdox Should report an already-verified sign-up as verified even after its verification link has expired.
+	 */
+	public function test_process_verification_action_on_already_verified_notification_with_expired_key_reports_verified() {
+		$id = $this->arrange_notification(
+			NotificationStatus::ACTIVE,
+			'verification_action_key',
+			( time() - Config::get_verification_expiration_time_threshold() - MINUTE_IN_SECONDS ) . ':' . wp_fast_hash( 'test' )
+		);
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verified_email' );
+
+		$this->assert_request_redirects( $id, 'test', 'verify' );
+
+		$this->assertEquals( NotificationStatus::ACTIVE, Factory::get_notification( $id )->get_status() );
+		$this->assertSame( 1, wc_notice_count( 'notice' ) );
+		$this->assertSame( 0, wc_notice_count( 'error' ) );
+	}
+
+	/**
+	 * @testdox Should show a generic error notice when the $action link points at a notification that no longer exists.
+	 * @dataProvider provider_email_actions
+	 *
+	 * @param string $action Email action: 'verify' or 'unsubscribe'.
+	 */
+	public function test_process_action_with_missing_notification_shows_error_notice( string $action ) {
+		$this->assert_request_redirects( PHP_INT_MAX, 'any-key', $action );
+
+		$this->assertSame( 1, wc_notice_count( 'error' ) );
+		$this->assertSame( 0, wc_notice_count( 'success' ) );
+	}
+
+	/**
+	 * Email actions that reach the shopper via a link.
+	 *
+	 * @return array[]
+	 */
+	public function provider_email_actions(): array {
+		return array(
+			array( 'verify' ),
+			array( 'unsubscribe' ),
+		);
+	}
+
+	/**
+	 * @testdox Should show an error notice and leave the notification unchanged when the unsubscribe key is garbage.
+	 */
+	public function test_process_unsubscribe_action_with_invalid_key_leaves_notification_unchanged() {
+		$id = $this->arrange_notification( NotificationStatus::ACTIVE, 'unsubscribe_action_key', wp_fast_hash( 'real-key' ) );
+
+		$this->assert_request_redirects( $id, 'wrong-key', 'unsubscribe' );
+
+		$updated = Factory::get_notification( $id );
+		$this->assertEquals( NotificationStatus::ACTIVE, $updated->get_status() );
+		$this->assertNull( $updated->get_date_cancelled() );
+		$this->assertSame( 1, wc_notice_count( 'error' ) );
+		$this->assertSame( 0, wc_notice_count( 'success' ) );
 	}
 
 	/**
@@ -230,7 +443,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 			time() . ':' . wp_fast_hash( 'test' )
 		);
 
-		$this->sut->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
+		$this->assert_request_redirects( $id, 'test', 'unsubscribe' );
 
 		$this->assertEquals( NotificationStatus::ACTIVE, Factory::get_notification( $id )->get_status() );
 	}

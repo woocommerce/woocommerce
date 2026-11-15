@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use a direct filesystem instance for log, import, product feed, and transient file operations inside the uploads directory, so they no longer fail on sites that have FS_METHOD set to an FTP-based method without complete credentials.

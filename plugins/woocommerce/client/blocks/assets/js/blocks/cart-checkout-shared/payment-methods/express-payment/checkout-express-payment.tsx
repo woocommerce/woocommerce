@@ -128,6 +128,7 @@ const CheckoutExpressPayment = () => {
 								) }
 							/>
 						) : (
+							// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
 							__( ' Express Checkout', 'woocommerce' )
 						) }
 					</h2>

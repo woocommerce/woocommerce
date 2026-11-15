@@ -226,6 +226,36 @@ class ItemEligibility {
 	}
 
 	/**
+	 * Collapse line items to one per (product, variation) review slot.
+	 *
+	 * Reviews are stored per product/variation, but an order can carry the same
+	 * product on several line items (add-ons, gift cards, bookings). Keep the
+	 * first line item for each slot so the page renders one row per review
+	 * instead of duplicate rows that all resolve to the same comment.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array<int|string, mixed> $items Order line items.
+	 * @return array<int, WC_Order_Item_Product> One line item per review slot.
+	 */
+	public static function unique_slot_items( array $items ): array {
+		$seen   = array();
+		$unique = array();
+		foreach ( $items as $item ) {
+			if ( ! $item instanceof WC_Order_Item_Product ) {
+				continue;
+			}
+			$slot = $item->get_product_id() . '|' . $item->get_variation_id();
+			if ( isset( $seen[ $slot ] ) ) {
+				continue;
+			}
+			$seen[ $slot ] = true;
+			$unique[]      = $item;
+		}
+		return $unique;
+	}
+
+	/**
 	 * Reset the per-request cache. Test helper.
 	 *
 	 * @since 10.8.0

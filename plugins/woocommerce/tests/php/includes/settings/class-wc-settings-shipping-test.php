@@ -69,16 +69,27 @@ class WC_Settings_Shipping_Test extends WC_Settings_Unit_Test_Case {
 		$sut->method( 'get_shipping_methods' )->willReturn( $methods );
 		$sut->method( 'wc_is_installing' )->willReturn( false );
 
-		$sections = $sut->get_sections();
+		$previous_fulfillments_enabled = get_option( 'woocommerce_feature_fulfillments_enabled', null );
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
 
-		$expected = array(
-			''            => 'Shipping zones',
-			'options'     => 'Shipping settings',
-			'classes'     => 'Classes',
-			'method_1_id' => 'Method_1_id',
-			'method_2_id' => 'method_2_title',
-		);
-		$this->assertEquals( $expected, $sections );
+		try {
+			$sections = $sut->get_sections();
+
+			$expected = array(
+				''            => 'Shipping zones',
+				'options'     => 'Shipping settings',
+				'classes'     => 'Classes',
+				'method_1_id' => 'Method_1_id',
+				'method_2_id' => 'method_2_title',
+			);
+			$this->assertEquals( $expected, $sections );
+		} finally {
+			if ( null === $previous_fulfillments_enabled ) {
+				delete_option( 'woocommerce_feature_fulfillments_enabled' );
+			} else {
+				update_option( 'woocommerce_feature_fulfillments_enabled', $previous_fulfillments_enabled );
+			}
+		}
 	}
 
 	/**

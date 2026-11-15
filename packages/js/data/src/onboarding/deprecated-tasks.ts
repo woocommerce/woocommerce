@@ -78,7 +78,7 @@ export class DeprecatedTasks {
 						is_dismissable: task.isDismissable,
 						is_complete: task.completed,
 					} ) ),
-			  }
+				}
 			: null;
 	}
 

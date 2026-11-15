@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Remove unused async product editor category field feature flag and deprecate its AJAX callback.

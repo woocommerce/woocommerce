@@ -1,6 +1,11 @@
 {
-    "position": 1,
+    "position": 3,
     "label": "Payments",
     "collapsible": true,
-    "collapsed": true
+    "collapsed": true,
+    "link": {
+        "type": "generated-index",
+        "title": "Payments",
+        "slug": "/features/payments"
+    }
 }

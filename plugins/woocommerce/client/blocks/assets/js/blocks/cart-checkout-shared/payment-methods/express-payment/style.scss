@@ -41,6 +41,21 @@ $border-width: 1px;
 				width: 100%;
 				height: 48px;
 			}
+
+			// Inline error shown in the editor in place of a broken button. It inherits the item's min-height, which is
+			// set to the button height, and uses a fixed font size because the cart sets the item's font size to 0.
+			> .wc-block-components-notice-banner {
+				@include font-small-locked;
+				align-items: center;
+				box-sizing: border-box;
+				margin: 0;
+				min-height: inherit;
+				padding-block: 0 !important;
+
+				> svg {
+					height: 24px;
+				}
+			}
 		}
 	}
 }

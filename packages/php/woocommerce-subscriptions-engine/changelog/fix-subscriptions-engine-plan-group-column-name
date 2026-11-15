@@ -1,4 +1,0 @@
-Significance: major
-Type: dev
-
-Rename app_id column to extension slug for plan groups

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore translated titles and descriptions for product, Cart, and Checkout blocks in the editor.

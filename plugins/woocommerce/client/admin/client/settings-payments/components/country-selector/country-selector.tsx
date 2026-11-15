@@ -81,7 +81,7 @@ export const CountrySelector = < ItemType extends Item >( {
 
 	const visibleItems =
 		searchText !== ''
-			? throttledApplySearchToItems( searchText, items ) ?? new Set()
+			? ( throttledApplySearchToItems( searchText, items ) ?? new Set() )
 			: new Set( items );
 
 	const {
@@ -128,7 +128,7 @@ export const CountrySelector = < ItemType extends Item >( {
 												currentSelectedItem
 											) + 1,
 											currentItems.length - 1
-									  )
+										)
 									: 0
 							],
 						isOpen: true, // Keep menu open after selection.
@@ -145,7 +145,7 @@ export const CountrySelector = < ItemType extends Item >( {
 												currentSelectedItem
 											) - 1,
 											0
-									  )
+										)
 									: currentItems.length - 1
 							],
 						isOpen: true, // Keep menu open after selection.
@@ -429,9 +429,9 @@ export const CountrySelector = < ItemType extends Item >( {
 													keyboardHighlightIndex !==
 													null
 														? index ===
-														  keyboardHighlightIndex
+															keyboardHighlightIndex
 														: index ===
-														  highlightedIndex,
+															highlightedIndex,
 											}
 										),
 										'data-index': index,

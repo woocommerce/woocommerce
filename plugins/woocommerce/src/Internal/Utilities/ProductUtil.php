@@ -11,6 +11,217 @@ use Automattic\WooCommerce\Caches\ProductCountCache;
  */
 class ProductUtil {
 	/**
+	 * Get the default catalog quantity without changing a filtered add-to-cart URL.
+	 *
+	 * @since 11.4.0
+	 * @param \WC_Product $product Product to render.
+	 * @param string|null $url Filtered URL, if already available.
+	 * @return int|float
+	 */
+	public function get_catalog_add_to_cart_quantity( \WC_Product $product, ?string $url = null ) {
+		if ( $product->is_sold_individually() ) {
+			return 1;
+		}
+
+		$url = $url ?? $product->add_to_cart_url();
+		parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+		if ( ( $query['add-to-cart'] ?? null ) === (string) $product->get_id() && is_numeric( $query['quantity'] ?? null ) ) {
+			$quantity = wc_stock_amount( (float) $query['quantity'] );
+			if ( $quantity > 0 ) {
+				return $quantity;
+			}
+		}
+
+		return max( 1, $product->get_min_purchase_quantity() );
+	}
+
+	/**
+	 * Get catalog button data, using the filtered URL quantity unless explicitly overridden.
+	 *
+	 * @since 11.4.0
+	 * @param \WC_Product $product Product to render.
+	 * @param mixed       $quantity Explicit button quantity, or null to resolve the default from the URL and product minimum.
+	 * @return array{url: string, text: string, description: string, original_description: string, quantity: mixed}
+	 */
+	public function get_catalog_add_to_cart_button_data( \WC_Product $product, $quantity = null ): array {
+		$description = $product->add_to_cart_description();
+		$data        = array(
+			'url'                  => $product->add_to_cart_url(),
+			'text'                 => $product->add_to_cart_text(),
+			'description'          => $description,
+			'original_description' => $description,
+		);
+
+		$quantity         = $quantity ?? $this->get_catalog_add_to_cart_quantity( $product, $data['url'] );
+		$data['quantity'] = $quantity;
+
+		if ( ! $product instanceof \WC_Product_Simple || ! $product->is_purchasable() || ! $product->is_in_stock() || ! is_numeric( $quantity ) || $quantity <= 0 ) {
+			return $data;
+		}
+
+		$quantity = wc_stock_amount( (float) $quantity );
+		parse_str( (string) wp_parse_url( $data['url'], PHP_URL_QUERY ), $query );
+		if ( ( $query['add-to-cart'] ?? null ) === (string) $product->get_id() ) {
+			$url_quantity = $query['quantity'] ?? null;
+			if ( ! is_numeric( $url_quantity ) || wc_stock_amount( (float) $url_quantity ) !== $quantity ) {
+				$data['url'] = add_query_arg( 'quantity', $quantity, $data['url'] );
+			}
+		}
+		$data['quantity'] = $quantity;
+
+		if ( $quantity > 1 ) {
+			if ( __( 'Add to cart', 'woocommerce' ) === $data['text'] ) {
+				/* translators: %s: Quantity of the product to add to the cart. */
+				$data['text'] = sprintf( __( 'Add %s to cart', 'woocommerce' ), $quantity );
+			}
+			/* translators: %s: Product title. */
+			if ( sprintf( __( 'Add to cart: &ldquo;%s&rdquo;', 'woocommerce' ), $product->get_name() ) === $description ) {
+				/* translators: 1: Quantity of the product to add to the cart, 2: Product title. */
+				$data['description'] = sprintf( __( 'Add %1$s to cart: &ldquo;%2$s&rdquo;', 'woocommerce' ), $quantity, $product->get_name() );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Transient name for the cached dashboard "out of stock" product count.
+	 *
+	 * Exposed as a constant so the one-time DB update that clears this transient
+	 * (wc_update_1110_delete_dashboard_outofstock_count_transient) stays in sync
+	 * with the runtime invalidation list below.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @var string
+	 */
+	public const OUTOFSTOCK_COUNT_TRANSIENT = 'wc_outofstock_count';
+
+	/**
+	 * Name prefixes of the transients kept for each product, followed by the product ID.
+	 *
+	 * Exposed as a constant so the "Clear transients" tool, which deletes these transients for
+	 * every product, stays in sync with the per-product invalidation below.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @var string[]
+	 */
+	public const PRODUCT_SPECIFIC_TRANSIENT_PREFIXES = array(
+		'wc_product_children_',
+		'wc_var_prices_',
+		'wc_related_',
+		'wc_child_has_weight_',
+		'wc_child_has_dimensions_',
+	);
+
+	/**
+	 * Number of products whose persistent transients are deleted per scheduled cleanup batch.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @var int
+	 */
+	public const TRANSIENT_CLEANUP_BATCH_SIZE = 500;
+
+	/**
+	 * Register hooks.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 */
+	public function register(): void {
+		add_action( 'woocommerce_delete_product_transients_batch', array( $this, 'handle_woocommerce_delete_product_transients_batch' ) );
+	}
+
+	/**
+	 * Schedule cleanup of existing products' persistent transients for the current site.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int $last_id Last product ID processed, or zero to start cleanup.
+	 * @return bool False if cleanup could not be scheduled.
+	 */
+	public function schedule_product_transient_cleanup( int $last_id = 0 ): bool {
+		if ( ! wp_using_ext_object_cache() ) {
+			return true;
+		}
+
+		// A new cleanup replaces any queued one instead of running alongside it.
+		if ( 0 === $last_id ) {
+			as_unschedule_all_actions( 'woocommerce_delete_product_transients_batch' );
+		}
+
+		return (bool) ActionSchedulerUtil::enqueue_async( 'woocommerce_delete_product_transients_batch', array( $last_id ), 'woocommerce' );
+	}
+
+	/**
+	 * Delete one batch of persistent product transients, bypassing per-transient deletion actions.
+	 * The scheduled action retains the last processed ID for the next batch.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @param mixed $last_id Last product ID processed.
+	 * @return void
+	 * @throws \RuntimeException If the batch cannot be read or continued.
+	 */
+	public function handle_woocommerce_delete_product_transients_batch( $last_id ): void {
+		if ( ! wp_using_ext_object_cache() ) {
+			return;
+		}
+
+		global $wpdb;
+		$products = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT ID, post_type FROM {$wpdb->posts} WHERE post_type IN ('product', 'product_variation') AND ID > %d ORDER BY ID LIMIT %d",
+				absint( $last_id ),
+				self::TRANSIENT_CLEANUP_BATCH_SIZE
+			)
+		);
+		if ( $wpdb->last_error ) {
+			throw new \RuntimeException( 'Unable to read products for transient cleanup.' );
+		}
+
+		$keys = array();
+		foreach ( $products as $product ) {
+			$prefixes = 'product_variation' === $product->post_type ? array( 'wc_related_' ) : self::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES;
+			foreach ( $prefixes as $prefix ) {
+				$keys[] = $prefix . $product->ID;
+			}
+			$last_id = (int) $product->ID;
+		}
+
+		if ( $keys ) {
+			wp_cache_delete_multiple( $keys, 'transient' );
+		}
+		if ( self::TRANSIENT_CLEANUP_BATCH_SIZE === count( $products ) && ! $this->schedule_product_transient_cleanup( $last_id ) ) {
+			throw new \RuntimeException( 'Unable to schedule the next product transient cleanup batch.' );
+		}
+	}
+
+	/**
+	 * Get a product ID from a product, post, or numeric value.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed $product Product instance, post instance, or numeric ID.
+	 * @return int Product ID, or 0 when no ID is available.
+	 */
+	public function get_product_id( $product ): int {
+		if ( is_numeric( $product ) ) {
+			return (int) $product;
+		} elseif ( $product instanceof \WC_Product ) {
+			return (int) $product->get_id();
+		} elseif ( is_object( $product ) && ! empty( $product->ID ) ) {
+			return (int) $product->ID;
+		} else {
+			return 0;
+		}
+	}
+
+	/**
 	 * Delete all product transients for a set of products.
 	 *
 	 * Fixed-name transients are deleted once for the whole set, and the
@@ -26,7 +237,7 @@ class ProductUtil {
 		$transients_to_clear = array(
 			'wc_products_onsale',
 			'wc_featured_products',
-			'wc_outofstock_count',
+			self::OUTOFSTOCK_COUNT_TRANSIENT,
 			'wc_low_stock_count',
 		);
 
@@ -41,6 +252,7 @@ class ProductUtil {
 
 		// Kept for compatibility, WooCommerce core doesn't use product transient versions anymore.
 		\WC_Cache_Helper::get_transient_version( 'product', true );
+		\WC_Cache_Helper::get_transient_version( 'product_query', true );
 
 		foreach ( $product_ids as $product_id ) {
 			/**
@@ -58,7 +270,7 @@ class ProductUtil {
 	 * Delete the transients related to a specific product.
 	 * If the product is a variation, delete the transients for the parent too.
 	 *
-	 * @param WC_Product|int $product_or_id The product or the product id.
+	 * @param \WC_Product|int $product_or_id The product or the product id.
 	 * @return void
 	 */
 	public function delete_product_specific_transients( $product_or_id ) {
@@ -97,16 +309,8 @@ class ProductUtil {
 
 		$product_ids = array_unique( array_filter( array_map( 'absint', $product_ids ) ) );
 
-		$product_specific_transient_names = array(
-			'wc_product_children_',
-			'wc_var_prices_',
-			'wc_related_',
-			'wc_child_has_weight_',
-			'wc_child_has_dimensions_',
-		);
-
 		foreach ( $product_ids as $product_id ) {
-			foreach ( $product_specific_transient_names as $transient ) {
+			foreach ( self::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES as $transient ) {
 				delete_transient( $transient . $product_id );
 			}
 		}
@@ -131,24 +335,50 @@ class ProductUtil {
 	}
 
 	/**
+	 * Append the product meta lookup join unless the clause mentions wc_product_meta_lookup as a standalone token.
+	 * References, SQL literals and comments also count as mentions; this is not an SQL parser.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed $join SQL JOIN clause supplied by query filters.
+	 * @return string
+	 */
+	public function append_product_sorting_table_join( $join ): string {
+		global $wpdb;
+
+		// Preserve stringable clauses: discarding a join can break a WHERE clause that still references it.
+		if ( ! is_string( $join ) ) {
+			$stringable = is_object( $join ) && method_exists( $join, '__toString' );
+			$join       = $stringable ? (string) $join : '';
+		}
+
+		// A non-empty wpdb prefix prevents a table-name match. Empty prefixes retain the old guard's limitation.
+		if ( ! preg_match( '/\bwc_product_meta_lookup\b/', $join ) ) {
+			$join .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
+		}
+		return $join;
+	}
+
+	/**
 	 * Counts per-status number of products of a given post type.
 	 *
 	 * @since 11.0.0
 	 *
 	 * @param string $post_type Post type (e.g. 'product', 'product_variation').
-	 * @return array<string,int>
+	 * @return array<string|int,int>
 	 */
 	public function get_counts_for_type( string $post_type ): array {
 		$product_count_cache = wc_get_container()->get( ProductCountCache::class );
 		$count_per_status    = $product_count_cache->get( $post_type );
 
 		if ( null === $count_per_status ) {
-			$count_per_status = array_merge(
-				array_fill_keys( array_keys( get_post_stati() ), 0 ),
-				(array) wp_count_posts( $post_type )
-			);
-
-			$product_count_cache->set_multiple( $post_type, $count_per_status );
+			// Defensive perimeter: dirty product data (running/crushed product data import/migration/mocking utilities).
+			// We passed on adding wc_doing_it_wrong as it'll add asymmetric friction to already running customers fleet.
+			// Enforce strict typing to prevent PHP from silently casting numeric-string array keys to integers, and to normalize inconsistent types from WordPress APIs.
+			$count_per_status = (array) wp_count_posts( $post_type ) + array_fill_keys( array_keys( get_post_stati() ), 0 );
+			foreach ( $count_per_status as $status => $count ) {
+				$product_count_cache->set( $post_type, (string) $status, (int) $count );
+			}
 		}
 
 		return array_map( 'intval', $count_per_status );

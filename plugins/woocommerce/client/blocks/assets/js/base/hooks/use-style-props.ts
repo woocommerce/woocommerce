@@ -40,7 +40,7 @@ const parseStyleAttributes = ( rawProps: BlockAttributes ): StyleAttributes => {
 		? rawProps
 		: {
 				style: {},
-		  };
+			};
 
 	let style = props.style;
 

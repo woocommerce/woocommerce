@@ -153,7 +153,9 @@ const { state } = store< Store >(
 						: getStoreNoticeContext()?.notice?.id;
 
 				// If noticeId is not found (e.g., context was null), do nothing.
-				if ( ! resolvedId ) return;
+				if ( ! resolvedId ) {
+					return;
+				}
 
 				const index = notices.findIndex(
 					( { id } ) => id === resolvedId

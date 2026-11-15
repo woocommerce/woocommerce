@@ -25,6 +25,7 @@ import { CurrencyContext } from '@woocommerce/currency';
 import './style.scss';
 import { getIndicatorData, getIndicatorValues } from './utils';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { PerformanceMetricsTour } from '~/guided-tours/performance-metrics-tour';
 
 const { performanceIndicators: indicators } = getAdminSetting(
 	'dataEndpoints',
@@ -34,6 +35,16 @@ const { performanceIndicators: indicators } = getAdminSetting(
 );
 
 class StorePerformance extends Component {
+	constructor( props ) {
+		super( props );
+		this.state = { hasOpenedMenu: false };
+		this.onToggleMenu = this.onToggleMenu.bind( this );
+	}
+
+	onToggleMenu() {
+		this.setState( { hasOpenedMenu: true } );
+	}
+
 	renderMenu() {
 		const {
 			hiddenBlocks,
@@ -50,6 +61,8 @@ class StorePerformance extends Component {
 
 		return (
 			<EllipsisMenu
+				className="woocommerce-dashboard__performance-menu"
+				onToggle={ this.onToggleMenu }
 				label={ __(
 					'Choose which analytics to display and the section name',
 					'woocommerce'
@@ -186,6 +199,9 @@ class StorePerformance extends Component {
 						{ this.renderList() }
 					</div>
 				) }
+				<PerformanceMetricsTour
+					hasOpenedMenu={ this.state.hasOpenedMenu }
+				/>
 			</Fragment>
 		);
 	}

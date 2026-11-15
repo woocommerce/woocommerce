@@ -34,7 +34,7 @@ const attributes = {
 		perPage: 5,
 		pages: 1,
 	},
-	hideControls: [ CoreFilterNames.FEATURED, CoreFilterNames.FILTERABLE ],
+	hideControls: [ CoreFilterNames.FEATURED ],
 };
 
 const heading: InnerBlockTemplate = [

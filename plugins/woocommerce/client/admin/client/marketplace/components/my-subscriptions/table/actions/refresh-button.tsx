@@ -10,10 +10,15 @@ import { useContext, useState } from '@wordpress/element';
  */
 import RefreshIcon from '../../../../assets/images/refresh.svg';
 import { SubscriptionsContext } from '../../../../contexts/subscriptions-context';
-import { addNotice, removeNotice } from '../../../../utils/functions';
-import { NoticeStatus } from '../../../../contexts/types';
-
-const NOTICE_ID = 'woocommerce-marketplace-refresh-subscriptions';
+import {
+	addNotice,
+	getRefreshErrorMessage,
+	removeNotice,
+} from '../../../../utils/functions';
+import {
+	NoticeStatus,
+	REFRESH_SUBSCRIPTIONS_NOTICE_ID as NOTICE_ID,
+} from '../../../../contexts/types';
 
 export function RefreshButton() {
 	const { refreshSubscriptions } = useContext( SubscriptionsContext );
@@ -44,7 +49,7 @@ export function RefreshButton() {
 							'Error refreshing subscriptions: %s',
 							'woocommerce'
 						),
-						error.data.message
+						getRefreshErrorMessage( error )
 					),
 					NoticeStatus.Error
 				);

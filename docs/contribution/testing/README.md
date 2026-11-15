@@ -22,6 +22,10 @@ If you have questions about testing, reach out to the developer community in our
 
 [API tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e/tests/api-tests) are part of the Playwright suite and use the same `wp-env` test environment as end-to-end tests.
 
+## PHP version coverage
+
+Use the [PHP version guidelines](/docs/contribution/testing/php-version-coverage/) to understand how to choose representative, minimum, and latest PHP versions, and where each belongs in E2E and PHP unit testing.
+
 ## Testing instructions
 
 When opening a pull request, use the [testing instructions guide](/docs/contribution/testing/writing-high-quality-testing-instructions/) to write clear steps that cover the behavior changed in the PR.

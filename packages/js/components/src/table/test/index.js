@@ -64,7 +64,7 @@ describe( 'TableCard', () => {
 		);
 	} );
 
-	it( 'should not error with default callback props', () => {
+	it( 'should not error with default callback props', async () => {
 		render(
 			<TableCard
 				title="Revenue"
@@ -78,12 +78,12 @@ describe( 'TableCard', () => {
 		);
 
 		// Trigger a query change (next page).
-		userEvent.click(
+		await userEvent.click(
 			screen.getByLabelText( 'Next Page', { selector: 'button' } )
 		);
 
 		// Trigger a column change.
-		userEvent.click(
+		await userEvent.click(
 			screen.getByTitle( 'Choose which values to display', {
 				selector: 'button',
 			} )

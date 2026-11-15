@@ -41,6 +41,8 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		$features            = $features_controller->get_features( true );
 		$features_controller->change_feature_enable( self::DESTROY_EMPTY_SESSION_FEATURE, ! empty( $features[ self::DESTROY_EMPTY_SESSION_FEATURE ]['enabled_by_default'] ) );
 
+		unset( $_COOKIE[ $this->get_session_cookie_name() ] );
+
 		parent::tearDown();
 	}
 
@@ -513,6 +515,18 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 
 		// Verify the DB and cache cleanup results.
 		$this->assertSame( array( array( 'customer' ) ), $wpdb->get_results( $wpdb->prepare( "SELECT session_key FROM %i WHERE session_key IN ('guest', 'customer')", "{$wpdb->prefix}woocommerce_sessions" ), ARRAY_N ) );
+	}
+
+	/**
+	 * Helper function to read the cookie name used by the handler under test.
+	 *
+	 * @return string
+	 */
+	protected function get_session_cookie_name(): string {
+		$cookie_property = ( new ReflectionClass( $this->handler ) )->getProperty( '_cookie' );
+		$cookie_property->setAccessible( true );
+
+		return (string) $cookie_property->getValue( $this->handler );
 	}
 
 	/**

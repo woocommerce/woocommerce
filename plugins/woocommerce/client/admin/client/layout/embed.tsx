@@ -72,7 +72,7 @@ export const EmbedLayout = compose(
 	getAdminSetting( 'preloadOptions' )
 		? withOptionsHydration( {
 				...getAdminSetting( 'preloadOptions' ),
-		  } )
+			} )
 		: identity,
 	withPluginsHydration( {
 		...getAdminSetting( 'plugins', {} ),

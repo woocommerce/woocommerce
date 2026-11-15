@@ -3,8 +3,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\Query as CustomersQuery;
 use Automattic\WooCommerce\Admin\Overrides\Order as AdminOrder;
+use Automattic\WooCommerce\Internal\Admin\Settings;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
@@ -44,29 +46,72 @@ class CustomerHistory {
 	/**
 	 * Get the order history for the customer.
 	 *
+	 * Totals are also returned per order currency, because amounts in different
+	 * currencies cannot be added together. `total_spend` and `avg_order_value` still
+	 * cover every order whatever its currency, so template overrides that read only
+	 * those keep receiving the same values.
+	 *
 	 * @param WC_Order $order The order object.
 	 *
-	 * @return array{orders_count: int, total_spend: float, avg_order_value: float, tooltip: string} Order count, total spend, average order value, and tooltip text.
+	 * @return array{orders_count: int, total_spend: float, avg_order_value: float, tooltip: string, totals_per_currency: array<string, float>, counts_per_currency: array<string, int>, averages_per_currency: array<string, float>} Order count, total spend, average order value, tooltip text, and the totals, order counts and averages per currency.
 	 */
 	private function get_customer_history( WC_Order $order ): array {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$customer_id   = $order->get_customer_id();
 			$billing_email = $order->get_billing_email();
-			$result        = $this->query_hpos( $customer_id, $billing_email );
+			$rows          = $this->query_hpos( $customer_id, $billing_email );
 		} else {
+			// The Analytics Customers report holds one total per customer with no currency
+			// breakdown, so legacy order storage keeps showing it as a single amount.
 			$customer_report_id = $this->get_cpt_report_customer_id( $order );
-			if ( $customer_report_id > 0 ) {
-				$result = $this->query_cpt( $customer_report_id );
-			} else {
-				$result = (object) array(
-					'orders_count' => 0,
-					'total_spend'  => 0,
-				);
-			}
+			$rows               = $customer_report_id > 0 ? array( $this->query_cpt( $customer_report_id ) ) : array();
 		}
 
-		$orders_count = (int) ( $result->orders_count ?? 0 );
-		$total_spend  = (float) ( $result->total_spend ?? 0 );
+		$store_currency = get_woocommerce_currency();
+		$orders_count   = 0;
+		$total_spend    = 0.0;
+		$per_currency   = array();
+
+		// Stored codes are matched to registered currencies whatever their letter case.
+		$registered_codes = array();
+		foreach ( array_keys( get_woocommerce_currencies() ) as $code ) {
+			$registered_codes[ strtoupper( (string) $code ) ] = (string) $code;
+		}
+
+		foreach ( $rows as $row ) {
+			$currency_orders_count = (int) ( $row->orders_count ?? 0 );
+			if ( $currency_orders_count < 1 ) {
+				continue;
+			}
+
+			// Orders saved without a currency keep counting towards the store currency.
+			$currency = trim( (string) ( $row->currency ?? '' ) );
+			$currency = '' === $currency ? $store_currency : ( $registered_codes[ strtoupper( $currency ) ] ?? $currency );
+
+			$currency_total = (float) ( $row->total_spend ?? 0 );
+			$orders_count  += $currency_orders_count;
+			$total_spend   += $currency_total;
+
+			$per_currency[ $currency ] = array(
+				'count' => ( $per_currency[ $currency ]['count'] ?? 0 ) + $currency_orders_count,
+				'total' => ( $per_currency[ $currency ]['total'] ?? 0.0 ) + $currency_total,
+			);
+		}
+
+		// Store currency first, then the other currencies by code.
+		ksort( $per_currency, SORT_STRING );
+		if ( isset( $per_currency[ $store_currency ] ) ) {
+			$per_currency = array( $store_currency => $per_currency[ $store_currency ] ) + $per_currency;
+		}
+
+		$totals_per_currency   = array();
+		$counts_per_currency   = array();
+		$averages_per_currency = array();
+		foreach ( $per_currency as $currency => $history ) {
+			$totals_per_currency[ $currency ]   = $history['total'];
+			$counts_per_currency[ $currency ]   = $history['count'];
+			$averages_per_currency[ $currency ] = $history['total'] / $history['count'];
+		}
 
 		// Build a dynamic tooltip listing the excluded statuses by their translated labels.
 		// Internal statuses (auto-draft, trash) are naturally filtered out because they
@@ -96,10 +141,13 @@ class CustomerHistory {
 		}
 
 		return array(
-			'orders_count'    => $orders_count,
-			'total_spend'     => $total_spend,
-			'avg_order_value' => $orders_count > 0 ? $total_spend / $orders_count : 0,
-			'tooltip'         => $tooltip,
+			'orders_count'          => $orders_count,
+			'total_spend'           => $total_spend,
+			'avg_order_value'       => $orders_count > 0 ? $total_spend / $orders_count : 0,
+			'tooltip'               => $tooltip,
+			'totals_per_currency'   => $totals_per_currency,
+			'counts_per_currency'   => $counts_per_currency,
+			'averages_per_currency' => $averages_per_currency,
 		);
 	}
 
@@ -109,46 +157,40 @@ class CustomerHistory {
 	 * @param int    $customer_id   The customer user ID.
 	 * @param string $billing_email The billing email address.
 	 *
-	 * @return object Object with orders_count and total_spend properties.
+	 * @return object[] One object per order currency, with currency, orders_count and total_spend properties.
 	 */
-	private function query_hpos( int $customer_id, string $billing_email ): object {
+	private function query_hpos( int $customer_id, string $billing_email ): array {
 		global $wpdb;
-
-		$default = (object) array(
-			'orders_count' => 0,
-			'total_spend'  => 0,
-		);
 
 		$excluded_statuses_sql = $this->get_excluded_statuses_sql();
 		$orders_table          = OrdersTableDataStore::get_orders_table_name();
 
 		$sql = null;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- status filters are built from hardcoded fragments; trusted table names.
 		if ( $customer_id > 0 ) {
 			$status_filter    = $excluded_statuses_sql ? "AND status NOT IN $excluded_statuses_sql" : '';
 			$co_status_filter = $excluded_statuses_sql ? "AND co.status NOT IN $excluded_statuses_sql" : '';
 
 			$sql = $wpdb->prepare(
-				"SELECT COUNT(*) AS orders_count,
+				"SELECT filtered.currency AS currency,
+					COUNT(*) AS orders_count,
 					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
 				FROM (
-					SELECT id, total_amount
-					FROM %i
+					SELECT id, total_amount, currency
+					FROM {$orders_table}
 					WHERE customer_id = %d AND type = 'shop_order' $status_filter
 				) AS filtered
 				LEFT JOIN (
 					SELECT rp.parent_order_id, SUM( rp.total_amount ) AS refund_total
-					FROM %i AS rp
-					INNER JOIN %i AS co ON rp.parent_order_id = co.id
+					FROM {$orders_table} AS rp
+					INNER JOIN {$orders_table} AS co ON rp.parent_order_id = co.id
 					WHERE rp.type = 'shop_order_refund'
 						AND co.customer_id = %d AND co.type = 'shop_order' $co_status_filter
 					GROUP BY rp.parent_order_id
-				) AS r ON filtered.id = r.parent_order_id",
-				$orders_table,
+				) AS r ON filtered.id = r.parent_order_id
+				GROUP BY filtered.currency",
 				$customer_id,
-				$orders_table,
-				$orders_table,
 				$customer_id
 			);
 		} elseif ( '' !== $billing_email ) {
@@ -157,40 +199,37 @@ class CustomerHistory {
 			$co_status_filter = $excluded_statuses_sql ? "AND co.status NOT IN $excluded_statuses_sql" : '';
 
 			$sql = $wpdb->prepare(
-				"SELECT COUNT(*) AS orders_count,
+				"SELECT filtered.currency AS currency,
+					COUNT(*) AS orders_count,
 					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
 				FROM (
-					SELECT o.id, o.total_amount
-					FROM %i AS o
-					INNER JOIN %i AS a ON o.id = a.order_id AND a.address_type = 'billing'
+					SELECT o.id, o.total_amount, o.currency
+					FROM {$orders_table} AS o
+					INNER JOIN {$addresses_table} AS a ON o.id = a.order_id AND a.address_type = 'billing'
 					WHERE o.customer_id = 0 AND a.email = %s AND o.type = 'shop_order' $o_status_filter
 				) AS filtered
 				LEFT JOIN (
 					SELECT rp.parent_order_id, SUM( rp.total_amount ) AS refund_total
-					FROM %i AS rp
-					INNER JOIN %i AS co ON rp.parent_order_id = co.id
-					INNER JOIN %i AS ca ON co.id = ca.order_id AND ca.address_type = 'billing'
+					FROM {$orders_table} AS rp
+					INNER JOIN {$orders_table} AS co ON rp.parent_order_id = co.id
+					INNER JOIN {$addresses_table} AS ca ON co.id = ca.order_id AND ca.address_type = 'billing'
 					WHERE rp.type = 'shop_order_refund'
 						AND co.customer_id = 0 AND ca.email = %s AND co.type = 'shop_order' $co_status_filter
 					GROUP BY rp.parent_order_id
-				) AS r ON filtered.id = r.parent_order_id",
-				$orders_table,
-				$addresses_table,
+				) AS r ON filtered.id = r.parent_order_id
+				GROUP BY filtered.currency",
 				$billing_email,
-				$orders_table,
-				$orders_table,
-				$addresses_table,
 				$billing_email
 			);
 		}
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( null === $sql ) {
-			return $default;
+			return array();
 		}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared above.
-		$row = $wpdb->get_row( $sql );
+		$rows = $wpdb->get_results( $sql );
 
 		if ( $wpdb->last_error ) {
 			wc_get_logger()->error(
@@ -199,7 +238,7 @@ class CustomerHistory {
 			);
 		}
 
-		return $row ?? $default;
+		return is_array( $rows ) ? $rows : array();
 	}
 
 	/**
@@ -238,9 +277,7 @@ class CustomerHistory {
 			return 0;
 		}
 
-		$report_order = $order instanceof AdminOrder ? $order : new AdminOrder( $order->get_id() );
-
-		return (int) $report_order->get_report_customer_id();
+		return (int) CustomersDataStore::get_existing_customer_id_from_order( $order );
 	}
 
 	/**
@@ -253,11 +290,14 @@ class CustomerHistory {
 			return $this->excluded_statuses;
 		}
 
-		$excluded_statuses = get_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
-		if ( ! is_array( $excluded_statuses ) ) {
-			$excluded_statuses = array( 'pending', 'failed', 'cancelled' );
-		}
-		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), $excluded_statuses );
+		$default_excluded_statuses = Settings::get_default_excluded_order_statuses();
+		$excluded_statuses         = get_option( 'woocommerce_excluded_report_order_statuses', $default_excluded_statuses );
+		$excluded_statuses         = Settings::get_valid_order_statuses_or_default( $excluded_statuses, $default_excluded_statuses );
+		$excluded_statuses         = array_merge( array( 'auto-draft', 'trash' ), $excluded_statuses );
+
+		// Keep the value a broken filter would otherwise replace, so the merchant's saved
+		// selection survives it. Mirrors Reports\DataStore::get_excluded_report_order_statuses().
+		$pre_filter_statuses = $excluded_statuses;
 
 		/**
 		 * Filter the list of excluded order statuses for customer history and analytics reports.
@@ -267,7 +307,8 @@ class CustomerHistory {
 		 */
 		$excluded_statuses = apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
 		if ( ! is_array( $excluded_statuses ) ) {
-			$excluded_statuses = array( 'auto-draft', 'trash', 'pending', 'failed', 'cancelled' );
+			wc_doing_it_wrong( __METHOD__, 'The woocommerce_analytics_excluded_order_statuses filter must return an array.', '11.2.0' );
+			$excluded_statuses = $pre_filter_statuses;
 		}
 
 		$this->excluded_statuses = $excluded_statuses;
@@ -291,7 +332,10 @@ class CustomerHistory {
 		$prefixed = array_map(
 			function ( $status ) {
 				$status = sanitize_title( $status );
-				return 'auto-draft' === $status || 'trash' === $status ? $status : 'wc-' . $status;
+				$status = 'auto-draft' === $status || 'trash' === $status ? $status : 'wc-' . $status;
+				// Status columns are varchar(20) and longer values are silently truncated
+				// on write, so truncate the same way or comparisons never match long slugs.
+				return mb_substr( $status, 0, 20 );
 			},
 			$excluded_statuses
 		);

@@ -123,14 +123,14 @@ const settings = {
 											'woocommerce/checkout-order-note-block',
 											{},
 											[]
-									  )
+										)
 									: false,
 								showPolicyLinks
 									? createBlock(
 											'woocommerce/checkout-terms-block',
 											{},
 											[]
-									  )
+										)
 									: false,
 								createBlock(
 									'woocommerce/checkout-actions-block',

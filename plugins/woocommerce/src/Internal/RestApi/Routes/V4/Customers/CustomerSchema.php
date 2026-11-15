@@ -277,6 +277,15 @@ class CustomerSchema extends AbstractSchema {
 
 		$data = $item->get_data();
 
+		// Only compute fields that will actually be returned. When $include_fields is empty the full
+		// response is requested, so everything is computed (default behavior, byte-identical output).
+		// When a sparse _fields subset is requested, skip the per-customer aggregates and the avatar
+		// lookup the caller did not ask for, instead of computing them and discarding them after
+		// array_intersect_key.
+		$is_field_included = static function ( string $field ) use ( $include_fields ) {
+			return empty( $include_fields ) || in_array( $field, $include_fields, true );
+		};
+
 		// Normalize last active timestamp - treat empty string, '0', 0, or false as null.
 		$last_active = $item->get_meta( 'wc_last_active' );
 		$last_active = empty( $last_active ) ? null : $last_active;
@@ -295,9 +304,9 @@ class CustomerSchema extends AbstractSchema {
 			'billing'            => $data['billing'],
 			'shipping'           => $data['shipping'],
 			'is_paying_customer' => $data['is_paying_customer'],
-			'orders_count'       => $item->get_order_count(),
-			'total_spent'        => $item->get_total_spent(),
-			'avatar_url'         => $item->get_avatar_url(),
+			'orders_count'       => $is_field_included( 'orders_count' ) ? $item->get_order_count() : null,
+			'total_spent'        => $is_field_included( 'total_spent' ) ? $item->get_total_spent() : null,
+			'avatar_url'         => $is_field_included( 'avatar_url' ) ? $item->get_avatar_url() : null,
 			'last_active'        => $last_active ? wc_rest_prepare_date_response( $last_active, false ) : null,
 			'last_active_gmt'    => $last_active ? wc_rest_prepare_date_response( $last_active ) : null,
 		);

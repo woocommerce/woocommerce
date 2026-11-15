@@ -1,0 +1,11 @@
+{
+    "position": 90,
+    "label": "UX guidelines",
+    "description": "UX guidelines for payments in WooCommerce.",
+    "collapsible": true,
+    "collapsed": true,
+    "link": {
+        "type": "doc",
+        "id": "README"
+    }
+}

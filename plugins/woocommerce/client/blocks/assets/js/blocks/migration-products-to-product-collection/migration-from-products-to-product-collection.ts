@@ -18,6 +18,10 @@ import type {
 	PostTemplateLayout,
 	PostTemplateLayoutTypes,
 } from './types';
+import {
+	PRODUCT_TITLE_VARIATION_NAME,
+	PRODUCT_SUMMARY_VARIATION_NAME,
+} from '../product-elements-blocks/variations/constants';
 import { DEFAULT_ATTRIBUTES } from '../product-collection/constants';
 import {
 	LayoutOptions,
@@ -65,37 +69,35 @@ const isPostSummary: IsBlockType = ( { name, attributes } ) =>
 		'woocommerce/product-query/product-summary';
 
 const transformPostTemplate: TransformBlock = ( block, innerBlocks ) => {
-	const { __woocommerceNamespace, className, layout, ...restAttrributes } =
+	const { __woocommerceNamespace, className, layout, ...restAttributes } =
 		block.attributes;
 
 	return createBlock(
 		'woocommerce/product-template',
-		restAttrributes,
+		restAttributes,
 		innerBlocks
 	);
 };
 
 const transformPostTitle: TransformBlock = ( block, innerBlocks ) => {
-	const { __woocommerceNamespace, ...restAttrributes } = block.attributes;
+	const { __woocommerceNamespace, ...restAttributes } = block.attributes;
 	return createBlock(
 		'core/post-title',
 		{
-			__woocommerceNamespace:
-				'woocommerce/product-collection/product-title',
-			...restAttrributes,
+			__woocommerceNamespace: PRODUCT_TITLE_VARIATION_NAME,
+			...restAttributes,
 		},
 		innerBlocks
 	);
 };
 
 const transformPostSummary: TransformBlock = ( block, innerBlocks ) => {
-	const { __woocommerceNamespace, ...restAttrributes } = block.attributes;
+	const { __woocommerceNamespace, ...restAttributes } = block.attributes;
 	return createBlock(
 		'core/post-excerpt',
 		{
-			__woocommerceNamespace:
-				'woocommerce/product-collection/product-summary',
-			...restAttrributes,
+			__woocommerceNamespace: PRODUCT_SUMMARY_VARIATION_NAME,
+			...restAttributes,
 		},
 		innerBlocks
 	);
@@ -138,7 +140,7 @@ const getLayoutAttribute = (
 	return postTemplateHasSupportForGridView
 		? mapLayoutPropertiesFromPostTemplateToProductCollection(
 				postTemplateLayout
-		  )
+			)
 		: attributes.displayLayout;
 };
 

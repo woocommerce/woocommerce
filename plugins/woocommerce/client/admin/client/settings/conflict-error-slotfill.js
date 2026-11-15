@@ -53,7 +53,7 @@ const SettingsErrorFill = () => {
 
 	const handleApplyRecommendedSettings = () => {
 		/** We're using jQuery in this file because the select boxes are implemented using select2 and can only be interacted with using jQuery */
-		// eslint-disable-next-line no-undef
+
 		window
 			.jQuery( '#woocommerce_tax_display_shop' )
 			.val( pricesEnteredWithTaxSetting )

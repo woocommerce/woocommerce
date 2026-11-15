@@ -318,10 +318,8 @@ function runComingSoonTests( themeContext = '' ) {
 			.waitFor( { state: 'visible' } );
 
 		await expect(
-			page.getByText(
-				"Pardon our dust! We're working on something amazing — check back soon!"
-			)
-		).toBeVisible();
+			page.locator( '.woocommerce-coming-soon-banner' )
+		).toContainText( 'is coming soon' );
 	} );
 
 	test( `Store only coming soon mode${ testSuffix }`, async ( {

@@ -1,4 +1,0 @@
-Significance: patch
-Type: performance
-
-Reduced the number of SQL queries on the cart and checkout pages in the store, as well as on admin pages, by adding cache priming.

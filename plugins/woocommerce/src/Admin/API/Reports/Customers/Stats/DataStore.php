@@ -89,6 +89,9 @@ class DataStore extends CustomersDataStore implements DataStoreInterface {
 	public function get_noncached_data( $query_args ) {
 		global $wpdb;
 		$this->initialize_queries();
+		$order_stats_table = $wpdb->prefix . 'wc_order_stats';
+		$countable_order   = static::get_countable_customer_order_predicate( $order_stats_table );
+		$orders_count      = "SUM( CASE WHEN {$countable_order} THEN 1 ELSE 0 END )";
 
 		$data = (object) array(
 			'customers_count'     => 0,
@@ -104,11 +107,11 @@ class DataStore extends CustomersDataStore implements DataStoreInterface {
 		$this->subquery->add_sql_clause( 'select', 'SUM( total_sales ) AS total_spend,' );
 		$this->subquery->add_sql_clause(
 			'select',
-			'SUM( CASE WHEN parent_id = 0 THEN 1 END ) as orders_count,'
+			"SUM( CASE WHEN {$countable_order} THEN 1 END ) as orders_count,"
 		);
 		$this->subquery->add_sql_clause(
 			'select',
-			'CASE WHEN SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) = 0 THEN NULL ELSE SUM( total_sales ) / SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) END AS avg_order_value'
+			"CASE WHEN {$orders_count} = 0 THEN NULL ELSE SUM( total_sales ) / {$orders_count} END AS avg_order_value"
 		);
 
 		$this->clear_sql_clause( array( 'order_by', 'limit' ) );

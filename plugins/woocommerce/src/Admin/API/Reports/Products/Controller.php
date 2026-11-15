@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
+use Automattic\WooCommerce\Internal\Admin\Reports\ProductSearchQuery;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -271,6 +272,7 @@ class Controller extends GenericController implements ExportableInterface {
 			),
 
 		);
+		$params['search']        = ProductSearchQuery::get_collection_param();
 		$params['extended_info'] = array(
 			'description'       => __( 'Add additional piece of info about each product to the report.', 'woocommerce' ),
 			'type'              => 'boolean',

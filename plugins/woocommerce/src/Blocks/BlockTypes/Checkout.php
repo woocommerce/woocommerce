@@ -160,21 +160,6 @@ class Checkout extends AbstractBlock {
 	}
 
 	/**
-	 * Get the editor script handle for this block type.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string;
-	 */
-	protected function get_block_type_editor_script( $key = null ) {
-		$script = [
-			'handle'       => 'wc-' . $this->block_name . '-block',
-			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
-			'dependencies' => [ 'wc-blocks' ],
-		];
-		return $key ? $script[ $key ] : $script;
-	}
-
-	/**
 	 * Get the frontend script handle for this block type.
 	 *
 	 * @see $this->register_block_type()
@@ -564,6 +549,21 @@ class Checkout extends AbstractBlock {
 				[]
 			);
 			$this->asset_data_registry->add( 'globalPaymentMethods', $formatted_payment_methods );
+		}
+
+		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
+			/**
+			 * Filters whether checkout shows the terms and conditions.
+			 *
+			 * Returning false hides the terms and conditions on classic checkout and on the Checkout block's Actions block, for example
+			 * when an extension shows its own legal checkboxes. Like classic checkout, this only runs on the frontend,
+			 * where callbacks can rely on the cart being loaded.
+			 *
+			 * @since 3.4.0
+			 * @since 11.4.0 Also applies to the Checkout block.
+			 * @param bool $show_terms Whether to show the terms and conditions.
+			 */
+			$this->asset_data_registry->add( 'checkoutShowTerms', (bool) apply_filters( 'woocommerce_checkout_show_terms', true ) );
 		}
 
 		// Check `current_user_can` so we can show notices about incompatible extensions in the front-end to admins too.

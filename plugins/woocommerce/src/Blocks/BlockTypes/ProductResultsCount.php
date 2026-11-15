@@ -1,8 +1,7 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
-
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * ProductResultsCount class.
@@ -26,43 +25,83 @@ class ProductResultsCount extends AbstractBlock {
 	}
 
 	/**
+	 * Get the frontend style handles for this block type.
+	 *
+	 * The interactivity build writes this block's stylesheet to the woocommerce/ folder, so the default
+	 * path would 404. The handle names stay the same for code that depends on or dequeues them.
+	 *
+	 * @return string[]
+	 */
+	protected function get_block_type_style() {
+		$this->asset_api->register_style( 'wc-blocks-style-' . $this->block_name, $this->asset_api->get_block_asset_build_path( 'woocommerce/' . $this->block_name . '-style', 'css' ), array(), 'all', true );
+
+		return array( 'wc-blocks-style', 'wc-blocks-style-' . $this->block_name );
+	}
+
+	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
 	 *
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ) {
 		// Buffer the result count and use it as the block's frontend content.
 		ob_start();
-		echo '<div>';
 		woocommerce_result_count();
-		echo '</div>';
-		$product_results_count = ob_get_clean();
+		$product_results_count = (string) ob_get_clean();
 
-		$p = new \WP_HTML_Tag_Processor( $product_results_count );
+		$processor = new \WP_HTML_Tag_Processor( $product_results_count );
+		if ( $processor->next_tag( array( 'class_name' => 'woocommerce-result-count' ) ) ) {
+			// The block speaks the count after client-side navigation; a second live region would compete with it.
+			$processor->remove_attribute( 'role' );
+			$processor->remove_attribute( 'aria-relevant' );
+		}
+		$product_results_count = $processor->get_updated_html();
 
-		// Advance to the wrapper and add the attributes necessary for the block.
-		$p->next_tag( 'div' );
-		$parsed_style_attributes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-		$classes                 = array_merge(
-			explode( ' ', $parsed_style_attributes['classes'] ),
+		$classes = 'woocommerce wc-block-product-results-count';
+		if ( ! empty( $attributes['fontSize'] ) ) {
+			// Preserve the legacy class for backward compatibility.
+			$classes .= ' has-font-size';
+		}
+
+		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'woocommerce',
-				'wc-block-product-results-count',
-				'wp-block-woocommerce-product-results-count',
-			),
-		);
-		$p->set_attribute( 'class', implode( ' ', $classes ) );
-		$p->set_attribute( 'style', $parsed_style_attributes['styles'] );
-		$p->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
-		$p->set_attribute(
-			'data-wp-router-region',
-			'wc-product-results-count-' . ( isset( $block->context['queryId'] ) ? $block->context['queryId'] : 0 )
+				'class'                 => $classes,
+				'data-wp-interactive'   => $this->get_full_block_name(),
+				'data-wp-router-region' => 'wc-product-results-count-' . ( $block->context['queryId'] ?? 0 ),
+				'data-wp-context'       => (string) wp_json_encode( array( 'announcement' => $this->get_announcement_text( $product_results_count ) ) ),
+				'data-wp-watch'         => 'callbacks.announceResultsCount',
+			)
 		);
 
-		return $p->get_updated_html();
+		return sprintf( '<div %1$s>%2$s</div>', $wrapper_attributes, $product_results_count );
+	}
+
+	/**
+	 * Get the result count as plain text, with each text fragment (such as the hidden sort label) separated by a space.
+	 *
+	 * @param string $markup Result count markup.
+	 *
+	 * @return string Text for screen readers.
+	 */
+	private function get_announcement_text( string $markup ): string {
+		$parts     = array();
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+
+		while ( $processor->next_token() ) {
+			if ( '#text' !== $processor->get_token_name() ) {
+				continue;
+			}
+
+			$part = trim( $processor->get_modifiable_text() );
+			if ( '' !== $part ) {
+				$parts[] = $part;
+			}
+		}
+
+		return implode( ' ', $parts );
 	}
 }

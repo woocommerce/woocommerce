@@ -75,7 +75,6 @@ class WC_Helper_Order {
 				'total'    => wc_get_price_excluding_tax( $product, array( 'qty' => 4 ) ),
 			)
 		);
-		$item->save();
 		$order->add_item( $item );
 
 		// Set billing address.

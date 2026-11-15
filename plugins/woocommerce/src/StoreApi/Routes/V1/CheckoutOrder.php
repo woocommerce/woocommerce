@@ -106,15 +106,16 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$order_id    = absint( $request['id'] );
-		$this->order = wc_get_order( $order_id );
+		$order_id = absint( $request['id'] );
+		$order    = wc_get_order( $order_id );
 
-		if ( ! $this->order instanceof \WC_Order || ! $this->order->needs_payment() ) {
+		if ( ! $order instanceof \WC_Order || ! $order->needs_payment() ) {
 			return new \WP_Error(
 				'invalid_order_update_status',
 				__( 'This order cannot be paid for.', 'woocommerce' )
 			);
 		}
+		$this->order = $order;
 
 		/**
 		 * Process request data.
@@ -140,9 +141,12 @@ class CheckoutOrder extends AbstractCartRoute {
 		$this->order_controller->validate_existing_order_before_payment( $this->order );
 
 		/**
-		 * Fires before an order is processed by the Checkout Block/Store API.
+		 * Fires after the Checkout Block/Store API request has populated and validated the order.
 		 *
-		 * This hook informs extensions that $order has completed processing and is ready for payment.
+		 * The action runs before payment is processed, so callbacks can still act on the order
+		 * on its way to the gateway. Do not use this action for payment-completion logic or to
+		 * call WC_Order::payment_complete(). Use woocommerce_payment_complete or
+		 * woocommerce_order_status_completed instead.
 		 *
 		 * This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:
 		 * - To keep the interface focused (only pass $order, not passing request data).
@@ -151,8 +155,8 @@ class CheckoutOrder extends AbstractCartRoute {
 		 * @since 7.2.0
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
-		 * @example See docs/examples/checkout-order-processed.md
-
+		 * @example docs/examples/checkout-order-processed.md
+		 *
 		 * @param \WC_Order $order Order object.
 		 */
 		do_action( 'woocommerce_store_api_checkout_order_processed', $this->order );
@@ -161,8 +165,12 @@ class CheckoutOrder extends AbstractCartRoute {
 		 * Process the payment and return the results.
 		 */
 		$payment_result = new PaymentResult();
+		$needs_payment  = $this->order->needs_payment();
 
-		if ( $this->order->needs_payment() ) {
+		// Callbacks on the action above, or on the needs_payment() filters, may have saved the order.
+		$this->validate_order_was_saved();
+
+		if ( $needs_payment ) {
 			$this->process_payment( $request, $payment_result );
 		} else {
 			$this->process_without_payment( $request, $payment_result );
@@ -202,12 +210,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		// Billing address is a required field.
 		$billing = $request['billing_address'];
 
-		// If shipping address (optional field) was not provided, set it to the given billing address (required field).
-		$shipping = $request['shipping_address'] ?? $billing;
-
-		$this->order->set_billing_address( $billing );
-		$this->order->set_shipping_address( $shipping );
-		$this->order_controller->validate_existing_order_before_update( $this->order );
+		$shipping = $this->order_controller->update_existing_order_addresses( $this->order, $billing, $request['shipping_address'] );
 
 		// Update customer object with validated order addresses.
 		foreach ( $billing as $key => $value ) {
@@ -216,7 +219,8 @@ class CheckoutOrder extends AbstractCartRoute {
 			}
 		}
 
-		foreach ( $shipping as $key => $value ) {
+		// When the order keeps its own shipping address, the customer's shipping follows billing.
+		foreach ( $shipping ?? $billing as $key => $value ) {
 			if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
 				$customer->{"set_shipping_$key"}( $value );
 			}
@@ -235,6 +239,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		$customer->save();
 		$this->order->save();
 		$this->order->calculate_totals();
+		$this->validate_order_was_saved();
 	}
 
 	/**

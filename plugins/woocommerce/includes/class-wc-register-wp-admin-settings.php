@@ -23,6 +23,14 @@ class WC_Register_WP_Admin_Settings {
 	protected $object;
 
 	/**
+	 * Type of settings the wrapped object holds ('page' or 'email').
+	 *
+	 * @since 11.2.0
+	 * @var string
+	 */
+	protected $type;
+
+	/**
 	 * Hooks into the settings API and starts registering our settings.
 	 *
 	 * @since 3.0.0
@@ -35,13 +43,40 @@ class WC_Register_WP_Admin_Settings {
 		}
 
 		$this->object = $object;
+		$this->type   = $type;
 
-		if ( 'page' === $type ) {
+		$this->register();
+	}
+
+	/**
+	 * Attaches the filters that expose the wrapped object's settings to the Settings REST API.
+	 *
+	 * Called from the constructor; safe to call again to re-attach after hook state has been
+	 * reset. Repeat calls re-add the same callbacks, which WordPress stores under the same
+	 * identifiers, so they never duplicate registered groups or settings.
+	 *
+	 * @since 11.2.0
+	 * @return void
+	 */
+	public function register() {
+		if ( 'page' === $this->type ) {
+			/**
+			 * A settings page (or an object with a compatible shape).
+			 *
+			 * @var WC_Settings_Page $page
+			 */
+			$page = $this->object;
 			add_filter( 'woocommerce_settings_groups', array( $this, 'register_page_group' ) );
-			add_filter( 'woocommerce_settings-' . $this->object->get_id(), array( $this, 'register_page_settings' ) );
-		} elseif ( 'email' === $type ) {
+			add_filter( 'woocommerce_settings-' . $page->get_id(), array( $this, 'register_page_settings' ) );
+		} elseif ( 'email' === $this->type ) {
+			/**
+			 * An email (or an object with a compatible shape).
+			 *
+			 * @var WC_Email $email
+			 */
+			$email = $this->object;
 			add_filter( 'woocommerce_settings_groups', array( $this, 'register_email_group' ) );
-			add_filter( 'woocommerce_settings-email_' . $this->object->id, array( $this, 'register_email_settings' ) );
+			add_filter( 'woocommerce_settings-email_' . $email->id, array( $this, 'register_email_settings' ) );
 		}
 	}
 

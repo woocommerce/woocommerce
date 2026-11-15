@@ -17,7 +17,7 @@ class StockManagementHelperTests extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * @before
+	 * Set up the test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
@@ -25,15 +25,15 @@ class StockManagementHelperTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @after
+	 * Tear down the test.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		unset( $this->sut );
 		// Clean up all notifications.
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notifications" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		parent::tearDown();
 	}
 
 	/**

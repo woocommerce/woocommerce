@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add Idempotency-Key support to the UCP cart endpoints so a retried agent request is not applied twice.

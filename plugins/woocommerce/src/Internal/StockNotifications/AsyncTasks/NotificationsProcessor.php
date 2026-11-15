@@ -30,7 +30,7 @@ class NotificationsProcessor {
 	/**
 	 * The logger.
 	 *
-	 * @var Logger
+	 * @var \WC_Logger_Interface
 	 */
 	private $logger;
 
@@ -135,7 +135,8 @@ class NotificationsProcessor {
 	 *
 	 * @param int $product_id The product ID.
 	 * @return \WC_Product
-	 * @throws \Exception If the product is not valid for notifications.
+	 * @throws \Exception If the product is not found.
+	 * @throws ExpectedSkipException If the product or its stock status is no longer eligible, which is an expected outcome.
 	 */
 	private function parse_product( int $product_id ): WC_Product {
 
@@ -145,11 +146,11 @@ class NotificationsProcessor {
 		}
 
 		if ( ! $this->eligibility_service->is_product_eligible( $product ) ) {
-			throw new \Exception( sprintf( 'Product %d is not eligible for notifications.', $product->get_id() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new ExpectedSkipException( sprintf( 'Product %d is not eligible for notifications.', $product->get_id() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		if ( ! $this->eligibility_service->is_stock_status_eligible( $product->get_stock_status() ) ) {
-			throw new \Exception( sprintf( 'Product %d stock status is not eligible for notifications (i.e. not in stock).', $product->get_id() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new ExpectedSkipException( sprintf( 'Product %d stock status is not eligible for notifications (i.e. not in stock).', $product->get_id() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		return $product;
@@ -169,7 +170,10 @@ class NotificationsProcessor {
 			$product     = $this->parse_product( $product_id );
 		} catch ( \Throwable $e ) {
 			$product_id = (int) $product_id;
-			$this->logger->error(
+			// An ineligible product or stock status is a normal outcome (e.g. stock went back out before the job ran).
+			$level = $e instanceof ExpectedSkipException ? \WC_Log_Levels::INFO : \WC_Log_Levels::ERROR;
+			$this->logger->log(
+				$level,
 				sprintf( 'Background process for product %s terminated. Reason: %s', $product_id, $e->getMessage() ),
 				array(
 					'source'     => 'wc-customer-stock-notifications',
@@ -225,11 +229,14 @@ class NotificationsProcessor {
 				continue;
 			}
 
-			$is_sent = true;
 			try {
-				$this->email_manager->send_stock_notification_email( $notification );
+				$is_sent = $this->email_manager->deliver_stock_notification( $notification );
 			} catch ( \Throwable $e ) {
 				$is_sent = false;
+				$this->logger->error(
+					sprintf( 'Delivery of notification %d failed: %s', $notification->get_id(), $e->getMessage() ),
+					array( 'source' => 'wc-customer-stock-notifications' )
+				);
 			}
 
 			if ( $is_sent ) {
@@ -243,7 +250,36 @@ class NotificationsProcessor {
 			}
 
 			// Always save the notification to reflect last attempt time.
-			$notification->save();
+			$saved = $notification->save();
+			if ( is_wp_error( $saved ) ) {
+				$this->logger->error(
+					sprintf( 'Failed to save notification %d: %s', $notification->get_id(), $saved->get_error_message() ),
+					array( 'source' => 'wc-customer-stock-notifications' )
+				);
+				continue;
+			}
+
+			$notification_product = $notification->get_product();
+			if ( $is_sent && $notification_product instanceof \WC_Product ) {
+				try {
+					/**
+					 * Action: woocommerce_customer_stock_notification_sent
+					 *
+					 * @since 11.4.0
+					 *
+					 * Fires once a stock notification has been delivered and saved as sent.
+					 *
+					 * @param Notification $notification The notification that was sent.
+					 * @param WC_Product   $product      The product the notification is about.
+					 */
+					do_action( 'woocommerce_customer_stock_notification_sent', $notification, $notification_product );
+				} catch ( \Throwable $e ) {
+					$this->logger->error(
+						sprintf( 'A woocommerce_customer_stock_notification_sent callback failed for notification %d: %s', $notification->get_id(), $e->getMessage() ),
+						array( 'source' => 'wc-customer-stock-notifications' )
+					);
+				}
+			}
 		}
 
 		if ( count( $notifications ) === $this->get_batch_size() ) {

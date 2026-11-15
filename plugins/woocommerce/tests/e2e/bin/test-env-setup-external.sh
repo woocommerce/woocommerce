@@ -35,9 +35,7 @@ echo "--------------------------------------------------------"
 
 # Define the list of PHP files to process
 mu_plugins=(
-    "filter-setter"
-    "process-waiting-actions"
-    "test-helper-apis"
+    "woocommerce-e2e-test-helper"
 	"woocommerce-cleanup"
 )
 
@@ -46,7 +44,7 @@ for plugin in "${mu_plugins[@]}"; do
     echo "Processing $plugin..."
 
     # Download the PHP file
-    curl -o "$plugin.php" "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce/tests/e2e/bin/$plugin.php"
+    curl -o "$plugin.php" "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce/tests/e2e/test-plugins/$plugin/$plugin.php"
 
     # Create a zip file
     (chmod 755 "$plugin.php" && zip "${plugin%}.zip" "$plugin.php")

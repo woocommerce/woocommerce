@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Match Blueprint's restricted site options regardless of the casing, padding or accents used in the imported key.

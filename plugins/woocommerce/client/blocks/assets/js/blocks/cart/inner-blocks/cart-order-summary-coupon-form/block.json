@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/cart-order-summary-coupon-form-block",
-	"version": "1.0.0",
 	"title": "Coupon Form",
 	"description": "Shows the apply coupon form.",
 	"category": "woocommerce",

@@ -12,39 +12,52 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { useFilterHook } from '~/utils/use-filter-hook';
 import { ScheduledUpdatesPromotionNotice } from '~/analytics/components';
 
-const RevenueReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-revenue" */ './revenue' )
+const RevenueReport = lazy(
+	() =>
+		import( /* webpackChunkName: "analytics-report-revenue" */ './revenue' )
 );
-const ProductsReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-products" */ './products' )
+const ProductsReport = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "analytics-report-products" */ './products'
+		)
 );
-const VariationsReport = lazy( () =>
-	import(
-		/* webpackChunkName: "analytics-report-variations" */ './variations'
-	)
+const VariationsReport = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "analytics-report-variations" */ './variations'
+		)
 );
-const OrdersReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-orders" */ './orders' )
+const OrdersReport = lazy(
+	() => import( /* webpackChunkName: "analytics-report-orders" */ './orders' )
 );
-const CategoriesReport = lazy( () =>
-	import(
-		/* webpackChunkName: "analytics-report-categories" */ './categories'
-	)
+const CategoriesReport = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "analytics-report-categories" */ './categories'
+		)
 );
-const CouponsReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-coupons" */ './coupons' )
+const CouponsReport = lazy(
+	() =>
+		import( /* webpackChunkName: "analytics-report-coupons" */ './coupons' )
 );
-const TaxesReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-taxes" */ './taxes' )
+const TaxesReport = lazy(
+	() => import( /* webpackChunkName: "analytics-report-taxes" */ './taxes' )
 );
-const DownloadsReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-downloads" */ './downloads' )
+const DownloadsReport = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "analytics-report-downloads" */ './downloads'
+		)
 );
-const StockReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-stock" */ './stock' )
+const StockReport = lazy(
+	() => import( /* webpackChunkName: "analytics-report-stock" */ './stock' )
 );
-const CustomersReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report-customers" */ './customers' )
+const CustomersReport = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "analytics-report-customers" */ './customers'
+		)
 );
 
 const manageStock = getAdminSetting( 'manageStock', 'no' );
@@ -116,7 +129,7 @@ const getReports = () => {
 					navArgs: {
 						id: 'woocommerce-analytics-stock',
 					},
-			  }
+				}
 			: null,
 		{
 			report: 'customers',

@@ -61,33 +61,35 @@ class EmailApiController {
 		// When the email type is not found, it means that the email type is not supported.
 		if ( ! $email ) {
 			return array(
-				'subject'         => null,
-				'subject_full'    => null,
-				'subject_partial' => null,
-				'preheader'       => null,
-				'default_subject' => null,
-				'email_type'      => null,
-				'recipient'       => null,
-				'cc'              => null,
-				'bcc'             => null,
+				'subject'                => null,
+				'subject_full'           => null,
+				'subject_partial'        => null,
+				'preheader'              => null,
+				'default_subject'        => null,
+				'email_type'             => null,
+				'recipient'              => null,
+				'cc'                     => null,
+				'bcc'                    => null,
+				'send_on_unpaid_timeout' => null,
 			);
 		}
 
 		$form_fields = $email->get_form_fields();
 		$enabled     = $email->get_option( 'enabled' );
 		return array(
-			'enabled'         => is_null( $enabled ) ? $email->is_enabled() : 'yes' === $enabled,
-			'is_manual'       => $email->is_manual(),
-			'subject'         => $email->get_option( 'subject' ),
-			'subject_full'    => $email->get_option( 'subject_full' ), // For customer_refunded_order email type because it has two different subjects.
-			'subject_partial' => $email->get_option( 'subject_partial' ),
-			'preheader'       => $email->get_option( 'preheader' ),
-			'default_subject' => $email->get_default_subject(),
-			'email_type'      => $email_type,
+			'enabled'                => is_null( $enabled ) ? $email->is_enabled() : 'yes' === $enabled,
+			'is_manual'              => $email->is_manual(),
+			'subject'                => $email->get_option( 'subject' ),
+			'subject_full'           => $email->get_option( 'subject_full' ), // For customer_refunded_order email type because it has two different subjects.
+			'subject_partial'        => $email->get_option( 'subject_partial' ),
+			'preheader'              => $email->get_option( 'preheader' ),
+			'default_subject'        => $email->get_default_subject(),
+			'email_type'             => $email_type,
 			// Recipient is possible to set only for the specific type of emails. When the field `recipient` is set in the form fields, it means that the email type has a recipient field.
-			'recipient'       => array_key_exists( 'recipient', $form_fields ) ? $email->get_option( 'recipient', get_option( 'admin_email' ) ) : null,
-			'cc'              => $email->get_option( 'cc' ),
-			'bcc'             => $email->get_option( 'bcc' ),
+			'recipient'              => array_key_exists( 'recipient', $form_fields ) ? $email->get_option( 'recipient', get_option( 'admin_email' ) ) : null,
+			'cc'                     => $email->supports_cc_bcc() ? $email->get_option( 'cc' ) : null,
+			'bcc'                    => $email->supports_cc_bcc() ? $email->get_option( 'bcc' ) : null,
+			'send_on_unpaid_timeout' => array_key_exists( 'send_on_unpaid_timeout', $form_fields ) ? 'yes' === $email->get_option( 'send_on_unpaid_timeout', 'yes' ) : null,
 		);
 	}
 
@@ -136,11 +138,16 @@ class EmailApiController {
 		if ( array_key_exists( 'recipient', $data ) ) {
 			$email->update_option( 'recipient', $data['recipient'] );
 		}
-		if ( array_key_exists( 'cc', $data ) ) {
-			$email->update_option( 'cc', $data['cc'] );
+		if ( isset( $data['send_on_unpaid_timeout'] ) && is_bool( $data['send_on_unpaid_timeout'] ) && array_key_exists( 'send_on_unpaid_timeout', $email->get_form_fields() ) ) {
+			$email->update_option( 'send_on_unpaid_timeout', $data['send_on_unpaid_timeout'] ? 'yes' : 'no' );
 		}
-		if ( array_key_exists( 'bcc', $data ) ) {
-			$email->update_option( 'bcc', $data['bcc'] );
+		if ( $email->supports_cc_bcc() ) {
+			if ( array_key_exists( 'cc', $data ) ) {
+				$email->update_option( 'cc', $data['cc'] );
+			}
+			if ( array_key_exists( 'bcc', $data ) ) {
+				$email->update_option( 'bcc', $data['bcc'] );
+			}
 		}
 
 		return null;
@@ -225,15 +232,16 @@ class EmailApiController {
 	public function get_email_data_schema(): array {
 		return Builder::object(
 			array(
-				'subject'         => Builder::string()->nullable(),
-				'subject_full'    => Builder::string()->nullable(), // For customer_refunded_order email type because it has two different subjects.
-				'subject_partial' => Builder::string()->nullable(),
-				'preheader'       => Builder::string()->nullable(),
-				'default_subject' => Builder::string()->nullable(),
-				'email_type'      => Builder::string()->nullable(),
-				'recipient'       => Builder::string()->nullable(),
-				'cc'              => Builder::string()->nullable(),
-				'bcc'             => Builder::string()->nullable(),
+				'subject'                => Builder::string()->nullable(),
+				'subject_full'           => Builder::string()->nullable(), // For customer_refunded_order email type because it has two different subjects.
+				'subject_partial'        => Builder::string()->nullable(),
+				'preheader'              => Builder::string()->nullable(),
+				'default_subject'        => Builder::string()->nullable(),
+				'email_type'             => Builder::string()->nullable(),
+				'recipient'              => Builder::string()->nullable(),
+				'cc'                     => Builder::string()->nullable(),
+				'bcc'                    => Builder::string()->nullable(),
+				'send_on_unpaid_timeout' => Builder::boolean()->nullable(),
 			)
 		)->to_array();
 	}
@@ -346,7 +354,7 @@ class EmailApiController {
 						'sanitize_callback' => 'absint',
 					),
 					'choices' => array(
-						'description' => __( 'Per-conflict apply decisions: an array of {path, decision} entries. `decision` is `keep_yours` or `use_core`.', 'woocommerce' ),
+						'description' => __( 'Per-conflict apply decisions: an array of {path, decision} entries. `decision` is `keep_yours` or `use_core`. A block with no entry follows the change summary: if only core changed the block, it takes core\'s version; if the merchant also edited it, it keeps the merchant\'s version. Without a stored base render, a block with no entry keeps the merchant\'s version.', 'woocommerce' ),
 						'type'        => 'array',
 						'required'    => false,
 						'default'     => array(),
@@ -711,7 +719,7 @@ class EmailApiController {
 			'type'       => 'object',
 			'properties' => array(
 				'merged_content'     => array(
-					'description' => __( 'The merged block content written to the post. May differ from the input `post_content` even when every choice was `keep_yours` — the namespace-alias migration (see `aliases_migrated`) rewrites legacy block names unconditionally.', 'woocommerce' ),
+					'description' => __( 'The merged block content written to the post. May differ from the input `post_content` even when every choice was `keep_yours`: blocks the merchant never edited take core\'s version, and the namespace-alias migration (see `aliases_migrated`) rewrites legacy block names unconditionally.', 'woocommerce' ),
 					'type'        => 'string',
 					'readonly'    => true,
 				),

@@ -56,7 +56,7 @@ const ProductDetails = ( {
 					( nameForClass
 						? `wc-block-components-product-details__${ kebabCase(
 								nameForClass
-						  ) }`
+							) }`
 						: '' );
 
 				const isLast = index === filteredDetails.length - 1;

@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/mini-cart-contents",
-	"version": "1.0.0",
 	"title": "Mini-Cart Contents",
 	"description": "Display a Mini-Cart widget.",
 	"category": "woocommerce",

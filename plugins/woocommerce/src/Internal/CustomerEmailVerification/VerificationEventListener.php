@@ -52,7 +52,7 @@ class VerificationEventListener {
 	 */
 	public function on_password_reset( $user ): void {
 		if ( $user instanceof WP_User ) {
-			$this->service->mark_verified( $user->ID );
+			$this->service->mark_verified( $user->ID, $user->user_email );
 		}
 	}
 }

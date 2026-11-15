@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop adding a status change note each time an auto-draft order is saved again through the REST API.

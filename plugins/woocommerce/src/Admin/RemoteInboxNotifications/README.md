@@ -65,7 +65,7 @@ The status will usually be `unactioned`, as this will get the note to appear.
 
 There are other note statuses but we just use them **internally**:
 
--   `pending`: the note is pending - hidden but not actioned. When the spec/rules are invalid, the note status will be set to pending.
+-   `pending`: the note is hidden but not actioned. Notes can become pending when their spec or rules are invalid, or when an unactioned WooCommerce.com Store Alert is no longer listed in a complete canonical feed response.
 -   `sent`: the note has been sent by email to the user.
 
 ### Locale

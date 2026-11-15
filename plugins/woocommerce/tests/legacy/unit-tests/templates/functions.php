@@ -292,6 +292,106 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_html, $actual_html );
 	}
 
+	/**
+	 * Item data used by the wc_get_formatted_cart_item_data tests, mixing rows
+	 * that should render (scalar or stringable rendered fields) with rows that
+	 * should be dropped (non-scalar rendered fields or malformed entries).
+	 *
+	 * @param array $item_data Existing item data.
+	 * @return array
+	 */
+	public function get_cart_item_data_fixture( $item_data ) {
+		$item_data[] = array(
+			'key'   => 'Gift wrap',
+			'value' => 'Included',
+		);
+		$item_data[] = array(
+			'key'     => 'Attachments',
+			'value'   => array( 'file-a.pdf', 'file-b.pdf' ),
+			'display' => '2 files',
+		);
+		$item_data[] = array(
+			'key'      => 'Custom',
+			'value'    => 'Hidden value',
+			'display'  => 'Shown',
+			'_private' => array( 'internal' => 'data' ),
+		);
+		$item_data[] = array(
+			'key'     => 'Note',
+			'display' => new class() {
+				public function __toString() { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+					return 'From object';
+				}
+			},
+		);
+		$item_data[] = array(
+			'key'   => 'Files',
+			'value' => array( 'file-c.pdf' ),
+		);
+		$item_data[] = array(
+			'key'     => 'Extra',
+			'value'   => 'Details',
+			'display' => new stdClass(),
+		);
+		$item_data[] = 'Malformed item data';
+
+		return $item_data;
+	}
+
+	/**
+	 * Calls wc_get_formatted_cart_item_data with the shared fixture hooked into
+	 * the woocommerce_get_item_data filter.
+	 *
+	 * @param bool $flat Whether to request flat output.
+	 * @return string
+	 */
+	private function get_formatted_cart_item_data_with_fixture( $flat ) {
+		$filter = array( $this, 'get_cart_item_data_fixture' );
+		add_filter( 'woocommerce_get_item_data', $filter );
+
+		try {
+			return wc_get_formatted_cart_item_data(
+				array(
+					'data'      => new WC_Product_Simple(),
+					'variation' => array(),
+				),
+				$flat
+			);
+		} finally {
+			remove_filter( 'woocommerce_get_item_data', $filter );
+		}
+	}
+
+	/**
+	 * @testdox 'wc_get_formatted_cart_item_data' renders rows whose label and display value are stringable and drops the rest.
+	 */
+	public function test_wc_get_formatted_cart_item_data_skips_non_renderable_item_data() {
+		$html = $this->get_formatted_cart_item_data_with_fixture( false );
+
+		$this->assertStringContainsString( 'Gift wrap', $html );
+		$this->assertStringContainsString( 'Included', $html );
+		$this->assertStringContainsString( 'Attachments', $html );
+		$this->assertStringContainsString( '2 files', $html );
+		$this->assertStringContainsString( 'Custom', $html );
+		$this->assertStringContainsString( 'Shown', $html );
+		$this->assertStringContainsString( 'Note', $html );
+		$this->assertStringContainsString( 'From object', $html );
+		$this->assertStringNotContainsString( 'Hidden value', $html );
+		$this->assertStringNotContainsString( 'file-a.pdf', $html );
+		$this->assertStringNotContainsString( 'Files', $html );
+		$this->assertStringNotContainsString( 'Extra', $html );
+		$this->assertStringNotContainsString( 'Malformed item data', $html );
+	}
+
+	/**
+	 * @testdox 'wc_get_formatted_cart_item_data' renders the same rows in flat output.
+	 */
+	public function test_wc_get_formatted_cart_item_data_skips_non_renderable_item_data_in_flat_output() {
+		$output = $this->get_formatted_cart_item_data_with_fixture( true );
+
+		$this->assertSame( "Gift wrap: Included\nAttachments: 2 files\nCustom: Shown\nNote: From object\n", $output );
+	}
+
 	public function test_hidden_field() {
 		$actual_html   = woocommerce_form_field(
 			'test',

@@ -96,12 +96,22 @@ class Controller extends AbstractBlock {
 	 * @return string   Modified block content with added interactivity.
 	 */
 	public function add_product_title_click_event_directives( $block_content, $block, $instance ) {
-		$namespace              = $instance->attributes['__woocommerceNamespace'] ?? '';
-		$is_product_title_block = 'woocommerce/product-collection/product-title' === $namespace;
-		$is_link                = $instance->attributes['isLink'] ?? false;
+		$namespace                         = $instance->attributes['__woocommerceNamespace'] ?? '';
+		$is_product_collection_inner_block = $instance->context['isProductCollectionInnerBlock'] ?? false;
+		$is_product_title_block            = in_array(
+			$namespace,
+			array(
+				'woocommerce/product-title',
+				'woocommerce/product-query/product-title',
+				'woocommerce/product-collection/product-title',
+			),
+			true
+		);
 
-		// Only proceed if the block is a Product Title (Post Title variation) block.
-		if ( $is_product_title_block && $is_link ) {
+		$is_link = $instance->attributes['isLink'] ?? false;
+
+		// Only proceed if the block is a Product Title (Post Title variation) block and is part of a Product Collection inner block.
+		if ( $is_product_title_block && $is_link && $is_product_collection_inner_block ) {
 			$p = new \WP_HTML_Tag_Processor( $block_content );
 			$p->next_tag( array( 'class_name' => 'wp-block-post-title' ) );
 			$is_anchor = $p->next_tag( array( 'tag_name' => 'a' ) );
@@ -220,8 +230,7 @@ class Controller extends AbstractBlock {
 	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 
-		// The `loop_shop_per_page` filter can be found in WC_Query::product_query().
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Query::product_query().
 		$this->asset_data_registry->add( 'loopShopPerPage', apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ) );
 	}
 
@@ -383,10 +392,9 @@ class Controller extends AbstractBlock {
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
 		$block_context_query['queryId']   = $block->context['queryId'] ?? null;
 
-		$inherit    = $block->context['query']['inherit'] ?? false;
-		$filterable = $block->context['query']['filterable'] ?? false;
-
-		$is_exclude_applied_filters = ! ( $inherit || $filterable );
+		if ( ! ( $block_context_query['inherit'] ?? false ) ) {
+			$block_context_query['filterParams'] = wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class )->get_filter_params( $block_context_query['queryId'] );
+		}
 
 		$collection_args = array(
 			'name'                      => $block->context['collection'] ?? '',
@@ -397,8 +405,7 @@ class Controller extends AbstractBlock {
 		return $this->query_builder->get_final_frontend_query(
 			$collection_args,
 			$block_context_query,
-			$page,
-			$is_exclude_applied_filters
+			$page
 		);
 	}
 

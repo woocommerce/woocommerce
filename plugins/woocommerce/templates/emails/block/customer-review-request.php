@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.8.0
+ * @version 11.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -34,6 +34,22 @@ defined( 'ABSPATH' ) || exit;
 
 <!-- wp:paragraph -->
 <p> <?php echo esc_html__( 'We’d love to know what you thought of the products you ordered. Your review helps other shoppers make better decisions and helps us improve.', 'woocommerce' ); ?> </p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><?php
+	$link_template = '<a data-link-href="%1$s" contenteditable="false" style="text-decoration: underline;">%2$s</a>';
+	printf(
+		'%s',
+		wp_kses_post(
+			sprintf(
+				$link_template,
+				esc_attr( '[woocommerce/order-review-url]' ),
+				esc_html__( 'Leave a review', 'woocommerce' )
+			)
+		)
+	);
+	?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->

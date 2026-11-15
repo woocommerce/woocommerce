@@ -31,6 +31,7 @@ export {
 	createStore,
 	type TemplatePreview,
 	type EmailBuiltStyles,
+	type RecentEmailsQuery,
 } from './store';
 
 /**

@@ -123,17 +123,41 @@ export class FrontendUtils {
 		// Start tracking cart requests before the action
 		const { waitForCartRequests } = this.trackCartRequests();
 
+		// The request can start after the click returns, so
+		// waitForCartRequests() alone can resolve before it. A page loaded
+		// before the server saves the cart can see an empty cart.
+		const cartUpdated = this.page.waitForResponse( ( response ) =>
+			[
+				...STORE_API_CART_WRITE_REQUEST_URLS,
+				'wc-ajax=add_to_cart',
+			].some( ( url ) => response.url().includes( url ) )
+		);
+
 		if ( itemName !== '' ) {
-			// We can't use `getByRole()` here because the Add to Cart button
-			// might be a button (in blocks) or a link (in the legacy template).
+			// The button's accessible name is translated, so matching on it
+			// breaks whenever the site runs in another language. Match the
+			// product by its title, which is content and stays as authored, and
+			// click the control by class, since it is a button in blocks and a
+			// link in the legacy template. Match the heading rather than any
+			// descendant text, so a product cannot be selected by text the
+			// card repeats, and keep it exact, or "Beanie" also selects
+			// "Beanie with Logo".
 			await this.page
-				.getByLabel( `Add to cart: “${ itemName }”` )
+				.locator( 'li.product' )
+				.filter( {
+					has: this.page.getByRole( 'heading', {
+						name: itemName,
+						exact: true,
+					} ),
+				} )
+				.locator( '.add_to_cart_button' )
 				.click();
 		} else {
 			await this.page.click( 'text=Add to cart' );
 		}
+		await cartUpdated;
 
-		// Wait for the cart request triggered by this action to complete
+		// Wait for any other cart requests this action triggered to complete.
 		// We do it the complex way as there are no visual cues that we can rely on
 		await waitForCartRequests();
 	}
@@ -163,9 +187,7 @@ export class FrontendUtils {
 		await this.goToCart();
 
 		// Check if cart is already empty
-		const emptyCartMessage = this.page.getByText(
-			'Your cart is currently empty!'
-		);
+		const emptyCartMessage = this.page.getByText( 'Your cart is empty' );
 		if ( await emptyCartMessage.isVisible() ) {
 			return; // Cart is already empty
 		}

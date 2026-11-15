@@ -10,25 +10,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-$who_refunded = new WP_User( $refund->get_refunded_by() );
+$refunded_by  = $refund->get_refunded_by();
+$who_refunded = new WP_User( $refunded_by );
+
+if ( $who_refunded->exists() ) {
+	$refund_author = sprintf(
+		'<abbr class="refund_by" title="%1$s">%2$s</abbr>',
+		/* translators: 1: ID who refunded */
+		sprintf( esc_attr__( 'ID: %d', 'woocommerce' ), absint( $who_refunded->ID ) ),
+		esc_html( $who_refunded->display_name )
+	);
+} elseif ( ! $refunded_by ) {
+	// Nobody was logged in when the refund was created, so no person can be named.
+	$refund_author = esc_html__( 'System', 'woocommerce' );
+} else {
+	// A user was recorded but their account is gone, so there is no name left to show.
+	$refund_author = '';
+}
 ?>
 <tr class="refund <?php echo ( ! empty( $class ) ) ? esc_attr( $class ) : ''; ?>" data-order_refund_id="<?php echo esc_attr( $refund->get_id() ); ?>">
 	<td class="thumb"><div></div></td>
 
 	<td class="name">
 		<?php
-		if ( $who_refunded->exists() ) {
+		if ( $refund_author ) {
 			printf(
-				/* translators: 1: refund id 2: refund date 3: username */
+				/* translators: 1: refund id 2: refund date 3: username, or "System" when no user issued the refund */
 				esc_html__( 'Refund #%1$s - %2$s by %3$s', 'woocommerce' ),
 				esc_html( $refund->get_id() ),
 				esc_html( wc_format_datetime( $refund->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) ) ),
-				sprintf(
-					'<abbr class="refund_by" title="%1$s">%2$s</abbr>',
-					/* translators: 1: ID who refunded */
-					sprintf( esc_attr__( 'ID: %d', 'woocommerce' ), absint( $who_refunded->ID ) ),
-					esc_html( $who_refunded->display_name )
-				)
+				$refund_author // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped above, where it is built.
 			);
 		} else {
 			printf(

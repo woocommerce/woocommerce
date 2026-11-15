@@ -18,7 +18,7 @@ class CurrentDateTimeProvider implements DateTimeProviderInterface {
 	/**
 	 * Returns the current DateTime.
 	 *
-	 * @return DateTime
+	 * @return \DateTime
 	 */
 	public function get_now() {
 		return new \DateTime();

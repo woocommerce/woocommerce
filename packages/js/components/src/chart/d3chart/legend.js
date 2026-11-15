@@ -122,7 +122,7 @@ class D3Legend extends Component {
 													'woocommerce'
 												),
 												selectionLimit
-										  )
+											)
 										: ''
 								}
 							>
@@ -142,7 +142,7 @@ class D3Legend extends Component {
 															keys,
 															colorScheme
 														)( row.key ),
-												  }
+													}
 												: null
 										}
 									/>

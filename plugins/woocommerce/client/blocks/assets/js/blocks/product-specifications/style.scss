@@ -1,3 +1,7 @@
 :where(.wp-block-product-specifications-item__label) {
 	text-align: left;
 }
+
+:where(.wp-block-product-specifications-item__value > p) {
+	margin: 0;
+}

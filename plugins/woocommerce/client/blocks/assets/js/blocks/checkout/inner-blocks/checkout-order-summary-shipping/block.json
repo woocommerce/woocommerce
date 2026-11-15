@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-order-summary-shipping-block",
-	"version": "1.0.0",
 	"title": "Shipping",
 	"description": "Shows the cart shipping row.",
 	"category": "woocommerce",

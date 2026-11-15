@@ -15,7 +15,7 @@ export const getObserversByPriority = (
 	return observers[ eventType ]
 		? Array.from( observers[ eventType ].values() ).sort( ( a, b ) => {
 				return a.priority - b.priority;
-		  } )
+			} )
 		: [];
 };
 

@@ -115,7 +115,7 @@ class LaunchYourStore {
 		// phpcs:enable
 
 		if ( $is_setting_page || $is_woopayments_connect ) {
-			// Regnerate the share key if it's not set.
+			// Regenerate the share key if it's not set.
 			add_option( 'woocommerce_share_key', wp_generate_password( 32, false ) );
 
 			$settings['siteVisibilitySettings'] = array(

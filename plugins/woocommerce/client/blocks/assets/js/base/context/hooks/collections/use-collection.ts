@@ -108,7 +108,7 @@ export const useCollection = < T >(
 							: __(
 									'Something went wrong while loading data.',
 									'woocommerce'
-							  );
+								);
 					throwError( new Error( message ) );
 				}
 			}

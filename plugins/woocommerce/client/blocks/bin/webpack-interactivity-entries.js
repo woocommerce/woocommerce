@@ -11,7 +11,11 @@ function blockSupportsInteractivity( blockJson ) {
 }
 
 function findInteractivityBlockAssets( dir = [] ) {
-	const additionalPatterns = [ 'frontend.*s', 'style.scss', 'editor.scss' ];
+	const additionalPatterns = [
+		'{frontend.ts,frontend.js}',
+		'style.scss',
+		'editor.scss',
+	];
 	let results = [];
 	const ents = fs.readdirSync( dir, { withFileTypes: true } );
 
@@ -97,7 +101,9 @@ const interactivityBlocks = findInteractivityBlockAssets(
 );
 
 const scriptModuleEntries = interactivityBlocks.reduce( ( acc, block ) => {
-	const frontendFile = block.assets.find( ( f ) => f.includes( 'frontend' ) );
+	const frontendFile = block.assets.find( ( f ) =>
+		[ 'frontend.ts', 'frontend.js' ].includes( path.basename( f ) )
+	);
 	if ( frontendFile ) {
 		acc[ block.blockName ] = frontendFile;
 	}
@@ -105,7 +111,9 @@ const scriptModuleEntries = interactivityBlocks.reduce( ( acc, block ) => {
 }, {} );
 
 const styleEntries = interactivityBlocks.reduce( ( acc, block ) => {
-	const styleFile = block.assets.find( ( f ) => f.includes( 'style' ) );
+	const styleFile = block.assets.find(
+		( f ) => path.basename( f ) === 'style.scss'
+	);
 	if ( styleFile ) {
 		acc[ `${ block.blockName }-style` ] = styleFile;
 	}
@@ -113,7 +121,9 @@ const styleEntries = interactivityBlocks.reduce( ( acc, block ) => {
 }, {} );
 
 const editorStyleEntries = interactivityBlocks.reduce( ( acc, block ) => {
-	const editorFile = block.assets.find( ( f ) => f.includes( 'editor' ) );
+	const editorFile = block.assets.find(
+		( f ) => path.basename( f ) === 'editor.scss'
+	);
 	if ( editorFile ) {
 		acc[ `${ block.blockName }-editor` ] = editorFile;
 	}

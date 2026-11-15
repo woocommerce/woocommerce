@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return saved Core ability values with single-type output schemas and omit only optional fields.

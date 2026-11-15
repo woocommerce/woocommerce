@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Add Jest coverage for the four Add to Cart with Options Interactivity API stores, plus PHPUnit coverage for the legacy form markup and the grouped-product quantity handler. No E2E tests are removed.

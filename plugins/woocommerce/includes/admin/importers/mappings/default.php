@@ -44,6 +44,7 @@ function wc_importer_default_english_mappings( $mappings ) {
 		'ID'                                      => 'id',
 		'Type'                                    => 'type',
 		'SKU'                                     => 'sku',
+		'GTIN, UPC, EAN, or ISBN'                 => 'global_unique_id',
 		'Name'                                    => 'name',
 		'Published'                               => 'published',
 		'Is featured?'                            => 'featured',
@@ -80,6 +81,9 @@ function wc_importer_default_english_mappings( $mappings ) {
 		'External URL'                            => 'product_url',
 		'Button text'                             => 'button_text',
 		'Position'                                => 'menu_order',
+		'Commodity code (HS code)'                => 'customs_commodity_code',
+		'Country of origin'                       => 'customs_country_of_origin',
+		'Customs description'                     => 'customs_description',
 	);
 
 	if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {

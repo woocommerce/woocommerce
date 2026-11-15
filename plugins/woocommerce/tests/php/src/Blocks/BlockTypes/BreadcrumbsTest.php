@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use WP_Theme_JSON_Data;
 use WP_UnitTestCase;
 
@@ -68,6 +69,7 @@ class BreadcrumbsTest extends WP_UnitTestCase {
 				return new WP_Theme_JSON_Data( $data, 'user' );
 			}
 		);
+		StyleAttributesUtils::reset_global_styles_cache();
 	}
 
 	/**
@@ -106,7 +108,9 @@ class BreadcrumbsTest extends WP_UnitTestCase {
 	public function test_custom_typography_font_size(): void {
 		$markup = $this->render_breadcrumbs( '{"style":{"typography":{"fontSize":"2rem"}}}' );
 
-		$this->assertStringContainsString( 'font-size: 2rem', $markup, 'Custom font size should be applied as inline style.' );
+		// Fluid typography may render the size as clamp(..., 2rem), so only
+		// require that 2rem appears within the font-size declaration itself.
+		$this->assertMatchesRegularExpression( '/font-size:[^;"]*2rem/', $markup, 'Custom font size should be applied as inline style.' );
 		$this->assertStringNotContainsString( 'has-small-font-size', $markup, 'Default small font size class should be removed for custom typography.' );
 	}
 

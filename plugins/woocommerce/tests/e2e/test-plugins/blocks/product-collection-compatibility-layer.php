@@ -8,6 +8,11 @@
  * @package woocommerce-blocks-test-product-collection-compatibility-layer
  */
 
+// Only requests from specs that enable this plugin send the cookie.
+if ( ! isset( $_COOKIE['woocommerce-blocks-test-product-collection-compatibility-layer'] ) ) {
+	return;
+}
+
 add_action(
 	'woocommerce_before_main_content',
 	function () {

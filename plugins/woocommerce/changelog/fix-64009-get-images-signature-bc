@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Follow-up to unreleased #64009: restore the original get_images()/get_image() signatures on product REST controllers so third-party subclasses do not fatal on PHP 8; the image_size parameter is now read from the current request.
-
-

@@ -1,5 +1,3 @@
-/* stylelint-disable function-url-quotes */
-/* quotes necessary for the data urls in url(), will shift these resources out to their own files when we enable asset modules */
 
 @keyframes fadeIn {
 	from {
@@ -94,6 +92,7 @@
 							h3 {
 								font-weight: 400;
 								color: #757575;
+								/* stylelint-disable-next-line declaration-property-unit-allowed-list */
 								line-height: 1.6rem;
 								margin: 0;
 							}
@@ -241,6 +240,7 @@ button.components-button.send-magic-link-button {
 // Shared `<QRDirectLoginCode />` rules live in the partial below. They are
 // reused by the standalone wc-admin page (`client/mobile-app-login`) so both
 // surfaces render the same QR / number-match / approved / rejected layouts.
+/* stylelint-disable-next-line no-invalid-position-at-import-rule */
 @import "./components/qr-direct-login.scss";
 
 // FAQ paragraph that sits below the stepper / QR block. Adds the breathing
@@ -366,6 +366,7 @@ button.components-button.send-magic-link-button {
 		.email-sent-subheader {
 			font-weight: 400;
 			font-size: 16px;
+			/* stylelint-disable-next-line declaration-property-unit-allowed-list */
 			line-height: 1.5rem;
 			color: #757575;
 			text-align: center;
@@ -409,6 +410,7 @@ button.components-button.send-magic-link-button {
 		.wrong-user-connected-subheader {
 			font-weight: 400;
 			font-size: 16px;
+			/* stylelint-disable-next-line declaration-property-unit-allowed-list */
 			line-height: 1.5rem;
 			color: #757575;
 			text-align: center;

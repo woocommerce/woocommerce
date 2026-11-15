@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Automatically match the GTIN, UPC, EAN, or ISBN column when importing exported product CSV files.

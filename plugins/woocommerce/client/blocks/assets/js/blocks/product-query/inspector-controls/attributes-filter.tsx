@@ -43,7 +43,6 @@ export const AttributesFilter = ( props: ProductQueryBlock ) => {
 				selected={ selected }
 				onChange={ ( attributes ) => {
 					const __woocommerceAttributes = attributes.map(
-						// eslint-disable-next-line @typescript-eslint/naming-convention
 						( { id, value } ) => ( {
 							termId: id,
 							taxonomy: value,

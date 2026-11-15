@@ -149,7 +149,7 @@ class WC_Breadcrumb {
 		if ( ! $post_id ) {
 			global $post;
 		} else {
-			$post = get_post( $post_id ); // WPCS: override ok.
+			$post = get_post( $post_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- $post is a local value when a post ID is provided.
 		}
 
 		if ( ! $permalink ) {

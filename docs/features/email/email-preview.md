@@ -1,6 +1,8 @@
 ---
 post_title: Email preview integration
+description: How to integrate with WooCommerce's email preview feature to showcase custom email templates.
 sidebar_label: Email preview integration
+sidebar_position: 2
 ---
 
 # Email Preview Integration

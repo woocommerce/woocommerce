@@ -24,7 +24,7 @@ const withViewSwitcher =
 						views: blockAttributes.editorViews,
 						currentView: blockAttributes.currentView,
 						viewClientId: clientId,
-				  }
+					}
 				: findParentBlockEditorViews( clientId );
 		} );
 

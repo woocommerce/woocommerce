@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-order-note-block",
-	"version": "1.0.0",
 	"title": "Order Note",
 	"description": "Allow customers to add a note to their order.",
 	"category": "woocommerce",

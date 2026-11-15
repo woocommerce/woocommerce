@@ -18,7 +18,7 @@ class DatabaseUtil {
 	 * Wrapper for the WordPress dbDelta function, allows to execute a series of SQL queries.
 	 *
 	 * @param string $queries The SQL queries to execute.
-	 * @param bool   $execute Ture to actually execute the queries, false to only simulate the execution.
+	 * @param bool   $execute True to actually execute the queries, false to only simulate the execution.
 	 * @return array The result of the execution (or simulation) from dbDelta.
 	 */
 	public function dbdelta( string $queries = '', bool $execute = true ): array {
@@ -436,5 +436,29 @@ $on_duplicate_clause
 		$order_item_table = $wpdb->prefix . 'woocommerce_order_items';
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_item_table is hardcoded.
 		return ! empty( $wpdb->get_results( "SHOW INDEX FROM $order_item_table WHERE Key_name = 'order_item_fts'" ) );
+	}
+
+	/**
+	 * Delete the transients whose name starts with any of the given prefixes.
+	 *
+	 * Rows are deleted from the options table directly, so transients held in a persistent object cache are not affected.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string[] $prefixes Transient name prefixes, without the "_transient_" part. Empty prefixes are ignored.
+	 * @return void
+	 */
+	public function delete_transients_by_prefix( array $prefixes ): void {
+		global $wpdb;
+
+		foreach ( array_filter( $prefixes ) as $prefix ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+					$wpdb->esc_like( '_transient_' . $prefix ) . '%',
+					$wpdb->esc_like( '_transient_timeout_' . $prefix ) . '%'
+				)
+			);
+		}
 	}
 }

@@ -20,7 +20,9 @@ export const ConstrainedResizable = ( {
 	} );
 	const throttledResize = useThrottledCallback< ResizeCallback >(
 		( event, direction, elt, _delta ) => {
-			if ( ! isResizing ) setIsResizing( true );
+			if ( ! isResizing ) {
+				setIsResizing( true );
+			}
 			onResize?.( event, direction, elt, _delta );
 		},
 		50,

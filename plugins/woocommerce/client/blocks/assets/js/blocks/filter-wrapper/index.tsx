@@ -246,7 +246,9 @@ registerBlockType( metadata, {
 					isFilterWidget( idBase ) && !! instance?.raw,
 				transform: ( { idBase, instance } ) => {
 					const filterBlockObject = getFilterBlockObject( idBase );
-					if ( ! filterBlockObject ) return null;
+					if ( ! filterBlockObject ) {
+						return null;
+					}
 					return transformFilterBlock(
 						filterBlockObject.name,
 						getTransformAttributes(

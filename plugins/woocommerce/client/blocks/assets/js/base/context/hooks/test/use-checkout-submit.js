@@ -1,21 +1,25 @@
 /**
  * External dependencies
  */
-import TestRenderer, { act } from 'react-test-renderer';
+import { act, renderHook } from '@testing-library/react';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { useCheckoutSubmit } from '../use-checkout-submit';
+import {
+	CART_STORE_KEY,
+	config as cartStoreConfig,
+} from '@woocommerce/block-data/cart';
 import {
 	CHECKOUT_STORE_KEY,
 	config as checkoutStoreConfig,
-} from '../../../../data/checkout';
+} from '@woocommerce/block-data/checkout';
 import {
 	PAYMENT_STORE_KEY,
 	config as paymentDataStoreConfig,
-} from '../../../../data/payment';
+} from '@woocommerce/block-data/payment';
+import { useCheckoutSubmit } from '../use-checkout-submit';
 
 jest.mock( '../../providers/cart-checkout/checkout-events', () => {
 	const original = jest.requireActual(
@@ -30,41 +34,53 @@ jest.mock( '../../providers/cart-checkout/checkout-events', () => {
 } );
 
 describe( 'useCheckoutSubmit', () => {
-	let registry, renderer;
+	let registry;
 
-	const getWrappedComponents = ( Component ) => (
-		<RegistryProvider value={ registry }>
-			<Component />
-		</RegistryProvider>
+	const wrapper = ( { children } ) => (
+		<RegistryProvider value={ registry }>{ children }</RegistryProvider>
 	);
-
-	const getTestComponent = () => () => {
-		const data = useCheckoutSubmit();
-		return <div { ...data } />;
-	};
 
 	beforeEach( () => {
 		registry = createRegistry( {
+			[ CART_STORE_KEY ]: cartStoreConfig,
 			[ CHECKOUT_STORE_KEY ]: checkoutStoreConfig,
 			[ PAYMENT_STORE_KEY ]: paymentDataStoreConfig,
 		} );
-		renderer = null;
 	} );
 
 	it( 'onSubmit calls the correct action in the checkout events context', () => {
-		const TestComponent = getTestComponent();
-
-		act( () => {
-			renderer = TestRenderer.create(
-				getWrappedComponents( TestComponent )
-			);
+		const { result } = renderHook( () => useCheckoutSubmit(), {
+			wrapper,
 		} );
 
-		//eslint-disable-next-line testing-library/await-async-query
-		const { onSubmit } = renderer.root.findByType( 'div' ).props;
+		const { onSubmit } = result.current;
 
 		onSubmit();
 
 		expect( onSubmit ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'keeps the place order button disabled while a shipping address change waits to be sent', () => {
+		const { result } = renderHook( () => useCheckoutSubmit(), {
+			wrapper,
+		} );
+
+		expect( result.current.isCalculating ).toBe( false );
+
+		act( () => {
+			registry
+				.dispatch( CART_STORE_KEY )
+				.__internalSetShippingRatesUpdateQueued( true );
+		} );
+
+		expect( result.current.isCalculating ).toBe( true );
+
+		act( () => {
+			registry
+				.dispatch( CART_STORE_KEY )
+				.__internalSetShippingRatesUpdateQueued( false );
+		} );
+
+		expect( result.current.isCalculating ).toBe( false );
 	} );
 } );

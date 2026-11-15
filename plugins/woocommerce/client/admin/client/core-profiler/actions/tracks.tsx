@@ -195,7 +195,9 @@ const recordTracksPluginsInstallationRequest = ( {
 } ) => {
 	recordEvent( 'coreprofiler_store_extensions_continue', {
 		shown: event.payload.pluginsShown || [],
-		selected: event.payload.pluginsSelected || [],
+		selected: ( event.payload.pluginsSelected || [] ).map( ( key ) =>
+			key.replace( ':alt', '' )
+		),
 		unselected: event.payload.pluginsUnselected || [],
 	} );
 

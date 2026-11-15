@@ -36,6 +36,91 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Shipping method routes are read-only.
+	 */
+	public function test_read_only_route_contract(): void {
+		wp_set_current_user( $this->user );
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/shipping_methods' ) );
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'rest_no_route', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Core shipping methods and optional instance costs.
+	 *
+	 * @return array
+	 */
+	public function core_shipping_method_provider(): array {
+		return array(
+			'flat rate'     => array( 'flat_rate', 'Flat rate', '10' ),
+			'free shipping' => array( 'free_shipping', 'Free shipping', null ),
+		);
+	}
+
+	/**
+	 * @testdox A core shipping method can be added to a zone with its settings, read back, and removed.
+	 *
+	 * @dataProvider core_shipping_method_provider
+	 *
+	 * @param string      $method_id    Shipping method ID.
+	 * @param string      $method_title Shipping method title.
+	 * @param string|null $cost         Optional instance cost.
+	 */
+	public function test_core_zone_method_create_lifecycle( $method_id, $method_title, $cost ): void {
+		wp_set_current_user( $this->user );
+
+		$zone = new WC_Shipping_Zone( null );
+		$zone->set_zone_name( 'Zone for ' . $method_title );
+		$zone->save();
+
+		$body = array(
+			'method_id' => $method_id,
+			'enabled'   => true,
+		);
+		if ( null !== $cost ) {
+			$body['settings'] = array( 'cost' => $cost );
+		}
+
+		$collection_path = '/wc/v3/shipping/zones/' . $zone->get_id() . '/methods';
+		$request         = new WP_REST_Request( 'POST', $collection_path );
+		$request->set_body_params( $body );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$instance_id = $data['instance_id'];
+		$this->assertIsInt( $instance_id );
+		$this->assertSame( $instance_id, $data['id'] );
+		$this->assertSame( $method_id, $data['method_id'] );
+		$this->assertSame( $method_title, $data['title'] );
+		$this->assertTrue( $data['enabled'] );
+		if ( null === $cost ) {
+			$this->assertArrayNotHasKey( 'cost', $data['settings'] );
+		} else {
+			$this->assertSame( $cost, $data['settings']['cost']['value'] );
+		}
+
+		$item_path = $collection_path . '/' . $instance_id;
+		$this->assertSame( rest_url( $item_path ), $data['_links']['self'][0]['href'] );
+		$this->assertSame( rest_url( $collection_path ), $data['_links']['collection'][0]['href'] );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $item_path ) );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $method_id, $response->get_data()['method_id'] );
+		$this->assertTrue( $response->get_data()['enabled'] );
+		if ( null !== $cost ) {
+			$this->assertSame( $cost, $response->get_data()['settings']['cost']['value'] );
+		}
+
+		$delete_request = new WP_REST_Request( 'DELETE', $item_path );
+		$delete_request->set_param( 'force', true );
+		$response = $this->server->dispatch( $delete_request );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $instance_id, $response->get_data()['instance_id'] );
+		$this->assertSame( 404, $this->server->dispatch( new WP_REST_Request( 'GET', $item_path ) )->get_status() );
+	}
+
+	/**
 	 * Test getting all shipping methods.
 	 *
 	 * @since 3.5.0

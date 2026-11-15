@@ -19,6 +19,7 @@ import {
 	onboardingStore,
 	optionsStore,
 } from '@woocommerce/data';
+import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -44,6 +45,7 @@ import {
 	useTaskListsState,
 } from '~/hooks/use-tasklists-state';
 import { hasTwoColumnLayout } from './utils';
+import { isFeatureEnabled } from '~/utils/features';
 
 const TaskLists = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../task-lists' ).then(
@@ -57,6 +59,7 @@ export const Layout = ( {
 	defaultHomescreenLayout,
 	query,
 	hasTaskList,
+	hasStaleTask,
 	showingProgressHeader,
 	isLoadingTaskLists,
 } ) => {
@@ -107,6 +110,13 @@ export const Layout = ( {
 		}
 	}, [ query?.nox, createInfoNotice ] );
 
+	// A stale task would render a blank screen, so send it to the homescreen instead
+	useEffect( () => {
+		if ( hasStaleTask ) {
+			getHistory().replace( getNewPath( {}, '/', {} ) );
+		}
+	}, [ hasStaleTask ] );
+
 	const shouldStickColumns = isWideViewport.current && twoColumns;
 	const shouldShowMobileAppModal = query.mobileAppModal ?? false;
 	const shouldShowEmailImprovementsModal =
@@ -148,7 +158,7 @@ export const Layout = ( {
 					<InboxPanel />
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
-					{ window.wcAdminFeatures.analytics && <StatsOverview /> }
+					{ isFeatureEnabled( 'analytics' ) && <StatsOverview /> }
 					{ ! isSetupTaskListActive && <StoreManagementLinks /> }
 				</Column>
 			</>
@@ -203,7 +213,7 @@ Layout.propTypes = {
 };
 
 export default compose(
-	withSelect( ( select ) => {
+	withSelect( ( select, { query } ) => {
 		const { isNotesRequesting } = select( notesStore );
 		const { getOption } = select( optionsStore );
 		const defaultHomescreenLayout =
@@ -211,6 +221,7 @@ export default compose(
 			'single_column';
 
 		const {
+			getTask,
 			getTaskLists,
 			hasFinishedResolution: taskListFinishResolution,
 		} = select( onboardingStore );
@@ -219,18 +230,28 @@ export default compose(
 		const hasTaskList = visibleTaskListIds.length > 0;
 
 		// Only fetch task lists if there are any visible task lists to avoid unnecessary API calls
+		// The task screen renders even when no task list is visible, so the stale task check below needs the fetch too
 		let isLoadingTaskLists = false;
 		let taskLists = [];
-		if ( hasTaskList ) {
+		if ( hasTaskList || query.task ) {
 			isLoadingTaskLists = ! taskListFinishResolution( 'getTaskLists' );
 			taskLists = getTaskLists();
 		}
+
+		// A task param is stale when it matches no fetched task: it was removed, or its list is hidden and the endpoint strips those tasks
+		// Empty task lists mean a failed or unfinished fetch, never a stale task
+		const hasStaleTask =
+			!! query.task &&
+			! isLoadingTaskLists &&
+			taskLists.length > 0 &&
+			! getTask( query.task );
 
 		return {
 			defaultHomescreenLayout,
 			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
 			isLoadingTaskLists,
 			hasTaskList,
+			hasStaleTask,
 			showingProgressHeader: !! taskLists.find(
 				( list ) => list.isVisible && list.displayProgressHeader
 			),

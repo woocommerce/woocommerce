@@ -109,7 +109,7 @@ export const Setup = ( { markConfigured, paymentGateway } ) => {
 							pluginSlugs={ plugins }
 						/>
 					),
-			  }
+				}
 			: null;
 	}, [] );
 

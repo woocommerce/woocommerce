@@ -21,11 +21,11 @@ const CustomizeStoreHeader = ( {
 		? __(
 				'Use our built-in AI tools to design your store and populate it with content, or select a pre-built theme and customize it to fit your brand.',
 				'woocommerce'
-		  )
+			)
 		: __(
 				'Quickly create a beautiful looking store using our built-in store designer, or select a pre-built theme and customize it to fit your brand.',
 				'woocommerce'
-		  );
+			);
 	return (
 		<div
 			className={ `woocommerce-task-header__contents-container woocommerce-task-header__${ task.id }` }

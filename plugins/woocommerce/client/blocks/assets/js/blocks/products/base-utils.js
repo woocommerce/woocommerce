@@ -6,14 +6,22 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
-import addToCartButtonMetadata from '../../atomic/blocks/product-elements/button/block.json';
-import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
+import addToCartButtonMetadata from '../product-elements-blocks/button/block.json';
 
 /**
  * The default layout built from the default template.
  */
 export const DEFAULT_PRODUCT_LIST_LAYOUT = [
-	[ 'woocommerce/product-image', { imageSizing: ImageSizing.THUMBNAIL } ],
+	[
+		'woocommerce/product-image',
+		{
+			style: {
+				dimensions: {
+					aspectRatio: '1/1',
+				},
+			},
+		},
+	],
 	[ 'woocommerce/product-title' ],
 	[ 'woocommerce/product-price' ],
 	[ 'woocommerce/product-rating' ],

@@ -3,27 +3,25 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * Unit tests for the CartController class.
  */
-class CartControllerTests extends TestCase {
+class CartControllerTests extends \WC_Unit_Test_Case {
 	/**
 	 * tearDown.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
-		WC()->cart->empty_cart();
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
-
 		// Reset DI container to clear any mocks.
 		$container = wc_get_container();
 		$container->reset_all_resolved();
 		$container->reset_all_replacements();
+
+		parent::tearDown();
 	}
 
 	/**
@@ -80,6 +78,27 @@ class CartControllerTests extends TestCase {
 		$class->normalize_cart();
 		$this->assertEquals( 6, wc()->cart->get_cart_item( $product_key )['quantity'] );
 		remove_all_filters( 'woocommerce_store_api_product_quantity_multiple_of' );
+		wc()->cart->empty_cart();
+	}
+
+	/**
+	 * Test set_cart_item_quantity stores the normalized quantity that was validated, not the raw value.
+	 */
+	public function test_set_cart_item_quantity_stores_normalized_quantity() {
+		$class    = new CartController();
+		$fixtures = new FixtureData();
+
+		$product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product 1',
+				'regular_price' => 10,
+			)
+		);
+
+		$product_key = wc()->cart->add_to_cart( $product->get_id(), 1 );
+		$class->set_cart_item_quantity( $product_key, '3abc' );
+
+		$this->assertSame( 3, wc()->cart->get_cart_item( $product_key )['quantity'] );
 		wc()->cart->empty_cart();
 	}
 
@@ -287,5 +306,132 @@ class CartControllerTests extends TestCase {
 		$this->assertArrayHasKey( 'package_name', $packages[0], 'Package should still have package_name.' );
 
 		remove_all_filters( 'woocommerce_cart_shipping_packages' );
+	}
+
+	/**
+	 * @testdox Add to cart applies woocommerce_add_to_cart_quantity to the requested quantity.
+	 */
+	public function test_add_to_cart_applies_quantity_filter(): void {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Quantity Filter Product',
+				'regular_price' => 10,
+			)
+		);
+
+		$captured = array();
+		$filter   = static function ( $quantity, $product_id, $variation_id ) use ( &$captured ) {
+			$captured = array( $quantity, $product_id, $variation_id );
+			return 4;
+		};
+
+		add_filter( 'woocommerce_add_to_cart_quantity', $filter, 10, 3 );
+		try {
+			$cart_id = ( new CartController() )->add_to_cart(
+				array(
+					'id'       => $product->get_id(),
+					'quantity' => 1,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_add_to_cart_quantity', $filter, 10 );
+		}
+
+		$this->assertSame( array( 1, $product->get_id(), 0 ), $captured );
+		$this->assertSame( 4, wc()->cart->get_cart_item( $cart_id )['quantity'] );
+	}
+
+	/**
+	 * @testdox Add to cart passes the variation ID to woocommerce_add_to_cart_quantity.
+	 */
+	public function test_add_to_cart_quantity_filter_receives_variation_id(): void {
+		$product   = \WC_Helper_Product::create_variation_product();
+		$variation = null;
+		foreach ( $product->get_available_variations() as $available_variation ) {
+			if ( ! in_array( '', $available_variation['attributes'], true ) ) {
+				$variation = $available_variation;
+				break;
+			}
+		}
+		$this->assertIsArray( $variation, 'Expected a variation with every attribute set.' );
+
+		$variation_request = array();
+		foreach ( $variation['attributes'] as $name => $value ) {
+			$attribute = $name;
+			if ( str_starts_with( $attribute, 'attribute_' ) ) {
+				$attribute = substr( $attribute, strlen( 'attribute_' ) );
+			}
+			$variation_request[] = array(
+				'attribute' => $attribute,
+				'value'     => $value,
+			);
+		}
+
+		$captured = array();
+		$filter   = static function ( $quantity, $product_id, $variation_id ) use ( &$captured ) {
+			$captured = array( $quantity, $product_id, $variation_id );
+			return 4;
+		};
+
+		add_filter( 'woocommerce_add_to_cart_quantity', $filter, 10, 3 );
+		try {
+			$cart_id = ( new CartController() )->add_to_cart(
+				array(
+					'id'        => $variation['variation_id'],
+					'quantity'  => 1,
+					'variation' => $variation_request,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_add_to_cart_quantity', $filter, 10 );
+		}
+
+		$this->assertSame( array( 1, $product->get_id(), (int) $variation['variation_id'] ), $captured );
+		$this->assertSame( 4, wc()->cart->get_cart_item( $cart_id )['quantity'] );
+	}
+
+	/**
+	 * @testdox Add to cart rejects an attribute value outside the configured options, including when an Any variation exists.
+	 */
+	public function test_add_to_cart_rejects_attribute_value_outside_options_when_any_variation_exists(): void {
+		$product   = new \WC_Product_Variable();
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red', 'Blue' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$red = new \WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '5' );
+		$red->save();
+
+		$any = new \WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '4' );
+		$any->save();
+
+		try {
+			( new CartController() )->add_to_cart(
+				array(
+					'id'        => $product->get_id(),
+					'quantity'  => 1,
+					'variation' => array(
+						array(
+							'attribute' => 'Color',
+							'value'     => 'Green',
+						),
+					),
+				)
+			);
+			$this->fail( 'Posting an attribute value that is not an option should be rejected, including when an Any variation exists.' );
+		} catch ( RouteException $exception ) {
+			$this->assertSame( 'woocommerce_rest_invalid_variation_data', $exception->getErrorCode() );
+			$this->assertStringContainsString( 'Invalid value posted for Color', $exception->getMessage() );
+		}
 	}
 }

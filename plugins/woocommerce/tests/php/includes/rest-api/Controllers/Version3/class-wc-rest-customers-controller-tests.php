@@ -138,6 +138,24 @@ class WC_REST_Customers_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A shop manager cannot update a customer who also has a role outside the editable roles.
+	 */
+	public function test_shop_manager_cannot_update_user_with_extra_role(): void {
+		$customer = new WP_User( $this->customer_id );
+		$customer->add_role( 'administrator' );
+
+		$api_request = new WP_REST_Request( 'PUT', '/wc/v3/customers/' );
+		$api_request->set_param( 'id', $this->customer_id );
+		$api_request->set_param( 'first_name', 'Test' );
+		wp_set_current_user( $this->shop_manager_id );
+
+		$result = $this->sut->update_item_permissions_check( $api_request );
+
+		$this->assertWPError( $result, 'A shop manager cannot update a mixed-role administrator.' );
+		$this->assertSame( 'woocommerce_rest_cannot_edit', $result->get_error_code() );
+	}
+
+	/**
 	 * @testDox Test deleting customers.
 	 */
 	public function test_customer_delete_permission(): void {

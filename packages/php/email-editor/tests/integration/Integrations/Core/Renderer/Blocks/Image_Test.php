@@ -123,6 +123,36 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a caption saved without core's caption class still gets it.
+	 *
+	 * Image captions saved before WordPress 6.2 carry no class, and the email's caption styles key off
+	 * that class, so without it a saved caption color never reaches them.
+	 */
+	public function testItAddsTheCaptionClassToACaptionSavedWithoutIt(): void {
+		$image_content             = str_replace( '</figure>', '<figcaption>Caption</figcaption></figure>', $this->image_content );
+		$parsed_image              = $this->parsed_image;
+		$parsed_image['innerHTML'] = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertStringContainsString( '<span class="wp-element-caption">Caption</span>', $rendered );
+	}
+
+	/**
+	 * Test it keeps a caption's existing classes and does not repeat the caption class.
+	 */
+	public function testItKeepsExistingCaptionClasses(): void {
+		$image_content             = str_replace( '</figure>', '<figcaption class="custom-caption wp-element-caption">Caption</figcaption></figure>', $this->image_content );
+		$parsed_image              = $this->parsed_image;
+		$parsed_image['innerHTML'] = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertStringContainsString( '<span class="custom-caption wp-element-caption">Caption</span>', $rendered );
+		$this->assertSame( 1, substr_count( $rendered, 'wp-element-caption' ) );
+	}
+
+	/**
 	 * Test it renders image alignment
 	 */
 	public function testItRendersImageAlignment(): void {
@@ -209,7 +239,44 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		$html->next_tag( array( 'tag_name' => 'img' ) );
 		$img_style = $html->get_attribute( 'style' );
 		$this->assertIsString( $img_style );
-		$this->assertStringNotContainsString( 'border', $img_style );
+		// The image keeps a rounded corner reduced by the border width so it stays flush inside the border.
+		$this->assertStringContainsString( 'border-radius:10px;', $img_style );
+		$this->assertStringNotContainsString( 'border-style', $img_style );
+		$this->assertStringNotContainsString( 'border-width', $img_style );
+		$this->assertStringNotContainsString( 'border-color', $img_style );
+	}
+
+	/**
+	 * Test the image radius is clamped to 0 when the border width exceeds the radius
+	 */
+	public function testItClampsImageBorderRadiusToZero(): void {
+		$image_content                            = '
+			<figure class="wp-block-image alignleft size-full is-style-default">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" style="border-width:10px;border-color:#000001;border-radius:5px;height:auto;" srcset="https://test.com/wp-content/uploads/2023/05/image.jpg 1000w"/>
+			</figure>
+		';
+		$parsed_image                             = $this->parsed_image;
+		$parsed_image['attrs']['style']['border'] = array(
+			'width'  => '10px',
+			'color'  => '#000001',
+			'radius' => '5px',
+		);
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+		$html     = new \WP_HTML_Tag_Processor( $rendered );
+		$html->next_tag(
+			array(
+				'tag_name'   => 'td',
+				'class_name' => 'email-image-border-cell',
+			)
+		);
+		$table_cell_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $table_cell_style );
+		$this->assertStringContainsString( 'border-radius:5px', $table_cell_style );
+		$html->next_tag( array( 'tag_name' => 'img' ) );
+		$img_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $img_style );
+		$this->assertStringContainsString( 'border-radius:0px;', $img_style );
 	}
 
 	/**
@@ -427,5 +494,185 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 
 		// Note: esc_attr() encodes single quotes as &#039;.
 		$this->assertStringContainsString( 'data-link-href="[trackable-link url=&#039;test&#039;]"', $rendered );
+	}
+
+	/**
+	 * Test that only attributes useful in an email stay on the image.
+	 */
+	public function testItRemovesWebOnlyAttributesFromImage(): void {
+		$image_content = '<figure class="wp-block-image"><img class="wp-image-1" src="https://test.com/image.jpg?a=1&b=2" alt="Alt" title="Title" width="640" height="320" loading="lazy" decoding="async" fetchpriority="low" srcset="https://test.com/image.jpg 1000w" sizes="(max-width: 640px) 100vw, 640px" data-id="1" style="aspect-ratio:2;object-fit:cover"/></figure>';
+
+		$rendered = $this->image_renderer->render( $image_content, $this->parsed_image, $this->rendering_context );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'img' ) ) );
+		$this->assertEqualsCanonicalizing(
+			array( 'src', 'alt', 'title', 'width', 'height', 'style' ),
+			$html->get_attribute_names_with_prefix( '' )
+		);
+		$this->assertSame( 'https://test.com/image.jpg?a=1&b=2', $html->get_attribute( 'src' ) );
+		$this->assertStringContainsString( 'object-fit:cover', (string) $html->get_attribute( 'style' ) );
+		$this->assertStringContainsString( 'aspect-ratio:2', (string) $html->get_attribute( 'style' ) );
+	}
+
+	/**
+	 * Test the saved height is scaled when capping the width shrinks the image.
+	 *
+	 * Outlook sizes from the width and height attributes, so a saved height left beside the capped
+	 * width would stretch the image vertically.
+	 */
+	public function testItScalesTheSavedHeightWhenItCapsTheWidth(): void {
+		$image_content = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="1024" height="555" style="max-width:100%;height:auto;"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] );
+		$parsed_image['email_attrs']['width'] = '660px';
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '660', $this->get_image_attribute( $rendered, 'width' ) );
+		// 555 * ( 660 / 1024 ) = 357.76.
+		$this->assertSame( '358', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test the saved height is scaled to a width set on the block.
+	 */
+	public function testItScalesTheSavedHeightToABlockWidth(): void {
+		$image_content                  = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="1024" height="555" style="max-width:100%;height:auto;"/>
+			</figure>
+		';
+		$parsed_image                   = $this->parsed_image;
+		$parsed_image['attrs']['width'] = '400px';
+		$parsed_image['innerHTML']      = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '400', $this->get_image_attribute( $rendered, 'width' ) );
+		// 555 * ( 400 / 1024 ) = 216.8.
+		$this->assertSame( '217', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test an image narrower than the content column keeps its saved dimensions.
+	 */
+	public function testItKeepsTheSavedHeightWhenTheImageFitsTheColumn(): void {
+		$image_content = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg?w=400" alt="" width="400" height="200" style="max-width:100%;height:auto;"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] );
+		$parsed_image['email_attrs']['width'] = '660px';
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '400', $this->get_image_attribute( $rendered, 'width' ) );
+		$this->assertSame( '200', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test a fixed height in the image's style wins over the scaled height.
+	 */
+	public function testItKeepsAFixedStyleHeight(): void {
+		$image_content = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="1024" height="555" style="max-width:100%;height:300px;"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] );
+		$parsed_image['email_attrs']['width'] = '660px';
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '660', $this->get_image_attribute( $rendered, 'width' ) );
+		$this->assertSame( '300', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test the saved height is kept when the width falls back to a percentage.
+	 *
+	 * There is no pixel width to scale the height against.
+	 */
+	public function testItKeepsTheSavedHeightWhenTheWidthFallsBackToAPercentage(): void {
+		$image_content = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="1024" height="555" style="max-width:100%;height:auto;"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] );
+		unset( $parsed_image['email_attrs']['width'] );
+		$parsed_image['innerHTML'] = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '555', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test the saved height is kept when the image has no saved width to scale it against.
+	 */
+	public function testItKeepsTheSavedHeightWhenTheImageHasNoSavedWidth(): void {
+		$image_content = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" height="555" style="max-width:100%;height:auto;"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] );
+		$parsed_image['email_attrs']['width'] = '660px';
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '660', $this->get_image_attribute( $rendered, 'width' ) );
+		$this->assertSame( '555', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test no height attribute is invented for an image saved without dimensions.
+	 *
+	 * This is how current core saves an image block: the size lives in the style, not in attributes.
+	 */
+	public function testItAddsNoHeightWhenTheImageHasNoSavedDimensions(): void {
+		$image_content = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" style="max-width:100%;height:auto;"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] );
+		$parsed_image['email_attrs']['width'] = '660px';
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '660', $this->get_image_attribute( $rendered, 'width' ) );
+		$this->assertNull( $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Read an attribute off the rendered image.
+	 *
+	 * @param string $rendered Rendered block content.
+	 * @param string $attribute Attribute name.
+	 * @return string|null The attribute value, or null when the image doesn't carry it.
+	 */
+	private function get_image_attribute( string $rendered, string $attribute ): ?string {
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'img' ) ), 'The rendered content has no image.' );
+		$value = $html->get_attribute( $attribute );
+		return is_string( $value ) ? $value : null;
 	}
 }

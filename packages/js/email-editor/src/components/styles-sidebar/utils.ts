@@ -34,12 +34,12 @@ export const getHeadingElementStyles = (
 				defaultStyleObject,
 				styles.elements?.heading || {},
 				styles.elements?.[ headingLevel ] || {},
-		  ] ) as EmailStyles )
+			] ) as EmailStyles )
 		: ( {
 				...defaultStyleObject,
 				...( styles.elements?.heading || {} ),
 				...( styles.elements?.[ headingLevel ] || {} ),
-		  } as EmailStyles );
+			} as EmailStyles );
 
 export const getElementStyles = (
 	styles: EmailStyles,
@@ -74,4 +74,125 @@ export const getElementStyles = (
 		typography: elementStyles.typography ?? {},
 		color: elementStyles.color ?? {},
 	} as EmailStyles;
+};
+
+type FontFace = {
+	fontStyle?: string;
+	fontWeight?: string | number;
+};
+
+type FontFamily = {
+	slug?: string;
+	fontFamily?: string;
+	fontFace?: FontFace[];
+};
+
+const PRESET_PREFIX = 'var:preset|font-family|';
+const CSS_VAR_PREFIX = 'var(--wp--preset--font-family--';
+
+/**
+ * Gets the font family slug from a preset reference.
+ *
+ * @param fontFamily The font family value.
+ * @return The slug, or undefined when the value is not a preset reference.
+ */
+const getFontFamilySlug = ( fontFamily: string | undefined ) => {
+	if ( fontFamily?.startsWith( PRESET_PREFIX ) ) {
+		return fontFamily.slice( PRESET_PREFIX.length );
+	}
+	if (
+		fontFamily?.startsWith( CSS_VAR_PREFIX ) &&
+		fontFamily.endsWith( ')' )
+	) {
+		return fontFamily.slice( CSS_VAR_PREFIX.length, -1 );
+	}
+	return undefined;
+};
+
+/**
+ * Treats a CSS `inherit` value as not set.
+ *
+ * Core's theme.json gives buttons `inherit` for their font family, style and weight.
+ *
+ * @param value The style value.
+ * @return The value, or undefined when it is `inherit`.
+ */
+export const withoutInherit = < T >( value: T ): T | undefined =>
+	value === 'inherit' ? undefined : value;
+
+/**
+ * Fills in the missing half of a saved font style and weight.
+ *
+ * The Appearance control only shows an option when both values match it exactly.
+ *
+ * @param current            The saved font style and weight.
+ * @param current.fontStyle  The saved font style.
+ * @param current.fontWeight The saved font weight.
+ * @return The style and weight to show, or both undefined when nothing is saved.
+ */
+export const getFontAppearanceValue = ( current: FontFace ) => {
+	const fontStyle = withoutInherit( current.fontStyle );
+	const fontWeight = withoutInherit( current.fontWeight );
+	if ( ! fontStyle && ! fontWeight ) {
+		return { fontStyle: undefined, fontWeight: undefined };
+	}
+	return {
+		fontStyle: fontStyle ?? 'normal',
+		fontWeight: String( fontWeight ?? '400' ),
+	};
+};
+
+/**
+ * Gets the font faces the Appearance control should offer for a font.
+ *
+ * Email fonts have no font faces, so core would offer every weight. The email theme lists the
+ * weights each font can show, and a saved style or weight is kept so the control still shows it.
+ *
+ * @param fontFamilies The font families from the theme settings.
+ * @param fontWeights  The comma-separated weights each font family can show, keyed by slug.
+ * @param fontFamily   The selected font family value or preset reference.
+ * @param current      The saved font style and weight.
+ * @return The font faces, or undefined to let core offer every weight.
+ */
+export const getFontFamilyFaces = (
+	fontFamilies: FontFamily[],
+	fontWeights: Record< string, string > | undefined,
+	fontFamily: string | undefined,
+	current: FontFace
+): FontFace[] | undefined => {
+	const slug = getFontFamilySlug( fontFamily );
+	const family =
+		fontFamilies.find( ( item ) => item.fontFamily === fontFamily ) ??
+		( slug
+			? fontFamilies.find( ( item ) => item.slug === slug )
+			: undefined );
+	const weights = ( family?.slug ? fontWeights?.[ family.slug ] : '' )
+		?.split( ',' )
+		.map( ( weight ) => weight.trim() )
+		.filter( Boolean );
+	let faces: FontFace[];
+	if ( family?.fontFace?.length ) {
+		faces = family.fontFace;
+	} else if ( weights?.length ) {
+		faces = weights.flatMap( ( fontWeight ) => [
+			{ fontStyle: 'normal', fontWeight },
+			{ fontStyle: 'italic', fontWeight },
+		] );
+	} else {
+		return undefined;
+	}
+
+	const { fontStyle, fontWeight } = getFontAppearanceValue( current );
+	if ( ! fontStyle || ! fontWeight ) {
+		return faces;
+	}
+
+	const isOffered = faces.some(
+		( face ) =>
+			( face.fontStyle ?? 'normal' ) === fontStyle &&
+			String( face.fontWeight ) === fontWeight
+	);
+
+	// First, because core skips single weights listed after a variable weight range.
+	return isOffered ? faces : [ { fontStyle, fontWeight }, ...faces ];
 };

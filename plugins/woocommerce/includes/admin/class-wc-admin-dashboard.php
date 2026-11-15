@@ -7,13 +7,16 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+	exit;
+	// Exit if accessed directly.
 }
 
 if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
@@ -165,29 +168,49 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 */
 		public function status_widget_content() {
 			//phpcs:ignore
-			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false ) || ! Features::is_enabled( 'analytics' );
-
-			$status_widget_reports = array(
-				'net_sales_link'      => 'admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue&chart=net_revenue&orderby=net_revenue&period=month&compare=previous_period',
-				'top_seller_link'     => 'admin.php?page=wc-admin&filter=single_product&path=%2Fanalytics%2Fproducts&products=',
-				'lowstock_link'       => 'admin.php?page=wc-admin&type=lowstock&path=%2Fanalytics%2Fstock',
-				'outofstock_link'     => 'admin.php?page=wc-admin&type=outofstock&path=%2Fanalytics%2Fstock',
-				'report_data'         => null,
-				'get_sales_sparkline' => array( $this, 'get_sales_sparkline' ),
-			);
+			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false ) || ! FeaturesUtil::feature_is_enabled( 'analytics' );
 
 			if ( $is_wc_admin_disabled ) {
+				$default_reports = array(
+					'net_sales_link'      => 'admin.php?page=wc-reports&tab=orders&range=month',
+					'top_seller_link'     => 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=',
+					'lowstock_link'       => 'admin.php?page=wc-reports&tab=stock&report=low_in_stock',
+					'outofstock_link'     => 'admin.php?page=wc-reports&tab=stock&report=out_of_stock',
+					'report_data'         => null,
+					'get_sales_sparkline' => null,
+				);
+
 				/**
-				 * Filter to change the reports of the status widget on the Dashboard page.
+				 * Filters the data of the status widget on the Dashboard page when Analytics is disabled.
 				 *
-				 * Please note that this filter is mainly for backward compatibility with the legacy reports.
-				 * It's not recommended to use this filter to change the data of this widget.
+				 * The net sales and top seller rows only show when `report_data` and `get_sales_sparkline` are both set.
+				 * They are null by default; when another callback is hooked here, legacy reports fill them in first.
+				 * This filter is kept for backward compatibility; it's not recommended for new code.
 				 *
 				 * @since 9.5.0
+				 *
+				 * @param array $status_widget_reports {
+				 *     Status widget data.
+				 *
+				 *     @type string        $net_sales_link      Admin URL path for the net sales row.
+				 *     @type string        $top_seller_link     Admin URL path for the top seller row; the product ID is appended.
+				 *     @type string        $lowstock_link       Admin URL path for the low in stock row.
+				 *     @type string        $outofstock_link     Admin URL path for the out of stock row.
+				 *     @type object|null   $report_data         Sales data with a `net_sales` property.
+				 *     @type callable|null $get_sales_sparkline Called with ( $product_id, $days, $type ) and returns an array with `total` and `data`.
+				 * }
 				 */
-				$status_widget_reports = apply_filters( 'woocommerce_dashboard_status_widget_reports', $status_widget_reports );
+				$status_widget_reports = apply_filters( 'woocommerce_dashboard_status_widget_reports', $default_reports );
+				$status_widget_reports = is_array( $status_widget_reports ) ? array_merge( $default_reports, $status_widget_reports ) : $default_reports;
 			} else {
-				$status_widget_reports['report_data'] = $this->get_wc_admin_performance_data();
+				$status_widget_reports = array(
+					'net_sales_link'      => 'admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue&chart=net_revenue&orderby=net_revenue&period=month&compare=previous_period',
+					'top_seller_link'     => 'admin.php?page=wc-admin&filter=single_product&path=%2Fanalytics%2Fproducts&products=',
+					'lowstock_link'       => 'admin.php?page=wc-admin&type=lowstock&path=%2Fanalytics%2Fstock',
+					'outofstock_link'     => 'admin.php?page=wc-admin&type=outofstock&path=%2Fanalytics%2Fstock',
+					'report_data'         => $this->get_wc_admin_performance_data(),
+					'get_sales_sparkline' => array( $this, 'get_sales_sparkline' ),
+				);
 			}
 
 			echo '<ul class="wc_status_list">';
@@ -210,7 +233,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					),
 				);
 
-				if ( $report_data && is_callable( $get_sales_sparkline ) ) {
+				if ( $report_data && ! is_wp_error( $report_data ) && is_callable( $get_sales_sparkline ) ) {
 					$sparkline = call_user_func_array( $get_sales_sparkline, array( '', $days ) );
 					$sparkline = $this->sales_sparkline_markup( 'sales', $days, $sparkline['total'], $sparkline['data'] );
 					?>
@@ -221,16 +244,16 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 						printf(
 							/* translators: %s: net sales */
 							esc_html__( 'Net sales this month %s', 'woocommerce' ),
-							'<strong>' . wc_price( $report_data->net_sales ) . '</strong>'
-						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+							'<strong>' . wc_price( $report_data->net_sales ) . '</strong>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_price() returns filterable price markup for the dashboard.
+						);
 					?>
 					</a>
 				</li>
 					<?php
 				}
 
-				$top_seller = $this->get_top_seller();
-				if ( $top_seller && $top_seller->qty && is_callable( $get_sales_sparkline ) ) {
+				$top_seller = is_callable( $get_sales_sparkline ) ? $this->get_top_seller() : null;
+				if ( $top_seller && $top_seller->qty ) {
 					$sparkline = call_user_func_array( $get_sales_sparkline, array( $top_seller->product_id, $days, 'count' ) );
 					$sparkline = $this->sales_sparkline_markup( 'count', $days, $sparkline['total'], $sparkline['data'] );
 					?>
@@ -241,9 +264,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 						printf(
 							/* translators: 1: top seller product title 2: top seller quantity sold */
 							esc_html( _n( 'Top seller this month %1$s (%2$d sale)', 'Top seller this month %1$s (%2$d sales)', $top_seller->qty, 'woocommerce' ) ),
-							'<strong>' . get_the_title( $top_seller->product_id ) . '</strong>',
-							$top_seller->qty
-						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+							'<strong>' . esc_html( get_the_title( $top_seller->product_id ) ) . '</strong>',
+							(int) $top_seller->qty
+						);
 					?>
 					</a>
 				</li>
@@ -266,7 +289,48 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			 */
 			$reports = apply_filters( 'woocommerce_after_dashboard_status_widget_parameter', null );
 			do_action( 'woocommerce_after_dashboard_status_widget', $reports );
+			$this->status_widget_extensions_without_subscription_row();
 			echo '</ul>';
+		}
+
+		/**
+		 * Show a row for installed WooCommerce.com extensions without a subscription.
+		 */
+		private function status_widget_extensions_without_subscription_row(): void {
+			if ( ! class_exists( 'WC_Helper_Updater' ) ) {
+				return;
+			}
+
+			$count = count( WC_Helper_Updater::get_plugins_without_subscription() ?? array() );
+			if ( 0 === $count ) {
+				return;
+			}
+
+			$my_subscriptions_url = add_query_arg(
+				array(
+					'page'         => 'wc-admin',
+					'tab'          => 'my-subscriptions',
+					'path'         => rawurlencode( '/extensions' ),
+					'utm_source'   => 'pu',
+					'utm_campaign' => 'pu_dashboard_widget_purchase',
+				),
+				admin_url( 'admin.php' )
+			);
+			?>
+			<li class="extensions-without-subscription">
+				<a href="<?php echo esc_url( $my_subscriptions_url ); ?>">
+				<?php
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: number of extensions */
+							_n( '<strong>%s extension</strong> without a WooCommerce.com subscription', '<strong>%s extensions</strong> without a WooCommerce.com subscription', $count, 'woocommerce' ),
+							$count
+						)
+					);
+				?>
+				</a>
+			</li>
+			<?php
 		}
 
 		/**
@@ -363,7 +427,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				set_transient( $transient_name, (int) $lowinstock_count, DAY_IN_SECONDS * 30 );
 			}
 
-			$transient_name   = 'wc_outofstock_count';
+			$transient_name   = ProductUtil::OUTOFSTOCK_COUNT_TRANSIENT;
 			$outofstock_count = get_transient( $transient_name );
 			$lowstock_url     = $lowstock_link ? admin_url( $lowstock_link ) : '#';
 			$outofstock_url   = $outofstock_link ? admin_url( $outofstock_link ) : '#';
@@ -379,14 +443,20 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				$outofstock_count = apply_filters( 'woocommerce_status_widget_out_of_stock_count_pre_query', null, $nostock );
 
 				if ( is_null( $outofstock_count ) ) {
+					// Count by the canonical, save-time-computed stock_status column (as the Analytics
+					// stock report does), rather than a live stock_quantity threshold. This also captures
+					// products with stock management disabled (a NULL stock_quantity never matched the old
+					// threshold query — see #29698). Note the trade-off: changing the
+					// woocommerce_notify_no_stock_amount option does not reclassify existing products'
+					// stock_status until each is re-saved, so this count reflects that same staleness.
 					$outofstock_count = (int) $wpdb->get_var(
 						$wpdb->prepare(
 							"SELECT COUNT( product_id )
 							FROM {$wpdb->wc_product_meta_lookup} AS lookup
 							INNER JOIN {$wpdb->posts} as posts ON lookup.product_id = posts.ID
-							WHERE stock_quantity <= %d
+							WHERE lookup.stock_status = %s
 							AND posts.post_status = 'publish'",
-							$nostock
+							ProductStockStatus::OUT_OF_STOCK
 						)
 					);
 				}

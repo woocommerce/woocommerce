@@ -1,5 +1,5 @@
-@import 'components/customer-feedback-simple/customer-feedback-simple.scss';
-@import 'components/feedback-modal/feedback-modal.scss';
+@import "components/customer-feedback-simple/customer-feedback-simple.scss";
+@import "components/feedback-modal/feedback-modal.scss";
 
 .woocommerce-customer-effort-score__selection {
 	margin: 1em 0 1.5em 0;
@@ -18,7 +18,6 @@
 			justify-items: center;
 		}
 	}
-
 
 
 	.components-radio-control__option {
@@ -49,13 +48,13 @@
 			}
 		}
 
-		input:focus+label {
+		input:focus + label {
 			outline: 2px solid $studio-wordpress-blue;
 			background-color: peach;
 			color: $studio-blue-60;
 		}
 
-		input:checked+label {
+		input:checked + label {
 			outline: 2px solid $studio-wordpress-blue;
 			background-color: $studio-wordpress-blue-0;
 		}
@@ -69,24 +68,24 @@
 			color: $studio-wordpress-blue;
 		}
 
-		input[value='1']+label::before {
-			content: '😞';
+		input[value="1"] + label::before {
+			content: "😞";
 		}
 
-		input[value='2']+label::before {
-			content: '🙁';
+		input[value="2"] + label::before {
+			content: "🙁";
 		}
 
-		input[value='3']+label::before {
-			content: '😑';
+		input[value="3"] + label::before {
+			content: "😑";
 		}
 
-		input[value='4']+label::before {
-			content: '🙂';
+		input[value="4"] + label::before {
+			content: "🙂";
 		}
 
-		input[value='5']+label::before {
-			content: '😍';
+		input[value="5"] + label::before {
+			content: "😍";
 		}
 	}
 }

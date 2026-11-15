@@ -25,34 +25,11 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 	private FulfillmentsManager $manager;
 
 	/**
-	 * The original value of the fulfillments feature flag before tests.
-	 *
-	 * @var string|false
-	 */
-	private static $original_fulfillments_enabled;
-
-	/**
 	 * Set up the test environment.
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		self::$original_fulfillments_enabled = get_option( 'woocommerce_feature_fulfillments_enabled' );
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
-	}
-
-	/**
-	 * Tear down the test environment.
-	 */
-	public static function tearDownAfterClass(): void {
-		if ( false === self::$original_fulfillments_enabled ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_enabled );
-		}
-		parent::tearDownAfterClass();
+		FulfillmentsHelper::create_tables();
 	}
 
 	/**
@@ -60,8 +37,8 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		FulfillmentsHelper::enable_fulfillments();
 		$this->manager = wc_get_container()->get( FulfillmentsManager::class );
-		$this->manager->register();
 	}
 
 	/**
@@ -227,12 +204,12 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 
 		$found = false;
 		foreach ( $notes as $note ) {
-			if ( str_contains( $note->content, 'TRACK123456' ) && str_contains( $note->content, 'fedex' ) ) {
+			if ( str_contains( $note->content, 'TRACK123456' ) && str_contains( $note->content, 'FedEx' ) ) {
 				$found = true;
 				break;
 			}
 		}
-		$this->assertTrue( $found, 'Expected the created note to include the shipping provider.' );
+		$this->assertTrue( $found, 'Expected the created note to include the resolved provider name, not the raw slug.' );
 	}
 
 	/**
@@ -316,7 +293,7 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 			if (
 				str_contains( $note->content, 'updated' )
 				&& str_contains( $note->content, 'UPS999' )
-				&& str_contains( $note->content, 'ups' )
+				&& str_contains( $note->content, 'Provider: UPS' )
 				&& str_contains( $note->content, 'https://ups.com/track/UPS999' )
 			) {
 				$found = true;

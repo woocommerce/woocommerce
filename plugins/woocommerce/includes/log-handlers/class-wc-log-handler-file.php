@@ -356,7 +356,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		if ( function_exists( 'wp_hash' ) ) {
 			return trailingslashit( $log_directory ) . self::get_log_file_name( $handle );
 		} else {
-			wc_doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'woocommerce' ), '3.0' );
+			wc_doing_it_wrong( __METHOD__, 'This method should not be called before plugins_loaded.', '3.0' );
 			return false;
 		}
 	}
@@ -376,7 +376,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			$hash_suffix = wp_hash( $handle );
 			return sanitize_file_name( implode( '-', array( $handle, $date_suffix, $hash_suffix ) ) . '.log' );
 		} else {
-			wc_doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'woocommerce' ), '3.3' );
+			wc_doing_it_wrong( __METHOD__, 'This method should not be called before plugins_loaded.', '3.3' );
 			return false;
 		}
 	}

@@ -40,7 +40,7 @@ function fireConfetti( colors: string[] ) {
 	};
 
 	function fire( particleRatio: number, opts: FireOptions ) {
-		confetti(
+		void confetti(
 			Object.assign( {}, defaults, opts, {
 				particleCount: Math.floor( count * particleRatio ),
 				startVelocity: opts.startVelocity

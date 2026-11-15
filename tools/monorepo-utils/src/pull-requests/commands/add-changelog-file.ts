@@ -53,7 +53,7 @@ const run = async (
 
 	let prData: any = await gql(
 		`
-query($pr_number: Int!) { 
+query($pr_number: Int!) {
 	repository(owner: "${ options.owner }", name: "${ options.name }") {
 		pullRequest(number: $pr_number) {
 			title
@@ -250,7 +250,7 @@ export const addChangelogFileCommand = new Command( 'add-changelog-file' )
 			.argParser( ( x ) =>
 				significanceValues.includes( x )
 					? x
-					: significances[ x ] ?? null
+					: ( significances[ x ] ?? null )
 			)
 	)
 	.addArgument(
@@ -259,7 +259,7 @@ export const addChangelogFileCommand = new Command( 'add-changelog-file' )
 			.argParser( ( x ) =>
 				types.includes( x )
 					? x
-					: types.find( ( t ) => t[ 0 ] === x[ 0 ] ) ?? null
+					: ( types.find( ( t ) => t[ 0 ] === x[ 0 ] ) ?? null )
 			)
 	)
 	.argument(

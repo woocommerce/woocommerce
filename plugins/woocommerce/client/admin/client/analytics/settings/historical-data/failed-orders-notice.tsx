@@ -76,7 +76,7 @@ function FailedOrdersNotice() {
 	}, [] );
 
 	useEffect( () => {
-		fetchStatus();
+		void fetchStatus();
 	}, [ fetchStatus ] );
 
 	const failedCount = status?.failed_count ?? 0;
@@ -118,17 +118,17 @@ function FailedOrdersNotice() {
 	const template =
 		overflowCount > 0
 			? /* translators: %d: number of failed orders currently stored (additional failures were dropped past the storage limit). <link> is a link to the order import log. */
-			  __(
+				__(
 					'More than %d orders failed to import. To recover all missed orders, run the import above with "Skip previously imported customers and orders" checked. <link>View the log</link> for details.',
 					'woocommerce'
-			  )
+				)
 			: /* translators: %d: number of failed orders. <link> is a link to the order import log. */
-			  _n(
+				_n(
 					'%d order failed to import. <link>View the log</link> for details.',
 					'%d orders failed to import. <link>View the log</link> for details.',
 					failedCount,
 					'woocommerce'
-			  );
+				);
 
 	const message = createInterpolateElement(
 		sprintf( template, failedCount ),

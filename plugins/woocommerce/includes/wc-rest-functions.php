@@ -87,6 +87,7 @@ function wc_rest_upload_image_from_url( $image_url ) {
 
 	$file_array         = array();
 	$file_array['name'] = basename( current( explode( '?', $image_url ) ) );
+	$file_array['type'] = ''; // WordPress uses this fallback for unfiltered uploads without a recognized type.
 
 	// Download file to temp location.
 	$file_array['tmp_name'] = download_url( $image_url );
@@ -161,8 +162,10 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
 	);
 
 	$attachment_id = wp_insert_attachment( $attachment, $upload['file'], $id );
-	if ( ! is_wp_error( $attachment_id ) ) {
+	if ( $attachment_id && ! is_wp_error( $attachment_id ) ) {
 		@wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $upload['file'] ) );
+	} else {
+		wp_delete_file( $upload['file'] );
 	}
 
 	return $attachment_id;
@@ -275,10 +278,10 @@ function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
 		$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
 
 		if ( isset( $user_data->roles ) ) {
-			$can_manage_users = array_intersect( $user_data->roles, array_unique( $shop_manager_editable_roles ) );
+			$can_manage_user = ! empty( $user_data->roles ) && empty( array_diff( $user_data->roles, array_unique( $shop_manager_editable_roles ) ) );
 
-			// Check if Shop Manager can edit customer or with the is same shop manager.
-			if ( 0 < count( $can_manage_users ) || intval( $object_id ) === intval( get_current_user_id() ) ) {
+			// Check if the Shop Manager can edit the user or is editing themselves.
+			if ( $can_manage_user || intval( $object_id ) === intval( get_current_user_id() ) ) {
 				$permission = current_user_can( $contexts[ $context ], $object_id );
 			}
 		}

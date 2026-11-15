@@ -58,7 +58,7 @@ export const Edit = ( {
 			: Array( MAX_THUMBNAILS ).fill( {
 					src: PLACEHOLDER_IMG_SRC,
 					alt: '',
-			  } );
+				} );
 	const renderThumbnails = noProductContext || ! hasOneOrNoImages;
 
 	const scrollableRef = useRef< HTMLDivElement >( null );

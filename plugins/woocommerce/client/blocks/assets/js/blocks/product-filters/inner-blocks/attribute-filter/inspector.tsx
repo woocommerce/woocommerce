@@ -128,11 +128,11 @@ export const Inspector = ( {
 											{
 												b: <strong />,
 											}
-									  )
+										)
 									: __(
 											"Display products that match any of the selected attributes (they don't need to match all).",
 											'woocommerce'
-									  )
+										)
 							}
 						>
 							<ToggleGroupControlOption

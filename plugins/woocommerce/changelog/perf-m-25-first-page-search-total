@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Speed up order searches on stores using HPOS when every matching order fits on the first page of results.

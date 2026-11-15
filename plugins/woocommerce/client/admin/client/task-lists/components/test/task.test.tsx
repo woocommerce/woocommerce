@@ -109,8 +109,10 @@ describe( 'Task', () => {
 				<Task query={ { task: 'test' } } task={ task } />
 			</div>
 		);
-		act( () => {
-			userEvent.click( getByRole( 'button', { name: 'complete' } ) );
+		act( async () => {
+			await userEvent.click(
+				getByRole( 'button', { name: 'complete' } )
+			);
 		} );
 		expect( optimisticallyCompleteTask ).toHaveBeenCalledWith( 'test' );
 		expect( invalidateResolutionForStoreSelector ).toHaveBeenCalledWith(

@@ -88,7 +88,7 @@ Please don't use actions listed below, instead relying on suggested alternatives
 
 Much of the data and api interface for components in the Checkout Block are constructed and exposed via [usage of `React.Context`](https://reactjs.org/docs/context.html). In some cases the context maintains the "tree" state within the context itself (via `useReducer`) and in others it interacts with a global `wp.data` store (for data that communicates with the server).
 
-You can find type definitions (`typedef`) for contexts in [this file](../../../../assets/js/types/type-defs/contexts.js).
+You can find type definitions (`typedef`) for contexts in [this file](../../../../packages/public-api/types/type-defs/contexts.js).
 
 ### Shipping Method Data context
 
@@ -124,7 +124,7 @@ These docs currently don't go into detail for all the hooks as that is fairly st
 
 ### `usePaymentMethodInterface`
 
-This hook is used to expose all the interfaces for the registered payment method components to utilize. Essentially the result from this hook is fed in as props on the registered payment components when they are setup by checkout. You can use the typedef ([`PaymentMethodInterface`](../../../../assets/js/types/type-defs/payment-method-interface.ts)) to see what is fed to payment methods as props from this hook.
+This hook is used to expose all the interfaces for the registered payment method components to utilize. Essentially the result from this hook is fed in as props on the registered payment components when they are setup by checkout. You can use the typedef ([`PaymentMethodInterface`](../../../../packages/public-api/types/type-defs/payment-method-interface.ts)) to see what is fed to payment methods as props from this hook.
 
 _Why don't payment methods just implement this hook_?
 

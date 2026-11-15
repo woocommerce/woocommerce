@@ -18,11 +18,7 @@ declare module '@wordpress/core-data' {
 }
 
 export type ProductType =
-	| 'simple'
-	| 'grouped'
-	| 'external'
-	| 'variable'
-	| 'variation';
+	'simple' | 'grouped' | 'external' | 'variable' | 'variation';
 export type ProductStatus =
 	| 'auto-draft'
 	| 'deleted'
@@ -75,10 +71,7 @@ export type ProductDimensions = {
 };
 
 export type ProductCatalogVisibility =
-	| 'visible'
-	| 'catalog'
-	| 'search'
-	| 'hidden';
+	'visible' | 'catalog' | 'search' | 'hidden';
 
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Post,
@@ -180,7 +173,7 @@ export type PartialProduct = Partial< Product > & Pick< Product, 'id' >;
 
 export type ProductQuery<
 	Status = ProductStatus,
-	Type = ProductType
+	Type = ProductType,
 > = BaseQueryParams< keyof Product > & {
 	orderby?:
 		| 'date'

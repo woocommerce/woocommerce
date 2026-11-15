@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prefill classic checkout shipping fields with the customer's saved shipping address, not their billing address.

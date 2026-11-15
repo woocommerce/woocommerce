@@ -1,18 +1,12 @@
 {
 	"name": "woocommerce/order-confirmation-downloads",
-	"version": "1.0.0",
 	"title": "Order Downloads",
 	"description": "Display links to purchased downloads.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"multiple": false,
-		"align": [
-			"wide",
-			"full"
-		],
+		"align": [ "wide", "full" ],
 		"html": false,
 		"typography": {
 			"fontSize": true,

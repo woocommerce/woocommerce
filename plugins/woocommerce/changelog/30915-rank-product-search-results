@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep SKU and title matches in admin product search results on large catalogs, instead of cutting them off.

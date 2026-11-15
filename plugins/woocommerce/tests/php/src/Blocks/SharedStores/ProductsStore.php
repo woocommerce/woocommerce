@@ -36,6 +36,14 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	protected $original_hydration_registry_entry = null;
 
 	/**
+	 * Start from empty ProductsStore statics, since block renders in other test classes fill them.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->reset_products_store_static_state();
+	}
+
+	/**
 	 * Reset static state on the ProductsStore and the global
 	 * WP_Interactivity_API instance between tests so state does not bleed.
 	 */
@@ -136,6 +144,29 @@ class ProductsStore extends \WC_Unit_Test_Case {
 				"Variation {$variation_id} should be in state."
 			);
 		}
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox load_variations() does not hydrate descriptions protected by the parent product password.
+	 */
+	public function test_load_variations_omits_parent_password_protected_descriptions(): void {
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+		$variation    = wc_get_product( $variation_id );
+		$variation->set_description( 'Protected variation description' );
+		$variation->save();
+		$product->set_post_password( 'secret' );
+		$product->save();
+
+		$result = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+
+		$this->assertSame(
+			'',
+			$result[ $variation_id ]['description'],
+			'Variation descriptions should be omitted until the parent product password is entered.'
+		);
 
 		$product->delete( true );
 	}

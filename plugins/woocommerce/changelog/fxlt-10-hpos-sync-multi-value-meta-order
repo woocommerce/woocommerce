@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep order meta in the posts tables in step with HPOS when sync is on: same order for multi-value meta, and no duplicate rows on sync-on-read.

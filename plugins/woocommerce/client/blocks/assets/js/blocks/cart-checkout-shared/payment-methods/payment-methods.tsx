@@ -14,6 +14,7 @@ import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed
 import NoPaymentMethods from './no-payment-methods';
 import OnlyExpressPayments from './only-express-payments';
 import PaymentMethodOptions from './payment-method-options';
+import PaymentMethodRequiredError from './payment-method-required-error';
 import SavedPaymentMethodOptions from './saved-payment-method-options';
 
 import './style-legacy.scss';
@@ -94,7 +95,9 @@ const PaymentMethods = ( {
 					} }
 				/>
 			) }
-			<PaymentMethodOptions />
+			<PaymentMethodRequiredError>
+				<PaymentMethodOptions />
+			</PaymentMethodRequiredError>
 		</DelayedContentWithSkeleton>
 	);
 };

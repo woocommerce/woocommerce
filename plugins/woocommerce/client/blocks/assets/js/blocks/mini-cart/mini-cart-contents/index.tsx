@@ -10,6 +10,7 @@ import edit, { Save as save } from './edit';
 import { blockName, attributes } from './attributes';
 import './inner-blocks';
 import { metadata } from './metadata';
+import './style.scss';
 
 registerBlockType( blockName, {
 	...metadata,

@@ -1,4 +1,9 @@
 {
     "position": 5,
-    "label": "Best practices"
+    "label": "Best practices",
+    "link": {
+        "type": "generated-index",
+        "title": "Best practices",
+        "slug": "/extensions/best-practices-extensions"
+    }
 }

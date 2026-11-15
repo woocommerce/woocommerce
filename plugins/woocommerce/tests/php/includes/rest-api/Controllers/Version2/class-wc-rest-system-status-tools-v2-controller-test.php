@@ -1,5 +1,9 @@
 <?php
 
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query as OrdersStatsQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+
 /**
  * Class WC_REST_System_Status_Tools_V2_Controller.
  */
@@ -147,6 +151,136 @@ class WC_REST_System_Status_Tools_V2_Controller_Test extends WC_REST_Unit_Test_C
 	}
 
 	/**
+	 * @testdox Clear transients tool deletes the per-product, product shortcode and report transients, and keeps other transients.
+	 */
+	public function test_execute_tool_clear_transients_deletes_transients_of_every_product() {
+		wp_set_current_user( $this->user );
+
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+		$product->get_variation_prices();
+		$product->child_has_weight();
+		$product->child_has_dimensions();
+		wc_get_related_products( $product_id );
+		do_shortcode( '[products]' );
+		( new OrdersStatsQuery( array() ) )->get_data();
+		set_transient( 'wc_facebook_test', 'kept', DAY_IN_SECONDS );
+		set_transient( 'other_plugin_cache', 'kept', DAY_IN_SECONDS );
+
+		$core_transients = array(
+			'wc_var_prices_' . $product_id,
+			'wc_product_children_' . $product_id,
+			'wc_child_has_weight_' . $product_id,
+			'wc_child_has_dimensions_' . $product_id,
+			'wc_related_' . $product_id,
+			'wc_product_loop_',
+			'wc_report_orders_stats_',
+		);
+		foreach ( $core_transients as $name ) {
+			$this->assertNotEmpty( $this->get_option_names_starting_with( '_transient_' . $name ), "Arrange should create the $name transient" );
+			$this->assertNotEmpty( $this->get_option_names_starting_with( '_transient_timeout_' . $name ), "Arrange should create the $name transient timeout" );
+		}
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'PUT', '/wc/v2/system_status/tools/clear_transients' ) );
+
+		$this->assertTrue( $response->get_data()['success'], 'The tool should report success' );
+		foreach ( $core_transients as $name ) {
+			$this->assertSame( array(), $this->get_option_names_starting_with( '_transient_' . $name ), "The $name transient should be deleted" );
+			$this->assertSame( array(), $this->get_option_names_starting_with( '_transient_timeout_' . $name ), "The $name transient timeout should be deleted" );
+		}
+		foreach ( array( 'wc_facebook_test', 'other_plugin_cache' ) as $name ) {
+			$this->assertSame( array( "_transient_$name" ), $this->get_option_names_starting_with( "_transient_$name" ), "Another plugin's $name transient should be kept" );
+			$this->assertSame( array( "_transient_timeout_$name" ), $this->get_option_names_starting_with( "_transient_timeout_$name" ), "Another plugin's $name transient timeout should be kept" );
+		}
+	}
+
+	/**
+	 * Get the names of the rows in the options table whose name starts with a given string.
+	 *
+	 * @param string $prefix Start of the option name.
+	 * @return string[] Matching option names.
+	 */
+	private function get_option_names_starting_with( string $prefix ): array {
+		global $wpdb;
+
+		return $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( $prefix ) . '%' ) );
+	}
+
+	/**
+	 * @testdox Clear transients invalidates Analytics and clears product caches in deferred, bounded batches.
+	 * @testWith [false, false]
+	 *           [true, false]
+	 *           [true, true]
+	 *
+	 * @param bool $external_cache Whether transients use the object cache.
+	 * @param bool $fail_enqueue   Whether scheduling should fail.
+	 */
+	public function test_clear_transients_clears_product_and_analytics_caches( bool $external_cache, bool $fail_enqueue ): void {
+		$batch_size   = ProductUtil::TRANSIENT_CLEANUP_BATCH_SIZE;
+		$ids          = $this->factory->post->create_many( $batch_size + 1, array( 'post_type' => 'product' ) );
+		$variation_id = $this->factory->post->create( array( 'post_type' => 'product_variation' ) );
+		$previous     = wp_using_ext_object_cache();
+		wp_using_ext_object_cache( $external_cache );
+		try {
+			foreach ( array( $ids[0], $ids[ $batch_size ] ) as $id ) {
+				foreach ( ProductUtil::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES as $prefix ) {
+					set_transient( $prefix . $id, 'cached', HOUR_IN_SECONDS );
+				}
+			}
+			set_transient( 'wc_related_' . $variation_id, 'cached', HOUR_IN_SECONDS );
+			set_transient( 'wc_var_prices_' . $variation_id, 'kept', HOUR_IN_SECONDS );
+			ReportsCache::set( 'wc_report_orders_stats_test', array( 'total' => 123 ) );
+			$this->assertNotFalse( ReportsCache::get( 'wc_report_orders_stats_test' ) );
+			set_transient( 'other_plugin_cache', 'kept', HOUR_IN_SECONDS );
+			if ( $fail_enqueue ) {
+				add_filter( 'pre_as_enqueue_async_action', '__return_zero' );
+			}
+			$response = $this->endpoint->execute_tool( 'clear_transients' );
+			$this->assertSame( ! $fail_enqueue, $response['success'] );
+			if ( $fail_enqueue ) {
+				$this->assertStringContainsString( 'Could not schedule', $response['message'] );
+				return;
+			}
+			if ( $external_cache ) {
+				$this->assertStringContainsString( 'scheduled', $response['message'] );
+				$this->assertSame( 'cached', get_transient( 'wc_var_prices_' . $ids[0] ) );
+				$this->assertTrue( $this->endpoint->execute_tool( 'clear_transients' )['success'] );
+				$pending = as_get_scheduled_actions(
+					array(
+						'hook'   => 'woocommerce_delete_product_transients_batch',
+						'status' => ActionScheduler_Store::STATUS_PENDING,
+					),
+					'ids'
+				);
+				$this->assertCount( 1, $pending, 'A second run must not queue an overlapping cleanup.' );
+				do_action( 'woocommerce_delete_product_transients_batch', 0 );
+				$this->assertFalse( get_transient( 'wc_var_prices_' . $ids[0] ) );
+				$this->assertSame( 'cached', get_transient( 'wc_var_prices_' . $ids[ $batch_size ] ) );
+				$this->assertTrue( as_has_scheduled_action( 'woocommerce_delete_product_transients_batch', array( $ids[ $batch_size - 1 ] ), 'woocommerce' ) );
+				$this->endpoint->execute_tool( 'clear_transients' );
+				$this->assertFalse( as_has_scheduled_action( 'woocommerce_delete_product_transients_batch', array( $ids[ $batch_size - 1 ] ), 'woocommerce' ), 'A new run must replace the queued cleanup.' );
+				$this->assertTrue( as_has_scheduled_action( 'woocommerce_delete_product_transients_batch', array( 0 ), 'woocommerce' ), 'A new run must restart cleanup from the first product.' );
+				do_action( 'woocommerce_delete_product_transients_batch', $ids[ $batch_size - 1 ] );
+				$this->assertFalse( as_has_scheduled_action( 'woocommerce_delete_product_transients_batch', array( $variation_id ), 'woocommerce' ) );
+			}
+			if ( ! $external_cache ) {
+				wp_cache_flush(); // Discard the request-local option values left after the SQL sweep.
+			}
+			foreach ( array( $ids[0], $ids[ $batch_size ] ) as $id ) {
+				foreach ( ProductUtil::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES as $prefix ) {
+					$this->assertFalse( get_transient( $prefix . $id ) );
+				}
+			}
+			$this->assertFalse( get_transient( 'wc_related_' . $variation_id ) );
+			$this->assertSame( $external_cache ? 'kept' : false, get_transient( 'wc_var_prices_' . $variation_id ) );
+			$this->assertFalse( ReportsCache::get( 'wc_report_orders_stats_test' ) );
+			$this->assertSame( 'kept', get_transient( 'other_plugin_cache' ) );
+		} finally {
+			wp_using_ext_object_cache( $previous );
+		}
+	}
+
+	/**
 	 * @testdox Product lookup table regeneration status is shown alongside the matching tool.
 	 */
 	public function test_get_tools_shows_product_lookup_table_regeneration_status() {
@@ -181,7 +315,6 @@ class WC_REST_System_Status_Tools_V2_Controller_Test extends WC_REST_Unit_Test_C
 			$tool = $this->endpoint->get_tools()['regenerate_product_lookup_tables'];
 			$this->assertStringContainsString( 'View queued updates', $tool['status_text'] );
 		} finally {
-			\Automattic\Jetpack\Constants::clear_single_constant( 'DISABLE_WP_CRON' );
 			as_unschedule_all_actions( '', array(), 'wc_update_product_lookup_tables' );
 		}
 	}

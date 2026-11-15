@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-order-summary-fee-block",
-	"version": "1.0.0",
 	"title": "Fees",
 	"description": "Shows the cart fee row.",
 	"category": "woocommerce",

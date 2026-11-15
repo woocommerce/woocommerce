@@ -1,0 +1,50 @@
+{
+	"name": "woocommerce/block-library",
+	"description": "Dev tooling for WooCommerce Blocks. Only used to run `pnpm build:docs`, which regenerates the hook docs from the PHP sources in plugins/woocommerce/src.",
+	"license": "GPL-3.0-or-later",
+	"prefer-stable": true,
+	"minimum-stability": "dev",
+	"require-dev": {
+		"wp-hooks/generator": "1.0.2",
+		"cweagans/composer-patches": "^1.7"
+	},
+	"config": {
+		"allow-plugins": {
+			"cweagans/composer-patches": true
+		},
+		"platform": {
+			"php": "8.3.0"
+		},
+		"platform-check": false
+	},
+	"extra": {
+		"composer-exit-on-patch-failure": true,
+		"patches": {
+			"wp-hooks/generator": {
+				"Keep @return/@throws tag types, warn instead of fatal on unknown hook doc tags, and emit raw docblock Markdown instead of Parsedown HTML": "bin/hook-docs/wp-hooks-generator.patch"
+			}
+		},
+		"wp-hooks": {
+			"ignore-files": [
+				"src/Abilities/",
+				"src/Admin/",
+				"src/Api/",
+				"src/Autoloader.php",
+				"src/Caches/",
+				"src/Caching/",
+				"src/Checkout/",
+				"src/Container.php",
+				"src/Database/",
+				"src/Deprecated.php",
+				"src/Enums/",
+				"src/Gateways/",
+				"src/Internal/",
+				"src/LayoutTemplates/",
+				"src/Packages.php",
+				"src/Proxies/",
+				"src/Utilities/",
+				"src/Vendor/"
+			]
+		}
+	}
+}

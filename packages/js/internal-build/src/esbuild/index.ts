@@ -41,10 +41,12 @@ async function resolveEntryPoints(
 
 function summarize( result: BuildResult ): string {
 	const parts: string[] = [];
-	if ( result.errors.length )
+	if ( result.errors.length ) {
 		parts.push( `${ result.errors.length } error(s)` );
-	if ( result.warnings.length )
+	}
+	if ( result.warnings.length ) {
 		parts.push( `${ result.warnings.length } warning(s)` );
+	}
 	return parts.length ? ` — ${ parts.join( ', ' ) }` : '';
 }
 
@@ -63,15 +65,18 @@ export async function buildPackage( options: BuildOptions ): Promise< void > {
 	const entryPoints = await resolveEntryPoints( options.entryPoints, ignore );
 
 	log.debug( 'build', `format: ${ format }, outdir: ${ outdir }` );
-	for ( const entry of entryPoints )
+	for ( const entry of entryPoints ) {
 		log.debug( 'build', `entry: ${ entry }` );
+	}
 
 	const t0 = Date.now();
 	log.info( 'build', `${ entryPoints.length } entry point(s)...` );
 	const result = await build(
 		prepareEsbuildOptions( format, entryPoints, options.esbuild )
 	);
-	if ( options.assets?.length ) await copyAssets( options.assets, outdir );
+	if ( options.assets?.length ) {
+		await copyAssets( options.assets, outdir );
+	}
 	log.info( 'ok', `done in ${ Date.now() - t0 }ms${ summarize( result ) }` );
 }
 
@@ -97,12 +102,15 @@ export async function watchPackage( options: BuildOptions ): Promise< void > {
 
 	log.debug( 'watch', `format: ${ format }, outdir: ${ outdir }` );
 	log.debug( 'watch', `watching: ${ watchedPatterns.join( ', ' ) }` );
-	for ( const entry of entryPoints )
+	for ( const entry of entryPoints ) {
 		log.debug( 'watch', `entry: ${ entry }` );
+	}
 
 	try {
 		const initial = await ctx.rebuild();
-		if ( assets.length ) await copyAssets( assets, outdir );
+		if ( assets.length ) {
+			await copyAssets( assets, outdir );
+		}
 		log.info(
 			'watch',
 			`ready in ${ Date.now() - startupT0 }ms — ${
@@ -127,7 +135,9 @@ export async function watchPackage( options: BuildOptions ): Promise< void > {
 	const restart = ( path: string, kind: string ): void => {
 		pendingChanges.add( `${ path } (${ kind })` );
 		log.debug( 'watch', `${ kind }: ${ path }` );
-		if ( pending ) clearTimeout( pending );
+		if ( pending ) {
+			clearTimeout( pending );
+		}
 		pending = setTimeout( () => {
 			void ( async () => {
 				const changes = [ ...pendingChanges ];
@@ -152,7 +162,9 @@ export async function watchPackage( options: BuildOptions ): Promise< void > {
 						)
 					);
 					const result = await ctx.rebuild();
-					if ( assets.length ) await copyAssets( assets, outdir );
+					if ( assets.length ) {
+						await copyAssets( assets, outdir );
+					}
 					log.info(
 						'ok',
 						`rebuilt in ${ Date.now() - t0 }ms — ${

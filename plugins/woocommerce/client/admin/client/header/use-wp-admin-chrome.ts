@@ -121,8 +121,12 @@ export const useWpAdminChrome = (
 			attributes: true,
 			attributeFilter: [ 'aria-expanded' ],
 		};
-		if ( screenOptBtn ) observer.observe( screenOptBtn, opts );
-		if ( helpBtn ) observer.observe( helpBtn, opts );
+		if ( screenOptBtn ) {
+			observer.observe( screenOptBtn, opts );
+		}
+		if ( helpBtn ) {
+			observer.observe( helpBtn, opts );
+		}
 		return () => observer.disconnect();
 	}, [ hasScreenOptions, hasContextualHelp ] );
 

@@ -11,16 +11,15 @@ use ReflectionClass;
 use ReflectionException;
 use Spy_REST_Server;
 use WP_REST_Server;
-use WP_Test_REST_TestCase;
 
 /**
  * ControllerTests
  */
-class RateLimitsTests extends WP_Test_REST_TestCase {
+class RateLimitsTests extends \WC_Unit_Test_Case {
 	/**
 	 * Setup Rest API server.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		/** @var WP_REST_Server $wp_rest_server */
@@ -31,6 +30,16 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 		$_SERVER['REMOTE_ADDR']                  = '76.45.67.179';
 
 		do_action( 'rest_api_init', $wp_rest_server );
+	}
+
+	/**
+	 * Discard the REST server installed for the test.
+	 */
+	public function tearDown(): void {
+		global $wp_rest_server;
+		$wp_rest_server = null;
+
+		parent::tearDown();
 	}
 
 	/**
@@ -79,7 +88,7 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 
 		$body = json_decode( $spy_rest_server->sent_body );
 		$this->assertEquals( JSON_ERROR_NONE, json_last_error() );
-		$this->assertEquals( 400, $body->data->status );
+		$this->assertEquals( 429, $body->data->status );
 
 		$this->assertEquals( $rate_limiting_options->limit, $spy_rest_server->sent_headers['RateLimit-Limit'] );
 		$this->assertIsInt( $spy_rest_server->sent_headers['RateLimit-Reset'] );
@@ -254,34 +263,28 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 	 * @throws ReflectionException On failing invoked private method through reflection class.
 	 */
 	public function test_is_only_post_request_method( string $method, ?string $override, bool $expected ) {
-		$original_server = $_SERVER;
+		$authentication          = new ReflectionClass( Authentication::class );
+		$is_only_post_request    = $authentication->getMethod( 'is_only_post_request' );
+		$authentication_instance = $authentication->newInstance();
+		$is_only_post_request->setAccessible( true );
 
-		try {
-			$authentication          = new ReflectionClass( Authentication::class );
-			$is_only_post_request    = $authentication->getMethod( 'is_only_post_request' );
-			$authentication_instance = $authentication->newInstance();
-			$is_only_post_request->setAccessible( true );
+		$_SERVER['REQUEST_METHOD'] = $method;
 
-			$_SERVER['REQUEST_METHOD'] = $method;
-
-			if ( null === $override ) {
-				unset( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] );
-			} else {
-				$_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] = $override;
-			}
-
-			$this->assertSame(
-				$expected,
-				$is_only_post_request->invoke( $authentication_instance ),
-				sprintf(
-					'is_only_post_request() should return %s for REQUEST_METHOD=%s with override=%s',
-					$expected ? 'true' : 'false',
-					$method,
-					$override ?? 'null'
-				)
-			);
-		} finally {
-			$_SERVER = $original_server;
+		if ( null === $override ) {
+			unset( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] );
+		} else {
+			$_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] = $override;
 		}
+
+		$this->assertSame(
+			$expected,
+			$is_only_post_request->invoke( $authentication_instance ),
+			sprintf(
+				'is_only_post_request() should return %s for REQUEST_METHOD=%s with override=%s',
+				$expected ? 'true' : 'false',
+				$method,
+				$override ?? 'null'
+			)
+		);
 	}
 }

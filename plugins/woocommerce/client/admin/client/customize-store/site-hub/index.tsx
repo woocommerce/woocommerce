@@ -1,5 +1,5 @@
 // Reference: https://github.com/WordPress/gutenberg/blob/v16.4.0/packages/edit-site/src/components/site-hub/index.js
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 /**
  * External dependencies
  */

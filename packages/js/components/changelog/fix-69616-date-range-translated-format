@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+DateRangeFilterPicker: parse typed dates with the same translated format shown as the field hint.

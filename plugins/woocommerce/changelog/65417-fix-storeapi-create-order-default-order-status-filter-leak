@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Store API: ensure the woocommerce_default_order_status filter is always removed after OrderController::create_order_from_cart(), even if order creation throws.

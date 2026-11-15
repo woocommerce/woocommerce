@@ -94,6 +94,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_checkout_page_id'                 => 'single_select_page_with_search',
 			'woocommerce_myaccount_page_id'                => 'single_select_page_with_search',
 			'woocommerce_terms_page_id'                    => 'single_select_page_with_search',
+			'woocommerce_refund_returns_page_id'           => 'single_select_page_with_search',
 			'checkout_process_options'                     => array( 'title', 'sectionend' ),
 			'woocommerce_force_ssl_checkout'               => 'checkbox',
 			'woocommerce_unforce_ssl_checkout'             => 'checkbox',
@@ -122,6 +123,68 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The return-policy page search excludes assigned commerce pages.
+	 */
+	public function test_refund_policy_page_excludes_commerce_pages(): void {
+		$page_ids = $this->factory->post->create_many( 4, array( 'post_type' => 'page' ) );
+		foreach ( array( 'cart', 'checkout', 'shop', 'myaccount' ) as $index => $role ) {
+			update_option( 'woocommerce_' . $role . '_page_id', $page_ids[ $index ] );
+		}
+
+		$settings = ( new WC_Settings_Advanced() )->get_settings_for_section( '' );
+		$by_id    = array_column( $settings, null, 'id' );
+		$this->assertSame( $page_ids, $by_id['woocommerce_refund_returns_page_id']['args']['exclude'] );
+
+		update_option( 'woocommerce_cart_page_id', '' );
+		$settings = ( new WC_Settings_Advanced() )->get_settings_for_section( '' );
+		$by_id    = array_column( $settings, null, 'id' );
+		$this->assertSame( array_slice( $page_ids, 1 ), $by_id['woocommerce_refund_returns_page_id']['args']['exclude'], 'Unset pages must not exclude unrelated page IDs.' );
+	}
+
+	/**
+	 * @testdox Saving Page setup reassigns or clears the selected refund and returns policy page.
+	 */
+	public function test_save_reassigns_refund_returns_page(): void {
+		$old_page_id = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		$new_page_id = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $old_page_id );
+
+		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restore the test request after saving.
+		$had_section      = array_key_exists( 'current_section', $GLOBALS );
+		$original_section = $GLOBALS['current_section'] ?? null;
+		try {
+			$GLOBALS['current_section'] = '';
+			$_POST                      = array( 'woocommerce_refund_returns_page_id' => (string) $new_page_id );
+			( new WC_Settings_Advanced() )->save();
+
+			$this->assertSame( (string) $new_page_id, get_option( 'woocommerce_refund_returns_page_id' ), 'The new selection should be saved.' );
+			$this->assertSame( $new_page_id, wc_get_page_id( 'refund_returns' ), 'Consumers should resolve the reassigned page.' );
+
+			$_POST['woocommerce_refund_returns_page_id'] = '';
+			( new WC_Settings_Advanced() )->save();
+			$this->assertSame( '', get_option( 'woocommerce_refund_returns_page_id' ), 'Clearing the selection should be saved.' );
+			$this->assertSame( -1, wc_get_page_id( 'refund_returns' ), 'Consumers should not resolve a page once selection is cleared.' );
+		} finally {
+			$_POST = $original_post;
+			if ( $had_section ) {
+				$GLOBALS['current_section'] = $original_section;
+			} else {
+				unset( $GLOBALS['current_section'] );
+			}
+		}
+	}
+
+	/**
 	 * @testdox get_settings('woocommerce_com') should return all the settings for the woocommerce_com section.
 	 */
 	public function test_get_woocommerce_com_settings_returns_all_settings() {
@@ -138,6 +201,71 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$this->assertEquals( $expected, $setting_ids_and_types );
+	}
+
+	/**
+	 * @testdox save should persist the selected WooCommerce.com checkbox without enabling its peer.
+	 *
+	 * @dataProvider woocommerce_com_checkbox_options_provider
+	 *
+	 * @param string $selected_option_id Selected checkbox option ID.
+	 * @param string $peer_option_id     Peer checkbox option ID.
+	 */
+	public function test_save_persists_woocommerce_com_checkbox_options( $selected_option_id, $peer_option_id ): void {
+		$had_current_section      = array_key_exists( 'current_section', $GLOBALS );
+		$original_current_section = $had_current_section ? $GLOBALS['current_section'] : null;
+
+		// Detach the tracking callbacks that react to woocommerce_allow_tracking changing:
+		// they have side effects the rollback cannot undo. `_restore_hooks()` puts them back
+		// after the test. The marketing-notes callback stays attached, because the notes it
+		// deletes are rows the rollback restores.
+		foreach ( array( 'get_tracking_history', 'handle_tracking_setting_change' ) as $method ) {
+			remove_action( 'update_option_woocommerce_allow_tracking', array( WC(), $method ), 10 );
+		}
+
+		try {
+			// The peer starts at 'yes' on purpose. Seeding both to 'no' would make the peer
+			// assertion below unfalsifiable: its expected post-state would equal its pre-state, so
+			// it would pass whether or not the save touched it. An unchecked box posts nothing and
+			// WC_Admin_Settings::save_fields writes 'no' for it, which is what is being asserted.
+			update_option( $selected_option_id, 'no' );
+			update_option( $peer_option_id, 'yes' );
+
+			// Post '1', the value a ticked checkbox submits. save_fields also accepts 'yes', which no
+			// browser sends, so posting 'yes' would not notice the '1' branch breaking.
+			$GLOBALS['current_section'] = 'woocommerce_com';
+			$_POST                      = array( $selected_option_id => '1' );
+
+			$sut = new WC_Settings_Advanced();
+			$sut->save();
+
+			// woocommerce_allow_tracking is autoloaded, and get_option() answers autoloaded options
+			// from `alloptions`, so clear that too for both values to be read from the database.
+			wp_cache_delete( $selected_option_id, 'options' );
+			wp_cache_delete( $peer_option_id, 'options' );
+			wp_cache_delete( 'alloptions', 'options' );
+
+			$this->assertSame( 'yes', get_option( $selected_option_id ) );
+			$this->assertSame( 'no', get_option( $peer_option_id ) );
+		} finally {
+			if ( $had_current_section ) {
+				$GLOBALS['current_section'] = $original_current_section;
+			} else {
+				unset( $GLOBALS['current_section'] );
+			}
+		}
+	}
+
+	/**
+	 * Provides WooCommerce.com checkbox options and their peers.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function woocommerce_com_checkbox_options_provider(): array {
+		return array(
+			'analytics tracking'      => array( 'woocommerce_allow_tracking', 'woocommerce_show_marketplace_suggestions' ),
+			'marketplace suggestions' => array( 'woocommerce_show_marketplace_suggestions', 'woocommerce_allow_tracking' ),
+		);
 	}
 
 	/**

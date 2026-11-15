@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Declare react/react-dom as devDependencies alongside the existing peerDependencies. Tooling only; no runtime change.

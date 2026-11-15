@@ -60,7 +60,7 @@ function enqueue_beta_tester_app_script() {
 		? require $script_asset_path
 		: array(
 			'dependencies' => array(),
-			'version'      => filemtime( $script_path ),
+			'version'      => filemtime( __DIR__ . $script_path ),
 		);
 	$script_url        = plugins_url( $script_path, __FILE__ );
 

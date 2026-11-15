@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Enable taxes in the prices_include_tax order tests instead of relying on state leaked from other test classes.
+

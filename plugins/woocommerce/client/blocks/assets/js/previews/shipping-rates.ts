@@ -25,7 +25,7 @@ const localPickupLocations = localPickupEnabled
 				formatted_address: string;
 				details: string;
 			}[]
-	  >( 'localPickupLocations', [] )
+		>( 'localPickupLocations', [] )
 	: [];
 
 const localPickupRates = localPickupLocations
@@ -56,7 +56,7 @@ const localPickupRates = localPickupLocations
 				method_id: 'pickup_location',
 				selected: false,
 			} )
-	  )
+		)
 	: [];
 
 export const previewShippingRates: CartResponseShippingRate[] = [

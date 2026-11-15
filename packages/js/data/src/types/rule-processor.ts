@@ -35,11 +35,4 @@ export type RuleType =
 	| 'wca_updated';
 
 export type RuleOperation =
-	| '='
-	| '<'
-	| '<='
-	| '>'
-	| '>='
-	| '!='
-	| 'contains'
-	| '!contains';
+	'=' | '<' | '<=' | '>' | '>=' | '!=' | 'contains' | '!contains';

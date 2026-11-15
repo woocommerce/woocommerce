@@ -1,44 +1,29 @@
 /**
  * External dependencies
  */
-import {
-	getCanvas,
-	goToPageEditor,
-	insertBlockByShortcut,
-	publishPage,
-	WC_API_PATH,
-	WP_API_PATH,
-} from '@woocommerce/e2e-utils-playwright';
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
 import { tags, test, expect, request } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { fillPageTitle } from '../../utils/editor';
-import { getFakeProduct, getFakeTag, getFakeAttribute } from '../../utils/data';
+import { getFakeProduct, getFakeAttribute, getFakeTag } from '../../utils/data';
 import { setOption } from '../../utils/options';
-
-const pageTitle = 'Product Showcase';
-
-const productTagName1 = getFakeTag().name;
-const productTagName2 = getFakeTag().name;
-const productTagName3 = getFakeTag().name;
 
 // Both the attribute and its term must be unique: the attribute creates a
 // global `pa_*` taxonomy and the term a global term within it, so a fixed name
 // would collide across parallel workers.
 const productAttributeName = getFakeAttribute().name;
 const productAttributeTerm = getFakeAttribute().name;
+// The tag creates a global `product_tag` term, so a fixed name would collide
+// across parallel workers, exactly as the attribute names above would.
+const productTagName = getFakeTag().name;
 
-let product1Id: number,
-	product2Id: number,
-	product3Id: number,
-	product1Slug: string,
-	productTag1Id: number,
-	productTag2Id: number,
-	productTag3Id: number,
-	attributeId: number;
+const productIds: number[] = [];
+let product1Slug = '';
+let attributeId = 0;
+let productTagId = 0;
 
 test.describe(
 	'Browse product tags and attributes from the product page',
@@ -51,29 +36,6 @@ test.describe(
 		const product3 = getFakeProduct();
 
 		test.beforeAll( async ( { restApi } ) => {
-			// add product tags
-			await restApi
-				.post( `${ WC_API_PATH }/products/tags`, {
-					name: productTagName1,
-				} )
-				.then( ( response ) => {
-					productTag1Id = response.data.id;
-				} );
-			await restApi
-				.post( `${ WC_API_PATH }/products/tags`, {
-					name: productTagName2,
-				} )
-				.then( ( response ) => {
-					productTag2Id = response.data.id;
-				} );
-			await restApi
-				.post( `${ WC_API_PATH }/products/tags`, {
-					name: productTagName3,
-				} )
-				.then( ( response ) => {
-					productTag3Id = response.data.id;
-				} );
-
 			// add product attribute
 			await restApi
 				.post( `${ WC_API_PATH }/products/attributes`, {
@@ -92,19 +54,18 @@ test.describe(
 				}
 			);
 
+			// add product tag
+			const tagResponse = await restApi.post(
+				`${ WC_API_PATH }/products/tags`,
+				{ name: productTagName }
+			);
+			productTagId = tagResponse.data.id;
+
 			// add products
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
 					...product1,
-					tags: [
-						{ id: productTag1Id },
-						{
-							id: productTag2Id,
-						},
-						{
-							id: productTag3Id,
-						},
-					],
+					tags: [ { id: productTagId } ],
 					attributes: [
 						{
 							id: attributeId,
@@ -114,18 +75,13 @@ test.describe(
 					],
 				} )
 				.then( ( response ) => {
-					product1Id = response.data.id;
+					productIds.push( response.data.id );
 					product1Slug = response.data.slug;
 				} );
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
 					...product2,
-					tags: [
-						{ id: productTag1Id },
-						{
-							id: productTag2Id,
-						},
-					],
+					tags: [ { id: productTagId } ],
 					attributes: [
 						{
 							id: attributeId,
@@ -135,12 +91,12 @@ test.describe(
 					],
 				} )
 				.then( ( response ) => {
-					product2Id = response.data.id;
+					productIds.push( response.data.id );
 				} );
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
 					...product3,
-					tags: [ { id: productTag1Id } ],
+					tags: [ { id: productTagId } ],
 					attributes: [
 						{
 							id: attributeId,
@@ -150,68 +106,61 @@ test.describe(
 					],
 				} )
 				.then( ( response ) => {
-					product3Id = response.data.id;
+					productIds.push( response.data.id );
 				} );
 		} );
 
 		test.afterAll( async ( { restApi } ) => {
-			await restApi.post( `${ WC_API_PATH }/products/batch`, {
-				delete: [ product1Id, product2Id, product3Id ],
-			} );
-			await restApi.post( `${ WC_API_PATH }/products/tags/batch`, {
-				delete: [ productTag1Id, productTag2Id, productTag3Id ],
-			} );
-			await restApi.post( `${ WC_API_PATH }/products/attributes/batch`, {
-				delete: [ attributeId ],
-			} );
+			const cleanupErrors: unknown[] = [];
 
-			const pages = await restApi.get( `${ WP_API_PATH }/pages` );
-
-			for ( const page of pages.data ) {
-				if ( page.title.rendered === pageTitle ) {
-					await restApi.delete(
-						`${ WP_API_PATH }/pages/${ page.id }`,
+			if ( productIds.length > 0 ) {
+				try {
+					await restApi.post( `${ WC_API_PATH }/products/batch`, {
+						delete: productIds,
+					} );
+				} catch ( error ) {
+					cleanupErrors.push( error );
+				}
+			}
+			if ( attributeId > 0 ) {
+				try {
+					await restApi.post(
+						`${ WC_API_PATH }/products/attributes/batch`,
 						{
-							data: {
-								force: true,
-							},
+							delete: [ attributeId ],
 						}
 					);
+				} catch ( error ) {
+					cleanupErrors.push( error );
 				}
+			}
+
+			if ( productTagId > 0 ) {
+				try {
+					await restApi.post(
+						`${ WC_API_PATH }/products/tags/batch`,
+						{
+							delete: [ productTagId ],
+						}
+					);
+				} catch ( error ) {
+					cleanupErrors.push( error );
+				}
+			}
+
+			if ( cleanupErrors.length > 0 ) {
+				throw new AggregateError(
+					cleanupErrors,
+					'Failed to clean up Product Tags and Attributes fixtures.'
+				);
 			}
 		} );
 
-		test( 'should see shop catalog with all its products', async ( {
-			page,
-		} ) => {
-			await page.goto( 'shop/' );
-			await expect(
-				page.getByRole( 'heading', { name: 'Shop' } )
-			).toBeVisible();
-			await expect(
-				page.locator( '.woocommerce-ordering' )
-			).toBeVisible();
-
-			const addToCart = page.getByRole( 'add_to_cart_button' );
-			for ( let i = 0; i < addToCart.count(); ++i )
-				await expect( addToCart.nth( i ) ).toBeVisible();
-
-			const productPrice = page.getByRole( 'woocommerce-Price-amount' );
-			for ( let i = 0; i < productPrice.count(); ++i )
-				await expect( productPrice.nth( i ) ).toBeVisible();
-
-			const productTitle = page.getByRole(
-				'woocommerce-loop-product__title'
-			);
-			for ( let i = 0; i < productTitle.count(); ++i )
-				await expect( productTitle.nth( i ) ).toBeVisible();
-
-			const productImage = page.getByRole( 'wp-post-image' );
-			for ( let i = 0; i < productImage.count(); ++i )
-				await expect( productImage.nth( i ) ).toBeVisible();
-		} );
-
-		test( 'should see and sort tags page with all the products', async ( {
+		// Canary for the product tag archive. The titles this batch removed were
+		// the only browser coverage of `Products tagged <name>`, and the lower
+		// test that covers the tag route lives in another PR, so this keeps one
+		// real browser assertion on the archive a shopper actually reaches.
+		test( 'can navigate from a product tag to its archive', async ( {
 			page,
 		} ) => {
 			// Navigate straight to the product by slug. Going through the
@@ -219,13 +168,17 @@ test.describe(
 			// workers' products can push this one onto a later page where the
 			// click would fail.
 			await page.goto( `product/${ product1Slug }` );
-			await page.getByRole( 'link', { name: productTagName1 } ).click();
+
+			await page
+				.getByRole( 'link', { name: productTagName, exact: true } )
+				.click();
+
 			await expect(
-				page.getByRole( 'heading', { name: productTagName1 } )
+				page.getByRole( 'heading', { name: productTagName } )
 			).toBeVisible();
 			await expect(
 				page.getByText(
-					new RegExp( `Products tagged .*${ productTagName1 }.*` )
+					new RegExp( `Products tagged .*${ productTagName }.*` )
 				)
 			).toBeVisible();
 			await expect(
@@ -233,7 +186,7 @@ test.describe(
 			).toBeVisible();
 		} );
 
-		test( 'should see and sort attributes page with all its products', async ( {
+		test( 'can navigate from a product attribute to its archive', async ( {
 			page,
 			baseURL,
 		} ) => {
@@ -296,51 +249,6 @@ test.describe(
 			await expect(
 				page.getByText( 'Showing all 3 results' )
 			).toBeVisible();
-		} );
-
-		test( 'can see products showcase', async ( { page } ) => {
-			// create as a merchant a new page with Product Collection block
-			await goToPageEditor( { page } );
-			await fillPageTitle( page, pageTitle );
-			await insertBlockByShortcut( page, 'Product Collection' );
-			const canvas = await getCanvas( page );
-
-			// Product Collection requires choosing some collection.
-			await canvas
-				.locator(
-					'[data-type="woocommerce/product-collection"] .components-placeholder'
-				)
-				.getByRole( 'button', {
-					name: 'create your own',
-				} )
-				.click();
-
-			await publishPage( page, pageTitle );
-
-			// go to created page with products showcase
-			await page.goto( 'product-showcase' );
-			await expect(
-				page.getByRole( 'heading', { name: pageTitle } )
-			).toBeVisible();
-			expect(
-				await page
-					.getByRole( 'button', { name: 'Add to cart' } )
-					.count()
-			).toBeGreaterThan( 0 );
-
-			const productPrice = page.locator( '.woocommerce-Price-amount' );
-			for ( let i = 0; i < productPrice.count(); ++i )
-				await expect( productPrice.nth( i ) ).toBeVisible();
-
-			const productTitle = page.locator(
-				'.woocommerce-loop-product__title'
-			);
-			for ( let i = 0; i < productTitle.count(); ++i )
-				await expect( productTitle.nth( i ) ).toBeVisible();
-
-			const productImage = page.locator( '.wp-post-image' );
-			for ( let i = 0; i < productImage.count(); ++i )
-				await expect( productImage.nth( i ) ).toBeVisible();
 		} );
 	}
 );

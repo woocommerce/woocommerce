@@ -137,7 +137,6 @@ export function generateCSVFileName(
  * @param {string} content  Contents of the file to download
  */
 export function downloadCSVFile( fileName: string, content: BlobPart ) {
-	// eslint-disable-next-line no-undef
 	const blob = new Blob( [ content ], { type: 'text/csv;charset=utf-8' } );
 
 	saveAs( blob, fileName );

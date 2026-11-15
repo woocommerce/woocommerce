@@ -10,10 +10,13 @@ import {
 	InspectorControls,
 } from '@wordpress/block-editor';
 import { getSetting, ADMIN_URL } from '@woocommerce/settings';
+import { SITE_TITLE } from '@woocommerce/settings/default-constants';
 import {
 	Disabled,
 	PanelBody,
 	ToggleControl,
+	// `Link` from `@wordpress/ui` isn't available to this package yet.
+	// eslint-disable-next-line @wordpress/use-recommended-components
 	ExternalLink,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
@@ -25,7 +28,6 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import { SITE_TITLE } from '../../../settings/shared/default-constants';
 import Form from './form';
 
 const defaultTemplate = [
@@ -42,9 +44,7 @@ const defaultTemplate = [
 	],
 	[
 		'core/list',
-		{
-			className: 'is-style-checkmark-list',
-		},
+		{},
 		[
 			[
 				'core/list-item',

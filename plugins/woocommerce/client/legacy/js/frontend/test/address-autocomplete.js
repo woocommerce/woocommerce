@@ -1263,6 +1263,38 @@ describe( 'Address Suggestions Component', () => {
 				'false'
 			);
 		} );
+
+		test.each( [
+			[ 'no suggestions', [] ],
+			[ 'an invalid response', undefined ],
+		] )(
+			'should restore browser autofill without moving focus after %s',
+			async ( _, result ) => {
+				const consoleSpy = jest
+					.spyOn( console, 'error' )
+					.mockImplementation( () => {} );
+				billingAddressInput.value = '123';
+				billingAddressInput.focus();
+				billingAddressInput.dispatchEvent( new Event( 'input' ) );
+				await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+				expect(
+					billingAddressInput.getAttribute( 'autocomplete' )
+				).toBe( 'none' );
+
+				mockProvider.search.mockResolvedValue( result );
+				billingAddressInput.value = '1234';
+				billingAddressInput.dispatchEvent( new Event( 'input' ) );
+				const cityInput = document.getElementById( 'billing_city' );
+				cityInput.focus();
+				await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+				expect(
+					billingAddressInput.getAttribute( 'autocomplete' )
+				).toBe( 'address-line1' );
+				expect( document.activeElement ).toBe( cityInput );
+				consoleSpy.mockRestore();
+			}
+		);
 	} );
 
 	describe( 'Security and Sanitization', () => {

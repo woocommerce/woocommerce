@@ -106,7 +106,7 @@ describe( 'CustomerEffortScore', () => {
 				unknown,
 				{
 					actions: [ { onClick: () => void } ];
-				}
+				},
 			]
 		) => {
 			// We're only interested in the 3rd argument.

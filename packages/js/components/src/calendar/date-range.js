@@ -23,6 +23,18 @@ import DateInput from './input';
 import phrases from './phrases';
 
 const isRTL = () => document.documentElement.dir === 'rtl';
+
+// react-dates builds each day's aria-label with moment, defaulting to 'dddd, LL'.
+// WordPress seeds `LL` with the PHP `date_format` option, which moment misreads as its
+// own tokens, so use moment tokens here instead. Called at render time so the
+// translation is read after the locale data loads.
+const getDayAriaLabelFormat = () =>
+	__(
+		/* translators: Moment.js format for the date a screen reader reads out on a calendar day. Keep the moment tokens (dddd, MMMM, D, YYYY) and reorder them to suit the locale. */
+		'dddd, MMMM D, YYYY',
+		'woocommerce'
+	);
+
 // Blur event sources
 const CONTAINER_DIV = 'container';
 const NEXT_MONTH_CLICK = 'onNextMonthClick';
@@ -266,6 +278,7 @@ class DateRange extends Component {
 							before
 						) }
 						phrases={ phrases }
+						dayAriaLabelFormat={ getDayAriaLabelFormat() }
 					/>
 				</div>
 			</div>

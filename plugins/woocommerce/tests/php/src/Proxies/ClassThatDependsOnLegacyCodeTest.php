@@ -24,6 +24,8 @@ class ClassThatDependsOnLegacyCodeTest extends \WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
+
 		$container = wc_get_container();
 
 		$this->sut = $container->get( ClassThatDependsOnLegacyCode::class );

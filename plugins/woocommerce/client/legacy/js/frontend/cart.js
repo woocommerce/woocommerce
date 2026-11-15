@@ -155,7 +155,7 @@ jQuery( function ( $ ) {
 				$new_coupon_field.val( $old_coupon_field_val );
 				// The coupon input with error needs to be focused before adding the live region
 				// with the error message, otherwise the screen reader won't read it.
-				$new_coupon_field.focus();
+				$new_coupon_field.trigger( 'focus' );
 				show_coupon_error( $old_coupon_error_msg, $new_coupon_field_wrapper, true );
 			}
 
@@ -234,6 +234,21 @@ jQuery( function ( $ ) {
 	};
 
 	/**
+	 * Handle when pressing the Space key on a link with the button role.
+	 *
+	 * @param {Object} event The jQuery event.
+	 */
+	var on_keydown_button = function ( event ) {
+		if ( event.key === ' ' ) {
+			event.preventDefault();
+
+			if ( ! event.originalEvent || ! event.originalEvent.repeat ) {
+				$( event.currentTarget ).trigger( 'click' );
+			}
+		}
+	};
+
+	/**
 	 * Object to handle AJAX calls for cart shipping changes.
 	 */
 	var cart_shipping = {
@@ -252,6 +267,11 @@ jQuery( function ( $ ) {
 				'click',
 				'.shipping-calculator-button',
 				this.toggle_shipping
+			);
+			$( document ).on(
+				'keydown',
+				'.shipping-calculator-button',
+				on_keydown_button
 			);
 			$( document ).on(
 				'change',
@@ -296,7 +316,6 @@ jQuery( function ( $ ) {
 		shipping_method_selected: function ( event ) {
 			var shipping_methods = {};
 
-			// eslint-disable-next-line max-len
 			$(
 				'select.shipping_method, :input[name^=shipping_method][type=radio]:checked, :input[name^=shipping_method][type=hidden]'
 			).each( function () {
@@ -314,6 +333,7 @@ jQuery( function ( $ ) {
 				type: 'post',
 				url: get_url( 'update_shipping_method' ),
 				data: data,
+				wc_form_encoding: true,
 				dataType: 'html',
 				success: function ( response ) {
 					update_cart_totals_div( response );
@@ -356,6 +376,7 @@ jQuery( function ( $ ) {
 				type: $form.attr( 'method' ),
 				url: $form.attr( 'action' ),
 				data: $form.serialize(),
+				wc_form_encoding: true,
 				dataType: 'html',
 				success: function ( response ) {
 					update_wc_div( response );
@@ -415,7 +436,7 @@ jQuery( function ( $ ) {
 			$( document ).on(
 				'keydown',
 				'a.woocommerce-remove-coupon',
-				this.on_keydown_remove_coupon
+				on_keydown_button
 			);
 			$( document ).on(
 				'click',
@@ -425,7 +446,7 @@ jQuery( function ( $ ) {
 			$( document ).on(
 				'keydown',
 				'.woocommerce-cart-form .product-remove > a',
-				this.on_keydown_remove_item
+				on_keydown_button
 			);
 			$( document ).on(
 				'click',
@@ -473,6 +494,7 @@ jQuery( function ( $ ) {
 				type: $form.attr( 'method' ),
 				url: $form.attr( 'action' ),
 				data: $form.serialize(),
+				wc_form_encoding: true,
 				dataType: 'html',
 				success: function ( response ) {
 					update_wc_div( response, preserve_notices );
@@ -606,6 +628,7 @@ jQuery( function ( $ ) {
 				type: 'POST',
 				url: get_url( 'apply_coupon' ),
 				data: data,
+				wc_form_encoding: true,
 				dataType: 'html',
 				success: function ( response ) {
 					$(
@@ -623,6 +646,11 @@ jQuery( function ( $ ) {
 						if ( $coupon_wrapper.length > 0 ) {
 							show_coupon_error( response, $coupon_wrapper, false );
 						}
+
+						$( document.body ).trigger( 'errored_coupon', [
+							coupon_code,
+							response,
+						] );
 					}
 
 					$( document.body ).trigger( 'applied_coupon', [
@@ -659,6 +687,7 @@ jQuery( function ( $ ) {
 				type: 'POST',
 				url: get_url( 'remove_coupon' ),
 				data: data,
+				wc_form_encoding: true,
 				dataType: 'html',
 				success: function ( response ) {
 					$(
@@ -680,20 +709,6 @@ jQuery( function ( $ ) {
 					cart.update_cart( true );
 				},
 			} );
-		},
-
-		/**
-		 * Handle when pressing the Space key on the remove coupon link.
-		 * This is necessary because the link got the role="button" attribute
-		 * and needs to act like a button.
-		 *
-		 * @param {Object} evt The JQuery event
-		 */
-		on_keydown_remove_coupon: function ( evt ) {
-			if ( evt.key === ' ' ) {
-				evt.preventDefault();
-				$( evt.currentTarget ).trigger( 'click' );
-			}
 		},
 
 		/**
@@ -732,6 +747,7 @@ jQuery( function ( $ ) {
 				type: $form.attr( 'method' ),
 				url: $form.attr( 'action' ),
 				data: $form.serialize(),
+				wc_form_encoding: true,
 				dataType: 'html',
 				success: function ( response ) {
 					update_wc_div( response );
@@ -772,20 +788,6 @@ jQuery( function ( $ ) {
 					$( document.body ).trigger( 'item_removed_from_classic_cart');
 				},
 			} );
-		},
-
-		/**
-		 * Handle when pressing the Space key on the remove item link.
-		 * This is necessary because the link got the role="button" attribute
-		 * and needs to act like a button.
-		 *
-		 * @param {Object} evt The JQuery event
-		 */
-		on_keydown_remove_item: function ( event ) {
-			if ( event.key === ' ' ) {
-				event.preventDefault();
-				$( event.currentTarget ).trigger( 'click' );
-			}
 		},
 
 		/**

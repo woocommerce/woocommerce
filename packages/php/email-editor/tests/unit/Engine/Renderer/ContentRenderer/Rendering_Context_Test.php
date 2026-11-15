@@ -114,7 +114,12 @@ class Rendering_Context_Test extends \Email_Editor_Unit_Test {
 
 		$this->assertSame( '#ff0000', $context->translate_slug_to_color( 'primary' ) );
 		$this->assertSame( '#00ff00', $context->translate_slug_to_color( 'secondary' ) );
-		$this->assertSame( 'unknown', $context->translate_slug_to_color( 'unknown' ) );
+		$this->assertSame( '', $context->translate_slug_to_color( 'unknown' ) );
+
+		// A value that is already a literal color is not a slug and passes through untranslated.
+		$this->assertSame( '#012345', $context->translate_slug_to_color( '#012345' ) );
+		$this->assertSame( 'rgb(1, 2, 3)', $context->translate_slug_to_color( 'rgb(1, 2, 3)' ) );
+		$this->assertSame( 'var(--wp--preset--color--base)', $context->translate_slug_to_color( 'var(--wp--preset--color--base)' ) );
 	}
 
 	/**

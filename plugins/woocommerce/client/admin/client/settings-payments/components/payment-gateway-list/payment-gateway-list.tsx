@@ -151,7 +151,7 @@ export const PaymentGatewayList = ( {
 									id={ offlinePmsGroup.id }
 									className="transitions-disabled woocommerce-list__item clickable-list-item enter-done"
 									onClick={ () => {
-										navigate(
+										void navigate(
 											removeOriginFromURL(
 												offlinePmsGroup.management
 													._links.settings.href
@@ -176,7 +176,7 @@ export const PaymentGatewayList = ( {
 											</span>
 											<span
 												className="woocommerce-list__item-content"
-												// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
+
 												dangerouslySetInnerHTML={ {
 													__html: offlinePmsGroup.description,
 												} }

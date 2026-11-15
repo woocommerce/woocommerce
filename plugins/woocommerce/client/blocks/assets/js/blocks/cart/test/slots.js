@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-commented-out-tests */
 /**
  * External dependencies
  */
@@ -12,7 +11,7 @@ import { registerPlugin } from '@wordpress/plugins';
 /**
  * Internal dependencies
  */
-import { defaultCartState } from '../../../data/cart/default-state';
+import { defaultCartState } from '@woocommerce/block-data/cart/default-state';
 
 import Cart from '../block';
 import OrderSummaryBlock from '../inner-blocks/cart-order-summary-block/frontend';

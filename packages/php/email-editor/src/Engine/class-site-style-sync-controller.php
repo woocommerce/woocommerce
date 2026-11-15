@@ -177,9 +177,16 @@ class Site_Style_Sync_Controller {
 	private function sync_settings_data( array $site_settings ): array {
 		$email_settings = array();
 
-		// Sync color palette.
+		// Sync color palette, without the colors email clients can’t render.
 		if ( isset( $site_settings['color']['palette'] ) ) {
-			$email_settings['color']['palette'] = $site_settings['color']['palette'];
+			$email_settings['color']['palette'] = array_values(
+				array_filter(
+					$site_settings['color']['palette'],
+					function ( $preset ) {
+						return $this->is_usable_color( $preset['color'] ?? null );
+					}
+				)
+			);
 		}
 
 		return $email_settings;
@@ -244,6 +251,9 @@ class Site_Style_Sync_Controller {
 	/**
 	 * Convert site color styles to email format
 	 *
+	 * Returns nothing when email clients can’t render one of the colors, so the email theme’s own
+	 * text and background apply together. One site color on the other default can be unreadable.
+	 *
 	 * @param array $color_styles Site color styles.
 	 * @return array Email-compatible color styles.
 	 */
@@ -253,7 +263,30 @@ class Site_Style_Sync_Controller {
 		$this->resolve_and_assign( $color_styles, 'background', $email_colors );
 		$this->resolve_and_assign( $color_styles, 'text', $email_colors );
 
+		foreach ( $email_colors as $color ) {
+			if ( ! $this->is_usable_color( $color ) ) {
+				return array();
+			}
+		}
+
 		return $email_colors;
+	}
+
+	/**
+	 * Whether the email can use a site color.
+	 *
+	 * Either email clients can render it, or it points at a palette color. Only the renderer sees
+	 * the whole email palette, so it swaps such a reference for its color or leaves it out.
+	 *
+	 * @param mixed $color Color value from the site theme.
+	 * @return bool
+	 */
+	private function is_usable_color( $color ): bool {
+		if ( is_string( $color ) && 1 === preg_match( '/^var\(--wp--preset--color--[\w-]+\)$/', trim( $color ) ) ) {
+			return true;
+		}
+
+		return Styles_Helper::is_email_safe_color( $color );
 	}
 
 	/**
@@ -434,42 +467,67 @@ class Site_Style_Sync_Controller {
 
 		// Map common web fonts to email-safe alternatives.
 		$font_map = array(
-			'helvetica' => $email_safe_fonts['arial'], // Arial fallback.
-			'times'     => $email_safe_fonts['georgia'], // Georgia fallback.
-			'courier'   => $email_safe_fonts['courier-new'], // Courier New.
-			'trebuchet' => $email_safe_fonts['trebuchet-ms'],
+			'helvetica'     => $email_safe_fonts['arial'], // Arial fallback.
+			'times'         => $email_safe_fonts['georgia'], // Georgia fallback.
+			'courier'       => $email_safe_fonts['courier-new'], // Courier New.
+			'trebuchet'     => $email_safe_fonts['trebuchet-ms'],
+			// Generic families, so serif and monospace fonts don't all turn into Arial.
+			// `fantasy` has no email-safe match, so it falls through to Arial.
+			'serif'         => $email_safe_fonts['georgia'],
+			'ui-serif'      => $email_safe_fonts['georgia'],
+			'monospace'     => $email_safe_fonts['courier-new'],
+			'ui-monospace'  => $email_safe_fonts['courier-new'],
+			'cursive'       => $email_safe_fonts['comic-sans-ms'],
+			'sans-serif'    => $email_safe_fonts['arial'],
+			'ui-sans-serif' => $email_safe_fonts['arial'],
+			'system-ui'     => $email_safe_fonts['arial'],
 		);
 
 		$email_safe_fonts = array_merge( $email_safe_fonts, $font_map );
 
 		$get_font_family = function ( $font_name ) use ( $email_safe_fonts ) {
-			$font_name_lower = strtolower( $font_name );
-
 			// First check for match in the email-safe slug.
-			if ( isset( $email_safe_fonts[ $font_name_lower ] ) ) {
-				return $email_safe_fonts[ $font_name_lower ];
+			if ( isset( $email_safe_fonts[ $font_name ] ) ) {
+				return $email_safe_fonts[ $font_name ];
 			}
 
-			// If no match in the slug, check for match in the font family name.
-			foreach ( $email_safe_fonts as $safe_font_slug => $safe_font ) {
-				if ( stripos( $safe_font, $font_name_lower ) !== false ) {
+			// If no match in the slug, look for the same family name in a stack.
+			// Whole names only: a substring match finds "serif" inside Arial's "sans-serif".
+			foreach ( $email_safe_fonts as $safe_font ) {
+				if ( in_array( $font_name, $this->get_font_names( $safe_font ), true ) ) {
 					return $safe_font;
 				}
 			}
 			return null;
 		};
 
-		// Check if it's already an email-safe font.
-		$font_family_array = explode( ',', $font_family );
-		$first_font        = trim( $font_family_array[0] );
-		$first_font        = trim( $first_font, "\"'" );
-		$safe_font_family  = $get_font_family( $first_font );
-		if ( $safe_font_family ) {
-			return $safe_font_family;
+		// Walk the stack as CSS would: the first email-safe font or generic family wins.
+		foreach ( $this->get_font_names( $font_family ) as $font_name ) {
+			$safe_font_family = $get_font_family( $font_name );
+			if ( $safe_font_family ) {
+				return $safe_font_family;
+			}
 		}
 
 		// Default to arial font if no match found.
 		return $email_safe_fonts['arial'];
+	}
+
+	/**
+	 * Split a CSS font-family stack into lowercase family names without quotes.
+	 *
+	 * @param string $font_family CSS font-family value.
+	 * @return string[] Family names in stack order.
+	 */
+	private function get_font_names( string $font_family ): array {
+		$names = array();
+		foreach ( explode( ',', $font_family ) as $name ) {
+			$name = strtolower( trim( trim( $name ), "\"'" ) );
+			if ( '' !== $name ) {
+				$names[] = $name;
+			}
+		}
+		return $names;
 	}
 
 	/**

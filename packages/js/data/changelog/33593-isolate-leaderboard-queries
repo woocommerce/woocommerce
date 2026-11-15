@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent stale leaderboard responses from overwriting results for another query.

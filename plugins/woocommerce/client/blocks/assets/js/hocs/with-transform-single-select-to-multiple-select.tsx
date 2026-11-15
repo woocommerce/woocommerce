@@ -3,7 +3,7 @@
  */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - Ignoring because @wordpress/element library does not have type definition for FunctionComponent
-// eslint-disable-next-line
+
 import { FunctionComponent } from '@wordpress/element';
 
 export type SelectedOption = number | string | null | number[] | string[];
@@ -16,7 +16,7 @@ export interface WithMaybeSelectedOption {
  * HOC that transforms a single select to a multiple select.
  */
 const withTransformSingleSelectToMultipleSelect = <
-	T extends Record< string, unknown >
+	T extends Record< string, unknown >,
 >(
 	OriginalComponent: FunctionComponent< T & WithMaybeSelectedOption >
 ) => {

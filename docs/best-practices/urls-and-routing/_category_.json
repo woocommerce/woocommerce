@@ -1,4 +1,9 @@
 {
     "position": 6,
-    "label": "URLs and routing"
+    "label": "URLs and routing",
+    "link": {
+        "type": "generated-index",
+        "title": "URLs and routing",
+        "slug": "/best-practices/urls-and-routing"
+    }
 }

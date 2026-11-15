@@ -44,8 +44,9 @@ export const log = {
 		console.log( format( prefix, message ) );
 	},
 	debug( context: string, message: string ): void {
-		if ( debugEnabled )
+		if ( debugEnabled ) {
 			console.log( format( 'debug', `${ context }: ${ message }` ) );
+		}
 	},
 	warn( prefix: LoggerPrefix, message: string ): void {
 		console.warn( format( prefix, message ) );

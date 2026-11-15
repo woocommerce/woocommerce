@@ -75,7 +75,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 															boxSizing: 'unset',
 															borderRadius:
 																'unset',
-													  }
+														}
 													: {}
 											}
 											type="number"
@@ -116,7 +116,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 															boxSizing: 'unset',
 															borderRadius:
 																'unset',
-													  }
+														}
 													: {}
 											}
 											type="number"

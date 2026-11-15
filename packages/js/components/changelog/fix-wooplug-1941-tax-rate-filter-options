@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show all applicable tax rates in the Analytics advanced filter by requesting the full page of results instead of only the first 10.

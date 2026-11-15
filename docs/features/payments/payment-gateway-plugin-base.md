@@ -1,6 +1,7 @@
 ---
 post_title: WooCommerce payment gateway plugin base
-
+sidebar_label: Payment gateway plugin base
+sidebar_position: 2
 ---
 
 # WooCommerce payment gateway plugin base

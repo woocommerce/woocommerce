@@ -47,7 +47,6 @@ class WC_Tests_Geolocation extends WC_Unit_Test_Case {
 		$this->assertEquals( '2620:0:ccc::2', WC_Geolocation::get_ip_address() );
 		$_SERVER['REMOTE_ADDR'] = '2620:0:ccc::2, 2001:4860:4860::8888';
 		$this->assertEquals( '2620:0:ccc::2', WC_Geolocation::get_ip_address() );
-		unset( $_SERVER['REMOTE_ADDR'] );
 	}
 
 	/**
@@ -85,6 +84,16 @@ class WC_Tests_Geolocation extends WC_Unit_Test_Case {
 		foreach ( $apis as $service_name => $endpoint ) {
 			$this->assertStringStartsWith( 'https://', $endpoint, "IP-lookup service {$service_name} must use HTTPS" );
 		}
+	}
+
+	/**
+	 * @testdox The default ipify IP-lookup endpoint should support IPv6.
+	 */
+	public function test_ipify_ip_lookup_api_uses_ipv6_capable_endpoint() {
+		$apis = $this->get_private_static( 'ip_lookup_apis' );
+
+		$this->assertArrayHasKey( 'ipify', $apis );
+		$this->assertSame( 'https://api64.ipify.org', $apis['ipify'] );
 	}
 
 	/**

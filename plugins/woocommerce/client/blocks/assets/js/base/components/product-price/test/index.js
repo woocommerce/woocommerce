@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import TestRenderer from 'react-test-renderer';
+import { render, screen, within } from '@testing-library/react';
 
 /**
  * Internal dependencies
  */
 import ProductPrice from '../index';
+import { textContentMatcher } from '../../../../../../tests/utils/find-by-text';
 
 describe( 'ProductPrice', () => {
 	const currency = {
@@ -37,7 +38,7 @@ describe( 'ProductPrice', () => {
 	};
 
 	test( 'should use default price if no format is provided', () => {
-		const component = TestRenderer.create(
+		render(
 			<ProductPrice
 				price={ 50 }
 				regularPrice={ 100 }
@@ -45,11 +46,12 @@ describe( 'ProductPrice', () => {
 			/>
 		);
 
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( screen.getByRole( 'deletion' ) ).toHaveTextContent( '£1.00' );
+		expect( screen.getByRole( 'insertion' ) ).toHaveTextContent( '£0.50' );
 	} );
 
 	test( 'should apply the format if one is provided', () => {
-		const component = TestRenderer.create(
+		const { container } = render(
 			<ProductPrice
 				price={ 50 }
 				regularPrice={ 100 }
@@ -58,6 +60,65 @@ describe( 'ProductPrice', () => {
 			/>
 		);
 
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( screen.getByRole( 'deletion' ) ).toHaveTextContent( '£1.00' );
+		expect( screen.getByRole( 'insertion' ) ).toHaveTextContent( '£0.50' );
+		// The custom format wraps the whole price, screen reader labels
+		// included.
+		expect( container ).toHaveTextContent(
+			'pre price Previous price:£1.00Discounted price:£0.50 Test format'
+		);
+	} );
+
+	test( 'keeps the sale price structure: labels and del/ins wrappers', () => {
+		const { container } = render(
+			<ProductPrice
+				price={ 50 }
+				regularPrice={ 100 }
+				currency={ currency }
+			/>
+		);
+
+		expect( container.firstChild ).toHaveClass(
+			'price',
+			'wc-block-components-product-price'
+		);
+
+		const previousLabel = screen.getByText( 'Previous price:' );
+		const discountedLabel = screen.getByText( 'Discounted price:' );
+		expect( previousLabel ).toHaveClass( 'screen-reader-text' );
+		expect( discountedLabel ).toHaveClass( 'screen-reader-text' );
+
+		// Each price follows its screen reader label.
+		const del = screen.getByRole( 'deletion' );
+		expect( del ).toHaveClass(
+			'wc-block-components-product-price__regular'
+		);
+		expect( del ).toHaveAttribute( 'translate', 'no' );
+		expect( previousLabel.nextElementSibling ).toBe( del );
+
+		const ins = screen.getByRole( 'insertion' );
+		expect( ins ).toHaveClass(
+			'wc-block-components-product-price__value',
+			'is-discounted'
+		);
+		expect( ins ).toHaveAttribute( 'translate', 'no' );
+		expect( discountedLabel.nextElementSibling ).toBe( ins );
+
+		// The wrappers hold a price element rather than a flat string, so the
+		// currency symbol keeps the isolation FormattedMonetaryAmount gives it.
+		expect(
+			within( del ).getByText( textContentMatcher( '£1.00' ) )
+		).toBeInTheDocument();
+		expect(
+			within( ins ).getByText( textContentMatcher( '£0.50' ) )
+		).toBeInTheDocument();
+	} );
+
+	test( 'renders a single price as a price element', () => {
+		render( <ProductPrice price={ 50 } currency={ currency } /> );
+
+		expect(
+			screen.getByText( textContentMatcher( '£0.50' ) )
+		).toBeInTheDocument();
 	} );
 } );

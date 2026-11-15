@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a "Send checkout recovery email" action to the order actions dropdown so merchants can manually send the Checkout Recovery email for pending or checkout-draft orders past the 1-hour abandonment threshold.

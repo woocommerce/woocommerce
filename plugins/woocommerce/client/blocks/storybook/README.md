@@ -38,7 +38,7 @@ Let's see the code in detail.
 This is the minimal scaffold you need for your new Story:
 
 ```tsx
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 import MyComponent, { MyComponentProps } from '..';
 
 export default {
@@ -46,7 +46,7 @@ export default {
 	component: MyComponent,
 } as Meta< MyComponentProps >;
 
-const Template: Story< MyComponentProps > = ( args ) => (
+const Template: StoryFn< MyComponentProps > = ( args ) => (
 	<MyComponent { ...args } />
 );
 
@@ -128,7 +128,7 @@ But a TL;DR of most common usecases:
 The recommended way to create a story is by creating a template function and duplicating it for each story, to avoid extra scaffolding. The simplest form of the template is as follows:
 
 ```tsx
-const Template: Story< MyComponentProps > = ( args ) => (
+const Template: StoryFn< MyComponentProps > = ( args ) => (
 	<MyComponent { ...args } />
 );
 ```
@@ -251,7 +251,7 @@ See: <https://github.com/strothj/react-docgen-typescript-loader/issues/75>
 Your component is not managing its own state and expects it to be passed as a prop, but you want to create a self-contained story. You can then edit your main `Template` function to manage the state, for example through hooks.
 
 ```tsx
-const Template: Story< MyControlledComponentProps > = ( args ) => {
+const Template: StoryFn< MyControlledComponentProps > = ( args ) => {
 	const [ myState, setMyState ] = useState( 0 );
 
 	const onChange = ( newVal ) => {
@@ -273,12 +273,12 @@ You will notice that when you do this, your controls will not be in sync anymore
 
 Often, it is enough to disable the control for `state` as it's not required.
 
-If you want to keep them in sync, you'll have to use `useArgs` from the Storybook client API.
+If you want to keep them in sync, you'll have to use `useArgs` from the Storybook preview API.
 
 ```tsx
-import { useArgs } from '@storybook/client-api';
+import { useArgs } from 'storybook/preview-api';
 
-const Template: Story< MyControlledComponentProps > = ( args ) => {
+const Template: StoryFn< MyControlledComponentProps > = ( args ) => {
 	const [ _, setArgs ] = useArgs();
 
 	const onChange = ( newVal ) => {
@@ -317,7 +317,7 @@ Full action docs: <https://storybook.js.org/docs/react/essentials/actions>
 **However**, you might want to simulate some sort of behavior from your component, for example show how a `Retry` button triggers a loading state. In this case you can use `useArgs`:
 
 ```tsx
-const Template: Story< MyComponentProps > = ( args ) => {
+const Template: StoryFn< MyComponentProps > = ( args ) => {
 	const [ { isLoading }, setArgs ] = useArgs();
 
 	const onRetry = () => {

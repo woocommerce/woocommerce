@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import {
@@ -12,6 +11,7 @@ import {
 } from '@woocommerce/data';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { withSpokenMessages } from '@wordpress/components';
+import { getShortDateFormat } from '@woocommerce/date';
 
 /**
  * Internal dependencies
@@ -23,7 +23,7 @@ class HistoricalData extends Component {
 	constructor() {
 		super( ...arguments );
 
-		this.dateFormat = __( 'MM/DD/YYYY', 'woocommerce' );
+		this.dateFormat = getShortDateFormat();
 		this.intervalId = -1;
 		this.lastImportStopTimestamp = 0;
 		this.cacheNeedsClearing = true;

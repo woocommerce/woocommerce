@@ -47,7 +47,7 @@ export default function SaveAsDraftButton( {
 		if ( error ) {
 			setError( error );
 		} else {
-			refreshOrderFulfillmentStatus( order.id );
+			void refreshOrderFulfillmentStatus( order.id );
 			setIsEditing( false );
 		}
 		setIsExecuting( false );

@@ -1,35 +1,42 @@
 <?php
 /**
- * Product update ability definition file.
+ * Product update ability class file.
  */
 
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductFieldRefusalsTrait;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers the WooCommerce product update ability.
+ * The WooCommerce product update ability. It runs the steps of ActionableAbility.
  */
-class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
+class ProductUpdate extends ActionableAbility {
 
+	use DomainAbilityHelpers;
 	use ProductAbilityTrait;
+	use ProductFieldRefusalsTrait;
 
 	/**
-	 * Get the ability name.
-	 *
-	 * @return string
-	 *
-	 * @since 10.9.0
+	 * Ability name.
 	 */
-	public static function get_name(): string {
-		return 'woocommerce/product-update';
-	}
+	public const ABILITY_NAME = 'woocommerce/product-update';
+
+	/**
+	 * The variations that change() planned, saved after their parent by save().
+	 *
+	 * @var array{save: array<int, array{0: \WC_Product_Variation, 1: array}>, delete: \WC_Product_Variation[]}
+	 */
+	private array $variations = array(
+		'save'   => array(),
+		'delete' => array(),
+	);
 
 	/**
 	 * Get the ability registration arguments.
@@ -46,9 +53,8 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
-			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_entity_output_schema( 'product', self::get_product_output_schema() ),
-			'execute_callback'    => array( __CLASS__, 'execute' ),
+			'input_schema'        => self::build_input_schema(),
+			'output_schema'       => self::get_product_mutation_output_schema(),
 			'permission_callback' => array( __CLASS__, 'can_update_product' ),
 			'meta'                => array(
 				'show_in_rest' => true,
@@ -66,14 +72,28 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 	}
 
 	/**
-	 * Update a product.
+	 * Resource that the ability changes.
+	 *
+	 * @return string
+	 */
+	public function get_resource(): string {
+		return 'product';
+	}
+
+	/**
+	 * Load the product to change, with the input type.
 	 *
 	 * @param array $input Ability input.
-	 * @return array|\WP_Error
-	 *
-	 * @since 10.9.0
+	 * @return \WC_Product|\WP_Error
 	 */
-	public static function execute( array $input ) {
+	protected function load( array $input ) {
+		$this->variations = array(
+			'save'   => array(),
+			'delete' => array(),
+		);
+		$this->deleted    = array();
+		$this->parent     = null;
+
 		$product = self::get_product_from_input( $input );
 
 		if ( is_wp_error( $product ) ) {
@@ -88,68 +108,134 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
-		$product_config = self::get_product_config_for_product( $product );
+		$error = self::check_publish_permission( $product, $input );
+		if ( is_wp_error( $error ) ) {
+			return $error;
+		}
+
+		if ( isset( $input['type'] ) && $input['type'] !== $product->get_type() ) {
+			$is_variable = static function ( $class_or_object ): bool {
+				return is_a( $class_or_object, \WC_Product_Variable::class, true ) || is_a( $class_or_object, \WC_Product_Variation::class, true );
+			};
+			if ( $is_variable( \WC_Product_Factory::get_product_classname( $product->get_id(), $input['type'] ) ) || $is_variable( $product ) ) {
+				return new \WP_Error(
+					'woocommerce_product_type_unsupported',
+					__( 'A product cannot change into or out of a variable product or a variation through this ability. WooCommerce would delete its variations.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+			return self::get_product_object_for_type( $input['type'], $product->get_id() );
+		}
+
+		return $product;
+	}
+
+	/**
+	 * Set the product properties in memory.
+	 *
+	 * @param \WC_Product $subject Product.
+	 * @param array       $input   Ability input.
+	 * @return null|\WP_Error|array<int, array{0: \WC_Product, 1: array}> The variations that the input names, each with the `extensions` input of its `variations` item. For a variation, its parent.
+	 */
+	protected function change( $subject, array $input ) {
+		$product_config = self::get_product_config_for_product( $subject );
 
 		if ( is_wp_error( $product_config ) ) {
 			return $product_config;
 		}
 
-		if (
-			isset( $input['status'] )
-			&& in_array(
-				sanitize_key( $input['status'] ),
-				array( ProductStatus::PUBLISH, ProductStatus::FUTURE, ProductStatus::PRIVATE ),
-				true
-			)
-			&& sanitize_key( $input['status'] ) !== $product->get_status()
-			&& ! self::current_user_can_publish_products()
-		) {
-			return new \WP_Error(
-				'woocommerce_product_publish_forbidden',
-				__( 'You are not allowed to publish products.', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
-		}
-
-		if ( isset( $input['product_type_alias'] ) ) {
-			$product_config = self::get_product_config_for_alias( $input['product_type_alias'] );
-
-			if ( is_wp_error( $product_config ) ) {
-				return $product_config;
-			}
-
-			$product = wc_get_product_object( $product_config['wc_type'], $product->get_id() );
-
-			if ( ! $product ) {
-				return new \WP_Error(
-					'woocommerce_invalid_product_type',
-					__( 'Invalid product type.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
-			}
-		}
-
 		try {
-			if ( isset( $input['product_type_alias'] ) ) {
-				self::apply_product_type_config( $product, $product_config );
+			if ( isset( $input['type'] ) && \WC_Product_Factory::get_product_type( $subject->get_id() ) !== $input['type'] ) {
+				self::apply_product_type_config( $subject, $product_config );
 			}
 
-			$validation_error = self::set_product_props_from_input( $product, $input, $product_config );
-			if ( is_wp_error( $validation_error ) ) {
-				return $validation_error;
+			$error = self::set_product_props_from_input( $subject, $input, $product_config );
+			if ( is_wp_error( $error ) ) {
+				return $error;
 			}
+
+			if ( $subject instanceof \WC_Product_Variable && isset( $input['variations'] ) ) {
+				$plan = self::plan_variations( $subject, $input['variations'] );
+				if ( is_wp_error( $plan ) ) {
+					return $plan;
+				}
+				$this->variations = $plan;
+				return $plan['save'];
+			}
+
+			$this->parent = self::get_variable_parent( $subject );
+
+			return null === $this->parent ? null : array( array( $this->parent, array() ) );
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
 		}
+	}
 
-		$save_error = self::save_product( $product, 'woocommerce_product_update_failed' );
-		if ( is_wp_error( $save_error ) ) {
-			return $save_error;
+	/**
+	 * The variations that the `variations` input marked for deletion, as they
+	 * were before the delete.
+	 *
+	 * @var \WC_Product_Variation[]
+	 */
+	private array $deleted = array();
+
+	/**
+	 * The parent of an updated variation, synced after the save.
+	 *
+	 * @var \WC_Product_Variable|null
+	 */
+	private ?\WC_Product_Variable $parent = null;
+
+	/**
+	 * The variations that the `variations` input marked for deletion.
+	 *
+	 * @return \WC_Product_Variation[]
+	 */
+	protected function get_deleted_objects(): array {
+		return $this->deleted;
+	}
+
+	/**
+	 * The variations that the `variations` input marked for deletion, for the validators.
+	 *
+	 * @return \WC_Product_Variation[]
+	 */
+	protected function get_objects_to_delete(): array {
+		return $this->variations['delete'];
+	}
+
+	/**
+	 * Save the product, then the variations that the input names.
+	 *
+	 * @param \WC_Product $subject Changed product.
+	 * @return null|\WP_Error
+	 */
+	protected function save( $subject ) {
+		$error = self::save_product( $subject, 'woocommerce_product_update_failed' );
+		if ( is_wp_error( $error ) ) {
+			return $error;
 		}
 
-		return array(
-			'product' => self::format_product_for_response( $product ),
-		);
+		if ( $subject instanceof \WC_Product_Variable ) {
+			$this->deleted = array_map( static fn( \WC_Product_Variation $variation ) => clone $variation, $this->variations['delete'] );
+			return self::save_variations( $subject, $this->variations, 'woocommerce_product_update_failed' );
+		}
+
+		if ( null !== $this->parent ) {
+			self::sync_variable_parent( $this->parent );
+		}
+
+		return null;
+	}
+
+	/**
+	 * The ability output for the saved product.
+	 *
+	 * @param \WC_Product $subject Saved product.
+	 * @return array|\WP_Error
+	 */
+	protected function prepare_response( $subject ) {
+		return self::format_product_mutation_response( $subject, array_column( $this->variations['save'], 0 ) );
 	}
 
 	/**
@@ -161,19 +247,12 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function can_update_product( $input = array() ): bool {
-		$product_id = self::get_id_from_input( $input );
+		$product_id = self::get_product_permission_id( self::get_id_from_input( $input ) );
+		$deletes    = ! empty( array_filter( array_column( $input['variations'] ?? array(), 'delete' ) ) );
 
-		return $product_id > 0 && wc_rest_check_post_permissions( 'product', 'edit', $product_id );
-	}
-
-	/**
-	 * Check whether the current user can publish products.
-	 *
-	 * @return bool
-	 */
-	private static function current_user_can_publish_products(): bool {
-		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce registers the publish_products capability.
-		return current_user_can( 'publish_products' );
+		return $product_id > 0
+			&& wc_rest_check_post_permissions( 'product', 'edit', $product_id )
+			&& ( ! $deletes || wc_rest_check_post_permissions( 'product', 'delete', $product_id ) );
 	}
 
 	/**
@@ -181,7 +260,7 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 	 *
 	 * @return array
 	 */
-	private static function get_input_schema(): array {
+	private static function build_input_schema(): array {
 		return self::get_product_update_input_schema();
 	}
 }

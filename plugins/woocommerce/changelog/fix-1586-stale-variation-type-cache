@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return false from wc_get_product() for a variation whose variable product was permanently deleted.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the products REST API logging a deprecation notice when filtering by min_price or max_price.

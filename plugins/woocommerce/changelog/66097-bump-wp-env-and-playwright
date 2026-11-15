@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Bump @wordpress/env to 11.9.0 and @playwright/test to 1.61.1 (dev dependencies; no merchant-facing change).

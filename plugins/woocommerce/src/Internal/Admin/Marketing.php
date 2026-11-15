@@ -77,7 +77,7 @@ class Marketing {
 				'manage_woocommerce',
 				'woocommerce-marketing',
 				null,
-				'dashicons-megaphone',
+				wc_get_container()->get( MenuIcons::class )->get_icon( 'woocommerce/megaphone', 'dashicons-megaphone' ),
 				58
 			);
 		}
@@ -233,6 +233,7 @@ class Marketing {
 		}
 
 		$settings['marketing']['installedExtensions'] = InstalledExtensions::get_data();
+		$settings['marketing']['canInstallPlugins']   = current_user_can( 'install_plugins' );
 
 		return $settings;
 	}

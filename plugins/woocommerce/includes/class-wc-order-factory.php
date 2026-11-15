@@ -166,7 +166,7 @@ class WC_Order_Factory {
 	/**
 	 * Get order item.
 	 *
-	 * @param int $item_id Order item ID to get.
+	 * @param int|string $item_id Order item ID, or numeric string ID, to get.
 	 * @return WC_Order_Item|false if not found
 	 */
 	public static function get_order_item( $item_id = 0 ) {

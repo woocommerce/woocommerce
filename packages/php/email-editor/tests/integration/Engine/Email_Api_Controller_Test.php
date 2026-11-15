@@ -228,4 +228,39 @@ class Email_Api_Controller_Test extends Email_Editor_Integration_Test_Case {
 
 		$this->assertTrue( $found, 'Test tag should be in the response' );
 	}
+
+	/**
+	 * Test that a failed preview email send returns a bad request response.
+	 */
+	public function testSendPreviewEmailDataReturnsBadRequestWhenSendingFails(): void {
+		$filter = static function () {
+			return false;
+		};
+		add_filter( 'woocommerce_email_editor_send_preview_email', $filter, PHP_INT_MAX, 1 );
+
+		try {
+			/**
+			 * The send-preview request.
+			 *
+			 * @var WP_REST_Request<array{_locale: string, email: string, postId: int}> $request
+			 */
+			$request = new WP_REST_Request( 'POST', '/woocommerce-email-editor/v1/send_preview_email' );
+			$request->set_param( 'email', 'test@example.com' );
+			$request->set_param( 'postId', 123 );
+
+			$response = $this->controller->send_preview_email_data( $request );
+
+			$this->assertSame( 400, $response->get_status(), 'A failed preview email send should return a bad request response.' );
+			$this->assertSame(
+				array(
+					'success' => false,
+					'result'  => false,
+				),
+				$response->get_data(),
+				'A failed preview email send should return the complete failure response data.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_email_editor_send_preview_email', $filter, PHP_INT_MAX );
+		}
+	}
 }

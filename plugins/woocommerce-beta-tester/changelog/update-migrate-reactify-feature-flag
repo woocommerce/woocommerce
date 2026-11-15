@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Remove reactify-classic-payments-settings flag as it was migrated to Core features

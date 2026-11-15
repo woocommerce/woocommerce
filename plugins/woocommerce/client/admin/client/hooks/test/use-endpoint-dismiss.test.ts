@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks/dom';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -28,6 +28,7 @@ describe( 'useEndpointDismiss', () => {
 		const { result } = renderHook( () => useEndpointDismiss( PATH, true ) );
 
 		expect( result.current.isDismissed ).toBe( true );
+		expect( result.current.hasResolved ).toBe( true );
 	} );
 
 	it( 'optimistically dismisses and POSTs to the endpoint', async () => {

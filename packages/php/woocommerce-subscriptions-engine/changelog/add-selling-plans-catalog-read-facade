@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the Api\SellingPlans catalog read facade (list_plans, get_plans) and an ids filter to PlanRepository::query().

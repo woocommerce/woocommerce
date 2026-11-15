@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "132ae9762f20fa948d2b8dddd4c2118d",
+    "content-hash": "5cd7c96a39a129e115b6cd4dbc1d2faa",
     "packages": [],
     "packages-dev": [
         {
@@ -145,11 +145,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.2.2",
+            "version": "2.3.4",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/e5cc34d491a90e79c216d824f60fe21fd4d93bd6",
-                "reference": "e5cc34d491a90e79c216d824f60fe21fd4d93bd6",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/f20ce6f3c82556cfcfc086b152445a12d1d64fff",
+                "reference": "f20ce6f3c82556cfcfc086b152445a12d1d64fff",
                 "shasum": ""
             },
             "require": {
@@ -205,7 +205,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-06-05T09:00:01+00:00"
+            "time": "2026-10-28T22:38:53+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",
@@ -339,5 +339,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

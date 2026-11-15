@@ -57,12 +57,12 @@ const StyledFooter = styled.div`
 
 	> * {
 		&:not( :first-of-type ) {
-			margin-left: 8px;
+			margin-inline-start: 8px;
 		}
 	}
 
 	.button-link-delete {
-		margin-right: auto;
+		margin-inline-end: auto;
 		color: #d63638;
 	}
 `;

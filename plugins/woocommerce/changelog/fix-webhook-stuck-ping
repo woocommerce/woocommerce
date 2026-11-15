@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Accept any 2xx response to a webhook's test ping, and stop repeating the ping after every successful delivery.

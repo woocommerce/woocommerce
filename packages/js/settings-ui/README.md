@@ -2,6 +2,8 @@
 
 React utilities for WooCommerce settings pages that opt in to the settings UI renderer.
 
+> **This package is experimental.** Until it is marked as stable, its API and the settings UI schema can change in backwards-incompatible ways in any release.
+
 For the full integration guide, see [Settings UI](../../../docs/extensions/settings-and-config/settings-ui.md).
 
 ## Usage
@@ -36,4 +38,4 @@ array(
 )
 ```
 
-Use native fields when possible and register custom components only for fields that need plugin-specific UI.
+Use DataForm's built-in controls when possible and register custom components only for fields that need plugin-specific UI.

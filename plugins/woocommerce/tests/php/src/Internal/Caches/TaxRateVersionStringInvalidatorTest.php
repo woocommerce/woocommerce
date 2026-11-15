@@ -150,7 +150,6 @@ class TaxRateVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 		$this->assertNotNull( $version_before, 'Version string should exist before hook fires' );
 
 		// Trigger the hook.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_tax_rate_added', $tax_rate_id );
 
 		$version_after = $this->version_generator->get_version( "tax_rate_{$tax_rate_id}", false );
@@ -170,7 +169,6 @@ class TaxRateVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 		$this->assertNotNull( $version_before, 'Version string should exist before update' );
 
 		// Trigger the hook.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_tax_rate_updated', $tax_rate_id );
 
 		$version_after = $this->version_generator->get_version( "tax_rate_{$tax_rate_id}", false );
@@ -190,7 +188,6 @@ class TaxRateVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 		$this->assertNotNull( $version_before, 'Version string should exist before deletion' );
 
 		// Trigger the hook.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_tax_rate_deleted', $tax_rate_id );
 
 		$version_after = $this->version_generator->get_version( "tax_rate_{$tax_rate_id}", false );

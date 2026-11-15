@@ -12,6 +12,8 @@ Generally, *only the latest version of WooCommerce has continued support*. If a 
 
 **For responsible disclosure of security issues and to be eligible for our bug bounty program, please submit your report based on instructions found on [automattic.com/security](https://automattic.com/security).**
 
+The security contact for this project is <security@automattic.com>.
+
 Our most critical targets are:
 
 * WooCommerce core (this repository)
@@ -29,7 +31,7 @@ We're committed to working with security researchers to resolve the vulnerabilit
 
 *   Follow [HackerOne's disclosure guidelines](https://www.hackerone.com/disclosure-guidelines).
 *   Pen-testing Production:
-    *   Please **setup a local environment** instead whenever possible. Most of our code is open source (see above).
+    *   Please **set up a local environment** instead whenever possible. Most of our code is open source (see above).
     *   If that's not possible, **limit any data access/modification** to the bare minimum necessary to reproduce a PoC.
     *   **Don't automate form submissions!** That's very annoying for us, because it adds extra work for the volunteers who manage those systems, and reduces the signal/noise ratio in our communication channels.
     *   To be eligible for a bounty, please follow all of these guidelines.

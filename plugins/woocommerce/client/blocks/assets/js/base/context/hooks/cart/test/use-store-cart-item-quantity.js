@@ -1,25 +1,35 @@
 /**
  * External dependencies
  */
-import TestRenderer, { act } from 'react-test-renderer';
+import { renderHook, act } from '@testing-library/react';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 import { CART_STORE_KEY, CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
  */
+import { config as checkoutStoreConfig } from '@woocommerce/block-data/checkout';
 import * as mockUseStoreCart from '../use-store-cart';
 import { useStoreCartItemQuantity } from '../use-store-cart-item-quantity';
-import { config as checkoutStoreConfig } from '../../../../../data/checkout';
 
 jest.mock( '../use-store-cart', () => ( {
 	useStoreCart: jest.fn(),
 } ) );
 
-jest.mock( '@woocommerce/block-data', () => ( {
-	__esModule: true,
-	...jest.requireActual( '@woocommerce/block-data' ),
-} ) );
+jest.mock( '@woocommerce/block-data', () => {
+	const cart = jest.requireActual( '@woocommerce/block-data/cart' );
+	const checkout = jest.requireActual( '@woocommerce/block-data/checkout' );
+	const utils = jest.requireActual( '@woocommerce/block-data/utils' );
+
+	return {
+		__esModule: true,
+		CART_STORE_KEY: cart.CART_STORE_KEY,
+		CHECKOUT_STORE_KEY: checkout.CHECKOUT_STORE_KEY,
+		cartStore: cart.store,
+		checkoutStore: checkout.store,
+		processErrorResponse: utils.processErrorResponse,
+	};
+} );
 
 // Make debounce instantaneous.
 jest.mock( 'use-debounce', () => ( {
@@ -27,18 +37,14 @@ jest.mock( 'use-debounce', () => ( {
 } ) );
 
 describe( 'useStoreCartItemQuantity', () => {
-	let registry, renderer;
+	let registry;
 
-	const getWrappedComponents = ( Component ) => (
-		<RegistryProvider value={ registry }>
-			<Component />
-		</RegistryProvider>
+	const wrapper = ( { children } ) => (
+		<RegistryProvider value={ registry }>{ children }</RegistryProvider>
 	);
 
-	const getTestComponent = ( options ) => () => {
-		const props = useStoreCartItemQuantity( options );
-		return <div { ...props } />;
-	};
+	const renderStoreCartItemQuantityHook = ( options ) =>
+		renderHook( () => useStoreCartItemQuantity( options ), { wrapper } );
 
 	let mockRemoveItemFromCart;
 	let mockChangeCartItemQuantity;
@@ -52,18 +58,27 @@ describe( 'useStoreCartItemQuantity', () => {
 			.mockReturnValue( { type: 'changeCartItemQuantityAction' } );
 
 		registry.registerStore( CART_STORE_KEY, {
-			reducer: () => ( {} ),
+			reducer: (
+				state = {
+					delete: isPendingDelete,
+					quantity: isPendingQuantity,
+				},
+				action
+			) =>
+				action.type === 'SET_ITEM_PENDING'
+					? { ...state, ...action.pending }
+					: state,
 			actions: {
 				removeItemFromCart: mockRemoveItemFromCart,
 				changeCartItemQuantity: mockChangeCartItemQuantity,
+				setItemPending: ( pending ) => ( {
+					type: 'SET_ITEM_PENDING',
+					pending,
+				} ),
 			},
 			selectors: {
-				isItemPendingDelete: jest
-					.fn()
-					.mockReturnValue( isPendingDelete ),
-				isItemPendingQuantity: jest
-					.fn()
-					.mockReturnValue( isPendingQuantity ),
+				isItemPendingDelete: ( state ) => state.delete,
+				isItemPendingQuantity: ( state ) => state.quantity,
 			},
 		} );
 
@@ -73,7 +88,6 @@ describe( 'useStoreCartItemQuantity', () => {
 
 	beforeEach( () => {
 		registry = createRegistry();
-		renderer = null;
 	} );
 
 	afterEach( () => {
@@ -90,69 +104,41 @@ describe( 'useStoreCartItemQuantity', () => {
 		} );
 
 		it( 'update quantity value should happen instantly', () => {
-			const TestComponent = getTestComponent( {
+			const { result } = renderStoreCartItemQuantityHook( {
 				key: '123',
 				quantity: 1,
 			} );
 
-			act( () => {
-				renderer = TestRenderer.create(
-					getWrappedComponents( TestComponent )
-				);
-			} );
-
-			const { setItemQuantity, quantity } =
-				renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
-
-			expect( quantity ).toBe( 1 );
+			expect( result.current.quantity ).toBe( 1 );
 
 			act( () => {
-				setItemQuantity( 2 );
+				result.current.setItemQuantity( 2 );
 			} );
 
-			const { quantity: newQuantity } =
-				renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
-
-			expect( newQuantity ).toBe( 2 );
+			expect( result.current.quantity ).toBe( 2 );
 		} );
 
 		it( 'removeItem should call the dispatch action', () => {
-			const TestComponent = getTestComponent( {
+			const { result } = renderStoreCartItemQuantityHook( {
 				key: '123',
 				quantity: 1,
 			} );
 
 			act( () => {
-				renderer = TestRenderer.create(
-					getWrappedComponents( TestComponent )
-				);
-			} );
-
-			const { removeItem } = renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
-
-			act( () => {
-				removeItem();
+				result.current.removeItem();
 			} );
 
 			expect( mockRemoveItemFromCart ).toHaveBeenCalledWith( '123' );
 		} );
 
 		it( 'setItemQuantity should call the dispatch action', () => {
-			const TestComponent = getTestComponent( {
+			const { result } = renderStoreCartItemQuantityHook( {
 				key: '123',
 				quantity: 1,
 			} );
 
 			act( () => {
-				renderer = TestRenderer.create(
-					getWrappedComponents( TestComponent )
-				);
-			} );
-
-			const { setItemQuantity } = renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
-
-			act( () => {
-				setItemQuantity( 2 );
+				result.current.setItemQuantity( 2 );
 			} );
 
 			expect( mockChangeCartItemQuantity.mock.calls ).toEqual( [
@@ -171,21 +157,14 @@ describe( 'useStoreCartItemQuantity', () => {
 			cartErrors: mockCartErrors,
 		} );
 
-		const TestComponent = getTestComponent( {
+		const { result } = renderStoreCartItemQuantityHook( {
 			key: '123',
 			quantity: 1,
 		} );
 
-		act( () => {
-			renderer = TestRenderer.create(
-				getWrappedComponents( TestComponent )
-			);
-		} );
-
-		const { cartItemQuantityErrors } =
-			renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
-
-		expect( cartItemQuantityErrors ).toEqual( mockCartErrors );
+		expect( result.current.cartItemQuantityErrors ).toEqual(
+			mockCartErrors
+		);
 	} );
 
 	it( 'isPendingDelete should depend on the value provided by the store', () => {
@@ -197,19 +176,63 @@ describe( 'useStoreCartItemQuantity', () => {
 			cartErrors: {},
 		} );
 
-		const TestComponent = getTestComponent( {
+		const { result } = renderStoreCartItemQuantityHook( {
 			key: '123',
 			quantity: 1,
 		} );
 
-		act( () => {
-			renderer = TestRenderer.create(
-				getWrappedComponents( TestComponent )
-			);
+		expect( result.current.isPendingDelete ).toBe( true );
+	} );
+
+	describe( 'checkout calculating count', () => {
+		const isCalculating = () =>
+			registry.select( CHECKOUT_STORE_KEY ).isCalculating();
+
+		beforeEach( () => {
+			mockUseStoreCart.useStoreCart.mockReturnValue( {
+				cartErrors: {},
+			} );
 		} );
 
-		const { isPendingDelete } = renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
+		it( 'keeps an existing hold when mounted with nothing pending', () => {
+			setupMocks( { isPendingDelete: false, isPendingQuantity: false } );
+			registry
+				.dispatch( CHECKOUT_STORE_KEY )
+				.__internalStartCalculation();
 
-		expect( isPendingDelete ).toBe( true );
+			renderStoreCartItemQuantityHook( { key: '123', quantity: 1 } );
+
+			expect( isCalculating() ).toBe( true );
+		} );
+
+		it.each( [ 'quantity', 'delete' ] )(
+			'releases only its own hold when the pending %s update settles',
+			( type ) => {
+				setupMocks( {
+					isPendingDelete: type === 'delete',
+					isPendingQuantity: type === 'quantity',
+				} );
+				registry
+					.dispatch( CHECKOUT_STORE_KEY )
+					.__internalStartCalculation();
+				renderStoreCartItemQuantityHook( { key: '123', quantity: 1 } );
+
+				act( () => {
+					registry
+						.dispatch( CART_STORE_KEY )
+						.setItemPending( { [ type ]: false } );
+				} );
+
+				expect( isCalculating() ).toBe( true );
+
+				act( () => {
+					registry
+						.dispatch( CHECKOUT_STORE_KEY )
+						.__internalFinishCalculation();
+				} );
+
+				expect( isCalculating() ).toBe( false );
+			}
+		);
 	} );
 } );

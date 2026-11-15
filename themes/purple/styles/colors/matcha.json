@@ -1,0 +1,57 @@
+{
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"color": "#f0efed",
+					"name": "Base",
+					"slug": "theme-1"
+				},
+				{
+					"color": "#000000",
+					"name": "Contrast",
+					"slug": "theme-2"
+				},
+				{
+					"color": "#56543b",
+					"name": "Primary",
+					"slug": "theme-3"
+				},
+				{
+					"color": "#373330",
+					"name": "Contrast Alt",
+					"slug": "theme-4"
+				},
+				{
+					"color": "#f4eecc",
+					"name": "Base Alt",
+					"slug": "theme-5"
+				},
+				{
+					"color": "rgba(17, 17, 17, 0.2)",
+					"name": "Border",
+					"slug": "theme-6"
+				},
+				{
+					"color": "#687300",
+					"name": "Accent",
+					"slug": "theme-7"
+				}
+			],
+			"duotone": [
+				{
+					"colors": [ "#000000", "#f0efed" ],
+					"name": "Duotone 1",
+					"slug": "duotone-1"
+				},
+				{
+					"colors": [ "#000000", "#f4eecc" ],
+					"name": "Duotone 2",
+					"slug": "duotone-2"
+				}
+			]
+		}
+	},
+	"version": 3,
+	"title": "Matcha"
+}

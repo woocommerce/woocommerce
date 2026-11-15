@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Add back closeOverlayOnEscape action in Product Filters store for backwards compatibility
+
+

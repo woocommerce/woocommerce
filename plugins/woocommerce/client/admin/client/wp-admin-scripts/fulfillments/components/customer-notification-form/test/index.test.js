@@ -53,7 +53,6 @@ jest.mock( '@wordpress/components', () => ( {
 	) ),
 	TextareaControl: ( props ) => (
 		<div data-testid="textarea-control">
-			{ /* eslint-disable-next-line jsx-a11y/label-has-associated-control */ }
 			<label htmlFor="customer-note">{ props.label }</label>
 			<textarea
 				id="customer-note"

@@ -23,6 +23,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
 
 		// phpcs:disable Squiz.Commenting
 
@@ -60,10 +61,6 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( 'wp_object_cache_key_prefix_the_type' );
-		remove_all_filters( 'wc_object_cache_get_engine' );
-		remove_all_filters( 'woocommerce_after_serializing_the_type_for_caching' );
-		remove_all_actions( 'woocommerce_after_removing_the_type_from_cache' );
-		remove_all_actions( 'woocommerce_after_flushing_the_type_cache' );
 
 		parent::tearDown();
 	}
@@ -136,10 +133,34 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox 'set' returns false if the cache engine's caching method fails.
 	 */
-	public function try_set_when_cache_engine_fails() {
-		$this->cache_engine->caching_succeeds = false;
+	public function test_try_set_when_cache_engine_fails() {
+		$cache_engine = $this->createMock( CacheEngine::class );
+		$cache_engine->method( 'cache_object' )->willReturn( false );
 
-		$result = $this->sut->set( array( 'foo' ), 'the_id' );
+		add_filter(
+			'wc_object_cache_get_engine',
+			function () use ( $cache_engine ) {
+				return $cache_engine;
+			}
+		);
+
+		// phpcs:disable Squiz.Commenting
+		$sut = new class() extends ObjectCache {
+			public function get_object_type(): string {
+				return 'the_type';
+			}
+
+			protected function get_object_id( $value ) {
+				return null;
+			}
+
+			protected function validate( $value ): ?array {
+				return null;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$result = $sut->set( array( 'foo' ), 'the_id' );
 		$this->assertFalse( $result );
 	}
 

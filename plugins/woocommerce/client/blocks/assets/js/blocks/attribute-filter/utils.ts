@@ -96,7 +96,7 @@ export const isQueryArgsEqual = (
 				: {
 						...acc,
 						[ key ]: value,
-				  };
+					};
 		},
 		{}
 	);

@@ -8,13 +8,31 @@
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"ancestor": [
-		"woocommerce/add-to-cart-with-options-variation-selector-attribute"
+		"woocommerce/add-to-cart-with-options-variation-selector-attribute",
+		"woocommerce/product-filter-attribute",
+		"woocommerce/product-filter-taxonomy",
+		"woocommerce/product-filter-status"
 	],
 	"supports": {
 		"interactivity": true,
 		"woocommerce": {
 			"innerBlockDisplayStyle": true
+		},
+		"color": {
+			"text": true,
+			"background": true,
+			"__experimentalSkipSerialization": true
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"width": true,
+			"style": true,
+			"radius": true,
+			"__experimentalSkipSerialization": true
 		}
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-dropdown :is(.wc-block-dropdown__select, .wc-block-dropdown__trigger, .wc-block-dropdown__panel)"
 	},
 	"usesContext": [ "woocommerce/selectableItems", "woocommerce/attributeId" ],
 	"attributes": {},

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Button block: call woocommerce_add_to_cart_quantity when adding products to cart instead of on render

@@ -29,7 +29,9 @@ const getFormattedDimensions = (
 	dimensions: Product[ 'dimensions' ],
 	dimensionUnit: string
 ) => {
-	if ( ! dimensions ) return '';
+	if ( ! dimensions ) {
+		return '';
+	}
 
 	const dimensionKeys = [
 		'length',
@@ -44,7 +46,9 @@ const getFormattedDimensions = (
 				typeof value === 'string' && value.length > 0
 		);
 
-	if ( validDimensions.length === 0 ) return '';
+	if ( validDimensions.length === 0 ) {
+		return '';
+	}
 
 	return `${ validDimensions.join( ' × ' ) } ${ dimensionUnit }`;
 };
@@ -90,7 +94,9 @@ const Edit = ( {
 
 	const { product, isLoadingProduct } = useSelect(
 		( select ) => {
-			if ( ! postId ) return EMPTY_PRODUCT_RESULT;
+			if ( ! postId ) {
+				return EMPTY_PRODUCT_RESULT;
+			}
 			const { getProduct } = select( productsStore );
 			return {
 				product: getProduct( Number( postId ) ),

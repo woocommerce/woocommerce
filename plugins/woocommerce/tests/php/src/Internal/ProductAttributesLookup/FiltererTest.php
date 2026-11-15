@@ -5,17 +5,26 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\AttributesHelper;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
+use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
+use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 
 /**
  * Tests related to filtering for WC_Query.
  */
 class FiltererTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * Product IDs owned by the current test.
+	 *
+	 * @var int[]
+	 */
+	private $product_ids = array();
 
 	/**
 	 * Counter to insert unique SKU for concurrent tests.
@@ -32,6 +41,25 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		global $wpdb, $wp_post_types;
 
 		parent::setUpBeforeClass();
+
+		foreach ( wc_get_attribute_taxonomy_ids() as $attribute_name => $attribute_id ) {
+			$taxonomy_name = wc_attribute_taxonomy_name( wc_sanitize_taxonomy_name( $attribute_name ) );
+			$terms         = get_terms(
+				array(
+					'taxonomy'   => $taxonomy_name,
+					'hide_empty' => false,
+				)
+			);
+
+			if ( ! is_wp_error( $terms ) ) {
+				foreach ( $terms as $term ) {
+					wp_delete_term( $term->term_id, $taxonomy_name );
+				}
+			}
+
+			unregister_taxonomy( $taxonomy_name );
+			wc_delete_attribute( $attribute_id );
+		}
 
 		$wpdb->query(
 			"
@@ -56,50 +84,18 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		global $wpdb;
-
 		remove_all_filters( 'woocommerce_layered_nav_count_cache_max_entries' );
 
-		parent::tearDown();
-
-		// Unregister all product attributes.
-
 		$attribute_ids_by_name = wc_get_attribute_taxonomy_ids();
-		foreach ( $attribute_ids_by_name as $attribute_name => $attribute_id ) {
+		foreach ( array_keys( $attribute_ids_by_name ) as $attribute_name ) {
 			$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
 			$taxonomy_name  = wc_attribute_taxonomy_name( $attribute_name );
 			unregister_taxonomy( $taxonomy_name );
-
-			wc_delete_attribute( $attribute_id );
 		}
 
-		// Remove all products.
-
-		$product_ids = wc_get_products( array( 'return' => 'ids' ) );
-		foreach ( $product_ids as $product_id ) {
-			$product     = wc_get_product( $product_id );
-			$is_variable = $product->is_type( ProductType::VARIABLE );
-
-			foreach ( $product->get_children() as $child_id ) {
-				$child = wc_get_product( $child_id );
-				if ( empty( $child ) ) {
-					continue;
-				}
-
-				if ( $is_variable ) {
-					$child->delete( true );
-				} else {
-					$child->set_parent_id( 0 );
-					$this->save( $child );
-				}
-			}
-
-			$product->delete( true );
-		}
-
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_attributes_lookup" );
-
+		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 		\WC_Query::reset_chosen_attributes();
+		parent::tearDown();
 	}
 
 	/**
@@ -246,6 +242,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$product->set_stock_status( $in_stock ? ProductStockStatus::IN_STOCK : ProductStockStatus::OUT_OF_STOCK );
 
 		$this->save( $product );
+		$this->product_ids[] = $product->get_id();
 
 		if ( empty( $attribute_terms_by_name ) ) {
 			return $product;
@@ -317,6 +314,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$this->save( $product );
 
 		$product_id = $product->get_id();
+
+		$this->product_ids[] = $product_id;
 
 		// * Now create the variations.
 
@@ -490,12 +489,93 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$_GET[ 'query_type_' . wc_sanitize_taxonomy_name( $name ) ] = $value;
 		}
 
-		return $wp_the_query->query(
+		$include_owned_products = fn() => $this->product_ids;
+		add_filter( 'loop_shop_post_in', $include_owned_products );
+
+		try {
+			return $wp_the_query->query(
+				array(
+					'post_type' => 'product',
+					'fields'    => 'ids',
+				)
+			);
+		} finally {
+			remove_filter( 'loop_shop_post_in', $include_owned_products );
+		}
+	}
+
+	/**
+	 * @testdox Product requests and counters are scoped to fixtures owned by the current test.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $using_lookup_table Whether attribute filtering uses the lookup table.
+	 */
+	public function test_product_requests_are_scoped_to_owned_products( bool $using_lookup_table ): void {
+		$this->set_use_lookup_table( $using_lookup_table );
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Green' ) );
+
+		$owned_product = $this->create_simple_product( array( 'Color' => array( 'Blue' ) ), true );
+		$this->create_simple_product( array( 'Color' => array( 'Blue' ) ), true );
+		$this->create_simple_product( array( 'Color' => array( 'Green' ) ), true );
+
+		$this->product_ids = array( $owned_product->get_id() );
+
+		$this->assertSame(
+			array( $owned_product->get_id() ),
+			$this->do_product_request( array( 'Color' => array( 'Blue' ) ), array( 'Color' => 'or' ) )
+		);
+		$this->assert_counters( 'Color', array( 'Blue' ), 'or' );
+	}
+
+	/**
+	 * Create a variable product with a single, in-stock, published Red variation.
+	 *
+	 * @return array Product and variation ids, as returned by create_variable_product.
+	 */
+	private function create_variable_product_with_red_variation() {
+		return $this->create_variable_product(
 			array(
-				'post_type' => 'product',
-				'fields'    => 'ids',
+				'variation_attributes'     => array( 'Color' => array( 'Red' ) ),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array( 'Color' => 'Red' ),
+					),
+				),
 			)
 		);
+	}
+
+	/**
+	 * @testdox Disabling a variation removes its product from lookup table filtering and its term from the widget counts.
+	 */
+	public function test_lookup_filtering_excludes_disabled_variations() {
+		$this->set_use_lookup_table( true );
+		$this->create_product_attribute( 'Color', array( 'Red' ) );
+		$products = array(
+			$this->create_variable_product_with_red_variation(),
+			$this->create_variable_product_with_red_variation(),
+		);
+
+		$this->assertEqualsCanonicalizing(
+			array( $products[0]['id'], $products[1]['id'] ),
+			$this->do_product_request( array( 'Color' => array( 'Red' ) ) )
+		);
+		\WC_Query::reset_chosen_attributes();
+
+		$variation = wc_get_product( $products[0]['variation_ids'][0] );
+		$variation->set_status( ProductStatus::PRIVATE );
+		self::with_direct_product_attribute_lookup_updates(
+			function () use ( $variation ) {
+				$variation->save();
+			}
+		);
+
+		$this->assertSame( array( $products[1]['id'] ), $this->do_product_request( array( 'Color' => array( 'Red' ) ) ) );
+		$this->assert_counters( 'Color', array( 'Red' ), 'or' );
 	}
 
 	/**
@@ -507,6 +587,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * @param string $filter_type The filter type in use, "and" or "or".
 	 */
 	private function assert_counters( $attribute_name, $expected_terms, $filter_type = 'and' ) {
+		global $wpdb;
+
 		$widget = new class() extends \WC_Widget_Layered_Nav {
 			// phpcs:disable Generic.CodeAnalysis.UselessOverridingMethod, Squiz.Commenting.FunctionComment
 			public function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
@@ -523,7 +605,19 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$expected[ $term_ids_by_name[ $term ] ] = 1;
 		}
 
-		$term_counts = $widget->get_filtered_term_product_counts( $term_ids_by_name, $taxonomy, $filter_type );
+		$scope_to_owned_products = function ( $query ) use ( $wpdb ) {
+			$owned_product_ids = implode( ',', array_map( 'absint', $this->product_ids ) );
+			$query['where']   .= empty( $owned_product_ids ) ? ' AND 1=0' : " AND {$wpdb->posts}.ID IN ({$owned_product_ids})";
+
+			return $query;
+		};
+		add_filter( 'woocommerce_get_filtered_term_product_counts_query', $scope_to_owned_products );
+
+		try {
+			$term_counts = $widget->get_filtered_term_product_counts( $term_ids_by_name, $taxonomy, $filter_type );
+		} finally {
+			remove_filter( 'woocommerce_get_filtered_term_product_counts_query', $scope_to_owned_products );
+		}
 		$this->assertEqualsCanonicalizing( $expected, $term_counts );
 	}
 
@@ -1176,6 +1270,98 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
 
 		$this->assert_counters( 'Color', $expected_to_be_included_in_count ? array( 'Blue', 'Red', 'Green' ) : array(), $filter_type );
+	}
+
+	/**
+	 * @testdox Multiple AND attributes match across variation and non-variation lookup rows.
+	 *
+	 * @testWith [["Red", "Blue"]]
+	 *           [["Red"]]
+	 *
+	 * @param string[] $color_terms Selected color terms.
+	 */
+	public function test_and_filters_match_variation_and_non_variation_attributes( array $color_terms ): void {
+		$this->set_use_lookup_table( true );
+		$this->create_product_attribute( 'Color', array( 'Red', 'Blue' ) );
+		$this->create_product_attribute( 'Material', array( 'Cotton', 'Wool' ) );
+
+		$data             = array(
+			'variation_attributes'     => array( 'Color' => array( 'Red', 'Blue' ) ),
+			'non_variation_attributes' => array( 'Material' => array( 'Cotton', 'Wool' ) ),
+			'variations'               => array(
+				array(
+					'in_stock'            => true,
+					'defining_attributes' => array( 'Color' => 'Red' ),
+				),
+				array(
+					'in_stock'            => true,
+					'defining_attributes' => array( 'Color' => 'Blue' ),
+				),
+			),
+		);
+		$matching_product = $this->create_variable_product( $data );
+
+		$data['non_variation_attributes']['Material'] = array( 'Cotton' );
+		$this->create_variable_product( $data );
+
+		$expected = array( $matching_product['id'] );
+		$this->assertSame(
+			$expected,
+			$this->do_product_request(
+				array(
+					'Color'    => $color_terms,
+					'Material' => array( 'Cotton', 'Wool' ),
+				),
+				array(
+					'Color'    => 'and',
+					'Material' => 'and',
+				)
+			),
+			'Catalog must match both selected terms in each attribute.'
+		);
+
+		$chosen_attributes = array(
+			'pa_color'    => array(
+				'terms'      => array_map( 'wc_sanitize_taxonomy_name', $color_terms ),
+				'query_type' => 'and',
+			),
+			'pa_material' => array(
+				'terms'      => array( 'cotton', 'wool' ),
+				'query_type' => 'and',
+			),
+		);
+		$query_clauses     = wc_get_container()->get( QueryClauses::class );
+		$filter            = static function ( $clauses ) use ( $query_clauses, $chosen_attributes ) {
+			return $query_clauses->add_attribute_clauses( $clauses, $chosen_attributes );
+		};
+		add_filter( 'posts_clauses', $filter );
+		try {
+			$filtered_ids = wc_get_products(
+				array(
+					'include' => $this->product_ids,
+					'limit'   => -1,
+					'return'  => 'ids',
+				)
+			);
+		} finally {
+			remove_filter( 'posts_clauses', $filter );
+		}
+		$this->assertSame( $expected, $filtered_ids, 'Shared clauses must match the catalog result.' );
+
+		$counts = wc_get_container()->get( FilterDataProvider::class )->with( $query_clauses )->get_attribute_counts(
+			array(
+				'post_type'           => 'product',
+				'post__in'            => $this->product_ids,
+				'filter_color'        => implode( ',', array_map( 'wc_sanitize_taxonomy_name', $color_terms ) ),
+				'query_type_color'    => 'and',
+				'filter_material'     => 'cotton,wool',
+				'query_type_material' => 'and',
+			),
+			'pa_material'
+		);
+		$this->assertSame( 1, $counts[ term_exists( 'Cotton', 'pa_material' )['term_id'] ] );
+		$this->assertSame( 1, $counts[ term_exists( 'Wool', 'pa_material' )['term_id'] ] );
+		$this->assert_counters( 'Material', array( 'Cotton', 'Wool' ), 'and' );
 	}
 
 	/**

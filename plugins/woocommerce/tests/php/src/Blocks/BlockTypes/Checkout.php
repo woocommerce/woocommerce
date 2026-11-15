@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\CheckoutMock;
  *
  * @since $VID:$
  */
-class Checkout extends \WP_UnitTestCase {
+class Checkout extends \WC_Unit_Test_Case {
 	/**
 	 * @var AssetDataRegistryMock The asset data registry mock.
 	 */
@@ -43,7 +43,9 @@ class Checkout extends \WP_UnitTestCase {
 	 * @return void
 	 * @throws \Exception If the API class is not registered with container.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
+		parent::setUp();
+
 		$this->asset_api            = Package::container()->get( API::class );
 		$this->registry             = new AssetDataRegistryMock( $this->asset_api );
 		$this->integration_registry = new IntegrationRegistry();
@@ -59,13 +61,15 @@ class Checkout extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		parent::tearDown();
-		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
+
+		// A test sets an admin screen so is_admin() is true.
+		unset( $GLOBALS['current_screen'] );
 	}
 
 	/**
-	 * Checks the local pickup title is updated when the Checkout block is saved.
+	 * @testdox The local pickup title is updated when the Checkout block is saved.
 	 * @return void
 	 */
 	public function test_local_pickup_title_change() {
@@ -130,7 +134,60 @@ class Checkout extends \WP_UnitTestCase {
 
 		$data_from_registry = $this->registry->get();
 		$this->assertEquals( 'Changed pickup', $data_from_registry['localPickupText'] );
-		wp_delete_post( $page_id );
+	}
+
+	/**
+	 * @testdox Checkout is told whether woocommerce_checkout_show_terms hides the terms.
+	 */
+	public function test_enqueue_data_exposes_checkout_show_terms(): void {
+		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
+
+		$checkout->mock_enqueue_data();
+		$this->assertTrue( $this->registry->get()['checkoutShowTerms'], 'Terms are shown by default' );
+
+		add_filter( 'woocommerce_checkout_show_terms', '__return_false' );
+		\WP_Block_Type_Registry::get_instance()->unregister( 'woocommerce/checkout-mock' );
+		$registry = new AssetDataRegistryMock( $this->asset_api );
+		$checkout = new CheckoutMock( $this->asset_api, $registry, $this->integration_registry, 'checkout-mock' );
+		$checkout->mock_enqueue_data();
+		$this->assertFalse( $registry->get()['checkoutShowTerms'], 'The filter should hide terms' );
+	}
+
+	/**
+	 * @testdox The editor does not run woocommerce_checkout_show_terms, because callbacks may expect a loaded cart.
+	 */
+	public function test_enqueue_data_skips_checkout_show_terms_in_admin(): void {
+		set_current_screen( 'page' );
+		$filter = function () {
+			// Mirrors a callback written for the frontend, where the cart is loaded.
+			return WC()->cart->get_total() > 0;
+		};
+		add_filter( 'woocommerce_checkout_show_terms', $filter );
+		$cart      = WC()->cart;
+		WC()->cart = null;
+
+		try {
+			$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
+			$checkout->mock_enqueue_data();
+		} finally {
+			WC()->cart = $cart;
+			remove_filter( 'woocommerce_checkout_show_terms', $filter );
+		}
+
+		$this->assertArrayNotHasKey( 'checkoutShowTerms', $this->registry->get(), 'The editor should not run the filter' );
+	}
+
+	/**
+	 * @testdox New Checkout pages put terms on the Actions block instead of a Terms and Conditions block.
+	 */
+	public function test_default_checkout_page_content_uses_actions_terms(): void {
+		$method = new \ReflectionMethod( \WC_Install::class, 'get_checkout_block_content' );
+		$method->setAccessible( true );
+		$fields = parse_blocks( $method->invoke( null ) )[0]['innerBlocks'][0];
+		$attrs  = array_column( $fields['innerBlocks'], 'attrs', 'blockName' );
+
+		$this->assertArrayNotHasKey( 'woocommerce/checkout-terms-block', $attrs, 'No Terms and Conditions block' );
+		$this->assertTrue( $attrs['woocommerce/checkout-actions-block']['showTerms'] ?? null, 'Actions block shows terms' );
 	}
 
 	/**

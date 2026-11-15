@@ -73,12 +73,16 @@ export const ShippingDataProvider = ( {
 	}, [ observers ] );
 
 	// increment/decrement checkout calculating counts when shipping is loading.
+	// The cleanup releases only the count this effect added, so other holds on
+	// the counter survive.
 	useEffect( () => {
-		if ( isLoadingRates ) {
-			__internalStartCalculation();
-		} else {
-			__internalFinishCalculation();
+		if ( ! isLoadingRates ) {
+			return;
 		}
+		void __internalStartCalculation();
+		return () => {
+			void __internalFinishCalculation();
+		};
 	}, [
 		isLoadingRates,
 		__internalStartCalculation,
@@ -87,11 +91,13 @@ export const ShippingDataProvider = ( {
 
 	// increment/decrement checkout calculating counts when shipping rates are being selected.
 	useEffect( () => {
-		if ( isSelectingRate ) {
-			__internalStartCalculation();
-		} else {
-			__internalFinishCalculation();
+		if ( ! isSelectingRate ) {
+			return;
 		}
+		void __internalStartCalculation();
+		return () => {
+			void __internalFinishCalculation();
+		};
 	}, [
 		__internalStartCalculation,
 		__internalFinishCalculation,
@@ -128,7 +134,7 @@ export const ShippingDataProvider = ( {
 			! isLoadingRates &&
 			( shippingRates.length === 0 || currentErrorStatus.hasError )
 		) {
-			emitEvent(
+			void emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATES_FAIL,
 				{
@@ -150,7 +156,7 @@ export const ShippingDataProvider = ( {
 			shippingRates.length > 0 &&
 			! currentErrorStatus.hasError
 		) {
-			emitEvent(
+			void emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATES_SUCCESS,
 				shippingRates
@@ -164,7 +170,7 @@ export const ShippingDataProvider = ( {
 			return;
 		}
 		if ( currentErrorStatus.hasError ) {
-			emitEvent(
+			void emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATE_SELECT_FAIL,
 				{
@@ -173,7 +179,7 @@ export const ShippingDataProvider = ( {
 				}
 			);
 		} else {
-			emitEvent(
+			void emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATE_SELECT_SUCCESS,
 				selectedRates.current

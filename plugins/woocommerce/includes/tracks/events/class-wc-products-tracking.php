@@ -64,9 +64,16 @@ class WC_Products_Tracking {
 			&& 'product' === wp_unslash( $_GET['post_type'] )
 			&& ! isset( $_GET['_wp_http_referer'] )
 		) {
-			// phpcs:enable
 
 			WC_Tracks::record_event( 'products_view' );
+
+			// Track sorting mode.
+			if (
+				isset( $_GET['orderby'] )
+				&& 'menu_order title' === wc_clean( wp_unslash( $_GET['orderby'] ) )
+			) {
+				WC_Tracks::record_event( 'products_sorting_view' );
+			}
 
 			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
 			if (

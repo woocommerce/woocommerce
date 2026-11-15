@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\DataStore;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Helper_Order;
 use WC_Order;
 use WC_Unit_Test_Case;
@@ -31,18 +32,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
-	}
-
-	/**
-	 * Runs after all the tests of the class.
-	 */
-	public static function tearDownAfterClass(): void {
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
-		parent::tearDownAfterClass();
+		FulfillmentsHelper::create_tables();
 	}
 
 	/**
@@ -50,24 +40,10 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		FulfillmentsHelper::enable_fulfillments();
 
 		$this->store = new FulfillmentsDataStore();
 		$this->order = WC_Helper_Order::create_order( get_current_user_id() );
-	}
-
-	/**
-	 * Tear down test case.
-	 *
-	 * This method is called after each test method is executed.
-	 * It is used to clean up any data created during the tests.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		// Remove any fulfillments added during the tests.
-		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillments;" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillment_meta;" );
 	}
 
 	/**

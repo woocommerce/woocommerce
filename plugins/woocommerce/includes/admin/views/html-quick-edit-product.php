@@ -46,6 +46,30 @@ defined( 'ABSPATH' ) || exit;
 				</span>
 			</label>
 			<br class="clear" />
+			<?php
+			/**
+			 * Hook to customize the regular expression that validates dates entered in the WooCommerce admin editors.
+			 *
+			 * @since 3.0.0
+			 *
+			 * @param string $pattern Default pattern to use.
+			 */
+			$date_input_html_pattern = apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' );
+			?>
+			<label>
+				<span class="title"><?php esc_html_e( 'Sale start', 'woocommerce' ); ?></span>
+				<span class="input-text-wrap">
+					<input type="text" name="_sale_price_dates_from" class="text sale_price_dates_from" placeholder="<?php echo esc_attr_x( 'From&hellip;', 'placeholder', 'woocommerce' ); ?> YYYY-MM-DD" value="" maxlength="10" pattern="<?php echo esc_attr( $date_input_html_pattern ); ?>">
+				</span>
+			</label>
+			<br class="clear" />
+			<label>
+				<span class="title"><?php esc_html_e( 'Sale end', 'woocommerce' ); ?></span>
+				<span class="input-text-wrap">
+					<input type="text" name="_sale_price_dates_to" class="text sale_price_dates_to" placeholder="<?php echo esc_attr_x( 'To&hellip;', 'placeholder', 'woocommerce' ); ?> YYYY-MM-DD" value="" maxlength="10" pattern="<?php echo esc_attr( $date_input_html_pattern ); ?>">
+				</span>
+			</label>
+			<br class="clear" />
 		</div>
 
 		<?php if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) : ?>

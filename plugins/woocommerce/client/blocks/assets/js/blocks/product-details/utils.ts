@@ -113,7 +113,7 @@ export const getTemplate = (
 									],
 								],
 							],
-					  ]
+						]
 					: [] ),
 				[
 					blockNames.item,

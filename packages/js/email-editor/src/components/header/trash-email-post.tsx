@@ -7,12 +7,8 @@ import { store as noticesStore } from '@wordpress/notices';
 import { trash } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
-import {
-	Button,
-	__experimentalText as Text,
-	__experimentalHStack as HStack,
-	__experimentalVStack as VStack,
-} from '@wordpress/components';
+import { Button } from '@wordpress/components';
+import { Stack, Text } from '@wordpress/ui';
 import { decodeEntities } from '@wordpress/html-entities';
 import { applyFilters } from '@wordpress/hooks';
 
@@ -52,7 +48,7 @@ function getModalTitle(
 						__i18n_text_domain__
 					),
 					items.length
-			  )
+				)
 			: sprintf(
 					// translators: %s: The post's title
 					__(
@@ -60,7 +56,7 @@ function getModalTitle(
 						__i18n_text_domain__
 					),
 					decodeEntities( getItemTitle( items[ 0 ] ) )
-			  );
+				);
 	}
 
 	return items.length > 1
@@ -73,7 +69,7 @@ function getModalTitle(
 					__i18n_text_domain__
 				),
 				items.length
-		  )
+			)
 		: sprintf(
 				// translators: %s: The item's title.
 				__(
@@ -81,7 +77,7 @@ function getModalTitle(
 					__i18n_text_domain__
 				),
 				getItemTitle( items[ 0 ] )
-		  );
+			);
 }
 
 const getTrashEmailPostAction = () => {
@@ -135,11 +131,11 @@ const getTrashEmailPostAction = () => {
 			};
 
 			return (
-				<VStack spacing="5">
+				<Stack direction="column" gap="lg">
 					<Text>
 						{ getModalTitle( items, shouldPermanentlyDelete ) }
 					</Text>
-					<HStack justify="right">
+					<Stack direction="row" justify="flex-end" gap="sm">
 						<Button
 							variant="tertiary"
 							onClick={ () => {
@@ -188,7 +184,7 @@ const getTrashEmailPostAction = () => {
 														__i18n_text_domain__
 													),
 													getItemTitle( items[ 0 ] )
-											  )
+												)
 											: sprintf(
 													/* translators: The item's title. */
 													__(
@@ -196,13 +192,13 @@ const getTrashEmailPostAction = () => {
 														__i18n_text_domain__
 													),
 													getItemTitle( items[ 0 ] )
-											  );
+												);
 									} else {
 										successMessage = shouldPermanentlyDelete
 											? __(
 													'The items were permanently deleted.',
 													__i18n_text_domain__
-											  )
+												)
 											: sprintf(
 													/* translators: The number of items. */
 													_n(
@@ -212,9 +208,9 @@ const getTrashEmailPostAction = () => {
 														__i18n_text_domain__
 													),
 													items.length
-											  );
+												);
 									}
-									createSuccessNotice( successMessage, {
+									void createSuccessNotice( successMessage, {
 										type: 'snackbar',
 										id: 'trash-email-post-action',
 									} );
@@ -289,7 +285,7 @@ const getTrashEmailPostAction = () => {
 											errorMessage,
 										}
 									);
-									createErrorNotice( errorMessage, {
+									void createErrorNotice( errorMessage, {
 										type: 'snackbar',
 									} );
 								}
@@ -305,11 +301,11 @@ const getTrashEmailPostAction = () => {
 								? __(
 										'Delete permanently',
 										__i18n_text_domain__
-								  )
+									)
 								: __( 'Move to trash', __i18n_text_domain__ ) }
 						</Button>
-					</HStack>
-				</VStack>
+					</Stack>
+				</Stack>
 			);
 		},
 	};

@@ -41,7 +41,9 @@ export const MiniCartInnerBlocksStyle = ( {
 				.map( ( { property, value } ) => `${ property }: ${ value };` )
 				.join( '' );
 
-			if ( rules ) return `${ selector } { ${ rules } }`;
+			if ( rules ) {
+				return `${ selector } { ${ rules } }`;
+			}
 			return '';
 		} )
 		.join( '' )

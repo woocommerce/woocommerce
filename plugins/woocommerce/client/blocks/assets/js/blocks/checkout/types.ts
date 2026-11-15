@@ -1,7 +1,7 @@
 export type InnerBlockTemplate = [
 	string,
 	Record< string, unknown >,
-	InnerBlockTemplate[] | undefined
+	InnerBlockTemplate[] | undefined,
 ];
 
 export interface Attributes extends Record< string, boolean | number > {

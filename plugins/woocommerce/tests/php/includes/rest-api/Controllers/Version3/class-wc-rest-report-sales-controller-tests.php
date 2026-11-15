@@ -228,4 +228,52 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'refunds', $bucket_schema['properties'], 'Per-period bucket should declare a refunds property.' );
 		$this->assertSame( 'string', $bucket_schema['properties']['refunds']['type'], 'refunds should be a string (decimal).' );
 	}
+
+	/**
+	 * Data provider for custom date ranges ending on 2024-03-15.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function provider_custom_range_start(): array {
+		return array(
+			'single-day range' => array( '2024-03-15' ),
+			'multi-day range'  => array( '2024-03-10' ),
+		);
+	}
+
+	/**
+	 * @testdox Should count customers who registered at any time on the last day of a custom range ($date_min to 2024-03-15).
+	 * @dataProvider provider_custom_range_start
+	 *
+	 * @param string $date_min Start of the custom range.
+	 */
+	public function test_total_customers_includes_the_whole_last_day_of_a_custom_range( string $date_min ): void {
+		$registered_dates = array(
+			'2024-03-15 00:00:00',
+			'2024-03-15 12:30:00',
+			'2024-03-15 23:59:59',
+			'2024-03-16 00:00:00',
+		);
+		foreach ( $registered_dates as $registered ) {
+			$this->factory->user->create(
+				array(
+					'role'            => 'customer',
+					'user_registered' => $registered,
+				)
+			);
+		}
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/reports/sales' );
+		$request->set_param( 'date_min', $date_min );
+		$request->set_param( 'date_max', '2024-03-15' );
+
+		try {
+			$data = ( new WC_REST_Report_Sales_Controller() )->prepare_item_for_response( null, $request )->get_data();
+		} finally {
+			// setup_report() passes the custom range to WC_Admin_Report through $_GET.
+			unset( $_GET['start_date'], $_GET['end_date'] );
+		}
+
+		$this->assertSame( 3, $data['total_customers'], 'Customers registered during 2024-03-15 should be counted, and those registered on 2024-03-16 should not.' );
+	}
 }

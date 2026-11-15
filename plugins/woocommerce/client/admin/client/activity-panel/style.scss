@@ -28,14 +28,6 @@
 				stroke: currentColor;
 			}
 		}
-
-		.setup-progress-slice {
-			stroke: none;
-		}
-
-		.setup-progress-ring {
-			stroke-width: 2px;
-		}
 	}
 
 	.woocommerce-layout__homescreen-display-options {
@@ -109,14 +101,6 @@
 			}
 		}
 
-		// The unread state ships as `bellUnread` from @wordpress/icons — a
-		// single SVG with the dot baked in. We just colour the dot red so the
-		// urgency signal reads, instead of inheriting currentColor like the
-		// rest of the icon.
-		&.has-unread svg circle {
-			fill: $alert-red;
-		}
-
 		&:hover,
 		&.components-button:not(:disabled):not([aria-disabled="true"]):hover {
 			box-shadow: none;
@@ -155,20 +139,6 @@
 	}
 }
 
-.woocommerce-layout__activity-panel-toggle-bubble.has-unread::after {
-	content: " ";
-	position: absolute;
-	padding: 1px;
-	background: $core-orange;
-	border: 2px solid $studio-white;
-	width: 4px;
-	height: 4px;
-	display: inline-block;
-	border-radius: 50%;
-	top: 6px;
-	right: 4px;
-}
-
 @keyframes tabSwitch {
 	0%,
 	100% {
@@ -196,7 +166,7 @@
 		outline: none;
 	}
 
-	height: calc(100vh - #{$header-height + $adminbar-height-mobile});
+	height: calc(100vh - var(--woocommerce-admin-header-height) - #{$adminbar-height-mobile});
 	background: $gray-100;
 	width: 430px;
 	@include breakpoint( "<782px" ) {
@@ -204,22 +174,24 @@
 	}
 	transform: translateX(100%);
 	@include activity-panel-slide();
-	position: absolute;
+	position: fixed;
 	right: 0;
-	// Clear the floating header's bottom border so it stays visible when the
-	// slide-over panel is open (otherwise the panel covers it). Shares the
-	// border width with the header — if that ever changes, this stays aligned.
-	top: calc(100% + #{$header-border-width});
+	top: calc(var(--woocommerce-admin-header-height) + #{$adminbar-height-mobile + $header-border-width});
 	z-index: 1000;
 	overflow-x: hidden;
 	overflow-y: auto;
 
 	@include breakpoint( ">782px" ) {
-		height: calc(100vh - #{$header-height + $adminbar-height});
+		height: calc(100vh - var(--woocommerce-admin-header-height) - #{$adminbar-height});
+		top: calc(var(--woocommerce-admin-header-height) + #{$adminbar-height + $header-border-width});
+	}
+	.is-wp-toolbar-disabled & {
+		height: calc(100vh - var(--woocommerce-admin-header-height));
+		top: calc(var(--woocommerce-admin-header-height) + #{$header-border-width});
 	}
 	.has-woocommerce-navigation & {
-		height: calc(100vh - #{$header-height});
-		top: #{$header-height};
+		height: calc(100vh - var(--woocommerce-admin-header-height));
+		top: var(--woocommerce-admin-header-height);
 	}
 
 	&.is-open {
@@ -239,17 +211,6 @@
 	.woocommerce-empty-content {
 		padding-left: $gap-large;
 		padding-right: $gap-large;
-	}
-}
-
-.woocommerce-layout__activity-panel-avatar-flag-overlay {
-	position: relative;
-	top: -$gap-small;
-
-	.woocommerce-flag {
-		position: relative;
-		top: 16px;
-		border: 2px solid $studio-white;
 	}
 }
 

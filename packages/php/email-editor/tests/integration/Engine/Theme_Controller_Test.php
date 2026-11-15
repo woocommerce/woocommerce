@@ -16,6 +16,13 @@ use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
  */
 class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
+	 * Theme that was active before the test.
+	 *
+	 * @var string
+	 */
+	private string $previous_theme = '';
+
+	/**
 	 * Theme controller instance
 	 *
 	 * @var Theme_Controller
@@ -29,6 +36,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		parent::setUp();
 
 		// Switch theme for easier testing theme colors.
+		$this->previous_theme = get_stylesheet();
 		switch_theme( 'twentytwentyfour' );
 
 		// Crete a custom user theme post.
@@ -55,6 +63,15 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_false' );
 
 		$this->theme_controller = $this->di_container->get( Theme_Controller::class );
+	}
+
+	/**
+	 * Switch back to the theme from before the test. Switching also clears WordPress's
+	 * cached theme styles, which the database rollback does not reset.
+	 */
+	public function tearDown(): void {
+		switch_theme( $this->previous_theme );
+		parent::tearDown();
 	}
 
 	/**
@@ -150,6 +167,75 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that a slug the palette does not define translates to an empty string.
+	 *
+	 * The slug as a value (`background-color: theme-4`) is invalid CSS that mail clients drop, which
+	 * costs the block its color.
+	 */
+	public function testItReturnsNoColorForUnknownSlug(): void {
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_true' );
+		$this->assertSame( '', $this->theme_controller->translate_slug_to_color( 'theme-4' ) );
+	}
+
+	/**
+	 * Test the generated preset classes agree with the color lookup on a duplicated slug.
+	 *
+	 * The stylesheet emits one rule per definition and the cascade reads the last, while the lookup
+	 * reads the first, so one definition per slug is what keeps the two routes agreeing.
+	 */
+	public function testItGeneratesPresetClassesThatAgreeWithTheColorLookup(): void {
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_false' );
+
+		// `black` is in core's default palette, so defining it again here duplicates the slug.
+		$duplicate = static function ( $theme ) {
+			$theme->merge(
+				new \WP_Theme_JSON(
+					array(
+						'version'  => 3,
+						'settings' => array(
+							'color' => array(
+								'palette' => array(
+									array(
+										'slug'  => 'black',
+										'color' => '#abcdef',
+									),
+								),
+							),
+						),
+					),
+					'custom'
+				)
+			);
+			return $theme;
+		};
+		add_filter( 'woocommerce_email_editor_theme_json', $duplicate, 20 );
+
+		$controller = $this->di_container->get( Theme_Controller::class );
+		$stylesheet = $controller->get_stylesheet_for_rendering();
+
+		$this->assertSame( '#abcdef', $controller->translate_slug_to_color( 'black' ) );
+		$this->assertStringContainsString( '.has-black-color { color: #abcdef; }', $stylesheet );
+		$this->assertStringNotContainsString( '.has-black-color { color: #000000; }', $stylesheet );
+
+		// One rule per slug, not one per origin that defines it.
+		$this->assertSame( 1, substr_count( $stylesheet, '.has-black-color {' ) );
+
+		remove_filter( 'woocommerce_email_editor_theme_json', $duplicate, 20 );
+	}
+
+	/**
+	 * Test that a literal color passes through untranslated.
+	 *
+	 * Color block attributes usually hold a slug, but a literal color can arrive in one, and callers
+	 * rely on getting it back unchanged.
+	 */
+	public function testItPassesLiteralColorsThrough(): void {
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_true' );
+		$this->assertSame( '#012345', $this->theme_controller->translate_slug_to_color( '#012345' ) );
+		$this->assertSame( 'rgba(1, 2, 3, 0.5)', $this->theme_controller->translate_slug_to_color( 'rgba(1, 2, 3, 0.5)' ) );
+	}
+
+	/**
 	 * Test if the theme controller loads custom user theme
 	 */
 	public function testItLoadsCustomUserTheme(): void {
@@ -184,6 +270,88 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_true' );
 		$settings = $this->theme_controller->get_settings();
 		$this->assertNotEmpty( $settings['color']['palette']['theme'] );
+	}
+
+	/**
+	 * Test that every email font family has a list of font weights
+	 */
+	public function testItProvidesFontWeightsForEveryFontFamily(): void {
+		$settings     = $this->theme_controller->get_settings();
+		$font_weights = $settings['custom']['fontWeights'] ?? array();
+
+		foreach ( $settings['typography']['fontFamilies']['default'] as $font_family ) {
+			$this->assertNotEmpty( $font_weights[ $font_family['slug'] ] ?? array(), $font_family['slug'] );
+		}
+		$this->assertSame( '400, 700', $font_weights['arial'] );
+		$this->assertSame( '300, 400, 500, 700', $font_weights['open-sans'] );
+	}
+
+	/**
+	 * Test that a caption color saved in a design reaches the email as a rule for core's caption class.
+	 *
+	 * A bare `caption` selector targets the `<caption>` table tag, which the rendered email never contains.
+	 */
+	public function testItMapsTheCaptionElementToTheCaptionClass(): void {
+		$add_caption_color = static function ( $theme ) {
+			$theme->merge(
+				new \WP_Theme_JSON(
+					array(
+						'version' => 3,
+						'styles'  => array(
+							'elements' => array(
+								'caption' => array(
+									'color' => array( 'text' => '#f78da7' ),
+								),
+							),
+						),
+					),
+					'custom'
+				)
+			);
+			return $theme;
+		};
+		add_filter( 'woocommerce_email_editor_theme_json', $add_caption_color, 20 );
+
+		$stylesheet = $this->di_container->get( Theme_Controller::class )->get_stylesheet_for_rendering();
+
+		$this->assertStringContainsString( '.wp-element-caption', $stylesheet );
+		$this->assertMatchesRegularExpression( '/\.wp-element-caption\s*\{[^}]*#f78da7/', $stylesheet );
+		$this->assertDoesNotMatchRegularExpression( '/(^|[\s,}])caption\s*\{/', $stylesheet );
+
+		remove_filter( 'woocommerce_email_editor_theme_json', $add_caption_color, 20 );
+	}
+
+	/**
+	 * Test the rendering stylesheet has no `:where()` selectors, which the CSS inliner skips, for a block link color.
+	 */
+	public function testItUnwrapsWhereSelectorsForBlockLinkColors(): void {
+		$add_link_color = function ( \WP_Theme_JSON $theme ): \WP_Theme_JSON {
+			$theme->merge(
+				new \WP_Theme_JSON(
+					array(
+						'version' => 3,
+						'styles'  => array(
+							'blocks' => array(
+								'core/paragraph' => array(
+									'elements' => array( 'link' => array( 'color' => array( 'text' => '#123456' ) ) ),
+								),
+							),
+						),
+					),
+					'custom'
+				)
+			);
+			return $theme;
+		};
+		add_filter( 'woocommerce_email_editor_theme_json', $add_link_color, 20 );
+
+		try {
+			$stylesheet = $this->di_container->get( Theme_Controller::class )->get_stylesheet_for_rendering();
+		} finally {
+			remove_filter( 'woocommerce_email_editor_theme_json', $add_link_color, 20 );
+		}
+		$this->assertStringContainsString( 'p a:not(.wp-element-button):not(.button-link):not(.product-button-link){color: #123456;}', $stylesheet );
+		$this->assertStringNotContainsString( ':where(', $stylesheet );
 	}
 
 	/**

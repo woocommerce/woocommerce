@@ -42,7 +42,6 @@ describe( 'AddressLineFields', () => {
 	it( 'should show the AddressAutocomplete component when providers are available', () => {
 		jest.isolateModules( () => {
 			const AddressLineFields =
-				// eslint-disable-next-line @typescript-eslint/no-var-requires
 				require( '../address-line-fields' ).default;
 			render(
 				<AddressLineFields
@@ -86,7 +85,6 @@ describe( 'AddressLineFields', () => {
 	it( 'should show the ValidatedTextInput component when no providers are available', () => {
 		jest.isolateModules( () => {
 			const AddressLineFields =
-				// eslint-disable-next-line @typescript-eslint/no-var-requires
 				require( '../address-line-fields' ).default;
 			jest.mock( '@woocommerce/settings', () => ( {
 				...jest.requireActual( '@woocommerce/settings' ),

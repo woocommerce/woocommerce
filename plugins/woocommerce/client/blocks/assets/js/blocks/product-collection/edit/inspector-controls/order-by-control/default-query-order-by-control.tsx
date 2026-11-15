@@ -60,9 +60,14 @@ const DefaultQueryOrderByControl = ( {
 
 	const onChange = ( newValue: string ) => {
 		setValue( newValue );
-		dispatch( coreStore ).editEntityRecord( 'root', 'site', undefined, {
-			[ `woocommerce_default_catalog_orderby` ]: newValue,
-		} );
+		void dispatch( coreStore ).editEntityRecord(
+			'root',
+			'site',
+			undefined,
+			{
+				[ `woocommerce_default_catalog_orderby` ]: newValue,
+			}
+		);
 		trackInteraction( CoreFilterNames.DEFAULT_ORDER );
 	};
 

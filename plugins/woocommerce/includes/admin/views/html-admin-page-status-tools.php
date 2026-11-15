@@ -32,7 +32,7 @@ foreach ( $tools as $action_name => $tool ) {
 				$row_classes[] = 'requires-refresh';
 			}
 			?>
-			<tr class="<?php echo esc_attr( implode( ' ', $row_classes ) ); ?>" data-tool-action="<?php echo esc_attr( $action_name ); ?>">
+			<tr id="<?php echo esc_attr( 'tool_' . $action_name ); ?>" class="<?php echo esc_attr( implode( ' ', $row_classes ) ); ?>" data-tool-action="<?php echo esc_attr( $action_name ); ?>">
 				<th>
 					<strong class="name"><?php echo esc_html( $tool['name'] ); ?></strong>
 					<p class="description">

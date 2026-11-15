@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the createElement/Fragment import in CustomerEffortScoreTracksContainer so the published esbuild artifact no longer references unbound identifiers.

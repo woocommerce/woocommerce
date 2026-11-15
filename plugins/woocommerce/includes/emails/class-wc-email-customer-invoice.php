@@ -5,6 +5,7 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -91,7 +92,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 				$subject = $this->get_option( 'subject_paid', $this->get_default_subject( true ) );
 
 				if ( $this->block_email_editor_enabled ) {
-					$subject = $this->personalizer->personalize_transactional_content( $subject, $this );
+					$subject = $this->personalizer->personalize_transactional_content( $subject, $this, Personalizer::RENDERING_CONTEXT_TEXT );
 				}
 
 				return apply_filters( 'woocommerce_email_subject_customer_invoice_paid', $this->format_string( $subject ), $this->object, $this );
@@ -100,7 +101,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 			$subject = $this->get_option( 'subject', $this->get_default_subject() );
 
 			if ( $this->block_email_editor_enabled ) {
-				$subject = $this->personalizer->personalize_transactional_content( $subject, $this );
+				$subject = $this->personalizer->personalize_transactional_content( $subject, $this, Personalizer::RENDERING_CONTEXT_TEXT );
 			}
 
 			return apply_filters( 'woocommerce_email_subject_customer_invoice', $this->format_string( $subject ), $this->object, $this );

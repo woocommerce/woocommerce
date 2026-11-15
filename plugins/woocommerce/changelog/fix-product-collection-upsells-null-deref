@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix PHP fatal in the Product Collection upsells handler when the product reference is unresolved (editor preview), and stop the cross-sells handler from leaking unresolved product references into its results.

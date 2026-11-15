@@ -6,6 +6,7 @@
 - [PHP Linting](#php-linting)
 - [JavaScript Linting](#javascript-linting)
 - [Markdown Linting](#markdown-linting)
+- [Dependency Changes](#dependency-changes)
 - [Important Linting Guidelines](#important-linting-guidelines)
 - [Example Workflow](#example-workflow)
 - [Understanding Linting Output](#understanding-linting-output)
@@ -71,7 +72,7 @@ vendor/bin/phpcs -s path/to/file.php
 
 ```bash
 # Run JS linting on changes in your branch
-pnpm run lint:changes:branch:js
+pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch:js
 ```
 
 This command:
@@ -80,11 +81,23 @@ This command:
 - Identifies code style and potential issues
 - Does not modify files
 
-**Important:** The plugin-level `.eslintignore` excludes `client/blocks/`, so `lint:changes:branch:js` will not catch eslint or prettier issues in blocks code. For blocks changes, also run the blocks package lint:
+**Important:** CI's "Lint - @woocommerce/plugin-woocommerce" job runs `lint:changes:branch`, which lints every changed `.js`, `.jsx`, `.ts` and `.tsx` file under `plugins/woocommerce` with the ESLint config nearest to it, and every changed PHP file. A sub-package's own lint command can pass while this job fails, because it covers fewer files (for example, classic-assets' `lint:lang:js` skips `client/legacy/js/frontend/test/`). Before pushing, run the job's command from anywhere in the repository:
 
 ```bash
-# Check blocks JS/TS (includes prettier via eslint plugin)
+git fetch origin trunk
+pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
+```
+
+It compares your working tree with the merge base of `origin/trunk` (fetch first, or a stale ref also lints files trunk changed since) and skips untracked files, so `git add` new files first. For a PR that targets another branch, fetch that branch and append it, for example `pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch origin/release/X.Y`. For SCSS changes in `client/legacy`, also run `pnpm --filter=@woocommerce/classic-assets lint`.
+
+**Important:** CI also runs a separate "Lint - @woocommerce/block-library" job over the whole blocks package, including stylelint for SCSS. For blocks changes, also run:
+
+```bash
+# Check blocks JS/TS (ESLint with Prettier)
 pnpm --filter=@woocommerce/block-library lint:js
+
+# Check blocks SCSS, if you changed any
+pnpm --filter=@woocommerce/block-library lint:css
 
 # Auto-fix blocks JS/TS issues
 pnpm --filter=@woocommerce/block-library lint:js-fix
@@ -105,6 +118,24 @@ markdownlint --fix path/to/file.md
 # Check for remaining errors
 markdownlint path/to/file.md
 ```
+
+## Dependency Changes
+
+Adding, updating or removing a dependency can make pnpm rewrite unrelated entries in `pnpm-lock.yaml`: it re-resolves the changed package's dependency tree, which includes tooling entries shared with other packages. These rewrites return on later changes, so do not try to settle them in your PR.
+
+**Which path to take.** The steps below keep the lockfile diff to the entries your change needs. Follow them when you add, update or remove one or a few dependencies in a package's `package.json`: that is where the rewrites bury a small change and conflict with other open PRs. Commit pnpm's lockfile as written, and say so in the PR description, when the lockfile change is the point of the PR: a change to `catalogs:`, `overrides:` or `patchedDependencies:` in `pnpm-workspace.yaml`, an upgrade whose own entries would be most of the diff (step 2 would copy more than a few dozen entries), or a change across many packages. A full regenerate or `pnpm dedupe` is a PR of its own, agreed in advance; never run either to tidy another PR's diff.
+
+For one or a few dependencies:
+
+1. Make the change with pnpm (`add`, `update` or `remove`), then check what it did with `git diff --numstat HEAD -- :/pnpm-lock.yaml`. If the package is pinned under `overrides:` in `pnpm-workspace.yaml`, change the override instead and commit pnpm's lockfile. If the pnpm command changed neither a `package.json` nor `pnpm-workspace.yaml` (for example, `pnpm update` found nothing newer), restore the lockfile with `git checkout HEAD -- :/pnpm-lock.yaml` and stop.
+2. If the diff holds more than your dependency's entries, save pnpm's lockfile outside the repository, restore the committed one with `git checkout HEAD -- :/pnpm-lock.yaml`, and bring over only what your change needs: its `importers:` entry, the `snapshots:` and `packages:` entries its new version reaches that the restored file lacks, and for an update or removal, the deletion of entries only the old version reached. Copy entries verbatim from pnpm's file; never write or edit an entry yourself. Deleted lines are expected for updates and removals.
+3. If pnpm also changed another dependency of the same package so that it names your dependency's new version (a peer), stop and ask for review. Keeping the old entry passes every check but leaves that dependency on the old peer, and copying it can add hundreds of lines.
+4. Run `pnpm -C "$(git rev-parse --show-toplevel)" install --frozen-lockfile`. It fails on missing entries but not on extra or stale ones, so it does not show whether every change was needed.
+5. Stage the lockfile with `git add -- :/pnpm-lock.yaml`: the restore and edit leave it unstaged.
+
+To see what the branch already changed in the lockfile, run `git diff --numstat "$(git merge-base origin/trunk HEAD)" HEAD -- :/pnpm-lock.yaml` (use the PR's base branch if it is not trunk). If an earlier commit kept pnpm's rewrites that its change did not need, redo that change with these steps, or say in the PR that you committed pnpm's lockfile as written.
+
+If a trunk merge conflicts in `pnpm-lock.yaml`, take trunk's version and conclude the merge. Then run `pnpm install` and continue from step 2 for every dependency the branch changed, committing the result separately.
 
 ## Important Linting Guidelines
 
@@ -131,19 +162,17 @@ Do not fix linting errors in unrelated code unless specifically asked to do so.
 git status
 git diff
 
-# 3. Run linting on your changes
-pnpm run lint:changes:branch:php
+# 3. Stage new files, then lint PHP and JS changes (what CI's Lint job runs)
+git add -N path/to/new-file.js
+pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
 
-# 4. Fix issues automatically
-pnpm run lint:php:fix
+# 4. Fix PHP issues automatically (fix JS issues by hand)
+pnpm --filter=@woocommerce/plugin-woocommerce lint:php:fix
 
 # 5. Review the fixes
 git diff
 
-# 6. If needed, check JavaScript changes
-pnpm run lint:changes:branch:js
-
-# 7. Commit your changes
+# 6. Commit your changes
 git add .
 git commit -m "Your commit message"
 ```
@@ -205,9 +234,10 @@ FOUND 2 ERRORS AFFECTING 2 LINES
 
 Before committing your changes:
 
-- [ ] Run `pnpm run lint:changes:branch:php`
-- [ ] Run `pnpm run lint:php:fix` if issues found
-- [ ] Run `pnpm run lint:changes:branch:js` if you modified JS files
+- [ ] `git add` any new files, then run `pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch` (PHP and JS; this is what CI's Lint job runs, and it skips untracked files). For a PR that does not target trunk, fetch its base branch and append it, for example `origin/release/X.Y`
+- [ ] Run `pnpm --filter=@woocommerce/plugin-woocommerce lint:php:fix` if PHP issues are found; there is no branch fixer for JS, so fix JS issues by hand
+- [ ] If you changed a dependency, check the `pnpm-lock.yaml` diff against the merge base holds only the entries your change needs, or the PR description says why you committed pnpm's lockfile as written (see [Dependency Changes](#dependency-changes))
+- [ ] If you changed a dependency or `pnpm-lock.yaml`, run `pnpm exec syncpack lint` from the repository root; CI's "Validate dependencies version" job runs it
 - [ ] Run `pnpm --filter=@woocommerce/block-library lint:js-fix` if you modified blocks JS/TS files
 - [ ] Review all automatic fixes with `git diff`
 - [ ] Address any remaining issues that can't be auto-fixed

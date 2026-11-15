@@ -48,7 +48,7 @@ export class ErrorBoundary extends Component<
 			.slice( 0, 10 )
 			.map( ( line ) => line.trim() );
 
-		captureException( error, {
+		void captureException( error, {
 			severity: 'critical',
 			extra: {
 				componentStack,

@@ -523,7 +523,12 @@ class WC_Brands_Admin {
 			return $columns;
 		}
 
-		$column_index  = 'taxonomy-product_brand';
+		$column_index = 'taxonomy-product_brand';
+
+		if ( ! isset( $columns[ $column_index ] ) ) {
+			return $columns;
+		}
+
 		$brands_column = $columns[ $column_index ];
 		unset( $columns[ $column_index ] );
 		return array_merge(

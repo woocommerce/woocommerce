@@ -8,7 +8,7 @@ import {
 } from '../get-option-groups';
 
 describe( 'getOptionGroups', () => {
-	it( 'should return nothing for unmatched opions', () => {
+	it( 'should return nothing for unmatched options', () => {
 		const options = [ 'unknown-value' ];
 		const result = getOptionGroups( options );
 		expect( result ).toEqual( [] );

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { union } from 'lodash';
-import { Reducer } from 'redux';
 
 /**
  * Internal dependencies
@@ -38,7 +37,10 @@ const updateGroupDataInNewState = (
 	return newState;
 };
 
-const reducer: Reducer< SettingsState, Actions > = ( state = {}, action ) => {
+const reducer = (
+	state: SettingsState = {},
+	action: Actions
+): SettingsState => {
 	const newState = {};
 	switch ( action.type ) {
 		case TYPES.SET_IS_REQUESTING:
@@ -47,6 +49,18 @@ const reducer: Reducer< SettingsState, Actions > = ( state = {}, action ) => {
 				[ action.group ]: {
 					...state[ action.group ],
 					isRequesting: action.isRequesting,
+				},
+			};
+			break;
+		case TYPES.CLEAR_ERROR_FOR_GROUP:
+			if ( ! state[ action.group ] ) {
+				break;
+			}
+			state = {
+				...state,
+				[ action.group ]: {
+					...state[ action.group ],
+					error: null,
 				},
 			};
 			break;
@@ -72,6 +86,12 @@ const reducer: Reducer< SettingsState, Actions > = ( state = {}, action ) => {
 					...state,
 					[ group ]: {
 						data: state[ group ] ? state[ group ].data : [],
+						// Keep the dirty keys so a failed save can be retried.
+						// Nothing else is carried over on purpose: the getSettings
+						// resolver sets isRequesting and never resets it, so
+						// preserving it here would leave the group stuck in a
+						// requesting state after a failed fetch.
+						dirty: state[ group ]?.dirty,
 						error,
 						lastReceived: time,
 					},

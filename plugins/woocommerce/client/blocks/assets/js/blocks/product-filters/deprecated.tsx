@@ -2,10 +2,12 @@
  * External dependencies
  */
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
+import metadata from './block.json';
 import { type BlockAttributes } from './types';
 import { getColorsFromBlockSupports } from './utils/get-colors-from-block-supports';
 import { presetToCssVariable } from './utils/preset-to-css-variable';
@@ -45,6 +47,40 @@ function getProductFiltersCssV1( attributes: BlockAttributes ) {
 	return styles;
 }
 
+type LegacyDrawerAttributes = BlockAttributes & {
+	showFilterDrawer?: boolean;
+};
+
+const v2 = {
+	attributes: {
+		...metadata.attributes,
+		showFilterDrawer: {
+			type: 'boolean',
+		},
+	},
+	save( { attributes }: { attributes: LegacyDrawerAttributes } ) {
+		const blockProps = useBlockProps.save( {
+			className: clsx( 'wc-block-product-filters', {
+				'is-filter-drawer-disabled':
+					attributes.showFilterDrawer === false,
+			} ),
+		} );
+		const innerBlocksProps = useInnerBlocksProps.save( blockProps );
+		return <div { ...innerBlocksProps } />;
+	},
+	isEligible( attributes: LegacyDrawerAttributes ) {
+		return typeof attributes.showFilterDrawer === 'boolean';
+	},
+	migrate( attributes: LegacyDrawerAttributes ) {
+		const { showFilterDrawer, ...currentAttributes } = attributes;
+
+		return {
+			...currentAttributes,
+			overlayMode: showFilterDrawer === false ? 'off' : 'mobile',
+		};
+	},
+};
+
 const v1 = {
 	save( { attributes }: { attributes: BlockAttributes } ) {
 		const blockProps = useBlockProps.save( {
@@ -56,4 +92,4 @@ const v1 = {
 	},
 };
 
-export default [ v1 ];
+export default [ v2, v1 ];

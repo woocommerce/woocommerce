@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix false "incompatible extension" notice shown in the block editor for express payment methods whose client-side `name` differs from their server-side gateway ID. The compatibility check now matches on `paymentMethodId` (falling back to `name`).

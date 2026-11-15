@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add refund preview endpoint (POST /wc/v4/refunds/preview) for server-side refund calculation

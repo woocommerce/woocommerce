@@ -5,7 +5,7 @@ const path = require( 'path' );
 module.exports = {
 	...defaultConfig,
 	entry: {
-		...defaultConfig.entry,
+		index: './src/index.js',
 		// Separate entry point for the live-branches page.
 		app: './src/app/index.js',
 		'live-branches': './src/live-branches/index.tsx',

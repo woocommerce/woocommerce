@@ -8,14 +8,14 @@ const termsPageLink = TERMS_URL
 	? `<a href="${ TERMS_URL }" target="_blank">${ __(
 			'Terms and Conditions',
 			'woocommerce'
-	  ) }</a>`
+		) }</a>`
 	: __( 'Terms and Conditions', 'woocommerce' );
 
 const privacyPageLink = PRIVACY_URL
 	? `<a href="${ PRIVACY_URL }" target="_blank">${ __(
 			'Privacy Policy',
 			'woocommerce'
-	  ) }</a>`
+		) }</a>`
 	: __( 'Privacy Policy', 'woocommerce' );
 
 export const termsConsentDefaultText = sprintf(

@@ -10,8 +10,12 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Exception;
 use WC_Admin_Notices;
 use WC_Admin_Status;
 use WC_Helper_Updater;
@@ -25,6 +29,21 @@ defined( 'ABSPATH' ) || exit;
  * SiteHealth class.
  */
 class SiteHealth {
+	/**
+	 * REST API namespace for tests that Site Health runs asynchronously.
+	 */
+	private const REST_NAMESPACE = 'wc-site-health/v1';
+
+	/**
+	 * Minimum order metadata rows before the table size check can recommend investigation.
+	 */
+	private const ORDER_META_ROW_COUNT_THRESHOLD = 1000000;
+
+	/**
+	 * Minimum metadata rows per order before the table size check can recommend investigation.
+	 */
+	private const ORDER_META_ROWS_PER_ORDER_THRESHOLD = 200;
+
 	/**
 	 * Class instance.
 	 *
@@ -48,6 +67,7 @@ class SiteHealth {
 	public function __construct() {
 		add_filter( 'site_status_should_suggest_persistent_object_cache', array( $this, 'should_suggest_persistent_object_cache' ) );
 		add_filter( 'site_status_tests', array( $this, 'handle_site_status_tests' ) );
+		add_action( 'rest_api_init', array( $this, 'register_async_test_routes' ) );
 	}
 
 	/**
@@ -60,18 +80,76 @@ class SiteHealth {
 	 */
 	public function handle_site_status_tests( $tests ) {
 		$tests['direct'] = $tests['direct'] ?? array();
+		$tests['async']  = $tests['async'] ?? array();
 
 		foreach ( $this->get_woocommerce_site_health_tests() as $test_id => $test ) {
-			$tests['direct'][ $test_id ] = array(
-				'label'     => $test['label'],
-				'test'      => function () use ( $test_id ) {
-					return $this->run_test( $test_id );
-				},
-				'skip_cron' => true,
+			$run = function () use ( $test_id ) {
+				return $this->run_test( $test_id );
+			};
+
+			if ( empty( $test['async'] ) ) {
+				$tests['direct'][ $test_id ] = array(
+					'label'     => $test['label'],
+					'test'      => $run,
+					'skip_cron' => $test['skip_cron'] ?? true,
+				);
+				continue;
+			}
+
+			$tests['async'][ $test_id ] = array(
+				'label'             => $test['label'],
+				'test'              => rest_url( self::REST_NAMESPACE . '/tests/' . $this->get_async_test_route( $test_id ) ),
+				'has_rest'          => true,
+				'async_direct_test' => $run,
+				'skip_cron'         => true,
 			);
 		}
 
 		return $tests;
+	}
+
+	/**
+	 * Register REST API routes for the tests that Site Health runs asynchronously.
+	 *
+	 * @internal
+	 */
+	public function register_async_test_routes(): void {
+		foreach ( $this->get_woocommerce_site_health_tests() as $test_id => $test ) {
+			if ( empty( $test['async'] ) ) {
+				continue;
+			}
+
+			register_rest_route(
+				self::REST_NAMESPACE,
+				'/tests/' . $this->get_async_test_route( $test_id ),
+				array(
+					'methods'             => 'GET',
+					'callback'            => function () use ( $test_id ) {
+						/**
+						 * This filter is documented in wp-admin/includes/class-wp-site-health.php
+						 *
+						 * Core runs it for direct tests only, so apply it here for tests moved to async.
+						 *
+						 * @since 5.3.0
+						 */
+						return rest_ensure_response( apply_filters( 'site_status_test_result', $this->run_test( $test_id ) ) );
+					},
+					'permission_callback' => function () {
+						return current_user_can( 'view_site_health_checks' );
+					},
+				)
+			);
+		}
+	}
+
+	/**
+	 * Get the REST API route segment for an asynchronous test.
+	 *
+	 * @param string $test_id Site Health test ID.
+	 * @return string
+	 */
+	private function get_async_test_route( string $test_id ): string {
+		return str_replace( '_', '-', $test_id );
 	}
 
 	/**
@@ -137,7 +215,9 @@ class SiteHealth {
 	 * Each entry describes one test:
 	 *   - label: visible test name in Site Health.
 	 *   - badge: 'security' or 'performance'.
+	 *   - async: optional; true to run the test after the page loads, for checks that make loopback requests.
 	 *   - check: callable returning bool (true = good) or array (empty = good, otherwise context for description/actions).
+	 *   - skip_cron: whether to exclude a direct test from scheduled checks (defaults to true).
 	 *   - good: result data when the check passes (label, description).
 	 *   - fail: result data when the check fails (status defaults to 'recommended', label, description, optional actions).
 	 *     Label, status, and description may be callables that receive the check context.
@@ -145,7 +225,7 @@ class SiteHealth {
 	 * @return array<string, array>
 	 */
 	protected function get_woocommerce_site_health_tests(): array {
-		return array(
+		$tests = array(
 			'woocommerce_secure_connection'            => array(
 				'label' => __( 'WooCommerce secure connection', 'woocommerce' ),
 				'badge' => 'security',
@@ -170,24 +250,39 @@ class SiteHealth {
 			'woocommerce_uploads_directory_protection' => array(
 				'label' => __( 'WooCommerce uploads directory protection', 'woocommerce' ),
 				'badge' => 'security',
+				'async' => true,
 				'check' => array( $this, 'is_uploads_directory_protected' ),
 				'good'  => array(
 					'label'       => __( 'WooCommerce uploads directory is protected', 'woocommerce' ),
-					'description' => __( 'The directory used for downloadable product files is not browsable from the web.', 'woocommerce' ),
+					'description' => function () {
+						return $this->uses_redirect_download_method()
+							? __( 'The directory used for downloadable product files is not browsable from the web.', 'woocommerce' )
+							: __( 'Downloadable product files cannot be accessed directly from the web.', 'woocommerce' );
+					},
 				),
 				'fail'  => array(
 					'status'      => function ( ?array $context ) {
 						return ! empty( $context['unverified'] ) ? 'recommended' : 'critical';
 					},
 					'label'       => function ( ?array $context ) {
-						return ! empty( $context['unverified'] )
-							? __( 'WooCommerce could not verify uploads directory protection', 'woocommerce' )
-							: __( 'WooCommerce uploads directory is browsable from the web', 'woocommerce' );
+						if ( ! empty( $context['unverified'] ) ) {
+							return __( 'WooCommerce could not verify uploads directory protection', 'woocommerce' );
+						}
+
+						return $this->uses_redirect_download_method()
+							? __( 'WooCommerce uploads directory is browsable from the web', 'woocommerce' )
+							: __( 'Downloadable product files can be accessed directly from the web', 'woocommerce' );
 					},
 					'description' => function ( ?array $context ) {
+						if ( $this->uses_redirect_download_method() ) {
+							return ! empty( $context['unverified'] )
+								? __( 'A loopback request to the WooCommerce uploads directory failed, so WooCommerce could not confirm whether directory browsing is disabled. Check your server configuration or try again later.', 'woocommerce' )
+								: __( 'Directory browsing can expose downloadable product files. Configure your web server to prevent directory indexing for the WooCommerce uploads directory.', 'woocommerce' );
+						}
+
 						return ! empty( $context['unverified'] )
-							? __( 'A loopback request to the WooCommerce uploads directory failed, so WooCommerce could not confirm whether directory browsing is disabled. Check your server configuration or try again later.', 'woocommerce' )
-							: __( 'Directory browsing can expose downloadable product files. Configure your web server to prevent directory indexing for the WooCommerce uploads directory.', 'woocommerce' );
+							? __( 'WooCommerce could not confirm whether downloadable product files can be accessed directly from the web. This happens when test files cannot be written to the uploads directory, your site cannot make requests to itself, or uploads are served from somewhere else, such as a CDN or behind a login.', 'woocommerce' )
+							: __( 'Anyone with the URL of a downloadable product file can download it without buying the product. Configure your web server to block direct access to the WooCommerce uploads directory.', 'woocommerce' );
 					},
 					'actions'     => array(
 						array(
@@ -367,11 +462,11 @@ class SiteHealth {
 				'check' => fn() => ! WC_Admin_Notices::has_notice( 'download_directories_sync_complete' ),
 				'good'  => array(
 					'label'       => __( 'WooCommerce approved download directories do not require review', 'woocommerce' ),
-					'description' => __( 'There is no completed approved download directories sync waiting for review.', 'woocommerce' ),
+					'description' => __( 'There is no completed approved download directory synchronization waiting for review.', 'woocommerce' ),
 				),
 				'fail'  => array(
 					'label'       => __( 'WooCommerce approved download directories need review', 'woocommerce' ),
-					'description' => __( 'The approved product download directories list was updated. Review it to confirm downloadable product files remain protected.', 'woocommerce' ),
+					'description' => __( 'Approved product download directory synchronization has completed. Review the list to confirm downloadable product files remain protected.', 'woocommerce' ),
 					'actions'     => array(
 						array(
 							'url'   => admin_url( 'admin.php?page=wc-settings&tab=products&section=download_urls' ),
@@ -384,6 +479,30 @@ class SiteHealth {
 								'_wc_notice_nonce'
 							),
 							'label' => __( 'Mark as reviewed', 'woocommerce' ),
+						),
+						array(
+							'url'     => 'https://woocommerce.com/document/approved-download-directories',
+							'label'   => __( 'Learn more about approved directories', 'woocommerce' ),
+							'new_tab' => true,
+						),
+					),
+				),
+			),
+			'woocommerce_approved_download_directories_enforcement' => array(
+				'label' => __( 'WooCommerce approved download directories', 'woocommerce' ),
+				'badge' => 'security',
+				'check' => fn() => Download_Directories::MODE_ENABLED === wc_get_container()->get( Download_Directories::class )->get_mode(),
+				'good'  => array(
+					'label'       => __( 'WooCommerce approved download directory rules are enforced', 'woocommerce' ),
+					'description' => __( 'Downloadable product files are restricted to approved directories.', 'woocommerce' ),
+				),
+				'fail'  => array(
+					'label'       => __( 'WooCommerce approved download directory rules are not enforced', 'woocommerce' ),
+					'description' => __( 'Enable approved download directory rules to control which local and remote locations can be used for downloadable product files. This reduces the risk of exposing unintended files or connecting to unapproved remote locations.', 'woocommerce' ),
+					'actions'     => array(
+						array(
+							'url'   => admin_url( 'admin.php?page=wc-settings&tab=products&section=download_urls' ),
+							'label' => __( 'Review approved directory rules', 'woocommerce' ),
 						),
 						array(
 							'url'     => 'https://woocommerce.com/document/approved-download-directories',
@@ -413,6 +532,100 @@ class SiteHealth {
 				),
 			),
 		);
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$tests['woocommerce_order_meta_table_size'] = array(
+				'label'     => __( 'WooCommerce order metadata table size', 'woocommerce' ),
+				'badge'     => 'performance',
+				'skip_cron' => false,
+				'check'     => fn() => $this->get_order_meta_table_size_issue(),
+				'good'      => array(
+					'label'       => __( 'WooCommerce order metadata table passed the size check', 'woocommerce' ),
+					'description' => __( 'WooCommerce did not detect an unusually large order metadata table.', 'woocommerce' ),
+				),
+				'fail'      => array(
+					'label'       => static fn( array $context ) => ! empty( $context['unverified'] )
+						? __( 'WooCommerce could not check the order metadata table size', 'woocommerce' )
+						: __( 'WooCommerce order metadata table is unusually large', 'woocommerce' ),
+					'description' => static fn( array $context ) => ! empty( $context['unverified'] )
+						? __( 'The database did not return row estimates for the order tables, so WooCommerce could not check the order metadata table size.', 'woocommerce' )
+						: sprintf(
+							/* translators: 1: Estimated number of order metadata rows. 2: Estimated number of order rows. */
+							__( 'The row counts are %1$s for the order metadata table and %2$s for the orders table. These are estimates and may be out of date. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.', 'woocommerce' ),
+							number_format_i18n( $context['meta_rows'] ),
+							number_format_i18n( $context['order_rows'] )
+						),
+				),
+			);
+		}
+
+		return $tests;
+	}
+
+	/**
+	 * Get estimated row counts for the HPOS orders and metadata tables.
+	 *
+	 * @return array{order_rows: int, meta_rows: int}|null
+	 */
+	private function get_hpos_table_statistics(): ?array {
+		global $wpdb;
+
+		$tables     = array(
+			'order_rows' => OrdersTableDataStore::get_orders_table_name(),
+			'meta_rows'  => OrdersTableDataStore::get_meta_table_name(),
+		);
+		$row_counts = array();
+
+		foreach ( $tables as $key => $table ) {
+			// LIKE limits the lookup to the named table, unlike WHERE, which reads every table in the schema on MySQL 5.7 and MariaDB.
+			// Naming the table also lets a database drop-in route the query to the server that holds it. The name is not passed
+			// through esc_like() because drop-ins would then read it with a leftover backslash (see WordPress core ticket #57149).
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- This reads database-maintained table statistics during Site Health checks.
+			$statuses = $wpdb->get_results( $wpdb->prepare( 'SHOW TABLE STATUS LIKE %s', $table ), ARRAY_A );
+			$status   = null;
+
+			// LIKE treats `_` as a wildcard, so only use the row for this exact table.
+			foreach ( (array) $statuses as $row ) {
+				if ( isset( $row['Name'] ) && 0 === strcasecmp( $row['Name'], $table ) ) {
+					$status = $row;
+					break;
+				}
+			}
+
+			if ( ! is_array( $status ) || ! isset( $status['Rows'] ) || ! is_numeric( $status['Rows'] ) ) {
+				return null;
+			}
+
+			$row_counts[ $key ] = (int) $status['Rows'];
+		}
+
+		return array(
+			'order_rows' => $row_counts['order_rows'],
+			'meta_rows'  => $row_counts['meta_rows'],
+		);
+	}
+
+	/**
+	 * Get context when the order metadata table is unusually large, or when its size could not be checked.
+	 *
+	 * @return array{order_rows: int, meta_rows: int}|array{unverified: true}|array{}
+	 */
+	private function get_order_meta_table_size_issue(): array {
+		$table_statistics = $this->get_hpos_table_statistics();
+
+		if ( null === $table_statistics ) {
+			return array( 'unverified' => true );
+		}
+
+		if ( $table_statistics['meta_rows'] < self::ORDER_META_ROW_COUNT_THRESHOLD ) {
+			return array();
+		}
+
+		if ( 0 !== $table_statistics['order_rows'] && intdiv( $table_statistics['meta_rows'], $table_statistics['order_rows'] ) < self::ORDER_META_ROWS_PER_ORDER_THRESHOLD ) {
+			return array();
+		}
+
+		return $table_statistics;
 	}
 
 	/**
@@ -519,22 +732,29 @@ class SiteHealth {
 	}
 
 	/**
-	 * Check if the WooCommerce uploads directory is protected from directory browsing.
+	 * Check if the WooCommerce uploads directory is protected.
+	 *
+	 * With the "Redirect only" download method files are served directly by design, so only directory browsing is checked.
+	 * Other methods need the files themselves to be blocked.
 	 *
 	 * @return bool|array{unverified: true}
 	 */
 	private function is_uploads_directory_protected() {
-		$cache_key = '_woocommerce_upload_directory_status';
-		$status    = get_transient( $cache_key );
+		$status = $this->uses_redirect_download_method() ? $this->get_uploads_directory_browsing_status() : $this->get_uploads_file_access_status();
 
-		if ( false !== $status ) {
-			if ( 'unverified' === $status ) {
-				return array( 'unverified' => true );
-			}
-
-			return 'protected' === $status;
+		if ( 'unverified' === $status ) {
+			return array( 'unverified' => true );
 		}
 
+		return 'protected' === $status;
+	}
+
+	/**
+	 * Check whether the WooCommerce uploads directory lists its files when requested from the web.
+	 *
+	 * @return string 'protected', 'unprotected', or 'unverified'.
+	 */
+	private function get_uploads_directory_browsing_status(): string {
 		$uploads  = wp_get_upload_dir();
 		$response = wp_safe_remote_get(
 			esc_url_raw( $uploads['baseurl'] . '/woocommerce_uploads/' ),
@@ -544,23 +764,88 @@ class SiteHealth {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			set_transient( $cache_key, 'unverified', HOUR_IN_SECONDS );
-			return array( 'unverified' => true );
+			return 'unverified';
 		}
 
 		$response_code = intval( wp_remote_retrieve_response_code( $response ) );
 
 		if ( 0 === $response_code ) {
-			set_transient( $cache_key, 'unverified', HOUR_IN_SECONDS );
-			return array( 'unverified' => true );
+			return 'unverified';
 		}
 
-		$response_content = wp_remote_retrieve_body( $response );
-		$is_protected     = ( 200 === $response_code && empty( $response_content ) ) || ( 200 !== $response_code );
+		return ( 200 !== $response_code || empty( wp_remote_retrieve_body( $response ) ) ) ? 'protected' : 'unprotected';
+	}
 
-		set_transient( $cache_key, $is_protected ? 'protected' : 'unprotected', DAY_IN_SECONDS );
+	/**
+	 * Check whether the web server serves files from the WooCommerce uploads directory directly.
+	 *
+	 * The directory request alone can't tell: the empty index.html WooCommerce installs there returns a blank 200
+	 * even when every file is downloadable. So this requests a temporary file instead.
+	 *
+	 * @return string 'protected', 'unprotected', or 'unverified'.
+	 */
+	private function get_uploads_file_access_status(): string {
+		$is_served = $this->is_uploads_test_file_served( 'woocommerce_uploads/' );
 
-		return $is_protected;
+		if ( null === $is_served ) {
+			return 'unverified';
+		}
+
+		if ( $is_served ) {
+			return 'unprotected';
+		}
+
+		// A blocked file only shows protection if an ordinary upload is served. Offloaded uploads, a site-wide
+		// login, or a server rule for the file type would block both.
+		return $this->is_uploads_test_file_served( '' ) ? 'protected' : 'unverified';
+	}
+
+	/**
+	 * Write a temporary file to the uploads directory, request it from the web, and delete it.
+	 *
+	 * @param string $subdir Directory relative to the uploads base directory, with a trailing slash, or ''.
+	 * @return bool|null Whether the file's contents were served, or null if the check could not run.
+	 */
+	private function is_uploads_test_file_served( string $subdir ): ?bool {
+		try {
+			$file_name  = 'wc-site-health-' . bin2hex( random_bytes( 6 ) ) . '.txt';
+			$contents   = bin2hex( random_bytes( 16 ) );
+			$filesystem = FilesystemUtil::get_wp_filesystem_direct();
+		} catch ( Exception $e ) {
+			return null;
+		}
+
+		$uploads   = wp_get_upload_dir();
+		$file_path = $uploads['basedir'] . '/' . $subdir . $file_name;
+
+		if ( ! $filesystem->put_contents( $file_path, $contents ) ) {
+			return null;
+		}
+
+		$response = wp_safe_remote_get( esc_url_raw( $uploads['baseurl'] . '/' . $subdir . $file_name ) );
+		$filesystem->delete( $file_path );
+
+		if ( is_wp_error( $response ) ) {
+			return null;
+		}
+
+		$response_code = intval( wp_remote_retrieve_response_code( $response ) );
+
+		if ( 0 === $response_code ) {
+			return null;
+		}
+
+		// Comparing contents means a login page or soft 404 reached through a redirect doesn't count as served.
+		return 200 === $response_code && trim( wp_remote_retrieve_body( $response ) ) === $contents;
+	}
+
+	/**
+	 * Check whether downloadable products use the "Redirect only" download method.
+	 *
+	 * @return bool
+	 */
+	private function uses_redirect_download_method(): bool {
+		return 'redirect' === get_option( 'woocommerce_file_download_method', 'force' );
 	}
 
 	/**

@@ -5,7 +5,7 @@
 
 // Layout rules for `.wc-block-components-product-image`,
 // `.wc-block-components-product-price` and `.wc-block-components-product-button`
-// come from the atomic product-image / -price / -button blocks' stylesheets,
+// come from the product image, price, and button blocks' stylesheets,
 // which the consuming blocks declare as style dependencies in `block.json`.
 // Don't duplicate those rules here.
 
@@ -25,7 +25,7 @@
 		pointer-events: none;
 	}
 
-	// The atomic product-button's `display: flex` outspecifies `[hidden]`,
+	// The product button's `display: flex` outspecifies `[hidden]`,
 	// so the action wrapper (Move to cart / Add to cart) wouldn't honor
 	// `hidden` without this.
 	.wp-block-button.wc-block-components-product-button[hidden] {
@@ -41,7 +41,7 @@
 		margin: 0 0 0.75rem;
 	}
 
-	// Quantity has no atomic equivalent in Product Collection, so we own
+	// Quantity has no product element equivalent in Product Collection, so we own
 	// its styling. Center-aligned and small to mirror the rest of the row
 	// (price + button use the WP `has-small-font-size` preset). Only the
 	// Saved for Later block renders this element — Wishlist omits it — but

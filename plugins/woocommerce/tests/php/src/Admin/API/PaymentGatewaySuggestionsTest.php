@@ -45,7 +45,7 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_it_clears_cache_when_the_base_country_gets_updated() {
-		// Clear any exisiting cache first.
+		// Clear any existing cache first.
 		Init::delete_specs_transient();
 
 		$existing_base_country = wc_get_base_location();

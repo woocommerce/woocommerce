@@ -1,0 +1,45 @@
+{
+	"name": "@woocommerce/theme-purple",
+	"version": "1.0.3",
+	"description": "Purple, a WooCommerce block theme.",
+	"private": true,
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^24.15.0"
+	},
+	"files": [
+		"assets",
+		"inc",
+		"parts",
+		"patterns",
+		"styles",
+		"templates",
+		"*.php",
+		"style.css",
+		"theme.json",
+		"screenshot.*",
+		"readme.txt",
+		"LICENSE*"
+	],
+	"scripts": {
+		"validate": "pnpm --filter=@woocommerce/theme-cli validate purple",
+		"changelog": "composer exec -- changelogger",
+		"env:start": "pnpm --filter=@woocommerce/theme-cli wp-env start purple",
+		"env:stop": "pnpm --filter=@woocommerce/theme-cli wp-env stop purple",
+		"build": "pnpm --filter=@woocommerce/theme-cli build purple"
+	},
+	"devDependencies": {
+		"@woocommerce/theme-cli": "workspace:*"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "validate",
+				"changes": "**/*",
+				"events": [
+					"pull_request"
+				]
+			}
+		}
+	}
+}

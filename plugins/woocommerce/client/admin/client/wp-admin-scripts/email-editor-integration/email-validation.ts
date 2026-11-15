@@ -110,7 +110,9 @@ const emailValidationRule: EmailContentValidationRule = {
 		const wooCommerceData = getWooCommerceData();
 		const email = wooCommerceData?.sender_settings?.from_address ?? '';
 
-		if ( ! email.trim() ) return false;
+		if ( ! email.trim() ) {
+			return false;
+		}
 
 		return ! isValidEmail( email.trim() );
 	},

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Session\SessionDataWriter;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use WC_Session;
 defined( 'ABSPATH' ) || exit;
@@ -44,7 +45,7 @@ final class SessionHandler extends WC_Session {
 	 * Constructor for the session class.
 	 */
 	public function __construct() {
-		$this->token = wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
+		$this->token = CartTokenUtils::get_request_cart_token();
 		$this->table = $GLOBALS['wpdb']->prefix . 'woocommerce_sessions';
 	}
 
@@ -58,13 +59,24 @@ final class SessionHandler extends WC_Session {
 
 	/**
 	 * Process the token header to load the correct session.
+	 *
+	 * Verifies the signature here rather than trusting the caller that selected this handler.
 	 */
 	protected function init_session_from_token() {
+		if ( ! CartTokenUtils::validate_cart_token( $this->token ) ) {
+			$this->_customer_id       = $this->generate_customer_id();
+			$this->session_expiration = CartTokenUtils::get_cart_token_expiration();
+			$this->_data              = array();
+			$this->set_loaded_session_snapshot( $this->_data );
+			return;
+		}
+
 		$payload = CartTokenUtils::get_cart_token_payload( $this->token );
 
 		$this->_customer_id       = $payload['user_id'];
 		$this->session_expiration = $payload['exp'];
 		$this->_data              = (array) $this->get_session( $this->get_customer_id(), array() );
+		$this->set_loaded_session_snapshot( $this->_data );
 	}
 
 	/**
@@ -127,8 +139,8 @@ final class SessionHandler extends WC_Session {
 
 		$value = $wpdb->get_var(
 			$wpdb->prepare(
-				'SELECT session_value FROM %i WHERE session_key = %s',
-				$this->table,
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+				"SELECT session_value FROM {$this->table} WHERE session_key = %s",
 				$customer_id
 			)
 		);
@@ -159,6 +171,7 @@ final class SessionHandler extends WC_Session {
 		$this->_data        = array();
 		$this->_dirty       = false;
 		$this->_customer_id = null;
+		$this->replace_session_on_save();
 	}
 
 	/**
@@ -182,18 +195,16 @@ final class SessionHandler extends WC_Session {
 	public function save_data() {
 		// Dirty if something changed - prevents saving nothing new.
 		if ( $this->_dirty ) {
-			global $wpdb;
+			$writer = wc_get_container()->get( SessionDataWriter::class );
 
-			$wpdb->query(
-				$wpdb->prepare(
-					'INSERT INTO %i (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)',
-					$this->table,
-					$this->get_customer_id(),
-					maybe_serialize( $this->_data ),
-					$this->session_expiration
-				)
-			);
+			// Merging writes only the keys this request changed, so changes other requests saved since it loaded are kept.
+			if ( $this->should_replace_session_on_save() ) {
+				$writer->replace( $this->table, $this->get_customer_id(), (int) $this->session_expiration, $this->_data );
+			} else {
+				$writer->merge( $this->table, $this->get_customer_id(), (int) $this->session_expiration, $this->_data, $this->get_loaded_session_snapshot() );
+			}
 
+			$this->set_loaded_session_snapshot( $this->_data );
 			$this->_dirty = false;
 		}
 	}

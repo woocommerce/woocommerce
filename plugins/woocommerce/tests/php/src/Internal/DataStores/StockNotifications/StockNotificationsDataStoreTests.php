@@ -8,11 +8,14 @@ use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificat
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 
 /**
  * Class StockNotificationsDataStoreTests.
  */
 class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The data store instance.
@@ -26,6 +29,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		$this->data_store = wc_get_container()->get( StockNotificationsDataStore::class );
 	}
 
@@ -33,11 +37,12 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	 * Tear down the test.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		// Clean up all notifications.
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notifications" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		$this->restore_stock_notifications_feature_option();
+		parent::tearDown();
 	}
 
 	/**
@@ -71,7 +76,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$notification->save();
 
 		// Verify all properties were saved correctly.
-		$this->assertEquals( 1, $notification->get_id() );
+		$this->assertGreaterThan( 0, $notification->get_id() );
 		$this->assertEquals( 1, $notification->get_product_id() );
 		$this->assertEquals( 1, $notification->get_user_id() );
 		$this->assertEquals( 'test@test.com', $notification->get_user_email() );
@@ -125,7 +130,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$notification->set_user_id( 1 );
 		$notification->save();
 
-		$this->assertEquals( 1, $notification->get_id() );
+		$this->assertGreaterThan( 0, $notification->get_id() );
 		$this->assertEquals( 1, $notification->get_product_id() );
 		$this->assertEquals( 1, $notification->get_user_id() );
 		$this->assertEquals( null, $notification->get_user_email() );
@@ -207,6 +212,178 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'Stock notification not found' );
 		new Notification( $notification_id );
+	}
+
+	/**
+	 * @testdox Should fire woocommerce_new_stock_notification with the ID once a notification is created.
+	 */
+	public function test_create_fires_new_stock_notification_action(): void {
+		$fired = array();
+		add_action(
+			'woocommerce_new_stock_notification',
+			function ( $id, $notification ) use ( &$fired ) {
+				$fired[] = array( $id, $notification );
+			},
+			10,
+			2
+		);
+
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@test.com' );
+		$notification->save();
+
+		$this->assertCount( 1, $fired );
+		$this->assertSame( $notification->get_id(), $fired[0][0] );
+		$this->assertSame( $notification, $fired[0][1] );
+
+		// Updating the same notification does not fire it again.
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+		$this->assertCount( 1, $fired );
+	}
+
+	/**
+	 * @testdox Should fire woocommerce_update_stock_notification with the ID once a notification is updated.
+	 */
+	public function test_update_fires_update_stock_notification_action(): void {
+		$fired = array();
+		add_action(
+			'woocommerce_update_stock_notification',
+			function ( $id, $notification ) use ( &$fired ) {
+				$fired[] = array( 'update', $id, $notification );
+			},
+			10,
+			2
+		);
+		add_action(
+			'woocommerce_stock_notification_status_changed',
+			function ( $id ) use ( &$fired ) {
+				$fired[] = array( 'status_changed', $id );
+			}
+		);
+
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@test.com' );
+		$notification->save();
+		$this->assertCount( 0, $fired, 'Creating does not fire an update.' );
+
+		$notification->set_user_email( 'other@test.com' );
+		$notification->save();
+		$this->assertSame( array( array( 'update', $notification->get_id(), $notification ) ), $fired );
+
+		// A status change fires the update action first, then the status change.
+		$fired = array();
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+		$this->assertSame( array( 'update', 'status_changed' ), array_column( $fired, 0 ) );
+
+		// The admin list table updates through the data store directly.
+		$fired = array();
+		$notification->set_product_id( 2 );
+		$this->data_store->update( $notification );
+		$this->assertCount( 1, $fired );
+		$this->assertSame( $notification->get_id(), $fired[0][1] );
+	}
+
+	/**
+	 * @testdox Should fire woocommerce_stock_notification_status_changed only when a different status is persisted.
+	 */
+	public function test_update_fires_status_changed_action(): void {
+		$fired = array();
+		add_action(
+			'woocommerce_stock_notification_status_changed',
+			function ( $id, $from, $to, $notification ) use ( &$fired ) {
+				$fired[] = array( $id, $from, $to, $notification );
+			},
+			10,
+			4
+		);
+
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@test.com' );
+		$notification->save();
+		$this->assertCount( 0, $fired, 'Creating does not fire a status change.' );
+
+		// A non-status change does not fire it.
+		$notification->set_product_id( 2 );
+		$notification->save();
+		$this->assertCount( 0, $fired );
+
+		// Re-setting the current status does not fire it.
+		$notification->set_status( NotificationStatus::PENDING );
+		$notification->save();
+		$this->assertCount( 0, $fired );
+
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+		$this->assertCount( 1, $fired );
+		$this->assertSame( array( $notification->get_id(), NotificationStatus::PENDING, NotificationStatus::ACTIVE, $notification ), $fired[0] );
+
+		// The admin list table updates through the data store directly.
+		$notification->set_status( NotificationStatus::CANCELLED );
+		$this->data_store->update( $notification );
+		$this->assertCount( 2, $fired );
+		$this->assertSame( NotificationStatus::ACTIVE, $fired[1][1] );
+		$this->assertSame( NotificationStatus::CANCELLED, $fired[1][2] );
+		$this->assertSame( NotificationStatus::CANCELLED, $fired[1][3]->get_status() );
+
+		// An update-action listener that changes the status in memory does not affect the persisted pair.
+		add_action(
+			'woocommerce_update_stock_notification',
+			function ( $id, $notification ) {
+				$notification->set_status( NotificationStatus::CANCELLED );
+			},
+			10,
+			2
+		);
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+		$this->assertCount( 3, $fired );
+		$this->assertSame( NotificationStatus::CANCELLED, $fired[2][1] );
+		$this->assertSame( NotificationStatus::ACTIVE, $fired[2][2] );
+	}
+
+	/**
+	 * @testdox Should fire woocommerce_delete_stock_notification with the ID once a notification is deleted.
+	 */
+	public function test_delete_fires_delete_stock_notification_action(): void {
+		$fired = array();
+		add_action(
+			'woocommerce_delete_stock_notification',
+			function ( $id, $notification ) use ( &$fired ) {
+				$fired[] = array( $id, $notification );
+			},
+			10,
+			2
+		);
+
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@test.com' );
+		$notification->save();
+		$notification_id = $notification->get_id();
+
+		$notification->delete();
+		$this->assertCount( 1, $fired );
+		$this->assertSame( $notification_id, $fired[0][0] );
+		$this->assertSame( $notification, $fired[0][1] );
+
+		// Deleting a row that is already gone does not fire it.
+		$notification->set_id( $notification_id );
+		$this->data_store->delete( $notification );
+		$this->assertCount( 1, $fired );
+
+		// The admin list table deletes through the data store directly.
+		$other = new Notification();
+		$other->set_product_id( 1 );
+		$other->set_user_email( 'other@test.com' );
+		$other->save();
+		$this->data_store->delete( $other );
+		$this->assertCount( 2, $fired );
+		$this->assertSame( $other->get_id(), $fired[1][0] );
 	}
 
 	/**
@@ -296,8 +473,11 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
 		$this->assertEquals( '', $notification->get_meta( 'test_meta' ) );
 		$notification->add_meta_data( 'test_meta', 'test_value' );
+		$fired = did_action( 'woocommerce_update_stock_notification' );
 		$notification->save();
 
+		$this->assertSame( 1, did_action( 'woocommerce_update_stock_notification' ) - $fired, 'A meta-only save fires the update action once.' );
+		$this->assertSame( 1, $this->count_meta_rows( $notification->get_id(), 'test_meta' ), 'The added meta is stored once.' );
 		$notification = new Notification( $notification->get_id() );
 		$this->assertNotEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
 	}
@@ -319,8 +499,10 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
 		$this->assertEquals( 'test_value', $notification->get_meta( 'test_meta' ) );
 		$notification->update_meta_data( 'test_meta', 'updated_value' );
+		$fired = did_action( 'woocommerce_update_stock_notification' );
 		$notification->save();
 
+		$this->assertSame( 1, did_action( 'woocommerce_update_stock_notification' ) - $fired, 'A meta-only save fires the update action once.' );
 		$notification = new Notification( $notification->get_id() );
 		$this->assertEquals( 'updated_value', $notification->get_meta( 'test_meta' ) );
 		$this->assertNotEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
@@ -341,10 +523,105 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$notification = new Notification( $notification->get_id() );
 		$this->assertEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
 		$notification->delete_meta_data( 'test_meta' );
+		$fired = did_action( 'woocommerce_update_stock_notification' );
+		$notification->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_update_stock_notification' ) - $fired, 'A meta-only save fires the update action once.' );
+		$this->assertSame( 0, $this->count_meta_rows( $notification->get_id(), 'test_meta' ) );
+		$notification = new Notification( $notification->get_id() );
+		$this->assertNotEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * @testdox Should save prop and meta changes together with one update action.
+	 */
+	public function test_prop_and_meta_changes_save_with_one_update_action(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->add_meta_data( 'test_meta', 'test_value' );
+		$fired = did_action( 'woocommerce_update_stock_notification' );
+		$notification->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_update_stock_notification' ) - $fired );
+		$notification = new Notification( $notification->get_id() );
+		$this->assertSame( NotificationStatus::ACTIVE, $notification->get_status() );
+		$this->assertSame( 'test_value', $notification->get_meta( 'test_meta' ) );
+		$this->assertNotEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * @testdox Should keep an explicitly set modified date when meta also changes.
+	 */
+	public function test_explicit_modified_date_is_kept_when_meta_changes(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$notification->set_date_modified( '2025-01-01 00:00:00' );
+		$notification->add_meta_data( 'test_meta', 'test_value' );
 		$notification->save();
 
 		$notification = new Notification( $notification->get_id() );
-		$this->assertNotEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
+		$this->assertSame( '2025-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * @testdox Should fire the update action once and leave the modified date alone when a save has no changes.
+	 */
+	public function test_save_without_changes_keeps_modified_date(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$fired        = did_action( 'woocommerce_update_stock_notification' );
+		$notification->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_update_stock_notification' ) - $fired );
+		$notification = new Notification( $notification->get_id() );
+		$this->assertSame( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * @testdox Should report no meta changes when meta was never read.
+	 */
+	public function test_has_meta_changes_is_false_when_meta_was_never_read(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+
+		$this->assertFalse( $notification->has_meta_changes() );
+	}
+
+	/**
+	 * @testdox Should report no meta changes for unchanged loaded meta.
+	 */
+	public function test_has_meta_changes_is_false_for_unchanged_loaded_meta(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$notification->add_meta_data( 'test_meta', 'test_value' );
+		$notification->save();
+
+		$notification = new Notification( $notification->get_id() );
+		$notification->get_meta( 'test_meta' );
+
+		$this->assertFalse( $notification->has_meta_changes() );
+	}
+
+	/**
+	 * @testdox Should report no meta changes when meta is added and deleted before saving.
+	 */
+	public function test_has_meta_changes_is_false_when_meta_is_added_then_deleted_before_save(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$notification->add_meta_data( 'test_meta', 'test_value' );
+		$this->assertTrue( $notification->has_meta_changes() );
+
+		$notification->delete_meta_data( 'test_meta' );
+		$this->assertFalse( $notification->has_meta_changes() );
+
+		$notification->save();
+		$notification = new Notification( $notification->get_id() );
+		$this->assertSame( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * @testdox Should store a first unsubscribe key on an existing notification once.
+	 */
+	public function test_first_unsubscribe_key_is_stored_once(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$notification->get_unsubscribe_key( true );
+
+		$this->assertSame( 1, $this->count_meta_rows( $notification->get_id(), 'unsubscribe_action_key' ) );
 	}
 
 	/**
@@ -462,6 +739,51 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should match sign-ups by any of the given user IDs or emails with the `customer` argument.
+	 */
+	public function test_query_notifications_with_customer() {
+
+		$by_id = new Notification();
+		$by_id->set_product_id( 1 );
+		$by_id->set_user_id( 1 );
+		$by_id->set_user_email( 'old@test.com' );
+		$by_id_id = $by_id->save();
+
+		$by_email = new Notification();
+		$by_email->set_product_id( 1 );
+		$by_email->set_user_email( 'new@test.com' );
+		$by_email_id = $by_email->save();
+
+		$other = new Notification();
+		$other->set_product_id( 1 );
+		$other->set_user_id( 2 );
+		$other->set_user_email( 'other@test.com' );
+		$other->save();
+
+		$notifications = $this->data_store->query(
+			array(
+				'customer' => array( 'New@Test.com', 1 ),
+			)
+		);
+		$this->assertSame( array( $by_id_id, $by_email_id ), $notifications );
+
+		$this->assertSame( array( $by_email_id ), $this->data_store->query( array( 'customer' => array( 'new@test.com' ) ) ) );
+		$this->assertSame( array( $by_id_id ), $this->data_store->query( array( 'customer' => array( 1 ) ) ) );
+		$this->assertSame(
+			2,
+			$this->data_store->query(
+				array(
+					'customer' => array( 'new@test.com', 1 ),
+					'return'   => 'count',
+				)
+			)
+		);
+		$this->assertSame( array(), $this->data_store->query( array( 'customer' => array( '', 0 ) ) ) );
+		$this->assertSame( array( $by_id_id ), $this->data_store->query( array( 'customer' => array( '1' ) ) ) );
+		$this->assertSame( array(), $this->data_store->query( array( 'customer' => array( '-1', '1.9', '1e0' ) ) ) );
+	}
+
+	/**
 	 * Test querying notifications with a last attempt limit.
 	 */
 	public function test_query_notifications_with_last_attempt_limit() {
@@ -533,8 +855,8 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertCount( 2, $notifications );
-		$this->assertEquals( 2, $notifications[0] );
-		$this->assertEquals( 3, $notifications[1] );
+		$this->assertEquals( $notification_2->get_id(), $notifications[0] );
+		$this->assertEquals( $notification_3->get_id(), $notifications[1] );
 	}
 
 	/**
@@ -561,6 +883,39 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should count notifications when the database runs with ONLY_FULL_GROUP_BY.
+	 */
+	public function test_query_notifications_with_return_type_count_under_only_full_group_by(): void {
+		global $wpdb;
+
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_id( 1 );
+		$notification->save();
+
+		$notification_2 = new Notification();
+		$notification_2->set_product_id( 1 );
+		$notification_2->set_user_id( 2 );
+		$notification_2->save();
+
+		$original_sql_mode = $wpdb->get_var( 'SELECT @@SESSION.sql_mode' );
+		$wpdb->query( "SET SESSION sql_mode = 'ONLY_FULL_GROUP_BY'" );
+
+		try {
+			$count = $this->data_store->query(
+				array(
+					'return'   => 'count',
+					'order_by' => array( 'id' => 'DESC' ),
+				)
+			);
+		} finally {
+			$wpdb->query( $wpdb->prepare( 'SET SESSION sql_mode = %s', $original_sql_mode ) );
+		}
+
+		$this->assertSame( 2, $count, 'The count should ignore order_by instead of failing the query' );
+	}
+
+	/**
 	 * Test querying notifications with a return type of ids.
 	 */
 	public function test_query_notifications_with_return_type_ids() {
@@ -579,7 +934,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertCount( 1, $notifications );
-		$this->assertEquals( 1, $notifications[0] );
+		$this->assertEquals( $notification->get_id(), $notifications[0] );
 
 		// Check the return type is ids.
 		$notifications = $this->data_store->query(
@@ -590,7 +945,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertCount( 1, $notifications );
-		$this->assertEquals( 1, $notifications[0] );
+		$this->assertEquals( $notification->get_id(), $notifications[0] );
 	}
 
 	/**
@@ -616,5 +971,68 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $notifications );
 		$this->assertInstanceOf( Notification::class, $notifications[0] );
 		$this->assertEquals( 'test@test.com', $notifications[0]->get_user_email() );
+	}
+
+	/**
+	 * @testdox notification_exists_by_email() should match a stored lowercase row from mixed-case input.
+	 */
+	public function test_notification_exists_by_email_is_case_insensitive(): void {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'foo@bar.com' );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$this->assertTrue( $this->data_store->notification_exists_by_email( 1, 'FOO@bar.com' ) );
+		$this->assertTrue( $this->data_store->notification_exists_by_email( 1, ' Foo@Bar.COM ' ) );
+		$this->assertFalse( $this->data_store->notification_exists_by_email( 1, 'other@bar.com' ) );
+	}
+
+	/**
+	 * @testdox query() should match an email containing a single quote.
+	 */
+	public function test_query_notifications_with_quoted_user_email(): void {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( "o'brien@example.com" );
+		$notification->save();
+
+		$notifications = $this->data_store->query( array( 'user_email' => "O'Brien@Example.com" ) );
+
+		$this->assertSame( array( $notification->get_id() ), array_map( 'intval', $notifications ) );
+	}
+
+	/**
+	 * Create a saved notification last modified on 2024-01-01, read back from the database.
+	 *
+	 * @return Notification
+	 */
+	private function create_notification_modified_in_the_past(): Notification {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_id( 1 );
+		$notification->set_date_modified( '2024-01-01 00:00:00' );
+		$notification->save();
+
+		return new Notification( $notification->get_id() );
+	}
+
+	/**
+	 * Count the stored meta rows for a notification and key.
+	 *
+	 * @param int    $notification_id The notification ID.
+	 * @param string $meta_key        The meta key.
+	 * @return int
+	 */
+	private function count_meta_rows( int $notification_id, string $meta_key ): int {
+		global $wpdb;
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_stock_notificationmeta WHERE notification_id = %d AND meta_key = %s",
+				$notification_id,
+				$meta_key
+			)
+		);
 	}
 }

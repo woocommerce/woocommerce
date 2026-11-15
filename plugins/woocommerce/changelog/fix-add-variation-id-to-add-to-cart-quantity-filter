@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-`woocommerce_add_to_cart_quantity` filter now receives `$variation_id`.

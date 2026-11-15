@@ -111,7 +111,7 @@ class Button extends Abstract_Block_Renderer {
 		);
 
 		$cell_attrs = array(
-			'class'  => $wrapper_styles['classnames'] . ' ' . $block_classname,
+			'class'  => trim( $wrapper_styles['classnames'] . ' ' . $block_classname ),
 			'style'  => $wrapper_styles['css'],
 			'align'  => $block_attributes['textAlign'],
 			'valign' => 'middle',

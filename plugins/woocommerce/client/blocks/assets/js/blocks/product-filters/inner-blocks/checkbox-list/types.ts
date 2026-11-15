@@ -6,7 +6,7 @@ import { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import type { SelectableItemsBlockContext } from '../../../../types/type-defs/selectable-items';
+import type { SelectableItemsBlockContext } from '@woocommerce/types';
 import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 
 export type Color = {

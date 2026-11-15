@@ -207,7 +207,7 @@ export class ProductStockCard extends Component {
 					/* translators: %s = time since last product order. e.g.: "10 minutes ago" - translated. */
 					__( 'Last ordered %s', 'woocommerce' ),
 					moment.utc( product.last_order_date ).fromNow()
-			  )
+				)
 			: null;
 
 		// Hide cards that are not in low stock and have not been edited.

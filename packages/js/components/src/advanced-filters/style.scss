@@ -31,11 +31,11 @@
 		}
 	}
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		margin: $gap 0;
 		border: 1px solid $gray-400;
 	}
-	@include breakpoint( '<400px' ) {
+	@include breakpoint( "<400px" ) {
 		margin: $gap-small 0;
 	}
 
@@ -76,7 +76,7 @@
 		color: $gray-700;
 		padding: $gap-smaller;
 
-		@include breakpoint( '<400px' ) {
+		@include breakpoint( "<400px" ) {
 			position: absolute;
 			top: 0;
 			right: $gap-smallest;
@@ -87,7 +87,7 @@
 		border-radius: 4px;
 	}
 
-	@include breakpoint( '<400px' ) {
+	@include breakpoint( "<400px" ) {
 		display: block;
 		position: relative;
 		padding: $gap-smaller $gap-smaller 0 0;
@@ -115,12 +115,12 @@
 	& > div {
 		padding: 0 $gap-smallest;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			width: 100%;
 			padding: $gap-smallest 0;
 		}
 
-		@include breakpoint( '<400px' ) {
+		@include breakpoint( "<400px" ) {
 			//display: block;
 			//margin: 0;
 		}
@@ -129,7 +129,7 @@
 	display: flex;
 	align-items: center;
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		display: block;
 	}
 
@@ -150,7 +150,7 @@
 			}
 		}
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			display: block;
 		}
 	}
@@ -208,7 +208,7 @@
 			background-color: $gray-200;
 		}
 
-		&:not(:disabled):not([aria-disabled='true']):focus {
+		&:not(:disabled):not([aria-disabled="true"]):focus {
 			background-color: $gray-100;
 			box-shadow: none;
 		}

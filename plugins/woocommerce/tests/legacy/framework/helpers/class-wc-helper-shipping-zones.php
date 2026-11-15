@@ -8,10 +8,13 @@
 class WC_Helper_Shipping_Zones {
 
 	/**
-	 * Create some mock shipping zones to test against
+	 * Create some mock shipping zones to test against.
+	 *
+	 * @return int[] Zone IDs keyed by fixture name.
 	 */
 	public static function create_mock_zones() {
 		self::remove_mock_zones();
+		$zone_ids = array();
 
 		// Local zone
 		$zone = new WC_Shipping_Zone();
@@ -20,6 +23,7 @@ class WC_Helper_Shipping_Zones {
 		$zone->add_location( 'GB', 'country' );
 		$zone->add_location( 'CB*', 'postcode' );
 		$zone->save();
+		$zone_ids['local'] = $zone->get_id();
 
 		// Europe zone
 		$zone = new WC_Shipping_Zone();
@@ -27,6 +31,7 @@ class WC_Helper_Shipping_Zones {
 		$zone->set_zone_order( 2 );
 		$zone->add_location( 'EU', 'continent' );
 		$zone->save();
+		$zone_ids['europe'] = $zone->get_id();
 
 		// US california zone
 		$zone = new WC_Shipping_Zone();
@@ -34,6 +39,7 @@ class WC_Helper_Shipping_Zones {
 		$zone->set_zone_order( 3 );
 		$zone->add_location( 'US:CA', 'state' );
 		$zone->save();
+		$zone_ids['california'] = $zone->get_id();
 
 		// US zone
 		$zone = new WC_Shipping_Zone();
@@ -41,6 +47,9 @@ class WC_Helper_Shipping_Zones {
 		$zone->set_zone_order( 4 );
 		$zone->add_location( 'US', 'country' );
 		$zone->save();
+		$zone_ids['us'] = $zone->get_id();
+
+		return $zone_ids;
 	}
 
 	/**
@@ -48,9 +57,9 @@ class WC_Helper_Shipping_Zones {
 	 */
 	public static function remove_mock_zones() {
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods;" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations;" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_shipping_zones;" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_shipping_zone_methods;" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_shipping_zone_locations;" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_shipping_zones;" );
 		WC_Cache_Helper::invalidate_cache_group( 'shipping_zones' );
 	}
 }

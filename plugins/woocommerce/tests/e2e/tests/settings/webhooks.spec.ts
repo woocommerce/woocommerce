@@ -13,13 +13,16 @@ test.describe( 'Manage webhooks', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
 	test.afterAll( async ( { restApi } ) => {
-		await restApi.get( `${ WC_API_PATH }/webhooks` ).then( ( response ) => {
-			const ids = response.data.map( ( webhook ) => webhook.id );
+		const response = await restApi.get( `${ WC_API_PATH }/webhooks`, {
+			per_page: 100,
+		} );
+		const ids = response.data.map( ( webhook ) => webhook.id );
 
-			restApi.post( `${ WC_API_PATH }/webhooks/batch`, {
+		if ( ids.length ) {
+			await restApi.post( `${ WC_API_PATH }/webhooks/batch`, {
 				delete: ids,
 			} );
-		} );
+		}
 	} );
 
 	const WEBHOOKS_SCREEN_URI =

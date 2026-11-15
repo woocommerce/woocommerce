@@ -85,7 +85,6 @@ test.describe(
 			await page.locator( 'button.add-order-item' ).click();
 
 			// search for product to add
-			await page.locator( 'text=Search for a product…' ).click();
 			await page
 				.locator( '.select2-search--dropdown' )
 				.getByRole( 'combobox' )
@@ -111,7 +110,10 @@ test.describe(
 				page.getByRole( 'cell', { name: 'Discount:', exact: true } )
 			).toBeVisible();
 			await expect(
-				page.getByRole( 'cell', { name: `- $${ couponAmount }.00` } )
+				page.getByRole( 'cell', {
+					name: `-$${ couponAmount }.00`,
+					exact: true,
+				} )
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', {
@@ -136,7 +138,8 @@ test.describe(
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', {
-					name: `- $${ couponAmount }.00`,
+					name: `-$${ couponAmount }.00`,
+					exact: true,
 				} )
 			).toBeVisible();
 			await expect(

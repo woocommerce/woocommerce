@@ -99,8 +99,9 @@ class Api {
 	 * @return string The cache buster value to use for the given file.
 	 */
 	protected function get_file_version( $file ) {
-		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && file_exists( $this->package->get_path() . $file ) ) {
-			return filemtime( $this->package->get_path( trim( $file, '/' ) ) );
+		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+			$mtime = @filemtime( $this->package->get_path( $file ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- performance optimization
+			return $mtime ? (string) $mtime : $this->wc_version;
 		}
 		return $this->wc_version;
 	}
@@ -120,17 +121,35 @@ class Api {
 	/**
 	 * Get the path to a block's metadata
 	 *
+	 * @deprecated 11.3.0 Use ::generate_block_metadata_path() instead.
+	 *
 	 * @param string $block_name The block to get metadata for.
 	 * @param string $path Optional. The path to the metadata file inside the 'assets/client/blocks' folder.
 	 *
 	 * @return string|boolean False if metadata file is not found for the block.
 	 */
 	public function get_block_metadata_path( $block_name, $path = '' ) {
-		$path_to_metadata_from_plugin_root = $this->package->get_path( 'assets/client/blocks/' . $path . $block_name . '/block.json' );
+		wc_deprecated_function( __METHOD__, '11.3.0', __CLASS__ . '::generate_block_metadata_path()' );
+
+		$path_to_metadata_from_plugin_root = $this->generate_block_metadata_path( $block_name, $path );
 		if ( ! file_exists( $path_to_metadata_from_plugin_root ) ) {
 			return false;
 		}
 		return $path_to_metadata_from_plugin_root;
+	}
+
+	/**
+	 * Generate the path to a block's metadata.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $block_name The block to get metadata for.
+	 * @param string $path       Optional. The path to the metadata file inside the 'assets/client/blocks' folder.
+	 *
+	 * @return string
+	 */
+	public function generate_block_metadata_path( $block_name, $path = '' ) {
+		return $this->package->get_path( 'assets/client/blocks/' . $path . $block_name . '/block.json' );
 	}
 
 	/**
@@ -242,10 +261,11 @@ class Api {
 		}
 
 		// Return asset details as well as the requested dependencies array.
+		$script_dependencies = $this->script_data[ $relative_src ]['dependencies'];
 		return [
 			'src'          => $this->script_data[ $relative_src ]['src'],
 			'version'      => $this->script_data[ $relative_src ]['version'],
-			'dependencies' => array_merge( $this->script_data[ $relative_src ]['dependencies'], $dependencies ),
+			'dependencies' => ! empty( $dependencies ) ? array_merge( $script_dependencies, $dependencies ) : $script_dependencies,
 		];
 	}
 
@@ -298,9 +318,7 @@ class Api {
 		$script_dependencies = apply_filters( 'woocommerce_blocks_register_script_dependencies', $script_data['dependencies'], $handle );
 
 		wp_register_script( $handle, $script_data['src'], $script_dependencies, $script_data['version'], true );
-
-		if ( $has_i18n && function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( $handle, 'woocommerce', $this->package->get_path( 'languages' ) );
+		if ( $has_i18n ) {
 			wp_set_script_translations( $handle, 'woocommerce', $this->package->get_path( 'i18n/languages' ) );
 		}
 	}
@@ -319,10 +337,9 @@ class Api {
 	 * @param boolean $rtl   Optional. Whether or not to register RTL styles.
 	 */
 	public function register_style( $handle, $relative_src, $deps = [], $media = 'all', $rtl = false ) {
-		$filename = str_replace( plugins_url( '/', dirname( __DIR__ ) ), '', $relative_src );
-		$src      = $this->get_asset_url( $relative_src );
-		$ver      = $this->get_file_version( $filename );
-		wp_register_style( $handle, $src, $deps, $ver, $media );
+		$src     = $this->get_asset_url( $relative_src );
+		$version = $this->get_file_version( $relative_src );
+		wp_register_style( $handle, $src, $deps, $version, $media );
 
 		if ( $rtl ) {
 			wp_style_add_data( $handle, 'rtl', 'replace' );

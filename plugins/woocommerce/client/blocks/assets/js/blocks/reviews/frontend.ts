@@ -17,9 +17,20 @@ const selector = `
 const getProps = ( el: HTMLElement ) => {
 	const showOrderby = el.dataset.showOrderby === 'true';
 	const showLoadMore = el.dataset.showLoadMore === 'true';
+	const parsedOffset = Number( el.dataset.offset ?? 0 );
+	const offset =
+		Number.isInteger( parsedOffset ) && parsedOffset >= 0
+			? parsedOffset
+			: 0;
+
+	const isFilteredReviewsBlock =
+		el.classList.contains( 'wp-block-woocommerce-reviews-by-product' ) ||
+		el.classList.contains( 'wp-block-woocommerce-reviews-by-category' );
 
 	return {
 		attributes: {
+			offset,
+			isFilteredReviewsBlock,
 			showOrderby,
 			showLoadMore,
 			showReviewDate: el.classList.contains( 'has-date' ),

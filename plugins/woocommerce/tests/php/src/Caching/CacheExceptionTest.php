@@ -21,6 +21,8 @@ class CacheExceptionTest extends \WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
+
 		// phpcs:disable Squiz.Commenting
 		$this->thrower = new class() extends ObjectCache {
 			public function get_object_type(): string {

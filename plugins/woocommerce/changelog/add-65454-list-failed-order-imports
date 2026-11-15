@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Analytics: list failed order imports in the Import historical data section with a retry action.

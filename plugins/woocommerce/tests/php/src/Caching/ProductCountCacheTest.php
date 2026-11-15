@@ -93,4 +93,66 @@ final class ProductCountCacheTest extends \WC_Unit_Test_Case {
 			$this->assertSame( 5, $cached[ $status ] );
 		}
 	}
+
+	/**
+	 * Data provider for corrupted statuses values scenarios.
+	 *
+	 * @return array
+	 */
+	public function provider_corrupted_statuses_values(): array {
+		return array(
+			'integers mixed with strings' => array( array( 'publish', 0, 'draft', 42 ) ),
+			'all integers'                => array( array( 0, 1, 2 ) ),
+			'non-array string'            => array( 'not-an-array' ),
+			'non-array integer'           => array( 123 ),
+		);
+	}
+
+	/**
+	 * @testdox Corrupted saved statuses cache is purged and get() falls back to null.
+	 * @dataProvider provider_corrupted_statuses_values
+	 *
+	 * @param mixed $corrupted_value The corrupted value to inject into the statuses cache.
+	 */
+	public function test_corrupted_statuses_cache_is_purged( $corrupted_value ): void {
+		$this->product_cache->set( 'product', ProductStatus::PUBLISH, 5 );
+		$this->assertNotNull( $this->product_cache->get( 'product' ) );
+
+		wp_cache_set( 'product-count_product_statuses', $corrupted_value );
+
+		$this->assertNull( $this->product_cache->get( 'product' ) );
+		$this->assertFalse( wp_cache_get( 'product-count_product_statuses' ) );
+	}
+
+	/**
+	 * Data provider for corrupted count value scenarios.
+	 *
+	 * @return array
+	 */
+	public function provider_corrupted_count_values(): array {
+		return array(
+			'string value'  => array( 'not-an-integer' ),
+			'boolean value' => array( true ),
+			'array value'   => array( array( 1 ) ),
+		);
+	}
+
+	/**
+	 * @testdox Corrupted count value is purged and get() falls back to null.
+	 * @dataProvider provider_corrupted_count_values
+	 *
+	 * @param mixed $corrupted_value The corrupted value to inject into a count cache slot.
+	 */
+	public function test_corrupted_count_value_is_purged( $corrupted_value ): void {
+		$this->product_cache->set( 'product', ProductStatus::PUBLISH, 5 );
+		$this->product_cache->set( 'product', ProductStatus::DRAFT, 10 );
+
+		wp_cache_set( 'product-count_product_publish', $corrupted_value );
+
+		$result = $this->product_cache->get( 'product', array( ProductStatus::PUBLISH, ProductStatus::DRAFT ) );
+		$this->assertNull( $result );
+
+		$this->assertFalse( wp_cache_get( 'product-count_product_publish' ) );
+		$this->assertSame( 10, wp_cache_get( 'product-count_product_draft' ) );
+	}
 }

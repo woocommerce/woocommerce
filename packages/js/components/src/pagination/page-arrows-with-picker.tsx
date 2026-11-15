@@ -4,7 +4,7 @@
 import { Button } from '@wordpress/components';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { chevronLeft, chevronRight } from '@wordpress/icons';
-import { sprintf, __ } from '@wordpress/i18n';
+import { sprintf, __, isRTL } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { uniqueId } from 'lodash';
 
@@ -92,7 +92,7 @@ export function PageArrowsWithPicker( {
 		<div className="woocommerce-pagination__page-arrows">
 			<Button
 				className={ previousLinkClass }
-				icon={ chevronLeft }
+				icon={ isRTL() ? chevronRight : chevronLeft }
 				disabled={ ! ( currentPage > 1 ) }
 				onClick={ previousPage }
 				label={ __( 'Previous Page', 'woocommerce' ) }
@@ -115,7 +115,7 @@ export function PageArrowsWithPicker( {
 			) }
 			<Button
 				className={ nextLinkClass }
-				icon={ chevronRight }
+				icon={ isRTL() ? chevronLeft : chevronRight }
 				disabled={ ! ( currentPage < pageCount ) }
 				onClick={ nextPage }
 				label={ __( 'Next Page', 'woocommerce' ) }

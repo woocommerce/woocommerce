@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Bump @playwright/test to 1.63.0 (dev dependency; no merchant-facing change).

@@ -106,7 +106,7 @@ describe( 'DismissableListHeading', () => {
 		expect( screen.queryByText( 'heading content' ) ).toBeInTheDocument();
 	} );
 
-	it( 'calls onDismiss when "Hide this" is clicked', () => {
+	it( 'calls onDismiss when "Hide this" is clicked', async () => {
 		const onDismiss = jest.fn();
 		render(
 			<DismissableListHeading onDismiss={ onDismiss }>
@@ -114,18 +114,18 @@ describe( 'DismissableListHeading', () => {
 			</DismissableListHeading>
 		);
 
-		userEvent.click( screen.getByTitle( 'Task List Options' ) );
-		userEvent.click( screen.getByText( 'Hide this' ) );
+		await userEvent.click( screen.getByTitle( 'Task List Options' ) );
+		await userEvent.click( screen.getByText( 'Hide this' ) );
 
 		expect( onDismiss ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	it( 'does not throw when "Hide this" is clicked without an onDismiss prop', () => {
+	it( 'does not throw when "Hide this" is clicked without an onDismiss prop', async () => {
 		render(
 			<DismissableListHeading>heading content</DismissableListHeading>
 		);
 
-		userEvent.click( screen.getByTitle( 'Task List Options' ) );
+		await userEvent.click( screen.getByTitle( 'Task List Options' ) );
 
 		expect( () =>
 			userEvent.click( screen.getByText( 'Hide this' ) )

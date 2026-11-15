@@ -172,6 +172,15 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 									</div>
 									<div class="wc-block-cart-item__quantity">
 										<div class="wc-block-components-quantity-selector" data-wp-bind--hidden="state.cartItem.sold_individually">
+											<button
+												data-wp-bind--disabled="state.minimumReached"
+												data-wp-on--click="actions.decrementQuantity"
+												data-wp-bind--aria-label="state.reduceQuantityLabel"
+												data-wp-bind--hidden="!state.cartItem.quantity_limits.editable"
+												class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"
+											>
+												−
+											</button>
 											<input
 												data-wp-on--input="actions.overrideInvalidQuantity"
 												data-wp-on--change="actions.changeQuantity"
@@ -184,15 +193,6 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 												type="number"
 												step="1"
 											>
-											<button
-												data-wp-bind--disabled="state.minimumReached"
-												data-wp-on--click="actions.decrementQuantity"
-												data-wp-bind--aria-label="state.reduceQuantityLabel"
-												data-wp-bind--hidden="!state.cartItem.quantity_limits.editable"
-												class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"
-											>
-												−
-											</button>
 											<button
 												data-wp-bind--disabled="state.maximumReached"
 												data-wp-on--click="actions.incrementQuantity"

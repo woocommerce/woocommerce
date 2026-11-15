@@ -72,9 +72,9 @@ const FrontendBlock = ( {
 
 	const onChange = ( method: string ) => {
 		if ( method === 'pickup' ) {
-			setPrefersCollection( true );
+			void setPrefersCollection( true );
 		} else {
-			setPrefersCollection( false );
+			void setPrefersCollection( false );
 
 			// When switching to Ship, if no non-pickup shipping rates are
 			// available (hidden because no address entered), clear the pickup

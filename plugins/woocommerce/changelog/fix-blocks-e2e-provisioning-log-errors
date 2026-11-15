@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Remove benign errors from the Blocks e2e build log: make provisioning idempotent (customer user and Test Helper APIs plugin) across the Core and Blocks setup paths, drop a redundant `--fields=id` from the product attribute listing, and navigate the page away before the per-test DB reset so late Store API requests stop logging false "not a valid JSON response" errors.

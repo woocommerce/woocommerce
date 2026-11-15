@@ -65,7 +65,9 @@ function hasSelectedSibblingChildren(
 ) {
 	return children.some( ( child ) => {
 		const isChildSelected = child.data.value in selectedItems;
-		if ( ! isChildSelected ) return false;
+		if ( ! isChildSelected ) {
+			return false;
+		}
 		return ! values.some(
 			( childValue ) => childValue.value === child.data.value
 		);
@@ -134,7 +136,9 @@ export function useSelection( {
 	}
 
 	function onSelectChildren( value: Item | Item[] ) {
-		if ( typeof onSelect !== 'function' ) return;
+		if ( typeof onSelect !== 'function' ) {
+			return;
+		}
 
 		if ( multiple && ! shouldNotRecursivelySelect ) {
 			value = [ item.data, ...( value as Item[] ) ];
@@ -144,7 +148,9 @@ export function useSelection( {
 	}
 
 	function onRemoveChildren( value: Item | Item[] ) {
-		if ( typeof onRemove !== 'function' ) return;
+		if ( typeof onRemove !== 'function' ) {
+			return;
+		}
 
 		if (
 			multiple &&

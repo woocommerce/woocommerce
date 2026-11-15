@@ -62,6 +62,8 @@ class BacsGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 			),
 		);
 
+		$core_field_overrides = array_merge( $core_field_overrides, $this->get_shipping_method_restriction_field_overrides( $gateway ) );
+
 		// account_details is handled in a separate group, skip it in the main fields.
 		$fields = $this->build_fields_from_form_fields( $gateway, $core_field_overrides, array( 'account_details' ) );
 

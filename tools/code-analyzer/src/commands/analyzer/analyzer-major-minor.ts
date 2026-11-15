@@ -3,7 +3,7 @@
  */
 import { join } from 'path';
 import { readFile } from 'fs/promises';
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { cloneRepo } from '@woocommerce/monorepo-utils/src/core/git';
 import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 import { Command } from '@commander-js/extra-typings';

@@ -76,8 +76,8 @@ describe( 'utils', () => {
 		const wrappedFunction = applyNamespace( mockedCallback, namespace );
 		wrappedFunction( 'a' );
 
-		expect( mockedCallback ).toBeCalledTimes( 1 );
-		expect( mockedCallback ).toBeCalledWith( 'a', 'test/namespace' );
+		expect( mockedCallback ).toHaveBeenCalledTimes( 1 );
+		expect( mockedCallback ).toHaveBeenCalledWith( 'a', 'test/namespace' );
 	} );
 
 	it( 'should get the keys from a namespace', () => {

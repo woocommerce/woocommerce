@@ -56,7 +56,7 @@ export function IncompatibleExtensionsNotice( {
 								<ExternalLink href="https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions/" />
 							),
 						}
-				  )
+					)
 				: createInterpolateElement(
 						sprintf(
 							// translators: %s is the name of the extension.
@@ -72,7 +72,7 @@ export function IncompatibleExtensionsNotice( {
 								<ExternalLink href="https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions/" />
 							),
 						}
-				  ) }
+					) }
 		</>
 	);
 

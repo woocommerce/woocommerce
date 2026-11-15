@@ -8,7 +8,9 @@
 declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine;
 
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Css_Selector_Normalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use WP_Block_Template;
 use WP_Post;
 use WP_Theme_JSON;
@@ -212,7 +214,7 @@ class Theme_Controller {
 			$css_presets .= ".has-{$font_size['slug']}-font-size { font-size: {$font_size['size']}; } \n";
 		}
 		// Color palette classes.
-		$color_definitions = array_merge( $email_theme_settings['color']['palette']['theme'] ?? array(), $email_theme_settings['color']['palette']['default'] ?? array() );
+		$color_definitions = Styles_Helper::palette_definitions( $email_theme_settings );
 		foreach ( $color_definitions as $color ) {
 			$css_presets .= ".has-{$color['slug']}-color { color: {$color['color']}; } \n";
 			$css_presets .= ".has-{$color['slug']}-background-color { background-color: {$color['color']}; } \n";
@@ -225,9 +227,7 @@ class Theme_Controller {
 		foreach ( $blocks as $block_metadata ) {
 			$css_blocks .= $this->get_theme()->get_styles_for_block( $block_metadata );
 		}
-
-		// Remove `:root :where(...)` selectors since they are not supported in the CSS inliner.
-		$css_blocks = preg_replace( '/:root\s:where\((.*?)\)/', '$1', $css_blocks );
+		$css_blocks = Css_Selector_Normalizer::normalize( $css_blocks );
 
 		// Element specific styles.
 		$elements_styles = $this->get_theme()->get_raw_data()['styles']['elements'] ?? array();
@@ -266,6 +266,10 @@ class Theme_Controller {
 				case 'link':
 					$selector = 'a:not(.button-link)';
 					break;
+				case 'caption':
+					// Captions render as elements carrying core's caption class, never as a `<caption>` tag.
+					$selector = '.wp-element-caption';
+					break;
 			}
 
 			$css_elements .= wp_style_engine_get_styles( $elements_style, array( 'selector' => $selector ) )['css'] ?? '';
@@ -297,20 +301,16 @@ class Theme_Controller {
 	}
 
 	/**
-	 * Translate color slug to color.
+	 * Translate a color slug to the color the palette gives it.
 	 *
-	 * @param string $color_slug Color slug.
-	 * @return string
+	 * A slug can be missing from the palette because the post was written under a different theme,
+	 * or came from a palette the email does not carry. {@see Styles_Helper::resolve_color_from_palette()}.
+	 *
+	 * @param string $color_slug Color slug, or a literal color.
+	 * @return string The color value, or an empty string for a slug the palette does not define.
 	 */
 	public function translate_slug_to_color( string $color_slug ): string {
-		$settings          = $this->get_settings();
-		$color_definitions = array_merge( $settings['color']['palette']['theme'] ?? array(), $settings['color']['palette']['default'] ?? array() );
-		foreach ( $color_definitions as $color_definition ) {
-			if ( $color_definition['slug'] === $color_slug ) {
-				return strtolower( $color_definition['color'] );
-			}
-		}
-		return $color_slug;
+		return Styles_Helper::resolve_color_from_palette( $this->get_settings(), $color_slug );
 	}
 
 	/**

@@ -43,13 +43,13 @@ const ProductImage = ( {
 				alt: rawAlt ? decodeEntities( rawAlt ) : 'Product Image',
 				srcSet: image.thumbnail_srcset || undefined,
 				sizes: sizesAttr,
-		  }
+			}
 		: {
 				src: PLACEHOLDER_IMG_SRC,
 				alt: '',
 				srcSet: undefined,
 				sizes: undefined,
-		  };
+			};
 
 	return (
 		<img

@@ -905,16 +905,29 @@
 	};
 
 	/**
-	 * Replace the current classic product gallery markup and reinitialize gallery behaviors.
+	 * Replace the classic product gallery unless the same variation gallery is already displayed.
 	 */
 	$.fn.wc_variations_gallery_replace = function ( gallery_html, variation ) {
 		var $form = $( this ),
 			$product = $form.closest( '.product' ),
 			$current_gallery = $product.wc_find_gallery_root(),
-			$parsed_gallery = $( $.parseHTML( $.trim( gallery_html ) ) ),
-			$new_gallery = $parsed_gallery.wc_find_gallery_root(),
+			$new_gallery,
 			current_image_id =
 				variation && variation.image_id ? variation.image_id : '';
+
+		gallery_html = $.trim( gallery_html );
+
+		// Compare the source markup because gallery initialization changes the DOM.
+		if (
+			variation &&
+			$form.wc_variations_gallery_is_active() &&
+			$current_gallery.data( 'wc_variation_gallery_html' ) === gallery_html
+		) {
+			$form.attr( 'current-image', current_image_id );
+			return true;
+		}
+
+		$new_gallery = $( $.parseHTML( gallery_html ) ).wc_find_gallery_root();
 
 		if ( ! $current_gallery.length || ! $new_gallery.length ) {
 			return false;
@@ -957,6 +970,7 @@
 			$new_gallery.css( 'opacity', 1 );
 		}
 
+		$new_gallery.data( 'wc_variation_gallery_html', gallery_html );
 		$form.attr( 'current-image', current_image_id );
 		$form.attr( 'data-product_gallery_active', 'yes' );
 

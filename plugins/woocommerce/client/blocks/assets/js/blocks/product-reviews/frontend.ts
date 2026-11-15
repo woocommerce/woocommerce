@@ -23,9 +23,8 @@ const productReviewsStore = {
 				return;
 			}
 
-			const { actions } = yield import(
-				'@wordpress/interactivity-router'
-			);
+			const { actions } =
+				yield import( '@wordpress/interactivity-router' );
 
 			yield actions.navigate( ref.href );
 

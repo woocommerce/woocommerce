@@ -1,21 +1,20 @@
 <?php
 /**
- * REST API Onboarding Themes Controller
+ * REST API Onboarding Products Controller
  *
- * Handles requests to install and activate themes.
+ * Handles requests to create dummy products for the Customize Your Store flow.
  */
 
 namespace Automattic\WooCommerce\Admin\API;
 
-use Automattic\WooCommerce\Blocks\AIContent\UpdateProducts;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Onboarding Themes Controller.
+ * Onboarding Products Controller.
  *
  * @internal
  * @extends WC_REST_Data_Controller
+ * @deprecated 11.1.0
  */
 class OnboardingProducts extends \WC_REST_Data_Controller {
 	/**
@@ -53,27 +52,22 @@ class OnboardingProducts extends \WC_REST_Data_Controller {
 	/**
 	 * Create products.
 	 *
+	 * @deprecated 11.1.0 Sample product creation for the Customize Your Store flow has been removed.
+	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return WP_REST_Response
 	 */
 	public function create_products( $request ) {
-		$update_products = new UpdateProducts();
+		wc_deprecated_function( __METHOD__, '11.1.0' );
 
-		$products = $update_products->fetch_dummy_products_to_update();
-
-		if ( is_wp_error( $products ) ) {
-			return rest_ensure_response( array( 'success' => false ) );
-		}
-
-		return rest_ensure_response( array( 'success' => true ) );
-
+		return rest_ensure_response( array( 'success' => false ) );
 	}
 
 	/**
-	 * Check if a given request has access to manage themes.
+	 * Check if a given request has access to create dummy products.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return WP_Error|bool
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'manage_options' ) ) {
@@ -81,5 +75,4 @@ class OnboardingProducts extends \WC_REST_Data_Controller {
 		}
 		return true;
 	}
-
 }

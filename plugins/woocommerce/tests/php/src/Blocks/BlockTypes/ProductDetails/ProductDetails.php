@@ -32,7 +32,7 @@ class ProductDetails extends \WP_UnitTestCase {
 		parent::setUpBeforeClass();
 
 		self::$product = WC_Helper_Product::create_simple_product( false );
-		WC_Helper_Product::create_product_review( self::$product );
+		WC_Helper_Product::create_product_review( self::$product->get_id() );
 
 		self::$page_id = wp_insert_post(
 			array(
@@ -212,11 +212,9 @@ class ProductDetails extends \WP_UnitTestCase {
 		// Next, we apply the `hooked_block_types` and `hooked_block_{$slug}` filters.
 		// We pretend that we're in the `last_child` position of the `woocommerce/accordion-group` block.
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
 		$hooked_block_types = apply_filters( 'hooked_block_types', array(), 'last_child', $accordion_group_name, null );
 		$this->assertSame( array( $test_block['slug'] ), $hooked_block_types );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
 		$hooked_block_custom_info = apply_filters(
 			'hooked_block_' . $test_block['slug'],
 			array(

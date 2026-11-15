@@ -14,9 +14,10 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrderDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
-use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * OrdersScheduler Class.
@@ -132,14 +133,19 @@ class OrdersScheduler extends ImportScheduler {
 			add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
 			add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
 			add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
+
+			// Trash and untrash bypass woocommerce_update_order. CPT emits both the Woo
+			// and the post hooks for one operation, so each handler takes a single store.
+			add_action( 'woocommerce_trash_order', array( __CLASS__, 'maybe_schedule_import_on_trash' ) );
+			add_action( 'woocommerce_order_status_changed', array( __CLASS__, 'maybe_schedule_import_on_untrash' ), 10, 2 );
+			add_action( 'trashed_post', array( __CLASS__, 'maybe_schedule_import_on_post_trash_change' ) );
+			add_action( 'untrashed_post', array( __CLASS__, 'maybe_schedule_import_on_post_trash_change' ) );
 		}
 
-		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
-			// Watch for changes to the scheduled import option.
-			add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );
-			add_action( 'update_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_change' ), 10, 2 );
-			add_action( 'delete_option', array( __CLASS__, 'handle_scheduled_import_option_before_delete' ), 10, 1 );
-		}
+		// Watch for changes to the scheduled import option.
+		add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );
+		add_action( 'update_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_change' ), 10, 2 );
+		add_action( 'delete_option', array( __CLASS__, 'handle_scheduled_import_option_before_delete' ), 10, 1 );
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
@@ -238,12 +244,20 @@ class OrdersScheduler extends ImportScheduler {
 			)";
 		}
 
+		$where_clause .= self::get_import_where_clause( $wpdb->posts );
+
 		$count = $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->posts}
 			WHERE post_type IN ( 'shop_order', 'shop_order_refund' )
 			AND post_status NOT IN ( 'wc-auto-draft', 'auto-draft', 'trash' )
 			{$where_clause}" // phpcs:ignore unprepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared SQL ok.
 		);
+		if ( self::log_last_db_error( 'Could not count the orders to import' ) ) {
+			return (object) array(
+				'total' => 0,
+				'ids'   => array(),
+			);
+		}
 
 		$order_ids = absint( $count ) > 0 ? $wpdb->get_col(
 			$wpdb->prepare(
@@ -258,6 +272,7 @@ class OrdersScheduler extends ImportScheduler {
 				$offset
 			)
 		) : array(); // phpcs:ignore unprepared SQL ok.
+		self::log_last_db_error( 'Could not query orders to import' );
 
 		return (object) array(
 			'total' => absint( $count ),
@@ -295,6 +310,8 @@ class OrdersScheduler extends ImportScheduler {
 				";
 		}
 
+		$where_clause .= self::get_import_where_clause( 'orders' );
+
 		$count = $wpdb->get_var(
 			"
 SELECT COUNT(*) FROM {$order_table} AS orders
@@ -303,6 +320,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 {$where_clause}
 "
 		); // phpcs:ignore unprepared SQL ok.
+		if ( self::log_last_db_error( 'Could not count the orders to import' ) ) {
+			return (object) array(
+				'total' => 0,
+				'ids'   => array(),
+			);
+		}
 
 		$order_ids = absint( $count ) > 0 ? $wpdb->get_col(
 			$wpdb->prepare(
@@ -317,6 +340,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				$offset
 			)
 		) : array(); // phpcs:ignore unprepared SQL ok.
+		self::log_last_db_error( 'Could not query orders to import' );
 
 		return (object) array(
 			'total' => absint( $count ),
@@ -359,7 +383,8 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 	/**
 	 * Imports a single order or refund to update lookup tables for.
-	 * If an error is encountered in one of the updates, a retry action is scheduled.
+	 * An order whose tax lookup rows could not be written, or whose exclusion check fails, stays on
+	 * the failed imports list.
 	 *
 	 * @internal
 	 * @param int $order_id Order or refund ID.
@@ -394,13 +419,32 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
-		$results = array(
-			OrdersStatsDataStore::sync_order( $order_id ),
-			ProductsDataStore::sync_order_products( $order_id ),
-			CouponsDataStore::sync_order_coupons( $order_id ),
-			TaxesDataStore::sync_order_taxes( $order_id ),
-			CustomersDataStore::sync_order_customer( $order_id ),
-		);
+		$excluded = self::is_excluded_from_import( (int) $order_id );
+		if ( null === $excluded ) {
+			// The exclusion is unknown, so neither import the record nor drop it: keep it on the list
+			// Analytics settings retries.
+			self::record_failed_order_import( $order_id );
+			return;
+		}
+		if ( $excluded ) {
+			// The record is excluded, so drop it from the list Analytics settings retries.
+			self::clear_failed_order_import( $order_id );
+			return;
+		}
+
+		// Skip trashed records Analytics does not already hold: importing one creates a
+		// wc_customer_lookup row via Order::get_report_customer_id() that nothing removes
+		// while the order stays trashed. Records trashed after being imported keep their
+		// stats row, so their status still syncs.
+		if ( OrderStatus::TRASH === $order->get_status() && ! self::has_order_stats_row( $order_id ) ) {
+			return;
+		}
+
+		OrdersStatsDataStore::sync_order( $order_id );
+		ProductsDataStore::sync_order_products( $order_id );
+		CouponsDataStore::sync_order_coupons( $order_id );
+		$taxes_synced = TaxesDataStore::sync_order_taxes( $order_id );
+		CustomersDataStore::sync_order_customer( $order_id );
 
 		if ( 'shop_order' === $type ) {
 			$order_refunds = $order->get_refunds();
@@ -412,8 +456,16 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		ReportsCache::invalidate();
 
-		// A successful import means the order is no longer missing from analytics.
-		self::clear_failed_order_import( $order_id );
+		// A tax sync that did not land leaves the order holding the lookup rows it came in with,
+		// so the import did not finish and the order stays on the list Analytics settings retries
+		// over. Only this sync is read: the other stores return false for writes that changed no
+		// rows as well, so their return value does not tell a failure from an order that was
+		// already up to date.
+		if ( false === $taxes_synced ) {
+			self::record_failed_order_import( $order_id );
+		} else {
+			self::clear_failed_order_import( $order_id );
+		}
 
 		/**
 		 * Fires after an order or refund has been imported into Analytics lookup tables
@@ -426,6 +478,81 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
+	 * Check whether an order or refund already has a row in the order stats table.
+	 *
+	 * @param int $order_id Order or refund ID.
+	 * @return bool
+	 */
+	private static function has_order_stats_row( $order_id ): bool {
+		global $wpdb;
+
+		$table_name = OrdersStatsDataStore::get_db_table_name();
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT order_id FROM {$table_name} WHERE order_id = %d LIMIT 1", $order_id ) );
+	}
+
+	/**
+	 * Schedule an analytics import when a CPT-based order is trashed or untrashed.
+	 *
+	 * The CPT admin UI trashes via wp_trash_post(), which fires no Woo-side signal.
+	 * HPOS has its own handlers, so it is skipped here to avoid a duplicate import.
+	 *
+	 * @internal
+	 * @since 11.1.0
+	 * @param int $post_id Post ID.
+	 */
+	public static function maybe_schedule_import_on_post_trash_change( $post_id ): void {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		self::possibly_schedule_import( $post_id );
+	}
+
+	/**
+	 * Schedule an analytics import when an HPOS order is trashed.
+	 *
+	 * CPT fires this hook too, on top of trashed_post, so it is handled there instead.
+	 *
+	 * @internal
+	 * @since 11.1.0
+	 * @param int $order_id Order ID.
+	 */
+	public static function maybe_schedule_import_on_trash( $order_id ): void {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		self::possibly_schedule_import( $order_id );
+	}
+
+	/**
+	 * Driven off the status transition rather than woocommerce_untrash_order, which
+	 * fires before the restored status is saved — so an import running synchronously
+	 * would record wc-trash, and nothing corrects it because the data store suppresses
+	 * woocommerce_update_order for trash transitions.
+	 *
+	 * CPT reaches this via its own save, so it is handled by untrashed_post instead.
+	 *
+	 * @internal
+	 * @since 11.1.0
+	 * @param int    $order_id    Order ID.
+	 * @param string $from_status Status the order transitioned from.
+	 */
+	public static function maybe_schedule_import_on_untrash( $order_id, $from_status ): void {
+		if ( OrderStatus::TRASH !== $from_status ) {
+			return;
+		}
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		self::possibly_schedule_import( $order_id );
+	}
+
+	/**
 	 * Schedule recurring batch processor for order imports.
 	 *
 	 * @internal
@@ -435,16 +562,11 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		if ( null === $action_hook ) {
 			return;
 		}
-		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
-		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
-		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		if ( call_user_func( $has_scheduled_action, $action_hook ) ) {
+		if ( ActionSchedulerUtil::has_scheduled_action( $action_hook ) ) {
 			return;
 		}
 
-		$interval = self::get_import_interval();
-
-		as_schedule_recurring_action( time(), $interval, $action_hook, array(), static::$group ?? '', true );
+		ActionSchedulerUtil::schedule_recurring( time(), self::get_import_interval(), $action_hook, array(), static::$group ?? '', true );
 	}
 
 	/**
@@ -565,6 +687,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		// Get orders updated since the cursor position.
 		$orders = self::get_orders_since( $cursor_date, $cursor_id, $batch_size );
 
+		// A failed query (a broken import conditions filter, say) also returns an empty result.
+		// Leave the cursor where it is so the batch is retried once the cause is fixed.
+		if ( self::log_last_db_error( 'Could not query orders to import, leaving the cursor unchanged' ) ) {
+			return;
+		}
+
 		if ( empty( $orders ) ) {
 			$logger->info( 'No orders to process', $context );
 			// Update the cursor position to the start time of the batch so that the next batch will start from that point.
@@ -636,7 +764,15 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		 * @since 10.4.0
 		 * @param int $interval The import interval in seconds. Default is 12 hours.
 		 */
-		return apply_filters( 'woocommerce_analytics_import_interval', 12 * HOUR_IN_SECONDS );
+		$interval = apply_filters( 'woocommerce_analytics_import_interval', 12 * HOUR_IN_SECONDS );
+		$seconds  = is_numeric( $interval ) && is_finite( (float) $interval ) && $interval <= PHP_INT_MAX ? (int) $interval : 0;
+
+		if ( $seconds < 1 ) {
+			wc_doing_it_wrong( __METHOD__, 'The woocommerce_analytics_import_interval filter must return a positive number of seconds; the 12 hour default was used.', '11.4.0' );
+			return 12 * HOUR_IN_SECONDS;
+		}
+
+		return $seconds;
 	}
 
 	/**
@@ -680,18 +816,20 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	private static function get_orders_since_from_orders_table( $cursor_date, $cursor_id, $limit ) {
 		global $wpdb;
 		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$import_where = self::get_import_where_clause( 'orders' );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT id, date_updated_gmt
-				FROM {$orders_table}
+				FROM {$orders_table} AS orders
 				WHERE type IN ('shop_order', 'shop_order_refund')
-				AND status NOT IN ('wc-auto-draft', 'auto-draft', 'trash')
+				AND status NOT IN ('wc-auto-draft', 'auto-draft')
 				AND (
 					date_updated_gmt > %s
 					OR (date_updated_gmt = %s AND id > %d)
 				)
+				{$import_where}
 				ORDER BY date_updated_gmt ASC, id ASC
 				LIMIT %d",
 				$cursor_date,
@@ -717,17 +855,20 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 */
 	private static function get_orders_since_from_posts_table( $cursor_date, $cursor_id, $limit ) {
 		global $wpdb;
+		$import_where = self::get_import_where_clause( $wpdb->posts );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT ID as id, post_modified_gmt as date_updated_gmt
 				FROM {$wpdb->posts}
 				WHERE post_type IN ('shop_order', 'shop_order_refund')
-				AND post_status NOT IN ('wc-auto-draft', 'auto-draft', 'trash')
+				AND post_status NOT IN ('wc-auto-draft', 'auto-draft')
 				AND (
 					post_modified_gmt > %s
 					OR (post_modified_gmt = %s AND ID > %d)
 				)
+				{$import_where}
 				ORDER BY post_modified_gmt ASC, ID ASC
 				LIMIT %d",
 				$cursor_date,
@@ -736,6 +877,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				$limit
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -778,6 +920,153 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		 * @since 10.7.0
 		 */
 		return apply_filters( 'woocommerce_analytics_is_test_order', $is_test, $check_order );
+	}
+
+	/**
+	 * Build the WHERE fragment that applies the import conditions filter to an Analytics order import query.
+	 *
+	 * A record is kept when Analytics already holds it, so it keeps syncing, or when it passes the
+	 * conditions and, for a refund, its parent is not an excluded order Analytics does not hold.
+	 * Every import query shares this fragment, so what is counted is what gets imported.
+	 *
+	 * @param string $table_alias Table name or alias the query uses for the orders or posts table.
+	 * @return string Empty string while the filter adds nothing, or a condition starting with ' AND '.
+	 */
+	private static function get_import_where_clause( string $table_alias ): string {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$table_name = OrdersTableDataStore::get_orders_table_name();
+			$columns    = array( 'id', 'type', 'parent_order_id' );
+		} else {
+			$table_name = $wpdb->posts;
+			$columns    = array( 'ID', 'post_type', 'post_parent' );
+		}
+		list( $id, $type, $parent ) = $columns;
+
+		$conditions = self::get_import_conditions( $table_alias, $table_name );
+		if ( '' === $conditions ) {
+			return '';
+		}
+
+		$parent_conditions = self::get_import_conditions( 'parent_order', $table_name );
+		$stats_table       = OrdersStatsDataStore::get_db_table_name();
+
+		// Some callers interpolate this fragment into $wpdb->prepare(), so a literal percent sign
+		// (a LIKE pattern, say) must not read as a placeholder. $wpdb->query() restores it.
+		// A parent whose conditions come out NULL counts as excluded, as it does in the per-record probe.
+		return $wpdb->add_placeholder_escape(
+			" AND (
+				EXISTS ( SELECT 1 FROM {$stats_table} AS held WHERE held.order_id = {$table_alias}.{$id} )
+				OR (
+					( {$conditions} )
+					AND (
+						{$table_alias}.{$type} <> 'shop_order_refund'
+						OR NOT EXISTS (
+							SELECT 1 FROM {$table_name} AS parent_order
+							WHERE parent_order.{$id} = {$table_alias}.{$parent}
+							AND NOT COALESCE( ( " . ( '' === $parent_conditions ? '1' : $parent_conditions ) . " ), 0 )
+							AND NOT EXISTS ( SELECT 1 FROM {$stats_table} AS parent_held WHERE parent_held.order_id = parent_order.{$id} )
+						)
+					)
+				)
+			)"
+		);
+	}
+
+	/**
+	 * Collect the conditions extensions add to the Analytics order import, for one table alias.
+	 *
+	 * @param string $table_alias Alias to prefix column names with.
+	 * @param string $table_name  Table the alias stands for.
+	 * @return string Empty string, or the conditions joined with AND.
+	 */
+	private static function get_import_conditions( string $table_alias, string $table_name ): string {
+		/**
+		 * Filters the SQL conditions that decide which orders and refunds Analytics imports.
+		 *
+		 * Each condition is a complete raw SQL expression: bind values with $wpdb->prepare() and prefix columns with
+		 * $table_alias. Refund rows are checked too, so guard order-only conditions with the type column. The filter
+		 * runs again with the alias `parent_order`, because a refund inherits the exclusion of its parent order.
+		 * After changing the conditions, delete and re-import historical data to apply them to past records.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param string[] $clauses     SQL conditions, joined with AND. Empty by default.
+		 * @param string   $table_alias Alias to prefix column names with.
+		 * @param string   $table_name  The orders table under HPOS, otherwise the posts table.
+		 */
+		$clauses = apply_filters( 'woocommerce_analytics_orders_import_where_clauses', array(), $table_alias, $table_name );
+		$clauses = array_filter(
+			array_map( 'trim', array_filter( is_array( $clauses ) ? $clauses : array(), 'is_string' ) ),
+			static function ( $clause ) {
+				// Keep '0': it is a valid condition that excludes every record.
+				return '' !== $clause;
+			}
+		);
+
+		return $clauses ? '( ' . implode( ' ) AND ( ', $clauses ) . ' )' : '';
+	}
+
+	/**
+	 * Whether the `woocommerce_analytics_orders_import_where_clauses` filter leaves a record out of the import.
+	 *
+	 * Applies the same rules as the import queries: a record Analytics already holds is never excluded,
+	 * and a refund inherits the exclusion of a parent order Analytics does not hold.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int $order_id Order or refund ID.
+	 * @return bool|null Whether the record is excluded, or null when the check failed (the error is logged).
+	 */
+	public static function is_excluded_from_import( int $order_id ): ?bool {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$from        = OrdersTableDataStore::get_orders_table_name() . ' AS orders';
+			$table_alias = 'orders';
+			$id_column   = 'orders.id';
+		} else {
+			$from        = $wpdb->posts;
+			$table_alias = $wpdb->posts;
+			$id_column   = "{$wpdb->posts}.ID";
+		}
+
+		$where = self::get_import_where_clause( $table_alias );
+		if ( '' === $where ) {
+			return false;
+		}
+
+		// Evaluate the rules on the record's own row: 1 keeps it, 0 excludes it, and no row means
+		// the record is not in this table, so the conditions cannot exclude it.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names and filtered SQL conditions are interpolated; the ID is prepared.
+		$kept = $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE( ( 1 {$where} ), 0 ) FROM {$from} WHERE {$id_column} = %d LIMIT 1", $order_id ) );
+
+		if ( self::log_last_db_error( "Could not check whether record #{$order_id} is excluded from the import" ) ) {
+			return null;
+		}
+
+		return null !== $kept && ! (int) $kept;
+	}
+
+	/**
+	 * Log the last database error, if there is one, to the import log.
+	 *
+	 * @param string $message What failed; the database error is appended.
+	 * @return bool Whether an error was logged.
+	 */
+	private static function log_last_db_error( string $message ): bool {
+		global $wpdb;
+
+		if ( '' === $wpdb->last_error ) {
+			return false;
+		}
+
+		wc_get_logger()->error( "{$message}: {$wpdb->last_error}", array( 'source' => 'wc-analytics-order-import' ) );
+
+		return true;
 	}
 
 	/**
@@ -918,8 +1207,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	/**
 	 * Check whether scheduled import is enabled.
 	 *
-	 * When the "analytics-scheduled-import" feature is disabled, only immediate
-	 * import is supported (returns false). When enabled, checks the option value.
+	 * Checks the scheduled import option value.
 	 *
 	 * @internal
 	 * @since 10.5.0 Introduced as a private method.
@@ -927,11 +1215,6 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @return bool
 	 */
 	public static function is_scheduled_import_enabled(): bool {
-		if ( ! Features::is_enabled( 'analytics-scheduled-import' ) ) {
-			// If the feature is disabled, only immediate import is supported.
-			return false;
-		}
-
 		$value = get_option( self::SCHEDULED_IMPORT_OPTION, false );
 
 		if ( false !== $value ) {

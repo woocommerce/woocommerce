@@ -53,6 +53,10 @@ test.describe( `${ blockData.name } Block`, () => {
 		await block.click();
 		await expect( block.locator( 'loading' ) ).toBeHidden();
 		await expect( block.getByRole( 'button' ) ).toHaveText( '1 in cart' );
+		await expect( block.getByRole( 'button' ) ).toHaveAttribute(
+			'aria-label',
+			`1 in cart, Add to cart: “${ productName }”`
+		);
 		await expect( block.getByRole( 'link' ) ).toHaveText( 'View cart' );
 
 		await frontendUtils.goToCheckout();

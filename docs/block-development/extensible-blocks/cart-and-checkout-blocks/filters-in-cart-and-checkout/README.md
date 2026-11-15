@@ -6,7 +6,7 @@ post_title: Cart and Checkout - Available Filters
 
 # Available Filters
 
-This document lists the filters that are currently available to extensions and offers usage information for each one of them. Information on registering filters can be found on the [Checkout - Filter Registry](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/checkout/filter-registry/README.md) page.
+This document lists the filters that are currently available to extensions and offers usage information for each one of them. Information on registering filters can be found on the [Checkout - Filter Registry](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-checkout/filter-registry/README.md) page.
 
 ## Cart Line Items filters
 

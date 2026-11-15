@@ -42,7 +42,6 @@ class ImplicitVerificationTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $this->sut->is_verified( $user_id ), 'New customers should not be verified by default' );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing a core WordPress hook to exercise the listener, not defining a new hook.
 		do_action( 'after_password_reset', $user, 'newpassword123' );
 
 		$this->assertTrue( $this->sut->is_verified( $user_id ), 'Customer should be verified after a password reset' );

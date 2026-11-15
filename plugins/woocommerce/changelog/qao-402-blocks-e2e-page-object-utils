@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Migrate Blocks e2e page-object utils (admin, editor, frontend, local-pickup, mini-cart, performance, shipping) into the Core e2e suite under utils/blocks/; test-only, no changes to shipped code.

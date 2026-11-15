@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop requiring a postcode or state for Macao at checkout, since Macao addresses use neither.

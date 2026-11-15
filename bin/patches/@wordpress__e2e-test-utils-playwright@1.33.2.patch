@@ -1,0 +1,17 @@
+diff --git a/build/admin/visit-site-editor.js b/build/admin/visit-site-editor.js
+index 8396b16ffcac2b39384ec878aa38a3eb18b6fc1f..6f851e640195973840b8919d9279d48802fd017c 100644
+--- a/build/admin/visit-site-editor.js
++++ b/build/admin/visit-site-editor.js
+@@ -52,7 +52,11 @@ async function visitSiteEditor(options = {}) {
+       ".edit-site-canvas-loader, .edit-site-canvas-spinner"
+     );
+     try {
+-      await canvasLoader.waitFor({ state: "visible", timeout: 6e4 });
++      // The loader either renders within a tick or is skipped entirely, so a
++      // long visible-state timeout is wasted when it never appears.
++      // Backported from Gutenberg #77725. Remove this package patch when the
++      // minimum package catalog reaches version 1.45.0 or later.
++      await canvasLoader.waitFor({ state: "visible", timeout: 3e3 });
+       await canvasLoader.waitFor({
+         state: "hidden",
+         // Bigger timeout is needed for larger entities, like the Large Post

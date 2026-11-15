@@ -1,6 +1,7 @@
 @include wordpress-admin-schemes;
 
 // Import our wp-admin reset.
+/* stylelint-disable-next-line no-invalid-position-at-import-rule */
 @import "./_reset.scss";
 
 // Some WooCommerce Admin page specific resets.
@@ -25,4 +26,5 @@
 }
 
 // Import any global styles.
+/* stylelint-disable-next-line no-invalid-position-at-import-rule */
 @import "./_global.scss";

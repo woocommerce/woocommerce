@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Mark back-in-stock sign-ups as sent only when the notification email actually goes out.

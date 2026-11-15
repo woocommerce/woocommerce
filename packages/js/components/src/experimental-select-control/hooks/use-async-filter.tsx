@@ -25,19 +25,22 @@ export default function useAsyncFilter< T >( {
 	const handleInputChange = useCallback(
 		function handleInputChangeCallback( value?: string ) {
 			if ( typeof filter === 'function' ) {
-				if ( typeof onFilterStart === 'function' )
+				if ( typeof onFilterStart === 'function' ) {
 					onFilterStart( value );
+				}
 
 				setIsFetching( true );
 
 				filter( value )
 					.then( ( filteredItems ) => {
-						if ( typeof onFilterEnd === 'function' )
+						if ( typeof onFilterEnd === 'function' ) {
 							onFilterEnd( filteredItems, value );
+						}
 					} )
 					.catch( ( error: Error ) => {
-						if ( typeof onFilterError === 'function' )
+						if ( typeof onFilterError === 'function' ) {
 							onFilterError( error, value );
+						}
 					} )
 					.finally( () => {
 						setIsFetching( false );
@@ -63,6 +66,7 @@ export default function useAsyncFilter< T >( {
 	};
 }
 
+/* eslint-disable @typescript-eslint/method-signature-style -- Preserve callback parameter variance for existing TypeScript consumers. */
 export type UseAsyncFilterInput< T > = {
 	filter( value?: string ): Promise< T[] >;
 	onFilterStart?( value?: string ): void;
@@ -70,6 +74,7 @@ export type UseAsyncFilterInput< T > = {
 	onFilterError?( error: Error, value?: string ): void;
 	debounceTime?: number;
 };
+/* eslint-enable @typescript-eslint/method-signature-style */
 
 export type UseAsyncFilterOutput< T > = Pick<
 	SelectControlProps< T >,

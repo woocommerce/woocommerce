@@ -59,6 +59,7 @@ class OrderTagsProvider extends AbstractTagProvider {
 				),
 				null,
 				array( Integration::EMAIL_POST_TYPE ),
+				Personalization_Tag::VALUE_TYPE_TEXT,
 			)
 		);
 
@@ -306,6 +307,23 @@ class OrderTagsProvider extends AbstractTagProvider {
 
 		$registry->register(
 			new Personalization_Tag(
+				__( 'Order Review URL', 'woocommerce' ),
+				'woocommerce/order-review-url',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					if ( ! isset( $context['order'] ) ) {
+						return '';
+					}
+					return wc_get_review_order_url( $context['order'] );
+				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
+			)
+		);
+
+		$registry->register(
+			new Personalization_Tag(
 				__( 'Order Custom Field', 'woocommerce' ),
 				'woocommerce/order-custom-field',
 				__( 'Order', 'woocommerce' ),
@@ -321,6 +339,7 @@ class OrderTagsProvider extends AbstractTagProvider {
 				),
 				null,
 				array( Integration::EMAIL_POST_TYPE ),
+				Personalization_Tag::VALUE_TYPE_TEXT,
 			)
 		);
 	}

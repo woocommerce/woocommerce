@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix fatal TypeError in ProductVersionStringInvalidator when a persistent object cache returns the cached variation parent ID as a string.

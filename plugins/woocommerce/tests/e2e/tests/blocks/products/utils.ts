@@ -14,6 +14,26 @@ export const getProductsNameFromProductQuery = async ( page: Page ) => {
 	return products.allTextContents();
 };
 
+export const getProductsNameFromProductCollection = async ( page: Page ) => {
+	const products = page.locator(
+		'.wp-block-woocommerce-product-collection .wp-block-post-title'
+	);
+	return products.allTextContents();
+};
+
+export const getProductCollectionQuery = async ( page: Page ) =>
+	page.evaluate( () => {
+		const block = window.wp.data
+			.select( 'core/block-editor' )
+			.getBlocks()
+			.find(
+				( candidate: { name: string } ) =>
+					candidate.name === 'woocommerce/product-collection'
+			);
+
+		return block?.attributes.query ?? {};
+	} );
+
 export const productQueryInnerBlocksTemplate = [
 	{
 		name: 'core/post-template',
@@ -50,6 +70,7 @@ export const insertProductsQuery = async (
 			namespace: 'woocommerce/product-query',
 			query: {
 				inherit: options.inherit ?? true,
+				postType: 'product',
 			},
 		},
 		innerBlocks: productQueryInnerBlocksTemplate,

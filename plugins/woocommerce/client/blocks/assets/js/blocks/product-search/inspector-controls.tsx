@@ -44,7 +44,7 @@ const ProductSearchControls = ( props: ProductSearchBlockProps ) => {
 		) {
 			setInitialPosition( buttonPosition );
 		}
-	}, [ buttonPosition ] );
+	}, [ buttonPosition, initialPosition ] );
 
 	return (
 		<InspectorControls group="styles">

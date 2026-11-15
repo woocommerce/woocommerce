@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Let experimental extensible ability fields declare nullable input with anyOf; feature is off by default.
+
+

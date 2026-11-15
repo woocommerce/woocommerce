@@ -39,7 +39,7 @@ export function ValidationNotices() {
 										>
 											{ label }
 										</Button>
-								  ) )
+									) )
 								: null }
 						</li>
 					) ) }

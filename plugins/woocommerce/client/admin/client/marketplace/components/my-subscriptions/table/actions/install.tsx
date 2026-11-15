@@ -21,6 +21,7 @@ import {
 import { Subscription } from '../../types';
 import { installingStore } from '../../../../contexts/install-store';
 import { NoticeStatus } from '../../../../contexts/types';
+import { MARKETPLACE_RENEW_SUBSCRIPTION_PATH } from '../../../constants';
 
 type ButtonProps = ComponentProps< typeof Button >;
 
@@ -44,19 +45,19 @@ export default function Install( props: InstallProps ) {
 	);
 
 	const startInstall = () => {
-		dispatch( installingStore ).startInstalling(
+		void dispatch( installingStore ).startInstalling(
 			props.subscription.product_key
 		);
 	};
 	const stopInstall = () => {
-		dispatch( installingStore ).stopInstalling(
+		void dispatch( installingStore ).stopInstalling(
 			props.subscription.product_key
 		);
 	};
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const handleInstallError = ( error: any ) => {
-		loadSubscriptions( false ).then( () => {
+		void loadSubscriptions( false ).then( () => {
 			let errorMessage = sprintf(
 				// translators: %s is the product name.
 				__( '%s couldn’t be installed.', 'woocommerce' ),
@@ -76,7 +77,7 @@ export default function Install( props: InstallProps ) {
 								'Download and install manually',
 								'woocommerce'
 							),
-							url: 'https://woocommerce.com/my-account/downloads/',
+							url: MARKETPLACE_RENEW_SUBSCRIPTION_PATH,
 							onClick: () => {},
 						},
 					],
@@ -110,7 +111,7 @@ export default function Install( props: InstallProps ) {
 		if ( props.subscription.is_installable ) {
 			installProduct( props.subscription )
 				.then( () => {
-					loadSubscriptions( false ).then( () => {
+					void loadSubscriptions( false ).then( () => {
 						addNotice(
 							props.subscription.product_key,
 							sprintf(

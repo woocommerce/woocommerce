@@ -88,7 +88,7 @@
 		@include visually-hidden;
 	}
 
-	& > [role='menu'] {
+	& > [role="menu"] {
 		border: 1px solid $gray-100;
 		border-bottom: none;
 	}
@@ -135,19 +135,19 @@
 		}
 
 		// Anything deeper than 5 levels will use this fallback depth
-		&[class*='depth-'] .woocommerce-search-list__item-label::before {
+		&[class*="depth-"] .woocommerce-search-list__item-label::before {
 			margin-right: $gap-smallest;
-			content: str-repeat('— ', 5);
+			content: str-repeat("— ", 5);
 		}
 
 		&.depth-0 .woocommerce-search-list__item-label::before {
 			margin-right: 0;
-			content: '';
+			content: "";
 		}
 
 		@for $i from 1 to 5 {
 			&.depth-#{$i} .woocommerce-search-list__item-label::before {
-				content: str-repeat('— ', $i);
+				content: str-repeat("— ", $i);
 			}
 		}
 
@@ -172,7 +172,7 @@
 
 				&::after {
 					margin-right: $gap-smallest;
-					content: ' ›';
+					content: " ›";
 				}
 			}
 		}

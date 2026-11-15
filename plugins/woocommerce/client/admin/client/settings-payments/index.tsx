@@ -6,6 +6,7 @@ import { Button, Placeholder, SelectControl } from '@wordpress/components';
 import React, { lazy, Suspense, useEffect } from '@wordpress/element';
 import {
 	unstable_HistoryRouter as HistoryRouter,
+	type HistoryRouterProps,
 	Route,
 	Routes,
 	useLocation,
@@ -90,19 +91,20 @@ const OfflinePaymentGatewayWrapper = ( {
 			<div className="settings-payments-offline__container">
 				<div className="settings-payment-gateways">
 					<div className="settings-payments-offline__header">
-						<BackButton
-							href={ getNewPath( {}, '/offline' ) }
-							title={ __(
-								'Return to payments settings',
-								'woocommerce'
-							) }
-							isRoute={ true }
-							from={ 'woopayments_payment_methods' }
-						/>
 						<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align settings-payments-offline__header-title">
-							<span className="woocommerce-settings-payments-header__title">
-								{ title }
-							</span>
+							<BackButton
+								href={ getNewPath( {}, '/offline' ) }
+								tooltipText={ __(
+									'Return to offline payment methods',
+									'woocommerce'
+								) }
+								isRoute={ true }
+								from={ 'woopayments_payment_methods' }
+							>
+								<span className="woocommerce-settings-payments-header__title">
+									{ title }
+								</span>
+							</BackButton>
 						</h1>
 					</div>
 					<Suspense fallback={ <Placeholder /> }>
@@ -216,23 +218,24 @@ export const SettingsPaymentsOfflineWrapper = () => {
 		<>
 			<div className="settings-payments-offline__container">
 				<div className="settings-payments-offline__header">
-					<BackButton
-						href={ getNewPath(
-							{ page: 'wc-settings', tab: 'checkout' },
-							'/',
-							{}
-						) }
-						title={ __(
-							'Return to payments settings',
-							'woocommerce'
-						) }
-						isRoute={ true }
-						from={ 'woopayments_payment_methods' }
-					/>
 					<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align">
-						<span className="woocommerce-settings-payments-header__title">
-							{ __( 'Take offline payments', 'woocommerce' ) }
-						</span>
+						<BackButton
+							href={ getNewPath(
+								{ page: 'wc-settings', tab: 'checkout' },
+								'/',
+								{}
+							) }
+							tooltipText={ __(
+								'Return to payments settings',
+								'woocommerce'
+							) }
+							isRoute={ true }
+							from={ 'woopayments_payment_methods' }
+						>
+							<span className="woocommerce-settings-payments-header__title">
+								{ __( 'Take offline payments', 'woocommerce' ) }
+							</span>
+						</BackButton>
 					</h1>
 				</div>
 				<Suspense fallback={ <ListPlaceholder rows={ 3 } /> }>
@@ -249,10 +252,7 @@ export const SettingsPaymentsOfflineWrapper = () => {
 export const SettingsPaymentsWooPaymentsWrapper = () => {
 	return (
 		<>
-			<Header
-				title={ __( 'Settings', 'woocommerce' ) }
-				context={ 'wc_settings_payments__woopayments' }
-			/>
+			<Header title={ __( 'Settings', 'woocommerce' ) } />
 			<Suspense
 				fallback={
 					<div>
@@ -294,11 +294,15 @@ export const SettingsPaymentsChequeWrapper = () =>
 export const SettingsPaymentsMainWrapper = () => {
 	return (
 		<>
-			<Header
-				title={ __( 'Settings', 'woocommerce' ) }
-				context={ 'wc_settings_payments__main' }
-			/>
-			<HistoryRouter history={ getHistory() }>
+			<Header title={ __( 'Settings', 'woocommerce' ) } />
+			<HistoryRouter
+				// The `history` v5 object provides what HistoryRouter uses at runtime; only the types differ.
+				history={
+					getHistory() as unknown as HistoryRouterProps[ 'history' ]
+				}
+				// Render route changes synchronously, as v6 did, so routes stay in step with getQuery().
+				useTransitions={ false }
+			>
 				<Routes>
 					<Route
 						path="/offline"

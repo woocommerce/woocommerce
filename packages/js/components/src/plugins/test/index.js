@@ -114,7 +114,9 @@ describe( 'Installing and activating', () => {
 			<Plugins pluginSlugs={ [ 'jetpack' ] } onComplete={ onComplete } />
 		);
 
-		userEvent.click( getByRole( 'button', { name: 'Install & enable' } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: 'Install & enable' } )
+		);
 
 		// Get the mocked installAndActivatePlugins function.
 		const { installAndActivatePlugins } = useDispatch();
@@ -153,7 +155,9 @@ describe( 'Installing and activating errors', () => {
 			/>
 		);
 
-		userEvent.click( getByRole( 'button', { name: 'Install & enable' } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: 'Install & enable' } )
+		);
 
 		expect( onComplete ).not.toHaveBeenCalled();
 

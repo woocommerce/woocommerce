@@ -72,7 +72,7 @@ const ConnectAccountPage = () => {
 			incentive_id: incentive.id,
 			source: determineTrackingSource(),
 		} );
-		updateOptions( {
+		void updateOptions( {
 			wcpay_welcome_page_viewed_timestamp: Math.floor(
 				Date.now() / 1000
 			),
@@ -134,7 +134,9 @@ const ConnectAccountPage = () => {
 		}
 	};
 
-	if ( ! incentive ) return null;
+	if ( ! incentive ) {
+		return null;
+	}
 
 	return (
 		<div className="woopayments-welcome-page">

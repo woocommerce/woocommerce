@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop a double-click on Update in the order editor from running order actions, such as resending emails, twice.

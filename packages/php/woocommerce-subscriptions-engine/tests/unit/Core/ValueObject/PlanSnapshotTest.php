@@ -9,14 +9,16 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\ValueObject;
 
-use DomainException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInternalInvariant;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot
  */
 class PlanSnapshotTest extends TestCase {
+
+	use AssertsInternalInvariant;
 
 	public function test_schema_version_defaults_to_one(): void {
 		$snapshot = PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) );
@@ -90,8 +92,55 @@ class PlanSnapshotTest extends TestCase {
 	}
 
 	public function test_negative_schema_version_throws(): void {
-		$this->expectException( DomainException::class );
+		$this->assert_internal_invariant(
+			static function (): void {
+				PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ), 0 );
+			}
+		);
+	}
 
-		PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ), 0 );
+	/**
+	 * @testdox get_pricing_policy returns the frozen payload exactly as captured.
+	 */
+	public function test_get_pricing_policy_returns_the_payload_as_captured(): void {
+		$payload  = array(
+			'policies'   => array(
+				array(
+					'type'  => 'tiered',
+					'value' => '7.5',
+				),
+			),
+			'custom_key' => array( 'nested' => true ),
+		);
+		$snapshot = PlanSnapshot::from_array( array( 'pricing_policy' => $payload ) );
+
+		$this->assertSame( $payload, $snapshot->get_pricing_policy() );
+	}
+
+	/**
+	 * @testdox get_pricing_policy is null when the key is absent.
+	 */
+	public function test_get_pricing_policy_is_null_when_absent(): void {
+		$snapshot = PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) );
+
+		$this->assertNull( $snapshot->get_pricing_policy() );
+	}
+
+	/**
+	 * @testdox get_pricing_policy is null when the key is explicitly null.
+	 */
+	public function test_get_pricing_policy_is_null_when_explicitly_null(): void {
+		$snapshot = PlanSnapshot::from_array( array( 'pricing_policy' => null ) );
+
+		$this->assertNull( $snapshot->get_pricing_policy() );
+	}
+
+	/**
+	 * @testdox get_pricing_policy is null when the stored value is not an array.
+	 */
+	public function test_get_pricing_policy_is_null_for_a_non_array(): void {
+		$snapshot = PlanSnapshot::from_array( array( 'pricing_policy' => 'bogo' ) );
+
+		$this->assertNull( $snapshot->get_pricing_policy() );
 	}
 }

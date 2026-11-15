@@ -46,12 +46,12 @@ export const validateState = (
 	if ( hasValidationError ) {
 		if ( ! isRequired || values.state ) {
 			// Validation error has been set, but it's no longer required, or the state was provided, clear the error.
-			dispatch( validationStore ).clearValidationError(
+			void dispatch( validationStore ).clearValidationError(
 				validationErrorId
 			);
 		} else if ( ! addressChanged ) {
 			// Validation error has been set, there has not been an address change so show the error.
-			dispatch( validationStore ).showValidationError(
+			void dispatch( validationStore ).showValidationError(
 				validationErrorId
 			);
 		}
@@ -62,7 +62,7 @@ export const validateState = (
 		values.country
 	) {
 		// No validation has been set yet, if it's required, there is a country set and no state, set the error.
-		dispatch( validationStore ).setValidationErrors( {
+		void dispatch( validationStore ).setValidationErrors( {
 			[ validationErrorId ]: {
 				message: sprintf(
 					/* translators: %s will be the state field label in lowercase e.g. "state" */

@@ -1,0 +1,182 @@
+{
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"color": "#262623",
+					"name": "Base",
+					"slug": "theme-1"
+				},
+				{
+					"color": "#f8f9f7",
+					"name": "Contrast",
+					"slug": "theme-2"
+				},
+				{
+					"color": "#1a1b19",
+					"name": "Primary",
+					"slug": "theme-3"
+				},
+				{
+					"color": "#969795",
+					"name": "Contrast Alt",
+					"slug": "theme-4"
+				},
+				{
+					"color": "#314a0d",
+					"name": "Base Alt",
+					"slug": "theme-5"
+				},
+				{
+					"color": "rgba(248, 249, 247, 0.2)",
+					"name": "Border",
+					"slug": "theme-6"
+				},
+				{
+					"color": "#a3f107",
+					"name": "Accent",
+					"slug": "theme-7"
+				}
+			],
+			"duotone": [
+				{
+					"colors": [ "#f8f9f7", "#262623" ],
+					"name": "Duotone 1",
+					"slug": "duotone-1"
+				},
+				{
+					"colors": [ "#f8f9f7", "#314a0d" ],
+					"name": "Duotone 2",
+					"slug": "duotone-2"
+				}
+			]
+		}
+	},
+	"styles": {
+		"blocks": {
+			"core/column": {
+				"variations": {
+					"section-2": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"elements": {
+							"heading": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							},
+							"link": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							}
+						}
+					},
+					"section-3": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"elements": {
+							"heading": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							},
+							"link": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							}
+						}
+					}
+				}
+			},
+			"core/columns": {
+				"variations": {
+					"section-2": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"elements": {
+							"heading": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							},
+							"link": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							}
+						}
+					},
+					"section-3": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"elements": {
+							"heading": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							},
+							"link": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							}
+						}
+					}
+				}
+			},
+			"core/group": {
+				"variations": {
+					"section-2": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"elements": {
+							"heading": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							},
+							"link": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							}
+						}
+					},
+					"section-3": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"elements": {
+							"heading": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							},
+							"link": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"elements": {
+			"button": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				}
+			}
+		}
+	},
+	"version": 3,
+	"title": "Electric Kiwi"
+}
