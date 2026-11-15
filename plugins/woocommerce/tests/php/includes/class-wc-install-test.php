@@ -930,51 +930,37 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not log a database error or take over a fresh installation lock held by another request.
+	 */
+	public function test_install_lock_contention_does_not_log_database_error(): void {
+		global $wpdb, $EZSQL_ERROR;
+
+		$lock_value = (string) time();
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_installing', %s, 'no')",
+				$lock_value
+			)
+		);
+
+		$errors_before = count( (array) $EZSQL_ERROR );
+
+		WC_Install::install();
+
+		$this->assertCount( $errors_before, (array) $EZSQL_ERROR, 'Lock contention must not record a database error.' );
+		$this->assertSame(
+			$lock_value,
+			$wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name = 'wc_installing'" ),
+			'A fresh lock held elsewhere must not be taken over or released.'
+		);
+	}
+
+	/**
 	 * Rebuilds the patterns through the real registration, so the test exercises the content
 	 * BlockTypesController ships rather than a copy of it that could drift. Registering a pattern that
 	 * is already live replaces it, so the siblings this also rebuilds just get their own content back.
 	 */
 	private function reregister_block_patterns(): void {
 		wc_get_container()->get( \Automattic\WooCommerce\Blocks\BlockTypesController::class )->register_block_patterns();
-	}
-
-	/**
-	 * @testdox Should acquire the installation lock with INSERT IGNORE so contention does not log a duplicate-key database error.
-	 */
-	public function test_create_lock_contention_uses_insert_ignore(): void {
-		global $wpdb;
-
-		// Simulate another process holding a fresh lock.
-		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name = 'wc_installing'" );
-		$wpdb->query(
-			$wpdb->prepare(
-				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_installing', %d, 'no')",
-				time()
-			)
-		);
-
-		$lock_inserts = array();
-		$capture      = static function ( $query ) use ( &$lock_inserts ) {
-			if ( false !== stripos( $query, 'INSERT' ) && false !== strpos( $query, "'wc_installing'" ) ) {
-				$lock_inserts[] = $query;
-			}
-			return $query;
-		};
-
-		add_filter( 'query', $capture );
-		$method = new ReflectionMethod( WC_Install::class, 'create_lock' );
-		$method->setAccessible( true );
-		$acquired = $method->invoke( null );
-		remove_filter( 'query', $capture );
-
-		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name = 'wc_installing'" );
-
-		$this->assertFalse( $acquired, 'A fresh lock held elsewhere must not be taken over.' );
-		$this->assertCount( 1, $lock_inserts, 'Exactly one lock INSERT should be attempted.' );
-		$this->assertMatchesRegularExpression(
-			'/^\s*INSERT\s+IGNORE\s+INTO/i',
-			$lock_inserts[0],
-			'The lock INSERT must use INSERT IGNORE so a duplicate key affects zero rows instead of logging a database error.'
-		);
 	}
 }

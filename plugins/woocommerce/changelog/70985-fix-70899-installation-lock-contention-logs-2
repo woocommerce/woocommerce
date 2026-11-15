@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevent duplicate `wc_installing` database errors from being logged when upgrade requests compete for the installation lock.
+Stop logging spurious database errors when several requests try to run a WooCommerce update at the same time.
