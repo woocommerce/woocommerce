@@ -174,8 +174,8 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
-		$this->enable_rest_api_v4_feature();
 		parent::setUp();
+		$this->enable_rest_api_v4_feature();
 		$this->endpoint = new ProductsController();
 		$this->reset_rest_server();
 		wp_set_current_user( self::$administrator_id );

@@ -35,6 +35,8 @@ class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
+		parent::setUp();
+
 		// Enable the REST API v4 feature.
 		add_filter(
 			'woocommerce_admin_features',
@@ -43,7 +45,6 @@ class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 				return $features;
 			},
 		);
-		parent::setUp();
 		$this->endpoint = new ProductsController();
 		wp_set_current_user( self::$user );
 	}

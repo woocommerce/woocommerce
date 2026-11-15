@@ -49,8 +49,8 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
-		self::enable_rest_api_v4_feature();
 		parent::setUp();
+		self::enable_rest_api_v4_feature();
 
 		wp_set_current_user( self::$user_id );
 	}

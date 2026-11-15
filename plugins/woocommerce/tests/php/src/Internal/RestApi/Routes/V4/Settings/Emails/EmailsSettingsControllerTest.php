@@ -110,15 +110,15 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 		$this->previous_emails_instance = $instance_property->getValue();
 		$this->previous_emails          = $this->previous_emails_instance ? $this->previous_emails_instance->emails : array();
 
-		// Enable the v4 REST API feature before bootstrapping.
+		parent::setUp();
+
+		// Enable the v4 REST API feature.
 		$feature_filter = function ( $features ) {
 			$features[] = 'rest-api-v4';
 			return $features;
 		};
 
 		add_filter( 'woocommerce_admin_features', $feature_filter );
-
-		parent::setUp();
 
 		// Enable block email editor feature.
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
