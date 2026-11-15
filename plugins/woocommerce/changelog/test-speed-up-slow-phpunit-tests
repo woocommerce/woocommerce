@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Speed up the slowest PHPUnit tests and run two of them in-process; no production change.
+

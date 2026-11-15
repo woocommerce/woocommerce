@@ -3063,11 +3063,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testdox Every product is processed when the backlog spans more than one batch.
 	 */
 	public function test_wc_scheduled_sales_processes_every_product_across_batches(): void {
-		$ids = array();
-		for ( $i = 0; $i < 51; $i++ ) {
-			$product = WC_Helper_Product::create_missed_sale_end_product();
-			$ids[]   = $product->get_id();
-		}
+		$ids = WC_Helper_Product::create_missed_sale_end_product_ids( 51 );
 
 		$before_payloads = array();
 		$after_payloads  = array();
@@ -3110,12 +3106,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testdox Priming happens per batch, not once for the whole backlog.
 	 */
 	public function test_wc_scheduled_sales_primes_one_batch_at_a_time(): void {
-		$ids = array();
-
-		for ( $i = 0; $i < 51; $i++ ) {
-			$product = WC_Helper_Product::create_missed_sale_end_product();
-			$ids[]   = $product->get_id();
-		}
+		WC_Helper_Product::create_missed_sale_end_product_ids( 51 );
 
 		$queued = array();
 		add_action(
