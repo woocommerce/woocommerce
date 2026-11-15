@@ -56,7 +56,6 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'pre_http_request', array( $this, 'answer_request' ), 10 );
 		delete_option( RemoteRules::OPTION );
 		parent::tearDown();
 	}

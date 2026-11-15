@@ -54,7 +54,6 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 	}
