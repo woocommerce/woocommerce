@@ -73,8 +73,8 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
-		$this->enable_rest_api_v4_feature();
 		parent::setUp();
+		$this->enable_rest_api_v4_feature();
 
 		// Create schema instance with dependency injection.
 		$order_note_schema = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Schema\OrderNoteSchema();

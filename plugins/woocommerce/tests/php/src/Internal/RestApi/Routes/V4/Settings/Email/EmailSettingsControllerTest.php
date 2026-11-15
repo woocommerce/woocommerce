@@ -51,7 +51,9 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * Setup.
 	 */
 	public function setUp(): void {
-		// Enable the v4 REST API feature before bootstrapping.
+		parent::setUp();
+
+		// Enable the v4 REST API feature.
 		$this->feature_filter = function ( $features ) {
 			$features[] = 'rest-api-v4';
 			return $features;
@@ -59,7 +61,6 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 		add_filter( 'woocommerce_admin_features', $this->feature_filter );
 
-		parent::setUp();
 		// Enable block email editor feature to test reply-to fields.
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 
