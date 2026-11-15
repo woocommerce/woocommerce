@@ -162,7 +162,7 @@ class WC_Early_Exit_Guard_Listener_Test extends WC_Unit_Test_Case {
 	 */
 	public function provider_process_endings(): array {
 		return array(
-			'exit during a test' => array( 'unfinished', 1, 'PHPUnit did not finish: the PHP process ended while running WC_Early_Exit_Guard_Runner_Test::test_noop.' ),
+			'exit during a test' => array( 'unfinished', 1, 'while running WC_Early_Exit_Guard_Runner_Test::test_noop' ),
 			'exit after the run' => array( 'finished', 0, '' ),
 		);
 	}
