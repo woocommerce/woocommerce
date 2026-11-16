@@ -50,7 +50,6 @@ class WC_Admin_Settings_View_Test extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'woocommerce_admin_features', array( $this, 'get_mocked_admin_features' ), self::HOOK_PRIORITY );
 		unset( $_GET['zone_id'] );
 		delete_option( 'woocommerce_show_marketplace_suggestions' );
 		delete_option( 'woocommerce_default_country' );

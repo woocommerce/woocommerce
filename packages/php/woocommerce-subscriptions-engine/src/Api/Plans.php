@@ -6,8 +6,10 @@
  * the payloads it is given and interprets none of them. It checks integrity only (a
  * non-empty name, a registered status, object-shaped policies), then lets the plan's
  * owning extension validate the write through `woocommerce_subscriptions_engine_validate_plan`.
- * Any caller may read any plan; an update names the plan's owning extension and never
- * reaches a plan of another one (authorization is the caller's concern). Reads return
+ * Any caller may read any plan. Every write names the expected owner (`extension_slug`), the
+ * plan's owning extension, also when acting for that extension, and never reaches a plan of
+ * another one: such a plan reads as missing. This guards against mistakes; it is not
+ * authorization (that is the caller's concern). Reads return
  * read-only {@see PlanView}s. The engine opens no transaction and keeps no cache.
  *
  * Plan policies are stored as given; the engine does not read them.
@@ -202,51 +204,65 @@ final class Plans {
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
-	 * Add a meta value to a plan, like `add_post_meta()`. A key may hold several values.
-	 * The plan is not looked up: meta for an unknown plan id is a caller error.
+	 * Add a meta value to a plan of the given extension, like `add_post_meta()`. A key may hold
+	 * several values. A plan of another extension reads as missing.
 	 *
-	 * @param int    $plan_id Plan id.
-	 * @param string $key     Meta key.
-	 * @param mixed  $value   Meta value; serialized when not scalar.
-	 * @param bool   $unique  When true, add nothing if the key already exists. Advisory: checked
-	 *                        before the insert with no unique index, so concurrent adds can both write.
+	 * @param int    $plan_id        Plan id.
+	 * @param string $extension_slug The expected owner (the plan's owning extension).
+	 * @param string $key            Meta key.
+	 * @param mixed  $value          Meta value; serialized when not scalar.
+	 * @param bool   $unique         When true, add nothing if the key already exists. Advisory: no
+	 *                               unique index, so concurrent adds can both write.
 	 * @return int|null The meta row id; null when `$unique` and the key exists.
-	 * @throws InvalidArgumentException If `$key` is empty.
+	 * @throws ValidationException If `$extension_slug` or `$key` is empty, with both reported.
+	 * @throws InvalidArgumentException If no plan of that extension has the id.
+	 * @throws RuntimeException If the key is longer than the meta_key column (255 characters).
 	 */
-	public static function add_meta( int $plan_id, string $key, $value, bool $unique = false ): ?int {
-		return ( new PlanRepository() )->add_meta( $plan_id, $key, $value, $unique );
+	public static function add_meta( int $plan_id, string $extension_slug, string $key, $value, bool $unique = false ): ?int {
+		self::assert_scope( $extension_slug, $key );
+
+		return ( new PlanRepository() )->add_meta( $plan_id, $extension_slug, $key, $value, $unique );
 	}
 
 	/**
-	 * Update a plan's meta values for `$key`, like `update_post_meta()`: adds the key
-	 * when absent, else rewrites every value, or only the values equal to `$prev_value`.
-	 * The absent-key check runs before the write with no unique index, so it is not a lock.
-	 * The plan is not looked up: meta for an unknown plan id is a caller error.
+	 * Update the meta values for `$key` of a plan of the given extension, like
+	 * `update_post_meta()`: adds the key when absent, else rewrites every value, or only the
+	 * values equal to `$prev_value`. A plan of another extension reads as missing.
 	 *
-	 * @param int    $plan_id    Plan id.
-	 * @param string $key        Meta key.
-	 * @param mixed  $value      New value; serialized when not scalar.
-	 * @param mixed  $prev_value Only update values equal to this; null updates all. Any other
-	 *                           value ('' and false included) matches literally.
+	 * @param int    $plan_id        Plan id.
+	 * @param string $extension_slug The expected owner (the plan's owning extension).
+	 * @param string $key            Meta key.
+	 * @param mixed  $value          New value; serialized when not scalar.
+	 * @param mixed  $prev_value     Only update values equal to this; null updates all. Any other
+	 *                               value ('' and false included) matches literally.
 	 * @return bool True when a value was added or changed; false when nothing changed.
-	 * @throws InvalidArgumentException If `$key` is empty.
+	 * @throws ValidationException If `$extension_slug` or `$key` is empty, with both reported.
+	 * @throws InvalidArgumentException If no plan of that extension has the id.
+	 * @throws RuntimeException If the key is longer than the meta_key column (255 characters).
 	 */
-	public static function update_meta( int $plan_id, string $key, $value, $prev_value = null ): bool {
-		return ( new PlanRepository() )->update_meta( $plan_id, $key, $value, $prev_value );
+	public static function update_meta( int $plan_id, string $extension_slug, string $key, $value, $prev_value = null ): bool {
+		self::assert_scope( $extension_slug, $key );
+
+		return ( new PlanRepository() )->update_meta( $plan_id, $extension_slug, $key, $value, $prev_value );
 	}
 
 	/**
-	 * Delete a plan's meta values for `$key`, like `delete_post_meta()`.
+	 * Delete the meta values for `$key` of a plan of the given extension, like
+	 * `delete_post_meta()`. Unlike `delete_post_meta()`, the owner comes second: an old-shape
+	 * call `delete_meta( $id, $key, $value )` reads as owner `$key`, key `$value`, and is not safe.
 	 *
-	 * @param int    $plan_id Plan id.
-	 * @param string $key     Meta key.
-	 * @param mixed  $value   Only delete values equal to this; null deletes every value for the key.
-	 *                        Any other value ('' and false included) matches literally.
-	 * @return bool True when at least one value was deleted.
-	 * @throws InvalidArgumentException If `$key` is empty.
+	 * @param int    $plan_id        Plan id.
+	 * @param string $extension_slug The expected owner (the plan's owning extension).
+	 * @param string $key            Meta key.
+	 * @param mixed  $value          Only delete values equal to this; null deletes every value for the key.
+	 *                               Any other value ('' and false included) matches literally.
+	 * @return bool True when at least one value was deleted; false also when no plan of that extension has the id.
+	 * @throws ValidationException If `$extension_slug` or `$key` is empty, with both reported.
 	 */
-	public static function delete_meta( int $plan_id, string $key, $value = null ): bool {
-		return ( new PlanRepository() )->delete_meta( $plan_id, $key, $value );
+	public static function delete_meta( int $plan_id, string $extension_slug, string $key, $value = null ): bool {
+		self::assert_scope( $extension_slug, $key );
+
+		return ( new PlanRepository() )->delete_meta( $plan_id, $extension_slug, $key, $value );
 	}
 
 	/**
@@ -338,6 +354,25 @@ final class Plans {
 			},
 			( new PlanRepository() )->query( $query )
 		);
+	}
+
+	/**
+	 * Check the positional scope arguments of a meta write, the expected owner and the key,
+	 * reporting every error at once.
+	 *
+	 * @param string $extension_slug The expected owner.
+	 * @param string $key            Meta key.
+	 * @throws ValidationException If the owner or the key is empty.
+	 */
+	private static function assert_scope( string $extension_slug, string $key ): void {
+		$validator = new ArgumentValidator();
+		$validator->get_non_empty_string( 'extension_slug', $extension_slug );
+		$validator->get_non_empty_string( 'key', $key );
+		try {
+			$validator->throw_errors();
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+		}
 	}
 
 	/**

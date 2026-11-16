@@ -109,6 +109,152 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Recalculating coupons reuses an unsaved coupon item instead of adding a duplicate.
+	 */
+	public function test_recalculate_coupons_reuses_unsaved_coupon_item(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
+		$order->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'unsaved-coupon-item' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-coupon-item' );
+		$order->add_item( $coupon_item );
+
+		$order->recalculate_coupons();
+
+		$coupon_items = $order->get_items( 'coupon' );
+		$this->assertCount( 1, $coupon_items, 'The unsaved coupon item should not be duplicated.' );
+		$this->assertEquals( 10, reset( $coupon_items )->get_discount(), 'The coupon discount should be set on the existing item.' );
+	}
+
+	/**
+	 * @testdox A reused unsaved coupon item keeps its coupon definition after the coupon is deleted.
+	 */
+	public function test_recalculate_coupons_stores_coupon_info_on_reused_unsaved_item(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
+		$order->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'unsaved-coupon-info' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-coupon-info' );
+		$order->add_item( $coupon_item );
+		$order->recalculate_coupons();
+		$order->save();
+
+		$coupon->delete( true );
+		$line_item = current( $order->get_items() );
+		$line_item->set_subtotal( 200 );
+		$line_item->set_total( 200 );
+		$line_item->save();
+
+		$order = wc_get_order( $order->get_id() );
+		$order->recalculate_coupons();
+
+		$this->assertCount( 1, $order->get_items( 'coupon' ), 'The coupon item should not be duplicated.' );
+		$this->assertEquals( 20, $order->get_discount_total(), 'The deleted percentage coupon should still apply 10% from its stored definition.' );
+	}
+
+	/**
+	 * @testdox Recalculating coupons keeps the coupon definition already stored on an unsaved coupon item.
+	 */
+	public function test_recalculate_coupons_keeps_existing_coupon_info_on_unsaved_item(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
+		$order->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'unsaved-existing-info' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+		$original_info = $coupon->get_short_info();
+
+		$coupon->set_amount( 25 );
+		$coupon->save();
+
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-existing-info' );
+		$coupon_item->add_meta_data( 'coupon_info', $original_info );
+		$order->add_item( $coupon_item );
+		$order->recalculate_coupons();
+
+		$coupon_item = current( $order->get_items( 'coupon' ) );
+		$this->assertCount( 1, $coupon_item->get_meta( 'coupon_info', false ), 'Only one coupon_info entry should be stored.' );
+		$this->assertSame( $original_info, $coupon_item->get_meta( 'coupon_info' ), 'The stored coupon definition should not be replaced.' );
+	}
+
+	/**
+	 * @testdox Recalculating coupons discounts each unsaved line item without failing.
+	 */
+	public function test_recalculate_coupons_with_unsaved_line_items(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$coupon  = new WC_Coupon();
+		$coupon->set_code( 'unsaved-line-items' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$order = new WC_Order();
+		foreach ( array( 100, 50 ) as $total ) {
+			$line_item = new WC_Order_Item_Product();
+			$line_item->set_product( $product );
+			$line_item->set_quantity( 1 );
+			$line_item->set_subtotal( $total );
+			$line_item->set_total( $total );
+			$order->add_item( $line_item );
+		}
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-line-items' );
+		$order->add_item( $coupon_item );
+
+		$order->recalculate_coupons();
+
+		$line_totals = array_map(
+			fn( $item ) => (float) $item->get_total(),
+			array_values( $order->get_items() )
+		);
+		$this->assertEqualsCanonicalizing( array( 90.0, 45.0 ), $line_totals, 'Each unsaved line item should get its own discount.' );
+		$this->assertCount( 1, $order->get_items( 'coupon' ), 'The coupon item should not be duplicated.' );
+		$this->assertEquals( 15, $order->get_discount_total() );
+	}
+
+	/**
 	 * @testdox Order and refund defaults capture the store tax mode without pending changes.
 	 * @dataProvider provide_order_tax_defaults
 	 *

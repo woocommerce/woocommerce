@@ -86,8 +86,6 @@ class RestApiTest extends WC_Unit_Test_Case {
 		if ( file_exists( $this->temp_file ) ) {
 			wp_delete_file( $this->temp_file );
 		}
-
-		remove_all_filters( 'pre_option_woocommerce_coming_soon' );
 	}
 
 	/**

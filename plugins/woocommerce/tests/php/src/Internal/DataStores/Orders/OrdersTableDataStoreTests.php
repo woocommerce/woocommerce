@@ -116,9 +116,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->clean_up_cot_setup();
 		$this->disable_cogs_feature();
 
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
-		remove_all_filters( 'woocommerce_load_order_cogs_value' );
-		remove_all_filters( 'woocommerce_save_order_cogs_value' );
 		parent::tearDown();
 	}
 
@@ -785,6 +782,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->trash_order( $order );
 		$this->sut->read( $order );
 
+		// Without transactional emails the notification count below stays 0 whatever untrash_order() does.
+		$this->enable_transactional_emails();
+
 		$status_action_count       = 0;
 		$status_notification_count = 0;
 		$status_action             = function ( $order_id ) use ( $order, &$status_action_count ) {
@@ -828,19 +828,21 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->trash_order( $order );
 		$this->sut->read( $order );
 
-		$dispatch_callbacks_before = array(
+		$this->enable_transactional_emails();
+		$this->assertNotFalse(
 			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'send_transactional_email' ) ),
-			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'queue_transactional_email' ) ),
+			'The email dispatch listener is registered before the restore.'
 		);
 
 		$this->assertTrue( $this->sut->untrash_order( $order ) );
 
-		$dispatch_callbacks_after = array(
-			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'send_transactional_email' ) ),
-			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'queue_transactional_email' ) ),
+		// untrash_order() swaps the listener for a wrapper in the same slot while it saves, so has_action() cannot
+		// tell whether it was put back. Check the stored callback instead.
+		global $wp_filter;
+		$this->assertSame(
+			array( 'WC_Emails', 'send_transactional_email' ),
+			$wp_filter['woocommerce_order_status_completed']->callbacks[10]['WC_Emails::send_transactional_email']['function']
 		);
-
-		$this->assertSame( $dispatch_callbacks_before, $dispatch_callbacks_after );
 	}
 
 	/**
@@ -4413,6 +4415,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		};
 
 		add_action( 'woocommerce_new_order', $callback );
+		// The new order email saves the order again while it is being saved, which this test is not about.
+		add_filter( 'woocommerce_email_enabled_new_order', '__return_false' );
 
 		$order = new WC_Order();
 		$order->set_status( OrderStatus::PROCESSING );

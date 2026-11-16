@@ -35,9 +35,6 @@ class WC_Order_Item_Data_Store_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->disable_cogs_feature();
-
-		remove_all_filters( 'woocommerce_save_order_item_cogs_value' );
-		remove_all_filters( 'woocommerce_load_order_item_cogs_value' );
 	}
 
 	/**

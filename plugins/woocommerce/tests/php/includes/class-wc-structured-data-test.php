@@ -17,9 +17,9 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function setUp(): void {
+		parent::setUp();
 		include_once WC_ABSPATH . 'includes/class-wc-structured-data.php';
 		$this->structured_data = new WC_Structured_Data();
-		parent::setUp();
 	}
 
 	/**
