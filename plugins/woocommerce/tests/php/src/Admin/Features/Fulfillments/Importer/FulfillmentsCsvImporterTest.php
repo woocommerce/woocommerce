@@ -1894,19 +1894,23 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	 * @testdox A notification listener that throws leaves the row imported and not counted as notified.
 	 */
 	public function test_failing_notification_keeps_the_row_imported(): void {
-		$order = OrderHelper::create_order();
+		$order  = OrderHelper::create_order();
+		$other  = OrderHelper::create_order();
+		$throws = 1;
 		add_action(
 			'woocommerce_fulfillment_created_notification',
-			function () {
-				throw new \Exception( 'Mail server down' );
+			function () use ( &$throws ) {
+				if ( $throws-- > 0 ) {
+					throw new \Exception( 'Mail server down' );
+				}
 			}
 		);
 
-		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,ups\n", array( 'notify_customer' => true ) );
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,ups\n{$other->get_id()},TRK-2,ups\n", array( 'notify_customer' => true ) );
 
-		$this->assertSame( 1, $result['counts'][ FulfillmentsCsvImporter::STATUS_CREATED ] );
-		$this->assertSame( 0, $result['counts']['notified'] );
-		$this->assertFalse( $result['rows'][0]['notified'] );
+		$this->assertSame( 2, $result['counts'][ FulfillmentsCsvImporter::STATUS_CREATED ] );
+		$this->assertSame( array( false, true ), array_column( $result['rows'], 'notified' ), 'A later row is notified normally' );
+		$this->assertFalse( doing_action( 'woocommerce_fulfillment_created_notification' ), 'The interrupted action is taken off the filter stack' );
 		$this->assertCount( 1, $this->fulfillments_of( $order ) );
 	}
 }

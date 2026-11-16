@@ -508,8 +508,7 @@ class FulfillmentsCsvImporter {
 		$rows = array();
 		$data = $read['rows'] ?? array();
 
-		global $wp_current_filter;
-		$hook_depth = count( $wp_current_filter );
+		$hook_depth = count( $GLOBALS['wp_current_filter'] );
 		$this->prime_orders( $data, $header_map );
 		foreach ( $data as $row ) {
 			$order_number = self::get_field( $row['cells'], $header_map, self::COL_ORDER_NUMBER );
@@ -517,7 +516,7 @@ class FulfillmentsCsvImporter {
 				$result = $this->import_row( $row['cells'], $header_map, $order_number, $row['row_number'], $seen );
 			} catch ( \Throwable $e ) {
 				// One row that throws, for example in a resolve-order callback, must not stop the chunk.
-				array_splice( $wp_current_filter, $hook_depth );
+				self::restore_filter_stack( $hook_depth );
 				wc_get_logger()->error(
 					sprintf( 'Fulfillments import could not import row %1$d: %2$s', $row['row_number'], $e->getMessage() ),
 					array( 'source' => 'fulfillments-importer' )
@@ -698,16 +697,14 @@ class FulfillmentsCsvImporter {
 			);
 		}
 
-		global $wp_current_filter;
-		$hook_depth = count( $wp_current_filter );
+		$hook_depth = count( $GLOBALS['wp_current_filter'] );
 		// The data store fires this action only once the row is written.
 		$written_hook = null === $existing ? 'woocommerce_fulfillment_after_create' : 'woocommerce_fulfillment_after_update';
 		$writes       = did_action( $written_hook );
 		try {
 			$fulfillment->save();
 		} catch ( \Throwable $e ) {
-			// A listener that throws leaves its hook on the stack, so doing_action() would skip later saves.
-			array_splice( $wp_current_filter, $hook_depth );
+			self::restore_filter_stack( $hook_depth );
 			wc_get_logger()->error(
 				sprintf( 'Fulfillments import could not save row %1$d for order %2$d: %3$s', $row_number, $order_id, $e->getMessage() ),
 				array( 'source' => 'fulfillments-importer' )
@@ -745,6 +742,7 @@ class FulfillmentsCsvImporter {
 	 * @return bool Whether the notification action ran without an error.
 	 */
 	private function notify_customer( WC_Order $order, Fulfillment $fulfillment, bool $was_fulfilled, int $row_number ): bool {
+		$hook_depth = count( $GLOBALS['wp_current_filter'] );
 		try {
 			if ( $was_fulfilled ) {
 				/**
@@ -764,12 +762,26 @@ class FulfillmentsCsvImporter {
 			}
 			return true;
 		} catch ( \Throwable $e ) {
+			self::restore_filter_stack( $hook_depth );
 			wc_get_logger()->error(
 				sprintf( 'Fulfillments import could not notify the customer for row %1$d of order %2$d: %3$s', $row_number, $order->get_id(), $e->getMessage() ),
 				array( 'source' => 'fulfillments-importer' )
 			);
 			return false;
 		}
+	}
+
+	/**
+	 * Take the hooks a throwing listener left on the filter stack back off it.
+	 *
+	 * Otherwise doing_action() stays true for them, and the data store skips its
+	 * after-save actions, which add order notes and update the order status, for later rows.
+	 *
+	 * @param int $depth Stack depth before the call that threw.
+	 */
+	private static function restore_filter_stack( int $depth ): void {
+		global $wp_current_filter;
+		array_splice( $wp_current_filter, $depth );
 	}
 
 	/**
