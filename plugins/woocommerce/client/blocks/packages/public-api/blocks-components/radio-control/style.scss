@@ -43,7 +43,7 @@ $content-padding-left: calc($gap + 24px + $gap-smaller);
 	label.wc-block-components-radio-control__option--checked-option-highlighted,
 	.wc-block-components-radio-control-accordion-option--checked-option-highlighted {
 		box-shadow: 0 0 0 1.5px currentColor inset;
-		border-radius: 4px;
+		border-radius: $universal-border-radius;
 	}
 
 	// Defines a border around the radio control. Cannot be done with normal CSS borders or outlines because when
@@ -58,7 +58,7 @@ $content-padding-left: calc($gap + 24px + $gap-smaller);
 		pointer-events: none;
 		position: absolute;
 		border: 1px solid $universal-border-light;
-		border-radius: 4px;
+		border-radius: $universal-border-radius;
 		width: 100%;
 		box-sizing: border-box;
 	}

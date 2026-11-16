@@ -262,6 +262,13 @@ const getExpectedWooCommerceTables = ( dbPrefix ) => {
 	];
 };
 
+// With an external object cache, product transients are cleared in the background.
+const getExpectedClearTransientsMessage = ( externalObjectCache ) => {
+	return externalObjectCache
+		? 'Product cache cleanup has been scheduled.'
+		: 'Product transients cleared';
+};
+
 /* eslint-disable playwright/no-nested-step */
 test.describe( 'System Status API tests', () => {
 	test( 'can view all system status items', async ( { request } ) => {
@@ -617,6 +624,11 @@ test.describe( 'System Status API tests', () => {
 	} );
 
 	test( 'can run a tool from system status', async ( { request } ) => {
+		const statusResponse = await request.get(
+			'./wp-json/wc/v3/system_status'
+		);
+		const { environment } = await statusResponse.json();
+
 		// call API to run a system status tool
 		const response = await request.put(
 			'./wp-json/wc/v3/system_status/tools/clear_transients'
@@ -632,7 +644,9 @@ test.describe( 'System Status API tests', () => {
 				description:
 					'This tool will clear the product/shop transients cache.',
 				success: true,
-				message: 'Product transients cleared',
+				message: getExpectedClearTransientsMessage(
+					environment.external_object_cache
+				),
 			} )
 		);
 	} );

@@ -20,13 +20,6 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 	private WC_Admin $sut;
 
 	/**
-	 * Original $_SERVER, or null when setUp did not get as far as capturing it.
-	 *
-	 * @var array<string,mixed>|null
-	 */
-	private ?array $original_server = null;
-
-	/**
 	 * The My Account page this test creates, so the redirect target is a real page.
 	 *
 	 * @var int
@@ -39,10 +32,6 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new WC_Admin();
-
-		// $_SERVER is the one request global the base class leaves alone: it only resets
-		// it for core's own suite, which never runs here.
-		$this->original_server = $_SERVER;
 
 		// Without a real My Account page, wc_get_page_permalink() falls back to the home URL and
 		// the redirect assertions cannot tell My Account from the site root.
@@ -57,21 +46,6 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_myaccount_page_id', $this->myaccount_page_id );
 
 		add_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
-	}
-
-	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		// PHPUnit runs tearDown whenever checkRequirements() passed, whether or not
-		// setUp finished, so an unconditional restore would blank $_SERVER for the
-		// rest of the process if setUp threw before the capture below it. Nothing
-		// puts it back: the base class only resets $_SERVER for core's own suite.
-		if ( null !== $this->original_server ) {
-			$_SERVER = $this->original_server;
-		}
-
-		parent::tearDown();
 	}
 
 	/**
@@ -284,6 +258,33 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 			$this->assertSame( false, $received, 'The prevent-admin-access filter should receive false for an exempt request.' );
 		} finally {
 			remove_filter( 'woocommerce_prevent_admin_access', $callback );
+		}
+	}
+
+	/**
+	 * @testdox The Export screen registers the HPOS order export handler.
+	 */
+	public function test_export_screen_registers_hpos_order_export_handler(): void {
+		remove_all_actions( 'export_wp' );
+		wc_get_container()->reset_all_resolved();
+
+		try {
+			set_current_screen( 'export' );
+
+			// Read the hook table directly: resolving the handler here would register the hook by itself.
+			global $wp_filter;
+			$callbacks = isset( $wp_filter['export_wp'] ) ? ( $wp_filter['export_wp']->callbacks[ PHP_INT_MAX ] ?? array() ) : array();
+			$handlers  = array_filter(
+				$callbacks,
+				static function ( $callback ) {
+					return is_array( $callback['function'] )
+						&& $callback['function'][0] instanceof \Automattic\WooCommerce\Internal\Admin\ImportExport\HposOrderExportHandler
+						&& 'handle_export_wp' === $callback['function'][1];
+				}
+			);
+			$this->assertCount( 1, $handlers, 'The Export screen should hook the HPOS order export handler on export_wp.' );
+		} finally {
+			set_current_screen( 'front' );
 		}
 	}
 

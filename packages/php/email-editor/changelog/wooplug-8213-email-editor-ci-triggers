@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Run the package PHP tests on PHP 7.4 in CI; no production change.
-

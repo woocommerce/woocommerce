@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\EmailEditor\PersonalizationTags;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\PersonalizationTags\OrderTagsProvider;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
@@ -69,5 +70,35 @@ class OrderTagsProviderTest extends WC_Unit_Test_Case {
 		$tag = $this->registry->get_by_token( '[woocommerce/order-review-url]' );
 
 		$this->assertSame( '', $tag->execute_callback( array() ) );
+	}
+
+	/**
+	 * @testdox The order date tag escapes markup that its format argument produces in HTML.
+	 */
+	public function test_order_date_tag_escapes_markup_from_format(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_date_created( '2024-03-15 10:00:00' );
+		$order->save();
+		$personalizer = new Personalizer( $this->registry );
+		$personalizer->set_context( array( 'order' => $order ) );
+
+		$html = $personalizer->personalize_content( '<p><!--[woocommerce/order-date format="&lt;\\m\\a\\r\\k&gt;Y&lt;/\\m\\a\\r\\k&gt;"]--></p>' );
+
+		$this->assertSame( '<p>&lt;mark&gt;2024&lt;/mark&gt;</p>', $html );
+	}
+
+	/**
+	 * @testdox The order custom field tag finds a field whose key has an apostrophe and shows its value as text.
+	 */
+	public function test_order_custom_field_tag_reads_key_with_apostrophe_and_shows_text(): void {
+		$order = wc_create_order();
+		$order->update_meta_data( "Customer's note", '<b>Leave</b> at the door' );
+		$order->save();
+		$personalizer = new Personalizer( $this->registry );
+		$personalizer->set_context( array( 'order' => $order ) );
+
+		$html = $personalizer->personalize_content( '<p><!--[woocommerce/order-custom-field key="Customer&#039;s note"]--></p>' );
+
+		$this->assertSame( '<p>&lt;b&gt;Leave&lt;/b&gt; at the door</p>', $html );
 	}
 }

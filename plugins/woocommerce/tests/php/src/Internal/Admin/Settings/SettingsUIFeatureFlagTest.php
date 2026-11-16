@@ -123,8 +123,6 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			unset( $GLOBALS['hide_save_button'] );
 		}
 
-		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
-		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
 		wp_dequeue_style( 'wc-settings-ui' );
 		wp_deregister_style( 'wc-settings-ui' );
 		wp_dequeue_script( 'settings-ui-counting-handle' );

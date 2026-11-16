@@ -555,7 +555,7 @@ class WC_Product_CSV_Importer_Controller {
 				'parse'              => true,
 			);
 
-			// Log failures.
+			// Load the import log from earlier batches.
 			if ( 0 !== $params['start_pos'] ) {
 				$error_log = array_filter( (array) get_user_option( 'product_import_error_log' ) );
 			} else {
@@ -571,7 +571,7 @@ class WC_Product_CSV_Importer_Controller {
 			$importer         = self::get_importer( $file, $params );
 			$results          = $importer->import();
 			$percent_complete = $importer->get_percent_complete();
-			$error_log        = array_merge( $error_log, $results['failed'], $results['skipped'] );
+			$error_log        = array_merge( $error_log, $results['failed'], $results['skipped'], $results['warnings'] ?? array() );
 
 			if ( 100 === $percent_complete ) {
 				self::delete_original_id_markers();

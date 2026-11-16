@@ -238,6 +238,37 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox update_fields refuses a name too long for its column, as insert does, and writes nothing.
+	 */
+	public function test_update_fields_refuses_a_name_too_long_for_its_column(): void {
+		$repo = new PlanRepository();
+		$long = str_repeat( 'n', 256 );
+
+		try {
+			$this->insert_plan( $repo, $long );
+			$this->fail( 'Expected insert to refuse the name.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'Failed to insert plan', $e->getMessage() );
+		}
+
+		$id   = $this->insert_plan( $repo, 'Short' );
+		$plan = $repo->find( $id );
+		$this->assertInstanceOf( Plan::class, $plan );
+		$plan->set_name( $long );
+
+		try {
+			$repo->update_fields( $plan, array( 'name' ) );
+			$this->fail( 'Expected update_fields to refuse the name.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'longer than the column allows', $e->getMessage() );
+		}
+
+		$stored = $repo->find( $id );
+		$this->assertInstanceOf( Plan::class, $stored );
+		$this->assertSame( 'Short', $stored->get_name() );
+	}
+
+	/**
 	 * @testdox update_fields without an id throws.
 	 */
 	public function test_update_fields_without_an_id_throws(): void {

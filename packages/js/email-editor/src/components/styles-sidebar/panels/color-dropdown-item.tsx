@@ -11,9 +11,9 @@ import {
 	Dropdown,
 	FlexItem,
 	__experimentalDropdownContentWrapper as DropdownContentWrapper,
-	__experimentalHStack as HStack,
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
+import { Stack } from '@wordpress/ui';
 
 import {
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
@@ -76,7 +76,13 @@ export function ColorDropdownItem( {
 							ref={ dropdownButtonRef }
 							__next40pxDefaultSize
 						>
-							<HStack justify="flex-start">
+							{ /* Full width: the block editor styles size the label relative to this row. */ }
+							<Stack
+								direction="row"
+								align="center"
+								gap="sm"
+								style={ { width: '100%' } }
+							>
 								<ColorIndicator
 									className="block-editor-panel-color-gradient-settings__color-indicator"
 									colorValue={ inheritedValue }
@@ -87,7 +93,7 @@ export function ColorDropdownItem( {
 								>
 									{ label }
 								</FlexItem>
-							</HStack>
+							</Stack>
 						</Button>
 						{ hasValue() && (
 							<Button

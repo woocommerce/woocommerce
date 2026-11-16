@@ -405,6 +405,47 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'unknown_product_ids', $result );
 	}
 	/**
+	 * @testdox Should count approved and held direct replies from store staff, so an agent can skip reviews the store answered.
+	 */
+	public function test_store_reply_counts(): void {
+		$product  = \WC_Helper_Product::create_simple_product()->get_id();
+		$staff    = get_current_user_id();
+		$customer = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$answered = $this->review( $product, 1 );
+		$open     = $this->review( $product, 2 );
+		$reply    = function ( int $review_id, string $approved, int $user_id ) use ( $product ): int {
+			return self::factory()->comment->create(
+				array(
+					'comment_post_ID'  => $product,
+					'comment_parent'   => $review_id,
+					'comment_approved' => $approved,
+					'user_id'          => $user_id,
+				)
+			);
+		};
+		$approved = $reply( $answered, '1', $staff );
+		$reply( $answered, '0', $staff );
+		$reply( $answered, 'spam', $staff );
+		$reply( $approved, '1', $staff );
+		$reply( $open, 'trash', $staff );
+		$reply( $open, '1', $customer );
+		$reply( $open, '1', 0 );
+		self::factory()->comment->create(
+			array(
+				'comment_post_ID' => self::factory()->post->create(),
+				'comment_parent'  => $open,
+				'user_id'         => $staff,
+			)
+		);
+
+		$result = $this->sut->execute( array( 'product_ids' => array( $product ) ) );
+		$counts = array_column( $result['reviews'], 'store_reply_count', 'id' );
+
+		$this->assertSame( 2, $counts[ $answered ] ?? null, 'Spam and nested replies do not count.' );
+		$this->assertSame( 0, $counts[ $open ] ?? null, 'Customer, guest, trashed and other posts\' replies do not count.' );
+	}
+
+	/**
 	 * @testdox Should leave nested comment queries unchanged and remove its query filter afterward.
 	 */
 	public function test_nested_comment_queries(): void {

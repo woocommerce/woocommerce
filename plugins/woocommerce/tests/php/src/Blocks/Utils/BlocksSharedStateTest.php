@@ -29,7 +29,6 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 	 * Tear down each test.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_cart_contents_count' );
 		$this->reset_shared_state();
 		parent::tearDown();
 	}
@@ -72,6 +71,25 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( "\u{00A0}", $currency_data['currency']['thousandSeparator'] );
 		$this->assertSame( ',', $currency_data['currency']['decimalSeparator'] );
+	}
+
+	/**
+	 * @testdox Currency symbol position follows the filtered price format.
+	 */
+	public function test_currency_data_symbol_position_uses_filtered_price_format(): void {
+		update_option( 'woocommerce_currency_pos', 'left' );
+		add_filter(
+			'woocommerce_price_format',
+			function () {
+				return '%2$s&nbsp;%1$s';
+			}
+		);
+
+		$method = new \ReflectionMethod( BlocksSharedState::class, 'get_currency_data' );
+		$method->setAccessible( true );
+		$currency_data = $method->invoke( null );
+
+		$this->assertSame( 'right_space', $currency_data['currency']['symbolPosition'] );
 	}
 
 	/**

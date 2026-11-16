@@ -12,24 +12,6 @@ use WC_Unit_Test_Case;
 class OrderAwareControllerTraitTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Filter hooks added during a test, as [ tag, callback ] pairs, removed again in tearDown().
-	 *
-	 * @var array[]
-	 */
-	private $added_filters = array();
-
-	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		foreach ( $this->added_filters as $added_filter ) {
-			remove_filter( $added_filter[0], $added_filter[1] );
-		}
-		$this->added_filters = array();
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox get_order_statuses includes the built-in default actionable statuses when not filtered.
 	 */
 	public function test_default_actionable_order_statuses_without_filter(): void {
@@ -72,7 +54,7 @@ class OrderAwareControllerTraitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Register a filter that returns a fixed value, tracked for removal in tearDown().
+	 * Register a filter that returns a fixed value.
 	 *
 	 * @param string $tag   Filter tag to hook.
 	 * @param array  $value Value the filter should return.
@@ -82,6 +64,5 @@ class OrderAwareControllerTraitTest extends WC_Unit_Test_Case {
 			return $value;
 		};
 		add_filter( $tag, $callback );
-		$this->added_filters[] = array( $tag, $callback );
 	}
 }

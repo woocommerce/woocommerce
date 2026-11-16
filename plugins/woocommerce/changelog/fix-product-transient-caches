@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Clear product and Analytics caches with persistent caching and prevent related-product cache growth.
