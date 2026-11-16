@@ -544,6 +544,12 @@ class FulfillmentsCsvImporter {
 			);
 		}
 
+		$items_cell = $this->get_field( $cells, $header_map, self::COL_ITEMS );
+		$items      = '' === $items_cell ? null : $this->parse_items( $items_cell, $order );
+		if ( is_string( $items ) ) {
+			return $this->fail( 'invalid_items', $items, $order_id );
+		}
+
 		try {
 			$existing = $this->find_existing_fulfillment( $order_id, $tracking_number );
 		} catch ( \RuntimeException $e ) {
@@ -565,12 +571,15 @@ class FulfillmentsCsvImporter {
 
 		$fulfillment = $existing ?? new Fulfillment();
 		if ( null === $existing ) {
-			$items = $this->default_items_from_order( $order );
+			// A blank items cell fulfills every item on create, but keeps the stored items on update.
+			$items = $items ?? $this->default_items_from_order( $order );
 			if ( array() === $items ) {
 				return $this->fail( 'no_items', __( 'This order has no items to fulfill.', 'woocommerce' ), $order_id );
 			}
 			$fulfillment->set_entity_type( WC_Order::class );
 			$fulfillment->set_entity_id( (string) $order_id );
+		}
+		if ( null !== $items ) {
 			$fulfillment->set_items( $items );
 		}
 		$fulfillment->set_status( 'fulfilled' );
@@ -763,6 +772,88 @@ class FulfillmentsCsvImporter {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Parse an items cell into fulfillment items.
+	 *
+	 * Entries are separated by "|" or ";" and are either "<order item ID>:<qty>" or
+	 * "sku:<SKU>:<qty>". Quantities of a repeated item are added up before they are
+	 * checked against the ordered quantity.
+	 *
+	 * @param string   $cell  Items cell, not empty.
+	 * @param WC_Order $order Order of the row.
+	 * @return array<int, array{item_id:int, qty:int}>|string Items, or a message saying why the cell is invalid.
+	 */
+	private function parse_items( string $cell, WC_Order $order ) {
+		$line_items = $order->get_items( 'line_item' );
+		$by_sku     = null;
+		$totals     = array();
+		$entries    = preg_split( '/[|;]/', $cell, -1, PREG_SPLIT_NO_EMPTY );
+
+		foreach ( false === $entries ? array() : $entries as $entry ) {
+			$parts = array_map( 'trim', explode( ':', $entry ) );
+			if ( 3 === count( $parts ) && 'sku' === strtolower( $parts[0] ) ) {
+				// Built on first use, since it loads the product of every line item.
+				$by_sku = $by_sku ?? $this->index_items_by_sku( $line_items );
+				$item   = $by_sku[ strtolower( $parts[1] ) ] ?? null;
+				if ( null === $item ) {
+					/* translators: %s: SKU from the CSV. */
+					return sprintf( __( 'SKU %s was not found on the order.', 'woocommerce' ), $parts[1] );
+				}
+			} elseif ( 2 === count( $parts ) ) {
+				$item = ctype_digit( $parts[0] ) ? ( $line_items[ (int) $parts[0] ] ?? null ) : null;
+				if ( null === $item ) {
+					/* translators: %s: order item ID from the CSV. */
+					return sprintf( __( 'Item ID %s is not part of this order.', 'woocommerce' ), $parts[0] );
+				}
+			} else {
+				/* translators: %s: one entry of the items cell. */
+				return sprintf( __( 'Invalid items entry: %s.', 'woocommerce' ), trim( $entry ) );
+			}
+
+			$qty = (string) end( $parts );
+			if ( ! ctype_digit( $qty ) || 0 === (int) $qty ) {
+				return __( 'Item quantity must be a positive integer.', 'woocommerce' );
+			}
+			$totals[ $item->get_id() ] = ( $totals[ $item->get_id() ] ?? 0 ) + (int) $qty;
+		}
+
+		if ( array() === $totals ) {
+			return __( 'The items cell has no item entries.', 'woocommerce' );
+		}
+
+		$items = array();
+		foreach ( $totals as $item_id => $qty ) {
+			$ordered = (int) $line_items[ $item_id ]->get_quantity();
+			if ( $qty > $ordered ) {
+				/* translators: 1: quantity from the CSV, 2: ordered quantity. */
+				return sprintf( __( 'Item quantity %1$d exceeds the ordered quantity %2$d.', 'woocommerce' ), $qty, $ordered );
+			}
+			$items[] = array(
+				'item_id' => (int) $item_id,
+				'qty'     => $qty,
+			);
+		}
+		return $items;
+	}
+
+	/**
+	 * Index line items by lowercase SKU; the first item with a SKU wins.
+	 *
+	 * @param array<int|string, \WC_Order_Item> $line_items Line items of the order.
+	 * @return array<string, \WC_Order_Item>
+	 */
+	private function index_items_by_sku( array $line_items ): array {
+		$by_sku = array();
+		foreach ( $line_items as $item ) {
+			$product = $item instanceof \WC_Order_Item_Product ? $item->get_product() : null;
+			$sku     = $product instanceof \WC_Product ? strtolower( (string) $product->get_sku() ) : '';
+			if ( '' !== $sku && ! isset( $by_sku[ $sku ] ) ) {
+				$by_sku[ $sku ] = $item;
+			}
+		}
+		return $by_sku;
 	}
 
 	/**

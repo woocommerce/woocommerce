@@ -1295,4 +1295,105 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'file_not_readable', $missing_file['error']['code'] );
 		$this->assertCount( 0, $this->fulfillments_of( $order ) );
 	}
+
+	/**
+	 * Create an order with item "a" (quantity 4, SKU "DUMMY SKU") and item "b" (quantity 2, SKU "SKU-B").
+	 *
+	 * @return array{0: WC_Order, 1: int, 2: int} The order and the IDs of items a and b.
+	 */
+	private function make_two_item_order(): array {
+		$order     = OrderHelper::create_order();
+		$product_b = \WC_Helper_Product::create_simple_product();
+		$product_b->set_sku( 'SKU-B' );
+		$product_b->save();
+		$item_b = $order->add_product( $product_b, 2 );
+		$order->save();
+		return array( $order, (int) current( $order->get_items() )->get_id(), (int) $item_b );
+	}
+
+	/**
+	 * @testdox The items cell takes item IDs and SKUs and adds up the quantities of a repeated item.
+	 */
+	public function test_items_cell_selects_items_by_id_and_sku(): void {
+		list( $order, $item_a, $item_b ) = $this->make_two_item_order();
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$order->get_id()},TRK-1,ups,,{$item_a}:1|sku:sku-b:1; {$item_a} : 2\n" );
+
+		$this->assertSame( 'created', $result['rows'][0]['status'] );
+		$this->assertSame(
+			array(
+				array(
+					'item_id' => $item_a,
+					'qty'     => 3,
+				),
+				array(
+					'item_id' => $item_b,
+					'qty'     => 1,
+				),
+			),
+			$this->fulfillments_of( $order )[0]->get_items()
+		);
+	}
+
+	/**
+	 * @testdox An invalid items cell fails the row with invalid_items and a message saying why.
+	 * @testWith ["{a}:5", "Item quantity 5 exceeds the ordered quantity 4."]
+	 *           ["{a}:3|{a}:2", "Item quantity 5 exceeds the ordered quantity 4."]
+	 *           ["{b}:3", "Item quantity 3 exceeds the ordered quantity 2."]
+	 *           ["99999999:1", "Item ID 99999999 is not part of this order."]
+	 *           ["{a}:1.5", "Item quantity must be a positive integer."]
+	 *           ["{a}:0", "Item quantity must be a positive integer."]
+	 *           ["{a}", "Invalid items entry: {a}."]
+	 *           ["sku:NOPE:1", "SKU NOPE was not found on the order."]
+	 *           ["|;", "The items cell has no item entries."]
+	 *
+	 * @param string $cell    Items cell; {a} and {b} stand for the item IDs.
+	 * @param string $message Expected message.
+	 */
+	public function test_invalid_items_cell_fails_the_row( string $cell, string $message ): void {
+		list( $order, $item_a, $item_b ) = $this->make_two_item_order();
+		$replace                         = array(
+			'{a}' => $item_a,
+			'{b}' => $item_b,
+		);
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$order->get_id()},TRK-1,ups,,\"" . strtr( $cell, $replace ) . "\"\n" );
+
+		$this->assertSame( 'invalid_items', $result['rows'][0]['code'] ?? null );
+		$this->assertSame( strtr( $message, $replace ), $result['rows'][0]['message'] );
+		$this->assertCount( 0, $this->fulfillments_of( $order ) );
+	}
+
+	/**
+	 * @testdox On an update a blank items cell keeps the stored items and a filled one replaces them.
+	 */
+	public function test_items_on_update_are_kept_when_blank_and_replaced_when_given(): void {
+		list( $order, $item_a, $item_b ) = $this->make_two_item_order();
+		$id                              = $order->get_id();
+		$this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$id},TRK-1,ups,,{$item_b}:1\n" );
+
+		$this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$id},TRK-1,fedex,,\n" );
+		$kept = $this->fulfillments_of( $order )[0]->get_items();
+		$this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$id},TRK-1,fedex,,{$item_a}:2\n" );
+
+		$this->assertSame(
+			array(
+				array(
+					'item_id' => $item_b,
+					'qty'     => 1,
+				),
+			),
+			$kept,
+			'A blank items cell must not widen a partial fulfillment to every item'
+		);
+		$this->assertSame(
+			array(
+				array(
+					'item_id' => $item_a,
+					'qty'     => 2,
+				),
+			),
+			$this->fulfillments_of( $order )[0]->get_items()
+		);
+	}
 }
