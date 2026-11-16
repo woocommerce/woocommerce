@@ -216,22 +216,24 @@ export const getPages = ( reports = [] ) => {
 		},
 	} );
 
-	pages.push( {
-		container: SalesReadiness,
-		layout: {
-			header: false,
-		},
-		path: '/sales-readiness',
-		breadcrumbs: [
-			...initialBreadcrumbs,
-			__( 'Sales readiness', 'woocommerce' ),
-		],
-		wpOpenMenu: 'toplevel_page_woocommerce',
-		capability: 'manage_woocommerce',
-		navArgs: {
-			id: 'woocommerce-sales-readiness',
-		},
-	} );
+	if ( isFeatureEnabled( 'agent_readiness' ) ) {
+		pages.push( {
+			container: SalesReadiness,
+			layout: {
+				header: false,
+			},
+			path: '/sales-readiness',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Sales readiness', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_woocommerce',
+			capability: 'manage_woocommerce',
+			navArgs: {
+				id: 'woocommerce-sales-readiness',
+			},
+		} );
+	}
 
 	pages.push( {
 		container: CoreProfiler,
