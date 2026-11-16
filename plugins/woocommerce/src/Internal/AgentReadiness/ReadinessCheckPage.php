@@ -46,7 +46,19 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * with AI shopping on, AI assistants can't connect, search or check out without them. These checks
 	 * are only shown while AI shopping is on. The rules file's `store_checks` can change any scanned check's level.
 	 */
-	private const REQUIRED_SCANNED = array( 'ucp_profile', 'ucp_endpoints_live', 'ucp_checkout' );
+	private const REQUIRED_SCANNED = array( 'ucp_profile', 'ucp_checkout' );
+
+	/**
+	 * Scanned checks shown with a Warning instead of as Required when they fail: catalog search can fail
+	 * now and then with nothing changed on the store, usually because of something in front of it.
+	 */
+	private const WARNING_SCANNED = array( 'ucp_endpoints_live' );
+
+	/**
+	 * Scanned checks that keep products from being listed but aren't Required: a store whose pages all
+	 * need a login, such as a members-only store, chose that, and can still be ready for AI assistants that sign in.
+	 */
+	private const OPTIONAL_SCANNED = array( 'pages_public' );
 
 	/**
 	 * Checks that can only run when the check they name passed, so aren't shown when it failed.
@@ -81,6 +93,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		'pass'  => 'stable',
 		'off'   => 'none',
 		'fix'   => 'low',
+		'warn'  => 'medium',
 	);
 
 	/**
@@ -194,9 +207,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		if ( null === $report ) {
 			return array( 'off', __( 'Not checked yet', 'woocommerce' ) );
 		}
-		// Only what the page shows: setup steps that don't join Fix first live in the Setup checklist.
-		$shown = array_filter( $this->visible_store_checks( $report, $checks ), static fn( array $check ): bool => ! self::is_setup_step( $check ) || self::joins_fix_first( $check ) );
-		return self::group_badge( array_merge( $shown, array_fill( 0, count( self::failing_product_checks( $report ) ), array( 'ok' => false ) ) ) );
+		// What the page shows: setup steps sit in their question's card too.
+		return self::group_badge( array_merge( $this->visible_store_checks( $report, $checks ), array_fill( 0, count( self::failing_product_checks( $report ) ), array( 'ok' => false ) ) ) );
 	}
 
 	/**
@@ -286,8 +298,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				) : null,
 			),
 			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
-			// Setup steps belong to the Setup checklist, so the question cards show only scanned checks.
-			'sections'     => null === $report ? array() : $this->sections( array_values( array_filter( $visible, static fn( array $check ): bool => ! self::is_setup_step( $check ) ) ), $launched, $report ),
+			// Setup steps also show in the Setup checklist; here they sit in the card of the question they answer.
+			'sections'     => null === $report ? array() : $this->sections( $visible, $launched, $report ),
 			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ),
 			'overview'     => array(
 				'shopping' => $this->shopping_card( $checks ),
@@ -425,7 +437,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		if ( self::is_setup_step( $check ) ) {
 			return StoreConditions::shows_required( $check );
 		}
-		return RemoteRules::store_check( $check['id'] )['required'] ?? ( in_array( $check['id'], self::REQUIRED_SCANNED, true ) || ( 'listing' === $check['blocks'] && 'access' === ( $check['group'] ?? '' ) ) );
+		return RemoteRules::store_check( $check['id'] )['required'] ?? ( in_array( $check['id'], self::REQUIRED_SCANNED, true ) || ( 'listing' === $check['blocks'] && 'access' === ( $check['group'] ?? '' ) && ! in_array( $check['id'], self::OPTIONAL_SCANNED, true ) ) );
 	}
 
 	/**
@@ -677,9 +689,11 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$blocks_listing = in_array( ReadinessRule::EFFECT_NOT_LISTABLE, array_column( (array) ( $check['channels'] ?? array() ), 'effect' ), true );
 			$share          = is_numeric( $check['sales_share'] ?? null ) ? (float) $check['sales_share'] : null;
 			// A share dropped because the count changed since the scan still ranks, so fixing one product doesn't move the issue down.
-			$rank     = $share ?? ( is_numeric( $check['ranked_share'] ?? null ) ? (float) $check['ranked_share'] : 0.0 );
-			$count    = (int) $check['count'];
-			$issue    = self::product_issue( $check, $linked );
+			$rank  = $share ?? ( is_numeric( $check['ranked_share'] ?? null ) ? (float) $check['ranked_share'] : 0.0 );
+			$count = (int) $check['count'];
+			$issue = self::product_issue( $check, $linked );
+			// Without sales to compare, an issue that keeps products out of more AI apps ranks higher.
+			$apps     = count( array_filter( (array) ( $check['channels'] ?? array() ), static fn( $channel ): bool => in_array( $channel['effect'] ?? '', array( ReadinessRule::EFFECT_NOT_LISTABLE, ReadinessRule::EFFECT_GAPS ), true ) ) );
 			$issues[] = array(
 				'id'    => (string) ( $check['id'] ?? '' ),
 				'tier'  => $blocks_listing ? 2 : 3,
@@ -688,7 +702,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'link'  => self::products_link( $count, (string) ( $check['id'] ?? '' ), $linked ),
 				'share' => $share,
 				'rank'  => $rank,
-				'count' => $count,
+				'count' => 0.0 < $rank ? $count : $count * max( 1, $apps ),
 			);
 		}
 		// Tier first, then the larger share of sales, then more products, then page order (usort isn't stable before PHP 8).
@@ -752,32 +766,32 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	private static function ranking_text( array $report, array $items ): string {
 		// A report from before sales were read has no `sales` key; the next check fills it in.
 		if ( ! array_key_exists( 'sales', $report ) ) {
-			return __( 'Ranked by how many products each issue affects.', 'woocommerce' );
+			return __( 'Ranked by how many products and AI apps each issue affects.', 'woocommerce' );
 		}
 		$sales = is_array( $report['sales'] ) ? $report['sales'] : null;
 		if ( null === $sales ) {
-			return __( 'Ranked by how many products each issue affects. Turn on Analytics to rank by sales instead.', 'woocommerce' );
+			return __( 'Ranked by how many products and AI apps each issue affects. Turn on Analytics to rank by sales instead.', 'woocommerce' );
 		}
 		if ( false === ( $sales['imported'] ?? true ) ) {
-			return __( 'Analytics hasn\'t imported all your past orders yet, so issues are ranked by how many products they affect. Import them in Analytics > Settings.', 'woocommerce' );
+			return __( 'Analytics hasn\'t imported all your past orders yet, so issues are ranked by how many products and AI apps they affect. Import them in Analytics > Settings.', 'woocommerce' );
 		}
 		$orders = (int) ( $sales['orders'] ?? 0 );
 		$days   = (int) ( $sales['days'] ?? 0 );
 		if ( 0 === $orders ) {
 			/* translators: %d: number of days. */
-			return sprintf( _n( 'No sales in the last %d day, so issues are ranked by how many products they affect.', 'No sales in the last %d days, so issues are ranked by how many products they affect.', $days, 'woocommerce' ), $days );
+			return sprintf( _n( 'No sales in the last %d day, so issues are ranked by how many products and AI apps they affect.', 'No sales in the last %d days, so issues are ranked by how many products and AI apps they affect.', $days, 'woocommerce' ), $days );
 		}
 		if ( $orders < ProductSales::MIN_ORDERS ) {
 			return sprintf(
 				/* translators: 1: number of orders, 2: number of days. */
-				_n( 'Only %1$s order in the last %2$d days, too few to rank by sales, so issues are ranked by how many products they affect.', 'Only %1$s orders in the last %2$d days, too few to rank by sales, so issues are ranked by how many products they affect.', $orders, 'woocommerce' ),
+				_n( 'Only %1$s order in the last %2$d days, too few to rank by sales, so issues are ranked by how many products and AI apps they affect.', 'Only %1$s orders in the last %2$d days, too few to rank by sales, so issues are ranked by how many products and AI apps they affect.', $orders, 'woocommerce' ),
 				number_format_i18n( $orders ),
 				$days
 			);
 		}
 		// No issue on the card with sales: the products sold nothing, store-wide issues filled the card, or counts changed since the check.
 		if ( array() === array_filter( $items, static fn( array $item ): bool => ( $item['share'] ?? 0.0 ) > 0.0 ) ) {
-			return __( 'Ranked by how many products each issue affects.', 'woocommerce' );
+			return __( 'Ranked by how many products and AI apps each issue affects.', 'woocommerce' );
 		}
 		/* translators: %d: number of days. */
 		return sprintf( _n( 'Start with the fixes that affect the most sales. Sales figures are from the last %d day.', 'Start with the fixes that affect the most sales. Sales figures are from the last %d days.', $days, 'woocommerce' ), $days );
@@ -992,7 +1006,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 					'text' => (string) $check['seen_at'],
 				)
 				: null;
-			$badge    = $required ? self::required_badge() : ( $conflict ? array( 'off', __( 'Likely conflict', 'woocommerce' ) ) : null );
+			$warning  = ! $required && in_array( $check['id'], self::WARNING_SCANNED, true );
+			$badge    = $required ? self::required_badge() : ( $conflict ? array( 'off', __( 'Likely conflict', 'woocommerce' ) ) : ( $warning ? array( 'warn', __( 'Warning', 'woocommerce' ) ) : null ) );
 			$rows[]   = self::row( $check['id'], $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'], $failing['link'] ?? '' ), $badge, $seen_at );
 		}
 		return $rows;

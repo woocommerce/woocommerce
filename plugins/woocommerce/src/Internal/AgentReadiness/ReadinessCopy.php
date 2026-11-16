@@ -39,6 +39,10 @@ final class ReadinessCopy {
 			/* translators: %s: UCP version the store serves, a date such as 2026-04-08. */
 			$check[3] = sprintf( __( 'Your store uses an older version of the Universal Commerce Protocol (UCP %s).', 'woocommerce' ), $source );
 		}
+		if ( 'ucp_endpoints_live' === $id && '' !== $source ) {
+			/* translators: %s: HTTP status and content type, such as 403 text/html. */
+			$check[3] .= ' ' . sprintf( __( 'The last answer was %s.', 'woocommerce' ), $source );
+		}
 		return array(
 			'title'  => $check[0],
 			'action' => $check[1],
