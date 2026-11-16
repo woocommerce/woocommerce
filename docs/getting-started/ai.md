@@ -10,28 +10,23 @@ This guide provides an overview of AI tools and how to use them to enhance your 
 
 ## MCP
 
-WooCommerce includes native support for the Model Context Protocol (MCP), enabling AI assistants and tools to interact directly with WooCommerce stores through a standardized protocol. Visit our full [MCP documentation](/docs/features/mcp/) for more information.
+WooCommerce registers product and order abilities that compatible AI clients can use through the WordPress MCP Adapter. This integration is a developer preview. See the [MCP documentation](/docs/features/mcp/) for setup and permissions.
 
-## AI Documentation Tools
+## AI documentation tools
 
-### LLMS.txt Files
+### Curated documentation index
 
-To feed the WooCommerce Developer Documentation into your LLM or AI-assisted IDE, you have two options:
+The [curated `llms.txt` index](https://developer.woocommerce.com/docs/llms.txt) links directly to Markdown versions of starting points and key references for WooCommerce development. Choose the guides relevant to your task, then open the individual pages for full instructions.
 
-1. [`llms.txt`](https://developer.woocommerce.com/docs/llms.txt) - A table of contents that includes the title, URL, and description of each document in the developer docs.
-2. [`llms-full.txt`](https://developer.woocommerce.com/docs/llms-full.txt) - A full Markdown-formatted export of the entire documentation in one file.
-
-If you are using an IDE like Cursor or Windsurf, we recommend adding these links as custom documentation so that you can reference them as needed.
-
-**Note** that these do not include the contents of the [WooCommerce Code Reference](https://woocommerce.github.io/code-reference/).
+The index does not include the contents of the [WooCommerce Code Reference](https://woocommerce.github.io/code-reference/).
 
 ### Serve as Markdown
 
-If you want to view the documentation as Markdown files, you can use append `.md` to the end of any documentation URL. For example, to view this page as Markdown, you can visit:   
+To read an individual documentation page as Markdown, append `.md` to its URL. For example, this page is available at:
 
-```plain
+```text
 https://developer.woocommerce.com/docs/getting-started/ai.md
-``` 
+```
 
 ### Copy to Markdown
 
