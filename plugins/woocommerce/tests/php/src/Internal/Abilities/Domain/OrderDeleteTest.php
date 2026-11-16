@@ -23,12 +23,20 @@ class OrderDeleteTest extends WC_Unit_Test_Case {
 	private ?bool $original_hpos = null;
 
 	/**
+	 * An administrator, who may delete any order, that every test starts as.
+	 *
+	 * @var int
+	 */
+	private static $administrator_id;
+
+	/**
 	 * Create the HPOS tables outside the test transaction, since DDL commits implicitly.
 	 *
 	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
 	 */
 	public static function wpSetUpBeforeClass( $factory ): void {
-		unset( $factory );
+		self::$administrator_id = $factory->user->create( array( 'role' => 'administrator' ) );
+
 		$previous_hpos = OrderUtil::custom_orders_table_usage_is_enabled();
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		try {
@@ -42,12 +50,12 @@ class OrderDeleteTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Log in as an administrator, who may delete any order.
+	 * Log in as the shared administrator.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::$administrator_id );
 	}
 
 	/**
