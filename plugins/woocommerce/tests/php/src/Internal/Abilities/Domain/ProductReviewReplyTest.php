@@ -33,7 +33,7 @@ class ProductReviewReplyTest extends \WC_Unit_Test_Case {
 	 *
 	 * @var int
 	 */
-	private static $user_id;
+	private static $shop_manager_id;
 
 	/**
 	 * The product every test reviews; each test's changes to it roll back.
@@ -48,8 +48,10 @@ class ProductReviewReplyTest extends \WC_Unit_Test_Case {
 	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
 	 */
 	public static function wpSetUpBeforeClass( $factory ): void {
-		self::$user_id           = $factory->user->create( array( 'role' => 'shop_manager' ) );
-		self::$shared_product_id = \WC_Helper_Product::create_simple_product()->get_id();
+		self::$shop_manager_id   = $factory->user->create( array( 'role' => 'shop_manager' ) );
+		self::$shared_product_id = self::with_direct_product_attribute_lookup_updates(
+			static fn() => \WC_Helper_Product::create_simple_product()
+		)->get_id();
 	}
 
 	/**
@@ -64,7 +66,7 @@ class ProductReviewReplyTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		wp_set_current_user( self::$user_id );
+		wp_set_current_user( self::$shop_manager_id );
 		$this->sut        = new \WP_Ability( ProductReviewReply::get_name(), ProductReviewReply::get_registration_args() );
 		$this->product_id = self::$shared_product_id;
 	}

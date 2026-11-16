@@ -28,7 +28,7 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 	 *
 	 * @var int
 	 */
-	private static $user_id;
+	private static $administrator_id;
 
 	/**
 	 * Create the fixtures that no test changes beyond its own transaction.
@@ -36,7 +36,7 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
 	 */
 	public static function wpSetUpBeforeClass( $factory ): void {
-		self::$user_id = $factory->user->create( array( 'role' => 'administrator' ) );
+		self::$administrator_id = $factory->user->create( array( 'role' => 'administrator' ) );
 	}
 
 	/**
@@ -44,7 +44,7 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		wp_set_current_user( self::$user_id );
+		wp_set_current_user( self::$administrator_id );
 		$this->sut = new \WP_Ability( ProductReviewsQuery::get_name(), ProductReviewsQuery::get_registration_args() );
 	}
 

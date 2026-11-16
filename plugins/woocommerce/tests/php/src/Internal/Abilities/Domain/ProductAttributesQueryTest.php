@@ -29,7 +29,7 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	 *
 	 * @var int
 	 */
-	private static $user_id;
+	private static $administrator_id;
 
 	/**
 	 * Create the fixtures that no test changes beyond its own transaction.
@@ -37,7 +37,7 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
 	 */
 	public static function wpSetUpBeforeClass( $factory ): void {
-		self::$user_id = $factory->user->create( array( 'role' => 'administrator' ) );
+		self::$administrator_id = $factory->user->create( array( 'role' => 'administrator' ) );
 	}
 
 	/**
@@ -46,7 +46,7 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new Ability( ProductAttributesQuery::get_name(), ProductAttributesQuery::get_registration_args() );
-		wp_set_current_user( self::$user_id );
+		wp_set_current_user( self::$administrator_id );
 	}
 
 	/**
