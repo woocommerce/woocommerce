@@ -161,6 +161,26 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a mapping with no id, sku or name column, so a wrong delimiter cannot create blank products.
+	 */
+	public function test_run_refuses_a_mapping_without_an_identifying_column(): void {
+		$before = wp_count_posts( 'product' )->publish;
+
+		try {
+			$this->sut->run(
+				$this->write_csv( "Type;SKU;Name\nsimple;IMPORT-RUNNER-SEMI;Semicolon\n" ),
+				array( 'mapping' => array( 'Type;SKU;Name' => '' ) )
+			);
+			$this->fail( 'Expected the run to refuse the mapping.' );
+		} catch ( \InvalidArgumentException $exception ) {
+			$this->assertStringContainsString( 'No column maps to id, sku or name', $exception->getMessage() );
+		}
+
+		$this->assertSame( $before, wp_count_posts( 'product' )->publish );
+		$this->assertNull( $this->import_lock->get_age() );
+	}
+
+	/**
 	 * @testdox Should report leftover placeholders while it holds the lock.
 	 */
 	public function test_run_reports_pending_placeholders_while_holding_the_lock(): void {

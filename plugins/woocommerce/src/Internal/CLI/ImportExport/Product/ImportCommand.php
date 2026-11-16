@@ -436,8 +436,9 @@ final class ImportCommand {
 		}
 
 		if ( $options['porcelain'] ) {
+			// `line()`, not `log()`, so `--quiet` cannot hide the output a script reads.
 			foreach ( array_merge( $results['imported_ids'], $results['imported_variation_ids'], $results['updated_ids'] ) as $id ) {
-				WP_CLI::log( (string) $id );
+				WP_CLI::line( (string) $id );
 			}
 
 			if ( $results['failed'] > 0 ) {

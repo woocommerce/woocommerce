@@ -343,7 +343,7 @@ final class ProductImporter {
 	 *
 	 * @param array<string, string> $mapping Header => target mapping.
 	 *
-	 * @throws InvalidArgumentException When a mapping target is not a valid importer schema key.
+	 * @throws InvalidArgumentException When a mapping target is not a valid importer schema key, or no column maps to id, sku or name.
 	 */
 	private function validate_mapping( array $mapping ): void {
 		$invalid = array();
@@ -356,6 +356,11 @@ final class ProductImporter {
 
 		if ( ! empty( $invalid ) ) {
 			throw new InvalidArgumentException( esc_html( 'Invalid mapping target(s): ' . implode( ', ', $invalid ) ) );
+		}
+
+		// Without one of these, every row would become a new, blank product, which is what a wrong delimiter produces.
+		if ( ! empty( $mapping ) && empty( array_intersect( array( 'id', 'sku', 'name' ), array_values( $mapping ) ) ) ) {
+			throw new InvalidArgumentException( 'No column maps to id, sku or name, so rows cannot be identified. Check the delimiter and the header row.' );
 		}
 	}
 
