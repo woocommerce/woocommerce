@@ -256,75 +256,115 @@ class WC_Post_Types {
 		global $wc_product_attributes;
 
 		$wc_product_attributes = array();
-		$attribute_taxonomies  = wc_get_attribute_taxonomies();
 
-		if ( $attribute_taxonomies ) {
-			foreach ( $attribute_taxonomies as $tax ) {
-				$name = wc_attribute_taxonomy_name( $tax->attribute_name );
-
-				if ( $name ) {
-					$tax->attribute_public          = absint( isset( $tax->attribute_public ) ? $tax->attribute_public : 1 );
-					$label                          = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
-					$wc_product_attributes[ $name ] = $tax;
-					$taxonomy_data                  = array(
-						'hierarchical'          => false,
-						'update_count_callback' => '_update_post_term_count',
-						'labels'                => array(
-							/* translators: %s: attribute name */
-							'name'              => sprintf( _x( 'Product %s', 'Product Attribute', 'woocommerce' ), $label ),
-							'singular_name'     => $label,
-							/* translators: %s: attribute name */
-							'search_items'      => sprintf( __( 'Search %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'all_items'         => sprintf( __( 'All %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'parent_item'       => sprintf( __( 'Parent %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'parent_item_colon' => sprintf( __( 'Parent %s:', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'edit_item'         => sprintf( __( 'Edit %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'update_item'       => sprintf( __( 'Update %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'add_new_item'      => sprintf( __( 'Add new %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'not_found'         => sprintf( __( 'No &quot;%s&quot; found', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'back_to_items'     => sprintf( __( '&larr; Back to "%s" attributes', 'woocommerce' ), $label ),
-						),
-						'show_ui'               => true,
-						'show_in_quick_edit'    => false,
-						'show_in_menu'          => false,
-						'meta_box_cb'           => false,
-						'query_var'             => 1 === $tax->attribute_public,
-						'rewrite'               => false,
-						'sort'                  => false,
-						'public'                => 1 === $tax->attribute_public,
-						'show_in_nav_menus'     => 1 === $tax->attribute_public && apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name ),
-						'capabilities'          => array(
-							'manage_terms' => 'manage_product_terms',
-							'edit_terms'   => 'edit_product_terms',
-							'delete_terms' => 'delete_product_terms',
-							'assign_terms' => 'assign_product_terms',
-						),
-					);
-
-					if ( 1 === $tax->attribute_public && sanitize_title( $tax->attribute_name ) ) {
-						$taxonomy_data['rewrite'] = array(
-							'slug'         => trailingslashit( $permalinks['attribute_rewrite_slug'] ) . urldecode( sanitize_title( $tax->attribute_name ) ),
-							'with_front'   => false,
-							'hierarchical' => true,
-						);
-					}
-
-					register_taxonomy( $name, apply_filters( "woocommerce_taxonomy_objects_{$name}", array( 'product' ) ), apply_filters( "woocommerce_taxonomy_args_{$name}", $taxonomy_data ) );
-				}
-			}
+		foreach ( wc_get_attribute_taxonomies() as $tax ) {
+			self::register_attribute_taxonomy( $tax, $permalinks );
 		}
 
+		/**
+		 * Fires after WooCommerce registers its taxonomies, including product attribute taxonomies.
+		 *
+		 * @since 2.1.0
+		 */
 		do_action( 'woocommerce_after_register_taxonomy' );
+	}
+
+	/**
+	 * Register one attribute taxonomy and add it to the $wc_product_attributes global.
+	 *
+	 * @param stdClass   $tax        Attribute row from wc_get_attribute_taxonomies().
+	 * @param array|null $permalinks Permalink structure, so a loop reads it only once.
+	 * @return void
+	 */
+	private static function register_attribute_taxonomy( $tax, ?array $permalinks = null ): void {
+		global $wc_product_attributes;
+
+		$name = wc_attribute_taxonomy_name( $tax->attribute_name );
+
+		if ( ! $name ) {
+			return;
+		}
+
+		$tax->attribute_public          = absint( isset( $tax->attribute_public ) ? $tax->attribute_public : 1 );
+		$label                          = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
+		$wc_product_attributes[ $name ] = $tax;
+		$taxonomy_data                  = array(
+			'hierarchical'          => false,
+			'update_count_callback' => '_update_post_term_count',
+			'labels'                => array(
+				/* translators: %s: attribute name */
+				'name'              => sprintf( _x( 'Product %s', 'Product Attribute', 'woocommerce' ), $label ),
+				'singular_name'     => $label,
+				/* translators: %s: attribute name */
+				'search_items'      => sprintf( __( 'Search %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'all_items'         => sprintf( __( 'All %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'parent_item'       => sprintf( __( 'Parent %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'parent_item_colon' => sprintf( __( 'Parent %s:', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'edit_item'         => sprintf( __( 'Edit %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'update_item'       => sprintf( __( 'Update %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'add_new_item'      => sprintf( __( 'Add new %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'not_found'         => sprintf( __( 'No &quot;%s&quot; found', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'back_to_items'     => sprintf( __( '&larr; Back to "%s" attributes', 'woocommerce' ), $label ),
+			),
+			'show_ui'               => true,
+			'show_in_quick_edit'    => false,
+			'show_in_menu'          => false,
+			'meta_box_cb'           => false,
+			'query_var'             => 1 === $tax->attribute_public,
+			'rewrite'               => false,
+			'sort'                  => false,
+			'public'                => 1 === $tax->attribute_public,
+			/**
+			 * Filters whether a public product attribute taxonomy shows in navigation menus.
+			 *
+			 * @since 2.1.0
+			 * @param bool   $show_in_nav_menus Whether to show the taxonomy in navigation menus.
+			 * @param string $name              Attribute taxonomy name, for example pa_color.
+			 */
+			'show_in_nav_menus'     => 1 === $tax->attribute_public && apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name ),
+			'capabilities'          => array(
+				'manage_terms' => 'manage_product_terms',
+				'edit_terms'   => 'edit_product_terms',
+				'delete_terms' => 'delete_product_terms',
+				'assign_terms' => 'assign_product_terms',
+			),
+		);
+
+		if ( 1 === $tax->attribute_public && sanitize_title( $tax->attribute_name ) ) {
+			$taxonomy_data['rewrite'] = array(
+				'slug'         => trailingslashit( ( $permalinks ?? wc_get_permalink_structure() )['attribute_rewrite_slug'] ) . urldecode( sanitize_title( $tax->attribute_name ) ),
+				'with_front'   => false,
+				'hierarchical' => true,
+			);
+		}
+
+		register_taxonomy(
+			$name,
+			/**
+			 * Filters the object types of a product attribute taxonomy.
+			 *
+			 * @since 2.1.0
+			 * @param array $object_types Object types. Default array( 'product' ).
+			 */
+			apply_filters( "woocommerce_taxonomy_objects_{$name}", array( 'product' ) ),
+			/**
+			 * Filters the arguments used to register a product attribute taxonomy.
+			 *
+			 * @since 2.1.0
+			 * @param array $taxonomy_data Taxonomy arguments.
+			 */
+			apply_filters( "woocommerce_taxonomy_args_{$name}", $taxonomy_data )
+		);
 	}
 
 	/**
