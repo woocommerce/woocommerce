@@ -1374,8 +1374,8 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	 * @testdox Chunks resume from the previous result, keep physical row numbers across blank lines and report eof only at the end.
 	 */
 	public function test_chunks_resume_from_the_previous_result(): void {
-		$id  = OrderHelper::create_order()->get_id();
-		$csv = "order_number,tracking_number,shipment_provider\n\n{$id},TRK-1,ups\n{$id},TRK-2,\"ups, ground\"\n\n,,\n{$id},TRK-3,ups\n{$id},TRK-4,ups\n{$id},TRK-5,ups\n";
+		$id  = array_map( fn() => OrderHelper::create_order()->get_id(), range( 1, 5 ) );
+		$csv = "order_number,tracking_number,shipment_provider\n\n{$id[0]},TRK-1,ups\n{$id[1]},TRK-2,\"ups, ground\"\n\n,,\n{$id[2]},TRK-3,ups\n{$id[3]},TRK-4,ups\n{$id[4]},TRK-5,ups\n";
 
 		$result = $this->import_csv( $csv, array(), 2 );
 
@@ -1467,9 +1467,9 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox An invalid items cell fails the row with invalid_items and a message saying why.
-	 * @testWith ["{a}:5", "Item quantity 5 exceeds the ordered quantity 4."]
-	 *           ["{a}:3|{a}:2", "Item quantity 5 exceeds the ordered quantity 4."]
-	 *           ["{b}:3", "Item quantity 3 exceeds the ordered quantity 2."]
+	 * @testWith ["{a}:5", "Item quantity 5 exceeds the quantity left to fulfill 4."]
+	 *           ["{a}:3|{a}:2", "Item quantity 5 exceeds the quantity left to fulfill 4."]
+	 *           ["{b}:3", "Item quantity 3 exceeds the quantity left to fulfill 2."]
 	 *           ["99999999:1", "Item ID 99999999 is not part of this order."]
 	 *           ["{a}:1.5", "Item quantity must be a positive integer."]
 	 *           ["{a}:0", "Item quantity must be a positive integer."]
@@ -1497,6 +1497,78 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( FulfillmentsCsvImporter::CODE_INVALID_ITEMS, $result['rows'][0]['code'] ?? null );
 		$this->assertSame( strtr( $message, $replace ), $result['rows'][0]['message'] );
 		$this->assertCount( 0, $this->fulfillments_of( $order ) );
+	}
+
+	/**
+	 * @testdox Items default to and are capped by what is left to fulfill after refunds and the order's other fulfillments.
+	 * @testWith ["{a}:1", "TRK-NEW", "", "{a}:3|{b}:1|{c}:1"]
+	 *           ["{a}:1", "TRK-NEW", "{a}:3", "{a}:3"]
+	 *           ["{a}:1", "TRK-NEW", "{a}:4", "Item quantity 4 exceeds the quantity left to fulfill 3."]
+	 *           ["{a}:1", "TRK-NEW", "{b}:2", "Item quantity 2 exceeds the quantity left to fulfill 1."]
+	 *           ["{a}:1", "TRK-OLD", "{a}:4", "{a}:4"]
+	 *           ["{a}:4|{b}:1|{c}:1", "TRK-NEW", "", "This order has no items left to fulfill."]
+	 *           ["{a}:4", "TRK-NEW", "{a}:1", "Item quantity 1 exceeds the quantity left to fulfill 0."]
+	 *
+	 * @param string $stored   Items of the stored fulfillment TRK-OLD.
+	 * @param string $tracking Tracking number of the row.
+	 * @param string $cell     Items cell of the row.
+	 * @param string $expected Items of the imported fulfillment, or the failure message.
+	 */
+	public function test_items_are_limited_to_what_is_left_to_fulfill( string $stored, string $tracking, string $cell, string $expected ): void {
+		list( $order, $item_a, $item_b ) = $this->make_two_item_order();
+		$replace                         = array(
+			'{a}' => $item_a,
+			'{b}' => $item_b,
+			'{c}' => array_keys( $order->get_items() )[2],
+		);
+		$to_items                        = static function ( string $entries ) use ( $replace ): array {
+			return array_map(
+				static function ( $entry ) {
+					list( $item_id, $qty ) = array_map( 'intval', explode( ':', $entry ) );
+					return array(
+						'item_id' => $item_id,
+						'qty'     => $qty,
+					);
+				},
+				explode( '|', strtr( $entries, $replace ) )
+			);
+		};
+		FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id' => (string) $order->get_id(),
+				'status'    => 'fulfilled',
+			),
+			array(
+				'_tracking_number' => 'TRK-OLD',
+				'_items'           => $to_items( $stored ),
+			)
+		);
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 1,
+				'line_items' => array(
+					$item_b => array(
+						'qty'          => 1,
+						'refund_total' => 1,
+					),
+				),
+			)
+		);
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$order->get_id()},{$tracking},ups,,\"" . strtr( $cell, $replace ) . "\"\n", array( 'update_existing' => true ) );
+
+		$items = array();
+		foreach ( $this->fulfillments_of( $order ) as $fulfillment ) {
+			$items = $tracking === $fulfillment->get_tracking_number() ? $fulfillment->get_items() : $items;
+		}
+		if ( '{' === $expected[0] ) {
+			$this->assertNotSame( FulfillmentsCsvImporter::STATUS_FAILED, $result['rows'][0]['status'] );
+			$this->assertSame( $to_items( $expected ), $items );
+		} else {
+			$this->assertSame( $expected, $result['rows'][0]['message'] );
+			$this->assertCount( 1, $this->fulfillments_of( $order ) );
+		}
 	}
 
 	/**

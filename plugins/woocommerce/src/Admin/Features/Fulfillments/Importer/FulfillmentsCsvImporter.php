@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\Admin\Features\Fulfillments\Importer;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentException;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 use WC_Data_Store;
 use WC_Order;
 
@@ -566,16 +567,27 @@ class FulfillmentsCsvImporter {
 			);
 		}
 
-		$items_cell = self::get_field( $cells, $header_map, self::COL_ITEMS );
-		$items      = '' === $items_cell ? null : $this->parse_items( $items_cell, $order );
-		if ( is_string( $items ) ) {
-			return self::fail( self::CODE_INVALID_ITEMS, $items, $order_id );
-		}
-
 		try {
 			$existing = $this->find_existing_fulfillment( $order_id, $tracking_number );
 		} catch ( \RuntimeException $e ) {
 			return self::fail( self::CODE_STORE_READ_FAILED, __( 'Could not read the fulfillments of this order. Please try again.', 'woocommerce' ), $order_id );
+		}
+
+		$pending    = $this->pending_items( $order, $existing );
+		$items_cell = self::get_field( $cells, $header_map, self::COL_ITEMS );
+		$items      = '' === $items_cell ? null : $this->parse_items( $items_cell, $order, $pending );
+		if ( is_string( $items ) ) {
+			return self::fail( self::CODE_INVALID_ITEMS, $items, $order_id );
+		}
+		if ( null === $items && null === $existing ) {
+			// A blank items cell fulfills what is left on create, but keeps the stored items on update.
+			$items = array();
+			foreach ( $pending as $item_id => $qty ) {
+				$items[] = array(
+					'item_id' => $item_id,
+					'qty'     => $qty,
+				);
+			}
 		}
 
 		if ( null !== $existing && ! $this->options['update_existing'] ) {
@@ -612,7 +624,7 @@ class FulfillmentsCsvImporter {
 	 *
 	 * @param WC_Order                                                            $order      Order of the row.
 	 * @param Fulfillment|null                                                    $existing   Fulfillment with the row's tracking number, if any.
-	 * @param array<int, array{item_id:int, qty:int}>|null                        $items      Items from the items cell; null when the cell is blank.
+	 * @param array<int, array{item_id:int, qty:int}>|null                        $items      Items to store; null keeps the stored items of an update.
 	 * @param array{tracking_number:string, provider:string, tracking_url:string} $fields     Validated cells; the URL may be empty.
 	 * @param int                                                                 $row_number Physical record number, for the log.
 	 * @return array<string, mixed> Row result without the row number and order number.
@@ -622,10 +634,8 @@ class FulfillmentsCsvImporter {
 		$fulfillment   = $existing ?? new Fulfillment();
 		$was_fulfilled = null !== $existing && $existing->get_is_fulfilled();
 		if ( null === $existing ) {
-			// A blank items cell fulfills every item on create, but keeps the stored items on update.
-			$items = $items ?? $this->default_items_from_order( $order );
 			if ( array() === $items ) {
-				return self::fail( self::CODE_NO_ITEMS, __( 'This order has no items to fulfill.', 'woocommerce' ), $order_id );
+				return self::fail( self::CODE_NO_ITEMS, __( 'This order has no items left to fulfill.', 'woocommerce' ), $order_id );
 			}
 			$fulfillment->set_entity_type( WC_Order::class );
 			$fulfillment->set_entity_id( (string) $order_id );
@@ -868,13 +878,14 @@ class FulfillmentsCsvImporter {
 	 *
 	 * Entries are separated by "|" or ";" and are either "<order item ID>:<qty>" or
 	 * "sku:<SKU>:<qty>"; empty entries are skipped. Quantities of a repeated item are
-	 * added up before they are checked against the ordered quantity.
+	 * added up before they are checked against the quantity left to fulfill.
 	 *
-	 * @param string   $cell  Items cell, not empty.
-	 * @param WC_Order $order Order of the row.
+	 * @param string          $cell    Items cell, not empty.
+	 * @param WC_Order        $order   Order of the row.
+	 * @param array<int, int> $pending Order item ID => quantity left to fulfill.
 	 * @return array<int, array{item_id:int, qty:int}>|string Items, or a message saying why the cell is invalid.
 	 */
-	private function parse_items( string $cell, WC_Order $order ) {
+	private function parse_items( string $cell, WC_Order $order, array $pending ) {
 		$line_items = $order->get_items( 'line_item' );
 		$by_sku     = null;
 		$totals     = array();
@@ -922,10 +933,10 @@ class FulfillmentsCsvImporter {
 
 		$items = array();
 		foreach ( $totals as $item_id => $qty ) {
-			$ordered = (int) $line_items[ $item_id ]->get_quantity();
-			if ( $qty > $ordered ) {
-				/* translators: 1: quantity from the CSV, 2: ordered quantity. */
-				return sprintf( __( 'Item quantity %1$d exceeds the ordered quantity %2$d.', 'woocommerce' ), $qty, $ordered );
+			$left = $pending[ $item_id ] ?? 0;
+			if ( $qty > $left ) {
+				/* translators: 1: quantity from the CSV, 2: quantity of the item not fulfilled yet. */
+				return sprintf( __( 'Item quantity %1$d exceeds the quantity left to fulfill %2$d.', 'woocommerce' ), $qty, $left );
 			}
 			$items[] = array(
 				'item_id' => (int) $item_id,
@@ -954,23 +965,20 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * Every line item of an order at its ordered quantity.
+	 * Quantities left to fulfill per order item, after refunds and the order's other fulfillments.
 	 *
-	 * @param WC_Order $order Order.
-	 * @return array<int, array{item_id:int, qty:int}>
+	 * @param WC_Order         $order    Order of the row.
+	 * @param Fulfillment|null $existing Fulfillment the row updates; its own items count as not fulfilled.
+	 * @return array<int, int> Order item ID => quantity.
 	 */
-	private function default_items_from_order( WC_Order $order ): array {
-		$items = array();
-		foreach ( $order->get_items( 'line_item' ) as $item ) {
-			$qty = (int) $item->get_quantity();
-			if ( $qty > 0 ) {
-				$items[] = array(
-					'item_id' => (int) $item->get_id(),
-					'qty'     => $qty,
-				);
+	private function pending_items( WC_Order $order, ?Fulfillment $existing ): array {
+		$others = array_filter(
+			$this->fulfillments_cache[ $order->get_id() ] ?? array(),
+			static function ( $fulfillment ) use ( $existing ) {
+				return $fulfillment !== $existing;
 			}
-		}
-		return $items;
+		);
+		return array_map( 'intval', array_column( FulfillmentUtils::get_pending_items( $order, $others ), 'qty', 'item_id' ) );
 	}
 
 	/**
