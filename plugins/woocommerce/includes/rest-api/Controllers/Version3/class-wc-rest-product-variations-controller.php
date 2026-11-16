@@ -207,6 +207,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
 	 * @throws \Throwable When setting gallery_image_ids fails.
+	 * @throws WC_REST_Exception When an attribute term ID is invalid.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$customs = CustomsDataValidator::normalize_fields( $request->get_params() );
@@ -430,8 +431,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
 					// A term ID identifies the term exactly; otherwise get the slug from the name posted to the API.
 					if ( isset( $attribute['term_id'] ) ) {
-						// Batch requests skip schema validation, so 0 or -42 must be rejected here instead of falling back to the name or to term 42.
-						$term_id = is_numeric( $attribute['term_id'] ) ? (int) $attribute['term_id'] : 0;
+						// Batch requests skip schema validation, so reject non-integer IDs before converting them.
+						$term_id = is_numeric( $attribute['term_id'] ) && (float) (int) $attribute['term_id'] === (float) $attribute['term_id'] ? (int) $attribute['term_id'] : 0;
 						$term    = $term_id > 0 ? get_term_by( 'id', $term_id, $parent_attributes[ $attribute_name ]->get_name() ) : false;
 						if ( ! $term instanceof WP_Term ) {
 							/* translators: %d: term ID */

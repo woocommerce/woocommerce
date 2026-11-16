@@ -1635,13 +1635,15 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A zero or negative variation attribute term ID is rejected and keeps the saved selection.
+	 * @testdox An invalid variation attribute term ID is rejected and keeps the saved selection.
 	 * @testWith [0]
 	 *           [-1]
+	 *           [1, 0.5]
 	 *
-	 * @param int $sign Multiplier applied to a real term ID: 0 posts 0, -1 posts the negated ID.
+	 * @param int   $sign   Multiplier applied to a real term ID: 0 posts 0, -1 posts the negated ID.
+	 * @param float $offset Fraction added to the term ID.
 	 */
-	public function test_batch_update_variation_rejects_non_positive_attribute_term_id( int $sign ): void {
+	public function test_batch_update_variation_rejects_non_positive_attribute_term_id( int $sign, float $offset = 0 ): void {
 		list( $attribute, $first_term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
 		$taxonomy = $attribute['attribute_taxonomy'];
 
@@ -1670,7 +1672,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 						'attributes' => array(
 							array(
 								'id'      => $attribute['attribute_id'],
-								'term_id' => $sign * $first_term_id,
+								'term_id' => $sign * $first_term_id + $offset,
 							),
 						),
 					),

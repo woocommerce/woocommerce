@@ -803,6 +803,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
+	 * @throws WC_REST_Exception When an attribute term ID is invalid.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$customs = CustomsDataValidator::normalize_fields( $request->get_params() );
@@ -914,8 +915,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 				// Check ID for global attributes or name for product attributes.
 				if ( ! empty( $attribute['id'] ) ) {
-					$attribute_id   = absint( $attribute['id'] );
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+					$attribute_id = absint( $attribute['id'] );
 				} elseif ( ! empty( $attribute['name'] ) ) {
 					$attribute_name = wc_clean( $attribute['name'] );
 				}
@@ -925,13 +925,14 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				}
 
 				if ( $attribute_id ) {
+					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
 
 					if ( isset( $attribute['term_ids'] ) && is_array( $attribute['term_ids'] ) ) {
 						// Term IDs identify terms exactly, even when several terms share a name.
 						$values = array();
 						foreach ( $attribute['term_ids'] as $posted_term_id ) {
-							// Batch requests skip schema validation, and absint() would turn -42 into term 42.
-							$term_id = is_numeric( $posted_term_id ) ? (int) $posted_term_id : 0;
+							// Batch requests skip schema validation, so reject non-integer IDs before converting them.
+							$term_id = is_numeric( $posted_term_id ) && (float) (int) $posted_term_id === (float) $posted_term_id ? (int) $posted_term_id : 0;
 							$term    = $term_id > 0 ? get_term( $term_id, wc_attribute_taxonomy_name_by_id( $attribute_id ) ) : null;
 							if ( ! $term instanceof WP_Term ) {
 								/* translators: %d: term ID */

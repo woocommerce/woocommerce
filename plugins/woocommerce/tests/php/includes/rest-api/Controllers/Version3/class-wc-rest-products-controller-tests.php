@@ -3016,9 +3016,14 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A negative attribute term ID is rejected instead of selecting the term with the matching positive ID.
+	 * @testdox An invalid attribute term ID is rejected instead of selecting a different term.
+	 * @testWith [-1, 0]
+	 *           [1, 0.5]
+	 *
+	 * @param int   $sign   Multiplier applied to a real term ID.
+	 * @param float $offset Fraction added to the term ID.
 	 */
-	public function test_batch_update_product_rejects_negative_attribute_term_id(): void {
+	public function test_batch_update_product_rejects_negative_attribute_term_id( int $sign, float $offset ): void {
 		list( $attribute, $first_term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
 		$taxonomy = $attribute['attribute_taxonomy'];
 
@@ -3039,7 +3044,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 						'attributes' => array(
 							array(
 								'id'       => $attribute['attribute_id'],
-								'term_ids' => array( -$first_term_id ),
+								'term_ids' => array( $sign * $first_term_id + $offset ),
 							),
 						),
 					),
@@ -3048,7 +3053,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		);
 		$data = $this->server->dispatch( $request )->get_data();
 
-		$this->assertSame( 'woocommerce_rest_invalid_attribute_term_id', $data['update'][0]['error']['code'] ?? null, 'The negative term ID should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_invalid_attribute_term_id', $data['update'][0]['error']['code'] ?? null, 'The invalid term ID should be rejected.' );
 		$this->assertSame( array( $second_term_id ), wc_get_product_terms( $product->get_id(), $taxonomy, array( 'fields' => 'ids' ) ), 'The product terms should not change.' );
 	}
 
