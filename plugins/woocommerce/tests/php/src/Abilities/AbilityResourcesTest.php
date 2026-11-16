@@ -67,6 +67,69 @@ class AbilityResourcesTest extends DomainAbilityTestCase {
 	}
 
 	/**
+	 * @testdox Should preserve typed classifications and withhold both root and extension fields.
+	 * @testWith ["email"]
+	 *           ["phone"]
+	 *           ["ip"]
+	 *           ["text"]
+	 *           ["address_state"]
+	 *           ["address_country"]
+	 *           ["numeric_id"]
+	 *           [true]
+	 * @param bool|string $classification Personal data classification.
+	 */
+	public function test_typed_personal_fields_are_withheld( $classification ): void {
+		$this->register_resources( 'ticket' );
+		$args = array(
+			'schema'        => array( 'type' => 'string' ),
+			'get_callback'  => static fn() => 'private',
+			'personal_data' => $classification,
+		);
+		AbilityResources::register_field( 'ticket', 'contact', $args );
+		AbilityResources::register_field( 'ticket', 'contact', $args + array( 'output_schema' => $args['schema'] ), 'test-ext' );
+		AbilityResources::register_field(
+			'ticket',
+			'public',
+			array(
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static fn() => 'public',
+			)
+		);
+
+		$this->assertSame( $classification, ExtensibleAbilities::get_fields( 'ticket' )['test-ext']['contact']['personal_data'] );
+		$this->assertSame( 'private', AbilityResources::output_data( 'ticket', array() )['contact'] );
+		$this->assertSame( 'private', AbilityResources::output_data( 'ticket', array() )['extensions']['test-ext']['contact'] );
+		$this->withhold_personal_data();
+
+		$this->assertSame( array( 'public' => 'public' ), AbilityResources::output_data( 'ticket', array() ) );
+		$this->assertSame( array( 'public' ), array_keys( AbilityResources::output_schema( 'ticket' )['properties'] ) );
+	}
+
+	/**
+	 * @testdox Should refuse unsupported classifications rather than treating arbitrary values as personal data.
+	 * @testWith ["unknown"]
+	 *           [""]
+	 *           [1]
+	 *           [["email"]]
+	 * @param mixed $classification Invalid classification.
+	 */
+	public function test_invalid_personal_data_classifications_are_refused( $classification ): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$this->register_resources( 'ticket' );
+		$args = array(
+			'schema'        => array( 'type' => 'string' ),
+			'get_callback'  => static fn() => 'private',
+			'personal_data' => $classification,
+		);
+		AbilityResources::register_field( 'ticket', 'contact', $args );
+		AbilityResources::register_field( 'ticket', 'contact', $args + array( 'output_schema' => $args['schema'] ), 'test-ext' );
+
+		$this->assertSame( array(), AbilityResources::output_data( 'ticket', array() ) );
+		$this->assertSame( array(), ExtensibleAbilities::get_fields( 'ticket' ) );
+	}
+
+	/**
 	 * @testdox Should identify a failing root field and keep its exception text in developer diagnostics.
 	 * @testWith ["Exception"]
 	 *           ["Error"]

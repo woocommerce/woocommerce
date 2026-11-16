@@ -104,7 +104,10 @@ class ExtensibleAbilities {
 	 *     @type string   $resource     Resource that an ability formats, for example `product`, `order` or `order_item`.
 	 *     @type string   $namespace    Slug of the extension that owns the field, such as `subscriptions`.
 	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
-	 *     @type bool     $personal_data Optional. Remove the field from output and output schema when sharing is disabled. Defaults to false.
+	 *     @type bool|string $personal_data Optional classification: email, phone, ip, text, address_state, address_country,
+	 *                                      or numeric_id. True means personal data of unspecified type; false or omitted
+	 *                                      means unclassified. All personal types are withheld equally. This does not
+	 *                                      select an erasure action or change input permissions.
 	 *     @type array    $output_schema Optional. JSON schema of the value that `get_callback` returns. Required
 	 *                                  with `get_callback`. It needs one `type` other than null, because clients
 	 *                                  expect one type for each field. Core publishes it as declared. Its

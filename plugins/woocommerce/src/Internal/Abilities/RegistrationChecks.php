@@ -38,7 +38,7 @@ final class RegistrationChecks {
 
 	/**
 	 * Whether the arguments every field needs are valid: a schema with a `type`, no `required`, a get_callback,
-	 * and a boolean personal_data flag.
+	 * and a supported personal_data classification.
 	 *
 	 * @param string               $method     Method that was called.
 	 * @param array<string, mixed> $args       Field arguments.
@@ -59,8 +59,19 @@ final class RegistrationChecks {
 			wc_doing_it_wrong( $method, 'The "get_callback" argument must be callable.', '11.4.0' );
 			return false;
 		}
-		if ( isset( $args['personal_data'] ) && ! is_bool( $args['personal_data'] ) ) {
-			wc_doing_it_wrong( $method, 'The "personal_data" argument must be a boolean.', '11.4.0' );
+		return self::has_personal_data( $method, $args );
+	}
+
+	/**
+	 * Whether a field declares a supported personal data classification.
+	 *
+	 * @param string               $method Registration method.
+	 * @param array<string, mixed> $args   Field arguments.
+	 * @return bool
+	 */
+	public static function has_personal_data( string $method, array $args ): bool {
+		if ( ! in_array( $args['personal_data'] ?? false, array( false, true, 'email', 'phone', 'ip', 'text', 'address_state', 'address_country', 'numeric_id' ), true ) ) {
+			wc_doing_it_wrong( $method, 'The "personal_data" argument must be a boolean or one of: email, phone, ip, text, address_state, address_country, numeric_id.', '11.4.0' );
 			return false;
 		}
 		return true;

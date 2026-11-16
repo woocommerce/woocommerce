@@ -107,8 +107,10 @@ class AbilityResources {
 	 *                                   null. No `required`.
 	 *     @type callable $get_callback  Receives the object and returns the value. Read the given object, not the
 	 *                                   database: an ability can format an object before it is saved.
-	 *     @type bool     $personal_data Optional. Whether the value is personal data, such as an email address. It is left
-	 *                                   out of the output and the output schema while the store withholds personal data. Defaults to false.
+	 *     @type bool|string $personal_data Optional classification: email, phone, ip, text, address_state, address_country,
+	 *                                      or numeric_id. True means personal data of unspecified type; false or omitted
+	 *                                      means unclassified. All personal types are withheld equally. This does not
+	 *                                      select an erasure action or change input permissions.
 	 *     @type bool $omit_if_null Optional. Omit unavailable root values. Defaults to false.
 	 * }
 	 * @param string $extension_namespace     Optional. Extension namespace, or empty for a root field.
@@ -654,6 +656,9 @@ class AbilityResources {
 				),
 				'11.3.0'
 			);
+			return;
+		}
+		if ( ! RegistrationChecks::has_personal_data( ExtensibleAbilities::class . '::register_field', $args ) ) {
 			return;
 		}
 		$readable = isset( $args['get_callback'] ) || isset( $args['output_schema'] );
