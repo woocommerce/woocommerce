@@ -919,7 +919,14 @@ class StoreOutputChecks {
 			if ( 200 === (int) ( $responses->get( self::host_root( '/llms.txt' ) )['status'] ?? 0 ) ) {
 				return '';
 			}
-			return 'disabled' === $status['status'] ? 'disabled' : 'not_reached';
+			if ( 'disabled' === $status['status'] ) {
+				return 'disabled';
+			}
+			// A root file still blocks WooCommerce's fallback, even when /llms.txt is not reached.
+			if ( 'physical_file' === $status['status'] ) {
+				return '';
+			}
+			return 'not_reached';
 		}
 		$response = $responses->get( self::host_root( '/llms.txt' ) );
 		if ( '1' === ( $response['headers']['x-woocommerce-llms-txt'] ?? '' ) ) {

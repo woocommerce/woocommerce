@@ -330,6 +330,11 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertNotSame( $default['fix'], $not_reached['fix'] );
 		$this->assertSame( '', self::llms_present( self::with_llms_status( 'no_rewrite', '## Agentic capabilities' ) )['source'], 'A status it doesn\'t know claims no cause' );
 
+		// A root file that isn't reached still blocks WooCommerce's fallback, so keep the default SEO fix.
+		$root_file = self::llms_present( self::with_llms_status( 'physical_file', '## Agentic capabilities' ) );
+		$this->assertSame( '', $root_file['source'], 'A root file that isn\'t served is not "WooCommerce will serve one"' );
+		$this->assertSame( $default['fix'], $root_file['fix'] );
+
 		$subdirectory = static fn( string $url ): string => (string) preg_replace( '#^(https?://[^/]+)#', '$1/shop', $url );
 		add_filter( 'home_url', $subdirectory );
 		try {
