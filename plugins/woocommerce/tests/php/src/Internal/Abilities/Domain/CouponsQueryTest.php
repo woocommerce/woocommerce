@@ -353,4 +353,41 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $result['total'] );
 		$this->assertSame( 1, $result['total_pages'] );
 	}
+	/**
+	 * @testdox Should validate spending limits against their final values without partial saves.
+	 * @testWith [{"minimum_amount":"30","maximum_amount":"40"}, "30", "40", true]
+	 *           [{"minimum_amount":"1","maximum_amount":"5"}, "1", "5", true]
+	 *           [{"minimum_amount":"30","maximum_amount":"0"}, "30", "0", true]
+	 *           [{"minimum_amount":"30","maximum_amount":""}, "30", "0", true]
+	 *           [{"minimum_amount":"","maximum_amount":"5"}, "0", "5", true]
+	 *           [{"minimum_amount":"30","maximum_amount":"25"}, "10", "20", false]
+	 *           [{"minimum_amount":"30"}, "10", "20", false]
+	 *           [{"maximum_amount":"5"}, "10", "20", false]
+	 * @param array  $input Requested limits.
+	 * @param string $minimum Expected minimum.
+	 * @param string $maximum Expected maximum.
+	 * @param bool   $valid Whether the final pair is valid.
+	 */
+	public function test_spending_limit_updates( array $input, string $minimum, string $maximum, bool $valid ): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'spending-limit-update' );
+		$coupon->set_minimum_amount( '10' );
+		$coupon->set_maximum_amount( '20' );
+		$coupon->save();
+		$before = ( new \WC_Coupon( $coupon->get_id() ) )->get_data();
+		$class  = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
+		$update = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$result = $update->execute( $input + array( 'id' => $coupon->get_id() ) );
+		if ( $valid ) {
+			$this->assertNotWPError( $result );
+		} else {
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_ability_coupon_invalid_data', $result->get_error_code() );
+			$this->assertEquals( $before, ( new \WC_Coupon( $coupon->get_id() ) )->get_data() );
+		}
+		$stored = new \WC_Coupon( $coupon->get_id() );
+		$this->assertSame( $minimum, $stored->get_minimum_amount() );
+		$this->assertSame( $maximum, $stored->get_maximum_amount() );
+	}
 }

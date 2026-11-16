@@ -279,6 +279,10 @@ trait CouponAbilityTrait {
 		);
 
 		try {
+			if ( isset( $input['minimum_amount'], $input['maximum_amount'] ) ) {
+				// Validate the new bounds together instead of against the stored maximum.
+				$coupon->set_maximum_amount( '' );
+			}
 			foreach ( $setters as $field => $setter ) {
 				if ( array_key_exists( $field, $input ) ) {
 					$coupon->$setter( $input[ $field ] ?? null );
