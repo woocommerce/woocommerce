@@ -650,7 +650,7 @@ final class WC_Cart_Session {
 
 			if ( '' === $value ) {
 				$value = $ordered;
-			} elseif ( '' !== $ordered && $recorded !== $normalize( (string) $value ) ) {
+			} elseif ( '' !== $ordered && $recorded !== (string) $value && $recorded !== $normalize( (string) $value ) ) {
 				return null;
 			}
 

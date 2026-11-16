@@ -101,6 +101,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * @testWith ["Blue", 0]
 	 *           ["Red", 1]
 	 *           ["A&amp;B", 1, "A&amp;amp;B"]
+	 *           ["A&amp;amp;B", 1, "A&amp;amp;B"]
 	 *
 	 * @param string $ordered_value  Value stored on the order item.
 	 * @param int    $expected_items Cart items expected after Order Again.
@@ -147,6 +148,18 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertCount( $expected_items, $populated, 'Only an ordered value that still matches the fixed attribute should be re-added.' );
 		if ( $expected_items ) {
 			$this->assertSame( array( 'attribute_colour' => $fixed_value ), array_values( $populated )[0]['variation'] );
+
+			WC()->cart->set_cart_contents( $populated );
+			WC()->cart->calculate_totals();
+			$next_order = new WC_Order();
+			$next_order->set_customer_id( $user_id );
+			$next_order->set_status( OrderStatus::COMPLETED );
+			WC_Checkout::instance()->create_order_line_items( $next_order, WC()->cart );
+			$next_order->save();
+
+			$reordered = $method->invoke( $cart_session, $next_order->get_id(), array() );
+			$this->assertCount( 1, $reordered, 'The selection must survive checkout and a second Order Again.' );
+			$this->assertSame( array( 'attribute_colour' => $fixed_value ), array_values( $reordered )[0]['variation'] );
 		}
 	}
 
