@@ -50,22 +50,6 @@ class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		// Disable the REST API v4 feature.
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features = array_diff( $features, array( 'rest-api-v4' ) );
-				return $features;
-			}
-		);
-	}
-
-	/**
 	 * Test that add_to_cart data is correctly populated in product responses.
 	 *
 	 * @param string $product_type The type of product to test.

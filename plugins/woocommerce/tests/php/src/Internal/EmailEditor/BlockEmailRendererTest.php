@@ -419,7 +419,6 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		WCTransactionalEmailPostsManager::get_instance()->clear_caches();
-		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 	}
 
 	/**

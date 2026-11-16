@@ -64,9 +64,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-
-		delete_option( self::OPTION_KEY );
-		delete_option( self::OPTION_KEY . '_chunk_size' );
 		$this->test_container->reset_all_replacements();
 	}
 

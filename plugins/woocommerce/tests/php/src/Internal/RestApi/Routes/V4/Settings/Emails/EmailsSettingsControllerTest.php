@@ -110,8 +110,6 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 		$this->previous_emails_instance = $instance_property->getValue();
 		$this->previous_emails          = $this->previous_emails_instance ? $this->previous_emails_instance->emails : array();
 
-		$this->prev_options['woocommerce_feature_block_email_editor_enabled'] = get_option( 'woocommerce_feature_block_email_editor_enabled', null );
-
 		parent::setUp();
 
 		// Enable the v4 REST API feature.
@@ -168,9 +166,6 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		$block_email_editor_option = $this->prev_options['woocommerce_feature_block_email_editor_enabled'];
-		unset( $this->prev_options['woocommerce_feature_block_email_editor_enabled'] );
-
 		try {
 			// Restore previous option values.
 			foreach ( $this->prev_options as $key => $value ) {
@@ -198,11 +193,6 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 					$instance_property->setAccessible( true );
 					$instance_property->setValue( null, $this->previous_emails_instance );
 				} finally {
-					if ( null === $block_email_editor_option ) {
-						delete_option( 'woocommerce_feature_block_email_editor_enabled' );
-					} else {
-						update_option( 'woocommerce_feature_block_email_editor_enabled', $block_email_editor_option );
-					}
 					$this->previous_emails          = array();
 					$this->previous_emails_instance = null;
 					$this->prev_options             = array();
