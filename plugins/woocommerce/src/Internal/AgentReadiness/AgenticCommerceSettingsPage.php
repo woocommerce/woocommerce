@@ -819,10 +819,19 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * What an open check asks the merchant to do: the action, the button text and where it goes.
 	 * A policy page that is chosen but not published links to its editor; a published store page asks for another page.
 	 *
-	 * @param array{id:string,label:string,fix_url:string} $check Store condition.
+	 * @param array{id:string,label:string,fix?:string,fix_url:string} $check Store condition.
 	 * @return array{0:string,1:string,2:string}
 	 */
 	private function check_action( array $check ): array {
+		// The UCP row's text is the specific fix (delete the file, fix permissions, or change permalinks).
+		if ( 'ucp_discovery' === $check['id'] ) {
+			$fix = (string) ( $check['fix'] ?? '' );
+			return array(
+				'' !== $fix ? $fix : __( 'Make the UCP address reachable', 'woocommerce' ),
+				__( 'Open permalinks', 'woocommerce' ),
+				(string) ( $check['fix_url'] ?? '' ),
+			);
+		}
 		$policies = array(
 			'privacy_page'         => array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Publish your privacy policy page', 'woocommerce' ), __( 'Choose a privacy policy page', 'woocommerce' ) ),
 			'terms_page'           => array( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Publish your terms and conditions page', 'woocommerce' ), __( 'Choose a terms and conditions page', 'woocommerce' ) ),
@@ -839,7 +848,6 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$actions = array(
 			'launched'       => array( __( 'Take your store out of coming soon mode', 'woocommerce' ), __( 'Go to Site visibility', 'woocommerce' ) ),
 			'https'          => array( __( 'Move your store to HTTPS', 'woocommerce' ), __( 'Learn how', 'woocommerce' ) ),
-			'ucp_discovery'  => array( __( 'Make the UCP address reachable', 'woocommerce' ), __( 'Open settings', 'woocommerce' ) ),
 			'search_visible' => array( __( 'Let search engines index your store', 'woocommerce' ), __( 'Open settings', 'woocommerce' ) ),
 			'guest_checkout' => array( __( 'Allow guest checkout', 'woocommerce' ), __( 'Open settings', 'woocommerce' ) ),
 			'order_emails'   => array( __( 'Turn on order confirmation emails', 'woocommerce' ), __( 'Open settings', 'woocommerce' ) ),

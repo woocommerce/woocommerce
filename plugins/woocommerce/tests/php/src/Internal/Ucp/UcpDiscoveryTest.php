@@ -103,18 +103,21 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox serve_status reads the permalink setting and the static file: no file is fine with pretty permalinks and missing with Plain; a file must be WooCommerce's and current.
+	 * @testdox serve_status reads the permalink setting and the static file: no file is fine with permalinks WordPress routes, and with Plain or index.php permalinks before UCP is on when the file can be written; a file must be WooCommerce's and current.
 	 * @testWith ["/%postname%/", null, "ok"]
 	 *           ["/%postname%/", "current", "ok"]
 	 *           ["/%postname%/", "foreign", "file_in_the_way"]
 	 *           ["/%postname%/", "outdated", "file_outdated"]
-	 *           ["", null, "no_file"]
+	 *           ["", null, "ok"]
 	 *           ["", "current", "ok"]
 	 *           ["", "current, other formatting", "ok"]
 	 *           ["", "foreign", "file_in_the_way"]
-	 *           ["", "not json", "file_in_the_way"]
-	 *           ["", "cut short", "file_in_the_way"]
+	 *           ["", "not json", "file_unusable"]
+	 *           ["", "cut short", "file_unusable"]
 	 *           ["", "outdated", "file_outdated"]
+	 *           ["/index.php/%postname%/", null, "ok"]
+	 *           ["/index.php/%postname%/", "current", "ok"]
+	 *           ["/index.php/%postname%/", "foreign", "file_in_the_way"]
 	 *
 	 * @param string      $structure Permalink structure.
 	 * @param string|null $file      The static file, or null for none.
@@ -169,10 +172,43 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 			if ( is_readable( $path ) ) {
 				$this->markTestSkipped( 'The test runs as a user who can read any file (root).' );
 			}
-			$this->assertSame( 'file_in_the_way', UcpDiscovery::serve_status() );
+			$this->assertSame( 'not_readable', UcpDiscovery::serve_status() );
 		} finally {
 			chmod( $path, 0644 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
 			self::remove_ucp_file( $path );
+		}
+	}
+
+	/**
+	 * @testdox Plain and index.php permalinks are not ok once UCP is on without a file, or when the folder can't be written.
+	 */
+	public function test_serve_status_no_file_when_the_address_cannot_be_served(): void {
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+		$this->set_permalink_structure( '' );
+		$this->assertSame( 'no_file', UcpDiscovery::serve_status() );
+
+		$this->set_permalink_structure( '/index.php/%postname%/' );
+		$this->assertSame( 'no_file', UcpDiscovery::serve_status(), 'A structure starting with index.php does not route /.well-known/ucp' );
+
+		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+		$locked = get_temp_dir() . uniqid( 'wc-ucp-locked-' );
+		mkdir( $locked ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
+		chmod( $locked, 0555 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $locked . '/ucp' );
+		try {
+			if ( is_writable( $locked ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+				$this->markTestSkipped( 'The test runs as a user who can write any directory (root).' );
+			}
+			$this->set_permalink_structure( '' );
+			$this->assertSame( 'no_file', UcpDiscovery::serve_status() );
+			$fix = UcpDiscovery::discovery_fix( 'no_file' );
+			$this->assertStringContainsString( 'Settings > Permalinks', $fix );
+			$this->assertStringContainsString( 'index.php', $fix );
+			$this->assertStringContainsString( 'writable', $fix );
+			$this->assertStringContainsString( $locked, $fix );
+		} finally {
+			chmod( $locked, 0755 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+			rmdir( $locked ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
 		}
 	}
 
@@ -187,6 +223,11 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		$this->set_permalink_structure( '/%postname%/' );
 		$this->sut->maybe_sync_file();
 		$this->assertFileDoesNotExist( $this->file );
+
+		$this->set_permalink_structure( '/index.php/%postname%/' );
+		$this->sut->maybe_sync_file();
+		$this->assertFileExists( $this->file, 'PATHINFO permalinks are served from the static file' );
+		wp_delete_file( $this->file );
 
 		$this->set_permalink_structure( '' );
 		$this->sut->maybe_sync_file();

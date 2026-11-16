@@ -43,29 +43,39 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Why `/.well-known/ucp` does or doesn't serve WooCommerce's current profile, read from the
-	 * permalink setting and the static file each call, so nothing is stored. The agent readiness
-	 * checks read this.
+	 * Why `/.well-known/ucp` does or doesn't serve WooCommerce's current profile, from the
+	 * permalink setting and the static file, read on every call so nothing is stored.
 	 *
-	 * - `ok`: no file and pretty permalinks (the rewrite rule answers), or WooCommerce's file with the current profile.
-	 * - `no_file`: Plain permalinks and no static file, so nothing answers the address.
-	 * - `file_in_the_way`: a file WooCommerce didn't write, or one it can't read (unreadable, not JSON, cut short).
-	 * - `file_outdated`: WooCommerce's file, but its profile isn't the current one (for example after a move to HTTPS).
+	 * Plain permalinks, and structures that start with index.php, don't route that address.
+	 * Before UCP is on, a folder WooCommerce can write still counts as ok: turning UCP on writes the file.
 	 *
-	 * @return string One of `ok`, `no_file`, `file_in_the_way`, `file_outdated`.
+	 * @return string One of `ok`, `no_file`, `file_in_the_way`, `not_readable`, `file_unusable`, `file_outdated`.
 	 */
 	public static function serve_status(): string {
-		global $wp_rewrite;
-
 		$path = self::get_file_path();
 		if ( ! is_file( $path ) ) {
-			return $wp_rewrite->using_permalinks() ? 'ok' : 'no_file';
+			if ( self::rewrite_serves_discovery() ) {
+				return 'ok';
+			}
+			// UCP off and a writable folder: enabling UCP writes the file, so permalinks don't have to change.
+			if ( ! Utils::is_enabled() && self::can_create_file( $path ) ) {
+				return 'ok';
+			}
+			return 'no_file';
+		}
+
+		if ( ! is_readable( $path ) ) {
+			return 'not_readable';
 		}
 
 		// The profile is a few KB; cap the read so a large file someone else put there isn't read whole.
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$profile = is_readable( $path ) ? json_decode( (string) file_get_contents( $path, false, null, 0, 65536 ), true ) : null;
-		$links   = is_array( $profile ) ? ( $profile['links'] ?? null ) : null;
+		$profile = json_decode( (string) file_get_contents( $path, false, null, 0, 65536 ), true );
+		if ( ! is_array( $profile ) ) {
+			return 'file_unusable';
+		}
+
+		$links = $profile['links'] ?? null;
 		if ( ! is_array( $links ) || ! in_array( self::LINK_REL, array_column( $links, 'rel' ), true ) ) {
 			return 'file_in_the_way';
 		}
@@ -74,6 +84,40 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		// The current profile goes through the same JSON round trip, so objects and arrays compare alike.
 		$current = json_decode( (string) wp_json_encode( ( new self() )->get_profile()['ucp'] ), true );
 		return ( $profile['ucp'] ?? null ) === $current ? 'ok' : 'file_outdated';
+	}
+
+	/**
+	 * What a merchant should do for a failing serve_status() value. Includes the file path.
+	 *
+	 * @param string $status A status from serve_status().
+	 * @return string Empty when the address is already served.
+	 */
+	public static function discovery_fix( string $status ): string {
+		$path = self::get_file_path();
+		$dir  = dirname( $path );
+
+		switch ( $status ) {
+			case 'not_readable':
+				/* translators: 1: discovery file path, 2: folder path. */
+				return sprintf( __( 'WooCommerce can\'t read %1$s. Make that file readable by the web server, or delete it. If you can\'t delete it, make %2$s writable by the web server.', 'woocommerce' ), $path, $dir );
+			case 'file_unusable':
+				/* translators: 1: discovery file path, 2: folder path. */
+				return sprintf( __( 'The %1$s file is incomplete or isn\'t valid JSON, so /.well-known/ucp can return an invalid profile. Delete it and check the server has free disk space. If you can\'t delete it, make %2$s writable by the web server.', 'woocommerce' ), $path, $dir );
+			case 'file_in_the_way':
+				/* translators: 1: discovery file path, 2: folder path. */
+				return sprintf( __( 'Remove the %1$s file that WooCommerce didn\'t write. It is being served instead of your store profile. If you can\'t remove it, make %2$s writable by the web server.', 'woocommerce' ), $path, $dir );
+			case 'file_outdated':
+				/* translators: 1: discovery file path, 2: folder path. */
+				return sprintf( __( 'Delete the %1$s file. It has an old profile. If you can\'t delete it, make %2$s writable by the web server so WooCommerce can replace it.', 'woocommerce' ), $path, $dir );
+			case 'no_file':
+				if ( is_multisite() ) {
+					return __( 'Choose a permalink structure other than Plain under Settings > Permalinks. A structure that starts with index.php doesn\'t serve /.well-known/ucp either.', 'woocommerce' );
+				}
+				/* translators: %s: folder path. */
+				return sprintf( __( 'Choose a permalink structure other than Plain under Settings > Permalinks. A structure that starts with index.php doesn\'t serve /.well-known/ucp either. Or make %s writable by the web server so WooCommerce can write the discovery file.', 'woocommerce' ), $dir );
+			default:
+				return '';
+		}
 	}
 
 	/**
@@ -141,20 +185,19 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Keep the static discovery file in sync on admin screens: write it under plain permalinks, delete it under pretty ones.
-	 * The file only refreshes on admin page loads.
+	 * Keep the static discovery file in sync: write it when permalinks don't route `/.well-known/ucp`
+	 * (Plain, or a structure that starts with index.php), and delete it when they do.
+	 * The file only refreshes on admin page loads, and when UCP is turned on.
 	 *
 	 * Failures are silent here: the Agentic Readiness checks report an unreachable or invalid discovery endpoint.
 	 */
 	public function maybe_sync_file(): void {
-		global $wp_rewrite;
-
 		// admin_init also fires for anonymous admin-ajax.php/admin-post.php requests and on every heartbeat.
 		if ( wp_doing_ajax() || ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
-		if ( $wp_rewrite->using_permalinks() ) {
+		if ( self::rewrite_serves_discovery() ) {
 			// A file that cannot be deleted keeps overriding the profile WooCommerce serves, as the web server answers first.
 			$this->delete_file();
 			return;
@@ -207,6 +250,44 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		$profile = is_file( $path ) ? json_decode( (string) file_get_contents( $path ), true ) : null;
 		$links   = $profile['links'] ?? null;
 		return is_array( $links ) && in_array( self::LINK_REL, array_column( $links, 'rel' ), true );
+	}
+
+	/**
+	 * Whether the permalink structure routes `/.well-known/ucp` to WordPress.
+	 * Structures that start with index.php (PATHINFO) do not: the web server only does
+	 * when it sends every path to WordPress, and the static file covers that case.
+	 *
+	 * @return bool
+	 */
+	private static function rewrite_serves_discovery(): bool {
+		global $wp_rewrite;
+
+		return $wp_rewrite->using_mod_rewrite_permalinks();
+	}
+
+	/**
+	 * Whether WooCommerce can create the static file, including the `.well-known` folder.
+	 * One file under ABSPATH can't hold a profile per site, so multisite never can.
+	 *
+	 * @param string $path Absolute file path.
+	 * @return bool
+	 */
+	private static function can_create_file( string $path ): bool {
+		if ( is_multisite() ) {
+			return false;
+		}
+
+		$dir = dirname( $path );
+		while ( ! is_dir( $dir ) ) {
+			$parent = dirname( $dir );
+			if ( $parent === $dir ) {
+				return false;
+			}
+			$dir = $parent;
+		}
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+		return is_writable( $dir );
 	}
 
 	/**

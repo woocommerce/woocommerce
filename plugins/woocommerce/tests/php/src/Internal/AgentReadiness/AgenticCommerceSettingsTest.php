@@ -641,6 +641,59 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A discovery file WooCommerce didn't write shows the removal instruction, not a permalinks link.
+	 */
+	public function test_ucp_file_in_the_way_shows_the_removal_instruction(): void {
+		StoreConditionsTest::make_store_ready();
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/.well-known/ucp';
+		wp_mkdir_p( dirname( $path ) );
+		file_put_contents( $path, '{}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+
+		try {
+			$html = $this->render_page();
+			$this->assertStringContainsString( 'didn&#039;t write', $html );
+			$this->assertStringContainsString( esc_html( $path ), $html );
+			$this->assertStringNotContainsString( 'options-permalink.php', $html );
+			$this->assertStringNotContainsString( 'Open permalinks', $html );
+		} finally {
+			wp_delete_file( $path );
+			foreach ( array( dirname( $path ), dirname( $path, 2 ) ) as $dir ) {
+				if ( is_dir( $dir ) ) {
+					rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+				}
+			}
+		}
+	}
+
+	/**
+	 * @testdox When the discovery file can't be written, the status row says to change permalinks or make the folder writable.
+	 */
+	public function test_ucp_no_file_shows_permalink_and_permission_fixes(): void {
+		global $wp_rewrite;
+		StoreConditionsTest::make_store_ready();
+		$wp_rewrite->set_permalink_structure( '' );
+		$locked = get_temp_dir() . uniqid( 'wc-ucp-locked-' );
+		mkdir( $locked ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
+		chmod( $locked, 0555 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $locked . '/ucp' );
+
+		try {
+			if ( is_writable( $locked ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+				$this->markTestSkipped( 'The test runs as a user who can write any directory (root).' );
+			}
+			$html = $this->render_page();
+			$this->assertStringContainsString( 'Open permalinks', $html );
+			$this->assertStringContainsString( 'options-permalink.php', $html );
+			$this->assertStringContainsString( 'writable', $html );
+			$this->assertStringContainsString( 'index.php', $html );
+		} finally {
+			chmod( $locked, 0755 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+			rmdir( $locked ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+		}
+	}
+
+	/**
 	 * @testdox The switch stays disabled until the required checks pass.
 	 */
 	public function test_switch_disabled_until_required_checks_pass(): void {

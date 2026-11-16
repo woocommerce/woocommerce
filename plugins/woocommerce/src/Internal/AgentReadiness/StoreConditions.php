@@ -184,11 +184,6 @@ class StoreConditions {
 	 * @return array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}
 	 */
 	private static function ucp_discovery( string $status ): array {
-		$fixes = array(
-			'no_file'         => __( 'Choose a permalink structure other than Plain under Settings > Permalinks.', 'woocommerce' ),
-			'file_in_the_way' => __( 'Remove the /.well-known/ucp file that WooCommerce didn\'t write from your WordPress folder. If permalinks are Plain, also choose another structure under Settings > Permalinks.', 'woocommerce' ),
-			'file_outdated'   => __( 'The /.well-known/ucp file in your WordPress folder has an old profile. Delete it, and if permalinks are Plain, choose another structure under Settings > Permalinks.', 'woocommerce' ),
-		);
 		return array(
 			'id'      => 'ucp_discovery',
 			'ok'      => 'ok' === $status,
@@ -197,8 +192,9 @@ class StoreConditions {
 			'name'    => __( 'Store serves the UCP address', 'woocommerce' ),
 			'label'   => __( 'Store can\'t serve the UCP address', 'woocommerce' ),
 			'why'     => __( 'Agents find your catalog at /.well-known/ucp, and that address doesn\'t return your store\'s current profile.', 'woocommerce' ),
-			'fix'     => $fixes[ $status ] ?? $fixes['no_file'],
-			'fix_url' => admin_url( 'options-permalink.php' ),
+			'fix'     => UcpDiscovery::discovery_fix( $status ),
+			// Permalinks are one fix only when nothing is serving the address. A file in the way is removed on disk.
+			'fix_url' => 'no_file' === $status ? admin_url( 'options-permalink.php' ) : '',
 		);
 	}
 

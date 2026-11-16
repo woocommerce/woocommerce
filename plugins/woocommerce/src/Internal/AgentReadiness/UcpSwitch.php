@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils as UcpUtils;
 
 defined( 'ABSPATH' ) || exit;
@@ -38,16 +39,25 @@ class UcpSwitch {
 	private StoreConditions $store_conditions;
 
 	/**
+	 * UCP discovery file.
+	 *
+	 * @var UcpDiscovery
+	 */
+	private UcpDiscovery $ucp_discovery;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
 	 *
 	 * @param FeaturesController $features_controller Features controller.
 	 * @param StoreConditions    $store_conditions    Store conditions.
+	 * @param UcpDiscovery       $ucp_discovery       UCP discovery file.
 	 */
-	final public function init( FeaturesController $features_controller, StoreConditions $store_conditions ): void {
+	final public function init( FeaturesController $features_controller, StoreConditions $store_conditions, UcpDiscovery $ucp_discovery ): void {
 		$this->features_controller = $features_controller;
 		$this->store_conditions    = $store_conditions;
+		$this->ucp_discovery       = $ucp_discovery;
 	}
 
 	/**
@@ -70,6 +80,10 @@ class UcpSwitch {
 
 		if ( UcpUtils::is_enabled() !== $enable ) {
 			$this->features_controller->change_feature_enable( UcpUtils::FEATURE_ID, $enable );
+			// Plain and index.php permalinks are served from the static file. Write it now so the address exists as soon as UCP is on.
+			if ( $enable ) {
+				$this->ucp_discovery->maybe_sync_file();
+			}
 			\WC_Tracks::record_event( 'agentic_commerce_ucp_toggled', array( 'enabled' => $enable ? 'yes' : 'no' ) );
 		}
 

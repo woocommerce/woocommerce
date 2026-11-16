@@ -176,21 +176,39 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Plain permalinks are required to change, since the store can't serve /.well-known/ucp with them.
+	 * @testdox Plain permalinks pass when WooCommerce can write the discovery file, and fail with both fixes when it can't.
 	 */
-	public function test_plain_permalinks_required(): void {
+	public function test_plain_permalinks_depend_on_writing_the_discovery_file(): void {
 		global $wp_rewrite;
 		self::make_store_ready();
 		$wp_rewrite->set_permalink_structure( '' );
 
-		$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
-		$this->assertStringContainsString( 'Settings > Permalinks', $this->ucp_discovery_fix() );
+		$this->assertNotContains( 'ucp_discovery', $this->sut->failing_required() );
+
+		$locked = get_temp_dir() . uniqid( 'wc-ucp-locked-' );
+		mkdir( $locked ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
+		chmod( $locked, 0555 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $locked . '/ucp' );
+		try {
+			if ( is_writable( $locked ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+				$this->markTestSkipped( 'The test runs as a user who can write any directory (root).' );
+			}
+			$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
+			$fix = $this->ucp_discovery_fix();
+			$this->assertStringContainsString( 'Settings > Permalinks', $fix );
+			$this->assertStringContainsString( 'writable', $fix );
+			$checks = array_column( $this->sut->all(), null, 'id' );
+			$this->assertSame( admin_url( 'options-permalink.php' ), $checks['ucp_discovery']['fix_url'] );
+		} finally {
+			chmod( $locked, 0755 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+			rmdir( $locked ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+		}
 	}
 
 	/**
 	 * @testdox A /.well-known/ucp file in the way fails the UCP address check with the fix for its reason, and deleting it passes the check.
-	 * @testWith ["foreign", "Remove the /.well-known/ucp file"]
-	 *           ["outdated", "The /.well-known/ucp file in your WordPress folder has an old profile"]
+	 * @testWith ["foreign", "Remove the "]
+	 *           ["outdated", "Delete the "]
 	 *
 	 * @param string $file   Someone else's file, or WooCommerce's file with an old profile.
 	 * @param string $prefix How the fix should start.
@@ -209,6 +227,9 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 		try {
 			$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
 			$this->assertStringStartsWith( $prefix, $this->ucp_discovery_fix() );
+			$this->assertStringContainsString( $path, $this->ucp_discovery_fix() );
+			$checks = array_column( $this->sut->all(), null, 'id' );
+			$this->assertSame( '', $checks['ucp_discovery']['fix_url'] );
 
 			// Following the fix passes the check: with the file gone and pretty permalinks, nothing is in the way.
 			wp_delete_file( $path );
