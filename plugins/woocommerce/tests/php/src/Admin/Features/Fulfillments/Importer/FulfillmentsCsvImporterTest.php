@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Importer;
 
 require_once __DIR__ . '/FulfillmentsCsvReadTracker.php';
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentException;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsCsvImporter;
@@ -1008,6 +1009,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	 *           [0, false, 200]
 	 *           ["junk", false, 200]
 	 *           [5000, false, 1000]
+	 *           [[500], false, 200]
 	 *           [null, true, 25]
 	 *           [10, true, 10]
 	 *           [500, true, 25]
@@ -1038,8 +1040,12 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	public function test_valid_row_creates_a_fulfilled_fulfillment_with_every_order_item(): void {
 		$order = OrderHelper::create_order();
 		$id    = $order->get_id();
+		$zero  = new \WC_Order_Item_Product();
+		$zero->set_quantity( 0 );
+		$order->add_item( $zero );
+		$order->save();
 
-		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,ups,https://example.com/t/TRK-1\n" );
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,ups,https://example.com/t/<b>TRK-1\n" );
 
 		$this->assertSame( self::counts( array( 'created' => 1 ) ), $result['counts'] );
 		$fulfillments = $this->fulfillments_of( $order );
@@ -1060,7 +1066,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $fulfillment->get_is_fulfilled() );
 		$this->assertSame( 'TRK-1', $fulfillment->get_tracking_number() );
 		$this->assertSame( 'ups', $fulfillment->get_shipment_provider() );
-		$this->assertSame( 'https://example.com/t/TRK-1', $fulfillment->get_tracking_url() );
+		$this->assertSame( 'https://example.com/t/bTRK-1', $fulfillment->get_tracking_url(), 'The URL is sanitized before it is stored' );
 		$item = current( $order->get_items() );
 		$this->assertEquals(
 			array(
@@ -1070,7 +1076,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 				),
 			),
 			$fulfillment->get_items(),
-			'A row without an items cell fulfills every line item'
+			'A row without an items cell fulfills every line item with a quantity'
 		);
 	}
 
@@ -1087,6 +1093,9 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 				if ( 'TRK-BLOCKED' === $fulfillment->get_tracking_number() ) {
 					throw new FulfillmentException( 'Blocked by an extension.' );
 				}
+				if ( 'TRK-CRASH' === $fulfillment->get_tracking_number() ) {
+					throw new \RuntimeException( 'Database gone away.' );
+				}
 				return $fulfillment;
 			}
 		);
@@ -1095,11 +1104,11 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			"order_number,tracking_number,shipment_provider,tracking_url\n"
 			. ",TRK-A,ups,\n{$id},,ups,\n{$id},TRK-B,,\n999999999,TRK-C,ups,\nINV-1,TRK-D,ups,\n"
 			. "{$id},TRK-E,ups,javascript:alert(1)\n{$id},TRK-F,ups,//example.com/t\n{$id},TRK-G,ups,/wp-admin/\n{$id},TRK-H,ups,ftp://example.com/t\n"
-			. "{$no_items},TRK-I,ups,\n{$id},TRK-BLOCKED,ups,\n{$id},TRK-OK,ups,http://example.com/t\n"
+			. "{$no_items},TRK-I,ups,\n{$id},TRK-BLOCKED,ups,\n{$id},TRK-CRASH,ups,\n{$id},TRK-OK,ups,http://example.com/t\n"
 		);
 
 		$this->assertSame(
-			array( 'missing_order_number', 'missing_tracking_number', 'missing_provider', 'order_not_found', 'order_not_found', 'invalid_tracking_url', 'invalid_tracking_url', 'invalid_tracking_url', 'invalid_tracking_url', 'no_items', 'save_failed', null ),
+			array( 'missing_order_number', 'missing_tracking_number', 'missing_provider', 'order_not_found', 'order_not_found', 'invalid_tracking_url', 'invalid_tracking_url', 'invalid_tracking_url', 'invalid_tracking_url', 'no_items', 'save_failed', 'save_failed', null ),
 			array_map(
 				static function ( $row ) {
 					return $row['code'] ?? null;
@@ -1111,13 +1120,14 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			self::counts(
 				array(
 					'created' => 1,
-					'failed'  => 11,
+					'failed'  => 12,
 				)
 			),
 			$result['counts']
 		);
-		$this->assertSame( range( 2, 13 ), array_column( $result['rows'], 'row' ) );
+		$this->assertSame( range( 2, 14 ), array_column( $result['rows'], 'row' ) );
 		$this->assertSame( 'Blocked by an extension.', $result['rows'][10]['message'], 'An extension message from a blocked save reaches the merchant' );
+		$this->assertSame( 'Could not save the fulfillment.', $result['rows'][11]['message'], 'Other save errors are not shown to the merchant' );
 		$this->assertSame( 'INV-1', $result['rows'][4]['order_number'], 'A failed row still names the order number from the file' );
 		$fulfillments = $this->fulfillments_of( $order );
 		$this->assertCount( 1, $fulfillments );
@@ -1125,15 +1135,25 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A repeated order and tracking number pair is skipped across chunks, and a failed row does not count as seen.
+	 * @testdox A repeated order and tracking number pair is skipped across chunks, and a row that failed to save does not count as seen.
 	 */
 	public function test_duplicate_pairs_are_skipped_after_the_first_imported_row(): void {
-		$order = OrderHelper::create_order();
-		$other = OrderHelper::create_order();
-		$id    = $order->get_id();
+		$order  = OrderHelper::create_order();
+		$other  = OrderHelper::create_order();
+		$id     = $order->get_id();
+		$blocks = 1;
+		add_filter(
+			'woocommerce_fulfillment_before_create',
+			function ( $fulfillment ) use ( &$blocks ) {
+				if ( $blocks-- > 0 ) {
+					throw new FulfillmentException( 'Blocked once.' );
+				}
+				return $fulfillment;
+			}
+		);
 
 		$result = $this->import_csv(
-			"order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,ups,ftp://bad\n{$id},trk-1,ups,\n{$id},TRK-1,fedex,\n{$other->get_id()},TRK-1,ups,\n",
+			"order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,ups,\n{$id},trk-1,ups,\n{$id},TRK-1,fedex,\n{$other->get_id()},TRK-1,ups,\n",
 			array(),
 			1
 		);
@@ -1222,26 +1242,112 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The orders a chunk names by ID are loaded in one query.
+	 * @testdox Each chunk loads the orders it names by ID in one query, uses them, and checks the filtered query result.
 	 */
 	public function test_chunk_orders_are_loaded_in_one_query(): void {
 		$first   = OrderHelper::create_order();
 		$second  = OrderHelper::create_order();
 		$queries = array();
+		$primed  = array();
 		add_filter(
 			'woocommerce_order_query_args',
 			function ( $args ) use ( &$queries ) {
 				if ( isset( $args['post__in'] ) ) {
-					$queries[] = $args['post__in'];
+					$queries[] = array( $args['post__in'], $args['limit'] );
 				}
 				return $args;
 			}
 		);
+		add_filter(
+			'woocommerce_order_query',
+			function ( $orders, $args ) use ( &$queries ) {
+				if ( ! isset( $args['post__in'] ) ) {
+					return $orders;
+				}
+				// The first priming query gets a junk entry, the second returns a non-array.
+				if ( 1 === count( $queries ) ) {
+					foreach ( $orders as $order ) {
+						$order->add_meta_data( '_test_primed', 'yes' );
+					}
+					$orders[] = 'junk';
+					return $orders;
+				}
+				return 'not an array';
+			},
+			10,
+			2
+		);
+		add_filter(
+			'woocommerce_fulfillments_csv_importer_resolve_order',
+			function ( $order ) use ( &$primed ) {
+				$primed[] = $order ? $order->get_meta( '_test_primed' ) : null;
+				return $order;
+			}
+		);
 
-		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$second->get_id()},TRK-1,ups\nINV-1,TRK-2,ups\n{$first->get_id()},TRK-3,ups\n{$second->get_id()},TRK-4,ups\n" );
+		$result = $this->import_csv(
+			"order_number,tracking_number,shipment_provider\nINV-1,TRK-1,ups\nINV-2,TRK-2,ups\n{$second->get_id()},TRK-3,ups\n{$second->get_id()},TRK-4,ups\n{$first->get_id()},TRK-5,ups\n",
+			array(),
+			2
+		);
 
-		$this->assertSame( array( array( $second->get_id(), $first->get_id() ) ), $queries );
-		$this->assertSame( array( $second->get_id(), $first->get_id(), $second->get_id() ), array_column( array_values( array_filter( $result['rows'], fn( $row ) => 'created' === $row['status'] ) ), 'order_id' ) );
+		$this->assertSame(
+			array(
+				array( array( $second->get_id() ), 1 ),
+				array( array( $first->get_id() ), 1 ),
+			),
+			$queries,
+			'A chunk without numeric order numbers runs no query, and IDs are not repeated'
+		);
+		$this->assertSame( array( null, null, 'yes', '' ), $primed, 'The primed order is used; a non-array query result falls back to a lookup' );
+		$this->assertSame( array( 'failed', 'failed', 'created', 'created', 'created' ), array_column( $result['rows'], 'status' ) );
+	}
+
+	/**
+	 * @testdox A row whose order fulfillments cannot be read fails without caching the failure.
+	 */
+	public function test_unreadable_fulfillments_fail_the_row(): void {
+		$order = OrderHelper::create_order();
+		$reads = 0;
+		$store = new class( $reads ) extends FulfillmentsDataStore {
+			/**
+			 * Read counter shared with the test.
+			 *
+			 * @var int
+			 */
+			private $reads;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param int $reads Read counter.
+			 */
+			public function __construct( int &$reads ) {
+				$this->reads = &$reads;
+			}
+
+			// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn -- The test double only throws.
+			/**
+			 * Fail every read.
+			 *
+			 * @param string $entity_type  Entity type.
+			 * @param string $entity_id    Entity ID.
+			 * @param bool   $with_deleted Whether to include deleted fulfillments.
+			 * @return array
+			 * @throws \Exception Always.
+			 */
+			public function read_fulfillments( string $entity_type, string $entity_id, bool $with_deleted = false ): array {
+				++$this->reads;
+				throw new \Exception( 'Table is locked.' );
+			}
+			// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn
+		};
+		add_filter( 'woocommerce_order-fulfillment_data_store', fn() => $store );
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,ups\n{$order->get_id()},TRK-2,ups\n" );
+
+		$this->assertSame( array( 'store_read_failed', 'store_read_failed' ), array_column( $result['rows'], 'code' ) );
+		$this->assertSame( 2, $reads, 'A failed read is not cached, so the next row reads again' );
 	}
 
 	/**
@@ -1297,7 +1403,8 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create an order with item "a" (quantity 4, SKU "DUMMY SKU") and item "b" (quantity 2, SKU "SKU-B").
+	 * Create an order with item "a" (quantity 4, SKU "DUMMY SKU"), item "b" (quantity 2, SKU "SKU-B")
+	 * and a third item whose product was deleted.
 	 *
 	 * @return array{0: WC_Order, 1: int, 2: int} The order and the IDs of items a and b.
 	 */
@@ -1306,8 +1413,11 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$product_b = \WC_Helper_Product::create_simple_product();
 		$product_b->set_sku( 'SKU-B' );
 		$product_b->save();
-		$item_b = $order->add_product( $product_b, 2 );
+		$item_b  = $order->add_product( $product_b, 2 );
+		$deleted = \WC_Helper_Product::create_simple_product();
+		$order->add_product( $deleted, 1 );
 		$order->save();
+		$deleted->delete( true );
 		return array( $order, (int) current( $order->get_items() )->get_id(), (int) $item_b );
 	}
 
@@ -1317,7 +1427,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	public function test_items_cell_selects_items_by_id_and_sku(): void {
 		list( $order, $item_a, $item_b ) = $this->make_two_item_order();
 
-		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$order->get_id()},TRK-1,ups,,{$item_a}:1|sku:sku-b:1; {$item_a} : 2\n" );
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$order->get_id()},TRK-1,ups,,{$item_a}:1|SKU:Sku-B:1; {$item_a} : 2\n" );
 
 		$this->assertSame( 'created', $result['rows'][0]['status'] );
 		$this->assertSame(
@@ -1344,7 +1454,9 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	 *           ["{a}:1.5", "Item quantity must be a positive integer."]
 	 *           ["{a}:0", "Item quantity must be a positive integer."]
 	 *           ["{a}", "Invalid items entry: {a}."]
+	 *           ["{a}abc:1", "Item ID {a}abc is not part of this order."]
 	 *           ["sku:NOPE:1", "SKU NOPE was not found on the order."]
+	 *           ["sku::1", "SKU  was not found on the order."]
 	 *           ["|;", "The items cell has no item entries."]
 	 *
 	 * @param string $cell    Items cell; {a} and {b} stand for the item IDs.

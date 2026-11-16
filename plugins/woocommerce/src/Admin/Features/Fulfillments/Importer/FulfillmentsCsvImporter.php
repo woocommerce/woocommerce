@@ -557,7 +557,6 @@ class FulfillmentsCsvImporter {
 		}
 
 		if ( null !== $existing && ! $this->options['update_existing'] ) {
-			$seen[ $pair ] = true;
 			return array(
 				'status'         => 'skipped',
 				'message'        => __( 'Fulfillment with this tracking number already exists.', 'woocommerce' ),
@@ -630,8 +629,6 @@ class FulfillmentsCsvImporter {
 				array( 'source' => 'fulfillments-importer' )
 			);
 			return $this->fail( 'save_failed', __( 'Could not save the fulfillment.', 'woocommerce' ), $order_id );
-		} finally {
-			unset( $this->fulfillments_cache[ $order_id ] );
 		}
 
 		return array(
@@ -742,7 +739,7 @@ class FulfillmentsCsvImporter {
 		$ids = array();
 		foreach ( $rows as $row ) {
 			$order_number = $this->get_field( $row['cells'], $header_map, self::COL_ORDER_NUMBER );
-			if ( ctype_digit( $order_number ) && ! array_key_exists( $order_number, $this->order_cache ) ) {
+			if ( ctype_digit( $order_number ) ) {
 				$ids[] = (int) $order_number;
 			}
 		}
@@ -756,9 +753,9 @@ class FulfillmentsCsvImporter {
 			array(
 				'post__in' => $ids,
 				'limit'    => count( $ids ),
-				'type'     => 'shop_order',
 			)
 		);
+		// The result passes through the woocommerce_order_query filter, so it is checked.
 		foreach ( is_array( $orders ) ? $orders : array() as $order ) {
 			if ( $order instanceof WC_Order ) {
 				$this->primed_orders[ $order->get_id() ] = $order;
@@ -907,7 +904,7 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * Index line items by lowercase SKU; the first item with a SKU wins.
+	 * Index line items by lowercase SKU.
 	 *
 	 * @param array<int|string, \WC_Order_Item> $line_items Line items of the order.
 	 * @return array<string, \WC_Order_Item>
@@ -917,7 +914,7 @@ class FulfillmentsCsvImporter {
 		foreach ( $line_items as $item ) {
 			$product = $item instanceof \WC_Order_Item_Product ? $item->get_product() : null;
 			$sku     = $product instanceof \WC_Product ? strtolower( (string) $product->get_sku() ) : '';
-			if ( '' !== $sku && ! isset( $by_sku[ $sku ] ) ) {
+			if ( '' !== $sku ) {
 				$by_sku[ $sku ] = $item;
 			}
 		}
