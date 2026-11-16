@@ -165,6 +165,7 @@ html[class*='docs-doc-id-getting-started/README'] .theme-doc-breadcrumbs {
 }
 
 .woo-docs-homepage {
+  --woo-home-lead-width: 48rem;
   --woo-home-surface: #faf7f3;
   --woo-home-card: #ffffff;
   --woo-home-border: #e9e1d9;
@@ -185,11 +186,11 @@ html[class*='docs-doc-id-getting-started/README'] .theme-doc-breadcrumbs {
 }
 
 .woo-docs-homepage__intro {
+  max-width: var(--woo-home-lead-width);
   padding: 2rem 0 2.5rem;
 }
 
 .woo-docs-homepage__intro > p {
-  max-width: 67ch;
   margin-bottom: 0;
   color: var(--woo-home-muted);
   font-size: clamp(1rem, 1.4vw, 1.16rem);
@@ -206,6 +207,7 @@ html[class*='docs-doc-id-getting-started/README'] .theme-doc-breadcrumbs {
 .woo-docs-homepage__start-grid {
   grid-template-columns: 1fr;
   align-items: stretch;
+  max-width: var(--woo-home-lead-width);
   margin-bottom: 3.5rem;
 }
 
