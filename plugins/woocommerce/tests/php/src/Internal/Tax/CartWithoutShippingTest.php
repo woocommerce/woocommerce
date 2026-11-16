@@ -44,6 +44,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		// A fresh instance, so state left by earlier tests cannot leak in; WC_Customer resolves it from the container.
 		$this->sut = new CartWithoutShipping();
 		wc_get_container()->replace( CartWithoutShipping::class, $this->sut );
+		$this->sut->register();
 		$this->customer = new \WC_Customer();
 		$this->customer->set_billing_location( 'GB', 'LND', 'SW1A 1AA', 'London' );
 		$this->customer->set_shipping_location( 'US', 'CA', '90210', 'Beverly Hills' );
@@ -241,6 +242,42 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 			),
 			$seen,
 			'Lookups during the load should not see a partly loaded cart as one without shipping.'
+		);
+	}
+
+	/**
+	 * @testdox Keeps the shipping address while the cart reloads after only the load-started counter was reset.
+	 *
+	 * Store API UCP routes reset the woocommerce_load_cart_from_session counter to reload a cart that was already loaded.
+	 */
+	public function test_keeps_shipping_address_while_cart_reloads_after_load_counter_reset(): void {
+		$this->seed_session_cart(
+			array(
+				'virtual'  => $this->create_product( true ),
+				'physical' => $this->create_product( false ),
+			)
+		);
+		WC()->session->set( 'cart_totals', array( 'total' => 0 ) );
+		$this->forget_cart_was_loaded();
+		WC()->cart->get_cart();
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+		$seen     = array();
+		$callback = function ( $session_data, $values, $key ) use ( &$seen ) {
+			unset( $values ); // Avoid parameter not used PHPCS errors.
+			$seen[ $key ] = $this->customer->get_taxable_address()[0];
+			return $session_data;
+		};
+		add_filter( 'woocommerce_get_cart_item_from_session', $callback, 10, 3 );
+
+		WC()->cart->get_cart();
+
+		$this->assertSame(
+			array(
+				'virtual'  => 'US',
+				'physical' => 'US',
+			),
+			$seen,
+			'Lookups during the reload should not see a partly loaded cart as one without shipping.'
 		);
 	}
 

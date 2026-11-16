@@ -22,11 +22,48 @@ class CartWithoutShipping {
 	private $is_checking_shipping = false;
 
 	/**
-	 * Whether the cart is being loaded from the session, so re-entrant calls from cart contents filter callbacks are skipped.
+	 * Whether this class is loading the cart because nothing else loaded it yet, so re-entrant calls from cart contents filter callbacks are skipped.
 	 *
 	 * @var bool
 	 */
 	private $is_loading_cart = false;
+
+	/**
+	 * Whether WC_Cart_Session is loading the cart from the session, so the cart holds only some of its items.
+	 *
+	 * Tracked with hooks rather than did_action() counters, because code that reloads the cart may reset those counters.
+	 *
+	 * @var bool
+	 */
+	private $is_cart_loading_from_session = false;
+
+	/**
+	 * Register the hooks that track loading the cart from the session.
+	 *
+	 * @internal
+	 */
+	public function register(): void {
+		add_action( 'woocommerce_load_cart_from_session', array( $this, 'handle_cart_load_started' ), PHP_INT_MIN );
+		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'handle_cart_load_finished' ), PHP_INT_MIN );
+	}
+
+	/**
+	 * Mark the cart as loading from the session.
+	 *
+	 * @internal
+	 */
+	public function handle_cart_load_started(): void {
+		$this->is_cart_loading_from_session = true;
+	}
+
+	/**
+	 * Mark the cart as fully loaded from the session.
+	 *
+	 * @internal
+	 */
+	public function handle_cart_load_finished(): void {
+		$this->is_cart_loading_from_session = false;
+	}
 
 	/**
 	 * Determine whether the customer's billing address should be used for tax because tax is based on shipping and no product in their cart needs shipping.
@@ -56,7 +93,7 @@ class CartWithoutShipping {
 		}
 
 		// A cart still being loaded from the session holds only some of its items.
-		if ( did_action( 'woocommerce_load_cart_from_session' ) > did_action( 'woocommerce_cart_loaded_from_session' ) ) {
+		if ( $this->is_cart_loading_from_session ) {
 			return false;
 		}
 
@@ -80,6 +117,7 @@ class CartWithoutShipping {
 			 *
 			 * Return anything other than true to keep using the shipping address. The filter only fires when the cart qualifies,
 			 * so it cannot turn the fallback on for other carts. It may fire multiple times per request.
+			 * Callbacks that resolve the taxable address while it runs get the shipping address.
 			 *
 			 * @since 11.4.0
 			 *
