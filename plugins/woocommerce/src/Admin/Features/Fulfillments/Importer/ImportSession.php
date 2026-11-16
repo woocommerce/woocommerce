@@ -807,7 +807,7 @@ final class ImportSession {
 	/**
 	 * The stored counts plus an empty rows list, in the shape the import run reports.
 	 *
-	 * Per-row results are not persisted, so rows is always empty here.
+	 * Rows are left empty here; the rows of the last recorded chunk are in last_chunk().
 	 *
 	 * @since 11.4.0
 	 *

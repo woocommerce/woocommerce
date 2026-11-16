@@ -31,6 +31,9 @@ defined( 'ABSPATH' ) || exit;
  * is trimmed, and a data row shorter than the header is padded with empty strings, so a
  * consumer can index a row by header position without a guard.
  *
+ * Orders, providers and fulfillments looked up by import_chunk() are cached for the
+ * life of the importer; the import run builds a new importer for each chunk.
+ *
  * @internal
  * @since 11.4.0
  */
@@ -92,7 +95,7 @@ class FulfillmentsCsvImporter {
 	private array $order_cache = array();
 
 	/**
-	 * Orders the current chunk names by ID, loaded in one query and keyed by order ID.
+	 * Orders named by ID in the chunks imported so far, loaded in one query per chunk and keyed by order ID.
 	 *
 	 * @var array<int, WC_Order>
 	 */
@@ -436,8 +439,15 @@ class FulfillmentsCsvImporter {
 	 *
 	 * A row creates a fulfilled fulfillment, updates the order's fulfillment with the same
 	 * tracking number (compared without case), or fails on its own with a code while the
-	 * rest of the chunk imports. Pass the previous result back as `$state` to continue; an
-	 * empty state starts after the header. A chunk-level problem returns `error` and writes nothing.
+	 * rest of the chunk imports. An update that would change nothing is skipped. Pass the
+	 * previous result back as `$state` to continue; an empty state starts after the header.
+	 * A chunk-level problem returns `error` and writes nothing.
+	 *
+	 * Each row has `row`, `order_number`, `status` (created, updated, skipped or failed) and
+	 * `message`; a failed row adds `code`. `order_id` is set once the order resolves, and
+	 * `fulfillment_id` when the row matches or saves a fulfillment. A created or updated row
+	 * adds `notified`: whether the notification action ran without an error, which is not
+	 * proof that an email was sent. Messages are plain text and can quote CSV values.
 	 *
 	 * @since 11.4.0
 	 *
@@ -839,7 +849,8 @@ class FulfillmentsCsvImporter {
 	 * Load the orders a chunk names by ID in one query.
 	 *
 	 * The import run builds a new importer for each request, so without this every row
-	 * would load its order on its own. The resolve-order filter still runs for each row.
+	 * would load its order on its own. The resolve-order filter still runs once per distinct
+	 * order number.
 	 *
 	 * @param array<int, array{row_number:int, cells:array<int, string>}> $rows       Rows of the chunk.
 	 * @param array<string, int>                                          $header_map Canonical column key => CSV column index.

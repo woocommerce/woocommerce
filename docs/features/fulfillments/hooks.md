@@ -5,7 +5,7 @@ sidebar_label: Hooks
 
 # Order fulfillments hooks
 
-WooCommerce exposes lifecycle hooks, status filters, provider filters, notification actions, email template hooks, and CSV importer hooks for order fulfillments. These hooks let extensions validate fulfillment data, synchronize external systems, customize tracking behavior, adjust merchant or customer-facing output, accept header names from warehouse exports, map custom order numbers and chunk sizes during a CSV import, and react when a staged import file is cleaned up.
+WooCommerce exposes lifecycle hooks, status filters, provider filters, notification actions, email template hooks, and CSV importer hooks for order fulfillments. These hooks let extensions validate fulfillment data, synchronize external systems, customize tracking behavior, adjust merchant or customer-facing output, accept header names from warehouse exports, map custom order numbers and set the chunk size of a CSV import, and react when a staged import file is cleaned up.
 
 ## Data lifecycle filters
 
@@ -60,7 +60,7 @@ add_action( 'woocommerce_fulfillment_after_update', function( $fulfillment, $cha
 
 ## Notification actions
 
-These actions back the built-in customer fulfillment emails and any additional notification channel an extension wants to add.
+These actions back the built-in customer fulfillment emails and any additional notification channel an extension wants to add. The CSV importer fires the created and updated actions for imported rows when the merchant turns on customer notifications.
 
 | Hook | Parameters | Purpose |
 | --- | --- | --- |
@@ -160,6 +160,8 @@ Aliases are normalized before matching (lowercase, with runs of non-alphanumeric
 | --- | --- |
 | `woocommerce_fulfillments_csv_importer_column_aliases` | Change the accepted header names for `order_number`, `tracking_number`, `shipment_provider`, `tracking_url`, and `items`. Receives the alias map and returns the modified map. |
 
+The `shipment_provider` cell is matched to a provider from `woocommerce_fulfillment_shipping_providers` by key or name, ignoring case. Any other value is stored the way the fulfillment editor stores a custom provider: `other`, with the name in `_provider_name`.
+
 ```php
 add_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', function( $aliases ) {
     $aliases['order_number'][]      = 'PO Number';
@@ -169,7 +171,7 @@ add_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', function( $a
 } );
 ```
 
-Each data row names its order in the `order_number` column. By default a number is looked up as an order ID. Stores that show customers a different order number, such as a sequential-numbers plugin, can map that value to the order with the resolve filter. Return a `WC_Order`, or `null` when the order cannot be found; any other value fails the row with `order_not_found`. The filter runs once per distinct order number in each chunk.
+Each data row names its order in the `order_number` column. By default a number is looked up as an order ID among the orders the default order query returns, so trashed and checkout-draft orders are not found. Stores that show customers a different order number, such as a sequential-numbers plugin, can map that value to the order with the resolve filter. Return a `WC_Order`, or `null` when the order cannot be found; any other value fails the row with `order_not_found`. The filter runs at most once per distinct order number in each chunk. A numeric cell arrives already matched to the order with that ID when one exists, so a filter for numeric custom numbers must replace that match; the early return in the example keeps it.
 
 | Hook | Parameters | Purpose |
 | --- | --- | --- |
@@ -187,11 +189,11 @@ add_filter( 'woocommerce_fulfillments_csv_importer_resolve_order', function( $or
 }, 10, 2 );
 ```
 
-The import runs in chunks of CSV data rows, one request per chunk. The chunk size filter lets a store with slow order hooks use smaller chunks, or a fast store use larger ones. The result is kept between 1 and 1000, and at most 25 while customer notifications are on, because every notified row sends an email during the request. A value that is not a positive number falls back to the default of 200.
+The import runs in chunks of CSV data rows, one request per chunk. The chunk size filter sets the most rows one request imports; a request can ask for fewer. It lets a store with slow order hooks use smaller chunks, or a fast store use larger ones. The result is kept between 1 and 1000, and at most 25 while customer notifications are on, because every notified row sends an email during the request. A value that is not numeric, or is below 1 after conversion to an integer, falls back to the default of 200.
 
 | Hook | Parameters | Purpose |
 | --- | --- | --- |
-| `woocommerce_fulfillments_csv_importer_chunk_size` | `int $chunk_size`, `bool $notify_customer` | Change how many data rows one import request processes. |
+| `woocommerce_fulfillments_csv_importer_chunk_size` | `int $chunk_size`, `bool $notify_customer` | Change the most data rows one import request processes. |
 
 ```php
 add_filter( 'woocommerce_fulfillments_csv_importer_chunk_size', function( $chunk_size, $notify_customer ) {
