@@ -48,7 +48,6 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 			'category'            => 'woocommerce',
 			'input_schema'        => array(
 				'type'                 => 'object',
-				'properties'           => array(),
 				'default'              => array(),
 				'additionalProperties' => false,
 			),
@@ -186,7 +185,7 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 			'version'                 => (string) $theme->get( 'Version' ),
 			'is_block_theme'          => $theme->is_block_theme(),
 			'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),
-			'has_outdated_templates'  => SiteHealth::get_instance()->has_outdated_template_overrides(),
+			'has_outdated_templates'  => 'recommended' === ( SiteHealth::get_instance()->run_test( 'woocommerce_template_overrides' )['status'] ?? '' ),
 		);
 
 		$parent = $theme->parent();
