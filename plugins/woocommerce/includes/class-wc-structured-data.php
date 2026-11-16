@@ -13,6 +13,7 @@
  */
 
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -1091,8 +1092,8 @@ class WC_Structured_Data {
 
 		$item = $variation ? $variation : $product;
 		if (
-			! $product->is_visible() ||
-			( $variation && ! $variation->is_visible() ) ||
+			( ! $product->is_visible() && CatalogVisibility::SEARCH !== $product->get_catalog_visibility() ) ||
+			( $variation && ! $variation->is_visible() && CatalogVisibility::SEARCH !== $variation->get_catalog_visibility() ) ||
 			! $item->is_publicly_viewable() ||
 			! $item->is_purchasable() ||
 			! $item->is_in_stock() ||
