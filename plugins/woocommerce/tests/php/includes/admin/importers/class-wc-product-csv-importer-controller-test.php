@@ -15,6 +15,13 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	private const MARKER_CSV = "ID,Type,SKU,Name,Parent\n4242,variable,marker-parent,Marker parent,\n4243,variation,marker-variation,Marker variation,id:4242\n";
 
 	/**
+	 * Lock token the last successful request returned, sent back like the import screen does.
+	 *
+	 * @var string
+	 */
+	private $lock_token = '';
+
+	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
 	public function setUp(): void {
@@ -545,6 +552,10 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		$placeholder->set_status( 'importing' );
 		$placeholder->save();
 
+		$import_lock = wc_get_container()->get( ProductImportLock::class );
+		$import_lock->acquire( ProductImportLock::HOLDER_ADMIN );
+		$this->lock_token = (string) $import_lock->get_token();
+
 		$response = $this->dispatch_import_request( 'cleanup:0' );
 
 		$this->assertSame( 'done', $response['data']['position'] );
@@ -632,7 +643,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		$this->assertIsNumeric( $response['data']['position'] );
 		$this->assertSame( 1, $response['data']['imported'] );
 
-		$this->age_import_lock( ProductImportLock::HOLDER_ADMIN, 2 * MINUTE_IN_SECONDS + 1 );
+		$this->age_import_lock( 2 * MINUTE_IN_SECONDS + 1 );
 
 		$response = $this->dispatch_import_request( '0', $csv );
 
@@ -728,7 +739,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_first_batch_takes_over_an_abandoned_admin_lock(): void {
 		$this->assertTrue( wc_get_container()->get( ProductImportLock::class )->acquire( ProductImportLock::HOLDER_ADMIN ) );
-		$this->age_import_lock( ProductImportLock::HOLDER_ADMIN, 2 * MINUTE_IN_SECONDS + 1 );
+		$this->age_import_lock( 2 * MINUTE_IN_SECONDS + 1 );
 
 		$this->dispatch_import_request( '0' );
 
@@ -741,7 +752,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	public function test_first_batch_takes_over_a_stale_cli_lock(): void {
 		$import_lock = wc_get_container()->get( ProductImportLock::class );
 		$this->assertTrue( $import_lock->acquire( ProductImportLock::HOLDER_CLI ) );
-		$this->age_import_lock( ProductImportLock::HOLDER_CLI, 11 * MINUTE_IN_SECONDS );
+		$this->age_import_lock( 11 * MINUTE_IN_SECONDS );
 
 		$this->dispatch_import_request( '0' );
 
@@ -754,7 +765,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	public function test_batch_refreshes_the_import_lock_between_rows(): void {
 		$import_lock = wc_get_container()->get( ProductImportLock::class );
 		$age_lock    = function (): void {
-			$this->age_import_lock( ProductImportLock::HOLDER_ADMIN, 2 * MINUTE_IN_SECONDS );
+			$this->age_import_lock( 2 * MINUTE_IN_SECONDS );
 		};
 		add_action( 'woocommerce_product_import_before_import', $age_lock, 5 );
 
@@ -776,7 +787,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 
 		try {
 			$response = $this->dispatch_import_request( '0' );
-			$this->age_import_lock( ProductImportLock::HOLDER_ADMIN, 5 * MINUTE_IN_SECONDS );
+			$this->age_import_lock( 5 * MINUTE_IN_SECONDS );
 
 			$this->dispatch_import_request( (string) $response['data']['position'] );
 
@@ -799,18 +810,82 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Rewrite the import lock so it looks like it was last refreshed in the past.
-	 *
-	 * @param string $holder  The lock holder to store.
-	 * @param int    $seconds How long ago the lock should appear to have been refreshed.
+	 * @testdox A later batch should stop, and leave the lock alone, once another import has taken the lock over.
 	 */
-	private function age_import_lock( string $holder, int $seconds ): void {
+	public function test_resumed_batch_stops_after_another_import_takes_over(): void {
+		add_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+
+		try {
+			$response = $this->dispatch_import_request( '0' );
+			$this->age_import_lock( 2 * MINUTE_IN_SECONDS + 1 );
+
+			$other_run = new ProductImportLock();
+			$this->assertTrue( $other_run->acquire( ProductImportLock::HOLDER_ADMIN ) );
+
+			$response = $this->send_import_request( (string) $response['data']['position'] );
+		} finally {
+			remove_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+		}
+
+		$this->assertFalse( $response['success'] );
+		$this->assertStringContainsString( 'another product import took over', $response['data']['message'] );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'marker-variation' ) );
+		$this->assertTrue( $other_run->refresh(), 'The other run should still hold the lock' );
+	}
+
+	/**
+	 * @testdox A cleanup request from a run that lost the lock should neither delete placeholders nor release the other run's lock.
+	 */
+	public function test_cleanup_request_stops_after_another_import_takes_over(): void {
+		$placeholder = new WC_Product_Simple();
+		$placeholder->set_status( 'importing' );
+		$placeholder->save();
+
+		$other_run = new ProductImportLock();
+		$this->assertTrue( $other_run->acquire( ProductImportLock::HOLDER_CLI ) );
+		$this->lock_token = 'a-run-that-lost-the-lock';
+
+		$response = $this->send_import_request( 'cleanup:0' );
+
+		$this->assertFalse( $response['success'] );
+		$this->assertNotNull( get_post( $placeholder->get_id() ) );
+		$this->assertTrue( $other_run->refresh(), 'The other run should still hold the lock' );
+	}
+
+	/**
+	 * @testdox A first batch that hits a PHP error should still release the lock it took.
+	 */
+	public function test_first_batch_error_releases_the_import_lock(): void {
+		$fail_batch = static function (): void {
+			throw new Error( 'Batch crashed' );
+		};
+		add_action( 'woocommerce_product_import_before_import', $fail_batch );
+
+		try {
+			$this->send_import_request( '0' );
+			$this->fail( 'The error should reach the caller' );
+		} catch ( Error $e ) {
+			$this->assertSame( 'Batch crashed', $e->getMessage() );
+		} finally {
+			remove_action( 'woocommerce_product_import_before_import', $fail_batch );
+		}
+
+		$this->assertNull( wc_get_container()->get( ProductImportLock::class )->get_age() );
+	}
+
+	/**
+	 * Rewrite the import lock so it looks like it was last refreshed in the past, keeping its holder and token.
+	 *
+	 * @param int $seconds How long ago the lock should appear to have been refreshed.
+	 */
+	private function age_import_lock( int $seconds ): void {
 		global $wpdb;
 
-		$wpdb->update(
-			$wpdb->options,
-			array( 'option_value' => ( time() - $seconds ) . ':' . $holder ),
-			array( 'option_name' => 'wc_product_importing' )
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->options} SET option_value = CONCAT( %d, SUBSTRING( option_value, LOCATE( ':', option_value ) ) ) WHERE option_name = 'wc_product_importing'",
+				time() - $seconds
+			)
 		);
 	}
 
@@ -859,6 +934,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		$_POST['file']            = $file;
 		$_POST['position']        = $position;
 		$_POST['update_existing'] = $update_existing;
+		$_POST['lock']            = $this->lock_token;
 		$_POST['mapping']         = array(
 			'from' => array( 'ID', 'Type', 'SKU', 'Name', 'Parent', 'Upsells' ),
 			'to'   => array( 'id', 'type', 'sku', 'name', 'parent_id', 'upsell_ids' ),
@@ -872,7 +948,9 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		try {
 			WC_Product_CSV_Importer_Controller::dispatch_ajax();
 		} catch ( Error $e ) {
-			$this->assertSame( 'wp_die', $e->getMessage() );
+			if ( 'wp_die' !== $e->getMessage() ) {
+				throw $e;
+			}
 		} finally {
 			$response = (string) ob_get_clean();
 
@@ -880,11 +958,15 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			remove_filter( 'wp_die_ajax_handler', array( $this, 'get_throwing_die_handler' ) );
 
 			wp_delete_file( $file );
-			unset( $_POST['file'], $_POST['position'], $_POST['mapping'], $_POST['security'], $_POST['update_existing'], $_REQUEST['security'] );
+			unset( $_POST['file'], $_POST['position'], $_POST['mapping'], $_POST['security'], $_POST['update_existing'], $_POST['lock'], $_REQUEST['security'] );
 		}
 
 		$decoded = json_decode( $response, true );
 		$this->assertIsArray( $decoded, $response );
+
+		if ( ! empty( $decoded['data']['lock'] ) ) {
+			$this->lock_token = $decoded['data']['lock'];
+		}
 
 		return $decoded;
 	}

@@ -103,7 +103,7 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 	 */
 	public function test_admin_takes_over_an_admin_lock_after_two_minutes(): void {
 		$this->assertTrue( $this->sut->acquire( ProductImportLock::HOLDER_ADMIN ) );
-		$this->age_lock( ProductImportLock::HOLDER_ADMIN, 2 * MINUTE_IN_SECONDS + 1 );
+		$this->age_lock( 2 * MINUTE_IN_SECONDS + 1 );
 
 		$this->assertTrue( $this->sut->acquire( ProductImportLock::HOLDER_ADMIN ) );
 	}
@@ -119,7 +119,7 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 	 */
 	public function test_two_minute_takeover_only_applies_between_admin_imports( string $holder, string $challenger ): void {
 		$this->assertTrue( $this->sut->acquire( $holder ) );
-		$this->age_lock( $holder, 2 * MINUTE_IN_SECONDS + 1 );
+		$this->age_lock( 2 * MINUTE_IN_SECONDS + 1 );
 
 		$this->assertFalse( $this->sut->acquire( $challenger ) );
 	}
@@ -153,6 +153,36 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A run that lost the lock to a takeover should find out on refresh and leave the new run's lock alone on release.
+	 */
+	public function test_run_that_lost_the_lock_cannot_refresh_or_release_it(): void {
+		$this->assertTrue( $this->sut->acquire( ProductImportLock::HOLDER_ADMIN ) );
+		$this->age_lock( 2 * MINUTE_IN_SECONDS + 1 );
+
+		$other_run = new ProductImportLock();
+		$this->assertTrue( $other_run->acquire( ProductImportLock::HOLDER_ADMIN ) );
+
+		$this->assertFalse( $this->sut->refresh() );
+		$this->sut->release();
+		$this->assertTrue( $other_run->refresh(), 'The new run should still hold the lock' );
+	}
+
+	/**
+	 * @testdox Resuming the lock should succeed only with the token of the run that holds it.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $use_own_token Whether to resume with the token the run got when it took the lock.
+	 */
+	public function test_resume_requires_the_holding_runs_token( bool $use_own_token ): void {
+		$this->assertTrue( $this->sut->acquire( ProductImportLock::HOLDER_ADMIN ) );
+
+		$next_request = new ProductImportLock();
+
+		$this->assertSame( $use_own_token, $next_request->resume( $use_own_token ? (string) $this->sut->get_token() : 'another-token' ) );
+	}
+
+	/**
 	 * @testdox A due refresh should only write once the lock is a minute old, so importing rows does not write on every row.
 	 * @testWith [50, 50]
 	 *           [60, 0]
@@ -162,7 +192,7 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 	 */
 	public function test_refresh_if_due_only_refreshes_an_old_enough_lock( int $age, int $expected_age ): void {
 		$this->sut->acquire( ProductImportLock::HOLDER_ADMIN );
-		$this->age_lock( ProductImportLock::HOLDER_ADMIN, $age );
+		$this->age_lock( $age );
 
 		$this->sut->refresh_if_due();
 
@@ -179,19 +209,19 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Rewrite the lock so it looks like it was last refreshed in the past.
+	 * Rewrite the lock so it looks like it was last refreshed in the past, keeping its holder and token.
 	 *
-	 * @param string $holder  The lock holder to store.
-	 * @param int    $seconds How long ago the lock should appear to have been refreshed.
+	 * @param int $seconds How long ago the lock should appear to have been refreshed.
 	 */
-	private function age_lock( string $holder, int $seconds ): void {
+	private function age_lock( int $seconds ): void {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->update(
-			$wpdb->options,
-			array( 'option_value' => ( time() - $seconds ) . ':' . $holder ),
-			array( 'option_name' => 'wc_product_importing' )
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->options} SET option_value = CONCAT( %d, SUBSTRING( option_value, LOCATE( ':', option_value ) ) ) WHERE option_name = 'wc_product_importing'",
+				time() - $seconds
+			)
 		);
 	}
 }

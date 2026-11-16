@@ -332,10 +332,8 @@ class WC_Product_CSV_Importer_Controller {
 	 * @param int $cursor Highest placeholder ID earlier cleanup requests have examined.
 	 */
 	private static function dispatch_ajax_cleanup( int $cursor ): void {
-		$import_lock = wc_get_container()->get( ProductImportLock::class );
+		$import_lock = self::resume_import_lock();
 		$cleanup     = wc_get_container()->get( ImportPlaceholders::class );
-
-		$import_lock->refresh();
 
 		$next_cursor = $cleanup->cleanup_after_import( $cursor );
 
@@ -358,11 +356,29 @@ class WC_Product_CSV_Importer_Controller {
 	}
 
 	/**
+	 * Resume the import lock the first batch of this run took, so a run that lost it stops.
+	 *
+	 * @throws \Exception When another import has taken the lock over.
+	 * @return ProductImportLock
+	 */
+	private static function resume_import_lock(): ProductImportLock {
+		$import_lock = wc_get_container()->get( ProductImportLock::class );
+		$token       = isset( $_POST['lock'] ) ? wc_clean( wp_unslash( $_POST['lock'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- dispatch_ajax() checks the nonce.
+
+		if ( ! is_string( $token ) || ! $import_lock->resume( $token ) ) {
+			throw new \Exception( esc_html__( 'This import was stopped because another product import took over. Please start the import again.', 'woocommerce' ) );
+		}
+
+		return $import_lock;
+	}
+
+	/**
 	 * Processes AJAX requests related to a product CSV import.
 	 *
 	 * @since 9.3.0
 	 *
 	 * @throws \Exception Caught internally and reported via `wp_send_json_error()`, so it never escapes this method.
+	 * @throws \Throwable PHP errors are rethrown after the first batch releases the lock it took.
 	 */
 	public static function dispatch_ajax() {
 		check_ajax_referer( 'wc-product-import', 'security' );
@@ -383,7 +399,7 @@ class WC_Product_CSV_Importer_Controller {
 			self::validate_file_path( $file );
 
 			$start_pos   = absint( $position );
-			$import_lock = wc_get_container()->get( ProductImportLock::class );
+			$import_lock = 0 === $start_pos ? wc_get_container()->get( ProductImportLock::class ) : self::resume_import_lock();
 
 			// Cleanup is site-wide, so the whole import, including this first batch, needs the lock held.
 			if ( 0 === $start_pos && ! $import_lock->acquire( ProductImportLock::HOLDER_ADMIN ) ) {
@@ -400,8 +416,6 @@ class WC_Product_CSV_Importer_Controller {
 
 			if ( 0 === $start_pos ) {
 				$first_batch_lock = $import_lock;
-			} else {
-				$import_lock->refresh();
 			}
 
 			$params = array(
@@ -458,8 +472,12 @@ class WC_Product_CSV_Importer_Controller {
 			// The last row hands over to the cleanup phase rather than running it in this request.
 			$next_position = 100 === $percent_complete ? self::CLEANUP_POSITION_PREFIX . '0' : $importer->get_file_position();
 
+			// The batch succeeded, so the run keeps its lock for the next request.
+			$first_batch_lock = null;
+
 			wp_send_json_success(
 				array(
+					'lock'                => $import_lock->get_token(),
 					'position'            => $next_position,
 					'percentage'          => $percent_complete,
 					'imported'            => is_countable( $results['imported'] ) ? count( $results['imported'] ) : 0,
@@ -469,10 +487,14 @@ class WC_Product_CSV_Importer_Controller {
 					'skipped'             => is_countable( $results['skipped'] ) ? count( $results['skipped'] ) : 0,
 				)
 			);
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			// The import screen stops on an error, so nothing else would release a lock taken by this request.
 			if ( null !== $first_batch_lock ) {
 				$first_batch_lock->release();
+			}
+
+			if ( ! $e instanceof \Exception ) {
+				throw $e;
 			}
 
 			// Exception messages are HTML-escaped, and the import screen renders this one as plain text.

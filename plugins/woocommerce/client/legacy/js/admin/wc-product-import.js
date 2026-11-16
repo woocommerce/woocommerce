@@ -9,6 +9,7 @@
 		this.xhr                = false;
 		this.mapping            = wc_product_import_params.mapping;
 		this.position           = 0;
+		this.lock               = '';
 		this.file               = wc_product_import_params.file;
 		this.update_existing    = wc_product_import_params.update_existing;
 		this.delimiter          = wc_product_import_params.delimiter;
@@ -43,6 +44,7 @@
 			data: {
 				action            : 'woocommerce_do_ajax_product_import',
 				position          : $this.position,
+				lock              : $this.lock,
 				mapping           : $this.mapping,
 				file              : $this.file,
 				update_existing   : $this.update_existing,
@@ -54,6 +56,7 @@
 			success: function( response ) {
 				if ( response.success ) {
 					$this.position  = response.data.position;
+					$this.lock      = response.data.lock || $this.lock;
 					$this.imported += response.data.imported;
 					$this.imported_variations += response.data.imported_variations;
 					$this.failed   += response.data.failed;

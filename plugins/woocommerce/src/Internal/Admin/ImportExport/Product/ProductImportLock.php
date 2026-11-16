@@ -10,8 +10,8 @@ namespace Automattic\WooCommerce\Internal\Admin\ImportExport\Product;
  * The admin product importer and the `wp wc product import` CLI command both run cleanup of
  * placeholder products at the end of an import, and that cleanup is site-wide rather than scoped
  * to the run that created the placeholders. Both entry points hold this lock for the duration
- * of their run to keep their cleanup passes apart. This is best-effort: the lock has no owner
- * check, so a run that loses it to a stale takeover can still touch the new run's state.
+ * of their run to keep their cleanup passes apart. Each run gets its own token, so a run that
+ * loses the lock to a stale takeover finds out on its next refresh instead of touching the new run's state.
  *
  * @since 11.4.0
  */
@@ -28,7 +28,7 @@ final class ProductImportLock {
 	public const HOLDER_CLI = 'cli';
 
 	/**
-	 * Option name used as the mutex for a running product import. Its value is `<timestamp>:<holder>`.
+	 * Option name used as the mutex for a running product import. Its value is `<timestamp>:<holder>:<token>`.
 	 */
 	private const IMPORT_LOCK_OPTION = 'wc_product_importing';
 
@@ -48,6 +48,13 @@ final class ProductImportLock {
 	private const REFRESH_INTERVAL = MINUTE_IN_SECONDS;
 
 	/**
+	 * Token of the run this instance holds the lock for, or null when it holds none.
+	 *
+	 * @var string|null
+	 */
+	private $token = null;
+
+	/**
 	 * Try to take the site-wide product import lock.
 	 *
 	 * Modeled on `WC_Install::create_lock()`: the option row acts as a mutex through an
@@ -63,7 +70,8 @@ final class ProductImportLock {
 	public function acquire( string $holder ): bool {
 		global $wpdb;
 
-		$value = time() . ':' . $holder;
+		$token = wp_generate_uuid4();
+		$value = time() . ':' . $holder . ':' . $token;
 
 		// A contended INSERT fails on the duplicate key by design, so keep wpdb from logging or printing it.
 		$suppress = $wpdb->suppress_errors( true );
@@ -96,28 +104,61 @@ final class ProductImportLock {
 			);
 		}
 
+		$this->token = $acquired ? $token : null;
+
 		return (bool) $acquired;
+	}
+
+	/**
+	 * Get the token of the run this instance holds the lock for.
+	 *
+	 * An admin import hands it to the browser so later requests of the same run can resume the lock.
+	 *
+	 * @return string|null The token, or null when this instance holds no lock.
+	 */
+	public function get_token(): ?string {
+		return $this->token;
+	}
+
+	/**
+	 * Resume a lock taken by an earlier request of the same run, and refresh it.
+	 *
+	 * @param string $token The token `get_token()` returned when the run took the lock.
+	 * @return bool Whether the run still holds the lock.
+	 */
+	public function resume( string $token ): bool {
+		$this->token = '' === $token ? null : $token;
+
+		return $this->refresh();
 	}
 
 	/**
 	 * Refresh the product import lock's timestamp so a long-running import isn't
 	 * mistaken for stale and taken over by another run.
 	 *
-	 * The caller must already hold the lock; this does not check ownership, since a
-	 * batch of an admin import runs in a request of its own and has no other way to
-	 * prove it.
+	 * Only touches the lock while it still carries this run's token.
+	 *
+	 * @return bool Whether this run still holds the lock.
 	 */
-	public function refresh(): void {
+	public function refresh(): bool {
 		global $wpdb;
+
+		if ( null === $this->token ) {
+			return false;
+		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$wpdb->options} SET option_value = CONCAT( %d, ':', SUBSTRING_INDEX( option_value, ':', -1 ) ) WHERE option_name = %s",
+				"UPDATE {$wpdb->options} SET option_value = CONCAT( %d, SUBSTRING( option_value, LOCATE( ':', option_value ) ) ) WHERE option_name = %s AND SUBSTRING_INDEX( option_value, ':', -1 ) = %s",
 				time(),
-				self::IMPORT_LOCK_OPTION
+				self::IMPORT_LOCK_OPTION,
+				$this->token
 			)
 		);
+
+		// MySQL reports no changed rows when the timestamp is unchanged, so check the stored token instead.
+		return $this->token === $this->get_part( 2 );
 	}
 
 	/**
@@ -135,13 +176,25 @@ final class ProductImportLock {
 	}
 
 	/**
-	 * Release the product import lock.
+	 * Release the product import lock, unless another run has taken it over.
 	 */
 	public function release(): void {
 		global $wpdb;
 
+		if ( null === $this->token ) {
+			return;
+		}
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name = %s", self::IMPORT_LOCK_OPTION ) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name = %s AND SUBSTRING_INDEX( option_value, ':', -1 ) = %s",
+				self::IMPORT_LOCK_OPTION,
+				$this->token
+			)
+		);
+
+		$this->token = null;
 	}
 
 	/**
@@ -165,13 +218,23 @@ final class ProductImportLock {
 	 * @return string|null One of the `HOLDER_*` constants, or null when no import is running.
 	 */
 	private function get_holder(): ?string {
-		return explode( ':', (string) $this->get_value() )[1] ?? null;
+		return $this->get_part( 1 );
+	}
+
+	/**
+	 * Get one part of the lock's stored `<timestamp>:<holder>:<token>` value.
+	 *
+	 * @param int $index 0 for the timestamp, 1 for the holder, 2 for the token.
+	 * @return string|null The part, or null when no import is running.
+	 */
+	private function get_part( int $index ): ?string {
+		return explode( ':', (string) $this->get_value() )[ $index ] ?? null;
 	}
 
 	/**
 	 * Read the lock's stored value directly, since the option cache cannot see another process taking it.
 	 *
-	 * @return string|null The `<timestamp>:<holder>` value, or null when no import is running.
+	 * @return string|null The `<timestamp>:<holder>:<token>` value, or null when no import is running.
 	 */
 	private function get_value(): ?string {
 		global $wpdb;
