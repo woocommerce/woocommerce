@@ -103,9 +103,17 @@ final class BlockTypesLazyController {
 						)
 					);
 					if ( $registered_block_type instanceof \WP_Block_Type ) {
-						// Clear '.min' suffix WordPress sets for file: styles — our CSS is unminified, breaking RTL replacement.
-						foreach ( $registered_block_type->style_handles as $style_handle ) {
-							wp_style_add_data( $style_handle, 'suffix', '' );
+						// Backward compatibility: re-register styles handles to match the original handles and RTL handling.
+						$legacy_handle     = 'wc-blocks-style-' . $block_name;
+						$handles_to_rename = array_filter( $registered_block_type->style_handles, static fn( $handle ) => ! str_starts_with( $handle, 'wc-' ) );
+						foreach ( $handles_to_rename as $index => $style_handle ) {
+							$style_object = wp_styles()->query( $style_handle );
+							if ( $style_object && $style_object->src ) {
+								wp_deregister_style( $style_handle );
+								wp_register_style( $legacy_handle, $style_object->src, $style_object->deps, $style_object->ver );
+								wp_style_add_data( $legacy_handle, 'rtl', 'replace' );
+								$registered_block_type->style_handles[ $index ] = $legacy_handle;
+							}
 						}
 						$this->registered_blocks[ $block_class ] = $registered_block_type->name;
 					}
