@@ -518,9 +518,6 @@ class AbstractAutomatticAddressProviderTest extends \WC_Unit_Test_Case {
 		// Check if script is registered and enqueued.
 		$this->assertTrue( wp_script_is( 'a8c-address-autocomplete-service', 'registered' ) );
 		$this->assertTrue( wp_script_is( 'a8c-address-autocomplete-service', 'enqueued' ) );
-
-		// Clean up filter.
-		remove_all_filters( 'woocommerce_is_checkout' );
 	}
 
 	/**
@@ -579,9 +576,6 @@ class AbstractAutomatticAddressProviderTest extends \WC_Unit_Test_Case {
 			// If no inline script was added, that's also acceptable for this test.
 			$this->assertTrue( true );
 		}
-
-		// Clean up filter.
-		remove_all_filters( 'woocommerce_is_checkout' );
 	}
 
 	/**
@@ -631,9 +625,6 @@ class AbstractAutomatticAddressProviderTest extends \WC_Unit_Test_Case {
 			// If no inline script was added, that's also acceptable for this test.
 			$this->assertTrue( true );
 		}
-
-		// Clean up filter.
-		remove_all_filters( 'woocommerce_is_checkout' );
 	}
 
 	/**
@@ -684,9 +675,6 @@ class AbstractAutomatticAddressProviderTest extends \WC_Unit_Test_Case {
 		// Script should still be registered and enqueued only once.
 		$this->assertTrue( wp_script_is( 'a8c-address-autocomplete-service', 'registered' ) );
 		$this->assertTrue( wp_script_is( 'a8c-address-autocomplete-service', 'enqueued' ) );
-
-		// Clean up filter.
-		remove_all_filters( 'woocommerce_is_checkout' );
 	}
 
 	/**
@@ -995,8 +983,5 @@ class AbstractAutomatticAddressProviderTest extends \WC_Unit_Test_Case {
 
 		// Check that script was not enqueued.
 		$this->assertFalse( wp_script_is( 'a8c-address-autocomplete-service', 'enqueued' ) );
-
-		// Clean up filter.
-		remove_all_filters( 'woocommerce_is_checkout' );
 	}
 }

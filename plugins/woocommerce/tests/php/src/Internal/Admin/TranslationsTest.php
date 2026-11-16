@@ -55,8 +55,6 @@ class TranslationsTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'pre_determine_locale', array( $this, 'force_de_locale' ) );
-
 		$combined = $this->lang_dir . 'woocommerce-de_DE-' . WC_ADMIN_APP . '.json';
 		if ( file_exists( $combined ) ) {
 			wp_delete_file( $combined );

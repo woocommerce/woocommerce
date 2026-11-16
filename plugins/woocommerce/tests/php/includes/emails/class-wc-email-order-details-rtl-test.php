@@ -13,7 +13,6 @@ class WC_Email_Order_Details_RTL_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		update_option( 'woocommerce_feature_email_improvements_enabled', 'no' );
 		$GLOBALS['wp_locale']->text_direction = 'ltr';
 	}
 

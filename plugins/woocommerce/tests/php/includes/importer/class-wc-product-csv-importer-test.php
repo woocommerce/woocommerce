@@ -27,15 +27,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up after each test.
-	 */
-	public function tearDown(): void {
-		remove_all_filters( 'wc_get_price_decimal_separator' );
-
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox An update import resolves relationship SKUs saved by earlier rows in the same import.
 	 * @testWith [-1]
 	 *           [1]
@@ -1845,8 +1836,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			? (int) $inserted->get_error_data( 'term_exists' )
 			: $inserted['term_id'];
 
-		// Preserve the previous option value so other tests reading it are unaffected.
-		$previous_default_cat = get_option( 'default_product_cat' );
 		update_option( 'default_product_cat', $default_cat );
 
 		$imported_ids = array();
@@ -1888,7 +1877,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			foreach ( $imported_ids as $id ) {
 				WC_Helper_Product::delete_product( $id );
 			}
-			update_option( 'default_product_cat', $previous_default_cat );
 		}
 	}
 

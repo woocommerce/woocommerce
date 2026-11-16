@@ -90,6 +90,26 @@ class StoreResponsesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failed Markdown request to the home page doesn't stop the scan when the page itself loads.
+	 */
+	public function test_failed_markdown_request_keeps_the_scan_going(): void {
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args ) {
+				unset( $pre );
+				return 'text/markdown' === ( $args['headers']['Accept'] ?? '' ) ? new \WP_Error( 'http_request_failed', 'Timed out' ) : self::response( 200, '<html></html>' );
+			},
+			10,
+			2
+		);
+		$sut = new StoreResponses( true );
+
+		$this->assertNull( $sut->get_as_markdown( '/' ) );
+		$this->assertSame( 200, $sut->home_page()['status'] );
+		$this->assertSame( 200, $sut->get( '/other' )['status'] );
+	}
+
+	/**
 	 * @testdox Redirects on the store's host are followed; a redirect to another host is not requested.
 	 */
 	public function test_redirects_stay_on_the_store_host(): void {

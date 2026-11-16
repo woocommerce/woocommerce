@@ -56,7 +56,6 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'pre_http_request', array( $this, 'answer_request' ), 10 );
 		delete_option( RemoteRules::OPTION );
 		parent::tearDown();
 	}
@@ -119,7 +118,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$output_checks = new StoreOutputChecks();
 		$output_checks->init( new ComingSoonHelper() );
 		$agent_readiness = new AgentReadiness();
-		$agent_readiness->init( $store_conditions, $output_checks, $this->sut );
+		$agent_readiness->init( $store_conditions, $output_checks, $this->sut, wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ) );
 		return $agent_readiness;
 	}
 

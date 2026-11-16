@@ -390,9 +390,7 @@ class DataStoreBasicsTest extends OrdersStatsTestCase {
 		);
 
 		// Enable taxes.
-		$default_calc_taxes       = get_option( 'woocommerce_calc_taxes', 'no' );
 		$default_customer_address = get_option( 'woocommerce_default_customer_address', 'geolocation' );
-		$default_tax_based_on     = get_option( 'woocommerce_tax_based_on', 'shipping' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_default_customer_address', 'base' );
 		update_option( 'woocommerce_tax_based_on', 'base' );
@@ -461,9 +459,6 @@ class DataStoreBasicsTest extends OrdersStatsTestCase {
 			$this->assertEmpty( $results );
 		}
 
-		// Reset taxes settings.
-		update_option( 'woocommerce_calc_taxes', $default_calc_taxes );
 		update_option( 'woocommerce_default_customer_address', $default_customer_address );
-		update_option( 'woocommerce_tax_based_on', $default_tax_based_on );
 	}
 }

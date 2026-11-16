@@ -82,8 +82,6 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertContains( $hook, $captured_actions, 'Pending to cancelled status changes should be part of the default transactional email action list.' );
 		$this->assertSame( 10, has_action( $hook, array( 'WC_Emails', 'send_transactional_email' ) ), 'Pending to cancelled status changes should dispatch transactional emails.' );
-
-		remove_action( $hook, array( 'WC_Emails', 'send_transactional_email' ), 10 );
 	}
 
 	/**
@@ -233,8 +231,6 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		$after = count( $mailer->mock_sent );
 
 		$this->assertSame( $before, $after, 'Backorder notification must not be sent when the setting is disabled.' );
-
-		update_option( 'woocommerce_notify_backorder', 'yes' );
 	}
 
 	/**

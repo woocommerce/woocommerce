@@ -182,10 +182,6 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 
 		$result = $email->format_string( 'Hello {customer_name}' );
 		$this->assertEquals( 'Hello Jane Smith', $result );
-
-		// Clean up filters.
-		remove_all_filters( 'woocommerce_email_format_string_replace' );
-		remove_all_filters( 'woocommerce_email_format_string_find' );
 	}
 
 	/**
@@ -218,10 +214,6 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 			$email->format_string( 'Welcome to {blogname}!' ),
 			'Legacy filters should be able to override the default blogname replacement but cannot due to a bug'
 		);
-
-		// Clean up filters.
-		remove_all_filters( 'woocommerce_email_format_string_replace' );
-		remove_all_filters( 'woocommerce_email_format_string_find' );
 	}
 
 	/**
@@ -242,9 +234,6 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 			'Completely overridden',
 			$email->format_string( 'Original text with {customer_name}' )
 		);
-
-		// Clean up.
-		remove_all_filters( 'woocommerce_email_format_string' );
 	}
 
 	/**
@@ -315,11 +304,6 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 		$this->assertTrue( $email->get_reply_to_enabled() );
 		$this->assertEquals( 'Support Team', $email->get_reply_to_name() );
 		$this->assertEquals( 'support@example.com', $email->get_reply_to_address() );
-
-		// Clean up.
-		delete_option( 'woocommerce_email_reply_to_enabled' );
-		delete_option( 'woocommerce_email_reply_to_name' );
-		delete_option( 'woocommerce_email_reply_to_address' );
 	}
 
 	/**
@@ -331,9 +315,6 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 		$email = new WC_Email();
 
 		$this->assertFalse( $email->get_reply_to_enabled() );
-
-		// Clean up.
-		delete_option( 'woocommerce_email_reply_to_enabled' );
 	}
 
 	/**
@@ -347,10 +328,6 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 'Support', $email->get_reply_to_name() );
 		$this->assertEquals( 'support@example.com', $email->get_reply_to_address() );
-
-		// Clean up.
-		delete_option( 'woocommerce_email_reply_to_name' );
-		delete_option( 'woocommerce_email_reply_to_address' );
 	}
 
 	/**
@@ -368,11 +345,6 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 		$result = $email->get_headers();
 
 		$this->assertStringContainsString( 'Reply-to: Support Team <support@example.com>', $result );
-
-		// Clean up.
-		delete_option( 'woocommerce_email_reply_to_enabled' );
-		delete_option( 'woocommerce_email_reply_to_name' );
-		delete_option( 'woocommerce_email_reply_to_address' );
 	}
 
 	/**
@@ -391,12 +363,6 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 		$result = $email->get_headers();
 
 		$this->assertStringContainsString( 'Reply-to: My Store <support@example.com>', $result );
-
-		// Clean up.
-		delete_option( 'woocommerce_email_reply_to_enabled' );
-		delete_option( 'woocommerce_email_reply_to_name' );
-		delete_option( 'woocommerce_email_reply_to_address' );
-		delete_option( 'woocommerce_email_from_name' );
 	}
 
 	/**
@@ -423,11 +389,6 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 		// Should use customer email, not custom reply-to.
 		$this->assertStringContainsString( 'Reply-to: John Doe <customer@example.com>', $result );
 		$this->assertStringNotContainsString( 'support@example.com', $result );
-
-		// Clean up.
-		delete_option( 'woocommerce_email_reply_to_enabled' );
-		delete_option( 'woocommerce_email_reply_to_name' );
-		delete_option( 'woocommerce_email_reply_to_address' );
 	}
 
 	/**
@@ -446,11 +407,6 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 
 		// Should use from address as reply-to.
 		$this->assertStringContainsString( 'Reply-to: My Store <store@example.com>', $result );
-
-		// Clean up.
-		delete_option( 'woocommerce_email_reply_to_enabled' );
-		delete_option( 'woocommerce_email_from_name' );
-		delete_option( 'woocommerce_email_from_address' );
 	}
 
 	/**
@@ -487,14 +443,6 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 		$this->assertFalse( $email->get_reply_to_enabled() );
 		$this->assertEquals( 'Filtered Name', $email->get_reply_to_name() );
 		$this->assertEquals( 'filtered@example.com', $email->get_reply_to_address() );
-
-		// Clean up.
-		remove_all_filters( 'woocommerce_email_reply_to_enabled' );
-		remove_all_filters( 'woocommerce_email_reply_to_name' );
-		remove_all_filters( 'woocommerce_email_reply_to_address' );
-		delete_option( 'woocommerce_email_reply_to_enabled' );
-		delete_option( 'woocommerce_email_reply_to_name' );
-		delete_option( 'woocommerce_email_reply_to_address' );
 	}
 
 	/**
@@ -516,12 +464,5 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 		// Should fallback to from address since reply-to address is invalid.
 		$this->assertStringContainsString( 'Reply-to: My Store <store@example.com>', $result );
 		$this->assertStringNotContainsString( 'invalid-email', $result );
-
-		// Clean up.
-		delete_option( 'woocommerce_email_reply_to_enabled' );
-		delete_option( 'woocommerce_email_reply_to_name' );
-		delete_option( 'woocommerce_email_reply_to_address' );
-		delete_option( 'woocommerce_email_from_name' );
-		delete_option( 'woocommerce_email_from_address' );
 	}
 }

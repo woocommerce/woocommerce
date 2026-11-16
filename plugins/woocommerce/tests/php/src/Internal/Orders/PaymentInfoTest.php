@@ -65,7 +65,5 @@ class PaymentInfoTest extends WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'payment_method', $result );
 		$this->assertEquals( 'foo', $result['payment_method'] );
-
-		remove_filter( 'wc_order_payment_card_info', $filter_callback );
 	}
 }

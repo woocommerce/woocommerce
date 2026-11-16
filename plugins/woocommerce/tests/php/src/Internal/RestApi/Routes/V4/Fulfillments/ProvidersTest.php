@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Fulfillments;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\OrderFulfillmentsRestController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Schema\FulfillmentSchema;
+use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 
@@ -20,13 +21,6 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 	 * @var FulfillmentsController
 	 */
 	private FulfillmentsController $controller;
-
-	/**
-	 * Original value of the fulfillments feature flag.
-	 *
-	 * @var mixed
-	 */
-	private static $original_fulfillments_flag;
 
 	/**
 	 * Admin user for tests, shared across all tests in the class for REST authentication.
@@ -54,23 +48,7 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
-	}
-
-	/**
-	 * Tear down the test environment.
-	 */
-	public static function tearDownAfterClass(): void {
-		if ( false === self::$original_fulfillments_flag ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
-		}
-		parent::tearDownAfterClass();
+		FulfillmentsHelper::create_tables();
 	}
 
 	/**
@@ -103,6 +81,7 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		FulfillmentsHelper::enable_fulfillments();
 
 		// Hooks added in setUpBeforeClass() are removed after the first test, so add them per test.
 		$fulfillments = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
