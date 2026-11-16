@@ -40,6 +40,8 @@ export function useReadinessView(
 	const [ running, setRunning ] = useState( false );
 	const viewed = useRef( false );
 	const pendingSince = useRef< number | null >( null );
+	// True after a view has been shown: poll failures must not spam Tracks or replace the page with an error.
+	const hasView = useRef( null !== initialView );
 
 	const load = useCallback( async () => {
 		try {
@@ -48,11 +50,15 @@ export function useReadinessView(
 			} );
 			setView( loaded );
 			setError( null );
+			hasView.current = true;
 			if ( ! viewed.current ) {
 				viewed.current = true;
 				trackReadiness( 'viewed', viewedProps( loaded, surface ) );
 			}
 		} catch {
+			if ( hasView.current ) {
+				return;
+			}
 			trackReadiness( 'error', { surface, action: 'load' } );
 			setError(
 				__(

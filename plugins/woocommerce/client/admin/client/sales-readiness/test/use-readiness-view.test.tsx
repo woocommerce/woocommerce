@@ -95,6 +95,24 @@ describe( 'useReadinessView', () => {
 		}
 		expect( viewCalls() ).toBe( POLL_FOR_MS / POLL_MS + 1 );
 	} );
+
+	it( 'does not record a load error or clear the page when a poll fails', async () => {
+		const { recordEvent } = jest.requireMock( '@woocommerce/tracks' );
+		mockFetch
+			.mockResolvedValueOnce( view( true ) )
+			.mockRejectedValueOnce( new Error( 'network' ) );
+		const { result } = renderHook( () => useReadinessView( 'page' ) );
+		await act( async () => jest.advanceTimersByTime( 0 ) );
+		expect( result.current.view?.run.pending ).toBe( true );
+
+		await act( async () => jest.advanceTimersByTime( POLL_MS ) );
+		expect( result.current.view?.run.pending ).toBe( true );
+		expect( result.current.error ).toBeNull();
+		expect( recordEvent ).not.toHaveBeenCalledWith(
+			'sales_readiness_error',
+			expect.objectContaining( { action: 'load' } )
+		);
+	} );
 } );
 
 describe( 'RunStatus', () => {
