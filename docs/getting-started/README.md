@@ -7,7 +7,7 @@ hide_title: true
 hide_table_of_contents: true
 ---
 
-<!-- markdownlint-disable MD033 MD041 -->
+{/* <!-- markdownlint-disable MD033 MD041 --> */}
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
