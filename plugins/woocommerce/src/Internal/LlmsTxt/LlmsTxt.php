@@ -23,6 +23,20 @@ final class LlmsTxt implements RegisterHooksInterface {
 	private $original_template;
 
 	/**
+	 * The 404 template before other filters run.
+	 *
+	 * @var string|null
+	 */
+	private $original_404_template;
+
+	/**
+	 * Whether a filter changed the 404 template.
+	 *
+	 * @var bool
+	 */
+	private $changed_404_template = false;
+
+	/**
 	 * Register the fallback after other providers have handled the request.
 	 *
 	 * @since 11.4.0
@@ -30,6 +44,8 @@ final class LlmsTxt implements RegisterHooksInterface {
 	public function register(): void {
 		add_filter( 'redirect_canonical', array( $this, 'filter_canonical_redirect' ) );
 		add_filter( 'exit_on_http_head', array( $this, 'filter_exit_on_http_head' ) );
+		add_filter( '404_template', array( $this, 'remember_404_template' ), PHP_INT_MIN );
+		add_filter( '404_template', array( $this, 'check_404_template' ), PHP_INT_MAX );
 		add_filter( 'template_include', array( $this, 'remember_template' ), PHP_INT_MIN );
 		add_filter( 'template_include', array( $this, 'maybe_render' ), PHP_INT_MAX );
 	}
@@ -88,6 +104,32 @@ final class LlmsTxt implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Remember the 404 template before other filters run.
+	 *
+	 * @internal
+	 *
+	 * @param string $template Selected template.
+	 * @return string
+	 */
+	public function remember_404_template( $template ) {
+		$this->original_404_template = $template;
+		return $template;
+	}
+
+	/**
+	 * Check whether another filter selected a 404 template.
+	 *
+	 * @internal
+	 *
+	 * @param string $template Selected template.
+	 * @return string
+	 */
+	public function check_404_template( $template ) {
+		$this->changed_404_template = $template !== $this->original_404_template;
+		return $template;
+	}
+
+	/**
 	 * Remember the template selected before other filters run.
 	 *
 	 * @internal
@@ -107,7 +149,7 @@ final class LlmsTxt implements RegisterHooksInterface {
 	 * @return string
 	 */
 	public function maybe_render( $template ) {
-		if ( '' === $template || $template !== $this->original_template || ! $this->should_render() ) {
+		if ( '' === $template || $this->changed_404_template || $template !== $this->original_template || ! $this->should_render() ) {
 			return $template;
 		}
 
