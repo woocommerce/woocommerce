@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improve product page performance when shipping zones are configured.
