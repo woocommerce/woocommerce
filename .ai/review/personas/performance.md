@@ -57,12 +57,13 @@ This controls false positives. Follow it strictly.
   correctness regression (mid-regeneration reads return incomplete rows).
 - **`SELECT MIN(col), MAX(col)`** over a large table scans every matching row. The exemption and
   the rewrite below cover one shape only: a single-table query without `GROUP BY`. For any other
-  shape, judge the plan on its own. Exempt: a `WHERE` that contains only equalities that pin every
-  leading column of an index to one constant value (`a = 1 AND b = 'x'`), with the column next in
-  that index. The database answers that form from the index ends, so don't flag it. Otherwise, when
-  an index returns rows sorted by the column (it starts with the column, or every earlier column is
-  pinned to one constant value) and few rows at its ends fail the `WHERE`, the fix is `MIN`/`MAX`
-  over a `UNION ALL` of two `ORDER BY col ASC|DESC LIMIT 1` seeks, which keeps the one-row result.
+  shape, judge the plan on its own. Exempt: no `WHERE` and an index that starts with the column, or
+  a `WHERE` that contains only equalities that pin every leading column of an index to one constant
+  value (`a = 1 AND b = 'x'`), with the column next in that index. The database answers those forms
+  from the index ends, so don't flag them. Otherwise, when an index returns rows sorted by the
+  column (it starts with the column, or every earlier column is pinned to one constant value) and
+  few rows at its ends fail the `WHERE`, the fix is `MIN`/`MAX` over a `UNION ALL` of two
+  `ORDER BY col ASC|DESC LIMIT 1` seeks, which keeps the one-row result.
   Anything that leaves an earlier index column with more than one value breaks that order: a range,
   `IN (...)`, `OR`, `!=` or a comparison with another column. Such an index cannot serve the seek,
   so don't suggest the rewrite on it. An index that stores only a prefix of a column, such as
