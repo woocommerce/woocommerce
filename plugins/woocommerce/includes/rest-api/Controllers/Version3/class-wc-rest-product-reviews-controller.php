@@ -370,15 +370,31 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Check that a rating is a whole number between 0 and 5.
+	 * Validate and normalize the request rating against the item schema.
 	 *
-	 * @param mixed $rating Rating value from the request.
-	 * @return bool
+	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return WP_Error|null Validation error, or null if the rating is absent or valid.
 	 */
-	private function is_valid_rating( $rating ): bool {
-		$rating = filter_var( $rating, FILTER_VALIDATE_INT );
+	private function validate_and_sanitize_rating( $request ) {
+		if ( ! isset( $request['rating'] ) ) {
+			return null;
+		}
 
-		return false !== $rating && $rating >= 0 && $rating <= 5;
+		$schema = $this->get_item_schema();
+		if ( empty( $schema['properties']['rating'] ) ) {
+			return null;
+		}
+
+		$rating_schema = $schema['properties']['rating'];
+		$valid         = rest_validate_value_from_schema( $request['rating'], $rating_schema, 'rating' );
+		if ( is_wp_error( $valid ) ) {
+			$valid->add_data( array( 'status' => 400 ) );
+			return $valid;
+		}
+
+		$request['rating'] = rest_sanitize_value_from_schema( $request['rating'], $rating_schema, 'rating' );
+
+		return null;
 	}
 
 	/**
@@ -398,9 +414,10 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		// Batch requests call this method directly, so the schema range is not enforced for them.
-		if ( isset( $request['rating'] ) && ! $this->is_valid_rating( $request['rating'] ) ) {
-			return new WP_Error( 'woocommerce_rest_review_invalid_rating', __( 'Invalid review rating. It must be a whole number between 0 and 5.', 'woocommerce' ), array( 'status' => 400 ) );
+		// Batch requests call this method directly, so validate the rating against the schema here.
+		$rating_error = $this->validate_and_sanitize_rating( $request );
+		if ( $rating_error ) {
+			return $rating_error;
 		}
 
 		$prepared_review = $this->prepare_item_for_database( $request );
@@ -573,9 +590,10 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_review_invalid_type', __( 'Sorry, you are not allowed to change the comment type.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		// Batch requests call this method directly, so the schema range is not enforced for them.
-		if ( isset( $request['rating'] ) && ! $this->is_valid_rating( $request['rating'] ) ) {
-			return new WP_Error( 'woocommerce_rest_review_invalid_rating', __( 'Invalid review rating. It must be a whole number between 0 and 5.', 'woocommerce' ), array( 'status' => 400 ) );
+		// Batch requests call this method directly, so validate the rating against the schema here.
+		$rating_error = $this->validate_and_sanitize_rating( $request );
+		if ( $rating_error ) {
+			return $rating_error;
 		}
 
 		$prepared_args = $this->prepare_item_for_database( $request );
