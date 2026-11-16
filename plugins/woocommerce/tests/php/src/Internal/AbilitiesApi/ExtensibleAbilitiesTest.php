@@ -50,13 +50,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	private $original_init_count;
 
 	/**
-	 * Actions that a test added, removed in tearDown.
-	 *
-	 * @var array<int, array{0: string, 1: callable, 2: int}>
-	 */
-	private $test_actions = array();
-
-	/**
 	 * Create immutable class fixtures.
 	 *
 	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
@@ -102,12 +95,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wp_actions;
 
-		remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_test_fields' ) );
-		remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_test_filters' ) );
-		foreach ( $this->test_actions as list( $hook, $callback, $priority ) ) {
-			remove_action( $hook, $callback, $priority );
-		}
-		$this->test_actions = array();
 		$this->set_feature( false );
 		$this->reset_registries();
 		wp_set_current_user( 0 );
@@ -509,7 +496,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		} finally {
 			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 			$this->toggle_cot_feature_and_usage( $original );
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
 	}
 
@@ -578,7 +564,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
 			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 			$this->toggle_cot_feature_and_usage( $original );
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
 	}
 
@@ -621,7 +606,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		} finally {
 			remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
 			$this->toggle_cot_feature_and_usage( $original );
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
 	}
 
@@ -3541,8 +3525,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
 			}
 		}
-
-		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
 	}
 
 	/**
@@ -5830,7 +5812,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Add a filter and remove it in tearDown.
+	 * Add a filter.
 	 *
 	 * @param string   $hook          Hook name.
 	 * @param callable $callback      Callback.
@@ -5839,11 +5821,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	private function add_test_filter( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		add_filter( $hook, $callback, $priority, $accepted_args );
-		$this->test_actions[] = array( $hook, $callback, $priority );
 	}
 
 	/**
-	 * Add an action that tearDown removes.
+	 * Add an action.
 	 *
 	 * @param string   $hook     Action name.
 	 * @param callable $callback Callback.
@@ -5852,7 +5833,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	private function add_test_action( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		add_action( $hook, $callback, $priority, $accepted_args );
-		$this->test_actions[] = array( $hook, $callback, $priority );
 	}
 
 	/**

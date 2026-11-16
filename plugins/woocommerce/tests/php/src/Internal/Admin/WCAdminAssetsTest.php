@@ -31,8 +31,6 @@ class WCAdminAssetsTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_minified_js_feature' ), 20 );
-
 		if ( $this->temp_min_file && file_exists( $this->temp_min_file ) ) {
 			wp_delete_file( $this->temp_min_file );
 			$this->temp_min_file = null;

@@ -42,12 +42,30 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Run every check. Each URL is requested at most once per call.
+	 * The responses of one scan, shared by everything that reads the store during it.
+	 */
+	public function responses(): StoreResponses {
+		return new StoreResponses( $this->coming_soon_helper->is_site_live() );
+	}
+
+	/**
+	 * Run every check. Each URL is requested at most once.
 	 *
 	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool}>
 	 */
 	public function all(): array {
-		$responses = new StoreResponses( $this->coming_soon_helper->is_site_live() );
+		return $this->all_for( $this->responses() );
+	}
+
+	/**
+	 * Run every check against one scan's responses, so other checks can read the same pages.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param StoreResponses $responses Responses of the scan.
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool}>
+	 */
+	public function all_for( StoreResponses $responses ): array {
 		// The home page first: when it can't be reached, no other request is made.
 		$responses->home_page();
 		$results = array();
@@ -108,7 +126,7 @@ class StoreOutputChecks {
 	/**
 	 * Organization and the subtypes stores use for themselves.
 	 */
-	private const ORGANIZATION_TYPES = array( 'Organization', 'OnlineStore', 'OnlineBusiness', 'Corporation', 'LocalBusiness', 'Store' );
+	public const ORGANIZATION_TYPES = array( 'Organization', 'OnlineStore', 'OnlineBusiness', 'Corporation', 'LocalBusiness', 'Store' );
 
 	/**
 	 * The checks, each with a test that returns true, false, or null for couldn't check.
@@ -365,7 +383,7 @@ class StoreOutputChecks {
 	 *
 	 * @param string $path Path from the host root, such as /llms.txt.
 	 */
-	private static function host_root( string $path ): string {
+	public static function host_root( string $path ): string {
 		$home = (array) wp_parse_url( home_url() );
 		return ( $home['scheme'] ?? 'http' ) . '://' . ( $home['host'] ?? '' ) . ( isset( $home['port'] ) ? ':' . $home['port'] : '' ) . $path;
 	}
@@ -391,16 +409,13 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Whether a sitemap the store serves names products. An index that does not
-	 * has its child sitemaps on this host opened, at any depth, up to five child
-	 * requests in all. Null when robots.txt or one of those sitemaps could not
-	 * be loaded and none named products.
+	 * Where a store's sitemaps may be: those robots.txt lists on this host (the first five), then the usual paths.
 	 *
-	 * @param StoreResponses $responses Store responses.
+	 * @param string $robots The robots.txt text.
+	 * @return string[]
 	 */
-	private function sitemap_lists_products( StoreResponses $responses ): ?bool {
-		$robots   = $this->robots_txt( $responses );
-		$listed   = null === $robots ? array() : array_slice(
+	public static function sitemap_urls( string $robots ): array {
+		$listed   = array_slice(
 			array_values( array_filter( ( new RobotsTxt( $robots ) )->sitemaps(), array( StoreResponses::class, 'is_store_url' ) ) ),
 			0,
 			self::MAX_LISTED_SITEMAPS
@@ -409,7 +424,20 @@ class StoreOutputChecks {
 		if ( function_exists( 'wp_sitemaps_get_server' ) && wp_sitemaps_get_server()->sitemaps_enabled() ) {
 			$defaults[] = '/wp-sitemap.xml';
 		}
-		$queue   = array_values( array_unique( array_map( array( self::class, 'absolute_url' ), array_merge( $listed, $defaults ) ) ) );
+		return array_values( array_unique( array_merge( $listed, $defaults ) ) );
+	}
+
+	/**
+	 * Whether a sitemap the store serves names products. An index that does not
+	 * has its child sitemaps on this host opened, at any depth, up to five child
+	 * requests in all. Null when robots.txt or one of those sitemaps could not
+	 * be loaded and none named products.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private function sitemap_lists_products( StoreResponses $responses ): ?bool {
+		$robots  = $this->robots_txt( $responses );
+		$queue   = array_values( array_unique( array_map( array( self::class, 'absolute_url' ), self::sitemap_urls( (string) $robots ) ) ) );
 		$seen    = array_fill_keys( $queue, true );
 		$budget  = count( $queue ) + self::MAX_CHILD_SITEMAPS;
 		$unknown = null === $robots;
@@ -676,9 +704,11 @@ class StoreOutputChecks {
 	 * page is missing: a server error, or a firewall or security plugin answering 401 or 403.
 	 * A check then reports couldn't check, as it does when the page times out.
 	 *
+	 * @since 11.4.0
+	 *
 	 * @param int $status HTTP status.
 	 */
-	private static function blocked( int $status ): bool {
+	public static function blocked( int $status ): bool {
 		return $status >= 500 || in_array( $status, array( 401, 403 ), true );
 	}
 

@@ -166,7 +166,6 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		$this->assertFalse( $zone->is_valid_location_type( 'poop' ) );
 		add_filter( 'woocommerce_valid_location_types', array( $this, 'add_valid_zone_location' ) );
 		$this->assertTrue( $zone->is_valid_location_type( 'poop' ) );
-		remove_filter( 'woocommerce_valid_location_types', array( $this, 'add_valid_zone_location' ), 10 );
 	}
 
 	/**

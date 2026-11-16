@@ -72,13 +72,9 @@ class ReportAbility implements AbilityDefinition {
 		unset( $input );
 		$readiness = wc_get_container()->get( AgentReadiness::class );
 		$scan      = wc_get_container()->get( ScheduledScan::class );
-		$report    = $readiness->get_cached_report();
-		if ( null !== $report ) {
-			$report['store_checks'] = $readiness->get_store_checks( $report );
-		}
-		$pending = $scan->is_pending();
+		$pending   = $scan->is_pending();
 		return array(
-			'report'       => $report,
+			'report'       => $readiness->get_served_report(),
 			'scan_pending' => $pending,
 			'scan_stalled' => $pending && $scan->is_stalled(),
 		);
@@ -178,6 +174,18 @@ class ReportAbility implements AbilityDefinition {
 										'items'       => array( 'type' => 'integer' ),
 									),
 									'fix_url'     => array( 'type' => 'string' ),
+								),
+							),
+						),
+						'declared'            => array(
+							'type'        => 'array',
+							'description' => __( 'Protocols and files the store declares to agents. Information only: found or not found, never a problem.', 'woocommerce' ),
+							'items'       => array(
+								'type'       => 'object',
+								'properties' => array(
+									'id'    => array( 'type' => 'string' ),
+									'name'  => array( 'type' => 'string' ),
+									'found' => array( 'type' => array( 'boolean', 'null' ) ),
 								),
 							),
 						),

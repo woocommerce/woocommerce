@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G22A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-22.php",
+			"before": {
+				"file": "fixtures/G22A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G22A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-22.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    $key = $id;"
+					}
+				]
+			}
+		},
+		{
+			"id": "G22B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-22.php",
+			"before": {
+				"file": "fixtures/G22B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G22B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-22.php",
+						"lines": [
+							12,
+							12
+						],
+						"anchor": "    wp_cache_delete( $id, 'stock_label' );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G22C-v4",
+			"path": "plugins/woocommerce/includes/class-wc-eval-22.php",
+			"before": {
+				"file": "fixtures/G22C-v4/before.php"
+			},
+			"after": {
+				"file": "fixtures/G22C-v4/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G22D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-22.php",
+			"before": {
+				"file": "fixtures/G22D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G22D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}
