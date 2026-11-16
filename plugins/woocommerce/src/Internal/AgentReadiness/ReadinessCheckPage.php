@@ -383,7 +383,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			return array(
 				'title' => $action[0],
 				'text'  => $action[1],
-				'fix'   => '',
+				'fix'   => $action[4] ?? '',
 				'url'   => $action[2],
 				'link'  => $action[3] ?? '',
 			);

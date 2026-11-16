@@ -1659,6 +1659,47 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A connection URL blocked by a file names that file, and does not offer permalinks.
+	 */
+	public function test_connection_url_file_step_names_the_file(): void {
+		$step = $this->setup_step_copy(
+			array(
+				'id'      => 'ucp_discovery',
+				'label'   => 'Fix your connection URL',
+				'why'     => 'AI assistants use your connection URL to find your products, and it doesn\'t load your store\'s details.',
+				'fix'     => 'Remove the /tmp/ucp file that WooCommerce didn\'t write. It is being served instead of your store profile.',
+				'fix_url' => '',
+			)
+		);
+
+		$this->assertSame( 'Fix your connection URL', $step['title'] );
+		$this->assertStringContainsString( 'didn\'t write', $step['fix'] );
+		$this->assertSame( '', $step['url'] );
+		$this->assertSame( '', $step['link'] );
+	}
+
+	/**
+	 * @testdox A connection URL with nothing serving it offers Change permalinks and says why.
+	 */
+	public function test_connection_url_permalink_step_offers_permalinks(): void {
+		$step = $this->setup_step_copy(
+			array(
+				'id'      => 'ucp_discovery',
+				'label'   => 'Use a readable permalink structure',
+				'why'     => 'Any structure except Plain lets AI assistants reach your store.',
+				'fix'     => 'Choose any structure except Plain under Settings > Permalinks. Structures that start with index.php don\'t work either. Or make /tmp writable by the web server so WooCommerce can write the file.',
+				'fix_url' => admin_url( 'options-permalink.php' ),
+			)
+		);
+
+		$this->assertSame( 'Use a readable permalink structure', $step['title'] );
+		$this->assertSame( 'Change permalinks', $step['link'] );
+		$this->assertStringContainsString( 'options-permalink.php', $step['url'] );
+		$this->assertStringContainsString( 'writable', $step['fix'] );
+		$this->assertStringContainsString( 'index.php', $step['fix'] );
+	}
+
+	/**
 	 * What Sales readiness says about a failing setup step, as Fix first would show it.
 	 *
 	 * @param string $id Setup step id.
@@ -1667,6 +1708,16 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	private function step_copy( string $id ): array {
 		$step = current( wp_list_filter( wc_get_container()->get( StoreConditions::class )->all(), array( 'id' => $id ) ) );
 		$this->assertIsArray( $step, 'No setup step with id ' . $id );
+		return $this->setup_step_copy( $step );
+	}
+
+	/**
+	 * What Sales readiness says about one setup step.
+	 *
+	 * @param array<string, mixed> $step Store condition.
+	 * @return array<string, string>
+	 */
+	private function setup_step_copy( array $step ): array {
 		$failing = new \ReflectionMethod( ReadinessCheckPage::class, 'failing_copy' );
 		$failing->setAccessible( true );
 		return $failing->invoke( null, $step );
