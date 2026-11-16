@@ -274,13 +274,43 @@ final class LlmsTxt implements RegisterHooksInterface {
 			$content .= '> ' . $tagline . "\n\n";
 		}
 
-		return $content . $this->get_guidance();
+		return $content . $this->get_guidance( ! is_user_logged_in() );
 	}
 
 	/**
 	 * Build the guidance used by the fallback and readiness check.
+	 *
+	 * @param bool $use_cache Whether to reuse guidance for an anonymous request.
 	 */
-	private function get_guidance(): string {
+	private function get_guidance( bool $use_cache = false ): string {
+		$cache_key = 'wc_llms_txt_guidance_' . md5( get_locale() . '|' . home_url() );
+		$guidance  = $use_cache ? get_transient( $cache_key ) : false;
+
+		if ( ! is_array( $guidance ) || ! isset( $guidance['section'], $guidance['profile'] ) || ! is_string( $guidance['section'] ) || ! is_array( $guidance['profile'] ) ) {
+			$guidance = $this->build_guidance();
+			if ( $use_cache ) {
+				set_transient( $cache_key, $guidance, 5 * MINUTE_IN_SECONDS );
+			}
+		}
+
+		/**
+		 * Filters the Markdown guidance in WooCommerce's llms.txt.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param string $section The Markdown guidance.
+		 * @param array  $profile The UCP profile, or an empty array when unavailable.
+		 */
+		$section = apply_filters( 'woocommerce_llms_txt_agentic_section', $guidance['section'], $guidance['profile'] );
+		return is_string( $section ) ? $section : '';
+	}
+
+	/**
+	 * Build the guidance and UCP profile.
+	 *
+	 * @return array{section:string,profile:array}
+	 */
+	private function build_guidance(): array {
 		global $wp_rewrite;
 
 		$profile      = array();
@@ -351,17 +381,10 @@ final class LlmsTxt implements RegisterHooksInterface {
 				$lines[] = '- [' . $policy_labels[ $key ] . '](' . esc_url_raw( $url ) . ')';
 			}
 		}
-		$section = implode( "\n", $lines ) . "\n";
-		/**
-		 * Filters the Markdown guidance in WooCommerce's llms.txt.
-		 *
-		 * @since 11.4.0
-		 *
-		 * @param string $section The Markdown guidance.
-		 * @param array  $profile The UCP profile, or an empty array when unavailable.
-		 */
-		$section = apply_filters( 'woocommerce_llms_txt_agentic_section', $section, $profile );
-		return is_string( $section ) ? $section : '';
+		return array(
+			'section' => implode( "\n", $lines ) . "\n",
+			'profile' => $profile,
+		);
 	}
 
 	/**
