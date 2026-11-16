@@ -836,7 +836,8 @@ class FulfillmentsCsvImporter {
 	 * @return string Sanitized URL, or empty when it is not allowed.
 	 */
 	private function sanitize_tracking_url( string $url ): string {
-		if ( ! preg_match( '#^https?://#i', $url ) ) {
+		$lower = strtolower( $url );
+		if ( ! str_starts_with( $lower, 'http://' ) && ! str_starts_with( $lower, 'https://' ) ) {
 			return '';
 		}
 		$url = esc_url_raw( $url, array( 'http', 'https' ) );
