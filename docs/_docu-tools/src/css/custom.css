@@ -164,6 +164,10 @@ html[class*='docs-doc-id-getting-started/README'] .theme-doc-breadcrumbs {
   display: none;
 }
 
+html[class*='docs-doc-id-getting-started/README'] .markdown-copy-button {
+  display: none;
+}
+
 .woo-docs-homepage {
   --woo-home-lead-width: 48rem;
   --woo-home-surface: #faf7f3;
@@ -185,9 +189,15 @@ html[class*='docs-doc-id-getting-started/README'] .theme-doc-breadcrumbs {
   --woo-home-accent: #caaaff;
 }
 
+.woo-docs-homepage__lead {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.5rem, 2vw, 2rem);
+  align-items: start;
+}
+
 .woo-docs-homepage__intro {
-  max-width: var(--woo-home-lead-width);
-  padding: 2rem 0 2.5rem;
+  padding: 1rem 0 0;
 }
 
 .woo-docs-homepage__intro > p {
@@ -195,67 +205,52 @@ html[class*='docs-doc-id-getting-started/README'] .theme-doc-breadcrumbs {
   color: var(--woo-home-muted);
   font-size: clamp(1rem, 1.4vw, 1.16rem);
   line-height: 1.65;
+  text-wrap: balance;
 }
 
-.woo-docs-homepage__start-grid,
 .woo-docs-homepage__capability-grid,
 .woo-docs-homepage__directory-grid {
   display: grid;
   gap: 1.1rem;
 }
 
-.woo-docs-homepage__start-grid {
-  grid-template-columns: 1fr;
-  align-items: stretch;
-  max-width: var(--woo-home-lead-width);
-  margin-bottom: 3.5rem;
-}
-
-.woo-docs-homepage__start-card {
+.woo-docs-homepage__setup {
   min-width: 0;
-  padding: clamp(1.5rem, 3vw, 2rem);
+  padding-block-start: 1rem;
+}
+
+.woo-docs-homepage__setup-tabs {
+  padding-inline-start: 1.25rem;
+}
+
+.woo-docs-homepage__setup-tabs + .margin-top--md {
+  margin-top: 0 !important;
+}
+
+.woo-docs-homepage__setup [role='tabpanel'] {
+  min-width: 0;
+  padding: 1.25rem;
   border: 1px solid var(--woo-home-border);
-  border-radius: 18px;
-  background: var(--woo-home-surface);
+  border-radius: 10px;
 }
 
-.woo-docs-homepage__start-card h2 {
-  margin: 0 0 0.9rem;
-  font-size: clamp(1.55rem, 2.3vw, 2rem);
-}
-
-.woo-docs-homepage__start-card > p:last-child {
+.woo-docs-homepage__setup [role='tabpanel'] > p:last-child {
   margin-bottom: 0;
 }
 
-.woo-docs-homepage__start-card .theme-code-block {
-  max-width: 36rem;
+.woo-docs-homepage__setup .theme-code-block {
+  width: 100%;
   overflow: hidden;
-  border: 1px solid var(--woo-home-border);
   border-radius: 10px;
   box-shadow: none;
 }
 
-.woo-docs-homepage__start-card .theme-code-block button[aria-label='Copy code to clipboard'] {
+.woo-docs-homepage__setup .theme-code-block button[aria-label='Copy code to clipboard'] {
   opacity: 1;
 }
 
-.woo-docs-homepage__start-card .language-text button[aria-label='Copy code to clipboard'] {
-  gap: 0.45rem;
-  width: auto;
-  min-height: 2rem;
-  padding: 0.35rem 0.55rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.woo-docs-homepage__start-card .language-text button[aria-label='Copy code to clipboard']::before {
-  content: 'Click to copy prompt';
-  white-space: nowrap;
-}
-
-.woo-docs-homepage__start-card pre,
-.woo-docs-homepage__start-card pre code {
+.woo-docs-homepage__setup pre,
+.woo-docs-homepage__setup pre code {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -307,6 +302,10 @@ html[class*='docs-doc-id-getting-started/README'] .theme-doc-breadcrumbs {
   color: var(--woo-home-muted);
 }
 
+.woo-docs-homepage__capability-card p:not(:last-child) {
+  text-wrap: balance;
+}
+
 .woo-docs-homepage__capability-card p:last-child {
   margin: auto 0 0;
 }
@@ -337,6 +336,7 @@ html[class*='docs-doc-id-getting-started/README'] .theme-doc-breadcrumbs {
   border-radius: 12px;
   background: var(--woo-home-surface);
   font-size: 0.94rem;
+  text-wrap: balance;
 }
 
 .woo-docs-homepage__resource-list li a {
@@ -392,6 +392,21 @@ html[class*='docs-doc-id-getting-started/README'] .theme-doc-breadcrumbs {
 }
 
 @media (max-width: 1100px) {
+  .woo-docs-homepage__lead {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .woo-docs-homepage__intro {
+    max-width: var(--woo-home-lead-width);
+    padding: 2rem 0 2.5rem;
+  }
+
+  .woo-docs-homepage__setup {
+    max-width: var(--woo-home-lead-width);
+    padding-block-start: 0;
+  }
+
   .woo-docs-homepage__capability-grid,
   .woo-docs-homepage__directory-grid,
   .woo-docs-homepage__resource-list ul {
@@ -400,7 +415,7 @@ html[class*='docs-doc-id-getting-started/README'] .theme-doc-breadcrumbs {
 }
 
 @media (max-width: 640px) {
-  .woo-docs-homepage__start-card .theme-code-block pre {
+  .woo-docs-homepage__setup .theme-code-block pre {
     padding-block-start: 3.1rem;
   }
 
@@ -408,10 +423,6 @@ html[class*='docs-doc-id-getting-started/README'] .theme-doc-breadcrumbs {
   .woo-docs-homepage__directory-grid,
   .woo-docs-homepage__resource-list ul {
     grid-template-columns: 1fr;
-  }
-
-  .woo-docs-homepage__start-grid {
-    margin-bottom: 2.5rem;
   }
 
   .woo-docs-homepage > h2 {

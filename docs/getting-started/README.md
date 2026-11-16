@@ -14,6 +14,8 @@ import TabItem from '@theme/TabItem';
 
 <div className="woo-docs-homepage">
 
+<div className="woo-docs-homepage__lead">
+
 <div className="woo-docs-homepage__intro">
 
 <h1>WooCommerce Developer Docs</h1>
@@ -22,27 +24,17 @@ WooCommerce is a customizable, open-source eCommerce platform built on WordPress
 
 </div>
 
-<div className="woo-docs-homepage__start-grid">
-
-<section className="woo-docs-homepage__start-card">
-
-## Start a local Woo store
+<div className="woo-docs-homepage__setup">
 
 <Tabs className="woo-docs-homepage__setup-tabs">
 
-<TabItem value="manual" label="Manual instructions" default>
-
-**Install the Studio CLI (macOS and Linux):**
+<TabItem value="manual" label="Command" default>
 
 ```bash
+# Install the Studio CLI if needed (macOS and Linux).
 curl -fsSL https://wordpress.studio/install.sh | bash
-```
 
-Open a new terminal and check `studio --help`. If you already use the WordPress Studio app, you can enable its CLI in the app settings instead. Windows installation steps are in the [Studio CLI guide](https://wordpress.studio/docs/cli/).
-
-**Start a store:** Open a new, empty directory, then run:
-
-```bash
+# In a new terminal and empty directory, start a Woo store.
 studio blueprint use woo-shop
 ```
 
@@ -62,7 +54,7 @@ Fetch the instructions from https://developer.woocommerce.com/docs/llms.txt.
 
 </Tabs>
 
-</section>
+</div>
 
 </div>
 
