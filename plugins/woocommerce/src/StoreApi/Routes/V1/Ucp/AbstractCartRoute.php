@@ -151,6 +151,27 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
+	 * Sync the draft order with the cart after a write, unless it was handed off for payment.
+	 *
+	 * The buyer may be paying a pending or failed order, and a save would put this request's copy over theirs.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return void
+	 */
+	protected function cart_updated( \WP_REST_Request $request ) {
+		$order = $this->get_draft_order();
+
+		if ( $order && ! $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
+			return;
+		}
+
+		parent::cart_updated( $request );
+	}
+
+	/**
 	 * Put the request's cart token slot back the way it was found.
 	 *
 	 * @param string $token The token the request arrived with, or '' for none.

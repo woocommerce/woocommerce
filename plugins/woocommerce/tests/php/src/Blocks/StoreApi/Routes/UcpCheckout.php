@@ -386,7 +386,7 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Completing again returns the hand-off unchanged with a warning, and does not write to the order the buyer may be paying.
+	 * @testdox Completing again returns the hand-off unchanged with a warning, and no request that leaves it standing saves the order the buyer may be paying.
 	 */
 	public function test_complete_again_returns_the_hand_off_unchanged(): void {
 		$created = $this->create_ready_checkout();
@@ -395,9 +395,17 @@ class UcpCheckout extends ControllerTestCase {
 		$order   = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
 		$order->update_status( OrderStatus::FAILED );
 		$processed = did_action( 'woocommerce_store_api_checkout_order_processed' );
+		$saves     = 0;
+		$count     = static function ( $saved ) use ( &$saves, $order ) {
+			$saves += (int) ( $saved->get_id() === $order->get_id() );
+		};
 
+		add_action( 'woocommerce_before_order_object_save', $count );
 		$second = $this->request( 'POST', $path . '/complete' )->get_data();
+		$this->request( 'PUT', $path, array() );
+		remove_action( 'woocommerce_before_order_object_save', $count );
 
+		$this->assertSame( 0, $saves, 'Neither a repeated complete nor an update that changes nothing saves the order.' );
 		$this->assertSame( $first['continue_url'], $second['continue_url'] );
 		$this->assertContains( 'ALREADY_HANDED_OFF', array_column( $second['messages'], 'code' ) );
 		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::FAILED ), 'A failed order the buyer may be retrying is not reset.' );
