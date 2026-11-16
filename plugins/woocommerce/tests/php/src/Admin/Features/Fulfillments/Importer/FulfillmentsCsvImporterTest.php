@@ -1180,7 +1180,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A listener that throws after the write leaves the row imported, keeps a later row from duplicating it and does not block later order updates.
+	 * @testdox A listener that changes the fulfillment and throws after the write leaves the row imported and notified, keeps a later row from duplicating it and does not block later order updates.
 	 * @testWith ["woocommerce_fulfillment_after_create", "created"]
 	 *           ["woocommerce_fulfillment_after_update", "updated"]
 	 *
@@ -1193,23 +1193,28 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$id    = $order->get_id();
 		if ( FulfillmentsCsvImporter::STATUS_UPDATED === $status ) {
 			$this->import_csv( "order_number,tracking_number,shipment_provider\n{$id},TRK-1,fedex\n" );
+		} else {
+			$item = current( $order->get_items() )->get_id();
+			$this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$id},TRK-0,ups,,{$item}:1\n" );
 		}
 		$throws = 1;
 		add_action(
 			$hook,
-			function () use ( &$throws ) {
+			function ( $fulfillment ) use ( &$throws ) {
 				if ( $throws-- > 0 ) {
+					$fulfillment->set_tracking_url( 'https://example.com/listener' );
 					throw new \RuntimeException( 'Listener failed.' );
 				}
 			},
 			5
 		);
 
-		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$id},TRK-1,ups\n{$id},TRK-1,dhl\n{$other->get_id()},TRK-2,ups\n{$id},TRK-3,ups\n" );
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$id},TRK-1,ups\n{$id},TRK-1,dhl\n{$other->get_id()},TRK-2,ups\n{$id},TRK-3,ups\n", array( 'notify_customer' => true ) );
 
 		$this->assertSame( array( $status, FulfillmentsCsvImporter::STATUS_SKIPPED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_FAILED ), array_column( $result['rows'], 'status' ) );
+		$this->assertTrue( $result['rows'][0]['notified'], 'The written row is notified' );
 		$this->assertSame( FulfillmentsCsvImporter::CODE_NO_ITEMS, $result['rows'][3]['code'], 'The saved row counts as fulfilled for a later row' );
-		$this->assertCount( 1, $this->fulfillments_of( $order ) );
+		$this->assertCount( FulfillmentsCsvImporter::STATUS_UPDATED === $status ? 1 : 2, $this->fulfillments_of( $order ) );
 		$this->assertFalse( doing_action( $hook ), 'The interrupted action is taken off the filter stack' );
 		$this->assertSame( 'fulfilled', wc_get_order( $other->get_id() )->get_meta( '_fulfillment_status' ), 'A later row still updates its order' );
 	}

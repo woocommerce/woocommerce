@@ -700,6 +700,9 @@ class FulfillmentsCsvImporter {
 
 		global $wp_current_filter;
 		$hook_depth = count( $wp_current_filter );
+		// The data store fires this action only once the row is written.
+		$written_hook = null === $existing ? 'woocommerce_fulfillment_after_create' : 'woocommerce_fulfillment_after_update';
+		$writes       = did_action( $written_hook );
 		try {
 			$fulfillment->save();
 		} catch ( \Throwable $e ) {
@@ -709,14 +712,13 @@ class FulfillmentsCsvImporter {
 				sprintf( 'Fulfillments import could not save row %1$d for order %2$d: %3$s', $row_number, $order_id, $e->getMessage() ),
 				array( 'source' => 'fulfillments-importer' )
 			);
-			// Changes are applied right after the write, so none left means only a later listener failed.
-			if ( array() !== $fulfillment->get_changes() ) {
-				// The cached fulfillment may hold the unsaved values, so the next row reads it again.
-				unset( $this->fulfillments_cache[ $order_id ] );
+			// The cached fulfillment may hold values that were not written, so the next row reads it again.
+			unset( $this->fulfillments_cache[ $order_id ] );
+			if ( did_action( $written_hook ) === $writes ) {
 				return self::fail( self::CODE_SAVE_FAILED, $e instanceof FulfillmentException ? $e->getMessage() : __( 'Could not save the fulfillment.', 'woocommerce' ), $order_id );
 			}
 		}
-		if ( null === $existing ) {
+		if ( null === $existing && isset( $this->fulfillments_cache[ $order_id ] ) ) {
 			$this->fulfillments_cache[ $order_id ][] = $fulfillment;
 		}
 
