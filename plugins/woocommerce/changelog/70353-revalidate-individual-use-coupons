@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revalidate individual-use coupon conflicts via WC_Discounts::is_coupon_valid so cart and Store API checks remove conflicting codes the same way as expired coupons.

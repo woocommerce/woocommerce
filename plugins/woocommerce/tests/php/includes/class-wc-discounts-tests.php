@@ -536,4 +536,125 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'With no matched categories the generic message is used.' );
 		remove_filter( 'woocommerce_coupon_is_valid_for_excluded_product_categories', '__return_false' );
 	}
+
+	/**
+	 * @testdox is_coupon_valid rejects other applied coupons when an individual-use coupon is already on the cart.
+	 */
+	public function test_is_coupon_valid_rejects_individual_use_conflicts_on_cart(): void {
+		WC()->cart->empty_cart();
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$coupon_one = WC_Helper_Coupon::create_coupon( 'discounts-combo1' );
+		$coupon_two = WC_Helper_Coupon::create_coupon( 'discounts-combo2' );
+
+		$this->assertTrue( WC()->cart->add_discount( $coupon_one->get_code() ) );
+		$this->assertTrue( WC()->cart->add_discount( $coupon_two->get_code() ) );
+
+		$coupon_one->set_individual_use( true );
+		$coupon_one->save();
+
+		$discounts = new WC_Discounts( WC()->cart );
+
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon_one ), 'The individual-use coupon itself remains valid.' );
+
+		$result = $discounts->is_coupon_valid( $coupon_two );
+		$this->assertWPError( $result, 'Other applied coupons conflict with the individual-use coupon.' );
+		$this->assertSame(
+			$coupon_one->get_coupon_error( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY ),
+			$result->get_error_message()
+		);
+
+		WC()->cart->empty_cart();
+	}
+
+	/**
+	 * @testdox is_coupon_valid skips individual-use checks for coupons that are not applied yet.
+	 */
+	public function test_is_coupon_valid_skips_individual_use_for_unapplied_coupon(): void {
+		WC()->cart->empty_cart();
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$existing = WC_Helper_Coupon::create_coupon( 'discounts-existing-iu' );
+		$existing->set_individual_use( true );
+		$existing->save();
+		$this->assertTrue( WC()->cart->add_discount( $existing->get_code() ) );
+
+		$new_coupon = WC_Helper_Coupon::create_coupon( 'discounts-new-iu' );
+		$new_coupon->set_individual_use( true );
+		$new_coupon->save();
+
+		$discounts = new WC_Discounts( WC()->cart );
+		$this->assertTrue(
+			$discounts->is_coupon_valid( $new_coupon ),
+			'Unapplied coupons skip individual-use revalidation so apply_coupon can replace existing codes.'
+		);
+
+		WC()->cart->empty_cart();
+	}
+
+	/**
+	 * @testdox is_coupon_valid does not enforce individual-use stacking rules on orders.
+	 */
+	public function test_is_coupon_valid_allows_individual_use_stacking_on_orders(): void {
+		$order = new WC_Order();
+
+		$coupon_one = WC_Helper_Coupon::create_coupon( 'order-iu-1' );
+		$coupon_one->set_individual_use( true );
+		$coupon_one->save();
+		$coupon_two = WC_Helper_Coupon::create_coupon( 'order-iu-2' );
+		$coupon_two->set_individual_use( true );
+		$coupon_two->save();
+
+		$discounts = new WC_Discounts( $order );
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon_one ), 'Order coupons are not limited by cart individual-use revalidation.' );
+		$this->assertTrue( $discounts->is_coupon_valid( $coupon_two ), 'Stacked individual-use coupons remain valid on orders.' );
+	}
+
+	/**
+	 * @testdox is_coupon_valid rejects a retained coupon that later becomes individual-use unless the with-filter allows it.
+	 */
+	public function test_is_coupon_valid_rejects_retained_coupon_that_becomes_individual_use(): void {
+		WC()->cart->empty_cart();
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$retained = WC_Helper_Coupon::create_coupon( 'discounts-retained' );
+		$iu       = WC_Helper_Coupon::create_coupon( 'discounts-iu-retain' );
+		$iu->set_individual_use( true );
+		$iu->save();
+
+		$retain_filter = static function () {
+			return array( 'discounts-retained' );
+		};
+
+		$this->assertTrue( WC()->cart->add_discount( $retained->get_code() ) );
+		add_filter( 'woocommerce_apply_individual_use_coupon', $retain_filter );
+		$this->assertTrue( WC()->cart->add_discount( $iu->get_code() ) );
+		$this->assertCount( 2, WC()->cart->get_applied_coupons() );
+
+		$retained->set_individual_use( true );
+		$retained->save();
+
+		$discounts = new WC_Discounts( WC()->cart );
+		$this->assertTrue( $discounts->is_coupon_valid( $iu ), 'The last individual-use coupon remains valid.' );
+
+		$result = $discounts->is_coupon_valid( $retained );
+		$this->assertWPError( $result, 'A retained coupon that becomes individual-use conflicts unless the with-filter allows it.' );
+		$this->assertSame(
+			$iu->get_coupon_error( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY ),
+			$result->get_error_message()
+		);
+
+		add_filter( 'woocommerce_apply_with_individual_use_coupon', '__return_true' );
+		$this->assertTrue(
+			$discounts->is_coupon_valid( $retained ),
+			'woocommerce_apply_with_individual_use_coupon can still permit the pair.'
+		);
+		remove_filter( 'woocommerce_apply_with_individual_use_coupon', '__return_true' );
+
+		remove_filter( 'woocommerce_apply_individual_use_coupon', $retain_filter );
+		WC()->cart->empty_cart();
+	}
 }

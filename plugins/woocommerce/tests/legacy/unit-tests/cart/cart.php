@@ -1841,6 +1841,121 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Saved carts must revalidate individual-use when the setting changes after apply.
+	 */
+	public function test_check_cart_coupons_removes_individual_use_conflict_after_setting_change() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$coupon_one = WC_Helper_Coupon::create_coupon( 'combo1' );
+		$coupon_two = WC_Helper_Coupon::create_coupon( 'combo2' );
+
+		$this->assertTrue( WC()->cart->add_discount( $coupon_one->get_code() ) );
+		$this->assertTrue( WC()->cart->add_discount( $coupon_two->get_code() ) );
+		$this->assertCount( 2, WC()->cart->get_applied_coupons() );
+
+		$coupon_one->set_individual_use( true );
+		$coupon_one->save();
+
+		wc_clear_notices();
+		WC()->cart->check_cart_coupons();
+
+		$this->assertSame( array( 'combo1' ), array_values( WC()->cart->get_applied_coupons() ), 'Individual-use coupon is kept; conflicting codes are removed.' );
+		$this->assertTrue( wc_has_notice( $coupon_two->get_coupon_error( WC_Coupon::E_WC_COUPON_INVALID_REMOVED ), 'error' ) );
+
+		WC()->cart->empty_cart();
+		wc_clear_notices();
+	}
+
+	/**
+	 * When multiple coupons become individual-use, the last-applied one wins.
+	 */
+	public function test_check_cart_coupons_keeps_last_applied_individual_use_coupon() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$coupon_one = WC_Helper_Coupon::create_coupon( 'iu-first' );
+		$coupon_two = WC_Helper_Coupon::create_coupon( 'iu-last' );
+
+		$this->assertTrue( WC()->cart->add_discount( $coupon_one->get_code() ) );
+		$this->assertTrue( WC()->cart->add_discount( $coupon_two->get_code() ) );
+
+		$coupon_one->set_individual_use( true );
+		$coupon_one->save();
+		$coupon_two->set_individual_use( true );
+		$coupon_two->save();
+
+		wc_clear_notices();
+		WC()->cart->check_cart_coupons();
+
+		$this->assertSame( array( 'iu-last' ), array_values( WC()->cart->get_applied_coupons() ) );
+		$this->assertTrue( wc_has_notice( $coupon_one->get_coupon_error( WC_Coupon::E_WC_COUPON_INVALID_REMOVED ), 'error' ) );
+
+		WC()->cart->empty_cart();
+		wc_clear_notices();
+	}
+
+	/**
+	 * A lone individual-use coupon remains valid during cart checks.
+	 */
+	public function test_check_cart_coupons_allows_single_individual_use_coupon() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'solo-iu' );
+		$coupon->set_individual_use( true );
+		$coupon->save();
+
+		$this->assertTrue( WC()->cart->add_discount( $coupon->get_code() ) );
+
+		wc_clear_notices();
+		WC()->cart->check_cart_coupons();
+
+		$this->assertSame( array( 'solo-iu' ), array_values( WC()->cart->get_applied_coupons() ) );
+		$this->assertFalse( wc_has_notice( $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_INVALID_REMOVED ), 'error' ) );
+
+		WC()->cart->empty_cart();
+		wc_clear_notices();
+	}
+
+	/**
+	 * Coupons retained via woocommerce_apply_individual_use_coupon stay valid during revalidation.
+	 */
+	public function test_check_cart_coupons_allows_coupons_retained_with_individual_use() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$keep_coupon = WC_Helper_Coupon::create_coupon( 'keep-me' );
+		$iu_coupon   = WC_Helper_Coupon::create_coupon( 'iu-keep' );
+		$iu_coupon->set_individual_use( true );
+		$iu_coupon->save();
+
+		$retain_filter = static function () {
+			return array( 'keep-me' );
+		};
+
+		$this->assertTrue( WC()->cart->add_discount( $keep_coupon->get_code() ) );
+
+		add_filter( 'woocommerce_apply_individual_use_coupon', $retain_filter );
+		$this->assertTrue( WC()->cart->add_discount( $iu_coupon->get_code() ) );
+		$this->assertCount( 2, WC()->cart->get_applied_coupons() );
+
+		wc_clear_notices();
+		WC()->cart->check_cart_coupons();
+
+		$this->assertCount( 2, WC()->cart->get_applied_coupons() );
+		$this->assertFalse( wc_has_notice( $keep_coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_INVALID_REMOVED ), 'error' ) );
+
+		remove_filter( 'woocommerce_apply_individual_use_coupon', $retain_filter );
+		WC()->cart->empty_cart();
+		wc_clear_notices();
+	}
+
+	/**
 	 * test_clone_cart.
 	 */
 	public function test_clone_cart() {
