@@ -476,6 +476,27 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A checkout paid once stays completed when its order is later refunded or cancelled, so it cannot be completed again.
+	 * @testWith ["processing", "cancelled"]
+	 *           ["on-hold", "refunded"]
+	 *
+	 * @param string $paid_status The status the payment left the order in.
+	 * @param string $later_status The status the store moved it to afterwards.
+	 */
+	public function test_paid_checkout_stays_completed_after_a_refund_or_cancellation( string $paid_status, string $later_status ): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'POST', $path . '/complete' );
+		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$order->update_status( $paid_status );
+		$order->update_status( $later_status );
+		$this->simulate_new_request( $created['id'] );
+
+		$this->assertSame( 'completed', $this->request( 'GET', $path )->get_data()['status'] );
+		$this->assertSame( 409, $this->request( 'POST', $path . '/complete' )->get_status() );
+	}
+
+	/**
 	 * @testdox A promoted cart is read but not written through the cart routes while its checkout is live, and is no longer a cart afterwards.
 	 */
 	public function test_cart_writes_are_refused_once_promoted(): void {
