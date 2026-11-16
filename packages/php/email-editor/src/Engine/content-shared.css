@@ -22,10 +22,10 @@ pre {
 }
 
 /*
- * Core breaks words only on fixed-layout tables, where the page scrolls the block instead;
- * an email has nowhere to scroll, so every table needs it or one long identifier sets the
- * message width. word-break also drops a cell's minimum width to one character, so min-width
- * keeps a short column beside a long one from being squeezed to a letter per line.
+ * Core breaks words only on fixed-layout tables, where overflow-x scrolls the block instead.
+ * An email has nowhere to scroll, so every table needs it, or one long identifier sets the
+ * message width. word-break drops a cell's minimum width to one character, so it needs a floor,
+ * the way core pairs it with min-width on the verse block. A column needs more than one letter.
  */
 .wp-block-table td,
 .wp-block-table th {
