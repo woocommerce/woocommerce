@@ -536,6 +536,21 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A cleanup request should delete placeholders and finish the import.
+	 */
+	public function test_cleanup_request_deletes_placeholders_and_finishes(): void {
+		$placeholder = new WC_Product_Simple();
+		$placeholder->set_status( 'importing' );
+		$placeholder->save();
+
+		$response = $this->dispatch_import_request( 'cleanup:0' );
+
+		$this->assertSame( 'done', $response['data']['position'] );
+		$this->assertArrayHasKey( 'url', $response['data'] );
+		$this->assertNull( get_post( $placeholder->get_id() ) );
+	}
+
+	/**
 	 * @testdox A resumed request should leave the markers of the run in progress alone.
 	 */
 	public function test_resumed_request_keeps_the_markers_of_the_run_in_progress(): void {

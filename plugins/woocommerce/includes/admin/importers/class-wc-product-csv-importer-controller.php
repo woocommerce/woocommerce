@@ -351,20 +351,6 @@ class WC_Product_CSV_Importer_Controller {
 	}
 
 	/**
-	 * Remove temporary mappings between CSV IDs and imported products.
-	 *
-	 * The last import batch clears them so a run abandoned during cleanup leaves none behind.
-	 * Markers from a run abandoned earlier are kept so a retry of the same file skips rows already imported.
-	 * Concurrent imports are unsupported: markers and placeholder cleanup are shared site-wide.
-	 */
-	private static function delete_original_id_markers(): void {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The importer requires one uncached cleanup of its temporary mapping markers.
-		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
-	}
-
-	/**
 	 * Processes AJAX requests related to a product CSV import.
 	 *
 	 * @since 9.3.0
@@ -422,7 +408,7 @@ class WC_Product_CSV_Importer_Controller {
 			$error_log        = array_merge( $error_log, $results['failed'], $results['skipped'], $results['warnings'] ?? array() );
 
 			if ( 100 === $percent_complete ) {
-				self::delete_original_id_markers();
+				wc_get_container()->get( ImportPlaceholders::class )->delete_original_id_markers();
 			}
 
 			update_user_option( get_current_user_id(), 'product_import_error_log', $error_log );

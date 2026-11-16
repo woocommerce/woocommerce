@@ -40,8 +40,7 @@ final class ImportPlaceholders {
 		global $wpdb;
 
 		if ( 0 === $cursor ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The importer requires one uncached cleanup of its temporary mapping markers.
-			$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
+			$this->delete_original_id_markers();
 		}
 
 		/** This filter is documented in includes/import/abstract-wc-product-importer.php */
@@ -79,6 +78,20 @@ final class ImportPlaceholders {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Remove temporary mappings between CSV IDs and imported products.
+	 *
+	 * The last import batch clears them so a run abandoned during cleanup leaves none behind.
+	 * Markers from a run abandoned earlier are kept so a retry of the same file skips rows already imported.
+	 * Concurrent imports are unsupported: markers and placeholder cleanup are shared site-wide.
+	 */
+	public function delete_original_id_markers(): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The importer requires one uncached cleanup of its temporary mapping markers.
+		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
 	}
 
 	/**
