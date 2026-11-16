@@ -327,11 +327,11 @@ if ( 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' ) ) {
 
 **When it applies:** All three conditions must hold:
 
-1. An index returns the rows already sorted by the ORDER BY column: either an index that starts with that column, or a composite index where every column before it has an equality predicate (`col = const`). A range, `IN (...)` or `!=` on an earlier column does not qualify, because the index is then sorted by that column first.
+1. An index returns the rows already sorted by the ORDER BY column: either an index that starts with that column, or a composite index where every column before it has an equality predicate (`col = const`). A range, `IN (...)` or `!=` on an earlier column does not qualify, because the index is then sorted by that column first. An index that stores only a prefix of a column, such as `meta_key_value (meta_key(50), meta_value(20))` on the HPOS order meta table, does not qualify either: it does not sort the full value.
 2. Few rows at each end of that index fail the remaining WHERE predicates. Each failing row is read and skipped before the first qualifying one.
 3. `LIMIT 1` stops the scan after the first qualifying row.
 
-When every WHERE predicate is an equality on the leading columns of a composite index that has the column next, keep the plain `MIN()` / `MAX()`: MySQL and MariaDB already answer it from the index ends (`EXPLAIN` shows `Select tables optimized away`).
+When every WHERE predicate is an equality with a constant on the leading columns of a composite index that has the column next, keep the plain `MIN()` / `MAX()`: MySQL and MariaDB already answer it from the index ends (`EXPLAIN` shows `Select tables optimized away`).
 
 The example below does not use `type_status_date(type, status, date_created_gmt)`: `status != 'trash'` is not an equality, so that index is sorted by status before date. The optimizer walks the single-column `date_created(date_created_gmt)` index from each end and checks `type` and `status` on each row. That reads one row per branch when the oldest and newest rows are orders that are not trashed, and one more for every refund or trashed order it has to skip first — confirm with `EXPLAIN`.
 
