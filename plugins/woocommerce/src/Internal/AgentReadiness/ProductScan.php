@@ -123,7 +123,7 @@ class ProductScan {
 	private bool $truncated = false;
 
 	/**
-	 * Called with each product id and its failures during evaluate_each(). Cleared when that pass ends.
+	 * Called with each product id and its failures during test(). Cleared when that batch ends.
 	 *
 	 * @var callable|null
 	 */
@@ -153,103 +153,128 @@ class ProductScan {
 	}
 
 	/**
-	 * Test every covered product, calling $on_tested with each product id and its failures.
+	 * Clear the totals, count the catalog and list the products to test: newest change first,
+	 * up to PRODUCT_LIMIT. The list is read once, so a scan in batches tests the same products
+	 * a single pass would, even when products change between batches.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
-	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
-	 * @param int                                                             $ids_limit     Product ids kept per rule.
-	 * @param callable                                                        $on_tested     Called with each product id and its failures.
+	 * @return array<int, int> Product ids.
 	 */
-	public function evaluate_each( array $rules, array $channel_rules, int $ids_limit, callable $on_tested ): void {
-		$this->tested_callback = $on_tested;
-		try {
-			$this->evaluate( $rules, $channel_rules, $ids_limit );
-		} finally {
-			$this->tested_callback = null;
-		}
-	}
-
-	/**
-	 * Test every covered product against the rules.
-	 *
-	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
-	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
-	 * @param int                                                             $ids_limit     Product ids kept per rule.
-	 */
-	public function evaluate( array $rules, array $channel_rules, int $ids_limit ): void {
-		$this->results             = array_fill_keys(
-			array_keys( $rules ),
-			array(
-				'count'       => 0,
-				'product_ids' => array(),
-				'sales'       => 0.0,
-			)
-		);
+	public function start(): array {
+		$this->results             = array();
 		$this->products            = 0;
 		$this->statuses            = array();
-		$this->truncated           = false;
 		$this->hidden_from_catalog = self::count_published( self::count_query( self::COUNT_HIDDEN ) );
 		$this->available           = self::count_published( self::count_query( self::COUNT_AVAILABLE ) );
 		$this->unsupported_types   = self::count_published( self::count_query( self::COUNT_UNSUPPORTED ) );
 
-		$flush_runtime_cache = wp_cache_supports( 'flush_runtime' );
-		$page                = 1;
-		do {
-			$query = new \WP_Query(
-				array(
-					'post_type'      => 'product',
-					'post_status'    => 'publish',
-					'posts_per_page' => self::BATCH_SIZE,
-					'paged'          => $page,
-					'fields'         => 'ids',
-					'orderby'        => array(
-						'modified' => 'DESC',
-						'ID'       => 'DESC',
-					),
-					'no_found_rows'  => true,
-					'tax_query'      => self::count_query( self::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-				)
-			);
+		$query           = new \WP_Query(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				// One more than the limit, to tell a catalog cut short from one that fits.
+				'posts_per_page' => self::PRODUCT_LIMIT + 1,
+				'fields'         => 'ids',
+				'orderby'        => array(
+					'modified' => 'DESC',
+					'ID'       => 'DESC',
+				),
+				'no_found_rows'  => true,
+				'tax_query'      => self::count_query( self::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			)
+		);
+		$product_ids     = array_map(
+			static function ( $post ): int {
+				return $post instanceof \WP_Post ? $post->ID : (int) $post;
+			},
+			$query->posts
+		);
+		$this->truncated = count( $product_ids ) > self::PRODUCT_LIMIT;
+		return array_slice( $product_ids, 0, self::PRODUCT_LIMIT );
+	}
 
-			$product_ids = array_map(
-				static function ( $post ): int {
-					return $post instanceof \WP_Post ? $post->ID : (int) $post;
-				},
-				$query->posts
-			);
-			$batch_count = count( $product_ids );
-			/**
-			 * Fires after one batch of product ids has been read, before those products are tested.
-			 * A product created here is not in this batch, so the scan does not replace its rows.
-			 *
-			 * An ids query returns before `posts_results` and `the_posts`, so those filters never see this query.
-			 *
-			 * @since 11.4.0
-			 *
-			 * @param int[] $product_ids Product ids in this batch.
-			 */
-			do_action( 'woocommerce_agent_readiness_scan_batch', $product_ids );
-			self::prime_related( $product_ids );
+	/**
+	 * Test one batch of products from start() and add them to the totals.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array<int, int>                                                 $product_ids   Product ids, at most BATCH_SIZE.
+	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
+	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
+	 * @param int                                                             $ids_limit     Product ids kept per rule.
+	 * @param callable|null                                                   $on_tested     Called with each product id and its failures.
+	 */
+	public function test( array $product_ids, array $rules, array $channel_rules, int $ids_limit, ?callable $on_tested = null ): void {
+		/**
+		 * Fires after one batch of product ids has been read, before those products are tested.
+		 * A product created here is not in this batch, so the scan does not replace its rows.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param int[] $product_ids Product ids in this batch.
+		 */
+		do_action( 'woocommerce_agent_readiness_scan_batch', $product_ids );
+		self::prime_related( $product_ids );
+		$this->tested_callback = $on_tested;
+		try {
 			foreach ( $product_ids as $product_id ) {
-				if ( self::PRODUCT_LIMIT === $this->products ) {
-					$this->truncated = true;
-					break 2;
-				}
 				$product = wc_get_product( $product_id );
 				if ( $product ) {
 					$this->record( $product, $rules, $channel_rules, $ids_limit );
 				}
 			}
+		} finally {
+			$this->tested_callback = null;
+		}
 
-			// A full-catalog read would otherwise keep every product's post, meta and terms in the request's object cache.
-			if ( $flush_runtime_cache ) {
-				wp_cache_flush_runtime();
-			}
-			++$page;
-		} while ( self::BATCH_SIZE === $batch_count );
-		$this->tested_callback = null;
+		// A full-catalog read would otherwise keep every product's post, meta and terms in the request's object cache.
+		if ( wp_cache_supports( 'flush_runtime' ) ) {
+			wp_cache_flush_runtime();
+		}
+	}
+
+	/**
+	 * The totals so far, to carry a scan in batches from one background action to the next.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function state(): array {
+		return array(
+			'results'             => $this->results,
+			'products'            => $this->products,
+			'statuses'            => $this->statuses,
+			'available'           => $this->available,
+			'hidden_from_catalog' => $this->hidden_from_catalog,
+			'unsupported_types'   => $this->unsupported_types,
+			'truncated'           => $this->truncated,
+			// Read once per scan; past the limit, each batch reads them again rather than storing them all.
+			'shared_gtins'        => null === $this->shared_gtins ? null : $this->shared_gtins(),
+		);
+	}
+
+	/**
+	 * A scan that goes on from state().
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array<string, mixed> $state Totals from state().
+	 */
+	public static function from_state( array $state ): self {
+		$scan                      = new self();
+		$scan->results             = (array) ( $state['results'] ?? array() );
+		$scan->products            = (int) ( $state['products'] ?? 0 );
+		$scan->statuses            = (array) ( $state['statuses'] ?? array() );
+		$scan->available           = (int) ( $state['available'] ?? 0 );
+		$scan->hidden_from_catalog = (int) ( $state['hidden_from_catalog'] ?? 0 );
+		$scan->unsupported_types   = (int) ( $state['unsupported_types'] ?? 0 );
+		$scan->truncated           = ! empty( $state['truncated'] );
+		if ( is_array( $state['shared_gtins'] ?? null ) ) {
+			$scan->use_shared_gtins( $state['shared_gtins'] );
+		}
+		return $scan;
 	}
 
 	/**
@@ -402,7 +427,7 @@ class ProductScan {
 	}
 
 	/**
-	 * Sales to add up per rule over the next evaluate(): each failing product adds its own, or
+	 * Sales to add up per rule over the next test(): each failing product adds its own, or
 	 * only its failing variations' when the check names them.
 	 *
 	 * @param array<int, float> $by_product   Net sales by product id.

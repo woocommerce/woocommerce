@@ -103,6 +103,8 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 	 * @testdox A product that stores rows while the scan runs keeps them.
 	 */
 	public function test_product_stored_during_scan_keeps_its_rows(): void {
+		// A product to scan, so there is a batch for the new product to be saved during.
+		WC_Helper_Product::create_simple_product();
 		$during_id = 0;
 		$hook      = static function () use ( &$during_id ) {
 			if ( 0 !== $during_id ) {

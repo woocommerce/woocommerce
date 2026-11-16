@@ -184,7 +184,9 @@ Per check, `channels` maps a channel id to the feed field and the effect, the sa
 
 ## Background scan and REST
 
-"Run checks" on WooCommerce > Sales readiness, or `POST wc/v3/agent-readiness/scan`, queues the scan in Action Scheduler (`ScheduledScan`). The report is stored in the `woocommerce_agent_readiness_report` option (not autoloaded). Each run schedules the next one a day later, before scanning, so a failed scan doesn't stop the daily refresh; a run that finds the feature disabled does. If a queued scan still hasn't started 10 minutes after it was due and no other scheduled action has finished, failed or started in that time (Action Scheduler isn't running), the Sales readiness page says so and the scan stays queued. The scan never runs in a page or REST request; splitting the product pass into one action per batch is WOOAI-1661.
+"Run checks" on WooCommerce > Sales readiness, or `POST wc/v3/agent-readiness/scan`, queues the scan in Action Scheduler (`ScheduledScan`). The report is stored in the `woocommerce_agent_readiness_report` option (not autoloaded). Each run schedules the next one a day later, before scanning, so a failed scan doesn't stop the daily refresh; a run that finds the feature disabled does. If a queued scan still hasn't started 10 minutes after it was due and no other scheduled action has finished, failed or started in that time (Action Scheduler isn't running), the Sales readiness page says so and the scan stays queued. The scan never runs in a page or REST request.
+
+A scan runs as a chain of actions (`NEXT_HOOK`, with the scan's id), so no action tests more than one batch of products. The first lists the products to test, newest change first, and stores that list with the totals in the `woocommerce_agent_readiness_scan` option (not autoloaded). Each action tests the next batch of 200, saves the totals and queues the next; the last builds the report, with the store output checks, and stores it. Each batch reads only its own products' sales, so the whole store's sales are never kept. Before testing, an action queues a retry RETRY_AFTER (10 minutes) later, which it removes when it finishes, so a batch that ends early, as on a timeout, is tried again from the last finished batch. After MAX_ATTEMPTS (3) tries of the same batch, the scan stops and the last report stays. A new request (or the daily run) replaces a scan in progress and starts over; the replaced scan's actions change nothing. With the feature off, the next action stops the scan. `refresh_report()` runs the same steps in one request.
 
 On a store with 11,000 products, a scan (stopping at 5,000) took about 4 seconds and 144 MB. A product saved since the scan is already reflected in the counts, as described under Failures per product.
 
@@ -192,7 +194,7 @@ On a store with 11,000 products, a scan (stopping at 5,000) took about 4 seconds
 
 The same shape is meant for every consumer: WooCommerce > Sales readiness and AI shopping, an outside scan of a store, and extensions that rank the findings by sales or offer fixes. Check and channel ids are stable keys.
 
-The scan walks published simple and variable products not set to Hidden in batches of 200, most recently modified first, primes meta, terms, images and variations per batch, and stops at 5,000 products.
+The scan walks published simple and variable products not set to Hidden in batches of 200, most recently modified first, primes meta, terms, images and variations per batch, and stops at 5,000 products. The list of products is read once when the scan starts, so a product changed while it runs neither moves nor gets tested twice; a product saved meanwhile stores its own results, as described under Failures per product.
 
 ## Abilities
 
