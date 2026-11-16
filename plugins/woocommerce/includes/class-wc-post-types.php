@@ -270,7 +270,7 @@ class WC_Post_Types {
 	}
 
 	/**
-	 * Register one attribute taxonomy and add it to the $wc_product_attributes global.
+	 * Register one attribute taxonomy. Init and refresh_attribute_taxonomy() both use this.
 	 *
 	 * @param stdClass   $tax        Attribute row from wc_get_attribute_taxonomies().
 	 * @param array|null $permalinks Permalink structure, so a loop reads it only once.
@@ -365,6 +365,44 @@ class WC_Post_Types {
 			 */
 			apply_filters( "woocommerce_taxonomy_args_{$name}", $taxonomy_data )
 		);
+	}
+
+	/**
+	 * Register a saved attribute's taxonomy again in this request. Does nothing before init registers taxonomies.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 * @param int $attribute_id Attribute ID.
+	 * @return void
+	 */
+	public static function refresh_attribute_taxonomy( int $attribute_id ): void {
+		if ( ! did_action( 'woocommerce_after_register_taxonomy' ) ) {
+			return;
+		}
+
+		delete_transient( 'wc_attribute_taxonomies' );
+		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+
+		$tax = wc_get_attribute_taxonomies()[ 'id:' . $attribute_id ] ?? null;
+		if ( ! $tax ) {
+			return;
+		}
+
+		// Unregister first, or the old query var and rewrite rules stay.
+		$name         = wc_attribute_taxonomy_name( $tax->attribute_name );
+		$existing     = get_taxonomy( $name );
+		$object_types = $existing ? $existing->object_type : array();
+		if ( $existing ) {
+			unregister_taxonomy( $name );
+		}
+
+		self::register_attribute_taxonomy( $tax );
+
+		// Keep object types that other code attached during this request.
+		foreach ( $object_types as $object_type ) {
+			register_taxonomy_for_object_type( $name, $object_type );
+		}
 	}
 
 	/**
