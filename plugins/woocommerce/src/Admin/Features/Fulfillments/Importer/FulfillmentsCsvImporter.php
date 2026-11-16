@@ -128,6 +128,28 @@ class FulfillmentsCsvImporter {
 	public const NOTIFY_CHUNK_SIZE = 25;
 
 	/**
+	 * Row statuses of import_chunk(); its counts use the same keys plus "notified".
+	 */
+	public const STATUS_CREATED = 'created';
+	public const STATUS_UPDATED = 'updated';
+	public const STATUS_SKIPPED = 'skipped';
+	public const STATUS_FAILED  = 'failed';
+
+	/**
+	 * Codes of a failed row.
+	 */
+	public const CODE_MISSING_ORDER_NUMBER    = 'missing_order_number';
+	public const CODE_MISSING_TRACKING_NUMBER = 'missing_tracking_number';
+	public const CODE_MISSING_PROVIDER        = 'missing_provider';
+	public const CODE_INVALID_TRACKING_URL    = 'invalid_tracking_url';
+	public const CODE_ORDER_NOT_FOUND         = 'order_not_found';
+	public const CODE_INVALID_ITEMS           = 'invalid_items';
+	public const CODE_STORE_READ_FAILED       = 'store_read_failed';
+	public const CODE_FULFILLMENT_LOCKED      = 'fulfillment_locked';
+	public const CODE_NO_ITEMS                = 'no_items';
+	public const CODE_SAVE_FAILED             = 'save_failed';
+
+	/**
 	 * Spellings accepted for a tab delimiter, since multipart and JSON clients
 	 * cannot always send a raw tab character.
 	 */
@@ -468,7 +490,7 @@ class FulfillmentsCsvImporter {
 
 		$this->prime_orders( $data, $header_map );
 		foreach ( $data as $row ) {
-			$order_number = $this->get_field( $row['cells'], $header_map, self::COL_ORDER_NUMBER );
+			$order_number = self::get_field( $row['cells'], $header_map, self::COL_ORDER_NUMBER );
 			$rows[]       = array(
 				'row'          => $row['row_number'],
 				'order_number' => $order_number,
@@ -478,11 +500,11 @@ class FulfillmentsCsvImporter {
 		$statuses = array_count_values( array_column( $rows, 'status' ) );
 		return array(
 			'counts'              => array(
-				'created'  => $statuses['created'] ?? 0,
-				'updated'  => $statuses['updated'] ?? 0,
-				'skipped'  => $statuses['skipped'] ?? 0,
-				'failed'   => $statuses['failed'] ?? 0,
-				'notified' => count( array_filter( array_column( $rows, 'notified' ) ) ),
+				self::STATUS_CREATED => $statuses[ self::STATUS_CREATED ] ?? 0,
+				self::STATUS_UPDATED => $statuses[ self::STATUS_UPDATED ] ?? 0,
+				self::STATUS_SKIPPED => $statuses[ self::STATUS_SKIPPED ] ?? 0,
+				self::STATUS_FAILED  => $statuses[ self::STATUS_FAILED ] ?? 0,
+				'notified'           => count( array_filter( array_column( $rows, 'notified' ) ) ),
 			),
 			'rows'                => $rows,
 			'seen_tracking_pairs' => $seen,
@@ -504,30 +526,30 @@ class FulfillmentsCsvImporter {
 	 * @return array<string, mixed> Status and message, plus code, order_id, fulfillment_id and notified when they apply.
 	 */
 	private function import_row( array $cells, array $header_map, string $order_number, int $row_number, array &$seen ): array {
-		$tracking_number = $this->get_field( $cells, $header_map, self::COL_TRACKING_NUMBER );
-		$provider        = $this->get_field( $cells, $header_map, self::COL_PROVIDER );
-		$tracking_url    = $this->get_field( $cells, $header_map, self::COL_TRACKING_URL );
+		$tracking_number = self::get_field( $cells, $header_map, self::COL_TRACKING_NUMBER );
+		$provider        = self::get_field( $cells, $header_map, self::COL_PROVIDER );
+		$tracking_url    = self::get_field( $cells, $header_map, self::COL_TRACKING_URL );
 
 		if ( '' === $order_number ) {
-			return $this->fail( 'missing_order_number', __( 'Missing order number.', 'woocommerce' ) );
+			return self::fail( self::CODE_MISSING_ORDER_NUMBER, __( 'Missing order number.', 'woocommerce' ) );
 		}
 		if ( '' === $tracking_number ) {
-			return $this->fail( 'missing_tracking_number', __( 'Missing tracking number.', 'woocommerce' ) );
+			return self::fail( self::CODE_MISSING_TRACKING_NUMBER, __( 'Missing tracking number.', 'woocommerce' ) );
 		}
 		if ( '' === $provider ) {
-			return $this->fail( 'missing_provider', __( 'Missing shipment provider.', 'woocommerce' ) );
+			return self::fail( self::CODE_MISSING_PROVIDER, __( 'Missing shipment provider.', 'woocommerce' ) );
 		}
 		if ( '' !== $tracking_url ) {
 			$tracking_url = $this->sanitize_tracking_url( $tracking_url );
 			if ( '' === $tracking_url ) {
-				return $this->fail( 'invalid_tracking_url', __( 'Tracking URL must be a valid http or https URL.', 'woocommerce' ) );
+				return self::fail( self::CODE_INVALID_TRACKING_URL, __( 'Tracking URL must be a valid http or https URL.', 'woocommerce' ) );
 			}
 		}
 
 		$order = $this->resolve_order( $order_number );
 		if ( null === $order ) {
-			return $this->fail(
-				'order_not_found',
+			return self::fail(
+				self::CODE_ORDER_NOT_FOUND,
 				/* translators: %s: order number from the CSV. */
 				sprintf( __( 'Order not found for order number "%s".', 'woocommerce' ), $order_number )
 			);
@@ -538,34 +560,34 @@ class FulfillmentsCsvImporter {
 		$pair = substr( md5( $order_id . '|' . strtolower( $tracking_number ) ), 0, 20 );
 		if ( isset( $seen[ $pair ] ) ) {
 			return array(
-				'status'   => 'skipped',
+				'status'   => self::STATUS_SKIPPED,
 				'message'  => __( 'Duplicate order and tracking number in this file.', 'woocommerce' ),
 				'order_id' => $order_id,
 			);
 		}
 
-		$items_cell = $this->get_field( $cells, $header_map, self::COL_ITEMS );
+		$items_cell = self::get_field( $cells, $header_map, self::COL_ITEMS );
 		$items      = '' === $items_cell ? null : $this->parse_items( $items_cell, $order );
 		if ( is_string( $items ) ) {
-			return $this->fail( 'invalid_items', $items, $order_id );
+			return self::fail( self::CODE_INVALID_ITEMS, $items, $order_id );
 		}
 
 		try {
 			$existing = $this->find_existing_fulfillment( $order_id, $tracking_number );
 		} catch ( \RuntimeException $e ) {
-			return $this->fail( 'store_read_failed', __( 'Could not read the fulfillments of this order. Please try again.', 'woocommerce' ), $order_id );
+			return self::fail( self::CODE_STORE_READ_FAILED, __( 'Could not read the fulfillments of this order. Please try again.', 'woocommerce' ), $order_id );
 		}
 
 		if ( null !== $existing && ! $this->options['update_existing'] ) {
 			return array(
-				'status'         => 'skipped',
+				'status'         => self::STATUS_SKIPPED,
 				'message'        => __( 'Fulfillment with this tracking number already exists.', 'woocommerce' ),
 				'order_id'       => $order_id,
 				'fulfillment_id' => $existing->get_id(),
 			);
 		}
 		if ( null !== $existing && $existing->is_locked() ) {
-			return $this->fail( 'fulfillment_locked', __( 'The fulfillment with this tracking number is locked and cannot be changed.', 'woocommerce' ), $order_id );
+			return self::fail( self::CODE_FULFILLMENT_LOCKED, __( 'The fulfillment with this tracking number is locked and cannot be changed.', 'woocommerce' ), $order_id );
 		}
 
 		$result = $this->save_fulfillment(
@@ -579,7 +601,7 @@ class FulfillmentsCsvImporter {
 			),
 			$row_number
 		);
-		if ( 'failed' !== $result['status'] ) {
+		if ( self::STATUS_FAILED !== $result['status'] ) {
 			$seen[ $pair ] = true;
 		}
 		return $result;
@@ -603,7 +625,7 @@ class FulfillmentsCsvImporter {
 			// A blank items cell fulfills every item on create, but keeps the stored items on update.
 			$items = $items ?? $this->default_items_from_order( $order );
 			if ( array() === $items ) {
-				return $this->fail( 'no_items', __( 'This order has no items to fulfill.', 'woocommerce' ), $order_id );
+				return self::fail( self::CODE_NO_ITEMS, __( 'This order has no items to fulfill.', 'woocommerce' ), $order_id );
 			}
 			$fulfillment->set_entity_type( WC_Order::class );
 			$fulfillment->set_entity_id( (string) $order_id );
@@ -622,17 +644,17 @@ class FulfillmentsCsvImporter {
 		try {
 			$fulfillment->save();
 		} catch ( FulfillmentException $e ) {
-			return $this->fail( 'save_failed', $e->getMessage(), $order_id );
+			return self::fail( self::CODE_SAVE_FAILED, $e->getMessage(), $order_id );
 		} catch ( \Throwable $e ) {
 			wc_get_logger()->error(
 				sprintf( 'Fulfillments import could not save row %1$d for order %2$d: %3$s', $row_number, $order_id, $e->getMessage() ),
 				array( 'source' => 'fulfillments-importer' )
 			);
-			return $this->fail( 'save_failed', __( 'Could not save the fulfillment.', 'woocommerce' ), $order_id );
+			return self::fail( self::CODE_SAVE_FAILED, __( 'Could not save the fulfillment.', 'woocommerce' ), $order_id );
 		}
 
 		return array(
-			'status'         => null === $existing ? 'created' : 'updated',
+			'status'         => null === $existing ? self::STATUS_CREATED : self::STATUS_UPDATED,
 			'message'        => null === $existing ? __( 'Fulfillment created.', 'woocommerce' ) : __( 'Fulfillment updated.', 'woocommerce' ),
 			'order_id'       => $order_id,
 			'fulfillment_id' => $fulfillment->get_id(),
@@ -687,9 +709,9 @@ class FulfillmentsCsvImporter {
 	 * @param int    $order_id Resolved order ID, or 0 when the order is not known.
 	 * @return array<string, mixed>
 	 */
-	private function fail( string $code, string $message, int $order_id = 0 ): array {
+	private static function fail( string $code, string $message, int $order_id = 0 ): array {
 		$result = array(
-			'status'  => 'failed',
+			'status'  => self::STATUS_FAILED,
 			'code'    => $code,
 			'message' => $message,
 		);
@@ -707,7 +729,7 @@ class FulfillmentsCsvImporter {
 	 * @param string             $column     Canonical column key.
 	 * @return string Empty when the column is not mapped or the row has no such cell.
 	 */
-	private function get_field( array $cells, array $header_map, string $column ): string {
+	private static function get_field( array $cells, array $header_map, string $column ): string {
 		return isset( $header_map[ $column ] ) ? (string) ( $cells[ $header_map[ $column ] ] ?? '' ) : '';
 	}
 
@@ -738,7 +760,7 @@ class FulfillmentsCsvImporter {
 	private function prime_orders( array $rows, array $header_map ): void {
 		$ids = array();
 		foreach ( $rows as $row ) {
-			$order_number = $this->get_field( $row['cells'], $header_map, self::COL_ORDER_NUMBER );
+			$order_number = self::get_field( $row['cells'], $header_map, self::COL_ORDER_NUMBER );
 			if ( ctype_digit( $order_number ) ) {
 				$ids[] = (int) $order_number;
 			}

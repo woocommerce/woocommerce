@@ -782,11 +782,11 @@ final class ImportSession {
 	public function counts(): array {
 		$counts = is_array( $this->data['counts'] ?? null ) ? $this->data['counts'] : array();
 		return array(
-			'created'  => (int) ( $counts['created'] ?? 0 ),
-			'updated'  => (int) ( $counts['updated'] ?? 0 ),
-			'skipped'  => (int) ( $counts['skipped'] ?? 0 ),
-			'failed'   => (int) ( $counts['failed'] ?? 0 ),
-			'notified' => (int) ( $counts['notified'] ?? 0 ),
+			FulfillmentsCsvImporter::STATUS_CREATED => (int) ( $counts[ FulfillmentsCsvImporter::STATUS_CREATED ] ?? 0 ),
+			FulfillmentsCsvImporter::STATUS_UPDATED => (int) ( $counts[ FulfillmentsCsvImporter::STATUS_UPDATED ] ?? 0 ),
+			FulfillmentsCsvImporter::STATUS_SKIPPED => (int) ( $counts[ FulfillmentsCsvImporter::STATUS_SKIPPED ] ?? 0 ),
+			FulfillmentsCsvImporter::STATUS_FAILED  => (int) ( $counts[ FulfillmentsCsvImporter::STATUS_FAILED ] ?? 0 ),
+			'notified'                              => (int) ( $counts['notified'] ?? 0 ),
 		);
 	}
 

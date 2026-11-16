@@ -92,7 +92,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	private function import_csv( string $csv, array $options = array(), int $limit = 200 ): array {
 		$file   = $this->make_csv( $csv );
 		$state  = array();
-		$counts = array_fill_keys( array( 'created', 'updated', 'skipped', 'failed', 'notified' ), 0 );
+		$counts = array_fill_keys( array( FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_UPDATED, FulfillmentsCsvImporter::STATUS_SKIPPED, FulfillmentsCsvImporter::STATUS_FAILED, 'notified' ), 0 );
 		$rows   = array();
 		$chunks = 0;
 		do {
@@ -130,7 +130,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	 * @return array<string, int>
 	 */
 	private static function counts( array $values ): array {
-		return array_merge( array_fill_keys( array( 'created', 'updated', 'skipped', 'failed', 'notified' ), 0 ), $values );
+		return array_merge( array_fill_keys( array( FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_UPDATED, FulfillmentsCsvImporter::STATUS_SKIPPED, FulfillmentsCsvImporter::STATUS_FAILED, 'notified' ), 0 ), $values );
 	}
 
 	/**
@@ -1047,7 +1047,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,ups,https://example.com/t/<b>TRK-1\n" );
 
-		$this->assertSame( self::counts( array( 'created' => 1 ) ), $result['counts'] );
+		$this->assertSame( self::counts( array( FulfillmentsCsvImporter::STATUS_CREATED => 1 ) ), $result['counts'] );
 		$fulfillments = $this->fulfillments_of( $order );
 		$this->assertCount( 1, $fulfillments );
 		$fulfillment = $fulfillments[0];
@@ -1055,7 +1055,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			array(
 				'row'            => 2,
 				'order_number'   => (string) $id,
-				'status'         => 'created',
+				'status'         => FulfillmentsCsvImporter::STATUS_CREATED,
 				'message'        => 'Fulfillment created.',
 				'order_id'       => $id,
 				'fulfillment_id' => $fulfillment->get_id(),
@@ -1108,7 +1108,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame(
-			array( 'missing_order_number', 'missing_tracking_number', 'missing_provider', 'order_not_found', 'order_not_found', 'invalid_tracking_url', 'invalid_tracking_url', 'invalid_tracking_url', 'invalid_tracking_url', 'no_items', 'save_failed', 'save_failed', null ),
+			array( FulfillmentsCsvImporter::CODE_MISSING_ORDER_NUMBER, FulfillmentsCsvImporter::CODE_MISSING_TRACKING_NUMBER, FulfillmentsCsvImporter::CODE_MISSING_PROVIDER, FulfillmentsCsvImporter::CODE_ORDER_NOT_FOUND, FulfillmentsCsvImporter::CODE_ORDER_NOT_FOUND, FulfillmentsCsvImporter::CODE_INVALID_TRACKING_URL, FulfillmentsCsvImporter::CODE_INVALID_TRACKING_URL, FulfillmentsCsvImporter::CODE_INVALID_TRACKING_URL, FulfillmentsCsvImporter::CODE_INVALID_TRACKING_URL, FulfillmentsCsvImporter::CODE_NO_ITEMS, FulfillmentsCsvImporter::CODE_SAVE_FAILED, FulfillmentsCsvImporter::CODE_SAVE_FAILED, null ),
 			array_map(
 				static function ( $row ) {
 					return $row['code'] ?? null;
@@ -1119,8 +1119,8 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame(
 			self::counts(
 				array(
-					'created' => 1,
-					'failed'  => 12,
+					FulfillmentsCsvImporter::STATUS_CREATED => 1,
+					FulfillmentsCsvImporter::STATUS_FAILED => 12,
 				)
 			),
 			$result['counts']
@@ -1158,7 +1158,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			1
 		);
 
-		$this->assertSame( array( 'failed', 'created', 'skipped', 'created' ), array_column( $result['rows'], 'status' ) );
+		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_FAILED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_SKIPPED, FulfillmentsCsvImporter::STATUS_CREATED ), array_column( $result['rows'], 'status' ) );
 		$this->assertSame( 'Duplicate order and tracking number in this file.', $result['rows'][2]['message'] );
 		$fulfillments = $this->fulfillments_of( $order );
 		$this->assertCount( 1, $fulfillments );
@@ -1177,7 +1177,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$id},trk-1,fedex,\n" );
 
-		$this->assertSame( self::counts( array( 'updated' => 1 ) ), $result['counts'] );
+		$this->assertSame( self::counts( array( FulfillmentsCsvImporter::STATUS_UPDATED => 1 ) ), $result['counts'] );
 		$this->assertSame( 'Fulfillment updated.', $result['rows'][0]['message'] );
 		$this->assertSame( $stored_id, $result['rows'][0]['fulfillment_id'] );
 		$fulfillments = $this->fulfillments_of( $order );
@@ -1234,9 +1234,9 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\nINV-7,TRK-1,ups\n{$other->get_id()},TRK-2,ups\n{$order->get_id()},TRK-3,ups\nINV-7,TRK-4,ups\n" );
 
-		$this->assertSame( array( 'created', 'failed', 'created', 'created' ), array_column( $result['rows'], 'status' ) );
+		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_FAILED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_CREATED ), array_column( $result['rows'], 'status' ) );
 		$this->assertSame( $order->get_id(), $result['rows'][0]['order_id'] );
-		$this->assertSame( 'order_not_found', $result['rows'][1]['code'] );
+		$this->assertSame( FulfillmentsCsvImporter::CODE_ORDER_NOT_FOUND, $result['rows'][1]['code'] );
 		$this->assertSame( array( 'INV-7', (string) $other->get_id(), (string) $order->get_id() ), $calls, 'The filter runs once per order number in a chunk' );
 		$this->assertCount( 0, $this->fulfillments_of( $other ) );
 	}
@@ -1300,7 +1300,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			'A chunk without numeric order numbers runs no query, and IDs are not repeated'
 		);
 		$this->assertSame( array( null, null, 'yes', '' ), $primed, 'The primed order is used; a non-array query result falls back to a lookup' );
-		$this->assertSame( array( 'failed', 'failed', 'created', 'created', 'created' ), array_column( $result['rows'], 'status' ) );
+		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_FAILED, FulfillmentsCsvImporter::STATUS_FAILED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_CREATED ), array_column( $result['rows'], 'status' ) );
 	}
 
 	/**
@@ -1346,7 +1346,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,ups\n{$order->get_id()},TRK-2,ups\n" );
 
-		$this->assertSame( array( 'store_read_failed', 'store_read_failed' ), array_column( $result['rows'], 'code' ) );
+		$this->assertSame( array( FulfillmentsCsvImporter::CODE_STORE_READ_FAILED, FulfillmentsCsvImporter::CODE_STORE_READ_FAILED ), array_column( $result['rows'], 'code' ) );
 		$this->assertSame( 2, $reads, 'A failed read is not cached, so the next row reads again' );
 	}
 
@@ -1361,7 +1361,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 3, $result['chunks'], 'Five rows in chunks of two take three chunks' );
 		$this->assertSame( array( 3, 4, 7, 8, 9 ), array_column( $result['rows'], 'row' ) );
-		$this->assertSame( self::counts( array( 'created' => 5 ) ), $result['counts'] );
+		$this->assertSame( self::counts( array( FulfillmentsCsvImporter::STATUS_CREATED => 5 ) ), $result['counts'] );
 	}
 
 	/**
@@ -1429,7 +1429,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$order->get_id()},TRK-1,ups,,{$item_a}:1|SKU:Sku-B:1; {$item_a} : 2\n" );
 
-		$this->assertSame( 'created', $result['rows'][0]['status'] );
+		$this->assertSame( FulfillmentsCsvImporter::STATUS_CREATED, $result['rows'][0]['status'] );
 		$this->assertSame(
 			array(
 				array(
@@ -1471,7 +1471,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$order->get_id()},TRK-1,ups,,\"" . strtr( $cell, $replace ) . "\"\n" );
 
-		$this->assertSame( 'invalid_items', $result['rows'][0]['code'] ?? null );
+		$this->assertSame( FulfillmentsCsvImporter::CODE_INVALID_ITEMS, $result['rows'][0]['code'] ?? null );
 		$this->assertSame( strtr( $message, $replace ), $result['rows'][0]['message'] );
 		$this->assertCount( 0, $this->fulfillments_of( $order ) );
 	}
@@ -1564,7 +1564,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $notify ? $expected : array(), $fired );
 		$this->assertSame( $notify ? 2 : 0, $first['counts']['notified'] );
 		$this->assertSame( $notify ? 1 : 0, $second['counts']['notified'] );
-		$this->assertSame( array( 'created', 'updated', 'updated' ), array_column( array_merge( $first['rows'], $second['rows'] ), 'status' ) );
+		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_UPDATED, FulfillmentsCsvImporter::STATUS_UPDATED ), array_column( array_merge( $first['rows'], $second['rows'] ), 'status' ) );
 		$this->assertSame( array( $notify, $notify, $notify ), array_column( array_merge( $first['rows'], $second['rows'] ), 'notified' ) );
 	}
 
@@ -1582,7 +1582,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,ups\n", array( 'notify_customer' => true ) );
 
-		$this->assertSame( self::counts( array( 'created' => 1 ) ), $result['counts'] );
+		$this->assertSame( self::counts( array( FulfillmentsCsvImporter::STATUS_CREATED => 1 ) ), $result['counts'] );
 		$this->assertFalse( $result['rows'][0]['notified'] );
 		$this->assertCount( 1, $this->fulfillments_of( $order ) );
 	}

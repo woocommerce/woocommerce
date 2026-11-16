@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Importer;
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsCsvImporter;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\ImportSession;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper;
 use Automattic\WooCommerce\Tests\Internal\TransientFiles\TransientFilesTestStreamWrapper;
@@ -594,16 +595,16 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	private function chunk_result( int $consumed, int $created, int $byte_offset, bool $eof = false ): array {
 		return array(
 			'counts'              => array(
-				'created'  => $created,
-				'updated'  => 1,
-				'skipped'  => 0,
-				'failed'   => 0,
-				'notified' => 0,
+				FulfillmentsCsvImporter::STATUS_CREATED => $created,
+				FulfillmentsCsvImporter::STATUS_UPDATED => 1,
+				FulfillmentsCsvImporter::STATUS_SKIPPED => 0,
+				FulfillmentsCsvImporter::STATUS_FAILED  => 0,
+				'notified'                              => 0,
 			),
 			'rows'                => array(
 				array(
 					'row'     => $byte_offset,
-					'status'  => 'created',
+					'status'  => FulfillmentsCsvImporter::STATUS_CREATED,
 					'message' => 'Fulfillment created.',
 				),
 			),
@@ -631,11 +632,11 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 7, $reloaded->next_record_number() );
 		$this->assertSame(
 			array(
-				'created'  => 10,
-				'updated'  => 2,
-				'skipped'  => 0,
-				'failed'   => 0,
-				'notified' => 0,
+				FulfillmentsCsvImporter::STATUS_CREATED => 10,
+				FulfillmentsCsvImporter::STATUS_UPDATED => 2,
+				FulfillmentsCsvImporter::STATUS_SKIPPED => 0,
+				FulfillmentsCsvImporter::STATUS_FAILED  => 0,
+				'notified'                              => 0,
 			),
 			$reloaded->counts()
 		);
@@ -664,7 +665,7 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 
 		$reloaded = ImportSession::load( 82, $session->token() );
 		$this->assertSame( 10, $reloaded->processed() );
-		$this->assertSame( 7, $reloaded->counts()['created'] );
+		$this->assertSame( 7, $reloaded->counts()[ FulfillmentsCsvImporter::STATUS_CREATED ] );
 		$this->assertSame( 400, $reloaded->byte_offset() );
 	}
 
