@@ -139,16 +139,16 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	public function test_get_months_filter_options_ignores_null_creation_date(): void {
 		global $wpdb;
 
-		$order = \WC_Helper_Order::create_order();
+		$order = wc_create_order();
 		$order->set_date_created( new \WC_DateTime( '2025-01-02 00:00:00' ) );
 		$order->save();
 
-		$order = \WC_Helper_Order::create_order();
+		$order = wc_create_order();
 		$order->set_date_created( new \WC_DateTime( '2025-03-02 00:00:00' ) );
 		$order->save();
 
 		// The data store always sets a creation date, so only a direct write can leave it NULL.
-		$undated_order = \WC_Helper_Order::create_order();
+		$undated_order = wc_create_order();
 		$wpdb->update(
 			OrdersTableDataStore::get_orders_table_name(),
 			array( 'date_created_gmt' => null ),
