@@ -145,7 +145,7 @@ class StoreResponses {
 	 */
 	public function post_json( string $url, array $body ): ?array {
 		$url = self::absolute( $url );
-		$key = 'POST ' . $url;
+		$key = self::post_key( $url, $body );
 		if ( ! array_key_exists( $key, $this->responses ) ) {
 			$this->responses[ $key ] = $this->site_live && $this->is_store_url( $url ) ? $this->request(
 				$url,
@@ -167,8 +167,18 @@ class StoreResponses {
 	 * @return array{status:int,body:string,headers:array<string,string>,truncated:bool}|null Null when the store could not be reached.
 	 */
 	public function post_json_again( string $url, array $body ): ?array {
-		unset( $this->responses[ 'POST ' . self::absolute( $url ) ] );
+		unset( $this->responses[ self::post_key( self::absolute( $url ), $body ) ] );
 		return $this->post_json( $url, $body );
+	}
+
+	/**
+	 * The key this scan keeps a POST's answer under: one per URL and body.
+	 *
+	 * @param string               $url  Absolute URL.
+	 * @param array<string, mixed> $body JSON object.
+	 */
+	private static function post_key( string $url, array $body ): string {
+		return 'POST ' . $url . ' ' . wp_json_encode( (object) $body );
 	}
 
 	/**

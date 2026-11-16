@@ -90,6 +90,31 @@ class StoreResponsesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A POST is kept per body: a different body to the same URL is sent, and sending it again replaces only its own answer.
+	 */
+	public function test_post_json_is_kept_per_body(): void {
+		$sent = array();
+		add_filter(
+			'pre_http_request',
+			function ( $pre, $args ) use ( &$sent ) {
+				unset( $pre );
+				$sent[] = $args['body'];
+				return self::response( 200, $args['body'] );
+			},
+			10,
+			2
+		);
+		$sut = new StoreResponses( true );
+
+		$this->assertSame( '{"a":1}', $sut->post_json( '/echo', array( 'a' => 1 ) )['body'] );
+		$this->assertSame( '{"b":2}', $sut->post_json( '/echo', array( 'b' => 2 ) )['body'] );
+		$this->assertSame( '{"a":1}', $sut->post_json( '/echo', array( 'a' => 1 ) )['body'], 'An earlier body is still read from this scan' );
+		$this->assertSame( '{"b":2}', $sut->post_json_again( '/echo', array( 'b' => 2 ) )['body'] );
+		$this->assertSame( '{"a":1}', $sut->post_json( '/echo', array( 'a' => 1 ) )['body'], 'Sending one body again keeps the other' );
+		$this->assertSame( array( '{"a":1}', '{"b":2}', '{"b":2}' ), $sent );
+	}
+
+	/**
 	 * @testdox A failed Markdown request to the home page doesn't stop the scan when the page itself loads.
 	 */
 	public function test_failed_markdown_request_keeps_the_scan_going(): void {
