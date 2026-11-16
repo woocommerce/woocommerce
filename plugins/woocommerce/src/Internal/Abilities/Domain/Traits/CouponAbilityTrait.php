@@ -223,7 +223,7 @@ trait CouponAbilityTrait {
 	 * @return true|\WP_Error
 	 */
 	protected static function set_coupon_props_from_input( \WC_Coupon $coupon, array $input ) {
-		if ( 'future' === $coupon->get_status() && ( ! $coupon->get_date_created() || $coupon->get_date_created()->getTimestamp() <= time() ) ) {
+		if ( 'future' === ( $input['status'] ?? null ) && ( ! $coupon->get_date_created() || $coupon->get_date_created()->getTimestamp() <= time() ) ) {
 			return new \WP_Error( 'woocommerce_ability_coupon_invalid_schedule', __( 'Scheduling requires an existing future publication date.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 		if ( isset( $input['date_expires'] ) && '' !== $input['date_expires'] ) {

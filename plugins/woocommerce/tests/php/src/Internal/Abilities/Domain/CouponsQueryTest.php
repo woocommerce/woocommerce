@@ -311,6 +311,56 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should allow unrelated overdue coupon edits while rejecting explicit invalid scheduling.
+	 */
+	public function test_update_overdue_scheduled_coupon(): void {
+		global $wpdb;
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_get_current_user()->add_cap( 'publish_shop_coupons', false );
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'overdue-scheduled' );
+		$coupon->set_amount( '10' );
+		$coupon->set_date_created( time() + DAY_IN_SECONDS );
+		$coupon->set_status( 'future' );
+		$coupon->save();
+		$overdue = time() - DAY_IN_SECONDS;
+		// Simulate a publication that WP-Cron has not processed yet.
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_date'     => wp_date( 'Y-m-d H:i:s', $overdue ),
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $overdue ),
+			),
+			array( 'ID' => $coupon->get_id() )
+		);
+		clean_post_cache( $coupon->get_id() );
+		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
+		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$input   = array(
+			'id'                 => $coupon->get_id(),
+			'amount'             => '15',
+			'email_restrictions' => array( 'customer@example.com' ),
+		);
+		$result  = $ability->execute( $input );
+		$this->assertNotWPError( $result );
+		$stored = new \WC_Coupon( $coupon->get_id() );
+		$this->assertSame( '15', $stored->get_amount() );
+		$this->assertSame( array( 'customer@example.com' ), $stored->get_email_restrictions() );
+		$this->assertSame( 'future', $stored->get_status() );
+		$this->assertSame( $overdue, $stored->get_date_created()->getTimestamp() );
+		$this->assertSame( 'future', $result['coupon']['status'] );
+
+		$before          = $stored->get_data();
+		$input['status'] = 'future';
+		$input['amount'] = '20';
+		$result          = $ability->execute( $input );
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_coupon_invalid_schedule', $result->get_error_code() );
+		$this->assertEquals( $before, ( new \WC_Coupon( $coupon->get_id() ) )->get_data() );
+	}
+
+	/**
 	 * @testdox Should publish a scheduled coupon in storage as well as in its response.
 	 */
 	public function test_publish_scheduled_coupon(): void {
