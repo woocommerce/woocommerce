@@ -865,6 +865,10 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $is_valid->call( $webhook, $subscriber_id ) );
 		$this->assertTrue( $is_valid->call( $webhook, $customer_id ) );
+		$this->assertTrue( $is_valid->call( $webhook, (string) $subscriber_id ) );
+		$this->assertFalse( $is_valid->call( $webhook, -$subscriber_id ) );
+		$this->assertFalse( $is_valid->call( $webhook, (string) -$subscriber_id ) );
+		$this->assertFalse( $is_valid->call( $webhook, $subscriber_id + 0.5 ) );
 		$this->assertFalse( $is_valid->call( $webhook, PHP_INT_MAX ) );
 	}
 
@@ -908,6 +912,43 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		wp_delete_user( $user_id );
 
 		$this->assertSame( array( $user_id ), $delivered_ids );
+	}
+
+	/**
+	 * @testdox Removing a site member directly only delivers customer.deleted to that site's webhook.
+	 */
+	public function test_removing_a_user_from_a_site_delivers_customer_deleted(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Requires multisite.' );
+		}
+
+		$site_id       = get_current_blog_id();
+		$other_site_id = $this->factory->blog->create();
+		$user_id       = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$non_member_id = $this->factory->user->create( array( 'role' => '' ) );
+		remove_user_from_blog( $non_member_id, $site_id );
+		$this->assertFalse( is_user_member_of_blog( $non_member_id, $site_id ) );
+		add_user_to_blog( $other_site_id, $user_id, 'subscriber' );
+
+		$other_deliveries = array();
+		switch_to_blog( $other_site_id );
+		try {
+			$this->record_deliveries( $this->create_active_webhook( 'customer.deleted' ), $other_deliveries );
+		} finally {
+			restore_current_blog();
+		}
+
+		$deliveries = array();
+		$this->record_deliveries( $this->create_active_webhook( 'customer.deleted' ), $deliveries );
+
+		remove_user_from_blog( -$user_id, $site_id );
+		remove_user_from_blog( $non_member_id, $site_id );
+		$this->assertSame( array(), $deliveries, 'Invalid IDs and non-members must not trigger delivery.' );
+
+		$this->assertTrue( remove_user_from_blog( $user_id, $site_id ) );
+		$this->assertSame( array( $user_id ), $deliveries );
+		$this->assertSame( array(), $other_deliveries, 'A webhook registered on another site must not deliver.' );
+		$this->assertTrue( is_user_member_of_blog( $user_id, $other_site_id ) );
 	}
 
 	/**
