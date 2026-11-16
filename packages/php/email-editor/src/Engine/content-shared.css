@@ -15,8 +15,22 @@ pre.has-background {
 	padding: 16px 24px;
 }
 
+/* pre-wrap breaks at spaces, so a long identifier or URL would still widen the block */
 pre {
 	font-family: 'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace;
+	word-break: break-word;
+}
+
+/*
+ * Core breaks words only on fixed-layout tables, where the page scrolls the block instead;
+ * an email has nowhere to scroll, so every table needs it or one long identifier sets the
+ * message width. word-break also drops a cell's minimum width to one character, so min-width
+ * keeps a short column beside a long one from being squeezed to a letter per line.
+ */
+.wp-block-table td,
+.wp-block-table th {
+	min-width: 3em;
+	word-break: break-word;
 }
 
 /* With a light text weight such as 300, the browser's "bolder" gives 400 and looks like normal text. */
