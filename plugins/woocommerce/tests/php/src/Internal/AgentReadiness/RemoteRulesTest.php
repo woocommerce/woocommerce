@@ -84,9 +84,10 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	/**
 	 * Point the rules URL at the test URL and answer with this rules file.
 	 *
-	 * @param array $checks Channel maps by check id.
+	 * @param array      $checks       Channel maps by check id.
+	 * @param array|null $store_checks The file's store_checks map, or null to leave it out.
 	 */
-	private function serve( array $checks ): void {
+	private function serve( array $checks, ?array $store_checks = null ): void {
 		add_filter(
 			'woocommerce_agent_readiness_rules_url',
 			static function () {
@@ -97,6 +98,9 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 			'version' => '2026-11-01',
 			'checks'  => array(),
 		);
+		if ( null !== $store_checks ) {
+			$file['store_checks'] = $store_checks;
+		}
 		foreach ( $checks as $id => $channels ) {
 			$file['checks'][ $id ] = array(
 				'label'    => 'Ignored by core',
@@ -118,7 +122,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$output_checks = new StoreOutputChecks();
 		$output_checks->init( new ComingSoonHelper() );
 		$agent_readiness = new AgentReadiness();
-		$agent_readiness->init( $store_conditions, $output_checks, $this->sut, wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ) );
+		$agent_readiness->init( $store_conditions, $output_checks, $this->sut, wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ), new \Automattic\WooCommerce\Internal\AgentReadiness\ProductSales() );
 		return $agent_readiness;
 	}
 
@@ -640,6 +644,83 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The file's store_checks set which store checks show as Required and which are off; a check that blocks AI shopping stays Required and on, and without the map the bundled list applies.
+	 */
+	public function test_file_sets_store_checks_required_or_off(): void {
+		$step     = static fn( string $id, string $level = StoreConditions::LEVEL_RECOMMENDED ): array => array(
+			'id'    => $id,
+			'level' => $level,
+		);
+		$channels = array(
+			'title_too_long' => array(
+				'chatgpt' => array(
+					'field'  => 'title',
+					'effect' => 'gaps',
+				),
+			),
+		);
+
+		$this->serve(
+			$channels,
+			array(
+				'refund_returns_page' => array( 'required' => true ),
+				'search_visible'      => array( 'required' => false ),
+				'launched'            => array(
+					'required' => false,
+					'off'      => true,
+				),
+				'order_emails'        => array(
+					'off'   => true,
+					'label' => 'Ignored',
+				),
+				'llms_txt_present'    => array( 'off' => true ),
+				'terms_page'          => array( 'required' => 'yes' ),
+				'privacy_page'        => 'required',
+			)
+		);
+		$this->assertTrue( $this->sut->refresh() );
+
+		$this->assertSame( array( 'off' => true ), RemoteRules::store_check( 'order_emails' ), 'Only required and off are kept' );
+		$this->assertSame( array(), RemoteRules::store_check( 'terms_page' ), 'A value that is not true or false is dropped' );
+		$this->assertSame( array(), RemoteRules::store_check( 'privacy_page' ) );
+		$this->assertTrue( StoreConditions::shows_required( $step( 'refund_returns_page' ) ) );
+		$this->assertFalse( StoreConditions::shows_required( $step( 'search_visible' ) ), 'The file can drop a bundled Required step' );
+		$this->assertTrue( StoreConditions::shows_required( $step( 'payment_method' ) ), 'A step the map leaves out keeps its bundled level' );
+		$this->assertTrue( StoreConditions::shows_required( $step( 'launched', StoreConditions::LEVEL_REQUIRED ) ), 'A required condition stays Required' );
+		$this->assertFalse( StoreConditions::is_off( 'launched', StoreConditions::LEVEL_REQUIRED ), 'A required condition always runs' );
+		$this->assertTrue( StoreConditions::is_off( 'llms_txt_present' ) );
+
+		$conditions = array_column( wc_get_container()->get( StoreConditions::class )->all(), 'id' );
+		$this->assertNotContains( 'order_emails', $conditions, 'A setup step turned off is not listed' );
+		$this->assertContains( 'launched', $conditions );
+
+		$report = array(
+			'store_checks' => array(
+				array(
+					'id'   => 'llms_txt_present',
+					'ok'   => false,
+					'name' => 'llms.txt is served',
+				),
+				array(
+					'id'   => 'canonical_url',
+					'ok'   => false,
+					'name' => 'Pages name their canonical URL',
+				),
+			),
+		);
+		$listed = array_column( wc_get_container()->get( AgentReadiness::class )->get_store_checks( $report ), 'id' );
+		$this->assertNotContains( 'llms_txt_present', $listed, 'An output check turned off after the scan is left out of the stored report' );
+		$this->assertContains( 'canonical_url', $listed );
+
+		$this->serve( $channels );
+		$this->assertTrue( $this->sut->refresh() );
+		$this->assertSame( array(), RemoteRules::store_check( 'refund_returns_page' ) );
+		$this->assertTrue( StoreConditions::shows_required( $step( 'search_visible' ) ), 'Without the map, the bundled list applies' );
+		$this->assertFalse( StoreConditions::shows_required( $step( 'refund_returns_page' ) ) );
+		$this->assertContains( 'order_emails', array_column( wc_get_container()->get( StoreConditions::class )->all(), 'id' ) );
+	}
+
+	/**
 	 * @testdox The shipped rules file names the same checks the code can run, and those are the ones that run.
 	 */
 	public function test_shipped_rules_file_is_a_subset_of_the_code(): void {
@@ -647,6 +728,12 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$file = json_decode( (string) file_get_contents( $path ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file.
 		$this->assertIsArray( $file );
 		$this->assertIsArray( $file['checks'] );
+		$this->assertMatchesRegularExpression( '/^\d{4}-\d{2}-\d{2}$/', $file['version'], 'The version is the date of the last change' );
+		$this->assertSame(
+			array_fill_keys( StoreConditions::SHOWN_REQUIRED, array( 'required' => true ) ),
+			$file['store_checks'],
+			'The shipped file marks the bundled Required steps and turns nothing off, so the first publish changes nothing'
+		);
 
 		$rules  = ( new AgentReadiness() )->get_default_rules();
 		$known  = array_keys( $rules );

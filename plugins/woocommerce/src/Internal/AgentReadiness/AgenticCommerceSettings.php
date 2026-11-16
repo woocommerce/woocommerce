@@ -20,6 +20,11 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 
 	public const TAB = 'agentic-commerce';
 
+	/**
+	 * The AI shopping section of the tab, which the landing page's Manage button opens.
+	 */
+	public const SHOPPING_SECTION = 'shopping';
+
 	public const PRIVACY_PAGE_OPTION = 'wp_page_for_privacy_policy';
 
 	public const TERMS_PAGE_OPTION = 'woocommerce_terms_page_id';
@@ -69,6 +74,15 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 * @var ScheduledScan
 	 */
 	private ScheduledScan $scheduled_scan;
+
+	/**
+	 * Link to the AI tools tab: its landing page, or a section of it.
+	 *
+	 * @param string $section Section id, or '' for the landing page.
+	 */
+	public static function url( string $section = '' ): string {
+		return admin_url( 'admin.php?page=wc-settings&tab=' . self::TAB . ( '' === $section ? '' : '&section=' . $section ) );
+	}
 
 	/**
 	 * Initialize dependencies.

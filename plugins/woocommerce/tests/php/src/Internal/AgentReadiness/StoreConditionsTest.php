@@ -138,6 +138,17 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The UCP and policy page fixes link to AI shopping's settings, the policy ones to their field.
+	 */
+	public function test_fix_links_open_ai_shopping(): void {
+		$checks   = array_column( $this->sut->all(), 'fix_url', 'id' );
+		$shopping = admin_url( 'admin.php?page=wc-settings&tab=agentic-commerce&section=shopping' );
+
+		$this->assertSame( $shopping, $checks['ucp_on'] );
+		$this->assertSame( $shopping . '#' . AgenticCommerceSettings::TERMS_PAGE_OPTION, $checks['terms_page'] );
+	}
+
+	/**
 	 * @testdox Either confirmation email is enough. Both off fails the check.
 	 */
 	public function test_order_email_passes_when_either_confirmation_is_on(): void {

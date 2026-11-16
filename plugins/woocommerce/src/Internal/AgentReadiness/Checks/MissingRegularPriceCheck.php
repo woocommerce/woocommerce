@@ -76,6 +76,18 @@ class MissingRegularPriceCheck extends AbstractReadinessCheck {
 	}
 
 	/**
+	 * The variations without a price.
+	 *
+	 * @param \WC_Product $product Product that fails the rule.
+	 * @param ProductScan $scan    Catalog-wide lookups.
+	 * @return array<int, int>|null
+	 */
+	public function failing_variations( \WC_Product $product, ProductScan $scan ): ?array {
+		unset( $scan );
+		return self::variation_ids_where( $product, static fn( \WC_Product $variation ): bool => ! self::has_positive_price( $variation ) );
+	}
+
+	/**
 	 * A gap, not a missing listing, for a variable product with a priced variation.
 	 *
 	 * @param \WC_Product                                      $product  Product that fails the rule.

@@ -52,9 +52,6 @@ class DeclaredToAgents {
 			'editorial-metadata'          => array( __( 'Author and publish date', 'woocommerce' ), self::has_editorial_metadata( array( $home, $page ) ) ),
 			'site-search-autocomplete'    => array( __( 'On-site search with autocomplete', 'woocommerce' ), self::page_has_tag( array( $home ), array( 'INPUT' ), array( self::class, 'is_autocomplete_search' ) ) ),
 			'mcp-server-card'             => array( __( 'MCP server card', 'woocommerce' ), self::either( self::document_served( $responses, '/.well-known/mcp/server-card.json', array( self::class, 'is_mcp_server_card' ) ), self::document_served( $responses, '/.well-known/mcp.json', array( self::class, 'is_mcp_server_card' ) ) ) ),
-			// Not read yet: DNS-AID needs a DNS lookup, and a feed product sync is set up outside the store's pages.
-			'dns-aid'                     => array( __( 'DNS for AI Discovery (DNS-AID)', 'woocommerce' ), null ),
-			'product-feed-automation'     => array( __( 'Automated product feed', 'woocommerce' ), null ),
 		);
 		foreach ( $lines as $id => $line ) {
 			$items[] = array(

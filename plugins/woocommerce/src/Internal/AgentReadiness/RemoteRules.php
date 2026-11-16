@@ -16,6 +16,13 @@ defined( 'ABSPATH' ) || exit;
  * text, is named with an empty channel map ("channels": {}). A file is only
  * stored when at least one check in it has a valid channel.
  *
+ * The optional `store_checks` map changes store checks by id: `required`
+ * (true or false) sets whether a setup step or output check is shown as
+ * Required, and `"off": true` stops one running. An id the map leaves out
+ * keeps its bundled behaviour. A check that keeps AI shopping from being
+ * turned on (StoreConditions::LEVEL_REQUIRED) is always Required and can't be
+ * turned off. `version` is the date of the file's last change (Y-m-d).
+ *
  * The file is fetched before each background scan: the daily run and any
  * scan that is asked for. Only a GET is made; the request's user agent
  * includes the site URL, as other WooCommerce.com polls do. A failed fetch
@@ -90,15 +97,46 @@ class RemoteRules {
 		if ( array() === $usable ) {
 			return false;
 		}
-		update_option(
-			self::OPTION,
-			array(
-				'version' => (string) ( $rules['version'] ?? '' ),
-				'checks'  => $checks,
-			),
-			false
+		$stored       = array(
+			'version' => (string) ( $rules['version'] ?? '' ),
+			'checks'  => $checks,
 		);
+		$store_checks = self::valid_store_checks( $rules['store_checks'] ?? null );
+		if ( array() !== $store_checks ) {
+			$stored['store_checks'] = $store_checks;
+		}
+		update_option( self::OPTION, $stored, false );
 		return true;
+	}
+
+	/**
+	 * What the stored file sets for one store check: `required` and `off`, each only when the file
+	 * sets it. Empty when no file is stored or the file doesn't name the check.
+	 *
+	 * @param string $id Store check id.
+	 * @return array{required?:bool,off?:bool}
+	 */
+	public static function store_check( string $id ): array {
+		$stored = get_option( self::OPTION );
+		$check  = is_array( $stored ) && is_array( $stored['store_checks'] ?? null ) ? ( $stored['store_checks'][ $id ] ?? null ) : null;
+		return is_array( $check ) ? $check : array();
+	}
+
+	/**
+	 * The `store_checks` entries with a boolean `required` or `off`, keeping only those two keys.
+	 *
+	 * @param mixed $store_checks `store_checks` map from the file.
+	 * @return array<string, array{required?:bool,off?:bool}>
+	 */
+	private static function valid_store_checks( $store_checks ): array {
+		$valid = array();
+		foreach ( is_array( $store_checks ) ? $store_checks : array() as $id => $check ) {
+			$set = is_string( $id ) && is_array( $check ) ? array_filter( array_intersect_key( $check, array_flip( array( 'required', 'off' ) ) ), 'is_bool' ) : array();
+			if ( array() !== $set ) {
+				$valid[ $id ] = $set;
+			}
+		}
+		return $valid;
 	}
 
 	/**

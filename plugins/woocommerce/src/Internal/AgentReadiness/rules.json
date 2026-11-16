@@ -1,5 +1,10 @@
 {
-	"version": "1",
+	"version": "2026-11-15",
+	"store_checks": {
+		"search_visible": { "required": true },
+		"payment_method": { "required": true },
+		"guest_checkout": { "required": true }
+	},
 	"checks": {
 		"missing_regular_price": {
 			"channels": {

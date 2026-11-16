@@ -41,7 +41,7 @@ class ScheduledScan implements RegisterHooksInterface {
 	/**
 	 * How long a daily scan marked running still counts as pending. A process killed mid-scan
 	 * leaves it running until Action Scheduler's cleanup marks it failed (after 5 minutes, on a
-	 * queue run), so this frees Run check even when that cleanup does not run.
+	 * queue run), so this frees Run checks even when that cleanup does not run.
 	 */
 	public const RUNNING_FOR = 10 * MINUTE_IN_SECONDS;
 
