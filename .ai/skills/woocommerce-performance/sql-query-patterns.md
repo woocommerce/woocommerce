@@ -327,7 +327,7 @@ if ( 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' ) ) {
 
 **When it applies:** All three conditions must hold:
 
-1. An index returns the rows already sorted by the ORDER BY column: either an index that starts with that column, or a composite index where every column before it has an equality predicate (`col = const`). A range, `IN (...)` or `!=` on an earlier column does not qualify, because the index is then sorted by that column first. An index that stores only a prefix of a column, such as `meta_key_value (meta_key(50), meta_value(20))` on the HPOS order meta table, does not qualify either: it does not sort the full value.
+1. An index returns the rows already sorted by the ORDER BY column: either an index that starts with that column, or a composite index where every column before it has an equality predicate (`col = const`). A range, `IN (...)`, `OR` or `!=` on an earlier column does not qualify, because the index is then sorted by that column first. An index that stores only a prefix of a column, such as `meta_key_value (meta_key(50), meta_value(20))` on the HPOS order meta table, does not qualify either: it does not sort the full value.
 2. Few rows at each end of that index fail the remaining WHERE predicates. Each failing row is read and skipped before the first qualifying one.
 3. `LIMIT 1` stops the scan after the first qualifying row.
 
@@ -355,6 +355,8 @@ FROM (
 ```
 
 **NULL handling:** `MIN()` / `MAX()` ignore NULLs; `ORDER BY col ASC LIMIT 1` returns NULL first (MySQL sorts NULLs before values in ASC). On a nullable column the two approaches produce different results. Pattern H is only safe when the column is `NOT NULL`, or when both UNION branches add `AND col IS NOT NULL` (as above: `date_created_gmt` is nullable).
+
+**Grouped queries:** Pattern H does not apply to a query with `GROUP BY`: the two seeks return one row, not one per group.
 
 **If the required index does not exist:** Adding it is a prerequisite, not a reason to skip the pattern. Evaluate whether the index's write, storage, and migration cost is justified before adding it. For example, `SELECT MAX(post_modified_gmt) FROM wp_posts WHERE post_type IN ('product', 'product_variation')` is a Pattern H candidate, but `post_modified_gmt` has no standard WordPress index — the optimization requires first adding `(post_type, post_modified_gmt)`. The `IN (...)` list is not an equality, so one `ORDER BY post_modified_gmt DESC LIMIT 1` over both types still reads and sorts every matching row: query each post type separately (`WHERE post_type = 'product'`, then `'product_variation'`) and take the larger result.
 
