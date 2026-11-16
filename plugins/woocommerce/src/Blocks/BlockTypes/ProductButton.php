@@ -339,11 +339,13 @@ class ProductButton extends AbstractBlock {
 
 		if ( ! $is_descendant_of_add_to_cart_form ) {
 			/**
-			 * Filters the add to cart button class.
+			 * Filters the add to cart button HTML.
 			 *
 			 * @since 8.7.0
 			 *
-			 * @param string $class The class.
+			 * @param string      $html    The add to cart button HTML.
+			 * @param \WC_Product $product The product object.
+			 * @param array       $args    Arguments used to build the button.
 			 */
 			$html = apply_filters(
 				'woocommerce_loop_add_to_cart_link',

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Fix the description and parameter docs of the woocommerce_loop_add_to_cart_link filter in the Product Button block; docs only.
+

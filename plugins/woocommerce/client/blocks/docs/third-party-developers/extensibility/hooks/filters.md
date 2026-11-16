@@ -1255,17 +1255,19 @@ apply_filters( 'woocommerce_loop_add_to_cart_args' )
 ## woocommerce_loop_add_to_cart_link
 
 
-Filters the add to cart button class.
+Filters the add to cart button HTML.
 
 ```php
-apply_filters( 'woocommerce_loop_add_to_cart_link', string $class )
+apply_filters( 'woocommerce_loop_add_to_cart_link', string $html, \WC_Product $product, array $args )
 ```
 
 ### Parameters
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $class | string | The class. |
+| $html | string | The add to cart button HTML. |
+| $product | \WC_Product | The product object. |
+| $args | array | Arguments used to build the button. |
 
 ### Source
 
