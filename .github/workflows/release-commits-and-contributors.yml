@@ -93,42 +93,28 @@ jobs:
             exit 1
           fi
 
-  count-commits-and-contributors:
-    name: Count commits and contributors between releases
+  count-commits:
+    name: Count commits between releases
     needs: extract-versions
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     timeout-minutes: 5
     outputs:
       commit_count: ${{ steps.count-commits.outputs.commit_count }}
-      contributor_count: ${{ steps.count-commits.outputs.contributor_count }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
-      - name: Count
+      - name: Count commits
         id: count-commits
         run: |
           CURRENT_BRANCH="origin/release/${{ needs.extract-versions.outputs.current_version }}"
           PREVIOUS_BRANCH="origin/release/${{ needs.extract-versions.outputs.previous_version }}"
 
-          set +e  # Don't exit on error for the git command
-          COMMIT_COUNT=$(git rev-list --count ${CURRENT_BRANCH} ^${PREVIOUS_BRANCH} 2>&1)
-          COMMIT_EXIT_CODE=$?
-
-          CONTRIBUTOR_COUNT=$(git log --format='%ae' ${PREVIOUS_BRANCH}..${CURRENT_BRANCH} | sort -u | wc -l 2>&1)
-          CONTRIBUTOR_EXIT_CODE=$?
-          set -e  # Resume exit on error
-
-          if [ $COMMIT_EXIT_CODE -eq 0 ] && [ $CONTRIBUTOR_EXIT_CODE -eq 0 ]; then
-            echo "Found ${COMMIT_COUNT} commits and ${CONTRIBUTOR_COUNT} contributors in the ${{ needs.extract-versions.outputs.current_version }} release"
-            echo "commit_count=${COMMIT_COUNT}" >> $GITHUB_OUTPUT
-            echo "contributor_count=${CONTRIBUTOR_COUNT}" >> $GITHUB_OUTPUT
-          else
-            echo "Error counting commits: ${COMMIT_COUNT}"
-            exit 1
-          fi
+          COMMIT_COUNT=$(git rev-list --count "${CURRENT_BRANCH}" "^${PREVIOUS_BRANCH}")
+          echo "Found ${COMMIT_COUNT} commits in the ${{ needs.extract-versions.outputs.current_version }} release"
+          echo "commit_count=${COMMIT_COUNT}" >> "$GITHUB_OUTPUT"
 
   generate-contributors-list:
     name: Generate contributors list
@@ -137,6 +123,7 @@ jobs:
     timeout-minutes: 10
     outputs:
       contributor_list_path: ${{ steps.generate-contributors-list.outputs.filepath }}
+      contributor_count: ${{ steps.generate-contributors-list.outputs.contributor_count }}
       artifact_url: ${{ steps.output-artifact-url.outputs.artifact_url }}
     steps:
       - name: Checkout repository
@@ -177,7 +164,14 @@ jobs:
             exit 1
           fi
 
+          CONTRIBUTOR_COUNT=$(echo "$OUTPUT" | sed -n 's/^Contributors counted: \([0-9][0-9]*\)$/\1/p')
+          if [ -z "$CONTRIBUTOR_COUNT" ]; then
+            echo "Error: Could not find contributor count in $OUTPUT"
+            exit 1
+          fi
+
           echo "filepath=${HTML_FILE_PATH}" >> $GITHUB_OUTPUT
+          echo "contributor_count=${CONTRIBUTOR_COUNT}" >> "$GITHUB_OUTPUT"
 
       - name: Upload contributors HTML
         id: artifact-upload
@@ -326,7 +320,7 @@ jobs:
 
   send-slack-notification:
     name: Send Slack Notification
-    needs: [extract-versions, count-commits-and-contributors, generate-contributors-list, db-updates]
+    needs: [extract-versions, count-commits, generate-contributors-list, db-updates]
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     timeout-minutes: 5
     steps:
@@ -340,8 +334,8 @@ jobs:
             :woo: *WooCommerce ${{ needs.extract-versions.outputs.current_version }} Release Summary*
 
             📊 *Statistics:*
-            • Commits: ${{ needs.count-commits-and-contributors.outputs.commit_count }}
-            • Contributors: ${{ needs.count-commits-and-contributors.outputs.contributor_count }}
+            • Commits: ${{ needs.count-commits.outputs.commit_count }}
+            • Contributors: ${{ needs.generate-contributors-list.outputs.contributor_count }}
             • <${{ needs.generate-contributors-list.outputs.artifact_url }}|Download Contributors List>
 
             :database: *Database Updates:*

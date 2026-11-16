@@ -190,8 +190,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			wc_doing_it_wrong(
 				'WC_Settings_Page::output',
 				sprintf(
-					/* translators: 1: settings page id, 2: settings section id, 3: fallback reason. */
-					__( 'Settings UI rendering for page "%1$s" section "%2$s" fell back to the legacy settings renderer. Reason: %3$s', 'woocommerce' ),
+					'Settings UI rendering for page "%1$s" section "%2$s" fell back to the legacy settings renderer. Reason: %3$s',
 					$page_id,
 					'' === $section_id ? 'default' : $section_id,
 					$reason
@@ -426,7 +425,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 					if ( $context->has_schema_failed() ) {
 						$schema_failure_reason = method_exists( $context, 'get_schema_failure_reason' )
 							? $context->get_schema_failure_reason()
-							: __( 'Settings UI schema generation failed.', 'woocommerce' );
+							: 'Settings UI schema generation failed.';
 
 						$this->log_settings_ui_fallback( $page_id, $section, $schema_failure_reason );
 					} else {

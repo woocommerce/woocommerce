@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Remove unused Allure test reporting dependencies; no production change.
+

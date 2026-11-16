@@ -278,7 +278,6 @@ describe( '__experimentalRegisterProductCollection', () => {
 				query: {
 					exclude: [],
 					featured: false,
-					filterable: false,
 					inherit: false,
 					isProductCollectionBlock: true,
 					offset: 0,

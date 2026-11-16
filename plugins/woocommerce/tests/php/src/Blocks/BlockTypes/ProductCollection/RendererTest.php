@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Renderer;
+use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
 /**
@@ -23,6 +24,61 @@ class RendererTest extends WC_Unit_Test_Case {
 		'render_block_core/query-pagination',
 		'render_block_context',
 	);
+
+	/**
+	 * @testdox Should extend context only for Product Collection and its descendants, including through Group and Product Template blocks.
+	 */
+	public function test_scopes_context_to_collection_descendants(): void {
+		remove_all_filters( 'render_block_context' );
+		new Renderer();
+		$product  = WC_Helper_Product::create_simple_product();
+		$contexts = array();
+		add_filter(
+			'render_block_context',
+			function ( $context, $parsed_block ) use ( &$contexts ) {
+				$anchor = $parsed_block['attrs']['anchor'] ?? '';
+				if ( $anchor ) {
+					$contexts[ $anchor ] = $context;
+				}
+				return $context;
+			},
+			12,
+			2
+		);
+
+		$markup = '<!-- wp:group {"anchor":"outside-group"} --><div class="wp-block-group">'
+			. '<!-- wp:paragraph {"anchor":"outside-child"} --><p>Outside</p><!-- /wp:paragraph -->'
+			. '<!-- wp:woocommerce/product-collection {"anchor":"collection","query":{"isProductCollectionBlock":false,"postType":"product","perPage":1,"inherit":false}} -->'
+			. '<div class="wp-block-woocommerce-product-collection">'
+			. '<!-- wp:group {"anchor":"inside-group"} --><div class="wp-block-group">'
+			. '<!-- wp:group {"anchor":"nested-group"} --><div class="wp-block-group">'
+			. '<!-- wp:paragraph {"anchor":"inside-child"} --><p>Inside</p><!-- /wp:paragraph -->'
+			. '</div><!-- /wp:group --></div><!-- /wp:group -->'
+			. '<!-- wp:woocommerce/product-template -->'
+			. '<!-- wp:group {"anchor":"inside-template-group"} --><div class="wp-block-group">'
+			. '<!-- wp:post-title {"anchor":"inside-product-title"} /-->'
+			. '</div><!-- /wp:group -->'
+			. '<!-- /wp:woocommerce/product-template -->'
+			. '</div><!-- /wp:woocommerce/product-collection -->'
+			. '<!-- wp:paragraph {"anchor":"outside-sibling"} --><p>After</p><!-- /wp:paragraph -->'
+			. '</div><!-- /wp:group -->';
+
+		render_block( parse_blocks( $markup )[0] );
+
+		foreach ( array( 'collection', 'inside-group', 'nested-group', 'inside-child', 'inside-template-group', 'inside-product-title' ) as $anchor ) {
+			$this->assertArrayHasKey( $anchor, $contexts, "The {$anchor} block must render." );
+			$this->assertSame( 'woocommerce/product-collection', $contexts[ $anchor ]['iapi/provider'] ?? null, "The {$anchor} block should use Product Collection actions." );
+			$this->assertTrue( $contexts[ $anchor ]['isProductCollectionInnerBlock'] ?? false, "The {$anchor} block should be marked as a collection descendant." );
+		}
+		$this->assertSame( $product->get_id(), $contexts['inside-product-title']['postId'] ?? null, 'The title must render for the product in the Product Template loop.' );
+
+		foreach ( array( 'outside-group', 'outside-child', 'outside-sibling' ) as $anchor ) {
+			$this->assertArrayHasKey( $anchor, $contexts, "The {$anchor} block must render." );
+			$this->assertArrayNotHasKey( 'iapi/provider', $contexts[ $anchor ], "The {$anchor} block must not receive a Product Collection provider." );
+			$this->assertArrayNotHasKey( 'isProductCollectionInnerBlock', $contexts[ $anchor ], "The {$anchor} block must not be marked as a collection descendant." );
+			$this->assertArrayNotHasKey( 'productCollectionLocation', $contexts[ $anchor ], "The {$anchor} block must not receive a Product Collection location." );
+		}
+	}
 
 	/**
 	 * @testdox Should reset result and No Results state between Product Collection renders.

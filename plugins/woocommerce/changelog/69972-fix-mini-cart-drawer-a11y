@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the closed Mini-Cart drawer unfocusable, give the drawer dialog an accessible name, and make its Close button label translatable.

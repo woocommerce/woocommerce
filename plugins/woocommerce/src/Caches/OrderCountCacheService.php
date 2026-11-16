@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Caches;
 
 use WC_Order;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -119,7 +120,7 @@ class OrderCountCacheService {
 		$frequency   = HOUR_IN_SECONDS * 12;
 		$timestamp   = time() + $frequency;
 		foreach ( $order_types as $order_type ) {
-			as_schedule_recurring_action( $timestamp, $frequency, self::BACKGROUND_EVENT_HOOK, array( $order_type ), 'count', true );
+			ActionSchedulerUtil::schedule_recurring( $timestamp, $frequency, self::BACKGROUND_EVENT_HOOK, array( $order_type ), 'count', true );
 		}
 	}
 

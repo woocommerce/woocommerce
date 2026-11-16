@@ -40,7 +40,8 @@ Additionally,
 
 The Blocks end-to-end tests were merged into the WooCommerce Core e2e suite. They now
 live at `plugins/woocommerce/tests/e2e/tests/blocks/` and run through the shared
-Playwright config (`tests/e2e/playwright.config.ts`, project `blocks-chromium`).
+Playwright config (`tests/e2e/playwright.config.ts`, projects `blocks-parallel` and
+`blocks-serial`).
 
 From `plugins/woocommerce`:
 
@@ -48,9 +49,17 @@ From `plugins/woocommerce`:
 # Start wp-env, run the Blocks test-env setup, and install the browser
 pnpm env:start:blocks
 
-# Run the Blocks e2e suite
+# Run the Blocks e2e suite: blocks-parallel first, then blocks-serial
 pnpm test:e2e:blocks
 ```
+
+Do not run both projects in one `playwright test` call. `blocks-serial` resets
+the database after each test, which breaks the tests that `blocks-parallel` runs
+at the same time.
+
+New specs run in `blocks-parallel` by default. Write them parallel-safe, or use
+a test lock. Add a spec to `blocksSerialSpecs` only when neither can work. See
+[Parallel, locked, and serial specs](../../../../tests/e2e/README.md#parallel-locked-and-serial-specs).
 
 For the full setup and available environments, see the
 [core e2e documentation](../../../../tests/e2e/README.md).

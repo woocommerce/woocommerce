@@ -87,4 +87,53 @@ class WC_Analytics_Tracking_Array_Props_Test extends BaseTestCase {
 
 		$this->assertSame( array( 'a' => 1, 'b' => 'x/y' ), json_decode( $query['meta'], true ) );
 	}
+
+	/**
+	 * Values a server-side filter returns reach the pixel without a PHP warning or a bracketed key.
+	 *
+	 * @dataProvider provide_filtered_values
+	 *
+	 * @param mixed  $value    Value the event-props filter adds.
+	 * @param string $expected Value Tracks should read back.
+	 */
+	public function test_filtered_value_flattens_to_json( $value, string $expected ): void {
+		$add_prop = static function ( $props ) use ( $value ) {
+			$props['probe'] = $value;
+			return $props;
+		};
+		add_filter( 'jetpack_woocommerce_analytics_event_props', $add_prop );
+
+		$warnings = array();
+		set_error_handler(
+			static function ( $errno, $errstr ) use ( &$warnings ) {
+				$warnings[] = $errstr;
+				return true;
+			}
+		);
+
+		try {
+			$raw = $this->raw_pixel_query( array() );
+		} finally {
+			restore_error_handler();
+			remove_filter( 'jetpack_woocommerce_analytics_event_props', $add_prop );
+		}
+
+		$this->assertSame( array(), $warnings );
+		$this->assertDoesNotMatchRegularExpression( '/(^|&)[^=&]*(%5B|%5D|\[|\])[^=&]*=/i', $raw );
+
+		parse_str( $raw, $query );
+		$this->assertSame( $expected, $query['probe'] );
+	}
+
+	/**
+	 * Filter return values that neither a comma join nor http_build_query() can represent.
+	 *
+	 * @return array<string, array{mixed, string}>
+	 */
+	public function provide_filtered_values(): array {
+		return array(
+			'nested indexed array' => array( array( 1, array( 2 ) ), '[1,[2]]' ),
+			'object'               => array( (object) array( 'a' => 1 ), '{"a":1}' ),
+		);
+	}
 }

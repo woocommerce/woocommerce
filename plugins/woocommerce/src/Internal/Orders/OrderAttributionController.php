@@ -326,6 +326,26 @@ class OrderAttributionController implements RegisterHooksInterface {
 		 */
 		$allow_tracking = wc_bool_to_string( apply_filters( 'wc_order_attribution_allow_tracking', true ) );
 
+		$default_cookie_fields = array_values( $this->fields );
+
+		/**
+		 * Filter the sourcebuster.js fields that are stored in the visitor's cookies.
+		 *
+		 * Defaults to the paths in `wc_order_attribution_tracking_fields`. Add a path such as `first.src`
+		 * to keep a cookie WooCommerce doesn't read, or return an empty array to store every field.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param string[] $cookie_fields Sourcebuster.js field paths, such as `current.typ`.
+		 */
+		$filtered_cookie_fields = apply_filters( 'wc_order_attribution_cookie_fields', $default_cookie_fields );
+		$cookie_fields          = is_array( $filtered_cookie_fields ) ? array_values( array_unique( array_filter( $filtered_cookie_fields, 'is_string' ) ) ) : array();
+
+		// An empty list stores every field, so only pass one on when the filter returned it.
+		if ( ! $cookie_fields && array() !== $filtered_cookie_fields ) {
+			$cookie_fields = $default_cookie_fields;
+		}
+
 		// Create Order Attribution JS namespace with parameters.
 		$namespace = array(
 			'params' => array(
@@ -335,6 +355,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 				'ajaxurl'       => admin_url( 'admin-ajax.php' ),
 				'prefix'        => $this->field_prefix,
 				'allowTracking' => 'yes' === $allow_tracking,
+				'cookieFields'  => $cookie_fields,
 			),
 			'fields' => $this->fields,
 		);

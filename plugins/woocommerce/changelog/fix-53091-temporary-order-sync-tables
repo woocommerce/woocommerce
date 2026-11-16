@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent database errors when checking order synchronization with temporary tables.

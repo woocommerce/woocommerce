@@ -112,7 +112,7 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( $this->products[0]->is_purchasable(), $data['is_purchasable'] );
 		$this->assertEquals( $this->products[0]->is_in_stock(), $data['is_in_stock'] );
 		$this->assertEquals( $this->products[0]->add_to_cart_text(), $data['add_to_cart']->text );
-		$this->assertEquals( $this->products[0]->add_to_cart_description(), $data['add_to_cart']->description );
+		$this->assertEqualHTML( $this->products[0]->add_to_cart_description(), $data['add_to_cart']->description );
 		$this->assertEquals( $this->products[0]->single_add_to_cart_text(), $data['add_to_cart']->single_text );
 		$this->assertEquals( $this->products[0]->is_on_sale(), $data['on_sale'] );
 		$this->assertEquals( $this->products[0]->get_weight(), $data['weight'] );
@@ -130,6 +130,34 @@ class Products extends ControllerTestCase {
 		$this->assertNotEmpty( wp_parse_url( $data['images'][0]->thumbnail, PHP_URL_HOST ) );
 
 		wp_delete_attachment( $image_id, true );
+	}
+
+	/**
+	 * @testdox Sale price is only returned while the sale is active.
+	 */
+	public function test_sale_price_is_hidden_until_scheduled_sale_starts(): void {
+		$fixtures  = new FixtureData();
+		$scheduled = $fixtures->get_simple_product(
+			array(
+				'regular_price'     => 100,
+				'sale_price'        => 63.45,
+				'date_on_sale_from' => strtotime( '+1 year' ),
+				'date_on_sale_to'   => strtotime( '+1 year +3 days' ),
+			)
+		);
+		$active    = $fixtures->get_simple_product(
+			array(
+				'regular_price' => 100,
+				'sale_price'    => 70,
+			)
+		);
+
+		$scheduled_prices = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $scheduled->get_id() ) )->get_data()['prices'];
+		$active_prices    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $active->get_id() ) )->get_data()['prices'];
+
+		$this->assertSame( '10000', $scheduled_prices->price );
+		$this->assertSame( '10000', $scheduled_prices->sale_price, 'A sale that has not started must not expose its sale price.' );
+		$this->assertSame( '7000', $active_prices->sale_price, 'An active sale returns its sale price.' );
 	}
 
 	/**
@@ -212,6 +240,56 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( 1, count( $data ) );
 		$this->assertArrayHasKey( 'sku', $data[0] );
 		$this->assertEquals( 'search-for-this-value', $data[0]['sku'] );
+	}
+
+	/**
+	 * @testdox Should return a bad request response for invalid price filter values.
+	 * @testWith ["min_price", "true"]
+	 *           ["max_price", "10.99invalid"]
+	 *           ["min_price", "-1"]
+	 *
+	 * @param string $param Price filter parameter.
+	 * @param string $value Price filter value.
+	 */
+	public function test_rejects_invalid_price_filter_values( string $param, string $value ): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( $param, $value );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status(), 'Invalid price filters should return HTTP 400.' );
+		$this->assertSame( 'rest_invalid_param', $data['code'], 'The response should identify an invalid request parameter.' );
+	}
+
+	/**
+	 * @testdox Should allow decimal price filter values produced by product filter blocks.
+	 * @testWith ["min_price", "110.00000000000001"]
+	 *           ["max_price", "10.99"]
+	 *
+	 * @param string $param Price filter parameter.
+	 * @param string $value Price filter value.
+	 */
+	public function test_allows_decimal_price_filter_values( string $param, string $value ): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( $param, $value );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Decimal price filters should be accepted.' );
+	}
+
+	/**
+	 * @testdox Should allow empty price filter values used by product filter blocks.
+	 */
+	public function test_allows_empty_price_filter_values(): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'min_price', '' );
+		$request->set_param( 'max_price', '' );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Empty price filters should be ignored.' );
 	}
 
 	/**
@@ -344,6 +422,31 @@ class Products extends ControllerTestCase {
 
 		$this->assertIsArray( $data['images'] );
 		$this->assertCount( 0, $data['images'] );
+	}
+
+	/**
+	 * @testdox The featured image is returned only once when it is also part of the product gallery.
+	 */
+	public function test_featured_image_in_gallery_is_not_duplicated(): void {
+		$fixtures    = new FixtureData();
+		$featured_id = $fixtures->create_image_attachment();
+		$gallery_id  = $fixtures->create_image_attachment();
+		$product     = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Test Product 1',
+				'regular_price'     => 10,
+				'image_id'          => $featured_id,
+				'gallery_image_ids' => array( $featured_id, $gallery_id ),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+
+		$this->assertSame(
+			array( $featured_id, $gallery_id ),
+			wp_list_pluck( $response->get_data()['images'], 'id' ),
+			'The featured image should be listed first and only once.'
+		);
 	}
 
 	/**

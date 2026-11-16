@@ -25,6 +25,7 @@ import {
 	triggerStockNotificationsBatch,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
+import { quotedPattern } from '../../utils/helpers';
 import { setOption } from '../../utils/options';
 
 test.describe(
@@ -130,11 +131,13 @@ test.describe(
 				await expect(
 					guestPage.getByText(
 						new RegExp(
-							`You have successfully signed up! You will be notified when "${ escapeRegExp(
-								variableProduct.name
-							) } [-–] ${ escapeRegExp(
-								outOfStockVariation.option
-							) }" is back in stock\\.`
+							`You have successfully signed up! You will be notified when ${ quotedPattern(
+								`${ escapeRegExp(
+									variableProduct.name
+								) } [-–] ${ escapeRegExp(
+									outOfStockVariation.option
+								) }`
+							) } is back in stock\\.`
 						)
 					)
 				).toBeVisible();

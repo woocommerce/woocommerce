@@ -118,7 +118,7 @@ test.describe( 'Product Collection: Collections', () => {
 		await expect( pageObject.products ).toHaveCount( 4 );
 	} );
 
-	test( 'Product Catalog collection can be added in post and syncs query with template', async ( {
+	test( 'Product Catalog collection can be added in post with a local query', async ( {
 		pageObject,
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock( 'productCatalog' );
@@ -127,10 +127,7 @@ test.describe( 'Product Collection: Collections', () => {
 			.locateSidebarSettings()
 			.getByLabel( SELECTORS.usePageContextControl );
 
-		await expect( queryTypeLocator.getByLabel( 'Default' ) ).toBeChecked();
-		await expect(
-			queryTypeLocator.getByLabel( 'Custom' )
-		).not.toBeChecked();
+		await expect( queryTypeLocator ).toBeHidden();
 		await expect( pageObject.products ).toHaveCount( 9 );
 
 		await pageObject.publishAndGoToFrontend();

@@ -839,6 +839,10 @@ class WC_Countries {
 		// Handle full state name.
 		$full_state = ( $country && $state && isset( $this->read_geo_property( 'states' )[ $country ][ $state ] ) ) ? $this->read_geo_property( 'states' )[ $country ][ $state ] : $state;
 
+		// Translations can store accented names as HTML entities, such as "Anc&ocirc;ne". Decode them so uppercasing and escaping below don't break them.
+		$full_country = html_entity_decode( $full_country, ENT_QUOTES, get_bloginfo( 'charset' ) );
+		$full_state   = html_entity_decode( $full_state, ENT_QUOTES, get_bloginfo( 'charset' ) );
+
 		// Substitute address parts into the string.
 		$replace = array_map(
 			'esc_html',
@@ -1181,6 +1185,15 @@ class WC_Countries {
 							'state' => array(
 								'required' => false,
 								'hidden'   => true,
+							),
+						),
+						'BJ' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'state'    => array(
+								'label' => __( 'Department', 'woocommerce' ),
 							),
 						),
 						'BO' => array(
@@ -1575,6 +1588,16 @@ class WC_Countries {
 						),
 						'MF' => array(
 							'state' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
+						'MO' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'state'    => array(
 								'required' => false,
 								'hidden'   => true,
 							),

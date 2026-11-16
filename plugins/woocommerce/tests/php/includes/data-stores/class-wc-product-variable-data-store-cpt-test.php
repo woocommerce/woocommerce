@@ -492,11 +492,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Clean up.
 		WC_Tax::_delete_tax_rate( $tax_id );
-
-		remove_filter( 'wc_tax_enabled', '__return_true' );
-		remove_filter( 'woocommerce_prices_include_tax', '__return_true' );
-		remove_filter( 'pre_option_woocommerce_tax_display_shop', array( $this, '__return_incl' ) );
-		remove_filter( 'pre_option_woocommerce_tax_display_cart', array( $this, '__return_incl' ) );
 	}
 
 	/**
@@ -618,10 +613,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Restore default state to avoid leaking into subsequent tests.
 		WC()->customer->set_is_vat_exempt( false );
-
-		remove_filter( 'wc_tax_enabled', $tax_enabled ? '__return_true' : '__return_false' );
-		remove_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
-		remove_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
 	}
 
 	/**
@@ -649,10 +640,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Restore default state to avoid leaking into other tests.
 		WC()->customer->set_is_vat_exempt( false );
-
-		remove_filter( 'wc_tax_enabled', '__return_true' );
-		remove_filter( 'woocommerce_product_is_taxable', '__return_true' );
-		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
 	}
 
 	/**
@@ -694,11 +681,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame( $expected, $extended_data_store->taxes_influence_price( $product ) );
 		$this->assertSame( $expected_default, $received_default, 'Filter callback should receive the default decision.' );
 		$this->assertSame( $product->get_id(), $received_product->get_id(), 'Filter callback should receive the product being evaluated.' );
-
-		remove_filter( 'woocommerce_variable_product_taxes_influence_price', $filter_callback, 10 );
-		remove_filter( 'wc_tax_enabled', '__return_true' );
-		remove_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
-		remove_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
 	}
 
 	/**
@@ -728,10 +710,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$expected_hashes = array( $extended_data_store->get_price_hash( $product, true ), $extended_data_store->get_price_hash( $product, false ) );
 		$actual_hashes   = array_unique( $this->get_keys_for_json_encoded_transient( $transient_name ) );
 		$this->assertSame( $expected_hashes, $actual_hashes );
-
-		remove_filter( 'wc_tax_enabled', '__return_true' );
-		remove_filter( 'woocommerce_product_is_taxable', '__return_true' );
-		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
 	}
 
 	/**
@@ -773,11 +751,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$expected_hashes = array( $extended_data_store->get_price_hash( $product, true ), $extended_data_store->get_price_hash( $product, false ) );
 		$actual_hashes   = array_unique( $this->get_keys_for_json_encoded_transient( $transient_name ) );
 		$this->assertSame( $expected_hashes, $actual_hashes );
-
-		remove_all_filters( 'woocommerce_variation_prices_array' );
-		remove_filter( 'wc_tax_enabled', '__return_true' );
-		remove_filter( 'woocommerce_product_is_taxable', '__return_false' );
-		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
 	}
 
 	/**
@@ -1174,10 +1147,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'pa_size'   => array( 'small', 'large', 'huge' ),
-				'pa_colour' => array(
-					0 => 'red',
-					2 => 'blue',
-				),
+				'pa_colour' => array( 'blue', 'red' ),
 				'pa_number' => array( '0', '1', '2' ),
 			),
 			$attributes
@@ -1306,6 +1276,44 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// The slug 'small' must be resolved back to the full display value 'Small'.
 		$this->assertSame( array( 'Small' ), $attributes['Size'] );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox read_variation_attributes treats a variation with no meta row for an attribute as "any" value.
+	 */
+	public function test_read_variation_attributes_treats_missing_meta_row_as_any_value(): void {
+		$product = new WC_Product_Variable();
+		$product->set_attributes(
+			array(
+				WC_Helper_Product::create_product_attribute_object( 'shade', array( 'blue', 'green', 'red' ) ),
+				WC_Helper_Product::create_product_attribute_object( 'fabric', array( 'cotton', 'silk', 'wool' ) ),
+			)
+		);
+		$product->save();
+		$product_id = $product->get_id();
+
+		$blue_cotton = WC_Helper_Product::create_product_variation_object(
+			$product_id,
+			'DUMMY SKU BLUE COTTON',
+			10,
+			array(
+				'pa_shade'  => 'blue',
+				'pa_fabric' => 'cotton',
+			)
+		);
+		// A duplicate row must not stand in for the shade row the silk variation lacks.
+		add_post_meta( $blue_cotton->get_id(), 'attribute_pa_shade', 'blue' );
+		WC_Helper_Product::create_product_variation_object( $product_id, 'DUMMY SKU ANY SILK', 15, array( 'pa_fabric' => 'silk' ) );
+
+		$product = wc_get_product( $product_id );
+		wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_' . $product_id, 'products' );
+
+		$attributes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product );
+
+		$this->assertSame( array( 'blue', 'green', 'red' ), $attributes['pa_shade'], 'The silk variation has no shade row, so every shade is available.' );
+		$this->assertSame( array( 'cotton', 'silk' ), $attributes['pa_fabric'], 'Every variation pins a fabric, so only those fabrics are available.' );
 
 		$product->delete();
 	}
@@ -2084,12 +2092,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( $hashes_after_first_call, $hashes_after_second_call, 'Hashes must not change after the second call.' );
 		$this->assertSame( $aggregation_after_first, $aggregation_count, 'Second call must not trigger re-aggregation.' );
-
-		remove_filter( 'woocommerce_variation_prices_price', $count_aggregation );
-
-		remove_filter( 'wc_tax_enabled', '__return_true' );
-		remove_filter( 'woocommerce_product_is_taxable', '__return_true' );
-		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
 	}
 
 	/**

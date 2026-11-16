@@ -31,18 +31,27 @@ class ProductButton extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Restore test options.
+	 * Restore test options and remove the published `woocommerce` state, which the base class does not reset.
 	 */
 	protected function tearDown(): void {
-		foreach ( $this->previous_options as $option_name => $value ) {
-			if ( null === $value ) {
-				delete_option( $option_name );
-			} else {
-				update_option( $option_name, $value );
+		try {
+			foreach ( $this->previous_options as $option_name => $value ) {
+				if ( null === $value ) {
+					delete_option( $option_name );
+				} else {
+					update_option( $option_name, $value );
+				}
 			}
-		}
 
-		parent::tearDown();
+			$interactivity = wp_interactivity();
+			$property      = new \ReflectionProperty( $interactivity, 'state_data' );
+			$property->setAccessible( true );
+			$state_data = $property->getValue( $interactivity );
+			unset( $state_data['woocommerce'] );
+			$property->setValue( $interactivity, $state_data );
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
@@ -53,7 +62,7 @@ class ProductButton extends \WP_UnitTestCase {
 	 */
 	private function render_product_button( \WC_Product $product ): string {
 		return do_blocks(
-			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-button /--><!-- /wp:woocommerce/single-product -->'
+			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="product-button-test-wrapper"><!-- wp:woocommerce/product-button /--></div><!-- /wp:woocommerce/single-product -->'
 		);
 	}
 
@@ -109,5 +118,304 @@ class ProductButton extends \WP_UnitTestCase {
 		$markup  = $this->render_product_button( $product );
 
 		$this->assertStringContainsString( 'rel="nofollow noopener noreferrer"', $markup );
+	}
+
+	/**
+	 * @testdox AJAX button aria-label starts with the visible button text when $quantity are in the cart.
+	 * @testWith [0, "Add to cart: “Beanie”"]
+	 *           [2, "2 in cart, Add to cart: “Beanie”"]
+	 *
+	 * @param int    $quantity Quantity of the product in the cart.
+	 * @param string $expected Expected aria-label.
+	 */
+	public function test_ajax_button_aria_label_starts_with_button_text( int $quantity, string $expected ): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', 'yes' );
+		$product = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Beanie' ) );
+		wp_interactivity_state(
+			'woocommerce',
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'id'       => $product->get_id(),
+							'quantity' => $quantity,
+						),
+					),
+				),
+			)
+		);
+
+		$aria_label = $this->get_button_aria_label( $this->render_product_button( $product ) );
+
+		$this->assertSame( $expected, $aria_label, 'The aria-label should start with the text shown on the button' );
+	}
+
+	/**
+	 * @testdox AJAX button aria-label replaces only the first placeholder when product name contains placeholder characters.
+	 */
+	public function test_ajax_button_aria_label_replaces_only_first_placeholder(): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', 'yes' );
+		$product = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Box ### Special' ) );
+		wp_interactivity_state(
+			'woocommerce',
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'id'       => $product->get_id(),
+							'quantity' => 1,
+						),
+					),
+				),
+			)
+		);
+
+		$aria_label = $this->get_button_aria_label( $this->render_product_button( $product ) );
+
+		$this->assertSame( '1 in cart, Add to cart: “Box ### Special”', $aria_label );
+	}
+
+	/**
+	 * @testdox Labels that become empty after sanitization are omitted.
+	 */
+	public function test_product_button_omits_aria_label_when_sanitization_results_in_empty(): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', 'yes' );
+		$product = WC_Helper_Product::create_simple_product();
+		$filter  = static function ( array $args ): array {
+			$args['attributes']['aria-label'] = '<em></em>';
+			return $args;
+		};
+
+		add_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		try {
+			$markup = $this->render_product_button( $product );
+		} finally {
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		}
+
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue( $processor->next_tag( 'button' ), 'Button element should exist in rendered markup.' );
+		$this->assertNull( $processor->get_attribute( 'aria-label' ), 'Empty aria-label attribute should be omitted.' );
+	}
+
+	/**
+	 * Get the aria-label of the rendered button.
+	 *
+	 * @param string $markup Rendered block markup.
+	 * @return string|null The aria-label, decoded.
+	 */
+	private function get_button_aria_label( string $markup ): ?string {
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$processor->next_tag( 'button' );
+
+		return $processor->get_attribute( 'aria-label' );
+	}
+
+	/**
+	 * @testdox Product Button starts with a quantity of 1.
+	 */
+	public function test_product_button_defaults_quantity_to_one(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->assertSame( 1, $this->get_quantity_to_add( $this->render_product_button( $product ) ) );
+	}
+
+	/**
+	 * @testdox Product Button adds and announces the minimum quantity with or without AJAX.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $ajax_enabled Whether AJAX add to cart is enabled.
+	 */
+	public function test_product_button_uses_minimum_purchase_quantity( bool $ajax_enabled ): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', $ajax_enabled ? 'yes' : 'no' );
+		$product = WC_Helper_Product::create_simple_product();
+		$filter  = static function () {
+			return 10;
+		};
+
+		add_filter( 'woocommerce_quantity_input_min', $filter );
+		try {
+			$markup = $this->render_product_button( $product );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $filter );
+		}
+
+		$this->assertSame( 10, $this->get_quantity_to_add( $markup ), 'The button context should use the minimum purchase quantity.' );
+		$this->assertStringContainsString( '>Add 10 to cart</span>', $markup, 'The button should disclose the quantity being added.' );
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue( $processor->next_tag( $ajax_enabled ? 'button' : 'a' ), 'The product button should be rendered.' );
+		$this->assertStringContainsString( 'Add 10 to cart', $processor->get_attribute( 'aria-label' ), 'The accessible name should include the visible button text.' );
+		if ( ! $ajax_enabled ) {
+			parse_str( wp_parse_url( $processor->get_attribute( 'href' ), PHP_URL_QUERY ), $query );
+			$this->assertSame( '10', $query['quantity'] ?? null, 'The non-AJAX link should add the minimum quantity.' );
+		}
+	}
+
+	/**
+	 * @testdox Product Button still adds one item for sold-individually products when a global minimum is filtered.
+	 */
+	public function test_product_button_minimum_respects_sold_individually(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sold_individually( true );
+		$product->save();
+		$filter = static function () {
+			return 10;
+		};
+
+		add_filter( 'woocommerce_quantity_input_min', $filter );
+		try {
+			$markup = $this->render_product_button( $product );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $filter );
+		}
+
+		$this->assertSame( 1, $this->get_quantity_to_add( $markup ), 'Sold-individually products should still add one item.' );
+		$this->assertStringContainsString( '>Add to cart</span>', $markup, 'The button should not promise a bulk quantity for sold-individually products.' );
+	}
+
+	/**
+	 * @testdox Quantity filters keep Product Button quantities, text, accessible labels, and links consistent.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $ajax_enabled Whether AJAX is enabled.
+	 */
+	public function test_loop_add_to_cart_args_sets_initial_quantity( bool $ajax_enabled ): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', $ajax_enabled ? 'yes' : 'no' );
+		$product = WC_Helper_Product::create_simple_product();
+		$minimum = static fn() => 10;
+		$filter  = static function ( $args ) {
+			$args['quantity'] = 30;
+			return $args;
+		};
+
+		add_filter( 'woocommerce_quantity_input_min', $minimum );
+		add_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		try {
+			$markup = $this->render_product_button( $product );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum );
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		}
+
+		$this->assertSame( 30, $this->get_quantity_to_add( $markup ) );
+		$this->assertStringContainsString( '>Add 30 to cart</span>', $markup );
+		$this->assertStringContainsString( 'aria-label="Add 30 to cart:', $markup );
+		if ( ! $ajax_enabled ) {
+			$this->assertStringContainsString( 'quantity=30', $markup );
+		}
+	}
+
+	/**
+	 * Read quantityToAdd from the rendered Product Button context.
+	 *
+	 * @param string $markup Rendered block markup.
+	 * @return int
+	 */
+	private function get_quantity_to_add( string $markup ) {
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue(
+			$processor->next_tag( array( 'class_name' => 'wc-block-components-product-button' ) ),
+			'Product Button wrapper was not rendered.'
+		);
+
+		$context = json_decode( (string) $processor->get_attribute( 'data-wp-context' ), true );
+		$this->assertIsArray( $context );
+		$this->assertArrayHasKey( 'quantityToAdd', $context );
+
+		return $context['quantityToAdd'];
+	}
+
+	/**
+	 * @testdox Catalog blocks retain URL-filter quantities unless button arguments override them.
+	 */
+	public function test_catalog_blocks_retain_filtered_url_quantity(): void {
+		$product     = WC_Helper_Product::create_simple_product();
+		$minimum     = static fn() => 10;
+		$url_filter  = static fn( $url ) => add_query_arg( 'quantity', 30, $url );
+		$args_filter = static function ( $args ) {
+			$args['quantity'] = 10;
+			return $args;
+		};
+		add_filter( 'woocommerce_quantity_input_min', $minimum );
+		add_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+		try {
+			$markup = $this->render_product_button( $product );
+			$this->assertSame( 30, $this->get_quantity_to_add( $markup ) );
+			$this->assertStringContainsString( '>Add 30 to cart</span>', $markup );
+			$this->assertStringContainsString( 'aria-label="Add 30 to cart:', $markup );
+			$this->assertStringContainsString( 'quantity=30', $markup );
+
+			$grid = do_blocks( '<!-- wp:woocommerce/handpicked-products {"products":[' . $product->get_id() . ']} /-->' );
+			$this->assertStringContainsString( 'data-quantity="30"', $grid );
+			$this->assertStringContainsString( '>Add 30 to cart</a>', $grid );
+			$this->assertStringContainsString( 'quantity=30', $grid );
+
+			add_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
+			$markup = $this->render_product_button( $product );
+			$this->assertSame( 10, $this->get_quantity_to_add( $markup ) );
+			$this->assertStringContainsString( '>Add 10 to cart</span>', $markup );
+			$this->assertStringContainsString( 'quantity=10', $markup );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum );
+			remove_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
+		}
+	}
+
+	/**
+	 * @testdox Buttons inside quantity forms retain their quantity-independent accessible name.
+	 */
+	public function test_form_button_retains_description(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$minimum = static fn() => 10;
+		add_filter( 'woocommerce_quantity_input_min', $minimum );
+		try {
+			$block  = new \WP_Block(
+				array(
+					'blockName' => 'woocommerce/product-button',
+					'attrs'     => array(),
+				),
+				array(
+					'postId' => $product->get_id(),
+					'woocommerce/isDescendantOfAddToCartWithOptions' => true,
+				)
+			);
+			$markup = $block->render();
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum );
+		}
+		$this->assertStringContainsString( '>Add to cart</span>', $markup );
+		$this->assertStringContainsString( 'Add to cart:', $this->get_button_aria_label( $markup ) );
+		$this->assertStringNotContainsString( 'Add 10 to cart', $markup );
+	}
+
+	/**
+	 * @testdox Legacy grids use their final quantity in both AJAX data and the button label and link.
+	 * @testWith [10]
+	 *           [30]
+	 * @param int $quantity Final grid quantity.
+	 */
+	public function test_legacy_grid_quantity( int $quantity ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$minimum = static fn() => 10;
+		$filter  = static function ( $attributes ) use ( $quantity ) {
+			$attributes['data-quantity'] = $quantity;
+			return $attributes;
+		};
+		add_filter( 'woocommerce_quantity_input_min', $minimum );
+		if ( 30 === $quantity ) {
+			add_filter( 'woocommerce_blocks_product_grid_add_to_cart_attributes', $filter );
+		}
+		try {
+			$markup = do_blocks( '<!-- wp:woocommerce/handpicked-products {"products":[' . $product->get_id() . ']} /-->' );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum );
+			remove_filter( 'woocommerce_blocks_product_grid_add_to_cart_attributes', $filter );
+		}
+		$this->assertStringContainsString( 'data-quantity="' . $quantity . '"', $markup );
+		$this->assertStringContainsString( '>Add ' . $quantity . ' to cart</a>', $markup );
+		$this->assertStringContainsString( 'quantity=' . $quantity, $markup );
+		$this->assertStringContainsString( 'aria-label="Add ' . $quantity . ' to cart:', $markup );
 	}
 }

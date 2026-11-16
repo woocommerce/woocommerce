@@ -205,7 +205,7 @@ import {
 
 The helper functions are described below:
 
--   `isSuccessResponse`, `isErrorResponse` and `isFailResponse`: These are helper functions that receive a value and report via boolean whether the object is a type of response expected. For event emitters that receive responses from registered observers, a `type` property on the returned object from the observer indicates what type of response it is and event emitters will react according to that type. So for instance if an observer returned `{ type: 'success' }` the emitter could feed that to `isSuccessResponse` and it would return `true`. You can see an example of this being implemented for the [payment processing emitted event here](https://github.com/woocommerce/woocommerce/blob/df02d62e2d41e9007da44cb87fea2b7a9551f55c/plugins/woocommerce/client/blocks/packages/public-api/types/type-guards/observers.ts#L41-L65).
+-   `isSuccessResponse`, `isErrorResponse` and `isFailResponse`: These are helper functions that receive a value and report via boolean whether the object is a type of response expected. For event emitters that receive responses from registered observers, a `type` property on the returned object from the observer indicates what type of response it is and event emitters will react according to that type. So for instance if an observer returned `{ type: 'success' }` the emitter could feed that to `isSuccessResponse` and it would return `true`. You can see an example of this being implemented for the [payment processing emitted event here](https://github.com/woocommerce/woocommerce/blob/b311f5a6c3594bac6b939be7183c87d42fe32fc6/plugins/woocommerce/client/blocks/packages/public-api/types/type-guards/observers.ts#L41-L65).
 -   `noticeContexts`: This is an object containing properties referencing areas where notices can be targeted in the checkout. The object has the following properties:
     -   `PAYMENTS`: This is a reference to the notice area in the payment methods step.
     -   `EXPRESS_PAYMENTS`: This is a reference to the notice area in the express payment methods step.
@@ -228,6 +228,7 @@ The following event emitters are available to extensions to register observers t
 Observers registered to this event emitter will receive nothing as an argument. Also, all observers will be executed before the checkout handles the responses from the emitters. Observers registered to this emitter can return `true` if they have nothing to communicate back to checkout, `false` if they want checkout to go back to `IDLE` status state, or an object with any of the following properties:
 
 -   `errorMessage`: This will be added as an error notice on the checkout context.
+-   `context`: The notice context to show `errorMessage` in, for example `noticeContexts.PAYMENTS`. Defaults to `wc/checkout`.
 -   `validationErrors`: This will be set as inline validation errors on checkout fields. If your observer wants to trigger validation errors it can use the following shape for the errors:
     -   This is an object where keys are the property names the validation error is for (that correspond to a checkout field, eg `country` or `coupon`) and values are the error message describing the validation problem.
 

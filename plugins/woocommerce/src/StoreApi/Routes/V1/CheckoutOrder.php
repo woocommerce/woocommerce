@@ -165,8 +165,12 @@ class CheckoutOrder extends AbstractCartRoute {
 		 * Process the payment and return the results.
 		 */
 		$payment_result = new PaymentResult();
+		$needs_payment  = $this->order->needs_payment();
 
-		if ( $this->order->needs_payment() ) {
+		// Callbacks on the action above, or on the needs_payment() filters, may have saved the order.
+		$this->validate_order_was_saved();
+
+		if ( $needs_payment ) {
 			$this->process_payment( $request, $payment_result );
 		} else {
 			$this->process_without_payment( $request, $payment_result );
@@ -206,12 +210,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		// Billing address is a required field.
 		$billing = $request['billing_address'];
 
-		// If shipping address (optional field) was not provided, set it to the given billing address (required field).
-		$shipping = $request['shipping_address'] ?? $billing;
-
-		$this->order->set_billing_address( $billing );
-		$this->order->set_shipping_address( $shipping );
-		$this->order_controller->validate_existing_order_before_update( $this->order );
+		$shipping = $this->order_controller->update_existing_order_addresses( $this->order, $billing, $request['shipping_address'] );
 
 		// Update customer object with validated order addresses.
 		foreach ( $billing as $key => $value ) {
@@ -220,7 +219,8 @@ class CheckoutOrder extends AbstractCartRoute {
 			}
 		}
 
-		foreach ( $shipping as $key => $value ) {
+		// When the order keeps its own shipping address, the customer's shipping follows billing.
+		foreach ( $shipping ?? $billing as $key => $value ) {
 			if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
 				$customer->{"set_shipping_$key"}( $value );
 			}
@@ -239,6 +239,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		$customer->save();
 		$this->order->save();
 		$this->order->calculate_totals();
+		$this->validate_order_was_saved();
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep a new shipping zone's name and regions when the first method added has settings but no settings modal.

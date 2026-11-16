@@ -1,8 +1,14 @@
 /**
  * External dependencies
  */
-import { test, expect, BlockData, wpCLI } from '@woocommerce/e2e-utils';
-import type { Page } from '@playwright/test';
+import { randomUUID } from 'crypto';
+import {
+	test,
+	expect,
+	BlockData,
+	enableTestPlugin,
+	wpCLI,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -189,19 +195,24 @@ test.describe( `${ blockData.name } Block`, () => {
 		await checkProductLink( page );
 	} );
 
-	test( 'should render the product table with no client-side error for a product with no item data', async ( {
+	test( 'should render the product table and its item data with no client-side error', async ( {
 		page,
+		context,
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
+		// The fixture plugin adds `woocommerce_get_item_data` entries to every
+		// cart item, so this test covers the whole wiring: the PHP filter, the
+		// Store API `item_data` field, and the Interactivity API render. How
+		// each entry is normalized is covered by the unit tests for
+		// `mini-cart/utils/item-data`.
+		await enableTestPlugin( context, 'item-data-display' );
+
 		const pageErrors: string[] = [];
 		const consoleErrors: string[] = [];
 
 		// Register listeners before navigating so nothing that happens during
-		// the mini-cart's render is missed. This product has no variation and
-		// no `woocommerce_get_item_data` additions (no fixture plugin is
-		// activated in this describe block), which is the plain rendering
-		// path the item-data/separator getters must not throw on.
+		// the mini-cart's render is missed.
 		page.on( 'pageerror', ( error ) => {
 			pageErrors.push( error.message );
 		} );
@@ -231,6 +242,15 @@ test.describe( `${ blockData.name } Block`, () => {
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
 		).toHaveValue( '1' );
+
+		// The filtered entries reach the rendered table.
+		const dialog = page.getByRole( 'dialog' );
+		await expect(
+			dialog.locator( '.wc-block-components-product-details__name' )
+		).toContainText( [ 'Gift Message' ] );
+		await expect(
+			dialog.locator( '.wc-block-components-product-details__value' )
+		).toContainText( [ 'Happy Birthday!' ] );
 
 		expect( pageErrors ).toEqual( [] );
 		expect( consoleErrors ).toEqual( [] );
@@ -384,603 +404,6 @@ test.describe( `${ blockData.name } Block`, () => {
 	} );
 } );
 
-test.describe( `${ blockData.name } Block (admin)`, () => {
-	// eslint-disable-next-line playwright/no-skipped-test
-	test.skip( 'should update badge colors when header background changes', async ( {
-		page,
-		admin,
-		editor,
-		frontendUtils,
-	} ) => {
-		// First, change the header background color in the site editor.
-		await admin.visitSiteEditor( {
-			postId: 'twentytwentyfour//header',
-			postType: 'wp_template_part',
-			canvas: 'edit',
-		} );
-
-		// Select the mini-cart block to get access to its parent (the header row).
-		const miniCartBlock = editor.canvas.locator(
-			'[data-type="woocommerce/mini-cart"]'
-		);
-		await miniCartBlock.click();
-
-		// Select the parent Row block that contains the mini-cart.
-		// Use the block toolbar to select parent.
-		await editor.clickBlockToolbarButton( 'Select parent block: Row' );
-
-		// Now open the Styles panel and set background color.
-		await editor.openDocumentSettingsSidebar();
-
-		// Click on the Styles tab.
-		const stylesTab = page.getByRole( 'tab', { name: 'Styles' } );
-		if ( await stylesTab.isVisible() ) {
-			await stylesTab.click();
-		}
-
-		// Find and click the background color control.
-		const bgColorButton = page
-			.getByRole( 'button', { name: 'Background' } )
-			.first();
-		await bgColorButton.click();
-
-		// Select "Contrast" preset color (black).
-		await page
-			.getByRole( 'option', { name: 'Contrast', exact: true } )
-			.click();
-
-		// Extract the background color hex value from the editor UI.
-		const parentBgColorHex = await page
-			.locator( '.components-color-palette__custom-color-value' )
-			.textContent();
-
-		// Close the background color popover by clicking outside.
-		await stylesTab.click();
-
-		// Find and click the text color control.
-		const textColorButton = page
-			.getByRole( 'button', { name: 'Text' } )
-			.first();
-		await textColorButton.click();
-
-		// Select "Base" preset color (white).
-		await page.getByRole( 'option', { name: 'Base', exact: true } ).click();
-
-		// Extract the text color hex value from the editor UI.
-		const parentTextColorHex = await page
-			.locator( '.components-color-palette__custom-color-value' )
-			.textContent();
-
-		// Save the changes.
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-
-		// Add an item to cart (use a product that's on the first page).
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-
-		// Verify color values were extracted from the editor.
-		expect( parentBgColorHex ).toBeTruthy();
-		expect( parentTextColorHex ).toBeTruthy();
-
-		// Helper to convert hex color to rgb format.
-		const hexToRgb = ( hex: string ) => {
-			const cleanHex = hex.replace( '#', '' );
-			const r = parseInt( cleanHex.slice( 0, 2 ), 16 );
-			const g = parseInt( cleanHex.slice( 2, 4 ), 16 );
-			const b = parseInt( cleanHex.slice( 4, 6 ), 16 );
-			return `rgb(${ r }, ${ g }, ${ b })`;
-		};
-
-		// Verify the badge has the correct colors:
-		// - Badge background = parent's text color (inverted)
-		// - Badge text = parent's background color (inverted)
-		const badge = page.locator( '.wc-block-mini-cart__badge' );
-		await expect( badge ).toHaveCSS(
-			'background-color',
-			hexToRgb( parentTextColorHex as string )
-		);
-		await expect( badge ).toHaveCSS(
-			'color',
-			hexToRgb( parentBgColorHex as string )
-		);
-
-		// Navigate to the next page using client-side navigation.
-		await page.getByRole( 'link', { name: 'Next Page' } ).click();
-
-		// Await for the navigation to happen.
-		await expect( page ).toHaveURL( /page\/2\/?$/ );
-
-		// Verify the badge colors persist after navigation.
-		await expect( badge ).toHaveCSS(
-			'background-color',
-			hexToRgb( parentTextColorHex as string )
-		);
-		await expect( badge ).toHaveCSS(
-			'color',
-			hexToRgb( parentBgColorHex as string )
-		);
-	} );
-} );
-
-test.describe( `${ blockData.name } Block (item data)`, () => {
-	test.use( {
-		storageState: {
-			origins: [],
-			cookies: [],
-		},
-	} );
-
-	// Activate in beforeEach because the DB is reset after every test.
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-item-data-display'
-		);
-	} );
-
-	test( 'should render plain text item data', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		// Verify the plain text name and value are rendered.
-		await expect(
-			dialog.locator( '.wc-block-components-product-details__name' )
-		).toContainText( [ 'Gift Message' ] );
-		await expect(
-			dialog.locator( '.wc-block-components-product-details__value' )
-		).toContainText( [ 'Happy Birthday!' ] );
-	} );
-
-	test( 'should use display field value when present', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		// The display field contains "<em>Best Wishes</em>".
-		// Verify the <em> tag is rendered as an actual HTML element.
-		const engravingValue = dialog
-			.locator( '.wc-block-components-product-details__value' )
-			.filter( { hasText: 'Best Wishes' } );
-		await expect( engravingValue ).toBeVisible();
-		await expect( engravingValue.locator( 'em' ) ).toBeVisible();
-		await expect( engravingValue.locator( 'em' ) ).toHaveText(
-			'Best Wishes'
-		);
-	} );
-
-	test( 'should decode HTML entities in item data values', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		// The value "1 &lt; 2" should display as "1 < 2"
-		// (entity decoded), not as literal "1 &lt; 2".
-		const sizeValue = dialog
-			.locator( '.wc-block-components-product-details__value' )
-			.filter( { hasText: '1' } );
-		await expect( sizeValue ).toBeVisible();
-		await expect( sizeValue ).toContainText( '1 < 2' );
-	} );
-
-	test( 'should not render entity-encoded HTML tags as DOM elements', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		const noteValue = dialog
-			.locator( '.wc-block-components-product-details__value' )
-			.filter( { hasText: 'important' } );
-		await expect( noteValue ).toBeVisible();
-		await expect( noteValue.locator( 'b' ) ).toHaveCount( 0 );
-	} );
-
-	test( 'should show a separator between item-data entries but not after the last one', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		// The fixture plugin injects 4 well-formed entries (Gift Message,
-		// Engraving, Size, Note) onto the cart item. Confirm all 4 rendered
-		// before counting separators, so a count mismatch below can only be
-		// attributed to separator placement, not to a missing entry.
-		const entryNames = dialog.locator(
-			'.wc-block-components-product-details__name'
-		);
-		await expect( entryNames ).toHaveCount( 4 );
-
-		// Each entry's trailing separator is a `span[aria-hidden="true"]`;
-		// the store getter that drives its `hidden` binding removes the
-		// `hidden` attribute exactly for the entries that should show a
-		// separator. Count only the ones that are actually visible (not
-		// `hidden`) — using `textContent` with a regex would also match the
-		// text of `hidden` separators and give a false pass/fail.
-		const visibleSeparators = dialog.locator(
-			'.wc-block-components-product-details span[aria-hidden="true"]:not([hidden])'
-		);
-		await expect( visibleSeparators ).toHaveCount( 3 );
-	} );
-} );
-
-/**
- * Registers page-error and console-error listeners for a defect scenario
- * (trailing malformed/hidden item-data entries). Must be called before
- * navigating so nothing that happens during the mini-cart's render is
- * missed — mirrors the listener setup used by the "no client-side error"
- * test above.
- *
- * @param {Page} page Playwright page to observe.
- * @return {{pageErrors: string[], consoleErrors: string[]}} Arrays that
- *                                                            accumulate as
- *                                                            errors fire.
- */
-const trackErrors = ( page: Page ) => {
-	const pageErrors: string[] = [];
-	const consoleErrors: string[] = [];
-
-	page.on( 'pageerror', ( error ) => {
-		pageErrors.push( error.message );
-	} );
-	page.on( 'console', ( message ) => {
-		// Exclude the browser's own "failed to load resource" network
-		// diagnostics: they are not JS errors raised by page code (no
-		// `console.error` call is involved) and can fire for reasons
-		// entirely unrelated to the item-data/separator logic under test.
-		if (
-			message.type() === 'error' &&
-			! message.text().includes( 'Failed to load resource' )
-		) {
-			consoleErrors.push( message.text() );
-		}
-	} );
-
-	return { pageErrors, consoleErrors };
-};
-
-test.describe( `${ blockData.name } Block (item data - malformed trailing entries)`, () => {
-	test.use( {
-		storageState: {
-			origins: [],
-			cookies: [],
-		},
-	} );
-
-	// Activate in beforeEach because the DB is reset after every test.
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-item-data-display-malformed'
-		);
-	} );
-
-	test( 'should render no client-side error and no trailing separator when the item data ends with a single malformed entry', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		const { pageErrors, consoleErrors } = trackErrors( page );
-
-		await frontendUtils.goToShop();
-		// Quantity 1 selects the fixture's [visible, malformed] scenario.
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		// Both entries render into the DOM (the malformed one hidden);
-		// confirm the DOM count before checking visibility, so a mismatch
-		// below can only be attributed to visibility/separator logic, not
-		// to a missing entry.
-		const allNames = dialog.locator(
-			'.wc-block-components-product-details__name'
-		);
-		await expect( allNames ).toHaveCount( 2 );
-
-		// The malformed entry renders no visible name/value: only the
-		// well-formed "Gift Message" entry is visible. Using `:visible`
-		// filters out elements hidden via the `hidden` attribute, unlike a
-		// plain `textContent` check which would also match hidden text.
-		const visibleNames = dialog.locator(
-			'.wc-block-components-product-details__name:visible'
-		);
-		await expect( visibleNames ).toHaveCount( 1 );
-		await expect( visibleNames ).toContainText( [ 'Gift Message' ] );
-
-		// The last (and only) visible entry shows no trailing separator,
-		// and no stray separator appears anywhere else in the list. Count
-		// only separators that are actually visible. `:visible` accounts
-		// for ancestor visibility, so a malformed/hidden entry's separator
-		// span — whose own `hidden` attribute is absent because it is not
-		// the last *visible* entry, but whose entry wrapper is hidden — is
-		// correctly excluded. A plain `:not([hidden])` attribute check
-		// would miss the hidden ancestor and a `textContent` regex would
-		// match hidden text.
-		const visibleSeparators = dialog.locator(
-			'.wc-block-components-product-details span[aria-hidden="true"]:visible'
-		);
-		await expect( visibleSeparators ).toHaveCount( 0 );
-
-		expect( pageErrors ).toEqual( [] );
-		expect( consoleErrors ).toEqual( [] );
-	} );
-
-	test( 'should render no client-side error and no trailing separator when the item data ends with two consecutive malformed entries', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		const { pageErrors, consoleErrors } = trackErrors( page );
-
-		await frontendUtils.goToShop();
-		// Adding the same product twice merges into a single cart line with
-		// quantity 2, which selects the fixture's
-		// [visible, malformed, malformed] scenario.
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		const allNames = dialog.locator(
-			'.wc-block-components-product-details__name'
-		);
-		await expect( allNames ).toHaveCount( 3 );
-
-		const visibleNames = dialog.locator(
-			'.wc-block-components-product-details__name:visible'
-		);
-		await expect( visibleNames ).toHaveCount( 1 );
-		await expect( visibleNames ).toContainText( [ 'Gift Message' ] );
-
-		// Count only separators that are actually visible. `:visible`
-		// accounts for ancestor visibility, so a malformed/hidden entry's
-		// separator span (hidden via its entry wrapper, not its own
-		// attribute) is correctly excluded — unlike `:not([hidden])`.
-		const visibleSeparators = dialog.locator(
-			'.wc-block-components-product-details span[aria-hidden="true"]:visible'
-		);
-		await expect( visibleSeparators ).toHaveCount( 0 );
-
-		expect( pageErrors ).toEqual( [] );
-		expect( consoleErrors ).toEqual( [] );
-	} );
-} );
-
-test.describe( `${ blockData.name } Block (item data - hidden trailing entries)`, () => {
-	test.use( {
-		storageState: {
-			origins: [],
-			cookies: [],
-		},
-	} );
-
-	// Activate in beforeEach because the DB is reset after every test.
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-item-data-display-hidden'
-		);
-	} );
-
-	test( 'should render no client-side error and no trailing separator when the item data ends with a single explicitly-hidden entry', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		const { pageErrors, consoleErrors } = trackErrors( page );
-
-		await frontendUtils.goToShop();
-		// Quantity 1 selects the fixture's [visible, hidden] scenario.
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		const allNames = dialog.locator(
-			'.wc-block-components-product-details__name'
-		);
-		await expect( allNames ).toHaveCount( 2 );
-
-		// The explicitly-hidden entry renders no visible name/value ("Secret"
-		// never appears among the visible entries): only the well-formed
-		// "Gift Message" entry is visible.
-		const visibleNames = dialog.locator(
-			'.wc-block-components-product-details__name:visible'
-		);
-		await expect( visibleNames ).toHaveCount( 1 );
-		await expect( visibleNames ).toContainText( [ 'Gift Message' ] );
-
-		// Count only separators that are actually visible. `:visible`
-		// accounts for ancestor visibility, so a malformed/hidden entry's
-		// separator span (hidden via its entry wrapper, not its own
-		// attribute) is correctly excluded — unlike `:not([hidden])`.
-		const visibleSeparators = dialog.locator(
-			'.wc-block-components-product-details span[aria-hidden="true"]:visible'
-		);
-		await expect( visibleSeparators ).toHaveCount( 0 );
-
-		expect( pageErrors ).toEqual( [] );
-		expect( consoleErrors ).toEqual( [] );
-	} );
-
-	test( 'should render no client-side error and no trailing separator when the item data ends with two consecutive explicitly-hidden entries', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		const { pageErrors, consoleErrors } = trackErrors( page );
-
-		await frontendUtils.goToShop();
-		// Adding the same product twice merges into a single cart line with
-		// quantity 2, which selects the fixture's
-		// [visible, hidden, hidden] scenario.
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		const allNames = dialog.locator(
-			'.wc-block-components-product-details__name'
-		);
-		await expect( allNames ).toHaveCount( 3 );
-
-		const visibleNames = dialog.locator(
-			'.wc-block-components-product-details__name:visible'
-		);
-		await expect( visibleNames ).toHaveCount( 1 );
-		await expect( visibleNames ).toContainText( [ 'Gift Message' ] );
-
-		// Count only separators that are actually visible. `:visible`
-		// accounts for ancestor visibility, so a malformed/hidden entry's
-		// separator span (hidden via its entry wrapper, not its own
-		// attribute) is correctly excluded — unlike `:not([hidden])`.
-		const visibleSeparators = dialog.locator(
-			'.wc-block-components-product-details span[aria-hidden="true"]:visible'
-		);
-		await expect( visibleSeparators ).toHaveCount( 0 );
-
-		expect( pageErrors ).toEqual( [] );
-		expect( consoleErrors ).toEqual( [] );
-	} );
-} );
-
-test.describe( `${ blockData.name } Block (item data - mixed trailing entries)`, () => {
-	test.use( {
-		storageState: {
-			origins: [],
-			cookies: [],
-		},
-	} );
-
-	// Activate in beforeEach because the DB is reset after every test.
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-item-data-display-mixed'
-		);
-	} );
-
-	test( 'should show no trailing separator when the item data ends with a malformed entry followed by a hidden entry', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		const { pageErrors, consoleErrors } = trackErrors( page );
-
-		await frontendUtils.goToShop();
-		// Quantity 1 selects the fixture's
-		// [visible, malformed, hidden] scenario.
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		const allNames = dialog.locator(
-			'.wc-block-components-product-details__name'
-		);
-		await expect( allNames ).toHaveCount( 3 );
-
-		const visibleNames = dialog.locator(
-			'.wc-block-components-product-details__name:visible'
-		);
-		await expect( visibleNames ).toHaveCount( 1 );
-		await expect( visibleNames ).toContainText( [ 'Gift Message' ] );
-
-		// Count only separators that are actually visible. `:visible`
-		// accounts for ancestor visibility, so a malformed/hidden entry's
-		// separator span (hidden via its entry wrapper, not its own
-		// attribute) is correctly excluded — unlike `:not([hidden])`.
-		const visibleSeparators = dialog.locator(
-			'.wc-block-components-product-details span[aria-hidden="true"]:visible'
-		);
-		await expect( visibleSeparators ).toHaveCount( 0 );
-
-		expect( pageErrors ).toEqual( [] );
-		expect( consoleErrors ).toEqual( [] );
-	} );
-
-	test( 'should show no trailing separator when the item data ends with a hidden entry followed by a malformed entry', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		const { pageErrors, consoleErrors } = trackErrors( page );
-
-		await frontendUtils.goToShop();
-		// Adding the same product twice merges into a single cart line with
-		// quantity 2, which selects the fixture's
-		// [visible, hidden, malformed] scenario (the reverse order).
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		const allNames = dialog.locator(
-			'.wc-block-components-product-details__name'
-		);
-		await expect( allNames ).toHaveCount( 3 );
-
-		const visibleNames = dialog.locator(
-			'.wc-block-components-product-details__name:visible'
-		);
-		await expect( visibleNames ).toHaveCount( 1 );
-		await expect( visibleNames ).toContainText( [ 'Gift Message' ] );
-
-		// Count only separators that are actually visible. `:visible`
-		// accounts for ancestor visibility, so a malformed/hidden entry's
-		// separator span (hidden via its entry wrapper, not its own
-		// attribute) is correctly excluded — unlike `:not([hidden])`.
-		const visibleSeparators = dialog.locator(
-			'.wc-block-components-product-details span[aria-hidden="true"]:visible'
-		);
-		await expect( visibleSeparators ).toHaveCount( 0 );
-
-		expect( pageErrors ).toEqual( [] );
-		expect( consoleErrors ).toEqual( [] );
-	} );
-} );
-
 test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 	test.use( {
 		storageState: {
@@ -989,17 +412,16 @@ test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 		},
 	} );
 
-	test( 'should decode entities in variation attributes rendered via data-wp-text', async ( {
+	test( 'should render variation attributes in the products table', async ( {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		cleanup,
 	} ) => {
-		// Create a variable product with an attribute value containing an
-		// ampersand, which the API returns as "&amp;". The data-wp-text
-		// path (textContent) relies on the textarea entity-decode step to
-		// display "Red & Blue" instead of literal "Red &amp; Blue".
+		// The API returns the ampersand as "&amp;", so this also checks that
+		// the variation branch of the table decodes it.
 		const cliOutput = await wpCLI(
-			`wc product create --user=1 --name="Test Variable" --type="variable" --attributes='${ JSON.stringify(
+			`wc product create --user=1 --name="Test Variable ${ randomUUID() }" --type="variable" --catalog_visibility="hidden" --attributes='${ JSON.stringify(
 				[
 					{
 						name: 'Shade',
@@ -1013,58 +435,31 @@ test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 		const productId = cliOutput.stdout.match(
 			/Created product (\d+)/
 		)?.[ 1 ];
-		await wpCLI(
+		expect( productId ).toBeDefined();
+		cleanup( async () => {
+			await wpCLI(
+				`wc product delete ${ productId } --force=true --user=1`
+			);
+		} );
+
+		const variationOutput = await wpCLI(
 			`wc product_variation create --user=1 "${ productId }" --regular_price="10" --attributes='${ JSON.stringify(
 				[ { name: 'Shade', option: 'Red & Blue' } ]
 			) }'`
 		);
+		const variationId = variationOutput.stdout.match(
+			/Created product_variation (\d+)/
+		)?.[ 1 ];
 
-		// Navigate to the product page and add the variation to cart.
-		await page.goto( `/product/test-variable/` );
-		await page
-			.getByLabel( 'Shade', { exact: true } )
-			.selectOption( 'Red & Blue' );
-
-		// The classic variable-product Add to cart button only registers a
-		// selection once the variations script has processed it. Until then the
-		// hidden `variation_id` input stays at "0" and clicking is a silent
-		// no-op (the disabled state is class-based, which Playwright's
-		// actionability checks ignore). Wait for the variation to be registered
-		// (a positive, non-zero variation id) before clicking.
-		// That is necessary but not sufficient: the script sets `variation_id`
-		// synchronously and only drops the `disabled` class ~300ms later, from a
-		// setTimeout, so wait for the button to be enabled as well. Clicking in
-		// that window hits the guard that raises a window.alert Playwright
-		// silently dismisses, and the form never submits.
-		await expect( page.locator( 'input.variation_id' ) ).toHaveValue(
-			/^[1-9][0-9]*$/
+		// Add the variation through the classic add-to-cart URL, since the
+		// product page form is not what this test covers.
+		await page.goto(
+			`/?add-to-cart=${ productId }&variation_id=${ variationId }`
 		);
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
-			exact: true,
-		} );
-		await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
-		await addToCartButton.click();
-
-		// Wait for a definitive "added to cart" confirmation before navigating
-		// to the shop. The single-product Add to cart is a form submission; if
-		// we navigate away before it settles the item may not be in the cart
-		// when the mini-cart opens, which is what makes the assertions below
-		// race the add-to-cart request. Scope to the success notice (role=alert)
-		// so we don't match unrelated page text.
-		await expect(
-			page.getByRole( 'alert' ).getByText( /added to your cart/i )
-		).toBeVisible();
-
-		// Open the mini-cart.
 		await frontendUtils.goToShop();
 		await miniCartUtils.openMiniCart();
 
 		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		// Variation attributes are rendered via data-wp-text (textContent).
-		// The entity "&amp;" should be decoded to "&".
 		await expect(
 			dialog.locator( '.wc-block-components-product-details__name' )
 		).toContainText( [ 'Shade' ] );

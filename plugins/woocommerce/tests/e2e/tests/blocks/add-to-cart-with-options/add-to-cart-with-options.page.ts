@@ -126,6 +126,14 @@ class AddToCartWithOptionsPage {
 		const addToCartFormBlock = await this.editor.getBlockByName(
 			'woocommerce/add-to-cart-form'
 		);
+		const addToCartWithOptionsBlock = await this.editor.getBlockByName(
+			'woocommerce/add-to-cart-with-options'
+		);
+		// `isVisible()` does not wait, so wait for the canvas to render either
+		// block first.
+		await expect(
+			addToCartFormBlock.or( addToCartWithOptionsBlock ).first()
+		).toBeVisible();
 		if ( await addToCartFormBlock.isVisible() ) {
 			await this.editor.selectBlocks( addToCartFormBlock );
 

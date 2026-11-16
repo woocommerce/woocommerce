@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Package;
 use WP_UnitTestCase;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 
@@ -508,5 +510,52 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 			TemplateContentUtils::strip_whitespace( $expected_single_product_template ),
 			TemplateContentUtils::strip_whitespace( $result )
 		);
+	}
+
+	/**
+	 * @testdox Renders single-product hooks once after repeated setup, template selection, and hook restoration.
+	 */
+	public function test_shared_compatibility_renders_hooks_once_after_reinitialization(): void {
+		$product_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'publish',
+			)
+		);
+		$this->go_to( get_permalink( $product_id ) );
+		$this->assertTrue( is_product(), 'The compatibility layer must run in a single-product request.' );
+
+		$rendered_product_ids = array();
+		add_action(
+			'woocommerce_before_single_product',
+			static function () use ( &$rendered_product_ids ) {
+				$rendered_product_ids[] = get_the_ID();
+				echo esc_html( '__SINGLE_PRODUCT_HOOK__' );
+			},
+			99
+		);
+		$hook_snapshot = array();
+		foreach ( $GLOBALS['wp_filter'] as $hook_name => $callbacks ) {
+			$hook_snapshot[ $hook_name ] = clone $callbacks;
+		}
+		$sut    = Package::container()->get( BlockTemplatesRegistry::class );
+		$markup = SingleProductTemplateCompatibility::add_compatibility_layer( '<!-- wp:paragraph --><p>__SINGLE_PRODUCT_CONTENT__</p><!-- /wp:paragraph -->' );
+
+		foreach ( array( 'initial', 'repeated initialization', 'repeated template selection', 'hook reset' ) as $stage ) {
+			if ( 'hook reset' === $stage ) {
+				$GLOBALS['wp_filter'] = $hook_snapshot; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate the hook restoration between WordPress tests.
+			}
+			if ( 'repeated template selection' !== $stage ) {
+				$sut->init_single_product_compatibility();
+			}
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress owns this filter.
+			apply_filters( 'template_include', 'index.php' );
+			$rendered_product_ids = array();
+			$output               = do_blocks( $markup );
+
+			$this->assertSame( array( $product_id ), $rendered_product_ids, $stage . ': the hook should fire once for the current product.' );
+			$this->assertSame( 1, substr_count( $output, '__SINGLE_PRODUCT_HOOK__' ), $stage . ': hook output should not repeat.' );
+			$this->assertSame( 1, substr_count( $output, '__SINGLE_PRODUCT_CONTENT__' ), $stage . ': product content should remain present.' );
+		}
 	}
 }

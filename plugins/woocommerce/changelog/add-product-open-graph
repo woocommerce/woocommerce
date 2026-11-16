@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add product link previews alongside SEO plugins; unset og:type via woocommerce_open_graph_tags to preserve existing types.

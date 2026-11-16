@@ -35,17 +35,17 @@
 		"@babel/core": "catalog:tooling",
 		"@babel/preset-env": "catalog:tooling",
 		"@babel/preset-typescript": "catalog:tooling",
-		"@jest/globals": "29.5.x",
-		"@types/jest": "29.5.x",
+		"@jest/globals": "catalog:tooling",
+		"@types/jest": "catalog:tooling",
 		"@types/jquery": "3.5.33",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/dependency-extraction-webpack-plugin": "next",
-		"babel-loader": "9.2.x",
-		"jest": "29.5.x",
-		"jest-environment-jsdom": "29.5.x",
-		"typescript": "5.7.x",
+		"babel-loader": "catalog:tooling",
+		"jest": "catalog:tooling",
+		"jest-environment-jsdom": "catalog:tooling",
+		"typescript": "catalog:tooling",
 		"webpack": "catalog:tooling",
-		"webpack-cli": "5.1.x"
+		"webpack-cli": "catalog:tooling"
 	},
 	"config": {
 		"ci": {

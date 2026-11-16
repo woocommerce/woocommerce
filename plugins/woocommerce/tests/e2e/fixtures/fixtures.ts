@@ -119,7 +119,13 @@ export const locks = {
 	// sent emails or the Email settings page also take it, since the flags
 	// change both.
 	EMAIL_FEATURE_FLAGS: 'email-feature-flags',
+	// `woocommerce_pickup_location_settings` and `pickup_location_pickup_locations`.
+	LOCAL_PICKUP: 'local-pickup',
 	// The Back in Stock feature flag and `woocommerce_customer_stock_notifications_*`.
 	// Concurrent writes of the same value make `e2e-options/update` return 400.
 	STOCK_NOTIFICATIONS: 'stock-notifications',
+	// The `taxonomy-product_cat`, `taxonomy-product_tag` and
+	// `taxonomy-product_brand` templates. The Site Editor offers to add one only
+	// while it does not exist.
+	TAXONOMY_TEMPLATES: 'taxonomy-templates',
 } as const;

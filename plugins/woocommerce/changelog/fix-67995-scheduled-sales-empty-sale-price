@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the daily scheduled-sales check reprocessing products that have a sale start date but no sale price.

@@ -18,7 +18,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch\DueDispatcher;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentValidator;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentFilter;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -42,17 +42,24 @@ final class ConsumerRegistry {
 	private static $consumers = array();
 
 	/**
-	 * Register a consumer extension by its slug, with an optional configuration.
-	 *
-	 * `contract_due_handler`: `callable( ContractView $contract, array $context ): void`, called
-	 * when one of the consumer's contracts is due (`$context['due_at']` is the due moment, UTC).
-	 * The slug is trimmed; an empty slug is ignored. A repeat registration, an unknown key or a
-	 * non-callable handler raises a `_doing_it_wrong()` notice (the first registration is kept;
-	 * the invalid key is dropped and the slug still registers). Register by `init`; a handler
-	 * registered after `wp_loaded` schedules the recurring due scan right away.
+	 * Register a consumer extension by its (trimmed, non-empty) slug. A repeat registration, an
+	 * unknown key or a non-callable handler gets `_doing_it_wrong()`: the first registration is
+	 * kept and an invalid key is dropped. Register by `init`; a handler registered after
+	 * `wp_loaded` schedules the recurring due scan right away.
 	 *
 	 * @param string               $slug   The consumer extension's registered slug.
-	 * @param array<string, mixed> $config Consumer configuration.
+	 * @param array<string, mixed> $config Consumer configuration. `contract_due_handler`:
+	 *                                     `callable( ContractView $contract, array $context ): void`,
+	 *                                     called when a contract is due, with `$context['due_at']`
+	 *                                     (UTC) and `$context['lock']` (the dispatcher's
+	 *                                     `ContractLock`, operation `engine_due_dispatch`, which
+	 *                                     other callers see while the handler runs). The
+	 *                                     dispatcher releases the lock when the
+	 *                                     handler returns, unless the handler already did, and keeps
+	 *                                     it until it expires when the handler throws. A handler
+	 *                                     that leaves the contract due (same due moment) is notified
+	 *                                     again by a later or overlapping scan; moving or clearing
+	 *                                     the due moment stops that.
 	 */
 	public static function register( string $slug, array $config = array() ): void {
 		$slug = trim( $slug );
@@ -65,7 +72,7 @@ final class ConsumerRegistry {
 			return;
 		}
 
-		$filtered_config = ArgumentValidator::filter_known_keys( __METHOD__, $config, self::CONFIG_KEYS );
+		$filtered_config = ArgumentFilter::filter_known_keys( __METHOD__, $config, self::CONFIG_KEYS );
 		$registration    = array();
 
 		if ( array_key_exists( 'contract_due_handler', $filtered_config ) ) {

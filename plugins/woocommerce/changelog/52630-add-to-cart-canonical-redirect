@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop add-to-cart links adding the product twice when WordPress redirects them to the canonical URL.

@@ -39,6 +39,8 @@ interface EmailWooCommerceData {
 	default_subject: string | null;
 	is_manual: boolean;
 	enabled: boolean;
+	/** `null` means this email has no such setting. */
+	send_on_unpaid_timeout: boolean | null;
 }
 
 /**

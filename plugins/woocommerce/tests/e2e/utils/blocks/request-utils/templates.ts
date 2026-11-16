@@ -22,6 +22,10 @@ export interface WPTemplate {
 	slug: string;
 	type: WPTemplateType;
 	origin: 'plugin' | 'theme' | null;
+	title: {
+		raw: string;
+		rendered: string;
+	};
 	content: {
 		raw: string;
 	};

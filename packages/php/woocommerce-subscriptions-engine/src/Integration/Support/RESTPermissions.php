@@ -29,7 +29,7 @@ class RESTPermissions {
 		if ( ! is_user_logged_in() ) {
 			return new \WP_Error(
 				'woocommerce_subscriptions_engine_not_authenticated',
-				__( 'You must be logged in to access this resource.', 'woocommerce-subscriptions-engine' ),
+				__( 'You must be logged in to access this resource.', 'woocommerce' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -52,7 +52,7 @@ class RESTPermissions {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return new \WP_Error(
 				'woocommerce_subscriptions_engine_insufficient_permissions',
-				__( 'Sorry, you are not allowed to access this resource.', 'woocommerce-subscriptions-engine' ),
+				__( 'Sorry, you are not allowed to access this resource.', 'woocommerce' ),
 				array( 'status' => 403 )
 			);
 		}

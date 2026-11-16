@@ -283,7 +283,6 @@ class NoticesTest extends \WC_Unit_Test_Case {
 	 * @param bool   $should_display Whether the notice should display.
 	 */
 	public function test_unsupported_currency_notice_respects_currency( $currency, $should_display ) {
-		$store_currency = get_option( 'woocommerce_currency' );
 		// Set the currency.
 		update_option( 'woocommerce_currency', $currency );
 
@@ -299,16 +298,12 @@ class NoticesTest extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertStringNotContainsString( 'PayPal Standard does not support your store currency', $output );
 		}
-
-		// Reset currency.
-		update_option( 'woocommerce_currency', $store_currency );
 	}
 
 	/**
 	 * Test that unsupported currency notice is not displayed when dismissed.
 	 */
 	public function test_unsupported_currency_notice_not_displayed_when_dismissed() {
-		$store_currency = get_option( 'woocommerce_currency' );
 		// Set the currency.
 		update_option( 'woocommerce_currency', 'TRY' );
 		update_user_meta( $this->admin_user_id, 'dismissed_paypal_unsupported_currency_notice', true );
@@ -320,9 +315,6 @@ class NoticesTest extends \WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertStringNotContainsString( 'PayPal Standard does not support your store currency', $output );
-
-		// Reset currency.
-		update_option( 'woocommerce_currency', $store_currency );
 	}
 
 	/**
@@ -363,9 +355,6 @@ class NoticesTest extends \WC_Unit_Test_Case {
 
 		// Verify the flag is still 'yes'.
 		$this->assertEquals( 'yes', get_option( 'woocommerce_paypal_account_restricted_status', 'no' ) );
-
-		// Clean up.
-		remove_filter( 'pre_update_option_woocommerce_paypal_account_restricted_status', $track_updates );
 	}
 
 	/**
@@ -406,9 +395,6 @@ class NoticesTest extends \WC_Unit_Test_Case {
 
 		// Verify the flag is still 'no'.
 		$this->assertEquals( 'no', get_option( 'woocommerce_paypal_account_restricted_status', 'no' ) );
-
-		// Clean up.
-		remove_filter( 'pre_update_option_woocommerce_paypal_account_restricted_status', $track_updates );
 	}
 
 	/**
@@ -495,7 +481,6 @@ class NoticesTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_paypal_account_restricted_status', 'yes' );
 		$this->mock_gateway_available();
 
-		$store_currency = get_option( 'woocommerce_currency' );
 		update_option( 'woocommerce_currency', 'TRY' );
 
 		$notices = new Notices();
@@ -510,9 +495,6 @@ class NoticesTest extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'PayPal Account Restricted', $output );
 		// Should contain unsupported currency notice.
 		$this->assertStringContainsString( 'PayPal Standard does not support your store currency', $output );
-
-		// Reset currency.
-		update_option( 'woocommerce_currency', $store_currency );
 	}
 
 	/**

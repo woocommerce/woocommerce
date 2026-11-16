@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Show the shipping provider name instead of its internal slug in fulfillment emails, order notes, and the orders list.

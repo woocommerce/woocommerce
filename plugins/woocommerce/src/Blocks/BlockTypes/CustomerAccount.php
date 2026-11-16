@@ -44,15 +44,9 @@ class CustomerAccount extends AbstractBlock {
 	 */
 	protected function initialize() {
 		parent::initialize();
-		/**
-		 * The hooked_block_{$hooked_block_type} filter was added in WordPress 6.5.
-		 * We are the only code adding the filter 'hooked_block_woocommerce/customer-account'.
-		 * Using has_filter() for a compatibility check won't work because add_filter() is used in the same file.
-		 */
-		if ( version_compare( get_bloginfo( 'version' ), '6.5', '>=' ) ) {
-			add_filter( 'hooked_block_woocommerce/customer-account', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
-			add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
-		}
+
+		add_filter( 'hooked_block_woocommerce/customer-account', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
+		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
 	}
 
 	/**
@@ -71,11 +65,9 @@ class CustomerAccount extends AbstractBlock {
 		$parsed_hooked_block['attrs']['iconStyle']    = 'line';
 		$parsed_hooked_block['attrs']['iconClass']    = 'wc-block-customer-account__account-icon';
 
-		$customer_account_block_font_size = wp_get_global_styles( array( 'blocks', 'woocommerce/customer-account', 'typography', 'fontSize' ) );
-
+		$customer_account_block_font_size = StyleAttributesUtils::get_global_styles( array( 'blocks', 'woocommerce/customer-account', 'typography', 'fontSize' ) );
 		if ( ! is_string( $customer_account_block_font_size ) ) {
-			$navigation_block_font_size = wp_get_global_styles( array( 'blocks', 'core/navigation', 'typography', 'fontSize' ) );
-
+			$navigation_block_font_size = StyleAttributesUtils::get_global_styles( array( 'blocks', 'core/navigation', 'typography', 'fontSize' ) );
 			if ( is_string( $navigation_block_font_size ) ) {
 				$parsed_hooked_block['attrs']['style']['typography']['fontSize'] = $navigation_block_font_size;
 			}
@@ -153,7 +145,7 @@ class CustomerAccount extends AbstractBlock {
 		<div
 			class="wp-block-woocommerce-customer-account <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 			style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
-		>	
+		>
 			<a
 				class="wc-block-customer-account__link"
 				href="<?php echo esc_url( $account_link ); ?>"

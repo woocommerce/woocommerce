@@ -5,6 +5,7 @@ import debugFactory from 'debug';
 /**
  * Internal dependencies
  */
+import { consentManager } from './consent';
 import { BATCH_SIZE, DEBOUNCE_DELAY } from './constants';
 import type { ApiEvent, ApiFetchResponse } from './types/shared';
 
@@ -17,6 +18,7 @@ export class ApiClient {
 	private eventQueue: ApiEvent[] = [];
 	private debounceTimer: number | null = null;
 	private isInitialized: boolean = false;
+	private withdrawalCount: number = 0;
 	/**
 	 * Initialize the API client
 	 */
@@ -29,8 +31,29 @@ export class ApiClient {
 		// Send any pending events when the page is about to unload
 		window.addEventListener( 'beforeunload', this.flush );
 		window.addEventListener( 'pagehide', this.flush );
+		consentManager.addConsentChangeListener( hasConsent => {
+			if ( ! hasConsent ) {
+				this.withdrawalCount++;
+				this.dropQueuedEvents();
+			}
+		} );
 
 		this.isInitialized = true;
+	};
+
+	/**
+	 * Drop events that are queued but not sent yet, for when statistics consent is withdrawn.
+	 */
+	private dropQueuedEvents = (): void => {
+		if ( this.debounceTimer ) {
+			clearTimeout( this.debounceTimer );
+			this.debounceTimer = null;
+		}
+
+		if ( this.eventQueue.length > 0 ) {
+			debug( 'Dropping %d queued events because statistics consent was withdrawn', this.eventQueue.length );
+			this.eventQueue = [];
+		}
 	};
 
 	/**
@@ -115,6 +138,12 @@ export class ApiClient {
 			return;
 		}
 
+		// Consent can also be withdrawn without a change event, so the listener may not have dropped the queue.
+		if ( ! consentManager.hasAnalyticsConsent() ) {
+			this.dropQueuedEvents();
+			return;
+		}
+
 		const eventsToSend = [ ...this.eventQueue ];
 		this.eventQueue = [];
 
@@ -144,6 +173,8 @@ export class ApiClient {
 			return;
 		}
 
+		const withdrawalCount = this.withdrawalCount;
+
 		try {
 			debug( 'Sending %d events to API', events.length );
 
@@ -165,6 +196,11 @@ export class ApiClient {
 			debug( 'API response received: %o', data );
 		} catch ( error ) {
 			debug( 'Failed to send events to API: %o', error );
+			// Consent was withdrawn while the request was pending, possibly granted again since.
+			if ( withdrawalCount !== this.withdrawalCount ) {
+				debug( 'Dropping %d failed events because statistics consent was withdrawn', events.length );
+				return;
+			}
 			// Re-add events to queue for potential retry on next event
 			this.eventQueue.unshift( ...events );
 		}

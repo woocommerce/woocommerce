@@ -4,7 +4,7 @@
 # the config's `themes` array; the only thing config cannot express is the CSV
 # fixture that WC_Tests_Product_CSV_Importer::test_server_path_traversal reads from
 # `/var/www/sample.csv` (above ABSPATH, where www-data cannot write, so copy as root).
-WP_ENV_TEST_CMD="wp-env --config .wp-env.test.json"
+WP_ENV_TEST_CMD="wp-env --config ${WC_TEST_ENV_CONFIG:-.wp-env.test.json}"
 WP_CLI_PREFIX="${WP_CLI_PREFIX-$WP_ENV_TEST_CMD run cli}"
 
 echo -e 'Pre-place sample.csv fixture \n'

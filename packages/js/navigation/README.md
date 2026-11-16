@@ -28,123 +28,138 @@ render() {
 }
 ```
 
-### getPath() ⇒ <code>String</code>
+### getPath() ⇒ `String`
+
 Get the current path from history.
 
-**Returns**: <code>String</code> - Current path.
+**Returns**: `String` - Current path.
 
-### getTimeRelatedQuery(query) ⇒ <code>Object</code>
+### getTimeRelatedQuery(query) ⇒ `Object`
+
 Gets time related parameters from a query.
 
-**Returns**: <code>Object</code> - Object containing the time related queries.
+**Returns**: `Object` - Object containing the time related queries.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| query | <code>Object</code> | Query containing the parameters. |
+| query | `Object` | Query containing the parameters. |
 
-### getIdsFromQuery(queryString) ⇒ <code>Array</code>
+### getIdsFromQuery(queryString) ⇒ `Array`
+
 Get an array of IDs from a comma-separated query parameter.
 
-**Returns**: <code>Array</code> - List of IDs converted to an array of unique integers.
+**Returns**: `Array` - List of IDs converted to an array of unique integers.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| queryString | <code>string</code> | string value extracted from URL. |
+| queryString | `string` | string value extracted from URL. |
 
-### getNewPath(query, path, currentQuery) ⇒ <code>String</code>
+### getNewPath(query, path, currentQuery, page) ⇒ `String`
+
 Return a URL with set query parameters.
 
-**Returns**: <code>String</code> - Updated URL merging query params into existing params.
+**Returns**: `String` - Updated URL merging query params into existing params.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| query | <code>Object</code> | object of params to be updated. |
-| path | <code>String</code> | Relative path (defaults to current path). |
-| currentQuery | <code>Object</code> | object of current query params (defaults to current querystring). |
+| query | `Object` | object of params to be updated. |
+| path | `String` | Admin page path, e.g. `/analytics/orders` (defaults to the current path). Used as-is for the `path` query arg; `./` and `../` segments are not resolved against the current path. |
+| currentQuery | `Object` | object of current query params (defaults to current querystring). |
+| page | `String` | Page key (defaults to "wc-admin"). |
 
-### getQuery() ⇒ <code>Object</code>
+### getQuery() ⇒ `Object`
+
 Get the current query string, parsed into an object, from history.
 
-**Returns**: <code>Object</code> - Current query object, defaults to empty object.
+**Returns**: `Object` - Current query object, defaults to empty object.
 
-### onQueryChange(param, path, query) ⇒ <code>function</code>
+### onQueryChange(param, path, query) ⇒ `function`
+
 This function returns an event handler for the given `param`
 
-**Returns**: <code>function</code> - A callback which will update `param` to the passed value when called.
+**Returns**: `function` - A callback which will update `param` to the passed value when called.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| param | <code>string</code> | The parameter in the querystring which should be updated (ex `page`, `per_page`) |
-| path | <code>string</code> | Relative path (defaults to current path). |
-| query | <code>string</code> | object of current query params (defaults to current querystring). |
+| param | `string` | The parameter in the querystring which should be updated (ex `page`, `per_page`) |
+| path | `string` | Admin page path, e.g. `/analytics/orders` (defaults to the current path). Used as-is for the `path` query arg; `./` and `../` segments are not resolved against the current path. |
+| query | `Object` | object of current query params (defaults to current querystring). |
 
-### updateQueryString(query, path, currentQuery)
+### updateQueryString(query, path, currentQuery, page)
+
 Updates the query parameters of the current page.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| query | <code>Object</code> | object of params to be updated. |
-| path | <code>String</code> | Relative path (defaults to current path). |
-| currentQuery | <code>Object</code> | object of current query params (defaults to current querystring). |
+| query | `Object` | object of params to be updated. |
+| path | `String` | Admin page path, e.g. `/analytics/orders` (defaults to the current path). Used as-is for the `path` query arg; `./` and `../` segments are not resolved against the current path. |
+| currentQuery | `Object` | object of current query params (defaults to current querystring). |
+| page | `String` | Page key (defaults to "wc-admin"). |
 
-### flattenFilters(filters) ⇒ <code>Array</code>
+### flattenFilters(filters) ⇒ `Array`
+
 Collapse an array of filter values with subFilters into a 1-dimensional array.
 
-**Returns**: <code>Array</code> - Flattened array of all filters.
+**Returns**: `Array` - Flattened array of all filters.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| filters | <code>Array</code> | Set of filters with possible subfilters. |
+| filters | `Array` | Set of filters with possible subfilters. |
 
-### getActiveFiltersFromQuery(query, config) ⇒ <code>Array.&lt;activeFilters&gt;</code>
+### getActiveFiltersFromQuery(query, config) ⇒ `Array.<activeFilters>`
+
 Given a query object, return an array of activeFilters, if any.
 
-**Returns**: <code>Array.&lt;activeFilters&gt;</code> - - array of activeFilters
+**Returns**: `Array.<activeFilters>` - - array of activeFilters
 
 | Param | Type | Description |
 | --- | --- | --- |
-| query | <code>object</code> | query object |
-| config | <code>object</code> | config object |
+| query | `object` | query object |
+| config | `object` | config object |
 
-### getDefaultOptionValue(config, options) ⇒ <code>string</code> \| <code>undefined</code>
-Get the default option's value from the configuration object for a given filter. The first option is used as default if no <code>defaultOption</code> is provided.
+### getDefaultOptionValue(config, options) ⇒ `string` \| `undefined`
 
-**Returns**: <code>string</code> \| <code>undefined</code> - - the value of the default option.
+Get the default option's value from the configuration object for a given filter. The first option is used as default if no `defaultOption` is provided.
+
+**Returns**: `string` \| `undefined` - - the value of the default option.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| config | <code>object</code> | a filter config object. |
-| options | <code>array</code> | select options. |
+| config | `object` | a filter config object. |
+| options | `array` | select options. |
 
-### getQueryFromActiveFilters(activeFilters, query, config) ⇒ <code>object</code>
+### getQueryFromActiveFilters(activeFilters, query, config) ⇒ `object`
+
 Given activeFilters, create a new query object to update the url. Use previousFilters to
 Remove unused params.
 
-**Returns**: <code>object</code> - - query object representing the new parameters
+**Returns**: `object` - - query object representing the new parameters
 
 | Param | Type | Description |
 | --- | --- | --- |
-| activeFilters | <code>Array.&lt;activeFilters&gt;</code> | activeFilters shown in the UI |
-| query | <code>object</code> | the current url query object |
-| config | <code>object</code> | config object |
+| activeFilters | `Array.<activeFilters>` | activeFilters shown in the UI |
+| query | `object` | the current url query object |
+| config | `object` | config object |
 
-### getUrlKey(key, rule) ⇒ <code>string</code>
+### getUrlKey(key, rule) ⇒ `string`
+
 Get the url query key from the filter key and rule.
 
-**Returns**: <code>string</code> - - url query key.
+**Returns**: `string` - - url query key.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| key | <code>string</code> | filter key. |
-| rule | <code>string</code> | filter rule. |
+| key | `string` | filter key. |
+| rule | `string` | filter rule. |
 
-### activeFilter : <code>Object</code>
+### activeFilter : `Object`
+
 Describe activeFilter object.
 
-**Properties**
+#### Properties
 
 | Name | Type | Description |
 | --- | --- | --- |
-| key | <code>string</code> | filter key. |
-| [rule] | <code>string</code> | a modifying rule for a filter, eg 'includes' or 'is_not'. |
-| value | <code>string</code> | filter value(s). |
+| key | `string` | filter key. |
+| [rule] | `string` | a modifying rule for a filter, eg 'includes' or 'is_not'. |
+| value | `string` | filter value(s). |

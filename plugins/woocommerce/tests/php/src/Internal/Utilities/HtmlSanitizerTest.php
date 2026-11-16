@@ -31,7 +31,8 @@ class HtmlSanitizerTest extends \WC_Unit_Test_Case {
 	 * @param string $explanation Notes about why we expect this/what we're testing.
 	 */
 	public function test_trimmed_balanced_low_html_sanitizer( string $test_string, string $expected, string $explanation ) {
-		$this->assertEquals( $expected, $this->sut->sanitize( $test_string, HtmlSanitizer::LOW_HTML_BALANCED_TAGS_NO_LINKS ), $explanation );
+		// WordPress 7.2's HTML API-based KSES parser can serialize void elements without the trailing slash.
+		$this->assertEqualHTML( $expected, $this->sut->sanitize( $test_string, HtmlSanitizer::LOW_HTML_BALANCED_TAGS_NO_LINKS ), '<body>', $explanation );
 	}
 
 	/**
@@ -58,7 +59,7 @@ class HtmlSanitizerTest extends \WC_Unit_Test_Case {
 		$output = $this->sut->sanitize(
 			'Test string',
 			array(
-				'pre_processors' => array(
+				'pre_processors'  => array(
 					'strtoupper',
 					'invalid_callback_1',
 				),
@@ -80,13 +81,11 @@ class HtmlSanitizerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Describes expected behavior for the sanitizer's styled_post_content method.
-	 * @return void
+	 * @testdox Styled post content preserves styles and allowed HTML while removing script elements.
 	 */
 	public function test_styled_post_content(): void {
-		$initial_html = '
+		$allowed_html = '
 			<style> p { color: teal; } </style>
-			<script> alert( "I am bad, and I live by my own rules." ); </script>
 			<div>
 				<p>Waltz, bad nymph, for quick jigs vex.</p>
 				<p>Two driven jocks help fax my big quiz.</p>
@@ -94,13 +93,10 @@ class HtmlSanitizerTest extends \WC_Unit_Test_Case {
 			</div>
 		';
 
-		$expected_output = str_replace( '<script>', '', $initial_html );
-		$expected_output = str_replace( '</script>', '', $expected_output );
+		$actual = $this->sut->styled_post_content( '<script>alert( "bad" );</script>' . $allowed_html );
 
-		$this->assertEquals(
-			$this->sut->styled_post_content( $initial_html ),
-			$expected_output,
-			'We retain the protections offered by wp_kses_post, but also allow the use of `style` elements.'
-		);
+		// Legacy KSES preserves script text, while WordPress 7.2's HTML API-based parser removes it.
+		$this->assertStringContainsString( $allowed_html, $actual );
+		$this->assertStringNotContainsString( '<script', $actual );
 	}
 }

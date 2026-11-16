@@ -95,6 +95,33 @@ if ( ! class_exists( 'WC_Order' ) ) {
 		}
 
 		/**
+		 * Get customer ID.
+		 *
+		 * @return int
+		 */
+		public function get_customer_id() {
+			return 0;
+		}
+
+		/**
+		 * Get customer note.
+		 *
+		 * @return string
+		 */
+		public function get_customer_note() {
+			return '';
+		}
+
+		/**
+		 * Get shipping method.
+		 *
+		 * @return string
+		 */
+		public function get_shipping_method() {
+			return '';
+		}
+
+		/**
 		 * Get coupons.
 		 *
 		 * @return array

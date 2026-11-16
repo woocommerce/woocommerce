@@ -19,6 +19,7 @@ import { withSpokenMessages } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 import type { SelectableItemsContext } from '@woocommerce/types';
 
 /**
@@ -44,12 +45,13 @@ const Edit = ( props: EditProps ) => {
 	const {
 		attributeId,
 		queryType,
-		isPreview,
 		displayStyle,
 		showCounts,
 		sortOrder,
 		hideEmpty,
 	} = blockAttributes;
+
+	const isPreviewMode = usePreviewMode();
 
 	const attributeObject = getAttributeFromId( attributeId );
 
@@ -217,7 +219,7 @@ const Edit = ( props: EditProps ) => {
 					value={ {
 						'woocommerce/selectableItems': {
 							items:
-								attributeOptions.length === 0 && isPreview
+								attributeOptions.length === 0 && isPreviewMode
 									? attributeOptionsPreview
 									: attributeOptions,
 							selectionMode: 'multiple' as const,

@@ -35,6 +35,7 @@ import {
 	SetPreviewState,
 	ProductCollectionUIStatesInEditor,
 	CoreCollectionNames,
+	LayoutOptions,
 } from './types';
 import {
 	coreQueryPaginationBlockName,
@@ -125,9 +126,7 @@ const isInProductArchive = () => {
 	return false;
 };
 
-const isFirstBlockThatUsesPageContext = (
-	property: 'inherit' | 'filterable'
-) => {
+const isFirstBlockThatUsesPageContext = () => {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet, natively.
 	const { getBlocksByName, getBlock } = select( blockEditorStore );
@@ -139,7 +138,7 @@ const isFirstBlockThatUsesPageContext = (
 		( clientId ) => {
 			const block = getBlock( clientId );
 
-			return block.attributes?.query?.[ property ];
+			return block.attributes?.query?.inherit;
 		}
 	);
 
@@ -147,15 +146,7 @@ const isFirstBlockThatUsesPageContext = (
 };
 
 export function getDefaultValueOfInherit() {
-	return isInProductArchive()
-		? isFirstBlockThatUsesPageContext( 'inherit' )
-		: false;
-}
-
-export function getDefaultValueOfFilterable() {
-	return ! isInProductArchive()
-		? isFirstBlockThatUsesPageContext( 'filterable' )
-		: false;
+	return isInProductArchive() ? isFirstBlockThatUsesPageContext() : false;
 }
 
 /**
@@ -501,14 +492,38 @@ export const getDefaultQueryForSettingsSection = (
 	orderBy: DEFAULT_QUERY.orderBy as TProductCollectionOrderBy,
 	order: DEFAULT_QUERY.order as TProductCollectionOrder,
 	inherit: getDefaultValueOfInherit(),
-	filterable: getDefaultValueOfFilterable(),
 	perPage: DEFAULT_QUERY.perPage,
 	offset: DEFAULT_QUERY.offset,
 	pages: DEFAULT_QUERY.pages,
 } );
 
-export const getDefaultDisplayLayout = () =>
-	DEFAULT_ATTRIBUTES.displayLayout as ProductCollectionDisplayLayout;
+export const getDefaultDisplayLayout =
+	(): Required< ProductCollectionDisplayLayout > =>
+		DEFAULT_ATTRIBUTES.displayLayout as Required< ProductCollectionDisplayLayout >;
+
+/**
+ * Drop column settings the current layout does not use.
+ * Stack and Carousel ignore `columns` and `shrinkColumns`, so those keys are
+ * left out of the attributes that get saved in the block comment.
+ */
+export function sanitizeDisplayLayout(
+	displayLayout?: Partial< ProductCollectionDisplayLayout > | null
+): ProductCollectionDisplayLayout {
+	if (
+		displayLayout?.type === LayoutOptions.STACK ||
+		displayLayout?.type === LayoutOptions.CAROUSEL
+	) {
+		return { type: displayLayout.type };
+	}
+
+	const defaults = getDefaultDisplayLayout();
+
+	return {
+		type: displayLayout?.type ?? defaults.type,
+		columns: displayLayout?.columns ?? defaults.columns,
+		shrinkColumns: displayLayout?.shrinkColumns ?? defaults.shrinkColumns,
+	};
+}
 
 export const getDefaultSettings = (
 	currentAttributes: ProductCollectionAttributes
@@ -526,7 +541,6 @@ export const getDefaultProductCollection = () =>
 			query: {
 				...DEFAULT_ATTRIBUTES.query,
 				inherit: getDefaultValueOfInherit(),
-				filterable: getDefaultValueOfFilterable(),
 			},
 		},
 		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )
@@ -597,7 +611,7 @@ export const useGetProduct = ( productId: number | undefined ) => {
 						productId
 					) ) as ProductResponseItem;
 					setProduct( fetchedProduct );
-				} catch ( error ) {
+				} catch {
 					setProduct( null );
 				} finally {
 					setIsLoading( false );

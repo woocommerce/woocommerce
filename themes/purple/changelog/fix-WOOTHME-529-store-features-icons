@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make 'Four columns of store features with icons' pattern better adapt to different viewport sizes

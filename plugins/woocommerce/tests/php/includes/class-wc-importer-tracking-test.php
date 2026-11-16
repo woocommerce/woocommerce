@@ -29,7 +29,9 @@ class WC_Importer_Tracking_Test extends \WC_Unit_Test_Case {
 		unset(
 			$_REQUEST['step'],
 			$_REQUEST['_wpnonce'],
-			$_REQUEST['nonce'],
+			$_REQUEST['file'],
+			$_REQUEST['update_existing'],
+			$_REQUEST['delimiter'],
 			$_GET['products-imported'],
 			$_GET['products-imported-variations'],
 			$_GET['products-updated'],
@@ -78,13 +80,78 @@ class WC_Importer_Tracking_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Without a nonce on the request the completion event must not fire.
+	 * @testdox Should not record the completion event when the nonce is missing or invalid.
+	 * @testWith [null]
+	 *           ["not-a-valid-nonce"]
+	 *
+	 * @param string|null $nonce Nonce value to send, or null to send none.
 	 */
-	public function test_import_complete_not_recorded_without_nonce() {
+	public function test_import_complete_not_recorded_without_valid_nonce( ?string $nonce ): void {
 		$_REQUEST['step'] = 'done';
+		if ( null !== $nonce ) {
+			$_REQUEST['_wpnonce'] = $nonce;
+		}
 
 		do_action( 'product_page_product_importer' );
 
 		$this->assertNotRecordedTracksEvent( 'wcadmin_product_import_complete' );
+	}
+
+	/**
+	 * @testdox Should record the start event with its options when the nonce is valid.
+	 */
+	public function test_import_start_is_recorded_with_valid_nonce(): void {
+		$_REQUEST['step']            = 'import';
+		$_REQUEST['file']            = '/tmp/products.csv';
+		$_REQUEST['update_existing'] = '1';
+		$_REQUEST['delimiter']       = ';';
+		$_REQUEST['_wpnonce']        = wp_create_nonce( 'woocommerce-csv-importer' );
+
+		do_action( 'product_page_product_importer' );
+
+		$events = $this->get_tracks_events( 'wcadmin_product_import_start' );
+		$this->assertNotEmpty( $events, 'The start event should be recorded for a valid nonce' );
+		$event = end( $events );
+		$this->assertTrue( $event->update_existing );
+		$this->assertEquals( ';', $event->delimiter );
+	}
+
+	/**
+	 * @testdox Should not record the start event when the nonce is missing or invalid.
+	 * @testWith [null]
+	 *           ["not-a-valid-nonce"]
+	 *
+	 * @param string|null $nonce Nonce value to send, or null to send none.
+	 */
+	public function test_import_start_not_recorded_without_valid_nonce( ?string $nonce ): void {
+		$_REQUEST['step'] = 'import';
+		$_REQUEST['file'] = '/tmp/products.csv';
+		if ( null !== $nonce ) {
+			$_REQUEST['_wpnonce'] = $nonce;
+		}
+
+		do_action( 'product_page_product_importer' );
+
+		$this->assertNotRecordedTracksEvent( 'wcadmin_product_import_start' );
+	}
+
+	/**
+	 * @testdox Should ignore a valid nonce that was created for another action.
+	 */
+	public function test_events_not_recorded_with_nonce_for_another_action(): void {
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'wc-product-import' );
+		$_REQUEST['file']     = '/tmp/products.csv';
+		$events_by_step       = array(
+			'import' => 'wcadmin_product_import_start',
+			'done'   => 'wcadmin_product_import_complete',
+		);
+
+		foreach ( $events_by_step as $step => $event ) {
+			$_REQUEST['step'] = $step;
+
+			do_action( 'product_page_product_importer' );
+
+			$this->assertNotRecordedTracksEvent( $event );
+		}
 	}
 }

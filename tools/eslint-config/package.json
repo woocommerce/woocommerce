@@ -23,7 +23,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*"
 	},
 	"devDependencies": {
-		"eslint": "^10.0.0"
+		"eslint": "catalog:tooling"
 	},
 	"config": {
 		"ci": {

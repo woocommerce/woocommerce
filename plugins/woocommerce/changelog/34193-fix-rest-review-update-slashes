@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep quotes and backslashes as entered when a product review is edited through the REST API.

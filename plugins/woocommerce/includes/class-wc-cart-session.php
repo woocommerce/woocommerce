@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -379,6 +380,7 @@ final class WC_Cart_Session {
 		$wc_session->set( 'coupon_discount_tax_totals', null );
 		$wc_session->set( 'removed_cart_contents', null );
 		$wc_session->set( 'order_awaiting_payment', null );
+		$wc_session->set( PaymentRecovery::ORDER_SENT_TO_GATEWAY, null );
 		$wc_session->set( 'store_api_draft_order', null );
 		$wc_session->set( 'shipping_method_counts', null );
 		$wc_session->set( 'previous_shipping_methods', null );
@@ -680,7 +682,8 @@ final class WC_Cart_Session {
 					if ( taxonomy_is_product_attribute( $meta->key ) ) {
 						$variations[ $attribute_key ] = sanitize_title( $meta->value );
 					} else {
-						$variations[ $attribute_key ] = html_entity_decode( wc_clean( $meta->value ), ENT_QUOTES, get_bloginfo( 'charset' ) );
+						// Preserve literal percent escapes, matching custom values added through the cart and Store API.
+						$variations[ $attribute_key ] = wp_strip_all_tags( html_entity_decode( $meta->value, ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 					}
 				}
 			}

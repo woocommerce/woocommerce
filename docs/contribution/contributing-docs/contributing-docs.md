@@ -5,7 +5,7 @@ sidebar_label: Contributing docs
 
 # Contributing technical documentation
 
-Thanks for helping improve WooCommerce's developer documentation. Our docs are powered by Docusaurus, and live inside the [`woocommerce/docs/`](https://github.com/woocommerce/woocommerce/tree/trunk/docs) folder of the monorepo.
+Thanks for helping improve WooCommerce's developer documentation. Our docs are powered by Docusaurus and live in [`docs/`](https://github.com/woocommerce/woocommerce/tree/trunk/docs) at the root of the WooCommerce monorepo. All file paths in this guide are relative to the repository root unless stated otherwise.
 
 This guide walks you through the structure, tooling, and process for contributing effectively.
 
@@ -24,10 +24,10 @@ This guide walks you through the structure, tooling, and process for contributin
 2. For each modification you'd like to make, create a new branch off `trunk` in your fork that starts with `docs/`. For example, if you're adding a doc about improving extension performance, you could call your branch `docs/improve-extension-performance`.
 3. Create or edit markdown files inside the appropriate folder under `docs/`.
 4. If needed, update the folder's `_category_.json` (for sidebar label/position).
-5. Run a build to verify changes, confirm that the sitemaps and llms-txt files are updated, and detect markdown linting errors and broken links (link checking only happens on build):
+5. From the repository root, run a build to verify changes, confirm that the sitemaps and llms-txt files are updated, and detect markdown linting errors and broken links (link checking only happens on build):
 
     ```bash
-    npm run build
+    cd docs/_docu-tools && pnpm build
     ```
 
 ### Opening a pull request
@@ -44,14 +44,14 @@ This guide walks you through the structure, tooling, and process for contributin
 ### Tooling and configuration
 
 * **Supporting tooling and config** lives in:
-    * [`woocommerce/docs/_docu-tools/`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/_docu-tools/)
+    * [`docs/_docu-tools/`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/_docu-tools/)
 * **Top-level sidebar and navbar** are configured in:
     * [`sidebars.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/_docu-tools/sidebars.ts)
     * [`docusaurus.config.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/_docu-tools/docusaurus.config.ts)
 
 ### Documentation files
 
-* **Docs location**: All documentation lives inside of [`woocommerce/docs/`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/)
+* **Docs location**: All documentation lives inside of [`docs/`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/)
 * **Each folder is sidebar or top nav category**, for example: `getting-started`, `code-snippets`, etc.
 * **Sidebar configuration** for each category is managed using a `_category_.json` file inside each category folder:
 
@@ -80,7 +80,7 @@ To include an image in a markdown file, reference it like this:
 
 Before creating a new category, you should consider whether it is truly necessary to do so. Where possible, you should default to creating content in an existing category. If you do need to create a new category, follow these steps:
 
-1. Inside the `/docs` folder, create a sub-folder with a descriptive name. For example, if you wanted to create a `Checkout design guidelines` section, you'd create a folder called `/docs/checkout-design-guidelines`.
+1. Inside the `docs/` folder, create a sub-folder with a descriptive name. For example, if you wanted to create a `Checkout design guidelines` section, you'd create a folder called `docs/checkout-design-guidelines/`.
 
 2. Create a `_category_.json` file inside each category folder and give it a position it should have in the sidebar as well as a label:
 

@@ -10,6 +10,7 @@ import type { ProductFiltersStore } from '../frontend';
 const mockGetContext = jest.fn();
 const mockGetServerContext = jest.fn();
 const mockGetConfig = jest.fn();
+const mockGetElement = jest.fn();
 const mockReload = jest.fn();
 
 jest.mock( '../../../utils/navigation', () => ( {
@@ -19,6 +20,7 @@ jest.mock( '../../../utils/navigation', () => ( {
 let mockRegisteredStore: {
 	state: ProductFiltersStore[ 'state' ];
 	actions: ProductFiltersStore[ 'actions' ];
+	callbacks: ProductFiltersStore[ 'callbacks' ];
 } | null = null;
 
 jest.mock(
@@ -27,10 +29,13 @@ jest.mock(
 		getContext: mockGetContext,
 		getServerContext: mockGetServerContext,
 		getConfig: mockGetConfig,
+		getElement: mockGetElement,
+		withSyncEvent: ( callback: unknown ) => callback,
 		store: jest.fn( ( _name, definition ) => {
 			mockRegisteredStore = {
 				state: definition.state,
 				actions: definition.actions,
+				callbacks: definition.callbacks,
 			};
 			return mockRegisteredStore;
 		} ),
@@ -57,11 +62,13 @@ describe( 'product filters interactivity store', () => {
 		mockGetContext.mockReset();
 		mockGetServerContext.mockReset();
 		mockGetConfig.mockReset();
+		mockGetElement.mockReset();
+		mockGetElement.mockReturnValue( { ref: null } );
 		mockReload.mockReset();
 		mockRegisteredStore = null;
 
 		jest.isolateModules( () => {
-			require( '../frontend' );
+			jest.requireActual( '../frontend' );
 		} );
 	} );
 
@@ -122,6 +129,7 @@ describe( 'product filters interactivity store', () => {
 			{
 				value: 'blue',
 				type: 'attribute/color',
+				label: 'blue',
 				activeLabel: 'Color: blue',
 			},
 		] );
@@ -156,6 +164,7 @@ describe( 'product filters interactivity store', () => {
 			{
 				value: 'gray',
 				type: 'attribute/color',
+				label: 'Gray',
 				activeLabel: 'Color: Gray',
 				attributeQueryType: 'or',
 			},
@@ -169,6 +178,44 @@ describe( 'product filters interactivity store', () => {
 
 		expect( context.activeFilters ).toEqual( [] );
 		expect( mockRegisteredStore.state.params ).toEqual( {} );
+	} );
+
+	it( 'retains unavailable selections and labels from existing filter payloads', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+		mockGetContext.mockReturnValue( {
+			filterType: 'attribute/color',
+			activeFilters: [
+				{
+					type: 'attribute/color',
+					value: 'blue',
+					activeLabel: 'Color: Blue',
+				},
+				{
+					type: 'attribute/color',
+					value: 'yellow',
+					label: 'Yellow',
+					activeLabel: 'Color: Yellow',
+				},
+				{
+					type: 'status',
+					value: 'instock',
+					label: 'In stock',
+					activeLabel: 'Availability: In stock',
+				},
+			],
+		} );
+		mockGetServerContext.mockReturnValue( {
+			items: [
+				{ type: 'attribute/color', value: 'blue', label: 'Blue' },
+			],
+		} );
+		expect(
+			mockRegisteredStore.state.selectedItems.map(
+				( item ) => item.label
+			)
+		).toEqual( [ 'Blue', 'Yellow' ] );
 	} );
 
 	it( 'returns no selectable items when server context items are not an array', () => {
@@ -204,6 +251,54 @@ describe( 'product filters interactivity store', () => {
 			currentTarget: wrapper,
 		} as unknown as MouseEvent );
 		expect( context.isOverlayOpened ).toBe( false );
+	} );
+
+	it( 'focuses the dialog after the overlay is shown', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+
+		const root = document.createElement( 'div' );
+		const openButton = document.createElement( 'button' );
+		const dialog = document.createElement( 'div' );
+		const closeButton = document.createElement( 'button' );
+		Object.defineProperty( closeButton, 'offsetParent', {
+			get: () => document.body,
+		} );
+		dialog.append( closeButton );
+		root.append( openButton, dialog );
+		document.body.append( root );
+
+		const context = { isOverlayOpened: false };
+		mockGetContext.mockReturnValue( context );
+		mockGetElement.mockReturnValue( { ref: openButton } );
+
+		let frame: ( ( time: number ) => void ) | undefined;
+		const requestAnimationFrameSpy = jest
+			.spyOn( window, 'requestAnimationFrame' )
+			.mockImplementation( ( callback ) => {
+				frame = callback;
+				return 1;
+			} );
+
+		try {
+			mockRegisteredStore.actions.openOverlay();
+			mockGetElement.mockReturnValue( { ref: dialog } );
+			mockRegisteredStore.callbacks.focusOverlay();
+
+			expect( context.isOverlayOpened ).toBe( true );
+			expect( root.ownerDocument.activeElement ).not.toBe( closeButton );
+
+			frame?.( 0 );
+
+			expect( root.ownerDocument.activeElement ).toBe( closeButton );
+
+			mockRegisteredStore.actions.closeOverlay();
+			expect( root.ownerDocument.activeElement ).toBe( openButton );
+		} finally {
+			root.remove();
+			requestAnimationFrameSpy.mockRestore();
+		}
 	} );
 
 	it( 'does not add child-owned index metadata to selectable items', () => {
@@ -247,19 +342,20 @@ describe( 'product filters interactivity store', () => {
 			// producing `%25D4%25B1%25D5%25B8%25D6%2582%25D5%25A4%25D5%25AB%25D5%25B8%25D5%25A3%25D5%25AB%25D6%2580%25D6%2584`
 			// instead of the intended `%D4%B1%D5%B8%D6%82%D5%A4%D5%AB%D5%B8%D5%A3%D5%AB%D6%80%D6%84`.
 			expectedUrl:
-				'https://example.com/shop/?color=%D4%B1%D5%B8%D6%82%D5%A4%D5%AB%D5%B8%D5%A3%D5%AB%D6%80%D6%84',
+				'https://example.com/shop/?existing=1&color=%D4%B1%D5%B8%D6%82%D5%A4%D5%AB%D5%B8%D5%A3%D5%AB%D6%80%D6%84',
 		},
 		{
 			description: 'latin value',
 			label: 'Blue',
 			value: 'blue',
-			expectedUrl: 'https://example.com/shop/?color=blue',
+			expectedUrl: 'https://example.com/shop/?existing=1&color=blue',
 		},
 		{
 			description: 'malformed encoded value',
 			label: 'Invalid',
 			value: '%E0%A4%A',
-			expectedUrl: 'https://example.com/shop/?color=%25E0%25A4%25A',
+			expectedUrl:
+				'https://example.com/shop/?existing=1&color=%25E0%25A4%25A',
 			expectConsoleWarn: true,
 		},
 	].forEach(
@@ -353,6 +449,171 @@ describe( 'product filters interactivity store', () => {
 			} );
 		}
 	);
+
+	it.each( [ 0, 17 ] )(
+		'scopes navigation and clearing to collection %i',
+		( queryId ) => {
+			if ( ! mockRegisteredStore ) {
+				throw new Error( 'Product filters store was not registered.' );
+			}
+			window.history.replaceState(
+				{},
+				'',
+				`https://example.com/shop/?min_price=5&wcp-${ queryId }-min_price=10&wcp-${ queryId }-maker=old&wcp-28-min_price=60&query-${ queryId }-page=3&query-28-page=2&campaign=spring`
+			);
+			const context = {
+				queryId,
+				params: { min_price: '10', maker: 'old' },
+				activeFilters: [
+					{
+						type: 'taxonomy/product_brand',
+						value: 'acme',
+						activeLabel: 'Acme',
+					},
+				],
+				forcePageReload: true,
+			};
+			mockGetContext.mockReturnValue( context );
+			mockGetServerContext.mockReturnValue( context );
+			mockGetConfig.mockReturnValue( {
+				canonicalUrl: 'https://example.com/shop/',
+				filterParamKeys: [ 'min_price', 'maker' ],
+				taxonomyParamsMap: { product_brand: 'maker' },
+			} );
+
+			expect( mockRegisteredStore.state.params ).toEqual( {
+				maker: 'acme',
+			} );
+			mockRegisteredStore.actions.navigate().next();
+			expect( mockReload ).toHaveBeenLastCalledWith(
+				`https://example.com/shop/?min_price=5&wcp-28-min_price=60&query-28-page=2&campaign=spring&wcp-${ queryId }-maker=acme`
+			);
+
+			context.activeFilters = [];
+			mockRegisteredStore.actions.navigate().next();
+			expect( mockReload ).toHaveBeenLastCalledWith(
+				'https://example.com/shop/?min_price=5&wcp-28-min_price=60&query-28-page=2&campaign=spring'
+			);
+		}
+	);
+
+	it.each( [ 'completion', 'failure', 'history', 'other navigation' ] )(
+		'preserves overlapping changes and resets pending state on %s',
+		( finish ) => {
+			if ( ! mockRegisteredStore ) {
+				throw new Error( 'Product filters store was not registered.' );
+			}
+			const { actions } = mockRegisteredStore;
+			window.history.replaceState(
+				{},
+				'',
+				'https://example.com/shop/?query-0-page=2&query-28-page=3'
+			);
+			mockGetConfig.mockReturnValue( {
+				filterParamKeys: [ 'categories' ],
+				taxonomyParamsMap: { product_cat: 'categories' },
+			} );
+			const routerNavigate = jest.fn();
+			const router = {
+				actions: { navigate: routerNavigate },
+			} as unknown as typeof import( '@wordpress/interactivity-router' );
+			const navigate = ( queryId: number, value: string ) => {
+				const context = {
+					queryId,
+					params: {},
+					activeFilters: value
+						? [ { type: 'taxonomy/product_cat', value } ]
+						: [],
+				};
+				mockGetContext.mockReturnValue( context );
+				mockGetServerContext.mockReturnValue( context );
+				const iterator = actions.navigate();
+				iterator.next();
+				iterator.next( router );
+				return iterator;
+			};
+
+			const first = navigate( 0, 'shirts' );
+			const second = navigate( 28, 'hats' );
+			expect( routerNavigate ).toHaveBeenLastCalledWith(
+				'https://example.com/shop/?wcp-0-categories=shirts&wcp-28-categories=hats'
+			);
+			first.next();
+			const clear = navigate( 0, '' );
+			expect( routerNavigate ).toHaveBeenLastCalledWith(
+				'https://example.com/shop/?wcp-28-categories=hats'
+			);
+			second.next();
+			let error;
+			try {
+				if ( finish === 'failure' ) {
+					clear.throw( new Error( 'Navigation failed' ) );
+				}
+			} catch ( caught ) {
+				error = caught;
+			}
+			expect( error ).toEqual(
+				finish === 'failure'
+					? new Error( 'Navigation failed' )
+					: undefined
+			);
+			if ( finish === 'history' ) {
+				window.dispatchEvent( new PopStateEvent( 'popstate' ) );
+			} else if ( finish === 'other navigation' ) {
+				window.history.replaceState( {}, '', '/shop/?campaign=summer' );
+			} else {
+				clear.next();
+			}
+			const next = navigate( 0, 'boots' );
+			expect( routerNavigate ).toHaveBeenLastCalledWith(
+				finish === 'other navigation'
+					? 'https://example.com/shop/?campaign=summer&wcp-0-categories=boots'
+					: 'https://example.com/shop/?query-28-page=3&wcp-0-categories=boots'
+			);
+			next.next();
+		}
+	);
+
+	it( 'does not restore cleared local parameters from the global canonical URL', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+		window.history.replaceState( {}, '', '/shop/?wcp-0-categories=shirts' );
+		mockGetConfig.mockReturnValue( {
+			canonicalUrl: 'https://example.com/shop/?wcp-0-categories=shirts',
+			filterParamKeys: [ 'categories' ],
+			taxonomyParamsMap: { product_cat: 'categories' },
+		} );
+		mockGetContext.mockReturnValue( { activeFilters: [] } );
+		mockGetServerContext.mockReturnValue( { queryId: 0, params: {} } );
+		const local = mockRegisteredStore.actions.navigate();
+		local.next();
+		mockGetServerContext.mockReturnValue( { params: {} } );
+		mockGetContext.mockReturnValue( {
+			activeFilters: [ { type: 'taxonomy/product_cat', value: 'hats' } ],
+		} );
+		const global = mockRegisteredStore.actions.navigate();
+		global.next();
+		const navigate = jest.fn();
+		const router = {
+			actions: { navigate },
+		} as unknown as typeof import( '@wordpress/interactivity-router' );
+		global.next( router );
+		local.next( router );
+		expect( navigate.mock.calls ).toEqual( [
+			[ 'https://example.com/shop/?categories=hats' ],
+		] );
+		window.history.replaceState( {}, '', '/shop/?categories=hats' );
+		global.next();
+		mockGetContext.mockReturnValue( { activeFilters: [] } );
+		const clear = mockRegisteredStore.actions.navigate();
+		clear.next();
+		clear.next( router );
+		expect( navigate ).toHaveBeenLastCalledWith(
+			'https://example.com/shop/'
+		);
+		clear.next();
+	} );
 
 	it( 'triggers a full-page reload instead of router when forcePageReload is true', () => {
 		if ( ! mockRegisteredStore ) {

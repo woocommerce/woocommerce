@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Keep order attribution cookies small to prevent 400 errors. Session entry is now a page path, referrers drop their query, and very long UTM values are shortened.

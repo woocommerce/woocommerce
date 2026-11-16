@@ -18,6 +18,10 @@ import type {
 	PostTemplateLayout,
 	PostTemplateLayoutTypes,
 } from './types';
+import {
+	PRODUCT_TITLE_VARIATION_NAME,
+	PRODUCT_SUMMARY_VARIATION_NAME,
+} from '../product-elements-blocks/variations/constants';
 import { DEFAULT_ATTRIBUTES } from '../product-collection/constants';
 import {
 	LayoutOptions,
@@ -80,8 +84,7 @@ const transformPostTitle: TransformBlock = ( block, innerBlocks ) => {
 	return createBlock(
 		'core/post-title',
 		{
-			__woocommerceNamespace:
-				'woocommerce/product-collection/product-title',
+			__woocommerceNamespace: PRODUCT_TITLE_VARIATION_NAME,
 			...restAttributes,
 		},
 		innerBlocks
@@ -93,8 +96,7 @@ const transformPostSummary: TransformBlock = ( block, innerBlocks ) => {
 	return createBlock(
 		'core/post-excerpt',
 		{
-			__woocommerceNamespace:
-				'woocommerce/product-collection/product-summary',
+			__woocommerceNamespace: PRODUCT_SUMMARY_VARIATION_NAME,
 			...restAttributes,
 		},
 		innerBlocks

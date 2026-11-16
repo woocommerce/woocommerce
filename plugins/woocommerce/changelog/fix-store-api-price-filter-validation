@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reject invalid minimum and maximum price filters instead of returning a server error.

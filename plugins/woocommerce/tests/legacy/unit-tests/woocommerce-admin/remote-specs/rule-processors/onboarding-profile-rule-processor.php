@@ -31,14 +31,6 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_OnboardingProfileRuleProcessor e
 	}
 
 	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		update_option( OnboardingProfile::DATA_OPTION, array() );
-	}
-
-	/**
 	 * Tests that the processor returns false if onboarding profile is empty.
 	 *
 	 * @group fast

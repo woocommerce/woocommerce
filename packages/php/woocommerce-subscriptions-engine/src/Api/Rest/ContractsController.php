@@ -95,7 +95,7 @@ final class ContractsController extends WP_REST_Controller {
 			array(
 				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the contract.', 'woocommerce-subscriptions-engine' ),
+						'description' => __( 'Unique identifier for the contract.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
 				),
@@ -117,7 +117,7 @@ final class ContractsController extends WP_REST_Controller {
 			array(
 				'args' => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the contract.', 'woocommerce-subscriptions-engine' ),
+						'description' => __( 'Unique identifier for the contract.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
 				),
@@ -132,17 +132,17 @@ final class ContractsController extends WP_REST_Controller {
 					'permission_callback' => array( $this, 'run_action_permissions_check' ),
 					'args'                => array(
 						'action'         => array(
-							'description' => __( 'Action to run.', 'woocommerce-subscriptions-engine' ),
+							'description' => __( 'Action to run.', 'woocommerce' ),
 							'type'        => 'string',
 							'required'    => true,
 						),
 						'extension_slug' => array(
-							'description' => __( 'Slug of the extension that owns the contract and registered the action.', 'woocommerce-subscriptions-engine' ),
+							'description' => __( 'Slug of the extension that owns the contract and registered the action.', 'woocommerce' ),
 							'type'        => 'string',
 							'required'    => true,
 						),
 						'action_args'    => array(
-							'description' => __( 'Arguments for the action, as its schema describes them.', 'woocommerce-subscriptions-engine' ),
+							'description' => __( 'Arguments for the action, as its schema describes them.', 'woocommerce' ),
 							'type'        => 'object',
 							'default'     => array(),
 						),
@@ -241,7 +241,7 @@ final class ContractsController extends WP_REST_Controller {
 			if ( ! ContractActionRegistry::is_available( $definition, $contract ) ) {
 				return new WP_Error(
 					'woocommerce_subscriptions_engine_action_not_available',
-					__( 'This action is not available for the contract.', 'woocommerce-subscriptions-engine' ),
+					__( 'This action is not available for the contract.', 'woocommerce' ),
 					array( 'status' => 409 )
 				);
 			}
@@ -346,29 +346,29 @@ final class ContractsController extends WP_REST_Controller {
 		}
 
 		$properties = array(
-			'id'                   => array( 'integer', __( 'Unique identifier for the contract.', 'woocommerce-subscriptions-engine' ) ),
-			'extension_slug'       => array( array( 'string', 'null' ), __( 'Slug of the extension that owns the contract.', 'woocommerce-subscriptions-engine' ) ),
-			'status'               => array( 'string', __( 'Contract status slug.', 'woocommerce-subscriptions-engine' ) ),
-			'customer_id'          => array( array( 'integer', 'null' ), __( 'Customer user ID.', 'woocommerce-subscriptions-engine' ) ),
-			'currency'             => array( array( 'string', 'null' ), __( 'Currency code.', 'woocommerce-subscriptions-engine' ) ),
-			'selling_plan_id'      => array( array( 'integer', 'null' ), __( 'Plan ID.', 'woocommerce-subscriptions-engine' ) ),
-			'origin_order_id'      => array( array( 'integer', 'null' ), __( 'ID of the order the contract started from.', 'woocommerce-subscriptions-engine' ) ),
-			'payment_method'       => array( array( 'string', 'null' ), __( 'Payment gateway ID.', 'woocommerce-subscriptions-engine' ) ),
-			'payment_method_title' => array( array( 'string', 'null' ), __( 'Payment method title.', 'woocommerce-subscriptions-engine' ) ),
-			'payment_token_id'     => array( array( 'integer', 'null' ), __( 'Payment token ID.', 'woocommerce-subscriptions-engine' ) ),
-			'start_gmt'            => array( array( 'string', 'null' ), __( 'Start date, as GMT.', 'woocommerce-subscriptions-engine' ) ),
-			'next_payment_gmt'     => array( array( 'string', 'null' ), __( 'Next-due moment, as GMT.', 'woocommerce-subscriptions-engine' ) ),
-			'last_payment_gmt'     => array( array( 'string', 'null' ), __( 'Last payment date, as GMT.', 'woocommerce-subscriptions-engine' ) ),
-			'last_attempt_gmt'     => array( array( 'string', 'null' ), __( 'Last payment attempt date, as GMT.', 'woocommerce-subscriptions-engine' ) ),
-			'trial_end_gmt'        => array( array( 'string', 'null' ), __( 'Trial end date, as GMT.', 'woocommerce-subscriptions-engine' ) ),
-			'end_gmt'              => array( array( 'string', 'null' ), __( 'End date, as GMT.', 'woocommerce-subscriptions-engine' ) ),
-			'schedule_source'      => array( 'string', __( 'Who keeps the payment schedule.', 'woocommerce-subscriptions-engine' ) ),
-			'billing_total'        => array( 'string', __( 'Recurring total.', 'woocommerce-subscriptions-engine' ) ),
-			'discount_total'       => array( 'string', __( 'Recurring discount total.', 'woocommerce-subscriptions-engine' ) ),
-			'shipping_total'       => array( 'string', __( 'Recurring shipping total.', 'woocommerce-subscriptions-engine' ) ),
-			'tax_total'            => array( 'string', __( 'Recurring tax total.', 'woocommerce-subscriptions-engine' ) ),
-			'items'                => array( 'array', __( 'Line items.', 'woocommerce-subscriptions-engine' ) ),
-			'addresses'            => array( 'object', __( 'Billing and shipping addresses.', 'woocommerce-subscriptions-engine' ) ),
+			'id'                   => array( 'integer', __( 'Unique identifier for the contract.', 'woocommerce' ) ),
+			'extension_slug'       => array( array( 'string', 'null' ), __( 'Slug of the extension that owns the contract.', 'woocommerce' ) ),
+			'status'               => array( 'string', __( 'Contract status slug.', 'woocommerce' ) ),
+			'customer_id'          => array( array( 'integer', 'null' ), __( 'Customer user ID.', 'woocommerce' ) ),
+			'currency'             => array( array( 'string', 'null' ), __( 'Currency code.', 'woocommerce' ) ),
+			'selling_plan_id'      => array( array( 'integer', 'null' ), __( 'Plan ID.', 'woocommerce' ) ),
+			'origin_order_id'      => array( array( 'integer', 'null' ), __( 'ID of the order the contract started from.', 'woocommerce' ) ),
+			'payment_method'       => array( array( 'string', 'null' ), __( 'Payment gateway ID.', 'woocommerce' ) ),
+			'payment_method_title' => array( array( 'string', 'null' ), __( 'Payment method title.', 'woocommerce' ) ),
+			'payment_token_id'     => array( array( 'integer', 'null' ), __( 'Payment token ID.', 'woocommerce' ) ),
+			'start_gmt'            => array( array( 'string', 'null' ), __( 'Start date, as GMT.', 'woocommerce' ) ),
+			'next_payment_gmt'     => array( array( 'string', 'null' ), __( 'Next-due moment, as GMT.', 'woocommerce' ) ),
+			'last_payment_gmt'     => array( array( 'string', 'null' ), __( 'Last payment date, as GMT.', 'woocommerce' ) ),
+			'last_attempt_gmt'     => array( array( 'string', 'null' ), __( 'Last payment attempt date, as GMT.', 'woocommerce' ) ),
+			'trial_end_gmt'        => array( array( 'string', 'null' ), __( 'Trial end date, as GMT.', 'woocommerce' ) ),
+			'end_gmt'              => array( array( 'string', 'null' ), __( 'End date, as GMT.', 'woocommerce' ) ),
+			'schedule_source'      => array( 'string', __( 'Who keeps the payment schedule.', 'woocommerce' ) ),
+			'billing_total'        => array( 'string', __( 'Recurring total.', 'woocommerce' ) ),
+			'discount_total'       => array( 'string', __( 'Recurring discount total.', 'woocommerce' ) ),
+			'shipping_total'       => array( 'string', __( 'Recurring shipping total.', 'woocommerce' ) ),
+			'tax_total'            => array( 'string', __( 'Recurring tax total.', 'woocommerce' ) ),
+			'items'                => array( 'array', __( 'Line items.', 'woocommerce' ) ),
+			'addresses'            => array( 'object', __( 'Billing and shipping addresses.', 'woocommerce' ) ),
 		);
 
 		$schema_properties = array();
@@ -461,7 +461,7 @@ final class ContractsController extends WP_REST_Controller {
 	private function get_not_found_error(): WP_Error {
 		return new WP_Error(
 			'woocommerce_subscriptions_engine_contract_not_found',
-			__( 'Contract not found.', 'woocommerce-subscriptions-engine' ),
+			__( 'Contract not found.', 'woocommerce' ),
 			array( 'status' => 404 )
 		);
 	}
@@ -553,7 +553,7 @@ final class ContractsController extends WP_REST_Controller {
 
 		return new WP_Error(
 			'woocommerce_subscriptions_engine_action_failed',
-			__( 'The action could not be completed.', 'woocommerce-subscriptions-engine' ),
+			__( 'The action could not be completed.', 'woocommerce' ),
 			array( 'status' => 500 )
 		);
 	}

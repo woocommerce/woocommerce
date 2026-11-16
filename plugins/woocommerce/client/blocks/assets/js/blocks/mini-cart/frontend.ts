@@ -25,12 +25,13 @@ import {
  * Internal dependencies
  */
 import type { CartItem, Currency } from '@woocommerce/types';
+import { getFocusableElements } from '../../utils/get-focusable-elements';
 import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
 import {
-	getEntryFieldRaw,
 	isItemDataEntryVisible,
 	isLastVisibleEntry,
 	buildCartItemDataAttr,
+	renderEntryFieldHTML,
 } from './utils/item-data';
 import type { ItemData, CartItemDataAttr } from './utils/item-data';
 
@@ -151,23 +152,6 @@ const trimWords = ( html: string, maxWords = 15 ): string => {
 	}
 	return words.slice( 0, maxWords ).join( ' ' ) + '…';
 };
-
-const focusableSelectors = `
-	a[href],
-	input:not([disabled]):not([type="hidden"]):not([aria-hidden]),
-	select:not([disabled]):not([aria-hidden]),
-	textarea:not([disabled]):not([aria-hidden]),
-	button:not([disabled]):not([aria-hidden]),
-	[contenteditable],
-	[tabindex]:not([tabindex^="-"])
-`;
-
-const getFocusableElements = ( container: HTMLElement | null ) =>
-	container
-		? Array.from(
-				container.querySelectorAll< HTMLElement >( focusableSelectors )
-			).filter( ( el ) => el.offsetParent !== null )
-		: [];
 
 const { state: woocommerceState, actions } = store< WooCommerce >(
 	'woocommerce',
@@ -453,14 +437,6 @@ function resolveDataItemAttr(): ItemData | undefined {
 	} >();
 
 	return itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
-}
-
-/**
- * Returns the raw API value for an item_data field. Used by both innerHTML
- * callbacks and the cartItemDataAttr getter.
- */
-function getItemDataRaw( field: 'name' | 'value' ): string {
-	return getEntryFieldRaw( resolveDataItemAttr(), field );
 }
 
 const { state: cartItemState } = store(
@@ -976,18 +952,22 @@ const { state: cartItemState } = store(
 
 			itemDataNameInnerHTML() {
 				const { ref } = getElement();
-				const raw = getItemDataRaw( 'name' );
-				if ( ref && raw ) {
-					ref.innerHTML = trimWords( raw + ':' );
-				}
+				renderEntryFieldHTML(
+					ref,
+					resolveDataItemAttr(),
+					'name',
+					trimWords
+				);
 			},
 
 			itemDataValueInnerHTML() {
 				const { ref } = getElement();
-				const raw = getItemDataRaw( 'value' );
-				if ( ref && raw ) {
-					ref.innerHTML = trimWords( raw );
-				}
+				renderEntryFieldHTML(
+					ref,
+					resolveDataItemAttr(),
+					'value',
+					trimWords
+				);
 			},
 
 			filterCartItemClass() {

@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use WP_Theme_JSON_Data;
 use WP_UnitTestCase;
 
@@ -31,7 +32,6 @@ class BreadcrumbsTest extends WP_UnitTestCase {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'wp_theme_json_data_user' );
 		switch_theme( $this->original_theme );
 		parent::tearDown();
 	}
@@ -68,6 +68,7 @@ class BreadcrumbsTest extends WP_UnitTestCase {
 				return new WP_Theme_JSON_Data( $data, 'user' );
 			}
 		);
+		StyleAttributesUtils::reset_global_styles_cache();
 	}
 
 	/**

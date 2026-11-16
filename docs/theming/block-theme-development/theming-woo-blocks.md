@@ -1,18 +1,14 @@
 ---
-post_title: Theming for Woo blocks
-sidebar_label: Theming for Woo blocks
-
+post_title: WooCommerce block theme development
 ---
 
-# Theming for Woo blocks
+# WooCommerce block theme development
 
----
+:::info
+We're assuming you have some previous knowledge about block theme development and some WordPress concepts. If you are completely new to block theme development, please check [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/) to learn about block theme development, and explore the [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/) tool when you're ready to create a new theme.
 
-**Note:** We're assuming you have some previous knowledge about block theme development and some WordPress concepts. If you are completely new to block theme development, please check [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/)
-to learn about block theme development, and explore
-the [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/) tool when you're ready to create a new theme.
-
----
+For a WooCommerce-specific starting point, [Purple](https://wordpress.org/themes/purple/) is a starter Block theme available in the WordPress.org theme directory. You can also [follow Purple's development in the WooCommerce monorepo](https://github.com/woocommerce/woocommerce/tree/trunk/themes/purple).
+:::
 
 ## General concepts
 
@@ -25,16 +21,19 @@ WooCommerce comes with several [block templates](https://github.com/woocommerce/
     - Products by Category (`taxonomy-product_cat.html`)
     - Products by Tag (`taxonomy-product_tag.html`)
     - Products by Attribute (`taxonomy-product_attribute.html`)
+    - Products by Brand (`taxonomy-product_brand.html`)
 - Product Search Results (`product-search-results.html`)
-- Page: Coming soon (`page-coming-soon.html`)
+- Page: Coming soon (`coming-soon.html`)
 - Page: Cart (`page-cart.html`)
 - Page: Checkout (`page-checkout.html`)
 - Order Confirmation (`order-confirmation.html`)
 
+See the [WooCommerce block template hierarchy](/docs/theming/block-theme-development/template-hierarchy/) for the complete template list, precedence rules, and fallback chains.
+
 Block themes can customize those templates in the following ways:
 
 - It's possible to override the templates by creating a file with the same file name under the `/templates` folder. For example, if a block theme contains a `wp-content/themes/yourtheme/templates/single-product.html` template, it will take priority over the WooCommerce default Single Product template.
-- Products by Category, Products by Tag and Products by Attribute templates fall back to the Product Catalog template. In other words, if a theme provides an `archive-product.html` template but doesn't provide a `taxonomy-product_cat.html` template, the Products by Category template will use the `archive-product.html` template. Same for the Products by Tag and Products by Attribute templates.
+- Products by Category, Products by Tag, Products by Brand, and Products by Attribute templates fall back to the Product Catalog template. In other words, if a theme provides an `archive-product.html` template but doesn't provide a `taxonomy-product_cat.html` template, the Products by Category template will use the `archive-product.html` template. Products by Attribute only use the generic `taxonomy-product_attribute.html` template when the theme provides it or a merchant has customized it in the Site Editor; otherwise, they use `archive-product.html`.
 - It's possible to create templates for specific products and taxonomies. For example, if the theme provides a template with file name of `single-product-cap.html`, that template will be used when rendering the product with slug `cap`. Similarly, themes can provide specific taxonomy templates: `taxonomy-product_cat-clothing.html` would be used in the product category with slug `clothing`.
 - Always keep in mind users can make modifications to the templates provided by the theme via the Site Editor.
 
@@ -118,3 +117,5 @@ For example, let's imagine you are building a theme and would like to customize 
 | ![Product Collection block showing the Product Price block with default styles](https://github.com/woocommerce/woocommerce/assets/3616980/fbc11b83-f47b-4b25-bdeb-df798b251cce) | ![Product Collection block showing the Product Price styled with background and text colors and italic and bold typography](https://github.com/woocommerce/woocommerce/assets/3616980/c9730445-b9df-4e96-8204-a10896ac2c5a) |
 
 You can find more [documentation on global styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/) in developer.wordpress.org. You can also find the [list of WooCommerce blocks and their names in the docs](/docs/block-development/reference/block-references).
+
+For WooCommerce-specific `theme.json` examples, block style variations, and Site Editor guidance, see [Global styles for WooCommerce](/docs/theming/block-theme-development/global-styles/).

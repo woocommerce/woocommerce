@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Imported sale end dates without a time now run to the end of that day, matching the product editor.

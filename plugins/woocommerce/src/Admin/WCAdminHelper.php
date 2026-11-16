@@ -147,7 +147,8 @@ class WCAdminHelper {
 		 * @param array $store_pages The store pages array. The keys are the page slugs and the values are the page IDs.
 		 */
 		$store_pages = apply_filters( 'woocommerce_store_pages', $store_pages );
-		_prime_post_caches( array_values( array_filter( $store_pages ) ), false, false );
+		$prime_ids   = array_values( array_filter( $store_pages, static fn( $page_id ) => $page_id > 0 ) );
+		_prime_post_caches( $prime_ids, false, false );
 
 		foreach ( $store_pages as $page_slug => $page_id ) {
 			if ( $page_id > 0 && is_page( $page_id ) ) {

@@ -90,10 +90,6 @@ class BlockPatterns {
 	 * @return void
 	 */
 	public function register_block_patterns() {
-		if ( ! class_exists( 'WP_Block_Patterns_Registry' ) ) {
-			return;
-		}
-
 		foreach ( $this->get_block_patterns() as $pattern ) {
 			// The pattern list can come from a stale or malformed site transient, so make sure the source is a
 			// usable string before dereferencing it, to avoid a PHP warning when building the path.

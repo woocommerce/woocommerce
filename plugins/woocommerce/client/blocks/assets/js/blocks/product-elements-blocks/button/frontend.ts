@@ -28,6 +28,8 @@ interface Context {
 	animationStatus: AnimationStatus;
 	hasPressedButton: boolean;
 	inTheCartText: string;
+	addToCartAriaLabel: string;
+	inTheCartAriaLabel: string;
 }
 
 enum AnimationStatus {
@@ -137,6 +139,15 @@ const productButtonStore = {
 			}
 
 			return addToCartText;
+		},
+		get addToCartAriaLabel(): string {
+			const { addToCartText, addToCartAriaLabel, inTheCartAriaLabel } =
+				getContext< Context >();
+			const text = state.addToCartText;
+
+			return text === addToCartText
+				? addToCartAriaLabel
+				: inTheCartAriaLabel.replace( '###', text );
 		},
 		get displayViewCart(): boolean {
 			const { displayViewCart } = getContext< Context >();

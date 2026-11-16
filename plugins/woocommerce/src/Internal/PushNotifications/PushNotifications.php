@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\DriverAvailabilityService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\StaleTokenCleanupService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\UserDataCleanupService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
@@ -34,6 +35,14 @@ class PushNotifications {
 	 * Feature name for the push notifications feature.
 	 */
 	const FEATURE_NAME = 'push_notifications';
+
+	/**
+	 * Option holding the Unix timestamp of when push notifications were first
+	 * recorded as enabled on this site.
+	 *
+	 * @since 11.4.0
+	 */
+	const ENABLED_AT_OPTION = 'woocommerce_push_notifications_enabled_at';
 
 	/**
 	 * Roles that can receive push notifications.
@@ -82,6 +91,10 @@ class PushNotifications {
 		// to start sending against.
 		wc_get_container()->get( UserDataCleanupService::class )->register();
 
+		// Also registered ahead of the enablement check: it unschedules the
+		// cleanup while the feature is off, and tracks how long it was off.
+		wc_get_container()->get( StaleTokenCleanupService::class )->register();
+
 		// Registered ahead of the enablement check so the token list can still be
 		// read on a store that has been switched off. The controller registers the
 		// write routes only while the module is enabled, like everything below.
@@ -93,8 +106,15 @@ class PushNotifications {
 		wc_get_container()->get( StepLogRestController::class )->register();
 
 		if ( ! $this->should_be_enabled() ) {
+			// Keep marking orders that reach a notifiable status while push
+			// notifications are off, so turning them back on does not announce
+			// those orders as new.
+			( new NewOrderNotificationTrigger() )->register_while_disabled();
+
 			return;
 		}
+
+		$this->record_enabled_at();
 
 		$this->register_post_types();
 
@@ -159,5 +179,33 @@ class PushNotifications {
 		$this->enabled = wc_get_container()->get( DriverAvailabilityService::class )->is_remote_proxy_available();
 
 		return $this->enabled;
+	}
+
+	/**
+	 * Returns when push notifications were first recorded as enabled on this site.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return int|null Unix timestamp, or null when it has not been recorded.
+	 */
+	public function get_enabled_at(): ?int {
+		$enabled_at = (int) get_option( self::ENABLED_AT_OPTION, 0 );
+
+		return $enabled_at > 0 ? $enabled_at : null;
+	}
+
+	/**
+	 * Records the first time push notifications are enabled. Never updated
+	 * afterwards, so switching the module off and on keeps the original date.
+	 *
+	 * Autoloaded because the order trigger reads it whenever an order moves
+	 * into a notifiable status.
+	 *
+	 * @return void
+	 */
+	private function record_enabled_at(): void {
+		if ( false === get_option( self::ENABLED_AT_OPTION ) ) {
+			add_option( self::ENABLED_AT_OPTION, time(), '', true );
+		}
 	}
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Ability errors for extension fields now say what is wrong and what to do, for every bad field in one message: an unregistered namespace, an unknown field with the writable fields listed, a read-only field, or a bad value.

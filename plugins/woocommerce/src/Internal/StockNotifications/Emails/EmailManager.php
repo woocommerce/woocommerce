@@ -277,7 +277,7 @@ class EmailManager {
 	 * Send a stock notification email.
 	 *
 	 * @param Notification $notification The notification object.
-	 * @return void
+	 * @return bool Whether the email was sent.
 	 */
 	public function send_stock_notification_email( Notification $notification ) {
 		$emails = WC()->mailer()->get_emails();
@@ -285,10 +285,62 @@ class EmailManager {
 
 		if ( ! $email instanceof CustomerStockNotificationEmail ) {
 			$this->log_missing_email( 'WC_Email_Customer_Stock_Notification', $notification );
-			return;
+			return false;
 		}
 
-		$email->trigger( $notification );
+		return $email->trigger( $notification );
+	}
+
+	/**
+	 * Deliver a stock notification, letting an integration take over delivery.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param Notification $notification The notification object.
+	 * @return bool Whether the notification was delivered.
+	 */
+	public function deliver_stock_notification( Notification $notification ): bool {
+		$product = $notification->get_product();
+		if ( ! $product instanceof \WC_Product ) {
+			return false;
+		}
+
+		/**
+		 * Filter: woocommerce_customer_stock_notification_pre_send
+		 *
+		 * @since 11.4.0
+		 *
+		 * Take over delivery of a stock notification instead of sending the Core email.
+		 *
+		 * @param null|bool|\WP_Error $handled      Null to let Core send its own email. True when the notification was delivered
+		 *                                          externally and should be marked sent. False or a WP_Error when delivery failed.
+		 * @param Notification        $notification The notification being delivered.
+		 * @param \WC_Product         $product      The product the notification is about.
+		 * @return null|bool|\WP_Error
+		 */
+		$handled = apply_filters( 'woocommerce_customer_stock_notification_pre_send', null, $notification, $product );
+
+		if ( null === $handled ) {
+			return $this->send_stock_notification_email( $notification );
+		}
+
+		if ( true === $handled ) {
+			return true;
+		}
+
+		$reason = is_wp_error( $handled )
+			? $handled->get_error_message()
+			: sprintf( 'the pre-send filter returned %s instead of true, false, null or WP_Error', false === $handled ? 'false' : gettype( $handled ) );
+
+		wc_get_logger()->warning(
+			sprintf( 'Delivery of notification %d failed: %s', $notification->get_id(), $reason ),
+			array(
+				'source'          => 'wc-customer-stock-notifications',
+				'notification_id' => $notification->get_id(),
+			)
+		);
+
+		return false;
 	}
 
 	/**

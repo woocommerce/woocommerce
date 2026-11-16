@@ -49,7 +49,9 @@ const pageGroups = [
 			{
 				name: 'Add new product',
 				url: 'wp-admin/post-new.php?post_type=product',
-				expectedCount: 151,
+				// WP 7.2 disables admin script concatenation by default.
+				// https://github.com/WordPress/wordpress-develop/pull/13090
+				expectedCount: 154,
 			},
 			{
 				name: 'Analytics page',

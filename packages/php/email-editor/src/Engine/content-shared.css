@@ -10,8 +10,19 @@ h2.has-background,
 h3.has-background,
 h4.has-background,
 h5.has-background,
-h6.has-background {
+h6.has-background,
+pre.has-background {
 	padding: 16px 24px;
+}
+
+pre {
+	font-family: 'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace;
+}
+
+/* With a light text weight such as 300, the browser's "bolder" gives 400 and looks like normal text. */
+strong,
+b {
+	font-weight: bold;
 }
 
 /* Specific padding for list elements */
@@ -23,5 +34,9 @@ ol.has-background {
 /* Remove default browser underline from site title link */
 .wp-block-site-title a:not(.wp-element-button) {
 	text-decoration: none !important;
+}
+
+/* Keep link colors from parent blocks off a site title without a link color of its own */
+.wp-block-site-title:not(.has-link-color) a:not(.wp-element-button) {
 	color: inherit;
 }

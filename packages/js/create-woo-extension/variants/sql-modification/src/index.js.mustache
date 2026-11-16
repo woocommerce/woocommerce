@@ -156,8 +156,9 @@ const currencies = {
 /**
  * Update report currency formatting based on selected currency.
  *
- * @param {Object} config - Default currency configuration.
- * @param {Object} query - Query parameters including currency.
+ * @param {Object} config           - Default currency configuration.
+ * @param {Object} query            - Query parameters.
+ * @param {string} [query.currency] - Selected currency code.
  * @return {Object} Updated currency configuration.
  */
 const updateReportCurrencies = ( config, { currency } ) => {

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Return safe debug details for unexpected Store API engine errors.

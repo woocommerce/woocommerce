@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { union } from 'lodash';
-import { Reducer } from 'redux';
 
 /**
  * Internal dependencies
@@ -38,7 +37,10 @@ const updateGroupDataInNewState = (
 	return newState;
 };
 
-const reducer: Reducer< SettingsState, Actions > = ( state = {}, action ) => {
+const reducer = (
+	state: SettingsState = {},
+	action: Actions
+): SettingsState => {
 	const newState = {};
 	switch ( action.type ) {
 		case TYPES.SET_IS_REQUESTING:

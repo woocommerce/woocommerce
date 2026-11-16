@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Location } from 'react-router-dom';
+import { Location } from 'history';
 import { useEffect, useMemo } from '@wordpress/element';
 
 /**

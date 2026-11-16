@@ -18,6 +18,13 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 	use HPOSToggleTrait;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
 	 * The System Under Test.
 	 *
 	 * @var OrdersTableDataStore
@@ -46,9 +53,10 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 
-		$this->setup_cot();
-		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		$this->toggle_cot_feature_and_usage( true );
+		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 		update_option( CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION, 'yes' );
 
 		$container = wc_get_container();
@@ -65,8 +73,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 		$this->clean_up_cot_setup();
 		delete_option( CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION );
 
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
-		remove_all_filters( 'woocommerce_logging_class' );
 		parent::tearDown();
 	}
 
@@ -297,8 +303,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 			}
 		}
 		$this->assertTrue( $found_hpos_source, 'Debug log entries should have source "hpos-data-cache"' );
-
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -344,8 +348,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 		$this->assertInstanceOf( \stdClass::class, $recached[ $order_id ], 'The corrupt entry should be replaced in cache by a valid object.' );
 
 		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS order cache entry' );
-
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -387,8 +389,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 		$this->assertSame( $order_id, (int) $order_data[ $order_id ]->id );
 
 		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS order cache entry' );
-
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -426,8 +426,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 		$this->assertSame( 'custom_value', $reloaded_order->get_meta( 'custom_meta_key' ), 'Meta should be re-read from the database after the corrupt cache entry is discarded.' );
 
 		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS meta cache entry' );
-
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -468,8 +466,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 		$this->assertInstanceOf( WC_Order::class, $reloaded_order, 'The order should load instead of fataling on the corrupt meta elements.' );
 		$this->assertSame( 'custom_value', $reloaded_order->get_meta( 'custom_meta_key' ), 'Meta should be re-read correctly from the database, not the corrupt scalar elements.' );
 		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS meta cache entry' );
-
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -505,8 +501,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 		$this->assertInstanceOf( WC_Order::class, $reloaded_order, 'The order should load instead of using the incomplete cached row.' );
 		$this->assertSame( 'custom_value', $reloaded_order->get_meta( 'custom_meta_key' ), 'The incomplete row should be discarded and the real value re-read from the database.' );
 		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS meta cache entry' );
-
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -547,8 +541,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 		$this->assertArrayHasKey( $order_id, $order_data, 'Order data should still be returned after the cross-bled entry is discarded.' );
 		$this->assertSame( $order_id, (int) $order_data[ $order_id ]->id, 'The mismatched-id entry should be replaced by the correct order read from the database.' );
 		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS order cache entry' );
-
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -598,8 +590,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 		$this->assertTrue( property_exists( $order_data[ $order_id ], 'status' ), 'The truncated entry should be replaced by a complete record read from the database.' );
 		$this->assertSame( $order_id, (int) $order_data[ $order_id ]->id );
 		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS order cache entry' );
-
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -629,8 +619,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 
 		$this->assertSame( array(), $result, 'A non-array meta argument should be treated as empty meta.' );
 		$this->assert_hpos_cache_warning_logged( $fake_logger, 'Discarded malformed meta data' );
-
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -697,8 +685,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 			$this->count_hpos_cache_warnings( $fake_logger, 'Discarded malformed meta data' ),
 			'The corruption warning should fire once and stop once the cache self-heals.'
 		);
-
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -749,8 +735,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 			$order->get_meta( 'custom_meta_key' ),
 			'The incomplete row should be discarded and the real value re-read from the database, not loaded as null.'
 		);
-
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**
@@ -817,9 +801,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 		);
 		$this->assertSame( 'virtual_value', $order->get_meta( '_virtual_meta' ), 'The injected virtual meta should still resolve after a cache hit.' );
 		$this->assertSame( 'custom_value', $order->get_meta( 'custom_meta_key' ), 'The real database meta should be unaffected.' );
-
-		remove_filter( 'woocommerce_data_store_wp_post_read_meta', $read_meta_filter );
-		remove_all_filters( 'woocommerce_logging_class' );
 	}
 
 	/**

@@ -511,7 +511,7 @@ class Controller extends AbstractController {
 		if ( ! is_array( $providers ) ) {
 			_doing_it_wrong(
 				'woocommerce_rest_prepare_fulfillments_providers',
-				esc_html__( 'The filter must return an array of providers.', 'woocommerce' ),
+				esc_html( 'The filter must return an array of providers.' ),
 				'10.5.0'
 			);
 			$providers = array();
@@ -554,7 +554,7 @@ class Controller extends AbstractController {
 		if ( $has_invalid ) {
 			_doing_it_wrong(
 				'woocommerce_rest_prepare_fulfillments_providers',
-				esc_html__( 'Some providers were removed because they are missing required keys (label, icon, value, url).', 'woocommerce' ),
+				esc_html( 'Some providers were removed because they are missing required keys (label, icon, value, url).' ),
 				'10.5.0'
 			);
 		}

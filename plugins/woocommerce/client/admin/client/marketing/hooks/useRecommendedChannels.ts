@@ -10,14 +10,23 @@ import { differenceWith } from 'lodash';
  */
 import { STORE_KEY } from '~/marketing/data-multichannel/constants';
 import type { RecommendedChannel } from '~/marketing/data-multichannel/types';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 type UseRecommendedChannels = {
 	loading: boolean;
 	data?: Array< RecommendedChannel >;
 };
 
+// Comes from PHP because the REST user capabilities report install_plugins
+// for site admins on multisite, even though they can't install plugins.
+const { canInstallPlugins = true } = getAdminSetting( 'marketing', {} );
+
 export const useRecommendedChannels = (): UseRecommendedChannels => {
 	return useSelect( ( select ) => {
+		if ( ! canInstallPlugins ) {
+			return { loading: false, data: [] };
+		}
+
 		const { hasFinishedResolution, getRecommendedChannels } =
 			select( STORE_KEY );
 		const { data, error } = getRecommendedChannels() as {

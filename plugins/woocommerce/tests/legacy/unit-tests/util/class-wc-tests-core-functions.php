@@ -460,8 +460,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( wp_json_encode( $arr ), wc_print_r( $arr, true ) );
 		$this->assertEquals( serialize( $arr ), wc_print_r( $arr, true ) );
 		$this->assertFalse( wc_print_r( $arr, true ) );
-
-		remove_filter( 'woocommerce_print_r_alternatives', array( $this, 'filter_wc_print_r_alternatives' ) );
 	}
 
 	/**
@@ -899,15 +897,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		wc_transaction_query( 'commit', true );
 		$col = $wpdb->get_col( "SElECT option_value FROM {$wpdb->prefix}options WHERE option_name = 'transaction_test'" );
 		$this->assertEquals( '0', $col[0] );
-
-		// The commits above made the row permanent, so the cleanup has to be committed as well.
-		$wpdb->delete(
-			$wpdb->prefix . 'options',
-			array(
-				'option_name' => 'transaction_test',
-			)
-		);
-		wc_transaction_query( 'commit', true );
 	}
 
 	/**

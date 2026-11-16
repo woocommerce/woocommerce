@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Analytics report exports losing each other's progress when running at the same time, which left an export stuck and its download email unsent.

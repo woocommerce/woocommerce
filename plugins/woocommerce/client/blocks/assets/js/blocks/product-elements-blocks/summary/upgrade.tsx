@@ -15,21 +15,22 @@ import {
 	type ComponentType,
 } from '@wordpress/element';
 import { type EditorBlock } from '@woocommerce/types';
-import { VARIATION_NAME as PQ_PRODUCT_SUMMARY_VARIATION_NAME } from '@woocommerce/blocks/product-query/variations/elements/product-summary';
-import { VARIATION_NAME as PC_PRODUCT_SUMMARY_VARIATION_NAME } from '@woocommerce/blocks/product-collection/variations/elements/product-summary';
 import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-downgrade-notice';
+
+/**
+ * Internal dependencies
+ */
+import { PRODUCT_SUMMARY_NAMESPACES } from '../variations/constants';
 
 const CORE_NAME = 'core/post-excerpt';
 
 const isProductSummaryBlockVariation = ( props: BlockInstance ) => {
-	const pqVariation =
-		props.attributes.__woocommerceNamespace ===
-		PQ_PRODUCT_SUMMARY_VARIATION_NAME;
-	const pcVariation =
-		props.attributes.__woocommerceNamespace ===
-		PC_PRODUCT_SUMMARY_VARIATION_NAME;
-
-	return props.name === CORE_NAME && ( pqVariation || pcVariation );
+	return (
+		props.name === CORE_NAME &&
+		PRODUCT_SUMMARY_NAMESPACES.includes(
+			props.attributes.__woocommerceNamespace
+		)
+	);
 };
 
 const UpgradeNotice = ( { clientId }: { clientId: string } ) => {

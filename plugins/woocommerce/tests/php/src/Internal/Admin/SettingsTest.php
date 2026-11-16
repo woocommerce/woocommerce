@@ -23,29 +23,11 @@ class SettingsTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Filter hooks added during a test, as [ tag, callback ] pairs, removed again in tearDown().
-	 *
-	 * @var array[]
-	 */
-	private $added_filters = array();
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = Settings::get_instance();
-	}
-
-	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		foreach ( $this->added_filters as $added_filter ) {
-			remove_filter( $added_filter[0], $added_filter[1] );
-		}
-		$this->added_filters = array();
-		parent::tearDown();
 	}
 
 	/**
@@ -158,7 +140,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_default_order_statuses_filter_all_unknown_falls_back(): void {
 		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( $this, 'return_only_unknown_statuses' ) );
-		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( $this, 'return_only_unknown_statuses' ) );
 
 		$settings = $this->sut->add_settings( array() );
 		$setting  = $this->find_setting( $settings, 'woocommerce_excluded_report_order_statuses' );
@@ -182,7 +163,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_default_order_statuses_filter_invalid_type_falls_back(): void {
 		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', '__return_false' );
-		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', '__return_false' );
 
 		$settings = $this->sut->add_settings( array() );
 		$setting  = $this->find_setting( $settings, 'woocommerce_excluded_report_order_statuses' );
@@ -191,14 +171,12 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Hook the shared filter callback and track it for removal in tearDown().
+	 * Hook the shared filter callback.
 	 *
 	 * @param string $filter Filter tag to hook.
 	 */
 	private function add_default_status_filter( string $filter ): void {
-		$callback = array( $this, 'add_status_to_defaults' );
-		add_filter( $filter, $callback );
-		$this->added_filters[] = array( $filter, $callback );
+		add_filter( $filter, array( $this, 'add_status_to_defaults' ) );
 	}
 
 	/**
@@ -283,7 +261,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 			return array();
 		};
 		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', $empty_filter );
-		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', $empty_filter );
 
 		$settings = $this->sut->add_settings( array() );
 		$setting  = $this->find_setting( $settings, 'woocommerce_excluded_report_order_statuses' );
@@ -320,7 +297,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 			return $types;
 		};
 		add_filter( 'woocommerce_coupon_discount_types', $add_type );
-		$this->added_filters[] = array( 'woocommerce_coupon_discount_types', $add_type );
 		// Coupon types are only injected on wc-admin pages; the base tearDown unsets the current screen.
 		set_current_screen( 'dashboard' );
 		$_GET['page'] = 'wc-admin'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -397,7 +373,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 			return array( 'not-a-real-status' );
 		};
 		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', $callback );
-		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', $callback );
 
 		$setting = $this->find_setting( $this->get_wc_admin_group_settings(), 'woocommerce_excluded_report_order_statuses' );
 		$this->assertSame( array( 'pending', 'cancelled', 'failed' ), $setting['default'], 'The page should fall back to the built-in default.' );
@@ -405,6 +380,25 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$this->save_wc_admin_setting( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'cancelled', 'failed' ) );
 
 		$this->assertSame( array( 'pending', 'cancelled', 'failed' ), get_option( 'woocommerce_excluded_report_order_statuses' ), 'The shown list differs from the runtime default, so it must be stored.' );
+	}
+
+	/**
+	 * @testdox Saving the shown default when a filter adds an undisplayable status to the runtime default deletes the option, so the default filter keeps applying.
+	 */
+	public function test_saving_shown_default_deletes_option_when_runtime_default_is_superset(): void {
+		$callback = function ( $statuses ) {
+			return array_merge( $statuses, array( 'not-a-real-status' ) );
+		};
+		add_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses', $callback );
+		update_option( 'woocommerce_actionable_order_statuses', array( 'processing' ) );
+
+		$setting = $this->find_setting( $this->get_wc_admin_group_settings(), 'woocommerce_actionable_order_statuses' );
+		$this->assertSame( array( 'processing', 'on-hold' ), $setting['default'], 'The page should drop the status it cannot display.' );
+		$this->assertContains( 'not-a-real-status', Settings::get_default_actionable_order_statuses(), 'The runtime default should keep the status the page drops.' );
+
+		$this->save_wc_admin_setting( 'woocommerce_actionable_order_statuses', array( 'processing', 'on-hold' ) );
+
+		$this->assertFalse( get_option( 'woocommerce_actionable_order_statuses' ), 'The shown list is a subset of the runtime default, so it must not be stored.' );
 	}
 
 	/**

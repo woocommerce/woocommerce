@@ -3,7 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * UCP `POST /catalog/product` route.
@@ -47,7 +47,7 @@ class CatalogProduct extends AbstractCatalogRoute {
 	 * @return string
 	 */
 	protected function get_capability(): string {
-		return UcpUtils::CAPABILITY_CATALOG_LOOKUP;
+		return Utils::CAPABILITY_CATALOG_LOOKUP;
 	}
 
 	/**
@@ -84,13 +84,13 @@ class CatalogProduct extends AbstractCatalogRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$id = trim( strval( $request->get_param( 'id' ) ) );
+		$id = trim( strval( Utils::json_param( $request, 'id' ) ) );
 
 		if ( '' === $id ) {
 			return $this->ucp_error( 'VALIDATION_ERROR', __( 'id is required.', 'woocommerce' ), 'recoverable', 400 );
 		}
 
-		$selected = (array) ( $request->get_param( 'selected' ) ?? array() );
+		$selected = (array) ( Utils::json_param( $request, 'selected' ) ?? array() );
 
 		// Checked before the product is loaded: an over-long selection is refused
 		// without paying for the lookup it would have been applied to.

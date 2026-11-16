@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Admin\API;
 defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Jetpack\JetpackConnection;
+use Automattic\WooCommerce\Internal\RestApi\InteractiveSessionCheck;
 use WC_REST_Data_Controller;
 use WP_Error;
 use WP_REST_Request;
@@ -22,6 +23,7 @@ use WP_REST_Response;
  * @extends WC_REST_Data_Controller
  */
 class OnboardingPlugins extends WC_REST_Data_Controller {
+
 	/**
 	 * Endpoint namespace.
 	 *
@@ -108,7 +110,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				array(
 					'methods'             => 'GET',
 					'callback'            => array( $this, 'get_jetpack_authorization_url' ),
-					'permission_callback' => array( $this, 'can_install_plugins' ),
+					'permission_callback' => array( $this, 'check_jetpack_authorization_url_permissions' ),
 					'args'                => array(
 						'redirect_url' => array(
 							'description'       => 'The URL to redirect to after authorization',
@@ -247,6 +249,25 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Permission check for the Jetpack authorization URL endpoint.
+	 *
+	 * Requires an interactive admin session on top of the `install_plugins` capability.
+	 *
+	 * @since 11.2.2
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request WP_REST_Request object.
+	 * @return WP_Error|boolean
+	 */
+	public function check_jetpack_authorization_url_permissions( $request ) {
+		$session = InteractiveSessionCheck::require_interactive_session( $request );
+		if ( is_wp_error( $session ) ) {
+			return $session;
+		}
+
+		return $this->can_install_plugins();
 	}
 
 	/**

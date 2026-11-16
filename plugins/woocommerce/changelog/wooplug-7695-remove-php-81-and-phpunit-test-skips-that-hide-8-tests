@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Remove outdated shims and skips from the test suites.

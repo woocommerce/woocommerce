@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
+import { test as base, expect, ProductTemplate } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -14,11 +14,13 @@ const blockData = {
 		frontend: {},
 		editor: {},
 	},
-	slug: 'single-product',
-	productPage: '/product/hoodie/',
 };
 
-const test = base.extend< { pageObject: ProductGalleryPage } >( {
+const test = base.extend< {
+	pageObject: ProductGalleryPage;
+	sourceProductSlug: string;
+	productTemplate: ProductTemplate;
+} >( {
 	pageObject: async ( { page, editor, frontendUtils }, use ) => {
 		const pageObject = new ProductGalleryPage( {
 			page,
@@ -27,42 +29,23 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 		} );
 		await use( pageObject );
 	},
+	sourceProductSlug: [ 'hoodie', { option: true } ],
+	productTemplate: async (
+		{ createProductTemplate, sourceProductSlug },
+		use
+	) => {
+		await use( await createProductTemplate( sourceProductSlug ) );
+	},
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editor } ) => {
+	test.beforeEach( async ( { admin, editor, productTemplate } ) => {
 		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//${ blockData.slug }`,
+			postId: productTemplate.template.id,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
 		await editor.openDocumentSettingsSidebar();
-	} );
-
-	test( 'Renders Product Gallery Viewer block on the editor and frontend side', async ( {
-		page,
-		editor,
-		pageObject,
-	} ) => {
-		await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-		const viewerBlock = await pageObject.getViewerBlock( {
-			page: 'editor',
-		} );
-
-		await expect( viewerBlock ).toBeVisible();
-
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-
-		await page.goto( blockData.productPage );
-
-		const viewerBlockFrontend = await pageObject.getViewerBlock( {
-			page: 'frontend',
-		} );
-
-		await expect( viewerBlockFrontend ).toBeVisible();
 	} );
 
 	test.describe( 'Zoom while hovering setting', () => {
@@ -78,6 +61,7 @@ test.describe( `${ blockData.name }`, () => {
 			pageObject,
 			editor,
 			page,
+			productTemplate,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await pageObject.toggleZoomWhileHoveringSetting( true );
@@ -85,7 +69,7 @@ test.describe( `${ blockData.name }`, () => {
 				isOnlyCurrentEntityDirty: true,
 			} );
 
-			await page.goto( blockData.productPage );
+			await page.goto( productTemplate.productUrl );
 
 			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
@@ -132,6 +116,7 @@ test.describe( `${ blockData.name }`, () => {
 			pageObject,
 			editor,
 			page,
+			productTemplate,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await pageObject.toggleZoomWhileHoveringSetting( false );
@@ -143,7 +128,7 @@ test.describe( `${ blockData.name }`, () => {
 				isOnlyCurrentEntityDirty: true,
 			} );
 
-			await page.goto( blockData.productPage );
+			await page.goto( productTemplate.productUrl );
 
 			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
@@ -168,6 +153,7 @@ test.describe( `${ blockData.name }`, () => {
 		page,
 		editor,
 		pageObject,
+		productTemplate,
 	} ) => {
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
 		await pageObject.addClassicAddToCartFormBlock();
@@ -181,7 +167,7 @@ test.describe( `${ blockData.name }`, () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( blockData.productPage );
+		await page.goto( productTemplate.productUrl );
 
 		// Initial state: only the parent's featured image is visible.
 		const featuredImageId = await pageObject.getViewerImageId();
@@ -215,6 +201,7 @@ test.describe( `${ blockData.name }`, () => {
 		page,
 		editor,
 		pageObject,
+		productTemplate,
 	} ) => {
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
 		await pageObject.addClassicAddToCartFormBlock();
@@ -223,7 +210,7 @@ test.describe( `${ blockData.name }`, () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( blockData.productPage );
+		await page.goto( productTemplate.productUrl );
 		const featuredImageId = await pageObject.getViewerImageId();
 		expect( featuredImageId ).not.toBeNull();
 		const parentImageIds = await pageObject.getVisibleViewerImageIds();
@@ -298,23 +285,28 @@ test.describe( `${ blockData.name }`, () => {
 
 	test.describe( 'Frontend navigation', () => {
 		test.use( {
+			sourceProductSlug: 'beanie',
 			hasTouch: true,
 			contextOptions: { reducedMotion: 'no-preference' },
 		} );
 
-		test.beforeEach( async ( { pageObject, editor, page } ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+		test.beforeEach(
+			async ( { pageObject, editor, page, productTemplate } ) => {
+				await pageObject.addProductGalleryBlock( {
+					cleanContent: true,
+				} );
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 
-			await page.goto( '/product/beanie/' );
+				await page.goto( productTemplate.productUrl );
 
-			await page.setViewportSize( {
-				height: 667,
-				width: 390, // iPhone 12 Pro
-			} );
-		} );
+				await page.setViewportSize( {
+					height: 667,
+					width: 390, // iPhone 12 Pro
+				} );
+			}
+		);
 
 		test( 'updates thumbnail selection during a native swipe', async ( {
 			pageObject,

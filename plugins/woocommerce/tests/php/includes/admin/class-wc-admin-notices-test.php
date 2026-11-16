@@ -12,6 +12,10 @@ class WC_Admin_Notices_Test extends WP_Ajax_UnitTestCase {
 	public function set_up() {
 		parent::set_up();
 
+		remove_action( 'admin_init', '_maybe_update_core' );
+		remove_action( 'admin_init', '_maybe_update_plugins' );
+		remove_action( 'admin_init', '_maybe_update_themes' );
+
 		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-notices.php';
 
 		if ( ! has_action( 'wp_ajax_woocommerce_hide_notice', array( 'WC_Admin_Notices', 'ajax_hide_notice' ) ) ) {

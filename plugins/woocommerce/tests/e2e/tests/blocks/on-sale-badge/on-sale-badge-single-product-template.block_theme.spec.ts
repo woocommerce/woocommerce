@@ -2,13 +2,17 @@
  * External dependencies
  */
 import type { FrameLocator, Page } from '@playwright/test';
-import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
+import { test as base, expect, ProductTemplate } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'woocommerce/product-sale-badge',
-	slug: 'single-product',
-	productPage: '/product/hoodie/',
 };
+
+const test = base.extend< { hoodieTemplate: ProductTemplate } >( {
+	hoodieTemplate: async ( { createProductTemplate }, use ) => {
+		await use( await createProductTemplate( 'hoodie' ) );
+	},
+} );
 
 const badgeSelector = '.wc-block-components-product-sale-badge';
 const badgeContainerSelector = '.wp-block-woocommerce-product-sale-badge';
@@ -55,9 +59,9 @@ const getAlignmentDelta = async (
 
 test.describe( `${ blockData.name }`, () => {
 	test.describe( `On the Single Product Template`, () => {
-		test.beforeEach( async ( { admin, editor } ) => {
+		test.beforeEach( async ( { admin, editor, hoodieTemplate } ) => {
 			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_SLUG }//${ blockData.slug }`,
+				postId: hoodieTemplate.template.id,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );
@@ -67,6 +71,7 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'renders and aligns the sale badge in editor and frontend', async ( {
 			editor,
 			page,
+			hoodieTemplate,
 		} ) => {
 			const context = page.context();
 			const baselinePageCount = context.pages().length;
@@ -96,7 +101,7 @@ test.describe( `${ blockData.name }`, () => {
 					isOnlyCurrentEntityDirty: true,
 				} );
 
-				await frontendPage.goto( blockData.productPage );
+				await frontendPage.goto( hoodieTemplate.productUrl );
 				await expect(
 					frontendPage.locator( badgeSelector ).first()
 				).toBeVisible();
@@ -124,7 +129,7 @@ test.describe( `${ blockData.name }`, () => {
 						isOnlyCurrentEntityDirty: true,
 					} );
 
-					await frontendPage.goto( blockData.productPage );
+					await frontendPage.goto( hoodieTemplate.productUrl );
 					await expect(
 						frontendPage.locator( badgeSelector ).first()
 					).toBeVisible();

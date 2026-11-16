@@ -204,6 +204,7 @@ class QueryBuilder {
 				'timeFrame'           => $time_frame,
 				'priceRange'          => $price_range,
 				'queryId'             => $query_id,
+				'filterParams'        => $query['filterParams'] ?? null,
 			),
 			$is_exclude_applied_filters
 		);
@@ -313,8 +314,9 @@ class QueryBuilder {
 
 		if ( ! $is_exclude_applied_filters ) {
 			// Rating must be a tax query; the remaining filters are query vars consumed by QueryClauses.
-			$final_query = $this->merge_queries( $final_query, $this->get_filter_by_rating_query() );
-			$final_query = array_merge( $final_query, $this->get_applied_filter_query_vars() );
+			$filter_params = $query['filterParams'] ?? null;
+			$final_query   = $this->merge_queries( $final_query, $this->get_filter_by_rating_query( $filter_params ) );
+			$final_query   = array_merge( $final_query, $this->get_applied_filter_query_vars( $filter_params ) );
 		}
 
 		return $final_query;
@@ -512,10 +514,11 @@ class QueryBuilder {
 	/**
 	 * Return a query that filters products by rating.
 	 *
+	 * @param array|null $filter_params Local selections, or null for global query vars.
 	 * @return array
 	 */
-	private function get_filter_by_rating_query() {
-		$filter_rating_values = get_query_var( RatingFilter::RATING_QUERY_VAR );
+	private function get_filter_by_rating_query( ?array $filter_params = null ) {
+		$filter_rating_values = null === $filter_params ? get_query_var( RatingFilter::RATING_QUERY_VAR ) : ( $filter_params[ RatingFilter::RATING_QUERY_VAR ] ?? '' );
 		if ( empty( $filter_rating_values ) ) {
 			return array();
 		}
@@ -616,9 +619,10 @@ class QueryBuilder {
 	/**
 	 * Get the active Product Filter URL query variables.
 	 *
+	 * @param array|null $filter_params Local selections, or null for global query vars.
 	 * @return array
 	 */
-	private function get_applied_filter_query_vars(): array {
+	private function get_applied_filter_query_vars( ?array $filter_params = null ): array {
 		$params                          = wc_get_container()->get( Params::class );
 		$filter_query_vars               = array();
 		$registered_attribute_params     = $params->get_param( 'attribute' );
@@ -635,14 +639,14 @@ class QueryBuilder {
 				continue;
 			}
 
-			$value = get_query_var( $param_key );
+			$value = null === $filter_params ? get_query_var( $param_key ) : ( $filter_params[ $param_key ] ?? '' );
 			if ( ( is_string( $value ) || is_numeric( $value ) ) && '' !== (string) $value ) {
 				$filter_query_vars[ $param_key ] = (string) $value;
 			}
 		}
 
 		foreach ( $this->get_filter_by_attributes_query_vars() as $attribute_name => $query_args ) {
-			$filter_value = get_query_var( $query_args['filter'] );
+			$filter_value = null === $filter_params ? get_query_var( $query_args['filter'] ) : ( $filter_params[ $query_args['filter'] ] ?? '' );
 			if ( ( ! is_string( $filter_value ) && ! is_numeric( $filter_value ) ) || '' === (string) $filter_value ) {
 				continue;
 			}
@@ -651,7 +655,7 @@ class QueryBuilder {
 				$attribute_name = preg_replace( '/^(filter_|pa_)/', '', $query_args['filter'] );
 			}
 			$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
-			$query_type     = get_query_var( $query_args['query_type'] );
+			$query_type     = null === $filter_params ? get_query_var( $query_args['query_type'] ) : ( $filter_params[ $query_args['query_type'] ] ?? '' );
 
 			$filter_query_vars[ AttributeFilter::FILTER_QUERY_VAR_PREFIX . $attribute_name ]     = (string) $filter_value;
 			$filter_query_vars[ AttributeFilter::QUERY_TYPE_QUERY_VAR_PREFIX . $attribute_name ] = is_string( $query_type ) && in_array( $query_type, array( 'and', 'or' ), true )

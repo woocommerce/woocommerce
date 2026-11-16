@@ -1799,7 +1799,7 @@ describe( 'Job Processing', () => {
 					report: {
 						resultsBlobName: 'blob-name',
 						resultsPath: 'results-path',
-						allure: false,
+						publish: false,
 					},
 				},
 				{
@@ -1813,7 +1813,7 @@ describe( 'Job Processing', () => {
 					report: {
 						resultsBlobName: 'blob-name',
 						resultsPath: 'results-path',
-						allure: false,
+						publish: false,
 					},
 				}
 			);
@@ -1836,7 +1836,7 @@ describe( 'Job Processing', () => {
 						report: {
 							resultsBlobName: 'blob-name',
 							resultsPath: 'results-path',
-							allure: false,
+							publish: false,
 						},
 					},
 					{
@@ -1854,7 +1854,7 @@ describe( 'Job Processing', () => {
 						report: {
 							resultsBlobName: 'blob-name',
 							resultsPath: 'results-path',
-							allure: false,
+							publish: false,
 						},
 					},
 				] )
@@ -1878,7 +1878,7 @@ describe( 'Job Processing', () => {
 					report: {
 						resultsBlobName: 'blob-name',
 						resultsPath: 'results-path',
-						allure: false,
+						publish: false,
 					},
 				},
 				{
@@ -1892,7 +1892,7 @@ describe( 'Job Processing', () => {
 					report: {
 						resultsBlobName: 'blob-name',
 						resultsPath: 'results-path',
-						allure: false,
+						publish: false,
 					},
 				}
 			);
@@ -1913,7 +1913,7 @@ describe( 'Job Processing', () => {
 				report: {
 					resultsBlobName: 'blob-name',
 					resultsPath: 'results-path',
-					allure: false,
+					publish: false,
 				},
 			} );
 		} );
@@ -1935,7 +1935,7 @@ describe( 'Job Processing', () => {
 					report: {
 						resultsBlobName: 'blob-name',
 						resultsPath: 'results-path',
-						allure: false,
+						publish: false,
 					},
 				},
 				{
@@ -1949,7 +1949,7 @@ describe( 'Job Processing', () => {
 					report: {
 						resultsBlobName: 'blob-name',
 						resultsPath: 'results-path',
-						allure: false,
+						publish: false,
 					},
 				}
 			);
@@ -1970,7 +1970,7 @@ describe( 'Job Processing', () => {
 				report: {
 					resultsBlobName: 'blob-name',
 					resultsPath: 'results-path',
-					allure: false,
+					publish: false,
 				},
 			} );
 		} );

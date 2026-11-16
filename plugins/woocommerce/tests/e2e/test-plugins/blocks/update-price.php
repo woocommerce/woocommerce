@@ -8,6 +8,11 @@
  * @package woocommerce-blocks-test-update-price
  */
 
+// Only requests from specs that enable this plugin send the cookie.
+if ( ! isset( $_COOKIE['woocommerce-blocks-test-update-price'] ) ) {
+	return;
+}
+
 function calc_price( $cart_object ) {
 	foreach ( $cart_object->get_cart() as $hash => $value ) {
 		$value['data']->set_price( 50 );

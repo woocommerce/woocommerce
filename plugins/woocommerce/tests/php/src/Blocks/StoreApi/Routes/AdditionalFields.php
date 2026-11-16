@@ -50,6 +50,13 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	protected $products;
 
 	/**
+	 * Additional field values on the customer before the test, restored at teardown.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private $previous_customer_field_values = array();
+
+	/**
 	 * Create immutable catalog rows shared by all test methods.
 	 */
 	public static function wpSetUpBeforeClass(): void {
@@ -100,6 +107,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+		$this->previous_customer_field_values = $this->get_customer_additional_field_values();
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 
@@ -127,11 +135,63 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		unset( WC()->countries->locale );
 		WC()->cart->empty_cart();
 		WC()->session->destroy_session();
-		remove_all_filters( 'woocommerce_get_country_locale' );
-		remove_all_actions( 'doing_it_wrong_run' );
-		remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 		$this->unregister_fields();
+		$this->restore_customer_additional_field_values();
 		parent::tearDown();
+	}
+
+	/**
+	 * Put the customer's additional field values back to what they were before the test.
+	 *
+	 * `WC()->customer` is built once for the whole process, so the values one test saves stay
+	 * readable by the next one and decide what a conditional rule sees. Restoring them in memory
+	 * is enough: the customer is read back from the session, which this teardown destroys.
+	 */
+	private function restore_customer_additional_field_values() {
+		$customer = WC()->customer;
+
+		if ( ! $customer ) {
+			return;
+		}
+
+		foreach ( array_diff_key( $this->get_customer_additional_field_values(), $this->previous_customer_field_values ) as $key => $value ) {
+			$customer->delete_meta_data( $key );
+		}
+
+		foreach ( $this->previous_customer_field_values as $key => $value ) {
+			$customer->update_meta_data( $key, $value );
+		}
+	}
+
+	/**
+	 * Get the additional field values saved on the customer, keyed by meta key.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function get_customer_additional_field_values(): array {
+		$customer = WC()->customer;
+		$values   = array();
+
+		if ( ! $customer ) {
+			return $values;
+		}
+
+		$prefixes = array(
+			CheckoutFields::BILLING_FIELDS_PREFIX,
+			CheckoutFields::SHIPPING_FIELDS_PREFIX,
+			CheckoutFields::OTHER_FIELDS_PREFIX,
+		);
+
+		foreach ( $customer->get_meta_data() as $meta ) {
+			foreach ( $prefixes as $prefix ) {
+				if ( 0 === strpos( (string) $meta->key, $prefix ) ) {
+					$values[ $meta->key ] = $meta->value;
+					break;
+				}
+			}
+		}
+
+		return $values;
 	}
 
 	/**
@@ -236,14 +296,6 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		);
 		// register fields.
 		$this->register_fields();
-		// remove our callbacks.
-		\remove_action(
-			'doing_it_wrong_run',
-			array(
-				$doing_it_wrong_mocker,
-				'doing_it_wrong_run',
-			)
-		);
 	}
 
 	/**
@@ -614,14 +666,6 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 				'location' => 'address',
 				'type'     => 'text',
 				'required' => true,
-			)
-		);
-
-		\remove_action(
-			'doing_it_wrong_run',
-			array(
-				$doing_it_wrong_mocker,
-				'doing_it_wrong_run',
 			)
 		);
 	}
@@ -2496,8 +2540,6 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		$this->assertEquals( 'external-value', ( (array) $data['additional_fields'] )[ $id ], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
-
-		\remove_all_filters( "woocommerce_get_default_value_for_{$id}" );
 	}
 
 	/**
@@ -2569,7 +2611,6 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		$this->assertEquals( 'value', ( (array) $data['additional_fields'] )[ $id ], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
-		\remove_all_filters( "woocommerce_get_default_value_for_{$id}" );
 	}
 
 
@@ -2650,14 +2691,6 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
-
-		\remove_action(
-			'woocommerce_set_additional_field_value',
-			array(
-				$set_value_mocker,
-				'woocommerce_set_additional_field_value',
-			)
-		);
 	}
 
 	/**

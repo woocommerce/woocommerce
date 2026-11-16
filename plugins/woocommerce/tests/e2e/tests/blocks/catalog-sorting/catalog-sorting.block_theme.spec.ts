@@ -13,13 +13,17 @@ test.describe( `${ blockData.slug } Block`, () => {
 	test( 'block can be inserted in the Site Editor', async ( {
 		admin,
 		requestUtils,
+		cleanup,
 		editor,
 	} ) => {
 		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug: 'sorter',
-			title: 'Sorter',
+			slug: `catalog-sorting-test-${ test.info().repeatEachIndex }`,
+			title: `Catalog Sorting Test ${ test.info().repeatEachIndex }`,
 			content: 'placeholder',
 		} );
+		cleanup( () =>
+			requestUtils.revertTemplate( 'wp_template', template.id )
+		);
 
 		await admin.visitSiteEditor( {
 			postId: template.id,

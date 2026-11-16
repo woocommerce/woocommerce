@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
 	createBlock,
@@ -36,8 +36,8 @@ import {
 } from '../constants';
 import {
 	addProductCollectionToQueryPaginationParentOrAncestor,
-	getDefaultValueOfFilterable,
 	getDefaultValueOfInherit,
+	sanitizeDisplayLayout,
 } from '../utils';
 import {
 	CoreCollectionNames,
@@ -184,6 +184,52 @@ describe( 'Product Collection editor contracts', () => {
 		}
 	);
 
+	it.each( [
+		{
+			layout: LayoutOptions.STACK,
+			saved: { type: LayoutOptions.STACK },
+		},
+		{
+			layout: LayoutOptions.CAROUSEL,
+			saved: { type: LayoutOptions.CAROUSEL },
+		},
+	] )(
+		'omits column settings from the saved $layout markup',
+		( { layout, saved } ) => {
+			const block = createBlock( PRODUCT_COLLECTION_BLOCK_NAME, {
+				displayLayout: sanitizeDisplayLayout( {
+					type: layout,
+					columns: 4,
+					shrinkColumns: true,
+				} ),
+			} );
+			const serialized = serialize( block );
+
+			expect( serialized ).toContain(
+				`"displayLayout":${ JSON.stringify( saved ) }`
+			);
+		}
+	);
+
+	it( 'keeps column settings in the saved Grid markup', () => {
+		const block = createBlock( PRODUCT_COLLECTION_BLOCK_NAME, {
+			displayLayout: sanitizeDisplayLayout( {
+				type: LayoutOptions.GRID,
+				columns: 4,
+				shrinkColumns: false,
+			} ),
+		} );
+		const serialized = serialize( block );
+
+		expect( serialized ).toContain(
+			`"displayLayout":${ JSON.stringify( {
+				type: LayoutOptions.GRID,
+				columns: 4,
+				shrinkColumns: false,
+			} ) }`
+		);
+	} );
+
 	it( 'adds Product Collection to the real Pagination metadata filter', () => {
 		addProductCollectionToQueryPaginationParentOrAncestor();
 
@@ -250,30 +296,6 @@ describe( 'Product Collection page-context defaults', () => {
 			property: 'inherit',
 			templateSlug: 'taxonomy-product_brand',
 		},
-		{
-			caseName: 'post filtering',
-			getDefault: getDefaultValueOfFilterable,
-			property: 'filterable',
-			templateSlug: 'post',
-		},
-		{
-			caseName: 'home filtering',
-			getDefault: getDefaultValueOfFilterable,
-			property: 'filterable',
-			templateSlug: 'home',
-		},
-		{
-			caseName: 'index filtering',
-			getDefault: getDefaultValueOfFilterable,
-			property: 'filterable',
-			templateSlug: 'index',
-		},
-		{
-			caseName: 'Single Product filtering',
-			getDefault: getDefaultValueOfFilterable,
-			property: 'filterable',
-			templateSlug: 'single-product',
-		},
 	] as const )(
 		'allows only the first collection to own $caseName',
 		( { getDefault, property, templateSlug } ) => {
@@ -316,7 +338,6 @@ describe( 'Product Collection page-context defaults', () => {
 const createPreviewAttributes = (): ProductCollectionAttributes => ( {
 	...DEFAULT_ATTRIBUTES,
 	convertedFromProducts: false,
-	filterable: false,
 	hideControls: [],
 	query: {
 		...DEFAULT_QUERY,
@@ -417,14 +438,12 @@ describe( 'default catalog order control', () => {
 					trackInteraction={ trackInteraction }
 				/>
 			);
-			await act( async () => {
-				await user.selectOptions(
-					screen.getByRole( 'combobox', {
-						name: 'Default sort by',
-					} ),
-					'price-desc'
-				);
-			} );
+			await user.selectOptions(
+				screen.getByRole( 'combobox', {
+					name: 'Default sort by',
+				} ),
+				'price-desc'
+			);
 
 			expect( editEntityRecord ).toHaveBeenCalledWith(
 				'root',

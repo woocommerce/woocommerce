@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
+use Automattic\WooCommerce\Internal\Utilities\CurrencySymbol;
 use Automattic\WooCommerce\Internal\Utilities\PriceSeparators;
 use Exception;
 use InvalidArgumentException;
@@ -120,8 +121,8 @@ class AssetDataRegistry {
 		return [
 			'code'              => $currency,
 			'precision'         => wc_get_price_decimals(),
-			'symbol'            => html_entity_decode( get_woocommerce_currency_symbol( $currency ) ),
-			'symbolPosition'    => get_option( 'woocommerce_currency_pos' ),
+			'symbol'            => CurrencySymbol::get_symbol(),
+			'symbolPosition'    => CurrencySymbol::get_position(),
 			'decimalSeparator'  => PriceSeparators::get_decimal(),
 			'thousandSeparator' => PriceSeparators::get_thousand(),
 			'priceFormat'       => html_entity_decode( get_woocommerce_price_format() ),
@@ -428,7 +429,7 @@ class AssetDataRegistry {
 	protected function add_data( $key, $data ) {
 		if ( ! is_string( $key ) ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			trigger_error( esc_html__( 'Key for the data being registered must be a string', 'woocommerce' ), E_USER_WARNING );
+			trigger_error( esc_html( 'Key for the data being registered must be a string' ), E_USER_WARNING );
 			return;
 		}
 		if ( $this->exists( $key ) ) {
@@ -436,7 +437,7 @@ class AssetDataRegistry {
 		}
 		if ( isset( $this->data[ $key ] ) ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			trigger_error( esc_html__( 'Overriding existing data with an already registered key is not allowed', 'woocommerce' ), E_USER_WARNING );
+			trigger_error( esc_html( 'Overriding existing data with an already registered key is not allowed' ), E_USER_WARNING );
 			return;
 		}
 		if ( \is_callable( $data ) ) {

@@ -352,12 +352,6 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 			$order->set_customer_id( $customer->ID );
 			$order->save();
 
-			if ( $order->has_downloadable_item() ) {
-				$data_store = WC_Data_Store::load( 'customer-download' );
-				$data_store->delete_by_order_id( $order->get_id() );
-				wc_downloadable_product_permissions( $order->get_id(), true );
-			}
-
 			do_action( 'woocommerce_update_new_customer_past_order', $order_id, $customer );
 
 			if ( $order->get_status() === OrderInternalStatus::COMPLETED ) {
@@ -1158,11 +1152,6 @@ function wc_update_user_last_active( $user_id ) {
  * @return string
  */
 function wc_translate_user_roles( $translation, $text, $context ) {
-	// translate_user_role() only accepts a second parameter starting in WP 5.2.
-	if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
-		return $translation;
-	}
-
 	if ( 'User role' === $context && in_array( $text, array( 'Shop manager', 'Customer' ), true ) ) {
 		return translate_user_role( $text, 'woocommerce' );
 	}

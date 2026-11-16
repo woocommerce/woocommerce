@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Block checkout now completes an existing zero-total pending or failed order instead of creating a new one.

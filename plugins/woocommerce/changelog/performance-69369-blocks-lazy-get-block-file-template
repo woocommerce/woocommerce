@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Lazy-load block template files content in the registry.

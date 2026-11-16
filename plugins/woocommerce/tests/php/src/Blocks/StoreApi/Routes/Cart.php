@@ -257,32 +257,28 @@ class Cart extends ControllerTestCase {
 		};
 		add_filter( 'woocommerce_store_api_cart_item_parent_item_key', $parent_item_key_filter, 10, 3 );
 
-		try {
-			$cart_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
-			$this->assertSame( 200, $cart_response->get_status() );
-			$cart_items = array_column( $cart_response->get_data()['items'], null, 'key' );
-			$this->assertSame( $this->keys[0], $cart_items[ $this->keys[1] ]['parent_item_key'] );
-			$this->assertNull( $cart_items[ $this->keys[0] ]['parent_item_key'] );
+		$cart_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+		$this->assertSame( 200, $cart_response->get_status() );
+		$cart_items = array_column( $cart_response->get_data()['items'], null, 'key' );
+		$this->assertSame( $this->keys[0], $cart_items[ $this->keys[1] ]['parent_item_key'] );
+		$this->assertNull( $cart_items[ $this->keys[0] ]['parent_item_key'] );
 
-			$remove_request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
-			$remove_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
-			$remove_request->set_body_params( array( 'key' => $this->keys[0] ) );
-			$remove_response = rest_get_server()->dispatch( $remove_request );
+		$remove_request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
+		$remove_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$remove_request->set_body_params( array( 'key' => $this->keys[0] ) );
+		$remove_response = rest_get_server()->dispatch( $remove_request );
 
-			$this->assertSame( 200, $remove_response->get_status() );
-			$remaining_items = array_column( $remove_response->get_data()['items'], null, 'key' );
-			$this->assertArrayNotHasKey( $this->keys[0], $remaining_items );
-			$this->assertArrayHasKey( $this->keys[1], $remaining_items );
-			$this->assertNull( $remaining_items[ $this->keys[1] ]['parent_item_key'] );
-			$this->assertSame( 1, $remaining_items[ $this->keys[1] ]['quantity'] );
+		$this->assertSame( 200, $remove_response->get_status() );
+		$remaining_items = array_column( $remove_response->get_data()['items'], null, 'key' );
+		$this->assertArrayNotHasKey( $this->keys[0], $remaining_items );
+		$this->assertArrayHasKey( $this->keys[1], $remaining_items );
+		$this->assertNull( $remaining_items[ $this->keys[1] ]['parent_item_key'] );
+		$this->assertSame( 1, $remaining_items[ $this->keys[1] ]['quantity'] );
 
-			$this->assertSame( $this->keys[0], wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 ) );
-			$restored_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
-			$restored_items    = array_column( $restored_response->get_data()['items'], null, 'key' );
-			$this->assertSame( $this->keys[0], $restored_items[ $this->keys[1] ]['parent_item_key'] );
-		} finally {
-			remove_filter( 'woocommerce_store_api_cart_item_parent_item_key', $parent_item_key_filter, 10 );
-		}
+		$this->assertSame( $this->keys[0], wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 ) );
+		$restored_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+		$restored_items    = array_column( $restored_response->get_data()['items'], null, 'key' );
+		$this->assertSame( $this->keys[0], $restored_items[ $this->keys[1] ]['parent_item_key'] );
 	}
 
 	/**
@@ -355,14 +351,6 @@ class Cart extends ControllerTestCase {
 						),
 					),
 				),
-			)
-		);
-
-		remove_action(
-			'woocommerce_store_api_cart_update_customer_from_request',
-			array(
-				$action_callback,
-				'do_customer_callback',
 			)
 		);
 	}
@@ -851,6 +839,72 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Adding custom variations preserves percent escapes in cart storage and decodes them in the API display value.
+	 * @testWith ["attribute_finish", "Black%20White"]
+	 *           ["Finish", "Black%20White"]
+	 *           ["finish", "Black%20White"]
+	 *           ["attribute_finish", ""]
+	 *           ["Finish", ""]
+	 *           ["finish", ""]
+	 *           ["Finish", "Black%20White", true]
+	 *           ["Finish", "", true]
+	 * @param string $attribute_name Posted attribute name.
+	 * @param string $variation_value Fixed value or an Any variation.
+	 * @param bool   $filter_label Whether the display label differs from the stored name.
+	 */
+	public function test_add_item_preserves_custom_attribute_percent_escapes( string $attribute_name, string $variation_value, bool $filter_label = false ): void {
+		wc_empty_cart();
+
+		if ( $filter_label ) {
+			add_filter(
+				'woocommerce_attribute_label',
+				static function () {
+					return 'Surface';
+				}
+			);
+		}
+
+		$product   = new \WC_Product_Variable();
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Finish' );
+		$attribute->set_options( array( 'Black%20White', 'Gloss' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'finish' => $variation_value ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'        => $variation->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => $attribute_name,
+						'value'     => 'Black%20White',
+					),
+				),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 201, $response->get_status(), 'A matching custom attribute must be accepted.' );
+		$data = $response->get_data();
+		$this->assertCount( 1, $data['items'], 'The response should contain the added variation.' );
+		$this->assertSame( 'Black White', $data['items'][0]['variation'][0]['value'], 'The display value must be decoded so Blocks matches the classic cart.' );
+		$cart = WC()->cart->get_cart();
+		$item = reset( $cart );
+		$this->assertSame( $variation->get_id(), $item['variation_id'], 'The cart must contain the selected variation.' );
+		$this->assertSame( 'Black%20White', $item['variation']['attribute_finish'], 'The cart must preserve the selected custom value.' );
+	}
+
+	/**
 	 * Test adding a variable product to cart returns proper variation data.
 	 */
 	public function test_add_variable_product_to_cart_returns_variation_data() {
@@ -1234,8 +1288,6 @@ class Cart extends ControllerTestCase {
 		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
 		$this->assertSame( $this->products[0]->get_id(), $captured_args['product_id'] );
 		$this->assertEquals( 2, $captured_args['quantity'] );
-
-		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
 	}
 
 	/**
@@ -1267,8 +1319,6 @@ class Cart extends ControllerTestCase {
 		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
 		$this->assertSame( $this->products[0]->get_id(), $captured_args['product_id'] );
 		$this->assertEquals( 1, $captured_args['quantity'] );
-
-		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
 	}
 
 	/**
@@ -1299,8 +1349,6 @@ class Cart extends ControllerTestCase {
 		$this->assertEquals( 5, $captured_args['quantity'] );
 		$this->assertEquals( 2, $captured_args['old_quantity'] );
 		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
-
-		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
 	}
 
 	/**
@@ -1328,8 +1376,6 @@ class Cart extends ControllerTestCase {
 		$this->assertNotEmpty( $captured_args, 'The remove action should have been fired' );
 		$this->assertSame( $this->keys[0], $captured_args['cart_item_key'] );
 		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
-
-		remove_action( 'internal_woocommerce_cart_item_removed_from_user_request', $callback );
 	}
 
 	/**
@@ -1355,8 +1401,6 @@ class Cart extends ControllerTestCase {
 		$this->assertAPIResponse( $request, 200 );
 
 		$this->assertFalse( $action_fired, 'The update action should not fire when quantity is unchanged' );
-
-		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
 	}
 
 	/**
@@ -1404,8 +1448,6 @@ class Cart extends ControllerTestCase {
 		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
 		$this->assertSame( $variation->get_id(), $captured_args['product_id'], 'The product_id should be the variation ID, not the parent product ID' );
 		$this->assertEquals( 1, $captured_args['quantity'] );
-
-		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
 	}
 
 	/**
@@ -1430,8 +1472,6 @@ class Cart extends ControllerTestCase {
 		$this->assertAPIResponse( $request, 200 );
 
 		$this->assertFalse( $action_fired, 'The update action should not fire when quantity is not set' );
-
-		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
 	}
 
 	/**
@@ -1546,8 +1586,6 @@ class Cart extends ControllerTestCase {
 		$this->assertNotEmpty( $captured_args, 'The update action should have been fired' );
 		$this->assertSame( 3, $captured_args['quantity'], 'The new quantity should be a numeric value' );
 		$this->assertSame( 2, $captured_args['old_quantity'], 'The old quantity should be normalized to a numeric value' );
-
-		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
 	}
 
 	/**
@@ -1585,9 +1623,6 @@ class Cart extends ControllerTestCase {
 
 		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
 		$this->assertSame( 2, $captured_args['quantity'], 'The quantity should be normalized to a numeric value' );
-
-		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
-		remove_filter( 'woocommerce_store_api_add_to_cart_data', $add_to_cart_data_callback );
 	}
 
 	/**
@@ -1661,5 +1696,28 @@ class Cart extends ControllerTestCase {
 		}
 
 		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
+	}
+
+	/**
+	 * @testdox A cart change removes the draft order from the session when syncing the change to it fails to save.
+	 */
+	public function test_cart_change_forgets_draft_order_that_fails_to_save(): void {
+		$draft_order_id = (int) wc()->session->get( 'store_api_draft_order' );
+		$this->assertGreaterThan( 0, $draft_order_id );
+
+		$fail = function ( $order ) use ( $draft_order_id ) {
+			if ( $order->get_id() === $draft_order_id ) {
+				throw new \Exception( 'Forced save failure' );
+			}
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( array( 'key' => $this->keys[0] ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'The cart change itself should still succeed.' );
+		$this->assertEmpty( wc()->session->get( 'store_api_draft_order' ), 'A draft order that failed to save must not stay in the session to be resumed.' );
 	}
 }

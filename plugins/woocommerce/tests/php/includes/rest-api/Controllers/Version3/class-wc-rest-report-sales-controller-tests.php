@@ -164,53 +164,47 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * per-row net sales (sales - refunds) wrong.
 	 */
 	public function test_refunds_bucketed_by_local_time_in_non_utc_site(): void {
-		$previous_wp_tz = get_option( 'timezone_string' );
-
 		// Pacific/Auckland is UTC+12 (or +13 in DST). Configure the non-UTC site the
 		// way WordPress actually does (via the timezone_string option, leaving PHP's
 		// default timezone at UTC) so the legacy report range math (which assumes the
 		// WordPress UTC invariant) is exercised as it runs in production.
 		update_option( 'timezone_string', 'Pacific/Auckland' );
 
-		try {
-			$order = WC_Helper_Order::create_order();
-			$order->set_status( OrderStatus::COMPLETED );
-			$order->save();
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
 
-			$refund = wc_create_refund(
-				array(
-					'amount'   => 3,
-					'order_id' => $order->get_id(),
-				)
-			);
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 3,
+				'order_id' => $order->get_id(),
+			)
+		);
 
-			// Local time of 02:00 is still the previous calendar day in UTC, so the
-			// refund's post_date (local) and post_date_gmt (UTC) land on different days.
-			// Bucketing by UTC instead of local time would put the refund in the wrong row.
-			$local_today     = current_datetime()->format( 'Y-m-d' );
-			$local_post_date = $local_today . ' 02:00:00';
-			wp_update_post(
-				array(
-					'ID'        => $refund->get_id(),
-					'post_date' => $local_post_date,
-				)
-			);
+		// Local time of 02:00 is still the previous calendar day in UTC, so the
+		// refund's post_date (local) and post_date_gmt (UTC) land on different days.
+		// Bucketing by UTC instead of local time would put the refund in the wrong row.
+		$local_today     = current_datetime()->format( 'Y-m-d' );
+		$local_post_date = $local_today . ' 02:00:00';
+		wp_update_post(
+			array(
+				'ID'        => $refund->get_id(),
+				'post_date' => $local_post_date,
+			)
+		);
 
-			$data = $this->get_report( 'month' );
+		$data = $this->get_report( 'month' );
 
-			$this->assertArrayHasKey(
-				$local_today,
-				$data['totals'],
-				'Local-time today should exist as a bucket key.'
-			);
-			$this->assertSame(
-				'3.00',
-				$data['totals'][ $local_today ]['refunds'],
-				'Refund must bucket by local time so it lines up with sales/orders in the same row.'
-			);
-		} finally {
-			update_option( 'timezone_string', $previous_wp_tz );
-		}
+		$this->assertArrayHasKey(
+			$local_today,
+			$data['totals'],
+			'Local-time today should exist as a bucket key.'
+		);
+		$this->assertSame(
+			'3.00',
+			$data['totals'][ $local_today ]['refunds'],
+			'Refund must bucket by local time so it lines up with sales/orders in the same row.'
+		);
 	}
 
 	/**
@@ -227,5 +221,53 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'object', $bucket_schema['type'] );
 		$this->assertArrayHasKey( 'refunds', $bucket_schema['properties'], 'Per-period bucket should declare a refunds property.' );
 		$this->assertSame( 'string', $bucket_schema['properties']['refunds']['type'], 'refunds should be a string (decimal).' );
+	}
+
+	/**
+	 * Data provider for custom date ranges ending on 2024-03-15.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function provider_custom_range_start(): array {
+		return array(
+			'single-day range' => array( '2024-03-15' ),
+			'multi-day range'  => array( '2024-03-10' ),
+		);
+	}
+
+	/**
+	 * @testdox Should count customers who registered at any time on the last day of a custom range ($date_min to 2024-03-15).
+	 * @dataProvider provider_custom_range_start
+	 *
+	 * @param string $date_min Start of the custom range.
+	 */
+	public function test_total_customers_includes_the_whole_last_day_of_a_custom_range( string $date_min ): void {
+		$registered_dates = array(
+			'2024-03-15 00:00:00',
+			'2024-03-15 12:30:00',
+			'2024-03-15 23:59:59',
+			'2024-03-16 00:00:00',
+		);
+		foreach ( $registered_dates as $registered ) {
+			$this->factory->user->create(
+				array(
+					'role'            => 'customer',
+					'user_registered' => $registered,
+				)
+			);
+		}
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/reports/sales' );
+		$request->set_param( 'date_min', $date_min );
+		$request->set_param( 'date_max', '2024-03-15' );
+
+		try {
+			$data = ( new WC_REST_Report_Sales_Controller() )->prepare_item_for_response( null, $request )->get_data();
+		} finally {
+			// setup_report() passes the custom range to WC_Admin_Report through $_GET.
+			unset( $_GET['start_date'], $_GET['end_date'] );
+		}
+
+		$this->assertSame( 3, $data['total_customers'], 'Customers registered during 2024-03-15 should be counted, and those registered on 2024-03-16 should not.' );
 	}
 }

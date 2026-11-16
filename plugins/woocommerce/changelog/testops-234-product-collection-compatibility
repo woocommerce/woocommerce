@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Move 9 collection compatibility hook checks to PHPUnit; the spec keeps two rendered-order browser titles.
-

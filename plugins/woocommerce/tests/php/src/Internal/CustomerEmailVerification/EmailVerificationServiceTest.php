@@ -57,8 +57,22 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $this->sut->is_verified( $user_id ), 'User should be verified after mark_verified()' );
 		$this->assertSame( 1, $hook_calls, 'Hook should fire exactly once' );
 		$this->assertSame( $user_id, $hook_arg, 'Hook should receive the correct user ID' );
+	}
 
-		remove_action( 'woocommerce_customer_email_verified', $listener );
+	/**
+	 * @testdox Legacy one-argument calls report incorrect usage without changing verification state.
+	 */
+	public function test_mark_verified_without_expected_email(): void {
+		$user_id    = wc_create_new_customer( 'legacy@example.com', 'legacyuser', 'pw' );
+		$key        = $this->sut->create_verification_key( $user_id );
+		$hook_calls = did_action( 'woocommerce_customer_email_verified' );
+
+		$this->setExpectedIncorrectUsage( EmailVerificationService::class . '::mark_verified' );
+		$this->sut->mark_verified( $user_id );
+
+		$this->assertFalse( $this->sut->is_verified( $user_id ), 'An omitted expected email must not verify the account' );
+		$this->assertTrue( $this->sut->check_verification_key( $user_id, $key ), 'An omitted expected email must not consume the pending key' );
+		$this->assertSame( $hook_calls, did_action( 'woocommerce_customer_email_verified' ), 'An omitted expected email must not fire the verification hook' );
 	}
 
 	/**
@@ -180,8 +194,6 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( 0, $hook_calls, 'A mismatched email must not fire the verification hook' );
 		$this->assertTrue( $this->sut->has_pending_key( $user_id ), 'A mismatched email must not consume the pending key' );
 		$this->assertFalse( $this->sut->check_verification_key( $user_id, $key ), 'The key must remain bound to the original email' );
-
-		remove_action( 'woocommerce_customer_email_verified', $listener );
 	}
 
 	/**

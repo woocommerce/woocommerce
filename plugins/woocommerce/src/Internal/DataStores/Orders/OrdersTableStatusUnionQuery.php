@@ -132,14 +132,17 @@ class OrdersTableStatusUnionQuery {
 
 	/**
 	 * Extracts the sort direction from the ORDER BY clause, or NULL when it isn't an ORDER BY on date_created_gmt
-	 * alone (the only ordering the type_status_date index can satisfy within each branch).
+	 * alone, optionally followed by id in the same direction (the only ordering the type_status_date index can
+	 * satisfy within each branch).
 	 *
 	 * @param string $orderby The ORDER BY clause, including the keyword.
 	 * @return string|null 'ASC', 'DESC', or NULL when ineligible.
 	 */
 	private function extract_order_direction( string $orderby ): ?string {
 		foreach ( array( 'ASC', 'DESC' ) as $direction ) {
-			if ( "ORDER BY {$this->orders_table}.date_created_gmt {$direction}" === $orderby ) {
+			$date_only = "ORDER BY {$this->orders_table}.date_created_gmt {$direction}";
+
+			if ( $date_only === $orderby || "{$date_only}, {$this->orders_table}.id {$direction}" === $orderby ) {
 				return $direction;
 			}
 		}
@@ -236,7 +239,7 @@ class OrdersTableStatusUnionQuery {
 		foreach ( $types as $type ) {
 			foreach ( $statuses as $status ) {
 				$branch = $wpdb->prepare(
-					"SELECT id, date_created_gmt FROM {$this->orders_table} WHERE type = %s AND status = %s ORDER BY date_created_gmt {$direction} LIMIT {$branch_rows}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT id, date_created_gmt FROM {$this->orders_table} WHERE type = %s AND status = %s ORDER BY date_created_gmt {$direction}, id {$direction} LIMIT {$branch_rows}", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					$type,
 					$status
 				);
@@ -245,7 +248,7 @@ class OrdersTableStatusUnionQuery {
 			}
 		}
 
-		return 'SELECT id FROM ( ' . implode( ' UNION ALL ', $branches ) . " ) candidates ORDER BY date_created_gmt {$direction} {$limits}";
+		return 'SELECT id FROM ( ' . implode( ' UNION ALL ', $branches ) . " ) candidates ORDER BY date_created_gmt {$direction}, id {$direction} {$limits}";
 	}
 
 	/**

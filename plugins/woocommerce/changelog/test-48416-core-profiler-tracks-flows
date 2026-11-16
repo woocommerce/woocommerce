@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Record the skipped Core Profiler extensions step when no extensions are selected.

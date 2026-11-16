@@ -163,6 +163,51 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Color values, and whether email clients can render them.
+	 *
+	 * @return array<string, array{mixed, bool}>
+	 */
+	public function emailSafeColorProvider(): array {
+		return array(
+			'hex'                        => array( '#abcdef', true ),
+			'short hex'                  => array( '#abc', true ),
+			'hex with alpha'             => array( '#aabbccdd', true ),
+			'uppercase hex in spaces'    => array( '  #ABCDEF  ', true ),
+			'rgb'                        => array( 'rgb(1, 2, 3)', true ),
+			'rgba'                       => array( 'rgba(1, 2, 3, 0.5)', true ),
+			'hsl, space separated'       => array( 'hsl(120deg 50% 50%)', true ),
+			'hsla, uppercase'            => array( 'HSLA(120, 50%, 50%, 0.3)', true ),
+			'keyword'                    => array( 'white', true ),
+			'keyword, mixed case'        => array( 'currentColor', true ),
+
+			// Twenty Twenty-Five’s accent-6.
+			'color-mix'                  => array( 'color-mix(in srgb, currentColor 20%, transparent)', false ),
+			'light-dark'                 => array( 'light-dark(#ffffff, #000000)', false ),
+			'preset variable'            => array( 'var(--wp--preset--color--base)', false ),
+			'oklch'                      => array( 'oklch(0.7 0.1 200)', false ),
+			'rgb with a nested variable' => array( 'rgb(var(--red), 0, 0)', false ),
+			'rgba with calc'             => array( 'rgba(0, 0, 0, calc(1 - 0.5))', false ),
+			'unclosed function'          => array( 'rgb(1, 2, 3', false ),
+			'incomplete hex'             => array( '#zz', false ),
+			'not a color value'          => array( 'dark-gray', false ),
+			'empty'                      => array( '', false ),
+			'not a string'               => array( array( '#abcdef' ), false ),
+		);
+	}
+
+	/**
+	 * Test it tells a color email clients can render from one they drop.
+	 *
+	 * @dataProvider emailSafeColorProvider
+	 *
+	 * @param mixed $color    Color value.
+	 * @param bool  $expected Whether email clients can render it.
+	 */
+	public function testItIdentifiesEmailSafeColors( $color, bool $expected ): void {
+		$this->assertSame( $expected, Styles_Helper::is_email_safe_color( $color ) );
+	}
+
+	/**
 	 * Test it resolves a slug against every palette origin, highest priority first.
 	 */
 	public function testItResolvesColorsFromEveryPaletteOrigin(): void {
@@ -912,5 +957,29 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		$this->assertSame( '16', Styles_Helper::remove_css_unit( '16em' ) );
 		$this->assertSame( '100', Styles_Helper::remove_css_unit( '100%' ) );
 		$this->assertSame( '100', Styles_Helper::remove_css_unit( '100vh' ) );
+	}
+
+	/**
+	 * A font size becomes a plain px length an email can use, or null when it can't.
+	 *
+	 * @dataProvider static_font_size_provider
+	 * @param string      $input Font size.
+	 * @param string|null $expected Static px length, or null.
+	 */
+	public function testItConvertsFontSizeToStaticPx( string $input, ?string $expected ): void {
+		$this->assertSame( $expected, Styles_Helper::get_static_font_size( $input ) );
+	}
+
+	/**
+	 * Font sizes and their static px value.
+	 */
+	public function static_font_size_provider(): array {
+		return array(
+			'px'                 => array( '32px', '32px' ),
+			'rem'                => array( '2rem', '32px' ),
+			'clamp'              => array( 'clamp(20px, 2vw, 40px)', '20px' ),
+			'extra declarations' => array( '16px;display:none;--x:1px', null ),
+			'unknown'            => array( 'large', null ),
+		);
 	}
 }

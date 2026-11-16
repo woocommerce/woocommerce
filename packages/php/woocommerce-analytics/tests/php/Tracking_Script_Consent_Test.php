@@ -69,6 +69,30 @@ class Tracking_Script_Consent_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Test that with proxy tracking, s.js does not print but scripts depending on its handle still do.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_tracking_script_is_skipped_when_proxy_tracking_is_enabled(): void {
+		require_once __DIR__ . '/mocks/wp-consent-api-functions.php';
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+
+		Woocommerce_Analytics::enqueue_tracking_script();
+		wp_enqueue_script( 'analytics-dependent', 'https://example.com/dependent.js', array( 'woocommerce-analytics' ), '1.0' );
+
+		$output    = $this->print_scripts();
+		$dependent = $this->get_script_attributes( $output, 'analytics-dependent-js' );
+
+		$this->assertStringNotContainsString( 'stats.wp.com', $output );
+		$this->assertNull( $this->get_script_attributes( $output, 'woocommerce-analytics-js' ) );
+		$this->assertFalse( has_filter( 'wp_script_attributes', array( Woocommerce_Analytics::class, 'hold_tracking_script_until_consent' ) ) );
+
+		$this->assertIsArray( $dependent );
+		$this->assertSame( 'https://example.com/dependent.js?ver=1.0', $dependent['src'] ?? null );
+	}
+
+	/**
 	 * Print the enqueued scripts and return the markup.
 	 *
 	 * @return string

@@ -107,9 +107,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_get_dimension() {
-		// Save default.
-		$default_unit = get_option( 'woocommerce_dimension_unit' );
-
 		// in (default unit).
 		$this->assertEquals(
 			array( 25.4, 10, 0.2777777782, 254, 0.254 ),
@@ -187,9 +184,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 				wc_get_dimension( 10, 'yd', 'mm' ),
 			)
 		);
-
-		// Restore default.
-		update_option( 'woocommerce_dimension_unit', $default_unit );
 	}
 
 	/**
@@ -198,9 +192,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_get_weight() {
-		// Save default.
-		$default_unit = get_option( 'woocommerce_weight_unit' );
-
 		// lbs (default unit).
 		$this->assertEquals( 4.53592, wc_get_weight( 10, 'kg' ) );
 		$this->assertEquals( 4535.92, wc_get_weight( 10, 'g' ) );
@@ -236,9 +227,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		// Negative.
 		$this->assertEquals( 0, wc_get_weight( -10, 'g' ) );
-
-		// Restore default.
-		update_option( 'woocommerce_weight_unit', $default_unit );
 	}
 
 	/**
@@ -274,9 +262,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 82, wc_round_tax_total( 82.5, 0 ) );
 		$this->assertEquals( 83, wc_round_tax_total( 82.54, 0 ) );
 		$this->assertEquals( 83, wc_round_tax_total( 82.546, 0 ) );
-
-		// Default.
-		update_option( 'woocommerce_prices_include_tax', 'no' );
 	}
 
 	/**
@@ -388,10 +373,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// Floats.
 		$this->assertEquals( '0.00001', wc_format_decimal( 0.00001 ) );
 		$this->assertEquals( '0.22222222', wc_format_decimal( 0.22222222 ) );
-
-		update_option( 'woocommerce_price_num_decimals', '2' );
-		update_option( 'woocommerce_price_decimal_sep', '.' );
-		update_option( 'woocommerce_price_thousand_sep', ',' );
 	}
 
 	/**
@@ -411,14 +392,9 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_format_localized_price() {
-		// Save default.
-		$decimal_sep = get_option( 'woocommerce_price_decimal_sep' );
 		update_option( 'woocommerce_price_decimal_sep', ',' );
 
 		$this->assertEquals( '1,17', wc_format_localized_price( '1.17' ) );
-
-		// Restore default.
-		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
 	}
 
 	/**
@@ -436,7 +412,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_coupon_code() {
-		$this->assertEquals( 'foo#baralert();', wc_format_coupon_code( 'foo#bar<script>alert();</script>' ) );
+		$this->assertEquals( 'foo#bar&lt;script&gt;alert();&lt;/script&gt;', wc_format_coupon_code( 'foo#bar<script>alert();</script>' ) );
 	}
 
 	/**
@@ -466,7 +442,14 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_sanitize_tooltip() {
-		$this->assertEquals( 'alert();cleaned&lt;p&gt;foo&lt;/p&gt;&lt;span&gt;bar&lt;/span&gt;', wc_sanitize_tooltip( '<script>alert();</script>cleaned<p>foo</p><span>bar</span>' ) );
+		// Since WordPress 7.2, wp_kses() also removes the contents of disallowed script elements.
+		$this->assertContains(
+			wc_sanitize_tooltip( '<script>alert();</script>cleaned<p>foo</p><span>bar</span>' ),
+			array(
+				'alert();cleaned&lt;p&gt;foo&lt;/p&gt;&lt;span&gt;bar&lt;/span&gt;',
+				'cleaned&lt;p&gt;foo&lt;/p&gt;&lt;span&gt;bar&lt;/span&gt;',
+			)
+		);
 	}
 
 	/**
@@ -519,9 +502,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_get_woocommerce_price_format() {
-		// Save default.
-		$currency_pos = get_option( 'woocommerce_currency_pos' );
-
 		// Default format (left).
 		$this->assertEquals( '%1$s%2$s', get_woocommerce_price_format() );
 
@@ -536,9 +516,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// Right space.
 		update_option( 'woocommerce_currency_pos', 'right_space' );
 		$this->assertEquals( '%2$s&nbsp;%1$s', get_woocommerce_price_format() );
-
-		// Restore default.
-		update_option( 'woocommerce_currency_pos', $currency_pos );
 	}
 
 	/**
@@ -547,8 +524,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_get_price_thousand_separator() {
-		$separator = get_option( 'woocommerce_price_thousand_sep' );
-
 		// Default value.
 		$this->assertEquals( ',', wc_get_price_thousand_separator() );
 
@@ -557,8 +532,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_price_thousand_sep', '&lt;.&gt;' );
 		$this->assertEquals( '&lt;.&gt;', wc_get_price_thousand_separator() );
-
-		update_option( 'woocommerce_price_thousand_sep', $separator );
 	}
 
 	/**
@@ -567,8 +540,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_get_price_decimal_separator() {
-		$separator = get_option( 'woocommerce_price_decimal_sep' );
-
 		// Default value.
 		$this->assertEquals( '.', wc_get_price_decimal_separator() );
 
@@ -577,8 +548,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_price_decimal_sep', '&lt;.&gt;' );
 		$this->assertEquals( '&lt;.&gt;', wc_get_price_decimal_separator() );
-
-		update_option( 'woocommerce_price_decimal_sep', $separator );
 	}
 
 	/**
@@ -587,8 +556,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_get_price_decimals() {
-		$decimals = get_option( 'woocommerce_price_num_decimals' );
-
 		// Default value.
 		$this->assertEquals( 2, wc_get_price_decimals() );
 
@@ -600,8 +567,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_price_num_decimals', '2.50' );
 		$this->assertEquals( 2, wc_get_price_decimals() );
-
-		update_option( 'woocommerce_price_num_decimals', $decimals );
 	}
 
 	/**
@@ -637,10 +602,8 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_price_trim_zeros', '__return_true' );
 
 		// Ex tax label.
-		$calc_taxes = get_option( 'woocommerce_calc_taxes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#36;</span>1,111.17</bdi></span> <small class="woocommerce-Price-taxLabel tax_label">(ex. tax)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
-		update_option( 'woocommerce_calc_taxes', $calc_taxes );
 	}
 
 	/**
@@ -652,8 +615,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 11.1.0
 	 */
 	public function test_wc_price_currency_symbol_is_direction_isolated() {
-		$original_position = get_option( 'woocommerce_currency_pos' );
-		$symbol            = '<span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#x644;.&#x644;</span>';
+		$symbol = '<span class="woocommerce-Price-currencySymbol" translate="no" dir="auto">&#x644;.&#x644;</span>';
 
 		$expected_by_position = array(
 			'left'        => $symbol . '15.00',
@@ -670,8 +632,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 				"Currency position '{$position}' should render the direction-isolated symbol on the configured side"
 			);
 		}
-
-		update_option( 'woocommerce_currency_pos', $original_position );
 	}
 
 	/**
@@ -760,9 +720,6 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// Test with invalid offset.
 		update_option( 'gmt_offset', 'invalid' );
 		$this->assertContains( wc_timezone_string(), array( '+00:00', 'UTC' ) );
-
-		// Restore default.
-		update_option( 'gmt_offset', '0' );
 	}
 
 	/**
@@ -895,11 +852,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	public function test_wc_format_phone_number_is_not_affected_by_validate_phone_filter() {
 		add_filter( 'woocommerce_validate_phone', '__return_false' );
 
-		try {
-			$this->assertEquals( '1-610-385-0000', wc_format_phone_number( '1.610.385.0000' ) );
-		} finally {
-			remove_filter( 'woocommerce_validate_phone', '__return_false' );
-		}
+		$this->assertEquals( '1-610-385-0000', wc_format_phone_number( '1.610.385.0000' ) );
 	}
 
 	/**
@@ -919,14 +872,10 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_format_phone_number', $callback, 10, 3 );
 
-		try {
-			$this->assertEquals( 'filtered', wc_format_phone_number( '1.610.385.0000' ) );
-			$this->assertEquals( '1-610-385-0000', $received['formatted'] );
-			$this->assertEquals( '1.610.385.0000', $received['original'] );
-			$this->assertTrue( $received['is_valid'] );
-		} finally {
-			remove_filter( 'woocommerce_format_phone_number', $callback, 10 );
-		}
+		$this->assertEquals( 'filtered', wc_format_phone_number( '1.610.385.0000' ) );
+		$this->assertEquals( '1-610-385-0000', $received['formatted'] );
+		$this->assertEquals( '1.610.385.0000', $received['original'] );
+		$this->assertTrue( $received['is_valid'] );
 	}
 
 	/**

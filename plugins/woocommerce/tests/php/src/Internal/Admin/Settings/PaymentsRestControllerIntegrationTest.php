@@ -126,12 +126,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	 */
 	private static array $initial_option_states = array();
 
-	/** @var bool Whether the WooPayments version override existed before the test. */
-	private bool $initial_wcpay_version_override_exists = false;
-
-	/** @var mixed WooPayments version override value before the test. */
-	private $initial_wcpay_version_override;
-
 	/**
 	 * Saves values of initial country and currency before running test suite.
 	 */
@@ -167,8 +161,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->initial_wcpay_version_override_exists = array_key_exists( 'WCPAY_VERSION_NUMBER', Constants::$set_constants );
-		$this->initial_wcpay_version_override        = Constants::$set_constants['WCPAY_VERSION_NUMBER'] ?? null;
 
 		$gateways                   = \WC_Payment_Gateways::instance();
 		$gateways->payment_gateways = array();
@@ -205,7 +197,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		);
 		$this->run_cleanup_step( fn() => wc_get_container()->reset_all_resolved(), $cleanup_errors );
 		$this->run_cleanup_step( fn() => $this->clear_rest_server(), $cleanup_errors );
-		$this->run_cleanup_step( fn() => $this->restore_wcpay_version_override(), $cleanup_errors );
 		$this->run_cleanup_step( fn() => parent::tearDown(), $cleanup_errors );
 		$this->run_cleanup_step( fn() => self::invalidate_test_option_caches(), $cleanup_errors );
 
@@ -225,17 +216,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 			$callback();
 		} catch ( \Throwable $error ) {
 			$errors[] = $error;
-		}
-	}
-
-	/**
-	 * Restore only the Jetpack constant override owned by this fixture.
-	 */
-	private function restore_wcpay_version_override(): void {
-		if ( $this->initial_wcpay_version_override_exists ) {
-			Constants::set_constant( 'WCPAY_VERSION_NUMBER', $this->initial_wcpay_version_override );
-		} else {
-			Constants::clear_single_constant( 'WCPAY_VERSION_NUMBER' );
 		}
 	}
 
@@ -379,9 +359,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -427,9 +404,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		$this->assertCount( 0, $data['suggestions'] );
 		// But we do get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -478,9 +452,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Assert that the other suggestions are all PSPs.
 		$other_suggestions = $data['suggestions'];
 		$this->assertSame( array( PaymentsExtensionSuggestions::TYPE_PSP ), array_unique( array_column( $other_suggestions, '_type' ) ) );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -831,9 +802,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( '_priority', $suggestion_category, 'Suggestion category `_order` entry is missing' );
 		$this->assertArrayHasKey( 'title', $suggestion_category, 'Suggestion category `title` entry is missing' );
 		$this->assertArrayHasKey( 'description', $suggestion_category, 'Suggestion category `description` entry is missing' );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -1022,9 +990,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Assert that the PayPal gateway is returned as enabled.
 		$provider = $data['providers'][1];
 		$this->assertTrue( $provider['state']['enabled'] );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -1214,9 +1179,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Assert that the PayPal gateway is returned as enabled.
 		$provider = $data['providers'][1];
 		$this->assertTrue( $provider['state']['enabled'] );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -1348,9 +1310,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Assert that the PayPal gateway is returned as enabled.
 		$provider = $data['providers'][3];
 		$this->assertTrue( $provider['state']['enabled'] );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
