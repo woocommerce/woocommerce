@@ -73,12 +73,20 @@
 					// Nothing was saved, so redraw from the model, which releases the table.
 					shippingMethod.trigger( 'rerender' );
 
-					if ( _.isEmpty( shippingMethod.changes ) ) {
-						// Saving an empty change set would just fail again, so clear the busy
-						// state without marking the form dirty.
-						$save_button.removeClass( 'is-busy' );
-					} else {
+					// A delete leaves a methods entry on a clean form and a toggle leaves the same
+					// entry on a dirty one, so take either signal, but never an empty change set.
+					var retryable = ! _.isEmpty( shippingMethod.changes ) && (
+						! _.isEmpty( _.omit( shippingMethod.changes, 'methods' ) ) ||
+						shippingMethodView.needsUnloadConfirm
+					);
+
+					if ( retryable ) {
 						shippingMethod.trigger( 'change:methods' );
+					} else {
+						// Saving an empty change set would just fail again, and nothing is left to
+						// lose, so clear the busy state and the unload warning.
+						$save_button.removeClass( 'is-busy' );
+						shippingMethodView.clearUnloadConfirmation();
 					}
 				},
 				onSaveResponse: function( response, textStatus, snapshot ) {
@@ -749,6 +757,14 @@
 							// in the table in case merchant doesn't finish flow.
 
 							shippingMethodView.model.set( 'methods', withPendingEdits( shippingMethodView.model, response.data.methods ) );
+
+							// Setting 'methods' above marks the form dirty, which on the modal branch below
+							// still has to warn about navigating away from unfinished settings, so only
+							// the button is disabled here: an empty change set posts nothing and the
+							// endpoint rejects it. A completed save clears the flag via 'saved:methods'.
+							if ( _.isEmpty( shippingMethodView.model.changes ) ) {
+								$save_button.attr( 'disabled', 'disabled' );
+							}
 
 							// Close original modal
 							closeModal();

@@ -168,7 +168,7 @@ trait ProductReviewAbilityTrait {
 		 * @param int    $object_id   Review ID.
 		 * @param string $object_type Always 'product_review'.
 		 */
-		return true === apply_filters( 'woocommerce_rest_check_permissions', current_user_can( 'edit_products' ), $context, $review_id, 'product_review' );
+		return (bool) apply_filters( 'woocommerce_rest_check_permissions', current_user_can( 'edit_products' ), $context, $review_id, 'product_review' );
 	}
 
 	/**

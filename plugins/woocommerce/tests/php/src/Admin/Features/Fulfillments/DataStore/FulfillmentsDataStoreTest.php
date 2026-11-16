@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\DataStore;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Meta_Data;
 
 /**
@@ -26,18 +27,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
-	}
-
-	/**
-	 * Runs after all the tests of the class.
-	 */
-	public static function tearDownAfterClass(): void {
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
-		parent::tearDownAfterClass();
+		FulfillmentsHelper::create_tables();
 	}
 
 	/**
@@ -45,6 +35,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		FulfillmentsHelper::enable_fulfillments();
 		$this->data_store = wc_get_container()->get( FulfillmentsDataStore::class );
 	}
 

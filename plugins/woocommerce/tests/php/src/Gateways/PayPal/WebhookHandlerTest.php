@@ -54,7 +54,6 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		remove_filter( 'pre_http_request', array( $this, 'mock_paypal_http_response' ) );
 		$this->webhook_handler = null;
 		$this->mock_request    = null;
 		parent::tearDown();

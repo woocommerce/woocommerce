@@ -303,6 +303,24 @@ class ProductReviewUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should trash a review when the trashable filter returns a truthy non-boolean, as REST does.
+	 */
+	public function test_truthy_trashable_filter_allows_trash(): void {
+		$id = $this->review( 'approved' );
+		add_filter( 'woocommerce_rest_product_review_trashable', fn() => 1 );
+
+		$result = $this->sut->execute(
+			array(
+				'id'     => $id,
+				'status' => 'trash',
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'trash', get_comment( $id )->comment_approved );
+	}
+
+	/**
 	 * @testdox Should moderate a direct reply to a review, but not a reply to a reply.
 	 */
 	public function test_moderates_replies(): void {

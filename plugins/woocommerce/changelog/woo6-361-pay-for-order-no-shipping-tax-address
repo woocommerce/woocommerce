@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Calculate tax from the billing address when an order that needs no shipping and has no address is paid through the Store API.

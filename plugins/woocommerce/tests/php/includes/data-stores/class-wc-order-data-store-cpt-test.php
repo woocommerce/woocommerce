@@ -61,7 +61,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		$this->disable_cogs_feature();
 		parent::tearDown();
 	}
@@ -336,6 +335,9 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order->delete();
 		$this->assertEquals( OrderStatus::TRASH, $order->get_status(), 'The order was successfully trashed.' );
 
+		// Without transactional emails the notification count below stays 0 whatever untrash() does.
+		$this->enable_transactional_emails();
+
 		$status_action_count       = 0;
 		$status_notification_count = 0;
 		$status_action             = function ( $id ) use ( $order_id, &$status_action_count ) {
@@ -371,6 +373,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testdox Restoring an order only suppresses transactional email dispatch for the restored order.
 	 */
 	public function test_untrash_does_not_suppress_email_dispatch_for_other_orders(): void {
+		$this->enable_transactional_emails();
 		$restored_order = WC_Helper_Order::create_order();
 		$restored_order->set_status( OrderStatus::COMPLETED );
 		$restored_order->save();
@@ -435,6 +438,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function test_untrash_preserves_email_hook_callback_order(): void {
 		global $wp_filter;
 
+		$this->enable_transactional_emails();
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();

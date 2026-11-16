@@ -29,14 +29,6 @@ class WebflowPlatformTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up after each test.
-	 */
-	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_migrator_platforms' );
-		parent::tearDown();
-	}
-
-	/**
 	 * Test that the Webflow platform is registered with the expected configuration.
 	 */
 	public function test_webflow_platform_is_registered() {

@@ -56,8 +56,6 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
-
 		unset( $_GET['_wpnonce'], $_GET[ NotificationManagementService::RESEND_QUERY_ARG ] );
 		wp_set_current_user( 0 );
 

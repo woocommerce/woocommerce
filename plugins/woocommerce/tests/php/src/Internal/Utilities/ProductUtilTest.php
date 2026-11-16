@@ -18,6 +18,50 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
  */
 class ProductUtilTest extends \WC_Unit_Test_Case {
 	/**
+	 * @testdox Filtered URL quantities respect explicit button quantities and sold-individually limits.
+	 * @testWith [null, 30]
+	 *           [10, 10]
+	 *           [30, 30]
+	 *           [null, 1, true]
+	 * @param int|null $quantity Explicit button quantity.
+	 * @param int      $expected Expected quantity.
+	 * @param bool     $sold_individually Whether the product is sold individually.
+	 */
+	public function test_catalog_button_preserves_filtered_url_quantity( ?int $quantity, int $expected, bool $sold_individually = false ): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_sold_individually( $sold_individually );
+		$sut        = wc_get_container()->get( ProductUtil::class );
+		$minimum    = static fn() => 10;
+		$url_filter = static fn( $url ) => add_query_arg(
+			array(
+				'quantity' => '030',
+				'custom'   => 'a b',
+			),
+			$url
+		);
+		add_filter( 'woocommerce_quantity_input_min', $minimum );
+		add_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+		try {
+			$url  = $product->add_to_cart_url();
+			$data = $sut->get_catalog_add_to_cart_button_data( $product, $quantity );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum );
+			remove_filter( 'woocommerce_product_add_to_cart_url', $url_filter );
+		}
+		$this->assertSame( $expected, $data['quantity'] );
+		$expected_text = $expected > 1 ? 'Add ' . $expected . ' to cart' : 'Add to cart';
+		$this->assertSame( $expected_text, $data['text'] );
+		$this->assertStringContainsString( $expected_text . ':', $data['description'] );
+		if ( 30 === $expected ) {
+			$this->assertSame( $url, $data['url'], 'An unchanged quantity must preserve the filtered URL exactly.' );
+		} else {
+			parse_str( wp_parse_url( $data['url'], PHP_URL_QUERY ), $query );
+			$this->assertSame( (string) $expected, $query['quantity'] );
+			$this->assertSame( 'a b', $query['custom'], 'Other URL customizations must remain intact.' );
+		}
+	}
+
+	/**
 	 * @testdox Product cache cleanup can be scheduled when the loaded Action Scheduler lacks async actions.
 	 */
 	public function test_cleanup_supports_action_scheduler_without_async_actions(): void {
