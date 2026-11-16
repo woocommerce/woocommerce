@@ -1251,6 +1251,32 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A row that throws after changing a stored fulfillment in memory leaves nothing behind for a later row.
+	 */
+	public function test_row_that_throws_before_the_save_leaves_no_values_behind(): void {
+		$order = OrderHelper::create_order();
+		$id    = $order->get_id();
+		$item  = current( $order->get_items() )->get_id();
+		$this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$id},TRK-1,ups,,{$item}:1\n" );
+		$throws = 1;
+		add_filter(
+			'woocommerce_fulfillment_shipping_providers',
+			function ( $providers ) use ( &$throws ) {
+				if ( $throws-- > 0 ) {
+					throw new \RuntimeException( 'Provider service down.' );
+				}
+				return $providers;
+			},
+			1
+		);
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$id},TRK-1,ups,,{$item}:2\n{$id},TRK-1,UPS,,\n" );
+
+		$this->assertSame( FulfillmentsCsvImporter::CODE_ROW_FAILED, $result['rows'][0]['code'] );
+		$this->assertSame( 1, $this->fulfillments_of( $order )[0]->get_items()[0]['qty'], 'The failed row quantity is not saved by a later row' );
+	}
+
+	/**
 	 * @testdox A repeated order and tracking number pair is skipped across chunks, and a row that failed to save does not count as seen.
 	 */
 	public function test_duplicate_pairs_are_skipped_after_the_first_imported_row(): void {

@@ -517,6 +517,8 @@ class FulfillmentsCsvImporter {
 			} catch ( \Throwable $e ) {
 				// One row that throws, for example in a resolve-order callback, must not stop the chunk.
 				self::restore_filter_stack( $hook_depth );
+				// The row may have changed a cached fulfillment it never saved, so later rows read again.
+				$this->fulfillments_cache = array();
 				wc_get_logger()->error(
 					sprintf( 'Fulfillments import could not import row %1$d: %2$s', $row['row_number'], $e->getMessage() ),
 					array( 'source' => 'fulfillments-importer' )
