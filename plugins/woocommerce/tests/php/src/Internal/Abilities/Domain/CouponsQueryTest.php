@@ -44,8 +44,7 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate::class;
 		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
-		$this->assertArrayNotHasKey( 'email_restrictions', $ability->get_input_schema()['properties'] );
-		$result = $ability->execute(
+		$result  = $ability->execute(
 			array(
 				'code'   => 'write-test',
 				'amount' => '10',
@@ -57,8 +56,7 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$coupon->save();
 		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
 		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
-		$this->assertArrayNotHasKey( 'email_restrictions', $ability->get_input_schema()['properties'] );
-		$result = $ability->execute(
+		$result  = $ability->execute(
 			array(
 				'id'     => $coupon->get_id(),
 				'amount' => '20',
@@ -67,6 +65,101 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $result );
 		$this->assertSame( '20', $result['coupon']['amount'] );
 		$this->assertSame( 2, $result['coupon']['usage_count'] );
+	}
+
+	/**
+	 * @testdox Should accept supplied email restrictions without disclosing them in responses.
+	 */
+	public function test_email_restriction_writes(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$class  = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate::class;
+		$create = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$result = $create->execute(
+			array(
+				'code'               => 'restricted-emails',
+				'email_restrictions' => array( ' Customer@example.test ', 'other@example.test' ),
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertArrayNotHasKey( 'email_restrictions', $result['coupon'] );
+		$id = $result['coupon']['id'];
+		$this->assertSame( array( 'customer@example.test', 'other@example.test' ), ( new \WC_Coupon( $id ) )->get_email_restrictions() );
+
+		$class  = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
+		$update = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$result = $update->execute(
+			array(
+				'id'                 => $id,
+				'email_restrictions' => array( 'replacement@example.test' ),
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertArrayNotHasKey( 'email_restrictions', $result['coupon'] );
+		$this->assertSame( array( 'replacement@example.test' ), ( new \WC_Coupon( $id ) )->get_email_restrictions() );
+
+		$result = $update->execute(
+			array(
+				'id'     => $id,
+				'amount' => '15',
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertSame( array( 'replacement@example.test' ), ( new \WC_Coupon( $id ) )->get_email_restrictions() );
+		$query  = new \WP_Ability( CouponsQuery::get_name(), CouponsQuery::get_registration_args() );
+		$result = $query->execute( array( 'include' => array( $id ) ) );
+		$this->assertNotWPError( $result );
+		$this->assertArrayNotHasKey( 'email_restrictions', $result['coupons'][0] );
+
+		$result = $update->execute(
+			array(
+				'id'                 => $id,
+				'email_restrictions' => array(),
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertSame( array(), ( new \WC_Coupon( $id ) )->get_email_restrictions() );
+	}
+
+	/**
+	 * @testdox Should reject invalid emails before saving any coupon changes.
+	 * @testWith [["not-an-email"]]
+	 *           [["customer name@example.test"]]
+	 *           [[""]]
+	 *           [["valid@example.test", "invalid"]]
+	 * @param array $emails Supplied restrictions.
+	 */
+	public function test_invalid_email_restrictions( array $emails ): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$class  = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate::class;
+		$create = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$result = $create->execute(
+			array(
+				'code'               => 'invalid-email-create',
+				'email_restrictions' => $emails,
+			)
+		);
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_coupon_email_invalid', $result->get_error_code() );
+		$this->assertSame( 0, wc_get_coupon_id_by_code( 'invalid-email-create' ) );
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'invalid-email-update' );
+		$coupon->set_amount( '10' );
+		$coupon->set_email_restrictions( array( 'original@example.test' ) );
+		$coupon->save();
+		$before = ( new \WC_Coupon( $coupon->get_id() ) )->get_data();
+		$class  = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
+		$update = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$result = $update->execute(
+			array(
+				'id'                 => $coupon->get_id(),
+				'amount'             => '20',
+				'email_restrictions' => $emails,
+			)
+		);
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_coupon_email_invalid', $result->get_error_code() );
+		$this->assertEquals( $before, ( new \WC_Coupon( $coupon->get_id() ) )->get_data() );
 	}
 
 	/**
@@ -122,7 +215,6 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$coupon->save();
 		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
 		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
-		$this->assertArrayNotHasKey( 'email_restrictions', $ability->get_input_schema()['properties'] );
 		$this->assertWPError(
 			$ability->execute(
 				array(

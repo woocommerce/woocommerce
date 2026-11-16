@@ -153,7 +153,11 @@ trait CouponAbilityTrait {
 				'type'    => 'string',
 				'pattern' => '^([0-9]+(\.[0-9]+)?)?$',
 			),
-
+			'email_restrictions'   => array(
+				'type'        => 'array',
+				'description' => __( 'Allowed billing emails supplied by the user. Replaces existing restrictions; an empty array clears them. Omit to keep them. Not returned in responses.', 'woocommerce' ),
+				'items'       => array( 'type' => 'string' ),
+			),
 		);
 	}
 
@@ -248,6 +252,15 @@ trait CouponAbilityTrait {
 			$coupon->set_code( $code );
 		}
 
+		if ( isset( $input['email_restrictions'] ) ) {
+			$input['email_restrictions'] = array_map( 'trim', $input['email_restrictions'] );
+			foreach ( $input['email_restrictions'] as $email ) {
+				if ( ! is_email( $email ) ) {
+					return new \WP_Error( 'woocommerce_ability_coupon_email_invalid', __( 'Email restrictions must be valid email addresses.', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+			}
+		}
+
 		$setters = array(
 			'discount_type'        => 'set_discount_type',
 			'amount'               => 'set_amount',
@@ -258,6 +271,7 @@ trait CouponAbilityTrait {
 			'free_shipping'        => 'set_free_shipping',
 			'minimum_amount'       => 'set_minimum_amount',
 			'maximum_amount'       => 'set_maximum_amount',
+			'email_restrictions'   => 'set_email_restrictions',
 		);
 
 		try {
