@@ -10,14 +10,14 @@ export interface PreloadedCartResponse {
 }
 
 /**
- * Returns the cart the page was rendered with, when the server preloaded it (`AssetDataRegistry::hydrate_api_request`),
- * or null.
+ * Returns the cart the page was rendered with, when the server preloaded it (`AssetDataRegistry::hydrate_api_request`
+ * prints it as `wcSettings.preloadedCart`), or null.
  */
 export const getPreloadedCartResponse = (): PreloadedCartResponse | null => {
-	const preloaded = getSetting<
-		Record< string, Partial< PreloadedCartResponse > | undefined >
-	>( 'preloadedApiRequests', {} );
-	const response = preloaded?.[ '/wc/store/v1/cart' ];
+	const response = getSetting< Partial< PreloadedCartResponse > | null >(
+		'preloadedCart',
+		null
+	);
 
 	if ( ! response?.body || typeof response.body !== 'object' ) {
 		return null;

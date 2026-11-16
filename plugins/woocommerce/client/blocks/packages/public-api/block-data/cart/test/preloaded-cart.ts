@@ -29,45 +29,27 @@ const cartBody = {
 	items_count: 1,
 } as unknown as CartResponse;
 
-const preloadedApiRequests = {
-	'/wc/store/v1/cart': {
-		body: cartBody,
-		headers: { 'Cart-Hash': 'hash-from-preload' },
-	},
+const preloadedCart = {
+	body: cartBody,
+	headers: { 'Cart-Hash': 'hash-from-preload' },
 };
 
 describe( 'getPreloadedCartResponse', () => {
 	it( 'returns the preloaded cart with its headers', () => {
-		mockGetSetting.mockReturnValueOnce( preloadedApiRequests );
+		mockGetSetting.mockReturnValueOnce( preloadedCart );
 
-		expect( getPreloadedCartResponse() ).toEqual( {
-			body: cartBody,
-			headers: { 'Cart-Hash': 'hash-from-preload' },
-		} );
-		expect( mockGetSetting ).toHaveBeenCalledWith(
-			'preloadedApiRequests',
-			{}
-		);
+		expect( getPreloadedCartResponse() ).toEqual( preloadedCart );
+		expect( mockGetSetting ).toHaveBeenCalledWith( 'preloadedCart', null );
 	} );
 
 	it( 'returns null when the page did not preload the cart', () => {
-		mockGetSetting.mockReturnValueOnce( {
-			'/wc/store/v1/products': { body: [], headers: {} },
-		} );
-
-		expect( getPreloadedCartResponse() ).toBeNull();
-	} );
-
-	it( 'returns null when nothing was preloaded', () => {
-		mockGetSetting.mockReturnValueOnce( {} );
+		mockGetSetting.mockReturnValueOnce( null );
 
 		expect( getPreloadedCartResponse() ).toBeNull();
 	} );
 
 	it( 'returns null when the preloaded cart has no body', () => {
-		mockGetSetting.mockReturnValueOnce( {
-			'/wc/store/v1/cart': { headers: {} },
-		} );
+		mockGetSetting.mockReturnValueOnce( { headers: {} } );
 
 		expect( getPreloadedCartResponse() ).toBeNull();
 	} );
@@ -77,13 +59,20 @@ describe( 'Cart store with a preloaded cart', () => {
 	const loadStore = ( {
 		preloaded,
 		editor = false,
+		cartHashThrows = false,
 	}: {
-		preloaded: Record< string, unknown >;
+		preloaded: unknown;
 		editor?: boolean;
+		cartHashThrows?: boolean;
 	} ) => {
+		const startResolution = jest.fn();
 		const receiveCart = jest.fn();
 		const finishResolution = jest.fn();
-		const setCartHash = jest.fn();
+		const setCartHash = jest.fn( () => {
+			if ( cartHashThrows ) {
+				throw new Error( 'QuotaExceededError' );
+			}
+		} );
 
 		jest.isolateModules( () => {
 			const { getSetting: actualGetSetting } = jest.requireActual< {
@@ -93,13 +82,17 @@ describe( 'Cart store with a preloaded cart', () => {
 				'@woocommerce/settings'
 			).getSetting.mockImplementation(
 				( name: string, fallback: unknown ) =>
-					name === 'preloadedApiRequests'
+					name === 'preloadedCart'
 						? preloaded
 						: actualGetSetting( name, fallback )
 			);
 			jest.requireMock< { dispatch: jest.Mock } >(
 				'@wordpress/data'
-			).dispatch.mockReturnValue( { receiveCart, finishResolution } );
+			).dispatch.mockReturnValue( {
+				startResolution,
+				receiveCart,
+				finishResolution,
+			} );
 			jest.requireMock< { isEditor: jest.Mock } >(
 				'../../utils'
 			).isEditor.mockReturnValue( editor );
@@ -110,39 +103,54 @@ describe( 'Cart store with a preloaded cart', () => {
 			jest.requireActual( '../index' );
 		} );
 
-		return { receiveCart, finishResolution, setCartHash };
+		return { startResolution, receiveCart, finishResolution, setCartHash };
 	};
 
-	it( 'receives the preloaded cart and resolves getCartData before any block renders', () => {
-		const { receiveCart, finishResolution, setCartHash } = loadStore( {
-			preloaded: preloadedApiRequests,
-		} );
+	it( 'starts getCartData, receives the preloaded cart, then finishes getCartData, before any block renders', () => {
+		const { startResolution, receiveCart, finishResolution, setCartHash } =
+			loadStore( { preloaded: preloadedCart } );
 
+		expect( startResolution ).toHaveBeenCalledWith( 'getCartData', [] );
 		expect( receiveCart ).toHaveBeenCalledWith( cartBody );
-		expect( finishResolution ).toHaveBeenCalledWith( 'getCartData' );
+		expect( finishResolution ).toHaveBeenCalledWith( 'getCartData', [] );
 		expect( setCartHash ).toHaveBeenCalledWith( {
 			'Cart-Hash': 'hash-from-preload',
 		} );
+		expect( startResolution.mock.invocationCallOrder[ 0 ] ).toBeLessThan(
+			receiveCart.mock.invocationCallOrder[ 0 ]
+		);
 		expect( receiveCart.mock.invocationCallOrder[ 0 ] ).toBeLessThan(
 			finishResolution.mock.invocationCallOrder[ 0 ]
 		);
 	} );
 
-	it( 'leaves the cart to the resolver when the page did not preload it', () => {
+	it( 'receives the preloaded cart when storing the cart hash fails', () => {
 		const { receiveCart, finishResolution } = loadStore( {
-			preloaded: {},
+			preloaded: preloadedCart,
+			cartHashThrows: true,
 		} );
 
+		expect( receiveCart ).toHaveBeenCalledWith( cartBody );
+		expect( finishResolution ).toHaveBeenCalledWith( 'getCartData', [] );
+	} );
+
+	it( 'leaves the cart to the resolver when the page did not preload it', () => {
+		const { startResolution, receiveCart, finishResolution } = loadStore( {
+			preloaded: null,
+		} );
+
+		expect( startResolution ).not.toHaveBeenCalled();
 		expect( receiveCart ).not.toHaveBeenCalled();
 		expect( finishResolution ).not.toHaveBeenCalled();
 	} );
 
 	it( 'does not receive a preloaded cart in the editor', () => {
-		const { receiveCart, finishResolution } = loadStore( {
-			preloaded: preloadedApiRequests,
+		const { startResolution, receiveCart, finishResolution } = loadStore( {
+			preloaded: preloadedCart,
 			editor: true,
 		} );
 
+		expect( startResolution ).not.toHaveBeenCalled();
 		expect( receiveCart ).not.toHaveBeenCalled();
 		expect( finishResolution ).not.toHaveBeenCalled();
 	} );

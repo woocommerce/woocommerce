@@ -232,26 +232,35 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox `preloadedApiRequests` holds each preloaded response under its path, for the preloading middleware and the cart data store.
+	 * @testdox `preloadedCart` holds the preloaded cart response for the cart data store.
 	 */
-	public function test_preloaded_api_requests_holds_hydrated_responses() {
+	public function test_preloaded_cart_holds_the_hydrated_cart() {
 		$this->registry->hydrate_api_request( '/wc/store/v1/cart' );
 
 		$this->registry->initialize_core_data();
 
-		$preloaded = (array) $this->registry->get()['preloadedApiRequests'];
-		$this->assertSame( array( '/wc/store/v1/cart' ), array_keys( $preloaded ) );
-		$this->assertArrayHasKey( 'body', $preloaded['/wc/store/v1/cart'] );
-		$this->assertArrayHasKey( 'headers', $preloaded['/wc/store/v1/cart'] );
-		$this->assertArrayHasKey( 'items', $preloaded['/wc/store/v1/cart']['body'] );
+		$cart = $this->registry->get()['preloadedCart'];
+		$this->assertArrayHasKey( 'body', $cart );
+		$this->assertArrayHasKey( 'headers', $cart );
+		$this->assertArrayHasKey( 'items', $cart['body'] );
 	}
 
 	/**
-	 * @testdox `preloadedApiRequests` is an empty object when nothing was preloaded, so it prints as `{}`.
+	 * @testdox `preloadedCart` is null when the cart was not preloaded.
 	 */
-	public function test_preloaded_api_requests_is_an_empty_object_without_hydration() {
+	public function test_preloaded_cart_is_null_without_hydration() {
 		$this->registry->initialize_core_data();
 
-		$this->assertSame( '{}', wp_json_encode( $this->registry->get()['preloadedApiRequests'] ) );
+		$this->assertNull( $this->registry->get()['preloadedCart'] );
+	}
+
+	/**
+	 * @testdox The preloading middleware serves every preloaded response but the cart's, so a later cart request reads the server.
+	 */
+	public function test_preloading_middleware_leaves_out_the_cart() {
+		$this->registry->hydrate_api_request( '/wc/store/v1/cart' );
+		$this->registry->hydrate_api_request( '/wc/store/v1/products' );
+
+		$this->assertSame( array( '/wc/store/v1/products' ), array_keys( $this->registry->preloading_middleware_requests() ) );
 	}
 }

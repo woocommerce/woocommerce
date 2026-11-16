@@ -143,24 +143,32 @@ const unsubscribeUpdatePaymentMethods = subscribe( async () => {
 	}
 }, store );
 
-// The Cart and Checkout blocks render before the getCartData resolver can read the preloaded cart (it reads it through
-// apiFetch, asynchronously), so their first render is the loading skeleton, which DelayedContentWithSkeleton then keeps
-// for its minimum display time. When the page preloaded the cart, receive it now, as the resolver would, so the first
-// render shows the cart. This runs after the subscriptions above, so they see the cart arrive.
+// The Cart and Checkout blocks render before the getCartData resolver could read a preloaded cart through apiFetch, so
+// their first render would be the loading skeleton, which DelayedContentWithSkeleton then keeps for its minimum display
+// time. When the page preloaded the cart (wcSettings.preloadedCart, which the preloading middleware does not serve, so a
+// later cart request reads the server), receive it now, as the resolver would, so the first render shows the cart. This
+// runs after the subscriptions above, so they see the cart arrive.
 const preloadedCart = getPreloadedCartResponse();
 
 if ( preloadedCart && ! isEditor() ) {
-	if (
-		// @ts-expect-error setCartHash exists but is not typed
-		typeof apiFetch.setCartHash === 'function'
-	) {
-		// @ts-expect-error setCartHash exists but is not typed
-		apiFetch.setCartHash( preloadedCart.headers );
+	// Started before the cart arrives: receiveCart notifies the subscribers above, which select getCartData, and a
+	// resolution not yet started would queue the resolver.
+	void wpDispatch( store ).startResolution( 'getCartData', [] );
+	try {
+		if (
+			// @ts-expect-error setCartHash exists but is not typed
+			typeof apiFetch.setCartHash === 'function'
+		) {
+			// @ts-expect-error setCartHash exists but is not typed
+			apiFetch.setCartHash( preloadedCart.headers );
+		}
+	} catch {
+		// The hash is stored in localStorage, which a browser may refuse to write; the cart is received regardless.
 	}
 	setTriggerStoreSyncEvent( false );
 	void wpDispatch( store ).receiveCart( preloadedCart.body );
 	setTriggerStoreSyncEvent( true );
-	void wpDispatch( store ).finishResolution( 'getCartData' );
+	void wpDispatch( store ).finishResolution( 'getCartData', [] );
 }
 
 export const CART_STORE_KEY = STORE_KEY;

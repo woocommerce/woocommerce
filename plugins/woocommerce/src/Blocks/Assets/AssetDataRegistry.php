@@ -36,6 +36,13 @@ class AssetDataRegistry {
 	private $preloaded_api_requests = [];
 
 	/**
+	 * The Store API path of the cart.
+	 *
+	 * @var string
+	 */
+	const CART_PATH = '/wc/store/v1/cart';
+
+	/**
 	 * Lazy data is an array of closures that will be invoked just before
 	 * asset data is generated for the enqueued script.
 	 *
@@ -261,9 +268,20 @@ class AssetDataRegistry {
 		$core_data['experimentalWcRestApiV4']      = Features::is_enabled( 'rest-api-v4' );
 		$core_data['experimentalCartSaveForLater'] = FeaturesUtil::feature_is_enabled( 'cart_save_for_later' );
 		$core_data['preloadedApiRequestPaths']     = array_keys( $this->preloaded_api_requests );
-		$core_data['preloadedApiRequests']         = (object) $this->preloaded_api_requests;
+		$core_data['preloadedCart']                = $this->preloaded_api_requests[ self::CART_PATH ] ?? null;
 		// note this WILL wipe any data already registered to these keys because they are protected.
 		$this->data = array_replace_recursive( $settings, $core_data );
+	}
+
+	/**
+	 * The preloaded responses the apiFetch preloading middleware serves: every one but the cart's. The cart data store
+	 * receives the preloaded cart from wcSettings.preloadedCart before the first render; the middleware serves each
+	 * response once, so a cart left in it would answer a later cart request with the cart the page was rendered with.
+	 *
+	 * @return array Preloaded responses by path.
+	 */
+	protected function preloading_middleware_requests() {
+		return array_diff_key( $this->preloaded_api_requests, array( self::CART_PATH => true ) );
 	}
 
 	/**
@@ -408,10 +426,10 @@ class AssetDataRegistry {
 			$wc_settings_script            = "var wcSettings = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
 			$preloaded_api_requests_script = '';
 
-			// The preloaded responses are printed once, in wcSettings: the middleware reads them from there, and so does
-			// the cart data store, which receives the preloaded cart before the first render.
-			if ( count( $this->preloaded_api_requests ) > 0 ) {
-				$preloaded_api_requests_script = 'wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( wcSettings.preloadedApiRequests ) );';
+			$preloaded_api_requests = $this->preloading_middleware_requests();
+			if ( count( $preloaded_api_requests ) > 0 ) {
+				$preloaded_api_requests        = rawurlencode( wp_json_encode( $preloaded_api_requests ) );
+				$preloaded_api_requests_script = "wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( JSON.parse( decodeURIComponent( '" . esc_js( $preloaded_api_requests ) . "' ) ) ) );";
 			}
 
 			wp_add_inline_script(
