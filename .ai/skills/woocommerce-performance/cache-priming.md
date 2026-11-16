@@ -8,7 +8,7 @@ Covers correct usage of `_prime_post_caches()` to reduce SQL query counts when l
 
 **Apply when:** any `array_map` or loop fetches multiple objects by ID using `get_post()`, `wc_get_product()`, or any function that resolves to a `get_post()` call per item (e.g. a `format_*` helper that calls `get_post()` internally).
 
-**Orders are different.** `_prime_post_caches()` does not load orders stored in the HPOS tables. Replace a `wc_get_order()` loop with `WC_Order_Factory::get_orders( $order_ids )`, which batches the load on either order storage.
+**Orders are different.** `_prime_post_caches()` does not load orders stored in the HPOS tables. Load them with `WC_Order_Factory::get_orders( $order_ids )` instead of a `wc_get_order()` loop: it reads HPOS orders in bulk, and on post-based order storage it primes the post and meta caches before reading each order. It is not a drop-in replacement: it returns a list in input order (input keys are dropped), returns a duplicate ID once, and does not return `false` for a missing ID (it throws on post-based order storage and leaves a non-order entry in the list under HPOS; `$skip_invalid` fixes neither). Keep the behavior the caller relies on.
 
 **Correct pattern:**
 
@@ -230,7 +230,7 @@ _prime_post_caches( $result );
 $products = array_map( 'wc_get_product', $result );
 ```
 
-Priming is only needed when starting from a raw list of IDs — see pattern 1. That includes IDs returned by a `'fields' => 'ids'` query, which primes no caches, and queries that disabled `update_post_meta_cache` or `update_post_term_cache`.
+Priming is only needed when starting from a raw list of IDs — see pattern 1. That includes IDs returned by a `'fields' => 'ids'` query, which primes no caches. A query that set `update_post_meta_cache`, `update_post_term_cache` or `cache_results` to `false` returns `WP_Post` objects but leaves that cache cold: when the code that follows reads it, prime the IDs with `_prime_post_caches( wp_list_pluck( $posts, 'ID' ) )`.
 
 ---
 

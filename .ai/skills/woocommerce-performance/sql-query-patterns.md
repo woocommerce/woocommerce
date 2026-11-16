@@ -287,7 +287,7 @@ LIMIT 1
 SELECT product_id FROM wp_wc_product_meta_lookup WHERE downloadable = 1 LIMIT 1
 ```
 
-The "after" query no longer checks `post_type` or `post_status`. That is acceptable for this caller, which only asks whether the store sells downloadable products at all; it would not be for a query that must return published products.
+The "after" query no longer checks `post_type` or `post_status`, so it also counts variations and products that are not published, and it can disagree with the "before" query that still runs while the lookup table regenerates. `DownloadsWrapper` tolerates that because the value only sets a CSS class in the editor preview; a query that must return published products has to keep the filter.
 
 **Canonical example:** `DownloadsWrapper` in `src/Blocks/BlockTypes/OrderConfirmation/DownloadsWrapper.php`; `FilterData::get_stock_status_counts` in `src/Internal/ProductFilters/FilterData.php`.
 
@@ -323,15 +323,17 @@ if ( 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' ) ) {
 
 ## Pattern H — `MIN/MAX` full scan → `UNION ALL + LIMIT 1`
 
-`SELECT MIN(col), MAX(col) FROM table WHERE ...` requires a full index scan of all matching rows. When the column is covered by a sorted composite index, the min and max can each be found in a single seek by reading one row from each end.
+`SELECT MIN(col), MAX(col) FROM table WHERE ...` reads every matching row when the optimizer cannot jump to the ends of an index. When an index returns the rows sorted by the column, the min and max can each be found by reading from one end of it.
 
 **When it applies:** All three conditions must hold:
 
-1. The WHERE predicates on the leading index columns are equality constraints (`col = const`) or bounded ranges that the optimizer can resolve as a contiguous index segment.
-2. The ORDER BY column is the trailing key of that same index.
+1. An index returns the rows already sorted by the ORDER BY column: either an index that starts with that column, or a composite index where every column before it has an equality predicate (`col = const`). A range, `IN (...)` or `!=` on an earlier column does not qualify, because the index is then sorted by that column first.
+2. Few rows at each end of that index fail the remaining WHERE predicates. Each failing row is read and skipped before the first qualifying one.
 3. `LIMIT 1` stops the scan after the first qualifying row.
 
-In the example below, `type = 'shop_order'` is an equality (const) and `date_created_gmt` is read directionally with `LIMIT 1` stopping after the first qualifying row in each direction. `status != 'trash'` is not an equality, so the seek stays cheap only while few rows at either end are trashed — confirm with `EXPLAIN`.
+When every WHERE predicate is an equality on the leading columns of a composite index that has the column next, keep the plain `MIN()` / `MAX()`: MySQL and MariaDB already answer it from the index ends (`EXPLAIN` shows `Select tables optimized away`).
+
+The example below does not use `type_status_date(type, status, date_created_gmt)`: `status != 'trash'` is not an equality, so that index is sorted by status before date. The optimizer walks the single-column `date_created(date_created_gmt)` index from each end and checks `type` and `status` on each row. That reads one row per branch when the oldest and newest rows are orders that are not trashed, and one more for every refund or trashed order it has to skip first — confirm with `EXPLAIN`.
 
 ```sql
 -- Full scan: 51,831 rows examined, ~66ms avg
@@ -354,9 +356,9 @@ FROM (
 
 **NULL handling:** `MIN()` / `MAX()` ignore NULLs; `ORDER BY col ASC LIMIT 1` returns NULL first (MySQL sorts NULLs before values in ASC). On a nullable column the two approaches produce different results. Pattern H is only safe when the column is `NOT NULL`, or when both UNION branches add `AND col IS NOT NULL` (as above: `date_created_gmt` is nullable).
 
-**If the required index does not exist:** Adding it is a prerequisite, not a reason to skip the pattern. Evaluate whether the index's write, storage, and migration cost is justified before adding it. For example, `SELECT MAX(post_modified_gmt) FROM wp_posts WHERE post_type IN ('product', 'product_variation')` is a Pattern H candidate, but `post_modified_gmt` has no standard WordPress index — the optimization requires first adding `(post_type, post_modified_gmt)`.
+**If the required index does not exist:** Adding it is a prerequisite, not a reason to skip the pattern. Evaluate whether the index's write, storage, and migration cost is justified before adding it. For example, `SELECT MAX(post_modified_gmt) FROM wp_posts WHERE post_type IN ('product', 'product_variation')` is a Pattern H candidate, but `post_modified_gmt` has no standard WordPress index — the optimization requires first adding `(post_type, post_modified_gmt)`. The `IN (...)` list is not an equality, so one `ORDER BY post_modified_gmt DESC LIMIT 1` over both types still reads and sorts every matching row: query each post type separately (`WHERE post_type = 'product'`, then `'product_variation'`) and take the larger result.
 
-**Table scope:** The pattern applies to any table with a suitable composite index — not only `wp_wc_orders`. When HPOS is disabled, orders reside in `wp_posts` with index `type_status_date(post_type, post_status, post_date)` — a different trailing key than `wp_wc_orders`. Always verify the target table's actual index covers the WHERE + ORDER BY columns before applying the rewrite.
+**Table scope:** The pattern applies to any table with a suitable index — not only `wp_wc_orders`. When HPOS is disabled, orders reside in `wp_posts` with index `type_status_date(post_type, post_status, post_date, ID)` and no index that starts with `post_date`, so the `status != 'trash'` example above has no cheap seek there. Always check the target table's actual indexes against condition 1 before applying the rewrite.
 
 **Canonical example:** `ListTable` in `src/Internal/Admin/Orders/ListTable.php`.
 
@@ -375,5 +377,5 @@ When writing or reviewing a SQL query:
 - [ ] Are two fan-out tables joined flat (multiplying rows)? Decouple one side as a subquery. (Pattern F)
 - [ ] Does a `wp_posts + wp_postmeta` join fetch data available in `wc_product_meta_lookup`? Use the lookup table if the regeneration guard passes, keeping any `post_status` filter the result needs. (Pattern G)
 - [ ] Does any dynamic `IN (...)` list guard against empty input and sanitize values? (Cross-cutting)
-- [ ] Does the query compute `MIN(col)` or `MAX(col)` over a large indexed table? Use `UNION ALL + LIMIT 1` if WHERE + ORDER BY share a composite index and the column is `NOT NULL` (or both branches add `AND col IS NOT NULL`). (Pattern H)
+- [ ] Does the query compute `MIN(col)` or `MAX(col)` over a large indexed table? Use `UNION ALL + LIMIT 1` if an index returns the rows sorted by that column, few rows at its ends fail the WHERE, and the column is `NOT NULL` (or both branches add `AND col IS NOT NULL`). Keep plain `MIN` / `MAX` when every predicate is an equality on the index's leading columns. (Pattern H)
 - [ ] After applying any optimization, verify the execution plan changed as expected with `EXPLAIN` — check `type`, `key`, `rows`, and `Extra` columns before and after.

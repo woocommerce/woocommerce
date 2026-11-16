@@ -162,7 +162,7 @@ $autoload_options[ $option_name ] = isset( $option['autoload'] ) ? (bool) $optio
 update_option( $name, $value, $autoload_options[ $name ] ? 'yes' : 'no' );
 ```
 
-WordPress loads all autoloaded options into the object cache at bootstrap via `wp_load_alloptions()`. This means that **any `get_option()` call reading a WooCommerce settings-API option that has been saved is already served from cache** — adding `wp_prime_option_caches` there is a no-op.
+WordPress loads all autoloaded options into the object cache at bootstrap via `wp_load_alloptions()`. This means that **any `get_option()` call reading a WooCommerce settings-API option that has been saved with autoload on is already served from cache** — adding `wp_prime_option_caches` there is a no-op. Options whose field sets `'autoload' => false` (several email, account, shipping and advanced settings do) are not loaded at bootstrap and can still benefit from priming.
 
 ### False-positive patterns — do NOT add priming
 
