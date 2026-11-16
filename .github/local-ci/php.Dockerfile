@@ -13,7 +13,7 @@
 # Every job gets a fresh container and only named volumes survive between
 # them, so pnpm must be in the image itself.
 ARG PHP_IMAGE
-FROM node:24.15.0-bookworm@sha256:f22d6a1f082c02f292e86929b5b0442ac2e5eaf438a5dea9b1566601c3e05940 AS node
+FROM node:24.22.3-bookworm@sha256:9d266751ca3d7fdbe651c878ffd5ad0a42fed49a18c283509267c97f025b7496 AS node
 FROM composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 AS composer
 
 FROM ${PHP_IMAGE}

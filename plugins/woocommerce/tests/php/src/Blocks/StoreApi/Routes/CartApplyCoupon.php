@@ -272,9 +272,6 @@ class CartApplyCoupon extends ControllerTestCase {
 
 		$this->assertEquals( 404, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_cart_coupon_disabled', $data['code'] );
-
-		// Re-enable coupons for other tests.
-		update_option( 'woocommerce_enable_coupons', 'yes' );
 	}
 
 	/**

@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers as ShippingProviders;
+use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 
 /**
  * ShippingProvidersTest class.
@@ -13,40 +14,18 @@ use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers as ShippingProv
 class ShippingProvidersTest extends \WP_UnitTestCase {
 
 	/**
-	 * Original value of the fulfillments feature flag.
-	 *
-	 * @var mixed
-	 */
-	private $original_fulfillments_flag;
-
-	/**
 	 * Set up the test environment.
 	 */
-	public function setUp(): void {
-		parent::setUp();
-		$this->original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
-	}
-
-	/**
-	 * Tear down the test environment.
-	 */
-	public function tearDown(): void {
-		if ( false === $this->original_fulfillments_flag ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', $this->original_fulfillments_flag );
-		}
-		parent::tearDown();
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+		FulfillmentsHelper::create_tables();
 	}
 
 	/**
 	 * Test that the shipping providers configuration returns the correct instances.
 	 */
 	public function test_shipping_providers_configuration(): void {
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
+		FulfillmentsHelper::enable_fulfillments();
 
 		$shipping_providers = FulfillmentUtils::get_shipping_providers();
 		$this->assertNotEmpty( $shipping_providers, 'Expected at least one registered shipping provider.' );

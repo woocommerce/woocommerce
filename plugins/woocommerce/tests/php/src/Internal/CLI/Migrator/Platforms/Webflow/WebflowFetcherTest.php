@@ -32,35 +32,16 @@ class WebflowFetcherTest extends WC_Unit_Test_Case {
 	private WebflowFetcher $fetcher;
 
 	/**
-	 * HTTP filter callbacks registered during the test, removed in tearDown.
-	 *
-	 * @var array<callable>
-	 */
-	private array $http_filters = array();
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->http_filters = array();
-		$this->fetcher      = new WebflowFetcher(
+		$this->fetcher = new WebflowFetcher(
 			array(
 				'site_id'      => 'site-123',
 				'access_token' => 'ws-test-token',
 			)
 		);
-	}
-
-	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		foreach ( $this->http_filters as $cb ) {
-			remove_filter( 'pre_http_request', $cb );
-		}
-		$this->http_filters = array();
-		parent::tearDown();
 	}
 
 	/**
@@ -94,7 +75,6 @@ class WebflowFetcherTest extends WC_Unit_Test_Case {
 		};
 
 		add_filter( 'pre_http_request', $cb, 10, 3 );
-		$this->http_filters[] = $cb;
 	}
 
 	/**
@@ -139,7 +119,6 @@ class WebflowFetcherTest extends WC_Unit_Test_Case {
 		};
 
 		add_filter( 'pre_http_request', $cb, 10, 3 );
-		$this->http_filters[] = $cb;
 
 		$this->fetcher->fetch_batch(
 			array(
@@ -270,7 +249,6 @@ class WebflowFetcherTest extends WC_Unit_Test_Case {
 			);
 		};
 		add_filter( 'pre_http_request', $cb, 10, 3 );
-		$this->http_filters[] = $cb;
 
 		$this->fetcher->fetch_batch( array( 'limit' => 2 ) );
 		$this->fetcher->fetch_batch(
@@ -321,7 +299,6 @@ class WebflowFetcherTest extends WC_Unit_Test_Case {
 			);
 		};
 		add_filter( 'pre_http_request', $cb, 10, 3 );
-		$this->http_filters[] = $cb;
 
 		$result = $this->fetcher->fetch_batch( array( 'limit' => 2 ) );
 

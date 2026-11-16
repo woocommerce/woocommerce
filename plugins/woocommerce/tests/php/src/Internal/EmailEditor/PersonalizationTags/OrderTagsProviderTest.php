@@ -86,4 +86,19 @@ class OrderTagsProviderTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( '<p>&lt;mark&gt;2024&lt;/mark&gt;</p>', $html );
 	}
+
+	/**
+	 * @testdox The order custom field tag finds a field whose key has an apostrophe and shows its value as text.
+	 */
+	public function test_order_custom_field_tag_reads_key_with_apostrophe_and_shows_text(): void {
+		$order = wc_create_order();
+		$order->update_meta_data( "Customer's note", '<b>Leave</b> at the door' );
+		$order->save();
+		$personalizer = new Personalizer( $this->registry );
+		$personalizer->set_context( array( 'order' => $order ) );
+
+		$html = $personalizer->personalize_content( '<p><!--[woocommerce/order-custom-field key="Customer&#039;s note"]--></p>' );
+
+		$this->assertSame( '<p>&lt;b&gt;Leave&lt;/b&gt; at the door</p>', $html );
+	}
 }

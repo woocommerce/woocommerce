@@ -54,7 +54,6 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 				$this->original_hpos = null;
 			}
 		} finally {
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 			parent::tearDown();
 		}
 	}
@@ -126,8 +125,8 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	public function test_include_without_per_page_returns_one_page(): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$order_ids = array();
-		foreach ( range( 1, 15 ) as $unused ) {
-			$order_ids[] = OrderHelper::create_order()->get_id();
+		foreach ( range( 1, 11 ) as $unused ) {
+			$order_ids[] = wc_create_order()->get_id();
 		}
 
 		$all_ids = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'include' => $order_ids ) );
@@ -164,12 +163,10 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	 * @testdox Should refuse an id together with include.
 	 */
 	public function test_refuses_id_with_include(): void {
-		$order = OrderHelper::create_order();
-
 		$result = OrdersQuery::execute(
 			array(
-				'id'      => $order->get_id(),
-				'include' => array( $order->get_id() ),
+				'id'      => 1,
+				'include' => array( 1 ),
 			)
 		);
 
@@ -179,11 +176,15 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Search terms that each match one detail of the order that create_detailed_order() builds, on both storages.
+	 * @testdox Should find an order by each customer and item detail the search input describes.
 	 *
-	 * @return array<string, array{0: bool, 1: string}>
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
 	 */
-	public function search_terms(): array {
+	public function test_search_matches_order_details( bool $hpos ): void {
+		$this->use_storage( $hpos );
+		$order = $this->create_detailed_order();
+		$this->create_customer_order( 'John', 'Smith', 'john@example.com' );
 		$terms = array(
 			'first name'         => 'Jane',
 			'last name'          => 'doe',
@@ -198,30 +199,11 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 			'padded term'        => ' Enamel ',
 		);
 
-		$cases = array();
-		foreach ( $this->storage_modes() as $storage => list( $hpos ) ) {
-			foreach ( $terms as $detail => $term ) {
-				$cases[ "$detail, $storage" ] = array( $hpos, $term );
-			}
+		foreach ( $terms as $detail => $search ) {
+			$result = OrdersQuery::execute( array( 'search' => $search ) );
+
+			$this->assertSame( array( $order ), array_column( $result['orders'], 'id' ), "Search by $detail." );
 		}
-		return $cases;
-	}
-
-	/**
-	 * @testdox Should find an order by each customer and item detail the search input describes.
-	 *
-	 * @dataProvider search_terms
-	 * @param bool   $hpos   Whether to use the custom orders table.
-	 * @param string $search Search text.
-	 */
-	public function test_search_matches_order_details( bool $hpos, string $search ): void {
-		$this->use_storage( $hpos );
-		$order = $this->create_detailed_order();
-		$this->create_customer_order( 'John', 'Smith', 'john@example.com' );
-
-		$result = OrdersQuery::execute( array( 'search' => $search ) );
-
-		$this->assertSame( array( $order ), array_column( $result['orders'], 'id' ) );
 	}
 
 	/**
@@ -246,11 +228,9 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	 * @testdox Should refuse an id together with search.
 	 */
 	public function test_refuses_id_with_search(): void {
-		$order = OrderHelper::create_order();
-
 		$result = OrdersQuery::execute(
 			array(
-				'id'     => $order->get_id(),
+				'id'     => 1,
 				'search' => 'Jane',
 			)
 		);
@@ -335,28 +315,12 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return each order exactly once across pages when orders tie on $orderby $order, with HPOS $hpos.
-	 * @testWith [true, "date", "asc"]
-	 *           [true, "date", "desc"]
-	 *           [true, "date_modified", "asc"]
-	 *           [true, "date_modified", "desc"]
-	 *           [true, "total", "asc"]
-	 *           [true, "total", "desc"]
-	 *           [true, "id", "asc"]
-	 *           [true, "id", "desc"]
-	 *           [false, "date", "asc"]
-	 *           [false, "date", "desc"]
-	 *           [false, "date_modified", "asc"]
-	 *           [false, "date_modified", "desc"]
-	 *           [false, "total", "asc"]
-	 *           [false, "total", "desc"]
-	 *           [false, "id", "asc"]
-	 *           [false, "id", "desc"]
-	 * @param bool   $hpos    Whether to use the custom orders table.
-	 * @param string $orderby Sort field.
-	 * @param string $order   Sort direction.
+	 * @testdox Should return each order exactly once across pages when orders tie on every sort field.
+	 *
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
 	 */
-	public function test_pages_tied_orders_once_each( bool $hpos, string $orderby, string $order ): void {
+	public function test_pages_tied_orders_once_each( bool $hpos ): void {
 		$this->use_storage( $hpos );
 		$ids = array();
 		for ( $i = 0; $i < 7; $i++ ) {
@@ -364,24 +328,29 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 		}
 		$this->set_modified_date( $ids, $hpos );
 
-		$paged = array();
-		for ( $page = 1; $page <= 3; $page++ ) {
-			$result = OrdersQuery::execute(
-				array(
-					'orderby'  => $orderby,
-					'order'    => $order,
-					'page'     => $page,
-					'per_page' => 3,
-				)
-			);
-			$this->assertIsArray( $result );
-			$paged = array_merge( $paged, array_column( $result['orders'], 'id' ) );
-		}
+		foreach ( array( 'date', 'date_modified', 'total', 'id' ) as $orderby ) {
+			foreach ( array( 'asc', 'desc' ) as $order ) {
+				$paged = array();
+				for ( $page = 1; $page <= 3; $page++ ) {
+					$result = OrdersQuery::execute(
+						array(
+							'orderby'  => $orderby,
+							'order'    => $order,
+							'page'     => $page,
+							'per_page' => 3,
+						)
+					);
+					$this->assertIsArray( $result );
+					$paged = array_merge( $paged, array_column( $result['orders'], 'id' ) );
+				}
 
-		if ( 'desc' === $order ) {
-			rsort( $ids );
+				$expected = $ids;
+				if ( 'desc' === $order ) {
+					rsort( $expected );
+				}
+				$this->assertSame( $expected, $paged, "Tied orders should be sorted by ID when sorting by $orderby $order." );
+			}
 		}
-		$this->assertSame( $ids, $paged, 'Tied orders should be sorted by ID in the requested direction.' );
 	}
 
 	/**
@@ -445,6 +414,200 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 				);
 			}
 		}
+	}
+
+	/**
+	 * @testdox Should return the order number, type, parent, totals and paid and completed dates of every order.
+	 *
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
+	 */
+	public function test_returns_order_fields( bool $hpos ): void {
+		$this->use_storage( $hpos );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$paid_at = strtotime( '2026-01-02 03:04:05 UTC' );
+		$parent  = OrderHelper::create_order();
+		$child   = OrderHelper::create_order();
+		$child->set_parent_id( $parent->get_id() );
+		$child->set_date_paid( $paid_at );
+		$child->set_date_completed( $paid_at + HOUR_IN_SECONDS );
+		$child->save();
+		add_filter(
+			'woocommerce_order_number',
+			static function ( $number ) {
+				return 'A-' . $number;
+			}
+		);
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'include' => array( $parent->get_id(), $child->get_id() ) ) );
+
+		$this->assertNotWPError( $result, 'The new fields should match the output schema.' );
+		$orders = array_column( $result['orders'], null, 'id' );
+		$child  = $orders[ $child->get_id() ];
+		$parent = $orders[ $parent->get_id() ];
+		$this->assertSame( 'A-' . $child['id'], $child['number'], 'The number should be the one shown to the customer, not the ID.' );
+		$this->assertSame( 'shop_order', $child['type'] );
+		$this->assertSame( $parent['id'], $child['parent_id'] );
+		$this->assertSame( 0, $parent['parent_id'] );
+		$this->assertSame( '10', $child['shipping_total'] );
+		$this->assertSame( '0', $child['discount_total'] );
+		$this->assertSame( '0', $child['total_tax'] );
+		$this->assertSame( '2026-01-02T03:04:05+00:00', $child['date_paid_gmt'] );
+		$this->assertSame( '2026-01-02T04:04:05+00:00', $child['date_completed_gmt'] );
+		$this->assertArrayHasKey( 'date_paid', $child );
+		$this->assertArrayHasKey( 'date_completed', $child );
+		$this->assertArrayNotHasKey( 'date_paid', $parent, 'An unpaid order should leave the date out rather than return null.' );
+		$this->assertArrayNotHasKey( 'date_completed_gmt', $parent );
+	}
+
+	/**
+	 * @testdox Should return the shipping, fee, coupon and tax lines with include_lines, named as in wc/v3/orders.
+	 *
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
+	 */
+	public function test_include_lines_returns_every_line_type( bool $hpos ): void {
+		$this->use_storage( $hpos );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		list( $order, $rate_id ) = $this->create_order_with_every_line();
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'id'            => $order->get_id(),
+				'include_lines' => true,
+			)
+		);
+
+		$this->assertNotWPError( $result, 'The lines should match the output schema.' );
+		$data = $result['orders'][0];
+		$this->assertArrayNotHasKey( 'line_items', $data, 'include_lines should not also return the product lines.' );
+		$this->assertSame( '5', $data['discount_total'] );
+
+		$this->assertCount( 1, $data['shipping_lines'] );
+		$this->assertSame( 'flat_rate_shipping', $data['shipping_lines'][0]['method_id'] );
+		$this->assertSame( '1', $data['shipping_lines'][0]['total_tax'] );
+
+		$this->assertCount( 1, $data['fee_lines'] );
+		$this->assertSame( 'Handling', $data['fee_lines'][0]['name'] );
+		$this->assertSame( 'taxable', $data['fee_lines'][0]['tax_status'] );
+		$this->assertSame( '5', $data['fee_lines'][0]['total'] );
+
+		$this->assertCount( 1, $data['coupon_lines'] );
+		$this->assertSame( 'save5', $data['coupon_lines'][0]['code'] );
+		$this->assertSame( '5', $data['coupon_lines'][0]['discount'] );
+
+		$this->assertCount( 1, $data['tax_lines'] );
+		$tax_line = $data['tax_lines'][0];
+		$this->assertSame( $rate_id, $tax_line['rate_id'] );
+		$this->assertSame( 'VAT', $tax_line['label'] );
+		$this->assertFalse( $tax_line['compound'] );
+		$this->assertEqualsWithDelta( (float) $data['total_tax'], (float) $tax_line['tax_total'] + (float) $tax_line['shipping_tax_total'], 0.001, 'The tax line should add up to the order tax.' );
+	}
+
+	/**
+	 * @testdox Should return the SKU, price, tax class and taxes of each line item.
+	 */
+	public function test_line_items_return_price_and_taxes(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		list( $order ) = $this->create_order_with_every_line();
+		$product       = current( $order->get_items() )->get_product();
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'id'                 => $order->get_id(),
+				'include_line_items' => true,
+			)
+		);
+
+		$this->assertNotWPError( $result, 'The line items should match the output schema.' );
+		$line_item = $result['orders'][0]['line_items'][0];
+		$this->assertArrayNotHasKey( 'shipping_lines', $result['orders'][0], 'Shipping lines should need include_lines.' );
+		$this->assertSame( $product->get_sku(), $line_item['sku'] );
+		$this->assertSame( '8.75', $line_item['price'], 'The price should be per unit and after the coupon: 35 over 4 units.' );
+		$this->assertSame( '', $line_item['tax_class'] );
+		$this->assertSame( '4', $line_item['subtotal_tax'] );
+		$this->assertSame( '3.5', $line_item['total_tax'] );
+	}
+
+	/**
+	 * @testdox Should leave out the SKU of a deleted product and return a price of 0 for a line with no quantity.
+	 */
+	public function test_line_items_without_product_or_quantity(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$order = OrderHelper::create_order();
+		$item  = current( $order->get_items() );
+		$item->set_quantity( 0 );
+		$item->save();
+		wc_get_product( $item->get_product_id() )->delete( true );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'id'                 => $order->get_id(),
+				'include_line_items' => true,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$line_item = $result['orders'][0]['line_items'][0];
+		$this->assertArrayNotHasKey( 'sku', $line_item, 'A missing product should leave the SKU out rather than return null.' );
+		$this->assertSame( '0', $line_item['price'] );
+	}
+
+	/**
+	 * @testdox Should return no line arrays when neither include_line_items nor include_lines is sent.
+	 */
+	public function test_returns_no_lines_by_default(): void {
+		$order = OrderHelper::create_order();
+
+		$result = OrdersQuery::execute( array( 'id' => $order->get_id() ) );
+
+		foreach ( array( 'line_items', 'shipping_lines', 'fee_lines', 'coupon_lines', 'tax_lines' ) as $key ) {
+			$this->assertArrayNotHasKey( $key, $result['orders'][0] );
+		}
+	}
+
+	/**
+	 * Create a taxed order with one product line, one shipping line, a fee and a coupon.
+	 *
+	 * @return array{0: \WC_Order, 1: int} The order and the ID of its tax rate.
+	 */
+	private function create_order_with_every_line(): array {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$rate_id = \WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		\WC_Helper_Coupon::create_coupon(
+			'save5',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+			)
+		);
+
+		$order = OrderHelper::create_order();
+		$fee   = new \WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'       => 'Handling',
+				'tax_status' => 'taxable',
+				'total'      => '5',
+			)
+		);
+		$order->add_item( $fee );
+		$order->apply_coupon( 'save5' );
+		$order->calculate_totals();
+
+		return array( wc_get_order( $order->get_id() ), $rate_id );
 	}
 
 	/**

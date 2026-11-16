@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 
@@ -9,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
  * AdditionalFieldsWrapper class.
  */
 class AdditionalFieldsWrapper extends AbstractOrderConfirmationBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.

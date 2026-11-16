@@ -163,6 +163,153 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	}
 
 	/**
+	 * Test a palette color email clients can’t render is not synced.
+	 *
+	 * Twenty Twenty-Five defines `accent-6` as color-mix(). It comes first here because the synced
+	 * palette has to stay a list: WP_Theme_JSON reads one without a first entry as a set of origins.
+	 */
+	public function test_sync_site_styles_leaves_out_palette_colors_email_clients_cannot_render(): void {
+		$this->use_site_theme(
+			array(
+				'version'  => 3,
+				'settings' => array(
+					'color' => array(
+						'palette' => array(
+							array(
+								'slug'  => 'accent-6',
+								'color' => 'color-mix(in srgb, currentColor 20%, transparent)',
+								'name'  => 'Accent 6',
+							),
+							array(
+								'slug'  => 'accent-1',
+								'color' => '#ffee58',
+								'name'  => 'Accent 1',
+							),
+							array(
+								'slug'  => 'primary',
+								'color' => 'var(--wp--preset--color--accent-1)',
+								'name'  => 'Primary',
+							),
+							// Only a plain reference to a palette color is kept. The email has no other variables.
+							array(
+								'slug'  => 'brand',
+								'color' => 'var(--wp--custom--brand)',
+								'name'  => 'Brand',
+							),
+							array(
+								'slug'  => 'tint',
+								'color' => 'color-mix(in srgb, var(--wp--preset--color--accent-1) 20%, transparent)',
+								'name'  => 'Tint',
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		$this->assertEquals(
+			array(
+				array(
+					'slug'  => 'accent-1',
+					'color' => '#ffee58',
+					'name'  => 'Accent 1',
+				),
+				array(
+					'slug'  => 'primary',
+					'color' => 'var(--wp--preset--color--accent-1)',
+					'name'  => 'Primary',
+				),
+			),
+			$synced_data['settings']['color']['palette'],
+			'A color that points at another palette color is kept: the renderer resolves it.'
+		);
+
+		$synced_theme = $this->controller->get_theme();
+		$this->assertInstanceOf( WP_Theme_JSON::class, $synced_theme );
+		$this->assertSame( array( 'accent-1', 'primary' ), array_column( $synced_theme->get_settings()['color']['palette']['theme'], 'slug' ) );
+	}
+
+	/**
+	 * Test site colors email clients can’t render are not synced, so the email theme’s own apply.
+	 *
+	 * Text and background go together: a site text color on the email theme’s background, or the
+	 * other way round, can be unreadable.
+	 */
+	public function test_sync_site_styles_leaves_out_style_colors_email_clients_cannot_render(): void {
+		$this->use_site_theme(
+			array(
+				'version' => 3,
+				'styles'  => array(
+					'color'    => array(
+						'text'       => '#111111',
+						'background' => 'light-dark(#ffffff, #000000)',
+					),
+					'elements' => array(
+						'heading' => array( 'color' => array( 'text' => 'color-mix(in srgb, #ff0000 85%, #000000)' ) ),
+						'button'  => array( 'color' => array( 'text' => 'var(--wp--custom--brand)' ) ),
+						'link'    => array( 'color' => array( 'text' => '#0000ff' ) ),
+					),
+				),
+			)
+		);
+
+		$synced_styles = $this->controller->sync_site_styles()['styles'];
+
+		$this->assertSame( array(), $synced_styles['color'], 'A text color is not synced without its background.' );
+		$this->assertSame( array(), $synced_styles['elements']['heading']['color'] );
+		$this->assertSame( array(), $synced_styles['elements']['button']['color'], 'A variable that is not a palette color is not synced.' );
+		$this->assertSame( array( 'text' => '#0000ff' ), $synced_styles['elements']['link']['color'], 'A color email clients can render is still synced.' );
+	}
+
+	/**
+	 * Test site colors that point at a palette color are synced as they are.
+	 *
+	 * The site theme can’t resolve a reference to one of core’s colors, and the renderer does it
+	 * later. Twenty Twenty-Four’s Fossil style sets its button text this way.
+	 */
+	public function test_sync_site_styles_keeps_style_colors_that_point_at_a_palette_color(): void {
+		$this->use_site_theme(
+			array(
+				'version' => 3,
+				'styles'  => array(
+					'color'    => array(
+						'text'       => 'var:preset|color|black',
+						'background' => 'var:preset|color|pale-pink',
+					),
+					'elements' => array(
+						'button' => array(
+							'color' => array(
+								'text'       => 'var(--wp--preset--color--white)',
+								'background' => '#65574e',
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$synced_styles = $this->controller->sync_site_styles()['styles'];
+
+		// WP_Theme_JSON rewrites the `var:preset|` form as a CSS variable.
+		$this->assertSame(
+			array(
+				'background' => 'var(--wp--preset--color--pale-pink)',
+				'text'       => 'var(--wp--preset--color--black)',
+			),
+			$synced_styles['color']
+		);
+		$this->assertSame(
+			array(
+				'background' => '#65574e',
+				'text'       => 'var(--wp--preset--color--white)',
+			),
+			$synced_styles['elements']['button']['color']
+		);
+	}
+
+	/**
 	 * Test sync_site_styles with typography styles.
 	 */
 	public function test_sync_site_styles_with_typography(): void {
@@ -1335,5 +1482,19 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 				);
 			}
 		}
+	}
+
+	/**
+	 * Make the controller sync the given theme data as the site theme.
+	 *
+	 * @param array $theme_data Theme JSON data.
+	 */
+	private function use_site_theme( array $theme_data ): void {
+		add_filter(
+			'woocommerce_email_editor_site_theme',
+			static function () use ( $theme_data ) {
+				return new WP_Theme_JSON( $theme_data, 'theme' );
+			}
+		);
 	}
 }

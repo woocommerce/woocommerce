@@ -52,8 +52,6 @@ class ProductFilterAttributeTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'woocommerce_pre_product_filter_data', array( $this, 'filter_product_filter_data' ), 10 );
-
 		foreach ( $this->attribute_term_ids as $taxonomy => $term_ids ) {
 			foreach ( $term_ids as $term_id ) {
 				wp_delete_term( $term_id, $taxonomy );

@@ -37,7 +37,5 @@ class WC_Site_Tracking_Tests extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		WC_Site_Tracking::set_tracking_cookie( 'bar', 'baz' );
 		$this->assertNotEquals( 'bar', $last_cookie_key, 'When tracking is disabled, a tracking cookie cannot be set.' );
-
-		remove_filter( 'woocommerce_set_cookie_enabled', $watch_wc_cookie );
 	}
 }

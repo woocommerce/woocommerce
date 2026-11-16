@@ -29,7 +29,10 @@
 		flex: 3 1 120px;
 	}
 
+	// The button is at least as tall as the text input next to it (50px), whatever padding the theme gives buttons.
 	.wc-block-components-totals-coupon__button {
+		min-block-size: 50px;
+		padding-block: 0;
 		padding-left: $gap;
 		padding-right: $gap;
 		white-space: nowrap;
