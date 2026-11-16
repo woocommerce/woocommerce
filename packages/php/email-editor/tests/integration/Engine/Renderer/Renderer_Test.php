@@ -9,6 +9,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Utils;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
@@ -68,15 +69,10 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$theme_controller_mock->method( 'get_styles' )->willReturn( $styles );
 		$theme_controller_mock->method( 'get_layout_settings' )->willReturn( array( 'contentSize' => '660px' ) );
 
-		// Create a mock for Personalization_Tags_Registry.
-		$personalization_tags_registry_mock = $this->createMock( \Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry::class );
-		$personalization_tags_registry_mock->method( 'get_all' )->willReturn( array() );
-
 		$this->renderer = $this->getServiceWithOverrides(
 			Renderer::class,
 			array(
-				'theme_controller'              => $theme_controller_mock,
-				'personalization_tags_registry' => $personalization_tags_registry_mock,
+				'theme_controller' => $theme_controller_mock,
 			)
 		);
 
@@ -441,28 +437,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test that rendering preserves personalization tags.
 	 */
 	public function testItPreservesPersonalizationTags(): void {
-		$registry = new \Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry(
-			$this->di_container->get( \Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger::class )
-		);
-		$registry->register(
-			new \Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag(
-				'Customer Username',
-				'[woocommerce/customer-username]',
-				'Customer',
-				function () {
-					return '';
-				}
-			)
-		);
-
-		$this->renderer = $this->getServiceWithOverrides(
-			Renderer::class,
-			array(
-				'personalization_tags_registry' => $registry,
-			)
-		);
-
-		$this->email_post->post_content = '<!-- wp:paragraph --><p><!--[woocommerce/customer-username]--><!--[woocommerce/customer-username default="john"]--></p><!-- /wp:paragraph -->';
+		$this->email_post->post_content = '<!-- wp:paragraph --><p><!--[woocommerce/customer-username]--><!--[woocommerce/customer-username default="john"]--><!--[woocommerce/customer-username default="a [2026]"]--></p><!-- /wp:paragraph -->';
 		wp_update_post(
 			array(
 				'ID'           => $this->email_post->ID,
@@ -479,6 +454,8 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="john"]-->', $rendered['html'] );
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username]-->', $rendered['text'] );
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="john"]-->', $rendered['text'] );
+		// A "]" inside a quoted attribute value must not end the tag early.
+		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="a [2026]"]-->', $rendered['text'] );
 	}
 
 	/**
@@ -575,8 +552,8 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			),
 			'strong_emphasis'     => array(
 				'<!-- wp:paragraph --><p>This is <strong>important</strong> and <em>emphasized</em> text.</p><!-- /wp:paragraph -->',
-				'This is important and emphasized text.',
-				'Strong and emphasis tags converted to plain text',
+				'This is *important* and emphasized text.',
+				'Bold text is marked with asterisks, emphasis is plain text',
 			),
 			'line_breaks'         => array(
 				'<!-- wp:paragraph --><p>Line one<br>Line two<br/>Line three</p><!-- /wp:paragraph -->',
@@ -712,35 +689,13 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * fail for an unrelated reason.
 	 */
 	public function testItRestoresMoreThanTenPersonalizationTagsInTextVersion(): void {
-		$registry = new Personalization_Tags_Registry(
-			$this->di_container->get( \Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger::class )
-		);
-
 		$paragraphs = array();
 		$expected   = array();
 		for ( $i = 0; $i < 14; $i++ ) {
-			$token = 'renderer-test/tag-' . $i;
-			$registry->register(
-				new Personalization_Tag(
-					'Renderer Test Tag ' . $i,
-					'[' . $token . ']',
-					'Renderer Test',
-					function () use ( $i ) {
-						return 'value-' . $i;
-					}
-				)
-			);
+			$token        = 'renderer-test/tag-' . $i;
 			$paragraphs[] = '<!-- wp:paragraph --><p>Field ' . $i . ': <!--[' . $token . ']--></p><!-- /wp:paragraph -->';
 			$expected[]   = '<!--[' . $token . ']-->';
 		}
-
-		// The renderer built in setUp() uses a registry mock with no tags, so it preserves nothing.
-		$this->renderer = $this->getServiceWithOverrides(
-			Renderer::class,
-			array(
-				'personalization_tags_registry' => $registry,
-			)
-		);
 
 		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
 		register_block_template(
@@ -767,5 +722,99 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			$this->assertStringContainsString( $token, $rendered['text'], "Tag {$index} was not restored in the text version." );
 			$this->assertStringContainsString( $token, $rendered['html'], "Tag {$index} was not restored in the HTML version." );
 		}
+	}
+
+	/**
+	 * Render the given post content and return the text version, with a registry holding one tag for the Personalizer.
+	 *
+	 * @param string $content Post content.
+	 * @return array{0: Personalization_Tags_Registry, 1: string}
+	 */
+	private function render_with_link_tag( string $content ): array {
+		$registry = new Personalization_Tags_Registry(
+			$this->di_container->get( \Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger::class )
+		);
+		$registry->register(
+			new Personalization_Tag(
+				'Account URL',
+				'[renderer-test/account-url]',
+				'Renderer Test',
+				function () {
+					return 'https://shop.example/account?a=1&b=2';
+				}
+			)
+		);
+		$templates_registry = \WP_Block_Templates_Registry::get_instance();
+		if ( ! $templates_registry->is_registered( 'renderer-tests//test-email-template-plain-text' ) ) {
+			$templates_registry->register(
+				'renderer-tests//test-email-template-plain-text',
+				array(
+					'title'       => 'Test Email Template',
+					'description' => 'A test email template.',
+					'content'     => '<!-- wp:group --><div class="wp-block-group"><!-- wp:post-content /--></div><!-- /wp:group -->',
+				)
+			);
+		}
+
+		$rendered = $this->renderer->render_from_content( $content, 'test-email-template-plain-text', 'Subject', 'Preheader' );
+		return array( $registry, (string) $rendered['text'] );
+	}
+
+	/**
+	 * Test that the text version keeps the token of a tag that is not registered, so it can still be
+	 * personalized later, when the plugin has registered it, instead of disappearing.
+	 */
+	public function testItKeepsTagsUnknownAtRenderTimeInTextVersion(): void {
+		list( , $text ) = $this->render_with_link_tag( '<!-- wp:paragraph --><p>Hi <!--[other-plugin/first-name]-->, welcome.</p><!-- /wp:paragraph -->' );
+		$this->assertStringContainsString( 'Hi <!--[other-plugin/first-name]-->, welcome.', $text );
+	}
+
+	/**
+	 * Test that a tag used in a link URL is personalized in the text version, as it is in the HTML version.
+	 */
+	public function testItPersonalizesLinkTagsInTextVersion(): void {
+		list( $registry, $text ) = $this->render_with_link_tag(
+			// The editor writes data-link-href links without an href; a button keeps href="#" next to it.
+			'<!-- wp:paragraph --><p>See <a href="http://[renderer-test/account-url]">My account</a>, <a data-link-href="[renderer-test/account-url]" contenteditable="false">Orders</a> or <a href="#" data-link-href="[renderer-test/account-url]">Returns</a>.</p><!-- /wp:paragraph -->'
+		);
+		$personalizer = new Personalizer( $registry );
+		$this->assertStringContainsString(
+			'See [My account](https://shop.example/account?a=1&b=2), [Orders](https://shop.example/account?a=1&b=2) or [Returns](https://shop.example/account?a=1&b=2).',
+			$personalizer->personalize_content( $text, Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+	}
+
+	/**
+	 * Test that a link whose URL is a tag never leaves a raw tag in the personalized text version.
+	 */
+	public function testItLeavesNoRawTagInTextVersionLinks(): void {
+		list( $registry, $text ) = $this->render_with_link_tag(
+			'<!-- wp:paragraph --><p>A <a data-link-href="[renderer-test/account-url note=\'x\']">Account</a>, B <a data-link-href="[other-plugin/url]">Orders</a>, C <a href="#" data-link-href="[renderer-test/account-url]"><img src="https://shop.example/logo.png"></a>, D <a data-link-href="[renderer-test/account-url]">Hi <!--[other-plugin/first-name]--></a>, E <a data-link-href="[renderer-test/account-url]">see [docs]</a>.</p><!-- /wp:paragraph -->'
+		);
+
+		$personalized = ( new Personalizer( $registry ) )->personalize_content( $text, Personalizer::RENDERING_CONTEXT_TEXT );
+		// Link text with a tag or with brackets must not stop the target from being personalized.
+		$this->assertStringContainsString(
+			'A [Account](https://shop.example/account?a=1&b=2), B [Orders], C , D [Hi ](https://shop.example/account?a=1&b=2), E [see [docs]](https://shop.example/account?a=1&b=2).',
+			$personalized
+		);
+		$this->assertStringNotContainsString( '[other-plugin/url]', $personalized );
+
+		// A "]" inside a quoted argument does not end the link target early.
+		list( $registry, $text ) = $this->render_with_link_tag(
+			'<!-- wp:paragraph --><p>F <a data-link-href="[renderer-test/account-url note=\'a]b\']">Account</a>.</p><!-- /wp:paragraph -->'
+		);
+		$this->assertStringContainsString(
+			'F [Account](https://shop.example/account?a=1&b=2).',
+			( new Personalizer( $registry ) )->personalize_content( $text, Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+	}
+
+	/**
+	 * Test that bold text made of only a tag gets no bold markers, so an empty tag value leaves no stray "**".
+	 */
+	public function testItDoesNotMarkBoldTagsInTextVersion(): void {
+		list( , $text ) = $this->render_with_link_tag( '<!-- wp:paragraph --><p>Username: <strong><!--[other-plugin/username]--></strong>, <strong>Bold</strong></p><!-- /wp:paragraph -->' );
+		$this->assertStringContainsString( 'Username: <!--[other-plugin/username]-->, *Bold*', $text );
 	}
 }

@@ -164,8 +164,6 @@ class UtilsTest extends WC_Unit_Test_Case {
 		global $wp, $wp_rewrite;
 
 		$original_request              = $wp->request;
-		$original_query_string_exists  = array_key_exists( 'QUERY_STRING', $_SERVER ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$original_query_string         = $_SERVER['QUERY_STRING'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 		$original_use_trailing_slashes = $wp_rewrite->use_trailing_slashes;
 		$original_permalink_structure  = $wp_rewrite->permalink_structure;
 
@@ -185,12 +183,6 @@ class UtilsTest extends WC_Unit_Test_Case {
 			$wp->request                      = $original_request;
 			$wp_rewrite->use_trailing_slashes = $original_use_trailing_slashes;
 			$wp_rewrite->permalink_structure  = $original_permalink_structure;
-
-			if ( $original_query_string_exists ) {
-				$_SERVER['QUERY_STRING'] = $original_query_string;
-			} else {
-				unset( $_SERVER['QUERY_STRING'] );
-			}
 		}
 	}
 

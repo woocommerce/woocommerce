@@ -137,41 +137,7 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	private $subscriber_id;
 
 	/**
-	 * Original value of $_SERVER['HTTPS'] (if any) before each test.
-	 *
-	 * @var string|null
-	 */
-	private $original_https;
-
-	/**
-	 * Original value of $_SERVER['SERVER_PORT'] (if any) before each test.
-	 *
-	 * Captured alongside HTTPS because `is_ssl()` returns true when
-	 * SERVER_PORT === '443', regardless of the HTTPS header.
-	 *
-	 * @var string|null
-	 */
-	private $original_server_port;
-
-	/**
-	 * Original value of $_SERVER['HTTP_X_FORWARDED_PROTO'] (if any) before each test.
-	 *
-	 * Some hosts and reverse-proxy plugins use this header to derive scheme,
-	 * so we normalize it across tests to keep `is_ssl()` deterministic.
-	 *
-	 * @var string|null
-	 */
-	private $original_http_x_forwarded_proto;
-
-	/**
-	 * Original value of $_SERVER['REMOTE_ADDR'] (if any) before each test.
-	 *
-	 * @var string|null
-	 */
-	private $original_remote_addr;
-
-	/**
-	 * Filters registered via force_site_url() so tearDown() can remove them.
+	 * Filters registered via force_site_url(), counted to give each a higher priority.
 	 *
 	 * @var array<int, callable>
 	 */
@@ -204,14 +170,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		$this->shop_manager_id = self::$fixture_shop_manager_id;
 		$this->subscriber_id   = self::$fixture_subscriber_id;
 
-		// Remember existing $_SERVER values so we can restore them in tearDown.
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Unit-test fixture: values are captured for restoration only, never used for processing.
-		$this->original_https                  = isset( $_SERVER['HTTPS'] ) ? (string) $_SERVER['HTTPS'] : null;
-		$this->original_server_port            = isset( $_SERVER['SERVER_PORT'] ) ? (string) $_SERVER['SERVER_PORT'] : null;
-		$this->original_http_x_forwarded_proto = isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) ? (string) $_SERVER['HTTP_X_FORWARDED_PROTO'] : null;
-		$this->original_remote_addr            = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : null;
-		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
 		// Default to HTTPS on for most tests; disable explicitly where needed.
 		$this->force_https( true );
 
@@ -239,37 +197,7 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		// Clear any QR login data the tests may have written.
 		$this->delete_all_qr_login_data();
 
-		// Restore $_SERVER state.
-		if ( null === $this->original_https ) {
-			unset( $_SERVER['HTTPS'] );
-		} else {
-			$_SERVER['HTTPS'] = $this->original_https;
-		}
-
-		if ( null === $this->original_server_port ) {
-			unset( $_SERVER['SERVER_PORT'] );
-		} else {
-			$_SERVER['SERVER_PORT'] = $this->original_server_port;
-		}
-
-		if ( null === $this->original_http_x_forwarded_proto ) {
-			unset( $_SERVER['HTTP_X_FORWARDED_PROTO'] );
-		} else {
-			$_SERVER['HTTP_X_FORWARDED_PROTO'] = $this->original_http_x_forwarded_proto;
-		}
-
-		if ( null === $this->original_remote_addr ) {
-			unset( $_SERVER['REMOTE_ADDR'] );
-		} else {
-			$_SERVER['REMOTE_ADDR'] = $this->original_remote_addr;
-		}
-
-		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
-
-		// Remove any pre_option_siteurl filters force_site_url() registered.
-		foreach ( $this->site_url_filters as $priority => $filter ) {
-			remove_filter( 'pre_option_siteurl', $filter, $priority );
-		}
+		// Reset the filters registered by force_site_url().
 		$this->site_url_filters = array();
 		$this->clear_rest_server();
 		unset( $this->server, $this->controller );
@@ -305,8 +233,7 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	 * Uses the `pre_option_siteurl` filter so we do not have to mutate and restore
 	 * the real `siteurl` option. Filters stack — the last one registered with the
 	 * highest priority wins — so callers can override an earlier setUp() default
-	 * by calling this method again. All registered filters are removed in
-	 * tearDown().
+	 * by calling this method again.
 	 *
 	 * @param string $url The URL to return from `get_site_url()`.
 	 */
@@ -822,14 +749,10 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'site_url', $downgrade_site_url );
 
-		try {
-			$response = $this->dispatch_generate();
+		$response = $this->dispatch_generate();
 
-			$this->assertSame( 500, $response->get_status() );
-			$this->assertSame( 'insecure_site_url', $response->get_data()['code'] );
-		} finally {
-			remove_filter( 'site_url', $downgrade_site_url );
-		}
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'insecure_site_url', $response->get_data()['code'] );
 	}
 
 	/**
@@ -874,14 +797,10 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 
 		add_filter( 'wp_is_application_passwords_available', '__return_false' );
 
-		try {
-			$response = $this->dispatch_generate();
+		$response = $this->dispatch_generate();
 
-			$this->assertSame( 501, $response->get_status() );
-			$this->assertSame( 'application_passwords_unavailable', $response->get_data()['code'] );
-		} finally {
-			remove_filter( 'wp_is_application_passwords_available', '__return_false' );
-		}
+		$this->assertSame( 501, $response->get_status() );
+		$this->assertSame( 'application_passwords_unavailable', $response->get_data()['code'] );
 	}
 
 	/**
@@ -894,20 +813,16 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		// Disable APs only for the exchange itself.
 		add_filter( 'wp_is_application_passwords_available', '__return_false' );
 
-		try {
-			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
-			$this->assertSame( 501, $response->get_status() );
-			$this->assertSame( 'application_passwords_unavailable', $response->get_data()['code'] );
-			$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
-			$this->assertSame(
-				MobileAppQRLogin::STATE_APPROVED,
-				get_transient( $this->token_transient_key( $prep['plaintext'] ) )['state']
-			);
-			$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
-		} finally {
-			remove_filter( 'wp_is_application_passwords_available', '__return_false' );
-		}
+		$this->assertSame( 501, $response->get_status() );
+		$this->assertSame( 'application_passwords_unavailable', $response->get_data()['code'] );
+		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
+		$this->assertSame(
+			MobileAppQRLogin::STATE_APPROVED,
+			get_transient( $this->token_transient_key( $prep['plaintext'] ) )['state']
+		);
+		$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
 	}
 
 	/**
@@ -924,18 +839,14 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'map_meta_cap', $deny_create_app_password, 10, 2 );
 
-		try {
-			wp_set_current_user( 0 );
-			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
+		wp_set_current_user( 0 );
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
-			$this->assertSame( rest_authorization_required_code(), $response->get_status() );
-			$this->assertSame( 'rest_cannot_create_application_passwords', $response->get_data()['code'] );
-			$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
-			$this->assertIsArray( get_transient( $this->token_transient_key( $prep['plaintext'] ) ) );
-			$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
-		} finally {
-			remove_filter( 'map_meta_cap', $deny_create_app_password, 10 );
-		}
+		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
+		$this->assertSame( 'rest_cannot_create_application_passwords', $response->get_data()['code'] );
+		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
+		$this->assertIsArray( get_transient( $this->token_transient_key( $prep['plaintext'] ) ) );
+		$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
 	}
 
 	/**
@@ -1293,28 +1204,24 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 
 		add_filter( 'wp_is_application_passwords_available', '__return_false' );
 
-		try {
-			for ( $i = 1; $i <= MobileAppQRLogin::MAX_EXCHANGE_ATTEMPTS; $i++ ) {
-				$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
-				$this->assertSame(
-					501,
-					$response->get_status(),
-					sprintf( 'Application Passwords unavailable response expected before the valid-token cap, got %d on attempt %d.', $response->get_status(), $i )
-				);
-			}
-
+		for ( $i = 1; $i <= MobileAppQRLogin::MAX_EXCHANGE_ATTEMPTS; $i++ ) {
 			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
-
-			$this->assertSame( 429, $response->get_status() );
-			$this->assertSame( 'rate_limit_exceeded', $response->get_data()['code'] );
 			$this->assertSame(
-				MobileAppQRLogin::STATE_APPROVED,
-				get_transient( $this->token_transient_key( $prep['plaintext'] ) )['state']
+				501,
+				$response->get_status(),
+				sprintf( 'Application Passwords unavailable response expected before the valid-token cap, got %d on attempt %d.', $response->get_status(), $i )
 			);
-			$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
-		} finally {
-			remove_filter( 'wp_is_application_passwords_available', '__return_false' );
-		}//end try
+		}
+
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
+
+		$this->assertSame( 429, $response->get_status() );
+		$this->assertSame( 'rate_limit_exceeded', $response->get_data()['code'] );
+		$this->assertSame(
+			MobileAppQRLogin::STATE_APPROVED,
+			get_transient( $this->token_transient_key( $prep['plaintext'] ) )['state']
+		);
+		$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
 	}
 
 	// -----------------------------------------------------------------------
@@ -2364,8 +2271,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 			get_option( $claim_key ),
 			'A rejected second scan must not release another request\'s claim.'
 		);
-
-		delete_option( $claim_key );
 	}
 
 	/**
@@ -2386,8 +2291,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $method->invoke( $controller, $claim_key, $stale_claim_value ) );
 		$this->assertSame( $fresh_claim_value, get_option( $claim_key ) );
-
-		delete_option( $claim_key );
 	}
 
 	/**
@@ -2423,8 +2326,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 			get_option( $claim_key ),
 			'A rejected concurrent approval must not release another request\'s claim.'
 		);
-
-		delete_option( $claim_key );
 	}
 
 	/**

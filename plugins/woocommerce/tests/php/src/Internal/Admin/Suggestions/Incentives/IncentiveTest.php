@@ -514,9 +514,6 @@ class IncentiveTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertTrue( $result );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -552,9 +549,6 @@ class IncentiveTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertFalse( $result );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -590,9 +584,6 @@ class IncentiveTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertFalse( $result );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**

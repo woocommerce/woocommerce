@@ -52,13 +52,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	private $original_init_count;
 
 	/**
-	 * Actions that a test added, removed in tearDown.
-	 *
-	 * @var array<int, array{0: string, 1: callable, 2: int}>
-	 */
-	private $test_actions = array();
-
-	/**
 	 * Create immutable class fixtures.
 	 *
 	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
@@ -104,12 +97,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wp_actions;
 
-		remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_test_fields' ) );
-		remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_test_filters' ) );
-		foreach ( $this->test_actions as list( $hook, $callback, $priority ) ) {
-			remove_action( $hook, $callback, $priority );
-		}
-		$this->test_actions = array();
 		$this->set_feature( false );
 		$this->reset_registries();
 		wp_set_current_user( 0 );
@@ -511,7 +498,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		} finally {
 			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 			$this->toggle_cot_feature_and_usage( $original );
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
 	}
 
@@ -580,7 +566,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
 			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 			$this->toggle_cot_feature_and_usage( $original );
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
 	}
 
@@ -623,7 +608,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		} finally {
 			remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
 			$this->toggle_cot_feature_and_usage( $original );
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
 	}
 
@@ -1115,7 +1099,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$resources = new \ReflectionProperty( \Automattic\WooCommerce\Abilities\AbilityResources::class, 'resources' );
 		$resources->setAccessible( true );
-		$this->assertSame( array( 'product', 'order', 'order_item', 'order_shipping', 'product_term', 'product_review' ), array_keys( $resources->getValue() ) );
+		$this->assertSame( array( 'product', 'order', 'order_item', 'order_shipping', 'product_term', 'product_review', 'customer' ), array_keys( $resources->getValue() ) );
 	}
 
 	/**
@@ -3549,8 +3533,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
 			}
 		}
-
-		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
 	}
 
 	/**
@@ -4467,6 +4449,100 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'test-ext:test_refused', $refused->get_data()['code'] );
 		$this->assertSame( 'Lisbon', $saved->get_shipping_city() );
 		$this->assertSame( 'high', $saved->get_meta( '_test_priority' ) );
+	}
+
+	/**
+	 * @testdox Should create an order with an extension field in one save, show validators the sent status, and create nothing when a validator refuses.
+	 */
+	public function test_order_create_writes_extension_fields_and_runs_validators(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'order',
+						'namespace'     => 'test-ext',
+						'field'         => 'priority',
+						'output_schema' => array( 'type' => 'string' ),
+						'input_schema'  => array( 'type' => 'string' ),
+						'get_callback'  => static function ( \WC_Order $order ) {
+							return $order->get_meta( '_test_priority' );
+						},
+						'set_callback'  => static function ( \WC_Order $order, $value ) {
+							$order->update_meta_data( '_test_priority', $value );
+						},
+					)
+				);
+			}
+		);
+		$seen = array();
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $order ) use ( &$seen ) {
+				$seen[] = array( $order->get_status(), count( $order->get_items() ), $order->get_total() );
+				return 'Closed' === $order->get_shipping_city() ? new \WP_Error( 'test_refused', 'Refused.' ) : null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '10' ) );
+		$writes  = array(
+			'woocommerce_new_order'    => 0,
+			'woocommerce_update_order' => 0,
+		);
+		foreach ( array_keys( $writes ) as $hook ) {
+			$this->add_test_action(
+				$hook,
+				static function () use ( &$writes, $hook ) {
+					++$writes[ $hook ];
+				}
+			);
+		}
+		$before = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$output  = $this->run_ability(
+			'woocommerce/order-create',
+			array(
+				'status'     => 'processing',
+				'shipping'   => array( 'city' => 'Lisbon' ),
+				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
+				'extensions' => array( 'test-ext' => array( 'priority' => 'high' ) ),
+			)
+		);
+		$refused = $this->run_ability_response(
+			'woocommerce/order-create',
+			array(
+				'shipping'   => array( 'city' => 'Closed' ),
+				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
+				'extensions' => array( 'test-ext' => array( 'priority' => 'low' ) ),
+			)
+		);
+
+		wp_cache_flush();
+		$saved = wc_get_order( $output['order']['id'] );
+		$this->assertSame( 1, $writes['woocommerce_new_order'] );
+		$this->assertSame( 0, $writes['woocommerce_update_order'], 'The order should save once, with its lines, totals and status.' );
+		$this->assertSame( array( 'processing', 1, '10.00' ), $seen[0], 'The validator should see the status and totals that the save writes.' );
+		$this->assertSame( 'high', $output['order']['extensions']['test-ext']['priority'] );
+		$this->assertSame( 'high', $saved->get_meta( '_test_priority' ) );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'test-ext:test_refused', $refused->get_data()['code'] );
+		$this->assertEqualsCanonicalizing(
+			array_merge( $before, array( $saved->get_id() ) ),
+			wc_get_orders(
+				array(
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			),
+			'The refused call should create no order.'
+		);
 	}
 
 	/**
@@ -5744,7 +5820,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Add a filter and remove it in tearDown.
+	 * Add a filter.
 	 *
 	 * @param string   $hook          Hook name.
 	 * @param callable $callback      Callback.
@@ -5753,11 +5829,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	private function add_test_filter( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		add_filter( $hook, $callback, $priority, $accepted_args );
-		$this->test_actions[] = array( $hook, $callback, $priority );
 	}
 
 	/**
-	 * Add an action that tearDown removes.
+	 * Add an action.
 	 *
 	 * @param string   $hook     Action name.
 	 * @param callable $callback Callback.
@@ -5766,7 +5841,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	private function add_test_action( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		add_action( $hook, $callback, $priority, $accepted_args );
-		$this->test_actions[] = array( $hook, $callback, $priority );
 	}
 
 	/**

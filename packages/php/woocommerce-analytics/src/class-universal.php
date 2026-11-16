@@ -363,11 +363,7 @@ class Universal {
 			// @phan-suppress-next-line PhanUndeclaredMethod -- Checked before being called. See also https://github.com/phan/phan/issues/1204.
 			$product_id = is_callable( array( $order_item, 'get_product_id' ) ) ? $order_item->get_product_id() : -1;
 
-			$order_items       = $order->get_items();
-			$order_items_count = 0;
-			if ( is_array( $order_items ) ) {
-				$order_items_count = count( $order_items );
-			}
+			$order_items_count   = $this->get_order_items_count( $order );
 			$order_coupons       = $order->get_coupons();
 			$order_coupons_count = 0;
 			if ( is_array( $order_coupons ) ) {
@@ -654,7 +650,7 @@ class Universal {
 					'oi'                       => $order->get_id(),
 					'order_value'              => $order->get_subtotal(),
 					'order_total'              => $order->get_total(),
-					'products_count'           => $order->get_item_count(),
+					'products_count'           => $this->get_order_items_count( $order ),
 					'total_discount'           => $order->get_discount_total(),
 					'total_shipping'           => $order->get_shipping_total(),
 					'total_tax'                => $order->get_total_tax(),

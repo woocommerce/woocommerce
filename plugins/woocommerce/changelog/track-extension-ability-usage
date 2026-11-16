@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Record calls to abilities that extensions register through WooCommerce in usage tracking, when the store allows it.

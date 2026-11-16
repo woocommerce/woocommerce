@@ -192,7 +192,7 @@ trait OrderAbilityTrait {
 		$class_names = \WC_Order_Factory::get_class_names_for_order_ids( array( $order_id ) );
 
 		if ( empty( $class_names[ $order_id ] ) ) {
-			return wc_rest_check_post_permissions( 'shop_order', 'edit' === $context ? 'batch' : $context );
+			return (bool) wc_rest_check_post_permissions( 'shop_order', 'edit' === $context ? 'batch' : $context );
 		}
 
 		$type = OrderUtil::get_order_type( $order_id );
@@ -210,20 +210,37 @@ trait OrderAbilityTrait {
 	protected static function format_saved_order_for_response( \WC_Order $order ) {
 		$stored = wc_get_order( $order->get_id() );
 
-		return self::format_order_for_response( $stored instanceof \WC_Order ? $stored : $order, false );
+		return self::format_order_for_response( $stored instanceof \WC_Order ? $stored : $order, array() );
 	}
 
 	/**
 	 * Format orders for ability output. One order that fails returns its error.
 	 *
-	 * @param \WC_Order[] $orders             Order objects.
-	 * @param bool        $include_line_items Whether to include line items.
+	 * @param \WC_Order[] $orders   Order objects.
+	 * @param string[]    $includes Optional parts, as for format_order_for_response().
 	 * @return array|\WP_Error
 	 */
-	protected static function format_orders_for_response( array $orders, bool $include_line_items ) {
+	protected static function format_orders_for_response( array $orders, array $includes ) {
+		if ( in_array( 'line_items', $includes, true ) ) {
+			$product_ids = array();
+			foreach ( $orders as $order ) {
+				foreach ( $order->get_items() as $item ) {
+					if ( $item instanceof \WC_Order_Item_Product ) {
+						$product_ids[] = $item->get_product_id();
+						$product_ids[] = $item->get_variation_id();
+					}
+				}
+			}
+			$product_ids = array_unique( array_filter( $product_ids ) );
+			if ( ! empty( $product_ids ) ) {
+				// Prime caches to reduce future queries.
+				_prime_post_caches( $product_ids );
+			}
+		}
+
 		$formatted = array();
 		foreach ( $orders as $order ) {
-			$data = self::format_order_for_response( $order, $include_line_items );
+			$data = self::format_order_for_response( $order, $includes );
 			if ( is_wp_error( $data ) ) {
 				return $data;
 			}
@@ -245,11 +262,18 @@ trait OrderAbilityTrait {
 	/**
 	 * Format an order for ability output.
 	 *
-	 * @param \WC_Order $order              Order object.
-	 * @param bool      $include_line_items Whether to include line items and shipping lines.
+	 * @param \WC_Order $order    Order object.
+	 * @param string[]  $includes Optional parts: `line_items`, and `lines` for the shipping, fee, coupon and tax lines.
 	 * @return array|\WP_Error A WP_Error when an extension field value does not match its schema.
 	 */
-	protected static function format_order_for_response( \WC_Order $order, bool $include_line_items ) {
-		return AbilityResources::output_data( 'order', $order, null, $include_line_items ? array() : array( 'line_items', 'shipping_lines' ) );
+	protected static function format_order_for_response( \WC_Order $order, array $includes ) {
+		$exclude = array();
+		if ( ! in_array( 'line_items', $includes, true ) ) {
+			$exclude[] = 'line_items';
+		}
+		if ( ! in_array( 'lines', $includes, true ) ) {
+			$exclude = array_merge( $exclude, array( 'shipping_lines', 'fee_lines', 'coupon_lines', 'tax_lines' ) );
+		}
+		return AbilityResources::output_data( 'order', $order, null, $exclude );
 	}
 }

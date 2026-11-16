@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Remove circular imports in the email editor's tracking code; no production change.

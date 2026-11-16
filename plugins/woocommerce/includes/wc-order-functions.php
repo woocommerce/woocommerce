@@ -640,9 +640,13 @@ function wc_create_refund( $args = array() ) {
 				// later to be used for revoking download permission.
 				// checking if the item is a product, as we only need to revoke download permission for products.
 				if ( $item->is_type( 'line_item' ) ) {
+					$product_id = $item->get_product_id();
+					if ( $item instanceof WC_Order_Item_Product && $item->get_variation_id() ) {
+						$product_id = $item->get_variation_id();
+					}
 					$refunded_order_and_products[ $item_id ] = array(
 						'order_id'   => $order->get_id(),
-						'product_id' => $item->get_product_id(),
+						'product_id' => $product_id,
 					);
 				}
 

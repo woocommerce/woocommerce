@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 
@@ -77,16 +78,93 @@ class WC_Helper_Product {
 	 * @return WC_Product
 	 */
 	public static function create_missed_sale_end_product() {
+		$meta    = self::get_missed_sale_end_meta();
 		$product = self::create_simple_product();
-		$product->set_regular_price( '100' );
-		$product->set_sale_price( '50' );
+		$product->set_regular_price( $meta['_regular_price'] );
+		$product->set_sale_price( $meta['_sale_price'] );
 		$product->save();
 
-		update_post_meta( $product->get_id(), '_price', 50 );
-		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
-		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+		foreach ( array( '_price', '_sale_price_dates_from', '_sale_price_dates_to' ) as $key ) {
+			update_post_meta( $product->get_id(), $key, $meta[ $key ] );
+		}
 
 		return $product;
+	}
+
+	/**
+	 * Get the price and sale date meta of a product whose sale has ended while its stored price is still the sale price.
+	 *
+	 * @return array<string, string|int> Meta values keyed by meta key.
+	 */
+	private static function get_missed_sale_end_meta(): array {
+		return array(
+			'_regular_price'         => '100',
+			'_sale_price'            => '50',
+			'_price'                 => '50',
+			'_sale_price_dates_from' => time() - 300,
+			'_sale_price_dates_to'   => time() - 100,
+		);
+	}
+
+	/**
+	 * Create simple products whose sale has ended, writing only the rows the scheduled sales query reads.
+	 *
+	 * Skips the product save cascade, so batch-boundary tests can create many of them cheaply.
+	 *
+	 * @param int $count Number of products to create.
+	 * @return int[] The product IDs, in ascending order.
+	 * @throws RuntimeException When the rows cannot be inserted.
+	 */
+	public static function create_missed_sale_end_product_ids( int $count ): array {
+		global $wpdb;
+
+		$ids  = self::insert_product_post_rows( $count );
+		$meta = self::get_missed_sale_end_meta();
+
+		$values = array();
+		foreach ( $ids as $id ) {
+			foreach ( $meta as $key => $value ) {
+				$values[] = $wpdb->prepare( '(%d, %s, %s)', $id, $key, $value );
+			}
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Each row is prepared above.
+		if ( count( $values ) !== $wpdb->query( "INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) VALUES " . implode( ', ', $values ) ) ) {
+			throw new RuntimeException( esc_html( 'Could not insert the sale meta rows: ' . $wpdb->last_error ) );
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * Insert bare product post rows in one query, for tests of code that only reads the posts table.
+	 *
+	 * The rows have no meta, terms or lookup data.
+	 *
+	 * @param int    $count     Number of rows to insert.
+	 * @param string $post_type Post type of the rows.
+	 * @return int[] The new post IDs, in ascending order.
+	 * @throws RuntimeException When the rows cannot be inserted.
+	 */
+	public static function insert_product_post_rows( int $count, string $post_type = 'product' ): array {
+		global $wpdb;
+
+		$name_prefix = 'product-post-row-' . wp_generate_password( 8, false ) . '-';
+		$values      = array();
+		for ( $i = 0; $i < $count; $i++ ) {
+			$values[] = $wpdb->prepare( "(%s, %s, 'Product post row', '', '', '', '', '', %s)", $post_type, ProductStatus::PUBLISH, $name_prefix . $i );
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Each row is prepared above.
+		$inserted = $wpdb->query( "INSERT INTO {$wpdb->posts} (post_type, post_status, post_title, post_content, post_excerpt, to_ping, pinged, post_content_filtered, post_name) VALUES " . implode( ', ', $values ) );
+		if ( $count !== $inserted ) {
+			throw new RuntimeException( esc_html( 'Could not insert the product post rows: ' . $wpdb->last_error ) );
+		}
+
+		return array_map(
+			'intval',
+			$wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_name LIKE %s ORDER BY ID", $wpdb->esc_like( $name_prefix ) . '%' ) )
+		);
 	}
 
 	/**

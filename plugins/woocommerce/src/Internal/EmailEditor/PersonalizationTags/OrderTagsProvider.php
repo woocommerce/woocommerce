@@ -59,6 +59,7 @@ class OrderTagsProvider extends AbstractTagProvider {
 				),
 				null,
 				array( Integration::EMAIL_POST_TYPE ),
+				Personalization_Tag::VALUE_TYPE_TEXT,
 			)
 		);
 
@@ -338,6 +339,7 @@ class OrderTagsProvider extends AbstractTagProvider {
 				),
 				null,
 				array( Integration::EMAIL_POST_TYPE ),
+				Personalization_Tag::VALUE_TYPE_TEXT,
 			)
 		);
 	}

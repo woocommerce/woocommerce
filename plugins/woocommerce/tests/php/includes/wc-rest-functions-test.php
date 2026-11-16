@@ -62,6 +62,5 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 		$this->assertFalse( wc_rest_should_load_namespace( 'wc/v1', 'wc/v2' ) );
 		add_filter( 'wc_rest_should_load_namespace', '__return_true' );
 		$this->assertTrue( wc_rest_should_load_namespace( 'wc/v1', 'wc/v2' ) );
-		remove_filter( 'wc_rest_should_load_namespace', '__return_true' );
 	}
 }
