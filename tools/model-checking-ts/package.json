@@ -1,0 +1,18 @@
+{
+	"name": "@woocommerce/model-checking-ts",
+	"version": "0.0.0",
+	"private": true,
+	"description": "An isolated proof of concept for TypeScript-authored TLA+ models.",
+	"license": "GPL-2.0-or-later",
+	"type": "module",
+	"engines": {
+		"node": "^24.15.0"
+	},
+	"scripts": {
+		"check": "node run.mjs",
+		"check:tlc": "node run.mjs --tlc"
+	},
+	"devDependencies": {
+		"tla-ts": "0.0.10"
+	}
+}
