@@ -815,6 +815,50 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product shipping data does not render shipping settings HTML.
+	 */
+	public function test_product_shipping_data_skips_settings_html(): void {
+		WC_Helper_Shipping_Zones::remove_mock_zones();
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'US' ) );
+		$zone = new WC_Shipping_Zone();
+		$zone->set_zone_name( 'US' );
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+		$product     = WC_Helper_Product::create_simple_product();
+		$rendered    = 0;
+
+		add_filter(
+			'woocommerce_shipping_instance_form_fields_flat_rate',
+			static function ( $fields ) {
+				$fields['probe'] = array(
+					'type'    => 'regression_probe',
+					'default' => '',
+				);
+				return $fields;
+			}
+		);
+		add_filter(
+			'woocommerce_generate_regression_probe_html',
+			static function ( $html ) use ( &$rendered ) {
+				++$rendered;
+				return $html . '<tr>probe</tr>';
+			}
+		);
+
+		$this->structured_data->generate_product_data( $product );
+		$this->assertSame( 0, $rendered, 'Product schema should not render shipping settings.' );
+		$this->assertSame( 'US', $this->structured_data->get_data()[0]['offers'][0]['shippingDetails'][0]['shippingDestination'][0]['addressCountry'] );
+
+		foreach ( array( 'admin', 'json' ) as $context ) {
+			$methods = $zone->get_shipping_methods( true, $context );
+			$this->assertStringContainsString( '<tr>probe</tr>', $methods[ $instance_id ]->settings_html );
+		}
+		$this->assertSame( 2, $rendered, 'Admin and JSON contexts should still render shipping settings.' );
+	}
+
+	/**
 	 * Test simple product offer structured data includes offer-level price currency.
 	 *
 	 * @return void
