@@ -3,10 +3,11 @@
 
 	&.is-dropdown {
 		display: flex;
-	}
+		gap: 0.5em;
 
-	select {
-		margin-right: 0.5em;
+		.wc-block-product-categories__dropdown {
+			display: contents;
+		}
 	}
 }
 
