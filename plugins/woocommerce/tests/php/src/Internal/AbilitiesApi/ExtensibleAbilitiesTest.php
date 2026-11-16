@@ -1115,7 +1115,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$resources = new \ReflectionProperty( \Automattic\WooCommerce\Abilities\AbilityResources::class, 'resources' );
 		$resources->setAccessible( true );
-		$this->assertSame( array( 'product', 'order', 'order_item', 'product_term', 'product_review' ), array_keys( $resources->getValue() ) );
+		$this->assertSame( array( 'product', 'order', 'order_item', 'order_shipping', 'product_term', 'product_review' ), array_keys( $resources->getValue() ) );
 	}
 
 	/**

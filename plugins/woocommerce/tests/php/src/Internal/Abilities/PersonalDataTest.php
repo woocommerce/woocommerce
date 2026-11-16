@@ -7,7 +7,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
+use Automattic\WooCommerce\Abilities\AbilityResources;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Abilities\PersonalData;
 use Automattic\WooCommerce\Tests\Internal\Abilities\Domain\DomainAbilityTestCase;
 
@@ -82,6 +84,8 @@ class PersonalDataTest extends DomainAbilityTestCase {
 		$result = $this->run_ability( 'woocommerce/orders-query', array( 'id' => $order->get_id() ) );
 
 		$this->assertSame( 'jane@example.com', $result['orders'][0]['billing_email'] );
+		$this->assertSame( $order->get_customer_id(), $result['orders'][0]['customer_id'] );
+		$this->assertSame( $order->get_address( 'shipping' ), $result['orders'][0]['shipping'] );
 		$this->assertArrayHasKey( 'billing_email', $this->get_order_item_schema()['properties'] );
 	}
 
@@ -197,6 +201,71 @@ class PersonalDataTest extends DomainAbilityTestCase {
 	}
 
 	/**
+	 * @testdox Should protect the shipping address and customer ID when only order sharing is disabled.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $extensions_enabled Whether extension support is enabled.
+	 */
+	public function test_order_policy_protects_nested_shipping( bool $extensions_enabled ): void {
+		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', $extensions_enabled ? 'yes' : 'no' );
+		$order = $this->create_order_with_email();
+		$this->filter_personal_data( static fn( $shared, $resource_name ) => 'order' !== $resource_name, 2 );
+
+		$result = $this->run_ability( 'woocommerce/orders-query', array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+		foreach ( array( 'billing_email', 'customer_id', 'shipping' ) as $field ) {
+			$this->assertArrayNotHasKey( $field, $result['orders'][0] );
+			$this->assertArrayNotHasKey( $field, $this->get_order_item_schema()['properties'] );
+		}
+		$this->assertSame( $order->get_id(), $result['orders'][0]['id'] );
+	}
+
+	/**
+	 * @testdox Should classify each shipping attribute and preserve the object shape when all its fields are withheld.
+	 */
+	public function test_shipping_attributes_have_their_own_classification(): void {
+		$order = $this->create_order_with_email();
+		$this->filter_personal_data( static fn( $shared, $resource_name ) => 'order_shipping' !== $resource_name, 2 );
+
+		$result = $this->run_ability( 'woocommerce/orders-query', array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'jane@example.com', $result['orders'][0]['billing_email'] );
+		$this->assertInstanceOf( \stdClass::class, $result['orders'][0]['shipping'] );
+		$this->assertSame( array(), get_object_vars( $result['orders'][0]['shipping'] ) );
+		$this->assertEmpty( $this->get_order_item_schema()['properties']['shipping']['properties'] );
+	}
+
+	/**
+	 * @testdox Should map exposed order classifications to the existing Core eraser types.
+	 */
+	public function test_classifications_match_core_order_eraser(): void {
+		$eraser_types = array();
+		add_filter(
+			'woocommerce_privacy_remove_order_personal_data_props',
+			static function ( $types ) use ( &$eraser_types ) {
+				$eraser_types = $types;
+				return $types;
+			},
+			PHP_INT_MIN
+		);
+		\WC_Privacy_Erasers::remove_order_personal_data( $this->create_order_with_email() );
+		AbilitiesLoader::register_core_resources();
+		$property = new \ReflectionProperty( AbilityResources::class, 'fields' );
+		$property->setAccessible( true );
+		$fields = $property->getValue();
+
+		foreach ( array( 'billing_email', 'customer_id' ) as $field ) {
+			$this->assertSame( $eraser_types[ $field ], $fields['order'][''][ $field ]['personal_data'] );
+		}
+		$this->assertCount( 10, $fields['order_shipping'][''] );
+		foreach ( $fields['order_shipping'][''] as $field => $args ) {
+			$this->assertSame( $eraser_types[ 'shipping_' . $field ], $args['personal_data'], $field );
+		}
+	}
+
+	/**
 	 * Output schema of one order in woocommerce/orders-query.
 	 *
 	 * @return array<string, mixed>
@@ -214,6 +283,8 @@ class PersonalDataTest extends DomainAbilityTestCase {
 		$order = \WC_Helper_Order::create_order();
 		$order->set_billing_email( 'jane@example.com' );
 		$order->set_billing_phone( '555-0100' );
+		$order->set_shipping_first_name( 'Jane' );
+		$order->set_shipping_phone( '555-0101' );
 		$order->save();
 
 		return $order;

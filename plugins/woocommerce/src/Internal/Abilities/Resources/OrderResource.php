@@ -26,12 +26,15 @@ class OrderResource {
 	public const NAME = 'order';
 	public const ITEM = 'order_item';
 
+	public const SHIPPING = 'order_shipping';
+
 	/**
 	 * Register order and line item fields.
 	 */
 	public static function register(): void {
 		AbilityResources::register_resource( self::NAME );
 		AbilityResources::register_resource( self::ITEM );
+		self::register_shipping();
 
 		AbilityResources::register_field(
 			'order',
@@ -91,8 +94,9 @@ class OrderResource {
 			'order',
 			'customer_id',
 			array(
-				'schema'       => array( 'type' => 'integer' ),
-				'get_callback' => static fn( \WC_Order $order ) => $order->get_customer_id(),
+				'schema'        => array( 'type' => 'integer' ),
+				'get_callback'  => static fn( \WC_Order $order ) => $order->get_customer_id(),
+				'personal_data' => 'numeric_id',
 			)
 		);
 
@@ -107,7 +111,7 @@ class OrderResource {
 				),
 				'get_callback'  => static fn( \WC_Order $order ) => '' === $order->get_billing_email() ? null : $order->get_billing_email(),
 				'omit_if_null'  => true,
-				'personal_data' => true,
+				'personal_data' => 'email',
 			)
 		);
 
@@ -202,13 +206,14 @@ class OrderResource {
 			'order',
 			'shipping',
 			array(
-				'schema'       => array(
-					'type'                 => 'object',
-					'description'          => __( 'Order shipping address. Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.', 'woocommerce' ),
-					'properties'           => array_fill_keys( self::shipping_address_fields(), array( 'type' => 'string' ) ),
-					'additionalProperties' => false,
+				'schema'        => array(
+					'$ref'        => self::SHIPPING,
+					'exclude'     => array( 'extensions' ),
+					'description' => __( 'Order shipping address. Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.', 'woocommerce' ),
 				),
-				'get_callback' => static fn( \WC_Order $order ) => array_intersect_key( $order->get_address( 'shipping' ), array_flip( self::shipping_address_fields() ) ),
+				'get_callback'  => static fn( \WC_Order $order ) => $order->get_address( 'shipping' ),
+				// Every member is personal; the order policy must also protect this nested resource.
+				'personal_data' => true,
 			)
 		);
 
@@ -350,12 +355,33 @@ class OrderResource {
 
 
 	/**
-	 * The shipping address fields of the output. The woocommerce_get_order_address
-	 * filter can add other keys, and the closed output schema refuses them.
-	 *
-	 * @return string[]
+	 * Register shipping attributes using the Core order eraser's property classifications.
 	 */
-	private static function shipping_address_fields(): array {
-		return array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' );
+	private static function register_shipping(): void {
+		AbilityResources::register_resource( self::SHIPPING );
+		$types = array(
+			'first_name' => 'text',
+			'last_name'  => 'text',
+			'company'    => 'text',
+			'address_1'  => 'text',
+			'address_2'  => 'text',
+			'city'       => 'text',
+			'state'      => 'address_state',
+			'postcode'   => 'text',
+			'country'    => 'address_country',
+			'phone'      => 'phone',
+		);
+		foreach ( $types as $field => $type ) {
+			AbilityResources::register_field(
+				self::SHIPPING,
+				$field,
+				array(
+					'schema'        => array( 'type' => 'string' ),
+					'get_callback'  => static fn( array $address ) => $address[ $field ] ?? null,
+					'omit_if_null'  => true,
+					'personal_data' => $type,
+				)
+			);
+		}
 	}
 }
