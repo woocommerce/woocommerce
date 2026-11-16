@@ -3022,6 +3022,40 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Quantity validation runs before a subclass can prepare and save any line items.
+	 */
+	public function test_quantity_validation_precedes_subclass_preparation(): void {
+		$sut     = new class() extends WC_REST_Orders_Controller {
+			/**
+			 * Whether order preparation was called.
+			 *
+			 * @var bool
+			 */
+			public $prepared = false;
+
+			/**
+			 * Simulate an extension with its own order preparation.
+			 *
+			 * @param WP_REST_Request $request  Full details about the request.
+			 * @param bool            $creating Whether this is a creation request.
+			 * @return WP_Error
+			 */
+			protected function prepare_object_for_database( $request, $creating = false ) {
+				$this->prepared = true;
+				return new WP_Error( 'unexpected_preparation', 'Invalid quantities must be rejected before preparing items.' );
+			}
+		};
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( array( 'line_items' => array( array( 'quantity' => 1.5 ) ) ) );
+
+		$result = $sut->create_item( $request );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_rest_invalid_quantity', $result->get_error_code() );
+		$this->assertFalse( $sut->prepared, 'Extension item processing must not run for invalid quantities.' );
+	}
+
+	/**
 	 * @testdox A batch update does not remove a fee line sent with a non-integer quantity.
 	 * @testWith ["invalid"]
 	 *           ["0"]

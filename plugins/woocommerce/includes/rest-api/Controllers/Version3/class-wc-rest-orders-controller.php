@@ -117,8 +117,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
 
-		$this->validate_line_item_quantities( $request['line_items'] );
-
 		$this->check_new_line_item_products( $request['line_items'] );
 
 		$item_types = array( 'shipping_lines', 'line_items', 'fee_lines' );
@@ -263,6 +261,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	protected function save_object( $request, $creating = false ) {
 		$object = null;
 		try {
+			$this->validate_line_item_quantities( $request['line_items'] );
+
 			$object = $this->prepare_object_for_database( $request, $creating );
 
 			if ( is_wp_error( $object ) ) {
