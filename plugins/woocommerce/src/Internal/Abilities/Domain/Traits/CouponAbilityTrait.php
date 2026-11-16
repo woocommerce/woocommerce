@@ -65,6 +65,10 @@ trait CouponAbilityTrait {
 					'type'  => 'array',
 					'items' => array( 'type' => 'integer' ),
 				),
+				'email_restrictions'          => array(
+					'type'  => 'array',
+					'items' => array( 'type' => 'string' ),
+				),
 				'exclude_sale_items'          => array( 'type' => 'boolean' ),
 				'redeemable'                  => array( 'type' => 'boolean' ),
 				'expired'                     => array( 'type' => 'boolean' ),
@@ -155,7 +159,7 @@ trait CouponAbilityTrait {
 			),
 			'email_restrictions'   => array(
 				'type'        => 'array',
-				'description' => __( 'Allowed billing emails supplied by the user. Replaces existing restrictions; an empty array clears them. Omit to keep them. Not returned in responses.', 'woocommerce' ),
+				'description' => __( 'Allowed billing emails supplied by the user. Replaces existing restrictions; an empty array clears them. Omit to keep them.', 'woocommerce' ),
 				'items'       => array( 'type' => 'string' ),
 			),
 		);
@@ -322,6 +326,7 @@ trait CouponAbilityTrait {
 			'product_categories'          => array_values( $coupon->get_product_categories() ),
 			'excluded_product_categories' => array_values( $coupon->get_excluded_product_categories() ),
 			'exclude_sale_items'          => $coupon->get_exclude_sale_items(),
+			'email_restrictions'          => array_values( $coupon->get_email_restrictions() ),
 			'usage_count'                 => $coupon->get_usage_count(),
 			'usage_limit'                 => (int) $usage_limit,
 			'usage_limit_per_user'        => (int) $usage_limit_per_user,

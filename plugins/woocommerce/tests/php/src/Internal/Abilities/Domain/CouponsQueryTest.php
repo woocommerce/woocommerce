@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\CouponsQuery;
  */
 class CouponsQueryTest extends \WC_Unit_Test_Case {
 	/**
-	 * @testdox Should find scheduled coupons by code without returning customer email restrictions.
+	 * @testdox Should find scheduled coupons by code with their email restrictions.
 	 */
 	public function test_scheduled_coupon_lookup(): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
@@ -34,7 +34,7 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $result['coupons'][0]['scheduled'] );
 		$this->assertFalse( $result['coupons'][0]['redeemable'] );
 		$this->assertArrayHasKey( 'starts_at', $result['coupons'][0] );
-		$this->assertArrayNotHasKey( 'email_restrictions', $result['coupons'][0] );
+		$this->assertSame( array( 'customer@example.test' ), $result['coupons'][0]['email_restrictions'] );
 	}
 
 	/**
@@ -68,7 +68,7 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should accept supplied email restrictions without disclosing them in responses.
+	 * @testdox Should return saved email restrictions on create, update and query.
 	 */
 	public function test_email_restriction_writes(): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
@@ -81,7 +81,7 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertNotWPError( $result );
-		$this->assertArrayNotHasKey( 'email_restrictions', $result['coupon'] );
+		$this->assertSame( array( 'customer@example.test', 'other@example.test' ), $result['coupon']['email_restrictions'] );
 		$id = $result['coupon']['id'];
 		$this->assertSame( array( 'customer@example.test', 'other@example.test' ), ( new \WC_Coupon( $id ) )->get_email_restrictions() );
 
@@ -94,7 +94,7 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertNotWPError( $result );
-		$this->assertArrayNotHasKey( 'email_restrictions', $result['coupon'] );
+		$this->assertSame( array( 'replacement@example.test' ), $result['coupon']['email_restrictions'] );
 		$this->assertSame( array( 'replacement@example.test' ), ( new \WC_Coupon( $id ) )->get_email_restrictions() );
 
 		$result = $update->execute(
@@ -108,7 +108,7 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$query  = new \WP_Ability( CouponsQuery::get_name(), CouponsQuery::get_registration_args() );
 		$result = $query->execute( array( 'include' => array( $id ) ) );
 		$this->assertNotWPError( $result );
-		$this->assertArrayNotHasKey( 'email_restrictions', $result['coupons'][0] );
+		$this->assertSame( array( 'replacement@example.test' ), $result['coupons'][0]['email_restrictions'] );
 
 		$result = $update->execute(
 			array(
@@ -117,6 +117,7 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertNotWPError( $result );
+		$this->assertSame( array(), $result['coupon']['email_restrictions'] );
 		$this->assertSame( array(), ( new \WC_Coupon( $id ) )->get_email_restrictions() );
 	}
 
