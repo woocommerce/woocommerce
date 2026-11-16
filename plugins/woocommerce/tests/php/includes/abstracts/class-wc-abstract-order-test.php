@@ -402,7 +402,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->registered_order_statuses = array();
 
 		parent::tearDown();
-		$this->disable_cogs_feature();
 	}
 
 	/**

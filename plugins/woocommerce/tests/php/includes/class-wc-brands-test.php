@@ -58,9 +58,6 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->remove_added_uploads();
 		parent::tearDown();
-
-		// Clear term cache to prevent interference between tests.
-		clean_term_cache( array(), 'product_brand' );
 	}
 	/**
 	 * Test that `product_brand_thumbnails` shortcode's `show_empty` argument works as expected.

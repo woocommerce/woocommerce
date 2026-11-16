@@ -22,15 +22,6 @@ class WC_Shipping_Zones_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		WC_Helper_Shipping_Zones::remove_mock_zones();
-	}
-
-	/**
 	 * @testdox Should warn when a postcode zone is below a broader state zone.
 	 */
 	public function test_warns_when_postcode_zone_is_below_broader_state_zone(): void {
