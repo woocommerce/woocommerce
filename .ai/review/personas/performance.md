@@ -55,12 +55,16 @@ This controls false positives. Follow it strictly.
   `woocommerce_attribute_lookup_enabled` must be `'yes'` to use the attributes table. Code that builds
   or regenerates the lookup tables must read the source tables. Removing or inverting a gate is a
   correctness regression (mid-regeneration reads return incomplete rows).
-- **`SELECT MIN(col), MAX(col)`** over a large table scans every matching row. When `WHERE` and the
-  column share a composite index (equality or bounded-range leading keys, target column trailing),
-  rewrite as `UNION ALL` of two `ORDER BY col ASC|DESC LIMIT 1` seeks. This is only safe when the
-  column is `NOT NULL` or both branches add `AND col IS NOT NULL`: `MIN`/`MAX` skip NULLs, while
-  `ORDER BY ASC` returns them first. A rewrite on a nullable column without those guards silently
-  changes results: a correctness regression.
+- **`SELECT MIN(col), MAX(col)`** over a large table scans every matching row, except when every
+  `WHERE` predicate is an equality on the leading columns of an index that has the column next: the
+  database answers that form from the index ends, so don't flag it. Otherwise, when an index returns
+  rows sorted by the column (it starts with the column, or every earlier column has an equality
+  predicate) and few rows at its ends fail the `WHERE`, the fix is a `UNION ALL` of two
+  `ORDER BY col ASC|DESC LIMIT 1` seeks. A range, `IN (...)` or `!=` on an earlier index column
+  breaks that order, so that index cannot serve the seek: don't suggest the rewrite on it. The
+  rewrite is only safe when the column is `NOT NULL` or both branches add `AND col IS NOT NULL`:
+  `MIN`/`MAX` skip NULLs, while `ORDER BY ASC` returns them first. A rewrite on a nullable column
+  without those guards silently changes results: a correctness regression.
 - **Dynamic `IN (...)` lists** must guard against empty input (`IN ()` is a SQL syntax error) and
   sanitize members (`array_map( 'absint', ... )` for IDs, `$wpdb->prepare` placeholders for strings).
   These are correctness and security findings, not performance ones.
