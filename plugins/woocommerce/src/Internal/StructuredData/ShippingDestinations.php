@@ -208,7 +208,7 @@ class ShippingDestinations {
 			if ( ! $destinations ) {
 				continue;
 			}
-			$methods = $zone->get_shipping_methods( true );
+			$methods = $zone->get_shipping_methods( true, 'structured-data' );
 			if ( ! is_array( $methods ) ) {
 				continue;
 			}

@@ -153,7 +153,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * Get shipping methods linked to this zone.
 	 *
 	 * @param bool   $enabled_only Only return enabled methods.
-	 * @param string $context Getting shipping methods for what context. Valid values, admin, json.
+	 * @param string $context Context for shipping methods: admin, json, or structured-data (without settings HTML).
 	 * @return array of objects
 	 */
 	public function get_shipping_methods( $enabled_only = false, $context = 'admin' ) {
@@ -191,7 +191,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 					$methods[ $instance_id ]->method_order       = absint( $raw_method->method_order );
 					$methods[ $instance_id ]->enabled            = $raw_method->is_enabled ? 'yes' : 'no';
 					$methods[ $instance_id ]->has_settings       = $methods[ $instance_id ]->has_settings();
-					$methods[ $instance_id ]->settings_html      = $methods[ $instance_id ]->supports( 'instance-settings-modal' ) ? $methods[ $instance_id ]->get_admin_options_html() : false;
+					$methods[ $instance_id ]->settings_html      = $methods[ $instance_id ]->supports( 'instance-settings-modal' ) && 'structured-data' !== $context ? $methods[ $instance_id ]->get_admin_options_html() : false;
 					$methods[ $instance_id ]->method_description = wp_kses_post( wpautop( $methods[ $instance_id ]->method_description ) );
 				}
 
