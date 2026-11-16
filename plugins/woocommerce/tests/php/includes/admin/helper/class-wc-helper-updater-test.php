@@ -2674,11 +2674,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		};
 		add_filter( 'pre_http_request', $fail );
 
-		try {
-			$this->assertNull( WC_Helper_Updater::get_plugins_without_subscription( false ), 'Without the list the answer is unknown.' );
-		} finally {
-			remove_filter( 'pre_http_request', $fail );
-		}
+		$this->assertNull( WC_Helper_Updater::get_plugins_without_subscription( false ), 'Without the list the answer is unknown.' );
 	}
 
 	/**

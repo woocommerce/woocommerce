@@ -1651,7 +1651,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->read( $refreshed_order );
 
 		$this->assertEquals( array( 'key' => 'value' ), $refreshed_order->get_meta( 'my_custom_meta' ) );
-		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1692,7 +1691,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'custom_value_4', $refreshed_order->get_meta( 'custom_meta_4' ) );
 		$this->assertEquals( 'custom_value_1_updated', $refreshed_order->get_meta( 'custom_meta_1' ) );
 		$this->assertEquals( '', $refreshed_order->get_meta( 'custom_meta_2' ) );
-		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1726,7 +1724,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( array( 'new_value' ), get_post_meta( $order->get_id(), 'new_meta', false ) );
 		$this->assertEquals( array( 'after' ), get_post_meta( $order->get_id(), 'changed_meta', false ) );
 		$this->assertEquals( array( 'y', 'z' ), get_post_meta( $order->get_id(), 'multi_meta', false ) );
-		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1760,7 +1757,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->read( $r_order );
 		$this->assertFalse( $post_order_comparison_closure->call( $this->sut, $r_order ) );
 		$this->assertEquals( array( 'key' => 'value' ), $r_order->get_meta( 'my_custom_meta' ) );
-		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1926,9 +1922,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->reset_order_data_store_state( $this->sut );
 		wc_get_order( $order->get_id() );
 		$this->assertFalse( $sync_on_read_triggered, 'Sync on read should not trigger when post is older.' );
-
-		remove_all_actions( 'woocommerce_hpos_post_record_migrated_on_read' );
-		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -2659,9 +2652,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 * @testdox Generic order persistence saves the store tax-mode default captured at construction.
 	 */
 	public function test_create_without_explicit_prices_include_tax_keeps_default(): void {
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
-		$order             = null;
+		$order = null;
 
 		try {
 			update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -2687,8 +2678,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			if ( $order ) {
 				$order->delete( true );
 			}
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
-			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
@@ -2696,8 +2685,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 * @testDox An explicitly set prices_include_tax value is persisted as given, not replaced by the store setting.
 	 */
 	public function test_create_keeps_explicit_prices_include_tax_value(): void {
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$order             = null;
+		$order = null;
 
 		try {
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
@@ -2721,7 +2709,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			if ( $order ) {
 				$order->delete( true );
 			}
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
 		}
 	}
 
@@ -2731,9 +2718,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_read_with_null_prices_include_tax_uses_store_default(): void {
 		global $wpdb;
 
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
-		$order             = new WC_Order();
+		$order = new WC_Order();
 
 		try {
 			update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -2762,8 +2747,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			$this->assertArrayNotHasKey( 'prices_include_tax', $read_order->get_changes() );
 		} finally {
 			$order->delete( true );
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
-			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
@@ -3377,7 +3360,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
 		$this->assertEquals( 'test_value_2', $r_order->get_meta( 'test_key_2', true ) );
 		$this->assertEquals( 'test_value_3', $r_order->get_meta( 'test_key_3', true ) );
-		remove_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ) );
 	}
 
 	/**
@@ -3415,7 +3397,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'test_value_2', $r_order->get_meta( 'test_key_2', true ) );
 		$this->assertEquals( 'test_value_3', $r_order->get_meta( 'test_key_3', true ) );
 		$this->assertEquals( 1, $r_order->get_customer_id() );
-		remove_filter( 'added_post_meta', array( $this, 'add_meta_when_meta_added' ) );
 	}
 
 	/**
@@ -3517,9 +3498,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			$this->assertEquals( 2, $new_count );
 			$this->assertEquals( 2, $update_count );
 		}
-
-		remove_action( 'woocommerce_new_order', $callback );
-		remove_action( 'woocommerce_update_order', $callback );
 	}
 
 	/**
@@ -4007,8 +3985,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$r_order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 2, $r_order->get_customer_id() );
-
-		remove_all_actions( 'woocommerce_delete_shop_order_transients' );
 	}
 
 	/**
@@ -4094,7 +4070,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertTrue( $current_time_called, 'current_time mock was not called' );
 
 		remove_filter( 'woocommerce_order_data_store', $orders_table_data_store, 1000 );
-		remove_all_actions( 'woocommerce_before_order_object_save' );
 	}
 
 	/**
@@ -4362,8 +4337,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		}
 
 		$this->assertEquals( 0, $new_count );
-
-		remove_action( 'woocommerce_new_order', $callback );
 	}
 
 	/**
@@ -4399,8 +4372,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		}
 
 		$this->assertEquals( 4, $new_count );
-
-		remove_action( 'woocommerce_new_order', $callback );
 	}
 
 	/**
@@ -4427,8 +4398,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->save();
 
 		$this->assertEquals( 1, $new_count );
-
-		remove_action( 'woocommerce_new_order', $callback );
 	}
 
 

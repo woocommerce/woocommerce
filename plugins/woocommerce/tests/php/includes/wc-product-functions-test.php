@@ -775,8 +775,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_product_get_price', $callback, 50, 2 );
 
 		$this->assertEquals( 50, wc_get_product( $product_id )->get_price(), 'A deliberate third-party price is respected, not reverted to the sale price.' );
-
-		remove_filter( 'woocommerce_product_get_price', $callback, 50 );
 	}
 
 	/**
@@ -808,8 +806,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			wc_get_product( $product_id )->get_price(),
 			'The third-party price wins over the scheduled-sale heal (which would otherwise return 20).'
 		);
-
-		remove_filter( 'woocommerce_product_get_price', $callback, 50 );
 	}
 
 	/**
@@ -1575,8 +1571,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testdox Assigned-customer orders apply matched rates for the editor tax location and pass the order customer to the filter.
 	 */
 	public function test_wc_get_price_excluding_tax_editor_location_filters_customer_rates(): void {
-		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 
@@ -1640,8 +1634,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			WC_Tax::_delete_tax_rate( $french_tax_rate_id );
 			$order->delete( true );
 			wp_delete_user( $customer->get_id() );
-			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
 		}
 	}
 
@@ -1721,13 +1713,14 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Related caches trim old variants and keep two large alternating queries cacheable.
-	 * @testWith [false, 8192]
-	 *           [true, 65536]
+	 * @testWith [false, 8192, 150]
+	 *           [true, 65536, 1000]
 	 *
 	 * @param bool $external_cache Whether transients use the object cache.
 	 * @param int  $budget         Cache size target.
+	 * @param int  $queries        Distinct queries to cache, enough to run past the budget (85 and 682 entries fit).
 	 */
-	public function test_related_product_cache_has_size_limit( bool $external_cache, int $budget ): void {
+	public function test_related_product_cache_has_size_limit( bool $external_cache, int $budget, int $queries ): void {
 		$product_id = $this->factory->post->create( array( 'post_type' => 'product' ) );
 		$related_id = $this->factory->post->create( array( 'post_type' => 'product' ) );
 		$category   = $this->factory->term->create( array( 'taxonomy' => 'product_cat' ) );
@@ -1747,13 +1740,16 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			$this->assertLessThanOrEqual( $budget, strlen( maybe_serialize( $cached ) ), 'An oversized pre-upgrade cache must be trimmed.' );
 			$this->assertArrayHasKey( 'legacy=19999', $cached, 'The newest pre-upgrade queries should remain cached.' );
 
-			$min_count = PHP_INT_MAX;
-			for ( $context = 0; $context < 1000; ++$context ) {
+			$min_count   = PHP_INT_MAX;
+			$first_query = null;
+			for ( $context = 0; $context < $queries; ++$context ) {
 				wc_get_related_products( $product_id, 5, array( 100000 + $context ) );
-				if ( $context >= 500 ) {
+				$first_query = $first_query ?? array_key_last( get_transient( $key ) );
+				if ( $context >= $queries / 2 ) {
 					$min_count = min( $min_count, count( get_transient( $key ) ) );
 				}
 			}
+			$this->assertArrayNotHasKey( $first_query, get_transient( $key ), 'The loop must run past the budget so its own oldest query is evicted.' );
 			$this->assertLessThanOrEqual( $budget, strlen( maybe_serialize( get_transient( $key ) ) ) );
 			$this->assertGreaterThan( 2, $min_count, 'Only the oldest queries should be evicted.' );
 			foreach ( array( 100000, 200000 ) as $exclude_start ) {
@@ -3055,7 +3051,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			wp_delete_attachment( $attachment_id, true );
 			WC_Helper_Product::delete_product( $product->get_id() );
 			wp_delete_user( $subscriber_id );
-			delete_option( 'woocommerce_product_match_featured_image_by_sku' );
 		}
 	}
 
@@ -3063,11 +3058,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testdox Every product is processed when the backlog spans more than one batch.
 	 */
 	public function test_wc_scheduled_sales_processes_every_product_across_batches(): void {
-		$ids = array();
-		for ( $i = 0; $i < 51; $i++ ) {
-			$product = WC_Helper_Product::create_missed_sale_end_product();
-			$ids[]   = $product->get_id();
-		}
+		$ids = WC_Helper_Product::create_missed_sale_end_product_ids( 51 );
 
 		$before_payloads = array();
 		$after_payloads  = array();
@@ -3110,12 +3101,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testdox Priming happens per batch, not once for the whole backlog.
 	 */
 	public function test_wc_scheduled_sales_primes_one_batch_at_a_time(): void {
-		$ids = array();
-
-		for ( $i = 0; $i < 51; $i++ ) {
-			$product = WC_Helper_Product::create_missed_sale_end_product();
-			$ids[]   = $product->get_id();
-		}
+		WC_Helper_Product::create_missed_sale_end_product_ids( 51 );
 
 		$queued = array();
 		add_action(

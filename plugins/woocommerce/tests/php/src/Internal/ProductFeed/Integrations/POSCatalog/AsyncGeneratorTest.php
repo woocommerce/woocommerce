@@ -209,7 +209,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertSame( AsyncGenerator::STATE_SCHEDULED, $status['state'] );
 
 		as_unschedule_all_actions( AsyncGenerator::FEED_GENERATION_ACTION, array(), 'woo-product-feed' );
-		delete_option( $option_key );
 	}
 
 	/**
@@ -280,7 +279,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$callback = fn() => 10;
 		add_filter( 'woocommerce_product_feed_in_progress_timeout', $callback );
 		$this->assertFalse( $method->invoke( $this->sut, $status ) );
-		remove_filter( 'woocommerce_product_feed_in_progress_timeout', $callback );
 	}
 
 	/**
@@ -325,7 +323,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$callback = fn() => 20 * MINUTE_IN_SECONDS;
 		add_filter( 'woocommerce_product_feed_batch_time_limit', $callback );
 		$this->assertTrue( $method->invoke( $this->sut, $status ) );
-		remove_filter( 'woocommerce_product_feed_batch_time_limit', $callback );
 	}
 
 	/**
@@ -697,8 +694,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 2500, (int) get_option( $option_key . '_chunk_size' ) );
 
 		as_unschedule_all_actions( AsyncGenerator::FEED_GENERATION_ACTION, array(), 'woo-product-feed' );
-		delete_option( $option_key );
-		delete_option( $option_key . '_chunk_size' );
 	}
 
 	/**
@@ -716,8 +711,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1000, $reduce->invoke( $this->sut, $option_key ) );
 		// Already at the smallest configured size: it stays there.
 		$this->assertSame( 1000, $reduce->invoke( $this->sut, $option_key ) );
-
-		delete_option( $option_key . '_chunk_size' );
 	}
 
 	/**
@@ -766,8 +759,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 2500, (int) get_option( $option_key . '_chunk_size' ) );
 
 		as_unschedule_all_actions( AsyncGenerator::FEED_GENERATION_ACTION, array(), 'woo-product-feed' );
-		delete_option( $option_key );
-		delete_option( $option_key . '_chunk_size' );
 	}
 
 	/**
@@ -817,7 +808,6 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'file_name', $status );
 
 		as_unschedule_all_actions( AsyncGenerator::FEED_GENERATION_ACTION, array(), 'woo-product-feed' );
-		delete_option( $option_key );
 	}
 
 	/**

@@ -100,9 +100,6 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -188,9 +185,6 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( '_priority', $suggestion_category, 'Suggestion category `_order` entry is missing' );
 		$this->assertArrayHasKey( 'title', $suggestion_category, 'Suggestion category `title` entry is missing' );
 		$this->assertArrayHasKey( 'description', $suggestion_category, 'Suggestion category `description` entry is missing' );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -269,9 +263,6 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 			$this->assertIsArray( $suggestion['tags'] );
 			$this->assertArrayHasKey( 'category', $suggestion, 'Suggestion `category` entry is missing' );
 		}
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -500,9 +491,6 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertCount( 2, $data['suggestions'] );
 		// Assert we get the suggestion categories.
 		$this->assertCount( 3, $data['suggestion_categories'] );
-
-		// Clean up.
-		delete_option( 'woocommerce_default_country' );
 	}
 
 	/**

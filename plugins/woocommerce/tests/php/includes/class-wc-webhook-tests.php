@@ -847,8 +847,6 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 			wc_get_webhook( $webhook->get_id() )->get_failure_count(),
 			'Failure tracking must still run when delivery logging is disabled.'
 		);
-
-		remove_filter( 'woocommerce_logger_log_message', $log_spy, 10 );
 	}
 
 	/**

@@ -217,7 +217,7 @@ class WC_REST_System_Status_Tools_V2_Controller_Test extends WC_REST_Unit_Test_C
 	 */
 	public function test_clear_transients_clears_product_and_analytics_caches( bool $external_cache, bool $fail_enqueue ): void {
 		$batch_size   = ProductUtil::TRANSIENT_CLEANUP_BATCH_SIZE;
-		$ids          = $this->factory->post->create_many( $batch_size + 1, array( 'post_type' => 'product' ) );
+		$ids          = WC_Helper_Product::insert_product_post_rows( $batch_size + 1 );
 		$variation_id = $this->factory->post->create( array( 'post_type' => 'product_variation' ) );
 		$previous     = wp_using_ext_object_cache();
 		wp_using_ext_object_cache( $external_cache );
