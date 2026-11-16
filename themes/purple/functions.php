@@ -119,7 +119,6 @@ if ( ! function_exists( 'purple_get_woocommerce_stylesheets' ) ) :
 		}
 
 		$stylesheets = array(
-			'11.2.0' => 'assets/css/woocommerce-11.1.css',
 			'11.3.0' => 'assets/css/woocommerce-11.2.css',
 		);
 

@@ -64,6 +64,89 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests translation updates with malformed installed or remote revision dates.
+	 *
+	 * @dataProvider translation_revision_dates
+	 * @param string|null $installed_revision Date in the installed PO file, or null when the locale is not installed.
+	 * @param string      $remote_revision    Date reported by the update service.
+	 * @param bool        $expect_update      Whether the update should be offered.
+	 */
+	public function test_translation_update_revision_dates( ?string $installed_revision, string $remote_revision, bool $expect_update ): void {
+		$plugin   = $this->mock_local_woo_plugin();
+		$lang_dir = WP_LANG_DIR . '/plugins/';
+		$pack     = $lang_dir . 'woo-test-plugin-fr_FR';
+		wp_mkdir_p( $lang_dir );
+		wp_delete_file( $pack . '.po' );
+		if ( null !== $installed_revision ) {
+			file_put_contents( $pack . '.po', "\"PO-Revision-Date: {$installed_revision}\\n\"\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture.
+		}
+
+		$files   = static fn( $files, $path ) => $lang_dir === $path ? array( $pack . '.mo' ) : $files;
+		$active  = static fn() => array( $plugin );
+		$locales = static fn() => array( 'fr_FR' );
+		$opt_in  = static fn() => true;
+		$mock    = static function ( $response, $args, $url ) use ( $remote_revision ) {
+			if ( 'https://translate.wordpress.com/api/translations-updates/woocommerce' !== $url ) {
+				return $response;
+			}
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode(
+					array(
+						'data' => array(
+							'woo-test-plugin' => array(
+								array(
+									'wp_locale'     => 'fr_FR',
+									'last_modified' => $remote_revision,
+									'version'       => '1.0.0',
+									'package'       => 'https://example.test/fr_FR.zip',
+								),
+							),
+						),
+					)
+				),
+			);
+		};
+
+		add_filter( 'pre_get_language_files_from_path', $files, 10, 2 );
+		add_filter( 'pre_option_active_plugins', $active );
+		add_filter( 'plugins_update_check_locales', $locales );
+		add_filter( 'woocommerce_translations_updates_for_woo-test-plugin', $opt_in );
+		add_filter( 'pre_http_request', $mock, 10, 3 );
+
+		try {
+			$this->assertSame( $installed_revision, wp_get_installed_translations( 'plugins' )['woo-test-plugin']['fr_FR']['PO-Revision-Date'] ?? null );
+			$updates = WC_Helper_Updater::get_translations_update_data();
+			$this->assertSame( $expect_update ? array( 'fr_FR' ) : array(), array_column( $updates, 'language' ) );
+		} finally {
+			remove_filter( 'pre_get_language_files_from_path', $files );
+			remove_filter( 'pre_option_active_plugins', $active );
+			remove_filter( 'plugins_update_check_locales', $locales );
+			remove_filter( 'woocommerce_translations_updates_for_woo-test-plugin', $opt_in );
+			remove_filter( 'pre_http_request', $mock );
+			wp_delete_file( $pack . '.po' );
+		}
+	}
+
+	/**
+	 * Supplies installed and remote translation revision dates.
+	 *
+	 * @return array
+	 */
+	public function translation_revision_dates(): array {
+		return array(
+			'replace invalid installed date' => array( '2018-MO-DA HO:MI+ZONE', '2026-02-01 00:00+0000', true ),
+			'skip invalid remote date'       => array( '2026-01-01 00:00+0000', 'invalid', false ),
+			'offer newer update'             => array( '2026-01-01 00:00+0000', '2026-02-01 00:00+0000', true ),
+			'keep newer installed pack'      => array( '2026-02-01 00:00+0000', '2026-01-01 00:00+0000', false ),
+			'replace empty installed date'   => array( '', '2026-02-01 00:00+0000', true ),
+			'skip empty remote date'         => array( '2026-01-01 00:00+0000', '', false ),
+			'install without remote date'    => array( null, '', true ),
+			'install with invalid remote'    => array( null, 'invalid', true ),
+		);
+	}
+
+	/**
 	 * Unregister and delete the fixture theme, when one was created.
 	 */
 	private function cleanup_theme_fixture() {

@@ -83,7 +83,6 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		$current_section = $this->original_current_section;
 		$current_tab     = $this->original_current_tab;
 
-		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		foreach ( array( 'acme-native-settings-ui', 'acme-payments-settings-ui', 'direct-payments-settings-ui' ) as $script_handle ) {
 			wp_dequeue_script( $script_handle );
 			wp_deregister_script( $script_handle );

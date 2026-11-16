@@ -14,20 +14,6 @@ declare(strict_types=1);
 class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 
 	/**
-	 * Original hold stock minutes option value.
-	 *
-	 * @var int
-	 */
-	public $original_hold_stock_minutes = 0;
-
-	/**
-	 * Original manage stock option value.
-	 *
-	 * @var string
-	 */
-	public $original_manage_stock_option = 'yes';
-
-	/**
 	 * Set up test environment.
 	 * @return void
 	 */
@@ -36,8 +22,6 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 
 		// Don't allow actual order cancellations during tests.
 		add_filter( 'woocommerce_cancel_unpaid_order', '__return_false', 10, 0 );
-		$this->original_hold_stock_minutes  = get_option( 'woocommerce_hold_stock_minutes', 0 );
-		$this->original_manage_stock_option = get_option( 'woocommerce_manage_stock', 'yes' );
 	}
 
 	/**
@@ -321,26 +305,5 @@ class WC_Tests_Cancel_Unpaid_Orders extends WC_Unit_Test_Case {
 				'WP-Cron event should be scheduled when Action Scheduler is not available'
 			);
 		}
-	}
-
-	/**
-	 * Clean up after tests.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		// Clean up scheduled actions and settings.
-		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
-		}
-		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
-
-		update_option( 'woocommerce_hold_stock_minutes', $this->original_hold_stock_minutes );
-		update_option( 'woocommerce_manage_stock', $this->original_manage_stock_option );
-
-		// Remove any filters that might have been added.
-		remove_all_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes' );
-		remove_all_filters( 'woocommerce_cancel_unpaid_orders' );
-		remove_all_filters( 'woocommerce_cancel_unpaid_order' );
 	}
 }

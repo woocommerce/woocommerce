@@ -24,10 +24,6 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	protected static $user_id;
 
 	/**
-	 * @var callable
-	 */
-	private $feature_filter;
-	/**
 	 * @var string|false
 	 */
 	private $prev_default_country;
@@ -45,15 +41,15 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	 * Setup.
 	 */
 	public function setUp(): void {
-		// Set up the feature flag before parent::setUp() to ensure the feature is enabled.
-		$this->feature_filter = function ( $features ) {
+		parent::setUp();
+
+		// REST routes are registered on the first request, so the feature can be enabled here.
+		$feature_filter = function ( $features ) {
 			$features[] = 'rest-api-v4';
 			return $features;
 		};
 
-		add_filter( 'woocommerce_admin_features', $this->feature_filter );
-
-		parent::setUp();
+		add_filter( 'woocommerce_admin_features', $feature_filter );
 
 		// This is to reset the country after the test.
 		$this->prev_default_country = get_option( 'woocommerce_default_country' );
@@ -63,9 +59,6 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		if ( isset( $this->feature_filter ) ) {
-			remove_filter( 'woocommerce_admin_features', $this->feature_filter );
-		}
 		if ( isset( $this->prev_default_country ) ) {
 			update_option( 'woocommerce_default_country', $this->prev_default_country );
 		}

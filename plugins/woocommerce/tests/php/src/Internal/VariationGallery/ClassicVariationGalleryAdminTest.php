@@ -39,11 +39,6 @@ class ClassicVariationGalleryAdminTest extends \WC_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		remove_filter(
-			'woocommerce_product_variation_get_gallery_image_ids',
-			array( $this->legacy_compat, 'maybe_read_legacy_gallery_image_ids' ),
-			10
-		);
 		unset( $_POST['variable_gallery_image_ids'] );
 		parent::tearDown();
 	}

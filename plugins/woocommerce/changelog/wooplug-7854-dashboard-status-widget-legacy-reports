@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Hide the sales rows in the WooCommerce Status dashboard widget when Analytics is turned off, instead of using legacy reports.

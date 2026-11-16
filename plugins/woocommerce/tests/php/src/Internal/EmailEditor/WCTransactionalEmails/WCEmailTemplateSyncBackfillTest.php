@@ -65,9 +65,6 @@ class WCEmailTemplateSyncBackfillTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->cleanup_injected_emails();
 
-		remove_all_filters( 'woocommerce_transactional_emails_for_block_editor' );
-		remove_all_actions( WCEmailTemplateSyncBackfill::BACKFILL_COMPLETE_ACTION );
-
 		WCEmailTemplateSyncRegistry::reset_cache();
 		WCEmailTemplateSyncBackfill::set_logger( null );
 
