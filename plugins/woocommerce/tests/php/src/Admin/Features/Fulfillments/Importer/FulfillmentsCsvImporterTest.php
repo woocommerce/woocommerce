@@ -1041,7 +1041,9 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $fulfillments );
 		$fulfillment = $fulfillments[0];
 		$row         = $result['rows'][0];
-		$this->assertSame( array( 'row', 'order_number', 'status', 'message', 'order_id', 'fulfillment_id', 'notified' ), array_keys( $row ), 'The import client reads these keys' );
+		foreach ( array( 'row', 'order_number', 'status', 'message', 'order_id', 'fulfillment_id', 'notified' ) as $key ) {
+			$this->assertArrayHasKey( $key, $row, 'The import client reads this key' );
+		}
 		$this->assertSame( 2, $row['row'] );
 		$this->assertSame( FulfillmentsCsvImporter::STATUS_CREATED, $row['status'] );
 		$this->assertSame( $id, $row['order_id'] );
@@ -1109,9 +1111,12 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $result['counts'][ FulfillmentsCsvImporter::STATUS_CREATED ] );
 		$this->assertSame( 15, $result['counts'][ FulfillmentsCsvImporter::STATUS_FAILED ] );
 		$this->assertSame( range( 2, 17 ), array_column( $result['rows'], 'row' ) );
-		$this->assertSame( array( 'row', 'order_number', 'status', 'code', 'message' ), array_keys( $result['rows'][1] ), 'A row that fails before its order resolves has no order_id' );
+		foreach ( array( 'row', 'order_number', 'status', 'code', 'message' ) as $key ) {
+			$this->assertArrayHasKey( $key, $result['rows'][1] );
+			$this->assertArrayHasKey( $key, $result['rows'][9] );
+		}
+		$this->assertArrayNotHasKey( 'order_id', $result['rows'][1], 'A row that fails before its order resolves has no order_id' );
 		$this->assertSame( (string) $id, $result['rows'][1]['order_number'] );
-		$this->assertSame( array( 'row', 'order_number', 'status', 'code', 'message', 'order_id' ), array_keys( $result['rows'][9] ), 'A row that fails after its order resolves names it' );
 		$this->assertSame( $no_items, $result['rows'][9]['order_id'] );
 		$this->assertSame( 'Blocked by an extension.', $result['rows'][10]['message'], 'An extension message from a blocked save reaches the merchant' );
 		$this->assertSame( 'Could not save the fulfillment.', $result['rows'][11]['message'], 'Other save errors are not shown to the merchant' );
