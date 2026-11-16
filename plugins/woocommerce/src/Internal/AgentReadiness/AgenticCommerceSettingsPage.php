@@ -348,11 +348,11 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 					$action   = self::check_action( $check );
 					$required = StoreConditions::shows_required( $check );
 					$lines    = array( esc_html( $action[1] ) );
-					if ( '' !== (string) ( $action[4] ?? '' ) ) {
-						$lines[] = esc_html( (string) $action[4] );
+					if ( '' !== $action[4] ) {
+						$lines[] = esc_html( $action[4] );
 					}
 					// Other steps say Review. The connection URL step says Change permalinks, and only when permalinks are one of the fixes.
-					$label  = 'ucp_discovery' === $check['id'] && '' !== (string) ( $action[3] ?? '' ) ? (string) $action[3] : __( 'Review', 'woocommerce' );
+					$label  = 'ucp_discovery' === $check['id'] && '' !== $action[3] ? $action[3] : __( 'Review', 'woocommerce' );
 					$review = '' === $action[2] ? '' : '<a class="button wc-agentic-commerce-review" href="' . esc_url( $action[2] ) . '">' . esc_html( $label ) . '</a>';
 					self::render_item( $required ? 'required' : 'open', esc_html( $action[0] ) . ( $required ? ' ' . self::required_badge() : '' ), $lines, $review );
 				}
