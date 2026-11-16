@@ -650,7 +650,9 @@ class FulfillmentsCsvImporter {
 		if ( null !== $items ) {
 			$fulfillment->set_items( $items );
 		}
-		$fulfillment->set_status( 'fulfilled' );
+		if ( ! $fulfillment->get_is_fulfilled() ) {
+			$fulfillment->set_status( 'fulfilled' );
+		}
 		$fulfillment->set_tracking_number( $fields['tracking_number'] );
 		$provider_key = $this->known_provider_key( $fields['provider'] );
 		// An unknown provider is stored the way the fulfillment editor stores a custom one.
@@ -661,6 +663,14 @@ class FulfillmentsCsvImporter {
 		// A blank URL cell keeps the stored URL on an update.
 		if ( '' !== $fields['tracking_url'] ) {
 			$fulfillment->set_tracking_url( $fields['tracking_url'] );
+		}
+		if ( null !== $existing && array() === $fulfillment->get_changes() ) {
+			return array(
+				'status'         => self::STATUS_SKIPPED,
+				'message'        => __( 'Fulfillment unchanged.', 'woocommerce' ),
+				'order_id'       => $order_id,
+				'fulfillment_id' => $existing->get_id(),
+			);
 		}
 
 		try {

@@ -1214,7 +1214,19 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$order = OrderHelper::create_order();
 		$id    = $order->get_id();
 		$this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,ups,https://example.com/1\n" );
-		$stored_id = $this->fulfillments_of( $order )[0]->get_id();
+		add_filter(
+			'woocommerce_fulfillment_fulfillment_statuses',
+			fn( $statuses ) => $statuses + array(
+				'delivered' => array(
+					'label'        => 'Delivered',
+					'is_fulfilled' => true,
+				),
+			)
+		);
+		$stored = $this->fulfillments_of( $order )[0];
+		$stored->set_status( 'delivered' );
+		$stored->save();
+		$stored_id = $stored->get_id();
 
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$id},trk-1,fedex,\n" );
 
@@ -1226,6 +1238,30 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'trk-1', $fulfillments[0]->get_tracking_number() );
 		$this->assertSame( 'fedex', $fulfillments[0]->get_shipment_provider() );
 		$this->assertSame( 'https://example.com/1', $fulfillments[0]->get_tracking_url() );
+		$this->assertSame( 'delivered', $fulfillments[0]->get_status(), 'A status that is already fulfilled is kept' );
+	}
+
+	/**
+	 * @testdox A row whose mapped values match the stored fulfillment is skipped without a save or a notification.
+	 */
+	public function test_unchanged_update_is_skipped_without_a_save_or_notification(): void {
+		$order   = OrderHelper::create_order();
+		$csv     = "order_number,tracking_number,shipment_provider,tracking_url\n{$order->get_id()},TRK-1,UPS,HTTPS://example.com/t\n{$order->get_id()},TRK-2,Acme Freight,\n";
+		$options = array(
+			'notify_customer' => true,
+			'update_existing' => true,
+		);
+		$this->import_csv( $csv, $options );
+		$updates = did_action( 'woocommerce_fulfillment_after_update' );
+		$emails  = did_action( 'woocommerce_fulfillment_updated_notification' );
+
+		$result = $this->import_csv( $csv, $options );
+
+		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_SKIPPED, FulfillmentsCsvImporter::STATUS_SKIPPED ), array_column( $result['rows'], 'status' ) );
+		$this->assertSame( 'Fulfillment unchanged.', $result['rows'][0]['message'] );
+		$this->assertSame( 0, $result['counts']['notified'] );
+		$this->assertSame( $updates, did_action( 'woocommerce_fulfillment_after_update' ), 'An unchanged row is not saved' );
+		$this->assertSame( $emails, did_action( 'woocommerce_fulfillment_updated_notification' ) );
 	}
 
 	/**
