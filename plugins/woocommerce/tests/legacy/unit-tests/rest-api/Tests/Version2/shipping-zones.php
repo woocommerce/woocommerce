@@ -164,8 +164,6 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/shipping/zones' ) );
 		$this->assertEquals( 404, $response->get_status() );
-
-		remove_filter( 'wc_shipping_enabled', '__return_false' );
 	}
 
 	/**

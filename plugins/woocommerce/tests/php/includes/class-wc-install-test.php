@@ -292,8 +292,6 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		\WC_Install::maybe_set_store_id();
 		$existing_store_id = get_option( \WC_Install::STORE_ID_OPTION );
 		$this->assertSame( $store_id, $existing_store_id );
-		// cleanup.
-		delete_option( \WC_Install::STORE_ID_OPTION );
 	}
 
 	/**
@@ -370,13 +368,6 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$shop_id       = 10;
 		WC_Install::is_new_install();
 		$this->assertFalse( $counted_posts, 'For established stores (version and shop ID both set), we do not need to count the number of existing products.' );
-
-		// Cleanup.
-		remove_filter( 'option_woocommerce_version', $supply_version );
-		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
-		remove_filter( 'wp_count_posts', $supply_post_count );
-		remove_filter( 'pre_option_woocommerce_coming_soon', $supply_coming_soon );
-		remove_filter( 'pre_option_woocommerce_task_list_completed_lists', $supply_completed_lists );
 	}
 
 	/**
@@ -519,11 +510,6 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 		// Assert that the schema includes fulfillment_status index.
 		$this->assertStringContainsString( 'KEY fulfillment_status (fulfillment_status),', $schema, 'Schema should include fulfillment_status index for new installations.' );
-
-		// Cleanup.
-		remove_filter( 'option_woocommerce_version', $supply_version );
-		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
-		remove_filter( 'pre_option_woocommerce_feature_fulfillments_enabled', $supply_feature_enabled );
 	}
 
 	/**
@@ -564,10 +550,6 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 		// Assert that the schema does NOT include fulfillment_status index.
 		$this->assertStringNotContainsString( 'KEY fulfillment_status (fulfillment_status),', $schema, 'Schema should NOT include fulfillment_status index for new installations without fulfillments feature enabled.' );
-
-		// Cleanup.
-		remove_filter( 'option_woocommerce_version', $supply_version );
-		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
 	}
 
 	/**
@@ -609,11 +591,6 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 		// Assert that the schema does NOT include fulfillment_status column.
 		$this->assertStringNotContainsString( 'fulfillment_status', $schema, 'Schema should NOT include fulfillment_status column for existing installations without the column.' );
-
-		// Cleanup.
-		remove_filter( 'option_woocommerce_version', $supply_version );
-		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
-		remove_filter( 'pre_option_' . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, $supply_column_status );
 	}
 
 	/**
@@ -655,11 +632,6 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 		// Assert that the schema DOES include fulfillment_status column for consistency.
 		$this->assertStringContainsString( 'fulfillment_status', $schema, 'Schema should include fulfillment_status column for existing installations that already have the column.' );
-
-		// Cleanup.
-		remove_filter( 'option_woocommerce_version', $supply_version );
-		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
-		remove_filter( 'pre_option_' . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, $supply_column_status );
 	}
 
 	/**

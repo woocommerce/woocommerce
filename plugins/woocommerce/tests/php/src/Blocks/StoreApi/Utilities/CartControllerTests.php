@@ -263,8 +263,6 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'package_name', $packages[1], 'Second package should have package_name.' );
 		$this->assertEquals( 1, $packages[1]['package_id'], 'Second package should have package_id of 1.' );
 		$this->assertStringContainsString( 'Shipment 2', $packages[1]['package_name'], 'Second package should have package_name containing "Shipment 2".' );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -304,8 +302,6 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( $packages, 'Should have at least one shipping package.' );
 		$this->assertEquals( 'custom-package-123', $packages[0]['package_id'], 'Package should use custom package_id from filter.' );
 		$this->assertArrayHasKey( 'package_name', $packages[0], 'Package should still have package_name.' );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**

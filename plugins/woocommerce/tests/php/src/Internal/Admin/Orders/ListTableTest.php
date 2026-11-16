@@ -162,8 +162,6 @@ class ListTableTest extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( 2024, end( $year_months )->year );
 		$this->assertEquals( 12, end( $year_months )->month );
-
-		delete_option( 'gmt_offset' );
 	}
 
 	/**
