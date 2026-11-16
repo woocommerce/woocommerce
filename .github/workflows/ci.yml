@@ -98,7 +98,7 @@ jobs:
               - '.github/workflows/ci.yml'
               - '.github/workflows/phpstan.yml'
             needs-changelog-validation:
-              - '{packages,plugins}/*/!((changelog/*)|(readme.txt))'
+              - '{packages,plugins,themes}/*/!((changelog/*)|(readme.txt))'
             needs-markdown-validation:
               - '*.md'
               - '!(.github/**)/**/*.md'
