@@ -672,22 +672,23 @@ final class ImportSession {
 	/**
 	 * Freeze the mapping and run options so every chunk imports under the same rules.
 	 *
-	 * Only the first call counts; later calls are ignored. The values are written with the
-	 * next recorded chunk, so a first chunk that fails before recording freezes again on retry.
+	 * Only the first call stores the values; later calls keep them.
 	 *
 	 * @since 11.4.0
 	 *
 	 * @param array<int, string> $mapping CSV column index => canonical column key.
 	 * @param bool               $notify  Whether to fire customer notifications.
 	 * @param bool               $update  Whether to update existing fulfillments on tracking-number match.
+	 * @return bool False when the settings could not be stored.
 	 */
-	public function freeze_run_settings( array $mapping, bool $notify, bool $update ): void {
+	public function freeze_run_settings( array $mapping, bool $notify, bool $update ): bool {
 		if ( null !== $this->frozen_mapping() ) {
-			return;
+			return true;
 		}
 		$this->data['mapping']         = $mapping;
 		$this->data['notify_customer'] = $notify;
 		$this->data['update_existing'] = $update;
+		return $this->persist();
 	}
 
 	/**
@@ -736,20 +737,29 @@ final class ImportSession {
 	/**
 	 * Record a chunk returned by FulfillmentsCsvImporter::import_chunk() and persist the session.
 	 *
-	 * Only a chunk that starts at the recorded progress is accepted, so a replayed or
-	 * out-of-order chunk can never add its counts twice. The dedupe set and the resume
-	 * position are replaced. Only this chunk's rows are kept, which bounds the payload.
+	 * Only a chunk that starts at the recorded progress, in memory and in the stored payload,
+	 * is accepted, so a replayed or out-of-order chunk never adds its counts twice. This
+	 * protects the counts only: the caller compares the offset before importing the rows.
+	 * Re-reading the payload narrows the window for two requests recording the same chunk;
+	 * the caller's lock closes it. The dedupe set and the resume position are replaced, and
+	 * only this chunk's rows are kept, which bounds the payload.
 	 *
 	 * @since 11.4.0
 	 *
 	 * @param int                  $offset Data rows processed before this chunk; must equal processed().
 	 * @param array<string, mixed> $chunk  Result of import_chunk() without an error.
-	 * @return bool False when $offset is not the recorded progress or the session could not be stored.
+	 * @return bool False for an error result, an offset that is not the recorded progress, a
+	 *              session that is gone, or a payload that could not be stored.
 	 */
 	public function record_chunk( int $offset, array $chunk ): bool {
-		if ( $offset !== $this->processed() ) {
+		if ( isset( $chunk['error'] ) || $offset !== $this->processed() ) {
 			return false;
 		}
+		$stored = get_transient( self::PREFIX . $this->user_id . '_' . $this->token );
+		if ( ! is_array( $stored ) || (int) ( $stored['processed'] ?? 0 ) !== $offset ) {
+			return false;
+		}
+		$previous = $this->data;
 
 		$counts = $this->counts();
 		foreach ( array_keys( $counts ) as $key ) {
@@ -769,7 +779,11 @@ final class ImportSession {
 			'eof'    => ! empty( $chunk['eof'] ),
 		);
 
-		return $this->persist();
+		if ( $this->persist() ) {
+			return true;
+		}
+		$this->data = $previous;
+		return false;
 	}
 
 	/**

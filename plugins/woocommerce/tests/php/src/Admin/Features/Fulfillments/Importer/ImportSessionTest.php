@@ -670,7 +670,29 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox freeze_run_settings() keeps the first mapping and options, and they are stored with the next recorded chunk.
+	 * @testdox record_chunk() refuses an error result, a stale copy of the session, a deleted session and a lost write.
+	 */
+	public function test_record_chunk_refuses_what_it_cannot_store_safely(): void {
+		$session = $this->make_session( 84 );
+		$stale   = ImportSession::load( 84, $session->token() );
+
+		$this->assertFalse( $session->record_chunk( 0, array( 'error' => array( 'code' => 'file_not_readable' ) ) ), 'An error result is refused' );
+		$this->assertTrue( $session->record_chunk( 0, $this->chunk_result( 10, 7, 400 ) ) );
+		$this->assertFalse( $stale->record_chunk( 0, $this->chunk_result( 10, 3, 999 ) ), 'A copy loaded before the stored progress moved is refused' );
+		$this->assertSame( 400, ImportSession::load( 84, $session->token() )->byte_offset(), 'The stale copy cannot replace newer progress' );
+
+		add_filter( 'pre_update_option__transient_wc_fulfillment_import_84_' . $session->token(), fn( $value, $old ) => $old, 10, 2 );
+		$this->assertFalse( $session->record_chunk( 10, $this->chunk_result( 5, 1, 650 ) ), 'A lost write is reported' );
+		$this->assertSame( 10, $session->processed(), 'A lost write does not advance the session in memory' );
+
+		$gone = $this->make_session( 85 );
+		$gone->delete();
+		$this->assertFalse( $gone->record_chunk( 0, $this->chunk_result( 5, 1, 650 ) ), 'A deleted session is refused' );
+		$this->assertNull( ImportSession::load( 85, $gone->token() ), 'A refused chunk does not bring the session back' );
+	}
+
+	/**
+	 * @testdox freeze_run_settings() stores the first mapping and options and keeps them.
 	 */
 	public function test_freeze_run_settings_keeps_the_first_settings(): void {
 		$mapping = array(
@@ -680,18 +702,11 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		);
 		$session = $this->make_session( 83 );
 
-		$session->freeze_run_settings( $mapping, true, false );
-		$session->freeze_run_settings( array( 0 => 'tracking_number' ), false, true );
-
-		$this->assertSame( $mapping, $session->frozen_mapping(), 'A second call must not replace the frozen mapping' );
-		$this->assertTrue( $session->notify_customer() );
-		$this->assertFalse( $session->update_existing() );
-		$this->assertNull( ImportSession::load( 83, $session->token() )->frozen_mapping(), 'Freezing alone does not write the session' );
-
-		$session->record_chunk( 0, $this->chunk_result( 1, 1, 90 ) );
+		$this->assertTrue( $session->freeze_run_settings( $mapping, true, false ) );
+		$this->assertTrue( ImportSession::load( 83, $session->token() )->freeze_run_settings( array( 0 => 'tracking_number' ), false, true ) );
 
 		$reloaded = ImportSession::load( 83, $session->token() );
-		$this->assertSame( $mapping, $reloaded->frozen_mapping() );
+		$this->assertSame( $mapping, $reloaded->frozen_mapping(), 'The first settings are stored and a second call keeps them' );
 		$this->assertTrue( $reloaded->notify_customer() );
 		$this->assertFalse( $reloaded->update_existing() );
 	}
