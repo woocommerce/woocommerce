@@ -339,6 +339,25 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	}
 
 	// ---------------------------------------------------------------------
+	// 6. Holds that outlive the pending status.
+	// ---------------------------------------------------------------------
+
+	/**
+	 * @testdox A hold still counts for an order in processing, on-hold or completed status until it is released.
+	 */
+	public function test_hold_counts_for_orders_past_pending_until_released(): void {
+		foreach ( array( OrderStatus::PROCESSING, OrderStatus::ON_HOLD, OrderStatus::COMPLETED ) as $status ) {
+			$product = $this->create_stock_managed_product( 1 );
+			$order   = $this->create_unpaid_order_for( 0, $product, $status );
+
+			// Written after the status change, so the status hooks have not released it.
+			$this->hold_stock( $order, $product->get_id(), 1, 5 );
+
+			$this->assertSame( 1, wc_get_held_stock_quantity( $product, 0 ), "A hold on a {$status} order should count." );
+		}
+	}
+
+	// ---------------------------------------------------------------------
 	// Helpers.
 	// ---------------------------------------------------------------------
 
