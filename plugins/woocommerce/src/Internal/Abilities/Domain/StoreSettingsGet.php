@@ -270,7 +270,7 @@ class StoreSettingsGet implements AbilityDefinition {
 		$result  = array();
 		foreach ( self::get_onboarding_schema()['properties'] as $key => $schema ) {
 			if ( is_array( $profile ) && array_key_exists( $key, $profile ) && true === rest_validate_value_from_schema( $profile[ $key ], $schema ) ) {
-				$result[ $key ] = $profile[ $key ];
+				$result[ $key ] = rest_sanitize_value_from_schema( $profile[ $key ], $schema );
 			}
 		}
 		return $result;

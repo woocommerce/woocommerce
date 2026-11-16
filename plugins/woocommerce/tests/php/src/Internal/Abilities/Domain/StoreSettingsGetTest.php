@@ -59,6 +59,28 @@ class StoreSettingsGetTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should normalize accepted onboarding values to their declared types.
+	 * @testWith ["false", false]
+	 *           ["true", true]
+	 *           [false, false]
+	 *           [true, true]
+	 * @param mixed $stored Stored boolean value.
+	 * @param bool  $expected Expected boolean value.
+	 */
+	public function test_onboarding_boolean_values( $stored, bool $expected ): void {
+		update_option(
+			'woocommerce_onboarding_profile',
+			array(
+				'completed' => $stored,
+				'industry'  => array( 'fashion' ),
+			)
+		);
+		$result = $this->sut->execute();
+		$this->assertSame( $expected, $result['onboarding_profile']->completed );
+		$this->assertSame( array( 'fashion' ), $result['onboarding_profile']->industry );
+	}
+
+	/**
 	 * @testdox Should expose only the country lists used by the active location settings.
 	 */
 	public function test_location_scopes(): void {
