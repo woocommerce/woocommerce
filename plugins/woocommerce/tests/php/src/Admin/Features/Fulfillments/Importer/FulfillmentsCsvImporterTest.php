@@ -1135,6 +1135,26 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A tracking URL must start with http:// or https:// and keep a host after sanitizing.
+	 * @testWith ["N/A", null]
+	 *           ["http:example.com", null]
+	 *           ["https:/example.com", null]
+	 *           ["http:///path", null]
+	 *           ["HTTPS://Host/x", "https://Host/x"]
+	 *
+	 * @param string      $cell   Tracking URL cell.
+	 * @param string|null $stored Expected stored URL, or null when the row fails.
+	 */
+	public function test_tracking_url_needs_an_http_scheme_and_a_host( string $cell, ?string $stored ): void {
+		$order = OrderHelper::create_order();
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$order->get_id()},TRK-1,ups,{$cell}\n" );
+
+		$this->assertSame( null === $stored ? FulfillmentsCsvImporter::CODE_INVALID_TRACKING_URL : null, $result['rows'][0]['code'] ?? null );
+		$this->assertSame( $stored, null === $stored ? null : $this->fulfillments_of( $order )[0]->get_tracking_url() );
+	}
+
+	/**
 	 * @testdox A repeated order and tracking number pair is skipped across chunks, and a row that failed to save does not count as seen.
 	 */
 	public function test_duplicate_pairs_are_skipped_after_the_first_imported_row(): void {

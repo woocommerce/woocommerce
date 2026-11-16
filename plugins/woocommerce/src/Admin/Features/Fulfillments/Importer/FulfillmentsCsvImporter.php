@@ -736,16 +736,18 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Keep a tracking URL only when it is an http or https URL.
 	 *
-	 * The URL is shown as a link in the admin and in customer emails. esc_url_raw() applies
-	 * its protocol list only to a URL with a scheme, so "//host/path" is checked here too.
+	 * The URL is shown as a link in the admin and in customer emails. esc_url_raw() adds
+	 * "http://" to a cell without a scheme, so the cell itself must start with one.
 	 *
 	 * @param string $url URL cell.
 	 * @return string Sanitized URL, or empty when it is not allowed.
 	 */
 	private function sanitize_tracking_url( string $url ): string {
-		$url    = esc_url_raw( $url, array( 'http', 'https' ) );
-		$scheme = strtolower( (string) wp_parse_url( $url, PHP_URL_SCHEME ) );
-		return in_array( $scheme, array( 'http', 'https' ), true ) ? $url : '';
+		if ( ! preg_match( '#^https?://#i', $url ) ) {
+			return '';
+		}
+		$url = esc_url_raw( $url, array( 'http', 'https' ) );
+		return '' !== (string) wp_parse_url( $url, PHP_URL_HOST ) ? $url : '';
 	}
 
 	/**
