@@ -55,18 +55,20 @@ This controls false positives. Follow it strictly.
   `woocommerce_attribute_lookup_enabled` must be `'yes'` to use the attributes table. Code that builds
   or regenerates the lookup tables must read the source tables. Removing or inverting a gate is a
   correctness regression (mid-regeneration reads return incomplete rows).
-- **`SELECT MIN(col), MAX(col)`** over a large table scans every matching row, except when every
-  `WHERE` predicate is an equality with a constant on the leading columns of an index that has the
-  column next: the database answers that form from the index ends, so don't flag it. Otherwise, when
-  an index returns rows sorted by the column (it starts with the column, or every earlier column has
-  an equality with a constant) and few rows at its ends fail the `WHERE`, the fix is a `UNION ALL`
-  of two `ORDER BY col ASC|DESC LIMIT 1` seeks. A range, `IN (...)`, `!=` or a comparison with
-  another column on an earlier index column breaks that order, so that index cannot serve the seek:
-  don't suggest the rewrite on it. An index that stores only a prefix of a column, such as
+- **`SELECT MIN(col), MAX(col)`** over a large table scans every matching row, except when the
+  `WHERE` pins every leading column of an index to one constant value (`a = 1 AND b = 'x'`) and the
+  column comes next in that index: the database answers that form from the index ends, so don't flag
+  it. Otherwise, when an index returns rows sorted by the column (it starts with the column, or
+  every earlier column is pinned to one constant value) and few rows at its ends fail the `WHERE`,
+  the fix is a `UNION ALL` of two `ORDER BY col ASC|DESC LIMIT 1` seeks. Anything that leaves an
+  earlier index column with more than one value breaks that order: a range, `IN (...)`, `OR`, `!=`
+  or a comparison with another column. Such an index cannot serve the seek, so don't suggest the
+  rewrite on it. An index that stores only a prefix of a column, such as
   `meta_key_value (meta_key(50), meta_value(20))` on the HPOS order meta table, serves neither the
-  exemption nor the seek. The rewrite is only safe when the column is `NOT NULL` or both branches
-  add `AND col IS NOT NULL`: `MIN`/`MAX` skip NULLs, while `ORDER BY ASC` returns them first. A
-  rewrite on a nullable column without those guards silently changes results: a correctness
+  exemption nor the seek. Don't suggest the rewrite for a query with `GROUP BY`: the seeks return
+  one row, not one per group. The rewrite is only safe when the column is `NOT NULL` or both
+  branches add `AND col IS NOT NULL`: `MIN`/`MAX` skip NULLs, while `ORDER BY ASC` returns them
+  first. A rewrite on a nullable column without those guards silently changes results: a correctness
   regression.
 - **Dynamic `IN (...)` lists** must guard against empty input (`IN ()` is a SQL syntax error) and
   sanitize members (`array_map( 'absint', ... )` for IDs, `$wpdb->prepare` placeholders for strings).
