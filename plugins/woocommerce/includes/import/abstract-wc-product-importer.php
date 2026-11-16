@@ -515,7 +515,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					}
 
 					// Check for default attributes and set "is_variation".
-					if ( ! empty( $attribute['default'] ) && in_array( $attribute['default'], $options, true ) ) {
+					if ( ! empty( $attribute['default'] ) && in_array( $attribute['default'], $options, true ) && ( ! isset( $attribute['variation'] ) || $attribute['variation'] ) ) {
 						$default_term = get_term_by( 'name', $attribute['default'], $attribute_name );
 
 						if ( $default_term && ! is_wp_error( $default_term ) ) {
@@ -550,7 +550,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					}
 				} elseif ( isset( $attribute['value'] ) ) {
 					// Check for default attributes and set "is_variation".
-					if ( ! empty( $attribute['default'] ) && in_array( $attribute['default'], $attribute['value'], true ) ) {
+					if ( ! empty( $attribute['default'] ) && in_array( $attribute['default'], $attribute['value'], true ) && ( ! isset( $attribute['variation'] ) || $attribute['variation'] ) ) {
 						$default_attributes[ sanitize_title( $attribute['name'] ) ] = $attribute['default'];
 						$is_variation = 1;
 					}

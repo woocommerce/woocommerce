@@ -1292,9 +1292,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				unset( $data[ $key ] );
 
 			} elseif ( $this->starts_with( $key, 'attributes:variation' ) ) {
-				// An empty cell keeps the inferred setting.
-				if ( '' !== $value && null !== $value ) {
-					$attributes[ str_replace( 'attributes:variation', '', $key ) ]['variation'] = wc_string_to_bool( $value );
+				// Empty or invalid values keep the inferred setting.
+				if ( in_array( $value, array( true, false, 0, 1, '0', '1' ), true ) ) {
+					$attributes[ str_replace( 'attributes:variation', '', $key ) ]['variation'] = (bool) $value;
 				}
 				unset( $data[ $key ] );
 

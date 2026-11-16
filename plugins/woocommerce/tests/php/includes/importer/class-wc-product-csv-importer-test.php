@@ -3306,7 +3306,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 */
 	private function import_row_with_used_for_variations_column( string $csv_row, bool $update_existing = true ): array {
 		$csv_file = trailingslashit( get_temp_dir() ) . 'import-attribute-used-for-variations.csv';
-		file_put_contents( $csv_file, "ID,Type,SKU,Name,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 used for variations\n" . $csv_row . "\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+		file_put_contents( $csv_file, "ID,Type,SKU,Name,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 used for variations,Attribute 1 global,Attribute 1 default\n" . $csv_row . "\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
 
 		$importer = new WC_Product_CSV_Importer(
 			$csv_file,
@@ -3322,10 +3322,12 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 					'Attribute 1 value(s)'            => 'attributes:value1',
 					'Attribute 1 visible'             => 'attributes:visible1',
 					'Attribute 1 used for variations' => 'attributes:variation1',
+					'Attribute 1 global'              => 'attributes:taxonomy1',
+					'Attribute 1 default'             => 'attributes:default1',
 				),
 			)
 		);
-		$data = $importer->import();
+		$data     = $importer->import();
 
 		wp_delete_file( $csv_file );
 
@@ -3341,19 +3343,39 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	private function get_color_attribute( int $product_id ): WC_Product_Attribute {
 		$attributes = wc_get_product( $product_id )->get_attributes();
 
-		return $attributes['color'];
+		return array_values( $attributes )[0];
 	}
 
 	/**
 	 * @testdox The "Used for variations" column sets the attribute flag on a new product without variation rows.
+	 * @testWith [0, 1, ""]
+	 *           [1, 1, ""]
+	 *           [0, 0, "Red"]
+	 *           [1, 0, "Red"]
+	 *           [0, 1, "Red"]
+	 *           [1, 1, "Red"]
+	 *
+	 * @param int    $is_global    Whether the attribute is global.
+	 * @param int    $variation Whether the attribute is used for variations.
+	 * @param string $default_value   Default attribute value.
 	 */
-	public function test_import_sets_used_for_variations_from_column(): void {
-		$data = $this->import_row_with_used_for_variations_column( ',variable,used-for-variations-29903,Shirt,Color,"Red, Blue",1,1', false );
+	public function test_import_sets_used_for_variations_from_column( int $is_global, int $variation, string $default_value ): void {
+		if ( $is_global ) {
+			WC_Helper_Product::create_attribute( 'Color', array( 'Red', 'Blue' ) );
+		}
+		$data = $this->import_row_with_used_for_variations_column( ',variable,used-for-variations-29903,Shirt,Color,"Red, Blue",1,' . $variation . ',' . $is_global . ',' . $default_value, false );
 
 		$this->assertCount( 1, $data['imported'] );
 		$attribute = $this->get_color_attribute( $data['imported'][0] );
-		$this->assertTrue( $attribute->get_variation() );
+		$this->assertSame( (bool) $variation, $attribute->get_variation() );
 		$this->assertTrue( $attribute->get_visible() );
+		$this->assertSame( (bool) $is_global, $attribute->is_taxonomy() );
+		$default_values = wc_get_product( $data['imported'][0] )->get_default_attributes();
+		if ( $variation && '' !== $default_value ) {
+			$this->assertSame( $is_global ? 'red' : 'Red', $default_values[ sanitize_title( $attribute->get_name() ) ] );
+		} else {
+			$this->assertEmpty( $default_values, 'An attribute disabled for variations must not have a default selection.' );
+		}
 	}
 
 	/**
@@ -3373,6 +3395,9 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->import_row_with_used_for_variations_column( $product->get_id() . ',variable,,Shirt,Color,"Red, Blue",1,' );
 		$this->assertTrue( $this->get_color_attribute( $product->get_id() )->get_variation(), 'An empty cell should keep the existing setting.' );
+
+		$this->import_row_with_used_for_variations_column( $product->get_id() . ',variable,,Shirt,Color,"Red, Blue",1,enabled' );
+		$this->assertTrue( $this->get_color_attribute( $product->get_id() )->get_variation(), 'An invalid value should keep the existing setting.' );
 
 		$this->import_row_with_used_for_variations_column( $product->get_id() . ',variable,,Shirt,Color,"Red, Blue",1,0' );
 		$this->assertFalse( $this->get_color_attribute( $product->get_id() )->get_variation(), 'A 0 should turn the setting off.' );
@@ -3405,7 +3430,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		$data = $importer->import();
+		$data     = $importer->import();
 		wp_delete_file( $csv_file );
 
 		$this->assertCount( 1, $data['imported'], 'The parent should be imported.' );

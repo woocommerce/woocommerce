@@ -490,16 +490,47 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Attribute columns include whether each attribute is used for variations.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $used_for_variations Attribute setting to export.
 	 */
-	public function test_export_includes_attribute_used_for_variations(): void {
-		$parent = WC_Helper_Product::create_variation_product();
+	public function test_export_includes_attribute_used_for_variations( bool $used_for_variations ): void {
+		$parent     = WC_Helper_Product::create_variation_product();
+		$attributes = $parent->get_attributes();
+		foreach ( $attributes as $key => $attribute ) {
+			$attribute = clone $attribute;
+			$attribute->set_variation( $used_for_variations );
+			$attributes[ $key ] = $attribute;
+		}
+		$parent->set_attributes( $attributes );
+		$parent->save();
 
 		$sut = new WC_Product_CSV_Exporter();
 		$sut->set_product_ids_to_export( array( $parent->get_id() ) );
+		$sut->set_columns_to_export( array( 'id', 'attributes' ) );
 		$sut->prepare_data_to_export();
 		$rows = array_column( $this->get_exported_data( $sut ), null, 'id' );
 
 		$this->assertSame( 'Attribute 1 used for variations', $sut->get_column_names()['attributes:variation1'] );
-		$this->assertTrue( $rows[ $parent->get_id() ]['attributes:variation1'] );
+		$this->assertSame( $used_for_variations, $rows[ $parent->get_id() ]['attributes:variation1'] );
+
+		$columns = array();
+		foreach ( $sut->get_column_names() as $key => $name ) {
+			if ( $sut->is_column_exporting( $key ) ) {
+				$columns[] = $key;
+			}
+		}
+		$method = ( new ReflectionClass( WC_Product_CSV_Exporter::class ) )->getMethod( 'get_csv_data' );
+		$method->setAccessible( true );
+		$serialized_rows = array();
+		foreach ( explode( "\n", trim( $method->invoke( $sut ) ) ) as $row ) {
+			$values                           = array_combine( $columns, str_getcsv( $row ) );
+			$serialized_rows[ $values['id'] ] = $values;
+		}
+		$this->assertSame( $used_for_variations ? '1' : '0', $serialized_rows[ $parent->get_id() ]['attributes:variation1'] );
+		foreach ( $parent->get_children() as $variation_id ) {
+			$this->assertSame( '', $serialized_rows[ $variation_id ]['attributes:variation1'], 'A variation row leaves the setting blank for inference.' );
+		}
 	}
 }
