@@ -13,6 +13,18 @@ class AllReviews extends AbstractBlock {
 	protected $block_name = 'all-reviews';
 
 	/**
+	 * Get the frontend styles, including shared component styles.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return string[]
+	 */
+	protected function get_block_type_style() {
+		// The sorting control's styles are bundled separately from the block's styles.
+		return array_merge( parent::get_block_type_style() ?? [], [ 'wc-blocks-packages-style' ] );
+	}
+
+	/**
 	 * Get the frontend script handle for this block type.
 	 *
 	 * @see $this->register_block_type()
