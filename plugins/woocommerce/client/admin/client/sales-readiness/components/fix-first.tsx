@@ -8,6 +8,7 @@ import { Badge, Card, Link, Text } from '@wordpress/ui';
  * Internal dependencies
  */
 import type { FixFirst as FixFirstData } from '../types';
+import { trackReadiness, type Surface } from '../tracks';
 import { Row, RowLink } from './check-row';
 
 /**
@@ -16,13 +17,15 @@ import { Row, RowLink } from './check-row';
  */
 export const FixFirstList = ( {
 	items,
+	surface,
 }: {
 	items: FixFirstData[ 'items' ];
+	surface: Surface;
 } ) => {
 	let lastTier: string | null = null;
 	return (
 		<ol className="wc-sales-readiness-list">
-			{ items.map( ( item ) => {
+			{ items.map( ( item, index ) => {
 				const heading = item.tier !== lastTier ? item.tier : null;
 				lastTier = item.tier;
 				return (
@@ -46,7 +49,19 @@ export const FixFirstList = ( {
 						<Row
 							title={ item.title }
 							action={
-								item.link && <RowLink link={ item.link } />
+								item.link && (
+									<RowLink
+										link={ item.link }
+										onClick={ () =>
+											trackReadiness( 'link_click', {
+												surface,
+												area: 'fix_first',
+												check_id: item.id,
+												position: index + 1,
+											} )
+										}
+									/>
+								)
 							}
 							srState={ item.tier + ':' }
 						>
@@ -88,7 +103,7 @@ export const FixFirstCard = ( { fixFirst }: { fixFirst: FixFirstData } ) => (
 					</>
 				) }
 			</Text>
-			<FixFirstList items={ fixFirst.items } />
+			<FixFirstList items={ fixFirst.items } surface="page" />
 		</Card.Content>
 	</Card.Root>
 );

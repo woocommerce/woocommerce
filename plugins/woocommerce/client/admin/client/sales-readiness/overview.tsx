@@ -13,6 +13,7 @@ import type { ReadinessView } from './types';
 import { useReadinessView } from './use-readiness-view';
 import { FixFirstList } from './components/fix-first';
 import { RunStatus } from './components/run-status';
+import { trackReadiness } from './tracks';
 
 /**
  * WooCommerce > Settings > AI tools, the Overview: the AI shopping card, then the Sales readiness
@@ -23,7 +24,10 @@ export default function SalesReadinessOverview( {
 }: {
 	initialView?: ReadinessView | null;
 } ) {
-	const { view, error, running, runCheck } = useReadinessView( initialView );
+	const { view, error, running, runCheck } = useReadinessView(
+		'overview',
+		initialView
+	);
 
 	if ( ! view ) {
 		return error ? (
@@ -68,6 +72,12 @@ export default function SalesReadinessOverview( {
 							variant="secondary"
 							size="compact"
 							href={ shopping.button.href }
+							onClick={ () =>
+								trackReadiness( 'link_click', {
+									surface: 'overview',
+									area: 'shopping',
+								} )
+							}
 						>
 							{ shopping.button.text }
 						</Button>
@@ -113,7 +123,10 @@ export default function SalesReadinessOverview( {
 					) : (
 						<>
 							{ view.fix_first?.items.length ? (
-								<FixFirstList items={ view.fix_first.items } />
+								<FixFirstList
+									items={ view.fix_first.items }
+									surface="overview"
+								/>
 							) : (
 								<Text variant="body-md">
 									{ __(
@@ -127,6 +140,12 @@ export default function SalesReadinessOverview( {
 									variant="tertiary"
 									size="compact"
 									href={ viewAll.href }
+									onClick={ () =>
+										trackReadiness( 'link_click', {
+											surface: 'overview',
+											area: 'view_all',
+										} )
+									}
 								>
 									{ viewAll.text }
 								</Button>

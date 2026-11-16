@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
  * Internal dependencies
  */
 import type { CheckRow as CheckRowData, ViewBadge, ViewLink } from '../types';
+import { trackReadiness } from '../tracks';
 
 /**
  * Where to fix it: an outline button when it has a URL, plain text otherwise.
@@ -165,7 +166,13 @@ const TextWithLink = ( {
  * One check. Failing: what to do, why it matters and what was found, the fix line when there is
  * one, and where to fix it. Passed: its title and why it matters.
  */
-export const CheckRow = ( { row }: { row: CheckRowData } ) => {
+export const CheckRow = ( {
+	row,
+	section,
+}: {
+	row: CheckRowData;
+	section: string;
+} ) => {
 	const states: Record< CheckRowData[ 'state' ], string > = {
 		open: __( 'Issue:', 'woocommerce' ),
 		required: __( 'Issue:', 'woocommerce' ),
@@ -179,7 +186,22 @@ export const CheckRow = ( { row }: { row: CheckRowData } ) => {
 			title={ row.title }
 			srState={ states[ row.state ] }
 			badge={ row.badge }
-			action={ row.link && <RowLink link={ row.link } /> }
+			action={
+				row.link && (
+					<RowLink
+						link={ row.link }
+						onClick={ () =>
+							trackReadiness( 'link_click', {
+								surface: 'page',
+								area: 'section',
+								section,
+								check_id: row.id,
+								state: row.state,
+							} )
+						}
+					/>
+				)
+			}
 		>
 			{ row.text && (
 				<Text variant="body-sm" className="wc-sales-readiness__muted">

@@ -9,6 +9,8 @@ import { render, screen } from '@testing-library/react';
 import { FixFirstCard, FixFirstList } from '../components/fix-first';
 import type { FixFirstItem } from '../types';
 
+jest.mock( '../tracks', () => ( { trackReadiness: jest.fn() } ) );
+
 const item = ( id: string, tier: string ): FixFirstItem => ( {
 	id,
 	tier,
@@ -30,6 +32,7 @@ describe( 'FixFirstList', () => {
 					item( 'guest_checkout', 'Required for AI shopping' ),
 					item( 'image', 'Needed to list products' ),
 				] }
+				surface="page"
 			/>
 		);
 

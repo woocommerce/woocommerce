@@ -24,7 +24,7 @@ const row = ( fields: Partial< CheckRowData > ): CheckRowData => ( {
 const renderRow = ( data: CheckRowData ) =>
 	render(
 		<ul>
-			<CheckRow row={ data } />
+			<CheckRow row={ data } section="find" />
 		</ul>
 	);
 
