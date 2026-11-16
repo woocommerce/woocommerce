@@ -151,7 +151,17 @@ class SystemStatusGetTest extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'http', $json, 'No URL should reach the output.' );
 		$this->assertStringNotContainsString( untrailingslashit( ABSPATH ), $json, 'Server paths should be left out.' );
 		$this->assertStringNotContainsString( untrailingslashit( WC_LOG_DIR ), $json, 'The log directory should be left out.' );
-		$this->assertStringNotContainsString( $wpdb->prefix, $json, 'The database prefix and table names should be left out.' );
+		// Field names such as wp_cron share the default wp_ prefix, so only values are checked for it.
+		$values = array();
+		array_walk_recursive(
+			$result,
+			static function ( $value ) use ( &$values ) {
+				if ( is_string( $value ) ) {
+					$values[] = $value;
+				}
+			}
+		);
+		$this->assertStringNotContainsString( $wpdb->prefix, implode( "\n", $values ), 'The database prefix and table names should be left out.' );
 	}
 
 	/**
