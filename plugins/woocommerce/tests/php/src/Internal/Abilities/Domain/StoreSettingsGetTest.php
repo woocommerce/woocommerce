@@ -51,6 +51,14 @@ class StoreSettingsGetTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should honor a truthy integer returned by the REST permission filter.
+	 */
+	public function test_integer_permission_filter(): void {
+		add_filter( 'woocommerce_rest_check_permissions', static fn() => 1 );
+		$this->assertIsArray( $this->sut->execute() );
+	}
+
+	/**
 	 * @testdox Should expose only the country lists used by the active location settings.
 	 */
 	public function test_location_scopes(): void {

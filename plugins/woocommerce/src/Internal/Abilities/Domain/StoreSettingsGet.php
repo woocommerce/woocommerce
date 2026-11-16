@@ -71,7 +71,7 @@ class StoreSettingsGet implements AbilityDefinition {
 	 * @return bool
 	 */
 	public static function can_read_settings(): bool {
-		return wc_rest_check_manager_permissions( 'settings', 'read' );
+		return (bool) wc_rest_check_manager_permissions( 'settings', 'read' );
 	}
 
 	/**
