@@ -1836,8 +1836,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			? (int) $inserted->get_error_data( 'term_exists' )
 			: $inserted['term_id'];
 
-		// Preserve the previous option value so other tests reading it are unaffected.
-		$previous_default_cat = get_option( 'default_product_cat' );
 		update_option( 'default_product_cat', $default_cat );
 
 		$imported_ids = array();
@@ -1879,7 +1877,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			foreach ( $imported_ids as $id ) {
 				WC_Helper_Product::delete_product( $id );
 			}
-			update_option( 'default_product_cat', $previous_default_cat );
 		}
 	}
 

@@ -218,30 +218,26 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 		};
 		add_filter( 'posts_clauses', $capture_orderby, PHP_INT_MAX );
 
-		try {
-			$this->get_search_results( $search_phrase );
-			$this->assertStringContainsString( 'CASE WHEN', (string) $captured_orderby, 'A default-ordered search should rank title matches first.' );
-			$this->assertStringContainsString( 'post_title LIKE', (string) $captured_orderby, 'The relevance clause should match against product titles.' );
+		$this->get_search_results( $search_phrase );
+		$this->assertStringContainsString( 'CASE WHEN', (string) $captured_orderby, 'A default-ordered search should rank title matches first.' );
+		$this->assertStringContainsString( 'post_title LIKE', (string) $captured_orderby, 'The relevance clause should match against product titles.' );
 
-			$captured_orderby = null;
-			$this->get_search_results(
-				$search_phrase,
-				array(
-					'orderby' => 'title',
-					'order'   => 'ASC',
-				)
-			);
-			$this->assertStringNotContainsString( 'CASE WHEN', (string) $captured_orderby, 'An explicitly sorted search should keep the requested ordering untouched.' );
+		$captured_orderby = null;
+		$this->get_search_results(
+			$search_phrase,
+			array(
+				'orderby' => 'title',
+				'order'   => 'ASC',
+			)
+		);
+		$this->assertStringNotContainsString( 'CASE WHEN', (string) $captured_orderby, 'An explicitly sorted search should keep the requested ordering untouched.' );
 
-			// A stopword-only term falls back to ranking by the whole group, mirroring search_products().
-			// \S* absorbs the LIKE wildcards around the term: at the posts_clauses stage they are still
-			// dynamic wpdb placeholder-escape hashes, not %.
-			$captured_orderby = null;
-			$this->get_search_results( 'the' );
-			$this->assertMatchesRegularExpression( "/CASE WHEN.+post_title LIKE '\\S*the\\S*'/", (string) $captured_orderby, 'A stopword-only search should rank by the raw search group.' );
-		} finally {
-			remove_filter( 'posts_clauses', $capture_orderby, PHP_INT_MAX );
-		}
+		// A stopword-only term falls back to ranking by the whole group, mirroring search_products().
+		// \S* absorbs the LIKE wildcards around the term: at the posts_clauses stage they are still
+		// dynamic wpdb placeholder-escape hashes, not %.
+		$captured_orderby = null;
+		$this->get_search_results( 'the' );
+		$this->assertMatchesRegularExpression( "/CASE WHEN.+post_title LIKE '\\S*the\\S*'/", (string) $captured_orderby, 'A stopword-only search should rank by the raw search group.' );
 	}
 
 	/**

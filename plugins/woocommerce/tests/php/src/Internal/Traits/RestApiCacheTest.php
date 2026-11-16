@@ -166,8 +166,6 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 
 		$response3 = $this->query_endpoint( 'with_endpoint_hooks' );
 		$this->assertCacheHeader( $response3, 'MISS' );
-
-		remove_filter( 'test_endpoint_hook_for_caching', '__return_true' );
 	}
 
 	/**
@@ -188,8 +186,6 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 
 		$response3 = $this->query_endpoint( 'with_controller_hooks' );
 		$this->assertCacheHeader( $response3, 'MISS' );
-
-		remove_filter( 'test_controller_hook_for_caching', '__return_false' );
 	}
 
 	/**
@@ -293,8 +289,6 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 		$response = $this->query_endpoint( 'single_entity' );
 		$this->assertCacheHeader( $response, 'SKIP' );
 		$this->assertCount( 0, $this->get_all_cache_keys() );
-
-		remove_all_filters( 'woocommerce_rest_api_enable_response_caching' );
 	}
 
 	/**
@@ -393,8 +387,6 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $filter_called, 'Filter should have been called' );
 		$this->assertCacheHeader( $response2, 'MISS' );
 		$this->assertCount( 2, $this->get_all_cache_keys() );
-
-		remove_all_filters( 'woocommerce_rest_api_cache_key_info' );
 	}
 
 	/**
@@ -688,8 +680,6 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'X-Header-One', $headers );
 		$this->assertArrayNotHasKey( 'X-Header-Two', $headers, 'Filtered header should not be restored' );
 		$this->assertArrayHasKey( 'X-Header-Three', $headers );
-
-		remove_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10 );
 	}
 
 	/**
@@ -783,8 +773,6 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'no-cache', $headers['Cache-Control'], 'Original no-cache value should not be in Cache-Control' );
 		$this->assertStringContainsString( 'max-age', $headers['Cache-Control'], 'Our generated Cache-Control should contain max-age' );
 		$this->assertArrayHasKey( 'X-Custom-Header', $headers );
-
-		remove_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10 );
 	}
 
 	/**
@@ -802,8 +790,6 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Internal\Traits\RestApiCache::get_headers_to_cache' );
 
 		$this->query_endpoint( 'standard' );
-
-		remove_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10 );
 	}
 
 	/**
@@ -1483,8 +1469,6 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 		$this->assertSame( 200, $response2->get_status() );
 		$this->assertNotNull( $response2->get_data() );
 		$this->assertCacheHeader( $response2, 'HEADERS' );
-
-		remove_filter( 'woocommerce_rest_api_not_modified_response', $filter, 10 );
 	}
 
 	/**
@@ -1516,8 +1500,6 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 		$headers = $response2->get_headers();
 		$this->assertArrayHasKey( 'X-Custom-Header', $headers );
 		$this->assertSame( 'custom-value', $headers['X-Custom-Header'] );
-
-		remove_filter( 'woocommerce_rest_api_not_modified_response', $filter, 10 );
 	}
 
 	/**
@@ -1554,8 +1536,6 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 		$this->assertSame( 200, $response3->get_status() );
 		$this->assertNotNull( $response3->get_data() );
 		$this->assertCacheHeader( $response3, 'HIT' );
-
-		remove_filter( 'woocommerce_rest_api_not_modified_response', $filter, 10 );
 	}
 
 	/**

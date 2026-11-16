@@ -74,8 +74,6 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		foreach ( $expected_rates as $rate ) {
 			$this->assertArrayHasKey( $rate, $result['rates'] );
 		}
-
-		remove_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
 	}
 
 	/**
@@ -210,9 +208,6 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		// Verify that rates are still returned.
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'rates', $result );
-
-		remove_filter( 'woocommerce_package_rates', $filter_callback, 10 );
-		remove_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
 	}
 
 	/**
@@ -240,8 +235,6 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		$this->sut->calculate_shipping_for_package( $package );
 
 		$this->assertSame( 1, $filter_calls );
-
-		remove_filter( 'woocommerce_package_rates', $filter, 10 );
 	}
 
 	/**
@@ -268,8 +261,6 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		$this->sut->calculate_shipping_for_package( $package );
 
 		$this->assertSame( 2, $filter_calls );
-
-		remove_filter( 'woocommerce_package_rates', $filter, 10 );
 	}
 
 	/**
@@ -292,8 +283,6 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		$this->sut->calculate_shipping_for_package( $package );
 
 		$this->assertSame( 2, $filter_calls );
-
-		remove_filter( 'woocommerce_package_rates', $filter, 10 );
 	}
 
 	/**
@@ -321,9 +310,6 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		$this->sut->calculate_shipping_for_package( $package );
 
 		$this->assertSame( 1, $filter_calls );
-
-		remove_filter( 'woocommerce_shipping_package_hash_ignored_fields', $ignored_fields_filter );
-		remove_filter( 'woocommerce_package_rates', $filter, 10 );
 	}
 
 	/**
@@ -353,8 +339,6 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		$this->sut->calculate_shipping_for_package( $package );
 
 		$this->assertSame( $expected_calculations, $filter_calls );
-
-		remove_filter( 'woocommerce_package_rates', $filter, 10 );
 	}
 
 	/**
@@ -383,9 +367,6 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		$this->sut->calculate_shipping_for_package( $package );
 
 		$this->assertSame( 1, $filter_calls );
-
-		remove_filter( 'woocommerce_shipping_package_hash_ignored_fields', $ignored_fields_filter );
-		remove_filter( 'woocommerce_package_rates', $filter, 10 );
 	}
 
 	/**

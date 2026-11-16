@@ -187,8 +187,6 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 		$store->register();
 
 		$store->add( $this->create_order_mock( 42 ) );
-
-		remove_filter( 'pre_as_schedule_single_action', '__return_zero' );
 	}
 
 	/**
@@ -358,8 +356,6 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 		$store->add( $this->create_order_mock( 1 ) );
 
 		$store->dispatch_all();
-
-		remove_action( 'shutdown', array( $store, 'dispatch_all' ) );
 	}
 
 	/**

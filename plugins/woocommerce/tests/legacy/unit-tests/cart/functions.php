@@ -213,8 +213,6 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 
 		$message = wc_add_to_cart_message( $product->get_id(), true, true );
 		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart. <a href="' . $cart_page_url . '" class="button wc-forward' . $wp_button_class . '">View cart</a>', $message );
-
-		delete_option( 'woocommerce_cart_page_id' );
 	}
 
 	/**
