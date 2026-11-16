@@ -86,6 +86,21 @@ class FulfillmentsCsvImporter {
 	public const MAX_IMPORT_ROWS = 5000;
 
 	/**
+	 * Data rows imported per chunk unless the chunk size filter changes it.
+	 */
+	public const DEFAULT_CHUNK_SIZE = 200;
+
+	/**
+	 * Largest chunk size accepted from the filter.
+	 */
+	public const MAX_CHUNK_SIZE = 1000;
+
+	/**
+	 * Largest chunk size while notifying customers, since every notified row sends an email.
+	 */
+	public const NOTIFY_CHUNK_SIZE = 25;
+
+	/**
 	 * Spellings accepted for a tab delimiter, since multipart and JSON clients
 	 * cannot always send a raw tab character.
 	 */
@@ -172,6 +187,37 @@ class FulfillmentsCsvImporter {
 			return '"';
 		}
 		return $enclosure;
+	}
+
+	/**
+	 * Number of data rows to import per chunk.
+	 *
+	 * The filtered value is kept between 1 and MAX_CHUNK_SIZE, and at most NOTIFY_CHUNK_SIZE
+	 * when customers are notified, so a chunk stays within typical request time limits.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param bool $notify_customer Whether the import sends customer notifications.
+	 * @return int
+	 */
+	public static function resolve_chunk_size( bool $notify_customer = false ): int {
+		/**
+		 * Filter the number of CSV data rows the fulfillments importer processes per request.
+		 *
+		 * The result is kept between 1 and 1000, and at most 25 while customer notifications
+		 * are on. A value that is not a positive number falls back to the default.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param int  $chunk_size      Default chunk size (200).
+		 * @param bool $notify_customer Whether the import sends customer notifications.
+		 */
+		$size = apply_filters( 'woocommerce_fulfillments_csv_importer_chunk_size', self::DEFAULT_CHUNK_SIZE, $notify_customer );
+		$size = is_numeric( $size ) ? (int) $size : 0;
+		if ( $size < 1 ) {
+			$size = self::DEFAULT_CHUNK_SIZE;
+		}
+		return min( $size, $notify_customer ? self::NOTIFY_CHUNK_SIZE : self::MAX_CHUNK_SIZE );
 	}
 
 	/**

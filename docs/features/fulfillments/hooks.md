@@ -169,6 +169,18 @@ add_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', function( $a
 } );
 ```
 
+The import runs in chunks of CSV data rows, one request per chunk. The chunk size filter lets a store with slow order hooks use smaller chunks, or a fast store use larger ones. The result is kept between 1 and 1000, and at most 25 while customer notifications are on, because every notified row sends an email during the request. A value that is not a positive number falls back to the default of 200.
+
+| Hook | Parameters | Purpose |
+| --- | --- | --- |
+| `woocommerce_fulfillments_csv_importer_chunk_size` | `int $chunk_size`, `bool $notify_customer` | Change how many data rows one import request processes. |
+
+```php
+add_filter( 'woocommerce_fulfillments_csv_importer_chunk_size', function( $chunk_size, $notify_customer ) {
+    return $notify_customer ? 10 : 100;
+}, 10, 2 );
+```
+
 ## CSV importer actions
 
 The import wizard stages the uploaded CSV and schedules its cleanup through Action Scheduler. The action fires after the import session's lifetime (one hour plus a five-minute grace period) so the staged file is removed when the wizard never finished. It also fires while the session is still live, because a later write to the session extends its lifetime after the action was scheduled. The default handler, `ImportSession::handle_cleanup_hook()`, then leaves the file alone and schedules the action again; once the session has expired it deletes the file and its attachment post. Listeners that treat the session as abandoned must check it first: `ImportSession::load( $user_id, $token )` returns `null` once the session is gone. The action is only scheduled while the `fulfillments` feature is enabled, but the handler is attached regardless of the flag so a pending cleanup still runs after the feature is turned off.

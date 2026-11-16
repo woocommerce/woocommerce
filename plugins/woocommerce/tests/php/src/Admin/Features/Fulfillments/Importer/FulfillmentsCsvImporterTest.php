@@ -931,4 +931,36 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array( '1043', '1Z998', 'usps' ), $read['rows'][1]['cells'], 'Whitespace inside a quoted cell and a leading tab are trimmed too' );
 		$this->assertSame( $parsed['headers'], $read['headers'], 'Both paths must return the same trimmed headers' );
 	}
+
+	/**
+	 * @testdox resolve_chunk_size() keeps the filtered size between 1 and 1000, and at most 25 while notifying.
+	 * @testWith [null, false, 200]
+	 *           [50, false, 50]
+	 *           ["75", false, 75]
+	 *           [0, false, 200]
+	 *           ["junk", false, 200]
+	 *           [5000, false, 1000]
+	 *           [null, true, 25]
+	 *           [10, true, 10]
+	 *           [500, true, 25]
+	 *
+	 * @param mixed $filtered Value the filter returns; null leaves the default.
+	 * @param bool  $notify   Whether the import notifies customers.
+	 * @param int   $expected Expected chunk size.
+	 */
+	public function test_resolve_chunk_size_clamps_the_filtered_value( $filtered, bool $notify, int $expected ): void {
+		$received = array();
+		add_filter(
+			'woocommerce_fulfillments_csv_importer_chunk_size',
+			function ( $size, $notify_customer ) use ( $filtered, &$received ) {
+				$received = array( $size, $notify_customer );
+				return $filtered ?? $size;
+			},
+			10,
+			2
+		);
+
+		$this->assertSame( $expected, FulfillmentsCsvImporter::resolve_chunk_size( $notify ) );
+		$this->assertSame( array( 200, $notify ), $received, 'The filter receives the default size and the notify flag' );
+	}
 }
