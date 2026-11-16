@@ -96,12 +96,11 @@ final class BlockTypesLazyController {
 					}
 					$asset_api          = $this->asset_api;
 					$use_custom_handles = static function ( $metadata ) use ( $block_name, $asset_api ) {
-						$styles = (array) ( $metadata['style'] ?? array() );
-						foreach ( $styles as $index => $specifier ) {
+						foreach ( (array) ( $metadata['style'] ?? array() ) as $index => $specifier ) {
 							if ( 'file:../' . $block_name . '.css' === $specifier ) {
-								$styles[ $index ]  = 'wc-blocks-style-' . $block_name;
-								$metadata['style'] = $styles;
-								$asset_api->register_style( $styles[ $index ], $asset_api->get_block_asset_build_path( $block_name, 'css' ), array(), 'all', true );
+								$custom_handle               = 'wc-blocks-style-' . $block_name;
+								$metadata['style'][ $index ] = $custom_handle;
+								$asset_api->register_style( $custom_handle, $asset_api->get_block_asset_build_path( $block_name, 'css' ), array(), 'all', true );
 								break;
 							}
 						}
