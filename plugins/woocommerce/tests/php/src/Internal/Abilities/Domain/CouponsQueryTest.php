@@ -390,4 +390,51 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $minimum, $stored->get_minimum_amount() );
 		$this->assertSame( $maximum, $stored->get_maximum_amount() );
 	}
+
+	/**
+	 * @testdox Should retain a zero search term instead of returning every included coupon.
+	 */
+	public function test_zero_search(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$ids = array();
+		foreach ( array( 'no-match', 'match-0' ) as $code ) {
+			$coupon = new \WC_Coupon();
+			$coupon->set_code( $code );
+			$coupon->save();
+			$ids[] = $coupon->get_id();
+		}
+		$ability = new \WP_Ability( CouponsQuery::get_name(), CouponsQuery::get_registration_args() );
+		$result  = $ability->execute(
+			array(
+				'include' => $ids,
+				'search'  => '0',
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( array( $ids[1] ), array_column( $result['coupons'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should reject exact codes that normalize to empty instead of listing unrelated coupons.
+	 * @testWith [""]
+	 *           ["   "]
+	 *           ["\u0000"]
+	 * @param string $code Exact code input.
+	 */
+	public function test_empty_exact_code( string $code ): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'unrelated-coupon' );
+		$coupon->save();
+		$ability = new \WP_Ability( CouponsQuery::get_name(), CouponsQuery::get_registration_args() );
+		$result  = $ability->execute(
+			array(
+				'include' => array( $coupon->get_id() ),
+				'code'    => $code,
+			)
+		);
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_coupon_code_required', $result->get_error_code() );
+	}
 }

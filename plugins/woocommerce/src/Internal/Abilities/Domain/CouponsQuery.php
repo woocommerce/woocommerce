@@ -86,7 +86,7 @@ class CouponsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'order'          => 'DESC',
 		);
 
-		if ( ! empty( $input['search'] ) ) {
+		if ( isset( $input['search'] ) && '' !== $input['search'] ) {
 			$args['s'] = wc_clean( $input['search'] );
 		}
 
@@ -95,6 +95,9 @@ class CouponsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		}
 		if ( isset( $input['code'] ) ) {
 			$args['title'] = wc_format_coupon_code( $input['code'] );
+			if ( '' === $args['title'] ) {
+				return new \WP_Error( 'woocommerce_ability_coupon_code_required', __( 'Coupon code is required.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
 		}
 		if ( isset( $input['discount_type'] ) ) {
 			$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Coupon discount types are stored only in post meta.
