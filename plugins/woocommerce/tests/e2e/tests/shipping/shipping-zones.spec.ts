@@ -1142,6 +1142,48 @@ test( 'keeps a switched-off method off when removing an abandoned new method fai
 	expect( stored.enabled ).toBe( false );
 } );
 
+// Regression: adding a method raises the unload warning even on a clean form, because the
+// unfinished settings step still has to be warned about. A failed cleanup must not read that
+// warning as pending changes and turn Save back on with nothing to post.
+test( 'leaves Save changes disabled when removing an abandoned new method fails', async ( {
+	page,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	await page.route( isRemoveMethod, ( route ) =>
+		route.fulfill( {
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify( { success: false, data: 'bad_nonce' } ),
+		} )
+	);
+
+	await openAddMethodModal( page );
+	await page
+		.locator( '.wc-backbone-modal' )
+		.getByText( 'Flat rate', { exact: true } )
+		.click();
+	await page.getByRole( 'button', { name: 'Continue' } ).click();
+	await expect( page.locator( '#btn-ok' ) ).toBeVisible();
+	await page.locator( '.modal-close-link' ).click();
+
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( REMOVE_FAILED_MESSAGE );
+
+	// The failed cleanup draws the method it could not remove, so the merchant can reach it.
+	// It decides Save in the same block, so two rows also means Save has settled.
+	await expect( methodRow( page, 'Flat rate' ) ).toHaveCount( 2 );
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+} );
+
 // Regression: the lock is released before the settings step opens, so a row behind it can be
 // deleted and the step then closed, leaving two removals in flight. The first to finish must
 // not unlock the table or turn Save back on while the second is still running.

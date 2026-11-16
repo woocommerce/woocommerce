@@ -1,12 +1,12 @@
 /* global shippingZoneMethodsLocalizeScript, ajaxurl, WCNumberValidation, WCMaybeModifyDecimal */
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
-		var $table          = $( '.wc-shipping-zone-methods' ),
-			$tbody          = $( '.wc-shipping-zone-method-rows' ),
-			$save_button    = $( '.wc-shipping-zone-method-save' ),
+		var $table             = $( '.wc-shipping-zone-methods' ),
+			$tbody             = $( '.wc-shipping-zone-method-rows' ),
+			$save_button       = $( '.wc-shipping-zone-method-save' ),
 			$add_method_button = $( '.wc-shipping-zone-add-method' ),
-			$row_template   = wp.template( 'wc-shipping-zone-method-row' ),
-			$blank_template = wp.template( 'wc-shipping-zone-method-row-blank' ),
+			$row_template      = wp.template( 'wc-shipping-zone-method-row' ),
+			$blank_template    = wp.template( 'wc-shipping-zone-method-row-blank' ),
 
 			// Backbone model
 			ShippingMethod       = Backbone.Model.extend({
@@ -299,9 +299,9 @@
 							setRunning( model, false );
 							window.alert( data.strings.remove_method_failed );
 							shippingMethodView.unblock();
-							// The delete failed; restore Save if the form was dirty before it and no
-							// other operation is still running.
-							if ( shippingMethodView.needsUnloadConfirm && ! model.isRunning ) {
+							// Adding a method raises the unload warning on a clean form, so the change
+							// set, not needsUnloadConfirm, says whether Save has anything to post.
+							if ( ! _.isEmpty( model.changes ) && ! model.isRunning ) {
 								$save_button.prop( 'disabled', false );
 							}
 						};
@@ -925,9 +925,12 @@
 								// skipped rendering it, so draw it now or the merchant cannot reach it. The
 								// delete handler's failure path must not render, as it never touched the model.
 								shippingMethodView.render();
-								// The cleanup failed; restore Save if the form was dirty before it and no
-								// other operation is still running.
-								if ( shippingMethodView.needsUnloadConfirm && ! shippingMethod.isRunning ) {
+								// The method stays on the server, so nothing is left to warn about, and
+								// clearing the warning switches Save off too. Otherwise Save comes back,
+								// the same rule applyMethodRemoval() applies on success.
+								if ( _.isEmpty( shippingMethod.changes ) ) {
+									shippingMethodView.clearUnloadConfirmation();
+								} else if ( ! shippingMethod.isRunning ) {
 									$save_button.prop( 'disabled', false );
 								}
 							};
