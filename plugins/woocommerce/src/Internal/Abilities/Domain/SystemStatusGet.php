@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Admin\SiteHealth;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Utilities\LoggingUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -42,7 +43,7 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 		return array(
 			'label'               => __( 'Get system status', 'woocommerce' ),
 			'description'         => __(
-				'Get the WooCommerce and database versions, order storage, installed plugins, enabled WooCommerce features, the theme, the store pages, security checks and post counts. WordPress, PHP and database server versions come from core/get-environment-info.',
+				'Get the WooCommerce and database versions, order storage, environment checks, installed plugins, enabled WooCommerce features, the theme, the store pages, security checks and post counts. WordPress, PHP and database server versions come from core/get-environment-info.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
@@ -86,6 +87,7 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 				'woocommerce_version'    => (string) WC()->version,
 				'woocommerce_db_version' => (string) get_option( 'woocommerce_db_version', '' ),
 				'order_storage'          => OrderUtil::custom_orders_table_usage_is_enabled() ? 'hpos' : 'posts',
+				'environment'            => self::get_environment(),
 				'active_plugins'         => self::format_plugins( $controller->get_active_plugins() ),
 				'inactive_plugins'       => self::format_plugins( $controller->get_inactive_plugins() ),
 				'mu_plugins'             => self::format_plugins( $dropins_mu['mu_plugins'] ?? array() ),
@@ -174,18 +176,37 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 	}
 
 	/**
+	 * Read directly: the status controller's environment section also makes two remote test requests.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private static function get_environment(): array {
+		$memory_limit = (string) ini_get( 'memory_limit' );
+
+		return array(
+			'wp_cron'                => ! ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ),
+			'wp_debug_mode'          => defined( 'WP_DEBUG' ) && WP_DEBUG,
+			'external_object_cache'  => (bool) wp_using_ext_object_cache(),
+			'memory_limit'           => '-1' === $memory_limit ? -1 : wp_convert_hr_to_bytes( $memory_limit ),
+			'max_upload_size'        => (int) wp_max_upload_size(),
+			'log_directory_writable' => wp_is_writable( LoggingUtil::get_log_directory( false ) ),
+		);
+	}
+
+	/**
 	 * Read locally: the status controller looks up the latest theme version on WordPress.org.
 	 *
 	 * @return array<string, mixed>
 	 */
 	private static function get_theme(): array {
-		$theme = wp_get_theme();
-		$info  = array(
+		$theme          = wp_get_theme();
+		$template_check = SiteHealth::get_instance()->run_test( 'woocommerce_template_overrides' );
+		$info           = array(
 			'name'                    => (string) $theme->get( 'Name' ),
 			'version'                 => (string) $theme->get( 'Version' ),
 			'is_block_theme'          => $theme->is_block_theme(),
 			'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),
-			'has_outdated_templates'  => 'recommended' === ( SiteHealth::get_instance()->run_test( 'woocommerce_template_overrides' )['status'] ?? '' ),
+			'has_outdated_templates'  => isset( $template_check['status'] ) && 'good' !== $template_check['status'],
 		);
 
 		$parent = $theme->parent();
@@ -198,7 +219,7 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 	}
 
 	/**
-	 * Leaves out page IDs and the expected shortcode or block of each page.
+	 * Leaves out page IDs and the names of the expected shortcode and block.
 	 *
 	 * @param mixed $pages Page rows from the status controller.
 	 * @return array<int, array<string, mixed>>
@@ -211,10 +232,14 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 		$items = array();
 		foreach ( array_filter( $pages, 'is_array' ) as $page ) {
 			$items[] = array(
-				'name'    => (string) ( $page['page_name'] ?? '' ),
-				'set'     => (bool) ( $page['page_set'] ?? false ),
-				'exists'  => (bool) ( $page['page_exists'] ?? false ),
-				'visible' => (bool) ( $page['page_visible'] ?? false ),
+				'name'               => (string) ( $page['page_name'] ?? '' ),
+				'set'                => (bool) ( $page['page_set'] ?? false ),
+				'exists'             => (bool) ( $page['page_exists'] ?? false ),
+				'visible'            => (bool) ( $page['page_visible'] ?? false ),
+				'shortcode_required' => (bool) ( $page['shortcode_required'] ?? false ),
+				'shortcode_present'  => (bool) ( $page['shortcode_present'] ?? false ),
+				'block_required'     => (bool) ( $page['block_required'] ?? false ),
+				'block_present'      => (bool) ( $page['block_present'] ?? false ),
 			);
 		}
 		return $items;
@@ -263,6 +288,27 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 				'order_storage'          => array(
 					'type' => 'string',
 					'enum' => array( 'hpos', 'posts' ),
+				),
+				'environment'            => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'wp_cron'                => array(
+							'type'        => 'boolean',
+							'description' => __( 'Whether WP-Cron runs on page loads; false when DISABLE_WP_CRON is set.', 'woocommerce' ),
+						),
+						'wp_debug_mode'          => array( 'type' => 'boolean' ),
+						'external_object_cache'  => array( 'type' => 'boolean' ),
+						'memory_limit'           => array(
+							'type'        => 'integer',
+							'description' => __( 'PHP memory limit in bytes, which WordPress raises to WP_MEMORY_LIMIT; -1 for no limit.', 'woocommerce' ),
+						),
+						'max_upload_size'        => array(
+							'type'        => 'integer',
+							'description' => __( 'Bytes.', 'woocommerce' ),
+						),
+						'log_directory_writable' => array( 'type' => 'boolean' ),
+					),
+					'additionalProperties' => false,
 				),
 				'active_plugins'         => array(
 					'type'  => 'array',
@@ -315,14 +361,18 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 				),
 				'pages'                  => array(
 					'type'        => 'array',
-					'description' => __( 'The WooCommerce pages: whether each is assigned in settings, exists, and is published.', 'woocommerce' ),
+					'description' => __( 'The WooCommerce pages: whether each is assigned in settings, exists, is published, and holds the shortcode or block it needs.', 'woocommerce' ),
 					'items'       => array(
 						'type'                 => 'object',
 						'properties'           => array(
-							'name'    => $string,
-							'set'     => array( 'type' => 'boolean' ),
-							'exists'  => array( 'type' => 'boolean' ),
-							'visible' => array( 'type' => 'boolean' ),
+							'name'               => $string,
+							'set'                => array( 'type' => 'boolean' ),
+							'exists'             => array( 'type' => 'boolean' ),
+							'visible'            => array( 'type' => 'boolean' ),
+							'shortcode_required' => array( 'type' => 'boolean' ),
+							'shortcode_present'  => array( 'type' => 'boolean' ),
+							'block_required'     => array( 'type' => 'boolean' ),
+							'block_present'      => array( 'type' => 'boolean' ),
 						),
 						'additionalProperties' => false,
 					),

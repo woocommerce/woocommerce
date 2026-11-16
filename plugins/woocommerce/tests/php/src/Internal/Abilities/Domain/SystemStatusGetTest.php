@@ -113,7 +113,7 @@ class SystemStatusGetTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $result );
 		$this->assertSame(
-			array( 'woocommerce_version', 'woocommerce_db_version', 'order_storage', 'active_plugins', 'inactive_plugins', 'mu_plugins', 'dropins', 'enabled_features', 'theme', 'pages', 'security', 'post_type_counts' ),
+			array( 'woocommerce_version', 'woocommerce_db_version', 'order_storage', 'environment', 'active_plugins', 'inactive_plugins', 'mu_plugins', 'dropins', 'enabled_features', 'theme', 'pages', 'security', 'post_type_counts' ),
 			array_keys( $result['system_status'] )
 		);
 		$this->assertSame( WC()->version, $result['system_status']['woocommerce_version'] );
@@ -155,13 +155,14 @@ class SystemStatusGetTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should report a published checkout page as set, existing and visible, without its ID.
+	 * @testdox Should report a published checkout page with its block as set, existing, visible and complete, without its ID.
 	 */
 	public function test_pages_report_setup_without_ids(): void {
 		$page_id = self::factory()->post->create(
 			array(
-				'post_type'   => 'page',
-				'post_status' => 'publish',
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_content' => '<!-- wp:woocommerce/checkout /-->',
 			)
 		);
 		update_option( 'woocommerce_checkout_page_id', $page_id );
@@ -173,6 +174,8 @@ class SystemStatusGetTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $pages['Checkout']['set'] );
 		$this->assertTrue( $pages['Checkout']['exists'] );
 		$this->assertTrue( $pages['Checkout']['visible'] );
+		$this->assertTrue( $pages['Checkout']['block_present'] );
+		$this->assertFalse( $pages['Checkout']['shortcode_present'] );
 		$this->assertArrayNotHasKey( 'page_id', $pages['Checkout'] );
 	}
 
@@ -187,5 +190,70 @@ class SystemStatusGetTest extends \WC_Unit_Test_Case {
 		$this->assertSame( wp_get_theme()->get( 'Name' ), $theme['name'] );
 		$this->assertArrayNotHasKey( 'parent_name', $theme );
 		$this->assertArrayNotHasKey( 'parent_version', $theme );
+	}
+
+	/**
+	 * @testdox Should report outdated templates when the theme overrides a template with an older version.
+	 */
+	public function test_reports_outdated_template_override(): void {
+		$theme_dir = get_temp_dir() . 'wc-system-status-' . wp_generate_password( 8, false );
+		wp_mkdir_p( $theme_dir . '/woocommerce/cart' );
+		file_put_contents( $theme_dir . '/woocommerce/cart/cart.php', "<?php\n/**\n * @version 1.0.0\n */\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$use_theme_dir = static fn() => $theme_dir;
+		add_filter( 'stylesheet_directory', $use_theme_dir );
+
+		try {
+			$theme = $this->get_status()['system_status']['theme'];
+		} finally {
+			remove_filter( 'stylesheet_directory', $use_theme_dir );
+			unlink( $theme_dir . '/woocommerce/cart/cart.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
+			rmdir( $theme_dir . '/woocommerce/cart' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+			rmdir( $theme_dir . '/woocommerce' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+			rmdir( $theme_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+		}
+
+		$this->assertTrue( $theme['has_outdated_templates'] );
+	}
+
+	/**
+	 * @testdox Should report the parent theme name and version for a child theme.
+	 */
+	public function test_child_theme_reports_parent(): void {
+		global $wp_theme_directories;
+
+		$root           = get_temp_dir() . 'wc-system-status-themes-' . wp_generate_password( 8, false );
+		$original_theme = get_stylesheet();
+		$original_dirs  = $wp_theme_directories;
+		$theme_headers  = array(
+			'wc-canary-parent' => "/*\nTheme Name: Canary Parent\nVersion: 2.0.0\n*/",
+			'wc-canary-child'  => "/*\nTheme Name: Canary Child\nTemplate: wc-canary-parent\nVersion: 1.0.0\n*/",
+		);
+		foreach ( $theme_headers as $slug => $header ) {
+			wp_mkdir_p( "$root/$slug" );
+			file_put_contents( "$root/$slug/style.css", $header ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			file_put_contents( "$root/$slug/index.php", '<?php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		}
+
+		register_theme_directory( $root );
+		wp_clean_themes_cache();
+
+		try {
+			switch_theme( 'wc-canary-child' );
+			$theme = $this->get_status()['system_status']['theme'];
+		} finally {
+			switch_theme( $original_theme );
+			$wp_theme_directories = $original_dirs; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			wp_clean_themes_cache();
+			foreach ( array_keys( $theme_headers ) as $slug ) {
+				unlink( "$root/$slug/style.css" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
+				unlink( "$root/$slug/index.php" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
+				rmdir( "$root/$slug" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+			}
+			rmdir( $root ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+		}
+
+		$this->assertSame( 'Canary Child', $theme['name'] );
+		$this->assertSame( 'Canary Parent', $theme['parent_name'] );
+		$this->assertSame( '2.0.0', $theme['parent_version'] );
 	}
 }
