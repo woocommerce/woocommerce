@@ -14,7 +14,7 @@ use WP_REST_Request;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Records a Tracks event for each WooCommerce ability invocation.
+ * Records Tracks events for WooCommerce abilities, including extension abilities registered through its loader.
  *
  * Hooks only collect data in memory. Events are sent once per request on shutdown through the batched
  * Tracks client. Ability input and output are never recorded, except the name of a registered ability an agent
@@ -50,7 +50,7 @@ class AbilitiesTracking {
 	private const TRACKED_CHANNELS = array( 'mcp', 'rest', 'cli' );
 
 	/**
-	 * Only abilities in this namespace are tracked.
+	 * Abilities in this namespace are always tracked.
 	 *
 	 * @var string
 	 */
@@ -922,13 +922,21 @@ class AbilitiesTracking {
 	}
 
 	/**
-	 * Whether an ability is in the tracked namespace.
+	 * Whether an ability uses WooCommerce's namespace or was registered through its loader.
 	 *
 	 * @param mixed $ability_name The ability name.
 	 * @return bool
 	 */
 	private static function is_tracked_ability( $ability_name ): bool {
-		return is_string( $ability_name ) && 0 === strpos( $ability_name, self::ABILITY_PREFIX );
+		if ( ! is_string( $ability_name ) ) {
+			return false;
+		}
+
+		if ( 0 === strpos( $ability_name, self::ABILITY_PREFIX ) ) {
+			return true;
+		}
+
+		return AbilitiesLoader::is_registered_ability( $ability_name );
 	}
 
 	/**

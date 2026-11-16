@@ -61,10 +61,6 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( 'wp_object_cache_key_prefix_the_type' );
-		remove_all_filters( 'wc_object_cache_get_engine' );
-		remove_all_filters( 'woocommerce_after_serializing_the_type_for_caching' );
-		remove_all_actions( 'woocommerce_after_removing_the_type_from_cache' );
-		remove_all_actions( 'woocommerce_after_flushing_the_type_cache' );
 
 		parent::tearDown();
 	}

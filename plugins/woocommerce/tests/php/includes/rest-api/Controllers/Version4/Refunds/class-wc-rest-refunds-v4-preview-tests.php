@@ -39,19 +39,6 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Disable the REST API v4 feature.
-	 */
-	public static function disable_rest_api_v4_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features = array_diff( $features, array( 'rest-api-v4' ) );
-				return $features;
-			}
-		);
-	}
-
-	/**
 	 * Create the shared admin user once per class.
 	 */
 	public static function setUpBeforeClass(): void {
@@ -86,8 +73,8 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
-		$this->enable_rest_api_v4_feature();
 		parent::setUp();
+		$this->enable_rest_api_v4_feature();
 
 		wp_set_current_user( self::$user_id );
 	}
@@ -99,7 +86,6 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->created_orders = array();
 
 		parent::tearDown();
-		$this->disable_rest_api_v4_feature();
 	}
 
 	/**

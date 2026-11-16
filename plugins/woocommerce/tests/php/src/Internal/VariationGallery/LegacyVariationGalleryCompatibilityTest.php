@@ -28,18 +28,6 @@ class LegacyVariationGalleryCompatibilityTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Remove registered filters after each test.
-	 */
-	public function tearDown(): void {
-		remove_filter(
-			'woocommerce_product_variation_get_gallery_image_ids',
-			array( $this->sut, 'maybe_read_legacy_gallery_image_ids' ),
-			10
-		);
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox Legacy variation gallery meta is ignored when the core gallery already has values.
 	 */
 	public function test_legacy_gallery_meta_is_ignored_when_core_gallery_is_present() {

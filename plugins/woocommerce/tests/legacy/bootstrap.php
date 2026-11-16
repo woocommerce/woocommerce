@@ -266,6 +266,11 @@ class WC_Unit_Tests_Bootstrap {
 		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
 
 		require_once $this->plugin_dir . '/woocommerce.php';
+
+		// Hook-driven transactional emails are off in tests. Their listeners are built lazily, in whichever test fires
+		// the first email, so only that test would send any. A test opts in with enable_transactional_emails().
+		remove_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
+
 		FeaturePlugin::instance()->init();
 
 		// The test case wraps each test in a transaction that it rolls back. Own

@@ -554,4 +554,32 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertIsIntAndEquals( $site_wide_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
 	}
+
+	/**
+	 * @testdox Reducing stock for an order updates the modified date of the product that holds the stock.
+	 */
+	public function test_reducing_order_stock_updates_product_date_modified(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->save();
+
+		$past = '2020-01-01 00:00:00';
+		$GLOBALS['wpdb']->update(
+			$GLOBALS['wpdb']->posts,
+			array(
+				'post_modified'     => $past,
+				'post_modified_gmt' => $past,
+			),
+			array( 'ID' => $product->get_id() )
+		);
+		clean_post_cache( $product->get_id() );
+
+		$order = WC_Helper_Order::create_order( 0, $product );
+		wc_reduce_stock_levels( $order );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertSame( 6, $product->get_stock_quantity() );
+		$this->assertGreaterThan( strtotime( $past ), $product->get_date_modified()->getTimestamp() );
+	}
 }

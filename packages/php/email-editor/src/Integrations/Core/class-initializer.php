@@ -54,6 +54,7 @@ class Initializer {
 		'core/list',
 		'core/list-item',
 		'core/paragraph',
+		'core/preformatted',
 		'core/quote',
 		'core/separator',
 		'core/spacer',
@@ -108,6 +109,8 @@ class Initializer {
 		add_filter( 'woocommerce_email_editor_theme_json', array( $this, 'adjust_theme_json' ), 10, 1 );
 		add_filter( 'safe_style_css', array( $this, 'allow_styles' ) );
 		add_action( 'woocommerce_email_editor_render_start', array( $this, 'reset_renderers' ) );
+		add_action( 'woocommerce_email_editor_render_start', array( $this, 'disable_web_image_attributes' ) );
+		add_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_web_image_attributes' ) );
 	}
 
 	/**
@@ -115,6 +118,33 @@ class Initializer {
 	 */
 	public function reset_renderers(): void {
 		$this->renderers = array();
+	}
+
+	/**
+	 * Stop WordPress from adding loading, decoding, srcset and sizes to images in the email.
+	 *
+	 * Apple Mail never loads images marked loading="lazy".
+	 */
+	public function disable_web_image_attributes(): void {
+		add_filter( 'wp_get_loading_optimization_attributes', array( $this, 'get_no_image_attributes' ), PHP_INT_MAX );
+		add_filter( 'wp_calculate_image_srcset_meta', array( $this, 'get_no_image_attributes' ), PHP_INT_MAX );
+	}
+
+	/**
+	 * Filter callback that gives WordPress no image attributes or srcset data to work with.
+	 *
+	 * @return array Empty array.
+	 */
+	public function get_no_image_attributes(): array {
+		return array();
+	}
+
+	/**
+	 * Let WordPress add its image attributes again once the email has rendered.
+	 */
+	public function restore_web_image_attributes(): void {
+		remove_filter( 'wp_get_loading_optimization_attributes', array( $this, 'get_no_image_attributes' ), PHP_INT_MAX );
+		remove_filter( 'wp_calculate_image_srcset_meta', array( $this, 'get_no_image_attributes' ), PHP_INT_MAX );
 	}
 
 	/**
@@ -164,6 +194,10 @@ class Initializer {
 	 * @return array Modified block settings.
 	 */
 	public function update_block_settings( array $settings ): array {
+		if ( ! isset( $settings['name'] ) ) {
+			return $settings;
+		}
+
 		// Enable blocks in email editor and set rendering callback.
 		if ( in_array( $settings['name'], self::ALLOWED_BLOCK_TYPES, true ) ) {
 			$settings['supports']['email']     = true;
@@ -209,6 +243,7 @@ class Initializer {
 		switch ( $block_name ) {
 			case 'core/heading':
 			case 'core/paragraph':
+			case 'core/preformatted':
 			case 'core/site-title':
 			case 'core/post-title':
 				$renderer = new Text();

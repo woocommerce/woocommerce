@@ -21,7 +21,7 @@ trait ProductAttributeAbilityTrait {
 	 * @return bool
 	 */
 	private static function can_manage_product_attributes( string $context ): bool {
-		return wc_rest_check_manager_permissions( 'attributes', $context );
+		return (bool) wc_rest_check_manager_permissions( 'attributes', $context );
 	}
 
 	/**

@@ -11,6 +11,216 @@
 class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * @testdox Missing permalink bases use the site locale without importing the request's MO catalog.
+	 */
+	public function test_wc_get_permalink_structure_uses_site_locale_for_missing_defaults(): void {
+		global $l10n, $wp_textdomain_registry;
+
+		$site_locale           = 'wc_TEST';
+		$fixtures_dir          = WC_ABSPATH . 'tests/php/src/Internal/Utilities/fixtures/';
+		$controller            = WP_Translation_Controller::get_instance();
+		$original_locale       = $controller->get_locale();
+		$original_path         = $wp_textdomain_registry->get( 'woocommerce', $site_locale );
+		$original_translations = $l10n['woocommerce'] ?? null;
+		$request_file          = trailingslashit( get_temp_dir() ) . wp_unique_filename( get_temp_dir(), 'woocommerce-request-translations.mo' );
+
+		delete_option( 'woocommerce_permalinks' );
+		add_filter( 'pre_option_WPLANG', static fn() => $site_locale );
+		add_filter( 'pre_determine_locale', static fn() => 'en_US' );
+		add_filter( 'lang_dir_for_domain', static fn( $path, $domain, $locale ) => 'woocommerce' === $domain && $site_locale === $locale ? $fixtures_dir : $path, 10, 3 );
+		add_filter( 'load_translation_file', static fn( $file, $domain, $locale ) => 'woocommerce' === $domain && $site_locale === $locale ? $fixtures_dir . 'permalink-translations.php' : $file, 10, 3 );
+
+		try {
+			$request_translations = new MO();
+			$request_translations->add_entry(
+				array(
+					'singular'     => 'product-tag',
+					'context'      => 'slug',
+					'translations' => array( 'request-product-tag' ),
+				)
+			);
+			$this->assertTrue( $request_translations->export_to_file( $request_file ) );
+			$this->assertTrue( $request_translations->import_from_file( $request_file ) );
+			$l10n['woocommerce'] = $request_translations; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate a request-locale catalog with a file core could reload.
+
+			$permalinks = wc_get_permalink_structure();
+			$persisted  = get_option( 'woocommerce_permalinks' );
+			$expected   = array(
+				'product_base'  => 'site-product',
+				'category_base' => 'site-product-category',
+				'tag_base'      => 'product-tag',
+			);
+			foreach ( $expected as $key => $slug ) {
+				$this->assertSame( $slug, $permalinks[ $key ] );
+				$this->assertSame( $slug, $persisted[ $key ] );
+			}
+			$this->assertSame( $request_translations, $l10n['woocommerce'] );
+			$this->assertSame( $original_locale, $controller->get_locale() );
+			$this->assertSame( 'en_US', determine_locale() );
+		} finally {
+			$controller->unload_textdomain( 'woocommerce', $site_locale );
+			$controller->set_locale( $original_locale );
+			$wp_textdomain_registry->set( 'woocommerce', $site_locale, $original_path );
+			wp_delete_file( $request_file );
+			if ( null === $original_translations ) {
+				unset( $l10n['woocommerce'] );
+			} else {
+				$l10n['woocommerce'] = $original_translations; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the test's original translations.
+			}
+		}
+	}
+
+	/**
+	 * @testdox Existing permalink bases are preserved without translating defaults.
+	 */
+	public function test_wc_get_permalink_structure_preserves_existing_bases(): void {
+		update_option(
+			'woocommerce_permalinks',
+			array(
+				'product_base'  => 'custom-product',
+				'category_base' => 'custom-product-category',
+				'tag_base'      => 'custom-product-tag',
+			)
+		);
+		$permalinks = wc_get_permalink_structure();
+
+		$this->assertSame( 'custom-product', $permalinks['product_base'] );
+		$this->assertSame( 'custom-product-category', $permalinks['category_base'] );
+		$this->assertSame( 'custom-product-tag', $permalinks['tag_base'] );
+	}
+
+	/**
+	 * @testdox Missing permalink bases honor catalogs supplied by translation loaders.
+	 * @testWith ["pre_load_textdomain"]
+	 *           ["override_load_textdomain"]
+	 *
+	 * @param string $hook Translation loading filter.
+	 */
+	public function test_permalink_defaults_honor_translation_loaders( string $hook ): void {
+		global $l10n, $l10n_unloaded, $wp_textdomain_registry;
+
+		$locale                = 'wc_LOADER';
+		$previous_path         = $wp_textdomain_registry->get( 'woocommerce', $locale );
+		$previous_translations = $l10n['woocommerce'] ?? null;
+		$previous_unloaded     = $l10n_unloaded['woocommerce'] ?? null;
+		$previous_locale       = WP_Translation_Controller::get_instance()->get_locale();
+		$wp_textdomain_registry->set( 'woocommerce', $locale, WC_ABSPATH . 'tests/php/src/Internal/Utilities/fixtures/' );
+		add_filter( 'pre_option_WPLANG', static fn() => $locale );
+		add_filter( 'pre_determine_locale', static fn() => 'en_US' );
+		add_filter(
+			$hook,
+			static function ( $override, $domain ) use ( $locale ) {
+				if ( 'woocommerce' === $domain ) {
+					$catalog = new \MO();
+					$catalog->add_entry(
+						array(
+							'singular'     => 'product',
+							'context'      => 'slug',
+							'translations' => array( determine_locale() === $locale ? 'loader-product' : 'request-product' ),
+						)
+					);
+					$GLOBALS['l10n'][ $domain ] = $catalog; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate an external translation loader.
+					return true;
+				}
+				return $override;
+			},
+			10,
+			2
+		);
+		delete_option( 'woocommerce_permalinks' );
+		$l10n_unloaded['woocommerce'] = true; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Model a request that disabled just-in-time loading.
+
+		try {
+			wc_get_permalink_structure();
+			$this->assertSame( 'loader-product', get_option( 'woocommerce_permalinks' )['product_base'] );
+			$this->assertSame( $previous_translations, $l10n['woocommerce'] ?? null, 'Restore the request catalog.' );
+			$this->assertSame( $previous_locale, WP_Translation_Controller::get_instance()->get_locale() );
+			$this->assertTrue( $l10n_unloaded['woocommerce'] ?? false, 'Preserve the request decision to disable just-in-time loading.' );
+		} finally {
+			$wp_textdomain_registry->set( 'woocommerce', $locale, $previous_path );
+			if ( null === $previous_unloaded ) {
+				unset( $l10n_unloaded['woocommerce'] );
+			} else {
+				$l10n_unloaded['woocommerce'] = $previous_unloaded; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the test's original marker.
+			}
+		}
+	}
+
+	/**
+	 * @testdox Missing permalink bases keep slugs customized through gettext filters.
+	 * @testWith ["en_US"]
+	 *           ["fr_FR"]
+	 *
+	 * @param string $request_locale Locale of the request that fills in the missing bases.
+	 */
+	public function test_missing_permalink_bases_keep_gettext_filtered_slugs( string $request_locale ): void {
+		$slugs = array(
+			'product-category' => 'waren-kategorie',
+			'product-tag'      => 'waren-schlagwort',
+		);
+		add_filter( 'pre_determine_locale', static fn() => $request_locale );
+		add_filter(
+			'gettext_with_context',
+			static fn( $translation, $text, $context, $domain ) => 'woocommerce' === $domain && 'slug' === $context ? ( $slugs[ $text ] ?? $translation ) : $translation,
+			10,
+			4
+		);
+		update_option(
+			'woocommerce_permalinks',
+			array(
+				'product_base'  => 'waren',
+				'category_base' => '',
+				'tag_base'      => '',
+			)
+		);
+
+		wc_get_permalink_structure();
+		$permalinks = get_option( 'woocommerce_permalinks' );
+
+		$this->assertSame( 'waren', $permalinks['product_base'], 'A stored base should be left alone.' );
+		$this->assertSame( 'waren-kategorie', $permalinks['category_base'], 'The filtered category slug should be stored.' );
+		$this->assertSame( 'waren-schlagwort', $permalinks['tag_base'], 'The filtered tag slug should be stored.' );
+	}
+
+	/**
+	 * @testdox A translation loader that reads the permalink settings does not re-enter the slug lookup.
+	 */
+	public function test_translate_slug_does_not_re_enter_from_a_translation_loader(): void {
+		global $wp_textdomain_registry;
+
+		$loader_calls  = 0;
+		$previous_path = $wp_textdomain_registry->get( 'woocommerce', 'wc_LOADER' );
+		$wp_textdomain_registry->set( 'woocommerce', 'wc_LOADER', WC_ABSPATH . 'tests/php/src/Internal/Utilities/fixtures/' );
+		add_filter( 'pre_option_WPLANG', static fn() => 'wc_LOADER' );
+		add_filter( 'pre_determine_locale', static fn() => 'en_US' );
+		add_filter(
+			'pre_load_textdomain',
+			static function ( $override, $domain ) use ( &$loader_calls ) {
+				if ( 'woocommerce' === $domain ) {
+					++$loader_calls;
+					if ( $loader_calls > 10 ) {
+						throw new \RuntimeException( 'The translation loader re-entered the slug lookup.' );
+					}
+					wc_get_permalink_structure();
+				}
+				return $override;
+			},
+			10,
+			2
+		);
+		delete_option( 'woocommerce_permalinks' );
+
+		try {
+			$permalinks = wc_get_permalink_structure();
+		} finally {
+			$wp_textdomain_registry->set( 'woocommerce', 'wc_LOADER', $previous_path );
+		}
+
+		$this->assertSame( 'product', $permalinks['product_base'], 'The lookup should finish with the untranslated slug.' );
+		$this->assertLessThanOrEqual( 3, $loader_calls, 'Each missing base should reach the loader once at most.' );
+	}
+
+	/**
 	 * Create a Shop page with one child.
 	 *
 	 * @param int    $parent_id Shop page parent ID.
@@ -172,6 +382,135 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( 'index.php?pagename=boutique/sale', $rules['boutique/sale/?$'] );
+	}
+
+	/**
+	 * @testdox Shop subpage rules follow the persisted base despite language filters.
+	 * @testWith ["", "shop", false]
+	 *           ["woocommerce_get_shop_page_id", "shop", true]
+	 *           ["option_woocommerce_shop_page_id", "shop", true]
+	 *           ["woocommerce_get_shop_page_id", "boutique", false]
+	 *           ["option_woocommerce_shop_page_id", "boutique", false]
+	 *
+	 * @param string $shop_filter       Filter translating the Shop page ID.
+	 * @param string $base              Persisted product base.
+	 * @param bool   $expect_other_root Whether the other Shop tree should receive rules.
+	 */
+	public function test_wc_fix_rewrite_rules_ignores_request_language( string $shop_filter, string $base, bool $expect_other_root ): void {
+		$shop_ids = array(
+			'shop'     => $this->create_shop_page_tree(),
+			'boutique' => $this->create_shop_page_tree( 0, 'boutique' ),
+		);
+		$this->create_shop_page_tree( $shop_ids[ $base ], 'collection' );
+		update_option( 'woocommerce_shop_page_id', $shop_ids['shop'] );
+		update_option( 'woocommerce_permalinks', array( 'product_base' => '/' . $base . '/%product_cat%' ) );
+
+		if ( '' !== $shop_filter ) {
+			add_filter( $shop_filter, static fn() => $shop_ids['boutique'] );
+		}
+		add_action(
+			'parse_query',
+			static function ( $query ) {
+				if ( 'page' === $query->get( 'post_type' ) ) {
+					$query->set( 'post__in', array( 0 ) );
+				}
+			}
+		);
+
+		$this->assertSame( array(), wc_get_page_children( $shop_ids[ $base ] ), 'The language filter should hide pages from the public page helper.' );
+		$rules = wc_fix_rewrite_rules( array() );
+		$this->assertSame( 'index.php?pagename=' . $base . '/sale', $rules[ $base . '/sale/?$' ] ?? null );
+		$this->assertSame( 'index.php?pagename=' . $base . '/collection/sale', $rules[ $base . '/collection/sale/?$' ] ?? null, 'Nested descendants need rules too.' );
+		$other_base = 'shop' === $base ? 'boutique' : 'shop';
+		$this->assertSame( $expect_other_root, isset( $rules[ $other_base . '/sale/?$' ] ), 'Keep filtered Shop rules without adding an unrelated stored Shop path.' );
+	}
+
+	/**
+	 * @testdox Shop subpage rules include the stored Shop when its translation shares the same slug.
+	 */
+	public function test_wc_fix_rewrite_rules_includes_shop_roots_with_the_same_slug(): void {
+		$this->create_shop_page_tree();
+		add_filter( 'pre_wp_unique_post_slug', static fn( $override, $slug ) => $slug, 10, 2 );
+		$translated_shop_page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_name'   => 'shop',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_permalinks', array( 'product_base' => '/shop/%product_cat%' ) );
+		add_filter( 'option_woocommerce_shop_page_id', static fn() => $translated_shop_page_id );
+
+		$this->assertSame( 'shop', get_page_uri( $translated_shop_page_id ), 'The translated Shop should share the stored Shop slug.' );
+		$rules = wc_fix_rewrite_rules( array() );
+		$this->assertSame( 'index.php?pagename=shop/sale', $rules['shop/sale/?$'] ?? null );
+	}
+
+	/**
+	 * @testdox Shop subpage rules exclude hidden statuses and unrelated pages.
+	 */
+	public function test_wc_fix_rewrite_rules_skips_excluded_statuses_and_unrelated_pages(): void {
+		register_post_status( 'wc_hidden', array( 'exclude_from_search' => true ) );
+		$this->create_shop_page_tree( 0, 'unrelated' );
+		$shop_page_id = $this->create_shop_page_tree();
+		self::factory()->post->create(
+			array(
+				'post_parent' => $shop_page_id,
+				'post_type'   => 'page',
+				'post_name'   => 'members',
+				'post_status' => 'wc_hidden',
+			)
+		);
+		update_option( 'woocommerce_permalinks', array( 'product_base' => '/shop' ) );
+
+		try {
+			$rules = wc_fix_rewrite_rules( array() );
+		} finally {
+			unset( $GLOBALS['wp_post_statuses']['wc_hidden'] );
+		}
+
+		$this->assertArrayHasKey( 'shop/sale/?$', $rules, 'Searchable Shop children should keep their rules.' );
+		$this->assertArrayNotHasKey( 'shop/members/?$', $rules, 'A status excluded from search should not receive a rule.' );
+		$this->assertArrayNotHasKey( 'unrelated/?$', $rules, 'An unrelated page should not receive a rule.' );
+		$this->assertArrayNotHasKey( 'unrelated/sale/?$', $rules, 'Unrelated descendants should not receive rules.' );
+	}
+
+	/**
+	 * @testdox Editing a child of the stored Shop page flushes rewrite rules even when the Shop page is filtered.
+	 * @testWith ["woocommerce_get_shop_page_id"]
+	 *           ["option_woocommerce_shop_page_id"]
+	 *
+	 * @param string $shop_filter Filter translating the Shop page ID.
+	 */
+	public function test_flush_rewrite_rules_on_shop_page_save_uses_the_stored_shop_page( string $shop_filter ): void {
+		$boutique_page_id = $this->create_shop_page_tree( 0, 'boutique' );
+		$shop_page_id     = $this->create_shop_page_tree();
+		$child_id         = self::factory()->post->create(
+			array(
+				'post_parent' => $shop_page_id,
+				'post_type'   => 'page',
+			)
+		);
+		$grandchild_id    = self::factory()->post->create(
+			array(
+				'post_parent' => $child_id,
+				'post_type'   => 'page',
+			)
+		);
+		$unrelated_id     = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		add_filter( $shop_filter, static fn() => $boutique_page_id );
+		remove_all_actions( 'woocommerce_flush_rewrite_rules' );
+		$flushes_before = did_action( 'woocommerce_flush_rewrite_rules' );
+		set_current_screen( 'page' );
+		$_GET['action'] = 'edit';
+
+		$_GET['post'] = $unrelated_id;
+		flush_rewrite_rules_on_shop_page_save();
+		$this->assertSame( $flushes_before, did_action( 'woocommerce_flush_rewrite_rules' ), 'An unrelated page should not flush rewrite rules.' );
+
+		$_GET['post'] = $grandchild_id;
+		flush_rewrite_rules_on_shop_page_save();
+		$this->assertSame( $flushes_before + 1, did_action( 'woocommerce_flush_rewrite_rules' ), 'A descendant of the stored Shop page should flush rewrite rules.' );
 	}
 
 	/**
