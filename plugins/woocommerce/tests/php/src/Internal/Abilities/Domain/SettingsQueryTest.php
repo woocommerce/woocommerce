@@ -335,6 +335,7 @@ class SettingsQueryTest extends \WC_Unit_Test_Case {
 	 * @testWith ["password", true, "secret"]
 	 *           ["text", false, "secret"]
 	 *           ["text", true, {"api_key": "secret"}]
+	 *           ["text", true, [null]]
 	 * @param string $type Field type.
 	 * @param bool   $read Read opt-in.
 	 * @param mixed  $value Supplied value.

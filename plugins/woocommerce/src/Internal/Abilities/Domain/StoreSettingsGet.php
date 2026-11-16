@@ -232,27 +232,27 @@ class StoreSettingsGet implements AbilityDefinition {
 					'type' => 'boolean',
 				),
 				'business_choice'         => array(
-					'type' => array( 'string', 'null' ),
+					'type' => 'string',
 				),
 				'selling_online_answer'   => array(
-					'type' => array( 'string', 'null' ),
+					'type' => 'string',
 				),
 				'industry'                => array(
-					'type'  => array( 'array', 'null' ),
+					'type'  => 'array',
 					'items' => array(
-						'type' => array( 'string', 'null' ),
+						'type' => 'string',
 					),
 				),
 				'business_extensions'     => array(
-					'type'  => array( 'array', 'null' ),
+					'type'  => 'array',
 					'items' => array(
-						'type' => array( 'string', 'null' ),
+						'type' => 'string',
 					),
 				),
 				'selling_platforms'       => array(
-					'type'  => array( 'array', 'null' ),
+					'type'  => 'array',
 					'items' => array(
-						'type' => array( 'string', 'null' ),
+						'type' => 'string',
 					),
 				),
 			),

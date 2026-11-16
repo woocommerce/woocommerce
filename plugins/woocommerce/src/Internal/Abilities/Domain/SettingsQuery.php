@@ -190,14 +190,36 @@ class SettingsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_value_schema(): array {
-		return array(
-			'type'                 => array( 'string', 'number', 'boolean', 'null', 'array', 'object' ),
-			'items'                => array( 'type' => array( 'string', 'number', 'boolean', 'null' ) ),
-			'properties'           => array(
-				'number' => array( 'type' => array( 'string', 'number' ) ),
-				'unit'   => array( 'type' => 'string' ),
+		$scalar = array(
+			'anyOf' => array(
+				array( 'type' => 'string' ),
+				array( 'type' => 'number' ),
+				array( 'type' => 'boolean' ),
 			),
-			'additionalProperties' => false,
+		);
+		return array(
+			'anyOf' => array_merge(
+				$scalar['anyOf'],
+				array(
+					array(
+						'type'  => 'array',
+						'items' => $scalar,
+					),
+					array(
+						'type'                 => 'object',
+						'properties'           => array(
+							'number' => array(
+								'anyOf' => array(
+									array( 'type' => 'string' ),
+									array( 'type' => 'number' ),
+								),
+							),
+							'unit'   => array( 'type' => 'string' ),
+						),
+						'additionalProperties' => false,
+					),
+				)
+			),
 		);
 	}
 

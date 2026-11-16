@@ -74,15 +74,17 @@ class StoreSettingsGetTest extends \WC_Unit_Test_Case {
 		update_option(
 			'woocommerce_onboarding_profile',
 			array(
-				'completed'   => true,
-				'store_email' => 'private@example.test',
-				'api_key'     => 'secret-sentinel',
-				'industry'    => array( array( 'password' => 'secret-sentinel' ) ),
+				'completed'       => true,
+				'business_choice' => null,
+				'store_email'     => 'private@example.test',
+				'api_key'         => 'secret-sentinel',
+				'industry'        => array( array( 'password' => 'secret-sentinel' ) ),
 			)
 		);
 		$result = $this->sut->execute();
 		$this->assertIsArray( $result );
 		$this->assertTrue( $result['onboarding_profile']->completed );
+		$this->assertArrayNotHasKey( 'business_choice', (array) $result['onboarding_profile'] );
 		$this->assertStringNotContainsString( 'secret-sentinel', wp_json_encode( $result ) );
 		$this->assertStringNotContainsString( 'private@example.test', wp_json_encode( $result ) );
 	}
