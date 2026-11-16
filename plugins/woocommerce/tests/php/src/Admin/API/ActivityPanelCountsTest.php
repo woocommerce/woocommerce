@@ -26,6 +26,13 @@ use WP_REST_Server;
 class ActivityPanelCountsTest extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Tests re-register routes after changing the options they read.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * Endpoint.
 	 *
 	 * @var string

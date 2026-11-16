@@ -70,17 +70,13 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 			array(
 				'/ai.txt'                      => array( 403, 'Forbidden' ),
 				'/.well-known/agent-card.json' => array( 401, '' ),
-				'/feed/'                       => array( 403, '' ),
 				'markdown /'                   => array( 403, '' ),
-				'/sitemap.xml'                 => array( 403, '' ),
 			)
 		);
 
 		$this->assertNull( $results['ai-txt'] );
 		$this->assertNull( $results['a2a-agent-card'] );
-		$this->assertNull( $results['feed-present'] );
 		$this->assertNull( $results['markdown-pages'] );
-		$this->assertNull( $results['sitemap-lastmod'] );
 	}
 
 	/**
@@ -228,49 +224,88 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox lastmod is read from a sitemap or from the first sitemap an index lists.
+	 * @testdox The API catalog, llms-full.txt and a Link header to agent resources are found when served.
 	 */
-	public function test_sitemap_lastmod(): void {
-		$child = home_url( '/products.xml' );
-		$this->assertTrue( $this->results( array( '/sitemap.xml' => array( 200, '<urlset><url><loc>a</loc><lastmod>2026-01-01</lastmod></url></urlset>' ) ) )['sitemap-lastmod'] );
-		remove_all_filters( 'pre_http_request' );
-		$this->assertFalse( $this->results( array( '/sitemap.xml' => array( 200, '<urlset><url><loc>a</loc></url></urlset>' ) ) )['sitemap-lastmod'] );
-		remove_all_filters( 'pre_http_request' );
-		$this->assertTrue(
-			$this->results(
-				array(
-					'/sitemap.xml'  => array( 200, "<sitemapindex><sitemap><loc>$child</loc></sitemap></sitemapindex>" ),
-					'/products.xml' => array( 200, '<urlset><url><loc>a</loc><lastmod>2026-01-01</lastmod></url></urlset>' ),
-				)
-			)['sitemap-lastmod']
+	public function test_api_catalog_llms_full_and_link_header(): void {
+		$results = $this->results(
+			array(
+				'/.well-known/api-catalog' => array( 200, '{"linkset":[{"anchor":"https://example.com/wp-json/"}]}' ),
+				'/llms-full.txt'           => array( 200, '# Store' ),
+				'/'                        => array( 200, '<html></html>', array( 'link' => '</.well-known/api-catalog>; rel="api-catalog"' ) ),
+			)
 		);
+		$this->assertTrue( $results['api-catalog'] );
+		$this->assertTrue( $results['llms-full'] );
+		$this->assertTrue( $results['link-header-agent-resources'] );
+
+		remove_all_filters( 'pre_http_request' );
+		$results = $this->results(
+			array(
+				'/.well-known/api-catalog' => array( 200, '{"error":"not found"}' ),
+				'/'                        => array( 200, '<html></html>', array( 'link' => '<https://example.com/wp-json/>; rel="https://api.w.org/"' ) ),
+			)
+		);
+		$this->assertFalse( $results['api-catalog'], 'A JSON error is not a catalog' );
+		$this->assertFalse( $results['llms-full'] );
+		$this->assertFalse( $results['link-header-agent-resources'], 'The REST API link is not an agent resource' );
+
+		remove_all_filters( 'pre_http_request' );
+		$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '</llms.txt>; rel="alternate"; type="text/plain"' ) ) ) );
+		$this->assertTrue( $results['link-header-agent-resources'], 'A link to llms.txt counts' );
+
+		$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+		foreach ( array( '<llms.txt>; rel="alternate"', '<./llms.txt>; rel="alternate"', '<https://' . $host . '/llms.txt>; rel="alternate"' ) as $header ) {
+			remove_all_filters( 'pre_http_request' );
+			$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => $header ) ) ) );
+			$this->assertTrue( $results['link-header-agent-resources'], $header );
+		}
+
+		foreach ( array( '</llms.txt.bak>; rel="preload"', '</docs/llms.txt>; rel="alternate"', '<https://other.example/llms.txt>; rel="alternate"', '</.well-known/api-catalog>; rel="not-api-catalog"', '</a>; title="rel=api-catalog"', '</a>; title="x; rel=api-catalog"' ) as $header ) {
+			remove_all_filters( 'pre_http_request' );
+			$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => $header ) ) ) );
+			$this->assertFalse( $results['link-header-agent-resources'], $header );
+		}
+		remove_all_filters( 'pre_http_request' );
+		$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '<https://example.com/wp-json/>; rel="https://api.w.org/", </.well-known/api-catalog>; rel="service-desc api-catalog"' ) ) ) );
+		$this->assertTrue( $results['link-header-agent-resources'], 'The second of two values, with two rel tokens' );
+
+		remove_all_filters( 'pre_http_request' );
+		$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '</.well-known/api-catalog>; rel=api-catalog' ) ) ) );
+		$this->assertTrue( $results['link-header-agent-resources'], 'An unquoted rel' );
 	}
 
 	/**
-	 * @testdox lastmod is not found on a sitemap without dates, and not checked when a sitemap or robots.txt fails.
+	 * @testdox A relative llms.txt link is the file at the host root when WordPress is in a subdirectory.
 	 */
-	public function test_sitemap_lastmod_unknown(): void {
-		$child = home_url( '/products.xml' );
-		$index = array( 200, "<sitemapindex><sitemap><loc>$child</loc></sitemap></sitemapindex>" );
-		$this->assertFalse(
-			$this->results(
-				array(
-					'/sitemap.xml'  => $index,
-					'/products.xml' => array( 200, '<urlset><url><loc>a</loc></url></urlset>' ),
-				)
-			)['sitemap-lastmod']
+	public function test_llms_txt_link_in_a_subdirectory(): void {
+		add_filter(
+			'home_url',
+			static function ( $url ) {
+				$parts = wp_parse_url( (string) $url );
+				if ( ! is_array( $parts ) || empty( $parts['host'] ) ) {
+					return $url;
+				}
+				$path = $parts['path'] ?? '';
+				if ( '/shop' === $path || str_starts_with( $path, '/shop/' ) ) {
+					return $url;
+				}
+				$built = ( $parts['scheme'] ?? 'http' ) . '://' . $parts['host'];
+				if ( isset( $parts['port'] ) ) {
+					$built .= ':' . $parts['port'];
+				}
+				$built .= '/shop' . $path;
+				if ( isset( $parts['query'] ) ) {
+					$built .= '?' . $parts['query'];
+				}
+				return $built;
+			}
 		);
-		remove_all_filters( 'pre_http_request' );
-		$this->assertNull(
-			$this->results(
-				array(
-					'/sitemap.xml'  => $index,
-					'/products.xml' => array( 503, '' ),
-				)
-			)['sitemap-lastmod']
-		);
-		remove_all_filters( 'pre_http_request' );
-		$this->assertNull( $this->results( array( '/robots.txt' => array( 403, '' ) ) )['sitemap-lastmod'] );
+		try {
+			$results = $this->results( array( '/' => array( 200, '<html></html>', array( 'link' => '<llms.txt>; rel="alternate"' ) ) ) );
+			$this->assertTrue( $results['link-header-agent-resources'], 'llms.txt is at the host root, not under /shop' );
+		} finally {
+			remove_all_filters( 'home_url' );
+		}
 	}
 
 	/**
@@ -312,32 +347,28 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The feed and home page structured data are read from what the store serves.
+	 * @testdox Home page structured data are read from what the store serves.
 	 */
-	public function test_feed_and_home_page(): void {
+	public function test_home_page_structured_data(): void {
 		$results = $this->results(
 			array(
-				'/feed/' => array( 200, '<?xml version="1.0"?><rss version="2.0"></rss>' ),
-				'/'      => array( 200, '<html><head><script type="application/ld+json">{"@type":"WebSite","potentialAction":{"@type":"SearchAction"}}</script></head></html>' ),
+				'/' => array( 200, '<html><head><script type="application/ld+json">{"@type":"WebSite","potentialAction":{"@type":"SearchAction"}}</script></head></html>' ),
 			)
 		);
 
-		$this->assertTrue( $results['feed-present'] );
 		$this->assertTrue( $results['site-search-action'] );
 		$this->assertFalse( $results['sameas-links'] );
 	}
 
 	/**
-	 * @testdox A failing feed is not checked, and only a SearchAction counts as on-site search.
+	 * @testdox Only a SearchAction counts as on-site search.
 	 */
-	public function test_failing_feed_and_other_actions(): void {
+	public function test_only_search_action_counts(): void {
 		$results = $this->results(
 			array(
-				'/feed/' => array( 503, '' ),
-				'/'      => array( 200, '<html><script type="application/ld+json">{"@type":"WebSite","potentialAction":{"@type":"ReadAction"}}</script></html>' ),
+				'/' => array( 200, '<html><script type="application/ld+json">{"@type":"WebSite","potentialAction":{"@type":"ReadAction"}}</script></html>' ),
 			)
 		);
-		$this->assertNull( $results['feed-present'] );
 		$this->assertFalse( $results['site-search-action'] );
 
 		remove_all_filters( 'pre_http_request' );

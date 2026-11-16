@@ -12,7 +12,6 @@ use WP_Block;
  * It's responsible to render each child product in a form of a list item.
  */
 class GroupedProductItem extends AbstractBlock {
-
 	use EnableBlockJsonAssetsTrait;
 
 	/**

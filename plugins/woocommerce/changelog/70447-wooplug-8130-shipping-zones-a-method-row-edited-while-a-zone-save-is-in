@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop losing unsaved shipping method changes made while another action is still running, and report method removals that fail.

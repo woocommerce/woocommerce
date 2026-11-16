@@ -16,6 +16,13 @@ use WP_REST_Request;
 class ProvidersTest extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Tests register their own controller's routes, which a reused server would keep serving from the first test.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * Controller instance
 	 *
 	 * @var FulfillmentsController
