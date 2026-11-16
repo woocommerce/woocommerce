@@ -453,8 +453,11 @@ class WC_Regenerate_Images {
 
 		if ( isset( $new_metadata['sizes'][ self::$regenerate_size ] ) ) {
 			$metadata['sizes'][ self::$regenerate_size ] = $new_metadata['sizes'][ self::$regenerate_size ];
-			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
+
+		// wp_generate_attachment_metadata() first saves a record with no sizes. Always save the stored
+		// record again, even when WordPress made no new size, for example because a site filter skipped it.
+		wp_update_attachment_metadata( $attachment_id, $metadata );
 
 		// Now we've done our regen, attempt to return the new size.
 		$new_image = self::unfiltered_image_downsize( $attachment_id, self::$regenerate_size );

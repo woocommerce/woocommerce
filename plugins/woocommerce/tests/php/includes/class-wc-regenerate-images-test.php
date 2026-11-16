@@ -68,4 +68,41 @@ class WC_Regenerate_Images_Test extends WC_Unit_Test_Case {
 			'Metadata hidden by a wp_get_attachment_metadata filter should survive on-the-fly regeneration'
 		);
 	}
+
+	/**
+	 * @testdox Rendering an image should keep its stored sizes when a site filter skips the WooCommerce size.
+	 */
+	public function test_render_keeps_sizes_when_site_filter_skips_requested_size(): void {
+		$generation_runs = 0;
+
+		// A site that keeps the size registered but never generates it.
+		add_filter(
+			'intermediate_image_sizes_advanced',
+			function ( $sizes ) use ( &$generation_runs ) {
+				++$generation_runs;
+				unset( $sizes['woocommerce_thumbnail'] );
+
+				return $sizes;
+			},
+			20
+		);
+
+		// The image is wide because maybe_resize_image() regenerates only when the aspect ratio does not match.
+		$attachment_id = $this->create_image_attachment( 900, 300, 'wc-regen-skipped-size.jpg' );
+		$stored_sizes  = wp_get_attachment_metadata( $attachment_id, true )['sizes'];
+
+		$this->assertNotEmpty( $stored_sizes, 'The upload should generate the sizes the site allows' );
+		$this->assertArrayNotHasKey( 'woocommerce_thumbnail', $stored_sizes, 'The site filter should stop the WooCommerce size at upload' );
+
+		$runs_after_upload = $generation_runs;
+
+		wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
+
+		$this->assertGreaterThan( $runs_after_upload, $generation_runs, 'Rendering should try to regenerate the missing size' );
+		$this->assertSame(
+			$stored_sizes,
+			wp_get_attachment_metadata( $attachment_id, true )['sizes'],
+			'A regeneration that creates no file should leave the stored sizes as they were'
+		);
+	}
 }
