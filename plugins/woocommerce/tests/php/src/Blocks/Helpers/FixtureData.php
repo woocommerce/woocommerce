@@ -417,7 +417,7 @@ class FixtureData {
 				)
 			)
 		);
-		\WC_Comments::clear_transients( $product_id );
+		\WC_Comments::maybe_update_product_average_rating( $product_id );
 	}
 
 	/**

@@ -906,42 +906,30 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 
 		$analytics = new Analytics();
 
-		try {
-			$this->assertNotFalse(
-				has_filter( 'woocommerce_component_settings_preload_endpoints', array( $analytics, 'add_preload_endpoints' ) ),
-				'Preload endpoints filter should be registered in the admin area.'
-			);
-			$this->assertNotFalse(
-				has_filter( 'woocommerce_admin_get_user_data_fields', array( $analytics, 'add_user_data_fields' ) ),
-				'User data fields filter should be registered in the admin area.'
-			);
-			$this->assertNotFalse(
-				has_action( 'admin_menu', array( $analytics, 'register_pages' ) ),
-				'Admin menu action should be registered in the admin area.'
-			);
-			$this->assertNotFalse(
-				has_filter( 'woocommerce_debug_tools', array( $analytics, 'register_cache_clear_tool' ) ),
-				'Cache clear tool filter should be registered in the admin area.'
-			);
-			$this->assertNotFalse(
-				has_filter( 'woocommerce_debug_tools', array( $analytics, 'register_regenerate_order_fulfillment_status_tool' ) ),
-				'Regenerate fulfillment status tool filter should be registered in the admin area.'
-			);
-			$this->assertNotFalse(
-				has_filter( 'woocommerce_debug_tools', array( $analytics, 'register_refund_double_count_tool' ) ),
-				'Refund double-count tool filter should be registered in the admin area.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_component_settings_preload_endpoints', array( $analytics, 'add_preload_endpoints' ) );
-			remove_filter( 'woocommerce_admin_get_user_data_fields', array( $analytics, 'add_user_data_fields' ) );
-			remove_action( 'admin_menu', array( $analytics, 'register_pages' ) );
-			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_cache_clear_tool' ) );
-			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
-			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_refund_double_count_tool' ) );
-			remove_action( 'woocommerce_analytics_refund_fix_batch', array( $analytics, 'process_refund_fix_batch' ) );
-			remove_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK, array( $analytics, 'process_refund_double_count_fix_batch' ) );
-			remove_action( 'woocommerce_analytics_regenerate_init', array( $analytics, 'maybe_cancel_refund_double_count_fix_on_regenerate' ) );
-		}
+		$this->assertNotFalse(
+			has_filter( 'woocommerce_component_settings_preload_endpoints', array( $analytics, 'add_preload_endpoints' ) ),
+			'Preload endpoints filter should be registered in the admin area.'
+		);
+		$this->assertNotFalse(
+			has_filter( 'woocommerce_admin_get_user_data_fields', array( $analytics, 'add_user_data_fields' ) ),
+			'User data fields filter should be registered in the admin area.'
+		);
+		$this->assertNotFalse(
+			has_action( 'admin_menu', array( $analytics, 'register_pages' ) ),
+			'Admin menu action should be registered in the admin area.'
+		);
+		$this->assertNotFalse(
+			has_filter( 'woocommerce_debug_tools', array( $analytics, 'register_cache_clear_tool' ) ),
+			'Cache clear tool filter should be registered in the admin area.'
+		);
+		$this->assertNotFalse(
+			has_filter( 'woocommerce_debug_tools', array( $analytics, 'register_regenerate_order_fulfillment_status_tool' ) ),
+			'Regenerate fulfillment status tool filter should be registered in the admin area.'
+		);
+		$this->assertNotFalse(
+			has_filter( 'woocommerce_debug_tools', array( $analytics, 'register_refund_double_count_tool' ) ),
+			'Refund double-count tool filter should be registered in the admin area.'
+		);
 	}
 
 	/**
@@ -990,7 +978,6 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 				'Admin footer action should not be registered in REST context.'
 			);
 		} finally {
-			Constants::clear_single_constant( 'REST_REQUEST' );
 			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_cache_clear_tool' ) );
 			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
 			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_refund_double_count_tool' ) );
@@ -1046,7 +1033,6 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 				'Admin footer action should not be registered in WP-CLI context.'
 			);
 		} finally {
-			Constants::clear_single_constant( 'WP_CLI' );
 			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_cache_clear_tool' ) );
 			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
 			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_refund_double_count_tool' ) );

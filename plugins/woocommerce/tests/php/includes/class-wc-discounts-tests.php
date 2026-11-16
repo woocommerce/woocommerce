@@ -283,7 +283,6 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$result = $discounts->is_coupon_valid( $valid_coupon );
 		$this->assertWPError( $result, 'Returning false from the filter should force rejection.' );
 		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'Forced rejection should surface the product_ids error.' );
-		remove_filter( 'woocommerce_coupon_is_valid_for_product_ids', '__return_false' );
 	}
 
 	/**
@@ -336,7 +335,6 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$result = $discounts->is_coupon_valid( $valid_coupon );
 		$this->assertWPError( $result, 'Returning false from the filter should force rejection.' );
 		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'Forced rejection should surface the product_categories error.' );
-		remove_filter( 'woocommerce_coupon_is_valid_for_product_categories', '__return_false' );
 	}
 
 	/**
@@ -381,7 +379,6 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$result = $discounts->is_coupon_valid( $valid_coupon );
 		$this->assertWPError( $result, 'Returning false from the filter should force rejection.' );
 		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'Forced rejection should surface the excluded_items error.' );
-		remove_filter( 'woocommerce_coupon_is_valid_for_excluded_items', '__return_false' );
 	}
 
 	/**
@@ -437,7 +434,6 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$result = $discounts->is_coupon_valid( $valid_coupon );
 		$this->assertWPError( $result, 'Returning false from the filter should force rejection.' );
 		$this->assertStringContainsString( 'is not valid for sale items', $result->get_error_message(), 'Forced rejection should surface the sale_items error.' );
-		remove_filter( 'woocommerce_coupon_is_valid_for_sale_items', '__return_false' );
 	}
 
 	/**
@@ -484,7 +480,6 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$this->assertWPError( $result, 'Returning false should reject even when no excluded product is in the cart.' );
 		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'With no matched products the generic message is used.' );
 		$this->assertStringNotContainsString( 'products: .', $result->get_error_message(), 'The rejection message should not contain an empty product list.' );
-		remove_filter( 'woocommerce_coupon_is_valid_for_excluded_product_ids', '__return_false' );
 	}
 
 	/**
@@ -534,6 +529,5 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$result = $discounts->is_coupon_valid( $unmatched_coupon );
 		$this->assertWPError( $result, 'Returning false should reject even when no excluded category is in the cart.' );
 		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'With no matched categories the generic message is used.' );
-		remove_filter( 'woocommerce_coupon_is_valid_for_excluded_product_categories', '__return_false' );
 	}
 }

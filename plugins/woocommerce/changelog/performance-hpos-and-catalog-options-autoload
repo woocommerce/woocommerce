@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Autoload frequently used HPOS and catalog display options.

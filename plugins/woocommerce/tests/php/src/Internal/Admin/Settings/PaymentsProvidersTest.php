@@ -878,10 +878,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			$gateway_details['management']['_links']['settings']['href']
 		);
 		$this->assertTrue( $gateway_details['state']['test_mode'] ); // It should be in test mode because of the DB options. The custom provider logic handles this.
-
-		// Clean up.
-		delete_option( 'mollie-payments-for-woocommerce_test_mode_enabled' );
-		delete_option( 'mollie-payments-for-woocommerce_test_api_key' );
 	}
 
 	/**
@@ -2414,9 +2410,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'timestamp', $nox_profile['suggestions'][ $suggestion_id ]['attached'] );
 		// The other profile entries should be kept.
 		$this->assertSame( 'value', $nox_profile['something_other'] );
-
-		// Clean up.
-		delete_option( Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**
@@ -2467,10 +2460,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_KEY );
 		$this->assertIsArray( $nox_profile['suggestions'][ $suggestion_id ]['attached'] );
 		$this->assertArrayHasKey( 'timestamp', $nox_profile['suggestions'][ $suggestion_id ]['attached'] );
-
-		// Clean up.
-		delete_option( 'woocommerce_paypal_branded' );
-		delete_option( Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**

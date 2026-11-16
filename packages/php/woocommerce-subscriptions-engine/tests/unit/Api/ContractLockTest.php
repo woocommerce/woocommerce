@@ -37,7 +37,7 @@ class ContractLockTest extends TestCase {
 	private function issue(): ContractLock {
 		$factory = Closure::bind(
 			static function ( string $token ): ContractLock {
-				return new ContractLock( 7, 'hold', $token );
+				return new ContractLock( 7, 'acme', 'hold', $token );
 			},
 			null,
 			ContractRepository::class
@@ -162,7 +162,7 @@ class ContractLockTest extends TestCase {
 	 * @testdox A stamp trusts the lock for at most 60 s, less when it ends sooner, and not at all with 60 s or less left.
 	 */
 	public function test_trust_window_follows_the_last_stamp(): void {
-		$state = new ContractLockState( self::TOKEN );
+		$state = new ContractLockState( self::TOKEN, 'acme' );
 		$this->assertTrue( $state->is_trusted() );
 		$this->assertLessThanOrEqual( 60.0, $this->trust_left( $state ) );
 		$this->assertGreaterThan( 59.0, $this->trust_left( $state ) );
@@ -185,7 +185,7 @@ class ContractLockTest extends TestCase {
 	 * @testdox A lock is near expiry by the local estimate when 120 s or less remain.
 	 */
 	public function test_near_expiry_estimate(): void {
-		$state = new ContractLockState( self::TOKEN );
+		$state = new ContractLockState( self::TOKEN, 'acme' );
 		$this->assertFalse( $state->is_near_expiry() );
 
 		$state->stamp( 120 );
@@ -196,10 +196,17 @@ class ContractLockTest extends TestCase {
 	}
 
 	/**
+	 * @testdox The state keeps the owner the lock was taken for.
+	 */
+	public function test_state_keeps_the_owner(): void {
+		$this->assertSame( 'acme', ( new ContractLockState( self::TOKEN, 'acme' ) )->get_extension_slug() );
+	}
+
+	/**
 	 * @testdox A released lock is never trusted, even after a stamp.
 	 */
 	public function test_a_released_lock_is_never_trusted(): void {
-		$state = new ContractLockState( self::TOKEN );
+		$state = new ContractLockState( self::TOKEN, 'acme' );
 		$state->mark_released();
 
 		$this->assertTrue( $state->is_released() );
@@ -213,7 +220,7 @@ class ContractLockTest extends TestCase {
 	 * @testdox The extend allowance is recorded once used.
 	 */
 	public function test_extend_allowance_flag(): void {
-		$state = new ContractLockState( self::TOKEN );
+		$state = new ContractLockState( self::TOKEN, 'acme' );
 		$this->assertFalse( $state->has_extended() );
 
 		$state->mark_extended();

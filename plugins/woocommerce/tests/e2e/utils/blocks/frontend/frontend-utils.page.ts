@@ -123,6 +123,16 @@ export class FrontendUtils {
 		// Start tracking cart requests before the action
 		const { waitForCartRequests } = this.trackCartRequests();
 
+		// The request can start after the click returns, so
+		// waitForCartRequests() alone can resolve before it. A page loaded
+		// before the server saves the cart can see an empty cart.
+		const cartUpdated = this.page.waitForResponse( ( response ) =>
+			[
+				...STORE_API_CART_WRITE_REQUEST_URLS,
+				'wc-ajax=add_to_cart',
+			].some( ( url ) => response.url().includes( url ) )
+		);
+
 		if ( itemName !== '' ) {
 			// The button's accessible name is translated, so matching on it
 			// breaks whenever the site runs in another language. Match the
@@ -132,16 +142,6 @@ export class FrontendUtils {
 			// descendant text, so a product cannot be selected by text the
 			// card repeats, and keep it exact, or "Beanie" also selects
 			// "Beanie with Logo".
-			//
-			// The request starts after the click returns, so the tracker below
-			// alone can resolve before it. A guest gets its session cookie
-			// only from this response.
-			const cartUpdated = this.page.waitForResponse( ( response ) =>
-				[
-					...STORE_API_CART_WRITE_REQUEST_URLS,
-					'wc-ajax=add_to_cart',
-				].some( ( url ) => response.url().includes( url ) )
-			);
 			await this.page
 				.locator( 'li.product' )
 				.filter( {
@@ -152,12 +152,12 @@ export class FrontendUtils {
 				} )
 				.locator( '.add_to_cart_button' )
 				.click();
-			await cartUpdated;
 		} else {
 			await this.page.click( 'text=Add to cart' );
 		}
+		await cartUpdated;
 
-		// Wait for the cart request triggered by this action to complete
+		// Wait for any other cart requests this action triggered to complete.
 		// We do it the complex way as there are no visual cues that we can rely on
 		await waitForCartRequests();
 	}

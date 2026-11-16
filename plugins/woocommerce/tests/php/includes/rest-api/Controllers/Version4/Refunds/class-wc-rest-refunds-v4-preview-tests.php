@@ -39,19 +39,6 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Disable the REST API v4 feature.
-	 */
-	public static function disable_rest_api_v4_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features = array_diff( $features, array( 'rest-api-v4' ) );
-				return $features;
-			}
-		);
-	}
-
-	/**
 	 * Create the shared admin user once per class.
 	 */
 	public static function setUpBeforeClass(): void {
@@ -86,8 +73,8 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
-		$this->enable_rest_api_v4_feature();
 		parent::setUp();
+		$this->enable_rest_api_v4_feature();
 
 		wp_set_current_user( self::$user_id );
 	}
@@ -99,7 +86,6 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->created_orders = array();
 
 		parent::tearDown();
-		$this->disable_rest_api_v4_feature();
 	}
 
 	/**
@@ -1618,27 +1604,23 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		// Switch to a zero-decimal currency for the request only.
 		add_filter( 'wc_get_price_decimals', '__return_zero' );
 
-		try {
-			$response = $this->do_preview_request(
-				$order->get_id(),
+		$response = $this->do_preview_request(
+			$order->get_id(),
+			array(
 				array(
-					array(
-						'line_item_id' => $item_id,
-						'refund_total' => 55.4,
-					),
-				)
-			);
+					'line_item_id' => $item_id,
+					'refund_total' => 55.4,
+				),
+			)
+		);
 
-			$this->assertEquals( 200, $response->get_status() );
-			$item = $response->get_data()['breakdown']['products']['items'][0];
+		$this->assertEquals( 200, $response->get_status() );
+		$item = $response->get_data()['breakdown']['products']['items'][0];
 
-			// 55.4 rounds to 55 at 0dp; the 10% split gives whole-unit 50 net / 5 tax.
-			$this->assertEquals( '55', $item['total'], 'Total should round to a whole unit.' );
-			$this->assertEquals( '5', $item['tax'] );
-			$this->assertEquals( '50', $item['subtotal'] );
-		} finally {
-			remove_filter( 'wc_get_price_decimals', '__return_zero' );
-		}
+		// 55.4 rounds to 55 at 0dp; the 10% split gives whole-unit 50 net / 5 tax.
+		$this->assertEquals( '55', $item['total'], 'Total should round to a whole unit.' );
+		$this->assertEquals( '5', $item['tax'] );
+		$this->assertEquals( '50', $item['subtotal'] );
 	}
 
 	/**

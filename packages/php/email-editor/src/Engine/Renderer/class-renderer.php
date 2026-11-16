@@ -15,6 +15,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use WP_Style_Engine;
 
 /**
@@ -57,13 +58,6 @@ class Renderer {
 	private Process_Manager $process_manager;
 
 	/**
-	 * Personalization tags registry
-	 *
-	 * @var Personalization_Tags_Registry
-	 */
-	private Personalization_Tags_Registry $personalization_tags_registry;
-
-	/**
 	 * Map of placeholders to full HTML comment tags for restoration.
 	 *
 	 * @var array
@@ -81,7 +75,7 @@ class Renderer {
 	 * @param Templates                     $templates Templates.
 	 * @param Css_Inliner                   $css_inliner CSS Inliner.
 	 * @param Theme_Controller              $theme_controller Theme controller.
-	 * @param Personalization_Tags_Registry $personalization_tags_registry Personalization tags registry.
+	 * @param Personalization_Tags_Registry $personalization_tags_registry Personalization tags registry. No longer used.
 	 * @param Process_Manager               $process_manager Process manager.
 	 */
 	public function __construct(
@@ -92,12 +86,13 @@ class Renderer {
 		Personalization_Tags_Registry $personalization_tags_registry,
 		Process_Manager $process_manager
 	) {
-		$this->content_renderer              = $content_renderer;
-		$this->templates                     = $templates;
-		$this->theme_controller              = $theme_controller;
-		$this->css_inliner                   = $css_inliner;
-		$this->personalization_tags_registry = $personalization_tags_registry;
-		$this->process_manager               = $process_manager;
+		$this->content_renderer = $content_renderer;
+		$this->templates        = $templates;
+		$this->theme_controller = $theme_controller;
+		$this->css_inliner      = $css_inliner;
+		$this->process_manager  = $process_manager;
+		// The registry is no longer needed, but integrators construct the Renderer directly, so the signature stays.
+		unset( $personalization_tags_registry );
 	}
 
 	/**
@@ -265,7 +260,14 @@ class Renderer {
 		// Preserve personalization tags by temporarily replacing them with unique placeholders.
 		$template = $this->preserve_personalization_tags( $template );
 
-		$result = Html2Text::convert( (string) $template, array( 'ignore_errors' => true ) );
+		$result = Html2Text::convert(
+			(string) $template,
+			array(
+				'ignore_errors'    => true,
+				'mark_bold'        => true,
+				'tag_link_targets' => true,
+			)
+		);
 		if ( ! $result ) {
 			return '';
 		}
@@ -283,38 +285,18 @@ class Renderer {
 	 * @return string
 	 */
 	private function preserve_personalization_tags( string $template ): string {
-		$all_registered_tags                    = $this->personalization_tags_registry->get_all();
 		$this->personalization_tag_placeholders = array();
 		$counter                                = 0;
 
-		$base_tokens    = array(); // All the tokens used in the email, e.g. [woocommerce/customer-username].
-		$token_prefixes = array(); // All the used prefixes, e.g. woocommerce, mailpoet, etc.
-		foreach ( $all_registered_tags as $tag ) {
-			$token                 = $tag->get_token(); // E.g. [woocommerce/customer-username].
-			$base_tokens[ $token ] = true;
-			// Remove brackets for regex matching, escape for regex.
-			$token_prefixes[] = preg_quote( substr( $token, 1, -1 ), '/' );
-		}
-
-		if ( empty( $token_prefixes ) ) {
-			return $template;
-		}
-
-		// Match all of the code comments that look like a personalization tags.
-		$pattern = '/<!--\[(' . implode( '|', $token_prefixes ) . ')(?:\s+[^\]]*)?\]-->/';
-
+		// Match every comment that looks like a personalization tag, registered or not: a plugin may
+		// register its tags only before personalizing, and Html2Text would drop the comment.
 		$template = preg_replace_callback(
-			$pattern,
-			function ( $matches ) use ( &$counter, $base_tokens ) {
-				// $matches[1] is the token without brackets, add brackets for lookup.
-				$base_token = '[' . $matches[1] . ']';
-				if ( isset( $base_tokens[ $base_token ] ) ) {
-					$placeholder = 'PERSONALIZATION_TAG_PLACEHOLDER_' . $counter;
-					$this->personalization_tag_placeholders[ $placeholder ] = $matches[0];
-					++$counter;
-					return $placeholder;
-				}
-				return $matches[0];
+			'/<!--\[[a-zA-Z0-9\-\/]+' . Personalizer::TAG_ARGUMENTS_PATTERN . '\]-->/',
+			function ( $matches ) use ( &$counter ) {
+				$placeholder = 'PERSONALIZATION_TAG_PLACEHOLDER_' . $counter;
+				$this->personalization_tag_placeholders[ $placeholder ] = $matches[0];
+				++$counter;
+				return $placeholder;
 			},
 			$template
 		);
@@ -332,6 +314,8 @@ class Renderer {
 		if ( empty( $this->personalization_tag_placeholders ) ) {
 			return $text;
 		}
+		// Bold text made of only a tag is not marked, so an empty tag value leaves no stray "**".
+		$text = (string) preg_replace( '/\*(PERSONALIZATION_TAG_PLACEHOLDER_\d+)\*/', '$1', $text );
 		// Placeholders are numbered, so PERSONALIZATION_TAG_PLACEHOLDER_1 is a prefix of _10, _11 and
 		// so on. strtr() matches the longest key at each position and never re-scans text it has
 		// already replaced, so a short placeholder cannot match inside a longer one.

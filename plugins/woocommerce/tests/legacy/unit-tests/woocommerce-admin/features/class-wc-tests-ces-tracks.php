@@ -54,7 +54,6 @@ class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 		if ( $this->current_screen_backup ) {
 			$GLOBALS['current_screen'] = $this->current_screen_backup;
 		}
-		update_option( 'woocommerce_allow_tracking', 'no' );
 	}
 
 	/**

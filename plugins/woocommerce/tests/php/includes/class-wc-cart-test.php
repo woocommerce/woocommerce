@@ -37,9 +37,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		WC()->customer->set_is_vat_exempt( false );
-		WC()->session->set( 'wc_notices', null );
-
 		// The checkout fields may have been built while a test's filters were attached.
 		$this->clear_checkout_fields();
 
@@ -50,8 +47,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		foreach ( array( 'shipping_method_counts', 'previous_shipping_methods', 'shipping_for_package_0', 'shipping_for_package_1', 'chosen_shipping_methods' ) as $key ) {
 			WC()->session->set( $key, null );
 		}
-
-		remove_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10 );
 	}
 
 	/**
@@ -858,6 +853,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$fixed_variation->set_parent_id( $product->get_id() );
 		$fixed_variation->set_attributes( array( 'finish' => 'Black%20White' ) );
 		$fixed_variation->set_regular_price( '10' );
+		$fixed_variation->set_menu_order( 1 );
 		$fixed_variation->save();
 
 		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $fixed_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
@@ -867,10 +863,12 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		WC()->cart->empty_cart();
 
+		// Ordered before the fixed variation so that variation does not claim this selection.
 		$any_variation = new WC_Product_Variation();
 		$any_variation->set_parent_id( $product->get_id() );
 		$any_variation->set_attributes( array( 'finish' => '' ) );
 		$any_variation->set_regular_price( '10' );
+		$any_variation->set_menu_order( 0 );
 		$any_variation->save();
 
 		$any_cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $any_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
@@ -1131,14 +1129,10 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->customer->set_shipping_location( 'US', 'NY', '', '' );
 
-		try {
-			$this->assertSame( $expected, WC()->cart->show_shipping(), 'Shipping should only stay hidden while the shopper has a postcode field to fill in.' );
+		$this->assertSame( $expected, WC()->cart->show_shipping(), 'Shipping should only stay hidden while the shopper has a postcode field to fill in.' );
 
-			WC()->customer->set_shipping_location( 'US', '', '', '' );
-			$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
-		} finally {
-			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
-		}
+		WC()->customer->set_shipping_location( 'US', '', '', '' );
+		$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
 	}
 
 	/**
@@ -1684,54 +1678,48 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
-		// Rates are only ever found for a customer with a country, and the customer object
-		// carries whatever address the test before this one left on it.
-		$previous_billing_country = WC()->customer->get_billing_country();
+		// Rates are only ever found for a customer with a country.
 		WC()->customer->set_shipping_country( 'GB' );
 		WC()->customer->set_billing_country( 'GB' );
 
-		try {
-			// Create a product to add to cart.
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_regular_price( 100 );
-			$product->save();
+		// Create a product to add to cart.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
 
-			// Create a coupon with uppercase code.
-			$coupon = WC_Helper_Coupon::create_coupon( 'TESTCOUPON123' );
-			$coupon->set_discount_type( 'fixed_cart' );
-			$coupon->set_amount( 10 );
-			$coupon->save();
+		// Create a coupon with uppercase code.
+		$coupon = WC_Helper_Coupon::create_coupon( 'TESTCOUPON123' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
 
-			// Add product to cart.
-			WC()->cart->add_to_cart( $product->get_id(), 1 );
-			WC()->cart->calculate_totals();
+		// Add product to cart.
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
 
-			// Apply the coupon using lowercase code.
-			$applied = WC()->cart->apply_coupon( 'testcoupon123' );
-			$this->assertTrue( $applied, 'Coupon should be applied successfully with lowercase code' );
+		// Apply the coupon using lowercase code.
+		$applied = WC()->cart->apply_coupon( 'testcoupon123' );
+		$this->assertTrue( $applied, 'Coupon should be applied successfully with lowercase code' );
 
-			// Verify the coupon is in applied coupons (should be stored in original case).
-			$applied_coupons = WC()->cart->get_applied_coupons();
-			$this->assertContains( 'testcoupon123', $applied_coupons, 'Coupon should be stored in provided case' );
+		// Verify the coupon is in applied coupons (should be stored in original case).
+		$applied_coupons = WC()->cart->get_applied_coupons();
+		$this->assertContains( 'testcoupon123', $applied_coupons, 'Coupon should be stored in provided case' );
 
-			// Test get_coupon_discount_amount with lowercase code.
-			$discount_amount = WC()->cart->get_coupon_discount_amount( 'testcoupon123' );
-			$this->assertEquals( 10.00, $discount_amount, 'get_coupon_discount_amount should return correct value with lowercase code' );
+		// Test get_coupon_discount_amount with lowercase code.
+		$discount_amount = WC()->cart->get_coupon_discount_amount( 'testcoupon123' );
+		$this->assertEquals( 10.00, $discount_amount, 'get_coupon_discount_amount should return correct value with lowercase code' );
 
-			// Test get_coupon_discount_amount with uppercase code.
-			$discount_amount_upper = WC()->cart->get_coupon_discount_amount( 'TESTCOUPON123' );
-			$this->assertEquals( 10.00, $discount_amount_upper, 'get_coupon_discount_amount should return correct value with uppercase code' );
+		// Test get_coupon_discount_amount with uppercase code.
+		$discount_amount_upper = WC()->cart->get_coupon_discount_amount( 'TESTCOUPON123' );
+		$this->assertEquals( 10.00, $discount_amount_upper, 'get_coupon_discount_amount should return correct value with uppercase code' );
 
-			// Test get_coupon_discount_tax_amount with lowercase code.
-			$tax_amount = WC()->cart->get_coupon_discount_tax_amount( 'testcoupon123' );
-			$this->assertEquals( 2.00, $tax_amount, 'get_coupon_discount_tax_amount should return correct value with lowercase code' );
+		// Test get_coupon_discount_tax_amount with lowercase code.
+		$tax_amount = WC()->cart->get_coupon_discount_tax_amount( 'testcoupon123' );
+		$this->assertEquals( 2.00, $tax_amount, 'get_coupon_discount_tax_amount should return correct value with lowercase code' );
 
-			// Test get_coupon_discount_tax_amount with uppercase code.
-			$tax_amount_upper = WC()->cart->get_coupon_discount_tax_amount( 'TESTCOUPON123' );
-			$this->assertEquals( 2.00, $tax_amount_upper, 'get_coupon_discount_tax_amount should return correct value with uppercase code' );
-		} finally {
-			WC()->customer->set_billing_country( $previous_billing_country );
-		}
+		// Test get_coupon_discount_tax_amount with uppercase code.
+		$tax_amount_upper = WC()->cart->get_coupon_discount_tax_amount( 'TESTCOUPON123' );
+		$this->assertEquals( 2.00, $tax_amount_upper, 'get_coupon_discount_tax_amount should return correct value with uppercase code' );
 	}
 
 		/**
@@ -2239,8 +2227,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2280,8 +2266,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2319,8 +2303,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNotEmpty( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2356,8 +2338,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -3042,5 +3022,45 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$skipped_child->delete( true );
 			$first_child->delete( true );
 		}
+	}
+
+	/**
+	 * @testdox Add to cart rejects a variation when an earlier variation matches.
+	 */
+	public function test_add_to_cart_rejects_a_variation_when_an_earlier_variation_matches(): void {
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$red = new WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '10' );
+		$red->set_menu_order( 0 );
+		$red->save();
+
+		$any = new WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '5' );
+		$any->set_menu_order( 1 );
+		$any->save();
+
+		wc_clear_notices();
+		$cart_item_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$any->get_id(),
+			array(
+				'attribute_color' => 'Red',
+			)
+		);
+
+		$this->assertFalse( $cart_item_key, 'Add to cart should reject a variation when an earlier variation matches.' );
+		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
 	}
 }

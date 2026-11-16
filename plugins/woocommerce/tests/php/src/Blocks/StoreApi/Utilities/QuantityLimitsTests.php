@@ -11,14 +11,6 @@ use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
  */
 class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	/**
-	 * Clean up filters registered by tests, even when a test fails mid-way.
-	 */
-	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_store_api_cart_item_quantity_validation' );
-		parent::tearDown();
-	}
-
-	/**
 	 * Enable float support for tests.
 	 */
 	private function enable_float_support() {
@@ -87,7 +79,6 @@ class QuantityLimitsTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 2, $limits['minimum'], 'Minimum quantity should be 2' );
 		$this->assertEquals( 10, $limits['maximum'], 'Maximum quantity should be 10 to match stock quantity' );
 		$this->assertEquals( 2, $limits['multiple_of'], 'Multiple of should be 2' );
-		remove_all_filters( 'woocommerce_quantity_input_args' );
 	}
 
 	/**
