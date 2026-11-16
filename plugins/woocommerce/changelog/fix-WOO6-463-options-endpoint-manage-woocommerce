@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Require the manage_woocommerce capability for the legacy wc-admin options REST endpoint.
