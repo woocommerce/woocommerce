@@ -21,7 +21,7 @@ echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
 echo esc_html( wp_strip_all_tags( $email_heading ) );
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-echo esc_html__( 'Woo! Here’s what’s being fulfilled from your order. You can use the below information to track your shipment:', 'woocommerce' ) . "\n\n";
+echo esc_html__( 'Woo! Here’s what’s being fulfilled from your order. You can use the information below to track your shipment:', 'woocommerce' ) . "\n\n";
 
 /**
  * Display fulfillment details.

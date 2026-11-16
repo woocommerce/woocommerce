@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
 
 <!-- wp:paragraph -->
 <p><?php
-	echo esc_html__( 'Woo! Here’s what’s being fulfilled from your order. You can use the below information to track your shipment:', 'woocommerce' );
+	echo esc_html__( 'Woo! Here’s what’s being fulfilled from your order. You can use the information below to track your shipment:', 'woocommerce' );
 ?></p>
 <!-- /wp:paragraph -->
 
