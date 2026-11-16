@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Enums\ProductType;
  * Block type for variation selector in add to cart with options.
  */
 class VariationSelector extends AbstractBlock {
-
 	use EnableBlockJsonAssetsTrait;
 
 	/**

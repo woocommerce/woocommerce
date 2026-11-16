@@ -1053,6 +1053,79 @@ The two error cases are different and return different codes:
 -   Missing `tracking_number`: WordPress rejects the request before the endpoint runs, because the parameter is registered as required. The response is a `400` with the code `rest_missing_callback_param`.
 -   Empty `tracking_number` (for example `?tracking_number=`): the request reaches the endpoint and returns a `400` with the code `woocommerce_rest_tracking_number_missing`.
 
+## Prepare a fulfillments import
+
+Uploads a CSV of tracking data, reads its header row and opens an import session for the column-mapping step of the import wizard. Requires the `manage_woocommerce` capability. Each user has one import session at a time: a successful call replaces the caller's previous session and removes its staged file, while a rejected upload (a `400` or `413` response) leaves the previous session untouched.
+
+The request body is `multipart/form-data`. The official client libraries do not send multipart requests, so the example uses cURL.
+
+```http
+POST /wp-json/wc/v3/fulfillments/import/prepare
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl -X POST "https://example.com/wp-json/wc/v3/fulfillments/import/prepare" \
+	-u consumer_key:consumer_secret \
+	-F "file=@shipments.csv;type=text/csv" \
+	-F "delimiter=,"
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+	"token": "6b4c90a944064f5ba32938f140d453d5",
+	"headers": ["order_id", "tracking_number", "shipment_provider", "tracking_url"],
+	"sample": ["101", "1Z999AA10123456784", "ups", "https://www.ups.com/track?tracknum=1Z999AA10123456784"],
+	"total": 1,
+	"detected_mapping": {
+		"0": "order_number",
+		"1": "tracking_number",
+		"2": "shipment_provider",
+		"3": "tracking_url"
+	},
+	"delimiter": ","
+}
+```
+
+  </TabItem>
+</Tabs>
+
+#### Available parameters
+
+| Parameter         | Type    | Description                                                                                                                    |
+| ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `file`            | file    | Required. The CSV file to import, up to the site's upload size limit and at most 5,000 data rows. A `.txt` file is accepted only when WordPress identifies its content as plain text; comma-separated content must use the `.csv` extension. |
+| `delimiter`       | string  | Single ASCII character used as the column delimiter, or `tab`. Defaults to `,`.                                                 |
+| `notify_customer` | boolean | Initial value for the import run: whether customers are notified about imported fulfillments. Stored on the session. Defaults to `false`. |
+| `update_existing` | boolean | Initial value for the import run: whether a fulfillment with the same tracking number is updated instead of skipped. Stored on the session. Defaults to `true`. |
+
+#### Response properties
+
+| Property           | Type    | Description                                                                                            |
+| ------------------ | ------- | ------------------------------------------------------------------------------------------------------ |
+| `token`            | string  | Import session token to pass to the next step of the import.                                           |
+| `headers`          | array   | Header row of the staged CSV. The first non-blank record is the header.                               |
+| `sample`           | array   | First non-blank data row, for the mapping preview. Cells are trimmed and padded to the header length. |
+| `total`            | integer | Number of non-blank data rows.                                                                         |
+| `detected_mapping` | object  | Auto-detected canonical column for each CSV column index. Columns that were not detected are omitted.  |
+| `delimiter`        | string  | Delimiter used to read the file.                                                                       |
+
+Error codes specific to this endpoint:
+
+-   `woocommerce_fulfillments_import_no_file` (`400`) - No file was uploaded.
+-   `woocommerce_fulfillments_import_file_too_large` (`413`) - The file exceeds the upload size limit, including a file PHP itself refused for its size, or the site has no upload space left (multisite quota).
+-   `woocommerce_fulfillments_import_upload_failed` (`400` or `500`) - The file could not be staged, is not a CSV, or was stored outside the import directory.
+-   `woocommerce_fulfillments_csv_parse_error` (`400`) - The file is empty, unreadable, not valid UTF-8, saved as UTF-16 or with CR-only line endings, or has no data rows. The error `data.reason` carries the importer's code.
+-   `woocommerce_fulfillments_import_too_many_rows` (`413`) - The file has more than 5,000 data rows.
+-   `woocommerce_fulfillments_import_session_failed` (`500`) - The import session could not be stored, or the cleanup of its staged file could not be scheduled. The staged file is removed. The caller's previous session was replaced before this point and is gone as well.
+-   `rest_invalid_param` (`400`) - The `delimiter` is not a single ASCII character or `tab`, or `notify_customer` or `update_existing` is not a boolean.
+-   `woocommerce_rest_cannot_create` (`401` or `403`) - The request is not authenticated or the user lacks `manage_woocommerce`.
+
 ## Error responses
 
 Errors follow the standard WooCommerce REST API error shape:
