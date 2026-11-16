@@ -78,16 +78,32 @@ class WC_Helper_Product {
 	 * @return WC_Product
 	 */
 	public static function create_missed_sale_end_product() {
+		$meta    = self::get_missed_sale_end_meta();
 		$product = self::create_simple_product();
-		$product->set_regular_price( '100' );
-		$product->set_sale_price( '50' );
+		$product->set_regular_price( $meta['_regular_price'] );
+		$product->set_sale_price( $meta['_sale_price'] );
 		$product->save();
 
-		update_post_meta( $product->get_id(), '_price', 50 );
-		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
-		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+		foreach ( array( '_price', '_sale_price_dates_from', '_sale_price_dates_to' ) as $key ) {
+			update_post_meta( $product->get_id(), $key, $meta[ $key ] );
+		}
 
 		return $product;
+	}
+
+	/**
+	 * Get the price and sale date meta of a product whose sale has ended while its stored price is still the sale price.
+	 *
+	 * @return array<string, string|int> Meta values keyed by meta key.
+	 */
+	private static function get_missed_sale_end_meta(): array {
+		return array(
+			'_regular_price'         => '100',
+			'_sale_price'            => '50',
+			'_price'                 => '50',
+			'_sale_price_dates_from' => time() - 300,
+			'_sale_price_dates_to'   => time() - 100,
+		);
 	}
 
 	/**
@@ -103,13 +119,7 @@ class WC_Helper_Product {
 		global $wpdb;
 
 		$ids  = self::insert_product_post_rows( $count );
-		$meta = array(
-			'_regular_price'         => 100,
-			'_sale_price'            => 50,
-			'_price'                 => 50,
-			'_sale_price_dates_from' => time() - 300,
-			'_sale_price_dates_to'   => time() - 100,
-		);
+		$meta = self::get_missed_sale_end_meta();
 
 		$values = array();
 		foreach ( $ids as $id ) {
