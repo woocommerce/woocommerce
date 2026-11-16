@@ -702,4 +702,33 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $reloaded->notify_customer() );
 		$this->assertFalse( $reloaded->update_existing() );
 	}
+
+	/**
+	 * @testdox freeze_run_settings() rolls back a lost write, builds on a newer stored copy and refuses a deleted session.
+	 */
+	public function test_freeze_run_settings_writes_only_on_top_of_the_stored_session(): void {
+		$mapping = array( 0 => 'order_number' );
+		$session = $this->make_session( 86 );
+		$keep    = fn( $value, $old ) => $old;
+		add_filter( 'pre_update_option__transient_wc_fulfillment_import_86_' . $session->token(), $keep, 10, 2 );
+		$this->assertFalse( $session->freeze_run_settings( $mapping, true, true ), 'A lost write is reported' );
+		remove_filter( 'pre_update_option__transient_wc_fulfillment_import_86_' . $session->token(), $keep, 10 );
+		$this->assertTrue( $session->freeze_run_settings( $mapping, true, true ) );
+		$this->assertSame( $mapping, ImportSession::load( 86, $session->token() )->frozen_mapping(), 'A retry stores the settings' );
+
+		$first  = $this->make_session( 87 );
+		$second = ImportSession::load( 87, $first->token() );
+		$first->freeze_run_settings( $mapping, true, true );
+		$first->record_chunk( 0, $this->chunk_result( 10, 7, 400 ) );
+		$this->assertTrue( $second->freeze_run_settings( array( 0 => 'tracking_number' ), false, false ) );
+		$reloaded = ImportSession::load( 87, $first->token() );
+		$this->assertSame( $mapping, $reloaded->frozen_mapping(), 'A stale copy does not replace the stored settings' );
+		$this->assertSame( 10, $reloaded->processed(), 'A stale copy does not rewind the stored progress' );
+		$this->assertSame( $mapping, $second->frozen_mapping(), 'The stale copy takes the stored settings' );
+
+		$gone = $this->make_session( 88 );
+		$gone->delete();
+		$this->assertFalse( $gone->freeze_run_settings( $mapping, true, true ), 'A deleted session is refused' );
+		$this->assertNull( ImportSession::load( 88, $gone->token() ) );
+	}
 }

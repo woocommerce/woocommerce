@@ -672,23 +672,38 @@ final class ImportSession {
 	/**
 	 * Freeze the mapping and run options so every chunk imports under the same rules.
 	 *
-	 * Only the first call stores the values; later calls keep them.
+	 * Only the first call stores the values; later calls keep them. The stored payload is read
+	 * first and this copy takes it over, so a copy loaded before another request froze the
+	 * settings or recorded a chunk cannot write over them. That narrows the window for two
+	 * requests freezing at once; the caller's lock closes it.
 	 *
 	 * @since 11.4.0
 	 *
 	 * @param array<int, string> $mapping CSV column index => canonical column key.
 	 * @param bool               $notify  Whether to fire customer notifications.
 	 * @param bool               $update  Whether to update existing fulfillments on tracking-number match.
-	 * @return bool False when the settings could not be stored.
+	 * @return bool False when the session is gone or the settings could not be stored.
 	 */
 	public function freeze_run_settings( array $mapping, bool $notify, bool $update ): bool {
+		if ( null !== $this->frozen_mapping() ) {
+			return true;
+		}
+		$stored = get_transient( self::PREFIX . $this->user_id . '_' . $this->token );
+		if ( ! is_array( $stored ) ) {
+			return false;
+		}
+		$this->data = $stored;
 		if ( null !== $this->frozen_mapping() ) {
 			return true;
 		}
 		$this->data['mapping']         = $mapping;
 		$this->data['notify_customer'] = $notify;
 		$this->data['update_existing'] = $update;
-		return $this->persist();
+		if ( $this->persist() ) {
+			return true;
+		}
+		$this->data = $stored;
+		return false;
 	}
 
 	/**
