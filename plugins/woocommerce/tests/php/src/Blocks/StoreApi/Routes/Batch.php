@@ -17,6 +17,9 @@ class Batch extends ControllerTestCase {
 	 * Setup test product data. Called before every test.
 	 */
 	protected function setUp(): void {
+		parent::setUp();
+
+		// Allow GET in batches, then build the routes again: the parent registered them before the filter.
 		add_filter(
 			'__experimental_woocommerce_store_api_batch_request_methods',
 			function ( $methods ) {
@@ -24,7 +27,7 @@ class Batch extends ControllerTestCase {
 				return $methods;
 			}
 		);
-		parent::setUp();
+		$this->initialize_store_api_server();
 
 		$fixtures = new FixtureData();
 

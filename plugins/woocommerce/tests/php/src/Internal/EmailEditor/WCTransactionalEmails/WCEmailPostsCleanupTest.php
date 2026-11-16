@@ -58,8 +58,6 @@ class WCEmailPostsCleanupTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->cleanup_injected_emails();
 
-		remove_all_filters( 'woocommerce_email_block_template_html' );
-
 		$this->posts_manager->clear_caches();
 		delete_transient( WCEmailPostsCleanup::LEGACY_GENERATION_TRANSIENT );
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
@@ -398,8 +396,6 @@ class WCEmailPostsCleanupTest extends \WC_Unit_Test_Case {
 			(int) get_option( $lookalike_option ),
 			'Options merely matching the LIKE pattern must never be deleted'
 		);
-
-		delete_option( $lookalike_option );
 	}
 
 	/**

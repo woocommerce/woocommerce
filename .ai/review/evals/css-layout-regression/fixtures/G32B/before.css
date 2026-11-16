@@ -1,0 +1,4 @@
+/* Theme header and Cart styles loaded together. */
+.site-header { height: 24px; overflow: hidden; }
+.site-header button { height: 24px; }
+.wc-block-cart .wc-block-cart__coupon button { min-height: 44px; }

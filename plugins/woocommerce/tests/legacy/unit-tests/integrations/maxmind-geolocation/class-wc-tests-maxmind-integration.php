@@ -39,9 +39,6 @@ class WC_Tests_MaxMind_Integration extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		unset( $GLOBALS['wp_filesystem'] );
 
-		remove_filter( 'filesystem_method', array( $this, 'override_filesystem_method' ) );
-		remove_filter( 'woocommerce_maxmind_geolocation_database_service', array( $this, 'override_integration_service' ) );
-
 		parent::tearDown();
 	}
 

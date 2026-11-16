@@ -26,13 +26,6 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	private $sut;
 
 	/**
-	 * Callback added to the woocommerce_product_filter_params filter during a test.
-	 *
-	 * @var callable|null
-	 */
-	private $taxonomy_params_filter;
-
-	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -45,20 +38,6 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 
 		// The static map may have been warmed by another test class before product_brand existed.
 		$this->clear_params_cache();
-	}
-
-	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		try {
-			if ( null !== $this->taxonomy_params_filter ) {
-				remove_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
-				$this->taxonomy_params_filter = null;
-			}
-		} finally {
-			parent::tearDown();
-		}
 	}
 
 	/**
@@ -441,11 +420,11 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		$brand_owner = $this->products[0];
 		$brand_slug  = $this->assign_brand_to_product( $brand_owner, 'Acme' );
 
-		$this->taxonomy_params_filter = function ( array $params ): array {
+		$taxonomy_params_filter = function ( array $params ): array {
 			$params['taxonomy']['product_brand'] = 'wc_brands';
 			return $params;
 		};
-		add_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+		add_filter( 'woocommerce_product_filter_params', $taxonomy_params_filter );
 
 		list( $where, $posts ) = $this->query_main_products( array( 'brands' => $brand_slug ) );
 
