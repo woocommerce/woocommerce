@@ -300,15 +300,14 @@ final class ReserveStock {
 
 		// Orders that just moved to processing, on-hold or completed keep their hold until stock has been
 		// reduced and the hold released by the status hooks, so the hold must still count in that gap.
-		$statuses = "'wc-checkout-draft', '" . implode(
-			"', '",
-			array(
-				OrderInternalStatus::PENDING,
-				OrderInternalStatus::PROCESSING,
-				OrderInternalStatus::ON_HOLD,
-				OrderInternalStatus::COMPLETED,
-			)
-		) . "'";
+		$statuses = array(
+			'wc-checkout-draft',
+			OrderInternalStatus::PENDING,
+			OrderInternalStatus::PROCESSING,
+			OrderInternalStatus::ON_HOLD,
+			OrderInternalStatus::COMPLETED,
+		);
+		$statuses = "'" . implode( "', '", $statuses ) . "'";
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$join         = "{$wpdb->prefix}wc_orders orders ON stock_table.`order_id` = orders.id";
 			$where_status = "orders.status IN ( $statuses )";
