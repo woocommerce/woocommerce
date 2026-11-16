@@ -184,12 +184,6 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		remove_action(
-			'woocommerce_register_feature_definitions',
-			array( $this, 'register_dummy_features' ),
-			11,
-			1
-		);
 		$this->reset_container_replacements();
 		$this->reset_container_resolutions();
 

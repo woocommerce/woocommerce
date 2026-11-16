@@ -16,14 +16,6 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		$this->disable_cogs_feature();
-	}
-
-	/**
 	 * Test generic setters and getters for WC_Order_Item_Product.
 	 *
 	 * @since 3.2.0

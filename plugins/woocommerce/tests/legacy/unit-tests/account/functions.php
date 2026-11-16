@@ -272,9 +272,11 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_get_account_formatted_address() {
+		// The customer's country is the store's, so the formatted address leaves it out.
+		update_option( 'woocommerce_default_country', 'US:CA' );
 		$customer = WC_Helper_Customer::create_customer();
 
-		$this->assertEquals( '123 South Street<br/>Apt 1<br/>San Francisco, CA 94110<br/>United States (US)', wc_get_account_formatted_address( 'billing', $customer->get_id() ) );
+		$this->assertEquals( '123 South Street<br/>Apt 1<br/>San Francisco, CA 94110', wc_get_account_formatted_address( 'billing', $customer->get_id() ) );
 
 		$customer->delete( true );
 	}

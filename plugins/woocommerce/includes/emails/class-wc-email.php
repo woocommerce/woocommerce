@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Html2Text;
 use Automattic\WooCommerce\Internal\Email\EmailHeaders;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
@@ -297,6 +298,13 @@ class WC_Email extends WC_Settings_API {
 	public $block_email_editor_enabled;
 
 	/**
+	 * Whether the email being sent is a block email, whose plain text part is built from its HTML.
+	 *
+	 * @var bool
+	 */
+	private $is_block_email = false;
+
+	/**
 	 * Whether Cc/Bcc recipients can be configured for this email.
 	 *
 	 * False for emails that carry a credential such as a password reset key.
@@ -371,23 +379,24 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Handle multipart mail.
 	 *
-	 * @param  PHPMailer $mailer PHPMailer object.
-	 * @return PHPMailer
+	 * @param  \PHPMailer\PHPMailer\PHPMailer $mailer PHPMailer object.
+	 * @return \PHPMailer\PHPMailer\PHPMailer
 	 */
 	public function handle_multipart( $mailer ) {
 		if ( ! $this->sending ) {
 			return $mailer;
 		}
 
+		$alt_body = '';
 		if ( 'multipart' === $this->get_email_type() ) {
-			$mailer->AltBody = wordwrap( // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				preg_replace( $this->plain_search, $this->plain_replace, wp_strip_all_tags( $this->get_content_plain() ) )
-			);
-		} else {
-			$mailer->AltBody = ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			$alt_body = $this->is_block_email
+				? Html2Text::convert( $mailer->Body, array( 'ignore_errors' => true ) ) // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				: wordwrap( preg_replace( $this->plain_search, $this->plain_replace, wp_strip_all_tags( $this->get_content_plain() ) ) );
 		}
+		$mailer->AltBody = $alt_body; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
-		$this->sending = false;
+		$this->is_block_email = false;
+		$this->sending        = false;
 		return $mailer;
 	}
 
@@ -911,7 +920,8 @@ class WC_Email extends WC_Settings_API {
 	public function get_content() {
 		$this->sending = true;
 
-		$block_email_content = $this->get_block_email_html_content();
+		$block_email_content  = $this->get_block_email_html_content();
+		$this->is_block_email = (bool) $block_email_content;
 		if ( $block_email_content ) {
 			$this->email_type = 'plain' === $this->email_type ? 'html' : $this->email_type;
 			return $block_email_content;

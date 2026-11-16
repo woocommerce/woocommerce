@@ -42,13 +42,6 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 	private $original_session;
 
 	/**
-	 * The customer the bootstrap set up, put back in tearDown.
-	 *
-	 * @var WC_Customer|null
-	 */
-	private $original_customer;
-
-	/**
 	 * $_COOKIE as it was before the test, put back in tearDown.
 	 *
 	 * @var array
@@ -65,8 +58,7 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_schema_version', 430 );
 		update_option( 'woocommerce_hold_stock_minutes', self::HOLD_MINUTES );
 
-		$this->original_session  = WC()->session;
-		$this->original_customer = WC()->customer;
+		$this->original_session = WC()->session;
 
 		// Earlier suites can leave a valid session cookie in $_COOKIE (the test
 		// framework never resets it), and WC_Session_Handler::init() would then
@@ -94,9 +86,8 @@ class ReserveStockOwnHoldsTest extends WC_Unit_Test_Case {
 
 		wp_set_current_user( 0 );
 
-		$_COOKIE       = $this->original_cookies;
-		WC()->session  = $this->original_session;
-		WC()->customer = $this->original_customer;
+		$_COOKIE      = $this->original_cookies;
+		WC()->session = $this->original_session;
 
 		parent::tearDown();
 	}

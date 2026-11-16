@@ -2807,7 +2807,6 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['refund_reason'], $_POST['line_item_qtys'], $_POST['line_item_totals'], $_POST['line_item_tax_totals'], $_POST['api_refund'] );
 		WC_Tax::_delete_tax_rate( $rate_id );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
@@ -3794,10 +3793,12 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 */
 	public function test_update_order_review_skips_reload_without_session(): void {
 		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+		$original_cookies = $_COOKIE;
 		$original_session = WC()->session;
 
 		try {
 			wp_set_current_user( 0 );
+			$_COOKIE      = array();
 			WC()->session = new WC_Session_Handler();
 			WC()->session->init_session_cookie();
 
@@ -3816,6 +3817,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		} finally {
 			WC()->session = $original_session;
 			$_POST        = $original_post;
+			$_COOKIE      = $original_cookies;
 		}
 	}
 

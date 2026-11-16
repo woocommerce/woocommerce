@@ -333,7 +333,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 * a rest_pre_insert_product_review callback can send the review to a different one.
 		 */
 		if ( ! empty( $request['rating'] ) && $product_review instanceof WP_Comment && '1' === $product_review->comment_approved ) {
-			WC_Comments::clear_transients( (int) $product_review->comment_post_ID );
+			WC_Comments::maybe_update_product_average_rating( (int) $product_review->comment_post_ID );
 		}
 
 		$this->update_additional_fields_for_object( $product_review, $request );

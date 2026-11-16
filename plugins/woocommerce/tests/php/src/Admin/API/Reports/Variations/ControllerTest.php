@@ -27,15 +27,6 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		remove_all_filters( 'woocommerce_report_variations_export_columns' );
-		remove_all_filters( 'woocommerce_report_variations_prepare_export_item' );
-	}
-
-	/**
 	 * @testdox get_export_columns returns the default column set.
 	 */
 	public function test_get_export_columns_returns_defaults(): void {

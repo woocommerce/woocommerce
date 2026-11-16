@@ -215,7 +215,24 @@ const insertPersonalizationTag = (
 	} as RichTextValue;
 };
 
+/**
+ * Return where a caret belongs after typed tags became comments. Each tag then counts as one character.
+ *
+ * @param original The content with the tag as plain text.
+ * @param replaced The content with the tag as a comment.
+ * @param offset   The caret offset in the original content.
+ */
+const getOffsetAfterTagReplacement = (
+	original: unknown,
+	replaced: unknown,
+	offset: number
+): number =>
+	offset -
+	( create( { html: String( original ) } ).text.length -
+		create( { html: String( replaced ) } ).text.length );
+
 export {
+	getOffsetAfterTagReplacement,
 	getCursorPosition,
 	getElementRange,
 	insertPersonalizationTag,
