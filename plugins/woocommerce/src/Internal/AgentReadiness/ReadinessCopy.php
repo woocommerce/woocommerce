@@ -59,11 +59,11 @@ final class ReadinessCopy {
 	public static function llms_txt_source( string $source ): ?array {
 		switch ( $source ) {
 			case 'woocommerce':
-				return array( 'pass' => __( 'WooCommerce creates it from your store’s details.', 'woocommerce' ) );
+				return array( 'pass' => __( 'From WooCommerce, using your store’s details.', 'woocommerce' ) );
 			case 'file':
-				return array( 'pass' => __( 'It’s a file in your site’s root folder, so WooCommerce doesn’t add its own.', 'woocommerce' ) );
+				return array( 'pass' => __( 'From a file in your site’s root folder.', 'woocommerce' ) );
 			case 'other':
-				return array( 'pass' => __( 'Another plugin or your host provides it, so WooCommerce doesn’t add its own.', 'woocommerce' ) );
+				return array( 'pass' => __( 'From another plugin or your host.', 'woocommerce' ) );
 			case 'disabled':
 				return array( 'fix' => __( 'WooCommerce’s llms.txt is turned off by code on your store (the woocommerce_enable_llms_txt filter). Remove that code, or turn on llms.txt in your SEO plugin.', 'woocommerce' ) );
 			case 'not_reached':
