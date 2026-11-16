@@ -360,10 +360,6 @@ class MiniCart extends \WC_Unit_Test_Case {
 
 		// Mini-cart should not render (empty output).
 		$this->assertEmpty( $output, 'Mini-cart should not render for logged-out users when store is in coming soon mode.' );
-
-		// Clean up.
-		update_option( 'woocommerce_coming_soon', 'no' );
-		update_option( 'woocommerce_store_pages_only', 'no' );
 	}
 
 	/**
@@ -388,8 +384,6 @@ class MiniCart extends \WC_Unit_Test_Case {
 
 		// Clean up.
 		wp_set_current_user( 0 );
-		update_option( 'woocommerce_coming_soon', 'no' );
-		update_option( 'woocommerce_store_pages_only', 'no' );
 	}
 
 	/**
@@ -484,10 +478,6 @@ class MiniCart extends \WC_Unit_Test_Case {
 
 		// Mini-cart should render (non-empty output) because the logic only checks for store pages coming soon.
 		$this->assertNotEmpty( $output, 'Mini-cart should render when site-wide coming soon is enabled but not store pages only.' );
-
-		// Clean up.
-		update_option( 'woocommerce_coming_soon', 'no' );
-		update_option( 'woocommerce_store_pages_only', 'no' );
 	}
 
 	/**

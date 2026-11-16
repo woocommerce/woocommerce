@@ -1129,14 +1129,10 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->customer->set_shipping_location( 'US', 'NY', '', '' );
 
-		try {
-			$this->assertSame( $expected, WC()->cart->show_shipping(), 'Shipping should only stay hidden while the shopper has a postcode field to fill in.' );
+		$this->assertSame( $expected, WC()->cart->show_shipping(), 'Shipping should only stay hidden while the shopper has a postcode field to fill in.' );
 
-			WC()->customer->set_shipping_location( 'US', '', '', '' );
-			$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
-		} finally {
-			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
-		}
+		WC()->customer->set_shipping_location( 'US', '', '', '' );
+		$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
 	}
 
 	/**
@@ -2231,8 +2227,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2272,8 +2266,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2311,8 +2303,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNotEmpty( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2348,8 +2338,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
