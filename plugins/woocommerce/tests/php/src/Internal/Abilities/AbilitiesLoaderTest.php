@@ -46,6 +46,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/orders-query',
 		'woocommerce/order-send-email',
 		'woocommerce/order-create',
+		'woocommerce/order-delete',
 		'woocommerce/order-update',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
@@ -321,6 +322,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
+			),
+			'woocommerce/order-delete'              => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => true,
 			),
 			'woocommerce/order-update'              => array(
 				'readonly'    => false,
@@ -1084,6 +1090,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'woocommerce/order-create',
 				array( 'line_items' => array( array( 'product_id' => 1 ) ) ),
 			),
+			'order-delete'             => array(
+				'woocommerce/order-delete',
+				array(
+					'id' => 1,
+				),
+			),
 			'order-update'             => array(
 				'woocommerce/order-update',
 				array(
@@ -1190,6 +1202,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'products-query'                 => array( 'woocommerce/products-query', $missing_id ),
 			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
 			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),
+			'order-delete by missing order'  => array( 'woocommerce/order-delete', $missing_id ),
 			'payment-gateways-query'         => array( 'woocommerce/payment-gateways-query', array() ),
 			'payment-gateway-update'         => array(
 				'woocommerce/payment-gateway-update',
@@ -1280,6 +1293,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'woocommerce/order-send-email'    => array(
 				'id'    => $order->get_id(),
 				'email' => 'invoice',
+			),
+			'woocommerce/order-delete'        => array(
+				'id' => $order->get_id(),
 			),
 			'woocommerce/order-update'        => array(
 				'id'       => $order->get_id(),
@@ -1454,6 +1470,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'woocommerce/order-send-email'    => array(
 				'id'    => $order_id,
 				'email' => 'invoice',
+			),
+			'woocommerce/order-delete'        => array(
+				'id' => $order_id,
 			),
 			'woocommerce/order-update'        => array(
 				'id'       => $order_id,
@@ -1802,6 +1821,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id'    => -123,
 					'email' => 'invoice',
 				),
+			),
+			'order-delete'          => array(
+				'woocommerce/order-delete',
+				array( 'id' => -123 ),
 			),
 			'order-update'          => array(
 				'woocommerce/order-update',
