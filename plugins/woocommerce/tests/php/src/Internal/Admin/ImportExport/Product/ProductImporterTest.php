@@ -227,6 +227,36 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should stop without importing or touching the new lock when another import takes the lock over during the placeholder prompt.
+	 */
+	public function test_run_stops_when_the_lock_is_taken_over_during_the_placeholder_prompt(): void {
+		global $wpdb;
+
+		$this->create_placeholder();
+		$other_run = new ProductImportLock();
+
+		try {
+			$this->sut->run(
+				$this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-TAKEOVER,Taken Over\n" ),
+				array( 'mapping' => $this->get_simple_mapping() ),
+				null,
+				function () use ( $wpdb, $other_run ): void {
+					// Simulate a prompt left open past the stale timeout, then an admin import taking over.
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					$wpdb->query( "UPDATE {$wpdb->options} SET option_value = CONCAT( 1, SUBSTRING( option_value, LOCATE( ':', option_value ) ) ) WHERE option_name = 'wc_product_importing'" );
+					$this->assertTrue( $other_run->acquire( ProductImportLock::HOLDER_ADMIN ) );
+				}
+			);
+			$this->fail( 'Expected the run to stop once it lost the lock.' );
+		} catch ( ImportLockedException $exception ) {
+			$this->assertStringContainsString( 'took over', $exception->getMessage() );
+		}
+
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-RUNNER-TAKEOVER' ) );
+		$this->assertTrue( $other_run->refresh(), 'The other run should still hold the lock' );
+	}
+
+	/**
 	 * @testdox Should leave no placeholder-status posts behind after a variation's forward parent SKU reference resolves.
 	 */
 	public function test_run_leaves_no_placeholders_for_a_forward_parent_reference(): void {
@@ -398,10 +428,11 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 
 		$arrange = function () use ( $wpdb, $lock_age ): void {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->update(
-				$wpdb->options,
-				array( 'option_value' => ( time() - $lock_age ) . ':' . ProductImportLock::HOLDER_CLI ),
-				array( 'option_name' => 'wc_product_importing' )
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->options} SET option_value = CONCAT( %d, SUBSTRING( option_value, LOCATE( ':', option_value ) ) ) WHERE option_name = 'wc_product_importing'",
+					time() - $lock_age
+				)
 			);
 		};
 		$observe = function () use ( &$age ): void {

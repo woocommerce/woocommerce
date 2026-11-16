@@ -144,7 +144,7 @@ final class ProductImporter {
 	 *
 	 * @return ImportResult
 	 *
-	 * @throws ImportLockedException When another import already holds the site-wide import lock.
+	 * @throws ImportLockedException When another import already holds the site-wide import lock, or takes it over mid-run.
 	 */
 	public function run( string $file, array $options, ?callable $on_batch = null, ?callable $on_pending_placeholders = null ): array {
 		$this->load_importer();
@@ -161,6 +161,9 @@ final class ProductImporter {
 
 			if ( $pending_placeholders > 0 ) {
 				$on_pending_placeholders( $pending_placeholders );
+
+				// The callback can wait on a prompt, long enough for the lock to go stale.
+				$this->keep_lock();
 			}
 
 			$totals = array(
@@ -196,7 +199,7 @@ final class ProductImporter {
 					}
 
 					// A long import can outlast the lock's stale timeout, so keep it fresh between batches.
-					$this->import_lock->refresh();
+					$this->keep_lock();
 
 					if ( null !== $on_batch ) {
 						$on_batch( $position, $batch['results'] );
@@ -210,13 +213,24 @@ final class ProductImporter {
 
 			$cursor = 0;
 			do {
-				$this->import_lock->refresh();
+				$this->keep_lock();
 				$cursor = $this->cleanup->cleanup_after_import( (int) $cursor );
 			} while ( null !== $cursor );
 
 			return $totals;
 		} finally {
 			$this->import_lock->release();
+		}
+	}
+
+	/**
+	 * Refresh the import lock, and stop the run if another import has taken it over.
+	 *
+	 * @throws ImportLockedException When another import has taken the lock over.
+	 */
+	private function keep_lock(): void {
+		if ( ! $this->import_lock->refresh() ) {
+			throw new ImportLockedException( esc_html( 'Another product import took over the import lock, so this import stopped.' ) );
 		}
 	}
 
