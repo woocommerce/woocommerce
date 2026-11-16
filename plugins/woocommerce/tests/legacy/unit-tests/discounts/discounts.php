@@ -1509,8 +1509,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		}
 
 		$this->assertEquals( 20, $discount_total );
-
-		remove_filter( 'woocommerce_coupon_get_discount_amount', array( $this, 'filter_woocommerce_coupon_get_discount_amount' ) );
 	}
 
 	/**

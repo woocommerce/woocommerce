@@ -20,47 +20,14 @@ class EmailStyleSyncTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Original option values to restore after tests.
-	 *
-	 * @var array
-	 */
-	private $original_options;
-
-	/**
 	 * Set up.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new EmailStyleSync();
 
-		// Store original option values.
-		$this->original_options = array(
-			EmailStyleSync::AUTO_SYNC_OPTION          => get_option( EmailStyleSync::AUTO_SYNC_OPTION, false ),
-			'woocommerce_email_base_color'            => get_option( 'woocommerce_email_base_color', '' ),
-			'woocommerce_email_background_color'      => get_option( 'woocommerce_email_background_color', '' ),
-			'woocommerce_email_body_background_color' => get_option( 'woocommerce_email_body_background_color', '' ),
-			'woocommerce_email_text_color'            => get_option( 'woocommerce_email_text_color', '' ),
-			'woocommerce_email_footer_text_color'     => get_option( 'woocommerce_email_footer_text_color', '' ),
-		);
-
 		// Ensure we have a clean state for each test.
 		delete_option( EmailStyleSync::AUTO_SYNC_OPTION );
-	}
-
-	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		// Restore original option values.
-		foreach ( $this->original_options as $option_name => $option_value ) {
-			if ( $option_value ) {
-				update_option( $option_name, $option_value );
-			} else {
-				delete_option( $option_name );
-			}
-		}
 	}
 
 	/**

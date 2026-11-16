@@ -33,6 +33,18 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	use PushNotificationsTestTrait;
 
 	/**
+	 * Start without the push token post type. WordPress does not reset post types between plugin
+	 * tests, so one registered by an earlier test would still be there.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		if ( post_type_exists( PushToken::POST_TYPE ) ) {
+			unregister_post_type( PushToken::POST_TYPE );
+		}
+	}
+
+	/**
 	 * Tear down the test case.
 	 */
 	public function tearDown(): void {
@@ -101,8 +113,6 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$push_notifications = new PushNotifications();
 
 		$this->assertFalse( $push_notifications->should_be_enabled() );
-
-		remove_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
 	}
 
 	/**

@@ -51,8 +51,7 @@ class EvaluateOverridesTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_overrides_can_use_existing_rules() {
-		$current_wc_country = get_option( 'woocommerce_default_country' );
-		$evaluator          = new EvaluateOverrides();
+		$evaluator = new EvaluateOverrides();
 
 		$extensions = $this->get_extensions();
 		// Set default country to "CA".
@@ -71,9 +70,6 @@ class EvaluateOverridesTest extends WC_Unit_Test_Case {
 
 		// Evaluation should pass and return the overridden value.
 		$this->assertEquals( 2, $result[0]->order );
-
-		// Reset the default country.
-		update_option( 'woocommerce_default_country', $current_wc_country );
 	}
 
 	/**

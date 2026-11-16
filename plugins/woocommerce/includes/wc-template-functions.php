@@ -1470,7 +1470,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 		}
 
 		$defaults = array(
-			'quantity'              => 1,
+			'quantity'              => wc_get_container()->get( \Automattic\WooCommerce\Internal\Utilities\ProductUtil::class )->get_catalog_add_to_cart_quantity( $product ),
 			'class'                 => implode(
 				' ',
 				array_filter(
@@ -1508,6 +1508,11 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 			$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
 		}
 
+		$button_data = wc_get_container()->get( \Automattic\WooCommerce\Internal\Utilities\ProductUtil::class )->get_catalog_add_to_cart_button_data( $product, $args['quantity'] ?? null );
+		if ( ( $args['attributes']['aria-label'] ?? null ) === wp_strip_all_tags( $button_data['original_description'] ) ) {
+			$args['attributes']['aria-label'] = wp_strip_all_tags( $button_data['description'] );
+		}
+
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
 		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
 
@@ -1524,6 +1529,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 			$args['attributes']['role'] = 'button';
 		}
 
+		$args['button_data'] = $button_data;
 		wc_get_template( 'loop/add-to-cart.php', $args );
 	}
 }

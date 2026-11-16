@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G41A-v2",
+			"path": "plugins/woocommerce/src/Internal/ProductDownloads/DownloadableFileAttachments.php",
+			"before": {
+				"file": "fixtures/G41A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G41A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/src/Internal/ProductDownloads/DownloadableFileAttachments.php",
+						"lines": [
+							13,
+							13
+						],
+						"anchor": "        $path = get_post_meta( $attachment_id, '_wp_attached_file', true );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G41B-v2",
+			"path": "plugins/woocommerce/src/Internal/ProductDownloads/DownloadableFileAttachments.php",
+			"before": {
+				"file": "fixtures/G41B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G41B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/src/Internal/ProductDownloads/DownloadableFileAttachments.php",
+						"lines": [
+							13,
+							16
+						],
+						"anchor": "        $path = get_post_meta( $attachment_id, '_wp_attached_file', true );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G41C-v2",
+			"path": "plugins/woocommerce/src/Internal/ProductDownloads/DownloadableFileAttachments.php",
+			"before": {
+				"file": "fixtures/G41C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G41C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G41D-v1",
+			"path": "plugins/woocommerce/src/Internal/ProductDownloads/DownloadableFileAttachments.php",
+			"before": {
+				"file": "fixtures/G41D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G41D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}
