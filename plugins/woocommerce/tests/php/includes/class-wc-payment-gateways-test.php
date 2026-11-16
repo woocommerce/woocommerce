@@ -30,14 +30,6 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		delete_option( 'jetpack_activation_source' );
-	}
-
-	/**
 	 * @testdox Gateway settings option changes use gateway defaults for malformed transition values.
 	 * @dataProvider provider_malformed_gateway_settings_transitions
 	 *

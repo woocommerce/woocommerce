@@ -44,14 +44,6 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	private $order_schema;
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		$this->disable_rest_api_v4_feature();
-	}
-
-	/**
 	 * Enable the REST API v4 feature.
 	 */
 	public static function enable_rest_api_v4_feature() {
@@ -61,19 +53,6 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				$features[] = 'rest-api-v4';
 				return $features;
 			},
-		);
-	}
-
-	/**
-	 * Disable the REST API v4 feature.
-	 */
-	public static function disable_rest_api_v4_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features = array_diff( $features, array( 'rest-api-v4' ) );
-				return $features;
-			}
 		);
 	}
 
@@ -868,8 +847,6 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test edge case: created_via filtering when COT is enabled.
 	 */
 	public function test_created_via_filtering_with_cot_enabled(): void {
-		$original_cot_setting = get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
-
 		// Skip test if COT cannot be safely enabled/disabled.
 		try {
 			update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
@@ -896,10 +873,9 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $response_data );
 		$this->assertEquals( 'checkout', $response_data[0]['created_via'] );
 
-		// Clean up orders first, then restore setting.
+		// Clean up orders.
 		$order1->delete( true );
 		$order2->delete( true );
-		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $original_cot_setting );
 	}
 
 	/**

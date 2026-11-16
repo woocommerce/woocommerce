@@ -16,7 +16,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		$this->disable_cogs_feature();
 		self::disable_direct_product_attribute_lookup_updates();
 	}
 
@@ -424,7 +423,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 * See https://github.com/woocommerce/woocommerce/issues/41676 for more details.
 	 */
 	public function test_validate_props_respects_non_default_no_stock_threshold_for_float_stock_quantity() {
-		$previous_threshold = get_option( 'woocommerce_notify_no_stock_amount' );
 		update_option( 'woocommerce_notify_no_stock_amount', 5 );
 		remove_filter( 'woocommerce_stock_amount', 'intval' );
 		add_filter( 'woocommerce_stock_amount', 'floatval' );
@@ -451,7 +449,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_stock_amount', 'floatval' );
 		add_filter( 'woocommerce_stock_amount', 'intval' );
-		update_option( 'woocommerce_notify_no_stock_amount', $previous_threshold );
 	}
 
 	/**
@@ -461,7 +458,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 * and stay in stock. With abs(), the threshold is compared by magnitude, so -5 behaves like 5.
 	 */
 	public function test_validate_props_treats_negative_no_stock_threshold_by_magnitude() {
-		$previous_threshold = get_option( 'woocommerce_notify_no_stock_amount' );
 		update_option( 'woocommerce_notify_no_stock_amount', -5 );
 		remove_filter( 'woocommerce_stock_amount', 'intval' );
 		add_filter( 'woocommerce_stock_amount', 'floatval' );
@@ -488,7 +484,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_stock_amount', 'floatval' );
 		add_filter( 'woocommerce_stock_amount', 'intval' );
-		update_option( 'woocommerce_notify_no_stock_amount', $previous_threshold );
 	}
 
 	/**

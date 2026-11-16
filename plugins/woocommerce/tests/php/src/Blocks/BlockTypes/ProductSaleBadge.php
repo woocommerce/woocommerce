@@ -344,7 +344,6 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 			}
 		} finally {
 			\WC_Tax::_delete_tax_rate( $tax_id );
-			remove_filter( 'wc_tax_enabled', '__return_true' );
 		}
 	}
 

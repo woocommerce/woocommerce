@@ -433,7 +433,6 @@ class WC_Admin_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 		);
 		$list->hide();
 		$this->assertEquals( get_option( 'woocommerce_default_homepage_layout', null ), 'two_columns' );
-		delete_option( 'woocommerce_default_homepage_layout' );
 	}
 
 	/**
@@ -447,6 +446,5 @@ class WC_Admin_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 		);
 		$list->possibly_track_completion();
 		$this->assertEquals( get_option( 'woocommerce_default_homepage_layout', null ), 'two_columns' );
-		delete_option( 'woocommerce_default_homepage_layout' );
 	}
 }
