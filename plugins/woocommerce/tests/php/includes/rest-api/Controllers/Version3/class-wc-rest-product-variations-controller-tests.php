@@ -1698,6 +1698,59 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A variation batch update skips malformed attribute entries while applying valid term selections.
+	 * @testWith [null]
+	 *           [false]
+	 *           [42]
+	 *           ["invalid"]
+	 *
+	 * @param mixed $invalid_attribute Non-array attribute entry.
+	 */
+	public function test_batch_update_variation_skips_non_array_attributes( $invalid_attribute ): void {
+		list( $attribute, $first_term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+		$taxonomy          = $attribute['attribute_taxonomy'];
+		$product_attribute = new WC_Product_Attribute();
+		$product_attribute->set_id( $attribute['attribute_id'] );
+		$product_attribute->set_name( $taxonomy );
+		$product_attribute->set_options( array( $first_term_id, $second_term_id ) );
+		$product_attribute->set_variation( true );
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $product_attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( $taxonomy => get_term( $first_term_id )->slug ) );
+		$variation->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'         => $variation->get_id(),
+						'attributes' => array(
+							$invalid_attribute,
+							array(
+								'id'      => $attribute['attribute_id'],
+								'term_id' => $second_term_id,
+							),
+							$invalid_attribute,
+						),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $variation->get_id(), $data['update'][0]['id'] );
+		$this->assertArrayNotHasKey( 'error', $data['update'][0] );
+		$this->assertSame( get_term( $second_term_id )->slug, wc_get_product( $variation->get_id() )->get_attributes()[ $taxonomy ] );
+	}
+
+	/**
 	 * Creates a global attribute with two terms that share the name "Green" but have different slugs.
 	 *
 	 * @return array{0: array, 1: int, 2: int} Attribute data, first term ID, second term ID.

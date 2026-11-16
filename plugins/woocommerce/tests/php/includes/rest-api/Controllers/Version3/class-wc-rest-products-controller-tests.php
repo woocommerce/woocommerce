@@ -3072,6 +3072,64 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A malformed attribute rejects only its batch item and preserves its saved product data.
+	 * @testWith [null]
+	 *           [false]
+	 *           [42]
+	 *           ["invalid"]
+	 *
+	 * @param mixed $invalid_attribute Non-array attribute entry.
+	 */
+	public function test_batch_update_continues_after_non_array_attribute( $invalid_attribute ): void {
+		list( $attribute, $term_id ) = $this->create_attribute_with_duplicate_term_names();
+		$product_attribute           = new WC_Product_Attribute();
+		$product_attribute->set_id( $attribute['attribute_id'] );
+		$product_attribute->set_name( $attribute['attribute_taxonomy'] );
+		$product_attribute->set_options( array( $term_id ) );
+
+		$before  = WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_attributes( array( $product_attribute ) );
+		$product->save();
+		$original_name = $product->get_name();
+		$after         = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'   => $before->get_id(),
+						'name' => 'Updated before invalid item',
+					),
+					array(
+						'id'         => $product->get_id(),
+						'name'       => 'Must not be saved',
+						'attributes' => array( $invalid_attribute ),
+					),
+					array(
+						'id'   => $after->get_id(),
+						'name' => 'Updated after invalid item',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 3, $data['update'] );
+		$this->assertSame( $before->get_id(), $data['update'][0]['id'] );
+		$this->assertSame( 'woocommerce_rest_invalid_attribute', $data['update'][1]['error']['code'] );
+		$this->assertSame( 400, $data['update'][1]['error']['data']['status'] );
+		$this->assertSame( $after->get_id(), $data['update'][2]['id'] );
+		$this->assertSame( 'Updated before invalid item', wc_get_product( $before->get_id() )->get_name() );
+		$this->assertSame( $original_name, wc_get_product( $product->get_id() )->get_name() );
+		$this->assertSame( array( $term_id ), wc_get_product_terms( $product->get_id(), $attribute['attribute_taxonomy'], array( 'fields' => 'ids' ) ) );
+		$this->assertSame( 'Updated after invalid item', wc_get_product( $after->get_id() )->get_name() );
+	}
+
+	/**
 	 * Creates a global attribute with two terms that share the name "Green" but have different slugs.
 	 *
 	 * @return array{0: array, 1: int, 2: int} Attribute data, first term ID, second term ID.

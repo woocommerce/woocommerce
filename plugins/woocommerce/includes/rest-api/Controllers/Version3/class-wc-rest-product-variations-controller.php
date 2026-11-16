@@ -224,7 +224,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		$attribute_terms = array();
 		if ( isset( $request['attributes'] ) ) {
 			foreach ( $request['attributes'] as $index => $attribute ) {
-				if ( ! array_key_exists( 'term_id', $attribute ) ) {
+				if ( ! is_array( $attribute ) || ! array_key_exists( 'term_id', $attribute ) ) {
 					continue;
 				}
 				$taxonomy                  = ! empty( $attribute['id'] ) ? wc_attribute_taxonomy_name_by_id( absint( $attribute['id'] ) ) : sanitize_title( is_string( $attribute['name'] ?? null ) ? $attribute['name'] : '' );
@@ -415,6 +415,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			$parent_attributes = $parent->get_attributes();
 
 			foreach ( $request['attributes'] as $index => $attribute ) {
+				if ( ! is_array( $attribute ) ) {
+					continue;
+				}
+
 				$attribute_id   = 0;
 				$attribute_name = '';
 

@@ -803,7 +803,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
-	 * @throws WC_REST_Exception When an attribute term ID is invalid.
+	 * @throws WC_REST_Exception When a product attribute or term ID is invalid.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$customs = CustomsDataValidator::normalize_fields( $request->get_params() );
@@ -910,6 +910,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$attributes = array();
 
 			foreach ( $request['attributes'] as $attribute ) {
+				if ( ! is_array( $attribute ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute', esc_html__( 'Each attribute must be an object.', 'woocommerce' ), 400 );
+				}
+
 				$attribute_id   = 0;
 				$attribute_name = '';
 
