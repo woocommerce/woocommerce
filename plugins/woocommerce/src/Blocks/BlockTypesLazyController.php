@@ -90,9 +90,25 @@ final class BlockTypesLazyController {
 		foreach ( $block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
 				if ( isset( $whitelisted[ $block_class ] ) ) {
+					// Backward compatibility: use original handles for the editor scripts and blocks styles.
 					if ( ! $unified_editor_assets && $is_admin ) {
 						$this->asset_api->register_script( 'wc-' . $block_name . '-block', $this->asset_api->get_block_asset_build_path( $block_name ), array( 'wc-blocks' ) );
 					}
+					$asset_api          = $this->asset_api;
+					$use_custom_handles = static function ( $metadata ) use ( $block_name, $asset_api ) {
+						$styles = (array) ( $metadata['style'] ?? array() );
+						foreach ( $styles as $index => $specifier ) {
+							if ( $specifier === 'file:../' . $block_name . '.css' ) {
+								$styles[ $index ]  = 'wc-blocks-style-' . $block_name;
+								$metadata['style'] = $styles;
+								$asset_api->register_style( $styles[ $index ], $asset_api->get_block_asset_build_path( $block_name, 'css' ), array(), 'all', true );
+								break;
+							}
+						}
+						return $metadata;
+					};
+
+					add_filter( 'block_type_metadata', $use_custom_handles );
 					$registered_block_type = register_block_type_from_metadata(
 						$this->asset_api->generate_block_metadata_path( $block_name ),
 						array(
@@ -102,19 +118,9 @@ final class BlockTypesLazyController {
 							'editor_script'   => $unified_editor_assets ? 'wc-block-library' : 'wc-' . $block_name . '-block',
 						)
 					);
+					remove_filter( 'block_type_metadata', $use_custom_handles );
+
 					if ( $registered_block_type instanceof \WP_Block_Type ) {
-						// Backward compatibility: re-register styles handles to match the original handles and RTL handling.
-						$legacy_handle     = 'wc-blocks-style-' . $block_name;
-						$handles_to_rename = array_filter( $registered_block_type->style_handles, static fn( $handle ) => ! str_starts_with( $handle, 'wc-' ) );
-						foreach ( $handles_to_rename as $index => $style_handle ) {
-							$style_object = wp_styles()->query( $style_handle );
-							if ( $style_object && $style_object->src ) {
-								wp_deregister_style( $style_handle );
-								wp_register_style( $legacy_handle, $style_object->src, $style_object->deps, $style_object->ver );
-								wp_style_add_data( $legacy_handle, 'rtl', 'replace' );
-								$registered_block_type->style_handles[ $index ] = $legacy_handle;
-							}
-						}
 						$this->registered_blocks[ $block_class ] = $registered_block_type->name;
 					}
 				}
