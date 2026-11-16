@@ -920,6 +920,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					$attribute_name = wc_clean( $attribute['name'] );
 				}
 
+				if ( array_key_exists( 'term_ids', $attribute ) && ( ! $attribute_id || ! is_array( $attribute['term_ids'] ) ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_term_id', esc_html__( 'Term IDs must be an array belonging to a valid global attribute.', 'woocommerce' ), 400 );
+				}
+
 				if ( ! $attribute_id && ! $attribute_name ) {
 					continue;
 				}
@@ -927,7 +931,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				if ( $attribute_id ) {
 					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
 
-					if ( isset( $attribute['term_ids'] ) && is_array( $attribute['term_ids'] ) ) {
+					if ( array_key_exists( 'term_ids', $attribute ) ) {
+						if ( ! $attribute_name || ! taxonomy_exists( $attribute_name ) ) {
+							throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_term_id', esc_html__( 'Term IDs must be an array belonging to a valid global attribute.', 'woocommerce' ), 400 );
+						}
+
 						// Term IDs identify terms exactly, even when several terms share a name.
 						$values = array();
 						foreach ( $attribute['term_ids'] as $posted_term_id ) {

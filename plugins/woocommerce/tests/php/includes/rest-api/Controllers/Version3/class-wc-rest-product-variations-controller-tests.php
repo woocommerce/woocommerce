@@ -1662,6 +1662,13 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 		$variation->set_parent_id( $product->get_id() );
 		$variation->set_attributes( array( $taxonomy => $selected_slug ) );
 		$variation->save();
+		$attachment_id = $this->factory->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		update_post_meta( $attachment_id, '_wp_attachment_image_alt', 'Original image text' );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/batch' );
 		$request->set_body_params(
@@ -1669,6 +1676,10 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 				'update' => array(
 					array(
 						'id'         => $variation->get_id(),
+						'image'      => array(
+							'id'  => $attachment_id,
+							'alt' => 'Changed by rejected request',
+						),
 						'attributes' => array(
 							array(
 								'id'      => $attribute['attribute_id'],
@@ -1683,6 +1694,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'woocommerce_rest_invalid_attribute_term_id', $data['update'][0]['error']['code'] ?? null, 'The term ID should be rejected.' );
 		$this->assertSame( $selected_slug, wc_get_product( $variation->get_id() )->get_attributes()[ $taxonomy ], 'The saved selection should not change.' );
+		$this->assertSame( 'Original image text', get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ), 'Rejected requests must not update attachment metadata.' );
 	}
 
 	/**

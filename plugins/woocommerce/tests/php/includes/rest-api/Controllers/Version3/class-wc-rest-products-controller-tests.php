@@ -3017,13 +3017,16 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox An invalid attribute term ID is rejected instead of selecting a different term.
-	 * @testWith [-1, 0]
-	 *           [1, 0.5]
+	 * @testWith ["negative"]
+	 *           ["fractional"]
+	 *           ["scalar"]
+	 *           ["null"]
+	 *           ["unknown_attribute"]
+	 *           ["missing_attribute"]
 	 *
-	 * @param int   $sign   Multiplier applied to a real term ID.
-	 * @param float $offset Fraction added to the term ID.
+	 * @param string $scenario Invalid term-ID payload to submit.
 	 */
-	public function test_batch_update_product_rejects_negative_attribute_term_id( int $sign, float $offset ): void {
+	public function test_batch_update_product_rejects_negative_attribute_term_id( string $scenario ): void {
 		list( $attribute, $first_term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
 		$taxonomy = $attribute['attribute_taxonomy'];
 
@@ -3035,6 +3038,16 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$product->set_attributes( array( $product_attribute ) );
 		$product->save();
 
+		$unknown_term = 'unknown_attribute' === $scenario ? $this->factory->term->create( array( 'taxonomy' => 'product_cat' ) ) : 0;
+		$term_ids     = array(
+			'negative'          => array( -$first_term_id ),
+			'fractional'        => array( $first_term_id + 0.5 ),
+			'scalar'            => $first_term_id,
+			'null'              => null,
+			'unknown_attribute' => array( $unknown_term ),
+			'missing_attribute' => array( $first_term_id ),
+		)[ $scenario ];
+
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
 		$request->set_body_params(
 			array(
@@ -3043,8 +3056,9 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 						'id'         => $product->get_id(),
 						'attributes' => array(
 							array(
-								'id'       => $attribute['attribute_id'],
-								'term_ids' => array( $sign * $first_term_id + $offset ),
+								'id'       => 'unknown_attribute' === $scenario ? PHP_INT_MAX : ( 'missing_attribute' === $scenario ? 0 : $attribute['attribute_id'] ),
+								'name'     => 'Color',
+								'term_ids' => $term_ids,
 							),
 						),
 					),
