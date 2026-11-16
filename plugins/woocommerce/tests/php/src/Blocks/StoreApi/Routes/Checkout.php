@@ -210,6 +210,8 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 			unset( WC()->countries->locale );
 			WC()->cart->empty_cart();
+			// A test that created an account leaves it signed in; sign out first so the next test gets a guest session ID, not that user's.
+			wp_set_current_user( 0 );
 			WC()->session->destroy_session();
 			WC()->customer = null;
 			WC()->initialize_cart();
