@@ -100,11 +100,13 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * @testdox Order Again skips an item whose ordered value no longer matches a variation attribute changed from "Any" to a fixed value.
 	 * @testWith ["Blue", 0]
 	 *           ["Red", 1]
+	 *           ["A&amp;B", 1, "A&amp;amp;B"]
 	 *
 	 * @param string $ordered_value  Value stored on the order item.
 	 * @param int    $expected_items Cart items expected after Order Again.
+	 * @param string $fixed_value    Current variation attribute value.
 	 */
-	public function test_order_again_rejects_ordered_value_that_no_longer_matches_fixed_attribute( string $ordered_value, int $expected_items ): void {
+	public function test_order_again_rejects_ordered_value_that_no_longer_matches_fixed_attribute( string $ordered_value, int $expected_items, string $fixed_value = 'Red' ): void {
 		$user_id = $this->factory->user->create();
 		wp_set_current_user( $user_id );
 
@@ -115,7 +117,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$attribute = new WC_Product_Attribute();
 		$attribute->set_name( 'Colour' );
-		$attribute->set_options( array( 'Red', 'Blue' ) );
+		$attribute->set_options( array( $fixed_value, 'Blue' ) );
 		$attribute->set_variation( true );
 
 		$variable_product = new WC_Product_Variable();
@@ -134,7 +136,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$order_item->set_variation( array( 'attribute_colour' => $ordered_value ) );
 		$order_item->save();
 
-		$variation->set_attributes( array( 'colour' => 'Red' ) );
+		$variation->set_attributes( array( 'colour' => $fixed_value ) );
 		$variation->save();
 
 		$cart_session = new WC_Cart_Session( WC()->cart );
@@ -144,7 +146,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$this->assertCount( $expected_items, $populated, 'Only an ordered value that still matches the fixed attribute should be re-added.' );
 		if ( $expected_items ) {
-			$this->assertSame( array( 'attribute_colour' => 'Red' ), array_values( $populated )[0]['variation'] );
+			$this->assertSame( array( 'attribute_colour' => $fixed_value ), array_values( $populated )[0]['variation'] );
 		}
 	}
 

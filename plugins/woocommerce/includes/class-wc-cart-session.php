@@ -646,10 +646,11 @@ final class WC_Cart_Session {
 				return $is_taxonomy ? sanitize_title( $raw ) : wp_strip_all_tags( html_entity_decode( $raw, ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 			};
 			$ordered     = $normalize( (string) $item->get_meta( $meta_key ) );
+			$recorded    = $is_taxonomy ? $ordered : wp_strip_all_tags( (string) $item->get_meta( $meta_key ) );
 
 			if ( '' === $value ) {
 				$value = $ordered;
-			} elseif ( '' !== $ordered && $ordered !== $normalize( (string) $value ) ) {
+			} elseif ( '' !== $ordered && $recorded !== $normalize( (string) $value ) ) {
 				return null;
 			}
 
