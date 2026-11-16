@@ -2093,9 +2093,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		// Reduced-rate class (20%) applied via filter: ex-tax subtotal is unchanged, total rises to reflect higher rate.
 		$this->assertEquals( '5.71', WC()->cart->get_subtotal() );
 		$this->assertEquals( '6.85', WC()->cart->get_total( 'edit' ) );
-
-		remove_filter( 'woocommerce_product_get_tax_class', array( $this, 'change_tax_class_filter' ) );
-		remove_filter( 'woocommerce_product_variation_get_tax_class', array( $this, 'change_tax_class_filter' ) );
 	}
 
 	/**

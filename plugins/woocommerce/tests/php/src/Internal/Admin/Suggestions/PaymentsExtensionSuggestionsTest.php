@@ -178,8 +178,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			$this->assertNotContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $square['tags'] );
 			$this->assertNotContains( PaymentsExtensionSuggestions::TAG_PREFERRED_OFFLINE, $square['tags'] );
 		}
-
-		delete_option( OnboardingProfile::DATA_OPTION );
 	}
 
 	/**

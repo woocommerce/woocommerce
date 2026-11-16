@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+In block email product collections, hide catalog-hidden products, apply exclusions to picked products, and use current sales.

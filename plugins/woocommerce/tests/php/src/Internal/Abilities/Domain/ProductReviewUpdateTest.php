@@ -29,13 +29,46 @@ class ProductReviewUpdateTest extends \WC_Unit_Test_Case {
 	private $product_id;
 
 	/**
+	 * A shop manager that every test acts as.
+	 *
+	 * @var int
+	 */
+	private static $shop_manager_id;
+
+	/**
+	 * The product every test reviews; each test's changes to it roll back.
+	 *
+	 * @var int
+	 */
+	private static $shared_product_id;
+
+	/**
+	 * Create the fixtures that no test changes beyond its own transaction.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$shop_manager_id   = $factory->user->create( array( 'role' => 'shop_manager' ) );
+		self::$shared_product_id = self::with_direct_product_attribute_lookup_updates(
+			static fn() => \WC_Helper_Product::create_simple_product()
+		)->get_id();
+	}
+
+	/**
+	 * Delete the shared product, whose lookup rows the WordPress class cleanup leaves behind.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		wc_get_product( self::$shared_product_id )->delete( true );
+	}
+
+	/**
 	 * Set up a shop manager and a product.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+		wp_set_current_user( self::$shop_manager_id );
 		$this->sut        = new \WP_Ability( ProductReviewUpdate::get_name(), ProductReviewUpdate::get_registration_args() );
-		$this->product_id = \WC_Helper_Product::create_simple_product()->get_id();
+		$this->product_id = self::$shared_product_id;
 	}
 
 	/**
@@ -300,6 +333,24 @@ class ProductReviewUpdateTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 'woocommerce_ability_product_review_status_locked', $result->get_error_code() );
 		$this->assertStringNotContainsString( 'Restore the product', $result->get_error_message(), 'Only a trashed product needs restoring.' );
+	}
+
+	/**
+	 * @testdox Should trash a review when the trashable filter returns a truthy non-boolean, as REST does.
+	 */
+	public function test_truthy_trashable_filter_allows_trash(): void {
+		$id = $this->review( 'approved' );
+		add_filter( 'woocommerce_rest_product_review_trashable', fn() => 1 );
+
+		$result = $this->sut->execute(
+			array(
+				'id'     => $id,
+				'status' => 'trash',
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'trash', get_comment( $id )->comment_approved );
 	}
 
 	/**

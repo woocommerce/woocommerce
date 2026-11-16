@@ -57,8 +57,6 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $this->sut->is_verified( $user_id ), 'User should be verified after mark_verified()' );
 		$this->assertSame( 1, $hook_calls, 'Hook should fire exactly once' );
 		$this->assertSame( $user_id, $hook_arg, 'Hook should receive the correct user ID' );
-
-		remove_action( 'woocommerce_customer_email_verified', $listener );
 	}
 
 	/**
@@ -196,8 +194,6 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( 0, $hook_calls, 'A mismatched email must not fire the verification hook' );
 		$this->assertTrue( $this->sut->has_pending_key( $user_id ), 'A mismatched email must not consume the pending key' );
 		$this->assertFalse( $this->sut->check_verification_key( $user_id, $key ), 'The key must remain bound to the original email' );
-
-		remove_action( 'woocommerce_customer_email_verified', $listener );
 	}
 
 	/**

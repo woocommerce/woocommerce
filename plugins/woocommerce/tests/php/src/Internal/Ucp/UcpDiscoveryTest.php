@@ -43,10 +43,6 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wp_rewrite;
 		unset( $wp_rewrite->extra_rules_top[ self::RULE ] );
-		remove_filter( 'query_vars', array( $this->sut, 'add_query_var' ), 0 );
-		remove_action( 'parse_request', array( $this->sut, 'maybe_render' ), 0 );
-		remove_action( 'admin_init', array( $this->sut, 'maybe_sync_file' ) );
-		remove_action( 'deactivate_' . plugin_basename( WC_PLUGIN_FILE ), array( $this->sut, 'delete_file' ) );
 		delete_option( 'woocommerce_queue_flush_rewrite_rules' );
 		if ( is_file( $this->file ) ) {
 			wp_delete_file( $this->file );

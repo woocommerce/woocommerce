@@ -40,6 +40,13 @@ class UcpCart extends UcpCartTestCase {
 	);
 
 	/**
+	 * The global size attribute the class fixtures created, or 0 when one already existed.
+	 *
+	 * @var int
+	 */
+	private static $size_attribute_id = 0;
+
+	/**
 	 * Create immutable fixtures before route registration starts.
 	 */
 	public static function wpSetUpBeforeClass(): void {
@@ -81,9 +88,14 @@ class UcpCart extends UcpCartTestCase {
 
 		self::$limited_stock_id = $limited[0]->get_id();
 
-		$fixtures  = new \Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData();
-		$parent    = $fixtures->get_variable_product( array( 'name' => 'UCP Cart Tee' ), array( $fixtures->get_product_attribute( 'size', array( 'small', 'large' ) ) ) );
-		$variation = $fixtures->get_variation_product(
+		$fixtures             = new \Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData();
+		$attribute_ids_before = array_map( 'intval', wc_get_attribute_taxonomy_ids() );
+		$size                 = $fixtures->get_product_attribute( 'size', array( 'small', 'large' ) );
+		// The helper matches "size" as a label before a slug, so check the ID it returns, not the slug.
+		$size_existed            = in_array( (int) $size['attribute_id'], $attribute_ids_before, true );
+		self::$size_attribute_id = $size_existed ? 0 : $size['attribute_id'];
+		$parent                  = $fixtures->get_variable_product( array( 'name' => 'UCP Cart Tee' ), array( $size ) );
+		$variation               = $fixtures->get_variation_product(
 			$parent->get_id(),
 			array( 'pa_size' => 'small' ),
 			array( 'regular_price' => '12.00' )
@@ -110,6 +122,13 @@ class UcpCart extends UcpCartTestCase {
 				array( self::$limited_stock_id, self::$variable['variation'], self::$variable['parent'] )
 			)
 		);
+
+		// Class fixtures are committed, so a created attribute would outlive the class, and a later
+		// fixture asking for a "Size" attribute would get this one with its lowercase label.
+		if ( self::$size_attribute_id ) {
+			wc_delete_attribute( self::$size_attribute_id );
+			self::$size_attribute_id = 0;
+		}
 	}
 
 	/**
@@ -254,14 +273,10 @@ class UcpCart extends UcpCartTestCase {
 		$bind->setAccessible( true );
 		$bind->invoke( $route, new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts' ) );
 
-		try {
-			$this->assertSame(
-				SessionHandler::class,
-				apply_filters( 'woocommerce_session_handler', \WC_Session_Handler::class )
-			);
-		} finally {
-			remove_filter( 'woocommerce_session_handler', array( AbstractCartRoute::class, 'session_handler_class' ) );
-		}
+		$this->assertSame(
+			SessionHandler::class,
+			apply_filters( 'woocommerce_session_handler', \WC_Session_Handler::class )
+		);
 	}
 
 	/**

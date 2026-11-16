@@ -147,7 +147,6 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 		if ( $this->flush_hook_was_registered ) {
 			add_action( 'woocommerce_after_register_post_type', array( 'WC_Post_Types', 'maybe_flush_rewrite_rules' ) );
 		}
-		remove_filter( 'flush_rewrite_rules_hard', '__return_false' );
 		wp_installing( $this->original_installing );
 
 		parent::tearDown();

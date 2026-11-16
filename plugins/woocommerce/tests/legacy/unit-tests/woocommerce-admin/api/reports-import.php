@@ -271,11 +271,22 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$product->set_regular_price( 25 );
 		$product->save();
 
-		for ( $i = 0; $i < 25; $i++ ) {
+		for ( $i = 0; $i < 3; $i++ ) {
 			$order = WC_Helper_Order::create_order( 1, $product );
 			$order->set_status( OrderStatus::COMPLETED );
 			$order->save();
 		}
+
+		// Delete the orders in two batches, as a larger store would.
+		add_filter(
+			'woocommerce_analytics_regenerate_batch_size',
+			function ( $batch_size, $scheduler, $action ) {
+				unset( $scheduler );
+				return 'delete' === $action ? 2 : $batch_size;
+			},
+			10,
+			3
+		);
 
 		// Check that stats exist before deleting.
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
@@ -286,7 +297,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 25, $reports );
+		$this->assertCount( 3, $reports );
 
 		$request = new WP_REST_Request( 'GET', '/wc-analytics/reports/customers' );
 		$request->set_query_params( array( 'per_page' => 25 ) );

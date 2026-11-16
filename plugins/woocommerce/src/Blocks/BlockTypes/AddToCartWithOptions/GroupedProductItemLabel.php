@@ -13,7 +13,6 @@ use WP_Block;
  * It's responsible to render the label for each child product.
  */
 class GroupedProductItemLabel extends AbstractBlock {
-
 	use EnableBlockJsonAssetsTrait;
 
 	/**

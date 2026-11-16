@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Agent readiness: more store checks, GTIN and brand checks on the served page, and declared items behind the agent readiness flag; nothing ships to merchants.
