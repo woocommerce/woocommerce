@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.7.0
+ * @version 11.4.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
 
 <!-- wp:paragraph -->
 <p><?php
-	echo esc_html__( 'Woo! Some items you purchased are being fulfilled. You can use the below information to track your shipment:', 'woocommerce' );
+	echo esc_html__( 'Woo! Here’s what’s being fulfilled from your order. You can use the below information to track your shipment:', 'woocommerce' );
 ?></p>
 <!-- /wp:paragraph -->
 

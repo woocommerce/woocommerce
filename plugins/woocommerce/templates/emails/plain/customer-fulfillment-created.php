@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 10.1.0
+ * @version 11.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -21,7 +21,7 @@ echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
 echo esc_html( wp_strip_all_tags( $email_heading ) );
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-echo esc_html__( 'Woo! Some items you purchased are being fulfilled. You can use the below information to track your shipment:', 'woocommerce' ) . "\n\n";
+echo esc_html__( 'Woo! Here’s what’s being fulfilled from your order. You can use the below information to track your shipment:', 'woocommerce' ) . "\n\n";
 
 /**
  * Display fulfillment details.

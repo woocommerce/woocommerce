@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\HTML
- * @version 10.4.0
+ * @version 11.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <div class="email-introduction">
-	<p><?php echo esc_html__( 'Woo! Some items you purchased are being fulfilled. You can use the below information to track your shipment:', 'woocommerce' ); ?></p>
+	<p><?php echo esc_html__( 'Woo! Here’s what’s being fulfilled from your order. You can use the below information to track your shipment:', 'woocommerce' ); ?></p>
 </div>
 
 <?php
