@@ -569,6 +569,35 @@ class FulfillmentsCsvImporter {
 			return $this->fail( 'fulfillment_locked', __( 'The fulfillment with this tracking number is locked and cannot be changed.', 'woocommerce' ), $order_id );
 		}
 
+		$result = $this->save_fulfillment(
+			$order,
+			$existing,
+			$items,
+			array(
+				'tracking_number' => $tracking_number,
+				'provider'        => $provider,
+				'tracking_url'    => $tracking_url,
+			),
+			$row_number
+		);
+		if ( 'failed' !== $result['status'] ) {
+			$seen[ $pair ] = true;
+		}
+		return $result;
+	}
+
+	/**
+	 * Create a fulfilled fulfillment for the order, or update the matching one, and notify the customer when asked.
+	 *
+	 * @param WC_Order                                                            $order      Order of the row.
+	 * @param Fulfillment|null                                                    $existing   Fulfillment with the row's tracking number, if any.
+	 * @param array<int, array{item_id:int, qty:int}>|null                        $items      Items from the items cell; null when the cell is blank.
+	 * @param array{tracking_number:string, provider:string, tracking_url:string} $fields     Validated cells; the URL may be empty.
+	 * @param int                                                                 $row_number Physical record number, for the log.
+	 * @return array<string, mixed> Row result without the row number and order number.
+	 */
+	private function save_fulfillment( WC_Order $order, ?Fulfillment $existing, ?array $items, array $fields, int $row_number ): array {
+		$order_id      = $order->get_id();
 		$fulfillment   = $existing ?? new Fulfillment();
 		$was_fulfilled = null !== $existing && $existing->get_is_fulfilled();
 		if ( null === $existing ) {
@@ -584,11 +613,11 @@ class FulfillmentsCsvImporter {
 			$fulfillment->set_items( $items );
 		}
 		$fulfillment->set_status( 'fulfilled' );
-		$fulfillment->set_tracking_number( $tracking_number );
-		$fulfillment->set_shipment_provider( $provider );
+		$fulfillment->set_tracking_number( $fields['tracking_number'] );
+		$fulfillment->set_shipment_provider( $fields['provider'] );
 		// A blank URL cell keeps the stored URL on an update.
-		if ( '' !== $tracking_url ) {
-			$fulfillment->set_tracking_url( $tracking_url );
+		if ( '' !== $fields['tracking_url'] ) {
+			$fulfillment->set_tracking_url( $fields['tracking_url'] );
 		}
 
 		try {
@@ -605,7 +634,6 @@ class FulfillmentsCsvImporter {
 			unset( $this->fulfillments_cache[ $order_id ] );
 		}
 
-		$seen[ $pair ] = true;
 		return array(
 			'status'         => null === $existing ? 'created' : 'updated',
 			'message'        => null === $existing ? __( 'Fulfillment created.', 'woocommerce' ) : __( 'Fulfillment updated.', 'woocommerce' ),
