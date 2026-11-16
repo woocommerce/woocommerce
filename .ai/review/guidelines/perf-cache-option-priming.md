@@ -18,7 +18,7 @@
 - Product collections rendered with images without `ProductUtil::prime_image_caches()`.
 - Sequential non-autoloaded `get_option()` calls (use `wp_prime_option_caches`).
 - Removing an effective prime.
-- Dead priming: after a full-post `WP_Query`, on order line items, or behind `is_callable` guards.
+- Dead priming: after a full-post `WP_Query`, on line item product IDs that order `get_items()` already warmed, or behind `is_callable` guards.
 
 **How to confirm:** See where the IDs come from (`'fields' => 'ids'` or full posts). Check whether the options are autoloaded (WC settings API options are). Check transient names are only primed under `! wp_using_ext_object_cache() && ! wp_installing()`.
 

@@ -72,7 +72,10 @@ This controls false positives. Follow it strictly.
   batching argument (e.g. `get_comments( [ 'update_comment_post_cache' => true ] )`), runs per-item
   queries instead of two batched ones. Flag the introduction. Flag REMOVAL of effective priming as a
   straight regression. `_prime_post_caches()` does not load HPOS orders: for `wc_get_order()` loops
-  the fix is `WC_Order_Factory::get_orders()`.
+  the fix is `WC_Order_Factory::get_orders()`. It is not a drop-in replacement: it returns a list in
+  input order (input keys are dropped), returns a duplicate ID once, and does not return `false` for
+  a missing ID (it throws on post-based order storage and leaves a non-order entry in the list under
+  HPOS; `$skip_invalid` fixes neither). A suggested fix must keep the behavior the caller relies on.
 - Exempt: product and variation loads reached through order `get_items()`. The order data store's
   batch prime and the lazy `get_items()` path already warm those caches. Not exempt: the parent of a
   variation (the lazy path primes the variation only) and items added through the
@@ -82,8 +85,9 @@ This controls false positives. Follow it strictly.
     - after a WP_Query that loaded full post objects (no `fields` argument): it already primed post,
     meta, and term caches, and `_prime_post_caches()` expects IDs, not `WP_Post[]`. A
     `'fields' => 'ids'` query primes nothing, so priming its IDs afterward is CORRECT; don't flag it;
-    - on product or variation IDs collected from order `get_items()`
-    (`prime_product_post_caches_for_order_items` and the lazy path already primed them);
+    - on product or variation IDs that order `get_items()` already warmed
+    (`prime_product_post_caches_for_order_items` and the lazy path). Priming the "Not exempt" IDs
+    above is correct, not dead;
     - on IDs an object-cache layer (e.g. OrderCache) already resolved; prime only the uncached rest.
 - Rendering a product or variation collection with images needs the attachment prime too. For
   variations this is two-phase: prime variation posts, then collect `_thumbnail_id` and
