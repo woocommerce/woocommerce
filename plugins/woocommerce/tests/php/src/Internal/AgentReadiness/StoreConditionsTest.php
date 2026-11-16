@@ -199,6 +199,7 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 			$this->assertStringContainsString( 'writable', $fix );
 			$checks = array_column( $this->sut->all(), null, 'id' );
 			$this->assertSame( admin_url( 'options-permalink.php' ), $checks['ucp_discovery']['fix_url'] );
+			$this->assertSame( 'Use a readable permalink structure', $checks['ucp_discovery']['label'], 'Plain permalinks are the cause, so the step names them' );
 		} finally {
 			chmod( $locked, 0755 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
 			rmdir( $locked ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
@@ -245,6 +246,7 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 			$this->assertStringContainsString( $path, $this->ucp_discovery_fix() );
 			$checks = array_column( $this->sut->all(), null, 'id' );
 			$this->assertSame( '', $checks['ucp_discovery']['fix_url'] );
+			$this->assertSame( 'Fix your connection URL', $checks['ucp_discovery']['label'], 'A file is the cause, not permalinks' );
 
 			// Following the fix passes the check: with the file gone and pretty permalinks, nothing is in the way.
 			if ( 'unreadable' === $file ) {

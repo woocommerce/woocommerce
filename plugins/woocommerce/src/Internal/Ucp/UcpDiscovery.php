@@ -111,10 +111,10 @@ final class UcpDiscovery implements RegisterHooksInterface {
 				return sprintf( __( 'Delete the %1$s file. It has an old profile. If you can\'t delete it, make %2$s writable by the web server so WooCommerce can replace it.', 'woocommerce' ), $path, $dir );
 			case 'no_file':
 				if ( is_multisite() ) {
-					return __( 'Choose a permalink structure other than Plain under Settings > Permalinks. A structure that starts with index.php doesn\'t serve /.well-known/ucp either.', 'woocommerce' );
+					return __( 'Choose any structure except Plain under Settings > Permalinks. Structures that start with index.php don\'t work either.', 'woocommerce' );
 				}
 				/* translators: %s: folder path. */
-				return sprintf( __( 'Choose a permalink structure other than Plain under Settings > Permalinks. A structure that starts with index.php doesn\'t serve /.well-known/ucp either. Or make %s writable by the web server so WooCommerce can write the discovery file.', 'woocommerce' ), $dir );
+				return sprintf( __( 'Choose any structure except Plain under Settings > Permalinks. Structures that start with index.php don\'t work either. Or make %s writable by the web server so WooCommerce can write the file.', 'woocommerce' ), $dir );
 			default:
 				return '';
 		}

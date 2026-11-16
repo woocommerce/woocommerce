@@ -827,7 +827,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		if ( 'ucp_discovery' === $check['id'] ) {
 			$fix = (string) ( $check['fix'] ?? '' );
 			return array(
-				'' !== $fix ? $fix : __( 'Make the UCP address reachable', 'woocommerce' ),
+				'' !== $fix ? $fix : __( 'Fix your connection URL', 'woocommerce' ),
 				__( 'Open permalinks', 'woocommerce' ),
 				(string) ( $check['fix_url'] ?? '' ),
 			);
