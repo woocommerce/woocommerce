@@ -77,6 +77,24 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 	}
 
 	/**
+	 * Return the main instance of WC_Cart class.
+	 *
+	 * @deprecated 11.4.0 Use WC()->cart instead.
+	 * @return \WC_Cart|null
+	 */
+	protected function get_cart_instance() {
+		wc_deprecated_function( __METHOD__, '11.4.0', 'WC()->cart' );
+
+		$cart = WC()->cart;
+
+		if ( $cart && $cart instanceof \WC_Cart ) {
+			return $cart;
+		}
+
+		return null;
+	}
+
+	/**
 	 * Computes the total items description text based on which settings are enabled.
 	 *
 	 * @return string The description text for the total items, or empty string if none are enabled.
