@@ -1,0 +1,19 @@
+{
+	"name": "woocommerce/model-checking-php",
+	"description": "An isolated finite-state safety-checking proof of concept.",
+	"type": "project",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=7.4"
+	},
+	"autoload": {
+		"psr-4": {
+			"Automattic\\WooCommerce\\Tools\\ModelChecking\\": "src/",
+			"Automattic\\WooCommerce\\Tools\\ModelChecking\\Examples\\": "examples/"
+		}
+	},
+	"scripts": {
+		"check": "php -d memory_limit=512M run.php",
+		"test": "php tests/ExplorerChecks.php"
+	}
+}
