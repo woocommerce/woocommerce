@@ -3355,24 +3355,69 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Clearing an expired sale end date compares normalized prices and preserves a newly scheduled sale.
+	 * @testWith [".", "5.00", "", ""]
+	 *           [",", "5,00", "", ""]
+	 *           [".", "6.00", "", "6.00"]
+	 *           [".", "5.00", "2099-01-01", "5.00"]
+	 *
+	 * @param string $separator      Store decimal separator.
+	 * @param string $sale_price     Imported sale price.
+	 * @param string $sale_starts    Imported sale start date.
+	 * @param string $expected_price Expected sale price after import.
+	 */
+	public function test_import_expired_sale_checks_price_and_new_schedule( string $separator, string $sale_price, string $sale_starts, string $expected_price ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->set_sale_price( 5 );
+		$product->set_date_on_sale_from( '2020-01-01' );
+		$product->set_date_on_sale_to( '2020-02-01' );
+		$product->save();
+
+		$original_separator = get_option( 'woocommerce_price_decimal_sep' );
+		update_option( 'woocommerce_price_decimal_sep', $separator );
+		try {
+			$this->import_sale_dates_row( $product->get_id() . ',' . $sale_starts . ',', $sale_price );
+		} finally {
+			update_option( 'woocommerce_price_decimal_sep', $original_separator );
+		}
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertSame( $expected_price, $product->get_sale_price( 'edit' ) );
+		$this->assertNull( $product->get_date_on_sale_to( 'edit' ) );
+		if ( '' !== $sale_starts ) {
+			$this->assertSame( wc_string_to_datetime( $sale_starts )->getTimestamp(), $product->get_date_on_sale_from( 'edit' )->getTimestamp() );
+			$this->assertFalse( $product->is_on_sale() );
+		}
+	}
+
+	/**
 	 * Imports one row that updates a product's sale dates.
 	 *
-	 * @param string $csv_row CSV row after the header.
+	 * @param string      $csv_row    CSV row after the header.
+	 * @param string|null $sale_price Optional sale price column.
 	 */
-	private function import_sale_dates_row( string $csv_row ): void {
+	private function import_sale_dates_row( string $csv_row, ?string $sale_price = null ): void {
 		$csv_file = trailingslashit( get_temp_dir() ) . 'import-sale-dates.csv';
-		file_put_contents( $csv_file, "ID,Date sale price starts,Date sale price ends\n" . $csv_row . "\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+		$header   = 'ID,Date sale price starts,Date sale price ends';
+		$mapping  = array(
+			'ID'                     => 'id',
+			'Date sale price starts' => 'date_on_sale_from',
+			'Date sale price ends'   => 'date_on_sale_to',
+		);
+		if ( null !== $sale_price ) {
+			$header               .= ',Sale price';
+			$csv_row              .= ',"' . str_replace( '"', '""', $sale_price ) . '"';
+			$mapping['Sale price'] = 'sale_price';
+		}
+		file_put_contents( $csv_file, $header . "\n" . $csv_row . "\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
 
 		$importer = new WC_Product_CSV_Importer(
 			$csv_file,
 			array(
 				'parse'           => true,
 				'update_existing' => true,
-				'mapping'         => array(
-					'ID'                     => 'id',
-					'Date sale price starts' => 'date_on_sale_from',
-					'Date sale price ends'   => 'date_on_sale_to',
-				),
+				'mapping'         => $mapping,
 			)
 		);
 		$importer->import();

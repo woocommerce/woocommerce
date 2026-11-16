@@ -396,9 +396,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 			// A sale that already ended keeps its sale price. Clearing the expired end date would put that price back on sale.
 			if ( $updating && isset( $data['date_on_sale_to'] ) && '' === $data['date_on_sale_to'] ) {
-				$sale_ends = $object->get_date_on_sale_to( 'edit' );
-				$old_price = $object->get_sale_price( 'edit' );
-				if ( $sale_ends && $sale_ends->getTimestamp() <= time() && ( ! isset( $data['sale_price'] ) || (string) $data['sale_price'] === (string) $old_price ) ) {
+				$sale_ends  = $object->get_date_on_sale_to( 'edit' );
+				$old_price  = $object->get_sale_price( 'edit' );
+				$sale_from  = isset( $data['date_on_sale_from'] ) && '' !== $data['date_on_sale_from'] ? wc_string_to_datetime( $data['date_on_sale_from'] ) : null;
+				$same_price = ! isset( $data['sale_price'] ) || wc_format_decimal( $data['sale_price'], false, true ) === wc_format_decimal( $old_price, false, true );
+				if ( $sale_ends && $sale_ends->getTimestamp() <= time() && ( ! $sale_from || $sale_from->getTimestamp() <= time() ) && $same_price ) {
 					$data['sale_price'] = '';
 				}
 			}
