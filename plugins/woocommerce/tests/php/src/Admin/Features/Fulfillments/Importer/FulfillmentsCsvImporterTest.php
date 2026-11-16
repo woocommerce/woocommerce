@@ -1825,6 +1825,27 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox No notification fires for a row that a listener saved as not fulfilled.
+	 */
+	public function test_no_notification_for_a_fulfillment_saved_as_not_fulfilled(): void {
+		$order = OrderHelper::create_order();
+		add_filter(
+			'woocommerce_fulfillment_before_create',
+			function ( $fulfillment ) {
+				$fulfillment->set_status( 'unfulfilled' );
+				return $fulfillment;
+			}
+		);
+		$fired = did_action( 'woocommerce_fulfillment_created_notification' );
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,ups\n", array( 'notify_customer' => true ) );
+
+		$this->assertSame( FulfillmentsCsvImporter::STATUS_CREATED, $result['rows'][0]['status'] );
+		$this->assertFalse( $result['rows'][0]['notified'] );
+		$this->assertSame( $fired, did_action( 'woocommerce_fulfillment_created_notification' ) );
+	}
+
+	/**
 	 * @testdox A notification listener that throws leaves the row imported and not counted as notified.
 	 */
 	public function test_failing_notification_keeps_the_row_imported(): void {

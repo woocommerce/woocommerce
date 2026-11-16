@@ -714,7 +714,7 @@ class FulfillmentsCsvImporter {
 			'message'        => null === $existing ? __( 'Fulfillment created.', 'woocommerce' ) : __( 'Fulfillment updated.', 'woocommerce' ),
 			'order_id'       => $order_id,
 			'fulfillment_id' => $fulfillment->get_id(),
-			'notified'       => $this->options['notify_customer'] && $this->notify_customer( $order, $fulfillment, $was_fulfilled, $row_number ),
+			'notified'       => $this->options['notify_customer'] && $fulfillment->get_is_fulfilled() && $this->notify_customer( $order, $fulfillment, $was_fulfilled, $row_number ),
 		);
 	}
 
@@ -722,13 +722,14 @@ class FulfillmentsCsvImporter {
 	 * Fire the customer notification the fulfillments screen fires for the same change.
 	 *
 	 * The row is already saved, so a listener that throws is logged and the row still
-	 * counts as imported.
+	 * counts as imported. True means the action ran, not that an email was sent: the
+	 * email can be turned off in the settings.
 	 *
 	 * @param WC_Order    $order         Order of the row.
 	 * @param Fulfillment $fulfillment   Saved fulfillment.
 	 * @param bool        $was_fulfilled Whether the fulfillment was fulfilled before this row.
 	 * @param int         $row_number    Physical record number, for the log.
-	 * @return bool Whether the notification ran without an error.
+	 * @return bool Whether the notification action ran without an error.
 	 */
 	private function notify_customer( WC_Order $order, Fulfillment $fulfillment, bool $was_fulfilled, int $row_number ): bool {
 		try {
@@ -737,6 +738,7 @@ class FulfillmentsCsvImporter {
 				 * This action is documented in src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php.
 				 *
 				 * @since 10.1.0
+				 * @since 10.8.0 Added $customer_note parameter.
 				 */
 				do_action( 'woocommerce_fulfillment_updated_notification', $order->get_id(), $fulfillment, $order, '' );
 			} else {
