@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderSendEmail;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
@@ -31,6 +32,8 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolRun;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
 use Automattic\WooCommerce\Internal\AgentReadiness\RunCheckAbility;
@@ -57,6 +60,7 @@ class AbilitiesLoader {
 	private const CORE_ABILITY_DEFINITION_CLASSES = array(
 		OrdersQuery::class,
 		OrderAddNote::class,
+		OrderCreate::class,
 		OrderNotesQuery::class,
 		OrderSendEmail::class,
 		OrderUpdate::class,
@@ -77,6 +81,8 @@ class AbilitiesLoader {
 		ReportAbility::class,
 		RunCheckAbility::class,
 		ShippingZonesQuery::class,
+		SystemStatusToolsQuery::class,
+		SystemStatusToolRun::class,
 		TaxRatesQuery::class,
 		CustomersQuery::class,
 	);

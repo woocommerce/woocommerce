@@ -18,8 +18,17 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	public static function tearDownAfterClass(): void {
 		parent::tearDownAfterClass();
 
-		// Reinstall WooCommerce to ensure test environment is clean.
+		// The tests run installs inside their transaction. An install's schema changes commit the
+		// install lock it took, while its release is rolled back with the test, so the lock can
+		// still be there. Clear it, or this reinstall and every later one would do nothing.
+		delete_transient( 'wc_installing' );
+		delete_option( 'wc_installing' );
+
+		// Reinstall WooCommerce to ensure test environment is clean, and commit it: the next class
+		// reconnects to the database, which would drop the writes the install made after its last
+		// schema change, including the release of its lock.
 		WC_Install::install();
+		self::commit_transaction();
 
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {

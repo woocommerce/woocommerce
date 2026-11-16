@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
@@ -37,7 +38,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$output_checks = new StoreOutputChecks();
 		$output_checks->init( new ComingSoonHelper() );
 		$this->sut = new AgentReadiness();
-		$this->sut->init( $store_conditions, $output_checks, new RemoteRules() );
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules(), wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ) );
 	}
 
 	/**
@@ -53,6 +54,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 					'id'      => $id,
 					'test'    => $test,
 					'blocks'  => 'listing',
+					'group'   => 'find',
 					'name'    => $id,
 					'label'   => $id,
 					'why'     => '',
@@ -73,7 +75,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$output_checks->init( new ComingSoonHelper() );
 		$store_conditions = new StoreConditions();
 		$store_conditions->init( new ComingSoonHelper() );
-		$this->sut->init( $store_conditions, $output_checks, new RemoteRules() );
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules(), wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ) );
 		add_filter( 'pre_http_request', static fn() => new \WP_Error( 'http_request_failed', 'Timed out' ) );
 
 		$checks = array_column( $this->sut->get_report()['store_checks'], null, 'id' );
@@ -95,7 +97,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$report = $this->sut->get_report();
 
-		$this->assertSame( array( 'generated_at', 'products', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
+		$this->assertSame( array( 'generated_at', 'products', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'declared', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
 		$this->assertFalse( $report['truncated'] );
 		$this->assertSame( array( 'id', 'ok', 'blocks', 'level', 'name', 'label', 'why', 'fix', 'fix_url' ), array_keys( $report['store_checks'][0] ) );
 		$this->assertSame( array( 'chatgpt', 'google', 'copilot' ), array_keys( $report['channels'] ) );
@@ -272,6 +274,47 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->sut->get_report();
 
 		$this->assertArrayNotHasKey( 'duplicate_gtin', $this->sut->check_product( $first )['checks'] );
+	}
+
+	/**
+	 * @testdox Past the limit, the scan stores no shared GTINs, so checking one product reads the catalog.
+	 */
+	public function test_shared_gtins_past_the_limit(): void {
+		$scan = new ProductScan();
+		$scan->use_shared_gtins( range( 1, ProductScan::SHARED_GTINS_LIMIT ) );
+		$this->assertCount( ProductScan::SHARED_GTINS_LIMIT, $scan->shared_gtins() );
+
+		$scan->use_shared_gtins( range( 1, ProductScan::SHARED_GTINS_LIMIT + 1 ) );
+		$this->assertNull( $scan->shared_gtins() );
+	}
+
+	/**
+	 * @testdox After a stored scan, checking one product reads the scan's shared GTINs instead of every published product, and the report doesn't show them.
+	 */
+	public function test_check_product_reads_stored_shared_gtins(): void {
+		StoreOutputChecksTest::block_requests();
+		$first = WC_Helper_Product::create_simple_product();
+		$first->set_global_unique_id( '4006381333931' );
+		$first->save();
+		$second_id = WC_Helper_Product::create_simple_product()->get_id();
+		update_post_meta( $second_id, '_global_unique_id', '4006381333931' );
+		$this->sut->refresh_report();
+
+		$this->assertSame( array( '4006381333931' ), get_option( AgentReadiness::REPORT_OPTION )['shared_gtins'] );
+		$this->assertArrayNotHasKey( 'shared_gtins', $this->sut->get_cached_report() );
+
+		delete_post_meta( $second_id, '_global_unique_id' );
+		$queries = 0;
+		$count   = static function ( $query ) use ( &$queries ) {
+			$queries += false !== strpos( (string) $query, 'HAVING COUNT(*) > 1' ) ? 1 : 0;
+			return $query;
+		};
+		add_filter( 'query', $count );
+		$checks = $this->sut->check_product( $first )['checks'];
+		remove_filter( 'query', $count );
+
+		$this->assertArrayHasKey( 'duplicate_gtin', $checks, 'A GTIN change on another product waits for the next scan' );
+		$this->assertSame( 0, $queries );
 	}
 
 	/**

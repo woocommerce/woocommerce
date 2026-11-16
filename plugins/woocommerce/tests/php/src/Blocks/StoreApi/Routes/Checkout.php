@@ -64,6 +64,14 @@ class Checkout extends \WP_Test_REST_TestCase {
 	private $paypal_gateway_before_test;
 
 	/**
+	 * $_COOKIE before the test. filter_woocommerce_set_cookie_enabled() writes the cookies the
+	 * checkout sets, such as the session and login cookies, into it.
+	 *
+	 * @var array<string, string>
+	 */
+	private $cookies_before_test = array();
+
+	/**
 	 * Tax rate IDs inserted by the current test, removed in tearDown().
 	 *
 	 * @var int[]
@@ -126,6 +134,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
+		$this->cookies_before_test = $_COOKIE;
 		add_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4 );
 
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
@@ -185,13 +194,6 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 			remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 
-			remove_all_filters( 'woocommerce_get_country_locale' );
-			remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
-			remove_all_filters( 'wc_order_statuses' );
-			remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
-			remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
-			remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
-
 			update_option( 'woocommerce_ship_to_countries', 'all' );
 			update_option( 'woocommerce_allowed_countries', 'all' );
 			update_option( 'woocommerce_enable_guest_checkout', 'yes' );
@@ -220,6 +222,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 				$this->invalidate_checkout_option_caches();
 				WC()->payment_gateways()->payment_gateways = $this->payment_gateways_before_test;
 				\WC_Gateway_Paypal::set_instance( $this->paypal_gateway_before_test );
+				$_COOKIE = $this->cookies_before_test;
 			}
 		}
 	}
@@ -1881,7 +1884,6 @@ class Checkout extends \WP_Test_REST_TestCase {
 		add_action( 'woocommerce_store_api_checkout_update_order_from_request', array( $action_callback, 'do_callback' ), 10, 2 );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
-		remove_action( 'woocommerce_store_api_checkout_update_order_from_request', array( $action_callback, 'do_callback' ), 10, 2 );
 	}
 
 	/**

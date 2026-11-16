@@ -23,15 +23,6 @@ class WC_Admin_Tests_WCAdminAssets extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tear Down
-	 */
-	public function tearDown(): void {
-		remove_filter( 'woocommerce_admin_features', array( $this, 'turn_on_minified_js_feature' ), 20 );
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Filter to enable the minified-js feature.
 	 *
 	 * @param  array $features Array of active features.

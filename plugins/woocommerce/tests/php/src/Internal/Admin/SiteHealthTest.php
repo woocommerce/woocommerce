@@ -263,18 +263,14 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
 
-		try {
-			$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
+		$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
 
-			$this->assertSame( 'recommended', $result['status'], 'Request failures should not be reported as a confirmed security failure.' );
-			$this->assertSame( 'WooCommerce could not verify uploads directory protection', $result['label'], 'Request failures should report that the result could not be verified.' );
+		$this->assertSame( 'recommended', $result['status'], 'Request failures should not be reported as a confirmed security failure.' );
+		$this->assertSame( 'WooCommerce could not verify uploads directory protection', $result['label'], 'Request failures should report that the result could not be verified.' );
 
-			$this->sut->run_test( 'woocommerce_uploads_directory_protection' );
+		$this->sut->run_test( 'woocommerce_uploads_directory_protection' );
 
-			$this->assertSame( 2, $request_count, 'Each run should check again instead of reusing an earlier result.' );
-		} finally {
-			remove_filter( 'pre_http_request', $filter_callback, 10 );
-		}
+		$this->assertSame( 2, $request_count, 'Each run should check again instead of reusing an earlier result.' );
 	}
 
 	/**
@@ -298,14 +294,10 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
 
-		try {
-			$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
+		$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
 
-			$this->assertSame( 'recommended', $result['status'], 'Missing response codes should not be reported as a confirmed security failure.' );
-			$this->assertSame( 'WooCommerce could not verify uploads directory protection', $result['label'], 'Missing response codes should report that the result could not be verified.' );
-		} finally {
-			remove_filter( 'pre_http_request', $filter_callback, 10 );
-		}
+		$this->assertSame( 'recommended', $result['status'], 'Missing response codes should not be reported as a confirmed security failure.' );
+		$this->assertSame( 'WooCommerce could not verify uploads directory protection', $result['label'], 'Missing response codes should report that the result could not be verified.' );
 	}
 
 	/**
@@ -331,14 +323,10 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
 
-		try {
-			$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
+		$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
 
-			$this->assertSame( 'critical', $result['status'], 'Browsable uploads directories should remain critical.' );
-			$this->assertSame( 'WooCommerce uploads directory is browsable from the web', $result['label'], 'Browsable uploads directories should keep the confirmed security failure label.' );
-		} finally {
-			remove_filter( 'pre_http_request', $filter_callback, 10 );
-		}
+		$this->assertSame( 'critical', $result['status'], 'Browsable uploads directories should remain critical.' );
+		$this->assertSame( 'WooCommerce uploads directory is browsable from the web', $result['label'], 'Browsable uploads directories should keep the confirmed security failure label.' );
 	}
 
 	/**
@@ -367,16 +355,12 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
 
-		try {
-			$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
+		$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
 
-			$this->assertSame( 'critical', $result['status'], 'Directly downloadable files should be a confirmed security failure.' );
-			$this->assertSame( 'Downloadable product files can be accessed directly from the web', $result['label'], 'Directly downloadable files should report that files are exposed.' );
-			$this->assertStringStartsWith( $uploads['basedir'] . '/woocommerce_uploads/', $requested_paths[0], 'The check should request a file in the WooCommerce uploads directory.' );
-			$this->assertFileDoesNotExist( $requested_paths[0], 'The temporary file should be deleted after the request.' );
-		} finally {
-			remove_filter( 'pre_http_request', $filter_callback, 10 );
-		}
+		$this->assertSame( 'critical', $result['status'], 'Directly downloadable files should be a confirmed security failure.' );
+		$this->assertSame( 'Downloadable product files can be accessed directly from the web', $result['label'], 'Directly downloadable files should report that files are exposed.' );
+		$this->assertStringStartsWith( $uploads['basedir'] . '/woocommerce_uploads/', $requested_paths[0], 'The check should request a file in the WooCommerce uploads directory.' );
+		$this->assertFileDoesNotExist( $requested_paths[0], 'The temporary file should be deleted after the request.' );
 	}
 
 	/**
@@ -408,14 +392,10 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
 
-		try {
-			$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
+		$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
 
-			$this->assertSame( 'good', $result['status'], 'Files that are not served should be reported as protected.' );
-			$this->assertStringContainsString( 'Downloadable product files cannot be accessed directly from the web.', $result['description'], 'The protected description should refer to file access.' );
-		} finally {
-			remove_filter( 'pre_http_request', $filter_callback, 10 );
-		}
+		$this->assertSame( 'good', $result['status'], 'Files that are not served should be reported as protected.' );
+		$this->assertStringContainsString( 'Downloadable product files cannot be accessed directly from the web.', $result['description'], 'The protected description should refer to file access.' );
 	}
 
 	/**
@@ -443,15 +423,11 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
 
-		try {
-			$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
+		$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
 
-			$this->assertSame( 'recommended', $result['status'], 'A site that blocks every upload should not be reported as protected.' );
-			foreach ( $requested_urls as $url ) {
-				$this->assertFileDoesNotExist( str_replace( $uploads['baseurl'], $uploads['basedir'], $url ), 'Each temporary file should be deleted after its request.' );
-			}
-		} finally {
-			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		$this->assertSame( 'recommended', $result['status'], 'A site that blocks every upload should not be reported as protected.' );
+		foreach ( $requested_urls as $url ) {
+			$this->assertFileDoesNotExist( str_replace( $uploads['baseurl'], $uploads['basedir'], $url ), 'Each temporary file should be deleted after its request.' );
 		}
 	}
 
@@ -521,16 +497,11 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 		add_filter( 'pre_http_request', $http_callback );
 		add_filter( 'upload_dir', $upload_dir_callback );
 
-		try {
-			$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
+		$result = $this->sut->run_test( 'woocommerce_uploads_directory_protection' );
 
-			$this->assertSame( 'recommended', $result['status'], 'A file that cannot be written should not be reported as a confirmed security failure.' );
-			$this->assertSame( 'WooCommerce could not verify uploads directory protection', $result['label'], 'A file that cannot be written should report that the result could not be verified.' );
-			$this->assertSame( 0, $request_count, 'No request should be made without a temporary file.' );
-		} finally {
-			remove_filter( 'pre_http_request', $http_callback );
-			remove_filter( 'upload_dir', $upload_dir_callback );
-		}
+		$this->assertSame( 'recommended', $result['status'], 'A file that cannot be written should not be reported as a confirmed security failure.' );
+		$this->assertSame( 'WooCommerce could not verify uploads directory protection', $result['label'], 'A file that cannot be written should report that the result could not be verified.' );
+		$this->assertSame( 0, $request_count, 'No request should be made without a temporary file.' );
 	}
 
 	/**
