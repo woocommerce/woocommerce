@@ -83,9 +83,10 @@
 					if ( retryable ) {
 						shippingMethod.trigger( 'change:methods' );
 					} else {
-						// Saving an empty change set would just fail again, so clear the busy
-						// state without marking the form dirty.
+						// Saving an empty change set would just fail again, and nothing is left to
+						// lose, so clear the busy state and the unload warning.
 						$save_button.removeClass( 'is-busy' );
+						shippingMethodView.clearUnloadConfirmation();
 					}
 				},
 				onSaveResponse: function( response, textStatus, snapshot ) {

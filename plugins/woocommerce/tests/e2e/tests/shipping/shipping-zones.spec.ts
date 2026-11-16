@@ -642,6 +642,9 @@ test( 'leaves Save changes disabled when a settings save fails on a freshly adde
 	// The zone itself was never edited, so there is nothing to retry.
 	await expect( page.locator( '#submit' ) ).toBeDisabled();
 	await expect( page.locator( '#submit' ) ).not.toHaveClass( /is-busy/ );
+
+	// With nothing left to save, leaving the page must not raise the unsaved-changes prompt.
+	await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
 	expect( dialogMessages ).toHaveLength( 1 );
 } );
 
