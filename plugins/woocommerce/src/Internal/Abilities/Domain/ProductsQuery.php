@@ -63,7 +63,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_collection_output_schema( 'products', self::get_product_output_schema() ),
+			'output_schema'       => self::get_output_schema(),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_query_products' ),
 			'meta'                => array(
@@ -112,6 +112,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 			return array(
 				'products'    => $products,
+				'total'       => 1,
 				'total_pages' => 1,
 				'page'        => 1,
 				'per_page'    => 1,
@@ -185,10 +186,25 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		add_filter( 'posts_where', array( __CLASS__, 'limit_to_parent_types' ), 10, 2 );
 		$results = wc_get_products( $args );
-		remove_filter( 'posts_where', array( __CLASS__, 'limit_to_parent_types' ) );
 
 		$products = is_object( $results ) && isset( $results->products ) ? $results->products : array();
 		$pages    = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $products ) > 0 ? 1 : 0 );
+		$total    = is_object( $results ) && isset( $results->total ) ? (int) $results->total : count( $products );
+
+		// Posts storage skips its count when the requested page has no rows.
+		if ( 0 === $total && empty( $products ) && $page > 1 ) {
+			$count_args = array_merge(
+				$args,
+				array(
+					'page'   => 1,
+					'limit'  => 1,
+					'return' => 'ids',
+				)
+			);
+			$count      = wc_get_products( $count_args );
+			$total      = is_object( $count ) && isset( $count->total ) ? (int) $count->total : 0;
+		}
+		remove_filter( 'posts_where', array( __CLASS__, 'limit_to_parent_types' ) );
 
 		$image_ids = array_unique( array_merge( array(), ...array_map( array( __CLASS__, 'get_product_image_ids' ), $products ) ) );
 		if ( ! empty( $image_ids ) ) {
@@ -202,6 +218,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		return array(
 			'products'    => $products,
+			'total'       => $total,
 			'total_pages' => $pages,
 			'page'        => $page,
 			'per_page'    => $per_page,
@@ -259,6 +276,21 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$product_id = self::get_product_permission_id( self::get_id_from_input( $input ) );
 
 		return (bool) wc_rest_check_post_permissions( 'product', 'read', $product_id );
+	}
+
+	/**
+	 * Get the ability output schema.
+	 *
+	 * @return array
+	 */
+	private static function get_output_schema(): array {
+		$schema                        = self::get_collection_output_schema( 'products', self::get_product_output_schema() );
+		$schema['properties']['total'] = array(
+			'type'        => 'integer',
+			'description' => __( 'Total number of matching products across all pages.', 'woocommerce' ),
+		);
+
+		return $schema;
 	}
 
 	/**

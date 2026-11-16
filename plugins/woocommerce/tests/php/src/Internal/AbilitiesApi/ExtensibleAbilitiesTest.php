@@ -323,6 +323,21 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
+		$beyond = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'search'   => 'Pen',
+				'per_page' => 2,
+				'page'     => 3,
+				'filters'  => $filters,
+			)
+		);
+
+		$this->assertSame( 3, $page_one['total'] );
+		$this->assertSame( 3, $page_two['total'] );
+		$this->assertSame( 3, $beyond['total'] );
+		$this->assertSame( array(), $beyond['products'] );
+		$this->assertSame( 1, $plain['total'] );
 		$this->assertSame( 2, $page_one['total_pages'] );
 		$this->assertEqualsCanonicalizing( $with_code, array_merge( array_column( $page_one['products'], 'id' ), array_column( $page_two['products'], 'id' ) ) );
 		$this->assertSame( array( $without_code->get_id() ), array_column( $plain['products'], 'id' ) );
@@ -491,6 +506,17 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 			$this->assertSame( $hpos, OrderUtil::custom_orders_table_usage_is_enabled() );
 			$this->assertSame( $sync, OrderUtil::is_custom_order_tables_in_sync() );
+			$beyond = $this->run_ability(
+				'woocommerce/orders-query',
+				array(
+					'per_page' => 1,
+					'page'     => 3,
+					'filters'  => array( 'extensions' => array( 'test-ext' => array( 'tag' => 'gift' ) ) ),
+				)
+			);
+			$this->assertSame( 2, $output['total'] );
+			$this->assertSame( 2, $beyond['total'] );
+			$this->assertSame( array(), $beyond['orders'] );
 			$this->assertSame( 2, $output['total_pages'] );
 			$this->assertContains( $output['orders'][0]['id'], $tagged );
 		} finally {

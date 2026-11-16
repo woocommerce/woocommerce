@@ -431,7 +431,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertArrayHasKey( 'total_pages', $properties );
 			$this->assertArrayHasKey( 'page', $properties );
 			$this->assertArrayHasKey( 'per_page', $properties );
-			$this->assertArrayNotHasKey( 'total', $properties );
+			if ( 'woocommerce/payment-gateways-query' === $ability_id ) {
+				$this->assertArrayNotHasKey( 'total', $properties );
+			} else {
+				$this->assertSame( 'integer', $properties['total']['type'] );
+				$this->assertNotEmpty( $properties['total']['description'] );
+			}
 			$this->assertNotEmpty( $properties[ $collection_key ]['description'] ?? '' );
 			$this->assertNotEmpty( $properties['total_pages']['description'] ?? '' );
 			$this->assertNotEmpty( $properties['page']['description'] ?? '' );
