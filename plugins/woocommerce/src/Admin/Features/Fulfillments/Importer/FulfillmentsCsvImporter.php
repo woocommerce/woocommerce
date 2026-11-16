@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDat
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentException;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use WC_Data_Store;
 use WC_Order;
 
@@ -868,11 +869,13 @@ class FulfillmentsCsvImporter {
 			return;
 		}
 
-		// post__in is the ID argument both order data stores understand.
+		// post__in is the ID argument both order data stores understand. The default status
+		// list includes checkout drafts, which are carts that were never placed.
 		$orders = wc_get_orders(
 			array(
 				'post__in' => $ids,
 				'limit'    => count( $ids ),
+				'status'   => array_diff( array_keys( wc_get_order_statuses() ), array( 'wc-' . OrderStatus::CHECKOUT_DRAFT ) ),
 			)
 		);
 		// The result passes through the woocommerce_order_query filter, so it is checked.
@@ -886,9 +889,10 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Resolve an order number cell to an order.
 	 *
-	 * A number is looked up among the orders prime_orders() loaded by ID, so orders the default
-	 * order query leaves out, such as trashed ones, are not found. The filter then decides, so a
-	 * store with its own order numbers can map them. The result is cached on the importer.
+	 * A number is looked up among the orders prime_orders() loaded by ID: orders with a registered
+	 * order status other than checkout-draft, so trashed and checkout-draft orders are not found. The
+	 * filter then decides, so a store with its own order numbers can map them. The result is cached
+	 * on the importer.
 	 *
 	 * @param string $order_number Order number cell.
 	 * @return WC_Order|null
