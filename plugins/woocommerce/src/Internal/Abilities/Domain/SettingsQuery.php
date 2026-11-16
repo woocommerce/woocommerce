@@ -34,7 +34,7 @@ class SettingsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Query settings', 'woocommerce' ),
-			'description'         => __( 'Read approved settings in a group. Use include for specific setting IDs. Unapproved fields and passwords are omitted.', 'woocommerce' ),
+			'description'         => __( 'Read approved settings in a group. Use include for specific setting IDs. Country fields return codes without choices. Unapproved fields and passwords are omitted.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_output_schema(),
