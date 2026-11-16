@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Match shipping zones by the store base postcode and city before a customer enters an address, when the default customer location is the shop base.
