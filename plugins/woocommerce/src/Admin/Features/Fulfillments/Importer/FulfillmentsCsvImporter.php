@@ -893,6 +893,10 @@ class FulfillmentsCsvImporter {
 				// Built on first use, since it loads the product of every line item.
 				$by_sku = $by_sku ?? $this->index_items_by_sku( $line_items );
 				$item   = $by_sku[ strtolower( $parts[1] ) ] ?? null;
+				if ( false === $item ) {
+					/* translators: %s: SKU from the CSV. */
+					return sprintf( __( 'SKU %s matches more than one item of this order. Use the item ID instead.', 'woocommerce' ), $parts[1] );
+				}
 				if ( null === $item ) {
 					/* translators: %s: SKU from the CSV. */
 					return sprintf( __( 'SKU %s was not found on the order.', 'woocommerce' ), $parts[1] );
@@ -935,7 +939,7 @@ class FulfillmentsCsvImporter {
 	 * Index line items by lowercase SKU.
 	 *
 	 * @param array<int|string, \WC_Order_Item> $line_items Line items of the order.
-	 * @return array<string, \WC_Order_Item>
+	 * @return array<string, \WC_Order_Item|false> False for a SKU shared by more than one line item.
 	 */
 	private function index_items_by_sku( array $line_items ): array {
 		$by_sku = array();
@@ -943,7 +947,7 @@ class FulfillmentsCsvImporter {
 			$product = $item instanceof \WC_Order_Item_Product ? $item->get_product() : null;
 			$sku     = $product instanceof \WC_Product ? strtolower( (string) $product->get_sku() ) : '';
 			if ( '' !== $sku ) {
-				$by_sku[ $sku ] = $item;
+				$by_sku[ $sku ] = isset( $by_sku[ $sku ] ) ? false : $item;
 			}
 		}
 		return $by_sku;

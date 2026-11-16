@@ -1500,6 +1500,20 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A SKU shared by two line items of the order fails the row instead of picking one.
+	 */
+	public function test_sku_shared_by_two_line_items_fails_the_row(): void {
+		list( $order, , $item_b ) = $this->make_two_item_order();
+		$order->add_product( $order->get_item( $item_b )->get_product(), 1 );
+		$order->save();
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$order->get_id()},TRK-1,ups,,sku:sku-b:1\n" );
+
+		$this->assertSame( FulfillmentsCsvImporter::CODE_INVALID_ITEMS, $result['rows'][0]['code'] ?? null );
+		$this->assertSame( 'SKU sku-b matches more than one item of this order. Use the item ID instead.', $result['rows'][0]['message'] );
+	}
+
+	/**
 	 * @testdox On an update a blank items cell keeps the stored items and a filled one replaces them.
 	 */
 	public function test_items_on_update_are_kept_when_blank_and_replaced_when_given(): void {
