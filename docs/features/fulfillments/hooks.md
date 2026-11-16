@@ -171,7 +171,7 @@ add_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', function( $a
 } );
 ```
 
-Each data row names its order in the `order_number` column. By default a number is looked up as an order ID among the orders the default order query returns, so trashed and checkout-draft orders are not found. Stores that show customers a different order number, such as a sequential-numbers plugin, can map that value to the order with the resolve filter. Return a `WC_Order`, or `null` when the order cannot be found; any other value fails the row with `order_not_found`. The filter runs at most once per distinct order number in each chunk. A numeric cell arrives already matched to the order with that ID when one exists, so a filter for numeric custom numbers must replace that match; the early return in the example keeps it.
+Each data row names its order in the `order_number` column. By default a number is looked up as an order ID among the orders the default order query returns, so a trashed order is not found. Stores that show customers a different order number, such as a sequential-numbers plugin, can map that value to the order with the resolve filter. Return a `WC_Order`, or `null` when the order cannot be found; any other value fails the row with `order_not_found`. The filter runs at most once per distinct order number in each chunk. A numeric cell arrives already matched to the order with that ID when one exists, so a filter for numeric custom numbers must replace that match; the early return in the example keeps it.
 
 | Hook | Parameters | Purpose |
 | --- | --- | --- |
