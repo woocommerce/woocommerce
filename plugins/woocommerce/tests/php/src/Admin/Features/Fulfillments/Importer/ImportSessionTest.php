@@ -673,7 +673,15 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( $stale->record_chunk( 0, $this->chunk_result( 10, 3, 999 ) ), 'A copy loaded before the stored progress moved is refused' );
 		$this->assertSame( 400, ImportSession::load( 84, $session->token() )->byte_offset(), 'The stale copy cannot replace newer progress' );
 
-		add_filter( 'pre_update_option__transient_wc_fulfillment_import_84_' . $session->token(), fn( $value, $old ) => $old, 10, 2 );
+		add_filter(
+			'pre_update_option__transient_wc_fulfillment_import_84_' . $session->token(),
+			function ( $value, $old ) {
+				unset( $value );
+				return $old;
+			},
+			10,
+			2
+		);
 		$this->assertFalse( $session->record_chunk( 10, $this->chunk_result( 5, 1, 650 ) ), 'A lost write is reported' );
 		$this->assertSame( 10, $session->processed(), 'A lost write does not advance the session in memory' );
 
@@ -709,7 +717,10 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	public function test_freeze_run_settings_writes_only_on_top_of_the_stored_session(): void {
 		$mapping = array( 0 => 'order_number' );
 		$session = $this->make_session( 86 );
-		$keep    = fn( $value, $old ) => $old;
+		$keep    = function ( $value, $old ) {
+			unset( $value );
+			return $old;
+		};
 		add_filter( 'pre_update_option__transient_wc_fulfillment_import_86_' . $session->token(), $keep, 10, 2 );
 		$this->assertFalse( $session->freeze_run_settings( $mapping, true, true ), 'A lost write is reported' );
 		remove_filter( 'pre_update_option__transient_wc_fulfillment_import_86_' . $session->token(), $keep, 10 );
