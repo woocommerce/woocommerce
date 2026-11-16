@@ -451,6 +451,20 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
+		// wp_generate_attachment_metadata() can also replace the main file with a scaled or rotated copy.
+		// Take these keys from its result so they describe the file that is now attached.
+		foreach ( array( 'file', 'width', 'height', 'filesize' ) as $key ) {
+			if ( isset( $new_metadata[ $key ] ) ) {
+				$metadata[ $key ] = $new_metadata[ $key ];
+			}
+		}
+
+		// Keep a stored original_image, because it names the upload. When WordPress scales the
+		// -scaled copy again, it reports that copy as the original.
+		if ( empty( $metadata['original_image'] ) && isset( $new_metadata['original_image'] ) ) {
+			$metadata['original_image'] = $new_metadata['original_image'];
+		}
+
 		if ( isset( $new_metadata['sizes'][ self::$regenerate_size ] ) ) {
 			$metadata['sizes'][ self::$regenerate_size ] = $new_metadata['sizes'][ self::$regenerate_size ];
 		}
