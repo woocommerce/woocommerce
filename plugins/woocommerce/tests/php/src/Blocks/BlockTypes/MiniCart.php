@@ -577,6 +577,32 @@ class MiniCart extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render the interactive block when LegacyProxy reports another page, even if is_cart() or is_checkout() is true.
+	 *
+	 * @testWith [ "woocommerce_is_cart" ]
+	 *           [ "woocommerce_is_checkout" ]
+	 *
+	 * @param string $page_filter Conditional filter that makes the real page check true.
+	 */
+	public function test_interactive_block_follows_legacy_proxy_over_real_page_checks( string $page_filter ): void {
+		// The real check and the proxy disagree, so the test fails if MiniCart calls is_cart() or is_checkout() directly, whatever earlier tests defined.
+		add_filter( $page_filter, '__return_true' );
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'is_cart'     => '__return_false',
+				'is_checkout' => '__return_false',
+			)
+		);
+		$asset_data_registry = $this->createMock( AssetDataRegistry::class );
+		$asset_data_registry->expects( $this->atLeastOnce() )->method( 'add' );
+		$this->mock = $this->replace_block_type( 'woocommerce/mini-cart', static fn () => new MiniCartMock( $asset_data_registry ) );
+
+		$this->render_mini_cart_block();
+
+		$this->assertSame( 10, has_action( 'wp_footer', array( $this->mock, 'render_mini_cart_overlay' ) ), 'The overlay should be printed in the footer.' );
+	}
+
+	/**
 	 * Assert the markup is the hidden, disabled Mini-Cart button rendered on the cart and checkout pages.
 	 *
 	 * @param string $output Rendered block markup.
