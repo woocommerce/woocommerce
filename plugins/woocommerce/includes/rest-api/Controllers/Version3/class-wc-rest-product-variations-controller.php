@@ -207,6 +207,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
 	 * @throws \Throwable When setting gallery images fails or an attribute term ID is invalid.
+	 * @throws WC_REST_Exception When an attribute option is an array.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$customs = CustomsDataValidator::normalize_fields( $request->get_params() );
@@ -224,7 +225,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		$attribute_terms = array();
 		if ( isset( $request['attributes'] ) ) {
 			foreach ( $request['attributes'] as $index => $attribute ) {
-				if ( ! is_array( $attribute ) || ! array_key_exists( 'term_id', $attribute ) ) {
+				if ( ! is_array( $attribute ) ) {
+					continue;
+				}
+				if ( isset( $attribute['option'] ) && is_array( $attribute['option'] ) ) {
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_option', esc_html__( 'Attribute option must be a single value, not an array.', 'woocommerce' ), 400 );
+				}
+				if ( ! array_key_exists( 'term_id', $attribute ) ) {
 					continue;
 				}
 				$taxonomy                  = ! empty( $attribute['id'] ) ? wc_attribute_taxonomy_name_by_id( absint( $attribute['id'] ) ) : sanitize_title( is_string( $attribute['name'] ?? null ) ? $attribute['name'] : '' );

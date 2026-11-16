@@ -1751,6 +1751,97 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An array option rejects only its variation batch item without changing saved data or images.
+	 * @testWith [false, false]
+	 *           [true, false]
+	 *           [false, true]
+	 *
+	 * @param bool $use_term_id Whether to include a valid term ID alongside the invalid option.
+	 * @param bool $custom_attribute Whether to use a custom attribute instead of a global attribute.
+	 */
+	public function test_batch_update_variation_rejects_array_option( bool $use_term_id, bool $custom_attribute ): void {
+		if ( $custom_attribute ) {
+			$product          = $this->create_customs_product_with_variation_attribute();
+			$taxonomy         = 'size';
+			$selected_option  = 'Small';
+			$posted_attribute = array( 'name' => 'Size' );
+		} else {
+			list( $attribute, $first_term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+			$taxonomy          = $attribute['attribute_taxonomy'];
+			$selected_option   = get_term( $first_term_id )->slug;
+			$product_attribute = new WC_Product_Attribute();
+			$product_attribute->set_id( $attribute['attribute_id'] );
+			$product_attribute->set_name( $taxonomy );
+			$product_attribute->set_options( array( $first_term_id, $second_term_id ) );
+			$product_attribute->set_variation( true );
+			$product = new WC_Product_Variable();
+			$product->set_attributes( array( $product_attribute ) );
+			$product->save();
+			$posted_attribute = array( 'id' => $attribute['attribute_id'] );
+			if ( $use_term_id ) {
+				$posted_attribute['term_id'] = $second_term_id;
+			}
+		}
+		$posted_attribute['option'] = array( 'Invalid option' );
+		$variations                 = array();
+		for ( $index = 0; $index < 3; ++$index ) {
+			$variation = new WC_Product_Variation();
+			$variation->set_parent_id( $product->get_id() );
+			$variation->set_attributes( array( $taxonomy => $selected_option ) );
+			$variation->set_description( 'Original description' );
+			$variation->save();
+			$variations[] = $variation;
+		}
+		$attachment_id = $this->factory->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+				'meta_input'     => array( '_wp_attached_file' => 'variation.jpg' ),
+			)
+		);
+		update_post_meta( $attachment_id, '_wp_attachment_image_alt', 'Original image text' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'          => $variations[0]->get_id(),
+						'description' => 'Updated before invalid item',
+					),
+					array(
+						'id'          => $variations[1]->get_id(),
+						'description' => 'Must not be saved',
+						'attributes'  => array( $posted_attribute ),
+						'image'       => array(
+							'id'  => $attachment_id,
+							'alt' => 'Changed by rejected request',
+						),
+					),
+					array(
+						'id'          => $variations[2]->get_id(),
+						'description' => 'Updated after invalid item',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 3, $data['update'] );
+		$this->assertSame( $variations[0]->get_id(), $data['update'][0]['id'] );
+		$this->assertSame( 'woocommerce_rest_invalid_attribute_option', $data['update'][1]['error']['code'] );
+		$this->assertSame( 400, $data['update'][1]['error']['data']['status'] );
+		$this->assertSame( $variations[2]->get_id(), $data['update'][2]['id'] );
+		$this->assertSame( 'Updated before invalid item', wc_get_product( $variations[0]->get_id() )->get_description() );
+		$this->assertSame( 'Original description', wc_get_product( $variations[1]->get_id() )->get_description() );
+		$this->assertSame( $selected_option, wc_get_product( $variations[1]->get_id() )->get_attributes()[ $taxonomy ] );
+		$this->assertSame( 'Original image text', get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) );
+		$this->assertSame( 'Updated after invalid item', wc_get_product( $variations[2]->get_id() )->get_description() );
+	}
+
+	/**
 	 * Creates a global attribute with two terms that share the name "Green" but have different slugs.
 	 *
 	 * @return array{0: array, 1: int, 2: int} Attribute data, first term ID, second term ID.
