@@ -209,8 +209,10 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	 * @testdox A /.well-known/ucp file in the way fails the UCP address check with the fix for its reason, and deleting it passes the check.
 	 * @testWith ["foreign", "Remove the "]
 	 *           ["outdated", "Delete the "]
+	 *           ["not_json", "The "]
+	 *           ["unreadable", "WooCommerce can't read "]
 	 *
-	 * @param string $file   Someone else's file, or WooCommerce's file with an old profile.
+	 * @param string $file   Someone else's file, an old profile, invalid JSON, or a file the web server can't read.
 	 * @param string $prefix How the fix should start.
 	 */
 	public function test_ucp_file_fix( string $file, string $prefix ): void {
@@ -220,11 +222,24 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 
 		$profile                   = ( new UcpDiscovery() )->get_profile();
 		$profile['ucp']['version'] = '1999-01-01';
+		$encoded                   = (string) wp_json_encode( $profile );
+		$contents                  = array(
+			'foreign'    => '{}',
+			'outdated'   => $encoded,
+			'not_json'   => '{bad',
+			'unreadable' => $encoded,
+		);
 
 		wp_mkdir_p( dirname( $path ) );
-		file_put_contents( $path, 'foreign' === $file ? '{}' : (string) wp_json_encode( $profile ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		file_put_contents( $path, $contents[ $file ] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		if ( 'unreadable' === $file ) {
+			chmod( $path, 0000 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+		}
 
 		try {
+			if ( 'unreadable' === $file && is_readable( $path ) ) {
+				$this->markTestSkipped( 'The test runs as a user who can read any file (root).' );
+			}
 			$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
 			$this->assertStringStartsWith( $prefix, $this->ucp_discovery_fix() );
 			$this->assertStringContainsString( $path, $this->ucp_discovery_fix() );
@@ -232,9 +247,15 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 			$this->assertSame( '', $checks['ucp_discovery']['fix_url'] );
 
 			// Following the fix passes the check: with the file gone and pretty permalinks, nothing is in the way.
+			if ( 'unreadable' === $file ) {
+				chmod( $path, 0644 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+			}
 			wp_delete_file( $path );
 			$this->assertSame( array(), $this->sut->failing_required() );
 		} finally {
+			if ( is_file( $path ) ) {
+				chmod( $path, 0644 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+			}
 			self::remove_ucp_file( $path );
 		}
 	}
