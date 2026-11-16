@@ -655,7 +655,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			$this->assertStringContainsString( 'didn&#039;t write', $html );
 			$this->assertStringContainsString( esc_html( $path ), $html );
 			$this->assertStringNotContainsString( 'options-permalink.php', $html );
-			$this->assertStringNotContainsString( 'Open permalinks', $html );
+			$this->assertStringNotContainsString( 'Change permalinks', $html );
 		} finally {
 			wp_delete_file( $path );
 			foreach ( array( dirname( $path ), dirname( $path, 2 ) ) as $dir ) {
@@ -683,7 +683,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 				$this->markTestSkipped( 'The test runs as a user who can write any directory (root).' );
 			}
 			$html = $this->render_page();
-			$this->assertStringContainsString( 'Open permalinks', $html );
+			$this->assertStringContainsString( 'Change permalinks', $html );
 			$this->assertStringContainsString( 'options-permalink.php', $html );
 			$this->assertStringContainsString( 'writable', $html );
 			$this->assertStringContainsString( 'index.php', $html );

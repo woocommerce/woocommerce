@@ -828,7 +828,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			$fix = (string) ( $check['fix'] ?? '' );
 			return array(
 				'' !== $fix ? $fix : __( 'Fix your connection URL', 'woocommerce' ),
-				__( 'Open permalinks', 'woocommerce' ),
+				__( 'Change permalinks', 'woocommerce' ),
 				(string) ( $check['fix_url'] ?? '' ),
 			);
 		}

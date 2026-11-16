@@ -102,13 +102,13 @@ final class UcpDiscovery implements RegisterHooksInterface {
 				return sprintf( __( 'WooCommerce can\'t read %1$s. Make that file readable by the web server, or delete it. If you can\'t delete it, make %2$s writable by the web server.', 'woocommerce' ), $path, $dir );
 			case 'file_unusable':
 				/* translators: 1: discovery file path, 2: folder path. */
-				return sprintf( __( 'The %1$s file is incomplete or isn\'t valid JSON, so /.well-known/ucp can return an invalid profile. Delete it and check the server has free disk space. If you can\'t delete it, make %2$s writable by the web server.', 'woocommerce' ), $path, $dir );
+				return sprintf( __( 'The %1$s file is incomplete or damaged, so your connection URL can give AI assistants wrong details. Delete it and check the server has free disk space. If you can\'t delete it, make %2$s writable by the web server.', 'woocommerce' ), $path, $dir );
 			case 'file_in_the_way':
 				/* translators: 1: discovery file path, 2: folder path. */
-				return sprintf( __( 'Remove the %1$s file that WooCommerce didn\'t write. It is being served instead of your store profile. If you can\'t remove it, make %2$s writable by the web server.', 'woocommerce' ), $path, $dir );
+				return sprintf( __( 'Remove the %1$s file that WooCommerce didn\'t write. It loads instead of your store\'s details. If you can\'t remove it, make %2$s writable by the web server.', 'woocommerce' ), $path, $dir );
 			case 'file_outdated':
 				/* translators: 1: discovery file path, 2: folder path. */
-				return sprintf( __( 'Delete the %1$s file. It has an old profile. If you can\'t delete it, make %2$s writable by the web server so WooCommerce can replace it.', 'woocommerce' ), $path, $dir );
+				return sprintf( __( 'Delete the %1$s file. It has old store details. If you can\'t delete it, make %2$s writable by the web server so WooCommerce can replace it.', 'woocommerce' ), $path, $dir );
 			case 'no_file':
 				if ( is_multisite() ) {
 					return __( 'Choose any structure except Plain under Settings > Permalinks. Structures that start with index.php don\'t work either.', 'woocommerce' );
