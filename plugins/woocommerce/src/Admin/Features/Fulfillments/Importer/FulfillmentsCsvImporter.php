@@ -854,11 +854,13 @@ class FulfillmentsCsvImporter {
 	 */
 	private function known_provider_key( string $cell ): string {
 		if ( null === $this->provider_keys ) {
-			$this->provider_keys = array();
+			// Kept unset until the list is built, so a lookup that throws runs again for the next row.
+			$keys = array();
 			foreach ( FulfillmentUtils::get_shipping_providers() as $key => $provider ) {
-				$this->provider_keys[ wc_strtolower( $provider->get_name() ) ] = (string) $key;
-				$this->provider_keys[ wc_strtolower( (string) $key ) ]         = (string) $key;
+				$keys[ wc_strtolower( $provider->get_name() ) ] = (string) $key;
+				$keys[ wc_strtolower( (string) $key ) ]         = (string) $key;
 			}
+			$this->provider_keys = $keys;
 		}
 		return $this->provider_keys[ wc_strtolower( $cell ) ] ?? '';
 	}

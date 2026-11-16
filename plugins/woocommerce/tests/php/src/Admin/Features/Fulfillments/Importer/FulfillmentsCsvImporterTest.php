@@ -1277,6 +1277,30 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The provider lookup runs again after it throws once.
+	 */
+	public function test_provider_lookup_is_retried_after_it_throws(): void {
+		$first  = OrderHelper::create_order();
+		$second = OrderHelper::create_order();
+		$throws = 1;
+		add_filter(
+			'woocommerce_fulfillment_shipping_providers',
+			function ( $providers ) use ( &$throws ) {
+				if ( $throws-- > 0 ) {
+					throw new \RuntimeException( 'Provider service down.' );
+				}
+				return $providers;
+			},
+			1
+		);
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$first->get_id()},TRK-1,UPS\n{$second->get_id()},TRK-2,UPS\n" );
+
+		$this->assertSame( FulfillmentsCsvImporter::CODE_ROW_FAILED, $result['rows'][0]['code'] );
+		$this->assertSame( 'ups', $this->fulfillments_of( $second )[0]->get_shipment_provider() );
+	}
+
+	/**
 	 * @testdox A repeated order and tracking number pair is skipped across chunks, and a row that failed to save does not count as seen.
 	 */
 	public function test_duplicate_pairs_are_skipped_after_the_first_imported_row(): void {
