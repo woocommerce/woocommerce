@@ -515,7 +515,7 @@ class FulfillmentsCsvImporter {
 			}
 			$rows[] = array(
 				'row'          => $row['row_number'],
-				'order_number' => $order_number,
+				'order_number' => self::clip( $order_number ),
 			) + $result;
 		}
 
@@ -573,7 +573,7 @@ class FulfillmentsCsvImporter {
 			return self::fail(
 				self::CODE_ORDER_NOT_FOUND,
 				/* translators: %s: order number from the CSV. */
-				sprintf( __( 'Order not found for order number "%s".', 'woocommerce' ), $order_number )
+				sprintf( __( 'Order not found for order number "%s".', 'woocommerce' ), self::clip( $order_number ) )
 			);
 		}
 		$order_id = $order->get_id();
@@ -763,7 +763,7 @@ class FulfillmentsCsvImporter {
 	 * Build a failed row result.
 	 *
 	 * @param string $code     Machine-readable failure code.
-	 * @param string $message  Message safe to show to the merchant.
+	 * @param string $message  Plain text that can hold raw CSV values; escape it on output.
 	 * @param int    $order_id Resolved order ID, or 0 when the order is not known.
 	 * @return array<string, mixed>
 	 */
@@ -777,6 +777,16 @@ class FulfillmentsCsvImporter {
 			$result['order_id'] = $order_id;
 		}
 		return $result;
+	}
+
+	/**
+	 * Cut a CSV value echoed in a row result, since the results are stored with the session.
+	 *
+	 * @param string $value CSV value.
+	 * @return string The value, or its first 100 characters followed by "...".
+	 */
+	private static function clip( string $value ): string {
+		return mb_strlen( $value ) > 100 ? mb_substr( $value, 0, 100 ) . '...' : $value;
 	}
 
 	/**
@@ -964,7 +974,7 @@ class FulfillmentsCsvImporter {
 			$is_sku = 'sku' === strtolower( $parts[0] );
 			if ( count( $parts ) !== ( $is_sku ? 3 : 2 ) ) {
 				/* translators: %s: one entry of the items cell. */
-				return sprintf( __( 'Invalid items entry: %s.', 'woocommerce' ), $entry );
+				return sprintf( __( 'Invalid items entry: %s.', 'woocommerce' ), self::clip( $entry ) );
 			}
 			if ( $is_sku ) {
 				// Built on first use, since it loads the product of every line item.
@@ -972,17 +982,17 @@ class FulfillmentsCsvImporter {
 				$item   = $by_sku[ strtolower( $parts[1] ) ] ?? null;
 				if ( false === $item ) {
 					/* translators: %s: SKU from the CSV. */
-					return sprintf( __( 'SKU %s matches more than one item of this order. Use the item ID instead.', 'woocommerce' ), $parts[1] );
+					return sprintf( __( 'SKU %s matches more than one item of this order. Use the item ID instead.', 'woocommerce' ), self::clip( $parts[1] ) );
 				}
 				if ( null === $item ) {
 					/* translators: %s: SKU from the CSV. */
-					return sprintf( __( 'SKU %s was not found on the order.', 'woocommerce' ), $parts[1] );
+					return sprintf( __( 'SKU %s was not found on the order.', 'woocommerce' ), self::clip( $parts[1] ) );
 				}
 			} else {
 				$item = ctype_digit( $parts[0] ) ? ( $line_items[ (int) $parts[0] ] ?? null ) : null;
 				if ( null === $item ) {
 					/* translators: %s: order item ID from the CSV. */
-					return sprintf( __( 'Item ID %s is not part of this order.', 'woocommerce' ), $parts[0] );
+					return sprintf( __( 'Item ID %s is not part of this order.', 'woocommerce' ), self::clip( $parts[0] ) );
 				}
 			}
 

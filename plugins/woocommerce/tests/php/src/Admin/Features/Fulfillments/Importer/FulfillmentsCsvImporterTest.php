@@ -1138,6 +1138,23 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox CSV values echoed in a row result are cut to 100 characters.
+	 */
+	public function test_echoed_csv_values_are_shortened(): void {
+		$order = OrderHelper::create_order();
+		$long  = str_repeat( 'x', 101 );
+		$short = str_repeat( 'x', 100 ) . '...';
+		$fits  = str_repeat( 'y', 100 );
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$long},TRK-1,ups,,\n{$order->get_id()},TRK-2,ups,,{$long}\n{$fits},TRK-3,ups,,\n" );
+
+		$this->assertSame( $short, $result['rows'][0]['order_number'] );
+		$this->assertSame( "Order not found for order number \"{$short}\".", $result['rows'][0]['message'] );
+		$this->assertSame( "Invalid items entry: {$short}.", $result['rows'][1]['message'] );
+		$this->assertSame( $fits, $result['rows'][2]['order_number'] );
+	}
+
+	/**
 	 * @testdox A tracking URL must start with http:// or https:// and keep a host after sanitizing.
 	 * @testWith ["N/A", null]
 	 *           ["http:example.com", null]
