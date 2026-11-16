@@ -1,8 +1,8 @@
 # AI review guideline evals
 
-This corpus covers 41 review guidelines with two bug cases and at least two safe boundary cases per guideline, for 165 registered cases. The SQL suite also retains a separate safe-batching example, G25E-v1, alongside its neutral refactor control. The root `ai-review-config.json` links each guideline to its suite. The `perf-blocking-remote-call`, `order-storage-access`, and `payment-callbacks` guidelines are outside this corpus.
+This corpus covers 41 review guidelines with at least two bug cases and at least two safe boundary cases per guideline, for 169 registered cases. The SQL suite also retains a separate safe-batching example, G25E-v1, alongside its neutral refactor control. The root `ai-review-config.json` links each guideline to its suite. The `perf-blocking-remote-call`, `order-storage-access`, and `payment-callbacks` guidelines are outside this corpus.
 
-The committed suites contain these 165 snapshot cases. [Optional prepared pairs](#event-name-contract-pair) add historical patch cases in separate generated checkouts.
+The committed suites contain these 169 snapshot cases. [Optional prepared pairs](#event-name-contract-pair) add historical patch cases in separate generated checkouts.
 
 ## Set up the runner
 
@@ -52,7 +52,7 @@ a8c-review eval
 a8c-review eval --guideline sql-clause-filter-contract
 ```
 
-`--plan` validates the definitions and reads the fixtures without calling models. In the committed checkout it reports 165 cases. Live runs inherit this repository's reviewers, models, and prompt content. Named-guideline evaluation requires a CLI version that confirms the full named guideline reaches its configured reviewers before inference. Older V0 execution uses ordinary review selection and can omit that guideline. They require credentials for both the configured Claude and Codex engines. No model override is introduced by these suites.
+`--plan` validates the definitions and reads the fixtures without calling models. In the committed checkout it reports 169 cases. Live runs inherit this repository's reviewers, models, and prompt content. Named-guideline evaluation requires a CLI version that confirms the full named guideline reaches its configured reviewers before inference. Older V0 execution uses ordinary review selection and can omit that guideline. They require credentials for both the configured Claude and Codex engines. No model override is introduced by these suites.
 
 An unfiltered `eval` selects every registered case. Use `--guideline`, `--case` or `--group` to narrow the selection.
 
@@ -76,7 +76,7 @@ All current `finding` expectations use `locations`, which require the finding's 
 
 The optional [event-name pair](fix-and-test-verification/groups/event-name-contract/README.md) tests whether the reviewer distinguishes documented inputs from incidental coercion.
 
-Its preparation script creates a separate 167-case checkout from committed policy files and existing local source objects. The default 165 cases remain unchanged.
+Its preparation script creates a separate 171-case checkout from committed policy files and existing local source objects. The default 169 cases remain unchanged.
 
 The [hook re-entrancy suite](hook-callback-reentrancy/README.md) also includes a bounded local behavior check.
 
@@ -84,7 +84,7 @@ The [hook re-entrancy suite](hook-callback-reentrancy/README.md) also includes a
 
 The optional [TextControl cascade pair](css-layout-regression/groups/text-control-cascade/README.md) checks the prior computed styles before reporting a new sizing regression.
 
-It replays the complete historical patch and a collapsed-input control from the same parent. Its preparation script creates a separate 167-case checkout. The default 165 cases remain unchanged.
+It replays the complete historical patch and a collapsed-input control from the same parent. Its preparation script creates a separate 171-case checkout. The default 169 cases remain unchanged.
 
 ## Adding cases
 
@@ -111,7 +111,7 @@ Each entry in `groups` references IDs already declared in `cases`:
 { "id": "example-group", "regression": "G00E-example-v1", "controls": ["G00A-example-v1"] }
 ```
 
-Groups require a CLI checkout that supports them. Earlier versions reject a suite containing `groups`. Check that `a8c-review eval --help` lists `--group` before running such a suite. Suites without `groups`, including the committed 165 cases, also run on earlier inline-case versions.
+Groups require a CLI checkout that supports them. Earlier versions reject a suite containing `groups`. Check that `a8c-review eval --help` lists `--group` before running such a suite. Suites without `groups`, including the committed 169 cases, also run on earlier inline-case versions.
 
 ## Limitations
 
@@ -146,7 +146,7 @@ These cases exercise review behavior on selected changes. They do not measure pr
 | [sql-clause-filter-contract](sql-clause-filter-contract/cases.json) | G21A-v3, G21B-v3 | G21C-v3, G21D-v3 |
 | [cache-invalidation-and-poisoning](cache-invalidation-and-poisoning/cases.json) | G22A-v3, G22B-v3 | G22C-v4, G22D-v3 |
 | [perf-refactor-semantic-drift](perf-refactor-semantic-drift/cases.json) | G23A-v6, G23B-v4 | G23C-v3, G23D-v3 |
-| [fix-and-test-verification](fix-and-test-verification/cases.json) | G24A-v3, G24B-v3 | G24C-v4, G24D-v3 |
+| [fix-and-test-verification](fix-and-test-verification/cases.json) | G24A-v3, G24B-v3, G24E-v1, G24F-v1 | G24C-v4, G24D-v3, G24G-v1, G24H-v1 |
 | [perf-sql-query-shape](perf-sql-query-shape/cases.json) | G25A-v4, G25B-v3 | G25D-v3, G25C-v8, G25E-v1 |
 | [perf-cache-option-priming](perf-cache-option-priming/cases.json) | G26A-v3, G26B-v6 | G26C-v3, G26D-v3 |
 | [perf-hot-path-eager-work](perf-hot-path-eager-work/cases.json) | G27A-v4, G27B-v4 | G27C-v4, G27D-v4 |

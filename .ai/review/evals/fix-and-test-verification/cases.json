@@ -88,6 +88,78 @@
 			"expect": {
 				"outcome": "quiet"
 			}
+		},
+		{
+			"id": "G24E-v1",
+			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
+			"before": {
+				"file": "fixtures/G24E/before.php"
+			},
+			"after": {
+				"file": "fixtures/G24E/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-24.php",
+						"lines": [
+							13,
+							17
+						],
+						"anchor": "        $this->assertSame( '', $wpdb->last_error );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G24F-v1",
+			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
+			"before": {
+				"file": "fixtures/G24F/before.php"
+			},
+			"after": {
+				"file": "fixtures/G24F/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-24.php",
+						"lines": [
+							19,
+							22
+						],
+						"anchor": "        $this->assertSame( array(), $importer->errors );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G24G-v1",
+			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
+			"before": {
+				"file": "fixtures/G24G/before.php"
+			},
+			"after": {
+				"file": "fixtures/G24G/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G24H-v1",
+			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
+			"before": {
+				"file": "fixtures/G24H/before.php"
+			},
+			"after": {
+				"file": "fixtures/G24H/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
 		}
 	]
 }
