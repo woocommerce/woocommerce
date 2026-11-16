@@ -23,13 +23,18 @@ pre {
 
 /*
  * Core breaks words only on fixed-layout tables, where overflow-x scrolls the block instead.
- * An email has nowhere to scroll, so every table needs it, or one long identifier sets the
- * message width. word-break drops a cell's minimum width to one character, so it needs a floor,
- * the way core pairs it with min-width on the verse block. A column needs more than one letter.
+ * An email has nowhere to scroll, so every table gets both. Equal columns are the only
+ * arrangement that neither overflows, whatever the column count, nor leaves a short label
+ * squeezed beside a long value until it reads one letter per line. The class sits on the
+ * table in the email and on the figure around it in the editor.
  */
+table.wp-block-table,
+.wp-block-table > table {
+	table-layout: fixed;
+}
+
 .wp-block-table td,
 .wp-block-table th {
-	min-width: 3em;
 	word-break: break-word;
 }
 

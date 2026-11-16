@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Wrap long lines in code, verse and table blocks, in the editor and the email, so they no longer scroll sideways.
+Wrap long lines in code, verse and table blocks, and give table columns an equal share of the width, so an email no longer scrolls sideways.

@@ -770,63 +770,38 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test a short column keeps a readable width beside a long one, instead of being squeezed
-	 * to the single character that word-break allows.
+	 * Test every table gets a fixed layout, so a short label keeps a readable column beside a
+	 * long value instead of being squeezed to one letter per line.
 	 */
-	public function testItKeepsAFloorUnderNarrowCells(): void {
-		$styles = $this->get_cell_styles(
-			$this->render_table(
-				'<thead><tr><th>Code</th><th>Value</th></tr></thead>
-				<tbody><tr><td>GR-1</td><td>' . self::UNBREAKABLE_WORD . '</td></tr></tbody>'
-			)
+	public function testItGivesEveryTableAFixedLayout(): void {
+		$rendered = $this->render_table(
+			'<thead><tr><th>Code</th><th>Value</th></tr></thead>
+			<tbody><tr><td>GR-1</td><td>' . self::UNBREAKABLE_WORD . '</td></tr></tbody>'
 		);
 
-		$this->assertCount( 4, $styles );
-		foreach ( $styles as $style ) {
-			$this->assertStringContainsString( 'min-width: 3em', $style );
-		}
+		$this->assertStringContainsString( 'table-layout: fixed', $this->get_table_style( $rendered ) );
 	}
 
 	/**
-	 * Test the floor every cell carries stays small enough that a table of short columns,
-	 * which fitted before the floor existed, still fits.
+	 * Test the column count cannot push a table past the width a phone gives it.
+	 *
+	 * A per-cell minimum would: they accumulate, so six columns at 3em need 391px where a
+	 * 390px phone, less the email's 24px of root padding either side, leaves 342px. Equal
+	 * columns divide that width however many there are.
 	 */
-	public function testTheCellFloorLeavesRoomForSeveralColumns(): void {
-		$styles = $this->get_cell_styles(
-			$this->render_table(
-				'<thead><tr><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr></thead>
-				<tbody><tr><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr></tbody>'
-			)
+	public function testASixColumnTableStillFitsThePhone(): void {
+		$rendered = $this->render_table(
+			'<thead><tr><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr></thead>
+			<tbody><tr><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr></tbody>'
 		);
 
-		$this->assertCount( 10, $styles, 'Every cell should carry the floor.' );
+		$this->assertStringContainsString( 'table-layout: fixed', $this->get_table_style( $rendered ) );
 
-		$floors = array();
+		$styles = $this->get_cell_styles( $rendered );
+		$this->assertCount( 12, $styles );
 		foreach ( $styles as $style ) {
-			$floors[] = $this->get_cell_floor_in_em( $style );
+			$this->assertStringNotContainsString( 'min-width', $style, 'A per-cell minimum would accumulate across columns.' );
 		}
-		$this->assertSame( array_fill( 0, 10, $floors[0] ), $floors, 'Every cell should carry the same floor.' );
-
-		// A 390px phone, less the email's 24px of root padding either side, leaves 342px. Measure
-		// against that rather than the 612px desktop width, which is wide enough to accept a floor
-		// that overflows a phone.
-		$columns      = 5;
-		$mobile_width = 342;
-		$width        = static function ( int $em ) use ( $columns ): int {
-			// Each cell adds 8px of padding either side, and collapsed borders add one per column
-			// plus one.
-			return $columns * ( $em * 16 + 16 ) + $columns + 1;
-		};
-
-		$this->assertLessThanOrEqual(
-			$mobile_width,
-			$width( $floors[0] ),
-			'The floor must leave a table of short columns inside the width a phone gives it.'
-		);
-
-		// A 4em floor clears the desktop width and still overflows a phone, which is what makes
-		// the limit above worth asserting.
-		$this->assertGreaterThan( $mobile_width, $width( 4 ) );
 	}
 
 	/**
@@ -1009,20 +984,20 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Return the min-width floor a cell's style attribute declares, in em.
+	 * Return the style attribute of the table block's own table element.
 	 *
-	 * @param string $style Style attribute of a table cell.
+	 * @param string $html Rendered HTML.
 	 */
-	private function get_cell_floor_in_em( string $style ): int {
-		foreach ( explode( ';', $style ) as $declaration ) {
-			$parts = explode( ':', $declaration, 2 );
-			if ( 2 === count( $parts ) && 'min-width' === strtolower( trim( $parts[0] ) ) ) {
-				$value = trim( $parts[1] );
-				$this->assertStringEndsWith( 'em', $value );
-				return (int) $value;
+	private function get_table_style( string $html ): string {
+		$processor = new \WP_HTML_Tag_Processor( $html );
+
+		while ( $processor->next_tag( array( 'tag_name' => 'TABLE' ) ) ) {
+			$class = (string) $processor->get_attribute( 'class' );
+			if ( false !== strpos( $class, 'wp-block-table' ) ) {
+				return (string) $processor->get_attribute( 'style' );
 			}
 		}
 
-		$this->fail( 'The cell declares no min-width floor: ' . $style );
+		$this->fail( 'The rendered email holds no table block.' );
 	}
 }
