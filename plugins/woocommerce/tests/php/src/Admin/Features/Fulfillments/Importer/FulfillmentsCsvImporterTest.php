@@ -1396,4 +1396,82 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			$this->fulfillments_of( $order )[0]->get_items()
 		);
 	}
+
+	/**
+	 * @testdox With notify_customer on, a newly fulfilled row fires the created notification and an update of a fulfilled one the updated notification.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $notify Importer notify_customer option.
+	 */
+	public function test_notify_customer_fires_the_fulfillment_notifications( bool $notify ): void {
+		$order = OrderHelper::create_order();
+		$id    = $order->get_id();
+		$item  = current( $order->get_items() )->get_id();
+		FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id' => (string) $id,
+				'status'    => 'unfulfilled',
+			),
+			array(
+				'_tracking_number' => 'TRK-2',
+				'_items'           => array(
+					array(
+						'item_id' => $item,
+						'qty'     => 1,
+					),
+				),
+			)
+		);
+		$fired = array();
+		add_action(
+			'woocommerce_fulfillment_created_notification',
+			function ( $order_id, $fulfillment, $notified_order ) use ( &$fired ) {
+				$fired[] = array( 'created', $order_id, $fulfillment->get_tracking_number(), $notified_order->get_id() );
+			},
+			10,
+			3
+		);
+		add_action(
+			'woocommerce_fulfillment_updated_notification',
+			function ( $order_id, $fulfillment, $notified_order, $note ) use ( &$fired ) {
+				$fired[] = array( 'updated', $order_id, $fulfillment->get_tracking_number(), $notified_order->get_id(), $note );
+			},
+			10,
+			4
+		);
+
+		$first  = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$id},TRK-1,ups\n{$id},TRK-2,ups\n", array( 'notify_customer' => $notify ) );
+		$second = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$id},TRK-1,fedex\n", array( 'notify_customer' => $notify ) );
+
+		$expected = array(
+			array( 'created', $id, 'TRK-1', $id ),
+			array( 'created', $id, 'TRK-2', $id ),
+			array( 'updated', $id, 'TRK-1', $id, '' ),
+		);
+		$this->assertSame( $notify ? $expected : array(), $fired );
+		$this->assertSame( $notify ? 2 : 0, $first['counts']['notified'] );
+		$this->assertSame( $notify ? 1 : 0, $second['counts']['notified'] );
+		$this->assertSame( array( 'created', 'updated', 'updated' ), array_column( array_merge( $first['rows'], $second['rows'] ), 'status' ) );
+		$this->assertSame( array( $notify, $notify, $notify ), array_column( array_merge( $first['rows'], $second['rows'] ), 'notified' ) );
+	}
+
+	/**
+	 * @testdox A notification listener that throws leaves the row imported and not counted as notified.
+	 */
+	public function test_failing_notification_keeps_the_row_imported(): void {
+		$order = OrderHelper::create_order();
+		add_action(
+			'woocommerce_fulfillment_created_notification',
+			function () {
+				throw new \Exception( 'Mail server down' );
+			}
+		);
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,ups\n", array( 'notify_customer' => true ) );
+
+		$this->assertSame( self::counts( array( 'created' => 1 ) ), $result['counts'] );
+		$this->assertFalse( $result['rows'][0]['notified'] );
+		$this->assertCount( 1, $this->fulfillments_of( $order ) );
+	}
 }

@@ -569,7 +569,8 @@ class FulfillmentsCsvImporter {
 			return $this->fail( 'fulfillment_locked', __( 'The fulfillment with this tracking number is locked and cannot be changed.', 'woocommerce' ), $order_id );
 		}
 
-		$fulfillment = $existing ?? new Fulfillment();
+		$fulfillment   = $existing ?? new Fulfillment();
+		$was_fulfilled = null !== $existing && $existing->get_is_fulfilled();
 		if ( null === $existing ) {
 			// A blank items cell fulfills every item on create, but keeps the stored items on update.
 			$items = $items ?? $this->default_items_from_order( $order );
@@ -610,8 +611,47 @@ class FulfillmentsCsvImporter {
 			'message'        => null === $existing ? __( 'Fulfillment created.', 'woocommerce' ) : __( 'Fulfillment updated.', 'woocommerce' ),
 			'order_id'       => $order_id,
 			'fulfillment_id' => $fulfillment->get_id(),
-			'notified'       => false,
+			'notified'       => $this->options['notify_customer'] && $this->notify_customer( $order, $fulfillment, $was_fulfilled, $row_number ),
 		);
+	}
+
+	/**
+	 * Fire the customer notification the fulfillments screen fires for the same change.
+	 *
+	 * The row is already saved, so a listener that throws is logged and the row still
+	 * counts as imported.
+	 *
+	 * @param WC_Order    $order         Order of the row.
+	 * @param Fulfillment $fulfillment   Saved fulfillment.
+	 * @param bool        $was_fulfilled Whether the fulfillment was fulfilled before this row.
+	 * @param int         $row_number    Physical record number, for the log.
+	 * @return bool Whether the notification ran without an error.
+	 */
+	private function notify_customer( WC_Order $order, Fulfillment $fulfillment, bool $was_fulfilled, int $row_number ): bool {
+		try {
+			if ( $was_fulfilled ) {
+				/**
+				 * This action is documented in src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php.
+				 *
+				 * @since 10.1.0
+				 */
+				do_action( 'woocommerce_fulfillment_updated_notification', $order->get_id(), $fulfillment, $order, '' );
+			} else {
+				/**
+				 * This action is documented in src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php.
+				 *
+				 * @since 10.1.0
+				 */
+				do_action( 'woocommerce_fulfillment_created_notification', $order->get_id(), $fulfillment, $order );
+			}
+			return true;
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Fulfillments import could not notify the customer for row %1$d of order %2$d: %3$s', $row_number, $order->get_id(), $e->getMessage() ),
+				array( 'source' => 'fulfillments-importer' )
+			);
+			return false;
+		}
 	}
 
 	/**
