@@ -158,7 +158,6 @@ final class ImportCommand {
 	public function __invoke( array $args, array $assoc_args ): void {
 		$batch_size = (int) WP_CLI\Utils\get_flag_value( $assoc_args, 'batch-size', $this->get_default_batch_size() );
 
-		// The import lock is only refreshed between batches, so a batch must finish well within the lock's stale window.
 		if ( $batch_size < 1 || $batch_size > self::MAX_BATCH_SIZE ) {
 			WP_CLI::error( sprintf( 'The --batch-size argument must be an integer between 1 and %d.', self::MAX_BATCH_SIZE ) );
 			return;
