@@ -19,8 +19,8 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Embed;
 class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Host used for mocked oEmbed thumbnail URLs.
-	 * The renderer validates thumbnails with wp_http_validate_url(), which does a DNS lookup for hostnames.
-	 * An IP literal (TEST-NET-3) skips that lookup, so these tests don't fail when DNS is unavailable in CI.
+	 * An IP address skips the DNS lookup in wp_http_validate_url().
+	 * WordPress blocks TEST-NET-3, so setUp() allows it with the http_request_host_is_external filter.
 	 */
 	private const MOCK_THUMBNAIL_HOST = 'https://203.0.113.10';
 
@@ -110,6 +110,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_filter( 'http_request_host_is_external', fn( $external, $host ) => '203.0.113.10' === $host ? true : $external, 10, 2 );
 		$this->di_container->get( Email_Editor::class )->initialize();
 		$this->embed_renderer    = new Embed();
 		$theme_controller        = $this->di_container->get( Theme_Controller::class );
