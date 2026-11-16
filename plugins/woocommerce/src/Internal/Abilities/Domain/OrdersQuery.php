@@ -49,7 +49,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_collection_output_schema( 'orders', self::get_order_output_schema() ),
+			'output_schema'       => self::get_output_schema(),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_query_orders' ),
 			'meta'                => array(
@@ -134,6 +134,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 			return array(
 				'orders'      => $orders,
+				'total'       => 1,
 				'total_pages' => 1,
 				'page'        => 1,
 				'per_page'    => 1,
@@ -225,7 +226,22 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		$results = wc_get_orders( $args );
 		$orders  = is_object( $results ) && isset( $results->orders ) ? $results->orders : array();
-		$orders  = array_values(
+		$total   = is_object( $results ) && isset( $results->total ) ? (int) $results->total : count( $orders );
+
+		// Posts storage skips its count when the requested page has no rows.
+		if ( 0 === $total && empty( $orders ) && $page > 1 ) {
+			$count_args = array_merge(
+				$args,
+				array(
+					'page'   => 1,
+					'limit'  => 1,
+					'return' => 'ids',
+				)
+			);
+			$count      = wc_get_orders( $count_args );
+			$total      = is_object( $count ) && isset( $count->total ) ? (int) $count->total : 0;
+		}
+		$orders = array_values(
 			array_filter(
 				$orders,
 				static function ( $order ): bool {
@@ -233,7 +249,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				}
 			)
 		);
-		$pages   = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $orders ) > 0 ? 1 : 0 );
+		$pages  = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $orders ) > 0 ? 1 : 0 );
 
 		$orders = self::format_orders_for_response( $orders, $includes );
 		if ( is_wp_error( $orders ) ) {
@@ -242,6 +258,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		return array(
 			'orders'      => $orders,
+			'total'       => $total,
 			'total_pages' => $pages,
 			'page'        => $page,
 			'per_page'    => $per_page,
@@ -276,6 +293,21 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 */
 	private static function get_order_type_from_input( array $input ): string {
 		return $input['type'] ?? 'shop_order';
+	}
+
+	/**
+	 * Get the ability output schema.
+	 *
+	 * @return array
+	 */
+	private static function get_output_schema(): array {
+		$schema                        = self::get_collection_output_schema( 'orders', self::get_order_output_schema() );
+		$schema['properties']['total'] = array(
+			'type'        => 'integer',
+			'description' => __( 'Total number of matching orders across all pages.', 'woocommerce' ),
+		);
+
+		return $schema;
 	}
 
 	/**
