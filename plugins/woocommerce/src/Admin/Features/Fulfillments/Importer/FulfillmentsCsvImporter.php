@@ -156,6 +156,7 @@ class FulfillmentsCsvImporter {
 	public const CODE_FULFILLMENT_LOCKED      = 'fulfillment_locked';
 	public const CODE_NO_ITEMS                = 'no_items';
 	public const CODE_SAVE_FAILED             = 'save_failed';
+	public const CODE_ROW_FAILED              = 'row_failed';
 
 	/**
 	 * Spellings accepted for a tab delimiter, since multipart and JSON clients
@@ -496,13 +497,26 @@ class FulfillmentsCsvImporter {
 		$rows = array();
 		$data = $read['rows'] ?? array();
 
+		global $wp_current_filter;
+		$hook_depth = count( $wp_current_filter );
 		$this->prime_orders( $data, $header_map );
 		foreach ( $data as $row ) {
 			$order_number = self::get_field( $row['cells'], $header_map, self::COL_ORDER_NUMBER );
-			$rows[]       = array(
+			try {
+				$result = $this->import_row( $row['cells'], $header_map, $order_number, $row['row_number'], $seen );
+			} catch ( \Throwable $e ) {
+				// One row that throws, for example in a resolve-order callback, must not stop the chunk.
+				array_splice( $wp_current_filter, $hook_depth );
+				wc_get_logger()->error(
+					sprintf( 'Fulfillments import could not import row %1$d: %2$s', $row['row_number'], $e->getMessage() ),
+					array( 'source' => 'fulfillments-importer' )
+				);
+				$result = self::fail( self::CODE_ROW_FAILED, __( 'Could not import this row.', 'woocommerce' ) );
+			}
+			$rows[] = array(
 				'row'          => $row['row_number'],
 				'order_number' => $order_number,
-			) + $this->import_row( $row['cells'], $header_map, $order_number, $row['row_number'], $seen );
+			) + $result;
 		}
 
 		$statuses = array_count_values( array_column( $rows, 'status' ) );

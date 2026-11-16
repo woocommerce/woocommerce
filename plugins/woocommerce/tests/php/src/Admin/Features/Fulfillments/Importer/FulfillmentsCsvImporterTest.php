@@ -1382,6 +1382,32 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A row that throws outside the save fails on its own and the rest of the chunk still imports.
+	 */
+	public function test_row_that_throws_fails_alone(): void {
+		$first  = OrderHelper::create_order();
+		$second = OrderHelper::create_order();
+		add_filter(
+			'woocommerce_fulfillments_csv_importer_resolve_order',
+			function ( $order, $order_number ) {
+				if ( 'BOOM' === $order_number ) {
+					throw new \RuntimeException( 'Lookup service down.' );
+				}
+				return $order;
+			},
+			10,
+			2
+		);
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$first->get_id()},TRK-1,ups\nBOOM,TRK-2,ups\n{$second->get_id()},TRK-3,ups\n" );
+
+		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_FAILED, FulfillmentsCsvImporter::STATUS_CREATED ), array_column( $result['rows'], 'status' ) );
+		$this->assertSame( FulfillmentsCsvImporter::CODE_ROW_FAILED, $result['rows'][1]['code'] );
+		$this->assertSame( 'BOOM', $result['rows'][1]['order_number'] );
+		$this->assertFalse( doing_filter( 'woocommerce_fulfillments_csv_importer_resolve_order' ) );
+	}
+
+	/**
 	 * @testdox Each chunk loads the orders it names by ID in one query, uses them, and checks the filtered query result.
 	 */
 	public function test_chunk_orders_are_loaded_in_one_query(): void {
