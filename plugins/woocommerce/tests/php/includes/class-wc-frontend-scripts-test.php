@@ -30,8 +30,6 @@ class WC_Frontend_Scripts_Test extends WC_Unit_Test_Case {
 
 		// Reinitialize payment gateways to clean state.
 		WC()->payment_gateways()->init();
-
-		delete_option( 'jetpack_activation_source' );
 	}
 
 	/**
