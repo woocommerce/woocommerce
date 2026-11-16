@@ -4348,6 +4348,55 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Retrying a checkout that created the shopper's account and then failed at payment reuses the first order.
+	 */
+	public function test_retry_after_failed_payment_reuses_the_order_when_checkout_created_the_account(): void {
+		// A shopper with a cart has a stored session, so signing in the new account reloads it from storage.
+		WC()->session->set_customer_session_cookie( true );
+		WC()->session->save_data();
+
+		$decline = function ( $context ) {
+			$context->order->update_status( OrderStatus::FAILED );
+			throw new \Exception( 'Card declined.' );
+		};
+		add_action( 'woocommerce_rest_checkout_process_payment_with_context', $decline, 1 );
+
+		$first_request = $this->build_checkout_post_request();
+		$first_request->set_param( 'create_account', true );
+		$first_response = rest_get_server()->dispatch( $first_request );
+
+		$this->assertSame( 400, $first_response->get_status(), 'The first attempt should fail at payment.' );
+		$this->assertGreaterThan( 0, get_current_user_id(), 'The first attempt should have created and signed in the account.' );
+
+		$order_ids = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+				'return' => 'ids',
+			)
+		);
+		$this->assertCount( 1, $order_ids, 'The first attempt should leave one order.' );
+		$first_order_id = (int) $order_ids[0];
+
+		$stored_session = WC()->session->get_session( WC()->session->get_customer_id() );
+		$this->assertSame(
+			$first_order_id,
+			(int) maybe_unserialize( $stored_session['store_api_draft_order'] ?? '0' ),
+			'The stored session must still point at the failed order after the account was signed in.'
+		);
+
+		remove_action( 'woocommerce_rest_checkout_process_payment_with_context', $decline, 1 );
+		$this->simulate_fresh_request();
+
+		$retry_request = $this->build_checkout_post_request();
+		$retry_request->set_param( 'create_account', true );
+		$retry_response = rest_get_server()->dispatch( $retry_request );
+
+		$this->assertSame( 200, $retry_response->get_status(), print_r( $retry_response->get_data(), true ) );
+		$this->assertSame( $first_order_id, (int) $retry_response->get_data()['order_id'], 'The retry must reuse the failed order, not create a second one.' );
+	}
+
+	/**
 	 * @testdox Checkout stops when the draft order could not be saved.
 	 */
 	public function test_post_rejects_draft_order_when_save_fails(): void {

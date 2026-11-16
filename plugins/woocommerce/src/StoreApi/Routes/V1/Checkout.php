@@ -632,6 +632,10 @@ class Checkout extends AbstractCartRoute {
 		// Customer save-point: 2 (db-stored; optional, guest -> customer transition or customer data has changed).
 		wc_log_order_step( '[Store API #6] Created and/or persisted customer data from order', array( 'order_object' => $this->order ) );
 
+		// Signing in a new customer reloads the session from storage, which drops the draft order ID set above before it was saved.
+		// Without it, a retry after a failed payment creates a second order instead of reusing this one.
+		$this->set_draft_order_id( $this->order->get_id() );
+
 		/**
 		 * Validate updated order before payment is attempted.
 		 */
