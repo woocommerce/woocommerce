@@ -82,9 +82,11 @@ This controls false positives. Follow it strictly.
   `woocommerce_order_get_items` filter.
 - Priming that is dead or wrong is a finding the other way (and removing it is the fix, not a
   finding):
-    - after a WP_Query that loaded full post objects (no `fields` argument): it already primed post,
-    meta, and term caches, and `_prime_post_caches()` expects IDs, not `WP_Post[]`. A
-    `'fields' => 'ids'` query primes nothing, so priming its IDs afterward is CORRECT; don't flag it;
+    - after a WP_Query that loaded full post objects (no `fields` argument, cache flags left at
+    their defaults): it already primed post, meta, and term caches, and `_prime_post_caches()`
+    expects IDs, not `WP_Post[]`. A `'fields' => 'ids'` query primes nothing, and a query with
+    `update_post_meta_cache`, `update_post_term_cache` or `cache_results` set to `false` leaves
+    that cache cold, so priming those IDs afterward is CORRECT; don't flag it;
     - on product or variation IDs that order `get_items()` already warmed
     (`prime_product_post_caches_for_order_items` and the lazy path). Priming the "Not exempt" IDs
     above is correct, not dead;
