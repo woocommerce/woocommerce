@@ -19,6 +19,9 @@ defined( 'ABSPATH' ) || exit;
  * Extensions register resources in `woocommerce_extensible_abilities_resources_init`, which fires
  * only while the experimental `extensible_abilities` feature is on.
  *
+ * This registration and classification API is experimental. Its field model may change before
+ * promotion to a stable API. Core output withholding does not depend on the extension feature flag.
+ *
  * @since 11.4.0
  */
 class AbilityResources {

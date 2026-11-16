@@ -14,6 +14,9 @@ defined( 'ABSPATH' ) || exit;
  * withholds them through the `woocommerce_abilities_share_personal_data` filter. It applies to the fields
  * of every resource, also while the experimental `extensible_abilities` feature is off.
  *
+ * This Abilities-only disclosure API is experimental. Classification describes the field; this
+ * policy does not control erasure, REST access, inputs or searches. Existing permissions still apply.
+ *
  * @since 11.4.0
  */
 class PersonalData {
@@ -41,7 +44,8 @@ class PersonalData {
 			 *
 			 * Return false to leave out fields flagged as personal data, such as billing emails, from
 			 * the output and the output schema. It runs once per resource and request, and the result
-			 * applies to both.
+			 * applies to both. Clients must refresh cached schemas when their disclosure context changes;
+			 * a cached schema never overrides the server's current decision.
 			 *
 			 * @since 11.4.0
 			 *
