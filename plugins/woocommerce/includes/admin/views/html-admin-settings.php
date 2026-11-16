@@ -62,7 +62,9 @@ try {
 }
 
 // Drill-down pages replace the top-level settings tabs with their own header when the shell can render.
+// AI tools > AI shopping renders its header, with the breadcrumb back to AI tools, from settings-embed.
 $hide_nav = ( 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true ) )
+	|| ( 'agentic-commerce' === $current_tab && 'shopping' === $current_section )
 	|| $is_rendering_settings_ui_drill_down;
 
 $is_settings_ui_page = null !== $settings_ui_settings_page;

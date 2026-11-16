@@ -6,7 +6,13 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettingsPage;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
+use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessCheckPage;
+use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessCopy;
+use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
+use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
 use WC_Admin_Settings;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -24,6 +30,13 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Gateways and emails a test turned on, with the enabled value to put back.
+	 *
+	 * @var array<int, array{0:object,1:string}>
+	 */
+	private array $restore = array();
+
+	/**
 	 * Load the settings page base class and act as an admin in wp-admin.
 	 */
 	public function setUp(): void {
@@ -35,7 +48,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		set_current_screen( 'dashboard' );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
-		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+		delete_option( 'woocommerce_feature_ucp_enabled' );
 		$this->sut = wc_get_container()->get( AgenticCommerceSettings::class );
 	}
 
@@ -45,6 +58,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			set_current_screen( 'front' );
+			foreach ( $this->restore as $item ) {
+				$item[0]->enabled = $item[1];
+			}
 		} finally {
 			parent::tearDown();
 		}
@@ -70,6 +86,53 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The AI tools tab, and only that tab, gets its body class for the white panel.
+	 */
+	public function test_body_class_only_on_the_tab(): void {
+		global $current_tab;
+		$previous = $current_tab;
+		try {
+			$current_tab = AgenticCommerceSettings::TAB; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$this->assertStringContainsString( 'woocommerce-settings-agentic-commerce-tab', $this->sut->handle_admin_body_class( 'wp-admin' ) );
+
+			$current_tab = 'checkout'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$this->assertSame( 'wp-admin', $this->sut->handle_admin_body_class( 'wp-admin' ) );
+		} finally {
+			$current_tab = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
+
+	/**
+	 * @testdox Sales readiness is added only while the agent_readiness feature is enabled, as a WooCommerce Admin page under WooCommerce, before Settings.
+	 */
+	public function test_readiness_page_only_with_feature_enabled(): void {
+		$page = wc_get_container()->get( ReadinessCheckPage::class );
+		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
+		remove_all_actions( 'admin_menu' );
+		$page->handle_init();
+		$this->assertFalse( has_action( 'admin_menu', array( $page, 'handle_admin_menu' ) ), 'No page with the feature off' );
+
+		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
+		$page->handle_init();
+		$this->assertSame( ReadinessCheckPage::MENU_PRIORITY, has_action( 'admin_menu', array( $page, 'handle_admin_menu' ) ), 'After Reports (20), before Settings (50)' );
+
+		// The menu globals aren't rolled back between tests, so put them back after.
+		$globals = array( 'menu', 'submenu', 'admin_page_hooks', '_registered_pages', '_parent_pages', '_wp_real_parent_file', '_wp_submenu_nopriv' );
+		$saved   = array_map( static fn( string $name ) => $GLOBALS[ $name ] ?? null, array_combine( $globals, $globals ) );
+		try {
+			$GLOBALS['submenu'] = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Start from an empty menu; restored below.
+			add_menu_page( 'WooCommerce', 'WooCommerce', 'manage_woocommerce', 'woocommerce' );
+			$page->handle_admin_menu();
+			$this->assertSame( array( 'Sales readiness', 'manage_woocommerce', 'wc-admin&path=/sales-readiness' ), array_slice( end( $GLOBALS['submenu']['woocommerce'] ), 0, 3 ) );
+		} finally {
+			foreach ( $saved as $name => $value ) {
+				$GLOBALS[ $name ] = $value; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring what the test changed.
+			}
+		}
+		$this->assertSame( admin_url( 'admin.php?page=wc-admin&path=/sales-readiness' ), ReadinessCheckPage::url() );
+	}
+
+	/**
 	 * @testdox Before the first scan the page asks for one instead of showing counts; dropdowns list published pages only.
 	 */
 	public function test_output_without_report(): void {
@@ -91,7 +154,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$html = $this->render_page();
 
-		$this->assertStringContainsString( 'Product counts appear after the first agent readiness check.', $html );
+		$this->assertStringContainsString( 'Product counts show after the first Sales readiness check.', $html );
+		$this->assertStringContainsString( 'path=/sales-readiness">Sales readiness</a> <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--off">Not checked yet</mark>', $html, 'Status links to Sales readiness, not yet run' );
 		$this->assertStringNotContainsString( 'View products', $html );
 		$this->assertStringContainsString( 'Published returns page', $html );
 		$this->assertStringNotContainsString( 'Draft returns page', $html );
@@ -110,61 +174,119 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$html = $this->render_page();
 
-		$this->assertStringContainsString( '<span>Available to agents</span> <strong>1</strong>', $html );
-		$this->assertStringContainsString( '<span>Not supported yet</span> <strong>1</strong>', $html );
-		$this->assertStringContainsString( 'Simple and variable products only, for now.', $html );
-		$this->assertStringNotContainsString( 'aren&#039;t shown', $html );
-		$this->assertStringContainsString( '<span>Available to agents</span> <strong>1</strong></li>', $html, 'No list matches the available count, so it has no link' );
-		$this->assertStringContainsString( 'product_type=simple,variable&#038;product_visibility=exclude-from-catalog', $html, 'The hidden link matches its count' );
+		$this->assertStringContainsString( '<span>Available to AI assistants</span> <strong>1</strong> <a href="', $html );
+		$stored              = get_option( AgentReadiness::REPORT_OPTION );
+		$stored['products']  = ProductScan::PRODUCT_LIMIT;
+		$stored['available'] = 8400;
+		update_option( AgentReadiness::REPORT_OPTION, $stored );
+		$this->assertStringContainsString( '<span>Available to AI assistants</span> <strong>8,400</strong> <a href="', $this->render_page(), 'The whole catalog, like the other two, not only the products the scan stopped at' );
+		$this->assertMatchesRegularExpression( '#<span>Product type not supported yet <span[^>]*woocommerce-help-tip[^>]*AI assistants can find these products, but shoppers can.{1,7}t buy them through an assistant yet\.[^>]*></span></span> <strong>1</strong>#', $html, 'The tip says what not supported means' );
+		$this->assertStringContainsString( 'agent_readiness=' . ProductScan::COUNT_UNSUPPORTED . '">View products</a>', $html, 'Each count links to its products' );
+		$this->assertMatchesRegularExpression( '#<h2>Setup checklist</h2>\s*<mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--info">\s*\d+ steps? left\s*</mark>\s*</div>\s*<p>Finish \d+ required steps? to get your store ready for AI shopping\.</p>#', $html, 'The checklist says how many steps are left, then counts the required steps first, even with UCP off' );
+		$this->assertMatchesRegularExpression( '#Use a secure connection \(HTTPS\) <mark[^>]*>Required</mark></p>.*?</div><a class="button wc-agentic-commerce-review" href="[^"]*site-health\.php">Review</a></li>#s', $html, 'A step is not a link itself: Review at the end of the row opens where to fix it' );
 		$this->assertStringContainsString( 'aria-checked="false"', $html );
 		$this->assertStringNotContainsString( 'to turn this on', $html );
-		$this->assertMatchesRegularExpression( '/but \d+ required setup checks? below still needs? fixing\./', (string) wp_scripts()->get_data( 'wc-agentic-commerce-settings', 'data' ), 'Turning the switch on shows the failing checks without a reload' );
-		$this->assertStringContainsString( 'wc-agentic-commerce-check--required', $html, 'Failing required checks are in the Required group' );
+		$this->assertMatchesRegularExpression( '#wc-agentic-commerce-item--required.*badge--check">Required</mark>#', $html, 'Failing required checks are marked Required' );
+		$this->assertStringNotContainsString( 'Check</mark>', $html, 'Failing recommended checks have no badge' );
+		$this->assertStringNotContainsString( 'Required.', $html, 'Policy pages are recommended, so no field is marked required' );
+		$this->assertLessThan( strpos( $html, 'wc-agentic-commerce-item--open' ), strrpos( $html, 'wc-agentic-commerce-item--required' ), 'Required steps come first' );
+		$this->assertLessThan( strpos( $html, 'AI assistants can only find your products when your store is live.' ), strpos( $html, 'Use a secure connection (HTTPS)' ), 'HTTPS is listed first, as in the design' );
 		$this->assertMatchesRegularExpression( '/(Choose a|Publish your) privacy policy page/', $html, 'An open check says what to do' );
-		$this->assertStringContainsString( 'Test your setup', $html, 'Placeholder until WOOAI-1619' );
-		$this->assertStringContainsString( '<h2>Security</h2>', $html, 'Placeholder until WOOAI-1620' );
+		$this->assertStringContainsString( 'Connection URL', $html );
+		$this->assertStringContainsString( 'page=wc-settings&#038;tab=agentic-commerce">AI tools</a> <span aria-hidden="true">/</span> <span aria-current="page">AI shopping</span></div>', $html, 'AI shopping has a breadcrumb back to the landing page' );
+		$this->assertStringNotContainsString( '<h2>Security</h2>', $html, 'No Security card until a UCP flow signs anything (WOOAI-1620)' );
 		$this->assertStringNotContainsString( 'Universal Commerce Protocol (UCP) is off', $html, 'UCP is the switch, not a listed check' );
-	}
-
-	/**
-	 * @testdox The switch message counts failing required checks, singular for one, and says ready for none.
-	 */
-	public function test_on_message_counts(): void {
-		$on_message = new \ReflectionMethod( AgenticCommerceSettingsPage::class, 'on_message' );
-		$on_message->setAccessible( true );
-
-		$this->assertStringContainsString( 'but 1 required setup check below still needs fixing.', $on_message->invoke( null, 1 ) );
-		$this->assertStringContainsString( 'but 3 required setup checks below still need fixing.', $on_message->invoke( null, 3 ) );
-		$this->assertSame( 'AI agents can now find and shop your store.', $on_message->invoke( null, 0 ) );
 	}
 
 	/**
 	 * @testdox With every required check passing, open checks are only Recommended and passing ones are Done.
 	 */
 	public function test_output_on_a_ready_store(): void {
-		StoreConditionsTest::make_store_ready();
+		$this->make_every_step_pass();
 
 		$html = $this->render_page();
 
-		$this->assertStringContainsString( 'Everything agents need is set up.', $html );
-		$this->assertStringNotContainsString( 'wc-agentic-commerce-check--required', $html );
-		$this->assertStringContainsString( 'wc-agentic-commerce-group--done', $html );
+		$this->assertMatchesRegularExpression( '#<p>Your store is ready for AI shopping\. (You have \d+ optional steps? left\.|Turn it on to let AI assistants find your products\.)</p>#', $html );
+		$this->assertStringNotContainsString( 'badge--pass', $html, 'Completed steps need no badge, their marker says so' );
+		$this->assertStringNotContainsString( 'wc-agentic-commerce-missing', $html );
+		$this->assertStringNotContainsString( 'wc-agentic-commerce-item--required', $html );
+		$this->assertMatchesRegularExpression( '#Show \d+ completed steps?</span>#', $html, 'Completed steps are folded' );
 		$this->assertStringContainsString( 'Privacy policy page is selected', $html, 'Done rows are named by their passing state' );
 		$this->assertStringNotContainsString( 'wc-agentic-commerce-notice', $html, 'No coming soon notice on a live store' );
+
+		$shopping = $this->view()['overview']['shopping'];
+		$this->assertNull( $shopping['badge'], 'With UCP off and nothing required failing, the Overview card has no badge' );
+		$this->assertSame( 'Let shoppers find and buy your products through AI assistants.', $shopping['text'] );
+		$this->assertSame( 'Set up AI shopping', $shopping['button']['text'], 'and offers set up' );
+	}
+
+	/**
+	 * The design's five AI shopping scenarios: how the store is set up, the UCP setting, and what the Overview card and
+	 * the Setup checklist say.
+	 *
+	 * @return array<string, array{0:string,1:string|null,2:string,3:string|null,4:string,5:string}>
+	 */
+	public function provider_shopping_scenarios(): array {
+		return array(
+			'not set up yet'      => array( 'every_step', null, '#^Let shoppers find and buy your products through AI assistants\.$#', null, 'Set up AI shopping', '#<p>Your store is ready for AI shopping\. Turn it on to let AI assistants find your products\.</p>#' ),
+			'steps left'          => array( 'coming_soon', 'yes', '#^AI assistants can\'t shop your store yet\. \d+ steps? left\.$#', 'Needs attention', 'Manage', '#<p>Finish \d+ required steps? to get your store ready for AI shopping\.</p>#' ),
+			'optional steps left' => array( 'optional_left', 'yes', '#^AI assistants can shop your store\. 1 step left\.$#', 'Active', 'Manage', '#<p>Your store is ready for AI shopping\. You have 1 optional step left\.</p>#' ),
+			'all steps done'      => array( 'every_step', 'yes', '#^AI assistants can shop your store\.$#', 'Active', 'Manage', '#<p>Your store is ready for AI shopping\.</p>#' ),
+			'turned off'          => array( 'every_step', 'no', '#^AI shopping is off\.$#', null, 'Manage', '#<p>Your store is ready for AI shopping\. Turn it on to let AI assistants find your products\.</p>#' ),
+			'off, steps left'     => array( 'coming_soon', 'no', '#^AI shopping is off\.$#', 'Needs attention', 'Manage', '#<p>Finish \d+ required steps? to get your store ready for AI shopping\.</p>#' ),
+		);
+	}
+
+	/**
+	 * @testdox The AI shopping card and the Setup checklist follow the design in each scenario: $_dataName.
+	 * @dataProvider provider_shopping_scenarios
+	 *
+	 * @param string      $store     How the store is set up.
+	 * @param string|null $ucp       The stored UCP setting, or null when it was never saved.
+	 * @param string      $text      The card text, as a pattern.
+	 * @param string|null $badge     The card badge, or null for none.
+	 * @param string      $button    The card button.
+	 * @param string      $checklist The Setup checklist summary, as a pattern.
+	 */
+	public function test_shopping_scenarios( string $store, ?string $ucp, string $text, ?string $badge, string $button, string $checklist ): void {
+		if ( 'coming_soon' === $store ) {
+			remove_all_filters( 'pre_option_home' );
+			update_option( 'woocommerce_coming_soon', 'yes' );
+			update_option( 'home', 'http://example.org' );
+		} else {
+			$this->make_every_step_pass();
+		}
+		if ( 'optional_left' === $store ) {
+			foreach ( array_intersect_key( WC()->mailer()->get_emails(), array_flip( array( 'WC_Email_Customer_Processing_Order', 'WC_Email_Customer_Completed_Order' ) ) ) as $email ) {
+				$this->restore[] = array( $email, $email->enabled );
+				$email->enabled  = 'no';
+			}
+		}
+
+		$html = $this->render_page( AgenticCommerceSettings::SHOPPING_SECTION, 'yes' === $ucp );
+		if ( 'no' === $ucp ) {
+			update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+		}
+		$shopping = $this->view()['overview']['shopping'];
+
+		$this->assertMatchesRegularExpression( $checklist, $html );
+		$this->assertMatchesRegularExpression( $text, $shopping['text'] );
+		$this->assertSame( $badge, $shopping['badge']['text'] ?? null );
+		$this->assertSame( $button, $shopping['button']['text'] );
 	}
 
 	/**
 	 * @testdox A missing policy page is recommended, so it does not block the switch or the required group.
 	 */
 	public function test_missing_policy_page_is_recommended(): void {
-		StoreConditionsTest::make_store_ready();
+		$this->make_every_step_pass();
 		delete_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION );
 
 		$html = $this->render_page();
 
-		$this->assertStringNotContainsString( 'wc-agentic-commerce-check--required', $html );
-		$this->assertMatchesRegularExpression( '/wc-agentic-commerce-group--recommended.*Choose a privacy policy page/s', $html );
-		$this->assertStringContainsString( 'Everything agents need is set up.', $html );
+		$this->assertStringNotContainsString( 'wc-agentic-commerce-item--required', $html );
+		$this->assertMatchesRegularExpression( '#wc-agentic-commerce-item--open.*Choose a privacy policy page#s', $html );
+		$this->assertDoesNotMatchRegularExpression( '#required steps?#', $html );
 		$this->assertDoesNotMatchRegularExpression( '/<button[^>]*wc-agentic-commerce-ucp-switch[^>]*disabled=([\'"])disabled\\1/', $html );
 	}
 
@@ -176,7 +298,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$html = $this->render_page();
 
-		$this->assertMatchesRegularExpression( '/wc-agentic-commerce-switch-card.*wc-agentic-commerce-notice.*Go to Site visibility/s', $html );
+		$this->assertMatchesRegularExpression( '/wc-agentic-commerce-switch-card.*wc-agentic-commerce-notice.*Change site visibility/s', $html );
 		$this->assertLessThan( strpos( $html, 'wc-agentic-commerce-status-card' ), strpos( $html, 'wc-agentic-commerce-switch-card' ), 'The switch comes first' );
 	}
 
@@ -184,6 +306,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 * @testdox A chosen policy page that isn't published links to its editor.
 	 */
 	public function test_draft_policy_page_links_to_review_and_publish(): void {
+		$this->make_every_step_pass();
 		$draft = self::factory()->post->create(
 			array(
 				'post_type'   => 'page',
@@ -195,11 +318,61 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$html = $this->render_page();
 
 		$this->assertStringContainsString( 'Publish your refund and returns policy page', $html );
-		$this->assertStringContainsString( 'Review and publish', $html );
+		$this->assertStringContainsString( 'A refund policy needs to be available for AI assistants to share with shoppers.', $html, 'The refund page says why it matters, as in the design' );
+		$this->assertMatchesRegularExpression( '#Publish your refund and returns policy page.*?href="[^"]*post=' . $draft . '&amp;action=edit">Review</a>#s', $html, 'Review opens the page editor' );
+
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+			)
+		);
+		$view = $this->view();
+		$this->assertNull( $view['fix_first'], 'A policy page is only recommended, so it stays out of Fix first' );
+		$this->assertStringNotContainsString( 'Publish your refund and returns policy page', (string) wp_json_encode( $view['sections'] ), 'Setup steps stay in the Setup checklist' );
+		$copy = $this->step_copy( 'refund_returns_page' );
+		$this->assertStringContainsString( 'post=' . $draft . '&action=edit', $copy['url'], 'Readiness check links the step to the page editor' );
+		$this->assertSame( 'Edit refund policy', $copy['link'], 'named for the policy' );
+		$this->assertSame( 'A refund policy needs to be available for AI assistants to share with shoppers.', $copy['text'], 'The refund draft keeps its own line' );
 	}
 
 	/**
-	 * @testdox A store check from the last scan that couldn't run shows "Couldn't check" and doesn't block the switch.
+	 * @testdox Each draft policy page links to its editor with the policy's own link text.
+	 */
+	public function test_draft_policy_pages_name_their_edit_link(): void {
+		$this->make_every_step_pass();
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+			)
+		);
+		$pages = array(
+			AgenticCommerceSettings::PRIVACY_PAGE_OPTION => array( 'Publish your privacy policy page', 'Edit privacy policy', 'privacy_page' ),
+			AgenticCommerceSettings::TERMS_PAGE_OPTION   => array( 'Publish your terms and conditions page', 'Edit terms and conditions', 'terms_page' ),
+			AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION => array( 'Publish your shipping policy page', 'Edit shipping policy', 'shipping_policy_page' ),
+		);
+		foreach ( $pages as $option => $copy ) {
+			$draft = self::factory()->post->create(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'draft',
+				)
+			);
+			update_option( $option, $draft );
+			$step = $this->step_copy( $copy[2] );
+			$this->assertSame( $copy[0], $step['title'] );
+			$this->assertStringContainsString( 'post=' . $draft . '&action=edit', $step['url'], $copy[1] );
+			$this->assertSame( $copy[1], $step['link'] );
+			$this->assertSame( 'It\'s still a draft. AI assistants only link to published pages.', $step['text'], $copy[0] . ' keeps the default draft line' );
+			wp_publish_post( $draft );
+		}
+	}
+
+	/**
+	 * @testdox A scanned check that couldn't run is shown as such; a stale setup result in the report is not read.
 	 */
 	public function test_output_scanned_check_couldnt_check(): void {
 		StoreConditionsTest::make_store_ready( $this );
@@ -215,35 +388,13 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 						'fix_url' => '',
 					),
 					array(
-						'id'      => 'sitemap_xml',
+						'id'      => 'robots_txt',
 						'group'   => 'find',
-						'ok'      => null,
+						'ok'      => true,
 						'level'   => 'recommended',
-						'name'    => 'Sitemap lists your products',
+						'name'    => 'Robots file allows AI assistants',
 						'fix_url' => '',
 					),
-				),
-			),
-			false
-		);
-
-		$html = $this->render_page();
-
-		$this->assertStringContainsString( 'Sitemap lists your products', $html );
-		$this->assertStringContainsString( 'Couldn&#039;t check', $html );
-		$this->assertStringNotContainsString( 'Stale launched result', $html, 'Live conditions are read now, not from the report' );
-		$this->assertStringNotContainsString( 'to turn this on.', $html );
-	}
-
-	/**
-	 * @testdox A check that couldn't run says why: launch the store in coming soon mode, otherwise the store couldn't load its page.
-	 */
-	public function test_output_couldnt_check_message_follows_coming_soon(): void {
-		StoreConditionsTest::make_store_ready( $this );
-		update_option(
-			AgentReadiness::REPORT_OPTION,
-			array(
-				'store_checks' => array(
 					array(
 						'id'      => 'sitemap_xml',
 						'group'   => 'find',
@@ -257,39 +408,80 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			false
 		);
 
-		$live = $this->render_page();
-		update_option( 'woocommerce_coming_soon', 'yes' );
-		$coming_soon = $this->render_page();
+		$titles = $this->titles( $this->view() );
 
-		$this->assertStringContainsString( 'This couldn&#039;t be checked.', $live );
-		$this->assertStringNotContainsString( 'Launch your store', $live );
-		$this->assertStringContainsString( 'Launch your store to run this check.', $coming_soon );
-		$this->assertStringNotContainsString( 'This couldn&#039;t be checked.', $coming_soon );
+		$this->assertContains( 'Sitemap lists your products', $titles );
+		$this->assertSame( 'unknown', $this->row( 'Sitemap lists your products' )['state'] );
+		$this->assertNotContains( 'Stale launched result', $titles, 'Live conditions are read now, not from the report' );
 	}
 
 	/**
-	 * @testdox With UCP already on and a required check failing, the switch says the checks still need fixing.
+	 * @testdox A check that couldn't run says why on its row; a card none of whose checks ran says why once, for coming soon mode or a host that blocks the store's own pages.
+	 */
+	public function test_output_couldnt_check_message_follows_coming_soon(): void {
+		StoreConditionsTest::make_store_ready( $this );
+		$sitemap = array(
+			'id'      => 'sitemap_xml',
+			'group'   => 'find',
+			'ok'      => null,
+			'level'   => 'recommended',
+			'name'    => 'Sitemap lists your products',
+			'fix_url' => '',
+		);
+		$robots  = array(
+			'id'      => 'robots_txt',
+			'group'   => 'find',
+			'ok'      => true,
+			'level'   => 'recommended',
+			'name'    => 'Robots file allows AI assistants',
+			'fix_url' => '',
+		);
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $sitemap, $robots ) ), false );
+		$this->assertSame( 'This couldn\'t be checked. The next check tries again.', $this->row( 'Sitemap lists your products' )['text'] );
+
+		update_option( AgentReadiness::REPORT_OPTION, array( 'store_checks' => array( $sitemap, array( 'ok' => null ) + $robots ) ), false );
+		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
+		$this->assertSame( 'Couldn’t check', $card['badge']['text'] );
+		$this->assertSame( array( 'We couldn’t check your pages' ), array_column( $card['rows'], 'title' ), 'One row for the card, not one per check' );
+		$this->assertSame( 'Your host stopped the store from opening its own pages. Try again later, or ask your host.', $card['rows'][0]['text'] );
+
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		$card = array_column( $this->view()['sections'], null, 'id' )['find'];
+		$this->assertSame( 'They show your coming soon page until the store is live.', $card['rows'][0]['text'] );
+	}
+
+	/**
+	 * @testdox With UCP already on and a required check failing, the switch stays on and the checklist asks for the required steps, without saying assistants can shop.
 	 */
 	public function test_output_switch_on_with_failing_checks(): void {
-		$page = $this->page();
 		remove_all_filters( 'pre_option_home' );
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		update_option( 'home', 'http://example.org' );
-		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
-
-		ob_start();
-		$page->output();
-		$html = (string) ob_get_clean();
+		$html = $this->render_page( AgenticCommerceSettings::SHOPPING_SECTION, true );
 
 		$this->assertStringContainsString( 'aria-checked="true"', $html );
-		$this->assertStringContainsString( 'required setup checks below still need fixing.', $html );
-		$this->assertStringNotContainsString( 'AI agents can now find and shop your store.</p>', $html );
+		$this->assertStringNotContainsString( 'AI assistants can now find and shop your store.', $html );
+		$this->assertMatchesRegularExpression( '#<p>Finish \d+ required steps? to get your store ready for AI shopping\.</p>#', $html );
+
+		$shopping = $this->view()['overview']['shopping'];
+		$this->assertSame(
+			array(
+				'intent' => 'low',
+				'text'   => 'Needs attention',
+			),
+			$shopping['badge'],
+			'The Overview card says so too'
+		);
+		$this->assertMatchesRegularExpression( '#^AI assistants can\'t shop your store yet\. \d+ steps? left\.$#', $shopping['text'] );
+		$this->assertSame( 'Manage', $shopping['button']['text'], 'and Manage opens AI shopping' );
+		$this->assertStringContainsString( 'section=shopping', $shopping['button']['href'] );
 	}
 
 	/**
-	 * @testdox The page answers each merchant question, marks a likely conflict with the page but names no plugin, hides checks whose prerequisite failed, and folds passed checks away.
+	 * @testdox Sales readiness badges each merchant question, marks a likely conflict with the page but names no plugin, hides checks whose prerequisite failed, and folds passed checks away.
 	 */
 	public function test_output_groups_summary_and_conflict(): void {
+		$this->make_every_step_pass();
 		$row = static fn( string $id, ?bool $ok, bool $conflict = false ): array => array(
 			'id'       => $id,
 			'ok'       => $ok,
@@ -321,25 +513,79 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$html = $this->render_page();
+		$view     = $this->view();
+		$sections = array_column( $view['sections'], null, 'id' );
+		$json     = wp_json_encode( $view );
 
-		foreach ( array( 'Can agents get in?', 'Can they find your store?', 'Do they understand your products?', 'Can they buy?' ) as $question ) {
-			$this->assertStringContainsString( $question, $html );
-		}
-		$this->assertStringContainsString( 'Agent shopping is off', $html, 'UCP is off in this test' );
-		$this->assertMatchesRegularExpression( '/data-on="(?![^"]*Agent shopping is off)[^"]*" data-off="Agent shopping is off/', $html, 'The switch script can show the line for UCP on without a reload' );
-		$this->assertStringContainsString( 'Likely conflict', $html );
-		$this->assertStringContainsString( 'Something on your store may be replacing this.', $html );
-		$this->assertStringContainsString( 'Seen on: <a href="https://example.org/product/mug/">https://example.org/product/mug/</a>', $html, 'A conflict names the page' );
-		$this->assertStringNotContainsString( 'Yoast SEO', $html, 'No plugin is named, even from an older stored report' );
-		$this->assertStringNotContainsString( 'product_offer_jsonld name', $html, 'Its prerequisite failed' );
-		$this->assertMatchesRegularExpression( '#<details>.*sitemap_lists_products name.*</details>#s', $html );
+		$this->assertSame(
+			array( 'Store access', 'Can AI assistants find your store?', 'Can AI assistants read your product details?', 'Can AI assistants list your products?', 'Can shoppers buy through AI assistants?' ),
+			array_column( $view['sections'], 'title' ),
+			'Products come before Can shoppers buy through AI assistants?'
+		);
+		$this->assertSame( 'AI shopping is off, so we didn’t check your connection URL.', $sections['access']['note'], 'UCP is off in this test' );
+		$this->assertSame(
+			array(
+				'intent' => 'low',
+				'text'   => '1 issue',
+			),
+			$sections['understand']['badge'],
+			'The failing check is the issue; the unrun one is hidden'
+		);
+		$this->assertSame(
+			array(
+				'intent' => 'stable',
+				'text'   => 'All passed',
+			),
+			$sections['find']['badge']
+		);
+		$conflict = $sections['understand']['rows'][0];
+		$this->assertSame( 'Add product details AI assistants can read', $conflict['title'], 'A failing check is headed by what to do' );
+		$this->assertStringEndsWith( 'We found none on a recent product page.', $conflict['text'], 'then why it matters and what the check found' );
+		$this->assertStringStartsWith( 'Test a product page in Google', $conflict['fix'], 'and the fix, since it has one' );
+		$this->assertSame(
+			array(
+				'intent' => 'none',
+				'text'   => 'Likely conflict',
+			),
+			$conflict['badge']
+		);
+		$this->assertSame(
+			array(
+				'href' => 'https://example.org/product/mug/',
+				'text' => 'https://example.org/product/mug/',
+			),
+			$conflict['seen_at'],
+			'A conflict names the page'
+		);
+		$report                               = get_option( 'woocommerce_agent_readiness_report' );
+		$report['store_checks'][0]['seen_at'] = 'javascript:alert(1)';
+		$report['store_checks'][0]['fix_url'] = 'javascript:alert(1)';
+		update_option( 'woocommerce_agent_readiness_report', $report );
+		$row = array_column( $this->view()['sections'], null, 'id' )['understand']['rows'][0];
+		$this->assertNull( $row['seen_at'], 'A stored page that is not an http(s) URL is not linked' );
+		$this->assertNull( $row['link'], 'nor is a stored fix URL' );
+		$sitemap = $this->view_with_check( 'sitemap_lists_products' )['sections'][1]['rows'][0];
+		$this->assertSame( 'Add a sitemap that lists your products', $sitemap['title'] );
+		$this->assertStringContainsString( 'SEO plugin', $sitemap['fix'], 'A failed row says where to fix it' );
+		$this->assertNull( $sitemap['badge'], 'Only a blocker is Required' );
+		$this->assertStringNotContainsString( 'Yoast SEO', $json, 'No plugin is named, even from an older stored report' );
+		$this->assertStringNotContainsString( 'product_offer_jsonld name', $json, 'Its prerequisite failed' );
+		$this->assertStringNotContainsString( 'product_jsonld_present name', $json );
+		$this->assertStringNotContainsString( 'sitemap_lists_products label', $json, 'A passed check keeps its passing title' );
+		$this->assertSame( array(), $sections['find']['rows'], 'Nothing open under find' );
+		$passed = array_column( $sections['find']['folded'], null, 'title' )['A sitemap lists your products'] ?? null;
+		$this->assertNotNull( $passed, 'Passed checks are folded, under their passing title' );
+		$this->assertSame( 'Crawlers use the sitemap to find new and changed products.', $passed['text'], 'with why it matters' );
+		$this->assertStringNotContainsString( 'sitemap_lists_products why', $json, 'A passed scanned check drops the report\'s failure-worded why' );
+		$this->assertStringNotContainsString( 'Order confirmation emails are on', (string) wp_json_encode( $sections ), 'Setup steps stay in the Setup checklist' );
+		$this->assertStringNotContainsString( 'Shoppers who buy through an agent get no confirmation from your store.', $json, 'A passed setup step drops its failure-worded why, as in Status' );
 	}
 
 	/**
-	 * @testdox The declared list shows found and not found as information, and isn't counted in the summary.
+	 * @testdox What the store shares is information: how many items were found, every item behind a fold, and no badge.
 	 */
 	public function test_output_declared_block(): void {
+		$this->make_every_step_pass();
 		update_option(
 			'woocommerce_agent_readiness_report',
 			array(
@@ -356,102 +602,852 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 						'name'  => 'AGENTS.md',
 						'found' => false,
 					),
+					array(
+						'id'    => 'tdmrep',
+						'name'  => 'TDMRep',
+						'found' => null,
+					),
 				),
 			)
 		);
 
-		$html = $this->render_page();
+		$view = $this->view();
 
-		$this->assertStringContainsString( '1 of 2 found', $html );
-		$this->assertStringContainsString( 'Not found', $html );
-		$this->assertStringNotContainsString( 'AGENTS.md</td><td>Fix', $html );
-		$this->assertMatchesRegularExpression( '#Can they find your store\?</a>\s*Run check to find out#', $html, 'Not counted as a result' );
+		$this->assertSame( 'What does your store share with AI assistants?', $view['declared']['title'] );
+		$this->assertSame( 'Optional files that some AI assistants look for. You don’t need to fix anything. Found 1 of 3.', $view['declared']['text'] );
+		$this->assertSame( 'Optional', $view['declared']['badge']['text'] );
+		$this->assertSame(
+			array(
+				array(
+					'name'  => 'ai.txt usage file',
+					'found' => true,
+				),
+				array(
+					'name'  => 'AGENTS.md',
+					'found' => false,
+				),
+				array(
+					'name'  => 'TDMRep',
+					'found' => false,
+				),
+			),
+			$view['declared']['items'],
+			'Every item, found or not'
+		);
+		$this->assertSame(
+			array(
+				'intent' => 'none',
+				'text'   => 'Not checked yet',
+			),
+			array_column( $view['sections'], 'badge', 'id' )['find'],
+			'Not counted as a result; the search engine step is in the Setup checklist, so the card has no checks'
+		);
 	}
 
 	/**
-	 * @testdox The declared summary says what couldn't be checked, and a bad stored entry doesn't break the page.
+	 * @testdox A bad stored entry isn't counted and doesn't break the page; with no items there is no card.
 	 */
-	public function test_output_declared_unknown_and_bad_entries(): void {
-		$report = static fn( array $declared ): array => array(
+	public function test_output_declared_none_found_and_bad_entries(): void {
+		update_option(
+			'woocommerce_agent_readiness_report',
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+				'declared'     => array(
+					array(
+						'id'    => 'ai-txt',
+						'name'  => 'ai.txt usage file',
+						'found' => false,
+					),
+					'not an array',
+				),
+			)
+		);
+
+		$this->assertStringContainsString( 'You don’t need to fix anything. Found 0 of 1.', $this->view()['declared']['text'] );
+
+		update_option(
+			'woocommerce_agent_readiness_report',
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+				'declared'     => array(),
+			)
+		);
+		$this->assertNull( $this->view()['declared'] );
+	}
+
+	/**
+	 * @testdox Fix first keeps ranking an issue by its share after its count changes, and names sales only when an issue on the card sold something.
+	 */
+	public function test_output_fix_first_stale_share_and_no_sales(): void {
+		$this->make_every_step_pass();
+		$check  = static fn( string $id, int $count, ?float $share, array $extra = array() ): array => $extra + array(
+			'id'          => $id,
+			'label'       => $id . ' label',
+			'why'         => $id . ' why.',
+			'fix'         => $id . ' fix.',
+			'channels'    => array(
+				'chatgpt' => array(
+					'field'  => 'field',
+					'effect' => ReadinessRule::EFFECT_NOT_LISTABLE,
+				),
+			),
+			'count'       => $count,
+			'product_ids' => array(),
+			'sales_share' => $share,
+		);
+		$report = array(
 			'generated_at' => gmdate( 'c' ),
+			'products'     => 120,
 			'store_checks' => array(),
-			'declared'     => $declared,
-		);
-		$item   = static fn( ?bool $found ): array => array(
-			'id'    => 'ai-txt',
-			'name'  => 'ai.txt usage file',
-			'found' => $found,
-		);
-
-		update_option( 'woocommerce_agent_readiness_report', $report( array( $item( null ), $item( null ), 'not an array' ) ) );
-		$html = $this->render_page();
-		$this->assertStringContainsString( '<summary>Not checked</summary>', $html );
-		$this->assertStringNotContainsString( '0 of', $html );
-
-		update_option( 'woocommerce_agent_readiness_report', $report( array( $item( true ), $item( false ), $item( null ) ) ) );
-		$this->assertStringContainsString( '1 of 3 found, 1 not checked', $this->render_page() );
-	}
-
-	/**
-	 * @testdox Every question reads the scan, so without one each asks for it; pending checks don't count as unchecked.
-	 */
-	public function test_groups_need_a_scan(): void {
-		$summary = new \ReflectionMethod( AgenticCommerceSettingsPage::class, 'group_summary' );
-		$summary->setAccessible( true );
-		$passed = array(
-			array(
-				'ok'    => true,
-				'level' => 'recommended',
+			'channels'     => array( 'chatgpt' => array( 'name' => 'ChatGPT' ) ),
+			'checks'       => array(
+				$check( 'missing_brand', 30, 0.01 ),
+				$check( 'missing_images', 99, null, array( 'ranked_share' => 0.6 ) ),
+			),
+			'sales'        => array(
+				'days'   => 90,
+				'orders' => 30,
 			),
 		);
+		update_option( AgentReadiness::REPORT_OPTION, $report );
 
-		$pending = array(
-			array(
-				'ok'      => null,
-				'level'   => 'recommended',
-				'pending' => true,
+		$fix_first = $this->view()['fix_first'];
+		$this->assertSame( array( 'missing_images', 'missing_brand' ), array_column( $fix_first['items'], 'id' ), 'An issue whose count changed since the check keeps the rank its sales gave it' );
+		$this->assertStringNotContainsString( 'of your sales', $fix_first['items'][0]['why'], 'Its share is not shown, since it was measured on other products' );
+		$this->assertStringStartsWith( '1% of your sales in the last 90 days.', $fix_first['items'][1]['why'], 'The first share shown says the period' );
+
+		$report['checks'][0]['sales_share'] = 0.0;
+		update_option( AgentReadiness::REPORT_OPTION, $report );
+		$fix_first = $this->view()['fix_first'];
+		$this->assertSame( 'Ranked by how many products each issue affects.', $fix_first['ranking'], 'No issue on the card sold anything, so sales did not decide the order' );
+		$this->assertStringStartsWith( 'No sales in the last 90 days.', $fix_first['items'][1]['why'] );
+	}
+
+	/**
+	 * @testdox Fix first lists the failing required steps, then the top 3 issues: what keeps products off a channel, then what makes them harder to find, each ranked by its share of sales.
+	 */
+	public function test_output_fix_first_ranks_by_sales(): void {
+		$this->make_every_step_pass();
+		remove_all_filters( 'pre_option_home' );
+		update_option( 'home', 'http://example.org' );
+		$check  = static fn( string $id, int $count, ?float $share, string $effect ): array => array(
+			'id'          => $id,
+			'label'       => $id . ' label',
+			'why'         => $id . ' why.',
+			'fix'         => $id . ' fix.',
+			'channels'    => array(
+				'chatgpt' => array(
+					'field'  => 'field',
+					'effect' => $effect,
+				),
+			),
+			'count'       => $count,
+			'product_ids' => array(),
+			'sales_share' => $share,
+		);
+		$report = array(
+			'generated_at' => gmdate( 'c' ),
+			'products'     => 40,
+			'store_checks' => array(),
+			'channels'     => array(
+				'chatgpt' => array( 'name' => 'ChatGPT' ),
+				'broken'  => 'not an array',
+			),
+			'checks'       => array(
+				$check( 'missing_gtin', 30, 0.6, ReadinessRule::EFFECT_GAPS ),
+				$check( 'missing_brand', 2, 0.05, ReadinessRule::EFFECT_NOT_LISTABLE ),
+				$check( 'missing_images', 5, 0.18, ReadinessRule::EFFECT_NOT_LISTABLE ),
+				$check( 'title_too_long', 1, 0.001, ReadinessRule::EFFECT_GAPS ),
+			),
+			'sales'        => array(
+				'days'   => 90,
+				'orders' => 30,
 			),
 		);
+		update_option( AgentReadiness::REPORT_OPTION, $report );
 
-		$this->assertSame( 'Run check to find out', $summary->invoke( null, 'buy', $passed, false, 0, false, true ) );
-		$this->assertSame( 'Yes', $summary->invoke( null, 'buy', $passed, true, 0, false, true ) );
-		$this->assertSame( 'Yes', $summary->invoke( null, 'buy', array_merge( $passed, $pending ), true, 0, false, true ) );
-		$this->assertSame( 'Coming soon', $summary->invoke( null, 'buy', $pending, true, 0, false, true ), 'Only pending checks answer nothing yet' );
-		$this->assertSame( 'Run check to find out', $summary->invoke( null, 'access', $passed, true, 0, false, true ), 'A scan from before UCP was on does not answer access' );
-		$this->assertSame( 'Yes', $summary->invoke( null, 'access', $passed, true, 0, true, true ) );
+		$fix_first = $this->view()['fix_first'];
+		$this->assertSame( 'Start with the fixes that affect the most sales. Sales figures are from the last 90 days.', $fix_first['ranking'] );
+		update_option( AgentReadiness::REPORT_OPTION, array_replace_recursive( $report, array( 'sales' => array( 'days' => 1 ) ) ) );
+		$this->assertSame( 'Start with the fixes that affect the most sales. Sales figures are from the last 1 day.', $this->view()['fix_first']['ranking'], 'One day reads in the singular' );
+		update_option( AgentReadiness::REPORT_OPTION, $report );
+		$this->assertSame(
+			array( 'Use a secure connection (HTTPS)', 'Add a main image to 5 products', 'Add a brand to 2 products', 'Add barcode numbers to 30 products' ),
+			array_column( $fix_first['items'], 'title' ),
+			'The required step, then 3 issues: the not listable checks by share, then GTIN, a gap, despite its larger share; the title, a smaller gap, is left out'
+		);
+		$this->assertSame( array( 'Required for AI shopping', 'Needed to list products', 'Needed to list products', 'Helps shoppers find products' ), array_column( $fix_first['items'], 'tier' ) );
+		$this->assertSame( array( 'Required', null, null, null ), array_map( static fn( array $item ): ?string => $item['badge']['text'] ?? null, $fix_first['items'] ), 'Only the Required heading has a badge' );
+		$this->assertArrayNotHasKey( 'impact', $fix_first['items'][1], 'The share of sales is in the line, so no badge repeats it' );
+		$this->assertSame( '18% of your sales in the last 90 days. AI assistants only list products that have a main image.', $fix_first['items'][1]['why'], 'The first share says over which period, then why the issue matters' );
+		$this->assertSame( '5% of your sales. ChatGPT only lists products that have a brand. In Google and Copilot, a brand makes products easier to find.', $fix_first['items'][2]['why'], 'The next ones give only the share' );
+		$this->assertNotEmpty( $fix_first['items'][0]['link']['text'] ?? '', 'A setup step links to where to fix it' );
+		$this->assertSame(
+			array(
+				'href' => '',
+				'text' => '5 products',
+			),
+			$fix_first['items'][1]['link'],
+			'A product issue names how many products it affects; no stored failures, so no list to link'
+		);
+
+		$report['checks'][1]['sales_share'] = 0.0;
+		update_option( AgentReadiness::REPORT_OPTION, $report );
+		$json = wp_json_encode( $this->view() );
+		$this->assertStringContainsString( 'No sales. ChatGPT only lists products that have a brand.', $json, 'Products that sold nothing in the period say so, not 0%' );
+		$this->assertStringNotContainsString( '"0% of', $json );
+		$report['checks'][1]['sales_share'] = 0.003;
+		update_option( AgentReadiness::REPORT_OPTION, $report );
+		$view = $this->view();
+		$this->assertStringContainsString( 'under 1% of your sales', wp_json_encode( $view['fix_first'] ), 'A share under 1% is not rounded to 0%' );
+		$this->assertStringNotContainsString( 'under 1%', wp_json_encode( $view['sections'] ), 'Shares are in Fix first only, not on the product card' );
+
+		$report['sales'] = null;
+		foreach ( $report['checks'] as &$row ) {
+			$row['sales_share'] = null;
+		}
+		unset( $row );
+		update_option( AgentReadiness::REPORT_OPTION, $report );
+		$fix_first = $this->view()['fix_first'];
+		$this->assertSame( 'Ranked by how many products each issue affects. Turn on Analytics to rank by sales instead.', $fix_first['ranking'] );
+		$this->assertStringNotContainsString( 'of your sales', wp_json_encode( $fix_first ) );
+
+		$report['sales'] = array(
+			'days'   => 90,
+			'orders' => 30,
+		);
+		update_option( AgentReadiness::REPORT_OPTION, $report );
+		$this->assertSame( 'Ranked by how many products each issue affects.', $this->view()['fix_first']['ranking'], 'Orders with no share to rank by, such as free products or counts changed since the check' );
+
+		$report['sales'] = array(
+			'days'   => 90,
+			'orders' => 12,
+		);
+		update_option( AgentReadiness::REPORT_OPTION, $report );
+		$this->assertSame( 'Only 12 orders in the last 90 days, too few to rank by sales, so issues are ranked by how many products they affect.', $this->view()['fix_first']['ranking'] );
+
+		$report['sales'] = array(
+			'days'   => 90,
+			'orders' => 0,
+		);
+		update_option( AgentReadiness::REPORT_OPTION, $report );
+		$this->assertSame( 'No sales in the last 90 days, so issues are ranked by how many products they affect.', $this->view()['fix_first']['ranking'] );
+
+		$report['sales'] = array(
+			'days'     => 90,
+			'orders'   => 0,
+			'imported' => false,
+		);
+		update_option( AgentReadiness::REPORT_OPTION, $report );
+		$this->assertSame( 'Analytics hasn\'t imported all your past orders yet, so issues are ranked by how many products they affect. Import them in Analytics > Settings.', $this->view()['fix_first']['ranking'], 'Missing orders don\'t read as no sales' );
+
+		unset( $report['sales'] );
+		update_option( AgentReadiness::REPORT_OPTION, $report );
+		$this->assertSame( 'Ranked by how many products each issue affects.', $this->view()['fix_first']['ranking'], 'A report from before sales were read doesn\'t say Analytics is off' );
 	}
 
 	/**
-	 * @testdox Examples skip deleted products, so a deleted product doesn't leave the cell empty.
+	 * @testdox In Fix first, store pages agents can't reach stop every sale; any other check that blocks listing keeps products off a channel.
 	 */
-	public function test_examples_skip_deleted_products(): void {
-		$kept  = \WC_Helper_Product::create_simple_product();
-		$links = new \ReflectionMethod( AgenticCommerceSettingsPage::class, 'product_links' );
-		$links->setAccessible( true );
+	public function test_output_fix_first_tiers_store_checks(): void {
+		$this->make_every_step_pass();
+		$output = static fn( string $id, string $group ): array => array(
+			'id'       => $id,
+			'ok'       => false,
+			'blocks'   => 'listing',
+			'group'    => $group,
+			'level'    => 'recommended',
+			'name'     => $id . ' name',
+			'label'    => $id . ' label',
+			'why'      => $id . ' why.',
+			'fix'      => $id . ' fix.',
+			'fix_url'  => '',
+			'conflict' => false,
+		);
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'products'     => 4,
+				'store_checks' => array( $output( 'other_listing_check', 'understand' ), $output( 'pages_public', 'access' ) ),
+				'channels'     => array(),
+				'checks'       => array(),
+			)
+		);
 
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-		$result = $links->invoke( $this->page(), array( 999991, 999992, 999993, $kept->get_id() ) );
+		$items = $this->view()['fix_first']['items'];
+		$this->assertSame(
+			array(
+				array( 'Required for AI shopping', 'Let shoppers open store pages without logging in' ),
+				array( 'Needed to list products', 'other_listing_check label' ),
+			),
+			array_map( static fn( array $item ): array => array( $item['tier'], $item['title'] ), $items ),
+			'Store pages AI assistants can\'t reach are a blocker, so Required; a check without copy keeps the report\'s title'
+		);
 
-		$this->assertCount( 1, $result );
-		$this->assertStringContainsString( (string) $kept->get_id(), $result[0] );
+		update_option(
+			RemoteRules::OPTION,
+			array(
+				'version'      => '2026-11-15',
+				'checks'       => array(),
+				'store_checks' => array(
+					'pages_public'        => array( 'required' => false ),
+					'other_listing_check' => array( 'required' => true ),
+				),
+			),
+			false
+		);
+		$this->assertSame(
+			array( 'other_listing_check', 'pages_public' ),
+			array_column( $this->view()['fix_first']['items'], 'id' ),
+			'The rules file sets which output checks are Required, as for setup steps'
+		);
+		$this->assertSame( array( 'Required for AI shopping', 'Needed to list products' ), array_column( $this->view()['fix_first']['items'], 'tier' ) );
 	}
 
 	/**
-	 * @testdox The page shows each failing product check with its channel tags and example products, and a failing setup check says what to do.
+	 * @testdox A store with no products shows the product cards' No products state, with a way to add one, instead of their checks.
+	 */
+	public function test_output_no_products(): void {
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'products'     => 0,
+				'store_checks' => array(),
+				'channels'     => array(),
+				'checks'       => array(),
+			)
+		);
+
+		$sections = array_column( $this->view()['sections'], null, 'id' );
+		foreach ( array( 'products', 'understand' ) as $id ) {
+			$this->assertSame( 'No products', $sections[ $id ]['badge']['text'], $id . ' says why it has no checks' );
+			$this->assertSame( array(), array_merge( $sections[ $id ]['rows'], $sections[ $id ]['folded'] ) );
+			$this->assertSame( 'You don’t have any products yet', $sections[ $id ]['empty']['title'] );
+			$this->assertSame( 'Add a product', $sections[ $id ]['empty']['link']['text'] );
+			$this->assertStringContainsString( 'post-new.php?post_type=product', $sections[ $id ]['empty']['link']['href'] );
+		}
+		$this->assertNull( $sections['find']['empty'], 'Store cards keep their checks' );
+	}
+
+	/**
+	 * @testdox In Fix first, a store-wide listing issue ranks above product issues in the same tier, whatever their share of sales.
+	 */
+	public function test_output_fix_first_store_wide_issue_ranks_first(): void {
+		$this->make_every_step_pass();
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'products'     => 40,
+				'store_checks' => array(
+					array(
+						'id'       => 'store_wide',
+						'ok'       => false,
+						'blocks'   => 'listing',
+						'group'    => 'understand',
+						'level'    => 'recommended',
+						'name'     => 'store_wide name',
+						'label'    => 'store_wide label',
+						'why'      => 'store_wide why.',
+						'fix'      => 'store_wide fix.',
+						'fix_url'  => '',
+						'conflict' => false,
+					),
+				),
+				'channels'     => array( 'chatgpt' => array( 'name' => 'ChatGPT' ) ),
+				'checks'       => array(
+					array(
+						'id'          => 'missing_images',
+						'label'       => 'missing_images label',
+						'why'         => 'missing_images why.',
+						'fix'         => 'missing_images fix.',
+						'channels'    => array(
+							'chatgpt' => array(
+								'field'  => 'field',
+								'effect' => ReadinessRule::EFFECT_NOT_LISTABLE,
+							),
+						),
+						'count'       => 30,
+						'product_ids' => array(),
+						'sales_share' => 0.9,
+					),
+				),
+				'sales'        => array(
+					'days'   => 90,
+					'orders' => 30,
+				),
+			)
+		);
+
+		$items = $this->view()['fix_first']['items'];
+		$this->assertSame( 'store_wide label', $items[0]['title'], 'It keeps every product off, so it ranks as all sales' );
+		$this->assertStringStartsWith( '90% of your sales', $items[1]['why'], 'The product issue below it gives its share in the line' );
+	}
+
+	/**
+	 * @testdox Fix first items and check rows carry the check's id, so the views can track clicks without translated titles.
+	 */
+	public function test_view_items_carry_check_ids(): void {
+		$this->make_every_step_pass();
+		$output = static fn( string $id, string $group ): array => array(
+			'id'       => $id,
+			'ok'       => false,
+			'blocks'   => 'listing',
+			'group'    => $group,
+			'level'    => 'recommended',
+			'name'     => $id . ' name',
+			'label'    => $id . ' label',
+			'why'      => $id . ' why.',
+			'fix'      => $id . ' fix.',
+			'fix_url'  => '',
+			'conflict' => false,
+		);
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'products'     => 4,
+				'store_checks' => array( $output( 'product_shipping_schema', 'buy' ), $output( 'pages_public', 'access' ) ),
+				'channels'     => array(),
+				'checks'       => array(),
+			)
+		);
+
+		$view = $this->view();
+		$this->assertSame( array( 'pages_public', 'product_shipping_schema' ), array_column( $view['fix_first']['items'], 'id' ) );
+		$ids = array();
+		foreach ( $view['sections'] as $section ) {
+			foreach ( array_merge( $section['rows'], $section['folded'] ) as $row ) {
+				$this->assertNotSame( '', $row['id'], $row['title'] . ' has no id' );
+				$ids[] = $row['id'];
+			}
+		}
+		$this->assertContains( 'pages_public', $ids );
+	}
+
+	/**
+	 * @testdox Fix first is left out when nothing fails.
+	 */
+	public function test_output_fix_first_hidden_when_nothing_fails(): void {
+		$this->make_every_step_pass();
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+				'checks'       => array(),
+			)
+		);
+		$this->assertNull( $this->view()['fix_first'] );
+	}
+
+	/**
+	 * @testdox A question's badge counts its issues; a check that couldn't run isn't an issue, nor a pass.
+	 */
+	public function test_group_badge(): void {
+		$badge = new \ReflectionMethod( ReadinessCheckPage::class, 'group_badge' );
+		$badge->setAccessible( true );
+		$text = static fn( array $checks ): string => $badge->invoke( null, $checks )[1];
+		$row  = static fn( ?bool $ok ): array => array( 'ok' => $ok );
+
+		$this->assertSame( '2 issues', $text( array( $row( false ), $row( false ), $row( true ) ) ) );
+		$this->assertSame( '1 issue', $text( array( $row( false ), $row( null ) ) ) );
+		$this->assertSame( 'All passed', $text( array( $row( true ), $row( true ) ) ) );
+		$this->assertSame( 'No issues', $text( array( $row( true ), $row( null ) ) ), 'A check that could not run is not an issue, nor a pass' );
+		$this->assertSame( 'Not checked yet', $text( array() ) );
+		$this->assertSame( 'Not checked yet', $text( array( $row( null ), $row( null ) ) ), 'Nothing ran, so nothing is shown as passed' );
+
+		$map = new \ReflectionMethod( ReadinessCheckPage::class, 'badge_data' );
+		$map->setAccessible( true );
+		$this->assertSame( 'stable', $map->invoke( null, $badge->invoke( null, array( $row( true ) ) ) )['intent'], 'All passed is green, as in the design' );
+		$this->assertSame( 'low', $map->invoke( null, $badge->invoke( null, array( $row( false ) ) ) )['intent'], 'Issues are low' );
+		$this->assertSame( 'low', $map->invoke( null, array( 'fix', 'Required' ) )['intent'], 'Required is yellow, as in the design' );
+		$this->assertSame( 'stable', $map->invoke( null, array( 'pass', 'Active' ) )['intent'] );
+	}
+
+	/**
+	 * @testdox A fix for two products names both, and one for more than three gives the count.
+	 */
+	public function test_output_product_fix_names_a_few_products(): void {
+		$first  = WC_Helper_Product::create_simple_product();
+		$second = WC_Helper_Product::create_simple_product();
+		$second->set_name( 'Red cap' );
+		$second->save();
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+
+		$titles = array();
+		foreach ( $this->view()['sections'] as $section ) {
+			$titles = array_merge( $titles, array_column( array_merge( $section['rows'], $section['folded'] ), 'title' ) );
+		}
+		$brand = array_values( array_filter( $titles, static fn( string $title ): bool => 0 === strpos( $title, 'Add a brand to ' ) ) );
+		$this->assertCount( 1, $brand );
+		$this->assertStringContainsString( $first->get_name(), $brand[0], 'Both failing products are named' );
+		$this->assertStringContainsString( 'Red cap', $brand[0] );
+		$this->assertStringContainsString( ' and ', $brand[0], 'Two names are joined with "and", in either order' );
+		$named = array_filter( (array) $this->view()['fix_first']['items'], static fn( array $item ): bool => false !== strpos( $item['title'], 'Red cap' ) );
+		$this->assertNotEmpty( $named, 'Fix first has a product fix that names the products' );
+
+		WC_Helper_Product::create_simple_product();
+		WC_Helper_Product::create_simple_product();
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+		$this->row( 'Add a brand to 4 products' );
+		$counted = array_filter( (array) $this->view()['fix_first']['items'], static fn( array $item ): bool => false !== strpos( $item['title'], ' 4 products' ) );
+		$this->assertNotEmpty( $counted, 'Fix first has a product fix that counts the products' );
+	}
+
+	/**
+	 * @testdox Sales readiness shows what each channel can list and each failing check, naming the channel that can't list it, with a filtered list link, without the alt text check.
 	 */
 	public function test_output_product_checks_and_store_check_detail(): void {
 		$product = WC_Helper_Product::create_simple_product();
+		$image   = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+		$product->set_image_id( $image );
+		$product->save();
 		update_option( 'blog_public', '0' );
 		wc_get_container()->get( AgentReadiness::class )->refresh_report();
 
-		$html = $this->render_page();
+		$view     = $this->view();
+		$products = array_column( $view['sections'], null, 'id' )['products'];
+		$json     = wp_json_encode( $view );
 
-		$this->assertStringContainsString( 'Product checks', $html );
-		$this->assertStringContainsString( 'Required by ChatGPT', $html );
-		$this->assertStringContainsString( 'Harder to find on Google', $html );
-		$this->assertStringContainsString( 'post=' . $product->get_id(), $html );
-		$this->assertStringContainsString( 'Let search engines index your store', $html, 'Hidden from search engines is a Recommended setup step' );
-		$this->assertStringContainsString( 'Last checked', $html );
+		$this->assertGreaterThan( 0, array_column( get_option( AgentReadiness::REPORT_OPTION )['checks'], 'count', 'id' )['image_alt_text'] ?? 0, 'The scan found the missing alt text' );
+		$this->assertMatchesRegularExpression( '#^\d+ issues?$#', $products['badge']['text'], 'Products have their own question' );
+		$this->assertSame(
+			array(
+				'name'     => 'ChatGPT',
+				'listable' => '0',
+				'of'       => 'of 1 can be listed',
+			),
+			$products['channels'][0],
+			'The count reads as one line, with no link of its own'
+		);
+		$this->assertStringStartsWith( 'Last checked today at ', $view['last_checked'] );
+		$this->assertNotNull( $view['fix_first'], 'When it last ran, Fix first, then a card per question' );
+		$brand = $this->row( 'Add a brand to ' . $product->get_name() );
+		$this->assertSame( 'ChatGPT only lists products that have a brand. In Google and Copilot, a brand makes products easier to find.', $brand['text'], 'One failing product is named in the title; the text says why a brand matters' );
+		$this->assertSame( '', $brand['fix'], 'Adding a brand needs no fix line' );
+		$this->assertStringNotContainsString( 'Required by', $json );
+		$this->assertStringNotContainsString( 'Harder to find on', $json, 'Only channels that can\'t list the product are tagged' );
+		$this->assertSame( 'View 1 product', $brand['link']['text'] );
+		$this->assertStringContainsString( 'agent_readiness=', $brand['link']['href'], 'The link opens the Products list filtered to the failing products' );
+		$this->assertStringNotContainsString( 'main image has no alt text', $json, 'Store readiness covers alt text' );
+		$this->assertStringNotContainsString( 'post=' . $product->get_id(), $json, 'No example products' );
+		$this->assertStringContainsString( 'Let search engines index your store', $this->render_page(), 'Hidden from search engines is a Recommended setup step' );
+		$this->assertNull( $view['checked_note'] );
+
+		$stored              = get_option( AgentReadiness::REPORT_OPTION );
+		$stored['truncated'] = true;
+		update_option( AgentReadiness::REPORT_OPTION, $stored );
+		$this->assertSame(
+			sprintf( 'Checked the %s products you changed most recently.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['checked_note'],
+			'A report without the total keeps the short note'
+		);
+		$stored['available'] = 8400;
+		update_option( AgentReadiness::REPORT_OPTION, $stored );
+		$this->assertSame(
+			sprintf( 'Checked the %s products you changed most recently, out of 8,400.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['checked_note'],
+			'With the total from the same scan'
+		);
+		$this->assertSame(
+			sprintf( 'Based on your %s most recently changed products.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['overview']['based_on'],
+			'The AI tools card says it after its description'
+		);
+	}
+
+	/**
+	 * @testdox AI tools opens on the Overview, a React root; AI shopping's Status links to Sales readiness with the store and product issues counted together.
+	 */
+	public function test_sections_and_status_links(): void {
+		$this->make_every_step_pass();
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(
+					array(
+						'id'      => 'llms_txt_present',
+						'group'   => 'find',
+						'ok'      => false,
+						'blocks'  => 'discovery',
+						'level'   => 'recommended',
+						'name'    => 'Store serves an llms.txt file',
+						'label'   => 'No llms.txt file',
+						'why'     => '',
+						'fix'     => '',
+						'fix_url' => '',
+					),
+				),
+				'checks'       => array(
+					array(
+						'id'    => 'image_alt_text',
+						'count' => 3,
+					),
+					array(
+						'id'    => 'missing_brand',
+						'label' => 'Products with no brand',
+						'count' => 2,
+					),
+				),
+			),
+			false
+		);
+
+		$this->assertSame( array( '', AgenticCommerceSettings::SHOPPING_SECTION ), array_keys( $this->page()->get_sections() ) );
+
+		$html = $this->render_page( '' );
+		$this->assertTrue( $this->save_hidden, 'Nothing on the Overview saves' );
+		$this->assertStringContainsString( '<div id="wc-agent-readiness-overview"', $html, 'The Overview is React, mounted by the settings-embed script' );
+		$this->assertMatchesRegularExpression( '#data-view="([^"]+)"#', $html );
+		preg_match( '#data-view="([^"]+)"#', $html, $match );
+		$this->assertSame( 'Set up AI shopping', json_decode( html_entity_decode( $match[1] ), true )['overview']['shopping']['button']['text'], 'The view comes with the page, so the cards draw without a request' );
+		$this->assertStringNotContainsString( 'No llms.txt file', $html );
+
+		$view = $this->view();
+		$this->assertSame( 'Set up AI shopping', $view['overview']['shopping']['button']['text'] );
+		$this->assertSame( 'View all checks', $view['overview']['view_all']['text'] );
+		$this->assertStringContainsString( 'path=/sales-readiness', $view['overview']['view_all']['href'] );
+		$badges = array_column( $view['sections'], 'badge', 'id' );
+		$this->assertSame( '1 issue', $badges['find']['text'] );
+		$this->assertSame(
+			array(
+				'intent' => 'none',
+				'text'   => 'Not checked yet',
+			),
+			$badges['access'],
+			'With AI shopping off and setup steps in the Setup checklist, the fixture has no access check'
+		);
+		$this->assertSame( '1 issue', $badges['products']['text'] );
+		$this->assertNull( $view['declared'], 'No card when the report lists no declared items' );
+
+		$html = $this->render_page();
+		$this->assertMatchesRegularExpression( '#path=/sales-readiness">Sales readiness</a> <mark[^>]*>2 issues</mark>#', $html, 'One store and one product issue; the alt text check is not counted' );
+		$this->assertSame( 1, substr_count( $html, 'wc-agentic-commerce-results"><li>' ), 'One results row' );
+		$this->assertFalse( $this->save_hidden, 'AI shopping saves the store policy fields' );
+		$this->assertStringContainsString( '<span aria-current="page">AI shopping</span>', $html );
+		$this->assertStringNotContainsString( 'No llms.txt file', $html, 'The checks themselves are on Sales readiness' );
+
+		$this->assertSame(
+			array(
+				'href' => '',
+				'text' => '2 products',
+			),
+			$this->row( 'Add a brand to 2 products' )['link'],
+			'Product check titles say what to do and to how many; a report without stored failures has no filtered list to link to'
+		);
+	}
+
+	/**
+	 * @testdox Status says no issues only when readiness checks ran; a scan whose checks couldn't run isn't shown as passed.
+	 */
+	public function test_status_link_when_checks_could_not_run(): void {
+		$this->make_every_step_pass();
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(
+					array(
+						'id'      => 'llms_txt_present',
+						'group'   => 'find',
+						'ok'      => null,
+						'blocks'  => 'discovery',
+						'level'   => 'recommended',
+						'name'    => 'Store serves an llms.txt file',
+						'label'   => 'No llms.txt file',
+						'why'     => '',
+						'fix'     => '',
+						'fix_url' => '',
+					),
+				),
+			),
+			false
+		);
+
+		$this->assertMatchesRegularExpression( '#Sales readiness</a> <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--off">No issues</mark>#', $this->render_page() );
+	}
+
+	/**
+	 * @testdox Guest checkout off is Required in Fix first once this WooCommerce serves UCP checkout, whose routes take guest orders only; before that it is an Optional setup step, not in Fix first.
+	 */
+	public function test_guest_checkout_is_required_with_ucp_checkout(): void {
+		$this->make_every_step_pass();
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+			),
+			false
+		);
+
+		$serves = StoreConditions::serves_ucp_checkout();
+		$items  = array_column( $this->view()['fix_first']['items'] ?? array(), 'tier', 'id' );
+		if ( $serves ) {
+			$this->assertSame( 'Required for AI shopping', $items['guest_checkout'] ?? null );
+		} else {
+			$this->assertArrayNotHasKey( 'guest_checkout', $items, 'No heading says Required for an Optional step' );
+		}
+		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'It doesn\'t keep AI shopping from being turned on' );
+	}
+
+	/**
+	 * @testdox "Discourage search engines" and a missing payment method are Required in Fix first and the Setup checklist, but don't keep AI shopping from being turned on.
+	 */
+	public function test_search_and_payments_are_shown_required_without_blocking(): void {
+		$this->make_every_step_pass();
+		update_option( 'blog_public', '0' );
+		$emails = array_intersect_key( WC()->mailer()->get_emails(), array_flip( array( 'WC_Email_Customer_Processing_Order', 'WC_Email_Customer_Completed_Order' ) ) );
+		foreach ( $emails as $email ) {
+			$this->restore[] = array( $email, $email->enabled );
+			$email->enabled  = 'no';
+		}
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			$this->restore[]  = array( $gateway, $gateway->enabled );
+			$gateway->enabled = 'no';
+		}
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+			),
+			false
+		);
+
+		$items = array_column( $this->view()['fix_first']['items'], null, 'id' );
+		$this->assertSame( 'Required for AI shopping', $items['search_visible']['tier'] );
+		$this->assertSame( 'Required for AI shopping', $items['payment_method']['tier'] );
+		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'Neither blocks the switch' );
+
+		$html = $this->render_page();
+		$this->assertMatchesRegularExpression( '#Finish 2 required steps#', $html );
+		$this->assertLessThan( strpos( $html, 'wc-agentic-commerce-item--open' ), strrpos( $html, 'wc-agentic-commerce-item--required' ), 'They come before the optional order emails step' );
+		$this->assertMatchesRegularExpression( '#Sales readiness</a> <mark[^>]*>2 issues</mark>#', $html, 'Status counts what Sales readiness shows: both; order emails are only in the Setup checklist' );
+
+		foreach ( $emails as $email ) {
+			$email->enabled = 'yes';
+		}
+		delete_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION );
+		$this->assertMatchesRegularExpression( '#Sales readiness</a> <mark[^>]*>2 issues</mark>#', $this->render_page(), 'A missing policy page is only in the Setup checklist, so not counted' );
+		$this->assertDoesNotMatchRegularExpression( '/<button[^>]*wc-agentic-commerce-ucp-switch[^>]*disabled=([\'"])disabled\\1/', $html );
+	}
+
+	/**
+	 * @testdox With AI shopping on, a connection URL or catalog search that fails is Required and in Fix first.
+	 */
+	public function test_failing_ucp_profile_and_endpoint_are_required(): void {
+		$this->make_every_step_pass();
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+		$row = static fn( string $id ): array => array(
+			'id'       => $id,
+			'ok'       => false,
+			'blocks'   => 'ucp',
+			'group'    => 'access',
+			'name'     => 'name',
+			'label'    => 'label',
+			'why'      => 'why',
+			'fix'      => 'fix',
+			'fix_url'  => '',
+			'conflict' => false,
+			'pending'  => false,
+		);
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array( $row( 'ucp_profile' ), $row( 'ucp_endpoints_live' ), $row( 'ucp_profile_version' ) ),
+			),
+			false
+		);
+
+		$view  = $this->view();
+		$items = array_column( $view['fix_first']['items'], 'tier', 'id' );
+		$this->assertSame( 'Required for AI shopping', $items['ucp_profile'] );
+		$this->assertSame( 'Required for AI shopping', $items['ucp_endpoints_live'] );
+		$this->assertArrayNotHasKey( 'ucp_profile_version', $items, 'A different version is likely another plugin, not a blocker' );
+		$this->assertSame( 'Required', array_column( array_column( $view['sections'], null, 'id' )['access']['rows'], 'badge', 'id' )['ucp_profile']['text'] );
+	}
+
+	/**
+	 * @testdox A missing returns policy in the product details shows once, as the refund and returns page step, while no page is chosen.
+	 */
+	public function test_returns_policy_shows_once_with_the_refund_page_step(): void {
+		$this->make_every_step_pass();
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(
+					array(
+						'id'       => 'product_return_policy_schema',
+						'ok'       => false,
+						'blocks'   => 'checkout',
+						'group'    => 'buy',
+						'name'     => 'name',
+						'label'    => 'label',
+						'why'      => 'why',
+						'fix'      => 'fix',
+						'fix_url'  => '',
+						'conflict' => false,
+						'pending'  => false,
+					),
+				),
+			),
+			false
+		);
+		$title = ReadinessCopy::store_check( 'product_return_policy_schema' )['action'];
+
+		$this->assertStringContainsString( $title, (string) wp_json_encode( $this->view() ), 'Shown while a refund and returns page is chosen' );
+
+		delete_option( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION );
+		$this->assertStringNotContainsString( $title, (string) wp_json_encode( $this->view() ), 'Left out while the step fails' );
+	}
+
+	/**
+	 * @testdox Checks coming in a later update aren't shown or counted, and an open check names its fix and links to it.
+	 */
+	public function test_readiness_hides_pending_checks(): void {
+		$this->make_every_step_pass();
+		$row = static fn( string $id, ?bool $ok, bool $pending = false ): array => array(
+			'id'      => $id,
+			'ok'      => $ok,
+			'blocks'  => 'checkout',
+			'group'   => 'buy',
+			'name'    => $id . ' name',
+			'label'   => $id . ' label',
+			'why'     => $id . ' why',
+			'fix'     => $id . ' fix',
+			'fix_url' => admin_url( 'upload.php' ),
+			'pending' => $pending,
+		);
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array( $row( 'policy_pages_linked', false ), $row( 'product_shipping_schema', null, true ) ),
+			),
+			false
+		);
+
+		$view = $this->view();
+		$json = wp_json_encode( $view );
+
+		$this->assertStringNotContainsString( 'product_shipping_schema', $json );
+		$this->assertStringNotContainsString( 'Coming soon', $json );
+		$this->assertMatchesRegularExpression( '#Sales readiness</a> <mark[^>]*>1 issue</mark>#', $this->render_page(), 'Status counts the same checks' );
+		$this->assertSame( '1 issue', array_column( $view['sections'], 'badge', 'id' )['buy']['text'] );
+		$row = $this->row( 'Link to your privacy and returns pages from your home page' );
+		$this->assertSame( ReadinessCopy::store_check( 'policy_pages_linked' )['fix'], $row['fix'], 'The fix line comes from the copy, not the report' );
+		$this->assertSame( 'Go to Media library', $row['link']['text'], 'A fix in the media library says where it goes' );
+		$this->assertSame( 'Check again', $view['run']['label'], 'Once a check has run, the button runs it again' );
 	}
 
 	/**
@@ -461,21 +1457,29 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		delete_option( AgentReadiness::REPORT_OPTION );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 
-		$html = $this->render_page();
-		$this->assertDoesNotMatchRegularExpression( '/wc-agentic-commerce-run"[^>]*disabled/', $html );
-		$this->assertStringNotContainsString( 'Product checks', $html, 'No product checks before the first scan' );
+		$view = $this->view();
+		$this->assertSame( 'Not checked yet', $view['last_checked'], 'No check has run' );
+		$this->assertSame( 'Run checks', $view['run']['label'], 'and the page offers to run one' );
+		$this->assertFalse( $view['run']['pending'] );
+		$this->assertSame( 'Run a check to see what AI assistants get when they visit your store and read your products.', $view['intro'], 'No results before the first scan' );
+		$this->assertSame( array(), $view['sections'] );
+		$this->assertNull( $view['fix_first'] );
 
 		wc_get_container()->get( ScheduledScan::class )->queue();
-		$html = $this->render_page();
-		$this->assertStringContainsString( 'Checking your store in the background.', $html );
-		$this->assertMatchesRegularExpression( '/wc-agentic-commerce-run"[^>]*disabled/', $html );
+		$run = $this->view()['run'];
+		$this->assertSame( 'Checking your store.', $run['message'], 'Read out to screen readers; the page shows a spinner' );
+		$this->assertTrue( $run['pending'] );
+		$this->assertFalse( $run['stalled'], 'A queued check is not stalled, so the page keeps polling' );
 
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		$this->age_finished_actions();
 		as_schedule_single_action( time() - ScheduledScan::STALLED_AFTER - 60, ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP );
-		$html = $this->render_page();
-		$this->assertStringContainsString( 'The check has not started because scheduled actions', $html );
-		$this->assertMatchesRegularExpression( '/wc-agentic-commerce-run"[^>]*disabled/', $html );
+		$run = $this->view()['run'];
+		$this->assertSame( 'The check can’t start because scheduled actions aren’t running on this site.', $run['message'] );
+		$this->assertSame( 'Go to Scheduled Actions', $run['link']['text'] );
+		$this->assertStringContainsString( 'tab=action-scheduler', $run['link']['href'] );
+		$this->assertTrue( $run['pending'] );
+		$this->assertTrue( $run['stalled'], 'and the page stops showing a spinner' );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 	}
 
@@ -514,7 +1518,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, $draft );
 		update_option( AgenticCommerceSettings::FAQ_PAGE_OPTION, $old_faq );
 
-		$settings = $this->page()->get_settings_for_section( '' );
+		$settings = $this->page()->get_settings_for_section( AgenticCommerceSettings::SHOPPING_SECTION );
 		$refund   = current( wp_list_filter( $settings, array( 'id' => AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION ) ) );
 		$terms    = current( wp_list_filter( $settings, array( 'id' => AgenticCommerceSettings::TERMS_PAGE_OPTION ) ) );
 		$this->assertSame( 'Returns draft (Draft)', $refund['options'][ (string) $draft ], 'The stored draft is listed with its status' );
@@ -553,7 +1557,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 		update_option( 'woocommerce_checkout_page_id', $checkout );
 		$terms_field = array();
-		foreach ( $this->page()->get_settings_for_section( '' ) as $field ) {
+		foreach ( $this->page()->get_settings_for_section( AgenticCommerceSettings::SHOPPING_SECTION ) as $field ) {
 			if ( AgenticCommerceSettings::TERMS_PAGE_OPTION === ( $field['id'] ?? '' ) ) {
 				$terms_field = $field;
 			}
@@ -561,7 +1565,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( (string) $checkout, $terms_field['options'], 'The checkout page is not offered' );
 
 		WC_Admin_Settings::save_fields(
-			$this->page()->get_settings_for_section( '' ),
+			$this->page()->get_settings_for_section( AgenticCommerceSettings::SHOPPING_SECTION ),
 			array( AgenticCommerceSettings::TERMS_PAGE_OPTION => (string) $checkout )
 		);
 
@@ -582,7 +1586,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_cart_page_id', $cart );
 		update_option( AgenticCommerceSettings::TERMS_PAGE_OPTION, $cart );
 
-		$settings = $this->page()->get_settings_for_section( '' );
+		$settings = $this->page()->get_settings_for_section( AgenticCommerceSettings::SHOPPING_SECTION );
 		$terms    = current( wp_list_filter( $settings, array( 'id' => AgenticCommerceSettings::TERMS_PAGE_OPTION ) ) );
 		$this->assertSame( 'Cart (Store page)', $terms['options'][ (string) $cart ] );
 		$html = $this->render_page();
@@ -607,7 +1611,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( AgenticCommerceSettings::TERMS_PAGE_OPTION, $published );
 
 		WC_Admin_Settings::save_fields(
-			$this->page()->get_settings_for_section( '' ),
+			$this->page()->get_settings_for_section( AgenticCommerceSettings::SHOPPING_SECTION ),
 			array( AgenticCommerceSettings::TERMS_PAGE_OPTION => '' )
 		);
 
@@ -655,25 +1659,190 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * What Sales readiness says about a failing setup step, as Fix first would show it.
+	 *
+	 * @param string $id Setup step id.
+	 * @return array<string, string>
+	 */
+	private function step_copy( string $id ): array {
+		$step = current( wp_list_filter( wc_get_container()->get( StoreConditions::class )->all(), array( 'id' => $id ) ) );
+		$this->assertIsArray( $step, 'No setup step with id ' . $id );
+		$failing = new \ReflectionMethod( ReadinessCheckPage::class, 'failing_copy' );
+		$failing->setAccessible( true );
+		return $failing->invoke( null, $step );
+	}
+
+	/**
+	 * Make every setup step pass, recommended ones too, so a test counts only the scanned checks.
+	 */
+	private function make_every_step_pass(): void {
+		StoreConditionsTest::make_store_ready( $this );
+		update_option( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, get_option( AgenticCommerceSettings::TERMS_PAGE_OPTION ) );
+		update_option( 'blog_public', '1' );
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+		$gateways = WC()->payment_gateways()->payment_gateways();
+		$email    = WC()->mailer()->get_emails()['WC_Email_Customer_Processing_Order'];
+		foreach ( array( reset( $gateways ), $email ) as $item ) {
+			$this->restore[] = array( $item, $item->enabled );
+			$item->enabled   = 'yes';
+		}
+	}
+
+	/**
 	 * A fresh settings page.
 	 */
 	private function page(): AgenticCommerceSettingsPage {
 		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
-		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+		delete_option( 'woocommerce_feature_ucp_enabled' );
 		$this->sut->handle_init();
 		$pages = $this->sut->handle_woocommerce_get_settings_pages( array() );
 		return $pages[0];
 	}
 
 	/**
-	 * Render the default section.
+	 * What Sales readiness and the Overview show, from ReadinessCheckPage::view().
+	 *
+	 * @return array<string, mixed>
 	 */
-	private function render_page(): string {
+	private function view(): array {
+		return wc_get_container()->get( ReadinessCheckPage::class )->view();
+	}
+
+	/**
+	 * The titles of every row in every section, open or folded.
+	 *
+	 * @param array<string, mixed> $view The view.
+	 * @return array<int, string>
+	 */
+	private function titles( array $view ): array {
+		$titles = array();
+		foreach ( $view['sections'] as $section ) {
+			$titles = array_merge( $titles, array_column( $section['rows'], 'title' ), array_column( $section['folded'], 'title' ) );
+		}
+		return $titles;
+	}
+
+	/**
+	 * The row with this title, from any section.
+	 *
+	 * @param string $title Row title.
+	 * @return array<string, mixed>
+	 */
+	private function row( string $title ): array {
+		foreach ( $this->view()['sections'] as $section ) {
+			foreach ( array_merge( $section['rows'], $section['folded'] ) as $row ) {
+				if ( $title === $row['title'] ) {
+					return $row;
+				}
+			}
+		}
+		$this->fail( 'No row titled ' . $title );
+	}
+
+	/**
+	 * Read apostrophes the same on every WordPress: esc_html() writes the entity, and wp_kses_post() on WordPress 7.2 and later turns it back into a plain apostrophe.
+	 *
+	 * @param string $html Rendered page.
+	 */
+	private static function plain_apostrophes( string $html ): string {
+		return str_replace( '&#039;', "'", $html );
+	}
+
+	/**
+	 * Whether the last render_page() hid Save changes.
+	 *
+	 * @var bool
+	 */
+	private $save_hidden = false;
+
+	/**
+	 * Render a section of the tab: AI shopping, or '' for the landing page.
+	 *
+	 * @param string $section Section id.
+	 * @param bool   $ucp_on  Whether UCP is on; page() turns it off.
+	 */
+	private function render_page( string $section = AgenticCommerceSettings::SHOPPING_SECTION, bool $ucp_on = false ): string {
+		global $current_section;
 		// Localized data accumulates on a registered handle, so start each render clean.
 		wp_deregister_script( 'wc-agentic-commerce-settings' );
 		$page = $this->page();
-		ob_start();
-		$page->output();
-		return (string) ob_get_clean();
+		if ( $ucp_on ) {
+			update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+		}
+		unset( $GLOBALS['hide_save_button'] );
+		$current_section = $section; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The section WooCommerce sets from the URL; reset below.
+		try {
+			ob_start();
+			$page->output();
+			return self::plain_apostrophes( (string) ob_get_clean() );
+		} finally {
+			$current_section   = ''; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Reset after the render.
+			$this->save_hidden = ! empty( $GLOBALS['hide_save_button'] );
+			unset( $GLOBALS['hide_save_button'] );
+		}
+	}
+
+	/**
+	 * @testdox With "Discourage search engines" on, the noindex it prints is one issue: the setup step, not also the scanned check.
+	 */
+	public function test_noindex_from_discourage_search_engines_shows_once(): void {
+		$this->make_every_step_pass();
+		update_option( 'blog_public', '0' );
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(
+					array(
+						'id'      => 'no_noindex_directives',
+						'ok'      => false,
+						'blocks'  => 'listing',
+						'group'   => 'access',
+						'name'    => 'noindex name',
+						'label'   => 'noindex label',
+						'why'     => '',
+						'fix'     => '',
+						'fix_url' => '',
+					),
+				),
+			)
+		);
+
+		$titles = array_column( $this->view()['fix_first']['items'], 'title' );
+		$this->assertSame( array( 'Let search engines index your store' ), $titles );
+
+		update_option( 'blog_public', '1' );
+		$this->assertCount( 1, $this->view()['fix_first']['items'], 'A noindex from elsewhere, such as an SEO plugin, still shows' );
+		$this->assertNotContains( 'Let search engines index your store', array_column( $this->view()['fix_first']['items'], 'title' ) );
+	}
+
+	/**
+	 * The view with one failing scanned check, which has no affects line of its own.
+	 *
+	 * @param string $id Check id.
+	 * @return array<string, mixed>
+	 */
+	private function view_with_check( string $id ): array {
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(
+					array(
+						'id'       => $id,
+						'ok'       => false,
+						'blocks'   => 'discovery',
+						'group'    => 'find',
+						'name'     => $id . ' name',
+						'label'    => $id . ' label',
+						'why'      => '',
+						'fix'      => '',
+						'fix_url'  => '',
+						'conflict' => false,
+					),
+				),
+			)
+		);
+		return $this->view();
 	}
 }

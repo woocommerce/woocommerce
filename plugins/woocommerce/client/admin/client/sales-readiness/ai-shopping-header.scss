@@ -1,0 +1,28 @@
+// AI tools > AI shopping: the breadcrumb as the WooCommerce header's title, the description on
+// its own line under it.
+.woocommerce-layout__header:has(.wc-ai-shopping-header__trail) .woocommerce-layout__header-wrapper {
+	flex-wrap: wrap;
+}
+
+// With the tabs hidden, the first card would touch the header.
+body:has(.wc-ai-shopping-header__trail) .wc-agentic-commerce {
+	margin-block-start: var(--wpds-dimension-gap-2xl);
+}
+
+.wc-ai-shopping-header__trail {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--wpds-dimension-gap-sm);
+}
+
+.wc-ai-shopping-header__separator {
+	color: var(--wpds-color-foreground-content-neutral-weak);
+}
+
+.wc-ai-shopping-header__description {
+	flex-basis: 100%;
+	margin: 0;
+	padding-inline: 24px;
+	padding-block-end: var(--wpds-dimension-gap-lg);
+	color: var(--wpds-color-foreground-content-neutral-weak);
+}
