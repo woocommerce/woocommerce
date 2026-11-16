@@ -405,4 +405,158 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 			);
 		}
 	}
+
+	/**
+	 * @testdox The "Completed order" email check is hooked when fulfillments are active.
+	 */
+	public function test_completed_order_email_hook_is_registered(): void {
+		$this->assertNotFalse(
+			has_filter( 'woocommerce_email_enabled_customer_completed_order', array( $this->manager, 'maybe_suppress_completed_order_email' ) ),
+			'The "Completed order" email check should be hooked.'
+		);
+	}
+
+	/**
+	 * @testdox The "Completed order" email still sends for a fulfilled order when nothing opts out of it.
+	 */
+	public function test_completed_order_email_sends_for_fulfilled_order_by_default(): void {
+		$order = $this->create_order_with_fulfilled_quantity( 4 );
+
+		$this->assertSame( 'fulfilled', $order->get_meta( '_fulfillment_status', true ), 'The order should be fully fulfilled.' );
+		$this->assertTrue( $this->is_completed_order_email_enabled( $order ), 'Both emails should send unless a store opts out.' );
+	}
+
+	/**
+	 * @testdox The "Completed order" email is skipped for a fulfilled order when a store opts out of it.
+	 */
+	public function test_completed_order_email_is_skipped_for_fulfilled_order_when_opted_out(): void {
+		$order = $this->create_order_with_fulfilled_quantity( 4 );
+		add_filter( 'woocommerce_fulfillments_suppress_completed_email', '__return_true' );
+
+		$this->assertFalse( $this->is_completed_order_email_enabled( $order ), 'A fully fulfilled order should skip the email.' );
+	}
+
+	/**
+	 * @testdox The "Completed order" email still sends for a partially fulfilled order when a store opts out of it.
+	 */
+	public function test_completed_order_email_sends_for_partially_fulfilled_order_when_opted_out(): void {
+		$order = $this->create_order_with_fulfilled_quantity( 1 );
+		add_filter( 'woocommerce_fulfillments_suppress_completed_email', '__return_true' );
+
+		$this->assertSame( 'partially_fulfilled', $order->get_meta( '_fulfillment_status', true ), 'The order should be partially fulfilled.' );
+		$this->assertTrue( $this->is_completed_order_email_enabled( $order ), 'An order with items left to ship should keep the email.' );
+	}
+
+	/**
+	 * @testdox The "Completed order" email still sends for an order without fulfillments when a store opts out of it.
+	 */
+	public function test_completed_order_email_sends_without_fulfillments_when_opted_out(): void {
+		$order = OrderHelper::create_order( get_current_user_id(), \WC_Helper_Product::create_simple_product() );
+		add_filter( 'woocommerce_fulfillments_suppress_completed_email', '__return_true' );
+
+		$this->assertTrue( $this->is_completed_order_email_enabled( $order ), 'An order with no fulfillments should keep the email.' );
+	}
+
+	/**
+	 * @testdox Opting out never turns the "Completed order" email back on when the merchant disabled it.
+	 */
+	public function test_completed_order_email_stays_off_when_the_merchant_disabled_it(): void {
+		$order = $this->create_order_with_fulfilled_quantity( 4 );
+		add_filter( 'woocommerce_fulfillments_suppress_completed_email', '__return_true' );
+
+		$this->assertFalse( $this->is_completed_order_email_enabled( $order, 'no' ), 'A disabled email should stay disabled.' );
+	}
+
+	/**
+	 * @testdox Opting out leaves the "Completed order" email alone when the email has no order, as on the settings screen.
+	 */
+	public function test_completed_order_email_is_untouched_without_an_order(): void {
+		add_filter( 'woocommerce_fulfillments_suppress_completed_email', '__return_true' );
+
+		$this->assertTrue( $this->is_completed_order_email_enabled( null ), 'Without an order the email setting should be reported as it is.' );
+	}
+
+	/**
+	 * @testdox The "Completed order" email still sends for an order whose fulfillments are all unfulfilled.
+	 */
+	public function test_completed_order_email_sends_for_unfulfilled_order_when_opted_out(): void {
+		$order = $this->create_order_with_fulfilled_quantity( 4, false );
+		add_filter( 'woocommerce_fulfillments_suppress_completed_email', '__return_true' );
+
+		$this->assertSame( 'unfulfilled', $order->get_meta( '_fulfillment_status', true ), 'The order should be unfulfilled.' );
+		$this->assertTrue( $this->is_completed_order_email_enabled( $order ), 'An order whose shipments have not gone out should keep the email.' );
+	}
+
+	/**
+	 * @testdox The order is passed to the suppression filter so a callback can decide per order.
+	 */
+	public function test_suppression_filter_receives_the_order(): void {
+		$order           = $this->create_order_with_fulfilled_quantity( 4 );
+		$received_orders = array();
+
+		add_filter(
+			'woocommerce_fulfillments_suppress_completed_email',
+			function ( $suppress, $filtered_order ) use ( &$received_orders ) {
+				$received_orders[] = $filtered_order;
+				return $suppress;
+			},
+			10,
+			2
+		);
+
+		$this->is_completed_order_email_enabled( $order );
+
+		$this->assertNotEmpty( $received_orders, 'The filter should run for the email.' );
+		$this->assertSame( $order->get_id(), $received_orders[0]->get_id(), 'The filter should receive the order the email is about.' );
+	}
+
+	/**
+	 * Create an order of four units and fulfill the given quantity of them.
+	 *
+	 * @param int  $quantity Quantity to put in the fulfillment.
+	 * @param bool $fulfilled Whether the fulfillment itself has shipped.
+	 * @return WC_Order The order, re-read so it carries the recalculated fulfillment status.
+	 */
+	private function create_order_with_fulfilled_quantity( int $quantity, bool $fulfilled = true ): WC_Order {
+		$order = OrderHelper::create_order( get_current_user_id(), \WC_Helper_Product::create_simple_product() );
+
+		$items = array();
+		foreach ( $order->get_items() as $item_id => $item ) {
+			$items[] = array(
+				'item_id' => $item_id,
+				'qty'     => $quantity,
+			);
+		}
+
+		FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => $fulfilled ? 'fulfilled' : 'unfulfilled',
+				'is_fulfilled' => $fulfilled,
+			),
+			array( '_items' => $items )
+		);
+
+		return wc_get_order( $order->get_id() );
+	}
+
+	/**
+	 * Whether the "Completed order" email reports itself as enabled for the given order.
+	 *
+	 * @param WC_Order|null $order   The order the email is about, or null as on the settings screen.
+	 * @param string        $setting The merchant's enabled setting for the email.
+	 * @return bool
+	 */
+	private function is_completed_order_email_enabled( $order, string $setting = 'yes' ): bool {
+		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-completed-order.php';
+
+		$email          = new \WC_Email_Customer_Completed_Order();
+		$email->enabled = $setting;
+		$email->object  = $order;
+
+		return $email->is_enabled();
+	}
 }
