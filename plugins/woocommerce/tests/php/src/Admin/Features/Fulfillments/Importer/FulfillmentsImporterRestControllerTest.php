@@ -767,6 +767,13 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 			 */
 			public int $stored_id = 0;
 
+			/**
+			 * Error wp_handle_sideload() returned, empty when the file was stored.
+			 *
+			 * @var string
+			 */
+			public string $sideload_error = '';
+
 			// The stub always throws; the array return type is never reached.
 			// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
 			/**
@@ -792,14 +799,23 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 
 				$this->get_import_dir();
 				add_filter( 'upload_dir', array( $this, 'override_upload_dir' ) );
-				$upload = wp_handle_sideload( $file, array( 'test_form' => false ) );
+				// The type check is off: finfo reports this content as text/plain or text/csv
+				// depending on the PHP version, and core refuses a .txt detected as text/csv.
+				$upload = wp_handle_sideload(
+					$file,
+					array(
+						'test_form' => false,
+						'test_type' => false,
+					)
+				);
 				remove_filter( 'upload_dir', array( $this, 'override_upload_dir' ) );
 
-				$this->stored_file = (string) ( $upload['file'] ?? '' );
-				$this->stored_id   = (int) wp_insert_attachment(
+				$this->sideload_error = (string) ( $upload['error'] ?? '' );
+				$this->stored_file    = (string) ( $upload['file'] ?? '' );
+				$this->stored_id      = (int) wp_insert_attachment(
 					array(
 						'post_title'     => 'fulfillment-sample.txt',
-						'post_mime_type' => (string) ( $upload['type'] ?? 'text/plain' ),
+						'post_mime_type' => 'text/plain',
 					),
 					$this->stored_file
 				);
@@ -818,6 +834,7 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->temp_files[] = $helper->stored_file;
 		$this->assertSame( $hooks_before, array( $this->callback_count( 'wp_handle_upload' ), $this->callback_count( 'add_attachment' ) ), 'The recording hooks are removed' );
+		$this->assertSame( '', $helper->sideload_error, 'The helper stored the fixture' );
 		$this->assertTrue( ImportSession::is_staged_path( $helper->stored_file ), 'The helper stored the file under wc-imports' );
 		$this->assertGreaterThan( 0, $helper->stored_id, 'The helper created an attachment' );
 
