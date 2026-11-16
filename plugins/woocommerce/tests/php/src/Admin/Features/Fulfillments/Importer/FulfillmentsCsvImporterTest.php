@@ -1155,6 +1155,27 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A provider cell maps to a known provider by key or name ignoring case, and anything else is stored as a custom provider.
+	 * @testWith ["UPS", "ups", ""]
+	 *           ["royal mail", "royal-mail", ""]
+	 *           ["Royal-Mail", "royal-mail", ""]
+	 *           ["Acme Freight", "other", "Acme Freight"]
+	 *
+	 * @param string $cell     Provider cell.
+	 * @param string $provider Expected _shipment_provider.
+	 * @param string $name     Expected _provider_name.
+	 */
+	public function test_provider_cell_maps_to_a_known_or_custom_provider( string $cell, string $provider, string $name ): void {
+		$order = OrderHelper::create_order();
+
+		$this->import_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,{$cell}\n" );
+
+		$fulfillment = $this->fulfillments_of( $order )[0];
+		$this->assertSame( $provider, $fulfillment->get_shipment_provider() );
+		$this->assertSame( $name, (string) $fulfillment->get_meta( '_provider_name', true ) );
+	}
+
+	/**
 	 * @testdox A repeated order and tracking number pair is skipped across chunks, and a row that failed to save does not count as seen.
 	 */
 	public function test_duplicate_pairs_are_skipped_after_the_first_imported_row(): void {

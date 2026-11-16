@@ -106,6 +106,13 @@ class FulfillmentsCsvImporter {
 	private array $fulfillments_cache = array();
 
 	/**
+	 * Known provider keys by lowercase key and name, built on first use.
+	 *
+	 * @var array<string, string>|null
+	 */
+	private ?array $provider_keys = null;
+
+	/**
 	 * Maximum number of data rows accepted per file.
 	 *
 	 * The cap bounds the time the prepare request spends counting rows and the
@@ -645,7 +652,12 @@ class FulfillmentsCsvImporter {
 		}
 		$fulfillment->set_status( 'fulfilled' );
 		$fulfillment->set_tracking_number( $fields['tracking_number'] );
-		$fulfillment->set_shipment_provider( $fields['provider'] );
+		$provider_key = $this->known_provider_key( $fields['provider'] );
+		// An unknown provider is stored the way the fulfillment editor stores a custom one.
+		$fulfillment->set_shipment_provider( '' !== $provider_key ? $provider_key : 'other' );
+		if ( '' === $provider_key ) {
+			$fulfillment->update_meta_data( '_provider_name', $fields['provider'] );
+		}
 		// A blank URL cell keeps the stored URL on an update.
 		if ( '' !== $fields['tracking_url'] ) {
 			$fulfillment->set_tracking_url( $fields['tracking_url'] );
@@ -758,6 +770,23 @@ class FulfillmentsCsvImporter {
 		}
 		$url = esc_url_raw( $url, array( 'http', 'https' ) );
 		return '' !== (string) wp_parse_url( $url, PHP_URL_HOST ) ? $url : '';
+	}
+
+	/**
+	 * Map a provider cell to a known provider key, matching the key or the name without case.
+	 *
+	 * @param string $cell Provider cell.
+	 * @return string Provider key, or empty when the provider is not known.
+	 */
+	private function known_provider_key( string $cell ): string {
+		if ( null === $this->provider_keys ) {
+			$this->provider_keys = array();
+			foreach ( FulfillmentUtils::get_shipping_providers() as $key => $provider ) {
+				$this->provider_keys[ wc_strtolower( $provider->get_name() ) ] = (string) $key;
+				$this->provider_keys[ wc_strtolower( (string) $key ) ]         = (string) $key;
+			}
+		}
+		return $this->provider_keys[ wc_strtolower( $cell ) ] ?? '';
 	}
 
 	/**
