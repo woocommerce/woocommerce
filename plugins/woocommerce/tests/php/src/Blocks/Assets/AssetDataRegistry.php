@@ -147,7 +147,6 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 		$data = $this->registry->get();
 		$this->registry->initialize_core_data();
 		$this->assertEquals( $original_data, $data );
-		remove_filter( 'woocommerce_shared_settings', [ self::class, 'pdatcallback' ] );
 	}
 
 	public static function pdatcallback( $existing_data ) {
@@ -168,7 +167,6 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 		$data = $this->registry->get();
 		$original_data['cheeseburger'] = 'fries';
 		$this->assertEquals( $original_data, $data );
-		remove_filter( 'woocommerce_shared_settings', [ self::class, 'ndcallback' ] );
 	}
 
 	/**

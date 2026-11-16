@@ -109,6 +109,152 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Recalculating coupons reuses an unsaved coupon item instead of adding a duplicate.
+	 */
+	public function test_recalculate_coupons_reuses_unsaved_coupon_item(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
+		$order->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'unsaved-coupon-item' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-coupon-item' );
+		$order->add_item( $coupon_item );
+
+		$order->recalculate_coupons();
+
+		$coupon_items = $order->get_items( 'coupon' );
+		$this->assertCount( 1, $coupon_items, 'The unsaved coupon item should not be duplicated.' );
+		$this->assertEquals( 10, reset( $coupon_items )->get_discount(), 'The coupon discount should be set on the existing item.' );
+	}
+
+	/**
+	 * @testdox A reused unsaved coupon item keeps its coupon definition after the coupon is deleted.
+	 */
+	public function test_recalculate_coupons_stores_coupon_info_on_reused_unsaved_item(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
+		$order->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'unsaved-coupon-info' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-coupon-info' );
+		$order->add_item( $coupon_item );
+		$order->recalculate_coupons();
+		$order->save();
+
+		$coupon->delete( true );
+		$line_item = current( $order->get_items() );
+		$line_item->set_subtotal( 200 );
+		$line_item->set_total( 200 );
+		$line_item->save();
+
+		$order = wc_get_order( $order->get_id() );
+		$order->recalculate_coupons();
+
+		$this->assertCount( 1, $order->get_items( 'coupon' ), 'The coupon item should not be duplicated.' );
+		$this->assertEquals( 20, $order->get_discount_total(), 'The deleted percentage coupon should still apply 10% from its stored definition.' );
+	}
+
+	/**
+	 * @testdox Recalculating coupons keeps the coupon definition already stored on an unsaved coupon item.
+	 */
+	public function test_recalculate_coupons_keeps_existing_coupon_info_on_unsaved_item(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
+		$order->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'unsaved-existing-info' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+		$original_info = $coupon->get_short_info();
+
+		$coupon->set_amount( 25 );
+		$coupon->save();
+
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-existing-info' );
+		$coupon_item->add_meta_data( 'coupon_info', $original_info );
+		$order->add_item( $coupon_item );
+		$order->recalculate_coupons();
+
+		$coupon_item = current( $order->get_items( 'coupon' ) );
+		$this->assertCount( 1, $coupon_item->get_meta( 'coupon_info', false ), 'Only one coupon_info entry should be stored.' );
+		$this->assertSame( $original_info, $coupon_item->get_meta( 'coupon_info' ), 'The stored coupon definition should not be replaced.' );
+	}
+
+	/**
+	 * @testdox Recalculating coupons discounts each unsaved line item without failing.
+	 */
+	public function test_recalculate_coupons_with_unsaved_line_items(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$coupon  = new WC_Coupon();
+		$coupon->set_code( 'unsaved-line-items' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$order = new WC_Order();
+		foreach ( array( 100, 50 ) as $total ) {
+			$line_item = new WC_Order_Item_Product();
+			$line_item->set_product( $product );
+			$line_item->set_quantity( 1 );
+			$line_item->set_subtotal( $total );
+			$line_item->set_total( $total );
+			$order->add_item( $line_item );
+		}
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-line-items' );
+		$order->add_item( $coupon_item );
+
+		$order->recalculate_coupons();
+
+		$line_totals = array_map(
+			fn( $item ) => (float) $item->get_total(),
+			array_values( $order->get_items() )
+		);
+		$this->assertEqualsCanonicalizing( array( 90.0, 45.0 ), $line_totals, 'Each unsaved line item should get its own discount.' );
+		$this->assertCount( 1, $order->get_items( 'coupon' ), 'The coupon item should not be duplicated.' );
+		$this->assertEquals( 15, $order->get_discount_total() );
+	}
+
+	/**
 	 * @testdox Order and refund defaults capture the store tax mode without pending changes.
 	 * @dataProvider provide_order_tax_defaults
 	 *
@@ -118,21 +264,15 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 * @phpstan-param class-string<WC_Abstract_Order> $order_class
 	 */
 	public function test_constructor_initializes_prices_include_tax( string $order_class, string $tax_mode, bool $expected ): void {
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', $tax_mode );
+		$sut = new $order_class();
 
-		try {
-			update_option( 'woocommerce_calc_taxes', 'yes' );
-			update_option( 'woocommerce_prices_include_tax', $tax_mode );
-			$sut = new $order_class();
+		$this->assertSame( $expected, $sut->get_prices_include_tax( 'edit' ) );
+		$this->assertArrayNotHasKey( 'prices_include_tax', $sut->get_changes(), 'Initialization must not be a pending edit.' );
 
-			$this->assertSame( $expected, $sut->get_prices_include_tax( 'edit' ) );
-			$this->assertArrayNotHasKey( 'prices_include_tax', $sut->get_changes(), 'Initialization must not be a pending edit.' );
-
-			update_option( 'woocommerce_prices_include_tax', 'yes' === $tax_mode ? 'no' : 'yes' );
-			$this->assertSame( $expected, $sut->get_prices_include_tax( 'edit' ), 'The default must be captured at construction, not at read time.' );
-		} finally {
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
-		}
+		update_option( 'woocommerce_prices_include_tax', 'yes' === $tax_mode ? 'no' : 'yes' );
+		$this->assertSame( $expected, $sut->get_prices_include_tax( 'edit' ), 'The default must be captured at construction, not at read time.' );
 	}
 
 	/**
@@ -158,8 +298,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 * @param bool      $expected Expected persisted tax mode.
 	 */
 	public function test_prices_include_tax_persists_initial_value( string $tax_mode, ?bool $override, bool $expected ): void {
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$sut               = null;
+		$sut = null;
 
 		try {
 			update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -178,7 +317,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			if ( $sut ) {
 				$sut->delete( true );
 			}
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
 		}
 	}
 
@@ -205,9 +343,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 * @param bool      $expected Expected refund tax mode.
 	 */
 	public function test_refund_inherits_parent_prices_include_tax( string $tax_mode, ?bool $override, bool $expected ): void {
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$order             = null;
-		$sut               = null;
+		$order = null;
+		$sut   = null;
 
 		// This persistence test must not leave email logs for subsequent logging tests.
 		add_filter( 'woocommerce_email_log_enabled', '__return_false' );
@@ -240,8 +377,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			if ( $order ) {
 				$order->delete( true );
 			}
-			remove_filter( 'woocommerce_email_log_enabled', '__return_false' );
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
 		}
 	}
 
@@ -256,7 +391,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->registered_order_statuses = array();
 
 		parent::tearDown();
-		$this->disable_cogs_feature();
 	}
 
 	/**
@@ -737,18 +871,14 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			2
 		);
 
-		try {
-			$result = $order->remove_coupon( $coupon_code );
+		$result = $order->remove_coupon( $coupon_code );
 
-			$this->assertTrue( $result );
-			$this->assertTrue( $hook_fired, 'woocommerce_order_removed_coupon hook did not fire.' );
-			$this->assertInstanceOf( WC_Coupon::class, $hook_coupon, 'First parameter should be a WC_Coupon instance.' );
-			$this->assertEquals( $coupon->get_code(), $hook_coupon->get_code(), 'Hook coupon code should match.' );
-			$this->assertSame( $order, $hook_order, 'Second parameter should be the same WC_Order instance.' );
-			$this->assertCount( 0, $order->get_items( 'coupon' ) );
-		} finally {
-			remove_all_actions( 'woocommerce_order_removed_coupon' );
-		}
+		$this->assertTrue( $result );
+		$this->assertTrue( $hook_fired, 'woocommerce_order_removed_coupon hook did not fire.' );
+		$this->assertInstanceOf( WC_Coupon::class, $hook_coupon, 'First parameter should be a WC_Coupon instance.' );
+		$this->assertEquals( $coupon->get_code(), $hook_coupon->get_code(), 'Hook coupon code should match.' );
+		$this->assertSame( $order, $hook_order, 'Second parameter should be the same WC_Order instance.' );
+		$this->assertCount( 0, $order->get_items( 'coupon' ) );
 	}
 
 	/**
@@ -2445,30 +2575,25 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_order_data_store', $data_store_filter, PHP_INT_MAX );
 		add_action( 'woocommerce_removed_order_items', $removed_hook, 10, 2 );
 
-		try {
-			$reflection = new ReflectionProperty( WC_Data::class, 'data_store' );
-			$reflection->setAccessible( true );
-			$reflection->setValue( $order, new WC_Data_Store( 'order' ) );
+		$reflection = new ReflectionProperty( WC_Data::class, 'data_store' );
+		$reflection->setAccessible( true );
+		$reflection->setValue( $order, new WC_Data_Store( 'order' ) );
 
-			$order->remove_order_items( $type );
+		$order->remove_order_items( $type );
 
-			$this->assertSame( array( $type ), $custom_data_store->deleted_item_types, 'The custom delete_items() implementation should run synchronously with the requested type.' );
-			$this->assertSame( array( $type ), $removed_item_types, 'The post-removal hook should run synchronously with the requested type.' );
-			foreach ( $expected_deleted_ids as $item_id ) {
-				$this->assertFalse( WC_Order_Factory::get_order_item( $item_id ), 'Items selected for removal should be deleted synchronously.' );
-			}
-			foreach ( $expected_retained_ids as $item_id ) {
-				$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $item_id ), 'Items of other types should be retained.' );
-			}
-
-			$order->save();
-
-			$this->assertSame( array( $type ), $custom_data_store->deleted_item_types, 'Saving should not invoke the custom delete_items() implementation again.' );
-			$this->assertSame( array( $type ), $removed_item_types, 'Saving should not fire the post-removal hook again.' );
-		} finally {
-			remove_filter( 'woocommerce_order_data_store', $data_store_filter, PHP_INT_MAX );
-			remove_action( 'woocommerce_removed_order_items', $removed_hook, 10 );
+		$this->assertSame( array( $type ), $custom_data_store->deleted_item_types, 'The custom delete_items() implementation should run synchronously with the requested type.' );
+		$this->assertSame( array( $type ), $removed_item_types, 'The post-removal hook should run synchronously with the requested type.' );
+		foreach ( $expected_deleted_ids as $item_id ) {
+			$this->assertFalse( WC_Order_Factory::get_order_item( $item_id ), 'Items selected for removal should be deleted synchronously.' );
 		}
+		foreach ( $expected_retained_ids as $item_id ) {
+			$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $item_id ), 'Items of other types should be retained.' );
+		}
+
+		$order->save();
+
+		$this->assertSame( array( $type ), $custom_data_store->deleted_item_types, 'Saving should not invoke the custom delete_items() implementation again.' );
+		$this->assertSame( array( $type ), $removed_item_types, 'Saving should not fire the post-removal hook again.' );
 	}
 
 	/**
@@ -2695,31 +2820,26 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		add_action( 'woocommerce_remove_order_items', $pre_callback, 10, 2 );
 		add_action( 'woocommerce_removed_order_items', $post_callback, 10, 2 );
 
-		try {
-			$order->remove_order_items( 'line_item' );
+		$order->remove_order_items( 'line_item' );
 
-			$this->assertSame(
-				$expected_log,
-				$pre_calls,
-				'woocommerce_remove_order_items should fire once when removal is requested.'
-			);
-			$this->assertSame(
-				array(),
-				$post_calls,
-				'woocommerce_removed_order_items should not fire until the deferred DB delete runs in save().'
-			);
+		$this->assertSame(
+			$expected_log,
+			$pre_calls,
+			'woocommerce_remove_order_items should fire once when removal is requested.'
+		);
+		$this->assertSame(
+			array(),
+			$post_calls,
+			'woocommerce_removed_order_items should not fire until the deferred DB delete runs in save().'
+		);
 
-			$order->save();
+		$order->save();
 
-			$this->assertSame(
-				$expected_log,
-				$post_calls,
-				'woocommerce_removed_order_items should fire once with the requested type after save() commits the delete.'
-			);
-		} finally {
-			remove_action( 'woocommerce_remove_order_items', $pre_callback, 10 );
-			remove_action( 'woocommerce_removed_order_items', $post_callback, 10 );
-		}//end try
+		$this->assertSame(
+			$expected_log,
+			$post_calls,
+			'woocommerce_removed_order_items should fire once with the requested type after save() commits the delete.'
+		);
 	}
 
 	/**
@@ -2847,30 +2967,26 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_order_type_to_group', $adjust );
 
-		try {
-			$items_prop = $reflect->getProperty( 'items' );
-			$items_prop->setAccessible( true );
-			$items = $items_prop->getValue( $order );
+		$items_prop = $reflect->getProperty( 'items' );
+		$items_prop->setAccessible( true );
+		$items = $items_prop->getValue( $order );
 
-			$items['custom_unit_test_lines'] = array( 'sentinel' );
-			$items_prop->setValue( $order, $items );
+		$items['custom_unit_test_lines'] = array( 'sentinel' );
+		$items_prop->setValue( $order, $items );
 
-			$order->remove_order_items();
+		$order->remove_order_items();
 
-			$items_after = $items_prop->getValue( $order );
-			$this->assertArrayHasKey(
-				'custom_unit_test_lines',
-				$items_after,
-				'Filter-registered groups should be present as keys after the in-memory clear.'
-			);
-			$this->assertSame(
-				array(),
-				$items_after['custom_unit_test_lines'],
-				'Filter-registered group should be cleared to an empty array — not left with stale entries.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_order_type_to_group', $adjust );
-		}
+		$items_after = $items_prop->getValue( $order );
+		$this->assertArrayHasKey(
+			'custom_unit_test_lines',
+			$items_after,
+			'Filter-registered groups should be present as keys after the in-memory clear.'
+		);
+		$this->assertSame(
+			array(),
+			$items_after['custom_unit_test_lines'],
+			'Filter-registered group should be cleared to an empty array — not left with stale entries.'
+		);
 	}
 
 	/**

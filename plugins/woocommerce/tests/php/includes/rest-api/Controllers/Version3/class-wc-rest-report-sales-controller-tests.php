@@ -164,53 +164,47 @@ class WC_REST_Report_Sales_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * per-row net sales (sales - refunds) wrong.
 	 */
 	public function test_refunds_bucketed_by_local_time_in_non_utc_site(): void {
-		$previous_wp_tz = get_option( 'timezone_string' );
-
 		// Pacific/Auckland is UTC+12 (or +13 in DST). Configure the non-UTC site the
 		// way WordPress actually does (via the timezone_string option, leaving PHP's
 		// default timezone at UTC) so the legacy report range math (which assumes the
 		// WordPress UTC invariant) is exercised as it runs in production.
 		update_option( 'timezone_string', 'Pacific/Auckland' );
 
-		try {
-			$order = WC_Helper_Order::create_order();
-			$order->set_status( OrderStatus::COMPLETED );
-			$order->save();
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
 
-			$refund = wc_create_refund(
-				array(
-					'amount'   => 3,
-					'order_id' => $order->get_id(),
-				)
-			);
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 3,
+				'order_id' => $order->get_id(),
+			)
+		);
 
-			// Local time of 02:00 is still the previous calendar day in UTC, so the
-			// refund's post_date (local) and post_date_gmt (UTC) land on different days.
-			// Bucketing by UTC instead of local time would put the refund in the wrong row.
-			$local_today     = current_datetime()->format( 'Y-m-d' );
-			$local_post_date = $local_today . ' 02:00:00';
-			wp_update_post(
-				array(
-					'ID'        => $refund->get_id(),
-					'post_date' => $local_post_date,
-				)
-			);
+		// Local time of 02:00 is still the previous calendar day in UTC, so the
+		// refund's post_date (local) and post_date_gmt (UTC) land on different days.
+		// Bucketing by UTC instead of local time would put the refund in the wrong row.
+		$local_today     = current_datetime()->format( 'Y-m-d' );
+		$local_post_date = $local_today . ' 02:00:00';
+		wp_update_post(
+			array(
+				'ID'        => $refund->get_id(),
+				'post_date' => $local_post_date,
+			)
+		);
 
-			$data = $this->get_report( 'month' );
+		$data = $this->get_report( 'month' );
 
-			$this->assertArrayHasKey(
-				$local_today,
-				$data['totals'],
-				'Local-time today should exist as a bucket key.'
-			);
-			$this->assertSame(
-				'3.00',
-				$data['totals'][ $local_today ]['refunds'],
-				'Refund must bucket by local time so it lines up with sales/orders in the same row.'
-			);
-		} finally {
-			update_option( 'timezone_string', $previous_wp_tz );
-		}
+		$this->assertArrayHasKey(
+			$local_today,
+			$data['totals'],
+			'Local-time today should exist as a bucket key.'
+		);
+		$this->assertSame(
+			'3.00',
+			$data['totals'][ $local_today ]['refunds'],
+			'Refund must bucket by local time so it lines up with sales/orders in the same row.'
+		);
 	}
 
 	/**

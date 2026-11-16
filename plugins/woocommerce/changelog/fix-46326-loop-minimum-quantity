@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make catalog add-to-cart buttons add the minimum quantity and show how many items will be added.

@@ -122,7 +122,5 @@ class McStatsTest extends \WC_Unit_Test_Case {
 
 		$result = $this->sut->do_server_side_stat( 'http://example.com' );
 		$this->assertTrue( $result );
-
-		remove_all_filters( 'pre_http_request' );
 	}
 }

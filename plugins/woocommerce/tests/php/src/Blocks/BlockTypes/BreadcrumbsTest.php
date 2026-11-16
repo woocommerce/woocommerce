@@ -32,7 +32,6 @@ class BreadcrumbsTest extends WP_UnitTestCase {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'wp_theme_json_data_user' );
 		switch_theme( $this->original_theme );
 		parent::tearDown();
 	}

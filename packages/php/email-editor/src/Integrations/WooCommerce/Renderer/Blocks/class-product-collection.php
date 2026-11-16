@@ -327,31 +327,36 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 			$query_args['orderby']  = 'post__in';
 		}
 
+		$visibility_terms = wc_get_product_visibility_term_ids();
+
 		// Handle featured products - use the WooCommerce way.
 		$is_featured = $query_attrs['featured'] ?? false;
 		if ( 'woocommerce/product-collection/featured' === $collection || $is_featured ) {
-			// Use WooCommerce's built-in function to get featured products query.
-			$featured_query = wc_get_product_visibility_term_ids();
-			if ( isset( $featured_query['featured'] ) ) {
+			if ( isset( $visibility_terms['featured'] ) ) {
 				$query_args['tax_query'][] = array(
 					'taxonomy' => 'product_visibility',
 					'field'    => 'term_taxonomy_id',
-					'terms'    => array( (int) $featured_query['featured'] ),
+					'terms'    => array( (int) $visibility_terms['featured'] ),
 					'operator' => 'IN',
 				);
 			}
 		}
 
-		// Handle on-sale products.
+		// Handle on-sale products the way the shop does: the sale must be running now, and variable
+		// products count when one of their variations is on sale.
 		$is_on_sale = $query_attrs['woocommerceOnSale'] ?? false;
 		if ( 'woocommerce/product-collection/on-sale' === $collection || $is_on_sale ) {
-			$query_args['meta_query'][] = array(
-				'relation' => 'OR',
-				array(
-					'key'     => '_sale_price',
-					'value'   => '',
-					'compare' => '!=',
-				),
+			$query_args['post__in'] = $this->restrict_post_ids( $query_args['post__in'] ?? null, wc_get_product_ids_on_sale() );
+		}
+
+		// Leave out products hidden from the shop catalog, as the shop's Product Collection does.
+		// Cart contents keep them: the shop's cart lists every cart item, hidden or not.
+		if ( 'woocommerce/product-collection/cart-contents' !== $collection && ! empty( $visibility_terms['exclude-from-catalog'] ) ) {
+			$query_args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'term_taxonomy_id',
+				'terms'    => array( (int) $visibility_terms['exclude-from-catalog'] ),
+				'operator' => 'NOT IN',
 			);
 		}
 
@@ -380,7 +385,13 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		// Handle special collections: upsells, cross-sells, related, cart-contents.
 		$product_ids_to_include = $this->get_collection_specific_product_ids( $collection, $parsed_block, $rendering_context );
 		if ( ! empty( $product_ids_to_include ) ) {
-			$query_args['post__in'] = $product_ids_to_include;
+			// Keep earlier limits, such as the on-sale filter, that already set post__in.
+			$query_args['post__in'] = $this->restrict_post_ids( $query_args['post__in'] ?? null, $product_ids_to_include );
+		}
+
+		// WP_Query ignores post__not_in when post__in is set, so remove the exclusions from the list.
+		if ( ! empty( $query_args['post__in'] ) && ! empty( $query_args['post__not_in'] ) ) {
+			$query_args['post__in'] = $this->match_ids_or_nothing( array_diff( $query_args['post__in'], $query_args['post__not_in'] ) );
 		}
 
 		// Set tax_query relation if multiple tax queries.
@@ -393,6 +404,28 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		return $wp_query;
 	}
 
+
+	/**
+	 * Limit a post__in list to the allowed IDs.
+	 *
+	 * @param array|null $current_ids Current post__in list, or null when there is none.
+	 * @param array      $allowed_ids IDs the query may return.
+	 * @return array
+	 */
+	private function restrict_post_ids( ?array $current_ids, array $allowed_ids ): array {
+		return $this->match_ids_or_nothing( null === $current_ids ? $allowed_ids : array_intersect( $current_ids, $allowed_ids ) );
+	}
+
+	/**
+	 * Turn a list of IDs into a post__in value.
+	 *
+	 * @param array $ids Product IDs.
+	 * @return array
+	 */
+	private function match_ids_or_nothing( array $ids ): array {
+		// An empty post__in means "no restriction" to WP_Query, so use 0 to match no product.
+		return empty( $ids ) ? array( 0 ) : array_values( array_map( 'intval', $ids ) );
+	}
 
 	/**
 	 * Check if all stock statuses are selected (meaning no filtering needed).

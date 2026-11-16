@@ -75,7 +75,6 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 
 		$this->clean_up_cot_setup();
 		$this->toggle_cot_feature_and_usage( $this->prev_hpos_enabled );
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 
 		parent::tearDown();
 	}

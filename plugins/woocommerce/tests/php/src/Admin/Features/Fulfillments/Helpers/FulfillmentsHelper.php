@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController;
 use WC_Order;
 
 /**
@@ -13,6 +14,36 @@ use WC_Order;
  * @since 9.0.0
  */
 class FulfillmentsHelper {
+	/**
+	 * Create the fulfillments tables without registering any fulfillments hooks.
+	 *
+	 * Call it from setUpBeforeClass(): creating tables inside a test's transaction is not allowed.
+	 * Hooks added there would stay for the whole run when the class runs first, so add them per test
+	 * with enable_fulfillments() instead.
+	 *
+	 * @return void
+	 */
+	public static function create_tables(): void {
+		$controller = wc_get_container()->get( FulfillmentsController::class );
+		$method     = new \ReflectionMethod( $controller, 'maybe_create_db_tables' );
+		$method->setAccessible( true );
+		$method->invoke( $controller );
+	}
+
+	/**
+	 * Turn the fulfillments feature on for the current test and register its hooks.
+	 *
+	 * Call it from setUp(), after parent::setUp(): the test transaction rolls back the option and the
+	 * base tear-down removes the hooks. The shipping provider taxonomy it registers stays for the rest
+	 * of the process. The tables must already exist (see create_tables()).
+	 *
+	 * @return void
+	 */
+	public static function enable_fulfillments(): void {
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		wc_get_container()->get( FulfillmentsController::class )->initialize_fulfillments();
+	}
+
 	/**
 	 * Helper function to create a fulfillment.
 	 *
