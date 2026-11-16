@@ -20,7 +20,7 @@ final class ProductExporter {
 	 * Validate a CSV export destination.
 	 *
 	 * `-` (STDOUT) always passes through unchanged. Any other destination must not be a
-	 * stream wrapper or URL, and must have a writable parent directory.
+	 * stream wrapper or URL, must not be a directory, and must have a writable parent directory.
 	 *
 	 * @param string $destination Path to write the CSV to, or `-` for STDOUT.
 	 *
@@ -35,6 +35,14 @@ final class ProductExporter {
 
 		if ( preg_match( '/^[a-z][a-z0-9+.-]*:\/\//i', $destination ) ) {
 			throw new InvalidArgumentException( 'The destination cannot be a URL or stream wrapper.' );
+		}
+
+		if ( is_dir( $destination ) ) {
+			throw new InvalidArgumentException( esc_html( sprintf( 'The destination "%s" is a directory. Pass a file path instead.', $destination ) ) );
+		}
+
+		if ( file_exists( $destination ) && ! is_writable( $destination ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable -- CLI local filesystem check, no WP_Filesystem context here.
+			throw new InvalidArgumentException( esc_html( sprintf( 'The file "%s" is not writable.', $destination ) ) );
 		}
 
 		$directory = dirname( $destination );

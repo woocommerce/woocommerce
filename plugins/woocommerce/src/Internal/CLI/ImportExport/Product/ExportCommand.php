@@ -198,7 +198,8 @@ final class ExportCommand {
 		}
 
 		if ( $porcelain ) {
-			WP_CLI::log( (string) $results['exported'] );
+			// `line()`, not `log()`, so `--quiet` cannot hide the output a script reads.
+			WP_CLI::line( (string) $results['exported'] );
 			return;
 		}
 

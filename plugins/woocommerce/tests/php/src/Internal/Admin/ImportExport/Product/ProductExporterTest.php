@@ -310,6 +310,16 @@ class ProductExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject a directory before exporting anything.
+	 */
+	public function test_validate_destination_rejects_a_directory(): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'is a directory' );
+
+		$this->sut->validate_destination( get_temp_dir() );
+	}
+
+	/**
 	 * @testdox Should pass a valid local path and STDOUT marker through unchanged.
 	 */
 	public function test_validate_destination_accepts_valid_destinations(): void {
