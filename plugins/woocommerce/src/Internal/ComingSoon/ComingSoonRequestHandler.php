@@ -29,6 +29,18 @@ class ComingSoonRequestHandler {
 	private static $show_coming_soon = null;
 
 	/**
+	 * Whether the coming soon screen was selected for this request.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @internal
+	 * @return bool
+	 */
+	public static function is_showing_coming_soon(): bool {
+		return true === self::$show_coming_soon;
+	}
+
+	/**
 	 * Sets up the hook.
 	 *
 	 * @internal

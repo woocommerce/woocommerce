@@ -515,4 +515,124 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( array( $product_1->get_id(), $product_2->get_id() ), $synced_ids, 'Each product should be synced at most once per request' );
 		$this->assertEmpty( $wc_deferred_product_sync, 'The queue should be empty after the sync' );
 	}
+
+	/**
+	 * @testdox Renaming an attribute term should rename the defaults of several products together and keep a default saved while the rename runs.
+	 */
+	public function test_renaming_attribute_term_keeps_defaults_saved_during_the_rename(): void {
+		global $wpdb;
+		$attribute = WC_Helper_Product::create_attribute( 'color', array( 'blue' ) );
+		$taxonomy  = $attribute['attribute_taxonomy'];
+		$products  = array();
+		foreach ( array( 'renamed', 'saved' ) as $label ) {
+			$products[ $label ] = new WC_Product_Variable();
+			$products[ $label ]->set_default_attributes(
+				array(
+					$taxonomy => 'blue',
+					'note'    => $label,
+				)
+			);
+			$products[ $label ]->save();
+		}
+		$saved_meanwhile = array(
+			$taxonomy => 'blue',
+			'note'    => 'saved meanwhile',
+		);
+		// Another request saves the second product between the rename reading the rows and writing them.
+		$save = function ( $query ) use ( $wpdb, $products, $saved_meanwhile, &$save ) {
+			if ( 0 === strpos( $query, "UPDATE {$wpdb->postmeta} SET meta_value = CASE" ) ) {
+				remove_filter( 'query', $save );
+				$wpdb->update(
+					$wpdb->postmeta,
+					array( 'meta_value' => serialize( $saved_meanwhile ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value, WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+					array(
+						'post_id'  => $products['saved']->get_id(),
+						'meta_key' => '_default_attributes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					)
+				);
+			}
+			return $query;
+		};
+		add_filter( 'query', $save );
+
+		wp_update_term( $attribute['term_ids'][0], $taxonomy, array( 'slug' => 'navy-blue' ) );
+		remove_filter( 'query', $save );
+
+		$this->assertSame(
+			array(
+				$taxonomy => 'navy-blue',
+				'note'    => 'renamed',
+			),
+			get_post_meta( $products['renamed']->get_id(), '_default_attributes', true ),
+			'The default for the renamed term should change'
+		);
+		$this->assertSame( $saved_meanwhile, get_post_meta( $products['saved']->get_id(), '_default_attributes', true ), 'A default saved during the rename should be kept' );
+	}
+
+	/**
+	 * @testdox Renaming an attribute term should update the default attributes that use it and leave other default values unchanged.
+	 */
+	public function test_renaming_attribute_term_updates_only_matching_default_attributes(): void {
+		$attribute = WC_Helper_Product::create_attribute( 'color', array( 'blue' ) );
+		$taxonomy  = $attribute['attribute_taxonomy'];
+		// A custom attribute value can hold the same text as the stored taxonomy/slug pair.
+		$custom_value = serialize( $taxonomy ) . serialize( 'blue' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		$product      = new WC_Product_Variable();
+		$product->set_default_attributes(
+			array(
+				$taxonomy => 'blue',
+				'note'    => $custom_value,
+			)
+		);
+		$product->save();
+
+		wp_update_term( $attribute['term_ids'][0], $taxonomy, array( 'slug' => 'navy-blue' ) );
+
+		$this->assertSame(
+			array(
+				$taxonomy => 'navy-blue',
+				'note'    => $custom_value,
+			),
+			get_post_meta( $product->get_id(), '_default_attributes', true ),
+			'Only the default for the renamed term should change'
+		);
+	}
+
+	/**
+	 * @testdox Renaming an attribute term should leave default attributes that hold objects unchanged, without creating the objects.
+	 */
+	public function test_renaming_attribute_term_leaves_default_attributes_with_objects_alone(): void {
+		global $wpdb;
+
+		ObjectInstantiationProbe::$was_unserialized = false;
+		$attribute                                  = WC_Helper_Product::create_attribute( 'color', array( 'blue' ) );
+		$taxonomy                                   = $attribute['attribute_taxonomy'];
+		$product                                    = new WC_Product_Variable();
+		$product->set_default_attributes( array( $taxonomy => 'blue' ) );
+		$product->save();
+		// Store the row directly, as only a corrupted row can hold an object.
+		$stored = serialize( // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+			array(
+				$taxonomy => 'blue',
+				'probe'   => new ObjectInstantiationProbe(),
+			)
+		);
+		$wpdb->update(
+			$wpdb->postmeta,
+			array( 'meta_value' => $stored ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			array(
+				'post_id'  => $product->get_id(),
+				'meta_key' => '_default_attributes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			)
+		);
+
+		wp_update_term( $attribute['term_ids'][0], $taxonomy, array( 'slug' => 'navy-blue' ) );
+
+		$this->assertFalse( ObjectInstantiationProbe::$was_unserialized, 'The rename must not create objects stored in default attributes' );
+		$this->assertSame(
+			$stored,
+			$wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_default_attributes'", $product->get_id() ) ),
+			'A row holding an object should not be rewritten'
+		);
+	}
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix variation selection from cart links and REST API attribute handling for non-Latin slugs.

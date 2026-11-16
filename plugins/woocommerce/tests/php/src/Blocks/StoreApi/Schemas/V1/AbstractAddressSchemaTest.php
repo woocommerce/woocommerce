@@ -70,7 +70,6 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		__internal_woocommerce_blocks_deregister_checkout_field( $this->field_id );
-		remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 
 		parent::tearDown();
 	}
@@ -154,6 +153,27 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 		$result = $this->sut->sanitize_callback( $address, null, 'billing_address' );
 
 		$this->assertSame( '+1-555-123-4567', $result['phone'] );
+	}
+
+	/**
+	 * @testdox Should accept a phone number up to 100 characters, the size of the order address phone column.
+	 */
+	public function test_accepts_phone_up_to_column_length(): void {
+		$address = $this->make_address( array( 'phone' => str_repeat( '1', 100 ) ) );
+
+		$this->assertTrue( $this->sut->validate_callback( $address, null, 'billing_address' ) );
+	}
+
+	/**
+	 * @testdox Should reject a phone number longer than 100 characters, which cannot be stored against the order.
+	 */
+	public function test_rejects_phone_longer_than_column_length(): void {
+		$address = $this->make_address( array( 'phone' => str_repeat( '1', 101 ) ) );
+
+		$result = $this->sut->validate_callback( $address, null, 'billing_address' );
+
+		$this->assertWPError( $result );
+		$this->assertContains( 'invalid_phone', $result->get_error_codes() );
 	}
 
 	/**

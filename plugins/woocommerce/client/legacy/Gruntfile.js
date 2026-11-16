@@ -290,6 +290,7 @@ module.exports = function ( grunt ) {
 					] )
 				);
 
+			runQueued( [ 'assets' ] );
 			grunt.log.writeln( 'Watching css/ and js/ for changes...' );
 		}
 	);

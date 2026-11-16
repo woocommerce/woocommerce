@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix server-path CSV product imports on sites where wp-content is outside the WordPress directory.

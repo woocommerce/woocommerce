@@ -1187,6 +1187,15 @@ class WC_Countries {
 								'hidden'   => true,
 							),
 						),
+						'BJ' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+							'state'    => array(
+								'label' => __( 'Department', 'woocommerce' ),
+							),
+						),
 						'BO' => array(
 							'postcode' => array(
 								'required' => false,

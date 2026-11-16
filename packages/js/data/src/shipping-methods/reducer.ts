@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import { ACTION_TYPES } from './action-types';
@@ -16,14 +11,14 @@ export type ShippingMethodsState = {
 	errors: Record< string, unknown >;
 };
 
-const reducer: Reducer< ShippingMethodsState, Actions > = (
-	state = {
+const reducer = (
+	state: ShippingMethodsState = {
 		shippingMethods: [],
 		isUpdating: false,
 		errors: {},
 	},
-	payload
-) => {
+	payload: Actions
+): ShippingMethodsState => {
 	if ( payload && 'type' in payload ) {
 		switch ( payload.type ) {
 			case ACTION_TYPES.GET_SHIPPING_METHODS_REQUEST:

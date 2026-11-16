@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Ability errors now list every refused value of a product or order write in one message, so AI agents can fix them all in one retry.

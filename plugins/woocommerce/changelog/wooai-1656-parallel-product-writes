@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Fail ability writes that hit a deadlock in unreleased transaction code; nothing shipped is affected.
+

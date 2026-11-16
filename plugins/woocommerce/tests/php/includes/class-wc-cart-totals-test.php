@@ -21,6 +21,12 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 
 		$this->shipping_was_enabled = WC()->shipping()->enabled;
 		WC()->shipping()->enabled   = false;
+
+		// The tax rates these tests insert have no country of their own, and
+		// WC_Tax::find_rates() finds nothing for a customer whose taxable address has no
+		// country, so give the customer one.
+		WC()->customer->set_billing_country( 'US' );
+		WC()->customer->set_shipping_country( 'US' );
 	}
 
 	/**

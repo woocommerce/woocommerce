@@ -3,7 +3,6 @@
  */
 import moment from 'moment';
 import { getShortDateFormat } from '@woocommerce/date';
-import type { Reducer } from 'redux';
 
 /**
  * Internal dependencies
@@ -12,8 +11,8 @@ import TYPES from './action-types';
 import { ImportState } from './types';
 import { Action } from './actions';
 
-const reducer: Reducer< ImportState, Action > = (
-	state = {
+const reducer = (
+	state: ImportState = {
 		activeImport: false,
 		importStatus: {},
 		importTotals: {},
@@ -25,8 +24,8 @@ const reducer: Reducer< ImportState, Action > = (
 		},
 		skipPrevious: true,
 	},
-	action
-) => {
+	action: Action
+): ImportState => {
 	switch ( action.type ) {
 		case TYPES.SET_IMPORT_STARTED:
 			const { activeImport } = action;

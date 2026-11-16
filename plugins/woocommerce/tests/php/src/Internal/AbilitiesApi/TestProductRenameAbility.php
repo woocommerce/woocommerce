@@ -30,7 +30,7 @@ class TestProductRenameAbility extends ActionableAbility {
 	 * @param array $input Ability input.
 	 * @return \WC_Product|\WP_Error
 	 */
-	public function load( array $input ) {
+	protected function load( array $input ) {
 		$product = wc_get_product( $input['id'] );
 		return $product ? $product : new \WP_Error( 'test_not_found', 'Not found.', array( 'status' => 404 ) );
 	}
@@ -42,7 +42,7 @@ class TestProductRenameAbility extends ActionableAbility {
 	 * @param array       $input   Ability input.
 	 * @return null
 	 */
-	public function change( $subject, array $input ) {
+	protected function change( $subject, array $input ) {
 		$subject->set_name( $input['name'] );
 		return null;
 	}
@@ -53,7 +53,7 @@ class TestProductRenameAbility extends ActionableAbility {
 	 * @param \WC_Product $subject Saved product.
 	 * @return array
 	 */
-	public function prepare_response( $subject ) {
+	protected function prepare_response( $subject ) {
 		return ExtensibleAbilities::add_fields_to_object( array( 'id' => $subject->get_id() ), 'product', $subject );
 	}
 }

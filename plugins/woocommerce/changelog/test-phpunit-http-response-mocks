@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Isolate HTTP requests in PHPUnit tests; no production change.

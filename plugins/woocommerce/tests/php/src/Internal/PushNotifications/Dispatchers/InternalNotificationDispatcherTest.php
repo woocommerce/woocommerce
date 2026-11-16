@@ -60,14 +60,6 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		remove_filter( 'pre_http_request', array( $this, 'intercept_http_request' ), 10 );
-		parent::tearDown();
-	}
-
-	/**
 	 * Intercepts wp_remote_post calls and captures request data.
 	 *
 	 * @param false|array $preempt   Whether to preempt the request.

@@ -1044,12 +1044,23 @@ class WC_Helper_Updater {
 		foreach ( $response['data'] as $plugin_name => $language_packs ) {
 			foreach ( $language_packs as $language_pack ) {
 				// Maybe we have this language pack already installed so lets check revision date.
-				if ( array_key_exists( $plugin_name, $installed_translations ) && array_key_exists( $language_pack['wp_locale'], $installed_translations[ $plugin_name ] ) ) {
-					$installed_translation_revision_time = new DateTime( $installed_translations[ $plugin_name ][ $language_pack['wp_locale'] ]['PO-Revision-Date'] );
-					$new_translation_revision_time       = new DateTime( $language_pack['last_modified'] );
-					// Skip if translation language pack is not newer than what is installed already.
-					if ( $new_translation_revision_time <= $installed_translation_revision_time ) {
+				if ( isset( $installed_translations[ $plugin_name ][ $language_pack['wp_locale'] ] ) ) {
+					$remote_revision = $language_pack['last_modified'] ?? '';
+					if ( ! is_string( $remote_revision ) || '' === trim( $remote_revision ) ) {
 						continue;
+					}
+					$new_translation_revision_time = date_create( $remote_revision );
+					if ( false === $new_translation_revision_time ) {
+						continue;
+					}
+
+					// Intended: an empty or invalid installed date lets a valid pack replace it.
+					$installed_revision = $installed_translations[ $plugin_name ][ $language_pack['wp_locale'] ]['PO-Revision-Date'] ?? '';
+					if ( is_string( $installed_revision ) && '' !== trim( $installed_revision ) ) {
+						$installed_translation_revision_time = date_create( $installed_revision );
+						if ( false !== $installed_translation_revision_time && $new_translation_revision_time <= $installed_translation_revision_time ) {
+							continue;
+						}
 					}
 				}
 				$translations[] = array(
@@ -1097,13 +1108,18 @@ class WC_Helper_Updater {
 
 	/**
 	 * Whether cached update data is recent enough to use without a new check. The cache is kept
-	 * for a week so a failed check has something to fall back on, but it's only fresh for 12 hours.
+	 * for a week so a failed check has something to fall back on, but it's only fresh for 11 hours.
+	 *
+	 * The package URLs in the response are presigned links that WooCommerce.com sets to expire
+	 * 12 hours after the check, so the cache has to stop being fresh before they do. Otherwise
+	 * a twice-daily update run, which starts about 12 hours after the last check, could be handed
+	 * links that have just expired.
 	 *
 	 * @param array $data The cached update data.
 	 * @return bool
 	 */
 	private static function is_fresh_update_data( array $data ): bool {
-		return isset( $data['updated'] ) && is_numeric( $data['updated'] ) && (int) $data['updated'] > time() - 12 * HOUR_IN_SECONDS;
+		return isset( $data['updated'] ) && is_numeric( $data['updated'] ) && (int) $data['updated'] > time() - 11 * HOUR_IN_SECONDS;
 	}
 
 	/**

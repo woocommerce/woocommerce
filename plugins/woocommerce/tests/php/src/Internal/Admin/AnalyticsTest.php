@@ -990,7 +990,6 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 				'Admin footer action should not be registered in REST context.'
 			);
 		} finally {
-			Constants::clear_single_constant( 'REST_REQUEST' );
 			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_cache_clear_tool' ) );
 			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
 			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_refund_double_count_tool' ) );
@@ -1046,7 +1045,6 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 				'Admin footer action should not be registered in WP-CLI context.'
 			);
 		} finally {
-			Constants::clear_single_constant( 'WP_CLI' );
 			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_cache_clear_tool' ) );
 			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
 			remove_filter( 'woocommerce_debug_tools', array( $analytics, 'register_refund_double_count_tool' ) );

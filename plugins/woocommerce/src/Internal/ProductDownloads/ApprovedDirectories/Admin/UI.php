@@ -206,7 +206,7 @@ class UI {
 				? $this->register->add_approved_directory( $url, $enabled )
 				: $this->register->update_approved_directory( $url_id, $url, $enabled );
 
-			if ( is_integer( $upserted ) ) {
+			if ( is_int( $upserted ) ) {
 				$redirect_url = add_query_arg( 'url', $upserted, $redirect_url );
 			}
 

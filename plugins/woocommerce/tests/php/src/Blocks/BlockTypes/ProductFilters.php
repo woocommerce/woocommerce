@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 /**
  * Tests for the ProductFilters block type.
  */
-class ProductFilters extends \WP_UnitTestCase {
+class ProductFilters extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test-only filter block name.
@@ -26,13 +26,6 @@ class ProductFilters extends \WP_UnitTestCase {
 	 * @var ProductFiltersBlock
 	 */
 	private $product_filters;
-
-	/**
-	 * Tracks dynamically added filters so they can be removed during tearDown.
-	 *
-	 * @var array
-	 */
-	private $registered_filters = [];
 
 	/**
 	 * Reflection method used to invoke the private get_canonical_url_no_pagination method.
@@ -89,28 +82,19 @@ class ProductFilters extends \WP_UnitTestCase {
 			. '</div><!-- /wp:woocommerce/product-filter-taxonomy --></div><!-- /wp:woocommerce/product-filters -->'
 			. '<!-- wp:woocommerce/product-template --><!-- wp:post-title /--><!-- /wp:woocommerce/product-template -->'
 			. '</div><!-- /wp:woocommerce/product-collection -->';
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Restore the original request verbatim after the test.
-		$original_uri = $_SERVER['REQUEST_URI'] ?? null;
-		try {
-			$_SERVER['REQUEST_URI'] = '/?wcp-0-categories=local-blue&wcp-0-min_price=20&min_price=999';
-			$html                   = do_blocks( $markup );
-			$this->assertStringContainsString( 'wp-block-woocommerce-product-collection', $html );
-			$this->assertStringNotContainsString( 'wp-block-post-title', $html );
-			$this->assertStringContainsString( 'aria-label="Local red"', $html );
-			$this->assertStringNotContainsString( 'aria-label="Local blue"', $html );
-			$this->assertStringContainsString( 'data-wp-text="context.item.count">1</span>', $html );
 
-			$_SERVER['REQUEST_URI'] = '/?wcp-0-categories=local-red&min_price=999';
-			$html                   = do_blocks( $markup );
-			$this->assertStringContainsString( 'wp-block-post-title', $html );
-			$this->assertStringContainsString( 'data-wp-text="context.item.count">2</span>', $html );
-		} finally {
-			if ( null === $original_uri ) {
-				unset( $_SERVER['REQUEST_URI'] );
-			} else {
-				$_SERVER['REQUEST_URI'] = $original_uri;
-			}
-		}
+		$_SERVER['REQUEST_URI'] = '/?wcp-0-categories=local-blue&wcp-0-min_price=20&min_price=999';
+		$html                   = do_blocks( $markup );
+		$this->assertStringContainsString( 'wp-block-woocommerce-product-collection', $html );
+		$this->assertStringNotContainsString( 'wp-block-post-title', $html );
+		$this->assertStringContainsString( 'aria-label="Local red"', $html );
+		$this->assertStringNotContainsString( 'aria-label="Local blue"', $html );
+		$this->assertStringContainsString( 'data-wp-text="context.item.count">1</span>', $html );
+
+		$_SERVER['REQUEST_URI'] = '/?wcp-0-categories=local-red&min_price=999';
+		$html                   = do_blocks( $markup );
+		$this->assertStringContainsString( 'wp-block-post-title', $html );
+		$this->assertStringContainsString( 'data-wp-text="context.item.count">2</span>', $html );
 	}
 
 	/**
@@ -118,7 +102,7 @@ class ProductFilters extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		$asset_api            = Package::container()->get( Api::class );
@@ -165,26 +149,7 @@ class ProductFilters extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Clean up dynamically added hooks.
-	 *
-	 * @return void
-	 */
-	protected function tearDown(): void {
-		foreach ( array_reverse( $this->registered_filters ) as $filter ) {
-			remove_filter( $filter['hook'], $filter['callback'], $filter['priority'] );
-		}
-
-		$this->registered_filters = [];
-
-		if ( \WP_Block_Type_Registry::get_instance()->is_registered( self::TEST_FILTER_BLOCK ) ) {
-			unregister_block_type( self::TEST_FILTER_BLOCK );
-		}
-
-		parent::tearDown();
-	}
-
-	/**
-	 * Helper to register filters and track them for cleanup.
+	 * Helper to register filters.
 	 *
 	 * @param string   $hook          Filter name.
 	 * @param callable $callback      Callback.
@@ -194,12 +159,6 @@ class ProductFilters extends \WP_UnitTestCase {
 	 */
 	private function register_filter( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		add_filter( $hook, $callback, $priority, $accepted_args );
-
-		$this->registered_filters[] = [
-			'hook'     => $hook,
-			'callback' => $callback,
-			'priority' => $priority,
-		];
 	}
 
 	/**

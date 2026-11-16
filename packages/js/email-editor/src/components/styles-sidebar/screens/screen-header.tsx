@@ -4,12 +4,10 @@
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
 import {
-	__experimentalHStack as HStack,
-	__experimentalVStack as VStack,
 	__experimentalSpacer as Spacer,
-	__experimentalHeading as Heading,
 	__experimentalView as View,
 } from '@wordpress/components';
+import { Stack, Text } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -33,10 +31,10 @@ type Props = {
  */
 export function ScreenHeader( { title, description, onBack }: Props ) {
 	return (
-		<VStack spacing={ 0 }>
+		<Stack direction="column">
 			<View>
 				<Spacer marginBottom={ 0 } paddingX={ 4 } paddingY={ 3 }>
-					<HStack spacing={ 2 }>
+					<Stack direction="row" align="center" gap="sm">
 						<Navigator.BackButton
 							style={ { minWidth: 24, padding: 0 } }
 							icon={ chevronLeft }
@@ -47,16 +45,10 @@ export function ScreenHeader( { title, description, onBack }: Props ) {
 							) }
 							onClick={ onBack }
 						/>
-						<Spacer>
-							<Heading
-								className="woocommerce-email-editor-styles-header"
-								level={ 2 }
-								size={ 13 }
-							>
-								{ title }
-							</Heading>
-						</Spacer>
-					</HStack>
+						<Text variant="heading-md" render={ <h2 /> }>
+							{ title }
+						</Text>
+					</Stack>
 				</Spacer>
 			</View>
 			{ description && (
@@ -64,7 +56,7 @@ export function ScreenHeader( { title, description, onBack }: Props ) {
 					{ description }
 				</p>
 			) }
-		</VStack>
+		</Stack>
 	);
 }
 

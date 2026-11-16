@@ -11,6 +11,80 @@ use Automattic\WooCommerce\Caches\ProductCountCache;
  */
 class ProductUtil {
 	/**
+	 * Get the default catalog quantity without changing a filtered add-to-cart URL.
+	 *
+	 * @since 11.4.0
+	 * @param \WC_Product $product Product to render.
+	 * @param string|null $url Filtered URL, if already available.
+	 * @return int|float
+	 */
+	public function get_catalog_add_to_cart_quantity( \WC_Product $product, ?string $url = null ) {
+		if ( $product->is_sold_individually() ) {
+			return 1;
+		}
+
+		$url = $url ?? $product->add_to_cart_url();
+		parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+		if ( ( $query['add-to-cart'] ?? null ) === (string) $product->get_id() && is_numeric( $query['quantity'] ?? null ) ) {
+			$quantity = wc_stock_amount( (float) $query['quantity'] );
+			if ( $quantity > 0 ) {
+				return $quantity;
+			}
+		}
+
+		return max( 1, $product->get_min_purchase_quantity() );
+	}
+
+	/**
+	 * Get catalog button data, using the filtered URL quantity unless explicitly overridden.
+	 *
+	 * @since 11.4.0
+	 * @param \WC_Product $product Product to render.
+	 * @param mixed       $quantity Explicit button quantity, or null to resolve the default from the URL and product minimum.
+	 * @return array{url: string, text: string, description: string, original_description: string, quantity: mixed}
+	 */
+	public function get_catalog_add_to_cart_button_data( \WC_Product $product, $quantity = null ): array {
+		$description = $product->add_to_cart_description();
+		$data        = array(
+			'url'                  => $product->add_to_cart_url(),
+			'text'                 => $product->add_to_cart_text(),
+			'description'          => $description,
+			'original_description' => $description,
+		);
+
+		$quantity         = $quantity ?? $this->get_catalog_add_to_cart_quantity( $product, $data['url'] );
+		$data['quantity'] = $quantity;
+
+		if ( ! $product instanceof \WC_Product_Simple || ! $product->is_purchasable() || ! $product->is_in_stock() || ! is_numeric( $quantity ) || $quantity <= 0 ) {
+			return $data;
+		}
+
+		$quantity = wc_stock_amount( (float) $quantity );
+		parse_str( (string) wp_parse_url( $data['url'], PHP_URL_QUERY ), $query );
+		if ( ( $query['add-to-cart'] ?? null ) === (string) $product->get_id() ) {
+			$url_quantity = $query['quantity'] ?? null;
+			if ( ! is_numeric( $url_quantity ) || wc_stock_amount( (float) $url_quantity ) !== $quantity ) {
+				$data['url'] = add_query_arg( 'quantity', $quantity, $data['url'] );
+			}
+		}
+		$data['quantity'] = $quantity;
+
+		if ( $quantity > 1 ) {
+			if ( __( 'Add to cart', 'woocommerce' ) === $data['text'] ) {
+				/* translators: %s: Quantity of the product to add to the cart. */
+				$data['text'] = sprintf( __( 'Add %s to cart', 'woocommerce' ), $quantity );
+			}
+			/* translators: %s: Product title. */
+			if ( sprintf( __( 'Add to cart: &ldquo;%s&rdquo;', 'woocommerce' ), $product->get_name() ) === $description ) {
+				/* translators: 1: Quantity of the product to add to the cart, 2: Product title. */
+				$data['description'] = sprintf( __( 'Add %1$s to cart: &ldquo;%2$s&rdquo;', 'woocommerce' ), $quantity, $product->get_name() );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
 	 * Transient name for the cached dashboard "out of stock" product count.
 	 *
 	 * Exposed as a constant so the one-time DB update that clears this transient
@@ -40,6 +114,92 @@ class ProductUtil {
 		'wc_child_has_weight_',
 		'wc_child_has_dimensions_',
 	);
+
+	/**
+	 * Number of products whose persistent transients are deleted per scheduled cleanup batch.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @var int
+	 */
+	public const TRANSIENT_CLEANUP_BATCH_SIZE = 500;
+
+	/**
+	 * Register hooks.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 */
+	public function register(): void {
+		add_action( 'woocommerce_delete_product_transients_batch', array( $this, 'handle_woocommerce_delete_product_transients_batch' ) );
+	}
+
+	/**
+	 * Schedule cleanup of existing products' persistent transients for the current site.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int $last_id Last product ID processed, or zero to start cleanup.
+	 * @return bool False if cleanup could not be scheduled.
+	 */
+	public function schedule_product_transient_cleanup( int $last_id = 0 ): bool {
+		if ( ! wp_using_ext_object_cache() ) {
+			return true;
+		}
+
+		// A new cleanup replaces any queued one instead of running alongside it.
+		if ( 0 === $last_id ) {
+			as_unschedule_all_actions( 'woocommerce_delete_product_transients_batch' );
+		}
+
+		return (bool) ActionSchedulerUtil::enqueue_async( 'woocommerce_delete_product_transients_batch', array( $last_id ), 'woocommerce' );
+	}
+
+	/**
+	 * Delete one batch of persistent product transients, bypassing per-transient deletion actions.
+	 * The scheduled action retains the last processed ID for the next batch.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @param mixed $last_id Last product ID processed.
+	 * @return void
+	 * @throws \RuntimeException If the batch cannot be read or continued.
+	 */
+	public function handle_woocommerce_delete_product_transients_batch( $last_id ): void {
+		if ( ! wp_using_ext_object_cache() ) {
+			return;
+		}
+
+		global $wpdb;
+		$products = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT ID, post_type FROM {$wpdb->posts} WHERE post_type IN ('product', 'product_variation') AND ID > %d ORDER BY ID LIMIT %d",
+				absint( $last_id ),
+				self::TRANSIENT_CLEANUP_BATCH_SIZE
+			)
+		);
+		if ( $wpdb->last_error ) {
+			throw new \RuntimeException( 'Unable to read products for transient cleanup.' );
+		}
+
+		$keys = array();
+		foreach ( $products as $product ) {
+			$prefixes = 'product_variation' === $product->post_type ? array( 'wc_related_' ) : self::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES;
+			foreach ( $prefixes as $prefix ) {
+				$keys[] = $prefix . $product->ID;
+			}
+			$last_id = (int) $product->ID;
+		}
+
+		if ( $keys ) {
+			wp_cache_delete_multiple( $keys, 'transient' );
+		}
+		if ( self::TRANSIENT_CLEANUP_BATCH_SIZE === count( $products ) && ! $this->schedule_product_transient_cleanup( $last_id ) ) {
+			throw new \RuntimeException( 'Unable to schedule the next product transient cleanup batch.' );
+		}
+	}
 
 	/**
 	 * Get a product ID from a product, post, or numeric value.

@@ -414,7 +414,7 @@ describe( 'Config', () => {
 								report: {
 									resultsBlobName: 'foo-blob-report',
 									resultsPath: '/test-results',
-									allure: true,
+									publish: true,
 								},
 							},
 						],
@@ -435,7 +435,7 @@ describe( 'Config', () => {
 						report: {
 							resultsBlobName: 'foo-blob-report',
 							resultsPath: '/test-results',
-							allure: true,
+							publish: true,
 						},
 					},
 				],

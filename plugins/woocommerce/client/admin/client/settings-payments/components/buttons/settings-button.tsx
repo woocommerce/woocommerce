@@ -91,7 +91,7 @@ export const SettingsButton = ( {
 					void invalidateResolutionForStoreSelector(
 						'getPaymentGateway'
 					);
-					navigate( removeOriginFromURL( settingsHref ) );
+					void navigate( removeOriginFromURL( settingsHref ) );
 				} else {
 					window.location.href = settingsHref;
 				}

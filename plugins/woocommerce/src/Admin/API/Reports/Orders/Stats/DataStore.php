@@ -548,6 +548,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
+		// Same defense-in-depth for records the import conditions filter excludes. A failed check
+		// writes nothing either, and reports a failed sync rather than a skip.
+		$excluded = OrdersScheduler::is_excluded_from_import( (int) $order->get_id() );
+		if ( null === $excluded ) {
+			return false;
+		}
+		if ( $excluded ) {
+			return -1;
+		}
+
 		$format = array(
 			'%d',
 			'%d',

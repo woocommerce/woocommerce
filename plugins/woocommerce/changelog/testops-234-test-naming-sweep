@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Rename test titles, provider keys and helpers to match what each test asserts

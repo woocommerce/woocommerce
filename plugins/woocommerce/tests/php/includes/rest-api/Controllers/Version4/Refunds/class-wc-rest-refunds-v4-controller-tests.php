@@ -108,7 +108,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		self::disable_direct_product_attribute_lookup_updates();
 		parent::tearDown();
-		$this->disable_rest_api_v4_feature();
 	}
 
 	/**
@@ -125,24 +124,11 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Disable the REST API v4 feature.
-	 */
-	public static function disable_rest_api_v4_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features = array_diff( $features, array( 'rest-api-v4' ) );
-				return $features;
-			}
-		);
-	}
-
-	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
-		$this->enable_rest_api_v4_feature();
 		parent::setUp();
+		$this->enable_rest_api_v4_feature();
 		self::enable_direct_product_attribute_lookup_updates();
 
 		// Create schema instances with dependency injection.
@@ -453,6 +439,35 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertIsArray( $response_data );
 		$this->assertCount( 1, $response_data, 'Should return exactly 1 refund for the second order' );
 		$this->assertEquals( $order2->get_id(), $response_data[0]['order_id'] );
+	}
+
+	/**
+	 * @testdox GMT date filters should pass dates with an explicit offset to the query as the equivalent UTC time.
+	 */
+	public function test_get_query_args_converts_offset_dates_for_gmt_filters(): void {
+		update_option( 'timezone_string', 'Europe/Athens' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/refunds' );
+		$request->set_param( 'dates_are_gmt', true );
+		$request->set_param( 'after', '2026-09-24T16:39:52+02:00' );
+		$request->set_param( 'before', '2026-09-24T14:39:52Z' );
+
+		$date_query = ( new CollectionQuery() )->get_query_args( $request )['date_query'];
+
+		$this->assertContains(
+			array(
+				'column' => 'post_date_gmt',
+				'after'  => '2026-09-24 14:39:52',
+			),
+			$date_query
+		);
+		$this->assertContains(
+			array(
+				'column' => 'post_date_gmt',
+				'before' => '2026-09-24 14:39:52',
+			),
+			$date_query
+		);
 	}
 
 	/**

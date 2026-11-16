@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Read UCP input from the JSON only and refuse other content types.

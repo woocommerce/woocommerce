@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Skip payment gateways initialization when rendering mini-cart.

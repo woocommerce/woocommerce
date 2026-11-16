@@ -1728,4 +1728,27 @@ class Cart extends ControllerTestCase {
 
 		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
 	}
+
+	/**
+	 * @testdox A cart change removes the draft order from the session when syncing the change to it fails to save.
+	 */
+	public function test_cart_change_forgets_draft_order_that_fails_to_save(): void {
+		$draft_order_id = (int) wc()->session->get( 'store_api_draft_order' );
+		$this->assertGreaterThan( 0, $draft_order_id );
+
+		$fail = function ( $order ) use ( $draft_order_id ) {
+			if ( $order->get_id() === $draft_order_id ) {
+				throw new \Exception( 'Forced save failure' );
+			}
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( array( 'key' => $this->keys[0] ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'The cart change itself should still succeed.' );
+		$this->assertEmpty( wc()->session->get( 'store_api_draft_order' ), 'A draft order that failed to save must not stay in the session to be resumed.' );
+	}
 }

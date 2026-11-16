@@ -1,0 +1,36 @@
+Preheader
+
+Your order is on its way
+
+Hi there, read our [shipping policy](https://example.com/shipping) or reply to this email. Tracking: https://example.com/track/AVeryLongUnbreakableTrackingCodeThatShouldNotWidenTheEmailLayout1234567890
+
+[A parcel]
+The parcel
+
+Left column
+
+Right column
+
+[View order](https://example.com/order)
+
+- First item
+- Second item
+
+Great service.
+
+A customer
+
+Product	Price
+T-shirt	$20
+
+Inside a group
+
+Text on a cover
+
+Media and text
+
+[Shop again](https://example.com/shop)
+
+[facebook icon](https://example.com/facebook)
+
+[instagram icon](https://example.com/instagram)

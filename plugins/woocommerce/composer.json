@@ -61,7 +61,7 @@
 		"johnkary/phpunit-speedtrap": "*",
 		"mockery/mockery": "^1.6.10",
 		"php-stubs/wordpress-stubs": "^6.8",
-		"phpstan/phpstan": "^2.1",
+		"phpstan/phpstan": "^2.3.4",
 		"phpunit/phpunit": "^9.6",
 		"sebastian/comparator": "^4.0",
 		"spatie/phpunit-watcher": "^1.23",
@@ -114,6 +114,9 @@
 		},
 		"classmap": [
 			"tests/legacy/unit-tests/rest-api/Helpers"
+		],
+		"exclude-from-classmap": [
+			"tests/Tools/phpstan/data/"
 		]
 	},
 	"scripts": {
@@ -162,6 +165,9 @@
 		],
 		"phpstan:baseline": [
 			"vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=4G --generate-baseline=phpstan-baseline.neon"
+		],
+		"test:phpstan-rules": [
+			"phpunit -c tests/Tools/phpstan/phpunit.xml"
 		]
 	},
 	"extra": {

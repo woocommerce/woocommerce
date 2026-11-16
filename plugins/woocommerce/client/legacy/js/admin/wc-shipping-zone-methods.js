@@ -34,8 +34,18 @@
 					this.trigger( 'change:methods' );
 				},
 				save: function() {
+					// Keep what this request submits, so the response can tell it apart from an edit
+					// made while the request was in flight.
+					var model    = this,
+						snapshot = _.clone( this.changes ),
+						changes  = _.clone( this.changes );
+
+					// Mark a save in flight: disable the button so a second save cannot start, and
+					// let render() keep the rows blocked through a mid-request zone edit.
+					this.isSaving = true;
+					$save_button.prop( 'disabled', true );
+
 					// Special handling for an empty 'zone_locations' array, which jQuery filters out during $.post().
-					var changes = _.clone( this.changes );
 					if ( _.has( changes, 'zone_locations' ) && _.isEmpty( changes.zone_locations ) ) {
 						changes.zone_locations = [''];
 					}
@@ -47,33 +57,70 @@
 							changes                 : changes,
 							zone_id                 : data.zone_id
 						},
-						this.onSaveResponse,
+						function( response, textStatus ) {
+							model.onSaveResponse( response, textStatus, snapshot );
+						},
 						'json'
-					);
+					).fail( function() {
+						model.onSaveFailure();
+					} );
 				},
-				onSaveResponse: function( response, textStatus ) {
-					if ( 'success' === textStatus ) {
-						if ( response.success ) {
-							if ( response.data.zone_id !== data.zone_id ) {
-								data.zone_id = response.data.zone_id;
-								if ( window.history.pushState ) {
-									window.history.pushState(
-										{},
-										'',
-										'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id
-									);
-								}
-							}
-							shippingMethod.set( 'methods', response.data.methods );
-							shippingMethod.trigger( 'change:methods' );
-							shippingMethod.changes = {};
-							shippingMethod.trigger( 'saved:methods' );
+				onSaveFailure: function() {
+					shippingMethod.isSaving = false;
 
-							// Overrides the onbeforeunload callback added by settings.js.
-							window.onbeforeunload = null;
-						} else {
-							window.alert( data.strings.save_failed );
+					window.alert( data.strings.save_failed );
+
+					// Nothing was saved, so redraw from the model, which releases the table.
+					shippingMethod.trigger( 'rerender' );
+
+					// A row delete leaves a methods entry behind while marking the form clean, so
+					// ignore methods here exactly as the response does.
+					if ( _.isEmpty( _.omit( shippingMethod.changes, 'methods' ) ) ) {
+						// Saving an empty change set would just fail again, so clear the busy
+						// state without marking the form dirty.
+						$save_button.removeClass( 'is-busy' );
+					} else {
+						shippingMethod.trigger( 'change:methods' );
+					}
+				},
+				onSaveResponse: function( response, textStatus, snapshot ) {
+					shippingMethod.isSaving = false;
+
+					if (
+						'success' !== textStatus ||
+						! response ||
+						! response.success ||
+						! response.data
+					) {
+						shippingMethod.onSaveFailure();
+						return;
+					}
+
+					if ( response.data.zone_id !== data.zone_id ) {
+						data.zone_id = response.data.zone_id;
+						if ( window.history.pushState ) {
+							window.history.pushState(
+								{},
+								'',
+								'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id
+							);
 						}
+					}
+					shippingMethod.set( 'methods', response.data.methods );
+					shippingMethod.trigger( 'change:methods' );
+
+					// Clear what this request submitted. Only the zone fields are editable while the
+					// table is blocked, so they are the only ones a mid-request edit can reach.
+					shippingMethod.changes = _.omit( shippingMethod.changes, function( value, key ) {
+						return 'methods' === key || _.isEqual( value, ( snapshot || {} )[ key ] );
+					} );
+					shippingMethod.trigger( 'saved:methods' );
+
+					if ( _.isEmpty( shippingMethod.changes ) ) {
+						// Overrides the onbeforeunload callback added by settings.js.
+						window.onbeforeunload = null;
+					} else {
+						shippingMethod.trigger( 'change:methods' );
 					}
 				}
 			} ),
@@ -195,6 +242,11 @@
 					}
 
 					this.initTooltips();
+
+					// render() unblocks the rows; re-apply the block if a save is still in flight.
+					if ( this.model.isSaving ) {
+						this.block();
+					}
 				},
 				initTooltips: function() {
 					$( '#tiptip_holder' ).removeAttr( 'style' );
@@ -263,6 +315,13 @@
 				},
 				setUnloadConfirmation: function() {
 					this.needsUnloadConfirm = true;
+
+					// A mid-request edit must not re-enable the button, or it could start a second,
+					// concurrent save while this one is still in flight.
+					if ( this.model.isSaving ) {
+						return;
+					}
+
 					$save_button.prop( 'disabled', false );
 					$save_button.removeClass( 'is-busy' );
 				},
@@ -397,7 +456,7 @@
 								data                    : shippingMethodView.unformatShippingMethodNumericValues( posted_data )
 							},
 							function( response, textStatus ) {
-								if ( 'success' === textStatus && response.success ) {
+								if ( 'success' === textStatus && response && response.success && response.data ) {
 									$( 'table.wc-shipping-zone-methods' ).parent().find( '#woocommerce_errors' ).remove();
 
 									// If there were errors, prepend the form.
@@ -412,12 +471,13 @@
 										shippingMethodView.model.onSaveResponse( response, textStatus );
 									}
 								} else {
-									window.alert( data.strings.save_failed );
-									shippingMethodView.unblock();
+									shippingMethod.onSaveFailure();
 								}
 							},
 							'json'
-						);
+						).fail( function() {
+							shippingMethod.onSaveFailure();
+						} );
 					}
 				},
 				onConfigureShippingMethodBack: function( event, target ) {
@@ -610,26 +670,38 @@
 							method_id               : posted_data.add_method_id,
 							zone_id                 : data.zone_id
 						}, function( response, textStatus ) {
-							if ( 'success' === textStatus && response.success ) {
-								if ( response.data.zone_id !== data.zone_id ) {
-									data.zone_id = response.data.zone_id;
-									if ( window.history.pushState ) {
-										window.history.pushState(
-											{},
-											'',
-											'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id
-										);
-									}
-								}
-
-								// Avoid triggering a rerender here because we don't want to show the method
-								// in the table in case merchant doesn't finish flow.
-
-								shippingMethodView.model.set( 'methods', response.data.methods );
-
-								// Close original modal
-								closeModal();
+							// An error response carries a message in place of the methods, so bail
+							// before reading them.
+							if (
+								'success' !== textStatus ||
+								! response ||
+								! response.success ||
+								! response.data
+							) {
+								$( '#btn-next' ).removeClass( 'is-busy' );
+								shippingMethod.onSaveFailure();
+								return;
 							}
+
+							if ( response.data.zone_id !== data.zone_id ) {
+								data.zone_id = response.data.zone_id;
+								if ( window.history.pushState ) {
+									window.history.pushState(
+										{},
+										'',
+										'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id
+									);
+								}
+							}
+
+							// Avoid triggering a rerender here because we don't want to show the method
+							// in the table in case merchant doesn't finish flow.
+
+							shippingMethodView.model.set( 'methods', response.data.methods );
+
+							// Close original modal
+							closeModal();
+
 							var instance_id = response.data.instance_id,
 							    method      = response.data.methods[ instance_id ];
 
@@ -667,7 +739,10 @@
 							}
 
 							$( document.body ).trigger( 'init_tooltips' );
-						}, 'json' );
+						}, 'json' ).fail( function() {
+							$( '#btn-next' ).removeClass( 'is-busy' );
+							shippingMethod.onSaveFailure();
+						} );
 					}
 				},
 				// Free Shipping has hidden field elements depending on data values.

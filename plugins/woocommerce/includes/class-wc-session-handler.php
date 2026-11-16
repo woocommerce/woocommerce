@@ -166,6 +166,13 @@ class WC_Session_Handler extends WC_Session {
 		$cookie = $this->get_session_cookie();
 
 		if ( ! $cookie ) {
+			// A cookie that is present but cannot be verified (e.g. the site's salts changed) is not a session.
+			// Expire it and drop it from this request so has_session() doesn't treat it as one.
+			if ( isset( $_COOKIE[ $this->_cookie ] ) ) {
+				wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, $this->use_secure_cookie(), true );
+				unset( $_COOKIE[ $this->_cookie ] );
+			}
+
 			// If there is no cookie, generate a new session/customer ID.
 			$this->_customer_id = $this->generate_customer_id();
 			$this->_data        = $this->get_session_data();

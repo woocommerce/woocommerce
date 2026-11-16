@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent the WooCommerce Home page from shifting when opening the Inbox dismiss-all confirmation.

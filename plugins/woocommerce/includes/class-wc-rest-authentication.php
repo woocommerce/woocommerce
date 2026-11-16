@@ -55,7 +55,7 @@ class WC_REST_Authentication {
 	 */
 	public function __construct() {
 		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 15 );
-		add_filter( 'rest_authentication_errors', array( $this, 'authentication_fallback' ) );
+		add_filter( 'rest_authentication_errors', array( $this, 'authentication_fallback' ), 8 );
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication_error' ), 15 );
 		add_filter( 'rest_authentication_errors', array( $this, 'reject_out_of_scope_route' ), 20 );
 		add_filter( 'rest_post_dispatch', array( $this, 'send_unauthorized_headers' ), 50 );
@@ -72,9 +72,14 @@ class WC_REST_Authentication {
 			return false;
 		}
 
+		// Only treat this as a WooCommerce REST API request once WordPress is actually dispatching one.
+		if ( ! wp_is_rest_endpoint() ) {
+			return false;
+		}
+
 		$resolved_route = $this->resolved_route();
 		$is_wc_route    = $this->is_wc_namespace( $this->route_from_request_uri() )
-			|| ( wp_is_rest_endpoint() && null !== $resolved_route && $this->is_wc_namespace( $resolved_route ) );
+			|| ( null !== $resolved_route && $this->is_wc_namespace( $resolved_route ) );
 
 		/**
 		 * Filters whether the current request is a request to the WooCommerce REST API.
@@ -224,7 +229,11 @@ class WC_REST_Authentication {
 	 * Authenticate the user if authentication wasn't performed during the
 	 * determine_current_user action.
 	 *
-	 * Necessary in cases where wp_get_current_user() is called before WooCommerce is loaded.
+	 * This is the usual place a WooCommerce REST API key gets authenticated: it happens here
+	 * because wp_get_current_user() usually resolves before REST dispatch is confirmed.
+	 *
+	 * Runs at priority 8, just ahead of the default priority other plugins tend to use on this
+	 * filter, so our own call to get_current_user_id() below is what resolves the real user first.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/26847
 	 *
@@ -232,17 +241,19 @@ class WC_REST_Authentication {
 	 * @return WP_Error|null|bool
 	 */
 	public function authentication_fallback( $error ) {
-		if ( ! empty( $error ) ) {
-			// Another plugin has already declared a failure.
+		if ( is_wp_error( $error ) ) {
+			// Another plugin has already declared a failure. A plain `true` falls through instead.
 			return $error;
 		}
-		if ( empty( $this->error ) && empty( $this->auth_method ) && empty( $this->user ) && 0 === get_current_user_id() ) {
+		if ( 0 === get_current_user_id() && empty( $this->error ) && empty( $this->auth_method ) && empty( $this->user ) ) {
 			// Authentication hasn't occurred during `determine_current_user`, so check auth.
 			$user_id = $this->authenticate( false );
 			if ( $user_id ) {
 				wp_set_current_user( $user_id );
-				return true;
 			}
+		}
+		if ( $this->user ) {
+			return true;
 		}
 		return $error;
 	}
@@ -265,9 +276,9 @@ class WC_REST_Authentication {
 	/**
 	 * Reject a request when a WooCommerce API key authenticated a route outside our namespaces.
 	 *
-	 * Scope is first judged from REQUEST_URI, during 'determine_current_user', before WordPress has
-	 * parsed the request, so at that point the route the request will be dispatched to is not settled
-	 * yet. This runs later on rest_authentication_errors, after authentication_fallback() and
+	 * Scope is first judged from REQUEST_URI, during 'determine_current_user', where a URI that names
+	 * one of our routes is enough, and that is not necessarily the route WordPress dispatches the
+	 * request to. This runs later on rest_authentication_errors, after authentication_fallback() and
 	 * check_authentication_error(), so $this->user reflects the final authentication decision and
 	 * WordPress has resolved the route. It acts only on a key we authenticated ourselves; a failed or
 	 * absent key keeps the result the earlier callbacks produced.

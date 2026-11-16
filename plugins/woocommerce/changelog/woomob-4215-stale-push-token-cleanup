@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Stop sending push notifications to devices that haven't checked in for 90 days (180 for older app versions).

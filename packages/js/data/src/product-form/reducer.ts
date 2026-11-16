@@ -1,26 +1,20 @@
 /**
- * External dependencies
- */
-
-import type { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import TYPES from './action-types';
 import { Action } from './actions';
 import { ProductFormState } from './types';
 
-const reducer: Reducer< ProductFormState, Action > = (
-	state = {
+const reducer = (
+	state: ProductFormState = {
 		errors: {},
 		fields: [],
 		sections: [],
 		subsections: [],
 		tabs: [],
 	},
-	action
-) => {
+	action: Action
+): ProductFormState => {
 	switch ( action.type ) {
 		case TYPES.GET_FIELDS_SUCCESS:
 			state = {

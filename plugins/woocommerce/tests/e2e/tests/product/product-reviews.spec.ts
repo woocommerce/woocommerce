@@ -72,7 +72,7 @@ const test = baseTest.extend( {
 
 test.describe( 'Product Reviews', () => {
 	test.describe( 'Merchant manages reviews', () => {
-		test( 'can filter the reviews by product', async ( {
+		test( 'can filter the reviews by product and read the review row', async ( {
 			page,
 			reviews,
 		} ) => {
@@ -361,7 +361,7 @@ test.describe( 'Product Reviews', () => {
 				page.locator( '.comment_container' ).first()
 			).toContainText( updatedReview );
 			await expect(
-				page.getByLabel( `${ updatedRating } out of 5` )
+				page.getByLabel( `${ updatedRating } out of 5` ).first()
 			).toBeVisible();
 		} );
 	} );
