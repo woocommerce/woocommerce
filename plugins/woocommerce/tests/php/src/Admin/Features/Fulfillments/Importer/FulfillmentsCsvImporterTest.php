@@ -1087,6 +1087,8 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$order    = OrderHelper::create_order();
 		$id       = $order->get_id();
 		$no_items = wc_create_order()->get_id();
+		$trashed  = OrderHelper::create_order();
+		$trashed->delete( false );
 		add_filter(
 			'woocommerce_fulfillment_before_create',
 			function ( $fulfillment ) {
@@ -1104,11 +1106,12 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			"order_number,tracking_number,shipment_provider,tracking_url\n"
 			. ",TRK-A,ups,\n{$id},,ups,\n{$id},TRK-B,,\n999999999,TRK-C,ups,\nINV-1,TRK-D,ups,\n"
 			. "{$id},TRK-E,ups,javascript:alert(1)\n{$id},TRK-F,ups,//example.com/t\n{$id},TRK-G,ups,/wp-admin/\n{$id},TRK-H,ups,ftp://example.com/t\n"
-			. "{$no_items},TRK-I,ups,\n{$id},TRK-BLOCKED,ups,\n{$id},TRK-CRASH,ups,\n{$id},TRK-OK,ups,http://example.com/t\n"
+			. "{$no_items},TRK-I,ups,\n{$id},TRK-BLOCKED,ups,\n{$id},TRK-CRASH,ups,\n"
+			. "{$trashed->get_id()},TRK-T,ups,\n{$id}x,TRK-X,ups,\n{$id},TRK-OK,ups,http://example.com/t\n"
 		);
 
 		$this->assertSame(
-			array( FulfillmentsCsvImporter::CODE_MISSING_ORDER_NUMBER, FulfillmentsCsvImporter::CODE_MISSING_TRACKING_NUMBER, FulfillmentsCsvImporter::CODE_MISSING_PROVIDER, FulfillmentsCsvImporter::CODE_ORDER_NOT_FOUND, FulfillmentsCsvImporter::CODE_ORDER_NOT_FOUND, FulfillmentsCsvImporter::CODE_INVALID_TRACKING_URL, FulfillmentsCsvImporter::CODE_INVALID_TRACKING_URL, FulfillmentsCsvImporter::CODE_INVALID_TRACKING_URL, FulfillmentsCsvImporter::CODE_INVALID_TRACKING_URL, FulfillmentsCsvImporter::CODE_NO_ITEMS, FulfillmentsCsvImporter::CODE_SAVE_FAILED, FulfillmentsCsvImporter::CODE_SAVE_FAILED, null ),
+			array( FulfillmentsCsvImporter::CODE_MISSING_ORDER_NUMBER, FulfillmentsCsvImporter::CODE_MISSING_TRACKING_NUMBER, FulfillmentsCsvImporter::CODE_MISSING_PROVIDER, FulfillmentsCsvImporter::CODE_ORDER_NOT_FOUND, FulfillmentsCsvImporter::CODE_ORDER_NOT_FOUND, FulfillmentsCsvImporter::CODE_INVALID_TRACKING_URL, FulfillmentsCsvImporter::CODE_INVALID_TRACKING_URL, FulfillmentsCsvImporter::CODE_INVALID_TRACKING_URL, FulfillmentsCsvImporter::CODE_INVALID_TRACKING_URL, FulfillmentsCsvImporter::CODE_NO_ITEMS, FulfillmentsCsvImporter::CODE_SAVE_FAILED, FulfillmentsCsvImporter::CODE_SAVE_FAILED, FulfillmentsCsvImporter::CODE_ORDER_NOT_FOUND, FulfillmentsCsvImporter::CODE_ORDER_NOT_FOUND, null ),
 			array_map(
 				static function ( $row ) {
 					return $row['code'] ?? null;
@@ -1120,12 +1123,12 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			self::counts(
 				array(
 					FulfillmentsCsvImporter::STATUS_CREATED => 1,
-					FulfillmentsCsvImporter::STATUS_FAILED => 12,
+					FulfillmentsCsvImporter::STATUS_FAILED => 14,
 				)
 			),
 			$result['counts']
 		);
-		$this->assertSame( range( 2, 14 ), array_column( $result['rows'], 'row' ) );
+		$this->assertSame( range( 2, 16 ), array_column( $result['rows'], 'row' ) );
 		$this->assertSame( 'Blocked by an extension.', $result['rows'][10]['message'], 'An extension message from a blocked save reaches the merchant' );
 		$this->assertSame( 'Could not save the fulfillment.', $result['rows'][11]['message'], 'Other save errors are not shown to the merchant' );
 		$this->assertSame( 'INV-1', $result['rows'][4]['order_number'], 'A failed row still names the order number from the file' );
@@ -1466,8 +1469,8 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			$queries,
 			'A chunk without numeric order numbers runs no query, and IDs are not repeated'
 		);
-		$this->assertSame( array( null, null, 'yes', '' ), $primed, 'The primed order is used; a non-array query result falls back to a lookup' );
-		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_FAILED, FulfillmentsCsvImporter::STATUS_FAILED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_CREATED ), array_column( $result['rows'], 'status' ) );
+		$this->assertSame( array( null, null, 'yes', null ), $primed, 'The primed order is used, and a non-array query result finds nothing' );
+		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_FAILED, FulfillmentsCsvImporter::STATUS_FAILED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_FAILED ), array_column( $result['rows'], 'status' ) );
 	}
 
 	/**

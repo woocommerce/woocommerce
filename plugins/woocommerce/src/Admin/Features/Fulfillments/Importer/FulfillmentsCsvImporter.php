@@ -865,8 +865,9 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Resolve an order number cell to an order.
 	 *
-	 * A number is looked up as an order ID. The filter then decides, so a store with its own
-	 * order numbers can map them. The result is cached for the rest of the chunk.
+	 * A number is looked up among the orders prime_orders() loaded by ID, so orders the default
+	 * order query leaves out, such as trashed ones, are not found. The filter then decides, so a
+	 * store with its own order numbers can map them. The result is cached on the importer.
 	 *
 	 * @param string $order_number Order number cell.
 	 * @return WC_Order|null
@@ -878,7 +879,7 @@ class FulfillmentsCsvImporter {
 
 		$order = null;
 		if ( ctype_digit( $order_number ) ) {
-			$order = $this->primed_orders[ (int) $order_number ] ?? wc_get_order( (int) $order_number );
+			$order = $this->primed_orders[ (int) $order_number ] ?? null;
 		}
 
 		/**
