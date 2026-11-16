@@ -256,6 +256,63 @@ class SettingsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should ignore supplied image values in REST without losing presentation values.
+	 * @testWith ["v2"]
+	 *           ["v3"]
+	 * @param string $version REST API version.
+	 */
+	public function test_rest_definition_values( string $version ): void {
+		WC()->register_wp_admin_settings();
+		$stored = array(
+			'width'  => 300,
+			'height' => 200,
+			'crop'   => true,
+		);
+		update_option( 'extension_image', $stored );
+		add_filter(
+			'woocommerce_general_settings',
+			static function ( $settings ) {
+				$settings[] = array(
+					'id'          => 'extension_image',
+					'type'        => 'image_width',
+					'value'       => 'supplied',
+					'fixed_value' => 'fixed',
+					'default'     => array(
+						'width'  => 100,
+						'height' => 100,
+						'crop'   => false,
+					),
+				);
+				return $settings;
+			}
+		);
+		add_filter(
+			'woocommerce_settings-general',
+			static function ( $settings ) {
+				foreach ( array( 'title', 'sectionend' ) as $type ) {
+					$settings[] = array(
+						'id'         => 'extension_' . $type,
+						'option_key' => 'extension_' . $type,
+						'type'       => $type,
+						'value'      => 'presentation',
+					);
+				}
+				return $settings;
+			}
+		);
+
+		$response = rest_do_request( new \WP_REST_Request( 'GET', '/wc/' . $version . '/settings/general' ) );
+		$this->assertSame( 200, $response->get_status() );
+		$settings = array_column( $response->get_data(), null, 'id' );
+		$this->assertSame( $stored, $settings['extension_image']['value'] );
+		$this->assertArrayNotHasKey( 'fixed_value', $settings['extension_image'] );
+		$controller = 'v2' === $version ? new \WC_REST_Setting_Options_V2_Controller() : new \WC_REST_Setting_Options_Controller();
+		$settings   = array_column( $controller->get_group_settings( 'general' ), null, 'id' );
+		$this->assertSame( 'presentation', $settings['extension_title']['value'] );
+		$this->assertSame( 'presentation', $settings['extension_sectionend']['value'] );
+	}
+
+	/**
 	 * @testdox Should read additional tax classes from their definition rather than a missing option.
 	 */
 	public function test_additional_tax_classes(): void {
