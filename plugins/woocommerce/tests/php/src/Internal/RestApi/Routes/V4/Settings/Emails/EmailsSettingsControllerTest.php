@@ -79,13 +79,6 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 	protected static $user_id;
 
 	/**
-	 * Feature filter callback.
-	 *
-	 * @var callable
-	 */
-	private $feature_filter;
-
-	/**
 	 * Previous option values to restore after tests.
 	 *
 	 * @var array<string, mixed>
@@ -117,16 +110,15 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 		$this->previous_emails_instance = $instance_property->getValue();
 		$this->previous_emails          = $this->previous_emails_instance ? $this->previous_emails_instance->emails : array();
 
-		// Enable the v4 REST API feature before bootstrapping.
-		$this->feature_filter = function ( $features ) {
+		parent::setUp();
+
+		// Enable the v4 REST API feature.
+		$feature_filter = function ( $features ) {
 			$features[] = 'rest-api-v4';
 			return $features;
 		};
 
-		add_filter( 'woocommerce_admin_features', $this->feature_filter );
-		$this->prev_options['woocommerce_feature_block_email_editor_enabled'] = get_option( 'woocommerce_feature_block_email_editor_enabled', null );
-
-		parent::setUp();
+		add_filter( 'woocommerce_admin_features', $feature_filter );
 
 		// Enable block email editor feature.
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
@@ -174,14 +166,7 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		$block_email_editor_option = $this->prev_options['woocommerce_feature_block_email_editor_enabled'];
-		unset( $this->prev_options['woocommerce_feature_block_email_editor_enabled'] );
-
 		try {
-			if ( isset( $this->feature_filter ) ) {
-				remove_filter( 'woocommerce_admin_features', $this->feature_filter );
-			}
-
 			// Restore previous option values.
 			foreach ( $this->prev_options as $key => $value ) {
 				if ( null === $value ) {
@@ -208,11 +193,6 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 					$instance_property->setAccessible( true );
 					$instance_property->setValue( null, $this->previous_emails_instance );
 				} finally {
-					if ( null === $block_email_editor_option ) {
-						delete_option( 'woocommerce_feature_block_email_editor_enabled' );
-					} else {
-						update_option( 'woocommerce_feature_block_email_editor_enabled', $block_email_editor_option );
-					}
 					$this->previous_emails          = array();
 					$this->previous_emails_instance = null;
 					$this->prev_options             = array();

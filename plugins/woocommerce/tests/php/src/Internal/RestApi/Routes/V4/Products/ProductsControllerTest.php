@@ -40,8 +40,6 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 		unset( $this->server );
 
 		parent::tearDown();
-		$this->disable_cogs_feature();
-		$this->disable_rest_api_v4_feature();
 	}
 
 	/**
@@ -54,19 +52,6 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 				$features[] = 'rest-api-v4';
 				return $features;
 			},
-		);
-	}
-
-	/**
-	 * Disable the REST API v4 feature.
-	 */
-	public static function disable_rest_api_v4_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features = array_diff( $features, array( 'rest-api-v4' ) );
-				return $features;
-			}
 		);
 	}
 
@@ -189,8 +174,8 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
-		$this->enable_rest_api_v4_feature();
 		parent::setUp();
+		$this->enable_rest_api_v4_feature();
 		$this->endpoint = new ProductsController();
 		$this->reset_rest_server();
 		wp_set_current_user( self::$administrator_id );

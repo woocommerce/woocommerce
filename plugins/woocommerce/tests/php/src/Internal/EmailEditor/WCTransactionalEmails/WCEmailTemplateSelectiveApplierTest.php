@@ -63,9 +63,6 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->cleanup_injected_emails();
 
-		remove_all_filters( 'woocommerce_transactional_emails_for_block_editor' );
-		remove_all_filters( 'woocommerce_email_content_post_data' );
-
 		WCEmailTemplateSyncRegistry::reset_cache();
 		WCEmailTemplateChangeSummary::reset_cache();
 		WCEmailTemplateChangeSummary::set_logger( null );

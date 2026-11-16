@@ -33,7 +33,7 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Restore options.
+	 * Restore the customer shipping address.
 	 */
 	public function tearDown(): void {
 		foreach ( $this->previous_shipping_address as $key => $value ) {
@@ -41,9 +41,6 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		}
 
 		parent::tearDown();
-
-		update_option( 'woocommerce_shipping_debug_mode', 'no' );
-		update_option( 'woocommerce_shipping_hide_rates_when_free', 'no' );
 	}
 
 	/**

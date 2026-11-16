@@ -13,24 +13,6 @@ declare( strict_types = 1 );
 class WC_Lazy_REST_Server_Test extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * Filter callback currently enabling the rest-api-v4 feature, if any.
-	 *
-	 * @var callable|null
-	 */
-	private $enable_v4_feature_callback = null;
-
-	/**
-	 * Clean up the feature filter.
-	 */
-	public function tearDown(): void {
-		if ( null !== $this->enable_v4_feature_callback ) {
-			remove_filter( 'woocommerce_admin_features', $this->enable_v4_feature_callback );
-			$this->enable_v4_feature_callback = null;
-		}
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox get_routes() returns the complete route table after a scoped namespace dispatch.
 	 */
 	public function test_get_routes_returns_full_route_table_after_scoped_dispatch() {
@@ -101,10 +83,10 @@ class WC_Lazy_REST_Server_Test extends WC_REST_Unit_Test_Case {
 	 * Enable the REST API v4 feature for the current test.
 	 */
 	private function enable_rest_api_v4_feature(): void {
-		$this->enable_v4_feature_callback = static function ( $features ) {
+		$enable_v4_feature_callback = static function ( $features ) {
 			$features[] = 'rest-api-v4';
 			return $features;
 		};
-		add_filter( 'woocommerce_admin_features', $this->enable_v4_feature_callback );
+		add_filter( 'woocommerce_admin_features', $enable_v4_feature_callback );
 	}
 }

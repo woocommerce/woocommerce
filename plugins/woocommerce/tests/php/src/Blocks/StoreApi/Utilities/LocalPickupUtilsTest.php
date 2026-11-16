@@ -47,9 +47,6 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 		// Restore original shipping methods.
 		WC()->shipping()->shipping_methods = $this->original_shipping_methods;
 
-		// Remove the filter.
-		remove_filter( 'pre_option_pickup_location_pickup_locations', array( $this, 'filter_pickup_locations' ) );
-
 		// Reset mocked value.
 		$this->mocked_pickup_locations = null;
 

@@ -27,15 +27,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up after each test.
-	 */
-	public function tearDown(): void {
-		remove_all_filters( 'wc_get_price_decimal_separator' );
-
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox An update import resolves relationship SKUs saved by earlier rows in the same import.
 	 * @testWith [-1]
 	 *           [1]

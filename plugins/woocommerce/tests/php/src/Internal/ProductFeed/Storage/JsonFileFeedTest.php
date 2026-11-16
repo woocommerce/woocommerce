@@ -27,7 +27,6 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->get_and_delete_dir();
-		remove_all_filters( 'woocommerce_product_feed_time' );
 	}
 
 	/**

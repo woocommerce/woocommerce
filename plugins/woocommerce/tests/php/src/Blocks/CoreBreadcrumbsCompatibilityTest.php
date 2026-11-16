@@ -134,8 +134,6 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wp;
 
-		remove_filter( 'woocommerce_is_account_page', '__return_true' );
-
 		update_option( 'woocommerce_shop_page_id', $this->original_shop_page_id );
 		update_option( 'woocommerce_myaccount_page_id', $this->original_myaccount_page_id );
 		update_option( 'woocommerce_permalinks', $this->original_woocommerce_permalinks );

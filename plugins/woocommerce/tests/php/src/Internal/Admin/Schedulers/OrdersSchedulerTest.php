@@ -30,25 +30,6 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down the test environment.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		// Clean up options.
-		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
-		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION );
-		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
-		delete_option( OrdersScheduler::LEGACY_IMMEDIATE_IMPORT_OPTION );
-		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
-
-		// Clean up any scheduled actions.
-		$this->clear_scheduled_batch_processor();
-
-		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
-	}
-
-	/**
 	 * Hook the import filter that keeps child orders out of Analytics, for the active order storage.
 	 */
 	private function exclude_child_orders_from_import(): void {

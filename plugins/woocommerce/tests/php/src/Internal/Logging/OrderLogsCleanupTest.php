@@ -57,13 +57,6 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	 */
 	private TestingContainer $container;
 
-	/**
-	 * Temporary storage of the target for the data store class filter.
-	 *
-	 * @var callable
-	 */
-	private $data_store_filter_callback = null;
-
 	// phpcs:disable WordPress.DB.SlowDBQuery
 
 	/**
@@ -135,10 +128,6 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 		self::delete_all_log_files();
 		as_unschedule_all_actions( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK );
 		parent::tearDown();
-		if ( $this->data_store_filter_callback ) {
-				remove_filter( 'woocommerce_order_data_store', $this->data_store_filter_callback, 99999 );
-				$this->data_store_filter_callback = null;
-		}
 	}
 
 	/**
@@ -408,11 +397,15 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	 * @param mixed  $argument Argument to pass to the method, null to pass none.
 	 */
 	public function test_unknown_data_source( string $method_name, $argument ) {
-		$data_store                       = new class() extends \WC_Order_Data_Store_CPT {};
-		$this->data_store_filter_callback = function () use ( $data_store ) {
-			return $data_store;
-		};
-		add_filter( 'woocommerce_order_data_store', $this->data_store_filter_callback, 99999, 0 );
+		$data_store = new class() extends \WC_Order_Data_Store_CPT {};
+		add_filter(
+			'woocommerce_order_data_store',
+			function () use ( $data_store ) {
+				return $data_store;
+			},
+			99999,
+			0
+		);
 
 		$this->setup_hpos_and_reset_container( false );
 
@@ -598,7 +591,7 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 		$order_count = OrderLogsCleanupHelper::MAX_ORDERS_PER_RUN + $extra;
 
 		for ( $i = 0; $i < $order_count; $i++ ) {
-			$order = wc_create_order();
+			$order = new \WC_Order();
 			$order->set_date_created( strtotime( '-5 days' ) );
 			$order->add_meta_data( '_debug_log_source', 'place-order-debug-drain-' . $i, true );
 			$order->save();
@@ -645,7 +638,7 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 
 		// Two full batches, so the second run still has a batch left to hand over.
 		for ( $i = 0; $i < 2 * OrderLogsCleanupHelper::MAX_ORDERS_PER_RUN; $i++ ) {
-			$order = wc_create_order();
+			$order = new \WC_Order();
 			$order->set_date_created( strtotime( '-5 days' ) );
 			$order->add_meta_data( '_debug_log_source', 'place-order-debug-running-' . $i, true );
 			$order->save();

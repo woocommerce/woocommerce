@@ -43,16 +43,6 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_attribute_taxonomies' );
-		remove_all_filters( 'sanitize_taxonomy_name' );
-
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox wc_is_attribute_in_product_name() should only search the attributes area of a variation name when the variation is given.
 	 */
 	public function test_wc_is_attribute_in_product_name_ignores_the_parent_name_when_the_variation_is_given(): void {

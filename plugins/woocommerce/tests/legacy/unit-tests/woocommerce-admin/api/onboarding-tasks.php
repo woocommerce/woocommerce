@@ -66,7 +66,6 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		remove_action( 'add_attachment', array( $this, 'track_created_attachment' ) );
 		foreach ( array_unique( $this->created_attachment_ids ) as $attachment_id ) {
 			wp_delete_attachment( $attachment_id, true );
 		}

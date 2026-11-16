@@ -73,8 +73,6 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 		$this->clean_up_cot_setup();
 		delete_option( CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION );
 
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
-		remove_all_filters( 'woocommerce_logging_class' );
 		parent::tearDown();
 	}
 
