@@ -16,9 +16,9 @@ defined( 'ABSPATH' ) || exit;
  * Per-user import session stored in a transient.
  *
  * The prepare endpoint creates it with the staged file path, attachment ID, delimiter,
- * headers and row total, and schedules the cleanup of the staged file. The progress
- * fields (processed, byte_offset, mapping, counts, seen_tracking_pairs) are stored here
- * for the import run that lands next. One session is active per user at a time.
+ * headers and row total, and schedules the cleanup of the staged file. The import run
+ * freezes its mapping here and records each chunk's progress (processed, byte_offset,
+ * counts, seen_tracking_pairs, last chunk). One session is active per user at a time.
  *
  * @internal
  * @since 11.4.0
@@ -670,6 +670,27 @@ final class ImportSession {
 	}
 
 	/**
+	 * Freeze the mapping and run options so every chunk imports under the same rules.
+	 *
+	 * Only the first call counts; later calls are ignored. The values are written with the
+	 * next recorded chunk, so a first chunk that fails before recording freezes again on retry.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array<int, string> $mapping CSV column index => canonical column key.
+	 * @param bool               $notify  Whether to fire customer notifications.
+	 * @param bool               $update  Whether to update existing fulfillments on tracking-number match.
+	 */
+	public function freeze_run_settings( array $mapping, bool $notify, bool $update ): void {
+		if ( null !== $this->frozen_mapping() ) {
+			return;
+		}
+		$this->data['mapping']         = $mapping;
+		$this->data['notify_customer'] = $notify;
+		$this->data['update_existing'] = $update;
+	}
+
+	/**
 	 * Byte offset in the CSV reached by the import run.
 	 *
 	 * @since 11.4.0
@@ -678,6 +699,77 @@ final class ImportSession {
 	 */
 	public function byte_offset(): int {
 		return (int) ( $this->data['byte_offset'] ?? 0 );
+	}
+
+	/**
+	 * Physical record number of the row at byte_offset(), passed back to the reader on resume.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return int 0 until a chunk is recorded.
+	 */
+	public function next_record_number(): int {
+		return (int) ( $this->data['next_record_number'] ?? 0 );
+	}
+
+	/**
+	 * The most recently recorded chunk: its offset, per-row results and end-of-file flag.
+	 *
+	 * Lets a caller answer a replay of that chunk without importing its rows again.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return array{offset:int, rows:array<int, array<string, mixed>>, eof:bool}|null Null until a chunk is recorded.
+	 */
+	public function last_chunk(): ?array {
+		$chunk = $this->data['last_chunk'] ?? null;
+		if ( ! is_array( $chunk ) ) {
+			return null;
+		}
+		return array(
+			'offset' => (int) ( $chunk['offset'] ?? 0 ),
+			'rows'   => is_array( $chunk['rows'] ?? null ) ? $chunk['rows'] : array(),
+			'eof'    => ! empty( $chunk['eof'] ),
+		);
+	}
+
+	/**
+	 * Record a chunk returned by FulfillmentsCsvImporter::import_chunk() and persist the session.
+	 *
+	 * Only a chunk that starts at the recorded progress is accepted, so a replayed or
+	 * out-of-order chunk can never add its counts twice. The dedupe set and the resume
+	 * position are replaced. Only this chunk's rows are kept, which bounds the payload.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int                  $offset Data rows processed before this chunk; must equal processed().
+	 * @param array<string, mixed> $chunk  Result of import_chunk() without an error.
+	 * @return bool False when $offset is not the recorded progress or the session could not be stored.
+	 */
+	public function record_chunk( int $offset, array $chunk ): bool {
+		if ( $offset !== $this->processed() ) {
+			return false;
+		}
+
+		$counts = $this->counts();
+		foreach ( array_keys( $counts ) as $key ) {
+			$counts[ $key ] += (int) ( $chunk['counts'][ $key ] ?? 0 );
+		}
+		$rows = is_array( $chunk['rows'] ?? null ) ? array_values( $chunk['rows'] ) : array();
+		$seen = $chunk['seen_tracking_pairs'] ?? array();
+
+		$this->data['processed']           = $offset + max( 0, (int) ( $chunk['consumed'] ?? 0 ) );
+		$this->data['counts']              = $counts;
+		$this->data['seen_tracking_pairs'] = is_array( $seen ) ? $seen : array();
+		$this->data['byte_offset']         = max( 0, (int) ( $chunk['byte_offset'] ?? 0 ) );
+		$this->data['next_record_number']  = max( 0, (int) ( $chunk['next_record_number'] ?? 0 ) );
+		$this->data['last_chunk']          = array(
+			'offset' => $offset,
+			'rows'   => $rows,
+			'eof'    => ! empty( $chunk['eof'] ),
+		);
+
+		return $this->persist();
 	}
 
 	/**

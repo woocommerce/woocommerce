@@ -581,4 +581,117 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 			}
 		);
 	}
+
+	/**
+	 * Build a result in the shape FulfillmentsCsvImporter::import_chunk() returns.
+	 *
+	 * @param int  $consumed    Data rows the chunk processed.
+	 * @param int  $created     Rows created by the chunk.
+	 * @param int  $byte_offset Position the next chunk resumes from.
+	 * @param bool $eof         Whether the chunk reached the end of the file.
+	 * @return array<string, mixed>
+	 */
+	private function chunk_result( int $consumed, int $created, int $byte_offset, bool $eof = false ): array {
+		return array(
+			'counts'              => array(
+				'created'  => $created,
+				'updated'  => 1,
+				'skipped'  => 0,
+				'failed'   => 0,
+				'notified' => 0,
+			),
+			'rows'                => array(
+				array(
+					'row'     => $byte_offset,
+					'status'  => 'created',
+					'message' => 'Fulfillment created.',
+				),
+			),
+			'seen_tracking_pairs' => array( 'pair-' . $byte_offset => true ),
+			'consumed'            => $consumed,
+			'byte_offset'         => $byte_offset,
+			'next_record_number'  => $consumed + 2,
+			'eof'                 => $eof,
+		);
+	}
+
+	/**
+	 * @testdox record_chunk() advances processed, adds counts and stores the resume position and the last chunk's rows.
+	 */
+	public function test_record_chunk_persists_progress(): void {
+		$session = $this->make_session( 81 );
+
+		$this->assertTrue( $session->record_chunk( 0, $this->chunk_result( 10, 7, 400 ) ) );
+		$this->assertTrue( $session->record_chunk( 10, $this->chunk_result( 5, 3, 650, true ) ) );
+
+		$reloaded = ImportSession::load( 81, $session->token() );
+		$this->assertNotNull( $reloaded );
+		$this->assertSame( 15, $reloaded->processed(), 'processed is the chunk offset plus the rows it consumed' );
+		$this->assertSame( 650, $reloaded->byte_offset() );
+		$this->assertSame( 7, $reloaded->next_record_number() );
+		$this->assertSame(
+			array(
+				'created'  => 10,
+				'updated'  => 2,
+				'skipped'  => 0,
+				'failed'   => 0,
+				'notified' => 0,
+			),
+			$reloaded->counts()
+		);
+		$this->assertSame( array( 'pair-650' => true ), $reloaded->seen_tracking_pairs(), 'The dedupe set is replaced, not merged' );
+		$this->assertSame(
+			array(
+				'offset' => 10,
+				'rows'   => $this->chunk_result( 5, 3, 650 )['rows'],
+				'eof'    => true,
+			),
+			$reloaded->last_chunk(),
+			'Only the last chunk keeps its rows, so a replay of it can return them'
+		);
+	}
+
+	/**
+	 * @testdox record_chunk() refuses an offset other than the recorded progress, so a replayed chunk is never counted twice.
+	 */
+	public function test_record_chunk_refuses_an_offset_that_is_not_the_recorded_progress(): void {
+		$session = $this->make_session( 82 );
+		$this->assertNull( $session->last_chunk() );
+		$session->record_chunk( 0, $this->chunk_result( 10, 7, 400 ) );
+
+		$this->assertFalse( $session->record_chunk( 0, $this->chunk_result( 10, 7, 400 ) ), 'A replayed offset must be refused' );
+		$this->assertFalse( $session->record_chunk( 20, $this->chunk_result( 10, 7, 800 ) ), 'An offset ahead of the progress must be refused' );
+
+		$reloaded = ImportSession::load( 82, $session->token() );
+		$this->assertSame( 10, $reloaded->processed() );
+		$this->assertSame( 7, $reloaded->counts()['created'] );
+		$this->assertSame( 400, $reloaded->byte_offset() );
+	}
+
+	/**
+	 * @testdox freeze_run_settings() keeps the first mapping and options, and they are stored with the next recorded chunk.
+	 */
+	public function test_freeze_run_settings_keeps_the_first_settings(): void {
+		$mapping = array(
+			0 => 'order_number',
+			1 => 'tracking_number',
+			2 => 'shipment_provider',
+		);
+		$session = $this->make_session( 83 );
+
+		$session->freeze_run_settings( $mapping, true, false );
+		$session->freeze_run_settings( array( 0 => 'tracking_number' ), false, true );
+
+		$this->assertSame( $mapping, $session->frozen_mapping(), 'A second call must not replace the frozen mapping' );
+		$this->assertTrue( $session->notify_customer() );
+		$this->assertFalse( $session->update_existing() );
+		$this->assertNull( ImportSession::load( 83, $session->token() )->frozen_mapping(), 'Freezing alone does not write the session' );
+
+		$session->record_chunk( 0, $this->chunk_result( 1, 1, 90 ) );
+
+		$reloaded = ImportSession::load( 83, $session->token() );
+		$this->assertSame( $mapping, $reloaded->frozen_mapping() );
+		$this->assertTrue( $reloaded->notify_customer() );
+		$this->assertFalse( $reloaded->update_existing() );
+	}
 }
