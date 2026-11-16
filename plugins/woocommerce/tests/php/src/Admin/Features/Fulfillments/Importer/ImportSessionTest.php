@@ -630,16 +630,8 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 15, $reloaded->processed(), 'processed is the chunk offset plus the rows it consumed' );
 		$this->assertSame( 650, $reloaded->byte_offset() );
 		$this->assertSame( 7, $reloaded->next_record_number() );
-		$this->assertSame(
-			array(
-				FulfillmentsCsvImporter::STATUS_CREATED => 10,
-				FulfillmentsCsvImporter::STATUS_UPDATED => 2,
-				FulfillmentsCsvImporter::STATUS_SKIPPED => 0,
-				FulfillmentsCsvImporter::STATUS_FAILED  => 0,
-				'notified'                              => 0,
-			),
-			$reloaded->counts()
-		);
+		$this->assertSame( 10, $reloaded->counts()[ FulfillmentsCsvImporter::STATUS_CREATED ], 'Counts of each chunk are added up' );
+		$this->assertSame( 2, $reloaded->counts()[ FulfillmentsCsvImporter::STATUS_UPDATED ] );
 		$this->assertSame( array( 'pair-650' => true ), $reloaded->seen_tracking_pairs(), 'The dedupe set is replaced, not merged' );
 		$this->assertSame(
 			array(

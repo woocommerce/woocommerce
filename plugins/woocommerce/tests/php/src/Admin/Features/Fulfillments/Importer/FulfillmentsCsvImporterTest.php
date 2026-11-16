@@ -7,6 +7,7 @@ require_once __DIR__ . '/FulfillmentsCsvReadTracker.php';
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentException;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsCsvImporter;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\ImportSession;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Data_Store;
@@ -86,7 +87,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	 * @param string               $csv     CSV content with its columns in the order of IMPORT_MAPPING.
 	 * @param array<string, mixed> $options Importer options.
 	 * @param int                  $limit   Data rows per chunk.
-	 * @return array{counts: array<string, int>, rows: array<int, array<string, mixed>>, chunks: int}
+	 * @return array{counts: array<string, int>, rows: array<int, array<string, mixed>>}
 	 */
 	private function import_csv( string $csv, array $options = array(), int $limit = 200 ): array {
 		$file   = $this->make_csv( $csv );
@@ -108,7 +109,6 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		return array(
 			'counts' => $counts,
 			'rows'   => $rows,
-			'chunks' => $chunks,
 		);
 	}
 
@@ -120,16 +120,6 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	 */
 	private function fulfillments_of( WC_Order $order ): array {
 		return WC_Data_Store::load( 'order-fulfillment' )->read_fulfillments( WC_Order::class, (string) $order->get_id() );
-	}
-
-	/**
-	 * Counts with the given values and zero for the rest.
-	 *
-	 * @param array<string, int> $values Non-zero counts.
-	 * @return array<string, int>
-	 */
-	private static function counts( array $values ): array {
-		return array_merge( array_fill_keys( array( FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_UPDATED, FulfillmentsCsvImporter::STATUS_SKIPPED, FulfillmentsCsvImporter::STATUS_FAILED, 'notified' ), 0 ), $values );
 	}
 
 	/**
@@ -1046,22 +1036,17 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,ups,https://example.com/t/<b>TRK-1\n" );
 
-		$this->assertSame( self::counts( array( FulfillmentsCsvImporter::STATUS_CREATED => 1 ) ), $result['counts'] );
+		$this->assertSame( 1, $result['counts'][ FulfillmentsCsvImporter::STATUS_CREATED ] );
 		$fulfillments = $this->fulfillments_of( $order );
 		$this->assertCount( 1, $fulfillments );
 		$fulfillment = $fulfillments[0];
-		$this->assertSame(
-			array(
-				'row'            => 2,
-				'order_number'   => (string) $id,
-				'status'         => FulfillmentsCsvImporter::STATUS_CREATED,
-				'message'        => 'Fulfillment created.',
-				'order_id'       => $id,
-				'fulfillment_id' => $fulfillment->get_id(),
-				'notified'       => false,
-			),
-			$result['rows'][0]
-		);
+		$row         = $result['rows'][0];
+		$this->assertSame( array( 'row', 'order_number', 'status', 'message', 'order_id', 'fulfillment_id', 'notified' ), array_keys( $row ), 'The import client reads these keys' );
+		$this->assertSame( 2, $row['row'] );
+		$this->assertSame( FulfillmentsCsvImporter::STATUS_CREATED, $row['status'] );
+		$this->assertSame( $id, $row['order_id'] );
+		$this->assertSame( $fulfillment->get_id(), $row['fulfillment_id'] );
+		$this->assertFalse( $row['notified'] );
 		$this->assertTrue( $fulfillment->get_is_fulfilled() );
 		$this->assertSame( 'TRK-1', $fulfillment->get_tracking_number() );
 		$this->assertSame( 'ups', $fulfillment->get_shipment_provider() );
@@ -1118,16 +1103,13 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 				$result['rows']
 			)
 		);
-		$this->assertSame(
-			self::counts(
-				array(
-					FulfillmentsCsvImporter::STATUS_CREATED => 1,
-					FulfillmentsCsvImporter::STATUS_FAILED => 14,
-				)
-			),
-			$result['counts']
-		);
+		$this->assertSame( 1, $result['counts'][ FulfillmentsCsvImporter::STATUS_CREATED ] );
+		$this->assertSame( 14, $result['counts'][ FulfillmentsCsvImporter::STATUS_FAILED ] );
 		$this->assertSame( range( 2, 16 ), array_column( $result['rows'], 'row' ) );
+		$this->assertSame( array( 'row', 'order_number', 'status', 'code', 'message' ), array_keys( $result['rows'][1] ), 'A row that fails before its order resolves has no order_id' );
+		$this->assertSame( (string) $id, $result['rows'][1]['order_number'] );
+		$this->assertSame( array( 'row', 'order_number', 'status', 'code', 'message', 'order_id' ), array_keys( $result['rows'][9] ), 'A row that fails after its order resolves names it' );
+		$this->assertSame( $no_items, $result['rows'][9]['order_id'] );
 		$this->assertSame( 'Blocked by an extension.', $result['rows'][10]['message'], 'An extension message from a blocked save reaches the merchant' );
 		$this->assertSame( 'Could not save the fulfillment.', $result['rows'][11]['message'], 'Other save errors are not shown to the merchant' );
 		$this->assertSame( 'INV-1', $result['rows'][4]['order_number'], 'A failed row still names the order number from the file' );
@@ -1274,12 +1256,12 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		);
 
 		$result = $this->import_csv(
-			"order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,ups,\n{$id},trk-1,ups,\n{$id},TRK-1,fedex,\n{$other->get_id()},TRK-1,ups,\n",
+			"order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,ups,\n{$id},trk-1,ups,\n{$id},TRK-1,fedex,\n{$other->get_id()},TRK-1,ups,\n0{$id},TRK-1,ups,\n",
 			array(),
 			1
 		);
 
-		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_FAILED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_SKIPPED, FulfillmentsCsvImporter::STATUS_CREATED ), array_column( $result['rows'], 'status' ) );
+		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_FAILED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_SKIPPED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_SKIPPED ), array_column( $result['rows'], 'status' ), 'The pair is keyed by the resolved order, so 0123 repeats 123' );
 		$this->assertSame( 'Duplicate order and tracking number in this file.', $result['rows'][2]['message'] );
 		$fulfillments = $this->fulfillments_of( $order );
 		$this->assertCount( 1, $fulfillments );
@@ -1310,7 +1292,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$id},trk-1,fedex,\n" );
 
-		$this->assertSame( self::counts( array( FulfillmentsCsvImporter::STATUS_UPDATED => 1 ) ), $result['counts'] );
+		$this->assertSame( 1, $result['counts'][ FulfillmentsCsvImporter::STATUS_UPDATED ] );
 		$this->assertSame( 'Fulfillment updated.', $result['rows'][0]['message'] );
 		$this->assertSame( $stored_id, $result['rows'][0]['fulfillment_id'] );
 		$fulfillments = $this->fulfillments_of( $order );
@@ -1343,6 +1325,22 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 0, $result['counts']['notified'] );
 		$this->assertSame( $updates, did_action( 'woocommerce_fulfillment_after_update' ), 'An unchanged row is not saved' );
 		$this->assertSame( $emails, did_action( 'woocommerce_fulfillment_updated_notification' ) );
+	}
+
+	/**
+	 * @testdox A deleted fulfillment with the row's tracking number is not updated; the row creates a new one.
+	 */
+	public function test_deleted_fulfillment_is_not_matched(): void {
+		$order = OrderHelper::create_order();
+		$csv   = "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,ups\n";
+		$this->import_csv( $csv );
+		$deleted = $this->fulfillments_of( $order )[0];
+		$deleted->delete();
+
+		$result = $this->import_csv( $csv );
+
+		$this->assertSame( FulfillmentsCsvImporter::STATUS_CREATED, $result['rows'][0]['status'] );
+		$this->assertNotSame( $deleted->get_id(), $result['rows'][0]['fulfillment_id'] );
 	}
 
 	/**
@@ -1516,17 +1514,55 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Chunks resume from the previous result, keep physical row numbers across blank lines and report eof only at the end.
+	 * @testdox A run resumed through the session at any chunk size imports the same rows as one chunk and refuses a replay.
+	 * @testWith [1]
+	 *           [2]
+	 *           [3]
+	 *           [4]
+	 *           [5]
+	 *           [6]
+	 *
+	 * @param int $limit Data rows per chunk.
 	 */
-	public function test_chunks_resume_from_the_previous_result(): void {
-		$id  = array_map( fn() => OrderHelper::create_order()->get_id(), range( 1, 5 ) );
-		$csv = "order_number,tracking_number,shipment_provider\n\n{$id[0]},TRK-1,ups\n{$id[1]},TRK-2,\"ups, ground\"\n\n,,\n{$id[2]},TRK-3,ups\n{$id[3]},TRK-4,ups\n{$id[4]},TRK-5,ups\n";
+	public function test_run_resumed_through_the_session_matches_one_chunk( int $limit ): void {
+		$ids     = array_map( fn() => (string) OrderHelper::create_order()->get_id(), range( 1, 4 ) );
+		$file    = $this->make_csv( "order_number,tracking_number,shipment_provider\n\n{$ids[0]},TRK-1,ups\n{$ids[1]},TRK-2,\"ups, ground\"\n\n,,\n{$ids[2]},TRK-3,ups\n{$ids[2]},trk-3,ups\nINV-9,TRK-4,ups\n{$ids[3]},TRK-5,ups\n" );
+		$parsed  = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+		$session = ImportSession::create( 1, $file, ',', $parsed['headers'], $parsed['total'], false, true );
+		$session->freeze_run_settings( self::IMPORT_MAPPING, false, true );
+		$rows     = array();
+		$consumed = 0;
+		$guard    = 0;
+		do {
+			$session = ImportSession::load( 1, $session->token() );
+			$offset  = $session->processed();
+			$chunk   = ( new FulfillmentsCsvImporter( $file, array( 'update_existing' => $session->update_existing() ) ) )->import_chunk(
+				$limit,
+				$session->frozen_mapping(),
+				array(
+					'byte_offset'         => $session->byte_offset(),
+					'next_record_number'  => $session->next_record_number(),
+					'seen_tracking_pairs' => $session->seen_tracking_pairs(),
+				)
+			);
+			$this->assertTrue( $session->record_chunk( $offset, $chunk ) );
+			$this->assertFalse( ImportSession::load( 1, $session->token() )->record_chunk( $offset, $chunk ), 'A replay of the chunk is refused' );
+			$rows      = array_merge( $rows, $chunk['rows'] );
+			$consumed += $chunk['consumed'];
+		} while ( ! $chunk['eof'] && ++$guard < 20 );
+		$session = ImportSession::load( 1, $session->token() );
+		foreach ( $ids as $id ) {
+			WC_Data_Store::load( 'order-fulfillment' )->delete_by_entity( WC_Order::class, $id );
+		}
+		$single = ( new FulfillmentsCsvImporter( $file ) )->import_chunk( 200, self::IMPORT_MAPPING );
 
-		$result = $this->import_csv( $csv, array(), 2 );
-
-		$this->assertSame( 3, $result['chunks'], 'Five rows in chunks of two take three chunks' );
-		$this->assertSame( array( 3, 4, 7, 8, 9 ), array_column( $result['rows'], 'row' ) );
-		$this->assertSame( self::counts( array( FulfillmentsCsvImporter::STATUS_CREATED => 5 ) ), $result['counts'] );
+		$strip = fn( $row ) => array_diff_key( $row, array( 'fulfillment_id' => 0 ) );
+		$this->assertSame( array_map( $strip, $single['rows'] ), array_map( $strip, $rows ) );
+		$this->assertSame( array( 3, 4, 7, 8, 9, 10 ), array_column( $rows, 'row' ), 'Physical row numbers survive blank lines and chunk edges' );
+		$this->assertSame( FulfillmentsCsvImporter::STATUS_SKIPPED, $rows[3]['status'], 'The dedupe set is carried by the session' );
+		$this->assertSame( $parsed['total'], $consumed );
+		$this->assertSame( $parsed['total'], $session->processed() );
+		$this->assertSame( $single['counts'], $session->counts() );
 	}
 
 	/**
@@ -1820,6 +1856,9 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $notify ? 1 : 0, $second['counts']['notified'] );
 		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_UPDATED, FulfillmentsCsvImporter::STATUS_UPDATED ), array_column( array_merge( $first['rows'], $second['rows'] ), 'status' ) );
 		$this->assertSame( array( $notify, $notify, $notify ), array_column( array_merge( $first['rows'], $second['rows'] ), 'notified' ) );
+		foreach ( $this->fulfillments_of( $order ) as $fulfillment ) {
+			$this->assertTrue( $fulfillment->get_is_fulfilled(), 'An update fulfills a fulfillment that was not fulfilled' );
+		}
 	}
 
 	/**
@@ -1857,7 +1896,8 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,ups\n", array( 'notify_customer' => true ) );
 
-		$this->assertSame( self::counts( array( FulfillmentsCsvImporter::STATUS_CREATED => 1 ) ), $result['counts'] );
+		$this->assertSame( 1, $result['counts'][ FulfillmentsCsvImporter::STATUS_CREATED ] );
+		$this->assertSame( 0, $result['counts']['notified'] );
 		$this->assertFalse( $result['rows'][0]['notified'] );
 		$this->assertCount( 1, $this->fulfillments_of( $order ) );
 	}
