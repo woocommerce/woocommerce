@@ -33,6 +33,9 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewReply;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewUpdate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneMethodCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneMethodUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolRun;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolsQuery;
@@ -87,6 +90,9 @@ class AbilitiesLoader {
 		ShippingZonesQuery::class,
 		SystemStatusToolsQuery::class,
 		SystemStatusToolRun::class,
+		ShippingZoneCreate::class,
+		ShippingZoneMethodCreate::class,
+		ShippingZoneMethodUpdate::class,
 		TaxRatesQuery::class,
 		CustomersQuery::class,
 	);
