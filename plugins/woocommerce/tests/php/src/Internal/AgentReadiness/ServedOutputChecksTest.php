@@ -256,16 +256,21 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox llms.txt names its source: WooCommerce's guidance first, even in a file on disk, then a file in the site root, then another provider.
+	 * @testdox llms.txt names its source from the response header, a file in the site root, or another provider.
 	 */
 	public function test_llms_txt_source_when_served(): void {
 		$section                = "## Agentic capabilities\n\n- [WooCommerce Store API](" . home_url( '/wp-json/wc/store/v1' ) . ')';
 		$responses              = $this->good_store();
-		$responses['/llms.txt'] = array( 200, "# Shop\n\n" . $section . "\n" );
+		$responses['/llms.txt'] = array( 200, "# Shop\n\nA customized guide.\n", array( 'X-WooCommerce-LLMs-Txt' => '1' ) );
 		$this->serve( $responses );
 
 		$this->assertSame( 'woocommerce', self::llms_present( self::with_llms_status( 'unknown', $section . "\n" ) )['source'] );
-		$this->assertSame( 'woocommerce', self::llms_present( self::with_llms_status( 'physical_file', $section ) )['source'], 'A file WooCommerce wrote is still WooCommerce\'s' );
+		$this->assertSame( 'woocommerce', self::llms_present( self::with_llms_status( 'physical_file', $section ) )['source'], 'The served response takes precedence over a local file' );
+
+		$responses['/llms.txt'] = array( 200, "# Shop\n\n" . $section . "\n" );
+		$this->serve( $responses );
+		$this->assertSame( 'other', self::llms_present( self::with_llms_status( 'unknown', $section ) )['source'], 'Copied guidance does not identify the provider' );
+		$this->assertSame( 'file', self::llms_present( self::with_llms_status( 'physical_file', $section ) )['source'] );
 
 		$responses['/llms.txt'] = array( 200, "# Shop\n\n- [About](" . home_url( '/about/' ) . ")\n" );
 		$this->serve( $responses );
@@ -273,6 +278,35 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'other', self::llms_present( self::with_llms_status( 'unknown', $section ) )['source'] );
 		$this->assertSame( 'other', self::llms_present( self::with_llms_status( 'disabled' ) )['source'], 'Served while WooCommerce\'s is off' );
 		$this->assertSame( '', self::llms_present( self::with_llms_status( null ) )['source'], 'Without the fallback, no source' );
+
+		$subdirectory = static fn( string $url ): string => (string) preg_replace( '#^(https?://[^/]+)#', '$1/shop', $url );
+		add_filter( 'home_url', $subdirectory );
+		remove_all_filters( 'pre_http_request' );
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args, $url ) {
+				unset( $pre, $args );
+				$is_llms = '/llms.txt' === wp_parse_url( $url, PHP_URL_PATH );
+				return array(
+					'headers'  => new \WpOrg\Requests\Utility\CaseInsensitiveDictionary( $is_llms ? array( 'X-WooCommerce-LLMs-Txt' => '1' ) : array() ),
+					'body'     => $is_llms ? "# Shop\n" : self::page(),
+					'response' => array(
+						'code'    => 200,
+						'message' => '',
+					),
+					'cookies'  => array(),
+				);
+			},
+			10,
+			3
+		);
+		try {
+			$result = self::llms_present( self::with_llms_status( 'unknown', $section ) );
+			$this->assertTrue( $result['ok'] );
+			$this->assertSame( '', $result['source'], 'A host-root response does not identify the subdirectory store\'s provider' );
+		} finally {
+			remove_filter( 'home_url', $subdirectory );
+		}
 	}
 
 	/**
