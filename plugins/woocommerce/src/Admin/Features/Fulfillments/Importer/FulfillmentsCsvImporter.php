@@ -867,8 +867,8 @@ class FulfillmentsCsvImporter {
 	 * Parse an items cell into fulfillment items.
 	 *
 	 * Entries are separated by "|" or ";" and are either "<order item ID>:<qty>" or
-	 * "sku:<SKU>:<qty>". Quantities of a repeated item are added up before they are
-	 * checked against the ordered quantity.
+	 * "sku:<SKU>:<qty>"; empty entries are skipped. Quantities of a repeated item are
+	 * added up before they are checked against the ordered quantity.
 	 *
 	 * @param string   $cell  Items cell, not empty.
 	 * @param WC_Order $order Order of the row.
@@ -878,11 +878,18 @@ class FulfillmentsCsvImporter {
 		$line_items = $order->get_items( 'line_item' );
 		$by_sku     = null;
 		$totals     = array();
-		$entries    = preg_split( '/[|;]/', $cell, -1, PREG_SPLIT_NO_EMPTY );
-
-		foreach ( false === $entries ? array() : $entries as $entry ) {
-			$parts = array_map( 'trim', explode( ':', $entry ) );
-			if ( 3 === count( $parts ) && 'sku' === strtolower( $parts[0] ) ) {
+		foreach ( explode( '|', str_replace( ';', '|', $cell ) ) as $entry ) {
+			$entry = trim( $entry );
+			if ( '' === $entry ) {
+				continue;
+			}
+			$parts  = array_map( 'trim', explode( ':', $entry ) );
+			$is_sku = 'sku' === strtolower( $parts[0] );
+			if ( count( $parts ) !== ( $is_sku ? 3 : 2 ) ) {
+				/* translators: %s: one entry of the items cell. */
+				return sprintf( __( 'Invalid items entry: %s.', 'woocommerce' ), $entry );
+			}
+			if ( $is_sku ) {
 				// Built on first use, since it loads the product of every line item.
 				$by_sku = $by_sku ?? $this->index_items_by_sku( $line_items );
 				$item   = $by_sku[ strtolower( $parts[1] ) ] ?? null;
@@ -890,15 +897,12 @@ class FulfillmentsCsvImporter {
 					/* translators: %s: SKU from the CSV. */
 					return sprintf( __( 'SKU %s was not found on the order.', 'woocommerce' ), $parts[1] );
 				}
-			} elseif ( 2 === count( $parts ) ) {
+			} else {
 				$item = ctype_digit( $parts[0] ) ? ( $line_items[ (int) $parts[0] ] ?? null ) : null;
 				if ( null === $item ) {
 					/* translators: %s: order item ID from the CSV. */
 					return sprintf( __( 'Item ID %s is not part of this order.', 'woocommerce' ), $parts[0] );
 				}
-			} else {
-				/* translators: %s: one entry of the items cell. */
-				return sprintf( __( 'Invalid items entry: %s.', 'woocommerce' ), trim( $entry ) );
 			}
 
 			$qty = (string) end( $parts );

@@ -1442,19 +1442,19 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The items cell takes item IDs and SKUs and adds up the quantities of a repeated item.
+	 * @testdox The items cell takes item IDs and SKUs, skips empty entries and adds up a repeated item up to the ordered quantity.
 	 */
 	public function test_items_cell_selects_items_by_id_and_sku(): void {
 		list( $order, $item_a, $item_b ) = $this->make_two_item_order();
 
-		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$order->get_id()},TRK-1,ups,,{$item_a}:1|SKU:Sku-B:1; {$item_a} : 2\n" );
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$order->get_id()},TRK-1,ups,,\"{$item_a}:1| |SKU:Sku-B:1; {$item_a} : 3\"\n" );
 
 		$this->assertSame( FulfillmentsCsvImporter::STATUS_CREATED, $result['rows'][0]['status'] );
 		$this->assertSame(
 			array(
 				array(
 					'item_id' => $item_a,
-					'qty'     => 3,
+					'qty'     => 4,
 				),
 				array(
 					'item_id' => $item_b,
@@ -1476,6 +1476,9 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	 *           ["{a}", "Invalid items entry: {a}."]
 	 *           ["{a}abc:1", "Item ID {a}abc is not part of this order."]
 	 *           ["sku:NOPE:1", "SKU NOPE was not found on the order."]
+	 *           ["sku:SKU-B", "Invalid items entry: sku:SKU-B."]
+	 *           ["{a}:1:2", "Invalid items entry: {a}:1:2."]
+	 *           ["0", "Invalid items entry: 0."]
 	 *           ["sku::1", "SKU  was not found on the order."]
 	 *           ["|;", "The items cell has no item entries."]
 	 *
