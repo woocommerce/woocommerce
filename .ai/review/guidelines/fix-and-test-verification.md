@@ -11,6 +11,6 @@
 
 - Tests pass on impossible input, would still pass with the fix reverted, or depend on the clock or random data.
 
-**How to confirm:** Trace the triggering input from the PR description to user-visible output. Revert the fix in your head and ask whether each new test still passes. Check that the state each assertion reads survives until the assertion runs: a later query clears `$wpdb->last_error`, for example. Check the test reaches the same branch production does.
+**How to confirm:** Trace the triggering input from the PR description to user-visible output. Revert the fix in your head and ask whether each new test still passes. Check the test reaches the same branch production does.
 
 **Don't flag when:** Refactor-only PRs with no claimed behavior change. Test-only PRs that cover existing behavior and do fail on mutation.
