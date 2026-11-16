@@ -63,6 +63,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 * page trusts a pending order's stock to be held and checks nothing itself.
 	 * A cart with nothing to pay is refused: these routes complete no order, and the payment page takes no such order.
 	 * A checkout that is not ready yet is returned as it is, with messages naming what is missing.
+	 * So is one already handed off and unchanged since, with a warning: its order is not written to again.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -82,14 +83,19 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		$order       = $this->get_draft_order();
 		unset( $state['status'], $state['continue_url'] );
 
-		// The cart can change behind the checkout, through the Store API or a price edit, and a
-		// new order is then made for it: the one already handed off must not stay payable too.
-		if ( ! empty( $state['order_id'] ) && ( ! $order || $order->get_id() !== (int) $state['order_id'] ) ) {
+		// Taken before the hooks below run, so a cart one of them changes no longer matches the order.
+		$fingerprint = $this->hand_off_fingerprint();
+
+		// The cart or its addresses can change behind the checkout, through the Store API or a price edit, and
+		// a new order is then made for it: the one already handed off must not stay payable too.
+		if ( ! empty( $state['order_id'] ) && ( ! $order || $order->get_id() !== (int) $state['order_id'] || ( $state['fingerprint'] ?? '' ) !== $fingerprint ) ) {
 			$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session cart changed after payment was handed off.', 'woocommerce' ) );
 
 			if ( ! empty( $state['order_id'] ) ) {
 				return $this->refuse_kept_order();
 			}
+
+			$order = $this->get_draft_order();
 		}
 
 		if ( CheckoutMapper::STATUS_READY_FOR_COMPLETE !== ( new CheckoutMapper() )->build_checkout( $cart, $checkout_id, $state )['status'] ) {
@@ -107,6 +113,11 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			return $this->ucp_error( 'payment_not_required', __( 'This checkout has nothing to pay, so it cannot be handed off for payment. It must be made on the store itself.', 'woocommerce' ), 'unrecoverable', 200 );
 		}
 
+		// Handed off already and unchanged. The buyer may be paying this order now, so it is not written to again.
+		if ( ! empty( $state['order_id'] ) ) {
+			return $this->already_handed_off_response( $checkout_id, $cart );
+		}
+
 		if ( $order ) {
 			$this->order_controller->update_order_from_cart( $order );
 		} else {
@@ -120,28 +131,21 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		// Remembered before the hold so a refused hold leaves a draft the next attempt reuses.
 		$this->set_draft_order_id( $order->get_id() );
 
-		// Taken before the hooks below run, so a cart one of them changes no longer matches the order.
-		$fingerprint = $this->hand_off_fingerprint();
-
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
 		do_action( 'woocommerce_store_api_checkout_update_order_meta', $order );
 
 		try {
 			$this->order_controller->validate_order_before_payment( $order );
 		} catch ( RouteException $e ) {
-			// An order the Store API checkout would refuse must not be, or stay, payable.
-			$this->cancel_handed_off_order( $state, __( 'UCP checkout session no longer passes checkout validation.', 'woocommerce' ) );
-
+			// The order stays a draft, which the payment page refuses.
 			return $this->ucp_error( 'VALIDATION_ERROR', wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200 );
 		}
 
 		try {
 			wc_reserve_stock_for_order( $order );
 		} catch ( ReserveStockException $e ) {
-			// The hold failed on stock another checkout took since the cart was last checked. A draft
-			// stays one, which the payment page refuses; an order handed off earlier is closed.
-			$this->cancel_handed_off_order( $state, __( 'UCP checkout session stock could no longer be held.', 'woocommerce' ) );
-
+			// The hold failed on stock another checkout took since the cart was last checked. The order
+			// stays a draft, which the payment page refuses.
 			return $this->ucp_error( Utils::cart_error_code( (string) $e->getErrorCode() ), wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200, '$.line_items' );
 		}
 
@@ -164,5 +168,31 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		$this->save_checkout_state( $state );
 
 		return $this->checkout_response( $checkout_id, $this->checkout_state() ?? $state, 200, $cart );
+	}
+
+	/**
+	 * Return a checkout whose payment was already handed off, as it stands, with a warning that nothing was done.
+	 *
+	 * @param string               $checkout_id Checkout identifier.
+	 * @param array<string, mixed> $cart Cart response.
+	 * @return \WP_REST_Response
+	 */
+	private function already_handed_off_response( string $checkout_id, array $cart ): \WP_REST_Response {
+		// Read again, so an order paid while this request ran is reported as it now stands.
+		$response = $this->checkout_response( $checkout_id, (array) $this->checkout_state(), 200, $cart );
+		$data     = (array) $response->get_data();
+
+		if ( ! empty( $data['continue_url'] ) ) {
+			$data['messages'][] = array(
+				'type'         => 'warning',
+				'code'         => 'ALREADY_HANDED_OFF',
+				'content'      => __( 'Payment for this checkout session was already handed off, so it was returned unchanged. Update the checkout session to change it, or send the buyer to the payment page.', 'woocommerce' ),
+				'path'         => '$.status',
+				'content_type' => 'plain',
+			);
+			$response->set_data( $data );
+		}
+
+		return $response;
 	}
 }

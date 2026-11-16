@@ -386,6 +386,25 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Completing again returns the hand-off unchanged with a warning, and does not write to the order the buyer may be paying.
+	 */
+	public function test_complete_again_returns_the_hand_off_unchanged(): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$first   = $this->request( 'POST', $path . '/complete' )->get_data();
+		$order   = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$order->update_status( OrderStatus::FAILED );
+		$processed = did_action( 'woocommerce_store_api_checkout_order_processed' );
+
+		$second = $this->request( 'POST', $path . '/complete' )->get_data();
+
+		$this->assertSame( $first['continue_url'], $second['continue_url'] );
+		$this->assertContains( 'ALREADY_HANDED_OFF', array_column( $second['messages'], 'code' ) );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::FAILED ), 'A failed order the buyer may be retrying is not reset.' );
+		$this->assertSame( $processed, did_action( 'woocommerce_store_api_checkout_order_processed' ) );
+	}
+
+	/**
 	 * @testdox Completing a changed cart makes no second order when the first is paid while the request is under way.
 	 */
 	public function test_complete_stops_for_an_order_paid_mid_request(): void {
@@ -864,11 +883,8 @@ class UcpCheckout extends ControllerTestCase {
 
 	/**
 	 * @testdox Completing again cancels the order already handed off when its stock can no longer be held.
-	 * @dataProvider provider_when_the_rival_takes_the_stock
-	 *
-	 * @param bool $mid_request Whether the rival takes the unit during the second complete rather than before it.
 	 */
-	public function test_complete_again_cancels_an_order_it_cannot_hold_stock_for( bool $mid_request ): void {
+	public function test_complete_again_cancels_an_order_it_cannot_hold_stock_for(): void {
 		$product = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -890,32 +906,12 @@ class UcpCheckout extends ControllerTestCase {
 		$rival = wc_create_order();
 		$rival->add_product( $product, 1 );
 		$rival->save();
-		$hold_rival = static function () use ( $rival, &$hold_rival ) {
-			remove_action( 'woocommerce_order_before_calculate_totals', $hold_rival );
-			wc_reserve_stock_for_order( $rival );
-		};
-		if ( $mid_request ) {
-			add_action( 'woocommerce_order_before_calculate_totals', $hold_rival );
-		} else {
-			$hold_rival();
-		}
+		wc_reserve_stock_for_order( $rival );
 		$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
 
 		$this->assertContains( 'out_of_stock', array_column( $response->get_data()['messages'], 'code' ) );
 		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ) );
 		$this->assertArrayNotHasKey( 'continue_url', $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data() );
-	}
-
-	/**
-	 * When the rival order takes the stock, relative to the second complete.
-	 *
-	 * @return array<string, array{bool}>
-	 */
-	public function provider_when_the_rival_takes_the_stock(): array {
-		return array(
-			'before the request' => array( false ),
-			'during the request' => array( true ),
-		);
 	}
 
 	/**
