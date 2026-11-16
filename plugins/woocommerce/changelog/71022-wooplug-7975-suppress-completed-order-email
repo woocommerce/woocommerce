@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add a filter that lets a store skip the Completed order email for orders that are fully fulfilled.
