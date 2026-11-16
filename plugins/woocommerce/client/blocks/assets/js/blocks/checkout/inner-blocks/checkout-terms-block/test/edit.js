@@ -1,15 +1,32 @@
 /**
  * External dependencies
  */
-import { render, queryByText } from '@testing-library/react';
+import { render, queryByText, screen, fireEvent } from '@testing-library/react';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { Edit } from '../edit';
 
+const mockReplaceInnerBlocks = jest.fn();
+const mockSelectBlock = jest.fn();
+let mockCheckoutBlocks = [];
+
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
+
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: () => ( {
+		replaceInnerBlocks: mockReplaceInnerBlocks,
+		selectBlock: mockSelectBlock,
+	} ),
+	useRegistry: () => ( {
+		select: () => ( {
+			getBlockRootClientId: () => 'fields-1',
+			getBlocks: () => mockCheckoutBlocks,
+		} ),
+	} ),
 	useSelect: jest.fn().mockImplementation( ( fn ) => {
 		const select = () => {
 			return {
@@ -20,6 +37,17 @@ jest.mock( '@wordpress/data', () => ( {
 					clientId: null,
 				} ),
 				getFormatTypes: () => [],
+				getBlockRootClientId: () => 'fields-1',
+				getBlockOrder: () =>
+					mockCheckoutBlocks.map( ( block ) => block.clientId ),
+				getBlockName: ( clientId ) =>
+					mockCheckoutBlocks.find(
+						( block ) => block.clientId === clientId
+					)?.name,
+				getBlockAttributes: ( clientId ) =>
+					mockCheckoutBlocks.find(
+						( block ) => block.clientId === clientId
+					)?.attributes,
 			};
 		};
 
@@ -48,6 +76,11 @@ jest.mock( '@woocommerce/block-settings', () => ( {
 const blockSettingsMock = jest.requireMock( '@woocommerce/block-settings' );
 
 describe( 'Edit', () => {
+	beforeEach( () => {
+		jest.clearAllMocks();
+		mockCheckoutBlocks = [];
+	} );
+
 	it( 'Renders a checkbox if the checkbox attribute is true', async () => {
 		const { container } = render(
 			<Edit
@@ -134,4 +167,79 @@ describe( 'Edit', () => {
 			)
 		).not.toBeInTheDocument();
 	} );
+
+	it.each( [ true, false ] )(
+		'only moves terms after clicking the switch button (checkbox: %s)',
+		( checkbox ) => {
+			mockCheckoutBlocks = [
+				{
+					clientId: 'terms-1',
+					name: 'woocommerce/checkout-terms-block',
+					attributes: {
+						checkbox,
+						text: 'Custom terms',
+						showSeparator: true,
+					},
+				},
+				{
+					clientId: 'payment-1',
+					name: 'woocommerce/checkout-payment-block',
+					attributes: {},
+				},
+				{
+					clientId: 'actions-1',
+					name: 'woocommerce/checkout-actions-block',
+					attributes: { showReturnToCart: true, cartPageId: 123 },
+				},
+			];
+			const { container } = render(
+				<Edit
+					clientId="terms-1"
+					attributes={ mockCheckoutBlocks[ 0 ].attributes }
+					setAttributes={ () => void 0 }
+				/>
+			);
+			expect( mockReplaceInnerBlocks ).not.toHaveBeenCalled();
+			expect( mockSelectBlock ).not.toHaveBeenCalled();
+
+			expect(
+				queryByText(
+					container,
+					'Show Terms and Conditions next to the Place order button. Your text and checkbox setting move to the Actions block.'
+				)
+			).toBeInTheDocument();
+			expect(
+				queryByText( container, 'Switch to the Actions block' )
+			).toBeInTheDocument();
+
+			fireEvent.click(
+				screen.getByRole( 'button', {
+					name: 'Switch to the Actions block',
+				} )
+			);
+
+			expect( mockReplaceInnerBlocks ).toHaveBeenCalledTimes( 1 );
+			expect( mockReplaceInnerBlocks ).toHaveBeenCalledWith(
+				'fields-1',
+				[
+					mockCheckoutBlocks[ 1 ],
+					{
+						...mockCheckoutBlocks[ 2 ],
+						attributes: {
+							...mockCheckoutBlocks[ 2 ].attributes,
+							showTerms: true,
+							termsCheckbox: checkbox,
+							termsText: 'Custom terms',
+						},
+					},
+				],
+				false
+			);
+			expect( mockSelectBlock ).toHaveBeenCalledWith( 'actions-1' );
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'blocks_checkout_terms_migration',
+				{ transform_to: 'actions_block' }
+			);
+		}
+	);
 } );

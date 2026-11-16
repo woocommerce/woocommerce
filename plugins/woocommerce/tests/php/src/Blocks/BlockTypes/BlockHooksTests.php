@@ -6,30 +6,18 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockHooksTestBlock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockHooksLowerVersionTestBlock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\BlockHooksNoVersionTestBlock;
-use WP_UnitTestCase;
+use WC_Unit_Test_Case;
 
 /**
  * Tests Block Hooks logic.
  */
-class BlockHooksTests extends WP_UnitTestCase {
+class BlockHooksTests extends WC_Unit_Test_Case {
 	/**
 	 * Option name for storing the block hooks version.
 	 *
 	 * @var string
 	 */
 	protected static $option_name = 'woocommerce_hooked_blocks_version';
-
-	/**
-	 * Clean up the mock block registration.
-	 */
-	public function tearDown(): void {
-		$registry = \WP_Block_Type_Registry::get_instance();
-		if ( $registry->is_registered( 'woocommerce/test-block' ) ) {
-			unregister_block_type( 'woocommerce/test-block' );
-		}
-
-		parent::tearDown();
-	}
 
 	/**
 	 * @testdox Should hook the mock block when the configured version meets the placement requirement.

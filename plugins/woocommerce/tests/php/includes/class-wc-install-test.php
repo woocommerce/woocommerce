@@ -930,6 +930,32 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not log a database error or take over a fresh installation lock held by another request.
+	 */
+	public function test_install_lock_contention_does_not_log_database_error(): void {
+		global $wpdb, $EZSQL_ERROR;
+
+		$lock_value = (string) time();
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_installing', %s, 'no')",
+				$lock_value
+			)
+		);
+
+		$errors_before = count( (array) $EZSQL_ERROR );
+
+		WC_Install::install();
+
+		$this->assertCount( $errors_before, (array) $EZSQL_ERROR, 'Lock contention must not record a database error.' );
+		$this->assertSame(
+			$lock_value,
+			$wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name = 'wc_installing'" ),
+			'A fresh lock held elsewhere must not be taken over or released.'
+		);
+	}
+
+	/**
 	 * Rebuilds the patterns through the real registration, so the test exercises the content
 	 * BlockTypesController ships rather than a copy of it that could drift. Registering a pattern that
 	 * is already live replaces it, so the siblings this also rebuilds just get their own content back.

@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-
-import type { Reducer } from 'redux';
-/**
  * Internal dependencies
  */
 import TYPES from './action-types';
@@ -15,10 +10,10 @@ const initialState: ReviewsState = {
 	errors: {},
 	data: {},
 };
-const reducer: Reducer< ReviewsState, Action > = (
-	state = initialState,
-	action
-) => {
+const reducer = (
+	state: ReviewsState = initialState,
+	action: Action
+): ReviewsState => {
 	switch ( action.type ) {
 		case TYPES.UPDATE_REVIEWS:
 			const ids: Array< number > = [];

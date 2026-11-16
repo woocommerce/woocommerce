@@ -1,10 +1,4 @@
 /**
- * External dependencies
- */
-
-import type { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import TYPES from './action-types';
@@ -12,15 +6,15 @@ import { Action } from './actions';
 import { hashExportArgs } from './utils';
 import { ExportState } from './types';
 
-const reducer: Reducer< ExportState, Action > = (
-	state = {
+const reducer = (
+	state: ExportState = {
 		errors: {},
 		requesting: {},
 		exportMeta: {},
 		exportIds: {},
 	},
-	action
-) => {
+	action: Action
+): ExportState => {
 	switch ( action.type ) {
 		case TYPES.SET_IS_REQUESTING:
 			return {

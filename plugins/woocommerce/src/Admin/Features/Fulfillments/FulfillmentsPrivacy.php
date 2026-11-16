@@ -263,8 +263,12 @@ class FulfillmentsPrivacy {
 			return;
 		}
 
+		$default_keys = array( '_tracking_number', '_tracking_url' );
+
 		/**
 		 * Filters the fulfillment meta keys redacted during personal-data erasure.
+		 *
+		 * A non-array return is ignored and the default keys are cleared instead. An empty array clears nothing.
 		 *
 		 * @since 11.4.0
 		 *
@@ -273,12 +277,16 @@ class FulfillmentsPrivacy {
 		 */
 		$meta_keys = apply_filters(
 			'woocommerce_privacy_remove_fulfillment_personal_data_meta',
-			array( '_tracking_number', '_tracking_url' ),
+			$default_keys,
 			$order
 		);
 
 		if ( ! is_array( $meta_keys ) ) {
-			return;
+			wc_get_logger()->warning(
+				'The woocommerce_privacy_remove_fulfillment_personal_data_meta filter returned a non-array value for order ' . $order->get_id() . ', so the default keys were used.',
+				array( 'source' => 'fulfillments' )
+			);
+			$meta_keys = $default_keys;
 		}
 
 		$meta_keys = array_values(

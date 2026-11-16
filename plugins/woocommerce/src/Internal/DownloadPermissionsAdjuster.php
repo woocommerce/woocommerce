@@ -44,6 +44,11 @@ class DownloadPermissionsAdjuster {
 			return;
 		}
 
+		// No parent files means there is nothing to copy onto variations, so skip loading the children.
+		if ( ! $product->get_downloads() ) {
+			return;
+		}
+
 		_prime_post_caches( $children_ids );
 
 		$are_any_children_downloadable = false;

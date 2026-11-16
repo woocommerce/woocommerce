@@ -10,23 +10,6 @@ use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 class WooCommerce_Test extends \WC_Unit_Test_Case {
 
 	/**
-	 * The default URI.
-	 *
-	 * @var string
-	 */
-	private static $default_uri;
-
-	/**
-	 * Store the default URI.
-	 *
-	 */
-	public static function setUpBeforeClass(): void {
-		parent::setUpBeforeClass();
-		self::$default_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-	}
-
-
-	/**
 	 * Setup test data. Called before every test.
 	 */
 	public function setUp(): void {
@@ -38,15 +21,6 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->user );
-	}
-
-
-	/**
-	 * Restore the default URI.
-	 */
-	public static function tearDownAfterClass(): void {
-		parent::tearDownAfterClass();
-		$_SERVER['REQUEST_URI'] = self::$default_uri;
 	}
 
 	/**

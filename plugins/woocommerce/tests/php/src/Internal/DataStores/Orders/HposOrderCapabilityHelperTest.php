@@ -57,10 +57,8 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 		}
 		$this->custom_roles = array();
 
-		remove_filter( 'wc_order_statuses', array( $this, 'add_private_test_order_status' ) );
 		$this->unregister_private_test_order_status();
 		$this->clean_up_cot_setup();
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		parent::tearDown();
 	}
 

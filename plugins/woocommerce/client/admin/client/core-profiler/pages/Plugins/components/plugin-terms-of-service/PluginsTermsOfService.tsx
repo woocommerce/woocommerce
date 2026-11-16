@@ -50,7 +50,7 @@ export const PluginsTermsOfService = ( {
 					span: <span />,
 					link: (
 						<Link
-							href="https://wordpress.com/tos/"
+							href="https://automattic.com/tos/"
 							target="_blank"
 							type="external"
 						/>

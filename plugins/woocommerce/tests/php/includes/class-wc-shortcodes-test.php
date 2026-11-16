@@ -478,6 +478,63 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An invalid add-to-cart shortcode preserves the surrounding product on a non-product page.
+	 * @testWith ["missing_id"]
+	 *           ["non_product_id"]
+	 *           ["missing_sku"]
+	 * @param string $reference The invalid product reference to use.
+	 */
+	public function test_product_add_to_cart_invalid_reference_preserves_product( string $reference ): void {
+		$previous_product = $GLOBALS['product'] ?? null;
+
+		try {
+			$post_id = self::factory()->post->create();
+			$this->go_to( get_permalink( $post_id ) );
+
+			$outer_product = WC_Helper_Product::create_simple_product();
+			$outer_product = wc_setup_product_data( $outer_product->get_id() );
+			$references    = array(
+				'missing_id'     => array( 'id' => PHP_INT_MAX ),
+				'non_product_id' => array( 'id' => $post_id ),
+				'missing_sku'    => array( 'sku' => 'nonexistent-shortcode-product' ),
+			);
+
+			$this->assertSame( '', WC_Shortcodes::product_add_to_cart( $references[ $reference ] ) );
+			$this->assertSame( $outer_product, $GLOBALS['product'] ?? null );
+		} finally {
+			$GLOBALS['product'] = $previous_product;
+		}
+	}
+
+	/**
+	 * @testdox The add-to-cart shortcode only renders viewable products for visitors.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $published Whether the product is published.
+	 */
+	public function test_product_add_to_cart_respects_visibility( bool $published ): void {
+		$previous_product = $GLOBALS['product'] ?? null;
+
+		try {
+			$this->go_to( get_permalink( self::factory()->post->create() ) );
+			wp_set_current_user( 0 );
+			$shortcode_product = WC_Helper_Product::create_simple_product();
+			$shortcode_product->set_status( $published ? ProductStatus::PUBLISH : ProductStatus::DRAFT );
+			$shortcode_product->save();
+
+			$output = WC_Shortcodes::product_add_to_cart( array( 'id' => $shortcode_product->get_id() ) );
+
+			if ( $published ) {
+				$this->assertStringContainsString( 'add_to_cart_button', $output );
+			} else {
+				$this->assertSame( '', $output );
+			}
+		} finally {
+			$GLOBALS['product'] = $previous_product;
+		}
+	}
+
+	/**
 	 * @testdox The shop_messages shortcode should render queued notices inside the shared notices wrapper.
 	 */
 	public function test_shop_messages_shortcode_uses_notices_wrapper(): void {

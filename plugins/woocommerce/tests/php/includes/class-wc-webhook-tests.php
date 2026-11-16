@@ -872,6 +872,9 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$webhook->set_failure_count( 0 );
 		$webhook->save();
 
+		// Saving an active webhook with a pending delivery pings its URL; answer locally.
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
+
 		$response = array(
 			'response' => array(
 				'code'    => 500,
@@ -927,6 +930,9 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$webhook->set_user_id( 1 );
 		$webhook->set_failure_count( 0 );
 		$webhook->save();
+
+		// Saving an active webhook with a pending delivery pings its URL; answer locally.
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
 
 		$webhook->stage_delivery_result( 500 );
 		$this->assertSame( 1, $webhook->get_failure_count() );
@@ -989,6 +995,8 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	public function test_save_skips_the_disabled_action_when_the_webhook_is_active_again() {
 		$webhook = $this->create_failing_webhook();
 		$fired   = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
 
 		$webhook->stage_delivery_result( 500 );
 		$webhook->set_status( 'active' );

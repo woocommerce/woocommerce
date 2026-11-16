@@ -32,14 +32,6 @@ class SessionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		unset( $_SERVER['HTTP_CART_TOKEN'] );
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox SessionHandler extends WC_Session.
 	 */
 	public function test_extends_wc_session(): void {

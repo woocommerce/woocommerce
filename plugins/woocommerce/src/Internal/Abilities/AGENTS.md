@@ -1,6 +1,6 @@
 # WooCommerce abilities
 
-The Core abilities live in `Domain/`. `AbilitiesLoader` registers them with `Automattic\WooCommerce\Abilities\Ability` or a subclass of `ActionableAbility`. Two PHPStan rules keep it that way.
+The Core abilities live in `Domain/`. `AbilitiesLoader` registers them with `Ability` or a subclass of `ActionableAbility`. Two PHPStan rules keep it that way.
 
 ## Trust the input schema
 
@@ -21,3 +21,6 @@ Keep:
 - Calls that normalize a valid value, such as `sanitize_title()` on a slug or `wc_format_decimal()` on a price.
 - A cast that a WooCommerce function needs, such as `(int)` for `add_order_note()`.
 
+## Omit unavailable output fields
+
+Core ability output types are never nullable. Omit an unavailable field instead of returning `null`. Declare date fields as `string` with the `date-time` format.

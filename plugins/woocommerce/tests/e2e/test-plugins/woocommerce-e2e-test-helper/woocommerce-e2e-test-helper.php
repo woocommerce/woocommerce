@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WooCommerce E2E Test Helper
- * Description: Always-on utilities for the WooCommerce E2E suite: cookie-driven filter overrides, synchronous Action Scheduler processing, a REST API for feature flags, options and theme switching, and fixed overrides that remove production timing delays.
+ * Description: Always-on utilities for the WooCommerce E2E suite: cookie-driven filter overrides, synchronous Action Scheduler processing, a REST API for feature flags, options and theme switching, fixed overrides that remove production timing delays, and a mail override for Back in Stock Notifications batches.
  * Version: 1.0.0
  * Requires PHP: 7.4
  * Author: WooCommerce
@@ -329,6 +329,38 @@ add_filter(
 	'__return_zero',
 	PHP_INT_MAX
 );
+
+/*
+ * -----------------------------------------------------------------------------
+ * Mail overrides
+ * -----------------------------------------------------------------------------
+ */
+
+/*
+ * Report Back in Stock Notifications emails as sent while a notifications batch runs.
+ *
+ * wp-env has no mail transport, so `wp_mail()` fails after WP Mail Logging logs the message,
+ * and a failed send cancels the sign-up. Hooked to the batch job so it applies whichever runner
+ * processes it. Not global, because other specs assert the failed-send path.
+ */
+
+/**
+ * Remove the `pre_wp_mail` short-circuit added for the batch.
+ */
+function woocommerce_e2e_remove_mail_short_circuit(): void {
+	remove_filter( 'pre_wp_mail', '__return_true' );
+}
+
+add_action(
+	'wc_send_stock_notifications_batch',
+	function () {
+		add_filter( 'pre_wp_mail', '__return_true' );
+	},
+	PHP_INT_MIN
+);
+add_action( 'wc_send_stock_notifications_batch', 'woocommerce_e2e_remove_mail_short_circuit', PHP_INT_MAX );
+// The PHP_INT_MAX remover does not run when the job throws, and the queue runner moves on to the next job.
+add_action( 'action_scheduler_failed_execution', 'woocommerce_e2e_remove_mail_short_circuit' );
 
 /*
  * -----------------------------------------------------------------------------

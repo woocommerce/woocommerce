@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\LlmsTxt;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
 use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils as UcpUtils;
 
@@ -124,6 +125,10 @@ final class LlmsTxt implements RegisterHooksInterface {
 		if ( ! headers_sent() ) {
 			header( 'Content-Type: text/plain; charset=utf-8' );
 			header( 'Cache-Control: no-cache, must-revalidate' );
+			header( 'X-WooCommerce-LLMs-Txt: 1' );
+			if ( ! get_option( 'blog_public' ) ) {
+				header( 'X-Robots-Tag: noindex, nofollow', false );
+			}
 		}
 		if ( 'GET' === $method ) {
 			echo $this->get_content(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text Markdown, not HTML.
@@ -137,6 +142,7 @@ final class LlmsTxt implements RegisterHooksInterface {
 	private function should_render(): bool {
 		return $this->is_llms_request()
 			&& $this->is_enabled()
+			&& ! wc_get_container()->get( ComingSoonHelper::class )->is_store_coming_soon()
 			&& $this->is_unclaimed_request()
 			&& true !== $this->has_physical_file()
 			&& ! $this->has_route();
@@ -220,15 +226,13 @@ final class LlmsTxt implements RegisterHooksInterface {
 	private function get_content(): string {
 		$name    = $this->plain_text( get_bloginfo( 'name' ) );
 		$tagline = $this->plain_text( get_bloginfo( 'description' ) );
+		$content = '# ' . ( '' !== $name ? $name : home_url() ) . "\n\n";
 
-		return wc_get_template_html(
-			'llms-txt.php',
-			array(
-				'site_name' => '' !== $name ? $name : home_url(),
-				'tagline'   => $tagline,
-				'guidance'  => $this->get_guidance(),
-			)
-		);
+		if ( '' !== $tagline ) {
+			$content .= '> ' . $tagline . "\n\n";
+		}
+
+		return $content . $this->get_guidance();
 	}
 
 	/**
@@ -273,18 +277,39 @@ final class LlmsTxt implements RegisterHooksInterface {
 			}
 		}
 
-		$section = wc_get_template_html(
-			'llms-txt/agentic-section.php',
-			array(
-				'store_api_url' => rest_url( 'wc/store/v1' ),
-				'ucp_profile'   => $profile,
-				'ucp_url'       => home_url( '/.well-known/ucp' ),
-				'ucp_version'   => $this->plain_text( $profile['ucp']['version'] ?? '' ),
-				'capabilities'  => $capabilities,
-				'mcp_url'       => isset( $routes['/mcp/mcp-adapter-default-server'] ) ? rest_url( 'mcp/mcp-adapter-default-server' ) : '',
-				'policy_urls'   => $policy_urls,
-			)
-		);
+		$lines                  = array( '## Agentic capabilities', '' );
+		$store_api_capabilities = array();
+		if ( isset( $routes['/wc/store/v1/products'] ) ) {
+			$store_api_capabilities[] = 'browse products';
+		}
+		if ( isset( $routes['/wc/store/v1/cart'] ) ) {
+			$store_api_capabilities[] = 'use the cart';
+		}
+		if ( $store_api_capabilities ) {
+			$lines[] = '- [WooCommerce Store API](' . esc_url_raw( rest_url( 'wc/store/v1' ) ) . '): ' . ucfirst( implode( ' and ', $store_api_capabilities ) ) . '. See the [Store API documentation](https://developer.woocommerce.com/docs/apis/store-api/).';
+		}
+		if ( $profile ) {
+			$version       = $this->plain_text( $profile['ucp']['version'] ?? '' );
+			$checkout_note = isset( $profile['ucp']['capabilities']['dev.ucp.shopping.checkout'] ) ? '' : ' Checkout is completed on the store, not through UCP.';
+			$lines[]       = '- [Universal Commerce Protocol (UCP) profile](' . esc_url_raw( home_url( '/.well-known/ucp' ) ) . '): ' . implode( ', ', $capabilities ) . '. Version ' . $version . '.' . $checkout_note;
+		}
+		if ( isset( $routes['/mcp/mcp-adapter-default-server'] ) ) {
+			$lines[] = '- [Merchant MCP](' . esc_url_raw( rest_url( 'mcp/mcp-adapter-default-server' ) ) . '): For authorized store management; authentication is required.';
+		}
+		if ( $policy_urls ) {
+			$policy_labels = array(
+				'terms'   => 'Terms and conditions',
+				'returns' => 'Refund and returns',
+				'privacy' => 'Privacy policy',
+			);
+			$lines[]       = '';
+			$lines[]       = '## Policies';
+			$lines[]       = '';
+			foreach ( $policy_urls as $key => $url ) {
+				$lines[] = '- [' . $policy_labels[ $key ] . '](' . esc_url_raw( $url ) . ')';
+			}
+		}
+		$section = implode( "\n", $lines ) . "\n";
 		/**
 		 * Filters the Markdown guidance in WooCommerce's llms.txt.
 		 *

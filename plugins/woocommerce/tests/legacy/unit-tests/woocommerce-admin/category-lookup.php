@@ -26,10 +26,11 @@ class WC_Admin_Tests_Category_Lookup extends WP_UnitTestCase {
 	 */
 
 	public function setUp(): void {
+		parent::setUp();
+
 		delete_transient( 'wc_installing' );
 		delete_option( 'wc_installing' );
 
-		parent::setUp();
 		$parent                = wp_insert_term( 'test_parent', 'product_cat' );
 		$parent2               = wp_insert_term( 'test_parent_2', 'product_cat' );
 		$child                 = wp_insert_term(
@@ -43,16 +44,6 @@ class WC_Admin_Tests_Category_Lookup extends WP_UnitTestCase {
 		$this->parent2_term_id = $parent2['term_id'];
 		$this->child_term_id   = $child['term_id'];
 		CategoryLookup::instance()->init();
-	}
-
-	/**
-	 * Tear Down
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		wp_delete_term( $this->parent_term_id, 'product_cat' );
-		wp_delete_term( $this->parent2_term_id, 'product_cat' );
-		wp_delete_term( $this->child_term_id, 'product_cat' );
 	}
 
 	/**

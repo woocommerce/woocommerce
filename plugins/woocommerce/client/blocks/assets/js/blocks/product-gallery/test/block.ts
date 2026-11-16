@@ -71,6 +71,15 @@ const handlers = [
 		return HttpResponse.json( {} );
 	} ),
 
+	http.get( '/wp/v2/settings', () => {
+		return HttpResponse.json( {} );
+	} ),
+
+	// The editor preflights several of its requests, and an unhandled request makes MSW warn.
+	http.options( '*', () => {
+		return HttpResponse.json( {} );
+	} ),
+
 	http.get( '/wc/store/v1/products/:id', () => {
 		return HttpResponse.json( {
 			id: 123,
@@ -250,9 +259,5 @@ describe( 'Product Gallery Block', () => {
 			name: /Block: Thumbnails/i,
 		} );
 		expect( thumbnailsBlock ).toBeInTheDocument();
-
-		// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-		// opt out of without changing the visual output.
-		expect( console ).toHaveWarned();
 	} );
 } );
