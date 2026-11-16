@@ -59,6 +59,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/tax-rates-query',
 		'woocommerce/system-status-tools-query',
 		'woocommerce/system-status-tool-run',
+		'woocommerce/payment-gateway-update',
 	);
 
 	/**
@@ -367,6 +368,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'destructive' => false,
 			),
 			'woocommerce/system-status-tool-run'    => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/payment-gateway-update'    => array(
 				'readonly'    => false,
 				'idempotent'  => true,
 				'destructive' => false,
@@ -1147,6 +1153,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'woocommerce/system-status-tool-run',
 				array( 'id' => 'recount_terms' ),
 			),
+			'payment-gateway-update'   => array(
+				'woocommerce/payment-gateway-update',
+				array(
+					'id'      => 'bacs',
+					'enabled' => true,
+				),
+			),
 		);
 	}
 
@@ -1178,6 +1191,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
 			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),
 			'payment-gateways-query'         => array( 'woocommerce/payment-gateways-query', array() ),
+			'payment-gateway-update'         => array(
+				'woocommerce/payment-gateway-update',
+				array(
+					'id'      => 'bacs',
+					'enabled' => true,
+				),
+			),
 			'customers-query'                => array( 'woocommerce/customers-query', array() ),
 			'shipping-zones-query'           => array( 'woocommerce/shipping-zones-query', array() ),
 			'tax-rates-query'                => array( 'woocommerce/tax-rates-query', array() ),
@@ -5648,7 +5668,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $result );
 		$this->assertCount( 1, $result['gateways'] );
 		$this->assertSame(
-			array( 'id', 'title', 'method_title', 'description', 'enabled' ),
+			array( 'id', 'title', 'method_title', 'description', 'enabled', 'order' ),
 			array_keys( $result['gateways'][0] )
 		);
 		$this->assertTrue( $result['gateways'][0]['enabled'] );
