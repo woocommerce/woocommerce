@@ -56,11 +56,12 @@ This controls false positives. Follow it strictly.
   or regenerates the lookup tables must read the source tables. Removing or inverting a gate is a
   correctness regression (mid-regeneration reads return incomplete rows).
 - **`SELECT MIN(col), MAX(col)`** over a large table scans every matching row, except when the
-  `WHERE` pins every leading column of an index to one constant value (`a = 1 AND b = 'x'`) and the
-  column comes next in that index: the database answers that form from the index ends, so don't flag
-  it. Otherwise, when an index returns rows sorted by the column (it starts with the column, or
-  every earlier column is pinned to one constant value) and few rows at its ends fail the `WHERE`,
-  the fix is a `UNION ALL` of two `ORDER BY col ASC|DESC LIMIT 1` seeks. Anything that leaves an
+  `WHERE` contains only equalities that pin every leading column of an index to one constant value
+  (`a = 1 AND b = 'x'`) and the column comes next in that index: the database answers that form from
+  the index ends, so don't flag it. Otherwise, when an index returns rows sorted by the column (it
+  starts with the column, or every earlier column is pinned to one constant value) and few rows at
+  its ends fail the `WHERE`, the fix is `MIN`/`MAX` over a `UNION ALL` of two
+  `ORDER BY col ASC|DESC LIMIT 1` seeks, which keeps the one-row result. Anything that leaves an
   earlier index column with more than one value breaks that order: a range, `IN (...)`, `OR`, `!=`
   or a comparison with another column. Such an index cannot serve the seek, so don't suggest the
   rewrite on it. An index that stores only a prefix of a column, such as
