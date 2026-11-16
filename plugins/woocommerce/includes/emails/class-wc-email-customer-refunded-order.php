@@ -303,6 +303,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 					'default'   => 'yes',
 				),
 				'subject_full'       => array(
+					'abilities'   => array( 'read' => true ),
 					'title'       => __( 'Full refund subject', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -311,6 +312,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 					'default'     => '',
 				),
 				'subject_partial'    => array(
+					'abilities'   => array( 'read' => true ),
 					'title'       => __( 'Partial refund subject', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -319,6 +321,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 					'default'     => '',
 				),
 				'heading_full'       => array(
+					'abilities'   => array( 'read' => true ),
 					'title'       => __( 'Full refund email heading', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -327,6 +330,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 					'default'     => '',
 				),
 				'heading_partial'    => array(
+					'abilities'   => array( 'read' => true ),
 					'title'       => __( 'Partial refund email heading', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,

@@ -223,6 +223,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 					'default'     => '',
 				),
 				'subject_paid'       => array(
+					'abilities'   => array( 'read' => true ),
 					'title'       => __( 'Subject (paid)', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
@@ -231,6 +232,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 					'default'     => '',
 				),
 				'heading_paid'       => array(
+					'abilities'   => array( 'read' => true ),
 					'title'       => __( 'Email heading (paid)', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,

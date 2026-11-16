@@ -398,6 +398,28 @@ class SettingsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should read the subject and heading variants of refund and paid-invoice emails.
+	 * @testWith ["customer_refunded_order", ["subject_full", "subject_partial", "heading_full", "heading_partial"]]
+	 *           ["customer_pos_refunded_order", ["subject_full", "subject_partial", "heading_full", "heading_partial"]]
+	 *           ["customer_invoice", ["subject_paid", "heading_paid"]]
+	 * @param string $email_id Email ID.
+	 * @param array  $fields Subject and heading field IDs.
+	 */
+	public function test_email_subject_and_heading_variants( string $email_id, array $fields ): void {
+		$values = array_fill_keys( $fields, 'Custom email text' );
+		update_option( 'woocommerce_' . $email_id . '_settings', $values );
+		$result = wp_get_ability( 'woocommerce/settings-query' )->execute(
+			array(
+				'group'   => 'email_' . $email_id,
+				'include' => $fields,
+			)
+		);
+		$this->assertIsArray( $result );
+		$this->assertSame( count( $fields ), $result['total'] );
+		$this->assertSame( $values, array_column( $result['settings'], 'value', 'id' ) );
+	}
+
+	/**
 	 * @testdox Should return a stable error for unknown groups.
 	 */
 	public function test_unknown_group(): void {
