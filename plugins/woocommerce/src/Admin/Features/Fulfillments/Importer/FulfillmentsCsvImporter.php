@@ -673,16 +673,26 @@ class FulfillmentsCsvImporter {
 			);
 		}
 
+		global $wp_current_filter;
+		$hook_depth = count( $wp_current_filter );
 		try {
 			$fulfillment->save();
-		} catch ( FulfillmentException $e ) {
-			return self::fail( self::CODE_SAVE_FAILED, $e->getMessage(), $order_id );
 		} catch ( \Throwable $e ) {
+			// A listener that throws leaves its hook on the stack, so doing_action() would skip later saves.
+			array_splice( $wp_current_filter, $hook_depth );
 			wc_get_logger()->error(
 				sprintf( 'Fulfillments import could not save row %1$d for order %2$d: %3$s', $row_number, $order_id, $e->getMessage() ),
 				array( 'source' => 'fulfillments-importer' )
 			);
-			return self::fail( self::CODE_SAVE_FAILED, __( 'Could not save the fulfillment.', 'woocommerce' ), $order_id );
+			// Changes are applied right after the write, so none left means only a later listener failed.
+			if ( array() !== $fulfillment->get_changes() ) {
+				// The cached fulfillment may hold the unsaved values, so the next row reads it again.
+				unset( $this->fulfillments_cache[ $order_id ] );
+				return self::fail( self::CODE_SAVE_FAILED, $e instanceof FulfillmentException ? $e->getMessage() : __( 'Could not save the fulfillment.', 'woocommerce' ), $order_id );
+			}
+		}
+		if ( null === $existing ) {
+			$this->fulfillments_cache[ $order_id ][] = $fulfillment;
 		}
 
 		return array(

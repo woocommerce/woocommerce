@@ -1176,6 +1176,67 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A listener that throws after the write leaves the row imported, keeps a later row from duplicating it and does not block later order updates.
+	 * @testWith ["woocommerce_fulfillment_after_create", "created"]
+	 *           ["woocommerce_fulfillment_after_update", "updated"]
+	 *
+	 * @param string $hook   Action whose listener throws once.
+	 * @param string $status Expected status of the first row.
+	 */
+	public function test_listener_throwing_after_the_write_keeps_the_row_imported( string $hook, string $status ): void {
+		$order = OrderHelper::create_order();
+		$other = OrderHelper::create_order();
+		$id    = $order->get_id();
+		if ( FulfillmentsCsvImporter::STATUS_UPDATED === $status ) {
+			$this->import_csv( "order_number,tracking_number,shipment_provider\n{$id},TRK-1,fedex\n" );
+		}
+		$throws = 1;
+		add_action(
+			$hook,
+			function () use ( &$throws ) {
+				if ( $throws-- > 0 ) {
+					throw new \RuntimeException( 'Listener failed.' );
+				}
+			},
+			5
+		);
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$id},TRK-1,ups\n{$id},TRK-1,dhl\n{$other->get_id()},TRK-2,ups\n{$id},TRK-3,ups\n" );
+
+		$this->assertSame( array( $status, FulfillmentsCsvImporter::STATUS_SKIPPED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_FAILED ), array_column( $result['rows'], 'status' ) );
+		$this->assertSame( FulfillmentsCsvImporter::CODE_NO_ITEMS, $result['rows'][3]['code'], 'The saved row counts as fulfilled for a later row' );
+		$this->assertCount( 1, $this->fulfillments_of( $order ) );
+		$this->assertFalse( doing_action( $hook ), 'The interrupted action is taken off the filter stack' );
+		$this->assertSame( 'fulfilled', wc_get_order( $other->get_id() )->get_meta( '_fulfillment_status' ), 'A later row still updates its order' );
+	}
+
+	/**
+	 * @testdox A blocked update leaves none of its values behind for a later row of the same fulfillment.
+	 */
+	public function test_blocked_update_does_not_leak_its_values_into_a_later_row(): void {
+		$order = OrderHelper::create_order();
+		$id    = $order->get_id();
+		$this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,ups,https://example.com/1\n" );
+		$blocks = 1;
+		add_filter(
+			'woocommerce_fulfillment_before_update',
+			function ( $fulfillment ) use ( &$blocks ) {
+				if ( $blocks-- > 0 ) {
+					throw new FulfillmentException( 'Blocked once.' );
+				}
+				return $fulfillment;
+			}
+		);
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,fedex,https://example.com/bad\n{$id},TRK-1,dhl,\n" );
+
+		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_FAILED, FulfillmentsCsvImporter::STATUS_UPDATED ), array_column( $result['rows'], 'status' ) );
+		$stored = $this->fulfillments_of( $order )[0];
+		$this->assertSame( 'dhl', $stored->get_shipment_provider() );
+		$this->assertSame( 'https://example.com/1', $stored->get_tracking_url() );
+	}
+
+	/**
 	 * @testdox A repeated order and tracking number pair is skipped across chunks, and a row that failed to save does not count as seen.
 	 */
 	public function test_duplicate_pairs_are_skipped_after_the_first_imported_row(): void {
@@ -1246,7 +1307,8 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_unchanged_update_is_skipped_without_a_save_or_notification(): void {
 		$order   = OrderHelper::create_order();
-		$csv     = "order_number,tracking_number,shipment_provider,tracking_url\n{$order->get_id()},TRK-1,UPS,HTTPS://example.com/t\n{$order->get_id()},TRK-2,Acme Freight,\n";
+		$item    = current( $order->get_items() )->get_id();
+		$csv     = "order_number,tracking_number,shipment_provider,tracking_url,items\n{$order->get_id()},TRK-1,UPS,HTTPS://example.com/t,{$item}:1\n{$order->get_id()},TRK-2,Acme Freight,,{$item}:1\n";
 		$options = array(
 			'notify_customer' => true,
 			'update_existing' => true,
@@ -1309,7 +1371,8 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			2
 		);
 
-		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\nINV-7,TRK-1,ups\n{$other->get_id()},TRK-2,ups\n{$order->get_id()},TRK-3,ups\nINV-7,TRK-4,ups\n" );
+		$item   = current( $order->get_items() )->get_id();
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\nINV-7,TRK-1,ups,,{$item}:1\n{$other->get_id()},TRK-2,ups\n{$order->get_id()},TRK-3,ups,,{$item}:1\nINV-7,TRK-4,ups,,{$item}:1\n" );
 
 		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_FAILED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_CREATED ), array_column( $result['rows'], 'status' ) );
 		$this->assertSame( $order->get_id(), $result['rows'][0]['order_id'] );
@@ -1324,6 +1387,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	public function test_chunk_orders_are_loaded_in_one_query(): void {
 		$first   = OrderHelper::create_order();
 		$second  = OrderHelper::create_order();
+		$item    = current( $second->get_items() )->get_id();
 		$queries = array();
 		$primed  = array();
 		add_filter(
@@ -1363,7 +1427,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		);
 
 		$result = $this->import_csv(
-			"order_number,tracking_number,shipment_provider\nINV-1,TRK-1,ups\nINV-2,TRK-2,ups\n{$second->get_id()},TRK-3,ups\n{$second->get_id()},TRK-4,ups\n{$first->get_id()},TRK-5,ups\n",
+			"order_number,tracking_number,shipment_provider\nINV-1,TRK-1,ups\nINV-2,TRK-2,ups\n{$second->get_id()},TRK-3,ups,,{$item}:1\n{$second->get_id()},TRK-4,ups,,{$item}:1\n{$first->get_id()},TRK-5,ups\n",
 			array(),
 			2
 		);
