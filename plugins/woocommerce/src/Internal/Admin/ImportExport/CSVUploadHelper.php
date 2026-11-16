@@ -136,12 +136,10 @@ class CSVUploadHelper {
 	private function discard_rejected_upload( array $upload ): void {
 		if ( ! empty( $upload['id'] ) ) {
 			// A pre_delete_attachment veto keeps the attachment, and its file with it.
-			wp_delete_attachment( absint( $upload['id'] ), true );
+			wp_delete_attachment( $upload['id'], true );
 			return;
 		}
-		if ( ! empty( $upload['file'] ) && file_exists( $upload['file'] ) ) {
-			wp_delete_file( $upload['file'] );
-		}
+		wp_delete_file( $upload['file'] );
 	}
 
 	/**
