@@ -780,7 +780,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$tracking_data = WC_Tracker::get_tracking_data();
 		$this->assertArrayHasKey( 'store_id', $tracking_data );
 		$this->assertEquals( '12345', $tracking_data['store_id'] );
-		delete_option( \WC_Install::STORE_ID_OPTION );
 	}
 
 	/**
@@ -792,7 +791,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$tracking_data = WC_Tracker::get_tracking_data();
 		$this->assertArrayHasKey( 'admin_install_timestamp', $tracking_data['settings'] );
 		$this->assertEquals( $tracking_data['settings']['admin_install_timestamp'], $time );
-		delete_option( 'woocommerce_admin_install_timestamp' );
 	}
 
 	/**
@@ -806,8 +804,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 * @testDox Test woocommerce_allow_tracking related data is included in tracking snapshot.
 	 */
 	public function test_tracking_data_woocommerce_allow_tracking() {
-		$current_woocommerce_allow_tracking = get_option( 'woocommerce_allow_tracking', 'no' );
-
 		// Clear everything.
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		delete_option( 'woocommerce_allow_tracking_last_modified' );
@@ -848,11 +844,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $tracking_data['woocommerce_allow_tracking'], 'yes' );
 		$this->assertGreaterThanOrEqual( $before, (int) $tracking_data['woocommerce_allow_tracking_last_modified'] );
 		$this->assertEquals( $first_optin, (int) $tracking_data['woocommerce_allow_tracking_first_optin'] );
-
-		// Restore everything as it was.
-		update_option( 'woocommerce_allow_tracking', $current_woocommerce_allow_tracking );
-		delete_option( 'woocommerce_allow_tracking_last_modified' );
-		delete_option( 'woocommerce_allow_tracking_first_optin' );
 	}
 
 	/**

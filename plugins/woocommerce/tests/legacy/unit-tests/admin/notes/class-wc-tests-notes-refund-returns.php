@@ -47,6 +47,6 @@ class WC_Tests_Notes_Refund_Returns extends WC_Unit_Test_Case {
 		$note_from_db->set_name( WC_Notes_Refund_Returns::NOTE_NAME );
 		$note_from_db->set_locale( 'zh_TW' );
 		$note = WC_Notes_Refund_Returns::get_note_from_db( $note_from_db );
-		$this->assertEquals( $note->get_title(), 'Setup a Refund and Returns Policy page to boost your store\'s credibility.' );
+		$this->assertEquals( $note->get_title(), 'Set up a Refund and Returns Policy page to boost your store\'s credibility.' );
 	}
 }

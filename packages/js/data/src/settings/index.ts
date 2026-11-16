@@ -3,11 +3,11 @@
  */
 import { createReduxStore, register } from '@wordpress/data';
 import { controls } from '@wordpress/data-controls';
-import type { Reducer } from 'redux';
 
 /**
  * Internal dependencies
  */
+import type { AnyAction } from '../crud/types';
 import { STORE_NAME } from './constants';
 import * as selectors from './selectors';
 import * as actions from './actions';
@@ -19,7 +19,10 @@ export * from './types';
 export type { State };
 
 export const store = createReduxStore( STORE_NAME, {
-	reducer: reducer as Reducer< SettingsState >,
+	reducer: reducer as (
+		state: SettingsState | undefined,
+		action: AnyAction
+	) => SettingsState,
 	actions,
 	controls,
 	selectors,

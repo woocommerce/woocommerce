@@ -40,7 +40,7 @@ test.describe( 'WooCommerce Tax Settings > enable', () => {
 
 		// Enable tax calculation
 		await page.locator( '#woocommerce_calc_taxes' ).check();
-		await page.locator( 'text=Save changes' ).click();
+		await page.getByRole( 'button', { name: 'Save changes' } ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(

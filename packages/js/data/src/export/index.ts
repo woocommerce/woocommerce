@@ -2,10 +2,10 @@
  * External dependencies
  */
 import { registerStore } from '@wordpress/data';
-import { Reducer, AnyAction } from 'redux';
 /**
  * Internal dependencies
  */
+import type { AnyAction } from '../crud/types';
 import { STORE_NAME } from './constants';
 import * as selectors from './selectors';
 import * as actions from './actions';
@@ -18,7 +18,10 @@ export type { State };
 
 // @ts-expect-error migrate store to createReduxStore function https://github.com/woocommerce/woocommerce/issues/55640
 registerStore< State >( STORE_NAME, {
-	reducer: reducer as Reducer< State, AnyAction >,
+	reducer: reducer as (
+		state: State | undefined,
+		action: AnyAction
+	) => State,
 	actions,
 	controls,
 	selectors,

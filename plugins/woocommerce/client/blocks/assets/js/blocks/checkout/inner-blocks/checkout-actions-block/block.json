@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/checkout-actions-block",
 	"title": "Actions",
-	"description": "Allow customers to place their order.",
+	"description": "Place order button, with optional Terms and Conditions and Return to Cart links.",
 	"category": "woocommerce",
 	"supports": {
 		"align": false,
@@ -34,8 +34,28 @@
 		"priceSeparator": {
 			"type": "string",
 			"default": "·"
+		},
+		"showTerms": {
+			"type": "boolean"
+		},
+		"termsCheckbox": {
+			"type": "boolean"
+		},
+		"termsText": {
+			"type": "string"
 		}
 	},
+	"styles": [
+		{
+			"name": "without-price",
+			"label": "Hide Price",
+			"isDefault": true
+		},
+		{
+			"name": "with-price",
+			"label": "Show Price"
+		}
+	],
 	"parent": [ "woocommerce/checkout-fields-block" ],
 	"textdomain": "woocommerce",
 	"$schema": "https://schemas.wp.org/trunk/block.json",

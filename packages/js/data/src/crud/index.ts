@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { createReduxStore, register } from '@wordpress/data';
-import { AnyAction } from 'redux';
 
 /**
  * Internal dependencies
  */
+import type { AnyAction } from './types';
 import { createSelectors } from './selectors';
 import { createDispatchActions } from './actions';
 import defaultControls from '../controls';

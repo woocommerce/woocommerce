@@ -43,7 +43,8 @@ final class CallbackUtil {
 			try {
 				return self::get_closure_signature( $callback );
 			} catch ( \Exception $e ) {
-				return 'Closure@' . spl_object_hash( $callback );
+				// spl_object_hash() is deprecated in PHP 8.6; from PHP 8.1 it returns exactly this string.
+				return 'Closure@' . ( PHP_VERSION_ID >= 80100 ? sprintf( '%016x0000000000000000', spl_object_id( $callback ) ) : spl_object_hash( $callback ) );
 			}
 		}
 

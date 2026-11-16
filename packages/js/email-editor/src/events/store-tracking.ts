@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { recordEvent, isEventTrackingEnabled } from '.';
+import { recordEvent, isEventTrackingEnabled } from './event-pipeline';
 
 /**
  * Handler functions for tracking individual events recorder by the listening to store actions.

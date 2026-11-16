@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep new and scheduled variable products in attribute filters when optimized lookup table updates are on.

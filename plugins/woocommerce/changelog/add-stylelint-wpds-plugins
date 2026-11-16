@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Lint WPDS design token usage and add token fallbacks at build time; no merchant-facing change.

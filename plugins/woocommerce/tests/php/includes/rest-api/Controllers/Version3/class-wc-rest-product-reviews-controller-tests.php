@@ -301,6 +301,38 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Review content that must be stored exactly as sent.
+	 *
+	 * @return array
+	 */
+	public function provide_review_content_with_slashes(): array {
+		return array(
+			'quotes'    => array( 'It\'s "great"' ),
+			'backslash' => array( 'Cable 1\\2 inch' ),
+			'mixed'     => array( 'It\'s a 1\\2" cable' ),
+		);
+	}
+
+	/**
+	 * @testdox Updating review content stores quotes and backslashes as sent.
+	 * @dataProvider provide_review_content_with_slashes
+	 *
+	 * @param string $content Review content.
+	 */
+	public function test_update_item_stores_review_content_as_sent( string $content ): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$review_id  = $this->create_review( $product_id, 'First draft.', 5 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_body_params( array( 'review' => $content ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( $content, get_comment( $review_id )->comment_content );
+	}
+
+	/**
 	 * @testdox A rating-only edit stores the rating and refreshes aggregates in one product save.
 	 */
 	public function test_update_item_with_only_a_rating_recalculates_aggregates_in_one_product_save() {

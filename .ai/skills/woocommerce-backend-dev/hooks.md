@@ -49,6 +49,19 @@ For the `@since` version:
 do_action( 'woocommerce_order_processed', $order_id, $order_data );
 ```
 
+## Recursion Through Other Plugins' Callbacks
+
+A hook callback can run again before it returns. When it reads data other plugins can filter, such as meta, options, permalinks, GUIDs, or capabilities, their callback on that read can call back into your hook. Neither callback is wrong on its own, but together they recurse until PHP runs out of memory, on every request that reaches the hook.
+
+An example of this type of recursion shipped in 11.3.0 RC-1 ([#70198](https://github.com/woocommerce/woocommerce/pull/70198)). A `get_the_guid` callback read `_wp_attached_file` with `get_post_meta()`. Real Media Library's `get_post_metadata` callback for that key calls `get_the_guid()`, so stores running both ran out of memory on most pages with media.
+
+Watch for this when a callback on a hook that runs many times per request (not an exclusive list, but examples: `get_the_guid`, `attachment_link`, `post_link`, `the_content`, `get_post_metadata`, `option_*`, `user_has_cap`, `map_meta_cap`) reads filtered data or calls a function that fires the same hook. When it does:
+
+- Run the cheap checks first (post type, values the hook already passed in) so most calls return before the filtered read.
+- Add a re-entrancy guard around the filtered read and reset it in `finally`. Classes from the DI container are shared, so an instance property is enough.
+- Have the nested call return its input unchanged, and check that the outer call still reaches the right result. Returning a "safe" value from the nested call can make the outer result wrong.
+- If a test is useful and necessary, make sure any recursion testing fails past a small limit rather than crashing the test environment.
+
 ## Regenerating the Published Hook Docs
 
 Hooks in `plugins/woocommerce/src/Blocks` and `plugins/woocommerce/src/StoreApi` are published as a developer reference generated from their docblocks:

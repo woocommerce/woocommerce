@@ -127,7 +127,7 @@ class Table extends Abstract_Block_Renderer {
 			$sanitized_caption = Html_Processing_Helper::sanitize_caption_html( $caption );
 			// Extract typography styles from table styles (not spacing styles) and apply to caption.
 			$caption_styles    = $this->extract_typography_styles_for_caption( $table_styles['css'] );
-			$complete_content .= '<div style="text-align: center; margin-top: 8px; ' . $caption_styles . '">' . $sanitized_caption . '</div>';
+			$complete_content .= '<div class="wp-element-caption" style="text-align: center; margin-top: 8px; ' . $caption_styles . '">' . $sanitized_caption . '</div>';
 		}
 
 		$table_attrs = array(

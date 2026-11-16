@@ -81,6 +81,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 			'description',
 			'short_description',
 			'sku',
+			'mpn',
 			'price',
 			'regular_price',
 			'sale_price',

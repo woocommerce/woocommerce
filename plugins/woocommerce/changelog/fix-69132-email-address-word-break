@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Stop splitting billing and shipping addresses in the middle of words in order emails.

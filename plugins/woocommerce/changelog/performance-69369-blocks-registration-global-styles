@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Introduced request-level cache for wp_get_global_styles usage by blocks.

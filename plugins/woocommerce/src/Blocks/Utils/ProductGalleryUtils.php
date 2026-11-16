@@ -16,7 +16,7 @@ class ProductGalleryUtils {
 	 */
 	public static function get_all_image_ids( $product ) {
 		if ( ! $product instanceof \WC_Product ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '9.8.0' );
+			wc_doing_it_wrong( __FUNCTION__, 'Invalid product object.', '9.8.0' );
 			return array();
 		}
 
@@ -65,7 +65,7 @@ class ProductGalleryUtils {
 	 */
 	public static function get_all_media_items( $product ) {
 		if ( ! $product instanceof \WC_Product ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '10.9.0' );
+			wc_doing_it_wrong( __FUNCTION__, 'Invalid product object.', '10.9.0' );
 			return array();
 		}
 
@@ -365,7 +365,7 @@ class ProductGalleryUtils {
 		$variation_image_ids = array();
 
 		if ( ! $product instanceof \WC_Product ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '9.8.0' );
+			wc_doing_it_wrong( __FUNCTION__, 'Invalid product object.', '9.8.0' );
 			return $variation_image_ids;
 		}
 
@@ -397,7 +397,7 @@ class ProductGalleryUtils {
 		$variation_gallery_data = array();
 
 		if ( ! $product instanceof \WC_Product ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '10.8.0' );
+			wc_doing_it_wrong( __FUNCTION__, 'Invalid product object.', '10.8.0' );
 			return $variation_gallery_data;
 		}
 

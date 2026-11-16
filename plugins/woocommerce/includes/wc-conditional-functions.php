@@ -362,7 +362,7 @@ if ( ! function_exists( 'is_filtered' ) ) {
 		 * @since 2.1.0
 		 * @param bool $is_filtered Whether a product filter is active.
 		 */
-		return apply_filters( 'woocommerce_is_filtered', ( count( WC_Query::get_layered_nav_chosen_attributes() ) > 0 || isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) || isset( $_GET['rating_filter'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only presence checks on public catalog filter parameters; nothing is written.
+		return apply_filters( 'woocommerce_is_filtered', ( count( WC_Query::get_layered_nav_chosen_attributes() ) > 0 || null !== WC_Query::get_price_filter( 'max_price' ) || null !== WC_Query::get_price_filter( 'min_price' ) || isset( $_GET['rating_filter'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only presence check on a public catalog filter parameter; nothing is written.
 	}
 }
 
@@ -640,22 +640,11 @@ function wc_wp_theme_get_element_class_name( $element ) {
  * @return bool
  */
 function wc_block_theme_has_styles_for_element( $element ) {
-	if (
-		! wp_is_block_theme() ||
-		wc_wp_theme_get_element_class_name( $element ) === ''
-	) {
+	if ( ! wp_is_block_theme() || wc_wp_theme_get_element_class_name( $element ) === '' ) {
 		return false;
 	}
 
-	if ( function_exists( 'wp_get_global_styles' ) ) {
-		$global_styles = wp_get_global_styles();
-		if (
-			array_key_exists( 'elements', $global_styles ) &&
-			array_key_exists( $element, $global_styles['elements'] )
-		) {
-			return is_array( $global_styles['elements'][ $element ] );
-		}
-	}
+	$global_styles = \Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils::get_global_styles();
 
-	return false;
+	return is_array( $global_styles['elements'][ $element ] ?? null );
 }

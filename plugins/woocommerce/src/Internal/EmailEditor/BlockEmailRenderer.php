@@ -139,9 +139,9 @@ class BlockEmailRenderer {
 			$preheader = $wc_email->get_preheader();
 
 			if ( $email_post ) {
-				$rendered_email_data = $this->renderer->render( $email_post, $subject, $preheader, 'en' );
+				$rendered_email_data = $this->renderer->render( $email_post, $subject, $preheader, get_bloginfo( 'language' ) );
 			} else {
-				$rendered_email_data = $this->renderer->render_from_content( $file_template_content, ( new WooEmailTemplate() )->get_slug(), $subject, $preheader, 'en' );
+				$rendered_email_data = $this->renderer->render_from_content( $file_template_content, ( new WooEmailTemplate() )->get_slug(), $subject, $preheader, get_bloginfo( 'language' ) );
 			}
 
 			$personalized_email = $this->personalizer->personalize_content( $rendered_email_data['html'] );

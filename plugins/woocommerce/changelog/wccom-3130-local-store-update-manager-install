@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+On local stores, offer the WooCommerce.com Update Manager as a download instead of a one-click install that can't reach them.

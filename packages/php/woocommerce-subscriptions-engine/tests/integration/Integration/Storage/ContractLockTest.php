@@ -30,6 +30,11 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstall
 class ContractLockTest extends EngineIntegrationTestCase {
 
 	/**
+	 * Owning extension of the fixture contracts.
+	 */
+	private const OWNER = 'engine-tests';
+
+	/**
 	 * The System Under Test.
 	 *
 	 * @var ContractRepository
@@ -45,7 +50,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		return $this->insert_released(
 			Contract::create(
 				array(
-					'extension_slug'   => 'engine-tests',
+					'extension_slug'   => self::OWNER,
 					'status'           => ContractStatus::ACTIVE,
 					'next_payment_gmt' => $next_payment_gmt,
 				)
@@ -83,7 +88,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	}
 
 	private function acquire( int $id, string $operation = 'hold' ): ContractLock {
-		$lock = $this->sut->acquire_lock( $id, $operation );
+		$lock = $this->sut->acquire_lock( $id, self::OWNER, $operation );
 		$this->assertInstanceOf( ContractLock::class, $lock );
 
 		return $lock;
@@ -100,7 +105,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( $id, $lock->get_contract_id() );
 		$this->assertSame( 'hold', $lock->get_operation() );
-		$this->assertNull( $this->sut->acquire_lock( $id, 'cancel' ) );
+		$this->assertNull( $this->sut->acquire_lock( $id, self::OWNER, 'cancel' ) );
 		$this->assertSame( '2035-01-01 00:10:00', $this->lock_columns( $id )['locked_until_gmt'] );
 		$this->assertSame(
 			array(
@@ -120,7 +125,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$old = $this->acquire( $id );
 
 		$this->pin_db_clock( '2035-01-01 00:09:59' );
-		$this->assertNull( $this->sut->acquire_lock( $id, 'cancel' ), 'Still live one second before expiry.' );
+		$this->assertNull( $this->sut->acquire_lock( $id, self::OWNER, 'cancel' ), 'Still live one second before expiry.' );
 
 		$this->pin_db_clock( '2035-01-01 00:10:00' );
 		$new = $this->acquire( $id, 'cancel' );
@@ -146,9 +151,9 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	public function test_acquire_with_an_equality_condition(): void {
 		$id = $this->insert_contract( '2026-06-20 00:00:00' );
 
-		$this->assertNull( $this->sut->acquire_lock( $id, 'engine_due_dispatch', array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) ) );
+		$this->assertNull( $this->sut->acquire_lock( $id, self::OWNER, 'engine_due_dispatch', array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) ) );
 		$this->assertNull( $this->get_lock_holder( $id )['operation'] );
-		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, 'engine_due_dispatch', array( 'next_payment_gmt' => '2026-06-20 00:00:00' ) ) );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, self::OWNER, 'engine_due_dispatch', array( 'next_payment_gmt' => '2026-06-20 00:00:00' ) ) );
 	}
 
 	/**
@@ -156,11 +161,11 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	 */
 	public function test_acquire_with_a_null_condition(): void {
 		$set = $this->insert_contract( '2026-06-20 00:00:00' );
-		$this->assertNull( $this->sut->acquire_lock( $set, 'engine_due_dispatch', array( 'next_payment_gmt' => null ) ) );
+		$this->assertNull( $this->sut->acquire_lock( $set, self::OWNER, 'engine_due_dispatch', array( 'next_payment_gmt' => null ) ) );
 		$this->assertNull( $this->get_lock_holder( $set )['operation'] );
 
 		$cleared = $this->insert_contract( null );
-		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $cleared, 'engine_due_dispatch', array( 'next_payment_gmt' => null ) ) );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $cleared, self::OWNER, 'engine_due_dispatch', array( 'next_payment_gmt' => null ) ) );
 	}
 
 	/**
@@ -172,6 +177,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->assertNull(
 			$this->sut->acquire_lock(
 				$id,
+				self::OWNER,
 				'engine_due_dispatch',
 				array(
 					'next_payment_gmt' => '2026-06-20 00:00:00',
@@ -184,6 +190,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 			ContractLock::class,
 			$this->sut->acquire_lock(
 				$id,
+				self::OWNER,
 				'engine_due_dispatch',
 				array(
 					'next_payment_gmt' => '2026-06-20 00:00:00',
@@ -201,7 +208,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 
 		foreach ( array( array( 'lock_token' => null ), array( 'customer_id' => 1 ), array( 'status' => array( ContractStatus::ACTIVE ) ) ) as $conditions ) {
 			try {
-				$this->sut->acquire_lock( $id, 'engine_due_dispatch', $conditions );
+				$this->sut->acquire_lock( $id, self::OWNER, 'engine_due_dispatch', $conditions );
 				$this->fail( 'Expected an invalid condition to throw.' );
 			} catch ( InvalidArgumentException $e ) {
 				$this->assertNull( $this->get_lock_holder( $id )['operation'] );
@@ -210,10 +217,37 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A contract of another extension cannot be locked, and its lock columns are untouched.
+	 */
+	public function test_a_foreign_contract_cannot_be_locked(): void {
+		$id     = $this->insert_contract();
+		$before = $this->lock_columns( $id );
+
+		$this->assertNull( $this->sut->acquire_lock( $id, 'other-extension', 'hold' ) );
+		$this->assertSame( $before, $this->lock_columns( $id ) );
+		$this->assertNull( $this->sut->acquire_lock( $id, 'other-extension', 'engine_due_dispatch', array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) ), 'A met condition does not lift the owner scope.' );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, self::OWNER, 'hold' ) );
+	}
+
+	/**
+	 * @testdox The internal lock reads a contract of another extension as missing, also while another operation holds its lock.
+	 */
+	public function test_the_internal_lock_reads_a_foreign_contract_as_missing(): void {
+		$id = $this->insert_contract();
+
+		$this->assertNull( $this->sut->acquire_internal_lock( $id, 'other-extension' ) );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, self::OWNER, 'hold' ) );
+		$this->assertNull( $this->sut->acquire_internal_lock( $id, 'other-extension' ), 'No ContractLockedException for a foreign row.' );
+
+		$this->expectException( ContractLockedException::class );
+		$this->sut->acquire_internal_lock( $id, self::OWNER );
+	}
+
+	/**
 	 * @testdox An unknown contract cannot be locked and reads as missing.
 	 */
 	public function test_unknown_contract(): void {
-		$this->assertNull( $this->sut->acquire_lock( 999999, 'hold' ) );
+		$this->assertNull( $this->sut->acquire_lock( 999999, self::OWNER, 'hold' ) );
 		$this->assertFalse( $this->get_lock_holder( 999999 )['exists'] );
 	}
 
@@ -237,15 +271,15 @@ class ContractLockTest extends EngineIntegrationTestCase {
 
 		foreach ( array( '', str_repeat( 'o', 65 ), 'Hold', 'hold now', '<b>hold</b>', "hold\n", 'hôld' ) as $operation ) {
 			try {
-				$this->sut->acquire_lock( $id, $operation );
+				$this->sut->acquire_lock( $id, self::OWNER, $operation );
 				$this->fail( 'Expected an invalid label to be refused.' );
 			} catch ( InvalidArgumentException $e ) {
 				$this->assertNull( $this->get_lock_holder( $id )['operation'] );
 			}
 		}
 
-		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, str_repeat( 'o', 64 ) ) );
-		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $this->insert_contract(), 'renewal_retry-2' ) );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, self::OWNER, str_repeat( 'o', 64 ) ) );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $this->insert_contract(), self::OWNER, 'renewal_retry-2' ) );
 	}
 
 	/**
@@ -269,7 +303,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 			$this->lock_columns( $id )
 		);
 		$this->assertTrue( $this->lock_state( $lock )->is_released() );
-		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, 'cancel' ), 'A released contract can be locked again at once.' );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, self::OWNER, 'cancel' ), 'A released contract can be locked again at once.' );
 	}
 
 	/**
@@ -413,7 +447,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->age_lock_trust( $old );
 
 		try {
-			$this->sut->add_meta( $id, '_stale', 'x', false, $old );
+			$this->sut->add_meta( $id, self::OWNER, '_stale', 'x', false, $old );
 			$this->fail( 'Expected the taken-over lock to be refused.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'cancel', $e->get_operation() );
@@ -428,7 +462,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	public function test_a_lock_built_outside_the_repository_is_doing_it_wrong(): void {
 		$this->setExpectedIncorrectUsage( ContractLock::class . '::__construct' );
 
-		$lock = new ContractLock( 7, 'hold', str_repeat( 'a', 32 ) );
+		$lock = new ContractLock( 7, self::OWNER, 'hold', str_repeat( 'a', 32 ) );
 
 		$this->assertSame( 7, $lock->get_contract_id() );
 	}
@@ -461,9 +495,9 @@ class ContractLockTest extends EngineIntegrationTestCase {
 			$this->assertInstanceOf( Contract::class, $contract );
 			$contract->set_status( ContractStatus::ON_HOLD );
 			$this->assertTrue( $this->sut->update_fields( $contract, array( 'status' ), $lock ) );
-			$this->assertIsInt( $this->sut->add_meta( $id, 'note', 'x', false, $lock ) );
+			$this->assertIsInt( $this->sut->add_meta( $id, self::OWNER, 'note', 'x', false, $lock ) );
 			$lock->release();
-			$this->assertNotNull( $this->sut->insert( Contract::create( array( 'extension_slug' => 'engine-tests' ) ), 'checkout' ) );
+			$this->assertNotNull( $this->sut->insert( Contract::create( array( 'extension_slug' => self::OWNER ) ), 'checkout' ) );
 		} finally {
 			remove_action( 'doing_it_wrong_run', $count );
 		}
@@ -480,11 +514,11 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->acquire( $id );
 
 		$this->setExpectedIncorrectUsage( ContractLock::class . '::__construct' );
-		$forged = new ContractLock( $id, 'forged', str_repeat( 'f', 32 ) );
+		$forged = new ContractLock( $id, self::OWNER, 'forged', str_repeat( 'f', 32 ) );
 		$this->age_lock_trust( $forged );
 
 		try {
-			$this->sut->add_meta( $id, '_forged', 'x', false, $forged );
+			$this->sut->add_meta( $id, self::OWNER, '_forged', 'x', false, $forged );
 			$this->fail( 'Expected the forged lock to be refused.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'hold', $e->get_operation() );
@@ -501,7 +535,13 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->refuse_next_write( 'UPDATE `' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ) . '` SET' );
 
 		try {
-			Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ) );
+			Contracts::update(
+				$id,
+				array(
+					'extension_slug' => self::OWNER,
+					'status'         => ContractStatus::ON_HOLD,
+				)
+			);
 			$this->fail( 'Expected the refused write to throw.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'engine_contract_update', $e->get_operation() );
@@ -523,28 +563,28 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		};
 		add_filter( 'query', $count );
 		try {
-			$this->assertIsInt( $this->sut->add_meta( $id, '_note', 'a' ) );
-			$this->assertTrue( $this->sut->update_meta( $id, '_note', 'b' ) );
-			$this->assertFalse( $this->sut->update_meta( $id, '_note', 'b' ), 'The stored value: nothing to change.' );
-			$this->assertTrue( $this->sut->delete_meta( $id, '_note' ) );
-			$this->assertFalse( $this->sut->delete_meta( $id, '_absent' ) );
+			$this->assertIsInt( $this->sut->add_meta( $id, self::OWNER, '_note', 'a' ) );
+			$this->assertTrue( $this->sut->update_meta( $id, self::OWNER, '_note', 'b' ) );
+			$this->assertFalse( $this->sut->update_meta( $id, self::OWNER, '_note', 'b' ), 'The stored value: nothing to change.' );
+			$this->assertTrue( $this->sut->delete_meta( $id, self::OWNER, '_note' ) );
+			$this->assertFalse( $this->sut->delete_meta( $id, self::OWNER, '_absent' ) );
 		} finally {
 			remove_filter( 'query', $count );
 		}
 		$this->assertSame( 5, $acquires, 'Each write takes the internal lock.' );
 		$this->assertNull( $this->get_lock_holder( $id )['operation'], 'Each write releases it.' );
 
-		$this->sut->add_meta( $id, '_anchor', 'a' );
+		$this->sut->add_meta( $id, self::OWNER, '_anchor', 'a' );
 		$this->acquire( $id, 'renewal' );
 		$writes = array(
 			'add_meta'    => function () use ( $id ): void {
-				$this->sut->add_meta( $id, '_anchor', 'b' );
+				$this->sut->add_meta( $id, self::OWNER, '_anchor', 'b' );
 			},
 			'update_meta' => function () use ( $id ): void {
-				$this->sut->update_meta( $id, '_anchor', 'b' );
+				$this->sut->update_meta( $id, self::OWNER, '_anchor', 'b' );
 			},
 			'delete_meta' => function () use ( $id ): void {
-				$this->sut->delete_meta( $id, '_anchor' );
+				$this->sut->delete_meta( $id, self::OWNER, '_anchor' );
 			},
 		);
 		foreach ( $writes as $name => $write ) {
@@ -557,10 +597,10 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		}
 		$this->assertSame( array( 'a' ), $this->sut->get_meta( $id, '_anchor' ) );
 
-		$this->assertFalse( $this->sut->delete_meta( 999999, '_anchor' ), 'A delete on a missing contract deletes nothing.' );
+		$this->assertFalse( $this->sut->delete_meta( 999999, self::OWNER, '_anchor' ), 'A delete on a missing contract deletes nothing.' );
 		foreach ( array( 'add_meta', 'update_meta' ) as $method ) {
 			try {
-				$this->sut->$method( 999999, '_anchor', 'x' );
+				$this->sut->$method( 999999, self::OWNER, '_anchor', 'x' );
 				$this->fail( "Expected {$method} on a missing contract to throw." );
 			} catch ( InvalidArgumentException $e ) {
 				$this->assertStringContainsString( '999999', $e->getMessage() );
@@ -581,10 +621,10 @@ class ContractLockTest extends EngineIntegrationTestCase {
 
 		$writes = array(
 			'update_meta'       => function () use ( $id, $lock ): void {
-				$this->sut->update_meta( $id, '_note', 'x', null, $lock );
+				$this->sut->update_meta( $id, self::OWNER, '_note', 'x', null, $lock );
 			},
 			'delete_meta'       => function () use ( $id, $lock ): void {
-				$this->sut->delete_meta( $id, '_note', null, $lock );
+				$this->sut->delete_meta( $id, self::OWNER, '_note', null, $lock );
 			},
 			'replace_items'     => function () use ( $id, $lock ): void {
 				$this->call_private( $this->sut, 'replace_items', $id, array( array( 'item_name' => 'Changed' ) ), $lock );

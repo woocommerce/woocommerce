@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Fix an unreleased fulfillment privacy filter fallback; nothing merchant-facing changes.
+
+

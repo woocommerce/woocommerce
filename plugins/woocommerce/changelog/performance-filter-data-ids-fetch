@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Optimized fetching product IDs in product filters.

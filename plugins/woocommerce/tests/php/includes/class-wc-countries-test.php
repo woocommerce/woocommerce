@@ -384,7 +384,7 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Remove registered filters and reset test state.
+	 * Reset test state.
 	 */
 	public function tearDown(): void {
 		if ( $this->states_global_existed ) {
@@ -395,31 +395,6 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 
 		$this->states_global_existed = false;
 		$this->states_global_value   = null;
-
-		remove_filter( 'determine_locale', array( $this, 'filter_active_locale' ) );
-		remove_filter( 'determine_locale', array( $this, 'filter_counted_active_locale' ) );
-		remove_filter( 'determine_locale', array( $this, 'filter_stateful_locale' ) );
-		remove_filter( 'woocommerce_countries', array( $this, 'filter_country_names' ) );
-		remove_filter( 'woocommerce_countries', array( $this, 'record_country_filter_call' ) );
-		remove_filter( 'woocommerce_countries', array( $this, 'filter_empty_geographical_data' ) );
-		remove_filter( 'woocommerce_states', array( $this, 'filter_state_names' ) );
-		remove_filter( 'woocommerce_states', array( $this, 'filter_empty_geographical_data' ) );
-		remove_filter( 'woocommerce_continents', array( $this, 'filter_continent_names' ) );
-		remove_filter( 'woocommerce_continents', array( $this, 'filter_empty_geographical_data' ) );
-		remove_filter( 'woocommerce_get_country_locale', array( $this, 'filter_country_locale' ) );
-		remove_filter( 'pre_option_woocommerce_allowed_countries', array( $this, 'return_all_countries' ) );
-		remove_filter( 'pre_option_woocommerce_ship_to_countries', array( $this, 'return_all_countries' ) );
-		remove_filter( 'locale', array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
-		remove_filter( 'determine_locale', array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
-		remove_filter( 'pre_determine_locale', array( $this, 'read_geographical_data_in_locale_filter' ), 20 );
-		remove_filter( 'woocommerce_countries', array( $this, 'determine_locale_while_building' ) );
-		remove_filter( 'woocommerce_states', array( $this, 'determine_locale_while_building' ) );
-		remove_filter( 'woocommerce_get_country_locale', array( $this, 'determine_locale_while_building' ) );
-		remove_filter( 'woocommerce_countries', array( $this, 'stamp_country_names_with_switched_locale' ) );
-		remove_filter( 'woocommerce_get_country_locale', array( $this, 'stamp_country_locale_with_switched_locale' ) );
-		remove_filter( 'get_available_languages', array( $this, 'add_available_test_locale' ) );
-		remove_filter( 'locale', array( $this, 'read_default_location_in_locale_filter' ), 20 );
-		remove_filter( 'determine_locale', array( $this, 'read_default_location_in_locale_filter' ), 20 );
 
 		if ( null !== $this->original_countries ) {
 			WC()->countries = $this->original_countries;
@@ -1009,6 +984,71 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Benin has no postal codes: mail goes to a PO box ("BP") in a locality. Its 12 departments stay a required list.
+	 *
+	 * @testdox 'get_address_fields' hides the postcode for Benin and labels the state as a department, like Bolivia.
+	 *
+	 * @return void
+	 */
+	public function test_get_address_fields_hides_postcode_and_labels_departments_for_benin() {
+		$fields = ( new WC_Countries() )->get_address_fields( 'BJ', 'billing_' );
+
+		$this->assertTrue( $fields['billing_postcode']['hidden'] ?? false, 'Benin has no postal codes, so the field should be hidden.' );
+		$this->assertFalse( $fields['billing_postcode']['required'], 'Benin has no postal codes, so the field should not be required.' );
+		$this->assertSame( 'Department', $fields['billing_state']['label'], 'Benin is divided into departments.' );
+		$this->assertTrue( $fields['billing_state']['required'], 'Benin keeps its required list of 12 departments.' );
+	}
+
+	/**
+	 * @testdox 'get_formatted_address' outputs translated state names stored as HTML entities as text, including in uppercase.
+	 */
+	public function test_get_formatted_address_decodes_entity_encoded_state_names(): void {
+		$this->translate_strings( array( 'Ancona' => 'Anc&ocirc;ne' ) );
+		$this->use_address_format( 'IT', "{state}\n{state_upper}" );
+		$sut = new WC_Countries();
+
+		$address = $sut->get_formatted_address(
+			array(
+				'state'   => 'AN',
+				'country' => 'IT',
+			),
+			"\n"
+		);
+
+		$this->assertSame( "Ancône\nANCÔNE", $address, 'The state should not be output as entities, or escaped twice once uppercased.' );
+	}
+
+	/**
+	 * @testdox 'get_formatted_address' outputs country names stored as HTML entities as text, including in uppercase.
+	 */
+	public function test_get_formatted_address_decodes_entity_encoded_country_names(): void {
+		$this->use_address_format( 'CW', "{country}\n{country_upper}" );
+		$sut = new WC_Countries();
+
+		$address = $sut->get_formatted_address( array( 'country' => 'CW' ), "\n" );
+
+		$this->assertSame( "Curaçao\nCURAÇAO", $address, 'The country should not be output as entities, or escaped twice once uppercased.' );
+	}
+
+	/**
+	 * @testdox 'get_formatted_address' escapes markup in a translated state name after decoding its entities.
+	 */
+	public function test_get_formatted_address_escapes_markup_in_entity_encoded_state_names(): void {
+		$this->translate_strings( array( 'Ancona' => 'Anc&lt;b&gt;ne' ) );
+		$this->use_address_format( 'IT', '{state_upper}' );
+		$sut = new WC_Countries();
+
+		$address = $sut->get_formatted_address(
+			array(
+				'state'   => 'AN',
+				'country' => 'IT',
+			)
+		);
+
+		$this->assertSame( 'ANC&lt;B&gt;NE', $address, 'Decoded markup should be escaped again for output.' );
+	}
+
+	/**
 	 * Provider for `test_get_country_from_alpha_3_code`.
 	 *
 	 * @return array
@@ -1193,6 +1233,38 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	private function assert_switched_locale_stamps( WC_Countries $sut, $stamp ): void {
 		$this->assertSame( $stamp, $sut->get_countries()['US'], "Countries should use the $stamp locale cache." );
 		$this->assertSame( $stamp, $sut->get_country_locale()['US']['postcode']['label'], "Country locale settings should use the $stamp locale." );
+	}
+
+	/**
+	 * Translate WooCommerce strings, as a language pack would.
+	 *
+	 * @param array<string, string> $translations Translations keyed by the original string.
+	 */
+	private function translate_strings( array $translations ): void {
+		add_filter(
+			'gettext',
+			function ( $translation, $text, $domain ) use ( $translations ) {
+				return 'woocommerce' === $domain && isset( $translations[ $text ] ) ? $translations[ $text ] : $translation;
+			},
+			10,
+			3
+		);
+	}
+
+	/**
+	 * Use the given address format for a country.
+	 *
+	 * @param string $country Country code.
+	 * @param string $format  Address format.
+	 */
+	private function use_address_format( $country, $format ): void {
+		add_filter(
+			'woocommerce_localisation_address_formats',
+			function ( $formats ) use ( $country, $format ) {
+				$formats[ $country ] = $format;
+				return $formats;
+			}
+		);
 	}
 
 	/**

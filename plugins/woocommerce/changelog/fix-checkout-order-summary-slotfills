@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep extension SlotFills mounted when repositioning the Checkout order summary.

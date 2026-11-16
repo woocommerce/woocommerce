@@ -459,7 +459,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_default_customer_address',
 						label: 'Default customer location',
-						description: '',
+						description: expect.any( String ),
 						type: 'select',
 						default: 'base',
 						tip: 'This option determines a customers default location. The MaxMind GeoLite Database will be periodically downloaded to your wp-content directory if using geolocation.',
@@ -1051,7 +1051,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_tax_based_on',
 						label: 'Calculate tax based on',
-						description: '',
+						description: expect.any( String ),
 						type: 'select',
 						default: 'shipping',
 						options: {

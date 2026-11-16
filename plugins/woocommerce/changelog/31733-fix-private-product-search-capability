@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Show private products in admin product searches to users who can read private products but not edit them.

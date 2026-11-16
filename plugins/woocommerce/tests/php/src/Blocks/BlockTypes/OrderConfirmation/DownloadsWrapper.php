@@ -40,7 +40,6 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 	public function tear_down() {
 		delete_option( 'woocommerce_product_lookup_table_is_generating' );
 		wp_cache_delete( 'woocommerce_has_downloadable_products', 'woocommerce' );
-		remove_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', array( self::class, 'enable_direct_attribute_lookup_updates' ) );
 
 		parent::tear_down();
 	}

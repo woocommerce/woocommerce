@@ -506,7 +506,6 @@ class PaymentsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$initial_country = WC()->countries->get_base_country();
 		update_option( 'woocommerce_default_country', $country );
 
 		// Act.
@@ -517,7 +516,6 @@ class PaymentsTest extends WC_Unit_Test_Case {
 
 		// Clean up.
 		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
-		update_option( 'woocommerce_default_country', $initial_country );
 	}
 
 	/**

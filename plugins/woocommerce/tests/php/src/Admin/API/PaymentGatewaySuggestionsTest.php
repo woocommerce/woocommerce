@@ -48,7 +48,6 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 		// Clear any existing cache first.
 		Init::delete_specs_transient();
 
-		$existing_base_country = wc_get_base_location();
 		// update the base country to the U.S for testing purposes.
 		update_option( 'woocommerce_default_country', 'US:CA' );
 
@@ -90,11 +89,5 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 		// Make a new request -- this should populate the cache with the updated country.
 		$response = rest_get_server()->dispatch( $request )->get_data();
 		$this->assertEquals( 'CA', $response[0]->id );
-
-		// Clean up.
-		remove_filter( 'pre_http_request', $response_mock_ref );
-
-		// restore the base country.
-		update_option( 'woocommerce_default_country', $existing_base_country['country'] . ':' . $existing_base_country['state'] );
 	}
 }

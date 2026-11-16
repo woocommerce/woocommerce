@@ -59,14 +59,12 @@ Plugins that connect to externally-billed services cannot use the standard paid 
 
 | Billing Model | Description | Best For |
 | --- | --- | --- |
-| **Billing API** (recommended) | Our API handles subscription billing on behalf of your service, with validation endpoints to confirm payment status and active subscriptions. Billing shifts to Woo, and you receive payouts based on the revenue share model. [View Billing API documentation →](https://woocommerce.com/document/billing-api-for-saas-products/) | SaaS providers who want Woo to manage the billing relationship with merchants. |
+| **Billing API** (recommended) | Our API handles subscription billing on behalf of your service, with validation endpoints to confirm payment status and active subscriptions. Billing shifts to Woo, and you receive payouts based on the revenue share model. [View Billing API documentation →](/docs/woo-marketplace/billing-api-saas/) | SaaS providers who want Woo to manage the billing relationship with merchants. |
 | **Partnership Agreement** | An agreement that extends our [Marketplace Vendor Agreement](https://woocommerce.com/woo-vendor-agreement/) to accommodate solutions where billing occurs outside of WooCommerce. The plugin is listed free on the Marketplace. | Companies with existing billing relationships and infrastructure. |
 
 ### About the Partnership Agreement
 
-The Partnership Agreement is available as an alternative when the Billing API is not suitable for your business model. However, this option requires formal agreement to our partnership conditions and is subject to approval at our discretion. We assess each application to ensure alignment with Marketplace standards and merchant experience expectations.
-
-If you're considering this option, we recommend [contacting our Marketplace team](#questions-about-your-billing-structure) early in your planning process to discuss eligibility and requirements before investing development effort.
+The Partnership Agreement is an alternative when the Billing API is not suitable for your business model. However, this option requires formal agreement to our partnership conditions and is subject to our approval. We assess each application to ensure alignment with Marketplace standards and merchant experience expectations, and we will confirm the billing structure with you during the submission process. 
 
 ## Theme licensing
 
@@ -82,10 +80,10 @@ If you offer business services that complement WooCommerce and would like to exp
 
 ## Questions about your billing structure?
 
-If you're unsure which monetization model applies to your plugin, theme, or service, or if you'd like to discuss partnership options before submitting for review, please [contact the Marketplace team](https://woocommerce.com/partnerships-contact/). We recommend reaching out early in your planning process to ensure alignment before you invest significant development effort.
+If you're unsure which monetization model applies to your plugin, theme, or service, or if you'd like to discuss partnership options before submitting for review, please [contact the Marketplace team](https://woocommerce.com/partnerships-contact/). 
 
 ## Related resources
 
 - [Marketplace Vendor Agreement](https://woocommerce.com/woo-vendor-agreement/) — Standard terms for all Marketplace vendors
-- [Billing API for SaaS Products](https://woocommerce.com/document/billing-api-for-saas-products/) — Technical documentation for integrating with our billing system
-- [Submitting Your Product](https://woocommerce.com/document/submitting-your-product-to-the-woo-marketplace/) — Complete submission guidelines
+- [Billing API for SaaS Products](/docs/woo-marketplace/billing-api-saas/) — Technical documentation for integrating with our billing system
+- [Submitting Your Product](/docs/woo-marketplace/submitting-your-product/) — Complete submission guidelines

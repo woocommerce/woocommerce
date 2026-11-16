@@ -124,9 +124,22 @@ if (
 }
 
 /**
- * Register the reset notification email content entity action for the woo_email post type.
+ * The reset notification email content entity action for the woo_email post type.
  * This action allows users to reset the email content to the original state as distributed by the plugin.
+ * From WordPress 7.2 the action is registered on the server (Integration::register_entity_actions())
+ * and the email editor's script module reads its JavaScript parts from this filter.
  */
+addFilter(
+	'woocommerce_email_editor_entity_actions',
+	`${ NAME_SPACE }/reset-notification-email-content`,
+	( actions: Record< string, unknown > ) => ( {
+		...actions,
+		'reset-notification-email-content':
+			getResetNotificationEmailContentAction(),
+	} )
+);
+
+// Up to WordPress 7.1 the action is registered on the client.
 const registerResetNotificationEmailContentAction = ( postType: string ) => {
 	if ( postType !== 'woo_email' ) {
 		return;

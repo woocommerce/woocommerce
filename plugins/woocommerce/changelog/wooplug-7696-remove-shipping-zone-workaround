@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Remove a stale shipping workaround from the shortcode checkout custom button e2e spec; no production change.

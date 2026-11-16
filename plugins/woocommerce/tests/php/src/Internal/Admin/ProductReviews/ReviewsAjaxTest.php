@@ -38,6 +38,10 @@ class ReviewsAjaxTest extends WP_Ajax_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 
+		remove_action( 'admin_init', '_maybe_update_core' );
+		remove_action( 'admin_init', '_maybe_update_plugins' );
+		remove_action( 'admin_init', '_maybe_update_themes' );
+
 		$this->reviews = wc_get_container()->get( Reviews::class );
 
 		add_action( 'wp_ajax_edit-comment', array( $this->reviews, 'handle_edit_review' ), -1 );

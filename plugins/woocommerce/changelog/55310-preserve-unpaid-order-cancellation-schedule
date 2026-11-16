@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Preserve the unpaid order cancellation schedule when saving unchanged hold stock settings.

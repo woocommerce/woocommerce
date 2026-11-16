@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Point back-in-stock email links to the store front end when WordPress is installed in a subdirectory.

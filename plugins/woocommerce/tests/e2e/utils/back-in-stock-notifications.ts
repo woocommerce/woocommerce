@@ -1083,6 +1083,9 @@ export async function getEmailLinkById(
 /**
  * Run any pending Action Scheduler jobs via the process-waiting-actions mu-plugin.
  *
+ * The E2E test helper plugin makes the batch's emails report as sent, so the
+ * sign-up is marked sent whichever request runs the batch.
+ *
  * @param {Page} page Playwright page (can be on any URL).
  */
 export async function triggerStockNotificationsBatch(

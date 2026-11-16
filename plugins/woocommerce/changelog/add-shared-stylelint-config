@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Share the stylelint config with the JS packages and apply its autofixes to blocks styles; no visual change.

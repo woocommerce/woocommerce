@@ -1,0 +1,46 @@
+name: 'Close linked PRs when an issue is closed'
+
+on:
+  issues:
+    types: [closed]
+
+permissions: {}
+
+jobs:
+  close-linked-prs:
+    name: 'Close linked PRs not tied to other open issues'
+    # Duplicates are skipped: the canonical issue is still open, so the PR's work may still be needed.
+    if: github.repository == 'woocommerce/woocommerce' && github.event.issue.state_reason != 'duplicate'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: write
+    env:
+      REPORT_PATH: close-linked-prs-report.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            .github/workflows/scripts
+
+      - name: Close linked PRs
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/close-linked-prs-on-issue-close.js');
+            await script({ github, context, core });
+
+      # Only written when the issue had open linked PRs; uploaded even if some closes failed.
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: close-linked-prs-issue-${{ github.event.issue.number }}
+          path: ${{ env.REPORT_PATH }}
+          if-no-files-found: ignore
+          # A re-run of a failed job uploads under the same name again.
+          overwrite: true

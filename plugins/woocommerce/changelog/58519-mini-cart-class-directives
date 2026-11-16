@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Use class directives for the Mini Cart overlay without changing its merchant-facing behavior.

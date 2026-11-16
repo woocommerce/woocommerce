@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix classic cart Undo when the site uses Referrer-Policy: no-referrer.

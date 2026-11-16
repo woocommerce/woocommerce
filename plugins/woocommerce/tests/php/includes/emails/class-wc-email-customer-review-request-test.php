@@ -126,8 +126,6 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_review_request_delay_seconds', $override );
 
 		$this->assertSame( 90, $this->sut->get_delay_seconds() );
-
-		remove_filter( 'woocommerce_review_request_delay_seconds', $override );
 	}
 
 	/**
@@ -168,8 +166,6 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_review_order_url', $override );
 
 		$this->assertSame( 'https://example.test/custom', $this->sut->get_review_order_url() );
-
-		remove_filter( 'woocommerce_review_order_url', $override );
 	}
 
 	/**

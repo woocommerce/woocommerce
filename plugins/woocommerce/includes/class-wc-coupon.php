@@ -634,7 +634,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount.', 'woocommerce' ) );
 		}
 
-		if ( 'percent' === $this->get_discount_type() && (float) $amount > 100 ) {
+		if ( 'percent' === $this->get_discount_type( 'edit' ) && (float) $amount > 100 ) {
 			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount.', 'woocommerce' ) );
 		}
 
@@ -804,7 +804,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function set_minimum_amount( $amount ) {
 		$amount = wc_format_decimal( $amount );
-		if ( (float) $this->get_maximum_amount() && (float) $amount > (float) $this->get_maximum_amount() ) {
+		if ( (float) $this->get_maximum_amount( 'edit' ) && (float) $amount > (float) $this->get_maximum_amount( 'edit' ) ) {
 			$this->error( 'coupon_invalid_minimum_amount', __( 'Invalid minimum spend value.', 'woocommerce' ) );
 		}
 		$this->set_prop( 'minimum_amount', $amount );
@@ -819,7 +819,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function set_maximum_amount( $amount ) {
 		$amount = wc_format_decimal( $amount );
-		if ( (float) $amount && (float) $this->get_minimum_amount() > (float) $amount ) {
+		if ( (float) $amount && (float) $this->get_minimum_amount( 'edit' ) > (float) $amount ) {
 			$this->error( 'coupon_invalid_maximum_amount', __( 'Invalid maximum spend value.', 'woocommerce' ) );
 		}
 
@@ -1267,8 +1267,10 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 						if ( count( $intersect ) > 0 ) {
 							foreach ( $intersect as $cat_id ) {
-								$cat          = get_term( $cat_id, 'product_cat' );
-								$categories[] = $cat->name;
+								$cat = get_term( $cat_id, 'product_cat' );
+								if ( $cat instanceof WP_Term ) {
+									$categories[] = $cat->name;
+								}
 							}
 						}
 					}

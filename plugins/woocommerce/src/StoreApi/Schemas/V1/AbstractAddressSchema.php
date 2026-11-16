@@ -100,6 +100,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 				'phone'      => [
 					'description' => __( 'Phone', 'woocommerce' ),
 					'type'        => 'string',
+					'maxLength'   => 100,
 					'context'     => [ 'view', 'edit' ],
 					'required'    => true,
 				],

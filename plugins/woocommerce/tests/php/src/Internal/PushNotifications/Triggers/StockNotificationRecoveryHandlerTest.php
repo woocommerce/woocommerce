@@ -45,9 +45,6 @@ class StockNotificationRecoveryHandlerTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_action( 'woocommerce_product_set_stock', array( $this->sut, 'on_stock_change' ) );
-		remove_action( 'woocommerce_variation_set_stock', array( $this->sut, 'on_stock_change' ) );
-
 		if ( false === $this->original_no_stock_amount ) {
 			delete_option( 'woocommerce_notify_no_stock_amount' );
 		} else {

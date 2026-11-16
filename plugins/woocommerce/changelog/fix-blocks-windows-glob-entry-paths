@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Resolve blocks webpack entry paths with POSIX separators so the build works on Windows.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improve the orders list performance when filtering by shipping provider on stores with many orders.

@@ -108,6 +108,10 @@ export interface WooPaymentsProviderOnboardingStep {
 			type?: string;
 			href?: string;
 		};
+		authorize?: {
+			type?: string;
+			href?: string;
+		};
 		reset?: {
 			type?: string;
 			href?: string;

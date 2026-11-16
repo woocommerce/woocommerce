@@ -209,28 +209,28 @@ class CollectionQuery extends AbstractCollectionQuery {
 		if ( isset( $request['before'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_date_gmt' : 'post_date',
-				'before' => $request['before'],
+				'before' => $use_gmt ? self::to_gmt_date_query_value( $request['before'] ) : $request['before'],
 			);
 		}
 
 		if ( isset( $request['after'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_date_gmt' : 'post_date',
-				'after'  => $request['after'],
+				'after'  => $use_gmt ? self::to_gmt_date_query_value( $request['after'] ) : $request['after'],
 			);
 		}
 
 		if ( isset( $request['modified_before'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_modified_gmt' : 'post_modified',
-				'before' => $request['modified_before'],
+				'before' => $use_gmt ? self::to_gmt_date_query_value( $request['modified_before'] ) : $request['modified_before'],
 			);
 		}
 
 		if ( isset( $request['modified_after'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_modified_gmt' : 'post_modified',
-				'after'  => $request['modified_after'],
+				'after'  => $use_gmt ? self::to_gmt_date_query_value( $request['modified_after'] ) : $request['modified_after'],
 			);
 		}
 

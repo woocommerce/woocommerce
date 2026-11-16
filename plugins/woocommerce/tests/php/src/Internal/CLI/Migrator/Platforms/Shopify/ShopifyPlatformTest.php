@@ -29,15 +29,6 @@ class ShopifyPlatformTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		// Remove all filters to ensure clean state.
-		remove_all_filters( 'woocommerce_migrator_platforms' );
-	}
-
-	/**
 	 * Test that the Shopify platform is registered correctly.
 	 */
 	public function test_shopify_platform_is_registered() {

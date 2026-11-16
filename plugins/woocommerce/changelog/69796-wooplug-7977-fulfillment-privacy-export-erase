@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Include fulfillment tracking data in WordPress personal data exports, and redact it when an order is anonymized.

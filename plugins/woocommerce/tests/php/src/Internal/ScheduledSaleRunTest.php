@@ -329,11 +329,11 @@ class ScheduledSaleRunTest extends WC_Unit_Test_Case {
 	 */
 	public function test_processes_a_duplicated_id_across_batches_once(): void {
 		$product = WC_Helper_Product::create_missed_sale_end_product();
-		$rows    = array( $product->get_id() );
-		for ( $i = 1; $i < ScheduledSaleRun::BATCH_SIZE; $i++ ) {
-			$rows[] = WC_Helper_Product::create_missed_sale_end_product()->get_id();
-		}
-		$rows[] = (string) $product->get_id();
+		$rows    = array_merge(
+			array( $product->get_id() ),
+			WC_Helper_Product::create_missed_sale_end_product_ids( ScheduledSaleRun::BATCH_SIZE - 1 ),
+			array( (string) $product->get_id() )
+		);
 
 		$saves = 0;
 		add_action(

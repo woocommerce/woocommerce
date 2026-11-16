@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\RestApi\OrderLineItemValidationTrait;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\OrderLineMetaValidator;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -29,6 +30,8 @@ use Automattic\WooCommerce\Utilities\StringUtil;
 class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 	// phpcs:enable
+	use OrderLineItemValidationTrait;
+
 	/**
 	 * Endpoint namespace.
 	 *
@@ -63,6 +66,13 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @var array
 	 */
 	protected $request = array();
+
+	/**
+	 * Order whose item set_item() is preparing, so new line items are priced at the order's tax location.
+	 *
+	 * @var WC_Order|null
+	 */
+	private $order_for_item = null;
 
 	/**
 	 * Register the routes for orders.
@@ -719,6 +729,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Prepare a single order for create or update.
 	 *
+	 * @throws WC_REST_Exception When a new line item's product doesn't exist.
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
@@ -729,8 +740,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
 
+		$this->check_new_line_item_products( $request['line_items'] );
+
+		$item_types = array( 'shipping_lines', 'line_items', 'fee_lines', 'coupon_lines' );
+
 		// Handle all writable props.
-		foreach ( $data_keys as $key ) {
+		foreach ( array_diff( $data_keys, $item_types ) as $key ) {
 			$value = $request[ $key ];
 
 			if ( ! is_null( $value ) ) {
@@ -741,22 +756,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					case 'billing':
 					case 'shipping':
 						$this->update_address( $order, $value, $key );
-						break;
-					case 'line_items':
-					case 'shipping_lines':
-					case 'fee_lines':
-					case 'coupon_lines':
-						if ( is_array( $value ) ) {
-							foreach ( $value as $item ) {
-								if ( is_array( $item ) ) {
-									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
-										$order->remove_item( $item['id'] );
-									} else {
-										$this->set_item( $order, $key, $item );
-									}
-								}
-							}
-						}
 						break;
 					case 'meta_data':
 						if ( is_array( $value ) ) {
@@ -770,6 +769,23 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							$order->{"set_{$key}"}( $value );
 						}
 						break;
+				}
+			}
+		}
+
+		// Set items once the address is known, shipping lines first, so new line items are priced at the order's tax location (the base address for local pickup).
+		foreach ( array_intersect( $item_types, $data_keys ) as $key ) {
+			if ( ! is_array( $request[ $key ] ) ) {
+				continue;
+			}
+
+			foreach ( $request[ $key ] as $item ) {
+				if ( is_array( $item ) ) {
+					if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
+						$order->remove_item( $item['id'] );
+					} else {
+						$this->set_item( $order, $key, $item );
+					}
 				}
 			}
 		}
@@ -885,10 +901,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$product_id = (int) $posted['product_id'];
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];
-		} elseif ( 'update' === $action ) {
+		} elseif ( 'update' === $action || $this->is_custom_line_item( $posted ) ) {
 			$product_id = 0;
 		} else {
-			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
+			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required. For a custom item, send a name and total instead.', 'woocommerce' ), 400 );
 		}
 		return $product_id;
 	}
@@ -962,6 +979,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			&& array_key_exists( 'variation_id', $posted )
 			&& 0 === (int) $posted['variation_id'];
 
+		// Only new items are checked, so orders whose products were deleted later stay editable.
+		// prepare_object_for_database() already checks them up front, but subclasses that skip it, like Subscriptions, rely on this check.
+		if ( 'create' === $action ) {
+			$this->check_line_item_product( $posted, $product );
+		}
+
 		if ( $clear_variation_id && $product instanceof WC_Product_Variation ) {
 			$product = wc_get_product( $current_product_id );
 		}
@@ -996,7 +1019,15 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 			if ( 'create' === $action ) {
 				$quantity = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
-				$total    = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
+				$order    = $this->order_for_item;
+				$total    = wc_get_price_excluding_tax(
+					$product,
+					array(
+						'qty'          => $quantity,
+						'order'        => $order,
+						'tax_location' => $order ? $order->get_taxable_location() : array(),
+					)
+				);
 				$item->set_total( $total );
 				$item->set_subtotal( $total );
 			}
@@ -1124,7 +1155,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Prepare item data.
-		$item = $this->$method( $posted, $action, $item );
+		$this->order_for_item = $order;
+		try {
+			$item = $this->$method( $posted, $action, $item );
+		} finally {
+			$this->order_for_item = null;
+		}
 
 		/**
 		 * Allow extensions be notified before the item is saved.

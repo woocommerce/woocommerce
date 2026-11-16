@@ -110,7 +110,7 @@ class WooCommercePayments {
 			sprintf(
 				/* translators: 1: opening link tag, 2: closing tag */
 				__( 'By clicking "Get started", you agree to our %1$sTerms of Service%2$s', 'woocommerce' ),
-				'<a href="https://wordpress.com/tos/" target="_blank">',
+				'<a href="https://automattic.com/tos/" target="_blank">',
 				'</a>'
 			)
 		);
