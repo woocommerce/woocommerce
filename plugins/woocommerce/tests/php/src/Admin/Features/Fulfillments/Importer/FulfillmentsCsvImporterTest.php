@@ -4,13 +4,29 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Importer;
 
 require_once __DIR__ . '/FulfillmentsCsvReadTracker.php';
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentException;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsCsvImporter;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
+use WC_Data_Store;
+use WC_Order;
 
 /**
  * Tests for the Fulfillments CSV importer service.
  */
 class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * Column mapping the import tests use; their CSVs list the columns in this order.
+	 */
+	private const IMPORT_MAPPING = array(
+		0 => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+		1 => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+		2 => FulfillmentsCsvImporter::COL_PROVIDER,
+		3 => FulfillmentsCsvImporter::COL_TRACKING_URL,
+		4 => FulfillmentsCsvImporter::COL_ITEMS,
+	);
 
 	/**
 	 * Paths to temporary CSV files created by tests; cleaned up in tearDown.
@@ -62,6 +78,58 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		file_put_contents( $path, $content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
 		$this->temp_files[] = $path;
 		return $path;
+	}
+
+	/**
+	 * Import a CSV the way the import run does: a new importer per chunk, each resuming from the last result.
+	 *
+	 * @param string               $csv     CSV content with its columns in the order of IMPORT_MAPPING.
+	 * @param array<string, mixed> $options Importer options.
+	 * @param int                  $limit   Data rows per chunk.
+	 * @return array{counts: array<string, int>, rows: array<int, array<string, mixed>>, chunks: int}
+	 */
+	private function import_csv( string $csv, array $options = array(), int $limit = 200 ): array {
+		$file   = $this->make_csv( $csv );
+		$state  = array();
+		$counts = array_fill_keys( array( 'created', 'updated', 'skipped', 'failed', 'notified' ), 0 );
+		$rows   = array();
+		$chunks = 0;
+		do {
+			$chunk = ( new FulfillmentsCsvImporter( $file, $options ) )->import_chunk( $limit, self::IMPORT_MAPPING, $state );
+			$this->assertArrayNotHasKey( 'error', $chunk );
+			foreach ( $chunk['counts'] as $key => $count ) {
+				$counts[ $key ] += $count;
+			}
+			$rows  = array_merge( $rows, $chunk['rows'] );
+			$state = $chunk;
+			++$chunks;
+		} while ( ! $chunk['eof'] && $chunks < 20 );
+
+		return array(
+			'counts' => $counts,
+			'rows'   => $rows,
+			'chunks' => $chunks,
+		);
+	}
+
+	/**
+	 * Fulfillments of an order that are not deleted.
+	 *
+	 * @param WC_Order $order Order.
+	 * @return array<int, Fulfillment>
+	 */
+	private function fulfillments_of( WC_Order $order ): array {
+		return WC_Data_Store::load( 'order-fulfillment' )->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+	}
+
+	/**
+	 * Counts with the given values and zero for the rest.
+	 *
+	 * @param array<string, int> $values Non-zero counts.
+	 * @return array<string, int>
+	 */
+	private static function counts( array $values ): array {
+		return array_merge( array_fill_keys( array( 'created', 'updated', 'skipped', 'failed', 'notified' ), 0 ), $values );
 	}
 
 	/**
@@ -962,5 +1030,269 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $expected, FulfillmentsCsvImporter::resolve_chunk_size( $notify ) );
 		$this->assertSame( array( 200, $notify ), $received, 'The filter receives the default size and the notify flag' );
+	}
+
+	/**
+	 * @testdox A valid row creates a fulfilled fulfillment covering every order item at its ordered quantity.
+	 */
+	public function test_valid_row_creates_a_fulfilled_fulfillment_with_every_order_item(): void {
+		$order = OrderHelper::create_order();
+		$id    = $order->get_id();
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,ups,https://example.com/t/TRK-1\n" );
+
+		$this->assertSame( self::counts( array( 'created' => 1 ) ), $result['counts'] );
+		$fulfillments = $this->fulfillments_of( $order );
+		$this->assertCount( 1, $fulfillments );
+		$fulfillment = $fulfillments[0];
+		$this->assertSame(
+			array(
+				'row'            => 2,
+				'order_number'   => (string) $id,
+				'status'         => 'created',
+				'message'        => 'Fulfillment created.',
+				'order_id'       => $id,
+				'fulfillment_id' => $fulfillment->get_id(),
+				'notified'       => false,
+			),
+			$result['rows'][0]
+		);
+		$this->assertTrue( $fulfillment->get_is_fulfilled() );
+		$this->assertSame( 'TRK-1', $fulfillment->get_tracking_number() );
+		$this->assertSame( 'ups', $fulfillment->get_shipment_provider() );
+		$this->assertSame( 'https://example.com/t/TRK-1', $fulfillment->get_tracking_url() );
+		$item = current( $order->get_items() );
+		$this->assertEquals(
+			array(
+				array(
+					'item_id' => $item->get_id(),
+					'qty'     => 4,
+				),
+			),
+			$fulfillment->get_items(),
+			'A row without an items cell fulfills every line item'
+		);
+	}
+
+	/**
+	 * @testdox Each invalid row fails with its own code while the valid rows of the file still import.
+	 */
+	public function test_invalid_rows_fail_with_a_code_while_the_rest_imports(): void {
+		$order    = OrderHelper::create_order();
+		$id       = $order->get_id();
+		$no_items = wc_create_order()->get_id();
+		add_filter(
+			'woocommerce_fulfillment_before_create',
+			function ( $fulfillment ) {
+				if ( 'TRK-BLOCKED' === $fulfillment->get_tracking_number() ) {
+					throw new FulfillmentException( 'Blocked by an extension.' );
+				}
+				return $fulfillment;
+			}
+		);
+
+		$result = $this->import_csv(
+			"order_number,tracking_number,shipment_provider,tracking_url\n"
+			. ",TRK-A,ups,\n{$id},,ups,\n{$id},TRK-B,,\n999999999,TRK-C,ups,\nINV-1,TRK-D,ups,\n"
+			. "{$id},TRK-E,ups,javascript:alert(1)\n{$id},TRK-F,ups,//example.com/t\n{$id},TRK-G,ups,/wp-admin/\n{$id},TRK-H,ups,ftp://example.com/t\n"
+			. "{$no_items},TRK-I,ups,\n{$id},TRK-BLOCKED,ups,\n{$id},TRK-OK,ups,http://example.com/t\n"
+		);
+
+		$this->assertSame(
+			array( 'missing_order_number', 'missing_tracking_number', 'missing_provider', 'order_not_found', 'order_not_found', 'invalid_tracking_url', 'invalid_tracking_url', 'invalid_tracking_url', 'invalid_tracking_url', 'no_items', 'save_failed', null ),
+			array_map(
+				static function ( $row ) {
+					return $row['code'] ?? null;
+				},
+				$result['rows']
+			)
+		);
+		$this->assertSame(
+			self::counts(
+				array(
+					'created' => 1,
+					'failed'  => 11,
+				)
+			),
+			$result['counts']
+		);
+		$this->assertSame( range( 2, 13 ), array_column( $result['rows'], 'row' ) );
+		$this->assertSame( 'Blocked by an extension.', $result['rows'][10]['message'], 'An extension message from a blocked save reaches the merchant' );
+		$this->assertSame( 'INV-1', $result['rows'][4]['order_number'], 'A failed row still names the order number from the file' );
+		$fulfillments = $this->fulfillments_of( $order );
+		$this->assertCount( 1, $fulfillments );
+		$this->assertSame( 'http://example.com/t', $fulfillments[0]->get_tracking_url() );
+	}
+
+	/**
+	 * @testdox A repeated order and tracking number pair is skipped across chunks, and a failed row does not count as seen.
+	 */
+	public function test_duplicate_pairs_are_skipped_after_the_first_imported_row(): void {
+		$order = OrderHelper::create_order();
+		$other = OrderHelper::create_order();
+		$id    = $order->get_id();
+
+		$result = $this->import_csv(
+			"order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,ups,ftp://bad\n{$id},trk-1,ups,\n{$id},TRK-1,fedex,\n{$other->get_id()},TRK-1,ups,\n",
+			array(),
+			1
+		);
+
+		$this->assertSame( array( 'failed', 'created', 'skipped', 'created' ), array_column( $result['rows'], 'status' ) );
+		$this->assertSame( 'Duplicate order and tracking number in this file.', $result['rows'][2]['message'] );
+		$fulfillments = $this->fulfillments_of( $order );
+		$this->assertCount( 1, $fulfillments );
+		$this->assertSame( 'ups', $fulfillments[0]->get_shipment_provider(), 'The skipped duplicate must not change the imported row' );
+		$this->assertCount( 1, $this->fulfillments_of( $other ) );
+	}
+
+	/**
+	 * @testdox A row whose tracking number matches a stored fulfillment of the order, in any case, updates it and keeps its URL when the cell is blank.
+	 */
+	public function test_existing_fulfillment_with_the_same_tracking_number_is_updated(): void {
+		$order = OrderHelper::create_order();
+		$id    = $order->get_id();
+		$this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$id},TRK-1,ups,https://example.com/1\n" );
+		$stored_id = $this->fulfillments_of( $order )[0]->get_id();
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url\n{$id},trk-1,fedex,\n" );
+
+		$this->assertSame( self::counts( array( 'updated' => 1 ) ), $result['counts'] );
+		$this->assertSame( 'Fulfillment updated.', $result['rows'][0]['message'] );
+		$this->assertSame( $stored_id, $result['rows'][0]['fulfillment_id'] );
+		$fulfillments = $this->fulfillments_of( $order );
+		$this->assertCount( 1, $fulfillments );
+		$this->assertSame( 'trk-1', $fulfillments[0]->get_tracking_number() );
+		$this->assertSame( 'fedex', $fulfillments[0]->get_shipment_provider() );
+		$this->assertSame( 'https://example.com/1', $fulfillments[0]->get_tracking_url() );
+	}
+
+	/**
+	 * @testdox A matching fulfillment is left alone when updates are off or when it is locked.
+	 * @testWith [false, false, "skipped", null]
+	 *           [true, true, "failed", "fulfillment_locked"]
+	 *
+	 * @param bool        $update_existing Importer update_existing option.
+	 * @param bool        $locked          Whether the stored fulfillment is locked.
+	 * @param string      $status          Expected row status.
+	 * @param string|null $code            Expected row code.
+	 */
+	public function test_matching_fulfillment_is_kept_when_updates_are_off_or_it_is_locked( bool $update_existing, bool $locked, string $status, ?string $code ): void {
+		$order = OrderHelper::create_order();
+		$id    = $order->get_id();
+		$this->import_csv( "order_number,tracking_number,shipment_provider\n{$id},TRK-1,ups\n" );
+		$stored = $this->fulfillments_of( $order )[0];
+		$stored->set_locked( $locked );
+		$stored->save();
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$id},TRK-1,fedex\n", array( 'update_existing' => $update_existing ) );
+
+		$this->assertSame( $status, $result['rows'][0]['status'] );
+		$this->assertSame( $code, $result['rows'][0]['code'] ?? null );
+		$this->assertSame( 'ups', $this->fulfillments_of( $order )[0]->get_shipment_provider() );
+	}
+
+	/**
+	 * @testdox The resolve-order filter maps custom order numbers, runs for primed orders, and a non-order result fails the row.
+	 */
+	public function test_resolve_order_filter_decides_the_order(): void {
+		$order = OrderHelper::create_order();
+		$other = OrderHelper::create_order();
+		$calls = array();
+		add_filter(
+			'woocommerce_fulfillments_csv_importer_resolve_order',
+			function ( $resolved, $order_number ) use ( $order, $other, &$calls ) {
+				$calls[] = $order_number;
+				if ( 'INV-7' === $order_number ) {
+					return $order;
+				}
+				return (string) $other->get_id() === $order_number ? 'not an order' : $resolved;
+			},
+			10,
+			2
+		);
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\nINV-7,TRK-1,ups\n{$other->get_id()},TRK-2,ups\n{$order->get_id()},TRK-3,ups\nINV-7,TRK-4,ups\n" );
+
+		$this->assertSame( array( 'created', 'failed', 'created', 'created' ), array_column( $result['rows'], 'status' ) );
+		$this->assertSame( $order->get_id(), $result['rows'][0]['order_id'] );
+		$this->assertSame( 'order_not_found', $result['rows'][1]['code'] );
+		$this->assertSame( array( 'INV-7', (string) $other->get_id(), (string) $order->get_id() ), $calls, 'The filter runs once per order number in a chunk' );
+		$this->assertCount( 0, $this->fulfillments_of( $other ) );
+	}
+
+	/**
+	 * @testdox The orders a chunk names by ID are loaded in one query.
+	 */
+	public function test_chunk_orders_are_loaded_in_one_query(): void {
+		$first   = OrderHelper::create_order();
+		$second  = OrderHelper::create_order();
+		$queries = array();
+		add_filter(
+			'woocommerce_order_query_args',
+			function ( $args ) use ( &$queries ) {
+				if ( isset( $args['post__in'] ) ) {
+					$queries[] = $args['post__in'];
+				}
+				return $args;
+			}
+		);
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$second->get_id()},TRK-1,ups\nINV-1,TRK-2,ups\n{$first->get_id()},TRK-3,ups\n{$second->get_id()},TRK-4,ups\n" );
+
+		$this->assertSame( array( array( $second->get_id(), $first->get_id() ) ), $queries );
+		$this->assertSame( array( $second->get_id(), $first->get_id(), $second->get_id() ), array_column( array_values( array_filter( $result['rows'], fn( $row ) => 'created' === $row['status'] ) ), 'order_id' ) );
+	}
+
+	/**
+	 * @testdox Chunks resume from the previous result, keep physical row numbers across blank lines and report eof only at the end.
+	 */
+	public function test_chunks_resume_from_the_previous_result(): void {
+		$id  = OrderHelper::create_order()->get_id();
+		$csv = "order_number,tracking_number,shipment_provider\n\n{$id},TRK-1,ups\n{$id},TRK-2,\"ups, ground\"\n\n,,\n{$id},TRK-3,ups\n{$id},TRK-4,ups\n{$id},TRK-5,ups\n";
+
+		$result = $this->import_csv( $csv, array(), 2 );
+
+		$this->assertSame( 3, $result['chunks'], 'Five rows in chunks of two take three chunks' );
+		$this->assertSame( array( 3, 4, 7, 8, 9 ), array_column( $result['rows'], 'row' ) );
+		$this->assertSame( self::counts( array( 'created' => 5 ) ), $result['counts'] );
+	}
+
+	/**
+	 * @testdox The chunk limit falls back to and is capped by the resolved chunk size.
+	 * @testWith [100, 2]
+	 *           [0, 2]
+	 *           [1, 1]
+	 *
+	 * @param int $limit    Requested limit.
+	 * @param int $consumed Expected rows consumed.
+	 */
+	public function test_chunk_limit_is_capped_by_the_resolved_chunk_size( int $limit, int $consumed ): void {
+		add_filter( 'woocommerce_fulfillments_csv_importer_chunk_size', fn() => 2 );
+		$id  = OrderHelper::create_order()->get_id();
+		$sut = new FulfillmentsCsvImporter( $this->make_csv( "order_number,tracking_number,shipment_provider\n{$id},T-1,ups\n{$id},T-2,ups\n{$id},T-3,ups\n" ) );
+
+		$chunk = $sut->import_chunk( $limit, self::IMPORT_MAPPING );
+
+		$this->assertSame( $consumed, $chunk['consumed'] );
+		$this->assertCount( $consumed, $chunk['rows'] );
+		$this->assertFalse( $chunk['eof'] );
+	}
+
+	/**
+	 * @testdox A chunk-level problem returns an error and writes nothing.
+	 */
+	public function test_chunk_errors_write_nothing(): void {
+		$order = OrderHelper::create_order();
+		$sut   = new FulfillmentsCsvImporter( $this->make_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},T-1,ups\n" ) );
+
+		$missing_column = $sut->import_chunk( 10, array_slice( self::IMPORT_MAPPING, 0, 2, true ) );
+		$missing_file   = ( new FulfillmentsCsvImporter( '/path/that/does/not/exist.csv' ) )->import_chunk( 10, self::IMPORT_MAPPING );
+
+		$this->assertSame( array( 'error' ), array_keys( $missing_column ) );
+		$this->assertSame( 'missing_required_columns', $missing_column['error']['code'] );
+		$this->assertStringContainsString( 'shipment_provider', $missing_column['error']['message'] );
+		$this->assertSame( 'file_not_readable', $missing_file['error']['code'] );
+		$this->assertCount( 0, $this->fulfillments_of( $order ) );
 	}
 }
