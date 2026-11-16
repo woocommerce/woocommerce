@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Importer;
 
 require_once __DIR__ . '/FulfillmentsCsvReadTracker.php';
 
-use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentException;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsCsvImporter;
@@ -1494,45 +1493,24 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	 * @testdox A row whose order fulfillments cannot be read fails without caching the failure.
 	 */
 	public function test_unreadable_fulfillments_fail_the_row(): void {
+		global $wpdb;
 		$order = OrderHelper::create_order();
 		$reads = 0;
-		$store = new class( $reads ) extends FulfillmentsDataStore {
-			/**
-			 * Read counter shared with the test.
-			 *
-			 * @var int
-			 */
-			private $reads;
-
-			/**
-			 * Constructor.
-			 *
-			 * @param int $reads Read counter.
-			 */
-			public function __construct( int &$reads ) {
-				$this->reads = &$reads;
+		add_filter(
+			'query',
+			function ( $query ) use ( &$reads ) {
+				if ( false !== strpos( $query, 'wc_order_fulfillments WHERE entity_type' ) ) {
+					++$reads;
+					return str_replace( 'wc_order_fulfillments', 'wc_order_fulfillments_missing', $query );
+				}
+				return $query;
 			}
-
-			// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn -- The test double only throws.
-			/**
-			 * Fail every read.
-			 *
-			 * @param string $entity_type  Entity type.
-			 * @param string $entity_id    Entity ID.
-			 * @param bool   $with_deleted Whether to include deleted fulfillments.
-			 * @return array
-			 * @throws \Exception Always.
-			 */
-			public function read_fulfillments( string $entity_type, string $entity_id, bool $with_deleted = false ): array {
-				++$this->reads;
-				throw new \Exception( 'Table is locked.' );
-			}
-			// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn
-		};
-		add_filter( 'woocommerce_order-fulfillment_data_store', fn() => $store );
+		);
+		$suppress = $wpdb->suppress_errors( true );
 
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,ups\n{$order->get_id()},TRK-2,ups\n" );
 
+		$wpdb->suppress_errors( $suppress );
 		$this->assertSame( array( FulfillmentsCsvImporter::CODE_STORE_READ_FAILED, FulfillmentsCsvImporter::CODE_STORE_READ_FAILED ), array_column( $result['rows'], 'code' ) );
 		$this->assertSame( 2, $reads, 'A failed read is not cached, so the next row reads again' );
 	}

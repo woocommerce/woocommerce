@@ -921,23 +921,24 @@ class FulfillmentsCsvImporter {
 	 */
 	private function find_existing_fulfillment( int $order_id, string $tracking_number ): ?Fulfillment {
 		if ( ! isset( $this->fulfillments_cache[ $order_id ] ) ) {
-			try {
-				/**
-				 * Fulfillments data store.
-				 *
-				 * @var FulfillmentsDataStore $store
-				 */
-				$store = WC_Data_Store::load( 'order-fulfillment' );
-
-				$this->fulfillments_cache[ $order_id ] = $store->read_fulfillments( WC_Order::class, (string) $order_id );
-			} catch ( \Throwable $e ) {
+			global $wpdb;
+			/**
+			 * Fulfillments data store.
+			 *
+			 * @var FulfillmentsDataStore $store
+			 */
+			$store        = WC_Data_Store::load( 'order-fulfillment' );
+			$fulfillments = $store->read_fulfillments( WC_Order::class, (string) $order_id );
+			// A failed query reads as no fulfillments, which would turn an update into a duplicate.
+			if ( '' !== $wpdb->last_error ) {
 				wc_get_logger()->error(
-					sprintf( 'Fulfillments import could not read the fulfillments of order %1$d: %2$s', $order_id, $e->getMessage() ),
+					sprintf( 'Fulfillments import could not read the fulfillments of order %1$d: %2$s', $order_id, $wpdb->last_error ),
 					array( 'source' => 'fulfillments-importer' )
 				);
-				// Not cached, so a passing store error cannot turn a later update into a duplicate.
+				// Not cached, so the next row of this order reads again.
 				throw new \RuntimeException( 'fulfillments_read_failed' );
 			}
+			$this->fulfillments_cache[ $order_id ] = $fulfillments;
 		}
 
 		$needle = strtolower( $tracking_number );
