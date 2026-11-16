@@ -5,14 +5,17 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Tax;
 
 use Automattic\WooCommerce\Enums\TaxBasedOn;
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
  * Decides when shipping-based tax should use the billing address because nothing in the cart ships.
  *
+ * Every guard falls back to the shipping address, so an interrupted cart load or a re-entrant lookup gets the pre-fallback result.
+ *
  * @internal
  * @since 11.4.0
  */
-class CartWithoutShipping {
+class CartWithoutShipping implements RegisterHooksInterface {
 
 	/**
 	 * Whether the cart shipping check is running, so re-entrant calls from needs_shipping filter callbacks are skipped.
@@ -32,6 +35,7 @@ class CartWithoutShipping {
 	 * Whether WC_Cart_Session is loading the cart from the session, so the cart holds only some of its items.
 	 *
 	 * Tracked with hooks rather than did_action() counters, because code that reloads the cart may reset those counters.
+	 * If a load is interrupted by an exception, the flag stays set until the next load finishes.
 	 *
 	 * @var bool
 	 */

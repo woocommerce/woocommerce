@@ -282,6 +282,29 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Keeps the shipping address after a cart load from the session is interrupted by an exception.
+	 */
+	public function test_keeps_shipping_address_after_interrupted_cart_load(): void {
+		$this->throw_while_loading_cart();
+		$this->add_product_to_cart( true );
+
+		$this->assertFalse( WC()->cart->needs_shipping(), 'The cart should not need shipping.' );
+		$this->assertSame( 'US', $this->customer->get_taxable_address()[0], 'Lookups after an interrupted load should keep the shipping address.' );
+	}
+
+	/**
+	 * @testdox Uses the billing address again once a cart load after an interrupted one finishes.
+	 */
+	public function test_uses_billing_address_after_cart_reload_following_interrupted_load(): void {
+		$this->throw_while_loading_cart();
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+
+		WC()->cart->get_cart();
+
+		$this->assertSame( 'GB', $this->customer->get_taxable_address()[0], 'A finished reload should restore the billing address fallback.' );
+	}
+
+	/**
 	 * @testdox Does not recurse when a cart contents callback resolves the taxable address and the cart is never loaded from the session.
 	 */
 	public function test_does_not_recurse_when_cart_contents_callback_resolves_taxable_address(): void {
@@ -676,6 +699,27 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 			);
 		}
 		WC()->session->set( 'cart', $cart );
+	}
+
+	/**
+	 * Seed a virtual-only session cart and load it with an item callback that throws, leaving the load unfinished.
+	 */
+	private function throw_while_loading_cart(): void {
+		$this->seed_session_cart( array( 'virtual' => $this->create_product( true ) ) );
+		$this->forget_cart_was_loaded();
+		$throwing = static function () {
+			throw new \RuntimeException( 'Callback failure.' );
+		};
+		add_filter( 'woocommerce_get_cart_item_from_session', $throwing );
+
+		try {
+			WC()->cart->get_cart();
+			$this->fail( 'The callback exception should reach the caller.' );
+		} catch ( \RuntimeException $e ) {
+			unset( $e );
+		} finally {
+			remove_filter( 'woocommerce_get_cart_item_from_session', $throwing );
+		}
 	}
 
 	/**
