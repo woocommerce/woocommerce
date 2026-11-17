@@ -1,3 +1,5 @@
 Significance: minor
 Type: dev
 Comment: Add an experimental shared registry and typed personal-data declarations for abilities.
+
+Add an experimental shared field registry for WooCommerce abilities.
