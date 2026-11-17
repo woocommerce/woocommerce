@@ -92,6 +92,13 @@ class RoutesController {
 				Routes\V1\Ucp\CartsById::IDENTIFIER      => Routes\V1\Ucp\CartsById::class,
 				Routes\V1\Ucp\CartsCancel::IDENTIFIER    => Routes\V1\Ucp\CartsCancel::class,
 			],
+			'ucp_checkout'  => [
+				// Gated further by Utils::is_checkout_enabled().
+				Routes\V1\Ucp\CheckoutSessions::IDENTIFIER => Routes\V1\Ucp\CheckoutSessions::class,
+				Routes\V1\Ucp\CheckoutSessionsById::IDENTIFIER => Routes\V1\Ucp\CheckoutSessionsById::class,
+				Routes\V1\Ucp\CheckoutSessionsComplete::IDENTIFIER => Routes\V1\Ucp\CheckoutSessionsComplete::class,
+				Routes\V1\Ucp\CheckoutSessionsCancel::IDENTIFIER => Routes\V1\Ucp\CheckoutSessionsCancel::class,
+			],
 		];
 	}
 
@@ -109,6 +116,10 @@ class RoutesController {
 
 		if ( Utils::is_enabled() ) {
 			$this->register_routes( 'ucp', 'wc/ucp/v1' );
+
+			if ( Utils::is_checkout_enabled() ) {
+				$this->register_routes( 'ucp_checkout', 'wc/ucp/v1' );
+			}
 		}
 	}
 

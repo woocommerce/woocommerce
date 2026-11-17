@@ -676,4 +676,117 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 
 		return $order->get_id();
 	}
+
+	/**
+	 * @testdox Should return the exact total of matching orders on partial, empty and out-of-range pages.
+	 *
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
+	 */
+	public function test_returns_total_across_pages( bool $hpos ): void {
+		$this->use_storage( $hpos );
+		$order_ids = array();
+		foreach ( range( 1, 11 ) as $unused ) {
+			$order_ids[] = OrderHelper::create_order()->get_id();
+		}
+
+		$last = OrdersQuery::execute( array( 'page' => 2 ) );
+		$this->assertSame( 11, $last['total'] );
+		$this->assertSame( 2, $last['total_pages'] );
+		$this->assertCount( 1, $last['orders'] );
+
+		$beyond = OrdersQuery::execute( array( 'page' => 3 ) );
+		$this->assertSame( array(), $beyond['orders'] );
+		$this->assertSame( 11, $beyond['total'], 'An out-of-range page should keep the matching total.' );
+		$this->assertSame( 2, $beyond['total_pages'] );
+
+		$none = OrdersQuery::execute( array( 'status' => array( OrderStatus::REFUNDED ) ) );
+		$this->assertSame( 0, $none['total'] );
+		$this->assertSame( 0, $none['total_pages'] );
+		$this->assertSame( array(), $none['orders'] );
+		$none_beyond = OrdersQuery::execute(
+			array(
+				'status' => array( OrderStatus::REFUNDED ),
+				'page'   => 3,
+			)
+		);
+		$this->assertSame( 0, $none_beyond['total'] );
+		$this->assertSame( 0, $none_beyond['total_pages'] );
+
+		$id = OrdersQuery::execute( array( 'id' => $order_ids[0] ) );
+		$this->assertSame( 1, $id['total'] );
+		$this->assertSame( 1, $id['total_pages'] );
+
+		$schema = OrdersQuery::get_registration_args()['output_schema'];
+		$this->assertTrue( rest_validate_value_from_schema( $last, $schema, 'orders' ) );
+	}
+
+	/**
+	 * @testdox Should preserve filtered page sizes on full, partial and empty pages.
+	 *
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
+	 */
+	public function test_pagination_follows_filtered_page_size( bool $hpos ): void {
+		$this->use_storage( $hpos );
+		for ( $i = 0; $i < 11; ++$i ) {
+			wc_create_order( array( 'status' => OrderStatus::PENDING ) );
+		}
+
+		$callback = static function ( $args ) {
+			if ( 10 === $args['limit'] ) {
+				$args['limit'] = 5;
+			}
+			return $args;
+		};
+		add_filter( 'woocommerce_order_query_args', $callback );
+		try {
+			foreach ( array(
+				1 => 5,
+				3 => 1,
+				4 => 0,
+			) as $page => $rows ) {
+				$result = OrdersQuery::execute(
+					array(
+						'page'     => $page,
+						'per_page' => 10,
+					)
+				);
+				$this->assertCount( $rows, $result['orders'] );
+				$this->assertSame( 11, $result['total'] );
+				$this->assertSame( 3, $result['total_pages'] );
+				$this->assertSame( 10, $result['per_page'] );
+			}
+		} finally {
+			remove_filter( 'woocommerce_order_query_args', $callback );
+		}
+	}
+
+	/**
+	 * @testdox Should narrow the total with extension query filters.
+	 *
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
+	 */
+	public function test_total_follows_extension_query_filter( bool $hpos ): void {
+		$this->use_storage( $hpos );
+		$kept     = OrderHelper::create_order();
+		$excluded = OrderHelper::create_order();
+
+		$callback = static function ( $args ) use ( $excluded ) {
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+				$args['exclude'] = array( $excluded->get_id() );
+			} else {
+				$args['post__not_in'] = array( $excluded->get_id() );
+			}
+			return $args;
+		};
+		$hook     = $hpos ? 'woocommerce_order_query_args' : 'woocommerce_order_data_store_cpt_get_orders_query';
+		add_filter( $hook, $callback );
+		$result = OrdersQuery::execute( array() );
+		remove_filter( $hook, $callback );
+
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( $kept->get_id(), $result['orders'][0]['id'] );
+	}
 }
