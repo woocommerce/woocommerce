@@ -188,10 +188,9 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$results = wc_get_products( $args );
 
 		$products = is_object( $results ) && isset( $results->products ) ? $results->products : array();
-		$pages    = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $products ) > 0 ? 1 : 0 );
 		$total    = is_object( $results ) && isset( $results->total ) ? (int) $results->total : count( $products );
 
-		// Posts storage skips its count when the requested page has no rows.
+		// Queries skip their count when the requested page has no rows.
 		if ( 0 === $total && empty( $products ) && $page > 1 ) {
 			$count_args = array_merge(
 				$args,
@@ -219,7 +218,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		return array(
 			'products'    => $products,
 			'total'       => $total,
-			'total_pages' => $pages,
+			'total_pages' => (int) ceil( $total / $per_page ),
 			'page'        => $page,
 			'per_page'    => $per_page,
 		);

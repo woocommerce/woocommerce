@@ -336,6 +336,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 3, $page_one['total'] );
 		$this->assertSame( 3, $page_two['total'] );
 		$this->assertSame( 3, $beyond['total'] );
+		$this->assertSame( 2, $beyond['total_pages'] );
 		$this->assertSame( array(), $beyond['products'] );
 		$this->assertSame( 1, $plain['total'] );
 		$this->assertSame( 2, $page_one['total_pages'] );
@@ -516,6 +517,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			);
 			$this->assertSame( 2, $output['total'] );
 			$this->assertSame( 2, $beyond['total'] );
+			$this->assertSame( 2, $beyond['total_pages'] );
 			$this->assertSame( array(), $beyond['orders'] );
 			$this->assertSame( 2, $output['total_pages'] );
 			$this->assertContains( $output['orders'][0]['id'], $tagged );

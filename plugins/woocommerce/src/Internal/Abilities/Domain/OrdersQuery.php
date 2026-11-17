@@ -228,7 +228,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$orders  = is_object( $results ) && isset( $results->orders ) ? $results->orders : array();
 		$total   = is_object( $results ) && isset( $results->total ) ? (int) $results->total : count( $orders );
 
-		// Posts storage skips its count when the requested page has no rows.
+		// Queries skip their count when the requested page has no rows.
 		if ( 0 === $total && empty( $orders ) && $page > 1 ) {
 			$count_args = array_merge(
 				$args,
@@ -249,7 +249,6 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				}
 			)
 		);
-		$pages  = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $orders ) > 0 ? 1 : 0 );
 
 		$orders = self::format_orders_for_response( $orders, $includes );
 		if ( is_wp_error( $orders ) ) {
@@ -259,7 +258,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		return array(
 			'orders'      => $orders,
 			'total'       => $total,
-			'total_pages' => $pages,
+			'total_pages' => (int) ceil( $total / $per_page ),
 			'page'        => $page,
 			'per_page'    => $per_page,
 		);

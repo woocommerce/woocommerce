@@ -224,9 +224,11 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 		$beyond = ProductsQuery::execute( array( 'page' => 3 ) );
 		$this->assertSame( array(), $beyond['products'] );
 		$this->assertSame( 11, $beyond['total'], 'An out-of-range page should keep the matching total.' );
+		$this->assertSame( 2, $beyond['total_pages'] );
 
 		$none = ProductsQuery::execute( array( 'search' => 'no-such-product-xyz' ) );
 		$this->assertSame( 0, $none['total'] );
+		$this->assertSame( 0, $none['total_pages'] );
 		$this->assertSame( array(), $none['products'] );
 		$none_beyond = ProductsQuery::execute(
 			array(
@@ -235,9 +237,11 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertSame( 0, $none_beyond['total'] );
+		$this->assertSame( 0, $none_beyond['total_pages'] );
 
 		$id = ProductsQuery::execute( array( 'id' => $product_ids[0] ) );
 		$this->assertSame( 1, $id['total'] );
+		$this->assertSame( 1, $id['total_pages'] );
 
 		$schema = ProductsQuery::get_registration_args()['output_schema'];
 		$this->assertTrue( rest_validate_value_from_schema( $last, $schema, 'products' ) );

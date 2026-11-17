@@ -698,9 +698,11 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 		$beyond = OrdersQuery::execute( array( 'page' => 3 ) );
 		$this->assertSame( array(), $beyond['orders'] );
 		$this->assertSame( 11, $beyond['total'], 'An out-of-range page should keep the matching total.' );
+		$this->assertSame( 2, $beyond['total_pages'] );
 
 		$none = OrdersQuery::execute( array( 'status' => array( OrderStatus::REFUNDED ) ) );
 		$this->assertSame( 0, $none['total'] );
+		$this->assertSame( 0, $none['total_pages'] );
 		$this->assertSame( array(), $none['orders'] );
 		$none_beyond = OrdersQuery::execute(
 			array(
@@ -709,9 +711,11 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertSame( 0, $none_beyond['total'] );
+		$this->assertSame( 0, $none_beyond['total_pages'] );
 
 		$id = OrdersQuery::execute( array( 'id' => $order_ids[0] ) );
 		$this->assertSame( 1, $id['total'] );
+		$this->assertSame( 1, $id['total_pages'] );
 
 		$schema = OrdersQuery::get_registration_args()['output_schema'];
 		$this->assertTrue( rest_validate_value_from_schema( $last, $schema, 'orders' ) );
