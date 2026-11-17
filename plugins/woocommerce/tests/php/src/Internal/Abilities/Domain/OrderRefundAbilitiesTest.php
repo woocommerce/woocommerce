@@ -247,10 +247,12 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	 * @testdox Should return the message of an extension that declines the refund by throwing, and save nothing.
 	 */
 	public function test_returns_declined_refund_message(): void {
-		$order = $this->create_order_without_lines();
+		$order    = $this->create_order_without_lines();
+		$declined = null;
 		add_action(
 			'woocommerce_create_refund',
-			static function () {
+			static function ( $refund ) use ( &$declined ) {
+				$declined = $refund;
 				throw new \Exception( 'Team seats are still in use.' );
 			}
 		);
@@ -266,6 +268,183 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'woocommerce_ability_order_refund_declined', $result->get_error_code() );
 		$this->assertSame( 'Team seats are still in use.', $result->get_error_message() );
 		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+		$this->assertInstanceOf( \WC_Order_Refund::class, $declined );
+		$this->assertSame( 0, $declined->get_id(), 'The refund should be deleted, not only rolled back, for tables without transactions.' );
+	}
+
+	/**
+	 * @testdox Should refuse a repeat of a refund it just made, and return that refund, so a retried call cannot refund twice.
+	 */
+	public function test_refuses_repeated_refund(): void {
+		$order = $this->create_order();
+		$input = array(
+			'id'             => $order->get_id(),
+			'amount'         => '10',
+			'refund_payment' => true,
+		);
+		$first = $this->refund( $input );
+
+		$second = $this->refund( $input );
+
+		$this->assertIsArray( $first, is_wp_error( $first ) ? $first->get_error_message() : '' );
+		$this->assertWPError( $second );
+		$this->assertSame( 'woocommerce_ability_order_refund_duplicate', $second->get_error_code() );
+		$this->assertSame( 409, $second->get_error_data()['status'] );
+		$this->assertSame( $first['refund']['id'], $second->get_error_data()['refund']['id'] );
+		$this->assertSame( array( '10' ), $this->gateway->refunded );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should allow a different refund of the same order right after another one.
+	 */
+	public function test_allows_different_refund_right_after(): void {
+		$order = $this->create_order_without_lines();
+		$this->refund(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '10',
+			)
+		);
+
+		$result = $this->refund(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '5',
+			)
+		);
+
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertCount( 2, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should allow the same refund again once the duplicate window has passed.
+	 */
+	public function test_allows_same_refund_after_window(): void {
+		$order = $this->create_order_without_lines();
+		$input = array(
+			'id'     => $order->get_id(),
+			'amount' => '10',
+		);
+		$first = $this->refund( $input );
+		$this->assertIsArray( $first, is_wp_error( $first ) ? $first->get_error_message() : '' );
+		$refund = wc_get_order( $first['refund']['id'] );
+		$refund->set_date_created( time() - 11 * MINUTE_IN_SECONDS );
+		$refund->save();
+
+		$result = $this->refund( $input );
+
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertCount( 2, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should allow a retry after the gateway refused, since no refund was made.
+	 */
+	public function test_allows_retry_after_gateway_refusal(): void {
+		$order                        = $this->create_order();
+		$input                        = array(
+			'id'             => $order->get_id(),
+			'amount'         => '10',
+			'refund_payment' => true,
+		);
+		$this->gateway->refund_result = new \WP_Error( 'declined', 'Card issuer declined the refund.' );
+		$this->refund( $input );
+		$this->gateway->refund_result = true;
+
+		$result = $this->refund( $input );
+
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should refuse a refund while another refund of the order holds its lock.
+	 */
+	public function test_refuses_refund_while_order_is_locked(): void {
+		$order = $this->create_order_without_lines();
+		add_option( 'woocommerce_ability_order_refund_lock_' . $order->get_id(), time() + MINUTE_IN_SECONDS, '', false );
+
+		$result = $this->refund(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '10',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_in_progress', $result->get_error_code() );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should release the lock of the order after a refund, so the next refund can run.
+	 */
+	public function test_releases_order_lock(): void {
+		$order = $this->create_order_without_lines();
+
+		$this->refund(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '10',
+			)
+		);
+
+		wp_cache_delete( 'notoptions', 'options' );
+		$this->assertFalse( get_option( 'woocommerce_ability_order_refund_lock_' . $order->get_id() ) );
+	}
+
+	/**
+	 * @testdox Should keep the refund and say not to refund again when a hook fails after the gateway refunded.
+	 */
+	public function test_keeps_refund_when_a_later_step_fails(): void {
+		$order = $this->create_order();
+		$input = array(
+			'id'             => $order->get_id(),
+			'amount'         => '10',
+			'refund_payment' => true,
+		);
+		add_action(
+			'woocommerce_order_partially_refunded',
+			static function () {
+				throw new \Exception( 'Loyalty points service is down.' );
+			}
+		);
+
+		$result = $this->refund( $input );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_incomplete', $result->get_error_code() );
+		$this->assertStringContainsString( 'Loyalty points service is down.', $result->get_error_message() );
+		$this->assertTrue( $result->get_error_data()['refunded_payment'] );
+		$refund = wc_get_order( $result->get_error_data()['refund_id'] );
+		$this->assertInstanceOf( \WC_Order_Refund::class, $refund );
+		$this->assertTrue( $refund->get_refunded_payment() );
+		$this->assertSame( array( '10' ), $this->gateway->refunded );
+
+		$retry = $this->refund( $input );
+		$this->assertWPError( $retry );
+		$this->assertSame( 'woocommerce_ability_order_refund_duplicate', $retry->get_error_code() );
+		$this->assertSame( array( '10' ), $this->gateway->refunded );
+	}
+
+	/**
+	 * @testdox Should round the amount to the store decimals before the gateway gets it.
+	 */
+	public function test_rounds_amount_to_store_decimals(): void {
+		$order = $this->create_order();
+
+		$result = $this->refund(
+			array(
+				'id'             => $order->get_id(),
+				'amount'         => '10.004',
+				'refund_payment' => true,
+			)
+		);
+
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertSame( array( '10' ), $this->gateway->refunded );
 	}
 
 	/**
@@ -404,6 +583,19 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	 * @testdox Should create the same refund and fire the same hooks as wc_create_refund().
 	 */
 	public function test_matches_wc_create_refund(): void {
+		$args = array();
+		foreach ( array( 'woocommerce_create_refund', 'woocommerce_refund_created' ) as $hook ) {
+			add_action(
+				$hook,
+				static function ( $refund, $hook_args ) use ( $hook, &$args ) {
+					unset( $refund ); // Avoid parameter not used PHPCS errors.
+					$args[ $hook ][] = $hook_args;
+				},
+				10,
+				2
+			);
+		}
+
 		$legacy_order = $this->create_order();
 		$legacy       = wc_create_refund(
 			array(
@@ -443,6 +635,13 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 
 		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
 		$this->assertSame( $legacy_hooks, $this->fired, 'The hooks should fire in the same order.' );
+		foreach ( $args as $hook => $calls ) {
+			$this->assertCount( 2, $calls, $hook );
+			$this->assertSame( array_keys( $calls[0] ), array_keys( $calls[1] ), "$hook should get the arguments of wc_create_refund()." );
+			$this->assertSame( $legacy_order->get_id(), $calls[0]['order_id'], $hook );
+			$this->assertSame( $order->get_id(), $calls[1]['order_id'], $hook );
+			$this->assertSame( $calls[0]['refund_id'], $calls[1]['refund_id'], $hook );
+		}
 
 		$this->assertInstanceOf( \WC_Order_Refund::class, $legacy );
 		$legacy = wc_get_order( $legacy->get_id() );

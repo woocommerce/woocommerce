@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderRefundAbilityTrait;
 use Automattic\WooCommerce\Internal\Orders\RefundCreator;
 use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -30,6 +31,26 @@ class OrderRefundCreate extends ActionableAbility {
 	 * Ability name.
 	 */
 	public const ABILITY_NAME = 'woocommerce/order-refund-create';
+
+	/**
+	 * Seconds for which a refund blocks the same refund of the order, so a call retried after a timeout cannot refund twice.
+	 */
+	private const DUPLICATE_WINDOW = 10 * MINUTE_IN_SECONDS;
+
+	/**
+	 * Refund meta with the fingerprint of the call that created the refund.
+	 */
+	private const FINGERPRINT_META_KEY = '_woocommerce_ability_refund_fingerprint';
+
+	/**
+	 * Option that locks the refunds of one order, followed by the order ID.
+	 */
+	private const LOCK_OPTION_PREFIX = 'woocommerce_ability_order_refund_lock_';
+
+	/**
+	 * Seconds after which a lock is stale, longer than a gateway call takes, so a crashed request cannot block the order.
+	 */
+	private const LOCK_TTL = 5 * MINUTE_IN_SECONDS;
 
 	/**
 	 * Order of the current call, set by load().
@@ -120,18 +141,20 @@ class OrderRefundCreate extends ActionableAbility {
 	 */
 	public function change( $subject, array $input ) {
 		$order            = $this->order;
+		$decimals         = wc_get_price_decimals();
 		$this->refundable = (float) $order->get_remaining_refund_amount();
 		$prepared         = wc_get_container()->get( DataUtils::class )->prepare_refund_creation_or_error(
 			$order,
 			$input['line_items'] ?? array(),
 			isset( $input['amount'] ),
-			isset( $input['amount'] ) ? wc_format_decimal( $input['amount'] ) : null,
+			isset( $input['amount'] ) ? NumberUtil::round( (float) $input['amount'], $decimals ) : null,
 			'woocommerce-abilities'
 		);
 		if ( is_wp_error( $prepared ) ) {
 			return self::refund_error( $prepared );
 		}
 
+		$amount         = NumberUtil::round( (float) $prepared['amount'], $decimals );
 		$refund_payment = $input['refund_payment'] ?? false;
 		if ( $refund_payment && ! self::gateway_can_refund( $order ) ) {
 			return new \WP_Error(
@@ -141,10 +164,20 @@ class OrderRefundCreate extends ActionableAbility {
 			);
 		}
 
+		$fingerprint = md5(
+			(string) wp_json_encode(
+				array( $order->get_id(), wc_format_decimal( $amount, $decimals ), $prepared['line_items'], $refund_payment, get_current_user_id() )
+			)
+		);
+		$duplicate   = self::find_recent_refund( $order, $fingerprint );
+		if ( null !== $duplicate ) {
+			return self::duplicate_error( $duplicate );
+		}
+
 		$this->creator = new RefundCreator(
 			$order,
 			array(
-				'amount'         => $prepared['amount'],
+				'amount'         => $amount,
 				'reason'         => isset( $input['reason'] ) ? sanitize_textarea_field( $input['reason'] ) : null,
 				'line_items'     => $prepared['line_items'],
 				'refund_payment' => $refund_payment,
@@ -153,8 +186,44 @@ class OrderRefundCreate extends ActionableAbility {
 		);
 
 		$staged = $this->creator->stage( $subject );
+		if ( is_wp_error( $staged ) ) {
+			return self::refund_error( $staged );
+		}
 
-		return is_wp_error( $staged ) ? self::refund_error( $staged ) : null;
+		$subject->update_meta_data( self::FINGERPRINT_META_KEY, $fingerprint );
+
+		return null;
+	}
+
+	/**
+	 * Lock the refunds of the order for the call, so a second call cannot pass the duplicate and amount checks
+	 * before the first refund is saved. A dry run saves nothing, so it takes no lock.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $input Ability input.
+	 * @return mixed|\WP_Error
+	 */
+	public function execute_change( $input = null ) {
+		if ( ! is_array( $input ) || $this->is_dry_run( $input ) ) {
+			return parent::execute_change( $input );
+		}
+
+		$order_id = $input['id'];
+		$lock     = self::lock_order( $order_id );
+		if ( null === $lock ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_refund_in_progress',
+				__( 'Another refund of this order is in progress. List the refunds of the order with woocommerce/order-refunds-query before you refund it again.', 'woocommerce' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		try {
+			return parent::execute_change( $input );
+		} finally {
+			self::unlock_order( $order_id, $lock );
+		}
 	}
 
 	/**
@@ -185,7 +254,8 @@ class OrderRefundCreate extends ActionableAbility {
 
 	/**
 	 * Refund the payment, restock and update the order, after the refund row is committed. A gateway refusal
-	 * deletes the refund, so the call fails with nothing saved.
+	 * deletes the refund, so the call fails with nothing saved. A later failure keeps the refund, and its error
+	 * tells the client not to refund again.
 	 *
 	 * @param \WC_Order_Refund $subject Saved refund.
 	 * @param array            $input   Ability input.
@@ -195,6 +265,24 @@ class OrderRefundCreate extends ActionableAbility {
 		$finished = $this->creator->finish( $subject );
 		if ( ! is_wp_error( $finished ) ) {
 			return null;
+		}
+
+		if ( 'refund_incomplete' === $finished->get_error_code() ) {
+			$message = $subject->get_refunded_payment()
+				/* translators: 1: refund ID, 2: error message. */
+				? __( 'The payment gateway refunded the payment and refund %1$d was created, but a later step failed, so the order may not show the refund in full: %2$s Do not refund again. Check the order instead.', 'woocommerce' )
+				/* translators: 1: refund ID, 2: error message. */
+				: __( 'Refund %1$d was created, but a later step failed, so the order may not show the refund in full: %2$s Do not refund again. Check the order instead.', 'woocommerce' );
+
+			return new \WP_Error(
+				'woocommerce_ability_order_refund_incomplete',
+				sprintf( $message, $subject->get_id(), $finished->get_error_message() ),
+				array(
+					'status'           => 500,
+					'refund_id'        => $subject->get_id(),
+					'refunded_payment' => $subject->get_refunded_payment(),
+				)
+			);
 		}
 
 		return new \WP_Error(
@@ -256,6 +344,100 @@ class OrderRefundCreate extends ActionableAbility {
 			'refundable_amount'        => self::format_amount_for_response( $this->refundable ),
 			'gateway_supports_refunds' => self::gateway_can_refund( $this->order ),
 			'dry_run'                  => $dry_run,
+		);
+	}
+
+	/**
+	 * A refund of the order, created within the duplicate window by a call with the same fingerprint.
+	 *
+	 * @param \WC_Order $order       Order.
+	 * @param string    $fingerprint Fingerprint of the call.
+	 * @return \WC_Order_Refund|null
+	 */
+	private static function find_recent_refund( \WC_Order $order, string $fingerprint ): ?\WC_Order_Refund {
+		$refund_ids = wc_get_orders(
+			array(
+				'type'         => 'shop_order_refund',
+				'parent'       => $order->get_id(),
+				'date_created' => '>' . ( time() - self::DUPLICATE_WINDOW ),
+				'limit'        => -1,
+				'return'       => 'ids',
+			)
+		);
+
+		foreach ( is_array( $refund_ids ) ? $refund_ids : array() as $refund_id ) {
+			$refund = wc_get_order( $refund_id );
+			if ( $refund instanceof \WC_Order_Refund && $refund->get_meta( self::FINGERPRINT_META_KEY ) === $fingerprint ) {
+				return $refund;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * The refusal of a refund that repeats a recent one, with that refund, so a client that retried learns it was made.
+	 *
+	 * @param \WC_Order_Refund $refund Refund that the call repeats.
+	 * @return \WP_Error
+	 */
+	private static function duplicate_error( \WC_Order_Refund $refund ): \WP_Error {
+		$created   = $refund->get_date_created();
+		$created   = $created ? $created->getTimestamp() : time();
+		$formatted = self::format_refund_for_response( $refund );
+
+		return new \WP_Error(
+			'woocommerce_ability_order_refund_duplicate',
+			sprintf(
+				/* translators: 1: refund ID, 2: time since the refund, such as "2 mins", 3: time until the same refund is allowed again. */
+				__( 'Refund %1$d refunded the same amount and lines of this order %2$s ago, so no new refund was created. The same refund can be created again in %3$s.', 'woocommerce' ),
+				$refund->get_id(),
+				human_time_diff( $created ),
+				human_time_diff( time(), $created + self::DUPLICATE_WINDOW )
+			),
+			array(
+				'status' => 409,
+				'refund' => is_wp_error( $formatted ) ? array( 'id' => $refund->get_id() ) : $formatted,
+			)
+		);
+	}
+
+	/**
+	 * Lock the refunds of an order with an option row, as WC_Install::create_lock() does, taking over a stale lock.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return string|null The lock value to release it with, or null when another call holds the lock.
+	 */
+	private static function lock_order( int $order_id ): ?string {
+		global $wpdb;
+
+		$name    = self::LOCK_OPTION_PREFIX . $order_id;
+		$expires = time() + self::LOCK_TTL;
+
+		// INSERT IGNORE affects no rows while another call holds the lock, so contention is not logged as a DB error.
+		$locked = $wpdb->query(
+			$wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %d, 'no')", $name, $expires )
+		);
+		if ( ! $locked ) {
+			$locked = $wpdb->query(
+				$wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = %d WHERE option_name = %s AND option_value < %d", $expires, $name, time() )
+			);
+		}
+
+		return $locked ? (string) $expires : null;
+	}
+
+	/**
+	 * Release the lock of an order, unless another call took it over as stale.
+	 *
+	 * @param int    $order_id Order ID.
+	 * @param string $lock     Value that lock_order() returned.
+	 */
+	private static function unlock_order( int $order_id, string $lock ): void {
+		global $wpdb;
+
+		$wpdb->query(
+			$wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", self::LOCK_OPTION_PREFIX . $order_id, $lock )
 		);
 	}
 
