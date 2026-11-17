@@ -33,7 +33,8 @@
 					data: { enabled: enable },
 				} );
 				render( response.enabled );
-				// Status and the other cards depend on the switch. A dirty form warns before navigation, so reloading would drop unsaved fields or leave those cards stale if the merchant stays.
+				// Status and the other cards depend on the switch.
+				// A dirty form warns before leaving, so don't reload over unsaved fields.
 				if ( window.onbeforeunload ) {
 					message.textContent = settings.i18n.unsaved;
 					return;
