@@ -1,4 +1,4 @@
 Significance: patch
-Type: fixed
+Type: fix
 
 Fit Columns blocks whose column widths add up to more than 100% within the email, instead of rendering too wide.
