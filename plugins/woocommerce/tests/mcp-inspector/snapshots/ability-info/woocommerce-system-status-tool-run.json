@@ -1,0 +1,53 @@
+{
+	"name": "woocommerce/system-status-tool-run",
+	"label": "Run status tool",
+	"description": "Run a maintenance tool from WooCommerce > Status > Tools that clears caches or rebuilds derived data. Only tools that woocommerce/system-status-tools-query marks as runnable can be run.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "string",
+				"description": "Status tool ID.",
+				"enum": [
+					"clear_transients",
+					"clear_expired_transients",
+					"clear_template_cache",
+					"clear_system_status_theme_info_cache",
+					"recount_terms",
+					"regenerate_product_lookup_tables",
+					"repair_coupons_lookup_table"
+				]
+			}
+		},
+		"required": [
+			"id"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "string"
+			},
+			"message": {
+				"type": "string",
+				"description": "What the tool did, or that it scheduled the work to run in the background."
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

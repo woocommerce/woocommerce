@@ -33,7 +33,14 @@ describe( ABILITY, () => {
 		for ( const gateway of ( await execute( ABILITY ) ).gateways ) {
 			assert.deepEqual(
 				Object.keys( gateway ).sort(),
-				[ 'description', 'enabled', 'id', 'method_title', 'title' ],
+				[
+					'description',
+					'enabled',
+					'id',
+					'method_title',
+					'order',
+					'title',
+				],
 				gateway.id
 			);
 		}

@@ -1,0 +1,124 @@
+{
+	"name": "woocommerce/shipping-zone-method-create",
+	"label": "Add shipping method to zone",
+	"description": "Add a flat rate, free shipping or local pickup method to a shipping zone, with its settings. Zone 0 covers every location no other zone matches.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"zone_id": {
+				"type": "integer",
+				"minimum": 0
+			},
+			"method_id": {
+				"type": "string",
+				"enum": [
+					"flat_rate",
+					"free_shipping",
+					"local_pickup"
+				]
+			},
+			"enabled": {
+				"type": "boolean",
+				"description": "Whether customers can choose the method at checkout."
+			},
+			"order": {
+				"type": "integer",
+				"description": "Position of the method in its zone. Lower comes first.",
+				"minimum": 0
+			},
+			"settings": {
+				"type": "object",
+				"description": "Settings to change. Flat rate and local pickup take title, tax_status and cost. Free shipping takes title, requires, min_amount and ignore_discounts.",
+				"properties": {
+					"title": {
+						"type": "string",
+						"description": "Name customers see at checkout."
+					},
+					"tax_status": {
+						"type": "string",
+						"enum": [
+							"taxable",
+							"none"
+						]
+					},
+					"cost": {
+						"type": "string",
+						"description": "Cost before tax, such as \"5\" or a formula like \"10 + [qty] * 2\". [qty] is the number of items, [cost] the order cost, and [fee percent=\"10\" min_fee=\"2\"] a percentage fee."
+					},
+					"requires": {
+						"type": "string",
+						"description": "What earns free shipping: nothing, a free shipping coupon, the minimum amount, either one, or both. Sending min_amount alone on a method with no requirement sets this to min_amount.",
+						"enum": [
+							"",
+							"coupon",
+							"min_amount",
+							"either",
+							"both"
+						]
+					},
+					"min_amount": {
+						"type": "string",
+						"description": "Order amount that earns free shipping, as a decimal string without a currency symbol."
+					},
+					"ignore_discounts": {
+						"type": "boolean",
+						"description": "Whether the minimum applies to the order amount before coupon discounts."
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"required": [
+			"zone_id",
+			"method_id"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"method": {
+				"type": "object",
+				"properties": {
+					"instance_id": {
+						"type": "integer"
+					},
+					"method_id": {
+						"type": "string"
+					},
+					"title": {
+						"type": "string"
+					},
+					"enabled": {
+						"type": "boolean"
+					},
+					"order": {
+						"type": "integer"
+					},
+					"settings": {
+						"type": "object",
+						"description": "Settings such as cost or min_amount, as stored. Only for the flat rate, free shipping and local pickup methods.",
+						"additionalProperties": {
+							"type": "string"
+						}
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": false,
+			"idempotent": false
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

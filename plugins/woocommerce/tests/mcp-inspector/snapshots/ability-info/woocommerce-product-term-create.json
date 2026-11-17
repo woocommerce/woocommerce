@@ -1,0 +1,89 @@
+{
+	"name": "woocommerce/product-term-create",
+	"label": "Create product term",
+	"description": "Create a product category, tag, brand or a term of a global attribute, such as pa_color. Product writes then assign it by ID.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"taxonomy": {
+				"description": "Product taxonomy: product_cat, product_tag, product_brand, or the slug of a global attribute from product-attributes-query.",
+				"type": "string",
+				"pattern": "^(product_cat|product_tag|product_brand|pa_[^\\s]+)$"
+			},
+			"name": {
+				"type": "string",
+				"minLength": 1
+			},
+			"slug": {
+				"type": "string",
+				"minLength": 1,
+				"description": "Defaults to one made from the name."
+			},
+			"parent": {
+				"description": "Parent term ID, for categories and brands only. Zero makes a top-level term.",
+				"type": "integer",
+				"minimum": 0
+			},
+			"description": {
+				"type": "string"
+			}
+		},
+		"required": [
+			"taxonomy",
+			"name"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"term": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"name": {
+						"type": "string"
+					},
+					"slug": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"count": {
+						"type": "integer"
+					},
+					"parent": {
+						"type": "integer"
+					},
+					"display": {
+						"type": "string"
+					},
+					"menu_order": {
+						"type": "integer"
+					},
+					"image": {
+						"type": "object"
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": false,
+			"idempotent": false
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

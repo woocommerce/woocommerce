@@ -10,6 +10,11 @@
 		"description": "Add a note to an order."
 	},
 	{
+		"name": "woocommerce/order-create",
+		"label": "Create order",
+		"description": "Create an order, as the order screen does, for example for a phone order. Without customer_id, the order is a guest order. Without status, the order gets the default status of the store, which is pending payment unless an extension changes it. A processing, on-hold or completed status reduces the stock of the products and sends the order emails to the store and the customer, so confirm the status before you send it."
+	},
+	{
 		"name": "woocommerce/order-notes-query",
 		"label": "Query order notes",
 		"description": "List every note of an order, newest first."
@@ -18,6 +23,11 @@
 		"name": "woocommerce/order-send-email",
 		"label": "Send order email",
 		"description": "Send an order email to the customer again."
+	},
+	{
+		"name": "woocommerce/order-delete",
+		"label": "Delete order",
+		"description": "Move an order to the trash, or delete it permanently."
 	},
 	{
 		"name": "woocommerce/order-update",
@@ -35,6 +45,11 @@
 		"description": "List the payment gateways in checkout order, enabled or not, or get one by ID."
 	},
 	{
+		"name": "woocommerce/payment-gateway-update",
+		"label": "Update payment gateway",
+		"description": "Turn a payment gateway on or off, change its checkout title, or move it in the checkout order. Cannot change other gateway settings or credentials."
+	},
+	{
 		"name": "woocommerce/products-query",
 		"label": "Query products",
 		"description": "Find products by ID or common catalog filters."
@@ -43,6 +58,16 @@
 		"name": "woocommerce/product-terms-query",
 		"label": "Query product terms",
 		"description": "Find product categories, tags, brands or the terms of a global attribute, such as pa_color. Use include to retrieve specific term IDs."
+	},
+	{
+		"name": "woocommerce/product-term-create",
+		"label": "Create product term",
+		"description": "Create a product category, tag, brand or a term of a global attribute, such as pa_color. Product writes then assign it by ID."
+	},
+	{
+		"name": "woocommerce/product-term-update",
+		"label": "Update product term",
+		"description": "Change the name, slug, parent or description of a product category, tag, brand or global attribute term. Fields left out keep their value."
 	},
 	{
 		"name": "woocommerce/product-reviews-query",
@@ -88,6 +113,31 @@
 		"name": "woocommerce/shipping-zones-query",
 		"label": "Query shipping zones",
 		"description": "List shipping zones in matching order, with the regions each covers and its shipping methods. Zone 0 covers every location no other zone matches."
+	},
+	{
+		"name": "woocommerce/system-status-tools-query",
+		"label": "Query status tools",
+		"description": "List the maintenance tools under WooCommerce > Status > Tools, in screen order, and what each does. Run a runnable one with woocommerce/system-status-tool-run."
+	},
+	{
+		"name": "woocommerce/system-status-tool-run",
+		"label": "Run status tool",
+		"description": "Run a maintenance tool from WooCommerce > Status > Tools that clears caches or rebuilds derived data. Only tools that woocommerce/system-status-tools-query marks as runnable can be run."
+	},
+	{
+		"name": "woocommerce/shipping-zone-create",
+		"label": "Create shipping zone",
+		"description": "Create a shipping zone for a set of regions. It has no methods yet; add them with shipping-zone-method-create. A customer gets the first zone in order that matches their address."
+	},
+	{
+		"name": "woocommerce/shipping-zone-method-create",
+		"label": "Add shipping method to zone",
+		"description": "Add a flat rate, free shipping or local pickup method to a shipping zone, with its settings. Zone 0 covers every location no other zone matches."
+	},
+	{
+		"name": "woocommerce/shipping-zone-method-update",
+		"label": "Update shipping method",
+		"description": "Turn a flat rate, free shipping or local pickup method of a zone on or off, move it, or change its settings, such as the cost or the free shipping minimum. Get the instance_id from shipping-zones-query."
 	},
 	{
 		"name": "woocommerce/tax-rates-query",

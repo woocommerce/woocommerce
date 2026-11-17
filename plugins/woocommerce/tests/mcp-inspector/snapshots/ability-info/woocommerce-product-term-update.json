@@ -1,0 +1,92 @@
+{
+	"name": "woocommerce/product-term-update",
+	"label": "Update product term",
+	"description": "Change the name, slug, parent or description of a product category, tag, brand or global attribute term. Fields left out keep their value.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"taxonomy": {
+				"description": "Product taxonomy of the term: product_cat, product_tag, product_brand, or the slug of a global attribute.",
+				"type": "string",
+				"pattern": "^(product_cat|product_tag|product_brand|pa_[^\\s]+)$"
+			},
+			"id": {
+				"type": "integer",
+				"minimum": 1
+			},
+			"name": {
+				"type": "string",
+				"minLength": 1
+			},
+			"slug": {
+				"type": "string",
+				"minLength": 1
+			},
+			"parent": {
+				"description": "Parent term ID, for categories and brands only. Zero makes a top-level term.",
+				"type": "integer",
+				"minimum": 0
+			},
+			"description": {
+				"type": "string"
+			}
+		},
+		"required": [
+			"taxonomy",
+			"id"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"term": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"name": {
+						"type": "string"
+					},
+					"slug": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"count": {
+						"type": "integer"
+					},
+					"parent": {
+						"type": "integer"
+					},
+					"display": {
+						"type": "string"
+					},
+					"menu_order": {
+						"type": "integer"
+					},
+					"image": {
+						"type": "object"
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": true,
+			"idempotent": false
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

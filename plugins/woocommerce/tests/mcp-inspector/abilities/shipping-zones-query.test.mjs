@@ -8,7 +8,7 @@ const ABILITY = 'woocommerce/shipping-zones-query';
 describe( ABILITY, () => {
 	let zone;
 	before( async () => {
-		zone = await seed( 'shipping-zone' );
+		zone = await seed( 'shipping-zone', { name: 'MCP zones query' } );
 	} );
 
 	test( 'returns a zone with its locations and method settings', async () => {
