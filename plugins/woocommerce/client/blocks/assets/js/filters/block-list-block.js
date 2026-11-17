@@ -19,19 +19,10 @@ const withDefaultAttributes = createHigherOrderComponent(
 			mounted = false;
 
 			componentDidMount() {
-				const { block, attributes, clientId, updateBlockAttributes } =
-					this.props;
+				const { block, clientId, updateBlockAttributes } = this.props;
 
 				if ( block.name.startsWith( 'woocommerce/' ) ) {
-					const missingDefaults = Object.fromEntries(
-						Object.entries(
-							this.getAttributesWithDefaults()
-						).filter(
-							( [ key, value ] ) =>
-								typeof attributes[ key ] === 'undefined' &&
-								typeof value !== 'undefined'
-						)
-					);
+					const missingDefaults = this.getMissingDefaults();
 
 					if ( Object.keys( missingDefaults ).length ) {
 						updateBlockAttributes( clientId, missingDefaults );
@@ -48,31 +39,49 @@ const withDefaultAttributes = createHigherOrderComponent(
 				}
 			}
 
-			getAttributesWithDefaults() {
+			getMissingDefaults() {
 				const blockType = getBlockType( this.props.block.name );
-				let attributes = this.props.attributes;
+				const attributes = this.props.attributes || {};
+				const missingDefaults = {};
 
 				if (
-					! this.mounted &&
-					this.props.block.name.startsWith( 'woocommerce/' ) &&
-					typeof blockType.attributes !== 'undefined' &&
-					typeof blockType.defaults !== 'undefined'
+					! blockType ||
+					typeof blockType.attributes === 'undefined' ||
+					typeof blockType.defaults === 'undefined'
 				) {
-					attributes = Object.assign(
-						{},
-						this.props.attributes || {}
-					);
-					Object.keys( blockType.attributes ).map( ( key ) => {
-						if (
-							typeof attributes[ key ] === 'undefined' &&
-							typeof blockType.defaults[ key ] !== 'undefined'
-						) {
-							attributes[ key ] = blockType.defaults[ key ];
-						}
-						return key;
-					} );
+					return missingDefaults;
 				}
-				return attributes;
+
+				Object.keys( blockType.attributes ).forEach( ( key ) => {
+					if (
+						typeof attributes[ key ] === 'undefined' &&
+						typeof blockType.defaults[ key ] !== 'undefined'
+					) {
+						missingDefaults[ key ] = blockType.defaults[ key ];
+					}
+				} );
+
+				return missingDefaults;
+			}
+
+			getAttributesWithDefaults() {
+				if (
+					this.mounted ||
+					! this.props.block.name.startsWith( 'woocommerce/' )
+				) {
+					return this.props.attributes;
+				}
+
+				const missingDefaults = this.getMissingDefaults();
+
+				if ( ! Object.keys( missingDefaults ).length ) {
+					return this.props.attributes;
+				}
+
+				return {
+					...( this.props.attributes || {} ),
+					...missingDefaults,
+				};
 			}
 
 			render() {
