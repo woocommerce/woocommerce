@@ -57,7 +57,7 @@ const minifyBundleCopies = require( '@woocommerce/extension-tooling/webpack-dist
 ```
 
 - `includeScripts( [ [ source, destination ] ] )` expands classic scripts that use `include( 'relative/file.js' );`. It emits the regular asset and a `.min.js` copy for the caller's webpack minimizer. Limit the minimizer to `.min.js` files, for example `new TerserPlugin( { test: /\.min\.js$/ } )`, to keep the regular asset readable. Each `include()` must be on its own line; the build fails on any other `include()` line.
-- `minifyBundleCopies( [ 'frontend/*.js' ] )` emits minified copies of matching bundles after dependency metadata is generated. It skips a bundle that already has a `.min.js` asset, such as an `includeScripts` destination.
+- `minifyBundleCopies( [ 'admin/*.js' ], [ 'frontend/**/*.js' ] )` emits minified copies of bundles matching the first list after dependency metadata is generated. Match only JavaScript assets in either list. The optional second list minifies matching assets in place, including `.min.js` assets, and takes precedence when both lists match. Copy mode skips a bundle that already has a `.min.js` asset, such as an `includeScripts` destination.
 
 ## Translation checks
 
