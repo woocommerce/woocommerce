@@ -1,6 +1,6 @@
 <?php
 /**
- * A zone for Germany with a flat rate, found by its name and reset on every seed.
+ * A zone for Germany with a flat rate, found by its name and reset on every seed. Each test file passes a name of its own.
  *
  * @package WooCommerce\Tests\McpInspector
  */
@@ -8,10 +8,11 @@
 declare( strict_types = 1 );
 
 /**
+ * @param array{name?: string} $args
  * @return array{id: int, flat_rate: int, name: string}
  */
-return static function (): array {
-	$name = 'MCP fixture zone';
+return static function ( array $args ): array {
+	$name = $args['name'] ?? 'MCP fixture zone';
 	foreach ( WC_Shipping_Zones::get_zones() as $data ) {
 		if ( $name === $data['zone_name'] ) {
 			( new WC_Shipping_Zone( $data['id'] ) )->delete();

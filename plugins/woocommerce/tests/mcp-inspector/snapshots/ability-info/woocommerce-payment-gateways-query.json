@@ -40,6 +40,10 @@
 						},
 						"enabled": {
 							"type": "boolean"
+						},
+						"order": {
+							"type": "integer",
+							"description": "Position in the checkout order, starting at 0."
 						}
 					},
 					"additionalProperties": false
