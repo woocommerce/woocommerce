@@ -392,6 +392,38 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that classic themes can turn on the visible "Sort by" label with the woocommerce_catalog_orderby_use_label filter.
+	 */
+	public function test_woocommerce_catalog_ordering_use_label_filter() {
+		wc_setup_loop(
+			array(
+				'is_paginated' => true,
+				'total'        => 1,
+			)
+		);
+
+		ob_start();
+		woocommerce_catalog_ordering();
+		$without_filter = ob_get_clean();
+
+		add_filter( 'woocommerce_catalog_orderby_use_label', '__return_true' );
+		ob_start();
+		woocommerce_catalog_ordering();
+		$with_filter = ob_get_clean();
+		remove_filter( 'woocommerce_catalog_orderby_use_label', '__return_true' );
+
+		wc_reset_loop();
+
+		$this->assertStringNotContainsString( '<label', $without_filter );
+		$this->assertStringContainsString( 'aria-label="Shop order"', $without_filter );
+		$this->assertStringContainsString( '>Default sorting</option>', $without_filter );
+
+		$this->assertMatchesRegularExpression( '/<label for="(woocommerce-orderby-[^"]+)">Sort by<\/label>.*id="\1"/s', $with_filter );
+		$this->assertStringNotContainsString( 'aria-label="Shop order"', $with_filter );
+		$this->assertStringContainsString( '>Default</option>', $with_filter );
+	}
+
+	/**
 	 * Test wc_add_aria_label_to_pagination_numbers with basic pagination links
 	 */
 	public function test_wc_add_aria_label_to_pagination_numbers_basic() {
