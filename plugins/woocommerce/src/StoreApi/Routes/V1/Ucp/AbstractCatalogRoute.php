@@ -208,6 +208,9 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * they are checked as if shown everywhere, keeping the other rules and the filter. The
 	 * filter gets the ID, so a callback that reloads the product sees its saved setting.
 	 *
+	 * Does not call set_catalog_visibility(): an extension can remove `visible` from
+	 * woocommerce_product_visibility_options, and that setter would throw on the temporary value.
+	 *
 	 * @param \WC_Product $product Product, not a variation.
 	 * @return bool
 	 */
@@ -215,9 +218,19 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 		if ( CatalogVisibility::SEARCH !== $product->get_catalog_visibility() ) {
 			return $product->is_visible();
 		}
-		$shown = clone $product;
-		$shown->set_catalog_visibility( CatalogVisibility::VISIBLE );
-		return $shown->is_visible();
+		// Same core rules as a Shop and search results product, then the public visibility filter.
+		$visible = $product->is_viewable();
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $product->is_in_stock() ) {
+			$visible = false;
+		}
+		/**
+		 * Filters the product visibility for catalog lookup (same hook as WC_Product::is_visible).
+		 *
+		 * @since 2.1.0 Filter introduced on WC_Product::is_visible.
+		 * @param bool $visible    Whether the product is considered visible.
+		 * @param int  $product_id Product ID.
+		 */
+		return (bool) apply_filters( 'woocommerce_product_is_visible', $visible, $product->get_id() );
 	}
 
 	/**

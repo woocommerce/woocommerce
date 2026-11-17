@@ -265,6 +265,30 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * Lookup still opens a "Search results only" product when an extension removes `visible`
+	 * from the catalog visibility options (the temporary override path must not throw).
+	 */
+	public function test_lookup_opens_search_only_when_visible_option_is_removed(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_catalog_visibility( 'search' );
+		$product->save();
+		$id = (string) $product->get_id();
+
+		$filter = static function ( array $options ): array {
+			unset( $options['visible'] );
+			return $options;
+		};
+		add_filter( 'woocommerce_product_visibility_options', $filter );
+		try {
+			$data = $this->post( '/catalog/lookup', array( 'ids' => array( $id ) ) )->get_data();
+		} finally {
+			remove_filter( 'woocommerce_product_visibility_options', $filter );
+		}
+
+		$this->assertSame( array( $id ), wp_list_pluck( $data['products'], 'id' ) );
+	}
+
+	/**
 	 * A category list resolving to no existing term matches nothing rather than everything.
 	 */
 	public function test_search_unknown_category_returns_no_products(): void {
