@@ -384,7 +384,7 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 		if ( false !== $at ) {
 			$assignments = explode( ', ', substr( $sql, $at + strlen( $marker ) ) );
 			$guarded     = array();
-			$captured    = false;
+			$status      = null;
 
 			foreach ( $assignments as $assignment ) {
 				$eq = strpos( $assignment, '=' );
@@ -394,18 +394,22 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 					continue;
 				}
 
-				$left  = trim( substr( $assignment, 0, $eq ) );
-				$right = trim( substr( $assignment, $eq + 1 ) );
+				$left      = trim( substr( $assignment, 0, $eq ) );
+				$right     = trim( substr( $assignment, $eq + 1 ) );
+				$rewritten = $left . ' = IF( ' . $guard . ', ' . $right . ', ' . $left . ' )';
 
-				// MySQL uses a column's new value in later assignments, so the original status is read once.
-				if ( ! $captured ) {
-					$condition = '(@ucp_payable := (' . $guard . '))';
-					$captured  = true;
-				} else {
-					$condition = '@ucp_payable';
+				// This is an update of one row, applied left to right, so a later assignment sees a column's new value.
+				// The status assignment goes last and the earlier ones still read the original status.
+				if ( trim( $left, '`' ) === $column ) {
+					$status = $rewritten;
+					continue;
 				}
 
-				$guarded[] = $left . ' = IF( ' . $condition . ', ' . $right . ', ' . $left . ' )';
+				$guarded[] = $rewritten;
+			}
+
+			if ( null !== $status ) {
+				$guarded[] = $status;
 			}
 
 			return substr( $sql, 0, $at + strlen( $marker ) ) . implode( ', ', $guarded );
