@@ -14,14 +14,16 @@
 
 		// The prompt renders once per product, after a variations form. Only the closest form before it drives it,
 		// wherever themes wrap them, so another form of the product on the page can't.
-		self.$formContainer    = $( '.wc_bis_form[data-bis-product-id="' + self.product_id + '"]' ).first();
-		var $forms             = $( '.variations_form[data-product_id="' + self.product_id + '"]' );
-		var prompt             = self.$formContainer[0];
-		var $owner             = $forms.filter( function() {
-			return prompt && this.compareDocumentPosition( prompt ) === Node.DOCUMENT_POSITION_FOLLOWING;
-		} ).last();
+		var formSelector       = '.variations_form[data-product_id="' + self.product_id + '"]';
+		var promptSelector     = '.wc_bis_form[data-bis-product-id="' + self.product_id + '"]';
+		self.$formContainer    = $( promptSelector ).first();
 
-		if ( ! self.$formContainer.length || ! self.$variationsForm.is( $owner.length ? $owner : $forms.first() ) ) {
+		// jQuery keeps selections in document order, so the owner is the element right before the prompt.
+		var $both              = $( formSelector + ', ' + promptSelector );
+		var index              = $both.index( self.$formContainer );
+		var $owner             = index > 0 ? $both.eq( index - 1 ) : $( formSelector ).first();
+
+		if ( ! self.$formContainer.length || ! self.$variationsForm.is( $owner ) ) {
 			return;
 		}
 
