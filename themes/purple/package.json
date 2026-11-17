@@ -23,7 +23,7 @@
 	],
 	"scripts": {
 		"validate": "pnpm --filter=@woocommerce/theme-cli validate purple",
-		"changelog": "composer exec -- changelogger",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"env:start": "pnpm --filter=@woocommerce/theme-cli wp-env start purple",
 		"env:stop": "pnpm --filter=@woocommerce/theme-cli wp-env stop purple",
 		"build": "pnpm --filter=@woocommerce/theme-cli build purple"

@@ -494,14 +494,4 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		// When not explicitly passed, context should default to WC_ADMIN_NOTE_OPER_GLOBAL.
 		$this->assertEquals( $global_context, $global_context_received );
 	}
-
-	/**
-	 * Delete notes created by this class's tests.
-	 */
-	public function tearDown(): void {
-		global $wpdb;
-
-		parent::tearDown();
-		$wpdb->query( $wpdb->prepare( 'DELETE n.*, a.* FROM ' . $wpdb->prefix . 'wc_admin_notes n JOIN ' . $wpdb->prefix . 'wc_admin_note_actions a ON n.note_id = a.note_id WHERE n.source = %s', 'PHPUNIT_TEST' ) );
-	}
 }

@@ -1,7 +1,7 @@
 === Purple ===
 Contributors: Automattic
 Requires at least: 7.1
-Tested up to: 7.1
+Tested up to: 7.2
 Requires PHP: 7.4
 Stable tag: 1.0.3
 License: GPLv2 or later
@@ -16,7 +16,7 @@ Purple is a WooCommerce starter theme made for the Site Editor and modern commer
 Purple requires:
 - WordPress 7.1 or newer,
 - PHP 7.4 or newer,
-- WooCommerce 11.1 or newer.
+- WooCommerce 11.2 or newer.
 
 Install and activate WooCommerce before activating the theme.
 

@@ -41,6 +41,8 @@ class WCEmailTemplateSyncRegistryTest extends \WC_Unit_Test_Case {
 		parent::setUp();
 
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
+		// Build the mailer with the editor on, so it loads the emails the editor adds.
+		$this->rebuild_mailer();
 
 		$this->fixtures_base = __DIR__ . '/fixtures/';
 
@@ -56,8 +58,6 @@ class WCEmailTemplateSyncRegistryTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		WCEmailTemplateSyncRegistry::reset_cache();
 		WCEmailTemplateSyncRegistry::set_logger( null );
-
-		remove_all_filters( 'woocommerce_transactional_emails_for_block_editor' );
 
 		$emails_container = \WC_Emails::instance();
 		$reflection       = new \ReflectionClass( $emails_container );

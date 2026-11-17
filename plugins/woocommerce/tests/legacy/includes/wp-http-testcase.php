@@ -201,9 +201,6 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 
 		parent::tearDown();
 
-		remove_filter( 'pre_http_request', array( $this, 'http_request_listener' ) );
-		remove_filter( 'wp_handle_sideload_overrides', array( $this, 'set_sample_image_unique_filename_callback' ) );
-
 		$this->skip_cache_next               = false;
 		$this->sample_image_download_pending = false;
 	}

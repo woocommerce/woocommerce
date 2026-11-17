@@ -9,13 +9,20 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
 
 /**
  * Integration test for Table class
  */
 class Table_Test extends \Email_Editor_Integration_Test_Case {
+	/**
+	 * A word no email client can break on whitespace, which is what widens the email.
+	 */
+	private const UNBREAKABLE_WORD = 'EACMP_BREAKING_UNRECOVERABLE_INVARIANT_WITH_A_NAME_FAR_WIDER_THAN_THE_EMAIL';
+
 	/**
 	 * Table renderer instance
 	 *
@@ -101,6 +108,20 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 	private $rendering_context;
 
 	/**
+	 * Block type that was given an email render callback, so tearDown can restore it.
+	 *
+	 * @var \WP_Block_Type|null
+	 */
+	private $wired_block_type = null;
+
+	/**
+	 * The email render callback core/table had before the test set one.
+	 *
+	 * @var mixed
+	 */
+	private $previous_email_callback = null;
+
+	/**
 	 * Set up before each test
 	 */
 	public function setUp(): void {
@@ -109,6 +130,17 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 		$this->table_renderer    = new Table();
 		$theme_controller        = $this->di_container->get( Theme_Controller::class );
 		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme() );
+	}
+
+	/**
+	 * Clean up after each test.
+	 */
+	public function tearDown(): void {
+		if ( $this->wired_block_type ) {
+			$this->wired_block_type->__set( 'render_email_callback', $this->previous_email_callback );
+			$this->wired_block_type = null;
+		}
+		parent::tearDown();
 	}
 
 	/**
@@ -738,6 +770,58 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test every table gets a fixed layout, so a short label keeps a readable column beside a
+	 * long value instead of being squeezed to one letter per line.
+	 */
+	public function testItGivesEveryTableAFixedLayout(): void {
+		$rendered = $this->render_table(
+			'<thead><tr><th>Code</th><th>Value</th></tr></thead>
+			<tbody><tr><td>GR-1</td><td>' . self::UNBREAKABLE_WORD . '</td></tr></tbody>'
+		);
+
+		$this->assertStringContainsString( 'table-layout: fixed', $this->get_table_style( $rendered ) );
+	}
+
+	/**
+	 * Test the column count cannot push a table past the width a phone gives it.
+	 *
+	 * A per-cell minimum would: they accumulate, so six columns at 3em need 391px where a
+	 * 390px phone, less the email's 24px of root padding either side, leaves 342px. Equal
+	 * columns divide that width however many there are.
+	 */
+	public function testASixColumnTableStillFitsThePhone(): void {
+		$rendered = $this->render_table(
+			'<thead><tr><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr></thead>
+			<tbody><tr><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr></tbody>'
+		);
+
+		$this->assertStringContainsString( 'table-layout: fixed', $this->get_table_style( $rendered ) );
+
+		$styles = $this->get_cell_styles( $rendered );
+		$this->assertCount( 12, $styles );
+		foreach ( $styles as $style ) {
+			$this->assertStringNotContainsString( 'min-width', $style, 'A per-cell minimum would accumulate across columns.' );
+		}
+	}
+
+	/**
+	 * Test every cell wraps long unbreakable words, so a wide cell can't widen the email.
+	 */
+	public function testItWrapsLongWordsInCells(): void {
+		$styles = $this->get_cell_styles(
+			$this->render_table(
+				'<thead><tr><th>' . self::UNBREAKABLE_WORD . '</th></tr></thead>
+				<tbody><tr><td>' . self::UNBREAKABLE_WORD . '</td></tr></tbody>'
+			)
+		);
+
+		$this->assertCount( 2, $styles );
+		foreach ( $styles as $style ) {
+			$this->assertStringContainsString( 'word-break: break-word', $style );
+		}
+	}
+
+	/**
 	 * Test it does not apply fixed layout when class is not present
 	 */
 	public function testItDoesNotApplyFixedLayoutWithoutClass(): void {
@@ -815,5 +899,105 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed['innerHTML'] = $input;
 		$rendered            = $this->table_renderer->render( $input, $parsed, $this->rendering_context );
 		$this->assertStringContainsString( '<table', $rendered );
+	}
+
+	/**
+	 * Give core/table the email render callback Bootstrap gives it in production.
+	 *
+	 * The block settings filter only runs when a block is registered, and core blocks are
+	 * already registered by the time a test boots the editor.
+	 */
+	private function wire_table_renderer(): void {
+		$initializer = $this->di_container->get( Initializer::class );
+		$initializer->initialize();
+
+		$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'core/table' );
+		$this->assertInstanceOf( \WP_Block_Type::class, $block_type );
+
+		$settings = $initializer->update_block_settings( array( 'name' => 'core/table' ) );
+		$this->assertArrayHasKey( 'render_email_callback', $settings );
+
+		$this->previous_email_callback = get_object_vars( $block_type )['render_email_callback'] ?? null;
+		$this->wired_block_type        = $block_type;
+		$block_type->__set( 'render_email_callback', $settings['render_email_callback'] );
+	}
+
+	/**
+	 * Render an email holding one table block and return the HTML.
+	 *
+	 * The cell wrapping rules live in the shared stylesheet, so they only reach the cells once
+	 * the content renderer has inlined it. Rendering the block on its own would miss them.
+	 *
+	 * @param string $rows Table rows.
+	 */
+	private function render_table( string $rows ): string {
+		$this->wire_table_renderer();
+
+		$table   = '<figure class="wp-block-table"><table>' . $rows . '</table></figure>';
+		$content = '<!-- wp:table -->' . $table . '<!-- /wp:table -->';
+
+		$email_post_id = $this->factory->post->create( array( 'post_content' => $content ) );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+
+		$html = $this->di_container->get( Content_Renderer::class )->render( $email_post, $template );
+
+		// Only this renderer sets cellpadding, so without it the block fell back to the engine's
+		// generic renderer and the test would be measuring the wrong markup.
+		$this->assertStringContainsString( 'cellpadding="8"', $html, 'The table block should reach the email through its own renderer.' );
+
+		return $html;
+	}
+
+	/**
+	 * Return the style attribute of every cell of the table block in the rendered HTML.
+	 *
+	 * An email is built out of layout tables, so the cells are selected from the table block
+	 * rather than from the document, which holds many cells that are not the block's.
+	 *
+	 * @param string $html Rendered HTML.
+	 * @return string[]
+	 */
+	private function get_cell_styles( string $html ): array {
+		$document = new \DOMDocument();
+		libxml_use_internal_errors( true );
+		$document->loadHTML( '<?xml encoding="utf-8" ?>' . $html );
+		libxml_clear_errors();
+
+		$cells = ( new \DOMXPath( $document ) )->query(
+			"//*[contains(concat(' ', normalize-space(@class), ' '), ' wp-block-table ')]//*[self::td or self::th]"
+		);
+		$this->assertInstanceOf( \DOMNodeList::class, $cells );
+
+		$styles = array();
+		foreach ( $cells as $cell ) {
+			$this->assertInstanceOf( \DOMElement::class, $cell );
+			$styles[] = $cell->getAttribute( 'style' );
+		}
+
+		return $styles;
+	}
+
+	/**
+	 * Return the style attribute of the table block's own table element.
+	 *
+	 * @param string $html Rendered HTML.
+	 */
+	private function get_table_style( string $html ): string {
+		$processor = new \WP_HTML_Tag_Processor( $html );
+
+		while ( $processor->next_tag( array( 'tag_name' => 'TABLE' ) ) ) {
+			$class = (string) $processor->get_attribute( 'class' );
+			if ( false !== strpos( $class, 'wp-block-table' ) ) {
+				return (string) $processor->get_attribute( 'style' );
+			}
+		}
+
+		$this->fail( 'The rendered email holds no table block.' );
 	}
 }

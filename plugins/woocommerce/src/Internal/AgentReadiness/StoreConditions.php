@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
+use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 defined( 'ABSPATH' ) || exit;
@@ -13,8 +14,9 @@ defined( 'ABSPATH' ) || exit;
  * whatever the product data. The readiness report and the Agentic commerce
  * settings page both read this list, so they never disagree.
  *
- * `ok` says whether the store is clear of the problem the label names;
- * `name` is the check worded as its passing state.
+ * `ok` says whether the store is clear of the problem the label names, or is
+ * null when it couldn't be checked (StoreOutputChecks); `name` is the check
+ * worded as its passing state.
  * `blocks` says what a failing condition stops: `listing` hides every product
  * on every channel, `ucp` hides the catalog from agents that use UCP,
  * `checkout` stops or weakens agent orders. A failing `required` condition
@@ -110,6 +112,7 @@ class StoreConditions {
 				'fix'     => __( 'Move the site to HTTPS; your host can usually turn it on.', 'woocommerce' ),
 				'fix_url' => wp_get_update_https_url(),
 			),
+			self::ucp_discovery( UcpDiscovery::serve_status() ),
 			$policy_page(
 				'privacy_page',
 				AgenticCommerceSettings::PRIVACY_PAGE_OPTION,
@@ -139,6 +142,17 @@ class StoreConditions {
 				__( 'Shoppers ask agents about delivery times and costs.', 'woocommerce' )
 			),
 			array(
+				'id'      => 'payment_method',
+				'ok'      => $this->payment_method_enabled(),
+				'blocks'  => 'checkout',
+				'level'   => self::LEVEL_RECOMMENDED,
+				'name'    => __( 'A payment method is turned on', 'woocommerce' ),
+				'label'   => __( 'No payment method is turned on', 'woocommerce' ),
+				'why'     => __( 'Shoppers sent by an agent cannot pay for their order.', 'woocommerce' ),
+				'fix'     => __( 'Turn on a payment method under WooCommerce > Settings > Payments.', 'woocommerce' ),
+				'fix_url' => $settings_url( 'checkout' ),
+			),
+			array(
 				'id'      => 'guest_checkout',
 				'ok'      => ! $this->registration_required(),
 				'blocks'  => 'checkout',
@@ -164,15 +178,37 @@ class StoreConditions {
 	}
 
 	/**
+	 * The UCP address condition, with the fix for why the address doesn't serve the profile.
+	 *
+	 * @param string $status A status from UcpDiscovery::serve_status().
+	 * @return array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}
+	 */
+	private static function ucp_discovery( string $status ): array {
+		return array(
+			'id'      => 'ucp_discovery',
+			'ok'      => 'ok' === $status,
+			'blocks'  => 'ucp',
+			'level'   => self::LEVEL_REQUIRED,
+			'name'    => __( 'Use a readable permalink structure', 'woocommerce' ),
+			// Without a file in the way, Plain permalinks are why the connection URL doesn't load.
+			'label'   => 'no_file' === $status ? __( 'Use a readable permalink structure', 'woocommerce' ) : __( 'Fix your connection URL', 'woocommerce' ),
+			'why'     => 'no_file' === $status ? __( 'Any structure except Plain lets AI assistants reach your store.', 'woocommerce' ) : __( 'AI assistants use your connection URL to find your products, and it doesn\'t load your store\'s details.', 'woocommerce' ),
+			'fix'     => UcpDiscovery::discovery_fix( $status ),
+			// Permalinks are one fix only when nothing is serving the address. A file in the way is removed on disk.
+			'fix_url' => 'no_file' === $status ? admin_url( 'options-permalink.php' ) : '',
+		);
+	}
+
+	/**
 	 * Ids of the required conditions that fail.
 	 *
-	 * @param array<int, array{id:string,ok:bool,level:string}>|null $conditions Conditions from all(), or null to check them now.
+	 * @param array<int, array{id:string,ok:bool|null,level:string}>|null $conditions Conditions from all(), or null to check them now.
 	 * @return array<int, string>
 	 */
 	public function failing_required( ?array $conditions = null ): array {
 		$ids = array();
 		foreach ( $conditions ?? $this->all() as $condition ) {
-			if ( self::LEVEL_REQUIRED === $condition['level'] && ! $condition['ok'] ) {
+			if ( self::LEVEL_REQUIRED === $condition['level'] && false === $condition['ok'] ) {
 				$ids[] = $condition['id'];
 			}
 		}
@@ -210,6 +246,19 @@ class StoreConditions {
 	private function registration_required(): bool {
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core's hook, documented in WC_Checkout.
 		return (bool) apply_filters( 'woocommerce_checkout_registration_required', 'yes' !== get_option( 'woocommerce_enable_guest_checkout' ) );
+	}
+
+	/**
+	 * Whether any payment gateway is turned on. Whether it can take a given order
+	 * depends on the cart, so this reads the setting, not is_available().
+	 */
+	private function payment_method_enabled(): bool {
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			if ( $gateway instanceof \WC_Payment_Gateway && 'yes' === $gateway->enabled ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

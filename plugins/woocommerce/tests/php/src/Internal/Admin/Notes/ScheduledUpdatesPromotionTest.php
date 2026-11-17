@@ -139,25 +139,4 @@ class ScheduledUpdatesPromotionTest extends WC_Unit_Test_Case {
 		// Verify option was NOT updated (still null/doesn't exist).
 		$this->assertFalse( get_option( 'woocommerce_analytics_scheduled_import' ), 'Option should not exist' );
 	}
-
-	/**
-	 * Clean up after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		// Delete all test notes.
-		$data_store = \WC_Data_Store::load( 'admin-note' );
-		$note_ids   = $data_store->get_notes_with_name( ScheduledUpdatesPromotion::NOTE_NAME );
-
-		foreach ( $note_ids as $note_id ) {
-			$note = \Automattic\WooCommerce\Admin\Notes\Notes::get_note( $note_id );
-			if ( $note ) {
-				$note->delete();
-			}
-		}
-
-		// Reset options.
-		delete_option( 'woocommerce_analytics_scheduled_import' );
-	}
 }

@@ -359,9 +359,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -407,9 +404,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		$this->assertCount( 0, $data['suggestions'] );
 		// But we do get the suggestion categories.
 		$this->assertCount( 4, $data['suggestion_categories'] );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -458,9 +452,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Assert that the other suggestions are all PSPs.
 		$other_suggestions = $data['suggestions'];
 		$this->assertSame( array( PaymentsExtensionSuggestions::TYPE_PSP ), array_unique( array_column( $other_suggestions, '_type' ) ) );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -811,9 +802,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( '_priority', $suggestion_category, 'Suggestion category `_order` entry is missing' );
 		$this->assertArrayHasKey( 'title', $suggestion_category, 'Suggestion category `title` entry is missing' );
 		$this->assertArrayHasKey( 'description', $suggestion_category, 'Suggestion category `description` entry is missing' );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -1002,9 +990,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Assert that the PayPal gateway is returned as enabled.
 		$provider = $data['providers'][1];
 		$this->assertTrue( $provider['state']['enabled'] );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -1194,9 +1179,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Assert that the PayPal gateway is returned as enabled.
 		$provider = $data['providers'][1];
 		$this->assertTrue( $provider['state']['enabled'] );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -1328,9 +1310,6 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		// Assert that the PayPal gateway is returned as enabled.
 		$provider = $data['providers'][3];
 		$this->assertTrue( $provider['state']['enabled'] );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**

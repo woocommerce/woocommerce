@@ -138,30 +138,7 @@ class MigrationTest extends \WC_Unit_Test_Case {
 	private function create_variation_posts( int $count ): array {
 		global $wpdb;
 
-		$post_title        = 'Variation gallery migration batch fixture ' . wp_generate_uuid4();
-		$post_placeholders = array_fill( 0, $count, '(%s, %s, %s)' );
-		$post_values       = array();
-
-		for ( $index = 0; $index < $count; ++$index ) {
-			array_push( $post_values, 'product_variation', 'publish', $post_title );
-		}
-
-		$posts_query = $wpdb->prepare(
-			"INSERT INTO {$wpdb->posts} (post_type, post_status, post_title) VALUES " . implode( ', ', $post_placeholders ), // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.NotPrepared -- Placeholders are generated above.
-			$post_values
-		);
-		$wpdb->query( $posts_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
-
-		$variation_ids = array_map(
-			'intval',
-			$wpdb->get_col(
-				$wpdb->prepare(
-					"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_title = %s ORDER BY ID ASC",
-					'product_variation',
-					$post_title
-				)
-			)
-		);
+		$variation_ids = WC_Helper_Product::insert_product_post_rows( $count, 'product_variation' );
 		$this->assertCount( $count, $variation_ids );
 
 		$meta_placeholders = array_fill( 0, $count, '(%d, %s, %s)' );

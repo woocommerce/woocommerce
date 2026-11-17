@@ -42,12 +42,6 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		update_option( 'moderation_keys', '' );
 		update_option( 'disallowed_keys', '' );
 		update_option( 'comment_registration', $this->comment_registration );
-		remove_all_filters( 'woocommerce_review_order_submitted' );
-		remove_all_filters( 'woocommerce_review_order_eligible_statuses' );
-		remove_all_filters( 'woocommerce_review_order_eligible_items' );
-		remove_all_filters( 'wp_die_ajax_handler' );
-		remove_all_filters( 'wp_send_json_handler' );
-		remove_all_filters( 'wp_doing_ajax' );
 		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 		parent::tearDown();
 	}

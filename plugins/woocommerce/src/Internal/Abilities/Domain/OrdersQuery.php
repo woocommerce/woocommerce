@@ -76,7 +76,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function execute( array $input ) {
-		$include_line_items = $input['include_line_items'] ?? false;
+		$includes = array_keys(
+			array_filter(
+				array(
+					'line_items' => $input['include_line_items'] ?? false,
+					'lines'      => $input['include_lines'] ?? false,
+				)
+			)
+		);
 
 		if ( ! empty( $input['id'] ) && ! empty( $input['filters'] ) ) {
 			return new \WP_Error(
@@ -120,7 +127,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				return $order;
 			}
 
-			$orders = self::format_orders_for_response( array( $order ), $include_line_items );
+			$orders = self::format_orders_for_response( array( $order ), $includes );
 			if ( is_wp_error( $orders ) ) {
 				return $orders;
 			}
@@ -228,7 +235,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		);
 		$pages   = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $orders ) > 0 ? 1 : 0 );
 
-		$orders = self::format_orders_for_response( $orders, $include_line_items );
+		$orders = self::format_orders_for_response( $orders, $includes );
 		if ( is_wp_error( $orders ) ) {
 			return $orders;
 		}
@@ -258,7 +265,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		$type = self::get_order_type_from_input( $input );
 
-		return wc_rest_check_post_permissions( $type, 'read' );
+		return (bool) wc_rest_check_post_permissions( $type, 'read' );
 	}
 
 	/**
@@ -365,9 +372,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				'include_line_items' => array(
 					'type'        => 'boolean',
 					'description' => __(
-						'Whether to include order line items and shipping lines in each returned order. Defaults to false.',
+						'Whether to include order line items in each returned order. Defaults to false.',
 						'woocommerce'
 					),
+					'default'     => false,
+				),
+				'include_lines'      => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whether to include the shipping, fee, coupon and tax lines in each returned order. Defaults to false.', 'woocommerce' ),
 					'default'     => false,
 				),
 				'page'               => array(

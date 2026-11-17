@@ -558,8 +558,6 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( $filter_calls, 'Filter should have been called' );
 		$this->assertSame( ProductVersionStringInvalidator::DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL, $filter_calls[0]['ttl'] );
 		$this->assertSame( 'product', $filter_calls[0]['entity_type'] );
-
-		remove_all_filters( 'woocommerce_version_string_invalidator_taxonomy_lookup_ttl' );
 	}
 
 	/**
