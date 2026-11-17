@@ -79,7 +79,7 @@ final class ReadinessCopy {
 				return self::product(
 					/* translators: %s: names of up to three products, such as "Blue hoodie and Red cap", or number of products. */
 					self::title( $count, $names, _n( 'Fix the barcode number of %s', 'Fix the barcode numbers of %s', $count, 'woocommerce' ), __( 'Fix the barcode number of a product', 'woocommerce' ), sprintf( _n( 'Fix the barcode number of %s product', 'Fix the barcode numbers of %s products', $count, 'woocommerce' ), $n ) ),
-					__( 'The barcode numbers listed aren’t valid, so AI shopping apps can’t use them to match your products. A barcode number has 8, 12, 13, or 14 digits.', 'woocommerce' ),
+					_n( 'The barcode number listed isn’t valid, so AI shopping apps can’t use it to match your product. A barcode number has 8, 12, 13, or 14 digits.', 'The barcode numbers listed aren’t valid, so AI shopping apps can’t use them to match your products. A barcode number has 8, 12, 13, or 14 digits.', $count, 'woocommerce' ),
 					__( 'Use the number from the packaging or your supplier.', 'woocommerce' )
 				);
 			case 'duplicate_gtin':
@@ -414,8 +414,8 @@ final class ReadinessCopy {
 				__( 'Add your returns policy to your product details', 'woocommerce' ),
 				__( 'AI assistants use it to tell shoppers whether they can return an item before they buy.', 'woocommerce' ),
 				__( 'Your product page code doesn’t include your returns policy, so AI assistants can’t tell shoppers whether they can return an item.', 'woocommerce' ),
-				__( 'Choose a refund and returns policy page.', 'woocommerce' ),
-				AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ) . '#' . AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION,
+				// Shown only once a published refund and returns page is chosen, so the fix can't be to choose one.
+				__( 'WooCommerce adds it from your refund and returns page. Check the schema settings in your SEO plugin or theme.', 'woocommerce' ),
 			),
 			'product_shipping_schema'        => array(
 				__( 'Product details include shipping', 'woocommerce' ),

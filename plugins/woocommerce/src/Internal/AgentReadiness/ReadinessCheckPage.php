@@ -310,10 +310,14 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		$enabled  = UcpUtils::is_enabled();
 		$left     = count( self::open_steps( $checks ) );
 		$badge    = $this->shopping_badge( $checks );
-		$can_shop = $enabled && array() === $this->store_conditions->failing_required( $checks );
-		$set_up   = $enabled || false !== get_option( $this->features_controller->feature_enable_option_name( UcpUtils::FEATURE_ID ) );
+		$blocked  = array() !== $this->store_conditions->failing_required( $checks );
+		$can_shop = $enabled && ! $blocked;
+		// As in the design: Continue setup while a required step is left, otherwise View settings.
+		$button = $blocked ? __( 'Continue setup', 'woocommerce' ) : __( 'View settings', 'woocommerce' );
+		$set_up = $enabled || false !== get_option( $this->features_controller->feature_enable_option_name( UcpUtils::FEATURE_ID ) );
 		if ( ! $set_up ) {
-			$text = __( 'Let shoppers find and buy your products through AI assistants.', 'woocommerce' );
+			$text   = __( 'Let shoppers find and buy your products through AI assistants.', 'woocommerce' );
+			$button = __( 'Set up AI shopping', 'woocommerce' );
 		} elseif ( ! $enabled ) {
 			$text = __( 'AI shopping is off.', 'woocommerce' );
 		} elseif ( 0 === $left ) {
@@ -331,8 +335,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'text'   => $text,
 			'button' => array(
 				'href' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ),
-				// As in the design: Continue setup while a required step is left, otherwise View settings.
-				'text' => ! $set_up ? __( 'Set up AI shopping', 'woocommerce' ) : ( array() !== $this->store_conditions->failing_required( $checks ) ? __( 'Continue setup', 'woocommerce' ) : __( 'View settings', 'woocommerce' ) ),
+				'text' => $button,
 			),
 		);
 	}
@@ -712,8 +715,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$list[] = array(
 				'id'    => $item['id'],
 				'tier'  => $tiers[ $item['tier'] ],
-				// Required issues are store-wide, so the badge says so where product issues give their share of sales.
-				'badge' => 0 === $item['tier'] ? self::badge_data( array( 'info', __( 'Whole store', 'woocommerce' ) ) ) : null,
+				// Required issues are store-wide, so the badge says so where product issues give their share of sales. Same intent as Required.
+				'badge' => 0 === $item['tier'] ? self::badge_data( array( self::required_badge()[0], __( 'Whole store', 'woocommerce' ) ) ) : null,
 				'title' => $item['title'],
 				'why'   => $why,
 				'link'  => $item['link'],
