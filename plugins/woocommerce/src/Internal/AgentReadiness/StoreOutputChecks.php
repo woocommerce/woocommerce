@@ -1974,7 +1974,8 @@ class StoreOutputChecks {
 			return true;
 		}
 		// wc_get_products() ignores meta_query, so the reviewed product is looked up as a post.
-		$ids = get_posts(
+		// The same products the scan checks: Search results only included, Hidden left out.
+		$ids     = get_posts(
 			array(
 				'post_type'        => 'product',
 				'post_status'      => ProductStatus::PUBLISH,
@@ -1985,14 +1986,7 @@ class StoreOutputChecks {
 				'order'            => 'DESC',
 				'suppress_filters' => false,
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Five rows, once per background scan.
-				'tax_query'        => array(
-					array(
-						'taxonomy' => 'product_visibility',
-						'field'    => 'slug',
-						'terms'    => array( 'exclude-from-catalog' ),
-						'operator' => 'NOT IN',
-					),
-				),
+				'tax_query'        => ProductScan::count_query( ProductScan::COUNT_AVAILABLE ),
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Five rows, once per background scan.
 				'meta_query'       => array(
 					array(

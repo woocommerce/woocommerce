@@ -416,7 +416,7 @@ class AgentReadiness {
 				'conflict' => ! empty( $check['conflict'] ),
 				'pending'  => ! empty( $check['pending'] ),
 				'seen_at'  => (string) ( $check['seen_at'] ?? '' ),
-				'source'   => (string) ( $check['source'] ?? '' ),
+				'source'   => sanitize_text_field( (string) ( $check['source'] ?? '' ) ),
 			);
 		}
 		return $checks;

@@ -556,6 +556,29 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A reviewed Search results only product is sampled, so missing rating markup fails.
+	 */
+	public function test_review_markup_samples_search_only_products(): void {
+		update_option( 'woocommerce_enable_reviews', 'yes' );
+		update_option( 'woocommerce_enable_review_rating', 'yes' );
+		$search = WC_Helper_Product::create_simple_product();
+		$search->set_catalog_visibility( 'search' );
+		$search->save();
+		update_post_meta( $search->get_id(), '_wc_average_rating', '4.00' );
+
+		$store = $this->healthy_store();
+		$json  = wp_json_encode(
+			array(
+				'@type' => 'Product',
+				'name'  => $search->get_name(),
+			)
+		);
+		$store[ self::path( $search->get_permalink() ) ] = array( 200, '<script type="application/ld+json">' . $json . '</script>' );
+
+		$this->assertFalse( $this->results( $store )['product_review_markup'] );
+	}
+
+	/**
 	 * @testdox Hidden reviewed products are skipped before the sample limit, so an older visible one is still read.
 	 */
 	public function test_review_markup_skips_a_run_of_hidden_products(): void {

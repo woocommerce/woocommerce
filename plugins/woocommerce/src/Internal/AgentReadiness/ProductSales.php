@@ -108,7 +108,8 @@ class ProductSales {
 
 	/**
 	 * How many orders the store holds since a date, with the statuses Analytics counts. Analytics
-	 * holds fewer while its import of past orders hasn't run or finished.
+	 * holds fewer while its import of past orders hasn't run or finished. Child orders are left
+	 * out: a multivendor sub-order is not a separate order Analytics imports.
 	 *
 	 * @param \DateTimeImmutable $since    Start of the period.
 	 * @param array<int, string> $excluded Statuses Analytics leaves out.
@@ -121,6 +122,7 @@ class ProductSales {
 		$orders = wc_get_orders(
 			array(
 				'type'         => 'shop_order',
+				'parent'       => 0,
 				'status'       => array_values( $statuses ),
 				'date_created' => '>=' . $since->getTimestamp(),
 				'limit'        => 1,
