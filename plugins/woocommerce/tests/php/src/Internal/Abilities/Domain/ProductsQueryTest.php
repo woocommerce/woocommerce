@@ -248,6 +248,43 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve filtered page sizes on full, partial and empty pages.
+	 */
+	public function test_pagination_follows_filtered_page_size(): void {
+		for ( $i = 0; $i < 11; ++$i ) {
+			WC_Helper_Product::create_simple_product();
+		}
+
+		$callback = static function ( $args ) {
+			if ( 10 === $args['posts_per_page'] ) {
+				$args['posts_per_page'] = 5;
+			}
+			return $args;
+		};
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $callback );
+		try {
+			foreach ( array(
+				1 => 5,
+				3 => 1,
+				4 => 0,
+			) as $page => $rows ) {
+				$result = ProductsQuery::execute(
+					array(
+						'page'     => $page,
+						'per_page' => 10,
+					)
+				);
+				$this->assertCount( $rows, $result['products'] );
+				$this->assertSame( 11, $result['total'] );
+				$this->assertSame( 3, $result['total_pages'] );
+				$this->assertSame( 10, $result['per_page'] );
+			}
+		} finally {
+			remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $callback );
+		}
+	}
+
+	/**
 	 * @testdox Should narrow the total with extension query filters.
 	 */
 	public function test_total_follows_extension_query_filter(): void {

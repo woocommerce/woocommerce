@@ -227,6 +227,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$results = wc_get_orders( $args );
 		$orders  = is_object( $results ) && isset( $results->orders ) ? $results->orders : array();
 		$total   = is_object( $results ) && isset( $results->total ) ? (int) $results->total : count( $orders );
+		$pages   = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : (int) ceil( $total / $per_page );
 
 		// Queries skip their count when the requested page has no rows.
 		if ( 0 === $total && empty( $orders ) && $page > 1 ) {
@@ -234,12 +235,12 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				$args,
 				array(
 					'page'   => 1,
-					'limit'  => 1,
 					'return' => 'ids',
 				)
 			);
 			$count      = wc_get_orders( $count_args );
 			$total      = is_object( $count ) && isset( $count->total ) ? (int) $count->total : 0;
+			$pages      = is_object( $count ) && isset( $count->max_num_pages ) ? (int) $count->max_num_pages : (int) ceil( $total / $per_page );
 		}
 		$orders = array_values(
 			array_filter(
@@ -258,7 +259,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		return array(
 			'orders'      => $orders,
 			'total'       => $total,
-			'total_pages' => (int) ceil( $total / $per_page ),
+			'total_pages' => $pages,
 			'page'        => $page,
 			'per_page'    => $per_page,
 		);

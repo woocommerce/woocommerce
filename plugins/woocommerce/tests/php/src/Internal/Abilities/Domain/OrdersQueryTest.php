@@ -722,6 +722,47 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve filtered page sizes on full, partial and empty pages.
+	 *
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
+	 */
+	public function test_pagination_follows_filtered_page_size( bool $hpos ): void {
+		$this->use_storage( $hpos );
+		for ( $i = 0; $i < 11; ++$i ) {
+			wc_create_order( array( 'status' => OrderStatus::PENDING ) );
+		}
+
+		$callback = static function ( $args ) {
+			if ( 10 === $args['limit'] ) {
+				$args['limit'] = 5;
+			}
+			return $args;
+		};
+		add_filter( 'woocommerce_order_query_args', $callback );
+		try {
+			foreach ( array(
+				1 => 5,
+				3 => 1,
+				4 => 0,
+			) as $page => $rows ) {
+				$result = OrdersQuery::execute(
+					array(
+						'page'     => $page,
+						'per_page' => 10,
+					)
+				);
+				$this->assertCount( $rows, $result['orders'] );
+				$this->assertSame( 11, $result['total'] );
+				$this->assertSame( 3, $result['total_pages'] );
+				$this->assertSame( 10, $result['per_page'] );
+			}
+		} finally {
+			remove_filter( 'woocommerce_order_query_args', $callback );
+		}
+	}
+
+	/**
 	 * @testdox Should narrow the total with extension query filters.
 	 *
 	 * @dataProvider storage_modes
