@@ -138,7 +138,14 @@ class FulfillmentsManager {
 			return (bool) $enabled;
 		}
 
-		return 'fulfilled' !== FulfillmentUtils::get_order_fulfillment_status( $order );
+		// The email can carry an order instance that was loaded before the last fulfillment was
+		// saved, so read the status from the stored order instead of from that snapshot.
+		$stored_order = wc_get_order( $order->get_id() );
+		if ( ! $stored_order instanceof WC_Order ) {
+			return (bool) $enabled;
+		}
+
+		return 'fulfilled' !== FulfillmentUtils::get_order_fulfillment_status( $stored_order );
 	}
 
 	/**

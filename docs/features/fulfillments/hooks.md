@@ -152,6 +152,8 @@ The callback owns the decision of whether an order can do without its "Completed
 - **A fulfilled order has not necessarily emailed the customer.** Auto-fulfilled items (**Settings > Products > Auto-fulfill items**, on by default for downloadable products), fulfillments saved with "Notify customer" unticked, and imported fulfillments all reach the `fulfilled` status without sending a fulfillment email.
 - **Only the "Completed order" email carries the order totals and the download links.** It fires `woocommerce_email_order_details`; the fulfillment emails list a shipment and its tracking details instead. An order holding downloadable or virtual products usually still needs it.
 
+The order the callback receives is the instance the email carries, which may have been loaded before the last fulfillment was saved. Read the order itself from it, such as its items, rather than its fulfillment status, which WooCommerce checks against the stored order after the callback returns.
+
 For example, this skips the email for shipped orders but keeps it whenever the order holds a downloadable item:
 
 ```php

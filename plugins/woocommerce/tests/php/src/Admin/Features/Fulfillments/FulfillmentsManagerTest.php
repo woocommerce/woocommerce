@@ -2,7 +2,9 @@
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsManager;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
@@ -511,6 +513,41 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The "Completed order" email is skipped for a fulfilled order when the email carries an instance read before the fulfillment.
+	 */
+	public function test_completed_order_email_is_skipped_for_an_order_read_before_the_fulfillment(): void {
+		$order = OrderHelper::create_order( get_current_user_id(), \WC_Helper_Product::create_simple_product() );
+
+		// Stands for the instance a caller holds while it saves the last fulfillment and then
+		// completes the order. It is constructed directly so the order cache cannot refresh it.
+		$held_order = new WC_Order( $order->get_id() );
+
+		$this->fulfill_quantity( $order, 4 );
+		add_filter( 'woocommerce_fulfillments_suppress_completed_email', '__return_true' );
+
+		$this->assertSame( 'no_fulfillments', FulfillmentUtils::get_order_fulfillment_status( $held_order ), 'The held instance should still carry the status it was read with.' );
+		$this->assertFalse( $this->is_completed_order_email_enabled( $held_order ), 'A fully fulfilled order should skip the email even when the email carries an older instance.' );
+	}
+
+	/**
+	 * @testdox The "Completed order" email still sends when the email carries an instance read before the fulfillment was deleted.
+	 */
+	public function test_completed_order_email_sends_for_an_order_read_before_the_fulfillment_was_deleted(): void {
+		$order       = OrderHelper::create_order( get_current_user_id(), \WC_Helper_Product::create_simple_product() );
+		$fulfillment = $this->fulfill_quantity( $order, 4 );
+
+		// Read while the order was fulfilled, so the instance keeps a status the merchant has since
+		// undone. It is constructed directly so the order cache cannot refresh it.
+		$held_order = new WC_Order( $order->get_id() );
+
+		$fulfillment->delete();
+		add_filter( 'woocommerce_fulfillments_suppress_completed_email', '__return_true' );
+
+		$this->assertSame( 'fulfilled', FulfillmentUtils::get_order_fulfillment_status( $held_order ), 'The held instance should still carry the status it was read with.' );
+		$this->assertTrue( $this->is_completed_order_email_enabled( $held_order ), 'An order whose fulfillment was deleted should keep its email.' );
+	}
+
+	/**
 	 * Create an order of four units and fulfill the given quantity of them.
 	 *
 	 * @param int  $quantity Quantity to put in the fulfillment.
@@ -519,7 +556,20 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	 */
 	private function create_order_with_fulfilled_quantity( int $quantity, bool $fulfilled = true ): WC_Order {
 		$order = OrderHelper::create_order( get_current_user_id(), \WC_Helper_Product::create_simple_product() );
+		$this->fulfill_quantity( $order, $quantity, $fulfilled );
 
+		return wc_get_order( $order->get_id() );
+	}
+
+	/**
+	 * Create a fulfillment holding the given quantity of each item in the order.
+	 *
+	 * @param WC_Order $order     The order to fulfill.
+	 * @param int      $quantity  Quantity to put in the fulfillment.
+	 * @param bool     $fulfilled Whether the fulfillment itself has shipped.
+	 * @return Fulfillment The fulfillment that was created.
+	 */
+	private function fulfill_quantity( WC_Order $order, int $quantity, bool $fulfilled = true ): Fulfillment {
 		$items = array();
 		foreach ( $order->get_items() as $item_id => $item ) {
 			$items[] = array(
@@ -528,7 +578,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 			);
 		}
 
-		FulfillmentsHelper::create_fulfillment(
+		return FulfillmentsHelper::create_fulfillment(
 			array(
 				'entity_type'  => WC_Order::class,
 				'entity_id'    => $order->get_id(),
@@ -537,8 +587,6 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 			),
 			array( '_items' => $items )
 		);
-
-		return wc_get_order( $order->get_id() );
 	}
 
 	/**
