@@ -374,10 +374,10 @@ class Image extends Abstract_Block_Renderer {
 		$attrs        = $parsed_block['attrs'] ?? array();
 		$aspect_ratio = isset( $attrs['aspectRatio'] ) && is_string( $attrs['aspectRatio'] ) ? trim( $attrs['aspectRatio'] ) : '';
 		$ratio_value  = Html_Processing_Helper::parse_aspect_ratio( $aspect_ratio );
-		$block_width  = isset( $attrs['width'] ) ? (string) $attrs['width'] : '';
+		$block_width  = isset( $attrs['width'] ) && is_scalar( $attrs['width'] ) ? trim( (string) $attrs['width'] ) : '';
 
-		// A contain scale letterboxes instead of cropping, and a percentage width has no pixel size to crop to.
-		if ( null === $ratio_value || 'cover' !== ( $attrs['scale'] ?? null ) || '' === $block_width || false !== strpos( $block_width, '%' ) ) {
+		// A contain scale letterboxes instead of cropping, and only a pixel width gives a size to crop to.
+		if ( null === $ratio_value || 'cover' !== ( $attrs['scale'] ?? null ) || ! preg_match( '/^\d+(?:\.\d+)?(?:px)?$/', $block_width ) ) {
 			return $block_content;
 		}
 

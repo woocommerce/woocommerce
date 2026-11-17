@@ -820,6 +820,28 @@ class Html_Processing_Helper_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test parse_aspect_ratio reads the ratio formats core saves.
+	 */
+	public function testParseAspectRatioReadsValidRatios(): void {
+		$this->assertSame( 1.0, Html_Processing_Helper::parse_aspect_ratio( '1' ) );
+		$this->assertSame( 1.5, Html_Processing_Helper::parse_aspect_ratio( '1.5' ) );
+		$this->assertSame( 4 / 3, Html_Processing_Helper::parse_aspect_ratio( '4/3' ) );
+		$this->assertSame( 16 / 9, Html_Processing_Helper::parse_aspect_ratio( ' 16 / 9 ' ) );
+	}
+
+	/**
+	 * Test parse_aspect_ratio rejects values that aren't a simple positive ratio.
+	 *
+	 * The ratio is interpolated into inline CSS, so anything beyond digits and one slash must be rejected.
+	 */
+	public function testParseAspectRatioRejectsInvalidRatios(): void {
+		$invalid = array( '', 'auto', '0', '0/1', '1/0', '-1', '4/3/2', '1;color:red', '1/1 !important', '4:3' );
+		foreach ( $invalid as $ratio ) {
+			$this->assertNull( Html_Processing_Helper::parse_aspect_ratio( $ratio ), "Accepted invalid ratio: {$ratio}" );
+		}
+	}
+
+	/**
 	 * Test get_crop_height returns the height an aspect-ratio crop gives an image.
 	 */
 	public function testGetCropHeightDividesTheWidthByTheRatio(): void {

@@ -764,6 +764,9 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 			'invalid ratio'    => array( array( 'aspectRatio' => '1;color:red' ) ),
 			'non-string ratio' => array( array( 'aspectRatio' => array( '1' ) ) ),
 			'percentage width' => array( array( 'width' => '50%' ) ),
+			'em width'         => array( array( 'width' => '20em' ) ),
+			'rem width'        => array( array( 'width' => '30rem' ) ),
+			'viewport width'   => array( array( 'width' => '50vw' ) ),
 		);
 	}
 
