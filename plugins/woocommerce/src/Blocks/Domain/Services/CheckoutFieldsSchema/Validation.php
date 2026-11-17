@@ -229,6 +229,8 @@ class Validation {
 	 * This check is separate from meta-schema validation so PHP-valid rules can
 	 * remain registered and enforced on the server.
 	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
 	 * @since 11.4.0
 	 *
 	 * @param mixed  $rules The rules to walk.

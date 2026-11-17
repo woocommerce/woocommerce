@@ -17,6 +17,15 @@ jest.mock( '@woocommerce/base-hooks', () => ( {
 	usePrevious: jest.fn(),
 } ) );
 
+let mockIsAdmin = true;
+
+jest.mock( '@woocommerce/settings', () => ( {
+	...jest.requireActual( '@woocommerce/settings' ),
+	get CURRENT_USER_IS_ADMIN() {
+		return mockIsAdmin;
+	},
+} ) );
+
 const createParser = () =>
 	new Ajv( {
 		allErrors: true,
@@ -47,6 +56,7 @@ describe( 'compileSchema', () => {
 	let consoleError: jest.SpyInstance;
 
 	beforeEach( () => {
+		mockIsAdmin = true;
 		consoleError = jest
 			.spyOn( console, 'error' )
 			.mockImplementation( () => {} );
@@ -97,6 +107,18 @@ describe( 'compileSchema', () => {
 		const [ message, patterns ] = consoleError.mock.calls[ 0 ];
 		expect( message ).toContain( 'ECMA-262' );
 		expect( patterns ).toEqual( [ pattern ] );
+	} );
+
+	it( 'does not log a skipped pattern for shoppers', () => {
+		mockIsAdmin = false;
+
+		const validate = compileSchema(
+			createParser(),
+			schemaWithPattern( '^[0-9]{4}\\-$' )
+		);
+
+		expect( validate ).toBeNull();
+		expect( consoleError ).not.toHaveBeenCalled();
 	} );
 
 	it.each( [

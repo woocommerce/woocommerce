@@ -127,6 +127,12 @@ class JavaScriptPatternTest extends WC_Unit_Test_Case {
 			'possessive quantifier',
 			JavaScriptPattern::find_unsupported_construct( '^a++$' )
 		);
+
+		$this->assertStringContainsString(
+			'\\é',
+			JavaScriptPattern::find_unsupported_construct( '^[a-z]\\é$' ),
+			'A non-ASCII escape must be quoted as a whole character.'
+		);
 	}
 
 	/**

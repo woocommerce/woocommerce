@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import type Ajv from 'ajv';
 import type { ErrorObject } from 'ajv';
 
@@ -116,6 +117,10 @@ export const compileSchema = (
 		// is async. None of the schemas here are, so the boolean is unwrapped.
 		return parser.compile( schema as never ) as unknown as CompiledSchema;
 	} catch ( error ) {
+		if ( ! CURRENT_USER_IS_ADMIN ) {
+			return null;
+		}
+
 		const unseen = collectPatterns( schema ).filter(
 			( pattern ) => ! reportedPatterns.has( pattern )
 		);

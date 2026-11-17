@@ -192,6 +192,12 @@ final class JavaScriptPattern {
 
 		$escape = $pattern[ $index + 1 ];
 
+		// `u` mode never allows escaping a non-ASCII character. Quote the whole
+		// character, since a single byte of it is not valid UTF-8.
+		if ( ord( $escape ) > 127 ) {
+			return '\\' . mb_substr( substr( $pattern, $index + 1 ), 0, 1, 'UTF-8' ) . ', an escape JavaScript does not allow';
+		}
+
 		if ( ctype_digit( $escape ) ) {
 			if ( $in_class && '0' !== $escape ) {
 				return 'a numeric escape inside a character class, which JavaScript does not support';
