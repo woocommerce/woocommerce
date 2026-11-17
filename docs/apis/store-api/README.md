@@ -209,16 +209,18 @@ add_action(
 );
 ```
 
-`wc_load_cart()` sets up the session and an empty cart. It doesn't read the cart items, so call `WC()->cart->get_cart()` next, which loads the items and totals from the session. Then call `calculate_totals()`, because the stored totals can be out of date, for example when a product in the cart was deleted. After that, other cart methods such as `get_cart_contents()` and `get_total()` return the customer's cart.
+`wc_load_cart()` sets up the session and an empty cart. It doesn't read the cart items, so call `WC()->cart->get_cart()` next, which loads the items and totals from the session. Then call `calculate_totals()`, because the stored totals can be out of date. Nothing re-checks them on load, so they go stale when a price, tax rate, shipping rate or coupon changed since the cart was last updated. After that, other cart methods such as `get_cart_contents()` and `get_total()` return the customer's cart.
 
 The response is different for every customer, so the example sends `Cache-Control: no-store, private`. WordPress only sends no-cache headers for logged-in users, and a page cache could otherwise serve one guest's cart to another.
 
 The session is read from the customer's cookies, so call the route from the browser with `credentials: 'same-origin'`. Also send an `X-WP-Nonce` header created with `wp_create_nonce( 'wp_rest' )`. WordPress handles the nonce in two ways:
 
 * If the nonce is invalid, WordPress rejects the request with a `rest_cookie_invalid_nonce` error before your callbacks run.
-* If no nonce is sent, WordPress runs the request as a guest, even when the customer is logged in. Loading the cart as a guest would discard the customer's session, so the example's permission callback rejects a request that has a logged-in cookie but no nonce. Guests don't need a nonce.
+* If no nonce is sent, WordPress runs the request as a guest, even when the customer is logged in. Loading the cart as a guest would discard the customer's session, so the example's permission callback rejects a request that has a logged-in cookie but no nonce.
 
-The Store API `Nonce` and `Cart-Token` headers only work on Store API routes. A guest [Cart Token](/docs/apis/store-api/cart-tokens) passed in the `session` query parameter is still honored, because `wc_load_cart()` checks for it on any request.
+Guests don't need a nonce, but WordPress checks any nonce that is sent. A stale nonce, for example from a cached page, gets a 403 for guests too. That response doesn't include a refreshed nonce, so check `response.ok` before reading the body.
+
+The Store API `Nonce` and `Cart-Token` headers only work on Store API routes.
 
 Pass the route URL and the initial nonce to your script from PHP, so the URL works on any install layout:
 
@@ -246,6 +248,10 @@ async function getCartSummary() {
 
 	// Each response carries a refreshed nonce. Use it for the next request instead of the initial one.
 	restNonce = response.headers.get( 'X-WP-Nonce' ) || restNonce;
+
+	if ( ! response.ok ) {
+		throw new Error( `Cart summary request failed with status ${ response.status }.` );
+	}
 
 	return response.json();
 }
