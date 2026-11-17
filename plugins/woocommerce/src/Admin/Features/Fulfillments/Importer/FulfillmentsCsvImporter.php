@@ -773,6 +773,8 @@ class FulfillmentsCsvImporter {
 			return true;
 		} catch ( \Throwable $e ) {
 			self::restore_filter_stack( $hook_depth );
+			// The listener may have changed the cached fulfillment, so the next row reads it again.
+			unset( $this->fulfillments_cache[ $order->get_id() ] );
 			wc_get_logger()->error(
 				sprintf( 'Fulfillments import could not notify the customer for row %1$d of order %2$d: %3$s', $row_number, $order->get_id(), $e->getMessage() ),
 				array( 'source' => 'fulfillments-importer' )

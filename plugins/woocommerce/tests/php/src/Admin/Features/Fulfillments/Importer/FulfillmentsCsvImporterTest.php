@@ -1986,6 +1986,32 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A notification listener that changes the fulfillment and throws leaves nothing behind for a later row.
+	 */
+	public function test_failing_notification_does_not_leak_its_changes_into_a_later_row(): void {
+		$order  = OrderHelper::create_order();
+		$id     = $order->get_id();
+		$item   = current( $order->get_items() )->get_id();
+		$throws = 1;
+		add_action(
+			'woocommerce_fulfillment_created_notification',
+			function ( $order_id, $fulfillment ) use ( &$throws ) {
+				if ( $throws-- > 0 ) {
+					$fulfillment->set_tracking_number( 'TRK-2' );
+					throw new \Exception( 'Mail server down' );
+				}
+			},
+			10,
+			2
+		);
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$id},TRK-1,ups,,{$item}:1\n{$id},TRK-2,ups,,{$item}:1\n", array( 'notify_customer' => true ) );
+
+		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_CREATED ), array_column( $result['rows'], 'status' ) );
+		$this->assertCount( 2, $this->fulfillments_of( $order ) );
+	}
+
+	/**
 	 * @testdox A notification listener that throws leaves the row imported and not counted as notified.
 	 */
 	public function test_failing_notification_keeps_the_row_imported(): void {
