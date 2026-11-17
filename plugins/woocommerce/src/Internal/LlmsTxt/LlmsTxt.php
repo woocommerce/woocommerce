@@ -269,12 +269,10 @@ final class LlmsTxt implements RegisterHooksInterface {
 	 * @return array{section:string,profile:array}
 	 */
 	private function build_guidance(): array {
-		global $wp_rewrite;
-
 		$profile      = array();
 		$capabilities = array();
 
-		if ( UcpUtils::is_enabled() && isset( $wp_rewrite ) && $wp_rewrite->using_permalinks() ) {
+		if ( UcpUtils::is_enabled() ) {
 			$profile      = wc_get_container()->get( UcpDiscovery::class )->get_profile();
 			$capabilities = array_keys( $profile['ucp']['capabilities'] ?? array() );
 			$labels       = array(
