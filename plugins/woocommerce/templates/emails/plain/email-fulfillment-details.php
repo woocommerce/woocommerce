@@ -23,7 +23,19 @@ if ( null === $fulfillment->get_date_deleted() ) {
 	$tracking_number   = $fulfillment->get_meta( '_tracking_number', true );
 	$tracking_url      = $fulfillment->get_meta( '_tracking_url' );
 	$shipment_provider = $fulfillment->get_meta( '_shipment_provider' );
-	if ( ! $tracking_number && ! $tracking_url && ! $shipment_provider ) {
+	$pickup_location   = Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_fulfillment_pickup_location( $fulfillment );
+	if ( null !== $pickup_location ) {
+		echo esc_html( $pickup_location['name'] ) . "\n";
+		if ( '' !== $pickup_location['address'] ) {
+			echo esc_html( $pickup_location['address'] ) . "\n";
+		}
+		if ( '' !== $pickup_location['details'] ) {
+			echo esc_html( wp_strip_all_tags( $pickup_location['details'] ) ) . "\n";
+		}
+		echo "\n";
+	} elseif ( Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::STATUS_PREPARING === $fulfillment->get_status() ) {
+		echo esc_html__( 'We will send tracking details once these items ship.', 'woocommerce' ) . "\n\n";
+	} elseif ( ! $tracking_number && ! $tracking_url && ! $shipment_provider ) {
 		echo esc_html__( 'No tracking information available for this fulfillment at the moment.', 'woocommerce' );
 		return;
 	} else {

@@ -12,7 +12,16 @@ import { LineItem, Order } from '../../data/types';
 import { FulfillmentProvider } from '../../context/fulfillment-context';
 import SaveAsDraftButton from '../action-buttons/save-draft-button';
 import FulfillItemsButton from '../action-buttons/fulfill-items-button';
-import { getItemsNotInAnyFulfillment } from '../../utils/order-utils';
+import {
+	getItemsNotInAnyFulfillment,
+	getOrderPickupLocation,
+} from '../../utils/order-utils';
+import PickupInformation from '../pickup-information';
+import {
+	PickedUpButton,
+	ReadyForPickupButton,
+} from '../action-buttons/pickup-buttons';
+import StartPreparingButton from '../action-buttons/preparing-button';
 import ItemSelector from './item-selector';
 import { useFulfillmentDrawerContext } from '../../context/drawer-context';
 import ErrorLabel from '../user-interface/error-label';
@@ -59,6 +68,8 @@ const NewFulfillmentForm: React.FC = () => {
 	if ( remainingItems.length === 0 ) {
 		return null;
 	}
+
+	const pickupLocation = getOrderPickupLocation( order );
 
 	return (
 		<div
@@ -132,12 +143,45 @@ const NewFulfillmentForm: React.FC = () => {
 						>
 							<ItemSelector editMode={ true } />
 
-							<ShipmentForm />
-							<CustomerNotificationBox type="fulfill" />
-							<div className="woocommerce-fulfillment-item-actions">
-								<SaveAsDraftButton setError={ setError } />
-								<FulfillItemsButton setError={ setError } />
-							</div>
+							{ pickupLocation ? (
+								<>
+									<PickupInformation
+										location={ pickupLocation }
+									/>
+									<CustomerNotificationBox type="pickup" />
+									<div className="woocommerce-fulfillment-item-actions">
+										<SaveAsDraftButton
+											setError={ setError }
+										/>
+										<StartPreparingButton
+											setError={ setError }
+										/>
+										<PickedUpButton
+											variant="secondary"
+											setError={ setError }
+										/>
+										<ReadyForPickupButton
+											setError={ setError }
+										/>
+									</div>
+								</>
+							) : (
+								<>
+									<ShipmentForm />
+									<CustomerNotificationBox type="fulfill" />
+									<div className="woocommerce-fulfillment-item-actions">
+										<SaveAsDraftButton
+											setError={ setError }
+										/>
+										<StartPreparingButton
+											setError={ setError }
+										/>
+										<FulfillItemsButton
+											setError={ setError }
+										/>
+									</div>
+								</>
+							) }
 						</FulfillmentProvider>
 					</ShipmentFormProvider>
 				</div>

@@ -93,7 +93,7 @@ describe( 'CustomerNotificationBox component', () => {
 		// Check description text
 		expect(
 			screen.getByText(
-				'Automatically send an email to the customer when the selected items are fulfilled.'
+				'Automatically send an email to the customer when you start preparing the selected items or fulfill them.'
 			)
 		).toBeInTheDocument();
 	} );
