@@ -21,6 +21,8 @@ parameters:
 		- tests/Tools/phpstan/AbilityRegistrationRule.php
 	scanDirectories:
 		- vendor/wordpress/abilities-api
+		- bin/composer/mcp-adapter/vendor/wordpress/mcp-adapter/includes
+		- bin/composer/mcp-adapter/vendor/wordpress/php-mcp-schema/src
 		- packages/action-scheduler
 		- ../../packages/php/woocommerce-analytics/src
 	scanFiles:

@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderRefundAbilityTrait;
+use Automattic\WooCommerce\Internal\MCP\OrderRefundTool;
 use Automattic\WooCommerce\Internal\Orders\RefundCreator;
 use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -94,7 +95,7 @@ class OrderRefundCreate extends ActionableAbility {
 			'meta'                => array(
 				'show_in_rest' => true,
 				'mcp'          => array(
-					'public' => true,
+					'public' => ! OrderRefundTool::is_available(),
 					'type'   => 'tool',
 				),
 				'annotations'  => array(

@@ -1,0 +1,15 @@
+{
+	"minimum-stability": "dev",
+	"prefer-stable": true,
+	"require-dev": {
+		"wordpress/mcp-adapter": "^0.7.1"
+	},
+	"config": {
+		"platform": {
+			"php": "7.4"
+		},
+		"allow-plugins": {
+			"automattic/jetpack-autoloader": false
+		}
+	}
+}

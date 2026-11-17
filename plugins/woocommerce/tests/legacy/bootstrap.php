@@ -42,6 +42,7 @@ class WC_Unit_Tests_Bootstrap {
 		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
 
 		$this->register_autoloader_for_testing_tools();
+		self::register_autoloader_for_mcp_adapter();
 
 		$this->maybe_initialize_code_hacker();
 
@@ -117,6 +118,33 @@ class WC_Unit_Tests_Bootstrap {
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.PHP.DiscouragedPHPFunctions
 		error_reporting( error_reporting() & ~E_DEPRECATED );
+	}
+
+	/**
+	 * Load the MCP Adapter classes from its isolated Composer install, without its own autoloader, which brings a
+	 * Jetpack Autoloader version that WooCommerce does not use. Its transport classes stay unloaded, so tests can
+	 * replace them with fakes.
+	 */
+	protected static function register_autoloader_for_mcp_adapter() {
+		$vendor = dirname( __DIR__, 2 ) . '/bin/composer/mcp-adapter/vendor/wordpress';
+		$roots  = array(
+			'WP\\MCP\\'       => $vendor . '/mcp-adapter/includes/',
+			'WP\\McpSchema\\' => $vendor . '/php-mcp-schema/src/',
+		);
+
+		spl_autoload_register(
+			function ( $class_name ) use ( $roots ) {
+				foreach ( $roots as $prefix => $base_dir ) {
+					if ( 0 === strncmp( $prefix, $class_name, strlen( $prefix ) ) && 0 !== strpos( $class_name, 'WP\\MCP\\Transport\\' ) ) {
+						$file = $base_dir . str_replace( '\\', '/', substr( $class_name, strlen( $prefix ) ) ) . '.php';
+						if ( file_exists( $file ) ) {
+							require $file;
+						}
+						return;
+					}
+				}
+			}
+		);
 	}
 
 	/**

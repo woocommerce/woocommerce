@@ -193,7 +193,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 			$meta = $ability->get_meta();
 			$this->assertTrue( $meta['show_in_rest'] ?? false, "{$ability_id} should be exposed in REST." );
-			$this->assertTrue( $meta['mcp']['public'] ?? false, "{$ability_id} should be flagged as MCP-public." );
+			$this->assertSame(
+				'woocommerce/order-refund-create' !== $ability_id || ! \Automattic\WooCommerce\Internal\MCP\OrderRefundTool::is_available(),
+				$meta['mcp']['public'] ?? false,
+				"{$ability_id} should be flagged as MCP-public, unless the refund tool replaces it."
+			);
 			$this->assertSame( 'tool', $meta['mcp']['type'] ?? '', "{$ability_id} should be an MCP tool." );
 			$this->assertArrayHasKey( 'readonly', $meta['annotations'] );
 			$this->assertArrayHasKey( 'destructive', $meta['annotations'] );

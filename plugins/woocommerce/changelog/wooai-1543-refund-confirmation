@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Ask the merchant to approve a refund in MCP clients that can show forms, before an AI agent refunds an order.
