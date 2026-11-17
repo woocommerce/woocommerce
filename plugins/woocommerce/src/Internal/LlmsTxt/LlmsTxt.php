@@ -357,7 +357,7 @@ final class LlmsTxt implements RegisterHooksInterface {
 		if ( isset( $routes['/wc/store/v1/cart'] ) ) {
 			$store_api_capabilities[] = 'use the cart';
 		}
-		if ( $store_api_capabilities ) {
+		if ( $store_api_capabilities && isset( $routes['/wc/store/v1'] ) ) {
 			$lines[] = '- [WooCommerce Store API](' . esc_url_raw( rest_url( 'wc/store/v1' ) ) . '): ' . ucfirst( implode( ' and ', $store_api_capabilities ) ) . '. See the [Store API documentation](https://developer.woocommerce.com/docs/apis/store-api/).';
 		}
 		if ( $profile ) {
