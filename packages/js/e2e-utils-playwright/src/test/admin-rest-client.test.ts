@@ -186,6 +186,43 @@ describe( 'createAdminRestClient', () => {
 		}
 	} );
 
+	it( 'fetches a fresh nonce for a stream upload after the retry rejects its nonce', async () => {
+		const { request, get, fetch, nonceResponse, restResponse } =
+			mockAdminRequest();
+		nonceResponse.text
+			.mockResolvedValueOnce( 'aaaaaaaaaa' )
+			.mockResolvedValueOnce( 'bbbbbbbbbb' )
+			.mockResolvedValueOnce( 'cccccccccc' );
+		const stale = {
+			status: () => 403,
+			json: jest.fn().mockResolvedValue( {
+				code: 'rest_cookie_invalid_nonce',
+			} ),
+			dispose: jest.fn().mockResolvedValue( undefined ),
+		};
+		fetch.mockResolvedValueOnce( stale ).mockResolvedValueOnce( stale );
+		const send = createAdminRestClient( request, 'https://example.com' );
+
+		await expect( send( 'wp/v2/pages' ) ).resolves.toBe( stale );
+		expect( get ).toHaveBeenCalledTimes( 2 );
+
+		const file = createReadStream( __filename );
+		try {
+			await expect(
+				send( 'wp/v2/media', { method: 'POST', multipart: { file } } )
+			).resolves.toBe( restResponse );
+			expect( fetch ).toHaveBeenLastCalledWith(
+				'https://example.com/wp-json/wp/v2/media',
+				expect.objectContaining( {
+					headers: { 'X-WP-Nonce': 'cccccccccc' },
+				} )
+			);
+			expect( get ).toHaveBeenCalledTimes( 3 );
+		} finally {
+			file.destroy();
+		}
+	} );
+
 	it.each( [
 		'https://other.example/orders',
 		'../wp-admin',

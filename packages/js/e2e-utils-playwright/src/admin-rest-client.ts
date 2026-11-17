@@ -75,25 +75,28 @@ export function createAdminRestClient(
 				( [ name ] ) => name.toLowerCase() !== 'x-wp-nonce'
 			)
 		);
-		const send = ( value: string ) =>
-			request.fetch( endpoint.href, {
+		const send = async () => {
+			const usedNonce = getCachedNonce();
+			const value = await usedNonce;
+			const response = await request.fetch( endpoint.href, {
 				...options,
 				headers: { ...headers, 'X-WP-Nonce': value },
 				failOnStatusCode: false,
 				maxRedirects: 0,
 			} );
-		const usedNonce = getCachedNonce();
-		const response = await send( await usedNonce );
-		if (
-			response.status() !== 403 ||
-			( await response.json().catch( () => null ) )?.code !==
-				'rest_cookie_invalid_nonce'
-		) {
-			return response;
-		}
+			const nonceRejected =
+				response.status() === 403 &&
+				( await response.json().catch( () => null ) )?.code ===
+					'rest_cookie_invalid_nonce';
+			if ( nonceRejected && nonce === usedNonce ) {
+				nonce = undefined;
+			}
+			return { response, nonceRejected };
+		};
 
-		if ( nonce === usedNonce ) {
-			nonce = undefined;
+		const { response, nonceRejected } = await send();
+		if ( ! nonceRejected ) {
+			return response;
 		}
 		// Playwright consumes multipart upload streams on the first request.
 		if (
@@ -105,6 +108,7 @@ export function createAdminRestClient(
 		}
 
 		await response.dispose();
-		return send( await getCachedNonce() );
+		const { response: retryResponse } = await send();
+		return retryResponse;
 	};
 }
