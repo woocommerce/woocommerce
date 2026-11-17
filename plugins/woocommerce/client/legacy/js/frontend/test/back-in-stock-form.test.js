@@ -98,6 +98,19 @@ describe( 'Back in stock form', () => {
 			expect( $productId().val() ).toBe( '11' );
 		} );
 
+		test( 'leaves the prompt to the form it follows when the first form is wrapped', () => {
+			const wrappedA = `<div class="wrap">${ variationsForm( 'a', 'red' ) }</div>`;
+			load(
+				`<div class="summary">${ wrappedA }${ variationsForm( 'b', 'blue' ) }${ prompt }</div>`
+			);
+
+			pickOutOfStock( $( '#a' ) );
+			expect( $prompt().prop( 'hidden' ) ).toBe( true );
+
+			pickOutOfStock( $( '#b' ) );
+			expect( $prompt().prop( 'hidden' ) ).toBe( false );
+		} );
+
 		test( 'posts the attributes of the form the prompt renders after', () => {
 			const $form = $prompt().find( 'form' );
 			$form.on( 'submit', ( event ) => event.preventDefault() );

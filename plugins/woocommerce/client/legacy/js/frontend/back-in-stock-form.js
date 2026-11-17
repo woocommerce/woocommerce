@@ -16,10 +16,13 @@
 		var promptSelector     = '.wc_bis_form[data-bis-product-id="' + self.product_id + '"]';
 		self.$formContainer    = self.$variationsForm.nextUntil( '.variations_form', promptSelector ).first();
 
-		// Themes may wrap the form or the prompt, so fall back to a page-wide lookup for the product's first form.
-		var $firstForm = $( '.variations_form[data-product_id="' + self.product_id + '"]' ).first();
-		if ( ! self.$formContainer.length && self.$variationsForm.is( $firstForm ) ) {
-			self.$formContainer = $( promptSelector ).first();
+		// Themes may wrap the form or the prompt, so fall back to a page-wide lookup for the product's first form,
+		// unless another form of the product precedes the prompt and owns it.
+		var formSelector = '.variations_form[data-product_id="' + self.product_id + '"]';
+		var $prompt      = $( promptSelector ).first();
+		var isFirstForm  = self.$variationsForm.is( $( formSelector ).first() );
+		if ( ! self.$formContainer.length && isFirstForm && ! $prompt.prevAll( formSelector ).length ) {
+			self.$formContainer = $prompt;
 		}
 
 		if ( ! self.$formContainer.length ) {
