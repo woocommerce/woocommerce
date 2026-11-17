@@ -32,7 +32,9 @@ import {
 	FormRef,
 	InputProps,
 	PropsWithChildrenFunction,
+	RadioControlProps,
 	SelectControlProps,
+	TextControlProps,
 	FormContextType,
 	FormErrors,
 } from './types';
@@ -352,6 +354,26 @@ function FormComponent< Values extends Record< string, any > = any >(
 		] );
 	}
 
+	function getRadioControlProps< P extends keyof Values >(
+		name: P,
+		inputProps: ConsumerInputProps< Values > = {}
+	): RadioControlProps< Values, Values[ P ] > {
+		return _omit( getInputProps( name, inputProps ), [
+			'checked',
+			'value',
+		] );
+	}
+
+	function getTextControlProps< P extends keyof Values >(
+		name: P,
+		inputProps: ConsumerInputProps< Values > = {}
+	): TextControlProps< Values, Values[ P ] > {
+		return _omit( getInputProps( name, inputProps ), [
+			'checked',
+			'selected',
+		] );
+	}
+
 	function getSelectControlProps< P extends keyof Values >(
 		name: P,
 		inputProps: ConsumerInputProps< Values > = {}
@@ -383,7 +405,9 @@ function FormComponent< Values extends Record< string, any > = any >(
 			handleSubmit,
 			getCheckboxControlProps,
 			getInputProps,
+			getRadioControlProps,
 			getSelectControlProps,
+			getTextControlProps,
 			isValidForm: ! Object.keys( errors ).length,
 			resetForm,
 		};

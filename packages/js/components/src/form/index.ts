@@ -6,6 +6,8 @@ export type {
 	FormRef,
 	InputProps,
 	CheckboxProps,
+	RadioControlProps,
 	SelectControlProps,
+	TextControlProps,
 	ConsumerInputProps,
 } from './types';
