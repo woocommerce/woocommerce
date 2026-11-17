@@ -3769,6 +3769,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'product',
 			'test-ext',
 			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse ) {
+				unset( $ability );
 				$seen[ $product->get_id() ] = $context['deleting'];
 				return $refuse && $context['deleting'] ? new \WP_Error( 'test_keep', 'Keep them.' ) : null;
 			}
@@ -3777,6 +3778,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'product',
 			'test-ext',
 			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+				unset( $saved, $ability );
 				$deleted = array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] );
 				return null;
 			}
@@ -5090,6 +5092,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'product',
 			'test-ext',
 			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted, &$refuse ) {
+				unset( $saved, $ability );
 				$deleted = array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] );
 				return $refuse ? new \WP_Error( 'test_refused', 'Refused.' ) : null;
 			}
@@ -5130,6 +5133,105 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		foreach ( $ids as $variation_id ) {
 			$this->assertNull( get_post( $variation_id ) );
 		}
+	}
+
+	/**
+	 * @testdox Should delete the variations on a change from variable to a variable type of an extension, unless the filter keeps them for the new product.
+	 */
+	public function test_a_change_between_two_variable_types_follows_the_filter(): void {
+		$this->register_variation_subclass();
+		$input   = $this->get_shirt_input();
+		$deleted = $this->run_ability( 'woocommerce/product-create', $input );
+
+		$input['variations'][0]['sku'] = 'other-s';
+		$input['variations'][1]['sku'] = 'other-m';
+
+		$kept = $this->run_ability( 'woocommerce/product-create', $input );
+
+		$with_items = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $deleted['product']['id'],
+				'type'       => 'test-variable',
+				'variations' => array(
+					array(
+						'id'            => $deleted['product']['variation_ids'][0],
+						'regular_price' => '9.00',
+					),
+				),
+			)
+		);
+		$changed    = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'   => $deleted['product']['id'],
+				'type' => 'test-variable',
+			)
+		);
+		$this->add_test_action(
+			'woocommerce_delete_variations_on_product_type_change',
+			static fn( $delete, $product ) => $product instanceof TestVariableProduct ? false : $delete,
+			10,
+			2
+		);
+		$kept_change = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $kept['product']['id'],
+				'type'       => 'test-variable',
+				'variations' => array(
+					array(
+						'id'            => $kept['product']['variation_ids'][0],
+						'regular_price' => '9.00',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 400, $with_items->get_status() );
+		$this->assertSame( 'test-variable', $changed['product']['type'] );
+		$this->assertSame( array(), $changed['product']['variation_ids'] );
+		$this->assertNull( get_post( $deleted['product']['variation_ids'][0] ) );
+		$this->assertSame( 'test-variable', $kept_change['product']['type'] );
+		$this->assertEqualsCanonicalizing( $kept['product']['variation_ids'], $kept_change['product']['variation_ids'] );
+		$this->assertSame( '9.00', $kept_change['variations'][0]['regular_price'] );
+	}
+
+	/**
+	 * @testdox Should refuse a type change that deletes the variations when a variation appears after the validators ran.
+	 */
+	public function test_a_type_change_refuses_a_variation_added_during_the_call(): void {
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$id      = $created['product']['id'];
+		$added   = 0;
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function ( \WC_Product $product ) use ( $id, &$added ) {
+				if ( $id === $product->get_id() && ! $added ) {
+					$variation = new \WC_Product_Variation();
+					$variation->set_parent_id( $id );
+					$variation->save();
+					$added = $variation->get_id();
+				}
+				return null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $id,
+				'type' => 'simple',
+			)
+		);
+
+		$this->assertSame( 409, $refused->get_status() );
+		$this->assertSame( 'variable', wc_get_product( $id )->get_type() );
+		$this->assertInstanceOf( \WC_Product_Variation::class, wc_get_product( $added ) );
+		$this->assertInstanceOf( \WC_Product_Variation::class, wc_get_product( $created['product']['variation_ids'][0] ) );
 	}
 
 	/**

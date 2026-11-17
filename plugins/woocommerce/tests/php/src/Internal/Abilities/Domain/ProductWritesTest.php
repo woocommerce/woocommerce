@@ -641,6 +641,33 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should answer the permission check without an error for a variation ID or a type that is not a string.
+	 */
+	public function test_permission_check_with_a_variation_id_or_a_bad_type(): void {
+		$variable  = WC_Helper_Product::create_variation_product();
+		$variation = $variable->get_children()[0];
+		$deny      = static fn( $caps, $cap ) => 'delete_post' === $cap ? array( 'do_not_allow' ) : $caps;
+
+		add_filter( 'map_meta_cap', $deny, 10, 2 );
+		$from_variation = ProductUpdate::can_update_product(
+			array(
+				'id'   => $variation,
+				'type' => 'simple',
+			)
+		);
+		$bad_type       = ProductUpdate::can_update_product(
+			array(
+				'id'   => $variable->get_id(),
+				'type' => array( 'simple' ),
+			)
+		);
+		remove_filter( 'map_meta_cap', $deny, 10 );
+
+		$this->assertTrue( $from_variation, 'load() refuses the type change of a variation, so the check needs no delete permission.' );
+		$this->assertTrue( $bad_type, 'The schema refuses a type that is not a string.' );
+	}
+
+	/**
 	 * @testdox Should require the delete permission for a type change that deletes variations.
 	 */
 	public function test_type_change_that_deletes_variations_requires_the_delete_permission(): void {

@@ -135,16 +135,16 @@ class ProductUpdate extends ActionableAbility {
 				);
 			}
 			if ( $this->type_deletes ) {
-				$children                   = get_posts(
-					array(
-						'post_parent' => $product->get_id(),
-						'post_type'   => 'product_variation',
-						'fields'      => 'ids',
-						'post_status' => array( 'any', ProductStatus::TRASH, ProductStatus::AUTO_DRAFT ),
-						'numberposts' => -1,
-					)
-				);
+				$children = self::get_variation_ids( $product->get_id() );
+				_prime_post_caches( $children );
 				$this->variations['delete'] = array_values( array_filter( array_map( 'wc_get_product', $children ), static fn( $child ) => $child instanceof \WC_Product_Variation ) );
+				if ( count( $this->variations['delete'] ) !== count( $children ) ) {
+					return new \WP_Error(
+						'woocommerce_product_type_unsupported',
+						__( 'A variation of this product cannot be loaded, so the ability cannot check it before it deletes it.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
 			}
 			$this->changes_type = true;
 			return self::get_product_object_for_type( $input['type'], $product->get_id() );
@@ -253,6 +253,14 @@ class ProductUpdate extends ActionableAbility {
 	protected function save( $subject ) {
 		$this->deleted = array_map( static fn( \WC_Product_Variation $variation ) => clone $variation, $this->variations['delete'] );
 
+		$planned = array_map( static fn( \WC_Product_Variation $variation ) => $variation->get_id(), $this->variations['delete'] );
+		$current = $this->type_deletes ? self::get_variation_ids( $subject->get_id() ) : $planned;
+		sort( $planned );
+		sort( $current );
+		if ( $planned !== $current ) {
+			return new \WP_Error( 'woocommerce_product_update_conflict', __( 'The variations of the product changed during the call. Try again.', 'woocommerce' ), array( 'status' => 409 ) );
+		}
+
 		$error = self::save_product( $subject, 'woocommerce_product_update_failed' );
 		if ( is_wp_error( $error ) ) {
 			return $error;
@@ -308,7 +316,7 @@ class ProductUpdate extends ActionableAbility {
 	 */
 	public static function can_update_product( $input = array() ): bool {
 		$product_id = self::get_id_from_input( $input );
-		$product    = isset( $input['type'] ) ? wc_get_product( $product_id ) : null;
+		$product    = is_string( $input['type'] ?? null ) ? wc_get_product( $product_id ) : null;
 		$deletes    = ! empty( array_filter( array_column( $input['variations'] ?? array(), 'delete' ) ) )
 			|| ( $product instanceof \WC_Product && self::type_change_deletes_variations( $product, $input['type'] ) );
 
@@ -322,7 +330,8 @@ class ProductUpdate extends ActionableAbility {
 	 * always loses its variations. Here the ability differs from WooCommerce on
 	 * purpose: WooCommerce keeps them when the old type is not exactly
 	 * `variable` or when the filter returns false, and they stay without a
-	 * variable parent. Between two variable classes the filter decides.
+	 * variable parent. Between two variable classes the filter decides. It gets
+	 * the product with its new class, as WooCommerce passes it in the save.
 	 *
 	 * @param \WC_Product $product Product before the change.
 	 * @param string      $type    New product type.
@@ -330,10 +339,14 @@ class ProductUpdate extends ActionableAbility {
 	 */
 	private static function type_change_deletes_variations( \WC_Product $product, string $type ): bool {
 		$from = $product->get_type();
-		if ( ! $product instanceof \WC_Product_Variable || $type === $from ) {
+		if ( ! $product instanceof \WC_Product_Variable || $type === $from || is_a( \WC_Product_Factory::get_product_classname( $product->get_id(), $type ), \WC_Product_Variation::class, true ) ) {
 			return false;
 		}
-		if ( ! is_a( \WC_Product_Factory::get_product_classname( $product->get_id(), $type ), \WC_Product_Variable::class, true ) ) {
+		$target = self::get_product_object_for_type( $type, $product->get_id() );
+		if ( is_wp_error( $target ) ) {
+			return false;
+		}
+		if ( ! $target instanceof \WC_Product_Variable ) {
 			return true;
 		}
 
@@ -342,12 +355,33 @@ class ProductUpdate extends ActionableAbility {
 		 *
 		 * @since 5.0.0
 		 *
-		 * @param bool       $delete  Whether to delete the variations.
-		 * @param \WC_Product $product Product.
-		 * @param string     $from    Old product type.
-		 * @param string     $to      New product type.
+		 * @param bool        $delete  Whether to delete the variations.
+		 * @param \WC_Product $product Product with its new type.
+		 * @param string      $from    Old product type.
+		 * @param string      $to      New product type.
 		 */
-		return (bool) apply_filters( 'woocommerce_delete_variations_on_product_type_change', ProductType::VARIABLE === $from && ProductType::VARIABLE !== $type, $product, $from, $type );
+		return (bool) apply_filters( 'woocommerce_delete_variations_on_product_type_change', ProductType::VARIABLE === $from && ProductType::VARIABLE !== $type, $target, $from, $type );
+	}
+
+	/**
+	 * The IDs of every variation of a product, with the query that the
+	 * variable product data store uses to delete them, trashed ones included.
+	 *
+	 * @param int $product_id Product ID.
+	 * @return int[]
+	 */
+	private static function get_variation_ids( int $product_id ): array {
+		return wp_parse_id_list(
+			get_posts(
+				array(
+					'post_parent' => $product_id,
+					'post_type'   => 'product_variation',
+					'fields'      => 'ids',
+					'post_status' => array( 'any', ProductStatus::TRASH, ProductStatus::AUTO_DRAFT ),
+					'numberposts' => -1,
+				)
+			)
+		);
 	}
 
 	/**
