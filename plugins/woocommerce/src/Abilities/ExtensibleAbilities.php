@@ -137,8 +137,11 @@ class ExtensibleAbilities {
 	 *                                  expect one type for each field. Core publishes it as declared. Its
 	 *                                  `title` is the label clients show. Nested properties must not be nullable
 	 *                                  either: leave a property out when it has no value. A list of types or a
-	 *                                  null type at any depth, also in an `anyOf`, `oneOf` or `allOf` branch, is
-	 *                                  refused.
+	 *                                  null type is refused in every nested schema under `properties`,
+	 *                                  `patternProperties`, `additionalProperties`, `items`, `anyOf` and `oneOf`,
+	 *                                  which are the keywords with a nested schema that WordPress supports (see
+	 *                                  `rest_get_allowed_schema_keywords()`), and under `allOf`, which
+	 *                                  WooCommerce also reads.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
 	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
@@ -157,7 +160,8 @@ class ExtensibleAbilities {
 	 *                                  the whole result.
 	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. It needs
 	 *                                  one `type` name, or an `anyOf` where each branch has one `type` name. A
-	 *                                  list of types is refused at any depth, because some clients refuse it: a
+	 *                                  list of types is refused, at the top level and in every nested schema under
+	 *                                  the keywords listed for `output_schema`, because some clients refuse it: a
 	 *                                  nullable value uses `[{"type":"string"},{"type":"null"}]` as its `anyOf`.
 	 *                                  Core publishes it as declared. A value can be null only where it declares
 	 *                                  null. Required with `set_callback`.
