@@ -119,6 +119,27 @@ class ProductSalesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox WCPay test-mode orders are left out of the import denominator, matching Analytics.
+	 */
+	public function test_last_days_imported_ignores_test_orders(): void {
+		$mug = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		for ( $i = 0; $i < ProductSales::MIN_ORDERS; $i++ ) {
+			$this->order( array( array( $mug, 1 ) ), OrderStatus::COMPLETED );
+		}
+		// Three unsynced test orders: 20/23 would fail the 90% gate if they counted.
+		for ( $i = 0; $i < 3; $i++ ) {
+			$test = wc_create_order();
+			$test->add_product( $mug, 1 );
+			$test->set_status( OrderStatus::COMPLETED );
+			$test->update_meta_data( '_wcpay_mode', 'test' );
+			$test->calculate_totals();
+			$test->save();
+		}
+
+		$this->assertTrue( $this->sut->last_days()['imported'], '20 real orders imported; three WCPay test-mode orders must not block the gate' );
+	}
+
+	/**
 	 * @testdox With no orders the total is zero; with Analytics off there are no sales to read.
 	 */
 	public function test_last_days_without_sales_or_analytics(): void {

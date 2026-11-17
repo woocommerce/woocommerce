@@ -174,7 +174,7 @@ class StoreConditions {
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Guest checkout is allowed', 'woocommerce' ),
 				'label'   => __( 'Guest checkout is off', 'woocommerce' ),
-				'why'     => __( 'Shopping agents check out for shoppers without an account on your store, so they cannot place orders.', 'woocommerce' ),
+				'why'     => __( 'With guest checkout off, AI assistants can\'t check out for shoppers. They can still find your products and build carts.', 'woocommerce' ),
 				'fix'     => __( 'Tick "Enable guest checkout" under WooCommerce > Settings > Accounts & Privacy.', 'woocommerce' ),
 				'fix_url' => $settings_url( 'account' ),
 			),

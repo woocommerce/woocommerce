@@ -66,10 +66,14 @@ trait ReadinessMarkup {
 	 * What an open check asks the merchant to do: the action, why it matters and where to do it.
 	 * A policy page that is chosen but not published links to its editor; a published store page asks for another page.
 	 *
-	 * @param array{id:string,label?:string,why:string,fix_url:string} $check Store condition.
-	 * @return array{0:string,1:string,2:string,3?:string} The action, why, where to do it, and the link text when the URL alone doesn't say it.
+	 * @param array{id:string,label?:string,why:string,fix?:string,fix_url:string} $check Store condition.
+	 * @return array{0:string,1:string,2:string,3:string,4:string} The action, why, where to do it, the link text when the URL alone doesn't say it, and the fix line.
 	 */
 	private static function check_action( array $check ): array {
+		// The connection URL step names its cause in the fix line: Plain permalinks, or a file in the way.
+		if ( 'ucp_discovery' === $check['id'] ) {
+			return array( $check['label'] ?? '', $check['why'], $check['fix_url'], '' !== $check['fix_url'] ? __( 'Change permalinks', 'woocommerce' ) : '', (string) ( $check['fix'] ?? '' ) );
+		}
 		$policies = array(
 			'privacy_page'         => array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Publish your privacy policy page', 'woocommerce' ), __( 'Choose a privacy policy page', 'woocommerce' ), __( 'Shoppers can read how you handle their information before they buy.', 'woocommerce' ), __( 'Edit privacy policy', 'woocommerce' ) ),
 			'terms_page'           => array( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Publish your terms and conditions page', 'woocommerce' ), __( 'Choose a terms and conditions page', 'woocommerce' ), __( 'Terms and conditions set out what shoppers agree to when they place an order.', 'woocommerce' ), __( 'Edit terms and conditions', 'woocommerce' ) ),
@@ -81,8 +85,8 @@ trait ReadinessMarkup {
 			$page_id = (int) get_option( $policy[0] );
 			$edit    = $page_id > 0 && get_post( $page_id ) && 'publish' !== get_post_status( $page_id ) ? (string) get_edit_post_link( $page_id, 'raw' ) : '';
 			return '' !== $edit
-				? array( $policy[1], $policy[5] ?? __( 'It\'s still a draft. AI assistants only link to published pages.', 'woocommerce' ), $edit, $policy[4] )
-				: array( $policy[2], $policy[3], $check['fix_url'] );
+				? array( $policy[1], $policy[5] ?? __( 'It\'s still a draft. AI assistants only link to published pages.', 'woocommerce' ), $edit, $policy[4], '' )
+				: array( $policy[2], $policy[3], $check['fix_url'], '', '' );
 		}
 		$actions = array(
 			'launched'       => array( __( 'Make your store live', 'woocommerce' ), __( 'AI assistants can only find your products when your store is live.', 'woocommerce' ) ),
@@ -94,7 +98,7 @@ trait ReadinessMarkup {
 		);
 		$action  = $actions[ $check['id'] ] ?? array( $check['label'] ?? '', $check['why'] );
 		// Site Health says how to move to HTTPS, and offers to do it where the host allows.
-		return array( $action[0], $action[1], 'https' === $check['id'] ? admin_url( 'site-health.php' ) : $check['fix_url'] );
+		return array( $action[0], $action[1], 'https' === $check['id'] ? admin_url( 'site-health.php' ) : $check['fix_url'], '', '' );
 	}
 
 	/**

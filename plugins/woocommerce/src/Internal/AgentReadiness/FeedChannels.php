@@ -36,7 +36,7 @@ final class FeedChannels {
 				'url'  => 'https://support.google.com/merchants/answer/7052112',
 			),
 			self::COPILOT => array(
-				'name' => 'Microsoft Copilot',
+				'name' => 'Copilot',
 				'spec' => 'Microsoft Merchant Center product data',
 				'url'  => 'https://learn.microsoft.com/en-us/advertising/shopping-content/products-resource',
 			),

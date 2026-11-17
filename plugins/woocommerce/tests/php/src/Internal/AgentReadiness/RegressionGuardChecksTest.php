@@ -138,17 +138,16 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox When the store can't reach itself, the guards that read pages are couldn't check.
+	 * @testdox When the store can't reach itself, every guard is couldn't check, including reviews when no page needs loading.
 	 */
 	public function test_unreachable_store(): void {
 		add_filter( 'pre_http_request', static fn() => new \WP_Error( 'http_request_failed', 'Blocked in tests' ) );
 
 		$results = array_column( wc_get_container()->get( StoreOutputChecks::class )->all(), 'ok', 'id' );
 
-		foreach ( array_diff( self::GUARDS, array( 'product_review_markup' ) ) as $id ) {
+		foreach ( self::GUARDS as $id ) {
 			$this->assertNull( $results[ $id ], $id );
 		}
-		$this->assertTrue( $results['product_review_markup'], 'No product has reviews, so there is nothing to mark up and no page is loaded' );
 	}
 
 	/**

@@ -1057,11 +1057,9 @@ class StoreOutputChecks {
 	 * @param string                           $property Offer property.
 	 */
 	private static function offer_has( array $products, string $property ): bool {
-		foreach ( self::with_variants( $products ) as $product ) {
-			foreach ( self::as_list( $product['offers'] ?? null ) as $offer ) {
-				if ( ! empty( $offer[ $property ] ) ) {
-					return true;
-				}
+		foreach ( self::offers( $products ) as $offer ) {
+			if ( ! empty( $offer[ $property ] ) ) {
+				return true;
 			}
 		}
 		return false;
@@ -1905,6 +1903,10 @@ class StoreOutputChecks {
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private function reviews_marked_up( StoreResponses $responses ): ?bool {
+		// The passes below load no page. Without a product page the rest of the card couldn't run, so neither does this.
+		if ( null === $responses->product_page() ) {
+			return null;
+		}
 		// WooCommerce prints a rating only when ratings are on and the product has rated reviews; the rating count is stored per star, the average as a number.
 		if ( ! wc_review_ratings_enabled() ) {
 			return true;
@@ -1955,9 +1957,6 @@ class StoreOutputChecks {
 		$sampled = $responses->product();
 		if ( null !== $sampled && $sampled->get_id() === $product->get_id() ) {
 			$page = $responses->product_page();
-			if ( null === $page ) {
-				return null;
-			}
 		} else {
 			$page = $responses->get( (string) $product->get_permalink() );
 			if ( null === $page || 200 !== $page['status'] ) {

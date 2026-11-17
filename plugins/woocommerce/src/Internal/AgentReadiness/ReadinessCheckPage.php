@@ -182,17 +182,10 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The page's slug in the WooCommerce submenu.
-	 */
-	private static function menu_slug(): string {
-		return 'wc-admin&path=' . self::PATH;
-	}
-
-	/**
 	 * Link to the page.
 	 */
 	public static function url(): string {
-		return admin_url( 'admin.php?page=' . self::menu_slug() );
+		return admin_url( 'admin.php?page=wc-admin&path=' . self::PATH );
 	}
 
 	/**
@@ -328,10 +321,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	private function shopping_card( array $checks ): array {
 		$enabled  = UcpUtils::is_enabled();
 		$left     = count( self::open_steps( $checks ) );
-		$blocked  = array() !== $this->store_conditions->failing_required( $checks );
 		$badge    = $this->shopping_badge( $checks );
-		$can_shop = $enabled && ! $blocked;
-		$set_up   = $enabled || false !== get_option( wc_get_container()->get( FeaturesController::class )->feature_enable_option_name( UcpUtils::FEATURE_ID ) );
+		$can_shop = $enabled && array() === $this->store_conditions->failing_required( $checks );
+		$set_up   = $enabled || false !== get_option( $this->features_controller->feature_enable_option_name( UcpUtils::FEATURE_ID ) );
 		if ( ! $set_up ) {
 			$text = __( 'Let shoppers find and buy your products through AI assistants.', 'woocommerce' );
 		} elseif ( ! $enabled ) {
@@ -395,9 +387,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			return array(
 				'title' => $action[0],
 				'text'  => $action[1],
-				'fix'   => '',
+				'fix'   => $action[4],
 				'url'   => $action[2],
-				'link'  => $action[3] ?? '',
+				'link'  => $action[3],
 			);
 		}
 		$copy = ReadinessCopy::store_check( $check['id'], (string) ( $check['source'] ?? '' ) );
@@ -415,16 +407,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'fix'   => (string) ( $check['fix'] ?? '' ),
 			'url'   => $check['fix_url'],
 		);
-	}
-
-	/**
-	 * The stored report's channels, skipping entries that are not arrays.
-	 *
-	 * @param array<string, mixed> $report Stored report.
-	 * @return array<string, array<string, mixed>>
-	 */
-	private static function stored_channels( array $report ): array {
-		return array_filter( is_array( $report['channels'] ?? null ) ? $report['channels'] : array(), 'is_array' );
 	}
 
 	/**
@@ -535,7 +517,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 */
 	private function product_section( array $report ): array {
 		$failing  = self::failing_product_checks( $report );
-		$channels = self::stored_channels( $report );
+		$channels = array_filter( is_array( $report['channels'] ?? null ) ? $report['channels'] : array(), 'is_array' );
 		$linked   = ! empty( $report['failures_stored'] );
 		$rows     = array();
 		foreach ( $failing as $check ) {
@@ -554,7 +536,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		return array(
 			'id'       => 'products',
 			'title'    => self::products_question(),
-			'badge'    => self::badge_data( self::product_badge( $report ) ),
+			'badge'    => self::badge_data( array() === $failing ? array( 'info', __( 'All passed', 'woocommerce' ) ) : self::group_badge( array_fill( 0, count( $failing ), array( 'ok' => false ) ) ) ),
 			'note'     => null,
 			'channels' => $listed,
 			'rows'     => $rows,
@@ -919,11 +901,16 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		if ( array() === $items ) {
 			return null;
 		}
+		$found = array_filter( $items, static fn( array $item ): bool => true === ( $item['found'] ?? null ) );
 		return array(
-			'title' => self::declared_question(),
+			'title' => __( 'What does your store share with AI assistants?', 'woocommerce' ),
 			'badge' => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
-			/* translators: %s: how many items were found, such as "4 of 33 found". */
-			'text'  => sprintf( __( 'Optional files that some AI assistants look for. You don’t need to fix anything. %s.', 'woocommerce' ), self::declared_count( $items ) ),
+			'text'  => sprintf(
+				/* translators: %s: how many items were found, such as "Found 4 of 33". */
+				__( 'Optional files that some AI assistants look for. You don’t need to fix anything. %s.', 'woocommerce' ),
+				/* translators: 1: number of items found, 2: number of items looked for. */
+				sprintf( __( 'Found %1$s of %2$s', 'woocommerce' ), number_format_i18n( count( $found ) ), number_format_i18n( count( $items ) ) )
+			),
 			'items' => array_map(
 				static fn( array $item ): array => array(
 					'name'  => (string) ( $item['name'] ?? '' ),
@@ -932,24 +919,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				$items
 			),
 		);
-	}
-
-	/**
-	 * The declared items question's title, on its card and its Overview row.
-	 */
-	private static function declared_question(): string {
-		return __( 'What does your store share with AI assistants?', 'woocommerce' );
-	}
-
-	/**
-	 * "4 of 33 found": how many declared items the store serves.
-	 *
-	 * @param array $items Items from the report.
-	 */
-	private static function declared_count( array $items ): string {
-		$found = array_filter( $items, static fn( $item ): bool => is_array( $item ) && true === ( $item['found'] ?? null ) );
-		/* translators: 1: number of items found, 2: number of items looked for. */
-		return sprintf( __( 'Found %1$s of %2$s', 'woocommerce' ), number_format_i18n( count( $found ) ), number_format_i18n( count( array_filter( $items, 'is_array' ) ) ) );
 	}
 
 	/**
@@ -1038,36 +1007,24 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @param string $url Fix URL.
 	 */
 	private static function fix_link_text( string $url ): string {
-		if ( str_starts_with( $url, admin_url( 'upload.php' ) ) ) {
-			return __( 'Go to Media library', 'woocommerce' );
-		}
-		if ( str_starts_with( $url, admin_url( 'post.php' ) ) ) {
-			return __( 'Edit page', 'woocommerce' );
-		}
-		if ( str_starts_with( $url, admin_url( 'admin.php?page=wc-settings&tab=site-visibility' ) ) ) {
-			return __( 'Change site visibility', 'woocommerce' );
-		}
-		if ( str_starts_with( $url, admin_url( 'options-reading.php' ) ) ) {
-			return __( 'Change Reading settings', 'woocommerce' );
-		}
-		$tabs = array(
-			'account'  => __( 'Go to Accounts & Privacy', 'woocommerce' ),
-			'checkout' => __( 'Go to Payments', 'woocommerce' ),
-			'email'    => __( 'Go to Emails', 'woocommerce' ),
+		$targets = array(
+			'upload.php'                              => __( 'Go to Media library', 'woocommerce' ),
+			'post.php'                                => __( 'Edit page', 'woocommerce' ),
+			'admin.php?page=wc-settings&tab=site-visibility' => __( 'Change site visibility', 'woocommerce' ),
+			'options-reading.php'                     => __( 'Change Reading settings', 'woocommerce' ),
+			'admin.php?page=wc-settings&tab=account'  => __( 'Go to Accounts & Privacy', 'woocommerce' ),
+			'admin.php?page=wc-settings&tab=checkout' => __( 'Go to Payments', 'woocommerce' ),
+			'admin.php?page=wc-settings&tab=email'    => __( 'Go to Emails', 'woocommerce' ),
+			'site-health.php'                         => __( 'View Site Health', 'woocommerce' ),
+			'plugins.php'                             => __( 'View plugins', 'woocommerce' ),
 		);
-		foreach ( $tabs as $tab => $text ) {
-			if ( str_starts_with( $url, admin_url( 'admin.php?page=wc-settings&tab=' . $tab ) ) ) {
+		foreach ( $targets as $path => $text ) {
+			if ( str_starts_with( $url, admin_url( $path ) ) ) {
 				return $text;
 			}
 		}
 		if ( str_starts_with( $url, AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ) . '#' ) ) {
 			return __( 'Choose a page', 'woocommerce' );
-		}
-		if ( str_starts_with( $url, admin_url( 'site-health.php' ) ) ) {
-			return __( 'View Site Health', 'woocommerce' );
-		}
-		if ( str_starts_with( $url, admin_url( 'plugins.php' ) ) ) {
-			return __( 'View plugins', 'woocommerce' );
 		}
 		return str_starts_with( $url, admin_url() ) ? __( 'Open settings', 'woocommerce' ) : __( 'Learn how', 'woocommerce' );
 	}
@@ -1140,16 +1097,5 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 */
 	private static function products_question(): string {
 		return __( 'Can AI assistants list your products?', 'woocommerce' );
-	}
-
-	/**
-	 * The badge on the product question: how many product checks fail, or All passed.
-	 *
-	 * @param array<string, mixed> $report Stored report.
-	 * @return array{0:string,1:string} Badge class and text.
-	 */
-	private static function product_badge( array $report ): array {
-		$failing = self::failing_product_checks( $report );
-		return array() === $failing ? array( 'info', __( 'All passed', 'woocommerce' ) ) : self::group_badge( array_fill( 0, count( $failing ), array( 'ok' => false ) ) );
 	}
 }

@@ -29,7 +29,11 @@ export const FixFirstList = ( {
 					<Fragment key={ item.id }>
 						{ heading && (
 							<li className="wc-sales-readiness-tier">
-								<Text variant="heading-sm" aria-hidden="true">
+								<Text
+									variant="heading-sm"
+									className="wc-sales-readiness-card__label"
+									aria-hidden="true"
+								>
 									{ heading }
 								</Text>
 								{ item.badge && (
