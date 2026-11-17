@@ -1,3 +1,4 @@
-Significance: patch
-Type: dev
-Comment: Reuse logged-in WordPress admin sessions for WooCommerce REST requests in Playwright.
+Significance: minor
+Type: add
+
+Add a Playwright helper for WordPress REST requests using a logged-in admin session.
