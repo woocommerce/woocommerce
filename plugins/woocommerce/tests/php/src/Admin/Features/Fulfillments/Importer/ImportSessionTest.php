@@ -633,15 +633,10 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 10, $reloaded->counts()[ FulfillmentsCsvImporter::STATUS_CREATED ], 'Counts of each chunk are added up' );
 		$this->assertSame( 2, $reloaded->counts()[ FulfillmentsCsvImporter::STATUS_UPDATED ] );
 		$this->assertSame( array( 'pair-650' => true ), $reloaded->seen_tracking_pairs(), 'The dedupe set is replaced, not merged' );
-		$this->assertSame(
-			array(
-				'offset' => 10,
-				'rows'   => $this->chunk_result( 5, 3, 650 )['rows'],
-				'eof'    => true,
-			),
-			$reloaded->last_chunk(),
-			'Only the last chunk keeps its rows, so a replay of it can return them'
-		);
+		$last = $reloaded->last_chunk();
+		$this->assertSame( 10, $last['offset'] );
+		$this->assertSame( $this->chunk_result( 5, 3, 650 )['rows'], $last['rows'], 'Only the last chunk keeps its rows, so a replay of it can return them' );
+		$this->assertTrue( $last['eof'] );
 	}
 
 	/**
