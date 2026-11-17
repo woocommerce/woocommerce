@@ -173,13 +173,22 @@ class OrderTagsProviderTest extends WC_Unit_Test_Case {
 	 * @testdox The block fulfillment created template takes its heading from the tag.
 	 */
 	public function test_block_template_heading_comes_from_the_tag(): void {
-		$email  = $this->create_fulfillment_email( 2 );
-		$markup = WCTransactionalEmailPostsGenerator::render_block_template_html( $email );
+		$email = $this->create_fulfillment_email( 2 );
 
+		// A heading no template could contain, so the assertion fails if the markup carries its own.
+		$filter = function () {
+			return 'Heading taken from the email';
+		};
+		add_filter( 'woocommerce_email_heading_customer_fulfillment_created', $filter );
+
+		$markup       = WCTransactionalEmailPostsGenerator::render_block_template_html( $email );
 		$personalizer = new Personalizer( $this->registry );
 		$personalizer->set_context( array( 'wc_email' => $email ) );
+		$html = $personalizer->personalize_content( $markup );
 
-		$this->assertStringContainsString( 'Your items are on the way!', $personalizer->personalize_content( $markup ) );
+		remove_filter( 'woocommerce_email_heading_customer_fulfillment_created', $filter );
+
+		$this->assertStringContainsString( 'Heading taken from the email', $html );
 	}
 
 	/**
