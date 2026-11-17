@@ -15,7 +15,7 @@ class Authentication {
 	 */
 	public function init() {
 		// UCP routes get rate limiting only: the other filters below assume a browser client with a nonce.
-		if ( 0 === strpos( $GLOBALS['wp']->query_vars['rest_route'] ?? '', '/wc/ucp/' ) ) {
+		if ( 0 === stripos( $GLOBALS['wp']->query_vars['rest_route'] ?? '', '/wc/ucp/' ) ) {
 			add_filter( 'rest_authentication_errors', array( $this, 'rate_limit_ucp_request' ) );
 			return;
 		}

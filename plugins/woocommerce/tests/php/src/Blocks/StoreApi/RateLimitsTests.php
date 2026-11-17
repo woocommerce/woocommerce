@@ -114,7 +114,7 @@ class RateLimitsTests extends \WC_Unit_Test_Case {
 		);
 
 		remove_all_filters( 'rest_authentication_errors' );
-		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/ucp/v1/catalog/search';
+		$GLOBALS['wp']->query_vars['rest_route'] = '/WC/UCP/v1/catalog/search';
 		$authentication                          = new Authentication();
 		$authentication->init();
 
