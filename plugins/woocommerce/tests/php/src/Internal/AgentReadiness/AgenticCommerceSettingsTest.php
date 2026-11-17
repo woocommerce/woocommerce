@@ -329,7 +329,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			)
 		);
 		$view = $this->view();
-		$this->assertNull( $view['fix_first'], 'A policy page is only recommended, so it stays out of Fix first' );
+		$this->assertSame( array(), $view['fix_first']['items'], 'A policy page is only recommended, so it stays out of Fix first' );
 		$this->assertStringNotContainsString( 'Publish your refund and returns policy page', (string) wp_json_encode( $view['sections'] ), 'Setup steps stay in the Setup checklist' );
 		$copy = $this->step_copy( 'refund_returns_page' );
 		$this->assertStringContainsString( 'post=' . $draft . '&action=edit', $copy['url'], 'Readiness check links the step to the page editor' );
@@ -518,11 +518,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$json     = wp_json_encode( $view );
 
 		$this->assertSame(
-			array( 'Store access', 'Can AI assistants find your store?', 'Can AI assistants read your product details?', 'Can AI assistants list your products?', 'Can shoppers buy through AI assistants?' ),
+			array( 'Store access', 'Search and discovery', 'Can AI assistants read your product details?', 'Can AI assistants list your products?', 'Can shoppers buy through AI assistants?' ),
 			array_column( $view['sections'], 'title' ),
 			'Products come before Can shoppers buy through AI assistants?'
 		);
-		$this->assertSame( 'AI shopping is off, so we didn’t check your connection URL.', $sections['access']['note'], 'UCP is off in this test' );
+		$this->assertSame( 'Some checks only run when AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', $sections['access']['note'], 'UCP is off in this test' );
 		$this->assertSame(
 			array(
 				'intent' => 'low',
@@ -575,7 +575,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $sections['find']['rows'], 'Nothing open under find' );
 		$passed = array_column( $sections['find']['folded'], null, 'title' )['A sitemap lists your products'] ?? null;
 		$this->assertNotNull( $passed, 'Passed checks are folded, under their passing title' );
-		$this->assertSame( 'Crawlers use the sitemap to find new and changed products.', $passed['text'], 'with why it matters' );
+		$this->assertSame( 'Search engines and AI assistants use it to find new and updated products.', $passed['text'], 'with why it matters' );
 		$this->assertStringNotContainsString( 'sitemap_lists_products why', $json, 'A passed scanned check drops the report\'s failure-worded why' );
 		$this->assertStringNotContainsString( 'Order confirmation emails are on', (string) wp_json_encode( $sections ), 'Setup steps stay in the Setup checklist' );
 		$this->assertStringNotContainsString( 'Shoppers who buy through an agent get no confirmation from your store.', $json, 'A passed setup step drops its failure-worded why, as in Status' );
@@ -779,7 +779,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'The required step, then 3 issues: the not listable checks by share, then GTIN, a gap, despite its larger share; the title, a smaller gap, is left out'
 		);
 		$this->assertSame( array( 'Required for AI shopping', 'Needed to list products', 'Needed to list products', 'Helps shoppers find products' ), array_column( $fix_first['items'], 'tier' ) );
-		$this->assertSame( array( 'Required', null, null, null ), array_map( static fn( array $item ): ?string => $item['badge']['text'] ?? null, $fix_first['items'] ), 'Only the Required heading has a badge' );
+		$this->assertSame( array( 'Whole store', null, null, null ), array_map( static fn( array $item ): ?string => $item['badge']['text'] ?? null, $fix_first['items'] ), 'Only the Required heading has a badge' );
 		$this->assertArrayNotHasKey( 'impact', $fix_first['items'][1], 'The share of sales is in the line, so no badge repeats it' );
 		$this->assertSame( '18% of your sales in the last 90 days. AI assistants only list products that have a main image.', $fix_first['items'][1]['why'], 'The first share says over which period, then why the issue matters' );
 		$this->assertSame( '5% of your sales. ChatGPT only lists products that have a brand. In Google and Copilot, a brand makes products easier to find.', $fix_first['items'][2]['why'], 'The next ones give only the share' );
@@ -811,7 +811,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		unset( $row );
 		update_option( AgentReadiness::REPORT_OPTION, $report );
 		$fix_first = $this->view()['fix_first'];
-		$this->assertSame( 'Ranked by how many products each issue affects. Turn on Analytics to rank by sales instead.', $fix_first['ranking'] );
+		$this->assertSame( 'Start with the fixes that affect the most products.', $fix_first['ranking'] );
+		$this->assertSame( 'Turn on Analytics to see which fixes affect the most sales.', $fix_first['link']['text'] );
+		$this->assertStringContainsString( 'tab=advanced&section=features', $fix_first['link']['href'], 'The link opens the Features settings, where Analytics is turned on' );
 		$this->assertStringNotContainsString( 'of your sales', wp_json_encode( $fix_first ) );
 
 		$report['sales'] = array(
@@ -826,14 +828,15 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'orders' => 12,
 		);
 		update_option( AgentReadiness::REPORT_OPTION, $report );
-		$this->assertSame( 'Only 12 orders in the last 90 days, too few to rank by sales, so issues are ranked by how many products they affect.', $this->view()['fix_first']['ranking'] );
+		$this->assertSame( 'Start with the fixes that affect the most products. Sales rankings start once your store has enough orders.', $this->view()['fix_first']['ranking'] );
+		$this->assertNull( $this->view()['fix_first']['link'], 'Analytics is on, so there is no link to turn it on' );
 
 		$report['sales'] = array(
 			'days'   => 90,
 			'orders' => 0,
 		);
 		update_option( AgentReadiness::REPORT_OPTION, $report );
-		$this->assertSame( 'No sales in the last 90 days, so issues are ranked by how many products they affect.', $this->view()['fix_first']['ranking'] );
+		$this->assertSame( 'Start with the fixes that affect the most products. Sales rankings start once your store has enough orders.', $this->view()['fix_first']['ranking'], 'No sales reads like too few orders' );
 
 		$report['sales'] = array(
 			'days'     => 90,
@@ -1030,9 +1033,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Fix first is left out when nothing fails.
+	 * @testdox Fix first says there is nothing to fix when nothing fails.
 	 */
-	public function test_output_fix_first_hidden_when_nothing_fails(): void {
+	public function test_output_fix_first_nothing_to_fix(): void {
 		$this->make_every_step_pass();
 		update_option(
 			AgentReadiness::REPORT_OPTION,
@@ -1042,7 +1045,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 				'checks'       => array(),
 			)
 		);
-		$this->assertNull( $this->view()['fix_first'] );
+		$fix_first = $this->view()['fix_first'];
+		$this->assertSame( 'Nothing to fix', $fix_first['title'] );
+		$this->assertSame( 'Your store has everything AI assistants need to find and shop your products.', $fix_first['ranking'] );
+		$this->assertSame( array(), $fix_first['items'] );
+		$this->assertNull( $fix_first['link'] );
 	}
 
 	/**

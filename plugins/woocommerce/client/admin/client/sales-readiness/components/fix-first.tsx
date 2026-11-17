@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Fragment } from '@wordpress/element';
-import { Badge, Card, Text } from '@wordpress/ui';
+import { Badge, Card, Link, Text } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -79,8 +79,18 @@ export const FixFirstCard = ( { fixFirst }: { fixFirst: FixFirstData } ) => (
 		<Card.Content>
 			<Text variant="body-md" className="wc-sales-readiness__muted">
 				{ fixFirst.ranking }
+				{ fixFirst.link && (
+					<>
+						{ ' ' }
+						<Link href={ fixFirst.link.href }>
+							{ fixFirst.link.text }
+						</Link>
+					</>
+				) }
 			</Text>
-			<FixFirstList items={ fixFirst.items } />
+			{ fixFirst.items.length > 0 && (
+				<FixFirstList items={ fixFirst.items } />
+			) }
 		</Card.Content>
 	</Card.Root>
 );

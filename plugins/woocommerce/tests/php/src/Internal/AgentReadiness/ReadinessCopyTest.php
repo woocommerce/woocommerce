@@ -50,7 +50,8 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Let AI assistants send shoppers to your checkout', $copy['action'] ?? null );
 		$this->assertNotSame( '', $copy['why'] );
 		$this->assertNotSame( '', $copy['found'] );
-		$this->assertSame( 'Turn off AI shopping (also called UCP or agentic commerce) in the other plugin, or deactivate it.', $copy['fix'] );
+		$this->assertSame( 'In the other plugin, turn off any setting for AI shopping, UCP, or agentic commerce. Or deactivate the plugin.', $copy['fix'] );
+		$this->assertSame( admin_url( 'plugins.php' ), $copy['url'], 'View plugins opens the Plugins screen' );
 
 		$required = new \ReflectionMethod( ReadinessCheckPage::class, 'is_required' );
 		$required->setAccessible( true );

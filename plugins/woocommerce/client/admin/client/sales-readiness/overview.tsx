@@ -112,12 +112,12 @@ export default function SalesReadinessOverview( {
 						</>
 					) : (
 						<>
-							{ view.fix_first ? (
+							{ view.fix_first?.items.length ? (
 								<FixFirstList items={ view.fix_first.items } />
 							) : (
 								<Text variant="body-md">
 									{ __(
-										'Nothing to fix first.',
+										'Nothing to fix right now. Your store has everything AI assistants need to find and shop your products.',
 										'woocommerce'
 									) }
 								</Text>

@@ -681,17 +681,22 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * The Fix first card: items under a heading for what each group of issues stops, with a line on
-	 * how it is ranked. A product issue's line starts with its share of sales. Null when there is
-	 * nothing to fix.
+	 * how it is ranked. A product issue's line starts with its share of sales. With nothing to fix,
+	 * the card says so instead.
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks Store checks shown on the page.
 	 * @param array<string, mixed>                                                                                                                                                                           $report Stored report.
-	 * @return array{title:string,ranking:string,items:array<int, array{id:string,tier:string,badge:array{intent:string,text:string}|null,title:string,why:string,link:array{href:string,text:string}|null}>}|null
+	 * @return array{title:string,ranking:string,link:array{href:string,text:string}|null,items:array<int, array{id:string,tier:string,badge:array{intent:string,text:string}|null,title:string,why:string,link:array{href:string,text:string}|null}>}
 	 */
-	private function fix_first( array $checks, array $report ): ?array {
+	private function fix_first( array $checks, array $report ): array {
 		$items = $this->fix_first_items( $checks, $report );
 		if ( array() === $items ) {
-			return null;
+			return array(
+				'title'   => __( 'Nothing to fix', 'woocommerce' ),
+				'ranking' => __( 'Your store has everything AI assistants need to find and shop your products.', 'woocommerce' ),
+				'link'    => null,
+				'items'   => array(),
+			);
 		}
 		$tiers = array(
 			0 => __( 'Required for AI shopping', 'woocommerce' ),
@@ -711,7 +716,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$list[] = array(
 				'id'    => $item['id'],
 				'tier'  => $tiers[ $item['tier'] ],
-				'badge' => 0 === $item['tier'] ? self::badge_data( self::required_badge() ) : null,
+				// Required issues are store-wide, so the badge says so where product issues give their share of sales.
+				'badge' => 0 === $item['tier'] ? self::badge_data( array( 'info', __( 'Whole store', 'woocommerce' ) ) ) : null,
 				'title' => $item['title'],
 				'why'   => $why,
 				'link'  => $item['link'],
@@ -720,6 +726,11 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		return array(
 			'title'   => __( 'Fix first', 'woocommerce' ),
 			'ranking' => self::ranking_text( $report, $items ),
+			// With Analytics off, where to turn it on: a report with a null `sales` key was read without it.
+			'link'    => array_key_exists( 'sales', $report ) && null === $report['sales'] ? array(
+				'href' => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ),
+				'text' => __( 'Turn on Analytics to see which fixes affect the most sales.', 'woocommerce' ),
+			) : null,
 			'items'   => $list,
 		);
 	}
@@ -738,24 +749,16 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		}
 		$sales = is_array( $report['sales'] ) ? $report['sales'] : null;
 		if ( null === $sales ) {
-			return __( 'Ranked by how many products each issue affects. Turn on Analytics to rank by sales instead.', 'woocommerce' );
+			return __( 'Start with the fixes that affect the most products.', 'woocommerce' );
 		}
 		if ( false === ( $sales['imported'] ?? true ) ) {
 			return __( 'Analytics hasn\'t imported all your past orders yet, so issues are ranked by how many products they affect. Import them in Analytics > Settings.', 'woocommerce' );
 		}
 		$orders = (int) ( $sales['orders'] ?? 0 );
 		$days   = (int) ( $sales['days'] ?? 0 );
-		if ( 0 === $orders ) {
-			/* translators: %d: number of days. */
-			return sprintf( _n( 'No sales in the last %d day, so issues are ranked by how many products they affect.', 'No sales in the last %d days, so issues are ranked by how many products they affect.', $days, 'woocommerce' ), $days );
-		}
+		// No sales, or too few to rank by.
 		if ( $orders < ProductSales::MIN_ORDERS ) {
-			return sprintf(
-				/* translators: 1: number of orders, 2: number of days. */
-				_n( 'Only %1$s order in the last %2$d days, too few to rank by sales, so issues are ranked by how many products they affect.', 'Only %1$s orders in the last %2$d days, too few to rank by sales, so issues are ranked by how many products they affect.', $orders, 'woocommerce' ),
-				number_format_i18n( $orders ),
-				$days
-			);
+			return __( 'Start with the fixes that affect the most products. Sales rankings start once your store has enough orders.', 'woocommerce' );
 		}
 		// No issue on the card with sales: the products sold nothing, store-wide issues filled the card, or counts changed since the check.
 		if ( array() === array_filter( $items, static fn( array $item ): bool => ( $item['share'] ?? 0.0 ) > 0.0 ) ) {
@@ -1045,7 +1048,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'id'       => $id,
 				'title'    => $group[0],
 				'badge'    => self::badge_data( $cant && array() === $rows ? array( 'off', __( 'Couldn’t check', 'woocommerce' ) ) : self::group_badge( $checks ) ),
-				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? __( 'AI shopping is off, so we didn’t check your connection URL.', 'woocommerce' ) : null,
+				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? __( 'Some checks only run when AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', 'woocommerce' ) : null,
 				'channels' => array(),
 				'rows'     => $cant ? array_merge( $rows, array( self::cant_check_row( $launched ) ) ) : $rows,
 				'folded'   => self::check_rows( array_values( $folded ), $launched ),
@@ -1064,7 +1067,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	private static function question_groups( array $checks ): array {
 		$groups = array(
 			'access'     => array( __( 'Store access', 'woocommerce' ), array() ),
-			'find'       => array( __( 'Can AI assistants find your store?', 'woocommerce' ), array() ),
+			'find'       => array( __( 'Search and discovery', 'woocommerce' ), array() ),
 			'understand' => array( __( 'Can AI assistants read your product details?', 'woocommerce' ), array() ),
 			'buy'        => array( __( 'Can shoppers buy through AI assistants?', 'woocommerce' ), array() ),
 		);

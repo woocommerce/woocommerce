@@ -6,7 +6,7 @@ import { render, screen } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-import { FixFirstList } from '../components/fix-first';
+import { FixFirstCard, FixFirstList } from '../components/fix-first';
 import type { FixFirstItem } from '../types';
 
 const item = ( id: string, tier: string ): FixFirstItem => ( {
@@ -40,5 +40,50 @@ describe( 'FixFirstList', () => {
 			1
 		);
 		expect( screen.getAllByText( 'Required' ) ).toHaveLength( 1 );
+	} );
+} );
+
+describe( 'FixFirstCard', () => {
+	it( 'links to where Analytics is turned on, after the ranking line', () => {
+		render(
+			<FixFirstCard
+				fixFirst={ {
+					title: 'Fix first',
+					ranking:
+						'Start with the fixes that affect the most products.',
+					link: {
+						href: '/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features',
+						text: 'Turn on Analytics to see which fixes affect the most sales.',
+					},
+					items: [ item( 'image', 'Needed to list products' ) ],
+				} }
+			/>
+		);
+
+		expect(
+			screen.getByRole( 'link', {
+				name: 'Turn on Analytics to see which fixes affect the most sales.',
+			} )
+		).toHaveAttribute(
+			'href',
+			'/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features'
+		);
+	} );
+
+	it( 'shows Nothing to fix without an empty list', () => {
+		const { container } = render(
+			<FixFirstCard
+				fixFirst={ {
+					title: 'Nothing to fix',
+					ranking:
+						'Your store has everything AI assistants need to find and shop your products.',
+					link: null,
+					items: [],
+				} }
+			/>
+		);
+
+		expect( screen.getByText( 'Nothing to fix' ) ).toBeInTheDocument();
+		expect( container.querySelector( 'ol' ) ).toBeNull();
 	} );
 } );

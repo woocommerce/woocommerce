@@ -47,8 +47,11 @@ export interface FixFirstItem {
 }
 
 export interface FixFirst {
+	/** Fix first, or Nothing to fix when there are no items. */
 	title: string;
 	ranking: string;
+	/** Where to turn on Analytics, while it is off. */
+	link: ViewLink | null;
 	items: FixFirstItem[];
 }
 
