@@ -230,13 +230,14 @@ class StoreConditions {
 	 * The UCP address condition, with the fix for why the address doesn't serve the profile.
 	 *
 	 * @param string $status A status from UcpDiscovery::serve_status().
-	 * @return array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}
+	 * @return array{id:string,ok:bool,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}
 	 */
 	private static function ucp_discovery( string $status ): array {
 		return array(
 			'id'      => 'ucp_discovery',
 			'ok'      => 'ok' === $status,
 			'blocks'  => 'ucp',
+			'group'   => 'access',
 			'level'   => self::LEVEL_REQUIRED,
 			'name'    => __( 'Use a readable permalink structure', 'woocommerce' ),
 			// Without a file in the way, Plain permalinks are why the connection URL doesn't load.
