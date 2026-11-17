@@ -202,6 +202,24 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * The transaction id stored for an order. On the orders table it sorts after status.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return string
+	 */
+	private function stored_transaction_id( int $order_id ): string {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$table = OrdersTableDataStore::get_orders_table_name();
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WooCommerce's orders table.
+			return (string) $wpdb->get_var( $wpdb->prepare( "SELECT transaction_id FROM {$table} WHERE id = %d", $order_id ) );
+		}
+
+		return (string) $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s", $order_id, '_transaction_id' ) );
+	}
+
+	/**
 	 * The modification time stored for an order, not the time on the in-memory object.
 	 *
 	 * @param int $order_id Order ID.
@@ -895,6 +913,7 @@ class UcpCheckout extends ControllerTestCase {
 				return;
 			}
 			$order->set_customer_note( 'kept on cancel' );
+			$order->set_transaction_id( 'ucp-txn' );
 			$order->update_meta_data( 'ucp_cancel_marker', 'wc-cancelled' );
 		};
 		add_action( 'woocommerce_before_order_object_save', $annotate );
@@ -909,6 +928,7 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertTrue( $order->has_status( OrderStatus::CANCELLED ) );
 		$this->assertSame( 'kept on cancel', $order->get_customer_note() );
 		$this->assertSame( 'wc-cancelled', $order->get_meta( 'ucp_cancel_marker' ) );
+		$this->assertSame( 'ucp-txn', $this->stored_transaction_id( $order_id ) );
 		$this->assertNotSame( '2000-01-01 00:00:00', $this->stored_order_modified_gmt( $order_id ) );
 	}
 

@@ -384,6 +384,7 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 		if ( false !== $at ) {
 			$assignments = explode( ', ', substr( $sql, $at + strlen( $marker ) ) );
 			$guarded     = array();
+			$captured    = false;
 
 			foreach ( $assignments as $assignment ) {
 				$eq = strpos( $assignment, '=' );
@@ -393,9 +394,18 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 					continue;
 				}
 
-				$left      = trim( substr( $assignment, 0, $eq ) );
-				$right     = trim( substr( $assignment, $eq + 1 ) );
-				$guarded[] = $left . ' = IF( ' . $guard . ', ' . $right . ', ' . $left . ' )';
+				$left  = trim( substr( $assignment, 0, $eq ) );
+				$right = trim( substr( $assignment, $eq + 1 ) );
+
+				// MySQL uses a column's new value in later assignments, so the original status is read once.
+				if ( ! $captured ) {
+					$condition = '(@ucp_payable := (' . $guard . '))';
+					$captured  = true;
+				} else {
+					$condition = '@ucp_payable';
+				}
+
+				$guarded[] = $left . ' = IF( ' . $condition . ', ' . $right . ', ' . $left . ' )';
 			}
 
 			return substr( $sql, 0, $at + strlen( $marker ) ) . implode( ', ', $guarded );
