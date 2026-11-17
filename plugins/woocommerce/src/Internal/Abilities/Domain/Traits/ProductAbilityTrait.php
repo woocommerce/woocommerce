@@ -288,6 +288,11 @@ trait ProductAbilityTrait {
 			'attributes'         => self::get_product_attributes_schema( $for_variation ),
 			'variations'         => array( 'type' => 'array' ),
 			'sku'                => array( 'type' => 'string' ),
+			'global_unique_id'   => array(
+				'type'        => 'string',
+				'description' => __( 'GTIN, UPC, EAN or ISBN, unique in the store. Empty removes it.', 'woocommerce' ),
+				'pattern'     => '^[0-9-]*[0-9Xx]?$',
+			),
 			'regular_price'      => array(
 				'type'        => 'string',
 				'description' => __( 'Decimal price as a string, without a currency symbol or thousand separators.', 'woocommerce' ),
@@ -469,7 +474,7 @@ trait ProductAbilityTrait {
 	 */
 	protected static function get_variation_config(): array {
 		return array(
-			'fields'        => array( 'sku', 'description', 'status', 'virtual', 'downloadable', 'attributes', 'regular_price', 'sale_price', 'manage_stock', 'stock_quantity', 'stock_status' ),
+			'fields'        => array( 'sku', 'global_unique_id', 'description', 'status', 'virtual', 'downloadable', 'attributes', 'regular_price', 'sale_price', 'manage_stock', 'stock_quantity', 'stock_status' ),
 			'product_props' => array(),
 		);
 	}
@@ -617,7 +622,7 @@ trait ProductAbilityTrait {
 	 * @return array<int, string>
 	 */
 	private static function get_common_product_mutation_fields(): array {
-		return array( 'name', 'sku', 'description', 'short_description', 'status', 'categories', 'tags', 'brands', 'images', 'catalog_visibility', 'featured' );
+		return array( 'name', 'sku', 'global_unique_id', 'description', 'short_description', 'status', 'categories', 'tags', 'brands', 'images', 'catalog_visibility', 'featured' );
 	}
 
 	/**
@@ -711,6 +716,7 @@ trait ProductAbilityTrait {
 			'parent_id'          => 'set_parent_id',
 			'name'               => 'set_name',
 			'sku'                => 'set_sku',
+			'global_unique_id'   => 'set_global_unique_id',
 			'regular_price'      => 'set_regular_price',
 			'sale_price'         => 'set_sale_price',
 			'description'        => 'set_description',
@@ -1023,10 +1029,11 @@ trait ProductAbilityTrait {
 	/**
 	 * Check that no variation picks the same options as another variation in
 	 * the list or a saved variation of the parent, and that no variation in the
-	 * list carries the SKU of the parent or of another variation in the list. A
-	 * saved variation that the input names is left out, because the input
-	 * changes or deletes it. `set_sku()` already checks a SKU against the saved
-	 * products, but not against the parent's SKU before the parent is saved.
+	 * list carries the SKU or GTIN of the parent or of another variation in the
+	 * list. A saved variation that the input names is left out, because the
+	 * input changes or deletes it. `set_sku()` and `set_global_unique_id()`
+	 * already check a value against the saved products, but not against the
+	 * parent's value before the parent is saved.
 	 *
 	 * @param \WC_Product_Variable    $parent_product Parent product.
 	 * @param \WC_Product_Variation[] $variations     Variations to save, in input order.
@@ -1037,6 +1044,8 @@ trait ProductAbilityTrait {
 		$combinations = array();
 		$parent_sku   = $parent_product->get_sku( 'edit' );
 		$skus         = '' === $parent_sku ? array() : array( $parent_sku => true );
+		$parent_gtin  = $parent_product->get_global_unique_id( 'edit' );
+		$gtins        = '' === $parent_gtin ? array() : array( $parent_gtin => true );
 		$child_ids    = $parent_product->get_id() > 0 ? self::read_variation_children( $parent_product, true )['all'] : array();
 		_prime_post_caches( $child_ids );
 		foreach ( $child_ids as $child_id ) {
@@ -1068,6 +1077,17 @@ trait ProductAbilityTrait {
 				);
 			}
 			$skus[ $sku ] = true;
+
+			$gtin = $variation->get_global_unique_id( 'edit' );
+			if ( '' !== $gtin && isset( $gtins[ $gtin ] ) ) {
+				return new \WP_Error(
+					'woocommerce_product_variation_global_unique_id_duplicate',
+					/* translators: %d: variation position. */
+					sprintf( __( 'Variation %d repeats the GTIN of the product or of another variation. Give each one its own GTIN.', 'woocommerce' ), $position ),
+					array( 'status' => 400 )
+				);
+			}
+			$gtins[ $gtin ] = true;
 		}
 
 		return null;
@@ -1768,6 +1788,7 @@ trait ProductAbilityTrait {
 			'type'               => $product->get_type(),
 			'status'             => $product->get_status(),
 			'sku'                => $product->get_sku(),
+			'global_unique_id'   => $product->get_global_unique_id(),
 			'currency'           => get_woocommerce_currency(),
 			'currency_symbol'    => html_entity_decode(
 				get_woocommerce_currency_symbol(),
@@ -2045,6 +2066,7 @@ trait ProductAbilityTrait {
 					'enum' => self::get_product_output_status_slugs(),
 				),
 				'sku'                => array( 'type' => 'string' ),
+				'global_unique_id'   => array( 'type' => 'string' ),
 				'currency'           => array(
 					'type' => 'string',
 					'enum' => array_keys( get_woocommerce_currencies() ),

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Let the product abilities read and write the product GTIN, UPC, EAN or ISBN.
