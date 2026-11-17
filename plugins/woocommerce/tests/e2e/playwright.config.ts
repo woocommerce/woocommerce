@@ -118,8 +118,8 @@ const serialRunSpecs = [
 	// behavior for every other worker. (`cart.spec.ts` runs in core-parallel — it
 	// scopes its tax rate to a dedicated tax class instead of toggling global tax.)
 	'**/tests/cart/add-to-cart.spec.ts',
-	// Activates a custom-gateway test plugin globally, which would surface its extra
-	// payment button on every other worker's checkout.
+	// Activates a test plugin with WP-CLI, which races other workers on the
+	// `active_plugins` option.
 	'**/tests/checkout/checkout-shortcode-custom-place-order-button.spec.ts',
 	// Mutate the global onboarding profile/options, site-visibility options and
 	// the active theme.
@@ -214,14 +214,8 @@ const blocksSerialSpecs = [
 	'**/tests/blocks/stock-filter/stock-filter.block_theme.spec.ts',
 	'**/tests/blocks/templates/legacy-templates.block_theme.spec.ts',
 
-	// Activate test plugins that change every cart, checkout or product page, or
-	// race other specs on the `active_plugins` option.
-	'**/tests/blocks/cart/cart-checkout-block-extension-callbacks.shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/checkout-block-custom-place-order-button.block_theme.spec.ts',
-	'**/tests/blocks/checkout/checkout-block-extensibility.shopper.block_theme.spec.ts',
-	'**/tests/blocks/product-button/product-button.block_theme.spec.ts',
-	'**/tests/blocks/product-collection/product-picker.block_theme.spec.ts',
-	'**/tests/blocks/product-collection/register-product-collection.block_theme.spec.ts',
+	// Turn off AJAX add to cart, which every Product Button reads.
+	'**/tests/blocks/product-button/product-button-ajax-disabled.block_theme.spec.ts',
 
 	// Change global settings that cart, checkout and storefront specs read:
 	// shipping, taxes, local pickup, account creation, site language, the shop
