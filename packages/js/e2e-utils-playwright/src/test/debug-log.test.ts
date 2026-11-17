@@ -29,20 +29,21 @@ describe( 'readPhpDebugLog', () => {
 			logPrefix: 'acceptance-log-marker-',
 		},
 	] )( 'reads the log written by $queryParameter', async ( logMarker ) => {
-		let text = '';
-		get.mockImplementationOnce( ( path, options ) => {
-			expect( path ).toBe( '/' );
-			const value = options.params[ logMarker.queryParameter ];
-			expect( value ).toMatch( /^[0-9a-f-]{36}$/ );
-			text = `${ logMarker.logPrefix }${ value }\nPHP Warning: example`;
-			return { ok: () => true };
-		} ).mockResolvedValueOnce( {
+		const value = '4d34912a-1697-419d-9aa1-d4196772d663';
+		jest.spyOn( globalThis.crypto, 'randomUUID' ).mockReturnValueOnce(
+			value
+		);
+		const text = `${ logMarker.logPrefix }${ value }\nPHP Warning: example`;
+		get.mockResolvedValueOnce( { ok: () => true } ).mockResolvedValueOnce( {
 			status: () => 200,
 			text: () => Promise.resolve( text ),
 		} );
 
 		const log = await readPhpDebugLog( request, logMarker );
 		expect( log ).toBe( text );
+		expect( get ).toHaveBeenNthCalledWith( 1, '/', {
+			params: { [ logMarker.queryParameter ]: value },
+		} );
 		expect( get ).toHaveBeenNthCalledWith( 2, '/wp-content/debug.log' );
 	} );
 
