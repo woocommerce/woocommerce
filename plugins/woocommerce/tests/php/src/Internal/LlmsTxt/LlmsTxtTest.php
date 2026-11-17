@@ -18,8 +18,8 @@ class LlmsTxtTest extends \WC_Unit_Test_Case {
 			$this->markTestSkipped( 'The test site already has an llms.txt file.' );
 		}
 
-		$sut    = wc_get_container()->get( LlmsTxt::class );
-		$result = $sut->get_status();
+		$llms_txt = wc_get_container()->get( LlmsTxt::class );
+		$result   = $llms_txt->get_status();
 		$this->assertSame( 'unknown', $result['status'] );
 		$this->assertStringContainsString( 'WooCommerce Store API', $result['section'] );
 
@@ -29,7 +29,7 @@ class LlmsTxtTest extends \WC_Unit_Test_Case {
 				'status'  => 'disabled',
 				'section' => '',
 			),
-			$sut->get_status()
+			$llms_txt->get_status()
 		);
 	}
 
