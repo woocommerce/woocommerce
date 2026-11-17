@@ -8,6 +8,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
@@ -18,6 +19,11 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
  * This renderer handles core/media-text blocks with proper email-friendly HTML layout.
  */
 class Media_Text extends Abstract_Block_Renderer {
+	/**
+	 * Padding in pixels on each side of the media cell.
+	 */
+	private const MEDIA_CELL_PADDING = 10;
+
 	/**
 	 * Renders the media-text block content using a direct table-based layout.
 	 *
@@ -43,6 +49,8 @@ class Media_Text extends Abstract_Block_Renderer {
 		if ( empty( $media_content ) || empty( $text_content ) ) {
 			return '';
 		}
+
+		$media_content = $this->constrain_media_image_width( $media_content, $parsed_block, $rendering_context );
 
 		// Build the email-friendly layout.
 		return $this->build_email_layout( $media_content, $text_content, $block_attrs, $block_content, $rendering_context );
@@ -116,7 +124,7 @@ class Media_Text extends Abstract_Block_Renderer {
 
 		// Build individual table cells.
 		$media_cell_attrs = array(
-			'style'  => sprintf( 'width: %d%%; padding: 10px; vertical-align: %s;', $media_width, $vertical_alignment ),
+			'style'  => sprintf( 'width: %d%%; padding: %dpx; vertical-align: %s;', $media_width, self::MEDIA_CELL_PADDING, $vertical_alignment ),
 			'valign' => $vertical_alignment,
 		);
 		$text_cell_attrs  = array(
@@ -138,6 +146,93 @@ class Media_Text extends Abstract_Block_Renderer {
 
 		// Use render_cell = false to avoid wrapping in an extra <td>.
 		return Table_Wrapper_Helper::render_table_wrapper( $cells, $table_attrs, array(), array(), false );
+	}
+
+	/**
+	 * Cap the media image at the width of the media cell.
+	 *
+	 * WordPress saves the image's full `width` attribute (often 1024px). Outlook lays the image out at
+	 * that width and ignores `max-width`, and other clients size the table by it, so the email grows
+	 * wider than its layout and Gmail on Android shrinks the whole message to fit the screen.
+	 *
+	 * @param string            $media_content Media HTML content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string Media HTML content.
+	 */
+	private function constrain_media_image_width( string $media_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		if ( ! isset( $parsed_block['email_attrs']['width'] ) ) {
+			return $media_content;
+		}
+
+		$block_attrs = $parsed_block['attrs'] ?? array();
+		$block_width = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] ) - $this->get_horizontal_box_width( $block_attrs, $rendering_context );
+		$max_width   = (int) floor( $block_width * $this->get_media_width_from_attributes( $block_attrs ) / 100 ) - 2 * self::MEDIA_CELL_PADDING;
+		if ( $max_width <= 0 ) {
+			return $media_content;
+		}
+
+		$html = new \WP_HTML_Tag_Processor( $media_content );
+		if ( ! $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
+			return $media_content;
+		}
+
+		$saved_width = $html->get_attribute( 'width' );
+		if ( ! is_string( $saved_width ) || ! is_numeric( $saved_width ) || (float) $saved_width <= $max_width ) {
+			return $media_content;
+		}
+
+		$saved_height = $html->get_attribute( 'height' );
+		if ( is_string( $saved_height ) && is_numeric( $saved_height ) ) {
+			$scaled_height = max( 1, (int) round( (float) $saved_height * $max_width / (float) $saved_width ) );
+			$html->set_attribute( 'height', (string) $scaled_height );
+		}
+		$html->set_attribute( 'width', (string) $max_width );
+
+		$style = $html->get_attribute( 'style' );
+		$style = is_string( $style ) ? rtrim( trim( $style ), ';' ) . ';' : '';
+		$html->set_attribute( 'style', $style . sprintf( 'max-width:%dpx;width:100%%;height:auto;', $max_width ) );
+
+		return $html->get_updated_html();
+	}
+
+	/**
+	 * Get the block's own left and right padding plus border width, in pixels.
+	 *
+	 * The block's email width includes these, but they're applied to the wrapper table, so the
+	 * cells get what's left.
+	 *
+	 * @param array             $block_attrs Block attributes.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return float
+	 */
+	private function get_horizontal_box_width( array $block_attrs, Rendering_Context $rendering_context ): float {
+		$padding = $block_attrs['style']['spacing']['padding'] ?? array();
+		$border  = $block_attrs['style']['border'] ?? array();
+		$padding = is_array( $padding ) ? $padding : array();
+		$border  = is_array( $border ) ? $border : array();
+
+		$values = array( $padding['left'] ?? '0px', $padding['right'] ?? '0px' );
+		foreach ( array( 'left', 'right' ) as $side ) {
+			$side_border = $border[ $side ] ?? array();
+			$values[]    = ( is_array( $side_border ) ? $side_border['width'] ?? null : null ) ?? $border['width'] ?? '0px';
+		}
+
+		$variables_map = null;
+		$total         = 0.0;
+		foreach ( $values as $value ) {
+			if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+				continue;
+			}
+			$value = (string) $value;
+			if ( Preset_Variable_Resolver::is_preset_reference( $value ) ) {
+				$variables_map = $variables_map ?? Preset_Variable_Resolver::get_variables_map( $rendering_context->get_theme_json() );
+				$value         = Preset_Variable_Resolver::resolve( $value, $variables_map );
+			}
+			$total += Styles_Helper::parse_value( $value );
+		}
+
+		return $total;
 	}
 
 	/**

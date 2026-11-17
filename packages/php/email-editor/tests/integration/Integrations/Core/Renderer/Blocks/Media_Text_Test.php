@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Tests\Integration\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Media_Text;
@@ -221,5 +222,134 @@ class Media_Text_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->media_renderer->render( '', $parsed_media, $this->rendering_context );
 		$this->assertStringContainsString( 'media-image.jpg', $rendered );
 		$this->assertStringNotContainsString( 'text-image.jpg', $rendered );
+	}
+
+	/**
+	 * A 1200px image in a 50% media cell of a 612px block is capped at the cell's inner width
+	 * (612 * 50% - 2 * 10px padding = 286px), with its height scaled to keep the aspect ratio.
+	 */
+	public function testItCapsOversizedImageToMediaCellWidth(): void {
+		$img = $this->render_and_get_img( $this->get_block_with_image( 1200, 800, 50 ) );
+
+		$this->assertSame( '286', $img['width'] );
+		$this->assertSame( '191', $img['height'] );
+		$this->assertStringContainsString( 'max-width:286px;width:100%;height:auto;', $img['style'] );
+	}
+
+	/**
+	 * An image that already fits its media cell keeps its saved dimensions.
+	 */
+	public function testItLeavesImageThatFitsUnchanged(): void {
+		$img = $this->render_and_get_img( $this->get_block_with_image( 200, 100, 50 ) );
+
+		$this->assertSame( '200', $img['width'] );
+		$this->assertSame( '100', $img['height'] );
+		$this->assertSame( 'max-width:100%', $img['style'] );
+	}
+
+	/**
+	 * The cap follows the media width share: 612 * 30% = 183px, minus 20px of cell padding.
+	 */
+	public function testItAppliesMediaWidthShareToCap(): void {
+		$img = $this->render_and_get_img( $this->get_block_with_image( 1200, 800, 30 ) );
+
+		$this->assertSame( '163', $img['width'] );
+		$this->assertSame( '109', $img['height'] );
+	}
+
+	/**
+	 * The block's own padding and border sit on the wrapper table, so they're taken off the width
+	 * first: ( 612 - 2 * 20px - 2 * 2px ) * 50% - 20px = 264px.
+	 */
+	public function testItSubtractsBlockPaddingAndBorderFromCap(): void {
+		$parsed_block                   = $this->get_block_with_image( 1200, 800, 50 );
+		$parsed_block['attrs']['style'] = array(
+			'spacing' => array(
+				'padding' => array(
+					'left'  => '20px',
+					'right' => '20px',
+				),
+			),
+			'border'  => array( 'width' => '2px' ),
+		);
+
+		$img = $this->render_and_get_img( $parsed_block );
+
+		$this->assertSame( '264', $img['width'] );
+	}
+
+	/**
+	 * Padding saved as a spacing preset is resolved through the theme's variables.
+	 */
+	public function testItResolvesPresetPaddingForCap(): void {
+		$variables = Preset_Variable_Resolver::get_variables_map( $this->rendering_context->get_theme_json() );
+		$preset    = (float) ( $variables['--wp--preset--spacing--20'] ?? 0 );
+		$this->assertGreaterThan( 0, $preset, 'Expected the email theme to define spacing preset 20 in px.' );
+
+		$parsed_block                   = $this->get_block_with_image( 1200, 800, 50 );
+		$parsed_block['attrs']['style'] = array(
+			'spacing' => array(
+				'padding' => array(
+					'left'  => 'var:preset|spacing|20',
+					'right' => 'var:preset|spacing|20',
+				),
+			),
+		);
+
+		$img = $this->render_and_get_img( $parsed_block );
+
+		$this->assertSame( (string) ( (int) floor( ( 612 - 2 * $preset ) * 0.5 ) - 20 ), $img['width'] );
+	}
+
+	/**
+	 * Without a computed email width there's nothing to cap against, so the image is left alone.
+	 */
+	public function testItLeavesImageUnchangedWithoutEmailWidth(): void {
+		$parsed_block = $this->get_block_with_image( 1200, 800, 50 );
+		unset( $parsed_block['email_attrs'] );
+
+		$img = $this->render_and_get_img( $parsed_block );
+
+		$this->assertSame( '1200', $img['width'] );
+		$this->assertSame( '800', $img['height'] );
+	}
+
+	/**
+	 * Build a media & text block whose media is an image with the given saved dimensions.
+	 *
+	 * @param int $width Saved image width.
+	 * @param int $height Saved image height.
+	 * @param int $media_width Media width share in percent.
+	 * @return array
+	 */
+	private function get_block_with_image( int $width, int $height, int $media_width ): array {
+		$parsed_block                        = $this->parsed_media;
+		$parsed_block['attrs']['mediaWidth'] = $media_width;
+		$parsed_block['email_attrs']         = array( 'width' => '612px' );
+		$parsed_block['innerHTML']           = sprintf(
+			'<figure class="wp-block-media-text__media"><img src="test-image.jpg" alt="Test Image" width="%d" height="%d" style="max-width:100%%" /></figure><div class="wp-block-media-text__content"><p>Media content</p></div>',
+			$width,
+			$height
+		);
+		return $parsed_block;
+	}
+
+	/**
+	 * Render the block and return the media image's width, height and style attributes.
+	 *
+	 * @param array $parsed_block Parsed block.
+	 * @return array{width: string, height: string, style: string}
+	 */
+	private function render_and_get_img( array $parsed_block ): array {
+		$rendered = $this->media_renderer->render( '', $parsed_block, $this->rendering_context );
+
+		$processor = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'img' ) ), 'Expected the media image in the rendered output.' );
+
+		return array(
+			'width'  => (string) $processor->get_attribute( 'width' ),
+			'height' => (string) $processor->get_attribute( 'height' ),
+			'style'  => (string) $processor->get_attribute( 'style' ),
+		);
 	}
 }

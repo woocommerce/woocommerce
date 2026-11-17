@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep Media & Text images within their column so emails no longer render too wide or with tiny text in Gmail on Android.

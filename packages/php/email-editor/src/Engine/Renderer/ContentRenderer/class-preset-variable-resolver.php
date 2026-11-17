@@ -8,6 +8,8 @@
 declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
 
+use WP_Theme_JSON;
+
 /**
  * Resolves WordPress preset variable references to their actual values.
  *
@@ -61,6 +63,25 @@ class Preset_Variable_Resolver {
 
 		$css_var_name = self::to_css_variable_name( $value );
 		return $variables_map[ $css_var_name ] ?? $value;
+	}
+
+	/**
+	 * Build the map of CSS variable names to values that a theme defines.
+	 *
+	 * @param WP_Theme_JSON $theme Theme to read the variables from.
+	 * @return array<string, string> Map such as `array( '--wp--preset--spacing--20' => '20px' )`.
+	 */
+	public static function get_variables_map( WP_Theme_JSON $theme ): array {
+		$variables_css = $theme->get_stylesheet( array( 'variables' ) );
+		$map           = array();
+
+		if ( preg_match_all( '/--(.*?):\s*(.*?);/', $variables_css, $matches, PREG_SET_ORDER ) ) {
+			foreach ( $matches as $match ) {
+				$map[ '--' . $match[1] ] = $match[2];
+			}
+		}
+
+		return $map;
 	}
 
 	/**
