@@ -19,6 +19,7 @@
 		"./check-i18n": "./src/check-i18n.js"
 	},
 	"bin": {
+		"woo-extension-config": "./bin/woo-config.sh",
 		"woo-extension-env-start": "./bin/env-start.sh",
 		"woo-extension-env-dev-reset": "./bin/env-dev-reset.sh"
 	},
@@ -55,6 +56,7 @@
 					"changes": [
 						"package.json",
 						"bin/env-start.sh",
+						"bin/woo-config.*",
 						"{src,test}/**/*.js"
 					],
 					"events": [
