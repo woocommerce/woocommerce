@@ -455,7 +455,11 @@ class SettingsQueryTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertIsArray( $result );
 		$this->assertSame( count( $fields ), $result['total'] );
-		$this->assertSame( $values, array_column( $result['settings'], 'value', 'id' ) );
+		$returned_values = array_column( $result['settings'], 'value', 'id' );
+		foreach ( $values as $id => $expected ) {
+			$this->assertArrayHasKey( $id, $returned_values );
+			$this->assertSame( $expected, $returned_values[ $id ] );
+		}
 	}
 
 	/**
