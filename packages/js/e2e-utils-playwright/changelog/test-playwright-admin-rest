@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a Playwright helper for WordPress REST requests using a logged-in admin session.
