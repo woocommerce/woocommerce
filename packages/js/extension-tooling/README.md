@@ -59,6 +59,23 @@ Add this mapping alongside the extension's existing `wp-content/bin` mapping in 
 
 Use `wp-env run cli bash wp-content/woo-extension-tooling/seed-dev.sh wp-content/bin/seed_dev_plugin.sh` for `env:dev:seed`. Pass the fixture hook's path inside the container. Include WooCommerce Gateway Dummy in the development site's plugin list to use the seeded dummy payment method.
 
+## Lint and analysis presets
+
+If your Stylelint config already disables `selector-class-pattern` for legacy SCSS, extend the shared overlay after the WordPress preset. Keep any file-specific rules in your own config.
+
+```json
+{
+	"extends": [
+		"@wordpress/stylelint-config/scss-stylistic",
+		"@woocommerce/extension-tooling/stylelint/legacy-scss"
+	]
+}
+```
+
+Add `configs/phpstan.neon` from the pinned tooling source as the last entry in PHPStan's `includes` list. To use analysis level 8 and a two-process cap, remove the local `level` and `parallel.maximumNumberOfProcesses` settings, which take precedence over included values. Composer-only jobs can read the file directly from the same checkout. Keep the PHP target version, paths, bootstrap, stubs, and baseline in your extension config.
+
+For PHPCS, extend the `WooCommerce-Core` standard from `woocommerce/woocommerce-sniffs`. Define text domains, PHP compatibility checks, and exclusions in the extension's ruleset.
+
 ## License
 
 GPL-3.0-or-later. The helpers originated in WooCommerce Composite Products.

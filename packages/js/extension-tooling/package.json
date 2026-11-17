@@ -16,7 +16,8 @@
 	"exports": {
 		"./webpack-dist-minify": "./src/webpack-dist-minify.js",
 		"./webpack-text-includes": "./src/webpack-text-includes.js",
-		"./check-i18n": "./src/check-i18n.js"
+		"./check-i18n": "./src/check-i18n.js",
+		"./stylelint/legacy-scss": "./configs/stylelint-legacy-scss.json"
 	},
 	"bin": {
 		"woo-extension-config": "./bin/woo-config.sh",
@@ -25,6 +26,7 @@
 	},
 	"files": [
 		"bin",
+		"configs",
 		"src"
 	],
 	"publishConfig": {
