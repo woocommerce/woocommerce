@@ -14,6 +14,21 @@ describe( 'HeaderSave', () => {
 			'<form id="mainform"><p class="submit"><button name="save" disabled class="woocommerce-save-button" type="submit" value="Save changes">Save changes</button></p></form>';
 	} );
 
+	afterEach( () => {
+		window.onbeforeunload = null;
+	} );
+
+	it( 'renders nothing and leaves the page alone when the form has no Save button', () => {
+		document.body.innerHTML = '<form id="mainform"></form>';
+		const { container } = render( <HeaderSave />, {
+			container: document.body.appendChild(
+				document.createElement( 'div' )
+			),
+		} );
+
+		expect( container.querySelector( 'button' ) ).toBeNull();
+	} );
+
 	it( 'moves the form’s own Save changes button into the header as Save, still submitting the form', () => {
 		const { container } = render( <HeaderSave />, {
 			container: document.body.appendChild(
