@@ -165,16 +165,12 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_product_export_product_query_args', array( $this, 'set_export_product_query_args' ) );
 
-		try {
-			$exporter = new WC_Product_CSV_Exporter();
-			$exporter->prepare_data_to_export();
-			$data = $this->get_exported_data( $exporter );
+		$exporter = new WC_Product_CSV_Exporter();
+		$exporter->prepare_data_to_export();
+		$data = $this->get_exported_data( $exporter );
 
-			foreach ( $data as $row ) {
-				$this->assertEquals( -1, $row['published'] );
-			}
-		} finally {
-			remove_filter( 'woocommerce_product_export_product_query_args', array( $this, 'set_export_product_query_args' ) );
+		foreach ( $data as $row ) {
+			$this->assertEquals( -1, $row['published'] );
 		}
 	}
 
@@ -190,17 +186,13 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_product_export_product_query_args', array( $this, 'set_export_product_query_args' ) );
 
-		try {
-			$exporter = new WC_Product_CSV_Exporter();
-			$exporter->prepare_data_to_export();
-			$data = $this->get_exported_data( $exporter );
+		$exporter = new WC_Product_CSV_Exporter();
+		$exporter->prepare_data_to_export();
+		$data = $this->get_exported_data( $exporter );
 
-			$this->assertNotEmpty( $data, 'Pending review product should be included in the export.' );
-			foreach ( $data as $row ) {
-				$this->assertEquals( 2, $row['published'], 'Pending review products should not export as draft (-1).' );
-			}
-		} finally {
-			remove_filter( 'woocommerce_product_export_product_query_args', array( $this, 'set_export_product_query_args' ) );
+		$this->assertNotEmpty( $data, 'Pending review product should be included in the export.' );
+		foreach ( $data as $row ) {
+			$this->assertEquals( 2, $row['published'], 'Pending review products should not export as draft (-1).' );
 		}
 	}
 

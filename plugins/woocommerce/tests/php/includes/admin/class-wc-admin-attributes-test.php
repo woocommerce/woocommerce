@@ -29,11 +29,9 @@ class WC_Admin_Attributes_Test extends WC_Unit_Test_Case {
 	private static int $attribute_counter = 0;
 
 	/**
-	 * Clean up test attributes, filters, and attribute caches.
+	 * Clean up test attributes and attribute caches.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_attribute_taxonomy_row_actions' );
-
 		foreach ( $this->attribute_ids as $attribute_id ) {
 			wc_delete_attribute( $attribute_id );
 		}

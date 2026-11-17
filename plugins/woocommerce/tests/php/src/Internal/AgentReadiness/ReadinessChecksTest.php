@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\DuplicateGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\ImageTooSmallCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingBrandCheck;
@@ -61,7 +62,8 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 		$table = SimpleCheck::table();
 		foreach ( $table as $id => $check ) {
 			$this->assertSame( $id, $check->id() );
-			$this->assertSame( array_keys( FeedChannels::all() ), array_keys( $check->channels() ), "$id names a field on every channel" );
+			$expected = 'image_alt_text' === $id ? array() : array_keys( FeedChannels::all() );
+			$this->assertSame( $expected, array_keys( $check->channels() ), "$id names a field on every channel, or none for a page check" );
 		}
 
 		$simple = WC_Helper_Product::create_simple_product();
@@ -79,6 +81,87 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 		$variation->set_attributes( array_fill_keys( array_keys( $attributes ), '' ) );
 		$variation->save();
 		$this->assertTrue( $table['variation_attributes_not_set']->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'A variation set to "any"' );
+	}
+
+	/**
+	 * @testdox Image alt text is read from the main image only: not the gallery, and a variable product by its own image.
+	 */
+	public function test_image_alt_text(): void {
+		$sut     = SimpleCheck::table()['image_alt_text'];
+		$image   = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+		$gallery = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+		$product = WC_Helper_Product::create_simple_product();
+		$this->assertFalse( $sut->fails( $product, $this->scan ), 'No image is missing_images, not this check' );
+
+		$product->set_image_id( $image );
+		$product->set_gallery_image_ids( array( $gallery ) );
+		$product->save();
+		$this->assertTrue( $sut->fails( $product, $this->scan ) );
+		update_post_meta( $image, '_wp_attachment_image_alt', '  ' );
+		$this->assertTrue( $sut->fails( $product, $this->scan ), 'Blank alt text is no alt text' );
+		update_post_meta( $image, '_wp_attachment_image_alt', 'Blue wool beanie' );
+		$this->assertFalse( $sut->fails( $product, $this->scan ), 'A gallery image without alt text does not count' );
+
+		$variable  = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $variable->get_children()[0] );
+		$variation->set_image_id( $gallery );
+		$variation->save();
+		$variable->set_image_id( $image );
+		$variable->save();
+		$this->assertFalse( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'A variation image without alt text does not count' );
+	}
+
+	/**
+	 * @testdox A check with no channel lists the product with no channel effect, and the rules filter can still remove it.
+	 */
+	public function test_check_with_no_channel(): void {
+		StoreOutputChecksTest::block_requests();
+		$product = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms( $product->get_id(), 'Acme', 'product_brand' );
+		$image = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+		$product->set_image_id( $image );
+		$product->save();
+		$readiness = wc_get_container()->get( AgentReadiness::class );
+
+		$result = $readiness->check_product( wc_get_product( $product->get_id() ) );
+		$this->assertArrayHasKey( 'image_alt_text', $result['checks'] );
+		$this->assertSame( array(), $result['checks']['image_alt_text'] );
+
+		$checks = array_column( $readiness->get_report()['checks'], null, 'id' );
+		$this->assertSame( 1, $checks['image_alt_text']['count'] );
+
+		add_filter(
+			'woocommerce_agent_readiness_rules',
+			static function ( $rules ) {
+				unset( $rules['image_alt_text'] );
+				return $rules;
+			}
+		);
+		$this->assertArrayNotHasKey( 'image_alt_text', wc_get_container()->get( AgentReadiness::class )->get_channel_rules() );
+	}
+
+	/**
+	 * @testdox The payment method check passes while any gateway is turned on.
+	 */
+	public function test_payment_method_condition(): void {
+		$gateways = WC()->payment_gateways()->payment_gateways();
+		$enabled  = array_map( static fn( $gateway ) => $gateway->enabled, $gateways );
+		$sut      = wc_get_container()->get( StoreConditions::class );
+		$ok       = static fn() => array_column( $sut->all(), 'ok', 'id' )['payment_method'];
+		$this->assertNotEmpty( $gateways, 'Core registers its gateways' );
+		try {
+			foreach ( $gateways as $gateway ) {
+				$gateway->enabled = 'no';
+			}
+			$this->assertFalse( $ok() );
+
+			reset( $gateways )->enabled = 'yes';
+			$this->assertTrue( $ok() );
+		} finally {
+			foreach ( $gateways as $id => $gateway ) {
+				$gateway->enabled = $enabled[ $id ];
+			}
+		}
 	}
 
 	/**
@@ -255,6 +338,77 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A variable product with no main image is listed with a published variation's own image, which is also checked for size.
+	 */
+	public function test_missing_images_counts_variation_images(): void {
+		$sut      = SimpleCheck::table()['missing_images'];
+		$variable = WC_Helper_Product::create_variation_product();
+		$variable->set_image_id( 0 );
+		$variable->save();
+		$variable = wc_get_product( $variable->get_id() );
+
+		$this->assertTrue( $sut->fails( $variable, $this->scan ), 'No image on the product or any variation' );
+
+		$variation = wc_get_product( $variable->get_children()[0] );
+		$variation->set_image_id( self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) ) );
+		$variation->save();
+
+		$this->assertFalse( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'A variation with its own image can be listed' );
+
+		wp_update_attachment_metadata(
+			$variation->get_image_id(),
+			array(
+				'width'  => 300,
+				'height' => 300,
+			)
+		);
+		$this->assertTrue( ( new ImageTooSmallCheck() )->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'The variation image it lists with is checked for size' );
+	}
+
+	/**
+	 * @testdox A variable product fails the image size check when any variation lists with a small image, whatever the variation order.
+	 */
+	public function test_image_too_small_checks_every_variation_image(): void {
+		$sut        = new ImageTooSmallCheck();
+		$image      = function ( int $size ): int {
+			$id = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+			wp_update_attachment_metadata(
+				$id,
+				array(
+					'width'  => $size,
+					'height' => $size,
+				)
+			);
+			return $id;
+		};
+		$variable   = WC_Helper_Product::create_variation_product();
+		$variations = array_slice( $variable->get_children(), 0, 2 );
+		$variable->set_image_id( 0 );
+		$variable->save();
+
+		foreach ( array( array( 800, 100 ), array( 100, 800 ) ) as $sizes ) {
+			foreach ( $variations as $i => $variation_id ) {
+				$variation = wc_get_product( $variation_id );
+				$variation->set_image_id( $image( $sizes[ $i ] ) );
+				$variation->save();
+			}
+			$this->assertTrue( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), implode( ' x ', $sizes ) . ': a small variation image fails in either order' );
+		}
+
+		foreach ( $variable->get_children() as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			$variation->set_image_id( $image( 800 ) );
+			$variation->save();
+		}
+		$this->assertFalse( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'All variation images are large enough' );
+
+		$variable = wc_get_product( $variable->get_id() );
+		$variable->set_image_id( $image( 100 ) );
+		$variable->save();
+		$this->assertFalse( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'A small parent image no variation lists with is not counted' );
+	}
+
+	/**
 	 * @testdox An image under 500 pixels on either side fails; one without recorded size does not.
 	 */
 	public function test_image_too_small_reads_attachment_size(): void {
@@ -286,67 +440,64 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Store conditions report coming soon mode, discouraged search engines, UCP, permalinks and guest checkout.
+	 * @testdox Store conditions report coming soon mode, discouraged search engines, UCP and guest checkout.
 	 */
 	public function test_store_conditions(): void {
-		global $wp_rewrite;
-		$permalinks = (string) get_option( 'permalink_structure' );
-		try {
-			$sut = new StoreConditions();
-			$sut->init( new ComingSoonHelper() );
+		$sut = new StoreConditions();
+		$sut->init( new ComingSoonHelper() );
+		$ok = static fn(): array => array_intersect_key( array_column( $sut->all(), 'ok', 'id' ), array_flip( array( 'launched', 'search_visible', 'ucp_on', 'guest_checkout' ) ) );
 
-			update_option( 'woocommerce_coming_soon', 'no' );
-			update_option( 'blog_public', '1' );
-			update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
-			update_option( 'woocommerce_enable_guest_checkout', 'yes' );
-			$wp_rewrite->set_permalink_structure( '/%postname%/' );
-			$this->assertSame(
-				array(
-					'launched'          => true,
-					'search_visible'    => true,
-					'ucp_on'            => true,
-					'pretty_permalinks' => true,
-					'guest_checkout'    => true,
-				),
-				array_column( $sut->all(), 'ok', 'id' )
-			);
+		update_option( 'woocommerce_coming_soon', 'no' );
+		update_option( 'blog_public', '1' );
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+		$this->assertSame(
+			array(
+				'launched'       => true,
+				'search_visible' => true,
+				'ucp_on'         => true,
+				'guest_checkout' => true,
+			),
+			$ok()
+		);
 
-			update_option( 'woocommerce_coming_soon', 'yes' );
-			update_option( 'woocommerce_store_pages_only', 'yes' );
-			update_option( 'blog_public', '0' );
-			update_option( 'woocommerce_feature_ucp_enabled', 'no' );
-			update_option( 'woocommerce_enable_guest_checkout', 'no' );
-			$wp_rewrite->set_permalink_structure( '' );
-			$this->assertSame(
-				array(
-					'launched'          => false,
-					'search_visible'    => false,
-					'ucp_on'            => false,
-					'pretty_permalinks' => false,
-					'guest_checkout'    => false,
-				),
-				array_column( $sut->all(), 'ok', 'id' )
-			);
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		update_option( 'woocommerce_store_pages_only', 'yes' );
+		update_option( 'blog_public', '0' );
+		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+		$this->assertSame(
+			array(
+				'launched'       => false,
+				'search_visible' => false,
+				'ucp_on'         => false,
+				'guest_checkout' => false,
+			),
+			$ok()
+		);
 
-			update_option( 'woocommerce_enable_guest_checkout', 'yes' );
-			add_filter( 'woocommerce_checkout_registration_required', '__return_true' );
-			$guest_checkout = array_column( $sut->all(), 'ok', 'id' )['guest_checkout'];
-			remove_filter( 'woocommerce_checkout_registration_required', '__return_true' );
-			$this->assertFalse( $guest_checkout, 'An extension that requires registration should fail the check' );
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+		add_filter( 'woocommerce_checkout_registration_required', '__return_true' );
+		$guest_checkout = array_column( $sut->all(), 'ok', 'id' )['guest_checkout'];
+		remove_filter( 'woocommerce_checkout_registration_required', '__return_true' );
+		$this->assertFalse( $guest_checkout, 'An extension that requires registration should fail the check' );
 
-			$this->assertSame(
-				array(
-					'launched'          => 'listing',
-					'search_visible'    => 'listing',
-					'ucp_on'            => 'ucp',
-					'pretty_permalinks' => 'ucp',
-					'guest_checkout'    => 'checkout',
-				),
-				array_column( $sut->all(), 'blocks', 'id' )
-			);
-		} finally {
-			$wp_rewrite->set_permalink_structure( $permalinks );
-		}
+		$this->assertSame(
+			array(
+				'launched'             => 'listing',
+				'search_visible'       => 'listing',
+				'ucp_on'               => 'ucp',
+				'https'                => 'ucp',
+				'privacy_page'         => 'checkout',
+				'terms_page'           => 'checkout',
+				'refund_returns_page'  => 'checkout',
+				'shipping_policy_page' => 'checkout',
+				'payment_method'       => 'checkout',
+				'guest_checkout'       => 'checkout',
+				'order_emails'         => 'checkout',
+			),
+			array_column( $sut->all(), 'blocks', 'id' )
+		);
 	}
 
 	/**

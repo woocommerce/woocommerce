@@ -43,6 +43,25 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 		$this->assertSame( ',', $currency_data['decimalSeparator'] );
 	}
 
+	/**
+	 * @testdox Currency symbol position follows the filtered price format.
+	 */
+	public function test_currency_data_symbol_position_uses_filtered_price_format() {
+		update_option( 'woocommerce_currency_pos', 'left' );
+		add_filter(
+			'woocommerce_price_format',
+			function () {
+				return '%2$s&nbsp;%1$s';
+			}
+		);
+
+		$method = new \ReflectionMethod( $this->registry, 'get_currency_data' );
+		$method->setAccessible( true );
+		$currency_data = $method->invoke( $this->registry );
+
+		$this->assertSame( 'right_space', $currency_data['symbolPosition'] );
+	}
+
 	public function test_add_data() {
 		$this->registry->add( 'test', 'foo' );
 		$this->assertEquals( [ 'test' => 'foo' ], $this->registry->get() );
@@ -128,7 +147,6 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 		$data = $this->registry->get();
 		$this->registry->initialize_core_data();
 		$this->assertEquals( $original_data, $data );
-		remove_filter( 'woocommerce_shared_settings', [ self::class, 'pdatcallback' ] );
 	}
 
 	public static function pdatcallback( $existing_data ) {
@@ -149,7 +167,6 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 		$data = $this->registry->get();
 		$original_data['cheeseburger'] = 'fries';
 		$this->assertEquals( $original_data, $data );
-		remove_filter( 'woocommerce_shared_settings', [ self::class, 'ndcallback' ] );
 	}
 
 	/**

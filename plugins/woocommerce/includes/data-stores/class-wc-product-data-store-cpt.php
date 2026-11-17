@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\DataStores\PostDataSlashing;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -108,6 +109,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @var array
 	 */
 	protected $updated_props = array();
+
+	/**
+	 * Lookup refreshes currently handed off to a product-type store, keyed by blog and product ID.
+	 *
+	 * @var array<string, bool>
+	 */
+	private static $refreshing_lookup_table = array();
 
 
 	/**
@@ -208,28 +216,35 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->set_date_created( time() );
 		}
 
-		$id = wp_insert_post(
-			apply_filters(
-				'woocommerce_new_product_data',
-				array(
-					'post_type'      => 'product',
-					'post_status'    => $product->get_status() ? $product->get_status() : ProductStatus::PUBLISH,
-					'post_author'    => get_current_user_id(),
-					'post_title'     => $product->get_name() ? $product->get_name() : __( 'Product', 'woocommerce' ),
-					'post_content'   => $product->get_description(),
-					'post_excerpt'   => $product->get_short_description(),
-					'post_parent'    => $product->get_parent_id(),
-					'comment_status' => $product->get_reviews_allowed() ? 'open' : 'closed',
-					'ping_status'    => 'closed',
-					'menu_order'     => $product->get_menu_order(),
-					'post_password'  => $product->get_post_password( 'edit' ),
-					'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
-					'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
-					'post_name'      => $product->get_slug( 'edit' ),
-				)
-			),
-			true
+		/**
+		 * Filters the post data used to create a product.
+		 *
+		 * Values are unslashed. They are slashed before being passed to wp_insert_post().
+		 *
+		 * @since 3.0.0
+		 * @param array $data Post data for wp_insert_post().
+		 */
+		$post_data = apply_filters(
+			'woocommerce_new_product_data',
+			array(
+				'post_type'      => 'product',
+				'post_status'    => $product->get_status() ? $product->get_status() : ProductStatus::PUBLISH,
+				'post_author'    => get_current_user_id(),
+				'post_title'     => $product->get_name() ? $product->get_name() : __( 'Product', 'woocommerce' ),
+				'post_content'   => $product->get_description(),
+				'post_excerpt'   => $product->get_short_description(),
+				'post_parent'    => $product->get_parent_id(),
+				'comment_status' => $product->get_reviews_allowed() ? 'open' : 'closed',
+				'ping_status'    => 'closed',
+				'menu_order'     => $product->get_menu_order(),
+				'post_password'  => $product->get_post_password( 'edit' ),
+				'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+				'post_name'      => $product->get_slug( 'edit' ),
+			)
 		);
+
+		$id = wp_insert_post( PostDataSlashing::slash( $post_data ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
@@ -366,7 +381,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $product->get_id() ) );
 				clean_post_cache( $product->get_id() );
 			} else {
-				wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
+				wp_update_post( PostDataSlashing::slash( array_merge( array( 'ID' => $product->get_id() ), $post_data ) ) );
 			}
 			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 
@@ -1005,11 +1020,36 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Refresh the product meta lookup table row for a given product.
 	 *
+	 * When the product type's data store extends this one, the refresh runs there so its lookup data is used.
+	 *
 	 * @since 10.8.0
 	 * @param int $product_id Product ID.
 	 * @return void
 	 */
 	public function refresh_product_lookup_table( int $product_id ): void {
+		$product_id = absint( $product_id );
+		if ( ! $product_id ) {
+			return;
+		}
+		$refresh_key = get_current_blog_id() . ':' . $product_id;
+
+		// Custom stores can delegate back here through a different store instance.
+		if ( empty( self::$refreshing_lookup_table[ $refresh_key ] ) ) {
+			$product_type = WC_Product_Factory::get_product_type( $product_id );
+			$data_store   = WC_Data_Store::load( is_string( $product_type ) ? 'product-' . $product_type : 'product' );
+
+			// Only hand off to a more specific store, so a customized generic store keeps its own lookup data.
+			if ( is_subclass_of( $data_store->get_current_class_name(), get_class( $this ) ) ) {
+				self::$refreshing_lookup_table[ $refresh_key ] = true;
+				try {
+					$data_store->__call( 'refresh_product_lookup_table', array( $product_id ) );
+				} finally {
+					unset( self::$refreshing_lookup_table[ $refresh_key ] );
+				}
+				return;
+			}
+		}
+
 		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
 	}
 
@@ -1867,7 +1907,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Sometimes I wonder if it shouldn't be part of update_lookup_table.
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
 
-		$this->update_lookup_table( $product_id_with_stock, 'wc_product_meta_lookup' );
+		$this->refresh_product_lookup_table( absint( $product_id_with_stock ) );
 	}
 
 	/**
@@ -1936,7 +1976,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Sometimes I wonder if it shouldn't be part of update_lookup_table.
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
 
-		$this->update_lookup_table( $product_id_with_stock, 'wc_product_meta_lookup' );
+		$this->refresh_product_lookup_table( absint( $product_id_with_stock ) );
 
 		/**
 		 * Fire an action for this direct update so it can be detected by other code.
@@ -2000,7 +2040,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		wp_cache_delete( $product_id, 'post_meta' );
 
-		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
+		$this->refresh_product_lookup_table( absint( $product_id ) );
 
 		/**
 		 * Fire an action for this direct update so it can be detected by other code.

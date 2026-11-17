@@ -13,14 +13,6 @@ use Automattic\Jetpack\Constants;
 class WC_Tests_Payment_Gateway_COD extends WC_Unit_Test_Case {
 
 	/**
-	 * Clean up after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		Constants::clear_constants();
-	}
-	/**
 	 * Make sure that the options for the "enable_for_methods" setting are not loaded by default.
 	 */
 	public function test_method_options_not_loaded_universally() {
