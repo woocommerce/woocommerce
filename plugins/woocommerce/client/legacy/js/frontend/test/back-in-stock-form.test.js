@@ -9,33 +9,28 @@ describe( 'Back in stock form', () => {
 		variation_is_visible: true,
 	};
 
-	const variationsForm = ( id, color ) => `
-		<form id="${ id }" class="variations_form cart" data-product_id="10">
+	const form = ( id, productId = 10 ) => `
+		<form id="${ id }" class="variations_form cart" data-product_id="${ productId }">
 			<table class="variations"><tbody><tr><td>
-				<select name="attribute_pa_color">
-					<option value="${ color }" selected>${ color }</option>
-				</select>
+				<select name="attribute_pa_color"><option value="${ id }" selected></option></select>
 			</td></tr></tbody></table>
 		</form>
 	`;
 
+	const wrap = ( html ) => `<div class="wrap">${ html }</div>`;
+
 	const prompt = `
 		<div class="wc_bis_form" data-bis-product-id="10" hidden>
-			<form method="post">
-				<input type="hidden" name="wc_bis_product_id" value="10" />
-			</form>
+			<form method="post"><input type="hidden" name="wc_bis_product_id" value="10" /></form>
 		</div>
 	`;
 
-	// Load the script against fresh markup, so each test starts from a clean state.
+	// Load the script against fresh markup. jQuery runs document-ready callbacks on a timer.
 	const load = ( html ) => {
 		document.body.innerHTML = html;
-
-		// jQuery runs document-ready callbacks on a timer once the document is loaded.
 		jest.useFakeTimers();
 		jest.isolateModules( () => {
-			$ = require( 'jquery' );
-			global.jQuery = $;
+			$ = global.jQuery = require( 'jquery' );
 			require( '../back-in-stock-form' );
 		} );
 		jest.runAllTimers();
@@ -47,78 +42,38 @@ describe( 'Back in stock form', () => {
 		delete global.jQuery;
 	} );
 
-	const $prompt = () => $( '.wc_bis_form' );
-	const $productId = () => $prompt().find( '[name="wc_bis_product_id"]' );
-	const pickOutOfStock = ( $form ) =>
-		$form
+	const pickOutOfStock = ( id ) =>
+		$( `#${ id }` )
 			.trigger( 'found_variation', [ outOfStock ] )
 			.trigger( 'show_variation', [ outOfStock ] );
 
-	describe( 'with a single variations form', () => {
-		test( 'shows the prompt for an out of stock variation and hides it on reset', () => {
-			load( `<div class="summary">${ variationsForm( 'a', 'red' ) }${ prompt }</div>` );
+	// [ layout, form that drives the prompt, another form that must not ].
+	test.each( [
+		[ 'one form', form( 'a' ) + prompt, 'a', null ],
+		[ 'one wrapped form', wrap( form( 'a' ) ) + prompt, 'a', null ],
+		[ 'a second form after the prompt', form( 'a' ) + prompt + form( 'b' ), 'a', 'b' ],
+		[ 'a second form before the prompt', wrap( form( 'a' ) ) + form( 'b' ) + prompt, 'b', 'a' ],
+		[ 'two wrapped forms', wrap( form( 'a' ) ) + wrap( form( 'b' ) ) + prompt, 'b', 'a' ],
+		[ "another product's form in between", form( 'a' ) + form( 'c', 20 ) + prompt, 'a', 'c' ],
+	] )( 'with %s, only the closest form before the prompt drives it', ( _, html, owner, other ) => {
+		load( html );
+		const $prompt = $( '.wc_bis_form' );
+		const $promptForm = $prompt.find( 'form' ).on( 'submit', ( event ) => event.preventDefault() );
 
-			pickOutOfStock( $( '#a' ) );
-			expect( $prompt().prop( 'hidden' ) ).toBe( false );
-			expect( $productId().val() ).toBe( '11' );
+		if ( other ) {
+			pickOutOfStock( other );
+			expect( $prompt.prop( 'hidden' ) ).toBe( true );
+			expect( $prompt.find( '[name="wc_bis_product_id"]' ).val() ).toBe( '10' );
+		}
 
-			$( '#a' ).trigger( 'reset_data' );
-			expect( $prompt().prop( 'hidden' ) ).toBe( true );
-		} );
+		pickOutOfStock( owner );
+		expect( $prompt.prop( 'hidden' ) ).toBe( false );
+		expect( $prompt.find( '[name="wc_bis_product_id"]' ).val() ).toBe( '11' );
 
-		test( 'finds the prompt when the theme wraps the form', () => {
-			load(
-				`<div class="summary"><div class="wrap">${ variationsForm( 'a', 'red' ) }</div>${ prompt }</div>`
-			);
+		$promptForm.trigger( 'submit' );
+		expect( $promptForm.find( '[name="attribute_pa_color"]' ).val() ).toBe( owner );
 
-			pickOutOfStock( $( '#a' ) );
-			expect( $prompt().prop( 'hidden' ) ).toBe( false );
-		} );
-	} );
-
-	describe( 'with two variations forms for the same product', () => {
-		beforeEach( () => {
-			load(
-				`<div class="summary">${ variationsForm( 'a', 'red' ) }${ prompt }${ variationsForm( 'b', 'blue' ) }</div>`
-			);
-		} );
-
-		test( 'ignores variations picked in the form without its own prompt', () => {
-			pickOutOfStock( $( '#b' ) );
-
-			expect( $prompt().prop( 'hidden' ) ).toBe( true );
-			expect( $productId().val() ).toBe( '10' );
-		} );
-
-		test( 'follows the form the prompt renders after', () => {
-			pickOutOfStock( $( '#a' ) );
-			$( '#b' ).trigger( 'reset_data' );
-
-			expect( $prompt().prop( 'hidden' ) ).toBe( false );
-			expect( $productId().val() ).toBe( '11' );
-		} );
-
-		test( 'leaves the prompt to the form it follows when the first form is wrapped', () => {
-			const wrappedA = `<div class="wrap">${ variationsForm( 'a', 'red' ) }</div>`;
-			load(
-				`<div class="summary">${ wrappedA }${ variationsForm( 'b', 'blue' ) }${ prompt }</div>`
-			);
-
-			pickOutOfStock( $( '#a' ) );
-			expect( $prompt().prop( 'hidden' ) ).toBe( true );
-
-			pickOutOfStock( $( '#b' ) );
-			expect( $prompt().prop( 'hidden' ) ).toBe( false );
-		} );
-
-		test( 'posts the attributes of the form the prompt renders after', () => {
-			const $form = $prompt().find( 'form' );
-			$form.on( 'submit', ( event ) => event.preventDefault() );
-			$form.trigger( 'submit' );
-
-			expect( $form.find( '[name="attribute_pa_color"]' ).val() ).toBe(
-				'red'
-			);
-		} );
+		$( `#${ owner }` ).trigger( 'reset_data' );
+		expect( $prompt.prop( 'hidden' ) ).toBe( true );
 	} );
 } );

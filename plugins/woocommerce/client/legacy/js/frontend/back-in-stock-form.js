@@ -12,20 +12,16 @@
 		self.$variationsForm   = $variationsForm;
 		self.product_id        = self.$variationsForm.data( 'product_id' );
 
-		// The prompt renders once per product, right after the first variations form. Bind it to that form only.
-		var promptSelector     = '.wc_bis_form[data-bis-product-id="' + self.product_id + '"]';
-		self.$formContainer    = self.$variationsForm.nextUntil( '.variations_form', promptSelector ).first();
+		// The prompt renders once per product, after a variations form. Only the closest form before it drives it,
+		// wherever themes wrap them, so another form of the product on the page can't.
+		self.$formContainer    = $( '.wc_bis_form[data-bis-product-id="' + self.product_id + '"]' ).first();
+		var $forms             = $( '.variations_form[data-product_id="' + self.product_id + '"]' );
+		var prompt             = self.$formContainer[0];
+		var $owner             = $forms.filter( function() {
+			return prompt && this.compareDocumentPosition( prompt ) === Node.DOCUMENT_POSITION_FOLLOWING;
+		} ).last();
 
-		// Themes may wrap the form or the prompt, so fall back to a page-wide lookup for the product's first form,
-		// unless another form of the product precedes the prompt and owns it.
-		var formSelector = '.variations_form[data-product_id="' + self.product_id + '"]';
-		var $prompt      = $( promptSelector ).first();
-		var isFirstForm  = self.$variationsForm.is( $( formSelector ).first() );
-		if ( ! self.$formContainer.length && isFirstForm && ! $prompt.prevAll( formSelector ).length ) {
-			self.$formContainer = $prompt;
-		}
-
-		if ( ! self.$formContainer.length ) {
+		if ( ! self.$formContainer.length || ! self.$variationsForm.is( $owner.length ? $owner : $forms.first() ) ) {
 			return;
 		}
 
