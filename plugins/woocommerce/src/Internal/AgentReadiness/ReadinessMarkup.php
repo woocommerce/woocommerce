@@ -66,7 +66,7 @@ trait ReadinessMarkup {
 	 * What an open check asks the merchant to do: the action, why it matters and where to do it.
 	 * A policy page that is chosen but not published links to its editor; a published store page asks for another page.
 	 *
-	 * @param array{id:string,label?:string,why:string,fix?:string,fix_url:string} $check Store condition.
+	 * @param array{id:string,ok?:bool|null,label?:string,why:string,fix?:string,fix_url:string} $check Store condition.
 	 * @return array{0:string,1:string,2:string,3:string,4:string} The action, why, where to do it, the link text when the URL alone doesn't say it, and the fix line.
 	 */
 	private static function check_action( array $check ): array {
@@ -76,7 +76,7 @@ trait ReadinessMarkup {
 		}
 		// The privacy field is a WordPress setting. A user who can open this page but not manage
 		// privacy options would otherwise get a Review link to a field this page does not render.
-		if ( 'privacy_page' === $check['id'] && ! current_user_can( 'manage_privacy_options' ) ) {
+		if ( 'privacy_page' === $check['id'] && empty( $check['ok'] ) && ! current_user_can( 'manage_privacy_options' ) ) {
 			$page_id = (int) get_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION );
 			$draft   = $page_id > 0 && get_post( $page_id ) && 'publish' !== get_post_status( $page_id ) && current_user_can( 'edit_post', $page_id );
 			if ( ! $draft ) {
@@ -90,17 +90,17 @@ trait ReadinessMarkup {
 			}
 		}
 		$policies = array(
-			'privacy_page'         => array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Publish your privacy policy page', 'woocommerce' ), __( 'Choose a privacy policy page', 'woocommerce' ), __( 'Shoppers can read how you handle their information before they buy.', 'woocommerce' ), __( 'Edit privacy policy', 'woocommerce' ) ),
-			'terms_page'           => array( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Publish your terms and conditions page', 'woocommerce' ), __( 'Choose a terms and conditions page', 'woocommerce' ), __( 'Terms and conditions set out what shoppers agree to when they place an order.', 'woocommerce' ), __( 'Edit terms and conditions', 'woocommerce' ) ),
-			'refund_returns_page'  => array( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Publish your refund and returns policy page', 'woocommerce' ), __( 'Choose a refund and returns policy page', 'woocommerce' ), __( 'AI assistants link to it so customers can read it before they buy.', 'woocommerce' ), __( 'Edit refund policy', 'woocommerce' ), __( 'A refund policy needs to be available for AI assistants to share with shoppers.', 'woocommerce' ) ),
-			'shipping_policy_page' => array( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Publish your shipping policy page', 'woocommerce' ), __( 'Choose a shipping policy page', 'woocommerce' ), __( 'AI assistants share it so shoppers can check how and when you deliver before they buy.', 'woocommerce' ), __( 'Edit shipping policy', 'woocommerce' ) ),
+			'privacy_page'         => array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Publish your privacy policy page', 'woocommerce' ), __( 'Choose a privacy policy page', 'woocommerce' ), __( 'Shoppers can read how you handle their information before they buy.', 'woocommerce' ), __( 'Edit privacy policy', 'woocommerce' ), __( 'A privacy policy needs to be published for AI assistants to share it with shoppers.', 'woocommerce' ) ),
+			'terms_page'           => array( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Publish your terms and conditions page', 'woocommerce' ), __( 'Choose a terms and conditions page', 'woocommerce' ), __( 'Terms and conditions set out what shoppers agree to when they place an order.', 'woocommerce' ), __( 'Edit terms and conditions', 'woocommerce' ), __( 'Terms and conditions need to be published for AI assistants to share them with shoppers.', 'woocommerce' ) ),
+			'refund_returns_page'  => array( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Publish your refund and returns policy page', 'woocommerce' ), __( 'Choose a refund and returns policy page', 'woocommerce' ), __( 'Shoppers can check whether they can return an item before they buy.', 'woocommerce' ), __( 'Edit refund policy', 'woocommerce' ), __( 'A refund policy needs to be available for AI assistants to share with shoppers.', 'woocommerce' ) ),
+			'shipping_policy_page' => array( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Publish your shipping policy page', 'woocommerce' ), __( 'Choose a shipping policy page', 'woocommerce' ), __( 'AI assistants share it so shoppers can check how and when you deliver before they buy.', 'woocommerce' ), __( 'Edit shipping policy', 'woocommerce' ), __( 'A shipping policy needs to be published for AI assistants to share it with shoppers.', 'woocommerce' ) ),
 		);
 		if ( isset( $policies[ $check['id'] ] ) ) {
 			$policy  = $policies[ $check['id'] ];
 			$page_id = (int) get_option( $policy[0] );
 			$edit    = $page_id > 0 && get_post( $page_id ) && 'publish' !== get_post_status( $page_id ) ? (string) get_edit_post_link( $page_id, 'raw' ) : '';
 			return '' !== $edit
-				? array( $policy[1], $policy[5] ?? __( 'It\'s still a draft. AI assistants only link to published pages.', 'woocommerce' ), $edit, $policy[4], '' )
+				? array( $policy[1], $policy[5], $edit, $policy[4], '' )
 				: array( $policy[2], $policy[3], $check['fix_url'], '', '' );
 		}
 		$actions = array(

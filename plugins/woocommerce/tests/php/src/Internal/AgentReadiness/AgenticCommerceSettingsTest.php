@@ -174,16 +174,16 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$html = $this->render_page();
 
-		$this->assertStringContainsString( '<span>Available to AI assistants</span> <strong>1</strong> <a href="', $html );
+		$this->assertStringContainsString( '<span>Visible</span> <strong>1</strong> <a href="', $html );
 		$stored              = get_option( AgentReadiness::REPORT_OPTION );
 		$stored['products']  = ProductScan::PRODUCT_LIMIT;
 		$stored['available'] = 8400;
 		update_option( AgentReadiness::REPORT_OPTION, $stored );
-		$this->assertStringContainsString( '<span>Available to AI assistants</span> <strong>8,400</strong> <a href="', $this->render_page(), 'The whole catalog, like the other two, not only the products the scan stopped at' );
-		$this->assertMatchesRegularExpression( '#<span>Product type not supported yet <span[^>]*woocommerce-help-tip[^>]*AI assistants can find these products, but shoppers can.{1,7}t buy them through an assistant yet\.[^>]*></span></span> <strong>1</strong>#', $html, 'The tip says what not supported means' );
+		$this->assertStringContainsString( '<span>Visible</span> <strong>8,400</strong> <a href="', $this->render_page(), 'The whole catalog, like the other two, not only the products the scan stopped at' );
+		$this->assertMatchesRegularExpression( '#<span>Not supported <span[^>]*woocommerce-help-tip[^>]*AI assistants can find these products, but shoppers can.{1,7}t buy them through an assistant yet\.[^>]*></span></span> <strong>1</strong>#', $html, 'The tip says what not supported means' );
 		$this->assertStringContainsString( 'agent_readiness=' . ProductScan::COUNT_UNSUPPORTED . '">View products</a>', $html, 'Each count links to its products' );
 		$this->assertMatchesRegularExpression( '#<h2>Setup checklist</h2>\s*<mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--info">\s*\d+ steps? left\s*</mark>\s*</div>\s*<p>Finish \d+ required steps? to get your store ready for AI shopping\.</p>#', $html, 'The checklist says how many steps are left, then counts the required steps first, even with UCP off' );
-		$this->assertMatchesRegularExpression( '#Use a secure connection \(HTTPS\) <mark[^>]*>Required</mark></p>.*?</div><a class="button wc-agentic-commerce-review" href="[^"]*site-health\.php">Review</a></li>#s', $html, 'A step is not a link itself: Review at the end of the row opens where to fix it' );
+		$this->assertMatchesRegularExpression( '#Use a secure connection \(HTTPS\) <mark[^>]*>Required</mark></p>.*?</div><a class="button wc-agentic-commerce-review" href="[^"]*site-health\.php">View Site Health</a></li>#s', $html, 'A step is not a link itself: the button at the end of the row opens where to fix it, named as in the design' );
 		$this->assertStringContainsString( 'aria-checked="false"', $html );
 		$this->assertStringNotContainsString( 'to turn this on', $html );
 		$this->assertMatchesRegularExpression( '#wc-agentic-commerce-item--required.*badge--check">Required</mark>#', $html, 'Failing required checks are marked Required' );
@@ -211,7 +211,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'wc-agentic-commerce-missing', $html );
 		$this->assertStringNotContainsString( 'wc-agentic-commerce-item--required', $html );
 		$this->assertMatchesRegularExpression( '#Show \d+ completed steps?</span>#', $html, 'Completed steps are folded' );
-		$this->assertStringContainsString( 'Privacy policy page is selected', $html, 'Done rows are named by their passing state' );
+		$this->assertMatchesRegularExpression( '#wc-agentic-commerce-item--pass">.*?</span>Choose a privacy policy page</p><p class="description">Shoppers can read how you handle their information before they buy\.</p>#s', $html, 'A completed step keeps its title and why it matters, as in the design' );
+		$this->assertStringNotContainsString( 'Privacy policy page is selected', $html );
 		$this->assertStringNotContainsString( 'wc-agentic-commerce-notice', $html, 'No coming soon notice on a live store' );
 
 		$shopping = $this->view()['overview']['shopping'];
@@ -319,7 +320,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'Publish your refund and returns policy page', $html );
 		$this->assertStringContainsString( 'A refund policy needs to be available for AI assistants to share with shoppers.', $html, 'The refund page says why it matters, as in the design' );
-		$this->assertMatchesRegularExpression( '#Publish your refund and returns policy page.*?href="[^"]*post=' . $draft . '&amp;action=edit">Review</a>#s', $html, 'Review opens the page editor' );
+		$this->assertMatchesRegularExpression( '#Publish your refund and returns policy page.*?href="[^"]*post=' . $draft . '&amp;action=edit" aria-label="Edit refund policy">Edit page</a>#s', $html, 'Edit page opens the page editor, named for the policy for screen readers' );
 
 		update_option(
 			AgentReadiness::REPORT_OPTION,
@@ -350,9 +351,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			)
 		);
 		$pages = array(
-			AgenticCommerceSettings::PRIVACY_PAGE_OPTION => array( 'Publish your privacy policy page', 'Edit privacy policy', 'privacy_page' ),
-			AgenticCommerceSettings::TERMS_PAGE_OPTION   => array( 'Publish your terms and conditions page', 'Edit terms and conditions', 'terms_page' ),
-			AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION => array( 'Publish your shipping policy page', 'Edit shipping policy', 'shipping_policy_page' ),
+			AgenticCommerceSettings::PRIVACY_PAGE_OPTION => array( 'Publish your privacy policy page', 'Edit privacy policy', 'privacy_page', 'A privacy policy needs to be published for AI assistants to share it with shoppers.' ),
+			AgenticCommerceSettings::TERMS_PAGE_OPTION   => array( 'Publish your terms and conditions page', 'Edit terms and conditions', 'terms_page', 'Terms and conditions need to be published for AI assistants to share them with shoppers.' ),
+			AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION => array( 'Publish your shipping policy page', 'Edit shipping policy', 'shipping_policy_page', 'A shipping policy needs to be published for AI assistants to share it with shoppers.' ),
 		);
 		foreach ( $pages as $option => $copy ) {
 			$draft = self::factory()->post->create(
@@ -366,7 +367,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			$this->assertSame( $copy[0], $step['title'] );
 			$this->assertStringContainsString( 'post=' . $draft . '&action=edit', $step['url'], $copy[1] );
 			$this->assertSame( $copy[1], $step['link'] );
-			$this->assertSame( 'It\'s still a draft. AI assistants only link to published pages.', $step['text'], $copy[0] . ' keeps the default draft line' );
+			$this->assertSame( $copy[3], $step['text'], $copy[0] . ' says why it needs publishing, as in the design' );
 			wp_publish_post( $draft );
 		}
 	}
@@ -1326,6 +1327,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$items = array_column( $this->view()['fix_first']['items'] ?? array(), 'tier', 'id' );
 		$this->assertArrayNotHasKey( 'guest_checkout', $items, 'No heading says Required for an Optional step' );
 		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'It doesn\'t keep AI shopping from being turned on' );
+		$this->assertMatchesRegularExpression( '#Allow guest checkout</p>.*?tab=account[^"]*">View account settings</a>#s', $this->render_page(), 'The step\'s button is named as in the design' );
 	}
 
 	/**

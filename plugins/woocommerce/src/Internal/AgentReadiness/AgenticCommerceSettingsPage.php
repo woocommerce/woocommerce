@@ -144,12 +144,12 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				'desc'  => __( 'AI assistants share these pages with shoppers. The pages you choose here are also used across the rest of your store.', 'woocommerce' ),
 				'id'    => self::POLICIES_SECTION,
 			),
-			$page_field( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Refund and returns', 'woocommerce' ) ),
-			$page_field( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Shipping policy', 'woocommerce' ), __( 'Optional.', 'woocommerce' ) ),
+			$page_field( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Refund and returns policy', 'woocommerce' ) ),
+			$page_field( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Shipping policy (optional)', 'woocommerce' ) ),
 			...( current_user_can( 'manage_privacy_options' ) ? array( $page_field( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Privacy policy', 'woocommerce' ) ) ) : array() ),
 			$page_field( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Terms and conditions', 'woocommerce' ) ),
-			$page_field( AgenticCommerceSettings::FAQ_PAGE_OPTION, __( 'FAQ', 'woocommerce' ), __( 'Optional.', 'woocommerce' ) ),
-			$page_field( AgenticCommerceSettings::WARRANTY_PAGE_OPTION, __( 'Warranty', 'woocommerce' ), __( 'Optional.', 'woocommerce' ) ),
+			$page_field( AgenticCommerceSettings::FAQ_PAGE_OPTION, __( 'FAQ (optional)', 'woocommerce' ) ),
+			$page_field( AgenticCommerceSettings::WARRANTY_PAGE_OPTION, __( 'Warranty policy (optional)', 'woocommerce' ) ),
 			array(
 				'type' => 'sectionend',
 				'id'   => self::POLICIES_SECTION,
@@ -239,7 +239,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	private function render_visibility( ?array $report ): void {
 		echo '<div class="wc-agentic-commerce-card" id="wc-agentic-commerce-visibility">';
 		echo '<div class="wc-agentic-commerce-card__header"><h2>' . esc_html__( 'Product visibility', 'woocommerce' ) . '</h2>';
-		echo '<p>' . esc_html__( 'AI assistants see the same products as shoppers. Shoppers can buy simple and variable products through them.', 'woocommerce' ) . '</p></div>';
+		echo '<p>' . esc_html__( 'AI assistants can see the same products as shoppers, as long as they’re simple or variable products.', 'woocommerce' ) . '</p></div>';
 
 		if ( null === $report ) {
 			echo '<p class="wc-agentic-commerce-card__body">' . esc_html__( 'Product counts show after the first Sales readiness check.', 'woocommerce' ) . '</p></div>';
@@ -248,9 +248,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 
 		$cards = array(
 			// The whole catalog, like the other two; `products` stops at PRODUCT_LIMIT. Reports from before `available` have only `products`.
-			array( __( 'Available to AI assistants', 'woocommerce' ), (int) ( $report['available'] ?? $report['products'] ?? 0 ), '', ProductScan::COUNT_AVAILABLE ),
-			array( __( 'Hidden from your catalog', 'woocommerce' ), (int) ( $report['hidden_from_catalog'] ?? 0 ), __( 'Products set to Hidden in Catalog visibility.', 'woocommerce' ), ProductScan::COUNT_HIDDEN ),
-			array( __( 'Product type not supported yet', 'woocommerce' ), (int) ( $report['unsupported_types'] ?? 0 ), __( 'AI assistants can find these products, but shoppers can\'t buy them through an assistant yet. This includes grouped, external, subscription, booking and bundle products.', 'woocommerce' ), ProductScan::COUNT_UNSUPPORTED ),
+			array( __( 'Visible', 'woocommerce' ), (int) ( $report['available'] ?? $report['products'] ?? 0 ), '', ProductScan::COUNT_AVAILABLE ),
+			array( __( 'Hidden', 'woocommerce' ), (int) ( $report['hidden_from_catalog'] ?? 0 ), __( 'Products set to Hidden in Catalog visibility.', 'woocommerce' ), ProductScan::COUNT_HIDDEN ),
+			array( __( 'Not supported', 'woocommerce' ), (int) ( $report['unsupported_types'] ?? 0 ), __( 'AI assistants can find these products, but shoppers can\'t buy them through an assistant yet. This includes grouped, external, subscription, booking and bundle products.', 'woocommerce' ), ProductScan::COUNT_UNSUPPORTED ),
 		);
 
 		echo '<ul class="wc-agentic-commerce-counts">';
@@ -295,7 +295,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				<div class="wc-agentic-commerce-notice">
 					<span class="dashicons dashicons-warning" aria-hidden="true"></span>
 					<p><?php esc_html_e( 'Your store is in coming soon mode, so AI assistants can’t shop it yet. Make your store live to let them in.', 'woocommerce' ); ?></p>
-					<a class="button button-primary" href="<?php echo esc_url( $launched['fix_url'] ); ?>"><?php esc_html_e( 'Change site visibility', 'woocommerce' ); ?></a>
+					<a class="button wc-agentic-commerce-review" href="<?php echo esc_url( $launched['fix_url'] ); ?>"><?php esc_html_e( 'Change site visibility', 'woocommerce' ); ?></a>
 				</div>
 			<?php endif; ?>
 		</div>
@@ -351,9 +351,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 					if ( '' !== $action[4] ) {
 						$lines[] = esc_html( $action[4] );
 					}
-					// Other steps say Review. The connection URL step says Change permalinks, and only when permalinks are one of the fixes.
-					$label  = 'ucp_discovery' === $check['id'] && '' !== $action[3] ? $action[3] : __( 'Review', 'woocommerce' );
-					$review = '' === $action[2] ? '' : '<a class="button wc-agentic-commerce-review" href="' . esc_url( $action[2] ) . '">' . esc_html( $label ) . '</a>';
+					$label  = self::step_button( $check['id'], $action[3] );
+					$review = '' === $action[2] ? '' : '<a class="button wc-agentic-commerce-review" href="' . esc_url( $action[2] ) . '"' . ( '' === $label[1] ? '' : ' aria-label="' . esc_attr( $label[1] ) . '"' ) . '>' . esc_html( $label[0] ) . '</a>';
 					self::render_item( $required ? 'required' : 'open', esc_html( $action[0] ) . ( $required ? ' ' . self::required_badge() : '' ), $lines, $review );
 				}
 				echo '</ul>';
@@ -362,8 +361,10 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				/* translators: %d: number of completed setup steps. */
 				self::open_more( sprintf( _n( 'Show %d completed step', 'Show %d completed steps', count( $done ), 'woocommerce' ), count( $done ) ) );
 				echo '<ul class="wc-agentic-commerce-items">';
+				// A completed step keeps its title and why it matters, as in the design.
 				foreach ( $done as $check ) {
-					self::render_item( 'pass', esc_html( $check['name'] ), array() );
+					$action = 'ucp_discovery' === $check['id'] ? array( $check['name'], __( 'Any structure except Plain lets AI assistants reach your store.', 'woocommerce' ) ) : self::check_action( $check );
+					self::render_item( 'pass', esc_html( $action[0] ), array( esc_html( $action[1] ) ) );
 				}
 				echo '</ul></details>';
 			}
@@ -371,6 +372,29 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * A setup step's button, as in the design: where it goes, or Review.
+	 *
+	 * @param string $id   Store condition ID.
+	 * @param string $link The link text check_action() gives when the URL alone doesn't say it, such as Edit refund policy.
+	 * @return array{0:string,1:string} The button text, and a longer label for screen readers, or ''.
+	 */
+	private static function step_button( string $id, string $link ): array {
+		// A policy page that is still a draft opens its editor.
+		if ( str_ends_with( $id, '_page' ) ) {
+			return '' !== $link ? array( __( 'Edit page', 'woocommerce' ), $link ) : array( __( 'Choose page', 'woocommerce' ), '' );
+		}
+		$labels = array(
+			'https'          => __( 'View Site Health', 'woocommerce' ),
+			'launched'       => __( 'Change site visibility', 'woocommerce' ),
+			'guest_checkout' => __( 'View account settings', 'woocommerce' ),
+			// Change permalinks, and only when permalinks are one of the fixes.
+			'ucp_discovery'  => $link,
+		);
+		$label  = $labels[ $id ] ?? '';
+		return array( '' !== $label ? $label : __( 'Review', 'woocommerce' ), '' );
 	}
 
 	/**

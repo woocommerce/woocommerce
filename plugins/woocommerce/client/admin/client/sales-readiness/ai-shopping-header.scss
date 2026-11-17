@@ -26,3 +26,14 @@ body:has(.wc-ai-shopping-header__trail) .wc-agentic-commerce {
 	padding-block-end: var(--wpds-dimension-gap-lg);
 	color: var(--wpds-color-foreground-content-neutral-weak);
 }
+
+// Save at the end of the title line. The form's submit row, left with only its nonce, takes no space.
+.wc-ai-shopping-header__save {
+	display: flex;
+	align-items: center;
+	padding-inline-end: 24px;
+}
+
+body:has(.wc-ai-shopping-header__save .woocommerce-save-button) #mainform p.submit {
+	display: none;
+}
