@@ -113,6 +113,21 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Assert fulfillment items one field at a time.
+	 *
+	 * @param array<int, int>                  $expected Order item ID => quantity, in the stored order.
+	 * @param array<int, array<string, mixed>> $items    Fulfillment items.
+	 * @param string                           $message  Assertion message.
+	 */
+	private function assert_items( array $expected, array $items, string $message = '' ): void {
+		$this->assertCount( count( $expected ), $items, $message );
+		foreach ( array_keys( $expected ) as $index => $item_id ) {
+			$this->assertSame( $item_id, $items[ $index ]['item_id'], $message );
+			$this->assertSame( $expected[ $item_id ], $items[ $index ]['qty'], $message );
+		}
+	}
+
+	/**
 	 * Fulfillments of an order that are not deleted.
 	 *
 	 * @param WC_Order $order Order.
@@ -1053,17 +1068,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'TRK-1', $fulfillment->get_tracking_number() );
 		$this->assertSame( 'ups', $fulfillment->get_shipment_provider() );
 		$this->assertSame( 'https://example.com/t/bTRK-1', $fulfillment->get_tracking_url(), 'The URL is sanitized before it is stored' );
-		$item = current( $order->get_items() );
-		$this->assertEquals(
-			array(
-				array(
-					'item_id' => $item->get_id(),
-					'qty'     => 4,
-				),
-			),
-			$fulfillment->get_items(),
-			'A row without an items cell fulfills every line item with a quantity'
-		);
+		$this->assert_items( array( current( $order->get_items() )->get_id() => 4 ), $fulfillment->get_items(), 'A row without an items cell fulfills every line item with a quantity' );
 	}
 
 	/**
@@ -1734,16 +1739,10 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$order->get_id()},TRK-1,ups,,\"{$item_a}:1| |SKU:Sku-B:1; {$item_a} : 3\"\n" );
 
 		$this->assertSame( FulfillmentsCsvImporter::STATUS_CREATED, $result['rows'][0]['status'] );
-		$this->assertSame(
+		$this->assert_items(
 			array(
-				array(
-					'item_id' => $item_a,
-					'qty'     => 4,
-				),
-				array(
-					'item_id' => $item_b,
-					'qty'     => 1,
-				),
+				$item_a => 4,
+				$item_b => 1,
 			),
 			$this->fulfillments_of( $order )[0]->get_items()
 		);
@@ -1848,7 +1847,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		}
 		if ( '{' === $expected[0] ) {
 			$this->assertNotSame( FulfillmentsCsvImporter::STATUS_FAILED, $result['rows'][0]['status'] );
-			$this->assertSame( $to_items( $expected ), $items );
+			$this->assert_items( array_column( $to_items( $expected ), 'qty', 'item_id' ), $items );
 		} else {
 			$this->assertSame( $expected, $result['rows'][0]['message'] );
 			$this->assertCount( 1, $this->fulfillments_of( $order ) );
@@ -1881,25 +1880,8 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$kept = $this->fulfillments_of( $order )[0]->get_items();
 		$this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$id},TRK-1,fedex,,{$item_a}:2\n" );
 
-		$this->assertSame(
-			array(
-				array(
-					'item_id' => $item_b,
-					'qty'     => 1,
-				),
-			),
-			$kept,
-			'A blank items cell must not widen a partial fulfillment to every item'
-		);
-		$this->assertSame(
-			array(
-				array(
-					'item_id' => $item_a,
-					'qty'     => 2,
-				),
-			),
-			$this->fulfillments_of( $order )[0]->get_items()
-		);
+		$this->assert_items( array( $item_b => 1 ), $kept, 'A blank items cell must not widen a partial fulfillment to every item' );
+		$this->assert_items( array( $item_a => 2 ), $this->fulfillments_of( $order )[0]->get_items() );
 	}
 
 	/**
