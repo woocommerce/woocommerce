@@ -157,3 +157,21 @@ export const EditIcon = () => (
 		/>
 	</svg>
 );
+
+export const StoreIcon = () => (
+	<svg
+		width="18"
+		height="18"
+		viewBox="0 0 24 24"
+		fill="none"
+		xmlns="http://www.w3.org/2000/svg"
+		aria-hidden="true"
+	>
+		<path
+			fillRule="evenodd"
+			clipRule="evenodd"
+			d="M19.75 11H21V8.667L19.875 4H4.125L3 8.667V11h1.25v8.75h15.5V11zm-1.5 0H5.75v7.25H10V13h4v5.25h4.25V11zm-5.5-5.5h2.067l.486 3.667H12.75V5.5zm-1.5 0H9.183l-.486 3.667h2.553V5.5zm-3.582 0l-.485 3.667H4.524L5.42 5.5h1.749zm11.664 0h-1.749l.485 3.667h2.159L18.833 5.5zM19.5 10.667V11h-15v-.333l-.019.083h15.038l-.019-.083zM12.5 14.5h-1v3.75h1V14.5z"
+			fill="#1E1E1E"
+		/>
+	</svg>
+);

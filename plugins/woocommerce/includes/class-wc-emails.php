@@ -302,9 +302,10 @@ class WC_Emails {
 			'WC_Email_Customer_POS_Refunded_Order'   => __DIR__ . '/emails/class-wc-email-customer-pos-refunded-order.php',
 		);
 		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
-			$emails['WC_Email_Customer_Fulfillment_Created'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-created.php';
-			$emails['WC_Email_Customer_Fulfillment_Updated'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-updated.php';
-			$emails['WC_Email_Customer_Fulfillment_Deleted'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-deleted.php';
+			$emails['WC_Email_Customer_Fulfillment_Created']          = __DIR__ . '/emails/class-wc-email-customer-fulfillment-created.php';
+			$emails['WC_Email_Customer_Fulfillment_Updated']          = __DIR__ . '/emails/class-wc-email-customer-fulfillment-updated.php';
+			$emails['WC_Email_Customer_Fulfillment_Deleted']          = __DIR__ . '/emails/class-wc-email-customer-fulfillment-deleted.php';
+			$emails['WC_Email_Customer_Fulfillment_Ready_For_Pickup'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-ready-for-pickup.php';
 		}
 		if ( FeaturesUtil::feature_is_enabled( 'customer_review_request' ) ) {
 			$emails['WC_Email_Customer_Review_Request'] = __DIR__ . '/emails/class-wc-email-customer-review-request.php';

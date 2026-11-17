@@ -333,7 +333,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			// Track if tracking information was added with this new fulfillment.
 			$this->maybe_track_tracking_added( $fulfillment, $request );
 
-			if ( $fulfillment->get_is_fulfilled() && $notify_customer ) {
+			if ( $notify_customer && FulfillmentUtils::STATUS_READY_FOR_PICKUP === $fulfillment->get_status() ) {
+				$this->send_ready_for_pickup_notification( $order_id, $fulfillment );
+			} elseif ( $fulfillment->get_is_fulfilled() && $notify_customer && FulfillmentUtils::STATUS_PICKED_UP !== $fulfillment->get_status() ) {
 				/**
 				 * Trigger the fulfillment created notification on creating a fulfilled fulfillment.
 				 *
@@ -477,8 +479,12 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			// Track if tracking information was added or changed in this update.
 			$this->maybe_track_tracking_added( $fulfillment, $request, $changed_fields );
 
-			if ( $notify_customer ) {
-				if ( ! $previous_state && $next_state ) {
+			$next_status = $fulfillment->get_status();
+			// A picked up fulfillment sends nothing: the customer has the items, and the shipping emails would be wrong.
+			if ( $notify_customer && FulfillmentUtils::STATUS_PICKED_UP !== $next_status ) {
+				if ( FulfillmentUtils::STATUS_READY_FOR_PICKUP === $next_status && FulfillmentUtils::STATUS_READY_FOR_PICKUP !== $previous_status ) {
+					$this->send_ready_for_pickup_notification( $order_id, $fulfillment );
+				} elseif ( ! $previous_state && $next_state ) {
 					/**
 					 * Trigger the fulfillment created notification on fulfilling a fulfillment.
 					 *
@@ -1285,6 +1291,26 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			),
 			$status
 		);
+	}
+
+	/**
+	 * Send the Ready for pickup notification for a fulfillment.
+	 *
+	 * @param int         $order_id    The order ID.
+	 * @param Fulfillment $fulfillment The fulfillment that is ready for pickup.
+	 */
+	private function send_ready_for_pickup_notification( int $order_id, Fulfillment $fulfillment ): void {
+		/**
+		 * Trigger the ready for pickup notification when a fulfillment becomes ready for pickup.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int                              $order_id    The order ID.
+		 * @param Fulfillment                      $fulfillment The fulfillment object.
+		 * @param \WC_Order|\WC_Order_Refund|false $order       The order object.
+		 */
+		do_action( 'woocommerce_fulfillment_ready_for_pickup_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
+		FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_ready_for_pickup', $fulfillment->get_id(), $order_id );
 	}
 
 	/**
