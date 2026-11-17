@@ -436,7 +436,9 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		$this->sut->run();
 		$chain = get_option( AgentReadiness::SCAN_OPTION )['id'];
 		$this->sut->run_batch( $chain );
-		$this->assertNotEmpty( ProductFailures::stored( $ids[0] ), 'The finished batch wrote failure rows' );
+		// The scan walks newest products first, so the first batch covers the last id created, not $ids[0].
+		$covered = (int) end( $ids );
+		$this->assertNotEmpty( ProductFailures::stored( $covered ), 'The finished batch wrote failure rows' );
 
 		$crash = static function (): void {
 			throw new \RuntimeException( 'Fatal on the next batch' );
@@ -453,7 +455,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		$this->sut->run_batch( $chain );
 
 		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
-		$this->assertSame( array(), ProductFailures::stored( $ids[0] ), 'Rows the abandoned scan added are removed' );
+		$this->assertSame( array(), ProductFailures::stored( $covered ), 'Rows the abandoned scan added are removed' );
 		$this->assertSame( 7, get_option( AgentReadiness::REPORT_OPTION )['products'] );
 	}
 
