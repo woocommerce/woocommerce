@@ -345,20 +345,23 @@ class AgentReadiness {
 			if ( ! is_array( $check ) || ! isset( $check['id'] ) ) {
 				continue;
 			}
-			$id    = (string) $check['id'];
-			$count = $counts[ $id ] ?? 0;
-			if ( (int) ( $check['count'] ?? 0 ) !== $count ) {
-				// The share was measured on the products that failed at the scan, so it isn't shown; Fix first still ranks by it.
+			$id       = (string) $check['id'];
+			$count    = $counts[ $id ] ?? 0;
+			$examples = array_map( 'intval', (array) ( $check['product_ids'] ?? array() ) );
+			$still    = array_values(
+				array_filter(
+					$examples,
+					static fn( int $product_id ): bool => in_array( $id, ProductFailures::for_product( $product_id ), true )
+				)
+			);
+			// Drop the displayed share when the failing set changed, even if the count stayed the same
+			// (e.g. one example fixed and another product now fails). Fix first still ranks by the scan-time share.
+			if ( (int) ( $check['count'] ?? 0 ) !== $count || $still !== $examples ) {
 				$report['checks'][ $index ]['ranked_share'] = $check['sales_share'] ?? null;
 				$report['checks'][ $index ]['sales_share']  = null;
 			}
 			$report['checks'][ $index ]['count']       = $count;
-			$report['checks'][ $index ]['product_ids'] = array_values(
-				array_filter(
-					(array) ( $check['product_ids'] ?? array() ),
-					static fn( $product_id ): bool => in_array( $id, ProductFailures::for_product( (int) $product_id ), true )
-				)
-			);
+			$report['checks'][ $index ]['product_ids'] = $still;
 		}
 		// Every product the checks cover has a checked row, so products added, fixed or removed since the scan count now.
 		$products           = $counts[ ProductFailures::CHECKED ] ?? 0;

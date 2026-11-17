@@ -139,6 +139,48 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Status groups by shows_required(), so a recommended-level check the rules mark Required lands in Required.
+	 */
+	public function test_status_groups_by_shows_required(): void {
+		$render = new \ReflectionMethod( AgenticCommerceSettingsPage::class, 'render_status' );
+		$render->setAccessible( true );
+		ob_start();
+		$render->invoke(
+			$this->page(),
+			array(
+				array(
+					'id'      => 'search_visible',
+					'level'   => 'recommended',
+					'ok'      => false,
+					'name'    => 'Products can be found in search',
+					'label'   => 'Search',
+					'fix_url' => '#search',
+					'fix'     => 'Fix search',
+				),
+				array(
+					'id'      => 'canonical_url',
+					'level'   => 'recommended',
+					'ok'      => false,
+					'name'    => 'Pages name their canonical URL',
+					'label'   => 'Canonical',
+					'fix_url' => '#canonical',
+					'fix'     => 'Fix canonical',
+				),
+			),
+			\Automattic\WooCommerce\Internal\AgentReadiness\UcpSwitch::STATUS_OFF,
+			0
+		);
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'wc-agentic-commerce-group--required', $html );
+		$this->assertStringContainsString( 'Let search engines index your store', $html, 'search_visible shows as Required via shows_required()' );
+		$this->assertMatchesRegularExpression(
+			'/wc-agentic-commerce-group--required[\s\S]*Let search engines index your store[\s\S]*wc-agentic-commerce-group--recommended[\s\S]*Canonical/s',
+			$html
+		);
+	}
+
+	/**
 	 * @testdox With every required check passing, open checks are only Recommended and passing ones are Done.
 	 */
 	public function test_output_on_a_ready_store(): void {

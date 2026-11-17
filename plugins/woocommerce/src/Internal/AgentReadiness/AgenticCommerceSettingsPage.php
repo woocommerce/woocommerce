@@ -516,7 +516,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			if ( 'ucp_on' === $check['id'] ) {
 				continue;
 			}
-			$group                 = $check['ok'] ? 'done' : ( StoreConditions::LEVEL_REQUIRED === $check['level'] ? 'required' : 'recommended' );
+			$group                 = $check['ok'] ? 'done' : ( StoreConditions::shows_required( $check ) ? 'required' : 'recommended' );
 			$groups[ $group ][1][] = $check;
 		}
 		$summary = $failing_required > 0
@@ -612,8 +612,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * @param bool                                                       $ucp_enabled      Whether UCP is on.
 	 */
 	private static function group_summary( string $group, array $checks, bool $scanned, int $product_problems, bool $ucp_scanned, bool $ucp_enabled ): string {
-		$fix     = count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] && StoreConditions::LEVEL_REQUIRED === $check['level'] ) );
-		$check   = $product_problems + count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] && StoreConditions::LEVEL_REQUIRED !== $check['level'] ) );
+		$fix     = count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] && StoreConditions::shows_required( $check ) ) );
+		$check   = $product_problems + count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] && ! StoreConditions::shows_required( $check ) ) );
 		$unknown = count( array_filter( $checks, static fn( array $check ): bool => null === $check['ok'] && empty( $check['pending'] ) ) );
 		$parts   = array();
 		if ( $fix > 0 ) {
@@ -667,7 +667,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 						$badge = array( 'pass', __( 'Pass', 'woocommerce' ) );
 					} elseif ( $conflict ) {
 						$badge = array( 'check', __( 'Likely conflict', 'woocommerce' ) );
-					} elseif ( StoreConditions::LEVEL_REQUIRED === $check['level'] ) {
+					} elseif ( StoreConditions::shows_required( $check ) ) {
 						$badge = array( 'fix', __( 'Fix', 'woocommerce' ) );
 					} else {
 						$badge = array( 'check', __( 'Check', 'woocommerce' ) );

@@ -54,7 +54,17 @@ class ProductSales {
 		$lookup = $wpdb->prefix . 'wc_order_product_lookup';
 		$stats  = $wpdb->prefix . 'wc_order_stats';
 
+		// Count first so an Analytics import that commits between the two reads cannot make
+		// the order total cover revenue that this request never saw.
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table names from $wpdb, placeholders built for the excluded statuses; the scan runs this once, in the background.
+		$orders = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT( DISTINCT stats.order_id )
+				FROM {$stats} AS stats
+				WHERE stats.parent_id = 0 AND stats.date_created >= %s {$not_in}",
+				array_merge( array( $since ), $excluded )
+			)
+		);
 		$rows   = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT lookup.product_id, lookup.variation_id, SUM( lookup.product_net_revenue ) AS revenue
@@ -65,14 +75,6 @@ class ProductSales {
 				array_merge( array( $since ), $excluded )
 			),
 			ARRAY_A
-		);
-		$orders = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT( DISTINCT stats.order_id )
-				FROM {$stats} AS stats
-				WHERE stats.parent_id = 0 AND stats.date_created >= %s {$not_in}",
-				array_merge( array( $since ), $excluded )
-			)
 		);
 		// phpcs:enable
 
@@ -108,7 +110,9 @@ class ProductSales {
 
 	/**
 	 * How many orders the store holds since a date, with the statuses Analytics counts. Analytics
-	 * holds fewer while its import of past orders hasn't run or finished.
+	 * holds fewer while its import of past orders hasn't run or finished. WCPay test-mode orders
+	 * are left out the same way OrdersScheduler skips them (meta `_wcpay_mode=test`); a custom
+	 * `woocommerce_analytics_is_test_order` callback is not applied to this count query.
 	 *
 	 * @param \DateTimeImmutable $since    Start of the period.
 	 * @param array<int, string> $excluded Statuses Analytics leaves out.
@@ -126,6 +130,19 @@ class ProductSales {
 				'limit'        => 1,
 				'return'       => 'ids',
 				'paginate'     => true,
+				// Match OrdersScheduler::is_test_order()'s default: exclude `_wcpay_mode=test`.
+				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- One count for the import gate, not a storefront query.
+					'relation' => 'OR',
+					array(
+						'key'     => '_wcpay_mode',
+						'compare' => 'NOT EXISTS',
+					),
+					array(
+						'key'     => '_wcpay_mode',
+						'value'   => 'test',
+						'compare' => '!=',
+					),
+				),
 			)
 		);
 		return is_object( $orders ) && isset( $orders->total ) ? (int) $orders->total : 0;
