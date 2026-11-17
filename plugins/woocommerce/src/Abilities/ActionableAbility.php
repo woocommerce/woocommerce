@@ -141,9 +141,11 @@ abstract class ActionableAbility extends Ability {
 
 	/**
 	 * Work that a rollback could not undo, such as a request to a payment
-	 * gateway. It runs after the commit, so a failure here leaves the change
-	 * saved unless this method undoes it. Inside a transaction that a caller
-	 * opened, the caller's commit still decides whether the rows stay.
+	 * gateway. It runs after the commit, so the syncs have already run and
+	 * been told the object was saved. A failure here leaves the change and
+	 * the rows of the syncs saved, unless this method undoes them. Inside a
+	 * transaction that a caller opened, the caller's commit still decides
+	 * whether the rows stay.
 	 *
 	 * @since 11.4.0
 	 *
