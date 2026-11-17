@@ -1,6 +1,6 @@
 ---
 name: woocommerce-local-env
-description: Set up, start, stop, restart, verify, and troubleshoot the WooCommerce Core local development environment with wp-env and asset build watchers. Use when Codex is asked to run WooCommerce locally, prepare wp-env, watch WooCommerce builds, choose between full and targeted build/watch commands, diagnose localhost:8888, or explain local environment setup commands.
+description: Set up, start, stop, restart, verify, and troubleshoot the WooCommerce Core local development environment with wp-env and asset build watchers. Use when Codex is asked to run WooCommerce locally, prepare wp-env, watch WooCommerce builds, choose between full and targeted build/watch commands, diagnose localhost:8888, explain local environment setup commands, or test WooCommerce abilities over MCP against wp-env.
 ---
 
 # WooCommerce Local Environment
@@ -119,6 +119,35 @@ curl -I http://localhost:8888/
 ```
 
 For browser-based verification, open `http://localhost:8888/` with the Browser plugin when the user asks to inspect or test the local site.
+
+## Testing Abilities over MCP
+
+When a change touches a WooCommerce ability, call it through MCP the way an AI client does. The MCP Adapter is not bundled, so add it with a gitignored `plugins/woocommerce/.wp-env.override.json`, then run `pnpm env:dev:start` from `plugins/woocommerce/`:
+
+```json
+{
+    "plugins": [ ".", "https://downloads.wordpress.org/plugin/mcp-adapter.zip" ],
+    "config": {
+        "WP_MEMORY_LIMIT": "1G",
+        "WP_DEBUG_DISPLAY": false
+    }
+}
+```
+
+Call one ability headlessly from `plugins/woocommerce/`:
+
+```bash
+npx @modelcontextprotocol/inspector --cli \
+  --method tools/call --tool-name mcp-adapter-execute-ability \
+  --tool-arg ability_name=woocommerce/products-query --tool-arg 'parameters={}' \
+  -- pnpm exec wp-env run cli wp mcp-adapter serve --server=mcp-adapter-default-server --user=admin
+```
+
+- Keep the `--`; without it Inspector consumes `--server`.
+- Use `pnpm exec wp-env`, not `pnpm wp-env`, or pnpm's command echo corrupts the MCP stream.
+- Change `--user` to check the ability's permission callback.
+
+The full workflow is in `docs/contribution/testing/mcp-abilities-testing.md`.
 
 ## Troubleshooting
 
