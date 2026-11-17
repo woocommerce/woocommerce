@@ -50,11 +50,11 @@ class OrderResource {
 			'order',
 			'status',
 			array(
-				'schema'       => array(
+				'schema'        => array(
 					'type' => 'string',
-					'enum' => self::get_order_output_status_slugs(),
 				),
-				'get_callback' => static fn( \WC_Order $order ) => $order->get_status(),
+				'enum_callback' => static fn() => self::get_order_output_status_slugs(),
+				'get_callback'  => static fn( \WC_Order $order ) => $order->get_status(),
 			)
 		);
 
@@ -234,11 +234,11 @@ class OrderResource {
 			'order',
 			'type',
 			array(
-				'schema'       => array(
+				'schema'        => array(
 					'type' => 'string',
-					'enum' => self::get_order_type_slugs(),
 				),
-				'get_callback' => static fn( \WC_Order $order ) => $order->get_type(),
+				'enum_callback' => static fn() => self::get_order_type_slugs(),
+				'get_callback'  => static fn( \WC_Order $order ) => $order->get_type(),
 			)
 		);
 

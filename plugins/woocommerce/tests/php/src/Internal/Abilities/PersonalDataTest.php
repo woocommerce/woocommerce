@@ -19,6 +19,34 @@ use Automattic\WooCommerce\Tests\Internal\Abilities\Domain\DomainAbilityTestCase
 class PersonalDataTest extends DomainAbilityTestCase {
 
 	/**
+	 * @testdox Should include statuses and types registered during extension setup in output schemas.
+	 */
+	public function test_order_enums_include_extension_registrations(): void {
+		global $wc_order_types;
+		$original_types = $wc_order_types;
+		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', 'yes' );
+		add_action(
+			'woocommerce_extensible_abilities_resources_init',
+			static function () {
+				register_post_status( 'wc-pii-custom', array( 'public' => true ) );
+				wc_register_order_type( 'pii_custom_order', array( 'class_name' => \WC_Order::class ) );
+			}
+		);
+		try {
+			$ability = wp_get_ability( 'woocommerce/orders-query' );
+			$input   = $ability->get_input_schema()['properties'];
+			$output  = $this->get_order_item_schema()['properties'];
+			$this->assertContains( 'pii-custom', $input['status']['items']['enum'] );
+			$this->assertContains( 'pii-custom', $output['status']['enum'] );
+			$this->assertContains( 'pii_custom_order', $input['type']['enum'] );
+			$this->assertContains( 'pii_custom_order', $output['type']['enum'] );
+			$this->assertNotContains( 'shop_order_refund', $output['type']['enum'] );
+		} finally {
+			$wc_order_types = $original_types; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
+
+	/**
 	 * @testdox Should share personal data by default.
 	 */
 	public function test_is_shared_by_default(): void {

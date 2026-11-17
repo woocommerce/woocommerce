@@ -111,6 +111,7 @@ class AbilityResources {
 	 *                                      or numeric_id. True means personal data of unspecified type; false or omitted
 	 *                                      means unclassified. All personal types are withheld equally. This does not
 	 *                                      select an erasure action or change input permissions.
+	 *     @type callable $enum_callback Optional. Returns the field enum when its output schema is built.
 	 *     @type bool $omit_if_null Optional. Omit unavailable root values. Defaults to false.
 	 * }
 	 * @param string $extension_namespace     Optional. Extension namespace, or empty for a root field.
@@ -174,6 +175,7 @@ class AbilityResources {
 			'field'         => $field,
 			'schema'        => $args['schema'],
 			'get_callback'  => $args['get_callback'],
+			'enum_callback' => $args['enum_callback'] ?? null,
 			'personal_data' => $args['personal_data'] ?? false,
 			'omit_if_null'  => $args['omit_if_null'] ?? false,
 		);
@@ -470,7 +472,11 @@ class AbilityResources {
 			'additionalProperties' => false,
 		);
 		foreach ( self::get_output_fields( $args, $resolving ) as $field => $field_args ) {
-			$schema['properties'][ $field ] = self::resolve_ref( $field_args['schema'], $resolving );
+			$field_schema = $field_args['schema'];
+			if ( isset( $field_args['enum_callback'] ) ) {
+				$field_schema['enum'] = call_user_func( $field_args['enum_callback'] );
+			}
+			$schema['properties'][ $field ] = self::resolve_ref( $field_schema, $resolving );
 		}
 		if ( empty( $schema['properties'] ) ) {
 			unset( $schema['properties'] );

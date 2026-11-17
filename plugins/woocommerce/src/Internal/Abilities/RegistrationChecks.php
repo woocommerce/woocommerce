@@ -59,6 +59,10 @@ final class RegistrationChecks {
 			wc_doing_it_wrong( $method, 'The "get_callback" argument must be callable.', '11.4.0' );
 			return false;
 		}
+		if ( isset( $args['enum_callback'] ) && ! is_callable( $args['enum_callback'] ) ) {
+			wc_doing_it_wrong( $method, 'The "enum_callback" argument must be callable.', '11.4.0' );
+			return false;
+		}
 		return self::has_personal_data( $method, $args );
 	}
 
