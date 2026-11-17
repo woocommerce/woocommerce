@@ -4221,6 +4221,14 @@ table {
 	}
 }
 
+// Keep the WordPress responsive table widths in charge on small screens.
+:where(td.wc-shipping-zone-sort),
+:where(td.wc-shipping-zone-method-sort),
+:where(td.wc-shipping-zone-worldwide),
+:where(td.wc-shipping-zone-method-enabled) {
+	width: 1%;
+}
+
 table.wc-shipping-zones,
 table.wc-shipping-zone-methods,
 table.wc-shipping-classes {
