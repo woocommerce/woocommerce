@@ -51,6 +51,97 @@ class StoreSettingsGetTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should omit summary fields when their source is not readable.
+	 * @testWith ["general", "woocommerce_default_country", "address", ["country_code", "state_code"]]
+	 *           ["general", "woocommerce_currency_pos", "currency", ["symbol_position", "price_format"]]
+	 *           ["products", "woocommerce_weight_unit", "units", ["weight"]]
+	 *           ["tax", "woocommerce_tax_display_cart", "tax", ["display_in_cart"]]
+	 *           ["account", "woocommerce_enable_guest_checkout", "capabilities", ["guest_checkout"]]
+	 * @param string $group Source group.
+	 * @param string $id Source setting.
+	 * @param string $section Summary section.
+	 * @param array  $fields Dependent fields.
+	 */
+	public function test_summary_opt_out( string $group, string $id, string $section, array $fields ): void {
+		$before = $this->sut->execute();
+		foreach ( $fields as $field ) {
+			$this->assertArrayHasKey( $field, $before[ $section ] );
+		}
+		add_filter(
+			'woocommerce_settings-' . $group,
+			static function ( $settings ) use ( $id ) {
+				foreach ( $settings as &$setting ) {
+					if ( $id === $setting['id'] ) {
+						$setting['abilities']['read'] = false;
+					}
+				}
+				return $settings;
+			},
+			100
+		);
+		$result = $this->sut->execute();
+		$this->assertIsArray( $result );
+		foreach ( $fields as $field ) {
+			$this->assertArrayNotHasKey( $field, $result[ $section ] );
+		}
+		$this->assertSame( $before['timezone'], $result['timezone'] );
+		$this->assertSame( WC_VERSION, $result['woocommerce_version'] );
+	}
+
+	/**
+	 * @testdox Should combine only readable address lines and retain empty object schemas.
+	 * @testWith [["woocommerce_store_address"], "Suite 2"]
+	 *           [["woocommerce_store_address_2"], "Main Street"]
+	 *           [["woocommerce_store_address", "woocommerce_store_address_2"], null]
+	 * @param array       $denied Hidden setting IDs.
+	 * @param string|null $street Expected street.
+	 */
+	public function test_partial_address( array $denied, ?string $street ): void {
+		update_option( 'woocommerce_store_address', 'Main Street' );
+		update_option( 'woocommerce_store_address_2', 'Suite 2' );
+		add_filter(
+			'woocommerce_settings-general',
+			static function ( $settings ) use ( $denied ) {
+				return array_filter( $settings, static fn( $setting ) => ! in_array( $setting['id'], $denied, true ) );
+			},
+			100
+		);
+		$result = $this->sut->execute();
+		if ( null === $street ) {
+			$this->assertArrayNotHasKey( 'street', $result['address'] );
+		} else {
+			$this->assertSame( $street, $result['address']['street'] );
+		}
+		add_filter( 'woocommerce_settings-general', '__return_empty_array', 101 );
+		$result = $this->sut->execute();
+		$this->assertInstanceOf( \stdClass::class, $result['address'] );
+		$this->assertSame( array(), (array) $result['address'] );
+		$this->assertArrayNotHasKey( 'selling_locations', $result );
+	}
+
+	/**
+	 * @testdox Should omit a country list independently of its readable scope and reject password opt-ins.
+	 */
+	public function test_country_list_opt_out(): void {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'GB' ) );
+		add_filter(
+			'woocommerce_settings-general',
+			static function ( $settings ) {
+				foreach ( $settings as &$setting ) {
+					if ( 'woocommerce_specific_allowed_countries' === $setting['id'] ) {
+						$setting['type'] = 'password';
+					}
+				}
+				return $settings;
+			},
+			100
+		);
+		$result = $this->sut->execute();
+		$this->assertSame( array( 'scope' => 'specific' ), $result['selling_locations'] );
+	}
+
+	/**
 	 * @testdox Should honor a truthy integer returned by the REST permission filter.
 	 */
 	public function test_integer_permission_filter(): void {

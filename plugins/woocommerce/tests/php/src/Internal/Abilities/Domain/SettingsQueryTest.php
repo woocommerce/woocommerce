@@ -257,7 +257,7 @@ class SettingsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should let an extension opt a Core setting out at its definition.
+	 * @testdox Should let an extension opt a Core setting out of both group reads and the fixed summary.
 	 */
 	public function test_core_setting_can_opt_out(): void {
 		add_filter(
@@ -272,7 +272,7 @@ class SettingsQueryTest extends \WC_Unit_Test_Case {
 			},
 			20
 		);
-		update_option( 'test_secret', 'secret-sentinel' );
+		update_option( 'woocommerce_currency', 'GBP' );
 		$result = wp_get_ability( 'woocommerce/settings-query' )->execute(
 			array(
 				'group'   => 'general',
@@ -280,6 +280,9 @@ class SettingsQueryTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertSame( 0, $result['total'] );
+		$summary = wp_get_ability( 'woocommerce/store-settings-get' )->execute();
+		$this->assertArrayNotHasKey( 'code', $summary['currency'] );
+		$this->assertArrayNotHasKey( 'symbol', $summary['currency'] );
 	}
 
 	/**
