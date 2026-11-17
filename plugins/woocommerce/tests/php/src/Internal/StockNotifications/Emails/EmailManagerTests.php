@@ -399,6 +399,7 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$emails = WC()->mailer()->get_emails();
 		$sut    = $emails[ $verified ? 'WC_Email_Customer_Stock_Notification_Verified' : 'WC_Email_Customer_Stock_Notification' ];
 		$sut->prepare_email( $notification );
+		$notification->save();
 		$content = $plain_text ? $sut->get_content_plain() : $sut->get_content_html();
 		$pattern = $plain_text ? '/^.*: (https?:\/\/\S+)$/m' : '/href="([^"]+)" id="notification__unsubscribe_link"/';
 		$this->assertSame( 1, preg_match( $pattern, $content, $matches ), 'The footer must contain its management link.' );
