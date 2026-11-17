@@ -135,13 +135,14 @@ class ExtensibleAbilities {
 	 *     @type array    $output_schema Optional. JSON schema of the value that `get_callback` returns. Required
 	 *                                  with `get_callback`. It needs one `type` other than null, because clients
 	 *                                  expect one type for each field. Core publishes it as declared. Its
-	 *                                  `title` is the label clients show. Nested properties must not be nullable
-	 *                                  either: leave a property out when it has no value. A list of types or a
-	 *                                  null type is refused in every nested schema under `properties`,
+	 *                                  `title` is the label clients show. Leave a nested property out when it has
+	 *                                  no value. Where a nested value must be null, such as an item of a list,
+	 *                                  declare it with an `anyOf` that has a `{"type":"null"}` branch. A list of
+	 *                                  types is refused in every nested schema under `properties`,
 	 *                                  `patternProperties`, `additionalProperties`, `items`, `anyOf` and `oneOf`,
 	 *                                  which are the keywords with a nested schema that WordPress supports (see
 	 *                                  `rest_get_allowed_schema_keywords()`), and under `allOf`, which
-	 *                                  WooCommerce also reads.
+	 *                                  WooCommerce also reads, because some clients refuse it.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
 	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
@@ -235,11 +236,6 @@ class ExtensibleAbilities {
 				wc_doing_it_wrong( __METHOD__, 'The "type" of the "output_schema" argument must be one type name other than "null". Return null to leave the field out.', '11.4.0' );
 				return;
 			}
-			$path = self::find_nested_type_problem( $args['output_schema'], true );
-			if ( null !== $path ) {
-				wc_doing_it_wrong( __METHOD__, sprintf( 'The "output_schema" argument has a list of types or a "null" type at "%s". Leave a property out when it has no value.', $path ), '11.4.0' );
-				return;
-			}
 		}
 		if ( $writable ) {
 			if ( ! is_callable( $args['set_callback'] ?? null ) ) {
@@ -250,9 +246,11 @@ class ExtensibleAbilities {
 				wc_doing_it_wrong( __METHOD__, 'The "input_schema" argument must be an array with one "type" name, or with an "anyOf" where each branch has one "type" name. For a nullable field, use an "anyOf" with a {"type":"null"} branch instead of a list of types.', '11.4.0' );
 				return;
 			}
-			$path = self::find_nested_type_problem( $args['input_schema'], false );
+		}
+		foreach ( array( 'output_schema', 'input_schema' ) as $key ) {
+			$path = isset( $args[ $key ] ) ? self::find_nested_type_list( $args[ $key ] ) : null;
 			if ( null !== $path ) {
-				wc_doing_it_wrong( __METHOD__, sprintf( 'The "input_schema" argument has a list of types at "%s". For a nullable property, use an "anyOf" with a {"type":"null"} branch instead.', $path ), '11.4.0' );
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%1$s" argument has a list of types at "%2$s". Use an "anyOf" with a {"type":"null"} branch instead. In an output, prefer to leave the property out when it has no value.', $key, $path ), '11.4.0' );
 				return;
 			}
 		}
@@ -303,14 +301,13 @@ class ExtensibleAbilities {
 
 	/**
 	 * Find the first nested schema under `properties`, `patternProperties`, `additionalProperties`, `items`,
-	 * `anyOf`, `oneOf` or `allOf` whose `type` is a list, or, in an output schema, is "null".
+	 * `anyOf`, `oneOf` or `allOf` whose `type` is a list.
 	 *
 	 * @param array<string, mixed> $schema Field schema.
-	 * @param bool                 $output Whether it is an output schema.
 	 * @param string               $path   Path of the schema, such as `properties.size`.
-	 * @return string|null Path of the first bad schema, or null when there is none.
+	 * @return string|null Path of the first schema with a list of types, or null when there is none.
 	 */
-	private static function find_nested_type_problem( array $schema, bool $output, string $path = '' ): ?string {
+	private static function find_nested_type_list( array $schema, string $path = '' ): ?string {
 		foreach ( array( 'properties', 'patternProperties', 'additionalProperties', 'items', 'anyOf', 'oneOf', 'allOf' ) as $keyword ) {
 			$children = $schema[ $keyword ] ?? null;
 			if ( ! is_array( $children ) ) {
@@ -324,11 +321,10 @@ class ExtensibleAbilities {
 					continue;
 				}
 				$child_path = trim( "$path.$keyword.$key", '.' );
-				$type       = $child['type'] ?? null;
-				if ( is_array( $type ) || ( $output && 'null' === $type ) ) {
+				if ( is_array( $child['type'] ?? null ) ) {
 					return $child_path;
 				}
-				$found = self::find_nested_type_problem( $child, $output, $child_path );
+				$found = self::find_nested_type_list( $child, $child_path );
 				if ( null !== $found ) {
 					return $found;
 				}

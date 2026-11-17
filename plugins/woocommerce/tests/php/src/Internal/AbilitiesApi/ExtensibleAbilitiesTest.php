@@ -1406,11 +1406,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse a field whose output schema has a list of types or a null type below the top level.
-	 * @dataProvider provider_nested_nullable_output_schemas
+	 * @testdox Should refuse a field whose output schema has a list of types below the top level.
+	 * @dataProvider provider_nested_type_list_output_schemas
 	 * @param array $schema Output schema.
 	 */
-	public function test_a_nested_nullable_output_schema_is_refused( array $schema ): void {
+	public function test_a_nested_type_list_in_an_output_schema_is_refused( array $schema ): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
 		AbilitiesLoader::register_core_resources();
 
@@ -1428,20 +1428,18 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Output schemas with a nullable node below the top level.
+	 * Output schemas with a list of types below the top level.
 	 *
 	 * @return array<string, array{0: array<string, mixed>}>
 	 */
-	public function provider_nested_nullable_output_schemas(): array {
+	public function provider_nested_type_list_output_schemas(): array {
 		$object = fn( array $property ) => array(
 			'type'       => 'object',
 			'properties' => array( 'a' => $property ),
 		);
 		return array(
 			'property type list'             => array( $object( array( 'type' => array( 'string', 'null' ) ) ) ),
-			'property null type'             => array( $object( array( 'type' => 'null' ) ) ),
-			'anyOf null branch'              => array( $object( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ) ),
-			'oneOf null branch'              => array( $object( array( 'oneOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ) ),
+			'oneOf branch type list'         => array( $object( array( 'oneOf' => array( array( 'type' => array( 'string', 'null' ) ), array( 'type' => 'integer' ) ) ) ) ),
 			'deep item type list'            => array(
 				$object(
 					array(
@@ -1462,7 +1460,52 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					'patternProperties' => array( '^a' => array( 'type' => array( 'string', 'null' ) ) ),
 				),
 			),
-			'allOf null branch'              => array( $object( array( 'allOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ) ),
+			'allOf branch type list'         => array( $object( array( 'allOf' => array( array( 'type' => array( 'string', 'null' ) ) ) ) ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should register a field whose output schema has a null type or a null branch below the top level.
+	 * @dataProvider provider_nested_null_output_schemas
+	 * @param array $schema Output schema.
+	 */
+	public function test_a_nested_null_in_an_output_schema_is_registered( array $schema ): void {
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'nested',
+				'field'         => 'value',
+				'output_schema' => $schema,
+				'get_callback'  => '__return_null',
+			)
+		);
+
+		$this->assertArrayHasKey( 'value', ExtensibleAbilities::get_fields( 'order' )['nested'] ?? array() );
+	}
+
+	/**
+	 * Output schemas with a null type or a null branch below the top level.
+	 *
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provider_nested_null_output_schemas(): array {
+		$object = fn( array $property ) => array(
+			'type'       => 'object',
+			'properties' => array( 'a' => $property ),
+		);
+		return array(
+			'property null type'  => array( $object( array( 'type' => 'null' ) ) ),
+			'anyOf null branch'   => array( $object( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ) ),
+			'oneOf null branch'   => array( $object( array( 'oneOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ) ),
+			'allOf null branch'   => array( $object( array( 'allOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ) ),
+			'nullable list items' => array(
+				array(
+					'type'  => 'array',
+					'items' => array( 'anyOf' => array( array( 'type' => 'number' ), array( 'type' => 'null' ) ) ),
+				),
+			),
 		);
 	}
 
