@@ -24,6 +24,7 @@ defined( 'ABSPATH' ) || exit;
  * or trashed order, and a failure rolls everything back. A forced delete
  * also deletes the orders that the order store deletes with it, such as
  * refunds and, with HPOS, subscriptions, so they go through the same checks.
+ * The syncs also see any other order that a plugin deletes during the delete.
  */
 class OrderDelete extends ActionableAbility {
 
@@ -214,7 +215,7 @@ class OrderDelete extends ActionableAbility {
 			$this->trashed = array( clone $subject );
 		}
 
-		$deleted = $subject->delete( $this->force );
+		$deleted = $this->force ? $this->delete_recording_other_orders( $subject ) : $subject->delete();
 		$stored  = wc_get_order( $this->order_id );
 
 		if (
@@ -231,6 +232,48 @@ class OrderDelete extends ActionableAbility {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Force delete the order, and add each other order that the delete removed
+	 * to the deleted orders, as it was before. A plugin can delete orders from a
+	 * delete hook, and those orders bypass the validators.
+	 *
+	 * @param \WC_Order $subject Order to delete.
+	 * @return bool Whether the order store deleted the order.
+	 */
+	private function delete_recording_other_orders( \WC_Order $subject ): bool {
+		$before = array();
+		$record = static function ( $order_id, $order = null ) use ( &$before ): void {
+			unset( $order_id );
+			if ( $order instanceof \WC_Abstract_Order && $order->get_id() > 0 && ! isset( $before[ $order->get_id() ] ) ) {
+				$before[ $order->get_id() ] = clone $order;
+			}
+		};
+		// A plugin can delete an order post with wp_delete_post(), which skips the order store hooks.
+		$record_post = static function ( $post_id ) use ( $record ): void {
+			if ( in_array( get_post_type( $post_id ), wc_get_order_types(), true ) ) {
+				$record( $post_id, wc_get_order( $post_id ) );
+			}
+		};
+
+		add_action( 'woocommerce_before_delete_order', $record, PHP_INT_MIN, 2 );
+		add_action( 'before_delete_post', $record_post, PHP_INT_MIN );
+		try {
+			$deleted = $subject->delete( true );
+		} finally {
+			remove_action( 'woocommerce_before_delete_order', $record, PHP_INT_MIN );
+			remove_action( 'before_delete_post', $record_post, PHP_INT_MIN );
+		}
+
+		$known = array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $this->deleted );
+		foreach ( array_diff_key( $before, array_flip( $known ) ) as $order_id => $order ) {
+			if ( false === wc_get_order( $order_id ) ) {
+				$this->deleted[] = $order;
+			}
+		}
+
+		return (bool) $deleted;
 	}
 
 	/**

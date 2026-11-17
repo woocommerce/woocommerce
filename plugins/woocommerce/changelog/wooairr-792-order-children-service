@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Pass orders a plugin deletes during a forced order-delete to the syncs; the ability is unreleased.
+

@@ -3404,6 +3404,65 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should pass the syncs an order that a plugin deletes during a forced delete, once, along with the order and its refund.
+	 *
+	 * @dataProvider provider_order_storage
+	 *
+	 * @param bool $hpos Whether to use the custom orders table.
+	 */
+	public function test_the_syncs_see_an_order_that_a_plugin_deletes_with_the_order( bool $hpos ): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( $hpos );
+
+		try {
+			$order_id  = \WC_Helper_Order::create_order()->get_id();
+			$refund_id = wc_create_refund(
+				array(
+					'order_id' => $order_id,
+					'amount'   => 1,
+				)
+			)->get_id();
+			$other_id  = \WC_Helper_Order::create_order()->get_id();
+			$deleted   = array();
+			add_action(
+				'woocommerce_delete_order',
+				static function ( $deleted_id ) use ( $order_id, $other_id ) {
+					$other = wc_get_order( $other_id );
+					if ( $order_id === (int) $deleted_id && $other ) {
+						$other->delete( true );
+					}
+				}
+			);
+			$this->register_sync(
+				'order',
+				'test-ext',
+				static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+					unset( $saved, $ability );
+					$deleted = array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $context['deleted'] );
+				}
+			);
+			$this->reset_registries();
+			AbilitiesLoader::init_extensions();
+
+			$result = $this->run_ability(
+				'woocommerce/order-delete',
+				array(
+					'id'    => $order_id,
+					'force' => true,
+				)
+			);
+
+			$this->assertSame( 'deleted', $result['status'] );
+			$this->assertFalse( wc_get_order( $other_id ), 'The plugin should delete the other order.' );
+			$this->assertSame( array( $order_id, $refund_id, $other_id ), $deleted );
+		} finally {
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
 	 * Order storage modes.
 	 *
 	 * @return array<string, array{0: bool}>
