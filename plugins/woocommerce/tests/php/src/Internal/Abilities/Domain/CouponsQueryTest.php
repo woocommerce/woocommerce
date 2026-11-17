@@ -557,4 +557,24 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_ability_coupon_code_required', $result->get_error_code() );
 	}
+	/**
+	 * @testdox Should report the stored status when a creation filter changes it.
+	 */
+	public function test_create_response_uses_saved_coupon(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		add_filter(
+			'woocommerce_new_coupon_data',
+			static function ( $data ) {
+				$data['post_status'] = 'draft';
+				return $data;
+			}
+		);
+		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate::class;
+		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$result  = $ability->execute( array( 'code' => 'filtered-creation' ) );
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'draft', ( new \WC_Coupon( $result['coupon']['id'] ) )->get_status() );
+		$this->assertSame( 'draft', $result['coupon']['status'] );
+		$this->assertFalse( $result['coupon']['redeemable'] );
+	}
 }
