@@ -139,45 +139,27 @@ An order that ships in parts sends one fulfillment email per shipment, and WooCo
 
 | Hook | Parameters | Purpose |
 | --- | --- | --- |
-| `woocommerce_fulfillments_suppress_completed_email` | `bool $suppress`, `WC_Order $order` | Return true to skip the "Completed order" email for an order whose fulfillment status is `fulfilled`. Defaults to false, which sends both emails. |
+| `woocommerce_fulfillment_suppress_completed_order_email` | `bool $suppress`, `WC_Order $order` | Return true to skip the "Completed order" email for an order whose fulfillment status is `fulfilled`. Defaults to false, which sends both emails. |
 
-```php
-add_filter( 'woocommerce_fulfillments_suppress_completed_email', '__return_true' );
-```
+Only `true` skips the email, and only a fully fulfilled order is affected: a partially fulfilled order, or one with no fulfillments, still receives it. Only the email that follows the order being marked complete is skipped, so sending the "Completed order" email again, through the REST API or the `woocommerce/order-send-email` ability, still reaches the customer.
 
-Only a fully fulfilled order skips the email: a partially fulfilled order, or one with no fulfillments, still receives it.
-
-The callback owns the decision of whether an order can do without its "Completed order" email, and the order is passed in so it can decide per order rather than store-wide. Two things are worth checking before returning true:
-
-- **A fulfilled order has not necessarily emailed the customer.** Auto-fulfilled items (**Settings > Products > Auto-fulfill items**, on by default for downloadable products), fulfillments saved with "Notify customer" unticked, and imported fulfillments all reach the `fulfilled` status without sending a fulfillment email.
-- **Only the "Completed order" email carries the order totals and the download links.** It fires `woocommerce_email_order_details`; the fulfillment emails list a shipment and its tracking details instead. An order holding downloadable or virtual products usually still needs it.
-
-The order the callback receives is the instance the email carries, which may have been loaded before the last fulfillment was saved. Read the order itself from it, such as its items, rather than its fulfillment status, which WooCommerce checks against the stored order after the callback returns.
-
-For example, this skips the email for shipped orders but keeps it whenever the order holds a downloadable item:
+The callback owns the decision of whether an order can do without its "Completed order" email, and it receives the order so it can decide per order rather than store-wide. That order is the instance the email carries, which can predate the order's last edit and hold an out-of-date fulfillment status, so a callback that depends on either should re-read the order with `wc_get_order( $order->get_id() )`. The example below skips the email for shipped orders and keeps it whenever the order holds a downloadable item, which is part of the check the email itself uses to decide whether to show download links:
 
 ```php
 add_filter(
-    'woocommerce_fulfillments_suppress_completed_email',
+    'woocommerce_fulfillment_suppress_completed_order_email',
     function ( $suppress, $order ) {
-        foreach ( $order->get_items() as $item ) {
-            $product = $item->get_product();
-
-            // Downloadable items are auto-fulfilled without a fulfillment email, and their
-            // download links are only in this one.
-            if ( $product && $product->is_downloadable() ) {
-                return false;
-            }
-        }
-
-        return true;
+        return ! $order->has_downloadable_item();
     },
     10,
     2
 );
 ```
 
-Resending the "Completed order" email for a suppressed order sends nothing, because the resend runs the same check.
+Two things are worth checking before opting out of the email for every order:
+
+- **A fulfilled order has not necessarily emailed the customer.** Auto-fulfilled items (**Settings > Products > Auto-fulfill items**, on by default for downloadable products), fulfillments saved with the **Fulfillment notification** toggle off, the **Mark as fulfilled** bulk action on the orders list, and imported fulfillments all reach the `fulfilled` status without sending a fulfillment email. An order of downloadable products that goes straight from pending to completed can therefore end up with no email at all: whether its "Completed order" email goes out before or after its items are auto-fulfilled depends on whether the store defers transactional emails.
+- **The "Completed order" email is not always the only one carrying the order totals and the download links.** The "Processing order" email carries them as well, because access to downloads is granted after payment by default, so an order that passes through "Processing" has already sent both. An order that skips it has them in the "Completed order" email alone.
 
 ## Privacy filters
 
