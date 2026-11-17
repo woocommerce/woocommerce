@@ -829,7 +829,8 @@ trait ProductAbilityTrait {
 	/**
 	 * Check an `edit` or `delete` permission on a product ID, as the REST API does.
 	 * An ID that is not a product or variation passes for users who could act on
-	 * any product, so they get the not-found error instead of a permission error.
+	 * any product and read private ones, so they get the not-found error instead
+	 * of a permission error.
 	 *
 	 * @param int    $product_id Product or variation ID.
 	 * @param string $context    `edit` or `delete`.
@@ -844,6 +845,10 @@ trait ProductAbilityTrait {
 
 		if ( in_array( get_post_type( $product_id ), array( 'product', 'product_variation' ), true ) ) {
 			return (bool) wc_rest_check_post_permissions( 'product', $context, $product_id );
+		}
+
+		if ( ! wc_rest_check_post_permissions( 'product', 'read' ) ) {
+			return false;
 		}
 
 		if ( 'edit' === $context ) {

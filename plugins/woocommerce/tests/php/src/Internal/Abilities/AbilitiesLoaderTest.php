@@ -4447,6 +4447,23 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse permission for an unknown product ID to users who cannot read private products.
+	 *
+	 * @dataProvider provider_product_mutation_unknown_id_inputs
+	 *
+	 * @param string $ability_id Ability ID.
+	 * @param array  $input      Ability input.
+	 */
+	public function test_product_mutations_refuse_unknown_ids_to_users_who_cannot_read_private_products( string $ability_id, array $input ): void {
+		wp_set_current_user( $this->create_user_with_caps( array( 'edit_products', 'edit_others_products', 'publish_products', 'delete_products', 'delete_others_products' ) ) );
+
+		$result = wp_get_ability( $ability_id )->execute( $input );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+	}
+
+	/**
 	 * Provides product mutation inputs with unknown IDs.
 	 *
 	 * @return array<string, array{0: string, 1: array, 2: string}>
