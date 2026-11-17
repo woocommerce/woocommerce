@@ -171,8 +171,9 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	/**
 	 * Cancel an order only when its stored status is still one the payment page accepts.
 	 *
-	 * The status row is updated with that condition in the same statement. A payment that
-	 * committed first does not match, the cancellation stops, and the paid status stays.
+	 * The order-row update runs with that condition added, so every column in the statement
+	 * is written together. A payment that committed first does not match, the cancellation
+	 * stops, and the paid status stays.
 	 *
 	 * @param \WC_Order $order The handed-off order.
 	 * @param string    $note Order note explaining the cancellation.
@@ -204,7 +205,11 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	}
 
 	/**
-	 * Replace an unconditional status write with one that matches only a still-payable order.
+	 * Run the order-row update only when the stored status is still payable.
+	 *
+	 * The datastore's own statement is kept, with the payable statuses added to its
+	 * condition, so the modification date and every other column in that statement
+	 * are written with the status. Metadata and other tables are left alone.
 	 *
 	 * @param mixed $sql SQL about to run.
 	 * @return mixed
@@ -215,31 +220,188 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 			return $sql;
 		}
 
+		$conditional = $this->sql_while_still_payable( $sql );
+
 		$this->writing_conditional_status = true;
-		$updated                          = $this->write_cancelled_status_if_payable( $this->conditional_status_order_id, $this->conditional_status_payable );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The datastore statement, plus the payable-status condition. A cache would hide a concurrent payment.
+		$updated                          = (int) $GLOBALS['wpdb']->query( $conditional );
 		$this->writing_conditional_status = false;
 
-		if ( 1 !== $updated ) {
+		// An insert-or-update reports 2 when it changes the existing row, and 0 when every column keeps its value.
+		if ( $updated < 1 ) {
 			throw new \Exception( 'Order is no longer payable.' );
 		}
 
 		$this->conditional_status_written = true;
 
-		// The conditional update already wrote the status. Skip the unconditional write that would follow.
+		// The conditional update already wrote the row. Skip the unconditional write that would follow.
 		return 'SELECT 1';
 	}
 
 	/**
-	 * Whether a statement sets this order's status to cancelled.
+	 * Whether this statement is the order row's own update to cancelled.
+	 *
+	 * An insert of metadata, or an update of another table, can mention the cancelled
+	 * status and the order id without being the status write. Only the orders table
+	 * (or the shop-order post) assigning its status column counts.
 	 *
 	 * @param string $sql SQL about to run.
 	 * @return bool
 	 */
 	private function query_cancels_order( string $sql ): bool {
-		$trimmed = ltrim( $sql );
-		$writes  = 0 === stripos( $trimmed, 'insert' ) || 0 === stripos( $trimmed, 'update' );
+		global $wpdb;
 
-		return $writes && false !== strpos( $sql, OrderInternalStatus::CANCELLED ) && $this->sql_mentions_id( $sql, $this->conditional_status_order_id );
+		$orders = OrderUtil::custom_orders_table_usage_is_enabled() ? OrdersTableDataStore::get_orders_table_name() : $wpdb->posts;
+		$column = OrderUtil::custom_orders_table_usage_is_enabled() ? 'status' : 'post_status';
+
+		if ( $this->inserts_into_table( $sql, $orders ) && false !== stripos( $sql, 'ON DUPLICATE KEY UPDATE' ) ) {
+			return false !== strpos( $sql, "'" . OrderInternalStatus::CANCELLED . "'" ) && $this->sql_mentions_id( $sql, $this->conditional_status_order_id );
+		}
+
+		return $this->updated_table( $sql ) === $orders
+			&& $this->assigns_column( $this->set_clause( $sql ), $column, OrderInternalStatus::CANCELLED )
+			&& $this->sql_mentions_id( $sql, $this->conditional_status_order_id );
+	}
+
+	/**
+	 * Whether an INSERT writes the given table and not one whose name merely starts with it.
+	 *
+	 * @param string $sql SQL about to run.
+	 * @param string $table Table name.
+	 * @return bool
+	 */
+	private function inserts_into_table( string $sql, string $table ): bool {
+		foreach ( array( 'INSERT INTO `' . $table . '`', 'INSERT INTO ' . $table ) as $needle ) {
+			$pos = stripos( $sql, $needle );
+
+			if ( false === $pos ) {
+				continue;
+			}
+
+			$after = $pos + strlen( $needle );
+			$next  = isset( $sql[ $after ] ) ? $sql[ $after ] : ' ';
+
+			if ( ! ctype_alnum( $next ) && '_' !== $next ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * The table an UPDATE writes, or '' when the statement is not an update.
+	 *
+	 * @param string $sql SQL about to run.
+	 * @return string
+	 */
+	private function updated_table( string $sql ): string {
+		$trimmed = ltrim( $sql );
+
+		if ( 0 !== stripos( $trimmed, 'update ' ) ) {
+			return '';
+		}
+
+		$rest  = ltrim( substr( $trimmed, 7 ) );
+		$space = strpos( $rest, ' ' );
+
+		if ( false === $space ) {
+			return '';
+		}
+
+		return trim( substr( $rest, 0, $space ), '`' );
+	}
+
+	/**
+	 * The SET clause of a statement, without the WHERE that follows it.
+	 *
+	 * @param string $sql SQL about to run.
+	 * @return string
+	 */
+	private function set_clause( string $sql ): string {
+		$set   = stripos( $sql, ' set ' );
+		$where = stripos( $sql, ' where ' );
+
+		if ( false === $set || false === $where || $where < $set ) {
+			return '';
+		}
+
+		return substr( $sql, $set, $where - $set );
+	}
+
+	/**
+	 * Whether a SET clause assigns one column a quoted value.
+	 *
+	 * @param string $set    SET clause.
+	 * @param string $column Column name.
+	 * @param string $value  Unquoted value.
+	 * @return bool
+	 */
+	private function assigns_column( string $set, string $column, string $value ): bool {
+		$quoted = "'" . $value . "'";
+
+		foreach ( array( $column, '`' . $column . '`' ) as $name ) {
+			if ( false !== strpos( $set, $name . ' = ' . $quoted ) || false !== strpos( $set, $name . '=' . $quoted ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Add the payable-status condition to an order-row update.
+	 *
+	 * @param string $sql The datastore's update.
+	 * @return string
+	 */
+	private function sql_while_still_payable( string $sql ): string {
+		global $wpdb;
+
+		$column       = OrderUtil::custom_orders_table_usage_is_enabled() ? 'status' : 'post_status';
+		$placeholders = implode( ', ', array_fill( 0, max( 1, count( $this->conditional_status_payable ) ), '%s' ) );
+		$statuses     = array();
+
+		foreach ( $this->conditional_status_payable as $status ) {
+			$status = (string) $status;
+			if ( '' === $status ) {
+				continue;
+			}
+			$statuses[] = 0 === strpos( $status, 'wc-' ) ? $status : 'wc-' . $status;
+		}
+		$statuses = array_values( array_unique( $statuses ) );
+
+		if ( array() === $statuses ) {
+			$statuses     = array( '' );
+			$placeholders = '%s';
+		}
+
+		$in_list = $wpdb->prepare( $placeholders, ...$statuses ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Placeholders were built to match $statuses.
+		$guard   = '`' . $column . '` IN ( ' . $in_list . ' )';
+		$marker  = 'ON DUPLICATE KEY UPDATE ';
+		$at      = stripos( $sql, $marker );
+
+		if ( false !== $at ) {
+			$assignments = explode( ', ', substr( $sql, $at + strlen( $marker ) ) );
+			$guarded     = array();
+
+			foreach ( $assignments as $assignment ) {
+				$eq = strpos( $assignment, '=' );
+
+				if ( false === $eq ) {
+					$guarded[] = $assignment;
+					continue;
+				}
+
+				$left      = trim( substr( $assignment, 0, $eq ) );
+				$right     = trim( substr( $assignment, $eq + 1 ) );
+				$guarded[] = $left . ' = IF( ' . $guard . ', ' . $right . ', ' . $left . ' )';
+			}
+
+			return substr( $sql, 0, $at + strlen( $marker ) ) . implode( ', ', $guarded );
+		}
+
+		return rtrim( rtrim( $sql ), ';' ) . ' AND ' . $guard;
 	}
 
 	/**
@@ -272,48 +434,6 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Set the order's stored status to cancelled when it is still payable.
-	 *
-	 * @param int           $order_id Order ID.
-	 * @param array<string> $payable Unprefixed statuses the payment page still accepts.
-	 * @return int Rows updated.
-	 */
-	private function write_cancelled_status_if_payable( int $order_id, array $payable ): int {
-		global $wpdb;
-
-		$statuses = array();
-		foreach ( $payable as $status ) {
-			$status = (string) $status;
-			if ( '' === $status ) {
-				continue;
-			}
-			$statuses[] = 0 === strpos( $status, 'wc-' ) ? $status : 'wc-' . $status;
-		}
-		$statuses = array_values( array_unique( $statuses ) );
-
-		if ( array() === $statuses ) {
-			return 0;
-		}
-
-		$placeholders = implode( ', ', array_fill( 0, count( $statuses ), '%s' ) );
-		$params       = array_merge( array( OrderInternalStatus::CANCELLED, $order_id ), $statuses );
-
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$table = OrdersTableDataStore::get_orders_table_name();
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name is WooCommerce's; placeholders match $statuses.
-			$sql = "UPDATE {$table} SET status = %s WHERE id = %d AND status IN ( {$placeholders} )";
-		} else {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Placeholders match $statuses.
-			$sql = "UPDATE {$wpdb->posts} SET post_status = %s WHERE ID = %d AND post_type = 'shop_order' AND post_status IN ( {$placeholders} )";
-		}
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Conditional status write; a cache would hide a concurrent payment.
-		$result = $wpdb->query( $wpdb->prepare( $sql, ...$params ) );
-
-		return (int) $result;
 	}
 
 	/**

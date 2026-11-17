@@ -8,8 +8,10 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Ucp\AbstractCheckoutRoute;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for the /wc/ucp/v1/checkout-sessions endpoints.
@@ -150,6 +152,48 @@ class UcpCheckout extends ControllerTestCase {
 		WC()->customer = null;
 		WC()->cart     = null;
 		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'], $GLOBALS['wp_actions']['woocommerce_after_calculate_totals'] );
+	}
+
+	/**
+	 * Move the stored modification time into the past so a later save is visible.
+	 *
+	 * @param int $order_id Order ID.
+	 */
+	private function backdate_order_modified( int $order_id ): void {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->update(
+				OrdersTableDataStore::get_orders_table_name(),
+				array( 'date_updated_gmt' => '2000-01-01 00:00:00' ),
+				array( 'id' => $order_id )
+			);
+			return;
+		}
+
+		$wpdb->update(
+			$wpdb->posts,
+			array( 'post_modified_gmt' => '2000-01-01 00:00:00' ),
+			array( 'ID' => $order_id )
+		);
+	}
+
+	/**
+	 * The modification time stored for an order, not the time on the in-memory object.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return string
+	 */
+	private function stored_order_modified_gmt( int $order_id ): string {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$table = OrdersTableDataStore::get_orders_table_name();
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WooCommerce's orders table.
+			return (string) $wpdb->get_var( $wpdb->prepare( "SELECT date_updated_gmt FROM {$table} WHERE id = %d", $order_id ) );
+		}
+
+		return (string) $wpdb->get_var( $wpdb->prepare( "SELECT post_modified_gmt FROM {$wpdb->posts} WHERE ID = %d", $order_id ) );
 	}
 
 	/**
@@ -356,6 +400,7 @@ class UcpCheckout extends ControllerTestCase {
 		$this->request( 'POST', $path . '/complete' );
 		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
 		WC()->cart->set_quantity( (string) array_key_first( WC()->cart->get_cart() ), 2 );
+		WC()->session->save_data();
 
 		$fail = static function ( $order ) {
 			if ( $order->has_status( OrderStatus::CANCELLED ) ) {
@@ -813,6 +858,38 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Cancelling a handed-off order writes the modification time and the other changes from that save.
+	 */
+	public function test_cancel_writes_the_whole_order_row(): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'POST', $path . '/complete' );
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		$this->backdate_order_modified( $order_id );
+
+		$annotate = static function ( $order ) {
+			if ( ! $order instanceof \WC_Order || OrderStatus::CANCELLED !== $order->get_status() ) {
+				return;
+			}
+			$order->set_customer_note( 'kept on cancel' );
+			$order->update_meta_data( 'ucp_cancel_marker', 'wc-cancelled' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $annotate );
+
+		try {
+			$this->request( 'PUT', $path, array( 'line_items' => array( $this->line_item( 1, 2 ) ) ) );
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $annotate );
+		}
+
+		$order = wc_get_order( $order_id );
+		$this->assertTrue( $order->has_status( OrderStatus::CANCELLED ) );
+		$this->assertSame( 'kept on cancel', $order->get_customer_note() );
+		$this->assertSame( 'wc-cancelled', $order->get_meta( 'ucp_cancel_marker' ) );
+		$this->assertNotSame( '2000-01-01 00:00:00', $this->stored_order_modified_gmt( $order_id ) );
+	}
+
+	/**
 	 * @testdox Complete returns a hand-off another request stored after this one read the session, and does not create a second order.
 	 */
 	public function test_complete_returns_a_hand_off_saved_since_the_session_was_read(): void {
@@ -820,8 +897,10 @@ class UcpCheckout extends ControllerTestCase {
 		$path     = '/checkout-sessions/' . $created['id'];
 		$first    = $this->request( 'POST', $path . '/complete' )->get_data();
 		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		$stored   = WC()->session->get_session( (string) WC()->session->get_customer_id(), array() );
+		$saved    = is_array( $stored ) ? maybe_unserialize( $stored['ucp_checkout'] ?? null ) : null;
 
-		WC()->session->save_data();
+		$this->assertSame( $order_id, (int) ( is_array( $saved ) ? ( $saved['order_id'] ?? 0 ) : 0 ) );
 
 		$state = WC()->session->get( 'ucp_checkout' );
 		unset( $state['order_id'], $state['status'], $state['continue_url'], $state['fingerprint'] );
@@ -892,6 +971,7 @@ class UcpCheckout extends ControllerTestCase {
 		// As POST /wc/store/v1/cart/update-item does with the checkout id as its Cart-Token.
 		$cart = WC()->cart;
 		$cart->set_quantity( (string) array_key_first( $cart->get_cart() ), 2 );
+		WC()->session->save_data();
 
 		// Until then a read shows the changed cart without the payment URL of the order it no longer matches.
 		$read = $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data();

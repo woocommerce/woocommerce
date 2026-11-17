@@ -84,6 +84,11 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 
 			return $this->hand_off_checkout( $request );
 		} finally {
+			// The row must exist before the lock is released. Shutdown is too late: the next completion can read the gap.
+			$session = WC()->session;
+			if ( $session instanceof \WC_Session && is_callable( array( $session, 'save_data' ) ) ) {
+				$session->save_data();
+			}
 			$release();
 		}
 	}
@@ -182,7 +187,9 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		$order->save();
 
 		// Stored before the processed callbacks, which can pay the order. A callback that then
-		// fails must leave this association in place so a retry finds the order.
+		// fails must leave this association in place so a retry finds the order and does not
+		// create another. The hook is not run again on that retry: a callback that already
+		// ran must not run twice, which is also how the Store API checkout behaves.
 		$state = array_merge(
 			$state,
 			array(
@@ -203,15 +210,24 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	/**
 	 * Hold the checkout until this completion has stored its order, so a second one waits and then sees it.
 	 *
-	 * The name is a hash of the checkout id: a lock name is limited to 64 characters and the id is not.
+	 * The lock follows the session row, not the cart token. Two tokens for one session share a customer id
+	 * and must share the lock. The name is limited to 64 characters, so a longer identity is shortened.
 	 *
-	 * @param string $checkout_id Checkout identifier.
+	 * @param string $checkout_id Checkout identifier, used when the request has no session yet.
 	 * @return \Closure|\WP_REST_Response A release callback, or the error response when the lock was not acquired.
 	 */
 	private function acquire_checkout_lock( string $checkout_id ) {
 		global $wpdb;
 
-		$name     = 'wc_ucp_' . md5( $checkout_id );
+		$session     = WC()->session;
+		$customer_id = $session instanceof \WC_Session ? (string) $session->get_customer_id() : '';
+		$identity    = '' !== $customer_id ? get_current_blog_id() . ':' . $customer_id : $checkout_id;
+		$name        = 'wc_ucp_' . $identity;
+
+		if ( strlen( $name ) > 64 ) {
+			$name = 'wc_ucp_' . md5( $identity );
+		}
+
 		$acquired = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $name, 15 ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Named lock; it must not be served from a cache.
 
 		if ( '1' !== (string) $acquired ) {
@@ -246,10 +262,21 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			return;
 		}
 
-		foreach ( array( self::CHECKOUT_SESSION_KEY, 'store_api_draft_order' ) as $key ) {
-			if ( array_key_exists( $key, $stored ) ) {
-				$session->set( $key, maybe_unserialize( $stored[ $key ] ) );
+		foreach ( $stored as $key => $value ) {
+			if ( is_string( $key ) ) {
+				$session->set( $key, maybe_unserialize( $value ) );
 			}
+		}
+
+		// The cart and customer objects were filled before this lock. They have to match the row just read,
+		// or a fingerprint from the older cart cancels the order the row points at.
+		if ( isset( $stored['cart'] ) && WC()->cart instanceof \WC_Cart ) {
+			WC()->cart->get_cart_from_session();
+		}
+
+		$customer = WC()->customer;
+		if ( isset( $stored['customer'] ) && $customer instanceof \WC_Customer && $customer->get_data_store() instanceof \WC_Customer_Data_Store_Session ) {
+			$customer->get_data_store()->read( $customer );
 		}
 	}
 
