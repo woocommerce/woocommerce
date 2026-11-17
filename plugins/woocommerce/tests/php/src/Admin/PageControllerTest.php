@@ -103,9 +103,6 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		// Remove redirect listener.
-		remove_filter( 'wp_redirect', array( $this, 'watch_and_annul_redirects' ) );
-
 		// Clean up users.
 		wp_delete_user( $this->admin_user_id );
 		wp_delete_user( $this->shop_manager_user_id );

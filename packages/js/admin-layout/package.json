@@ -74,14 +74,14 @@
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
-		"eslint": "^10.0.0",
-		"jest": "29.5.x",
-		"jest-cli": "29.5.x",
+		"eslint": "catalog:tooling",
+		"jest": "catalog:tooling",
+		"jest-cli": "catalog:tooling",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
-		"rimraf": "5.0.5",
-		"ts-jest": "29.1.x",
-		"typescript": "5.7.x"
+		"rimraf": "catalog:tooling",
+		"ts-jest": "catalog:tooling",
+		"typescript": "catalog:tooling"
 	},
 	"peerDependencies": {
 		"@types/react": "18.3.x",

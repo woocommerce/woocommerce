@@ -1,33 +1,67 @@
+// The Place order button's width when it shares the row with Return to Cart.
+$place-order-column-width: max(50%, 260px);
+
 .wc-block-checkout__actions {
 	margin-bottom: $gap-larger;
+
+	// Checkbox terms sit above the row.
+	> .wc-block-checkout__terms {
+		margin: 0 0 $gap-small;
+		padding-block: 0;
+	}
 
 	.wc-block-checkout__actions_row {
 		@include font-small-locked;
 		display: flex;
+		flex-wrap: wrap;
 		justify-content: space-between;
 		align-items: center;
-		gap: $gap-smaller;
-
-		&--justify-flex-end {
-			justify-content: flex-end;
-		}
+		gap: $gap-small;
 
 		.wc-block-components-checkout-place-order-button--full-width {
 			width: 100%;
 		}
+
+		// Text-only terms take a whole line, so they wrap below the button.
+		> .wc-block-checkout__terms {
+			box-sizing: border-box;
+			flex: 0 0 100%;
+			justify-content: center;
+			margin: 0;
+			padding-block: 0;
+			text-align: center;
+		}
+
+		&--with-return-to-cart {
+			.wc-block-components-checkout-place-order-button {
+				flex: 0 0 $place-order-column-width;
+			}
+
+			// Line the terms up under the button.
+			> .wc-block-checkout__terms {
+				padding-inline-start: calc(100% - #{$place-order-column-width});
+			}
+		}
 	}
 }
 
-@include cart-checkout-mobile-container {
-	.wc-block-checkout__actions {
-		.wc-block-checkout__actions_row {
-			flex-direction: column-reverse;
-			justify-content: center;
-			gap: $gap;
+// On narrow checkouts everything is full width, with Return to Cart below the terms.
+@include cart-checkout-below-medium-container {
+	.wc-block-checkout__actions
+		.wc-block-checkout__actions_row--with-return-to-cart {
+		.wc-block-components-checkout-place-order-button {
+			flex-basis: 100%;
+			order: 1;
 		}
 
-		.wc-block-components-checkout-place-order-button {
-			width: 100%;
+		> .wc-block-checkout__terms {
+			order: 2;
+			padding-inline-start: 0;
+		}
+
+		.wc-block-components-checkout-return-to-cart-button {
+			order: 3;
+			margin-inline: auto;
 		}
 	}
 }

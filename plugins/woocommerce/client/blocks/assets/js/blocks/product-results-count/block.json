@@ -6,6 +6,7 @@
 	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"interactivity": {
+			"interactive": true,
 			"clientNavigation": true
 		},
 		"color": {
@@ -27,6 +28,7 @@
 		}
 	},
 	"usesContext": [ "queryId" ],
+	"viewScriptModule": "woocommerce/product-results-count",
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

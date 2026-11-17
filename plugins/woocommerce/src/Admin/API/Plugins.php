@@ -8,6 +8,7 @@
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Internal\RestApi\InteractiveSessionCheck;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 
 defined( 'ABSPATH' ) || exit;
@@ -19,6 +20,7 @@ defined( 'ABSPATH' ) || exit;
  * @extends \WC_REST_Data_Controller
  */
 class Plugins extends \WC_REST_Data_Controller {
+
 	/**
 	 * Endpoint namespace.
 	 *
@@ -148,7 +150,7 @@ class Plugins extends \WC_REST_Data_Controller {
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'connect_jetpack' ),
-					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'permission_callback' => array( $this, 'connect_jetpack_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_connect_schema' ),
 			)
@@ -218,6 +220,25 @@ class Plugins extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'You do not have permissions to manage plugins. Please contact your site administrator.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
+	}
+
+	/**
+	 * Permission check for the connect-jetpack endpoint.
+	 *
+	 * Requires an interactive admin session on top of the `install_plugins` capability.
+	 *
+	 * @since 11.2.2
+	 *
+	 * @param  \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_Error|boolean
+	 */
+	public function connect_jetpack_permissions_check( $request ) {
+		$session = InteractiveSessionCheck::require_interactive_session( $request );
+		if ( is_wp_error( $session ) ) {
+			return $session;
+		}
+
+		return $this->update_item_permissions_check( $request );
 	}
 
 	/**

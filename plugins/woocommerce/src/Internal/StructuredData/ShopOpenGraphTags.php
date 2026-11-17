@@ -35,6 +35,10 @@ class ShopOpenGraphTags {
 			array( 'og:description' => wc_trim_string( $description ) ),
 			array( 'og:site_name' => get_bloginfo( 'name' ) ),
 		);
+		$locale      = get_locale();
+		if ( preg_match( '/^[a-z]{2,3}_[A-Z]{2}$/', $locale ) ) {
+			$tags[] = array( 'og:locale' => $locale );
+		}
 
 		$image_id = get_post_thumbnail_id( $page );
 		$image    = $image_id ? wc_get_container()->get( OpenGraphImageTags::class )->get_tags( $image_id, null, true ) : array();

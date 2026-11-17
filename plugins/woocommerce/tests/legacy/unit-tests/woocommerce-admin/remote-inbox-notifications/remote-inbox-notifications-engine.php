@@ -58,15 +58,6 @@ class WC_Admin_Tests_RemoteInboxNotifications_RemoteInboxNotificationsEngine ext
 		);
 	}
 
-	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		delete_transient( 'woocommerce_admin_' . RemoteInboxNotificationsDataSourcePoller::ID . '_specs' );
-		remove_all_filters( 'transient_woocommerce_admin_' . RemoteInboxNotificationsDataSourcePoller::ID . '_specs' );
-	}
-
 
 	/**
 	 * Tests get_note_from_db function with a invalid note.

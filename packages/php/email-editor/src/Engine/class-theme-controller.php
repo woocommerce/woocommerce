@@ -8,6 +8,7 @@
 declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine;
 
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Css_Selector_Normalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use WP_Block_Template;
@@ -226,9 +227,7 @@ class Theme_Controller {
 		foreach ( $blocks as $block_metadata ) {
 			$css_blocks .= $this->get_theme()->get_styles_for_block( $block_metadata );
 		}
-
-		// Remove `:root :where(...)` selectors since they are not supported in the CSS inliner.
-		$css_blocks = preg_replace( '/:root\s:where\((.*?)\)/', '$1', $css_blocks );
+		$css_blocks = Css_Selector_Normalizer::normalize( $css_blocks );
 
 		// Element specific styles.
 		$elements_styles = $this->get_theme()->get_raw_data()['styles']['elements'] ?? array();

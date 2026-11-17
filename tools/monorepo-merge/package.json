@@ -17,7 +17,7 @@
 	},
 	"devDependencies": {
 		"@woocommerce/eslint-config": "workspace:*",
-		"eslint": "^10.0.0"
+		"eslint": "catalog:tooling"
 	},
 	"engines": {
 		"node": "^24.15.0"

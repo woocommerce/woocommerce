@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -435,6 +436,8 @@ function wc_cart_round_discount( $value, $precision ) {
 /**
  * Gets chosen shipping method IDs from chosen_shipping_methods session, without instance IDs.
  *
+ * Only choices whose rate was listed for the cart are returned, see ShippingUtil::filter_chosen_shipping_methods().
+ *
  * @since  2.6.2
  * @return string[]
  */
@@ -443,7 +446,7 @@ function wc_get_chosen_shipping_method_ids() {
 		return array();
 	}
 
-	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	$chosen_methods = ShippingUtil::filter_chosen_shipping_methods( WC()->session->get( 'chosen_shipping_methods', array() ) );
 	$method_ids     = array();
 
 	foreach ( $chosen_methods as $chosen_method ) {

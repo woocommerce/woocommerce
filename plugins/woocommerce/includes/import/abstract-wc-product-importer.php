@@ -184,7 +184,23 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			try {
 				// Prevent getting "variation_invalid_id" error message from Variation Data Store.
 				if ( ProductType::VARIATION === $data['type'] ) {
-					$was_variation = $id && 'product_variation' === get_post_type( $id );
+					$post_type = $id ? get_post_type( $id ) : false;
+
+					// The wp_update_post() below rewrites the post type, so refuse an ID that is
+					// not already a product or variation to avoid converting an arbitrary post.
+					if ( $post_type && ! in_array( $post_type, array( 'product', 'product_variation' ), true ) ) {
+						return new WP_Error(
+							'woocommerce_product_csv_importer_invalid_id',
+							/* translators: %d: product ID */
+							sprintf( __( 'Invalid product ID %d.', 'woocommerce' ), $id ),
+							array(
+								'id'     => $id,
+								'status' => 401,
+							)
+						);
+					}
+
+					$was_variation = 'product_variation' === $post_type;
 
 					$id = wp_update_post(
 						array(
@@ -378,7 +394,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				unset( $data['cogs_value'] );
 			}
 
-			$result = $object->set_props( array_diff_key( $data, array_flip( array( 'meta_data', 'raw_image_id', 'raw_gallery_image_ids', 'raw_attributes' ) ) ) );
+			$result = $object->set_props( array_intersect_key( $data, array_flip( $object->get_data_keys() ) ) );
 
 			if ( is_wp_error( $result ) ) {
 				throw new Exception( $result->get_error_message() );
@@ -773,6 +789,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$id = wc_rest_set_uploaded_image_as_attachment( $upload, $product_id );
 
 			if ( ! wp_attachment_is_image( $id ) ) {
+				if ( $id > 0 ) {
+					wp_delete_attachment( $id, true );
+				}
+
 				/* translators: %s: image URL */
 				throw new Exception( sprintf( __( 'Not able to attach "%s".', 'woocommerce' ), $url ), 400 );
 			}
@@ -827,8 +847,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @throws Exception If taxonomy cannot be loaded.
 	 */
 	public function get_attribute_taxonomy_id( $raw_name ) {
-		global $wpdb, $wc_product_attributes;
-
 		$attribute_name = $this->get_attribute_taxonomy_name_from_raw_name( $raw_name );
 		$attribute_id   = $this->get_existing_attribute_taxonomy_id( $raw_name );
 
@@ -850,32 +868,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		if ( is_wp_error( $attribute_id ) ) {
 			throw new Exception( $attribute_id->get_error_message(), 400 );
-		}
-
-		// Register as taxonomy while importing.
-		$taxonomy_name = wc_attribute_taxonomy_name( $attribute_name );
-		register_taxonomy(
-			$taxonomy_name,
-			apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
-			apply_filters(
-				'woocommerce_taxonomy_args_' . $taxonomy_name,
-				array(
-					'labels'       => array(
-						'name' => $raw_name,
-					),
-					'hierarchical' => true,
-					'show_ui'      => false,
-					'query_var'    => true,
-					'rewrite'      => false,
-				)
-			)
-		);
-
-		// Set product attributes global.
-		$wc_product_attributes = array();
-
-		foreach ( wc_get_attribute_taxonomies() as $taxonomy ) {
-			$wc_product_attributes[ wc_attribute_taxonomy_name( $taxonomy->attribute_name ) ] = $taxonomy;
 		}
 
 		return $attribute_id;

@@ -37,7 +37,6 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'wc_order_statuses', array( $this, 'add_custom_status' ) );
 		delete_option( 'woocommerce_excluded_report_order_statuses' );
 		unset( $GLOBALS['wp_post_statuses'][ 'wc-' . $this->long_status ] );
 		parent::tearDown();

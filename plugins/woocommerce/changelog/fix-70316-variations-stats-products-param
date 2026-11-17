@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Map the Analytics `products` filter on variations stats so single-product Variation table totals match the rows.

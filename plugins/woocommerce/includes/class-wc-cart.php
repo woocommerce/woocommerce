@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
+use Automattic\WooCommerce\Internal\ProductVariations\VariationMatcher;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
@@ -1314,12 +1315,20 @@ class WC_Cart extends WC_Legacy_Cart {
 					} elseif ( '' === $valid_value ) {
 						$missing_attributes[] = wc_attribute_label( $attribute['name'] );
 					}
-
-					$variation = $attributes;
 				}
+
+				// Keep only the checked attributes. This also drops posted values when the parent has no variation attributes.
+				$variation = $attributes;
 				if ( ! empty( $missing_attributes ) ) {
 					/* translators: %s: Attribute name. */
 					throw new Exception( sprintf( _n( '%s is a required field', '%s are required fields', count( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ) );
+				}
+
+				if (
+					$product_data instanceof WC_Product_Variation &&
+					wc_get_container()->get( VariationMatcher::class )->has_earlier_match( $product_data, $variation )
+				) {
+					throw new Exception( __( 'The selected options belong to a different variation of this product.', 'woocommerce' ) );
 				}
 			}
 

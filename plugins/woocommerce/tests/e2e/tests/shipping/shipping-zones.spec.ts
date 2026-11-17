@@ -18,9 +18,24 @@ function rand() {
 const SAVE_CHANGES_ACTION = 'woocommerce_shipping_zone_methods_save_changes';
 const SAVE_SETTINGS_ACTION = 'woocommerce_shipping_zone_methods_save_settings';
 const ADD_METHOD_ACTION = 'woocommerce_shipping_zone_add_method';
+const REMOVE_METHOD_ACTION = 'woocommerce_shipping_zone_remove_method';
+const REMOVE_FAILED_MESSAGE =
+	'Shipping method could not be removed. Please retry.';
 
 function isSaveChanges( url: URL ) {
 	return url.searchParams.get( 'action' ) === SAVE_CHANGES_ACTION;
+}
+
+function isRemoveMethod( url: URL ) {
+	return url.searchParams.get( 'action' ) === REMOVE_METHOD_ACTION;
+}
+
+function methodRow( page: Page, title: string ) {
+	return page.locator( '.wc-shipping-zone-method-rows tr[data-id]', {
+		has: page.locator( '.wc-shipping-zone-method-title', {
+			hasText: title,
+		} ),
+	} );
 }
 
 async function openAddMethodModal( page: Page ) {
@@ -192,7 +207,7 @@ test( 'saves an unsaved shipping zone when adding a method', async ( {
 		await page
 			.getByRole( 'button', { name: 'Add shipping method' } )
 			.click();
-		await page.getByText( 'Flat rate' ).click();
+		await page.getByText( 'Flat rate', { exact: true } ).click();
 		const addMethodResponsePromise = page.waitForResponse( ( response ) => {
 			return response
 				.url()
@@ -433,13 +448,294 @@ test( 'surfaces a failed zone save and releases the methods table', async ( {
 		.poll( () => dialogMessages )
 		.toContain( 'Your changes were not saved. Please retry.' );
 
-	// Releasing the table and clearing the busy state are what regress; the enabled button
-	// is recorded as the expected end state rather than as coverage, since Save changes is
-	// never disabled on this path either way.
+	// Releasing the table and clearing the busy state are what regress; Save is re-enabled
+	// here because the change set is still pending.
 	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
 	await expect( page.locator( '#submit' ) ).toBeEnabled();
 	await expect( page.locator( '#submit' ) ).not.toHaveClass( /is-busy/ );
 	expect( dialogMessages ).toHaveLength( 1 );
+} );
+
+// Regression: a failed save left Save changes disabled when the only pending change was a
+// method toggle or reorder, which both log a methods-only change set, so no retry was possible.
+test( 'retries a failed save whose only pending change is a method toggle', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	await page.route( isSaveChanges, ( route ) =>
+		route.fulfill( {
+			status: 500,
+			contentType: 'text/plain',
+			body: 'Injected save failure',
+		} )
+	);
+
+	const toggle = page.locator( '.wc-shipping-zone-method-enabled a' ).first();
+
+	await expect( toggle ).toHaveText( 'Yes' );
+	await toggle.click();
+	await expect(
+		page.locator( '.wc-shipping-zone-method-enabled a' ).first()
+	).toHaveText( 'No' );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+
+	await page.locator( '#submit' ).click();
+
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( 'Your changes were not saved. Please retry.' );
+
+	// The toggle is still pending and the page still warns about it on unload, so the button
+	// has to stay clickable for the retry the alert asks for.
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+	await expect( page.locator( '#submit' ) ).not.toHaveClass( /is-busy/ );
+	await expect(
+		page.locator( '.wc-shipping-zone-method-enabled a' ).first()
+	).toHaveText( 'No' );
+
+	// A clickable button is only worth having if the retry it allows actually saves, so let
+	// the next request through and check the toggle reaches the database.
+	await page.unroute( isSaveChanges );
+	const retry = page.waitForResponse( ( response ) =>
+		isSaveChanges( new URL( response.url() ) )
+	);
+	await page.locator( '#submit' ).click();
+	expect( ( await ( await retry ).json() ).success ).toBe( true );
+
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+	expect( dialogMessages ).toHaveLength( 1 );
+
+	const methods = await restApi.get(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`
+	);
+	expect( methods.data[ 0 ].enabled ).toBe( false );
+} );
+
+// Adding a method replaces the table from the server, so the unsaved toggle has to be laid back
+// over that list and saved with the add, as pending zone edits are.
+test( 'saves an unsaved method toggle along with a method that is added', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	const toggle = page.locator( '.wc-shipping-zone-method-enabled a' ).first();
+
+	await expect( toggle ).toHaveText( 'Yes' );
+	await toggle.click();
+	await expect(
+		page.locator( '.wc-shipping-zone-method-enabled a' ).first()
+	).toHaveText( 'No' );
+
+	await openAddMethodModal( page );
+	await page.getByText( 'E2E Non-Modal Method' ).click();
+	await page.getByRole( 'button', { name: 'Continue' } ).click();
+
+	await expect(
+		page.locator( '.wc-shipping-zone-method-title', {
+			hasText: 'E2E Non-Modal Method',
+		} )
+	).toBeVisible();
+
+	const methods = await restApi.get(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`
+	);
+	const flatRate = methods.data.find(
+		( method: { method_id: string } ) => method.method_id === 'flat_rate'
+	);
+
+	expect( flatRate.enabled ).toBe( false );
+	await expect(
+		page.locator( '.wc-shipping-zone-method-enabled a' ).first()
+	).toHaveText( 'No' );
+	expect( dialogMessages ).toEqual( [] );
+} );
+
+// Cancelling the settings modal of a method that was just added removes it again. That cleanup
+// must leave the toggle the table still shows pending, not overwrite it with the server's rows.
+test( 'keeps an unsaved method toggle pending when the settings of an added method are cancelled', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	await page.locator( '.wc-shipping-zone-method-enabled a' ).first().click();
+	await expect(
+		page.locator( '.wc-shipping-zone-method-enabled a' ).first()
+	).toHaveText( 'No' );
+
+	await openAddMethodModal( page );
+	await page.getByText( 'Free shipping', { exact: true } ).click();
+	await page.getByRole( 'button', { name: 'Continue' } ).click();
+	await expect( page.locator( '#btn-ok' ) ).toBeVisible();
+
+	const removeMethodResponse = page.waitForResponse( ( response ) =>
+		response
+			.url()
+			.includes( 'action=woocommerce_shipping_zone_remove_method' )
+	);
+	await page.keyboard.press( 'Escape' );
+	await removeMethodResponse;
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+
+	await expect(
+		page.locator( '.wc-shipping-zone-method-enabled a' ).first()
+	).toHaveText( 'No' );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+
+	await Promise.all( [
+		page.waitForResponse( ( response ) =>
+			isSaveChanges( new URL( response.url() ) )
+		),
+		page.locator( '#submit' ).click(),
+	] );
+
+	const methods = await restApi.get(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`
+	);
+	expect( methods.data ).toHaveLength( 1 );
+	expect( methods.data[ 0 ].enabled ).toBe( false );
+} );
+
+// Regression: adding a method with a settings modal marks the form dirty through the model's
+// method list, but the add already persisted the method, so the zone-level change set is empty.
+// A failed settings save left Save changes enabled over that empty set, and submitting it posts
+// no changes at all, which the endpoint rejects as missing_fields. The non-modal branch cannot
+// show this: it reaches onSaveResponse, whose 'saved:methods' already disables the button.
+test( 'leaves Save changes disabled when a settings save fails on a freshly added method', async ( {
+	page,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	await page.route(
+		( url ) => url.searchParams.get( 'action' ) === SAVE_SETTINGS_ACTION,
+		( route ) =>
+			route.fulfill( {
+				status: 500,
+				contentType: 'text/plain',
+				body: 'Injected settings save failure',
+			} )
+	);
+
+	// Free shipping has a settings modal and is not already on the fixture's zone.
+	await openAddMethodModal( page );
+	await page.getByText( 'Free shipping', { exact: true } ).click();
+	await page.getByRole( 'button', { name: 'Continue' } ).click();
+
+	await page.locator( '#btn-ok' ).click();
+
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( 'Your changes were not saved. Please retry.' );
+
+	// The zone itself was never edited, so there is nothing to retry.
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+	await expect( page.locator( '#submit' ) ).not.toHaveClass( /is-busy/ );
+
+	// With nothing left to save, leaving the page must not raise the unsaved-changes prompt.
+	await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
+	expect( dialogMessages ).toHaveLength( 1 );
+} );
+
+// Guards the other half of the branch, not the toggle fix: a delete marks the form clean while
+// a zone edit is still pending. Simplifying down to the unload flag alone would drop this case.
+test( 'keeps Save changes clickable when a failed save carries a zone edit made before a delete', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	// The delete only leaves that entry behind when another method remains.
+	await restApi.post(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`,
+		{
+			method_id: 'free_shipping',
+		}
+	);
+
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	// Editing the name re-renders the rows and rebinds their handlers, so hold on to a row
+	// and wait for it to leave the document before clicking a row action.
+	const staleRow = await page
+		.locator( '.wc-shipping-zone-method-rows tr' )
+		.first()
+		.elementHandle();
+
+	// The screen re-renders on both `input` and `change`, so set the value with a single
+	// event to keep the row this test clicks from being replaced underneath it.
+	await page.getByLabel( 'Zone name' ).evaluate( ( input, value ) => {
+		( input as HTMLInputElement ).value = value;
+		input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+	}, `Failed save ${ rand() }` );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+	await page.waitForFunction( ( row ) => ! row.isConnected, staleRow );
+
+	await page
+		.locator(
+			'.wc-shipping-zone-method-rows .wc-shipping-zone-method-delete'
+		)
+		.first()
+		.click();
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( 'Are you sure you want to delete this shipping method?' );
+	await expect(
+		page.locator(
+			'.wc-shipping-zone-method-rows .wc-shipping-zone-method-title'
+		)
+	).toHaveCount( 1 );
+
+	await page.route( isSaveChanges, ( route ) =>
+		route.fulfill( {
+			status: 500,
+			contentType: 'text/plain',
+			body: 'Injected save failure',
+		} )
+	);
+
+	// A successful settings save flushes the pending zone edit through save_changes without
+	// logging a change of its own, so the form is still marked clean when that save fails.
+	await page.locator( 'a.wc-shipping-zone-method-settings' ).first().click();
+	await page.locator( '#btn-ok' ).click();
+
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( 'Your changes were not saved. Please retry.' );
+
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+	await expect( page.locator( '#submit' ) ).not.toHaveClass( /is-busy/ );
 } );
 
 // Regression: an edit typed while a save is in flight must stay unsaved instead of being
@@ -493,8 +789,30 @@ test( 'keeps a zone edit made while an earlier save is in flight', async ( {
 	await page.getByLabel( 'Zone name' ).fill( firstName );
 	await page.locator( '#submit' ).click();
 
+	// While the save is in flight every action control is locked, so no second operation can
+	// start: Save and Add method are disabled and the method rows stay blocked.
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+	await expect(
+		page.locator( '.wc-shipping-zone-add-method' )
+	).toBeDisabled();
+	await expect( page.locator( '.blockOverlay' ).first() ).toBeVisible();
+
+	// Keyboard activation reaches the row links through the overlay, so prove the guard
+	// refuses the action rather than trusting the overlay.
+	const firstRow = page
+		.locator( '.wc-shipping-zone-method-rows tr[data-id]' )
+		.first();
+	await expect( firstRow ).toHaveAttribute( 'data-enabled', 'yes' );
+	await firstRow.locator( '.wc-shipping-zone-method-enabled a' ).focus();
+	await page.keyboard.press( 'Enter' );
+	await expect( firstRow ).toHaveAttribute( 'data-enabled', 'yes' );
+
 	// The zone fields stay editable while the table is blocked, so type again mid-request.
 	await page.getByLabel( 'Zone name' ).fill( secondName );
+
+	// That edit re-renders the rows, so the block has to be reapplied.
+	await expect( page.locator( '.blockOverlay' ).first() ).toBeVisible();
+
 	releaseFirstSave();
 	await page.waitForFunction(
 		() =>
@@ -512,6 +830,7 @@ test( 'keeps a zone edit made while an earlier save is in flight', async ( {
 	await page.locator( '#submit' ).click();
 	await secondSave;
 	await expect( page.locator( '#submit' ) ).toBeDisabled();
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
 
 	const saved = await restApi.get(
 		`${ WC_API_PATH }/shipping/zones/${ zone.id }`
@@ -675,4 +994,295 @@ test( 'does not claim unsaved zone changes after a row delete and a failed setti
 				message === 'Your changes were not saved. Please retry.'
 		)
 	).toHaveLength( 1 );
+} );
+
+// Regression: a refused delete answers with HTTP 200 and success: false, so the row has to stay
+// and the merchant has to be told, not shown a method that vanished while it still exists.
+test( 'keeps the method and reports it when a delete is refused', async ( {
+	page,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	await page.route( isRemoveMethod, ( route ) =>
+		route.fulfill( {
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify( { success: false, data: 'bad_nonce' } ),
+		} )
+	);
+
+	await methodRow( page, 'Flat rate' )
+		.locator( '.wc-shipping-zone-method-delete' )
+		.click();
+
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( REMOVE_FAILED_MESSAGE );
+
+	await expect( methodRow( page, 'Flat rate' ) ).toHaveCount( 1 );
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+	// Nothing about the zone changed, so the screen must not look dirty.
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+	await expect(
+		page.locator( '.wc-shipping-zone-add-method' )
+	).toBeEnabled();
+} );
+
+// Regression: the delete answer carries the server's copy of the methods, where every method is
+// still on, so the merchant's unsaved switch has to be laid back over it.
+test( 'keeps a switched-off method off after another method is deleted', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	await restApi.post(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`,
+		{
+			method_id: 'free_shipping',
+		}
+	);
+	await openZone( page, zone.name );
+	page.on( 'dialog', ( dialog ) => dialog.accept() );
+
+	const flatRate = methodRow( page, 'Flat rate' );
+	await flatRate.locator( '.wc-shipping-zone-method-enabled a' ).click();
+	await expect( flatRate ).toHaveAttribute( 'data-enabled', 'no' );
+
+	await methodRow( page, 'Free shipping' )
+		.locator( '.wc-shipping-zone-method-delete' )
+		.click();
+	await expect( methodRow( page, 'Free shipping' ) ).toHaveCount( 0 );
+
+	await expect( flatRate ).toHaveAttribute( 'data-enabled', 'no' );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+
+	const saved = page.waitForResponse( ( response ) =>
+		isSaveChanges( new URL( response.url() ) )
+	);
+	await page.locator( '#submit' ).click();
+	await saved;
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+
+	const methods = await restApi.get(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`
+	);
+	const stored = methods.data.find(
+		( method: { method_id: string } ) => method.method_id === 'flat_rate'
+	);
+	expect( stored.enabled ).toBe( false );
+} );
+
+// Regression: adding a method replaced the method list with the server's copy, so a switch the
+// merchant had already turned off looked on again after the settings step was abandoned and its
+// cleanup failed, while Save still stored it as off.
+test( 'keeps a switched-off method off when removing an abandoned new method fails', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	const original = methodRow( page, 'Flat rate' );
+	const originalId = await original.getAttribute( 'data-id' );
+	await original.locator( '.wc-shipping-zone-method-enabled a' ).click();
+	await expect( original ).toHaveAttribute( 'data-enabled', 'no' );
+
+	await page.route( isRemoveMethod, ( route ) =>
+		route.fulfill( {
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify( { success: false, data: 'bad_nonce' } ),
+		} )
+	);
+
+	await openAddMethodModal( page );
+	await page
+		.locator( '.wc-backbone-modal' )
+		.getByText( 'Flat rate', { exact: true } )
+		.click();
+	await page.getByRole( 'button', { name: 'Continue' } ).click();
+	await expect( page.locator( '#btn-ok' ) ).toBeVisible();
+	await page.locator( '.modal-close-link' ).click();
+
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( REMOVE_FAILED_MESSAGE );
+
+	const originalRow = page.locator(
+		`.wc-shipping-zone-method-rows tr[data-id="${ originalId }"]`
+	);
+	await expect( originalRow ).toHaveAttribute( 'data-enabled', 'no' );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+
+	const saved = page.waitForResponse( ( response ) =>
+		isSaveChanges( new URL( response.url() ) )
+	);
+	await page.locator( '#submit' ).click();
+	await saved;
+
+	const methods = await restApi.get(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`
+	);
+	const stored = methods.data.find(
+		( method: { id: number } ) => method.id === Number( originalId )
+	);
+	expect( stored.enabled ).toBe( false );
+} );
+
+// Regression: adding a method raises the unload warning even on a clean form, because the
+// unfinished settings step still has to be warned about. A failed cleanup must not read that
+// warning as pending changes and turn Save back on with nothing to post.
+test( 'leaves Save changes disabled when removing an abandoned new method fails', async ( {
+	page,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	await page.route( isRemoveMethod, ( route ) =>
+		route.fulfill( {
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify( { success: false, data: 'bad_nonce' } ),
+		} )
+	);
+
+	await openAddMethodModal( page );
+	await page
+		.locator( '.wc-backbone-modal' )
+		.getByText( 'Flat rate', { exact: true } )
+		.click();
+	await page.getByRole( 'button', { name: 'Continue' } ).click();
+	await expect( page.locator( '#btn-ok' ) ).toBeVisible();
+	await page.locator( '.modal-close-link' ).click();
+
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( REMOVE_FAILED_MESSAGE );
+
+	// The failed cleanup draws the method it could not remove, so the merchant can reach it.
+	// It decides Save in the same block, so two rows also means Save has settled.
+	await expect( methodRow( page, 'Flat rate' ) ).toHaveCount( 2 );
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+} );
+
+// Regression: the lock is released before the settings step opens, so a row behind it can be
+// deleted and the step then closed, leaving two removals in flight. The first to finish must
+// not unlock the table or turn Save back on while the second is still running.
+test( 'keeps the table locked and Save off until overlapping removals have both finished', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	await restApi.post(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`,
+		{
+			method_id: 'free_shipping',
+		}
+	);
+	await openZone( page, zone.name );
+	page.on( 'dialog', ( dialog ) => dialog.accept() );
+
+	// Switch a method off so the form is dirty: Save is then what the removals must leave alone.
+	const flatRate = methodRow( page, 'Flat rate' );
+	await flatRate.locator( '.wc-shipping-zone-method-enabled a' ).click();
+	await expect( flatRate ).toHaveAttribute( 'data-enabled', 'no' );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+
+	// Hold each response, not the request: the server handles the removals in order while the
+	// browser receives them the other way round, so the older method list lands last.
+	const releases: Array< () => void > = [];
+	await page.route( isRemoveMethod, async ( route ) => {
+		const response = await route.fetch();
+		await new Promise< void >( ( resolve ) => releases.push( resolve ) );
+		await route.fulfill( { response } );
+	} );
+
+	// jQuery fires ajaxComplete after the request's success callback, so the counter proves a
+	// removal response was handled.
+	await page.evaluate( ( action: string ) => {
+		const context = window as unknown as {
+			wcRemovalsHandled?: number;
+			jQuery: ( target: Document ) => {
+				on: (
+					event: string,
+					handler: ( ...args: unknown[] ) => void
+				) => void;
+			};
+		};
+
+		context.wcRemovalsHandled = 0;
+		context.jQuery( document ).on( 'ajaxComplete', ( ...args ) => {
+			const settings = args[ 2 ] as { url?: string } | undefined;
+			if ( settings && settings.url && settings.url.includes( action ) ) {
+				context.wcRemovalsHandled =
+					( context.wcRemovalsHandled || 0 ) + 1;
+			}
+		} );
+	}, REMOVE_METHOD_ACTION );
+
+	const removalsHandled = ( count: number ) =>
+		page.waitForFunction(
+			( expected: number ) =>
+				( window as unknown as { wcRemovalsHandled?: number } )
+					.wcRemovalsHandled === expected,
+			count
+		);
+
+	await openAddMethodModal( page );
+	await page
+		.locator( '.wc-backbone-modal' )
+		.getByText( 'Flat rate', { exact: true } )
+		.click();
+	await page.getByRole( 'button', { name: 'Continue' } ).click();
+	await expect( page.locator( '#btn-ok' ) ).toBeVisible();
+
+	// The modal does not trap focus, so the row behind it can still be deleted.
+	await methodRow( page, 'Free shipping' )
+		.locator( '.wc-shipping-zone-method-delete' )
+		.dispatchEvent( 'click' );
+	await expect.poll( () => releases.length ).toBe( 1 );
+
+	await page.locator( '.modal-close-link' ).click();
+	await expect.poll( () => releases.length ).toBe( 2 );
+
+	releases[ 1 ]();
+	await removalsHandled( 1 );
+	await expect(
+		page.locator( '.wc-shipping-zone-add-method' )
+	).toBeDisabled();
+	await expect( page.locator( '.blockOverlay' ).first() ).toBeVisible();
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+
+	releases[ 0 ]();
+	await removalsHandled( 2 );
+	await expect(
+		page.locator( '.wc-shipping-zone-add-method' )
+	).toBeEnabled();
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+	// The switch is still pending, so the last removal to finish hands Save back.
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+
+	// Both removals succeeded, so only the original method is left, still switched off.
+	await expect( methodRow( page, 'Free shipping' ) ).toHaveCount( 0 );
+	await expect( methodRow( page, 'Flat rate' ) ).toHaveCount( 1 );
+	await expect( flatRate ).toHaveAttribute( 'data-enabled', 'no' );
 } );

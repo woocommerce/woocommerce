@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 
 defined( 'ABSPATH' ) || exit;
@@ -501,8 +502,8 @@ class WC_Checkout {
 
 				/**
 				 * Filters whether a resumed classic checkout order keeps the items that haven't changed, so their IDs
-				 * stay the same. Kept items don't run the woocommerce_checkout_create_order_*_item hooks again. Return false
-				 * to remove every item and add it again from the cart.
+				 * stay the same. Orders with item creation or removal callbacks always rebuild their items for compatibility.
+				 * Return false to rebuild items even when those hooks have no callbacks.
 				 *
 				 * @since 11.4.0
 				 *
@@ -511,7 +512,7 @@ class WC_Checkout {
 				 */
 				$keep_items = apply_filters( 'woocommerce_checkout_keep_order_items_on_resume', true, $order );
 
-				if ( true === $keep_items && $order instanceof WC_Order ) {
+				if ( true === $keep_items && $order instanceof WC_Order && ! $this->has_order_item_callbacks() ) {
 					// The rest of the items are added again from the cart later.
 					$this->kept_order_item_types = $this->remove_changed_order_items( $order, $cart_hashes );
 				} else {
@@ -661,6 +662,54 @@ class WC_Checkout {
 		if ( $this->should_add_order_items( OrderItemType::COUPON ) ) {
 			$this->create_order_coupon_lines( $order, WC()->cart );
 		}
+	}
+
+	/**
+	 * Whether callbacks require the original item creation and removal hooks on a checkout retry.
+	 *
+	 * @return bool
+	 */
+	private function has_order_item_callbacks(): bool {
+		global $wp_filter;
+
+		$hooks = array(
+			'woocommerce_checkout_create_order_line_item_object',
+			'woocommerce_checkout_create_order_line_item',
+			'woocommerce_checkout_create_order_fee_item',
+			'woocommerce_checkout_create_order_shipping_item',
+			'woocommerce_checkout_create_order_tax_item',
+			'woocommerce_checkout_create_order_coupon_item',
+			'woocommerce_remove_order_items',
+			'woocommerce_removed_order_items',
+		);
+		foreach ( $hooks as $hook ) {
+			if ( has_filter( $hook ) ) {
+				return true;
+			}
+		}
+
+		// Core always registers a forwarder; only its legacy listeners require a rebuild.
+		foreach ( $wp_filter['woocommerce_new_order_item']->callbacks ?? array() as $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				$function = $callback['function'];
+				$handler  = is_array( $function ) ? ( $function[0] ?? null ) : null;
+				if (
+					! $handler instanceof WC_Deprecated_Action_Hooks ||
+					WC_Deprecated_Action_Hooks::class !== get_class( $handler ) ||
+					'maybe_handle_deprecated_hook' !== ( $function[1] ?? null )
+				) {
+					return true;
+				}
+
+				foreach ( $handler->get_old_hooks( 'woocommerce_new_order_item' ) as $hook ) {
+					if ( has_action( $hook ) ) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1414,12 +1463,15 @@ class WC_Checkout {
 		array_walk( $address_fields, array( $this, 'set_customer_address_fields' ), $data );
 		WC()->customer->save();
 
+		// Calculate the rates for the posted address, so the posted choices are checked against them.
+		WC()->cart->calculate_shipping();
+
 		// Update customer shipping and payment method to posted method.
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
 		if ( is_array( $data['shipping_method'] ) ) {
 			foreach ( $data['shipping_method'] as $i => $value ) {
-				if ( ! is_string( $value ) ) {
+				if ( ! is_string( $value ) || ! ShippingUtil::is_shipping_rate_listed( $i, $value ) ) {
 					continue;
 				}
 				$chosen_shipping_methods[ $i ] = $value;
@@ -1643,6 +1695,11 @@ class WC_Checkout {
 					throw new Exception( apply_filters( 'woocommerce_registration_error_email_exists', __( 'An account is already registered with your email address. <a href="#" class="showlogin">Please log in.</a>', 'woocommerce' ), $data['billing_email'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 				throw new Exception( $customer_id->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			}
+
+			// Save the posted choices, because the login loads the session again from the database.
+			if ( is_callable( array( WC()->session, 'save_data' ) ) ) {
+				WC()->session->save_data();
 			}
 
 			wc_set_customer_auth_cookie( $customer_id );

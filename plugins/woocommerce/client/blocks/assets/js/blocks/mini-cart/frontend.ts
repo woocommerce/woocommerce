@@ -28,10 +28,10 @@ import type { CartItem, Currency } from '@woocommerce/types';
 import { getFocusableElements } from '../../utils/get-focusable-elements';
 import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
 import {
-	getEntryFieldRaw,
 	isItemDataEntryVisible,
 	isLastVisibleEntry,
 	buildCartItemDataAttr,
+	renderEntryFieldHTML,
 } from './utils/item-data';
 import type { ItemData, CartItemDataAttr } from './utils/item-data';
 
@@ -437,14 +437,6 @@ function resolveDataItemAttr(): ItemData | undefined {
 	} >();
 
 	return itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
-}
-
-/**
- * Returns the raw API value for an item_data field. Used by both innerHTML
- * callbacks and the cartItemDataAttr getter.
- */
-function getItemDataRaw( field: 'name' | 'value' ): string {
-	return getEntryFieldRaw( resolveDataItemAttr(), field );
 }
 
 const { state: cartItemState } = store(
@@ -960,18 +952,22 @@ const { state: cartItemState } = store(
 
 			itemDataNameInnerHTML() {
 				const { ref } = getElement();
-				const raw = getItemDataRaw( 'name' );
-				if ( ref && raw ) {
-					ref.innerHTML = trimWords( raw + ':' );
-				}
+				renderEntryFieldHTML(
+					ref,
+					resolveDataItemAttr(),
+					'name',
+					trimWords
+				);
 			},
 
 			itemDataValueInnerHTML() {
 				const { ref } = getElement();
-				const raw = getItemDataRaw( 'value' );
-				if ( ref && raw ) {
-					ref.innerHTML = trimWords( raw );
-				}
+				renderEntryFieldHTML(
+					ref,
+					resolveDataItemAttr(),
+					'value',
+					trimWords
+				);
 			},
 
 			filterCartItemClass() {

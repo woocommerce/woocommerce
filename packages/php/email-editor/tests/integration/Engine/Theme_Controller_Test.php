@@ -16,6 +16,13 @@ use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
  */
 class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
+	 * Theme that was active before the test.
+	 *
+	 * @var string
+	 */
+	private string $previous_theme = '';
+
+	/**
 	 * Theme controller instance
 	 *
 	 * @var Theme_Controller
@@ -29,6 +36,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		parent::setUp();
 
 		// Switch theme for easier testing theme colors.
+		$this->previous_theme = get_stylesheet();
 		switch_theme( 'twentytwentyfour' );
 
 		// Crete a custom user theme post.
@@ -55,6 +63,15 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_false' );
 
 		$this->theme_controller = $this->di_container->get( Theme_Controller::class );
+	}
+
+	/**
+	 * Switch back to the theme from before the test. Switching also clears WordPress's
+	 * cached theme styles, which the database rollback does not reset.
+	 */
+	public function tearDown(): void {
+		switch_theme( $this->previous_theme );
+		parent::tearDown();
 	}
 
 	/**
@@ -302,6 +319,39 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertDoesNotMatchRegularExpression( '/(^|[\s,}])caption\s*\{/', $stylesheet );
 
 		remove_filter( 'woocommerce_email_editor_theme_json', $add_caption_color, 20 );
+	}
+
+	/**
+	 * Test the rendering stylesheet has no `:where()` selectors, which the CSS inliner skips, for a block link color.
+	 */
+	public function testItUnwrapsWhereSelectorsForBlockLinkColors(): void {
+		$add_link_color = function ( \WP_Theme_JSON $theme ): \WP_Theme_JSON {
+			$theme->merge(
+				new \WP_Theme_JSON(
+					array(
+						'version' => 3,
+						'styles'  => array(
+							'blocks' => array(
+								'core/paragraph' => array(
+									'elements' => array( 'link' => array( 'color' => array( 'text' => '#123456' ) ) ),
+								),
+							),
+						),
+					),
+					'custom'
+				)
+			);
+			return $theme;
+		};
+		add_filter( 'woocommerce_email_editor_theme_json', $add_link_color, 20 );
+
+		try {
+			$stylesheet = $this->di_container->get( Theme_Controller::class )->get_stylesheet_for_rendering();
+		} finally {
+			remove_filter( 'woocommerce_email_editor_theme_json', $add_link_color, 20 );
+		}
+		$this->assertStringContainsString( 'p a:not(.wp-element-button):not(.button-link):not(.product-button-link){color: #123456;}', $stylesheet );
+		$this->assertStringNotContainsString( ':where(', $stylesheet );
 	}
 
 	/**

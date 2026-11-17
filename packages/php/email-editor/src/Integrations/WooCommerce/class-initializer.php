@@ -48,6 +48,10 @@ class Initializer {
 	 * @return array
 	 */
 	public function update_block_settings( array $settings ): array {
+		if ( ! isset( $settings['name'] ) ) {
+			return $settings;
+		}
+
 		if ( in_array( $settings['name'], self::ALLOWED_BLOCK_TYPES, true ) ) {
 			$settings['supports']['email']     = true;
 			$settings['render_email_callback'] = array( $this, 'render_block' );

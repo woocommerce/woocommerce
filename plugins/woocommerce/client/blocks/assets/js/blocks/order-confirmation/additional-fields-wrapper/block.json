@@ -27,6 +27,10 @@
 			}
 		}
 	},
+	"style": [
+		"wc-blocks-style",
+		"file:../order-confirmation-additional-fields-wrapper.css"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

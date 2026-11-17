@@ -49,9 +49,9 @@
 	},
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
-		"eslint": "^10.0.0",
-		"rimraf": "5.0.5",
-		"typescript": "5.7.x"
+		"eslint": "catalog:tooling",
+		"rimraf": "catalog:tooling",
+		"typescript": "catalog:tooling"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

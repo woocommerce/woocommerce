@@ -1,0 +1,11 @@
+Preheader
+
+Styled heading
+
+Paragraph with a palette background and a [link inside a group with a link color](https://example.com/link).
+
+Text color with a palette slug that does not exist
+
+Monospace text
+
+[Call to action](https://example.com/cta)

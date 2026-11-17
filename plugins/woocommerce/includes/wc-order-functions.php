@@ -640,15 +640,25 @@ function wc_create_refund( $args = array() ) {
 				// later to be used for revoking download permission.
 				// checking if the item is a product, as we only need to revoke download permission for products.
 				if ( $item->is_type( 'line_item' ) ) {
+					$product_id = $item->get_product_id();
+					if ( $item instanceof WC_Order_Item_Product && $item->get_variation_id() ) {
+						$product_id = $item->get_variation_id();
+					}
 					$refunded_order_and_products[ $item_id ] = array(
 						'order_id'   => $order->get_id(),
-						'product_id' => $item->get_product_id(),
+						'product_id' => $product_id,
 					);
 				}
 
 				$class         = get_class( $item );
 				$refunded_item = new $class( $item );
 				$refunded_item->set_id( 0 );
+
+				// Copied metadata needs new IDs so refund changes cannot update or delete the original item's metadata.
+				foreach ( $refunded_item->get_meta_data() as $meta ) {
+					$meta->id = 0;
+				}
+
 				$refunded_item->add_meta_data( '_refunded_item_id', $item_id, true );
 				$refunded_item->set_total( wc_format_refund_total( $refund_total ) );
 				$refunded_item->set_taxes(

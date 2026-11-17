@@ -127,7 +127,14 @@ jQuery( function ( $ ) {
 				$( 'ul.wc-tabs li', panel_wrap ).removeClass( 'active' );
 				$( this ).parent().addClass( 'active' );
 				$( 'div.panel', panel_wrap ).hide();
-				$( $( this ).attr( 'href' ) ).show( 0, function () {
+				// Look up the panel by the link's selector. A selector that is not valid finds nothing.
+				var panel;
+				try {
+					panel = $( document ).find( $( this ).attr( 'href' ) || '' );
+				} catch ( error ) {
+					panel = $();
+				}
+				panel.show( 0, function () {
 					$( this ).trigger( 'woocommerce_tab_shown' );
 				} );
 			} );

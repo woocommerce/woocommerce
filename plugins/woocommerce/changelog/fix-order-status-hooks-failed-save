@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+WC_Order::save() no longer fires the order status change hooks when the order write fails. The next successful save of the same order object fires them once.

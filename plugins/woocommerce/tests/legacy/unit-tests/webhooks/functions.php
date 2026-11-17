@@ -171,13 +171,8 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_valid_webhook_events', $add_event );
 		add_filter( 'woocommerce_valid_webhook_resources', $add_resource );
 
-		try {
-			$this->assertTrue( wc_is_webhook_valid_topic( 'order.refunded' ) );
-			$this->assertTrue( wc_is_webhook_valid_topic( 'subscription.created' ) );
-		} finally {
-			remove_filter( 'woocommerce_valid_webhook_events', $add_event );
-			remove_filter( 'woocommerce_valid_webhook_resources', $add_resource );
-		}
+		$this->assertTrue( wc_is_webhook_valid_topic( 'order.refunded' ) );
+		$this->assertTrue( wc_is_webhook_valid_topic( 'subscription.created' ) );
 	}
 
 	/**
@@ -537,7 +532,6 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		$webhook2->delete( true );
 		$customer1->delete( true );
 		$customer2->delete( true );
-		remove_action( 'woocommerce_webhook_process_delivery', array( $this, 'woocommerce_webhook_process_delivery' ), 1, 2 );
 	}
 
 	/**

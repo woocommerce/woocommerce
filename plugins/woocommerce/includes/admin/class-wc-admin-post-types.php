@@ -557,6 +557,8 @@ class WC_Admin_Post_Types {
 
 		$data_store = $product->get_data_store();
 
+		$this->apply_bulk_edit_taxonomy_changes( $product, $request_data );
+
 		if ( ! empty( $request_data['change_weight'] ) && isset( $request_data['_weight'] ) ) {
 			$product->set_weight( wc_clean( wp_unslash( $request_data['_weight'] ) ) );
 		}
@@ -1019,6 +1021,54 @@ class WC_Admin_Post_Types {
 	 */
 	protected function request_data() {
 		return $_REQUEST;
+	}
+
+	/**
+	 * Apply category and brand changes through the product's CRUD properties.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param WC_Product $product Product being edited.
+	 * @param array      $request_data Bulk edit request fields.
+	 * @return void
+	 */
+	private function apply_bulk_edit_taxonomy_changes( WC_Product $product, array $request_data ): void {
+		$taxonomies = $request_data['wc_bulk_edit_taxonomies'] ?? array();
+		$tax_input  = $request_data['tax_input'] ?? array();
+		$mixed      = $request_data['wc_bulk_edit_indeterminate'] ?? array();
+		if ( ! is_array( $taxonomies ) || ! is_array( $tax_input ) || ! is_array( $mixed ) ) {
+			return;
+		}
+
+		// Taxonomy names differ from CRUD property names; setters keep the product object in sync.
+		$taxonomy_properties = array(
+			'product_cat'   => 'category_ids',
+			'product_brand' => 'brand_ids',
+		);
+		foreach ( $taxonomy_properties as $taxonomy_name => $property ) {
+			$taxonomy      = get_taxonomy( $taxonomy_name );
+			$seen          = $taxonomies[ $taxonomy_name ] ?? null;
+			$checked       = $tax_input[ $taxonomy_name ] ?? array();
+			$indeterminate = $mixed[ $taxonomy_name ] ?? array();
+			if ( ! $taxonomy || ! is_string( $seen ) || ! is_array( $checked ) || ! is_array( $indeterminate ) || ! $taxonomy->hierarchical || ! $taxonomy->show_in_quick_edit || ! current_user_can( $taxonomy->cap->assign_terms ) ) {
+				continue;
+			}
+
+			$seen          = wp_parse_id_list( wp_unslash( $seen ) );
+			$checked       = wp_parse_id_list( array_filter( wp_unslash( $checked ), 'is_scalar' ) );
+			$indeterminate = wp_parse_id_list( array_filter( wp_unslash( $indeterminate ), 'is_scalar' ) );
+			$current       = $product->{"get_$property"}( 'edit' );
+
+			// Match Core's mixed-state handling while preserving terms omitted from the checklist.
+			$editable  = array_diff( $seen, $indeterminate );
+			$preserved = array_diff( $current, $editable );
+			$terms     = array_values( array_unique( array_merge( $preserved, array_intersect( $checked, $editable ) ) ) );
+			if ( ! array_diff( $current, $terms ) && ! array_diff( $terms, $current ) ) {
+				continue;
+			}
+
+			$product->{"set_$property"}( $terms );
+		}
 	}
 
 	/**
