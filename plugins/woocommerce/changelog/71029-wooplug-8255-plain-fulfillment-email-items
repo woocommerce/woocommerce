@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the fulfilled items in plain text fulfillment emails when the shipment has no tracking details.
