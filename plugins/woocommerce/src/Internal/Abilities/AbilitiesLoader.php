@@ -165,7 +165,8 @@ class AbilitiesLoader {
 	 */
 	public static function register_core_resources(): void {
 		foreach ( array( 'product', 'order', 'order_item', 'order_refund', 'product_term', 'product_review', 'customer' ) as $resource_name ) {
-			ExtensibleAbilities::register_resource( $resource_name );
+			// A refund moves money through the gateway and the woocommerce_create_refund callbacks, which a sync's rollback cannot undo.
+			ExtensibleAbilities::register_resource( $resource_name, array( 'syncs' => 'order_refund' !== $resource_name ) );
 		}
 	}
 

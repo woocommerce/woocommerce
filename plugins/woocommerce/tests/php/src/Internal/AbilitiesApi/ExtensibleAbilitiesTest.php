@@ -3609,6 +3609,19 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a sync on order_refund, whose ability moves money that a rollback cannot return.
+	 */
+	public function test_a_sync_on_order_refund_is_refused(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_sync' );
+		$this->register_sync( 'order_refund', 'test-ext', '__return_null' );
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$this->assertEmpty( ExtensibleAbilities::get_syncs( 'order_refund' ) );
+		$this->assertTrue( ExtensibleAbilities::is_resource_registered( 'order_refund' ) );
+	}
+
+	/**
 	 * @testdox Should run the validators of a secondary object's own resource, and not those of the primary object's resource.
 	 */
 	public function test_a_secondary_object_gets_the_validators_of_its_own_resource(): void {

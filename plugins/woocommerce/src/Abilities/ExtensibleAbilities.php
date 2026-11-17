@@ -44,7 +44,7 @@ class ExtensibleAbilities {
 	/**
 	 * Registered resources, keyed by resource name.
 	 *
-	 * @var array<string, bool>
+	 * @var array<string, array{syncs: bool}>
 	 */
 	private static array $resources = array();
 
@@ -100,10 +100,18 @@ class ExtensibleAbilities {
 	 * Registering the same resource again does nothing.
 	 *
 	 * @since 11.3.0
+	 * @since 11.4.0 Added the `$args` parameter.
 	 *
 	 * @param string $resource_name Slug of the resource, such as `ticket`.
+	 * @param array  $args {
+	 *     Optional. Resource arguments.
+	 *
+	 *     @type bool $syncs Whether extensions can register syncs on the resource. Default true. Pass false when
+	 *                       the abilities of the resource do work that a rollback cannot undo, such as a payment
+	 *                       refund, so a sync that refuses could not undo the call.
+	 * }
 	 */
-	public static function register_resource( string $resource_name ): void {
+	public static function register_resource( string $resource_name, array $args = array() ): void {
 		if ( did_action( 'woocommerce_extensible_abilities_resources_init' ) && ! doing_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
 			wc_doing_it_wrong( __METHOD__, 'Register a resource inside the woocommerce_extensible_abilities_resources_init action, before the fields are registered.', '11.3.0' );
 			return;
@@ -113,7 +121,9 @@ class ExtensibleAbilities {
 			return;
 		}
 
-		self::$resources[ $resource_name ] = true;
+		if ( ! isset( self::$resources[ $resource_name ] ) ) {
+			self::$resources[ $resource_name ] = array( 'syncs' => false !== ( $args['syncs'] ?? true ) );
+		}
 	}
 
 	/**
@@ -647,9 +657,18 @@ class ExtensibleAbilities {
 	 *                               send email or make HTTP requests, because an undo does not reach outside
 	 *                               the database.
 	 * }
+	 * A sync on a resource registered with `syncs` set to false, such as `order_refund`, is refused.
 	 */
 	public static function register_sync( array $args ): void {
 		if ( ! self::check_callback_args( $args, __METHOD__, 'sync', '11.4.0' ) ) {
+			return;
+		}
+		if ( ! self::$resources[ $args['resource'] ]['syncs'] ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf( 'The "%s" resource takes no syncs, because its abilities do work that a rollback cannot undo. Refuse the change with a validator, or react to it in a hook that fires after it.', $args['resource'] ),
+				'11.4.0'
+			);
 			return;
 		}
 
