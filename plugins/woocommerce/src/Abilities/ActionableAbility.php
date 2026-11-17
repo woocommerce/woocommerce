@@ -352,7 +352,7 @@ abstract class ActionableAbility extends Ability {
 	/**
 	 * Drop the object caches of the objects a rolled back save() touched. The
 	 * saves filled the caches with rows the rollback removed, so a read in the
-	 * same request would still see them. The `WC_Data` meta cache and the
+	 * same request would still see them. The `WC_Data` meta cache, the product type cache and the
 	 * product instance cache are separate from the post cache.
 	 *
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects.
@@ -367,6 +367,7 @@ abstract class ActionableAbility extends Ability {
 			}
 			if ( $id > 0 && $object instanceof \WC_Product ) {
 				clean_post_cache( $id );
+				\WC_Cache_Helper::invalidate_cache_group( 'product_' . $id );
 				wc_delete_product_transients( $id );
 				$product_cache->remove( $id );
 				if ( $object->get_parent_id() > 0 ) {

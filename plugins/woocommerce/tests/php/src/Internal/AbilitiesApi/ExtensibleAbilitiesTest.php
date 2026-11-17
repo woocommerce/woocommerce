@@ -5041,24 +5041,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse a type change out of a variable product type that an extension registers, and allow one into it.
+	 * @testdox Should change a simple product into a variable product type that an extension registers.
 	 */
-	public function test_type_change_out_of_a_variable_subclass_is_refused_and_into_it_is_allowed(): void {
+	public function test_a_simple_product_becomes_a_variable_subclass(): void {
 		$this->register_variation_subclass();
+		$simple = \WC_Helper_Product::create_simple_product();
 
-		$input         = $this->get_shirt_input();
-		$input['type'] = 'test-variable';
-		$created       = $this->run_ability( 'woocommerce/product-create', $input );
-		$simple        = \WC_Helper_Product::create_simple_product();
-
-		$out_of = $this->run_ability_response(
-			'woocommerce/product-update',
-			array(
-				'id'   => $created['product']['id'],
-				'type' => 'simple',
-			)
-		);
-		$into   = $this->run_ability(
+		$into = $this->run_ability(
 			'woocommerce/product-update',
 			array(
 				'id'   => $simple->get_id(),
@@ -5066,11 +5055,81 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( 'woocommerce_product_type_unsupported', $out_of->get_data()['code'] );
-		$this->assertInstanceOf( TestVariableProduct::class, wc_get_product( $created['product']['id'] ) );
-		$this->assertCount( 2, wc_get_product( $created['product']['id'] )->get_children() );
 		$this->assertSame( 'test-variable', $into['product']['type'] );
 		$this->assertInstanceOf( TestVariableProduct::class, wc_get_product( $simple->get_id() ) );
+	}
+
+	/**
+	 * @testdox Should delete every variation, trashed ones too, when a $type product of an extension becomes simple, with the delete permission and a rollback on refusal.
+	 *
+	 * @testWith ["test-variable"]
+	 *           ["test-plan"]
+	 *
+	 * @param string $type Variable product type that an extension registers.
+	 */
+	public function test_a_variable_subclass_becomes_simple_and_loses_its_variations( string $type ): void {
+		$this->register_variation_subclass();
+		$plan_class = get_class(
+			new class() extends \WC_Product_Variable {
+				/**
+				 * Get the product type.
+				 *
+				 * @return string
+				 */
+				public function get_type() {
+					return 'test-plan';
+				}
+			}
+		);
+		$this->add_test_action( 'product_type_selector', static fn( array $types ): array => $types + array( 'test-plan' => 'Test plan' ) );
+		$this->add_test_action( 'woocommerce_data_stores', static fn( array $stores ): array => $stores + array( 'product-test-plan' => 'WC_Product_Variable_Data_Store_CPT' ) );
+		$this->add_test_action( 'woocommerce_product_class', static fn( $classname, $product_type ) => 'test-plan' === $product_type ? $plan_class : $classname, 10, 2 );
+		$refuse  = false;
+		$deleted = array();
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted, &$refuse ) {
+				$deleted = array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] );
+				return $refuse ? new \WP_Error( 'test_refused', 'Refused.' ) : null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$input         = $this->get_shirt_input();
+		$input['type'] = $type;
+		$created       = $this->run_ability( 'woocommerce/product-create', $input );
+		$id            = $created['product']['id'];
+		$ids           = $created['product']['variation_ids'];
+		wc_get_product( $ids[0] )->delete();
+		$change = array(
+			'id'   => $id,
+			'type' => 'simple',
+		);
+
+		$deny      = static fn( $caps, $cap ) => 'delete_post' === $cap ? array( 'do_not_allow' ) : $caps;
+		add_filter( 'map_meta_cap', $deny, 10, 2 );
+		$forbidden = $this->run_ability_response( 'woocommerce/product-update', $change );
+		remove_filter( 'map_meta_cap', $deny, 10 );
+		$refuse  = true;
+		$refused = $this->run_ability_response( 'woocommerce/product-update', $change );
+		$kept    = array_map( 'get_post_status', $ids );
+		$type    = wc_get_product( $id )->get_type();
+		$refuse  = false;
+		$changed = $this->run_ability( 'woocommerce/product-update', $change );
+
+		$this->assertSame( 403, $forbidden->get_status() );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( array( 'trash', 'publish' ), $kept );
+		$this->assertSame( $input['type'], $type, 'A rolled back call keeps the old type.' );
+		$this->assertSame( $id, $changed['product']['id'] );
+		$this->assertSame( 'simple', $changed['product']['type'] );
+		$this->assertSame( array(), $changed['product']['variation_ids'] );
+		$this->assertEqualsCanonicalizing( $ids, $deleted );
+		foreach ( $ids as $variation_id ) {
+			$this->assertNull( get_post( $variation_id ) );
+		}
 	}
 
 	/**
