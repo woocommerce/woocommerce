@@ -362,6 +362,32 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 
 		$this->assertWPError( $repeating );
 		$this->assertSame( 'woocommerce_product_variation_global_unique_id_duplicate', $repeating->get_error_code() );
+
+		$mixed_case = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'       => 'Book',
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M' ),
+					),
+				),
+				'variations' => array(
+					array(
+						'attributes'       => $size( 'S' ),
+						'global_unique_id' => '080442957X',
+					),
+					array(
+						'attributes'       => $size( 'M' ),
+						'global_unique_id' => '080442957x',
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $mixed_case, 'An ISBN-10 check digit X is the same in either case.' );
+		$this->assertSame( 'woocommerce_product_variation_global_unique_id_duplicate', $mixed_case->get_error_code() );
 	}
 
 	/**

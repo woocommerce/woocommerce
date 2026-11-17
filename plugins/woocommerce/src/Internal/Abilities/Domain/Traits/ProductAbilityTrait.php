@@ -291,7 +291,7 @@ trait ProductAbilityTrait {
 			'global_unique_id'   => array(
 				'type'        => 'string',
 				'description' => __( 'GTIN, UPC, EAN or ISBN, unique in the store. Empty removes it.', 'woocommerce' ),
-				'pattern'     => '^[0-9-]*[0-9Xx]?$',
+				'pattern'     => self::get_global_unique_id_input_pattern(),
 			),
 			'regular_price'      => array(
 				'type'        => 'string',
@@ -1045,7 +1045,7 @@ trait ProductAbilityTrait {
 		$parent_sku   = $parent_product->get_sku( 'edit' );
 		$skus         = '' === $parent_sku ? array() : array( $parent_sku => true );
 		$parent_gtin  = $parent_product->get_global_unique_id( 'edit' );
-		$gtins        = '' === $parent_gtin ? array() : array( $parent_gtin => true );
+		$gtins        = '' === $parent_gtin ? array() : array( strtoupper( $parent_gtin ) => true );
 		$child_ids    = $parent_product->get_id() > 0 ? self::read_variation_children( $parent_product, true )['all'] : array();
 		_prime_post_caches( $child_ids );
 		foreach ( $child_ids as $child_id ) {
@@ -1078,7 +1078,7 @@ trait ProductAbilityTrait {
 			}
 			$skus[ $sku ] = true;
 
-			$gtin = $variation->get_global_unique_id( 'edit' );
+			$gtin = strtoupper( $variation->get_global_unique_id( 'edit' ) );
 			if ( '' !== $gtin && isset( $gtins[ $gtin ] ) ) {
 				return new \WP_Error(
 					'woocommerce_product_variation_global_unique_id_duplicate',
@@ -1628,6 +1628,16 @@ trait ProductAbilityTrait {
 		}
 
 		return $term->term_id;
+	}
+
+	/**
+	 * Pattern of a GTIN input: digits and hyphens, and an X only as the ISBN-10 check digit. The setter
+	 * would strip any other character, so the schema refuses it instead.
+	 *
+	 * @return string
+	 */
+	private static function get_global_unique_id_input_pattern(): string {
+		return '^[0-9-]*[0-9Xx]?$';
 	}
 
 	/**
