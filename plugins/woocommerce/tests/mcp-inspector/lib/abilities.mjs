@@ -4,18 +4,33 @@ import { callTool, payloadOf } from './inspector.mjs';
 export const ADMIN = 'admin';
 export const CUSTOMER = 'customer';
 
+// Test files run in parallel, and two product saves at once can deadlock. The database rolls back the loser's
+// write and the ability fails with this error, so the call is tried again, as a client would.
+const CONFLICT = /another change ran at the same time/;
+const ATTEMPTS = 3;
+
 /**
  * Calls an ability the way an MCP client does, through the adapter's `mcp-adapter-execute-ability` meta tool.
  */
 export async function call( ability, parameters = {}, { user = ADMIN } = {} ) {
-	const response = await callTool( user, 'mcp-adapter-execute-ability', {
-		ability_name: ability,
-		parameters,
-	} );
-	return {
-		isError: response.isError === true,
-		payload: payloadOf( response ),
-	};
+	for ( let attempt = 1; ; attempt++ ) {
+		const response = await callTool( user, 'mcp-adapter-execute-ability', {
+			ability_name: ability,
+			parameters,
+		} );
+		const result = {
+			isError: response.isError === true,
+			payload: payloadOf( response ),
+		};
+
+		if (
+			! result.isError ||
+			attempt === ATTEMPTS ||
+			! CONFLICT.test( String( result.payload ) )
+		) {
+			return result;
+		}
+	}
 }
 
 /**
