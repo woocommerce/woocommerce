@@ -604,12 +604,12 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	/**
 	 * One line on where a question stands.
 	 *
-	 * @param string                                                     $group            Question id.
-	 * @param array<int, array{ok:bool|null,level:string,pending?:bool}> $checks           The question's checks. Pending ones don't count as unchecked.
-	 * @param bool                                                       $scanned          Whether a scan has run.
-	 * @param int                                                        $product_problems Failing product checks under the question.
-	 * @param bool                                                       $ucp_scanned      Whether the last scan checked UCP.
-	 * @param bool                                                       $ucp_enabled      Whether UCP is on.
+	 * @param string                                                               $group            Question id.
+	 * @param array<int, array{id:string,ok:bool|null,level:string,pending?:bool}> $checks           The question's checks. Pending ones don't count as unchecked.
+	 * @param bool                                                                 $scanned          Whether a scan has run.
+	 * @param int                                                                  $product_problems Failing product checks under the question.
+	 * @param bool                                                                 $ucp_scanned      Whether the last scan checked UCP.
+	 * @param bool                                                                 $ucp_enabled      Whether UCP is on.
 	 */
 	private static function group_summary( string $group, array $checks, bool $scanned, int $product_problems, bool $ucp_scanned, bool $ucp_enabled ): string {
 		$fix     = count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] && StoreConditions::shows_required( $check ) ) );

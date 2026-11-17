@@ -181,12 +181,31 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Render the page with one payment gateway turned on, since a payment method is Required.
+	 *
+	 * @return string
+	 */
+	private function render_with_a_payment_method(): string {
+		$gateways = WC()->payment_gateways()->payment_gateways();
+		$this->assertNotEmpty( $gateways, 'Core registers its gateways' );
+		$gateway = reset( $gateways );
+		$enabled = $gateway->enabled;
+
+		$gateway->enabled = 'yes';
+		try {
+			return $this->render_page();
+		} finally {
+			$gateway->enabled = $enabled;
+		}
+	}
+
+	/**
 	 * @testdox With every required check passing, open checks are only Recommended and passing ones are Done.
 	 */
 	public function test_output_on_a_ready_store(): void {
 		StoreConditionsTest::make_store_ready();
 
-		$html = $this->render_page();
+		$html = $this->render_with_a_payment_method();
 
 		$this->assertStringContainsString( 'Everything agents need is set up.', $html );
 		$this->assertStringNotContainsString( 'wc-agentic-commerce-check--required', $html );
@@ -202,7 +221,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		StoreConditionsTest::make_store_ready();
 		delete_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION );
 
-		$html = $this->render_page();
+		$html = $this->render_with_a_payment_method();
 
 		$this->assertStringNotContainsString( 'wc-agentic-commerce-check--required', $html );
 		$this->assertMatchesRegularExpression( '/wc-agentic-commerce-group--recommended.*Choose a privacy policy page/s', $html );
