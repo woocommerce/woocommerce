@@ -59,6 +59,35 @@ class Html_Processing_Helper {
 	}
 
 	/**
+	 * Scale the image's saved height attribute to the width the email renders it at.
+	 *
+	 * Outlook renders with Word's engine, which sizes an image from its width and height
+	 * attributes and ignores the inlined `height: auto`. A saved height left beside a rewritten
+	 * width therefore stretches the image, so the height is scaled by the same factor.
+	 *
+	 * The height is left alone when either saved dimension is missing or non-numeric, since there
+	 * is then no ratio to scale by.
+	 *
+	 * @param \WP_HTML_Tag_Processor $html Processor positioned on the img tag.
+	 * @param float                  $new_width Width in pixels the image is rendered at.
+	 */
+	public static function scale_height_attribute( \WP_HTML_Tag_Processor $html, float $new_width ): void {
+		$saved_width  = $html->get_attribute( 'width' );
+		$saved_height = $html->get_attribute( 'height' );
+
+		if ( ! is_string( $saved_width ) || ! is_numeric( $saved_width ) || ! is_string( $saved_height ) || ! is_numeric( $saved_height ) ) {
+			return;
+		}
+
+		if ( (float) $saved_width <= 0 ) {
+			return;
+		}
+
+		$scaled_height = max( 1, (int) round( (float) $saved_height * ( $new_width / (float) $saved_width ) ) );
+		$html->set_attribute( 'height', esc_attr( (string) $scaled_height ) );
+	}
+
+	/**
 	 * Remove from an element the class names whose styles the renderer applies to the wrapping table cell.
 	 *
 	 * Background and border classes are resolved by the CSS inliner wherever they appear. The wrapping

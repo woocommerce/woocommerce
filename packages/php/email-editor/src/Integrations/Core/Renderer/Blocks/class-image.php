@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
@@ -347,7 +348,7 @@ class Image extends Abstract_Block_Renderer {
 				$width       = Styles_Helper::parse_value( $block_width );
 				// A percentage can't be scaled against, and a fixed height is the author's choice.
 				if ( ! $has_fixed_height && strpos( $block_width, '%' ) === false ) {
-					$this->scale_height_attribute( $html, $width );
+					Html_Processing_Helper::scale_height_attribute( $html, $width );
 				}
 				/* @phpstan-ignore-next-line Wrong annotation for parameter in WP. */
 				$html->set_attribute( 'width', esc_attr( $width ) );
@@ -356,35 +357,6 @@ class Image extends Abstract_Block_Renderer {
 		}
 
 		return $block_content;
-	}
-
-	/**
-	 * Scale the image's saved height attribute to the width the email renders it at.
-	 *
-	 * Outlook renders with Word's engine, which sizes an image from its width and height
-	 * attributes and ignores the inlined `height: auto`. A saved height left beside a rewritten
-	 * width therefore stretches the image, so the height is scaled by the same factor.
-	 *
-	 * The height is left alone when either saved dimension is missing or non-numeric, since there
-	 * is then no ratio to scale by.
-	 *
-	 * @param \WP_HTML_Tag_Processor $html Processor positioned on the img tag.
-	 * @param float                  $new_width Width in pixels the image is rendered at.
-	 */
-	private function scale_height_attribute( \WP_HTML_Tag_Processor $html, float $new_width ): void {
-		$saved_width  = $html->get_attribute( 'width' );
-		$saved_height = $html->get_attribute( 'height' );
-
-		if ( ! is_string( $saved_width ) || ! is_numeric( $saved_width ) || ! is_string( $saved_height ) || ! is_numeric( $saved_height ) ) {
-			return;
-		}
-
-		if ( (float) $saved_width <= 0 ) {
-			return;
-		}
-
-		$scaled_height = max( 1, (int) round( (float) $saved_height * ( $new_width / (float) $saved_width ) ) );
-		$html->set_attribute( 'height', esc_attr( (string) $scaled_height ) );
 	}
 
 	/**

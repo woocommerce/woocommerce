@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
@@ -151,7 +152,7 @@ class Media_Text extends Abstract_Block_Renderer {
 	/**
 	 * Cap the media image at the width of the media cell.
 	 *
-	 * WordPress saves the image's full `width` attribute (often 1024px). Outlook lays the image out at
+	 * WordPress gives the image its full `width` (often 1024px). Outlook lays the image out at
 	 * that width and ignores `max-width`, and other clients size the table by it, so the email grows
 	 * wider than its layout and Gmail on Android shrinks the whole message to fit the screen.
 	 *
@@ -186,10 +187,11 @@ class Media_Text extends Abstract_Block_Renderer {
 			return $media_content;
 		}
 
-		if ( is_string( $saved_height ) && is_numeric( $saved_height ) ) {
-			$scaled_height = max( 1, (int) round( (float) $saved_height * $max_width / (float) $saved_width ) );
-			$html->set_attribute( 'height', (string) $scaled_height );
+		$html->set_attribute( 'width', $saved_width );
+		if ( is_string( $saved_height ) ) {
+			$html->set_attribute( 'height', $saved_height );
 		}
+		Html_Processing_Helper::scale_height_attribute( $html, $max_width );
 		$html->set_attribute( 'width', (string) $max_width );
 
 		$style = $html->get_attribute( 'style' );
