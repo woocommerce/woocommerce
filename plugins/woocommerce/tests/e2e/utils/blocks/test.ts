@@ -145,8 +145,45 @@ const test = base.extend<
 		wpCoreVersion: number;
 	}
 >( {
-	admin: async ( { page, pageUtils, editor, wpCoreVersion }, use ) => {
-		await use( new Admin( { page, pageUtils, editor, wpCoreVersion } ) );
+	// Deletes each post that `createNewPost` opens, drafts included, because
+	// `blocks-parallel` never resets the database. In `blocks-serial`, the
+	// delete runs before the database reset only when `page` is set up before
+	// `cleanup`; otherwise it fails with a 404 and only logs a warning.
+	admin: async (
+		{ page, pageUtils, editor, wpCoreVersion, requestUtils, cleanup },
+		use
+	) => {
+		const admin = new Admin( { page, pageUtils, editor, wpCoreVersion } );
+		const createNewPost = admin.createNewPost.bind( admin );
+		admin.createNewPost = async ( ...args ) => {
+			await createNewPost( ...args );
+			// `createNewPost` waits for `wp.data`, not for the editor to mount.
+			const id = await (
+				await page.waitForFunction( () =>
+					window.wp.data.select( 'core/editor' )?.getCurrentPostId()
+				)
+			).jsonValue();
+			const restBase = await page.evaluate(
+				async () =>
+					(
+						await window.wp.data
+							.resolveSelect( 'core' )
+							.getPostType(
+								window.wp.data
+									.select( 'core/editor' )
+									.getCurrentPostType()
+							)
+					).rest_base
+			);
+			cleanup( () =>
+				requestUtils.rest( {
+					method: 'DELETE',
+					path: `/wp/v2/${ restBase }/${ id }`,
+					params: { force: true },
+				} )
+			);
+		};
+		await use( admin );
 	},
 	editor: async ( { page, wpCoreVersion }, use ) => {
 		await use( new Editor( { page, wpCoreVersion } ) );
