@@ -1014,6 +1014,38 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Complete keeps an order handed off for a cart another request saved, instead of the cart this request had read.
+	 */
+	public function test_complete_keeps_an_order_for_a_cart_saved_since_the_session_was_read(): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$key     = (string) array_key_first( WC()->cart->get_cart() );
+
+		WC()->cart->set_quantity( $key, 2 );
+		WC()->session->save_data();
+		$first    = $this->request( 'POST', $path . '/complete' )->get_data();
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+
+		// The row holds quantity 2 and its order. This request still has the quantity 1 it read.
+		WC()->cart->set_quantity( $key, 1 );
+
+		$second = $this->request( 'POST', $path . '/complete' )->get_data();
+		$this->assertSame( $first['continue_url'], $second['continue_url'] );
+		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ) );
+		$this->assertCount(
+			1,
+			wc_get_orders(
+				array(
+					'status' => 'any',
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			)
+		);
+	}
+
+	/**
 	 * @testdox Complete refuses a checkout with nothing to pay, which the payment page would not take, and makes no order.
 	 */
 	public function test_complete_refuses_a_free_checkout(): void {
