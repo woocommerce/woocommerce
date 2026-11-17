@@ -4414,14 +4414,32 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject product mutation unknown IDs without leaking existence.
+	 * @testdox Should return the not-found error for an unknown product ID to users who can act on any product.
+	 *
+	 * @dataProvider provider_product_mutation_unknown_id_inputs
+	 *
+	 * @param string $ability_id Ability ID.
+	 * @param array  $input      Ability input.
+	 * @param string $error_code Expected error code.
+	 */
+	public function test_product_mutations_return_not_found_for_unknown_ids( string $ability_id, array $input, string $error_code ): void {
+		$result = wp_get_ability( $ability_id )->execute( $input );
+
+		$this->assertWPError( $result );
+		$this->assertSame( $error_code, $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should refuse permission for an unknown product ID to users who cannot act on any product.
 	 *
 	 * @dataProvider provider_product_mutation_unknown_id_inputs
 	 *
 	 * @param string $ability_id Ability ID.
 	 * @param array  $input      Ability input.
 	 */
-	public function test_product_mutations_reject_unknown_ids_without_leaking_existence( string $ability_id, array $input ): void {
+	public function test_product_mutations_refuse_unknown_ids_to_users_who_cannot_act_on_any_product( string $ability_id, array $input ): void {
+		wp_set_current_user( $this->create_user_with_caps( array( 'edit_products', 'publish_products', 'delete_products' ) ) );
+
 		$result = wp_get_ability( $ability_id )->execute( $input );
 
 		$this->assertWPError( $result );
@@ -4431,24 +4449,81 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	/**
 	 * Provides product mutation inputs with unknown IDs.
 	 *
-	 * @return array<string, array{0: string, 1: array}>
+	 * @return array<string, array{0: string, 1: array, 2: string}>
 	 */
 	public function provider_product_mutation_unknown_id_inputs(): array {
 		return array(
-			'product-update' => array(
+			'product-update'                  => array(
 				'woocommerce/product-update',
 				array(
 					'id'   => 999999,
 					'name' => 'Unknown Product',
 				),
+				'woocommerce_product_not_found',
 			),
-			'product-delete' => array(
+			'product-update variation delete' => array(
+				'woocommerce/product-update',
+				array(
+					'id'         => 999999,
+					'variations' => array(
+						array(
+							'id'     => 999998,
+							'delete' => true,
+						),
+					),
+				),
+				'woocommerce_product_not_found',
+			),
+			'product-delete'                  => array(
 				'woocommerce/product-delete',
 				array(
 					'id' => 999999,
 				),
+				'woocommerce_product_not_found',
+			),
+			'product-create variation'        => array(
+				'woocommerce/product-create',
+				array(
+					'type'      => 'variation',
+					'parent_id' => 999999,
+				),
+				'woocommerce_product_parent_invalid',
 			),
 		);
+	}
+
+	/**
+	 * @testdox Should return the not-found error for an unknown term ID to users who can edit product terms.
+	 */
+	public function test_product_term_update_returns_not_found_for_unknown_id(): void {
+		$result = wp_get_ability( 'woocommerce/product-term-update' )->execute(
+			array(
+				'taxonomy' => 'product_cat',
+				'id'       => 999999,
+				'name'     => 'Unknown',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_product_term_not_found', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should refuse permission for an unknown term ID to users who cannot edit product terms.
+	 */
+	public function test_product_term_update_refuses_unknown_id_to_users_who_cannot_edit_terms(): void {
+		wp_set_current_user( $this->create_user_with_caps( array( 'manage_product_terms' ) ) );
+
+		$result = wp_get_ability( 'woocommerce/product-term-update' )->execute(
+			array(
+				'taxonomy' => 'product_cat',
+				'id'       => 999999,
+				'name'     => 'Unknown',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
 	}
 
 	/**
