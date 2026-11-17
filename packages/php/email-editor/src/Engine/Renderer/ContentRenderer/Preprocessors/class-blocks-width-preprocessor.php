@@ -241,19 +241,21 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 	private function shrink_overflowing_columns( array $columns, float $columns_width ): array {
 		$pixel_widths = array();
 		foreach ( $columns as $key => $column ) {
-			$pixel_widths[ $key ] = $this->convert_width_to_pixels( $this->normalize_width_input( $column['attrs']['width'] ?? '100%' ), $columns_width );
+			$pixel_widths[ $key ] = $this->convert_width_to_pixels( $this->normalize_width_input( $column['attrs']['width'] ), $columns_width );
 		}
 		$total_width = array_sum( $pixel_widths );
 
 		// Percent widths are rounded to whole pixels, so allow half a pixel per column
 		// before treating the row as overflowing (e.g. 3 x 33.33% of 620px is 621px).
-		if ( $total_width <= $columns_width + count( $columns ) * 0.5 ) {
+		// A row with no room left (heavily padded parent) has nothing sensible to shrink to.
+		if ( $columns_width <= 0 || $total_width <= $columns_width + count( $columns ) * 0.5 ) {
 			return $columns;
 		}
 
 		$ratio = $columns_width / $total_width;
 		foreach ( $pixel_widths as $key => $pixel_width ) {
-			$shrunk_width                                   = round( $pixel_width * $ratio, 2 );
+			// Whole pixels keep the cell width attribute an integer; flooring keeps the row within its width.
+			$shrunk_width                                   = floor( $pixel_width * $ratio );
 			$columns[ $key ]['email_attrs']['column-width'] = "{$shrunk_width}px";
 		}
 		return $columns;

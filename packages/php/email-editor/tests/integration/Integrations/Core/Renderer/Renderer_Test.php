@@ -304,11 +304,11 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
 
 		preg_match_all( '/<td[^>]*class="[^"]*wp-block-column[^"]*"[^>]*width="([^"]+)"/', $rendered['html'], $column_widths );
-		preg_match_all( '/<img[^>]*width="(\d+)"/', $rendered['html'], $image_widths );
+		preg_match_all( '/<img(?=[^>]*example\.com\/image\.jpg)[^>]*width="(\d+)"/', $rendered['html'], $image_widths );
 		$this->assertCount( 2, $column_widths[1] );
 		$this->assertCount( 2, $image_widths[1] );
 
-		$this->assertStringNotContainsString( '%', $column_widths[1][0], 'The column cell declares the shrunk width, not the saved 100%.' );
+		$this->assertMatchesRegularExpression( '/^\d+$/', $column_widths[1][0], 'The column cell declares the shrunk width in whole pixels, not the saved 100%.' );
 		$column_width = (float) $column_widths[1][0];
 		$this->assertSame( $column_widths[1][0], $column_widths[1][1] );
 		$this->assertLessThanOrEqual( 660, $column_width * 2, 'Both columns fit within the 660px email.' );

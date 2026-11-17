@@ -719,9 +719,9 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$result  = $this->preprocessor->preprocess( $this->get_columns_blocks( array( '400px', '100%' ) ), array( 'contentSize' => '580px' ), $this->styles );
 		$columns = $result[0]['innerBlocks'];
 
-		// 400 + 580 = 980, scaled by 580 / 980.
-		$this->assertEquals( '236.73px', $columns[0]['email_attrs']['column-width'] );
-		$this->assertEquals( '343.27px', $columns[1]['email_attrs']['column-width'] );
+		// 400 + 580 = 980, scaled by 580 / 980 and floored to whole pixels.
+		$this->assertEquals( '236px', $columns[0]['email_attrs']['column-width'] );
+		$this->assertEquals( '343px', $columns[1]['email_attrs']['column-width'] );
 	}
 
 	/**
@@ -758,9 +758,30 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$result  = $this->preprocessor->preprocess( $this->get_columns_blocks( array( '100%', null ) ), array( 'contentSize' => '580px' ), $this->styles );
 		$columns = $result[0]['innerBlocks'];
 
-		// The unset column gets an equal share (290px), then 580 + 290 is scaled to fit 580.
-		$this->assertEquals( '386.67px', $columns[0]['email_attrs']['column-width'] );
-		$this->assertEquals( '193.33px', $columns[1]['email_attrs']['column-width'] );
+		// The unset column gets an equal share (290px), then 580 + 290 is scaled to fit 580 and floored.
+		$this->assertEquals( '386px', $columns[0]['email_attrs']['column-width'] );
+		$this->assertEquals( '193px', $columns[1]['email_attrs']['column-width'] );
+	}
+
+	/**
+	 * Test a row with no room left (padding wider than the parent) is left alone instead of shrunk to negative widths
+	 */
+	public function testItDoesNotShrinkColumnsInARowWithNoRoom(): void {
+		$blocks = $this->get_columns_blocks( array( '100px', '100px' ) );
+
+		$blocks[0]['attrs']['style']['spacing']['padding'] = array(
+			'left'  => '80px',
+			'right' => '80px',
+		);
+		$columns = $this->preprocessor->preprocess( $blocks, array( 'contentSize' => '100px' ), $this->styles )[0]['innerBlocks'];
+		$this->assertArrayNotHasKey( 'column-width', $columns[0]['email_attrs'] );
+		$this->assertEquals( '100px', $columns[0]['email_attrs']['width'] );
+
+		// Zero widths in that row used to divide by zero.
+		$blocks[0]['innerBlocks'] = $this->get_columns_blocks( array( '0%', '0px' ) )[0]['innerBlocks'];
+		$columns                  = $this->preprocessor->preprocess( $blocks, array( 'contentSize' => '100px' ), $this->styles )[0]['innerBlocks'];
+		$this->assertArrayNotHasKey( 'column-width', $columns[0]['email_attrs'] );
+		$this->assertArrayNotHasKey( 'column-width', $columns[1]['email_attrs'] );
 	}
 
 	/**
