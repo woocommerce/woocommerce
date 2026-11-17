@@ -122,7 +122,7 @@ For browser-based verification, open `http://localhost:8888/` with the Browser p
 
 ## Testing Abilities over MCP
 
-When a change touches a WooCommerce ability, call it through MCP the way an AI client does. The MCP Adapter is not bundled, so add it with a gitignored `plugins/woocommerce/.wp-env.override.json`, then run `pnpm env:dev:start` from `plugins/woocommerce/`:
+When a change touches a WooCommerce ability, call it through MCP the way an AI client does. The MCP Adapter is not bundled, so add it with a gitignored `plugins/woocommerce/.wp-env.override.json` like the one below, then run `pnpm env:dev:start` from `plugins/woocommerce/`. If that file already exists, merge into it instead of replacing it: add the adapter URL to its `plugins` array, keeping its existing entries and `"."`, and add the `config` keys.
 
 ```json
 {
