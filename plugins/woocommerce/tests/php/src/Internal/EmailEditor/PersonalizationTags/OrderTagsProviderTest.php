@@ -8,6 +8,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\PersonalizationTags\OrderTagsProvider;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
 
@@ -166,6 +167,19 @@ class OrderTagsProviderTest extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_email_heading_customer_fulfillment_created', $filter );
 
 		$this->assertSame( '<h2>Packed &amp; ready</h2>', $html );
+	}
+
+	/**
+	 * @testdox The block fulfillment created template takes its heading from the tag.
+	 */
+	public function test_block_template_heading_comes_from_the_tag(): void {
+		$email  = $this->create_fulfillment_email( 2 );
+		$markup = WCTransactionalEmailPostsGenerator::render_block_template_html( $email );
+
+		$personalizer = new Personalizer( $this->registry );
+		$personalizer->set_context( array( 'wc_email' => $email ) );
+
+		$this->assertStringContainsString( 'Your items are on the way!', $personalizer->personalize_content( $markup ) );
 	}
 
 	/**
