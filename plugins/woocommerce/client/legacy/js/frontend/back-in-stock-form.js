@@ -11,7 +11,21 @@
 		var self               = this;
 		self.$variationsForm   = $variationsForm;
 		self.product_id        = self.$variationsForm.data( 'product_id' );
-		self.$formContainer    = $( '.wc_bis_form[data-bis-product-id="' + self.product_id + '"]' );
+
+		// The prompt renders once per product, right after the first variations form. Bind it to that form only.
+		var promptSelector     = '.wc_bis_form[data-bis-product-id="' + self.product_id + '"]';
+		self.$formContainer    = self.$variationsForm.nextUntil( '.variations_form', promptSelector ).first();
+
+		// Themes may wrap the form or the prompt, so fall back to a page-wide lookup for the product's first form.
+		var $firstForm = $( '.variations_form[data-product_id="' + self.product_id + '"]' ).first();
+		if ( ! self.$formContainer.length && self.$variationsForm.is( $firstForm ) ) {
+			self.$formContainer = $( promptSelector ).first();
+		}
+
+		if ( ! self.$formContainer.length ) {
+			return;
+		}
+
 		self.$form             = self.$formContainer.find( 'form' );
 		self.$formProductInput = self.$formContainer.find( 'input[name="wc_bis_product_id"]' );
 
