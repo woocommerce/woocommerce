@@ -298,6 +298,26 @@ class Media_Text_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Percentage padding resolves against the block's width: 5% of 612px is 30.6px per side,
+	 * so ( 612 - 61.2 ) * 50% - 20px = 255px.
+	 */
+	public function testItResolvesPercentagePaddingAgainstBlockWidth(): void {
+		$parsed_block                   = $this->get_block_with_image( 1200, 800, 50 );
+		$parsed_block['attrs']['style'] = array(
+			'spacing' => array(
+				'padding' => array(
+					'left'  => '5%',
+					'right' => '5%',
+				),
+			),
+		);
+
+		$img = $this->render_and_get_img( $parsed_block );
+
+		$this->assertSame( '255', $img['width'] );
+	}
+
+	/**
 	 * Padding saved as a spacing preset is resolved through the theme's variables.
 	 */
 	public function testItResolvesPresetPaddingForCap(): void {

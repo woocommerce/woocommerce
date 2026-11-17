@@ -167,7 +167,8 @@ class Media_Text extends Abstract_Block_Renderer {
 		}
 
 		$block_attrs = $parsed_block['attrs'] ?? array();
-		$block_width = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] ) - $this->get_horizontal_box_width( $block_attrs, $rendering_context );
+		$email_width = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] );
+		$block_width = $email_width - $this->get_horizontal_box_width( $block_attrs, $email_width, $rendering_context );
 		$max_width   = (int) floor( $block_width * $this->get_media_width_from_attributes( $block_attrs ) / 100 ) - 2 * self::MEDIA_CELL_PADDING;
 		if ( $max_width <= 0 ) {
 			return $media_content;
@@ -235,13 +236,14 @@ class Media_Text extends Abstract_Block_Renderer {
 	 * Get the block's own left and right padding plus border width, in pixels.
 	 *
 	 * The block's email width includes these, but they're applied to the wrapper table, so the
-	 * cells get what's left.
+	 * cells get what's left. Percentages resolve against the block's email width, as CSS padding does.
 	 *
 	 * @param array             $block_attrs Block attributes.
+	 * @param float             $email_width Block's email width in pixels.
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return float
 	 */
-	private function get_horizontal_box_width( array $block_attrs, Rendering_Context $rendering_context ): float {
+	private function get_horizontal_box_width( array $block_attrs, float $email_width, Rendering_Context $rendering_context ): float {
 		$padding = $block_attrs['style']['spacing']['padding'] ?? array();
 		$border  = $block_attrs['style']['border'] ?? array();
 		$padding = is_array( $padding ) ? $padding : array();
@@ -263,6 +265,10 @@ class Media_Text extends Abstract_Block_Renderer {
 			if ( Preset_Variable_Resolver::is_preset_reference( $value ) ) {
 				$variables_map = $variables_map ?? Preset_Variable_Resolver::get_variables_map( $rendering_context->get_theme_json() );
 				$value         = Preset_Variable_Resolver::resolve( $value, $variables_map );
+			}
+			if ( '%' === substr( trim( $value ), -1 ) ) {
+				$total += $email_width * Styles_Helper::parse_value( $value ) / 100;
+				continue;
 			}
 			$px     = Styles_Helper::convert_to_px( $value, false );
 			$total += Styles_Helper::parse_value( $px ?? $value );
