@@ -71,17 +71,22 @@ Supported methods: `get(path, params, debug)`, `post(path, data, debug)`, `put(p
 
 ### Logged-in admin session
 
-Use `createAdminRestClient` with an authenticated Playwright request context. Pass the WordPress site URL, including the subdirectory if the site uses one. The helper reuses a WordPress REST nonce for the lifetime of the client and returns Playwright's `APIResponse`.
+Use `createAdminRestClient` with an authenticated Playwright request context and a WordPress site that exposes its REST API at `wp-json/`. Pass the site URL, including any installation subdirectory, and include the namespace in each route. The helper preserves caller headers, manages the WordPress REST nonce, and returns Playwright's `APIResponse` for all HTTP statuses.
+
+The helper refreshes the nonce and retries once when WordPress returns `rest_cookie_invalid_nonce`. If the request uploads a stream, it returns that response so the caller can retry with a fresh stream.
 
 ```js
 import { createAdminRestClient } from '@woocommerce/e2e-utils-playwright';
 
 const send = createAdminRestClient(adminPage.request, 'http://localhost:8889/');
-const response = await send('orders/123', {
+const response = await send('wc/v3/orders/123', {
   method: 'PUT',
   data: { status: 'completed' },
 });
 await expect(response).toBeOK();
+
+const pages = await send('wp/v2/pages', { params: { per_page: 5 } });
+await expect(pages).toBeOK();
 ```
 
 ## Contributing to this package

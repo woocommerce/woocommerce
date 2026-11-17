@@ -2,20 +2,21 @@
  * External dependencies
  */
 import type { APIRequestContext } from '@playwright/test';
+import { Readable } from 'node:stream';
 
 type AdminRestRequestOptions = Omit<
 	NonNullable< Parameters< APIRequestContext[ 'fetch' ] >[ 1 ] >,
-	'headers' | 'maxRedirects'
+	'failOnStatusCode' | 'maxRedirects'
 >;
 
 /**
- * Create a WooCommerce REST client for an authenticated WordPress admin session.
- * Create one client per test session. The client reuses its REST nonce and returns
- * Playwright responses for the caller to check.
+ * Create a WordPress REST client for an authenticated Playwright admin session.
+ * It reuses a nonce and retries once if WordPress rejects it. For an upload
+ * using a stream, the caller must supply a fresh stream and retry.
  *
  * @param request Playwright request context with the admin session cookies.
  * @param siteUrl WordPress site URL, including any installation subdirectory.
- * @return A function that accepts a route relative to wp-json/wc/v3 and request options.
+ * @return A function that accepts a route relative to wp-json and returns an APIResponse.
  */
 export function createAdminRestClient(
 	request: APIRequestContext,
@@ -25,7 +26,7 @@ export function createAdminRestClient(
 	if ( ! base.pathname.endsWith( '/' ) ) {
 		base.pathname += '/';
 	}
-	const restUrl = new URL( 'wp-json/wc/v3/', base );
+	const restUrl = new URL( 'wp-json/', base );
 	const nonceUrl = new URL(
 		'wp-admin/admin-ajax.php?action=rest-nonce',
 		base
@@ -35,6 +36,7 @@ export function createAdminRestClient(
 	async function getNonce() {
 		const response = await request.get( nonceUrl.href, {
 			maxRedirects: 0,
+			failOnStatusCode: false,
 		} );
 		try {
 			const value = ( await response.text() ).trim();
@@ -49,6 +51,14 @@ export function createAdminRestClient(
 		}
 	}
 
+	function getCachedNonce() {
+		nonce ??= getNonce().catch( ( error ) => {
+			nonce = undefined;
+			throw error;
+		} );
+		return nonce;
+	}
+
 	return async ( route: string, options?: AdminRestRequestOptions ) => {
 		const endpoint = new URL( route.replace( /^\//, '' ), restUrl );
 		if (
@@ -56,19 +66,45 @@ export function createAdminRestClient(
 			! endpoint.pathname.startsWith( restUrl.pathname )
 		) {
 			throw new Error(
-				'Expected a route within the WooCommerce REST API.'
+				'Expected a route within the WordPress REST API.'
 			);
 		}
 
-		nonce ??= getNonce().catch( ( error ) => {
-			nonce = undefined;
-			throw error;
-		} );
+		const headers = Object.fromEntries(
+			Object.entries( options?.headers ?? {} ).filter(
+				( [ name ] ) => name.toLowerCase() !== 'x-wp-nonce'
+			)
+		);
+		const send = ( value: string ) =>
+			request.fetch( endpoint.href, {
+				...options,
+				headers: { ...headers, 'X-WP-Nonce': value },
+				failOnStatusCode: false,
+				maxRedirects: 0,
+			} );
+		const usedNonce = getCachedNonce();
+		const response = await send( await usedNonce );
+		if (
+			response.status() !== 403 ||
+			( await response.json().catch( () => null ) )?.code !==
+				'rest_cookie_invalid_nonce'
+		) {
+			return response;
+		}
 
-		return request.fetch( endpoint.href, {
-			...options,
-			headers: { 'X-WP-Nonce': await nonce },
-			maxRedirects: 0,
-		} );
+		if ( nonce === usedNonce ) {
+			nonce = undefined;
+		}
+		// Playwright consumes multipart upload streams on the first request.
+		if (
+			Object.values( options?.multipart ?? {} ).some(
+				( value ) => value instanceof Readable
+			)
+		) {
+			return response;
+		}
+
+		await response.dispose();
+		return send( await getCachedNonce() );
 	};
 }
