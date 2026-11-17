@@ -182,7 +182,7 @@ class Media_Text extends Abstract_Block_Renderer {
 		$saved_width  = $html->get_attribute( 'width' );
 		$saved_height = $html->get_attribute( 'height' );
 		if ( null === $saved_width && null === $saved_height ) {
-			list( $saved_width, $saved_height ) = $this->get_attachment_image_dimensions( $html, $block_attrs );
+			list( $saved_width, $saved_height ) = $this->get_unsaved_image_dimensions( $html, $block_attrs );
 		}
 		if ( is_string( $saved_width ) && is_numeric( $saved_width ) ) {
 			if ( (float) $saved_width <= $max_width ) {
@@ -194,7 +194,7 @@ class Media_Text extends Abstract_Block_Renderer {
 			}
 			Html_Processing_Helper::scale_height_attribute( $html, $max_width );
 		} else {
-			// The size is unknown, as for an image inserted from a URL. Fill the cell as the editor
+			// The size is unknown, as for an image hosted on another site. Fill the cell as the editor
 			// does, and drop the height since there's no width to scale it against.
 			$html->remove_attribute( 'height' );
 		}
@@ -205,6 +205,33 @@ class Media_Text extends Abstract_Block_Renderer {
 		$html->set_attribute( 'style', $style . sprintf( 'max-width:%dpx;width:100%%;height:auto;', $max_width ) );
 
 		return $html->get_updated_html();
+	}
+
+	/**
+	 * Find the size of an image saved without `width` and `height`.
+	 *
+	 * Tries the attachment, then a `w` query parameter, then the file in the uploads directory.
+	 * A `w` parameter gives no height.
+	 *
+	 * @param \WP_HTML_Tag_Processor $html Processor positioned on the image.
+	 * @param array                  $block_attrs Block attributes.
+	 * @return array{0: ?string, 1: ?string} Width and height, or nulls when unknown.
+	 */
+	private function get_unsaved_image_dimensions( \WP_HTML_Tag_Processor $html, array $block_attrs ): array {
+		$dimensions = $this->get_attachment_image_dimensions( $html, $block_attrs );
+		$src        = $html->get_attribute( 'src' );
+		if ( null !== $dimensions[0] || ! is_string( $src ) ) {
+			return $dimensions;
+		}
+
+		$query_width = Html_Processing_Helper::get_width_from_url_query( $src );
+		if ( null !== $query_width ) {
+			return array( (string) $query_width, null );
+		}
+
+		$local_size = Html_Processing_Helper::get_local_image_size( $src );
+
+		return null === $local_size ? array( null, null ) : array( (string) $local_size[0], (string) $local_size[1] );
 	}
 
 	/**

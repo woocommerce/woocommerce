@@ -59,6 +59,13 @@ class Media_Text_Test extends \Email_Editor_Integration_Test_Case {
 	private $rendering_context;
 
 	/**
+	 * Files written to the uploads directory by a test.
+	 *
+	 * @var string[]
+	 */
+	private $uploaded_files = array();
+
+	/**
 	 * Set up before each test
 	 */
 	public function setUp(): void {
@@ -414,6 +421,38 @@ class Media_Text_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * An image CDN URL's `w` parameter gives the served width, so an image it shows to fit is left alone.
+	 */
+	public function testItLeavesImageWithSmallWidthQueryUnchanged(): void {
+		$parsed_block              = $this->get_block_with_image( 1200, 800, 50 );
+		$parsed_block['innerHTML'] = '<figure class="wp-block-media-text__media"><img src="https://example.com/remote-image.jpg?w=150" alt="Remote Image" /></figure><div class="wp-block-media-text__content"><p>Media content</p></div>';
+
+		$img = $this->render_and_get_img( $parsed_block );
+
+		$this->assertSame( '', $img['width'] );
+		$this->assertStringNotContainsString( 'max-width:286px', $img['style'] );
+	}
+
+	/**
+	 * An image URL in the uploads directory with no attachment is measured from the file.
+	 */
+	public function testItReadsSizeOfUploadedFileWithoutAttachment(): void {
+		$large_url = $this->create_uploaded_image( 'media-text-large.png', 1200, 600 );
+		$small_url = $this->create_uploaded_image( 'media-text-small.png', 120, 60 );
+
+		$parsed_block              = $this->get_block_with_image( 1, 1, 50 );
+		$parsed_block['innerHTML'] = sprintf( '<figure class="wp-block-media-text__media"><img src="%s" alt="" /></figure><div class="wp-block-media-text__content"><p>Media content</p></div>', esc_url( $large_url ) );
+		$large_img                 = $this->render_and_get_img( $parsed_block );
+
+		$parsed_block['innerHTML'] = sprintf( '<figure class="wp-block-media-text__media"><img src="%s" alt="" /></figure><div class="wp-block-media-text__content"><p>Media content</p></div>', esc_url( $small_url ) );
+		$small_img                 = $this->render_and_get_img( $parsed_block );
+
+		$this->assertSame( '286', $large_img['width'] );
+		$this->assertSame( '143', $large_img['height'] );
+		$this->assertSame( '', $small_img['width'], 'An uploaded image that fits should keep its natural size.' );
+	}
+
+	/**
 	 * A height without a width can't be scaled, so it's dropped rather than distorting the image in Outlook.
 	 */
 	public function testItDropsHeightWhenWidthIsUnknown(): void {
@@ -444,6 +483,40 @@ class Media_Text_Test extends \Email_Editor_Integration_Test_Case {
 			$height
 		);
 		return $parsed_block;
+	}
+
+	/**
+	 * Write a PNG of the given size to the uploads directory, removed again after the test.
+	 *
+	 * @param string $filename File name.
+	 * @param int    $width Width in pixels.
+	 * @param int    $height Height in pixels.
+	 * @return string URL of the file.
+	 */
+	private function create_uploaded_image( string $filename, int $width, int $height ): string {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is needed to create a test image.' );
+		}
+
+		$upload_dir = wp_upload_dir();
+		$path       = trailingslashit( $upload_dir['path'] ) . $filename;
+		$image      = imagecreatetruecolor( max( 1, $width ), max( 1, $height ) );
+		$this->assertNotFalse( $image );
+		imagepng( $image, $path );
+		$this->uploaded_files[] = $path;
+
+		return trailingslashit( $upload_dir['url'] ) . $filename;
+	}
+
+	/**
+	 * Remove the files the test wrote to the uploads directory.
+	 */
+	public function tearDown(): void {
+		foreach ( $this->uploaded_files as $path ) {
+			wp_delete_file( $path );
+		}
+		$this->uploaded_files = array();
+		parent::tearDown();
 	}
 
 	/**
