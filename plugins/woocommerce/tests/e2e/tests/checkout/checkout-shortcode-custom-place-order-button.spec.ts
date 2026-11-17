@@ -17,6 +17,7 @@ import {
 } from '../../utils/pages';
 import { wpCLI } from '../../utils/cli';
 import { setGatewayEnabled } from '../../utils/payment-gateways';
+import { enableTestPlugin } from '../../utils/blocks/test-plugins';
 
 const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
@@ -37,12 +38,13 @@ const test = baseTest.extend( {
 		const codWasEnabled = await setGatewayEnabled( restApi, 'cod', true );
 
 		await page.context().clearCookies();
+		await enableTestPlugin(
+			page.context(),
+			'custom-place-order-button-test'
+		);
 		await use( page );
 
-		// Cleanup: deactivate the test plugin so its custom gateway stops being
-		// registered on every checkout/order-pay page for the rest of the run.
-		// The gateway hardcodes `enabled = 'yes'` in its constructor, so deleting
-		// the option alone would NOT disable it — only deactivation does.
+		// Cleanup: undo the plugin activation and the option.
 		await wpCLI(
 			'wp plugin deactivate woocommerce-blocks-test-plugins/custom-place-order-button-test.php'
 		);

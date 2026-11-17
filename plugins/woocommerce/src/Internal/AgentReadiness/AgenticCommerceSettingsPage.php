@@ -172,7 +172,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		echo '<p class="wc-agentic-commerce-intro">' . esc_html__( 'Let AI shopping assistants find your products, build a cart, and send shoppers to your checkout to pay. Uses the Universal Commerce Protocol (UCP).', 'woocommerce' ) . '</p>';
 		$this->render_switch( $checks, count( $failing ) );
 		$this->render_visibility( $report );
-		$this->render_status( $checks, $this->ucp_switch->status( $failing ), count( $failing ) );
+		$this->render_status( $checks, $this->ucp_switch->status( $failing ) );
 		$this->render_readiness( array_slice( $this->agent_readiness->get_store_checks( $report, $checks ), count( $checks ) ), (bool) ( array_column( $checks, 'ok', 'id' )['launched'] ?? true ), $report );
 
 		echo '<div class="wc-agentic-commerce-card wc-agentic-commerce-policies">';
@@ -316,7 +316,11 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * @param array<string, mixed> $report Stored report.
 	 */
 	private function render_product_checks( array $report ): void {
-		$channels = is_array( $report['channels'] ?? null ) ? $report['channels'] : array();
+		$channels = array_filter( is_array( $report['channels'] ?? null ) ? $report['channels'] : array(), 'is_array' );
+		$channels = array_map(
+			static fn( array $channel ): array => $channel + array_fill_keys( array( 'url', 'name', 'spec', 'listable', 'not_listable', 'with_gaps', 'complete' ), '' ),
+			$channels
+		);
 		$failing  = array_filter(
 			is_array( $report['checks'] ?? null ) ? $report['checks'] : array(),
 			static fn( $check ): bool => is_array( $check ) && (int) ( $check['count'] ?? 0 ) > 0
@@ -492,11 +496,10 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * The Status card: a badge, then the setup checks grouped into Required, Recommended and Done.
 	 * Each open check says what to do and links to where to do it. UCP itself is the switch, so it is not listed.
 	 *
-	 * @param array<int, array{id:string,level:string,ok:bool,name:string,label:string,fix_url:string}> $checks           Store conditions.
-	 * @param string                                                                                    $status           UcpSwitch status.
-	 * @param int                                                                                       $failing_required Number of failing required setup checks.
+	 * @param array<int, array{id:string,level:string,ok:bool,name:string,label:string,fix_url:string}> $checks Store conditions.
+	 * @param string                                                                                    $status UcpSwitch status.
 	 */
-	private function render_status( array $checks, string $status, int $failing_required ): void {
+	private function render_status( array $checks, string $status ): void {
 		$statuses = self::status_labels();
 		$classes  = array(
 			UcpSwitch::STATUS_ACTIVE          => 'pass',
@@ -512,12 +515,14 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			if ( 'ucp_on' === $check['id'] ) {
 				continue;
 			}
-			$group                 = $check['ok'] ? 'done' : ( StoreConditions::LEVEL_REQUIRED === $check['level'] ? 'required' : 'recommended' );
+			$group                 = $check['ok'] ? 'done' : ( StoreConditions::shows_required( $check ) ? 'required' : 'recommended' );
 			$groups[ $group ][1][] = $check;
 		}
-		$summary = $failing_required > 0
-			/* translators: %d: number of failing required setup checks. */
-			? sprintf( _n( '%d required step to finish so agents can shop your store.', '%d required steps to finish so agents can shop your store.', $failing_required, 'woocommerce' ), $failing_required )
+		// The summary follows the Required rows on this card. $failing_required is the smaller set that blocks the switch.
+		$shown_failing = count( $groups['required'][1] );
+		$summary       = $shown_failing > 0
+			/* translators: %d: number of failing checks shown as Required. */
+			? sprintf( _n( '%d required step to finish so agents can shop your store.', '%d required steps to finish so agents can shop your store.', $shown_failing, 'woocommerce' ), $shown_failing )
 			: __( 'Everything agents need is set up.', 'woocommerce' );
 		?>
 		<div class="wc-agentic-commerce-card wc-agentic-commerce-status-card">
@@ -600,16 +605,16 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	/**
 	 * One line on where a question stands.
 	 *
-	 * @param string                                                     $group            Question id.
-	 * @param array<int, array{ok:bool|null,level:string,pending?:bool}> $checks           The question's checks. Pending ones don't count as unchecked.
-	 * @param bool                                                       $scanned          Whether a scan has run.
-	 * @param int                                                        $product_problems Failing product checks under the question.
-	 * @param bool                                                       $ucp_scanned      Whether the last scan checked UCP.
-	 * @param bool                                                       $ucp_enabled      Whether UCP is on.
+	 * @param string                                                               $group            Question id.
+	 * @param array<int, array{id:string,ok:bool|null,level:string,pending?:bool}> $checks           The question's checks. Pending ones don't count as unchecked.
+	 * @param bool                                                                 $scanned          Whether a scan has run.
+	 * @param int                                                                  $product_problems Failing product checks under the question.
+	 * @param bool                                                                 $ucp_scanned      Whether the last scan checked UCP.
+	 * @param bool                                                                 $ucp_enabled      Whether UCP is on.
 	 */
 	private static function group_summary( string $group, array $checks, bool $scanned, int $product_problems, bool $ucp_scanned, bool $ucp_enabled ): string {
-		$fix     = count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] && StoreConditions::LEVEL_REQUIRED === $check['level'] ) );
-		$check   = $product_problems + count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] && StoreConditions::LEVEL_REQUIRED !== $check['level'] ) );
+		$fix     = count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] && StoreConditions::shows_required( $check ) ) );
+		$check   = $product_problems + count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] && ! StoreConditions::shows_required( $check ) ) );
 		$unknown = count( array_filter( $checks, static fn( array $check ): bool => null === $check['ok'] && empty( $check['pending'] ) ) );
 		$parts   = array();
 		if ( $fix > 0 ) {
@@ -642,8 +647,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	/**
 	 * A table of store checks.
 	 *
-	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool}> $checks   Checks.
-	 * @param bool|null                                                                                                                                          $launched Whether the store is launched.
+	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks   Checks.
+	 * @param bool|null                                                                                                                                                          $launched Whether the store is launched.
 	 */
 	private function render_check_rows( array $checks, ?bool $launched ): void {
 		if ( array() === $checks ) {
@@ -663,7 +668,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 						$badge = array( 'pass', __( 'Pass', 'woocommerce' ) );
 					} elseif ( $conflict ) {
 						$badge = array( 'check', __( 'Likely conflict', 'woocommerce' ) );
-					} elseif ( StoreConditions::LEVEL_REQUIRED === $check['level'] ) {
+					} elseif ( StoreConditions::shows_required( $check ) ) {
 						$badge = array( 'fix', __( 'Fix', 'woocommerce' ) );
 					} else {
 						$badge = array( 'check', __( 'Check', 'woocommerce' ) );
@@ -675,6 +680,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 							<?php echo esc_html( $check['name'] ); ?>
 							<?php if ( false === $check['ok'] ) : ?>
 								<br /><span class="description"><?php echo esc_html( trim( ( $conflict ? __( 'Something on your store may be replacing this. If you just changed it, a page cache may show the old page for a while.', 'woocommerce' ) . ' ' : '' ) . $check['why'] . ' ' . self::blocks_text( $check['blocks'] ) ) ); ?></span>
+								<?php if ( $conflict && ! empty( $check['seen_at'] ) ) : ?>
+									<br /><span class="description"><?php esc_html_e( 'Seen on:', 'woocommerce' ); ?> <a href="<?php echo esc_url( $check['seen_at'] ); ?>"><?php echo esc_html( $check['seen_at'] ); ?></a></span>
+								<?php endif; ?>
 							<?php endif; ?>
 						</td>
 						<td>
@@ -722,9 +730,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * affect the switch, so they sit apart from the setup checks in Status. Run check is
 	 * at the top, and the product checks sit under "Do they understand your products?".
 	 *
-	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool}> $checks   Scanned checks.
-	 * @param bool                                                                                                                                                             $launched Whether the store is launched.
-	 * @param array<string, mixed>|null                                                                                                                                        $report   Stored report, or null before the first scan.
+	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks   Scanned checks.
+	 * @param bool                                                                                                                                                                             $launched Whether the store is launched.
+	 * @param array<string, mixed>|null                                                                                                                                                        $report   Stored report, or null before the first scan.
 	 */
 	private function render_readiness( array $checks, bool $launched, ?array $report ): void {
 		$results = array_column( $checks, 'ok', 'id' );
@@ -812,10 +820,19 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * What an open check asks the merchant to do: the action, the button text and where it goes.
 	 * A policy page that is chosen but not published links to its editor; a published store page asks for another page.
 	 *
-	 * @param array{id:string,label:string,fix_url:string} $check Store condition.
+	 * @param array{id:string,label:string,fix?:string,fix_url:string} $check Store condition.
 	 * @return array{0:string,1:string,2:string}
 	 */
 	private function check_action( array $check ): array {
+		// The UCP row's text is the specific fix (delete the file, fix permissions, or change permalinks).
+		if ( 'ucp_discovery' === $check['id'] ) {
+			$fix = (string) ( $check['fix'] ?? '' );
+			return array(
+				'' !== $fix ? $fix : __( 'Fix your connection URL', 'woocommerce' ),
+				__( 'Change permalinks', 'woocommerce' ),
+				(string) ( $check['fix_url'] ?? '' ),
+			);
+		}
 		$policies = array(
 			'privacy_page'         => array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Publish your privacy policy page', 'woocommerce' ), __( 'Choose a privacy policy page', 'woocommerce' ) ),
 			'terms_page'           => array( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Publish your terms and conditions page', 'woocommerce' ), __( 'Choose a terms and conditions page', 'woocommerce' ) ),

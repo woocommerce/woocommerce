@@ -150,7 +150,11 @@
 				"changes": [
 					"composer.lock",
 					"**/*.php",
-					"**/*.js"
+					"**/*.{js,jsx,ts,tsx}"
+				],
+				"ignore": [
+					"client/admin/client/**/*.{js,jsx,ts,tsx}",
+					"client/blocks/{assets,packages,tests}/**/*.{js,jsx,ts,tsx}"
 				]
 			},
 			"tests": [
