@@ -393,6 +393,7 @@ final class LlmsTxt implements RegisterHooksInterface {
 	 * @param string $text Site text.
 	 */
 	private function plain_text( string $text ): string {
-		return trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( html_entity_decode( $text, ENT_QUOTES, 'UTF-8' ) ) ) ?? '' );
+		$text = str_replace( array( "\f", "\v" ), ' ', html_entity_decode( $text, ENT_QUOTES, 'UTF-8' ) );
+		return wp_strip_all_tags( $text, true );
 	}
 }
