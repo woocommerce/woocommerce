@@ -71,13 +71,9 @@
 		color: var(--wc-sr-muted);
 	}
 
-	// No orphans: balance the last line of text, and keep an external link on one line.
+	// No orphans: balance the last line of text.
 	:is(p, .components-text, [class*="__body-"]) {
 		text-wrap: pretty;
-	}
-
-	a[target="_blank"] {
-		white-space: nowrap;
 	}
 
 	// AI tools Overview: centered in the settings panel, like the Sales readiness content.
@@ -227,7 +223,6 @@
 	align-items: center;
 	gap: var(--wpds-dimension-gap-sm);
 	min-height: 24px;
-	padding: 0;
 	margin: var(--wpds-dimension-gap-md) 0 0;
 
 	&:first-child {

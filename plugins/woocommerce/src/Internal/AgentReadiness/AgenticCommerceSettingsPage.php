@@ -343,7 +343,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			</div>
 			<?php
 			if ( array() !== $open ) {
-				echo '<ul class="wc-agentic-commerce-items wc-agentic-commerce-steps">';
+				echo '<ul class="wc-agentic-commerce-items">';
 				foreach ( $open as $check ) {
 					$action   = self::check_action( $check );
 					$required = StoreConditions::shows_required( $check );
