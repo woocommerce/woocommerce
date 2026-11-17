@@ -366,3 +366,31 @@ This is optional. If the feature flag is disabled, or the page does not return a
 - [Settings UI](./settings-ui.md)
 - [WC_Settings_Page code reference](https://woocommerce.github.io/code-reference/classes/WC-Settings-Page.html)
 - [WC_Admin_Settings code reference](https://woocommerce.github.io/code-reference/classes/WC-Admin-Settings.html)
+
+## Opt a setting into ability reads
+
+Starting with WooCommerce 11.4, `woocommerce/settings-query` reads settings only when their definition contains `abilities.read` set to the boolean `true`. Add the metadata beside the field's `id` and `type`:
+
+```php
+array(
+    'id'        => 'my_plugin_mode',
+    'title'     => __( 'Display mode', 'my-plugin' ),
+    'type'      => 'select',
+    'default'   => 'compact',
+    'options'   => array(
+        'compact' => __( 'Compact', 'my-plugin' ),
+        'full'    => __( 'Full', 'my-plugin' ),
+    ),
+    'abilities' => array( 'read' => true ),
+),
+```
+
+The same metadata works on email form fields exposed through a settings group. It does not register a new group or expose payment gateway or shipping-instance settings automatically. Callers still need permission to read WooCommerce settings.
+
+Fields without explicit opt-in are omitted, even when requested by ID. The response lists known but withheld setting IDs in `omitted`; unknown IDs and presentation fields are not listed. This list follows `include` and is computed before pagination. Totals count only returned settings. Password fields are always omitted, including when `read` is `true`. Never opt in API keys, tokens or other secrets stored in text fields. Review defaults and choices as well as stored values, since the ability can return all three. Supported values are scalars, lists of scalars and the retention-period object with `number` and `unit` members; other object shapes are omitted.
+
+Choices are returned only when supplied in the field definition. Country fields return country or country/state codes without choice lists, keeping group responses small.
+
+The group read uses a non-null `fixed_value` first, then a non-null `value` supplied by the definition, then the stored option and its default. This follows the admin field value precedence and supports settings such as additional tax classes that are not stored as options. Supplied values still require read opt-in and pass the same password and value-shape checks. Existing REST settings reads retain their current behavior.
+
+This metadata also controls fields in the fixed `woocommerce/store-settings-get` summary that come from WooCommerce setting definitions. Missing opt-in or a password type omits the corresponding summary fields, including derived fields such as the currency symbol. The street address combines only readable address lines. Country scopes and their country lists are checked separately. Summary fields without a WooCommerce setting definition (WordPress timezone/date settings, version, install timestamp and the reviewed onboarding fields) retain their fixed inclusion policy. Only `read` is supported; there is no per-field personal-data sharing control yet. Opt-in allows the field to be returned to authorized callers without a separate PII check.
