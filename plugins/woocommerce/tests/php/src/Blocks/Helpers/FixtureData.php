@@ -159,8 +159,6 @@ class FixtureData {
 	 * @return array Attribute data and created terms.
 	 */
 	public static function get_product_attribute( $raw_name = 'size', $terms = array( 'small' ) ) {
-		global $wpdb, $wc_product_attributes;
-
 		// Make sure caches are clean.
 		delete_transient( 'wc_attribute_taxonomies' );
 		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
@@ -190,31 +188,6 @@ class FixtureData {
 					'has_archives' => 0,
 				)
 			);
-
-			// Register as taxonomy.
-			register_taxonomy(
-				$taxonomy_name,
-				apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
-				apply_filters(
-					'woocommerce_taxonomy_args_' . $taxonomy_name,
-					array(
-						'labels'       => array(
-							'name' => $raw_name,
-						),
-						'hierarchical' => false,
-						'show_ui'      => false,
-						'query_var'    => true,
-						'rewrite'      => false,
-					)
-				)
-			);
-
-			// Set product attributes global.
-			$wc_product_attributes = array();
-
-			foreach ( wc_get_attribute_taxonomies() as $taxonomy ) {
-				$wc_product_attributes[ wc_attribute_taxonomy_name( $taxonomy->attribute_name ) ] = $taxonomy;
-			}
 		}
 
 		$attribute = wc_get_attribute( $attribute_id );
