@@ -1225,6 +1225,46 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A save that fails before the write is failed even when a listener saved another fulfillment first.
+	 * @testWith ["woocommerce_fulfillment_before_create", "created"]
+	 *           ["woocommerce_fulfillment_before_update", "updated"]
+	 *
+	 * @param string $hook   Filter whose callback saves another fulfillment and then throws once.
+	 * @param string $status Expected status of the retried row.
+	 */
+	public function test_nested_save_does_not_mark_a_failed_row_as_written( string $hook, string $status ): void {
+		$order = OrderHelper::create_order();
+		$id    = $order->get_id();
+		if ( FulfillmentsCsvImporter::STATUS_UPDATED === $status ) {
+			$this->import_csv( "order_number,tracking_number,shipment_provider\n{$id},TRK-A,fedex\n" );
+		}
+		$other  = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) OrderHelper::create_order()->get_id() ) );
+		$throws = 1;
+		add_filter(
+			$hook,
+			function ( $fulfillment ) use ( &$throws, $other, $status ) {
+				if ( 'TRK-A' === $fulfillment->get_tracking_number() && $throws-- > 0 ) {
+					// The nested save fires the same after-write action the row's own save would.
+					if ( FulfillmentsCsvImporter::STATUS_CREATED === $status ) {
+						FulfillmentsHelper::create_fulfillment( array( 'entity_id' => $other->get_entity_id() ) );
+					} else {
+						$other->set_status( 'fulfilled' );
+						$other->save();
+					}
+					throw new \RuntimeException( 'Blocked after a nested save.' );
+				}
+				return $fulfillment;
+			}
+		);
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$id},TRK-A,ups\n{$id},TRK-A,ups\n" );
+
+		$this->assertSame( array( FulfillmentsCsvImporter::STATUS_FAILED, $status ), array_column( $result['rows'], 'status' ) );
+		$this->assertCount( 1, $this->fulfillments_of( $order ) );
+		$this->assertArrayNotHasKey( PHP_INT_MIN, $GLOBALS['wp_filter'][ str_replace( 'before', 'after', $hook ) ]->callbacks, 'The write listener is removed' );
+	}
+
+	/**
 	 * @testdox A blocked update leaves none of its values behind for a later row of the same fulfillment.
 	 */
 	public function test_blocked_update_does_not_leak_its_values_into_a_later_row(): void {

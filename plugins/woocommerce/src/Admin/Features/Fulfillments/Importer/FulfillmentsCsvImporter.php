@@ -700,9 +700,15 @@ class FulfillmentsCsvImporter {
 		}
 
 		$hook_depth = count( $GLOBALS['wp_current_filter'] );
-		// The data store fires this action only once the row is written.
+		// The data store fires this action with the fulfillment only once its row is written.
 		$written_hook = null === $existing ? 'woocommerce_fulfillment_after_create' : 'woocommerce_fulfillment_after_update';
-		$writes       = did_action( $written_hook );
+		$written      = false;
+		$mark_written = static function ( $saved ) use ( $fulfillment, &$written ) {
+			if ( $saved === $fulfillment ) {
+				$written = true;
+			}
+		};
+		add_action( $written_hook, $mark_written, PHP_INT_MIN );
 		try {
 			$fulfillment->save();
 		} catch ( \Throwable $e ) {
@@ -713,9 +719,11 @@ class FulfillmentsCsvImporter {
 			);
 			// The cached fulfillment may hold values that were not written, so the next row reads it again.
 			unset( $this->fulfillments_cache[ $order_id ] );
-			if ( did_action( $written_hook ) === $writes ) {
+			if ( ! $written ) {
 				return self::fail( self::CODE_SAVE_FAILED, $e instanceof FulfillmentException ? $e->getMessage() : __( 'Could not save the fulfillment.', 'woocommerce' ), $order_id );
 			}
+		} finally {
+			remove_action( $written_hook, $mark_written, PHP_INT_MIN );
 		}
 		if ( null === $existing && isset( $this->fulfillments_cache[ $order_id ] ) ) {
 			$this->fulfillments_cache[ $order_id ][] = $fulfillment;
