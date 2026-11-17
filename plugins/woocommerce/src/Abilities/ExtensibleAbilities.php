@@ -1019,12 +1019,21 @@ class ExtensibleAbilities {
 	 * Send an empty array for an `object` as an empty object, at any depth.
 	 * rest_sanitize_value_from_schema() turns every object into an array, so a
 	 * callback cannot send `{}` by itself. A part with no schema stays as it is.
+	 * A schema with an `anyOf` or `oneOf` and no `type` uses the branch that
+	 * rest_sanitize_value_from_schema() picked, and a value that matches no
+	 * branch stays as it is.
 	 *
 	 * @param mixed                $value  Sanitized value.
 	 * @param array<string, mixed> $schema Schema of the value.
 	 * @return mixed The value for the JSON output.
 	 */
 	private static function prepare_json_value( $value, array $schema ) {
+		if ( ! isset( $schema['type'] ) && ( isset( $schema['anyOf'] ) || isset( $schema['oneOf'] ) ) ) {
+			$schema = isset( $schema['anyOf'] ) ? rest_find_any_matching_schema( $value, $schema, '' ) : rest_find_one_matching_schema( $value, $schema, '' );
+			if ( is_wp_error( $schema ) ) {
+				return $value;
+			}
+		}
 		$type = rest_get_best_type_for_value( $value, (array) ( $schema['type'] ?? array() ) );
 		if ( 'array' === $type ) {
 			$children = array_fill_keys( array_keys( $value ), $schema['items'] ?? null );

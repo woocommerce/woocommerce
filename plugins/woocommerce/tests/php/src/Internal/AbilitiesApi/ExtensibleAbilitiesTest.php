@@ -2051,6 +2051,64 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should send an empty array for an object as an empty object under an anyOf or a oneOf with a null branch.
+	 */
+	public function test_an_empty_object_under_an_any_of_or_one_of_is_an_empty_object(): void {
+		$object_or_null = fn( string $keyword ) => array( $keyword => array( array( 'type' => 'object' ), array( 'type' => 'null' ) ) );
+		$output         = $this->read_field_values(
+			array(
+				'any_of_items'    => array(
+					array(
+						'type'  => 'array',
+						'items' => $object_or_null( 'anyOf' ),
+					),
+					array( array(), null ),
+				),
+				'one_of_items'    => array(
+					array(
+						'type'  => 'array',
+						'items' => $object_or_null( 'oneOf' ),
+					),
+					array( array(), null ),
+				),
+				'any_of_property' => array(
+					array(
+						'type'       => 'object',
+						'properties' => array(
+							'empty' => $object_or_null( 'anyOf' ),
+							'null'  => $object_or_null( 'anyOf' ),
+						),
+					),
+					array(
+						'empty' => array(),
+						'null'  => null,
+					),
+				),
+				'any_of_deep'     => array(
+					array(
+						'type'  => 'array',
+						'items' => array(
+							'anyOf' => array(
+								array(
+									'type'       => 'object',
+									'properties' => array( 'inner' => array( 'type' => 'object' ) ),
+								),
+								array( 'type' => 'null' ),
+							),
+						),
+					),
+					array( array( 'inner' => array() ) ),
+				),
+			)
+		);
+
+		$this->assertSame(
+			'{"any_of_items":[{},null],"one_of_items":[{},null],"any_of_property":{"empty":{},"null":null},"any_of_deep":[{"inner":{}}]}',
+			wp_json_encode( $output )
+		);
+	}
+
+	/**
 	 * @testdox Should return product amounts as strings when the getters return an int or a float, and save the write.
 	 */
 	public function test_product_amounts_are_returned_as_strings(): void {
