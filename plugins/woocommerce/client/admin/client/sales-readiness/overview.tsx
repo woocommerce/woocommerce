@@ -65,8 +65,8 @@ export default function SalesReadinessOverview( {
 					</Text>
 					<div className="wc-sales-readiness-card__actions">
 						<Button
-							__next40pxDefaultSize
 							variant="secondary"
+							size="compact"
 							href={ shopping.button.href }
 						>
 							{ shopping.button.text }
@@ -100,8 +100,8 @@ export default function SalesReadinessOverview( {
 							<RunStatus run={ view.run } />
 							<div className="wc-sales-readiness-card__actions">
 								<Button
-									__next40pxDefaultSize
 									variant="secondary"
+									size="compact"
 									disabled={ view.run.pending || running }
 									isBusy={ running }
 									onClick={ runCheck }

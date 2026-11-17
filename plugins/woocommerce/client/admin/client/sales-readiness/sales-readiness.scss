@@ -63,7 +63,7 @@
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		gap: var(--wpds-dimension-gap-lg);
+		gap: var(--wpds-dimension-gap-xl);
 		padding: var(--wpds-dimension-padding-2xl) var(--wpds-dimension-padding-lg);
 	}
 
@@ -108,13 +108,18 @@
 		width: 100%;
 	}
 
+	// Fix first group labels and channel names: heading-sm, semibold as in the design.
+	&__label {
+		font-weight: 600;
+	}
+
 	&__actions {
 		margin-block-start: var(--wpds-dimension-gap-md);
 	}
 
-	// 24px from the last row's divider to "View all checks" on the Overview.
+	// 16px from the last row's divider to "View all checks" on the Overview.
 	.wc-sales-readiness-list + &__actions {
-		margin-block-start: var(--wpds-dimension-gap-xl);
+		margin-block-start: var(--wpds-dimension-gap-lg);
 	}
 
 	// "View all checks": a minimal button, like Show more, its text in line with the card text.
@@ -129,14 +134,30 @@
 		margin-block-end: var(--wpds-dimension-gap-xl);
 	}
 
-	// A list that opens the card starts at the content's edge, not a row's padding below it.
-	.components-card__body > .wc-sales-readiness-list:first-child > .wc-sales-readiness-row:first-child,
-	&__description + .wc-sales-readiness-list > .wc-sales-readiness-row:first-child {
-		padding-block-start: 0;
+	// A list that opens the card starts 4px under the content's edge (32px under the title), not a
+	// row's padding below it. After a description or the channels, it starts at their margin.
+	.wc-sales-readiness-list:first-child > .wc-sales-readiness-row:first-child {
+		padding-block-start: var(--wpds-dimension-padding-xs);
 	}
 
-	.wc-sales-readiness-channels + .wc-sales-readiness-list {
-		border-block-start: 1px solid var(--wc-sr-stroke);
+	:is(&__description, .wc-sales-readiness-channels) + .wc-sales-readiness-list > .wc-sales-readiness-row:first-child {
+		padding-block-start: 0;
+	}
+}
+
+// Sales readiness page: the card header is 24px tall with the title at its top, so the content
+// starts 28px under the title, and a badge centers on the title. The Overview keeps the card's 24px.
+.wc-sales-readiness:not(.wc-sales-readiness--overview) .wc-sales-readiness-card {
+	.wc-sales-readiness-card__title {
+		min-height: 24px;
+	}
+
+	.wc-sales-readiness-card__head {
+		align-items: flex-start;
+
+		> :not(.wc-sales-readiness-card__title) {
+			margin-block-start: -2px;
+		}
 	}
 }
 
@@ -189,26 +210,24 @@
 	padding-block-start: var(--wpds-dimension-gap-xl);
 }
 
-// A tier heading, then 16px to its first row.
+// On the Overview the design has 18px there: a 12px gap plus a 10px margin, measured to the heading text, which sits 4px into its 24px line.
+.wc-sales-readiness--overview .wc-sales-readiness-list:has(.wc-sales-readiness-tier) {
+	padding-block-start: 18px;
+}
+
+// A tier heading on a 24px line (its badge's height), 12px under the row above, then the first
+// row's own padding: 16px from the heading to the row's title.
 .wc-sales-readiness-tier {
 	display: flex;
 	align-items: center;
 	gap: var(--wpds-dimension-gap-sm);
+	min-height: 24px;
 	padding: 0;
-	margin: var(--wpds-dimension-gap-lg) 0;
-
-	> * {
-		font-weight: 600;
-	}
+	margin: var(--wpds-dimension-gap-md) 0 0;
 
 	&:first-child {
 		margin-block-start: 0;
 	}
-}
-
-// The tier's margin is the space above the first row under it.
-.wc-sales-readiness-tier + .wc-sales-readiness-row {
-	padding-block-start: 0;
 }
 
 .wc-sales-readiness-row {
@@ -264,28 +283,17 @@
 
 .wc-sales-readiness-channels {
 	list-style: none;
-	margin: 0 0 var(--wpds-dimension-gap-sm);
-	padding: var(--wpds-dimension-padding-xs) 0 var(--wpds-dimension-padding-lg);
+	margin: 0 0 var(--wpds-dimension-gap-xl);
+	padding: 0;
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-	gap: var(--wpds-dimension-gap-lg);
+	gap: var(--wpds-dimension-gap-xl);
 
 	li {
 		margin: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
-	}
-
-	&__name {
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: var(--wc-sr-muted);
-	}
-
-	&__count {
-		font-size: 20px;
-		font-weight: 500;
+		gap: var(--wpds-dimension-gap-xs);
 	}
 }
 

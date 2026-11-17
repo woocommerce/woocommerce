@@ -63,7 +63,7 @@ export const SectionCard = ( { section }: { section: Section } ) => {
 	);
 	const note = section.note && (
 		<Text
-			variant="body-sm"
+			variant="body-md"
 			className="wc-sales-readiness__muted wc-sales-readiness-card__description"
 		>
 			{ section.note }
@@ -105,19 +105,22 @@ export const SectionCard = ( { section }: { section: Section } ) => {
 						{ section.channels.map( ( channel ) => (
 							<li key={ channel.name }>
 								<Text
-									variant="body-sm"
-									className="wc-sales-readiness-channels__name"
+									variant="heading-sm"
+									className="wc-sales-readiness-card__label"
 								>
 									{ channel.name }
 								</Text>
-								<Text variant="body-md">
-									<strong className="wc-sales-readiness-channels__count">
+								<div>
+									<Text variant="body-lg">
 										{ channel.listable }
-									</strong>{ ' ' }
-									<span className="wc-sales-readiness__muted">
+									</Text>{ ' ' }
+									<Text
+										variant="body-sm"
+										className="wc-sales-readiness__muted"
+									>
 										{ channel.of }
-									</span>
-								</Text>
+									</Text>
+								</div>
 							</li>
 						) ) }
 					</ul>
@@ -193,7 +196,7 @@ export const DeclaredCard = ( { declared }: { declared: Declared } ) => (
 		</CollapsibleCard.Header>
 		<CollapsibleCard.Content>
 			<Text
-				variant="body-sm"
+				variant="body-md"
 				className="wc-sales-readiness__muted wc-sales-readiness-card__description"
 			>
 				{ declared.text }
