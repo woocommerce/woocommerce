@@ -105,10 +105,10 @@ class CustomerUpdate extends ActionableAbility {
 
 		$user_id = CustomerLookup::get_user_id( $customer_id );
 		if ( ! is_int( $user_id ) ) {
-			return wc_rest_check_user_permissions( 'read' );
+			return (bool) wc_rest_check_user_permissions( 'read' );
 		}
 
-		return wc_rest_check_user_permissions( 'edit', $user_id );
+		return (bool) wc_rest_check_user_permissions( 'edit', $user_id );
 	}
 
 	/**
@@ -150,6 +150,15 @@ class CustomerUpdate extends ActionableAbility {
 				/* translators: %d: customer ID. */
 				sprintf( __( 'Customer %d is a guest, with no account to update. A guest\'s addresses are saved only on their orders, which the woocommerce/order-update ability changes by order ID.', 'woocommerce' ), $input['id'] ),
 				array( 'status' => 409 )
+			);
+		}
+
+		// The permission check may have passed for a guest whose row has since been linked to an account.
+		if ( ! wc_rest_check_user_permissions( 'edit', $user_id ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_customer_forbidden',
+				__( 'You are not allowed to edit this customer.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
 			);
 		}
 

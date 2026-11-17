@@ -243,6 +243,36 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should recheck edit access when a guest is linked to an account after the permission check.
+	 */
+	public function test_rechecks_access_for_guest_linked_after_permission_check(): void {
+		global $wpdb;
+		$order = wc_create_order( array( 'status' => OrderStatus::COMPLETED ) );
+		$order->set_billing_email( 'linked@example.test' );
+		$order->save();
+		\WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+		$guest = (int) CustomersDataStore::get_guest_id_by_email( 'linked@example.test' );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+		add_action(
+			'wp_before_execute_ability',
+			static function () use ( $wpdb, $guest ) {
+				$wpdb->update( CustomersDataStore::get_db_table_name(), array( 'user_id' => self::$user_id ), array( 'customer_id' => $guest ) );
+			}
+		);
+
+		$result = $this->execute(
+			array(
+				'id'         => $guest,
+				'first_name' => 'Ana',
+			)
+		);
+
+		$this->assertSame( 'woocommerce_ability_customer_forbidden', $result->get_error_code() );
+		$this->assertSame( '', ( new \WC_Customer( self::$user_id ) )->get_first_name() );
+	}
+
+	/**
 	 * @testdox Should refuse to run while Analytics is off.
 	 */
 	public function test_refuses_without_analytics(): void {
@@ -260,11 +290,15 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should list an extension field it set, since extension fields write meta that get_changes() leaves out.
+	 * Run a test with the core resources and the given extension callbacks registered, and restore
+	 * the registry after it.
+	 *
+	 * @param callable $register Registers fields or syncs inside woocommerce_extensible_abilities_init.
+	 * @param callable $test     Receives a CustomerUpdate built while they are registered.
 	 */
-	public function test_lists_extension_fields_it_set(): void {
+	private function with_extensions( callable $register, callable $test ): void {
 		$saved = array();
-		foreach ( array( 'resources', 'fields', 'filters' ) as $name ) {
+		foreach ( array( 'resources', 'fields', 'validators', 'filters', 'syncs' ) as $name ) {
 			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
 			$property->setAccessible( true );
 			$saved[ $name ] = $property->getValue();
@@ -274,37 +308,9 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
 			add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
 			do_action( 'woocommerce_extensible_abilities_resources_init' );
-			add_action(
-				'woocommerce_extensible_abilities_init',
-				static function () {
-					ExtensibleAbilities::register_field(
-						array(
-							'resource'      => 'customer',
-							'namespace'     => 'test-ext',
-							'field'         => 'tier',
-							'output_schema' => array( 'type' => 'string' ),
-							'input_schema'  => array( 'type' => 'string' ),
-							'get_callback'  => static fn( \WC_Customer $customer ) => (string) $customer->get_meta( '_test_tier' ),
-							'set_callback'  => static function ( \WC_Customer $customer, $value ) {
-								$customer->update_meta_data( '_test_tier', $value );
-								return null;
-							},
-						)
-					);
-				}
-			);
+			add_action( 'woocommerce_extensible_abilities_init', $register );
 			do_action( 'woocommerce_extensible_abilities_init' );
-			$ability = new CustomerUpdate( CustomerUpdate::ABILITY_NAME, CustomerUpdate::get_registration_args() );
-
-			list( $id, $user_id ) = $this->registered_customer();
-			$result               = $ability->execute(
-				array(
-					'id'         => $id,
-					'extensions' => array( 'test-ext' => array( 'tier' => 'gold' ) ),
-				)
-			);
-			$this->assertSame( array( 'extensions.test-ext.tier' ), $result['customer']['updated_fields'] );
-			$this->assertSame( 'gold', ( new \WC_Customer( $user_id ) )->get_meta( '_test_tier' ) );
+			$test( new CustomerUpdate( CustomerUpdate::ABILITY_NAME, CustomerUpdate::get_registration_args() ) );
 		} finally {
 			foreach ( $saved as $name => $value ) {
 				$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
@@ -312,5 +318,68 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 				$property->setValue( null, $value );
 			}
 		}
+	}
+
+	/**
+	 * @testdox Should list an extension field it set, since extension fields write meta that get_changes() leaves out.
+	 */
+	public function test_lists_extension_fields_it_set(): void {
+		$this->with_extensions(
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'customer',
+						'namespace'     => 'test-ext',
+						'field'         => 'tier',
+						'output_schema' => array( 'type' => 'string' ),
+						'input_schema'  => array( 'type' => 'string' ),
+						'get_callback'  => static fn( \WC_Customer $customer ) => (string) $customer->get_meta( '_test_tier' ),
+						'set_callback'  => static function ( \WC_Customer $customer, $value ) {
+							$customer->update_meta_data( '_test_tier', $value );
+							return null;
+						},
+					)
+				);
+			},
+			function ( CustomerUpdate $ability ) {
+				list( $id, $user_id ) = $this->registered_customer();
+				$result               = $ability->execute(
+					array(
+						'id'         => $id,
+						'extensions' => array( 'test-ext' => array( 'tier' => 'gold' ) ),
+					)
+				);
+				$this->assertSame( array( 'extensions.test-ext.tier' ), $result['customer']['updated_fields'] );
+				$this->assertSame( 'gold', ( new \WC_Customer( $user_id ) )->get_meta( '_test_tier' ) );
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should not leave the cached user meta of a save that a sync refused.
+	 */
+	public function test_refused_sync_leaves_no_cached_address(): void {
+		$this->with_extensions(
+			static function () {
+				ExtensibleAbilities::register_sync(
+					array(
+						'resource'  => 'customer',
+						'namespace' => 'test-ext',
+						'callback'  => static fn() => new \WP_Error( 'test_refused', 'Refused.' ),
+					)
+				);
+			},
+			function ( CustomerUpdate $ability ) {
+				list( $id, $user_id ) = $this->registered_customer();
+				$result               = $ability->execute(
+					array(
+						'id'      => $id,
+						'billing' => array( 'city' => 'New city' ),
+					)
+				);
+				$this->assertWPError( $result );
+				$this->assertSame( 'Old city', ( new \WC_Customer( $user_id ) )->get_billing_city() );
+			}
+		);
 	}
 }
