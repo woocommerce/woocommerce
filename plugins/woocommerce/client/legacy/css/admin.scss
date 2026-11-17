@@ -9776,7 +9776,8 @@ body.woocommerce_page_wc-settings.woocommerce-settings-agentic-commerce-tab {
 }
 
 .wc-agentic-commerce {
-	max-inline-size: 720px;
+	// Sizes and spacing as in the design: 632px cards 24px apart, titles 15/20, text 13/20.
+	max-inline-size: 632px;
 	margin-inline: auto;
 
 	h2,
@@ -9785,10 +9786,16 @@ body.woocommerce_page_wc-settings.woocommerce-settings-agentic-commerce-tab {
 	}
 
 	.wc-agentic-commerce-card {
-		margin-block: 0 16px;
+		margin-block: 0 24px;
 		background: #fff;
 		border: 1px solid #dcdcde;
 		border-radius: 4px;
+
+		h2 {
+			font-size: 15px;
+			line-height: 20px;
+			font-weight: 600;
+		}
 
 		> h2,
 		> div[id$="-description"],
@@ -9806,26 +9813,38 @@ body.woocommerce_page_wc-settings.woocommerce-settings-agentic-commerce-tab {
 		}
 	}
 
+	// 24px from the title to the description, and from the description to the content.
 	.wc-agentic-commerce-card__header {
-		padding: 24px 24px 16px;
+		padding: 24px;
 
-		// The title, with how many steps are left at the end of the line.
+		// The title line is 24px, as in the design, with or without a badge.
+		> h2,
+		.wc-agentic-commerce-card__title {
+			min-block-size: 24px;
+		}
+
+		// The title, with how many steps are left at the end of the line, centered on the title.
 		.wc-agentic-commerce-card__title {
 			display: flex;
 			justify-content: space-between;
-			align-items: center;
+			align-items: flex-start;
 			gap: 16px;
+
+			.wc-agentic-commerce-badge {
+				margin-block-start: -1px;
+			}
 		}
 
 		p {
-			margin: 4px 0 0;
+			margin: 24px 0 0;
 			color: #50575e;
+			line-height: 20px;
 		}
 	}
 
 	.wc-agentic-commerce-card__body {
 		margin: 0;
-		padding: 16px 24px;
+		padding: 24px;
 	}
 
 	.wc-agentic-commerce-card__header + .wc-agentic-commerce-card__body {
@@ -9885,7 +9904,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-agentic-commerce-tab {
 	}
 }
 
-.wc-agentic-commerce-switch-card {
+.wc-agentic-commerce .wc-agentic-commerce-switch-card {
 	padding: 24px;
 
 	.wc-agentic-commerce-switch-row {
@@ -9894,8 +9913,17 @@ body.woocommerce_page_wc-settings.woocommerce-settings-agentic-commerce-tab {
 		gap: 12px;
 	}
 
-	p {
-		margin: 4px 0 0;
+	// The switch label is a plain toggle label in the design (13/16), its help text 12/20, 8px under it.
+	.wc-agentic-commerce-switch-row h2 {
+		font-size: 13px;
+		line-height: 16px;
+		font-weight: 400;
+	}
+
+	.wc-agentic-commerce-switch-row p {
+		margin: 8px 0 0;
+		font-size: 12px;
+		line-height: 20px;
 	}
 
 	.wc-agentic-commerce-ucp-message:empty {
@@ -9934,36 +9962,40 @@ body.woocommerce_page_wc-settings.woocommerce-settings-agentic-commerce-tab {
 	}
 }
 
+// Three plain columns: the label (11/16), the count (15/24) 4px under it, View products (12/16) 8px under that.
 .wc-agentic-commerce-counts {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
+	gap: 24px;
 	margin: 0;
-	border-block-start: 1px solid #f0f0f1;
+	padding: 0 24px 24px;
 
 	li {
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
+		align-items: flex-start;
 		margin: 0;
-		padding: 16px 24px;
-	}
-
-	li + li {
-		border-inline-start: 1px solid #f0f0f1;
 	}
 
 	li > span {
-		color: #757575;
+		color: #1e1e1e;
 		font-size: 11px;
-		font-weight: 500;
-		letter-spacing: 0.04em;
+		font-weight: 600;
+		line-height: 16px;
 		text-transform: uppercase;
 	}
 
 	strong {
-		font-size: 1.6em;
+		margin-block-start: 4px;
+		font-size: 15px;
 		font-weight: 400;
-		line-height: 1.2;
+		line-height: 24px;
+	}
+
+	a {
+		margin-block-start: 8px;
+		font-size: 12px;
+		line-height: 16px;
 	}
 }
 
@@ -9971,11 +10003,12 @@ body.woocommerce_page_wc-settings.woocommerce-settings-agentic-commerce-tab {
 	display: inline-block;
 	flex: none;
 	white-space: nowrap;
-	padding: 2px 8px;
+	// 22px tall, as in the design.
+	padding: 2px 7px;
 	border: 1px solid transparent;
 	border-radius: 4px;
 	font-size: 12px;
-	line-height: 1.5;
+	line-height: 16px;
 	background: #f0f0f1;
 	color: #1d2327;
 
@@ -10016,6 +10049,13 @@ body.woocommerce_page_wc-settings.woocommerce-settings-agentic-commerce-tab {
 	margin: 0 24px;
 }
 
+// The first step, or Show completed steps when every step is done, starts 28px under the card
+// description, as in the design, not a row's padding plus the header's.
+.wc-agentic-commerce-card__header + .wc-agentic-commerce-items > .wc-agentic-commerce-item:first-child,
+.wc-agentic-commerce-card__header + .wc-agentic-commerce-more {
+	padding-block-start: 4px;
+}
+
 .wc-agentic-commerce-item {
 	display: flex;
 	align-items: center;
@@ -10034,21 +10074,32 @@ body.woocommerce_page_wc-settings.woocommerce-settings-agentic-commerce-tab {
 		min-inline-size: 0;
 	}
 
+	// 2px from the title to the why line.
 	p {
 		margin: 0 0 2px;
 	}
 
+	p:last-child {
+		margin-block-end: 0;
+	}
+
+	// The why line under a step: 12/16.
 	.description {
 		color: #757575;
+		font-size: 12px;
+		line-height: 16px;
 	}
 
 	&__title {
 		font-size: 13px;
+		line-height: 20px;
 		font-weight: 600;
 
+		// The 22px badge sits in the 20px line without making it taller.
 		.wc-agentic-commerce-badge {
+			margin-block: -1px;
 			margin-inline-start: 8px;
-			font-weight: 400;
+			font-weight: 600;
 		}
 	}
 
