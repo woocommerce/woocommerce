@@ -84,6 +84,7 @@ class CouponUpdate extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	protected function change( $subject, array $input ) {
+		$previous_status = $subject->get_status();
 		if ( isset( $input['status'] ) ) {
 			if ( 'publish' === $input['status'] && $subject->get_date_created() && $subject->get_date_created()->getTimestamp() > time() ) {
 				$subject->set_date_created( time() );
@@ -91,7 +92,24 @@ class CouponUpdate extends ActionableAbility {
 			$subject->set_status( $input['status'] );
 		}
 		$result = self::set_coupon_props_from_input( $subject, $input );
-		return is_wp_error( $result ) ? $result : null;
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$status = $subject->get_status();
+		// WordPress can publish a scheduled coupon when post fields are saved near or after its publication time.
+		if (
+			'future' === $status
+			&& $subject->get_date_created()
+			&& $subject->get_date_created()->getTimestamp() < time() + MINUTE_IN_SECONDS
+			&& array_intersect( array( 'code', 'description', 'date_created', 'date_modified', 'status' ), array_keys( $subject->get_changes() ) )
+		) {
+			$status = 'publish';
+		}
+		if ( $status !== $previous_status && in_array( $status, array( 'publish', 'future', 'private' ), true ) && ! wc_rest_check_post_permissions( 'shop_coupon', 'create' ) ) {
+			return new \WP_Error( 'woocommerce_ability_coupon_publish_forbidden', __( 'You are not allowed to publish coupons.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		return null;
 	}
 
 	/**
@@ -116,7 +134,7 @@ class CouponUpdate extends ActionableAbility {
 	public static function can_update_coupon( $input = array() ): bool {
 		$coupon_id = self::get_id_from_input( $input );
 
-		return ( ! isset( $input['status'] ) || get_post_status( $coupon_id ) === $input['status'] || ! in_array( $input['status'], array( 'publish', 'future', 'private' ), true ) || wc_rest_check_post_permissions( 'shop_coupon', 'create' ) ) && $coupon_id > 0 && wc_rest_check_post_permissions( 'shop_coupon', 'edit', $coupon_id );
+		return $coupon_id > 0 && wc_rest_check_post_permissions( 'shop_coupon', 'edit', $coupon_id );
 	}
 
 	/**

@@ -213,18 +213,46 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$coupon = new \WC_Coupon();
 		$coupon->set_code( 'restricted-status' );
 		$coupon->set_status( 'draft' );
+		$coupon->set_date_created( time() + DAY_IN_SECONDS );
 		$coupon->save();
 		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
 		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
-		$this->assertWPError(
-			$ability->execute(
-				array(
-					'id'     => $coupon->get_id(),
-					'status' => $status,
-				)
+		$before  = ( new \WC_Coupon( $coupon->get_id() ) )->get_data();
+		$result  = $ability->execute(
+			array(
+				'id'     => $coupon->get_id(),
+				'status' => $status,
+				'amount' => '20',
 			)
 		);
-		$this->assertSame( 'draft', ( new \WC_Coupon( $coupon->get_id() ) )->get_status() );
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_coupon_publish_forbidden', $result->get_error_code() );
+		$this->assertEquals( $before, ( new \WC_Coupon( $coupon->get_id() ) )->get_data() );
+	}
+
+	/**
+	 * @testdox Should authorize publication against the coupon loaded after the permission callback.
+	 */
+	public function test_publication_permission_after_status_change(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_get_current_user()->add_cap( 'publish_shop_coupons', false );
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'publication-status-change' );
+		$coupon->save();
+		$class = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
+		$input = array(
+			'id'     => $coupon->get_id(),
+			'status' => 'publish',
+		);
+		$this->assertTrue( $class::can_update_coupon( $input ) );
+		$coupon->set_status( 'draft' );
+		$coupon->save();
+		$before  = ( new \WC_Coupon( $coupon->get_id() ) )->get_data();
+		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$result  = $ability->execute_change( $input );
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_coupon_publish_forbidden', $result->get_error_code() );
+		$this->assertEquals( $before, ( new \WC_Coupon( $coupon->get_id() ) )->get_data() );
 	}
 
 	/**
@@ -311,20 +339,32 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should allow unrelated overdue coupon edits while rejecting explicit invalid scheduling.
+	 * @testdox Should authorize implicit publication while allowing unrelated overdue coupon edits.
+	 * @testWith [{"amount":"15","email_restrictions":["customer@example.com"]}, false, "future"]
+	 *           [{"description":"changed","amount":"15"}, false, null]
+	 *           [{"code":"changed-code","amount":"15"}, false, null]
+	 *           [{"description":"changed"}, true, "publish"]
+	 *           [{"code":"changed-code"}, true, "publish"]
+	 *           [{"description":"","code":"overdue-scheduled","amount":"15"}, false, "future"]
+	 *           [{"description":"changed","status":"draft"}, false, "draft"]
+	 *           [{"description":"changed"}, false, null, 30]
+	 * @param array       $input Update fields.
+	 * @param bool        $can_publish Whether publication is allowed.
+	 * @param string|null $expected_status Saved status, or null for a rejected update.
+	 * @param int         $publication_offset Seconds until the publication date.
 	 */
-	public function test_update_overdue_scheduled_coupon(): void {
+	public function test_update_overdue_scheduled_coupon( array $input, bool $can_publish, ?string $expected_status, int $publication_offset = -DAY_IN_SECONDS ): void {
 		global $wpdb;
 
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-		wp_get_current_user()->add_cap( 'publish_shop_coupons', false );
+		wp_get_current_user()->add_cap( 'publish_shop_coupons', $can_publish );
 		$coupon = new \WC_Coupon();
 		$coupon->set_code( 'overdue-scheduled' );
 		$coupon->set_amount( '10' );
 		$coupon->set_date_created( time() + DAY_IN_SECONDS );
 		$coupon->set_status( 'future' );
 		$coupon->save();
-		$overdue = time() - DAY_IN_SECONDS;
+		$overdue = time() + $publication_offset;
 		// Simulate a publication that WP-Cron has not processed yet.
 		$wpdb->update(
 			$wpdb->posts,
@@ -337,27 +377,35 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		clean_post_cache( $coupon->get_id() );
 		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
 		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
-		$input   = array(
-			'id'                 => $coupon->get_id(),
-			'amount'             => '15',
-			'email_restrictions' => array( 'customer@example.com' ),
-		);
-		$result  = $ability->execute( $input );
+		$before  = ( new \WC_Coupon( $coupon->get_id() ) )->get_data();
+		$result  = $ability->execute( $input + array( 'id' => $coupon->get_id() ) );
+		$stored  = new \WC_Coupon( $coupon->get_id() );
+		if ( null === $expected_status ) {
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_ability_coupon_publish_forbidden', $result->get_error_code() );
+			$this->assertEquals( $before, $stored->get_data() );
+			return;
+		}
 		$this->assertNotWPError( $result );
-		$stored = new \WC_Coupon( $coupon->get_id() );
-		$this->assertSame( '15', $stored->get_amount() );
-		$this->assertSame( array( 'customer@example.com' ), $stored->get_email_restrictions() );
-		$this->assertSame( 'future', $stored->get_status() );
+		$this->assertSame( $expected_status, $stored->get_status() );
+		$this->assertSame( $expected_status, $result['coupon']['status'] );
 		$this->assertSame( $overdue, $stored->get_date_created()->getTimestamp() );
-		$this->assertSame( 'future', $result['coupon']['status'] );
-
-		$before          = $stored->get_data();
-		$input['status'] = 'future';
-		$input['amount'] = '20';
-		$result          = $ability->execute( $input );
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_ability_coupon_invalid_schedule', $result->get_error_code() );
-		$this->assertEquals( $before, ( new \WC_Coupon( $coupon->get_id() ) )->get_data() );
+		foreach ( $input as $field => $value ) {
+			$this->assertSame( $value, $stored->{ 'get_' . $field }() );
+		}
+		if ( 'future' === $expected_status ) {
+			$before = $stored->get_data();
+			$result = $ability->execute(
+				array(
+					'id'     => $coupon->get_id(),
+					'status' => 'future',
+					'amount' => '20',
+				)
+			);
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_ability_coupon_invalid_schedule', $result->get_error_code() );
+			$this->assertEquals( $before, ( new \WC_Coupon( $coupon->get_id() ) )->get_data() );
+		}
 	}
 
 	/**
