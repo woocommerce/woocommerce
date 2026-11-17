@@ -586,6 +586,64 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should set the stock of a variable product, which its variations use, and refuse a stock status for it.
+	 */
+	public function test_variable_product_stock_fields(): void {
+		$created = $this->execute(
+			'woocommerce/product-create',
+			array(
+				'name'           => 'Shirt',
+				'type'           => 'variable',
+				'manage_stock'   => true,
+				'stock_quantity' => 5,
+				'attributes'     => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S' ),
+					),
+				),
+				'variations'     => array(
+					array(
+						'attributes'    => array(
+							array(
+								'name'   => 'Size',
+								'option' => 'S',
+							),
+						),
+						'regular_price' => '10',
+					),
+				),
+			)
+		)['product'];
+
+		$this->assertTrue( $created['manage_stock'] );
+		$this->assertSame( 5, $created['stock_quantity'] );
+
+		$updated = $this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'             => $created['id'],
+				'stock_quantity' => 0,
+			)
+		)['product'];
+
+		$variation = wc_get_product( $created['variation_ids'][0] );
+		$this->assertSame( 0, $updated['stock_quantity'] );
+		$this->assertSame( 'outofstock', $updated['stock_status'] );
+		$this->assertSame( 0, $variation->get_stock_quantity(), 'A variation without its own stock uses the stock of the product.' );
+		$this->assertFalse( $variation->is_in_stock() );
+
+		$status = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'           => $created['id'],
+				'stock_status' => 'instock',
+			)
+		);
+		$this->assertWPError( $status );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $status->get_error_code() );
+	}
+
+	/**
 	 * @testdox Should accept sale dates and the tax status on external products, but not sold individually.
 	 */
 	public function test_external_product_fields(): void {

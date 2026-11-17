@@ -323,7 +323,10 @@ trait ProductAbilityTrait {
 				'type'        => 'boolean',
 				'description' => __( 'Whether the product gives the customer files to download.', 'woocommerce' ),
 			),
-			'manage_stock'       => array( 'type' => 'boolean' ),
+			'manage_stock'       => array(
+				'type'        => 'boolean',
+				'description' => __( 'Whether the product tracks its stock quantity. On a variable product, a variation that does not track its own stock uses the stock of the product.', 'woocommerce' ),
+			),
 			'stock_quantity'     => array(
 				'type'        => self::get_product_stock_quantity_schema_type(),
 				'description' => __( 'Available stock quantity when product-level stock management is used.', 'woocommerce' ),
@@ -517,7 +520,7 @@ trait ProductAbilityTrait {
 				$fields = array_values( array_diff( $fields, array( 'attributes' ) ) );
 			}
 		} elseif ( is_a( $classname, \WC_Product_Variable::class, true ) ) {
-			$fields        = array_merge( $fields, array( 'attributes', 'variations', 'tax_status', 'sold_individually', 'weight', 'dimensions', 'shipping_class' ) );
+			$fields        = array_merge( $fields, array( 'attributes', 'variations', 'tax_status', 'sold_individually', 'weight', 'dimensions', 'shipping_class', 'manage_stock', 'stock_quantity' ) );
 			$product_props = array(
 				'date_on_sale_from' => null,
 				'date_on_sale_to'   => null,
