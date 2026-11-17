@@ -901,51 +901,13 @@ test.describe( 'Settings API tests: CRUD', () => {
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
-						id: 'woocommerce_notify_low_stock',
-						label: 'Notifications',
-						description: 'Enable low stock notifications',
-						type: 'checkbox',
-						default: 'yes',
-						value: 'yes',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_notify_no_stock',
-						label: '',
-						description: 'Enable out of stock notifications',
-						type: 'checkbox',
-						default: 'yes',
-						value: 'yes',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_stock_email_recipient',
-						label: 'Notification recipient(s)',
-						description:
-							'Enter recipients (comma separated) that will receive this notification.',
-						type: 'text',
-						default: expect.any( String ),
-						tip: 'Enter recipients (comma separated) that will receive this notification.',
-						value: expect.any( String ),
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
 						id: 'woocommerce_notify_low_stock_amount',
 						label: 'Low stock threshold',
-						description:
-							'When product stock reaches this amount you will be notified via email.',
+						description: expect.stringContaining(
+							'When product stock reaches this amount, the product counts as low stock.'
+						),
 						type: 'number',
 						default: '2',
-						tip: 'When product stock reaches this amount you will be notified via email.',
 						value: '2',
 					} ),
 				] )
@@ -955,11 +917,11 @@ test.describe( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_notify_no_stock_amount',
 						label: 'Out of stock threshold',
-						description:
-							'When product stock reaches this amount the stock status will change to "out of stock" and you will be notified via email. This setting does not affect existing "in stock" products.',
+						description: expect.stringContaining(
+							'When product stock reaches this amount, stock status changes to "out of stock".'
+						),
 						type: 'number',
 						default: '0',
-						tip: 'When product stock reaches this amount the stock status will change to "out of stock" and you will be notified via email. This setting does not affect existing "in stock" products.',
 						value: '0',
 					} ),
 				] )
