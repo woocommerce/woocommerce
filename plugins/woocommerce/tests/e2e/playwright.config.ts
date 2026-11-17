@@ -257,6 +257,9 @@ const blocksSerialSpecs = [
 	'**/tests/blocks/cart/cart-checkout-block-taxes.shopper.block_theme.spec.ts',
 	// Switches the site language, which every spec reads.
 	'**/tests/blocks/cart/cart-checkout-block-translations.shopper.block_theme.spec.ts',
+	// Turns on Back in Stock Notifications sign-ups, which adds a form to every
+	// out-of-stock product page.
+	'**/tests/blocks/add-to-cart-with-options/back-in-stock-form.block_theme.spec.ts',
 	// Changes local pickup, shipping methods, "Hide shipping costs until an
 	// address is entered" and the countries the store ships to, and saves the
 	// Checkout page template. Most tests also place orders, some for Beanie,
