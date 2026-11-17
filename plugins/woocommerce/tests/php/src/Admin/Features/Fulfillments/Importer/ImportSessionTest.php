@@ -737,6 +737,16 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 10, $reloaded->processed(), 'A stale copy does not rewind the stored progress' );
 		$this->assertSame( $mapping, $second->frozen_mapping(), 'The stale copy takes the stored settings' );
 
+		$early = $this->make_session( 89 );
+		$late  = ImportSession::load( 89, $early->token() );
+		$early->freeze_run_settings( $mapping, true, false );
+		$this->assertTrue( $late->record_chunk( 0, $this->chunk_result( 10, 7, 400 ) ) );
+		$reloaded = ImportSession::load( 89, $early->token() );
+		$this->assertSame( $mapping, $reloaded->frozen_mapping(), 'A chunk recorded by an older copy keeps the stored settings' );
+		$this->assertTrue( $reloaded->notify_customer() );
+		$this->assertFalse( $reloaded->update_existing() );
+		$this->assertSame( 10, $reloaded->processed() );
+
 		$gone = $this->make_session( 88 );
 		$gone->delete();
 		$this->assertFalse( $gone->freeze_run_settings( $mapping, true, true ), 'A deleted session is refused' );

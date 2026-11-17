@@ -756,8 +756,9 @@ final class ImportSession {
 	 * is accepted, so a replayed or out-of-order chunk never adds its counts twice. This
 	 * protects the counts only: the caller compares the offset before importing the rows.
 	 * Re-reading the payload narrows the window for two requests recording the same chunk;
-	 * the caller's lock closes it. The dedupe set and the resume position are replaced, and
-	 * only this chunk's rows are kept, which bounds the payload.
+	 * the caller's lock closes it. The chunk is written on top of the stored payload, so
+	 * settings another copy froze are kept. The dedupe set and the resume position are
+	 * replaced, and only this chunk's rows are kept, which bounds the payload.
 	 *
 	 * @since 11.4.0
 	 *
@@ -774,7 +775,8 @@ final class ImportSession {
 		if ( ! is_array( $stored ) || (int) ( $stored['processed'] ?? 0 ) !== $offset ) {
 			return false;
 		}
-		$previous = $this->data;
+		// Build on the stored payload, which may hold settings frozen by a copy loaded later.
+		$this->data = $stored;
 
 		$counts = $this->counts();
 		foreach ( array_keys( $counts ) as $key ) {
@@ -797,7 +799,7 @@ final class ImportSession {
 		if ( $this->persist() ) {
 			return true;
 		}
-		$this->data = $previous;
+		$this->data = $stored;
 		return false;
 	}
 
