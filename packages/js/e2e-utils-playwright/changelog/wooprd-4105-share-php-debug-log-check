@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add readPhpDebugLog to verify and read the PHP debug log in Playwright tests.

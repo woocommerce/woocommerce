@@ -33,6 +33,22 @@ test('can add products to cart', async ({ page }) => {
 });
 ```
 
+## PHP debug log checks
+
+Use `readPhpDebugLog` with a WordPress test site at the base URL's origin root. The site needs a test-only handler on `/` that writes a marker and a readable log at `/wp-content/debug.log`. Supply the handler's query parameter and log prefix. Filter the verified log for the plugin paths and PHP messages your suite checks.
+
+```js
+import { readPhpDebugLog } from '@woocommerce/e2e-utils-playwright';
+
+test('debug.log contains no PHP issues from the plugin', async ({ request }) => {
+  const log = await readPhpDebugLog(request, {
+    queryParameter: 'e2e_log_marker',
+    logPrefix: 'e2e-log-marker-',
+  });
+  expect(log).not.toContain('/plugins/my-extension/');
+});
+```
+
 ## API Client
 
 The package provides an API client utility for making authenticated requests to the WooCommerce REST API.

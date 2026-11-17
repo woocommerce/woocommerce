@@ -1,6 +1,7 @@
 // Re-export all modules
 export * from './cart';
 export * from './checkout';
+export * from './debug-log';
 export * from './editor';
 export * from './order';
 export * from './api-client';
