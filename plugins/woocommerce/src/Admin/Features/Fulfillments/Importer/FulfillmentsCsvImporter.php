@@ -1024,7 +1024,7 @@ class FulfillmentsCsvImporter {
 			if ( $is_sku ) {
 				// Built on first use, since it loads the product of every line item.
 				$by_sku = $by_sku ?? $this->index_items_by_sku( $line_items );
-				$item   = $by_sku[ strtolower( $parts[1] ) ] ?? null;
+				$item   = $by_sku[ wc_strtolower( $parts[1] ) ] ?? null;
 				if ( false === $item ) {
 					/* translators: %s: SKU from the CSV. */
 					return sprintf( __( 'SKU %s matches more than one item of this order. Use the item ID instead.', 'woocommerce' ), self::clip( $parts[1] ) );
@@ -1077,7 +1077,7 @@ class FulfillmentsCsvImporter {
 		$by_sku = array();
 		foreach ( $line_items as $item ) {
 			$product = $item instanceof \WC_Order_Item_Product ? $item->get_product() : null;
-			$sku     = $product instanceof \WC_Product ? strtolower( (string) $product->get_sku() ) : '';
+			$sku     = $product instanceof \WC_Product ? wc_strtolower( (string) $product->get_sku() ) : '';
 			if ( '' !== $sku ) {
 				$by_sku[ $sku ] = isset( $by_sku[ $sku ] ) ? false : $item;
 			}

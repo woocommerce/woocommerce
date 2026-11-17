@@ -1869,6 +1869,21 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A SKU entry matches the product SKU ignoring case for non-ASCII letters too.
+	 */
+	public function test_sku_entry_matches_a_non_ascii_sku_ignoring_case(): void {
+		list( $order, , $item_b ) = $this->make_two_item_order();
+		$product                  = $order->get_item( $item_b )->get_product();
+		$product->set_sku( "CAF\u{00C9}-1" );
+		$product->save();
+
+		$result = $this->import_csv( "order_number,tracking_number,shipment_provider,tracking_url,items\n{$order->get_id()},TRK-1,ups,,sku:caf\u{00E9}-1:1\n" );
+
+		$this->assertSame( FulfillmentsCsvImporter::STATUS_CREATED, $result['rows'][0]['status'], $result['rows'][0]['message'] );
+		$this->assert_items( array( $item_b => 1 ), $this->fulfillments_of( $order )[0]->get_items() );
+	}
+
+	/**
 	 * @testdox On an update a blank items cell keeps the stored items and a filled one replaces them.
 	 */
 	public function test_items_on_update_are_kept_when_blank_and_replaced_when_given(): void {
