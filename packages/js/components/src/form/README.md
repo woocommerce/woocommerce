@@ -8,11 +8,11 @@ A form component to handle form state and provide input helper props.
 const initialValues = { firstName: '' };
 
 <Form onSubmit={ ( values ) => {} } initialValues={ initialValues }>
-	{ ( { getInputProps, values, errors, handleSubmit } ) => (
+	{ ( { getTextControlProps, values, errors, handleSubmit } ) => (
 		<div>
 			<TextControl
 				label={ 'First Name' }
-				{ ...getInputProps( 'firstName' ) }
+				{ ...getTextControlProps( 'firstName' ) }
 			/>
 			<Button
 				isPrimary
@@ -32,9 +32,9 @@ const initialValues = { firstName: '' };
 const initialValues = { firstName: '' };
 
 const Field = () => {
-	const formProps = useFormContext< { foo: string } >();
+	const formProps = useFormContext< { firstName: string } >();
 
-	return <input type="text" { ...formProps.getInputProps<string>( 'firstName' ) } />
+	return <input type="text" { ...formProps.getTextControlProps( 'firstName' ) } />
 }
 
 <Form

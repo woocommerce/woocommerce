@@ -52,17 +52,24 @@ export const Basic = () => {
 				onChange={ handleChange }
 				initialValues={ initialValues }
 			>
-				{ ( { getInputProps, values, errors, handleSubmit } ) => {
-					const radioInputProps = getInputProps( 'radio' );
+				{ ( {
+					getInputProps,
+					getTextControlProps,
+					getSelectControlProps,
+					getRadioControlProps,
+					values,
+					errors,
+					handleSubmit,
+				} ) => {
 					return (
 						<div>
 							<TextControl
 								label={ 'First Name' }
-								{ ...getInputProps( 'firstName' ) }
+								{ ...getTextControlProps( 'firstName' ) }
 							/>
 							<TextControl
 								label={ 'Last Name' }
-								{ ...getInputProps( 'lastName' ) }
+								{ ...getTextControlProps( 'lastName' ) }
 							/>
 							<SelectControl
 								label="Select"
@@ -71,7 +78,7 @@ export const Basic = () => {
 									{ label: 'Option 2', value: '2' },
 									{ label: 'Option 3', value: '3' },
 								] }
-								{ ...getInputProps( 'select' ) }
+								{ ...getSelectControlProps( 'select' ) }
 							/>
 							<DateTimePickerControl
 								label="Date"
@@ -86,8 +93,7 @@ export const Basic = () => {
 							/>
 							<RadioControl
 								label="Radio"
-								onChange={ radioInputProps.onChange }
-								selected={ radioInputProps.value }
+								{ ...getRadioControlProps( 'radio' ) }
 								options={ [
 									{ label: 'Option 1', value: 'one' },
 									{ label: 'Option 2', value: 'two' },
