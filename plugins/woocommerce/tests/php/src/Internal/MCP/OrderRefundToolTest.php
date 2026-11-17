@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\MCP;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderRefundCreate;
 use Automattic\WooCommerce\Internal\MCP\OrderRefundTool;
 use WC_Unit_Test_Case;
@@ -83,6 +84,73 @@ class OrderRefundToolTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'only recorded', $question['params']['message'] );
 		$this->assertSame( array( 'approve' ), $question['params']['requestedSchema']['required'] );
 		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should describe the customer, the amounts before and after the refund, and that nothing is refunded yet.
+	 */
+	public function test_question_describes_the_order_and_the_remaining_amount(): void {
+		$order = $this->create_order();
+		$order->set_billing_first_name( 'Jane' );
+		$order->set_billing_last_name( 'Doe' );
+		$order->save();
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => '5',
+			)
+		);
+
+		$message = $this->ask_message( $order, '10' );
+
+		$this->assertStringContainsString( 'from Jane Doe', $message );
+		$this->assertStringContainsString( 'total 50.00 USD', $message );
+		$this->assertStringContainsString( 'Already refunded: 5.00 USD. Left to refund after this: 35.00 USD.', $message );
+		$this->assertStringNotContainsString( 'status changes to Refunded', $message );
+		$this->assertStringContainsString( 'Nothing has been refunded yet.', $message );
+	}
+
+	/**
+	 * @testdox Should warn that a refund of the whole remaining amount changes the order status.
+	 */
+	public function test_question_warns_about_a_full_refund(): void {
+		$order = $this->create_order();
+
+		$message = $this->ask_message( $order, '50' );
+
+		$this->assertStringContainsString( 'Left to refund after this: 0.00 USD.', $message );
+		$this->assertStringContainsString( 'its status changes to Refunded', $message );
+	}
+
+	/**
+	 * @testdox Should say that the payment gateway sends the money back when the refund goes through it.
+	 */
+	public function test_question_names_the_gateway_for_a_payment_refund(): void {
+		$gateways                                        = WC()->payment_gateways();
+		$original                                        = $gateways->payment_gateways;
+		$gateways->payment_gateways['refunding_gateway'] = new class() extends \WC_Payment_Gateway {
+			/**
+			 * Set the ID and the refund support.
+			 */
+			public function __construct() {
+				$this->id       = 'refunding_gateway';
+				$this->enabled  = 'yes';
+				$this->supports = array( PaymentGatewayFeature::PRODUCTS, PaymentGatewayFeature::REFUNDS );
+			}
+		};
+		$order = $this->create_order();
+		$order->set_payment_method( 'refunding_gateway' );
+		$order->set_payment_method_title( 'Test card' );
+		$order->save();
+
+		try {
+			$result = OrderRefundTool::handle( $this->input( $order ) + array( 'refund_payment' => true ), $this->context() );
+		} finally {
+			$gateways->payment_gateways = $original;
+		}
+
+		$this->assertInstanceOf( McpInputRequired::class, $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertStringContainsString( 'The payment gateway (Test card) sends 10.00 USD back to the customer', $result->input_requests()['approve_refund']['params']['message'] );
 	}
 
 	/**
@@ -257,6 +325,20 @@ class OrderRefundToolTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( McpInputRequired::class, $result );
 
 		return (string) $result->request_state();
+	}
+
+	/**
+	 * Ask for the approval of a manual refund, and return the message of the question.
+	 *
+	 * @param \WC_Order $order  Order.
+	 * @param string    $amount Amount.
+	 * @return string
+	 */
+	private function ask_message( \WC_Order $order, string $amount ): string {
+		$result = OrderRefundTool::handle( $this->input( $order, $amount ), $this->context() );
+		$this->assertInstanceOf( McpInputRequired::class, $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+
+		return $result->input_requests()['approve_refund']['params']['message'];
 	}
 
 	/**

@@ -257,40 +257,73 @@ class OrderRefundTool {
 	}
 
 	/**
-	 * Describe the previewed refund for the merchant: amount, how the money goes back, lines, restock and reason.
+	 * Describe the previewed refund for the merchant. Each line is a full sentence, since some clients show the
+	 * message as one paragraph.
 	 *
 	 * @param array $preview Dry-run output of the refund ability.
 	 * @param array $input   Refund input.
 	 * @return string
 	 */
 	private static function describe( array $preview, array $input ): string {
-		$refund   = $preview['refund'] ?? array();
-		$order    = wc_get_order( $refund['order_id'] ?? 0 );
-		$currency = $order instanceof \WC_Order ? $order->get_currency() : '';
-		$number   = $order instanceof \WC_Order ? $order->get_order_number() : (string) ( $refund['order_id'] ?? '' );
+		$refund = $preview['refund'] ?? array();
+		$order  = wc_get_order( $refund['order_id'] ?? 0 );
+		if ( ! $order instanceof \WC_Order ) {
+			return '';
+		}
+
+		$currency = $order->get_currency();
+		$amount   = (float) ( $refund['amount'] ?? 0 );
+		$customer = $order->get_formatted_billing_full_name();
+		$created  = $order->get_date_created();
+		$order_of = sprintf(
+			/* translators: 1: order number, 2: order date, 3: order total with currency code, such as "12.50 USD". */
+			__( 'order #%1$s (placed %2$s, total %3$s)', 'woocommerce' ),
+			$order->get_order_number(),
+			$created ? wc_format_datetime( $created ) : '',
+			self::format_money( $order->get_total(), $currency )
+		);
 
 		$lines = array(
-			/* translators: 1: amount with currency code, such as "12.50 USD", 2: order number. */
-			sprintf( __( 'Refund %1$s of order %2$s?', 'woocommerce' ), trim( wc_format_decimal( $refund['amount'] ?? 0, wc_get_price_decimals() ) . ' ' . $currency ), $number ),
+			'' !== trim( $customer )
+				/* translators: 1: refund amount with currency code, 2: order description, 3: customer name. */
+				? sprintf( __( 'Refund %1$s of %2$s from %3$s?', 'woocommerce' ), self::format_money( $amount, $currency ), $order_of, $customer )
+				/* translators: 1: refund amount with currency code, 2: order description. */
+				: sprintf( __( 'Refund %1$s of %2$s?', 'woocommerce' ), self::format_money( $amount, $currency ), $order_of ),
 		);
 
 		if ( $input['refund_payment'] ?? false ) {
 			$lines[] = sprintf(
-				/* translators: %s: payment method title, such as "Credit card". */
-				__( 'The payment gateway (%s) sends the money back to the customer.', 'woocommerce' ),
-				$order instanceof \WC_Order ? $order->get_payment_method_title() : ''
+				/* translators: 1: payment method title, such as "Credit card", 2: refund amount with currency code. */
+				__( 'The payment gateway (%1$s) sends %2$s back to the customer, unless it declines the refund.', 'woocommerce' ),
+				$order->get_payment_method_title(),
+				self::format_money( $amount, $currency )
 			);
 		} else {
 			$lines[] = __( 'The refund is only recorded. Return the money to the customer outside WooCommerce.', 'woocommerce' );
 		}
 
-		foreach ( $refund['line_items'] ?? array() as $line ) {
-			/* translators: 1: line name, 2: refunded quantity, 3: refunded amount. */
-			$lines[] = sprintf( __( '- %1$s × %2$s: %3$s', 'woocommerce' ), $line['name'] ?? '', $line['quantity'] ?? 0, wc_format_decimal( $line['total'] ?? 0, wc_get_price_decimals() ) );
+		$refund_lines = $refund['line_items'] ?? array();
+		if ( array() !== $refund_lines ) {
+			$lines[] = __( 'Refunded lines:', 'woocommerce' );
+			foreach ( $refund_lines as $line ) {
+				$total   = self::format_money( $line['total'] ?? 0, $currency );
+				$lines[] = ( $input['restock_items'] ?? false )
+					/* translators: 1: line name, 2: refunded quantity, 3: refunded amount with currency code. */
+					? sprintf( __( '- %1$s × %2$s: %3$s, back into stock.', 'woocommerce' ), $line['name'] ?? '', $line['quantity'] ?? 0, $total )
+					/* translators: 1: line name, 2: refunded quantity, 3: refunded amount with currency code. */
+					: sprintf( __( '- %1$s × %2$s: %3$s.', 'woocommerce' ), $line['name'] ?? '', $line['quantity'] ?? 0, $total );
+			}
 		}
 
-		if ( $input['restock_items'] ?? false ) {
-			$lines[] = __( 'The refunded items go back into stock.', 'woocommerce' );
+		$left    = (float) ( $preview['refundable_amount'] ?? 0 ) - $amount;
+		$lines[] = sprintf(
+			/* translators: 1: amount refunded before this refund, 2: amount left to refund after it, both with currency code. */
+			__( 'Already refunded: %1$s. Left to refund after this: %2$s.', 'woocommerce' ),
+			self::format_money( $order->get_total_refunded(), $currency ),
+			self::format_money( max( 0.0, $left ), $currency )
+		);
+		if ( $left < 0.5 / pow( 10, wc_get_price_decimals() ) ) {
+			$lines[] = __( 'This refunds the rest of the order, so its status changes to Refunded.', 'woocommerce' );
 		}
 
 		if ( isset( $refund['reason'] ) ) {
@@ -298,7 +331,20 @@ class OrderRefundTool {
 			$lines[] = sprintf( __( 'Reason: %s', 'woocommerce' ), $refund['reason'] );
 		}
 
+		$lines[] = __( 'Nothing has been refunded yet. This preview comes from a dry run of the refund.', 'woocommerce' );
+
 		return implode( "\n", $lines );
+	}
+
+	/**
+	 * An amount rounded to the store's price decimals, followed by the currency code.
+	 *
+	 * @param mixed  $amount   Amount.
+	 * @param string $currency Currency code.
+	 * @return string
+	 */
+	private static function format_money( $amount, string $currency ): string {
+		return trim( wc_format_decimal( $amount, wc_get_price_decimals() ) . ' ' . $currency );
 	}
 
 	/**
