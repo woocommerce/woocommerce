@@ -6,7 +6,7 @@ import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/pri
 /**
  * Internal dependencies
  */
-import type { SettingsField } from '../../packages/entity-fields/src/types';
+import type { SettingsField } from './types';
 
 // The editor's field registry is private. This logic will be replaced once the Field Collection API is available.
 const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(

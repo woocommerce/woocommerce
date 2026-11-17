@@ -19,10 +19,10 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
-import type { SettingsRecord } from '../../packages/entity-fields/src/types';
 import { ENTITY_KIND } from './entities';
 import type { SettingsEntityConfig } from './entities';
 import { getEntityFields, getEntityFieldsStatus } from './entity-fields';
+import type { SettingsRecord } from './types';
 import './style.scss';
 
 const EMPTY_FORM: Form = { fields: [] };
