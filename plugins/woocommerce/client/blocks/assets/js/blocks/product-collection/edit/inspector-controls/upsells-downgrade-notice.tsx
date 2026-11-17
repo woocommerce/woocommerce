@@ -53,7 +53,7 @@ export const UpsellsDowngradeNotice = ( {
 	}
 
 	const notice = __(
-		'Facing compatibility issues with extensions? You can switch back to the classic upsells display.',
+		'Facing compatibility issues with extensions? You can switch back to the classic upsells display. Switching will make upsells to appear under the Product Details block in all Single Product templates when the product has upsells defined.',
 		'woocommerce'
 	);
 
@@ -100,6 +100,7 @@ export const UpsellsDowngradeNotice = ( {
 		<UpgradeDowngradeNotice
 			actionLabel={ buttonLabel }
 			onActionClick={ handleClick }
+			isDismissible={ false }
 		>
 			{ notice }
 		</UpgradeDowngradeNotice>
