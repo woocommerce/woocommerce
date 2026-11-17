@@ -342,5 +342,25 @@ class OrderTagsProvider extends AbstractTagProvider {
 				Personalization_Tag::VALUE_TYPE_TEXT,
 			)
 		);
+
+		$registry->register(
+			new Personalization_Tag(
+				__( 'Fulfillment Heading', 'woocommerce' ),
+				'woocommerce/fulfillment-heading',
+				__( 'Order', 'woocommerce' ),
+				function ( array $context ): string {
+					$wc_email = $context['wc_email'] ?? null;
+					// Only the fulfillment emails have a heading that depends on the fulfillment.
+					if ( ! $wc_email instanceof \WC_Email || ! str_starts_with( $wc_email->id, 'customer_fulfillment_' ) ) {
+						return '';
+					}
+					return $wc_email->get_heading();
+				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
+				Personalization_Tag::VALUE_TYPE_TEXT,
+			)
+		);
 	}
 }

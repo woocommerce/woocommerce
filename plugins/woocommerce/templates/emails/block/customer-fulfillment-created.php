@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2 class="wp-block-heading"> <?php echo esc_html__( 'Your item is on the way!', 'woocommerce' ); ?> </h2>
+<h2 class="wp-block-heading"> <!--[woocommerce/fulfillment-heading]--> </h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
