@@ -34,6 +34,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private static $administrator_id;
 
 	private const CANONICAL_ABILITY_IDS = array(
+		'woocommerce/store-settings-get',
+		'woocommerce/settings-groups-query',
+		'woocommerce/settings-query',
 		'woocommerce/product-terms-query',
 		'woocommerce/product-term-create',
 		'woocommerce/product-term-update',
@@ -1036,6 +1039,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
+			'store-settings-get'          => array( 'woocommerce/store-settings-get', array() ),
+			'settings-groups-query'       => array( 'woocommerce/settings-groups-query', array() ),
+			'settings-query'              => array( 'woocommerce/settings-query', array( 'group' => 'general' ) ),
 			'product-terms-query'         => array(
 				'woocommerce/product-terms-query',
 				array(
