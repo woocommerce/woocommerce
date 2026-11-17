@@ -429,6 +429,20 @@ class UcpCart extends UcpCartTestCase {
 	}
 
 	/**
+	 * The cart hands the buyer a URL that restores the same cart in a browser.
+	 */
+	public function test_continue_url_carries_the_cart_token(): void {
+		$data = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
+
+		$query = array();
+		wp_parse_str( (string) wp_parse_url( $data['continue_url'], PHP_URL_QUERY ), $query );
+
+		// WC_Session_Handler restores or clones the guest session named by this token.
+		$this->assertSame( $data['id'], $query['session'] );
+		$this->assertStringStartsWith( wc_get_checkout_url(), $data['continue_url'] );
+	}
+
+	/**
 	 * Line items outside the JSON document do not act.
 	 */
 	public function test_line_items_in_the_query_string_are_ignored(): void {
@@ -1064,8 +1078,8 @@ class UcpCart extends UcpCartTestCase {
 	/**
 	 * Cancelling a cart must not break a storefront session cloned from it.
 	 *
-	 * The marker lives in the WooCommerce session, which a storefront session cloned
-	 * from this token would carry too, so only the UCP routes may act on it.
+	 * The marker lives in the WooCommerce session, which the buyer's browser can
+	 * reach through `continue_url`, so only the UCP routes may act on it.
 	 */
 	public function test_cancelling_a_cart_leaves_the_storefront_session_usable(): void {
 		$created = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
