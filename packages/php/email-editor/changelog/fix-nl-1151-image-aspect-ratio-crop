@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Show Image block crops in Gmail and Outlook when an image CDN can serve a cropped file.
+Add a filter that lets image CDNs serve cropped files for Image blocks in emails.
