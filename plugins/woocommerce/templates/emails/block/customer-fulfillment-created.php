@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2 class="wp-block-heading"> <!--[woocommerce/fulfillment-heading]--> </h2>
+<h2 class="wp-block-heading"> <?php echo '<!--[woocommerce/fulfillment-heading]-->&nbsp;'; // The non-breaking space is used to prevent the comment from being removed by the email editor. ?> </h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->

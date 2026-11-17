@@ -350,11 +350,12 @@ class OrderTagsProvider extends AbstractTagProvider {
 				__( 'Order', 'woocommerce' ),
 				function ( array $context ): string {
 					$wc_email = $context['wc_email'] ?? null;
-					// Only the fulfillment emails have a heading that depends on the fulfillment.
+					// The fulfillment emails are the only consumers of this tag.
 					if ( ! $wc_email instanceof \WC_Email || ! str_starts_with( $wc_email->id, 'customer_fulfillment_' ) ) {
 						return '';
 					}
-					return $wc_email->get_heading();
+					// get_heading() returns filtered output, so it is cast rather than trusted.
+					return (string) $wc_email->get_heading();
 				},
 				array(),
 				null,
