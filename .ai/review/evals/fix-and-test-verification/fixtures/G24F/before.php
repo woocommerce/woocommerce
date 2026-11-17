@@ -1,5 +1,5 @@
 <?php
-/* Product CSV row importer and its regression test, colocated for this eval. */
+/* Product CSV row importer and its tests, colocated for this eval. */
 class WC_Eval_Sku_Importer {
     public $errors = array();
     public function import_row( array $row ) {
@@ -12,5 +12,13 @@ class WC_Eval_Sku_Importer {
         foreach ( $rows as $row ) {
             $this->import_row( $row );
         }
+    }
+}
+
+class EvalSkuImporterTest extends WC_Unit_Test_Case {
+    public function test_invalid_sku_is_rejected(): void {
+        $importer = new WC_Eval_Sku_Importer();
+        $importer->import_row( array( 'sku' => '-BAD' ) );
+        $this->assertSame( array( 'invalid_sku' ), $importer->errors );
     }
 }

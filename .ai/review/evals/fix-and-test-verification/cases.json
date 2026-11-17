@@ -90,7 +90,7 @@
 			}
 		},
 		{
-			"id": "G24E-v1",
+			"id": "G24E-v2",
 			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
 			"before": {
 				"file": "fixtures/G24E/before.php"
@@ -104,8 +104,8 @@
 					{
 						"file": "plugins/woocommerce/includes/class-wc-eval-24.php",
 						"lines": [
-							13,
-							17
+							17,
+							21
 						],
 						"anchor": "        $this->assertSame( '', $wpdb->last_error );"
 					}
@@ -113,7 +113,7 @@
 			}
 		},
 		{
-			"id": "G24F-v1",
+			"id": "G24F-v2",
 			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
 			"before": {
 				"file": "fixtures/G24F/before.php"
@@ -127,8 +127,8 @@
 					{
 						"file": "plugins/woocommerce/includes/class-wc-eval-24.php",
 						"lines": [
-							19,
-							22
+							25,
+							28
 						],
 						"anchor": "        $this->assertSame( array(), $importer->errors );"
 					}
@@ -136,7 +136,7 @@
 			}
 		},
 		{
-			"id": "G24G-v1",
+			"id": "G24G-v2",
 			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
 			"before": {
 				"file": "fixtures/G24G/before.php"
@@ -149,7 +149,7 @@
 			}
 		},
 		{
-			"id": "G24H-v1",
+			"id": "G24H-v2",
 			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
 			"before": {
 				"file": "fixtures/G24H/before.php"

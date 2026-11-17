@@ -146,7 +146,7 @@ These cases exercise review behavior on selected changes. They do not measure pr
 | [sql-clause-filter-contract](sql-clause-filter-contract/cases.json) | G21A-v3, G21B-v3 | G21C-v3, G21D-v3 |
 | [cache-invalidation-and-poisoning](cache-invalidation-and-poisoning/cases.json) | G22A-v3, G22B-v3 | G22C-v4, G22D-v3 |
 | [perf-refactor-semantic-drift](perf-refactor-semantic-drift/cases.json) | G23A-v6, G23B-v4 | G23C-v3, G23D-v3 |
-| [fix-and-test-verification](fix-and-test-verification/cases.json) | G24A-v3, G24B-v3, G24E-v1, G24F-v1 | G24C-v4, G24D-v3, G24G-v1, G24H-v1 |
+| [fix-and-test-verification](fix-and-test-verification/cases.json) | G24A-v3, G24B-v3, G24E-v2, G24F-v2 | G24C-v4, G24D-v3, G24G-v2, G24H-v2 |
 | [perf-sql-query-shape](perf-sql-query-shape/cases.json) | G25A-v4, G25B-v3 | G25D-v3, G25C-v8, G25E-v1 |
 | [perf-cache-option-priming](perf-cache-option-priming/cases.json) | G26A-v3, G26B-v6 | G26C-v3, G26D-v3 |
 | [perf-hot-path-eager-work](perf-hot-path-eager-work/cases.json) | G27A-v4, G27B-v4 | G27C-v4, G27D-v4 |

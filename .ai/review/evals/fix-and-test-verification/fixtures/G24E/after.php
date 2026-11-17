@@ -1,5 +1,5 @@
 <?php
-/* Installation lock helper and its regression test, colocated for this eval. */
+/* Installation lock helper and its tests, colocated for this eval. */
 function wc_eval_create_lock() {
     global $wpdb;
     $created = $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_eval_lock', %d, 'no')", time() ) );
@@ -10,6 +10,10 @@ function wc_eval_create_lock() {
 }
 
 class EvalLockContentionTest extends WC_Unit_Test_Case {
+    public function test_free_lock_is_acquired(): void {
+        $this->assertTrue( wc_eval_create_lock() );
+    }
+
     public function test_held_lock_logs_no_database_error(): void {
         global $wpdb;
         $wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_eval_lock', %d, 'no')", time() ) );
