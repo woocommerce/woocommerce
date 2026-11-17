@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\ProductFeed\Mapping\UcpProductMapper;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Ucp\UcpProductSchema;
@@ -217,6 +218,11 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	private static function is_reachable( \WC_Product $product ): bool {
 		if ( CatalogVisibility::SEARCH !== $product->get_catalog_visibility() ) {
 			return $product->is_visible();
+		}
+		// is_viewable() is true for trash when the current user can edit the product.
+		// A catalog lookup is a public read, so an unpublished product is never reachable.
+		if ( ProductStatus::PUBLISH !== $product->get_status() ) {
+			return false;
 		}
 		// Same core rules as a Shop and search results product, then the public visibility filter.
 		$visible = $product->is_viewable();
