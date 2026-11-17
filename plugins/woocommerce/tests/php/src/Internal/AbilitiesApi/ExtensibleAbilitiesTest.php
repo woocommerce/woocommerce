@@ -2165,13 +2165,41 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					) + $property( 'a' ),
 					array( 'a' => array() ),
 				),
+				'untyped_outer'  => array(
+					array(
+						'type'  => 'array',
+						'items' => $object_or_null( 'anyOf' ) + $property( 'inner' ),
+					),
+					array( array( 'inner' => array() ) ),
+				),
 			)
 		);
 
 		$this->assertSame(
-			'{"any_of_branch":{"a":{}},"one_of_branch":{"a":{}},"one_of_items":[{}],"all_of_branch":{"a":{}},"pattern":{"x1":{}},"additional":{"k":{}},"top_properties":{"a":{}}}',
+			'{"any_of_branch":{"a":{}},"one_of_branch":{"a":{}},"one_of_items":[{}],"all_of_branch":{"a":{}},"pattern":{"x1":{}},"additional":{"k":{}},"top_properties":{"a":{}},"untyped_outer":[{"inner":{}}]}',
 			wp_json_encode( $output )
 		);
+	}
+
+	/**
+	 * @testdox Should match the sanitized value, so an empty object that also fits an array branch takes the first anyOf branch and stays as it is under a oneOf.
+	 */
+	public function test_an_empty_object_that_also_fits_an_array_branch_follows_the_sanitized_value(): void {
+		$items  = fn( string $keyword, array $branches ) => array(
+			'type'  => 'array',
+			'items' => array( $keyword => $branches ),
+		);
+		$object = array( 'type' => 'object' );
+		$list   = array( 'type' => 'array' );
+		$output = $this->read_field_values(
+			array(
+				'one_of'              => array( $items( 'oneOf', array( $object, $list ) ), array( new \stdClass() ) ),
+				'any_of_object_first' => array( $items( 'anyOf', array( $object, $list ) ), array( new \stdClass() ) ),
+				'any_of_array_first'  => array( $items( 'anyOf', array( $list, $object ) ), array( new \stdClass() ) ),
+			)
+		);
+
+		$this->assertSame( '{"one_of":[[]],"any_of_object_first":[{}],"any_of_array_first":[[]]}', wp_json_encode( $output ) );
 	}
 
 	/**

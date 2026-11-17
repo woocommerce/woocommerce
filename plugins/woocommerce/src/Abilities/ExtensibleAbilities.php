@@ -1020,8 +1020,10 @@ class ExtensibleAbilities {
 	 * rest_sanitize_value_from_schema() turns every object into an array, so a
 	 * callback cannot send `{}` by itself. A part with no schema stays as it is.
 	 * The nested schemas of every `allOf` branch, and of the `anyOf` and `oneOf`
-	 * branch that rest_sanitize_value_from_schema() picked, apply too. A value
-	 * that matches no `anyOf` or `oneOf` branch stays as it is.
+	 * branch that the sanitized value matches, apply too, after the schema's own.
+	 * A value that matches no branch stays as it is. An empty array fits both an
+	 * `object` and an `array` branch, so it takes the first `anyOf` branch, and
+	 * under a `oneOf` it stays as it is.
 	 *
 	 * @param mixed                $value  Sanitized value.
 	 * @param array<string, mixed> $schema Schema of the value.
