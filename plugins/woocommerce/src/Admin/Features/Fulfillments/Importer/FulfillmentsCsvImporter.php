@@ -722,6 +722,8 @@ class FulfillmentsCsvImporter {
 			if ( ! $written ) {
 				return self::fail( self::CODE_SAVE_FAILED, $e instanceof FulfillmentException ? $e->getMessage() : __( 'Could not save the fulfillment.', 'woocommerce' ), $order_id );
 			}
+			// The listener may have changed the object after the write, so the notification uses the stored row.
+			$fulfillment = new Fulfillment( (string) $fulfillment->get_id() );
 		} finally {
 			remove_action( $written_hook, $mark_written, PHP_INT_MIN );
 		}

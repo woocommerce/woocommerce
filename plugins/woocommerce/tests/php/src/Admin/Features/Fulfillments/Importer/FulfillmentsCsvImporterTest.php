@@ -1213,16 +1213,26 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			function ( $fulfillment ) use ( &$throws ) {
 				if ( $throws-- > 0 ) {
 					$fulfillment->set_tracking_url( 'https://example.com/listener' );
+					$fulfillment->set_status( 'unfulfilled' );
 					throw new \RuntimeException( 'Listener failed.' );
 				}
 			},
 			5
 		);
+		$notified = array();
+		$collect  = function ( $order_id, $fulfillment ) use ( &$notified, $id ) {
+			if ( $id === $order_id ) {
+				$notified[] = $fulfillment->get_status() . '|' . $fulfillment->get_tracking_url();
+			}
+		};
+		add_action( 'woocommerce_fulfillment_created_notification', $collect, 10, 2 );
+		add_action( 'woocommerce_fulfillment_updated_notification', $collect, 10, 2 );
 
 		$result = $this->import_csv( "order_number,tracking_number,shipment_provider\n{$id},TRK-1,ups\n{$id},TRK-1,dhl\n{$other->get_id()},TRK-2,ups\n{$id},TRK-3,ups\n", array( 'notify_customer' => true ) );
 
 		$this->assertSame( array( $status, FulfillmentsCsvImporter::STATUS_SKIPPED, FulfillmentsCsvImporter::STATUS_CREATED, FulfillmentsCsvImporter::STATUS_FAILED ), array_column( $result['rows'], 'status' ) );
 		$this->assertTrue( $result['rows'][0]['notified'], 'The written row is notified' );
+		$this->assertSame( array( 'fulfilled|' ), $notified, 'The notification gets the stored fulfillment, without the unsaved listener changes' );
 		$this->assertSame( FulfillmentsCsvImporter::CODE_NO_ITEMS, $result['rows'][3]['code'], 'The saved row counts as fulfilled for a later row' );
 		$this->assertCount( FulfillmentsCsvImporter::STATUS_UPDATED === $status ? 1 : 2, $this->fulfillments_of( $order ) );
 		$this->assertFalse( doing_action( $hook ), 'The interrupted action is taken off the filter stack' );
