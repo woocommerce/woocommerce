@@ -1,0 +1,381 @@
+<?php
+/**
+ * Changes only settings whose definitions opt in to both ability reads and writes.
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Internal\Abilities\Domain;
+
+use Automattic\WooCommerce\Abilities\AbilityDefinition;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Changes only settings whose definitions opt in to both ability reads and writes.
+ */
+class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition {
+	/**
+	 * Field types whose values are arrays rather than scalars.
+	 */
+	private const ARRAY_TYPES = array( 'multiselect', 'multi_select_countries', 'relative_date_selector' );
+
+	/**
+	 * Get the ability name.
+	 *
+	 * @since 11.4.0
+	 * @return string
+	 */
+	public static function get_name(): string {
+		return 'woocommerce/settings-update';
+	}
+
+	/**
+	 * Register the settings update.
+	 *
+	 * @since 11.4.0
+	 * @return array
+	 */
+	public static function get_registration_args(): array {
+		return array(
+			'label'               => __( 'Update settings', 'woocommerce' ),
+			'description'         => __( 'Change approved settings in a group. Read current values with woocommerce/settings-query first. Unapproved fields and passwords cannot be changed. If any setting is refused, nothing is saved.', 'woocommerce' ),
+			'category'            => 'woocommerce',
+			'input_schema'        => self::get_input_schema(),
+			'output_schema'       => self::get_output_schema(),
+			'execute_callback'    => array( __CLASS__, 'execute' ),
+			'permission_callback' => array( __CLASS__, 'can_edit_settings' ),
+			'meta'                => array(
+				'show_in_rest' => true,
+				'mcp'          => array(
+					'public' => true,
+					'type'   => 'tool',
+				),
+				'annotations'  => array(
+					'readonly'    => false,
+					'idempotent'  => true,
+					'destructive' => false,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Same capability as the REST settings update endpoints.
+	 *
+	 * @since 11.4.0
+	 * @return bool
+	 */
+	public static function can_edit_settings(): bool {
+		return (bool) wc_rest_check_manager_permissions( 'settings', 'edit' );
+	}
+
+	/**
+	 * Validate every requested change before saving any of them.
+	 *
+	 * @since 11.4.0
+	 * @param array $input Group and changes.
+	 * @return array|\WP_Error
+	 */
+	public static function execute( array $input ) {
+		$fields = SettingsQuery::get_group_fields( $input['group'] );
+		if ( is_wp_error( $fields ) ) {
+			return $fields;
+		}
+		$fields_by_id = array();
+		foreach ( $fields as $setting ) {
+			$fields_by_id[ $setting['id'] ] ??= $setting;
+		}
+
+		$ids = array_column( $input['settings'], 'id' );
+		if ( count( $ids ) !== count( array_unique( $ids ) ) ) {
+			return self::invalid_value_error( array_values( array_unique( array_diff_assoc( $ids, array_unique( $ids ) ) ) ) );
+		}
+
+		$denied = array();
+		foreach ( $ids as $id ) {
+			if ( ! isset( $fields_by_id[ $id ] ) || ! self::is_writable( $fields_by_id[ $id ] ) ) {
+				$denied[] = $id;
+			}
+		}
+		if ( $denied ) {
+			return new \WP_Error(
+				'woocommerce_ability_settings_not_writable',
+				__( 'These settings cannot be changed.', 'woocommerce' ),
+				array(
+					'status' => 403,
+					'ids'    => $denied,
+				)
+			);
+		}
+
+		$controller   = new \WC_REST_Setting_Options_Controller();
+		$changes      = array();
+		$invalid      = array();
+		$option_names = array();
+		foreach ( $input['settings'] as $item ) {
+			$setting = $fields_by_id[ $item['id'] ];
+			$value   = self::validate_value( $controller, $setting, $item['value'] );
+			if ( is_wp_error( $value ) ) {
+				$invalid[] = $item['id'];
+				continue;
+			}
+			$changes[]   = array( $setting, $value );
+			$option_name = SettingsQuery::get_option_name( $setting );
+			if ( null !== $option_name ) {
+				$option_names[] = $option_name;
+			}
+		}
+		if ( $invalid ) {
+			return self::invalid_value_error( $invalid );
+		}
+
+		$value_schema = SettingsQuery::get_value_schema();
+		wp_prime_option_caches( array_unique( $option_names ) );
+		$results = array();
+		foreach ( $changes as $change ) {
+			$result   = array( 'id' => $change[0]['id'] );
+			$previous = SettingsQuery::get_value( $change[0] );
+			if ( true === rest_validate_value_from_schema( $previous, $value_schema ) ) {
+				$result['previous'] = $previous;
+			}
+			$results[] = $result;
+		}
+
+		foreach ( $changes as $index => $change ) {
+			list( $setting, $value ) = $change;
+			self::save( $setting, $value );
+			$saved                      = SettingsQuery::get_value( $setting );
+			$results[ $index ]['value'] = true === rest_validate_value_from_schema( $saved, $value_schema ) ? $saved : $value;
+		}
+
+		return array( 'settings' => $results );
+	}
+
+	/**
+	 * Writable only when readable, opted in with `abilities.write` set to boolean true, and backed by a stored option.
+	 *
+	 * @param array $setting Field from SettingsQuery::get_group_fields().
+	 * @return bool
+	 */
+	private static function is_writable( array $setting ): bool {
+		return SettingsQuery::is_readable( $setting )
+			&& true === ( $setting['abilities']['write'] ?? false )
+			&& ! SettingsQuery::has_supplied_value( $setting )
+			&& null !== SettingsQuery::get_option_name( $setting );
+	}
+
+	/**
+	 * Applies the REST settings validator for the field type, then the shapes the settings read can return.
+	 *
+	 * @param \WC_REST_Setting_Options_Controller $controller Validator source.
+	 * @param array                               $setting    Writable field.
+	 * @param mixed                               $value      Requested value.
+	 * @return mixed|\WP_Error
+	 */
+	private static function validate_value( \WC_REST_Setting_Options_Controller $controller, array $setting, $value ) {
+		$type    = $setting['type'];
+		$invalid = new \WP_Error( 'woocommerce_ability_settings_invalid_value', __( 'An invalid setting value was passed.', 'woocommerce' ) );
+
+		// Stored options are strings: the admin save compares select values strictly and checkbox values as yes/no.
+		if ( is_bool( $value ) ) {
+			if ( 'checkbox' !== $type ) {
+				return $invalid;
+			}
+			$value = $value ? 'yes' : 'no';
+		} elseif ( is_int( $value ) || is_float( $value ) ) {
+			$value = (string) $value;
+		}
+		if ( is_array( $value ) !== in_array( $type, self::ARRAY_TYPES, true ) ) {
+			return $invalid;
+		}
+		if ( is_array( $value ) && 'relative_date_selector' !== $type ) {
+			if ( array_filter( $value, 'is_bool' ) ) {
+				return $invalid;
+			}
+			$value = array_map( 'strval', $value );
+		}
+
+		$method = 'validate_setting_' . $type . '_field';
+		if ( in_array( $type, array( 'select', 'radio', 'multiselect' ), true ) ) {
+			$setting['options'] = is_array( $setting['options'] ?? null ) ? $setting['options'] : array();
+		}
+		switch ( $type ) {
+			case 'single_select_country':
+				$setting['options'] = self::get_country_state_choices();
+				$method             = 'validate_setting_select_field';
+				break;
+			case 'multi_select_countries':
+				$setting['options'] = WC()->countries->get_countries();
+				$method             = 'validate_setting_multiselect_field';
+				break;
+			case 'relative_date_selector':
+				return self::validate_relative_date( $value, $invalid );
+			case 'number':
+				if ( '' !== $value && ! is_numeric( $value ) ) {
+					return $invalid;
+				}
+				break;
+		}
+		if ( ! is_callable( array( $controller, $method ) ) ) {
+			$method = 'validate_setting_text_field';
+		}
+
+		$validated = $controller->$method( $value, $setting );
+		if ( is_wp_error( $validated ) ) {
+			return $invalid;
+		}
+		if ( is_array( $value ) && count( (array) $validated ) !== count( $value ) ) {
+			return $invalid;
+		}
+		if ( true !== rest_validate_value_from_schema( $validated, SettingsQuery::get_value_schema() ) ) {
+			return $invalid;
+		}
+		return $validated;
+	}
+
+	/**
+	 * Requires a known unit, since the admin parser silently falls back to days.
+	 *
+	 * @param array     $value   Requested retention period.
+	 * @param \WP_Error $invalid Error to return.
+	 * @return array|\WP_Error
+	 */
+	private static function validate_relative_date( array $value, \WP_Error $invalid ) {
+		$number = $value['number'] ?? null;
+		if ( ! in_array( $value['unit'] ?? null, array( 'days', 'weeks', 'months', 'years' ), true ) || ( '' !== $number && ! ( is_numeric( $number ) && $number >= 0 ) ) ) {
+			return $invalid;
+		}
+		return wc_parse_relative_date_option( $value );
+	}
+
+	/**
+	 * Country and country:state codes, matching the choices the REST settings API offers for base-location fields.
+	 *
+	 * @return array<string, string>
+	 */
+	private static function get_country_state_choices(): array {
+		$choices = array();
+		foreach ( WC()->countries->get_countries() as $code => $name ) {
+			$states = WC()->countries->get_states( $code );
+			if ( ! $states ) {
+				$choices[ $code ] = $name;
+				continue;
+			}
+			foreach ( $states as $state_code => $state_name ) {
+				$choices[ $code . ':' . $state_code ] = $name . ' - ' . $state_name;
+			}
+		}
+		return $choices;
+	}
+
+	/**
+	 * String keys go through the admin save so its sanitize filters and option hooks still run.
+	 *
+	 * @param array $setting Writable field.
+	 * @param mixed $value   Validated value.
+	 * @return void
+	 */
+	private static function save( array $setting, $value ): void {
+		$key = $setting['option_key'];
+		if ( is_array( $key ) ) {
+			$option            = get_option( $key[0], array() );
+			$option            = is_array( $option ) ? $option : array();
+			$option[ $key[1] ] = $value;
+			update_option( $key[0], $option );
+			return;
+		}
+
+		// The admin save unslashes posted data and names the option after the field ID.
+		$data = array( $key => wp_slash( $value ) );
+		if ( false !== strpos( $key, '[' ) ) {
+			parse_str( $key, $parsed );
+			$name = (string) key( $parsed );
+			$data = array( $name => array( (string) key( (array) $parsed[ $name ] ) => wp_slash( $value ) ) );
+		}
+		$setting['id'] = $key;
+		unset( $setting['field_name'] );
+		\WC_Admin_Settings::save_fields( array( $setting ), $data );
+	}
+
+	/**
+	 * Lists every refused ID so a caller can correct the whole batch.
+	 *
+	 * @param string[] $ids Setting IDs with invalid values.
+	 * @return \WP_Error
+	 */
+	private static function invalid_value_error( array $ids ): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_ability_settings_invalid_value',
+			__( 'These settings have invalid values. Nothing was saved.', 'woocommerce' ),
+			array(
+				'status' => 400,
+				'ids'    => $ids,
+			)
+		);
+	}
+
+	/**
+	 * Changes are limited to one group and twenty settings per call.
+	 *
+	 * @return array
+	 */
+	private static function get_input_schema(): array {
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'group'    => array(
+					'type'      => 'string',
+					'minLength' => 1,
+				),
+				'settings' => array(
+					'type'     => 'array',
+					'minItems' => 1,
+					'maxItems' => 20,
+					'items'    => array(
+						'type'                 => 'object',
+						'properties'           => array(
+							'id'    => array(
+								'type'      => 'string',
+								'minLength' => 1,
+							),
+							'value' => SettingsQuery::get_value_schema(),
+						),
+						'required'             => array( 'id', 'value' ),
+						'additionalProperties' => false,
+					),
+				),
+			),
+			'required'             => array( 'group', 'settings' ),
+			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * `previous` is omitted when the stored value has a shape the settings read would not return.
+	 *
+	 * @return array
+	 */
+	private static function get_output_schema(): array {
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'settings' => array(
+					'type'  => 'array',
+					'items' => array(
+						'type'                 => 'object',
+						'properties'           => array(
+							'id'       => array( 'type' => 'string' ),
+							'previous' => SettingsQuery::get_value_schema(),
+							'value'    => SettingsQuery::get_value_schema(),
+						),
+						'required'             => array( 'id', 'value' ),
+						'additionalProperties' => false,
+					),
+				),
+			),
+			'required'             => array( 'settings' ),
+			'additionalProperties' => false,
+		);
+	}
+}

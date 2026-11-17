@@ -393,4 +393,21 @@ Choices are returned only when supplied in the field definition. Country fields 
 
 The group read uses a non-null `fixed_value` first, then a non-null `value` supplied by the definition, then the stored option and its default. This follows the admin field value precedence and supports settings such as additional tax classes that are not stored as options. Supplied values still require read opt-in and pass the same password and value-shape checks. Existing REST settings reads retain their current behavior.
 
-This metadata also controls fields in the fixed `woocommerce/store-settings-get` summary that come from WooCommerce setting definitions. Missing opt-in or a password type omits the corresponding summary fields, including derived fields such as the currency symbol. The street address combines only readable address lines. Country scopes and their country lists are checked separately. Summary fields without a WooCommerce setting definition (WordPress timezone/date settings, version, install timestamp and the reviewed onboarding fields) retain their fixed inclusion policy. Only `read` is supported; there is no per-field personal-data sharing control yet. Opt-in allows the field to be returned to authorized callers without a separate PII check.
+This metadata also controls fields in the fixed `woocommerce/store-settings-get` summary that come from WooCommerce setting definitions. Missing opt-in or a password type omits the corresponding summary fields, including derived fields such as the currency symbol. The street address combines only readable address lines. Country scopes and their country lists are checked separately. Summary fields without a WooCommerce setting definition (WordPress timezone/date settings, version, install timestamp and the reviewed onboarding fields) retain their fixed inclusion policy. There is no per-field personal-data sharing control yet. Opt-in allows the field to be returned to authorized callers without a separate PII check.
+
+## Opt a setting into ability writes
+
+`woocommerce/settings-update` changes a setting only when its definition sets both `abilities.read` and `abilities.write` to the boolean `true`. Write requires read, so the caller can check the current value with `woocommerce/settings-query` first:
+
+```php
+'abilities' => array(
+    'read'  => true,
+    'write' => true,
+),
+```
+
+Password fields are never writable, even when `write` is `true`. Never opt in API keys, tokens or other secrets stored in text fields. Fields with a non-null `fixed_value` or a `value` supplied by the definition are refused, since no option stores them. Callers need permission to edit WooCommerce settings.
+
+Values go through the same per-type validation as the REST settings API, then must match a shape that `woocommerce/settings-query` can return. Select and multiselect values must be one of the field's choices, and country fields must be known country or country/state codes. Fields with a string option key are saved through `WC_Admin_Settings::save_fields()`, so the `woocommerce_admin_settings_sanitize_option` filters run as they do in the admin form.
+
+Updates are all or nothing. If any requested ID is unknown, not opted in or has an invalid value, the ability returns one error and saves nothing. Unknown and withheld IDs return the same `woocommerce_ability_settings_not_writable` error, so callers cannot probe for hidden fields. Each saved setting returns its `previous` value, so a change can be undone. Existing REST settings reads and writes retain their current behavior.
