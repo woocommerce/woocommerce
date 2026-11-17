@@ -837,14 +837,12 @@ trait ProductAbilityTrait {
 	 * @return bool
 	 */
 	protected static function check_product_permission( int $product_id, string $context ): bool {
-		$product_id = self::get_product_permission_id( $product_id );
-
 		if ( $product_id <= 0 ) {
 			return false;
 		}
 
 		if ( in_array( get_post_type( $product_id ), array( 'product', 'product_variation' ), true ) ) {
-			return (bool) wc_rest_check_post_permissions( 'product', $context, $product_id );
+			return (bool) wc_rest_check_post_permissions( 'product', $context, self::get_product_permission_id( $product_id ) );
 		}
 
 		if ( ! wc_rest_check_post_permissions( 'product', 'read' ) ) {

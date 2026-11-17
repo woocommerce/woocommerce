@@ -4438,7 +4438,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @param array  $input      Ability input.
 	 */
 	public function test_product_mutations_refuse_unknown_ids_to_users_who_cannot_act_on_any_product( string $ability_id, array $input ): void {
-		wp_set_current_user( $this->create_user_with_caps( array( 'edit_products', 'publish_products', 'delete_products' ) ) );
+		wp_set_current_user( $this->create_user_with_caps( array( 'edit_products', 'publish_products', 'delete_products', 'read_private_products' ) ) );
 
 		$result = wp_get_ability( $ability_id )->execute( $input );
 
@@ -4461,6 +4461,23 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should refuse permission to delete a variation whose parent no longer exists.
+	 */
+	public function test_product_delete_refuses_variation_with_missing_parent(): void {
+		global $wpdb;
+
+		$variation_id = $this->create_variation_product_id_for_test();
+		$wpdb->update( $wpdb->posts, array( 'post_parent' => 999999 ), array( 'ID' => $variation_id ) );
+		clean_post_cache( $variation_id );
+
+		$result = wp_get_ability( 'woocommerce/product-delete' )->execute( array( 'id' => $variation_id ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		$this->assertSame( 'publish', get_post_status( $variation_id ) );
 	}
 
 	/**
