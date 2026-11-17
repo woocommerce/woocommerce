@@ -132,9 +132,9 @@ Find releases, changes, and extensions.
 
 <div className="woo-docs-homepage__resource-list">
 
-- [Releases](https://developer.woocommerce.com/releases/) — find WooCommerce Core release downloads.
-- [Changelog](https://developer.woocommerce.com/changelog/) — read recent release notes.
-- [Woo Marketplace](https://woocommerce.com/product-category/woocommerce-extensions/) — browse extensions for your store.
+- [Releases](https://developer.woocommerce.com/releases/) Find WooCommerce Core release downloads.
+- [Changelog](https://developer.woocommerce.com/changelog/) Read recent release notes.
+- [Woo Marketplace](https://woocommerce.com/product-category/woocommerce-extensions/) Browse extensions for your store.
 
 </div>
 

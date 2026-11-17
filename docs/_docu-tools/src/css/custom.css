@@ -170,7 +170,6 @@ html[class*='docs-doc-id-getting-started/README'] .markdown-copy-button {
 
 .woo-docs-homepage {
   --woo-home-lead-width: 48rem;
-  --woo-home-surface: #faf7f3;
   --woo-home-card: #ffffff;
   --woo-home-border: #e9e1d9;
   --woo-home-text: #101517;
@@ -181,7 +180,6 @@ html[class*='docs-doc-id-getting-started/README'] .markdown-copy-button {
 }
 
 [data-theme='dark'] .woo-docs-homepage {
-  --woo-home-surface: #28252e;
   --woo-home-card: #202126;
   --woo-home-border: #48434e;
   --woo-home-text: #f6f7f7;
@@ -334,7 +332,7 @@ html[class*='docs-doc-id-getting-started/README'] .markdown-copy-button {
   margin: 0;
   border: 1px solid var(--woo-home-border);
   border-radius: 12px;
-  background: var(--woo-home-surface);
+  background: var(--woo-home-card);
   font-size: 0.94rem;
   text-wrap: balance;
 }
@@ -357,7 +355,7 @@ html[class*='docs-doc-id-getting-started/README'] .markdown-copy-button {
   padding: 1.45rem;
   border: 1px solid var(--woo-home-border);
   border-radius: 14px;
-  background: var(--woo-home-surface);
+  background: var(--woo-home-card);
 }
 
 .woo-docs-homepage__directory-card ul {
