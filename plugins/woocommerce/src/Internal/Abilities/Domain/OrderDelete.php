@@ -243,16 +243,17 @@ class OrderDelete extends ActionableAbility {
 	 * @return bool Whether the order store deleted the order.
 	 */
 	private function delete_recording_other_orders( \WC_Order $subject ): bool {
-		$before = array();
+		$known  = array_fill_keys( array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $this->deleted ), null );
+		$before = $known;
 		$record = static function ( $order_id, $order = null ) use ( &$before ): void {
 			unset( $order_id );
-			if ( $order instanceof \WC_Abstract_Order && $order->get_id() > 0 && ! isset( $before[ $order->get_id() ] ) ) {
+			if ( $order instanceof \WC_Abstract_Order && $order->get_id() > 0 && ! array_key_exists( $order->get_id(), $before ) ) {
 				$before[ $order->get_id() ] = clone $order;
 			}
 		};
 		// A plugin can delete an order post with wp_delete_post(), which skips the order store hooks.
-		$record_post = static function ( $post_id ) use ( $record ): void {
-			if ( in_array( get_post_type( $post_id ), wc_get_order_types(), true ) ) {
+		$record_post = static function ( $post_id ) use ( $record, &$before ): void {
+			if ( ! array_key_exists( (int) $post_id, $before ) && in_array( get_post_type( $post_id ), wc_get_order_types(), true ) ) {
 				$record( $post_id, wc_get_order( $post_id ) );
 			}
 		};
@@ -266,9 +267,8 @@ class OrderDelete extends ActionableAbility {
 			remove_action( 'before_delete_post', $record_post, PHP_INT_MIN );
 		}
 
-		$known = array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $this->deleted );
-		foreach ( array_diff_key( $before, array_flip( $known ) ) as $order_id => $order ) {
-			if ( false === wc_get_order( $order_id ) ) {
+		foreach ( array_diff_key( $before, $known ) as $order_id => $order ) {
+			if ( $order instanceof \WC_Abstract_Order && false === wc_get_order( $order_id ) ) {
 				$this->deleted[] = $order;
 			}
 		}
