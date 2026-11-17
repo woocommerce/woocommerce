@@ -367,8 +367,6 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			),
 			$this->get_reviews_list_table()->get_columns()
 		);
-
-		remove_filter( 'woocommerce_product_reviews_table_columns', $filter_callback );
 	}
 
 	/**
@@ -1661,8 +1659,6 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$method->invokeArgs( $list_table, array( $review, 'custom_column' ) );
 
 		$this->assertSame( 'Custom content for "custom_column" for ID ' . $review->comment_ID, ob_get_clean() );
-
-		remove_action( 'woocommerce_product_reviews_table_column_custom_column', $callback );
 	}
 
 	/**
@@ -1688,8 +1684,6 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$output = $method->invokeArgs( $list_table, array( 'test', 'test content', $review ) );
 
 		$this->assertSame( 'Additional content to "test content" for test column belonging to review with ID: ' . (string) $review->comment_ID, $output );
-
-		remove_filter( 'woocommerce_product_reviews_table_column_test_content', $callback );
 	}
 
 	/**
@@ -2097,15 +2091,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'edit_comments_per_page', $legacy );
 
-		try {
-			$this->assertSame( 45, $method->invoke( $list_table ) );
+		$this->assertSame( 45, $method->invoke( $list_table ) );
 
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Mirrors WordPress's Screen Options filter.
-			$input_per_page = (int) apply_filters( Reviews::PER_PAGE_USER_OPTION_KEY, 20 );
-			$this->assertSame( 45, $input_per_page );
-		} finally {
-			remove_filter( 'edit_comments_per_page', $legacy );
-		}
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Mirrors WordPress's Screen Options filter.
+		$input_per_page = (int) apply_filters( Reviews::PER_PAGE_USER_OPTION_KEY, 20 );
+		$this->assertSame( 45, $input_per_page );
 	}
 
 	/**

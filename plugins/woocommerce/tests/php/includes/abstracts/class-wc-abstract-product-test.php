@@ -16,8 +16,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		$this->disable_cogs_feature();
-		remove_all_filters( 'woocommerce_get_cogs_total_value' );
 		self::disable_direct_product_attribute_lookup_updates();
 	}
 
@@ -45,12 +43,18 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 * Setup items we need repeatedly across tests in this class.
 	 */
 	public function set_up() {
+		parent::set_up();
+
 		self::enable_direct_product_attribute_lookup_updates();
 		$this->admin_user           = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		$this->shop_manager_user    = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
 		$this->download_directories = wc_get_container()->get( Download_Directories::class );
 
+		// Start from exactly these two enabled rules. Deleting and adding rules also clears the
+		// valid-path cache Register keeps for the whole process, which the rollback leaves behind:
+		// a test that disables a rule would otherwise make later tests reject this product's files.
 		$this->download_directories->set_mode( Download_Directories::MODE_ENABLED );
+		$this->download_directories->delete_all();
 		$this->download_directories->add_approved_directory( 'https://always.trusted/' );
 		$this->download_directories->add_approved_directory( 'https://new.supplier/' );
 
@@ -66,8 +70,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 				),
 			)
 		);
-
-		parent::set_up();
 	}
 
 	/**
@@ -421,7 +423,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 * See https://github.com/woocommerce/woocommerce/issues/41676 for more details.
 	 */
 	public function test_validate_props_respects_non_default_no_stock_threshold_for_float_stock_quantity() {
-		$previous_threshold = get_option( 'woocommerce_notify_no_stock_amount' );
 		update_option( 'woocommerce_notify_no_stock_amount', 5 );
 		remove_filter( 'woocommerce_stock_amount', 'intval' );
 		add_filter( 'woocommerce_stock_amount', 'floatval' );
@@ -448,7 +449,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_stock_amount', 'floatval' );
 		add_filter( 'woocommerce_stock_amount', 'intval' );
-		update_option( 'woocommerce_notify_no_stock_amount', $previous_threshold );
 	}
 
 	/**
@@ -458,7 +458,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 * and stay in stock. With abs(), the threshold is compared by magnitude, so -5 behaves like 5.
 	 */
 	public function test_validate_props_treats_negative_no_stock_threshold_by_magnitude() {
-		$previous_threshold = get_option( 'woocommerce_notify_no_stock_amount' );
 		update_option( 'woocommerce_notify_no_stock_amount', -5 );
 		remove_filter( 'woocommerce_stock_amount', 'intval' );
 		add_filter( 'woocommerce_stock_amount', 'floatval' );
@@ -485,7 +484,6 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_stock_amount', 'floatval' );
 		add_filter( 'woocommerce_stock_amount', 'intval' );
-		update_option( 'woocommerce_notify_no_stock_amount', $previous_threshold );
 	}
 
 	/**

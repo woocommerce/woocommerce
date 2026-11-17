@@ -224,7 +224,7 @@
 			"lint": {
 				"command": "lint",
 				"changes": [
-					"client/**/*.{js,ts,tsx,scss}",
+					"client/**/*.{js,jsx,ts,tsx,scss}",
 					"stylelint.config.js"
 				]
 			},

@@ -74,7 +74,6 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * Clean up test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 		$this->reset_cancel_order_handled_flag();
 
 		$_GET     = $this->original_get;

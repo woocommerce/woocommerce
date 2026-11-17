@@ -76,6 +76,27 @@ class MissingGtinCheck extends AbstractReadinessCheck {
 	}
 
 	/**
+	 * The variations that need a GTIN and have none.
+	 *
+	 * @param \WC_Product $product Product that fails the rule.
+	 * @param ProductScan $scan    Catalog-wide lookups.
+	 * @return array<int, int>|null
+	 */
+	public function failing_variations( \WC_Product $product, ProductScan $scan ): ?array {
+		unset( $scan );
+		return self::variation_ids_where( $product, static fn( \WC_Product $variation ): bool => self::lacks_gtin( $variation ) );
+	}
+
+	/**
+	 * Whether a product or variation needs a GTIN and has none.
+	 *
+	 * @param \WC_Product $item Product or variation.
+	 */
+	private static function lacks_gtin( \WC_Product $item ): bool {
+		return ProductFields::needs_identifiers( $item ) && '' === ProductFields::normalise_gtin( (string) $item->get_global_unique_id() );
+	}
+
+	/**
 	 * Whether the product has this problem.
 	 *
 	 * @param \WC_Product $product Published product.
@@ -88,7 +109,7 @@ class MissingGtinCheck extends AbstractReadinessCheck {
 		// A variable product with no published variation lists nothing, so it needs no GTIN.
 		$items = $product instanceof \WC_Product_Variable ? ProductFields::variations( $product ) : array( $product );
 		foreach ( $items as $item ) {
-			if ( ProductFields::needs_identifiers( $item ) && '' === ProductFields::normalise_gtin( (string) $item->get_global_unique_id() ) ) {
+			if ( self::lacks_gtin( $item ) ) {
 				return true;
 			}
 		}

@@ -3,10 +3,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
  * Unit tests for the CartController class.
@@ -263,8 +263,6 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'package_name', $packages[1], 'Second package should have package_name.' );
 		$this->assertEquals( 1, $packages[1]['package_id'], 'Second package should have package_id of 1.' );
 		$this->assertStringContainsString( 'Shipment 2', $packages[1]['package_name'], 'Second package should have package_name containing "Shipment 2".' );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -304,8 +302,6 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( $packages, 'Should have at least one shipping package.' );
 		$this->assertEquals( 'custom-package-123', $packages[0]['package_id'], 'Package should use custom package_id from filter.' );
 		$this->assertArrayHasKey( 'package_name', $packages[0], 'Package should still have package_name.' );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -432,6 +428,52 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		} catch ( RouteException $exception ) {
 			$this->assertSame( 'woocommerce_rest_invalid_variation_data', $exception->getErrorCode() );
 			$this->assertStringContainsString( 'Invalid value posted for Color', $exception->getMessage() );
+		}
+	}
+
+	/**
+	 * @testdox Add to cart rejects a variation when an earlier variation matches.
+	 */
+	public function test_add_to_cart_rejects_a_variation_when_an_earlier_variation_matches(): void {
+		$product   = new \WC_Product_Variable();
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$red = new \WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '10' );
+		$red->set_menu_order( 0 );
+		$red->save();
+
+		$any = new \WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '5' );
+		$any->set_menu_order( 1 );
+		$any->save();
+
+		try {
+			( new CartController() )->add_to_cart(
+				array(
+					'id'        => $any->get_id(),
+					'quantity'  => 1,
+					'variation' => array(
+						array(
+							'attribute' => 'Color',
+							'value'     => 'Red',
+						),
+					),
+				)
+			);
+			$this->fail( 'Add to cart should reject a variation when an earlier variation matches.' );
+		} catch ( RouteException $exception ) {
+			$this->assertSame( 'woocommerce_rest_invalid_variation_data', $exception->getErrorCode() );
+			$this->assertSame( 'The selected options belong to a different variation of this product.', $exception->getMessage() );
 		}
 	}
 }

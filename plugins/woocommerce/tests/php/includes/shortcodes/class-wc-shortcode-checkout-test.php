@@ -27,13 +27,6 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	private $original_customer_billing = array();
 
 	/**
-	 * Callback currently reordering the available gateways, if any.
-	 *
-	 * @var callable|null
-	 */
-	private $gateway_order_filter;
-
-	/**
 	 * Remember the shared customer state this test may change.
 	 */
 	public function setUp(): void {
@@ -64,11 +57,6 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 			WC()->payment_gateways()->payment_gateways()[ $gateway_id ]->enabled = $enabled;
 		}
 		$this->original_gateway_enabled = array();
-
-		if ( $this->gateway_order_filter ) {
-			remove_filter( 'woocommerce_available_payment_gateways', $this->gateway_order_filter );
-			$this->gateway_order_filter = null;
-		}
 
 		// The gateway objects are shared singletons, so clear the selection on all of them, not only those this test enabled.
 		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
@@ -101,11 +89,11 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	 * @param string $gateway_id Gateway ID to list first.
 	 */
 	private function put_gateway_first( string $gateway_id ): void {
-		$this->gateway_order_filter = function ( $gateways ) use ( $gateway_id ) {
+		$gateway_order_filter = function ( $gateways ) use ( $gateway_id ) {
 			return isset( $gateways[ $gateway_id ] ) ? array( $gateway_id => $gateways[ $gateway_id ] ) + $gateways : $gateways;
 		};
 
-		add_filter( 'woocommerce_available_payment_gateways', $this->gateway_order_filter );
+		add_filter( 'woocommerce_available_payment_gateways', $gateway_order_filter );
 	}
 
 	/**

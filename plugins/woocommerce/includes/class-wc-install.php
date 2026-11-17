@@ -751,10 +751,10 @@ class WC_Install {
 	private static function create_lock(): bool {
 		global $wpdb;
 
-		// Insert will fail if it already exists so this functions as a mutex.
+		// INSERT IGNORE affects no rows if another request holds the lock, so contention isn't logged as a DB error.
 		$created_lock = $wpdb->query(
 			$wpdb->prepare(
-				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_installing', %d, 'no')",
+				"INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_installing', %d, 'no')",
 				time()
 			)
 		);

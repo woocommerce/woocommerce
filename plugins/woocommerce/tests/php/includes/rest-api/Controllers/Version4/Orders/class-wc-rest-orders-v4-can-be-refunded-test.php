@@ -26,16 +26,6 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Disable the REST API v4 feature.
-	 */
-	private static function disable_rest_api_v4_feature(): void {
-		remove_filter(
-			'woocommerce_admin_features',
-			array( __CLASS__, 'add_v4_feature' ),
-		);
-	}
-
-	/**
 	 * Filter callback to add the rest-api-v4 feature.
 	 *
 	 * @param array $features Features array.
@@ -59,18 +49,10 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
-		self::enable_rest_api_v4_feature();
 		parent::setUp();
+		self::enable_rest_api_v4_feature();
 
 		wp_set_current_user( self::$user_id );
-	}
-
-	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		self::disable_rest_api_v4_feature();
 	}
 
 	/**

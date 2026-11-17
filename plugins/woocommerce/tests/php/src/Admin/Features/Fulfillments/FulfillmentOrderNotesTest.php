@@ -25,34 +25,11 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 	private FulfillmentsManager $manager;
 
 	/**
-	 * The original value of the fulfillments feature flag before tests.
-	 *
-	 * @var string|false
-	 */
-	private static $original_fulfillments_enabled;
-
-	/**
 	 * Set up the test environment.
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		self::$original_fulfillments_enabled = get_option( 'woocommerce_feature_fulfillments_enabled' );
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
-	}
-
-	/**
-	 * Tear down the test environment.
-	 */
-	public static function tearDownAfterClass(): void {
-		if ( false === self::$original_fulfillments_enabled ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_enabled );
-		}
-		parent::tearDownAfterClass();
+		FulfillmentsHelper::create_tables();
 	}
 
 	/**
@@ -60,8 +37,8 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		FulfillmentsHelper::enable_fulfillments();
 		$this->manager = wc_get_container()->get( FulfillmentsManager::class );
-		$this->manager->register();
 	}
 
 	/**
@@ -546,8 +523,6 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 			}
 		}
 		$this->assertTrue( $found, 'Expected a sanitized fulfillment note.' );
-
-		remove_filter( 'woocommerce_fulfillment_created_order_note', $malicious_filter );
 	}
 
 	/**
@@ -594,8 +569,6 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 			}
 		}
 		$this->assertTrue( $found, 'Expected allowed HTML to be preserved in note.' );
-
-		remove_filter( 'woocommerce_fulfillment_created_order_note', $filter_with_html );
 	}
 
 	/**
@@ -640,8 +613,6 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 			}
 		}
 		$this->assertFalse( $found_created_note, 'Expected no fulfillment note when filter returns a non-string value.' );
-
-		remove_filter( 'woocommerce_fulfillment_created_order_note', $non_string_filter );
 	}
 
 	/**
@@ -686,8 +657,6 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 			}
 		}
 		$this->assertFalse( $found_created_note, 'Expected no fulfillment note when filter returns empty string.' );
-
-		remove_filter( 'woocommerce_fulfillment_created_order_note', $empty_filter );
 	}
 
 	/**
@@ -732,8 +701,6 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 			}
 		}
 		$this->assertFalse( $found_created_note, 'Expected no fulfillment note when filter returns whitespace-only string.' );
-
-		remove_filter( 'woocommerce_fulfillment_created_order_note', $whitespace_filter );
 	}
 
 	/**
@@ -775,8 +742,6 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 			}
 		}
 		$this->assertFalse( $found_created_note, 'Expected no fulfillment created note when filter returns null.' );
-
-		remove_filter( 'woocommerce_fulfillment_created_order_note', '__return_null' );
 	}
 
 	/**
@@ -821,8 +786,6 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 			}
 		}
 		$this->assertTrue( $found, 'Expected the note to contain the custom filter message.' );
-
-		remove_filter( 'woocommerce_fulfillment_created_order_note', $custom_filter );
 	}
 
 	/**

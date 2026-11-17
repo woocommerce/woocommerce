@@ -46,14 +46,6 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up after tests.
-	 */
-	public function tearDown(): void {
-		remove_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
-		parent::tearDown();
-	}
-
-	/**
 	 * Test route registration.
 	 *
 	 * @since 3.5.0

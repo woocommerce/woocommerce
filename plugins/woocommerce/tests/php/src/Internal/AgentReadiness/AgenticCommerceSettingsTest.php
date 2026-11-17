@@ -139,12 +139,74 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Status groups by shows_required(), so a recommended-level check the rules mark Required lands in Required.
+	 */
+	public function test_status_groups_by_shows_required(): void {
+		$render = new \ReflectionMethod( AgenticCommerceSettingsPage::class, 'render_status' );
+		$render->setAccessible( true );
+		ob_start();
+		$render->invoke(
+			$this->page(),
+			array(
+				array(
+					'id'      => 'search_visible',
+					'level'   => 'recommended',
+					'ok'      => false,
+					'name'    => 'Products can be found in search',
+					'label'   => 'Search',
+					'fix_url' => '#search',
+					'fix'     => 'Fix search',
+				),
+				array(
+					'id'      => 'canonical_url',
+					'level'   => 'recommended',
+					'ok'      => false,
+					'name'    => 'Pages name their canonical URL',
+					'label'   => 'Canonical',
+					'fix_url' => '#canonical',
+					'fix'     => 'Fix canonical',
+				),
+			),
+			\Automattic\WooCommerce\Internal\AgentReadiness\UcpSwitch::STATUS_OFF
+		);
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'wc-agentic-commerce-group--required', $html );
+		$this->assertStringContainsString( '1 required step to finish so agents can shop your store.', $html, 'The summary counts a Required row even when it does not block the switch' );
+		$this->assertStringNotContainsString( 'Everything agents need is set up.', $html );
+		$this->assertStringContainsString( 'Let search engines index your store', $html, 'search_visible shows as Required via shows_required()' );
+		$this->assertMatchesRegularExpression(
+			'/wc-agentic-commerce-group--required[\s\S]*Let search engines index your store[\s\S]*wc-agentic-commerce-group--recommended[\s\S]*Canonical/s',
+			$html
+		);
+	}
+
+	/**
+	 * Render the page with one payment gateway turned on, since a payment method is Required.
+	 *
+	 * @return string
+	 */
+	private function render_with_a_payment_method(): string {
+		$gateways = WC()->payment_gateways()->payment_gateways();
+		$this->assertNotEmpty( $gateways, 'Core registers its gateways' );
+		$gateway = reset( $gateways );
+		$enabled = $gateway->enabled;
+
+		$gateway->enabled = 'yes';
+		try {
+			return $this->render_page();
+		} finally {
+			$gateway->enabled = $enabled;
+		}
+	}
+
+	/**
 	 * @testdox With every required check passing, open checks are only Recommended and passing ones are Done.
 	 */
 	public function test_output_on_a_ready_store(): void {
 		StoreConditionsTest::make_store_ready();
 
-		$html = $this->render_page();
+		$html = $this->render_with_a_payment_method();
 
 		$this->assertStringContainsString( 'Everything agents need is set up.', $html );
 		$this->assertStringNotContainsString( 'wc-agentic-commerce-check--required', $html );
@@ -160,7 +222,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		StoreConditionsTest::make_store_ready();
 		delete_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION );
 
-		$html = $this->render_page();
+		$html = $this->render_with_a_payment_method();
 
 		$this->assertStringNotContainsString( 'wc-agentic-commerce-check--required', $html );
 		$this->assertMatchesRegularExpression( '/wc-agentic-commerce-group--recommended.*Choose a privacy policy page/s', $html );
@@ -287,7 +349,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The page answers each merchant question, marks a likely conflict, hides checks whose prerequisite failed, and folds passed checks away.
+	 * @testdox The page answers each merchant question, marks a likely conflict with the page but names no plugin, hides checks whose prerequisite failed, and folds passed checks away.
 	 */
 	public function test_output_groups_summary_and_conflict(): void {
 		$row = static fn( string $id, ?bool $ok, bool $conflict = false ): array => array(
@@ -307,7 +369,14 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			array(
 				'generated_at' => gmdate( 'c' ),
 				'store_checks' => array(
-					$row( 'product_jsonld_present', false, true ),
+					array_merge(
+						$row( 'product_jsonld_present', false, true ),
+						array(
+							'seen_at' => 'https://example.org/product/mug/',
+							// A report stored before plugin names were dropped.
+							'plugins' => array( 'Yoast SEO', 'Rank Math SEO' ),
+						)
+					),
 					$row( 'product_offer_jsonld', null ),
 					$row( 'sitemap_lists_products', true ),
 				),
@@ -323,6 +392,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertMatchesRegularExpression( '/data-on="(?![^"]*Agent shopping is off)[^"]*" data-off="Agent shopping is off/', $html, 'The switch script can show the line for UCP on without a reload' );
 		$this->assertStringContainsString( 'Likely conflict', $html );
 		$this->assertStringContainsString( 'Something on your store may be replacing this.', $html );
+		$this->assertStringContainsString( 'Seen on: <a href="https://example.org/product/mug/">https://example.org/product/mug/</a>', $html, 'A conflict names the page' );
+		$this->assertStringNotContainsString( 'Yoast SEO', $html, 'No plugin is named, even from an older stored report' );
 		$this->assertStringNotContainsString( 'product_offer_jsonld name', $html, 'Its prerequisite failed' );
 		$this->assertMatchesRegularExpression( '#<details>.*sitemap_lists_products name.*</details>#s', $html );
 	}
@@ -629,6 +700,59 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertNotContains( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, array_column( $settings, 'id' ) );
 		$this->assertSame( $privacy, (int) get_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION ) );
+	}
+
+	/**
+	 * @testdox A discovery file WooCommerce didn't write shows the removal instruction, not a permalinks link.
+	 */
+	public function test_ucp_file_in_the_way_shows_the_removal_instruction(): void {
+		StoreConditionsTest::make_store_ready();
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/.well-known/ucp';
+		wp_mkdir_p( dirname( $path ) );
+		file_put_contents( $path, '{}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+
+		try {
+			$html = $this->render_page();
+			$this->assertStringContainsString( 'didn&#039;t write', $html );
+			$this->assertStringContainsString( esc_html( $path ), $html );
+			$this->assertStringNotContainsString( 'options-permalink.php', $html );
+			$this->assertStringNotContainsString( 'Change permalinks', $html );
+		} finally {
+			wp_delete_file( $path );
+			foreach ( array( dirname( $path ), dirname( $path, 2 ) ) as $dir ) {
+				if ( is_dir( $dir ) ) {
+					rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+				}
+			}
+		}
+	}
+
+	/**
+	 * @testdox When the discovery file can't be written, the status row says to change permalinks or make the folder writable.
+	 */
+	public function test_ucp_no_file_shows_permalink_and_permission_fixes(): void {
+		global $wp_rewrite;
+		StoreConditionsTest::make_store_ready();
+		$wp_rewrite->set_permalink_structure( '' );
+		$locked = get_temp_dir() . uniqid( 'wc-ucp-locked-' );
+		mkdir( $locked ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
+		chmod( $locked, 0555 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $locked . '/ucp' );
+
+		try {
+			if ( is_writable( $locked ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+				$this->markTestSkipped( 'The test runs as a user who can write any directory (root).' );
+			}
+			$html = $this->render_page();
+			$this->assertStringContainsString( 'Change permalinks', $html );
+			$this->assertStringContainsString( 'options-permalink.php', $html );
+			$this->assertStringContainsString( 'writable', $html );
+			$this->assertStringContainsString( 'index.php', $html );
+		} finally {
+			chmod( $locked, 0755 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+			rmdir( $locked ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+		}
 	}
 
 	/**
