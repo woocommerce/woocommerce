@@ -135,7 +135,9 @@ class ExtensibleAbilities {
 	 *     @type array    $output_schema Optional. JSON schema of the value that `get_callback` returns. Required
 	 *                                  with `get_callback`. It needs one `type` other than null, because clients
 	 *                                  expect one type for each field. Core publishes it as declared. Its
-	 *                                  `title` is the label clients show.
+	 *                                  `title` is the label clients show. Nested properties must not be nullable
+	 *                                  either: leave a property out when it has no value. Only the top-level
+	 *                                  `type` is checked at registration.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
 	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
