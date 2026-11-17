@@ -432,6 +432,7 @@ class UcpCart extends UcpCartTestCase {
 	 * The cart hands the buyer a URL that restores the same cart in a browser.
 	 */
 	public function test_continue_url_carries_the_cart_token(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
 		$data = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
 
 		$query = array();
@@ -880,6 +881,7 @@ class UcpCart extends UcpCartTestCase {
 		$this->assertCount( 1, $data['line_items'] );
 		$this->assertSame( 2, $data['line_items'][0]['quantity'] );
 		$this->assertSame( 'CANCELED', $data['messages'][0]['code'] );
+		$this->assertArrayNotHasKey( 'continue_url', $data );
 
 		foreach ( array( 'GET', 'PUT' ) as $method ) {
 			$after = $this->request( $method, '/carts/' . $created['id'] )->get_data();

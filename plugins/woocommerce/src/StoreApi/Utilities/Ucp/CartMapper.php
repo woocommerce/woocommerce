@@ -186,15 +186,13 @@ class CartMapper {
 	 * Build the URL that hands the cart to the buyer's own browser.
 	 *
 	 * `WC_Session_Handler` restores or clones the guest session named by the `session`
-	 * argument, so the shopper lands on checkout holding this cart. A logged-in session
-	 * is keyed to the user, not a token, so it gets a plain checkout URL.
+	 * argument, so the shopper lands on checkout holding this cart.
 	 *
 	 * @param string $cart_id Cart identifier.
 	 * @return string
 	 */
 	private function continue_url( string $cart_id ): string {
-		$checkout_url = wc_get_checkout_url();
-		$continue_url = is_user_logged_in() ? $checkout_url : add_query_arg( 'session', $cart_id, $checkout_url );
+		$continue_url = add_query_arg( 'session', $cart_id, wc_get_checkout_url() );
 
 		/**
 		 * Filters the URL a UCP cart hands the buyer for completing the purchase.
