@@ -129,8 +129,8 @@ class WC_Shortcode_Checkout {
 					throw new Exception( __( 'This order cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ) );
 				}
 
-				// Does not need payment.
-				if ( ! $order->needs_payment() ) {
+				// Does not need payment, or is a checkout-draft that has not passed checkout validation.
+				if ( ! $order->needs_payment() || $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
 					/* translators: %s: order status */
 					throw new Exception( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ) );
 				}
@@ -260,7 +260,7 @@ class WC_Shortcode_Checkout {
 
 			if ( $order && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
 
-				if ( $order->needs_payment() ) {
+				if ( $order->needs_payment() && ! $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
 
 					wc_get_template( 'checkout/order-receipt.php', array( 'order' => $order ) );
 

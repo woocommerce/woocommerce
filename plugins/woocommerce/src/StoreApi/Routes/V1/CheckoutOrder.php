@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidStockLevelsInCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
@@ -109,10 +110,11 @@ class CheckoutOrder extends AbstractCartRoute {
 		$order_id = absint( $request['id'] );
 		$order    = wc_get_order( $order_id );
 
-		if ( ! $order instanceof \WC_Order || ! $order->needs_payment() ) {
+		if ( ! $order instanceof \WC_Order || ! $order->needs_payment() || $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
 			return new \WP_Error(
 				'invalid_order_update_status',
-				__( 'This order cannot be paid for.', 'woocommerce' )
+				__( 'This order cannot be paid for.', 'woocommerce' ),
+				array( 'status' => 400 )
 			);
 		}
 		$this->order = $order;

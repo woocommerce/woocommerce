@@ -1,11 +1,13 @@
 <?php
-declare( strict_types = 1 );
-
 /**
  * Tests for WC_Shortcode_Checkout.
  *
  * @package WooCommerce\Tests\Shortcodes
  */
+
+declare( strict_types = 1 );
+
+use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
  * Class WC_Shortcode_Checkout_Test.
@@ -111,15 +113,18 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	/**
 	 * Render the pay page for an order, as the shopper following its payment link.
 	 *
-	 * @param WC_Order $order Order to pay for.
+	 * @param WC_Order $order         Order to pay for.
+	 * @param bool     $pay_for_order True for the payment link's pay form, false for the receipt step after checkout.
 	 * @return string Rendered markup.
 	 */
-	private function render_pay_page( WC_Order $order ): string {
+	private function render_pay_page( WC_Order $order, bool $pay_for_order = true ): string {
 		global $wp;
 
 		$wp->query_vars['order-pay'] = $order->get_id();
-		$_GET['pay_for_order']       = 'true';
 		$_GET['key']                 = $order->get_order_key();
+		if ( $pay_for_order ) {
+			$_GET['pay_for_order'] = 'true';
+		}
 
 		ob_start();
 		WC_Shortcode_Checkout::output( array() );
@@ -139,6 +144,21 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 		$order->set_created_via( $created_via );
 		$order->set_payment_method( $payment_method );
 		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Create a guest order with the checkout-draft status, which block checkout uses before an order is placed.
+	 *
+	 * @return WC_Order
+	 */
+	private function create_checkout_draft_order(): WC_Order {
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+
+		$this->assertTrue( $order->needs_payment(), 'Baseline: needs_payment() is still true for a draft, so the pay page has to refuse it explicitly.' );
 
 		return $order;
 	}
@@ -197,6 +217,36 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 		$output = (string) ob_get_clean();
 
 		$this->assertStringContainsString( 'Sorry, this order is invalid and cannot be paid for.', $output );
+	}
+
+	/**
+	 * @testdox The pay page refuses a checkout-draft order and offers no payment form for it.
+	 */
+	public function test_order_pay_refuses_checkout_draft_order(): void {
+		$output = $this->render_pay_page( $this->create_checkout_draft_order() );
+
+		$this->assertStringContainsString( 'it cannot be paid for', $output, 'The pay page must tell the shopper a draft cannot be paid for.' );
+		$this->assertStringNotContainsString( 'name="woocommerce_pay"', $output, 'No payment form may be offered for a draft.' );
+	}
+
+	/**
+	 * @testdox The order receipt step after checkout shows the receipt for a pending order and refuses a checkout-draft.
+	 * @testWith ["pending", true]
+	 *           ["checkout-draft", false]
+	 *
+	 * @param string $status        Order status.
+	 * @param bool   $shows_receipt Whether the receipt should render.
+	 */
+	public function test_order_receipt_is_shown_only_for_payable_orders( string $status, bool $shows_receipt ): void {
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_status( $status );
+		$order->save();
+		$this->assertTrue( $order->needs_payment(), 'Baseline: needs_payment() is true for both, so only the draft check can tell them apart.' );
+
+		$output = $this->render_pay_page( $order, false );
+
+		$this->assertSame( $shows_receipt, str_contains( $output, 'class="order_details"' ), $shows_receipt ? 'A pending order must show its receipt.' : 'No order receipt may be shown for a draft.' );
+		$this->assertSame( ! $shows_receipt, str_contains( $output, 'it cannot be paid for' ), 'Only a draft may get the cannot-be-paid notice.' );
 	}
 
 	/**
