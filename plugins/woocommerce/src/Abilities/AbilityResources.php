@@ -472,6 +472,9 @@ class AbilityResources {
 		foreach ( self::get_output_fields( $args ) as $field => $field_args ) {
 			$schema['properties'][ $field ] = self::resolve_ref( $field_args['schema'], $resolving );
 		}
+		if ( empty( $schema['properties'] ) ) {
+			unset( $schema['properties'] );
+		}
 		return $schema;
 	}
 

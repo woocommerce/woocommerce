@@ -234,7 +234,13 @@ class PersonalDataTest extends DomainAbilityTestCase {
 		$this->assertSame( 'jane@example.com', $result['orders'][0]['billing_email'] );
 		$this->assertInstanceOf( \stdClass::class, $result['orders'][0]['shipping'] );
 		$this->assertSame( array(), get_object_vars( $result['orders'][0]['shipping'] ) );
-		$this->assertEmpty( $this->get_order_item_schema()['properties']['shipping']['properties'] );
+		$schema = $this->get_order_item_schema()['properties']['shipping'];
+		$this->assertArrayNotHasKey( 'properties', $schema );
+		$this->assertSame( 'object', $schema['type'] );
+		$this->assertFalse( $schema['additionalProperties'] );
+		$this->assertStringNotContainsString( '"properties":[]', wp_json_encode( $this->get_order_item_schema() ) );
+		$this->assertTrue( rest_validate_value_from_schema( new \stdClass(), $schema ) );
+		$this->assertWPError( rest_validate_value_from_schema( array( 'email' => 'private@example.test' ), $schema ) );
 	}
 
 	/**

@@ -264,7 +264,7 @@ class AbilityResourcesTest extends DomainAbilityTestCase {
 		remove_action( 'woocommerce_extensible_abilities_init', $late );
 
 		$this->assertTrue( AbilityResources::is_registered( 'ticket' ) );
-		$this->assertArrayNotHasKey( 'late', AbilityResources::output_schema( 'ticket' )['properties'] );
+		$this->assertArrayNotHasKey( 'late', AbilityResources::output_schema( 'ticket' )['properties'] ?? array() );
 	}
 
 	/**
@@ -303,7 +303,7 @@ class AbilityResourcesTest extends DomainAbilityTestCase {
 			)
 		);
 
-		$this->assertSame( array(), AbilityResources::output_schema( 'ticket' )['properties'] );
+		$this->assertSame( array(), AbilityResources::output_schema( 'ticket' )['properties'] ?? array() );
 	}
 
 	/**
@@ -347,7 +347,7 @@ class AbilityResourcesTest extends DomainAbilityTestCase {
 		);
 
 		$this->assertArrayNotHasKey( 'extensions', AbilityResources::output_schema( 'product' )['properties'] );
-		$this->assertSame( array(), AbilityResources::output_schema( 'ticket' )['properties'] );
+		$this->assertSame( array(), AbilityResources::output_schema( 'ticket' )['properties'] ?? array() );
 	}
 
 	/**
@@ -408,7 +408,7 @@ class AbilityResourcesTest extends DomainAbilityTestCase {
 			)
 		);
 
-		$this->assertSame( array(), AbilityResources::output_schema( 'ticket' )['properties'] );
+		$this->assertSame( array(), AbilityResources::output_schema( 'ticket' )['properties'] ?? array() );
 	}
 
 	/**
