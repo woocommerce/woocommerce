@@ -143,6 +143,11 @@
 	:is(&__description, .wc-sales-readiness-channels) + .wc-sales-readiness-list > .wc-sales-readiness-row:first-child {
 		padding-block-start: 0;
 	}
+
+	// An open fold continues the list above it, under that list's last line.
+	.wc-sales-readiness-fold .wc-sales-readiness-list > .wc-sales-readiness-row:first-child {
+		padding-block-start: var(--wpds-dimension-padding-md);
+	}
 }
 
 // Sales readiness page: the card header is 24px tall with the title at its top, so the content
