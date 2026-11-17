@@ -264,7 +264,8 @@ class Media_Text extends Abstract_Block_Renderer {
 				$variables_map = $variables_map ?? Preset_Variable_Resolver::get_variables_map( $rendering_context->get_theme_json() );
 				$value         = Preset_Variable_Resolver::resolve( $value, $variables_map );
 			}
-			$total += Styles_Helper::parse_value( $value );
+			$px     = Styles_Helper::convert_to_px( $value, false );
+			$total += Styles_Helper::parse_value( $px ?? $value );
 		}
 
 		return $total;

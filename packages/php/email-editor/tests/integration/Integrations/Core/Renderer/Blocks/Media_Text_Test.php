@@ -279,6 +279,25 @@ class Media_Text_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Padding in rem is converted to px before it's taken off: ( 612 - 2 * 32px ) * 50% - 20px = 254px.
+	 */
+	public function testItConvertsRemPaddingForCap(): void {
+		$parsed_block                   = $this->get_block_with_image( 1200, 800, 50 );
+		$parsed_block['attrs']['style'] = array(
+			'spacing' => array(
+				'padding' => array(
+					'left'  => '2rem',
+					'right' => '2rem',
+				),
+			),
+		);
+
+		$img = $this->render_and_get_img( $parsed_block );
+
+		$this->assertSame( '254', $img['width'] );
+	}
+
+	/**
 	 * Padding saved as a spacing preset is resolved through the theme's variables.
 	 */
 	public function testItResolvesPresetPaddingForCap(): void {
