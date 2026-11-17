@@ -19,6 +19,50 @@ use Automattic\WooCommerce\Tests\Internal\Abilities\Domain\DomainAbilityTestCase
 class PersonalDataTest extends DomainAbilityTestCase {
 
 	/**
+	 * @testdox Should use the current user's policy and schema after the registry was built by another user.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $initially_shared Whether the registry is built for the sharing user.
+	 */
+	public function test_user_switch_updates_output_and_schema( bool $initially_shared ): void {
+		$order            = $this->create_order_with_email();
+		$withholding_user = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->add_test_field( 'order_item', static fn() => 'buyer@example.test', array( 'personal_data' => 'email' ) );
+		$this->filter_personal_data( static fn() => get_current_user_id() !== $withholding_user );
+		$first  = $initially_shared ? self::$administrator_id : $withholding_user;
+		$second = $initially_shared ? $withholding_user : self::$administrator_id;
+		wp_set_current_user( $first );
+		$query = wp_get_ability( 'woocommerce/orders-query' );
+		$write = wp_get_ability( 'woocommerce/order-update-status' );
+
+		foreach ( array( $first, $second, $first ) as $index => $user_id ) {
+			wp_set_current_user( $user_id );
+			$result = $query->execute(
+				array(
+					'id'                 => $order->get_id(),
+					'include_line_items' => true,
+				)
+			);
+			$this->assertNotWPError( $result );
+			$shared = $user_id !== $withholding_user;
+			$this->assertSame( $shared, isset( $result['orders'][0]['billing_email'] ) );
+			$this->assertSame( $shared, isset( $result['orders'][0]['line_items'][0]['extensions'] ) );
+			$schema = $query->get_output_schema();
+			$this->assertSame( $shared, isset( $schema['properties']['orders']['items']['properties']['billing_email'] ) );
+			$this->assertTrue( rest_validate_value_from_schema( $result, $schema ) );
+			$updated = $write->execute(
+				array(
+					'id'     => $order->get_id(),
+					'status' => 1 === $index ? 'pending' : 'completed',
+				)
+			);
+			$this->assertNotWPError( $updated );
+			$this->assertSame( $shared, isset( $updated['order']['billing_email'] ) );
+			$this->assertSame( $shared, isset( $write->get_output_schema()['properties']['order']['properties']['billing_email'] ) );
+		}
+	}
+
+	/**
 	 * @testdox Should include statuses and types registered during extension setup in output schemas.
 	 */
 	public function test_order_enums_include_extension_registrations(): void {

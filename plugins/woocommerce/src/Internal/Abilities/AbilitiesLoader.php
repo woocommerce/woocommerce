@@ -270,6 +270,9 @@ class AbilitiesLoader {
 			}
 
 			$registered_ability = wp_register_ability( $ability_name, $args );
+			if ( $is_core_ability && $registered_ability instanceof Ability ) {
+				$registered_ability->set_output_schema_factory( static fn() => $class_name::get_registration_args()['output_schema'] ?? array() );
+			}
 
 			if ( null !== $registered_ability ) {
 				self::$registered_abilities[ $ability_name ] = $registered_ability;

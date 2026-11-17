@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 class PersonalData {
 
 	/**
-	 * Whether each resource shares its personal data. Decided once per request, like the output schemas, so schema and output agree.
+	 * Whether each resource shares its personal data. Decided once per site and user in a request, so schema and output agree.
 	 *
 	 * @var array<string, bool>
 	 */
@@ -38,13 +38,15 @@ class PersonalData {
 	 * @return bool
 	 */
 	public static function is_shared( string $resource_name ): bool {
-		if ( ! isset( self::$shared[ $resource_name ] ) ) {
+		$key = get_current_blog_id() . ':' . get_current_user_id() . ':' . $resource_name;
+		if ( ! isset( self::$shared[ $key ] ) ) {
 			/**
 			 * Filters whether WooCommerce abilities return personal data.
 			 *
 			 * Return false to leave out fields flagged as personal data, such as billing emails, from
-			 * the output and the output schema. It runs once per resource and request, and the result
-			 * applies to both. Clients must refresh cached schemas when their disclosure context changes;
+			 * the output and the output schema. It runs on first schema or output access for each resource, site and user in a request.
+			 * Switching users or sites selects that context's decision and Core output schema. Other policy
+			 * inputs must stay fixed for that context within the request. Clients must refresh cached schemas when their disclosure context changes;
 			 * a cached schema never overrides the server's current decision.
 			 *
 			 * @since 11.4.0
@@ -52,8 +54,8 @@ class PersonalData {
 			 * @param bool   $shared        Whether personal data is returned. Default true.
 			 * @param string $resource_name Resource being formatted, such as `order`.
 			 */
-			self::$shared[ $resource_name ] = true === apply_filters( 'woocommerce_abilities_share_personal_data', true, $resource_name );
+			self::$shared[ $key ] = true === apply_filters( 'woocommerce_abilities_share_personal_data', true, $resource_name );
 		}
-		return self::$shared[ $resource_name ];
+		return self::$shared[ $key ];
 	}
 }

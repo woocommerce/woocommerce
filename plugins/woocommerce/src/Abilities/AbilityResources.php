@@ -50,7 +50,7 @@ class AbilityResources {
 	private static array $fields = array();
 
 	/**
-	 * Output fields keyed by resource and feature state. Personal data is decided once per request, so a list
+	 * Output fields keyed by site, user, resource, feature state and ancestor policy, so a list
 	 * of objects reuses the fields of the first one.
 	 *
 	 * @var array<string, array<string, array<string, mixed>>>
@@ -580,7 +580,7 @@ class AbilityResources {
 	 */
 	private static function fields_for_output( string $resource_name, bool $share_personal_data ): array {
 		$enabled = ExtensibleAbilities::is_enabled();
-		$key     = $resource_name . ( $enabled ? '|extensions' : '' ) . ( $share_personal_data ? '' : '|withheld' );
+		$key     = get_current_blog_id() . ':' . get_current_user_id() . ':' . $resource_name . ( $enabled ? '|extensions' : '' ) . ( $share_personal_data ? '' : '|withheld' );
 		if ( ! isset( self::$output_fields[ $key ] ) ) {
 			$fields = self::withhold( self::$fields[ $resource_name ][''] ?? array(), $resource_name, $share_personal_data );
 			$schema = ExtensibleAbilities::add_fields_schema( array(), $resource_name, null, $share_personal_data );
