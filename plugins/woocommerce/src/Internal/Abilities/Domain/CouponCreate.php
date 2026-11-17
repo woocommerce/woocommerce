@@ -96,7 +96,7 @@ class CouponCreate extends ActionableAbility {
 	 * @return array
 	 */
 	protected function prepare_response( $subject ): array {
-		return array( 'coupon' => self::format_coupon_for_response( new \WC_Coupon( $subject->get_id() ) ) );
+		return array( 'coupon' => self::format_coupon_for_response( new \WC_Coupon( $subject ) ) );
 	}
 
 	/**

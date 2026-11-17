@@ -577,4 +577,49 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'draft', $result['coupon']['status'] );
 		$this->assertFalse( $result['coupon']['redeemable'] );
 	}
+
+	/**
+	 * @testdox Should reload saved coupon responses without treating their IDs as virtual codes.
+	 * @testWith ["create"]
+	 *           ["update"]
+	 * @param string $operation Mutation to execute.
+	 */
+	public function test_saved_response_bypasses_virtual_coupon_filter( string $operation ): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$input = array( 'amount' => '15' );
+		if ( 'update' === $operation ) {
+			$coupon = new \WC_Coupon();
+			$coupon->set_code( 'saved-real-coupon' );
+			$coupon->save();
+			$input['id'] = $coupon->get_id();
+			$class       = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
+		} else {
+			$input['code'] = 'saved-real-coupon';
+			$class         = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate::class;
+		}
+		$saved_id = 0;
+		add_action(
+			'create' === $operation ? 'woocommerce_new_coupon' : 'woocommerce_update_coupon',
+			static function ( $id ) use ( &$saved_id ) {
+				$saved_id = $id;
+				add_filter(
+					'woocommerce_get_shop_coupon_data',
+					static function ( $data, $code ) use ( $id ) {
+						return (string) $id === (string) $code ? array( 'amount' => '99' ) : $data;
+					},
+					10,
+					2
+				);
+			}
+		);
+		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$result  = $ability->execute( $input );
+		$this->assertNotWPError( $result );
+		$this->assertGreaterThan( 0, $saved_id );
+		$this->assertSame( $saved_id, $result['coupon']['id'] );
+		$this->assertSame( 'saved-real-coupon', $result['coupon']['code'] );
+		$this->assertSame( '15', $result['coupon']['amount'] );
+		$this->assertSame( 'saved-real-coupon', get_post_field( 'post_title', $saved_id ) );
+		$this->assertSame( '15', get_post_meta( $saved_id, 'coupon_amount', true ) );
+	}
 }

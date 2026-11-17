@@ -120,7 +120,7 @@ class CouponUpdate extends ActionableAbility {
 	 */
 	protected function prepare_response( $subject ): array {
 		// Reload because saving can retain removed array entries in the in-memory object.
-		return array( 'coupon' => self::format_coupon_for_response( new \WC_Coupon( $subject->get_id() ) ) );
+		return array( 'coupon' => self::format_coupon_for_response( new \WC_Coupon( $subject ) ) );
 	}
 
 	/**
