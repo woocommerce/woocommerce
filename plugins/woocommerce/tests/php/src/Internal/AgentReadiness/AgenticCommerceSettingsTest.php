@@ -320,7 +320,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'Publish your refund and returns policy page', $html );
 		$this->assertStringContainsString( 'A refund policy needs to be available for AI assistants to share with shoppers.', $html, 'The refund page says why it matters, as in the design' );
-		$this->assertMatchesRegularExpression( '#Publish your refund and returns policy page.*?href="[^"]*post=' . $draft . '&amp;action=edit" aria-label="Edit refund policy">Edit page</a>#s', $html, 'Edit page opens the page editor, named for the policy for screen readers' );
+		$this->assertMatchesRegularExpression( '#Publish your refund and returns policy page.*?href="[^"]*post=' . $draft . '&amp;action=edit">Edit page<span class="screen-reader-text"> \(refund and returns policy\)</span></a>#s', $html, 'Edit page opens the page editor; screen readers also hear which policy' );
 
 		update_option(
 			AgentReadiness::REPORT_OPTION,
@@ -1362,6 +1362,13 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$html = $this->render_page();
 		$this->assertMatchesRegularExpression( '#Finish 2 required steps#', $html );
 		$this->assertLessThan( strpos( $html, 'wc-agentic-commerce-item--open' ), strrpos( $html, 'wc-agentic-commerce-item--required' ), 'They come before the optional order emails step' );
+		foreach ( array(
+			'Let search engines index your store' => 'Change Reading settings',
+			'Set up payments'                     => 'View payment settings',
+			'Turn on order confirmation emails'   => 'View email settings',
+		) as $title => $button ) {
+			$this->assertMatchesRegularExpression( '#' . $title . '.*?">' . $button . '</a>#s', $html, $title . ': the button says where it goes, as in the design' );
+		}
 		$this->assertMatchesRegularExpression( '#Sales readiness</a> <mark[^>]*>2 issues</mark>#', $html, 'Status counts what Sales readiness shows: both; order emails are only in the Setup checklist' );
 
 		foreach ( $emails as $email ) {

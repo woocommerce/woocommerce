@@ -114,7 +114,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		foreach ( is_array( $published ) ? $published : array() as $page ) {
 			$pages[ (string) $page->ID ] = $page->post_title;
 		}
-		$page_field = static function ( string $option, string $title, string $desc = '' ) use ( $pages, $store_pages ): array {
+		$page_field = static function ( string $option, string $title ) use ( $pages, $store_pages ): array {
 			$options = $pages;
 			$stored  = get_post( (int) get_option( $option ) );
 			// A stored page that can't be chosen here stays listed, so saving another field keeps it.
@@ -126,7 +126,6 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			}
 			return array(
 				'title'              => $title,
-				'desc'               => $desc,
 				'id'                 => $option,
 				'type'               => 'select',
 				'options'            => $options,
@@ -352,7 +351,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 						$lines[] = esc_html( $action[4] );
 					}
 					$label  = self::step_button( $check['id'], $action[3] );
-					$review = '' === $action[2] ? '' : '<a class="button wc-agentic-commerce-review" href="' . esc_url( $action[2] ) . '"' . ( '' === $label[1] ? '' : ' aria-label="' . esc_attr( $label[1] ) . '"' ) . '>' . esc_html( $label[0] ) . '</a>';
+					$review = '' === $action[2] ? '' : '<a class="button wc-agentic-commerce-review" href="' . esc_url( $action[2] ) . '">' . esc_html( $label[0] ) . ( '' === $label[1] ? '' : '<span class="screen-reader-text"> (' . esc_html( $label[1] ) . ')</span>' ) . '</a>';
 					self::render_item( $required ? 'required' : 'open', esc_html( $action[0] ) . ( $required ? ' ' . self::required_badge() : '' ), $lines, $review );
 				}
 				echo '</ul>';
@@ -375,21 +374,31 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * A setup step's button, as in the design: where it goes, or Review.
+	 * A setup step's button, as in the design: where it goes, or Review. Policy steps repeat the same
+	 * button, so screen readers also hear which policy it is for.
 	 *
 	 * @param string $id   Store condition ID.
-	 * @param string $link The link text check_action() gives when the URL alone doesn't say it, such as Edit refund policy.
-	 * @return array{0:string,1:string} The button text, and a longer label for screen readers, or ''.
+	 * @param string $link The link text check_action() gives when the URL alone doesn't say it, such as Change permalinks.
+	 * @return array{0:string,1:string} The button text, and the policy it is for, or ''.
 	 */
 	private static function step_button( string $id, string $link ): array {
-		// A policy page that is still a draft opens its editor.
-		if ( str_ends_with( $id, '_page' ) ) {
-			return '' !== $link ? array( __( 'Edit page', 'woocommerce' ), $link ) : array( __( 'Choose page', 'woocommerce' ), '' );
+		$policies = array(
+			'privacy_page'         => __( 'privacy policy', 'woocommerce' ),
+			'terms_page'           => __( 'terms and conditions', 'woocommerce' ),
+			'refund_returns_page'  => __( 'refund and returns policy', 'woocommerce' ),
+			'shipping_policy_page' => __( 'shipping policy', 'woocommerce' ),
+		);
+		if ( isset( $policies[ $id ] ) ) {
+			// A policy page that is still a draft opens its editor.
+			return array( '' !== $link ? __( 'Edit page', 'woocommerce' ) : __( 'Choose page', 'woocommerce' ), $policies[ $id ] );
 		}
 		$labels = array(
 			'https'          => __( 'View Site Health', 'woocommerce' ),
 			'launched'       => __( 'Change site visibility', 'woocommerce' ),
 			'guest_checkout' => __( 'View account settings', 'woocommerce' ),
+			'payment_method' => __( 'View payment settings', 'woocommerce' ),
+			'order_emails'   => __( 'View email settings', 'woocommerce' ),
+			'search_visible' => __( 'Change Reading settings', 'woocommerce' ),
 			// Change permalinks, and only when permalinks are one of the fixes.
 			'ucp_discovery'  => $link,
 		);
