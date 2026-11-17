@@ -515,6 +515,11 @@ class AgentReadiness {
 	 * @return string The scan's id, for continue_refresh().
 	 */
 	public function start_refresh(): string {
+		// Drop rows a replaced scan wrote for products the last report never covered.
+		$previous = get_option( self::SCAN_OPTION );
+		if ( is_array( $previous ) ) {
+			$this->abandon_refresh( $previous );
+		}
 		$state = array_merge(
 			$this->start_scan(),
 			array(
@@ -542,7 +547,7 @@ class AgentReadiness {
 		$state = (array) get_option( self::SCAN_OPTION );
 		if ( $state['attempts'] >= self::MAX_ATTEMPTS ) {
 			// The same batch failed every time: give up and keep the last report rather than loop.
-			delete_option( self::SCAN_OPTION );
+			$this->abandon_refresh( $state );
 			return false;
 		}
 		++$state['attempts'];
@@ -591,6 +596,26 @@ class AgentReadiness {
 	 * Stop the scan in progress, if any, keeping the last stored report.
 	 */
 	public function cancel_refresh(): void {
+		$state = get_option( self::SCAN_OPTION );
+		if ( is_array( $state ) ) {
+			$this->abandon_refresh( $state );
+			return;
+		}
+		delete_option( self::SCAN_OPTION );
+	}
+
+	/**
+	 * End a scan without storing a report. Removes failure rows it wrote for products the
+	 * previous report never covered, so the Products list stays aligned with that report.
+	 *
+	 * @param array{ids?:array<int,int>,had_rows?:array<int,int>} $state Scan progress.
+	 */
+	private function abandon_refresh( array $state ): void {
+		$had_rows = array_map( 'intval', (array) ( $state['had_rows'] ?? array() ) );
+		$ids      = array_map( 'intval', (array) ( $state['ids'] ?? array() ) );
+		foreach ( array_diff( $ids, $had_rows ) as $product_id ) {
+			ProductFailures::forget( $product_id );
+		}
 		delete_option( self::SCAN_OPTION );
 	}
 

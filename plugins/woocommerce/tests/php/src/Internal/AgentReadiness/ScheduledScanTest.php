@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\ProductFailures;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
@@ -423,6 +424,36 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
 		$this->assertFalse( as_has_scheduled_action( ScheduledScan::NEXT_HOOK, array( $chain ) ), 'No retry is left behind' );
+		$this->assertSame( 7, get_option( AgentReadiness::REPORT_OPTION )['products'] );
+	}
+
+	/**
+	 * @testdox Giving up after a finished batch removes failure rows that batch wrote for products the last report never covered.
+	 */
+	public function test_give_up_drops_failure_rows_the_last_report_did_not_cover(): void {
+		$ids = $this->create_products( ProductScan::BATCH_SIZE + 1 );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'products' => 7 ) );
+		$this->sut->run();
+		$chain = get_option( AgentReadiness::SCAN_OPTION )['id'];
+		$this->sut->run_batch( $chain );
+		$this->assertNotEmpty( ProductFailures::stored( $ids[0] ), 'The finished batch wrote failure rows' );
+
+		$crash = static function (): void {
+			throw new \RuntimeException( 'Fatal on the next batch' );
+		};
+		add_action( 'woocommerce_agent_readiness_scan_batch', $crash );
+		for ( $i = 0; $i < AgentReadiness::MAX_ATTEMPTS; $i++ ) {
+			try {
+				$this->sut->run_batch( $chain );
+			} catch ( \RuntimeException $e ) {
+				unset( $e );
+			}
+		}
+		remove_action( 'woocommerce_agent_readiness_scan_batch', $crash );
+		$this->sut->run_batch( $chain );
+
+		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
+		$this->assertSame( array(), ProductFailures::stored( $ids[0] ), 'Rows the abandoned scan added are removed' );
 		$this->assertSame( 7, get_option( AgentReadiness::REPORT_OPTION )['products'] );
 	}
 
