@@ -1456,6 +1456,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					'additionalProperties' => array( 'type' => array( 'string', 'null' ) ),
 				),
 			),
+			'patternProperties type list'    => array(
+				array(
+					'type'              => 'object',
+					'patternProperties' => array( '^a' => array( 'type' => array( 'string', 'null' ) ) ),
+				),
+			),
+			'allOf null branch'              => array( $object( array( 'allOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ) ),
 		);
 	}
 
@@ -1488,22 +1495,34 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function provider_nested_type_list_input_schemas(): array {
 		return array(
-			'property'     => array(
+			'property'          => array(
 				array(
 					'type'       => 'object',
 					'properties' => array( 'a' => array( 'type' => array( 'string', 'null' ) ) ),
 				),
 			),
-			'tuple item'   => array(
+			'tuple item'        => array(
 				array(
 					'type'  => 'array',
 					'items' => array( array( 'type' => 'string' ), array( 'type' => array( 'integer', 'null' ) ) ),
 				),
 			),
-			'anyOf branch' => array(
+			'anyOf branch'      => array(
 				array(
 					'type'  => 'object',
 					'anyOf' => array( array( 'type' => array( 'object', 'null' ) ) ),
+				),
+			),
+			'patternProperties' => array(
+				array(
+					'type'              => 'object',
+					'patternProperties' => array( '^a' => array( 'type' => array( 'string', 'null' ) ) ),
+				),
+			),
+			'allOf branch'      => array(
+				array(
+					'type'  => 'object',
+					'allOf' => array( array( 'type' => array( 'object', 'null' ) ) ),
 				),
 			),
 		);

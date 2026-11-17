@@ -137,7 +137,8 @@ class ExtensibleAbilities {
 	 *                                  expect one type for each field. Core publishes it as declared. Its
 	 *                                  `title` is the label clients show. Nested properties must not be nullable
 	 *                                  either: leave a property out when it has no value. A list of types or a
-	 *                                  null type at any depth, also in an `anyOf` or `oneOf` branch, is refused.
+	 *                                  null type at any depth, also in an `anyOf`, `oneOf` or `allOf` branch, is
+	 *                                  refused.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
 	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
@@ -297,8 +298,8 @@ class ExtensibleAbilities {
 	}
 
 	/**
-	 * Find the first nested schema under `properties`, `items`, `anyOf`, `oneOf` or `additionalProperties`
-	 * whose `type` is a list, or, in an output schema, is "null".
+	 * Find the first nested schema under `properties`, `patternProperties`, `additionalProperties`, `items`,
+	 * `anyOf`, `oneOf` or `allOf` whose `type` is a list, or, in an output schema, is "null".
 	 *
 	 * @param array<string, mixed> $schema Field schema.
 	 * @param bool                 $output Whether it is an output schema.
@@ -306,7 +307,7 @@ class ExtensibleAbilities {
 	 * @return string|null Path of the first bad schema, or null when there is none.
 	 */
 	private static function find_nested_type_problem( array $schema, bool $output, string $path = '' ): ?string {
-		foreach ( array( 'properties', 'items', 'anyOf', 'oneOf', 'additionalProperties' ) as $keyword ) {
+		foreach ( array( 'properties', 'patternProperties', 'additionalProperties', 'items', 'anyOf', 'oneOf', 'allOf' ) as $keyword ) {
 			$children = $schema[ $keyword ] ?? null;
 			if ( ! is_array( $children ) ) {
 				continue;
