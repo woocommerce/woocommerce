@@ -192,7 +192,7 @@ class CartMapper {
 	 * @return string
 	 */
 	private function continue_url( string $cart_id ): string {
-		$continue_url = add_query_arg( 'session', $cart_id, wc_get_checkout_url() );
+		$continue_url = add_query_arg( 'session', $cart_id, wc_get_cart_url() );
 
 		/**
 		 * Filters the URL a UCP cart hands the buyer for completing the purchase.
