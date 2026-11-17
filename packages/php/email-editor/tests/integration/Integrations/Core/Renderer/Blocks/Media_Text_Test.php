@@ -400,6 +400,33 @@ class Media_Text_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * An image inserted from a URL has no attachment to read its size from, so it fills the cell.
+	 */
+	public function testItFillsCellWhenImageSizeIsUnknown(): void {
+		$parsed_block              = $this->get_block_with_image( 1200, 800, 50 );
+		$parsed_block['innerHTML'] = '<figure class="wp-block-media-text__media"><img src="https://example.com/remote-image.jpg" alt="Remote Image" /></figure><div class="wp-block-media-text__content"><p>Media content</p></div>';
+
+		$img = $this->render_and_get_img( $parsed_block );
+
+		$this->assertSame( '286', $img['width'] );
+		$this->assertSame( '', $img['height'] );
+		$this->assertStringContainsString( 'max-width:286px;width:100%;height:auto;', $img['style'] );
+	}
+
+	/**
+	 * A height without a width can't be scaled, so it's dropped rather than distorting the image in Outlook.
+	 */
+	public function testItDropsHeightWhenWidthIsUnknown(): void {
+		$parsed_block              = $this->get_block_with_image( 1200, 800, 50 );
+		$parsed_block['innerHTML'] = '<figure class="wp-block-media-text__media"><img src="https://example.com/remote-image.jpg" alt="Remote Image" height="800" /></figure><div class="wp-block-media-text__content"><p>Media content</p></div>';
+
+		$img = $this->render_and_get_img( $parsed_block );
+
+		$this->assertSame( '286', $img['width'] );
+		$this->assertSame( '', $img['height'] );
+	}
+
+	/**
 	 * Build a media & text block whose media is an image with the given saved dimensions.
 	 *
 	 * @param int $width Saved image width.

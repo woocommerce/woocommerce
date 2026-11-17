@@ -184,15 +184,20 @@ class Media_Text extends Abstract_Block_Renderer {
 		if ( null === $saved_width && null === $saved_height ) {
 			list( $saved_width, $saved_height ) = $this->get_attachment_image_dimensions( $html, $block_attrs );
 		}
-		if ( ! is_string( $saved_width ) || ! is_numeric( $saved_width ) || (float) $saved_width <= $max_width ) {
-			return $media_content;
+		if ( is_string( $saved_width ) && is_numeric( $saved_width ) ) {
+			if ( (float) $saved_width <= $max_width ) {
+				return $media_content;
+			}
+			$html->set_attribute( 'width', $saved_width );
+			if ( is_string( $saved_height ) ) {
+				$html->set_attribute( 'height', $saved_height );
+			}
+			Html_Processing_Helper::scale_height_attribute( $html, $max_width );
+		} else {
+			// The size is unknown, as for an image inserted from a URL. Fill the cell as the editor
+			// does, and drop the height since there's no width to scale it against.
+			$html->remove_attribute( 'height' );
 		}
-
-		$html->set_attribute( 'width', $saved_width );
-		if ( is_string( $saved_height ) ) {
-			$html->set_attribute( 'height', $saved_height );
-		}
-		Html_Processing_Helper::scale_height_attribute( $html, $max_width );
 		$html->set_attribute( 'width', (string) $max_width );
 
 		$style = $html->get_attribute( 'style' );
