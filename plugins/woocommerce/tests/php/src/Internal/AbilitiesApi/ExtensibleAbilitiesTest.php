@@ -2109,6 +2109,72 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should send an empty array for an object as an empty object when the nested schema is in an anyOf, oneOf or allOf branch, or under patternProperties or additionalProperties.
+	 */
+	public function test_an_empty_object_in_a_branch_or_a_pattern_is_an_empty_object(): void {
+		$object_or_null = fn( string $keyword ) => array( $keyword => array( array( 'type' => 'object' ), array( 'type' => 'null' ) ) );
+		$property       = fn( string $name ) => array( 'properties' => array( $name => array( 'type' => 'object' ) ) );
+		$output         = $this->read_field_values(
+			array(
+				'any_of_branch'  => array(
+					array(
+						'type'  => 'object',
+						'anyOf' => array( $property( 'a' ), $property( 'b' ) ),
+					),
+					array( 'a' => array() ),
+				),
+				'one_of_branch'  => array(
+					array(
+						'type'  => 'object',
+						'oneOf' => array( $property( 'a' ) + array( 'required' => array( 'a' ) ), $property( 'b' ) + array( 'required' => array( 'b' ) ) ),
+					),
+					array( 'a' => array() ),
+				),
+				'one_of_items'   => array(
+					array(
+						'type'  => 'array',
+						'oneOf' => array( array( 'items' => array( 'type' => 'object' ) ), array( 'items' => array( 'type' => 'string' ) ) ),
+					),
+					array( array() ),
+				),
+				'all_of_branch'  => array(
+					array(
+						'type'  => 'object',
+						'allOf' => array( $property( 'a' ) ),
+					),
+					array( 'a' => array() ),
+				),
+				'pattern'        => array(
+					array(
+						'type'              => 'object',
+						'patternProperties' => array( '^x' => $object_or_null( 'anyOf' ) ),
+					),
+					array( 'x1' => array() ),
+				),
+				'additional'     => array(
+					array(
+						'type'                 => 'object',
+						'additionalProperties' => $object_or_null( 'oneOf' ),
+					),
+					array( 'k' => array() ),
+				),
+				'top_properties' => array(
+					array(
+						'type'  => 'object',
+						'anyOf' => array( array( 'required' => array( 'a' ) ) ),
+					) + $property( 'a' ),
+					array( 'a' => array() ),
+				),
+			)
+		);
+
+		$this->assertSame(
+			'{"any_of_branch":{"a":{}},"one_of_branch":{"a":{}},"one_of_items":[{}],"all_of_branch":{"a":{}},"pattern":{"x1":{}},"additional":{"k":{}},"top_properties":{"a":{}}}',
+			wp_json_encode( $output )
+		);
+	}
+
+	/**
 	 * @testdox Should return product amounts as strings when the getters return an int or a float, and save the write.
 	 */
 	public function test_product_amounts_are_returned_as_strings(): void {
