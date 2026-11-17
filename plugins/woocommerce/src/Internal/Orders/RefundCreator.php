@@ -29,7 +29,7 @@ class RefundCreator {
 	private \WC_Order $order;
 
 	/**
-	 * Arguments in the format of wc_create_refund(): amount, reason, line_items, refund_payment, restock_items.
+	 * Arguments in the format of wc_create_refund(), which the refund hooks receive.
 	 *
 	 * @var array
 	 */
@@ -67,7 +67,7 @@ class RefundCreator {
 	 * Constructor.
 	 *
 	 * @param \WC_Order $order Order to refund.
-	 * @param array     $args  Arguments in the format of wc_create_refund(). The order_id argument is ignored.
+	 * @param array     $args  Arguments in the format of wc_create_refund(). The order_id argument is always the order.
 	 *
 	 * @since 11.4.0
 	 */
@@ -78,17 +78,21 @@ class RefundCreator {
 			array(
 				'amount'         => 0,
 				'reason'         => null,
+				'order_id'       => 0,
+				'refund_id'      => 0,
 				'line_items'     => array(),
 				'refund_payment' => false,
 				'restock_items'  => false,
 			)
 		);
+
+		$this->args['order_id'] = $order->get_id();
 	}
 
 	/**
 	 * Save the refund, then fire woocommerce_create_refund. wc_create_refund() saves the refund before the hook too,
-	 * and callbacks use its ID, so the caller must run this inside a transaction it rolls back when this fails.
-	 * Callbacks can move money or take locks there, so a dry run or a refused refund must not reach it.
+	 * and callbacks use its ID. A declined refund is deleted, since a rollback cannot remove it from tables
+	 * without transactions. Callbacks can move money or take locks there, so a dry run or a refused refund must not reach it.
 	 *
 	 * @param \WC_Order_Refund $refund Staged refund, not saved.
 	 * @return null|\WP_Error A WP_Error when the refund was not saved, or a callback declined it by throwing.
@@ -116,6 +120,7 @@ class RefundCreator {
 			 */
 			do_action( 'woocommerce_create_refund', $refund, $args );
 		} catch ( \Exception $e ) {
+			$refund->delete( true );
 			return new \WP_Error( 'refund_declined', $e->getMessage(), array( 'status' => 400 ) );
 		}
 
@@ -168,26 +173,49 @@ class RefundCreator {
 	/**
 	 * Do what follows the save of the refund: refund the payment, restock, revoke downloads, mark the order
 	 * partially or fully refunded, and fire the refund hooks. When the gateway refuses, the refund is deleted
-	 * and nothing else runs.
+	 * and nothing else runs. An exception after that keeps the refund, since the money may have moved.
 	 *
 	 * @param \WC_Order_Refund $refund Saved refund.
-	 * @return null|\WP_Error The error of the gateway.
+	 * @return null|\WP_Error `refund_gateway_failed` with the message of the gateway, or `refund_incomplete`
+	 *                        with the message of the exception that stopped a later step.
 	 *
 	 * @since 11.4.0
 	 */
 	public function finish( \WC_Order_Refund $refund ): ?\WP_Error {
-		$order = $this->order;
-		$args  = $this->args;
-
-		if ( $args['refund_payment'] ) {
-			$result = wc_refund_payment( $order, wc_format_decimal( $refund->get_amount() ), $refund->get_reason() );
+		if ( $this->args['refund_payment'] ) {
+			$result = wc_refund_payment( $this->order, wc_format_decimal( $refund->get_amount() ), $refund->get_reason() );
 
 			if ( is_wp_error( $result ) ) {
 				$refund->delete();
-				return $result;
+				return new \WP_Error( 'refund_gateway_failed', $result->get_error_message(), $result->get_error_data() );
 			}
 
 			$refund->set_refunded_payment( true );
+		}
+
+		try {
+			$this->complete( $refund );
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Refund %1$d of order %2$d was created, but a later step failed: %3$s', $refund->get_id(), $this->order->get_id(), $e->getMessage() ),
+				array( 'source' => 'woocommerce-refunds' )
+			);
+			return new \WP_Error( 'refund_incomplete', $e->getMessage() );
+		}
+
+		return null;
+	}
+
+	/**
+	 * Everything after the payment refund, in the order of wc_create_refund().
+	 *
+	 * @param \WC_Order_Refund $refund Saved refund.
+	 */
+	private function complete( \WC_Order_Refund $refund ): void {
+		$order = $this->order;
+		$args  = $this->args;
+
+		if ( $refund->get_refunded_payment() ) {
 			$refund->save();
 		}
 
@@ -282,8 +310,6 @@ class RefundCreator {
 		 * @param int $refund_id Refund ID.
 		 */
 		do_action( 'woocommerce_order_refunded', $order->get_id(), $refund->get_id() );
-
-		return null;
 	}
 
 	/**
