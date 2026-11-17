@@ -135,7 +135,7 @@ trait CouponAbilityTrait {
 			'description'          => array( 'type' => 'string' ),
 			'date_expires'         => array(
 				'type'        => 'string',
-				'description' => __( 'Expiry date in the store timezone (Y-m-d or ISO 8601). An empty string removes the expiry date.', 'woocommerce' ),
+				'description' => __( 'Expiry date in the store timezone (Y-m-d or ISO 8601). A date without a time expires at 00:00 on that day; use the day after the last valid day. An empty string removes the expiry date.', 'woocommerce' ),
 			),
 			'usage_limit'          => array(
 				'type'        => 'integer',

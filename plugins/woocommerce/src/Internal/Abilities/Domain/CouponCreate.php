@@ -35,7 +35,7 @@ class CouponCreate extends ActionableAbility {
 		return array(
 			'label'               => __( 'Create coupon', 'woocommerce' ),
 			'description'         => __(
-				'Create a coupon. Defaults to a published fixed cart discount.',
+				'Create a coupon. Defaults to a published fixed cart discount. Requires publication permission even for drafts, matching WooCommerce REST.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
@@ -116,9 +116,12 @@ class CouponCreate extends ActionableAbility {
 	 * @return array
 	 */
 	private static function build_input_schema(): array {
+		$properties                   = self::get_coupon_writable_properties_schema();
+		$properties['status']['enum'] = array_values( array_diff( $properties['status']['enum'], array( 'future' ) ) );
+
 		return array(
 			'type'                 => 'object',
-			'properties'           => self::get_coupon_writable_properties_schema(),
+			'properties'           => $properties,
 			'required'             => array( 'code' ),
 			'additionalProperties' => false,
 		);

@@ -256,6 +256,25 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should require REST creation permission even for a draft coupon.
+	 */
+	public function test_draft_creation_permission(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_get_current_user()->add_cap( 'publish_shop_coupons', false );
+		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate::class;
+		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$result  = $ability->execute(
+			array(
+				'code'   => 'forbidden-draft',
+				'status' => 'draft',
+			)
+		);
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		$this->assertSame( 0, wc_get_coupon_id_by_code( 'forbidden-draft' ) );
+	}
+
+	/**
 	 * @testdox Should reject invalid mutations without changing stored coupon data.
 	 * @testWith [{"status":"future"}]
 	 *           [{"date_expires":"not-a-date"}]
@@ -278,11 +297,12 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should reject duplicate draft codes and unscheduled future creation.
-	 * @testWith [{"code":"existing-draft"}]
-	 *           [{"code":"new-future","status":"future"}]
-	 * @param array $input Creation input.
+	 * @testWith [{"code":"existing-draft"}, "woocommerce_ability_coupon_code_exists"]
+	 *           [{"code":"new-future","status":"future"}, "ability_invalid_input"]
+	 * @param array  $input Creation input.
+	 * @param string $error_code Expected rejection.
 	 */
-	public function test_invalid_creation( array $input ): void {
+	public function test_invalid_creation( array $input, string $error_code ): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$coupon = new \WC_Coupon();
 		$coupon->set_code( 'existing-draft' );
@@ -290,7 +310,9 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$coupon->save();
 		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate::class;
 		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
-		$this->assertWPError( $ability->execute( $input ) );
+		$result  = $ability->execute( $input );
+		$this->assertWPError( $result );
+		$this->assertSame( $error_code, $result->get_error_code() );
 	}
 
 	/**
