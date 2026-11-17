@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-utils';
+import {
+	expect,
+	test as base,
+	enableTestPlugin,
+	guestFile,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -19,15 +24,16 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Cart Extension Callbacks', () => {
+	test.use( { storageState: guestFile } );
+
+	test.beforeEach( async ( { context } ) => {
+		await enableTestPlugin( context, 'cart-extensions-test-helper' );
+	} );
+
 	test( 'Custom error code creates exception', async ( {
 		frontendUtils,
-		requestUtils,
 		page,
 	} ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-cart-extensions'
-		);
-
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCart();
@@ -47,13 +53,8 @@ test.describe( 'Shopper → Cart Extension Callbacks', () => {
 
 	test( 'Error code `woocommerce_rest_cart_extensions_error` creates notice', async ( {
 		frontendUtils,
-		requestUtils,
 		page,
 	} ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-cart-extensions'
-		);
-
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCart();
