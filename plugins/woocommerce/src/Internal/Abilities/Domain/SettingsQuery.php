@@ -129,7 +129,7 @@ class SettingsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			if ( true === rest_validate_value_from_schema( $default, self::get_value_schema() ) ) {
 				$item['default'] = $default;
 			}
-			if ( is_array( $setting['options'] ?? null ) ) {
+			if ( is_array( $setting['options'] ?? null ) && ! in_array( $setting['type'], array( 'single_select_country', 'multi_select_countries' ), true ) ) {
 				$item['options'] = (object) array_filter( $setting['options'], 'is_string' );
 			}
 			$items[] = $item;

@@ -74,6 +74,45 @@ class SettingsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should omit explicitly supplied country choices while preserving other select choices.
+	 * @testWith ["single_select_country", "US", false]
+	 *           ["multi_select_countries", ["US"], false]
+	 *           ["select", "US", true]
+	 * @param string $type Field type.
+	 * @param mixed  $value Supplied value.
+	 * @param bool   $has_choices Whether choices should be returned.
+	 */
+	public function test_country_choices( string $type, $value, bool $has_choices ): void {
+		add_filter(
+			'woocommerce_general_settings',
+			static function ( $settings ) use ( $type, $value ) {
+				$settings[] = array(
+					'id'        => 'extension_country',
+					'type'      => $type,
+					'value'     => $value,
+					'options'   => array( 'US' => 'United States' ),
+					'abilities' => array( 'read' => true ),
+				);
+				return $settings;
+			}
+		);
+		$result = wp_get_ability( 'woocommerce/settings-query' )->execute(
+			array(
+				'group'   => 'general',
+				'include' => array( 'extension_country' ),
+			)
+		);
+		$this->assertSame( 1, $result['total'] );
+		$setting = $result['settings'][0];
+		$this->assertSame( $value, $setting['value'] );
+		if ( $has_choices ) {
+			$this->assertSame( array( 'US' => 'United States' ), (array) $setting['options'] );
+		} else {
+			$this->assertArrayNotHasKey( 'options', $setting );
+		}
+	}
+
+	/**
 	 * @testdox Should omit password and unapproved text fields in both Core and extension groups.
 	 * @testWith ["general"]
 	 *           ["extension"]
