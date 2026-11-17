@@ -558,7 +558,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'title' => __( 'None of your products can be checked yet', 'woocommerce' ),
 				'text'  => __( 'They are hidden from the catalog, or a type AI assistants can’t list yet.', 'woocommerce' ),
 				'link'  => array(
-					'href' => AgenticCommerceSettings::url() . '#wc-agentic-commerce-visibility',
+					'href' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ) . '#wc-agentic-commerce-visibility',
 					'text' => __( 'View product visibility', 'woocommerce' ),
 				),
 			) : array(

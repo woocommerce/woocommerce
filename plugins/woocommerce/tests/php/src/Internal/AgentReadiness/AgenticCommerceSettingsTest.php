@@ -964,6 +964,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			$this->assertSame( 'Not checked', $sections[ $id ]['badge']['text'], $id );
 			$this->assertSame( 'None of your products can be checked yet', $sections[ $id ]['empty']['title'] );
 			$this->assertSame( 'View product visibility', $sections[ $id ]['empty']['link']['text'] );
+			$this->assertStringContainsString( 'section=' . AgenticCommerceSettings::SHOPPING_SECTION, $sections[ $id ]['empty']['link']['href'] );
 			$this->assertStringContainsString( '#wc-agentic-commerce-visibility', $sections[ $id ]['empty']['link']['href'] );
 			$this->assertStringNotContainsString( 'post-new.php', $sections[ $id ]['empty']['link']['href'] );
 		}
