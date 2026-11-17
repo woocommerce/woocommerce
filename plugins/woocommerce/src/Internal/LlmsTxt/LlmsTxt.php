@@ -156,7 +156,7 @@ final class LlmsTxt implements RegisterHooksInterface {
 			return false;
 		}
 
-		$request_path = wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH );
+		$request_path = wp_parse_url( sanitize_url( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH );
 		return wp_parse_url( home_url( '/llms.txt' ), PHP_URL_PATH ) === $request_path;
 	}
 
