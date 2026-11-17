@@ -647,24 +647,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$this->subquery->clear_sql_clause( 'select' );
 		$this->subquery->add_sql_clause( 'select', $selections );
-		// For aggregated fields, ensure deterministic ordering by including GROUP BY field.
-		$order_by             = $this->get_sql_clause( 'order_by' );
-		$aggregated_fields    = array( 'orders_count', 'total_spend', 'avg_order_value' );
-		$has_aggregated_field = false;
-
-		foreach ( $aggregated_fields as $field ) {
-			if ( false !== strpos( $order_by, $field ) ) {
-				$has_aggregated_field = true;
-				break;
-			}
-		}
-
-		if ( $has_aggregated_field ) {
-			$customer_lookup_table = self::get_db_table_name();
-			$this->subquery->add_sql_clause( 'order_by', $order_by . ", {$customer_lookup_table}.customer_id" );
-		} else {
-			$this->subquery->add_sql_clause( 'order_by', $order_by );
-		}
+		// Break ties by customer ID so pages neither repeat nor skip customers with the same sort value.
+		$customer_lookup_table = self::get_db_table_name();
+		$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) . ", {$customer_lookup_table}.customer_id" );
 		$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 
 		$customer_data = $wpdb->get_results(
