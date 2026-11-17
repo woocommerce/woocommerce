@@ -1023,7 +1023,9 @@ class ExtensibleAbilities {
 	 * branch that the sanitized value matches, apply too, after the schema's own.
 	 * A value that matches no branch stays as it is. An empty array fits both an
 	 * `object` and an `array` branch, so it takes the first `anyOf` branch, and
-	 * under a `oneOf` it stays as it is.
+	 * under a `oneOf` it stays as it is. Only one level of `allOf`, `anyOf` and
+	 * `oneOf` branches is read, so a combinator inside a branch is not followed.
+	 * When more than one branch declares the same property, the first one is used.
 	 *
 	 * @param mixed                $value  Sanitized value.
 	 * @param array<string, mixed> $schema Schema of the value.
