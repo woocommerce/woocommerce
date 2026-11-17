@@ -122,7 +122,8 @@ class Html_Processing_Helper {
 		}
 
 		$base_dir   = realpath( $upload_dir['basedir'] );
-		$image_path = realpath( $upload_dir['basedir'] . '/' . substr( $url, strlen( $base_url ) ) );
+		$relative   = (string) strtok( substr( $url, strlen( $base_url ) ), '?#' );
+		$image_path = realpath( $upload_dir['basedir'] . '/' . $relative );
 
 		if ( false === $base_dir || false === $image_path ) {
 			return null;

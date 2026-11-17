@@ -421,15 +421,17 @@ class Media_Text_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * An image CDN URL's `w` parameter gives the served width, so an image it shows to fit is left alone.
+	 * A `w` parameter that fits is written to the width attribute, not stretched to the cell. A host
+	 * that ignores `w` then still can't widen the email in Outlook.
 	 */
-	public function testItLeavesImageWithSmallWidthQueryUnchanged(): void {
+	public function testItSetsWidthFromSmallWidthQuery(): void {
 		$parsed_block              = $this->get_block_with_image( 1200, 800, 50 );
 		$parsed_block['innerHTML'] = '<figure class="wp-block-media-text__media"><img src="https://example.com/remote-image.jpg?w=150" alt="Remote Image" /></figure><div class="wp-block-media-text__content"><p>Media content</p></div>';
 
 		$img = $this->render_and_get_img( $parsed_block );
 
-		$this->assertSame( '', $img['width'] );
+		$this->assertSame( '150', $img['width'] );
+		$this->assertSame( '', $img['height'] );
 		$this->assertStringNotContainsString( 'max-width:286px', $img['style'] );
 	}
 
@@ -444,12 +446,14 @@ class Media_Text_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_block['innerHTML'] = sprintf( '<figure class="wp-block-media-text__media"><img src="%s" alt="" /></figure><div class="wp-block-media-text__content"><p>Media content</p></div>', esc_url( $large_url ) );
 		$large_img                 = $this->render_and_get_img( $parsed_block );
 
-		$parsed_block['innerHTML'] = sprintf( '<figure class="wp-block-media-text__media"><img src="%s" alt="" /></figure><div class="wp-block-media-text__content"><p>Media content</p></div>', esc_url( $small_url ) );
+		$parsed_block['innerHTML'] = sprintf( '<figure class="wp-block-media-text__media"><img src="%s" alt="" /></figure><div class="wp-block-media-text__content"><p>Media content</p></div>', esc_url( $small_url . '?ver=1' ) );
 		$small_img                 = $this->render_and_get_img( $parsed_block );
 
 		$this->assertSame( '286', $large_img['width'] );
 		$this->assertSame( '143', $large_img['height'] );
-		$this->assertSame( '', $small_img['width'], 'An uploaded image that fits should keep its natural size.' );
+		$this->assertSame( '120', $small_img['width'], 'An uploaded image that fits should keep its natural size, even with a query string.' );
+		$this->assertSame( '60', $small_img['height'] );
+		$this->assertStringNotContainsString( 'max-width:286px', $small_img['style'] );
 	}
 
 	/**

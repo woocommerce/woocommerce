@@ -181,12 +181,22 @@ class Media_Text extends Abstract_Block_Renderer {
 
 		$saved_width  = $html->get_attribute( 'width' );
 		$saved_height = $html->get_attribute( 'height' );
-		if ( null === $saved_width && null === $saved_height ) {
+		$is_looked_up = null === $saved_width && null === $saved_height;
+		if ( $is_looked_up ) {
 			list( $saved_width, $saved_height ) = $this->get_unsaved_image_dimensions( $html, $block_attrs );
 		}
 		if ( is_string( $saved_width ) && is_numeric( $saved_width ) ) {
 			if ( (float) $saved_width <= $max_width ) {
-				return $media_content;
+				if ( ! $is_looked_up ) {
+					return $media_content;
+				}
+				// Outlook reads only the attributes, so write the size found. A host that ignores `w`
+				// then can't serve the image wider than the cell.
+				$html->set_attribute( 'width', $saved_width );
+				if ( is_string( $saved_height ) ) {
+					$html->set_attribute( 'height', $saved_height );
+				}
+				return $html->get_updated_html();
 			}
 			$html->set_attribute( 'width', $saved_width );
 			if ( is_string( $saved_height ) ) {
