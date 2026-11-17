@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Speed up storefront and editor page loads on sites where a plugin filters the unified block editor assets setting.

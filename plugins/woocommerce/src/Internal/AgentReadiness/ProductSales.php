@@ -111,8 +111,9 @@ class ProductSales {
 	/**
 	 * How many orders the store holds since a date, with the statuses Analytics counts. Analytics
 	 * holds fewer while its import of past orders hasn't run or finished. WCPay test-mode orders
-	 * are left out the same way OrdersScheduler skips them (meta `_wcpay_mode=test`); a custom
-	 * `woocommerce_analytics_is_test_order` callback is not applied to this count query.
+	 * are left out the same way OrdersScheduler skips them (meta `_wcpay_mode=test`). They are
+	 * counted in a second query and subtracted, because the posts order store doesn't support
+	 * `meta_query`. A custom `woocommerce_analytics_is_test_order` callback is not applied.
 	 *
 	 * @param \DateTimeImmutable $since    Start of the period.
 	 * @param array<int, string> $excluded Statuses Analytics leaves out.
@@ -122,30 +123,33 @@ class ProductSales {
 		if ( array() === $statuses ) {
 			return 0;
 		}
-		$orders = wc_get_orders(
-			array(
-				'type'         => 'shop_order',
-				'status'       => array_values( $statuses ),
-				'date_created' => '>=' . $since->getTimestamp(),
-				'limit'        => 1,
-				'return'       => 'ids',
-				'paginate'     => true,
-				// Match OrdersScheduler::is_test_order()'s default: exclude `_wcpay_mode=test`.
-				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- One count for the import gate, not a storefront query.
-					'relation' => 'OR',
-					array(
-						'key'     => '_wcpay_mode',
-						'compare' => 'NOT EXISTS',
-					),
-					array(
-						'key'     => '_wcpay_mode',
-						'value'   => 'test',
-						'compare' => '!=',
-					),
-				),
+		$count = static function ( array $extra ) use ( $since, $statuses ): int {
+			$orders = wc_get_orders(
+				array(
+					'type'         => 'shop_order',
+					'status'       => array_values( $statuses ),
+					'date_created' => '>=' . $since->getTimestamp(),
+					'limit'        => 1,
+					'return'       => 'ids',
+					'paginate'     => true,
+				) + $extra
+			);
+			return is_object( $orders ) && isset( $orders->total ) ? (int) $orders->total : 0;
+		};
+		$all   = $count( array() );
+		// Below MIN_ORDERS the import check passes anyway, so test orders can't change it.
+		if ( $all < self::MIN_ORDERS ) {
+			return $all;
+		}
+		return max(
+			0,
+			$all - $count(
+				array(
+					'meta_key'   => '_wcpay_mode', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- One count for the import check.
+					'meta_value' => 'test', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- One count for the import check.
+				)
 			)
 		);
-		return is_object( $orders ) && isset( $orders->total ) ? (int) $orders->total : 0;
 	}
 
 	/**

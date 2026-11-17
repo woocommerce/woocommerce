@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
+use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 defined( 'ABSPATH' ) || exit;
@@ -126,6 +127,7 @@ class StoreConditions {
 				'fix'     => __( 'Move the site to HTTPS; your host can usually turn it on.', 'woocommerce' ),
 				'fix_url' => wp_get_update_https_url(),
 			),
+			self::ucp_discovery( UcpDiscovery::serve_status() ),
 			$policy_page(
 				'privacy_page',
 				AgenticCommerceSettings::PRIVACY_PAGE_OPTION,
@@ -222,6 +224,28 @@ class StoreConditions {
 	 */
 	public static function serves_ucp_checkout(): bool {
 		return defined( Utils::class . '::CAPABILITY_CHECKOUT' );
+	}
+
+	/**
+	 * The UCP address condition, with the fix for why the address doesn't serve the profile.
+	 *
+	 * @param string $status A status from UcpDiscovery::serve_status().
+	 * @return array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}
+	 */
+	private static function ucp_discovery( string $status ): array {
+		return array(
+			'id'      => 'ucp_discovery',
+			'ok'      => 'ok' === $status,
+			'blocks'  => 'ucp',
+			'level'   => self::LEVEL_REQUIRED,
+			'name'    => __( 'Use a readable permalink structure', 'woocommerce' ),
+			// Without a file in the way, Plain permalinks are why the connection URL doesn't load.
+			'label'   => 'no_file' === $status ? __( 'Use a readable permalink structure', 'woocommerce' ) : __( 'Fix your connection URL', 'woocommerce' ),
+			'why'     => 'no_file' === $status ? __( 'Any structure except Plain lets AI assistants reach your store.', 'woocommerce' ) : __( 'AI assistants use your connection URL to find your products, and it doesn\'t load your store\'s details.', 'woocommerce' ),
+			'fix'     => UcpDiscovery::discovery_fix( $status ),
+			// Permalinks are one fix only when nothing is serving the address. A file in the way is removed on disk.
+			'fix_url' => 'no_file' === $status ? admin_url( 'options-permalink.php' ) : '',
+		);
 	}
 
 	/**

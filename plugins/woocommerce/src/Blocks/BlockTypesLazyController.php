@@ -67,7 +67,7 @@ final class BlockTypesLazyController {
 
 		foreach ( $inner_block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
-				if ( isset( $whitelisted[ $block_class ] ) ) {
+				if ( isset( $whitelisted[ $block_class ] ) && false === has_action( "woocommerce_blocks_{$block_name}_block_registration" ) ) {
 					$registered_block_type = register_block_type_from_metadata(
 						$this->asset_api->generate_block_metadata_path( $block_name, 'inner-blocks/' ),
 						array(
@@ -76,6 +76,50 @@ final class BlockTypesLazyController {
 							'editor_style'    => $unified_editor_assets ? 'wc-block-library-style' : 'wc-blocks-editor-style',
 						)
 					);
+					if ( $registered_block_type instanceof \WP_Block_Type ) {
+						$this->registered_blocks[ $block_class ] = $registered_block_type->name;
+					}
+				}
+			}
+		}
+
+		$is_admin     = is_admin();
+		$block_groups = array(
+			$this->get_order_confirmation_blocks(),
+			$this->get_add_to_cart_with_options_blocks(),
+		);
+		foreach ( $block_groups as $blocks_group ) {
+			foreach ( $blocks_group as $block_name => $block_class ) {
+				if ( isset( $whitelisted[ $block_class ] ) && false === has_action( "woocommerce_blocks_{$block_name}_block_registration" ) ) {
+					// Backward compatibility: use original handles for the editor scripts and blocks styles.
+					if ( ! $unified_editor_assets && $is_admin ) {
+						$this->asset_api->register_script( 'wc-' . $block_name . '-block', $this->asset_api->get_block_asset_build_path( $block_name ), array( 'wc-blocks' ) );
+					}
+					$asset_api          = $this->asset_api;
+					$use_custom_handles = static function ( $metadata ) use ( $block_name, $asset_api ) {
+						foreach ( (array) ( $metadata['style'] ?? array() ) as $index => $specifier ) {
+							if ( 'file:../' . $block_name . '.css' === $specifier ) {
+								$custom_handle               = 'wc-blocks-style-' . $block_name;
+								$metadata['style'][ $index ] = $custom_handle;
+								$asset_api->register_style( $custom_handle, $asset_api->get_block_asset_build_path( $block_name, 'css' ), array(), 'all', true );
+								break;
+							}
+						}
+						return $metadata;
+					};
+
+					add_filter( 'block_type_metadata', $use_custom_handles );
+					$registered_block_type = register_block_type_from_metadata(
+						$this->asset_api->generate_block_metadata_path( $block_name ),
+						array(
+							// Please, don't extend this list further! We expect everyone to lean onto block.json.
+							'render_callback' => $this->create_lazy_render_callback( $block_class ),
+							'editor_style'    => $unified_editor_assets ? 'wc-block-library-style' : 'wc-blocks-editor-style',
+							'editor_script'   => $unified_editor_assets ? 'wc-block-library' : 'wc-' . $block_name . '-block',
+						)
+					);
+					remove_filter( 'block_type_metadata', $use_custom_handles );
+
 					if ( $registered_block_type instanceof \WP_Block_Type ) {
 						$this->registered_blocks[ $block_class ] = $registered_block_type->name;
 					}
@@ -109,8 +153,7 @@ final class BlockTypesLazyController {
 	 * @return array<string,string>
 	 */
 	private function get_cart_inner_blocks(): array {
-		// ProceedToCheckoutBlock: excluded — overrides enqueue_data() with editor-visible checkout page URL.
-		return array(
+		$list = array(
 			'cart-accepted-payment-methods-block'  => \Automattic\WooCommerce\Blocks\BlockTypes\CartAcceptedPaymentMethodsBlock::class,
 			'cart-cross-sells-block'               => \Automattic\WooCommerce\Blocks\BlockTypes\CartCrossSellsBlock::class,
 			'cart-cross-sells-products-block'      => \Automattic\WooCommerce\Blocks\BlockTypes\CartCrossSellsProductsBlock::class,
@@ -130,6 +173,12 @@ final class BlockTypesLazyController {
 			'empty-cart-block'                     => \Automattic\WooCommerce\Blocks\BlockTypes\EmptyCartBlock::class,
 			'filled-cart-block'                    => \Automattic\WooCommerce\Blocks\BlockTypes\FilledCartBlock::class,
 		);
+		if ( ! is_admin() ) {
+			// These blocks override enqueue_data() with editor-visible data, hence load eagerly in admin.
+			$list['proceed-to-checkout-block'] = \Automattic\WooCommerce\Blocks\BlockTypes\ProceedToCheckoutBlock::class;
+		}
+
+		return $list;
 	}
 
 	/**
@@ -171,8 +220,7 @@ final class BlockTypesLazyController {
 	 * @return array<string,string>
 	 */
 	private function get_mini_cart_inner_blocks(): array {
-		// MiniCartFooterBlock: excluded — overrides enqueue_data() with editor-visible footer description.
-		return array(
+		$list = array(
 			'empty-mini-cart-contents-block'      => \Automattic\WooCommerce\Blocks\BlockTypes\EmptyMiniCartContentsBlock::class,
 			'filled-mini-cart-contents-block'     => \Automattic\WooCommerce\Blocks\BlockTypes\FilledMiniCartContentsBlock::class,
 			'mini-cart-cart-button-block'         => \Automattic\WooCommerce\Blocks\BlockTypes\MiniCartCartButtonBlock::class,
@@ -184,5 +232,65 @@ final class BlockTypesLazyController {
 			'mini-cart-title-items-counter-block' => \Automattic\WooCommerce\Blocks\BlockTypes\MiniCartTitleItemsCounterBlock::class,
 			'mini-cart-title-label-block'         => \Automattic\WooCommerce\Blocks\BlockTypes\MiniCartTitleLabelBlock::class,
 		);
+		if ( ! is_admin() ) {
+			// These blocks override enqueue_data() with editor-visible data, hence load eagerly in admin.
+			$list['mini-cart-footer-block'] = \Automattic\WooCommerce\Blocks\BlockTypes\MiniCartFooterBlock::class;
+		}
+
+		return $list;
+	}
+
+	/**
+	 * Side effect free and stateless order confirmation blocks.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_order_confirmation_blocks(): array {
+		// CreateAccount: excluded — overrides initialize() with hooked_block_types (Block Hooks API).
+		$list = array(
+			'order-confirmation-status'                 => \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\Status::class,
+			'order-confirmation-summary'                => \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\Summary::class,
+			'order-confirmation-totals'                 => \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\Totals::class,
+			'order-confirmation-totals-wrapper'         => \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\TotalsWrapper::class,
+			'order-confirmation-downloads'              => \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\Downloads::class,
+			'order-confirmation-billing-wrapper'        => \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\BillingWrapper::class,
+			'order-confirmation-shipping-wrapper'       => \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\ShippingWrapper::class,
+			'order-confirmation-additional-information' => \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\AdditionalInformation::class,
+			'order-confirmation-additional-fields'      => \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\AdditionalFields::class,
+		);
+		if ( ! is_admin() ) {
+			// These blocks override enqueue_data() with editor-visible data, hence load eagerly in admin.
+			$list['order-confirmation-billing-address']           = \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\BillingAddress::class;
+			$list['order-confirmation-shipping-address']          = \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\ShippingAddress::class;
+			$list['order-confirmation-downloads-wrapper']         = \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\DownloadsWrapper::class;
+			$list['order-confirmation-additional-fields-wrapper'] = \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\AdditionalFieldsWrapper::class;
+		}
+
+		return $list;
+	}
+
+	/**
+	 * Side effect free and stateless add to cart with options blocks.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_add_to_cart_with_options_blocks(): array {
+		$list = array(
+			'add-to-cart-with-options-quantity-selector'  => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\QuantitySelector::class,
+			'add-to-cart-with-options-variation-description' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationDescription::class,
+			'add-to-cart-with-options-variation-selector' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelector::class,
+			'add-to-cart-with-options-variation-selector-attribute-name' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttributeName::class,
+			'add-to-cart-with-options-grouped-product-selector' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductSelector::class,
+			'add-to-cart-with-options-grouped-product-item' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductItem::class,
+			'add-to-cart-with-options-grouped-product-item-selector' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductItemSelector::class,
+			'add-to-cart-with-options-grouped-product-item-label' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductItemLabel::class,
+		);
+		if ( ! is_admin() ) {
+			// These blocks override enqueue_data() with editor-visible data, hence load eagerly in admin.
+			$list['add-to-cart-with-options']                              = \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::class;
+			$list['add-to-cart-with-options-variation-selector-attribute'] = \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::class;
+		}
+
+		return $list;
 	}
 }
