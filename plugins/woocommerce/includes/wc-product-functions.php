@@ -2341,7 +2341,7 @@ function wc_update_product_lookup_tables_column( $column ) {
 				"
 				UPDATE
 					{$wpdb->wc_product_meta_lookup} lookup_table
-					INNER JOIN (
+					LEFT JOIN (
 						SELECT lookup_table.product_id, MIN( meta_value+0 ) as min_price, MAX( meta_value+0 ) as max_price
 						FROM {$wpdb->wc_product_meta_lookup} lookup_table
 						LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
