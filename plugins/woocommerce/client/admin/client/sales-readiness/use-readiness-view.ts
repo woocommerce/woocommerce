@@ -41,7 +41,7 @@ export function useReadinessView(
 	const viewed = useRef( false );
 	const pendingSince = useRef< number | null >( null );
 	// True after a view has been shown: poll failures must not spam Tracks or replace the page with an error.
-	const hasView = useRef( null !== initialView );
+	const hasView = useRef( initialView !== null );
 
 	const load = useCallback( async () => {
 		try {
