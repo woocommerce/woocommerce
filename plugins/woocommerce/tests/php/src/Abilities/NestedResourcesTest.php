@@ -17,6 +17,32 @@ use Automattic\WooCommerce\Tests\Internal\Abilities\Domain\DomainAbilityTestCase
 class NestedResourcesTest extends DomainAbilityTestCase {
 
 	/**
+	 * @testdox Should apply an ancestor policy to marked nested root fields only.
+	 */
+	public function test_ancestor_policy_withholds_nested_root_fields(): void {
+		$this->filter_personal_data( static fn( $shared, $resource_name ) => 'test_order' !== $resource_name, 2 );
+		$customer = array(
+			'id'    => 3,
+			'email' => 'private@example.test',
+		);
+		$this->assertSame( 'private@example.test', AbilityResources::output_data( 'test_customer', $customer )['email'] );
+
+		$output = AbilityResources::output_data(
+			'test_order',
+			array(
+				'id'       => 1,
+				'customer' => $customer,
+			)
+		);
+		$schema = AbilityResources::output_schema( 'test_order' );
+
+		$this->assertArrayNotHasKey( 'email', $output['customer'] );
+		$this->assertSame( 3, $output['customer']['id'] );
+		$this->assertArrayNotHasKey( 'email', $schema['properties']['customer']['properties'] );
+		$this->assertArrayHasKey( 'email', AbilityResources::output_schema( 'test_customer' )['properties'] );
+	}
+
+	/**
 	 * Set up a `test_order` resource with a nullable `customer`.
 	 */
 	public function setUp(): void {

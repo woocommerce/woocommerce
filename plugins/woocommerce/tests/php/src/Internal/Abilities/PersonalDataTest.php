@@ -272,6 +272,38 @@ class PersonalDataTest extends DomainAbilityTestCase {
 	}
 
 	/**
+	 * @testdox Should withhold nested personal extensions without changing standalone child output.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $child_first Whether standalone output populates the cache first.
+	 */
+	public function test_order_policy_protects_item_extensions( bool $child_first ): void {
+		$order = $this->create_order_with_email();
+		$this->add_test_field( 'order_item', static fn() => 'buyer@example.test', array( 'personal_data' => 'email' ) );
+		$this->filter_personal_data( static fn( $shared, $resource_name ) => 'order' !== $resource_name, 2 );
+		wp_get_abilities();
+		$item = current( $order->get_items() );
+		if ( $child_first ) {
+			$this->assertSame( 'buyer@example.test', AbilityResources::output_data( 'order_item', $item )['extensions']['test-ext']['code'] );
+		}
+
+		$result = $this->run_ability(
+			'woocommerce/orders-query',
+			array(
+				'id'                 => $order->get_id(),
+				'include_line_items' => true,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertArrayNotHasKey( 'extensions', $result['orders'][0]['line_items'][0] );
+		$this->assertArrayHasKey( 'id', $result['orders'][0]['line_items'][0] );
+		$this->assertArrayNotHasKey( 'extensions', $this->get_order_item_schema()['properties']['line_items']['items']['properties'] );
+		$this->assertSame( 'buyer@example.test', AbilityResources::output_data( 'order_item', $item )['extensions']['test-ext']['code'] );
+		$this->assertArrayHasKey( 'extensions', AbilityResources::output_schema( 'order_item' )['properties'] );
+	}
+
+	/**
 	 * Output schema of one order in woocommerce/orders-query.
 	 *
 	 * @return array<string, mixed>

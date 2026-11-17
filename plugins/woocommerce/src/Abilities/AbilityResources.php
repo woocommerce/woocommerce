@@ -342,7 +342,7 @@ class AbilityResources {
 		$resource_name = (string) $args['resource'];
 		$resolving[]   = $resource_name;
 		$output        = array();
-		foreach ( self::get_output_fields( $args ) as $field => $field_args ) {
+		foreach ( self::get_output_fields( $args, $resolving ) as $field => $field_args ) {
 			try {
 				$value = call_user_func( $field_args['get_callback'], $subject );
 			} catch ( \Throwable $exception ) {
@@ -469,7 +469,7 @@ class AbilityResources {
 			'properties'           => array(),
 			'additionalProperties' => false,
 		);
-		foreach ( self::get_output_fields( $args ) as $field => $field_args ) {
+		foreach ( self::get_output_fields( $args, $resolving ) as $field => $field_args ) {
 			$schema['properties'][ $field ] = self::resolve_ref( $field_args['schema'], $resolving );
 		}
 		if ( empty( $schema['properties'] ) ) {
@@ -515,12 +515,20 @@ class AbilityResources {
 	/**
 	 * Fields to output: the root fields without withheld personal data, then `extensions`, then `fields` and `exclude`.
 	 *
-	 * @param array $args Arguments of output_schema() or output_data().
+	 * @param array    $args      Arguments of output_schema() or output_data().
+	 * @param string[] $resolving Resources containing this output.
 	 * @return array<string, array<string, mixed>>
 	 */
-	private static function get_output_fields( array $args ): array {
+	private static function get_output_fields( array $args, array $resolving ): array {
+		$share_personal_data = true;
+		foreach ( array_slice( $resolving, 0, -1 ) as $ancestor ) {
+			if ( ! PersonalData::is_shared( $ancestor ) ) {
+				$share_personal_data = false;
+				break;
+			}
+		}
 		$resource_name = (string) $args['resource'];
-		$fields        = self::fields_for_output( $resource_name );
+		$fields        = self::fields_for_output( $resource_name, $share_personal_data );
 		if ( isset( $args['fields'] ) ) {
 			$fields = array_intersect_key( $fields, array_flip( (array) $args['fields'] ) );
 		}
@@ -561,19 +569,20 @@ class AbilityResources {
 	 * Fields to output for a resource. Cached until a field is registered.
 	 *
 	 * @param string $resource_name Resource.
+	 * @param bool   $share_personal_data Whether containing resources permit personal data.
 	 * @return array<string, array<string, mixed>>
 	 */
-	private static function fields_for_output( string $resource_name ): array {
+	private static function fields_for_output( string $resource_name, bool $share_personal_data ): array {
 		$enabled = ExtensibleAbilities::is_enabled();
-		$key     = $resource_name . ( $enabled ? '|extensions' : '' );
+		$key     = $resource_name . ( $enabled ? '|extensions' : '' ) . ( $share_personal_data ? '' : '|withheld' );
 		if ( ! isset( self::$output_fields[ $key ] ) ) {
-			$fields = self::withhold( self::$fields[ $resource_name ][''] ?? array(), $resource_name );
-			$schema = ExtensibleAbilities::add_fields_schema( array(), $resource_name );
+			$fields = self::withhold( self::$fields[ $resource_name ][''] ?? array(), $resource_name, $share_personal_data );
+			$schema = ExtensibleAbilities::add_fields_schema( array(), $resource_name, null, $share_personal_data );
 			if ( isset( $schema['properties']['extensions'] ) ) {
 				$fields['extensions'] = array(
 					'schema'        => $schema['properties']['extensions'],
-					'get_callback'  => static function ( $subject ) use ( $resource_name ) {
-						$output = ExtensibleAbilities::add_fields_to_object( array(), $resource_name, $subject );
+					'get_callback'  => static function ( $subject ) use ( $resource_name, $share_personal_data ) {
+						$output = ExtensibleAbilities::add_fields_to_object( array(), $resource_name, $subject, $share_personal_data );
 						return is_wp_error( $output ) ? $output : ( $output['extensions'] ?? array() );
 					},
 					'omit_if_empty' => true,
@@ -596,11 +605,12 @@ class AbilityResources {
 	 *
 	 * @param array<string, array<string, mixed>> $fields        Field arguments keyed by field.
 	 * @param string                              $resource_name Resource.
+	 * @param bool                                $share_personal_data Whether containing resources permit personal data.
 	 * @return array<string, array<string, mixed>>
 	 */
-	private static function withhold( array $fields, string $resource_name ): array {
+	private static function withhold( array $fields, string $resource_name, bool $share_personal_data = true ): array {
 		$personal = array_filter( $fields, static fn( array $field_args ) => ! empty( $field_args['personal_data'] ) );
-		if ( empty( $personal ) || PersonalData::is_shared( $resource_name ) ) {
+		if ( empty( $personal ) || ( $share_personal_data && PersonalData::is_shared( $resource_name ) ) ) {
 			return $fields;
 		}
 		return array_diff_key( $fields, $personal );
@@ -611,11 +621,12 @@ class AbilityResources {
 	 *
 	 * @internal
 	 * @param string $resource_name Resource.
+	 * @param bool   $share_personal_data Whether containing resources permit personal data.
 	 * @return array<string, array<string, array<string, mixed>>>
 	 */
-	public static function get_output_extension_fields( string $resource_name ): array {
+	public static function get_output_extension_fields( string $resource_name, bool $share_personal_data = true ): array {
 		$extension_fields = array_map(
-			static fn( array $fields ) => self::withhold( $fields, $resource_name ),
+			static fn( array $fields ) => self::withhold( $fields, $resource_name, $share_personal_data ),
 			self::get_extension_fields( $resource_name )
 		);
 		return array_filter( $extension_fields );

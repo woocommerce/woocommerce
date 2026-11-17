@@ -576,15 +576,16 @@ class ExtensibleAbilities {
 	 * @param array<string, mixed> $output   Formatted object.
 	 * @param string               $resource_name Resource.
 	 * @param object               $subject  Object to read.
+	 * @param bool                 $share_personal_data Whether containing resources permit personal data.
 	 * @return array<string, mixed>|\WP_Error
 	 */
-	public static function add_fields_to_object( array $output, string $resource_name, $subject ) {
+	public static function add_fields_to_object( array $output, string $resource_name, $subject, bool $share_personal_data = true ) {
 		if ( empty( self::get_fields( $resource_name ) ) || ! self::is_enabled() ) {
 			return $output;
 		}
 
 		$extensions = array();
-		foreach ( AbilityResources::get_output_extension_fields( $resource_name ) as $namespace => $fields ) {
+		foreach ( AbilityResources::get_output_extension_fields( $resource_name, $share_personal_data ) as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
 				if ( ! isset( $args['get_callback'] ) || ! self::field_applies_to( $args, $subject ) ) {
 					continue;
@@ -649,9 +650,10 @@ class ExtensibleAbilities {
 	 * @param array<string, mixed> $schema        Object schema.
 	 * @param string               $resource_name Resource.
 	 * @param callable|null        $field_filter  Optional. Gets the arguments of a field and returns whether the schema lists it.
+	 * @param bool                 $share_personal_data Whether containing resources permit personal data.
 	 * @return array<string, mixed>
 	 */
-	public static function add_fields_schema( array $schema, string $resource_name, ?callable $field_filter = null ): array {
+	public static function add_fields_schema( array $schema, string $resource_name, ?callable $field_filter = null, bool $share_personal_data = true ): array {
 		if ( ! self::is_enabled() ) {
 			return $schema;
 		}
@@ -661,7 +663,7 @@ class ExtensibleAbilities {
 			'description'          => __( 'Values that extensions add, keyed by extension namespace, then field.', 'woocommerce' ),
 			'additionalProperties' => false,
 		);
-		foreach ( AbilityResources::get_output_extension_fields( $resource_name ) as $namespace => $fields ) {
+		foreach ( AbilityResources::get_output_extension_fields( $resource_name, $share_personal_data ) as $namespace => $fields ) {
 			$listed = array_filter(
 				$fields,
 				static function ( array $args ): bool {
