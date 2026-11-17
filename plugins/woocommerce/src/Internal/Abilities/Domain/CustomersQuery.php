@@ -140,6 +140,20 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 			return $data;
 		}
 
+		$total = (int) $data->total;
+		if ( 0 === $total && empty( $data->data ) && $page > 1 ) {
+			/**
+			 * The data store skips its count when the requested page is past the last one.
+			 *
+			 * @var \stdClass|\WP_Error $first_page
+			 */
+			$first_page = ( new CustomerLookup() )->get_data( array_merge( $query_args, array( 'page' => 1 ) ) );
+			if ( is_wp_error( $first_page ) ) {
+				return $first_page;
+			}
+			$total = (int) $first_page->total;
+		}
+
 		$rows = $data->data;
 		cache_users( array_filter( array_column( $rows, 'user_id' ) ) );
 
@@ -156,8 +170,8 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 
 		return array(
 			'customers'   => $customers,
-			'total'       => (int) $data->total,
-			'total_pages' => (int) ceil( $data->total / $per_page ),
+			'total'       => $total,
+			'total_pages' => (int) ceil( $total / $per_page ),
 			'page'        => $page,
 			'per_page'    => $per_page,
 		);

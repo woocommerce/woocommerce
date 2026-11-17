@@ -205,6 +205,34 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report the matching total on a page past the last one, and zero when nothing matches.
+	 */
+	public function test_page_past_last_keeps_total(): void {
+		$ids = $this->guest_customers( 3 );
+
+		$result = $this->sut->execute(
+			array(
+				'include'  => $ids,
+				'orderby'  => 'id',
+				'per_page' => 2,
+				'page'     => 5,
+			)
+		);
+		$this->assertSame( array(), $result['customers'] );
+		$this->assertSame( 3, $result['total'] );
+		$this->assertSame( 2, $result['total_pages'] );
+
+		$result = $this->sut->execute(
+			array(
+				'include' => array( max( $ids ) + 1000 ),
+				'page'    => 2,
+			)
+		);
+		$this->assertSame( 0, $result['total'] );
+		$this->assertSame( 0, $result['total_pages'] );
+	}
+
+	/**
 	 * @testdox Should sort by total spent.
 	 */
 	public function test_orderby_total_spent(): void {

@@ -130,6 +130,27 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should change other address fields while the saved state and postcode no longer match the saved country.
+	 */
+	public function test_outdated_saved_address_does_not_block_other_fields(): void {
+		list( $id, $user_id ) = $this->registered_customer();
+		$customer             = new \WC_Customer( $user_id );
+		$customer->set_billing_state( 'XX' );
+		$customer->set_billing_postcode( 'not-a-zip' );
+		$customer->save();
+
+		$result = $this->execute(
+			array(
+				'id'      => $id,
+				'billing' => array( 'phone' => '555-0199' ),
+			)
+		);
+
+		$this->assertSame( array( 'billing.phone' ), $result['customer']['updated_fields'] );
+		$this->assertSame( '555-0199', ( new \WC_Customer( $user_id ) )->get_billing_phone() );
+	}
+
+	/**
 	 * @testdox Should not quote the saved state and postcode when they fail against a sent country.
 	 */
 	public function test_refusal_does_not_quote_saved_values(): void {

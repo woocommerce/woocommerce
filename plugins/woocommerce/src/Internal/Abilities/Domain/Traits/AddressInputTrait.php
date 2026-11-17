@@ -26,7 +26,9 @@ trait AddressInputTrait {
 	/**
 	 * Check the sent fields of an address against the object, then set the fields
 	 * that pass. A bad country keeps the saved country, state and postcode, because
-	 * the state and postcode checks depend on the country.
+	 * the state and postcode checks depend on the country. A saved state or postcode
+	 * is checked only when it or the country is sent, so an outdated saved value
+	 * doesn't block changes to the other fields.
 	 *
 	 * @param \WC_Order|\WC_Customer $subject       Order or customer.
 	 * @param string                 $resource_name Resource in the error codes: order or customer.
@@ -56,7 +58,10 @@ trait AddressInputTrait {
 		$sent_fields = array_keys( (array) $address );
 		$sent        = static fn( string ...$fields ): bool => empty( array_diff( $fields, $sent_fields ) );
 
-		if ( '' !== $country && ! array_key_exists( $country, WC()->countries->get_countries() ) ) {
+		$check_state    = $sent( 'state' ) || $sent( 'country' );
+		$check_postcode = $sent( 'postcode' ) || $sent( 'country' );
+
+		if ( ( $check_state || $check_postcode ) && '' !== $country && ! array_key_exists( $country, WC()->countries->get_countries() ) ) {
 			$refused->merge_from(
 				self::address_error(
 					$resource_name,
@@ -72,7 +77,7 @@ trait AddressInputTrait {
 		} else {
 			$states = WC()->countries->get_states( $country );
 
-			if ( '' !== $state && ! empty( $states ) && ! array_key_exists( $state, $states ) ) {
+			if ( $check_state && '' !== $state && ! empty( $states ) && ! array_key_exists( $state, $states ) ) {
 				$refused->merge_from(
 					self::address_error(
 						$resource_name,
@@ -84,7 +89,7 @@ trait AddressInputTrait {
 				unset( $address['state'] );
 			}
 
-			if ( '' !== $postcode && '' !== $country ) {
+			if ( $check_postcode && '' !== $postcode && '' !== $country ) {
 				if ( ! \WC_Validation::is_postcode( $postcode, $country ) ) {
 					$refused->merge_from(
 						self::address_error(
@@ -127,11 +132,8 @@ trait AddressInputTrait {
 			/* translators: 1: country code sent by the client, 2: comma-separated state codes. */
 			return sprintf( __( 'The saved state is not a state of %1$s. Send the state with one of these codes: %2$s.', 'woocommerce' ), $country, implode( ', ', $state_codes ) );
 		}
-		if ( $state_sent ) {
-			/* translators: %s: state sent by the client. */
-			return sprintf( __( '"%s" is not a state of the saved country. Send the country and the state together.', 'woocommerce' ), $state );
-		}
-		return __( 'The saved state does not belong to the saved country. Send the country and the state together.', 'woocommerce' );
+		/* translators: %s: state sent by the client. */
+		return sprintf( __( '"%s" is not a state of the saved country. Send the country and the state together.', 'woocommerce' ), $state );
 	}
 
 	/**
@@ -152,11 +154,8 @@ trait AddressInputTrait {
 			/* translators: %s: country code sent by the client. */
 			return sprintf( __( 'The saved postcode is not valid for %s. Send a postcode in the format of that country.', 'woocommerce' ), $country );
 		}
-		if ( $postcode_sent ) {
-			/* translators: %s: postcode sent by the client. */
-			return sprintf( __( '"%s" is not a valid postcode for the saved country. Send a postcode in the format of that country.', 'woocommerce' ), $postcode );
-		}
-		return __( 'The saved postcode does not match the saved country. Send the country and the postcode together.', 'woocommerce' );
+		/* translators: %s: postcode sent by the client. */
+		return sprintf( __( '"%s" is not a valid postcode for the saved country. Send a postcode in the format of that country.', 'woocommerce' ), $postcode );
 	}
 
 	/**
