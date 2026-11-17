@@ -22,10 +22,11 @@ import { useState } from 'react';
 import { ENTITY_KIND } from './entities';
 import type { SettingsEntityConfig } from './entities';
 import { getEntityFields, getEntityFieldsStatus } from './entity-fields';
-import type { SettingsRecord } from './types';
+import type { SettingsField, SettingsRecord } from './types';
 import './style.scss';
 
 const EMPTY_FORM: Form = { fields: [] };
+const EMPTY_FIELDS: SettingsField[] = [];
 
 /**
  * Use REST error messages without assuming requests reject with Error instances.
@@ -72,10 +73,11 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 		},
 		[ kind, name ]
 	);
-	const data = editedRecord as SettingsRecord | undefined;
+	// The record is `false` until it loads. Validate without fields until then, so their getters never read it.
+	const data = ( editedRecord as SettingsRecord | false ) || undefined;
 	const { validity, isValid } = useFormValidity(
 		data ?? {},
-		fields,
+		data ? fields : EMPTY_FIELDS,
 		form ?? EMPTY_FORM
 	);
 	const saveSettings = async () => {
