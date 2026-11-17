@@ -66,15 +66,7 @@ class ProductPageIntegration {
 	public function __construct() {
 		add_action( 'woocommerce_simple_add_to_cart', array( $this, 'maybe_render_form' ), 30 );
 		add_action( 'woocommerce_after_add_to_cart_form', array( $this, 'maybe_render_form' ), 30 );
-		// A closure keeps this compatibility layer out of the public API until a dedicated block replaces it.
-		add_filter(
-			'render_block_' . self::ADD_TO_CART_WITH_OPTIONS_BLOCK,
-			function ( $block_content, $parsed_block, $block ) {
-				return $this->render_form_after_add_to_cart_with_options( (string) $block_content, $block );
-			},
-			10,
-			3
-		);
+		add_filter( 'render_block_' . self::ADD_TO_CART_WITH_OPTIONS_BLOCK, array( $this, 'render_form_after_add_to_cart_with_options' ), 10, 3 );
 	}
 
 	/**
@@ -100,11 +92,14 @@ class ProductPageIntegration {
 	/**
 	 * Append the BIS form to the Add to Cart + Options block, outside its <form>.
 	 *
+	 * @internal
+	 *
 	 * @param string    $block_content The block content.
+	 * @param array     $parsed_block  The parsed block.
 	 * @param \WP_Block $block         The block instance.
 	 * @return string
 	 */
-	private function render_form_after_add_to_cart_with_options( string $block_content, \WP_Block $block ): string {
+	public function render_form_after_add_to_cart_with_options( $block_content, $parsed_block, $block ) {
 		$product_id = (int) ( $block->context['postId'] ?? 0 );
 
 		// Only the block for the product being viewed, not those in related products, upsells or other products' Single Product blocks.
@@ -132,7 +127,7 @@ class ProductPageIntegration {
 		$html = new \WP_HTML_Tag_Processor( $form );
 
 		// The form of a variable product starts hidden until an out of stock variation is chosen.
-		if ( ! $product->is_type( 'variable' ) || ! $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ) || null === $html->get_attribute( 'hidden' ) ) {
+		if ( ! $product instanceof \WC_Product_Variable || ! $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ) || null === $html->get_attribute( 'hidden' ) ) {
 			return $form;
 		}
 
@@ -142,7 +137,7 @@ class ProductPageIntegration {
 		$html->set_attribute( 'data-wp-interactive', self::SCRIPT_MODULE );
 		$html->set_attribute( 'data-wp-bind--hidden', '!state.isVisible' );
 
-		while ( $html->next_tag( 'input' ) ) {
+		while ( $html->next_tag( array( 'tag_name' => 'input' ) ) ) {
 			if ( 'wc_bis_product_id' === $html->get_attribute( 'name' ) ) {
 				$html->set_attribute( 'data-wp-bind--value', 'woocommerce/products::state.productInContext.id' );
 				break;
@@ -154,6 +149,7 @@ class ProductPageIntegration {
 		// Post the chosen values, so "any" attributes are kept like in the classic form.
 		$attribute_inputs = '';
 		foreach ( array_keys( $product->get_variation_attributes() ) as $attribute_name ) {
+			$attribute_name    = (string) $attribute_name;
 			$attribute_inputs .= sprintf(
 				'<input type="hidden" name="%s" %s data-wp-bind--value="state.selectedAttributeValue" />',
 				esc_attr( wc_variation_attribute_name( $attribute_name ) ),
@@ -183,8 +179,7 @@ class ProductPageIntegration {
 			return;
 		}
 
-		// The block doesn't mark the product as rendered: its output can be rendered and discarded
-		// (e.g. a product description formatted for the Store API), which would use up the dedupe.
+		// The block doesn't mark the product as rendered, as its output can be discarded.
 		if ( ! $is_block ) {
 			$this->rendered[ $product->get_id() ] = true;
 		}
