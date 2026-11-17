@@ -8,14 +8,16 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\PaymentGatewayAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Lists payment gateways from their public properties. Gateway settings hold
- * API keys and passwords, so only the saved title and description are read.
+ * Lists payment gateways from their public properties, never their settings.
  */
 class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefinition {
+
+	use PaymentGatewayAbilityTrait;
 
 	/**
 	 * Ability ID, stable once released.
@@ -73,31 +75,18 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 	public static function execute( array $input ) {
 		$gateways = WC()->payment_gateways()->payment_gateways();
 
-		if ( isset( $input['id'] ) ) {
-			$id = $input['id'];
-
-			if ( ! isset( $gateways[ $id ] ) ) {
-				return new \WP_Error(
-					'woocommerce_payment_gateway_not_found',
-					__( 'Payment gateway not found.', 'woocommerce' ),
-					array( 'status' => 404 )
-				);
-			}
-
-			$gateways = array( $gateways[ $id ] );
+		if ( isset( $input['id'] ) && ! isset( $gateways[ $input['id'] ] ) ) {
+			return self::payment_gateway_not_found( 'woocommerce_payment_gateway_not_found' );
 		}
 
 		$items = array();
+		$order = 0;
 
-		foreach ( $gateways as $gateway ) {
-			// The title and description getters run checkout filters that may expect a cart.
-			$items[] = array(
-				'id'           => (string) $gateway->id,
-				'title'        => (string) ( $gateway->title ? $gateway->title : $gateway->get_option( 'title' ) ),
-				'method_title' => (string) $gateway->get_method_title(),
-				'description'  => (string) ( $gateway->description ? $gateway->description : $gateway->get_option( 'description' ) ),
-				'enabled'      => 'yes' === $gateway->enabled,
-			);
+		foreach ( $gateways as $id => $gateway ) {
+			if ( ! isset( $input['id'] ) || $input['id'] === (string) $id ) {
+				$items[] = self::format_payment_gateway_for_response( $gateway, $order );
+			}
+			++$order;
 		}
 
 		return array(
@@ -145,28 +134,6 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 	 * @return array
 	 */
 	private static function get_output_schema(): array {
-		return self::get_collection_output_schema(
-			'gateways',
-			array(
-				'type'                 => 'object',
-				'properties'           => array(
-					'id'           => array( 'type' => 'string' ),
-					'title'        => array(
-						'type'        => 'string',
-						'description' => __( 'Title shown to customers at checkout. Can be empty.', 'woocommerce' ),
-					),
-					'method_title' => array(
-						'type'        => 'string',
-						'description' => __( 'Name of the payment method or provider.', 'woocommerce' ),
-					),
-					'description'  => array(
-						'type'        => 'string',
-						'description' => __( 'Description shown to customers at checkout. Can be empty.', 'woocommerce' ),
-					),
-					'enabled'      => array( 'type' => 'boolean' ),
-				),
-				'additionalProperties' => false,
-			)
-		);
+		return self::get_collection_output_schema( 'gateways', self::get_payment_gateway_item_schema() );
 	}
 }
