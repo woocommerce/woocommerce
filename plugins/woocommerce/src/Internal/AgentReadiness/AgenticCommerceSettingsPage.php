@@ -237,7 +237,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * @param array<string, mixed>|null $report Stored report, or null before the first scan.
 	 */
 	private function render_visibility( ?array $report ): void {
-		echo '<div class="wc-agentic-commerce-card">';
+		echo '<div class="wc-agentic-commerce-card" id="wc-agentic-commerce-visibility">';
 		echo '<div class="wc-agentic-commerce-card__header"><h2>' . esc_html__( 'Product visibility', 'woocommerce' ) . '</h2>';
 		echo '<p>' . esc_html__( 'AI assistants see the same products as shoppers. Shoppers can buy simple and variable products through them.', 'woocommerce' ) . '</p></div>';
 

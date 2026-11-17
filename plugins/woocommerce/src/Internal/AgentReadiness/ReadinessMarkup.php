@@ -133,8 +133,9 @@ trait ReadinessMarkup {
 			array(
 				'path' => '/wc/v3/agent-readiness/ucp',
 				'i18n' => array(
-					'error'  => __( 'The setting didn’t save. Reload the page and try again.', 'woocommerce' ),
-					'copied' => __( 'Copied', 'woocommerce' ),
+					'error'   => __( 'The setting didn’t save. Reload the page and try again.', 'woocommerce' ),
+					'unsaved' => __( 'Save your changes to see the updated status.', 'woocommerce' ),
+					'copied'  => __( 'Copied', 'woocommerce' ),
 				),
 			)
 		);

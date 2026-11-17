@@ -100,6 +100,7 @@ describe( 'RunStatus', () => {
 		pending,
 		stalled,
 		message,
+		link: null,
 	} );
 
 	it( 'shows no spinner while a check runs, only its message for screen readers', () => {
