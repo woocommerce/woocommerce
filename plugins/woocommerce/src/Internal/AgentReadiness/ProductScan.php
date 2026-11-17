@@ -65,6 +65,11 @@ class ProductScan {
 	private array $statuses = array();
 
 	/**
+	 * Most shared GTINs the stored report keeps.
+	 */
+	public const SHARED_GTINS_LIMIT = 5000;
+
+	/**
 	 * Normalised GTIN keys carried by more than one published product.
 	 *
 	 * @var array<string, true>|null
@@ -77,6 +82,13 @@ class ProductScan {
 	 * @var bool
 	 */
 	private bool $truncated = false;
+
+	/**
+	 * Called with each product id and its failures during evaluate_each(). Cleared when that pass ends.
+	 *
+	 * @var callable|null
+	 */
+	private $tested_callback = null;
 
 	/**
 	 * Whether the readiness checks test this product.
@@ -99,6 +111,25 @@ class ProductScan {
 	private static function stored_type( \WC_Product $product ): string {
 		$type = \WC_Product_Factory::get_product_type( $product->get_id() );
 		return is_string( $type ) && '' !== $type ? $type : 'simple';
+	}
+
+	/**
+	 * Test every covered product, calling $on_tested with each product id and its failures.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
+	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
+	 * @param int                                                             $ids_limit     Product ids kept per rule.
+	 * @param callable                                                        $on_tested     Called with each product id and its failures.
+	 */
+	public function evaluate_each( array $rules, array $channel_rules, int $ids_limit, callable $on_tested ): void {
+		$this->tested_callback = $on_tested;
+		try {
+			$this->evaluate( $rules, $channel_rules, $ids_limit );
+		} finally {
+			$this->tested_callback = null;
+		}
 	}
 
 	/**
@@ -164,6 +195,17 @@ class ProductScan {
 				$query->posts
 			);
 			$batch_count = count( $product_ids );
+			/**
+			 * Fires after one batch of product ids has been read, before those products are tested.
+			 * A product created here is not in this batch, so the scan does not replace its rows.
+			 *
+			 * An ids query returns before `posts_results` and `the_posts`, so those filters never see this query.
+			 *
+			 * @since 11.4.0
+			 *
+			 * @param int[] $product_ids Product ids in this batch.
+			 */
+			do_action( 'woocommerce_agent_readiness_scan_batch', $product_ids );
 			self::prime_related( $product_ids );
 			foreach ( $product_ids as $product_id ) {
 				if ( self::PRODUCT_LIMIT === $this->products ) {
@@ -182,6 +224,7 @@ class ProductScan {
 			}
 			++$page;
 		} while ( self::BATCH_SIZE === $batch_count );
+		$this->tested_callback = null;
 	}
 
 	/**
@@ -264,16 +307,28 @@ class ProductScan {
 			false,
 			true
 		);
-		$placeholders = implode( ',', array_fill( 0, count( $product_ids ), '%d' ) );
-		_prime_post_caches(
+		$placeholders  = implode( ',', array_fill( 0, count( $product_ids ), '%d' ) );
+		$variation_ids = array_map(
+			'intval',
 			$wpdb->get_col(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- One %d placeholder per product.
 					"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product_variation' AND post_parent IN ({$placeholders})",
 					array_map( 'intval', $product_ids )
 				)
+			)
+		);
+		_prime_post_caches( $variation_ids, true, true );
+
+		// The variations' own images, which a variable product with no image of its own is listed with.
+		_prime_post_caches(
+			array_filter(
+				array_map(
+					static fn( int $variation_id ): int => (int) get_post_meta( $variation_id, '_thumbnail_id', true ),
+					$variation_ids
+				)
 			),
-			true,
+			false,
 			true
 		);
 	}
@@ -373,6 +428,35 @@ class ProductScan {
 	 * @param string $gtin Normalised GTIN.
 	 */
 	public function is_shared_gtin( string $gtin ): bool {
+		return isset( $this->shared_gtin_keys()[ ProductFields::gtin_key( $gtin ) ] );
+	}
+
+	/**
+	 * The GTIN keys more than one published product carries, for the scan to store.
+	 * Null past SHARED_GTINS_LIMIT, so the stored report stays small; checking one product then reads the catalog.
+	 *
+	 * @return array<int, string>|null
+	 */
+	public function shared_gtins(): ?array {
+		$keys = $this->shared_gtin_keys();
+		return count( $keys ) > self::SHARED_GTINS_LIMIT ? null : array_map( 'strval', array_keys( $keys ) );
+	}
+
+	/**
+	 * Use the shared GTIN keys a stored scan found, instead of reading every published product.
+	 *
+	 * @param array<int, mixed> $keys GTIN keys.
+	 */
+	public function use_shared_gtins( array $keys ): void {
+		$this->shared_gtins = array_fill_keys( array_map( 'strval', array_filter( $keys, 'is_scalar' ) ), true );
+	}
+
+	/**
+	 * Shared GTIN keys, read from the catalog the first time they're needed.
+	 *
+	 * @return array<string, bool>
+	 */
+	private function shared_gtin_keys(): array {
 		if ( null === $this->shared_gtins ) {
 			global $wpdb;
 
@@ -418,8 +502,7 @@ class ProductScan {
 
 			$this->shared_gtins = array_fill_keys( array_map( 'strval', $gtins ), true );
 		}
-
-		return isset( $this->shared_gtins[ ProductFields::gtin_key( $gtin ) ] );
+		return $this->shared_gtins;
 	}
 
 	/**
@@ -438,7 +521,8 @@ class ProductScan {
 				continue;
 			}
 			$channels = $rule->channels_for( $product, $channel_rules[ $id ] ?? array() );
-			if ( ! empty( $channels ) ) {
+			// A check with no channel (about the product page, not a feed) still counts the product.
+			if ( ! empty( $channels ) || empty( $channel_rules[ $id ] ?? array() ) ) {
 				$failed[ (string) $id ] = $channels;
 			}
 		}
@@ -455,6 +539,9 @@ class ProductScan {
 	 */
 	private function record( \WC_Product $product, array $rules, array $channel_rules, int $ids_limit ): void {
 		$failures = $this->failures( $product, $rules, $channel_rules );
+		if ( null !== $this->tested_callback ) {
+			( $this->tested_callback )( $product->get_id(), $failures );
+		}
 		foreach ( array_keys( $failures ) as $id ) {
 			$result = $this->result( $id );
 			++$result['count'];

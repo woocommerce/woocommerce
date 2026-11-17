@@ -66,10 +66,6 @@ class WC_Meta_Box_Product_Data_Linked_Products_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
-			if ( WC()->cart ) {
-				WC()->cart->empty_cart();
-			}
-
 			wp_reset_postdata();
 			wc_reset_loop();
 

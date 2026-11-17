@@ -81,20 +81,20 @@ class ImageTooSmallCheck extends AbstractReadinessCheck {
 	}
 
 	/**
-	 * Whether the product has this problem.
+	 * Whether the product has this problem: any image it lists with, for a variable product any
+	 * variation's, is too small. Images without a recorded size are not judged.
 	 *
 	 * @param \WC_Product $product Published product.
 	 * @param ProductScan $scan    Catalog-wide lookups.
 	 */
 	public function fails( \WC_Product $product, ProductScan $scan ): bool {
-		$image_id = ProductFields::image_id( $product );
-		if ( 0 === $image_id ) {
-			return false;
+		foreach ( ProductFields::listing_image_ids( $product ) as $image_id ) {
+			$metadata = wp_get_attachment_metadata( $image_id );
+			if ( is_array( $metadata ) && ! empty( $metadata['width'] ) && ! empty( $metadata['height'] )
+				&& ( (int) $metadata['width'] < self::MIN_PIXELS || (int) $metadata['height'] < self::MIN_PIXELS ) ) {
+				return true;
+			}
 		}
-		$metadata = wp_get_attachment_metadata( $image_id );
-		if ( ! is_array( $metadata ) || empty( $metadata['width'] ) || empty( $metadata['height'] ) ) {
-			return false;
-		}
-		return (int) $metadata['width'] < self::MIN_PIXELS || (int) $metadata['height'] < self::MIN_PIXELS;
+		return false;
 	}
 }

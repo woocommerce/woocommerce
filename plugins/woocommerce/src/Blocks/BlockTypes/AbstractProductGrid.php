@@ -5,6 +5,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlocksWpQuery;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 /**
  * AbstractProductGrid class.
@@ -654,7 +655,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 	protected function get_add_to_cart( $product ) {
 		$attributes = array(
 			'aria-label'       => $product->add_to_cart_description(),
-			'data-quantity'    => '1',
+			'data-quantity'    => wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_quantity( $product ),
 			'data-product_id'  => $product->get_id(),
 			'data-product_sku' => $product->get_sku(),
 			'data-price'       => wc_get_price_to_display( $product ),
@@ -680,13 +681,17 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		 *
 		 * @return array Returns an associative array derived from the default array passed as an argument and added the extra HTML attributes.
 		 */
-		$attributes = apply_filters( 'woocommerce_blocks_product_grid_add_to_cart_attributes', $attributes, $product );
+		$attributes  = apply_filters( 'woocommerce_blocks_product_grid_add_to_cart_attributes', $attributes, $product );
+		$button_data = wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_button_data( $product, $attributes['data-quantity'] ?? 1 );
+		if ( ( $attributes['aria-label'] ?? null ) === $button_data['original_description'] ) {
+			$attributes['aria-label'] = $button_data['description'];
+		}
 
 		return sprintf(
 			'<a href="%s" %s>%s</a>',
-			esc_url( $product->add_to_cart_url() ),
+			esc_url( $button_data['url'] ),
 			wc_implode_html_attributes( $attributes ),
-			esc_html( $product->add_to_cart_text() )
+			esc_html( $button_data['text'] )
 		);
 	}
 

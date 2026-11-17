@@ -222,6 +222,33 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return each product exactly once across pages when products share a creation date.
+	 */
+	public function test_pages_products_with_the_same_date_once_each(): void {
+		$ids = array();
+		for ( $i = 0; $i < 7; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_date_created( '2026-01-01T10:00:00' );
+			$product->save();
+			$ids[] = $product->get_id();
+		}
+
+		$paged = array();
+		for ( $page = 1; $page <= 3; $page++ ) {
+			$result = ProductsQuery::execute(
+				array(
+					'page'     => $page,
+					'per_page' => 3,
+				)
+			);
+			$paged  = array_merge( $paged, array_column( $result['products'], 'id' ) );
+		}
+
+		rsort( $ids );
+		$this->assertSame( $ids, $paged, 'Products with the same date should be sorted by ID, newest first.' );
+	}
+
+	/**
 	 * Query one product by ID and check the result against the output schema.
 	 *
 	 * @param int $product_id Product ID.

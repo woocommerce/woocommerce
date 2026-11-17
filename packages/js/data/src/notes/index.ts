@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { createReduxStore, register } from '@wordpress/data';
-import { Reducer, AnyAction } from 'redux';
 import { controls } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
  */
+import type { AnyAction } from '../crud/types';
 import { STORE_NAME } from './constants';
 import * as selectors from './selectors';
 import * as actions from './actions';
@@ -18,7 +18,10 @@ export * from './types';
 export type { State };
 
 export const store = createReduxStore( STORE_NAME, {
-	reducer: reducer as Reducer< State, AnyAction >,
+	reducer: reducer as (
+		state: State | undefined,
+		action: AnyAction
+	) => State,
 	actions,
 	controls,
 	selectors,

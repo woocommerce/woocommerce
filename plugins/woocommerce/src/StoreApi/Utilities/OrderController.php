@@ -98,7 +98,10 @@ class OrderController {
 		$order->set_customer_id( get_current_user_id() );
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( wc_get_user_agent() );
-		$order->set_payment_method( PaymentUtils::get_checkout_payment_method() );
+		$payment_method_id   = PaymentUtils::get_checkout_payment_method();
+		$registered_gateways = WC()->payment_gateways()->payment_gateways();
+		$payment_method      = $registered_gateways[ $payment_method_id ] ?? $payment_method_id;
+		$order->set_payment_method( $payment_method );
 		$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( wc()->cart->get_customer()->get_is_vat_exempt() ) );
 		$order->calculate_totals();
 	}
@@ -235,11 +238,67 @@ class OrderController {
 		}
 		$this->restore_state_names( $order, $old_states );
 
+		// Evaluate after setting the addresses so the public filter sees the request data.
 		$needs_shipping = $order->needs_shipping();
+		if ( ! $needs_shipping && empty( $old_shipping_location['country'] ) && ! self::ships_items_without_methods( $order ) ) {
+			// The shipping address of an order that needs no shipping is not validated, but it still sets the tax
+			// when tax is based on the shipping address. Store the billing address as the shipping address instead.
+			$shipping = self::get_billing_address_for_shipping( $order );
+			$order->set_shipping_address( $shipping );
+			$this->restore_state_names( $order, $old_states );
+			$needs_shipping = $order->needs_shipping();
+		}
+
 		$this->validate_addresses( $order, $needs_shipping );
 		$this->validate_location_change( $order, $old_shipping_location, $old_tax_location, $needs_shipping );
 
 		return $shipping;
+	}
+
+	/**
+	 * Checks whether an order still ships physical items while shipping is disabled or no method is registered.
+	 *
+	 * WC_Order::needs_shipping() returns false in either case, so the products are checked directly. An existing
+	 * shipping line means the order still has a destination and its shipping address must be kept.
+	 *
+	 * @param \WC_Order $order Order to check.
+	 * @return bool
+	 */
+	private static function ships_items_without_methods( \WC_Order $order ): bool {
+		if ( wc_shipping_enabled() && 0 < wc_get_shipping_method_count( true ) ) {
+			return false;
+		}
+		if ( ! $order->get_shipping_methods() ) {
+			return false;
+		}
+		foreach ( $order->get_items() as $item ) {
+			$product = $item instanceof \WC_Order_Item_Product ? $item->get_product() : null;
+			if ( $product instanceof \WC_Product && $product->needs_shipping() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Gets the unfiltered billing address fields that can be copied to shipping.
+	 *
+	 * @param \WC_Order $order Order to read.
+	 * @return array
+	 */
+	private static function get_billing_address_for_shipping( \WC_Order $order ): array {
+		return [
+			'first_name' => $order->get_billing_first_name( 'edit' ),
+			'last_name'  => $order->get_billing_last_name( 'edit' ),
+			'company'    => $order->get_billing_company( 'edit' ),
+			'address_1'  => $order->get_billing_address_1( 'edit' ),
+			'address_2'  => $order->get_billing_address_2( 'edit' ),
+			'city'       => $order->get_billing_city( 'edit' ),
+			'state'      => $order->get_billing_state( 'edit' ),
+			'postcode'   => $order->get_billing_postcode( 'edit' ),
+			'country'    => $order->get_billing_country( 'edit' ),
+			'phone'      => $order->get_billing_phone( 'edit' ),
+		];
 	}
 
 	/**

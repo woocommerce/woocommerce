@@ -46,9 +46,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	 * Tear down the test.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'wp_redirect', array( $this, 'capture_redirect' ) );
 		$this->redirect_location = null;
-		\wc_clear_notices();
 		\wp_set_current_user( 0 );
 		delete_option( MyAccountEndpoint::ENDPOINT_OPTION );
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited

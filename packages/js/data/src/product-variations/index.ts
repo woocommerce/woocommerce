@@ -1,11 +1,7 @@
 /**
- * External dependencies
- */
-import { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
+import type { AnyAction } from '../crud/types';
 import { STORE_NAME, WC_PRODUCT_VARIATIONS_NAMESPACE } from './constants';
 import { createCrudDataStore } from '../crud';
 import * as actions from './actions';
@@ -23,7 +19,10 @@ export const store = createCrudDataStore<
 	pluralResourceName: 'ProductVariations',
 	namespace: WC_PRODUCT_VARIATIONS_NAMESPACE,
 	storeConfig: {
-		reducer: reducer as Reducer< ResourceState >,
+		reducer: reducer as (
+			state: ResourceState | undefined,
+			action: AnyAction
+		) => ResourceState,
 		actions: actions as ProductVariationActions,
 		selectors: selectors as ProductVariationSelectors,
 	},

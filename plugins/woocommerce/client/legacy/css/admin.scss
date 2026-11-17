@@ -9728,3 +9728,298 @@ body.woocommerce-settings-payments-section_legacy {
 		}
 	}
 }
+
+// Settings > Agentic commerce.
+.wc-agentic-commerce {
+	max-inline-size: 720px;
+
+	h2,
+	h3 {
+		margin: 0;
+	}
+
+	.wc-agentic-commerce-card {
+		margin-block: 0 16px;
+		background: #fff;
+		border: 1px solid #dcdcde;
+		border-radius: 4px;
+
+		> h2,
+		> div[id$="-description"],
+		> .form-table,
+		> .description {
+			margin-inline: 24px;
+		}
+
+		> h2 {
+			margin-block-start: 24px;
+		}
+
+		> .description {
+			margin-block-end: 24px;
+		}
+	}
+
+	.wc-agentic-commerce-card__header {
+		padding: 24px 24px 16px;
+
+		p {
+			margin: 4px 0 0;
+			color: #50575e;
+		}
+
+		&--split {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+			gap: 16px;
+		}
+	}
+
+	.wc-agentic-commerce-card__body,
+	.wc-agentic-commerce-card__footer {
+		margin: 0;
+		padding: 16px 24px;
+	}
+
+	.wc-agentic-commerce-card__footer {
+		border-block-start: 1px solid #f0f0f1;
+		color: #50575e;
+	}
+
+	.wc-agentic-commerce-card--split {
+		display: grid;
+		grid-template-columns: 2fr 1fr;
+
+		> div {
+			padding: 24px;
+		}
+
+		> div + div {
+			border-inline-start: 1px solid #f0f0f1;
+		}
+
+		h3 {
+			margin-block-end: 8px;
+			font-size: 11px;
+			text-transform: uppercase;
+		}
+	}
+
+	.wc-agentic-commerce-placeholder p {
+		color: #757575;
+	}
+
+	.wc-agentic-commerce-policies .form-table {
+		display: block;
+		inline-size: auto;
+
+		tbody {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 0 16px;
+		}
+
+		tr {
+			display: flex;
+			flex-direction: column;
+		}
+
+		th,
+		td {
+			padding: 4px 0;
+		}
+
+		select {
+			inline-size: 100%;
+			min-inline-size: 0 !important;
+		}
+	}
+}
+
+.wc-agentic-commerce-switch-card {
+	padding: 24px;
+
+	.wc-agentic-commerce-switch-row {
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+	}
+
+	p {
+		margin: 4px 0 0;
+	}
+
+	.wc-agentic-commerce-ucp-message:empty {
+		display: none;
+	}
+}
+
+.wc-agentic-commerce-notice {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-block-start: 16px;
+	padding: 12px 16px;
+	background: #fcf9e8;
+	border: 1px solid #f0c33c;
+	border-radius: 2px;
+
+	p {
+		flex: 1;
+		margin: 0 !important;
+	}
+
+	.dashicons {
+		color: #8a6100;
+	}
+}
+
+.wc-agentic-commerce-counts {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	margin: 0;
+	border-block-start: 1px solid #f0f0f1;
+
+	li {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		margin: 0;
+		padding: 16px 24px;
+	}
+
+	li + li {
+		border-inline-start: 1px solid #f0f0f1;
+	}
+
+	strong {
+		font-size: 1.6em;
+		font-weight: 400;
+		line-height: 1.2;
+	}
+}
+
+.wc-agentic-commerce-group {
+
+	ul {
+		margin: 0;
+	}
+
+	&__title {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin: 0;
+		padding: 10px 24px;
+		font-size: 13px;
+		background: #f6f7f7;
+		border-block: 1px solid #f0f0f1;
+	}
+
+	&--done summary {
+		cursor: pointer;
+	}
+}
+
+.wc-agentic-commerce-count {
+	padding: 0 6px;
+	border-radius: 8px;
+	background: #dcdcde;
+	font-size: 11px;
+}
+
+.wc-agentic-commerce-check {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 0;
+	padding: 12px 24px;
+	border-block-end: 1px solid #f0f0f1;
+
+	&__text {
+		flex: 1;
+		font-weight: 600;
+	}
+
+	&__icon {
+		inline-size: 18px;
+		block-size: 18px;
+		border: 2px solid #a7aaad;
+		border-radius: 50%;
+	}
+
+	&--required &__icon {
+		border-color: #b26200;
+	}
+
+	&--done .dashicons {
+		color: $green;
+	}
+}
+
+.wc-agentic-commerce-badge {
+	display: inline-block;
+	white-space: nowrap;
+	padding: 0 8px;
+	border-radius: 2px;
+	font-weight: 600;
+	background: #f0f0f1;
+	color: #1d2327;
+
+	&--pass {
+		background: #edfaef;
+		color: $green;
+	}
+
+	&--fix {
+		background: #fcf0e1;
+		color: #8a4d00;
+	}
+
+	&--check {
+		background: #fcf9e8;
+		color: #8a6100;
+	}
+}
+
+.wc-agentic-commerce-card__section {
+	padding: 16px 24px 24px;
+	border-block-start: 1px solid #f0f0f1;
+
+	h3 {
+		margin-block-end: 8px;
+	}
+}
+
+.wc-agentic-commerce-channels {
+	margin-block-end: 16px;
+}
+
+.wc-agentic-commerce-summary {
+	max-inline-size: 900px;
+
+	li {
+		display: flex;
+		justify-content: space-between;
+		padding: 8px 12px;
+		margin: 0;
+		background: #fff;
+		border: 1px solid #dcdcde;
+		border-block-end-width: 0;
+
+		&:last-child {
+			border-block-end-width: 1px;
+		}
+	}
+}
+
+.wc-agentic-commerce-checks + details,
+.wc-agentic-commerce-checks ~ h4 {
+	margin-block-start: 12px;
+}
+
+.wc-agentic-commerce-ucp-switch {
+	flex: none;
+	margin-block-start: 2px;
+}

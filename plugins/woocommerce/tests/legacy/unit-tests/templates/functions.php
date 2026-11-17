@@ -492,6 +492,45 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the woocommerce_catalog_orderby_show_visual_label filter shows the "Sort by" label in classic themes.
+	 * The Catalog Sorting block passes its own setting and ignores the filter.
+	 */
+	public function test_woocommerce_catalog_ordering_show_visual_label_filter() {
+		wc_setup_loop(
+			array(
+				'is_paginated' => true,
+				'total'        => 1,
+			)
+		);
+
+		ob_start();
+		woocommerce_catalog_ordering();
+		$without_filter = ob_get_clean();
+
+		add_filter( 'woocommerce_catalog_orderby_show_visual_label', '__return_true' );
+		ob_start();
+		woocommerce_catalog_ordering();
+		$with_filter = ob_get_clean();
+		ob_start();
+		woocommerce_catalog_ordering( array( 'useLabel' => false ) );
+		$block_with_filter = ob_get_clean();
+		remove_filter( 'woocommerce_catalog_orderby_show_visual_label', '__return_true' );
+
+		wc_reset_loop();
+
+		$this->assertStringNotContainsString( '<label', $without_filter );
+		$this->assertStringContainsString( 'aria-label="Shop order"', $without_filter );
+		$this->assertStringContainsString( '>Default sorting</option>', $without_filter );
+
+		$this->assertMatchesRegularExpression( '/<label for="(woocommerce-orderby-[^"]+)">Sort by<\/label>\s*<select[^>]*\sid="\1"/', $with_filter );
+		$this->assertStringNotContainsString( 'aria-label="Shop order"', $with_filter );
+		$this->assertStringContainsString( '>Default</option>', $with_filter );
+
+		$this->assertStringNotContainsString( '<label', $block_with_filter );
+		$this->assertStringContainsString( 'aria-label="Shop order"', $block_with_filter );
+	}
+
+	/**
 	 * Test wc_add_aria_label_to_pagination_numbers with basic pagination links
 	 */
 	public function test_wc_add_aria_label_to_pagination_numbers_basic() {
