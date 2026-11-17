@@ -149,7 +149,10 @@ The callback owns the decision of whether an order can do without its "Completed
 add_filter(
     'woocommerce_fulfillment_suppress_completed_order_email',
     function ( $suppress, $order ) {
-        return ! $order->has_downloadable_item();
+        // Read again, because the instance the email carries can predate the order's last edit.
+        $order = wc_get_order( $order->get_id() );
+
+        return $order && ! $order->has_downloadable_item();
     },
     10,
     2
