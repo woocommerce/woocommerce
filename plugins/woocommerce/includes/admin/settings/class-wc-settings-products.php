@@ -86,7 +86,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					/* translators: %s: URL to settings. */
 					'desc'              => sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
 					'id'                => 'woocommerce_shop_page_id',
-					'abilities'         => array( 'read' => true ),
+					'abilities'         => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'type'              => 'single_select_page_with_search',
 					'default'           => '',
 					'class'             => 'wc-page-search',
@@ -101,7 +104,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'         => __( 'Add to cart behaviour', 'woocommerce' ),
 					'desc'          => __( 'Redirect to the cart page after successful addition', 'woocommerce' ),
 					'id'            => 'woocommerce_cart_redirect_after_add',
-					'abilities'     => array( 'read' => true ),
+					'abilities'     => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'       => 'no',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',
@@ -109,7 +115,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'desc'          => __( 'Enable AJAX add to cart buttons on archives', 'woocommerce' ),
 					'id'            => 'woocommerce_enable_ajax_add_to_cart',
-					'abilities'     => array( 'read' => true ),
+					'abilities'     => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'       => 'yes',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'end',
@@ -117,7 +126,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'title'       => __( 'Placeholder image', 'woocommerce' ),
 					'id'          => 'woocommerce_placeholder_image',
-					'abilities'   => array( 'read' => true ),
+					'abilities'   => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'type'        => 'text',
 					'default'     => '',
 					'class'       => '',
@@ -140,7 +152,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'     => __( 'Weight unit', 'woocommerce' ),
 					'desc'      => __( 'This controls what unit you will define weights in.', 'woocommerce' ),
 					'id'        => 'woocommerce_weight_unit',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'class'     => 'wc-enhanced-select',
 					'css'       => 'min-width:300px;',
 					'default'   => $default_weight_unit,
@@ -158,7 +173,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'     => __( 'Dimensions unit', 'woocommerce' ),
 					'desc'      => __( 'This controls what unit you will define lengths in.', 'woocommerce' ),
 					'id'        => 'woocommerce_dimension_unit',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'class'     => 'wc-enhanced-select',
 					'css'       => 'min-width:300px;',
 					'default'   => $default_dimension_unit,
@@ -189,7 +207,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'           => __( 'Enable reviews', 'woocommerce' ),
 					'desc'            => __( 'Enable product reviews', 'woocommerce' ),
 					'id'              => 'woocommerce_enable_reviews',
-					'abilities'       => array( 'read' => true ),
+					'abilities'       => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'         => 'yes',
 					'type'            => 'checkbox',
 					'checkboxgroup'   => 'start',
@@ -199,7 +220,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'desc'            => __( 'Show "verified owner" label on customer reviews', 'woocommerce' ),
 					'id'              => 'woocommerce_review_rating_verification_label',
-					'abilities'       => array( 'read' => true ),
+					'abilities'       => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'         => 'yes',
 					'type'            => 'checkbox',
 					'checkboxgroup'   => '',
@@ -210,7 +234,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'desc'            => __( 'Reviews can only be left by "verified owners"', 'woocommerce' ),
 					'id'              => 'woocommerce_review_rating_verification_required',
-					'abilities'       => array( 'read' => true ),
+					'abilities'       => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'         => 'no',
 					'type'            => 'checkbox',
 					'checkboxgroup'   => 'end',
@@ -222,7 +249,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'           => __( 'Product ratings', 'woocommerce' ),
 					'desc'            => __( 'Enable star rating on reviews', 'woocommerce' ),
 					'id'              => 'woocommerce_enable_review_rating',
-					'abilities'       => array( 'read' => true ),
+					'abilities'       => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'         => 'yes',
 					'type'            => 'checkbox',
 					'checkboxgroup'   => 'start',
@@ -232,7 +262,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'desc'            => __( 'Star ratings should be required, not optional', 'woocommerce' ),
 					'id'              => 'woocommerce_review_rating_required',
-					'abilities'       => array( 'read' => true ),
+					'abilities'       => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'         => 'yes',
 					'type'            => 'checkbox',
 					'checkboxgroup'   => 'end',
@@ -269,7 +302,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'     => __( 'Manage stock', 'woocommerce' ),
 					'desc'      => __( 'Enable stock management', 'woocommerce' ),
 					'id'        => 'woocommerce_manage_stock',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'   => 'yes',
 					'type'      => 'checkbox',
 				),
@@ -278,7 +314,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'             => __( 'Hold stock (minutes)', 'woocommerce' ),
 					'desc'              => __( 'Hold stock (for unpaid orders) for x minutes. When this limit is reached, the pending order will be cancelled. Leave blank to disable.', 'woocommerce' ),
 					'id'                => 'woocommerce_hold_stock_minutes',
-					'abilities'         => array( 'read' => true ),
+					'abilities'         => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'type'              => 'number',
 					'custom_attributes' => array(
 						'min'  => 0,
@@ -294,7 +333,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'         => __( 'Notifications', 'woocommerce' ),
 					'desc'          => __( 'Enable low stock notifications', 'woocommerce' ),
 					'id'            => 'woocommerce_notify_low_stock',
-					'abilities'     => array( 'read' => true ),
+					'abilities'     => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'       => 'yes',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',
@@ -305,7 +347,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'desc'          => __( 'Enable out of stock notifications', 'woocommerce' ),
 					'id'            => 'woocommerce_notify_no_stock',
-					'abilities'     => array( 'read' => true ),
+					'abilities'     => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'       => 'yes',
 					'type'          => 'checkbox',
 					'checkboxgroup' => '',
@@ -316,7 +361,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'desc'          => __( 'Enable backorder notifications', 'woocommerce' ),
 					'id'            => 'woocommerce_notify_backorder',
-					'abilities'     => array( 'read' => true ),
+					'abilities'     => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'       => 'yes',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'end',
@@ -340,7 +388,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'             => __( 'Low stock threshold', 'woocommerce' ),
 					'desc'              => __( 'When product stock reaches this amount you will be notified via email.', 'woocommerce' ),
 					'id'                => 'woocommerce_notify_low_stock_amount',
-					'abilities'         => array( 'read' => true ),
+					'abilities'         => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'css'               => 'width:50px;',
 					'type'              => 'number',
 					'custom_attributes' => array(
@@ -357,7 +408,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'             => __( 'Out of stock threshold', 'woocommerce' ),
 					'desc'              => __( 'When product stock reaches this amount the stock status will change to "out of stock" and you will be notified via email. This setting does not affect existing "in stock" products.', 'woocommerce' ),
 					'id'                => 'woocommerce_notify_no_stock_amount',
-					'abilities'         => array( 'read' => true ),
+					'abilities'         => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'css'               => 'width:50px;',
 					'type'              => 'number',
 					'custom_attributes' => array(
@@ -373,7 +427,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'     => __( 'Out of stock visibility', 'woocommerce' ),
 					'desc'      => __( 'Hide out of stock items from the catalog', 'woocommerce' ),
 					'id'        => 'woocommerce_hide_out_of_stock_items',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'   => 'no',
 					'type'      => 'checkbox',
 				),
@@ -382,7 +439,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'     => __( 'Stock display format', 'woocommerce' ),
 					'desc'      => __( 'This controls how stock quantities are displayed on the frontend.', 'woocommerce' ),
 					'id'        => 'woocommerce_stock_format',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'css'       => 'min-width:150px;',
 					'class'     => 'wc-enhanced-select',
 					'default'   => '',
@@ -428,7 +488,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'<code>mod_xsendfile</code>'
 					),
 					'id'        => 'woocommerce_file_download_method',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'type'      => 'select',
 					'class'     => 'wc-enhanced-select',
 					'css'       => 'min-width:300px;',
@@ -449,7 +512,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'desc'          => __( 'Allow using redirect mode (insecure) as a last resort', 'woocommerce' ),
 					'id'            => 'woocommerce_downloads_redirect_fallback_allowed',
-					'abilities'     => array( 'read' => true ),
+					'abilities'     => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'type'          => 'checkbox',
 					'default'       => 'no',
 					'desc_tip'      => sprintf(
@@ -465,7 +531,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'         => __( 'Access restriction', 'woocommerce' ),
 					'desc'          => __( 'Downloads require login', 'woocommerce' ),
 					'id'            => 'woocommerce_downloads_require_login',
-					'abilities'     => array( 'read' => true ),
+					'abilities'     => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'type'          => 'checkbox',
 					'default'       => 'no',
 					'desc_tip'      => __( 'This setting does not apply to guest purchases.', 'woocommerce' ),
@@ -476,7 +545,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'desc'          => __( 'Grant access to downloadable products after payment', 'woocommerce' ),
 					'id'            => 'woocommerce_downloads_grant_access_after_payment',
-					'abilities'     => array( 'read' => true ),
+					'abilities'     => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'type'          => 'checkbox',
 					'default'       => 'yes',
 					'desc_tip'      => __( 'Enable this option to grant access to downloads when orders are "processing", rather than "completed".', 'woocommerce' ),
@@ -488,7 +560,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'     => __( 'Open in browser', 'woocommerce' ),
 					'desc'      => __( 'Open downloadable files in the browser, instead of saving them to the device.', 'woocommerce' ),
 					'id'        => 'woocommerce_downloads_deliver_inline',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'type'      => 'checkbox',
 					'default'   => false,
 					'desc_tip'  => __( 'Customers can still save the file to their device, but by default file will be opened instead of being downloaded (does not work with redirects).', 'woocommerce' ),
@@ -499,7 +574,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'     => __( 'Filename', 'woocommerce' ),
 					'desc'      => __( 'Append a unique string to filename for security', 'woocommerce' ),
 					'id'        => 'woocommerce_downloads_add_hash_to_filename',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'type'      => 'checkbox',
 					'default'   => 'yes',
 					'desc_tip'  => sprintf(
@@ -513,7 +591,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'     => __( 'Count partial downloads', 'woocommerce' ),
 					'desc'      => __( 'Count downloads even if only part of a file is fetched.', 'woocommerce' ),
 					'id'        => 'woocommerce_downloads_count_partial',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'type'      => 'checkbox',
 					'default'   => 'yes',
 					'desc_tip'  => sprintf(

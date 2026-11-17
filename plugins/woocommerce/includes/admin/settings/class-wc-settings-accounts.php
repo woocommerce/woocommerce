@@ -64,7 +64,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'desc'          => __( 'Enable guest checkout (recommended)', 'woocommerce' ),
 				'desc_tip'      => __( 'Allows customers to checkout without an account.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_guest_checkout',
-				'abilities'     => array( 'read' => true ),
+				'abilities'     => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'       => 'yes',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
@@ -74,7 +77,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'         => __( 'Login', 'woocommerce' ),
 				'desc'          => __( 'Enable log-in during checkout', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_checkout_login_reminder',
-				'abilities'     => array( 'read' => true ),
+				'abilities'     => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
@@ -90,7 +96,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'</a>'
 				),
 				'id'                => 'woocommerce_enable_delayed_account_creation',
-				'abilities'         => array( 'read' => true ),
+				'abilities'         => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'           => 'no',
 				'type'              => 'checkbox',
 				'checkboxgroup'     => 'start',
@@ -105,7 +114,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'desc'          => __( 'During checkout', 'woocommerce' ),
 				'desc_tip'      => __( 'Customers can create an account before placing their order.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_signup_and_login_from_checkout',
-				'abilities'     => array( 'read' => true ),
+				'abilities'     => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
@@ -115,7 +127,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'         => __( 'Account creation', 'woocommerce' ),
 				'desc'          => __( 'On "My account" page', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_myaccount_registration',
-				'abilities'     => array( 'read' => true ),
+				'abilities'     => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
@@ -126,7 +141,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'desc'              => __( 'Send password setup link (recommended)', 'woocommerce' ),
 				'desc_tip'          => __( 'New users receive an email to set up their password.', 'woocommerce' ),
 				'id'                => 'woocommerce_registration_generate_password',
-				'abilities'         => array( 'read' => true ),
+				'abilities'         => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'           => 'yes',
 				'type'              => 'checkbox',
 				'checkboxgroup'     => 'start',
@@ -140,7 +158,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'desc'              => __( 'Generate account login (recommended)', 'woocommerce' ),
 				'desc_tip'          => __( 'Generate a login for the account using first and/or last name. If neither is usable (e.g. invalid or missing) the email address will be used. If this option is unchecked, customers will need to set a username during account creation', 'woocommerce' ),
 				'id'                => 'woocommerce_registration_generate_username',
-				'abilities'         => array( 'read' => true ),
+				'abilities'         => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'           => 'yes',
 				'type'              => 'checkbox',
 				'checkboxgroup'     => 'end',
@@ -155,7 +176,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				/* Translators: %s URL to erasure request screen. */
 				'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should personal data within orders be retained or removed?', 'woocommerce' ), $erasure_text ),
 				'id'            => 'woocommerce_erasure_request_removes_order_data',
-				'abilities'     => array( 'read' => true ),
+				'abilities'     => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'type'          => 'checkbox',
 				'default'       => 'no',
 				'checkboxgroup' => 'start',
@@ -166,7 +190,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				/* Translators: %s URL to erasure request screen. */
 				'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should access to downloadable files be revoked and download logs cleared?', 'woocommerce' ), $erasure_text ),
 				'id'            => 'woocommerce_erasure_request_removes_download_data',
-				'abilities'     => array( 'read' => true ),
+				'abilities'     => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'type'          => 'checkbox',
 				'default'       => 'no',
 				'checkboxgroup' => '',
@@ -177,7 +204,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'desc'          => __( 'Allow personal data to be removed in bulk from orders', 'woocommerce' ),
 				'desc_tip'      => __( 'Adds an option to the orders screen for removing personal data in bulk. Note that removing personal data cannot be undone.', 'woocommerce' ),
 				'id'            => 'woocommerce_allow_bulk_remove_personal_data',
-				'abilities'     => array( 'read' => true ),
+				'abilities'     => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
 				'default'       => 'no',
@@ -199,7 +229,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'     => __( 'Registration privacy policy', 'woocommerce' ),
 				'desc_tip'  => __( 'Optionally add some text about your store privacy policy to show on account registration forms.', 'woocommerce' ),
 				'id'        => 'woocommerce_registration_privacy_policy_text',
-				'abilities' => array( 'read' => true ),
+				'abilities' => array(
+					'read'  => true,
+					'write' => true,
+				),
 				/* translators: %s privacy policy page name and link */
 				'default'   => sprintf( __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ),
 				'type'      => 'textarea',
@@ -210,7 +243,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'     => __( 'Checkout privacy policy', 'woocommerce' ),
 				'desc_tip'  => __( 'Optionally add some text about your store privacy policy to show during checkout.', 'woocommerce' ),
 				'id'        => 'woocommerce_checkout_privacy_policy_text',
-				'abilities' => array( 'read' => true ),
+				'abilities' => array(
+					'read'  => true,
+					'write' => true,
+				),
 				/* translators: %s privacy policy page name and link */
 				'default'   => sprintf( __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ),
 				'type'      => 'textarea',
@@ -230,7 +266,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'       => __( 'Retain inactive accounts ', 'woocommerce' ),
 				'desc_tip'    => __( 'Inactive accounts are those which have not logged in, or placed an order, for the specified duration. They will be deleted. Any orders will be converted into guest orders.', 'woocommerce' ),
 				'id'          => 'woocommerce_delete_inactive_accounts',
-				'abilities'   => array( 'read' => true ),
+				'abilities'   => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'type'        => 'relative_date_selector',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => array(
@@ -243,7 +282,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'       => __( 'Retain pending orders ', 'woocommerce' ),
 				'desc_tip'    => __( 'Pending orders are unpaid and may have been abandoned by the customer. They will be trashed after the specified duration.', 'woocommerce' ),
 				'id'          => 'woocommerce_trash_pending_orders',
-				'abilities'   => array( 'read' => true ),
+				'abilities'   => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'type'        => 'relative_date_selector',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => '',
@@ -253,7 +295,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'       => __( 'Retain failed orders', 'woocommerce' ),
 				'desc_tip'    => __( 'Failed orders are unpaid and may have been abandoned by the customer. They will be trashed after the specified duration.', 'woocommerce' ),
 				'id'          => 'woocommerce_trash_failed_orders',
-				'abilities'   => array( 'read' => true ),
+				'abilities'   => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'type'        => 'relative_date_selector',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => '',
@@ -263,7 +308,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'       => __( 'Retain cancelled orders', 'woocommerce' ),
 				'desc_tip'    => __( 'Cancelled orders are unpaid and may have been cancelled by the store owner or customer. They will be trashed after the specified duration.', 'woocommerce' ),
 				'id'          => 'woocommerce_trash_cancelled_orders',
-				'abilities'   => array( 'read' => true ),
+				'abilities'   => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'type'        => 'relative_date_selector',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => '',
@@ -273,7 +321,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'       => __( 'Retain refunded orders', 'woocommerce' ),
 				'desc_tip'    => __( 'Retain refunded orders for a specified duration before anonymizing the personal data within them.', 'woocommerce' ),
 				'id'          => 'woocommerce_anonymize_refunded_orders',
-				'abilities'   => array( 'read' => true ),
+				'abilities'   => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'type'        => 'relative_date_selector',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => array(
@@ -286,7 +337,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'       => __( 'Retain completed orders', 'woocommerce' ),
 				'desc_tip'    => __( 'Retain completed orders for a specified duration before anonymizing the personal data within them.', 'woocommerce' ),
 				'id'          => 'woocommerce_anonymize_completed_orders',
-				'abilities'   => array( 'read' => true ),
+				'abilities'   => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'type'        => 'relative_date_selector',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => array(

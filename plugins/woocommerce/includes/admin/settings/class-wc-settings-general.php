@@ -86,7 +86,10 @@ class WC_Settings_General extends WC_Settings_Page {
 
 			$enable_address_autocomplete_setting = array(
 				'id'        => 'woocommerce_address_autocomplete_enabled',
-				'abilities' => array( 'read' => true ),
+				'abilities' => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'desc'      => __( 'Enable predictive address search', 'woocommerce' ),
 				'name'      => __( 'Address autocomplete', 'woocommerce' ),
 				'type'      => 'checkbox',
@@ -107,7 +110,10 @@ class WC_Settings_General extends WC_Settings_Page {
 				}
 				$address_autocomplete_preferred_provider_setting = array(
 					'id'        => 'woocommerce_address_autocomplete_provider',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'name'      => __( 'Preferred address autocomplete provider', 'woocommerce' ),
 					'type'      => 'select',
 					'class'     => 'wc-enhanced-select',
@@ -137,7 +143,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Address line 1', 'woocommerce' ),
 					'desc'      => __( 'The street address for your business location.', 'woocommerce' ),
 					'id'        => 'woocommerce_store_address',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'   => '',
 					'type'      => 'text',
 					'desc_tip'  => true,
@@ -147,7 +156,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Address line 2', 'woocommerce' ),
 					'desc'      => __( 'An additional, optional address line for your business location.', 'woocommerce' ),
 					'id'        => 'woocommerce_store_address_2',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'   => '',
 					'type'      => 'text',
 					'desc_tip'  => true,
@@ -157,7 +169,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'City', 'woocommerce' ),
 					'desc'      => __( 'The city in which your business is located.', 'woocommerce' ),
 					'id'        => 'woocommerce_store_city',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'   => '',
 					'type'      => 'text',
 					'desc_tip'  => true,
@@ -167,7 +182,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Country / State', 'woocommerce' ),
 					'desc'      => __( 'The country and state or province, if any, in which your business is located.', 'woocommerce' ),
 					'id'        => 'woocommerce_default_country',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'   => 'US:CA',
 					'type'      => 'single_select_country',
 					'desc_tip'  => true,
@@ -177,7 +195,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Postcode / ZIP', 'woocommerce' ),
 					'desc'      => __( 'The postal code, if any, in which your business is located.', 'woocommerce' ),
 					'id'        => 'woocommerce_store_postcode',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'css'       => 'min-width:50px;',
 					'default'   => '',
 					'type'      => 'text',
@@ -201,7 +222,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Selling location(s)', 'woocommerce' ),
 					'desc'      => __( 'This option lets you limit which countries you are willing to sell to.', 'woocommerce' ),
 					'id'        => 'woocommerce_allowed_countries',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'   => 'all',
 					'type'      => 'select',
 					'class'     => 'wc-enhanced-select',
@@ -218,7 +242,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Sell to all countries, except for&hellip;', 'woocommerce' ),
 					'desc'      => '',
 					'id'        => 'woocommerce_all_except_countries',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'css'       => 'min-width: 350px;',
 					'default'   => '',
 					'type'      => 'multi_select_countries',
@@ -228,7 +255,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Sell to specific countries', 'woocommerce' ),
 					'desc'      => '',
 					'id'        => 'woocommerce_specific_allowed_countries',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'css'       => 'min-width: 350px;',
 					'default'   => '',
 					'type'      => 'multi_select_countries',
@@ -238,7 +268,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Shipping location(s)', 'woocommerce' ),
 					'desc'      => __( 'Choose which countries you want to ship to, or choose to ship to all locations you sell to.', 'woocommerce' ),
 					'id'        => 'woocommerce_ship_to_countries',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'   => '',
 					'type'      => 'select',
 					'class'     => 'wc-enhanced-select',
@@ -255,7 +288,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Ship to specific countries', 'woocommerce' ),
 					'desc'      => '',
 					'id'        => 'woocommerce_specific_ship_to_countries',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'css'       => '',
 					'default'   => '',
 					'type'      => 'multi_select_countries',
@@ -264,7 +300,10 @@ class WC_Settings_General extends WC_Settings_Page {
 				array(
 					'title'     => __( 'Default customer location', 'woocommerce' ),
 					'id'        => 'woocommerce_default_customer_address',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'desc'      => wc_tax_enabled()
 						? sprintf(
 							/* translators: %s: link to the Tax settings. */
@@ -305,7 +344,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Enable taxes', 'woocommerce' ),
 					'desc'      => __( 'Enable tax rates and calculations', 'woocommerce' ),
 					'id'        => 'woocommerce_calc_taxes',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'   => 'no',
 					'type'      => 'checkbox',
 					'desc_tip'  => __( 'Rates will be configurable and taxes will be calculated during checkout.', 'woocommerce' ),
@@ -315,7 +357,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'           => __( 'Enable coupons', 'woocommerce' ),
 					'desc'            => __( 'Enable the use of coupon codes', 'woocommerce' ),
 					'id'              => 'woocommerce_enable_coupons',
-					'abilities'       => array( 'read' => true ),
+					'abilities'       => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'         => 'yes',
 					'type'            => 'checkbox',
 					'checkboxgroup'   => 'start',
@@ -326,7 +371,10 @@ class WC_Settings_General extends WC_Settings_Page {
 				array(
 					'desc'            => __( 'Calculate coupon discounts sequentially', 'woocommerce' ),
 					'id'              => 'woocommerce_calc_discounts_sequentially',
-					'abilities'       => array( 'read' => true ),
+					'abilities'       => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'         => 'no',
 					'type'            => 'checkbox',
 					'desc_tip'        => __( 'When applying multiple coupons, apply the first coupon to the full price and the second coupon to the discounted price and so on.', 'woocommerce' ),
@@ -352,7 +400,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Currency', 'woocommerce' ),
 					'desc'      => __( 'This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.', 'woocommerce' ),
 					'id'        => 'woocommerce_currency',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'default'   => 'USD',
 					'type'      => 'select',
 					'class'     => 'wc-enhanced-select',
@@ -364,7 +415,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Currency position', 'woocommerce' ),
 					'desc'      => __( 'This controls the position of the currency symbol.', 'woocommerce' ),
 					'id'        => 'woocommerce_currency_pos',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'class'     => 'wc-enhanced-select',
 					'default'   => 'left',
 					'type'      => 'select',
@@ -381,7 +435,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Thousand separator', 'woocommerce' ),
 					'desc'      => __( 'This sets the thousand separator of displayed prices.', 'woocommerce' ),
 					'id'        => 'woocommerce_price_thousand_sep',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'css'       => 'width:50px;',
 					'default'   => ',',
 					'type'      => 'text',
@@ -392,7 +449,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'     => __( 'Decimal separator', 'woocommerce' ),
 					'desc'      => __( 'This sets the decimal separator of displayed prices.', 'woocommerce' ),
 					'id'        => 'woocommerce_price_decimal_sep',
-					'abilities' => array( 'read' => true ),
+					'abilities' => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'css'       => 'width:50px;',
 					'default'   => '.',
 					'type'      => 'text',
@@ -403,7 +463,10 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'             => __( 'Number of decimals', 'woocommerce' ),
 					'desc'              => __( 'This sets the number of decimal points shown in displayed prices.', 'woocommerce' ),
 					'id'                => 'woocommerce_price_num_decimals',
-					'abilities'         => array( 'read' => true ),
+					'abilities'         => array(
+						'read'  => true,
+						'write' => true,
+					),
 					'css'               => 'width:50px;',
 					'default'           => '2',
 					'desc_tip'          => true,
