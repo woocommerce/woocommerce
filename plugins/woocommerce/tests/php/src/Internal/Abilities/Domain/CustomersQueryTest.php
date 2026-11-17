@@ -276,6 +276,26 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should skip a lookup row whose user was deleted, while total still counts it.
+	 */
+	public function test_skips_stale_lookup_row(): void {
+		global $wpdb;
+		list( $id ) = $this->registered_customer();
+		$wpdb->insert(
+			CustomersDataStore::get_db_table_name(),
+			array(
+				'user_id'         => self::$user_id + 100000,
+				'date_registered' => '2026-01-01 00:00:00',
+			)
+		);
+		$stale = (int) $wpdb->insert_id;
+
+		$result = $this->sut->execute( array( 'include' => array( $id, $stale ) ) );
+		$this->assertSame( array( $id ), array_column( $result['customers'], 'id' ) );
+		$this->assertSame( 2, $result['total'] );
+	}
+
+	/**
 	 * @testdox Should add extension fields and filters to registered customers only, and only while the extensible abilities feature is on.
 	 */
 	public function test_extension_fields_and_filters(): void {

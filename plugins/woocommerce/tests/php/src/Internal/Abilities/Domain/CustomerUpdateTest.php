@@ -7,8 +7,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CustomerUpdate;
 
 /**
@@ -234,5 +236,60 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( 'woocommerce_ability_customer_analytics_disabled', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should list an extension field it set, since extension fields write meta that get_changes() leaves out.
+	 */
+	public function test_lists_extension_fields_it_set(): void {
+		$saved = array();
+		foreach ( array( 'resources', 'fields', 'filters' ) as $name ) {
+			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property->setAccessible( true );
+			$saved[ $name ] = $property->getValue();
+			$property->setValue( null, array() );
+		}
+		try {
+			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
+			add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
+			do_action( 'woocommerce_extensible_abilities_resources_init' );
+			add_action(
+				'woocommerce_extensible_abilities_init',
+				static function () {
+					ExtensibleAbilities::register_field(
+						array(
+							'resource'      => 'customer',
+							'namespace'     => 'test-ext',
+							'field'         => 'tier',
+							'output_schema' => array( 'type' => 'string' ),
+							'input_schema'  => array( 'type' => 'string' ),
+							'get_callback'  => static fn( \WC_Customer $customer ) => (string) $customer->get_meta( '_test_tier' ),
+							'set_callback'  => static function ( \WC_Customer $customer, $value ) {
+								$customer->update_meta_data( '_test_tier', $value );
+								return null;
+							},
+						)
+					);
+				}
+			);
+			do_action( 'woocommerce_extensible_abilities_init' );
+			$ability = new CustomerUpdate( CustomerUpdate::ABILITY_NAME, CustomerUpdate::get_registration_args() );
+
+			list( $id, $user_id ) = $this->registered_customer();
+			$result               = $ability->execute(
+				array(
+					'id'         => $id,
+					'extensions' => array( 'test-ext' => array( 'tier' => 'gold' ) ),
+				)
+			);
+			$this->assertSame( array( 'extensions.test-ext.tier' ), $result['customer']['updated_fields'] );
+			$this->assertSame( 'gold', ( new \WC_Customer( $user_id ) )->get_meta( '_test_tier' ) );
+		} finally {
+			foreach ( $saved as $name => $value ) {
+				$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+				$property->setAccessible( true );
+				$property->setValue( null, $value );
+			}
+		}
 	}
 }

@@ -60,7 +60,7 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Query customers', 'woocommerce' ),
-			'description'         => __( 'Find registered and guest customers by ID, with their order count, total spent and activity dates, as WooCommerce Analytics counts them. Guest orders with the same email count as one guest. Names, usernames, emails, phone numbers and addresses are withheld.', 'woocommerce' ),
+			'description'         => __( 'Find registered and guest customers by ID, with their order count, total spent and activity dates, as WooCommerce Analytics counts them. A registered customer appears once Analytics has recorded them: when they order, sign in, or the store imports historical data. Guest orders with the same email count as one guest. Names, usernames, emails, phone numbers and addresses are withheld.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_output_schema(),
@@ -185,15 +185,13 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 			return $output;
 		}
 
-		try {
-			$customer = new \WC_Customer( (int) $row['user_id'] );
-		} catch ( \Exception $e ) {
+		$customer = new \WC_Customer( (int) $row['user_id'] );
+		if ( 0 === $customer->get_id() ) {
 			wc_get_logger()->warning(
 				'The customers-query ability skipped a user that does not load as a customer, so total counts more customers than it returns.',
 				array(
-					'source'        => 'woocommerce-abilities',
-					'user_id'       => (int) $row['user_id'],
-					'error_message' => $e->getMessage(),
+					'source'  => 'woocommerce-abilities',
+					'user_id' => (int) $row['user_id'],
 				)
 			);
 			return null;

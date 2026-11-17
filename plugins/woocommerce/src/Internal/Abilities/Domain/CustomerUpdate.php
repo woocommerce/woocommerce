@@ -28,7 +28,7 @@ class CustomerUpdate extends ActionableAbility {
 	public const ABILITY_NAME = 'woocommerce/customer-update';
 
 	/**
-	 * Fields that change() changed, as `first_name` or `billing.city`.
+	 * Fields that change() changed, as `first_name` or `billing.city`, and each extension field sent, as `extensions.<namespace>.<field>`.
 	 *
 	 * @var array<int, string>
 	 */
@@ -66,7 +66,7 @@ class CustomerUpdate extends ActionableAbility {
 						'user_id'        => array( 'type' => 'integer' ),
 						'updated_fields' => array(
 							'type'        => 'array',
-							'description' => __( 'Fields whose value changed, such as first_name or billing.city.', 'woocommerce' ),
+							'description' => __( 'Fields whose value changed, such as first_name or billing.city, and each extension field sent, as extensions.<namespace>.<field>.', 'woocommerce' ),
 							'items'       => array( 'type' => 'string' ),
 						),
 					),
@@ -148,7 +148,7 @@ class CustomerUpdate extends ActionableAbility {
 			return new \WP_Error(
 				'woocommerce_ability_customer_guest',
 				/* translators: %d: customer ID. */
-				sprintf( __( 'Customer %d is a guest, with no account to update. Change the addresses on their orders with the woocommerce/order-update ability.', 'woocommerce' ), $input['id'] ),
+				sprintf( __( 'Customer %d is a guest, with no account to update. A guest\'s addresses are saved only on their orders, which the woocommerce/order-update ability changes by order ID.', 'woocommerce' ), $input['id'] ),
 				array( 'status' => 409 )
 			);
 		}
@@ -161,9 +161,8 @@ class CustomerUpdate extends ActionableAbility {
 			);
 		}
 
-		try {
-			return new \WC_Customer( $user_id );
-		} catch ( \Exception $e ) {
+		$customer = new \WC_Customer( $user_id );
+		if ( 0 === $customer->get_id() ) {
 			return new \WP_Error(
 				'woocommerce_ability_customer_not_found',
 				/* translators: %d: customer ID. */
@@ -171,6 +170,7 @@ class CustomerUpdate extends ActionableAbility {
 				array( 'status' => 404 )
 			);
 		}
+		return $customer;
 	}
 
 	/**
@@ -204,6 +204,11 @@ class CustomerUpdate extends ActionableAbility {
 				continue;
 			}
 			$this->updated_fields[] = $key;
+		}
+		foreach ( $input['extensions'] ?? array() as $namespace => $fields ) {
+			foreach ( array_keys( $fields ) as $field ) {
+				$this->updated_fields[] = "extensions.{$namespace}.{$field}";
+			}
 		}
 
 		return $refused->has_errors() ? $refused : null;
