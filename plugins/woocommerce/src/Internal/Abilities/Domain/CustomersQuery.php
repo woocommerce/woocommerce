@@ -60,7 +60,7 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Query customers', 'woocommerce' ),
-			'description'         => __( 'Find registered and guest customers by ID, with their order count, total spent and activity dates, as WooCommerce Analytics counts them. A registered customer appears once Analytics has recorded them: when they order, sign in, or the store imports historical data. Guest orders with the same email count as one guest. Names, usernames, emails, phone numbers and addresses are withheld.', 'woocommerce' ),
+			'description'         => __( 'Find registered and guest customers by ID, user ID, name or email, with their order count, total spent and activity dates, as WooCommerce Analytics counts them. A registered customer appears once Analytics has recorded them: when they order, sign in, or the store imports historical data. Guest orders with the same email count as one guest. Names, usernames, emails, phone numbers and addresses are withheld from the results.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_output_schema(),
@@ -116,6 +116,11 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 		$page     = $input['page'] ?? 1;
 		$per_page = $input['per_page'] ?? ( empty( $input['include'] ) ? self::DEFAULT_PER_PAGE : max( 1, count( $include ) ) );
 
+		$users = $extension_args['post__in'] ?? array();
+		if ( isset( $input['user_id'] ) ) {
+			$users = ( empty( $users ) || in_array( $input['user_id'], array_map( 'intval', $users ), true ) ) ? array( $input['user_id'] ) : array( 0 );
+		}
+
 		$query_args = array(
 			'fields'            => self::FIELDS,
 			'orderby'           => self::ORDERBY[ $input['orderby'] ?? 'last_active' ],
@@ -125,7 +130,9 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 			'user_type'         => $input['type'] ?? 'all',
 			'customers'         => empty( $input['include'] ) ? array() : ( empty( $include ) ? array( 0 ) : $include ),
 			'customers_exclude' => empty( $input['include'] ) ? $exclude : array(),
-			'users'             => $extension_args['post__in'] ?? array(),
+			'users'             => $users,
+			'search'            => isset( $input['search'] ) ? sanitize_text_field( $input['search'] ) : '',
+			'searchby'          => $input['search_by'] ?? 'name',
 			'order_before'      => '',
 			'order_after'       => '',
 		);
@@ -296,32 +303,48 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'include'  => $ids + array(
+				'include'   => $ids + array(
 					'description' => __( 'Return only these customer IDs, up to 100. Without per_page, they come back in one page.', 'woocommerce' ),
 					'maxItems'    => 100,
 				),
-				'exclude'  => $ids + array( 'description' => __( 'Leave out these customer IDs.', 'woocommerce' ) ),
-				'type'     => array(
+				'exclude'   => $ids + array( 'description' => __( 'Leave out these customer IDs.', 'woocommerce' ) ),
+				'user_id'   => array(
+					'type'        => 'integer',
+					'description' => __( 'Return only the registered customer with this WordPress user ID, such as the customer_id of an order.', 'woocommerce' ),
+					'minimum'     => 1,
+				),
+				'search'    => array(
+					'type'        => 'string',
+					'description' => __( 'Return only customers whose name or email, as chosen by search_by, contains this text.', 'woocommerce' ),
+					'minLength'   => 1,
+					'maxLength'   => 200,
+				),
+				'search_by' => array(
+					'type'    => 'string',
+					'enum'    => array( 'name', 'email' ),
+					'default' => 'name',
+				),
+				'type'      => array(
 					'type'    => 'string',
 					'enum'    => array( 'all', 'registered', 'guest' ),
 					'default' => 'all',
 				),
-				'orderby'  => array(
+				'orderby'   => array(
 					'type'    => 'string',
 					'enum'    => array_keys( self::ORDERBY ),
 					'default' => 'last_active',
 				),
-				'order'    => array(
+				'order'     => array(
 					'type'    => 'string',
 					'enum'    => array( 'asc', 'desc' ),
 					'default' => 'desc',
 				),
-				'page'     => array(
+				'page'      => array(
 					'type'    => 'integer',
 					'default' => 1,
 					'minimum' => 1,
 				),
-				'per_page' => array(
+				'per_page'  => array(
 					'type'        => 'integer',
 					'description' => __( 'Customers per page. Defaults to 10, or to the number of IDs in include.', 'woocommerce' ),
 					'minimum'     => 1,

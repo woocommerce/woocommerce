@@ -233,6 +233,43 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should find customers by name, email and user ID without returning the name or email.
+	 */
+	public function test_search_and_user_id(): void {
+		list( $id, $user_id ) = $this->registered_customer();
+		list( $other )        = $this->registered_customer();
+		$guest                = $this->guest_customers( 1 )[0];
+		$email                = get_userdata( $user_id )->user_email;
+		$ids                  = static fn( array $result ): array => array_column( $result['customers'], 'id' );
+
+		$this->assertSame( array( $guest ), $ids( $this->sut->execute( array( 'search' => 'Privateguest' ) ) ), 'A guest is found by the name on their orders.' );
+		$this->assertEqualsCanonicalizing( array( $id, $other ), $ids( $this->sut->execute( array( 'search' => 'privatefirst privatelast' ) ) ) );
+
+		$result = $this->sut->execute(
+			array(
+				'search'    => $email,
+				'search_by' => 'email',
+			)
+		);
+		$this->assertSame( array( $id ), $ids( $result ) );
+		$this->assertStringNotContainsString( $email, (string) wp_json_encode( $result ) );
+		$this->assertSame( array(), $ids( $this->sut->execute( array( 'search' => $email ) ) ), 'search_by defaults to the name.' );
+
+		$this->assertSame( array( $id ), $ids( $this->sut->execute( array( 'user_id' => $user_id ) ) ) );
+		$this->assertSame(
+			array(),
+			$ids(
+				$this->sut->execute(
+					array(
+						'user_id' => $user_id,
+						'type'    => 'guest',
+					)
+				)
+			)
+		);
+	}
+
+	/**
 	 * @testdox Should sort by total spent.
 	 */
 	public function test_orderby_total_spent(): void {
