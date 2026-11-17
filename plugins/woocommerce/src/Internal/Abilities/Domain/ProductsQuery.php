@@ -303,9 +303,8 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'           => array(
-					'type'        => 'integer',
-					'minimum'     => 1,
-					'description' => __( 'Look up one product or variation by ID. Returns a not-found error when no product has this ID, while filters that match nothing return an empty list.', 'woocommerce' ),
+					'type'    => 'integer',
+					'minimum' => 1,
 				),
 				'search'       => array( 'type' => 'string' ),
 				'sku'          => array(
