@@ -511,37 +511,6 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 
 		$taxonomy = $attribute->slug;
 
-		// Taxonomy is registered on init from the cached list but not yet available
-		// at process_add_attribute time (cache invalidated after wc_create_attribute).
-		// Use the same WC filter seams as WC_Post_Types::register_taxonomies().
-		if ( ! taxonomy_exists( $taxonomy ) ) {
-			/**
-			 * Filters the object types for a WooCommerce taxonomy.
-			 *
-			 * @param array $objects Object types.
-			 *
-			 * @since 11.0.0
-			 */
-			$objects = apply_filters( "woocommerce_taxonomy_objects_{$taxonomy}", array( 'product' ) );
-			/**
-			 * Filters the arguments for a WooCommerce taxonomy.
-			 *
-			 * @param array $args Taxonomy arguments.
-			 *
-			 * @since 11.0.0
-			 */
-			$args = apply_filters(
-				"woocommerce_taxonomy_args_{$taxonomy}",
-				array(
-					'hierarchical' => false,
-					'public'       => false,
-					'show_ui'      => false,
-					'show_in_menu' => false,
-				)
-			);
-			register_taxonomy( $taxonomy, $objects, $args );
-		}
-
 		foreach ( self::get_default_color_terms() as $slug => $term ) {
 			if ( get_term_by( 'slug', $slug, $taxonomy ) ) {
 				continue;
