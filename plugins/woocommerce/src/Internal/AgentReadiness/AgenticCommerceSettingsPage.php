@@ -172,7 +172,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		echo '<p class="wc-agentic-commerce-intro">' . esc_html__( 'Let AI shopping assistants find your products, build a cart, and send shoppers to your checkout to pay. Uses the Universal Commerce Protocol (UCP).', 'woocommerce' ) . '</p>';
 		$this->render_switch( $checks, count( $failing ) );
 		$this->render_visibility( $report );
-		$this->render_status( $checks, $this->ucp_switch->status( $failing ), count( $failing ) );
+		$this->render_status( $checks, $this->ucp_switch->status( $failing ) );
 		$this->render_readiness( array_slice( $this->agent_readiness->get_store_checks( $report, $checks ), count( $checks ) ), (bool) ( array_column( $checks, 'ok', 'id' )['launched'] ?? true ), $report );
 
 		echo '<div class="wc-agentic-commerce-card wc-agentic-commerce-policies">';
@@ -496,11 +496,10 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * The Status card: a badge, then the setup checks grouped into Required, Recommended and Done.
 	 * Each open check says what to do and links to where to do it. UCP itself is the switch, so it is not listed.
 	 *
-	 * @param array<int, array{id:string,level:string,ok:bool,name:string,label:string,fix_url:string}> $checks           Store conditions.
-	 * @param string                                                                                    $status           UcpSwitch status.
-	 * @param int                                                                                       $failing_required Number of failing required setup checks.
+	 * @param array<int, array{id:string,level:string,ok:bool,name:string,label:string,fix_url:string}> $checks Store conditions.
+	 * @param string                                                                                    $status UcpSwitch status.
 	 */
-	private function render_status( array $checks, string $status, int $failing_required ): void {
+	private function render_status( array $checks, string $status ): void {
 		$statuses = self::status_labels();
 		$classes  = array(
 			UcpSwitch::STATUS_ACTIVE          => 'pass',
@@ -519,9 +518,11 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			$group                 = $check['ok'] ? 'done' : ( StoreConditions::shows_required( $check ) ? 'required' : 'recommended' );
 			$groups[ $group ][1][] = $check;
 		}
-		$summary = $failing_required > 0
-			/* translators: %d: number of failing required setup checks. */
-			? sprintf( _n( '%d required step to finish so agents can shop your store.', '%d required steps to finish so agents can shop your store.', $failing_required, 'woocommerce' ), $failing_required )
+		// The summary follows the Required rows on this card. $failing_required is the smaller set that blocks the switch.
+		$shown_failing = count( $groups['required'][1] );
+		$summary       = $shown_failing > 0
+			/* translators: %d: number of failing checks shown as Required. */
+			? sprintf( _n( '%d required step to finish so agents can shop your store.', '%d required steps to finish so agents can shop your store.', $shown_failing, 'woocommerce' ), $shown_failing )
 			: __( 'Everything agents need is set up.', 'woocommerce' );
 		?>
 		<div class="wc-agentic-commerce-card wc-agentic-commerce-status-card">

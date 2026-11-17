@@ -167,12 +167,13 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 					'fix'     => 'Fix canonical',
 				),
 			),
-			\Automattic\WooCommerce\Internal\AgentReadiness\UcpSwitch::STATUS_OFF,
-			0
+			\Automattic\WooCommerce\Internal\AgentReadiness\UcpSwitch::STATUS_OFF
 		);
 		$html = (string) ob_get_clean();
 
 		$this->assertStringContainsString( 'wc-agentic-commerce-group--required', $html );
+		$this->assertStringContainsString( '1 required step to finish so agents can shop your store.', $html, 'The summary counts a Required row even when it does not block the switch' );
+		$this->assertStringNotContainsString( 'Everything agents need is set up.', $html );
 		$this->assertStringContainsString( 'Let search engines index your store', $html, 'search_visible shows as Required via shows_required()' );
 		$this->assertMatchesRegularExpression(
 			'/wc-agentic-commerce-group--required[\s\S]*Let search engines index your store[\s\S]*wc-agentic-commerce-group--recommended[\s\S]*Canonical/s',

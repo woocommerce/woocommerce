@@ -175,7 +175,7 @@ class StoreConditions {
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Guest checkout is allowed', 'woocommerce' ),
 				'label'   => __( 'Guest checkout is off', 'woocommerce' ),
-				'why'     => __( 'With guest checkout off, AI assistants can\'t check out for shoppers. They can still find your products and build carts.', 'woocommerce' ),
+				'why'     => __( 'With guest checkout off, an AI assistant can check out only when the shopper creates an account at checkout. If account creation at checkout is off too, it can\'t. It can still find your products and build carts.', 'woocommerce' ),
 				'fix'     => __( 'Tick "Enable guest checkout" under WooCommerce > Settings > Accounts & Privacy.', 'woocommerce' ),
 				'fix_url' => $settings_url( 'account' ),
 			),
@@ -229,13 +229,14 @@ class StoreConditions {
 	 * The UCP address condition, with the fix for why the address doesn't serve the profile.
 	 *
 	 * @param string $status A status from UcpDiscovery::serve_status().
-	 * @return array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}
+	 * @return array{id:string,ok:bool,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}
 	 */
 	private static function ucp_discovery( string $status ): array {
 		return array(
 			'id'      => 'ucp_discovery',
 			'ok'      => 'ok' === $status,
 			'blocks'  => 'ucp',
+			'group'   => 'access',
 			'level'   => self::LEVEL_REQUIRED,
 			'name'    => __( 'Use a readable permalink structure', 'woocommerce' ),
 			// Without a file in the way, Plain permalinks are why the connection URL doesn't load.
