@@ -294,7 +294,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				<div class="wc-agentic-commerce-notice">
 					<span class="dashicons dashicons-warning" aria-hidden="true"></span>
 					<p><?php esc_html_e( 'Your store is in coming soon mode, so AI assistants can’t shop it yet. Make your store live to let them in.', 'woocommerce' ); ?></p>
-					<a class="button wc-agentic-commerce-review" href="<?php echo esc_url( $launched['fix_url'] ); ?>"><?php esc_html_e( 'Change site visibility', 'woocommerce' ); ?></a>
+					<a class="button wc-agentic-commerce-review" href="<?php echo esc_url( $launched['fix_url'] ); ?>"><?php esc_html_e( 'Change store visibility', 'woocommerce' ); ?></a>
 				</div>
 			<?php endif; ?>
 		</div>
@@ -394,7 +394,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		}
 		$labels = array(
 			'https'          => __( 'View Site Health', 'woocommerce' ),
-			'launched'       => __( 'Change site visibility', 'woocommerce' ),
+			'launched'       => __( 'Change store visibility', 'woocommerce' ),
 			'guest_checkout' => __( 'View account settings', 'woocommerce' ),
 			'payment_method' => __( 'View payment settings', 'woocommerce' ),
 			'order_emails'   => __( 'View email settings', 'woocommerce' ),
