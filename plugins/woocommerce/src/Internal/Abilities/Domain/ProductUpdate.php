@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductFieldRefusalsTrait;
@@ -94,6 +95,7 @@ class ProductUpdate extends ActionableAbility {
 		$this->deleted      = array();
 		$this->parent       = null;
 		$this->changes_type = false;
+		$this->type_deletes = false;
 
 		$product = self::get_product_from_input( $input );
 
@@ -115,13 +117,34 @@ class ProductUpdate extends ActionableAbility {
 		}
 
 		if ( isset( $input['type'] ) && $input['type'] !== $product->get_type() ) {
-			$into_variation = is_a( \WC_Product_Factory::get_product_classname( $product->get_id(), $input['type'] ), \WC_Product_Variation::class, true );
-			if ( $into_variation || $product instanceof \WC_Product_Variable || $product instanceof \WC_Product_Variation ) {
+			$target_class = \WC_Product_Factory::get_product_classname( $product->get_id(), $input['type'] );
+			if ( $product instanceof \WC_Product_Variation || is_a( $target_class, \WC_Product_Variation::class, true ) ) {
 				return new \WP_Error(
 					'woocommerce_product_type_unsupported',
-					__( 'A variable product or a variation cannot change its type through this ability, and a product cannot become a variation. WooCommerce would delete the variations of a variable product, or leave them without a variable parent.', 'woocommerce' ),
+					__( 'A variation cannot change its type, and a product cannot become a variation.', 'woocommerce' ),
 					array( 'status' => 400 )
 				);
+			}
+			if ( $product instanceof \WC_Product_Variable ) {
+				$this->type_deletes = self::type_change_deletes_variations( $product, $input['type'] );
+				if ( ! $this->type_deletes && ! is_a( $target_class, \WC_Product_Variable::class, true ) ) {
+					return new \WP_Error(
+						'woocommerce_product_type_unsupported',
+						__( 'WooCommerce would keep the variations of this product without a variable parent, so it cannot change into a type that is not variable.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+				if ( $this->type_deletes && isset( $input['variations'] ) ) {
+					return new \WP_Error(
+						'woocommerce_product_type_unsupported',
+						__( 'This type change deletes every variation of the product, so the call cannot also send variations.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+				if ( $this->type_deletes ) {
+					$children                   = self::read_variation_children( $product, true )['all'];
+					$this->variations['delete'] = array_values( array_filter( array_map( 'wc_get_product', $children ), static fn( $child ) => $child instanceof \WC_Product_Variation ) );
+				}
 			}
 			$this->changes_type = true;
 			return self::get_product_object_for_type( $input['type'], $product->get_id() );
@@ -194,7 +217,14 @@ class ProductUpdate extends ActionableAbility {
 	private bool $changes_type = false;
 
 	/**
-	 * The variations that the `variations` input marked for deletion.
+	 * Whether the type change deletes the variations of the product.
+	 *
+	 * @var bool
+	 */
+	private bool $type_deletes = false;
+
+	/**
+	 * The variations that the `variations` input or the type change deleted.
 	 *
 	 * @return \WC_Product_Variation[]
 	 */
@@ -203,7 +233,7 @@ class ProductUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * The variations that the `variations` input marked for deletion, for the validators.
+	 * The variations that the `variations` input or the type change will delete, for the validators.
 	 *
 	 * @return \WC_Product_Variation[]
 	 */
@@ -212,20 +242,32 @@ class ProductUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Save the product, then the variations that the input names.
+	 * Save the product, then the variations that the input names. A type change
+	 * that deletes the variations leaves the delete to WooCommerce, which runs
+	 * it in the save of the product, and checks that they are gone.
 	 *
 	 * @param \WC_Product $subject Changed product.
 	 * @return null|\WP_Error
 	 */
 	protected function save( $subject ) {
+		$this->deleted = array_map( static fn( \WC_Product_Variation $variation ) => clone $variation, $this->variations['delete'] );
+
 		$error = self::save_product( $subject, 'woocommerce_product_update_failed' );
 		if ( is_wp_error( $error ) ) {
 			return $error;
 		}
 
+		if ( $this->type_deletes ) {
+			foreach ( $this->variations['delete'] as $variation ) {
+				if ( null !== get_post( $variation->get_id() ) ) {
+					return new \WP_Error( 'woocommerce_product_update_failed', __( 'Failed to delete a variation.', 'woocommerce' ), array( 'status' => 500 ) );
+				}
+			}
+			$this->variations['delete'] = array();
+		}
+
 		if ( $subject instanceof \WC_Product_Variable ) {
-			$this->deleted = array_map( static fn( \WC_Product_Variation $variation ) => clone $variation, $this->variations['delete'] );
-			$error         = self::save_variations( $subject, $this->variations, 'woocommerce_product_update_failed' );
+			$error = self::save_variations( $subject, $this->variations, 'woocommerce_product_update_failed' );
 			if ( null === $error && $this->changes_type && empty( $this->variations['save'] ) && empty( $this->variations['delete'] ) ) {
 				self::sync_variable_parent( $subject );
 			}
@@ -259,10 +301,36 @@ class ProductUpdate extends ActionableAbility {
 	 */
 	public static function can_update_product( $input = array() ): bool {
 		$product_id = self::get_id_from_input( $input );
-		$deletes    = ! empty( array_filter( array_column( $input['variations'] ?? array(), 'delete' ) ) );
+		$product    = isset( $input['type'] ) ? wc_get_product( $product_id ) : null;
+		$deletes    = ! empty( array_filter( array_column( $input['variations'] ?? array(), 'delete' ) ) )
+			|| ( $product instanceof \WC_Product_Variable && self::type_change_deletes_variations( $product, $input['type'] ) );
 
 		return self::check_product_permission( $product_id, 'edit' )
 			&& ( ! $deletes || self::check_product_permission( $product_id, 'delete' ) );
+	}
+
+	/**
+	 * Whether WooCommerce deletes the variations of a variable product when
+	 * its type changes, which it decides when the product is saved.
+	 *
+	 * @param \WC_Product_Variable $product Variable product.
+	 * @param string               $type    New product type.
+	 * @return bool
+	 */
+	private static function type_change_deletes_variations( \WC_Product_Variable $product, string $type ): bool {
+		$from = $product->get_type();
+
+		/**
+		 * Filter whether WooCommerce deletes the variations of a variable product when its type changes.
+		 *
+		 * @since 5.0.0
+		 *
+		 * @param bool       $delete  Whether to delete the variations.
+		 * @param WC_Product $product Product.
+		 * @param string     $from    Old product type.
+		 * @param string     $to      New product type.
+		 */
+		return $type !== $from && (bool) apply_filters( 'woocommerce_delete_variations_on_product_type_change', ProductType::VARIABLE === $from && ProductType::VARIABLE !== $type, $product, $from, $type );
 	}
 
 	/**

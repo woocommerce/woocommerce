@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -548,25 +549,111 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse to turn a variable product or a variation into a simple product, and a simple-product price on a change into a variable one.
+	 * @testdox Should turn a variable product into a simple one, keep its ID and delete its variations.
 	 */
-	public function test_update_refuses_variable_to_simple_and_simple_fields_on_variable(): void {
+	public function test_update_turns_a_variable_product_into_a_simple_one(): void {
+		$variable   = WC_Helper_Product::create_variation_product();
+		$variations = $variable->get_children();
+
+		$updated = $this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'            => $variable->get_id(),
+				'type'          => 'simple',
+				'regular_price' => '15',
+			)
+		);
+
+		$this->assertGreaterThanOrEqual( 2, count( $variations ) );
+		$this->assertSame( $variable->get_id(), $updated['product']['id'] );
+		$this->assertSame( 'simple', $updated['product']['type'] );
+		$this->assertSame( '15', $updated['product']['regular_price'] );
+		$this->assertSame( array(), $updated['product']['variation_ids'] );
+		$this->assertSame( array(), $updated['variations'] );
+		foreach ( $variations as $variation_id ) {
+			$this->assertNull( get_post( $variation_id ), "Variation $variation_id should be deleted." );
+		}
+	}
+
+	/**
+	 * @testdox Should require the delete permission for a type change that deletes variations.
+	 */
+	public function test_type_change_that_deletes_variations_requires_the_delete_permission(): void {
 		$variable = WC_Helper_Product::create_variation_product();
 		$simple   = WC_Helper_Product::create_simple_product();
+		$deny     = static fn( $caps, $cap ) => 'delete_post' === $cap ? array( 'do_not_allow' ) : $caps;
 
-		$out_of         = wp_get_ability( 'woocommerce/product-update' )->execute(
+		add_filter( 'map_meta_cap', $deny, 10, 2 );
+		$refused = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
 				'id'   => $variable->get_id(),
 				'type' => 'simple',
 			)
 		);
-		$from_variation = wp_get_ability( 'woocommerce/product-update' )->execute(
+		$allowed = ProductUpdate::can_update_product(
+			array(
+				'id'   => $simple->get_id(),
+				'type' => 'external',
+			)
+		);
+		remove_filter( 'map_meta_cap', $deny, 10 );
+
+		$this->assertWPError( $refused );
+		$this->assertSame( 'ability_invalid_permissions', $refused->get_error_code() );
+		$this->assertTrue( $allowed, 'A type change that deletes nothing needs only the edit permission.' );
+		$this->assertSame( 'variable', wc_get_product( $variable->get_id() )->get_type() );
+		$this->assertNotEmpty( wc_get_product( $variable->get_id() )->get_children() );
+	}
+
+	/**
+	 * @testdox Should keep the variations when the save of a type change fails after WooCommerce deleted them.
+	 */
+	public function test_failed_type_change_keeps_the_variations(): void {
+		$variable   = WC_Helper_Product::create_variation_product();
+		$variations = $variable->get_children();
+		$fail       = static function () {
+			throw new \Exception( 'Save failed.' );
+		};
+
+		add_action( 'woocommerce_product_type_changed', $fail, 20 );
+		$failed = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $variable->get_id(),
+				'type' => 'simple',
+			)
+		);
+		remove_action( 'woocommerce_product_type_changed', $fail, 20 );
+
+		$this->assertWPError( $failed );
+		$this->assertSame( 'woocommerce_product_update_failed', $failed->get_error_code() );
+		$this->assertSame( 'variable', wc_get_product( $variable->get_id() )->get_type() );
+		foreach ( $variations as $variation_id ) {
+			$this->assertInstanceOf( \WC_Product_Variation::class, wc_get_product( $variation_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Should refuse a type change of a variation, variations sent with a change that deletes them, and a simple-product price on a variable product.
+	 */
+	public function test_update_refuses_type_changes_that_cannot_work(): void {
+		$variable = WC_Helper_Product::create_variation_product();
+		$simple   = WC_Helper_Product::create_simple_product();
+		$ability  = wp_get_ability( 'woocommerce/product-update' );
+
+		$from_variation = $ability->execute(
 			array(
 				'id'   => $variable->get_children()[0],
 				'type' => 'simple',
 			)
 		);
-		$price          = wp_get_ability( 'woocommerce/product-update' )->execute(
+		$with_items     = $ability->execute(
+			array(
+				'id'         => $variable->get_id(),
+				'type'       => 'simple',
+				'variations' => array( array( 'regular_price' => '1' ) ),
+			)
+		);
+		$price          = $ability->execute(
 			array(
 				'id'            => $simple->get_id(),
 				'type'          => 'variable',
@@ -574,15 +661,11 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertWPError( $out_of );
-		$this->assertSame( 'woocommerce_product_type_unsupported', $out_of->get_error_code() );
-		$this->assertSame( 'variable', wc_get_product( $variable->get_id() )->get_type() );
-		$this->assertNotEmpty( wc_get_product( $variable->get_id() )->get_children() );
-		$this->assertWPError( $from_variation );
 		$this->assertSame( 'woocommerce_product_type_unsupported', $from_variation->get_error_code() );
-		$this->assertWPError( $price );
+		$this->assertSame( 'woocommerce_product_type_unsupported', $with_items->get_error_code() );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $price->get_error_code() );
 		$this->assertSame( 'simple', wc_get_product( $simple->get_id() )->get_type() );
+		$this->assertNotEmpty( wc_get_product( $variable->get_id() )->get_children() );
 	}
 
 	/**

@@ -3757,6 +3757,53 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should run validators on the variations that a type change deletes, and give them to the syncs as deleted.
+	 */
+	public function test_a_type_change_reports_the_variations_it_deletes(): void {
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$ids     = $created['product']['variation_ids'];
+		$refuse  = true;
+		$seen    = array();
+		$deleted = array();
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse ) {
+				$seen[ $product->get_id() ] = $context['deleting'];
+				return $refuse && $context['deleting'] ? new \WP_Error( 'test_keep', 'Keep them.' ) : null;
+			}
+		);
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+				$deleted = array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] );
+				return null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$input = array(
+			'id'   => $created['product']['id'],
+			'type' => 'simple',
+		);
+
+		$refused = $this->run_ability_response( 'woocommerce/product-update', $input );
+		$kept    = wc_get_product( $created['product']['id'] )->get_children();
+		$refuse  = false;
+		$changed = $this->run_ability( 'woocommerce/product-update', $input );
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertEqualsCanonicalizing( $ids, $kept );
+		$this->assertSame( 'simple', $changed['product']['type'] );
+		$this->assertTrue( $seen[ $ids[0] ] );
+		$this->assertTrue( $seen[ $ids[1] ] );
+		$this->assertFalse( $seen[ $created['product']['id'] ] );
+		$this->assertEqualsCanonicalizing( $ids, $deleted );
+		$this->assertNull( get_post( $ids[0] ) );
+	}
+
+	/**
 	 * @testdox Should run validators on the variations of a deleted parent, and delete nothing when one refuses.
 	 */
 	public function test_a_validator_can_refuse_deleting_a_variable_parent(): void {

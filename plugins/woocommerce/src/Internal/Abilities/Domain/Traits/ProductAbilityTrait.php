@@ -64,6 +64,8 @@ trait ProductAbilityTrait {
 		if ( $creating ) {
 			$type_schema['default']      = ProductType::SIMPLE;
 			$type_schema['description'] .= ' ' . __( 'A product without a type is simple.', 'woocommerce' );
+		} else {
+			$type_schema['description'] .= ' ' . __( 'Changing the type of a variable product deletes all its variations for good. Only a change between two variable types can keep them, when the extension that owns one of the types says so. A variation cannot change its type.', 'woocommerce' );
 		}
 
 		$properties = $creating ? array() : array(
