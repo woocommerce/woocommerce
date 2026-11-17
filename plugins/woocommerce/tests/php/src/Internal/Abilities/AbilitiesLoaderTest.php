@@ -34,6 +34,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private static $administrator_id;
 
 	private const CANONICAL_ABILITY_IDS = array(
+		'woocommerce/coupons-query',
+		'woocommerce/coupon-create',
+		'woocommerce/coupon-update',
 		'woocommerce/product-terms-query',
 		'woocommerce/product-term-create',
 		'woocommerce/product-term-update',
@@ -1035,6 +1038,15 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
+			'coupons-query'               => array( 'woocommerce/coupons-query', array() ),
+			'coupon-create'               => array( 'woocommerce/coupon-create', array( 'code' => 'forbidden' ) ),
+			'coupon-update'               => array(
+				'woocommerce/coupon-update',
+				array(
+					'id'     => 1,
+					'amount' => '10',
+				),
+			),
 			'product-terms-query'         => array(
 				'woocommerce/product-terms-query',
 				array(
