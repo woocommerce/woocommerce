@@ -262,6 +262,19 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			return;
 		}
 
+		// A key this request loaded, and has not changed, is gone when the row no longer has it.
+		// Setting the stored keys alone would leave a removed coupon in memory.
+		foreach ( $this->loaded_session_snapshot( $session ) as $key => $loaded ) {
+			if ( ! is_string( $key ) || array_key_exists( $key, $stored ) || ! isset( $session->$key ) ) {
+				continue;
+			}
+
+			$current = $session->get( $key );
+			if ( $loaded === $current || maybe_unserialize( $loaded ) === $current ) {
+				$session->set( $key, null );
+			}
+		}
+
 		foreach ( $stored as $key => $value ) {
 			if ( is_string( $key ) ) {
 				$session->set( $key, maybe_unserialize( $value ) );
@@ -275,9 +288,27 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		}
 
 		$customer = WC()->customer;
-		if ( isset( $stored['customer'] ) && $customer instanceof \WC_Customer && $customer->get_data_store() instanceof \WC_Customer_Data_Store_Session ) {
-			$customer->get_data_store()->read( $customer );
+		if ( isset( $stored['customer'] ) && $customer instanceof \WC_Customer ) {
+			$store = $customer->get_data_store();
+			// get_data_store() returns the WC_Data_Store wrapper, not the session store it holds.
+			if ( $store instanceof \WC_Data_Store && is_a( $store->get_current_class_name(), \WC_Customer_Data_Store_Session::class, true ) ) {
+				$store->read( $customer );
+			}
 		}
+	}
+
+	/**
+	 * Session data this request loaded, so a reload can tell a local change from a stale key.
+	 *
+	 * @param \WC_Session $session The bound session.
+	 * @return array<string, mixed>
+	 */
+	private function loaded_session_snapshot( \WC_Session $session ): array {
+		$method = new \ReflectionMethod( \WC_Session::class, 'get_loaded_session_snapshot' );
+		$method->setAccessible( true );
+		$snapshot = $method->invoke( $session );
+
+		return is_array( $snapshot ) ? $snapshot : array();
 	}
 
 	/**

@@ -358,9 +358,8 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	private function sql_while_still_payable( string $sql ): string {
 		global $wpdb;
 
-		$column       = OrderUtil::custom_orders_table_usage_is_enabled() ? 'status' : 'post_status';
-		$placeholders = implode( ', ', array_fill( 0, max( 1, count( $this->conditional_status_payable ) ), '%s' ) );
-		$statuses     = array();
+		$column   = OrderUtil::custom_orders_table_usage_is_enabled() ? 'status' : 'post_status';
+		$statuses = array();
 
 		foreach ( $this->conditional_status_payable as $status ) {
 			$status = (string) $status;
@@ -372,9 +371,10 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 		$statuses = array_values( array_unique( $statuses ) );
 
 		if ( array() === $statuses ) {
-			$statuses     = array( '' );
-			$placeholders = '%s';
+			$statuses = array( '' );
 		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $statuses ), '%s' ) );
 
 		$in_list = $wpdb->prepare( $placeholders, ...$statuses ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Placeholders were built to match $statuses.
 		$guard   = '`' . $column . '` IN ( ' . $in_list . ' )';

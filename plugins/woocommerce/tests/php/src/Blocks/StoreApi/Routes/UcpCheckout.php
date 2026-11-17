@@ -179,6 +179,29 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * Remove one key from the stored session row, leaving this request's memory as it was.
+	 *
+	 * @param string $key Session key.
+	 */
+	private function drop_stored_session_key( string $key ): void {
+		global $wpdb;
+
+		$customer_id = (string) WC()->session->get_customer_id();
+		$stored      = WC()->session->get_session( $customer_id, array() );
+
+		if ( ! is_array( $stored ) ) {
+			return;
+		}
+
+		unset( $stored[ $key ] );
+		$wpdb->update(
+			$wpdb->prefix . 'woocommerce_sessions',
+			array( 'session_value' => maybe_serialize( $stored ) ),
+			array( 'session_key' => $customer_id )
+		);
+	}
+
+	/**
 	 * The modification time stored for an order, not the time on the in-memory object.
 	 *
 	 * @param int $order_id Order ID.
@@ -887,6 +910,55 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertSame( 'kept on cancel', $order->get_customer_note() );
 		$this->assertSame( 'wc-cancelled', $order->get_meta( 'ucp_cancel_marker' ) );
 		$this->assertNotSame( '2000-01-01 00:00:00', $this->stored_order_modified_gmt( $order_id ) );
+	}
+
+	/**
+	 * @testdox Cancelling still writes when the payable-status list repeats a status.
+	 */
+	public function test_cancel_accepts_a_repeated_payable_status(): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'POST', $path . '/complete' );
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		$repeat   = static function ( $statuses ) {
+			$statuses[] = OrderStatus::PENDING;
+			return $statuses;
+		};
+
+		add_filter( 'woocommerce_valid_order_statuses_for_payment', $repeat );
+		try {
+			$this->request( 'PUT', $path, array( 'line_items' => array( $this->line_item( 1, 2 ) ) ) );
+		} finally {
+			remove_filter( 'woocommerce_valid_order_statuses_for_payment', $repeat );
+		}
+
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::CANCELLED ) );
+	}
+
+	/**
+	 * @testdox Complete does not put back a coupon another request removed from the saved session.
+	 */
+	public function test_complete_drops_a_coupon_removed_since_the_session_was_read(): void {
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'ucp-ten-off' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$created = $this->create_ready_checkout();
+
+		try {
+			$this->assertTrue( WC()->cart->apply_coupon( $coupon->get_code() ) );
+			WC()->session->save_data();
+			$this->drop_stored_session_key( 'applied_coupons' );
+
+			$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+
+			$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+			$this->assertNotContains( $coupon->get_code(), $order->get_coupon_codes() );
+		} finally {
+			$coupon->delete( true );
+		}
 	}
 
 	/**
