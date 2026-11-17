@@ -136,8 +136,8 @@ class ExtensibleAbilities {
 	 *                                  with `get_callback`. It needs one `type` other than null, because clients
 	 *                                  expect one type for each field. Core publishes it as declared. Its
 	 *                                  `title` is the label clients show. Nested properties must not be nullable
-	 *                                  either: leave a property out when it has no value. Only the top-level
-	 *                                  `type` is checked at registration.
+	 *                                  either: leave a property out when it has no value. A list of types or a
+	 *                                  null type at any depth, also in an `anyOf` or `oneOf` branch, is refused.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
 	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
@@ -156,8 +156,8 @@ class ExtensibleAbilities {
 	 *                                  the whole result.
 	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. It needs
 	 *                                  one `type` name, or an `anyOf` where each branch has one `type` name. A
-	 *                                  list of types is refused at the top level, because some clients refuse it:
-	 *                                  a nullable field uses `[{"type":"string"},{"type":"null"}]` as its `anyOf`.
+	 *                                  list of types is refused at any depth, because some clients refuse it: a
+	 *                                  nullable value uses `[{"type":"string"},{"type":"null"}]` as its `anyOf`.
 	 *                                  Core publishes it as declared. A value can be null only where it declares
 	 *                                  null. Required with `set_callback`.
 	 *     @type callable $set_callback Optional. Receives the object and the value, and changes the object
@@ -230,6 +230,11 @@ class ExtensibleAbilities {
 				wc_doing_it_wrong( __METHOD__, 'The "type" of the "output_schema" argument must be one type name other than "null". Return null to leave the field out.', '11.4.0' );
 				return;
 			}
+			$path = self::find_nested_type_problem( $args['output_schema'], true );
+			if ( null !== $path ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "output_schema" argument has a list of types or a "null" type at "%s". Leave a property out when it has no value.', $path ), '11.4.0' );
+				return;
+			}
 		}
 		if ( $writable ) {
 			if ( ! is_callable( $args['set_callback'] ?? null ) ) {
@@ -238,6 +243,11 @@ class ExtensibleAbilities {
 			}
 			if ( ! is_array( $args['input_schema'] ?? null ) || ! self::input_schema_has_type( $args['input_schema'] ) ) {
 				wc_doing_it_wrong( __METHOD__, 'The "input_schema" argument must be an array with one "type" name, or with an "anyOf" where each branch has one "type" name. For a nullable field, use an "anyOf" with a {"type":"null"} branch instead of a list of types.', '11.4.0' );
+				return;
+			}
+			$path = self::find_nested_type_problem( $args['input_schema'], false );
+			if ( null !== $path ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "input_schema" argument has a list of types at "%s". For a nullable property, use an "anyOf" with a {"type":"null"} branch instead.', $path ), '11.4.0' );
 				return;
 			}
 		}
@@ -284,6 +294,42 @@ class ExtensibleAbilities {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Find the first nested schema under `properties`, `items`, `anyOf`, `oneOf` or `additionalProperties`
+	 * whose `type` is a list, or, in an output schema, is "null".
+	 *
+	 * @param array<string, mixed> $schema Field schema.
+	 * @param bool                 $output Whether it is an output schema.
+	 * @param string               $path   Path of the schema, such as `properties.size`.
+	 * @return string|null Path of the first bad schema, or null when there is none.
+	 */
+	private static function find_nested_type_problem( array $schema, bool $output, string $path = '' ): ?string {
+		foreach ( array( 'properties', 'items', 'anyOf', 'oneOf', 'additionalProperties' ) as $keyword ) {
+			$children = $schema[ $keyword ] ?? null;
+			if ( ! is_array( $children ) ) {
+				continue;
+			}
+			if ( 'additionalProperties' === $keyword || ( 'items' === $keyword && ! wp_is_numeric_array( $children ) ) ) {
+				$children = array( '' => $children );
+			}
+			foreach ( $children as $key => $child ) {
+				if ( ! is_array( $child ) ) {
+					continue;
+				}
+				$child_path = trim( "$path.$keyword.$key", '.' );
+				$type       = $child['type'] ?? null;
+				if ( is_array( $type ) || ( $output && 'null' === $type ) ) {
+					return $child_path;
+				}
+				$found = self::find_nested_type_problem( $child, $output, $child_path );
+				if ( null !== $found ) {
+					return $found;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
