@@ -76,8 +76,8 @@ final class LlmsTxt implements RegisterHooksInterface {
 	/**
 	 * Report local file checks for llms.txt after init.
 	 *
-	 * Status is disabled, physical_file, or unknown. Check the public URL to
-	 * determine which provider actually responds.
+	 * Status is physical_file, disabled, or unknown. A physical file takes precedence when the fallback is disabled.
+	 * Check the public URL to determine which provider actually responds.
 	 *
 	 * @since 11.4.0
 	 *
@@ -86,7 +86,7 @@ final class LlmsTxt implements RegisterHooksInterface {
 	public function get_status(): array {
 		if ( ! $this->is_enabled() ) {
 			return array(
-				'status'  => 'disabled',
+				'status'  => true === $this->has_physical_file() ? 'physical_file' : 'disabled',
 				'section' => '',
 			);
 		}
