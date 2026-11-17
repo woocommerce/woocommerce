@@ -67,13 +67,6 @@ class OrderRefundCreate extends ActionableAbility {
 	private RefundCreator $creator;
 
 	/**
-	 * What the order could refund before this refund, read by change().
-	 *
-	 * @var float
-	 */
-	private float $refundable = 0.0;
-
-	/**
 	 * Get the ability registration arguments.
 	 *
 	 * @return array
@@ -140,10 +133,9 @@ class OrderRefundCreate extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	public function change( $subject, array $input ) {
-		$order            = $this->order;
-		$decimals         = wc_get_price_decimals();
-		$this->refundable = (float) $order->get_remaining_refund_amount();
-		$prepared         = wc_get_container()->get( DataUtils::class )->prepare_refund_creation_or_error(
+		$order    = $this->order;
+		$decimals = wc_get_price_decimals();
+		$prepared = wc_get_container()->get( DataUtils::class )->prepare_refund_creation_or_error(
 			$order,
 			$input['line_items'] ?? array(),
 			isset( $input['amount'] ),
@@ -298,11 +290,7 @@ class OrderRefundCreate extends ActionableAbility {
 			return $formatted;
 		}
 
-		return array(
-			'refund'                   => $formatted,
-			'refundable_amount'        => self::format_amount_for_response( $this->refundable ),
-			'gateway_supports_refunds' => self::gateway_can_refund( $this->order ),
-		);
+		return array( 'refund' => $formatted );
 	}
 
 	/**
@@ -508,15 +496,7 @@ class OrderRefundCreate extends ActionableAbility {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'refund'                   => self::get_refund_output_schema(),
-				'refundable_amount'        => array(
-					'type'        => 'string',
-					'description' => __( 'Amount the order could refund before this refund.', 'woocommerce' ),
-				),
-				'gateway_supports_refunds' => array(
-					'type'        => 'boolean',
-					'description' => __( 'Whether the payment gateway of the order can send the money back with refund_payment.', 'woocommerce' ),
-				),
+				'refund' => self::get_refund_output_schema(),
 			),
 			'additionalProperties' => false,
 		);

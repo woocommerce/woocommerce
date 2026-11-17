@@ -80,7 +80,7 @@ trait OrderRefundAbilityTrait {
 	/**
 	 * Format a refund for the ability output.
 	 *
-	 * @param \WC_Order_Refund $refund Refund, saved or not.
+	 * @param \WC_Order_Refund $refund Saved refund.
 	 * @return array|\WP_Error
 	 */
 	protected static function format_refund_for_response( \WC_Order_Refund $refund ) {

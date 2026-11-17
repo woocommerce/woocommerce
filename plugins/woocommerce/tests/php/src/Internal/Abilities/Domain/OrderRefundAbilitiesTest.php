@@ -144,7 +144,6 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
-		$this->assertSame( '50', $result['refundable_amount'], 'The refundable amount is the one before the refund.' );
 		$this->assertSame( '10', $result['refund']['amount'] );
 		$this->assertSame( 'Damaged box', $result['refund']['reason'] );
 		$this->assertFalse( $result['refund']['refunded_payment'] );

@@ -90,44 +90,6 @@ class RefundCreator {
 	}
 
 	/**
-	 * Save the refund, then fire woocommerce_create_refund. wc_create_refund() saves the refund before the hook too,
-	 * and callbacks use its ID. A declined refund is deleted, since a rollback cannot remove it from tables
-	 * without transactions. Callbacks can move money or take locks there, so a refused refund must not reach it.
-	 *
-	 * @param \WC_Order_Refund $refund Staged refund, not saved.
-	 * @return null|\WP_Error A WP_Error when the refund was not saved, or a callback declined it by throwing.
-	 *
-	 * @since 11.4.0
-	 */
-	public function before_save( \WC_Order_Refund $refund ): ?\WP_Error {
-		$args = $this->args;
-
-		$refund->save();
-		if ( $refund->get_id() <= 0 ) {
-			return new \WP_Error( 'refund_not_saved', __( 'The refund could not be saved.', 'woocommerce' ), array( 'status' => 500 ) );
-		}
-
-		try {
-			/**
-			 * Fires before a new refund is saved, so a callback can change it.
-			 *
-			 * @since 3.0.0
-			 *
-			 * @param \WC_Order_Refund $refund Refund, saved once so it has an ID, before its final save.
-			 * @param array            $args   Arguments in the format of wc_create_refund().
-			 *
-			 * @throws \Exception To decline the refund, with the message to show.
-			 */
-			do_action( 'woocommerce_create_refund', $refund, $args );
-		} catch ( \Exception $e ) {
-			$refund->delete( true );
-			return new \WP_Error( 'refund_declined', $e->getMessage(), array( 'status' => 400 ) );
-		}
-
-		return null;
-	}
-
-	/**
 	 * Set the amount, lines and totals of the refund without saving it, and without firing any hook.
 	 *
 	 * @param \WC_Order_Refund $refund New refund, not saved.
@@ -166,6 +128,44 @@ class RefundCreator {
 		$refund->stage_tax_items();
 		$refund->stage_totals( false );
 		$refund->set_total( wc_format_decimal( $args['amount'] * -1 ) );
+
+		return null;
+	}
+
+	/**
+	 * Save the refund, then fire woocommerce_create_refund. wc_create_refund() saves the refund before the hook too,
+	 * and callbacks use its ID. A declined refund is deleted, since a rollback cannot remove it from tables
+	 * without transactions. Callbacks can move money or take locks there, so a refused refund must not reach it.
+	 *
+	 * @param \WC_Order_Refund $refund Staged refund, not saved.
+	 * @return null|\WP_Error A WP_Error when the refund was not saved, or a callback declined it by throwing.
+	 *
+	 * @since 11.4.0
+	 */
+	public function before_save( \WC_Order_Refund $refund ): ?\WP_Error {
+		$args = $this->args;
+
+		$refund->save();
+		if ( $refund->get_id() <= 0 ) {
+			return new \WP_Error( 'refund_not_saved', __( 'The refund could not be saved.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		try {
+			/**
+			 * Fires before a new refund is saved, so a callback can change it.
+			 *
+			 * @since 3.0.0
+			 *
+			 * @param \WC_Order_Refund $refund Refund, saved once so it has an ID, before its final save.
+			 * @param array            $args   Arguments in the format of wc_create_refund().
+			 *
+			 * @throws \Exception To decline the refund, with the message to show.
+			 */
+			do_action( 'woocommerce_create_refund', $refund, $args );
+		} catch ( \Exception $e ) {
+			$refund->delete( true );
+			return new \WP_Error( 'refund_declined', $e->getMessage(), array( 'status' => 400 ) );
+		}
 
 		return null;
 	}
