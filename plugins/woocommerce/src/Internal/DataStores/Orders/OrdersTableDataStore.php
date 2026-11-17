@@ -1236,7 +1236,7 @@ WHERE
 		 *
 		 * @since 11.4.0
 		 *
-		 * @param int    $limit Maximum number of order IDs to return. Any negative value means no limit. Default -1.
+		 * @param int    $limit Maximum number of order IDs to return. Any negative value means no limit, and 0 returns no results. Default -1.
 		 * @param string $term  Search term.
 		 */
 		$limit = apply_filters( 'woocommerce_order_search_limit', -1, $term );
@@ -1244,13 +1244,9 @@ WHERE
 
 		$order_ids = wc_get_orders(
 			array(
-				's'       => $term,
-				'limit'   => $limit,
-				'orderby' => array(
-					'date' => 'DESC',
-					'ID'   => 'DESC',
-				),
-				'return'  => 'ids',
+				's'      => $term,
+				'limit'  => $limit,
+				'return' => 'ids',
 			)
 		);
 
