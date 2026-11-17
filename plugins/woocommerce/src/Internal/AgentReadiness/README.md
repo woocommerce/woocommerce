@@ -52,7 +52,7 @@ Only published simple and variable products are checked, the types agents can bu
 - Products with catalog visibility "Hidden". Agents see the products shoppers see in the shop, so hiding one is the merchant's choice, not a problem. "Search results only" products are checked, since agents find them by search.
 - Products of any other type: grouped, external, subscription, booking, bundle and so on. A product keeps its stored type when its plugin is inactive, so it stays in this group.
 
-Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off and no HTTPS hide the catalog from UCP agents, and guest checkout off or no payment method turned on stops agents placing orders. Missing policy pages and order emails off weaken agent orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
+Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off and no HTTPS hide the catalog from UCP agents, no payment method turned on stops agents placing orders, and guest checkout off stops UCP checkout while agents can still build carts. Missing policy pages and order emails off weaken agent orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
 
 ## Store output checks
 

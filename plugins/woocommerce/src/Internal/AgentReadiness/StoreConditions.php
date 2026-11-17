@@ -33,13 +33,7 @@ class StoreConditions {
 	 * AI assistants read the catalog through the API whatever search engines are told, and with no
 	 * payment method no sale goes through. The rules file's `store_checks` can change any of them (RemoteRules).
 	 */
-	public const SHOWN_REQUIRED = array( 'search_visible', 'payment_method', 'guest_checkout' );
-
-	/**
-	 * Conditions shown as Required only when this WooCommerce serves UCP checkout: its checkout
-	 * takes guest orders only, so a store that requires an account offers AI assistants no checkout.
-	 */
-	private const NEEDS_UCP_CHECKOUT = array( 'guest_checkout' );
+	public const SHOWN_REQUIRED = array( 'search_visible', 'payment_method' );
 
 	public const LEVEL_RECOMMENDED = 'recommended';
 
@@ -77,8 +71,9 @@ class StoreConditions {
 			'name'    => $name,
 			'label'   => $label,
 			'why'     => $why,
-			'fix'     => __( 'Choose a published page under WooCommerce > Settings > AI tools > AI shopping.', 'woocommerce' ),
-			'fix_url' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ) . '#' . $option,
+			// The AI shopping section lands with #70590; until then the tab has one page.
+			'fix'     => __( 'Choose a published page under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
+			'fix_url' => AgenticCommerceSettings::url() . '#' . $option,
 		);
 
 		$conditions = array(
@@ -115,8 +110,8 @@ class StoreConditions {
 				'name'    => __( 'Universal Commerce Protocol (UCP) is on', 'woocommerce' ),
 				'label'   => __( 'Universal Commerce Protocol (UCP) is off', 'woocommerce' ),
 				'why'     => __( 'Shopping agents that use UCP cannot read your catalog.', 'woocommerce' ),
-				'fix'     => __( 'Turn on "Allow AI assistants to shop your store" under WooCommerce > Settings > AI tools > AI shopping.', 'woocommerce' ),
-				'fix_url' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ),
+				'fix'     => __( 'Turn on "Allow AI assistants to shop your store" under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
+				'fix_url' => AgenticCommerceSettings::url(),
 			),
 			array(
 				'id'      => 'https',
@@ -178,7 +173,7 @@ class StoreConditions {
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Guest checkout is allowed', 'woocommerce' ),
 				'label'   => __( 'Guest checkout is off', 'woocommerce' ),
-				'why'     => __( 'Shopping agents check out for shoppers without an account on your store, so they cannot place orders.', 'woocommerce' ),
+				'why'     => __( 'With guest checkout off, AI assistants can\'t check out for shoppers. They can still find your products and build carts.', 'woocommerce' ),
 				'fix'     => __( 'Tick "Enable guest checkout" under WooCommerce > Settings > Accounts & Privacy.', 'woocommerce' ),
 				'fix_url' => $settings_url( 'account' ),
 			),
@@ -200,16 +195,13 @@ class StoreConditions {
 
 	/**
 	 * Whether a store check is shown as Required: a required one, or one the rules file marks
-	 * `required`, else one in SHOWN_REQUIRED. Guest checkout only once this WooCommerce serves UCP checkout.
+	 * `required`, else one in SHOWN_REQUIRED.
 	 *
 	 * @param array{id:string,level:string} $check Store condition or output check.
 	 */
 	public static function shows_required( array $check ): bool {
 		if ( self::LEVEL_REQUIRED === $check['level'] ) {
 			return true;
-		}
-		if ( in_array( $check['id'], self::NEEDS_UCP_CHECKOUT, true ) && ! self::serves_ucp_checkout() ) {
-			return false;
 		}
 		return RemoteRules::store_check( $check['id'] )['required'] ?? in_array( $check['id'], self::SHOWN_REQUIRED, true );
 	}

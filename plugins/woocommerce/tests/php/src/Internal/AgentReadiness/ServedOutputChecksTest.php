@@ -468,6 +468,18 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $buy_action->invoke( null, array( $product ) ) );
 		$this->assertTrue( $buy_action->invoke( null, array( array( 'potentialAction' => array( array( '@type' => array( 'BuyAction' ) ) ) ) ) ) );
 		$this->assertFalse( $buy_action->invoke( null, array( array( 'potentialAction' => array( '@type' => 'ViewAction' ) ) ) ) );
+
+		$nested = array(
+			'@type'  => 'Product',
+			'offers' => array(
+				'@type'  => 'AggregateOffer',
+				'offers' => array(
+					'@type'                   => 'Offer',
+					'hasMerchantReturnPolicy' => array( '@type' => 'MerchantReturnPolicy' ),
+				),
+			),
+		);
+		$this->assertTrue( $offer_has->invoke( null, array( $nested ), 'hasMerchantReturnPolicy' ), 'Policy on a nested Offer inside AggregateOffer' );
 	}
 
 	/**

@@ -124,7 +124,7 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Guest checkout off is only recommended, so it doesn't block the switch.
+	 * @testdox Guest checkout off is Optional, so it doesn't block the switch.
 	 */
 	public function test_store_conditions_checks(): void {
 		self::make_store_ready();
@@ -135,17 +135,18 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $this->sut->failing_required() );
 		$this->assertFalse( $checks['guest_checkout']['ok'] );
 		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['guest_checkout']['level'] );
+		$this->assertFalse( StoreConditions::shows_required( $checks['guest_checkout'] ), 'AI assistants can still build carts without guest checkout' );
 	}
 
 	/**
-	 * @testdox The UCP and policy page fixes link to AI shopping's settings, the policy ones to their field.
+	 * @testdox The UCP and policy page fixes link to the Agentic commerce settings tab, the policy ones to their field.
 	 */
-	public function test_fix_links_open_ai_shopping(): void {
-		$checks   = array_column( $this->sut->all(), 'fix_url', 'id' );
-		$shopping = admin_url( 'admin.php?page=wc-settings&tab=agentic-commerce&section=shopping' );
+	public function test_fix_links_open_agentic_commerce(): void {
+		$checks = array_column( $this->sut->all(), 'fix_url', 'id' );
+		$tab    = admin_url( 'admin.php?page=wc-settings&tab=agentic-commerce' );
 
-		$this->assertSame( $shopping, $checks['ucp_on'] );
-		$this->assertSame( $shopping . '#' . AgenticCommerceSettings::TERMS_PAGE_OPTION, $checks['terms_page'] );
+		$this->assertSame( $tab, $checks['ucp_on'] );
+		$this->assertSame( $tab . '#' . AgenticCommerceSettings::TERMS_PAGE_OPTION, $checks['terms_page'] );
 	}
 
 	/**

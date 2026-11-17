@@ -1057,11 +1057,9 @@ class StoreOutputChecks {
 	 * @param string                           $property Offer property.
 	 */
 	private static function offer_has( array $products, string $property ): bool {
-		foreach ( self::with_variants( $products ) as $product ) {
-			foreach ( self::as_list( $product['offers'] ?? null ) as $offer ) {
-				if ( ! empty( $offer[ $property ] ) ) {
-					return true;
-				}
+		foreach ( self::offers( $products ) as $offer ) {
+			if ( ! empty( $offer[ $property ] ) ) {
+				return true;
 			}
 		}
 		return false;

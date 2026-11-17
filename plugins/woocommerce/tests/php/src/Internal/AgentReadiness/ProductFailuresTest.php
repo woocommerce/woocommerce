@@ -181,6 +181,48 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A check's share of sales is also dropped when the example products change while the count stays the same.
+	 */
+	public function test_sales_share_dropped_when_example_membership_changes(): void {
+		$kept  = WC_Helper_Product::create_simple_product();
+		$fixed = WC_Helper_Product::create_simple_product();
+		$added = WC_Helper_Product::create_simple_product();
+		$fail  = array(
+			'missing_images' => array(
+				'chatgpt' => array(
+					'field'  => 'image',
+					'effect' => 'gaps',
+				),
+			),
+		);
+		ProductFailures::store( $kept->get_id(), $fail );
+		ProductFailures::store( $fixed->get_id(), array() );
+		ProductFailures::store( $added->get_id(), $fail );
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'failures_stored' => true,
+				'products'        => 3,
+				'channels'        => array(),
+				'checks'          => array(
+					array(
+						'id'          => 'missing_images',
+						'count'       => 2,
+						'product_ids' => array( $kept->get_id(), $fixed->get_id() ),
+						'sales_share' => 0.5,
+					),
+				),
+			)
+		);
+
+		$check = array_column( (array) $this->readiness->get_cached_report()['checks'], null, 'id' )['missing_images'];
+		$this->assertSame( 2, $check['count'], 'Count still two failing products' );
+		$this->assertNull( $check['sales_share'], 'Share cleared: examples no longer match the scan' );
+		$this->assertSame( 0.5, $check['ranked_share'] );
+		$this->assertSame( array( $kept->get_id() ), $check['product_ids'], 'Only examples that still fail remain' );
+	}
+
+	/**
 	 * @testdox Every checked product has a checked row, passing or not, which for_product leaves out and the product total counts.
 	 */
 	public function test_checked_row_counts_products(): void {
