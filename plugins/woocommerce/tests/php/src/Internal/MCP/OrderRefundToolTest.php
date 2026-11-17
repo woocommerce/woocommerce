@@ -56,6 +56,17 @@ class OrderRefundToolTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not tell agents to use a dry run or the refund ability, which the default server does not offer.
+	 */
+	public function test_descriptions_do_not_point_to_unavailable_refund_paths(): void {
+		$schema = OrderRefundTool::create()->get_protocol_record( Schemas::create()->forVersion( Schemas::V2026_07_28 ) )->getInputSchema();
+
+		$this->assertFalse( property_exists( $schema->properties, 'dry_run' ) );
+		$this->assertStringNotContainsString( 'dry run', $schema->properties->refund_payment->description );
+		$this->assertStringNotContainsString( OrderRefundCreate::ABILITY_NAME, wp_get_ability( 'woocommerce/order-refunds-query' )->get_description() );
+	}
+
+	/**
 	 * @testdox Should ask the merchant to approve the previewed refund, and refund nothing yet.
 	 */
 	public function test_first_call_asks_for_approval(): void {

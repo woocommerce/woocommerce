@@ -95,6 +95,7 @@ class OrderRefundTool {
 
 		$input_schema = $ability->get_input_schema();
 		unset( $input_schema['properties']['dry_run'] );
+		$input_schema['properties']['refund_payment']['description'] = __( 'Whether the payment gateway sends the money back.', 'woocommerce' );
 
 		return McpTool::fromArray(
 			array(

@@ -42,10 +42,7 @@ class OrderRefundsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Query order refunds', 'woocommerce' ),
-			'description'         => __(
-				'List the refunds of an order, newest first. Use the woocommerce/order-refund-create ability to refund an order.',
-				'woocommerce'
-			),
+			'description'         => __( 'List the refunds of an order, newest first.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_output_schema(),
