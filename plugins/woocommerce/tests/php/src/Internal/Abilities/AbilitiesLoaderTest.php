@@ -1255,6 +1255,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$missing_id = array( 'id' => PHP_INT_MAX );
 
 		return array(
+			'coupon-create'                  => array( 'woocommerce/coupon-create', array( 'code' => 'granted' ) ),
+			'coupons-query'                  => array( 'woocommerce/coupons-query', array() ),
 			'products-query'                 => array( 'woocommerce/products-query', $missing_id ),
 			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
 			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),

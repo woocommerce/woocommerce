@@ -144,7 +144,7 @@ class CouponsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 11.4.0
 	 */
 	public static function can_query_coupons( $input = array() ): bool {
-		return wc_rest_check_post_permissions( 'shop_coupon', 'read', self::get_id_from_input( $input ) );
+		return (bool) wc_rest_check_post_permissions( 'shop_coupon', 'read', self::get_id_from_input( $input ) );
 	}
 
 	/**

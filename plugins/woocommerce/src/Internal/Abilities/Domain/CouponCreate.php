@@ -107,7 +107,7 @@ class CouponCreate extends ActionableAbility {
 	 * @since 11.4.0
 	 */
 	public static function can_create_coupon(): bool {
-		return wc_rest_check_post_permissions( 'shop_coupon', 'create' );
+		return (bool) wc_rest_check_post_permissions( 'shop_coupon', 'create' );
 	}
 
 	/**
