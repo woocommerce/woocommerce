@@ -545,13 +545,11 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 		}
 		$this->assertEmpty( get_post_meta( $product->get_id(), '_sale_price_dates_from', true ) );
 		$this->assertEmpty( get_post_meta( $product->get_id(), '_sale_price_dates_to', true ) );
-		$this->assertSame(
-			array(
-				'min_price' => '0.0000',
-				'max_price' => '0.0000',
-			),
-			$wpdb->get_row( $wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product->get_id() ), ARRAY_A )
-		);
+		$lookup = $wpdb->get_row( $wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product->get_id() ), ARRAY_A );
+		$this->assertArrayHasKey( 'min_price', $lookup );
+		$this->assertArrayHasKey( 'max_price', $lookup );
+		$this->assertSame( '0.0000', $lookup['min_price'] );
+		$this->assertSame( '0.0000', $lookup['max_price'] );
 	}
 
 	/**

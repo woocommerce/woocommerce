@@ -5198,6 +5198,33 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a type change when the other fields of the call change whether the filter deletes the variations.
+	 */
+	public function test_a_type_change_refuses_fields_that_change_the_delete_decision(): void {
+		$this->register_variation_subclass();
+		$this->add_test_action(
+			'woocommerce_delete_variations_on_product_type_change',
+			static fn( $delete, $product ) => 'Delete' === $product->get_name(),
+			10,
+			2
+		);
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $created['product']['id'],
+				'type' => 'test-variable',
+				'name' => 'Delete',
+			)
+		);
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'variable', wc_get_product( $created['product']['id'] )->get_type() );
+		$this->assertEqualsCanonicalizing( $created['product']['variation_ids'], wc_get_product( $created['product']['id'] )->get_children() );
+	}
+
+	/**
 	 * @testdox Should refuse a type change that deletes the variations when a variation appears after the validators ran.
 	 */
 	public function test_a_type_change_refuses_a_variation_added_during_the_call(): void {
