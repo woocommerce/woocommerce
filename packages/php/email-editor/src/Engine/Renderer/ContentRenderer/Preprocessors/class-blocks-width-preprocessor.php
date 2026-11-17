@@ -83,11 +83,8 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			// block instead of forcing the surrounding table to expand.
 			$block_border_horizontal = $this->get_block_horizontal_border( $block );
 
-			$width_input = $block['attrs']['width'] ?? '100%';
-			// Currently we support only % and px units in case only the number is provided we assume it's %
-			// because editor saves percent values as a number.
-			$width_input = is_numeric( $width_input ) ? "$width_input%" : $width_input;
-			$width_input = is_string( $width_input ) ? $width_input : '100%';
+			// A column shrunk to fit its row carries its shrunk width in email_attrs; the saved width would overflow.
+			$width_input = $this->normalize_width_input( $block['email_attrs']['column-width'] ?? $block['attrs']['width'] ?? '100%' );
 			$width       = $this->convert_width_to_pixels( $width_input, $layout_width );
 
 			if ( 'core/columns' === $block['blockName'] ) {
@@ -117,6 +114,21 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			$parsed_blocks[ $key ]         = $block;
 		}
 		return $parsed_blocks;
+	}
+
+	/**
+	 * Normalize a saved width to a string with a unit.
+	 *
+	 * Only % and px are supported. A bare number is treated as %, because the editor saves percent values as numbers.
+	 *
+	 * @param mixed $width Saved width.
+	 * @return string
+	 */
+	private function normalize_width_input( $width ): string {
+		if ( is_numeric( $width ) ) {
+			return "{$width}%";
+		}
+		return is_string( $width ) ? $width : '100%';
 	}
 
 	// TODO: We could add support for other units like em, rem, etc.
@@ -182,7 +194,7 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 		foreach ( $columns as $column ) {
 			if ( isset( $column['attrs']['width'] ) && ! empty( $column['attrs']['width'] ) ) {
 				++$columns_count_with_defined_width;
-				$defined_column_width += $this->convert_width_to_pixels( $column['attrs']['width'], $columns_width );
+				$defined_column_width += $this->convert_width_to_pixels( $this->normalize_width_input( $column['attrs']['width'] ), $columns_width );
 			} else {
 				// When width is not set we need to add padding to the defined column width for better ratio accuracy.
 				$defined_column_width += $this->parse_number_from_string_with_pixels( Preset_Variable_Resolver::resolve( $column['attrs']['style']['spacing']['padding']['left'] ?? '0px', $variables_map ) );
@@ -195,6 +207,11 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 
 		if ( $columns_count - $columns_count_with_defined_width > 0 ) {
 			$default_columns_width = round( ( $columns_width - $defined_column_width ) / ( $columns_count - $columns_count_with_defined_width ), 2 );
+			// When the defined widths already fill the row, give each unset column an equal share
+			// so it isn't zero or negative; shrink_overflowing_columns() then fits the row.
+			if ( $default_columns_width <= 0 ) {
+				$default_columns_width = round( $columns_width / $columns_count, 2 );
+			}
 			foreach ( $columns as $key => $column ) {
 				if ( ! isset( $column['attrs']['width'] ) || empty( $column['attrs']['width'] ) ) {
 					// Add padding to the specific column width because it's not included in the default width.
@@ -207,6 +224,37 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 					$columns[ $key ]['attrs']['width'] = "{$column_width}px";
 				}
 			}
+		}
+		return $this->shrink_overflowing_columns( $columns, $columns_width );
+	}
+
+	/**
+	 * Scale every column down by the same factor when their widths add up to more than the row.
+	 *
+	 * Matches flex-shrink on the web, e.g. two columns saved at 100% each become 50%.
+	 * The shrunk width goes in email_attrs['column-width']; rows that fit are left untouched.
+	 *
+	 * @param array $columns Columns, each with a width set.
+	 * @param float $columns_width Columns width.
+	 * @return array
+	 */
+	private function shrink_overflowing_columns( array $columns, float $columns_width ): array {
+		$pixel_widths = array();
+		foreach ( $columns as $key => $column ) {
+			$pixel_widths[ $key ] = $this->convert_width_to_pixels( $this->normalize_width_input( $column['attrs']['width'] ?? '100%' ), $columns_width );
+		}
+		$total_width = array_sum( $pixel_widths );
+
+		// Percent widths are rounded to whole pixels, so allow half a pixel per column
+		// before treating the row as overflowing (e.g. 3 x 33.33% of 620px is 621px).
+		if ( $total_width <= $columns_width + count( $columns ) * 0.5 ) {
+			return $columns;
+		}
+
+		$ratio = $columns_width / $total_width;
+		foreach ( $pixel_widths as $key => $pixel_width ) {
+			$shrunk_width                                   = round( $pixel_width * $ratio, 2 );
+			$columns[ $key ]['email_attrs']['column-width'] = "{$shrunk_width}px";
 		}
 		return $columns;
 	}
