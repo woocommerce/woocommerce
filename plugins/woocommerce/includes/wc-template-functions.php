@@ -1674,14 +1674,14 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			$use_label = (bool) $attributes['useLabel'];
 		} else {
 			/**
-			 * Filters whether the classic catalog sorting dropdown shows a visible "Sort by" label.
+			 * Filters whether the product sorting dropdown shows a visible "Sort by" label.
 			 *
-			 * Classic themes can return true to get the labeled dropdown that the Catalog Sorting block uses.
-			 * The block uses its own "Show label" setting and ignores this filter.
+			 * Return true to show the label in classic themes. The Catalog Sorting block
+			 * does not use this filter. It has its own "Show label" setting.
 			 *
 			 * @since 11.4.0
 			 *
-			 * @param bool $show_visual_label Whether to show the label. Default false.
+			 * @param bool $show_label Whether to show the label. Default false.
 			 */
 			$use_label = (bool) apply_filters( 'woocommerce_catalog_orderby_show_visual_label', false );
 		}

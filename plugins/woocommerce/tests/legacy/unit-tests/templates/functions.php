@@ -392,9 +392,10 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that classic themes can turn on the visible "Sort by" label with the woocommerce_catalog_orderby_show_visual_label filter, and that the block ignores it.
+	 * Test that the woocommerce_catalog_orderby_show_visual_label filter shows the "Sort by" label in classic themes.
+	 * The Catalog Sorting block passes its own setting and ignores the filter.
 	 */
-	public function test_woocommerce_catalog_ordering_use_label_filter() {
+	public function test_woocommerce_catalog_ordering_show_visual_label_filter() {
 		wc_setup_loop(
 			array(
 				'is_paginated' => true,
