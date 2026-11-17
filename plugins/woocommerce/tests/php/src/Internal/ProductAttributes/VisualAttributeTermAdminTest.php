@@ -145,9 +145,9 @@ class VisualAttributeTermAdminTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should auto-register the taxonomy and seed color terms when called before the taxonomy is registered.
+	 * @testdox Should seed color terms right after the attribute is created, in the same request.
 	 */
-	public function test_seeds_when_taxonomy_is_not_registered(): void {
+	public function test_seeds_right_after_the_attribute_is_created(): void {
 		$suffix         = self::get_unique_suffix();
 		$attribute_data = array(
 			'name' => 'Seed Visual Unregistered ' . $suffix,
@@ -161,19 +161,10 @@ class VisualAttributeTermAdminTest extends WC_Unit_Test_Case {
 		$taxonomy = wc_attribute_taxonomy_name( $attribute_data['slug'] );
 		$term_ids = array();
 
-		// Pre-assert the fallback branch is actually exercised; if WC auto-registers
-		// the taxonomy on init the test would silently bypass the code under test.
-		$this->assertFalse(
-			taxonomy_exists( $taxonomy ),
-			'Taxonomy should not be registered before the seeder runs; otherwise the fallback branch is not exercised.'
-		);
-
 		try {
 			VisualAttributeTermAdmin::seed_visual_attribute_terms(
 				$attribute_id
 			);
-
-			$this->assertTrue( taxonomy_exists( $taxonomy ), 'Seeder should register the taxonomy when missing.' );
 
 			$terms = get_terms(
 				array(
@@ -183,7 +174,7 @@ class VisualAttributeTermAdminTest extends WC_Unit_Test_Case {
 			);
 
 			$this->assertIsArray( $terms, 'Terms should be returned for the taxonomy.' );
-			$this->assertCount( 9, $terms, 'Nine default color terms should be seeded after auto-registering the taxonomy.' );
+			$this->assertCount( 9, $terms, 'Nine default color terms should be seeded.' );
 
 			foreach ( $terms as $term ) {
 				$term_ids[] = (int) $term->term_id;

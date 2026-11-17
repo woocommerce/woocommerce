@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the Attribute Filter block on its chosen attribute when the store's default filter attribute changes.
