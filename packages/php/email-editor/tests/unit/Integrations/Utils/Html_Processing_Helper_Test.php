@@ -818,4 +818,22 @@ class Html_Processing_Helper_Test extends \Email_Editor_Unit_Test {
 			$this->assertEquals( '', $result, 'Failed to reject invalid dimension: ' . $input_description );
 		}
 	}
+
+	/**
+	 * Test get_crop_height returns the height an aspect-ratio crop gives an image.
+	 */
+	public function testGetCropHeightDividesTheWidthByTheRatio(): void {
+		$this->assertSame( 580, Html_Processing_Helper::get_crop_height( 580, 1.0 ) );
+		$this->assertSame( 435, Html_Processing_Helper::get_crop_height( 580, 4 / 3 ) );
+		$this->assertSame( 1, Html_Processing_Helper::get_crop_height( 1, 100.0 ), 'A very wide ratio never rounds down to 0.' );
+	}
+
+	/**
+	 * Test get_crop_height returns 0 instead of dividing by an unusable width or ratio.
+	 */
+	public function testGetCropHeightReturnsZeroForAnUnusableWidthOrRatio(): void {
+		$this->assertSame( 0, Html_Processing_Helper::get_crop_height( 0, 1.0 ) );
+		$this->assertSame( 0, Html_Processing_Helper::get_crop_height( 580, 0.0 ) );
+		$this->assertSame( 0, Html_Processing_Helper::get_crop_height( 580, -1.0 ) );
+	}
 }
