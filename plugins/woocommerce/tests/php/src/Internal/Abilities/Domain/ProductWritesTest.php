@@ -415,6 +415,177 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should turn a simple product into a variable one with global attributes and priced variations, and keep its ID.
+	 */
+	public function test_update_turns_a_simple_product_into_a_variable_one(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'sku' => 'tee' ) );
+		$size    = WC_Helper_Product::create_attribute( 'size', array( 'small', 'large' ) );
+		$color   = WC_Helper_Product::create_attribute( 'color', array( 'red', 'blue' ) );
+		$items   = array();
+		$prices  = array( '11.00', '12.00', '13.00', '14.00' );
+		foreach ( array( 'small', 'large' ) as $size_slug ) {
+			foreach ( array( 'red', 'blue' ) as $color_slug ) {
+				$items[] = array(
+					'attributes'    => array(
+						array(
+							'id'     => $size['attribute_id'],
+							'option' => $size_slug,
+						),
+						array(
+							'id'     => $color['attribute_id'],
+							'option' => $color_slug,
+						),
+					),
+					'regular_price' => $prices[ count( $items ) ],
+				);
+			}
+		}
+
+		$updated = $this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'id'      => $size['attribute_id'],
+						'options' => array( 'small', 'large' ),
+					),
+					array(
+						'id'      => $color['attribute_id'],
+						'options' => array( 'red', 'blue' ),
+					),
+				),
+				'variations' => $items,
+			)
+		)['product'];
+
+		$this->assertSame( $product->get_id(), $updated['id'] );
+		$this->assertSame( 'variable', $updated['type'] );
+		$this->assertCount( 4, $updated['variation_ids'] );
+		$this->assertSame( 'tee', $updated['sku'] );
+
+		$variable = wc_get_product( $product->get_id() );
+		$this->assertInstanceOf( \WC_Product_Variable::class, $variable );
+		$this->assertSame( array( '11.00', '12.00', '13.00', '14.00' ), array_values( $variable->get_variation_prices()['regular_price'] ) );
+		$this->assertSame( '', get_post_meta( $product->get_id(), '_regular_price', true ), 'The old price of the simple product should be gone.' );
+		$this->assertSame( array( '11.00', '12.00', '13.00', '14.00' ), get_post_meta( $product->get_id(), '_price', false ) );
+	}
+
+	/**
+	 * @testdox Should turn a $source product into a variable one with a variation, and keep its ID.
+	 *
+	 * @testWith ["grouped"]
+	 *           ["external"]
+	 *
+	 * @param string $source Product type before the change.
+	 */
+	public function test_update_turns_a_grouped_or_external_product_into_a_variable_one( string $source ): void {
+		$product = 'grouped' === $source ? WC_Helper_Product::create_grouped_product() : WC_Helper_Product::create_external_product();
+
+		$updated = $this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M' ),
+					),
+				),
+				'variations' => array(
+					array(
+						'attributes'    => array(
+							array(
+								'name'   => 'Size',
+								'option' => 'S',
+							),
+						),
+						'regular_price' => '20',
+					),
+				),
+			)
+		)['product'];
+
+		$this->assertSame( $product->get_id(), $updated['id'] );
+		$this->assertSame( 'variable', $updated['type'] );
+		$this->assertCount( 1, $updated['variation_ids'] );
+		$this->assertSame( array( '20' ), get_post_meta( $product->get_id(), '_price', false ) );
+	}
+
+	/**
+	 * @testdox Should clear the old price and sale dates when a simple product becomes variable without variations.
+	 */
+	public function test_update_to_variable_without_variations_clears_the_old_price(): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price'     => '10',
+				'sale_price'        => '8',
+				'date_on_sale_from' => '2020-01-01',
+				'date_on_sale_to'   => '2040-01-01',
+			)
+		);
+
+		$updated = $this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'type' => 'variable',
+			)
+		)['product'];
+
+		$this->assertSame( 'variable', $updated['type'] );
+		foreach ( array( '_price', '_regular_price', '_sale_price' ) as $meta_key ) {
+			$this->assertFalse( metadata_exists( 'post', $product->get_id(), $meta_key ), "$meta_key should be gone." );
+		}
+		$this->assertEmpty( get_post_meta( $product->get_id(), '_sale_price_dates_from', true ) );
+		$this->assertEmpty( get_post_meta( $product->get_id(), '_sale_price_dates_to', true ) );
+		$this->assertNotSame( '8.0000', $wpdb->get_var( $wpdb->prepare( "SELECT min_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox Should refuse to turn a variable product or a variation into a simple product, and a simple-product price on a change into a variable one.
+	 */
+	public function test_update_refuses_variable_to_simple_and_simple_fields_on_variable(): void {
+		$variable = WC_Helper_Product::create_variation_product();
+		$simple   = WC_Helper_Product::create_simple_product();
+
+		$out_of         = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $variable->get_id(),
+				'type' => 'simple',
+			)
+		);
+		$from_variation = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $variable->get_children()[0],
+				'type' => 'simple',
+			)
+		);
+		$price          = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'            => $simple->get_id(),
+				'type'          => 'variable',
+				'regular_price' => '20',
+			)
+		);
+
+		$this->assertWPError( $out_of );
+		$this->assertSame( 'woocommerce_product_type_unsupported', $out_of->get_error_code() );
+		$this->assertSame( 'variable', wc_get_product( $variable->get_id() )->get_type() );
+		$this->assertNotEmpty( wc_get_product( $variable->get_id() )->get_children() );
+		$this->assertWPError( $from_variation );
+		$this->assertSame( 'woocommerce_product_type_unsupported', $from_variation->get_error_code() );
+		$this->assertWPError( $price );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $price->get_error_code() );
+		$this->assertSame( 'simple', wc_get_product( $simple->get_id() )->get_type() );
+	}
+
+	/**
 	 * @testdox Should accept sale dates and the tax status on external products, but not sold individually.
 	 */
 	public function test_external_product_fields(): void {

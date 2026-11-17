@@ -517,7 +517,11 @@ trait ProductAbilityTrait {
 				$fields = array_values( array_diff( $fields, array( 'attributes' ) ) );
 			}
 		} elseif ( is_a( $classname, \WC_Product_Variable::class, true ) ) {
-			$fields = array_merge( $fields, array( 'attributes', 'variations', 'tax_status', 'sold_individually', 'weight', 'dimensions', 'shipping_class' ) );
+			$fields        = array_merge( $fields, array( 'attributes', 'variations', 'tax_status', 'sold_individually', 'weight', 'dimensions', 'shipping_class' ) );
+			$product_props = array(
+				'date_on_sale_from' => null,
+				'date_on_sale_to'   => null,
+			);
 		} elseif ( is_a( $classname, \WC_Product_External::class, true ) ) {
 			$fields        = array_merge( $fields, $price_fields, array( 'external_url', 'button_text' ) );
 			$product_props = array(
@@ -1455,11 +1459,13 @@ trait ProductAbilityTrait {
 	 */
 	protected static function apply_product_type_config( \WC_Product $product, array $product_config ): void {
 		$prop_setters = array(
-			'virtual'        => 'set_virtual',
-			'downloadable'   => 'set_downloadable',
-			'manage_stock'   => 'set_manage_stock',
-			'stock_quantity' => 'set_stock_quantity',
-			'stock_status'   => 'set_stock_status',
+			'virtual'           => 'set_virtual',
+			'downloadable'      => 'set_downloadable',
+			'manage_stock'      => 'set_manage_stock',
+			'stock_quantity'    => 'set_stock_quantity',
+			'stock_status'      => 'set_stock_status',
+			'date_on_sale_from' => 'set_date_on_sale_from',
+			'date_on_sale_to'   => 'set_date_on_sale_to',
 		);
 
 		foreach ( $product_config['product_props'] as $prop => $value ) {

@@ -87,12 +87,13 @@ class ProductUpdate extends ActionableAbility {
 	 * @return \WC_Product|\WP_Error
 	 */
 	protected function load( array $input ) {
-		$this->variations = array(
+		$this->variations   = array(
 			'save'   => array(),
 			'delete' => array(),
 		);
-		$this->deleted    = array();
-		$this->parent     = null;
+		$this->deleted      = array();
+		$this->parent       = null;
+		$this->changes_type = false;
 
 		$product = self::get_product_from_input( $input );
 
@@ -114,16 +115,15 @@ class ProductUpdate extends ActionableAbility {
 		}
 
 		if ( isset( $input['type'] ) && $input['type'] !== $product->get_type() ) {
-			$is_variable = static function ( $class_or_object ): bool {
-				return is_a( $class_or_object, \WC_Product_Variable::class, true ) || is_a( $class_or_object, \WC_Product_Variation::class, true );
-			};
-			if ( $is_variable( \WC_Product_Factory::get_product_classname( $product->get_id(), $input['type'] ) ) || $is_variable( $product ) ) {
+			$into_variation = is_a( \WC_Product_Factory::get_product_classname( $product->get_id(), $input['type'] ), \WC_Product_Variation::class, true );
+			if ( $into_variation || $product instanceof \WC_Product_Variable || $product instanceof \WC_Product_Variation ) {
 				return new \WP_Error(
 					'woocommerce_product_type_unsupported',
-					__( 'A product cannot change into or out of a variable product or a variation through this ability. WooCommerce would delete its variations.', 'woocommerce' ),
+					__( 'A variable product or a variation cannot change its type through this ability, and a product cannot become a variation. WooCommerce would delete the variations of a variable product, or leave them without a variable parent.', 'woocommerce' ),
 					array( 'status' => 400 )
 				);
 			}
+			$this->changes_type = true;
 			return self::get_product_object_for_type( $input['type'], $product->get_id() );
 		}
 
@@ -187,6 +187,13 @@ class ProductUpdate extends ActionableAbility {
 	private ?\WC_Product_Variable $parent = null;
 
 	/**
+	 * Whether the input changes the product type.
+	 *
+	 * @var bool
+	 */
+	private bool $changes_type = false;
+
+	/**
 	 * The variations that the `variations` input marked for deletion.
 	 *
 	 * @return \WC_Product_Variation[]
@@ -218,7 +225,11 @@ class ProductUpdate extends ActionableAbility {
 
 		if ( $subject instanceof \WC_Product_Variable ) {
 			$this->deleted = array_map( static fn( \WC_Product_Variation $variation ) => clone $variation, $this->variations['delete'] );
-			return self::save_variations( $subject, $this->variations, 'woocommerce_product_update_failed' );
+			$error         = self::save_variations( $subject, $this->variations, 'woocommerce_product_update_failed' );
+			if ( null === $error && $this->changes_type && empty( $this->variations['save'] ) && empty( $this->variations['delete'] ) ) {
+				self::sync_variable_parent( $subject );
+			}
+			return $error;
 		}
 
 		if ( null !== $this->parent ) {
