@@ -58,7 +58,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			set_current_screen( 'front' );
-			foreach ( $this->restore as $item ) {
+			foreach ( array_reverse( $this->restore ) as $item ) {
 				$item[0]->enabled = $item[1];
 			}
 		} finally {
@@ -938,6 +938,42 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A store whose only product is grouped is not told it has no products.
+	 */
+	public function test_output_grouped_product_is_not_an_empty_store(): void {
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_name( 'Grouped only' );
+		$grouped->save();
+
+		$report = wc_get_container()->get( AgentReadiness::class )->get_report();
+		$this->assertSame( 0, $report['products'], 'A grouped product is not one the scan checks' );
+		$this->assertGreaterThan( 0, $report['unsupported_types'] );
+		update_option( AgentReadiness::REPORT_OPTION, $report, false );
+
+		$this->assert_products_are_unreadable();
+
+		$report['unsupported_types']   = 0;
+		$report['hidden_from_catalog'] = 1;
+		update_option( AgentReadiness::REPORT_OPTION, $report, false );
+		$this->assert_products_are_unreadable();
+	}
+
+	/**
+	 * The product cards when the scan checked nothing because every product is hidden or unsupported.
+	 */
+	private function assert_products_are_unreadable(): void {
+		$sections = array_column( $this->view()['sections'], null, 'id' );
+		foreach ( array( 'products', 'understand' ) as $id ) {
+			$this->assertSame( 'Not checked', $sections[ $id ]['badge']['text'], $id );
+			$this->assertSame( 'None of your products can be checked yet', $sections[ $id ]['empty']['title'] );
+			$this->assertSame( 'View product visibility', $sections[ $id ]['empty']['link']['text'] );
+			$this->assertStringContainsString( 'section=' . AgenticCommerceSettings::SHOPPING_SECTION, $sections[ $id ]['empty']['link']['href'] );
+			$this->assertStringContainsString( '#wc-agentic-commerce-visibility', $sections[ $id ]['empty']['link']['href'] );
+			$this->assertStringNotContainsString( 'post-new.php', $sections[ $id ]['empty']['link']['href'] );
+		}
+	}
+
+	/**
 	 * @testdox In Fix first, a store-wide listing issue ranks above product issues in the same tier, whatever their share of sales.
 	 */
 	public function test_output_fix_first_store_wide_issue_ranks_first(): void {
@@ -1636,9 +1672,10 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, $privacy );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
 
-		$settings = $this->page()->get_settings_for_section( '' );
+		$settings = $this->page()->get_settings_for_section( AgenticCommerceSettings::SHOPPING_SECTION );
 		WC_Admin_Settings::save_fields( $settings, array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION => (string) $published ) );
 
+		$this->assertContains( AgenticCommerceSettings::TERMS_PAGE_OPTION, array_column( $settings, 'id' ), 'The section under test has its fields' );
 		$this->assertNotContains( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, array_column( $settings, 'id' ) );
 		$this->assertSame( $privacy, (int) get_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION ) );
 	}

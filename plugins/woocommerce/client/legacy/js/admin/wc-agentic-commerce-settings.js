@@ -18,7 +18,11 @@
 
 
 	if ( toggle && knob && message ) {
+		let leaving = false;
 		toggle.addEventListener( 'click', async () => {
+			if ( leaving ) {
+				return;
+			}
 			const enable = toggle.getAttribute( 'aria-checked' ) !== 'true';
 			toggle.disabled = true;
 			knob.classList.add( 'woocommerce-input-toggle--loading' );
@@ -29,15 +33,23 @@
 					data: { enabled: enable },
 				} );
 				render( response.enabled );
-				// Status, the Overview and Sales readiness depend on the switch; reload to show them for the new state.
+				// Status and the other cards depend on the switch.
+				// A dirty form warns before leaving, so don't reload over unsaved fields.
+				if ( window.onbeforeunload ) {
+					message.textContent = settings.i18n.unsaved;
+					return;
+				}
+				leaving = true;
 				// Not reload(): after Save changes, that would post the settings form again.
 				window.location.assign( window.location.href.split( '#' )[ 0 ] );
 			} catch ( error ) {
 				render( ! enable );
 				message.textContent = ( error && error.message ) || settings.i18n.error;
 			} finally {
-				toggle.disabled = false;
-				knob.classList.remove( 'woocommerce-input-toggle--loading' );
+				if ( ! leaving ) {
+					toggle.disabled = false;
+					knob.classList.remove( 'woocommerce-input-toggle--loading' );
+				}
 			}
 		} );
 	}
