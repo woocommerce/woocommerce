@@ -208,6 +208,25 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should find a product or a variation by its exact GTIN, and nothing for a GTIN nobody has.
+	 */
+	public function test_filters_by_global_unique_id(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_global_unique_id( '4006381333931' );
+		$product->save();
+		$longer = WC_Helper_Product::create_simple_product();
+		$longer->set_global_unique_id( '40063813339310' );
+		$longer->save();
+		$variation = wc_get_product( WC_Helper_Product::create_variation_product()->get_children()[0] );
+		$variation->set_global_unique_id( '0012345678912' );
+		$variation->save();
+
+		$this->assertSame( array( $product->get_id() ), array_column( ProductsQuery::execute( array( 'global_unique_id' => '4006381333931' ) )['products'], 'id' ) );
+		$this->assertSame( array( $variation->get_id() ), array_column( ProductsQuery::execute( array( 'global_unique_id' => '0012345678912' ) )['products'], 'id' ) );
+		$this->assertSame( array(), ProductsQuery::execute( array( 'global_unique_id' => '9999999999999' ) )['products'] );
+	}
+
+	/**
 	 * @testdox Should return the exact total of matching products on partial, empty and out-of-range pages.
 	 */
 	public function test_returns_total_across_pages(): void {
