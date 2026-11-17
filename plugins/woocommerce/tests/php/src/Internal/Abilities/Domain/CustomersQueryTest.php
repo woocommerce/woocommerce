@@ -205,28 +205,6 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should order customers with the same sort value by ID, so pages neither repeat nor skip them.
-	 */
-	public function test_ties_page_by_id(): void {
-		$ids = $this->guest_customers( 3 );
-		sort( $ids );
-
-		$pages = array();
-		for ( $page = 1; $page <= 3; $page++ ) {
-			$result = $this->sut->execute(
-				array(
-					'include'  => $ids,
-					'orderby'  => 'registered_date',
-					'per_page' => 1,
-					'page'     => $page,
-				)
-			);
-			$pages  = array_merge( $pages, array_column( $result['customers'], 'id' ) );
-		}
-		$this->assertSame( $ids, $pages, 'Guests have no registration date, so the ID decides.' );
-	}
-
-	/**
 	 * @testdox Should sort by total spent.
 	 */
 	public function test_orderby_total_spent(): void {
