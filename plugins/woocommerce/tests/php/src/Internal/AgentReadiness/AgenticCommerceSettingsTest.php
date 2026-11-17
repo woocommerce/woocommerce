@@ -1274,9 +1274,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Guest checkout off is Required in Fix first once this WooCommerce serves UCP checkout, whose routes take guest orders only; before that it is an Optional setup step, not in Fix first.
+	 * @testdox Guest checkout off is an Optional setup step and stays out of Fix first, since AI assistants can still build carts.
 	 */
-	public function test_guest_checkout_is_required_with_ucp_checkout(): void {
+	public function test_guest_checkout_is_optional(): void {
 		$this->make_every_step_pass();
 		update_option( 'woocommerce_enable_guest_checkout', 'no' );
 		update_option(
@@ -1288,13 +1288,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			false
 		);
 
-		$serves = StoreConditions::serves_ucp_checkout();
-		$items  = array_column( $this->view()['fix_first']['items'] ?? array(), 'tier', 'id' );
-		if ( $serves ) {
-			$this->assertSame( 'Required for AI shopping', $items['guest_checkout'] ?? null );
-		} else {
-			$this->assertArrayNotHasKey( 'guest_checkout', $items, 'No heading says Required for an Optional step' );
-		}
+		$items = array_column( $this->view()['fix_first']['items'] ?? array(), 'tier', 'id' );
+		$this->assertArrayNotHasKey( 'guest_checkout', $items, 'No heading says Required for an Optional step' );
 		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'It doesn\'t keep AI shopping from being turned on' );
 	}
 
