@@ -51,9 +51,11 @@ Use `pnpm exec wp-env` rather than `pnpm wp-env` whenever a command runs `mcp-ad
 ## Connect MCP Inspector
 
 ```bash
-npx @modelcontextprotocol/inspector \
+npx @modelcontextprotocol/inspector -- \
   pnpm exec wp-env run cli wp mcp-adapter serve --server=mcp-adapter-default-server --user=admin
 ```
+
+Everything after `--` is the server command. Without it, Inspector takes `--server` as its own option and the adapter never receives it.
 
 Run it from `plugins/woocommerce`, because `wp-env` finds the environment from the working directory. The first connection takes several seconds while `wp-env` starts the command.
 
@@ -76,21 +78,22 @@ The `--user` flag on `mcp-adapter serve` sets the WordPress user every ability r
 ```bash
 pnpm exec wp-env run cli wp user create customer customer@example.com --role=customer
 
-npx @modelcontextprotocol/inspector \
+npx @modelcontextprotocol/inspector -- \
   pnpm exec wp-env run cli wp mcp-adapter serve --server=mcp-adapter-default-server --user=customer
 ```
 
 Executing `woocommerce/products-query` as `customer` returns `Permission denied`.
 
-You can also send messages without Inspector, which is useful for a quick check:
+For a quick check without the web UI, Inspector's CLI mode makes one call and prints the result. Its options go before `--`, as above:
 
 ```bash
-printf '%s\n' \
-  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"cli","version":"0"}}}' \
-  '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
-  '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"mcp-adapter-execute-ability","arguments":{"ability_name":"woocommerce/products-query","parameters":{}}}}' \
-  | pnpm exec wp-env run cli wp mcp-adapter serve --server=mcp-adapter-default-server --user=admin
+npx @modelcontextprotocol/inspector --cli \
+  --method tools/call --tool-name mcp-adapter-execute-ability \
+  --tool-arg ability_name=woocommerce/products-query --tool-arg 'parameters={}' \
+  -- pnpm exec wp-env run cli wp mcp-adapter serve --server=mcp-adapter-default-server --user=admin
 ```
+
+It exits non-zero when the tool returns an error, so it also works in scripts.
 
 ## Testing instructions in pull requests
 
@@ -100,5 +103,6 @@ When a pull request changes an ability, link to this page from its testing instr
 
 - **Inspector connects but receives no messages, or reports invalid JSON:** check that the command uses `pnpm exec wp-env`, and that `WP_DEBUG_DISPLAY` is `false`.
 - **`Allowed memory size … exhausted`:** set `WP_MEMORY_LIMIT` as shown above and restart the environment.
+- **`Server 'mcp-adapter-default-server' not found`:** Inspector read `--server` as its own option. Put `--` between Inspector's options and the server command.
 - **`Permission denied`:** the `--user` passed to `mcp-adapter serve` lacks the capability the ability requires.
 - **An ability is missing from discovery:** only abilities whose `meta` sets `mcp.public` to `true` are exposed through the default server.
