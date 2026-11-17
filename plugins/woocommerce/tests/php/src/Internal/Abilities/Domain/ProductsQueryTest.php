@@ -208,7 +208,7 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should find a product or a variation by its exact GTIN, and nothing for a GTIN nobody has.
+	 * @testdox Should find products and variations whose GTIN equals any of the GTINs sent, and nothing for GTINs nobody has.
 	 */
 	public function test_filters_by_global_unique_id(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -221,9 +221,12 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 		$variation->set_global_unique_id( '0012345678912' );
 		$variation->save();
 
-		$this->assertSame( array( $product->get_id() ), array_column( ProductsQuery::execute( array( 'global_unique_id' => '4006381333931' ) )['products'], 'id' ) );
-		$this->assertSame( array( $variation->get_id() ), array_column( ProductsQuery::execute( array( 'global_unique_id' => '0012345678912' ) )['products'], 'id' ) );
-		$this->assertSame( array(), ProductsQuery::execute( array( 'global_unique_id' => '9999999999999' ) )['products'] );
+		$find = static fn( array $gtins ): array => array_column( ProductsQuery::execute( array( 'global_unique_id' => $gtins ) )['products'], 'id' );
+
+		$this->assertSame( array( $product->get_id() ), $find( array( '4006381333931' ) ), 'A GTIN that only shares a prefix should not match.' );
+		$this->assertEqualsCanonicalizing( array( $product->get_id(), $variation->get_id() ), $find( array( '4006381333931', '0012345678912' ) ) );
+		$this->assertSame( array( $variation->get_id() ), $find( array( '0012345678912', '9999999999999' ) ) );
+		$this->assertSame( array(), $find( array( '9999999999999' ) ) );
 	}
 
 	/**

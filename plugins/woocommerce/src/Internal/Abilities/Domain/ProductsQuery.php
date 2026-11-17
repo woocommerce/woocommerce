@@ -320,9 +320,12 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'description' => __( 'Limit results to products with SKUs that partially match this string. Use * to match products with any non-empty SKU.', 'woocommerce' ),
 				),
 				'global_unique_id' => array(
-					'type'        => 'string',
-					'description' => __( 'Exact GTIN, UPC, EAN or ISBN. Finds variations too.', 'woocommerce' ),
-					'pattern'     => '^[0-9-]*[0-9Xx]?$',
+					'type'        => 'array',
+					'description' => __( 'Exact GTINs, UPCs, EANs or ISBNs. Matches any of them. Finds variations too.', 'woocommerce' ),
+					'items'       => array(
+						'type'    => 'string',
+						'pattern' => '^[0-9-]*[0-9Xx]?$',
+					),
 				),
 				'status'           => array(
 					'type' => 'string',
