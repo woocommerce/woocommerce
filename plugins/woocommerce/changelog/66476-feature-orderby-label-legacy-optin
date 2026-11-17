@@ -1,4 +1,4 @@
 Significance: minor
 Type: enhancement
 
-Add `woocommerce_catalog_orderby_show_visual_label` filter so classic themes can show a visible "Sort by" label on the orderby dropdown
+Add `woocommerce_catalog_orderby_use_label` filter to opt into more accessible orderby dropdowns
