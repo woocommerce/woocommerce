@@ -655,7 +655,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 	protected function get_add_to_cart( $product ) {
 		$attributes = array(
 			'aria-label'       => $product->add_to_cart_description(),
-			'data-quantity'    => wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_quantity( $product ),
+			'data-quantity'    => (string) wc_get_container()->get( ProductUtil::class )->get_catalog_add_to_cart_quantity( $product ),
 			'data-product_id'  => $product->get_id(),
 			'data-product_sku' => $product->get_sku(),
 			'data-price'       => wc_get_price_to_display( $product ),
