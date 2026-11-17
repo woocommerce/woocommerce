@@ -418,7 +418,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'aria-label="Shop order"', $without_filter );
 		$this->assertStringContainsString( '>Default sorting</option>', $without_filter );
 
-		$this->assertMatchesRegularExpression( '/<label for="(woocommerce-orderby-[^"]+)">Sort by<\/label>.*id="\1"/s', $with_filter );
+		$this->assertMatchesRegularExpression( '/<label for="(woocommerce-orderby-[^"]+)">Sort by<\/label>\s*<select[^>]*\sid="\1"/', $with_filter );
 		$this->assertStringNotContainsString( 'aria-label="Shop order"', $with_filter );
 		$this->assertStringContainsString( '>Default</option>', $with_filter );
 	}
