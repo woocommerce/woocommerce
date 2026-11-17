@@ -302,6 +302,52 @@ class Media_Text_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Core saves the media image without `width`/`height`; WordPress only adds them later from the
+	 * attachment metadata. The cap must use those dimensions, or the 1024px size slips through.
+	 */
+	public function testItCapsCoreMarkupImageUsingAttachmentDimensions(): void {
+		$attachment_id = self::factory()->attachment->create_object(
+			array(
+				'file'           => '2026/11/landscape.jpg',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$this->assertIsInt( $attachment_id );
+		wp_update_attachment_metadata(
+			$attachment_id,
+			array(
+				'width'  => 1600,
+				'height' => 900,
+				'file'   => '2026/11/landscape.jpg',
+				'sizes'  => array(
+					'large' => array(
+						'file'      => 'landscape-1024x576.jpg',
+						'width'     => 1024,
+						'height'    => 576,
+						'mime-type' => 'image/jpeg',
+					),
+				),
+			)
+		);
+		$large_url = str_replace( 'landscape.jpg', 'landscape-1024x576.jpg', (string) wp_get_attachment_url( $attachment_id ) );
+
+		$parsed_block                       = $this->get_block_with_image( 1, 1, 50 );
+		$parsed_block['attrs']['mediaId']   = $attachment_id;
+		$parsed_block['attrs']['mediaType'] = 'image';
+		$parsed_block['innerHTML']          = sprintf(
+			'<figure class="wp-block-media-text__media"><img src="%s" alt="" class="wp-image-%d size-large"/></figure><div class="wp-block-media-text__content"><p>Media content</p></div>',
+			esc_url( $large_url ),
+			$attachment_id
+		);
+
+		$img = $this->render_and_get_img( $parsed_block );
+
+		$this->assertSame( '286', $img['width'] );
+		$this->assertSame( '161', $img['height'] );
+		$this->assertStringContainsString( 'max-width:286px;', $img['style'] );
+	}
+
+	/**
 	 * Without a computed email width there's nothing to cap against, so the image is left alone.
 	 */
 	public function testItLeavesImageUnchangedWithoutEmailWidth(): void {

@@ -177,12 +177,15 @@ class Media_Text extends Abstract_Block_Renderer {
 			return $media_content;
 		}
 
-		$saved_width = $html->get_attribute( 'width' );
+		$saved_width  = $html->get_attribute( 'width' );
+		$saved_height = $html->get_attribute( 'height' );
+		if ( null === $saved_width && null === $saved_height ) {
+			list( $saved_width, $saved_height ) = $this->get_attachment_image_dimensions( $html, $block_attrs );
+		}
 		if ( ! is_string( $saved_width ) || ! is_numeric( $saved_width ) || (float) $saved_width <= $max_width ) {
 			return $media_content;
 		}
 
-		$saved_height = $html->get_attribute( 'height' );
 		if ( is_string( $saved_height ) && is_numeric( $saved_height ) ) {
 			$scaled_height = max( 1, (int) round( (float) $saved_height * $max_width / (float) $saved_width ) );
 			$html->set_attribute( 'height', (string) $scaled_height );
@@ -194,6 +197,36 @@ class Media_Text extends Abstract_Block_Renderer {
 		$html->set_attribute( 'style', $style . sprintf( 'max-width:%dpx;width:100%%;height:auto;', $max_width ) );
 
 		return $html->get_updated_html();
+	}
+
+	/**
+	 * Get the dimensions of the attachment the image shows.
+	 *
+	 * Core saves the media image without `width` and `height`. `wp_filter_content_tags()` adds them
+	 * from the attachment metadata, but only after this block has rendered, so look them up the same way.
+	 *
+	 * @param \WP_HTML_Tag_Processor $html Processor positioned on the image.
+	 * @param array                  $block_attrs Block attributes.
+	 * @return array{0: ?string, 1: ?string} Width and height, or nulls when unknown.
+	 */
+	private function get_attachment_image_dimensions( \WP_HTML_Tag_Processor $html, array $block_attrs ): array {
+		$src           = $html->get_attribute( 'src' );
+		$class         = $html->get_attribute( 'class' );
+		$attachment_id = is_numeric( $block_attrs['mediaId'] ?? null ) ? (int) $block_attrs['mediaId'] : 0;
+		if ( is_string( $class ) && preg_match( '/\bwp-image-(\d+)\b/', $class, $matches ) ) {
+			$attachment_id = (int) $matches[1];
+		}
+		if ( ! is_string( $src ) || $attachment_id <= 0 ) {
+			return array( null, null );
+		}
+
+		$metadata   = wp_get_attachment_metadata( $attachment_id );
+		$dimensions = is_array( $metadata ) ? wp_image_src_get_dimensions( $src, $metadata, $attachment_id ) : false;
+		if ( ! is_array( $dimensions ) ) {
+			return array( null, null );
+		}
+
+		return array( (string) $dimensions[0], (string) $dimensions[1] );
 	}
 
 	/**
