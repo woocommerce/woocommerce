@@ -69,6 +69,21 @@ console.log(response.data);
 
 Supported methods: `get(path, params, debug)`, `post(path, data, debug)`, `put(path, data, debug)`, `delete(path, params, debug)`
 
+### Logged-in admin session
+
+Use `createAdminRestClient` with an authenticated Playwright request context. Pass the WordPress site URL, including the subdirectory if the site uses one. The helper reuses a WordPress REST nonce for the lifetime of the client and returns Playwright's `APIResponse`.
+
+```js
+import { createAdminRestClient } from '@woocommerce/e2e-utils-playwright';
+
+const send = createAdminRestClient(adminPage.request, 'http://localhost:8889/');
+const response = await send('orders/123', {
+  method: 'PUT',
+  data: { status: 'completed' },
+});
+await expect(response).toBeOK();
+```
+
 ## Contributing to this package
 
 This is an individual package that's part of the WooCommerce project, which is organized as a monorepo.
