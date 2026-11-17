@@ -28,7 +28,7 @@ trait OrderRefundAbilityTrait {
 			'properties'           => array(
 				'id'               => array(
 					'type'        => 'integer',
-					'description' => __( 'Refund ID. Omitted in a dry run.', 'woocommerce' ),
+					'description' => __( 'Refund ID.', 'woocommerce' ),
 				),
 				'order_id'         => array( 'type' => 'integer' ),
 				'amount'           => array( 'type' => 'string' ),
@@ -47,7 +47,7 @@ trait OrderRefundAbilityTrait {
 				'date_created'     => array(
 					'type'        => 'string',
 					'format'      => 'date-time',
-					'description' => __( 'Refund date in the store timezone. Omitted in a dry run.', 'woocommerce' ),
+					'description' => __( 'Refund date in the store timezone.', 'woocommerce' ),
 				),
 				'line_items'       => array(
 					'type'        => 'array',
@@ -85,15 +85,12 @@ trait OrderRefundAbilityTrait {
 	 */
 	protected static function format_refund_for_response( \WC_Order_Refund $refund ) {
 		$data = array(
+			'id'               => $refund->get_id(),
 			'order_id'         => $refund->get_parent_id(),
 			'amount'           => self::format_amount_for_response( $refund->get_amount() ),
 			'refunded_payment' => $refund->get_refunded_payment(),
 			'line_items'       => array(),
 		);
-
-		if ( $refund->get_id() > 0 ) {
-			$data['id'] = $refund->get_id();
-		}
 
 		if ( '' !== $refund->get_reason() ) {
 			$data['reason'] = $refund->get_reason();

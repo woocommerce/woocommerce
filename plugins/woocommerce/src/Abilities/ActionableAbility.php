@@ -54,9 +54,6 @@ defined( 'ABSPATH' ) || exit;
  * or make HTTP requests, except after_commit(), which runs after the commit and
  * before prepare_response().
  *
- * When is_dry_run() is true for the input, the call stops after the validators,
- * saves nothing and returns prepare_preview().
- *
  * The API is experimental while the `extensible_abilities` feature exists.
  *
  * @since 11.3.0
@@ -140,33 +137,6 @@ abstract class ActionableAbility extends Ability {
 		}
 
 		return $subject->get_id() > 0 ? null : self::save_failed();
-	}
-
-	/**
-	 * Whether the call only checks the change. A dry run runs every step up to
-	 * the validators, saves nothing, and returns prepare_preview().
-	 *
-	 * @since 11.4.0
-	 *
-	 * @param array $input Ability input.
-	 * @return bool
-	 */
-	protected function is_dry_run( array $input ): bool {
-		return false;
-	}
-
-	/**
-	 * The ability output for a dry run. The object is changed in memory and was
-	 * never saved, so it can have no ID.
-	 *
-	 * @since 11.4.0
-	 *
-	 * @param \WC_Data $subject Changed object, not saved.
-	 * @param array    $input   Ability input.
-	 * @return mixed|\WP_Error
-	 */
-	protected function prepare_preview( $subject, array $input ) {
-		return $this->prepare_response( $subject );
 	}
 
 	/**
@@ -331,10 +301,6 @@ abstract class ActionableAbility extends Ability {
 		}
 		if ( $core_refused || $refused->has_errors() ) {
 			return self::join_refusals( $refused );
-		}
-
-		if ( $this->is_dry_run( $input ) ) {
-			return $this->prepare_preview( $subject, $input );
 		}
 
 		try {

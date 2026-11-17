@@ -144,7 +144,6 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
-		$this->assertFalse( $result['dry_run'] );
 		$this->assertSame( '50', $result['refundable_amount'], 'The refundable amount is the one before the refund.' );
 		$this->assertSame( '10', $result['refund']['amount'] );
 		$this->assertSame( 'Damaged box', $result['refund']['reason'] );
@@ -482,32 +481,6 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_ability_order_refund_gateway_unsupported', $result->get_error_code() );
-		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
-	}
-
-	/**
-	 * @testdox Should return the refund, the refundable amount and the gateway support in a dry run, and change nothing.
-	 */
-	public function test_dry_run_changes_nothing(): void {
-		$order = $this->create_order();
-
-		$result = $this->refund(
-			array(
-				'id'             => $order->get_id(),
-				'amount'         => '20',
-				'refund_payment' => true,
-				'dry_run'        => true,
-			)
-		);
-
-		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
-		$this->assertTrue( $result['dry_run'] );
-		$this->assertTrue( $result['gateway_supports_refunds'] );
-		$this->assertSame( '50', $result['refundable_amount'] );
-		$this->assertSame( '20', $result['refund']['amount'] );
-		$this->assertArrayNotHasKey( 'id', $result['refund'] );
-		$this->assertSame( array(), $this->gateway->refunded, 'A dry run should not move money.' );
-		$this->assertSame( array(), $this->fired, 'No refund hook should fire in a dry run, since some callbacks move money.' );
 		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
 	}
 

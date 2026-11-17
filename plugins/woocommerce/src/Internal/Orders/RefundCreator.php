@@ -92,7 +92,7 @@ class RefundCreator {
 	/**
 	 * Save the refund, then fire woocommerce_create_refund. wc_create_refund() saves the refund before the hook too,
 	 * and callbacks use its ID. A declined refund is deleted, since a rollback cannot remove it from tables
-	 * without transactions. Callbacks can move money or take locks there, so a dry run or a refused refund must not reach it.
+	 * without transactions. Callbacks can move money or take locks there, so a refused refund must not reach it.
 	 *
 	 * @param \WC_Order_Refund $refund Staged refund, not saved.
 	 * @return null|\WP_Error A WP_Error when the refund was not saved, or a callback declined it by throwing.

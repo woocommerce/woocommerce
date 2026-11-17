@@ -84,7 +84,7 @@ class OrderRefundCreate extends ActionableAbility {
 		return array(
 			'label'               => __( 'Refund order', 'woocommerce' ),
 			'description'         => __(
-				'Refund an amount or lines of an order. With refund_payment, the payment gateway sends the money back; without it, the refund is only recorded and the money is returned outside WooCommerce. Send dry_run first to read the refundable amount and whether the gateway can refund, without changing anything.',
+				'Refund an amount or lines of an order. With refund_payment, the payment gateway sends the money back; without it, the refund is only recorded and the money is returned outside WooCommerce.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
@@ -197,7 +197,7 @@ class OrderRefundCreate extends ActionableAbility {
 
 	/**
 	 * Lock the refunds of the order for the call, so a second call cannot pass the duplicate and amount checks
-	 * before the first refund is saved. A dry run saves nothing, so it takes no lock.
+	 * before the first refund is saved.
 	 *
 	 * @internal
 	 *
@@ -205,7 +205,7 @@ class OrderRefundCreate extends ActionableAbility {
 	 * @return mixed|\WP_Error
 	 */
 	public function execute_change( $input = null ) {
-		if ( ! is_array( $input ) || $this->is_dry_run( $input ) ) {
+		if ( ! is_array( $input ) ) {
 			return parent::execute_change( $input );
 		}
 
@@ -227,8 +227,8 @@ class OrderRefundCreate extends ActionableAbility {
 	}
 
 	/**
-	 * Fire woocommerce_create_refund only now, after the validators and never in a dry run, as some callbacks
-	 * refund the payment through their own gateway there.
+	 * Fire woocommerce_create_refund only now, after the validators, as some callbacks refund the payment
+	 * through their own gateway there.
 	 *
 	 * @param \WC_Order_Refund $subject Staged refund.
 	 * @return null|\WP_Error
@@ -240,16 +240,6 @@ class OrderRefundCreate extends ActionableAbility {
 		}
 
 		return parent::save( $subject );
-	}
-
-	/**
-	 * Whether the call only previews the refund.
-	 *
-	 * @param array $input Ability input.
-	 * @return bool
-	 */
-	protected function is_dry_run( array $input ): bool {
-		return $input['dry_run'] ?? false;
 	}
 
 	/**
@@ -303,7 +293,16 @@ class OrderRefundCreate extends ActionableAbility {
 	 * @return array|\WP_Error
 	 */
 	public function prepare_response( $subject ) {
-		return $this->format_result( $subject, false );
+		$formatted = self::format_refund_for_response( $subject );
+		if ( is_wp_error( $formatted ) ) {
+			return $formatted;
+		}
+
+		return array(
+			'refund'                   => $formatted,
+			'refundable_amount'        => self::format_amount_for_response( $this->refundable ),
+			'gateway_supports_refunds' => self::gateway_can_refund( $this->order ),
+		);
 	}
 
 	/**
@@ -313,38 +312,6 @@ class OrderRefundCreate extends ActionableAbility {
 	 */
 	protected function writes_extension_fields(): bool {
 		return false;
-	}
-
-	/**
-	 * The ability output for a dry run, with the refund that would be created.
-	 *
-	 * @param \WC_Order_Refund $subject Staged refund, not saved.
-	 * @param array            $input   Ability input.
-	 * @return array|\WP_Error
-	 */
-	protected function prepare_preview( $subject, array $input ) {
-		return $this->format_result( $subject, true );
-	}
-
-	/**
-	 * Format the refund with the refundable amount and the gateway support that the client checks before a refund.
-	 *
-	 * @param \WC_Order_Refund $refund  Refund.
-	 * @param bool             $dry_run Whether the refund was only staged.
-	 * @return array|\WP_Error
-	 */
-	private function format_result( \WC_Order_Refund $refund, bool $dry_run ) {
-		$formatted = self::format_refund_for_response( $refund );
-		if ( is_wp_error( $formatted ) ) {
-			return $formatted;
-		}
-
-		return array(
-			'refund'                   => $formatted,
-			'refundable_amount'        => self::format_amount_for_response( $this->refundable ),
-			'gateway_supports_refunds' => self::gateway_can_refund( $this->order ),
-			'dry_run'                  => $dry_run,
-		);
 	}
 
 	/**
@@ -518,17 +485,12 @@ class OrderRefundCreate extends ActionableAbility {
 				'reason'         => array( 'type' => 'string' ),
 				'refund_payment' => array(
 					'type'        => 'boolean',
-					'description' => __( 'Whether the payment gateway sends the money back. Check gateway_supports_refunds with a dry run first.', 'woocommerce' ),
+					'description' => __( 'Whether the payment gateway sends the money back.', 'woocommerce' ),
 					'default'     => false,
 				),
 				'restock_items'  => array(
 					'type'        => 'boolean',
 					'description' => __( 'Whether to return the refunded quantities of the product lines to stock.', 'woocommerce' ),
-					'default'     => false,
-				),
-				'dry_run'        => array(
-					'type'        => 'boolean',
-					'description' => __( 'Check the refund and return it without saving it or moving money.', 'woocommerce' ),
 					'default'     => false,
 				),
 			),
@@ -554,10 +516,6 @@ class OrderRefundCreate extends ActionableAbility {
 				'gateway_supports_refunds' => array(
 					'type'        => 'boolean',
 					'description' => __( 'Whether the payment gateway of the order can send the money back with refund_payment.', 'woocommerce' ),
-				),
-				'dry_run'                  => array(
-					'type'        => 'boolean',
-					'description' => __( 'True when nothing was saved and no money moved.', 'woocommerce' ),
 				),
 			),
 			'additionalProperties' => false,
