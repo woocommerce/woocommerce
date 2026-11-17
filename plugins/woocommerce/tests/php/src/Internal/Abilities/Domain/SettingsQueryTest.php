@@ -177,6 +177,86 @@ class SettingsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should distinguish withheld fields from missing IDs without reading secrets or counting other pages as omitted.
+	 * @testWith [[], ["denied", "password", "shape"], 2]
+	 *           [["visible", "other_visible", "denied", "password", "shape", "missing", "section"], ["denied", "password", "shape"], 2]
+	 *           [["denied", "missing"], ["denied"], 0]
+	 *           [["missing", "section"], [], 0]
+	 * @param array $included_ids Requested IDs.
+	 * @param array $omitted Expected omitted IDs.
+	 * @param int   $total Expected readable count.
+	 */
+	public function test_omitted_settings( array $included_ids, array $omitted, int $total ): void {
+		add_filter(
+			'woocommerce_settings-general',
+			static function () {
+				return array(
+					array(
+						'id'        => 'visible',
+						'type'      => 'text',
+						'abilities' => array( 'read' => true ),
+						'value'     => 'public',
+					),
+					array(
+						'id'        => 'other_visible',
+						'type'      => 'text',
+						'abilities' => array( 'read' => true ),
+						'value'     => 'public',
+					),
+					array(
+						'id'         => 'denied',
+						'type'       => 'text',
+						'option_key' => 'withheld_secret',
+						'default'    => 'secret-sentinel',
+					),
+					array(
+						'id'         => 'password',
+						'type'       => 'password',
+						'abilities'  => array( 'read' => true ),
+						'option_key' => 'withheld_secret',
+						'default'    => 'secret-sentinel',
+					),
+					array(
+						'id'        => 'shape',
+						'type'      => 'text',
+						'abilities' => array( 'read' => true ),
+						'value'     => array( 'api_key' => 'secret-sentinel' ),
+					),
+					array(
+						'id'   => 'section',
+						'type' => 'title',
+					),
+				);
+			},
+			100
+		);
+		add_filter(
+			'pre_option_withheld_secret',
+			function () {
+				$this->fail( 'Withheld option values must not be read.' );
+			}
+		);
+		$ability = wp_get_ability( 'woocommerce/settings-query' );
+		$input   = array(
+			'group'    => 'general',
+			'include'  => $included_ids,
+			'per_page' => 1,
+		);
+		$result  = $ability->execute( $input );
+		$this->assertSame( $omitted, $result['omitted'] );
+		$this->assertSame( $total, $result['total'] );
+		$this->assertStringNotContainsString( 'secret-sentinel', wp_json_encode( $result ) );
+		if ( $total ) {
+			$this->assertSame( 'visible', $result['settings'][0]['id'] );
+			$input['page'] = 2;
+			$result        = $ability->execute( $input );
+			$this->assertSame( 'other_visible', $result['settings'][0]['id'] );
+			$this->assertSame( $omitted, $result['omitted'] );
+			$this->assertSame( $total, $result['total'] );
+		}
+	}
+
+	/**
 	 * @testdox Should let an extension opt a Core setting out at its definition.
 	 */
 	public function test_core_setting_can_opt_out(): void {

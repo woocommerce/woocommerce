@@ -387,7 +387,7 @@ array(
 
 The same metadata works on email form fields exposed through a settings group. It does not register a new group or expose payment gateway or shipping-instance settings automatically. Callers still need permission to read WooCommerce settings.
 
-Fields without explicit opt-in are omitted, even when requested by ID. Password fields are always omitted, including when `read` is `true`. Never opt in API keys, tokens or other secrets stored in text fields. Review defaults and choices as well as stored values, since the ability can return all three. Supported values are scalars, lists of scalars and the retention-period object with `number` and `unit` members; other object shapes are omitted.
+Fields without explicit opt-in are omitted, even when requested by ID. The response lists known but withheld setting IDs in `omitted`; unknown IDs and presentation fields are not listed. This list follows `include` and is computed before pagination. Totals count only returned settings. Password fields are always omitted, including when `read` is `true`. Never opt in API keys, tokens or other secrets stored in text fields. Review defaults and choices as well as stored values, since the ability can return all three. Supported values are scalars, lists of scalars and the retention-period object with `number` and `unit` members; other object shapes are omitted.
 
 Choices are returned only when supplied in the field definition. Country fields return country or country/state codes without choice lists, keeping group responses small.
 

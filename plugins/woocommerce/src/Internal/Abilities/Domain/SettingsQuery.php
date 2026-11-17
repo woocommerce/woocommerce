@@ -75,6 +75,7 @@ class SettingsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		 */
 		$settings     = apply_filters( 'woocommerce_settings-' . $group, array() ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 		$readable     = array();
+		$matched      = array();
 		$option_names = array();
 		foreach ( is_array( $settings ) ? $settings : array() as $setting ) {
 			if ( ! is_array( $setting ) || ! is_string( $setting['id'] ?? null ) || ! is_string( $setting['type'] ?? null ) ) {
@@ -82,10 +83,11 @@ class SettingsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			}
 			$id  = $setting['id'];
 			$key = $setting['option_key'] ?? null;
-			if ( ! is_array( $setting['abilities'] ?? null ) || true !== ( $setting['abilities']['read'] ?? false ) || in_array( $setting['type'], array( 'password', 'title', 'sectionend' ), true ) ) {
+			if ( in_array( $setting['type'], array( 'title', 'sectionend' ), true ) || ( ! empty( $input['include'] ) && ! in_array( $id, $input['include'], true ) ) ) {
 				continue;
 			}
-			if ( ! empty( $input['include'] ) && ! in_array( $id, $input['include'], true ) ) {
+			$matched[] = $id;
+			if ( ! is_array( $setting['abilities'] ?? null ) || true !== ( $setting['abilities']['read'] ?? false ) || 'password' === $setting['type'] ) {
 				continue;
 			}
 			if ( isset( $setting['fixed_value'] ) || isset( $setting['value'] ) ) {
@@ -138,6 +140,7 @@ class SettingsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$page     = $input['page'] ?? 1;
 		$per_page = $input['per_page'] ?? 20;
 		return array(
+			'omitted'     => array_values( array_diff( array_unique( $matched ), array_column( $items, 'id' ) ) ),
 			'settings'    => array_slice( $items, ( $page - 1 ) * $per_page, $per_page ),
 			'total'       => $total,
 			'total_pages' => (int) ceil( $total / $per_page ),
@@ -229,7 +232,7 @@ class SettingsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_output_schema(): array {
-		$schema                        = self::get_collection_output_schema(
+		$schema                          = self::get_collection_output_schema(
 			'settings',
 			array(
 				'type'                 => 'object',
@@ -248,7 +251,12 @@ class SettingsQuery extends AbstractDomainAbility implements AbilityDefinition {
 				'additionalProperties' => false,
 			)
 		);
-		$schema['properties']['total'] = array( 'type' => 'integer' );
+		$schema['properties']['total']   = array( 'type' => 'integer' );
+		$schema['properties']['omitted'] = array(
+			'type'        => 'array',
+			'items'       => array( 'type' => 'string' ),
+			'description' => 'Known setting IDs withheld from this query, before pagination. Unknown IDs are not listed.',
+		);
 		return $schema;
 	}
 }
