@@ -167,8 +167,10 @@ class ShippingZoneCreate extends AbstractDomainAbility implements AbilityDefinit
 	private static function get_known_location_code( string $code, string $type ): ?string {
 		$countries = WC()->countries;
 		if ( 'country' === $type ) {
-			$known = array_keys( $countries->get_countries() );
-		} elseif ( 'continent' === $type ) {
+			return $countries->country_exists( strtoupper( $code ) ) ? strtoupper( $code ) : null;
+		}
+
+		if ( 'continent' === $type ) {
 			$known = array_keys( $countries->get_continents() );
 		} elseif ( 'state' === $type ) {
 			$parts   = explode( ':', $code, 2 );
