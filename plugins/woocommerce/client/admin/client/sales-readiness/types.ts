@@ -47,7 +47,6 @@ export interface FixFirstItem {
 }
 
 export interface FixFirst {
-	/** Fix first, or Nothing to fix when there are no items. */
 	title: string;
 	ranking: string;
 	/** Where to turn on Analytics, while it is off. */
@@ -102,6 +101,7 @@ export interface ReadinessView {
 		/** Scheduled Actions, when the check can't start. */
 		link: ViewLink | null;
 	};
+	/** Null before the first check, and when there is nothing to fix. */
 	fix_first: FixFirst | null;
 	sections: Section[];
 	declared: Declared | null;

@@ -88,9 +88,7 @@ export const FixFirstCard = ( { fixFirst }: { fixFirst: FixFirstData } ) => (
 					</>
 				) }
 			</Text>
-			{ fixFirst.items.length > 0 && (
-				<FixFirstList items={ fixFirst.items } />
-			) }
+			<FixFirstList items={ fixFirst.items } />
 		</Card.Content>
 	</Card.Root>
 );

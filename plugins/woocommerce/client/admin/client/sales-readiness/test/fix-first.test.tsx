@@ -69,21 +69,4 @@ describe( 'FixFirstCard', () => {
 			'/wp-admin/admin.php?page=wc-settings&tab=advanced&section=features'
 		);
 	} );
-
-	it( 'shows Nothing to fix without an empty list', () => {
-		const { container } = render(
-			<FixFirstCard
-				fixFirst={ {
-					title: 'Nothing to fix',
-					ranking:
-						'Your store has everything AI assistants need to find and shop your products.',
-					link: null,
-					items: [],
-				} }
-			/>
-		);
-
-		expect( screen.getByText( 'Nothing to fix' ) ).toBeInTheDocument();
-		expect( container.querySelector( 'ol' ) ).toBeNull();
-	} );
 } );

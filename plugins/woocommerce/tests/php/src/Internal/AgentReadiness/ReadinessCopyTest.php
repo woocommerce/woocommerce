@@ -126,10 +126,10 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 	 * @testdox The product why lines that name ChatGPT, Google or Copilot match the bundled channel rules.
 	 */
 	public function test_product_why_lines_match_channel_rules(): void {
-		// What each why line says, and what that means per channel; update both when the rules change.
+		// What each why line says, and what that means per channel; update both when the rules change. Lines that name no channel are left out.
 		$said  = array(
 			'missing_regular_price' => array(
-				'AI assistants only list products that have a price.',
+				'AI shopping apps only list products that have a price.',
 				array(
 					'chatgpt' => 'not_listable',
 					'google'  => 'not_listable',
@@ -137,19 +137,11 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 				),
 			),
 			'missing_images'        => array(
-				'AI assistants only list products that have a main image.',
+				'AI shopping apps need a main image to list a product.',
 				array(
 					'chatgpt' => 'not_listable',
 					'google'  => 'not_listable',
 					'copilot' => 'not_listable',
-				),
-			),
-			'missing_product_text'  => array(
-				'ChatGPT only lists products that have a description. In Google and Copilot, a description makes products easier to find.',
-				array(
-					'chatgpt' => 'not_listable',
-					'google'  => 'gaps',
-					'copilot' => 'gaps',
 				),
 			),
 			'missing_brand'         => array(
@@ -157,14 +149,6 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 				array(
 					'chatgpt' => 'not_listable',
 					'google'  => 'gaps',
-					'copilot' => 'gaps',
-				),
-			),
-			'invalid_gtin'          => array(
-				'Google doesn’t list products with a barcode number that isn’t valid. In ChatGPT and Copilot, a valid one makes products easier to find.',
-				array(
-					'chatgpt' => 'gaps',
-					'google'  => 'not_listable',
 					'copilot' => 'gaps',
 				),
 			),
