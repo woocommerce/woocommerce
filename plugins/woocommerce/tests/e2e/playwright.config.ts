@@ -121,6 +121,8 @@ const serialRunSpecs = [
 	// Activates a test plugin with WP-CLI, which races other workers on the
 	// `active_plugins` option.
 	'**/tests/checkout/checkout-shortcode-custom-place-order-button.spec.ts',
+	// Changes site visibility and the active plugins while checking llms.txt.
+	'**/tests/llms-txt/*.spec.ts',
 	// Mutate the global onboarding profile/options, site-visibility options and
 	// the active theme.
 	'**/tests/onboarding/**/*.spec.ts',

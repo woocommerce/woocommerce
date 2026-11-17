@@ -91,6 +91,7 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 
 		return array(
 			'gateways'    => $items,
+			'total'       => count( $items ),
 			'total_pages' => $items ? 1 : 0,
 			'page'        => 1,
 			'per_page'    => count( $items ),
@@ -134,6 +135,12 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 	 * @return array
 	 */
 	private static function get_output_schema(): array {
-		return self::get_collection_output_schema( 'gateways', self::get_payment_gateway_item_schema() );
+		$schema                        = self::get_collection_output_schema( 'gateways', self::get_payment_gateway_item_schema() );
+		$schema['properties']['total'] = array(
+			'type'        => 'integer',
+			'description' => __( 'Total number of matching payment gateways.', 'woocommerce' ),
+		);
+
+		return $schema;
 	}
 }
