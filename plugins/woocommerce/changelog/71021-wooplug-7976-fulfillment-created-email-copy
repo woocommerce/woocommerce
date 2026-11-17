@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Reword the fulfillment created email so its opening line reads correctly for both partial and complete fulfillments.
