@@ -100,6 +100,37 @@ class RateLimitsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that UCP requests are rate limited without the Store API authentication bypass.
+	 */
+	public function test_ucp_requests_are_rate_limited() {
+		add_filter(
+			'woocommerce_store_api_rate_limit_options',
+			function () {
+				return array(
+					'enabled' => true,
+					'limit'   => 1,
+				);
+			}
+		);
+
+		remove_all_filters( 'rest_authentication_errors' );
+		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/ucp/v1/catalog/search';
+		$authentication                          = new Authentication();
+		$authentication->init();
+
+		// Uses up the one allowed request.
+		$this->assertNull( apply_filters( 'rest_authentication_errors', null ), 'UCP requests must not be marked as authenticated.' );
+
+		/** @var Spy_REST_Server $spy_rest_server */
+		$spy_rest_server = rest_get_server();
+		$spy_rest_server->serve_request( '/wc/ucp/v1/catalog/search' );
+
+		$body = json_decode( $spy_rest_server->sent_body );
+		$this->assertEquals( 429, $body->data->status );
+		$this->assertEquals( 0, $spy_rest_server->sent_headers['RateLimit-Remaining'] );
+	}
+
+	/**
 	 * Tests that get_ip_address() correctly selects the $_SERVER var, parses and return the IP whether
 	 * behind a proxy or not.
 	 *

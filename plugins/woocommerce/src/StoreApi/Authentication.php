@@ -14,6 +14,12 @@ class Authentication {
 	 * Hook into WP lifecycle events. This is hooked by the StoreAPI class on `rest_api_init`.
 	 */
 	public function init() {
+		// UCP routes get rate limiting only: the other filters below assume a browser client with a nonce.
+		if ( 0 === strpos( $GLOBALS['wp']->query_vars['rest_route'] ?? '', '/wc/ucp/' ) ) {
+			add_filter( 'rest_authentication_errors', array( $this, 'rate_limit_ucp_request' ) );
+			return;
+		}
+
 		if ( ! $this->is_request_to_store_api() ) {
 			return;
 		}
@@ -165,6 +171,17 @@ class Authentication {
 
 		// Pass through errors from other authentication methods used before this one.
 		return ! empty( $result ) ? $result : true;
+	}
+
+	/**
+	 * Applies Store API rate limiting to a UCP request, passing any other authentication result through unchanged.
+	 *
+	 * @since 11.4.0
+	 * @param \WP_Error|mixed $result Error from another authentication handler, null if we should handle it, or another value if not.
+	 * @return \WP_Error|mixed
+	 */
+	public function rate_limit_ucp_request( $result ) {
+		return current_user_can( 'edit_posts' ) ? $result : $this->apply_rate_limiting( $result );
 	}
 
 	/**
