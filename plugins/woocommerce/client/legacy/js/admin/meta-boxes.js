@@ -294,7 +294,10 @@ jQuery( function ( $ ) {
 
 			$( 'div.panel-wrap' ).each( function () {
 				let $first_tab = $( this )
-					.find( 'ul.wc-tabs li:visible' )
+					.find( 'ul.wc-tabs li' )
+					.filter( function () {
+						return $( this ).css( 'display' ) !== 'none';
+					} )
 					.eq( 0 )
 					.find( 'a' );
 

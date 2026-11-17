@@ -259,7 +259,13 @@ jQuery( function ( $ ) {
 			show_and_hide_panels();
 			change_product_type_tip( get_product_tip_content( select_val ) );
 
-			$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).trigger( 'click' );
+			$( 'ul.wc-tabs li' )
+				.filter( function () {
+					return $( this ).css( 'display' ) !== 'none';
+				} )
+				.eq( 0 )
+				.find( 'a' )
+				.trigger( 'click' );
 
 			$( document.body ).trigger(
 				'woocommerce-product-type-change',
