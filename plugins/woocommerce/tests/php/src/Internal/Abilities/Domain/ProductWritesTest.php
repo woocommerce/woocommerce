@@ -545,7 +545,13 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 		}
 		$this->assertEmpty( get_post_meta( $product->get_id(), '_sale_price_dates_from', true ) );
 		$this->assertEmpty( get_post_meta( $product->get_id(), '_sale_price_dates_to', true ) );
-		$this->assertNotSame( '8.0000', $wpdb->get_var( $wpdb->prepare( "SELECT min_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product->get_id() ) ) );
+		$this->assertSame(
+			array(
+				'min_price' => '0.0000',
+				'max_price' => '0.0000',
+			),
+			$wpdb->get_row( $wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product->get_id() ), ARRAY_A )
+		);
 	}
 
 	/**
@@ -573,6 +579,65 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 		foreach ( $variations as $variation_id ) {
 			$this->assertNull( get_post( $variation_id ), "Variation $variation_id should be deleted." );
 		}
+	}
+
+	/**
+	 * @testdox Should drop the variation prices from the price lookup when a variable product becomes $type without a price.
+	 *
+	 * @testWith ["simple"]
+	 *           ["external"]
+	 *           ["grouped"]
+	 *
+	 * @param string $type New product type.
+	 */
+	public function test_change_out_of_variable_drops_the_variation_prices( string $type ): void {
+		global $wpdb;
+
+		$items  = array();
+		$prices = array(
+			'S' => '11',
+			'M' => '12',
+		);
+		foreach ( $prices as $option => $price ) {
+			$items[] = array(
+				'attributes'    => array(
+					array(
+						'name'   => 'Size',
+						'option' => $option,
+					),
+				),
+				'regular_price' => $price,
+			);
+		}
+		$created  = $this->execute(
+			'woocommerce/product-create',
+			array(
+				'name'       => 'Shirt',
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M' ),
+					),
+				),
+				'variations' => $items,
+			)
+		);
+		$variable = wc_get_product( $created['product']['id'] );
+
+		$this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'   => $variable->get_id(),
+				'type' => $type,
+			)
+		);
+
+		$this->assertEmpty( array_filter( get_post_meta( $variable->get_id(), '_price', false ), 'strlen' ) );
+		$this->assertLessThanOrEqual( 1, count( get_post_meta( $variable->get_id(), '_price', false ) ) );
+		$lookup = $wpdb->get_row( $wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $variable->get_id() ), ARRAY_A );
+		$this->assertEmpty( (float) $lookup['min_price'] );
+		$this->assertEmpty( (float) $lookup['max_price'] );
 	}
 
 	/**

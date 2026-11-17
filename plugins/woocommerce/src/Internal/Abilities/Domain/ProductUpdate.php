@@ -266,6 +266,11 @@ class ProductUpdate extends ActionableAbility {
 				}
 			}
 			$this->variations['delete'] = array();
+			if ( ! $subject instanceof \WC_Product_Variable && ! $subject instanceof \WC_Product_Grouped ) {
+				delete_post_meta( $subject->get_id(), '_price' );
+				add_post_meta( $subject->get_id(), '_price', $subject->get_price( 'edit' ) );
+				$subject->get_data_store()->refresh_product_lookup_table( $subject->get_id() ); // @phpstan-ignore method.notFound (WC_Data_Store forwards the call to the product data store)
+			}
 		}
 
 		if ( $subject instanceof \WC_Product_Variable ) {
