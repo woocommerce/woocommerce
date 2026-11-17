@@ -2,6 +2,19 @@
 
 Install `@woocommerce/extension-tooling` as a development dependency in the extension.
 
+## Extension configuration
+
+The reader uses Bash and `jq` to validate `config.woo` in the extension's `package.json` and apply defaults. Run it from the extension root.
+
+```sh
+pnpm exec woo-extension-config
+pnpm exec woo-extension-config '.zip.root'
+```
+
+Use `--github-output` to write the normalized JSON to `GITHUB_OUTPUT` under `json`. Use `--phpunit-matrix` to get the selected PHPUnit legs for the current extension. Set `SUITE=integration` for integration legs (the default is `unit`), or `SCHEDULED=true` to include scheduled legs. `REQUESTED_WP`, `REQUESTED_WC` and `REQUESTED_PHP` set version overrides, and `PREVIOUS_WP` supplies the version for `previous` WordPress legs.
+
+To run the reader before installing dependencies, get `bin/woo-config.sh` and `bin/woo-config.schema.json` from the same reviewed commit of this package. Keep the files in the same directory and run `bash /path/to/woo-config.sh` from the extension root.
+
 ## Webpack
 
 Import the helpers from the extension's webpack configuration. Keep the entry paths, output paths and match patterns in that configuration.
