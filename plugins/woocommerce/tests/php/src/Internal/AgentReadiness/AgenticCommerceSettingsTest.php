@@ -1640,6 +1640,20 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A shop manager with no privacy page sees the failing check and no link to a field they cannot use.
+	 */
+	public function test_privacy_check_without_manage_privacy_options_has_no_settings_link(): void {
+		StoreConditionsTest::make_store_ready();
+		delete_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+
+		$html = $this->render_page();
+
+		$this->assertStringContainsString( 'Someone who can manage privacy options needs to select a published privacy policy page under Settings &gt; Privacy.', $html );
+		$this->assertStringNotContainsString( '#wp_page_for_privacy_policy', $html );
+	}
+
+	/**
 	 * @testdox A discovery file WooCommerce didn't write shows the removal instruction, not a permalinks link.
 	 */
 	public function test_ucp_file_in_the_way_shows_the_removal_instruction(): void {
