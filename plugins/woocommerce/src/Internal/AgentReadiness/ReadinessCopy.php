@@ -32,7 +32,7 @@ final class ReadinessCopy {
 	 *
 	 * @param string $id     Check id.
 	 * @param string $source What the store serves for the check (the report's source), or ''.
-	 * @return array{title:string,action:string,why:string,found:string,fix:string,url:string}|null Passed title, failing title, why it matters (shown when passed), why and what was found (shown when failing), the fix line or '', and where to fix it or ''. Null for a check without copy here.
+	 * @return array{title:string,action:string,why:string,found:string,fix:string,url:string,found_link:array{href:string,text:string}|null}|null Passed title, failing title, why it matters (shown when passed), why and what was found (shown when failing), the fix line or '', where to fix it or '', and an optional tool name linked in the found line. Null for a check without copy here.
 	 */
 	public static function store_check( string $id, string $source = '' ): ?array {
 		$checks = self::store_checks();
