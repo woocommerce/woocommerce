@@ -1697,4 +1697,65 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$this->assertGreaterThan( 0, $item->get_product_id(), 'Item should have a product ID from cached meta' );
 		}
 	}
+
+	/**
+	 * @testdox clear_recorded_coupon_usage_counts() clears a set flag once, and only while the stored status matches the order object.
+	 */
+	public function test_clear_recorded_coupon_usage_counts(): void {
+		$sut         = new WC_Order_Data_Store_CPT();
+		$order       = $this->create_cancelled_order_with_counted_coupon_usage( $sut );
+		$other_order = $this->create_cancelled_order_with_counted_coupon_usage( $sut );
+
+		$copy_with_other_status = clone $order;
+		$copy_with_other_status->set_status( OrderStatus::FAILED );
+		$this->assertFalse( $sut->clear_recorded_coupon_usage_counts( $copy_with_other_status ), 'The flag should not be cleared when the stored status differs' );
+		$this->assertTrue( $sut->get_recorded_coupon_usage_counts( $order->get_id() ), 'The flag should stay set' );
+
+		$this->assertTrue( $sut->clear_recorded_coupon_usage_counts( $order ), 'A set flag should be cleared' );
+		$this->assertFalse( $sut->get_recorded_coupon_usage_counts( $order->get_id() ), 'The flag should read as cleared' );
+		$this->assertFalse( $order->get_recorded_coupon_usage_counts(), 'The order object should be updated' );
+		$this->assertTrue( $sut->get_recorded_coupon_usage_counts( $other_order->get_id() ), 'Other orders should keep their flag' );
+
+		$this->assertFalse( $sut->clear_recorded_coupon_usage_counts( $order ), 'A cleared flag should not be cleared again' );
+	}
+
+	/**
+	 * @testdox get_stored_recorded_coupon_usage_counts() reads the flag from the database, not from the cache.
+	 */
+	public function test_get_stored_recorded_coupon_usage_counts(): void {
+		global $wpdb;
+
+		$sut   = new WC_Order_Data_Store_CPT();
+		$order = $this->create_cancelled_order_with_counted_coupon_usage( $sut );
+		$this->assertFalse( $sut->get_stored_recorded_coupon_usage_counts( WC_Helper_Order::create_order() ), 'An order without the flag should read as not counted' );
+		$this->assertTrue( $sut->get_stored_recorded_coupon_usage_counts( $order ), 'A set flag should read as counted' );
+
+		$this->assertTrue( $sut->get_recorded_coupon_usage_counts( $order ), 'The cached read should see the set flag' );
+		$wpdb->update(
+			$wpdb->postmeta,
+			array( 'meta_value' => 'no' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			array(
+				'post_id'  => $order->get_id(),
+				'meta_key' => '_recorded_coupon_usage_counts', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			)
+		);
+
+		$this->assertTrue( $sut->get_recorded_coupon_usage_counts( $order ), 'The cached read should still see the old value' );
+		$this->assertFalse( $sut->get_stored_recorded_coupon_usage_counts( $order ), 'The stored read should see the cleared flag' );
+	}
+
+	/**
+	 * Create a cancelled order marked as having its coupon usage counted.
+	 *
+	 * @param WC_Order_Data_Store_CPT $data_store Data store to mark the order with.
+	 * @return WC_Order
+	 */
+	private function create_cancelled_order_with_counted_coupon_usage( WC_Order_Data_Store_CPT $data_store ): WC_Order {
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::CANCELLED );
+		$order->save();
+		$data_store->set_recorded_coupon_usage_counts( $order, true );
+
+		return $order;
+	}
 }

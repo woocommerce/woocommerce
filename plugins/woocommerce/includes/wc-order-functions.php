@@ -1063,9 +1063,36 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		$invalid_statuses
 	);
 
+	$stored_coupon_codes = null;
 	if ( $order->has_status( $invalid_statuses ) && $has_recorded ) {
 		$action = 'reduce';
-		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
+		if ( $data_store->has_callable( 'clear_recorded_coupon_usage_counts' ) ) {
+			// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
+			if ( ! $data_store->clear_recorded_coupon_usage_counts( $order ) ) {
+				// Another request already gave the uses back, or changed the order status since this order was loaded.
+				wc_release_coupons_for_order( $order );
+				return;
+			}
+		} else {
+			$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
+		}
+
+		if ( $data_store->has_callable( 'get_item_ids' ) ) {
+			try {
+				// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
+				$stored_item_ids = $data_store->get_item_ids( $order, 'coupon' );
+			} catch ( Exception $e ) {
+				// Give nothing back rather than risk giving a use back twice.
+				$stored_item_ids = array();
+			}
+
+			$stored_coupon_codes = array();
+			foreach ( $order->get_items( 'coupon' ) as $coupon_item ) {
+				if ( $coupon_item instanceof WC_Order_Item_Coupon && in_array( $coupon_item->get_id(), $stored_item_ids, true ) ) {
+					$stored_coupon_codes[] = $coupon_item->get_code();
+				}
+			}
+		}
 	} elseif ( ! $order->has_status( $invalid_statuses ) && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
@@ -1091,7 +1118,10 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 			switch ( $action ) {
 				case 'reduce':
-					$coupon->decrease_usage_count( $used_by );
+					// A coupon removed from the order after it was loaded here already gave its use back.
+					if ( null === $stored_coupon_codes || in_array( $code, $stored_coupon_codes, true ) ) {
+						$coupon->decrease_usage_count( $used_by );
+					}
 					break;
 				case 'increase':
 					$coupon->increase_usage_count( $used_by, $order );

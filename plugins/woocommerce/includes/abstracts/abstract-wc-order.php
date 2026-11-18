@@ -1937,9 +1937,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// Remove the coupon line.
 		foreach ( $coupons as $item_id => $coupon ) {
 			if ( wc_is_same_coupon( $coupon->get_code(), $code ) ) {
+				$stored_item = $this->get_item( $item_id, false );
 				$this->remove_item( $item_id );
 				$coupon_object = new WC_Coupon( $code );
-				$coupon_object->decrease_usage_count( $this->get_user_id() );
+				if ( $this->has_recorded_coupon_usage() && $this->delete_counted_coupon_line( $stored_item ) ) {
+					$coupon_object->decrease_usage_count( $this->get_user_id() );
+				}
 				$this->recalculate_coupons();
 
 				/**
@@ -1957,6 +1960,72 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Delete the coupon line of an order that counted its use, and tell whether this call should give the use back.
+	 *
+	 * Only the call that deleted the line gives the use back, and only while the stored order is still counted, so
+	 * parallel removals and a parallel cancellation give it back at most once.
+	 * If a cancellation runs at the same moment, both can skip it and the count stays one too high.
+	 *
+	 * @param WC_Order_Item|false $stored_item Removed coupon line, as stored in this order.
+	 * @return bool|null True if this call should give the coupon's use back, false if not, null if another call deleted the line or the delete failed.
+	 */
+	private function delete_counted_coupon_line( $stored_item ): ?bool {
+		if ( ! $stored_item instanceof WC_Order_Item_Coupon || ! $stored_item->get_id() ) {
+			return true;
+		}
+
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $item_data_store
+		 */
+		$item_data_store = $stored_item->get_data_store();
+		$deleted         = $item_data_store->delete( $stored_item );
+		if ( false === $deleted ) {
+			// A database error. The delete that remove_item() queued runs again on save.
+			return null;
+		}
+
+		// The row is gone, so the delete that remove_item() queued for save() must not run again.
+		$stored_item->set_id( 0 );
+
+		// No row deleted: another call deleted the line first. Item data stores that return nothing (custom or
+		// overridden) cannot report it, so only the counted check below applies to them.
+		if ( null !== $deleted && ! $deleted ) {
+			return null;
+		}
+
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $order_data_store
+		 */
+		$order_data_store = $this->get_data_store();
+		if ( ! $order_data_store->has_callable( 'get_stored_recorded_coupon_usage_counts' ) ) {
+			return true;
+		}
+
+		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
+		return $order_data_store->get_stored_recorded_coupon_usage_counts( $this );
+	}
+
+	/**
+	 * Whether the stored order has its coupon usage recorded.
+	 *
+	 * @return bool
+	 */
+	private function has_recorded_coupon_usage(): bool {
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $order_data_store
+		 */
+		$order_data_store = $this->get_data_store();
+		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
+		return $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this );
 	}
 
 	/**

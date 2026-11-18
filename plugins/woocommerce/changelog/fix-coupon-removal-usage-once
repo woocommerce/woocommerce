@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep coupon usage counts accurate when a coupon is removed from an order.
