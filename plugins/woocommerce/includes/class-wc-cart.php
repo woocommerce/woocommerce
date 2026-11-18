@@ -1568,13 +1568,17 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $cart_item_key contains the id of the cart item.
 	 * @param int    $quantity contains the quantity of the item.
 	 * @param bool   $refresh_totals whether or not to calculate totals after setting the new qty. Can be used to defer calculations if setting quantities in bulk.
-	 * @return bool
+	 * @return bool  False if the item is not in the cart, true otherwise.
 	 */
 	public function set_quantity( $cart_item_key, $quantity = 1, $refresh_totals = true ) {
 		if ( 0 === $quantity || $quantity < 0 ) {
 			wc_do_deprecated_action( 'woocommerce_before_cart_item_quantity_zero', array( $cart_item_key, $this ), '3.7.0', 'woocommerce_remove_cart_item' );
 			// If we're setting qty to 0 we're removing the item from the cart.
 			return $this->remove_cart_item( $cart_item_key );
+		}
+
+		if ( ! isset( $this->cart_contents[ $cart_item_key ] ) ) {
+			return false;
 		}
 
 		// Update qty.
