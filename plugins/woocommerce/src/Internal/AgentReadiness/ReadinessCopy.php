@@ -331,8 +331,8 @@ final class ReadinessCopy {
 				__( 'AI assistants can read your product details', 'woocommerce' ),
 				__( 'Let AI assistants read your product details', 'woocommerce' ),
 				__( 'WooCommerce adds each product’s name, price, and stock to the page’s code for AI assistants.', 'woocommerce' ),
-				__( 'WooCommerce adds the name, price and stock to product pages as structured data, so AI assistants don’t have to guess. A theme or SEO plugin may have removed it. We found none on a recent product page.', 'woocommerce' ),
-				__( 'Test a product page in Google’s Rich Results Test, then look for a theme or plugin setting that turns off WooCommerce structured data.', 'woocommerce' ),
+				__( 'Your newest product page doesn’t include these details in its code, so AI assistants may get them wrong. A theme or plugin may have turned this off, which usually affects every product page.', 'woocommerce' ),
+				__( 'Check their settings for WooCommerce structured data.', 'woocommerce' ),
 			),
 			'product_jsonld_from_core'       => array(
 				__( 'Your product pages have one set of product details', 'woocommerce' ),
