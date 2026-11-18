@@ -4814,4 +4814,39 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertInstanceOf( \Exception::class, $error, 'The update should throw when a value does not fit its column.' );
 		$this->assertStringContainsString( 'phone', $error->getMessage(), 'The error should name the column that is too long.' );
 	}
+
+	/**
+	 * @testDox clear_recorded_coupon_usage_counts() clears a set flag once, and only while the stored status matches the order object.
+	 */
+	public function test_clear_recorded_coupon_usage_counts(): void {
+		$this->toggle_cot_feature_and_usage( true );
+		$order       = $this->create_cancelled_order_with_counted_coupon_usage();
+		$other_order = $this->create_cancelled_order_with_counted_coupon_usage();
+
+		$copy_with_other_status = clone $order;
+		$copy_with_other_status->set_status( OrderStatus::FAILED );
+		$this->assertFalse( $this->sut->clear_recorded_coupon_usage_counts( $copy_with_other_status ), 'The flag should not be cleared when the stored status differs' );
+		$this->assertTrue( $this->sut->get_recorded_coupon_usage_counts( $order->get_id() ), 'The flag should stay set' );
+
+		$this->assertTrue( $this->sut->clear_recorded_coupon_usage_counts( $order ), 'A set flag should be cleared' );
+		$this->assertFalse( $this->sut->get_recorded_coupon_usage_counts( $order->get_id() ), 'The flag should read as cleared' );
+		$this->assertFalse( $order->get_recorded_coupon_usage_counts(), 'The order object should be updated' );
+		$this->assertTrue( $this->sut->get_recorded_coupon_usage_counts( $other_order->get_id() ), 'Other orders should keep their flag' );
+
+		$this->assertFalse( $this->sut->clear_recorded_coupon_usage_counts( $order ), 'A cleared flag should not be cleared again' );
+	}
+
+	/**
+	 * Create a cancelled order marked as having its coupon usage counted.
+	 *
+	 * @return WC_Order
+	 */
+	private function create_cancelled_order_with_counted_coupon_usage(): WC_Order {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::CANCELLED );
+		$order->save();
+		$this->sut->set_recorded_coupon_usage_counts( $order, true );
+
+		return $order;
+	}
 }
