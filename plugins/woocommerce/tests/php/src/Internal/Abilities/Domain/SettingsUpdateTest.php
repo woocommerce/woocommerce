@@ -389,14 +389,16 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse a list sent in value, and a single value sent in values.
-	 * @testWith ["multiselect", "value", ["live"]]
-	 *           ["text", "values", ["live"]]
-	 * @param string $type  Field type.
-	 * @param string $field Value field the item uses.
-	 * @param mixed  $value Requested value.
+	 * @testdox Should name the expected field when a setting is sent in the wrong one.
+	 * @testWith ["multiselect", "value", "live", "values"]
+	 *           ["text", "values", ["live"], "value"]
+	 * @param string $type     Field type.
+	 * @param string $field    Value field the item uses.
+	 * @param mixed  $value    Requested value.
+	 * @param string $expected Value field the setting takes.
 	 */
-	public function test_refuses_value_in_wrong_field( string $type, string $field, $value ): void {
+	public function test_names_expected_field_for_wrong_field( string $type, string $field, $value, string $expected ): void {
+		update_option( 'extension_field', 'stored' );
 		$this->add_general_field(
 			array(
 				'type'    => $type,
@@ -418,6 +420,42 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_ability_settings_invalid_value', $result->get_error_code() );
+		$this->assertSame( array( 'extension_field' => $expected ), $result->get_error_data()['expected'] );
+		$this->assertSame( 'stored', get_option( 'extension_field' ) );
+	}
+
+	/**
+	 * @testdox Should refuse a list in value through the input schema, before any setting is looked up.
+	 */
+	public function test_input_schema_refuses_list_in_value(): void {
+		$result = $this->sut->execute(
+			array(
+				'group'    => 'general',
+				'settings' => array(
+					array(
+						'id'    => 'woocommerce_specific_allowed_countries',
+						'value' => array( 'DE' ),
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should restore a list setting by sending its previous value back in values.
+	 */
+	public function test_restores_list_from_previous(): void {
+		update_option( 'woocommerce_specific_allowed_countries', array( 'DE', 'FR' ) );
+		$changed = $this->sut->execute( $this->input( 'general', array( 'woocommerce_specific_allowed_countries' => array( 'AT' ) ) ) );
+		$this->assertIsArray( $changed );
+
+		$restored = $this->sut->execute( $this->input( 'general', array( 'woocommerce_specific_allowed_countries' => $changed['settings'][0]['previous'] ) ) );
+
+		$this->assertIsArray( $restored );
+		$this->assertSame( array( 'DE', 'FR' ), get_option( 'woocommerce_specific_allowed_countries' ) );
 	}
 
 	/**

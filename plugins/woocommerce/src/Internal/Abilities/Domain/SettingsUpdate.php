@@ -49,7 +49,7 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Update settings', 'woocommerce' ),
-			'description'         => __( 'Change approved settings in one group, such as the currency, store address or checkout pages. Changes apply to the whole store and every customer at once, so confirm them with the merchant before you send them. Read current values with woocommerce/settings-query first. Send lists, such as multiselect choices, in values instead of value. Unapproved fields and passwords cannot be changed. If any setting is refused, nothing is saved. Each result returns the previous value, so a change can be undone.', 'woocommerce' ),
+			'description'         => __( 'Change approved settings in one group, such as the currency, store address or checkout pages. Changes apply to the whole store and every customer at once, so confirm them with the merchant before you send them. Read current values with woocommerce/settings-query first. Unapproved fields and passwords cannot be changed. If any setting is refused, nothing is saved. Each result returns the previous value, so a change can be undone.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_output_schema(),
@@ -128,14 +128,32 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 			);
 		}
 
+		$expected = array();
+		foreach ( $input['settings'] as $item ) {
+			$field = in_array( $fields_by_id[ $item['id'] ]['type'], self::LIST_TYPES, true ) ? 'values' : 'value';
+			if ( ! array_key_exists( $field, $item ) ) {
+				$expected[ $item['id'] ] = $field;
+			}
+		}
+		if ( $expected ) {
+			return new \WP_Error(
+				'woocommerce_ability_settings_invalid_value',
+				__( 'Send multiselect and country list settings in values, and every other setting in value. Nothing was saved.', 'woocommerce' ),
+				array(
+					'status'   => 400,
+					'ids'      => array_keys( $expected ),
+					'expected' => $expected,
+				)
+			);
+		}
+
 		$controller   = new \WC_REST_Setting_Options_Controller();
 		$changes      = array();
 		$invalid      = array();
 		$option_names = array();
 		foreach ( $input['settings'] as $item ) {
 			$setting = $fields_by_id[ $item['id'] ];
-			$is_list = array_key_exists( 'values', $item );
-			$value   = self::validate_value( $controller, $setting, $is_list ? $item['values'] : $item['value'], $is_list );
+			$value   = self::validate_value( $controller, $setting, $item['values'] ?? $item['value'] );
 			if ( is_wp_error( $value ) ) {
 				$invalid[] = $item['id'];
 				continue;
@@ -208,10 +226,9 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 	 * @param \WC_REST_Setting_Options_Controller $controller Validator source.
 	 * @param array                               $setting    Writable field.
 	 * @param mixed                               $value      Requested value.
-	 * @param bool                                $is_list    Whether the value was sent in `values`.
 	 * @return mixed|\WP_Error
 	 */
-	private static function validate_value( \WC_REST_Setting_Options_Controller $controller, array $setting, $value, bool $is_list ) {
+	private static function validate_value( \WC_REST_Setting_Options_Controller $controller, array $setting, $value ) {
 		$type    = $setting['type'];
 		$invalid = new \WP_Error( 'woocommerce_ability_settings_invalid_value', __( 'An invalid setting value was passed.', 'woocommerce' ) );
 
@@ -224,8 +241,7 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		} elseif ( is_int( $value ) || is_float( $value ) ) {
 			$value = (string) $value;
 		}
-		$expects_list = in_array( $type, self::LIST_TYPES, true );
-		if ( $is_list !== $expects_list || is_array( $value ) !== ( $expects_list || 'relative_date_selector' === $type ) ) {
+		if ( is_array( $value ) !== ( in_array( $type, self::LIST_TYPES, true ) || 'relative_date_selector' === $type ) ) {
 			return $invalid;
 		}
 		if ( is_array( $value ) && 'relative_date_selector' !== $type ) {
@@ -428,8 +444,13 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 								'type'      => 'string',
 								'minLength' => 1,
 							),
-							'value'  => array( 'anyOf' => array_values( array_filter( $branches, static fn( array $branch ): bool => ! $is_list( $branch ) ) ) ),
-							'values' => current( array_filter( $branches, $is_list ) ),
+							'value'  => array(
+								'description' => __( 'A single value, or a retention period with number and unit.', 'woocommerce' ),
+								'anyOf'       => array_values( array_filter( $branches, static fn( array $branch ): bool => ! $is_list( $branch ) ) ),
+							),
+							'values' => array(
+								'description' => __( 'A list, for multiselect and country list settings. Lists from woocommerce/settings-query or previous go here.', 'woocommerce' ),
+							) + current( array_filter( $branches, $is_list ) ),
 						),
 						'required'             => array( 'id' ),
 						'additionalProperties' => false,
