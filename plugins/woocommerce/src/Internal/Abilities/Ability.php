@@ -149,14 +149,15 @@ class Ability extends \WP_Ability {
 			return $is_valid;
 		}
 
-		return new \WP_Error(
-			$is_valid->get_error_code(),
-			sprintf(
-				/* translators: %s: error message. */
-				__( '%s The ability ran, so its changes may already be saved. Check the current state before you run it again.', 'woocommerce' ),
-				$is_valid->get_error_message()
-			),
-			$is_valid->get_error_data()
+		$error = clone $is_valid;
+		$code  = $error->get_error_code();
+
+		$error->errors[ $code ][0] = sprintf(
+			/* translators: %s: error message. */
+			__( '%s The ability ran, so its changes may already be saved. Check the current state before you run it again.', 'woocommerce' ),
+			$error->get_error_message()
 		);
+
+		return $error;
 	}
 }
