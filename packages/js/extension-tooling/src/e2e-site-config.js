@@ -3,6 +3,8 @@ const path = require( 'node:path' );
 
 const latestWooCommerce =
 	'https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip';
+const stableWooCommerce =
+	'https://downloads.wordpress.org/plugin/woocommerce.zip';
 const nightlyWooCommerce =
 	'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip';
 const isVersionNumber = ( value ) =>
@@ -49,10 +51,13 @@ function writeE2ESiteConfig( {
 			'/woocommerce.zip';
 	}
 	if ( wooSource ) {
-		const wooIndex = config.plugins.indexOf( latestWooCommerce );
+		const wooIndex = config.plugins.findIndex(
+			( source ) =>
+				source === latestWooCommerce || source === stableWooCommerce
+		);
 		if ( wooIndex === -1 ) {
 			throw new Error(
-				'.wp-env.test.json must install WooCommerce latest-stable.'
+				'.wp-env.test.json must include a WooCommerce ZIP mount.'
 			);
 		}
 		config.plugins[ wooIndex ] = wooSource;

@@ -119,7 +119,24 @@ test( 'can override the latest WooCommerce source and add mappings', ( context )
 	} );
 } );
 
-test( 'rejects a WooCommerce override without the latest-stable mount', ( context ) => {
+test( 'replaces the standard WooCommerce ZIP in a pinned job', ( context ) => {
+	const { root, pluginPath, input, defaults, output } = site( context );
+	defaults.plugins[ 1 ] =
+		'https://downloads.wordpress.org/plugin/woocommerce.zip';
+	fs.writeFileSync( input, JSON.stringify( defaults ) );
+	writeE2ESiteConfig( {
+		root,
+		pluginPath,
+		env: { WC_VERSION: '11.3.0' },
+	} );
+	const config = JSON.parse( fs.readFileSync( output, 'utf8' ) );
+	assert.equal(
+		config.plugins[ 1 ],
+		'https://github.com/woocommerce/woocommerce/releases/download/11.3.0/woocommerce.zip'
+	);
+} );
+
+test( 'rejects a WooCommerce override without a WooCommerce ZIP mount', ( context ) => {
 	const { root, pluginPath, input, defaults, output } = site( context );
 	fs.writeFileSync(
 		input,
@@ -132,7 +149,7 @@ test( 'rejects a WooCommerce override without the latest-stable mount', ( contex
 				pluginPath,
 				env: { WC_VERSION: 'nightly' },
 			} ),
-		/must install WooCommerce latest-stable/
+		/must include a WooCommerce ZIP mount/
 	);
 	assert.equal( fs.existsSync( output ), false );
 } );
