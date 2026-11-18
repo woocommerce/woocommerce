@@ -472,6 +472,30 @@ describe( 'AiShopping', () => {
 		).toHaveAttribute( 'href', 'https://ucp.dev/' );
 	} );
 
+	it( 'goes to a policy field from a link, on load and from the Setup checklist on this page', () => {
+		const scroll = jest.fn();
+		Element.prototype.scrollIntoView = scroll;
+		window.location.hash = '#woocommerce_terms_page_id';
+		renderPage( view() );
+
+		expect( scroll ).toHaveBeenCalled();
+		expect( document.activeElement ).toBe(
+			screen.getByLabelText( 'Terms and conditions' )
+		);
+
+		scroll.mockClear();
+		window.location.hash = '#woocommerce_refund_returns_page_id';
+		act( () => {
+			window.dispatchEvent( new HashChangeEvent( 'hashchange' ) );
+		} );
+
+		expect( scroll ).toHaveBeenCalled();
+		expect( document.activeElement ).toBe(
+			screen.getByLabelText( 'Refund and returns policy' )
+		);
+		window.location.hash = '';
+	} );
+
 	it( 'copies the connection URL, says Copied, then goes back to Copy', async () => {
 		jest.useFakeTimers();
 		const writeText = jest.fn().mockResolvedValue( undefined );

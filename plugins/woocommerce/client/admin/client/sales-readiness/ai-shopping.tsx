@@ -90,36 +90,44 @@ const card = ( extra = {} ) =>
 
 /**
  * A link from the Setup checklist or Sales readiness opens AI shopping on a card or a policy
- * field. The page draws after the browser looked for the anchor, so look again here.
+ * field. The page draws after the browser looked for the anchor, and the policy fields have no
+ * element with that id, so find the target here: on load, and when a link on this page changes the hash.
  */
 const useHashTarget = (
 	root: RefObject< HTMLDivElement >,
 	view: ShoppingView
 ) => {
 	useEffect( () => {
-		const id = decodeURIComponent( window.location.hash.slice( 1 ) );
-		if ( ! id || ! root.current ) {
-			return;
-		}
-		const field = view.policies.fields.find( ( f ) => f.id === id );
-		let target: HTMLElement | null = null;
-		if ( field ) {
-			const label = Array.from(
-				root.current.querySelectorAll( 'label' )
-			).find( ( element ) => element.textContent === field.label );
-			target = label?.htmlFor
-				? document.getElementById( label.htmlFor )
-				: null;
-		} else {
-			target = document.getElementById( id );
-		}
-		if ( target ) {
-			target.scrollIntoView( { block: 'center' } );
-			if ( field ) {
-				target.focus( { preventScroll: true } );
+		const go = () => {
+			const id = decodeURIComponent( window.location.hash.slice( 1 ) );
+			if ( ! id || ! root.current ) {
+				return;
 			}
-		}
-		// Only for the anchor the page opened with.
+			const field = view.policies.fields.find( ( f ) => f.id === id );
+			let target: HTMLElement | null = null;
+			if ( field ) {
+				const label = Array.from(
+					root.current.querySelectorAll( 'label' )
+				).find(
+					( element ) => element.textContent?.trim() === field.label
+				);
+				target = label?.htmlFor
+					? document.getElementById( label.htmlFor )
+					: null;
+			} else {
+				target = document.getElementById( id );
+			}
+			if ( target ) {
+				target.scrollIntoView( { block: 'center' } );
+				if ( field ) {
+					target.focus( { preventScroll: true } );
+				}
+			}
+		};
+		go();
+		window.addEventListener( 'hashchange', go );
+		return () => window.removeEventListener( 'hashchange', go );
+		// The fields don't change while the page is open.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 };
