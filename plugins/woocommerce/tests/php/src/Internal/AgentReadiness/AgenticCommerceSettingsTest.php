@@ -1449,6 +1449,55 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failing setup step shows in both places: the Setup checklist and Fix first, and the card of the question it answers, which counts it in its issues; once it passes it folds there.
+	 *
+	 * @dataProvider ai_shopping_and_sales
+	 *
+	 * @param bool $ucp_on     Whether AI shopping is on.
+	 * @param bool $with_sales Whether the report has sales to rank by.
+	 */
+	public function test_failing_setup_steps_show_and_count_in_their_question_card( bool $ucp_on, bool $with_sales ): void {
+		$this->make_every_step_pass();
+		$this->turn_off_order_emails();
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			$this->restore[]  = array( $gateway, $gateway->enabled );
+			$gateway->enabled = 'no';
+		}
+		$scanned = array(
+			'id'       => 'product_shipping_schema',
+			'ok'       => false,
+			'blocks'   => 'discovery',
+			'group'    => 'buy',
+			'level'    => 'recommended',
+			'name'     => 'shipping name',
+			'label'    => 'shipping label',
+			'why'      => '',
+			'fix'      => '',
+			'fix_url'  => '',
+			'conflict' => false,
+		);
+		update_option( AgentReadiness::REPORT_OPTION, $this->report_with_listing_issue( $with_sales, array( $scanned ) ), false );
+		update_option( 'woocommerce_feature_ucp_enabled', $ucp_on ? 'yes' : 'no' );
+
+		$view = $this->view();
+		$buy  = array_column( $view['sections'], null, 'id' )['buy'];
+		$rows = array_column( $buy['rows'], null, 'id' );
+		$this->assertSame( array( 'payment_method', 'order_emails', 'product_shipping_schema' ), array_keys( $rows ), 'Setup steps sit in the buying card with its scanned check' );
+		$this->assertSame( '3 issues', $buy['badge']['text'], 'The card counts the setup steps in its issues' );
+		$this->assertSame( 'Set up payments', $rows['payment_method']['title'], 'Worded as in the Setup checklist' );
+		$this->assertSame( 'required', $rows['payment_method']['state'] );
+		$this->assertSame( array( 'payment_method', 'order_emails', 'missing_images' ), array_column( $view['fix_first']['items'], 'id' ), 'They stay in Fix first too; the store check with no sales link stays out' );
+		$this->assertStringContainsString( 'Set up payments', $this->render_page( AgenticCommerceSettings::SHOPPING_SECTION, $ucp_on ), 'And in the Setup checklist' );
+
+		$this->make_every_step_pass();
+		update_option( 'woocommerce_feature_ucp_enabled', $ucp_on ? 'yes' : 'no' );
+		$buy = array_column( $this->view()['sections'], null, 'id' )['buy'];
+		$this->assertSame( array( 'product_shipping_schema' ), array_column( $buy['rows'], 'id' ) );
+		$this->assertSame( '1 issue', $buy['badge']['text'], 'A passed setup step isn\'t an issue' );
+		$this->assertContains( 'payment_method', array_column( $buy['folded'], 'id' ), 'It folds with the passed checks' );
+	}
+
+	/**
 	 * AI shopping on and off, each with and without sales to rank by.
 	 *
 	 * @return array<string, array{0:bool,1:bool}>
