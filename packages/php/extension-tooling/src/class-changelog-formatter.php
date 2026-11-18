@@ -55,6 +55,13 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 	const BULLET = '* ';
 
 	/**
+	 * Indentation for lines that continue a change bullet.
+	 *
+	 * @var string
+	 */
+	const CONTINUATION = '  ';
+
+	/**
 	 * Separator between a change's type and its content.
 	 *
 	 * @var string
@@ -115,11 +122,18 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 		$prologue = array();
 		$entries  = array();
 		$entry    = null;
+		$change   = null;
 
-		foreach ( explode( "\n", $changelog ) as $line ) {
-			$line = trim( $line );
+		foreach ( explode( "\n", $changelog ) as $raw_line ) {
+			if ( null !== $change && 0 === strpos( $raw_line, self::CONTINUATION ) ) {
+				$change->setContent( $change->getContent() . "\n" . substr( $raw_line, strlen( self::CONTINUATION ) ) );
+				continue;
+			}
+
+			$line = trim( $raw_line );
 
 			if ( '' === $line ) {
+				$change = null;
 				continue;
 			}
 
@@ -135,6 +149,7 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 				);
 
 				$entries[] = $entry;
+				$change    = null;
 				continue;
 			}
 
@@ -145,7 +160,8 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 			// next write. Fail instead. That is any line starting with a single `=`, and any
 			// heading in the older WooCommerce.com shape (`YYYY.MM.DD - version X.Y.Z`).
 			// A title starting with `==` is not a heading.
-			if ( ! $is_bullet && ( preg_match( '/^=(?!=)/', $line ) || false !== strpos( $line, self::SEPARATOR . 'version ' ) ) ) {
+			$is_old_heading = preg_match( '/^\d{4}[.-]\d{1,2}[.-]\d{1,2} - version\b/', $line );
+			if ( ! $is_bullet && ( preg_match( '/^=(?!=)/', $line ) || $is_old_heading ) ) {
 				throw new InvalidArgumentException( "Line looks like a version heading but is not one: $line" );
 			}
 
@@ -160,7 +176,13 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 				continue;
 			}
 
-			$entry->appendChange( $this->newChangeEntry( $this->parse_change( $line, $entry->getTimestamp() ) ) );
+			$change = $this->newChangeEntry( $this->parse_change( $line, $entry->getTimestamp() ) );
+			$entry->appendChange( $change );
+
+			// Continuations only follow the unindented bullets written by format().
+			if ( 0 !== strpos( $raw_line, self::BULLET ) ) {
+				$change = null;
+			}
 		}
 
 		$ret->setPrologue( $prologue ? implode( "\n", $prologue ) : $this->title );
@@ -176,8 +198,7 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 	 * @return string
 	 */
 	public function format( Changelog $changelog ) {
-		$ret    = '';
-		$indent = str_repeat( ' ', strlen( self::BULLET ) );
+		$ret = '';
 
 		$prologue = trim( $changelog->getPrologue() );
 
@@ -199,7 +220,7 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 					continue;
 				}
 
-				$ret .= self::BULLET . str_replace( "\n", "\n" . $indent, $line ) . "\n";
+				$ret .= self::BULLET . str_replace( "\n", "\n" . self::CONTINUATION, $line ) . "\n";
 			}
 
 			$ret = rtrim( $ret ) . "\n\n";

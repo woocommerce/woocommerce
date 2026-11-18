@@ -362,10 +362,53 @@ class ChangelogFormatterTest extends TestCase {
 	 * A title starting with `==`, like a readme section, is a title, not a heading.
 	 */
 	public function test_a_title_starting_with_equals_signs_is_not_a_heading() {
-		$changelog = "== Changelog ==\n\n= 1.0.0 - 2021-10-25 =\n* Initial release.\n";
+		$title     = '== Changelog - version history ==';
+		$changelog = "$title\n\n= 1.0.0 - 2021-10-25 =\n* Initial release.\n";
 
-		$this->assertSame( '== Changelog ==', $this->formatter->parse( $changelog )->getPrologue() );
+		$this->assertSame( $title, $this->formatter->parse( $changelog )->getPrologue() );
 		$this->assertSame( $changelog, $this->round_trip( $changelog ) );
+	}
+
+	/**
+	 * The formatter's continuation lines stay in the same change entry.
+	 */
+	public function test_multiline_change_round_trips_without_creating_extra_bullets() {
+		$changelog = "*** Title ***\n\n= 1.5.1 - 2026-09-17 =\n"
+			. "* Fix - First line.\n  Second line.\n  \n    Indented text.\n"
+			. "* Add - Separate change.\n\n= 1.5.0 - 2026-09-16 =\n* Initial change.\n";
+		$entries   = $this->formatter->parse( $changelog )->getEntries();
+		$changes   = $entries[0]->getChanges();
+
+		$this->assertCount( 2, $entries );
+		$this->assertCount( 2, $changes );
+		$this->assertSame( "First line.\nSecond line.\n\n  Indented text.", $changes[0]->getContent() );
+		$this->assertSame( $changelog, $this->round_trip( $changelog ) );
+	}
+
+	/**
+	 * Older lists with indented bullets still parse as separate changes.
+	 */
+	public function test_legacy_indented_bullets_stay_separate() {
+		$changelog = "*** Title ***\n\n= 1.5.1 - 2026-09-17 =\n  * Fix - First.\n  * Tweak - Second.\n";
+		$changes   = $this->formatter->parse( $changelog )->getLatestEntry()->getChanges();
+
+		$this->assertCount( 2, $changes );
+		$this->assertSame( 'Tweak', $changes[1]->getSubheading() );
+	}
+
+	/**
+	 * Setting a release date on an unreleased entry updates the heading.
+	 */
+	public function test_setting_a_release_date_replaces_the_parsed_unreleased_heading() {
+		$original  = "*** Title ***\n\n= 1.5.2 - unreleased =\n* Fix - Kept this change.\n";
+		$changelog = $this->formatter->parse( $original );
+		$this->assertSame( 'unreleased', $changelog->getLatestEntry()->getRawTimestamp() );
+		$changelog->getLatestEntry()->setTimestamp( new DateTime( '2026-09-17', new DateTimeZone( 'UTC' ) ) );
+
+		$this->assertSame(
+			str_replace( 'unreleased', '2026-09-17', $original ),
+			$this->formatter->format( $changelog )
+		);
 	}
 
 	/**

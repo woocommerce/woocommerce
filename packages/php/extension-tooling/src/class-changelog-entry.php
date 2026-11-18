@@ -25,6 +25,18 @@ class Changelog_Entry extends ChangelogEntry {
 	protected $raw_timestamp = null;
 
 	/**
+	 * Set the timestamp and discard any previously parsed heading text.
+	 *
+	 * @param \DateTime|string|null $timestamp Timestamp to set.
+	 * @return $this
+	 */
+	public function setTimestamp( $timestamp ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid -- Matches the API of the parent class.
+		parent::setTimestamp( $timestamp );
+		$this->raw_timestamp = null;
+		return $this;
+	}
+
+	/**
 	 * Get the raw date string.
 	 *
 	 * @return string|null

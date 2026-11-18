@@ -22,7 +22,6 @@
 	"extra": {
 		"changelogger": {
 			"changelog": "CHANGELOG.md",
-			"changes-dir": "changelog",
 			"types": {
 				"add": "Added functionality",
 				"fix": "Fixed behavior",
