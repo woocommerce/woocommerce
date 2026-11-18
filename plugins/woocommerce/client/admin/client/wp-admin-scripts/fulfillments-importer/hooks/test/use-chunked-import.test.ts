@@ -313,19 +313,35 @@ describe( 'useChunkedImport', () => {
 		expect( result.current.isRunning ).toBe( false );
 	} );
 
+	/**
+	 * Fails one chunk with the given error, then answers Retry with an ended
+	 * session, so the second message shows whether the outcome was unknown.
+	 */
+	async function failThenEndSession( error: unknown ) {
+		jest.useFakeTimers();
+		mockedRunChunk
+			.mockRejectedValueOnce( error )
+			.mockRejectedValueOnce( TOKEN_INVALID );
+
+		const { result, onError } = renderImport( { total: 2 } );
+
+		await runToEnd( result );
+		expect( mockedRunChunk ).toHaveBeenCalledTimes( 1 );
+		expect( onError ).toHaveBeenLastCalledWith(
+			( error as { message: string } ).message,
+			false
+		);
+
+		await runToEnd( result );
+		expect( mockedRunChunk ).toHaveBeenCalledTimes( 2 );
+		return onError;
+	}
+
 	it.each( [
 		[ 'a network failure', new Error( 'Failed to fetch' ) ],
 		[
-			'a 429',
-			{
-				code: 'rest_too_many_requests',
-				message: 'Too many requests.',
-				data: { status: 429 },
-			},
-		],
-		[
 			// apiFetch reports a body that is not JSON without its status.
-			'a 429 from a proxy with an HTML body',
+			'an HTML 429 from a proxy',
 			{
 				code: 'invalid_json',
 				message: 'The response is not a valid JSON response.',
@@ -342,6 +358,27 @@ describe( 'useChunkedImport', () => {
 		[
 			'a 503',
 			{ code: 'unavailable', message: 'Down.', data: { status: 503 } },
+		],
+	] )(
+		'does not resend the chunk after %s, whose outcome is unknown',
+		async ( _label, error ) => {
+			const onError = await failThenEndSession( error );
+
+			expect( onError ).toHaveBeenLastCalledWith(
+				MAY_HAVE_FINISHED,
+				true
+			);
+		}
+	);
+
+	it.each( [
+		[
+			'a JSON 429',
+			{
+				code: 'rest_too_many_requests',
+				message: 'Too many requests.',
+				data: { status: 429 },
+			},
 		],
 		[
 			'a 409 that is not chunk-in-progress',
@@ -360,19 +397,13 @@ describe( 'useChunkedImport', () => {
 			},
 		],
 	] )(
-		'does not resend the chunk after %s, which may have written it',
+		'does not resend the chunk after %s, which is a clear refusal',
 		async ( _label, error ) => {
-			jest.useFakeTimers();
-			mockedRunChunk.mockRejectedValue( error );
+			const onError = await failThenEndSession( error );
 
-			const { result, onError } = renderImport( { total: 2 } );
-
-			await runToEnd( result );
-
-			expect( mockedRunChunk ).toHaveBeenCalledTimes( 1 );
-			expect( onError ).toHaveBeenCalledWith(
-				( error as { message: string } ).message,
-				false
+			expect( onError ).toHaveBeenLastCalledWith(
+				TOKEN_INVALID.message,
+				true
 			);
 		}
 	);
