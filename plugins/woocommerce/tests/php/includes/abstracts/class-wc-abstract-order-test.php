@@ -799,6 +799,160 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Two copies of one order that both remove the same coupon give its use back only once.
+	 */
+	public function test_remove_coupon_from_two_copies_of_order_gives_use_back_once(): void {
+		$order       = $this->create_pending_order_with_counted_coupons( array( 'two-copies', 'two-copies-kept' ) );
+		$first_copy  = wc_get_order( $order->get_id() );
+		$second_copy = wc_get_order( $order->get_id() );
+		$this->assertCount( 2, $first_copy->get_items( 'coupon' ), 'The first copy should load both coupon lines' );
+		$this->assertCount( 2, $second_copy->get_items( 'coupon' ), 'The second copy should load both coupon lines before the first one removes a coupon' );
+		$decreases_before = did_action( 'woocommerce_decrease_coupon_usage_count' );
+		$removals_before  = did_action( 'woocommerce_order_removed_coupon' );
+		$deletes_before   = did_action( 'woocommerce_delete_order_item' );
+
+		$this->assertTrue( $first_copy->remove_coupon( 'two-copies' ), 'The first copy should remove the coupon' );
+		$this->assertSame( 1, did_action( 'woocommerce_delete_order_item' ) - $deletes_before, 'The coupon line should be deleted once, not again on save' );
+		$this->assertTrue( $second_copy->remove_coupon( 'two-copies' ), 'The second copy should also report the coupon as removed' );
+
+		$this->assertSame( 1, did_action( 'woocommerce_decrease_coupon_usage_count' ) - $decreases_before, 'The use should be given back once' );
+		$this->assertSame( 2, did_action( 'woocommerce_order_removed_coupon' ) - $removals_before, 'Both copies should fire the removed coupon hook' );
+		$this->assertSame( 5, ( new WC_Coupon( 'two-copies' ) )->get_usage_count(), 'The removed coupon should be back at its count before this order' );
+		$this->assertSame( 6, ( new WC_Coupon( 'two-copies-kept' ) )->get_usage_count(), 'The kept coupon should stay counted' );
+		$stored = wc_get_order( $order->get_id() );
+		$this->assertSame( array( 'two-copies-kept' ), $stored->get_coupon_codes(), 'Only the kept coupon should stay on the order' );
+		$this->assertTrue( $stored->get_data_store()->get_recorded_coupon_usage_counts( $stored ), 'The order should stay counted for the kept coupon' );
+	}
+
+	/**
+	 * @testdox Removing two coupons one after the other gives each use back.
+	 */
+	public function test_remove_coupons_one_after_another_gives_each_use_back(): void {
+		$order = $this->create_pending_order_with_counted_coupons( array( 'sequence-first', 'sequence-second' ) );
+
+		$this->assertTrue( $order->remove_coupon( 'sequence-first' ) );
+		$this->assertSame( 5, ( new WC_Coupon( 'sequence-first' ) )->get_usage_count(), 'The first coupon should be given back' );
+		$this->assertSame( 6, ( new WC_Coupon( 'sequence-second' ) )->get_usage_count(), 'The second coupon should stay counted' );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order->get_id() ), 'The order should stay counted while a coupon remains' );
+
+		$this->assertTrue( $order->remove_coupon( 'sequence-second' ) );
+		$this->assertSame( 5, ( new WC_Coupon( 'sequence-second' ) )->get_usage_count(), 'The second coupon should be given back' );
+	}
+
+	/**
+	 * @testdox Removing a coupon from an order that no longer counts its use leaves the line delete to the save, where woocommerce_pre_delete_order_item can keep the line.
+	 */
+	public function test_remove_coupon_from_uncounted_order_respects_pre_delete_filter(): void {
+		$order = $this->create_pending_order_with_counted_coupons( array( 'uncounted-filtered' ) );
+		$order->update_status( OrderStatus::CANCELLED );
+		$this->assertSame( 5, ( new WC_Coupon( 'uncounted-filtered' ) )->get_usage_count(), 'Cancelling should give the use back' );
+		$item_ids = $order->get_data_store()->get_item_ids( $order, 'coupon' );
+		add_filter( 'woocommerce_pre_delete_order_item', '__return_false' );
+
+		$this->assertTrue( $order->remove_coupon( 'uncounted-filtered' ), 'The coupon should be removed from the order object' );
+
+		$this->assertSame( $item_ids, $order->get_data_store()->get_item_ids( $order, 'coupon' ), 'The filter should keep the stored coupon line' );
+		$this->assertSame( 5, ( new WC_Coupon( 'uncounted-filtered' ) )->get_usage_count(), 'The use should not be given back again' );
+	}
+
+	/**
+	 * @testdox Removing a coupon gives the use back once when the coupon line's data store does not report deleted rows, and keeps it when the first delete fails.
+	 *
+	 * @testWith [null, false, 5]
+	 *           [false, false, 6]
+	 *           [null, true, 5]
+	 *
+	 * @param bool|null $first_result     What the coupon line data store's first delete() call returns.
+	 * @param bool      $cancel_meanwhile Whether a cancellation gives the use back while the line is being deleted.
+	 * @param int       $expected_count   Coupon usage count expected after the removal.
+	 */
+	public function test_remove_coupon_with_item_data_store_that_does_not_report_rows( ?bool $first_result, bool $cancel_meanwhile, int $expected_count ): void {
+		$order = $this->create_pending_order_with_counted_coupons( array( 'custom-item-store' ) );
+		$store = new class() extends WC_Order_Item_Coupon_Data_Store {
+			/**
+			 * What the first delete() call returns: null deletes the row and reports nothing, false fails like a database error.
+			 *
+			 * @var bool|null
+			 */
+			public $first_result;
+
+			/**
+			 * Number of delete() calls.
+			 *
+			 * @var int
+			 */
+			private $calls = 0;
+
+			/**
+			 * Delete the item and report nothing, failing the first call when set up to.
+			 *
+			 * @param WC_Order_Item $item Order item.
+			 * @param array         $args Delete arguments.
+			 * @return bool|null
+			 */
+			public function delete( &$item, $args = array() ) {
+				++$this->calls;
+				if ( 1 === $this->calls && false === $this->first_result ) {
+					return false;
+				}
+				parent::delete( $item, $args );
+				return null;
+			}
+		};
+
+		$store->first_result = $first_result;
+		add_filter(
+			'woocommerce_data_stores',
+			function ( $stores ) use ( $store ) {
+				$stores['order-item-coupon'] = $store;
+				return $stores;
+			}
+		);
+
+		$removing_copy = wc_get_order( $order->get_id() );
+		if ( $cancel_meanwhile ) {
+			$has_run = false;
+			add_action(
+				'woocommerce_before_delete_order_item',
+				function () use ( $order, &$has_run ) {
+					if ( ! $has_run ) {
+						$has_run = true;
+						wc_get_order( $order->get_id() )->update_status( OrderStatus::CANCELLED );
+					}
+				}
+			);
+		}
+
+		$this->assertTrue( $removing_copy->remove_coupon( 'custom-item-store' ), 'The coupon should be removed' );
+
+		$this->assertSame( array(), $order->get_data_store()->get_item_ids( $order, 'coupon' ), 'The coupon line should be deleted, by the save when the first delete failed' );
+		$this->assertSame( $expected_count, ( new WC_Coupon( 'custom-item-store' ) )->get_usage_count(), 'The use should be given back once when the store reports nothing, and kept when the first delete failed' );
+	}
+
+	/**
+	 * Create a pending order that counted a use of each coupon. Each coupon starts at 5 uses, so 6 with this order.
+	 *
+	 * The count starts above 1 because WC_Coupon::decrease_usage_count() skips a coupon whose loaded count is 0,
+	 * which would hide a second release.
+	 *
+	 * @param string[] $codes Coupon codes to create and apply.
+	 * @return WC_Order
+	 */
+	private function create_pending_order_with_counted_coupons( array $codes ): WC_Order {
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		foreach ( $codes as $code ) {
+			WC_Helper_Coupon::create_coupon( $code, array( 'usage_count' => 5 ) );
+			$order->apply_coupon( $code );
+			$this->assertSame( 6, ( new WC_Coupon( $code ) )->get_usage_count(), 'The order should count its coupon use' );
+		}
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order->get_id() ), 'The order should be marked as counted' );
+
+		return $order;
+	}
+
+	/**
 	 * Create a pending order with one $100 product whose line total was manually edited to $50.
 	 *
 	 * @return WC_Order

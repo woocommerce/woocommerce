@@ -725,6 +725,73 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
+	 * Clears the "coupon usage counted" flag, if it is still set and the stored order status still matches the order object.
+	 *
+	 * The check and the write are one database update, so the flag is cleared by at most one call.
+	 *
+	 * @since 11.3.1
+	 *
+	 * @internal For use by wc_update_coupon_usage_counts() only.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool True if this call cleared the flag.
+	 */
+	public function clear_recorded_coupon_usage_counts( $order ): bool {
+		global $wpdb;
+
+		$order_id = $order->get_id();
+		$status   = $order->get_status( 'edit' );
+		if ( ! $order_id || ! $status ) {
+			return false;
+		}
+
+		// Whether a status is stored with the "wc-" prefix depends on the post statuses registered when the order was saved.
+		$cleared = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->postmeta} SET meta_value = 'no'
+				WHERE post_id = %d AND meta_key = '_recorded_coupon_usage_counts' AND meta_value IN ( 'yes', 'true', '1' )
+				AND EXISTS ( SELECT 1 FROM {$wpdb->posts} WHERE ID = %d AND post_status IN ( %s, %s ) )",
+				$order_id,
+				$order_id,
+				$status,
+				'wc-' . $status
+			)
+		);
+
+		if ( (int) $cleared < 1 ) {
+			return false;
+		}
+
+		// The update above skips the meta cache, and the setter below finds nothing to change, so it would keep a stale 'yes' cached.
+		wp_cache_delete( $order_id, 'post_meta' );
+		$this->set_recorded_coupon_usage_counts( $order, false );
+		return true;
+	}
+
+	/**
+	 * Reads the "coupon usage counted" flag straight from the database, skipping the meta cache.
+	 *
+	 * @since 11.3.1
+	 *
+	 * @internal For use by WC_Abstract_Order::remove_coupon() only.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	public function get_stored_recorded_coupon_usage_counts( $order ): bool {
+		global $wpdb;
+
+		$value = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_recorded_coupon_usage_counts' ORDER BY meta_id ASC LIMIT 1",
+				$order->get_id()
+			)
+		);
+
+		return wc_string_to_bool( (string) $value );
+	}
+
+	/**
 	 * Whether email have been sent for this order.
 	 *
 	 * @param WC_Order|int $order Order ID or order object.
