@@ -61,9 +61,8 @@ export interface ProductCollectionDisplayLayout {
 	 */
 	columns?: number;
 	/**
-	 * Visible product count for the Carousel layout.
-	 * When omitted, the carousel keeps its responsive widths.
-	 * Omitted for Stack and Grid.
+	 * How many products the Carousel shows at once.
+	 * Carousels save this value. Omitted for Stack and Grid.
 	 */
 	carouselColumns?: number;
 	/**

@@ -39,7 +39,7 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 	const defaultLayout = getDefaultDisplayLayout();
 	const defaultMaxColumns = 6;
 	const effectiveMaxColumns = maxColumns ?? defaultMaxColumns;
-	// Unset carouselColumns keeps the responsive widths. The slider still needs a number.
+	// Older carousels have no carouselColumns. The slider still needs a number.
 	const columnCount = isCarouselLayout
 		? ( carouselColumns ??
 			Math.min( DEFAULT_CAROUSEL_COLUMNS, effectiveMaxColumns ) )
