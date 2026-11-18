@@ -160,6 +160,8 @@ class ProductScan {
 	 * @since 11.4.0
 	 *
 	 * @return array<int, int> Product ids.
+	 *
+	 * @throws \RuntimeException When the product list query fails.
 	 */
 	public function start(): array {
 		$this->results             = array();
@@ -169,29 +171,43 @@ class ProductScan {
 		$this->available           = self::count_published( self::count_query( self::COUNT_AVAILABLE ) );
 		$this->unsupported_types   = self::count_published( self::count_query( self::COUNT_UNSUPPORTED ) );
 
-		$query       = new \WP_Query(
-			array(
-				'post_type'      => 'product',
-				'post_status'    => 'publish',
-				// One more than the limit, to tell a catalog cut short from one that fits.
-				'posts_per_page' => self::PRODUCT_LIMIT + 1,
-				'fields'         => 'ids',
-				'orderby'        => array(
-					'modified' => 'DESC',
-					'ID'       => 'DESC',
-				),
-				'no_found_rows'  => true,
-				'tax_query'      => self::count_query( self::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-			)
-		);
+		$query_failed = false;
+		$note_failure = static function ( $posts ) use ( &$query_failed ) {
+			global $wpdb;
+			if ( is_string( $wpdb->last_error ) && '' !== $wpdb->last_error ) {
+				$query_failed = true;
+			}
+			return $posts;
+		};
+		add_filter( 'posts_results', $note_failure, PHP_INT_MAX );
+		try {
+			$query = new \WP_Query(
+				array(
+					'post_type'      => 'product',
+					'post_status'    => 'publish',
+					// One more than the limit, to tell a catalog cut short from one that fits.
+					'posts_per_page' => self::PRODUCT_LIMIT + 1,
+					'fields'         => 'ids',
+					'orderby'        => array(
+						'modified' => 'DESC',
+						'ID'       => 'DESC',
+					),
+					'no_found_rows'  => true,
+					'tax_query'      => self::count_query( self::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				)
+			);
+		} finally {
+			remove_filter( 'posts_results', $note_failure, PHP_INT_MAX );
+		}
 		$product_ids = array_map(
 			static function ( $post ): int {
 				return $post instanceof \WP_Post ? $post->ID : (int) $post;
 			},
 			is_array( $query->posts ) ? $query->posts : array()
 		);
-		// An empty list while the count found products is a failed query, not an empty catalog.
-		if ( $this->available > 0 && array() === $product_ids ) {
+		// The count and this query can disagree when the last eligible product is hidden between them.
+		// Only a database error is a failed list. An empty success publishes a scan of what is left.
+		if ( $this->available > 0 && array() === $product_ids && $query_failed ) {
 			throw new \RuntimeException( 'Agent readiness could not list products to scan.' );
 		}
 		$this->truncated = count( $product_ids ) > self::PRODUCT_LIMIT;

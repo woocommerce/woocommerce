@@ -504,6 +504,134 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A report that fails to store leaves the previous report's failure rows in place.
+	 */
+	public function test_failed_report_write_keeps_the_previous_rows(): void {
+		$stale = $this->create_products( 1 )[0];
+		ProductFailures::store( $stale, array() );
+		$this->hide_product( $stale );
+		update_option( AgentReadiness::REPORT_OPTION, array( 'products' => 4 ) );
+		$this->create_products( 1 );
+		$this->sut->run();
+		$keep_old = static function ( $value, $option, $old ) {
+			unset( $value, $option );
+			return $old;
+		};
+		add_filter( 'pre_update_option_' . AgentReadiness::REPORT_OPTION, $keep_old, 10, 3 );
+		try {
+			$this->run_batches();
+		} finally {
+			remove_filter( 'pre_update_option_' . AgentReadiness::REPORT_OPTION, $keep_old, 10 );
+		}
+
+		$this->assertSame( array( ProductFailures::CHECKED ), ProductFailures::stored( $stale ) );
+		$this->assertSame( 4, get_option( AgentReadiness::REPORT_OPTION )['products'] );
+	}
+
+	/**
+	 * @testdox Rows saved after a product was skipped by its batch are still there when the scan finishes.
+	 */
+	public function test_rows_saved_after_a_skipped_product_stay(): void {
+		$kept  = $this->create_products( 1 )[0];
+		$stale = $this->create_products( 1 )[0];
+		ProductFailures::store( $kept, array() );
+		ProductFailures::store( $stale, array() );
+		$this->hide_product( $stale );
+		$skip = function () use ( $kept ): void {
+			$this->hide_product( $kept );
+		};
+		add_action( 'woocommerce_agent_readiness_scan_batch', $skip );
+		$this->sut->run();
+		$this->sut->run_batch( get_option( AgentReadiness::SCAN_OPTION )['id'] );
+		remove_action( 'woocommerce_agent_readiness_scan_batch', $skip );
+		wp_set_object_terms( $kept, array(), 'product_visibility' );
+		clean_post_cache( $kept );
+		ProductFailures::store( $kept, array() );
+
+		$this->run_batches();
+
+		$this->assertSame( array( ProductFailures::CHECKED ), ProductFailures::stored( $kept ) );
+		$this->assertSame( array(), ProductFailures::stored( $stale ), 'Rows from before the scan, on a product it did not test, are removed' );
+	}
+
+	/**
+	 * @testdox Giving up after the report is stored keeps the rows that report counts.
+	 */
+	public function test_give_up_after_the_report_is_stored_keeps_its_rows(): void {
+		$product_id = $this->create_products( 1 )[0];
+		$this->sut->run();
+		$this->run_batches();
+		$report = get_option( AgentReadiness::REPORT_OPTION );
+		$this->assertNotEmpty( ProductFailures::stored( $product_id ) );
+
+		update_option(
+			AgentReadiness::SCAN_OPTION,
+			array(
+				'id'         => $report['scan_id'],
+				'attempts'   => AgentReadiness::MAX_ATTEMPTS,
+				'ids'        => array( $product_id ),
+				'had_rows'   => array(),
+				'tested'     => array( $product_id ),
+				'position'   => 1,
+				'rows_as_of' => microtime( true ),
+			),
+			false
+		);
+		$this->sut->run_batch( $report['scan_id'] );
+
+		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
+		$this->assertContains( ProductFailures::CHECKED, ProductFailures::stored( $product_id ) );
+		$this->assertArrayNotHasKey( 'scan_id', wc_get_container()->get( AgentReadiness::class )->get_cached_report() );
+	}
+
+	/**
+	 * @testdox An empty product list from a successful query is an empty catalog, and a query error stops the scan.
+	 */
+	public function test_empty_product_list_follows_the_query(): void {
+		$this->create_products( 1 );
+		$selection = static function ( $posts, $query ) {
+			if ( ProductScan::PRODUCT_LIMIT + 1 !== (int) $query->get( 'posts_per_page' ) ) {
+				return $posts;
+			}
+			return array();
+		};
+		add_filter( 'posts_results', $selection, 10, 2 );
+		try {
+			$this->assertSame( array(), ( new ProductScan() )->start() );
+		} finally {
+			remove_filter( 'posts_results', $selection, 10 );
+		}
+
+		$fail = static function ( $posts, $query ) {
+			if ( ProductScan::PRODUCT_LIMIT + 1 !== (int) $query->get( 'posts_per_page' ) ) {
+				return $posts;
+			}
+			global $wpdb;
+			$wpdb->last_error = 'database unavailable';
+			return array();
+		};
+		add_filter( 'posts_results', $fail, 10, 2 );
+		try {
+			$this->expectException( \RuntimeException::class );
+			( new ProductScan() )->start();
+		} finally {
+			remove_filter( 'posts_results', $fail, 10 );
+			global $wpdb;
+			$wpdb->last_error = '';
+		}
+	}
+
+	/**
+	 * Set a product to Catalog visibility Hidden without saving it through the product editor.
+	 *
+	 * @param int $product_id Product id.
+	 */
+	private function hide_product( int $product_id ): void {
+		wp_set_object_terms( $product_id, array( 'exclude-from-catalog', 'exclude-from-search' ), 'product_visibility' );
+		clean_post_cache( $product_id );
+	}
+
+	/**
 	 * @testdox Turning the feature off during a scan stops it at the next batch, storing nothing.
 	 */
 	public function test_feature_off_stops_the_scan(): void {

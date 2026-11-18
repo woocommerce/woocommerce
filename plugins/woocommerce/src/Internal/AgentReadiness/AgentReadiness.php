@@ -36,6 +36,11 @@ class AgentReadiness {
 	public const SCAN_OPTION = 'woocommerce_agent_readiness_scan';
 
 	/**
+	 * Report field naming the scan that stored it. Removed before the report is read.
+	 */
+	private const REPORT_SCAN_ID = 'scan_id';
+
+	/**
 	 * Times one batch is tried before the scan gives up.
 	 */
 	public const MAX_ATTEMPTS = 3;
@@ -362,7 +367,7 @@ class AgentReadiness {
 		if ( ! is_array( $report ) ) {
 			return null;
 		}
-		unset( $report['shared_gtins'] );
+		unset( $report['shared_gtins'], $report[ self::REPORT_SCAN_ID ] );
 		return self::with_saved_products( $report );
 	}
 
@@ -503,7 +508,7 @@ class AgentReadiness {
 			$more = $this->continue_refresh( $chain );
 		} while ( $more );
 		$report = (array) get_option( self::REPORT_OPTION, array() );
-		unset( $report['shared_gtins'] );
+		unset( $report['shared_gtins'], $report[ self::REPORT_SCAN_ID ] );
 		return $report;
 	}
 
@@ -520,15 +525,18 @@ class AgentReadiness {
 		if ( is_array( $previous ) ) {
 			$this->abandon_refresh( $previous );
 		}
-		$state = array_merge(
+		// Taken first, so a save while the product list is read still counts as during the scan.
+		$rows_as_of = microtime( true );
+		$state      = array_merge(
 			$this->start_scan(),
 			array(
-				'id'       => wp_generate_uuid4(),
-				'attempts' => 0,
+				'id'         => wp_generate_uuid4(),
+				'attempts'   => 0,
+				'rows_as_of' => $rows_as_of,
 				// Taken before the scan. A product saved while it runs is absent here, so its new rows stay.
-				'had_rows' => ProductFailures::stored_product_ids(),
+				'had_rows'   => ProductFailures::stored_product_ids(),
 				// Product ids actually evaluated; keep_only must not treat a skipped load as tested.
-				'tested'   => array(),
+				'tested'     => array(),
 			)
 		);
 		update_option( self::SCAN_OPTION, $state, false );
@@ -585,19 +593,20 @@ class AgentReadiness {
 			return true;
 		}
 
-		$report = $this->finish_scan( $state );
+		$report                         = $this->finish_scan( $state );
+		$report['failures_stored']      = true;
+		$report[ self::REPORT_SCAN_ID ] = $chain;
 		if ( ! $this->is_current( $chain ) ) {
 			return false;
 		}
-		ProductFailures::keep_only(
-			array_map( 'intval', (array) ( $state['had_rows'] ?? array() ) ),
-			array_map( 'intval', (array) ( $state['tested'] ?? array() ) )
-		);
-		$report['failures_stored'] = true;
+		// Store the report first. A failed write leaves the previous report and the rows it counts.
 		if ( false === update_option( self::REPORT_OPTION, $report, false ) ) {
-			// Leave the checkpoint so the next action can retry publication.
 			return true;
 		}
+		if ( ! $this->is_current( $chain ) ) {
+			return false;
+		}
+		$this->keep_tested_rows( $state );
 		// Re-check before deleting: a replacement scan must keep its own progress.
 		if ( ! $this->is_current( $chain ) ) {
 			return false;
@@ -634,16 +643,37 @@ class AgentReadiness {
 	/**
 	 * End a scan without storing a report. Removes failure rows it wrote for products the
 	 * previous report never covered, so the Products list stays aligned with that report.
+	 * A scan whose report is already stored only finishes that cleanup.
 	 *
-	 * @param array{ids?:array<int,int>,had_rows?:array<int,int>} $state Scan progress.
+	 * @param array{id?:string,ids?:array<int,int>,had_rows?:array<int,int>,tested?:array<int,int>,rows_as_of?:float} $state Scan progress.
 	 */
 	private function abandon_refresh( array $state ): void {
+		$stored  = get_option( self::REPORT_OPTION );
+		$scan_id = (string) ( $state['id'] ?? '' );
+		if ( is_array( $stored ) && '' !== $scan_id && ( $stored[ self::REPORT_SCAN_ID ] ?? '' ) === $scan_id ) {
+			$this->keep_tested_rows( $state );
+			delete_option( self::SCAN_OPTION );
+			return;
+		}
 		$had_rows = array_map( 'intval', (array) ( $state['had_rows'] ?? array() ) );
 		$ids      = array_map( 'intval', (array) ( $state['ids'] ?? array() ) );
 		foreach ( array_diff( $ids, $had_rows ) as $product_id ) {
 			ProductFailures::forget( $product_id );
 		}
 		delete_option( self::SCAN_OPTION );
+	}
+
+	/**
+	 * Drop rows the scan did not test, keeping rows saved while it ran.
+	 *
+	 * @param array{had_rows?:array<int,int>,tested?:array<int,int>,rows_as_of?:float} $state Scan progress.
+	 */
+	private function keep_tested_rows( array $state ): void {
+		ProductFailures::keep_only(
+			array_map( 'intval', (array) ( $state['had_rows'] ?? array() ) ),
+			array_map( 'intval', (array) ( $state['tested'] ?? array() ) ),
+			isset( $state['rows_as_of'] ) ? (float) $state['rows_as_of'] : null
+		);
 	}
 
 	/**
