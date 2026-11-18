@@ -671,6 +671,128 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The update-check fallback should only serve package links while the cached data is fresh.
+	 *
+	 * @testWith [1, false, true, "https://woocommerce.com/package.zip"]
+	 *           [13, false, true, ""]
+	 *           [1, true, true, "https://woocommerce.com/package.zip"]
+	 *           [13, true, true, ""]
+	 *           [1, false, false, "https://woocommerce.com/package.zip"]
+	 *
+	 * @param int    $age_in_hours     How long ago the cached update check was made.
+	 * @param bool   $in_backoff       Whether a backoff is active, rather than the check failing.
+	 * @param bool   $same_payload     Whether the cache was made for the current payload.
+	 * @param string $expected_package The package the fallback should serve.
+	 */
+	public function test_update_check_fallback_blanks_package_links_once_stale( int $age_in_hours, bool $in_backoff, bool $same_payload, string $expected_package ): void {
+		$payload = array(
+			123 => array(
+				'product_id' => 123,
+				'file_id'    => 'abc123',
+			),
+		);
+		$cached  = array(
+			'hash'     => $same_payload ? md5( wp_json_encode( $payload ) ) : 'a-different-payload',
+			'updated'  => time() - $age_in_hours * HOUR_IN_SECONDS,
+			'products' => array(
+				123 => array(
+					'version' => '1.2.3',
+					'package' => 'https://woocommerce.com/package.zip',
+				),
+			),
+			'errors'   => array(),
+		);
+		set_transient( '_woocommerce_helper_updates', $cached, WEEK_IN_SECONDS );
+
+		if ( $in_backoff ) {
+			WC_Helper_API_Backoff::record( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, 15 * MINUTE_IN_SECONDS );
+		}
+
+		$http_mock = static function () {
+			return new WP_Error( 'http_request_failed', 'cURL error 28: Operation timed out' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = $this->call_update_check( $payload );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertSame( $expected_package, $result[123]['package'], 'The fallback served the wrong package link' );
+		$this->assertSame( $cached, get_transient( '_woocommerce_helper_updates' ), 'The fallback should not change the cached data' );
+	}
+
+	/**
+	 * @testdox A WooCommerce.com item is only skipped by the auto-update run when it has no package.
+	 *
+	 * @testWith ["plugin", "", false]
+	 *           ["theme", "", false]
+	 *           ["plugin", "https://woocommerce.com/package.zip", true]
+	 *           ["theme", "https://woocommerce.com/package.zip", true]
+	 *
+	 * @param string $type     The item type, plugin or theme.
+	 * @param string $package  The package on the update offer.
+	 * @param bool   $expected Whether the item should still be auto-updated.
+	 */
+	public function test_auto_update_run_skips_woo_items_without_package( string $type, string $package, bool $expected ): void {
+		$id   = 'plugin' === $type ? $this->mock_local_woo_plugin() : $this->mock_local_woo_theme();
+		$item = (object) array(
+			$type     => $id,
+			'package' => $package,
+		);
+
+		$this->assertSame( $expected, $this->filter_during_auto_update_run( $type, $item ) );
+	}
+
+	/**
+	 * @testdox Another plugin's update should not be skipped by the auto-update run for having no package.
+	 */
+	public function test_auto_update_run_leaves_other_plugins_alone(): void {
+		$this->mock_local_woo_plugin();
+		$item = (object) array(
+			'plugin'  => 'not-from-woo/not-from-woo.php',
+			'package' => '',
+		);
+
+		$this->assertTrue( $this->filter_during_auto_update_run( 'plugin', $item ) );
+	}
+
+	/**
+	 * @testdox Screens reading the auto-update filter outside the auto-update run should not see an item without a package as disabled.
+	 */
+	public function test_auto_update_filter_is_unchanged_outside_the_auto_update_run(): void {
+		$item = (object) array(
+			'plugin'  => $this->mock_local_woo_plugin(),
+			'package' => '',
+		);
+
+		$this->assertTrue( apply_filters( 'auto_update_plugin', true, $item ) );
+	}
+
+	/**
+	 * Applies an auto-update filter from inside the auto-update run, without running real updates.
+	 *
+	 * @param string $type The item type, plugin or theme.
+	 * @param object $item The update offer.
+	 * @return mixed The filtered value.
+	 */
+	private function filter_during_auto_update_run( string $type, object $item ) {
+		remove_action( 'wp_maybe_auto_update', 'wp_maybe_auto_update' );
+
+		$result = null;
+		add_action(
+			'wp_maybe_auto_update',
+			static function () use ( $type, $item, &$result ) {
+				$result = apply_filters( "auto_update_{$type}", true, $item );
+			}
+		);
+		do_action( 'wp_maybe_auto_update' );
+
+		return $result;
+	}
+
+	/**
 	 * @testdox A rejected update check should cache the empty result as before, without a backoff.
 	 *
 	 * @testWith [401]
