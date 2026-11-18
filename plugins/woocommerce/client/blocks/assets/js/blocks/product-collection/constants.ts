@@ -28,7 +28,6 @@ import {
 export const PRODUCT_COLLECTION_BLOCK_NAME = blockJson.name;
 
 export const DEFAULT_CAROUSEL_COLUMNS = 6;
-export const MAX_CAROUSEL_COLUMNS = 6;
 
 export const STOCK_STATUS_OPTIONS = getSetting< Record< string, string > >(
 	'stockStatusOptions',

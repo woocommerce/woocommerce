@@ -507,9 +507,9 @@ export const getDefaultDisplayLayout = (): Required<
 
 /**
  * Drop column settings the current layout does not use.
- * Stack drops every column setting. Carousel keeps `carouselColumns` and,
- * when that count is set, `shrinkColumns`. Grid keeps `columns` and
- * `shrinkColumns`.
+ * Stack ignores `columns` and `shrinkColumns`, so those keys are left out of
+ * the attributes that get saved in the block comment.
+ * Carousel uses `carouselColumns` instead of `columns`.
  */
 export function sanitizeDisplayLayout(
 	displayLayout?: Partial< ProductCollectionDisplayLayout > | null
@@ -519,17 +519,11 @@ export function sanitizeDisplayLayout(
 	}
 
 	if ( displayLayout?.type === LayoutOptions.CAROUSEL ) {
-		if (
-			displayLayout.carouselColumns === undefined ||
-			! Number.isFinite( displayLayout.carouselColumns )
-		) {
-			return { type: displayLayout.type };
-		}
-
 		return {
 			type: displayLayout.type,
-			carouselColumns: displayLayout.carouselColumns,
-			...( displayLayout.shrinkColumns ? { shrinkColumns: true } : {} ),
+			carouselColumns:
+				displayLayout.carouselColumns ?? DEFAULT_CAROUSEL_COLUMNS,
+			shrinkColumns: displayLayout.shrinkColumns ?? true,
 		};
 	}
 
@@ -540,28 +534,6 @@ export function sanitizeDisplayLayout(
 		columns: displayLayout?.columns ?? defaults.columns,
 		shrinkColumns: displayLayout?.shrinkColumns ?? defaults.shrinkColumns,
 	};
-}
-
-/**
- * Display layout after the inspector layout control changes.
- * Carousel starts at six columns with Responsive on, which matches the
- * carousel widths from before a column count was saved.
- */
-export function getDisplayLayoutForType(
-	nextType: LayoutOptions,
-	current?: Partial< ProductCollectionDisplayLayout > | null
-): ProductCollectionDisplayLayout {
-	return sanitizeDisplayLayout( {
-		...( nextType === LayoutOptions.GRID ? getDefaultDisplayLayout() : {} ),
-		...current,
-		type: nextType,
-		...( nextType === LayoutOptions.CAROUSEL
-			? {
-					carouselColumns: DEFAULT_CAROUSEL_COLUMNS,
-					shrinkColumns: true,
-				}
-			: {} ),
-	} );
 }
 
 export const getDefaultSettings = (

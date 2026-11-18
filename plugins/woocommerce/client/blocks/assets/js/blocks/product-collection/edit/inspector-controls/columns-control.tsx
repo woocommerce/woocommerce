@@ -42,7 +42,7 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 	// Unset carouselColumns keeps the responsive widths. The slider still needs a number.
 	const columnCount = isCarouselLayout
 		? ( carouselColumns ??
-			Math.min( defaultLayout.columns, effectiveMaxColumns ) )
+			Math.min( DEFAULT_CAROUSEL_COLUMNS, effectiveMaxColumns ) )
 		: ( columns ?? defaultLayout.columns );
 
 	const onShrinkColumnsToggleChange = ( value: boolean ) => {
@@ -50,12 +50,6 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 			displayLayout: sanitizeDisplayLayout( {
 				...props.displayLayout,
 				shrinkColumns: value,
-				// The carousel maximum has to be saved before shrinking can apply.
-				...( isCarouselLayout &&
-					value &&
-					carouselColumns === undefined && {
-						carouselColumns: columnCount,
-					} ),
 			} ),
 		} );
 	};
@@ -66,6 +60,7 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 				displayLayout: sanitizeDisplayLayout( {
 					...props.displayLayout,
 					carouselColumns: DEFAULT_CAROUSEL_COLUMNS,
+					shrinkColumns: true,
 				} ),
 			} );
 			return;
