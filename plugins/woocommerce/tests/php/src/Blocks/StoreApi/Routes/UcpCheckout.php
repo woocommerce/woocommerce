@@ -1093,4 +1093,31 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertNotSame( $order_id, (int) WC()->session->get( 'store_api_draft_order' ) );
 		$this->assertSame( 1, ( new \WC_Coupon( $coupon->get_id() ) )->get_usage_count() );
 	}
+
+	/**
+	 * @testdox A coupon applied before the store turned coupons off is removed and reported, and is not carried into the order.
+	 */
+	public function test_coupon_is_removed_once_coupons_are_disabled(): void {
+		\WC_Helper_Coupon::create_coupon( 'save1', array( 'coupon_amount' => '1' ) );
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$applied = $this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'save1' ) ) ) )->get_data();
+		$this->assertSame( array( 'save1' ), array_column( $applied['discounts']['applied'], 'code' ) );
+
+		update_option( 'woocommerce_enable_coupons', 'no' );
+		$this->simulate_new_request();
+		$refused = $this->request( 'POST', $path . '/complete' )->get_data();
+
+		$this->assertSame( 'incomplete', $refused['status'], 'The total changed, so the buyer is not handed off on this request.' );
+		$this->assertContains( 'discount_code_invalid', array_column( $refused['messages'], 'code' ) );
+		$this->assertSame( array(), $refused['discounts']['applied'] ?? array() );
+		$this->assertSame( $created['totals'], $refused['totals'] );
+
+		$this->simulate_new_request();
+		$completed = $this->request( 'POST', $path . '/complete' )->get_data();
+		$order     = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+
+		$this->assertSame( 'requires_escalation', $completed['status'] );
+		$this->assertSame( array(), $order->get_coupon_codes() );
+	}
 }

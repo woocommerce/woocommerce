@@ -62,6 +62,13 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	const DISCOUNT_CODES_MAX = 10;
 
 	/**
+	 * Coupons this request took off the cart because the store has turned coupons off.
+	 *
+	 * @var array<int, string>
+	 */
+	private $disabled_coupons = array();
+
+	/**
 	 * Build the `ucp` envelope for a response from this route.
 	 *
 	 * @param string $status Response status, `success` or `error`.
@@ -129,13 +136,16 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			return $this->add_response_headers( $this->ucp_not_found() );
 		}
 
-		$inherited_token = CartTokenUtils::get_request_cart_token();
+		$inherited_token        = CartTokenUtils::get_request_cart_token();
+		$this->disabled_coupons = array();
 		add_filter( 'woocommerce_coupon_get_usage_count', array( $this, 'usage_count_without_own_order' ), 10, 2 );
+		add_action( 'woocommerce_store_api_cart_errors', array( $this, 'report_disabled_coupons' ) );
 
 		try {
 			return parent::get_response( $request );
 		} finally {
 			remove_filter( 'woocommerce_coupon_get_usage_count', array( $this, 'usage_count_without_own_order' ), 10 );
+			remove_action( 'woocommerce_store_api_cart_errors', array( $this, 'report_disabled_coupons' ) );
 			$this->restore_request_cart_token( $inherited_token );
 			remove_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
 		}
@@ -287,6 +297,43 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			}
 
 			throw $error;
+		}
+
+		$this->remove_disabled_coupons();
+	}
+
+	/**
+	 * Take the coupons off a cart that got them before the store turned coupons off.
+	 *
+	 * Core then only refuses to add a coupon: one already applied goes on discounting, into the order.
+	 */
+	private function remove_disabled_coupons(): void {
+		$cart = $this->cart_controller->get_cart_instance();
+
+		if ( wc_coupons_enabled() || ! $cart->get_applied_coupons() ) {
+			return;
+		}
+
+		$this->disabled_coupons = array_values( $cart->get_applied_coupons() );
+
+		foreach ( $this->disabled_coupons as $code ) {
+			$cart->remove_coupon( $code );
+		}
+
+		$cart->calculate_totals();
+	}
+
+	/**
+	 * Report the coupons removed above as cart errors, the way the cart reports a coupon it stops accepting.
+	 *
+	 * @internal
+	 *
+	 * @param \WP_Error $errors Cart errors.
+	 */
+	public function report_disabled_coupons( $errors ): void {
+		foreach ( $this->disabled_coupons as $code ) {
+			/* translators: %s: coupon code. */
+			$errors->add( 'woocommerce_rest_cart_coupon_error', sprintf( __( 'The "%s" coupon has been removed from your cart: coupons are disabled.', 'woocommerce' ), $code ) );
 		}
 	}
 
