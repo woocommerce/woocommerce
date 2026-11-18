@@ -522,8 +522,8 @@ export function sanitizeDisplayLayout(
 		return {
 			type: displayLayout.type,
 			carouselColumns:
-				displayLayout.carouselColumns ?? DEFAULT_CAROUSEL_COLUMNS,
-			shrinkColumns: displayLayout.shrinkColumns ?? true,
+				displayLayout?.carouselColumns ?? DEFAULT_CAROUSEL_COLUMNS,
+			shrinkColumns: displayLayout?.shrinkColumns ?? true,
 		};
 	}
 
