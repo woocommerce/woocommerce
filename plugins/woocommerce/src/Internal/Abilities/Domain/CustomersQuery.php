@@ -116,9 +116,9 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 		$page     = $input['page'] ?? 1;
 		$per_page = $input['per_page'] ?? ( empty( $input['include'] ) ? self::DEFAULT_PER_PAGE : max( 1, count( $include ) ) );
 
-		$search = isset( $input['search'] ) ? trim( $input['search'] ) : '';
+		$search = isset( $input['search'] ) ? (string) preg_replace( '/\s+/', ' ', trim( $input['search'] ) ) : '';
 		if ( isset( $input['search'] ) && '' === $search ) {
-			// The data store skips an empty search, which would return every customer. The term is bound, not cleaned, so an email keeps a literal "%41".
+			// The data store skips an empty search, which would return every customer. The term is bound, not cleaned, so an email keeps a literal "%41"; only whitespace is collapsed, which the name matches with single spaces.
 			return array(
 				'customers'   => array(),
 				'total'       => 0,

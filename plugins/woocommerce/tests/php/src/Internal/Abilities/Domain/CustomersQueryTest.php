@@ -244,6 +244,7 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( $guest ), $ids( $this->sut->execute( array( 'search' => 'Privateguest' ) ) ), 'A guest is found by the name on their orders.' );
 		$this->assertEqualsCanonicalizing( array( $id, $other ), $ids( $this->sut->execute( array( 'search' => 'privatefirst privatelast' ) ) ) );
+		$this->assertEqualsCanonicalizing( array( $id, $other ), $ids( $this->sut->execute( array( 'search' => "privatefirst \t privatelast" ) ) ), 'Runs of whitespace match the single space between the names.' );
 
 		$result = $this->sut->execute(
 			array(
