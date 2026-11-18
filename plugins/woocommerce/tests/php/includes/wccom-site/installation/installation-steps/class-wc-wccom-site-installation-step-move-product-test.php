@@ -125,6 +125,38 @@ class WC_WCCOM_Site_Installation_Step_Move_Product_Test extends WC_Unit_Test_Cas
 	}
 
 	/**
+	 * @testdox An empty folder left at the destination isn't an installed copy, so a package the site can't run is still stopped.
+	 */
+	public function test_stops_install_into_an_empty_destination_folder(): void {
+		wp_mkdir_p( $this->destination( 'plugin' ) );
+		$this->unpack_fixture( 'plugin', '99.0', '' );
+
+		$error = null;
+		try {
+			( new WC_WCCOM_Site_Installation_Step_Move_Product( $this->state( 'plugin' ) ) )->run();
+		} catch ( WC_REST_WCCOM_Site_Installer_Error $e ) {
+			$error = $e;
+		}
+
+		$this->assertNotNull( $error, 'The step should fail' );
+		$this->assertSame( 'incompatible_wp_required_version', $error->get_error_code() );
+		$this->assertFileDoesNotExist( $this->destination( 'plugin' ) . '/' . self::SLUG . '.php', 'Nothing should be installed' );
+	}
+
+	/**
+	 * @testdox A package whose requirements the site meets installs into an empty destination folder, as WordPress does.
+	 */
+	public function test_installs_into_an_empty_destination_folder(): void {
+		wp_mkdir_p( $this->destination( 'plugin' ) );
+		$this->unpack_fixture( 'plugin', '1.0', '' );
+
+		$state = ( new WC_WCCOM_Site_Installation_Step_Move_Product( $this->state( 'plugin' ) ) )->run();
+
+		$this->assertFileExists( $this->destination( 'plugin' ) . '/' . self::SLUG . '.php' );
+		$this->assertSame( trailingslashit( $this->destination( 'plugin' ) ), trailingslashit( $state->get_installed_path() ) );
+	}
+
+	/**
 	 * Installation state for the fixture product.
 	 *
 	 * @param string $type 'plugin' or 'theme'.

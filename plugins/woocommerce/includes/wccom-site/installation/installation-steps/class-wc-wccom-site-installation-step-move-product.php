@@ -95,7 +95,7 @@ class WC_WCCOM_Site_Installation_Step_Move_Product implements WC_WCCOM_Site_Inst
 	 */
 	protected function check_package_requirements( string $destination ): void {
 		$source = $this->get_package_root( (string) $this->state->get_unpacked_path() );
-		if ( '' === $source || is_dir( trailingslashit( $destination ) . basename( $source ) ) ) {
+		if ( '' === $source || $this->is_installed_copy( trailingslashit( $destination ) . basename( $source ) ) ) {
 			return;
 		}
 
@@ -134,6 +134,25 @@ class WC_WCCOM_Site_Installation_Step_Move_Product implements WC_WCCOM_Site_Inst
 			);
 			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
+	}
+
+	/**
+	 * Whether a copy is already installed at the path, using the same test as install_package()'s folder_exists check.
+	 *
+	 * An empty folder doesn't count: install_package() installs into it, so the requirements still need checking.
+	 *
+	 * @since 11.4.0
+	 * @param string $path Where the package would be installed.
+	 * @return bool
+	 */
+	private function is_installed_copy( string $path ): bool {
+		global $wp_filesystem;
+
+		if ( ! $wp_filesystem instanceof WP_Filesystem_Base ) {
+			return is_dir( $path ) && array() !== array_diff( (array) scandir( $path ), array( '.', '..' ) );
+		}
+
+		return $wp_filesystem->exists( $path ) && ! empty( $wp_filesystem->dirlist( $path ) );
 	}
 
 	/**
