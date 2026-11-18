@@ -49,7 +49,7 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Update settings', 'woocommerce' ),
-			'description'         => __( 'Change approved settings in a group. Read current values with woocommerce/settings-query first. Send lists, such as multiselect choices, in values instead of value. Unapproved fields and passwords cannot be changed. If any setting is refused, nothing is saved.', 'woocommerce' ),
+			'description'         => __( 'Change approved settings in one group, such as the currency, store address or checkout pages. Changes apply to the whole store and every customer at once, so confirm them with the merchant before you send them. Read current values with woocommerce/settings-query first. Send lists, such as multiselect choices, in values instead of value. Unapproved fields and passwords cannot be changed. If any setting is refused, nothing is saved. Each result returns the previous value, so a change can be undone.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_output_schema(),
