@@ -413,6 +413,45 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox With the JSON-LD WooCommerce prints, the shipping and buy action checks pass or couldn't check, never fail, for each product state.
+	 *
+	 * @testWith ["shipped", true]
+	 *           ["virtual", false]
+	 *           ["out_of_stock", false]
+	 *           ["variable", false]
+	 *
+	 * @param string $state   Product state.
+	 * @param bool   $printed Whether WooCommerce prints both fields for it.
+	 */
+	public function test_core_jsonld_never_fails_shipping_or_buy_action( string $state, bool $printed ): void {
+		$zone = new \WC_Shipping_Zone();
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$zone->add_shipping_method( 'flat_rate' );
+		$product = 'variable' === $state ? WC_Helper_Product::create_variation_product() : WC_Helper_Product::create_simple_product();
+		if ( 'virtual' === $state ) {
+			$product->set_virtual( true );
+		} elseif ( 'out_of_stock' === $state ) {
+			$product->set_stock_status( 'outofstock' );
+		}
+		$product->save();
+		if ( $product instanceof \WC_Product_Variable ) {
+			\WC_Product_Variable::sync( $product );
+		}
+		$product = wc_get_product( $product->get_id() );
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+		$results = $this->results();
+		$checks  = array( $results['product_shipping_schema'], $results['product_buy_action_schema'] );
+
+		if ( $printed ) {
+			$this->assertSame( array( true, true ), $checks );
+		} else {
+			$this->assertNotContains( false, $checks, 'A check fails on markup WooCommerce printed: its copy of the print conditions has drifted from WC_Structured_Data' );
+		}
+		$zone->delete();
+	}
+
+	/**
 	 * @testdox The product page checks skip a newer product of a type the report doesn't check.
 	 */
 	public function test_product_checks_skip_unchecked_types(): void {

@@ -3,8 +3,11 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
+use Automattic\WooCommerce\Internal\StructuredData\ShippingDestinations;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils as UcpUtils;
 
 defined( 'ABSPATH' ) || exit;
@@ -77,7 +80,8 @@ class StoreOutputChecks {
 			if ( StoreConditions::is_off( $check['id'] ) ) {
 				continue;
 			}
-			$pending = in_array( $check['id'], self::PENDING, true ) || ( 'ucp_checkout' === $check['id'] && ! StoreConditions::serves_ucp_checkout() );
+			// UCP checkout doesn't run until this WooCommerce serves it, and reads as coming soon, not failed.
+			$pending = 'ucp_checkout' === $check['id'] && ! StoreConditions::serves_ucp_checkout();
 			try {
 				$ok = $pending ? null : ( $check['test'] )( $responses );
 			} catch ( \Throwable $e ) {
@@ -115,17 +119,6 @@ class StoreOutputChecks {
 		}
 		return $results;
 	}
-
-	/**
-	 * Checks for output WooCommerce doesn't build yet. They don't run and are reported as
-	 * pending, not failed; remove the entry when the output ships. The output is built by
-	 * WOOPRD-3908 (shipping) and WOOPRD-3918 (buy action). The UCP checkout check is pending
-	 * until this WooCommerce serves UCP checkout (StoreConditions::serves_ucp_checkout()).
-	 */
-	private const PENDING = array(
-		'product_shipping_schema',
-		'product_buy_action_schema',
-	);
 
 	private const MAX_LISTED_SITEMAPS = 5;
 
@@ -470,18 +463,18 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'product_shipping_schema',
 				'group'   => 'buy',
-				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => self::ships( $responses ) ? self::offer_has( $products, 'shippingDetails' ) : null ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : ( self::offer_has( $products, 'shippingDetails' ) ? true : ( null === self::ships( $responses ) ? null : false ) ) ),
 				'blocks'  => 'checkout',
 				'name'    => __( 'Product structured data gives shipping details', 'woocommerce' ),
 				'label'   => __( 'Product structured data has no shipping details', 'woocommerce' ),
 				'why'     => __( 'Agents tell shoppers the delivery options and cost before they buy.', 'woocommerce' ),
-				'fix'     => __( 'Set up shipping zones so WooCommerce can add shipping details to your products.', 'woocommerce' ),
-				'fix_url' => admin_url( 'admin.php?page=wc-settings&tab=shipping' ),
+				'fix'     => __( 'Add a shipping zone with a shipping method, so WooCommerce can add shipping details to your products. If you have one, check whether your theme or an SEO plugin replaces WooCommerce\'s structured data.', 'woocommerce' ),
+				'fix_url' => '',
 			),
 			array(
 				'id'      => 'product_buy_action_schema',
 				'group'   => 'buy',
-				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => self::has_buy_action( $products, $responses->product() ) ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::has_buy_action( $products, $responses->product() ) ),
 				'blocks'  => 'checkout',
 				'name'    => __( 'Product structured data says how to buy', 'woocommerce' ),
 				'label'   => __( 'Product structured data has no buy action', 'woocommerce' ),
@@ -1086,13 +1079,43 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Whether the scanned product needs shipping. A product that doesn't ship has no shipping details to give.
+	 * Whether WooCommerce would print shipping details for the scanned product: a simple product with a
+	 * price that needs shipping (the conditions in WC_Structured_Data::generate_product_data()), on a store
+	 * ShippingDestinations can describe. False when the store has no zone with a delivery method yet, which
+	 * the merchant can fix. Null when WooCommerce wouldn't print them for another reason: a variable product,
+	 * shipping off, a zone criteria filter, or zones it can't describe.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
-	private static function ships( StoreResponses $responses ): bool {
+	private static function ships( StoreResponses $responses ): ?bool {
 		$product = $responses->product();
-		return null === $product || $product->needs_shipping();
+		if ( null !== $product && ( '' === $product->get_price() || ! $product->is_type( ProductType::SIMPLE ) || ! $product->needs_shipping() ) ) {
+			return null;
+		}
+		if ( ! wc_shipping_enabled() || has_filter( 'woocommerce_get_zone_criteria' ) ) {
+			return null;
+		}
+		if ( ! self::has_delivery_method() ) {
+			return false;
+		}
+		return array() !== wc_get_container()->get( ShippingDestinations::class )->get_shipping_details() ? true : null;
+	}
+
+	/**
+	 * Whether a shipping zone, "Rest of the world" included, has an enabled method other than local pickup,
+	 * the methods ShippingDestinations describes.
+	 */
+	private static function has_delivery_method(): bool {
+		$zones    = \WC_Shipping_Zones::get_shipping_zones();
+		$zones[0] = new \WC_Shipping_Zone( 0 );
+		foreach ( $zones as $zone ) {
+			foreach ( $zone->get_shipping_methods( true ) as $method ) {
+				if ( $method instanceof \WC_Shipping_Method && 'local_pickup' !== $method->id && ! $method->supports( 'local-pickup' ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -1206,8 +1229,8 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether a Product item, a variant or one of their offers has a BuyAction potentialAction.
-	 * Null for a variable product without one: WooCommerce doesn't link a variable product's
-	 * page to checkout, only a chosen variation.
+	 * Null without one when WooCommerce wouldn't print it: it links only a simple product, or a chosen
+	 * variation, that can be bought now (the conditions of WC_Structured_Data::get_product_checkout_url()).
 	 *
 	 * @param array<int, array<string, mixed>> $products Product items.
 	 * @param \WC_Product|null                 $scanned  The scanned product.
@@ -1223,7 +1246,10 @@ class StoreOutputChecks {
 				}
 			}
 		}
-		return null !== $scanned && $scanned->is_type( 'variable' ) ? null : false;
+		if ( null !== $scanned && ( ! $scanned->is_type( ProductType::SIMPLE ) || ( ! $scanned->is_visible() && CatalogVisibility::SEARCH !== $scanned->get_catalog_visibility() ) || ! $scanned->is_publicly_viewable() || ! $scanned->is_purchasable() || ! $scanned->is_in_stock() || ! $scanned->has_enough_stock( 1 ) ) ) {
+			return null;
+		}
+		return false;
 	}
 
 	/**

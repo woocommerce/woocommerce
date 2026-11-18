@@ -407,7 +407,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Checks for output WooCommerce doesn't build yet don't run, and are reported as pending.
+	 * @testdox Only the UCP checkout check waits as pending, until this WooCommerce serves UCP checkout; the product structured data checks run.
 	 */
 	public function test_pending_checks(): void {
 		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
@@ -415,14 +415,60 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 
 		$checks = array_column( $this->sut->all(), null, 'id' );
 
-		foreach ( ( new \ReflectionClassConstant( StoreOutputChecks::class, 'PENDING' ) )->getValue() as $id ) {
-			$this->assertNull( $checks[ $id ]['ok'], $id );
-			$this->assertTrue( $checks[ $id ]['pending'], $id );
+		foreach ( array( 'open_graph_tags', 'product_return_policy_schema', 'product_shipping_schema', 'product_buy_action_schema' ) as $id ) {
+			$this->assertFalse( $checks[ $id ]['pending'], $id . ' runs: WooCommerce prints its output' );
 		}
-		$this->assertFalse( $checks['open_graph_tags']['pending'] );
-		$this->assertFalse( $checks['product_return_policy_schema']['pending'], 'WooCommerce adds the returns policy since 11.3' );
-		$this->assertContains( 'product_shipping_schema', ( new \ReflectionClassConstant( StoreOutputChecks::class, 'PENDING' ) )->getValue(), 'The list is not empty' );
 		$this->assertSame( ! StoreConditions::serves_ucp_checkout(), $checks['ucp_checkout']['pending'], 'The UCP checkout check runs once this WooCommerce serves UCP checkout' );
+	}
+
+	/**
+	 * @testdox The shipping and buy action checks read the product page, and couldn't check a product that can't ship or can't be bought now.
+	 */
+	public function test_shipping_and_buy_action_on_the_page(): void {
+		$ld        = static fn( string $offer ): string => '<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Product","name":"Mug","offers":' . $offer . '}]}</script>';
+		$responses = $this->good_store();
+		$result    = function ( string $offer, string $id ) use ( $responses, $ld ): ?bool {
+			$responses[ $this->product_path() ] = array( 200, self::page( $ld( $offer ) ) );
+			$this->serve( $responses );
+			return array_column( $this->sut->all(), 'ok', 'id' )[ $id ];
+		};
+		$bare      = '{"@type":"Offer","price":"10"}';
+		$zone      = new \WC_Shipping_Zone();
+		$zone->set_zone_name( 'US' );
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$zone->add_shipping_method( 'flat_rate' );
+
+		$this->assertTrue( $result( '{"@type":"Offer","price":"10","shippingDetails":{"@type":"OfferShippingDetails"}}', 'product_shipping_schema' ) );
+		$this->assertFalse( $result( $bare, 'product_shipping_schema' ) );
+		$this->assertFalse( $result( $bare, 'product_buy_action_schema' ), 'An in-stock simple product gets a BuyAction from WooCommerce' );
+		$responses[ $this->product_path() ] = array( 200, self::page( '' ) );
+		$this->serve( $responses );
+		$no_ld = array_column( $this->sut->all(), 'ok', 'id' );
+		$this->assertNull( $no_ld['product_shipping_schema'], 'Without product details it couldn\'t check, as the other product details checks' );
+		$this->assertNull( $no_ld['product_buy_action_schema'] );
+
+		update_option( 'woocommerce_ship_to_countries', 'disabled' );
+		$this->assertNull( $result( $bare, 'product_shipping_schema' ), 'Shipping turned off: no shipping details to give' );
+		delete_option( 'woocommerce_ship_to_countries' );
+		add_filter( 'woocommerce_get_zone_criteria', '__return_empty_array' );
+		$this->assertNull( $result( $bare, 'product_shipping_schema' ), 'A zone criteria filter: WooCommerce prints no shipping details' );
+		remove_filter( 'woocommerce_get_zone_criteria', '__return_empty_array' );
+
+		add_filter( 'woocommerce_countries_shipping_countries', '__return_empty_array' );
+		$this->assertNull( $result( $bare, 'product_shipping_schema' ), 'A zone WooCommerce can\'t describe: it prints no shipping details' );
+		remove_filter( 'woocommerce_countries_shipping_countries', '__return_empty_array' );
+		$zone->delete();
+		$this->assertFalse( $result( $bare, 'product_shipping_schema' ), 'No zone with a delivery method: the merchant can add one' );
+		$this->assertTrue( $result( '{"@type":"Offer","price":"10","shippingDetails":{"@type":"OfferShippingDetails"}}', 'product_shipping_schema' ), 'Printed by another plugin, it still counts' );
+
+		add_filter( 'woocommerce_product_is_visible', '__return_false' );
+		$this->assertNull( $result( $bare, 'product_buy_action_schema' ), 'Hidden by a visibility filter: WooCommerce prints no BuyAction' );
+		remove_filter( 'woocommerce_product_is_visible', '__return_false' );
+
+		$this->product->set_stock_status( 'outofstock' );
+		$this->product->save();
+		$this->assertNull( $result( $bare, 'product_buy_action_schema' ), 'WooCommerce links only a product in stock to checkout' );
 	}
 
 	/**
@@ -445,7 +491,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The pending product checks find a returns policy and shipping details on an offer, and a BuyAction on the product or an offer.
+	 * @testdox The product checks find a returns policy and shipping details on an offer, and a BuyAction on the product or an offer.
 	 */
 	public function test_pending_product_detectors(): void {
 		$offer_has  = new \ReflectionMethod( StoreOutputChecks::class, 'offer_has' );
@@ -530,11 +576,26 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertNull( $buy_action->invoke( null, array( $empty_group ), $variable ), 'A variable product without one' );
 		$this->assertFalse( $buy_action->invoke( null, array( $empty_group ), $this->product ), 'A simple product without one' );
 
+		$variable->delete( true );
+		$this->assertFalse( $ships->invoke( null, new StoreResponses( true ) ), 'No zone with a delivery method' );
+		$zone = new \WC_Shipping_Zone();
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$zone->add_shipping_method( 'local_pickup' );
+		$this->assertFalse( $ships->invoke( null, new StoreResponses( true ) ), 'Local pickup only: WooCommerce describes no delivery' );
+		$zone->add_shipping_method( 'flat_rate' );
 		$this->assertTrue( $ships->invoke( null, new StoreResponses( true ) ) );
+		$this->product->set_regular_price( '' );
+		$this->product->save();
+		$this->assertNull( $ships->invoke( null, new StoreResponses( true ) ), 'Without a price WooCommerce prints no offer' );
+		$this->product->set_regular_price( '10' );
 		$this->product->set_virtual( true );
 		$this->product->save();
-		$variable->delete( true );
-		$this->assertFalse( $ships->invoke( null, new StoreResponses( true ) ), 'A virtual product has no shipping details to give' );
+		$this->assertNull( $ships->invoke( null, new StoreResponses( true ) ), 'A virtual product has no shipping details to give' );
+
+		$this->product->delete( true );
+		WC_Helper_Product::create_variation_product();
+		$this->assertNull( $ships->invoke( null, new StoreResponses( true ) ), 'A variable product: WooCommerce prints shipping details only for a chosen variation' );
 	}
 
 	/**
