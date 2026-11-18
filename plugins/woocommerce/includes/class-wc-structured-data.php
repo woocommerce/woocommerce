@@ -45,13 +45,6 @@ class WC_Structured_Data {
 	private $generated_product_ids = array();
 
 	/**
-	 * Product ID being added by generate_product_data().
-	 *
-	 * @var int
-	 */
-	private $generating_product_id = 0;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -97,13 +90,9 @@ class WC_Structured_Data {
 
 		if ( $reset && isset( $this->_data ) ) {
 			unset( $this->_data );
-			$this->generated_product_ids = array();
 		}
 
 		$this->_data[] = $data;
-		if ( $this->generating_product_id ) {
-			$this->generated_product_ids[ $this->generating_product_id ] = true;
-		}
 
 		return true;
 	}
@@ -698,13 +687,8 @@ class WC_Structured_Data {
 		 * @param array      $markup  Product structured data.
 		 * @param WC_Product $product Product being described.
 		 */
-		$markup                      = apply_filters( 'woocommerce_structured_data_product', $markup, $product );
-		$this->generating_product_id = $product->get_id();
-		try {
-			$this->set_data( $markup );
-		} finally {
-			$this->generating_product_id = 0;
-		}
+		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
+		$this->generated_product_ids[ $product->get_id() ] = true;
 	}
 
 	/**

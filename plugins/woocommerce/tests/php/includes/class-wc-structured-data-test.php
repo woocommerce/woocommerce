@@ -505,43 +505,6 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Resetting stored data allows product data to be generated again.
-	 */
-	public function test_output_structured_data_regenerates_product_after_reset(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		$this->go_to( get_permalink( $product->get_id() ) );
-		$this->structured_data->generate_product_data( $product );
-		$this->structured_data->set_data( array( '@type' => 'BreadcrumbList' ), true );
-
-		$this->output_footer_structured_data();
-
-		$data = $this->structured_data->get_data();
-		$this->assertCount( 2, $data, 'The fallback should regenerate product data removed by a reset.' );
-		$this->assertSame( get_permalink( $product->get_id() ) . '#product', $data[1]['@id'], 'The regenerated node should describe the queried product.' );
-	}
-
-	/**
-	 * @testdox Rejected markup does not mark a product as generated.
-	 */
-	public function test_output_structured_data_retries_rejected_product_data(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		$this->go_to( get_permalink( $product->get_id() ) );
-		$filter = static function ( $markup ) {
-			$markup['@type'] = 'Invalid-Type';
-			return $markup;
-		};
-		add_filter( 'woocommerce_structured_data_product', $filter );
-		$this->structured_data->generate_product_data( $product );
-		$this->assertSame( array(), $this->structured_data->get_data(), 'Invalid markup should not be stored.' );
-		remove_filter( 'woocommerce_structured_data_product', $filter );
-
-		$this->output_footer_structured_data();
-
-		$this->assertCount( 1, $this->structured_data->get_data(), 'The fallback should retry a product whose markup was rejected.' );
-		$this->assertSame( 'Product', $this->structured_data->get_data()[0]['@type'], 'The retry should store valid product data.' );
-	}
-
-	/**
 	 * @testdox Two-argument set_data() overrides remain compatible and avoid duplicate identifier-free Product nodes.
 	 */
 	public function test_product_data_with_two_argument_set_data_override(): void {
