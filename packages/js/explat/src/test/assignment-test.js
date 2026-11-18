@@ -13,6 +13,7 @@ import { addFilter } from '@wordpress/hooks';
 import {
 	fetchExperimentAssignment,
 	fetchExperimentAssignmentWithAuth,
+	fetchExperimentAssignmentWithDefaultVariationName,
 } from '../assignment';
 global.fetch = jest.fn().mockImplementation( () =>
 	Promise.resolve( {
@@ -111,6 +112,47 @@ describe( 'fetchExperimentAssignment', () => {
 			'woo_wcadmin_install_timestamp'
 		);
 		await fetchPromise;
+	} );
+} );
+
+describe( 'fetchExperimentAssignmentWithDefaultVariationName', () => {
+	it.each( [
+		[
+			'returns the default variation by name',
+			{ woocommerce_test: null },
+			{ woocommerce_test: { variation: 'control' } },
+			{ woocommerce_test: 'control' },
+		],
+		[
+			'keeps a non-default variation',
+			{ woocommerce_test: 'treatment' },
+			{ woocommerce_test: { variation: 'treatment' } },
+			{ woocommerce_test: 'treatment' },
+		],
+		[
+			'keeps null when there is no assignment',
+			{ woocommerce_test: null },
+			{ woocommerce_test: { variation: null } },
+			{ woocommerce_test: null },
+		],
+		[ 'keeps the response when the experiment is not running', {}, {}, {} ],
+	] )( '%s', async ( _case, variations, assignments, expected ) => {
+		window.fetch.mockImplementation( () =>
+			Promise.resolve( {
+				json: () =>
+					Promise.resolve( { variations, assignments, ttl: 60 } ),
+				ok: true,
+				status: 200,
+			} )
+		);
+
+		const response =
+			await fetchExperimentAssignmentWithDefaultVariationName( {
+				experimentName: 'woocommerce_test',
+				anonId: '1234',
+			} );
+
+		expect( response.variations ).toEqual( expected );
 	} );
 } );
 

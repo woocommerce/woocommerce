@@ -107,6 +107,40 @@ export const fetchExperimentAssignment = async ( {
 	return await response.json();
 };
 
+/**
+ * Same request as fetchExperimentAssignment, with the default variation returned by name.
+ *
+ * ExPlat sends the default variation as null in `variations`, the same as not being in the experiment. Its name is in `assignments`.
+ */
+export const fetchExperimentAssignmentWithDefaultVariationName = async ( {
+	experimentName,
+	anonId,
+}: {
+	experimentName: string;
+	anonId: string | null;
+} ): Promise< unknown > => {
+	const response = ( await fetchExperimentAssignment( {
+		experimentName,
+		anonId,
+	} ) ) as {
+		variations?: Record< string, unknown >;
+		assignments?: Record< string, { variation?: unknown } | null >;
+	} | null;
+	const variationName = response?.assignments?.[ experimentName ]?.variation;
+
+	if ( ! response?.variations || typeof variationName !== 'string' ) {
+		return response;
+	}
+
+	return {
+		...response,
+		variations: {
+			...response.variations,
+			[ experimentName ]: variationName,
+		},
+	};
+};
+
 export const fetchExperimentAssignmentWithAuth = async ( {
 	experimentName,
 	anonId,
