@@ -39,6 +39,10 @@ final class ReadinessCopy {
 			/* translators: %s: UCP version the store serves, a date such as 2026-04-08. */
 			$check[3] = sprintf( __( 'Your store uses an older version of the Universal Commerce Protocol (UCP %s).', 'woocommerce' ), $source );
 		}
+		if ( 'ucp_endpoints_live' === $id && '' !== $source ) {
+			/* translators: %s: HTTP status and content type, such as 403 text/html. */
+			$check[3] .= ' ' . sprintf( __( 'The last answer was %s.', 'woocommerce' ), $source );
+		}
 		return array(
 			'title'  => $check[0],
 			'action' => $check[1],
@@ -194,9 +198,9 @@ final class ReadinessCopy {
 			'pages_public'                   => array(
 				__( 'Store pages open without logging in', 'woocommerce' ),
 				__( 'Let shoppers open store pages without logging in', 'woocommerce' ),
-				__( 'AI assistants don’t log in, so store pages need to be open to everyone.', 'woocommerce' ),
-				__( 'Your store asks everyone to log in before they can see its pages. AI assistants don’t log in, so they can’t see your products.', 'woocommerce' ),
-				__( 'Check your membership, private store or maintenance plugin, which can ask visitors to log in.', 'woocommerce' ),
+				__( 'Most AI assistants don’t log in, so they only read pages that are open to everyone.', 'woocommerce' ),
+				__( 'Your store asks everyone to log in before they can see its pages. Most AI assistants don’t log in, so they can’t see your products.', 'woocommerce' ),
+				__( 'If your store isn’t meant to be members-only, check your membership, private store or maintenance plugin, which can ask visitors to log in.', 'woocommerce' ),
 				admin_url( 'admin.php?page=wc-settings&tab=site-visibility' ),
 			),
 			'ucp_profile'                    => array(

@@ -31,10 +31,12 @@ class StoreConditions {
 
 	/**
 	 * Recommended conditions shown as Required, which don't keep AI shopping from being turned on:
-	 * AI assistants read the catalog through the API whatever search engines are told, and with no
-	 * payment method no sale goes through. The rules file's `store_checks` can change any of them (RemoteRules).
+	 * AI assistants read the catalog through the API whatever search engines are told, with no
+	 * payment method no sale goes through, customers learn their order went through from its email,
+	 * and AI assistants share the policy pages with shoppers before they buy. The rules file's
+	 * `store_checks` can change any of them (RemoteRules).
 	 */
-	public const SHOWN_REQUIRED = array( 'search_visible', 'payment_method' );
+	public const SHOWN_REQUIRED = array( 'search_visible', 'payment_method', 'order_emails', 'privacy_page', 'terms_page', 'refund_returns_page' );
 
 	public const LEVEL_RECOMMENDED = 'recommended';
 
@@ -93,7 +95,8 @@ class StoreConditions {
 				'id'      => 'search_visible',
 				'ok'      => '0' !== (string) get_option( 'blog_public', '1' ),
 				'blocks'  => 'listing',
-				'group'   => 'find',
+				// In Store access, where the noindex check it causes sits.
+				'group'   => 'access',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Search engines can index the store', 'woocommerce' ),
 				'label'   => __( 'Store is hidden from search engines', 'woocommerce' ),

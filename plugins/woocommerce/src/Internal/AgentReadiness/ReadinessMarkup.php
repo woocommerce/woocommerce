@@ -54,16 +54,17 @@ trait ReadinessMarkup {
 				? array( $policy[1], $policy[5], $edit, $policy[4], '' )
 				: array( $policy[2], $policy[3], $check['fix_url'], '', '' );
 		}
+		// The action and why, then the fix line where the step names a setting to change.
 		$actions = array(
 			'launched'       => array( __( 'Make your store live', 'woocommerce' ), __( 'AI assistants can only find your products when your store is live.', 'woocommerce' ) ),
 			'https'          => array( __( 'Use a secure connection (HTTPS)', 'woocommerce' ), __( 'AI assistants only connect to stores with a secure connection.', 'woocommerce' ) ),
-			'search_visible' => array( __( 'Let search engines index your store', 'woocommerce' ), __( 'AI assistants use search engines to find stores and products.', 'woocommerce' ) ),
+			'search_visible' => array( __( 'Let search engines index your store', 'woocommerce' ), __( 'AI assistants use search engines to find stores and products.', 'woocommerce' ), (string) ( $check['fix'] ?? '' ) ),
 			'guest_checkout' => array( __( 'Allow guest checkout', 'woocommerce' ), __( 'Guest checkout lets shoppers from AI assistants pay without creating an account.', 'woocommerce' ) ),
 			'order_emails'   => array( __( 'Turn on order confirmation emails', 'woocommerce' ), __( 'An email lets customers know their order went through.', 'woocommerce' ) ),
 			'payment_method' => array( __( 'Set up payments', 'woocommerce' ), __( 'A payment method is needed so shoppers can pay on your checkout.', 'woocommerce' ) ),
 		);
 		$action  = $actions[ $check['id'] ] ?? array( $check['label'] ?? '', $check['why'] );
 		// Site Health says how to move to HTTPS, and offers to do it where the host allows.
-		return array( $action[0], $action[1], 'https' === $check['id'] ? admin_url( 'site-health.php' ) : $check['fix_url'], '', '' );
+		return array( $action[0], $action[1], 'https' === $check['id'] ? admin_url( 'site-health.php' ) : $check['fix_url'], '', $action[2] ?? '' );
 	}
 }
