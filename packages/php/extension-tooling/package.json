@@ -1,0 +1,22 @@
+{
+	"name": "@woocommerce/extension-changelogger",
+	"private": true,
+	"description": "Jetpack Changelogger formatter for WooCommerce extensions.",
+	"scripts": {
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"test:php": "composer install --no-interaction --prefer-dist && composer test"
+	},
+	"config": {
+		"ci": {
+			"tests": [
+				{
+					"name": "PHP: extension changelog formatter",
+					"testType": "unit:php",
+					"command": "test:php",
+					"changes": [ "package.json", "composer.*", "src/**", "tests/**" ],
+					"events": [ "pull_request", "push" ]
+				}
+			]
+		}
+	}
+}
