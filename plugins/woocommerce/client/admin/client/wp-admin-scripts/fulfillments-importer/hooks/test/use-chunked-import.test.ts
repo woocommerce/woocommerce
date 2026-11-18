@@ -81,6 +81,7 @@ function renderImport( overrides: Partial< UseChunkedImportArgs > = {} ) {
 		useChunkedImport( {
 			token: 'tok',
 			total: 4,
+			processed: 0,
 			mapping: MAPPING,
 			notifyCustomer: false,
 			updateExisting: true,
@@ -445,6 +446,20 @@ describe( 'useChunkedImport', () => {
 		expect( onError ).toHaveBeenCalledWith( error.message, true );
 	} );
 
+	it( 'starts from the progress already confirmed when the step mounts again', async () => {
+		mockedRunChunk.mockResolvedValueOnce( buildResponse( 4, 4, true ) );
+
+		const { result, onFinish } = renderImport( { processed: 2 } );
+
+		await act( async () => {
+			await result.current.run();
+		} );
+
+		expect( mockedRunChunk ).toHaveBeenCalledTimes( 1 );
+		expect( mockedRunChunk.mock.calls[ 0 ][ 0 ].offset ).toBe( 2 );
+		expect( onFinish ).toHaveBeenCalled();
+	} );
+
 	it( 'resumes from the last confirmed offset when run again after an error', async () => {
 		mockedRunChunk
 			.mockResolvedValueOnce( buildResponse( 2, 4, false ) )
@@ -793,6 +808,7 @@ describe( 'useChunkedImport', () => {
 				const { run } = useChunkedImport( {
 					token: 'tok',
 					total: 4,
+					processed: 0,
 					mapping: MAPPING,
 					notifyCustomer: false,
 					updateExisting: true,

@@ -78,6 +78,7 @@ describe( 'ImportStep', () => {
 
 	it( 'passes the session and run settings to the import loop', () => {
 		const { hookArgs } = renderStep( {
+			processed: 40,
 			mapping: { 0: 'order_number' },
 			notifyCustomer: true,
 			updateExisting: false,
@@ -87,6 +88,7 @@ describe( 'ImportStep', () => {
 			expect.objectContaining( {
 				token: 'tok',
 				total: 100,
+				processed: 40,
 				mapping: { 0: 'order_number' },
 				notifyCustomer: true,
 				updateExisting: false,

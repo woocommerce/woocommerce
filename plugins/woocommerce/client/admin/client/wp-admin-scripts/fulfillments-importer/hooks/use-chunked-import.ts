@@ -18,6 +18,8 @@ import type {
 export interface UseChunkedImportArgs {
 	token: string | null;
 	total: number;
+	// Rows the server already confirmed; a remounted step continues from here.
+	processed: number;
 	mapping: ColumnMapping;
 	notifyCustomer: boolean;
 	updateExisting: boolean;
@@ -132,12 +134,14 @@ function isChunkResponse( response: unknown ): response is RunChunkResponse {
  * A chunk is sent again automatically only when the server refused it without
  * running it. Any other failure stops the loop with an error, because the
  * chunk may already be written and sending it again could repeat customer
- * emails. Calling run() again resumes from the last offset the server reported.
+ * emails. Calling run() again, or mounting the hook again with the stored
+ * progress, resumes from the last offset the server reported.
  */
 export function useChunkedImport( args: UseChunkedImportArgs ) {
 	const {
 		token,
 		total,
+		processed,
 		mapping,
 		notifyCustomer,
 		updateExisting,
@@ -148,7 +152,7 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 	const chunkSize = resolvedChunkSize();
 
 	const [ isRunning, setIsRunning ] = useState( false );
-	const offsetRef = useRef< number >( 0 );
+	const offsetRef = useRef< number >( processed );
 	const abortRef = useRef< AbortController | null >( null );
 	const runningRef = useRef( false );
 	// Set when the last request failed in a way that may have written its chunk.

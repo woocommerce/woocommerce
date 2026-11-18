@@ -17,6 +17,7 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	const { run, isRunning } = useChunkedImport( {
 		token: state.token,
 		total: state.total,
+		processed: state.processed,
 		mapping: state.mapping,
 		notifyCustomer: state.notifyCustomer,
 		updateExisting: state.updateExisting,
