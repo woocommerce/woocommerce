@@ -32,7 +32,7 @@ export const PRODUCT_COLLECTION_BLOCK_NAME = blockJson.name;
  * ProductTemplate.php uses the same bounds.
  */
 const MIN_CAROUSEL_COLUMNS = 1;
-const MAX_CAROUSEL_COLUMNS = 6;
+export const MAX_CAROUSEL_COLUMNS = 6;
 
 /**
  * Returns a carousel column count in the supported range.

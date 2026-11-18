@@ -37,6 +37,7 @@ import {
 import {
 	addProductCollectionToQueryPaginationParentOrAncestor,
 	getDefaultValueOfInherit,
+	getDisplayLayoutForType,
 	sanitizeDisplayLayout,
 } from '../utils';
 import {
@@ -210,6 +211,20 @@ describe( 'Product Collection editor contracts', () => {
 			);
 		}
 	);
+
+	it( 'selecting Carousel saves six columns with Responsive on', () => {
+		expect(
+			getDisplayLayoutForType( LayoutOptions.CAROUSEL, {
+				type: LayoutOptions.GRID,
+				columns: 3,
+				shrinkColumns: false,
+			} )
+		).toEqual( {
+			type: LayoutOptions.CAROUSEL,
+			carouselColumns: 6,
+			shrinkColumns: true,
+		} );
+	} );
 
 	it( 'keeps column settings in the saved Grid markup', () => {
 		const block = createBlock( PRODUCT_COLLECTION_BLOCK_NAME, {
