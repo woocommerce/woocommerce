@@ -466,6 +466,7 @@ class ChangelogFormatterTest extends TestCase {
 			'heading'        => array( '= 1.5.0 - 2026-09-16 =' ),
 			'near heading'   => array( '= Another line.' ),
 			'legacy heading' => array( '2026.09.01  - version 1.1.0' ),
+			'uppercase heading' => array( '2026.09.01 - Version 1.1.0' ),
 		);
 	}
 
@@ -524,6 +525,7 @@ class ChangelogFormatterTest extends TestCase {
 			'placeholder version'             => array( "= {$this->placeholder_version()} - 2026-09-01 =" ),
 			'placeholder version, unreleased' => array( "= {$this->placeholder_version()} - unreleased =" ),
 			'dotted WooCommerce.com heading'  => array( '2026.09.01 - version 1.1.0' ),
+			'uppercase WooCommerce.com heading' => array( '2016.08.03 - Version 2.0.2' ),
 			'dashed WooCommerce.com heading'  => array( '2026-09-01 - version 1.1.0' ),
 			'spaced WooCommerce.com heading'  => array( '2026.09.01  - version 1.1.0' ),
 		);

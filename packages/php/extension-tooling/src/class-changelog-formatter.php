@@ -365,7 +365,7 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 	 * @return bool
 	 */
 	private static function looks_like_heading( $line ) {
-		return preg_match( '/^=(?!=)/', $line ) || preg_match( '/^\d{4}[.-]\d{1,2}[.-]\d{1,2}\h+-\h+version\b/', $line );
+		return preg_match( '/^=(?!=)/', $line ) || preg_match( '/^\d{4}[.-]\d{1,2}[.-]\d{1,2}\h+-\h+version\b/i', $line );
 	}
 
 	/**
