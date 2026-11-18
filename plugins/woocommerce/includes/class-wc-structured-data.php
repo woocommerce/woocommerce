@@ -13,6 +13,7 @@
  */
 
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -538,7 +539,23 @@ class WC_Structured_Data {
 				}
 			}
 
+			$checkout_url = $this->get_product_checkout_url( $product, $selected_variation );
+			if ( null !== $checkout_url ) {
+				$markup_offer['checkoutPageURLTemplate'] = $checkout_url;
+			}
+
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
+			$offer            = $markup['offers'][0];
+			if ( null !== $checkout_url && is_array( $offer ) && 'Offer' === ( $offer['@type'] ?? null ) && is_string( $offer['checkoutPageURLTemplate'] ?? null ) && '' !== $offer['checkoutPageURLTemplate'] ) {
+				$markup['potentialAction'] = array(
+					'@type'  => 'BuyAction',
+					'target' => array(
+						'@type'          => 'EntryPoint',
+						'urlTemplate'    => $offer['checkoutPageURLTemplate'],
+						'actionPlatform' => array( 'https://schema.org/DesktopWebPlatform', 'https://schema.org/MobileWebPlatform' ),
+					),
+				);
+			}
 		}
 
 		if ( $product->get_rating_count() && wc_review_ratings_enabled() ) {
@@ -1078,6 +1095,43 @@ class WC_Structured_Data {
 		}
 
 		return $variation;
+	}
+
+	/**
+	 * Get a checkout link for a simple product or selected variation.
+	 *
+	 * @param WC_Product                $product   Product shown on the page.
+	 * @param WC_Product_Variation|null $variation Selected variation, if any.
+	 * @return string|null Checkout URL, or null if it cannot be represented.
+	 */
+	private function get_product_checkout_url( $product, $variation ) {
+		if ( ! $variation && ! $product->is_type( ProductType::SIMPLE ) ) {
+			return null;
+		}
+
+		$item = $variation ? $variation : $product;
+		if (
+			( ! $product->is_visible() && CatalogVisibility::SEARCH !== $product->get_catalog_visibility() ) ||
+			( $variation && ! $variation->is_visible() && CatalogVisibility::SEARCH !== $variation->get_catalog_visibility() ) ||
+			! $item->is_publicly_viewable() ||
+			! $item->is_purchasable() ||
+			! $item->is_in_stock() ||
+			! $item->has_enough_stock( 1 )
+		) {
+			return null;
+		}
+
+		if ( $variation && in_array( '', wc_get_product_variation_attributes( $variation->get_id() ), true ) ) {
+			return null;
+		}
+
+		return add_query_arg(
+			array(
+				'checkout-link' => '1',
+				'products'      => rawurlencode( $item->get_id() . ':1' ),
+			),
+			home_url( '/' )
+		);
 	}
 
 	/**

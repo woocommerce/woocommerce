@@ -6,9 +6,9 @@ sidebar_label: Default payment method
 
 # Choosing the default payment method
 
-By default, the Checkout block loads with a payment method already selected. WooCommerce picks the first of these that exists: the customer's default saved card, the method they picked earlier in the same session, or the first enabled gateway. Some stores have requirements on whether a method may be preselected, or on which kind: for example, that the shopper must choose one themselves, or that a card is never selected for them.
+By default, the checkout loads with a payment method already selected. WooCommerce picks the first of these that exists: the method selected earlier in the same session, while it is still available for the cart; the customer's default saved card; or the first gateway the checkout lists. Some stores have requirements on whether a method may be preselected, or on which kind: for example, that the shopper must choose one themselves, or that a card is never selected for them.
 
-The `woocommerce_default_payment_method` filter lets a store decide what the Checkout block starts with when the shopper hasn't picked a method yet. It works with gateway ids. It is not the default saved card a customer picks in My Account: that card only decides which gateway WooCommerce would otherwise preselect.
+The `woocommerce_default_payment_method` filter lets a store decide what the checkout starts with when the shopper hasn't picked a method yet. The Checkout block, the classic checkout shortcode and the pay-for-order page all ask it. It works with gateway ids. It is not the default saved card a customer picks in My Account: that card only decides which gateway WooCommerce would otherwise preselect.
 
 ## The filter
 
@@ -18,7 +18,7 @@ apply_filters( 'woocommerce_default_payment_method', $payment_method, $available
 
 | Argument | Type | Description |
 | --- | --- | --- |
-| `$payment_method` | `string` | The gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first enabled gateway, or `''` when there is none. |
+| `$payment_method` | `string` | The gateway id WooCommerce would preselect, picked in the order described above, or `''` when there is none. |
 | `$available_gateways` | `array` | The gateways available for the current cart, keyed by gateway id. |
 
 Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing. Any other value selects nothing. Returning `$payment_method` unchanged keeps WooCommerce's answer as it is.
@@ -29,10 +29,12 @@ Attach the callback by `init` at the latest, so it is in place for every Store A
 
 Once a callback is attached:
 
-- The Checkout block keeps the shopper's own choice while that gateway is enabled, and it survives a reload. The filter decides what the block starts with before they choose.
-- The block follows the server. When the filter returns nothing, nothing is selected, and the block doesn't fall back to the first method. When it returns a gateway, that gateway is selected as it would be today, including the customer's default saved card for it.
+- The checkout keeps the shopper's own choice while that gateway is available for the cart, and it survives a reload. The filter decides what the checkout starts with before they choose.
+- The Checkout block and the classic checkout follow the server. When the filter returns nothing, nothing is selected, and neither falls back to the first method, not even after the classic checkout re-renders its payment methods for a new address. When it returns a gateway, that gateway is selected as it would be today, including the customer's default saved card for it.
+- The pay-for-order page asks the filter too, except for an order created in admin with a payment method: that method stays preselected.
+- Placing an order with nothing selected shows "Please select a payment method." on every surface.
 
-Without a callback, nothing changes.
+Without a callback, the Checkout block is unchanged. One thing changes on the classic checkout and the pay-for-order page since WooCommerce 11.4: a logged-in customer with a default saved card starts on that card's gateway, if it is available for the cart, on their first visit to the checkout in a session, as on the Checkout block. Before, those pages started on the first method they listed. Once the classic checkout has been opened, the method selected there is remembered for the session and takes precedence, whether the shopper or the page selected it, and it follows a guest who then logs in.
 
 ## Examples
 
@@ -86,6 +88,6 @@ function myshop_forget_payment_choice() {
 
 ## Things to keep in mind
 
-- The callback must give the same answer for the same shopper on every request. The checkout page and the Store API both ask it.
+- The callback must give the same answer for the same shopper on every request. The checkout page, the Store API and the classic checkout's AJAX updates all ask it.
 - Logic based on the shopper's IP address needs the checkout page excluded from full-page caching, or one visitor's answer is served to everyone.
-- The filter only covers the Checkout block. The classic checkout shortcode and the pay-for-order page still preselect a gateway.
+- A theme that overrides `checkout/payment.php` or `checkout/form-pay.php` needs the `data-preselected` attribute from the WooCommerce 11.4 versions of those templates on the payment methods list, or the classic checkout keeps selecting the first method when the filter returns nothing.

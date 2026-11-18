@@ -13,6 +13,13 @@ declare( strict_types = 1 );
 class WC_Lazy_REST_Server_Test extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Tests exercise route initialization on a pristine server.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * @testdox get_routes() returns the complete route table after a scoped namespace dispatch.
 	 */
 	public function test_get_routes_returns_full_route_table_after_scoped_dispatch() {
