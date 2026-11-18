@@ -1068,8 +1068,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should call the order and order item prime callbacks once with every order and every product line.
 	 */
 	public function test_prime_callbacks_get_orders_and_line_items(): void {
-		$orders = array( \WC_Helper_Order::create_order(), \WC_Helper_Order::create_order() );
-		$calls  = array();
+		$product = \WC_Helper_Product::create_simple_product();
+		$orders  = array( wc_create_order(), wc_create_order() );
+		foreach ( $orders as $order ) {
+			$order->add_product( $product );
+			$order->save();
+		}
+		$calls = array();
 		foreach ( array( 'order', 'order_item' ) as $resource_name ) {
 			$this->register_prime(
 				$resource_name,

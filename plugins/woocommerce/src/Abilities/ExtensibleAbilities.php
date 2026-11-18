@@ -688,7 +688,8 @@ class ExtensibleAbilities {
 	 *                               data for an object that is not in the cache. Core calls prime
 	 *                               callbacks only on reads, not on writes, so key the cache by object
 	 *                               ID and do not keep entries across writes in the same request, for
-	 *                               example by refilling the cache on every call.
+	 *                               example by emptying the cache at the start of every call, so a
+	 *                               failed load leaves no old entries.
 	 * }
 	 */
 	public static function register_prime( array $args ): void {
