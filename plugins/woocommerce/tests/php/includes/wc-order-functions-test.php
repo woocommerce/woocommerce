@@ -763,4 +763,52 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$downloads = WC_Data_Store::load( 'customer-download' )->get_downloads( array( 'order_id' => $order->get_id() ) );
 		return array_map( fn( $download ) => (int) $download->get_product_id(), $downloads );
 	}
+
+	/**
+	 * @testdox Counting a customer's order records its emails on a per-user coupon, and cancelling it removes them with the use.
+	 */
+	public function test_customer_order_records_and_releases_used_by_emails() {
+		$customer_id = $this->factory->user->create( array( 'user_email' => 'lifecycle@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'lifecycle_emails', array( 'usage_limit_per_user' => '1' ) );
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->apply_coupon( 'lifecycle_emails' );
+		$order = wc_get_order( $order->get_id() );
+
+		$coupon_id = ( new WC_Coupon( 'lifecycle_emails' ) )->get_id();
+		$this->assertContains( $customer_id . ':lifecycle@example.com', get_post_meta( $coupon_id, '_used_by_email', false ) );
+		$this->assertContains( $customer_id . ':' . strtolower( $order->get_billing_email() ), get_post_meta( $coupon_id, '_used_by_email', false ) );
+
+		wc_get_order( $order->get_id() )->update_status( OrderStatus::CANCELLED );
+
+		$coupon = new WC_Coupon( 'lifecycle_emails' );
+		$this->assertSame( array(), array_values( $coupon->get_used_by() ) );
+		$this->assertEquals( 0, $coupon->get_usage_count() );
+		$this->assertSame( array(), get_post_meta( $coupon_id, '_used_by_email', false ) );
+	}
+
+	/**
+	 * @testdox Applying a per-user coupon to a customer order that already counts its coupons records the order's billing email.
+	 */
+	public function test_apply_coupon_to_counted_order_records_billing_email() {
+		$customer_id = $this->factory->user->create( array( 'user_email' => 'apply-account@example.com' ) );
+		WC_Helper_Coupon::create_coupon( 'apply_counted_emails', array( 'usage_limit_per_user' => '1' ) );
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_billing_email( 'apply-billing@example.com' );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
+
+		wc_get_order( $order->get_id() )->apply_coupon( 'apply_counted_emails' );
+
+		$coupon  = new WC_Coupon( 'apply_counted_emails' );
+		$records = get_post_meta( $coupon->get_id(), '_used_by_email', false );
+		$this->assertContains( $customer_id . ':apply-account@example.com', $records );
+		$this->assertContains( $customer_id . ':apply-billing@example.com', $records );
+		$this->assertEquals( 1, $coupon->get_usage_count(), 'The use is counted once.' );
+		$this->assertSame( array( (string) $customer_id ), array_values( $coupon->get_used_by() ) );
+	}
 }
