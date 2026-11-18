@@ -1965,6 +1965,55 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox With "Discourage search engines" on, WordPress turns its sitemap off, so the missing product sitemap is that setup step, not also a sitemap row pointing at an SEO plugin.
+	 */
+	public function test_sitemap_off_from_discourage_search_engines_shows_once(): void {
+		$this->make_every_step_pass();
+		update_option( 'blog_public', '0' );
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(
+					array(
+						'id'      => 'sitemap_lists_products',
+						'ok'      => false,
+						'blocks'  => 'discovery',
+						'group'   => 'find',
+						'name'    => 'sitemap name',
+						'label'   => 'sitemap label',
+						'why'     => '',
+						'fix'     => '',
+						'fix_url' => '',
+					),
+				),
+			)
+		);
+		$row_ids = static function ( array $view ): array {
+			$ids = array();
+			foreach ( $view['sections'] as $section ) {
+				$ids = array_merge( $ids, array_column( $section['rows'], 'id' ) );
+			}
+			return $ids;
+		};
+
+		$view = $this->view();
+		$this->assertSame( array( 'Let search engines index your store' ), array_column( $view['fix_first']['items'], 'title' ), 'Fix first names the box to untick' );
+		$this->assertNotContains( 'sitemap_lists_products', $row_ids( $view ), 'and no card shows the sitemap row' );
+
+		update_option( 'blog_public', '1' );
+		$view = $this->view();
+		$this->assertContains( 'sitemap_lists_products', $row_ids( $view ), 'With the box cleared, a sitemap that still leaves products out shows' );
+		$rows = array();
+		foreach ( $view['sections'] as $section ) {
+			$rows = array_merge( $rows, $section['rows'] );
+		}
+		$row = $rows[ array_search( 'sitemap_lists_products', array_column( $rows, 'id' ), true ) ];
+		$this->assertSame( 'Add a sitemap that lists your products', $row['title'], 'as its own issue' );
+		$this->assertStringContainsString( 'SEO plugin', $row['fix'], 'with the fix for a sitemap plugin' );
+	}
+
+	/**
 	 * The view with one failing scanned check, which has no affects line of its own.
 	 *
 	 * @param string $id Check id.

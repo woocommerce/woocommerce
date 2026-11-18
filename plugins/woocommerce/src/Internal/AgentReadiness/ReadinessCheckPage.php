@@ -62,12 +62,13 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * Scanned checks left out while a setup step with the same cause fails, so it shows once: WordPress
-	 * prints noindex while "Discourage search engines" is on, WooCommerce adds no returns policy
+	 * prints noindex and turns its own sitemap off while "Discourage search engines" is on, WooCommerce adds no returns policy
 	 * to product pages until a refund and returns page is chosen, and UCP offers no checkout while
 	 * guest checkout is off.
 	 */
 	private const SAME_CAUSE = array(
 		'no_noindex_directives'        => 'search_visible',
+		'sitemap_lists_products'       => 'search_visible',
 		'product_return_policy_schema' => 'refund_returns_page',
 		'ucp_checkout'                 => 'guest_checkout',
 	);
