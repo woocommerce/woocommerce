@@ -136,7 +136,7 @@ class WC_Helper_Subscriptions_API {
 			array(
 				'methods'             => 'GET',
 				'callback'            => array( __CLASS__, 'install_url' ),
-				'permission_callback' => array( __CLASS__, 'get_permission' ),
+				'permission_callback' => array( __CLASS__, 'get_install_permission' ),
 				'args'                => array(
 					'product_key' => array(
 						'required' => true,
@@ -153,6 +153,16 @@ class WC_Helper_Subscriptions_API {
 	 */
 	public static function get_permission() {
 		return current_user_can( 'manage_woocommerce' );
+	}
+
+	/**
+	 * Install links are only for users who can install plugins.
+	 *
+	 * @since 11.3.1
+	 * @return bool
+	 */
+	public static function get_install_permission() {
+		return self::get_permission() && current_user_can( 'install_plugins' );
 	}
 
 	/**
