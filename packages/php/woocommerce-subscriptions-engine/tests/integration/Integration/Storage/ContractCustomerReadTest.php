@@ -1,7 +1,7 @@
 <?php
 /**
  * Integration tests for the customer-scoped contract reads on ContractRepository:
- * find_by_customer_id (owner scoping, ordering, status filter, paging) and
+ * find_by_customer_id (owner scoping, ordering, status and extension filters, paging) and
  * find_for_customer (the ownership-filtered full read behind the asymmetric
  * not-found rule).
  *
@@ -37,13 +37,14 @@ class ContractCustomerReadTest extends EngineIntegrationTestCase {
 	/**
 	 * Insert a contract for a customer at a given status.
 	 *
-	 * @param int    $customer_id Owning customer.
-	 * @param string $status      Contract status.
+	 * @param int    $customer_id    Owning customer.
+	 * @param string $status         Contract status.
+	 * @param string $extension_slug Owning extension.
 	 */
-	private function seed( int $customer_id, string $status ): int {
+	private function seed( int $customer_id, string $status, string $extension_slug = 'engine-tests' ): int {
 		$contract = Contract::create(
 			array(
-				'extension_slug'   => 'engine-tests',
+				'extension_slug'   => $extension_slug,
 				'customer_id'      => $customer_id,
 				'status'           => $status,
 				'currency'         => 'USD',
@@ -130,6 +131,60 @@ class ContractCustomerReadTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( array( $ids[0], $ids[1] ), $this->ids( $page_one ) );
 		$this->assertSame( array( $ids[2], $ids[3] ), $this->ids( $page_two ) );
+	}
+
+	public function test_honours_an_extension_slug_filter(): void {
+		$mine    = $this->seed( 16, ContractStatus::ACTIVE );
+		$foreign = $this->seed( 16, ContractStatus::ACTIVE, 'other-extension' );
+
+		$this->assertSame( array( $mine ), $this->ids( $this->sut->find_by_customer_id( 16, array( 'extension_slug' => 'engine-tests' ) ) ) );
+		$this->assertSame( array( $foreign ), $this->ids( $this->sut->find_by_customer_id( 16, array( 'extension_slug' => 'other-extension' ) ) ) );
+	}
+
+	public function test_combines_the_extension_slug_and_status_filters(): void {
+		$this->seed( 17, ContractStatus::ACTIVE );
+		$held = $this->seed( 17, ContractStatus::ON_HOLD );
+		$this->seed( 17, ContractStatus::ON_HOLD, 'other-extension' );
+
+		$results = $this->sut->find_by_customer_id(
+			17,
+			array(
+				'status'         => ContractStatus::ON_HOLD,
+				'extension_slug' => 'engine-tests',
+			)
+		);
+
+		$this->assertSame( array( $held ), $this->ids( $results ) );
+	}
+
+	public function test_pages_after_the_extension_slug_filter(): void {
+		$older = $this->seed( 18, ContractStatus::ACTIVE );
+		$newer = $this->seed( 18, ContractStatus::ACTIVE );
+		$this->seed( 18, ContractStatus::ACTIVE, 'other-extension' ); // Newest row, of another owner.
+
+		$args = array(
+			'limit'          => 1,
+			'extension_slug' => 'engine-tests',
+		);
+
+		$page_one = $this->sut->find_by_customer_id( 18, $args + array( 'offset' => 0 ) );
+		$page_two = $this->sut->find_by_customer_id( 18, $args + array( 'offset' => 1 ) );
+
+		$this->assertSame( array( $newer ), $this->ids( $page_one ), 'The newer foreign row takes no page slot.' );
+		$this->assertSame( array( $older ), $this->ids( $page_two ) );
+	}
+
+	public function test_the_extension_slug_filter_is_case_sensitive(): void {
+		$this->seed( 19, ContractStatus::ACTIVE );
+
+		$this->assertSame( array(), $this->sut->find_by_customer_id( 19, array( 'extension_slug' => 'Engine-Tests' ) ) );
+	}
+
+	public function test_lists_every_extension_without_an_extension_slug(): void {
+		$mine    = $this->seed( 21, ContractStatus::ACTIVE );
+		$foreign = $this->seed( 21, ContractStatus::ACTIVE, 'other-extension' );
+
+		$this->assertSame( array( $foreign, $mine ), $this->ids( $this->sut->find_by_customer_id( 21 ) ) );
 	}
 
 	public function test_empty_for_a_customer_with_no_contracts(): void {

@@ -1237,6 +1237,8 @@ final class ContractRepository {
 	 *     @type string|string[] $status Optional status filter: one status or a list of them
 	 *                                   ({@see ContractStatus}). Unregistered values are dropped;
 	 *                                   ignored when none remain.
+	 *     @type string $extension_slug Optional owner filter: only contracts of this extension
+	 *                                  (exact, case-sensitive match). Absent: every extension.
 	 * }
 	 * @return array<int, Contract> Contracts the customer owns, newest first.
 	 */
@@ -1260,14 +1262,18 @@ final class ContractRepository {
 		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$select = self::CONTRACT_SELECT;
 
-		// One query for both shapes: the optional status filter joins the WHERE, and
-		// every value is a placeholder (table names cannot be bound, so the table is
+		// One query for every shape: the optional status and owner filters join the WHERE,
+		// and every value is a placeholder (table names cannot be bound, so the table is
 		// interpolated).
 		$where  = 'customer_id = %d';
 		$params = array( $customer_id );
 		if ( array() !== $statuses ) {
 			$where .= ' AND status IN (' . implode( ', ', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
 			$params = array_merge( $params, $statuses );
+		}
+		if ( isset( $args['extension_slug'] ) && is_string( $args['extension_slug'] ) ) {
+			$where   .= ' AND ' . self::OWNER_MATCH;
+			$params[] = $args['extension_slug'];
 		}
 		$params[] = $limit;
 		$params[] = $offset;
