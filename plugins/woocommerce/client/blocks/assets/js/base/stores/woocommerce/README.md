@@ -22,7 +22,7 @@ A locked, server-populated iAPI store that exposes WooCommerce products and vari
 
 ### When to use it
 
-Use this store when an interactive block needs to read product fields (price, SKU, stock, images, attributes, …) inside a directive, and the surrounding markup implies a single "current" product — a single product page, a product in a product-collection loop, a grouped-product child, a variation inside a variable product, etc.
+Use this store when an interactive block needs to read product fields (price, SKU, stock, attributes, …) inside a directive, and the surrounding markup implies a single "current" product — a single product page, a product in a product-collection loop, a grouped-product child, a variation inside a variable product, etc.
 
 ### Architecture at a glance
 
@@ -173,7 +173,7 @@ $interactive_attributes = $is_interactive
     : '';
 ```
 
-Any `ProductResponseItem` field can be bound the same way, e.g. `state.productInContext.price_html`, `state.productInContext.stock_availability.text`, `state.mainProductInContext.name`.
+Any `ProductResponseItem` field can be bound the same way, e.g. `state.productInContext.price_html`, `state.productInContext.stock_availability.text`, `state.mainProductInContext.name`. The `images` field is not included in client state; blocks that show images get them in other ways.
 
 #### From JS (client)
 
