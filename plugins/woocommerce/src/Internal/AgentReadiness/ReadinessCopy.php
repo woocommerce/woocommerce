@@ -247,7 +247,7 @@ final class ReadinessCopy {
 				__( 'Add a sitemap that lists your products', 'woocommerce' ),
 				__( 'Search engines and AI assistants use it to find new and updated products.', 'woocommerce' ),
 				__( 'Your sitemap doesn’t list your products, so AI assistants can be slower to find new ones.', 'woocommerce' ),
-				__( 'Check the sitemap settings in your SEO plugin.', 'woocommerce' ),
+				__( 'Check the sitemap settings in your SEO plugin. If you don’t use one, another plugin may have turned off the WordPress sitemap.', 'woocommerce' ),
 			),
 			'llms_txt_present'               => array(
 				__( 'Your store has a summary file for AI assistants (llms.txt)', 'woocommerce' ),
