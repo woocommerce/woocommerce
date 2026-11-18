@@ -73,10 +73,16 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Put back the customer shipping location that setUp() replaced.
+	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
+		global $wpdb;
+
 		try {
+			$this->unlock_orders();
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( OrderController::ORDER_LOCK_OPTION_PREFIX ) . '%' ) );
+
 			foreach ( $this->previous_shipping_address as $key => $value ) {
 				WC()->customer->{"set_shipping_{$key}"}( $value );
 			}
@@ -743,6 +749,141 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		$this->assertTrue( $order->needs_shipping(), 'The order must need shipping for the country check to apply.' );
 
 		return $order;
+	}
+
+	/**
+	 * @testdox Order locks are re-entrant within a request and released by their owner.
+	 */
+	public function test_order_lock_is_reentrant_and_released(): void {
+		global $wpdb;
+
+		$order_id    = 123;
+		$option_name = OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id;
+
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ), 'The first acquisition should lock the order.' );
+		$shutdown_callback = $this->get_order_lock_shutdown_callback();
+		$this->assertInstanceOf( \Closure::class, $shutdown_callback );
+		$this->assertSame( PHP_INT_MAX, has_action( 'shutdown', $shutdown_callback ), 'The lock should be released after session data is persisted.' );
+		$first_expiry = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) );
+
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ), 'The same request should retain ownership.' );
+		$renewed_expiry = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) );
+		$this->assertGreaterThan( (float) $first_expiry, (float) $renewed_expiry, 'Re-entering the lock should renew its lease.' );
+
+		$this->unlock_orders();
+
+		$this->assertNull(
+			$wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ),
+			'Releasing the lock should remove its options-table row.'
+		);
+		$this->assertFalse( has_action( 'shutdown', $shutdown_callback ), 'Manual cleanup should remove the shutdown callback.' );
+	}
+
+	/**
+	 * @testdox A live order lock owned by another request blocks acquisition.
+	 */
+	public function test_order_lock_rejects_another_owner(): void {
+		global $wpdb;
+
+		$order_id = 456;
+		$inserted = $wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id,
+				'option_value' => number_format( microtime( true ) + 60, 6, '.', '' ),
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
+		);
+
+		$this->assertSame( 1, $inserted, 'The competing request lock should be inserted.' );
+		$this->assertFalse( OrderController::lock_order( $order_id, 0 ), 'The active lock should prevent acquisition.' );
+	}
+
+	/**
+	 * @testdox An expired order lock can be taken over and released by the new owner.
+	 */
+	public function test_order_lock_takes_over_expired_lock(): void {
+		global $wpdb;
+
+		$order_id    = 789;
+		$option_name = OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id;
+		$inserted    = $wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => $option_name,
+				'option_value' => number_format( microtime( true ) - 1, 6, '.', '' ),
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
+		);
+
+		$this->assertSame( 1, $inserted, 'The stale lock should be inserted.' );
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ), 'The expired lock should be available for takeover.' );
+		$this->assertGreaterThan(
+			microtime( true ),
+			(float) $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ),
+			'The takeover should store a new future expiry.'
+		);
+
+		$this->unlock_orders();
+
+		$this->assertNull( $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ) );
+	}
+
+	/**
+	 * @testdox Releasing a stale lock does not delete a replacement owner's lock.
+	 */
+	public function test_unlock_does_not_delete_replacement_lock(): void {
+		global $wpdb;
+
+		$order_id          = 987;
+		$option_name       = OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id;
+		$replacement_value = number_format( microtime( true ) + 120, 6, '.', '' );
+
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ) );
+		$this->assertSame(
+			1,
+			$wpdb->update(
+				$wpdb->options,
+				array( 'option_value' => $replacement_value ),
+				array( 'option_name' => $option_name ),
+				array( '%s' ),
+				array( '%s' )
+			),
+			'The replacement request should take ownership of the row.'
+		);
+		$this->assertFalse( OrderController::lock_order( $order_id, 0 ), 'The stale owner should not renew a replacement owner\'s lock.' );
+
+		$this->unlock_orders();
+
+		$this->assertSame(
+			$replacement_value,
+			$wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ),
+			'Releasing the stale owner should preserve the replacement lock.'
+		);
+	}
+
+	/**
+	 * Get the registered order-lock shutdown callback.
+	 *
+	 * @return \Closure|null
+	 */
+	private function get_order_lock_shutdown_callback(): ?\Closure {
+		$property = new \ReflectionProperty( OrderController::class, 'unlock_orders_on_shutdown' );
+		$property->setAccessible( true );
+
+		return $property->getValue();
+	}
+
+	/**
+	 * Release order locks registered by the current test.
+	 */
+	private function unlock_orders(): void {
+		$callback = $this->get_order_lock_shutdown_callback();
+		if ( $callback ) {
+			$callback();
+		}
 	}
 
 	/**

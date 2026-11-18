@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\SessionConcurrencyGuard;
 use WC_Session;
 defined( 'ABSPATH' ) || exit;
 
@@ -53,6 +54,7 @@ final class SessionHandler extends WC_Session {
 	 */
 	public function init() {
 		$this->init_session_from_token();
+		SessionConcurrencyGuard::capture( $this, $this->_data );
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
 	}
 
@@ -168,6 +170,7 @@ final class SessionHandler extends WC_Session {
 		$this->_data        = array();
 		$this->_dirty       = false;
 		$this->_customer_id = null;
+		SessionConcurrencyGuard::capture( $this, array() );
 	}
 
 	/**
@@ -203,6 +206,7 @@ final class SessionHandler extends WC_Session {
 				)
 			);
 
+			SessionConcurrencyGuard::capture( $this, $this->_data );
 			$this->_dirty = false;
 		}
 	}

@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
+use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
@@ -412,8 +413,14 @@ class WC_Checkout {
 			return $order_id;
 		}
 
+		$order = null;
+
 		try {
-			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
+			$order_id = absint( WC()->session->get( 'order_awaiting_payment' ) );
+			if ( $order_id && ! OrderController::lock_order( $order_id ) ) {
+				throw new Exception( esc_html( OrderController::get_order_lock_error_message() ) );
+			}
+
 			$cart_hash          = WC()->cart->get_cart_hash();
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 			$order              = $order_id ? wc_get_order( $order_id ) : null;
@@ -492,6 +499,11 @@ class WC_Checkout {
 			// Save the order.
 			$order_id = $order->save();
 
+			// This acquires the lock for a new order, or confirms ownership of a resumed order.
+			if ( ! OrderController::lock_order( $order_id ) ) {
+				throw new Exception( esc_html( OrderController::get_order_lock_error_message() ) );
+			}
+
 			// Defense-in-depth: if the cart still has items but the persisted order has none,
 			// the save silently dropped every line item (e.g. a $wpdb->insert() returning false
 			// in save_items()). Re-read the order from the data store so we check DB state, not
@@ -525,7 +537,7 @@ class WC_Checkout {
 
 			return $order_id;
 		} catch ( Exception $e ) {
-			if ( $order && $order instanceof WC_Order ) {
+			if ( $order instanceof WC_Order ) {
 				wc_release_coupons_for_order( $order );
 				/**
 				 * Action hook fired when an order is discarded due to Exception.
@@ -1234,10 +1246,15 @@ class WC_Checkout {
 	 * Process an order that does require payment.
 	 *
 	 * @since 3.0.0
+	 * @throws Exception When another request owns the order lock.
 	 * @param int    $order_id       Order ID.
 	 * @param string $payment_method Payment method.
 	 */
 	protected function process_order_payment( $order_id, $payment_method ) {
+		if ( ! OrderController::lock_order( absint( $order_id ), 0 ) ) {
+			throw new Exception( esc_html( OrderController::get_order_lock_error_message() ) );
+		}
+
 		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		if ( ! isset( $available_gateways[ $payment_method ] ) ) {
@@ -1286,10 +1303,14 @@ class WC_Checkout {
 	 * Process an order that doesn't require payment.
 	 *
 	 * @since 3.0.0
-	 * @throws Exception If the order is missing or a cancelled unpaid order would be marked paid.
+	 * @throws Exception If another request owns the order lock, the order is missing, or a cancelled unpaid order would be marked paid.
 	 * @param int $order_id Order ID.
 	 */
 	protected function process_order_without_payment( $order_id ) {
+		if ( ! OrderController::lock_order( absint( $order_id ), 0 ) ) {
+			throw new Exception( esc_html( OrderController::get_order_lock_error_message() ) );
+		}
+
 		$order = wc_get_order( $order_id );
 
 		if ( ! $order instanceof WC_Order ) {

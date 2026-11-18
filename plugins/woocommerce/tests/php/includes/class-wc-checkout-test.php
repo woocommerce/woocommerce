@@ -5,7 +5,10 @@
  * @package WooCommerce\Tests\Checkout.
  */
 
+declare( strict_types = 1 );
+
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
@@ -50,6 +53,14 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			public function update_session( $data ) {
 				return parent::update_session( $data );
 			}
+
+			public function process_order_for_test( $order_id, $with_payment ) {
+				if ( $with_payment ) {
+					return parent::process_order_payment( $order_id, WC_Gateway_BACS::ID );
+				}
+
+				return parent::process_order_without_payment( $order_id );
+			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 
@@ -62,19 +73,106 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
-		delete_option( 'woocommerce_calc_taxes' );
-		WC()->countries->locale = array();
-		delete_option( 'woocommerce_allowed_countries' );
-		delete_option( 'woocommerce_specific_allowed_countries' );
+		global $wpdb;
 
-		foreach ( $this->extra_field_filters as $extra_field_filter ) {
-			remove_filter( 'woocommerce_checkout_fields', $extra_field_filter );
+		try {
+			$shutdown_callback_property = new ReflectionProperty( OrderController::class, 'unlock_orders_on_shutdown' );
+			$shutdown_callback_property->setAccessible( true );
+			$shutdown_callback = $shutdown_callback_property->getValue();
+			if ( $shutdown_callback ) {
+				$shutdown_callback();
+			}
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( OrderController::ORDER_LOCK_OPTION_PREFIX ) . '%' ) );
+			remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+			delete_option( 'woocommerce_calc_taxes' );
+			WC()->countries->locale = array();
+			delete_option( 'woocommerce_allowed_countries' );
+			delete_option( 'woocommerce_specific_allowed_countries' );
+
+			foreach ( $this->extra_field_filters as $extra_field_filter ) {
+				remove_filter( 'woocommerce_checkout_fields', $extra_field_filter );
+			}
+
+			$this->extra_field_filters = array();
+		} finally {
+			parent::tearDown();
 		}
+	}
 
-		$this->extra_field_filters = array();
+	/**
+	 * @testdox Legacy checkout refuses an order currently locked by another request.
+	 */
+	public function test_create_order_refuses_locked_awaiting_payment_order(): void {
+		global $wpdb;
 
-		parent::tearDown();
+		$order = WC_Helper_Order::create_order();
+		WC()->session->set( 'order_awaiting_payment', $order->get_id() );
+		$inserted = $wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => OrderController::ORDER_LOCK_OPTION_PREFIX . $order->get_id(),
+				'option_value' => number_format( microtime( true ) + 60, 6, '.', '' ),
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
+		);
+		$this->assertSame( 1, $inserted, 'The competing request lock should be inserted.' );
+
+		$result = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'Your order is still being processed by another request. Please try again.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Legacy checkout locks an order after creating it.
+	 */
+	public function test_create_order_locks_new_order(): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+
+		$this->assertIsInt( $order_id, 'Checkout should create an order.' );
+		$this->assertNotNull(
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
+					OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id
+				)
+			),
+			'The newly created order should remain locked for the request.'
+		);
+	}
+
+	/**
+	 * @testdox Legacy checkout verifies lock ownership immediately before payment processing.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $with_payment Whether to exercise the payment-gateway path.
+	 */
+	public function test_payment_processing_refuses_lost_order_lock( bool $with_payment ): void {
+		global $wpdb;
+
+		$order = WC_Helper_Order::create_order();
+		$this->assertTrue( OrderController::lock_order( $order->get_id(), 0 ), 'The test request should initially own the lock.' );
+
+		$wpdb->update(
+			$wpdb->options,
+			array( 'option_value' => number_format( microtime( true ) + 120, 6, '.', '' ) ),
+			array( 'option_name' => OrderController::ORDER_LOCK_OPTION_PREFIX . $order->get_id() ),
+			array( '%s' ),
+			array( '%s' )
+		);
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Your order is still being processed by another request. Please try again.' );
+
+		$this->sut->process_order_for_test( $order->get_id(), $with_payment );
 	}
 
 	/**
