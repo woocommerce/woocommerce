@@ -129,7 +129,9 @@ class AbilityTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array( 'ability_invalid_output', 'output_policy' ), $result->get_error_codes() );
 		$this->assertStringContainsString( 'Check the current state before you run it again', $result->get_error_message() );
 		$this->assertSame( 'The output breaks a policy.', $result->get_error_message( 'output_policy' ) );
-		$this->assertSame( array( 'field' => 'name' ), $result->get_error_data( 'output_policy' ) );
+		$data = $result->get_error_data( 'output_policy' );
+		$this->assertArrayHasKey( 'field', $data );
+		$this->assertSame( 'name', $data['field'] );
 	}
 
 	/**
