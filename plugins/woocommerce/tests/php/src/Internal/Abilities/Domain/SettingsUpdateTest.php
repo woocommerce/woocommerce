@@ -52,7 +52,7 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Builds an update input.
+	 * Builds an update input, sending lists in `values` and everything else in `value`.
 	 *
 	 * @param string $group  Settings group.
 	 * @param array  $values Setting IDs mapped to new values.
@@ -61,9 +61,10 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	private function input( string $group, array $values ): array {
 		$settings = array();
 		foreach ( $values as $id => $value ) {
+			$field      = is_array( $value ) && array_values( $value ) === $value ? 'values' : 'value';
 			$settings[] = array(
-				'id'    => $id,
-				'value' => $value,
+				'id'   => $id,
+				$field => $value,
 			);
 		}
 		return array(
@@ -363,6 +364,143 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'USD', get_option( 'woocommerce_currency' ) );
 		$this->assertSame( 'Berlin', get_option( 'woocommerce_store_city' ) );
 		$this->assertSame( 'DE', get_option( 'woocommerce_default_country' ) );
+	}
+
+	/**
+	 * @testdox Should refuse an item that sends both value and values, or neither.
+	 * @testWith [{"value": "EUR", "values": ["EUR"]}]
+	 *           [{}]
+	 * @param array $fields Value fields of the item.
+	 */
+	public function test_refuses_items_without_exactly_one_value_field( array $fields ): void {
+		update_option( 'woocommerce_currency', 'USD' );
+
+		$result = $this->sut->execute(
+			array(
+				'group'    => 'general',
+				'settings' => array( array( 'id' => 'woocommerce_currency' ) + $fields ),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_settings_invalid_value', $result->get_error_code() );
+		$this->assertSame( array( 'woocommerce_currency' ), $result->get_error_data()['ids'] );
+		$this->assertSame( 'USD', get_option( 'woocommerce_currency' ) );
+	}
+
+	/**
+	 * @testdox Should refuse a list sent in value, and a single value sent in values.
+	 * @testWith ["multiselect", "value", ["live"]]
+	 *           ["text", "values", ["live"]]
+	 * @param string $type  Field type.
+	 * @param string $field Value field the item uses.
+	 * @param mixed  $value Requested value.
+	 */
+	public function test_refuses_value_in_wrong_field( string $type, string $field, $value ): void {
+		$this->add_general_field(
+			array(
+				'type'    => $type,
+				'options' => array( 'live' => 'Live' ),
+			)
+		);
+
+		$result = $this->sut->execute(
+			array(
+				'group'    => 'general',
+				'settings' => array(
+					array(
+						'id'   => 'extension_field',
+						$field => $value,
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_settings_invalid_value', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should accept only published pages, or an empty value, for page settings.
+	 */
+	public function test_page_values(): void {
+		$page    = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		$draft   = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'draft',
+			)
+		);
+		$product = self::factory()->post->create( array( 'post_type' => 'product' ) );
+		update_option( 'woocommerce_terms_page_id', '' );
+
+		foreach ( array( 'abc', (string) $draft, (string) $product, '999999' ) as $value ) {
+			$result = $this->sut->execute( $this->input( 'advanced', array( 'woocommerce_terms_page_id' => $value ) ) );
+			$this->assertWPError( $result, "{$value} should be refused." );
+			$this->assertSame( 'woocommerce_ability_settings_invalid_value', $result->get_error_code() );
+		}
+		$this->assertSame( '', get_option( 'woocommerce_terms_page_id' ) );
+
+		$result = $this->sut->execute( $this->input( 'advanced', array( 'woocommerce_terms_page_id' => $page ) ) );
+		$this->assertIsArray( $result );
+		$this->assertSame( (string) $page, get_option( 'woocommerce_terms_page_id' ) );
+
+		$result = $this->sut->execute( $this->input( 'advanced', array( 'woocommerce_terms_page_id' => '' ) ) );
+		$this->assertIsArray( $result );
+		$this->assertSame( '', get_option( 'woocommerce_terms_page_id' ) );
+	}
+
+	/**
+	 * @testdox Should refuse page settings that would share a page, against both the batch and the stored pages.
+	 * @testWith ["woocommerce_checkout_page_id", "woocommerce_cart_page_id"]
+	 *           ["woocommerce_myaccount_page_id", "woocommerce_checkout_page_id"]
+	 *           ["woocommerce_terms_page_id", "woocommerce_checkout_page_id"]
+	 * @param string $requested Page setting the batch changes.
+	 * @param string $stored    Page setting that already uses the page.
+	 */
+	public function test_refuses_shared_pages( string $requested, string $stored ): void {
+		$page = (string) self::factory()->post->create( array( 'post_type' => 'page' ) );
+		update_option( $stored, $page );
+		update_option( $requested, '' );
+
+		$result = $this->sut->execute( $this->input( 'advanced', array( $requested => $page ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_settings_page_conflict', $result->get_error_code() );
+		$this->assertSame( array( $requested ), $result->get_error_data()['ids'] );
+		$this->assertSame( '', get_option( $requested ) );
+
+		$other  = (string) self::factory()->post->create( array( 'post_type' => 'page' ) );
+		$result = $this->sut->execute(
+			$this->input(
+				'advanced',
+				array(
+					$requested => $other,
+					$stored    => $other,
+				)
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_settings_page_conflict', $result->get_error_code() );
+		$this->assertSame( $page, get_option( $stored ) );
+	}
+
+	/**
+	 * @testdox Should queue a rewrite rules flush when an endpoint slug changes, and only then.
+	 */
+	public function test_endpoint_change_queues_rewrite_flush(): void {
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+
+		$this->sut->execute( $this->input( 'advanced', array( 'woocommerce_myaccount_orders_endpoint' => 'my-orders' ) ) );
+
+		$this->assertSame( 'my-orders', get_option( 'woocommerce_myaccount_orders_endpoint' ) );
+		$this->assertSame( 'yes', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
+
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+		$this->sut->execute( $this->input( 'general', array( 'woocommerce_currency' => 'EUR' ) ) );
+
+		$this->assertSame( 'no', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
 	}
 
 	/**

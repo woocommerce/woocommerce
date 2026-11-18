@@ -16,9 +16,19 @@ defined( 'ABSPATH' ) || exit;
  */
 class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition {
 	/**
-	 * Field types whose values are arrays rather than scalars.
+	 * Field types whose values are sent in `values` rather than `value`.
 	 */
-	private const ARRAY_TYPES = array( 'multiselect', 'multi_select_countries', 'relative_date_selector' );
+	private const LIST_TYPES = array( 'multiselect', 'multi_select_countries' );
+
+	/**
+	 * Page settings that must not share a page, matching the checks the advanced settings tab applies on save.
+	 */
+	private const DISTINCT_PAGES = array(
+		array( 'woocommerce_terms_page_id', 'woocommerce_checkout_page_id' ),
+		array( 'woocommerce_cart_page_id', 'woocommerce_checkout_page_id' ),
+		array( 'woocommerce_cart_page_id', 'woocommerce_myaccount_page_id' ),
+		array( 'woocommerce_checkout_page_id', 'woocommerce_myaccount_page_id' ),
+	);
 
 	/**
 	 * Get the ability name.
@@ -39,7 +49,7 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Update settings', 'woocommerce' ),
-			'description'         => __( 'Change approved settings in a group. Read current values with woocommerce/settings-query first. Unapproved fields and passwords cannot be changed. If any setting is refused, nothing is saved.', 'woocommerce' ),
+			'description'         => __( 'Change approved settings in a group. Read current values with woocommerce/settings-query first. Send lists, such as multiselect choices, in values instead of value. Unapproved fields and passwords cannot be changed. If any setting is refused, nothing is saved.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_output_schema(),
@@ -91,6 +101,15 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		if ( count( $ids ) !== count( array_unique( $ids ) ) ) {
 			return self::invalid_value_error( array_values( array_unique( array_diff_assoc( $ids, array_unique( $ids ) ) ) ) );
 		}
+		$malformed = array();
+		foreach ( $input['settings'] as $item ) {
+			if ( array_key_exists( 'value', $item ) === array_key_exists( 'values', $item ) ) {
+				$malformed[] = $item['id'];
+			}
+		}
+		if ( $malformed ) {
+			return self::invalid_value_error( $malformed );
+		}
 
 		$denied = array();
 		foreach ( $ids as $id ) {
@@ -115,7 +134,8 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		$option_names = array();
 		foreach ( $input['settings'] as $item ) {
 			$setting = $fields_by_id[ $item['id'] ];
-			$value   = self::validate_value( $controller, $setting, $item['value'] );
+			$is_list = array_key_exists( 'values', $item );
+			$value   = self::validate_value( $controller, $setting, $is_list ? $item['values'] : $item['value'], $is_list );
 			if ( is_wp_error( $value ) ) {
 				$invalid[] = $item['id'];
 				continue;
@@ -128,6 +148,17 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		}
 		if ( $invalid ) {
 			return self::invalid_value_error( $invalid );
+		}
+		$conflicts = self::get_page_conflicts( $changes );
+		if ( $conflicts ) {
+			return new \WP_Error(
+				'woocommerce_ability_settings_page_conflict',
+				__( 'Cart, checkout and My account each need their own page, and terms cannot use the checkout page. Nothing was saved.', 'woocommerce' ),
+				array(
+					'status' => 400,
+					'ids'    => $conflicts,
+				)
+			);
 		}
 
 		$value_schema = SettingsQuery::get_value_schema();
@@ -142,11 +173,17 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 			$results[] = $result;
 		}
 
+		$flush_rewrite_rules = false;
 		foreach ( $changes as $index => $change ) {
 			list( $setting, $value ) = $change;
 			self::save( $setting, $value );
 			$saved                      = SettingsQuery::get_value( $setting );
 			$results[ $index ]['value'] = true === rest_validate_value_from_schema( $saved, $value_schema ) ? $saved : $value;
+			$flush_rewrite_rules        = $flush_rewrite_rules || '_endpoint' === substr( $setting['id'], -9 );
+		}
+		// Endpoint slugs are rewrite rules, which the admin save flushes after every change.
+		if ( $flush_rewrite_rules ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
 
 		return array( 'settings' => $results );
@@ -171,9 +208,10 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 	 * @param \WC_REST_Setting_Options_Controller $controller Validator source.
 	 * @param array                               $setting    Writable field.
 	 * @param mixed                               $value      Requested value.
+	 * @param bool                                $is_list    Whether the value was sent in `values`.
 	 * @return mixed|\WP_Error
 	 */
-	private static function validate_value( \WC_REST_Setting_Options_Controller $controller, array $setting, $value ) {
+	private static function validate_value( \WC_REST_Setting_Options_Controller $controller, array $setting, $value, bool $is_list ) {
 		$type    = $setting['type'];
 		$invalid = new \WP_Error( 'woocommerce_ability_settings_invalid_value', __( 'An invalid setting value was passed.', 'woocommerce' ) );
 
@@ -186,7 +224,8 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		} elseif ( is_int( $value ) || is_float( $value ) ) {
 			$value = (string) $value;
 		}
-		if ( is_array( $value ) !== in_array( $type, self::ARRAY_TYPES, true ) ) {
+		$expects_list = in_array( $type, self::LIST_TYPES, true );
+		if ( $is_list !== $expects_list || is_array( $value ) !== ( $expects_list || 'relative_date_selector' === $type ) ) {
 			return $invalid;
 		}
 		if ( is_array( $value ) && 'relative_date_selector' !== $type ) {
@@ -211,6 +250,9 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 				break;
 			case 'relative_date_selector':
 				return self::validate_relative_date( $value, $invalid );
+			case 'single_select_page':
+			case 'single_select_page_with_search':
+				return self::validate_page( $value, $invalid );
 			case 'number':
 				if ( '' !== $value && ! is_numeric( $value ) ) {
 					return $invalid;
@@ -247,6 +289,51 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 			return $invalid;
 		}
 		return wc_parse_relative_date_option( $value );
+	}
+
+	/**
+	 * A published page ID, or an empty string to unset the page, matching the pages the REST settings API offers.
+	 *
+	 * @param string    $value   Requested page ID.
+	 * @param \WP_Error $invalid Error to return.
+	 * @return string|\WP_Error
+	 */
+	private static function validate_page( string $value, \WP_Error $invalid ) {
+		if ( '' === $value ) {
+			return $value;
+		}
+		$page = ctype_digit( $value ) ? get_post( (int) $value ) : null;
+		if ( ! $page instanceof \WP_Post || 'page' !== $page->post_type || 'publish' !== $page->post_status ) {
+			return $invalid;
+		}
+		return $value;
+	}
+
+	/**
+	 * Requested page settings that would share a page with another page setting after the batch is saved.
+	 *
+	 * @param array $changes Validated `[ setting, value ]` pairs.
+	 * @return string[]
+	 */
+	private static function get_page_conflicts( array $changes ): array {
+		$requested = array();
+		foreach ( $changes as $change ) {
+			$requested[ $change[0]['id'] ] = $change[1];
+		}
+		$conflicts = array();
+		foreach ( self::DISTINCT_PAGES as $pair ) {
+			if ( ! isset( $requested[ $pair[0] ] ) && ! isset( $requested[ $pair[1] ] ) ) {
+				continue;
+			}
+			$pages = array_map(
+				static fn( string $id ): int => absint( $requested[ $id ] ?? get_option( $id ) ),
+				$pair
+			);
+			if ( $pages[0] > 0 && $pages[0] === $pages[1] ) {
+				$conflicts = array_merge( $conflicts, array_keys( array_intersect_key( $requested, array_flip( $pair ) ) ) );
+			}
+		}
+		return array_values( array_unique( $conflicts ) );
 	}
 
 	/**
@@ -316,11 +403,13 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 	}
 
 	/**
-	 * Changes are limited to one group and twenty settings per call.
+	 * Changes are limited to one group and twenty settings per call. Each item sends `value` or `values`, never both.
 	 *
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
+		$branches = SettingsQuery::get_value_schema()['anyOf'];
+		$is_list  = static fn( array $branch ): bool => 'array' === ( $branch['type'] ?? null );
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
@@ -335,13 +424,14 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 					'items'    => array(
 						'type'                 => 'object',
 						'properties'           => array(
-							'id'    => array(
+							'id'     => array(
 								'type'      => 'string',
 								'minLength' => 1,
 							),
-							'value' => SettingsQuery::get_value_schema(),
+							'value'  => array( 'anyOf' => array_values( array_filter( $branches, static fn( array $branch ): bool => ! $is_list( $branch ) ) ) ),
+							'values' => current( array_filter( $branches, $is_list ) ),
 						),
-						'required'             => array( 'id', 'value' ),
+						'required'             => array( 'id' ),
 						'additionalProperties' => false,
 					),
 				),
