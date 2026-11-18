@@ -167,18 +167,19 @@
 	margin: 0;
 	padding: 0;
 
-	// A line between rows: none under the last row of a Fix first group or of a closed list.
+	// A line between rows: none under the last row of a closed list.
 	> .wc-sales-readiness-row {
 		border-block-end: 1px solid var(--wc-sr-stroke);
-	}
-
-	> .wc-sales-readiness-row:has(+ .wc-sales-readiness-tier) {
-		border-block-end: 0;
 	}
 }
 
 // A list that ends the card (Fix first, an open fold, a passed card) has no line under its last row.
 .wc-sales-readiness-card .wc-sales-readiness-list:last-child > .wc-sales-readiness-row:last-child {
+	border-block-end: 0;
+}
+
+// Each Fix first tier has its own list, so drop the line under that group's last row.
+.wc-sales-readiness-tier-group .wc-sales-readiness-list > .wc-sales-readiness-row:last-child {
 	border-block-end: 0;
 }
 
@@ -207,27 +208,27 @@
 }
 
 // 24px from the card description to Fix first's first heading. Padding, so the margins don't collapse.
-.wc-sales-readiness-list:has(.wc-sales-readiness-tier) {
+.wc-sales-readiness-fix-first-groups {
 	padding-block-start: var(--wpds-dimension-gap-xl);
 }
 
 // On the Overview the design has 18px there: a 12px gap plus a 10px margin, measured to the heading text, which sits 4px into its 24px line.
-.wc-sales-readiness--overview .wc-sales-readiness-list:has(.wc-sales-readiness-tier) {
+.wc-sales-readiness--overview .wc-sales-readiness-fix-first-groups {
 	padding-block-start: 18px;
 }
 
-// A tier heading on a 24px line (its badge's height), 12px under the row above, then the first
+// A tier heading on a 24px line (its badge's height), 12px under the group above, then the first
 // row's own padding: 16px from the heading to the row's title.
 .wc-sales-readiness-tier {
 	display: flex;
 	align-items: center;
 	gap: var(--wpds-dimension-gap-sm);
 	min-height: 24px;
-	margin: var(--wpds-dimension-gap-md) 0 0;
+	margin: 0;
+}
 
-	&:first-child {
-		margin-block-start: 0;
-	}
+.wc-sales-readiness-tier-group + .wc-sales-readiness-tier-group {
+	margin-block-start: var(--wpds-dimension-gap-md);
 }
 
 .wc-sales-readiness-row {

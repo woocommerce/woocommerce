@@ -34,6 +34,8 @@ export function useReadinessView( initialView: ReadinessView | null = null ) {
 	const [ error, setError ] = useState< string | null >( null );
 	const [ running, setRunning ] = useState( false );
 	const pendingSince = useRef< number | null >( null );
+	// True after a view has been shown: poll failures must not replace it or stop polling.
+	const hasView = useRef( initialView !== null );
 
 	const load = useCallback( async () => {
 		try {
@@ -42,7 +44,11 @@ export function useReadinessView( initialView: ReadinessView | null = null ) {
 			} );
 			setView( loaded );
 			setError( null );
+			hasView.current = true;
 		} catch {
+			if ( hasView.current ) {
+				return;
+			}
 			setError(
 				__(
 					'Your check results didn’t load. Reload the page to try again.',
@@ -65,12 +71,18 @@ export function useReadinessView( initialView: ReadinessView | null = null ) {
 			return;
 		}
 		pendingSince.current ??= Date.now();
-		if ( Date.now() - pendingSince.current >= POLL_FOR_MS ) {
-			return;
-		}
-		const timer = setTimeout( () => void load(), POLL_MS );
-		return () => clearTimeout( timer );
-	}, [ view, load ] );
+		const timer = setInterval( () => {
+			if (
+				Date.now() - ( pendingSince.current ?? 0 ) >=
+				POLL_FOR_MS
+			) {
+				clearInterval( timer );
+				return;
+			}
+			void load();
+		}, POLL_MS );
+		return () => clearInterval( timer );
+	}, [ view?.run.pending, load ] );
 
 	const runCheck = useCallback( async () => {
 		setRunning( true );

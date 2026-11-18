@@ -4,7 +4,8 @@
 import { Badge, Icon, Link, Stack, Text, VisuallyHidden } from '@wordpress/ui';
 import { Button } from '@wordpress/components';
 import { Path, SVG } from '@wordpress/primitives';
-import { __ } from '@wordpress/i18n';
+import { createInterpolateElement } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 import type { ReactNode } from 'react';
 
 /**
@@ -168,8 +169,16 @@ export const CheckRow = ( { row }: { row: CheckRowData } ) => {
 			) }
 			{ row.seen_at && (
 				<Text variant="body-sm" className="wc-sales-readiness__muted">
-					{ __( 'Found on', 'woocommerce' ) }{ ' ' }
-					<Link href={ row.seen_at.href }>{ row.seen_at.text }</Link>
+					{ createInterpolateElement(
+						sprintf(
+							/* translators: %s: page title where the issue was found. */
+							__( 'Found on <link>%s</link>', 'woocommerce' ),
+							row.seen_at.text
+						),
+						{
+							link: <Link href={ row.seen_at.href } />,
+						}
+					) }
 				</Text>
 			) }
 		</Row>
