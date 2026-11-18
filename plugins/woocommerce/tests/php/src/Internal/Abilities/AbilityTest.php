@@ -97,6 +97,42 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep every error from the output validation filter when it adds the retry hint.
+	 */
+	public function test_invalid_output_keeps_every_error(): void {
+		if ( version_compare( get_bloginfo( 'version' ), '7.1-alpha', '<' ) ) {
+			$this->markTestSkipped( 'The wp_ability_validate_output filter exists since WordPress 7.1.' );
+		}
+
+		$filter = function ( $is_valid ) {
+			$is_valid->add( 'output_policy', 'The output breaks a policy.', array( 'field' => 'name' ) );
+			return $is_valid;
+		};
+		add_filter( 'wp_ability_validate_output', $filter );
+
+		$ability = new Ability(
+			'test/invalid-output-many-errors',
+			array(
+				'label'               => 'Invalid output',
+				'description'         => 'Returns output that does not match its schema.',
+				'category'            => 'woocommerce',
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => fn() => 'not an object',
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		$result = $ability->execute();
+		remove_filter( 'wp_ability_validate_output', $filter );
+
+		$this->assertWPError( $result );
+		$this->assertSame( array( 'ability_invalid_output', 'output_policy' ), $result->get_error_codes() );
+		$this->assertStringContainsString( 'Check the current state before you run it again', $result->get_error_message() );
+		$this->assertSame( 'The output breaks a policy.', $result->get_error_message( 'output_policy' ) );
+		$this->assertSame( array( 'field' => 'name' ), $result->get_error_data( 'output_policy' ) );
+	}
+
+	/**
 	 * Boolean flag values that the schema accepts, with the boolean each one means.
 	 *
 	 * @return array<string, array{0: bool|string|int, 1: bool}>
