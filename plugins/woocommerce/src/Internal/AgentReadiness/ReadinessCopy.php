@@ -63,7 +63,7 @@ final class ReadinessCopy {
 			case 'file':
 				return array( 'pass' => __( 'From a file in your site’s root folder.', 'woocommerce' ) );
 			case 'other':
-				return array( 'pass' => __( 'From another plugin or your host.', 'woocommerce' ) );
+				return array( 'pass' => __( 'Added by a plugin.', 'woocommerce' ) );
 			case 'disabled':
 				return array( 'fix' => __( 'WooCommerce’s llms.txt is turned off by code on your store (the woocommerce_enable_llms_txt filter). Remove that code, or turn on llms.txt in your SEO plugin.', 'woocommerce' ) );
 			case 'not_reached':
