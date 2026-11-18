@@ -173,14 +173,16 @@ $min-product-width: 150px;
 				}
 			}
 
-			// Not enough room for every column: use the responsive widths above,
-			// and skip steps that would show more products than this setting.
+			// Narrow screens use the responsive floors below, skipping steps that
+			// would show more products than this setting. The column width stays
+			// the maximum, so a wide screen cannot fit extra products.
 			@if $columns > 1 {
 				&.is-shrink-columns .wc-block-product {
-					flex-basis: 0;
+					flex-basis: $width;
+					flex-grow: 0;
 					flex-shrink: 1;
 					min-width: 42.5%;
-					max-width: 400px;
+					max-width: $width;
 
 					@each $breakpoint, $step-columns, $step-width in $carousel-shrink-steps {
 						@if $step-columns <= $columns {
