@@ -425,15 +425,16 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * @return array{0:string,1:string} The button text, and the policy it is for, or ''.
 	 */
 	private static function step_button( string $id, string $link ): array {
+		// Policy buttons repeat, so each one's accessible name says which page it is for.
 		$policies = array(
-			'privacy_page'         => __( 'privacy policy', 'woocommerce' ),
-			'terms_page'           => __( 'terms and conditions', 'woocommerce' ),
-			'refund_returns_page'  => __( 'refund and returns policy', 'woocommerce' ),
-			'shipping_policy_page' => __( 'shipping policy', 'woocommerce' ),
+			'privacy_page'         => array( __( 'Choose a privacy policy page', 'woocommerce' ), __( 'Edit your privacy policy page', 'woocommerce' ) ),
+			'terms_page'           => array( __( 'Choose a terms and conditions page', 'woocommerce' ), __( 'Edit your terms and conditions page', 'woocommerce' ) ),
+			'refund_returns_page'  => array( __( 'Choose a refund and returns policy page', 'woocommerce' ), __( 'Edit your refund and returns policy page', 'woocommerce' ) ),
+			'shipping_policy_page' => array( __( 'Choose a shipping policy page', 'woocommerce' ), __( 'Edit your shipping policy page', 'woocommerce' ) ),
 		);
 		if ( isset( $policies[ $id ] ) ) {
 			// A policy page that is still a draft opens its editor.
-			return array( '' !== $link ? __( 'Edit page', 'woocommerce' ) : __( 'Choose page', 'woocommerce' ), $policies[ $id ] );
+			return '' !== $link ? array( __( 'Edit page', 'woocommerce' ), $policies[ $id ][1] ) : array( __( 'Choose page', 'woocommerce' ), $policies[ $id ][0] );
 		}
 		$labels = array(
 			'https'          => __( 'View Site Health', 'woocommerce' ),

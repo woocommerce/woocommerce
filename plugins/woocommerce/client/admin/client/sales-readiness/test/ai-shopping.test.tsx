@@ -221,7 +221,7 @@ describe( 'AiShopping', () => {
 							link: {
 								href: '/post.php?post=5&action=edit',
 								text: 'Edit page',
-								sr: 'refund and returns policy',
+								sr: 'Edit your refund and returns policy page',
 							},
 						} ),
 					],
@@ -231,7 +231,7 @@ describe( 'AiShopping', () => {
 
 		expect(
 			screen.getByRole( 'link', {
-				name: 'Edit page (refund and returns policy)',
+				name: 'Edit your refund and returns policy page',
 			} )
 		).toHaveAttribute( 'href', '/post.php?post=5&action=edit' );
 		expect( screen.queryByText( 'Required' ) ).toBeNull();

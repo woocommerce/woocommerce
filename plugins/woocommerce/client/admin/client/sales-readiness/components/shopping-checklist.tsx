@@ -3,13 +3,7 @@
  */
 import { useState } from '@wordpress/element';
 /* eslint-disable @wordpress/use-recommended-components -- The design asks for these @wordpress/ui components; this chunk bundles the package. */
-import {
-	Badge,
-	Button,
-	Collapsible,
-	Text,
-	VisuallyHidden,
-} from '@wordpress/ui';
+import { Badge, Button, Collapsible, Text } from '@wordpress/ui';
 /* eslint-enable @wordpress/use-recommended-components */
 import { __ } from '@wordpress/i18n';
 
@@ -71,13 +65,9 @@ export const ShoppingChecklist = ( {
 										variant="outline"
 										size="compact"
 										{ ...asLink( step.link.href ) }
+										aria-label={ step.link.sr || undefined }
 									>
 										{ step.link.text }
-										{ step.link.sr && (
-											<VisuallyHidden>
-												{ ' (' + step.link.sr + ')' }
-											</VisuallyHidden>
-										) }
 									</Button>
 								)
 							}

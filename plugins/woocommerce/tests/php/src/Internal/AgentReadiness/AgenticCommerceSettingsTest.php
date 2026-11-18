@@ -315,7 +315,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Required', $privacy['badge']['text'] );
 		$this->assertSame( 'Choose a privacy policy page', $privacy['title'] );
 		$this->assertSame( 'Choose page', $privacy['link']['text'] );
-		$this->assertSame( 'privacy policy', $privacy['link']['sr'], 'Screen readers hear which policy' );
+		$this->assertSame( 'Choose a privacy policy page', $privacy['link']['sr'], 'Screen readers hear which policy' );
 		$this->assertStringEndsWith( '#' . AgenticCommerceSettings::PRIVACY_PAGE_OPTION, $privacy['link']['href'], 'Opens the page on its field' );
 		$this->assertStringStartsWith( 'Finish 1 required step', $shopping['checklist']['summary'] );
 		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'It doesn\'t block the switch' );
@@ -357,7 +357,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( 'A refund policy needs to be available for AI assistants to share with shoppers.' ), $refund['lines'], 'The refund page says why it matters, as in the design' );
 		$this->assertStringContainsString( 'post=' . $draft . '&action=edit', $refund['link']['href'], 'Edit page opens the page editor' );
 		$this->assertSame( 'Edit page', $refund['link']['text'] );
-		$this->assertSame( 'refund and returns policy', $refund['link']['sr'], 'screen readers also hear which policy' );
+		$this->assertSame( 'Edit your refund and returns policy page', $refund['link']['sr'], 'screen readers also hear which policy' );
 		$field = $this->policy( $shopping, AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION );
 		$this->assertSame( (string) $draft, $field['value'], 'The draft stays chosen, so saving another field keeps it' );
 		$this->assertMatchesRegularExpression( '#\(Draft\)$#', current( wp_list_filter( $field['options'], array( 'value' => (string) $draft ) ) )['label'] );
