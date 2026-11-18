@@ -90,6 +90,19 @@ describe( 'ImportStep', () => {
 		).toBeInTheDocument();
 	} );
 
+	it.each( [
+		[ 'an error', 'Failed to fetch', true ],
+		[ 'no error', null, false ],
+	] )(
+		'treats the last outcome as unknown when it mounts with %s',
+		( _label, error, expected ) => {
+			mockIsRunning = false;
+			const { hookArgs } = renderStep( { error } );
+
+			expect( hookArgs.outcomeUnknown ).toBe( expected );
+		}
+	);
+
 	it( 'passes the session and run settings to the import loop', () => {
 		const { hookArgs } = renderStep( {
 			processed: 40,

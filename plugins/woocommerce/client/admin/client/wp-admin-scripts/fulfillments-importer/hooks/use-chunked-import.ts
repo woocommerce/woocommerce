@@ -23,6 +23,12 @@ export interface UseChunkedImportArgs {
 	 * from here instead of from 0.
 	 */
 	processed: number;
+	/**
+	 * True when the last request before this mount may have written its chunk
+	 * without a clear answer. It keeps the may-have-finished warning across a
+	 * step that mounts again.
+	 */
+	outcomeUnknown: boolean;
 	mapping: ColumnMapping;
 	notifyCustomer: boolean;
 	updateExisting: boolean;
@@ -140,6 +146,7 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 		token,
 		total,
 		processed,
+		outcomeUnknown,
 		mapping,
 		notifyCustomer,
 		updateExisting,
@@ -154,7 +161,7 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 	const abortRef = useRef< AbortController | null >( null );
 	const runningRef = useRef( false );
 	// Set when the last request failed in a way that may have written its chunk.
-	const outcomeUnknownRef = useRef( false );
+	const outcomeUnknownRef = useRef( outcomeUnknown );
 	// Keep the latest callbacks in a ref so run() does not change identity each render.
 	const callbacksRef = useRef( { onChunk, onFinish, onError } );
 	useEffect( () => {

@@ -151,6 +151,26 @@ describe( 'ImportStep mounted again with the wizard state', () => {
 		expect( mockedRunChunk ).toHaveBeenCalledTimes( 2 );
 	} );
 
+	it( 'still warns that the import may have finished after a lost response', async () => {
+		mockedRunChunk
+			.mockResolvedValueOnce( chunk( 2 ) )
+			.mockRejectedValueOnce( new Error( 'Failed to fetch' ) )
+			.mockRejectedValueOnce( TOKEN_INVALID );
+		const { startImport, remount } = setUp();
+
+		await startImport();
+		await screen.findByText( 'Failed to fetch', IN_NOTICE );
+		remount();
+
+		await act( async () => {
+			screen.getByRole( 'button', { name: 'Retry' } ).click();
+		} );
+
+		await screen.findByText( MAY_HAVE_FINISHED, IN_NOTICE );
+		expect( mockedRunChunk ).toHaveBeenCalledTimes( 3 );
+		expect( mockedRunChunk.mock.calls[ 2 ][ 0 ].offset ).toBe( 2 );
+	} );
+
 	it( 'shows the expired session as is on a fresh import', async () => {
 		mockedRunChunk.mockRejectedValueOnce( TOKEN_INVALID );
 		const { startImport } = setUp();

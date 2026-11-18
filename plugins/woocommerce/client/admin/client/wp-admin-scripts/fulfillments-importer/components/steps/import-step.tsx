@@ -18,6 +18,9 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 		token: state.token,
 		total: state.total,
 		processed: state.processed,
+		// An error left on screen may hide a chunk the server wrote, so a step
+		// that mounts over one stays on the careful side.
+		outcomeUnknown: state.error !== null,
 		mapping: state.mapping,
 		notifyCustomer: state.notifyCustomer,
 		updateExisting: state.updateExisting,
