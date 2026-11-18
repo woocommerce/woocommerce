@@ -369,29 +369,37 @@ class WC_Helper_Updater {
 	}
 
 	/**
-	 * Message saying an update needs a newer WordPress, with a link to update it for users who can.
+	 * Message saying an update needs a newer WordPress, telling users who can update it to do so first.
+	 *
+	 * The HTML version links to the WordPress Updates screen. The plain-text version is for errors,
+	 * which callers may show as text.
 	 *
 	 * @since 11.4.0
 	 * @param string $requires The minimum WordPress version the update needs.
+	 * @param bool   $as_html  Whether to return HTML with a link, or plain text.
 	 * @return string
 	 */
-	private static function get_wp_requirement_notice( string $requires ): string {
+	private static function get_wp_requirement_notice( string $requires, bool $as_html = true ): string {
 		$notice = sprintf(
 			/* translators: 1: WordPress version the update needs, 2: WordPress version the site runs. */
 			__( 'This update needs WordPress %1$s or later, and this site runs WordPress %2$s.', 'woocommerce' ),
-			esc_html( $requires ),
-			esc_html( wp_get_wp_version() )
+			$as_html ? esc_html( $requires ) : $requires,
+			$as_html ? esc_html( wp_get_wp_version() ) : wp_get_wp_version()
 		);
 
-		if ( current_user_can( 'update_core' ) ) {
-			$notice .= ' ' . sprintf(
-				/* translators: %s: URL of the WordPress Updates screen. */
-				__( '<a href="%s">Update WordPress</a> first.', 'woocommerce' ),
-				esc_url( self_admin_url( 'update-core.php' ) )
-			);
+		if ( ! current_user_can( 'update_core' ) ) {
+			return $notice;
 		}
 
-		return $notice;
+		if ( ! $as_html ) {
+			return $notice . ' ' . __( 'Update WordPress first.', 'woocommerce' );
+		}
+
+		return $notice . ' ' . sprintf(
+			/* translators: %s: URL of the WordPress Updates screen. */
+			__( '<a href="%s">Update WordPress</a> first.', 'woocommerce' ),
+			esc_url( self_admin_url( 'update-core.php' ) )
+		);
 	}
 
 	/**
@@ -1646,7 +1654,7 @@ class WC_Helper_Updater {
 			return $reply;
 		}
 
-		return new WP_Error( 'woocommerce_update_needs_newer_wp', self::get_wp_requirement_notice( $requires ) );
+		return new WP_Error( 'woocommerce_update_needs_newer_wp', self::get_wp_requirement_notice( $requires, false ) );
 	}
 }
 

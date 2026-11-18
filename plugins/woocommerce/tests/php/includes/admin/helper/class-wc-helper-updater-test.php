@@ -2647,9 +2647,15 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Downloading a WooCommerce.com theme update that needs a newer WordPress is stopped.
+	 * @testdox Downloading a WooCommerce.com theme update that needs a newer WordPress is stopped with a plain-text error.
 	 */
 	public function test_pre_download_blocks_theme_update_needing_newer_wp(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		if ( is_multisite() ) {
+			grant_super_admin( $user_id ); // Only super admins have update_core on multisite.
+		}
+		wp_set_current_user( $user_id );
+
 		$stylesheet = $this->mock_local_woo_theme();
 		$this->mock_update_check_products( 456, false );
 		$this->mocked_updates[456]['requires'] = '99.0';
@@ -2671,6 +2677,11 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		$this->assertWPError( $reply );
 		$this->assertSame( 'woocommerce_update_needs_newer_wp', $reply->get_error_code() );
+		$this->assertSame(
+			sprintf( 'This update needs WordPress 99.0 or later, and this site runs WordPress %s. Update WordPress first.', wp_get_wp_version() ),
+			$reply->get_error_message(),
+			'The error is plain text, since callers may show it as text.'
+		);
 	}
 
 	/**
