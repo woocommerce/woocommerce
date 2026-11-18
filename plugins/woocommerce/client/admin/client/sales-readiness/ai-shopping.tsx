@@ -149,8 +149,26 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 	const [ busy, setBusy ] = useState( false );
 	const [ message, setMessage ] = useState( ucp.message );
 	const dirtyRef = useRef( false );
+	// Only clear the handler this page installed, so Save does not drop another unload listener.
+	const unloadHandler = useRef< ( () => string ) | null >( null );
 	const root = useRef< HTMLDivElement >( null );
 	useHashTarget( root, view );
+
+	useEffect( () => {
+		return () => {
+			if ( window.onbeforeunload === unloadHandler.current ) {
+				window.onbeforeunload = null;
+			}
+			unloadHandler.current = null;
+		};
+	}, [] );
+
+	const allowUnload = () => {
+		if ( window.onbeforeunload === unloadHandler.current ) {
+			window.onbeforeunload = null;
+		}
+		unloadHandler.current = null;
+	};
 
 	const say = ( text: string ) => {
 		setMessage( text );
@@ -212,7 +230,9 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 					'The changes you made will be lost if you navigate away from this page.',
 					'woocommerce'
 				);
-			window.onbeforeunload = () => warning;
+			const handler = () => warning;
+			unloadHandler.current = handler;
+			window.onbeforeunload = handler;
 		}
 	};
 
@@ -374,9 +394,7 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 						name="save"
 						value="Save changes"
 						disabled={ ! dirty }
-						onClick={ () => {
-							window.onbeforeunload = null;
-						} }
+						onClick={ allowUnload }
 					>
 						{ __( 'Save', 'woocommerce' ) }
 					</Button>
