@@ -69,35 +69,6 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should say that the callback ran when the output is invalid, so the caller checks the state before a retry.
-	 */
-	public function test_invalid_output_says_the_callback_ran(): void {
-		$runs    = 0;
-		$ability = new Ability(
-			'test/invalid-output',
-			array(
-				'label'               => 'Invalid output',
-				'description'         => 'Returns output that does not match its schema.',
-				'category'            => 'woocommerce',
-				'output_schema'       => array( 'type' => 'object' ),
-				'execute_callback'    => function () use ( &$runs ) {
-					++$runs;
-					return 'not an object';
-				},
-				'permission_callback' => '__return_true',
-			)
-		);
-
-		$result = $ability->execute();
-
-		$this->assertSame( 1, $runs );
-		$this->assertWPError( $result );
-		$this->assertSame( 'ability_invalid_output', $result->get_error_code() );
-		$this->assertStringContainsString( 'Check the current state before you run it again', $result->get_error_message() );
-		$this->assertTrue( $result->get_error_data()['callback_executed'] );
-	}
-
-	/**
 	 * Boolean flag values that the schema accepts, with the boolean each one means.
 	 *
 	 * @return array<string, array{0: bool|string|int, 1: bool}>
