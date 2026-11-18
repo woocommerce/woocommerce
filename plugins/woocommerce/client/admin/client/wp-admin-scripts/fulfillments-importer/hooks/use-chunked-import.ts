@@ -285,7 +285,7 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 				// The failed chunk may have been the last one: the server ends the session when the import finishes.
 				fail(
 					__(
-						'The import session ended after a request with no clear answer, so the import may have finished. Check your orders before you upload the file again.',
+						'The import session ended before the last batch of rows was confirmed, so the import may have finished. Check your orders before you upload the file again.',
 						'woocommerce'
 					),
 					true

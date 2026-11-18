@@ -37,7 +37,7 @@ const TOKEN_INVALID = {
 };
 
 const MAY_HAVE_FINISHED =
-	'The import session ended after a request with no clear answer, so the import may have finished. Check your orders before you upload the file again.';
+	'The import session ended before the last batch of rows was confirmed, so the import may have finished. Check your orders before you upload the file again.';
 
 function buildResponse(
 	processed: number,
