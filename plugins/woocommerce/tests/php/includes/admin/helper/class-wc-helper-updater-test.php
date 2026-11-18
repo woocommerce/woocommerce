@@ -2555,7 +2555,11 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @param bool   $with_link Whether the Update WordPress link is expected.
 	 */
 	public function test_update_row_explains_update_needing_newer_wp( string $role, bool $with_link ): void {
-		wp_set_current_user( self::factory()->user->create( array( 'role' => $role ) ) );
+		$user_id = self::factory()->user->create( array( 'role' => $role ) );
+		if ( is_multisite() && 'administrator' === $role ) {
+			grant_super_admin( $user_id ); // Only super admins have update_core on multisite.
+		}
+		wp_set_current_user( $user_id );
 
 		ob_start();
 		WC_Helper_Updater::display_notice_for_update_needing_newer_wp( array(), (object) array( 'requires' => '99.0' ) );
