@@ -241,12 +241,13 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @return array<string, mixed>
 	 */
 	public function view(): array {
+		// Pending before the report: a scan that finishes between the two reads must not pair an old report with pending false.
+		$pending  = $this->scheduled_scan->is_pending();
+		$stalled  = $pending && $this->scheduled_scan->is_stalled();
 		$report   = $this->agent_readiness->get_cached_report();
 		$checks   = $this->store_conditions->all();
 		$launched = (bool) ( array_column( $checks, 'ok', 'id' )['launched'] ?? true );
 		$visible  = $this->visible_store_checks( $report, $checks );
-		$pending  = $this->scheduled_scan->is_pending();
-		$stalled  = $pending && $this->scheduled_scan->is_stalled();
 		$message  = '';
 		if ( $stalled ) {
 			$message = __( 'The check can’t start because scheduled actions aren’t running on this site.', 'woocommerce' );
