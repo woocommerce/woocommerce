@@ -86,9 +86,16 @@ test( 'keeps the configured PHP version when an override is invalid', ( context 
 test( 'rejects invalid plugins and mappings before writing a config', ( context ) => {
 	const { root, pluginPath, input, defaults, output } = site( context );
 	for ( const [ overrides, error ] of [
-		[ { plugins: '.' }, 'plugins must be an array of strings' ],
-		[ { plugins: [ '.', 1 ] }, 'plugins must be an array of strings' ],
+		[ { plugins: '.' }, 'plugins must be an array of non-empty strings' ],
+		[
+			{ plugins: [ '.', 1 ] },
+			'plugins must be an array of non-empty strings',
+		],
 		[ { mappings: [] }, 'mappings must be an object' ],
+		[
+			{ mappings: { 'wp-content/mu-plugins/custom.php': 42 } },
+			'mappings must be an object of non-empty strings',
+		],
 	] ) {
 		fs.writeFileSync(
 			input,
@@ -121,7 +128,17 @@ test( 'preserves the previous output when a plugin override is invalid', ( conte
 			},
 			env: { WC_VERSION: 'nightly' },
 		},
+		...[ '', ' ' ].map( ( source ) => ( {
+			configure( config ) {
+				config.plugins.push( source );
+			},
+		} ) ),
 		{ woocommerce: { latest: 42 } },
+		{ woocommerce: { latest: '' } },
+		{
+			env: { WC_VERSION: 'nightly' },
+			woocommerce: { nightly: '' },
+		},
 	];
 
 	fs.writeFileSync( output, '{}' );
@@ -131,8 +148,33 @@ test( 'preserves the previous output when a plugin override is invalid', ( conte
 				writeE2ESiteConfig( { root, pluginPath, env: {}, ...options } ),
 			( failure ) =>
 				failure.message.includes(
-					'.wp-env.e2e.json plugins must be an array of strings'
+					'.wp-env.e2e.json plugins must be an array of non-empty strings'
 				)
+		);
+		assert.equal( fs.readFileSync( output, 'utf8' ), '{}' );
+	}
+} );
+
+test( 'preserves the previous output when a mapping override is invalid', ( context ) => {
+	const { root, pluginPath, output } = site( context );
+	fs.writeFileSync( output, '{}' );
+	for ( const mappings of [
+		[],
+		{ 'wp-content/mu-plugins/custom.php': 42 },
+		{ 'wp-content/mu-plugins/custom.php': ' ' },
+	] ) {
+		assert.throws(
+			() =>
+				writeE2ESiteConfig( {
+					root,
+					pluginPath,
+					env: {},
+					configure( config ) {
+						config.mappings = mappings;
+					},
+				} ),
+			( failure ) =>
+				failure.message.includes( '.wp-env.e2e.json mappings' )
 		);
 		assert.equal( fs.readFileSync( output, 'utf8' ), '{}' );
 	}

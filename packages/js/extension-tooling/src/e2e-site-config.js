@@ -10,13 +10,30 @@ const nightlyWooCommerce =
 // Match dotted version numbers and pre-release tags such as 11.3.0-rc.1.
 const isVersionNumber = ( value ) =>
 	typeof value === 'string' && /^\d+(\.\d+)*(-\w+(\.\w+)*)*$/.test( value );
+const isMountSource = ( source ) =>
+	typeof source === 'string' && source.trim() !== '';
 
 function assertPluginSources( plugins, filename ) {
 	if (
 		! Array.isArray( plugins ) ||
-		plugins.findIndex( ( source ) => typeof source !== 'string' ) !== -1
+		plugins.findIndex( ( source ) => ! isMountSource( source ) ) !== -1
 	) {
-		throw new Error( `${ filename } plugins must be an array of strings.` );
+		throw new Error(
+			`${ filename } plugins must be an array of non-empty strings.`
+		);
+	}
+}
+
+function assertMappings( mappings, filename ) {
+	if (
+		! mappings ||
+		typeof mappings !== 'object' ||
+		Array.isArray( mappings ) ||
+		! Object.values( mappings ).every( isMountSource )
+	) {
+		throw new Error(
+			`${ filename } mappings must be an object of non-empty strings.`
+		);
 	}
 }
 
@@ -55,18 +72,13 @@ function writeE2ESiteConfig( {
 	}
 	config.plugins[ checkout ] = pluginPath;
 	config.mappings ??= {};
-	if (
-		typeof config.mappings !== 'object' ||
-		Array.isArray( config.mappings )
-	) {
-		throw new Error( '.wp-env.test.json mappings must be an object.' );
-	}
+	assertMappings( config.mappings, '.wp-env.test.json' );
 	config.mappings[ './wp-content/debug.log' ] =
 		'./tests/_output/e2e-debug.log';
 	configure?.( config );
 
 	const { WC_VERSION, WP_VERSION, PHP_VERSION } = env;
-	let wooSource = woocommerce.latest;
+	let wooSource = woocommerce.latest ?? null;
 	if ( WC_VERSION === 'nightly' ) {
 		wooSource = woocommerce.nightly ?? nightlyWooCommerce;
 	} else if ( isVersionNumber( WC_VERSION ) ) {
@@ -75,7 +87,7 @@ function writeE2ESiteConfig( {
 			WC_VERSION +
 			'/woocommerce.zip';
 	}
-	if ( wooSource && Array.isArray( config.plugins ) ) {
+	if ( wooSource !== null && Array.isArray( config.plugins ) ) {
 		const wooIndex = config.plugins.findIndex(
 			( source ) =>
 				source === latestWooCommerce || source === stableWooCommerce
@@ -110,6 +122,7 @@ function writeE2ESiteConfig( {
 	}
 
 	assertPluginSources( config.plugins, '.wp-env.e2e.json' );
+	assertMappings( config.mappings, '.wp-env.e2e.json' );
 	fs.writeFileSync(
 		path.join( root, '.wp-env.e2e.json' ),
 		JSON.stringify( config )
