@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
  * Internal dependencies
  */
 import type { CheckRow as CheckRowData, ViewBadge, ViewLink } from '../types';
-import { trackReadiness } from '../tracks';
+import { trackReadiness, type Surface } from '../tracks';
 
 /**
  * Where to fix it: an outline button when it has a URL, plain text otherwise.
@@ -169,9 +169,11 @@ const TextWithLink = ( {
 export const CheckRow = ( {
 	row,
 	section,
+	surface = 'page',
 }: {
 	row: CheckRowData;
 	section: string;
+	surface?: Surface;
 } ) => {
 	const states: Record< CheckRowData[ 'state' ], string > = {
 		open: __( 'Issue:', 'woocommerce' ),
@@ -191,8 +193,8 @@ export const CheckRow = ( {
 					<RowLink
 						link={ row.link }
 						onClick={ () =>
-							trackReadiness( 'link_click', {
-								surface: 'page',
+							trackReadiness( 'link_clicked', {
+								surface,
 								area: 'section',
 								section,
 								check_id: row.id,

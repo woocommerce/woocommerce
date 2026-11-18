@@ -73,7 +73,7 @@ export default function SalesReadinessOverview( {
 							size="compact"
 							href={ shopping.button.href }
 							onClick={ () =>
-								trackReadiness( 'link_click', {
+								trackReadiness( 'link_clicked', {
 									surface: 'overview',
 									area: 'shopping',
 								} )
@@ -141,7 +141,7 @@ export default function SalesReadinessOverview( {
 									size="compact"
 									href={ viewAll.href }
 									onClick={ () =>
-										trackReadiness( 'link_click', {
+										trackReadiness( 'link_clicked', {
 											surface: 'overview',
 											area: 'view_all',
 										} )

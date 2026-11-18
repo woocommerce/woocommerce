@@ -33,7 +33,11 @@ export const Fold = ( {
 		<Collapsible.Root
 			open={ open }
 			onOpenChange={ ( next: boolean ) => {
-				trackReadiness( 'fold_toggle', { section, open: next } );
+				trackReadiness( 'fold_toggle', {
+					surface: 'page',
+					section,
+					open: next,
+				} );
 				setOpen( next );
 			} }
 			className="wc-sales-readiness-fold"
@@ -78,7 +82,12 @@ export const SectionCard = ( { section }: { section: Section } ) => {
 	const list = ( rows: Section[ 'rows' ] ) => (
 		<ul className="wc-sales-readiness-list">
 			{ rows.map( ( row ) => (
-				<CheckRow key={ row.id } row={ row } section={ section.id } />
+				<CheckRow
+					key={ row.id }
+					row={ row }
+					section={ section.id }
+					surface="page"
+				/>
 			) ) }
 		</ul>
 	);
@@ -90,6 +99,7 @@ export const SectionCard = ( { section }: { section: Section } ) => {
 				id={ 'wc-sales-readiness-' + section.id }
 				onOpenChange={ ( open: boolean ) =>
 					trackReadiness( 'fold_toggle', {
+						surface: 'page',
 						section: section.id,
 						open,
 					} )
@@ -197,7 +207,11 @@ export const DeclaredCard = ( { declared }: { declared: Declared } ) => (
 		className="wc-sales-readiness-card"
 		id="wc-sales-readiness-declared"
 		onOpenChange={ ( open: boolean ) =>
-			trackReadiness( 'fold_toggle', { section: 'declared', open } )
+			trackReadiness( 'fold_toggle', {
+				surface: 'page',
+				section: 'declared',
+				open,
+			} )
 		}
 	>
 		<CollapsibleCard.Header>

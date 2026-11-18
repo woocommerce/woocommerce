@@ -96,7 +96,7 @@ export function useReadinessView(
 	}, [ view, load ] );
 
 	const runCheck = useCallback( async () => {
-		trackReadiness( 'run_check_click', {
+		trackReadiness( 'run_check_clicked', {
 			surface,
 			first_check: !! view?.intro,
 		} );

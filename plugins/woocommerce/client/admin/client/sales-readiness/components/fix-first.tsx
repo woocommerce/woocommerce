@@ -53,7 +53,7 @@ export const FixFirstList = ( {
 									<RowLink
 										link={ item.link }
 										onClick={ () =>
-											trackReadiness( 'link_click', {
+											trackReadiness( 'link_clicked', {
 												surface,
 												area: 'fix_first',
 												check_id: item.id,

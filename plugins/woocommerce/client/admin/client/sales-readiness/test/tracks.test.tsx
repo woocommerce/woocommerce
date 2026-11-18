@@ -161,7 +161,7 @@ describe( 'Sales readiness tracking', () => {
 			expect( mockedApiFetch ).toHaveBeenCalledTimes( 3 )
 		);
 		expect( mockedRecord ).toHaveBeenCalledWith(
-			'sales_readiness_run_check_click',
+			'sales_readiness_run_check_clicked',
 			{
 				surface: 'page',
 				first_check: true,
@@ -180,7 +180,7 @@ describe( 'Sales readiness tracking', () => {
 			await screen.findByRole( 'link', { name: 'View 3 products' } )
 		);
 		expect( mockedRecord ).toHaveBeenCalledWith(
-			'sales_readiness_link_click',
+			'sales_readiness_link_clicked',
 			{
 				surface: 'page',
 				area: 'fix_first',
@@ -193,7 +193,7 @@ describe( 'Sales readiness tracking', () => {
 			screen.getByRole( 'link', { name: 'Open SEO settings' } )
 		);
 		expect( mockedRecord ).toHaveBeenCalledWith(
-			'sales_readiness_link_click',
+			'sales_readiness_link_clicked',
 			{
 				surface: 'page',
 				area: 'section',
@@ -209,6 +209,7 @@ describe( 'Sales readiness tracking', () => {
 		expect( mockedRecord ).toHaveBeenCalledWith(
 			'sales_readiness_fold_toggle',
 			{
+				surface: 'page',
 				section: 'find',
 				open: true,
 			}
@@ -218,6 +219,7 @@ describe( 'Sales readiness tracking', () => {
 		expect( mockedRecord ).toHaveBeenCalledWith(
 			'sales_readiness_fold_toggle',
 			{
+				surface: 'page',
 				section: 'find',
 				open: false,
 			}
@@ -241,21 +243,21 @@ describe( 'Sales readiness tracking', () => {
 			expect.objectContaining( { surface: 'overview', checked: true } )
 		);
 		expect( mockedRecord ).toHaveBeenCalledWith(
-			'sales_readiness_link_click',
+			'sales_readiness_link_clicked',
 			{
 				surface: 'overview',
 				area: 'view_all',
 			}
 		);
 		expect( mockedRecord ).toHaveBeenCalledWith(
-			'sales_readiness_link_click',
+			'sales_readiness_link_clicked',
 			{
 				surface: 'overview',
 				area: 'shopping',
 			}
 		);
 		expect( mockedRecord ).toHaveBeenCalledWith(
-			'sales_readiness_link_click',
+			'sales_readiness_link_clicked',
 			{
 				surface: 'overview',
 				area: 'fix_first',
