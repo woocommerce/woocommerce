@@ -149,8 +149,6 @@ class Ability extends \WP_Ability {
 			return $is_valid;
 		}
 
-		$data = $is_valid->get_error_data();
-
 		return new \WP_Error(
 			$is_valid->get_error_code(),
 			sprintf(
@@ -158,7 +156,7 @@ class Ability extends \WP_Ability {
 				__( '%s The ability ran, so its changes may already be saved. Check the current state before you run it again.', 'woocommerce' ),
 				$is_valid->get_error_message()
 			),
-			array_merge( is_array( $data ) ? $data : array(), array( 'callback_executed' => true ) )
+			$is_valid->get_error_data()
 		);
 	}
 }
