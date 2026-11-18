@@ -1064,8 +1064,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	/**
 	 * Get the stock status shared by all children, or null when a child has no row, several rows, a NULL status or a different status.
 	 *
-	 * Statuses are compared byte for byte, so values differing only in case or trailing spaces do not agree.
-	 *
 	 * @param int[]                                                          $child_ids Child product IDs.
 	 * @param array<int, array{child_id: string, stock_status: string|null}> $rows      Stored stock status rows of those children.
 	 * @return string|null
