@@ -440,7 +440,7 @@ const ProductTemplateEdit = (
 			layoutType === 'carousel' &&
 				carouselColumns &&
 				shrinkColumns &&
-				'wc-block-product-template__responsive'
+				'wc-block-product-template__carousel-responsive'
 		),
 	} );
 

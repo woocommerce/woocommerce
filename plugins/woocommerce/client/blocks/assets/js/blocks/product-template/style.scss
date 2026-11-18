@@ -97,6 +97,11 @@ $min-product-width: 150px;
 	container-type: inline-size;
 	container-name: carousel;
 
+	&.wc-block-product-template__carousel-responsive {
+		display: flex;
+		flex-wrap: nowrap;
+	}
+
 	.wc-block-product {
 		box-sizing: border-box;
 		// Padding to prevent focus outline from being clipped.
@@ -185,7 +190,7 @@ $min-product-width: 150px;
 			// would show more products than this setting. The column width stays
 			// the maximum, so a wide screen cannot fit extra products.
 			@if $columns > 1 {
-				&.wc-block-product-template__responsive .wc-block-product {
+				&.wc-block-product-template__carousel-responsive .wc-block-product {
 					flex-basis: $width;
 					flex-grow: 0;
 					flex-shrink: 1;
