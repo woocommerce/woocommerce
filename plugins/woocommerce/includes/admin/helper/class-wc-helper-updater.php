@@ -38,7 +38,8 @@ class WC_Helper_Updater {
 		add_action( 'pre_set_site_transient_update_themes', array( __CLASS__, 'transient_update_themes' ), 21, 1 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'upgrader_process_complete' ) );
 		add_action( 'upgrader_pre_download', array( __CLASS__, 'block_expired_updates' ), 10, 2 );
-		add_filter( 'upgrader_pre_download', array( __CLASS__, 'block_update_needing_newer_wp' ), 10, 4 );
+		// Runs first, so a callback that serves the package can't install the update before this check.
+		add_filter( 'upgrader_pre_download', array( __CLASS__, 'block_update_needing_newer_wp' ), 1, 4 );
 		add_action( 'admin_init', array( __CLASS__, 'add_hook_for_modifying_update_notices' ) );
 		// Late, so another callback can't switch the update back on.
 		add_filter( 'auto_update_plugin', array( __CLASS__, 'skip_auto_update_needing_newer_wp' ), PHP_INT_MAX, 2 );

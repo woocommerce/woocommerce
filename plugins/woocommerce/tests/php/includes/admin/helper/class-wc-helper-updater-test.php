@@ -2674,6 +2674,41 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An update that needs a newer WordPress is stopped even when another callback serves the package first.
+	 */
+	public function test_pre_download_blocks_update_before_early_package_callback(): void {
+		$stylesheet = $this->mock_local_woo_theme();
+		$this->mock_update_check_products( 456, false );
+		$this->mocked_updates[456]['requires'] = '99.0';
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			set_site_transient(
+				'update_themes',
+				(object) array(
+					'response' => array(),
+					'checked'  => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$serve_package = static function ( $reply ) {
+			return false === $reply ? '/tmp/served-package.zip' : $reply;
+		};
+		add_filter( 'upgrader_pre_download', $serve_package, 5 );
+		try {
+			$reply = apply_filters( 'upgrader_pre_download', false, '', null, array( 'theme' => $stylesheet ) );
+		} finally {
+			remove_filter( 'upgrader_pre_download', $serve_package, 5 );
+		}
+
+		$this->assertWPError( $reply );
+		$this->assertSame( 'woocommerce_update_needs_newer_wp', $reply->get_error_code() );
+	}
+
+	/**
 	 * @testdox A download that isn't a plugin or theme update, or that another callback already answered, is left alone.
 	 */
 	public function test_pre_download_leaves_other_downloads_alone(): void {
