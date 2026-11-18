@@ -83,10 +83,7 @@ class ChangelogFormatterTest extends TestCase {
 		$changelog = $this->formatter->parse( $contents );
 
 		$this->assertSame( $this->configured_title(), $changelog->getPrologue() );
-		$this->assertSame(
-			array( '1.5.1', '1.0.0' ),
-			array_map( static fn( $entry ) => $entry->getVersion(), $changelog->getEntries() )
-		);
+		$this->assertSame( array( '1.5.1', '1.0.0' ), $changelog->getVersions() );
 		$this->assertNotEmpty( $changelog->getLatestEntry()->getChanges() );
 	}
 
