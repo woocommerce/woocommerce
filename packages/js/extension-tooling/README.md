@@ -105,6 +105,16 @@ Add this mapping alongside the extension's existing `wp-content/bin` mapping in 
 
 Use `wp-env run cli bash wp-content/woo-extension-tooling/seed-dev.sh wp-content/bin/seed_dev_plugin.sh` for `env:dev:seed`. Pass the fixture hook's path inside the container. Include WooCommerce Gateway Dummy in the development site's plugin list to use the seeded dummy payment method.
 
+### Provision a browser test store
+
+For suites that switch between shortcode and block checkout, add the same `./wp-content/woo-extension-tooling` mapping to the browser test site. After resetting the site, run the shared provisioner before the extension's seed hook.
+
+```sh
+pnpm run wp-env:e2e run cli bash wp-content/woo-extension-tooling/provision-e2e-store.sh
+```
+
+The site needs Storefront, WooCommerce, and the extension's test mu-plugin that registers `wp wc docker-e2e provision` and switches between checkout modes. The shared script sets up both sets of pages and calls the extension's importer. Pass `--metric-units` if the suite expects kilograms and centimeters, as Product Bundles does.
+
 ## Lint and analysis presets
 
 If your Stylelint config already disables `selector-class-pattern` for legacy SCSS, extend the shared overlay after the WordPress preset. Keep any file-specific rules in your own config.
