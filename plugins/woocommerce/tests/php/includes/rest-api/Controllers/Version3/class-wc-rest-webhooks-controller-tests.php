@@ -355,6 +355,7 @@ class WC_REST_Webhooks_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 *
 	 * @testWith [{"delivery_url": "https://example.com/shop-manager-receiver"}, true]
 	 *           [{"name": "Renamed by the shop manager"}, false]
+	 *           [{"name": "Sent back whole", "delivery_url": "https://example.com/admin-integration"}, false]
 	 *
 	 * @param array $changes          The fields the shop manager updates.
 	 * @param bool  $editor_is_author Whether the shop manager should become the author.

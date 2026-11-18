@@ -117,7 +117,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</label>
 				</th>
 				<td class="forminp">
-					<input name="webhook_delivery_url" id="webhook_delivery_url" type="text" class="input-text regular-input" value="<?php echo esc_attr( $webhook->get_delivery_url() ); ?>" />
+					<?php // esc_attr() keeps entities such as &amp; as they are, so the browser would decode them and send back a different URL. esc_textarea() encodes them again. ?>
+					<input name="webhook_delivery_url" id="webhook_delivery_url" type="text" class="input-text regular-input" value="<?php echo esc_textarea( $webhook->get_delivery_url() ); ?>" />
 				</td>
 			</tr>
 			<tr valign="top">

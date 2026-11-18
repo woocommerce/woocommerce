@@ -92,8 +92,8 @@ class WC_Admin_Webhooks {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$delivery_url = ! empty( $_POST['webhook_delivery_url'] ) ? esc_url_raw( wp_unslash( $_POST['webhook_delivery_url'] ) ) : '';
 
-		// The form shows the stored URL with HTML entities decoded, so an unchanged URL can come back spelled differently.
-		if ( wc_is_valid_url( $delivery_url ) && html_entity_decode( $delivery_url, ENT_QUOTES | ENT_HTML5 ) !== html_entity_decode( $webhook->get_delivery_url(), ENT_QUOTES | ENT_HTML5 ) ) {
+		// An untouched form sends back the URL it displayed. That URL can differ from the stored one when a filter changes it, and it is not a change.
+		if ( wc_is_valid_url( $delivery_url ) && esc_url_raw( $webhook->get_delivery_url() ) !== $delivery_url ) {
 			$webhook->set_delivery_url( $delivery_url );
 		}
 
