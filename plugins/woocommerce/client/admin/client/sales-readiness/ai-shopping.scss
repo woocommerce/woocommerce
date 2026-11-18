@@ -148,6 +148,11 @@ body.woocommerce_page_wc-settings:has(.wc-ai-shopping) {
 	&__input {
 		flex: 1 1 auto;
 		min-width: 0;
+
+		// White as in the design: the read-only field is something to copy, not a disabled one.
+		input {
+			background-color: #fff;
+		}
 	}
 }
 
