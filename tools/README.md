@@ -34,11 +34,14 @@ For example, `@woocommerce/plugin-woocommerce` fans out to its three asset produ
 ```json
 {
 	"scripts": {
-		"build:project:admin": "pnpm --filter='@woocommerce/admin-library' build",
-		"build:project:blocks": "pnpm --filter='@woocommerce/block-library' build",
+		"build:project:bundles": "node ./bin/build-bundles.mjs",
 		"build:project:classic-assets": "pnpm --filter='@woocommerce/classic-assets' build"
 	}
 }
 ```
+
+`bin/build-bundles.mjs` runs `pnpm --filter='@woocommerce/block-library' build` and `pnpm --filter='@woocommerce/admin-library' build`, at the same time on machines with at least 12 GB of memory and one after the other on smaller ones.
+
+The root `pnpm build` runs `pnpm wc:build` for the plugin and, at the same time, every other project's `build:project:*` scripts. The plugin's bundles read package sources through the `wc-source` export condition, so they do not wait for the packages to build.
 
 Each producer writes its bundles directly into the plugin's final asset locations (`plugins/woocommerce/assets/{client/admin,client/blocks,css,js}`), so there is no intermediate copy step.
