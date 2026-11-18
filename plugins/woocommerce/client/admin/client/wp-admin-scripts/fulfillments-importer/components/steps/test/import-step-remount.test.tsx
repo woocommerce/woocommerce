@@ -13,10 +13,8 @@ jest.mock( '../../../data/api', () => ( {
  */
 import ImportStep from '../import-step';
 import { runChunk } from '../../../data/api';
-import {
-	useImporterState,
-	type ImporterAction,
-} from '../../../hooks/use-importer-state';
+import { useImporterState } from '../../../hooks/use-importer-state';
+import type { ImporterAction } from '../../../hooks/use-importer-state';
 import type { RunChunkResponse } from '../../../data/types';
 
 const mockedRunChunk = runChunk as jest.MockedFunction< typeof runChunk >;
