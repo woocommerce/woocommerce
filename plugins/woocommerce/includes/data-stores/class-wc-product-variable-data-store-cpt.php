@@ -1076,20 +1076,20 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		}
 
 		$shared_stock_status = null;
-		$seen_child_ids      = array();
+		$processed_child_ids = array();
 		foreach ( $rows as $row ) {
 			$child_id     = (int) $row['child_id'];
 			$stock_status = $row['stock_status'];
 
-			if ( isset( $seen_child_ids[ $child_id ] ) || ! is_string( $stock_status ) ) {
+			if ( isset( $processed_child_ids[ $child_id ] ) || ! is_string( $stock_status ) ) {
 				return null;
 			}
 			if ( null !== $shared_stock_status && $stock_status !== $shared_stock_status ) {
 				return null;
 			}
 
-			$seen_child_ids[ $child_id ] = true;
-			$shared_stock_status         = $stock_status;
+			$processed_child_ids[ $child_id ] = true;
+			$shared_stock_status              = $stock_status;
 		}
 
 		return $shared_stock_status;
