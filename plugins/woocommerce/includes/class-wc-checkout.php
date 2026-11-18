@@ -1815,6 +1815,17 @@ class WC_Checkout {
 
 			do_action( 'woocommerce_before_checkout_process' );
 
+			// Runs after the attempt hook, which extensions use to detect checkout requests, and before any processing or session work.
+			if ( ! is_user_logged_in() && ! $this->is_registration_enabled() && $this->is_registration_required() ) {
+				/**
+				 * This filter is documented in the Store API checkout route.
+				 *
+				 * @since 9.4.3
+				 */
+				$message = apply_filters( 'woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ) );
+				throw new Exception( esc_html( is_string( $message ) ? $message : __( 'You must be logged in to checkout.', 'woocommerce' ) ) );
+			}
+
 			if ( WC()->cart->is_empty() ) {
 				throw new Exception( $expiry_message );
 			}
