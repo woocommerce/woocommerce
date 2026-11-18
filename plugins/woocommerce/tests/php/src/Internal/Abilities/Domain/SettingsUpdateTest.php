@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxBasedOn;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 
 /**
@@ -315,6 +317,53 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse list entries the admin save would drop, even when they are valid choices.
+	 * @testWith [["0"]]
+	 *           [["0", "live"]]
+	 * @param array $values Requested list.
+	 */
+	public function test_refuses_list_entries_admin_save_drops( array $values ): void {
+		update_option( 'extension_field', array( 'live' ) );
+		$this->add_general_field(
+			array(
+				'type'    => 'multiselect',
+				'options' => array(
+					'0'    => 'None',
+					'live' => 'Live',
+				),
+			)
+		);
+
+		$result = $this->sut->execute( $this->input( 'general', array( 'extension_field' => $values ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_settings_invalid_value', $result->get_error_code() );
+		$this->assertSame( array( 'live' ), get_option( 'extension_field' ) );
+	}
+
+	/**
+	 * @testdox Should save an empty list.
+	 */
+	public function test_saves_empty_list(): void {
+		update_option( 'extension_field', array( 'live' ) );
+		$this->add_general_field(
+			array(
+				'type'    => 'multiselect',
+				'options' => array(
+					'0'    => 'None',
+					'live' => 'Live',
+				),
+			)
+		);
+
+		$result = $this->sut->execute( $this->input( 'general', array( 'extension_field' => array() ) ) );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( array(), $result['settings'][0]['value'] );
+		$this->assertSame( array(), get_option( 'extension_field' ) );
+	}
+
+	/**
 	 * @testdox Should validate country fields against store countries and states.
 	 * @testWith ["single_select_country", "US:CA", true]
 	 *           ["single_select_country", "US", false]
@@ -493,6 +542,27 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should restore an unset checkout page from the previous value it reports.
+	 */
+	public function test_restores_unset_checkout_page_from_previous(): void {
+		$page = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		delete_option( 'woocommerce_checkout_page_id' );
+
+		$changed = $this->sut->execute( $this->input( 'advanced', array( 'woocommerce_checkout_page_id' => $page ) ) );
+		$this->assertIsArray( $changed );
+		$this->assertSame( -1, $changed['settings'][0]['previous'] );
+
+		$restored = $this->sut->execute( $this->input( 'advanced', array( 'woocommerce_checkout_page_id' => $changed['settings'][0]['previous'] ) ) );
+		$this->assertIsArray( $restored );
+		$this->assertSame( '', get_option( 'woocommerce_checkout_page_id' ) );
+		$this->assertSame( -1, wc_get_page_id( 'checkout' ) );
+
+		$result = $this->sut->execute( $this->input( 'advanced', array( 'woocommerce_checkout_page_id' => '-2' ) ) );
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_settings_invalid_value', $result->get_error_code() );
+	}
+
+	/**
 	 * @testdox Should refuse page settings that would share a page, against both the batch and the stored pages.
 	 * @testWith ["woocommerce_checkout_page_id", "woocommerce_cart_page_id"]
 	 *           ["woocommerce_myaccount_page_id", "woocommerce_checkout_page_id"]
@@ -546,6 +616,58 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should recount product terms when out of stock visibility changes, and only then.
+	 */
+	public function test_out_of_stock_visibility_change_recounts_terms(): void {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+		$term_id = (int) wp_insert_term( 'Recount category', 'product_cat' )['term_id'];
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_category_ids( array( $term_id ) );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$product->save();
+		wc_recount_all_terms( false );
+		$this->assertSame( 1, (int) get_term_meta( $term_id, 'product_count_product_cat', true ) );
+
+		$recounts = 0;
+		$counter  = static function ( $recount ) use ( &$recounts ) {
+			++$recounts;
+			return $recount;
+		};
+		add_filter( 'woocommerce_product_recount_terms', $counter );
+
+		$this->sut->execute( $this->input( 'products', array( 'woocommerce_hide_out_of_stock_items' => false ) ) );
+		$this->assertSame( 0, $recounts );
+
+		$this->sut->execute( $this->input( 'products', array( 'woocommerce_hide_out_of_stock_items' => true ) ) );
+		remove_filter( 'woocommerce_product_recount_terms', $counter );
+
+		$this->assertSame( 'yes', get_option( 'woocommerce_hide_out_of_stock_items' ) );
+		$this->assertSame( 0, (int) get_term_meta( $term_id, 'product_count_product_cat', true ) );
+	}
+
+	/**
+	 * @testdox Should invalidate cached shipping rates after shipping or tax changes, and only then.
+	 */
+	public function test_shipping_and_tax_changes_invalidate_shipping_rates(): void {
+		set_transient( 'shipping-transient-version', 'stale' );
+		$this->sut->execute( $this->input( 'shipping', array( 'woocommerce_shipping_hide_rates_when_free' => true ) ) );
+
+		$this->assertSame( 'yes', get_option( 'woocommerce_shipping_hide_rates_when_free' ) );
+		$this->assertNotSame( 'stale', \WC_Cache_Helper::get_transient_version( 'shipping' ) );
+
+		set_transient( 'shipping-transient-version', 'stale' );
+		$this->sut->execute( $this->input( 'tax', array( 'woocommerce_tax_based_on' => TaxBasedOn::BILLING ) ) );
+
+		$this->assertSame( TaxBasedOn::BILLING, get_option( 'woocommerce_tax_based_on' ) );
+		$this->assertNotSame( 'stale', \WC_Cache_Helper::get_transient_version( 'shipping' ) );
+
+		set_transient( 'shipping-transient-version', 'stale' );
+		$this->sut->execute( $this->input( 'general', array( 'woocommerce_currency' => 'EUR' ) ) );
+
+		$this->assertSame( 'stale', \WC_Cache_Helper::get_transient_version( 'shipping' ) );
+	}
+
+	/**
 	 * @testdox Should refuse a batch that names the same setting twice.
 	 */
 	public function test_refuses_duplicate_ids(): void {
@@ -586,6 +708,38 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 			),
 			get_option( 'woocommerce_new_order_settings' )
 		);
+	}
+
+	/**
+	 * @testdox Should keep backslashes in text values, whether saved through the admin save or as an option member.
+	 */
+	public function test_keeps_backslashes(): void {
+		$this->add_general_field( array() );
+		$this->add_general_field(
+			array(
+				'id'   => 'extension_textarea',
+				'type' => 'textarea',
+			)
+		);
+
+		$result = $this->sut->execute(
+			$this->input(
+				'general',
+				array(
+					'extension_field'    => 'C:\Reports',
+					'extension_textarea' => 'C:\Reports\\\\Archive',
+				)
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'C:\Reports', get_option( 'extension_field' ) );
+		$this->assertSame( 'C:\Reports\\\\Archive', get_option( 'extension_textarea' ) );
+		$this->assertSame( 'C:\Reports', $result['settings'][0]['value'] );
+
+		$this->sut->execute( $this->input( 'email_new_order', array( 'subject' => 'C:\Reports' ) ) );
+
+		$this->assertSame( 'C:\Reports', get_option( 'woocommerce_new_order_settings' )['subject'] );
 	}
 
 	/**

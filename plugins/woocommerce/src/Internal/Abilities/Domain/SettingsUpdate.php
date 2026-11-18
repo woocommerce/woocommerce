@@ -205,6 +205,7 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 			$results[] = $result;
 		}
 
+		$hide_out_of_stock   = get_option( 'woocommerce_hide_out_of_stock_items' );
 		$flush_rewrite_rules = false;
 		foreach ( $changes as $index => $change ) {
 			list( $setting, $value ) = $change;
@@ -216,6 +217,14 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		// Endpoint slugs are rewrite rules, which the admin save flushes after every change.
 		if ( $flush_rewrite_rules ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+		}
+		// Term counts leave out hidden out-of-stock products, so the products settings save recounts them.
+		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) !== $hide_out_of_stock ) {
+			wc_recount_all_terms( false );
+		}
+		// Cart sessions keep calculated shipping rates until this version changes, which the shipping and tax admin saves bump.
+		if ( in_array( $input['group'], array( 'shipping', 'tax' ), true ) ) {
+			\WC_Cache_Helper::get_transient_version( 'shipping', true );
 		}
 
 		return array( 'settings' => $results );
@@ -263,6 +272,10 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 				return $invalid;
 			}
 			$value = array_map( 'strval', $value );
+			// The admin save drops "0" and empty entries from lists, so such a list would not be stored as sent.
+			if ( count( array_filter( $value ) ) !== count( $value ) ) {
+				return $invalid;
+			}
 		}
 
 		$method = 'validate_setting_' . $type . '_field';
@@ -291,6 +304,10 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		}
 		if ( ! is_callable( array( $controller, $method ) ) ) {
 			$method = 'validate_setting_text_field';
+		}
+		// These validators strip slashes, but ability input was never slashed.
+		if ( in_array( $method, array( 'validate_setting_text_field', 'validate_setting_textarea_field' ), true ) ) {
+			$value = wp_slash( $value );
 		}
 
 		$validated = $controller->$method( $value, $setting );
@@ -329,8 +346,9 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 	 * @return string|\WP_Error
 	 */
 	private static function validate_page( string $value, \WP_Error $invalid ) {
-		if ( '' === $value ) {
-			return $value;
+		// An unset checkout page reads as wc_get_page_id()'s -1, so `previous` can carry it back.
+		if ( '' === $value || '-1' === $value ) {
+			return '';
 		}
 		$page = ctype_digit( $value ) ? get_post( (int) $value ) : null;
 		if ( ! $page instanceof \WP_Post || 'page' !== $page->post_type || 'publish' !== $page->post_status ) {
