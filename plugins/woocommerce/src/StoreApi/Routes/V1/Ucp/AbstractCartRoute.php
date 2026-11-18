@@ -130,13 +130,44 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		}
 
 		$inherited_token = CartTokenUtils::get_request_cart_token();
+		add_filter( 'woocommerce_coupon_get_usage_count', array( $this, 'usage_count_without_own_order' ), 10, 2 );
 
 		try {
 			return parent::get_response( $request );
 		} finally {
+			remove_filter( 'woocommerce_coupon_get_usage_count', array( $this, 'usage_count_without_own_order' ), 10 );
 			$this->restore_request_cart_token( $inherited_token );
 			remove_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
 		}
+	}
+
+	/**
+	 * Leave the use this session's handed-off order recorded out of a coupon's usage count.
+	 *
+	 * The order spends the coupon while it awaits payment, and cart validation would otherwise
+	 * refuse a usage-limited coupon to the very checkout that spent it.
+	 *
+	 * @internal
+	 *
+	 * @param int|string $count Usage count.
+	 * @param \WC_Coupon $coupon The coupon.
+	 * @return int|string
+	 */
+	public function usage_count_without_own_order( $count, $coupon ) {
+		$order = wc_get_order( (int) ( $this->checkout_state()['order_id'] ?? 0 ) );
+
+		// Read on every call: an order this request cancels gives its use back, and must stop counting here.
+		if ( ! $order instanceof \WC_Order || ! $order->get_recorded_coupon_usage_counts() ) {
+			return $count;
+		}
+
+		foreach ( $order->get_coupon_codes() as $code ) {
+			if ( wc_is_same_coupon( $code, $coupon->get_code() ) ) {
+				return max( 0, (int) $count - 1 );
+			}
+		}
+
+		return $count;
 	}
 
 	/**

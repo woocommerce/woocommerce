@@ -144,6 +144,13 @@ class UcpCheckout extends ControllerTestCase {
 			$_SERVER['HTTP_CART_TOKEN'] = $cart_token;
 		}
 
+		if ( WC()->cart instanceof \WC_Cart ) {
+			// A real request ends with its cart; left hooked, this one would go on saving itself into later sessions.
+			$cart_session = new \ReflectionProperty( \WC_Cart::class, 'session' );
+			$cart_session->setAccessible( true );
+			remove_action( 'woocommerce_after_calculate_totals', array( $cart_session->getValue( WC()->cart ), 'set_session' ), 1000 );
+		}
+
 		WC()->session  = null;
 		WC()->customer = null;
 		WC()->cart     = null;
@@ -1038,5 +1045,52 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertSame( 'discount_code_invalid', $response->get_data()['messages'][0]['code'] );
 		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
 		$this->assertTrue( $order->has_status( OrderStatus::CHECKOUT_DRAFT ), 'A coupon that cannot be held must not leave a payable order.' );
+	}
+
+	/**
+	 * @testdox A handed-off checkout keeps the usage-limited coupon its own order spent, which stays spent for every other checkout.
+	 */
+	public function test_handed_off_checkout_keeps_its_own_coupon(): void {
+		$coupon  = \WC_Helper_Coupon::create_coupon(
+			'once',
+			array(
+				'coupon_amount' => '1',
+				'usage_limit'   => '1',
+			)
+		);
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'once' ) ) ) );
+		$first    = $this->request( 'POST', $path . '/complete' )->get_data();
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+
+		$this->assertSame( 1, ( new \WC_Coupon( 'once' ) )->get_usage_count(), 'The pending order spends the coupon.' );
+
+		$this->simulate_new_request();
+		$read = $this->request( 'GET', $path )->get_data();
+		$this->assertSame( array( 'once' ), array_column( $read['discounts']['applied'] ?? array(), 'code' ) );
+		$this->assertSame( $first['totals'], $read['totals'] );
+		$this->assertSame( $first['continue_url'], $read['continue_url'] );
+
+		$this->simulate_new_request();
+		$second = $this->request( 'POST', $path . '/complete' )->get_data();
+		$this->assertContains( 'ALREADY_HANDED_OFF', array_column( $second['messages'], 'code' ) );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ) );
+
+		$this->simulate_new_request();
+		$rival = $this->create_ready_checkout();
+		$rival = $this->request( 'PUT', '/checkout-sessions/' . $rival['id'], array( 'discounts' => array( 'codes' => array( 'once' ) ) ) )->get_data();
+		$this->assertSame( array(), $rival['discounts']['applied'] ?? array(), 'Another checkout cannot spend the coupon again.' );
+		$this->assertSame( 1, ( new \WC_Coupon( $coupon->get_id() ) )->get_usage_count() );
+
+		$this->simulate_new_request();
+		$changed = $this->request( 'PUT', $path, array( 'line_items' => array( $this->line_item( 0, 2 ) ) ) )->get_data();
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::CANCELLED ) );
+		$this->assertSame( 0, ( new \WC_Coupon( $coupon->get_id() ) )->get_usage_count(), 'The cancelled order gives its use back.' );
+		$this->assertSame( array( 'once' ), array_column( $changed['discounts']['applied'] ?? array(), 'code' ) );
+
+		$this->request( 'POST', $path . '/complete' );
+		$this->assertNotSame( $order_id, (int) WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertSame( 1, ( new \WC_Coupon( $coupon->get_id() ) )->get_usage_count() );
 	}
 }
