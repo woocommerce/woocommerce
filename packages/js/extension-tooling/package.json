@@ -17,6 +17,7 @@
 		"./webpack-dist-minify": "./src/webpack-dist-minify.js",
 		"./webpack-text-includes": "./src/webpack-text-includes.js",
 		"./check-i18n": "./src/check-i18n.js",
+		"./e2e-site-config": "./src/e2e-site-config.js",
 		"./stylelint/legacy-scss": "./configs/stylelint-legacy-scss.json"
 	},
 	"bin": {
