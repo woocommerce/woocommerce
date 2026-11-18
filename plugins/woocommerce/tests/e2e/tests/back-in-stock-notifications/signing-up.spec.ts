@@ -144,7 +144,7 @@ test.describe(
 				).toHaveAttribute( 'href', /stock-notifications/ );
 			} );
 
-			test( 'a repeated signup surfaces the "already joined" notice', async ( {
+			test( 'a signed-up shopper sees the "already joined" notice instead of the form on load', async ( {
 				page,
 				product,
 			} ) => {
@@ -158,16 +158,13 @@ test.describe(
 					page.getByText( bisNotice.success( product.name ) )
 				).toBeVisible();
 
-				// Submitting the form a second time (the "already joined"
-				// notice only renders as a form-submit response; the cached
-				// state shown on page reload is behind the off-by-default
-				// `woocommerce_customer_stock_notifications_personalization_enabled`
-				// filter).
 				await page.goto( product.permalink );
-				await signUpOnProductPage( page );
 				await expect(
-					page.getByText( bisNotice.alreadyJoined )
+					page.getByText( bisNotice.alreadyJoinedOnLoad )
 				).toBeVisible();
+				await expect(
+					page.getByRole( 'button', { name: /Notify me/i } )
+				).toHaveCount( 0 );
 			} );
 
 			test( 'a missing nonce is rejected once nonce checks are on', async ( {

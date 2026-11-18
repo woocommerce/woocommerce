@@ -4,7 +4,9 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Frontend;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\ProductPageIntegration;
+use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
@@ -323,5 +325,51 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		$markup            = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $simple_product_id . '} --><!-- wp:woocommerce/add-to-cart-form /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertStringContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should render inside the legacy Add to Cart Form block for an out of stock simple product.' );
+	}
+
+	/**
+	 * Log in a customer who has an active sign-up for the given product.
+	 *
+	 * @param int $product_id The product ID.
+	 */
+	private function log_in_customer_signed_up_for( int $product_id ): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+
+		$notification = new Notification();
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->set_product_id( $product_id );
+		$notification->set_user_id( $user_id );
+		$notification->save();
+	}
+
+	/**
+	 * @testdox Should show the "already joined" notice instead of the form on load to a logged-in customer who already signed up.
+	 */
+	public function test_already_joined_notice_replaces_form_for_signed_up_customer(): void {
+		$product_id = $this->create_and_visit_out_of_stock_simple_product();
+		$this->log_in_customer_signed_up_for( $product_id );
+
+		ob_start();
+		do_action( 'woocommerce_simple_add_to_cart' );
+		$markup = ob_get_clean();
+
+		$this->assertStringContainsString( 'You have already joined the waitlist!', $markup, 'A signed-up customer should see the "already joined" notice on load.' );
+		$this->assertStringNotContainsString( 'wc_bis_form', $markup, 'A signed-up customer should not see the Back in Stock form on load.' );
+	}
+
+	/**
+	 * @testdox Should keep rendering a variable product's hidden form, which JS points at the selected variation.
+	 */
+	public function test_variable_product_form_is_rendered_for_customer_signed_up_on_the_parent(): void {
+		$product_id = $this->create_and_visit_variable_product();
+		$this->log_in_customer_signed_up_for( $product_id );
+
+		ob_start();
+		do_action( 'woocommerce_after_add_to_cart_form' );
+		$markup = ob_get_clean();
+
+		$this->assertStringContainsString( 'wc_bis_form', $markup, 'The hidden variation form should still render.' );
+		$this->assertStringNotContainsString( 'You have already joined the waitlist!', $markup, 'The parent sign-up should not replace the variation form.' );
 	}
 }

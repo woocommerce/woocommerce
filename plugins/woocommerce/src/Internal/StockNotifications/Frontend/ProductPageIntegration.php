@@ -256,8 +256,9 @@ class ProductPageIntegration {
 			return;
 		}
 
-		// Check if already signed up.
-		if ( $this->is_personalization_enabled() && is_user_logged_in() ) {
+		// Check if already signed up. Only the form shown on load targets this product: a variable
+		// product's hidden form is pointed at the selected variation by JS.
+		if ( $this->is_visible_on_load( $product ) && $this->is_personalization_enabled() && is_user_logged_in() ) {
 			$user         = \get_user_by( 'id', \get_current_user_id() );
 			$notification = $this->signup_service->is_already_signed_up( $product->get_id(), $user->ID, $user->user_email );
 			if ( $notification instanceof Notification ) {
@@ -355,9 +356,6 @@ class ProductPageIntegration {
 			)
 		);
 
-		// When a variable has no purchasable variations, allow for signups on the parent product.
-		$is_visible = ! $product->is_type( 'variable' ) || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $product->has_purchasable_variations() );
-
 		wc_get_template(
 			'single-product/back-in-stock-form.php',
 			array(
@@ -366,15 +364,28 @@ class ProductPageIntegration {
 				'show_checkbox'    => false,
 				'show_email_field' => ! is_user_logged_in() && ! Config::requires_account(),
 				'button_class'     => $button_class,
-				'is_visible'       => $is_visible,
+				'is_visible'       => $this->is_visible_on_load( $product ),
 			)
 		);
+	}
+
+	/**
+	 * Whether the form is visible on page load, rather than revealed by JS for a selected variation.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return bool
+	 */
+	private function is_visible_on_load( WC_Product $product ): bool {
+		// When a variable has no purchasable variations, allow for signups on the parent product.
+		return ! $product->is_type( 'variable' ) || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $product->has_purchasable_variations() );
 	}
 
 	/**
 	 * Whether personalization is enabled.
 	 *
 	 * Personalization includes checking if the user is already signed up and displaying the 'already signed up' message.
+	 * It only changes the output for logged-in shoppers, whose pages full-page caches don't serve from cache. Sites
+	 * that cache logged-in pages across users can turn it off with the filter.
 	 *
 	 * @return bool True if personalization is enabled, false otherwise.
 	 */
@@ -388,6 +399,6 @@ class ProductPageIntegration {
 		 * @param bool $enabled Whether personalization is enabled.
 		 * @return bool
 		 */
-		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_personalization_enabled', false );
+		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_personalization_enabled', true );
 	}
 }
