@@ -3,11 +3,8 @@
  */
 import { useSelect } from '@wordpress/data';
 import { useState, useMemo } from '@wordpress/element';
-import {
-	__experimentalHStack as HStack,
-	__experimentalVStack as VStack,
-	__unstableMotion as motion,
-} from '@wordpress/components';
+import { __unstableMotion as motion } from '@wordpress/components';
+import { Stack } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -161,6 +158,7 @@ export function Preview( {
 		>
 			<motion.div
 				style={ {
+					position: 'relative',
 					height: normalizedHeight * ratio,
 					width: '100%',
 					background: backgroundColor,
@@ -178,9 +176,11 @@ export function Preview( {
 						overflow: 'hidden',
 					} }
 				>
-					<HStack
-						spacing={ 10 * ratio }
+					<Stack
+						direction="row"
+						align="center"
 						justify="center"
+						gap="3xl"
 						style={ {
 							height: '100%',
 							overflow: 'hidden',
@@ -199,7 +199,7 @@ export function Preview( {
 						>
 							Aa
 						</motion.div>
-						<VStack spacing={ 4 * ratio }>
+						<Stack direction="column" gap="lg">
 							{ highlightedColors.map(
 								( { slug, color }, index ) => (
 									<motion.div
@@ -231,8 +231,8 @@ export function Preview( {
 									/>
 								)
 							) }
-						</VStack>
-					</HStack>
+						</Stack>
+					</Stack>
 				</motion.div>
 				<motion.div
 					variants={ withHoverView && midFrame }
@@ -246,9 +246,8 @@ export function Preview( {
 						opacity: 0.1,
 					} }
 				>
-					<HStack
-						spacing={ 0 }
-						justify="flex-start"
+					<Stack
+						direction="row"
 						style={ {
 							height: '100%',
 							overflow: 'hidden',
@@ -264,7 +263,7 @@ export function Preview( {
 								} }
 							/>
 						) ) }
-					</HStack>
+					</Stack>
 				</motion.div>
 				<motion.div
 					variants={ secondFrame }
@@ -276,8 +275,8 @@ export function Preview( {
 						top: 0,
 					} }
 				>
-					<VStack
-						spacing={ 3 * ratio }
+					<Stack
+						direction="column"
 						justify="center"
 						style={ {
 							height: '100%',
@@ -300,7 +299,7 @@ export function Preview( {
 								{ label }
 							</div>
 						) }
-					</VStack>
+					</Stack>
 				</motion.div>
 			</motion.div>
 		</div>

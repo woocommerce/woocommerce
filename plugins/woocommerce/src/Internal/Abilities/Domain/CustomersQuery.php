@@ -71,7 +71,7 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 	 * @return bool
 	 */
 	public static function can_query_customers( $input = null ): bool {
-		return wc_rest_check_user_permissions( 'read' );
+		return (bool) wc_rest_check_user_permissions( 'read' );
 	}
 
 	/**

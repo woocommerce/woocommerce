@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { expect, test as base, guestFile } from '@woocommerce/e2e-utils';
+import {
+	expect,
+	test as base,
+	enableTestPlugin,
+	guestFile,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -21,20 +26,8 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 test.describe( 'Shopper → Extensibility', () => {
 	test.use( { storageState: guestFile } );
 
-	test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
-		await requestUtils.rest( {
-			method: 'PUT',
-			path: 'wc/v3/settings/account/woocommerce_enable_guest_checkout',
-			data: { value: 'yes' },
-		} );
-		await requestUtils.rest( {
-			method: 'PUT',
-			path: 'wc/v3/settings/account/woocommerce_enable_checkout_login_reminder',
-			data: { value: 'yes' },
-		} );
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-extensioncartupdate'
-		);
+	test.beforeEach( async ( { context, frontendUtils } ) => {
+		await enableTestPlugin( context, 'extension-cart-update' );
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );

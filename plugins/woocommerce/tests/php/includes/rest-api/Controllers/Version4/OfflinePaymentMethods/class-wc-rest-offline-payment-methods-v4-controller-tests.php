@@ -17,6 +17,13 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Tests register their own controller's routes, which a reused server would keep serving from the first test.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * Test endpoint.
 	 *
 	 * @var OfflinePaymentMethodsController

@@ -130,7 +130,8 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$expected_ids = array( (string) $mirrored->get_id() );
 		$batch_size   = ( new ReflectionClassConstant( HposOrderExportHandler::class, 'BATCH_SIZE' ) )->getValue();
 		for ( $i = 0; $i <= $batch_size; ++$i ) {
-			$expected_ids[] = (string) $this->create_order()->get_id();
+			// Pending orders skip the status-transition work a processing order triggers on save.
+			$expected_ids[] = (string) $this->create_order( OrderStatus::PENDING )->get_id();
 		}
 		$legacy_status_id = (int) end( $expected_ids );
 		global $wpdb;

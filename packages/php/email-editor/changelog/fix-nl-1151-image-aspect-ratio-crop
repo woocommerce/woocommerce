@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a filter that lets image CDNs serve cropped files for Image blocks in emails.

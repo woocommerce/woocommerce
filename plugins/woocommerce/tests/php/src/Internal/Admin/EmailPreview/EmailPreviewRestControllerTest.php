@@ -15,6 +15,14 @@ use WP_REST_Request;
  * @class PaymentsRestController
  */
 class EmailPreviewRestControllerTest extends WC_REST_Unit_Test_Case {
+
+	/**
+	 * Tests register their own controller's routes, which a reused server would keep serving from the first test.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
 	/**
 	 * Endpoint.
 	 *
@@ -116,8 +124,6 @@ class EmailPreviewRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( rest_authorization_required_code(), $response->get_status() );
-
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -142,8 +148,6 @@ class EmailPreviewRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 500, $response->get_status() );
 		$this->assertEquals( 'Error sending test email. Please try again.', $response->get_data()['message'] );
-
-		remove_filter( 'woocommerce_mail_callback', array( $this, 'simulate_failed_sending' ), 10 );
 	}
 
 	/**
@@ -165,20 +169,16 @@ class EmailPreviewRestControllerTest extends WC_REST_Unit_Test_Case {
 		};
 		add_action( 'woocommerce_email_sent', $capture, 10, 3 );
 
-		try {
-			$request  = $this->get_email_preview_request( EmailPreview::DEFAULT_EMAIL_TYPE, self::EMAIL );
-			$response = $this->server->dispatch( $request );
+		$request  = $this->get_email_preview_request( EmailPreview::DEFAULT_EMAIL_TYPE, self::EMAIL );
+		$response = $this->server->dispatch( $request );
 
-			$this->assertEquals( 200, $response->get_status() );
-			$this->assertNotEmpty( $captured, 'woocommerce_email_sent should fire for the preview send path.' );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNotEmpty( $captured, 'woocommerce_email_sent should fire for the preview send path.' );
 
-			$last = end( $captured );
-			$this->assertSame( EmailPreview::DEFAULT_EMAIL_TYPE, $last['class'], 'Send path should use the resolved WC_Email subclass, not a generic WC_Emails instance.' );
-			$this->assertNotEmpty( $last['email_id'], 'Email id should be set so listeners can identify the email type.' );
-			$this->assertSame( self::EMAIL, $last['recipient'], 'Recipient should be set on the resolved instance before send.' );
-		} finally {
-			remove_action( 'woocommerce_email_sent', $capture, 10 );
-		}
+		$last = end( $captured );
+		$this->assertSame( EmailPreview::DEFAULT_EMAIL_TYPE, $last['class'], 'Send path should use the resolved WC_Email subclass, not a generic WC_Emails instance.' );
+		$this->assertNotEmpty( $last['email_id'], 'Email id should be set so listeners can identify the email type.' );
+		$this->assertSame( self::EMAIL, $last['recipient'], 'Recipient should be set on the resolved instance before send.' );
 	}
 
 	/**
@@ -264,8 +264,6 @@ class EmailPreviewRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( rest_authorization_required_code(), $response->get_status() );
-
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -368,8 +366,6 @@ class EmailPreviewRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( rest_authorization_required_code(), $response->get_status() );
-
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**

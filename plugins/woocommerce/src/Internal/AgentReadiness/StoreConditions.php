@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
+use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 defined( 'ABSPATH' ) || exit;
@@ -15,7 +16,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * `ok` says whether the store is clear of the problem the label names, or is
  * null when it couldn't be checked (StoreOutputChecks); `name` is the check
- * worded as its passing state.
+ * worded as its passing state. `group` is the merchant question the check
+ * answers on Sales readiness, as for the store output checks.
  * `blocks` says what a failing condition stops: `listing` hides every product
  * on every channel, `ucp` hides the catalog from agents that use UCP,
  * `checkout` stops or weakens agent orders. A failing `required` condition
@@ -26,6 +28,13 @@ defined( 'ABSPATH' ) || exit;
 class StoreConditions {
 
 	public const LEVEL_REQUIRED = 'required';
+
+	/**
+	 * Recommended conditions shown as Required, which don't keep AI shopping from being turned on:
+	 * AI assistants read the catalog through the API whatever search engines are told, and with no
+	 * payment method no sale goes through. The rules file's `store_checks` can change any of them (RemoteRules).
+	 */
+	public const SHOWN_REQUIRED = array( 'search_visible', 'payment_method' );
 
 	public const LEVEL_RECOMMENDED = 'recommended';
 
@@ -50,7 +59,7 @@ class StoreConditions {
 	/**
 	 * Every condition with its current state.
 	 *
-	 * @return array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>
+	 * @return array<int, array{id:string,ok:bool,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>
 	 */
 	public function all(): array {
 		$settings_url = static fn( string $tab ): string => admin_url( 'admin.php?page=wc-settings&tab=' . $tab );
@@ -58,19 +67,22 @@ class StoreConditions {
 			'id'      => $id,
 			'ok'      => self::is_policy_page( (int) get_option( $option ) ),
 			'blocks'  => 'checkout',
+			'group'   => 'buy',
 			'level'   => self::LEVEL_RECOMMENDED,
 			'name'    => $name,
 			'label'   => $label,
 			'why'     => $why,
+			// The AI shopping section lands with #70590; until then the tab has one page.
 			'fix'     => __( 'Choose a published page under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
-			'fix_url' => $settings_url( AgenticCommerceSettings::TAB ) . '#' . $option,
+			'fix_url' => AgenticCommerceSettings::url() . '#' . $option,
 		);
 
-		return array(
+		$conditions = array(
 			array(
 				'id'      => 'launched',
 				'ok'      => $this->coming_soon_helper->is_site_live(),
 				'blocks'  => 'listing',
+				'group'   => 'access',
 				'level'   => self::LEVEL_REQUIRED,
 				'name'    => __( 'Store is launched', 'woocommerce' ),
 				'label'   => __( 'Store is in coming soon mode', 'woocommerce' ),
@@ -82,6 +94,7 @@ class StoreConditions {
 				'id'      => 'search_visible',
 				'ok'      => '0' !== (string) get_option( 'blog_public', '1' ),
 				'blocks'  => 'listing',
+				'group'   => 'find',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Search engines can index the store', 'woocommerce' ),
 				'label'   => __( 'Store is hidden from search engines', 'woocommerce' ),
@@ -93,17 +106,19 @@ class StoreConditions {
 				'id'      => 'ucp_on',
 				'ok'      => Utils::is_enabled(),
 				'blocks'  => 'ucp',
+				'group'   => 'access',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Universal Commerce Protocol (UCP) is on', 'woocommerce' ),
 				'label'   => __( 'Universal Commerce Protocol (UCP) is off', 'woocommerce' ),
 				'why'     => __( 'Shopping agents that use UCP cannot read your catalog.', 'woocommerce' ),
-				'fix'     => __( 'Turn on "Let AI agents shop your store" under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
-				'fix_url' => $settings_url( AgenticCommerceSettings::TAB ),
+				'fix'     => __( 'Turn on "Allow AI assistants to shop your store" under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
+				'fix_url' => AgenticCommerceSettings::url(),
 			),
 			array(
 				'id'      => 'https',
 				'ok'      => wc_site_is_https(),
 				'blocks'  => 'ucp',
+				'group'   => 'access',
 				'level'   => self::LEVEL_REQUIRED,
 				'name'    => __( 'Site uses HTTPS', 'woocommerce' ),
 				'label'   => __( 'Site does not use HTTPS', 'woocommerce' ),
@@ -111,6 +126,7 @@ class StoreConditions {
 				'fix'     => __( 'Move the site to HTTPS; your host can usually turn it on.', 'woocommerce' ),
 				'fix_url' => wp_get_update_https_url(),
 			),
+			self::ucp_discovery( UcpDiscovery::serve_status() ),
 			$policy_page(
 				'privacy_page',
 				AgenticCommerceSettings::PRIVACY_PAGE_OPTION,
@@ -143,6 +159,7 @@ class StoreConditions {
 				'id'      => 'payment_method',
 				'ok'      => $this->payment_method_enabled(),
 				'blocks'  => 'checkout',
+				'group'   => 'buy',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'A payment method is turned on', 'woocommerce' ),
 				'label'   => __( 'No payment method is turned on', 'woocommerce' ),
@@ -154,10 +171,11 @@ class StoreConditions {
 				'id'      => 'guest_checkout',
 				'ok'      => ! $this->registration_required(),
 				'blocks'  => 'checkout',
+				'group'   => 'buy',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Guest checkout is allowed', 'woocommerce' ),
 				'label'   => __( 'Guest checkout is off', 'woocommerce' ),
-				'why'     => __( 'Shopping agents check out for shoppers without an account on your store, so they cannot place orders.', 'woocommerce' ),
+				'why'     => __( 'With guest checkout off, an AI assistant can check out only when the shopper creates an account at checkout. If account creation at checkout is off too, it can\'t. It can still find your products and build carts.', 'woocommerce' ),
 				'fix'     => __( 'Tick "Enable guest checkout" under WooCommerce > Settings > Accounts & Privacy.', 'woocommerce' ),
 				'fix_url' => $settings_url( 'account' ),
 			),
@@ -165,6 +183,7 @@ class StoreConditions {
 				'id'      => 'order_emails',
 				'ok'      => $this->order_confirmation_email_enabled(),
 				'blocks'  => 'checkout',
+				'group'   => 'buy',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Order confirmation emails are on', 'woocommerce' ),
 				'label'   => __( 'Order confirmation emails are off', 'woocommerce' ),
@@ -172,6 +191,60 @@ class StoreConditions {
 				'fix'     => __( 'Turn on the Processing or Completed order email under WooCommerce > Settings > Emails.', 'woocommerce' ),
 				'fix_url' => $settings_url( 'email&section=wc_email_customer_processing_order' ),
 			),
+		);
+		return array_values( array_filter( $conditions, static fn( array $condition ): bool => ! self::is_off( $condition['id'], $condition['level'] ) ) );
+	}
+
+	/**
+	 * Whether a store check is shown as Required: a required one, or one the rules file marks
+	 * `required`, else one in SHOWN_REQUIRED.
+	 *
+	 * @param array{id:string,level:string} $check Store condition or output check.
+	 */
+	public static function shows_required( array $check ): bool {
+		if ( self::LEVEL_REQUIRED === $check['level'] ) {
+			return true;
+		}
+		return RemoteRules::store_check( $check['id'] )['required'] ?? in_array( $check['id'], self::SHOWN_REQUIRED, true );
+	}
+
+	/**
+	 * Whether the rules file turns a store check off. A required one always runs.
+	 *
+	 * @param string $id    Store condition or output check id.
+	 * @param string $level Its level; output checks are recommended.
+	 */
+	public static function is_off( string $id, string $level = self::LEVEL_RECOMMENDED ): bool {
+		return self::LEVEL_REQUIRED !== $level && true === ( RemoteRules::store_check( $id )['off'] ?? false );
+	}
+
+	/**
+	 * Whether this WooCommerce has the UCP checkout routes.
+	 */
+	public static function serves_ucp_checkout(): bool {
+		return defined( Utils::class . '::CAPABILITY_CHECKOUT' );
+	}
+
+	/**
+	 * The UCP address condition, with the fix for why the address doesn't serve the profile.
+	 *
+	 * @param string $status A status from UcpDiscovery::serve_status().
+	 * @return array{id:string,ok:bool,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}
+	 */
+	private static function ucp_discovery( string $status ): array {
+		return array(
+			'id'      => 'ucp_discovery',
+			'ok'      => 'ok' === $status,
+			'blocks'  => 'ucp',
+			'group'   => 'access',
+			'level'   => self::LEVEL_REQUIRED,
+			'name'    => __( 'Use a readable permalink structure', 'woocommerce' ),
+			// Without a file in the way, Plain permalinks are why the connection URL doesn't load.
+			'label'   => 'no_file' === $status ? __( 'Use a readable permalink structure', 'woocommerce' ) : __( 'Fix your connection URL', 'woocommerce' ),
+			'why'     => 'no_file' === $status ? __( 'Any structure except Plain lets AI assistants reach your store.', 'woocommerce' ) : __( 'AI assistants use your connection URL to find your products, and it doesn\'t load your store\'s details.', 'woocommerce' ),
+			'fix'     => UcpDiscovery::discovery_fix( $status ),
+			// Permalinks are one fix only when nothing is serving the address. A file in the way is removed on disk.
+			'fix_url' => 'no_file' === $status ? admin_url( 'options-permalink.php' ) : '',
 		);
 	}
 

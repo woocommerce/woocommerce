@@ -103,9 +103,6 @@ class WooPaymentsRestControllerTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**
@@ -158,9 +155,6 @@ class WooPaymentsRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'kyc_session_finish', $step['actions'] );
 		$this->assertArrayHasKey( 'kyc_fallback', $step['actions'] );
 		$this->assertArrayHasKey( 'clean', $step['actions'] );
-
-		// Clean up.
-		remove_filter( 'user_has_cap', $filter_callback );
 	}
 
 	/**

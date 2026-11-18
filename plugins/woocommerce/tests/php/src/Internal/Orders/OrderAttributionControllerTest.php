@@ -246,8 +246,6 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 
 		// Should only contain one instance.
 		$this->assertEquals( 1, substr_count( $output, '<wc-order-attribution-inputs>' ) );
-
-		remove_filter( 'wc_order_attribution_allow_multiple_elements', '__return_false' );
 	}
 
 	/**
@@ -303,8 +301,6 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 		$this->attribution_class->stamp_html_element();
 		$output2 = ob_get_clean();
 		$this->assertEmpty( $output2 );
-
-		remove_filter( 'wc_order_attribution_allow_multiple_elements', '__return_false' );
 	}
 
 	/**
@@ -337,8 +333,6 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 		$this->attribution_class->stamp_html_element();
 		$output3 = ob_get_clean();
 		$this->assertEmpty( $output3, 'Second call within same request should be suppressed' );
-
-		remove_filter( 'wc_order_attribution_allow_multiple_elements', '__return_false' );
 	}
 
 	/**

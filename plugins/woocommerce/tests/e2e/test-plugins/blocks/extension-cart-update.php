@@ -11,6 +11,11 @@
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 
+// Only requests from specs that enable this plugin send the cookie.
+if ( ! isset( $_COOKIE['woocommerce-blocks-test-extension-cart-update'] ) ) {
+	return;
+}
+
 add_action(
 	'woocommerce_init',
 	function () {

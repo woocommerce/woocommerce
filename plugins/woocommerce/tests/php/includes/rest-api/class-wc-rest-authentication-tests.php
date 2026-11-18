@@ -385,11 +385,7 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$this->simulate_rest_dispatching( true );
 		$_SERVER['REQUEST_URI'] = $request_uri;
 
-		try {
-			$this->assertSame( $expected, $this->is_request_to_rest_api() );
-		} finally {
-			remove_filter( 'option_home', $home_filter );
-		}
+		$this->assertSame( $expected, $this->is_request_to_rest_api() );
 	}
 
 	/**
@@ -532,20 +528,16 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 
 		add_filter( 'woocommerce_rest_is_request_to_rest_api', '__return_true' );
 
-		try {
-			$this->assertTrue(
-				$this->is_request_to_rest_api(),
-				'A namespace opted in through the filter must be treated as a WooCommerce request.'
-			);
+		$this->assertTrue(
+			$this->is_request_to_rest_api(),
+			'A namespace opted in through the filter must be treated as a WooCommerce request.'
+		);
 
-			$this->simulate_rest_dispatching( false );
-			$this->assertFalse(
-				$this->is_request_to_rest_api(),
-				'The filter must not opt in a request WordPress is not dispatching as REST.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_rest_is_request_to_rest_api', '__return_true' );
-		}
+		$this->simulate_rest_dispatching( false );
+		$this->assertFalse(
+			$this->is_request_to_rest_api(),
+			'The filter must not opt in a request WordPress is not dispatching as REST.'
+		);
 	}
 
 	/**
