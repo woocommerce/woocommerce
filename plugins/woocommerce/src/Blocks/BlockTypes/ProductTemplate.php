@@ -61,8 +61,9 @@ class ProductTemplate extends AbstractBlock {
 
 		$classnames = '';
 		if ( isset( $block->context['displayLayout'] ) && isset( $block->context['query'] ) ) {
-			$type    = $block->context['displayLayout']['type'] ?? '';
-			$columns = $block->context['displayLayout']['columns'] ?? null;
+			$type             = $block->context['displayLayout']['type'] ?? '';
+			$columns          = $block->context['displayLayout']['columns'] ?? null;
+			$carousel_columns = absint( $block->context['displayLayout']['carouselColumns'] ?? 0 );
 
 			$classnames = 'is-product-collection-layout-' . $type . ' ';
 
@@ -72,15 +73,11 @@ class ProductTemplate extends AbstractBlock {
 				} else {
 					$classnames = "is-flex-container columns-{$columns}";
 				}
-			}
-
-			// Classes exist for 1 through 6. Other values keep the responsive carousel.
-			$carousel_columns = absint( $block->context['displayLayout']['carouselColumns'] ?? 0 );
-			if ( 'carousel' === $type && $carousel_columns >= 1 && $carousel_columns <= 6 ) {
-				$classnames .= 'columns-' . $carousel_columns;
-
-				if ( ! empty( $block->context['displayLayout']['shrinkColumns'] ) ) {
-					$classnames .= ' is-shrink-columns';
+			} elseif ( 'carousel' === $type && $carousel_columns >= 1 && $carousel_columns <= 6 ) {
+				if ( isset( $block->context['displayLayout']['shrinkColumns'] ) && $block->context['displayLayout']['shrinkColumns'] ) {
+					$classnames .= "wc-block-product-template__responsive columns-{$carousel_columns}";
+				} else {
+					$classnames .= "columns-{$carousel_columns}";
 				}
 			}
 		}
