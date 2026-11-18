@@ -86,7 +86,6 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 						<Text
 							render={ <p /> }
 							role="status"
-							aria-live="polite"
 							className="woocommerce-fulfillment-importer-step__status"
 						>
 							{ statusLabel }

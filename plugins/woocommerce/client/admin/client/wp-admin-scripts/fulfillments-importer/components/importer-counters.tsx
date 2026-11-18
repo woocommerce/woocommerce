@@ -73,10 +73,7 @@ const ImporterCounters: React.FC< Props > = ( { counts } ) => {
 	];
 
 	return (
-		<dl
-			className="woocommerce-fulfillment-importer-counts"
-			aria-live="polite"
-		>
+		<dl className="woocommerce-fulfillment-importer-counts">
 			{ items.map( ( item ) => (
 				<div
 					key={ item.key }

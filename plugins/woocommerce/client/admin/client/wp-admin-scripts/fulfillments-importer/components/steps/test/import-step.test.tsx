@@ -173,6 +173,17 @@ describe( 'ImportStep', () => {
 		).toBeNull();
 	} );
 
+	it( 'announces progress only through the status line', () => {
+		// Bare counter numbers spoken after each chunk would have no labels.
+		const { container } = renderStep( { processed: 10 } );
+
+		const regions = container.querySelectorAll(
+			'[aria-live], [role="status"], [role="alert"], [role="log"]'
+		);
+		expect( regions ).toHaveLength( 1 );
+		expect( regions[ 0 ] ).toBe( screen.getByRole( 'status' ) );
+	} );
+
 	it( 'shows all five counters, zeros included', () => {
 		renderStep( {
 			counts: {
