@@ -22,6 +22,7 @@ const toggleHelp = __(
 	'Automatically adjust the number of columns to better fit smaller screens.',
 	'woocommerce'
 );
+const DEFAULT_CAROUSEL_COLUMNS = 6;
 
 interface ColumnsControlProps extends DisplayLayoutControlProps {
 	maxColumns?: number;
@@ -66,7 +67,7 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 			props.setAttributes( {
 				displayLayout: sanitizeDisplayLayout( {
 					...props.displayLayout,
-					carouselColumns: 6,
+					carouselColumns: DEFAULT_CAROUSEL_COLUMNS,
 				} ),
 			} );
 			return;
@@ -93,13 +94,8 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 
 	const hasCustomColumnCount = () =>
 		isCarouselLayout
-			? savedCarouselColumns !== undefined
+			? savedCarouselColumns !== DEFAULT_CAROUSEL_COLUMNS
 			: defaultLayout.columns !== columnCount;
-
-	const hasCustomShrinkColumns = () =>
-		isCarouselLayout
-			? !! shrinkColumns
-			: defaultLayout?.shrinkColumns !== shrinkColumns;
 
 	const onShrinkColumnsDeselect = () => {
 		if ( ! isCarouselLayout ) {
@@ -110,7 +106,7 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 		props.setAttributes( {
 			displayLayout: sanitizeDisplayLayout( {
 				...props.displayLayout,
-				shrinkColumns: false,
+				shrinkColumns: true,
 			} ),
 		} );
 	};
@@ -136,7 +132,9 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 			{ ! hideResponsiveToggle && (
 				<ToolsPanelItem
 					label={ toggleLabel }
-					hasValue={ hasCustomShrinkColumns }
+					hasValue={ () =>
+						defaultLayout?.shrinkColumns !== shrinkColumns
+					}
 					isShownByDefault
 					onDeselect={ onShrinkColumnsDeselect }
 				>
