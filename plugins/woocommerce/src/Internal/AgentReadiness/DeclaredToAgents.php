@@ -316,6 +316,7 @@ class DeclaredToAgents {
 	/**
 	 * Whether a path answers with a text file. A theme that answers every URL with a page, or a host
 	 * that answers unknown paths with a 200 JSON or HTML error, has no such file.
+	 * Null when the body was cut off before any content, so a blank prefix is not a missing file.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 * @param string         $path      Path from the host root.
@@ -326,6 +327,9 @@ class DeclaredToAgents {
 			return null;
 		}
 		$body = ltrim( $response['body'], " \t\r\n\xEF\xBB\xBF" );
+		if ( '' === $body && ! empty( $response['truncated'] ) ) {
+			return null;
+		}
 		return 200 === $response['status'] && '' !== $body && '<' !== $body[0]
 			&& 0 !== stripos( $response['headers']['content-type'] ?? '', 'text/html' )
 			&& null === json_decode( $body );

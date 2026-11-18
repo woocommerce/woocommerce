@@ -543,6 +543,21 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 			)['llms-txt-woocommerce-guidance'],
 			'Truncated body with no match is couldn\'t check'
 		);
+		$this->assertNull(
+			$found(
+				array(
+					'/llms.txt' => array(
+						200,
+						"\n\n",
+						array(
+							'content-type'   => 'text/plain',
+							'content-length' => '999999',
+						),
+					),
+				)
+			)['llms-txt-woocommerce-guidance'],
+			'A body cut off in leading blank lines is couldn\'t check'
+		);
 
 		$sut->status = array(
 			'status'  => 'disabled',
