@@ -68,6 +68,14 @@
 	}
 }
 
+:is(.woocommerce-cart, .woocommerce-checkout):not(.woocommerce-uses-block-theme):not(.woocommerce-block-theme-has-button-styles) {
+	.wc-block-cart__submit-button .wc-block-components-button__text,
+	.wc-block-components-checkout-place-order-button__text {
+		justify-content: center;
+		text-align: center;
+	}
+}
+
 body:not(.woocommerce-block-theme-has-button-styles)
 	.wc-block-components-button:not(.is-link):not(:where(.wp-block-woocommerce-cart *, .wp-block-woocommerce-checkout *)) {
 	min-height: 3em;
