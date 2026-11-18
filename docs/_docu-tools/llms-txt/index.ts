@@ -36,15 +36,16 @@ export default function llmsTxtPlugin(
         
         console.log(`Found ${markdownFiles.length} markdown files`);
         
-        // Generate llms.txt (file list with descriptions)
-        await generateFileList(markdownFiles, buildDir);
+        // Publish the hand-curated index alongside the generated full export.
+        await copyCuratedIndex(buildDir);
         
-        // Generate llms-full.txt (combined content)
+        // Keep llms-full.txt until its consumers and request logs have been checked.
         await generateCombinedContent(markdownFiles, buildDir);
         
         console.log(`Generated LLM documentation files in ${buildDir}`);
       } catch (err) {
         console.error('Error generating LLM documentation:', err);
+        throw err;
       }
     },
   };
@@ -117,21 +118,12 @@ function extractTitle(content: string, filename: string): string {
 }
 
 /**
- * Generates llms.txt file with file list and descriptions
+ * Copies the hand-curated llms.txt index into the build output.
  */
-async function generateFileList(files: Array<{ path: string; relativePath: string; content: string; title: string }>, buildDir: string): Promise<void> {
+async function copyCuratedIndex(buildDir: string): Promise<void> {
+  const sourcePath = path.resolve(__dirname, 'llms.txt');
   const outputPath = path.join(buildDir, 'llms.txt');
-  let content = '# WooCommerce Documentation\n\n';
-  content += 'This file contains a list of all documentation files available in the WooCommerce documentation.\n\n';
-  
-  for (const file of files) {
-    const description = extractDescription(file.content);
-    const posixPath = file.relativePath.split(path.sep).join('/'); // ensure forward slashes
-    const url = `https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/${posixPath}`;
-    content += `[${file.title}](${url}) ${description}\n\n`;
-  }
-  
-  await fs.promises.writeFile(outputPath, content, 'utf-8');
+  await fs.promises.copyFile(sourcePath, outputPath);
   console.log(`Generated ${outputPath}`);
 }
 
@@ -155,30 +147,6 @@ async function generateCombinedContent(files: Array<{ path: string; relativePath
   
   await fs.promises.writeFile(outputPath, content, 'utf-8');
   console.log(`Generated ${outputPath}`);
-}
-
-/**
- * Extracts a brief description from markdown content
- */
-function extractDescription(content: string): string {
-  // Remove frontmatter
-  let cleanContent = content.replace(/^---\s*\n[\s\S]*?\n---\s*\n/, '');
-  
-  // Remove headers
-  cleanContent = cleanContent.replace(/^#{1,6}\s+.+$/gm, '');
-  
-  // Get first paragraph (non-empty line)
-  const lines = cleanContent.split('\n').filter(line => line.trim() && !line.startsWith('!['));
-  
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith('#')) {
-      // Limit description length
-      return trimmed.length > 200 ? trimmed.substring(0, 200) + '...' : trimmed;
-    }
-  }
-  
-  return 'No description available';
 }
 
 /**

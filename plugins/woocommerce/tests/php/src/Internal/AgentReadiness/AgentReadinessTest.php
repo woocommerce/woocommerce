@@ -460,4 +460,24 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 1, $calls );
 	}
+
+	/**
+	 * @testdox A stored output check keeps the detail of what the store served.
+	 */
+	public function test_get_store_checks_keeps_the_served_detail(): void {
+		$checks = $this->sut->get_store_checks(
+			array(
+				'store_checks' => array(
+					array(
+						'id'     => 'ucp_endpoints_live',
+						'name'   => 'Catalog search answers',
+						'ok'     => false,
+						'source' => '403 text/html',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( '403 text/html', array_column( $checks, 'source', 'id' )['ucp_endpoints_live'] );
+	}
 }

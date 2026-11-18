@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/extension-tooling",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Shared build and development tools for WooCommerce extensions.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
@@ -17,12 +17,15 @@
 		"./webpack-dist-minify": "./src/webpack-dist-minify.js",
 		"./webpack-text-includes": "./src/webpack-text-includes.js",
 		"./check-i18n": "./src/check-i18n.js",
+		"./playwright-defaults": "./src/playwright-defaults.js",
+		"./e2e-site-config": "./src/e2e-site-config.js",
 		"./stylelint/legacy-scss": "./configs/stylelint-legacy-scss.json"
 	},
 	"bin": {
 		"woo-extension-config": "./bin/woo-config.sh",
 		"woo-extension-env-start": "./bin/env-start.sh",
-		"woo-extension-env-dev-reset": "./bin/env-dev-reset.sh"
+		"woo-extension-env-dev-reset": "./bin/env-dev-reset.sh",
+		"woo-extension-tooling": "./bin/woo-extension-tooling.js"
 	},
 	"files": [
 		"bin",
@@ -34,7 +37,7 @@
 	},
 	"scripts": {
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
-		"lint": "eslint src test",
+		"lint": "eslint src test bin/*.js",
 		"test": "node --test"
 	},
 	"dependencies": {
@@ -49,7 +52,7 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "{src,test}/**/*.js"
+				"changes": "{bin,src,test}/**/*.js"
 			},
 			"tests": [
 				{
@@ -57,8 +60,7 @@
 					"command": "test",
 					"changes": [
 						"package.json",
-						"bin/env-start.sh",
-						"bin/woo-config.*",
+						"bin/*",
 						"{src,test}/**/*.js"
 					],
 					"events": [
