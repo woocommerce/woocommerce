@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from '@testing-library/react';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -464,5 +470,59 @@ describe( 'AiShopping', () => {
 		expect(
 			screen.getByRole( 'link', { name: /Learn how it works/ } )
 		).toHaveAttribute( 'href', 'https://ucp.dev/' );
+	} );
+
+	it( 'copies the connection URL, says Copied, then goes back to Copy', async () => {
+		jest.useFakeTimers();
+		const writeText = jest.fn().mockResolvedValue( undefined );
+		Object.defineProperty( navigator, 'clipboard', {
+			value: { writeText },
+			configurable: true,
+		} );
+		renderPage( view() );
+
+		fireEvent.click( screen.getByRole( 'button', { name: 'Copy' } ) );
+
+		expect( writeText ).toHaveBeenCalledWith(
+			'https://example.com/.well-known/ucp'
+		);
+		expect(
+			await screen.findByRole( 'button', { name: 'Copied' } )
+		).toBeInTheDocument();
+		act( () => {
+			jest.advanceTimersByTime( 2000 );
+		} );
+		expect(
+			screen.getByRole( 'button', { name: 'Copy' } )
+		).toBeInTheDocument();
+		jest.useRealTimers();
+	} );
+
+	it( 'keeps Copy when the browser has no clipboard or refuses to write', async () => {
+		Object.defineProperty( navigator, 'clipboard', {
+			value: undefined,
+			configurable: true,
+		} );
+		renderPage( view() );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Copy' } ) );
+		expect(
+			screen.getByRole( 'button', { name: 'Copy' } )
+		).toBeInTheDocument();
+
+		Object.defineProperty( navigator, 'clipboard', {
+			value: {
+				writeText: jest.fn().mockRejectedValue( new Error( 'denied' ) ),
+			},
+			configurable: true,
+		} );
+		fireEvent.click( screen.getByRole( 'button', { name: 'Copy' } ) );
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', { name: 'Copy' } )
+			).toBeInTheDocument()
+		);
+		expect(
+			screen.queryByRole( 'button', { name: 'Copied' } )
+		).not.toBeInTheDocument();
 	} );
 } );

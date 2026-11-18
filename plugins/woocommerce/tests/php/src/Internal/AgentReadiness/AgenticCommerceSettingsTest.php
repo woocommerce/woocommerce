@@ -254,6 +254,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'not set up yet'      => array( 'every_step', null, '#^Let shoppers find and buy your products through AI assistants\.$#', null, 'Set up AI shopping', '#^Your store is ready for AI shopping\. Turn it on to let AI assistants find your products\.$#' ),
 			'steps left'          => array( 'coming_soon', 'yes', '#^AI assistants can\'t shop your store yet\. \d+ steps? left\.$#', 'Needs attention', 'Continue setup', '#^Finish \d+ required steps? to get your store ready for AI shopping\.$#' ),
 			'optional steps left' => array( 'optional_left', 'yes', '#^AI assistants can shop your store\. 1 step left\.$#', 'Active', 'View settings', '#^Your store is ready for AI shopping\. You have 1 optional step left\.$#' ),
+			'policy page left'    => array( 'policy_left', 'yes', '#^AI assistants can shop your store\. 1 step left\.$#', 'Active', 'Continue setup', '#^Finish 1 required step to get your store ready for AI shopping\.$#' ),
 			'all steps done'      => array( 'every_step', 'yes', '#^AI assistants can shop your store\.$#', 'Active', 'View settings', '#^Your store is ready for AI shopping\.$#' ),
 			'turned off'          => array( 'every_step', 'no', '#^AI shopping is off\.$#', null, 'View settings', '#^Your store is ready for AI shopping\. Turn it on to let AI assistants find your products\.$#' ),
 			'off, steps left'     => array( 'coming_soon', 'no', '#^AI shopping is off\.$#', 'Needs attention', 'Continue setup', '#^Finish \d+ required steps? to get your store ready for AI shopping\.$#' ),
@@ -281,6 +282,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		}
 		if ( 'optional_left' === $store ) {
 			update_option( 'woocommerce_enable_guest_checkout', 'no' );
+		}
+		if ( 'policy_left' === $store ) {
+			delete_option( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION );
 		}
 
 		$page = $this->shopping( 'yes' === $ucp );

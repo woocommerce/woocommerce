@@ -317,8 +317,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		$badge    = $this->shopping_badge( $checks );
 		$blocked  = array() !== $this->store_conditions->failing_required( $checks );
 		$can_shop = $enabled && ! $blocked;
-		// As in the design: Continue setup while a required step is left, otherwise View settings.
-		$button = $blocked ? __( 'Continue setup', 'woocommerce' ) : __( 'View settings', 'woocommerce' );
+		// As in the design: Continue setup while a required step is left, as the Setup checklist counts them, otherwise View settings.
+		$button = array() !== array_filter( self::open_steps( $checks ), array( StoreConditions::class, 'shows_required' ) ) ? __( 'Continue setup', 'woocommerce' ) : __( 'View settings', 'woocommerce' );
 		$set_up = $enabled || false !== get_option( $this->features_controller->feature_enable_option_name( UcpUtils::FEATURE_ID ) );
 		if ( ! $set_up ) {
 			$text   = __( 'Let shoppers find and buy your products through AI assistants.', 'woocommerce' );
