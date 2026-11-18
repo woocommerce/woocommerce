@@ -2,24 +2,19 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
-import { TotalsCoupon } from '@woocommerce/base-components/cart-checkout';
 
 /**
  * Internal dependencies
  */
 import Block from '../block';
-import CartCouponForm from '../../../../cart/inner-blocks/cart-order-summary-coupon-form/block';
 
 // Mock the settings
 jest.mock( '@woocommerce/settings', () => ( {
-	...jest.requireActual( '@woocommerce/settings' ),
 	getSetting: jest.fn( ( setting, defaultValue ) => {
 		if ( setting === 'couponsEnabled' ) {
 			return true;
 		}
-		return jest
-			.requireActual( '@woocommerce/settings' )
-			.getSetting( setting, defaultValue );
+		return defaultValue;
 	} ),
 } ) );
 
@@ -63,40 +58,6 @@ describe( 'Checkout Order Summary Coupon Form Block', () => {
 		expect( screen.getByText( 'Coupon Form' ) ).toBeInTheDocument();
 		expect( screen.getByTestId( 'totals-coupon' ) ).toBeInTheDocument();
 		expect( screen.getByTestId( 'totals-wrapper' ) ).toBeInTheDocument();
-	} );
-
-	it.each( [
-		[ 'Cart', CartCouponForm ],
-		[ 'Checkout', Block ],
-	] )( 'passes %s block styles to the coupon button', ( _, CouponForm ) => {
-		render(
-			<CouponForm
-				textColor="contrast"
-				style={ JSON.stringify( {
-					color: { background: '#123456' },
-					border: { radius: '12px' },
-					typography: { fontSize: '24px', textAlign: 'right' },
-				} ) }
-			/>
-		);
-
-		expect( TotalsCoupon ).toHaveBeenCalledWith(
-			expect.objectContaining( {
-				buttonStyleProps: expect.objectContaining( {
-					className: expect.stringContaining( 'has-contrast-color' ),
-					style: expect.objectContaining( {
-						backgroundColor: '#123456',
-						borderRadius: '12px',
-						fontSize: '24px',
-						textAlign: 'right',
-					} ),
-				} ),
-			} ),
-			expect.anything()
-		);
-		expect( screen.getByTestId( 'totals-wrapper' ) ).not.toHaveAttribute(
-			'style'
-		);
 	} );
 
 	it( 'does not render when coupons are disabled', () => {
@@ -153,6 +114,9 @@ describe( 'Checkout Order Summary Coupon Form Block', () => {
 	} );
 
 	it( 'integrates applyCoupon function from hook with TotalsCoupon', () => {
+		const TotalsCoupon =
+			require( '@woocommerce/base-components/cart-checkout' ).TotalsCoupon;
+
 		render( <Block /> );
 
 		// Verify TotalsCoupon receives applyCoupon function

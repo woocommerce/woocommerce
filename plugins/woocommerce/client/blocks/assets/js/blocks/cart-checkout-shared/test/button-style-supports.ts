@@ -2,14 +2,10 @@
  * Internal dependencies
  */
 import checkoutActions from '../../checkout/inner-blocks/checkout-actions-block/block.json';
-import checkoutCoupon from '../../checkout/inner-blocks/checkout-order-summary-coupon-form/block.json';
-import cartCoupon from '../../cart/inner-blocks/cart-order-summary-coupon-form/block.json';
 import proceedToCheckout from '../../cart/inner-blocks/proceed-to-checkout-block/block.json';
 
 describe.each( [
 	checkoutActions,
-	checkoutCoupon,
-	cartCoupon,
 	proceedToCheckout,
 ] )( '$name button style controls', ( { supports } ) => {
 	it( 'shows the primary style controls by default', () => {

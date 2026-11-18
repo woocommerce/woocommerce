@@ -268,7 +268,7 @@ Shows the apply coupon form.
 - **Name:** woocommerce/cart-order-summary-coupon-form-block
 - **Category:** woocommerce
 - **Parent:** woocommerce/cart-order-summary-block
-- **Supports:** color (background, gradients, text, ~~link~~), spacing (padding), typography (fontSize, lineHeight, textAlign), ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
+- **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
 ## Discount - woocommerce/cart-order-summary-discount-block
@@ -523,7 +523,7 @@ Shows the apply coupon form.
 - **Name:** woocommerce/checkout-order-summary-coupon-form-block
 - **Category:** woocommerce
 - **Parent:** woocommerce/checkout-order-summary-block
-- **Supports:** color (background, gradients, text, ~~link~~), spacing (padding), typography (fontSize, lineHeight, textAlign), ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
+- **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
 ## Discount - woocommerce/checkout-order-summary-discount-block
