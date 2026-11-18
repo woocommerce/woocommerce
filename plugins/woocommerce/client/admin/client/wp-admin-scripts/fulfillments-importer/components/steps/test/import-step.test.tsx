@@ -250,6 +250,19 @@ describe( 'ImportStep', () => {
 		expect( dispatch ).toHaveBeenCalledWith( { type: 'RESET' } );
 	} );
 
+	it( 'speaks only the error text, not the button labels', () => {
+		mockIsRunning = false;
+		renderStep( { error: 'The offset does not match.' } );
+
+		// Notice speaks through the shared assertive region of @wordpress/a11y,
+		// which adds a non-breaking space when a message repeats.
+		expect(
+			document
+				.getElementById( 'a11y-speak-assertive' )
+				?.textContent?.trim()
+		).toBe( 'The offset does not match.' );
+	} );
+
 	it( 'offers only Start over once the session has ended', () => {
 		mockIsRunning = false;
 		const { dispatch } = renderStep( {

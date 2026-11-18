@@ -94,7 +94,11 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 						<ImporterCounters counts={ state.counts } />
 
 						{ state.error ? (
-							<Notice status="error" isDismissible={ false }>
+							<Notice
+								status="error"
+								isDismissible={ false }
+								spokenMessage={ state.error }
+							>
 								<p>{ state.error }</p>
 								<Stack direction="row" gap="sm">
 									{ state.sessionEnded ? null : (
