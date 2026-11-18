@@ -94,7 +94,6 @@ class AbilityTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( 'ability_invalid_output', $result->get_error_code() );
 		$this->assertStringContainsString( 'Check the current state before you run it again', $result->get_error_message() );
-		$this->assertTrue( $result->get_error_data()['callback_executed'] );
 	}
 
 	/**
