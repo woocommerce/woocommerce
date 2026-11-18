@@ -857,6 +857,7 @@ export const bisNotice = {
 	doubleOptIn:
 		/Thanks for signing up! Please complete the sign-up process by following the verification link sent to your e-mail\./,
 	alreadyJoined: /You have already joined this waitlist\./,
+	alreadyJoinedOnLoad: /You have already joined the waitlist!/,
 	accountRequired: /Please log in to sign up for stock notifications\./,
 	/**
 	 * Printed on the shop page after a verify link is followed.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Back in Stock Notifications: show logged-in shoppers who already joined the waitlist the "already joined" notice on the product page instead of the sign-up form.

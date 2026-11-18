@@ -36,10 +36,9 @@ Covers the scenarios from the original plugin test plan that have a target in co
   that walks up to the parent — is only reached on the signup POST, which the
   form's absence makes unreachable from the UI.
 - The plugin's "already signed up for this variation" scenario has no core
-  target: that message is only rendered when the
-  `woocommerce_customer_stock_notifications_personalization_enabled` filter is
-  enabled (it defaults to `false`) and it resolves against the parent product on
-  a variable PDP, not the selected variation.
+  target: the on-load "already joined" message only resolves against the
+  product whose form is visible on load, never the variation selected on a
+  variable PDP.
 
 ## Configuration-branch notes
 
