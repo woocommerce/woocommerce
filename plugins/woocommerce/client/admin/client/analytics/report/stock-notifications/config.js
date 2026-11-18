@@ -32,13 +32,13 @@ export const charts = applyFilters( STOCK_NOTIFICATIONS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'notifications_sent',
 		label: __( 'Notifications sent', 'woocommerce' ),
+		order: 'desc',
+		orderby: 'notifications_sent',
 		type: 'number',
 	},
 	{
 		key: 'customers',
 		label: __( 'Customers', 'woocommerce' ),
-		order: 'desc',
-		orderby: 'customers',
 		type: 'number',
 	},
 ] );

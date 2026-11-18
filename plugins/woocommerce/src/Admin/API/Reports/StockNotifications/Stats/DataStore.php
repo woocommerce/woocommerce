@@ -17,7 +17,8 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 /**
  * Stock notifications stats report: totals plus per-interval subtotals.
  *
- * - signups and customers: same definitions as the per-product report, bucketed on date_created_gmt.
+ * - signups: same definition as the per-product report, bucketed on date_created_gmt.
+ * - customers: distinct emails behind `signups`.
  * - notifications_sent: rows whose date_notified_gmt falls in the period, any status. The date is
  *   overwritten on re-send, so a re-send moves the count to the new date rather than adding to it.
  */

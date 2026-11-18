@@ -37,11 +37,13 @@ trait ReportTestTrait {
 	/**
 	 * Insert a notification row directly, with exact GMT dates.
 	 *
-	 * @param int         $product_id    Product ID.
-	 * @param string      $status        Notification status.
-	 * @param string      $date_created  GMT creation date.
-	 * @param string      $email         Customer email.
-	 * @param string|null $date_notified GMT notified date.
+	 * @param int         $product_id          Product ID.
+	 * @param string      $status              Notification status.
+	 * @param string      $date_created        GMT creation date.
+	 * @param string      $email               Customer email.
+	 * @param string|null $date_notified       GMT notified date.
+	 * @param string|null $date_cancelled      GMT cancelled date.
+	 * @param string|null $cancellation_source Cancellation source.
 	 */
 	private function insert_row( int $product_id, string $status, string $date_created, string $email = 'customer@example.com', ?string $date_notified = null, ?string $date_cancelled = null, ?string $cancellation_source = null ): void {
 		global $wpdb;

@@ -150,7 +150,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$rows = $this->get_rows( self::PERIOD );
 
-		$this->assertSame( array( 2, 1 ), array_keys( $rows ), 'A product with no activity in the period is not listed.' );
+		$this->assertEqualsCanonicalizing( array( 1, 2 ), array_keys( $rows ), 'A product with no activity in the period is not listed.' );
 		$this->assertSame( 0, $rows[1]['signups'], 'Rows created before the period are not sign-ups.' );
 		$this->assertSame( 1, $rows[1]['notifications_sent'], 'A send in the period counts, whenever the sign-up was made.' );
 		$this->assertSame( 1, $rows[1]['unsubscribed'], 'Only cancellations by the customer count as unsubscribes.' );
