@@ -433,14 +433,15 @@ const ProductTemplateEdit = (
 			__unstableLayoutClassNames,
 			'wc-block-product-template',
 			customClassName,
-			{ [ `is-product-collection-layout-${ layoutType }` ]: layoutType },
-			layoutType === 'carousel' &&
-				carouselColumns &&
-				`columns-${ carouselColumns }`,
-			layoutType === 'carousel' &&
-				carouselColumns &&
-				shrinkColumns &&
-				'wc-block-product-template__carousel-responsive'
+			{
+				[ `is-product-collection-layout-${ layoutType }` ]: layoutType,
+				[ `columns-${ carouselColumns }` ]:
+					layoutType === 'carousel' && carouselColumns,
+				'wc-block-product-template__carousel-responsive':
+					layoutType === 'carousel' &&
+					carouselColumns &&
+					shrinkColumns,
+			}
 		),
 	} );
 

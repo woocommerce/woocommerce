@@ -39,7 +39,6 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 	const defaultLayout = getDefaultDisplayLayout();
 	const defaultMaxColumns = 6;
 	const effectiveMaxColumns = maxColumns ?? defaultMaxColumns;
-	// Older carousels have no carouselColumns. The slider still needs a number.
 	const columnCount = isCarouselLayout
 		? ( carouselColumns ??
 			Math.min( DEFAULT_CAROUSEL_COLUMNS, effectiveMaxColumns ) )
@@ -54,20 +53,14 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 		} );
 	};
 
-	const onPanelDeselect = () => {
-		if ( isCarouselLayout ) {
-			props.setAttributes( {
-				displayLayout: sanitizeDisplayLayout( {
-					...props.displayLayout,
-					carouselColumns: DEFAULT_CAROUSEL_COLUMNS,
-					shrinkColumns: true,
-				} ),
-			} );
-			return;
-		}
-
+	const onColumnsDeselect = () => {
 		props.setAttributes( {
-			displayLayout: sanitizeDisplayLayout( defaultLayout ),
+			displayLayout: sanitizeDisplayLayout( {
+				...props.displayLayout,
+				columns: isCarouselLayout
+					? DEFAULT_CAROUSEL_COLUMNS
+					: defaultLayout.columns,
+			} ),
 		} );
 	};
 
@@ -75,27 +68,21 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 		if ( value === undefined ) {
 			return;
 		}
+		const columnsKey = isCarouselLayout ? 'carouselColumns' : 'columns';
 		props.setAttributes( {
 			displayLayout: sanitizeDisplayLayout( {
 				...props.displayLayout,
-				...( isCarouselLayout
-					? { carouselColumns: value }
-					: { columns: value } ),
+				[ columnsKey ]: value,
 			} ),
 		} );
 	};
 
 	const hasCustomColumnCount = () =>
 		isCarouselLayout
-			? DEFAULT_CAROUSEL_COLUMNS !== carouselColumns
+			? DEFAULT_CAROUSEL_COLUMNS !== columnCount
 			: defaultLayout.columns !== columnCount;
 
 	const onShrinkColumnsDeselect = () => {
-		if ( ! isCarouselLayout ) {
-			onPanelDeselect();
-			return;
-		}
-
 		props.setAttributes( {
 			displayLayout: sanitizeDisplayLayout( {
 				...props.displayLayout,
@@ -110,7 +97,7 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 				label={ columnsLabel }
 				hasValue={ hasCustomColumnCount }
 				isShownByDefault
-				onDeselect={ onPanelDeselect }
+				onDeselect={ onColumnsDeselect }
 			>
 				<RangeControl
 					__next40pxDefaultSize
