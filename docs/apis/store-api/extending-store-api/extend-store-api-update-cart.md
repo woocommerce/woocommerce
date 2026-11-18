@@ -19,7 +19,7 @@ WooCommerce Blocks also provides a front-end function called `extensionCartUpdat
 In your extension's server-side integration code:
 
 ```php
-add_action('woocommerce_blocks_loaded', function() {
+add_action('woocommerce_init', function() {
   woocommerce_store_api_register_update_callback(
     [
       'namespace' => 'extension-unique-namespace',
@@ -74,7 +74,7 @@ function remove_discount() {
   /* Do some processing here */
 }
 
-add_action('woocommerce_blocks_loaded', function() {
+add_action('woocommerce_init', function() {
   woocommerce_store_api_register_update_callback(
     [
       'namespace' => 'extension-unique-namespace',
@@ -161,7 +161,7 @@ function redeem_points( $points ) {
   /* Do some processing here that applies a discount to the WC cart based on the value of $points */
 }
 
-add_action('woocommerce_blocks_loaded', function() {
+add_action('woocommerce_init', function() {
   woocommerce_store_api_register_update_callback(
     [
       'namespace' => 'super-coupons',
