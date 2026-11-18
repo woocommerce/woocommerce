@@ -554,14 +554,19 @@ class AgentReadiness {
 		update_option( self::SCAN_OPTION, $state, false );
 
 		if ( $state['position'] < count( $state['ids'] ) ) {
-			$state = $this->scan_batch(
+			// Collect first, then store only if this chain is still current: a replaced scan must not write failure rows.
+			$written = array();
+			$state   = $this->scan_batch(
 				$state,
-				static function ( int $product_id, array $failures ): void {
-					ProductFailures::store( $product_id, $failures );
+				static function ( int $product_id, array $failures ) use ( &$written ): void {
+					$written[ $product_id ] = $failures;
 				}
 			);
 			if ( ! $this->is_current( $chain ) ) {
 				return false;
+			}
+			foreach ( $written as $product_id => $failures ) {
+				ProductFailures::store( (int) $product_id, $failures );
 			}
 			$state['attempts'] = 0;
 			update_option( self::SCAN_OPTION, $state, false );

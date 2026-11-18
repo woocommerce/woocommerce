@@ -484,6 +484,26 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A batch replaced mid-run does not store the failure rows it collected.
+	 */
+	public function test_replaced_batch_does_not_store_failures(): void {
+		$ids = $this->create_products( ProductScan::BATCH_SIZE + 1 );
+		$this->sut->run();
+		$first   = get_option( AgentReadiness::SCAN_OPTION )['id'];
+		$covered = (int) end( $ids );
+
+		$replace = function (): void {
+			$this->sut->run();
+		};
+		add_action( 'woocommerce_agent_readiness_scan_batch', $replace );
+		$this->sut->run_batch( $first );
+		remove_action( 'woocommerce_agent_readiness_scan_batch', $replace );
+
+		$this->assertNotSame( $first, get_option( AgentReadiness::SCAN_OPTION )['id'] );
+		$this->assertSame( array(), ProductFailures::stored( $covered ), 'The replaced batch stored nothing' );
+	}
+
+	/**
 	 * @testdox Turning the feature off during a scan stops it at the next batch, storing nothing.
 	 */
 	public function test_feature_off_stops_the_scan(): void {
