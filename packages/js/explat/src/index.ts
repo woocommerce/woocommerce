@@ -50,6 +50,7 @@ export const { useExperiment, Experiment, ProvideExperimentData } =
 	createExPlatClientReactHelpers( exPlatClient );
 
 // A client that returns the default variation by name, so it can be told apart from not being in the experiment.
+// Assignments are cached per experiment name across clients, so read an experiment through one hook only.
 export const { useExperiment: useExperimentWithDefaultVariationName } =
 	createExPlatClientReactHelpers(
 		createExPlatClient( {

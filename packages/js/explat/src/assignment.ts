@@ -128,17 +128,11 @@ export const fetchExperimentAssignmentWithDefaultVariationName = async ( {
 	} | null;
 	const variationName = response?.assignments?.[ experimentName ]?.variation;
 
-	if ( ! response?.variations || typeof variationName !== 'string' ) {
-		return response;
+	if ( response?.variations && typeof variationName === 'string' ) {
+		response.variations[ experimentName ] = variationName;
 	}
 
-	return {
-		...response,
-		variations: {
-			...response.variations,
-			[ experimentName ]: variationName,
-		},
-	};
+	return response;
 };
 
 export const fetchExperimentAssignmentWithAuth = async ( {
