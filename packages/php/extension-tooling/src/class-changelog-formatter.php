@@ -152,10 +152,14 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 				throw new InvalidArgumentException( "Line looks like a version heading but is not one: $line" );
 			}
 
-			if ( ! $is_bullet && null !== $change && 0 === strpos( $raw_line, self::CONTINUATION ) ) {
-				$change->setContent( $change->getContent() . $first_line_tail . "\n" . substr( $raw_line, strlen( self::CONTINUATION ) ) );
-				$first_line_tail = '';
-				continue;
+			if ( null !== $change && 0 === strpos( $raw_line, self::CONTINUATION ) ) {
+				$continuation = substr( $raw_line, strlen( self::CONTINUATION ) );
+				// A bullet at the continuation margin starts a legacy change. A deeper bullet belongs to the body.
+				if ( ! $is_bullet || 0 !== strpos( $continuation, self::BULLET ) ) {
+					$change->setContent( $change->getContent() . $first_line_tail . "\n" . $continuation );
+					$first_line_tail = '';
+					continue;
+				}
 			}
 
 			if ( '' === $line ) {
@@ -327,7 +331,7 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 		if ( false !== strpos( $content, "\n" ) ) {
 			foreach ( array_slice( explode( "\n", $content ), 1 ) as $continuation ) {
 				$line = trim( $continuation );
-				if ( 0 === strpos( $line, self::BULLET ) || self::looks_like_heading( $line ) ) {
+				if ( 0 === strpos( rtrim( $continuation ), self::BULLET ) || self::looks_like_heading( $line ) ) {
 					throw new InvalidArgumentException( "Change continuation looks like a separate changelog entry: $line" );
 				}
 			}

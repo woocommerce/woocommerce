@@ -399,6 +399,38 @@ class ChangelogFormatterTest extends TestCase {
 	}
 
 	/**
+	 * A deeper bullet stays in the change body while a legacy bullet starts a new change.
+	 */
+	public function test_nested_body_and_legacy_bullets_keep_their_boundaries() {
+		$changelog = "*** Title ***\n\n= 1.5.1 - 2026-09-17 =\n"
+			. "* Fix - Example:\n      * literal pattern\n  * Tweak - Separate change.\n";
+		$changes   = $this->formatter->parse( $changelog )->getLatestEntry()->getChanges();
+
+		$this->assertCount( 2, $changes );
+		$this->assertSame( "Example:\n    * literal pattern", $changes[0]->getContent() );
+		$this->assertSame( 'Tweak', $changes[1]->getSubheading() );
+		$this->assertSame( str_replace( '  * Tweak', '* Tweak', $changelog ), $this->round_trip( $changelog ) );
+	}
+
+	/**
+	 * A new change with a nested list can be written and reread as one entry.
+	 */
+	public function test_write_keeps_nested_list_items_in_the_same_change() {
+		$original  = "*** Title ***\n\n= 1.5.1 - 2026-09-17 =\n* Fix - Supported modes:\n";
+		$changelog = $this->formatter->parse( $original );
+		$changes   = $changelog->getLatestEntry()->getChanges();
+		$content   = "Supported modes:\n* \n  * Automatic\n    * With limits";
+		$changes[0]->setContent( $content );
+
+		$written = $this->formatter->format( $changelog );
+		$this->assertSame( $original . "  * \n    * Automatic\n      * With limits\n", $written );
+
+		$changes = $this->formatter->parse( $written )->getLatestEntry()->getChanges();
+		$this->assertCount( 1, $changes );
+		$this->assertSame( $content, $changes[0]->getContent() );
+	}
+
+	/**
 	 * Change bodies from any platform serialize with the same continuation lines.
 	 */
 	public function test_write_normalizes_change_line_endings_before_indenting() {
