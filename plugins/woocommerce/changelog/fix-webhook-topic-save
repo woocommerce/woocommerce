@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent invalid webhook topics from creating webhooks or changing saved webhook settings.
