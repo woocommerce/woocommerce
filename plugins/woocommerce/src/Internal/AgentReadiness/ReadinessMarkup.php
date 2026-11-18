@@ -74,6 +74,21 @@ trait ReadinessMarkup {
 		if ( 'ucp_discovery' === $check['id'] ) {
 			return array( $check['label'] ?? '', $check['why'], $check['fix_url'], '' !== $check['fix_url'] ? __( 'Change permalinks', 'woocommerce' ) : '', (string) ( $check['fix'] ?? '' ) );
 		}
+		// The privacy field is a WordPress setting. A user who can open this page but not manage
+		// privacy options would otherwise get a Review link to a field this page does not render.
+		if ( 'privacy_page' === $check['id'] && ! current_user_can( 'manage_privacy_options' ) ) {
+			$page_id = (int) get_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION );
+			$draft   = $page_id > 0 && get_post( $page_id ) && 'publish' !== get_post_status( $page_id ) && current_user_can( 'edit_post', $page_id );
+			if ( ! $draft ) {
+				return array(
+					__( 'Choose a privacy policy page', 'woocommerce' ),
+					__( 'Someone who can manage privacy options needs to select a published privacy policy page under Settings > Privacy.', 'woocommerce' ),
+					'',
+					'',
+					'',
+				);
+			}
+		}
 		$policies = array(
 			'privacy_page'         => array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Publish your privacy policy page', 'woocommerce' ), __( 'Choose a privacy policy page', 'woocommerce' ), __( 'Shoppers can read how you handle their information before they buy.', 'woocommerce' ), __( 'Edit privacy policy', 'woocommerce' ) ),
 			'terms_page'           => array( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Publish your terms and conditions page', 'woocommerce' ), __( 'Choose a terms and conditions page', 'woocommerce' ), __( 'Terms and conditions set out what shoppers agree to when they place an order.', 'woocommerce' ), __( 'Edit terms and conditions', 'woocommerce' ) ),
@@ -118,8 +133,9 @@ trait ReadinessMarkup {
 			array(
 				'path' => '/wc/v3/agent-readiness/ucp',
 				'i18n' => array(
-					'error'  => __( 'The setting didn’t save. Reload the page and try again.', 'woocommerce' ),
-					'copied' => __( 'Copied', 'woocommerce' ),
+					'error'   => __( 'The setting didn’t save. Reload the page and try again.', 'woocommerce' ),
+					'unsaved' => __( 'Save your changes to see the updated status.', 'woocommerce' ),
+					'copied'  => __( 'Copied', 'woocommerce' ),
 				),
 			)
 		);

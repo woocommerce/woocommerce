@@ -391,6 +391,33 @@ class ProductButton extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Legacy grid attribute filters receive the calculated quantity as a string.
+	 * @testWith [1]
+	 *           [10]
+	 * @param int $quantity Minimum purchase quantity.
+	 */
+	public function test_legacy_grid_filter_quantity_is_string( int $quantity ): void {
+		$product           = WC_Helper_Product::create_simple_product();
+		$minimum           = static fn() => $quantity;
+		$filtered_quantity = null;
+		$filter            = static function ( $attributes ) use ( &$filtered_quantity ) {
+			$filtered_quantity = $attributes['data-quantity'];
+			return $attributes;
+		};
+		add_filter( 'woocommerce_quantity_input_min', $minimum );
+		add_filter( 'woocommerce_blocks_product_grid_add_to_cart_attributes', $filter );
+		try {
+			$markup = do_blocks( '<!-- wp:woocommerce/handpicked-products {"products":[' . $product->get_id() . ']} /-->' );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum );
+			remove_filter( 'woocommerce_blocks_product_grid_add_to_cart_attributes', $filter );
+		}
+
+		$this->assertSame( (string) $quantity, $filtered_quantity, 'The public grid attribute filter must receive a string quantity.' );
+		$this->assertStringContainsString( 'data-quantity="' . $quantity . '"', $markup );
+	}
+
+	/**
 	 * @testdox Legacy grids use their final quantity in both AJAX data and the button label and link.
 	 * @testWith [10]
 	 *           [30]

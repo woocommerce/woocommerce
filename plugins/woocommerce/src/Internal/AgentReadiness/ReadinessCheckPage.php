@@ -550,23 +550,30 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * A product card on a store with no products: a No products badge and a way to add one, instead
-	 * of checks that have nothing to look at.
+	 * A product card when the scan checked nothing: an empty store, or products it cannot read yet.
 	 *
-	 * @param string $id    Section id.
-	 * @param string $title Section title.
+	 * @param string $id         Section id.
+	 * @param string $title      Section title.
+	 * @param bool   $unreadable True when the store has products, but only hidden or unsupported ones.
 	 * @return array<string, mixed>
 	 */
-	private static function no_products_section( string $id, string $title ): array {
+	private static function no_products_section( string $id, string $title, bool $unreadable = false ): array {
 		return array(
 			'id'       => $id,
 			'title'    => $title,
-			'badge'    => self::badge_data( array( 'off', __( 'No products', 'woocommerce' ) ) ),
+			'badge'    => self::badge_data( array( 'off', $unreadable ? __( 'Not checked', 'woocommerce' ) : __( 'No products', 'woocommerce' ) ) ),
 			'note'     => null,
 			'channels' => array(),
 			'rows'     => array(),
 			'folded'   => array(),
-			'empty'    => array(
+			'empty'    => $unreadable ? array(
+				'title' => __( 'None of your products can be checked yet', 'woocommerce' ),
+				'text'  => __( 'They are hidden from the catalog, or a type AI assistants can’t list yet.', 'woocommerce' ),
+				'link'  => array(
+					'href' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ) . '#wc-agentic-commerce-visibility',
+					'text' => __( 'View product visibility', 'woocommerce' ),
+				),
+			) : array(
 				'title' => __( 'You don’t have any products yet', 'woocommerce' ),
 				'text'  => __( 'Product checks start once you add products.', 'woocommerce' ),
 				'link'  => array(
@@ -1040,14 +1047,16 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @return array<int, array<string, mixed>>
 	 */
 	private function sections( array $checks, bool $launched, array $report ): array {
-		$sections    = array();
+		$sections = array();
+		// products counts only what the scan can check. Hidden and unsupported products are counted apart, so they are not an empty store.
 		$no_products = isset( $report['products'] ) && 0 === (int) $report['products'];
+		$unreadable  = $no_products && ( (int) ( $report['hidden_from_catalog'] ?? 0 ) > 0 || (int) ( $report['unsupported_types'] ?? 0 ) > 0 );
 		foreach ( self::question_groups( $checks ) as $id => $group ) {
 			if ( 'buy' === $id ) {
-				$sections[] = $no_products ? self::no_products_section( 'products', self::products_question() ) : $this->product_section( $report );
+				$sections[] = $no_products ? self::no_products_section( 'products', self::products_question(), $unreadable ) : $this->product_section( $report );
 			}
 			if ( $no_products && 'understand' === $id ) {
-				$sections[] = self::no_products_section( $id, $group[0] );
+				$sections[] = self::no_products_section( $id, $group[0], $unreadable );
 				continue;
 			}
 			// When no scanned check could run, one row says why in their place; setup steps still show.

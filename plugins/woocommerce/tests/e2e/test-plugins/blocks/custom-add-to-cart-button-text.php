@@ -8,6 +8,11 @@
  * @package woocommerce-blocks-test-custom-add-to-cart-button-text
  */
 
+// Only requests from specs that enable this plugin send the cookie.
+if ( ! isset( $_COOKIE['woocommerce-blocks-test-custom-add-to-cart-button-text'] ) ) {
+	return;
+}
+
 function woocommerce_add_to_cart_button_text_archives() {
 	return 'Buy Now';
 }
