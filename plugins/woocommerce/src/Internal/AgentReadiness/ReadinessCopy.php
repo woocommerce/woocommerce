@@ -17,6 +17,11 @@ defined( 'ABSPATH' ) || exit;
 final class ReadinessCopy {
 
 	/**
+	 * UCP Playground, where a merchant can test the store's connection as AI assistants see it.
+	 */
+	public const UCP_PLAYGROUND_URL = 'https://ucpplayground.com/';
+
+	/**
 	 * Up to how many failing products a fix title names; more are given as a count.
 	 */
 	public const NAMED_MAX = 3;
@@ -40,12 +45,19 @@ final class ReadinessCopy {
 			$check[3] = sprintf( __( 'Your store uses an older version of the Universal Commerce Protocol (UCP %s).', 'woocommerce' ), $source );
 		}
 		return array(
-			'title'  => $check[0],
-			'action' => $check[1],
-			'why'    => $check[2],
-			'found'  => $check[3],
-			'fix'    => $check[4] ?? '',
-			'url'    => $check[5] ?? '',
+			'title'      => $check[0],
+			'action'     => $check[1],
+			'why'        => $check[2],
+			'found'      => $check[3],
+			'fix'        => $check[4] ?? '',
+			'url'        => $check[5] ?? '',
+			// A tool the found line names, linked where the name appears.
+			'found_link' => 'ucp_profile' === $id
+				? array(
+					'href' => self::UCP_PLAYGROUND_URL,
+					'text' => __( 'UCP Playground', 'woocommerce' ),
+				)
+				: null,
 		);
 	}
 

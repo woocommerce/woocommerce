@@ -33,6 +33,8 @@ export interface CheckRow {
 	fix: string;
 	link: ViewLink | null;
 	seen_at: ViewLink | null;
+	/** A name in the text to link, such as a tool to test with. */
+	text_link?: ViewLink | null;
 }
 
 export interface FixFirstItem {

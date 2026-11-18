@@ -91,6 +91,16 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '(UCP 2025-01-01)', ReadinessCopy::store_check( 'ucp_profile_version', '2025-01-01' )['found'] );
 		$this->assertStringContainsString( '(UCP).', ReadinessCopy::store_check( 'ucp_profile_version' )['found'] );
 		$this->assertSame( ReadinessCopy::store_check( 'ucp_profile' )['found'], ReadinessCopy::store_check( 'ucp_profile', '2025-01-01' )['found'], 'Other checks ignore the source' );
+		$this->assertSame(
+			array(
+				'href' => 'https://ucpplayground.com/',
+				'text' => 'UCP Playground',
+			),
+			ReadinessCopy::store_check( 'ucp_profile' )['found_link'],
+			'The connection check links UCP Playground where its found line names it'
+		);
+		$this->assertStringContainsString( 'UCP Playground', ReadinessCopy::store_check( 'ucp_profile' )['found'] );
+		$this->assertNull( ReadinessCopy::store_check( 'ucp_checkout' )['found_link'], 'Other checks link nothing in the text' );
 	}
 
 	/**

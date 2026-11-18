@@ -371,7 +371,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * ReadinessCopy, or from the report for a check that has none there.
 	 *
 	 * @param array{id:string,name:string,label?:string,why:string,fix?:string,fix_url:string,conflict?:bool} $check Store check.
-	 * @return array{title:string,text:string,fix:string,url:string,link?:string}
+	 * @return array{title:string,text:string,fix:string,url:string,link?:string,tool?:array{href:string,text:string}|null}
 	 */
 	private static function failing_copy( array $check ): array {
 		if ( self::is_setup_step( $check ) ) {
@@ -391,6 +391,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'text'  => $copy['found'],
 				'fix'   => $copy['fix'],
 				'url'   => '' !== $copy['url'] ? $copy['url'] : $check['fix_url'],
+				'tool'  => $copy['found_link'],
 			);
 		}
 		return array(
@@ -612,18 +613,20 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @param array{href:string,text:string}|null $link    Where to fix it, or the products it affects.
 	 * @param array{0:string,1:string}|null       $badge   Badge class and text: Required.
 	 * @param array{href:string,text:string}|null $seen_at The page a conflict was seen on.
+	 * @param array{href:string,text:string}|null $text_link A name in the text to link, such as a tool to test with.
 	 * @return array<string, mixed>
 	 */
-	private static function row( string $id, string $state, string $title, string $text, string $fix = '', ?array $link = null, ?array $badge = null, ?array $seen_at = null ): array {
+	private static function row( string $id, string $state, string $title, string $text, string $fix = '', ?array $link = null, ?array $badge = null, ?array $seen_at = null, ?array $text_link = null ): array {
 		return array(
-			'id'      => $id,
-			'state'   => $state,
-			'title'   => $title,
-			'badge'   => null === $badge ? null : self::badge_data( $badge ),
-			'text'    => trim( $text ),
-			'fix'     => trim( $fix ),
-			'link'    => $link,
-			'seen_at' => $seen_at,
+			'id'        => $id,
+			'state'     => $state,
+			'title'     => $title,
+			'badge'     => null === $badge ? null : self::badge_data( $badge ),
+			'text'      => trim( $text ),
+			'fix'       => trim( $fix ),
+			'link'      => $link,
+			'seen_at'   => $seen_at,
+			'text_link' => $text_link,
 		);
 	}
 
@@ -970,7 +973,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 					'text' => (string) $check['seen_at'],
 				)
 				: null;
-			$rows[]   = self::row( $check['id'], $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'], $failing['link'] ?? '' ), $required ? self::required_badge() : null, $seen_at );
+			$rows[]   = self::row( $check['id'], $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'], $failing['link'] ?? '' ), $required ? self::required_badge() : null, $seen_at, $failing['tool'] ?? null );
 		}
 		return $rows;
 	}
