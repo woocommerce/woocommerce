@@ -40,12 +40,12 @@
 	display: inline-flex;
 	height: auto;
 	justify-content: center;
-	text-align: center;
 	position: relative;
 	transition: box-shadow 0.1s linear;
 
 	&:not(:where(.wp-block-woocommerce-cart *, .wp-block-woocommerce-checkout *)) {
 		@include button-appearance;
+		text-align: center;
 	}
 
 	.wc-block-components-button__text {
@@ -68,11 +68,9 @@
 	}
 }
 
-:is(.woocommerce-cart, .woocommerce-checkout):not(.woocommerce-uses-block-theme):not(.woocommerce-block-theme-has-button-styles) {
-	.wc-block-cart__submit-button .wc-block-components-button__text,
-	.wc-block-components-checkout-place-order-button__text {
-		justify-content: center;
-		text-align: center;
+:where(.wp-block-woocommerce-cart, .wp-block-woocommerce-checkout) {
+	.wc-block-components-button:not(.is-link) .wc-block-components-button__text {
+		width: 100%;
 	}
 }
 
