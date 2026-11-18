@@ -137,6 +137,31 @@ export const Row = ( {
 );
 
 /**
+ * The text, with the link's name in it turned into the link.
+ */
+const TextWithLink = ( {
+	text,
+	link,
+}: {
+	text: string;
+	link?: ViewLink | null;
+} ) => {
+	const at = link?.text ? text.indexOf( link.text ) : -1;
+	if ( ! link || at < 0 ) {
+		return <>{ text }</>;
+	}
+	return (
+		<>
+			{ text.slice( 0, at ) }
+			<Link href={ link.href } openInNewTab>
+				{ link.text }
+			</Link>
+			{ text.slice( at + link.text.length ) }
+		</>
+	);
+};
+
+/**
  * One check. Failing: what to do, why it matters and what was found, the fix line when there is
  * one, and where to fix it. Passed: its title and why it matters.
  */
@@ -158,7 +183,7 @@ export const CheckRow = ( { row }: { row: CheckRowData } ) => {
 		>
 			{ row.text && (
 				<Text variant="body-sm" className="wc-sales-readiness__muted">
-					{ row.text }
+					<TextWithLink text={ row.text } link={ row.text_link } />
 				</Text>
 			) }
 			{ row.fix && (

@@ -50,7 +50,8 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Let AI assistants send shoppers to your checkout', $copy['action'] ?? null );
 		$this->assertNotSame( '', $copy['why'] );
 		$this->assertNotSame( '', $copy['found'] );
-		$this->assertSame( 'Turn off AI shopping (also called UCP or agentic commerce) in the other plugin, or deactivate it.', $copy['fix'] );
+		$this->assertSame( 'In the other plugin, turn off any setting for AI shopping, UCP, or agentic commerce. Or deactivate the plugin.', $copy['fix'] );
+		$this->assertSame( admin_url( 'plugins.php' ), $copy['url'], 'View plugins opens the Plugins screen' );
 
 		$required = new \ReflectionMethod( ReadinessCheckPage::class, 'is_required' );
 		$required->setAccessible( true );
@@ -90,6 +91,16 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '(UCP 2025-01-01)', ReadinessCopy::store_check( 'ucp_profile_version', '2025-01-01' )['found'] );
 		$this->assertStringContainsString( '(UCP).', ReadinessCopy::store_check( 'ucp_profile_version' )['found'] );
 		$this->assertSame( ReadinessCopy::store_check( 'ucp_profile' )['found'], ReadinessCopy::store_check( 'ucp_profile', '2025-01-01' )['found'], 'Other checks ignore the source' );
+		$this->assertSame(
+			array(
+				'href' => 'https://ucpplayground.com/',
+				'text' => 'UCP Playground',
+			),
+			ReadinessCopy::store_check( 'ucp_profile' )['found_link'],
+			'The connection check links UCP Playground where its found line names it'
+		);
+		$this->assertStringContainsString( 'UCP Playground', ReadinessCopy::store_check( 'ucp_profile' )['found'] );
+		$this->assertNull( ReadinessCopy::store_check( 'ucp_checkout' )['found_link'], 'Other checks link nothing in the text' );
 	}
 
 	/**
@@ -125,10 +136,10 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 	 * @testdox The product why lines that name ChatGPT, Google or Copilot match the bundled channel rules.
 	 */
 	public function test_product_why_lines_match_channel_rules(): void {
-		// What each why line says, and what that means per channel; update both when the rules change.
+		// What each why line says, and what that means per channel; update both when the rules change. Lines that name no channel are left out.
 		$said  = array(
 			'missing_regular_price' => array(
-				'AI assistants only list products that have a price.',
+				'AI shopping apps only list products that have a price.',
 				array(
 					'chatgpt' => 'not_listable',
 					'google'  => 'not_listable',
@@ -136,19 +147,11 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 				),
 			),
 			'missing_images'        => array(
-				'AI assistants only list products that have a main image.',
+				'AI shopping apps need a main image to list a product.',
 				array(
 					'chatgpt' => 'not_listable',
 					'google'  => 'not_listable',
 					'copilot' => 'not_listable',
-				),
-			),
-			'missing_product_text'  => array(
-				'ChatGPT only lists products that have a description. In Google and Copilot, a description makes products easier to find.',
-				array(
-					'chatgpt' => 'not_listable',
-					'google'  => 'gaps',
-					'copilot' => 'gaps',
 				),
 			),
 			'missing_brand'         => array(
@@ -156,14 +159,6 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 				array(
 					'chatgpt' => 'not_listable',
 					'google'  => 'gaps',
-					'copilot' => 'gaps',
-				),
-			),
-			'invalid_gtin'          => array(
-				'Google doesn’t list products with a barcode number that isn’t valid. In ChatGPT and Copilot, a valid one makes products easier to find.',
-				array(
-					'chatgpt' => 'gaps',
-					'google'  => 'not_listable',
 					'copilot' => 'gaps',
 				),
 			),

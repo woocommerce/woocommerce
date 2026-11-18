@@ -25,7 +25,7 @@ export interface CheckRow {
 	state: RowState;
 	/** What to do while the check fails, its passing title once it passes. */
 	title: string;
-	/** Required, or Likely conflict. */
+	/** Required. */
 	badge: ViewBadge | null;
 	/** Why it matters, and what the check found while it fails. */
 	text: string;
@@ -33,6 +33,8 @@ export interface CheckRow {
 	fix: string;
 	link: ViewLink | null;
 	seen_at: ViewLink | null;
+	/** A name in the text to link, such as a tool to test with. */
+	text_link?: ViewLink | null;
 }
 
 export interface FixFirstItem {
@@ -49,6 +51,8 @@ export interface FixFirstItem {
 export interface FixFirst {
 	title: string;
 	ranking: string;
+	/** Where to turn on Analytics, while it is off. */
+	link: ViewLink | null;
 	items: FixFirstItem[];
 }
 
@@ -99,6 +103,7 @@ export interface ReadinessView {
 		/** Scheduled Actions, when the check can't start. */
 		link: ViewLink | null;
 	};
+	/** Null before the first check, and when there is nothing to fix. */
 	fix_first: FixFirst | null;
 	sections: Section[];
 	declared: Declared | null;
