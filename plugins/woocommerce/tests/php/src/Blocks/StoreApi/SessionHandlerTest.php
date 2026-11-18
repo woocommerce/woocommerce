@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi;
 
 use Automattic\WooCommerce\StoreApi\SessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\SessionConcurrencyGuard;
 use WC_Session;
 use WC_Unit_Test_Case;
 
@@ -158,5 +159,53 @@ class SessionHandlerTest extends WC_Unit_Test_Case {
 		$handler->init();
 
 		$this->assertNotSame( 't_guest_session', $handler->get_customer_id(), 'A link token should not address the session it names' );
+	}
+
+	/**
+	 * @testdox Persisted session changes exclude unsaved changes made by the current request.
+	 */
+	public function test_detects_only_external_persisted_session_changes(): void {
+		global $wpdb;
+
+		$customer_id   = 't_session_revision';
+		$initial_data  = array( 'cart_version' => 'initial' );
+		$external_data = array( 'cart_version' => 'external' );
+		$table         = $wpdb->prefix . 'woocommerce_sessions';
+
+		try {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->replace(
+				$table,
+				array(
+					'session_key'    => $customer_id,
+					'session_value'  => maybe_serialize( $initial_data ),
+					'session_expiry' => time() + DAY_IN_SECONDS,
+				),
+				array( '%s', '%s', '%d' )
+			);
+			$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_token( $customer_id );
+
+			$handler = new SessionHandler();
+			$handler->init();
+			$handler->set( 'current_request', 'changed' );
+
+			$this->assertFalse( SessionConcurrencyGuard::has_changed( $handler ), 'Unsaved changes from this request should not look external.' );
+
+			$handler->save_data();
+			$this->assertFalse( SessionConcurrencyGuard::has_changed( $handler ), 'Saving this request should update its persisted baseline.' );
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->update(
+				$table,
+				array( 'session_value' => maybe_serialize( $external_data ) ),
+				array( 'session_key' => $customer_id ),
+				array( '%s' ),
+				array( '%s' )
+			);
+			$this->assertTrue( SessionConcurrencyGuard::has_changed( $handler ), 'A later persisted change should be detected.' );
+		} finally {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->delete( $table, array( 'session_key' => $customer_id ), array( '%s' ) );
+		}
 	}
 }

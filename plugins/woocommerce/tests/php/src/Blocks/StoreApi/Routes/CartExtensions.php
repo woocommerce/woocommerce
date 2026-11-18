@@ -40,7 +40,7 @@ class CartExtensions extends ControllerTestCase {
 				'callback'  => function () {
 					add_action(
 						'woocommerce_cart_calculate_fees',
-						function() {
+						function () {
 							wc()->cart->add_fee( 'Surcharge', 10, true, 'standard' );
 						}
 					);
@@ -165,7 +165,7 @@ class CartExtensions extends ControllerTestCase {
 			$syncs    = did_action( 'woocommerce_store_api_cart_update_order_from_request' );
 			$response = rest_get_server()->dispatch( $request );
 			$this->assertSame( 200, $response->get_status() );
-			$this->assertSame( $syncs + 1, did_action( 'woocommerce_store_api_cart_update_order_from_request' ), 'The cart update must reach the order sync, or the shipping assertions below prove nothing.' );
+			$this->assertSame( $syncs, did_action( 'woocommerce_store_api_cart_update_order_from_request' ), 'Cart routes must not sync draft orders outside the checkout lock.' );
 			$this->assertFalse( wc()->cart->has_calculated_shipping() );
 			$this->assertSame( array(), wc()->shipping()->get_packages() );
 		} finally {

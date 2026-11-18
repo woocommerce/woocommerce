@@ -7,6 +7,8 @@ use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
+use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
+use Automattic\WooCommerce\StoreApi\Utilities\SessionConcurrencyGuard;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractAddressSchema;
@@ -162,6 +164,7 @@ class Checkout extends AbstractCartRoute {
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
+	 * @throws RouteException If the persisted session changed after this request loaded it.
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
@@ -182,6 +185,10 @@ class Checkout extends AbstractCartRoute {
 
 		if ( ! $response ) {
 			try {
+				// Every method of this route reads and writes the draft order, so take it before anything reads it.
+				$this->lock_order_or_throw( absint( $this->get_draft_order_id() ) );
+				// The session was loaded before the lock. Refuse externally persisted changes rather than overwrite a newer draft and potentially complete the wrong total.
+				$this->throw_if_persisted_session_changed();
 				$response = $this->get_response_by_request_method( $request );
 			} catch ( InvalidCartException $error ) {
 				$response = $this->get_route_error_response_from_object( $error->getError(), $error->getCode(), $error->getAdditionalData() );
@@ -696,6 +703,16 @@ class Checkout extends AbstractCartRoute {
 			'woocommerce_store_api_checkout_order_processed',
 			'This action was deprecated in WooCommerce Blocks version 7.2.0. Please use woocommerce_store_api_checkout_order_processed instead.'
 		);
+
+		// The order is placed from here on as it was validated above, so make sure no other request could have written
+		// to it in the meantime. This also takes the lock for an order that was only created by this request.
+		if ( ! OrderController::lock_order( $this->order->get_id() ) ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_order_locked',
+				esc_html( OrderController::get_order_lock_error_message() ),
+				409
+			);
+		}
 
 		// Set initial status to 'pending'; woocommerce_store_api_checkout_order_processed (fired below) can override it.
 		// Custom statuses are preserved when no payment is needed; payment gateway statuses take precedence otherwise.
@@ -1223,6 +1240,44 @@ class Checkout extends AbstractCartRoute {
 				'actual_total'   => absint( $actual_total ),
 			]
 		);
+	}
+
+	/**
+	 * Refuse to use a session that another request changed after this request loaded it.
+	 *
+	 * Mutations made by this request are allowed because the session handler compares the latest persisted data with
+	 * the persisted data that initialized this request, not with its current in-memory data.
+	 *
+	 * @throws RouteException If another request changed the persisted session.
+	 */
+	private function throw_if_persisted_session_changed(): void {
+		if ( WC()->session && SessionConcurrencyGuard::has_changed( WC()->session ) ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_session_changed',
+				esc_html__( 'Your cart changed during checkout. Please review it and try again.', 'woocommerce' ),
+				409
+			);
+		}
+	}
+
+	/**
+	 * Give this request exclusive use of an order, or confirm that it still has it, and refuse the request otherwise.
+	 *
+	 * Checkout and other order writers must hold the same lock so an order cannot change between validation and placement.
+	 *
+	 * @see OrderController::lock_order()
+	 *
+	 * @throws RouteException If another request is using the order. Returns HTTP 409 with the cart so the client can refresh.
+	 * @param int $order_id Order ID.
+	 */
+	private function lock_order_or_throw( int $order_id ): void {
+		if ( ! OrderController::lock_order( $order_id ) ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_order_locked',
+				esc_html( OrderController::get_order_lock_error_message() ),
+				409
+			);
+		}
 	}
 
 	/**
