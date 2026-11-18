@@ -46,7 +46,12 @@ test( 'mounts the packaged plugin and adds a separate debug log', ( context ) =>
 } );
 
 test( 'sets pinned WordPress, WooCommerce and PHP versions', ( context ) => {
-	const { root, pluginPath, output } = site( context );
+	const { root, pluginPath, input, defaults, output } = site( context );
+	defaults.env = {
+		development: { core: 'WordPress/WordPress#7.0', phpVersion: '8.4' },
+		tests: { phpVersion: '8.3' },
+	};
+	fs.writeFileSync( input, JSON.stringify( defaults ) );
 	writeE2ESiteConfig( {
 		root,
 		pluginPath,
@@ -59,10 +64,40 @@ test( 'sets pinned WordPress, WooCommerce and PHP versions', ( context ) => {
 	const config = JSON.parse( fs.readFileSync( output, 'utf8' ) );
 	assert.equal( config.core, 'https://wordpress.org/wordpress-7.0.1.zip' );
 	assert.equal( config.phpVersion, '8.2' );
+	assert.deepEqual( config.env, {
+		development: { core: config.core, phpVersion: config.phpVersion },
+		tests: { phpVersion: '8.3' },
+	} );
 	assert.equal(
 		config.plugins[ 1 ],
 		'https://github.com/woocommerce/woocommerce/releases/download/11.3.0-rc.1/woocommerce.zip'
 	);
+} );
+
+test( 'ignores a non-string version override', ( context ) => {
+	const { root, pluginPath, output } = site( context );
+	writeE2ESiteConfig( { root, pluginPath, env: { PHP_VERSION: 8 } } );
+	const config = JSON.parse( fs.readFileSync( output, 'utf8' ) );
+	assert.equal( config.phpVersion, '8.3' );
+} );
+
+test( 'rejects invalid plugins and mappings before writing a config', ( context ) => {
+	const { root, pluginPath, input, defaults, output } = site( context );
+	for ( const [ overrides, error ] of [
+		[ { plugins: '.' }, /plugins must be an array of strings/ ],
+		[ { plugins: [ '.', 1 ] }, /plugins must be an array of strings/ ],
+		[ { mappings: [] }, /mappings must be an object/ ],
+	] ) {
+		fs.writeFileSync(
+			input,
+			JSON.stringify( { ...defaults, ...overrides } )
+		);
+		assert.throws(
+			() => writeE2ESiteConfig( { root, pluginPath, env: {} } ),
+			error
+		);
+		assert.equal( fs.existsSync( output ), false );
+	}
 } );
 
 test( 'preserves local integration mappings and the WooCommerce nightly mount', ( context ) => {

@@ -7,8 +7,17 @@ const stableWooCommerce =
 	'https://downloads.wordpress.org/plugin/woocommerce.zip';
 const nightlyWooCommerce =
 	'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip';
+// Match dotted version numbers and pre-release tags such as 11.3.0-rc.1.
 const isVersionNumber = ( value ) =>
-	/^\d+(\.\d+)*(-\w+(\.\w+)*)*$/.test( value );
+	typeof value === 'string' && /^\d+(\.\d+)*(-\w+(\.\w+)*)*$/.test( value );
+
+function setSiteVersion( config, option, value ) {
+	config[ option ] = value;
+	const development = config.env?.development;
+	if ( development && Object.hasOwn( development, option ) ) {
+		development[ option ] = value;
+	}
+}
 
 /**
  * Generate the browser test site config from the repo's wp-env tests site.
@@ -30,12 +39,26 @@ function writeE2ESiteConfig( {
 	const config = JSON.parse(
 		fs.readFileSync( path.join( root, '.wp-env.test.json' ), 'utf8' )
 	);
+	if (
+		! Array.isArray( config.plugins ) ||
+		! config.plugins.every( ( source ) => typeof source === 'string' )
+	) {
+		throw new Error(
+			'.wp-env.test.json plugins must be an array of strings.'
+		);
+	}
 	const checkout = config.plugins.indexOf( '.' );
 	if ( checkout === -1 ) {
 		throw new Error( '.wp-env.test.json must mount the checkout as ".".' );
 	}
 	config.plugins[ checkout ] = pluginPath;
 	config.mappings ??= {};
+	if (
+		typeof config.mappings !== 'object' ||
+		Array.isArray( config.mappings )
+	) {
+		throw new Error( '.wp-env.test.json mappings must be an object.' );
+	}
 	config.mappings[ './wp-content/debug.log' ] =
 		'./tests/_output/e2e-debug.log';
 	configure?.( config );
@@ -64,13 +87,20 @@ function writeE2ESiteConfig( {
 	}
 
 	if ( WP_VERSION === 'nightly' ) {
-		config.core =
-			'https://wordpress.org/nightly-builds/wordpress-latest.zip';
+		setSiteVersion(
+			config,
+			'core',
+			'https://wordpress.org/nightly-builds/wordpress-latest.zip'
+		);
 	} else if ( isVersionNumber( WP_VERSION ) ) {
-		config.core = 'https://wordpress.org/wordpress-' + WP_VERSION + '.zip';
+		setSiteVersion(
+			config,
+			'core',
+			'https://wordpress.org/wordpress-' + WP_VERSION + '.zip'
+		);
 	}
 	if ( isVersionNumber( PHP_VERSION ) ) {
-		config.phpVersion = PHP_VERSION;
+		setSiteVersion( config, 'phpVersion', PHP_VERSION );
 	}
 
 	fs.writeFileSync(
