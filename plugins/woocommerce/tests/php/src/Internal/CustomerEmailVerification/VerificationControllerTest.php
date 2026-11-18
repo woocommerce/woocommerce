@@ -86,9 +86,15 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 		update_user_meta( $user_id, 'default_password_nag', true );
 
 		try {
+			$user = get_user_by( 'id', $user_id );
+			$this->assertInstanceOf( \WP_User::class, $user );
+
+			// Set the password without consuming the emailed credential that would verify the address.
+			$user->user_activation_key = '';
+
 			// PHPUnit has already sent output; the reset cookie cannot emit HTTP headers here.
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Matches the existing shortcode reset tests.
-			@\WC_Shortcode_My_Account::reset_password( get_user_by( 'id', $user_id ), 'newpassword123' );
+			@\WC_Shortcode_My_Account::reset_password( $user, 'newpassword123' );
 			wp_set_current_user( $user_id );
 
 			$this->assertFalse( $this->service->is_verified( $user_id ), 'Setting a password must not verify the email.' );
@@ -96,7 +102,7 @@ class VerificationControllerTest extends WC_Unit_Test_Case {
 			$this->assertTrue( $this->ctrl->should_show_prompt(), 'The customer can request confirmation after setting their password.' );
 
 			$key      = $this->key_from_url( $this->capture_sent_url( $user_id ) );
-			$redirect = $this->open_verify_link( $user_id, $key );
+			$redirect = $this->submit_verify_form( $user_id, $key, 'newpassword123' );
 
 			$this->assertTrue( $this->service->is_verified( $user_id ), 'The email-bound confirmation should verify the address.' );
 			$this->assertSame( $user_id, wc_get_order( $order->get_id() )->get_customer_id(), 'Confirmation should link matching guest orders.' );
