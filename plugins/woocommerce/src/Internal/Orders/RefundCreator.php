@@ -134,8 +134,8 @@ class RefundCreator {
 
 	/**
 	 * Save the refund, then fire woocommerce_create_refund. wc_create_refund() saves the refund before the hook too,
-	 * and callbacks use its ID. A declined refund is deleted, since a rollback cannot remove it from tables
-	 * without transactions. Callbacks can move money or take locks there, so a refused refund must not reach it.
+	 * and callbacks use its ID. A declined or partly saved refund is deleted, since a rollback cannot remove it from
+	 * tables without transactions. Callbacks can move money or take locks there, so a refused refund must not reach it.
 	 *
 	 * @param \WC_Order_Refund $refund Staged refund, not saved.
 	 * @return null|\WP_Error A WP_Error when the refund was not saved, or a callback declined it by throwing.
@@ -146,7 +146,10 @@ class RefundCreator {
 		$args = $this->args;
 
 		$refund->save();
-		if ( $refund->get_id() <= 0 ) {
+		if ( $refund->get_id() <= 0 || null !== $refund->get_last_save_error() ) {
+			if ( $refund->get_id() > 0 ) {
+				$refund->delete( true );
+			}
 			return new \WP_Error( 'refund_not_saved', __( 'The refund could not be saved.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
@@ -215,16 +218,14 @@ class RefundCreator {
 	 * @throws \RuntimeException When the refund or the order could not be saved, or the order status could not change.
 	 */
 	private function complete( \WC_Order_Refund $refund ): void {
-		$order        = $this->order;
-		$args         = $this->args;
-		$status_error = null;
+		$order             = $this->order;
+		$args              = $this->args;
+		$status_error      = null;
+		$refund_save_error = null;
 
 		if ( $refund->get_refunded_payment() ) {
 			$refund->save();
 			$refund_save_error = $refund->get_last_save_error();
-			if ( $refund_save_error ) {
-				throw new \RuntimeException( esc_html( $refund_save_error->getMessage() ) );
-			}
 		}
 
 		if ( $args['restock_items'] ) {
@@ -290,8 +291,7 @@ class RefundCreator {
 			$parent_status = apply_filters( 'woocommerce_order_fully_refunded_status', OrderStatus::REFUNDED, $order->get_id(), $refund->get_id() );
 
 			if ( $parent_status && ! $order->update_status( $parent_status ) ) {
-				/* translators: %s: order status. */
-				$status_error = sprintf( __( 'The order status could not be changed to %s.', 'woocommerce' ), $parent_status );
+				$status_error = (string) $parent_status;
 			}
 		}
 
@@ -321,11 +321,15 @@ class RefundCreator {
 		 */
 		do_action( 'woocommerce_order_refunded', $order->get_id(), $refund->get_id() );
 
+		if ( $refund_save_error ) {
+			throw new \RuntimeException( esc_html( $refund_save_error->getMessage() ) );
+		}
 		if ( $order_save_error ) {
 			throw new \RuntimeException( esc_html( $order_save_error->getMessage() ) );
 		}
-		if ( null !== $status_error ) {
-			throw new \RuntimeException( esc_html( $status_error ) );
+		if ( null !== $status_error && ! $order->has_status( 'wc-' === substr( $status_error, 0, 3 ) ? substr( $status_error, 3 ) : $status_error ) ) {
+			/* translators: %s: order status. */
+			throw new \RuntimeException( esc_html( sprintf( __( 'The order status could not be changed to %s.', 'woocommerce' ), $status_error ) ) );
 		}
 	}
 

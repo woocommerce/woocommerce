@@ -44,6 +44,16 @@ class OrderRefundCreate extends ActionableAbility {
 	private const FINGERPRINT_META_KEY = '_woocommerce_ability_refund_fingerprint';
 
 	/**
+	 * Refund meta with the fingerprint of the amount and lines the call resolved to, so the same refund sent in another form matches.
+	 */
+	private const RESOLVED_FINGERPRINT_META_KEY = '_woocommerce_ability_refund_resolved_fingerprint';
+
+	/**
+	 * Refund meta set when the call asked the gateway to refund the payment.
+	 */
+	private const PAYMENT_REQUESTED_META_KEY = '_woocommerce_ability_refund_payment_requested';
+
+	/**
 	 * Option that locks the refunds of one order, followed by the order ID.
 	 */
 	private const LOCK_OPTION_PREFIX = 'woocommerce_ability_order_refund_lock_';
@@ -153,7 +163,7 @@ class OrderRefundCreate extends ActionableAbility {
 		$refund_payment = $input['refund_payment'] ?? false;
 
 		$fingerprint = self::fingerprint( $order, $input, $decimals );
-		$duplicate   = self::find_recent_refund( $order, $fingerprint );
+		$duplicate   = self::find_recent_refund( $order, self::FINGERPRINT_META_KEY, $fingerprint );
 		if ( null !== $duplicate ) {
 			return self::duplicate_error( $duplicate );
 		}
@@ -169,7 +179,21 @@ class OrderRefundCreate extends ActionableAbility {
 			return self::refund_error( $prepared );
 		}
 
-		$amount = NumberUtil::round( (float) $prepared['amount'], $decimals );
+		$amount               = NumberUtil::round( (float) $prepared['amount'], $decimals );
+		$resolved_fingerprint = self::fingerprint(
+			$order,
+			array(
+				'amount'         => $amount,
+				'line_items'     => $prepared['schema_line_items'],
+				'refund_payment' => $refund_payment,
+			),
+			$decimals
+		);
+		$duplicate            = self::find_recent_refund( $order, self::RESOLVED_FINGERPRINT_META_KEY, $resolved_fingerprint );
+		if ( null !== $duplicate ) {
+			return self::duplicate_error( $duplicate );
+		}
+
 		if ( $refund_payment && ! self::gateway_can_refund( $order ) ) {
 			return new \WP_Error(
 				'woocommerce_ability_order_refund_gateway_unsupported',
@@ -195,6 +219,10 @@ class OrderRefundCreate extends ActionableAbility {
 		}
 
 		$subject->update_meta_data( self::FINGERPRINT_META_KEY, $fingerprint );
+		$subject->update_meta_data( self::RESOLVED_FINGERPRINT_META_KEY, $resolved_fingerprint );
+		if ( $refund_payment ) {
+			$subject->update_meta_data( self::PAYMENT_REQUESTED_META_KEY, 'yes' );
+		}
 
 		return null;
 	}
@@ -305,11 +333,16 @@ class OrderRefundCreate extends ActionableAbility {
 		}
 
 		if ( 'refund_incomplete' === $finished->get_error_code() ) {
-			$message = $subject->get_refunded_payment()
+			if ( $subject->get_refunded_payment() ) {
 				/* translators: 1: refund ID, 2: error message. */
-				? __( 'The payment gateway refunded the payment and refund %1$d was created, but a later step failed, so the order may not show the refund in full: %2$s Do not refund again. Check the order instead.', 'woocommerce' )
+				$message = __( 'The payment gateway refunded the payment and refund %1$d was created, but a later step failed, so the order may not show the refund in full: %2$s Do not refund again. Check the order instead.', 'woocommerce' );
+			} elseif ( self::is_unpaid( $subject ) ) {
 				/* translators: 1: refund ID, 2: error message. */
-				: __( 'Refund %1$d was created, but a later step failed, so the order may not show the refund in full: %2$s Do not refund again. Check the order instead.', 'woocommerce' );
+				$message = __( 'Refund %1$d was created, but it could not be saved in full, so the payment gateway was not asked to refund the payment: %2$s Do not refund again. Check the order, and with the merchant either return the money outside WooCommerce or delete refund %1$d and refund again.', 'woocommerce' );
+			} else {
+				/* translators: 1: refund ID, 2: error message. */
+				$message = __( 'Refund %1$d was created, but a later step failed, so the order may not show the refund in full: %2$s Do not refund again. Check the order instead.', 'woocommerce' );
+			}
 
 			return new \WP_Error(
 				'woocommerce_ability_order_refund_incomplete',
@@ -391,31 +424,47 @@ class OrderRefundCreate extends ActionableAbility {
 	}
 
 	/**
-	 * A refund of the order, created within the duplicate window by a call with the same fingerprint.
+	 * A refund of the order with the same fingerprint, created within the duplicate window or, at any age, kept
+	 * without its payment refunded, since a retry would then record the refund twice.
 	 *
 	 * @param \WC_Order $order       Order.
+	 * @param string    $meta_key    Meta key of the fingerprint.
 	 * @param string    $fingerprint Fingerprint of the call.
 	 * @return \WC_Order_Refund|null
 	 */
-	private static function find_recent_refund( \WC_Order $order, string $fingerprint ): ?\WC_Order_Refund {
+	private static function find_recent_refund( \WC_Order $order, string $meta_key, string $fingerprint ): ?\WC_Order_Refund {
 		$refund_ids = wc_get_orders(
 			array(
-				'type'         => 'shop_order_refund',
-				'parent'       => $order->get_id(),
-				'date_created' => '>' . ( time() - self::DUPLICATE_WINDOW ),
-				'limit'        => -1,
-				'return'       => 'ids',
+				'type'   => 'shop_order_refund',
+				'parent' => $order->get_id(),
+				'limit'  => -1,
+				'return' => 'ids',
 			)
 		);
 
 		foreach ( is_array( $refund_ids ) ? $refund_ids : array() as $refund_id ) {
 			$refund = wc_get_order( $refund_id );
-			if ( $refund instanceof \WC_Order_Refund && $refund->get_meta( self::FINGERPRINT_META_KEY ) === $fingerprint ) {
+			if ( ! $refund instanceof \WC_Order_Refund || $refund->get_meta( $meta_key ) !== $fingerprint ) {
+				continue;
+			}
+			$created = $refund->get_date_created();
+			if ( self::is_unpaid( $refund ) || ( $created && $created->getTimestamp() > time() - self::DUPLICATE_WINDOW ) ) {
 				return $refund;
 			}
 		}
 
 		return null;
+	}
+
+	/**
+	 * Whether the call that created the refund asked the gateway to refund the payment and the payment was not refunded.
+	 * A gateway refusal deletes the refund, so only a refund kept after a failed save matches.
+	 *
+	 * @param \WC_Order_Refund $refund Refund.
+	 * @return bool
+	 */
+	private static function is_unpaid( \WC_Order_Refund $refund ): bool {
+		return 'yes' === $refund->get_meta( self::PAYMENT_REQUESTED_META_KEY ) && ! $refund->get_refunded_payment();
 	}
 
 	/**
@@ -429,15 +478,24 @@ class OrderRefundCreate extends ActionableAbility {
 		$created   = $created ? $created->getTimestamp() : time();
 		$formatted = self::format_refund_for_response( $refund );
 
-		return new \WP_Error(
-			'woocommerce_ability_order_refund_duplicate',
-			sprintf(
+		$message = self::is_unpaid( $refund )
+			? sprintf(
+				/* translators: 1: refund ID, 2: time since the refund, such as "2 mins". */
+				__( 'Refund %1$d recorded the same refund of this order %2$s ago, but the payment gateway was not asked to refund the payment, so no new refund was created. Check the order, and with the merchant either return the money outside WooCommerce or delete refund %1$d and refund again.', 'woocommerce' ),
+				$refund->get_id(),
+				human_time_diff( $created )
+			)
+			: sprintf(
 				/* translators: 1: refund ID, 2: time since the refund, such as "2 mins", 3: time until the same refund is allowed again. */
 				__( 'Refund %1$d refunded the same amount and lines of this order %2$s ago, so no new refund was created. The same refund can be created again in %3$s.', 'woocommerce' ),
 				$refund->get_id(),
 				human_time_diff( $created ),
 				human_time_diff( time(), $created + self::DUPLICATE_WINDOW )
-			),
+			);
+
+		return new \WP_Error(
+			'woocommerce_ability_order_refund_duplicate',
+			$message,
 			array(
 				'status' => 409,
 				'refund' => is_wp_error( $formatted ) ? array( 'id' => $refund->get_id() ) : $formatted,

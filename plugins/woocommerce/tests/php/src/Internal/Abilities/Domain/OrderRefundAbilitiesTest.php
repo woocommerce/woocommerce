@@ -87,6 +87,13 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 			public $refunded = array();
 
 			/**
+			 * Order IDs that process_refund() was called with.
+			 *
+			 * @var int[]
+			 */
+			public $refunded_orders = array();
+
+			/**
 			 * Set the ID and the refund support.
 			 */
 			public function __construct() {
@@ -104,7 +111,8 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 			 * @return bool|\WP_Error
 			 */
 			public function process_refund( $order_id, $amount = null, $reason = '' ) {
-				$this->refunded[] = (string) $amount;
+				$this->refunded[]        = (string) $amount;
+				$this->refunded_orders[] = (int) $order_id;
 				return $this->refund_result;
 			}
 		};
@@ -592,6 +600,7 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertSame( '10', $result['refund']['amount'] );
 		$this->assertSame( $order->get_id(), $result['refund']['order_id'] );
 		$this->assertSame( array( '5', '10' ), $this->gateway->refunded, 'Each order should reach the gateway once, with its own amount.' );
+		$this->assertSame( array( $other->get_id(), $order->get_id() ), $this->gateway->refunded_orders );
 
 		$refunds = wc_get_order( $order->get_id() )->get_refunds();
 		$this->assertCount( 1, $refunds );
@@ -676,6 +685,118 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_refunds() );
 		$this->assertSame( array(), $this->gateway->refunded );
 		$this->assertSame( 1, $completed );
+		$this->assertStringContainsString( 'not asked to refund the payment', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should refuse a retry of a refund kept without its payment, even after the duplicate window.
+	 */
+	public function test_refuses_retry_of_unpaid_refund_after_window(): void {
+		$order    = $this->create_order_without_lines();
+		$input    = array(
+			'id'             => $order->get_id(),
+			'amount'         => '10',
+			'refund_payment' => true,
+		);
+		$hook_ran = false;
+		$fail     = true;
+		add_action(
+			'woocommerce_create_refund',
+			static function () use ( &$hook_ran ) {
+				$hook_ran = true;
+			}
+		);
+		add_action(
+			'woocommerce_before_order_refund_object_save',
+			static function () use ( &$hook_ran, &$fail ) {
+				if ( $fail && $hook_ran ) {
+					throw new \Exception( 'Refund table is read-only.' );
+				}
+			}
+		);
+		$kept = $this->refund( $input );
+		$this->assertWPError( $kept );
+		$fail   = false;
+		$refund = wc_get_order( $kept->get_error_data()['refund_id'] );
+		$refund->set_date_created( time() - 11 * MINUTE_IN_SECONDS );
+		$refund->save();
+
+		$retry = $this->refund( $input );
+
+		$this->assertWPError( $retry );
+		$this->assertSame( 'woocommerce_ability_order_refund_duplicate', $retry->get_error_code() );
+		$this->assertStringContainsString( 'not asked to refund the payment', $retry->get_error_message() );
+		$this->assertSame( array(), $this->gateway->refunded );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should refuse the same refund sent again with its line total filled in, as a repeat of the refund.
+	 */
+	public function test_refuses_same_refund_sent_in_another_form(): void {
+		$order   = $this->create_order();
+		$line_id = $this->get_product_line_id( $order );
+		$first   = $this->refund(
+			array(
+				'id'         => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $line_id,
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+		$this->assertIsArray( $first, is_wp_error( $first ) ? $first->get_error_message() : '' );
+
+		$second = $this->refund(
+			array(
+				'id'         => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $line_id,
+						'quantity'     => 1,
+						'refund_total' => (float) $first['refund']['amount'],
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $second );
+		$this->assertSame( 'woocommerce_ability_order_refund_duplicate', $second->get_error_code() );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should save no refund and not fire woocommerce_create_refund when a refund line fails to save.
+	 */
+	public function test_refuses_refund_whose_line_fails_to_save(): void {
+		$order   = $this->create_order();
+		$line_id = $this->get_product_line_id( $order );
+		add_action(
+			'woocommerce_before_order_item_object_save',
+			static function () {
+				throw new \Exception( 'Order item table is read-only.' );
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'             => $order->get_id(),
+				'line_items'     => array(
+					array(
+						'line_item_id' => $line_id,
+						'quantity'     => 1,
+					),
+				),
+				'refund_payment' => true,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertNotContains( 'woocommerce_create_refund', $this->fired );
+		$this->assertSame( array(), $this->gateway->refunded );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
 	}
 
 	/**
@@ -1043,6 +1164,36 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Refund storage is read-only.', $result->get_error_message() );
 		$this->assertInstanceOf( \WC_Order_Refund::class, wc_get_order( $result->get_error_data()['refund_id'] ) );
 		$this->assertSame( array( '10' ), $this->gateway->refunded );
+		$this->assertContains( 'woocommerce_order_partially_refunded', $this->fired );
+		$this->assertContains( 'woocommerce_order_refunded', $this->fired );
+	}
+
+	/**
+	 * @testdox Should report success when the status change fails once and the final save of the order stores the status.
+	 */
+	public function test_succeeds_when_final_save_stores_the_status(): void {
+		$order  = $this->create_order_without_lines();
+		$thrown = false;
+		add_action(
+			'woocommerce_before_order_object_save',
+			static function ( $saved ) use ( $order, &$thrown ) {
+				if ( ! $thrown && $saved->get_id() === $order->get_id() && OrderStatus::REFUNDED === $saved->get_status() ) {
+					$thrown = true;
+					throw new \Exception( 'Order storage is busy.' );
+				}
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '50',
+			)
+		);
+
+		$this->assertTrue( $thrown, 'The order save during update_status() should have failed.' );
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertSame( OrderStatus::REFUNDED, wc_get_order( $order->get_id() )->get_status() );
 	}
 
 	/**
@@ -1054,7 +1205,7 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		add_action(
 			'woocommerce_before_order_object_save',
 			static function ( $saved ) use ( $order, &$thrown ) {
-				if ( ! $thrown && $saved->get_id() === $order->get_id() && OrderStatus::REFUNDED === $saved->get_status() ) {
+				if ( $saved->get_id() === $order->get_id() && OrderStatus::REFUNDED === $saved->get_status() ) {
 					$thrown = true;
 					throw new \Exception( 'Order storage is read-only.' );
 				}

@@ -3629,13 +3629,58 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			static function () {
 				ExtensibleAbilities::register_resource( 'order_refund' );
 			},
-			1
+			-1
 		);
 		$this->register_sync( 'order_refund', 'test-ext', '__return_null' );
 		$this->reset_registries();
 		AbilitiesLoader::init_extensions();
 
 		$this->assertEmpty( ExtensibleAbilities::get_syncs( 'order_refund' ) );
+	}
+
+	/**
+	 * @testdox Should drop a sync that an extension registered on order_refund before Core turned its syncs off.
+	 */
+	public function test_a_sync_registered_on_order_refund_before_core_is_dropped(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_resources_init',
+			static function () {
+				ExtensibleAbilities::register_resource( 'order_refund' );
+				ExtensibleAbilities::register_sync(
+					array(
+						'resource'  => 'order_refund',
+						'namespace' => 'test-ext',
+						'callback'  => '__return_null',
+					)
+				);
+			},
+			-1
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$this->assertEmpty( ExtensibleAbilities::get_syncs( 'order_refund' ) );
+	}
+
+	/**
+	 * @testdox Should register a resource without syncs when its syncs argument is not a boolean.
+	 */
+	public function test_a_resource_with_a_non_boolean_syncs_argument_takes_no_syncs(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_sync' );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_resources_init',
+			static function () {
+				ExtensibleAbilities::register_resource( 'ticket', array( 'syncs' => 0 ) );
+			}
+		);
+		$this->register_sync( 'ticket', 'test-ext', '__return_null' );
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$this->assertTrue( ExtensibleAbilities::is_resource_registered( 'ticket' ) );
+		$this->assertEmpty( ExtensibleAbilities::get_syncs( 'ticket' ) );
 	}
 
 	/**

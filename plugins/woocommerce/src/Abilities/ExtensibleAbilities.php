@@ -121,11 +121,24 @@ class ExtensibleAbilities {
 			return;
 		}
 
-		$syncs = false !== ( $args['syncs'] ?? true );
+		$syncs = $args['syncs'] ?? true;
+		if ( ! is_bool( $syncs ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The syncs argument must be a boolean, so the resource was registered without syncs.', '11.4.0' );
+			$syncs = false;
+		}
 		if ( isset( self::$resources[ $resource_name ] ) ) {
 			$syncs = $syncs && self::$resources[ $resource_name ]['syncs'];
 		}
 		self::$resources[ $resource_name ] = array( 'syncs' => $syncs );
+
+		if ( ! $syncs && ! empty( self::$syncs[ $resource_name ] ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf( 'The "%s" resource takes no syncs, so the syncs registered on it were dropped.', $resource_name ),
+				'11.4.0'
+			);
+			unset( self::$syncs[ $resource_name ] );
+		}
 	}
 
 	/**
@@ -939,7 +952,7 @@ class ExtensibleAbilities {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public static function get_syncs( string $resource_name ): array {
-		return self::$syncs[ $resource_name ] ?? array();
+		return ( self::$resources[ $resource_name ]['syncs'] ?? false ) ? ( self::$syncs[ $resource_name ] ?? array() ) : array();
 	}
 
 	/**
