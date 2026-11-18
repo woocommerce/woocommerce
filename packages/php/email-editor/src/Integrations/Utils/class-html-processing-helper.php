@@ -111,6 +111,57 @@ class Html_Processing_Helper {
 	}
 
 	/**
+	 * Parse an aspect ratio attribute value (e.g. "1", "1.5", "4/3") into a numeric width/height ratio.
+	 *
+	 * @param string $aspect_ratio Aspect ratio value.
+	 * @return float|null The ratio (width divided by height), or null when the value is invalid.
+	 */
+	public static function parse_aspect_ratio( string $aspect_ratio ): ?float {
+		// Only accept simple numeric ratios to avoid injecting anything unexpected into the markup.
+		if ( ! preg_match( '/^(\d+(?:\.\d+)?)(?:\s*\/\s*(\d+(?:\.\d+)?))?$/', trim( $aspect_ratio ), $matches ) ) {
+			return null;
+		}
+
+		$numerator   = (float) $matches[1];
+		$denominator = isset( $matches[2] ) ? (float) $matches[2] : 1.0;
+
+		if ( $numerator <= 0 || $denominator <= 0 ) {
+			return null;
+		}
+
+		return $numerator / $denominator;
+	}
+
+	/**
+	 * Get the height an aspect-ratio crop gives an image of the given width.
+	 *
+	 * @param int   $width Display width in px.
+	 * @param float $ratio_value Ratio from {@see self::parse_aspect_ratio()}.
+	 * @return int Height in px, at least 1 so a very wide ratio can't round down to nothing, or 0 when the width or ratio is unusable.
+	 */
+	public static function get_crop_height( int $width, float $ratio_value ): int {
+		return $width > 0 && $ratio_value > 0 ? max( 1, (int) round( $width / $ratio_value ) ) : 0;
+	}
+
+	/**
+	 * Check what a cropped-image-URL filter returned and escape it for output.
+	 *
+	 * A filter can return anything, so the crop counts only when it returned a different, non-empty
+	 * string. The comparison runs before escaping: get_attribute() decodes "&" and esc_url() re-encodes
+	 * it, so an escaped URL would never match a src with a multi-parameter query string.
+	 *
+	 * @param mixed  $filtered_url What the filter returned.
+	 * @param string $image_url The image's original, decoded src.
+	 * @return string The escaped cropped URL, or an empty string when the image wasn't cropped.
+	 */
+	public static function get_server_cropped_url( $filtered_url, string $image_url ): string {
+		if ( ! is_string( $filtered_url ) || '' === $image_url || '' === $filtered_url || $filtered_url === $image_url ) {
+			return '';
+		}
+		return esc_url( $filtered_url );
+	}
+
+	/**
 	 * Sanitize CSS value to prevent injection attacks.
 	 *
 	 * @param string $value CSS value to sanitize.

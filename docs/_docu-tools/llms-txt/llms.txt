@@ -1,0 +1,55 @@
+# WooCommerce developer docs
+
+> A curated starting point for building with WooCommerce. Developer docs links below point to Markdown pages; open the linked guides for detail.
+
+## Start a local Woo store
+
+On macOS or Linux, install the Studio CLI with `curl -fsSL https://wordpress.studio/install.sh | bash`, or enable the CLI in the WordPress Studio app settings. Open a new terminal and check `studio --help`. In a new, empty directory, run `studio blueprint use woo-shop`. Verify that the homepage and shop page load, WooCommerce is active, and `/wp-json/wc/store/v1/products` returns JSON. See the [Studio CLI guide](https://wordpress.studio/docs/cli/) for Windows installation.
+
+## Start here
+
+- [Developer docs](https://developer.woocommerce.com/docs/getting-started/README.md): Choose a local setup path, learn what you can build, and browse the docs.
+- [Set up a development environment](https://developer.woocommerce.com/docs/getting-started/development-environment.md): Install local tools and choose a WordPress development environment.
+- [AI development guide](https://developer.woocommerce.com/docs/getting-started/ai.md): Find agent tools, the curated index, and individual Markdown docs.
+
+## Local development
+
+- [WordPress Studio CLI](https://wordpress.studio/docs/cli/): Install the CLI and use a Blueprint to create a local site.
+- [Scaffolding and sample data](https://developer.woocommerce.com/docs/getting-started/scaffolding.md): Find tools for starting projects and adding test content.
+- [Debugging](https://developer.woocommerce.com/docs/getting-started/debugging.md): Diagnose issues in a WooCommerce development environment.
+
+## Extensions and themes
+
+- [Extension development](https://developer.woocommerce.com/docs/extensions/getting-started-extensions.md): Start building, testing, and distributing WooCommerce extensions.
+- [Build your first extension](https://developer.woocommerce.com/docs/extensions/getting-started-extensions/building-your-first-extension.md): Follow a practical extension tutorial.
+- [Block theme development](https://developer.woocommerce.com/docs/theming/block-theme-development/theming-woo-blocks.md): Customize WooCommerce templates and styles in a block theme.
+- [Child themes](https://developer.woocommerce.com/docs/theming/theme-development/set-up-a-child-theme.md): Extend an existing theme without editing its files directly.
+- [Block development](https://developer.woocommerce.com/docs/block-development.md): Build and extend WooCommerce blocks.
+
+## APIs
+
+- [WooCommerce REST API](https://developer.woocommerce.com/docs/apis/rest-api/index.md): Read and update store data with authenticated requests.
+- [REST API authentication](https://developer.woocommerce.com/docs/apis/rest-api/authentication.md): Choose an authentication method for WooCommerce REST API requests.
+- [REST API products](https://developer.woocommerce.com/docs/apis/rest-api/v3/products.md): Find product endpoints in the current REST API version.
+- [Store API](https://developer.woocommerce.com/docs/apis/store-api.md): Build shopper-facing product, cart, and checkout experiences.
+- [Store API products](https://developer.woocommerce.com/docs/apis/store-api/resources-endpoints/products.md): Read product data for a storefront.
+- [Store API cart](https://developer.woocommerce.com/docs/apis/store-api/resources-endpoints/cart.md): Read and update the shopper's cart.
+- [Store API checkout](https://developer.woocommerce.com/docs/apis/store-api/resources-endpoints/checkout.md): Learn how checkout requests work.
+- [Extend the Store API](https://developer.woocommerce.com/docs/apis/store-api/extending-store-api.md): Add extension data to Store API responses and requests.
+
+## MCP
+
+- [WooCommerce MCP](https://developer.woocommerce.com/docs/features/mcp.md): Set up the developer preview with the WordPress MCP Adapter and WooCommerce abilities.
+
+## Contribution
+
+- [Contributor guide](https://developer.woocommerce.com/docs/contribution/contributing.md): Find the WooCommerce repository, contribution process, and open issues.
+- [Contribute to the docs](https://developer.woocommerce.com/docs/contribution/contributing-docs/contributing-docs.md): Propose and review documentation changes.
+
+## Reference
+
+- [WooCommerce Code Reference](https://woocommerce.github.io/code-reference/): Look up WooCommerce classes, methods, functions, and hooks.
+- [Code snippets](https://developer.woocommerce.com/docs/code-snippets.md): Find examples for store customizations.
+- [WooCommerce CLI](https://developer.woocommerce.com/docs/wc-cli/cli-overview.md): Find WooCommerce commands for WP-CLI.
+- [Releases](https://developer.woocommerce.com/releases/): Find WooCommerce Core versions and downloads.
+- [Changelog](https://developer.woocommerce.com/changelog/): Read release notes and project updates.
