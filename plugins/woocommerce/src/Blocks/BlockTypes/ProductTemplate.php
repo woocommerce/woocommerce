@@ -69,9 +69,9 @@ class ProductTemplate extends AbstractBlock {
 
 			if ( 'flex' === $type && ! empty( $columns ) ) {
 				if ( isset( $block->context['displayLayout']['shrinkColumns'] ) && $block->context['displayLayout']['shrinkColumns'] ) {
-					$classnames = "wc-block-product-template__responsive columns-{$columns}";
+					$classnames .= "wc-block-product-template__responsive columns-{$columns}";
 				} else {
-					$classnames = "is-flex-container columns-{$columns}";
+					$classnames .= "is-flex-container columns-{$columns}";
 				}
 			} elseif ( 'carousel' === $type && $carousel_columns >= 1 && $carousel_columns <= 6 ) {
 				if ( isset( $block->context['displayLayout']['shrinkColumns'] ) && $block->context['displayLayout']['shrinkColumns'] ) {
