@@ -2,7 +2,8 @@
  * External dependencies
  */
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 jest.mock( '../../../data/api', () => ( {
 	runChunk: jest.fn(),
@@ -167,6 +168,31 @@ describe( 'ImportStep mounted again with the wizard state', () => {
 		await screen.findByText( MAY_HAVE_FINISHED, IN_NOTICE );
 		expect( mockedRunChunk ).toHaveBeenCalledTimes( 3 );
 		expect( mockedRunChunk.mock.calls[ 2 ][ 0 ].offset ).toBe( 2 );
+	} );
+
+	it( 'keeps keyboard focus in the step when Retry removes the notice', async () => {
+		mockedRunChunk
+			.mockResolvedValueOnce( chunk( 2 ) )
+			.mockRejectedValueOnce( new Error( 'Failed to fetch' ) )
+			.mockImplementationOnce( () => new Promise( () => {} ) );
+		const { startImport } = setUp();
+
+		await startImport();
+		await screen.findByText( 'Failed to fetch', IN_NOTICE );
+
+		screen.getByRole( 'button', { name: 'Retry' } ).focus();
+		await userEvent.keyboard( '{Enter}' );
+
+		await waitFor( () =>
+			expect( mockedRunChunk ).toHaveBeenCalledTimes( 3 )
+		);
+		expect(
+			screen.queryByText( 'Failed to fetch', IN_NOTICE )
+		).not.toBeInTheDocument();
+		const heading = screen.getByRole( 'heading', {
+			name: 'Importing fulfillments',
+		} );
+		expect( heading.ownerDocument.activeElement ).toBe( heading );
 	} );
 
 	it( 'shows the expired session as is on a fresh import', async () => {

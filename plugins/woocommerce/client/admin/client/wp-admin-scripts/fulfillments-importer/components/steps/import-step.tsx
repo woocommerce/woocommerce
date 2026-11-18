@@ -38,6 +38,7 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	// Start the loop once when the step mounts. Restarting it on identity
 	// changes could rerun an import that stopped with an error, so the latest
 	// run is kept in a ref instead.
+	const headingRef = useRef< HTMLHeadingElement >( null );
 	const runRef = useRef( run );
 	runRef.current = run;
 	// A step that mounts again over an error waits for Retry, like the loop
@@ -80,7 +81,10 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 						gap="lg"
 						className="woocommerce-fulfillment-importer-step__card-body"
 					>
-						<Text variant="heading-md" render={ <h2 /> }>
+						<Text
+							variant="heading-md"
+							render={ <h2 ref={ headingRef } tabIndex={ -1 } /> }
+						>
 							{ __( 'Importing fulfillments', 'woocommerce' ) }
 						</Text>
 
@@ -115,6 +119,8 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 										<Button
 											variant="secondary"
 											onClick={ () => {
+												// The notice and this button go away, so keep focus in the step.
+												headingRef.current?.focus();
 												dispatch( {
 													type: 'CLEAR_ERROR',
 												} );
