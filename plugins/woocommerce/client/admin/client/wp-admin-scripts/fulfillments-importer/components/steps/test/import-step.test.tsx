@@ -184,8 +184,9 @@ describe( 'ImportStep', () => {
 				onClose={ jest.fn() }
 			/>
 		);
-		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
-			/^Processed 1,200 of 5,000 rows$/
+		// Formatted the way the step formats them, so any default locale passes.
+		expect( screen.getByRole( 'status' ).textContent ).toBe(
+			`Processed ${ ( 1200 ).toLocaleString() } of ${ ( 5000 ).toLocaleString() } rows`
 		);
 	} );
 
@@ -238,7 +239,7 @@ describe( 'ImportStep', () => {
 			'Fulfillments updated': '2',
 			'Rows skipped': '0',
 			'Rows failed': '4',
-			'Customers notified': '1,500',
+			'Customers notified': ( 1500 ).toLocaleString(),
 		} );
 	} );
 
