@@ -64,7 +64,7 @@ class Ability extends \WP_Ability {
 			return $is_valid;
 		}
 
-		// Older Core already sanitizes in normalize_input() before execute() validates.
+		// On older Core, this class's normalize_input() override already sanitizes before execute() validates.
 		return method_exists( \WP_Ability::class, 'prepare_input' ) ? $this->sanitize_input( $input ) : $input;
 	}
 

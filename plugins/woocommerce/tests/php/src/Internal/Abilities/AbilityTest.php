@@ -142,6 +142,25 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should pass raw input unchanged when the caller skips preparation.
+	 */
+	public function test_direct_permission_check_does_not_prepare_raw_input(): void {
+		$sut = $this->get_ability();
+
+		$this->assertTrue(
+			$sut->check_permissions(
+				array(
+					'flag'  => 'false',
+					'count' => '5',
+				)
+			)
+		);
+		$this->assertSame( 'false', $this->received['permission']['flag'], 'A direct permission check does not convert the boolean string.' );
+		$this->assertSame( '5', $this->received['permission']['count'], 'A direct permission check does not convert the numeric string.' );
+		$this->assertArrayNotHasKey( 'execute', $this->received );
+	}
+
+	/**
 	 * @testdox Should prepare raw input before calling check_permissions() directly.
 	 */
 	public function test_prepares_input_for_a_direct_permission_check(): void {
