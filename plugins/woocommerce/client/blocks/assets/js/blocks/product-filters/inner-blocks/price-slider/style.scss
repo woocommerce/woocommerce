@@ -116,7 +116,8 @@
 			width: 100%;
 			height: 100%;
 			background: var(--range-color);
-			opacity: 0.3;
+			// 0.6 keeps the unselected track at 3:1 or more against light backgrounds (WCAG 1.4.11).
+			opacity: 0.6;
 		}
 
 		.range-bar {

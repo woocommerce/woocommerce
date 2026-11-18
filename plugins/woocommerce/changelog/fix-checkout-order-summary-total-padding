@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the side padding on the Total row in the Checkout block order summary.

@@ -59,7 +59,6 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
-			remove_all_filters( 'wc_get_template' );
 			delete_transient( 'wc_system_status_theme_info' );
 			ActionSchedulerUtil::reset_cache();
 			$this->reset_legacy_proxy_mocks();

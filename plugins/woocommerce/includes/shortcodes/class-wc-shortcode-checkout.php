@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Orders\PaymentStock;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 
 /**
  * Shortcode checkout class.
@@ -202,6 +203,7 @@ class WC_Shortcode_Checkout {
 					array(
 						'order'              => $order,
 						'available_gateways' => $available_gateways,
+						'has_chosen_gateway' => PaymentUtils::has_chosen_gateway( $available_gateways ),
 						'order_button_text'  => $order_button_text,
 					)
 				);

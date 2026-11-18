@@ -82,8 +82,6 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertContains( $hook, $captured_actions, 'Pending to cancelled status changes should be part of the default transactional email action list.' );
 		$this->assertSame( 10, has_action( $hook, array( 'WC_Emails', 'send_transactional_email' ) ), 'Pending to cancelled status changes should dispatch transactional emails.' );
-
-		remove_action( $hook, array( 'WC_Emails', 'send_transactional_email' ), 10 );
 	}
 
 	/**
@@ -163,6 +161,82 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Plain fulfillment details list the fulfilled items when the fulfillment has no tracking information.
+	 */
+	public function test_plain_fulfillment_details_list_items_without_tracking_information(): void {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = $this->create_fulfillment_covering_order( $order );
+
+		$content = $this->render_plain_fulfillment_details( $order, $fulfillment );
+
+		$this->assertStringContainsString( 'No tracking information available', $content, 'The missing tracking notice should still show' );
+		$this->assertStringContainsString( 'Fulfillment summary', $content, 'The summary should render without tracking information' );
+		foreach ( $order->get_items() as $item ) {
+			$this->assertStringContainsString( $item->get_name(), $content, 'Every fulfilled item should be listed' );
+		}
+	}
+
+	/**
+	 * @testdox Plain fulfillment details list the fulfilled items when the fulfillment has tracking information.
+	 */
+	public function test_plain_fulfillment_details_list_items_with_tracking_information(): void {
+		$order       = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$fulfillment = $this->create_fulfillment_covering_order( $order );
+		$fulfillment->add_meta_data( '_tracking_number', '1Z999AA10123456784', true );
+
+		$content = $this->render_plain_fulfillment_details( $order, $fulfillment );
+
+		$this->assertStringContainsString( '1Z999AA10123456784', $content, 'The tracking number should show' );
+		$this->assertStringContainsString( 'Fulfillment summary', $content, 'The summary should render with tracking information' );
+		foreach ( $order->get_items() as $item ) {
+			$this->assertStringContainsString( $item->get_name(), $content, 'Every fulfilled item should be listed' );
+		}
+	}
+
+	/**
+	 * Build an unsaved fulfillment covering every item of the order.
+	 *
+	 * @param WC_Order $order The order to fulfill.
+	 * @return Fulfillment
+	 */
+	private function create_fulfillment_covering_order( WC_Order $order ): Fulfillment {
+		$items = array();
+		foreach ( $order->get_items() as $item_id => $item ) {
+			$items[] = array(
+				'item_id' => $item_id,
+				'qty'     => $item->get_quantity(),
+			);
+		}
+
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_items( $items );
+
+		return $fulfillment;
+	}
+
+	/**
+	 * Render the plain text fulfillment details for an order.
+	 *
+	 * @param WC_Order    $order The order the details are about.
+	 * @param Fulfillment $fulfillment The fulfillment the details are about.
+	 * @return string
+	 */
+	private function render_plain_fulfillment_details( WC_Order $order, Fulfillment $fulfillment ): string {
+		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-fulfillment-created.php';
+
+		// Called directly rather than through its action: both that hook and the email class are
+		// only loaded when the fulfillments feature is on, and WC_Emails freezes its hooks when it
+		// is first constructed. The email is still passed, because the template hands it to its hooks.
+		$email_object = new WC_Emails();
+		ob_start();
+		$email_object->fulfillment_details( $order, $fulfillment, false, true, new WC_Email_Customer_Fulfillment_Created() );
+
+		return (string) ob_get_clean();
+	}
+
+	/**
 	 * Build a valid set of arguments for WC_Emails::backorder().
 	 *
 	 * @return array
@@ -175,6 +249,33 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 			'product'  => $product,
 			'quantity' => 2,
 			'order_id' => $order->get_id(),
+		);
+	}
+
+	/**
+	 * @testdox get_store_address() shows the store's country, and leaves later addresses in that country without it.
+	 */
+	public function test_get_store_address_forces_the_country_only_for_the_store_address(): void {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_store_address', '123 Main Street' );
+		update_option( 'woocommerce_store_city', 'San Francisco' );
+		update_option( 'woocommerce_store_postcode', '94110' );
+
+		$store_address = WC()->mailer()->get_store_address();
+
+		$this->assertStringContainsString( 'United States (US)', $store_address, 'The store address should show the country.' );
+		$this->assertStringNotContainsString(
+			'United States (US)',
+			WC()->countries->get_formatted_address(
+				array(
+					'address_1' => '1 Other Street',
+					'city'      => 'Los Angeles',
+					'state'     => 'CA',
+					'postcode'  => '90001',
+					'country'   => 'US',
+				)
+			),
+			'Addresses formatted after the store address should leave out the store\'s country again.'
 		);
 	}
 
@@ -206,8 +307,6 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		$after = count( $mailer->mock_sent );
 
 		$this->assertSame( $before, $after, 'Backorder notification must not be sent when the setting is disabled.' );
-
-		update_option( 'woocommerce_notify_backorder', 'yes' );
 	}
 
 	/**

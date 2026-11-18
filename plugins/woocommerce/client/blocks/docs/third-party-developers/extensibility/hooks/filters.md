@@ -36,6 +36,7 @@
 - [woocommerce_cart_contents_changed](#woocommerce_cart_contents_changed)
 - [woocommerce_cart_item_permalink](#woocommerce_cart_item_permalink)
 - [woocommerce_checkout_must_be_logged_in_message](#woocommerce_checkout_must_be_logged_in_message)
+- [woocommerce_checkout_show_terms](#woocommerce_checkout_show_terms)
 - [woocommerce_default_payment_method](#woocommerce_default_payment_method)
 - [woocommerce_delete_expired_draft_orders_batch_size](#woocommerce_delete_expired_draft_orders_batch_size)
 - [woocommerce_disable_compatibility_layer](#woocommerce_disable_compatibility_layer)
@@ -80,6 +81,10 @@
 - [woocommerce_store_api_rate_limit_options](#woocommerce_store_api_rate_limit_options)
 - [woocommerce_thankyou_order_failed_text](#woocommerce_thankyou_order_failed_text)
 - [woocommerce_thankyou_order_received_title](#woocommerce_thankyou_order_received_title)
+- [woocommerce_ucp_cart_continue_url](#woocommerce_ucp_cart_continue_url)
+- [woocommerce_ucp_idempotency_enabled](#woocommerce_ucp_idempotency_enabled)
+- [woocommerce_ucp_idempotency_retention_seconds](#woocommerce_ucp_idempotency_retention_seconds)
+- [woocommerce_ucp_idempotency_strict](#woocommerce_ucp_idempotency_strict)
 - [woocommerce_use_block_notices_in_classic_theme](#woocommerce_use_block_notices_in_classic_theme)
 - [woocommerce_valid_order_statuses_for_payment](#woocommerce_valid_order_statuses_for_payment)
 - [woocommerce_variation_option_name](#woocommerce_variation_option_name)
@@ -882,10 +887,35 @@ apply_filters( 'woocommerce_checkout_must_be_logged_in_message', string $message
 
 ---
 
+## woocommerce_checkout_show_terms
+
+
+Filters whether checkout shows the terms and conditions.
+
+```php
+apply_filters( 'woocommerce_checkout_show_terms', bool $show_terms )
+```
+
+### Description
+
+Returning false hides the terms and conditions on classic checkout and on the Checkout block's Actions block, for example when an extension shows its own legal checkboxes. Like classic checkout, this only runs on the frontend, where callbacks can rely on the cart being loaded.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $show_terms | bool | Whether to show the terms and conditions. |
+
+### Source
+
+- [Blocks/BlockTypes/Checkout.php](../../../../../../src/Blocks/BlockTypes/Checkout.php)
+
+---
+
 ## woocommerce_default_payment_method
 
 
-Filters the payment method the Checkout block starts with.
+Filters the payment method the checkout starts with: the Checkout block, the classic checkout shortcode and the pay-for-order page all ask it. On the checkout it runs only when the shopper has no session choice that is still available for the cart.
 
 ```php
 apply_filters( 'woocommerce_default_payment_method', string $payment_method, array $available_gateways )
@@ -899,7 +929,7 @@ Return a gateway id from `$available_gateways` to preselect it, or an empty stri
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $payment_method | string | Gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first enabled gateway; '' when there is none. |
+| $payment_method | string | Gateway id WooCommerce would preselect, or '' when there is none. See PaymentUtils::get_default_payment_method() for how it is picked. |
 | $available_gateways | array | Gateways available for this cart, keyed by id. |
 
 ### Source
@@ -2006,6 +2036,99 @@ apply_filters( 'woocommerce_thankyou_order_received_title', string $title, \WC_O
 ### Source
 
 - [Blocks/BlockTypes/OrderConfirmation/Status.php](../../../../../../src/Blocks/BlockTypes/OrderConfirmation/Status.php)
+
+---
+
+## woocommerce_ucp_cart_continue_url
+
+
+Filters the URL a UCP cart hands the buyer for completing the purchase.
+
+```php
+apply_filters( 'woocommerce_ucp_cart_continue_url', string $continue_url, string $cart_id )
+```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $continue_url | string | Continue URL. |
+| $cart_id | string | Cart identifier. |
+
+### Source
+
+- [StoreApi/Utilities/Ucp/CartMapper.php](../../../../../../src/StoreApi/Utilities/Ucp/CartMapper.php)
+
+---
+
+## woocommerce_ucp_idempotency_enabled
+
+
+Filters whether UCP idempotency handling runs at all.
+
+```php
+apply_filters( 'woocommerce_ucp_idempotency_enabled', bool $enabled )
+```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $enabled | bool | Whether the `Idempotency-Key` header is honoured. Default true. |
+
+### Source
+
+- [StoreApi/Utilities/Ucp/IdempotencyClaim.php](../../../../../../src/StoreApi/Utilities/Ucp/IdempotencyClaim.php)
+
+---
+
+## woocommerce_ucp_idempotency_retention_seconds
+
+
+Filters how long a completed UCP idempotency record is kept, in seconds.
+
+```php
+apply_filters( 'woocommerce_ucp_idempotency_retention_seconds', int $seconds )
+```
+
+### Description
+
+How long a retry carrying the same key is answered from storage. The [UCP spec](https://ucp.dev/2026-04-08/specification/checkout-rest/) requires at least 24 hours.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $seconds | int | Retention window. Default one day. |
+
+### Source
+
+- [StoreApi/Utilities/Ucp/IdempotencyStore.php](../../../../../../src/StoreApi/Utilities/Ucp/IdempotencyStore.php)
+
+---
+
+## woocommerce_ucp_idempotency_strict
+
+
+Filters whether a UCP write must carry an `Idempotency-Key`.
+
+```php
+apply_filters( 'woocommerce_ucp_idempotency_strict', bool $strict )
+```
+
+### Description
+
+True, the default, matches the UCP OpenAPI document, which declares the header required on every mutating cart operation: a missing or malformed key is refused at 400. False honours a key when one is sent and lets a keyless write through.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $strict | bool | Whether a key is required. Default true. |
+
+### Source
+
+- [StoreApi/Utilities/Ucp/IdempotencyClaim.php](../../../../../../src/StoreApi/Utilities/Ucp/IdempotencyClaim.php)
 
 ---
 

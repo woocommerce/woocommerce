@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductDescriptionUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductItemTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
 
@@ -80,8 +81,22 @@ class CartItemSchema extends ItemSchema {
 			'quantity'             => wc_stock_amount( $cart_item['quantity'] ),
 			'quantity_limits'      => (object) ( new QuantityLimits() )->get_cart_item_quantity_limits( $cart_item ),
 			'name'                 => $this->prepare_html_response( $product->get_title() ),
-			'short_description'    => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_short_description() ) ) ),
-			'description'          => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_description() ) ) ),
+			'short_description'    => $this->prepare_html_response(
+				ProductDescriptionUtils::guarded_format(
+					$product,
+					function () use ( $product ) {
+						return wc_format_content( wp_kses_post( $product->get_short_description() ) );
+					}
+				)
+			),
+			'description'          => $this->prepare_html_response(
+				ProductDescriptionUtils::guarded_format(
+					$product,
+					function () use ( $product ) {
+						return wc_format_content( wp_kses_post( $product->get_description() ) );
+					}
+				)
+			),
 			'sku'                  => $this->prepare_html_response( $product->get_sku() ),
 			'low_stock_remaining'  => $this->get_low_stock_remaining( $product ),
 			'backorders_allowed'   => (bool) $product->backorders_allowed(),

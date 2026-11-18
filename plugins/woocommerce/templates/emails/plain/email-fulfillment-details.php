@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 11.3.0
+ * @version 11.4.0
  */
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
@@ -24,8 +24,7 @@ if ( null === $fulfillment->get_date_deleted() ) {
 	$tracking_url      = $fulfillment->get_meta( '_tracking_url' );
 	$shipment_provider = $fulfillment->get_meta( '_shipment_provider' );
 	if ( ! $tracking_number && ! $tracking_url && ! $shipment_provider ) {
-		echo esc_html__( 'No tracking information available for this fulfillment at the moment.', 'woocommerce' );
-		return;
+		echo esc_html__( 'No tracking information available for this fulfillment at the moment.', 'woocommerce' ) . "\n\n";
 	} else {
 		echo esc_html__( 'Tracking Number', 'woocommerce' ) . ': ' . esc_attr( $tracking_number ) . "\n";
 		echo esc_html__( 'Shipment Provider', 'woocommerce' ) . ': ' . esc_html( FulfillmentUtils::get_provider_display_name( $fulfillment ) ) . "\n";

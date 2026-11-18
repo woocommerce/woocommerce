@@ -58,13 +58,6 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	private $original_global_order;
 
 	/**
-	 * Shipping fields filter added by a test.
-	 *
-	 * @var callable|null
-	 */
-	private $shipping_fields_filter;
-
-	/**
 	 * Set up test state.
 	 */
 	public function setUp(): void {
@@ -82,10 +75,6 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	 * Restore test state.
 	 */
 	public function tearDown(): void {
-		if ( $this->shipping_fields_filter ) {
-			remove_filter( 'woocommerce_admin_shipping_fields', $this->shipping_fields_filter );
-		}
-
 		foreach ( $this->orders as $order ) {
 			$order->delete( true );
 		}
@@ -568,7 +557,7 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	public function test_displays_custom_fields_when_order_does_not_need_shipping(): void {
 		$order = $this->create_order_with_shipping_data( false );
 
-		$this->shipping_fields_filter = static function ( array $fields ): array {
+		$shipping_fields_filter = static function ( array $fields ): array {
 			$fields['order_routing_reference'] = array(
 				'label' => 'Order routing reference',
 				'value' => 'Routing reference 39300',
@@ -576,7 +565,7 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 
 			return $fields;
 		};
-		add_filter( 'woocommerce_admin_shipping_fields', $this->shipping_fields_filter );
+		add_filter( 'woocommerce_admin_shipping_fields', $shipping_fields_filter );
 
 		$summary = $this->render_shipping_address_summary( $order );
 
@@ -589,7 +578,7 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	public function test_displays_filtered_phone_value_when_order_does_not_need_shipping(): void {
 		$order = $this->create_order_with_shipping_data( false );
 
-		$this->shipping_fields_filter = static function ( array $fields ): array {
+		$shipping_fields_filter = static function ( array $fields ): array {
 			$fields['phone'] = array(
 				'label' => 'Extension contact reference',
 				'value' => 'Extension reference 39300',
@@ -597,7 +586,7 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 
 			return $fields;
 		};
-		add_filter( 'woocommerce_admin_shipping_fields', $this->shipping_fields_filter );
+		add_filter( 'woocommerce_admin_shipping_fields', $shipping_fields_filter );
 
 		$summary = $this->render_shipping_address_summary( $order );
 

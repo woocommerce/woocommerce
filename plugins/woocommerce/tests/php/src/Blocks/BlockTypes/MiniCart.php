@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\MiniCartMock;
  *
  * @since $VID:$
  */
-class MiniCart extends \WP_UnitTestCase {
+class MiniCart extends \WC_Unit_Test_Case {
 	use BlockTypeRegistryTrait;
 
 	/**
@@ -131,16 +131,6 @@ class MiniCart extends \WP_UnitTestCase {
 		);
 		WC()->cart->empty_cart();
 		add_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
-	}
-
-	/**
-	 * Tear down test. Called after every test.
-	 * @return void
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		WC()->cart->empty_cart();
-		remove_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
 	}
 
 	/**
@@ -370,10 +360,6 @@ class MiniCart extends \WP_UnitTestCase {
 
 		// Mini-cart should not render (empty output).
 		$this->assertEmpty( $output, 'Mini-cart should not render for logged-out users when store is in coming soon mode.' );
-
-		// Clean up.
-		update_option( 'woocommerce_coming_soon', 'no' );
-		update_option( 'woocommerce_store_pages_only', 'no' );
 	}
 
 	/**
@@ -398,8 +384,6 @@ class MiniCart extends \WP_UnitTestCase {
 
 		// Clean up.
 		wp_set_current_user( 0 );
-		update_option( 'woocommerce_coming_soon', 'no' );
-		update_option( 'woocommerce_store_pages_only', 'no' );
 	}
 
 	/**
@@ -494,10 +478,6 @@ class MiniCart extends \WP_UnitTestCase {
 
 		// Mini-cart should render (non-empty output) because the logic only checks for store pages coming soon.
 		$this->assertNotEmpty( $output, 'Mini-cart should render when site-wide coming soon is enabled but not store pages only.' );
-
-		// Clean up.
-		update_option( 'woocommerce_coming_soon', 'no' );
-		update_option( 'woocommerce_store_pages_only', 'no' );
 	}
 
 	/**

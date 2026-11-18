@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep quick changes to quantities, shipping, address, and payment method in the Cart and Checkout blocks from being lost.

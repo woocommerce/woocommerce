@@ -17,7 +17,7 @@ use PHPStan\Rules\RuleErrorBuilder;
 
 /**
  * Reports a class that extends WP_Ability directly. A WooCommerce ability extends
- * Automattic\WooCommerce\Abilities\Ability or ActionableAbility, so it gets its input
+ * Automattic\WooCommerce\Internal\Abilities\Ability or ActionableAbility, so it gets its input
  * converted to the schema types.
  *
  * @implements Rule<InClassNode>
@@ -25,7 +25,7 @@ use PHPStan\Rules\RuleErrorBuilder;
 final class AbilityClassRule implements Rule {
 
 	private const ALLOWED_CLASSES = array(
-		'Automattic\\WooCommerce\\Abilities\\Ability',
+		'Automattic\\WooCommerce\\Internal\\Abilities\\Ability',
 		'Automattic\\WooCommerce\\Internal\\Abilities\\REST\\RestAbility',
 	);
 
@@ -54,7 +54,7 @@ final class AbilityClassRule implements Rule {
 		}
 
 		return array(
-			RuleErrorBuilder::message( sprintf( 'Class %s extends WP_Ability. Extend Automattic\WooCommerce\Abilities\Ability, or ActionableAbility for an ability that saves, so the input is converted to the schema types.', $class->getName() ) )
+			RuleErrorBuilder::message( sprintf( 'Class %s extends WP_Ability. Extend Automattic\WooCommerce\Internal\Abilities\Ability, or ActionableAbility for an ability that saves, so the input is converted to the schema types.', $class->getName() ) )
 				->identifier( 'woocommerce.abilityClass' )
 				->build(),
 		);

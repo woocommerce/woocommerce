@@ -13,6 +13,16 @@ import {
 	getItemUpdateError,
 } from './selectors';
 
+/**
+ * A store action with arbitrary properties, compatible with existing Redux actions.
+ */
+export type AnyAction = {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	type: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[ extraProps: string ]: any;
+};
+
 export type IdType = number | string;
 
 export type IdQuery =

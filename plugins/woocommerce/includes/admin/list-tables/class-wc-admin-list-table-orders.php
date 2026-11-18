@@ -271,17 +271,16 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 		$refunds = array();
 		foreach ( $order->get_refunds() as $refund ) {
-			foreach ( $refund->get_items() as $item ) {
-				$product_id = $item->get_product_id();
-				if ( array_key_exists( $product_id, $refunds ) ) {
-					$refunds[ $product_id ]['quantity'] += absint( $item->get_quantity() );
-					$refunds[ $product_id ]['total']    += abs( (float) $item->get_total() );
-				} else {
-					$refunds[ $product_id ] = array(
-						'quantity' => absint( $item->get_quantity() ),
-						'total'    => abs( (float) $item->get_total() ),
+			foreach ( $refund->get_items() as $refunded_item ) {
+				$refunded_item_id = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
+				if ( ! isset( $refunds[ $refunded_item_id ] ) ) {
+					$refunds[ $refunded_item_id ] = array(
+						'quantity' => 0,
+						'total'    => 0,
 					);
 				}
+				$refunds[ $refunded_item_id ]['quantity'] += absint( $refunded_item->get_quantity() );
+				$refunds[ $refunded_item_id ]['total']    += abs( (float) $refunded_item->get_total() );
 			}
 		}
 
@@ -290,7 +289,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 			$product_object = is_callable( array( $item, 'get_product' ) ) ? $item->get_product() : null;
 			$row_class      = apply_filters( 'woocommerce_admin_html_order_preview_item_class', '', $item, $order );
-			$refund         = $refunds[ $item->get_product_id() ] ?? null;
+			$refund         = $refunds[ $item->get_id() ] ?? null;
 
 			$html .= '<tr class="wc-order-preview-table__item wc-order-preview-table__item--' . esc_attr( $item_id ) . ( $row_class ? ' ' . esc_attr( $row_class ) : '' ) . '">';
 

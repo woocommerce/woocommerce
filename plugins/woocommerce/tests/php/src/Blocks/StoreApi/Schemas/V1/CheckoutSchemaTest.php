@@ -73,7 +73,6 @@ class CheckoutSchemaTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		__internal_woocommerce_blocks_deregister_checkout_field( $this->field_id );
-		remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 
 		parent::tearDown();
 	}

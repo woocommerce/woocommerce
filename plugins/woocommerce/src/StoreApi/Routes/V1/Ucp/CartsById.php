@@ -3,7 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * UCP `GET /carts/{id}` and `PUT /carts/{id}` route.
@@ -88,7 +88,7 @@ class CartsById extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_update_response( \WP_REST_Request $request ) {
-		$line_items = UcpUtils::json_param( $request, 'line_items' );
+		$line_items = Utils::json_param( $request, 'line_items' );
 
 		// `line_items` is the whole desired state, so omitting it is not the same as
 		// sending an empty list: it leaves the cart alone.

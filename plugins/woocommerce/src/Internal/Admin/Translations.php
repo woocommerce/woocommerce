@@ -138,6 +138,7 @@ class Translations {
 		// the filesystem object should be hooked up.
 		global $wp_filesystem;
 		$combined_translation_data = array();
+		$domain_key                = 'messages';
 
 		foreach ( $json_i18n_filenames as $json_filename ) {
 			if ( ! $wp_filesystem->is_readable( $json_filename ) ) {
@@ -161,14 +162,18 @@ class Translations {
 				continue;
 			}
 
+			// `wp i18n make-json` keeps strings under "messages"; Loco Translate uses the text domain.
+			$chunk_domain_key = isset( $chunk_data['locale_data']['woocommerce'] ) ? 'woocommerce' : 'messages';
+
 			if ( empty( $combined_translation_data ) ) {
 				// Use the first translation file as the base structure.
 				$combined_translation_data = $chunk_data;
+				$domain_key                = $chunk_domain_key;
 			} else {
 				// Combine all messages from all chunk files.
-				$combined_translation_data['locale_data']['woocommerce'] = array_merge(
-					$combined_translation_data['locale_data']['woocommerce'],
-					$chunk_data['locale_data']['woocommerce']
+				$combined_translation_data['locale_data'][ $domain_key ] = array_merge(
+					$combined_translation_data['locale_data'][ $domain_key ] ?? array(),
+					$chunk_data['locale_data'][ $chunk_domain_key ] ?? array()
 				);
 			}
 		}

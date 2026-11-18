@@ -23,22 +23,12 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	protected $add_to_cart_quantity_filter_args = array();
 
 	/**
-	 * Customer shipping address before the test, restored at teardown.
-	 *
-	 * @var array<string, string>
-	 */
-	private $previous_shipping_address = array();
-
-	/**
 	 * Called before every test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
-
-		// Several tests change the shipping address on WC()->customer, which outlives a test.
-		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 	}
 
 	/**
@@ -46,12 +36,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-
-		WC()->customer->set_is_vat_exempt( false );
-		foreach ( $this->previous_shipping_address as $key => $value ) {
-			WC()->customer->{"set_shipping_{$key}"}( $value );
-		}
-		WC()->session->set( 'wc_notices', null );
 
 		// The checkout fields may have been built while a test's filters were attached.
 		$this->clear_checkout_fields();
@@ -63,8 +47,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		foreach ( array( 'shipping_method_counts', 'previous_shipping_methods', 'shipping_for_package_0', 'shipping_for_package_1', 'chosen_shipping_methods' ) as $key ) {
 			WC()->session->set( $key, null );
 		}
-
-		remove_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10 );
 	}
 
 	/**
@@ -871,6 +853,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$fixed_variation->set_parent_id( $product->get_id() );
 		$fixed_variation->set_attributes( array( 'finish' => 'Black%20White' ) );
 		$fixed_variation->set_regular_price( '10' );
+		$fixed_variation->set_menu_order( 1 );
 		$fixed_variation->save();
 
 		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $fixed_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
@@ -880,10 +863,12 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		WC()->cart->empty_cart();
 
+		// Ordered before the fixed variation so that variation does not claim this selection.
 		$any_variation = new WC_Product_Variation();
 		$any_variation->set_parent_id( $product->get_id() );
 		$any_variation->set_attributes( array( 'finish' => '' ) );
 		$any_variation->set_regular_price( '10' );
+		$any_variation->set_menu_order( 0 );
 		$any_variation->save();
 
 		$any_cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $any_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
@@ -1144,15 +1129,10 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->customer->set_shipping_location( 'US', 'NY', '', '' );
 
-		try {
-			$this->assertSame( $expected, WC()->cart->show_shipping(), 'Shipping should only stay hidden while the shopper has a postcode field to fill in.' );
+		$this->assertSame( $expected, WC()->cart->show_shipping(), 'Shipping should only stay hidden while the shopper has a postcode field to fill in.' );
 
-			WC()->customer->set_shipping_location( 'US', '', '', '' );
-			$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
-		} finally {
-			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
-			WC()->customer->set_shipping_location( '', '', '', '' );
-		}
+		WC()->customer->set_shipping_location( 'US', '', '', '' );
+		$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
 	}
 
 	/**
@@ -1555,13 +1535,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$customer                        = WC()->cart->get_customer();
-		$this->original_shipping_address = array(
-			'shipping_country'  => $customer->get_shipping_country(),
-			'shipping_state'    => $customer->get_shipping_state(),
-			'shipping_city'     => $customer->get_shipping_city(),
-			'shipping_postcode' => $customer->get_shipping_postcode(),
-		);
+		$customer = WC()->cart->get_customer();
 		$customer->set_shipping_country( 'GB' );
 		$customer->set_shipping_state( '' );
 		$customer->set_shipping_city( '' );
@@ -1689,7 +1663,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * @see https://github.com/woocommerce/woocommerce/issues/58864
 	 */
 	public function test_coupon_discount_amount_case_sensitivity() {
-		$old_calc_taxes = get_option( 'woocommerce_calc_taxes', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
 		$tax_rate = array(
@@ -1703,7 +1676,11 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			'tax_rate_order'    => '1',
 		);
 
-		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Rates are only ever found for a customer with a country.
+		WC()->customer->set_shipping_country( 'GB' );
+		WC()->customer->set_billing_country( 'GB' );
 
 		// Create a product to add to cart.
 		$product = WC_Helper_Product::create_simple_product();
@@ -1743,18 +1720,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Test get_coupon_discount_tax_amount with uppercase code.
 		$tax_amount_upper = WC()->cart->get_coupon_discount_tax_amount( 'TESTCOUPON123' );
 		$this->assertEquals( 2.00, $tax_amount_upper, 'get_coupon_discount_tax_amount should return correct value with uppercase code' );
-
-		// Clean up.
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		$product->delete( true );
-		$coupon->delete( true );
-
-		// Restore global state.
-		update_option( 'woocommerce_calc_taxes', $old_calc_taxes );
-		if ( $tax_rate_id ) {
-			WC_Tax::_delete_tax_rate( $tax_rate_id );
-		}
 	}
 
 		/**
@@ -2262,8 +2227,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2303,8 +2266,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2342,8 +2303,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNotEmpty( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -2379,8 +2338,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
 		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
-
-		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -3065,5 +3022,45 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$skipped_child->delete( true );
 			$first_child->delete( true );
 		}
+	}
+
+	/**
+	 * @testdox Add to cart rejects a variation when an earlier variation matches.
+	 */
+	public function test_add_to_cart_rejects_a_variation_when_an_earlier_variation_matches(): void {
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$red = new WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '10' );
+		$red->set_menu_order( 0 );
+		$red->save();
+
+		$any = new WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '5' );
+		$any->set_menu_order( 1 );
+		$any->save();
+
+		wc_clear_notices();
+		$cart_item_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$any->get_id(),
+			array(
+				'attribute_color' => 'Red',
+			)
+		);
+
+		$this->assertFalse( $cart_item_key, 'Add to cart should reject a variation when an earlier variation matches.' );
+		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
 	}
 }

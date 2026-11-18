@@ -48,18 +48,27 @@ final class SimpleCheck extends AbstractReadinessCheck {
 	private \Closure $test;
 
 	/**
+	 * Whether one variation has the problem, for checks a variable product fails through its variations.
+	 *
+	 * @var \Closure(\WC_Product):bool|null
+	 */
+	private ?\Closure $variation_test;
+
+	/**
 	 * Build a check.
 	 *
 	 * @param string                                           $id       Check id.
 	 * @param array{label:string,why:string,fix:string}        $texts    Merchant-facing texts.
 	 * @param array<string, array{field:string,effect:string}> $channels Field and effect by channel.
 	 * @param \Closure                                         $test     Whether a product has the problem: fn( \WC_Product ): bool.
+	 * @param \Closure|null                                    $variation_test Whether one variation has it, for checks a variable product fails through its variations.
 	 */
-	public function __construct( string $id, array $texts, array $channels, \Closure $test ) {
-		$this->id       = $id;
-		$this->texts    = $texts;
-		$this->channels = $channels;
-		$this->test     = $test;
+	public function __construct( string $id, array $texts, array $channels, \Closure $test, ?\Closure $variation_test = null ) {
+		$this->id             = $id;
+		$this->texts          = $texts;
+		$this->channels       = $channels;
+		$this->test           = $test;
+		$this->variation_test = $variation_test;
 	}
 
 	/**
@@ -77,7 +86,8 @@ final class SimpleCheck extends AbstractReadinessCheck {
 					'fix'   => __( 'Add a main product image.', 'woocommerce' ),
 				),
 				self::fields( array( 'image_url', 'image_link', 'imageLink' ), self::EFFECT_NOT_LISTABLE ),
-				static fn( \WC_Product $product ): bool => 0 === ProductFields::image_id( $product )
+				// Each variation lists as its own item with its own image, so one image on a variation is enough.
+				static fn( \WC_Product $product ): bool => array() === ProductFields::listing_image_ids( $product )
 			),
 			new self(
 				'missing_product_text',
@@ -118,24 +128,26 @@ final class SimpleCheck extends AbstractReadinessCheck {
 					'fix'   => __( 'Set the options on each variation.', 'woocommerce' ),
 				),
 				self::fields( array( 'variant_dict', 'color, size', 'color, sizes' ), self::EFFECT_GAPS ),
-				\Closure::fromCallable( array( self::class, 'has_unset_variation_option' ) )
+				\Closure::fromCallable( array( self::class, 'has_unset_variation_option' ) ),
+				\Closure::fromCallable( array( self::class, 'has_unset_option' ) )
 			),
 			new self(
 				'missing_variation_images',
 				array(
 					'label' => __( 'Variable products with variations missing images', 'woocommerce' ),
-					'why'   => __( 'Each variation lists as its own item; without its own image it shows the parent image, which may not match the color or finish.', 'woocommerce' ),
+					'why'   => __( 'Each variation lists as its own item; without its own image it shows the parent image, which may not match the color or finish, or no image when the product has none.', 'woocommerce' ),
 					'fix'   => __( 'Add an image to each variation.', 'woocommerce' ),
 				),
 				self::fields( array( 'image_url', 'image_link', 'imageLink' ), self::EFFECT_GAPS ),
 				static function ( \WC_Product $product ): bool {
 					foreach ( ProductFields::variations( $product ) as $variation ) {
-						if ( (int) $variation->get_image_id( 'edit' ) <= 0 ) {
+						if ( self::has_no_own_image( $variation ) ) {
 							return true;
 						}
 					}
 					return false;
-				}
+				},
+				\Closure::fromCallable( array( self::class, 'has_no_own_image' ) )
 			),
 			new self(
 				'title_too_long',
@@ -147,8 +159,21 @@ final class SimpleCheck extends AbstractReadinessCheck {
 				self::on_every_channel( 'title', self::EFFECT_GAPS ),
 				static fn( \WC_Product $product ): bool => mb_strlen( $product->get_name() ) > self::TITLE_MAX_LENGTH
 			),
+			new self(
+				'image_alt_text',
+				array(
+					'label' => __( 'Products whose main image has no alt text', 'woocommerce' ),
+					'why'   => __( 'AI agents and screen readers read alt text to tell what an image shows. No channel\'s feed asks for it, so it doesn\'t change the channel counts.', 'woocommerce' ),
+					'fix'   => __( 'Describe the main image in its Alternative text field in the media library.', 'woocommerce' ),
+				),
+				array(),
+				static function ( \WC_Product $product ): bool {
+					$image_id = ProductFields::image_id( $product );
+					return $image_id > 0 && '' === trim( (string) get_post_meta( $image_id, '_wp_attachment_image_alt', true ) );
+				}
+			),
 		);
-		$by_id  = array();
+		$by_id = array();
 		foreach ( $checks as $check ) {
 			$by_id[ $check->id() ] = $check;
 		}
@@ -192,11 +217,41 @@ final class SimpleCheck extends AbstractReadinessCheck {
 			return true;
 		}
 		foreach ( ProductFields::variations( $product ) as $variation ) {
-			if ( in_array( '', array_map( 'strval', $variation->get_attributes() ), true ) ) {
+			if ( self::has_unset_option( $variation ) ) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Whether a variation has an option set to "any".
+	 *
+	 * @param \WC_Product $variation Variation.
+	 */
+	private static function has_unset_option( \WC_Product $variation ): bool {
+		return in_array( '', array_map( 'strval', $variation->get_attributes() ), true );
+	}
+
+	/**
+	 * Whether a variation has no image of its own.
+	 *
+	 * @param \WC_Product $variation Variation.
+	 */
+	private static function has_no_own_image( \WC_Product $variation ): bool {
+		return (int) $variation->get_image_id( 'edit' ) <= 0;
+	}
+
+	/**
+	 * The variations that have the problem, for checks a variable product fails through its variations.
+	 *
+	 * @param \WC_Product $product Product that fails the rule.
+	 * @param ProductScan $scan    Catalog-wide lookups.
+	 * @return array<int, int>|null
+	 */
+	public function failing_variations( \WC_Product $product, ProductScan $scan ): ?array {
+		unset( $scan );
+		return null === $this->variation_test ? null : self::variation_ids_where( $product, $this->variation_test );
 	}
 
 	/**

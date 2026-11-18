@@ -19,7 +19,7 @@ use WP_Query;
  *
  * @group query-building
  */
-class QueryBuilder extends \WP_UnitTestCase {
+class QueryBuilder extends \WC_Unit_Test_Case {
 	/**
 	 * This variable holds our Product Query object.
 	 *
@@ -35,9 +35,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * @param bool $legacy_filterable Previously saved filterable value.
 	 */
 	public function test_local_filter_products( int $query_id, bool $legacy_filterable ): void {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Restore the original request verbatim after the test.
-		$original_uri = $_SERVER['REQUEST_URI'] ?? null;
-		$products     = array();
+		$products = array();
 		foreach ( array( '10.25', '15.28', '5' ) as $price ) {
 			$product = WC_Helper_Product::create_simple_product();
 			$product->set_regular_price( $price );
@@ -64,18 +62,13 @@ class QueryBuilder extends \WP_UnitTestCase {
 			$this->assertEqualsCanonicalizing( array_slice( $products, 0, 2 ), wp_list_pluck( ( new WP_Query( $query ) )->posts, 'ID' ) );
 		} finally {
 			set_query_var( 'min_price', '' );
-			if ( null === $original_uri ) {
-				unset( $_SERVER['REQUEST_URI'] );
-			} else {
-				$_SERVER['REQUEST_URI'] = $original_uri;
-			}
 		}
 	}
 
 	/**
 	 * Initiate the mock object.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 		$this->block_instance = new ProductCollectionMock();
 	}
@@ -888,19 +881,15 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		add_filter( 'wp_date', $wp_date_mock, 10, 2 );
 
-		try {
-			$first_seed   = ProductCollectionUtils::get_random_order_seed( 53919, $query_context );
-			$rotation_key = '2026-06-04';
-			$second_seed  = ProductCollectionUtils::get_random_order_seed( 53919, $query_context );
+		$first_seed   = ProductCollectionUtils::get_random_order_seed( 53919, $query_context );
+		$rotation_key = '2026-06-04';
+		$second_seed  = ProductCollectionUtils::get_random_order_seed( 53919, $query_context );
 
-			$this->assertNotSame(
-				$first_seed,
-				$second_seed,
-				'Random sorting should use a different seed when the daily rotation key changes.'
-			);
-		} finally {
-			remove_filter( 'wp_date', $wp_date_mock, 10 );
-		}
+		$this->assertNotSame(
+			$first_seed,
+			$second_seed,
+			'Random sorting should use a different seed when the daily rotation key changes.'
+		);
 	}
 
 	/**
