@@ -732,6 +732,45 @@ describe( 'useChunkedImport', () => {
 		expect( onFinish ).toHaveBeenCalled();
 	} );
 
+	it.each( [
+		[ 'an empty summary', {} ],
+		[
+			'a summary with a missing count',
+			{ created: 4, updated: 0, skipped: 0, failed: 0, rows: [] },
+		],
+		[
+			'a summary with a negative count',
+			{
+				created: 4,
+				updated: 0,
+				skipped: -1,
+				failed: 0,
+				notified: 0,
+				rows: [],
+			},
+		],
+	] )(
+		'treats a done response with %s as a finished session without a summary',
+		async ( _label, summary ) => {
+			mockedRunChunk.mockResolvedValue( {
+				...buildResponse( 4, 4, true ),
+				summary,
+			} as unknown as RunChunkResponse );
+
+			const { result, onError, onFinish } = renderImport();
+
+			await act( async () => {
+				await result.current.run();
+			} );
+
+			expect( onFinish ).not.toHaveBeenCalled();
+			expect( onError ).toHaveBeenCalledWith(
+				'The import finished, but its summary could not be loaded. Check your orders to see what was imported.',
+				true
+			);
+		}
+	);
+
 	it( 'treats a done response without a summary as a finished session', async () => {
 		mockedRunChunk.mockResolvedValue( buildResponse( 4, 4, true, false ) );
 

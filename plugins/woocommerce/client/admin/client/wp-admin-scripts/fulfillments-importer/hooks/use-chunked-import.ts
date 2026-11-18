@@ -12,6 +12,7 @@ import { errorCode, errorMessage, errorStatus } from '../data/errors';
 import type {
 	ColumnMapping,
 	ImporterSummary,
+	RunChunkCounts,
 	RunChunkResponse,
 } from '../data/types';
 
@@ -114,21 +115,31 @@ function isCount( value: unknown ): value is number {
 	return typeof value === 'number' && Number.isInteger( value ) && value >= 0;
 }
 
+/**
+ * True when the value carries the five result counters, each a count. Used for
+ * the counts of every chunk and for the summary of the last one.
+ */
+function hasCounts( value: unknown ): value is RunChunkCounts {
+	if ( ! value || typeof value !== 'object' ) {
+		return false;
+	}
+	const counts = value as Partial< RunChunkCounts >;
+	return (
+		isCount( counts.created ) &&
+		isCount( counts.updated ) &&
+		isCount( counts.skipped ) &&
+		isCount( counts.failed ) &&
+		isCount( counts.notified )
+	);
+}
+
 function isChunkResponse( response: unknown ): response is RunChunkResponse {
 	if ( ! response || typeof response !== 'object' ) {
 		return false;
 	}
 	const { processed, done, counts } = response as Partial< RunChunkResponse >;
 	return (
-		isCount( processed ) &&
-		typeof done === 'boolean' &&
-		!! counts &&
-		typeof counts === 'object' &&
-		isCount( counts.created ) &&
-		isCount( counts.updated ) &&
-		isCount( counts.skipped ) &&
-		isCount( counts.failed ) &&
-		isCount( counts.notified )
+		isCount( processed ) && typeof done === 'boolean' && hasCounts( counts )
 	);
 }
 
@@ -261,7 +272,7 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 				offsetRef.current = response.processed;
 
 				if ( response.done ) {
-					if ( response.summary ) {
+					if ( hasCounts( response.summary ) ) {
 						callbacksRef.current.onFinish?.( response.summary );
 					} else {
 						// The server ends the session with the last chunk, so there is nothing to retry.
