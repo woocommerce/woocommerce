@@ -83,13 +83,11 @@ class ChangelogFormatterTest extends TestCase {
 		$changelog = $this->formatter->parse( $contents );
 
 		$this->assertSame( $this->configured_title(), $changelog->getPrologue() );
-		$this->assertNotEmpty( $changelog->getEntries() );
-		$this->assertCount( preg_match_all( '/^= /m', $contents ), $changelog->getEntries() );
-
-		$latest = $changelog->getLatestEntry();
-
-		$this->assertMatchesRegularExpression( '/^\d+\.\d+\.\d+$/', $latest->getVersion() );
-		$this->assertNotEmpty( $latest->getChanges() );
+		$this->assertSame(
+			array( '1.5.1', '1.0.0' ),
+			array_map( static fn( $entry ) => $entry->getVersion(), $changelog->getEntries() )
+		);
+		$this->assertNotEmpty( $changelog->getLatestEntry()->getChanges() );
 	}
 
 	/**
@@ -500,6 +498,15 @@ class ChangelogFormatterTest extends TestCase {
 	public function test_parse_rejects_a_malformed_heading( $heading ) {
 		$this->expectException( InvalidArgumentException::class );
 		$this->formatter->parse( "*** Title ***\n\n= 1.5.1 - 2026-09-17 =\n* Fix - Fixed a thing.\n\n$heading\n* Fix - Fixed another thing.\n" );
+	}
+
+	/**
+	 * An indented malformed heading immediately after a bullet is still invalid.
+	 */
+	public function test_parse_rejects_an_indented_heading_in_an_open_change() {
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Line looks like a version heading but is not one: = Another line.' );
+		$this->formatter->parse( "*** Title ***\n\n= 1.5.1 - 2026-09-17 =\n* Fix - Fixed a thing.\n  = Another line.\n" );
 	}
 
 	/**
