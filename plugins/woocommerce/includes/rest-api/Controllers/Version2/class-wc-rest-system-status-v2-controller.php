@@ -1561,6 +1561,9 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			 * @since 2.1.0
 			 */
 			$located = apply_filters( 'wc_get_template', $located, $file, array(), WC()->template_path(), $wc_templates_dir );
+			if ( ! is_string( $located ) || '' === $located ) {
+				continue;
+			}
 
 			// Check if the template is overridden (located outside WC core templates dir).
 			$override_file = false;

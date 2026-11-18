@@ -295,20 +295,44 @@ class SystemStatusGetTest extends \WC_Unit_Test_Case {
 					'version'     => '2.0',
 					'author_name' => '<script>x</script>Raw Author',
 				),
+				array(
+					'plugin'      => 'encoded/encoded.php',
+					'name'        => 'Encoded',
+					'version'     => '3.0',
+					'author_name' => '&lt;a href="https://anchor.example/e"&gt;Encoded Author&lt;/a&gt;',
+				),
 			)
 		);
 
 		$status   = $this->get_status()['system_status'];
 		$active   = array_column( $status['active_plugins'], null, 'plugin' )['anchor/anchor.php'];
-		$inactive = array_column( $status['inactive_plugins'], null, 'plugin' )['raw/raw.php'];
+		$inactive = array_column( $status['inactive_plugins'], null, 'plugin' );
 		$json     = (string) wp_json_encode( array( $active, $inactive ), JSON_UNESCAPED_SLASHES );
 
 		$this->assertSame( 'Canary Plugin', $active['name'] );
 		$this->assertSame( '1.0 notes', $active['version'] );
 		$this->assertSame( 'Anchor & Co', $active['author'] );
-		$this->assertSame( 'Raw Author', $inactive['author'] );
+		$this->assertSame( 'Raw Author', $inactive['raw/raw.php']['author'] );
+		$this->assertSame( 'Encoded Author', $inactive['encoded/encoded.php']['author'] );
 		$this->assertStringNotContainsString( 'anchor.example', $json );
 		$this->assertStringNotContainsString( '<', $json );
+	}
+
+	/**
+	 * @testdox Should skip a wc_get_template result that is not a path.
+	 */
+	public function test_ignores_non_string_template_filter_result(): void {
+		$return_array = static fn() => array();
+		add_filter( 'wc_get_template', $return_array );
+
+		try {
+			$result = $this->get_status();
+		} finally {
+			remove_filter( 'wc_get_template', $return_array );
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertFalse( $result['system_status']['theme']['has_outdated_templates'] );
 	}
 
 	/**

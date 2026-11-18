@@ -159,13 +159,13 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 	}
 
 	/**
-	 * Plugin headers can carry HTML, links included, and active plugin headers arrive entity-encoded.
+	 * Plugin headers can carry HTML, links included, either literal or entity-encoded.
 	 *
 	 * @param mixed $value Header value.
 	 * @return string
 	 */
 	private static function to_text( $value ): string {
-		return html_entity_decode( wp_strip_all_tags( (string) $value ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		return wp_strip_all_tags( html_entity_decode( (string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 	}
 
 	/**
@@ -238,7 +238,7 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 			return (bool) $debug_display;
 		}
 
-		$ini        = ini_get_all( null, true );
+		$ini        = function_exists( 'ini_get_all' ) ? ini_get_all( null, true ) : false;
 		$configured = is_array( $ini ) ? ( $ini['display_errors']['global_value'] ?? '' ) : ini_get( 'display_errors' );
 		return in_array( strtolower( (string) $configured ), array( '1', 'on', 'true', 'yes', 'stdout' ), true );
 	}
@@ -411,7 +411,7 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 						),
 						'hide_errors'       => array(
 							'type'        => 'boolean',
-							'description' => __( 'Whether the site configuration (WP_DEBUG_DISPLAY or the PHP display_errors setting) hides PHP errors from visitors.', 'woocommerce' ),
+							'description' => __( 'Whether the configuration hides PHP errors from visitors: WP_DEBUG_DISPLAY when WP_DEBUG is on, otherwise display_errors in the PHP configuration. An ini_set() override at runtime is not seen.', 'woocommerce' ),
 						),
 					),
 					'additionalProperties' => false,
