@@ -51,7 +51,7 @@ function setSiteVersion( config, option, value ) {
  * @param {Object}   options                   Site setup options.
  * @param {string}   options.root              Extension checkout directory.
  * @param {string}   options.pluginPath        Relative path to the unpacked production plugin.
- * @param {Object}   [options.env=process.env] WordPress, WooCommerce and PHP version variables.
+ * @param {Object}   [options.env=process.env] WordPress, WooCommerce and explicit E2E PHP version variables.
  * @param {Object}   [options.woocommerce]     Optional latest and nightly WooCommerce install sources.
  * @param {Function} [options.configure]       Set repo-specific plugins and mappings.
  */
@@ -73,15 +73,23 @@ function writeE2ESiteConfig( {
 	config.plugins[ checkout ] = pluginPath;
 	config.mappings ??= {};
 	assertMappings( config.mappings, '.wp-env.test.json' );
-	config.mappings[ './wp-content/debug.log' ] =
-		'./tests/_output/e2e-debug.log';
 	configure?.( config );
 
-	const { WC_VERSION, WP_VERSION, PHP_VERSION } = env;
+	const { WC_VERSION = '', WP_VERSION, E2E_PHP_VERSION } = env;
 	let wooSource = woocommerce.latest ?? null;
-	if ( WC_VERSION === 'nightly' ) {
+	if ( WC_VERSION === 'nightly' || WC_VERSION === 'trunk' ) {
 		wooSource = woocommerce.nightly ?? nightlyWooCommerce;
-	} else if ( isVersionNumber( WC_VERSION ) ) {
+	} else if ( WC_VERSION !== '' && WC_VERSION !== 'latest' ) {
+		if (
+			typeof WC_VERSION !== 'string' ||
+			! /^\d+\.\d+\.\d+(?:-[a-zA-Z0-9]+(?:[.-][a-zA-Z0-9]+)*)?$/.test(
+				WC_VERSION
+			)
+		) {
+			throw new Error(
+				`Invalid WC_VERSION: ${ WC_VERSION } (expected latest, nightly or a release tag).`
+			);
+		}
 		wooSource =
 			'https://github.com/woocommerce/woocommerce/releases/download/' +
 			WC_VERSION +
@@ -113,16 +121,28 @@ function writeE2ESiteConfig( {
 			'https://wordpress.org/wordpress-' + WP_VERSION + '.zip'
 		);
 	}
-	// wp-env accepts numeric PHP versions without pre-release suffixes.
-	if (
-		typeof PHP_VERSION === 'string' &&
-		/^\d+(?:\.\d+)*$/.test( PHP_VERSION )
-	) {
-		setSiteVersion( config, 'phpVersion', PHP_VERSION );
+	if ( E2E_PHP_VERSION !== undefined ) {
+		if (
+			typeof E2E_PHP_VERSION !== 'string' ||
+			! /^\d+\.\d+$/.test( E2E_PHP_VERSION )
+		) {
+			throw new Error(
+				'Invalid E2E_PHP_VERSION (expected major.minor).'
+			);
+		}
+		setSiteVersion( config, 'phpVersion', E2E_PHP_VERSION );
 	}
 
 	assertPluginSources( config.plugins, '.wp-env.e2e.json' );
 	assertMappings( config.mappings, '.wp-env.e2e.json' );
+
+	const debugLog = 'wp-content/debug.log';
+	const debugLogMount = `./${ debugLog }`;
+	const developmentMappings = config.env?.development?.mappings;
+	delete config.mappings[ debugLog ];
+	delete developmentMappings?.[ debugLog ];
+	delete developmentMappings?.[ debugLogMount ];
+	config.mappings[ debugLogMount ] = './tests/_output/e2e-debug.log';
 	fs.writeFileSync(
 		path.join( root, '.wp-env.e2e.json' ),
 		JSON.stringify( config )

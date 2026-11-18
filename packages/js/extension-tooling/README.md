@@ -44,7 +44,7 @@ writeE2ESiteConfig( {
 } );
 ```
 
-The helper reads `.wp-env.test.json`, mounts the unpacked ZIP in place of `.` and maps a separate debug log. It applies the E2E runner's `WP_VERSION` and `WC_VERSION` and reads `PHP_VERSION` from the environment. WooCommerce overrides replace the `woocommerce.latest-stable.zip` or `woocommerce.zip` entry from `downloads.wordpress.org`. Use `configure( config )` to add local plugins or mappings, and pass `woocommerce.latest` or `woocommerce.nightly` when an integration requires a specific WooCommerce mount.
+The helper reads `.wp-env.test.json`, mounts the unpacked ZIP in place of `.` and maps a separate debug log. It applies the E2E runner's `WP_VERSION` and `WC_VERSION`. Set `E2E_PHP_VERSION` to a major and minor version such as `8.4` to override the browser site's PHP version. The debug log mount is set after `configure( config )`. WooCommerce overrides replace the `woocommerce.latest-stable.zip` or `woocommerce.zip` entry from `downloads.wordpress.org`. Use `configure( config )` to add local plugins or mappings, and pass `woocommerce.latest` or `woocommerce.nightly` when an integration requires a specific WooCommerce mount.
 
 `phpcs-baseline` uses the scan paths set by the extension's PHPCS ruleset. Declare at least one `<file>` entry in the ruleset.
 

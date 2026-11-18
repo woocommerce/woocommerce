@@ -58,7 +58,7 @@ test( 'sets pinned WordPress, WooCommerce and PHP versions', ( context ) => {
 		env: {
 			WP_VERSION: '7.0.1',
 			WC_VERSION: '11.3.0-rc.1',
-			PHP_VERSION: '8.2',
+			E2E_PHP_VERSION: '8.2',
 		},
 	} );
 	const config = JSON.parse( fs.readFileSync( output, 'utf8' ) );
@@ -74,13 +74,66 @@ test( 'sets pinned WordPress, WooCommerce and PHP versions', ( context ) => {
 	);
 } );
 
-test( 'keeps the configured PHP version when an override is invalid', ( context ) => {
+test( 'keeps the configured PHP version when the host exports PHP_VERSION', ( context ) => {
 	const { root, pluginPath, output } = site( context );
-	for ( const PHP_VERSION of [ 8, '8.2-rc.1' ] ) {
-		writeE2ESiteConfig( { root, pluginPath, env: { PHP_VERSION } } );
-		const config = JSON.parse( fs.readFileSync( output, 'utf8' ) );
-		assert.equal( config.phpVersion, '8.3' );
+	writeE2ESiteConfig( { root, pluginPath, env: { PHP_VERSION: '8.4.26' } } );
+	const config = JSON.parse( fs.readFileSync( output, 'utf8' ) );
+	assert.equal( config.phpVersion, '8.3' );
+} );
+
+test( 'rejects invalid explicit PHP and WooCommerce versions', ( context ) => {
+	const { root, pluginPath, output } = site( context );
+	fs.writeFileSync( output, '{}' );
+	for ( const [ env, key ] of [
+		[ { E2E_PHP_VERSION: '' }, 'E2E_PHP_VERSION' ],
+		[ { E2E_PHP_VERSION: '8.2.1' }, 'E2E_PHP_VERSION' ],
+		[ { E2E_PHP_VERSION: '8.2-rc.1' }, 'E2E_PHP_VERSION' ],
+		[ { WC_VERSION: '11.3' }, 'WC_VERSION' ],
+		[ { WC_VERSION: 'v11.3.0' }, 'WC_VERSION' ],
+	] ) {
+		assert.throws(
+			() => writeE2ESiteConfig( { root, pluginPath, env } ),
+			( error ) => error.message.includes( key )
+		);
+		assert.equal( fs.readFileSync( output, 'utf8' ), '{}' );
 	}
+} );
+
+test( 'keeps one debug log mount after configuration and development overrides', ( context ) => {
+	const { root, pluginPath, output } = site( context );
+	writeE2ESiteConfig( {
+		root,
+		pluginPath,
+		env: {},
+		configure( config ) {
+			config.mappings = {
+				'wp-content/debug.log': './old.log',
+				'wp-content/mu-plugins/example.php': './example.php',
+			};
+			config.env = {
+				development: {
+					mappings: {
+						'./wp-content/debug.log': './development.log',
+						'wp-content/wp-env.php': './development.php',
+					},
+				},
+				tests: {
+					mappings: { './wp-content/debug.log': './tests.log' },
+				},
+			};
+		},
+	} );
+	const config = JSON.parse( fs.readFileSync( output, 'utf8' ) );
+	assert.deepEqual( config.mappings, {
+		'wp-content/mu-plugins/example.php': './example.php',
+		'./wp-content/debug.log': './tests/_output/e2e-debug.log',
+	} );
+	assert.deepEqual( config.env.development.mappings, {
+		'wp-content/wp-env.php': './development.php',
+	} );
+	assert.deepEqual( config.env.tests.mappings, {
+		'./wp-content/debug.log': './tests.log',
+	} );
 } );
 
 test( 'rejects invalid plugins and mappings before writing a config', ( context ) => {
