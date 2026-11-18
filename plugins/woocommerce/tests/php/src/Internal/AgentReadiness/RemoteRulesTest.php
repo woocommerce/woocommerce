@@ -730,9 +730,9 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $file['checks'] );
 		$this->assertMatchesRegularExpression( '/^\d{4}-\d{2}-\d{2}$/', $file['version'], 'The version is the date of the last change' );
 		$this->assertSame(
-			array_fill_keys( StoreConditions::SHOWN_REQUIRED, array( 'required' => true ) ),
+			array_fill_keys( StoreConditions::SHOWN_REQUIRED, array( 'required' => true ) ) + array( 'pages_public' => array( 'required' => false ) ),
 			$file['store_checks'],
-			'The shipped file marks the bundled Required steps and turns nothing off, so the first publish changes nothing'
+			'The shipped file marks the bundled Required steps, and store pages that need a login as not Required, and turns nothing off, so the first publish changes nothing'
 		);
 
 		$rules  = ( new AgentReadiness() )->get_default_rules();

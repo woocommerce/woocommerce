@@ -2215,6 +2215,55 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Store pages that need a login are Recommended: in Fix first under Needed to list products with no Required badge, in Store access without one, never blocking AI shopping, with AI shopping on or off and with or without sales; once they open, the row folds.
+	 *
+	 * @dataProvider ai_shopping_and_sales
+	 *
+	 * @param bool $ucp_on     Whether AI shopping is on.
+	 * @param bool $with_sales Whether the report has sales to rank by.
+	 */
+	public function test_login_wall_is_recommended( bool $ucp_on, bool $with_sales ): void {
+		$this->make_every_step_pass();
+		$wall = array(
+			'id'       => 'pages_public',
+			'ok'       => false,
+			'blocks'   => 'listing',
+			'group'    => 'access',
+			'level'    => 'recommended',
+			'name'     => 'Store pages open without logging in',
+			'label'    => 'Store pages ask visitors to sign in',
+			'why'      => '',
+			'fix'      => '',
+			'fix_url'  => '',
+			'conflict' => false,
+		);
+		update_option( AgentReadiness::REPORT_OPTION, $this->report_with_listing_issue( $with_sales, array( $wall ) ), false );
+		update_option( 'woocommerce_feature_ucp_enabled', $ucp_on ? 'yes' : 'no' );
+
+		$view  = $this->view();
+		$items = array_column( $view['fix_first']['items'], null, 'id' );
+		$this->assertSame( 'Needed to list products', $items['pages_public']['tier'], 'It keeps products from being listed, so it stays in Fix first, but not as Required' );
+		$this->assertNull( $items['pages_public']['badge'] );
+		$this->assertNotContains( 'Required for AI shopping', array_column( $view['fix_first']['items'], 'tier' ) );
+		$row = array_column( array_column( $view['sections'], null, 'id' )['access']['rows'], null, 'id' )['pages_public'];
+		$this->assertSame( 'open', $row['state'] );
+		$this->assertNull( $row['badge'], 'No Required badge in Store access' );
+		$this->assertSame( 'Let shoppers open store pages without logging in', $row['title'] );
+		$this->assertStringStartsWith( 'If your store isn’t meant to be members-only', $row['fix'], 'A members-only store can keep its login' );
+		$this->assertStringNotContainsString( 'need to be open', $row['text'] );
+		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'It doesn\'t block the switch' );
+		$html = $this->render_page( AgenticCommerceSettings::SHOPPING_SECTION, $ucp_on );
+		$this->assertStringNotContainsString( 'required step', $html, 'It isn\'t a required step in the Setup checklist' );
+		$this->assertDoesNotMatchRegularExpression( '/<button[^>]*wc-agentic-commerce-ucp-switch[^>]*disabled=([\'"])disabled\1/', $html );
+		$this->assertSame( $ucp_on ? 'Active' : 'Off', wc_get_container()->get( ReadinessCheckPage::class )->shopping_badge( wc_get_container()->get( StoreConditions::class )->all() )[1], 'AI shopping doesn\'t need attention for it' );
+
+		update_option( AgentReadiness::REPORT_OPTION, $this->report_with_listing_issue( $with_sales, array( array( 'ok' => true ) + $wall ) ), false );
+		$view = $this->view();
+		$this->assertSame( array( 'missing_images' ), array_column( $view['fix_first']['items'], 'id' ), 'Once the pages open, it leaves Fix first' );
+		$this->assertContains( 'pages_public', array_column( array_column( $view['sections'], null, 'id' )['access']['folded'], 'id' ) );
+	}
+
+	/**
 	 * The view with one failing scanned check, which has no affects line of its own.
 	 *
 	 * @param string $id Check id.
