@@ -95,7 +95,8 @@ class StoreConditions {
 				'id'      => 'search_visible',
 				'ok'      => '0' !== (string) get_option( 'blog_public', '1' ),
 				'blocks'  => 'listing',
-				'group'   => 'find',
+				// In Store access, where the noindex check it causes sits.
+				'group'   => 'access',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Search engines can index the store', 'woocommerce' ),
 				'label'   => __( 'Store is hidden from search engines', 'woocommerce' ),

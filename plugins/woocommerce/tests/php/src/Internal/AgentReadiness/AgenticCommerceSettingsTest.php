@@ -633,11 +633,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame(
 			array(
-				'intent' => 'stable',
-				'text'   => 'All passed',
+				'intent' => 'none',
+				'text'   => 'Not checked yet',
 			),
 			array_column( $view['sections'], 'badge', 'id' )['find'],
-			'Not counted as a result; the card holds only the passing search engine step'
+			'Not counted as a result; the find card has no checks in this report'
 		);
 	}
 
@@ -2163,6 +2163,55 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( 'blog_public', '1' );
 		$this->assertCount( 1, $this->view()['fix_first']['items'], 'A noindex from elsewhere, such as an SEO plugin, still shows' );
 		$this->assertNotContains( 'Let search engines index your store', array_column( $this->view()['fix_first']['items'], 'title' ) );
+	}
+
+	/**
+	 * @testdox "Discourage search engines" shows both as the setup step and in the Store access card, where the noindex check it causes sits, once, Required and naming the setting, with AI shopping on or off and with or without sales.
+	 *
+	 * @dataProvider ai_shopping_and_sales
+	 *
+	 * @param bool $ucp_on     Whether AI shopping is on.
+	 * @param bool $with_sales Whether the report has sales to rank by.
+	 */
+	public function test_discourage_search_engines_shows_in_store_access( bool $ucp_on, bool $with_sales ): void {
+		$this->make_every_step_pass();
+		update_option( 'blog_public', '0' );
+		$noindex = array(
+			'id'       => 'no_noindex_directives',
+			'ok'       => false,
+			'blocks'   => 'listing',
+			'group'    => 'access',
+			'level'    => 'recommended',
+			'name'     => 'noindex name',
+			'label'    => 'noindex label',
+			'why'      => '',
+			'fix'      => '',
+			'fix_url'  => '',
+			'conflict' => false,
+		);
+		update_option( AgentReadiness::REPORT_OPTION, $this->report_with_listing_issue( $with_sales, array( $noindex ) ), false );
+		update_option( 'woocommerce_feature_ucp_enabled', $ucp_on ? 'yes' : 'no' );
+
+		$view     = $this->view();
+		$sections = array_column( $view['sections'], null, 'id' );
+		$rows     = array_column( $sections['access']['rows'], null, 'id' );
+		$this->assertSame( array( 'search_visible' ), array_keys( $rows ), 'The setup step shows in Store access, and the noindex it prints doesn\'t show again' );
+		$this->assertSame( 'Let search engines index your store', $rows['search_visible']['title'] );
+		$this->assertSame( 'Required', $rows['search_visible']['badge']['text'] ?? null );
+		$this->assertStringContainsString( 'Discourage search engines from indexing this site', $rows['search_visible']['fix'], 'The row names the setting to clear' );
+		$this->assertSame( 'Change Reading settings', $rows['search_visible']['link']['text'] ?? null );
+		$this->assertSame( '1 issue', $sections['access']['badge']['text'] );
+		$this->assertStringNotContainsString( 'search_visible', (string) wp_json_encode( $sections['find'] ), 'Only in Store access, not also in the find card' );
+		$this->assertSame( array( 'search_visible', 'missing_images' ), array_column( $view['fix_first']['items'], 'id' ) );
+		$this->assertSame( 'Required for AI shopping', $view['fix_first']['items'][0]['tier'] );
+		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'It doesn\'t block the switch' );
+		$html = $this->render_page( AgenticCommerceSettings::SHOPPING_SECTION, $ucp_on );
+		$this->assertMatchesRegularExpression( '#Let search engines index your store <mark[^>]*>Required</mark>.*?Discourage search engines from indexing this site#s', $html, 'The Setup checklist shows it too, with the same fix line' );
+
+		update_option( 'blog_public', '1' );
+		$sections = array_column( $this->view()['sections'], null, 'id' );
+		$this->assertSame( array( 'no_noindex_directives' ), array_column( $sections['access']['rows'], 'id' ), 'A noindex from elsewhere, such as an SEO plugin, shows in its place' );
+		$this->assertContains( 'search_visible', array_column( $sections['access']['folded'], 'id' ), 'The passed step folds in Store access' );
 	}
 
 	/**
