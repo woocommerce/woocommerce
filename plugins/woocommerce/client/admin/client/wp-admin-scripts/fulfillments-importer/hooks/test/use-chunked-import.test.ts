@@ -165,6 +165,8 @@ describe( 'useChunkedImport', () => {
 		[ 'no processed count', { processed: undefined } ],
 		[ 'a negative processed count', { processed: -1 } ],
 		[ 'a fractional processed count', { processed: 2.5 } ],
+		[ 'no done flag', { done: undefined } ],
+		[ 'a done flag that is not a boolean', { done: 'true' } ],
 		[ 'no counts', { counts: null } ],
 		[ 'empty counts', { counts: {} } ],
 		[
