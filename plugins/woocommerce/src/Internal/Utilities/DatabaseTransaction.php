@@ -143,6 +143,16 @@ final class DatabaseTransaction {
 	}
 
 	/**
+	 * Whether a run() or a transaction that wc_transaction_query() started is open, so a run() started now
+	 * would not decide its own commit. A transaction opened with start() alone does not count.
+	 *
+	 * @return bool
+	 */
+	public static function is_caller_open(): bool {
+		return self::$watching || self::$caller_open;
+	}
+
+	/**
 	 * Record a start, commit or rollback that wc_transaction_query() sent outside run().
 	 *
 	 * @param string $type Types: start, commit, rollback.

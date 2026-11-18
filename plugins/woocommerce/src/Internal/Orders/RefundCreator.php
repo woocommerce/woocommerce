@@ -207,16 +207,23 @@ class RefundCreator {
 	}
 
 	/**
-	 * Everything after the payment refund, in the order of wc_create_refund().
+	 * Everything after the payment refund, in the order of wc_create_refund(). When the order fails to save or
+	 * change status, the closing refund hooks still fire, as they do in wc_create_refund(), since the refund exists.
 	 *
 	 * @param \WC_Order_Refund $refund Saved refund.
+	 * @throws \RuntimeException When the refund or the order could not be saved, or the order status could not change.
 	 */
 	private function complete( \WC_Order_Refund $refund ): void {
-		$order = $this->order;
-		$args  = $this->args;
+		$order        = $this->order;
+		$args         = $this->args;
+		$status_error = null;
 
 		if ( $refund->get_refunded_payment() ) {
 			$refund->save();
+			$refund_save_error = $refund->get_last_save_error();
+			if ( $refund_save_error ) {
+				throw new \RuntimeException( esc_html( $refund_save_error->getMessage() ) );
+			}
 		}
 
 		if ( $args['restock_items'] ) {
@@ -281,8 +288,9 @@ class RefundCreator {
 			 */
 			$parent_status = apply_filters( 'woocommerce_order_fully_refunded_status', OrderStatus::REFUNDED, $order->get_id(), $refund->get_id() );
 
-			if ( $parent_status ) {
-				$order->update_status( $parent_status );
+			if ( $parent_status && ! $order->update_status( $parent_status ) ) {
+				/* translators: %s: order status. */
+				$status_error = sprintf( __( 'The order status could not be changed to %s.', 'woocommerce' ), $parent_status );
 			}
 		}
 
@@ -291,6 +299,7 @@ class RefundCreator {
 			$order->calculate_cogs_total_value();
 		}
 		$order->save();
+		$order_save_error = $order->get_last_save_error();
 
 		/**
 		 * Fires after a refund is created and the order is updated.
@@ -310,6 +319,13 @@ class RefundCreator {
 		 * @param int $refund_id Refund ID.
 		 */
 		do_action( 'woocommerce_order_refunded', $order->get_id(), $refund->get_id() );
+
+		if ( $order_save_error ) {
+			throw new \RuntimeException( esc_html( $order_save_error->getMessage() ) );
+		}
+		if ( null !== $status_error ) {
+			throw new \RuntimeException( esc_html( $status_error ) );
+		}
 	}
 
 	/**

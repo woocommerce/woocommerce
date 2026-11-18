@@ -97,7 +97,7 @@ class ExtensibleAbilities {
 	 * Core registers `product`, `order` and `order_item` there. An
 	 * extension registers a resource that its own abilities format, and then calls `add_fields_to_object()`
 	 * and `add_fields_schema()` from those abilities, exactly as Core's abilities do.
-	 * Registering the same resource again does nothing.
+	 * Registering the same resource again can only turn its syncs off, never back on.
 	 *
 	 * @since 11.3.0
 	 * @since 11.4.0 Added the `$args` parameter.
@@ -121,9 +121,11 @@ class ExtensibleAbilities {
 			return;
 		}
 
-		if ( ! isset( self::$resources[ $resource_name ] ) ) {
-			self::$resources[ $resource_name ] = array( 'syncs' => false !== ( $args['syncs'] ?? true ) );
+		$syncs = false !== ( $args['syncs'] ?? true );
+		if ( isset( self::$resources[ $resource_name ] ) ) {
+			$syncs = $syncs && self::$resources[ $resource_name ]['syncs'];
 		}
+		self::$resources[ $resource_name ] = array( 'syncs' => $syncs );
 	}
 
 	/**

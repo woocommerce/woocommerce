@@ -3,8 +3,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
 
@@ -274,7 +276,7 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	 * @testdox Should refuse a repeat of a refund it just made, and return that refund, so a retried call cannot refund twice.
 	 */
 	public function test_refuses_repeated_refund(): void {
-		$order = $this->create_order();
+		$order = $this->create_order_without_lines();
 		$input = array(
 			'id'             => $order->get_id(),
 			'amount'         => '10',
@@ -291,6 +293,60 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertSame( $first['refund']['id'], $second->get_error_data()['refund']['id'] );
 		$this->assertSame( array( '10' ), $this->gateway->refunded );
 		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should refuse a retry that lists the same lines in another order as a repeat of the refund.
+	 */
+	public function test_refuses_repeated_refund_with_lines_reordered(): void {
+		$order    = $this->create_order();
+		$product  = array(
+			'line_item_id' => $this->get_product_line_id( $order ),
+			'quantity'     => 1,
+		);
+		$shipping = array(
+			'line_item_id' => array_key_first( $order->get_items( 'shipping' ) ),
+			'refund_total' => 5,
+		);
+		$first    = $this->refund(
+			array(
+				'id'         => $order->get_id(),
+				'line_items' => array( $product, $shipping ),
+			)
+		);
+
+		$second = $this->refund(
+			array(
+				'id'         => $order->get_id(),
+				'line_items' => array( $shipping, $product ),
+			)
+		);
+
+		$this->assertIsArray( $first, is_wp_error( $first ) ? $first->get_error_message() : '' );
+		$this->assertWPError( $second );
+		$this->assertSame( 'woocommerce_ability_order_refund_duplicate', $second->get_error_code() );
+		$this->assertSame( $first['refund']['id'], $second->get_error_data()['refund']['id'] );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should refuse a retry of a full refund as a repeat with that refund, not as an order that cannot be refunded.
+	 */
+	public function test_refuses_repeated_full_refund_as_duplicate(): void {
+		$order = $this->create_order_without_lines();
+		$input = array(
+			'id'     => $order->get_id(),
+			'amount' => '50',
+		);
+		$first = $this->refund( $input );
+
+		$second = $this->refund( $input );
+
+		$this->assertIsArray( $first, is_wp_error( $first ) ? $first->get_error_message() : '' );
+		$this->assertWPError( $second );
+		$this->assertSame( 'woocommerce_ability_order_refund_duplicate', $second->get_error_code() );
+		$this->assertSame( 409, $second->get_error_data()['status'] );
+		$this->assertSame( $first['refund']['id'], $second->get_error_data()['refund']['id'] );
 	}
 
 	/**
@@ -341,19 +397,25 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	 * @testdox Should allow a retry after the gateway refused, since no refund was made.
 	 */
 	public function test_allows_retry_after_gateway_refusal(): void {
-		$order                        = $this->create_order();
+		$order                        = $this->create_order_without_lines();
 		$input                        = array(
 			'id'             => $order->get_id(),
 			'amount'         => '10',
 			'refund_payment' => true,
 		);
 		$this->gateway->refund_result = new \WP_Error( 'declined', 'Card issuer declined the refund.' );
-		$this->refund( $input );
-		$this->gateway->refund_result = true;
+		$refused                      = $this->refund( $input );
 
-		$result = $this->refund( $input );
+		$this->assertWPError( $refused );
+		$this->assertSame( 'woocommerce_ability_order_refund_gateway_failed', $refused->get_error_code() );
+		$this->assertCount( 1, $this->gateway->refunded );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+
+		$this->gateway->refund_result = true;
+		$result                       = $this->refund( $input );
 
 		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertCount( 2, $this->gateway->refunded );
 		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_refunds() );
 	}
 
@@ -394,10 +456,154 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should save nothing when another call took over the lock of the order while the refund was checked.
+	 */
+	public function test_refuses_refund_when_lock_was_taken_over(): void {
+		global $wpdb;
+
+		$order     = $this->create_order_without_lines();
+		$lock_name = 'woocommerce_ability_order_refund_lock_' . $order->get_id();
+		$taken     = (string) ( time() + HOUR_IN_SECONDS );
+		$hook      = null;
+		$hook      = static function ( $results ) use ( $wpdb, $lock_name, $taken, &$hook ) {
+			remove_filter( 'woocommerce_order_query', $hook );
+			$wpdb->update( $wpdb->options, array( 'option_value' => $taken ), array( 'option_name' => $lock_name ) );
+			return $results;
+		};
+		add_filter( 'woocommerce_order_query', $hook );
+
+		$result = $this->refund(
+			array(
+				'id'             => $order->get_id(),
+				'amount'         => '10',
+				'refund_payment' => true,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_lock_lost', $result->get_error_code() );
+		$this->assertSame( 409, $result->get_error_data()['status'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+		$this->assertSame( array(), $this->gateway->refunded );
+		$this->assertSame( $taken, $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $lock_name ) ), 'The lock of the other call should be kept.' );
+	}
+
+	/**
+	 * @testdox Should refuse a refund inside a transaction that the caller started, before the gateway is called.
+	 */
+	public function test_refuses_refund_inside_caller_transaction(): void {
+		$order = $this->create_order_without_lines();
+
+		DatabaseTransaction::track_caller( 'start' );
+		try {
+			$result = $this->refund(
+				array(
+					'id'             => $order->get_id(),
+					'amount'         => '10',
+					'refund_payment' => true,
+				)
+			);
+		} finally {
+			DatabaseTransaction::track_caller( 'commit' );
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_in_transaction', $result->get_error_code() );
+		$this->assertSame( array(), $this->gateway->refunded );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should refuse a refund that a woocommerce_create_refund callback starts inside the transaction of another refund, and finish the outer refund.
+	 */
+	public function test_refuses_refund_from_create_refund_hook(): void {
+		$order   = $this->create_order_without_lines();
+		$other   = $this->create_order_without_lines();
+		$started = false;
+		$nested  = null;
+		add_action(
+			'woocommerce_create_refund',
+			function () use ( $other, &$started, &$nested ) {
+				if ( ! $started ) {
+					$started = true;
+					$nested  = $this->refund(
+						array(
+							'id'     => $other->get_id(),
+							'amount' => '5',
+						)
+					);
+				}
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'             => $order->get_id(),
+				'amount'         => '10',
+				'refund_payment' => true,
+			)
+		);
+
+		$this->assertWPError( $nested );
+		$this->assertSame( 'woocommerce_ability_order_refund_in_transaction', $nested->get_error_code() );
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertSame( '10', $result['refund']['amount'] );
+		$this->assertSame( $order->get_id(), $result['refund']['order_id'] );
+		$this->assertSame( array( '10' ), $this->gateway->refunded );
+		$this->assertCount( 0, wc_get_order( $other->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Should finish the outer refund against its own order when a woocommerce_create_refund callback refunds another order without transactions.
+	 */
+	public function test_nested_refund_keeps_outer_refund_state(): void {
+		Constants::set_constant( 'WC_USE_TRANSACTIONS', false );
+		$order   = $this->create_order_without_lines();
+		$other   = $this->create_order_without_lines();
+		$started = false;
+		$nested  = null;
+		add_action(
+			'woocommerce_create_refund',
+			function () use ( $other, &$started, &$nested ) {
+				if ( ! $started ) {
+					$started = true;
+					$nested  = $this->refund(
+						array(
+							'id'             => $other->get_id(),
+							'amount'         => '5',
+							'refund_payment' => true,
+						)
+					);
+				}
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'             => $order->get_id(),
+				'amount'         => '10',
+				'refund_payment' => true,
+			)
+		);
+
+		$this->assertIsArray( $nested, is_wp_error( $nested ) ? $nested->get_error_message() : '' );
+		$this->assertSame( $other->get_id(), $nested['refund']['order_id'] );
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertSame( '10', $result['refund']['amount'] );
+		$this->assertSame( $order->get_id(), $result['refund']['order_id'] );
+		$this->assertSame( array( '5', '10' ), $this->gateway->refunded, 'Each order should reach the gateway once, with its own amount.' );
+
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds );
+		$this->assertSame( 10.0, (float) $refunds[0]->get_amount() );
+		$this->assertCount( 1, wc_get_order( $other->get_id() )->get_refunds() );
+	}
+
+	/**
 	 * @testdox Should keep the refund and say not to refund again when a hook fails after the gateway refunded.
 	 */
 	public function test_keeps_refund_when_a_later_step_fails(): void {
-		$order = $this->create_order();
+		$order = $this->create_order_without_lines();
 		$input = array(
 			'id'             => $order->get_id(),
 			'amount'         => '10',
@@ -431,7 +637,7 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	 * @testdox Should round the amount to the store decimals before the gateway gets it.
 	 */
 	public function test_rounds_amount_to_store_decimals(): void {
-		$order = $this->create_order();
+		$order = $this->create_order_without_lines();
 
 		$result = $this->refund(
 			array(
@@ -487,7 +693,7 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	 * @testdox Should delete the refund and fail when the gateway refuses.
 	 */
 	public function test_gateway_refusal_leaves_no_refund(): void {
-		$order                        = $this->create_order();
+		$order                        = $this->create_order_without_lines();
 		$this->gateway->refund_result = new \WP_Error( 'declined', 'Card issuer declined the refund.' );
 
 		$result = $this->refund(
@@ -742,5 +948,86 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 			),
 			array_values( $refund->get_items() )
 		);
+	}
+
+	/**
+	 * @testdox Should omit the reason when a filter turns it into null.
+	 */
+	public function test_query_omits_reason_filtered_to_null(): void {
+		$order = $this->create_order_without_lines();
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 5,
+				'reason'   => 'Late delivery',
+			)
+		);
+		add_filter( 'woocommerce_order_refund_get_reason', '__return_null' );
+
+		$result = wp_get_ability( 'woocommerce/order-refunds-query' )->execute( array( 'id' => $order->get_id() ) );
+
+		remove_filter( 'woocommerce_order_refund_get_reason', '__return_null' );
+		$this->assertIsArray( $result, is_wp_error( $result ) ? $result->get_error_message() : '' );
+		$this->assertArrayNotHasKey( 'reason', $result['refunds'][0] );
+	}
+
+	/**
+	 * @testdox Should report an incomplete refund when the refund cannot be saved as paid back after the gateway refunded.
+	 */
+	public function test_reports_incomplete_when_paid_refund_save_fails(): void {
+		$order = $this->create_order_without_lines();
+		add_action(
+			'woocommerce_before_order_refund_object_save',
+			static function ( $refund ) {
+				if ( $refund->get_refunded_payment() ) {
+					throw new \Exception( 'Refund storage is read-only.' );
+				}
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'             => $order->get_id(),
+				'amount'         => '10',
+				'refund_payment' => true,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_incomplete', $result->get_error_code() );
+		$this->assertStringContainsString( 'Refund storage is read-only.', $result->get_error_message() );
+		$this->assertInstanceOf( \WC_Order_Refund::class, wc_get_order( $result->get_error_data()['refund_id'] ) );
+		$this->assertSame( array( '10' ), $this->gateway->refunded );
+	}
+
+	/**
+	 * @testdox Should report an incomplete refund, and still fire the closing refund hooks, when the order status cannot change.
+	 */
+	public function test_reports_incomplete_when_status_update_fails(): void {
+		$order  = $this->create_order_without_lines();
+		$thrown = false;
+		add_action(
+			'woocommerce_before_order_object_save',
+			static function ( $saved ) use ( $order, &$thrown ) {
+				if ( ! $thrown && $saved->get_id() === $order->get_id() && OrderStatus::REFUNDED === $saved->get_status() ) {
+					$thrown = true;
+					throw new \Exception( 'Order storage is read-only.' );
+				}
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '50',
+			)
+		);
+
+		$this->assertTrue( $thrown, 'The order save during update_status() should have failed.' );
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_incomplete', $result->get_error_code() );
+		$this->assertInstanceOf( \WC_Order_Refund::class, wc_get_order( $result->get_error_data()['refund_id'] ) );
+		$this->assertContains( 'woocommerce_refund_created', $this->fired );
+		$this->assertContains( 'woocommerce_order_refunded', $this->fired );
 	}
 }

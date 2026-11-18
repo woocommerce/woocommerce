@@ -92,8 +92,9 @@ trait OrderRefundAbilityTrait {
 			'line_items'       => array(),
 		);
 
-		if ( '' !== $refund->get_reason() ) {
-			$data['reason'] = $refund->get_reason();
+		$reason = $refund->get_reason();
+		if ( is_scalar( $reason ) && ! is_bool( $reason ) && '' !== (string) $reason ) {
+			$data['reason'] = (string) $reason;
 		}
 
 		if ( $refund->get_refunded_by() > 0 ) {

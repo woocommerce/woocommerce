@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderRefundAbilityTrait;
 use Automattic\WooCommerce\Internal\Orders\RefundCreator;
 use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -65,6 +66,13 @@ class OrderRefundCreate extends ActionableAbility {
 	 * @var RefundCreator
 	 */
 	private RefundCreator $creator;
+
+	/**
+	 * Lock value of the current call, set by execute_change().
+	 *
+	 * @var string|null
+	 */
+	private ?string $lock = null;
 
 	/**
 	 * Get the ability registration arguments.
@@ -133,8 +141,16 @@ class OrderRefundCreate extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	public function change( $subject, array $input ) {
-		$order    = $this->order;
-		$decimals = wc_get_price_decimals();
+		$order          = $this->order;
+		$decimals       = wc_get_price_decimals();
+		$refund_payment = $input['refund_payment'] ?? false;
+
+		$fingerprint = self::fingerprint( $order, $input, $decimals );
+		$duplicate   = self::find_recent_refund( $order, $fingerprint );
+		if ( null !== $duplicate ) {
+			return self::duplicate_error( $duplicate );
+		}
+
 		$prepared = wc_get_container()->get( DataUtils::class )->prepare_refund_creation_or_error(
 			$order,
 			$input['line_items'] ?? array(),
@@ -146,24 +162,13 @@ class OrderRefundCreate extends ActionableAbility {
 			return self::refund_error( $prepared );
 		}
 
-		$amount         = NumberUtil::round( (float) $prepared['amount'], $decimals );
-		$refund_payment = $input['refund_payment'] ?? false;
+		$amount = NumberUtil::round( (float) $prepared['amount'], $decimals );
 		if ( $refund_payment && ! self::gateway_can_refund( $order ) ) {
 			return new \WP_Error(
 				'woocommerce_ability_order_refund_gateway_unsupported',
 				__( 'The payment gateway of this order cannot refund it automatically. Send refund_payment as false to record a manual refund, and return the money outside WooCommerce.', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
-		}
-
-		$fingerprint = md5(
-			(string) wp_json_encode(
-				array( $order->get_id(), wc_format_decimal( $amount, $decimals ), $prepared['line_items'], $refund_payment, get_current_user_id() )
-			)
-		);
-		$duplicate   = self::find_recent_refund( $order, $fingerprint );
-		if ( null !== $duplicate ) {
-			return self::duplicate_error( $duplicate );
 		}
 
 		$this->creator = new RefundCreator(
@@ -189,7 +194,8 @@ class OrderRefundCreate extends ActionableAbility {
 
 	/**
 	 * Lock the refunds of the order for the call, so a second call cannot pass the duplicate and amount checks
-	 * before the first refund is saved.
+	 * before the first refund is saved. The state of an outer call, such as a hook that refunds another order
+	 * through this ability, is restored at the end.
 	 *
 	 * @internal
 	 *
@@ -201,6 +207,18 @@ class OrderRefundCreate extends ActionableAbility {
 			return parent::execute_change( $input );
 		}
 
+		if ( DatabaseTransaction::is_caller_open() ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_refund_in_transaction',
+				__( 'An order cannot be refunded inside an open database transaction, as a rollback would lose the refund after the payment was returned. Call this ability outside the transaction.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$outer_order   = $this->order ?? null;
+		$outer_creator = $this->creator ?? null;
+		$outer_lock    = $this->lock;
+
 		$order_id = $input['id'];
 		$lock     = self::lock_order( $order_id );
 		if ( null === $lock ) {
@@ -210,11 +228,19 @@ class OrderRefundCreate extends ActionableAbility {
 				array( 'status' => 409 )
 			);
 		}
+		$this->lock = $lock;
 
 		try {
 			return parent::execute_change( $input );
 		} finally {
 			self::unlock_order( $order_id, $lock );
+			$this->lock = $outer_lock;
+			if ( null !== $outer_order ) {
+				$this->order = $outer_order;
+			}
+			if ( null !== $outer_creator ) {
+				$this->creator = $outer_creator;
+			}
 		}
 	}
 
@@ -226,6 +252,14 @@ class OrderRefundCreate extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	protected function save( $subject ) {
+		if ( ! $this->holds_lock() ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_refund_lock_lost',
+				__( 'This refund took too long, and another refund of the order may have started, so no refund was created. List the refunds of the order with woocommerce/order-refunds-query before you refund it again.', 'woocommerce' ),
+				array( 'status' => 409 )
+			);
+		}
+
 		$declined = $this->creator->before_save( $subject );
 		if ( is_wp_error( $declined ) ) {
 			return self::refund_error( $declined );
@@ -300,6 +334,39 @@ class OrderRefundCreate extends ActionableAbility {
 	 */
 	protected function writes_extension_fields(): bool {
 		return false;
+	}
+
+	/**
+	 * Hash of the call input with the lines sorted by ID, taken before the refund is checked, so a retry of a
+	 * refund that used up the order still matches it.
+	 *
+	 * @param \WC_Order $order    Order.
+	 * @param array     $input    Ability input.
+	 * @param int       $decimals Price decimals.
+	 * @return string
+	 */
+	private static function fingerprint( \WC_Order $order, array $input, int $decimals ): string {
+		$lines = array();
+		foreach ( $input['line_items'] ?? array() as $line ) {
+			$lines[] = array(
+				(int) $line['line_item_id'],
+				isset( $line['quantity'] ) ? (int) $line['quantity'] : null,
+				isset( $line['refund_total'] ) ? wc_format_decimal( NumberUtil::round( (float) $line['refund_total'], $decimals ), $decimals ) : null,
+			);
+		}
+		sort( $lines );
+
+		return md5(
+			(string) wp_json_encode(
+				array(
+					$order->get_id(),
+					isset( $input['amount'] ) ? wc_format_decimal( NumberUtil::round( (float) $input['amount'], $decimals ), $decimals ) : null,
+					$lines,
+					(bool) ( $input['refund_payment'] ?? false ),
+					get_current_user_id(),
+				)
+			)
+		);
 	}
 
 	/**
@@ -383,6 +450,26 @@ class OrderRefundCreate extends ActionableAbility {
 	}
 
 	/**
+	 * Whether the lock row of the order still holds the value of this call. The locking read sees a takeover that
+	 * committed after the transaction began, and makes a later takeover wait until this refund commits.
+	 *
+	 * @return bool
+	 */
+	private function holds_lock(): bool {
+		global $wpdb;
+
+		if ( null === $this->lock ) {
+			return false;
+		}
+
+		$value = $wpdb->get_var(
+			$wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s FOR UPDATE", self::LOCK_OPTION_PREFIX . $this->order->get_id() )
+		);
+
+		return $value === $this->lock;
+	}
+
+	/**
 	 * Release the lock of an order, unless another call took it over as stale.
 	 *
 	 * @param int    $order_id Order ID.
@@ -416,7 +503,7 @@ class OrderRefundCreate extends ActionableAbility {
 	 * @return \WP_Error
 	 */
 	private static function refund_error( \WP_Error $error ): \WP_Error {
-		$reason = trim( (string) preg_replace( '/(^|_)refund(?=_|$)/', '', (string) $error->get_error_code() ), '_' );
+		$reason = implode( '_', array_diff( explode( '_', (string) $error->get_error_code() ), array( 'refund' ) ) );
 		$data   = $error->get_error_data();
 
 		return new \WP_Error(

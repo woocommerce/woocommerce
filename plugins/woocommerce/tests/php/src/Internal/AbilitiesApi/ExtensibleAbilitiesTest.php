@@ -1124,9 +1124,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		ExtensibleAbilities::register_resource( 'late_resource' );
 
-		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
-		$resources->setAccessible( true );
-		$this->assertSame( array( 'product', 'order', 'order_item', 'order_refund', 'product_term', 'product_review', 'customer' ), array_keys( $resources->getValue() ) );
+		$this->assertFalse( ExtensibleAbilities::is_resource_registered( 'late_resource' ) );
 	}
 
 	/**
@@ -3619,6 +3617,25 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertEmpty( ExtensibleAbilities::get_syncs( 'order_refund' ) );
 		$this->assertTrue( ExtensibleAbilities::is_resource_registered( 'order_refund' ) );
+	}
+
+	/**
+	 * @testdox Should refuse a sync on order_refund even when an extension registers the resource before Core.
+	 */
+	public function test_a_sync_on_order_refund_is_refused_when_an_extension_registers_it_first(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_sync' );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_resources_init',
+			static function () {
+				ExtensibleAbilities::register_resource( 'order_refund' );
+			},
+			1
+		);
+		$this->register_sync( 'order_refund', 'test-ext', '__return_null' );
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$this->assertEmpty( ExtensibleAbilities::get_syncs( 'order_refund' ) );
 	}
 
 	/**
