@@ -309,7 +309,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should export the product name, sign-ups, notified and unsubscribed columns.
+	 * @testdox Should export the product name, sign-ups, notifications sent and unsubscribed columns.
 	 */
 	public function test_export_columns_and_rows(): void {
 		$controller = new Controller();
@@ -325,7 +325,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 			array(
 				'product_name'       => 'Product',
 				'signups'            => 'Sign-ups',
-				'notifications_sent' => 'Notified',
+				'notifications_sent' => 'Notifications sent',
 				'unsubscribed'       => 'Unsubscribed',
 			),
 			$controller->get_export_columns()

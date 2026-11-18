@@ -207,7 +207,7 @@ class Controller extends GenericController implements ExportableInterface {
 		$export_columns = array(
 			'product_name'       => __( 'Product', 'woocommerce' ),
 			'signups'            => __( 'Sign-ups', 'woocommerce' ),
-			'notifications_sent' => __( 'Notified', 'woocommerce' ),
+			'notifications_sent' => __( 'Notifications sent', 'woocommerce' ),
 			'unsubscribed'       => __( 'Unsubscribed', 'woocommerce' ),
 		);
 

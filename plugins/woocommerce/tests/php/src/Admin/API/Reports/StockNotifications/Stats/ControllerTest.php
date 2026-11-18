@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\API\Reports\StockNotifications\Stats;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Tests\Admin\API\Reports\StockNotifications\ReportTestTrait;
 use WC_REST_Unit_Test_Case;
@@ -91,16 +92,20 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->insert_row( 2, NotificationStatus::ACTIVE, '2026-03-05 10:00:00', 'b@example.com' );
 		$this->insert_row( 2, NotificationStatus::ACTIVE, '2026-01-01 10:00:00', 'c@example.com', '2026-03-06 10:00:00' );
 		$this->insert_row( 3, NotificationStatus::SENT, '2026-01-01 10:00:00', 'd@example.com', '2026-02-01 10:00:00' );
+		$this->insert_row( 4, NotificationStatus::CANCELLED, '2026-01-01 10:00:00', 'e@example.com', null, '2026-03-05 10:00:00', NotificationCancellationSource::USER );
+		$this->insert_row( 5, NotificationStatus::CANCELLED, '2026-01-01 10:00:00', 'f@example.com', null, '2026-03-05 10:00:00', NotificationCancellationSource::ADMIN );
 
 		$stats = $this->get_stats( self::PERIOD );
 
 		$this->assertSame(
 			array(
 				'signups'            => 3,
-				'customers'          => 2,
 				'notifications_sent' => 2,
+				'unsubscribed'       => 1,
+				'products_count'     => 3,
 			),
-			$stats['totals']
+			$stats['totals'],
+			'Products 1, 2 and 4 have activity in the period; 3 was sent before it and 5 was cancelled by an admin.'
 		);
 		$sent = array_column( array_map( array( $this, 'flatten_interval' ), $stats['intervals'] ), 'notifications_sent', 'interval' );
 		$this->assertSame( 1, $sent['2026-03-04'] );
@@ -118,8 +123,8 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 			$this->assertSame(
 				array(
 					'signups'            => 0,
-					'customers'          => 0,
 					'notifications_sent' => 0,
+					'unsubscribed'       => 0,
 				),
 				$interval['subtotals'],
 				"Interval {$interval['interval']} should be zero-filled."

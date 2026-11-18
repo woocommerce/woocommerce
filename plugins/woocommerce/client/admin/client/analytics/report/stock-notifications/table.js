@@ -41,7 +41,7 @@ class StockNotificationsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Notified', 'woocommerce' ),
+				label: __( 'Notifications sent', 'woocommerce' ),
 				key: 'notifications_sent',
 				isSortable: true,
 				isNumeric: true,
@@ -97,19 +97,25 @@ class StockNotificationsReportTable extends Component {
 
 	getSummary( totals ) {
 		const {
+			products_count: productsCount = 0,
 			signups = 0,
-			customers = 0,
 			notifications_sent: notificationsSent = 0,
+			unsubscribed = 0,
 		} = totals;
 		const currency = this.context.getCurrencyConfig();
 		return [
 			{
-				label: _n( 'Sign-up', 'Sign-ups', signups, 'woocommerce' ),
-				value: formatValue( currency, 'number', signups ),
+				label: _n(
+					'Product',
+					'Products',
+					productsCount,
+					'woocommerce'
+				),
+				value: formatValue( currency, 'number', productsCount ),
 			},
 			{
-				label: _n( 'Customer', 'Customers', customers, 'woocommerce' ),
-				value: formatValue( currency, 'number', customers ),
+				label: _n( 'Sign-up', 'Sign-ups', signups, 'woocommerce' ),
+				value: formatValue( currency, 'number', signups ),
 			},
 			{
 				label: _n(
@@ -119,6 +125,10 @@ class StockNotificationsReportTable extends Component {
 					'woocommerce'
 				),
 				value: formatValue( currency, 'number', notificationsSent ),
+			},
+			{
+				label: __( 'Unsubscribed', 'woocommerce' ),
+				value: formatValue( currency, 'number', unsubscribed ),
 			},
 		];
 	}
@@ -133,9 +143,10 @@ class StockNotificationsReportTable extends Component {
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
 				summaryFields={ [
+					'products_count',
 					'signups',
-					'customers',
 					'notifications_sent',
+					'unsubscribed',
 				] }
 				isRequesting={ isRequesting }
 				itemIdField="product_id"

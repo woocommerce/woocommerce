@@ -37,8 +37,10 @@ export const charts = applyFilters( STOCK_NOTIFICATIONS_REPORT_CHARTS_FILTER, [
 		type: 'number',
 	},
 	{
-		key: 'customers',
-		label: __( 'Customers', 'woocommerce' ),
+		key: 'unsubscribed',
+		label: __( 'Unsubscribed', 'woocommerce' ),
+		order: 'desc',
+		orderby: 'unsubscribed',
 		type: 'number',
 	},
 ] );

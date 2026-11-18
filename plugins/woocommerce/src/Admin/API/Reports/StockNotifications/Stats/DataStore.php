@@ -17,10 +17,10 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 /**
  * Stock notifications stats report: totals plus per-interval subtotals.
  *
- * - signups: same definition as the per-product report, bucketed on date_created_gmt.
- * - customers: distinct emails behind `signups`.
- * - notifications_sent: rows whose date_notified_gmt falls in the period, any status. The date is
- *   overwritten on re-send, so a re-send moves the count to the new date rather than adding to it.
+ * - signups, notifications_sent, unsubscribed: same definitions as the per-product report, each
+ *   bucketed on its own date column. date_notified_gmt is overwritten on re-send, so a re-send
+ *   moves the count to the new date rather than adding to it.
+ * - products_count: products with any of those metrics in the period, i.e. the per-product report's rows.
  */
 class DataStore extends StockNotificationsDataStore implements DataStoreInterface {
 	use StatsDataStoreTrait;
@@ -38,8 +38,9 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 		'date_start_gmt'     => 'strval',
 		'date_end_gmt'       => 'strval',
 		'signups'            => 'intval',
-		'customers'          => 'intval',
 		'notifications_sent' => 'intval',
+		'unsubscribed'       => 'intval',
+		'products_count'     => 'intval',
 	);
 
 	/**
@@ -79,10 +80,8 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 	 * @return void
 	 */
 	protected function assign_report_columns() {
-		$table_name           = self::get_db_table_name();
 		$this->report_columns = array(
-			'signups'   => 'COUNT(*) AS signups',
-			'customers' => "COUNT( DISTINCT {$table_name}.user_email ) AS customers",
+			'signups' => 'COUNT(*) AS signups',
 		);
 	}
 
@@ -136,8 +135,8 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 	 * Returns the report data based on normalized parameters.
 	 * Will be called by `get_data` if there is no data in cache.
 	 *
-	 * Runs the standard interval flow for sign-ups, then merges in notifications sent,
-	 * which are bucketed on a different date column.
+	 * Runs the standard interval flow for sign-ups, then merges in the metrics bucketed on other
+	 * date columns and the product count.
 	 *
 	 * @override StockNotificationsDataStore::get_noncached_stats_data()
 	 *
@@ -219,45 +218,55 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 		 * @var \stdClass $data
 		 */
 
-		if ( $this->is_field_requested( $query_args, 'notifications_sent' ) ) {
-			$sent_by_interval = $this->get_notifications_sent_by_interval( $query_args );
-			foreach ( $data->intervals as $idx => $interval ) {
-				$data->intervals[ $idx ]['notifications_sent'] = $sent_by_interval[ $interval['time_interval'] ] ?? 0;
+		$conditions = $this->get_metric_conditions( $query_args );
+		$columns    = array(
+			'notifications_sent' => 'date_notified_gmt',
+			'unsubscribed'       => 'date_cancelled_gmt',
+		);
+		foreach ( $columns as $metric => $column ) {
+			if ( ! $this->is_field_requested( $query_args, $metric ) ) {
+				continue;
 			}
-			$data->totals->notifications_sent = array_sum( $sent_by_interval );
+			$by_interval = $this->get_count_by_interval( $query_args, $column, $conditions[ $metric ] );
+			foreach ( $data->intervals as $idx => $interval ) {
+				$data->intervals[ $idx ][ $metric ] = $by_interval[ $interval['time_interval'] ] ?? 0;
+			}
+			$data->totals->{$metric} = array_sum( $by_interval );
+		}
+
+		if ( $this->is_field_requested( $query_args, 'products_count' ) ) {
+			$data->totals->products_count = (int) $wpdb->get_var(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- built from internal clauses and prepared conditions.
+				"SELECT COUNT( DISTINCT product_id ) FROM {$table_name} WHERE (" . implode( ') OR (', $conditions ) . ')'
+			);
 		}
 
 		return $data;
 	}
 
 	/**
-	 * Returns notifications sent in the query period, keyed by time interval id.
+	 * Returns the rows matching a metric condition in the query period, keyed by time interval id.
 	 *
 	 * Covers the whole period, not just the current page, so any page can look up its intervals.
 	 *
-	 * @param array $query_args Query parameters.
+	 * @param array  $query_args Query parameters.
+	 * @param string $column     Date column the metric is bucketed on.
+	 * @param string $condition  Prepared SQL condition for the metric, including the period.
 	 * @return array<string, int>
 	 */
-	protected function get_notifications_sent_by_interval( $query_args ) {
+	protected function get_count_by_interval( $query_args, $column, $condition ) {
 		global $wpdb;
 
 		$table_name = self::get_db_table_name();
-		$column     = 'date_notified_gmt';
 		$interval   = $this->get_interval_sql( $query_args['interval'], $table_name, $column );
-		$where      = $wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
-			"{$table_name}.`{$column}` >= %s AND {$table_name}.`{$column}` <= %s",
-			$this->get_utc_datetime_string( $query_args['after'] ),
-			$this->get_utc_datetime_string( $query_args['before'] )
-		);
 
 		$rows = $wpdb->get_results(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- built from internal clauses and a prepared WHERE.
-			"SELECT {$interval} AS time_interval, COUNT(*) AS notifications_sent FROM {$table_name} WHERE {$where} GROUP BY time_interval",
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- built from internal clauses and a prepared condition.
+			"SELECT {$interval} AS time_interval, COUNT(*) AS total FROM {$table_name} WHERE {$condition} GROUP BY time_interval",
 			ARRAY_A
 		);
 
-		return array_map( 'intval', array_column( (array) $rows, 'notifications_sent', 'time_interval' ) );
+		return array_map( 'intval', array_column( (array) $rows, 'total', 'time_interval' ) );
 	}
 
 	/**

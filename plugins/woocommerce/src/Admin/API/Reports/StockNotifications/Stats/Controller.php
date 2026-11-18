@@ -101,16 +101,23 @@ class Controller extends GenericStatsController {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'customers'          => array(
-				'title'       => __( 'Customers', 'woocommerce' ),
-				'description' => __( 'Distinct email addresses behind the sign-ups in the period.', 'woocommerce' ),
+			'notifications_sent' => array(
+				'title'       => __( 'Notifications sent', 'woocommerce' ),
+				'description' => __( 'Back-in-stock emails sent in the period. A re-sent notification counts once, on its latest send date.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'notifications_sent' => array(
-				'title'       => __( 'Notifications sent', 'woocommerce' ),
-				'description' => __( 'Back-in-stock emails sent in the period. A re-sent notification counts once, on its latest send date.', 'woocommerce' ),
+			'unsubscribed'       => array(
+				'title'       => __( 'Unsubscribed', 'woocommerce' ),
+				'description' => __( 'Sign-ups the customer cancelled in the period.', 'woocommerce' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'products_count'     => array(
+				'title'       => __( 'Products', 'woocommerce' ),
+				'description' => __( 'Products with sign-ups, notifications sent or unsubscribes in the period.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -146,7 +153,6 @@ class Controller extends GenericStatsController {
 			array(
 				'date',
 				'signups',
-				'customers',
 			)
 		);
 
