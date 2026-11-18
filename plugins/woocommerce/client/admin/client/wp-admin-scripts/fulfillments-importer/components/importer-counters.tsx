@@ -4,16 +4,13 @@
 import React from 'react';
 import { _n } from '@wordpress/i18n';
 
-interface Counts {
-	created: number;
-	updated: number;
-	skipped: number;
-	failed: number;
-	notified: number;
-}
+/**
+ * Internal dependencies
+ */
+import type { RunChunkCounts } from '../data/types';
 
 interface Props {
-	counts: Counts;
+	counts: RunChunkCounts;
 }
 
 /**
