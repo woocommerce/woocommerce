@@ -1070,7 +1070,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	private function get_shared_stock_status( array $child_ids, array $rows ): ?string {
 		$child_statuses = array_filter( array_column( $rows, 'stock_status', 'child_id' ) );
-		if ( count( $child_statuses ) === count( $child_ids ) ) {
+		$children_count = count( $child_ids );
+		if ( $children_count === count( $child_statuses ) && $children_count === count( $rows ) ) {
 			$unique = array_values( array_unique( $child_statuses ) );
 			if ( 1 === count( $unique ) ) {
 				return $unique[0];
