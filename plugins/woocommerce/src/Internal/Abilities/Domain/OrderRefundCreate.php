@@ -54,6 +54,12 @@ class OrderRefundCreate extends ActionableAbility {
 	private const PAYMENT_REQUESTED_META_KEY = '_woocommerce_ability_refund_payment_requested';
 
 	/**
+	 * Refund meta saved right before the gateway is asked to refund the payment, so a refund whose paid flag
+	 * failed to save is not taken for one the gateway never saw.
+	 */
+	private const PAYMENT_ATTEMPTED_META_KEY = '_woocommerce_ability_refund_payment_attempted';
+
+	/**
 	 * Option that locks the refunds of one order, followed by the order ID.
 	 */
 	private const LOCK_OPTION_PREFIX = 'woocommerce_ability_order_refund_lock_';
@@ -316,7 +322,8 @@ class OrderRefundCreate extends ActionableAbility {
 	/**
 	 * Refund the payment, restock and update the order, after the refund row is committed. A gateway refusal
 	 * deletes the refund, so the call fails with nothing saved. A later failure keeps the refund, and its error
-	 * tells the client not to refund again. After a failed final save, the gateway is not asked to refund.
+	 * tells the client not to refund again. After a failed final save, or when the attempt cannot be recorded,
+	 * the gateway is not asked to refund.
 	 *
 	 * @param \WC_Order_Refund $subject Saved refund.
 	 * @param array            $input   Ability input.
@@ -324,7 +331,10 @@ class OrderRefundCreate extends ActionableAbility {
 	 */
 	protected function after_commit( $subject, array $input ): ?\WP_Error {
 		$save_error = $this->save_error;
-		$finished   = $this->creator->finish( $subject, null === $save_error );
+		if ( null === $save_error && ( $input['refund_payment'] ?? false ) && ! self::record_payment_attempt( $subject ) ) {
+			$save_error = new \WP_Error( 'refund_incomplete', __( 'The refund could not be marked as sent to the payment gateway.', 'woocommerce' ) );
+		}
+		$finished = $this->creator->finish( $subject, null === $save_error );
 		if ( null !== $save_error && ! is_wp_error( $finished ) ) {
 			$finished = new \WP_Error( 'refund_incomplete', $save_error->get_error_message() );
 		}
@@ -336,9 +346,9 @@ class OrderRefundCreate extends ActionableAbility {
 			if ( $subject->get_refunded_payment() ) {
 				/* translators: 1: refund ID, 2: error message. */
 				$message = __( 'The payment gateway refunded the payment and refund %1$d was created, but a later step failed, so the order may not show the refund in full: %2$s Do not refund again. Check the order instead.', 'woocommerce' );
-			} elseif ( self::is_unpaid( $subject ) ) {
+			} elseif ( self::is_unsettled( $subject ) ) {
 				/* translators: 1: refund ID, 2: error message. */
-				$message = __( 'Refund %1$d was created, but it could not be saved in full, so the payment gateway was not asked to refund the payment: %2$s Do not refund again. Check the order, and with the merchant either return the money outside WooCommerce or delete refund %1$d and refund again.', 'woocommerce' );
+				$message = __( 'Refund %1$d was created, but it could not be saved in full, so the payment gateway was not asked to refund the payment: %2$s Do not refund again. An extension may still have refunded the payment, so first check with the merchant and the payment gateway whether the money was returned. Only if it was not, return the money outside WooCommerce or delete refund %1$d and refund again.', 'woocommerce' );
 			} else {
 				/* translators: 1: refund ID, 2: error message. */
 				$message = __( 'Refund %1$d was created, but a later step failed, so the order may not show the refund in full: %2$s Do not refund again. Check the order instead.', 'woocommerce' );
@@ -448,7 +458,7 @@ class OrderRefundCreate extends ActionableAbility {
 				continue;
 			}
 			$created = $refund->get_date_created();
-			if ( self::is_unpaid( $refund ) || ( $created && $created->getTimestamp() > time() - self::DUPLICATE_WINDOW ) ) {
+			if ( self::is_unsettled( $refund ) || ( $created && $created->getTimestamp() > time() - self::DUPLICATE_WINDOW ) ) {
 				return $refund;
 			}
 		}
@@ -457,14 +467,38 @@ class OrderRefundCreate extends ActionableAbility {
 	}
 
 	/**
-	 * Whether the call that created the refund asked the gateway to refund the payment and the payment was not refunded.
-	 * A gateway refusal deletes the refund, so only a refund kept after a failed save matches.
+	 * Whether the call that created the refund asked for the payment to be refunded and the refund is not marked
+	 * as paid. A gateway refusal deletes the refund, so only a refund kept after a failed save matches.
 	 *
 	 * @param \WC_Order_Refund $refund Refund.
 	 * @return bool
 	 */
-	private static function is_unpaid( \WC_Order_Refund $refund ): bool {
+	private static function is_unsettled( \WC_Order_Refund $refund ): bool {
 		return 'yes' === $refund->get_meta( self::PAYMENT_REQUESTED_META_KEY ) && ! $refund->get_refunded_payment();
+	}
+
+	/**
+	 * Save the meta that says the gateway is about to be asked to refund the payment.
+	 *
+	 * @param \WC_Order_Refund $refund Saved refund.
+	 * @return bool False when the meta was not saved, and then it is not kept in memory either.
+	 */
+	private static function record_payment_attempt( \WC_Order_Refund $refund ): bool {
+		$refund->update_meta_data( self::PAYMENT_ATTEMPTED_META_KEY, 'yes' );
+		try {
+			$refund->save_meta_data();
+		} catch ( \Throwable $e ) {
+			unset( $e );
+		}
+
+		foreach ( $refund->get_meta_data() as $meta ) {
+			if ( self::PAYMENT_ATTEMPTED_META_KEY === $meta->key && ! empty( $meta->id ) ) {
+				return true;
+			}
+		}
+
+		$refund->delete_meta_data( self::PAYMENT_ATTEMPTED_META_KEY );
+		return false;
 	}
 
 	/**
@@ -478,20 +512,29 @@ class OrderRefundCreate extends ActionableAbility {
 		$created   = $created ? $created->getTimestamp() : time();
 		$formatted = self::format_refund_for_response( $refund );
 
-		$message = self::is_unpaid( $refund )
-			? sprintf(
+		if ( self::is_unsettled( $refund ) && 'yes' === $refund->get_meta( self::PAYMENT_ATTEMPTED_META_KEY ) ) {
+			$message = sprintf(
 				/* translators: 1: refund ID, 2: time since the refund, such as "2 mins". */
-				__( 'Refund %1$d recorded the same refund of this order %2$s ago, but the payment gateway was not asked to refund the payment, so no new refund was created. Check the order, and with the merchant either return the money outside WooCommerce or delete refund %1$d and refund again.', 'woocommerce' ),
+				__( 'Refund %1$d recorded the same refund of this order %2$s ago, so no new refund was created. The payment gateway was asked to refund the payment, but its result was not saved, so it may have refunded the payment. Do not refund again. Check the payment with the merchant and the payment gateway.', 'woocommerce' ),
 				$refund->get_id(),
 				human_time_diff( $created )
-			)
-			: sprintf(
+			);
+		} elseif ( self::is_unsettled( $refund ) ) {
+			$message = sprintf(
+				/* translators: 1: refund ID, 2: time since the refund, such as "2 mins". */
+				__( 'Refund %1$d recorded the same refund of this order %2$s ago, but the payment gateway was not asked to refund the payment, so no new refund was created. An extension may still have refunded the payment, so first check with the merchant and the payment gateway whether the money was returned. Only if it was not, return the money outside WooCommerce or delete refund %1$d and refund again.', 'woocommerce' ),
+				$refund->get_id(),
+				human_time_diff( $created )
+			);
+		} else {
+			$message = sprintf(
 				/* translators: 1: refund ID, 2: time since the refund, such as "2 mins", 3: time until the same refund is allowed again. */
 				__( 'Refund %1$d refunded the same amount and lines of this order %2$s ago, so no new refund was created. The same refund can be created again in %3$s.', 'woocommerce' ),
 				$refund->get_id(),
 				human_time_diff( $created ),
 				human_time_diff( time(), $created + self::DUPLICATE_WINDOW )
 			);
+		}
 
 		return new \WP_Error(
 			'woocommerce_ability_order_refund_duplicate',

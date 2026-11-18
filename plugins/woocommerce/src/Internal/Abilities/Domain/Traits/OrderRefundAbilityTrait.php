@@ -42,7 +42,7 @@ trait OrderRefundAbilityTrait {
 				),
 				'refunded_payment' => array(
 					'type'        => 'boolean',
-					'description' => __( 'Whether the payment gateway sent the money back. False for a manual refund, or when the gateway was not asked to refund the payment.', 'woocommerce' ),
+					'description' => __( 'Whether WooCommerce recorded that the payment gateway refunded the payment. False for a manual refund, but also when the gateway or an extension refunded it and the refund was not marked as paid, so check with the gateway when a refund error asked you to.', 'woocommerce' ),
 				),
 				'date_created'     => array(
 					'type'        => 'string',

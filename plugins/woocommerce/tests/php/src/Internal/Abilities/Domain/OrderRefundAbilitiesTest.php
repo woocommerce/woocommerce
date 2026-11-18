@@ -1166,6 +1166,19 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( '10' ), $this->gateway->refunded );
 		$this->assertContains( 'woocommerce_order_partially_refunded', $this->fired );
 		$this->assertContains( 'woocommerce_order_refunded', $this->fired );
+
+		$retry = $this->refund(
+			array(
+				'id'             => $order->get_id(),
+				'amount'         => '10',
+				'refund_payment' => true,
+			)
+		);
+		$this->assertWPError( $retry );
+		$this->assertSame( 'woocommerce_ability_order_refund_duplicate', $retry->get_error_code() );
+		$this->assertStringContainsString( 'may have refunded the payment', $retry->get_error_message() );
+		$this->assertStringNotContainsString( 'delete refund', $retry->get_error_message() );
+		$this->assertSame( array( '10' ), $this->gateway->refunded );
 	}
 
 	/**
