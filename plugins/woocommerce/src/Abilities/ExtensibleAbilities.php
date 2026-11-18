@@ -685,7 +685,10 @@ class ExtensibleAbilities {
 	 *                               callback skips the objects it does not need. Core ignores the
 	 *                               return value. When it throws, Core logs the error and formats
 	 *                               the objects anyway, so the get_callback must still load its
-	 *                               data for an object that is not in the cache.
+	 *                               data for an object that is not in the cache. Core calls prime
+	 *                               callbacks only on reads, not on writes, so key the cache by object
+	 *                               ID and do not keep entries across writes in the same request, for
+	 *                               example by refilling the cache on every call.
 	 * }
 	 */
 	public static function register_prime( array $args ): void {
@@ -699,6 +702,8 @@ class ExtensibleAbilities {
 	/**
 	 * Call every prime callback of a resource with the objects that an ability
 	 * is about to format. A callback that throws is logged, and the next one runs.
+	 * An extension that registers its own resource calls it from its list
+	 * abilities before add_fields_to_object(), as Core's abilities do.
 	 *
 	 * @since 11.4.0
 	 *

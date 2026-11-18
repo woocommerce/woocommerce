@@ -1023,12 +1023,33 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$first  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen one' ) );
 		$second = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen two' ) );
 		$calls  = array();
+		$cache  = array();
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( &$cache ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'product',
+						'namespace'     => 'test-ext',
+						'field'         => 'primed',
+						'output_schema' => array( 'type' => 'string' ),
+						'get_callback'  => static function ( \WC_Product $product ) use ( &$cache ) {
+							return $cache[ $product->get_id() ] ?? null;
+						},
+					)
+				);
+			}
+		);
 		foreach ( array( 'test-ext', 'other_ext' ) as $extension_namespace ) {
 			$this->register_prime(
 				'product',
 				$extension_namespace,
-				static function ( array $objects ) use ( &$calls, $extension_namespace ) {
-					$calls[] = array( $extension_namespace, array_map( static fn( \WC_Product $product ) => $product->get_id(), $objects ) );
+				static function ( array $objects ) use ( &$calls, &$cache, $extension_namespace ) {
+					$ids     = array_map( static fn( \WC_Product $product ) => $product->get_id(), $objects );
+					$calls[] = array( $extension_namespace, $ids );
+					if ( 'test-ext' === $extension_namespace ) {
+						$cache = array_combine( $ids, array_map( static fn( int $id ) => 'primed-' . $id, $ids ) );
+					}
 				}
 			);
 		}
@@ -1038,14 +1059,17 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$ids = array_column( $products, 'id' );
 		$this->assertSame( array( array( 'test-ext', $ids ), array( 'other_ext', $ids ) ), $calls );
 		$this->assertEqualsCanonicalizing( array( $first->get_id(), $second->get_id() ), $ids );
+		foreach ( $products as $product ) {
+			$this->assertSame( 'primed-' . $product['id'], $product['extensions']['test-ext']['primed'] );
+		}
 	}
 
 	/**
 	 * @testdox Should call the order and order item prime callbacks once with every order and every product line.
 	 */
 	public function test_prime_callbacks_get_orders_and_line_items(): void {
-		$order = \WC_Helper_Order::create_order();
-		$calls = array();
+		$orders = array( \WC_Helper_Order::create_order(), \WC_Helper_Order::create_order() );
+		$calls  = array();
 		foreach ( array( 'order', 'order_item' ) as $resource_name ) {
 			$this->register_prime(
 				$resource_name,
@@ -1059,13 +1083,17 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->run_ability(
 			'woocommerce/orders-query',
 			array(
-				'per_page'           => 1,
+				'per_page'           => 2,
 				'include_line_items' => true,
 			)
 		);
 
-		$this->assertSame( array( array( $order->get_id() ) ), $calls['order'] );
-		$this->assertSame( array( array_keys( $order->get_items() ) ), $calls['order_item'] );
+		$item_ids = array_merge( ...array_map( static fn( \WC_Order $order ) => array_keys( $order->get_items() ), $orders ) );
+		$this->assertCount( 2, $item_ids );
+		$this->assertCount( 1, $calls['order'] );
+		$this->assertEqualsCanonicalizing( array_map( static fn( \WC_Order $order ) => $order->get_id(), $orders ), $calls['order'][0] );
+		$this->assertCount( 1, $calls['order_item'] );
+		$this->assertEqualsCanonicalizing( $item_ids, $calls['order_item'][0] );
 	}
 
 	/**
