@@ -468,7 +468,7 @@ class StoreOutputChecks {
 				'name'    => __( 'Product structured data gives shipping details', 'woocommerce' ),
 				'label'   => __( 'Product structured data has no shipping details', 'woocommerce' ),
 				'why'     => __( 'Agents tell shoppers the delivery options and cost before they buy.', 'woocommerce' ),
-				'fix'     => __( 'Add a shipping zone with a shipping method, so WooCommerce can add shipping details to your products. If you have one, check whether your theme or an SEO plugin replaces WooCommerce\'s structured data.', 'woocommerce' ),
+				'fix'     => __( 'Add a shipping zone with a delivery method other than local pickup, so WooCommerce can add shipping details to your products. If you already have one, check whether your theme or an SEO plugin replaces WooCommerce\'s structured data.', 'woocommerce' ),
 				'fix_url' => '',
 			),
 			array(
@@ -1081,9 +1081,9 @@ class StoreOutputChecks {
 	/**
 	 * Whether WooCommerce would print shipping details for the scanned product: a simple product with a
 	 * price that needs shipping (the conditions in WC_Structured_Data::generate_product_data()), on a store
-	 * ShippingDestinations can describe. False when the store has no zone with a delivery method yet, which
-	 * the merchant can fix. Null when WooCommerce wouldn't print them for another reason: a variable product,
-	 * shipping off, a zone criteria filter, or zones it can't describe.
+	 * ShippingDestinations can describe. False when the store has no zone with a delivery method other than
+	 * local pickup, which the merchant can fix. Null when WooCommerce wouldn't print them for another reason:
+	 * a variable product, shipping off, a zone criteria filter, or zones it can't describe.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */

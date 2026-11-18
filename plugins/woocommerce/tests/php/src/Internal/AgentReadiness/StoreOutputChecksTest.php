@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\AgentReadiness\JsonLd;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
@@ -413,17 +414,20 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With the JSON-LD WooCommerce prints, the shipping and buy action checks pass or couldn't check, never fail, for each product state.
+	 * @testdox The shipping and buy action checks match the JSON-LD WooCommerce prints for each product state.
 	 *
-	 * @testWith ["shipped", true]
-	 *           ["virtual", false]
-	 *           ["out_of_stock", false]
-	 *           ["variable", false]
+	 * Shipping details, then the buy action. A virtual product still gets a buy action. An out-of-stock
+	 * product still gets shipping details. A variable product page gets neither.
 	 *
-	 * @param string $state   Product state.
-	 * @param bool   $printed Whether WooCommerce prints both fields for it.
+	 * @testWith ["shipped", [true, true]]
+	 *           ["virtual", [null, true]]
+	 *           ["out_of_stock", [true, null]]
+	 *           ["variable", [null, null]]
+	 *
+	 * @param string                $state    Product state.
+	 * @param array<int, bool|null> $expected Shipping check, then the buy action check.
 	 */
-	public function test_core_jsonld_never_fails_shipping_or_buy_action( string $state, bool $printed ): void {
+	public function test_core_jsonld_matches_what_woocommerce_prints( string $state, array $expected ): void {
 		$zone = new \WC_Shipping_Zone();
 		$zone->add_location( 'US', 'country' );
 		$zone->save();
@@ -432,7 +436,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		if ( 'virtual' === $state ) {
 			$product->set_virtual( true );
 		} elseif ( 'out_of_stock' === $state ) {
-			$product->set_stock_status( 'outofstock' );
+			$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		}
 		$product->save();
 		if ( $product instanceof \WC_Product_Variable ) {
@@ -441,13 +445,12 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$product = wc_get_product( $product->get_id() );
 		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
 		$results = $this->results();
-		$checks  = array( $results['product_shipping_schema'], $results['product_buy_action_schema'] );
 
-		if ( $printed ) {
-			$this->assertSame( array( true, true ), $checks );
-		} else {
-			$this->assertNotContains( false, $checks, 'A check fails on markup WooCommerce printed: its copy of the print conditions has drifted from WC_Structured_Data' );
-		}
+		$this->assertSame(
+			$expected,
+			array( $results['product_shipping_schema'], $results['product_buy_action_schema'] ),
+			'These checks disagree with the JSON-LD WooCommerce printed: their copy of the print conditions has drifted from WC_Structured_Data'
+		);
 		$zone->delete();
 	}
 
