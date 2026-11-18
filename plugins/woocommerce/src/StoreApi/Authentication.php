@@ -17,6 +17,7 @@ class Authentication {
 		// UCP routes get rate limiting only: the other filters below assume a browser client with a nonce.
 		if ( 0 === stripos( $GLOBALS['wp']->query_vars['rest_route'] ?? '', '/wc/ucp/' ) ) {
 			add_filter( 'rest_authentication_errors', array( $this, 'rate_limit_ucp_request' ) );
+			add_filter( 'rest_authentication_errors', array( $this, 'opt_in_checkout_endpoint' ), 9, 1 );
 			return;
 		}
 
@@ -204,10 +205,15 @@ class Authentication {
 	 * @return \WP_Error|null|bool
 	 */
 	public function opt_in_checkout_endpoint( $result ) {
+		$route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
+
+		// Of the UCP checkout routes only complete places an order, so only it is matched.
+		$is_checkout = ( $this->is_request_to_store_api() && preg_match( '#/wc/store(?:/v\d+)?/checkout#', $route ) )
+			|| preg_match( '#^/wc/ucp/v\d+/checkout-sessions/[^/]+/complete/?$#i', $route );
+
 		if (
 			FeaturesUtil::feature_is_enabled( 'rate_limit_checkout' )
-			&& $this->is_request_to_store_api()
-			&& preg_match( '#/wc/store(?:/v\d+)?/checkout#', $GLOBALS['wp']->query_vars['rest_route'] )
+			&& $is_checkout
 			&& $this->is_only_post_request()
 		) {
 			add_filter(

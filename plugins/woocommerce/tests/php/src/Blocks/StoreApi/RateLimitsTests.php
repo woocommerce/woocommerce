@@ -131,6 +131,42 @@ class RateLimitsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that the checkout rate limit covers the UCP route that places an order, and no other UCP route.
+	 *
+	 * @dataProvider provider_ucp_checkout_rate_limit
+	 *
+	 * @param string $route    Requested REST route.
+	 * @param bool   $expected Whether the checkout rate limit should apply.
+	 */
+	public function test_ucp_complete_opts_in_to_checkout_rate_limit( string $route, bool $expected ) {
+		update_option( 'woocommerce_feature_rate_limit_checkout_enabled', 'yes' );
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+
+		remove_all_filters( 'rest_authentication_errors' );
+		$GLOBALS['wp']->query_vars['rest_route'] = $route;
+		$authentication                          = new Authentication();
+		$authentication->init();
+		apply_filters( 'rest_authentication_errors', null );
+
+		$options = RateLimits::get_options();
+		$this->assertSame( $expected, $options->enabled );
+		$this->assertSame( $expected ? 3 : RateLimits::LIMIT, $options->limit );
+	}
+
+	/**
+	 * Data provider for test_ucp_complete_opts_in_to_checkout_rate_limit.
+	 *
+	 * @return array
+	 */
+	public function provider_ucp_checkout_rate_limit(): array {
+		return array(
+			'complete' => array( '/wc/ucp/v1/checkout-sessions/abc-123/complete', true ),
+			'create'   => array( '/wc/ucp/v1/checkout-sessions', false ),
+			'cancel'   => array( '/wc/ucp/v1/checkout-sessions/abc-123/cancel', false ),
+		);
+	}
+
+	/**
 	 * Tests that get_ip_address() correctly selects the $_SERVER var, parses and return the IP whether
 	 * behind a proxy or not.
 	 *
