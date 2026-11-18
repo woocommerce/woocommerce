@@ -67,6 +67,16 @@ export default [
 
 Refer to the [ESLint documentation on Flat Config](https://eslint.org/docs/latest/use/configure/configuration-files) for more information.
 
+### Jest 30 rules without a Jest install
+
+When your extension uses the Jest 30 rules from `recommended` without Jest installed, add `woocommerce.configs.jest30` after the recommended config. The setting gives the Jest plugin a version when it cannot detect one. Keep your test runner and file-specific overrides in your own config.
+
+```js
+import woocommerce from '@woocommerce/eslint-plugin';
+
+export default [ ...woocommerce.configs.recommended, woocommerce.configs.jest30 ];
+```
+
 ### Do not register `import` or `react` yourself
 
 `eslint-plugin-import` and `eslint-plugin-react` do not support ESLint v10.

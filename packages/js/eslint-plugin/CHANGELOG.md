@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0](https://www.npmjs.com/package/@woocommerce/eslint-plugin/v/4.1.0) - 2026-11-17
+
+-   Minor - Add an opt-in Jest 30 lint setting for extensions that use the recommended config without installing Jest. [#71059]
+
 ## [4.0.0](https://www.npmjs.com/package/@woocommerce/eslint-plugin/v/4.0.0) - 2026-08-06 
 
 -   Major [ **BREAKING CHANGE** ] - Add ESLint v9/v10 Flat Config support. `configs.recommended` is now a Flat Config array rather than an eslintrc object, the `eslint` peer range is `^9.22.0 || ^10.0.0`, and prettier `>=3` is required. There is no eslintrc compatibility wrapper: consumers must migrate to `eslint.config.mjs`. Do not register `eslint-plugin-import` or `eslint-plugin-react` yourself; neither supports ESLint v10, and `recommended` provides the wrapped instances. [#66621]

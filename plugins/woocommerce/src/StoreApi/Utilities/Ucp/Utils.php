@@ -35,12 +35,28 @@ class Utils {
 	const CAPABILITY_CART = 'dev.ucp.shopping.cart';
 
 	/**
+	 * Capability served by the `/checkout-sessions` routes.
+	 */
+	const CAPABILITY_CHECKOUT = 'dev.ucp.shopping.checkout';
+
+	/**
 	 * Whether the UCP routes are registered.
 	 *
 	 * @return bool
 	 */
 	public static function is_enabled(): bool {
 		return FeaturesUtil::feature_is_enabled( self::FEATURE_ID );
+	}
+
+	/**
+	 * Whether the checkout routes are served.
+	 *
+	 * They take guest orders only and create no account, so a store that requires one serves none of them.
+	 *
+	 * @return bool
+	 */
+	public static function is_checkout_enabled(): bool {
+		return ! WC()->checkout()->is_registration_required();
 	}
 
 	/**
@@ -64,12 +80,12 @@ class Utils {
 	}
 
 	/**
-	 * Spec and schema references for every capability these routes serve, keyed by capability name.
+	 * Spec and schema references for every capability the store serves, keyed by capability name.
 	 *
 	 * @return array
 	 */
 	public static function capability_declarations(): array {
-		return array(
+		$declarations = array(
 			self::CAPABILITY_CATALOG_SEARCH => array(
 				'version' => self::VERSION,
 				'spec'    => 'https://ucp.dev/' . self::VERSION . '/specification/catalog/search',
@@ -85,7 +101,18 @@ class Utils {
 				'spec'    => 'https://ucp.dev/' . self::VERSION . '/specification/cart',
 				'schema'  => 'https://ucp.dev/' . self::VERSION . '/schemas/shopping/cart.json',
 			),
+			self::CAPABILITY_CHECKOUT       => array(
+				'version' => self::VERSION,
+				'spec'    => 'https://ucp.dev/' . self::VERSION . '/specification/checkout',
+				'schema'  => 'https://ucp.dev/' . self::VERSION . '/schemas/shopping/checkout.json',
+			),
 		);
+
+		if ( ! self::is_checkout_enabled() ) {
+			unset( $declarations[ self::CAPABILITY_CHECKOUT ] );
+		}
+
+		return $declarations;
 	}
 
 	/**
@@ -183,7 +210,7 @@ class Utils {
 	 * differently — retry smaller, fix the quantity, or re-read the cart — stay apart
 	 * and the rest collapse.
 	 *
-	 * @param string $code Store API error code.
+	 * @param string $code Store API or stock reservation error code.
 	 * @param string $fallback UCP code for a cart error UCP has no closer name for.
 	 * @return string One of `out_of_stock`, `not_found`, `invalid_quantity` or the fallback.
 	 */
@@ -192,6 +219,8 @@ class Utils {
 			case 'woocommerce_rest_product_out_of_stock':
 			case 'woocommerce_rest_product_partially_out_of_stock':
 			case 'woocommerce_rest_product_too_many_in_cart':
+			case 'woocommerce_product_out_of_stock':
+			case 'woocommerce_product_not_enough_stock':
 				return 'out_of_stock';
 			case 'woocommerce_rest_cart_invalid_key':
 				return 'not_found';

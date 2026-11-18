@@ -37,6 +37,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/coupons-query',
 		'woocommerce/coupon-create',
 		'woocommerce/coupon-update',
+		'woocommerce/store-settings-get',
+		'woocommerce/settings-groups-query',
+		'woocommerce/settings-query',
 		'woocommerce/product-terms-query',
 		'woocommerce/product-term-create',
 		'woocommerce/product-term-update',
@@ -464,7 +467,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertArrayHasKey( 'total_pages', $properties );
 			$this->assertArrayHasKey( 'page', $properties );
 			$this->assertArrayHasKey( 'per_page', $properties );
-			$this->assertArrayNotHasKey( 'total', $properties );
+			$this->assertSame( 'integer', $properties['total']['type'] );
+			$this->assertNotEmpty( $properties['total']['description'] );
 			$this->assertNotEmpty( $properties[ $collection_key ]['description'] ?? '' );
 			$this->assertNotEmpty( $properties['total_pages']['description'] ?? '' );
 			$this->assertNotEmpty( $properties['page']['description'] ?? '' );
@@ -1047,6 +1051,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'amount' => '10',
 				),
 			),
+			'store-settings-get'          => array( 'woocommerce/store-settings-get', array() ),
+			'settings-groups-query'       => array( 'woocommerce/settings-groups-query', array() ),
+			'settings-query'              => array( 'woocommerce/settings-query', array( 'group' => 'general' ) ),
 			'product-terms-query'         => array(
 				'woocommerce/product-terms-query',
 				array(
@@ -5793,6 +5800,27 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'Direct bank transfer', array_column( $result['gateways'], 'method_title', 'id' )['bacs'] );
 		$this->assertSame( 1, $result['total_pages'] );
 		$this->assertSame( count( $result['gateways'] ), $result['per_page'] );
+		$this->assertSame( count( $result['gateways'] ), $result['total'] );
+	}
+
+	/**
+	 * @testdox Should return zero totals when no payment gateways are loaded.
+	 */
+	public function test_payment_gateways_query_returns_zero_total_without_gateways(): void {
+		add_filter( 'woocommerce_payment_gateways', '__return_empty_array' );
+		try {
+			self::reload_payment_gateways();
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array() );
+		} finally {
+			remove_filter( 'woocommerce_payment_gateways', '__return_empty_array' );
+			self::reload_payment_gateways();
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( array(), $result['gateways'] );
+		$this->assertSame( 0, $result['total'] );
+		$this->assertSame( 0, $result['per_page'] );
+		$this->assertSame( 0, $result['total_pages'] );
 	}
 
 	/**
@@ -5946,6 +5974,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $result );
 		$this->assertSame( 'bacs', $result['gateways'][0]['id'] );
+		$this->assertSame( 1, $result['total'] );
 	}
 
 	/**
