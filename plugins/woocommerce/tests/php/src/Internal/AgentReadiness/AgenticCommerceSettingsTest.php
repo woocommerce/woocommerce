@@ -633,11 +633,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame(
 			array(
-				'intent' => 'none',
-				'text'   => 'Not checked yet',
+				'intent' => 'stable',
+				'text'   => 'All passed',
 			),
 			array_column( $view['sections'], 'badge', 'id' )['find'],
-			'Not counted as a result; the find card has no checks in this report'
+			'Not counted as a result; the card holds only the passing search engine step'
 		);
 	}
 
@@ -2166,7 +2166,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox "Discourage search engines" shows both as the setup step and in the Store access card, where the noindex check it causes sits, once, Required and naming the setting, with AI shopping on or off and with or without sales.
+	 * @testdox "Discourage search engines" shows as the setup step and in both the Store access card, where the noindex check it causes sits, and the find card, counted in each, Required and naming the setting once per row, with AI shopping on or off and with or without sales.
 	 *
 	 * @dataProvider ai_shopping_and_sales
 	 *
@@ -2201,7 +2201,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Discourage search engines from indexing this site', $rows['search_visible']['fix'], 'The row names the setting to clear' );
 		$this->assertSame( 'Change Reading settings', $rows['search_visible']['link']['text'] ?? null );
 		$this->assertSame( '1 issue', $sections['access']['badge']['text'] );
-		$this->assertStringNotContainsString( 'search_visible', (string) wp_json_encode( $sections['find'] ), 'Only in Store access, not also in the find card' );
+		$find = array_column( $sections['find']['rows'], null, 'id' );
+		$this->assertSame( array( 'search_visible' ), array_keys( $find ), 'It shows in the find card too' );
+		$this->assertSame( $rows['search_visible'], $find['search_visible'], 'The same row, with one fix line and one link' );
+		$this->assertSame( 1, substr_count( $find['search_visible']['fix'], 'Discourage search engines' ) );
+		$this->assertSame( '1 issue', $sections['find']['badge']['text'], 'Each card it shows in counts it' );
 		$this->assertSame( array( 'search_visible', 'missing_images' ), array_column( $view['fix_first']['items'], 'id' ) );
 		$this->assertSame( 'Required for AI shopping', $view['fix_first']['items'][0]['tier'] );
 		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'It doesn\'t block the switch' );
@@ -2212,6 +2216,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$sections = array_column( $this->view()['sections'], null, 'id' );
 		$this->assertSame( array( 'no_noindex_directives' ), array_column( $sections['access']['rows'], 'id' ), 'A noindex from elsewhere, such as an SEO plugin, shows in its place' );
 		$this->assertContains( 'search_visible', array_column( $sections['access']['folded'], 'id' ), 'The passed step folds in Store access' );
+		$this->assertContains( 'search_visible', array_column( $sections['find']['folded'], 'id' ), 'and in the find card' );
+		$this->assertSame( 'All passed', $sections['find']['badge']['text'], 'It is no longer an issue in either card' );
 	}
 
 	/**

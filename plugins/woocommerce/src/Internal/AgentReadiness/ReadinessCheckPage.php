@@ -85,6 +85,14 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	);
 
 	/**
+	 * Checks that also show in another question's card, counted in each: "Discourage search engines"
+	 * keeps AI assistants from the store's pages (Store access, its group) and from finding it.
+	 */
+	private const ALSO_IN = array(
+		'search_visible' => array( 'find' ),
+	);
+
+	/**
 	 * Badge intents of the design system, by the badge class the PHP pages use.
 	 */
 	private const INTENTS = array(
@@ -1094,8 +1102,10 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		);
 		foreach ( $checks as $check ) {
 			// A report from before checks named their question has no group; the next scan fills it in.
-			if ( isset( $groups[ $check['group'] ?? '' ] ) ) {
-				$groups[ $check['group'] ][1][] = $check;
+			foreach ( array_merge( array( $check['group'] ?? '' ), self::ALSO_IN[ $check['id'] ] ?? array() ) as $group ) {
+				if ( isset( $groups[ $group ] ) ) {
+					$groups[ $group ][1][] = $check;
+				}
 			}
 		}
 		return $groups;
