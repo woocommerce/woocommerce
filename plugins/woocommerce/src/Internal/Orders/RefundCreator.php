@@ -175,14 +175,15 @@ class RefundCreator {
 	 * partially or fully refunded, and fire the refund hooks. When the gateway refuses, the refund is deleted
 	 * and nothing else runs. An exception after that keeps the refund, since the money may have moved.
 	 *
-	 * @param \WC_Order_Refund $refund Saved refund.
+	 * @param \WC_Order_Refund $refund      Saved refund.
+	 * @param bool             $pay_refund  False to skip the payment refund that the arguments ask for.
 	 * @return null|\WP_Error `refund_gateway_failed` with the message of the gateway, or `refund_incomplete`
 	 *                        with the message of the exception that stopped a later step.
 	 *
 	 * @since 11.4.0
 	 */
-	public function finish( \WC_Order_Refund $refund ): ?\WP_Error {
-		if ( $this->args['refund_payment'] ) {
+	public function finish( \WC_Order_Refund $refund, bool $pay_refund = true ): ?\WP_Error {
+		if ( $pay_refund && $this->args['refund_payment'] ) {
 			$result = wc_refund_payment( $this->order, wc_format_decimal( $refund->get_amount() ), $refund->get_reason() );
 
 			if ( is_wp_error( $result ) ) {

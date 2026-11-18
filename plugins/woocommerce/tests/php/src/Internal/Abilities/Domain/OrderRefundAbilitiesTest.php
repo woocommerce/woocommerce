@@ -634,6 +634,51 @@ class OrderRefundAbilitiesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the refund and not call the gateway when the final save fails after woocommerce_create_refund ran.
+	 */
+	public function test_keeps_refund_when_the_save_after_the_create_hook_fails(): void {
+		$order     = $this->create_order_without_lines();
+		$hook_ran  = false;
+		$completed = 0;
+		add_action(
+			'woocommerce_create_refund',
+			static function () use ( &$hook_ran ) {
+				$hook_ran = true;
+			}
+		);
+		add_action(
+			'woocommerce_before_order_refund_object_save',
+			static function () use ( &$hook_ran ) {
+				if ( $hook_ran ) {
+					throw new \Exception( 'Refund table is read-only.' );
+				}
+			}
+		);
+		add_action(
+			'woocommerce_order_refunded',
+			static function () use ( &$completed ) {
+				++$completed;
+			}
+		);
+
+		$result = $this->refund(
+			array(
+				'id'             => $order->get_id(),
+				'amount'         => '10',
+				'refund_payment' => true,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_refund_incomplete', $result->get_error_code() );
+		$this->assertFalse( $result->get_error_data()['refunded_payment'] );
+		$this->assertInstanceOf( \WC_Order_Refund::class, wc_get_order( $result->get_error_data()['refund_id'] ) );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_refunds() );
+		$this->assertSame( array(), $this->gateway->refunded );
+		$this->assertSame( 1, $completed );
+	}
+
+	/**
 	 * @testdox Should round the amount to the store decimals before the gateway gets it.
 	 */
 	public function test_rounds_amount_to_store_decimals(): void {

@@ -75,6 +75,13 @@ class OrderRefundCreate extends ActionableAbility {
 	private ?string $lock = null;
 
 	/**
+	 * Final save failure of the current call, after woocommerce_create_refund ran, when the refund is kept.
+	 *
+	 * @var \WP_Error|null
+	 */
+	private ?\WP_Error $save_error = null;
+
+	/**
 	 * Get the ability registration arguments.
 	 *
 	 * @return array
@@ -218,6 +225,7 @@ class OrderRefundCreate extends ActionableAbility {
 		$outer_order   = $this->order ?? null;
 		$outer_creator = $this->creator ?? null;
 		$outer_lock    = $this->lock;
+		$outer_error   = $this->save_error;
 
 		$order_id = $input['id'];
 		$lock     = self::lock_order( $order_id );
@@ -228,13 +236,15 @@ class OrderRefundCreate extends ActionableAbility {
 				array( 'status' => 409 )
 			);
 		}
-		$this->lock = $lock;
+		$this->lock       = $lock;
+		$this->save_error = null;
 
 		try {
 			return parent::execute_change( $input );
 		} finally {
 			self::unlock_order( $order_id, $lock );
-			$this->lock = $outer_lock;
+			$this->lock       = $outer_lock;
+			$this->save_error = $outer_error;
 			if ( null !== $outer_order ) {
 				$this->order = $outer_order;
 			}
@@ -246,7 +256,8 @@ class OrderRefundCreate extends ActionableAbility {
 
 	/**
 	 * Fire woocommerce_create_refund only now, after the validators, as some callbacks refund the payment
-	 * through their own gateway there.
+	 * through their own gateway there. Once they ran, money may have moved, so a failed final save keeps the
+	 * refund for after_commit() to report rather than rolling it back.
 	 *
 	 * @param \WC_Order_Refund $subject Staged refund.
 	 * @return null|\WP_Error
@@ -265,20 +276,30 @@ class OrderRefundCreate extends ActionableAbility {
 			return self::refund_error( $declined );
 		}
 
-		return parent::save( $subject );
+		$saved = parent::save( $subject );
+		if ( is_wp_error( $saved ) && $subject->get_id() > 0 ) {
+			$this->save_error = $saved;
+			return null;
+		}
+
+		return $saved;
 	}
 
 	/**
 	 * Refund the payment, restock and update the order, after the refund row is committed. A gateway refusal
 	 * deletes the refund, so the call fails with nothing saved. A later failure keeps the refund, and its error
-	 * tells the client not to refund again.
+	 * tells the client not to refund again. After a failed final save, the gateway is not asked to refund.
 	 *
 	 * @param \WC_Order_Refund $subject Saved refund.
 	 * @param array            $input   Ability input.
 	 * @return null|\WP_Error
 	 */
 	protected function after_commit( $subject, array $input ): ?\WP_Error {
-		$finished = $this->creator->finish( $subject );
+		$save_error = $this->save_error;
+		$finished   = $this->creator->finish( $subject, null === $save_error );
+		if ( null !== $save_error && ! is_wp_error( $finished ) ) {
+			$finished = new \WP_Error( 'refund_incomplete', $save_error->get_error_message() );
+		}
 		if ( ! is_wp_error( $finished ) ) {
 			return null;
 		}
