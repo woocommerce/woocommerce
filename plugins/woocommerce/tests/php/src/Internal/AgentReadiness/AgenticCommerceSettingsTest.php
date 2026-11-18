@@ -1412,6 +1412,57 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Order confirmation emails that are off are Required in Fix first, the Setup checklist and the buying card, ahead of every sale-ranked issue, with AI shopping on or off and with or without sales, and never keep AI shopping from being turned on.
+	 *
+	 * @dataProvider ai_shopping_and_sales
+	 *
+	 * @param bool $ucp_on     Whether AI shopping is on.
+	 * @param bool $with_sales Whether the report has sales to rank by.
+	 */
+	public function test_order_emails_are_shown_required_without_blocking( bool $ucp_on, bool $with_sales ): void {
+		$this->make_every_step_pass();
+		$this->turn_off_order_emails();
+		update_option( AgentReadiness::REPORT_OPTION, $this->report_with_listing_issue( $with_sales ), false );
+		update_option( 'woocommerce_feature_ucp_enabled', $ucp_on ? 'yes' : 'no' );
+
+		$view  = $this->view();
+		$items = $view['fix_first']['items'];
+		$this->assertSame( array( 'order_emails', 'missing_images' ), array_column( $items, 'id' ), 'The Required step comes before an issue with 90% of sales' );
+		$this->assertSame( 'Required for AI shopping', $items[0]['tier'] );
+		$this->assertSame( 'Required', $items[0]['badge']['text'] ?? null );
+		$this->assertSame( 'Turn on order confirmation emails', $items[0]['title'] );
+		$rows = array_column( array_column( $view['sections'], null, 'id' )['buy']['rows'], null, 'id' );
+		$this->assertSame( 'Required', $rows['order_emails']['badge']['text'] ?? null, 'The buying card marks it Required too' );
+		$this->assertSame( array(), wc_get_container()->get( StoreConditions::class )->failing_required(), 'It doesn\'t block the switch' );
+
+		$html = $this->render_page( AgenticCommerceSettings::SHOPPING_SECTION, $ucp_on );
+		$this->assertMatchesRegularExpression( '#Finish 1 required step to get#', $html );
+		$this->assertMatchesRegularExpression( '#Turn on order confirmation emails <mark[^>]*>Required</mark>#', $html, 'The Setup checklist marks it Required' );
+		$this->assertDoesNotMatchRegularExpression( '/<button[^>]*wc-agentic-commerce-ucp-switch[^>]*disabled=([\'"])disabled\1/', $html );
+
+		$this->make_every_step_pass();
+		update_option( 'woocommerce_feature_ucp_enabled', $ucp_on ? 'yes' : 'no' );
+		$view = $this->view();
+		$this->assertSame( array( 'missing_images' ), array_column( $view['fix_first']['items'], 'id' ), 'Once the email is on, it leaves Fix first' );
+		$this->assertStringContainsString( 'Order confirmation emails are on', (string) wp_json_encode( array_column( $view['sections'], null, 'id' )['buy']['folded'] ) );
+		$this->assertStringNotContainsString( 'required step', $this->render_page( AgenticCommerceSettings::SHOPPING_SECTION, $ucp_on ) );
+	}
+
+	/**
+	 * AI shopping on and off, each with and without sales to rank by.
+	 *
+	 * @return array<string, array{0:bool,1:bool}>
+	 */
+	public function ai_shopping_and_sales(): array {
+		return array(
+			'AI shopping on, with sales'     => array( true, true ),
+			'AI shopping on, without sales'  => array( true, false ),
+			'AI shopping off, with sales'    => array( false, true ),
+			'AI shopping off, without sales' => array( false, false ),
+		);
+	}
+
+	/**
 	 * @testdox With AI shopping on, a failing connection URL is Required and in Fix first, and failing catalog search is a Warning that says what came back.
 	 */
 	public function test_failing_ucp_profile_is_required_and_endpoint_a_warning(): void {
@@ -1869,6 +1920,56 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$failing = new \ReflectionMethod( ReadinessCheckPage::class, 'failing_copy' );
 		$failing->setAccessible( true );
 		return $failing->invoke( null, $step );
+	}
+
+	/**
+	 * Turn off the Processing and Completed order emails, so the order_emails step fails.
+	 */
+	private function turn_off_order_emails(): void {
+		$emails = array_intersect_key( WC()->mailer()->get_emails(), array_flip( array( 'WC_Email_Customer_Processing_Order', 'WC_Email_Customer_Completed_Order' ) ) );
+		foreach ( $emails as $email ) {
+			$this->restore[] = array( $email, $email->enabled );
+			$email->enabled  = 'no';
+		}
+	}
+
+	/**
+	 * A report with one product issue that keeps 30 products from being listed, with 90% of sales on
+	 * them when the store has sales to rank by, and Analytics off otherwise.
+	 *
+	 * @param bool                            $with_sales   Whether the report has sales to rank by.
+	 * @param array<int, array<string,mixed>> $store_checks Scanned store checks.
+	 * @return array<string, mixed>
+	 */
+	private function report_with_listing_issue( bool $with_sales, array $store_checks = array() ): array {
+		return array(
+			'generated_at' => gmdate( 'c' ),
+			'products'     => 40,
+			'store_checks' => $store_checks,
+			'channels'     => array( 'chatgpt' => array( 'name' => 'ChatGPT' ) ),
+			'checks'       => array(
+				array(
+					'id'          => 'missing_images',
+					'label'       => 'missing_images label',
+					'why'         => 'missing_images why.',
+					'fix'         => 'missing_images fix.',
+					'channels'    => array(
+						'chatgpt' => array(
+							'field'  => 'field',
+							'effect' => ReadinessRule::EFFECT_NOT_LISTABLE,
+						),
+					),
+					'count'       => 30,
+					'product_ids' => array(),
+					'sales_share' => $with_sales ? 0.9 : null,
+				),
+			),
+			'sales'        => $with_sales ? array(
+				'days'     => 90,
+				'orders'   => 30,
+				'imported' => true,
+			) : null,
+		);
 	}
 
 	/**
