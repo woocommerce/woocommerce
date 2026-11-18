@@ -183,7 +183,7 @@ $min-product-width: 150px;
 			// would show more products than this setting. The column width stays
 			// the maximum, so a wide screen cannot fit extra products.
 			@if $columns > 1 {
-				&.is-shrink-columns .wc-block-product {
+				&.wc-block-product-template__responsive .wc-block-product {
 					flex-basis: $width;
 					flex-grow: 0;
 					flex-shrink: 1;
