@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\ImportExport\Product;
 
 use Automattic\WooCommerce\Internal\Admin\ImportExport\TempDirectoryGuard;
+use Automattic\WooCommerce\Internal\ProductFeed\Utils\MemoryManager;
 use InvalidArgumentException;
 use RuntimeException;
 use WC_Product_CSV_Exporter;
@@ -15,6 +16,24 @@ use WC_Product_CSV_Exporter;
  * @since 11.4.0
  */
 final class ProductExporter {
+
+	/**
+	 * Frees the in-memory caches between batches.
+	 *
+	 * @var MemoryManager
+	 */
+	private MemoryManager $memory_manager;
+
+	/**
+	 * Initialize the product exporter with dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param MemoryManager $memory_manager Frees the in-memory caches between batches.
+	 */
+	final public function init( MemoryManager $memory_manager ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules
+		$this->memory_manager = $memory_manager;
+	}
 
 	/**
 	 * Validate a CSV export destination.
@@ -106,6 +125,7 @@ final class ProductExporter {
 			throw new InvalidArgumentException( 'The temporary directory resolves inside the web root. Set WP_TEMP_DIR to a location outside it.' );
 		}
 
+		$cache_addition_suspended = wp_suspend_cache_addition();
 		wp_suspend_cache_addition( true );
 
 		try {
@@ -122,12 +142,13 @@ final class ProductExporter {
 					$on_batch( $page, $exporter->get_total_exported() );
 				}
 
+				$this->memory_manager->flush_caches();
 				++$page;
 			} while ( $exporter->get_percent_complete() < 100 );
 
 			$this->write_output( $destination, $exporter );
 		} finally {
-			wp_suspend_cache_addition( false );
+			wp_suspend_cache_addition( $cache_addition_suspended );
 
 			wp_delete_file( $file_path );
 			wp_delete_file( $file_path . '.headers' );

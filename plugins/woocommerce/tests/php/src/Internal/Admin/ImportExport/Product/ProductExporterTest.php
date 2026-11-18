@@ -31,7 +31,7 @@ class ProductExporterTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = new ProductExporter();
+		$this->sut = wc_get_container()->get( ProductExporter::class );
 	}
 
 	/**
@@ -230,6 +230,22 @@ class ProductExporterTest extends WC_Unit_Test_Case {
 
 		$after_listing = glob( trailingslashit( get_temp_dir() ) . 'wc-product-export-*' );
 		$this->assertSame( $before_listing, $after_listing, 'Temporary export files should be removed even when a batch throws' );
+	}
+
+	/**
+	 * @testdox Should leave cache addition suspended when it was suspended before the export.
+	 */
+	public function test_run_restores_the_previous_cache_addition_state(): void {
+		WC_Helper_Product::create_simple_product();
+
+		wp_suspend_cache_addition( true );
+
+		try {
+			$this->sut->run( $this->new_temp_path(), array() );
+			$this->assertTrue( wp_suspend_cache_addition() );
+		} finally {
+			wp_suspend_cache_addition( false );
+		}
 	}
 
 	/**
