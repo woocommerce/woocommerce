@@ -157,8 +157,8 @@ $min-product-width: 150px;
 		scroll-padding: 0 3%;
 	}
 
-	// Fixed column count. These match the responsive widths above, so the next
-	// product still peeks into view. Blocks without a columns class are unchanged.
+	// Fixed column count. These match the widths above, so the next product
+	// still peeks into view. Markup with no columns class keeps those widths.
 	$carousel-column-widths: (
 		1: calc(85% / 1),
 		2: calc(85% / 2),
