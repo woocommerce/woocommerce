@@ -12,7 +12,7 @@ import {
 /**
  * Internal dependencies
  */
-import { getCarouselColumns } from '../../constants';
+import { DEFAULT_CAROUSEL_COLUMNS, getCarouselColumns } from '../../constants';
 import { DisplayLayoutControlProps, LayoutOptions } from '../../types';
 import { getDefaultDisplayLayout, sanitizeDisplayLayout } from '../../utils';
 
@@ -22,7 +22,6 @@ const toggleHelp = __(
 	'Automatically adjust the number of columns to better fit smaller screens.',
 	'woocommerce'
 );
-const DEFAULT_CAROUSEL_COLUMNS = 6;
 
 interface ColumnsControlProps extends DisplayLayoutControlProps {
 	maxColumns?: number;
@@ -94,7 +93,7 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 
 	const hasCustomColumnCount = () =>
 		isCarouselLayout
-			? savedCarouselColumns !== DEFAULT_CAROUSEL_COLUMNS
+			? DEFAULT_CAROUSEL_COLUMNS !== savedCarouselColumns
 			: defaultLayout.columns !== columnCount;
 
 	const onShrinkColumnsDeselect = () => {

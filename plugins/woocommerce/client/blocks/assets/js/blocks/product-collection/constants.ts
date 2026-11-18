@@ -27,11 +27,8 @@ import {
 
 export const PRODUCT_COLLECTION_BLOCK_NAME = blockJson.name;
 
-/**
- * Carousel column classes in product-template/style.scss cover this range.
- * ProductTemplate.php uses the same bounds.
- */
 const MIN_CAROUSEL_COLUMNS = 1;
+export const DEFAULT_CAROUSEL_COLUMNS = 6;
 export const MAX_CAROUSEL_COLUMNS = 6;
 
 /**
