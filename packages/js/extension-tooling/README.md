@@ -32,6 +32,20 @@ Choose a single folder name for `config.woo.zip.root`. When `build-zip` receives
 
 `e2e setup` uses the extension's `build:zip` script unless `E2E_PLUGIN_ZIP` supplies a ZIP. It calls `bin/link_plugins.js` to write `.wp-env.e2e.json`, `wp-env:e2e` to manage the site, and `env:test:e2e:seed` to seed it. `e2e with-env` also calls `test:e2e` to run the suite.
 
+In `bin/link_plugins.js`, call the shared site setup after any local preparation hook has gathered its fixtures.
+
+```js
+const path = require( 'node:path' );
+const writeE2ESiteConfig = require( '@woocommerce/extension-tooling/e2e-site-config' );
+
+writeE2ESiteConfig( {
+	root: path.resolve( __dirname, '..' ),
+	pluginPath: './deploy/e2e-plugin/your-extension',
+} );
+```
+
+The helper reads `.wp-env.test.json`, mounts the unpacked ZIP in place of `.` and maps a separate debug log. It applies the E2E runner's `WP_VERSION` and `WC_VERSION` and reads `PHP_VERSION` from the environment. WooCommerce overrides replace the `https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip` entry in the test config. Use `configure( config )` to add local plugins or mappings, and pass `woocommerce.latest` or `woocommerce.nightly` when an integration requires a specific WooCommerce mount.
+
 `phpcs-baseline` uses the scan paths set by the extension's PHPCS ruleset. Declare at least one `<file>` entry in the ruleset.
 
 For hosts with Composer and no Node.js, check out this package's `bin` directory from a reviewed WooCommerce commit and run its Bash files directly. Install the tools used by the selected command, such as `jq` for configuration, `rsync` and `zip` for packaging, `unzip` for ZIP checks, `git` for syntax checks, and WP-CLI for POT generation. Keep `woo-config.sh` and `woo-config.schema.json` alongside the commands that read extension configuration. For example, from the extension root:
