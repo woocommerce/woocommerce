@@ -25,7 +25,7 @@ export interface CheckRow {
 	state: RowState;
 	/** What to do while the check fails, its passing title once it passes. */
 	title: string;
-	/** Required, or Likely conflict. */
+	/** Required. */
 	badge: ViewBadge | null;
 	/** Why it matters, and what the check found while it fails. */
 	text: string;

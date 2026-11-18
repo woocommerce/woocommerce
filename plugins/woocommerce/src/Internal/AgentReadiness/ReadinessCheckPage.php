@@ -610,7 +610,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @param string                              $text    Why it matters, and what was found while it fails.
 	 * @param string                              $fix     What to do, or '' when the title says it.
 	 * @param array{href:string,text:string}|null $link    Where to fix it, or the products it affects.
-	 * @param array{0:string,1:string}|null       $badge   Badge class and text: Required, or Likely conflict.
+	 * @param array{0:string,1:string}|null       $badge   Badge class and text: Required.
 	 * @param array{href:string,text:string}|null $seen_at The page a conflict was seen on.
 	 * @return array<string, mixed>
 	 */
@@ -970,8 +970,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 					'text' => (string) $check['seen_at'],
 				)
 				: null;
-			$badge    = $required ? self::required_badge() : ( $conflict ? array( 'off', __( 'Likely conflict', 'woocommerce' ) ) : null );
-			$rows[]   = self::row( $check['id'], $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'], $failing['link'] ?? '' ), $badge, $seen_at );
+			$rows[]   = self::row( $check['id'], $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'], $failing['link'] ?? '' ), $required ? self::required_badge() : null, $seen_at );
 		}
 		return $rows;
 	}

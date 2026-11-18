@@ -543,13 +543,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Let AI assistants read your product details', $conflict['title'], 'A failing check is headed by what to do' );
 		$this->assertStringEndsWith( 'We found none on a recent product page.', $conflict['text'], 'then why it matters and what the check found' );
 		$this->assertStringStartsWith( 'Test a product page in Google', $conflict['fix'], 'and the fix, since it has one' );
-		$this->assertSame(
-			array(
-				'intent' => 'none',
-				'text'   => 'Likely conflict',
-			),
-			$conflict['badge']
-		);
+		$this->assertNull( $conflict['badge'], 'A likely conflict has no badge; the page it was seen on says where' );
 		$this->assertSame(
 			array(
 				'href' => 'https://example.org/product/mug/',
