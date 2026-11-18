@@ -408,7 +408,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'woocommerce/settings-update'             => array(
 				'readonly'    => false,
 				'idempotent'  => true,
-				'destructive' => false,
+				'destructive' => true,
 			),
 		);
 

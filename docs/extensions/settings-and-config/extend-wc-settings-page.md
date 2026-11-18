@@ -406,7 +406,7 @@ This metadata also controls fields in the fixed `woocommerce/store-settings-get`
 ),
 ```
 
-Password fields are never writable, even when `write` is `true`. Never opt in API keys, tokens or other secrets stored in text fields. Fields with a non-null `fixed_value` or a `value` supplied by the definition are refused, since no option stores them. Callers need permission to edit WooCommerce settings.
+Password fields are never writable, even when `write` is `true`. Never opt in API keys, tokens or other secrets stored in text fields, or settings that let a scheduled job delete data, such as retention periods. The ability is annotated as destructive, since each change overwrites a stored value. Fields with a non-null `fixed_value` or a `value` supplied by the definition are refused, since no option stores them. Callers need permission to edit WooCommerce settings.
 
 Values go through the same per-type validation as the REST settings API, then must match a shape that `woocommerce/settings-query` can return. Select and multiselect values must be one of the field's choices, and country fields must be known country or country/state codes. Fields with a string option key are saved through `WC_Admin_Settings::save_fields()`, so the `woocommerce_admin_settings_sanitize_option` filters run as they do in the admin form.
 

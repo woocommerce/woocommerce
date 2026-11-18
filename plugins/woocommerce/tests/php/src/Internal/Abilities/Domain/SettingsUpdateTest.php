@@ -164,6 +164,37 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse personal data retention periods, which let a scheduled job trash orders, anonymize orders or delete accounts.
+	 * @testWith ["woocommerce_delete_inactive_accounts"]
+	 *           ["woocommerce_trash_pending_orders"]
+	 *           ["woocommerce_trash_failed_orders"]
+	 *           ["woocommerce_trash_cancelled_orders"]
+	 *           ["woocommerce_anonymize_refunded_orders"]
+	 *           ["woocommerce_anonymize_completed_orders"]
+	 *
+	 * @param string $id Retention setting ID.
+	 */
+	public function test_refuses_retention_periods( string $id ): void {
+		delete_option( $id );
+
+		$result = $this->sut->execute(
+			$this->input(
+				'account',
+				array(
+					$id => array(
+						'number' => '1',
+						'unit'   => 'days',
+					),
+				)
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_settings_not_writable', $result->get_error_code() );
+		$this->assertFalse( get_option( $id ) );
+	}
+
+	/**
 	 * @testdox Should update an extension field registered directly on a custom group.
 	 */
 	public function test_updates_extension_group_field(): void {

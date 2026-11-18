@@ -266,10 +266,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'       => __( 'Retain inactive accounts ', 'woocommerce' ),
 				'desc_tip'    => __( 'Inactive accounts are those which have not logged in, or placed an order, for the specified duration. They will be deleted. Any orders will be converted into guest orders.', 'woocommerce' ),
 				'id'          => 'woocommerce_delete_inactive_accounts',
-				'abilities'   => array(
-					'read'  => true,
-					'write' => true,
-				),
+				'abilities'   => array( 'read' => true ),
 				'type'        => 'relative_date_selector',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => array(
@@ -282,10 +279,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'       => __( 'Retain pending orders ', 'woocommerce' ),
 				'desc_tip'    => __( 'Pending orders are unpaid and may have been abandoned by the customer. They will be trashed after the specified duration.', 'woocommerce' ),
 				'id'          => 'woocommerce_trash_pending_orders',
-				'abilities'   => array(
-					'read'  => true,
-					'write' => true,
-				),
+				'abilities'   => array( 'read' => true ),
 				'type'        => 'relative_date_selector',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => '',
@@ -295,10 +289,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'       => __( 'Retain failed orders', 'woocommerce' ),
 				'desc_tip'    => __( 'Failed orders are unpaid and may have been abandoned by the customer. They will be trashed after the specified duration.', 'woocommerce' ),
 				'id'          => 'woocommerce_trash_failed_orders',
-				'abilities'   => array(
-					'read'  => true,
-					'write' => true,
-				),
+				'abilities'   => array( 'read' => true ),
 				'type'        => 'relative_date_selector',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => '',
@@ -308,10 +299,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'       => __( 'Retain cancelled orders', 'woocommerce' ),
 				'desc_tip'    => __( 'Cancelled orders are unpaid and may have been cancelled by the store owner or customer. They will be trashed after the specified duration.', 'woocommerce' ),
 				'id'          => 'woocommerce_trash_cancelled_orders',
-				'abilities'   => array(
-					'read'  => true,
-					'write' => true,
-				),
+				'abilities'   => array( 'read' => true ),
 				'type'        => 'relative_date_selector',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => '',
@@ -321,10 +309,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'       => __( 'Retain refunded orders', 'woocommerce' ),
 				'desc_tip'    => __( 'Retain refunded orders for a specified duration before anonymizing the personal data within them.', 'woocommerce' ),
 				'id'          => 'woocommerce_anonymize_refunded_orders',
-				'abilities'   => array(
-					'read'  => true,
-					'write' => true,
-				),
+				'abilities'   => array( 'read' => true ),
 				'type'        => 'relative_date_selector',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => array(
@@ -337,10 +322,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'       => __( 'Retain completed orders', 'woocommerce' ),
 				'desc_tip'    => __( 'Retain completed orders for a specified duration before anonymizing the personal data within them.', 'woocommerce' ),
 				'id'          => 'woocommerce_anonymize_completed_orders',
-				'abilities'   => array(
-					'read'  => true,
-					'write' => true,
-				),
+				'abilities'   => array( 'read' => true ),
 				'type'        => 'relative_date_selector',
 				'placeholder' => __( 'N/A', 'woocommerce' ),
 				'default'     => array(
