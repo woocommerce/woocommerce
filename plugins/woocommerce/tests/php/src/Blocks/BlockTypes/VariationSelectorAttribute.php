@@ -277,6 +277,26 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that each attribute row is a list item, since the Variation Selector wrapper has role="list".
+	 *
+	 * @testdox VariationSelectorAttribute renders each attribute row with role="listitem".
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::render
+	 */
+	public function test_renders_attribute_row_as_list_item(): void {
+		$variable_product = $this->create_variable_product_with_variations();
+		$inner_blocks     = $this->get_attribute_name_block_markup() . $this->get_chips_block_markup();
+
+		$markup = $this->render_variation_selector_attribute( $variable_product, $inner_blocks );
+
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue(
+			$processor->next_tag( array( 'class_name' => 'wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute' ) ),
+			'Attribute row wrapper should render.'
+		);
+		$this->assertSame( 'listitem', $processor->get_attribute( 'role' ), 'Attribute row wrapper should have role="listitem".' );
+	}
+
+	/**
 	 * Create a variable product with color variations for rendering tests.
 	 *
 	 * @return \WC_Product_Variable
