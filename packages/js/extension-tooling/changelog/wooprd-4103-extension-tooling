@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add shared webpack, translation-check and wp-env helpers for WooCommerce extensions.

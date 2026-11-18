@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add an opt-in Jest 30 lint setting for extensions that use the recommended config without installing Jest.

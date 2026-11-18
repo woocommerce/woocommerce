@@ -440,7 +440,7 @@ class UcpCart extends UcpCartTestCase {
 
 		// WC_Session_Handler restores or clones the guest session named by this token.
 		$this->assertSame( $data['id'], $query['session'] );
-		$this->assertStringStartsWith( wc_get_checkout_url(), $data['continue_url'] );
+		$this->assertStringStartsWith( wc_get_cart_url(), $data['continue_url'] );
 	}
 
 	/**

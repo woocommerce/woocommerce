@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add the woo-extension-config command to validate extension configuration and apply defaults.

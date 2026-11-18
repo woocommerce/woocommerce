@@ -1,7 +1,7 @@
 const { posix } = require( 'node:path' );
 const uglify = require( 'uglify-js' );
 
-module.exports = function minifyBundleCopies( copies ) {
+module.exports = function minifyBundleCopies( copies, inPlace = [] ) {
 	const name = 'MinifyBundleCopies';
 
 	return {
@@ -14,20 +14,25 @@ module.exports = function minifyBundleCopies( copies ) {
 					{ name, stage: Compilation.PROCESS_ASSETS_STAGE_REPORT },
 					() => {
 						for ( const asset of compilation.getAssets() ) {
-							if (
-								asset.name.endsWith( '.min.js' ) ||
-								! copies.some( ( pattern ) =>
+							const replace = inPlace.some( ( pattern ) =>
+								posix.matchesGlob( asset.name, pattern )
+							);
+							const copy =
+								! asset.name.endsWith( '.min.js' ) &&
+								copies.some( ( pattern ) =>
 									posix.matchesGlob( asset.name, pattern )
-								)
-							) {
+								);
+							if ( ! replace && ! copy ) {
 								continue;
 							}
-							const destination = asset.name.replace(
-								/\.js$/,
-								'.min.js'
-							);
+							const destination = replace
+								? asset.name
+								: asset.name.replace( /\.js$/, '.min.js' );
 							// includeScripts emits its own .min.js copy; a second one would conflict.
-							if ( compilation.getAsset( destination ) ) {
+							if (
+								! replace &&
+								compilation.getAsset( destination )
+							) {
 								continue;
 							}
 							const result = uglify.minify(
@@ -44,13 +49,14 @@ module.exports = function minifyBundleCopies( copies ) {
 								);
 								continue;
 							}
-							compilation.emitAsset(
-								destination,
-								new sources.RawSource( result.code ),
-								{
+							const output = new sources.RawSource( result.code );
+							if ( replace ) {
+								compilation.updateAsset( destination, output );
+							} else {
+								compilation.emitAsset( destination, output, {
 									minimized: true,
-								}
-							);
+								} );
+							}
 						}
 					}
 				);

@@ -65,14 +65,14 @@ test( 'Expands classic includes and emits a minified bundle copy', async ( conte
 	assert.match( minified, /Hello world/ );
 } );
 
-async function buildIncludes( context, classic, plugins = [] ) {
+async function buildIncludes( context, classic, plugins = [], entry = '' ) {
 	const directory = await fs.mkdtemp(
 		path.join( os.tmpdir(), 'woo-extension-webpack-' )
 	);
 	context.after( () => fs.rm( directory, { recursive: true, force: true } ) );
 	await fs.writeFile( path.join( directory, 'classic.js' ), classic );
 	await fs.writeFile( path.join( directory, 'part.js' ), 'const part = 1;' );
-	await fs.writeFile( path.join( directory, 'entry.js' ), '' );
+	await fs.writeFile( path.join( directory, 'entry.js' ), entry );
 
 	const stats = await new Promise( ( resolve, reject ) => {
 		webpack(
@@ -118,6 +118,54 @@ test( 'Leaves the include copy when a bundle pattern also matches it', async ( c
 		'const part = 1;\n'
 	);
 	assert.ok( ( await fs.readdir( directory ) ).includes( 'bundle.min.js' ) );
+} );
+
+test( 'Minifies matching bundles in place even if they also match a copy pattern', async ( context ) => {
+	const classic = "include( 'part.js' );\nconsole.log( 'Included code' );\n";
+	const entry = "console.log( 'Hello world' );\n";
+	const original = await buildIncludes( context, classic, [], entry );
+	const { directory, stats } = await buildIncludes(
+		context,
+		classic,
+		[
+			minifyBundleCopies(
+				[ 'bundle.js' ],
+				[ 'bundle.js', 'assembled.min.js' ]
+			),
+		],
+		entry
+	);
+
+	assert.equal(
+		original.stats.hasErrors(),
+		false,
+		original.stats.toString( 'errors-only' )
+	);
+	assert.equal( stats.hasErrors(), false, stats.toString( 'errors-only' ) );
+	const bundle = await fs.readFile(
+		path.join( directory, 'bundle.js' ),
+		'utf8'
+	);
+	const unminified = await fs.readFile(
+		path.join( original.directory, 'bundle.js' ),
+		'utf8'
+	);
+	assert.ok( bundle.length < unminified.length );
+	assert.match( bundle, /Hello world/ );
+	assert.ok(
+		! ( await fs.readdir( directory ) ).includes( 'bundle.min.js' )
+	);
+
+	const included = await fs.readFile(
+		path.join( directory, 'assembled.min.js' ),
+		'utf8'
+	);
+	const unminifiedInclude = await fs.readFile(
+		path.join( original.directory, 'assembled.min.js' ),
+		'utf8'
+	);
+	assert.ok( included.length < unminifiedInclude.length );
+	assert.match( included, /Included code/ );
 } );
 
 test( 'Fails the build on an include line it cannot expand', async ( context ) => {
