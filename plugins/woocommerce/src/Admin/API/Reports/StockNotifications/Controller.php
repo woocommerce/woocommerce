@@ -112,25 +112,31 @@ class Controller extends GenericController implements ExportableInterface {
 			'title'      => 'report_stock_notifications',
 			'type'       => 'object',
 			'properties' => array(
-				'product_id'    => array(
+				'product_id'         => array(
 					'description' => __( 'ID of the product or variation customers signed up for.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'signups'       => array(
+				'signups'            => array(
 					'description' => __( 'Sign-ups created in the period. Excludes unconfirmed (pending) sign-ups.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'customers'     => array(
-					'description' => __( 'Distinct email addresses behind the sign-ups in the period.', 'woocommerce' ),
+				'notifications_sent' => array(
+					'description' => __( 'Back-in-stock emails sent in the period.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'extended_info' => array(
+				'unsubscribed'       => array(
+					'description' => __( 'Sign-ups the customer cancelled in the period.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'extended_info'      => array(
 					'name'      => array(
 						'type'        => 'string',
 						'readonly'    => true,
@@ -168,7 +174,8 @@ class Controller extends GenericController implements ExportableInterface {
 			array(
 				'product_id',
 				'signups',
-				'customers',
+				'notifications_sent',
+				'unsubscribed',
 			)
 		);
 		$params['products']           = array(
@@ -198,9 +205,10 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function get_export_columns() {
 		$export_columns = array(
-			'product_name' => __( 'Product', 'woocommerce' ),
-			'signups'      => __( 'Sign-ups', 'woocommerce' ),
-			'customers'    => __( 'Customers', 'woocommerce' ),
+			'product_name'       => __( 'Product', 'woocommerce' ),
+			'signups'            => __( 'Sign-ups', 'woocommerce' ),
+			'notifications_sent' => __( 'Notified', 'woocommerce' ),
+			'unsubscribed'       => __( 'Unsubscribed', 'woocommerce' ),
 		);
 
 		/**
@@ -221,9 +229,10 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function prepare_item_for_export( $item ) {
 		$export_item = array(
-			'product_name' => $item['extended_info']['name'] ?? '',
-			'signups'      => $item['signups'],
-			'customers'    => $item['customers'],
+			'product_name'       => $item['extended_info']['name'] ?? '',
+			'signups'            => $item['signups'],
+			'notifications_sent' => $item['notifications_sent'],
+			'unsubscribed'       => $item['unsubscribed'],
 		);
 
 		/**

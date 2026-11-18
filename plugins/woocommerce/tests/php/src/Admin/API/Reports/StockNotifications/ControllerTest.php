@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\StockNotifications;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\StockNotifications\Controller;
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
@@ -133,20 +134,28 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( array( 1 ), array_keys( $rows ), 'A product with only pending sign-ups should not be listed.' );
 		$this->assertSame( 2, $rows[1]['signups'], 'Cancelled and sent sign-ups count, pending ones do not.' );
-		$this->assertSame( 2, $rows[1]['customers'], 'Pending sign-ups do not add customers.' );
 	}
 
 	/**
-	 * @testdox Should count customers by distinct email.
+	 * @testdox Should count sends and customer unsubscribes on their own dates, listing products with no sign-ups in the period.
 	 */
-	public function test_customers_are_distinct_emails(): void {
-		$this->insert_row( 1, NotificationStatus::SENT, '2026-03-02 10:00:00', 'same@example.com' );
-		$this->insert_row( 1, NotificationStatus::CANCELLED, '2026-03-04 10:00:00', 'same@example.com' );
+	public function test_notified_and_unsubscribed_use_their_own_dates(): void {
+		$before = '2026-02-01 10:00:00';
+		$during = '2026-03-03 10:00:00';
+		$this->insert_row( 1, NotificationStatus::SENT, $before, 'a@example.com', $during );
+		$this->insert_row( 1, NotificationStatus::CANCELLED, $before, 'b@example.com', null, $during, NotificationCancellationSource::USER );
+		$this->insert_row( 1, NotificationStatus::CANCELLED, $before, 'c@example.com', null, $during, NotificationCancellationSource::ADMIN );
+		$this->insert_row( 2, NotificationStatus::SENT, $during, 'd@example.com', $before );
+		$this->insert_row( 3, NotificationStatus::CANCELLED, $before, 'e@example.com', null, $before, NotificationCancellationSource::USER );
 
 		$rows = $this->get_rows( self::PERIOD );
 
-		$this->assertSame( 2, $rows[1]['signups'] );
-		$this->assertSame( 1, $rows[1]['customers'] );
+		$this->assertSame( array( 2, 1 ), array_keys( $rows ), 'A product with no activity in the period is not listed.' );
+		$this->assertSame( 0, $rows[1]['signups'], 'Rows created before the period are not sign-ups.' );
+		$this->assertSame( 1, $rows[1]['notifications_sent'], 'A send in the period counts, whenever the sign-up was made.' );
+		$this->assertSame( 1, $rows[1]['unsubscribed'], 'Only cancellations by the customer count as unsubscribes.' );
+		$this->assertSame( 1, $rows[2]['signups'] );
+		$this->assertSame( 0, $rows[2]['notifications_sent'], 'A send before the period does not count.' );
 	}
 
 	/**
@@ -169,7 +178,8 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Should accept orderby $orderby.
 	 * @testWith ["product_id"]
 	 *           ["signups"]
-	 *           ["customers"]
+	 *           ["notifications_sent"]
+	 *           ["unsubscribed"]
 	 *
 	 * @param string $orderby Orderby value.
 	 */
@@ -299,30 +309,33 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should export the product name, sign-ups and customers columns.
+	 * @testdox Should export the product name, sign-ups, notified and unsubscribed columns.
 	 */
 	public function test_export_columns_and_rows(): void {
 		$controller = new Controller();
 		$item       = array(
-			'product_id'    => 7,
-			'signups'       => 3,
-			'customers'     => 2,
-			'extended_info' => array( 'name' => 'Hoodie' ),
+			'product_id'         => 7,
+			'signups'            => 3,
+			'notifications_sent' => 2,
+			'unsubscribed'       => 1,
+			'extended_info'      => array( 'name' => 'Hoodie' ),
 		);
 
 		$this->assertSame(
 			array(
-				'product_name' => 'Product',
-				'signups'      => 'Sign-ups',
-				'customers'    => 'Customers',
+				'product_name'       => 'Product',
+				'signups'            => 'Sign-ups',
+				'notifications_sent' => 'Notified',
+				'unsubscribed'       => 'Unsubscribed',
 			),
 			$controller->get_export_columns()
 		);
 		$this->assertSame(
 			array(
-				'product_name' => 'Hoodie',
-				'signups'      => 3,
-				'customers'    => 2,
+				'product_name'       => 'Hoodie',
+				'signups'            => 3,
+				'notifications_sent' => 2,
+				'unsubscribed'       => 1,
 			),
 			$controller->prepare_item_for_export( $item )
 		);

@@ -41,8 +41,14 @@ class StockNotificationsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Customers', 'woocommerce' ),
-				key: 'customers',
+				label: __( 'Notified', 'woocommerce' ),
+				key: 'notifications_sent',
+				isSortable: true,
+				isNumeric: true,
+			},
+			{
+				label: __( 'Unsubscribed', 'woocommerce' ),
+				key: 'unsubscribed',
 				isSortable: true,
 				isNumeric: true,
 			},
@@ -55,7 +61,11 @@ class StockNotificationsReportTable extends Component {
 			formatValue( currency, 'number', value );
 
 		return map( rows, ( row ) => {
-			const { customers, signups } = row;
+			const {
+				signups,
+				notifications_sent: notificationsSent,
+				unsubscribed,
+			} = row;
 			const { name, edit_url: editUrl } = row.extended_info || {};
 
 			return [
@@ -74,8 +84,12 @@ class StockNotificationsReportTable extends Component {
 					value: signups,
 				},
 				{
-					display: formatNumber( customers ),
-					value: customers,
+					display: formatNumber( notificationsSent ),
+					value: notificationsSent,
+				},
+				{
+					display: formatNumber( unsubscribed ),
+					value: unsubscribed,
 				},
 			];
 		} );

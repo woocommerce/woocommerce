@@ -14,16 +14,18 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 
 /**
  * Stock notifications report, one row per product.
  *
- * Metrics, per product:
+ * Metrics, per product, each on its own date column:
  * - signups: rows created in the period, excluding pending ones. Pending rows are unconfirmed
  *   double opt-in and get purged by DataRetentionController, so counting them would shrink history.
  *   Cancelled rows still count on their creation date.
- * - customers: distinct emails behind `signups`.
+ * - notifications_sent: rows notified in the period, like the stats report.
+ * - unsubscribed: rows the customer cancelled in the period.
  *
  * The product is the one the customer signed up for, so a variation is its own row.
  *
@@ -77,25 +79,61 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
-		'product_id' => 'intval',
-		'signups'    => 'intval',
-		'customers'  => 'intval',
+		'product_id'         => 'intval',
+		'signups'            => 'intval',
+		'notifications_sent' => 'intval',
+		'unsubscribed'       => 'intval',
 	);
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * The metrics depend on the period, so get_noncached_data() fills them in.
 	 *
 	 * @override ReportsDataStore::assign_report_columns()
 	 *
 	 * @return void
 	 */
 	protected function assign_report_columns() {
-		$table_name           = self::get_db_table_name();
 		$this->report_columns = array(
-			'product_id' => "{$table_name}.product_id",
-			'signups'    => 'COUNT(*) AS signups',
-			'customers'  => "COUNT( DISTINCT {$table_name}.user_email ) AS customers",
+			'product_id' => self::get_db_table_name() . '.product_id',
 		);
+	}
+
+	/**
+	 * Returns the SQL condition for each metric in the period, keyed by metric.
+	 *
+	 * @param array $query_args Query parameters.
+	 * @return array<string, string>
+	 */
+	protected function get_metric_conditions( $query_args ) {
+		global $wpdb;
+
+		$table_name = self::get_db_table_name();
+		$after      = $this->get_utc_datetime_string( $query_args['after'] );
+		$before     = $this->get_utc_datetime_string( $query_args['before'] );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+		return array(
+			'signups'            => $wpdb->prepare(
+				"{$table_name}.date_created_gmt BETWEEN %s AND %s AND {$table_name}.status <> %s",
+				$after,
+				$before,
+				NotificationStatus::PENDING
+			),
+			'notifications_sent' => $wpdb->prepare(
+				"{$table_name}.date_notified_gmt BETWEEN %s AND %s",
+				$after,
+				$before
+			),
+			'unsubscribed'       => $wpdb->prepare(
+				"{$table_name}.date_cancelled_gmt BETWEEN %s AND %s AND {$table_name}.cancellation_source = %s",
+				$after,
+				$before,
+				NotificationCancellationSource::USER
+			),
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -253,15 +291,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		$limit_params = $this->get_limit_sql_params( $query_args );
-		$this->add_time_period_sql_params( $query_args, $table_name );
-		$this->subquery->add_sql_clause(
-			'where',
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
-				"AND {$table_name}.status <> %s",
-				NotificationStatus::PENDING
-			)
-		);
+		$conditions   = $this->get_metric_conditions( $query_args );
+		foreach ( $conditions as $metric => $condition ) {
+			$this->report_columns[ $metric ] = "SUM( {$condition} ) AS {$metric}";
+		}
+		$this->subquery->add_sql_clause( 'where', 'AND ( (' . implode( ') OR (', $conditions ) . ') )' );
 
 		$included_products = $this->get_filtered_ids( $query_args, 'product_includes' );
 		if ( $included_products ) {
