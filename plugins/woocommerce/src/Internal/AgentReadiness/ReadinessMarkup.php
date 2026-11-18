@@ -3,64 +3,15 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
-use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Markup of the AI tools tab's AI shopping section, and the wording of setup steps that Sales
- * readiness shares: check rows, their badges and actions, folds, and the script for the switch and the
- * copy button.
+ * The wording of setup steps that AI shopping's Setup checklist and Sales readiness share: what each
+ * open step asks, why it matters and where to fix it.
  *
  * @since 11.4.0
  */
 trait ReadinessMarkup {
-
-	use ScriptDebug;
-
-	/**
-	 * One row: an icon for its state, the title, the lines under it, then a button when there is one.
-	 *
-	 * @param string             $state  open, required, unknown, pass or off.
-	 * @param string             $title  Escaped title HTML.
-	 * @param array<int, string> $lines  Escaped HTML lines; empty ones are skipped.
-	 * @param string             $action Escaped HTML at the end of the row, such as a Review button.
-	 */
-	private static function render_item( string $state, string $title, array $lines, string $action = '' ): void {
-		$states = array(
-			'open'     => __( 'Issue:', 'woocommerce' ),
-			'required' => __( 'Issue:', 'woocommerce' ),
-			'pass'     => __( 'Passed:', 'woocommerce' ),
-		);
-		echo '<li class="wc-agentic-commerce-item wc-agentic-commerce-item--' . esc_attr( $state ) . '"><span class="wc-agentic-commerce-item__icon" aria-hidden="true"></span><div>';
-		echo '<p class="wc-agentic-commerce-item__title"><span class="screen-reader-text">' . esc_html( $states[ $state ] ?? '' ) . ' </span>' . wp_kses_post( $title ) . '</p>';
-		foreach ( array_filter( $lines, static fn( string $line ): bool => '' !== trim( $line ) ) as $line ) {
-			echo '<p class="description">' . wp_kses_post( $line ) . '</p>';
-		}
-		echo '</div>' . wp_kses_post( $action ) . '</li>';
-	}
-
-	/**
-	 * The badge on a setup step AI assistants can't shop the store without.
-	 *
-	 * @return string Badge HTML.
-	 */
-	private static function required_badge(): string {
-		return '<mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--check">' . esc_html__( 'Required', 'woocommerce' ) . '</mark>';
-	}
-
-	/**
-	 * Open a fold: "Show …" while closed, "Hide completed steps" while open. The caller closes the details element.
-	 *
-	 * @param string $show Text while closed.
-	 */
-	private static function open_more( string $show ): void {
-		printf(
-			'<details class="wc-agentic-commerce-more"><summary><span class="wc-agentic-commerce-more__show">%1$s</span><span class="wc-agentic-commerce-more__hide">%2$s</span></summary>',
-			esc_html( $show ),
-			esc_html__( 'Hide completed steps', 'woocommerce' )
-		);
-	}
 
 	/**
 	 * What an open check asks the merchant to do: the action, why it matters and where to do it.
@@ -114,30 +65,5 @@ trait ReadinessMarkup {
 		$action  = $actions[ $check['id'] ] ?? array( $check['label'] ?? '', $check['why'] );
 		// Site Health says how to move to HTTPS, and offers to do it where the host allows.
 		return array( $action[0], $action[1], 'https' === $check['id'] ? admin_url( 'site-health.php' ) : $check['fix_url'], '', '' );
-	}
-
-	/**
-	 * Load the script for the switch and the copy button.
-	 */
-	private function enqueue_script(): void {
-		wp_enqueue_script(
-			'wc-agentic-commerce-settings',
-			plugins_url( 'assets/js/admin/wc-agentic-commerce-settings' . $this->get_script_suffix() . '.js', WC_PLUGIN_FILE ),
-			array( 'wp-api-fetch' ),
-			WC_VERSION,
-			true
-		);
-		wp_localize_script(
-			'wc-agentic-commerce-settings',
-			'wcAgenticCommerceSettings',
-			array(
-				'path' => '/wc/v3/agent-readiness/ucp',
-				'i18n' => array(
-					'error'   => __( 'The setting didn’t save. Reload the page and try again.', 'woocommerce' ),
-					'unsaved' => __( 'Save your changes to see the updated status.', 'woocommerce' ),
-					'copied'  => __( 'Copied', 'woocommerce' ),
-				),
-			)
-		);
 	}
 }

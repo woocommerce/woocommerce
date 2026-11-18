@@ -176,23 +176,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The badge for Sales readiness as a whole, as AI shopping's Status card links to it: how many store and
-	 * product checks fail, each failing product check counting as one issue.
-	 *
-	 * @param array<string, mixed>|null                                                                                                     $report Stored report, or null before the first scan.
-	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
-	 * @return array{0:string,1:string} Badge class and text.
-	 */
-	public function badge( ?array $report, array $checks ): array {
-		if ( null === $report ) {
-			return array( 'off', __( 'Not checked yet', 'woocommerce' ) );
-		}
-		// Only what the page shows: setup steps that don't join Fix first live in the Setup checklist.
-		$shown = array_filter( $this->visible_store_checks( $report, $checks ), static fn( array $check ): bool => ! self::is_setup_step( $check ) || self::joins_fix_first( $check ) );
-		return self::group_badge( array_merge( $shown, array_fill( 0, count( self::failing_product_checks( $report ) ), array( 'ok' => false ) ) ) );
-	}
-
-	/**
 	 * The AI shopping badge: Needs attention while a required step fails, even with UCP off,
 	 * otherwise Active or Off as UCP is.
 	 *

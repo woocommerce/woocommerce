@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Agent readiness is behind a feature flag: AI shopping spacing, copy and header Save to match the design.
+Comment: Agent readiness is behind a feature flag: AI shopping in React, and AI tools pages to match the design.
 

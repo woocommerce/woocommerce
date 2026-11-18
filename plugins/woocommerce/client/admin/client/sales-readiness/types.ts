@@ -109,3 +109,89 @@ export interface ReadinessView {
 		based_on: string | null;
 	};
 }
+
+/**
+ * What WooCommerce > Settings > AI tools > AI shopping shows, built by
+ * AgenticCommerceSettingsPage in PHP and handed to the page on its root.
+ */
+export interface ShoppingStep {
+	/** The store condition's id. */
+	id: string;
+	state: 'required' | 'open';
+	title: string;
+	/** Required, for a step AI shopping needs. */
+	badge: ViewBadge | null;
+	/** Why it matters, then the fix line when there is one. */
+	lines: string[];
+	/** Where to fix it; `sr` names the policy for screen readers, or is ''. */
+	link: ( ViewLink & { sr: string } ) | null;
+}
+
+export interface ShoppingCount {
+	id: string;
+	label: string;
+	/** Already formatted for the store's locale. */
+	count: string;
+	/** What the count means, shown in a popover, or ''. */
+	tip: string;
+	/** The accessible name of the popover's button. */
+	tip_label: string;
+	link: ViewLink;
+}
+
+export interface PolicyField {
+	/** The option the settings form saves. */
+	id: string;
+	label: string;
+	value: string;
+	options: { value: string; label: string }[];
+}
+
+export interface ShoppingView {
+	parent: ViewLink;
+	title: string;
+	description: string;
+	ucp: {
+		enabled: boolean;
+		/** Off, and a required step fails, so it can't be turned on. */
+		blocked: boolean;
+		title: string;
+		description: string;
+		learn_more: ViewLink;
+		/** What the switch says under it: that AI shopping is on, or ''. */
+		message: string;
+		path: string;
+		error: string;
+		unsaved: string;
+	};
+	coming_soon: { text: string; link: ViewLink } | null;
+	visibility: {
+		title: string;
+		description: string;
+		/** Said instead of the counts before the first check. */
+		empty: string | null;
+		counts: ShoppingCount[];
+	};
+	checklist: {
+		title: string;
+		badge: ViewBadge | null;
+		summary: string;
+		steps: ShoppingStep[];
+		done: { id: string; title: string; text: string }[];
+		show_done: string;
+		hide_done: string;
+	};
+	policies: {
+		title: string;
+		description: string;
+		fields: PolicyField[];
+	};
+	connection: {
+		title: string;
+		description: string;
+		url: string;
+		copy: string;
+		copied: string;
+		test: ViewLink;
+	};
+}

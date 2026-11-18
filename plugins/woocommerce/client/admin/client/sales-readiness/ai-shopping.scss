@@ -1,0 +1,173 @@
+// WooCommerce > Settings > AI tools > AI shopping: an admin-ui Page in the settings form, in place
+// of the WooCommerce header and the settings tabs, edge to edge as on Sales readiness.
+body.woocommerce_page_wc-settings:has(.wc-ai-shopping) {
+	.woocommerce-layout__header {
+		display: none;
+	}
+
+	#wpbody {
+		margin-top: 0;
+	}
+
+	#wpcontent {
+		padding-inline-start: 0;
+	}
+
+	.wrap.woocommerce {
+		margin: 0;
+	}
+
+	// Messages from the last save, such as "Your settings have been saved.", above the page.
+	#mainform > :is(.updated, .error, .notice) {
+		margin: var(--wpds-dimension-gap-lg) var(--wpds-dimension-padding-2xl) 0;
+	}
+}
+
+.wc-ai-shopping {
+	// The page title is semibold in the design; the admin-ui Page header sets medium.
+	h1 {
+		font-weight: 600;
+	}
+
+	&__message {
+		color: var(--wc-sr-muted);
+	}
+
+	// The switch: its label and help line up with the card text, in the design's colors.
+	.components-toggle-control {
+		.components-toggle-control__label,
+		.components-base-control__field label {
+			color: var(--wpds-color-foreground-content-neutral);
+			font-weight: 600;
+		}
+
+		.components-base-control__help {
+			margin-inline-start: 0;
+			padding-inline-start: 0;
+			color: var(--wc-sr-muted);
+		}
+	}
+}
+
+.wc-ai-shopping-breadcrumbs {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+
+	li {
+		display: flex;
+		align-items: center;
+		margin: 0;
+	}
+
+	h1 {
+		margin: 0;
+		padding: 0;
+	}
+
+	&__separator {
+		margin-inline: var(--wpds-dimension-gap-sm);
+		color: var(--wpds-color-stroke-surface-neutral);
+		user-select: none;
+	}
+}
+
+// Product visibility: a label, its count and a link, side by side.
+.wc-ai-shopping-stats {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wpds-dimension-gap-lg) var(--wpds-dimension-gap-xl);
+
+	li {
+		flex: 1 1 140px;
+		min-width: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--wpds-dimension-gap-sm);
+	}
+
+	&__label {
+		display: flex;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-xs);
+	}
+
+	&__name {
+		color: var(--wc-sr-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		font-weight: 500;
+	}
+
+	&__count {
+		color: var(--wpds-color-foreground-content-neutral);
+	}
+
+	&__info {
+		display: inline-flex;
+		align-items: center;
+		padding: 0;
+		border: 0;
+		border-radius: var(--wpds-border-radius-sm);
+		background: none;
+		color: var(--wc-sr-muted);
+		cursor: pointer;
+	}
+
+	&__popup {
+		max-width: 280px;
+	}
+}
+
+// The checklist's completed steps: "Show N completed steps" under the list, 16px under its line.
+.wc-ai-shopping-fold > .wc-sales-readiness-list > .wc-sales-readiness-row:first-child {
+	padding-block-start: var(--wpds-dimension-padding-md);
+}
+
+.wc-ai-shopping-fold > button {
+	margin-block-start: var(--wpds-dimension-gap-lg);
+}
+
+.wc-ai-shopping-connection {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--wpds-dimension-gap-md);
+
+	&__row {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--wpds-dimension-gap-sm);
+		align-self: stretch;
+	}
+
+	&__input {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+}
+
+// DataForm cards.
+.wc-ai-shopping .dataforms-layouts-card__field {
+	position: relative;
+
+	// A list that opens a card starts at the content's edge, and the last row has no line under it.
+	.wc-sales-readiness-list:first-child > .wc-sales-readiness-row:first-child {
+		padding-block-start: 0;
+	}
+
+	.wc-ai-shopping-checklist > .wc-sales-readiness-list:last-child > .wc-sales-readiness-row:last-child {
+		border-block-end: 0;
+	}
+}
+
+// "N steps left" at the end of the Setup checklist's title line.
+.wc-ai-shopping-checklist__badge {
+	position: absolute;
+	inset-block-start: var(--wpds-dimension-padding-2xl);
+	inset-inline-end: var(--wpds-dimension-padding-2xl);
+}
