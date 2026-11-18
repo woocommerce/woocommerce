@@ -527,6 +527,8 @@ class AgentReadiness {
 				'attempts' => 0,
 				// Taken before the scan. A product saved while it runs is absent here, so its new rows stay.
 				'had_rows' => ProductFailures::stored_product_ids(),
+				// Product ids actually evaluated; keep_only must not treat a skipped load as tested.
+				'tested'   => array(),
 			)
 		);
 		update_option( self::SCAN_OPTION, $state, false );
@@ -565,9 +567,19 @@ class AgentReadiness {
 			if ( ! $this->is_current( $chain ) ) {
 				return false;
 			}
+			// ProductScan flushes the runtime cache after the batch; prime again before the store loop.
+			_prime_post_caches( array_map( 'intval', array_keys( $written ) ), true, true );
 			foreach ( $written as $product_id => $failures ) {
 				ProductFailures::store( (int) $product_id, $failures );
 			}
+			$state['tested']   = array_values(
+				array_unique(
+					array_merge(
+						array_map( 'intval', (array) ( $state['tested'] ?? array() ) ),
+						array_map( 'intval', array_keys( $written ) )
+					)
+				)
+			);
 			$state['attempts'] = 0;
 			update_option( self::SCAN_OPTION, $state, false );
 			return true;
@@ -577,9 +589,19 @@ class AgentReadiness {
 		if ( ! $this->is_current( $chain ) ) {
 			return false;
 		}
-		ProductFailures::keep_only( $state['had_rows'], $state['ids'] );
+		ProductFailures::keep_only(
+			array_map( 'intval', (array) ( $state['had_rows'] ?? array() ) ),
+			array_map( 'intval', (array) ( $state['tested'] ?? array() ) )
+		);
 		$report['failures_stored'] = true;
-		update_option( self::REPORT_OPTION, $report, false );
+		if ( false === update_option( self::REPORT_OPTION, $report, false ) ) {
+			// Leave the checkpoint so the next action can retry publication.
+			return true;
+		}
+		// Re-check before deleting: a replacement scan must keep its own progress.
+		if ( ! $this->is_current( $chain ) ) {
+			return false;
+		}
 		delete_option( self::SCAN_OPTION );
 		return false;
 	}

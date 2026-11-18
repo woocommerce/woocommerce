@@ -169,7 +169,7 @@ class ProductScan {
 		$this->available           = self::count_published( self::count_query( self::COUNT_AVAILABLE ) );
 		$this->unsupported_types   = self::count_published( self::count_query( self::COUNT_UNSUPPORTED ) );
 
-		$query           = new \WP_Query(
+		$query       = new \WP_Query(
 			array(
 				'post_type'      => 'product',
 				'post_status'    => 'publish',
@@ -184,12 +184,16 @@ class ProductScan {
 				'tax_query'      => self::count_query( self::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			)
 		);
-		$product_ids     = array_map(
+		$product_ids = array_map(
 			static function ( $post ): int {
 				return $post instanceof \WP_Post ? $post->ID : (int) $post;
 			},
-			$query->posts
+			is_array( $query->posts ) ? $query->posts : array()
 		);
+		// An empty list while the count found products is a failed query, not an empty catalog.
+		if ( $this->available > 0 && array() === $product_ids ) {
+			throw new \RuntimeException( 'Agent readiness could not list products to scan.' );
+		}
 		$this->truncated = count( $product_ids ) > self::PRODUCT_LIMIT;
 		return array_slice( $product_ids, 0, self::PRODUCT_LIMIT );
 	}
@@ -220,7 +224,8 @@ class ProductScan {
 		try {
 			foreach ( $product_ids as $product_id ) {
 				$product = wc_get_product( $product_id );
-				if ( $product ) {
+				// Skip products that left the eligible set between start() and this batch.
+				if ( $product && self::covers( $product ) ) {
 					$this->record( $product, $rules, $channel_rules, $ids_limit );
 				}
 			}

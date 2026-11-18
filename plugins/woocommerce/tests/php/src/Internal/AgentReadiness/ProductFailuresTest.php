@@ -100,6 +100,33 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A product that becomes hidden after start() is not recorded and its old rows are cleared.
+	 */
+	public function test_product_hidden_between_start_and_batch_is_cleared(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$id      = $product->get_id();
+		$this->readiness->refresh_report();
+		$this->assertNotEmpty( ProductFailures::for_product( $id ) );
+
+		$hook = static function ( array $product_ids ) use ( $id ): void {
+			if ( ! in_array( $id, array_map( 'intval', $product_ids ), true ) ) {
+				return;
+			}
+			$product = wc_get_product( $id );
+			$product->set_catalog_visibility( 'hidden' );
+			$product->save();
+		};
+		add_action( 'woocommerce_agent_readiness_scan_batch', $hook );
+		try {
+			$this->readiness->refresh_report();
+		} finally {
+			remove_action( 'woocommerce_agent_readiness_scan_batch', $hook );
+		}
+
+		$this->assertSame( array(), ProductFailures::for_product( $id ) );
+	}
+
+	/**
 	 * @testdox A product that stores rows while the scan runs keeps them.
 	 */
 	public function test_product_stored_during_scan_keeps_its_rows(): void {

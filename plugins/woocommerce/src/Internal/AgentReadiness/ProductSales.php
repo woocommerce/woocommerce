@@ -112,7 +112,8 @@ class ProductSales {
 		$products = null === $product_ids ? '' : 'AND lookup.product_id IN ( ' . implode( ', ', array_fill( 0, count( $product_ids ), '%d' ) ) . ' )';
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table names from $wpdb, placeholders built for the statuses and product ids; the scan reads this in the background.
-		$rows = $wpdb->get_results(
+		$wpdb->last_error = '';
+		$rows             = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT lookup.product_id, lookup.variation_id, SUM( lookup.product_net_revenue ) AS revenue
 				FROM {$lookup} AS lookup
@@ -124,8 +125,15 @@ class ProductSales {
 			ARRAY_A
 		);
 		// phpcs:enable
+		if ( ! is_array( $rows ) || '' !== $wpdb->last_error ) {
+			throw new \RuntimeException(
+				'' !== $wpdb->last_error
+					? 'Agent readiness sales query failed: ' . $wpdb->last_error
+					: 'Agent readiness sales query failed.'
+			);
+		}
 
-		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+		foreach ( $rows as $row ) {
 			$product_id                = (int) $row['product_id'];
 			$by_product[ $product_id ] = ( $by_product[ $product_id ] ?? 0.0 ) + (float) $row['revenue'];
 			if ( (int) $row['variation_id'] > 0 ) {
