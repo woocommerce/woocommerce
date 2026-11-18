@@ -29,7 +29,6 @@ class WC_WCCOM_Site {
 		self::includes();
 
 		add_action( 'woocommerce_wccom_install_products', array( 'WC_WCCOM_Site_Installer', 'install' ) );
-		add_filter( 'determine_current_user', array( __CLASS__, 'authenticate_wccom' ), 14 );
 		add_filter( 'rest_authentication_errors', array( __CLASS__, 'authentication_fallback' ) );
 		add_action( 'woocommerce_rest_api_get_rest_namespaces', array( __CLASS__, 'register_rest_namespace' ) );
 	}
@@ -45,10 +44,13 @@ class WC_WCCOM_Site {
 	}
 
 	/**
-	 * Authenticate WooCommerce.com request.
+	 * Authenticate a WooCommerce.com request to the wccom-site REST API.
+	 *
+	 * Called from authentication_fallback() once WordPress has resolved the route. Returns the connected user,
+	 * or false with the reason added to the wccom_auth_error filter.
 	 *
 	 * @since 3.7.0
-	 * @param int|false $user_id User ID.
+	 * @param int|false $user_id Current user id if already set; always false from the only caller.
 	 * @return int|WP_User|false
 	 */
 	public static function authenticate_wccom( $user_id ) {
@@ -136,17 +138,16 @@ class WC_WCCOM_Site {
 	}
 
 	/**
-	 * Authenticate a WooCommerce.com request that carries `rest_route`.
+	 * Authenticate a WooCommerce.com request once WordPress has resolved its REST route.
 	 *
-	 * WordPress determines the current user before it parses the request, so `authenticate_wccom()` leaves
-	 * these requests alone during `determine_current_user` and they are authenticated here instead.
+	 * Only requests WordPress dispatches to the wccom-site namespace are authenticated, whatever the URL looked like.
 	 *
 	 * @since 11.3.0
 	 * @param WP_Error|null|bool $error Error from another authentication handler, null if none.
 	 * @return WP_Error|null|bool
 	 */
 	public static function authentication_fallback( $error ) {
-		if ( ! empty( $error ) || 0 !== get_current_user_id() || ! isset( $_REQUEST['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $error ) || 0 !== get_current_user_id() ) {
 			return $error;
 		}
 
@@ -192,8 +193,7 @@ class WC_WCCOM_Site {
 	/**
 	 * Check if this is a request to WCCOM Site REST API.
 	 *
-	 * Before WordPress parses the request only the URL path is checked. Requests carrying `rest_route`
-	 * return false until then, and `authentication_fallback()` authenticates them once the route is resolved.
+	 * Only the route WordPress resolved counts, so this is false until WordPress is dispatching the request as REST.
 	 *
 	 * @since 3.7.0
 	 * @return bool
@@ -201,23 +201,18 @@ class WC_WCCOM_Site {
 	protected static function is_request_to_wccom_site_rest_api() {
 		global $wp;
 
-		// Once WordPress is dispatching REST, the route it resolved is the one that counts.
-		if ( wp_is_rest_endpoint() ) {
-			$route = $wp instanceof WP ? ( $wp->query_vars['rest_route'] ?? null ) : null;
-			return is_string( $route ) && str_starts_with( ltrim( $route, '/' ), 'wccom-site/' );
-		}
-
-		// Before that, a rest_route in the query or body can override the path, so leave those requests to authentication_fallback().
-		if ( isset( $_REQUEST['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! wp_is_rest_endpoint() ) {
 			return false;
 		}
 
-		$path = wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only compared against the REST prefix.
-		return is_string( $path ) && str_contains( $path, trailingslashit( rest_get_url_prefix() ) . 'wccom-site/' );
+		$route = $wp instanceof WP ? ( $wp->query_vars['rest_route'] ?? null ) : null;
+		return is_string( $route ) && str_starts_with( ltrim( $route, '/' ), 'wccom-site/' );
 	}
 
 	/**
 	 * Verify WooCommerce.com request from a given body and signature request.
+	 *
+	 * Only what follows the first "?" of the request URI is treated as its query string.
 	 *
 	 * @since 3.7.0
 	 * @param string $body                Request body.
@@ -227,9 +222,15 @@ class WC_WCCOM_Site {
 	 */
 	protected static function verify_wccom_request( $body, $signature, $access_token_secret ) {
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$uri_parts   = explode( '?', $_SERVER['REQUEST_URI'] ?? '', 2 );
+		$request_uri = urldecode( $uri_parts[0] );
+		if ( isset( $uri_parts[1] ) ) {
+			$request_uri .= urldecode( remove_query_arg( array( 'token', 'signature' ), '?' . $uri_parts[1] ) );
+		}
+
 		$data = array(
 			'host'        => $_SERVER['HTTP_HOST'],
-			'request_uri' => urldecode( remove_query_arg( array( 'token', 'signature' ), $_SERVER['REQUEST_URI'] ) ),
+			'request_uri' => $request_uri,
 			'method'      => strtoupper( $_SERVER['REQUEST_METHOD'] ),
 		);
 		// phpcs:enable

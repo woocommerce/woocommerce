@@ -47,12 +47,16 @@ export default function PluginInstallNotice( props: { selectedTab: string } ) {
 						) }
 					></span>
 					<div className="components-notice__buttons">
-						<Button
-							href={ wccomSettings?.wooUpdateManagerInstallUrl }
-							variant="secondary"
-						>
-							{ __( 'Install', 'woocommerce' ) }
-						</Button>
+						{ wccomSettings?.wooUpdateManagerInstallUrl && (
+							<Button
+								href={
+									wccomSettings?.wooUpdateManagerInstallUrl
+								}
+								variant="secondary"
+							>
+								{ __( 'Install', 'woocommerce' ) }
+							</Button>
+						) }
 						<Button
 							href={ WOO_CONNECT_PLUGIN_DOWNLOAD_URL }
 							variant="link"
