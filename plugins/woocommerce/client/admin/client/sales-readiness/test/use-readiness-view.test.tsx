@@ -90,7 +90,7 @@ describe( 'useReadinessView', () => {
 		for ( let i = 0; i < POLL_FOR_MS / POLL_MS + 5; i++ ) {
 			await act( async () => jest.advanceTimersByTime( POLL_MS ) );
 		}
-		expect( viewCalls() ).toBe( POLL_FOR_MS / POLL_MS + 1 );
+		expect( viewCalls() ).toBe( POLL_FOR_MS / POLL_MS );
 	} );
 } );
 

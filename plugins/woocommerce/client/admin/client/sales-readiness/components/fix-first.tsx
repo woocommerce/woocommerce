@@ -45,10 +45,7 @@ export const FixFirstList = ( {
 } ) => (
 	<div className="wc-sales-readiness-fix-first-groups">
 		{ groupByTier( items ).map( ( group ) => (
-			<div
-				key={ group.tier }
-				className="wc-sales-readiness-tier-group"
-			>
+			<div key={ group.tier } className="wc-sales-readiness-tier-group">
 				<div className="wc-sales-readiness-tier">
 					<Text
 						variant="heading-sm"

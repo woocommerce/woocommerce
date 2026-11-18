@@ -72,10 +72,7 @@ export function useReadinessView( initialView: ReadinessView | null = null ) {
 		}
 		pendingSince.current ??= Date.now();
 		const timer = setInterval( () => {
-			if (
-				Date.now() - ( pendingSince.current ?? 0 ) >=
-				POLL_FOR_MS
-			) {
+			if ( Date.now() - ( pendingSince.current ?? 0 ) >= POLL_FOR_MS ) {
 				clearInterval( timer );
 				return;
 			}
