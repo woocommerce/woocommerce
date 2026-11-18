@@ -233,7 +233,9 @@ describe( 'useChunkedImport', () => {
 		[ '500', 'chunk size from the settings', 500 ],
 		[ '5000', 'clamped to the /run maximum', 1000 ],
 		[ '12.7', 'rounded down', 12 ],
+		[ undefined, 'replaced by the default', 200 ],
 		[ '0', 'replaced by the default', 200 ],
+		[ '-5', 'replaced by the default', 200 ],
 		[ 'abc', 'replaced by the default', 200 ],
 	] )(
 		'sends a localized chunk size of %s as the %s',
@@ -258,6 +260,21 @@ describe( 'useChunkedImport', () => {
 			);
 		}
 	);
+
+	it( 'sends the default chunk size when the settings are not on the page', async () => {
+		delete window.wcFulfillmentsImporterSettings;
+		mockedRunChunk.mockResolvedValueOnce( buildResponse( 2, 2, true ) );
+
+		const { result } = renderImport( { total: 2 } );
+
+		await act( async () => {
+			await result.current.run();
+		} );
+
+		expect( mockedRunChunk ).toHaveBeenCalledWith(
+			expect.objectContaining( { limit: 200 } )
+		);
+	} );
 
 	it( 'does nothing without a session token', async () => {
 		const { result } = renderImport( { token: null } );
