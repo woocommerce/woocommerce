@@ -80,6 +80,16 @@ describe( 'ImportStep', () => {
 		expect( mockRun ).toHaveBeenCalledTimes( 1 );
 	} );
 
+	it( 'does not start the loop when it mounts with an error showing', () => {
+		mockIsRunning = false;
+		renderStep( { processed: 2, error: 'Failed to fetch' } );
+
+		expect( mockRun ).not.toHaveBeenCalled();
+		expect(
+			screen.getByRole( 'button', { name: /retry/i } )
+		).toBeInTheDocument();
+	} );
+
 	it( 'passes the session and run settings to the import loop', () => {
 		const { hookArgs } = renderStep( {
 			processed: 40,

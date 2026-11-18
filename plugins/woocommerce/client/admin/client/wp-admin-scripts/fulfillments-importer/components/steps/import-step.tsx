@@ -37,8 +37,13 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	// run is kept in a ref instead.
 	const runRef = useRef( run );
 	runRef.current = run;
+	// A step that mounts again over an error waits for Retry, like the loop
+	// itself never resends a failed chunk on its own.
+	const mountedWithErrorRef = useRef( state.error !== null );
 	useEffect( () => {
-		void runRef.current();
+		if ( ! mountedWithErrorRef.current ) {
+			void runRef.current();
+		}
 	}, [] );
 
 	const percent =
