@@ -30718,18 +30718,6 @@ parameters:
 			path: includes/shortcodes/class-wc-shortcode-checkout.php
 
 		-
-			message: '#^Parameter \#1 \$email of function sanitize_email expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
-			message: '#^Parameter \#1 \$nonce of function wp_verify_nonce expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-checkout.php
-
-		-
 			message: '#^Parameter \#2 \$user_string of function hash_equals expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 2
@@ -66221,30 +66209,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Utilities/URL.php
-
-		-
-			message: '#^@param Automattic\\WooCommerce\\Internal\\Utilities\\WC_Order \$order does not accept actual type of parameter\: WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Internal/Utilities/Users.php
-
-		-
-			message: '#^Cannot call method get_billing_email\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Utilities/Users.php
-
-		-
-			message: '#^Cannot call method get_customer_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Utilities/Users.php
-
-		-
-			message: '#^Cannot call method get_date_created\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Utilities/Users.php
 
 		-
 			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
