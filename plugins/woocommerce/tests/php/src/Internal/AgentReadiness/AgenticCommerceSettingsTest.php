@@ -1942,6 +1942,54 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The admin footer is empty on the AI tools tab and on Sales readiness, and left alone elsewhere.
+	 */
+	public function test_admin_footer_only_hidden_on_ai_tools_and_sales_readiness(): void {
+		$get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		try {
+			foreach (
+				array(
+					array(
+						array(
+							'page' => 'wc-settings',
+							'tab'  => AgenticCommerceSettings::TAB,
+						),
+						'',
+					),
+					array(
+						array(
+							'page'    => 'wc-settings',
+							'tab'     => AgenticCommerceSettings::TAB,
+							'section' => AgenticCommerceSettings::SHOPPING_SECTION,
+						),
+						'',
+					),
+					array(
+						array(
+							'page' => 'wc-admin',
+							'path' => ReadinessCheckPage::PATH,
+						),
+						'',
+					),
+					array(
+						array(
+							'page' => 'wc-settings',
+							'tab'  => 'general',
+						),
+						'Rate us',
+					),
+					array( array( 'page' => 'wc-admin' ), 'Rate us' ),
+				) as $case
+			) {
+				$_GET = $case[0];
+				$this->assertSame( $case[1], $this->sut->handle_admin_footer( 'Rate us' ), wp_json_encode( $case[0] ) );
+			}
+		} finally {
+			$_GET = $get;
+		}
+	}
+
+	/**
 	 * @testdox With "Discourage search engines" on, the noindex it prints is one issue: the setup step, not also the scanned check.
 	 */
 	public function test_noindex_from_discourage_search_engines_shows_once(): void {

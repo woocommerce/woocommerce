@@ -48,6 +48,18 @@
 	}
 }
 
+// Sales readiness and the AI tools tab have no admin footer (AgenticCommerceSettings empties its
+// text), so the 24px under the last card is the page's own.
+body:has(.wc-sales-readiness) {
+	#wpfooter {
+		display: none;
+	}
+
+	#wpbody-content {
+		padding-block-end: 0;
+	}
+}
+
 .wc-sales-readiness {
 	--wc-sr-muted: var(--wpds-color-foreground-content-neutral-weak);
 	--wc-sr-stroke: var(--wpds-color-stroke-surface-neutral-weak);
@@ -84,8 +96,8 @@
 		gap: var(--wpds-dimension-gap-lg);
 		max-width: 632px;
 		margin: 0 auto;
-		// The settings form already leaves a gap under the tabs.
-		padding-block: 0 var(--wpds-dimension-padding-3xl);
+		// The settings form already leaves a gap under the tabs. 24px under the last card, as on Sales readiness.
+		padding-block: 0 var(--wpds-dimension-padding-2xl);
 	}
 }
 
