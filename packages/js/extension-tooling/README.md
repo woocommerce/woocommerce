@@ -61,6 +61,25 @@ Set `EXTENSION_TOOLING_BIN` to the absolute path of that `bin` directory. The in
 
 The Bash ZIP command works without Node.js when `config.woo.zip.build` is empty and the extension's staging hook and Composer scripts, if present, also work on that host.
 
+## Playwright configuration defaults
+
+Use the shared defaults in `tests/e2e/playwright.config.js` with the extension's installed Playwright. The helper supplies the browser site URL, CI retries, focused-test checks, failure artifacts, timeouts, and reporters. Pass paths relative to your Playwright config or absolute paths. Omit `jsonReport` for suites that produce only HTML reports.
+
+```js
+const { defineConfig } = require( '@playwright/test' );
+const playwrightDefaults = require( '@woocommerce/extension-tooling/playwright-defaults' );
+
+module.exports = defineConfig( playwrightDefaults( {
+	htmlReport: './test-results/playwright-report',
+	jsonReport: './test-results/results.json',
+} ), {
+	testDir: './specs',
+	workers: 1,
+} );
+```
+
+Use the second config to set suite-specific projects, worker limits, storage state, and overrides.
+
 ## Webpack
 
 Import the helpers from the extension's webpack configuration. Keep the entry paths, output paths and match patterns in that configuration.
