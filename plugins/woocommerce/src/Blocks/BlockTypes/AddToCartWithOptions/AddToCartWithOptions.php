@@ -16,7 +16,6 @@ use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
  * AddToCartWithOptions class.
  */
 class AddToCartWithOptions extends AbstractBlock {
-
 	use EnableBlockJsonAssetsTrait;
 
 	/**

@@ -206,7 +206,9 @@ class WC_Shortcode_My_Account {
 	public static function edit_address( $load_address = 'billing' ) {
 		$current_user = wp_get_current_user();
 		$load_address = sanitize_key( $load_address );
-		$country      = get_user_meta( get_current_user_id(), $load_address . '_country', true );
+		$copy_source  = WC_Form_Handler::get_copy_address_form_source( $load_address );
+		$values_from  = $copy_source ? $copy_source : $load_address;
+		$country      = get_user_meta( get_current_user_id(), $values_from . '_country', true );
 
 		if ( ! $country ) {
 			$country = WC()->countries->get_base_country();
@@ -236,8 +238,18 @@ class WC_Shortcode_My_Account {
 
 		// Prepare values.
 		foreach ( $address as $key => $field ) {
+			$meta_key = $key;
 
-			$value = get_user_meta( get_current_user_id(), $key, true );
+			if ( $copy_source && 0 === strpos( $key, $load_address . '_' ) ) {
+				$meta_key = $copy_source . substr( $key, strlen( $load_address ) );
+			}
+
+			$value = get_user_meta( get_current_user_id(), $meta_key, true );
+
+			// Keep what the edited address already has, such as a billing email or phone, when the copied address has none.
+			if ( '' === $value && $meta_key !== $key ) {
+				$value = get_user_meta( get_current_user_id(), $key, true );
+			}
 
 			if ( ! $value ) {
 				switch ( $key ) {

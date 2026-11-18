@@ -17,6 +17,7 @@ import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 import { useState, useMemo, useEffect } from '@wordpress/element';
 import { withSpokenMessages } from '@wordpress/components';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 import type { BlockEditProps } from '@wordpress/blocks';
 import type { SelectableItemsContext } from '@woocommerce/types';
 
@@ -37,7 +38,8 @@ import RatingStars from './components/rating-stars';
 const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 	const { attributes, setAttributes, clientId } = props;
 
-	const { isPreview, showCounts, minRating } = attributes;
+	const { showCounts, minRating } = attributes;
+	const isPreviewMode = usePreviewMode();
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		useBlockProps(),
@@ -74,11 +76,13 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 		} );
 
 	const [ displayedOptions, setDisplayedOptions ] = useState(
-		isPreview ? previewOptions : []
+		isPreviewMode ? previewOptions : []
 	);
 
 	const isLoading =
-		! isPreview && filteredCountsLoading && displayedOptions.length === 0;
+		! isPreviewMode &&
+		filteredCountsLoading &&
+		displayedOptions.length === 0;
 
 	const initialFilters = useMemo(
 		() => getActiveFilters( 'rating_filter' ),
@@ -95,7 +99,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 	 * and filtered counts to get a list of options to display.
 	 */
 	useEffect( () => {
-		if ( filteredCountsLoading || isPreview ) {
+		if ( filteredCountsLoading || isPreviewMode ) {
 			return;
 		}
 
@@ -138,7 +142,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 		setDisplayedOptions( productsRating );
 	}, [
 		showCounts,
-		isPreview,
+		isPreviewMode,
 		collectionFilters,
 		filteredCountsLoading,
 		productRatingsQuery,

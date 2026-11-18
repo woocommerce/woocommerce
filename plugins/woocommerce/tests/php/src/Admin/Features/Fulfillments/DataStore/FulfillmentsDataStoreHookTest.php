@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\DataStore;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Helper_Order;
 use WC_Order;
 use WC_Unit_Test_Case;
@@ -31,18 +32,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
-	}
-
-	/**
-	 * Runs after all the tests of the class.
-	 */
-	public static function tearDownAfterClass(): void {
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
-		parent::tearDownAfterClass();
+		FulfillmentsHelper::create_tables();
 	}
 
 	/**
@@ -50,6 +40,7 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		FulfillmentsHelper::enable_fulfillments();
 
 		$this->store = new FulfillmentsDataStore();
 		$this->order = WC_Helper_Order::create_order( get_current_user_id() );
@@ -294,7 +285,6 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$db_fulfillment = new Fulfillment( $fulfillment->get_id() );
 		$this->assertFalse( $db_fulfillment->get_is_fulfilled() );
-		remove_all_filters( 'woocommerce_fulfillment_before_fulfill' );
 	}
 
 	/**
@@ -337,7 +327,6 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$db_fulfillment = new Fulfillment( $fulfillment->get_id() );
 		$this->assertTrue( $db_fulfillment->get_is_fulfilled() );
-		remove_all_filters( 'woocommerce_fulfillment_before_fulfill' );
 	}
 
 	/**
@@ -389,7 +378,6 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 			$this->expectExceptionMessage( 'Fulfillment not found.' );
 			new Fulfillment( $fulfillment->get_id() );
 		}
-		remove_all_filters( 'woocommerce_fulfillment_before_fulfill' );
 	}
 
 	/**
@@ -441,7 +429,6 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key_2' ), $fulfillment->get_meta( 'test_meta_key_2' ) );
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_update' ), $fulfillment->get_meta( 'test_meta_update' ) );
 		$this->assertEquals( $received_fulfillment->get_items(), $fulfillment->get_items() );
-		remove_all_actions( 'woocommerce_fulfillment_after_fulfill' );
 	}
 
 	/**

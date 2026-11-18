@@ -1,0 +1,3 @@
+/* Cart main and sidebar are consecutive block children. */
+.wc-block-cart { writing-mode: horizontal-tb; display: block; }
+.wc-block-cart .wc-block-cart__main + .wc-block-cart__sidebar { margin-block-start: 24px; }

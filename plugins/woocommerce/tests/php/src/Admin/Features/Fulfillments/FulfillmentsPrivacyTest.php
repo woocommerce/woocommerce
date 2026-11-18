@@ -25,34 +25,11 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Original value of the fulfillments feature flag.
-	 *
-	 * @var mixed
-	 */
-	private static $original_fulfillments_flag;
-
-	/**
-	 * Enable the fulfillments feature and register its data store.
+	 * Create the fulfillments tables.
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
-	}
-
-	/**
-	 * Restore the fulfillments feature flag.
-	 */
-	public static function tearDownAfterClass(): void {
-		if ( false === self::$original_fulfillments_flag ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
-		}
-		parent::tearDownAfterClass();
+		FulfillmentsHelper::create_tables();
 	}
 
 	/**
@@ -60,6 +37,9 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Only the flag, not enable_fulfillments(): it would hook the container's FulfillmentsPrivacy
+		// too, and the end-to-end tests would pass on those hooks instead of the ones $this->sut adds.
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
 		$this->sut = new FulfillmentsPrivacy();
 	}
 

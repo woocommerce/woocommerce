@@ -65,15 +65,12 @@ class AssetsController extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Clean up mock dependencies and pages after each test.
+	 * Clean up mock dependencies and the cart after each test.
 	 *
 	 * @return void
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-
-		wp_delete_post( get_option( 'woocommerce_checkout_page_id' ), true );
-		delete_option( 'woocommerce_checkout_page_id' );
 
 		wc()->cart->empty_cart();
 
