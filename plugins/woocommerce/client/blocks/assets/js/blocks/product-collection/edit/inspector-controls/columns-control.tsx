@@ -66,7 +66,7 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 			props.setAttributes( {
 				displayLayout: sanitizeDisplayLayout( {
 					...props.displayLayout,
-					carouselColumns: undefined,
+					carouselColumns: 6,
 				} ),
 			} );
 			return;
