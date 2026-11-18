@@ -96,7 +96,7 @@ class RunCheckAbility implements AbilityDefinition {
 		}
 		$result = $readiness->check_product( $product );
 		if ( null === $result ) {
-			return new \WP_Error( 'woocommerce_agent_readiness_product_not_checked', __( 'Only published simple and variable products shown in the shop catalog are checked.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_agent_readiness_product_not_checked', __( 'Only published simple and variable products not set to Hidden are checked.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$rules  = $readiness->get_default_rules();

@@ -103,7 +103,7 @@ class Gallery extends Abstract_Block_Renderer {
 			// Use the per-image override only when it is a valid ratio; a malformed override falls
 			// back to the gallery ratio instead of silently disabling the crop for that image.
 			$image_ratio  = isset( $image_attrs['aspectRatio'] ) && is_string( $image_attrs['aspectRatio'] ) ? $image_attrs['aspectRatio'] : null;
-			$aspect_ratio = ( null !== $image_ratio && null !== $this->parse_aspect_ratio( $image_ratio ) ) ? $image_ratio : $gallery_aspect_ratio;
+			$aspect_ratio = ( null !== $image_ratio && null !== Html_Processing_Helper::parse_aspect_ratio( $image_ratio ) ) ? $image_ratio : $gallery_aspect_ratio;
 
 			$cell_width      = $this->get_cell_width( $index, $image_count, $columns, $layout_width );
 			$extracted_image = $this->extract_image_from_html( $block['innerHTML'], $aspect_ratio, $cell_width, $image_attrs );
@@ -275,7 +275,7 @@ class Gallery extends Abstract_Block_Renderer {
 
 		// Only accept simple numeric ratios such as "1", "1.5" or "4/3" to avoid injecting anything unexpected.
 		$aspect_ratio = trim( $aspect_ratio );
-		$ratio_value  = $this->parse_aspect_ratio( $aspect_ratio );
+		$ratio_value  = Html_Processing_Helper::parse_aspect_ratio( $aspect_ratio );
 		if ( null === $ratio_value ) {
 			return $img_html;
 		}
@@ -285,10 +285,8 @@ class Gallery extends Abstract_Block_Renderer {
 			return $img_html;
 		}
 
-		// Derive the target display dimensions from the cell width and the requested ratio. Clamp the
-		// height to at least 1px so a very wide ratio can't round down to a 0-height (unusable) crop.
 		$width  = $cell_width > 0 ? $cell_width : 0;
-		$height = $width > 0 ? max( 1, (int) round( $width / $ratio_value ) ) : 0;
+		$height = Html_Processing_Helper::get_crop_height( $width, $ratio_value );
 
 		// get_attribute() can return a string, null (absent), or bool true (valueless attribute);
 		// coerce anything that isn't a real URL string to an empty string.
@@ -312,17 +310,8 @@ class Gallery extends Abstract_Block_Renderer {
 		 */
 		$filtered_url = apply_filters( 'woocommerce_email_editor_gallery_cropped_image_url', $image_url, $aspect_ratio, $width, $height, $image_attrs );
 
-		// Extensions can return anything (arrays, WP_Error, objects). A crop happened only when an
-		// integration returned a *different*, non-empty string. Compare the raw filter result against
-		// the original src here, BEFORE escaping: get_attribute() returns the entity-decoded src (raw
-		// "&"), while esc_url() re-encodes "&" to "&#038;", so comparing an escaped URL against the
-		// decoded original would misclassify any image whose src has a multi-param query string (e.g.
-		// "?w=600&h=600", common with image CDNs) as server-cropped.
-		$is_server_cropped = is_string( $filtered_url ) && '' !== $image_url && '' !== $filtered_url && $filtered_url !== $image_url;
-
-		// Escape for output only after the decision. If esc_url() reduces a hostile/invalid crop URL
-		// to an empty string, fall through to the CSS branch rather than emit an empty src.
-		$cropped_url = $is_server_cropped ? esc_url( (string) $filtered_url ) : '';
+		// If esc_url() reduces a hostile crop URL to an empty string, this falls through to the CSS branch.
+		$cropped_url = Html_Processing_Helper::get_server_cropped_url( $filtered_url, $image_url );
 
 		// These crop styles are appended after Html_Processing_Helper::sanitize_image_html() has run
 		// (its style allowlist would otherwise strip object-fit), so they intentionally bypass that
@@ -351,28 +340,6 @@ class Gallery extends Abstract_Block_Renderer {
 		$html->set_attribute( 'style', esc_attr( $existing_style . $crop_styles ) );
 
 		return $html->get_updated_html();
-	}
-
-	/**
-	 * Parse an aspect ratio attribute value (e.g. "1", "1.5", "4/3") into a numeric width/height ratio.
-	 *
-	 * @param string $aspect_ratio Aspect ratio value.
-	 * @return float|null The ratio (width divided by height), or null when the value is invalid.
-	 */
-	private function parse_aspect_ratio( string $aspect_ratio ): ?float {
-		// Only accept simple numeric ratios to avoid injecting anything unexpected into the markup.
-		if ( ! preg_match( '/^(\d+(?:\.\d+)?)(?:\s*\/\s*(\d+(?:\.\d+)?))?$/', trim( $aspect_ratio ), $matches ) ) {
-			return null;
-		}
-
-		$numerator   = (float) $matches[1];
-		$denominator = isset( $matches[2] ) ? (float) $matches[2] : 1.0;
-
-		if ( $numerator <= 0 || $denominator <= 0 ) {
-			return null;
-		}
-
-		return $numerator / $denominator;
 	}
 
 	/**

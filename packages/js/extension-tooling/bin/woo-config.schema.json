@@ -1,0 +1,470 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "package.json config.woo",
+	"description": "Per-plugin settings of the shared WooCommerce plugin tooling. bin/woo-config.sh validates the object against this schema and applies the defaults shown here.",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"slug": {
+			"type": "string",
+			"pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+			"description": "Plugin slug: the name of the ZIP, the release asset and the WooCommerce.com or WordPress.org product. Default: the package.json name."
+		},
+		"mainFile": {
+			"type": "string",
+			"pattern": "\\.php$",
+			"description": "Main plugin file. Default: <slug>.php."
+		},
+		"productName": {
+			"type": "string",
+			"description": "Product name for docs and messages. Default: the slug."
+		},
+		"capabilities": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"js": {
+					"type": "boolean",
+					"default": true,
+					"description": "pnpm dependencies and the JavaScript gate (check:js, lint:md:docs)."
+				},
+				"jsTests": {
+					"type": "boolean",
+					"default": false,
+					"description": "pnpm run test:js in the shared plugin-js-lint.yml workflow."
+				},
+				"buildTests": {
+					"type": "boolean",
+					"default": false,
+					"description": "pnpm run test:build after the package build."
+				},
+				"e2e": {
+					"type": "boolean",
+					"default": false,
+					"description": "Playwright through bin/e2e.sh and the shared plugin-e2e.yml workflow."
+				},
+				"phpunit": {
+					"type": "boolean",
+					"default": true,
+					"description": "The shared plugin-phpunit.yml workflow with phpunit.legs."
+				},
+				"isolated": {
+					"type": "boolean",
+					"default": false,
+					"description": "composer run test:php:isolated in the shared plugin-php-lint.yml workflow."
+				},
+				"integration": {
+					"type": "boolean",
+					"default": false,
+					"description": "The shared plugin-phpunit.yml workflow with integration.legs (scheduled and manual runs)."
+				},
+				"qit": {
+					"type": "boolean",
+					"default": true,
+					"description": "QIT jobs in manual-ci.yml, ci-cron.yml and ci-cron-qit.yml."
+				},
+				"pluginCheck": {
+					"type": "boolean",
+					"default": true,
+					"description": "Plugin Check on the candidate ZIP."
+				}
+			}
+		},
+		"zip": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"phpCompatibility": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"testVersion": {
+							"type": "string",
+							"pattern": "^[0-9]+[.][0-9]+(-[0-9]+[.][0-9]+)?$",
+							"description": "PHP range to check against the packaged files, for example 7.4-8.5."
+						},
+						"ruleset": {
+							"type": "string",
+							"description": "Optional PHPCS ruleset using the plugin's locked tools/php-quality dependencies."
+						},
+						"ignore": {
+							"type": "string",
+							"description": "Optional comma-separated PHPCS path exclusions."
+						}
+					}
+				},
+				"root": {
+					"type": "string",
+					"description": "Folder inside the ZIP. Default: the slug."
+				},
+				"exclude": {
+					"type": "string",
+					"default": "exclude.lst",
+					"description": "Exclude list: one zip -x wildcard per line, matched against <root>/<path>; a leading / anchors at the plugin folder; # comments."
+				},
+				"build": {
+					"type": "string",
+					"default": "build",
+					"description": "Package script bin/build-zip.sh runs first; empty for none."
+				},
+				"composerProduction": {
+					"type": "boolean",
+					"default": false,
+					"description": "composer install --no-dev in the staging folder, so vendor/ ships."
+				},
+				"php": {
+					"type": "string",
+					"default": "8.4",
+					"description": "PHP of the CI package job; \"system\" keeps the runner's PHP."
+				}
+			}
+		},
+		"versionPatterns": {
+			"type": "array",
+			"description": "Version strings besides the main file header. update_version.sh rewrites and check_versions.sh checks each.",
+			"items": {
+				"type": "object",
+				"additionalProperties": false,
+				"required": [ "pattern" ],
+				"properties": {
+					"file": {
+						"type": "string",
+						"description": "Default: mainFile."
+					},
+					"pattern": {
+						"type": "string",
+						"pattern": "%s",
+						"description": "Literal text with %s for the version; a leading ^ anchors at the start of a line."
+					}
+				}
+			}
+		},
+		"pluginCheck": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"excludeChecks": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"excludeDirectories": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"excludeFiles": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"ignoreCodes": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"ignoreWarnings": {
+					"type": "boolean",
+					"default": false
+				},
+				"strict": {
+					"type": "boolean",
+					"default": false
+				},
+				"timeoutMinutes": {
+					"type": "integer",
+					"default": 10
+				}
+			}
+		},
+		"qit": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"extension": {
+					"type": "string",
+					"description": "QIT extension slug. Default: the slug."
+				},
+				"plugins": {
+					"type": "string",
+					"default": "",
+					"description": "Plugin the QIT activation test installs with the extension (--plugin=<value>), e.g. a required plugin."
+				},
+				"derivativeExclude": {
+					"type": "string",
+					"default": "",
+					"description": "Path removed from the security and PHP compatibility scan copy (e.g. lib/)."
+				},
+				"apiFuzz": {
+					"type": "boolean",
+					"default": true
+				},
+				"timeoutMinutes": {
+					"type": "integer",
+					"default": 100
+				}
+			}
+		},
+		"e2e": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"projects": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"default": [ "" ],
+					"description": "Playwright projects, one CI job each; \"\" runs every project in one job."
+				},
+				"timeoutMinutes": {
+					"type": "integer",
+					"default": 20
+				},
+				"privatePlugins": {
+					"type": "boolean",
+					"default": false,
+					"description": "Trusted runs pass ORG_DOWNLOADS to bin/e2e.sh prepare (bin/hooks/e2e-prepare.sh)."
+				}
+			}
+		},
+		"phpunit": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"timeoutMinutes": {
+					"type": "integer",
+					"default": 10
+				},
+				"phpInput": {
+					"enum": [ "ignore", "replace" ],
+					"default": "ignore",
+					"description": "Whether a requested PHP version replaces the legs' PHP."
+				},
+				"ini": {
+					"type": "string",
+					"default": "",
+					"description": "Extra setup-php ini-values."
+				},
+				"scheduledWc": {
+					"type": "string",
+					"default": "",
+					"description": "WooCommerce version for Cron CI (e.g. trunk); empty keeps latest."
+				},
+				"passEnv": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"pattern": "^[A-Z_][A-Z0-9_]*$"
+					},
+					"default": [],
+					"description": "Environment variables that the shared bin/phpunit.sh passes into the wp-env container when they are set on the host. A plugin with its own PHPUnit runner does not read it."
+				},
+				"legs": {
+					"$ref": "#/$defs/legs"
+				}
+			}
+		},
+		"phpLint": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"php": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"default": [ "8.4" ],
+					"description": "PHP versions of the plugin-php-lint.yml coding standards job (composer check:php, bin/hooks/php-lint.sh)."
+				},
+				"isolatedPhp": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"default": [ "8.4" ],
+					"description": "PHP versions of the plugin-php-lint.yml isolated tests job (capabilities.isolated)."
+				}
+			}
+		},
+		"makepot": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"exclude": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"default": [],
+					"description": "Paths bin/makepot.sh skips (wp i18n make-pot --exclude), on top of the WP-CLI defaults such as node_modules and vendor."
+				},
+				"headers": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					},
+					"default": {},
+					"description": "POT headers bin/makepot.sh sets (wp i18n make-pot --headers). Keys are written as given."
+				}
+			}
+		},
+		"integration": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"timeoutMinutes": {
+					"type": "integer",
+					"default": 20
+				},
+				"legs": {
+					"$ref": "#/$defs/legs"
+				}
+			}
+		},
+		"privatePlugins": {
+			"type": "array",
+			"description": "Private plugin ZIPs that trusted PHPUnit runs download before checkout.",
+			"items": {
+				"type": "object",
+				"additionalProperties": false,
+				"required": [ "slug" ],
+				"properties": {
+					"slug": {
+						"type": "string"
+					},
+					"source": {
+						"enum": [ "release", "all-plugins", "wordpress.org" ],
+						"default": "release",
+						"description": "release: <slug>.zip of woocommerce/<slug>'s latest release; all-plugins: product-packages/<slug>/<slug>.zip in woocommerce/all-plugins; wordpress.org: the latest stable WordPress.org ZIP (no token needed)."
+					},
+					"suites": {
+						"type": "array",
+						"items": {
+							"enum": [ "unit", "integration" ]
+						},
+						"default": [ "unit" ]
+					},
+					"dirEnv": {
+						"type": "string",
+						"description": "Environment variable that receives the plugin folder."
+					},
+					"requireEnv": {
+						"type": "string",
+						"description": "Environment variable set to 1 so tests fail instead of skipping."
+					},
+					"hookOnly": {
+						"type": "boolean",
+						"default": false,
+						"description": "Download only, for bin/hooks/php-tests.sh ($WOO_PRIVATE_PLUGINS_DIR/<slug>)."
+					},
+					"minimumPattern": {
+						"type": "string",
+						"pattern": "%s",
+						"description": "Literal text in mainFile with %s for this plugin's minimum supported version, for legs[].plugins minimum and below-minimum."
+					}
+				}
+			}
+		},
+		"pullRequests": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"privatePlugins": {
+					"type": "boolean",
+					"default": false,
+					"description": "The E2E and integration suites need privatePlugins in every run: same-repository pull requests download them (E2E gets ORG_DOWNLOADS, the integration suite runs), fork pull requests skip both with a warning."
+				}
+			}
+		},
+		"release": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"target": {
+					"enum": [ "woocommerce.com", "wordpress.org" ],
+					"default": "woocommerce.com"
+				},
+				"productId": {
+					"type": "integer",
+					"description": "WooCommerce.com product ID (bin/deploy.sh)."
+				},
+				"readmeChangelog": {
+					"type": "boolean",
+					"default": false,
+					"description": "readme.txt carries the changelog (sync at release start, checked by check_versions.sh)."
+				},
+				"wpOrgSlug": {
+					"type": "string",
+					"description": "WordPress.org slug; empty skips the WordPress.org deploy."
+				}
+			}
+		}
+	},
+	"$defs": {
+		"legs": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"additionalProperties": false,
+				"required": [ "php" ],
+				"properties": {
+					"php": {
+						"type": "string"
+					},
+					"wp": {
+						"type": "string",
+						"default": "latest",
+						"description": "latest, previous, minimum or a version."
+					},
+					"wc": {
+						"type": "string",
+						"default": "latest",
+						"description": "latest, minimum or a version/tag."
+					},
+					"script": {
+						"type": "string",
+						"default": "test:php:unit",
+						"description": "Composer script the leg runs."
+					},
+					"coverage": {
+						"type": "boolean",
+						"default": false
+					},
+					"env": {
+						"type": "object",
+						"additionalProperties": {
+							"type": "string"
+						}
+					},
+					"defaultOnly": {
+						"type": "boolean",
+						"default": false,
+						"description": "Run only when no WordPress or PHP version is requested."
+					},
+					"scheduledOnly": {
+						"type": "boolean",
+						"default": false,
+						"description": "Run only in Cron CI."
+					},
+					"plugins": {
+						"type": "object",
+						"additionalProperties": {
+							"type": "string"
+						},
+						"description": "Private plugin release per slug: latest, minimum, below-minimum (newest release older than the minimum) or a tag. release-source plugins only."
+					},
+					"provision": {
+						"enum": [ "install", "hook" ],
+						"default": "install",
+						"description": "install: bin/install.sh; hook: bin/hooks/php-tests-provision.sh."
+					}
+				}
+			}
+		}
+	}
+}

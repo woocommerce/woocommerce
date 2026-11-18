@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Register Purple validation as a CI lint job and package with wp-scripts; no storefront change.

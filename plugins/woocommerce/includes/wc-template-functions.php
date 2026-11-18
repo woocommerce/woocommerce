@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\SearchEngineVisibility;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
+use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -1683,6 +1684,22 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			return;
 		}
 
+		if ( isset( $attributes['useLabel'] ) ) {
+			$use_label = (bool) $attributes['useLabel'];
+		} else {
+			/**
+			 * Filters whether the product sorting dropdown shows a visible "Sort by" label.
+			 *
+			 * Return true to show the label in classic themes. The Catalog Sorting block
+			 * does not use this filter. It has its own "Show label" setting.
+			 *
+			 * @since 11.4.0
+			 *
+			 * @param bool $show_label Whether to show the label. Default false.
+			 */
+			$use_label = (bool) apply_filters( 'woocommerce_catalog_orderby_show_visual_label', false );
+		}
+
 		/**
 		 * Filter the default catalog orderby.
 		 *
@@ -1692,7 +1709,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 		 */
 		$show_default_orderby = 'menu_order' === apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', 'menu_order' ) );
 
-		if ( isset( $attributes ) && isset( $attributes['useLabel'] ) && $attributes['useLabel'] ) {
+		if ( $use_label ) {
 			/**
 			 * Filters the catalog orderby options.
 			 *
@@ -1758,7 +1775,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 				'catalog_orderby_options' => $catalog_orderby_options,
 				'orderby'                 => $orderby,
 				'show_default_orderby'    => $show_default_orderby,
-				'use_label'               => isset( $attributes['useLabel'] ) ? $attributes['useLabel'] : false,
+				'use_label'               => $use_label,
 			)
 		);
 	}
@@ -2969,6 +2986,7 @@ if ( ! function_exists( 'woocommerce_checkout_payment' ) ) {
 			array(
 				'checkout'           => WC()->checkout(),
 				'available_gateways' => $available_gateways,
+				'has_chosen_gateway' => PaymentUtils::has_chosen_gateway( $available_gateways ),
 				'order_button_text'  => apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woocommerce' ) ),
 			)
 		);

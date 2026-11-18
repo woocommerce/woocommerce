@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Locate product quantity fields by product name in Playwright helpers; no production change.

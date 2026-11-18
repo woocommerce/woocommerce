@@ -34,6 +34,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private static $administrator_id;
 
 	private const CANONICAL_ABILITY_IDS = array(
+		'woocommerce/store-settings-get',
+		'woocommerce/settings-groups-query',
+		'woocommerce/settings-query',
 		'woocommerce/product-terms-query',
 		'woocommerce/product-term-create',
 		'woocommerce/product-term-update',
@@ -46,6 +49,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/orders-query',
 		'woocommerce/order-send-email',
 		'woocommerce/order-create',
+		'woocommerce/order-delete',
 		'woocommerce/order-update',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
@@ -56,9 +60,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/product-review-reply',
 		'woocommerce/product-reviews-query',
 		'woocommerce/shipping-zones-query',
+		'woocommerce/shipping-zone-create',
+		'woocommerce/shipping-zone-method-create',
+		'woocommerce/shipping-zone-method-update',
 		'woocommerce/tax-rates-query',
 		'woocommerce/system-status-tools-query',
 		'woocommerce/system-status-tool-run',
+		'woocommerce/payment-gateway-update',
 	);
 
 	/**
@@ -251,125 +259,150 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_canonical_ability_annotations_match_intent(): void {
 		$expectations = array(
-			'woocommerce/products-query'            => array(
+			'woocommerce/products-query'              => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/product-reviews-query'     => array(
+			'woocommerce/product-reviews-query'       => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/shipping-zones-query'      => array(
+			'woocommerce/shipping-zones-query'        => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/tax-rates-query'           => array(
+			'woocommerce/tax-rates-query'             => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/product-attributes-query'  => array(
+			'woocommerce/product-attributes-query'    => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/product-attribute-create'  => array(
+			'woocommerce/product-attribute-create'    => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
 			),
-			'woocommerce/product-term-create'       => array(
+			'woocommerce/product-term-create'         => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
 			),
-			'woocommerce/product-term-update'       => array(
+			'woocommerce/product-term-update'         => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => true,
 			),
-			'woocommerce/product-create'            => array(
+			'woocommerce/product-create'              => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
 			),
-			'woocommerce/product-update'            => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => true,
-			),
-			'woocommerce/product-delete'            => array(
-				'readonly'    => false,
-				'idempotent'  => true,
-				'destructive' => true,
-			),
-			'woocommerce/orders-query'              => array(
-				'readonly'    => true,
-				'idempotent'  => true,
-				'destructive' => false,
-			),
-			'woocommerce/order-send-email'          => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => false,
-			),
-			'woocommerce/order-create'              => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => false,
-			),
-			'woocommerce/order-update'              => array(
+			'woocommerce/product-update'              => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => true,
 			),
-			'woocommerce/order-update-status'       => array(
+			'woocommerce/product-delete'              => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => true,
+			),
+			'woocommerce/orders-query'                => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/order-send-email'            => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/order-create'                => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/order-delete'                => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => true,
+			),
+			'woocommerce/order-update'                => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => true,
 			),
-			'woocommerce/order-add-note'            => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => false,
-			),
-			'woocommerce/order-notes-query'         => array(
-				'readonly'    => true,
-				'idempotent'  => true,
-				'destructive' => false,
-			),
-			'woocommerce/payment-gateways-query'    => array(
-				'readonly'    => true,
-				'idempotent'  => true,
-				'destructive' => false,
-			),
-			'woocommerce/customers-query'           => array(
-				'readonly'    => true,
-				'idempotent'  => true,
-				'destructive' => false,
-			),
-			'woocommerce/product-review-update'     => array(
+			'woocommerce/order-update-status'         => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => true,
 			),
-			'woocommerce/product-review-reply'      => array(
+			'woocommerce/order-add-note'              => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
 			),
-			'woocommerce/system-status-tools-query' => array(
+			'woocommerce/order-notes-query'           => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/system-status-tool-run'    => array(
+			'woocommerce/payment-gateways-query'      => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/customers-query'             => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/product-review-update'       => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/product-review-reply'        => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/system-status-tools-query'   => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/system-status-tool-run'      => array(
 				'readonly'    => false,
 				'idempotent'  => true,
 				'destructive' => false,
+			),
+			'woocommerce/payment-gateway-update'      => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/shipping-zone-create'        => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/shipping-zone-method-create' => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/shipping-zone-method-update' => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => true,
 			),
 		);
 
@@ -431,7 +464,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertArrayHasKey( 'total_pages', $properties );
 			$this->assertArrayHasKey( 'page', $properties );
 			$this->assertArrayHasKey( 'per_page', $properties );
-			$this->assertArrayNotHasKey( 'total', $properties );
+			$this->assertSame( 'integer', $properties['total']['type'] );
+			$this->assertNotEmpty( $properties['total']['description'] );
 			$this->assertNotEmpty( $properties[ $collection_key ]['description'] ?? '' );
 			$this->assertNotEmpty( $properties['total_pages']['description'] ?? '' );
 			$this->assertNotEmpty( $properties['page']['description'] ?? '' );
@@ -1005,20 +1039,23 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
-			'product-terms-query'      => array(
+			'store-settings-get'          => array( 'woocommerce/store-settings-get', array() ),
+			'settings-groups-query'       => array( 'woocommerce/settings-groups-query', array() ),
+			'settings-query'              => array( 'woocommerce/settings-query', array( 'group' => 'general' ) ),
+			'product-terms-query'         => array(
 				'woocommerce/product-terms-query',
 				array(
 					'taxonomy' => 'product_cat',
 				),
 			),
-			'product-term-create'      => array(
+			'product-term-create'         => array(
 				'woocommerce/product-term-create',
 				array(
 					'taxonomy' => 'product_cat',
 					'name'     => 'Forbidden',
 				),
 			),
-			'product-term-update'      => array(
+			'product-term-update'         => array(
 				'woocommerce/product-term-update',
 				array(
 					'taxonomy' => 'product_cat',
@@ -1026,126 +1063,165 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'name'     => 'Forbidden',
 				),
 			),
-			'product-attributes-query' => array(
+			'product-attributes-query'    => array(
 				'woocommerce/product-attributes-query',
 				array(),
 			),
-			'product-attribute-create' => array(
+			'product-attribute-create'    => array(
 				'woocommerce/product-attribute-create',
 				array(
 					'name' => 'Forbidden',
 				),
 			),
-			'products-query'           => array(
+			'products-query'              => array(
 				'woocommerce/products-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'product-create'           => array(
+			'product-create'              => array(
 				'woocommerce/product-create',
 				array(
 					'name' => 'Forbidden',
 				),
 			),
-			'product-update'           => array(
+			'product-update'              => array(
 				'woocommerce/product-update',
 				array(
 					'id'   => 1,
 					'name' => 'Forbidden',
 				),
 			),
-			'product-delete'           => array(
+			'product-delete'              => array(
 				'woocommerce/product-delete',
 				array(
 					'id' => 1,
 				),
 			),
-			'orders-query'             => array(
+			'orders-query'                => array(
 				'woocommerce/orders-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'order-send-email'         => array(
+			'order-send-email'            => array(
 				'woocommerce/order-send-email',
 				array(
 					'id'    => 1,
 					'email' => 'invoice',
 				),
 			),
-			'order-create'             => array(
+			'order-create'                => array(
 				'woocommerce/order-create',
 				array( 'line_items' => array( array( 'product_id' => 1 ) ) ),
 			),
-			'order-update'             => array(
+			'order-delete'                => array(
+				'woocommerce/order-delete',
+				array(
+					'id' => 1,
+				),
+			),
+			'order-update'                => array(
 				'woocommerce/order-update',
 				array(
 					'id'       => 1,
 					'shipping' => array( 'city' => 'Denied' ),
 				),
 			),
-			'order-update-status'      => array(
+			'order-update-status'         => array(
 				'woocommerce/order-update-status',
 				array(
 					'id'     => 1,
 					'status' => 'processing',
 				),
 			),
-			'product-review-update'    => array(
+			'product-review-update'       => array(
 				'woocommerce/product-review-update',
 				array(
 					'id'     => 1,
 					'status' => 'approved',
 				),
 			),
-			'product-review-reply'     => array(
+			'product-review-reply'        => array(
 				'woocommerce/product-review-reply',
 				array(
 					'id'      => 1,
 					'content' => 'denied',
 				),
 			),
-			'order-add-note'           => array(
+			'order-add-note'              => array(
 				'woocommerce/order-add-note',
 				array(
 					'id'   => 1,
 					'note' => 'denied',
 				),
 			),
-			'order-notes-query'        => array(
+			'order-notes-query'           => array(
 				'woocommerce/order-notes-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'payment-gateways-query'   => array(
+			'payment-gateways-query'      => array(
 				'woocommerce/payment-gateways-query',
 				array(),
 			),
-			'customers-query'          => array(
+			'customers-query'             => array(
 				'woocommerce/customers-query',
 				array(),
 			),
-			'product-reviews-query'    => array(
+			'product-reviews-query'       => array(
 				'woocommerce/product-reviews-query',
 				array(),
 			),
-			'shipping-zones-query'     => array(
+			'shipping-zones-query'        => array(
 				'woocommerce/shipping-zones-query',
 				array(),
 			),
-			'tax-rates-query'          => array(
+			'shipping-zone-create'        => array(
+				'woocommerce/shipping-zone-create',
+				array(
+					'name'      => 'Germany',
+					'locations' => array(
+						array(
+							'code' => 'DE',
+							'type' => 'country',
+						),
+					),
+				),
+			),
+			'shipping-zone-method-create' => array(
+				'woocommerce/shipping-zone-method-create',
+				array(
+					'zone_id'   => 0,
+					'method_id' => 'flat_rate',
+				),
+			),
+			'shipping-zone-method-update' => array(
+				'woocommerce/shipping-zone-method-update',
+				array(
+					'instance_id' => 1,
+					'enabled'     => false,
+				),
+			),
+			'tax-rates-query'             => array(
 				'woocommerce/tax-rates-query',
 				array(),
 			),
-			'status-tools-query'       => array(
+			'status-tools-query'          => array(
 				'woocommerce/system-status-tools-query',
 				array(),
 			),
-			'status-tool-run'          => array(
+			'status-tool-run'             => array(
 				'woocommerce/system-status-tool-run',
 				array( 'id' => 'recount_terms' ),
+			),
+			'payment-gateway-update'      => array(
+				'woocommerce/payment-gateway-update',
+				array(
+					'id'      => 'bacs',
+					'enabled' => true,
+				),
 			),
 		);
 	}
@@ -1177,9 +1253,24 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'products-query'                 => array( 'woocommerce/products-query', $missing_id ),
 			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
 			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),
+			'order-delete by missing order'  => array( 'woocommerce/order-delete', $missing_id ),
 			'payment-gateways-query'         => array( 'woocommerce/payment-gateways-query', array() ),
+			'payment-gateway-update'         => array(
+				'woocommerce/payment-gateway-update',
+				array(
+					'id'      => 'bacs',
+					'enabled' => true,
+				),
+			),
 			'customers-query'                => array( 'woocommerce/customers-query', array() ),
 			'shipping-zones-query'           => array( 'woocommerce/shipping-zones-query', array() ),
+			'shipping-zone-method-update'    => array(
+				'woocommerce/shipping-zone-method-update',
+				array(
+					'instance_id' => 1,
+					'enabled'     => false,
+				),
+			),
 			'tax-rates-query'                => array( 'woocommerce/tax-rates-query', array() ),
 			'product-attributes-query'       => array( 'woocommerce/product-attributes-query', array() ),
 			'product-attribute-create'       => array( 'woocommerce/product-attribute-create', array( 'name' => 'Size' ) ),
@@ -1260,6 +1351,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'woocommerce/order-send-email'    => array(
 				'id'    => $order->get_id(),
 				'email' => 'invoice',
+			),
+			'woocommerce/order-delete'        => array(
+				'id' => $order->get_id(),
 			),
 			'woocommerce/order-update'        => array(
 				'id'       => $order->get_id(),
@@ -1434,6 +1528,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'woocommerce/order-send-email'    => array(
 				'id'    => $order_id,
 				'email' => 'invoice',
+			),
+			'woocommerce/order-delete'        => array(
+				'id' => $order_id,
 			),
 			'woocommerce/order-update'        => array(
 				'id'       => $order_id,
@@ -1782,6 +1879,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id'    => -123,
 					'email' => 'invoice',
 				),
+			),
+			'order-delete'          => array(
+				'woocommerce/order-delete',
+				array( 'id' => -123 ),
 			),
 			'order-update'          => array(
 				'woocommerce/order-update',
@@ -5648,7 +5749,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $result );
 		$this->assertCount( 1, $result['gateways'] );
 		$this->assertSame(
-			array( 'id', 'title', 'method_title', 'description', 'enabled' ),
+			array( 'id', 'title', 'method_title', 'description', 'enabled', 'order' ),
 			array_keys( $result['gateways'][0] )
 		);
 		$this->assertTrue( $result['gateways'][0]['enabled'] );
@@ -5685,6 +5786,27 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'Direct bank transfer', array_column( $result['gateways'], 'method_title', 'id' )['bacs'] );
 		$this->assertSame( 1, $result['total_pages'] );
 		$this->assertSame( count( $result['gateways'] ), $result['per_page'] );
+		$this->assertSame( count( $result['gateways'] ), $result['total'] );
+	}
+
+	/**
+	 * @testdox Should return zero totals when no payment gateways are loaded.
+	 */
+	public function test_payment_gateways_query_returns_zero_total_without_gateways(): void {
+		add_filter( 'woocommerce_payment_gateways', '__return_empty_array' );
+		try {
+			self::reload_payment_gateways();
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array() );
+		} finally {
+			remove_filter( 'woocommerce_payment_gateways', '__return_empty_array' );
+			self::reload_payment_gateways();
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( array(), $result['gateways'] );
+		$this->assertSame( 0, $result['total'] );
+		$this->assertSame( 0, $result['per_page'] );
+		$this->assertSame( 0, $result['total_pages'] );
 	}
 
 	/**
@@ -5838,6 +5960,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $result );
 		$this->assertSame( 'bacs', $result['gateways'][0]['id'] );
+		$this->assertSame( 1, $result['total'] );
 	}
 
 	/**
