@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Agent readiness (unreleased): order emails and policy pages are Required, guest checkout is Optional, pages that need a login are Recommended, a failing UCP catalog search is a Warning, setup steps also show in their question card ("Discourage search engines" in Store access), and Fix first weighs AI apps when there are no sales.
