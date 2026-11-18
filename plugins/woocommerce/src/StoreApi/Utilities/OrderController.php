@@ -318,12 +318,16 @@ class OrderController {
 	 * Checks whether two locations match a different shipping zone or tax rate.
 	 *
 	 * Shipping zones and tax rates ignore case and postcode spacing, so a change in only those does not count.
+	 * Shared with DraftOrderTrait so both re-pricing guards agree on what counts as a destination change.
+	 *
+	 * @since 11.3.0
+	 * @since 11.3.1 Made public.
 	 *
 	 * @param array $old_location Location before the change.
 	 * @param array $new_location Location after the change.
 	 * @return bool
 	 */
-	private static function locations_differ( array $old_location, array $new_location ): bool {
+	public static function locations_differ( array $old_location, array $new_location ): bool {
 		foreach ( self::LOCATION_FIELDS as $field ) {
 			if ( self::normalize_location_field( $field, $old_location ) !== self::normalize_location_field( $field, $new_location ) ) {
 				return true;

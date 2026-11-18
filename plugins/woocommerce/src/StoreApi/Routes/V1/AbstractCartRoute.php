@@ -279,7 +279,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	protected function cart_updated( \WP_REST_Request $request ) {
 		$draft_order = $this->get_draft_order();
 
-		if ( $draft_order ) {
+		// An order awaiting its first address gets it at checkout, which validates it, not from a cart request.
+		if ( $draft_order && ! $this->order_awaits_first_address( $draft_order ) ) {
 			// This does not trigger a recalculation of the cart--endpoints should have already done so before returning
 			// the cart response.
 			$this->order_controller->update_order_from_cart( $draft_order, false );

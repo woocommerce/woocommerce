@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Strengthen checks before Store API checkout reuses an order awaiting payment.
