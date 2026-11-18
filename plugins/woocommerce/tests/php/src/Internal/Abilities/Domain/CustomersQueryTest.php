@@ -255,6 +255,28 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array( $id ), $ids( $result ) );
 		$this->assertStringNotContainsString( $email, (string) wp_json_encode( $result ) );
 		$this->assertSame( array(), $ids( $this->sut->execute( array( 'search' => $email ) ) ), 'search_by defaults to the name.' );
+		$this->assertSame(
+			array(),
+			$ids(
+				$this->sut->execute(
+					array(
+						'search'    => substr( $email, 0, -1 ),
+						'search_by' => 'email',
+					)
+				)
+			),
+			'An email search matches the whole address, so it cannot spell one out.'
+		);
+		$this->assertSame(
+			'woocommerce_ability_customer_search_unsupported',
+			$this->sut->execute(
+				array(
+					'search'    => $email . ',other@example.test',
+					'search_by' => 'email',
+				)
+			)->get_error_code(),
+			'An email search with a comma is refused rather than split into several addresses.'
+		);
 
 		$result = $this->sut->execute( array( 'search' => '   ' ) );
 		$this->assertSame( array(), $result['customers'], 'A whitespace-only search matches no one, not everyone.' );
@@ -278,7 +300,7 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 		CustomersDataStore::update_registered_customer( $plain_user );
 		$result = $this->sut->execute(
 			array(
-				'search'    => 'orders%41@',
+				'search'    => 'orders%41@example.test',
 				'search_by' => 'email',
 			)
 		);

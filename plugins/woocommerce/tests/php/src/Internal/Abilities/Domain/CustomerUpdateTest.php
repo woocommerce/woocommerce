@@ -247,6 +247,24 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse an edit that the user profile screen's address filter locks.
+	 */
+	public function test_honours_the_profile_address_lock(): void {
+		list( $id, $user_id ) = $this->registered_customer();
+		add_filter( 'woocommerce_current_user_can_edit_customer_meta_fields', '__return_false' );
+
+		$this->assertFalse( CustomerUpdate::can_edit_customer( array( 'id' => $id ) ) );
+		$result = $this->execute(
+			array(
+				'id'         => $id,
+				'first_name' => 'Changed',
+			)
+		);
+		$this->assertWPError( $result );
+		$this->assertNotSame( 'Changed', ( new \WC_Customer( $user_id ) )->get_first_name() );
+	}
+
+	/**
 	 * @testdox Should recheck edit access when a guest is linked to an account after the permission check.
 	 */
 	public function test_rechecks_access_for_guest_linked_after_permission_check(): void {

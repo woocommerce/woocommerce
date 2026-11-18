@@ -118,7 +118,7 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 
 		$search = isset( $input['search'] ) ? (string) preg_replace( '/\s+/', ' ', trim( $input['search'] ) ) : '';
 		if ( isset( $input['search'] ) && '' === $search ) {
-			// The data store skips an empty search, which would return every customer. The term is bound, not cleaned, so an email keeps a literal "%41"; only whitespace is collapsed, which the name matches with single spaces.
+			// The data store skips an empty search, which would return every customer. The term is escaped, not cleaned, so an email keeps a literal "%41"; only whitespace is collapsed, which the name matches with single spaces.
 			return array(
 				'customers'   => array(),
 				'total'       => 0,
@@ -132,7 +132,17 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 			// The data store reads a search of "0" as no search, which would return every customer.
 			return new \WP_Error(
 				'woocommerce_ability_customer_search_unsupported',
-				__( 'A search for "0" alone is not supported. Search for a longer part of the name or email.', 'woocommerce' ),
+				__( 'A search for "0" alone is not supported. Search for a longer part of the name, or a full email address.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$by_email = 'email' === ( $input['search_by'] ?? 'name' );
+		if ( $by_email && str_contains( $search, ',' ) ) {
+			// The data store splits an exact email match on commas, which would turn one search into several.
+			return new \WP_Error(
+				'woocommerce_ability_customer_search_unsupported',
+				__( 'An email search must be a single email address, without commas.', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -152,8 +162,10 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 			'customers'         => empty( $input['include'] ) ? array() : ( empty( $include ) ? array( 0 ) : $include ),
 			'customers_exclude' => empty( $input['include'] ) ? $exclude : array(),
 			'users'             => $users,
-			'search'            => $search,
-			'searchby'          => $input['search_by'] ?? 'name',
+			// An email must match in full: a substring match would let repeated searches spell out an email the output leaves out.
+			'email_includes'    => $by_email ? $search : '',
+			'search'            => $by_email ? '' : $search,
+			'searchby'          => 'name',
 			'order_before'      => '',
 			'order_after'       => '',
 		);
@@ -336,7 +348,7 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 				),
 				'search'    => array(
 					'type'        => 'string',
-					'description' => __( 'Return only customers whose name or email, as chosen by search_by, contains this text.', 'woocommerce' ),
+					'description' => __( 'With search_by name, return only customers whose name contains this text. With search_by email, return only the customer with this exact email address.', 'woocommerce' ),
 					'minLength'   => 1,
 					'maxLength'   => 200,
 				),

@@ -90,7 +90,7 @@ class CustomerUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Check user edit access, with the same rules as the customers REST API. An ID that is a guest or
+	 * Check user edit access, with the rules of the customers REST API and the user profile screen. An ID that is a guest or
 	 * no customer passes for users who can list customers, so they get the specific error.
 	 *
 	 * @since 11.4.0
@@ -108,7 +108,28 @@ class CustomerUpdate extends ActionableAbility {
 			return (bool) wc_rest_check_user_permissions( 'read' );
 		}
 
-		return (bool) wc_rest_check_user_permissions( 'edit', $user_id );
+		return self::can_edit_user( $user_id );
+	}
+
+	/**
+	 * The customers REST API rules, plus the filter that can lock the address fields on the user profile screen.
+	 *
+	 * @param int $user_id User ID.
+	 * @return bool
+	 */
+	private static function can_edit_user( int $user_id ): bool {
+		if ( ! wc_rest_check_user_permissions( 'edit', $user_id ) ) {
+			return false;
+		}
+
+		/**
+		 * Filters whether the current user can edit a customer's address fields, as on the user profile screen.
+		 *
+		 * @since 3.6.0
+		 * @param bool $can_edit Whether the current user can edit them.
+		 * @param int  $user_id  User ID of the customer.
+		 */
+		return (bool) apply_filters( 'woocommerce_current_user_can_edit_customer_meta_fields', current_user_can( 'manage_woocommerce' ), $user_id );
 	}
 
 	/**
@@ -154,7 +175,7 @@ class CustomerUpdate extends ActionableAbility {
 		}
 
 		// The permission check may have passed for a guest whose row has since been linked to an account.
-		if ( ! wc_rest_check_user_permissions( 'edit', $user_id ) ) {
+		if ( ! self::can_edit_user( $user_id ) ) {
 			return new \WP_Error(
 				'woocommerce_ability_customer_forbidden',
 				__( 'You are not allowed to edit this customer.', 'woocommerce' ),
