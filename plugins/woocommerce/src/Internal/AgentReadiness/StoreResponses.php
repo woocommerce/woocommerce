@@ -371,7 +371,7 @@ class StoreResponses {
 			return null;
 		}
 		$headers = array();
-		foreach ( array( 'location', 'x-robots-tag', 'content-type', 'vary', 'link' ) as $name ) {
+		foreach ( array( 'location', 'x-robots-tag', 'content-type', 'vary', 'link', 'x-woocommerce-llms-txt' ) as $name ) {
 			$value = wp_remote_retrieve_header( $response, $name );
 			$value = is_array( $value ) ? implode( ', ', $value ) : (string) $value;
 			if ( '' !== $value ) {
