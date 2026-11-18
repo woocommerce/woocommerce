@@ -44,7 +44,8 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 		state.total > 0
 			? Math.min(
 					100,
-					Math.round( ( state.processed / state.total ) * 100 )
+					// Round down so the bar is full only once every row is processed.
+					Math.floor( ( state.processed / state.total ) * 100 )
 				)
 			: 0;
 
