@@ -87,6 +87,7 @@ final class BlockTypesLazyController {
 		$block_groups = array(
 			$this->get_order_confirmation_blocks(),
 			$this->get_add_to_cart_with_options_blocks(),
+			$this->get_product_display_element_blocks(),
 		);
 		foreach ( $block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
@@ -97,10 +98,14 @@ final class BlockTypesLazyController {
 					}
 					$asset_api          = $this->asset_api;
 					$use_custom_handles = static function ( $metadata ) use ( $block_name, $asset_api ) {
-						foreach ( (array) ( $metadata['style'] ?? array() ) as $index => $specifier ) {
-							if ( 'file:../' . $block_name . '.css' === $specifier ) {
-								$custom_handle               = 'wc-blocks-style-' . $block_name;
-								$metadata['style'][ $index ] = $custom_handle;
+						// Backward compatibility: some blocks didn't use the custom handles before lazy-loading introduction.
+						$skip   = array( 'product-price', 'product-stock-indicator' );
+						$styles = (array) ( $metadata['style'] ?? array() );
+						foreach ( $styles as $index => $specifier ) {
+							if ( 'file:../' . $block_name . '.css' === $specifier && ! in_array( $block_name, $skip, true ) ) {
+								$custom_handle     = 'wc-blocks-style-' . $block_name;
+								$styles[ $index ]  = $custom_handle;
+								$metadata['style'] = $styles;
 								$asset_api->register_style( $custom_handle, $asset_api->get_block_asset_build_path( $block_name, 'css' ), array(), 'all', true );
 								break;
 							}
@@ -289,6 +294,40 @@ final class BlockTypesLazyController {
 			// These blocks override enqueue_data() with editor-visible data, hence load eagerly in admin.
 			$list['add-to-cart-with-options']                              = \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::class;
 			$list['add-to-cart-with-options-variation-selector-attribute'] = \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::class;
+		}
+
+		return $list;
+	}
+
+	/**
+	 * Side effect free and stateless product display element blocks.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_product_display_element_blocks(): array {
+		// ProductGalleryLargeImage: excluded — overrides initialize() with block_type_metadata_settings filter.
+		$list = array(
+			'product-price'                             => \Automattic\WooCommerce\Blocks\BlockTypes\ProductPrice::class,
+			'product-title'                             => \Automattic\WooCommerce\Blocks\BlockTypes\ProductTitle::class,
+			'product-sku'                               => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSKU::class,
+			'product-sale-badge'                        => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSaleBadge::class,
+			'product-summary'                           => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSummary::class,
+			'product-average-rating'                    => \Automattic\WooCommerce\Blocks\BlockTypes\ProductAverageRating::class,
+			'product-rating'                            => \Automattic\WooCommerce\Blocks\BlockTypes\ProductRating::class,
+			'product-rating-counter'                    => \Automattic\WooCommerce\Blocks\BlockTypes\ProductRatingCounter::class,
+			'product-rating-stars'                      => \Automattic\WooCommerce\Blocks\BlockTypes\ProductRatingStars::class,
+			'product-description'                       => \Automattic\WooCommerce\Blocks\BlockTypes\ProductDescription::class,
+			'product-specifications'                    => \Automattic\WooCommerce\Blocks\BlockTypes\ProductSpecifications::class,
+			'product-gallery'                           => \Automattic\WooCommerce\Blocks\BlockTypes\ProductGallery::class,
+			'product-gallery-thumbnails'                => \Automattic\WooCommerce\Blocks\BlockTypes\ProductGalleryThumbnails::class,
+			'product-gallery-large-image-next-previous' => \Automattic\WooCommerce\Blocks\BlockTypes\NextPreviousButtons::class,
+		);
+		if ( ! is_admin() ) {
+			// These blocks have no individual editor scripts or override enqueue_data(), hence load eagerly in admin.
+			$list['product-meta']            = \Automattic\WooCommerce\Blocks\BlockTypes\ProductMeta::class;
+			$list['product-image-gallery']   = \Automattic\WooCommerce\Blocks\BlockTypes\ProductImageGallery::class;
+			$list['product-image']           = \Automattic\WooCommerce\Blocks\BlockTypes\ProductImage::class;
+			$list['product-stock-indicator'] = \Automattic\WooCommerce\Blocks\BlockTypes\ProductStockIndicator::class;
 		}
 
 		return $list;

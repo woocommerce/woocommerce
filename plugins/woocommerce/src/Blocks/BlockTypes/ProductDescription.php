@@ -8,6 +8,8 @@ use Automattic\WooCommerce\Blocks\Utils\ProductDescriptionUtils;
  * ProductDescription class.
  */
 class ProductDescription extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -64,15 +66,6 @@ class ProductDescription extends AbstractBlock {
 			$wrapper_attributes,
 			$description
 		);
-	}
-
-	/**
-	 * Disable the frontend stylesheet for this block type. It does not have one.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
 	}
 
 	/**
