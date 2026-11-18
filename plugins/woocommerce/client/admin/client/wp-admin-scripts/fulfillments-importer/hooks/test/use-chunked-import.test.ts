@@ -81,7 +81,6 @@ function renderImport( overrides: Partial< UseChunkedImportArgs > = {} ) {
 			mapping: MAPPING,
 			notifyCustomer: false,
 			updateExisting: true,
-			chunkSize: 2,
 			onChunk,
 			onFinish,
 			onError,
@@ -122,6 +121,12 @@ async function runToEnd( result: { current: { run: () => Promise< void > } } ) {
 describe( 'useChunkedImport', () => {
 	beforeEach( () => {
 		mockedRunChunk.mockReset();
+		window.wcFulfillmentsImporterSettings = {
+			importRoute: '/wc/v3/fulfillments/import',
+			chunkSize: '2',
+			maxRows: '5000',
+			providers: [],
+		};
 	} );
 
 	afterEach( () => {
@@ -239,10 +244,7 @@ describe( 'useChunkedImport', () => {
 			};
 			mockedRunChunk.mockResolvedValueOnce( buildResponse( 2, 2, true ) );
 
-			const { result } = renderImport( {
-				total: 2,
-				chunkSize: undefined,
-			} );
+			const { result } = renderImport( { total: 2 } );
 
 			await act( async () => {
 				await result.current.run();
@@ -254,19 +256,6 @@ describe( 'useChunkedImport', () => {
 		}
 	);
 
-	it( 'clamps a chunk size passed by the caller', async () => {
-		mockedRunChunk.mockResolvedValueOnce( buildResponse( 2, 2, true ) );
-
-		const { result } = renderImport( { total: 2, chunkSize: 4000 } );
-
-		await act( async () => {
-			await result.current.run();
-		} );
-
-		expect( mockedRunChunk ).toHaveBeenCalledWith(
-			expect.objectContaining( { limit: 1000 } )
-		);
-	} );
 
 	it( 'does nothing without a session token', async () => {
 		const { result } = renderImport( { token: null } );
@@ -759,7 +748,6 @@ describe( 'useChunkedImport', () => {
 					mapping: MAPPING,
 					notifyCustomer: false,
 					updateExisting: true,
-					chunkSize: 2,
 					onFinish,
 					onError,
 				} );

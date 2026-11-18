@@ -21,7 +21,6 @@ export interface UseChunkedImportArgs {
 	mapping: ColumnMapping;
 	notifyCustomer: boolean;
 	updateExisting: boolean;
-	chunkSize?: number;
 	onChunk?: ( response: RunChunkResponse ) => void;
 	onFinish?: ( summary: ImporterSummary ) => void;
 	onError?: ( message: string, sessionEnded: boolean ) => void;
@@ -159,11 +158,7 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 		onFinish,
 		onError,
 	} = args;
-	// Caller-provided sizes go through the same clamp as the localized setting.
-	const chunkSize =
-		args.chunkSize === undefined
-			? resolvedChunkSize()
-			: normalizeChunkSize( args.chunkSize );
+	const chunkSize = resolvedChunkSize();
 
 	const [ isRunning, setIsRunning ] = useState( false );
 	const offsetRef = useRef< number >( 0 );
