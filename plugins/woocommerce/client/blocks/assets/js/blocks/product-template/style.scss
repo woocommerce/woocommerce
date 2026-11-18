@@ -88,6 +88,13 @@ $min-product-width: 150px;
  * Carousel layout
  */
 
+// The carousel element is the container named carousel, so a query there cannot
+// set its own scroll-padding. The collection is the ancestor query for snap styles.
+.wp-block-woocommerce-product-collection:has(.is-product-collection-layout-carousel) {
+	container-type: inline-size;
+	container-name: carousel-layout;
+}
+
 .is-product-collection-layout-carousel {
 	overflow-x: auto;
 	scrollbar-width: none;
@@ -138,25 +145,6 @@ $min-product-width: 150px;
 		}
 	}
 
-	&.columns-1 .wc-block-product,
-	&.columns-2 .wc-block-product,
-	&.columns-4 .wc-block-product,
-	&.columns-6 .wc-block-product {
-		scroll-snap-align: start;
-	}
-	&.columns-1 {
-		scroll-padding: 0 7.5%;
-	}
-	&.columns-2 {
-		scroll-padding: 0 6%;
-	}
-	&.columns-4 {
-		scroll-padding: 0 4%;
-	}
-	&.columns-6 {
-		scroll-padding: 0 3%;
-	}
-
 	// Fixed column count. These match the widths above, so the next product
 	// still peeks into view. Markup with no columns class keeps those widths.
 	$carousel-column-widths: (
@@ -175,6 +163,54 @@ $min-product-width: 150px;
 		1280px 5 18%,
 		1440px 6 15%,
 	);
+	// scroll-padding inline size and scroll-snap-align for each visible count.
+	// 3 and 5 match the carousel defaults above.
+	$carousel-scroll-styles: (
+		1: ( inline: 7.5%, align: start ),
+		2: ( inline: 6%, align: start ),
+		3: ( inline: 30%, align: center ),
+		4: ( inline: 4%, align: start ),
+		5: ( inline: 30%, align: center ),
+		6: ( inline: 3%, align: start ),
+	);
+	// First breakpoint at which the responsive layout shows each column count.
+	// Below 600px it shows 2. Later steps that repeat a count are skipped.
+	$carousel-visible-counts: ();
+	$carousel-seen-counts: ();
+	@each $breakpoint, $step-columns, $step-width in $carousel-shrink-steps {
+		@if not map.has-key($carousel-seen-counts, $step-columns) {
+			$carousel-visible-counts: map.merge(
+				$carousel-visible-counts,
+				(
+					$breakpoint: $step-columns,
+				)
+			);
+			$carousel-seen-counts: map.merge(
+				$carousel-seen-counts,
+				(
+					$step-columns: true,
+				)
+			);
+		}
+	}
+
+	@mixin carousel-scroll-for-count($count) {
+		$style: map.get($carousel-scroll-styles, $count);
+
+		scroll-padding: 0 #{ map.get($style, inline) };
+
+		.wc-block-product {
+			scroll-snap-align: map.get($style, align);
+		}
+	}
+
+	@each $count, $style in $carousel-scroll-styles {
+		@if map.get($style, inline) != 30% or map.get($style, align) != center {
+			&.columns-#{ $count } {
+				@include carousel-scroll-for-count($count);
+			}
+		}
+	}
 
 	@each $columns, $width in $carousel-column-widths {
 		&.columns-#{ $columns } {
@@ -202,6 +238,28 @@ $min-product-width: 150px;
 							@container carousel (min-width: #{$breakpoint}) {
 								min-width: $step-width;
 							}
+						}
+					}
+				}
+			}
+
+			// Responsive mode shows fewer products until the container is wide
+			// enough for this column count. Snap to that visible count.
+			@if $columns > 2 {
+				&.wc-block-product-template__carousel-responsive {
+					@include carousel-scroll-for-count(2);
+
+					$previous-visible-count: 2;
+					@each $breakpoint, $visible-count in $carousel-visible-counts {
+						$shown: $visible-count;
+						@if $shown > $columns {
+							$shown: $columns;
+						}
+						@if $shown != $previous-visible-count {
+							@container carousel-layout (min-width: #{$breakpoint}) {
+								@include carousel-scroll-for-count($shown);
+							}
+							$previous-visible-count: $shown;
 						}
 					}
 				}
