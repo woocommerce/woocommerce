@@ -19,7 +19,8 @@ import {
  * Internal dependencies
  */
 import { DisplayLayoutControlProps, LayoutOptions } from '../../types';
-import { getDisplayLayoutForType } from '../../utils';
+import { getDefaultDisplayLayout, sanitizeDisplayLayout } from '../../utils';
+import { DEFAULT_CAROUSEL_COLUMNS } from '../../constants';
 
 const getHelpText = ( layoutOptions: LayoutOptions ) => {
 	switch ( layoutOptions ) {
@@ -46,10 +47,19 @@ const LayoutOptionsControl = ( props: DisplayLayoutControlProps ) => {
 	const { type } = props.displayLayout;
 	const setDisplayLayout = ( nextType: LayoutOptions ) => {
 		props.setAttributes( {
-			displayLayout: getDisplayLayoutForType(
-				nextType,
-				props.displayLayout
-			),
+			displayLayout: sanitizeDisplayLayout( {
+				...( nextType === LayoutOptions.GRID
+					? getDefaultDisplayLayout()
+					: {} ),
+				...props.displayLayout,
+				type: nextType,
+				...( nextType === LayoutOptions.CAROUSEL
+					? {
+							carouselColumns: DEFAULT_CAROUSEL_COLUMNS,
+							shrinkColumns: true,
+						}
+					: {} ),
+			} ),
 		} );
 	};
 
