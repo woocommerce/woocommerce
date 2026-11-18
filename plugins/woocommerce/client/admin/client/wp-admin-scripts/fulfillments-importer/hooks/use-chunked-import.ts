@@ -18,7 +18,10 @@ import type {
 export interface UseChunkedImportArgs {
 	token: string | null;
 	total: number;
-	// Rows the server already confirmed; a remounted step continues from here.
+	/**
+	 * Rows the server already confirmed. A step that mounts again continues
+	 * from here instead of from 0.
+	 */
 	processed: number;
 	mapping: ColumnMapping;
 	notifyCustomer: boolean;
