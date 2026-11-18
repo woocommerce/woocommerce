@@ -42,7 +42,6 @@ import {
 	DEFAULT_QUERY,
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_TEMPLATE,
-	getCarouselColumns,
 	DEFAULT_CAROUSEL_COLUMNS,
 } from './constants';
 import blockJson from './block.json';
@@ -520,17 +519,16 @@ export function sanitizeDisplayLayout(
 	}
 
 	if ( displayLayout?.type === LayoutOptions.CAROUSEL ) {
-		const carouselColumns = getCarouselColumns(
-			displayLayout.carouselColumns
-		);
-
-		if ( carouselColumns === undefined ) {
+		if (
+			displayLayout.carouselColumns === undefined ||
+			! Number.isFinite( displayLayout.carouselColumns )
+		) {
 			return { type: displayLayout.type };
 		}
 
 		return {
 			type: displayLayout.type,
-			carouselColumns,
+			carouselColumns: displayLayout.carouselColumns,
 			...( displayLayout.shrinkColumns ? { shrinkColumns: true } : {} ),
 		};
 	}

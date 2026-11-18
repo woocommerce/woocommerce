@@ -31,10 +31,7 @@ import {
 	useProductCollectionQueryContext,
 	parseTemplateSlug,
 } from './utils';
-import {
-	getCarouselColumns,
-	getDefaultStockStatuses,
-} from '../product-collection/constants';
+import { getDefaultStockStatuses } from '../product-collection/constants';
 import { usePlaceholderProducts } from './use-placeholder-products';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
@@ -404,7 +401,6 @@ const ProductTemplateEdit = (
 	);
 
 	const hasLayoutFlex = layoutType === 'flex' && columns > 1;
-	const carouselColumnCount = getCarouselColumns( carouselColumns );
 	let customClassName = '';
 
 	const isPreviewWithNoProducts =
@@ -439,10 +435,10 @@ const ProductTemplateEdit = (
 			customClassName,
 			{ [ `is-product-collection-layout-${ layoutType }` ]: layoutType },
 			layoutType === 'carousel' &&
-				carouselColumnCount &&
-				`columns-${ carouselColumnCount }`,
+				carouselColumns &&
+				`columns-${ carouselColumns }`,
 			layoutType === 'carousel' &&
-				carouselColumnCount &&
+				carouselColumns &&
 				shrinkColumns &&
 				'wc-block-product-template__responsive'
 		),
