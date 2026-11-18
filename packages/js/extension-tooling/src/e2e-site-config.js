@@ -99,7 +99,11 @@ function writeE2ESiteConfig( {
 			'https://wordpress.org/wordpress-' + WP_VERSION + '.zip'
 		);
 	}
-	if ( isVersionNumber( PHP_VERSION ) ) {
+	// wp-env accepts numeric PHP versions without pre-release suffixes.
+	if (
+		typeof PHP_VERSION === 'string' &&
+		/^\d+(?:\.\d+)*$/.test( PHP_VERSION )
+	) {
 		setSiteVersion( config, 'phpVersion', PHP_VERSION );
 	}
 

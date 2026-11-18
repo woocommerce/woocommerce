@@ -74,11 +74,13 @@ test( 'sets pinned WordPress, WooCommerce and PHP versions', ( context ) => {
 	);
 } );
 
-test( 'ignores a non-string version override', ( context ) => {
+test( 'keeps the configured PHP version when an override is invalid', ( context ) => {
 	const { root, pluginPath, output } = site( context );
-	writeE2ESiteConfig( { root, pluginPath, env: { PHP_VERSION: 8 } } );
-	const config = JSON.parse( fs.readFileSync( output, 'utf8' ) );
-	assert.equal( config.phpVersion, '8.3' );
+	for ( const PHP_VERSION of [ 8, '8.2-rc.1' ] ) {
+		writeE2ESiteConfig( { root, pluginPath, env: { PHP_VERSION } } );
+		const config = JSON.parse( fs.readFileSync( output, 'utf8' ) );
+		assert.equal( config.phpVersion, '8.3' );
+	}
 } );
 
 test( 'rejects invalid plugins and mappings before writing a config', ( context ) => {
