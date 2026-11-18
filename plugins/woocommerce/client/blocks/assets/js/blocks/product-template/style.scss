@@ -155,22 +155,12 @@ $min-product-width: 150px;
 
 	@each $columns, $width in $carousel-column-widths {
 		&.columns-#{ $columns } {
-			// The responsive carousel centers a product inside an inset snap
-			// area. A fixed count aligns to the product edge so a full column
-			// stays in view instead of being cut off.
-			scroll-padding-inline: 0;
-
 			.wc-block-product {
 				flex-basis: $width;
 				flex-grow: 0;
 				flex-shrink: 0;
 				min-width: $width;
 				max-width: $width;
-				scroll-snap-align: start;
-
-				&:last-child {
-					scroll-snap-align: end;
-				}
 			}
 
 			// Narrow screens use the responsive floors below, skipping steps that
