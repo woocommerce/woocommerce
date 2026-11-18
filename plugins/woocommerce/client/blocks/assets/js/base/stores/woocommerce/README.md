@@ -173,7 +173,7 @@ $interactive_attributes = $is_interactive
     : '';
 ```
 
-Any `ProductResponseItem` field can be bound the same way, e.g. `state.productInContext.price_html`, `state.productInContext.stock_availability.text`, `state.mainProductInContext.name`. The `images` field is not included in client state; blocks that show images get them in other ways.
+Any `ProductResponseItem` field except `images` can be bound the same way, e.g. `state.productInContext.price_html`, `state.productInContext.stock_availability.text`, `state.mainProductInContext.name`. The `images` field is temporarily left out of the store's state, on both the server and the client.
 
 #### From JS (client)
 
