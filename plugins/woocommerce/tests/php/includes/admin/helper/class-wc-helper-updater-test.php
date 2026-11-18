@@ -2411,6 +2411,8 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			'number'            => array( 7, '7' ),
 			'missing'           => array( null, null ),
 			'empty string'      => array( '', null ),
+			'pre-release'       => array( '7.2-RC1', '7.2-RC1' ),
+			'empty suffix'      => array( '7.2-', null ),
 			'not a version'     => array( 'latest', null ),
 			'array'             => array( array( '7.0' ), null ),
 		);
@@ -2480,6 +2482,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	public function auto_update_offers(): array {
 		return array(
 			'Woo update needing a newer WordPress'     => array( true, true, '99.0', false ),
+			'Woo update needing a WordPress RC'        => array( true, true, '99.0-RC1', false ),
 			'Woo update the site meets'                => array( true, true, '1.0', true ),
 			'Woo update without a requirement'         => array( true, true, null, true ),
 			'another plugin needing a newer WordPress' => array( false, true, '99.0', true ),

@@ -272,7 +272,7 @@ class WC_Helper_Updater {
 	 * Gets the minimum WordPress version an update needs, from an update-check product or an update offer.
 	 *
 	 * The value arrives from a remote response or from a filtered update offer, so anything that
-	 * isn't a plain version number is treated as no requirement.
+	 * isn't a version number, optionally with a pre-release suffix such as -RC1, is treated as no requirement.
 	 *
 	 * @since 11.4.0
 	 * @param array $data Update-check product data, or an update offer cast to an array.
@@ -287,7 +287,7 @@ class WC_Helper_Updater {
 
 		$requires = trim( (string) $requires );
 
-		return 1 === preg_match( '/^\d+(\.\d+){0,3}$/', $requires ) ? $requires : '';
+		return 1 === preg_match( '/^\d+(\.\d+){0,3}(-[0-9A-Za-z.]+)?$/', $requires ) ? $requires : '';
 	}
 
 	/**
