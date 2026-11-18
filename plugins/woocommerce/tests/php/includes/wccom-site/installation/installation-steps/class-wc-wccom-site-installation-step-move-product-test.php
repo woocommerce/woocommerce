@@ -64,6 +64,9 @@ class WC_WCCOM_Site_Installation_Step_Move_Product_Test extends WC_Unit_Test_Cas
 			'plugin needing a newer PHP'       => array( 'plugin', '', '99.0', 'incompatible_php_required_version', '/This extension needs PHP 99\.0 or later, and this server runs PHP \d/' ),
 			'theme needing a newer WordPress'  => array( 'theme', '99.0', '', 'incompatible_wp_required_version', '/This extension needs WordPress 99\.0 or later/' ),
 			'theme needing a newer PHP'        => array( 'theme', '', '99.0', 'incompatible_php_required_version', '/This extension needs PHP 99\.0 or later/' ),
+			// PHP is reported first, as WordPress core does.
+			'plugin needing both'              => array( 'plugin', '99.0', '99.0', 'incompatible_php_required_version', '/This extension needs PHP 99\.0 or later/' ),
+			'theme needing both'               => array( 'theme', '99.0', '99.0', 'incompatible_php_required_version', '/This extension needs PHP 99\.0 or later/' ),
 		);
 	}
 

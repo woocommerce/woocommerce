@@ -101,23 +101,7 @@ class WC_WCCOM_Site_Installation_Step_Move_Product implements WC_WCCOM_Site_Inst
 
 		$headers = $this->get_package_headers( $source );
 
-		if ( ! is_wp_version_compatible( $headers['RequiresWP'] ) ) {
-			$this->delete_unpacked_package();
-			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The code is a static string; the message is escaped below.
-			throw new Installer_Error(
-				Installer_Error_Codes::INCOMPATIBLE_WP_REQUIRED_VERSION,
-				esc_html(
-					sprintf(
-						/* translators: 1: WordPress version the extension needs, 2: WordPress version the site runs. */
-						__( 'This extension needs WordPress %1$s or later, and this site runs WordPress %2$s.', 'woocommerce' ),
-						$headers['RequiresWP'],
-						wp_get_wp_version()
-					)
-				)
-			);
-			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
-		}
-
+		// PHP first, as Plugin_Upgrader::check_package() does: a newer WordPress may itself need a newer PHP.
 		if ( ! is_php_version_compatible( $headers['RequiresPHP'] ) ) {
 			$this->delete_unpacked_package();
 			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The code is a static string; the message is escaped below.
@@ -129,6 +113,23 @@ class WC_WCCOM_Site_Installation_Step_Move_Product implements WC_WCCOM_Site_Inst
 						__( 'This extension needs PHP %1$s or later, and this server runs PHP %2$s.', 'woocommerce' ),
 						$headers['RequiresPHP'],
 						PHP_VERSION
+					)
+				)
+			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
+		if ( ! is_wp_version_compatible( $headers['RequiresWP'] ) ) {
+			$this->delete_unpacked_package();
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The code is a static string; the message is escaped below.
+			throw new Installer_Error(
+				Installer_Error_Codes::INCOMPATIBLE_WP_REQUIRED_VERSION,
+				esc_html(
+					sprintf(
+						/* translators: 1: WordPress version the extension needs, 2: WordPress version the site runs. */
+						__( 'This extension needs WordPress %1$s or later, and this site runs WordPress %2$s.', 'woocommerce' ),
+						$headers['RequiresWP'],
+						wp_get_wp_version()
 					)
 				)
 			);
