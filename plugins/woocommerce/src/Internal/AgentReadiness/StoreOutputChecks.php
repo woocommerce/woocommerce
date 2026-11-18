@@ -895,12 +895,14 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether a served llms.txt holds WooCommerce's guidance, as WooCommerce's own file does.
+	 * Line endings are normalized so a CRLF copy of the section still matches.
 	 *
 	 * @param string $body    Served llms.txt.
 	 * @param string $section Guidance WooCommerce adds, '' when it adds none.
 	 */
 	public static function has_llms_txt_guidance( string $body, string $section ): bool {
-		$section = trim( $section );
+		$section = trim( str_replace( "\r\n", "\n", $section ) );
+		$body    = str_replace( "\r\n", "\n", $body );
 		return '' !== $section && str_contains( $body, $section );
 	}
 
@@ -913,17 +915,16 @@ class StoreOutputChecks {
 	public static function core_llms_txt_status(): ?array {
 		// Not in every WooCommerce version yet, so the class is named by string.
 		$class = 'Automattic\\WooCommerce\\Internal\\LlmsTxt\\LlmsTxt';
-		if ( ! class_exists( $class ) ) {
-			return null;
-		}
 		try {
-			$llms_txt = new $class();
-			$status   = is_object( $llms_txt ) && method_exists( $llms_txt, 'get_status' ) ? $llms_txt->get_status() : null;
+			if ( ! class_exists( $class ) ) {
+				return null;
+			}
+			$status = ( new $class() )->get_status();
 		} catch ( \Throwable $e ) {
 			wc_get_logger()->warning( 'Agent readiness could not read the llms.txt status: ' . $e->getMessage(), array( 'source' => 'agent-readiness' ) );
 			return null;
 		}
-		return is_array( $status ) && is_string( $status['status'] ?? null ) && is_string( $status['section'] ?? null ) ? $status : null;
+		return is_string( $status['status'] ?? null ) && is_string( $status['section'] ?? null ) ? $status : null;
 	}
 
 	/**
@@ -963,15 +964,15 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether a status says the store's request to itself was refused or failed, not that the
-	 * page is missing: a server error, or a firewall or security plugin answering 401 or 403.
-	 * A check then reports couldn't check, as it does when the page times out.
+	 * page is missing: a server error, rate limit (429), or a firewall or security plugin
+	 * answering 401 or 403. A check then reports couldn't check, as it does when the page times out.
 	 *
 	 * @since 11.4.0
 	 *
 	 * @param int $status HTTP status.
 	 */
 	public static function blocked( int $status ): bool {
-		return $status >= 500 || in_array( $status, array( 401, 403 ), true );
+		return $status >= 500 || in_array( $status, array( 401, 403, 429 ), true );
 	}
 
 	/**

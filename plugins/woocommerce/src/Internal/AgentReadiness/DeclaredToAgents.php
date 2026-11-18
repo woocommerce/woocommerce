@@ -83,6 +83,7 @@ class DeclaredToAgents {
 
 	/**
 	 * Whether the served llms.txt, from WooCommerce or any other provider, holds WooCommerce's guidance.
+	 * Null when the file couldn't be checked (refused, rate-limited, or truncated before a match).
 	 *
 	 * @param StoreResponses $responses Responses of the scan.
 	 * @param string         $section   Guidance WooCommerce adds.
@@ -92,7 +93,12 @@ class DeclaredToAgents {
 		if ( true !== $served ) {
 			return $served;
 		}
-		return StoreOutputChecks::has_llms_txt_guidance( (string) ( $responses->get( StoreOutputChecks::host_root( '/llms.txt' ) )['body'] ?? '' ), $section );
+		$response = $responses->get( StoreOutputChecks::host_root( '/llms.txt' ) );
+		$body     = (string) ( $response['body'] ?? '' );
+		if ( StoreOutputChecks::has_llms_txt_guidance( $body, $section ) ) {
+			return true;
+		}
+		return ! empty( $response['truncated'] ) ? null : false;
 	}
 
 	/**

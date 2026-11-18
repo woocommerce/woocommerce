@@ -63,19 +63,21 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A 401 or 403 is not checked: a firewall can refuse a file that exists.
+	 * @testdox A 401, 403 or 429 is not checked: a firewall or rate limit can refuse a file that exists.
 	 */
 	public function test_blocked_response_is_not_checked(): void {
 		$results = $this->results(
 			array(
 				'/ai.txt'                      => array( 403, 'Forbidden' ),
 				'/.well-known/agent-card.json' => array( 401, '' ),
+				'/llms-full.txt'               => array( 429, 'Too Many Requests' ),
 				'markdown /'                   => array( 403, '' ),
 			)
 		);
 
 		$this->assertNull( $results['ai-txt'] );
 		$this->assertNull( $results['a2a-agent-card'] );
+		$this->assertNull( $results['llms-full'] );
 		$this->assertNull( $results['markdown-pages'] );
 	}
 
@@ -521,9 +523,26 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 			'section' => $section . "\n",
 		);
 		$this->assertTrue( $found( array( '/llms.txt' => array( 200, "# Shop\n\n" . $section . "\n" ) ) )['llms-txt-woocommerce-guidance'] );
+		$this->assertTrue(
+			$found(
+				array(
+					'/llms.txt' => array( 200, "# Shop\r\n\r\n" . str_replace( "\n", "\r\n", $section ) . "\r\n" ),
+				)
+			)['llms-txt-woocommerce-guidance'],
+			'CRLF line endings still match'
+		);
 		$this->assertFalse( $found( array( '/llms.txt' => array( 200, "# Shop\n\n- [About](" . home_url( '/about/' ) . ')' ) ) )['llms-txt-woocommerce-guidance'], 'Another provider\'s file without it' );
 		$this->assertFalse( $found( array() )['llms-txt-woocommerce-guidance'], 'No llms.txt' );
 		$this->assertNull( $found( array( '/llms.txt' => array( 503, '' ) ) )['llms-txt-woocommerce-guidance'], 'Couldn\'t check' );
+		$this->assertNull( $found( array( '/llms.txt' => array( 429, '' ) ) )['llms-txt-woocommerce-guidance'], 'Rate limited' );
+		$this->assertNull(
+			$found(
+				array(
+					'/llms.txt' => array( 200, "# Shop\n", array( 'content-length' => '999999' ) ),
+				)
+			)['llms-txt-woocommerce-guidance'],
+			'Truncated body with no match is couldn\'t check'
+		);
 
 		$sut->status = array(
 			'status'  => 'disabled',
