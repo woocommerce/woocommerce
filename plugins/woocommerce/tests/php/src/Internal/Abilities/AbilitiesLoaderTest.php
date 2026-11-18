@@ -34,6 +34,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private static $administrator_id;
 
 	private const CANONICAL_ABILITY_IDS = array(
+		'woocommerce/coupons-query',
+		'woocommerce/coupon-create',
+		'woocommerce/coupon-update',
 		'woocommerce/store-settings-get',
 		'woocommerce/settings-groups-query',
 		'woocommerce/settings-query',
@@ -1039,6 +1042,15 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
+			'coupons-query'               => array( 'woocommerce/coupons-query', array() ),
+			'coupon-create'               => array( 'woocommerce/coupon-create', array( 'code' => 'forbidden' ) ),
+			'coupon-update'               => array(
+				'woocommerce/coupon-update',
+				array(
+					'id'     => 1,
+					'amount' => '10',
+				),
+			),
 			'store-settings-get'          => array( 'woocommerce/store-settings-get', array() ),
 			'settings-groups-query'       => array( 'woocommerce/settings-groups-query', array() ),
 			'settings-query'              => array( 'woocommerce/settings-query', array( 'group' => 'general' ) ),
@@ -1250,6 +1262,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$missing_id = array( 'id' => PHP_INT_MAX );
 
 		return array(
+			'coupon-create'                  => array( 'woocommerce/coupon-create', array( 'code' => 'granted' ) ),
+			'coupons-query'                  => array( 'woocommerce/coupons-query', array() ),
 			'products-query'                 => array( 'woocommerce/products-query', $missing_id ),
 			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
 			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),
