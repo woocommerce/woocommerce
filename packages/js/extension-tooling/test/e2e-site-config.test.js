@@ -3,7 +3,7 @@ const fs = require( 'node:fs' );
 const os = require( 'node:os' );
 const path = require( 'node:path' );
 const { test } = require( 'node:test' );
-const writeE2ESiteConfig = require( '../src/e2e-site-config' );
+const writeE2ESiteConfig = require( '@woocommerce/extension-tooling/e2e-site-config' );
 
 const latestWooCommerce =
 	'https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip';
@@ -86,9 +86,9 @@ test( 'keeps the configured PHP version when an override is invalid', ( context 
 test( 'rejects invalid plugins and mappings before writing a config', ( context ) => {
 	const { root, pluginPath, input, defaults, output } = site( context );
 	for ( const [ overrides, error ] of [
-		[ { plugins: '.' }, /plugins must be an array of strings/ ],
-		[ { plugins: [ '.', 1 ] }, /plugins must be an array of strings/ ],
-		[ { mappings: [] }, /mappings must be an object/ ],
+		[ { plugins: '.' }, 'plugins must be an array of strings' ],
+		[ { plugins: [ '.', 1 ] }, 'plugins must be an array of strings' ],
+		[ { mappings: [] }, 'mappings must be an object' ],
 	] ) {
 		fs.writeFileSync(
 			input,
@@ -96,9 +96,45 @@ test( 'rejects invalid plugins and mappings before writing a config', ( context 
 		);
 		assert.throws(
 			() => writeE2ESiteConfig( { root, pluginPath, env: {} } ),
-			error
+			( failure ) => failure.message.includes( error )
 		);
 		assert.equal( fs.existsSync( output ), false );
+	}
+} );
+
+test( 'preserves the previous output when a plugin override is invalid', ( context ) => {
+	const { root, pluginPath, output } = site( context );
+	const fixtures = [
+		{
+			configure( config ) {
+				config.plugins.push( undefined );
+			},
+		},
+		{
+			configure( config ) {
+				delete config.plugins[ 2 ];
+			},
+		},
+		{
+			configure( config ) {
+				config.plugins = null;
+			},
+			env: { WC_VERSION: 'nightly' },
+		},
+		{ woocommerce: { latest: 42 } },
+	];
+
+	fs.writeFileSync( output, '{}' );
+	for ( const options of fixtures ) {
+		assert.throws(
+			() =>
+				writeE2ESiteConfig( { root, pluginPath, env: {}, ...options } ),
+			( failure ) =>
+				failure.message.includes(
+					'.wp-env.e2e.json plugins must be an array of strings'
+				)
+		);
+		assert.equal( fs.readFileSync( output, 'utf8' ), '{}' );
 	}
 } );
 

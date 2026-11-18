@@ -11,6 +11,15 @@ const nightlyWooCommerce =
 const isVersionNumber = ( value ) =>
 	typeof value === 'string' && /^\d+(\.\d+)*(-\w+(\.\w+)*)*$/.test( value );
 
+function assertPluginSources( plugins, filename ) {
+	if (
+		! Array.isArray( plugins ) ||
+		plugins.findIndex( ( source ) => typeof source !== 'string' ) !== -1
+	) {
+		throw new Error( `${ filename } plugins must be an array of strings.` );
+	}
+}
+
 function setSiteVersion( config, option, value ) {
 	config[ option ] = value;
 	const development = config.env?.development;
@@ -39,14 +48,7 @@ function writeE2ESiteConfig( {
 	const config = JSON.parse(
 		fs.readFileSync( path.join( root, '.wp-env.test.json' ), 'utf8' )
 	);
-	if (
-		! Array.isArray( config.plugins ) ||
-		! config.plugins.every( ( source ) => typeof source === 'string' )
-	) {
-		throw new Error(
-			'.wp-env.test.json plugins must be an array of strings.'
-		);
-	}
+	assertPluginSources( config.plugins, '.wp-env.test.json' );
 	const checkout = config.plugins.indexOf( '.' );
 	if ( checkout === -1 ) {
 		throw new Error( '.wp-env.test.json must mount the checkout as ".".' );
@@ -73,7 +75,7 @@ function writeE2ESiteConfig( {
 			WC_VERSION +
 			'/woocommerce.zip';
 	}
-	if ( wooSource ) {
+	if ( wooSource && Array.isArray( config.plugins ) ) {
 		const wooIndex = config.plugins.findIndex(
 			( source ) =>
 				source === latestWooCommerce || source === stableWooCommerce
@@ -107,6 +109,7 @@ function writeE2ESiteConfig( {
 		setSiteVersion( config, 'phpVersion', PHP_VERSION );
 	}
 
+	assertPluginSources( config.plugins, '.wp-env.e2e.json' );
 	fs.writeFileSync(
 		path.join( root, '.wp-env.e2e.json' ),
 		JSON.stringify( config )
