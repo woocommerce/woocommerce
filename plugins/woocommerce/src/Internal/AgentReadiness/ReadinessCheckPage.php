@@ -241,10 +241,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @return array<string, mixed>
 	 */
 	public function view(): array {
-		// Pending before the report: a scan that finishes between the two reads must not pair an old report with pending false.
+		// Pending on either side of the report read: a scan that finishes during the read must not
+		// pair an old report with pending false, and a scan queued during the read must not be hidden.
 		$pending  = $this->scheduled_scan->is_pending();
-		$stalled  = $pending && $this->scheduled_scan->is_stalled();
 		$report   = $this->agent_readiness->get_cached_report();
+		$pending  = $pending || $this->scheduled_scan->is_pending();
+		$stalled  = $pending && $this->scheduled_scan->is_stalled();
 		$checks   = $this->store_conditions->all();
 		$launched = (bool) ( array_column( $checks, 'ok', 'id' )['launched'] ?? true );
 		$visible  = $this->visible_store_checks( $report, $checks );
