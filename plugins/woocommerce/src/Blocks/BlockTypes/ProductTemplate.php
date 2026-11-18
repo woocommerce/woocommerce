@@ -75,7 +75,7 @@ class ProductTemplate extends AbstractBlock {
 				}
 			} elseif ( 'carousel' === $type && $carousel_columns >= 1 && $carousel_columns <= 6 ) {
 				if ( isset( $block->context['displayLayout']['shrinkColumns'] ) && $block->context['displayLayout']['shrinkColumns'] ) {
-					$classnames .= "wc-block-product-template__responsive columns-{$carousel_columns}";
+					$classnames .= "wc-block-product-template__carousel-responsive columns-{$carousel_columns}";
 				} else {
 					$classnames .= "columns-{$carousel_columns}";
 				}
