@@ -431,6 +431,13 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			}
 		}
 
+		// Payloads are built as the author, so whoever changes where they go becomes the author.
+		// Code running without a logged-in user, such as scheduled tasks, keeps the existing author.
+		$editor_id = get_current_user_id();
+		if ( $editor_id && array_key_exists( 'delivery_url', $webhook->get_changes() ) ) {
+			$webhook->set_user_id( $editor_id );
+		}
+
 		// Update secret.
 		if ( ! empty( $request['secret'] ) ) {
 			$webhook->set_secret( $request['secret'] );

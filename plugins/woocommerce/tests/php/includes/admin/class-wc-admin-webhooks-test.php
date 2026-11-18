@@ -1,10 +1,24 @@
 <?php
 declare( strict_types = 1 );
 
+require_once WC_ABSPATH . 'includes/admin/class-wc-admin-webhooks.php';
+
 /**
- * Tests for webhook bulk status changes.
+ * Tests for WC_Admin_Webhooks.
+ *
+ * @package WooCommerce\Tests\Admin
  */
 class WC_Admin_Webhooks_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * Clear the submitted form after each test.
+	 */
+	public function tearDown(): void {
+		$_GET     = array();
+		$_POST    = array();
+		$_REQUEST = array();
+		parent::tearDown();
+	}
 
 	/**
 	 * @testdox Bulk actions save each supported webhook status.
@@ -227,6 +241,33 @@ class WC_Admin_Webhooks_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Saving the webhook form makes the editor the author only when the delivery URL really changes.
+	 *
+	 * @testWith ["https://example.com/hook?a=1&b=2", false]
+	 *           ["https://example.com/other-hook", true]
+	 *
+	 * @param string $submitted_url    The delivery URL the form submits.
+	 * @param bool   $editor_is_author Whether the editor should become the author.
+	 */
+	public function test_form_save_reassigns_author_only_for_a_new_delivery_url( string $submitted_url, bool $editor_is_author ): void {
+		$shop_manager_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		$admin_id        = self::factory()->user->create( array( 'role' => 'administrator' ) );
+
+		// The edit form displays this URL with `&amp;` decoded, so an unchanged save submits `&`.
+		$webhook = new WC_Webhook();
+		$webhook->set_user_id( $shop_manager_id );
+		$webhook->set_status( 'paused' );
+		$webhook->set_topic( 'customer.created' );
+		$webhook->set_delivery_url( 'https://example.com/hook?a=1&amp;b=2' );
+		$webhook->save();
+
+		wp_set_current_user( $admin_id );
+		$this->submit_webhook_form( $webhook->get_id(), $submitted_url );
+
+		$this->assertSame( $editor_is_author ? $admin_id : $shop_manager_id, wc_get_webhook( $webhook->get_id() )->get_user_id() );
+	}
+
+	/**
 	 * Run a callback that redirects and return the location it redirected to.
 	 *
 	 * @param callable $callback Callback expected to redirect.
@@ -275,5 +316,52 @@ class WC_Admin_Webhooks_Test extends WC_Unit_Test_Case {
 		}
 
 		return $webhook;
+	}
+
+	/**
+	 * Submit the webhook edit form for a webhook, stopping at the redirect that ends the save.
+	 *
+	 * @param int    $webhook_id   Webhook ID.
+	 * @param string $delivery_url Delivery URL to submit.
+	 */
+	private function submit_webhook_form( int $webhook_id, string $delivery_url ): void {
+		$nonce = wp_create_nonce( 'woocommerce-settings' );
+
+		$query = array(
+			'page'    => 'wc-settings',
+			'tab'     => 'advanced',
+			'section' => 'webhooks',
+		);
+
+		$form = array(
+			'save'                 => 'Save webhook',
+			'_wpnonce'             => $nonce,
+			'webhook_id'           => $webhook_id,
+			'webhook_name'         => 'Webhook',
+			'webhook_status'       => 'paused',
+			'webhook_delivery_url' => $delivery_url,
+			'webhook_topic'        => 'customer.created',
+		);
+
+		$_GET     = $query;
+		$_POST    = $form;
+		$_REQUEST = array_merge( $query, $form );
+		set_current_screen( 'woocommerce_page_wc-settings' );
+
+		add_filter(
+			'wp_redirect',
+			function () {
+				throw new RuntimeException( 'wp_redirect intercepted.' );
+			}
+		);
+
+		try {
+			( new WC_Admin_Webhooks() )->actions();
+		} catch ( RuntimeException $e ) {
+			$this->assertSame( 'wp_redirect intercepted.', $e->getMessage() );
+			return;
+		}
+
+		$this->fail( 'The webhook form save did not redirect.' );
 	}
 }
