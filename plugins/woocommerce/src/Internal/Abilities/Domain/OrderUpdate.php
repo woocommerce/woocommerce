@@ -354,8 +354,8 @@ class OrderUpdate extends ActionableAbility {
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'billing'        => self::get_address_input_schema( array_merge( self::shipping_address_fields(), array( 'email' ) ) ),
-				'shipping'       => self::get_address_input_schema( self::shipping_address_fields() ),
+				'billing'        => self::get_address_input_schema( array_merge( self::get_address_fields(), array( 'email' ) ) ),
+				'shipping'       => self::get_address_input_schema( self::get_address_fields() ),
 				'customer_note'  => array( 'type' => 'string' ),
 				'line_items'     => array(
 					'type'        => 'array',

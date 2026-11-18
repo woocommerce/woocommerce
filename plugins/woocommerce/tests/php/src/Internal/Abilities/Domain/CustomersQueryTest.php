@@ -255,6 +255,10 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( $email, (string) wp_json_encode( $result ) );
 		$this->assertSame( array(), $ids( $this->sut->execute( array( 'search' => $email ) ) ), 'search_by defaults to the name.' );
 
+		$result = $this->sut->execute( array( 'search' => '<b>' ) );
+		$this->assertSame( array(), $result['customers'], 'A search that is empty once cleaned matches no one, not everyone.' );
+		$this->assertSame( 0, $result['total'] );
+
 		$this->assertSame( array( $id ), $ids( $this->sut->execute( array( 'user_id' => $user_id ) ) ) );
 		$this->assertSame(
 			array(),

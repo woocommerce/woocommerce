@@ -60,7 +60,7 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Query customers', 'woocommerce' ),
-			'description'         => __( 'Find registered and guest customers by ID, user ID, name or email, with their order count, total spent and activity dates, as WooCommerce Analytics counts them. A registered customer appears once Analytics has recorded them: when they order, sign in, or the store imports historical data. Guest orders with the same email count as one guest. Names, usernames, emails, phone numbers and addresses are withheld from the results.', 'woocommerce' ),
+			'description'         => __( 'Find registered and guest customers by ID, user ID, name or email, with their order count, total spent and activity dates, as WooCommerce Analytics counts them. A registered customer appears once Analytics has recorded them: when they register, order, or visit signed in, or the store imports historical data. Guest orders with the same email count as one guest. Names, usernames, emails, phone numbers and addresses are withheld from the results.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_output_schema(),
@@ -116,6 +116,18 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 		$page     = $input['page'] ?? 1;
 		$per_page = $input['per_page'] ?? ( empty( $input['include'] ) ? self::DEFAULT_PER_PAGE : max( 1, count( $include ) ) );
 
+		$search = isset( $input['search'] ) ? sanitize_text_field( $input['search'] ) : '';
+		if ( isset( $input['search'] ) && '' === $search ) {
+			// The data store skips an empty search, which would return every customer.
+			return array(
+				'customers'   => array(),
+				'total'       => 0,
+				'total_pages' => 0,
+				'page'        => $page,
+				'per_page'    => $per_page,
+			);
+		}
+
 		$users = $extension_args['post__in'] ?? array();
 		if ( isset( $input['user_id'] ) ) {
 			$users = ( empty( $users ) || in_array( $input['user_id'], array_map( 'intval', $users ), true ) ) ? array( $input['user_id'] ) : array( 0 );
@@ -131,7 +143,7 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 			'customers'         => empty( $input['include'] ) ? array() : ( empty( $include ) ? array( 0 ) : $include ),
 			'customers_exclude' => empty( $input['include'] ) ? $exclude : array(),
 			'users'             => $users,
-			'search'            => isset( $input['search'] ) ? sanitize_text_field( $input['search'] ) : '',
+			'search'            => $search,
 			'searchby'          => $input['search_by'] ?? 'name',
 			'order_before'      => '',
 			'order_after'       => '',

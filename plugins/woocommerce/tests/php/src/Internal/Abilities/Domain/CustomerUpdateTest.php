@@ -154,7 +154,10 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 	 * @testdox Should not quote the saved state and postcode when they fail against a sent country.
 	 */
 	public function test_refusal_does_not_quote_saved_values(): void {
-		list( $id ) = $this->registered_customer();
+		list( $id, $user_id ) = $this->registered_customer();
+		$customer             = new \WC_Customer( $user_id );
+		$customer->set_billing_state( 'NY' );
+		$customer->save();
 
 		$result = $this->execute(
 			array(
@@ -166,6 +169,7 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertEqualsCanonicalizing( array( 'woocommerce_ability_customer_billing_state_invalid', 'woocommerce_ability_customer_billing_postcode_invalid' ), $result->get_error_codes() );
 		$messages = implode( ' ', $result->get_error_messages() );
+		$this->assertStringNotContainsString( 'NY', $messages );
 		$this->assertStringNotContainsString( '94110', $messages );
 		$this->assertStringNotContainsString( '"', $messages, 'Only sent values are quoted.' );
 	}

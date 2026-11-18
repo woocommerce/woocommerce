@@ -260,8 +260,8 @@ class OrderCreate extends ActionableAbility {
 					'description' => __( 'Order status slug without the wc- prefix. Defaults to the default status of the store.', 'woocommerce' ),
 					'enum'        => self::get_allowed_order_status_slugs(),
 				),
-				'billing'        => self::get_address_input_schema( array_merge( self::shipping_address_fields(), array( 'email' ) ) ),
-				'shipping'       => self::get_address_input_schema( self::shipping_address_fields() ),
+				'billing'        => self::get_address_input_schema( array_merge( self::get_address_fields(), array( 'email' ) ) ),
+				'shipping'       => self::get_address_input_schema( self::get_address_fields() ),
 				'customer_note'  => array( 'type' => 'string' ),
 				'line_items'     => array(
 					'type'        => 'array',
