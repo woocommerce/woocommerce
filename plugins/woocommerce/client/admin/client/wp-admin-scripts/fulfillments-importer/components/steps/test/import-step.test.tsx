@@ -53,6 +53,10 @@ function renderStep( overrides = {}, dispatch = jest.fn() ) {
 
 describe( 'ImportStep', () => {
 	beforeEach( () => {
+		// The a11y live regions are shared by every test in this file.
+		document
+			.querySelectorAll( '[id^="a11y-speak-"]' )
+			.forEach( ( region ) => region.replaceChildren() );
 		mockRun.mockClear();
 		mockedUseChunkedImport.mockClear();
 		mockIsRunning = true;
@@ -255,15 +259,13 @@ describe( 'ImportStep', () => {
 
 	it( 'speaks only the error text, not the button labels', () => {
 		mockIsRunning = false;
-		renderStep( { error: 'The offset does not match.' } );
+		// A text no other test speaks: @wordpress/a11y marks a repeated message.
+		renderStep( { error: 'Only this test shows this error.' } );
 
-		// Notice speaks through the shared assertive region of @wordpress/a11y,
-		// which adds a non-breaking space when a message repeats.
+		// Notice speaks through the shared assertive region of @wordpress/a11y.
 		expect(
-			document
-				.getElementById( 'a11y-speak-assertive' )
-				?.textContent?.trim()
-		).toBe( 'The offset does not match.' );
+			document.getElementById( 'a11y-speak-assertive' )?.textContent
+		).toBe( 'Only this test shows this error.' );
 	} );
 
 	it( 'offers only Start over once the session has ended', () => {
