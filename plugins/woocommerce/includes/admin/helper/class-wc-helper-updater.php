@@ -291,6 +291,19 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Gets the WordPress version an update offer needs, when the site runs an older one.
+	 *
+	 * @since 11.4.0
+	 * @param mixed $offer The update offer: an object for plugins, an array for themes.
+	 * @return string The version the site doesn't meet, or an empty string when it meets the requirement or there is none.
+	 */
+	private static function get_unmet_wp_requirement( $offer ): string {
+		$requires = self::get_required_wp_version( is_object( $offer ) ? get_object_vars( $offer ) : $offer );
+
+		return is_wp_version_compatible( $requires ) ? '' : $requires;
+	}
+
+	/**
 	 * Skips an automatic update to a WooCommerce.com extension version that needs a newer WordPress.
 	 *
 	 * Core's auto-updater checks only the PHP requirement, and the single-item upgrade it runs skips
@@ -308,8 +321,7 @@ class WC_Helper_Updater {
 			return $update;
 		}
 
-		$requires = self::get_required_wp_version( get_object_vars( $item ) );
-		if ( '' === $requires || is_wp_version_compatible( $requires ) ) {
+		if ( '' === self::get_unmet_wp_requirement( $item ) ) {
 			return $update;
 		}
 
@@ -347,12 +359,8 @@ class WC_Helper_Updater {
 	 * @return void
 	 */
 	public static function display_notice_for_update_needing_newer_wp( $plugin_data, $response ) {
-		if ( ! is_object( $response ) ) {
-			return;
-		}
-
-		$requires = self::get_required_wp_version( get_object_vars( $response ) );
-		if ( '' === $requires || is_wp_version_compatible( $requires ) ) {
+		$requires = self::get_unmet_wp_requirement( $response );
+		if ( '' === $requires ) {
 			return;
 		}
 
@@ -1632,8 +1640,8 @@ class WC_Helper_Updater {
 			return $reply;
 		}
 
-		$requires = self::get_required_wp_version( is_object( $offer ) ? get_object_vars( $offer ) : $offer );
-		if ( '' === $requires || is_wp_version_compatible( $requires ) || ! self::is_woo_update_offer( $item ) ) {
+		$requires = self::get_unmet_wp_requirement( $offer );
+		if ( '' === $requires || ! self::is_woo_update_offer( $item ) ) {
 			return $reply;
 		}
 
