@@ -123,7 +123,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			$GLOBALS['submenu'] = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Start from an empty menu; restored below.
 			add_menu_page( 'WooCommerce', 'WooCommerce', 'manage_woocommerce', 'woocommerce' );
 			$page->handle_admin_menu();
-			$this->assertSame( array( 'Sales readiness', 'manage_woocommerce', 'wc-admin&path=/sales-readiness' ), array_slice( end( $GLOBALS['submenu']['woocommerce'] ), 0, 3 ) );
+			$this->assertSame( array( 'AI sales readiness', 'manage_woocommerce', 'wc-admin&path=/sales-readiness' ), array_slice( end( $GLOBALS['submenu']['woocommerce'] ), 0, 3 ) );
 		} finally {
 			foreach ( $saved as $name => $value ) {
 				$GLOBALS[ $name ] = $value; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring what the test changed.
@@ -154,8 +154,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$html = $this->render_page();
 
-		$this->assertStringContainsString( 'Product counts show after the first Sales readiness check.', $html );
-		$this->assertStringContainsString( 'path=/sales-readiness">Sales readiness</a> <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--off">Not checked yet</mark>', $html, 'Status links to Sales readiness, not yet run' );
+		$this->assertStringContainsString( 'Product counts show after the first AI sales readiness check.', $html );
+		$this->assertStringContainsString( 'path=/sales-readiness">AI sales readiness</a> <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--off">Not checked yet</mark>', $html, 'Status links to Sales readiness, not yet run' );
 		$this->assertStringNotContainsString( 'View products', $html );
 		$this->assertStringContainsString( 'Published returns page', $html );
 		$this->assertStringNotContainsString( 'Draft returns page', $html );
@@ -541,8 +541,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 		$conflict = $sections['understand']['rows'][0];
 		$this->assertSame( 'Let AI assistants read your product details', $conflict['title'], 'A failing check is headed by what to do' );
-		$this->assertStringEndsWith( 'We found none on a recent product page.', $conflict['text'], 'then why it matters and what the check found' );
-		$this->assertStringStartsWith( 'Test a product page in Google', $conflict['fix'], 'and the fix, since it has one' );
+		$this->assertStringStartsWith( 'Your newest product page doesn’t include these details', $conflict['text'], 'then why it matters and what the check found' );
+		$this->assertSame( 'Check their settings for WooCommerce structured data.', $conflict['fix'], 'and the fix, since it has one' );
 		$this->assertNull( $conflict['badge'], 'A likely conflict has no badge; the page it was seen on says where' );
 		$this->assertSame(
 			array(
@@ -1261,7 +1261,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertNull( $view['declared'], 'No card when the report lists no declared items' );
 
 		$html = $this->render_page();
-		$this->assertMatchesRegularExpression( '#path=/sales-readiness">Sales readiness</a> <mark[^>]*>2 issues</mark>#', $html, 'One store and one product issue; the alt text check is not counted' );
+		$this->assertMatchesRegularExpression( '#path=/sales-readiness">AI sales readiness</a> <mark[^>]*>2 issues</mark>#', $html, 'One store and one product issue; the alt text check is not counted' );
 		$this->assertSame( 1, substr_count( $html, 'wc-agentic-commerce-results"><li>' ), 'One results row' );
 		$this->assertFalse( $this->save_hidden, 'AI shopping saves the store policy fields' );
 		$this->assertStringContainsString( '<span aria-current="page">AI shopping</span>', $html );
@@ -1304,7 +1304,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			false
 		);
 
-		$this->assertMatchesRegularExpression( '#Sales readiness</a> <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--off">No issues</mark>#', $this->render_page() );
+		$this->assertMatchesRegularExpression( '#AI sales readiness</a> <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--off">No issues</mark>#', $this->render_page() );
 	}
 
 	/**
@@ -1359,13 +1359,13 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$html = $this->render_page();
 		$this->assertMatchesRegularExpression( '#Finish 2 required steps#', $html );
 		$this->assertLessThan( strpos( $html, 'wc-agentic-commerce-item--open' ), strrpos( $html, 'wc-agentic-commerce-item--required' ), 'They come before the optional order emails step' );
-		$this->assertMatchesRegularExpression( '#Sales readiness</a> <mark[^>]*>2 issues</mark>#', $html, 'Status counts what Sales readiness shows: both; order emails are only in the Setup checklist' );
+		$this->assertMatchesRegularExpression( '#AI sales readiness</a> <mark[^>]*>2 issues</mark>#', $html, 'Status counts what Sales readiness shows: both; order emails are only in the Setup checklist' );
 
 		foreach ( $emails as $email ) {
 			$email->enabled = 'yes';
 		}
 		delete_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION );
-		$this->assertMatchesRegularExpression( '#Sales readiness</a> <mark[^>]*>2 issues</mark>#', $this->render_page(), 'A missing policy page is only in the Setup checklist, so not counted' );
+		$this->assertMatchesRegularExpression( '#AI sales readiness</a> <mark[^>]*>2 issues</mark>#', $this->render_page(), 'A missing policy page is only in the Setup checklist, so not counted' );
 		$this->assertDoesNotMatchRegularExpression( '/<button[^>]*wc-agentic-commerce-ucp-switch[^>]*disabled=([\'"])disabled\\1/', $html );
 	}
 
@@ -1471,7 +1471,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertStringNotContainsString( 'product_shipping_schema', $json );
 		$this->assertStringNotContainsString( 'Coming soon', $json );
-		$this->assertMatchesRegularExpression( '#Sales readiness</a> <mark[^>]*>1 issue</mark>#', $this->render_page(), 'Status counts the same checks' );
+		$this->assertMatchesRegularExpression( '#AI sales readiness</a> <mark[^>]*>1 issue</mark>#', $this->render_page(), 'Status counts the same checks' );
 		$this->assertSame( '1 issue', array_column( $view['sections'], 'badge', 'id' )['buy']['text'] );
 		$row = $this->row( 'Link to your privacy and returns pages from your home page' );
 		$this->assertSame( ReadinessCopy::store_check( 'policy_pages_linked' )['fix'], $row['fix'], 'The fix line comes from the copy, not the report' );

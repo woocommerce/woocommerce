@@ -242,7 +242,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		echo '<p>' . esc_html__( 'AI assistants see the same products as shoppers. Shoppers can buy simple and variable products through them.', 'woocommerce' ) . '</p></div>';
 
 		if ( null === $report ) {
-			echo '<p class="wc-agentic-commerce-card__body">' . esc_html__( 'Product counts show after the first Sales readiness check.', 'woocommerce' ) . '</p></div>';
+			echo '<p class="wc-agentic-commerce-card__body">' . esc_html__( 'Product counts show after the first AI sales readiness check.', 'woocommerce' ) . '</p></div>';
 			return;
 		}
 
@@ -384,7 +384,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		printf(
 			'<ul class="wc-agentic-commerce-results"><li><a href="%1$s">%2$s</a> <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--%3$s">%4$s</mark></li></ul>',
 			esc_url( ReadinessCheckPage::url() ),
-			esc_html__( 'Sales readiness', 'woocommerce' ),
+			esc_html__( 'AI sales readiness', 'woocommerce' ),
 			esc_attr( $badge[0] ),
 			esc_html( $badge[1] )
 		);

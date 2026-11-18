@@ -162,7 +162,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			array(
 				'id'         => self::PAGE_ID,
 				'parent'     => 'woocommerce',
-				'title'      => __( 'Sales readiness', 'woocommerce' ),
+				'title'      => __( 'AI sales readiness', 'woocommerce' ),
 				'path'       => self::PATH,
 				'capability' => 'manage_woocommerce',
 			)
@@ -264,7 +264,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				: sprintf( __( 'Checked the %s products you changed most recently.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
 		}
 		return array(
-			'title'        => __( 'Sales readiness', 'woocommerce' ),
+			'title'        => __( 'AI sales readiness', 'woocommerce' ),
 			'description'  => __( 'Check how well AI assistants can find and shop your store, and what to improve first.', 'woocommerce' ),
 			'last_checked' => self::last_checked( $report ),
 			'checked_note' => $truncated,
