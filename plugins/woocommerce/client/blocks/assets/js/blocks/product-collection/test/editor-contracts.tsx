@@ -31,13 +31,13 @@ import ProductCollectionContent from '../edit/product-collection-content';
 import DefaultQueryOrderByControl from '../edit/inspector-controls/order-by-control/default-query-order-by-control';
 import {
 	DEFAULT_ATTRIBUTES,
+	DEFAULT_CAROUSEL_COLUMNS,
 	DEFAULT_QUERY,
 	PRODUCT_COLLECTION_BLOCK_NAME,
 } from '../constants';
 import {
 	addProductCollectionToQueryPaginationParentOrAncestor,
 	getDefaultValueOfInherit,
-	getDisplayLayoutForType,
 	sanitizeDisplayLayout,
 } from '../utils';
 import {
@@ -185,24 +185,56 @@ describe( 'Product Collection editor contracts', () => {
 		}
 	);
 
+	it( 'omits column settings from the saved Stack markup', () => {
+		const block = createBlock( PRODUCT_COLLECTION_BLOCK_NAME, {
+			displayLayout: sanitizeDisplayLayout( {
+				type: LayoutOptions.STACK,
+				columns: 4,
+				shrinkColumns: true,
+			} ),
+		} );
+		const serialized = serialize( block );
+
+		expect( serialized ).toContain(
+			`"displayLayout":${ JSON.stringify( {
+				type: LayoutOptions.STACK,
+			} ) }`
+		);
+	} );
+
 	it.each( [
 		{
-			layout: LayoutOptions.STACK,
-			saved: { type: LayoutOptions.STACK },
+			caseName: 'the default carousel column count',
+			input: {
+				type: LayoutOptions.CAROUSEL,
+				columns: 4,
+				shrinkColumns: true,
+			},
+			saved: {
+				type: LayoutOptions.CAROUSEL,
+				carouselColumns: DEFAULT_CAROUSEL_COLUMNS,
+				shrinkColumns: true,
+			},
 		},
 		{
-			layout: LayoutOptions.CAROUSEL,
-			saved: { type: LayoutOptions.CAROUSEL },
+			caseName: 'an explicit carousel column count',
+			input: {
+				type: LayoutOptions.CAROUSEL,
+				columns: 4,
+				carouselColumns: 3,
+				shrinkColumns: false,
+			},
+			saved: {
+				type: LayoutOptions.CAROUSEL,
+				carouselColumns: 3,
+				shrinkColumns: false,
+			},
 		},
 	] )(
-		'omits column settings from the saved $layout markup',
-		( { layout, saved } ) => {
+		'saves $caseName and drops grid columns from the Carousel markup',
+		( { input, saved } ) => {
 			const block = createBlock( PRODUCT_COLLECTION_BLOCK_NAME, {
-				displayLayout: sanitizeDisplayLayout( {
-					type: layout,
-					columns: 4,
-					shrinkColumns: true,
-				} ),
+				displayLayout: sanitizeDisplayLayout( input ),
 			} );
 			const serialized = serialize( block );
 
