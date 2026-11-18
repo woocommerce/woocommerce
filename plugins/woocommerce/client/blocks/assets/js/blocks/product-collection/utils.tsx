@@ -43,7 +43,7 @@ import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_TEMPLATE,
 	getCarouselColumns,
-	MAX_CAROUSEL_COLUMNS,
+	DEFAULT_CAROUSEL_COLUMNS,
 } from './constants';
 import blockJson from './block.json';
 import {
@@ -559,7 +559,7 @@ export function getDisplayLayoutForType(
 		type: nextType,
 		...( nextType === LayoutOptions.CAROUSEL
 			? {
-					carouselColumns: MAX_CAROUSEL_COLUMNS,
+					carouselColumns: DEFAULT_CAROUSEL_COLUMNS,
 					shrinkColumns: true,
 				}
 			: {} ),
