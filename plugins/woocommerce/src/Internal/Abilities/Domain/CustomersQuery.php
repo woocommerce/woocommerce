@@ -60,7 +60,7 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Query customers', 'woocommerce' ),
-			'description'         => __( 'Find registered and guest customers by ID, user ID, name or email, with their order count, total spent and activity dates, as WooCommerce Analytics counts them. A registered customer appears once Analytics has recorded them: when they register, order, or visit signed in, or the store imports historical data. Guest orders with the same email count as one guest. Names, usernames, emails, phone numbers and addresses are withheld from the results.', 'woocommerce' ),
+			'description'         => __( 'Find registered and guest customers by ID, user ID, name or email, with their order count, total spent and activity dates, as WooCommerce Analytics counts them. A registered customer appears once Analytics has recorded them: when they register, order, or visit signed in, or the store imports historical data. Guest orders with the same email count as one guest. Core fields leave out names, usernames, emails, phone numbers and addresses.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_output_schema(),
@@ -116,15 +116,24 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 		$page     = $input['page'] ?? 1;
 		$per_page = $input['per_page'] ?? ( empty( $input['include'] ) ? self::DEFAULT_PER_PAGE : max( 1, count( $include ) ) );
 
-		$search = isset( $input['search'] ) ? sanitize_text_field( $input['search'] ) : '';
+		$search = isset( $input['search'] ) ? trim( $input['search'] ) : '';
 		if ( isset( $input['search'] ) && '' === $search ) {
-			// The data store skips an empty search, which would return every customer.
+			// The data store skips an empty search, which would return every customer. The term is bound, not cleaned, so an email keeps a literal "%41".
 			return array(
 				'customers'   => array(),
 				'total'       => 0,
 				'total_pages' => 0,
 				'page'        => $page,
 				'per_page'    => $per_page,
+			);
+		}
+
+		if ( '0' === $search ) {
+			// The data store reads a search of "0" as no search, which would return every customer.
+			return new \WP_Error(
+				'woocommerce_ability_customer_search_unsupported',
+				__( 'A search for "0" alone is not supported. Search for a longer part of the name or email.', 'woocommerce' ),
+				array( 'status' => 400 )
 			);
 		}
 

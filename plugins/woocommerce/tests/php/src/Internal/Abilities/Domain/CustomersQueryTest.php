@@ -255,9 +255,33 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( $email, (string) wp_json_encode( $result ) );
 		$this->assertSame( array(), $ids( $this->sut->execute( array( 'search' => $email ) ) ), 'search_by defaults to the name.' );
 
-		$result = $this->sut->execute( array( 'search' => '<b>' ) );
-		$this->assertSame( array(), $result['customers'], 'A search that is empty once cleaned matches no one, not everyone.' );
+		$result = $this->sut->execute( array( 'search' => '   ' ) );
+		$this->assertSame( array(), $result['customers'], 'A whitespace-only search matches no one, not everyone.' );
 		$this->assertSame( 0, $result['total'] );
+
+		$this->assertSame( 'woocommerce_ability_customer_search_unsupported', $this->sut->execute( array( 'search' => '0' ) )->get_error_code(), 'A search of "0" is refused rather than read as no search.' );
+
+		$encoded_user = self::factory()->user->create(
+			array(
+				'role'       => 'customer',
+				'user_email' => 'orders%41@example.test',
+			)
+		);
+		$plain_user   = self::factory()->user->create(
+			array(
+				'role'       => 'customer',
+				'user_email' => 'orders@example.test',
+			)
+		);
+		CustomersDataStore::update_registered_customer( $encoded_user );
+		CustomersDataStore::update_registered_customer( $plain_user );
+		$result = $this->sut->execute(
+			array(
+				'search'    => 'orders%41@',
+				'search_by' => 'email',
+			)
+		);
+		$this->assertSame( array( (int) CustomersDataStore::get_customer_id_by_user_id( $encoded_user ) ), $ids( $result ), 'An email search keeps its literal characters.' );
 
 		$this->assertSame( array( $id ), $ids( $this->sut->execute( array( 'user_id' => $user_id ) ) ) );
 		$this->assertSame(
