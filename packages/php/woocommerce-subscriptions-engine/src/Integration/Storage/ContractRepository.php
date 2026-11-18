@@ -1272,8 +1272,9 @@ final class ContractRepository {
 			$where .= ' AND status IN (' . implode( ', ', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
 			$params = array_merge( $params, $statuses );
 		}
-		// A present key always applies, so a non-string coerces to '' and matches nothing
-		// (no contract can own an empty slug) rather than widening to every owner.
+		// A present key always applies and never widens to every owner: the value binds as a
+		// string, so a non-scalar or false binds '' and matches nothing (no contract can own
+		// an empty slug), and any other scalar binds its string form as an exact owner.
 		if ( array_key_exists( 'extension_slug', $args ) ) {
 			$where   .= ' AND ' . self::OWNER_MATCH;
 			$params[] = Coercion::coerce_string( $args['extension_slug'] );
