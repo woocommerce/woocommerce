@@ -107,43 +107,69 @@ class WC_Regenerate_Images_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Rendering a large unscaled image should keep its sizes and record both the scaled file and the original.
+	 * @testdox Rendering an image that WordPress would now scale or rotate should add the size without replacing the attached file ($_dataName).
+	 * @dataProvider provide_images_wordpress_would_replace
+	 *
+	 * @param string $filter_at_upload The filter that is off while the image is uploaded.
+	 * @param string $file             Image file to upload.
 	 */
-	public function test_render_of_unscaled_large_image_keeps_file_keys_in_sync(): void {
-		// A site that keeps the size registered but never generates it.
-		add_filter(
-			'intermediate_image_sizes_advanced',
-			function ( $sizes ) {
-				unset( $sizes['woocommerce_thumbnail'] );
+	public function test_render_adds_size_without_replacing_attached_file( string $filter_at_upload, string $file ): void {
+		add_filter( $filter_at_upload, '__return_false' );
+		$attachment_id = $this->create_attachment_from_file( $file );
+		remove_filter( $filter_at_upload, '__return_false' );
 
-				return $sizes;
+		$this->delete_attachment_size( $attachment_id, 'woocommerce_thumbnail' );
+
+		$attached_file = get_attached_file( $attachment_id );
+		$stored        = wp_get_attachment_metadata( $attachment_id, true );
+		$saved_sizes   = array();
+		$contexts      = array();
+
+		add_filter(
+			'wp_update_attachment_metadata',
+			function ( $data ) use ( &$saved_sizes ) {
+				$saved_sizes[] = array_keys( $data['sizes'] ?? array() );
+
+				return $data;
+			}
+		);
+		add_filter(
+			'wp_generate_attachment_metadata',
+			function ( $data, $id, $context ) use ( &$contexts ) {
+				$contexts[] = $context;
+
+				return $data;
 			},
-			20
+			10,
+			3
 		);
 
-		// Store the image unscaled, like an upload from before WordPress 5.3 added the big image threshold.
-		add_filter( 'big_image_size_threshold', '__return_false' );
-		$attachment_id = $this->create_image_attachment( 3000, 2000, 'wc-regen-unscaled.jpg' );
-		remove_filter( 'big_image_size_threshold', '__return_false' );
-
-		$original_file = get_attached_file( $attachment_id );
-		$stored_sizes  = wp_get_attachment_metadata( $attachment_id, true )['sizes'];
-
-		// Render twice. The second render regenerates from the scaled file, which WordPress does not scale again.
-		wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
 		wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
 
-		$metadata      = wp_get_attachment_metadata( $attachment_id, true );
-		$attached_file = get_attached_file( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id, true );
 
-		$this->assertNotSame( $original_file, $attached_file, 'WordPress should have scaled the attached file down' );
-		$this->assertSame( basename( $attached_file ), basename( $metadata['file'] ), 'The stored file should be the attached file' );
-		$this->assertSame( array( 2560, 1707 ), array( $metadata['width'], $metadata['height'] ), 'The stored dimensions should be those of the scaled file' );
-		$this->assertSame( basename( $original_file ), $metadata['original_image'] ?? null, 'The stored record should point to the uploaded original' );
-		$this->assertSame( $original_file, wp_get_original_image_path( $attachment_id ), 'The original image path should be the uploaded file' );
+		$this->assertSame( $attached_file, get_attached_file( $attachment_id ), 'The attached file should not change' );
+		$this->assert_size_exists( $attachment_id, 'woocommerce_thumbnail' );
 
-		foreach ( array_keys( $stored_sizes ) as $size ) {
-			$this->assertArrayHasKey( $size, $metadata['sizes'], "The $size size should be kept" );
+		unset( $metadata['sizes']['woocommerce_thumbnail'] );
+		$this->assertSame( $stored, $metadata, 'Only the new size should be added to the stored record' );
+
+		foreach ( $saved_sizes as $sizes ) {
+			$this->assertEmpty( array_diff( array_keys( $stored['sizes'] ), $sizes ), 'No save should drop a stored size' );
 		}
+
+		$this->assertSame( array( 'update' ), $contexts, 'Plugins should see the new size as an update to an existing image' );
+	}
+
+	/**
+	 * Images that wp_generate_attachment_metadata() would give a new main file.
+	 *
+	 * @return array
+	 */
+	public function provide_images_wordpress_would_replace(): array {
+		return array(
+			'large image stored before the big image threshold' => array( 'big_image_size_threshold', DIR_TESTDATA . '/images/test-image-large.jpg' ),
+			'image stored without EXIF rotation' => array( 'wp_image_maybe_exif_rotate', DIR_TESTDATA . '/images/test-image-rotated-90ccw.jpg' ),
+		);
 	}
 }

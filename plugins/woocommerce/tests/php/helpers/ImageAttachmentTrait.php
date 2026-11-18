@@ -32,6 +32,32 @@ trait ImageAttachmentTrait {
 		imagejpeg( $image, $file, 90 );
 		imagedestroy( $image );
 
+		return $this->insert_image_attachment( $file );
+	}
+
+	/**
+	 * Create an attachment from a copy of an existing JPEG file.
+	 *
+	 * @param string $source Path of the file to copy into the uploads directory.
+	 * @return int Attachment ID.
+	 */
+	private function create_attachment_from_file( string $source ): int {
+		$uploads = wp_upload_dir();
+		$file    = trailingslashit( $uploads['path'] ) . wp_basename( $source );
+
+		wp_mkdir_p( $uploads['path'] );
+		copy( $source, $file );
+
+		return $this->insert_image_attachment( $file );
+	}
+
+	/**
+	 * Insert an attachment for a JPEG file in the uploads directory and generate its metadata.
+	 *
+	 * @param string $file Path of the file.
+	 * @return int Attachment ID.
+	 */
+	private function insert_image_attachment( string $file ): int {
 		$attachment_id = wp_insert_attachment(
 			array(
 				'post_mime_type' => 'image/jpeg',

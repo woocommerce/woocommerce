@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop product page views from renaming older image files or briefly erasing their sizes when WooCommerce makes a missing size.

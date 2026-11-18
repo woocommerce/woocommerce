@@ -320,10 +320,13 @@ class WC_Regenerate_Images {
 	/**
 	 * Only regenerate images for the requested size.
 	 *
+	 * @deprecated 11.4.0 On-the-fly resizing now makes the one size itself and no longer uses this filter callback.
 	 * @param array $sizes Array of image sizes.
 	 * @return array
 	 */
 	public static function adjust_intermediate_image_sizes( $sizes ) {
+		wc_deprecated_function( __METHOD__, '11.4.0' );
+
 		return array( self::$regenerate_size );
 	}
 
@@ -430,47 +433,54 @@ class WC_Regenerate_Images {
 		// Unfiltered: this is the base for a write, so it must be the stored value.
 		$metadata = wp_get_attachment_metadata( $attachment_id, true );
 
-		// Fix for images with no metadata.
-		if ( ! is_array( $metadata ) ) {
-			$metadata = array();
-		}
+		/**
+		 * The size as registered with add_image_size(), or null when it is not registered.
+		 *
+		 * @var array{width: int, height: int, crop: bool|array}|null $size_data
+		 */
+		$size_data = wp_get_registered_image_subsizes()[ self::$regenerate_size ] ?? null;
 
-		// We only want to regen a specific image size.
-		add_filter( 'intermediate_image_sizes', array( __CLASS__, 'adjust_intermediate_image_sizes' ) );
-
-		// This function will generate the new image sizes.
-		$new_metadata = wp_generate_attachment_metadata( $attachment_id, $fullsizepath );
-
-		// Remove custom filter.
-		remove_filter( 'intermediate_image_sizes', array( __CLASS__, 'adjust_intermediate_image_sizes' ) );
-
-		// If something went wrong lets just return the original image.
-		if ( is_wp_error( $new_metadata ) || empty( $new_metadata ) ) {
-			wp_update_attachment_metadata( $attachment_id, $metadata );
-
+		if ( empty( $metadata ) || ! is_array( $metadata ) || ! $size_data ) {
 			return $image;
 		}
 
-		// wp_generate_attachment_metadata() can also replace the main file with a scaled or rotated copy.
-		// Take these keys from its result so they describe the file that is now attached.
-		foreach ( array( 'file', 'width', 'height', 'filesize' ) as $key ) {
-			if ( isset( $new_metadata[ $key ] ) ) {
-				$metadata[ $key ] = $new_metadata[ $key ];
-			}
+		/** This filter is documented in wp-admin/includes/image.php */
+		$allowed_sizes = apply_filters( 'intermediate_image_sizes_advanced', array( self::$regenerate_size => $size_data ), $metadata, $attachment_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+
+		// Respect a site that turned this size off for its images.
+		if ( ! is_array( $allowed_sizes ) || ! isset( $allowed_sizes[ self::$regenerate_size ] ) ) {
+			return $image;
 		}
 
-		// Keep a stored original_image, because it names the upload. When WordPress scales the
-		// -scaled copy again, it reports that copy as the original.
-		if ( empty( $metadata['original_image'] ) && isset( $new_metadata['original_image'] ) ) {
-			$metadata['original_image'] = $new_metadata['original_image'];
+		$editor = wp_get_image_editor( $fullsizepath );
+
+		if ( is_wp_error( $editor ) ) {
+			return $image;
 		}
 
-		if ( isset( $new_metadata['sizes'][ self::$regenerate_size ] ) ) {
-			$metadata['sizes'][ self::$regenerate_size ] = $new_metadata['sizes'][ self::$regenerate_size ];
+		// Rotate like WordPress does when it makes sizes for an upload.
+		if ( ! empty( $metadata['image_meta'] ) ) {
+			$editor->maybe_exif_rotate();
 		}
 
-		// wp_generate_attachment_metadata() first saves a record with no sizes. Always save the stored
-		// record again, even when WordPress made no new size, for example because a site filter skipped it.
+		// Make only the one size, from the attached file. Unlike wp_generate_attachment_metadata(), this
+		// does not save an empty record first and does not replace the attached file.
+		$new_sizes = $editor->multi_resize( array( self::$regenerate_size => $size_data ) );
+
+		if ( empty( $new_sizes[ self::$regenerate_size ] ) ) {
+			return $image;
+		}
+
+		$metadata['sizes'][ self::$regenerate_size ] = $new_sizes[ self::$regenerate_size ];
+
+		// WordPress fires this with the update context when it adds missing sizes to an existing image.
+		/** This filter is documented in wp-admin/includes/image.php */
+		$filtered_metadata = apply_filters( 'wp_generate_attachment_metadata', $metadata, $attachment_id, 'update' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+
+		if ( is_array( $filtered_metadata ) ) {
+			$metadata = $filtered_metadata;
+		}
+
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 
 		// Now we've done our regen, attempt to return the new size.
