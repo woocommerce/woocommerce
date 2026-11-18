@@ -97,6 +97,22 @@ $min-product-width: 150px;
 	container-type: inline-size;
 	container-name: carousel;
 
+	&.columns-1 {
+		scroll-padding: 0 7.5%;
+
+		.wc-block-product {
+			scroll-snap-align: start;
+		}
+	}
+
+	&.columns-2 {
+		scroll-padding: 0 6%;
+
+		.wc-block-product {
+			scroll-snap-align: start;
+		}
+	}
+
 	.wc-block-product {
 		box-sizing: border-box;
 		// Padding to prevent focus outline from being clipped.
