@@ -1071,28 +1071,15 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @return string|null
 	 */
 	private function get_shared_stock_status( array $child_ids, array $rows ): ?string {
-		if ( count( $rows ) !== count( $child_ids ) ) {
-			return null;
+		$child_statuses = array_filter( array_column( $rows, 'stock_status', 'child_id' ) );
+		if ( count( $child_statuses ) === count( $child_ids ) ) {
+			$unique = array_unique( $child_statuses );
+			if ( 1 === count( $unique ) ) {
+				return reset( $unique );
+			}
 		}
 
-		$shared_stock_status = null;
-		$processed_child_ids = array();
-		foreach ( $rows as $row ) {
-			$child_id     = (int) $row['child_id'];
-			$stock_status = $row['stock_status'];
-
-			if ( isset( $processed_child_ids[ $child_id ] ) || ! is_string( $stock_status ) ) {
-				return null;
-			}
-			if ( null !== $shared_stock_status && $stock_status !== $shared_stock_status ) {
-				return null;
-			}
-
-			$processed_child_ids[ $child_id ] = true;
-			$shared_stock_status              = $stock_status;
-		}
-
-		return $shared_stock_status;
+		return null;
 	}
 
 	/**
