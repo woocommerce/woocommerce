@@ -75,16 +75,14 @@ function delay( ms: number, signal: AbortSignal ): Promise< void > {
 
 /**
  * True when the server refused the chunk without running it, so sending it
- * again cannot write a row twice: a 429, or another request for the same
- * session still holding the chunk lock.
+ * again cannot write a row twice: another request for the same session still
+ * holds the chunk lock.
  */
 function isSafeToResend( error: unknown ): boolean {
-	const status = errorStatus( error );
 	return (
-		status === 429 ||
-		( status === 409 &&
-			errorCode( error ) ===
-				'woocommerce_fulfillments_import_chunk_in_progress' )
+		errorStatus( error ) === 409 &&
+		errorCode( error ) ===
+			'woocommerce_fulfillments_import_chunk_in_progress'
 	);
 }
 

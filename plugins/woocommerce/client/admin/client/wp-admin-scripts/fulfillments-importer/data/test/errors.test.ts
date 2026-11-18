@@ -30,6 +30,7 @@ describe( 'errorStatus', () => {
 		[ { data: { status: '409' } }, null ],
 		[ { data: null }, null ],
 		[ { code: 'x' }, null ],
+		[ { code: 'invalid_json', message: 'Not JSON.' }, null ],
 		[ new Error( 'x' ), null ],
 		[ null, null ],
 	] )( 'reads %p as %p', ( error, expected ) => {

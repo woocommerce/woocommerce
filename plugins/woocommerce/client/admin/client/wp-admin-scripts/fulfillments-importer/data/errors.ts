@@ -5,7 +5,8 @@ import { __ } from '@wordpress/i18n';
 
 /**
  * Returns the HTTP status of an apiFetch error, or null when there is none.
- * apiFetch rejects with a plain `{ code, message, data: { status } }` object.
+ * Only a WordPress REST error body carries `data.status`; apiFetch reports a
+ * body that is not JSON as `{ code: 'invalid_json' }` without a status.
  */
 export function errorStatus( error: unknown ): number | null {
 	if ( ! error || typeof error !== 'object' || ! ( 'data' in error ) ) {

@@ -293,13 +293,9 @@ describe( 'useChunkedImport', () => {
 		expect( onFinish ).toHaveBeenCalled();
 	} );
 
-	it( 'resends a 429 and gives up after three waits', async () => {
+	it( 'gives up after three waits while the chunk stays in progress', async () => {
 		jest.useFakeTimers();
-		mockedRunChunk.mockRejectedValue( {
-			code: 'rest_too_many_requests',
-			message: 'Too many requests.',
-			data: { status: 429 },
-		} );
+		mockedRunChunk.mockRejectedValue( CHUNK_IN_PROGRESS );
 
 		const { result, onError } = renderImport( { total: 2 } );
 
@@ -307,12 +303,31 @@ describe( 'useChunkedImport', () => {
 
 		// One attempt plus one per backoff step.
 		expect( mockedRunChunk ).toHaveBeenCalledTimes( 4 );
-		expect( onError ).toHaveBeenCalledWith( 'Too many requests.', false );
+		expect( onError ).toHaveBeenCalledWith(
+			CHUNK_IN_PROGRESS.message,
+			false
+		);
 		expect( result.current.isRunning ).toBe( false );
 	} );
 
 	it.each( [
 		[ 'a network failure', new Error( 'Failed to fetch' ) ],
+		[
+			'a 429',
+			{
+				code: 'rest_too_many_requests',
+				message: 'Too many requests.',
+				data: { status: 429 },
+			},
+		],
+		[
+			// apiFetch reports a body that is not JSON without its status.
+			'a 429 from a proxy with an HTML body',
+			{
+				code: 'invalid_json',
+				message: 'The response is not a valid JSON response.',
+			},
+		],
 		[
 			'a 500',
 			{
@@ -513,15 +528,7 @@ describe( 'useChunkedImport', () => {
 	} );
 
 	it.each( [
-		[
-			'a refused resend',
-			{
-				code: 'rest_too_many_requests',
-				message: 'Too many requests.',
-				data: { status: 429 },
-			},
-			4,
-		],
+		[ 'a refused resend', CHUNK_IN_PROGRESS, 4 ],
 		[
 			'a 400',
 			{
