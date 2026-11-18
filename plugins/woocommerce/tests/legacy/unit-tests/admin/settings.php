@@ -16,7 +16,6 @@ class WC_Tests_Admin_Settings extends WC_Unit_Test_Case {
 	 * Test WC_Admin_Settings::check_download_folder_protection().
 	 */
 	public function test_check_download_folder_protection() {
-		$default    = get_option( 'woocommerce_file_download_method' );
 		$upload_dir = wp_get_upload_dir();
 		$file_path  = $upload_dir['basedir'] . '/woocommerce_uploads/.htaccess';
 
@@ -33,8 +32,6 @@ class WC_Tests_Admin_Settings extends WC_Unit_Test_Case {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$file_content = file_exists( $file_path ) ? file_get_contents( $file_path ) : '';
 		$this->assertEquals( 'Options -Indexes', $file_content );
-
-		update_option( 'woocommerce_file_download_method', $default );
 	}
 
 	/**

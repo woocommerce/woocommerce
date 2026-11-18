@@ -16,7 +16,14 @@ defined( 'ABSPATH' ) || exit;
  */
 class AgenticCommerceSettings implements RegisterHooksInterface {
 
+	public const FEATURE_ID = 'agent_readiness';
+
 	public const TAB = 'agentic-commerce';
+
+	/**
+	 * The AI shopping section of the tab, which the landing page's Manage button opens.
+	 */
+	public const SHOPPING_SECTION = 'shopping';
 
 	public const PRIVACY_PAGE_OPTION = 'wp_page_for_privacy_policy';
 
@@ -62,6 +69,22 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	private UcpSwitch $ucp_switch;
 
 	/**
+	 * Background scan.
+	 *
+	 * @var ScheduledScan
+	 */
+	private ScheduledScan $scheduled_scan;
+
+	/**
+	 * Link to the AI tools tab: its landing page, or a section of it.
+	 *
+	 * @param string $section Section id, or '' for the landing page.
+	 */
+	public static function url( string $section = '' ): string {
+		return admin_url( 'admin.php?page=wc-settings&tab=' . self::TAB . ( '' === $section ? '' : '&section=' . $section ) );
+	}
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
@@ -70,12 +93,14 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 * @param StoreConditions    $store_conditions    Store conditions.
 	 * @param AgentReadiness     $agent_readiness     Readiness service.
 	 * @param UcpSwitch          $ucp_switch          UCP switch.
+	 * @param ScheduledScan      $scheduled_scan      Background scan.
 	 */
-	final public function init( FeaturesController $features_controller, StoreConditions $store_conditions, AgentReadiness $agent_readiness, UcpSwitch $ucp_switch ): void {
+	final public function init( FeaturesController $features_controller, StoreConditions $store_conditions, AgentReadiness $agent_readiness, UcpSwitch $ucp_switch, ScheduledScan $scheduled_scan ): void {
 		$this->features_controller = $features_controller;
 		$this->store_conditions    = $store_conditions;
 		$this->agent_readiness     = $agent_readiness;
 		$this->ucp_switch          = $ucp_switch;
+		$this->scheduled_scan      = $scheduled_scan;
 	}
 
 	/**
@@ -91,7 +116,7 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 * @internal
 	 */
 	public function handle_init(): void {
-		if ( ! is_admin() || ! $this->features_controller->feature_is_enabled( StatusTab::FEATURE_ID ) ) {
+		if ( ! is_admin() || ! $this->features_controller->feature_is_enabled( self::FEATURE_ID ) ) {
 			return;
 		}
 		add_filter( 'woocommerce_get_settings_pages', array( $this, 'handle_woocommerce_get_settings_pages' ) );
@@ -109,7 +134,7 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 		if ( ! is_array( $pages ) || ! class_exists( \WC_Settings_Page::class, false ) ) {
 			return $pages;
 		}
-		$pages[] = new AgenticCommerceSettingsPage( $this->store_conditions, $this->agent_readiness, $this->ucp_switch );
+		$pages[] = new AgenticCommerceSettingsPage( $this->store_conditions, $this->agent_readiness, $this->ucp_switch, $this->scheduled_scan );
 		return $pages;
 	}
 }

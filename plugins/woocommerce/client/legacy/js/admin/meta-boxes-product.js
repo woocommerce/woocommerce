@@ -920,6 +920,24 @@ jQuery( function ( $ ) {
 		}
 	);
 
+	// Links already support Enter, but role="button" does not add Space-key support.
+	// Prevent Space from scrolling and activate on keyup, as native buttons do.
+	$( '#product_attributes' ).on(
+		'keydown keyup',
+		'.product_attributes a.remove_row[role="button"]',
+		function ( event ) {
+			if ( event.key !== ' ' ) {
+				return;
+			}
+
+			event.preventDefault();
+
+			if ( event.type === 'keyup' ) {
+				this.click();
+			}
+		}
+	);
+
 	$( '#product_attributes' ).on(
 		'click',
 		'.product_attributes .remove_row',

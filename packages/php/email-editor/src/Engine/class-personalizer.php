@@ -249,7 +249,12 @@ class Personalizer {
 					continue;
 				}
 
-				$value = $this->get_tag_value( $tag, $rendering_context, $token['arguments'] );
+				$arguments = $token['arguments'];
+				if ( self::RENDERING_CONTEXT_HTML === $rendering_context && Personalization_Tag::VALUE_TYPE_HTML === $tag->get_value_type() ) {
+					// An HTML-typed callback may output an argument as it is, so in HTML content it gets the values escaped for HTML.
+					$arguments = array_map( 'esc_html', $arguments );
+				}
+				$value = $this->get_tag_value( $tag, $rendering_context, $arguments );
 				if ( self::RENDERING_CONTEXT_HTML === $rendering_context && Personalization_Tag::VALUE_TYPE_TEXT === $tag->get_value_type() ) {
 					$value = esc_html( $value );
 				}

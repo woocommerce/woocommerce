@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\UcpSwitch;
+use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 
@@ -15,12 +16,21 @@ use WP_REST_Request;
 class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Tests fire rest_api_init with the feature both on and off.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * Enable the feature after parent::setUp(), so the filter stays out of the hook
 	 * snapshot WordPress takes in the first test. Routes register on first dispatch.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		add_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
+		// Report tests stay offline: store output checks would load the test site's pages.
+		StoreOutputChecksTest::block_requests();
 		delete_option( AgentReadiness::REPORT_OPTION );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
@@ -32,7 +42,6 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
-		remove_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
 		parent::tearDown();
 	}
 
@@ -56,6 +65,20 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$report   = wc_get_container()->get( AgentReadiness::class )->refresh_report();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness' ) );
 		$this->assertSame( $report['generated_at'], $response->get_data()['report']['generated_at'] );
+	}
+
+	/**
+	 * @testdox GET reads setup checks now, so a setting changed after the scan shows its current state.
+	 */
+	public function test_get_reads_store_checks_now(): void {
+		StoreConditionsTest::make_store_ready( $this );
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness' ) );
+		$checks   = array_column( $response->get_data()['report']['store_checks'], 'ok', 'id' );
+
+		$this->assertFalse( $checks['guest_checkout'] );
 	}
 
 	/**
@@ -171,6 +194,31 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 'no', get_option( 'woocommerce_feature_ucp_enabled' ) );
+	}
+
+	/**
+	 * @testdox Turning UCP on with Plain permalinks writes the discovery file, so the address is served without a permalink change.
+	 */
+	public function test_turning_ucp_on_writes_the_discovery_file_for_plain_permalinks(): void {
+		global $wp_rewrite;
+		StoreConditionsTest::make_store_ready();
+		$wp_rewrite->set_permalink_structure( '' );
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/ucp';
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+
+		try {
+			$response = $this->dispatch_ucp( true );
+
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertFileExists( $path );
+			$this->assertSame( 'ok', UcpDiscovery::serve_status() );
+		} finally {
+			wp_delete_file( $path );
+			$dir = dirname( $path );
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+			}
+		}
 	}
 
 	/**

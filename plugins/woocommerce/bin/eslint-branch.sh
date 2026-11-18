@@ -11,7 +11,12 @@
 baseBranch=${1:-"origin/trunk"}
 
 # shellcheck disable=SC2046
-changedFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=d -- '*.js' '*.jsx' '*.ts' '*.tsx')
+changedFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=d -- \
+    '*.js' '*.jsx' '*.ts' '*.tsx' \
+    ':(exclude)client/admin/client/**' \
+    ':(exclude)client/blocks/assets/**' \
+    ':(exclude)client/blocks/packages/**' \
+    ':(exclude)client/blocks/tests/**')
 
 # Only complete this if changed files are detected.
 if [[ -z $changedFiles ]]; then

@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G03A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
+			"before": {
+				"file": "fixtures/G03A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G03A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    return array_map( static function ( $key ) { return wc_status_label( $key ); }, array_keys( $statuses ) );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G03B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
+			"before": {
+				"file": "fixtures/G03B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G03B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
+						"lines": [
+							3,
+							4
+						],
+						"anchor": "    $per_page = absint( $per_page );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G03C-v3",
+			"path": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
+			"before": {
+				"file": "fixtures/G03C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G03C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G03D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
+			"before": {
+				"file": "fixtures/G03D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G03D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

@@ -271,11 +271,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( "The base transient files directory doesn't exist: foobar_dir" );
 
-		try {
-			$this->sut->get_transient_files_directory();
-		} finally {
-			remove_all_filters( 'woocommerce_transient_files_directory' );
-		}
+		$this->sut->get_transient_files_directory();
 	}
 
 	/**
@@ -367,11 +363,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( "The base transient files directory doesn't exist: $missing_dir" );
 
-		try {
-			$this->sut->get_transient_files_directory();
-		} finally {
-			remove_all_filters( 'woocommerce_transient_files_directory' );
-		}
+		$this->sut->get_transient_files_directory();
 	}
 
 	/**

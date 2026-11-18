@@ -1,0 +1,24 @@
+diff --git a/packages/js/components/changelog/fix-text-control-height-wp-7-1 b/packages/js/components/changelog/fix-text-control-height-wp-7-1
+new file mode 100644
+index 0000000000000000000000000000000000000000..d001705743a70b517e624543f2a0babdc984cc37
+--- /dev/null
++++ b/packages/js/components/changelog/fix-text-control-height-wp-7-1
+@@ -0,0 +1,4 @@
++Significance: patch
++Type: fix
++
++Fix `TextControl` inputs overflowing their box and hiding its bottom border on WordPress 7.1.
+diff --git a/packages/js/components/src/text-control/style.scss b/packages/js/components/src/text-control/style.scss
+index 3b8522a78af3ffb3f852353be1182602ee947d91..43ab1a8d6486c6ae21905325ca11b0a3e1ee450b 100644
+--- a/packages/js/components/src/text-control/style.scss
++++ b/packages/js/components/src/text-control/style.scss
+@@ -43,7 +43,8 @@
+ 		line-height: 21px;
+ 		margin: 0;
+ 		padding: 0;
+-		min-height: 30px;
++		min-height: 0;
++		height: 0;
+ 
+ 		&:focus {
+ 			box-shadow: none;
