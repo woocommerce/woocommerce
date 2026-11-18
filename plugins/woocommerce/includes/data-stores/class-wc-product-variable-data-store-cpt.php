@@ -1013,9 +1013,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	private function get_unanimous_custom_child_stock_status( $product ): string {
 		$custom_statuses = $this->get_custom_stock_status_options();
-		$child_ids       = array_values( array_unique( array_filter( array_map( 'absint', (array) $product->get_children() ) ) ) );
-		if ( $custom_statuses && $child_ids ) {
-			$shared_stock_status = $this->get_shared_stock_status( $child_ids, $this->read_child_stock_statuses( $child_ids ) );
+		if ( $custom_statuses ) {
+			$child_ids           = array_values( array_unique( array_filter( array_map( 'absint', (array) $product->get_children() ) ) ) );
+			$shared_stock_status = $child_ids ? $this->get_shared_stock_status( $child_ids, $this->read_child_stock_statuses( $child_ids ) ) : null;
 			if ( null !== $shared_stock_status && array_key_exists( $shared_stock_status, $custom_statuses ) ) {
 				return $shared_stock_status;
 			}
