@@ -30,13 +30,6 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	private $created_stock_notification_ids = array();
 
 	/**
-	 * Locale filters added by a test, as hook name, callback and priority.
-	 *
-	 * @var array<int, array{0: string, 1: callable, 2: int}>
-	 */
-	private $locale_filters = array();
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -56,19 +49,6 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_queue_class' );
-		remove_all_filters( 'woocommerce_allow_send_queued_transactional_email' );
-		remove_all_actions( 'woocommerce_send_queued_transactional_email' );
-		remove_all_actions( 'woocommerce_deferred_email_test_unknown_object' );
-		remove_all_actions( 'woocommerce_deferred_email_test_unknown_object_notification' );
-		remove_all_actions( 'woocommerce_deferred_email_test_unsaved_product' );
-		remove_all_actions( 'woocommerce_deferred_email_test_unsaved_product_notification' );
-		remove_all_filters( 'woocommerce_mail_callback' );
-		remove_all_filters( 'woocommerce_allow_switching_email_locale' );
-		foreach ( $this->locale_filters as list( $hook, $callback, $priority ) ) {
-			remove_filter( $hook, $callback, $priority );
-		}
-		$this->locale_filters = array();
 		if ( is_locale_switched() ) {
 			restore_current_locale();
 		}
@@ -723,7 +703,6 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		};
 
 		add_filter( $hook, $callback, $priority );
-		$this->locale_filters[] = array( $hook, $callback, $priority );
 	}
 
 	/**

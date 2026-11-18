@@ -4,18 +4,20 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 
 /**
  * Tests the state cleanup in WC_Unit_Test_Case: the WC() singleton, $_SERVER, Constants and
- * block type state that survives the parent teardown, and the attribute taxonomies the
- * rollback leaves registered.
+ * block type state that survives the parent teardown, the Analytics reload flag, and the
+ * attribute taxonomies the rollback leaves registered.
  *
  * This drives the cleanup methods directly rather than dirtying state in one test and
  * asserting it is gone in the next. A pair like that only holds under declaration order: run
  * the suite with --order-by=random or reverse and the assertion half runs first, passes
  * against state nothing has dirtied yet, and stops covering anything without ever going red.
- * The one exception stages a leftover taxonomy before parent::setUp() in the same test, so it
- * covers the setup call itself.
+ * Two tests cover the base class's own calls within a single test instead: one stages a
+ * leftover taxonomy before parent::setUp(), and one has tearDown() check the Analytics reload
+ * flag after the base teardown ran.
  */
 class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 
@@ -45,7 +47,14 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Drop the staged leftover in case setup did not.
+	 * Whether tearDown() checks that the base teardown cleared the Analytics reload flag.
+	 *
+	 * @var bool
+	 */
+	private $check_analytics_reload_flag_after_teardown = false;
+
+	/**
+	 * Drop the staged leftover in case setup did not, and run the Analytics flag check when a test asked for it.
 	 */
 	public function tearDown(): void {
 		global $wc_product_attributes;
@@ -54,6 +63,13 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 		unset( $wc_product_attributes[ self::STALE_TAXONOMY ] );
 
 		parent::tearDown();
+
+		if ( $this->check_analytics_reload_flag_after_teardown ) {
+			$flag_after_teardown = self::analytics_reload_flag();
+			// Clear it before asserting, so a failure here does not end the process at a later settings save.
+			$this->reset_analytics_reload_flag();
+			$this->assertFalse( $flag_after_teardown, 'The base teardown should clear the Analytics reload flag.' );
+		}
 	}
 
 	/**
@@ -225,26 +241,69 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The base teardown clears the flag that makes the next settings save redirect and exit, set by changing the Analytics option.
+	 */
+	public function test_teardown_clears_the_analytics_reload_flag_an_option_change_sets(): void {
+		update_option( Analytics::TOGGLE_OPTION_NAME, 'yes' );
+		update_option( Analytics::TOGGLE_OPTION_NAME, 'no' );
+		$this->assertTrue( self::analytics_reload_flag(), 'Changing the Analytics option should set the flag, or this test covers nothing.' );
+
+		// The assertion runs in this class's tearDown(), after WC_Unit_Test_Case::tearDown().
+		$this->check_analytics_reload_flag_after_teardown = true;
+	}
+
+	/**
+	 * Read the static flag Analytics::maybe_reload_page() checks before it redirects and exits.
+	 *
+	 * @return bool
+	 */
+	private static function analytics_reload_flag(): bool {
+		return \Closure::bind(
+			static function (): bool {
+				return self::$is_updated;
+			},
+			null,
+			Analytics::class
+		)();
+	}
+
+	/**
+	 * @testdox Whether WordPress uses an external object cache is put back as it was at setUp(), even when that was unset.
+	 */
+	public function test_restore_object_cache_mode_undoes_a_switch(): void {
+		$mode_at_setup = $GLOBALS['_wp_using_ext_object_cache'] ?? null;
+		wp_using_ext_object_cache( true !== $mode_at_setup );
+
+		$this->restore_object_cache_mode();
+
+		$this->assertSame( $mode_at_setup, $GLOBALS['_wp_using_ext_object_cache'] ?? null, 'The object cache mode should be back to what it was at setUp().' );
+	}
+
+	/**
 	 * @testdox The restores leave state alone for a test whose setUp() never reached the base class.
 	 */
 	public function test_restores_leave_state_alone_when_setup_did_not_run(): void {
 		// Like a test that skips in setUp() before calling parent::setUp(): PHPUnit still runs its tearDown().
 		$case = new class( 'placeholder' ) extends \WC_Unit_Test_Case {
 			/**
-			 * Run the three restores on a case that saved no state.
+			 * Run the restores on a case that saved no state.
 			 */
 			public function restore_without_setup(): void {
 				$this->restore_server_superglobal();
 				$this->restore_constant_overrides();
 				$this->restore_block_type_registry();
+				$this->restore_object_cache_mode();
 			}
 		};
 		Constants::set_constant( 'WC_TEARDOWN_TEST_KEPT', 'kept' );
 		$server      = $_SERVER;
 		$overrides   = Constants::$set_constants;
 		$block_types = \WP_Block_Type_Registry::get_instance()->get_all_registered();
+		wp_using_ext_object_cache( true );
 
 		$case->restore_without_setup();
+
+		$this->assertTrue( wp_using_ext_object_cache(), 'The object cache mode should be left as it was.' );
 
 		$this->assertSame( $server, $_SERVER, '$_SERVER should be left as it was.' );
 		$this->assertSame( $overrides, Constants::$set_constants, 'Constants overrides should be left as they were.' );

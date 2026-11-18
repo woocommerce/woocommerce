@@ -112,7 +112,6 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 		parent::tearDown();
 		$this->clear_rest_server();
 		unset( $this->server, $this->controller );
-		$this->disable_cogs_feature();
 	}
 
 	/**

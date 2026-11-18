@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore comments_clauses_without_product_reviews signature with second argument being optional

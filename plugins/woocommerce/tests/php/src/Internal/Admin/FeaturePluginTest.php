@@ -18,8 +18,6 @@ class FeaturePluginTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( Analytics::TOGGLE_OPTION_NAME );
-		remove_filter( 'woocommerce_admin_disabled', '__return_true', PHP_INT_MAX );
-		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_analytics_feature' ), PHP_INT_MAX );
 
 		parent::tearDown();
 	}
@@ -145,8 +143,6 @@ class FeaturePluginTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Serving and expiring existing exports stays enabled when Analytics is disabled.
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_export_files_are_still_handled_when_analytics_is_disabled(): void {
 		$export_hook        = ReportExporter::get_action( 'export_report' );

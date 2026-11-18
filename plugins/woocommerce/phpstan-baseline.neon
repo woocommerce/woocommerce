@@ -10447,12 +10447,6 @@ parameters:
 			path: includes/class-wc-comments.php
 
 		-
-			message: '#^Method WC_Comments\:\:clear_transients\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-comments.php
-
-		-
 			message: '#^Method WC_Comments\:\:delete_comments_count_cache\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11866,12 +11860,6 @@ parameters:
 			message: '#^Parameter \#2 \$version2 of function version_compare expects string, int\|string\|null given\.$#'
 			identifier: argument.type
 			count: 4
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Parameter \#4 \$autoload of function add_option expects bool\|null, string given\.$#'
-			identifier: argument.type
-			count: 5
 			path: includes/class-wc-install.php
 
 		-
@@ -18481,13 +18469,7 @@ parameters:
 			path: includes/emails/class-wc-email.php
 
 		-
-			message: '#^Access to property \$AltBody on an unknown class PHPMailer\.$#'
-			identifier: class.notFound
-			count: 4
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Action callback returns PHPMailer but should not return anything\.$#'
+			message: '#^Action callback returns PHPMailer\\PHPMailer\\PHPMailer but should not return anything\.$#'
 			identifier: return.void
 			count: 1
 			path: includes/emails/class-wc-email.php
@@ -18525,12 +18507,6 @@ parameters:
 		-
 			message: '#^Method WC_Email\:\:get_option_or_transient\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Method WC_Email\:\:handle_multipart\(\) has invalid return type PHPMailer\.$#'
-			identifier: class.notFound
 			count: 1
 			path: includes/emails/class-wc-email.php
 
@@ -18628,12 +18604,6 @@ parameters:
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(string\)\: bool\)\|null, ''is_email'' given\.$#'
 			identifier: argument.type
 			count: 3
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Parameter \$mailer of method WC_Email\:\:handle_multipart\(\) has invalid type PHPMailer\.$#'
-			identifier: class.notFound
-			count: 1
 			path: includes/emails/class-wc-email.php
 
 		-
@@ -23574,11 +23544,6 @@ parameters:
 			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
 
-		-
-			message: '#^Method WC_REST_Product_Attributes_V1_Controller\:\:get_items\(\) should return array but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
 
 		-
 			message: '#^Method WC_REST_Product_Attributes_V1_Controller\:\:get_items_permissions_check\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
@@ -23658,11 +23623,6 @@ parameters:
 			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
 
-		-
-			message: '#^Return type \(array\) of method WC_REST_Product_Attributes_V1_Controller\:\:get_items\(\) should be compatible with return type \(WP_Error\|WP_REST_Response\) of method WP_REST_Controller\:\:get_items\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
 
 		-
 			message: '#^Cannot access property \$post_date_gmt on WP_Post\|null\.$#'
@@ -38661,11 +38621,6 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributeTerms.php
 
-		-
-			message: '#^Access to offset ''search'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/ProductAttributes.php
 
 		-
 			message: '#^Access to offset ''slug'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
@@ -38697,23 +38652,8 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns array\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:register_routes\(\) has no return type specified\.$#'
@@ -38745,17 +38685,7 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Parameter \#1 \$request of method WC_REST_Product_Attributes_V1_Controller\:\:get_items\(\) expects WP_REST_Request, Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Parameter \#2 \$request of method WC_REST_Product_Attributes_V1_Controller\:\:prepare_item_for_response\(\) expects WP_REST_Request, Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
 		-
 			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int given\.$#'
@@ -38775,17 +38705,7 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Return type \(Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\) of method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) should be compatible with return type \(array\) of method WC_REST_Product_Attributes_V1_Controller\:\:get_items\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
 		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Product_Categories_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 103 on line 5$#'
@@ -47848,12 +47768,6 @@ parameters:
 			path: src/Blocks/BlockTypes/Checkout.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CheckoutActionsBlock\:\:initialize\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/CheckoutActionsBlock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CheckoutActionsBlock\:\:register_style_variations\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -48396,18 +48310,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartFooterBlock\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartFooterBlock\:\:get_cart_instance\(\) should return WC_Cart but returns null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
-
-		-
-			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''bdi'' given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartFooterBlock.php
 
@@ -49708,12 +49610,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductQuery.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRating\:\:get_block_type_style\(\) should return null but returns array\<mixed, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductRating.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRating\:\:get_block_type_uses_context\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -49722,12 +49618,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRating\:\:register_block_type_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductRating.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductRating.php
 
@@ -50405,12 +50295,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypesController\:\:register_block_patterns\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypesController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypesController\:\:register_blocks\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTypesController.php

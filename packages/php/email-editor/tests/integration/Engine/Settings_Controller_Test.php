@@ -60,6 +60,27 @@ class Settings_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test the editor gets the shared stylesheet unchanged, so the rules that keep a long word
+	 * from widening the email wrap the same way in the editor.
+	 */
+	public function testItAddsSharedContentStylesToEditorStyles(): void {
+		$shared_css = (string) file_get_contents( dirname( __DIR__, 3 ) . '/src/Engine/content-shared.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local package file.
+
+		$settings = $this->settings_controller->get_settings();
+
+		$shared_styles = array_filter(
+			$settings['styles'],
+			static function ( array $style ) use ( $shared_css ): bool {
+				return $style['css'] === $shared_css;
+			}
+		);
+
+		$this->assertCount( 1, $shared_styles, 'The iframe must receive content-shared.css unchanged' );
+		$this->assertStringContainsString( 'word-break: break-word', $shared_css, 'The shared stylesheet must hold the wrapping rules the email relies on' );
+		$this->assertStringContainsString( '.wp-block-table td', $shared_css );
+	}
+
+	/**
 	 * Test it keeps the admin color scheme stylesheet in the iframe assets.
 	 */
 	public function testItKeepsAdminColorSchemeStylesInIframeAssets(): void {

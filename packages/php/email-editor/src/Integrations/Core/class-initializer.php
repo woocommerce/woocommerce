@@ -54,6 +54,7 @@ class Initializer {
 		'core/list',
 		'core/list-item',
 		'core/paragraph',
+		'core/preformatted',
 		'core/quote',
 		'core/separator',
 		'core/spacer',
@@ -193,6 +194,10 @@ class Initializer {
 	 * @return array Modified block settings.
 	 */
 	public function update_block_settings( array $settings ): array {
+		if ( ! isset( $settings['name'] ) ) {
+			return $settings;
+		}
+
 		// Enable blocks in email editor and set rendering callback.
 		if ( in_array( $settings['name'], self::ALLOWED_BLOCK_TYPES, true ) ) {
 			$settings['supports']['email']     = true;
@@ -238,6 +243,7 @@ class Initializer {
 		switch ( $block_name ) {
 			case 'core/heading':
 			case 'core/paragraph':
+			case 'core/preformatted':
 			case 'core/site-title':
 			case 'core/post-title':
 				$renderer = new Text();

@@ -14,7 +14,6 @@ use WP_Block;
  * a checkbox, or a link.
  */
 class GroupedProductItemSelector extends AbstractBlock {
-
 	use EnableBlockJsonAssetsTrait;
 
 	/**

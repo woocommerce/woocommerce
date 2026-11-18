@@ -66,7 +66,6 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		remove_action( 'add_attachment', array( $this, 'track_created_attachment' ) );
 		foreach ( array_unique( $this->created_attachment_ids ) as $attachment_id ) {
 			wp_delete_attachment( $attachment_id, true );
 		}
@@ -151,9 +150,6 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 0, $data['skipped'] );
 		$this->assertArrayHasKey( 'updated', $data );
 		$this->assertEquals( 0, count( $data['updated'] ) );
-
-		remove_all_filters( 'pre_http_request' );
-		remove_all_filters( 'woocommerce_product_csv_importer_args' );
 	}
 
 	/**

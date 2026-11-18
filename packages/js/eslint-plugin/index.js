@@ -43,5 +43,10 @@ module.exports = {
 	},
 	configs: {
 		recommended: dedupePlugins( require( './configs/recommended' ) ),
+		jest30: {
+			settings: {
+				jest: { version: 30 },
+			},
+		},
 	},
 };
