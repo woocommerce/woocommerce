@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\ImportExport\Product;
 
 use Automattic\WooCommerce\Internal\Admin\ImportExport\ImportLockedException;
+use Automattic\WooCommerce\Internal\ProductFeed\Utils\MemoryManager;
 use InvalidArgumentException;
 use WC_Product_CSV_Importer_Controller;
 use WP_Error;
@@ -50,6 +51,13 @@ final class ProductImporter {
 	private ImportPlaceholders $cleanup;
 
 	/**
+	 * Frees the in-memory caches between batches.
+	 *
+	 * @var MemoryManager
+	 */
+	private MemoryManager $memory_manager;
+
+	/**
 	 * Initialize the product importer with dependencies.
 	 *
 	 * @internal
@@ -57,11 +65,13 @@ final class ProductImporter {
 	 * @param MappingResolver    $mapping_resolver The mapping resolver.
 	 * @param ProductImportLock  $import_lock      The site-wide product import lock.
 	 * @param ImportPlaceholders $cleanup          The placeholder product cleanup routine.
+	 * @param MemoryManager      $memory_manager   Frees the in-memory caches between batches.
 	 */
-	final public function init( MappingResolver $mapping_resolver, ProductImportLock $import_lock, ImportPlaceholders $cleanup ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules
+	final public function init( MappingResolver $mapping_resolver, ProductImportLock $import_lock, ImportPlaceholders $cleanup, MemoryManager $memory_manager ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules
 		$this->mapping_resolver = $mapping_resolver;
 		$this->import_lock      = $import_lock;
 		$this->cleanup          = $cleanup;
+		$this->memory_manager   = $memory_manager;
 	}
 
 	/**
@@ -178,6 +188,8 @@ final class ProductImporter {
 				'errors'                 => array(),
 			);
 
+			$term_counting_deferred   = wp_defer_term_counting();
+			$cache_addition_suspended = wp_suspend_cache_addition();
 			wp_defer_term_counting( true );
 			wp_suspend_cache_addition( true );
 
@@ -204,11 +216,13 @@ final class ProductImporter {
 					if ( null !== $on_batch ) {
 						$on_batch( $position, $batch['results'] );
 					}
+
+					$this->memory_manager->flush_caches();
 				} while ( ! $batch['done'] );
 			} finally {
 				remove_action( 'woocommerce_product_import_before_import', $refresh_lock );
-				wp_suspend_cache_addition( false );
-				wp_defer_term_counting( false );
+				wp_suspend_cache_addition( $cache_addition_suspended );
+				wp_defer_term_counting( $term_counting_deferred );
 			}
 
 			$cursor = 0;

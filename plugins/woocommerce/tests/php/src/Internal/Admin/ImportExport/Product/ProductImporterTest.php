@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ImportPlaceholder
 use Automattic\WooCommerce\Internal\Admin\ImportExport\ImportLockedException;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ProductImporter;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\MappingResolver;
+use Automattic\WooCommerce\Internal\ProductFeed\Utils\MemoryManager;
 use WC_Unit_Test_Case;
 use WC_Unit_Tests_Bootstrap;
 
@@ -50,7 +51,7 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 		$this->import_lock = new ProductImportLock();
 
 		$this->sut = new ProductImporter();
-		$this->sut->init( new MappingResolver(), $this->import_lock, new ImportPlaceholders() );
+		$this->sut->init( new MappingResolver(), $this->import_lock, new ImportPlaceholders(), new MemoryManager() );
 	}
 
 	/**
@@ -158,6 +159,23 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( $before, $count() );
+	}
+
+	/**
+	 * @testdox Should leave term counting deferred and cache addition suspended when they were before the import.
+	 */
+	public function test_run_restores_the_previous_term_counting_and_cache_states(): void {
+		wp_defer_term_counting( true );
+		wp_suspend_cache_addition( true );
+
+		try {
+			$this->sut->run( $this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-STATE,State\n" ), array( 'mapping' => $this->get_simple_mapping() ) );
+			$this->assertTrue( wp_defer_term_counting() );
+			$this->assertTrue( wp_suspend_cache_addition() );
+		} finally {
+			wp_suspend_cache_addition( false );
+			wp_defer_term_counting( false );
+		}
 	}
 
 	/**
