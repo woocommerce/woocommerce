@@ -57,3 +57,14 @@ export function getAttributeFromTaxonomy( taxonomy: string ) {
 		return attribute.taxonomy === taxonomy;
 	} );
 }
+
+/**
+ * Get the ID of the store's current default filter attribute, or 0 if none.
+ */
+export function getDefaultAttributeId(): number {
+	const defaultAttribute = getSetting< AttributeSetting | undefined >(
+		'defaultProductFilterAttribute',
+		undefined
+	);
+	return parseInt( defaultAttribute?.attribute_id ?? '0', 10 ) || 0;
+}

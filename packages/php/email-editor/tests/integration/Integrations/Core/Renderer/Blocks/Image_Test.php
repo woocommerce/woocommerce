@@ -663,6 +663,166 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a cropped image passes its crop to the filter so an integration can serve a cropped file.
+	 */
+	public function testItPassesTheCropToTheCroppedImageUrlFilter(): void {
+		$parsed_image = $this->get_cropped_image_block( '4/3' );
+
+		$received = array();
+		$filter   = function ( $url, $aspect_ratio, $width, $height, $attrs ) use ( &$received ) {
+			$received = array(
+				'url'          => $url,
+				'aspect_ratio' => $aspect_ratio,
+				'width'        => $width,
+				'height'       => $height,
+				'attrs'        => $attrs,
+			);
+			return $url;
+		};
+		add_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter, 10, 5 );
+		$this->image_renderer->render( $parsed_image['innerHTML'], $parsed_image, $this->rendering_context );
+		remove_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter, 10 );
+
+		$this->assertSame( 'https://test.com/wp-content/uploads/2023/05/image.jpg', $received['url'] );
+		$this->assertSame( '4/3', $received['aspect_ratio'] );
+		$this->assertSame( 580, $received['width'] );
+		$this->assertSame( 435, $received['height'] );
+		$this->assertSame( 1, $received['attrs']['id'] );
+	}
+
+	/**
+	 * Test a server-cropped URL is used with the crop's dimensions.
+	 *
+	 * Gmail and Outlook ignore the saved aspect-ratio CSS, so the cropped file and its height
+	 * attribute are what make the crop show up there.
+	 */
+	public function testItUsesAServerCroppedUrlWithTheCropDimensions(): void {
+		$parsed_image = $this->get_cropped_image_block( '1' );
+
+		$filter = function ( $url, $aspect_ratio, $width, $height ) {
+			return $url . '?resize=' . $width . ',' . $height;
+		};
+		add_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter, 10, 4 );
+		$rendered = $this->image_renderer->render( $parsed_image['innerHTML'], $parsed_image, $this->rendering_context );
+		remove_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter, 10 );
+
+		$this->assertSame( 'https://test.com/wp-content/uploads/2023/05/image.jpg?resize=580,580', $this->get_image_attribute( $rendered, 'src' ) );
+		$this->assertSame( '580', $this->get_image_attribute( $rendered, 'width' ) );
+		$this->assertSame( '580', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test an uncropped URL leaves the image at its own ratio.
+	 *
+	 * Writing the crop height onto the original file would squash it in Outlook.
+	 */
+	public function testItKeepsTheImageRatioWhenNothingCropsTheUrl(): void {
+		$parsed_image = $this->get_cropped_image_block( '1' );
+
+		$rendered = $this->image_renderer->render( $parsed_image['innerHTML'], $parsed_image, $this->rendering_context );
+
+		$this->assertSame( 'https://test.com/wp-content/uploads/2023/05/image.jpg', $this->get_image_attribute( $rendered, 'src' ) );
+		$this->assertSame( '580', $this->get_image_attribute( $rendered, 'width' ) );
+		$this->assertSame( '467', $this->get_image_attribute( $rendered, 'height' ) );
+		$this->assertStringContainsString( 'aspect-ratio:1', (string) $this->get_image_attribute( $rendered, 'style' ) );
+	}
+
+	/**
+	 * Test the filter is skipped when the block doesn't ask for a cover crop.
+	 *
+	 * A contain scale letterboxes rather than crops, and an unparseable ratio has no size to crop to.
+	 *
+	 * @dataProvider uncroppable_attrs_provider
+	 *
+	 * @param array $attrs Block attributes to apply over the cropped block.
+	 */
+	public function testItSkipsTheFilterWhenTheBlockIsNotCroppable( array $attrs ): void {
+		$parsed_image          = $this->get_cropped_image_block( '1' );
+		$parsed_image['attrs'] = array_merge( $parsed_image['attrs'], $attrs );
+
+		$calls  = 0;
+		$filter = function ( $url ) use ( &$calls ) {
+			++$calls;
+			return $url . '?cropped';
+		};
+		add_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter );
+		$rendered = $this->image_renderer->render( $parsed_image['innerHTML'], $parsed_image, $this->rendering_context );
+		remove_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter );
+
+		$this->assertSame( 0, $calls );
+		$this->assertStringNotContainsString( '?cropped', $rendered );
+	}
+
+	/**
+	 * Block attributes that must not trigger a server crop.
+	 *
+	 * @return array<string, array{0: array}>
+	 */
+	public function uncroppable_attrs_provider(): array {
+		return array(
+			'contain scale'    => array( array( 'scale' => 'contain' ) ),
+			'invalid ratio'    => array( array( 'aspectRatio' => '1;color:red' ) ),
+			'non-string ratio' => array( array( 'aspectRatio' => array( '1' ) ) ),
+			'percentage width' => array( array( 'width' => '50%' ) ),
+			'em width'         => array( array( 'width' => '20em' ) ),
+			'rem width'        => array( array( 'width' => '30rem' ) ),
+			'viewport width'   => array( array( 'width' => '50vw' ) ),
+		);
+	}
+
+	/**
+	 * Test a filter returning something other than a URL leaves the image uncropped.
+	 *
+	 * @dataProvider invalid_filter_result_provider
+	 *
+	 * @param mixed $result Value the filter returns.
+	 */
+	public function testItIgnoresAnInvalidCroppedImageUrl( $result ): void {
+		$parsed_image = $this->get_cropped_image_block( '1' );
+
+		$filter = function () use ( $result ) {
+			return $result;
+		};
+		add_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter );
+		$rendered = $this->image_renderer->render( $parsed_image['innerHTML'], $parsed_image, $this->rendering_context );
+		remove_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter );
+
+		$this->assertSame( 'https://test.com/wp-content/uploads/2023/05/image.jpg', $this->get_image_attribute( $rendered, 'src' ) );
+		$this->assertSame( '467', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Filter results that are not a usable cropped URL.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function invalid_filter_result_provider(): array {
+		return array(
+			'null'            => array( null ),
+			'empty string'    => array( '' ),
+			'array'           => array( array( 'https://test.com/cropped.jpg' ) ),
+			'unsafe protocol' => array( 'javascript:alert(1)' ),
+		);
+	}
+
+	/**
+	 * Build an image block cropped from a 1003×807 file, the way core saves an Aspect ratio crop.
+	 *
+	 * @param string $aspect_ratio Saved aspect ratio.
+	 */
+	private function get_cropped_image_block( string $aspect_ratio ): array {
+		$parsed_image                         = $this->parsed_image;
+		$parsed_image['attrs']['aspectRatio'] = $aspect_ratio;
+		$parsed_image['attrs']['width']       = '580px';
+		$parsed_image['innerHTML']            = '
+			<figure class="wp-block-image size-full">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="1003" height="807" style="aspect-ratio:' . $aspect_ratio . ';object-fit:cover"/>
+			</figure>
+		';
+		return $parsed_image;
+	}
+
+	/**
 	 * Read an attribute off the rendered image.
 	 *
 	 * @param string $rendered Rendered block content.

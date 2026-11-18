@@ -1796,6 +1796,22 @@ importers:
 
   packages/js/extend-cart-checkout-block: {}
 
+  packages/js/extension-tooling:
+    dependencies:
+      uglify-js:
+        specifier: 3.19.3
+        version: 3.19.3
+    devDependencies:
+      '@woocommerce/eslint-config':
+        specifier: workspace:*
+        version: link:../../../tools/eslint-config
+      eslint:
+        specifier: catalog:tooling
+        version: 10.7.0(jiti@2.6.1)
+      webpack:
+        specifier: catalog:tooling
+        version: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(uglify-js@3.19.3)
+
   packages/js/internal-build:
     dependencies:
       '@automattic/color-studio':
@@ -40593,6 +40609,19 @@ snapshots:
       esbuild: 0.28.2
       postcss: 8.5.26
 
+  minimizer-webpack-plugin@5.13.1(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(uglify-js@3.19.3)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(uglify-js@3.19.3)):
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.31
+      jest-worker: 27.5.1
+      schema-utils: 4.8.1(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(uglify-js@3.19.3))
+      terser: 5.51.2
+      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(uglify-js@3.19.3)
+    optionalDependencies:
+      '@swc/core': 1.15.24
+      esbuild: 0.27.7
+      postcss: 8.5.26
+      uglify-js: 3.19.3
+
   minimizer-webpack-plugin@5.13.1(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
@@ -42987,6 +43016,15 @@ snapshots:
       ajv-formats: 2.1.1(ajv@8.20.0)
       ajv-keywords: 5.1.0(ajv@8.20.0)
 
+  schema-utils@4.8.1(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(uglify-js@3.19.3)):
+    dependencies:
+      '@types/json-schema': 7.0.15
+      ajv: 8.20.0
+      ajv-formats: 3.0.1(ajv@8.20.0)
+      ajv-keywords: 5.1.0(ajv@8.20.0)
+    optionalDependencies:
+      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(uglify-js@3.19.3)
+
   schema-utils@4.8.1(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)):
     dependencies:
       '@types/json-schema': 7.0.15
@@ -44998,6 +45036,43 @@ snapshots:
       webpack-sources: 3.6.0
     optionalDependencies:
       webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@5.2.7)(webpack@5.112.2)
+    transitivePeerDependencies:
+      - '@minify-html/node'
+      - '@napi-rs/image'
+      - '@swc/core'
+      - '@swc/css'
+      - '@swc/html'
+      - clean-css
+      - cssnano
+      - csso
+      - esbuild
+      - html-minifier-terser
+      - imagemin
+      - lightningcss
+      - postcss
+      - sharp
+      - svgo
+      - uglify-js
+
+  webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(uglify-js@3.19.3):
+    dependencies:
+      '@types/estree': 1.0.8
+      '@types/json-schema': 7.0.15
+      '@webassemblyjs/ast': 1.14.1
+      '@webassemblyjs/wasm-edit': 1.14.1
+      '@webassemblyjs/wasm-parser': 1.14.1
+      browserslist: 4.29.5
+      chrome-trace-event: 1.0.4
+      enhanced-resolve: 5.26.0
+      es-module-lexer: 2.3.2
+      events: 3.3.0
+      graceful-fs: 4.2.11
+      mime-db: 1.54.0
+      minimizer-webpack-plugin: 5.13.1(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(uglify-js@3.19.3)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(uglify-js@3.19.3))
+      schema-utils: 4.8.1(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(uglify-js@3.19.3))
+      tapable: 2.3.3
+      watchpack: 2.6.3
+      webpack-sources: 3.6.0
     transitivePeerDependencies:
       - '@minify-html/node'
       - '@napi-rs/image'

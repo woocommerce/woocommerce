@@ -27,26 +27,28 @@ $settings = array(
 	),
 
 	array(
-		'title'    => __( 'Prices entered with tax', 'woocommerce' ),
-		'id'       => 'woocommerce_prices_include_tax',
-		'default'  => 'no',
-		'type'     => 'radio',
-		'desc_tip' => __( 'This option is important as it will affect how you input prices. If you select "Yes", enter prices including your base location\'s tax rate, the baseline for tax calculations. Changing this option will not update existing products.', 'woocommerce' ),
-		'options'  => array(
+		'title'     => __( 'Prices entered with tax', 'woocommerce' ),
+		'id'        => 'woocommerce_prices_include_tax',
+		'abilities' => array( 'read' => true ),
+		'default'   => 'no',
+		'type'      => 'radio',
+		'desc_tip'  => __( 'This option is important as it will affect how you input prices. If you select "Yes", enter prices including your base location\'s tax rate, the baseline for tax calculations. Changing this option will not update existing products.', 'woocommerce' ),
+		'options'   => array(
 			'yes' => __( 'Yes, I will enter prices inclusive of tax', 'woocommerce' ),
 			'no'  => __( 'No, I will enter prices exclusive of tax', 'woocommerce' ),
 		),
 	),
 
 	array(
-		'title'    => __( 'Calculate tax based on', 'woocommerce' ),
-		'id'       => 'woocommerce_tax_based_on',
-		'desc'     => $base_location_estimate_text,
-		'desc_tip' => __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
-		'default'  => TaxBasedOn::SHIPPING,
-		'type'     => 'select',
-		'class'    => 'wc-enhanced-select',
-		'options'  => array(
+		'title'     => __( 'Calculate tax based on', 'woocommerce' ),
+		'id'        => 'woocommerce_tax_based_on',
+		'abilities' => array( 'read' => true ),
+		'desc'      => $base_location_estimate_text,
+		'desc_tip'  => __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
+		'default'   => TaxBasedOn::SHIPPING,
+		'type'      => 'select',
+		'class'     => 'wc-enhanced-select',
+		'options'   => array(
 			TaxBasedOn::SHIPPING => __( 'Customer shipping address', 'woocommerce' ),
 			TaxBasedOn::BILLING  => __( 'Customer billing address', 'woocommerce' ),
 			TaxBasedOn::BASE     => __( 'Shop base address', 'woocommerce' ),
@@ -60,29 +62,32 @@ $settings = array(
 	),
 
 	'shipping-tax-class'                 => array(
-		'title'    => __( 'Shipping tax class', 'woocommerce' ),
-		'desc'     => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
-		'id'       => 'woocommerce_shipping_tax_class',
-		'css'      => 'min-width:150px;',
-		'default'  => 'inherit',
-		'type'     => 'select',
-		'class'    => 'wc-enhanced-select',
-		'options'  => array( 'inherit' => __( 'Shipping tax class based on cart items', 'woocommerce' ) ) + wc_get_product_tax_class_options(),
-		'desc_tip' => true,
+		'title'     => __( 'Shipping tax class', 'woocommerce' ),
+		'desc'      => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
+		'id'        => 'woocommerce_shipping_tax_class',
+		'abilities' => array( 'read' => true ),
+		'css'       => 'min-width:150px;',
+		'default'   => 'inherit',
+		'type'      => 'select',
+		'class'     => 'wc-enhanced-select',
+		'options'   => array( 'inherit' => __( 'Shipping tax class based on cart items', 'woocommerce' ) ) + wc_get_product_tax_class_options(),
+		'desc_tip'  => true,
 	),
 
 	array(
-		'title'   => __( 'Rounding', 'woocommerce' ),
-		'desc'    => __( 'Round tax at subtotal level, instead of rounding per line', 'woocommerce' ),
-		'id'      => 'woocommerce_tax_round_at_subtotal',
-		'default' => 'no',
-		'type'    => 'checkbox',
+		'title'     => __( 'Rounding', 'woocommerce' ),
+		'desc'      => __( 'Round tax at subtotal level, instead of rounding per line', 'woocommerce' ),
+		'id'        => 'woocommerce_tax_round_at_subtotal',
+		'abilities' => array( 'read' => true ),
+		'default'   => 'no',
+		'type'      => 'checkbox',
 	),
 
 	array(
 		'title'     => __( 'Additional tax classes', 'woocommerce' ),
 		'desc_tip'  => __( 'List additional tax classes you need below (1 per line, e.g. Reduced Rates). These are in addition to "Standard rate" which exists by default.', 'woocommerce' ),
 		'id'        => 'woocommerce_tax_classes',
+		'abilities' => array( 'read' => true ),
 		'css'       => 'height: 65px;',
 		'type'      => 'textarea',
 		'default'   => '',
@@ -91,24 +96,26 @@ $settings = array(
 	),
 
 	array(
-		'title'   => __( 'Display prices in the shop', 'woocommerce' ),
-		'id'      => 'woocommerce_tax_display_shop',
-		'default' => TaxDisplayMode::EXCLUSIVE,
-		'type'    => 'select',
-		'class'   => 'wc-enhanced-select',
-		'options' => array(
+		'title'     => __( 'Display prices in the shop', 'woocommerce' ),
+		'id'        => 'woocommerce_tax_display_shop',
+		'abilities' => array( 'read' => true ),
+		'default'   => TaxDisplayMode::EXCLUSIVE,
+		'type'      => 'select',
+		'class'     => 'wc-enhanced-select',
+		'options'   => array(
 			TaxDisplayMode::INCLUSIVE => __( 'Including tax', 'woocommerce' ),
 			TaxDisplayMode::EXCLUSIVE => __( 'Excluding tax', 'woocommerce' ),
 		),
 	),
 
 	array(
-		'title'   => __( 'Display prices during cart and checkout', 'woocommerce' ),
-		'id'      => 'woocommerce_tax_display_cart',
-		'default' => TaxDisplayMode::EXCLUSIVE,
-		'type'    => 'select',
-		'class'   => 'wc-enhanced-select',
-		'options' => array(
+		'title'     => __( 'Display prices during cart and checkout', 'woocommerce' ),
+		'id'        => 'woocommerce_tax_display_cart',
+		'abilities' => array( 'read' => true ),
+		'default'   => TaxDisplayMode::EXCLUSIVE,
+		'type'      => 'select',
+		'class'     => 'wc-enhanced-select',
+		'options'   => array(
 			TaxDisplayMode::INCLUSIVE => __( 'Including tax', 'woocommerce' ),
 			TaxDisplayMode::EXCLUSIVE => __( 'Excluding tax', 'woocommerce' ),
 		),
@@ -120,6 +127,7 @@ $settings = array(
 	array(
 		'title'       => __( 'Price display suffix', 'woocommerce' ),
 		'id'          => 'woocommerce_price_display_suffix',
+		'abilities'   => array( 'read' => true ),
 		'default'     => '',
 		'placeholder' => __( 'N/A', 'woocommerce' ),
 		'type'        => 'text',
@@ -127,16 +135,17 @@ $settings = array(
 	),
 
 	array(
-		'title'    => __( 'Display tax totals', 'woocommerce' ),
-		'id'       => 'woocommerce_tax_total_display',
-		'default'  => 'itemized',
-		'type'     => 'select',
-		'class'    => 'wc-enhanced-select',
-		'options'  => array(
+		'title'     => __( 'Display tax totals', 'woocommerce' ),
+		'id'        => 'woocommerce_tax_total_display',
+		'abilities' => array( 'read' => true ),
+		'default'   => 'itemized',
+		'type'      => 'select',
+		'class'     => 'wc-enhanced-select',
+		'options'   => array(
 			'single'   => __( 'As a single total', 'woocommerce' ),
 			'itemized' => __( 'Itemized', 'woocommerce' ),
 		),
-		'autoload' => false,
+		'autoload'  => false,
 	),
 
 	array(
