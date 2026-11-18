@@ -97,22 +97,6 @@ $min-product-width: 150px;
 	container-type: inline-size;
 	container-name: carousel;
 
-	&.columns-1 {
-		scroll-padding: 0 7.5%;
-
-		.wc-block-product {
-			scroll-snap-align: start;
-		}
-	}
-
-	&.columns-2 {
-		scroll-padding: 0 6%;
-
-		.wc-block-product {
-			scroll-snap-align: start;
-		}
-	}
-
 	.wc-block-product {
 		box-sizing: border-box;
 		// Padding to prevent focus outline from being clipped.
@@ -149,9 +133,27 @@ $min-product-width: 150px;
 		}
 	}
 
+	&.columns-1 .wc-block-product,
+	&.columns-2 .wc-block-product,
+	&.columns-4 .wc-block-product,
+	&.columns-6 .wc-block-product {
+		scroll-snap-align: start;
+	}
+	&.columns-1 {
+		scroll-padding: 0 7.5%;
+	}
+	&.columns-2 {
+		scroll-padding: 0 6%;
+	}
+	&.columns-4 {
+		scroll-padding: 0 4%;
+	}
+	&.columns-6 {
+		scroll-padding: 0 3%;
+	}
+
 	// Fixed column count. These match the responsive widths above, so the next
 	// product still peeks into view. Blocks without a columns class are unchanged.
-	// Keep the 1–6 range in sync with MIN_CAROUSEL_COLUMNS / MAX_CAROUSEL_COLUMNS.
 	$carousel-column-widths: (
 		1: calc(85% / 1),
 		2: calc(85% / 2),
