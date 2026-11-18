@@ -62,10 +62,7 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	);
 
 	return (
-		<div
-			className="woocommerce-fulfillment-importer-step woocommerce-fulfillment-importer-step--import"
-			aria-busy={ isRunning }
-		>
+		<div className="woocommerce-fulfillment-importer-step woocommerce-fulfillment-importer-step--import">
 			<Card.Root className="woocommerce-fulfillment-importer-step__card">
 				<Card.Content>
 					<Stack

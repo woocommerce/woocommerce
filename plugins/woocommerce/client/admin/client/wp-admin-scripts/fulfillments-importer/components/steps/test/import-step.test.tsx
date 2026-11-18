@@ -159,6 +159,20 @@ describe( 'ImportStep', () => {
 		);
 	} );
 
+	it( 'keeps the live progress regions outside a busy region while the loop runs', () => {
+		// Screen readers may hold back announcements inside a busy region.
+		renderStep( { processed: 10 } );
+
+		expect(
+			screen.getByRole( 'status' ).closest( '[aria-busy="true"]' )
+		).toBeNull();
+		expect(
+			document
+				.querySelector( '.woocommerce-fulfillment-importer-counts' )
+				?.closest( '[aria-busy="true"]' )
+		).toBeNull();
+	} );
+
 	it( 'shows all five counters, zeros included', () => {
 		renderStep( {
 			counts: {
