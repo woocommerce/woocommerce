@@ -48,6 +48,20 @@ class CartExtensions extends ControllerTestCase {
 			)
 		);
 	}
+
+	/**
+	 * Destroy the session and reset its customer, which create_pending_order_with_shipping() fills in.
+	 */
+	protected function tearDown(): void {
+		try {
+			WC()->session->destroy_session();
+			WC()->customer = null;
+			WC()->initialize_cart();
+		} finally {
+			parent::tearDown();
+		}
+	}
+
 	/**
 	 * Test getting cart with invalid namespace.
 	 */
@@ -104,8 +118,10 @@ class CartExtensions extends ControllerTestCase {
 			)
 		);
 
+		$syncs    = did_action( 'woocommerce_store_api_cart_update_order_from_request' );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( $syncs, did_action( 'woocommerce_store_api_cart_update_order_from_request' ), 'A rejected cart update must not sync the cart to the pending order.' );
 		$this->assertPendingOrderRetainsShipping( $order );
 	}
 
@@ -146,8 +162,10 @@ class CartExtensions extends ControllerTestCase {
 				)
 			);
 
+			$syncs    = did_action( 'woocommerce_store_api_cart_update_order_from_request' );
 			$response = rest_get_server()->dispatch( $request );
 			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( $syncs + 1, did_action( 'woocommerce_store_api_cart_update_order_from_request' ), 'The cart update must reach the order sync, or the shipping assertions below prove nothing.' );
 			$this->assertFalse( wc()->cart->has_calculated_shipping() );
 			$this->assertSame( array(), wc()->shipping()->get_packages() );
 		} finally {
@@ -177,8 +195,23 @@ class CartExtensions extends ControllerTestCase {
 	 * @return \WC_Order
 	 */
 	private function create_pending_order_with_shipping() {
+		// Give the session customer and the order the same address and mark the order as a Store API order, so
+		// is_valid_draft_order() reuses it and a successful cart update reaches update_order_from_cart(). An order with no
+		// address and a blank created_via counts as awaiting its first address, and cart_updated() would skip the sync.
+		$address = array(
+			'country'  => 'US',
+			'state'    => 'CA',
+			'postcode' => '90210',
+			'city'     => 'Los Angeles',
+		);
+		wc()->customer->set_billing_location( $address['country'], $address['state'], $address['postcode'], $address['city'] );
+		wc()->customer->set_shipping_location( $address['country'], $address['state'], $address['postcode'], $address['city'] );
+
 		$order = wc_create_order();
 		$order->add_product( $this->product, 1 );
+		$order->set_billing_address( $address );
+		$order->set_shipping_address( $address );
+		$order->set_created_via( 'store-api' );
 
 		$shipping_item = new \WC_Order_Item_Shipping();
 		$shipping_item->set_method_title( 'Flat rate' );
