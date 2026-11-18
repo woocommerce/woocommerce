@@ -69,7 +69,7 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should say that the callback ran when the output is invalid, so the caller does not retry.
+	 * @testdox Should say that the callback ran when the output is invalid, so the caller checks the state before a retry.
 	 */
 	public function test_invalid_output_says_the_callback_ran(): void {
 		$runs    = 0;
@@ -93,7 +93,7 @@ class AbilityTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $runs );
 		$this->assertWPError( $result );
 		$this->assertSame( 'ability_invalid_output', $result->get_error_code() );
-		$this->assertStringContainsString( 'Do not run it again', $result->get_error_message() );
+		$this->assertStringContainsString( 'Check the current state before you run it again', $result->get_error_message() );
 		$this->assertTrue( $result->get_error_data()['callback_executed'] );
 	}
 

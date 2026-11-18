@@ -123,10 +123,10 @@ class Ability extends \WP_Ability {
 	}
 
 	/**
-	 * Validate the output, and tell the caller not to retry when it is invalid.
+	 * Validate the output, and tell the caller that the ability ran when the output is invalid.
 	 *
-	 * WordPress validates the output after the execute callback ran, so any change
-	 * the callback made is already saved. The message says so, because some callers,
+	 * WordPress validates the output after the execute callback ran, so the callback
+	 * may already have saved changes. The message says so, because some callers,
 	 * such as MCP clients, receive only the message.
 	 *
 	 * @since 11.4.0
@@ -146,7 +146,7 @@ class Ability extends \WP_Ability {
 			$is_valid->get_error_code(),
 			sprintf(
 				/* translators: %s: error message. */
-				__( '%s The ability ran and its changes are saved. Do not run it again with the same input.', 'woocommerce' ),
+				__( '%s The ability ran, so its changes may already be saved. Check the current state before you run it again.', 'woocommerce' ),
 				$is_valid->get_error_message()
 			),
 			array_merge( is_array( $data ) ? $data : array(), array( 'callback_executed' => true ) )
