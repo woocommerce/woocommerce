@@ -180,6 +180,13 @@ class ContractCustomerReadTest extends EngineIntegrationTestCase {
 		$this->assertSame( array(), $this->sut->find_by_customer_id( 19, array( 'extension_slug' => 'Engine-Tests' ) ) );
 	}
 
+	public function test_a_non_string_extension_slug_matches_nothing(): void {
+		$this->seed( 22, ContractStatus::ACTIVE );
+
+		$this->assertSame( array(), $this->sut->find_by_customer_id( 22, array( 'extension_slug' => null ) ) );
+		$this->assertSame( array(), $this->sut->find_by_customer_id( 22, array( 'extension_slug' => array( 'engine-tests' ) ) ) );
+	}
+
 	public function test_lists_every_extension_without_an_extension_slug(): void {
 		$mine    = $this->seed( 21, ContractStatus::ACTIVE );
 		$foreign = $this->seed( 21, ContractStatus::ACTIVE, 'other-extension' );

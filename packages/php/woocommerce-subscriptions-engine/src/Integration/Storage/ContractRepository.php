@@ -1238,7 +1238,8 @@ final class ContractRepository {
 	 *                                   ({@see ContractStatus}). Unregistered values are dropped;
 	 *                                   ignored when none remain.
 	 *     @type string $extension_slug Optional owner filter: only contracts of this extension
-	 *                                  (exact, case-sensitive match). Absent: every extension.
+	 *                                  (binary, case-sensitive match, as the lock and write
+	 *                                  guards use). Absent: every extension.
 	 * }
 	 * @return array<int, Contract> Contracts the customer owns, newest first.
 	 */
@@ -1271,9 +1272,11 @@ final class ContractRepository {
 			$where .= ' AND status IN (' . implode( ', ', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
 			$params = array_merge( $params, $statuses );
 		}
-		if ( isset( $args['extension_slug'] ) && is_string( $args['extension_slug'] ) ) {
+		// A present key always applies, so a non-string coerces to '' and matches nothing
+		// (no contract can own an empty slug) rather than widening to every owner.
+		if ( array_key_exists( 'extension_slug', $args ) ) {
 			$where   .= ' AND ' . self::OWNER_MATCH;
-			$params[] = $args['extension_slug'];
+			$params[] = Coercion::coerce_string( $args['extension_slug'] );
 		}
 		$params[] = $limit;
 		$params[] = $offset;

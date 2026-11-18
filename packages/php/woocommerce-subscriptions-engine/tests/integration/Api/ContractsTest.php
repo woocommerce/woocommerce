@@ -2949,6 +2949,28 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox list_for_customer combines the status and owner filters.
+	 */
+	public function test_list_for_customer_combines_the_status_and_extension_slug_filters(): void {
+		$this->seed_for_customer( 49 );
+		$held = $this->seed_for_customer( 49, ContractStatus::ON_HOLD );
+		$this->seed_for_customer( 49, ContractStatus::ON_HOLD, 'other-extension' );
+
+		$views = Contracts::list_for_customer(
+			49,
+			20,
+			0,
+			array(
+				'status'         => ContractStatus::ON_HOLD,
+				'extension_slug' => 'engine-tests',
+			)
+		);
+
+		$this->assertCount( 1, $views );
+		$this->assertSame( $held, $views[0]->get_id() );
+	}
+
+	/**
 	 * @testdox list_for_customer refuses an invalid extension_slug.
 	 * @dataProvider provide_invalid_list_for_customer_slugs
 	 *
@@ -2969,6 +2991,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function provide_invalid_list_for_customer_slugs(): array {
 		return array(
+			'null'         => array( null, ValidationErrorCode::REQUIRED ),
 			'empty string' => array( '', ValidationErrorCode::REQUIRED ),
 			'integer'      => array( 5, ValidationErrorCode::INVALID_TYPE ),
 			'array'        => array( array( 'engine-tests' ), ValidationErrorCode::INVALID_TYPE ),
