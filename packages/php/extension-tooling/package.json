@@ -4,10 +4,15 @@
 	"description": "Jetpack Changelogger formatter for WooCommerce extensions.",
 	"scripts": {
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"lint": "composer install --no-interaction --prefer-dist && composer exec -- phpcs -s -p",
 		"test:php": "composer install --no-interaction --prefer-dist && composer test"
 	},
 	"config": {
 		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": [ "package.json", "composer.*", "phpcs.xml", "src/**", "tests/**" ]
+			},
 			"tests": [
 				{
 					"name": "PHP: extension changelog formatter",

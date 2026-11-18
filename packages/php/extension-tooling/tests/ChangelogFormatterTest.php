@@ -1,14 +1,15 @@
 <?php
-declare( strict_types = 1 );
-
 /**
  * Changelog formatter tests.
  *
  * @package WooCommerce\ExtensionChangelogger
  */
 
+declare( strict_types = 1 );
+
 use Automattic\Jetpack\Changelog\Changelog;
 use PHPUnit\Framework\TestCase;
+use Automattic\WooCommerce\ExtensionTools\Changelogger\Changelog_Entry;
 use Automattic\WooCommerce\ExtensionTools\Changelogger\Changelog_Formatter;
 
 /**
@@ -462,10 +463,10 @@ class ChangelogFormatterTest extends TestCase {
 	 */
 	public function provide_ambiguous_continuations() {
 		return array(
-			'bullet'         => array( '* Another change.' ),
-			'heading'        => array( '= 1.5.0 - 2026-09-16 =' ),
-			'near heading'   => array( '= Another line.' ),
-			'legacy heading' => array( '2026.09.01  - version 1.1.0' ),
+			'bullet'            => array( '* Another change.' ),
+			'heading'           => array( '= 1.5.0 - 2026-09-16 =' ),
+			'near heading'      => array( '= Another line.' ),
+			'legacy heading'    => array( '2026.09.01  - version 1.1.0' ),
 			'uppercase heading' => array( '2026.09.01 - Version 1.1.0' ),
 		);
 	}
@@ -476,8 +477,10 @@ class ChangelogFormatterTest extends TestCase {
 	public function test_setting_a_release_date_replaces_the_parsed_unreleased_heading() {
 		$original  = "*** Title ***\n\n= 1.5.2 - unreleased =\n* Fix - Kept this change.\n";
 		$changelog = $this->formatter->parse( $original );
-		$this->assertSame( 'unreleased', $changelog->getLatestEntry()->getRawTimestamp() );
-		$changelog->getLatestEntry()->setTimestamp( new DateTime( '2026-09-17', new DateTimeZone( 'UTC' ) ) );
+		$entry     = $changelog->getLatestEntry();
+		$this->assertInstanceOf( Changelog_Entry::class, $entry );
+		$this->assertSame( 'unreleased', $entry->getRawTimestamp() );
+		$entry->setTimestamp( new DateTime( '2026-09-17', new DateTimeZone( 'UTC' ) ) );
 
 		$this->assertSame(
 			str_replace( 'unreleased', '2026-09-17', $original ),
@@ -515,19 +518,19 @@ class ChangelogFormatterTest extends TestCase {
 	 */
 	public function provide_malformed_headings() {
 		return array(
-			'no date'                         => array( '= 1.1.0 =' ),
-			'indented near heading'           => array( '  = Another line.' ),
-			'no separator'                    => array( '= 1.1.0 2026-09-01 =' ),
-			'unpadded date'                   => array( '= 1.1.0 - 2026-9-1 =' ),
-			'dotted date'                     => array( '= 1.1.0 - 2026.09.01 =' ),
-			'placeholder date'                => array( '= 1.1.0 - 2026-xx-xx =' ),
-			'impossible date'                 => array( '= 1.1.0 - 2026-02-30 =' ),
-			'placeholder version'             => array( "= {$this->placeholder_version()} - 2026-09-01 =" ),
-			'placeholder version, unreleased' => array( "= {$this->placeholder_version()} - unreleased =" ),
-			'dotted WooCommerce.com heading'  => array( '2026.09.01 - version 1.1.0' ),
+			'no date'                           => array( '= 1.1.0 =' ),
+			'indented near heading'             => array( '  = Another line.' ),
+			'no separator'                      => array( '= 1.1.0 2026-09-01 =' ),
+			'unpadded date'                     => array( '= 1.1.0 - 2026-9-1 =' ),
+			'dotted date'                       => array( '= 1.1.0 - 2026.09.01 =' ),
+			'placeholder date'                  => array( '= 1.1.0 - 2026-xx-xx =' ),
+			'impossible date'                   => array( '= 1.1.0 - 2026-02-30 =' ),
+			'placeholder version'               => array( "= {$this->placeholder_version()} - 2026-09-01 =" ),
+			'placeholder version, unreleased'   => array( "= {$this->placeholder_version()} - unreleased =" ),
+			'dotted WooCommerce.com heading'    => array( '2026.09.01 - version 1.1.0' ),
 			'uppercase WooCommerce.com heading' => array( '2016.08.03 - Version 2.0.2' ),
-			'dashed WooCommerce.com heading'  => array( '2026-09-01 - version 1.1.0' ),
-			'spaced WooCommerce.com heading'  => array( '2026.09.01  - version 1.1.0' ),
+			'dashed WooCommerce.com heading'    => array( '2026-09-01 - version 1.1.0' ),
+			'spaced WooCommerce.com heading'    => array( '2026.09.01  - version 1.1.0' ),
 		);
 	}
 }

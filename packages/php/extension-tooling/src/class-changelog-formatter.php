@@ -124,7 +124,7 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 		$first_line_tail = '';
 
 		foreach ( explode( "\n", $changelog ) as $raw_line ) {
-			$line = trim( $raw_line );
+			$line    = trim( $raw_line );
 			$heading = $this->parse_heading( $line );
 
 			if ( null !== $heading ) {
@@ -323,6 +323,7 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 	 * @param string $subheading Change type.
 	 * @param string $content Change content.
 	 * @return string Empty string if there is nothing to write.
+	 * @throws InvalidArgumentException If a continuation looks like a separate changelog entry.
 	 */
 	private function format_change( $subheading, $content ) {
 		$subheading = trim( (string) $subheading );
