@@ -43,6 +43,7 @@ import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_TEMPLATE,
 	getCarouselColumns,
+	MAX_CAROUSEL_COLUMNS,
 } from './constants';
 import blockJson from './block.json';
 import {
@@ -541,6 +542,28 @@ export function sanitizeDisplayLayout(
 		columns: displayLayout?.columns ?? defaults.columns,
 		shrinkColumns: displayLayout?.shrinkColumns ?? defaults.shrinkColumns,
 	};
+}
+
+/**
+ * Display layout after the inspector layout control changes.
+ * Carousel starts at six columns with Responsive on, which matches the
+ * carousel widths from before a column count was saved.
+ */
+export function getDisplayLayoutForType(
+	nextType: LayoutOptions,
+	current?: Partial< ProductCollectionDisplayLayout > | null
+): ProductCollectionDisplayLayout {
+	return sanitizeDisplayLayout( {
+		...( nextType === LayoutOptions.GRID ? getDefaultDisplayLayout() : {} ),
+		...current,
+		type: nextType,
+		...( nextType === LayoutOptions.CAROUSEL
+			? {
+					carouselColumns: MAX_CAROUSEL_COLUMNS,
+					shrinkColumns: true,
+				}
+			: {} ),
+	} );
 }
 
 export const getDefaultSettings = (
