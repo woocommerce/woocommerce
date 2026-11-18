@@ -256,7 +256,6 @@ describe( 'useChunkedImport', () => {
 		}
 	);
 
-
 	it( 'does nothing without a session token', async () => {
 		const { result } = renderImport( { token: null } );
 

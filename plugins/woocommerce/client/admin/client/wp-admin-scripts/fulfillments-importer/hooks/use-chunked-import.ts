@@ -26,14 +26,9 @@ export interface UseChunkedImportArgs {
 	onError?: ( message: string, sessionEnded: boolean ) => void;
 }
 
-const FALLBACK_CHUNK_SIZE = 200;
-// The highest limit the /run endpoint accepts; it must match that endpoint.
-const MAX_CHUNK_SIZE = 1000;
 // Waits before resending a chunk the server refused without running it.
 const RETRY_BACKOFFS_MS = [ 1000, 3000, 6000 ];
 
-const CHUNK_IN_PROGRESS_CODE =
-	'woocommerce_fulfillments_import_chunk_in_progress';
 const TOKEN_INVALID_CODE = 'woocommerce_fulfillments_import_token_invalid';
 
 /**
@@ -46,26 +41,18 @@ const SESSION_ENDED_CODES = [
 ];
 
 /**
- * Coerce a chunk size to an integer the /run endpoint accepts, falling back
- * to the default when the value is missing or not a positive number. Accepts
- * numeric strings because wp_localize_script casts scalars to strings.
- */
-function normalizeChunkSize( value: unknown ): number {
-	const size = Number( value );
-	if ( Number.isFinite( size ) && size > 0 ) {
-		return Math.min( MAX_CHUNK_SIZE, Math.max( 1, Math.floor( size ) ) );
-	}
-	return FALLBACK_CHUNK_SIZE;
-}
-
-/**
- * Reads the chunk size from the localized settings. Nothing sets it yet, so
- * the default applies until the PHP side passes the size /run uses.
+ * Reads the chunk size from the localized settings as an integer the /run
+ * endpoint accepts. Nothing sets it yet, so the default of 200 applies until
+ * the PHP side passes the size /run uses. Accepts numeric strings because
+ * wp_localize_script casts scalars to strings.
  */
 function resolvedChunkSize(): number {
-	return normalizeChunkSize(
-		window.wcFulfillmentsImporterSettings?.chunkSize
-	);
+	const size = Number( window.wcFulfillmentsImporterSettings?.chunkSize );
+	if ( Number.isFinite( size ) && size > 0 ) {
+		// 1,000 is the highest limit the /run endpoint accepts.
+		return Math.min( 1000, Math.max( 1, Math.floor( size ) ) );
+	}
+	return 200;
 }
 
 function delay( ms: number, signal: AbortSignal ): Promise< void > {
@@ -95,7 +82,9 @@ function isSafeToResend( error: unknown ): boolean {
 	const status = errorStatus( error );
 	return (
 		status === 429 ||
-		( status === 409 && errorCode( error ) === CHUNK_IN_PROGRESS_CODE )
+		( status === 409 &&
+			errorCode( error ) ===
+				'woocommerce_fulfillments_import_chunk_in_progress' )
 	);
 }
 
