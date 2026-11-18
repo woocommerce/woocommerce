@@ -120,7 +120,8 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		if ( $denied ) {
 			return new \WP_Error(
 				'woocommerce_ability_settings_not_writable',
-				__( 'These settings cannot be changed.', 'woocommerce' ),
+				/* translators: %s: comma-separated setting IDs. */
+				sprintf( __( 'These settings cannot be changed: %s. Nothing was saved.', 'woocommerce' ), implode( ', ', $denied ) ),
 				array(
 					'status' => 403,
 					'ids'    => $denied,
@@ -136,9 +137,21 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 			}
 		}
 		if ( $expected ) {
+			$messages = array();
+			$in_list  = array_keys( $expected, 'values', true );
+			$single   = array_keys( $expected, 'value', true );
+			if ( $in_list ) {
+				/* translators: %s: comma-separated setting IDs. */
+				$messages[] = sprintf( __( 'Send these settings as a list in values: %s.', 'woocommerce' ), implode( ', ', $in_list ) );
+			}
+			if ( $single ) {
+				/* translators: %s: comma-separated setting IDs. */
+				$messages[] = sprintf( __( 'Send these settings in value, not values: %s.', 'woocommerce' ), implode( ', ', $single ) );
+			}
+			$messages[] = __( 'Nothing was saved.', 'woocommerce' );
 			return new \WP_Error(
 				'woocommerce_ability_settings_invalid_value',
-				__( 'Send multiselect and country list settings in values, and every other setting in value. Nothing was saved.', 'woocommerce' ),
+				implode( ' ', $messages ),
 				array(
 					'status'   => 400,
 					'ids'      => array_keys( $expected ),
@@ -171,7 +184,8 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		if ( $conflicts ) {
 			return new \WP_Error(
 				'woocommerce_ability_settings_page_conflict',
-				__( 'Cart, checkout and My account each need their own page, and terms cannot use the checkout page. Nothing was saved.', 'woocommerce' ),
+				/* translators: %s: comma-separated setting IDs. */
+				sprintf( __( 'These settings would share a page: %s. Cart, checkout and My account each need their own page, and terms cannot use the checkout page. Nothing was saved.', 'woocommerce' ), implode( ', ', $conflicts ) ),
 				array(
 					'status' => 400,
 					'ids'    => $conflicts,
@@ -402,7 +416,7 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 	}
 
 	/**
-	 * Lists every refused ID so a caller can correct the whole batch.
+	 * Names every refused ID in the message too, since MCP clients receive only the message.
 	 *
 	 * @param string[] $ids Setting IDs with invalid values.
 	 * @return \WP_Error
@@ -410,7 +424,8 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 	private static function invalid_value_error( array $ids ): \WP_Error {
 		return new \WP_Error(
 			'woocommerce_ability_settings_invalid_value',
-			__( 'These settings have invalid values. Nothing was saved.', 'woocommerce' ),
+			/* translators: %s: comma-separated setting IDs. */
+			sprintf( __( 'These settings have invalid values: %s. Nothing was saved.', 'woocommerce' ), implode( ', ', $ids ) ),
 			array(
 				'status' => 400,
 				'ids'    => $ids,

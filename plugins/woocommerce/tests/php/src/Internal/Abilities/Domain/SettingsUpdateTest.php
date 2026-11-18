@@ -361,6 +361,8 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( $code, $result->get_error_code() );
 		$this->assertSame( array( $bad_id ), $result->get_error_data()['ids'] );
+		$this->assertStringContainsString( $bad_id, $result->get_error_message() );
+		$this->assertStringNotContainsString( 'woocommerce_currency', $result->get_error_message() );
 		$this->assertSame( 'USD', get_option( 'woocommerce_currency' ) );
 		$this->assertSame( 'Berlin', get_option( 'woocommerce_store_city' ) );
 		$this->assertSame( 'DE', get_option( 'woocommerce_default_country' ) );
@@ -421,6 +423,8 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_ability_settings_invalid_value', $result->get_error_code() );
 		$this->assertSame( array( 'extension_field' => $expected ), $result->get_error_data()['expected'] );
+		$this->assertStringContainsString( "in {$expected}", $result->get_error_message() );
+		$this->assertStringContainsString( 'extension_field', $result->get_error_message() );
 		$this->assertSame( 'stored', get_option( 'extension_field' ) );
 	}
 
