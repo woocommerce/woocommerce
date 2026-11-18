@@ -126,7 +126,7 @@ class WC_Admin_Webhooks {
 			if ( wc_is_webhook_valid_topic( $topic ) ) {
 				$webhook->set_topic( $topic );
 			} else {
-				$errors[] = __( 'Webhook topic unknown. Please select a valid topic.', 'woocommerce' );
+				$errors[] = __( 'This webhook topic is not supported. Choose a different topic.', 'woocommerce' );
 			}
 		}
 
