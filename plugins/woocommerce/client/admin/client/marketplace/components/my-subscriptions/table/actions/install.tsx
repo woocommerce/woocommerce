@@ -16,6 +16,7 @@ import {
 	addNotice,
 	getInstallUrl,
 	getRequirementErrorNotice,
+	getWpAjaxErrorData,
 	installProduct,
 	removeNotice,
 } from '../../../../utils/functions';
@@ -116,7 +117,7 @@ export default function Install( props: InstallProps ) {
 			product_id: props.subscription.product_id,
 			product_current_version: props.subscription.version,
 			error_message: error?.data?.message,
-			error_code: error?.data?.code,
+			error_code: getWpAjaxErrorData( error ).code || '',
 		} );
 	};
 
