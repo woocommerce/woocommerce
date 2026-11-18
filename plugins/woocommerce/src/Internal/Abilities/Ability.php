@@ -123,6 +123,37 @@ class Ability extends \WP_Ability {
 	}
 
 	/**
+	 * Validate the output, and tell the caller not to retry when it is invalid.
+	 *
+	 * WordPress validates the output after the execute callback ran, so any change
+	 * the callback made is already saved. The message says so, because some callers,
+	 * such as MCP clients, receive only the message.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $output The output of the execute callback.
+	 * @return true|\WP_Error True when the output is valid, or a WP_Error.
+	 */
+	protected function validate_output( $output ) {
+		$is_valid = parent::validate_output( $output );
+		if ( ! is_wp_error( $is_valid ) ) {
+			return $is_valid;
+		}
+
+		$data = $is_valid->get_error_data();
+
+		return new \WP_Error(
+			$is_valid->get_error_code(),
+			sprintf(
+				/* translators: %s: error message. */
+				__( '%s The ability ran and its changes are saved. Do not run it again with the same input.', 'woocommerce' ),
+				$is_valid->get_error_message()
+			),
+			array_merge( is_array( $data ) ? $data : array(), array( 'callback_executed' => true ) )
+		);
+	}
+
+	/**
 	 * Get the first WP_Error in a converted value.
 	 *
 	 * @param mixed $value Converted value.

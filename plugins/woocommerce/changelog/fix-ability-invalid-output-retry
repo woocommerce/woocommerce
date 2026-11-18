@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Tell callers, such as AI agents, not to run an ability again when its output is invalid, because its changes are saved.
