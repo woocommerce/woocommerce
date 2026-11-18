@@ -722,8 +722,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$list[] = array(
 				'id'    => $item['id'],
 				'tier'  => $tiers[ $item['tier'] ],
-				// Required issues are store-wide, so the badge says so where product issues give their share of sales. Same intent as Required.
-				'badge' => 0 === $item['tier'] ? self::badge_data( array( self::required_badge()[0], __( 'Whole store', 'woocommerce' ) ) ) : null,
+				// The same Required badge as the AI shopping Setup checklist, so this tier stands out.
+				'badge' => 0 === $item['tier'] ? self::badge_data( self::required_badge() ) : null,
 				'title' => $item['title'],
 				'why'   => $why,
 				'link'  => $item['link'],

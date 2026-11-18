@@ -780,7 +780,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'The required step, then 3 issues: the not listable checks by share, then GTIN, a gap, despite its larger share; the title, a smaller gap, is left out'
 		);
 		$this->assertSame( array( 'Required for AI shopping', 'Needed to list products', 'Needed to list products', 'Helps shoppers find products' ), array_column( $fix_first['items'], 'tier' ) );
-		$this->assertSame( array( 'Whole store', null, null, null ), array_map( static fn( array $item ): ?string => $item['badge']['text'] ?? null, $fix_first['items'] ), 'Only the Required heading has a badge' );
+		$this->assertSame( array( 'Required', null, null, null ), array_map( static fn( array $item ): ?string => $item['badge']['text'] ?? null, $fix_first['items'] ), 'Only the Required heading has a badge' );
 		$this->assertArrayNotHasKey( 'impact', $fix_first['items'][1], 'The share of sales is in the line, so no badge repeats it' );
 		$this->assertSame( '18% of your sales in the last 90 days. AI shopping apps need a main image to list a product.', $fix_first['items'][1]['why'], 'The first share says over which period, then why the issue matters' );
 		$this->assertSame( '5% of your sales. ChatGPT only lists products that have a brand. In Google and Copilot, a brand makes products easier to find.', $fix_first['items'][2]['why'], 'The next ones give only the share' );
