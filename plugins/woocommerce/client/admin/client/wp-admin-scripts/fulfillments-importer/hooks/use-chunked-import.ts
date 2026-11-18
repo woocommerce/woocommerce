@@ -140,6 +140,11 @@ function isChunkResponse( response: unknown ): response is RunChunkResponse {
  * chunk may already be written and sending it again could repeat customer
  * emails. Calling run() again, or mounting the hook again with the stored
  * progress, resumes from the last offset the server reported.
+ *
+ * The caller must keep the hook mounted while a request is in flight. An
+ * unmount aborts that request without an error, so a later mount sends the
+ * chunk again and treats its outcome as known, although the server may have
+ * written it and ended the session.
  */
 export function useChunkedImport( args: UseChunkedImportArgs ) {
 	const {
