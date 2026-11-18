@@ -34,15 +34,6 @@ const RETRY_BACKOFFS_MS = [ 1000, 3000, 6000 ];
 const TOKEN_INVALID_CODE = 'woocommerce_fulfillments_import_token_invalid';
 
 /**
- * Codes the /run endpoint returns once the import session no longer exists.
- * Sending the chunk again cannot succeed; the wizard has to start over.
- */
-const SESSION_ENDED_CODES = [
-	TOKEN_INVALID_CODE,
-	'woocommerce_fulfillments_import_file_changed',
-];
-
-/**
  * Reads the chunk size from the localized settings as an integer the /run
  * endpoint accepts. Nothing sets it yet, so the default of 200 applies until
  * the PHP side passes the size /run uses. Accepts numeric strings because
@@ -97,22 +88,22 @@ function hasUnknownOutcome( error: unknown ): boolean {
 	return status === null || status >= 500;
 }
 
+/**
+ * True for the codes the /run endpoint returns once the import session no
+ * longer exists. Sending the chunk again cannot succeed; the wizard has to
+ * start over.
+ */
 function isSessionEnded( error: unknown ): boolean {
 	const code = errorCode( error );
-	return code !== null && SESSION_ENDED_CODES.includes( code );
+	return (
+		code === TOKEN_INVALID_CODE ||
+		code === 'woocommerce_fulfillments_import_file_changed'
+	);
 }
 
 function isCount( value: unknown ): value is number {
 	return typeof value === 'number' && Number.isInteger( value ) && value >= 0;
 }
-
-const COUNT_KEYS = [
-	'created',
-	'updated',
-	'skipped',
-	'failed',
-	'notified',
-] as const;
 
 function isChunkResponse( response: unknown ): response is RunChunkResponse {
 	if ( ! response || typeof response !== 'object' ) {
@@ -124,7 +115,11 @@ function isChunkResponse( response: unknown ): response is RunChunkResponse {
 		typeof done === 'boolean' &&
 		!! counts &&
 		typeof counts === 'object' &&
-		COUNT_KEYS.every( ( key ) => isCount( counts[ key ] ) )
+		isCount( counts.created ) &&
+		isCount( counts.updated ) &&
+		isCount( counts.skipped ) &&
+		isCount( counts.failed ) &&
+		isCount( counts.notified )
 	);
 }
 
