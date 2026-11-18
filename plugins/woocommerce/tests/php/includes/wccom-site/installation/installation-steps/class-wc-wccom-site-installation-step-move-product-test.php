@@ -131,7 +131,7 @@ class WC_WCCOM_Site_Installation_Step_Move_Product_Test extends WC_Unit_Test_Cas
 	 * @testdox An empty folder left at the destination isn't an installed copy, so a package the site can't run is still stopped.
 	 */
 	public function test_stops_install_into_an_empty_destination_folder(): void {
-		wp_mkdir_p( $this->destination( 'plugin' ) );
+		$this->make_empty_destination( 'plugin' );
 		$this->unpack_fixture( 'plugin', '99.0', '' );
 
 		$error = null;
@@ -209,7 +209,7 @@ class WC_WCCOM_Site_Installation_Step_Move_Product_Test extends WC_Unit_Test_Cas
 	 * @testdox A package whose requirements the site meets installs into an empty destination folder, as WordPress does.
 	 */
 	public function test_installs_into_an_empty_destination_folder(): void {
-		wp_mkdir_p( $this->destination( 'plugin' ) );
+		$this->make_empty_destination( 'plugin' );
 		$this->unpack_fixture( 'plugin', '1.0', '' );
 
 		$state = ( new WC_WCCOM_Site_Installation_Step_Move_Product( $this->state( 'plugin' ) ) )->run();
@@ -240,6 +240,21 @@ class WC_WCCOM_Site_Installation_Step_Move_Product_Test extends WC_Unit_Test_Cas
 	 */
 	private function destination( string $type ): string {
 		return ( 'plugin' === $type ? WP_PLUGIN_DIR : get_theme_root() ) . '/' . self::SLUG;
+	}
+
+	/**
+	 * Create an empty folder where the fixture would be installed, and check it's really there and empty.
+	 *
+	 * Without the check, a failed mkdir would leave the tests covering a missing folder instead.
+	 *
+	 * @param string $type 'plugin' or 'theme'.
+	 */
+	private function make_empty_destination( string $type ): void {
+		$dir = $this->destination( $type );
+		wp_mkdir_p( $dir );
+
+		$this->assertDirectoryExists( $dir, 'The empty destination folder should exist before the install' );
+		$this->assertSame( array(), array_values( array_diff( (array) scandir( $dir ), array( '.', '..' ) ) ), 'The destination folder should start empty' );
 	}
 
 	/**
