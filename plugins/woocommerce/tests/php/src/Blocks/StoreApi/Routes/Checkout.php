@@ -192,6 +192,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 			remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
 
 			update_option( 'woocommerce_ship_to_countries', 'all' );
+			update_option( 'woocommerce_ship_to_destination', 'billing' );
 			update_option( 'woocommerce_allowed_countries', 'all' );
 			update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 			update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
@@ -1269,6 +1270,612 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertEquals( 'Billing', $order->get_shipping_first_name() );
 		$this->assertEquals( '10 Billing Street', $order->get_shipping_address_1() );
 		$this->assertEquals( 'Cambridge', $order->get_shipping_city() );
+	}
+
+	/**
+	 * Turns on taxes based on the shipping address, with a rate for Ontario and Alberta and none for Canada as a whole.
+	 */
+	private function add_canada_tax_rates() {
+		$this->set_taxes_based_on( 'shipping' );
+		$rates = array(
+			'ON' => '13.0000',
+			'AB' => '5.0000',
+		);
+
+		foreach ( $rates as $state => $rate ) {
+			$this->inserted_tax_rate_ids[] = WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => 'CA',
+					'tax_rate_state'    => $state,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => "$state tax",
+					'tax_rate_priority' => '1',
+					'tax_rate_compound' => '0',
+					'tax_rate_shipping' => '1',
+					'tax_rate_order'    => '1',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Toronto address used by the address merge tests.
+	 *
+	 * @param array $overrides Fields to change; a null value removes the field from the address.
+	 * @return array
+	 */
+	private function get_toronto_address( array $overrides = array() ) {
+		$address = array_merge(
+			array(
+				'first_name' => 'Guest',
+				'last_name'  => 'Shopper',
+				'company'    => '',
+				'address_1'  => '100 Queen St W',
+				'address_2'  => '',
+				'city'       => 'Toronto',
+				'state'      => 'ON',
+				'postcode'   => 'M5H 2N2',
+				'country'    => 'CA',
+				'email'      => 'testaccount@test.com',
+				'phone'      => '',
+			),
+			$overrides
+		);
+
+		return array_filter( $address, fn( $value ) => null !== $value );
+	}
+
+	/**
+	 * Dispatches a checkout request with the given addresses.
+	 *
+	 * @param array      $billing  Billing address.
+	 * @param array|null $shipping Shipping address, or null to leave it out.
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_checkout_with_addresses( array $billing, ?array $shipping ) {
+		$params = array(
+			'billing_address' => (object) $billing,
+			'payment_method'  => WC_Gateway_BACS::ID,
+		);
+		if ( null !== $shipping ) {
+			$params['shipping_address'] = (object) $shipping;
+		}
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( $params );
+
+		return rest_get_server()->dispatch( $request );
+	}
+
+	/**
+	 * Sets the session customer's billing and shipping country and state.
+	 *
+	 * @param string $country Country code.
+	 * @param string $state   State.
+	 */
+	private function set_session_customer_location( string $country, string $state ) {
+		WC()->customer->set_billing_location( $country, $state, '', '' );
+		WC()->customer->set_shipping_location( $country, $state, '', '' );
+		WC()->customer->save();
+	}
+
+	/**
+	 * @testdox Checkout should store the state code when the address names the state and leaves out the country.
+	 */
+	public function test_checkout_converts_state_name_when_country_is_omitted() {
+		$this->add_canada_tax_rates();
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$address = $this->get_toronto_address(
+			array(
+				'state'   => 'Ontario',
+				'country' => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertSame( 'ON', $order->get_shipping_state() );
+		$this->assertSame( 'ON', $order->get_billing_state() );
+		$this->assertGreaterThan( 0, (float) $order->get_total_tax(), 'The Ontario rate must apply.' );
+	}
+
+	/**
+	 * @testdox Checkout should reject an unknown state when the address leaves out the country, without changing the session.
+	 */
+	public function test_checkout_rejects_unknown_state_when_country_is_omitted() {
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$address = $this->get_toronto_address(
+			array(
+				'state'   => 'Nowhere',
+				'country' => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertSame( 'ON', WC()->customer->get_shipping_state(), 'A rejected request must not change the session customer.' );
+	}
+
+	/**
+	 * @testdox Checkout should reject a postcode that is not valid for the session country when the address leaves out the country.
+	 */
+	public function test_checkout_rejects_invalid_postcode_when_country_is_omitted() {
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$address = $this->get_toronto_address(
+			array(
+				'postcode' => 'NOTAZIP',
+				'country'  => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertSame( '', WC()->customer->get_shipping_postcode(), 'A rejected request must not change the session customer.' );
+	}
+
+	/**
+	 * @testdox Checkout should format the postcode for the session country when the address leaves out the country.
+	 */
+	public function test_checkout_formats_postcode_when_country_is_omitted() {
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$address = $this->get_toronto_address(
+			array(
+				'postcode' => 'm5h2n2',
+				'country'  => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertSame( 'M5H 2N2', $order->get_shipping_postcode() );
+		$this->assertSame( 'M5H 2N2', $order->get_billing_postcode() );
+	}
+
+	/**
+	 * @testdox Checkout should store the state code when the address leaves out the state and the session holds its name.
+	 */
+	public function test_checkout_converts_session_state_name_when_state_is_omitted() {
+		$this->add_canada_tax_rates();
+		// The classic update_order_review handler stores the state as posted.
+		$this->set_session_customer_location( 'CA', 'Ontario' );
+		$address = $this->get_toronto_address( array( 'state' => null ) );
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'ON', wc_get_order( $response->get_data()['order_id'] )->get_shipping_state() );
+	}
+
+	/**
+	 * @testdox Checkout should reject a state of "0".
+	 */
+	public function test_checkout_rejects_state_zero() {
+		$address = $this->get_toronto_address( array( 'state' => '0' ) );
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Checkout should store the state code for a country code sent in lower case.
+	 */
+	public function test_checkout_formats_state_for_lowercase_country() {
+		$address = $this->get_toronto_address(
+			array(
+				'city'     => 'Chicago',
+				'state'    => 'ıl',
+				'postcode' => '60601',
+				'country'  => 'us',
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertSame( 'US', $order->get_shipping_country() );
+		$this->assertSame( 'IL', $order->get_shipping_state() );
+	}
+
+	/**
+	 * @testdox Checkout should accept a complete address when the session holds stale values for another country.
+	 */
+	public function test_checkout_accepts_full_address_over_stale_session_values() {
+		WC()->customer->set_props(
+			array(
+				'billing_country'   => 'GB',
+				'billing_postcode'  => 'NOTAZIP',
+				'billing_phone'     => 'abc',
+				'shipping_country'  => 'GB',
+				'shipping_postcode' => 'NOTAZIP',
+				'shipping_phone'    => 'abc',
+			)
+		);
+		WC()->customer->save();
+		$address = $this->get_toronto_address();
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+	}
+
+	/**
+	 * @testdox Checkout should not validate stale session fields that the address leaves out, other than the country, state and postcode.
+	 */
+	public function test_checkout_ignores_stale_session_fields_left_out_of_the_address() {
+		WC()->customer->set_props(
+			array(
+				'billing_country'   => 'CA',
+				'billing_state'     => 'ON',
+				'billing_postcode'  => 'M5H 2N2',
+				'billing_phone'     => 'abc',
+				'shipping_country'  => 'CA',
+				'shipping_state'    => 'ON',
+				'shipping_postcode' => 'M5H 2N2',
+				'shipping_phone'    => 'abc',
+			)
+		);
+		WC()->customer->save();
+		$address = $this->get_toronto_address(
+			array(
+				'postcode' => null,
+				'phone'    => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+	}
+
+	/**
+	 * @testdox Checkout should reject a session postcode that is not valid for the country when the $param leaves out the postcode, without changing the session.
+	 * @testWith ["billing_address"]
+	 *           ["shipping_address"]
+	 *
+	 * @param string $param The address that leaves out the postcode.
+	 */
+	public function test_checkout_rejects_session_postcode_not_valid_for_the_country( string $param ) {
+		WC()->customer->set_props(
+			array(
+				'billing_country'   => 'CA',
+				'billing_state'     => 'ON',
+				'billing_postcode'  => 'NOTAZIP',
+				'shipping_country'  => 'CA',
+				'shipping_state'    => 'ON',
+				'shipping_postcode' => 'NOTAZIP',
+			)
+		);
+		WC()->customer->save();
+		$addresses           = array(
+			'billing_address'  => $this->get_toronto_address(),
+			'shipping_address' => $this->get_toronto_address(),
+		);
+		$addresses[ $param ] = $this->get_toronto_address( array( 'postcode' => null ) );
+
+		$response = $this->dispatch_checkout_with_addresses( $addresses['billing_address'], $addresses['shipping_address'] );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertArrayHasKey( $param, $response->get_data()['data']['details'] );
+		$this->assertSame( 'NOTAZIP', WC()->customer->get_billing_postcode(), 'A rejected request must not save the billing address.' );
+		$this->assertSame( 'NOTAZIP', WC()->customer->get_shipping_postcode(), 'A rejected request must not save the shipping address.' );
+	}
+
+	/**
+	 * @testdox Checkout should reject a postcode saved for a country with no postcode rule when the address changes the country and leaves out the postcode.
+	 */
+	public function test_checkout_rejects_session_postcode_saved_for_another_country() {
+		$location = array(
+			'country'  => 'AE',
+			'state'    => '',
+			'postcode' => 'NOTAZIP',
+		);
+		$request  = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $location,
+				'shipping_address' => (object) $location,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+
+		$address  = $this->get_toronto_address( array( 'postcode' => null ) );
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertSame( 'AE', WC()->customer->get_shipping_country(), 'A rejected request must not change the session customer.' );
+	}
+
+	/**
+	 * @testdox Checkout should format a session postcode for the country when the address leaves out the postcode.
+	 */
+	public function test_checkout_formats_session_postcode_when_postcode_is_omitted() {
+		WC()->customer->set_billing_location( 'CA', 'ON', 'm5h2n2', '' );
+		WC()->customer->set_shipping_location( 'CA', 'ON', 'm5h2n2', '' );
+		WC()->customer->save();
+		$address = $this->get_toronto_address( array( 'postcode' => null ) );
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertSame( 'M5H 2N2', $order->get_shipping_postcode() );
+		$this->assertSame( 'M5H 2N2', $order->get_billing_postcode() );
+	}
+
+	/**
+	 * @testdox Checkout should ignore a stale session shipping address when the cart needs no shipping.
+	 */
+	public function test_checkout_without_shipping_ignores_stale_session_shipping() {
+		wc_empty_cart();
+		WC()->cart->add_to_cart( $this->products[2]->get_id(), 1 );
+		WC()->customer->set_shipping_location( 'CA', 'Nowhere', '', '' );
+		WC()->customer->save();
+
+		$response = $this->dispatch_checkout_with_addresses( $this->get_toronto_address(), null );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'ON', wc_get_order( $response->get_data()['order_id'] )->get_shipping_state() );
+	}
+
+	/**
+	 * @testdox Checkout should send error details with a rejected address, so the Checkout block can show a notice.
+	 */
+	public function test_checkout_rejected_address_includes_error_details() {
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$address = $this->get_toronto_address(
+			array(
+				'state'   => 'Nowhere',
+				'country' => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$data = $response->get_data()['data'];
+		$this->assertArrayHasKey( 'details', $data, 'The Checkout block builds its notices from details.' );
+		$this->assertArrayHasKey( 'billing_address', $data['details'] );
+		$this->assertArrayHasKey( 'message', $data['details']['billing_address'] );
+		$this->assertStringContainsString( 'NOWHERE', $data['details']['billing_address']['message'] );
+	}
+
+	/**
+	 * @testdox Checkout should reject an invalid $invalid_param without saving the other, valid address to the session.
+	 * @testWith ["billing_address"]
+	 *           ["shipping_address"]
+	 *
+	 * @param string $invalid_param The address that gets the invalid state.
+	 */
+	public function test_checkout_rejects_one_invalid_address_without_saving_the_other( string $invalid_param ) {
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$addresses = array(
+			'billing_address'  => $this->get_toronto_address(
+				array(
+					'city'     => 'Montreal',
+					'state'    => 'QC',
+					'postcode' => 'H2Y 1C6',
+				)
+			),
+			'shipping_address' => $this->get_toronto_address(
+				array(
+					'city'     => 'Montreal',
+					'state'    => 'QC',
+					'postcode' => 'H2Y 1C6',
+				)
+			),
+		);
+
+		$addresses[ $invalid_param ] = $this->get_toronto_address(
+			array(
+				'state'   => 'Nowhere',
+				'country' => null,
+			)
+		);
+
+		$response = $this->dispatch_checkout_with_addresses( $addresses['billing_address'], $addresses['shipping_address'] );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertArrayHasKey( $invalid_param, $response->get_data()['data']['details'] );
+		$this->assertSame( 'ON', WC()->customer->get_billing_state(), 'A rejected request must not save the billing address.' );
+		$this->assertSame( 'ON', WC()->customer->get_shipping_state(), 'A rejected request must not save the shipping address.' );
+	}
+
+	/**
+	 * @testdox Checkout should copy a partial billing address to shipping when the cart needs no shipping, ignoring the session shipping address.
+	 */
+	public function test_checkout_without_shipping_derives_shipping_from_partial_billing() {
+		wc_empty_cart();
+		WC()->cart->add_to_cart( $this->products[2]->get_id(), 1 );
+		WC()->customer->set_billing_location( 'CA', 'ON', '', '' );
+		WC()->customer->set_shipping_location( 'CA', 'Nowhere', '', '' );
+		WC()->customer->save();
+
+		$response = $this->dispatch_checkout_with_addresses( $this->get_toronto_address( array( 'state' => null ) ), null );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'ON', wc_get_order( $response->get_data()['order_id'] )->get_shipping_state() );
+	}
+
+	/**
+	 * @testdox Checkout should reject a partial address whose session state is not valid for the posted country, like cart/update-customer does.
+	 */
+	public function test_checkout_rejects_partial_address_with_session_state_invalid_for_new_country() {
+		$this->set_session_customer_location( 'CA', 'ON' );
+		$berlin  = array(
+			'address_1' => 'Unter den Linden 1',
+			'city'      => 'Berlin',
+			'postcode'  => '10115',
+			'country'   => 'DE',
+		);
+		$address = $this->get_toronto_address( array_merge( $berlin, array( 'state' => null ) ) );
+
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertStringContainsString( '(ON)', wp_json_encode( $response->get_data() ) );
+
+		// The Checkout block always sends the state, blank for Germany unless the shopper picks one.
+		$address  = $this->get_toronto_address( array_merge( $berlin, array( 'state' => '' ) ) );
+		$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertSame( '', wc_get_order( $response->get_data()['order_id'] )->get_shipping_state() );
+	}
+
+	/**
+	 * @testdox Checkout should still save an additional address field posted as "0".
+	 */
+	public function test_checkout_persists_additional_address_field_zero() {
+		$field_id = 'plugin-namespace/unit-number';
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => $field_id,
+				'label'    => 'Unit number',
+				'location' => 'address',
+				'type'     => 'text',
+				'required' => false,
+			)
+		);
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+
+		try {
+			$address = $this->get_toronto_address( array( $field_id => '0' ) );
+
+			$response = $this->dispatch_checkout_with_addresses( $address, $address );
+
+			$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+			$order = wc_get_order( $response->get_data()['order_id'] );
+			$this->assertSame( '0', $checkout_fields->get_field_from_object( $field_id, $order, 'billing' ) );
+		} finally {
+			$checkout_fields->deregister_checkout_field( $field_id );
+		}
+	}
+
+	/**
+	 * @testdox Checkout should ship to the billing address when the store ships to the billing address only, whatever shipping address the request sends.
+	 */
+	public function test_shipping_address_is_ignored_when_store_ships_to_billing_only() {
+		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
+		$this->assertTrue( WC()->cart->needs_shipping(), 'Test cart is expected to need shipping.' );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $this->get_fallback_billing_address(),
+				'shipping_address' => (object) $this->get_fallback_shipping_address(),
+				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertInstanceOf( \WC_Order::class, $order );
+		$this->assertEquals( 'Billing', $order->get_shipping_first_name() );
+		$this->assertEquals( '10 Billing Street', $order->get_shipping_address_1() );
+		$this->assertEquals( 'Cambridge', $order->get_shipping_city() );
+		$this->assertEquals( 'CB24 1AB', $order->get_shipping_postcode() );
+	}
+
+	/**
+	 * @testdox Checkout should not keep session shipping values the request's billing address leaves out when the store ships to the billing address only.
+	 */
+	public function test_session_shipping_values_are_replaced_when_store_ships_to_billing_only() {
+		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
+
+		WC()->customer->set_billing_company( 'Billing Company' );
+		WC()->customer->set_shipping_company( 'Session Company' );
+		WC()->customer->set_shipping_address_2( 'Session Flat 2' );
+
+		$billing_address = $this->get_fallback_billing_address();
+		unset( $billing_address['company'], $billing_address['address_2'] );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $billing_address,
+				'shipping_address' => (object) $billing_address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertInstanceOf( \WC_Order::class, $order );
+		$this->assertEquals( 'Billing Company', $order->get_shipping_company() );
+		$this->assertEquals( '', $order->get_shipping_address_2() );
+		$this->assertEquals( '10 Billing Street', $order->get_shipping_address_1() );
+	}
+
+	/**
+	 * @testdox Updating the customer should set the shipping address to the billing address when the store ships to the billing address only.
+	 */
+	public function test_cart_update_customer_uses_billing_address_when_store_ships_to_billing_only() {
+		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $this->get_fallback_billing_address(),
+				'shipping_address' => (object) $this->get_fallback_shipping_address(),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$response_shipping_address = (array) $response->get_data()['shipping_address'];
+		$this->assertSame( '10 Billing Street', $response_shipping_address['address_1'] );
+		$this->assertSame( 'Cambridge', $response_shipping_address['city'] );
+		$this->assertSame( '10 Billing Street', WC()->customer->get_shipping_address_1() );
+		$this->assertSame( 'Cambridge', WC()->customer->get_shipping_city() );
+	}
+
+	/**
+	 * @testdox Updating the customer should keep a different shipping address when the store does not ship to the billing address only.
+	 */
+	public function test_cart_update_customer_keeps_shipping_address_by_default() {
+		$this->assertFalse( wc_ship_to_billing_address_only() );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $this->get_fallback_billing_address(),
+				'shipping_address' => (object) $this->get_fallback_shipping_address(),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$this->assertSame( '20 Shipping Street', WC()->customer->get_shipping_address_1() );
+		$this->assertSame( 'Oxford', WC()->customer->get_shipping_city() );
 	}
 
 	/**
@@ -3038,6 +3645,28 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
 		$this->assertEquals( 'GB', wc_get_order( $order->get_id() )->get_shipping_country() );
+	}
+
+	/**
+	 * @testdox Existing order payment should reject a state of "0" as the first address of an order that holds none.
+	 */
+	public function test_checkout_order_rejects_state_zero_on_order_without_address() {
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_address( array_fill_keys( array( 'city', 'state', 'postcode', 'country' ), '' ) );
+		$order->save();
+
+		$address = array(
+			'city'     => 'Toronto',
+			'state'    => '0',
+			'postcode' => 'M5H 2N2',
+			'country'  => 'CA',
+		);
+
+		$response = $this->dispatch_pay_for_order_request( $order, $address, $address );
+
+		$this->assertEquals( 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertSame( '', wc_get_order( $order->get_id() )->get_billing_state() );
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Apply the right state tax and shipping rates to block checkout orders, and reject states and postcodes that are not valid for the country.
