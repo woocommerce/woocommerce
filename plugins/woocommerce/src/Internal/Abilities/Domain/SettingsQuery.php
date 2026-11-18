@@ -211,8 +211,15 @@ class SettingsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		if ( self::has_supplied_value( $setting ) ) {
 			return $setting['fixed_value'] ?? $setting['value'];
 		}
+		// Read the stored option directly: WC_Admin_Settings::get_option() strips backslashes the stored value keeps.
+		if ( is_string( $key ) && false !== strpos( $key, '[' ) ) {
+			parse_str( $key, $parsed );
+			$name = (string) key( $parsed );
+			$key  = array( $name, (string) key( (array) $parsed[ $name ] ) );
+		}
 		if ( is_string( $key ) ) {
-			return \WC_Admin_Settings::get_option( $key, $default );
+			$value = get_option( $key, null );
+			return null === $value ? $default : $value;
 		}
 		$option = get_option( $key[0], array() );
 		return is_array( $option ) ? ( $option[ $key[1] ] ?? $default ) : $default;
