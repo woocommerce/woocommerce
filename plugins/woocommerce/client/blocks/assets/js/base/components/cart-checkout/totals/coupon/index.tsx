@@ -16,6 +16,7 @@ import {
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
 import type { MouseEvent, MouseEventHandler } from 'react';
+import type { StyleProps } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -36,6 +37,10 @@ export interface TotalsCouponProps {
 	 */
 	displayCouponForm?: boolean;
 	/**
+	 * Styles for the Apply button.
+	 */
+	buttonStyleProps?: StyleProps;
+	/**
 	 * Submit handler
 	 */
 	onSubmit?: ( couponValue: string ) => Promise< boolean > | undefined;
@@ -46,6 +51,7 @@ export const TotalsCoupon = ( {
 	isLoading = false,
 	onSubmit,
 	displayCouponForm = false,
+	buttonStyleProps,
 }: TotalsCouponProps ): JSX.Element => {
 	const [ couponValue, setCouponValue ] = useState( '' );
 	const [ isCouponFormVisible, setIsCouponFormVisible ] =
@@ -118,11 +124,13 @@ export const TotalsCoupon = ( {
 						<Button
 							className={ clsx(
 								'wc-block-components-totals-coupon__button',
+								buttonStyleProps?.className,
 								{
 									'wc-block-components-totals-coupon__button--loading':
 										isLoading,
 								}
 							) }
+							style={ buttonStyleProps?.style }
 							disabled={ isLoading || ! couponValue }
 							onClick={ handleCouponSubmit }
 							type="submit"

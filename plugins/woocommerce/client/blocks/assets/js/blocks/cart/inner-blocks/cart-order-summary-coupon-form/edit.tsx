@@ -7,22 +7,19 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
 /**
  * Internal dependencies
  */
-import Block from './block';
+import Block, { BlockAttributes } from './block';
 
 export const Edit = ( {
 	attributes,
 }: {
-	attributes: {
-		className: string;
-	};
+	attributes: BlockAttributes;
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
-	const { className } = attributes;
 	const blockProps = useBlockProps();
 	return (
 		<div { ...blockProps }>
 			<Noninteractive>
-				<Block className={ className } />
+				<Block { ...attributes } displayCouponForm />
 			</Noninteractive>
 		</div>
 	);

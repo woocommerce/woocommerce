@@ -268,7 +268,7 @@ Shows the apply coupon form.
 - **Name:** woocommerce/cart-order-summary-coupon-form-block
 - **Category:** woocommerce
 - **Parent:** woocommerce/cart-order-summary-block
-- **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
+- **Supports:** color (background, gradients, text, ~~link~~), spacing (padding), typography (fontSize, lineHeight, textAlign), ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
 ## Discount - woocommerce/cart-order-summary-discount-block
@@ -378,7 +378,7 @@ Allow customers proceed to Checkout.
 - **Name:** woocommerce/proceed-to-checkout-block
 - **Category:** woocommerce
 - **Parent:** woocommerce/cart-totals-block
-- **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+- **Supports:** color (background, gradients, text, ~~link~~), spacing (padding), typography (fontSize, lineHeight, textAlign), ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
 ## Cart Link - woocommerce/cart-link
@@ -433,7 +433,7 @@ Place order button, with optional Terms and Conditions and Return to Cart links.
 - **Name:** woocommerce/checkout-actions-block
 - **Category:** woocommerce
 - **Parent:** woocommerce/checkout-fields-block
-- **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+- **Supports:** color (background, gradients, text, ~~link~~), spacing (padding), typography (fontSize, lineHeight, textAlign), ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** cartPageId, className, lock, priceSeparator, showReturnToCart, showTerms, termsCheckbox, termsText
 
 ## Additional information - woocommerce/checkout-additional-information-block
@@ -523,7 +523,7 @@ Shows the apply coupon form.
 - **Name:** woocommerce/checkout-order-summary-coupon-form-block
 - **Category:** woocommerce
 - **Parent:** woocommerce/checkout-order-summary-block
-- **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
+- **Supports:** color (background, gradients, text, ~~link~~), spacing (padding), typography (fontSize, lineHeight, textAlign), ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
 ## Discount - woocommerce/checkout-order-summary-discount-block

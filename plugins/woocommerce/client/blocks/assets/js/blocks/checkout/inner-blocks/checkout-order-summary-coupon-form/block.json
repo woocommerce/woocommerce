@@ -4,10 +4,64 @@
 	"description": "Shows the apply coupon form.",
 	"category": "woocommerce",
 	"supports": {
+		"color": {
+			"text": true,
+			"background": true,
+			"gradients": true,
+			"link": false,
+			"__experimentalDefaultControls": {
+				"background": true,
+				"text": true
+			},
+			"__experimentalSkipSerialization": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"textAlign": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalDefaultControls": {
+				"fontSize": true,
+				"textAlign": true
+			},
+			"__experimentalSkipSerialization": true
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true,
+			"__experimentalDefaultControls": {
+				"color": true,
+				"radius": true,
+				"style": true,
+				"width": true
+			},
+			"__experimentalSkipSerialization": true
+		},
+		"spacing": {
+			"padding": true,
+			"__experimentalDefaultControls": {
+				"padding": true
+			},
+			"__experimentalSkipSerialization": true
+		},
 		"align": false,
 		"html": false,
 		"multiple": false,
 		"reusable": false
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-checkout-order-summary-coupon-form-block",
+		"color": ".wp-block-woocommerce-checkout-order-summary-coupon-form-block .wc-block-components-totals-coupon__button",
+		"typography": ".wp-block-woocommerce-checkout-order-summary-coupon-form-block .wc-block-components-totals-coupon__button",
+		"border": ".wp-block-woocommerce-checkout-order-summary-coupon-form-block .wc-block-components-totals-coupon__button",
+		"spacing": ".wp-block-woocommerce-checkout-order-summary-coupon-form-block .wc-block-components-totals-coupon__button"
 	},
 	"attributes": {
 		"className": {

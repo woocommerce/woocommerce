@@ -12,6 +12,33 @@ import { validationStore } from '@woocommerce/block-data';
 import { TotalsCoupon } from '..';
 
 describe( 'TotalsCoupon', () => {
+	it( 'applies button styles only to the Apply button', () => {
+		render(
+			<TotalsCoupon
+				instanceId="coupon"
+				displayCouponForm
+				buttonStyleProps={ {
+					className: 'has-contrast-color',
+					style: { backgroundColor: '#123456', padding: '20px' },
+				} }
+			/>
+		);
+
+		expect( screen.getByRole( 'button', { name: 'Apply' } ) ).toHaveClass(
+			'has-contrast-color'
+		);
+		expect( screen.getByRole( 'button', { name: 'Apply' } ) ).toHaveStyle( {
+			backgroundColor: '#123456',
+			padding: '20px',
+		} );
+		expect( screen.getByLabelText( 'Enter code' ) ).not.toHaveAttribute(
+			'style'
+		);
+		expect(
+			screen.getByRole( 'button', { name: 'Add coupons' } )
+		).not.toHaveClass( 'has-contrast-color' );
+	} );
+
 	beforeEach( () => {
 		// Clear validation errors before each test
 		const { clearValidationErrors } = dispatch( validationStore );
