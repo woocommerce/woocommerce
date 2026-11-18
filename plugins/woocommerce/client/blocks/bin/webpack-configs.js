@@ -18,12 +18,12 @@ const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extr
 const {
 	WebpackRTLPlugin,
 } = require( '@woocommerce/internal-build/style-build' );
+const { swcLoader } = require( '@woocommerce/internal-build/swc-loader' );
 const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const { getEntryConfig, genericBlocks } = require( './webpack-entries' );
 const {
 	ASSET_CHECK,
-	NODE_ENV,
 	CHECK_CIRCULAR_DEPS,
 	requestToExternal,
 	requestToHandle,
@@ -34,16 +34,10 @@ const {
 const AddSplitChunkDependencies = require( './add-split-chunk-dependencies' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 
-const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
 // Blocks' webpack writes directly to the WooCommerce plugin's
 // `assets/client/blocks/` so PHP can enqueue files from their final location
 // without an intermediate rsync step.
 const BUILD_DIR = path.resolve( __dirname, '../../../assets/client/blocks' );
-const BABEL_CACHE_DIR = path.join(
-	ROOT_DIR,
-	'node_modules/.cache/babel-loader'
-);
-const isProduction = NODE_ENV === 'production';
 
 /**
  * Shared config for all script builds.
@@ -115,15 +109,7 @@ const getCoreConfig = ( options = {} ) => {
 					exclude: [
 						/[\/\\](node_modules|build|docs|bin|storybook|tests|test)[\/\\]/,
 					],
-					use: {
-						loader: 'babel-loader',
-						options: {
-							presets: [ '@wordpress/babel-preset-default' ],
-							plugins: [],
-							cacheDirectory: BABEL_CACHE_DIR,
-							cacheCompression: false,
-						},
-					},
+					use: swcLoader,
 				},
 				{
 					test: /\.s[c|a]ss$/,
@@ -187,19 +173,7 @@ const getMainConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
-					use: {
-						loader: 'babel-loader',
-						options: {
-							presets: [ '@wordpress/babel-preset-default' ],
-							plugins: [
-								isProduction
-									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
-									: false,
-							].filter( Boolean ),
-							cacheDirectory: BABEL_CACHE_DIR,
-							cacheCompression: false,
-						},
-					},
+					use: swcLoader,
 				},
 				{
 					test: /\.s[c|a]ss$/,
@@ -302,31 +276,7 @@ const getFrontConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
-					use: {
-						loader: 'babel-loader',
-						options: {
-							presets: [
-								[
-									'@wordpress/babel-preset-default',
-									{
-										modules: false,
-										targets: {
-											browsers: [
-												'extends @wordpress/browserslist-config',
-											],
-										},
-									},
-								],
-							],
-							plugins: [
-								isProduction
-									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
-									: false,
-							].filter( Boolean ),
-							cacheDirectory: BABEL_CACHE_DIR,
-							cacheCompression: false,
-						},
-					},
+					use: swcLoader,
 				},
 				{
 					test: /\.s[c|a]ss$/,
@@ -392,31 +342,7 @@ const getPaymentsConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
-					use: {
-						loader: 'babel-loader',
-						options: {
-							presets: [
-								[
-									'@wordpress/babel-preset-default',
-									{
-										modules: false,
-										targets: {
-											browsers: [
-												'extends @wordpress/browserslist-config',
-											],
-										},
-									},
-								],
-							],
-							plugins: [
-								isProduction
-									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
-									: false,
-							].filter( Boolean ),
-							cacheDirectory: BABEL_CACHE_DIR,
-							cacheCompression: false,
-						},
-					},
+					use: swcLoader,
 				},
 				{
 					test: /\.s[c|a]ss$/,
@@ -471,31 +397,7 @@ const getExtensionsConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
-					use: {
-						loader: 'babel-loader',
-						options: {
-							presets: [
-								[
-									'@wordpress/babel-preset-default',
-									{
-										modules: false,
-										targets: {
-											browsers: [
-												'extends @wordpress/browserslist-config',
-											],
-										},
-									},
-								],
-							],
-							plugins: [
-								isProduction
-									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
-									: false,
-							].filter( Boolean ),
-							cacheDirectory: BABEL_CACHE_DIR,
-							cacheCompression: false,
-						},
-					},
+					use: swcLoader,
 				},
 				{
 					test: /\.s[c|a]ss$/,
@@ -550,31 +452,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
-					use: {
-						loader: 'babel-loader',
-						options: {
-							presets: [
-								[
-									'@wordpress/babel-preset-default',
-									{
-										modules: false,
-										targets: {
-											browsers: [
-												'extends @wordpress/browserslist-config',
-											],
-										},
-									},
-								],
-							],
-							plugins: [
-								isProduction
-									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
-									: false,
-							].filter( Boolean ),
-							cacheDirectory: BABEL_CACHE_DIR,
-							cacheCompression: false,
-						},
-					},
+					use: swcLoader,
 				},
 				{
 					test: /\.s[c|a]ss$/,
@@ -684,19 +562,7 @@ const getStylingConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
-					use: {
-						loader: 'babel-loader',
-						options: {
-							presets: [ '@wordpress/babel-preset-default' ],
-							plugins: [
-								isProduction
-									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
-									: false,
-							].filter( Boolean ),
-							cacheDirectory: BABEL_CACHE_DIR,
-							cacheCompression: false,
-						},
-					},
+					use: swcLoader,
 				},
 				{
 					test: /\.s?css$/,
@@ -804,31 +670,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 				{
 					test: /\.(j|t)sx?$/,
 					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
-					use: {
-						loader: 'babel-loader',
-						options: {
-							presets: [
-								[
-									'@wordpress/babel-preset-default',
-									{
-										modules: false,
-										targets: {
-											browsers: [
-												'extends @wordpress/browserslist-config',
-											],
-										},
-									},
-								],
-							],
-							plugins: [
-								isProduction
-									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
-									: false,
-							].filter( Boolean ),
-							cacheDirectory: BABEL_CACHE_DIR,
-							cacheCompression: false,
-						},
-					},
+					use: swcLoader,
 				},
 				{
 					test: /\.s[c|a]ss$/,

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Speed up the monorepo build (swc, parallel blocks webpack, no double build); built assets behave the same.
+

@@ -28,6 +28,9 @@
 		"./style-build": {
 			"require": "./src/style-build/index.cjs"
 		},
+		"./swc-loader": {
+			"require": "./src/swc-loader/index.cjs"
+		},
 		"./configs/tsconfig.json": "./configs/tsconfig.json",
 		"./type-overrides/*": "./type-overrides/*",
 		"./styles/*": "./styles/*"
@@ -57,7 +60,9 @@
 	},
 	"dependencies": {
 		"@automattic/color-studio": "^4.0.0",
+		"@swc/core": "catalog:tooling",
 		"@wordpress/base-styles": "catalog:wp-bundled",
+		"@wordpress/browserslist-config": "next",
 		"@wordpress/postcss-plugins-preset": "catalog:tooling",
 		"@wordpress/theme": "catalog:wp-bundled",
 		"chokidar": "^3.6.0",
@@ -69,6 +74,7 @@
 		"postcss-loader": "catalog:tooling",
 		"rtlcss": "4.3.x",
 		"sass-loader": "catalog:tooling",
+		"swc-loader": "catalog:tooling",
 		"webpack-remove-empty-scripts": "1.0.x"
 	},
 	"devDependencies": {

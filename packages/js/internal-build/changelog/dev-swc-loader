@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a shared swc-loader webpack helper for the admin and blocks builds.

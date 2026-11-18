@@ -15,6 +15,7 @@ const webpack = require( 'webpack' );
 const {
 	webpackConfig: styleConfig,
 } = require( '@woocommerce/internal-build/style-build' );
+const { swcLoader } = require( '@woocommerce/internal-build/swc-loader' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
 const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
 const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
@@ -251,27 +252,24 @@ const jsConfig = {
 					/[\/\\]node_modules[\/\\]\.pnpm[\/\\]/,
 					/[\/\\](changelog|bin|build|docs|test)[\/\\]/,
 				],
-				use: {
-					loader: 'babel-loader',
-					options: {
-						// Prevent babel.config.js (Jest/Node context) from merging into this browser build and duplicating presets.
-						configFile: false,
-						sourceType: 'unambiguous',
-						presets: [ '@wordpress/babel-preset-default' ],
-						plugins: [
-							! isProduction &&
-								isHot &&
-								require.resolve( 'react-refresh/babel' ),
-							isProduction &&
-								require.resolve( 'babel-plugin-transform-react-remove-prop-types' ),
-						].filter( Boolean ),
-						cacheDirectory: path.resolve(
-							__dirname,
-							'../../../../node_modules/.cache/babel-loader'
-						),
-						cacheCompression: false,
-					},
-				},
+				// swc cannot add React Fast Refresh code with the JSX runtime
+				// WordPress ships, so hot reloading keeps the Babel setup.
+				use:
+					! isProduction && isHot
+						? {
+								loader: 'babel-loader',
+								options: {
+									configFile: false,
+									sourceType: 'unambiguous',
+									presets: [
+										'@wordpress/babel-preset-default',
+									],
+									plugins: [
+										require.resolve( 'react-refresh/babel' ),
+									],
+								},
+							}
+						: swcLoader,
 			},
 			{ test: /\.md$/, use: 'raw-loader' },
 			{
