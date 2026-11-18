@@ -211,11 +211,13 @@ class SystemStatusGetTest extends \WC_Unit_Test_Case {
 		file_put_contents( $theme_dir . '/woocommerce/cart/cart.php', "<?php\n/**\n * @version 1.0.0\n */\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 		$use_theme_dir = static fn() => $theme_dir;
 		add_filter( 'stylesheet_directory', $use_theme_dir );
+		wp_set_template_globals();
 
 		try {
 			$theme = $this->get_status()['system_status']['theme'];
 		} finally {
 			remove_filter( 'stylesheet_directory', $use_theme_dir );
+			wp_set_template_globals();
 			unlink( $theme_dir . '/woocommerce/cart/cart.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
 			rmdir( $theme_dir . '/woocommerce/cart' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
 			rmdir( $theme_dir . '/woocommerce' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
@@ -223,6 +225,90 @@ class SystemStatusGetTest extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertTrue( $theme['has_outdated_templates'] );
+	}
+
+	/**
+	 * @testdox Should report outdated templates when a plugin points WooCommerce to an older template through wc_get_template.
+	 */
+	public function test_reports_outdated_template_from_filter(): void {
+		$dir = get_temp_dir() . 'wc-system-status-' . wp_generate_password( 8, false );
+		wp_mkdir_p( $dir );
+		file_put_contents( $dir . '/cart.php', "<?php\n/**\n * @version 1.0.0\n */\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$redirect = static fn( $located, $name ) => 'cart/cart.php' === $name ? $dir . '/cart.php' : $located;
+		add_filter( 'wc_get_template', $redirect, 10, 2 );
+
+		try {
+			$theme = $this->get_status()['system_status']['theme'];
+		} finally {
+			remove_filter( 'wc_get_template', $redirect, 10 );
+			unlink( $dir . '/cart.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
+			rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+		}
+
+		$this->assertTrue( $theme['has_outdated_templates'] );
+	}
+
+	/**
+	 * @testdox Should give the same hide_errors answer whether or not WordPress turned display_errors off for a JSON request.
+	 */
+	public function test_hide_errors_does_not_depend_on_request_type(): void {
+		if ( ! ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) ) {
+			$this->markTestSkipped( 'Needs WP_DEBUG and WP_DEBUG_DISPLAY on, where the request type used to change the answer.' );
+		}
+
+		$original = (string) ini_get( 'display_errors' );
+
+		try {
+			ini_set( 'display_errors', '1' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Disallowed
+			$html = $this->get_status()['system_status']['security']['hide_errors'];
+			ini_set( 'display_errors', '0' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Disallowed
+			$json = $this->get_status()['system_status']['security']['hide_errors'];
+		} finally {
+			ini_set( 'display_errors', $original ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Disallowed
+		}
+
+		$this->assertSame( $html, $json );
+		$this->assertFalse( $json, 'WP_DEBUG_DISPLAY shows errors to visitors.' );
+	}
+
+	/**
+	 * @testdox Should report plugin headers as plain text, without HTML or links.
+	 */
+	public function test_plugin_headers_are_plain_text(): void {
+		set_transient(
+			'wc_system_status_active_plugins',
+			array(
+				array(
+					'plugin'      => 'anchor/anchor.php',
+					'name'        => '<code>Canary</code> Plugin',
+					'version'     => '1.0 <a href="https://anchor.example/v">notes</a>',
+					'author_name' => '<a href="https://anchor.example/">Anchor &amp; Co</a>',
+				),
+			)
+		);
+		set_transient(
+			'wc_system_status_inactive_plugins',
+			array(
+				array(
+					'plugin'      => 'raw/raw.php',
+					'name'        => 'Raw',
+					'version'     => '2.0',
+					'author_name' => '<script>x</script>Raw Author',
+				),
+			)
+		);
+
+		$status   = $this->get_status()['system_status'];
+		$active   = array_column( $status['active_plugins'], null, 'plugin' )['anchor/anchor.php'];
+		$inactive = array_column( $status['inactive_plugins'], null, 'plugin' )['raw/raw.php'];
+		$json     = (string) wp_json_encode( array( $active, $inactive ), JSON_UNESCAPED_SLASHES );
+
+		$this->assertSame( 'Canary Plugin', $active['name'] );
+		$this->assertSame( '1.0 notes', $active['version'] );
+		$this->assertSame( 'Anchor & Co', $active['author'] );
+		$this->assertSame( 'Raw Author', $inactive['author'] );
+		$this->assertStringNotContainsString( 'anchor.example', $json );
+		$this->assertStringNotContainsString( '<', $json );
 	}
 
 	/**

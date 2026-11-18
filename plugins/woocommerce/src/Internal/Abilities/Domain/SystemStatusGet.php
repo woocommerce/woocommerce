@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use Automattic\WooCommerce\Internal\Admin\SiteHealth;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\LoggingUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -93,11 +92,11 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 				'mu_plugins'             => self::format_plugins( $dropins_mu['mu_plugins'] ?? array() ),
 				'dropins'                => self::format_dropins( $dropins_mu['dropins'] ?? array() ),
 				'enabled_features'       => self::get_enabled_features(),
-				'theme'                  => self::get_theme(),
+				'theme'                  => self::get_theme( $controller ),
 				'pages'                  => self::format_pages( $controller->get_pages() ),
 				'security'               => array(
 					'secure_connection' => (bool) ( $security['secure_connection'] ?? false ),
-					'hide_errors'       => (bool) ( $security['hide_errors'] ?? false ),
+					'hide_errors'       => ! self::shows_errors_to_visitors(),
 				),
 				'post_type_counts'       => self::get_post_type_counts( $controller ),
 			),
@@ -130,9 +129,9 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 		foreach ( array_filter( $plugins, 'is_array' ) as $plugin ) {
 			$items[] = array(
 				'plugin'  => (string) ( $plugin['plugin'] ?? '' ),
-				'name'    => (string) ( $plugin['name'] ?? '' ),
-				'version' => (string) ( $plugin['version'] ?? '' ),
-				'author'  => (string) ( $plugin['author_name'] ?? '' ),
+				'name'    => self::to_text( $plugin['name'] ?? '' ),
+				'version' => self::to_text( $plugin['version'] ?? '' ),
+				'author'  => self::to_text( $plugin['author_name'] ?? '' ),
 			);
 		}
 		return $items;
@@ -153,10 +152,20 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 		foreach ( array_filter( $dropins, 'is_array' ) as $dropin ) {
 			$items[] = array(
 				'plugin' => (string) ( $dropin['plugin'] ?? '' ),
-				'name'   => (string) ( $dropin['name'] ?? '' ),
+				'name'   => self::to_text( $dropin['name'] ?? '' ),
 			);
 		}
 		return $items;
+	}
+
+	/**
+	 * Plugin headers can carry HTML, links included, and active plugin headers arrive entity-encoded.
+	 *
+	 * @param mixed $value Header value.
+	 * @return string
+	 */
+	private static function to_text( $value ): string {
+		return html_entity_decode( wp_strip_all_tags( (string) $value ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 	}
 
 	/**
@@ -194,19 +203,19 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 	}
 
 	/**
-	 * Read locally: the status controller looks up the latest theme version on WordPress.org.
+	 * Read locally: the status controller's theme section looks up the latest theme version on WordPress.org.
 	 *
+	 * @param \WC_REST_System_Status_Controller $controller Status controller.
 	 * @return array<string, mixed>
 	 */
-	private static function get_theme(): array {
-		$theme          = wp_get_theme();
-		$template_check = SiteHealth::get_instance()->run_test( 'woocommerce_template_overrides' );
-		$info           = array(
+	private static function get_theme( \WC_REST_System_Status_Controller $controller ): array {
+		$theme = wp_get_theme();
+		$info  = array(
 			'name'                    => (string) $theme->get( 'Name' ),
 			'version'                 => (string) $theme->get( 'Version' ),
 			'is_block_theme'          => $theme->is_block_theme(),
 			'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),
-			'has_outdated_templates'  => isset( $template_check['status'] ) && 'good' !== $template_check['status'],
+			'has_outdated_templates'  => $controller->get_template_overrides()['has_outdated_templates'],
 		);
 
 		$parent = $theme->parent();
@@ -216,6 +225,22 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 		}
 
 		return $info;
+	}
+
+	/**
+	 * Request-independent: WordPress turns display_errors off for JSON requests, so the configured value is read instead.
+	 *
+	 * @return bool
+	 */
+	private static function shows_errors_to_visitors(): bool {
+		$debug_display = defined( 'WP_DEBUG_DISPLAY' ) ? constant( 'WP_DEBUG_DISPLAY' ) : null;
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && null !== $debug_display ) {
+			return (bool) $debug_display;
+		}
+
+		$ini        = ini_get_all( null, true );
+		$configured = is_array( $ini ) ? ( $ini['display_errors']['global_value'] ?? '' ) : ini_get( 'display_errors' );
+		return in_array( strtolower( (string) $configured ), array( '1', 'on', 'true', 'yes', 'stdout' ), true );
 	}
 
 	/**
@@ -361,7 +386,7 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 				),
 				'pages'                  => array(
 					'type'        => 'array',
-					'description' => __( 'The WooCommerce pages: whether each is assigned in settings, exists, is published, and holds the shortcode or block it needs.', 'woocommerce' ),
+					'description' => __( 'The WooCommerce pages: whether each is assigned in settings, exists, is published, and has the content it needs. Where both shortcode_required and block_required are true, the page needs exactly one of the shortcode or block; both present is a problem.', 'woocommerce' ),
 					'items'       => array(
 						'type'                 => 'object',
 						'properties'           => array(
@@ -386,7 +411,7 @@ class SystemStatusGet extends AbstractDomainAbility implements AbilityDefinition
 						),
 						'hide_errors'       => array(
 							'type'        => 'boolean',
-							'description' => __( 'Whether PHP errors are hidden from visitors.', 'woocommerce' ),
+							'description' => __( 'Whether the site configuration (WP_DEBUG_DISPLAY or the PHP display_errors setting) hides PHP errors from visitors.', 'woocommerce' ),
 						),
 					),
 					'additionalProperties' => false,
