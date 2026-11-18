@@ -628,6 +628,9 @@ const getStylingConfig = ( options = {} ) => {
 			uniqueName: 'webpackWcBlocksStylingJsonp',
 		},
 		optimization: {
+			// This config only keeps the CSS (minified by cssnano in PostCSS).
+			// Its JS files are deleted after emit, so minifying them is wasted work.
+			minimize: false,
 			splitChunks: {
 				automaticNameDelimiter: '--',
 				cacheGroups: {
