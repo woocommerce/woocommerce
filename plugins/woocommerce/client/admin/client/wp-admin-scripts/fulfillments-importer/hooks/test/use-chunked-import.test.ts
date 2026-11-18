@@ -36,6 +36,9 @@ const TOKEN_INVALID = {
 	data: { status: 400 },
 };
 
+const MAY_HAVE_FINISHED =
+	'The import session ended after a request with no clear answer, so the import may have finished. Check your orders before you upload the file again.';
+
 function buildResponse(
 	processed: number,
 	total: number,
@@ -436,10 +439,7 @@ describe( 'useChunkedImport', () => {
 			await result.current.run();
 		} );
 
-		expect( onError ).toHaveBeenLastCalledWith(
-			'The connection dropped near the end of the import, so it may have finished. Check your orders before you upload the file again.',
-			true
-		);
+		expect( onError ).toHaveBeenLastCalledWith( MAY_HAVE_FINISHED, true );
 	} );
 
 	it( 'reports an expired session normally once a later chunk succeeded', async () => {
@@ -559,7 +559,7 @@ describe( 'useChunkedImport', () => {
 
 			expect( mockedRunChunk ).toHaveBeenCalledTimes( attempts + 2 );
 			expect( onError ).toHaveBeenLastCalledWith(
-				'The connection dropped near the end of the import, so it may have finished. Check your orders before you upload the file again.',
+				MAY_HAVE_FINISHED,
 				true
 			);
 		}
@@ -580,10 +580,7 @@ describe( 'useChunkedImport', () => {
 			await result.current.run();
 		} );
 
-		expect( onError ).toHaveBeenLastCalledWith(
-			'The connection dropped near the end of the import, so it may have finished. Check your orders before you upload the file again.',
-			true
-		);
+		expect( onError ).toHaveBeenLastCalledWith( MAY_HAVE_FINISHED, true );
 	} );
 
 	it( 'warns that the import may have finished after an unexpected response', async () => {
@@ -602,10 +599,7 @@ describe( 'useChunkedImport', () => {
 			await result.current.run();
 		} );
 
-		expect( onError ).toHaveBeenLastCalledWith(
-			'The connection dropped near the end of the import, so it may have finished. Check your orders before you upload the file again.',
-			true
-		);
+		expect( onError ).toHaveBeenLastCalledWith( MAY_HAVE_FINISHED, true );
 	} );
 
 	it( 'stops when a chunk reports no progress instead of looping', async () => {
