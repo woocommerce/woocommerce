@@ -94,7 +94,7 @@ class WC_WCCOM_Site_Installation_Step_Move_Product implements WC_WCCOM_Site_Inst
 	 * @throws WC_REST_WCCOM_Site_Installer_Error If the site doesn't meet the package's requirements.
 	 */
 	protected function check_package_requirements( string $destination ): void {
-		$source = $this->get_package_root( (string) $this->state->get_unpacked_path() );
+		$source = $this->get_package_root( $this->get_local_path( (string) $this->state->get_unpacked_path() ) );
 		if ( '' === $source || $this->is_installed_copy( trailingslashit( $destination ) . basename( $source ) ) ) {
 			return;
 		}
@@ -142,17 +142,31 @@ class WC_WCCOM_Site_Installation_Step_Move_Product implements WC_WCCOM_Site_Inst
 	 * An empty folder doesn't count: install_package() installs into it, so the requirements still need checking.
 	 *
 	 * @since 11.4.0
-	 * @param string $path Where the package would be installed.
+	 * @param string $path Where the package would be installed, as a local path.
 	 * @return bool
 	 */
 	private function is_installed_copy( string $path ): bool {
+		return file_exists( $path ) && ( ! is_dir( $path ) || array() !== array_diff( (array) scandir( $path ), array( '.', '..' ) ) );
+	}
+
+	/**
+	 * Turns a WP_Filesystem path into the local path PHP's own file functions can read, as Plugin_Upgrader::check_package() does.
+	 *
+	 * Over FTP or SSH the filesystem's root can differ from the local one, so the unpacked package's path doesn't
+	 * work with is_dir() and friends until it's mapped back.
+	 *
+	 * @since 11.4.0
+	 * @param string $path A path from WP_Filesystem, such as the unpacked package's.
+	 * @return string
+	 */
+	private function get_local_path( string $path ): string {
 		global $wp_filesystem;
 
-		if ( ! $wp_filesystem instanceof WP_Filesystem_Base ) {
-			return is_dir( $path ) && array() !== array_diff( (array) scandir( $path ), array( '.', '..' ) );
+		if ( '' === $path || ! $wp_filesystem instanceof WP_Filesystem_Base ) {
+			return $path;
 		}
 
-		return $wp_filesystem->exists( $path ) && ! empty( $wp_filesystem->dirlist( $path ) );
+		return str_replace( $wp_filesystem->wp_content_dir(), trailingslashit( WP_CONTENT_DIR ), $path );
 	}
 
 	/**

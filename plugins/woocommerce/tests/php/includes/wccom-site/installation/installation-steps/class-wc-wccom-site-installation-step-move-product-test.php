@@ -144,6 +144,65 @@ class WC_WCCOM_Site_Installation_Step_Move_Product_Test extends WC_Unit_Test_Cas
 	}
 
 	/**
+	 * @testdox The requirements are still checked when WordPress writes files over FTP or SSH, where the filesystem's root differs from the local one.
+	 */
+	public function test_checks_requirements_when_the_filesystem_root_differs(): void {
+		global $wp_filesystem;
+
+		$this->unpack_fixture( 'plugin', '99.0', '' );
+		WC_WCCOM_Site_Installer::get_wp_upgrader(); // Sets up WP_Filesystem, so the stand-in below isn't replaced.
+
+		$remote_content_dir = '/remote-root/wp-content/';
+		$state              = $this->state( 'plugin' );
+		$state->set_unpacked_path( str_replace( trailingslashit( WP_CONTENT_DIR ), $remote_content_dir, $this->unpacked_path ) );
+
+		$original_filesystem = $wp_filesystem;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Stand-in for an FTP filesystem, restored below.
+		$wp_filesystem = new class( null, $remote_content_dir ) extends WP_Filesystem_Direct {
+			/**
+			 * The content directory as the filesystem sees it.
+			 *
+			 * @var string
+			 */
+			private $remote_content_dir;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param mixed  $arg                Unused.
+			 * @param string $remote_content_dir The content directory as the filesystem sees it.
+			 */
+			public function __construct( $arg, string $remote_content_dir ) {
+				parent::__construct( $arg );
+				$this->remote_content_dir = $remote_content_dir;
+			}
+
+			/**
+			 * The content directory as the filesystem sees it.
+			 *
+			 * @return string
+			 */
+			public function wp_content_dir() {
+				return $this->remote_content_dir;
+			}
+		};
+
+		$error = null;
+		try {
+			( new WC_WCCOM_Site_Installation_Step_Move_Product( $state ) )->run();
+		} catch ( WC_REST_WCCOM_Site_Installer_Error $e ) {
+			$error = $e;
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the original filesystem.
+			$wp_filesystem = $original_filesystem;
+		}
+
+		$this->assertNotNull( $error, 'The step should fail' );
+		$this->assertSame( 'incompatible_wp_required_version', $error->get_error_code() );
+		$this->assertDirectoryDoesNotExist( $this->destination( 'plugin' ), 'Nothing should be installed' );
+	}
+
+	/**
 	 * @testdox A package whose requirements the site meets installs into an empty destination folder, as WordPress does.
 	 */
 	public function test_installs_into_an_empty_destination_folder(): void {
