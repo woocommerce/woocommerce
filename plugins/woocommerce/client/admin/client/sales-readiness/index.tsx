@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { Page } from '@wordpress/admin-ui';
+import { Breadcrumbs, Page } from '@wordpress/admin-ui';
+import { __ } from '@wordpress/i18n';
 import { Notice, Spinner } from '@wordpress/components';
 
 /**
@@ -23,7 +24,17 @@ export default function SalesReadiness() {
 	return (
 		<Page
 			className="wc-sales-readiness"
-			title={ view?.title ?? '' }
+			breadcrumbs={
+				<Breadcrumbs
+					items={ [
+						{
+							label:
+								view?.title ??
+								__( 'Sales readiness', 'woocommerce' ),
+						},
+					] }
+				/>
+			}
 			subTitle={ view?.description }
 			showSidebarToggle={ false }
 		>
