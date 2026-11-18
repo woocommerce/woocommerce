@@ -141,9 +141,21 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			return $this->ucp_error( 'VALIDATION_ERROR', wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200 );
 		}
 
+		// Held as the Store API checkout holds them, so a usage-limited coupon is not spent twice.
+		try {
+			$order->hold_applied_coupons( $order->get_billing_email() );
+		} catch ( \Exception $e ) {
+			// The holds taken before the failure are saved with the order.
+			wc_release_coupons_for_order( $order );
+
+			return $this->ucp_error( 'discount_code_invalid', wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200, '$.discounts.codes' );
+		}
+
 		try {
 			wc_reserve_stock_for_order( $order );
 		} catch ( ReserveStockException $e ) {
+			wc_release_coupons_for_order( $order );
+
 			// The hold failed on stock another checkout took since the cart was last checked. The order
 			// stays a draft, which the payment page refuses.
 			return $this->ucp_error( Utils::cart_error_code( (string) $e->getErrorCode() ), wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200, '$.line_items' );

@@ -55,6 +55,13 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	const LINE_ITEMS_MAX = 100;
 
 	/**
+	 * Most discount codes one request may submit.
+	 *
+	 * Each code costs a coupon lookup and validation, where the Store API takes one code per request.
+	 */
+	const DISCOUNT_CODES_MAX = 10;
+
+	/**
 	 * Build the `ucp` envelope for a response from this route.
 	 *
 	 * @param string $status Response status, `success` or `error`.
@@ -434,7 +441,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * Build a successful cart response.
 	 *
 	 * @param string               $cart_id Cart identifier.
-	 * @param array<string, mixed> $context Optional `messages` to merge into the payload.
+	 * @param array<string, mixed> $context Optional `messages` and `discount_codes`, as {@see CartMapper::build_cart()} takes them.
 	 * @return \WP_REST_Response
 	 */
 	protected function cart_response( string $cart_id, array $context = array() ): \WP_REST_Response {
@@ -656,6 +663,160 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Read the request's `discounts.codes`, normalized as WooCommerce stores coupon codes.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return array<int, string>|\WP_REST_Response|null The codes, a 400 error response, or null when the request sends none.
+	 */
+	protected function parse_discount_codes( \WP_REST_Request $request ) {
+		$discounts = Utils::json_param( $request, 'discounts' );
+
+		if ( ! is_array( $discounts ) || ! array_key_exists( 'codes', $discounts ) ) {
+			return null;
+		}
+
+		$codes = $discounts['codes'];
+
+		if ( ! is_array( $codes ) || array_values( $codes ) !== $codes || count( $codes ) > self::DISCOUNT_CODES_MAX ) {
+			return $this->ucp_error(
+				'VALIDATION_ERROR',
+				/* translators: %d: maximum number of discount codes accepted in one request. */
+				sprintf( __( 'discounts.codes must be an array of at most %d strings.', 'woocommerce' ), self::DISCOUNT_CODES_MAX ),
+				'recoverable',
+				400,
+				'$.discounts.codes'
+			);
+		}
+
+		foreach ( $codes as $index => $code ) {
+			if ( ! is_string( $code ) ) {
+				return $this->ucp_error( 'VALIDATION_ERROR', __( 'Each discount code must be a string.', 'woocommerce' ), 'recoverable', 400, sprintf( '$.discounts.codes[%d]', $index ) );
+			}
+
+			$codes[ $index ] = wc_format_coupon_code( trim( $code ) );
+		}
+
+		return $codes;
+	}
+
+	/**
+	 * Replace the cart's coupons with the submitted codes, which an empty list clears.
+	 *
+	 * A code the cart refuses is reported as a warning at its index, and the rest still apply.
+	 *
+	 * @param array<int, string>|null $codes Codes from parse_discount_codes(), or null to leave the coupons alone.
+	 * @return array<string, mixed> Context for the response: the `discount_codes` to echo and any `messages`.
+	 */
+	protected function apply_discount_codes( ?array $codes ): array {
+		if ( null === $codes ) {
+			return array();
+		}
+
+		$messages = array();
+
+		if ( ! wc_coupons_enabled() ) {
+			foreach ( $codes as $index => $code ) {
+				$messages[] = $this->discount_warning( 'discount_code_invalid', __( 'Coupons are disabled.', 'woocommerce' ), $index );
+			}
+
+			return array( 'messages' => $messages );
+		}
+
+		$cart = $this->cart_controller->get_cart_instance();
+
+		foreach ( $cart->get_applied_coupons() as $applied ) {
+			if ( ! in_array( $applied, $codes, true ) ) {
+				$cart->remove_coupon( $applied );
+			}
+		}
+
+		$rejected = array();
+
+		foreach ( $codes as $index => $code ) {
+			if ( $this->cart_controller->has_coupon( $code ) ) {
+				continue;
+			}
+
+			// The cart's refusal names no reason, so the one coupon validation gives is caught on its way out.
+			$reason  = null;
+			$capture = static function ( $message, $error_code ) use ( &$reason ) {
+				$reason = (int) $error_code;
+				return $message;
+			};
+			add_filter( 'woocommerce_coupon_error', $capture, PHP_INT_MAX, 2 );
+
+			try {
+				$this->cart_controller->apply_coupon( $code );
+			} catch ( RouteException $error ) {
+				$rejected[ $code ] = true;
+				$messages[]        = $this->discount_warning( $this->discount_error_code( $code, $reason ), wp_specialchars_decode( $error->getMessage(), ENT_QUOTES ), $index );
+			} finally {
+				remove_filter( 'woocommerce_coupon_error', $capture, PHP_INT_MAX );
+			}
+		}
+
+		// An individual-use coupon removes the coupons applied before it.
+		foreach ( $codes as $index => $code ) {
+			if ( ! isset( $rejected[ $code ] ) && ! $this->cart_controller->has_coupon( $code ) ) {
+				/* translators: %s: coupon code. */
+				$messages[] = $this->discount_warning( 'discount_code_combination_disallowed', sprintf( __( 'Coupon code "%s" cannot be used together with the other coupons applied.', 'woocommerce' ), $code ), $index );
+			}
+		}
+
+		$this->cart_controller->calculate_totals();
+
+		return array(
+			'discount_codes' => $codes,
+			'messages'       => $messages,
+		);
+	}
+
+	/**
+	 * The discount extension's rejection code for a coupon the cart refused.
+	 *
+	 * @param string   $code The refused coupon code.
+	 * @param int|null $reason The `WC_Coupon::E_WC_COUPON_*` code coupon validation gave, or null when it never ran.
+	 * @return string
+	 */
+	private function discount_error_code( string $code, ?int $reason ): string {
+		switch ( $reason ) {
+			case \WC_Coupon::E_WC_COUPON_EXPIRED:
+				return 'discount_code_expired';
+			case \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST:
+				return 'discount_code_user_not_logged_in';
+			case \WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED:
+			case \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK:
+				return 'discount_code_user_ineligible';
+			case null:
+				// Past validation, the cart only refuses an existing coupon for an individual-use one already applied.
+				return wc_get_coupon_id_by_code( $code ) ? 'discount_code_combination_disallowed' : 'discount_code_invalid';
+			default:
+				return 'discount_code_invalid';
+		}
+	}
+
+	/**
+	 * Build the warning reporting a submitted discount code that was not applied.
+	 *
+	 * @param string $code Rejection code.
+	 * @param string $content Message for the buyer.
+	 * @param int    $index Position of the code in `discounts.codes`.
+	 * @return array
+	 */
+	private function discount_warning( string $code, string $content, int $index ): array {
+		return array(
+			'type'         => 'warning',
+			'code'         => $code,
+			'content'      => $content,
+			'path'         => sprintf( '$.discounts.codes[%d]', $index ),
+			'content_type' => 'plain',
+		);
 	}
 
 	/**

@@ -214,7 +214,7 @@ class UcpCheckout extends ControllerTestCase {
 	public function test_create_from_line_items(): void {
 		$data = $this->create_ready_checkout();
 
-		$this->assertSame( array( 'dev.ucp.shopping.checkout' ), array_keys( $data['ucp']['capabilities'] ) );
+		$this->assertSame( array( 'dev.ucp.shopping.checkout', 'dev.ucp.shopping.discount' ), array_keys( $data['ucp']['capabilities'] ) );
 		$this->assertInstanceOf( \stdClass::class, $data['ucp']['payment_handlers'], 'A checkout envelope must carry the payment_handlers registry.' );
 		$this->assertSame( 'ready_for_complete', $data['status'] );
 		$this->assertSame( 'buyer@example.com', $data['buyer']['email'] );
@@ -1007,5 +1007,36 @@ class UcpCheckout extends ControllerTestCase {
 			$this->assertSame( 409, $this->request( 'POST', '/checkout-sessions/' . $created['id'] . $action )->get_status(), $action );
 		}
 		$this->assertSame( 409, $this->request( 'POST', '/checkout-sessions', array( 'cart_id' => $created['id'] ) )->get_status() );
+	}
+
+	/**
+	 * @testdox Complete holds the checkout's coupons, and refuses one whose last use another checkout took meanwhile.
+	 */
+	public function test_complete_holds_coupons(): void {
+		$coupon  = \WC_Helper_Coupon::create_coupon(
+			'once',
+			array(
+				'coupon_amount' => '1',
+				'usage_limit'   => '1',
+			)
+		);
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+
+		$updated = $this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'once' ) ) ) )->get_data();
+		$this->assertSame( array( 'once' ), array_column( $updated['discounts']['applied'], 'code' ) );
+
+		// A rival checkout holds the last use after this one passed validation.
+		$hold_rival = static function () use ( $coupon, &$hold_rival ) {
+			remove_action( 'woocommerce_checkout_validate_order_before_payment', $hold_rival );
+			$coupon->get_data_store()->check_and_hold_coupon( $coupon );
+		};
+		add_action( 'woocommerce_checkout_validate_order_before_payment', $hold_rival );
+		$response = $this->request( 'POST', $path . '/complete' );
+
+		$this->assertSame( 'error', $response->get_data()['ucp']['status'] );
+		$this->assertSame( 'discount_code_invalid', $response->get_data()['messages'][0]['code'] );
+		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertTrue( $order->has_status( OrderStatus::CHECKOUT_DRAFT ), 'A coupon that cannot be held must not leave a payable order.' );
 	}
 }
