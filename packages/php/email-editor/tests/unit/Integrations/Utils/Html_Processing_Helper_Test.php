@@ -818,4 +818,44 @@ class Html_Processing_Helper_Test extends \Email_Editor_Unit_Test {
 			$this->assertEquals( '', $result, 'Failed to reject invalid dimension: ' . $input_description );
 		}
 	}
+
+	/**
+	 * Test parse_aspect_ratio reads the ratio formats core saves.
+	 */
+	public function testParseAspectRatioReadsValidRatios(): void {
+		$this->assertSame( 1.0, Html_Processing_Helper::parse_aspect_ratio( '1' ) );
+		$this->assertSame( 1.5, Html_Processing_Helper::parse_aspect_ratio( '1.5' ) );
+		$this->assertSame( 4 / 3, Html_Processing_Helper::parse_aspect_ratio( '4/3' ) );
+		$this->assertSame( 16 / 9, Html_Processing_Helper::parse_aspect_ratio( ' 16 / 9 ' ) );
+	}
+
+	/**
+	 * Test parse_aspect_ratio rejects values that aren't a simple positive ratio.
+	 *
+	 * The ratio is interpolated into inline CSS, so anything beyond digits and one slash must be rejected.
+	 */
+	public function testParseAspectRatioRejectsInvalidRatios(): void {
+		$invalid = array( '', 'auto', '0', '0/1', '1/0', '-1', '4/3/2', '1;color:red', '1/1 !important', '4:3' );
+		foreach ( $invalid as $ratio ) {
+			$this->assertNull( Html_Processing_Helper::parse_aspect_ratio( $ratio ), "Accepted invalid ratio: {$ratio}" );
+		}
+	}
+
+	/**
+	 * Test get_crop_height returns the height an aspect-ratio crop gives an image.
+	 */
+	public function testGetCropHeightDividesTheWidthByTheRatio(): void {
+		$this->assertSame( 580, Html_Processing_Helper::get_crop_height( 580, 1.0 ) );
+		$this->assertSame( 435, Html_Processing_Helper::get_crop_height( 580, 4 / 3 ) );
+		$this->assertSame( 1, Html_Processing_Helper::get_crop_height( 1, 100.0 ), 'A very wide ratio never rounds down to 0.' );
+	}
+
+	/**
+	 * Test get_crop_height returns 0 instead of dividing by an unusable width or ratio.
+	 */
+	public function testGetCropHeightReturnsZeroForAnUnusableWidthOrRatio(): void {
+		$this->assertSame( 0, Html_Processing_Helper::get_crop_height( 0, 1.0 ) );
+		$this->assertSame( 0, Html_Processing_Helper::get_crop_height( 580, 0.0 ) );
+		$this->assertSame( 0, Html_Processing_Helper::get_crop_height( 580, -1.0 ) );
+	}
 }

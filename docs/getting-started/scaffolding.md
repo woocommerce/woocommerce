@@ -59,6 +59,20 @@ Read more about the [`wordpress/create-block` package](https://developer.wordpre
 
 ## Sample Store Data
 
+### Woo Store Blueprints with Mock Data
+
+[WordPress Studio Blueprints](https://wordpress.studio/docs/blueprints/) can create a local WooCommerce store with the Purple theme, a store-specific homepage, and a small catalog of fictional sample products. Use one when you need products to explore a theme, extension, or API integration.
+
+Install or enable the [Studio CLI](https://wordpress.studio/docs/cli/) first. Run `studio blueprint list` to see the available Blueprints. From a new, empty directory, use the command for the sample store you want:
+
+| Store | Command |
+| --- | --- |
+| Apparel | `studio blueprint use woo-apparel` |
+| Beauty + Wellness | `studio blueprint use woo-beauty-wellness` |
+| Digital Goods | `studio blueprint use woo-digital-goods` |
+| Food + Drink | `studio blueprint use woo-food-drink` |
+| Home + Living | `studio blueprint use woo-home-living` |
+
 ### Core Plugin Sample Data
 
 It may be helpful to load your local store with sample data. In the WooCommerce core plugin, you can find CSV and XML files that can be imported directly into WooCommerce using the WordPress admin or via WC-CLI. The sample data is located in [`/plugins/woocommerce/sample-data/`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/sample-data).

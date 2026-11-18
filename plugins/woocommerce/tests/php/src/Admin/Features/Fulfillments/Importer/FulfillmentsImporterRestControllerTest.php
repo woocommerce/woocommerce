@@ -16,6 +16,13 @@ use WP_REST_Request;
 class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Use a fresh REST server per test, since some tests register a controller with a mocked upload helper.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * Original fulfillments feature flag value.
 	 *
 	 * @var mixed

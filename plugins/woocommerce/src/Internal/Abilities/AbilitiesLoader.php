@@ -14,10 +14,12 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderSendEmail;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CustomersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewayUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributeCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributesQuery;
@@ -31,12 +33,18 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewReply;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewUpdate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneMethodCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneMethodUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolRun;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
 use Automattic\WooCommerce\Internal\AgentReadiness\RunCheckAbility;
+use Automattic\WooCommerce\Internal\Abilities\Domain\StoreSettingsGet;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsGroupsQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -63,9 +71,11 @@ class AbilitiesLoader {
 		OrderCreate::class,
 		OrderNotesQuery::class,
 		OrderSendEmail::class,
+		OrderDelete::class,
 		OrderUpdate::class,
 		OrderUpdateStatus::class,
 		PaymentGatewaysQuery::class,
+		PaymentGatewayUpdate::class,
 		ProductsQuery::class,
 		ProductTermsQuery::class,
 		ProductTermCreate::class,
@@ -83,8 +93,14 @@ class AbilitiesLoader {
 		ShippingZonesQuery::class,
 		SystemStatusToolsQuery::class,
 		SystemStatusToolRun::class,
+		ShippingZoneCreate::class,
+		ShippingZoneMethodCreate::class,
+		ShippingZoneMethodUpdate::class,
 		TaxRatesQuery::class,
 		CustomersQuery::class,
+		StoreSettingsGet::class,
+		SettingsQuery::class,
+		SettingsGroupsQuery::class,
 	);
 
 	/**
