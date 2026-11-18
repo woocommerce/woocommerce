@@ -2584,6 +2584,103 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Update downloads for a plugin offer, and whether the download should be stopped.
+	 *
+	 * @return array
+	 */
+	public function pre_download_offers(): array {
+		return array(
+			'Woo update needing a newer WordPress'     => array( true, '99.0', true ),
+			'Woo update the site meets'                => array( true, '1.0', false ),
+			'Woo update without a requirement'         => array( true, null, false ),
+			'another plugin needing a newer WordPress' => array( false, '99.0', false ),
+		);
+	}
+
+	/**
+	 * @testdox Downloading a WooCommerce.com plugin update that needs a newer WordPress is stopped, whichever path runs it: $_dataName.
+	 * @dataProvider pre_download_offers
+	 *
+	 * @param bool        $is_woo       Whether the offer is for the local WooCommerce.com plugin.
+	 * @param string|null $requires     WordPress version the offer needs, or null for none.
+	 * @param bool        $expect_error Whether the download should be stopped with an error.
+	 */
+	public function test_pre_download_blocks_plugin_update_needing_newer_wp( bool $is_woo, ?string $requires, bool $expect_error ): void {
+		$woo_filename   = $this->mock_local_woo_plugin();
+		$other_filename = 'another-plugin/another-plugin.php';
+		$this->mock_update_check_products( 123, false );
+		if ( null !== $requires ) {
+			$this->mocked_updates[123]['requires'] = $requires;
+		}
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			set_site_transient(
+				'update_plugins',
+				(object) array(
+					'response'  => array(
+						$other_filename => (object) array(
+							'plugin'      => $other_filename,
+							'new_version' => '2.0.0',
+							'requires'    => $requires,
+						),
+					),
+					'no_update' => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$reply = apply_filters( 'upgrader_pre_download', false, '', null, array( 'plugin' => $is_woo ? $woo_filename : $other_filename ) );
+
+		if ( $expect_error ) {
+			$this->assertWPError( $reply );
+			$this->assertSame( 'woocommerce_update_needs_newer_wp', $reply->get_error_code() );
+			$this->assertStringContainsString( 'This update needs WordPress 99.0 or later', $reply->get_error_message() );
+		} else {
+			$this->assertFalse( $reply );
+		}
+	}
+
+	/**
+	 * @testdox Downloading a WooCommerce.com theme update that needs a newer WordPress is stopped.
+	 */
+	public function test_pre_download_blocks_theme_update_needing_newer_wp(): void {
+		$stylesheet = $this->mock_local_woo_theme();
+		$this->mock_update_check_products( 456, false );
+		$this->mocked_updates[456]['requires'] = '99.0';
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			set_site_transient(
+				'update_themes',
+				(object) array(
+					'response' => array(),
+					'checked'  => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$reply = apply_filters( 'upgrader_pre_download', false, '', null, array( 'theme' => $stylesheet ) );
+
+		$this->assertWPError( $reply );
+		$this->assertSame( 'woocommerce_update_needs_newer_wp', $reply->get_error_code() );
+	}
+
+	/**
+	 * @testdox A download that isn't a plugin or theme update, or that another callback already answered, is left alone.
+	 */
+	public function test_pre_download_leaves_other_downloads_alone(): void {
+		$earlier_error = new WP_Error( 'earlier', 'Set by another callback.' );
+
+		$this->assertFalse( WC_Helper_Updater::block_update_needing_newer_wp( false, 'https://example.com/package.zip', null, array( 'type' => 'plugin' ) ) );
+		$this->assertSame( $earlier_error, WC_Helper_Updater::block_update_needing_newer_wp( $earlier_error, 'https://example.com/package.zip', null, array( 'plugin' => 'any/any.php' ) ) );
+	}
+
+	/**
 	 * Makes WC_Helper::get_local_woo_plugins() report a single Woo plugin, without touching the filesystem.
 	 *
 	 * @return string The plugin file name.

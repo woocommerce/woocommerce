@@ -38,6 +38,7 @@ class WC_Helper_Updater {
 		add_action( 'pre_set_site_transient_update_themes', array( __CLASS__, 'transient_update_themes' ), 21, 1 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'upgrader_process_complete' ) );
 		add_action( 'upgrader_pre_download', array( __CLASS__, 'block_expired_updates' ), 10, 2 );
+		add_filter( 'upgrader_pre_download', array( __CLASS__, 'block_update_needing_newer_wp' ), 10, 4 );
 		add_action( 'admin_init', array( __CLASS__, 'add_hook_for_modifying_update_notices' ) );
 		// Late, so another callback can't switch the update back on.
 		add_filter( 'auto_update_plugin', array( __CLASS__, 'skip_auto_update_needing_newer_wp' ), PHP_INT_MAX, 2 );
@@ -1597,6 +1598,46 @@ class WC_Helper_Updater {
 				esc_url( admin_url( 'admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions' ) )
 			)
 		);
+	}
+
+	/**
+	 * Runs on upgrader_pre_download, stops an update to a WooCommerce.com extension version that needs a newer WordPress.
+	 *
+	 * Core checks the requirement only in bulk updates. The single-item upgrade behind the "update now"
+	 * link's URL skips it, and would install a version WordPress then refuses to activate.
+	 *
+	 * @since 11.4.0
+	 * @param bool|WP_Error $reply      Whether to bail without returning the package, or an error already set.
+	 * @param string        $package    The package file name or URL.
+	 * @param WP_Upgrader   $upgrader   The upgrader instance.
+	 * @param array         $hook_extra Extra arguments, naming the plugin or theme being updated.
+	 * @return bool|WP_Error An error when the update needs a newer WordPress, otherwise $reply unchanged.
+	 */
+	public static function block_update_needing_newer_wp( $reply, $package = '', $upgrader = null, $hook_extra = array() ) {
+		unset( $package, $upgrader ); // Avoid parameter not used PHPCS errors.
+
+		if ( false !== $reply || ! is_array( $hook_extra ) ) {
+			return $reply;
+		}
+
+		if ( isset( $hook_extra['plugin'] ) && is_string( $hook_extra['plugin'] ) ) {
+			$transient = get_site_transient( 'update_plugins' );
+			$item      = (object) array( 'plugin' => $hook_extra['plugin'] );
+			$offer     = is_object( $transient ) ? ( $transient->response[ $hook_extra['plugin'] ] ?? null ) : null;
+		} elseif ( isset( $hook_extra['theme'] ) && is_string( $hook_extra['theme'] ) ) {
+			$transient = get_site_transient( 'update_themes' );
+			$item      = (object) array( 'theme' => $hook_extra['theme'] );
+			$offer     = is_object( $transient ) ? ( $transient->response[ $hook_extra['theme'] ] ?? null ) : null;
+		} else {
+			return $reply;
+		}
+
+		$requires = self::get_required_wp_version( is_object( $offer ) ? get_object_vars( $offer ) : $offer );
+		if ( '' === $requires || is_wp_version_compatible( $requires ) || ! self::is_woo_update_offer( $item ) ) {
+			return $reply;
+		}
+
+		return new WP_Error( 'woocommerce_update_needs_newer_wp', self::get_wp_requirement_notice( $requires ) );
 	}
 }
 
