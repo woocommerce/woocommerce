@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Honor the Gallery block’s Crop images to fit setting for mixed-shape rows in emails.
