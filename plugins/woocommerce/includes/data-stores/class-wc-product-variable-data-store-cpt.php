@@ -1014,21 +1014,16 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @return string
 	 */
 	private function get_unanimous_custom_child_stock_status( $product ): string {
-		$custom_stock_status_options = $this->get_custom_stock_status_options();
-		if ( ! $custom_stock_status_options ) {
-			return ProductStockStatus::OUT_OF_STOCK;
+		$custom_statuses = $this->get_custom_stock_status_options();
+		$child_ids       = array_values( array_unique( array_filter( array_map( 'absint', (array) $product->get_children() ) ) ) );
+		if ( $custom_statuses && $child_ids ) {
+			$shared_stock_status = $this->get_shared_stock_status( $child_ids, $this->read_child_stock_statuses( $child_ids ) );
+			if ( null !== $shared_stock_status && array_key_exists( $shared_stock_status, $custom_statuses ) ) {
+				return $shared_stock_status;
+			}
 		}
 
-		$child_ids = array_values( array_unique( array_filter( array_map( 'absint', (array) $product->get_children() ) ) ) );
-		if ( ! $child_ids ) {
-			return ProductStockStatus::OUT_OF_STOCK;
-		}
-
-		$shared_stock_status = self::get_shared_stock_status( $child_ids, $this->read_child_stock_statuses( $child_ids ) );
-
-		return null !== $shared_stock_status && array_key_exists( $shared_stock_status, $custom_stock_status_options )
-			? $shared_stock_status
-			: ProductStockStatus::OUT_OF_STOCK;
+		return ProductStockStatus::OUT_OF_STOCK;
 	}
 
 	/**
@@ -1077,7 +1072,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param array<int, array{child_id: string, stock_status: string|null}> $rows      Stored stock status rows of those children.
 	 * @return string|null
 	 */
-	private static function get_shared_stock_status( array $child_ids, array $rows ): ?string {
+	private function get_shared_stock_status( array $child_ids, array $rows ): ?string {
 		if ( count( $rows ) !== count( $child_ids ) ) {
 			return null;
 		}
