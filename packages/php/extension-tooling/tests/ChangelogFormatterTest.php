@@ -374,26 +374,72 @@ class ChangelogFormatterTest extends TestCase {
 	 */
 	public function test_multiline_change_round_trips_without_creating_extra_bullets() {
 		$changelog = "*** Title ***\n\n= 1.5.1 - 2026-09-17 =\n"
-			. "* Fix - First line.\n  Second line.\n  \n    Indented text.\n"
+			. "* Fix - First line.  \n  Second line.\n  \n    Indented text.\n"
 			. "* Add - Separate change.\n\n= 1.5.0 - 2026-09-16 =\n* Initial change.\n";
 		$entries   = $this->formatter->parse( $changelog )->getEntries();
 		$changes   = $entries[0]->getChanges();
 
 		$this->assertCount( 2, $entries );
 		$this->assertCount( 2, $changes );
-		$this->assertSame( "First line.\nSecond line.\n\n  Indented text.", $changes[0]->getContent() );
+		$this->assertSame( "First line.  \nSecond line.\n\n  Indented text.", $changes[0]->getContent() );
 		$this->assertSame( $changelog, $this->round_trip( $changelog ) );
 	}
 
 	/**
-	 * Older lists with indented bullets still parse as separate changes.
+	 * Older lists with mixed bullet indentation still parse as separate changes.
 	 */
-	public function test_legacy_indented_bullets_stay_separate() {
-		$changelog = "*** Title ***\n\n= 1.5.1 - 2026-09-17 =\n  * Fix - First.\n  * Tweak - Second.\n";
-		$changes   = $this->formatter->parse( $changelog )->getLatestEntry()->getChanges();
+	public function test_legacy_bullets_with_mixed_indentation_stay_separate() {
+		foreach ( array( '', '  ' ) as $indent ) {
+			$changelog = "*** Title ***\n\n= 1.5.1 - 2026-09-17 =\n{$indent}* Fix - First.\n  * Tweak - Second.\n";
+			$changes   = $this->formatter->parse( $changelog )->getLatestEntry()->getChanges();
 
-		$this->assertCount( 2, $changes );
-		$this->assertSame( 'Tweak', $changes[1]->getSubheading() );
+			$this->assertCount( 2, $changes );
+			$this->assertSame( 'Tweak', $changes[1]->getSubheading() );
+		}
+	}
+
+	/**
+	 * Change bodies from any platform serialize with the same continuation lines.
+	 */
+	public function test_write_normalizes_change_line_endings_before_indenting() {
+		$original = "*** Title ***\n\n= 1.5.1 - 2026-09-17 =\n* Fix - First.\n";
+		$expected = $original . "  Second.\n";
+		foreach ( array( "\n", "\r\n", "\r" ) as $separator ) {
+			$changelog = $this->formatter->parse( $original );
+			$changes   = $changelog->getLatestEntry()->getChanges();
+			$changes[0]->setContent( 'First.' . $separator . 'Second.' );
+			$this->assertSame( $expected, $this->formatter->format( $changelog ) );
+		}
+	}
+
+	/**
+	 * Preserve legacy entry boundaries by refusing to write ambiguous continuations.
+	 *
+	 * @dataProvider provide_ambiguous_continuations
+	 * @param string $continuation Change line that would split the entry when reparsed.
+	 */
+	public function test_write_rejects_ambiguous_continuations( $continuation ) {
+		$changelog = $this->formatter->parse( "*** Title ***\n\n= 1.5.1 - 2026-09-17 =\n* Fix - First.\n" );
+		$changes   = $changelog->getLatestEntry()->getChanges();
+		$changes[0]->setContent( "First.\n$continuation" );
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Change continuation looks like a separate changelog entry' );
+		$this->formatter->format( $changelog );
+	}
+
+	/**
+	 * These continuations would otherwise parse as independent changes or release headings.
+	 *
+	 * @return array
+	 */
+	public function provide_ambiguous_continuations() {
+		return array(
+			'bullet'         => array( '* Another change.' ),
+			'heading'        => array( '= 1.5.0 - 2026-09-16 =' ),
+			'near heading'   => array( '= Another line.' ),
+			'legacy heading' => array( '2026.09.01  - version 1.1.0' ),
+		);
 	}
 
 	/**
@@ -433,6 +479,7 @@ class ChangelogFormatterTest extends TestCase {
 	public function provide_malformed_headings() {
 		return array(
 			'no date'                         => array( '= 1.1.0 =' ),
+			'indented near heading'           => array( '  = Another line.' ),
 			'no separator'                    => array( '= 1.1.0 2026-09-01 =' ),
 			'unpadded date'                   => array( '= 1.1.0 - 2026-9-1 =' ),
 			'dotted date'                     => array( '= 1.1.0 - 2026.09.01 =' ),
@@ -442,6 +489,7 @@ class ChangelogFormatterTest extends TestCase {
 			'placeholder version, unreleased' => array( "= {$this->placeholder_version()} - unreleased =" ),
 			'dotted WooCommerce.com heading'  => array( '2026.09.01 - version 1.1.0' ),
 			'dashed WooCommerce.com heading'  => array( '2026-09-01 - version 1.1.0' ),
+			'spaced WooCommerce.com heading'  => array( '2026.09.01  - version 1.1.0' ),
 		);
 	}
 }

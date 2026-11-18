@@ -23,4 +23,6 @@ Before publication, add a Composer path repository to the extension's root `comp
 }
 ```
 
-Run `composer install` and `composer test` from this directory to test the formatter.
+From the extension root, run `composer update woocommerce/extension-changelogger` to install the package and update the extension's lockfile for the rehearsal.
+
+Run `composer install` and `composer test` from this directory to test the formatter itself.

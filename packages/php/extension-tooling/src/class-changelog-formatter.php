@@ -116,27 +116,15 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 	public function parse( $changelog ) {
 		$ret = new Changelog();
 
-		$changelog = strtr( (string) $changelog, array( "\r\n" => "\n" ) );
-		$changelog = strtr( $changelog, array( "\r" => "\n" ) );
-
-		$prologue = array();
-		$entries  = array();
-		$entry    = null;
-		$change   = null;
+		$changelog       = self::normalize_line_endings( $changelog );
+		$prologue        = array();
+		$entries         = array();
+		$entry           = null;
+		$change          = null;
+		$first_line_tail = '';
 
 		foreach ( explode( "\n", $changelog ) as $raw_line ) {
-			if ( null !== $change && 0 === strpos( $raw_line, self::CONTINUATION ) ) {
-				$change->setContent( $change->getContent() . "\n" . substr( $raw_line, strlen( self::CONTINUATION ) ) );
-				continue;
-			}
-
 			$line = trim( $raw_line );
-
-			if ( '' === $line ) {
-				$change = null;
-				continue;
-			}
-
 			$heading = $this->parse_heading( $line );
 
 			if ( null !== $heading ) {
@@ -160,9 +148,19 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 			// next write. Fail instead. That is any line starting with a single `=`, and any
 			// heading in the older WooCommerce.com shape (`YYYY.MM.DD - version X.Y.Z`).
 			// A title starting with `==` is not a heading.
-			$is_old_heading = preg_match( '/^\d{4}[.-]\d{1,2}[.-]\d{1,2} - version\b/', $line );
-			if ( ! $is_bullet && ( preg_match( '/^=(?!=)/', $line ) || $is_old_heading ) ) {
+			if ( ! $is_bullet && self::looks_like_heading( $line ) ) {
 				throw new InvalidArgumentException( "Line looks like a version heading but is not one: $line" );
+			}
+
+			if ( ! $is_bullet && null !== $change && 0 === strpos( $raw_line, self::CONTINUATION ) ) {
+				$change->setContent( $change->getContent() . $first_line_tail . "\n" . substr( $raw_line, strlen( self::CONTINUATION ) ) );
+				$first_line_tail = '';
+				continue;
+			}
+
+			if ( '' === $line ) {
+				$change = null;
+				continue;
 			}
 
 			// Anything else ahead of the first heading is the title block, bullets excepted:
@@ -182,6 +180,9 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 			// Continuations only follow the unindented bullets written by format().
 			if ( 0 !== strpos( $raw_line, self::BULLET ) ) {
 				$change = null;
+			} else {
+				// Keep a Markdown hard line break only if a continuation follows.
+				$first_line_tail = substr( $raw_line, strlen( rtrim( $raw_line, " \t" ) ) );
 			}
 		}
 
@@ -196,6 +197,7 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 	 *
 	 * @param Changelog $changelog Changelog object.
 	 * @return string
+	 * @throws InvalidArgumentException If a continuation looks like a separate changelog entry.
 	 */
 	public function format( Changelog $changelog ) {
 		$ret = '';
@@ -320,7 +322,16 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 	 */
 	private function format_change( $subheading, $content ) {
 		$subheading = trim( (string) $subheading );
-		$content    = trim( (string) $content );
+		$content    = trim( self::normalize_line_endings( $content ) );
+
+		if ( false !== strpos( $content, "\n" ) ) {
+			foreach ( array_slice( explode( "\n", $content ), 1 ) as $continuation ) {
+				$line = trim( $continuation );
+				if ( 0 === strpos( $line, self::BULLET ) || self::looks_like_heading( $line ) ) {
+					throw new InvalidArgumentException( "Change continuation looks like a separate changelog entry: $line" );
+				}
+			}
+		}
 
 		if ( '' === $subheading ) {
 			return $content;
@@ -331,6 +342,26 @@ class Changelog_Formatter extends Parser implements FormatterPlugin {
 		}
 
 		return $subheading . self::SEPARATOR . $content;
+	}
+
+	/**
+	 * Normalize CRLF and bare CR before classifying or indenting lines.
+	 *
+	 * @param string $text Source text.
+	 * @return string
+	 */
+	private static function normalize_line_endings( $text ) {
+		return str_replace( array( "\r\n", "\r" ), "\n", (string) $text );
+	}
+
+	/**
+	 * Whether the line begins like a current or legacy release heading.
+	 *
+	 * @param string $line Trimmed line.
+	 * @return bool
+	 */
+	private static function looks_like_heading( $line ) {
+		return preg_match( '/^=(?!=)/', $line ) || preg_match( '/^\d{4}[.-]\d{1,2}[.-]\d{1,2}\h+-\h+version\b/', $line );
 	}
 
 	/**
