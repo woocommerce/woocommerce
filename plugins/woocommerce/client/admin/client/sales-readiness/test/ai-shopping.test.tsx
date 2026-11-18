@@ -342,14 +342,16 @@ describe( 'AiShopping', () => {
 			} )
 		);
 		const input = ( id: string ) =>
-			container.querySelector(
-				`input[type="hidden"][name="${ id }"]`
-			);
+			container.querySelector( `input[type="hidden"][name="${ id }"]` );
 
-		expect( input( 'woocommerce_refund_returns_page_id' )?.getAttribute( 'value' ) ).toBe(
-			''
-		);
-		expect( input( 'woocommerce_terms_page_id' )?.getAttribute( 'value' ) ).toBe( '' );
+		expect(
+			input( 'woocommerce_refund_returns_page_id' )?.getAttribute(
+				'value'
+			)
+		).toBe( '' );
+		expect(
+			input( 'woocommerce_terms_page_id' )?.getAttribute( 'value' )
+		).toBe( '' );
 		expect(
 			screen.getByRole( 'combobox', {
 				name: 'Refund and returns policy',
@@ -374,9 +376,8 @@ describe( 'AiShopping', () => {
 			)?.value
 		).toBe( '12' );
 		expect(
-			container.querySelector(
-				'input[name="woocommerce_terms_page_id"]'
-			)?.value
+			container.querySelector( 'input[name="woocommerce_terms_page_id"]' )
+				?.value
 		).toBe( '12' );
 		expect( save() ).not.toHaveAttribute( 'aria-disabled', 'true' );
 		expect( typeof window.onbeforeunload ).toBe( 'function' );

@@ -502,7 +502,6 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( '', $page['ucp']['message'], 'It doesn\'t say AI assistants can shop' );
 		$this->assertMatchesRegularExpression( '#^Finish \d+ required steps? to get your store ready for AI shopping\.$#', $page['checklist']['summary'] );
 
-
 		$shopping = $this->view()['overview']['shopping'];
 		$this->assertSame(
 			array(
