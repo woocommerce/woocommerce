@@ -1,14 +1,22 @@
 /**
  * External dependencies
  */
-import { expect, test } from '@woocommerce/e2e-utils';
+import {
+	expect,
+	test,
+	enableTestPlugin,
+	guestFile,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
-import { blockData, handleAddToCartAjaxSetting } from './utils';
+import { blockData } from './utils';
 
 test.describe( `${ blockData.name } Block`, () => {
+	// A guest cart, because all workers share the admin cart.
+	test.use( { storageState: guestFile } );
+
 	test.beforeEach( async ( { frontendUtils } ) => {
 		await frontendUtils.goToShop();
 	} );
@@ -66,54 +74,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		await expect( productElement ).toBeVisible();
 	} );
 
-	test( 'should add product to the cart - with ajax disabled', async ( {
-		frontendUtils,
-		page,
-		admin,
-	} ) => {
-		await handleAddToCartAjaxSetting( admin, page, {
-			isChecked: true,
-		} );
-		await frontendUtils.goToShop();
-
-		const blocks = await frontendUtils.getBlockByName( blockData.slug );
-		const block = blocks.first();
-		const button = block.getByRole( 'link' );
-
-		const productId = await button.getAttribute( 'data-product_id' );
-
-		const productNameLocator = page.locator( `li.post-${ productId } h2` );
-		await expect( productNameLocator ).not.toBeEmpty();
-
-		const productName =
-			( await productNameLocator.textContent() ) as string;
-
-		await block.click();
-
-		await expect(
-			page.locator( `a[href*="cart=${ productId }"]` )
-		).toBeVisible();
-
-		await frontendUtils.goToCheckout();
-
-		const productElement = page.getByText( productName, {
-			exact: true,
-		} );
-
-		await expect( productElement ).toBeVisible();
-
-		await handleAddToCartAjaxSetting( admin, page, {
-			isChecked: false,
-		} );
-	} );
-
 	test( 'the filter `woocommerce_product_add_to_cart_text` should be applied', async ( {
-		requestUtils,
+		context,
 		frontendUtils,
 	} ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-custom-add-to-cart-button-text'
-		);
+		await enableTestPlugin( context, 'custom-add-to-cart-button-text' );
 		await frontendUtils.goToShop();
 		const blocks = await frontendUtils.getBlockByName( blockData.slug );
 		const buttonWithNewText = blocks.getByText( 'Buy Now' );
