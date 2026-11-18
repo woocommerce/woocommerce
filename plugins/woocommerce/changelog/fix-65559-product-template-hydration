@@ -1,4 +1,4 @@
 Significance: patch
 Type: performance
 
-Reduce product page size without changing product images or interactive shopping features.
+Reduce product page size by leaving image data out of the product state sent to interactive blocks.
