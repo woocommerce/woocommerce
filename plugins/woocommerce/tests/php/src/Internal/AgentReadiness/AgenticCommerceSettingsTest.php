@@ -123,7 +123,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			$GLOBALS['submenu'] = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Start from an empty menu; restored below.
 			add_menu_page( 'WooCommerce', 'WooCommerce', 'manage_woocommerce', 'woocommerce' );
 			$page->handle_admin_menu();
-			$this->assertSame( array( 'Sales readiness', 'manage_woocommerce', 'wc-admin&path=/sales-readiness' ), array_slice( end( $GLOBALS['submenu']['woocommerce'] ), 0, 3 ) );
+			$this->assertSame( array( 'AI sales readiness', 'manage_woocommerce', 'wc-admin&path=/sales-readiness' ), array_slice( end( $GLOBALS['submenu']['woocommerce'] ), 0, 3 ) );
 		} finally {
 			foreach ( $saved as $name => $value ) {
 				$GLOBALS[ $name ] = $value; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring what the test changed.
@@ -155,7 +155,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$shopping = $this->shopping();
 		$json     = $this->shopping_json();
 
-		$this->assertSame( 'Product counts show after the first Sales readiness check.', $shopping['visibility']['empty'] );
+		$this->assertSame( 'Product counts show after the first AI sales readiness check.', $shopping['visibility']['empty'] );
 		$this->assertSame( array(), $shopping['visibility']['counts'] );
 		$this->assertStringNotContainsString( 'Sales readiness</a>', $json, 'No Sales readiness row at the end of the checklist' );
 		$labels = array_column( $this->policy( $shopping, AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION )['options'], 'label' );

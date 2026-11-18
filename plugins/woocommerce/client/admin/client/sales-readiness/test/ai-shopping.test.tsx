@@ -198,7 +198,7 @@ describe( 'AiShopping', () => {
 		expect(
 			screen.getByRole( 'link', { name: 'View Site Health' } )
 		).toHaveAttribute( 'href', '/wp-admin/site-health.php' );
-		expect( screen.queryByText( /Sales readiness/ ) ).toBeNull();
+		expect( screen.queryByText( /sales readiness/i ) ).toBeNull();
 	} );
 
 	it( 'names the policy a draft page’s Edit page button is for, for screen readers', () => {
@@ -299,7 +299,7 @@ describe( 'AiShopping', () => {
 			view( {
 				visibility: {
 					...view().visibility,
-					empty: 'Product counts show after the first Sales readiness check.',
+					empty: 'Product counts show after the first AI sales readiness check.',
 					counts: [],
 				},
 			} )
@@ -307,7 +307,7 @@ describe( 'AiShopping', () => {
 
 		expect(
 			screen.getByText(
-				'Product counts show after the first Sales readiness check.'
+				'Product counts show after the first AI sales readiness check.'
 			)
 		).toBeInTheDocument();
 		expect( screen.queryByText( 'View products' ) ).toBeNull();

@@ -338,7 +338,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		return array(
 			'title'       => __( 'Product visibility', 'woocommerce' ),
 			'description' => __( 'AI assistants can see the same products as shoppers, as long as they’re simple or variable products.', 'woocommerce' ),
-			'empty'       => null === $report ? __( 'Product counts show after the first Sales readiness check.', 'woocommerce' ) : null,
+			'empty'       => null === $report ? __( 'Product counts show after the first AI sales readiness check.', 'woocommerce' ) : null,
 			'counts'      => $counts,
 		);
 	}

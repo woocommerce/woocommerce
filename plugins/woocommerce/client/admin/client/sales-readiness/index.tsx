@@ -30,7 +30,7 @@ export default function SalesReadiness() {
 						{
 							label:
 								view?.title ??
-								__( 'Sales readiness', 'woocommerce' ),
+								__( 'AI sales readiness', 'woocommerce' ),
 						},
 					] }
 				/>
