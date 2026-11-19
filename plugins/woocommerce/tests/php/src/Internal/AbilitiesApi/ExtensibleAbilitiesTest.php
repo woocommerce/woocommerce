@@ -1406,9 +1406,206 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a field whose output schema has a list of types below the top level.
+	 * @dataProvider provider_nested_type_list_output_schemas
+	 * @param array $schema Output schema.
+	 */
+	public function test_a_nested_type_list_in_an_output_schema_is_refused( array $schema ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'refused',
+				'field'         => 'value',
+				'output_schema' => $schema,
+				'get_callback'  => '__return_null',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+	}
+
+	/**
+	 * Output schemas with a list of types below the top level.
+	 *
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provider_nested_type_list_output_schemas(): array {
+		$object = fn( array $property ) => array(
+			'type'       => 'object',
+			'properties' => array( 'a' => $property ),
+		);
+		return array(
+			'property type list'             => array( $object( array( 'type' => array( 'string', 'null' ) ) ) ),
+			'oneOf branch type list'         => array( $object( array( 'oneOf' => array( array( 'type' => array( 'string', 'null' ) ), array( 'type' => 'integer' ) ) ) ) ),
+			'deep item type list'            => array(
+				$object(
+					array(
+						'type'  => 'array',
+						'items' => $object( array( 'type' => array( 'integer', 'null' ) ) ),
+					)
+				),
+			),
+			'additionalProperties type list' => array(
+				array(
+					'type'                 => 'object',
+					'additionalProperties' => array( 'type' => array( 'string', 'null' ) ),
+				),
+			),
+			'patternProperties type list'    => array(
+				array(
+					'type'              => 'object',
+					'patternProperties' => array( '^a' => array( 'type' => array( 'string', 'null' ) ) ),
+				),
+			),
+			'allOf branch type list'         => array( $object( array( 'allOf' => array( array( 'type' => array( 'string', 'null' ) ) ) ) ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should register a field whose output schema has a null type or a null branch below the top level.
+	 * @dataProvider provider_nested_null_output_schemas
+	 * @param array $schema Output schema.
+	 */
+	public function test_a_nested_null_in_an_output_schema_is_registered( array $schema ): void {
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'nested',
+				'field'         => 'value',
+				'output_schema' => $schema,
+				'get_callback'  => '__return_null',
+			)
+		);
+
+		$this->assertArrayHasKey( 'value', ExtensibleAbilities::get_fields( 'order' )['nested'] ?? array() );
+	}
+
+	/**
+	 * Output schemas with a null type or a null branch below the top level.
+	 *
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provider_nested_null_output_schemas(): array {
+		$object = fn( array $property ) => array(
+			'type'       => 'object',
+			'properties' => array( 'a' => $property ),
+		);
+		return array(
+			'property null type'  => array( $object( array( 'type' => 'null' ) ) ),
+			'anyOf null branch'   => array( $object( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ) ),
+			'oneOf null branch'   => array( $object( array( 'oneOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ) ),
+			'allOf null branch'   => array( $object( array( 'allOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ) ),
+			'nullable list items' => array(
+				array(
+					'type'  => 'array',
+					'items' => array( 'anyOf' => array( array( 'type' => 'number' ), array( 'type' => 'null' ) ) ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should refuse a field whose input schema has a list of types below the top level.
+	 * @dataProvider provider_nested_type_list_input_schemas
+	 * @param array $schema Input schema.
+	 */
+	public function test_a_nested_type_list_in_an_input_schema_is_refused( array $schema ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'     => 'order',
+				'namespace'    => 'refused',
+				'field'        => 'value',
+				'input_schema' => $schema,
+				'set_callback' => '__return_null',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+	}
+
+	/**
+	 * Input schemas with a list of types below the top level.
+	 *
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provider_nested_type_list_input_schemas(): array {
+		return array(
+			'property'          => array(
+				array(
+					'type'       => 'object',
+					'properties' => array( 'a' => array( 'type' => array( 'string', 'null' ) ) ),
+				),
+			),
+			'tuple item'        => array(
+				array(
+					'type'  => 'array',
+					'items' => array( array( 'type' => 'string' ), array( 'type' => array( 'integer', 'null' ) ) ),
+				),
+			),
+			'anyOf branch'      => array(
+				array(
+					'type'  => 'object',
+					'anyOf' => array( array( 'type' => array( 'object', 'null' ) ) ),
+				),
+			),
+			'patternProperties' => array(
+				array(
+					'type'              => 'object',
+					'patternProperties' => array( '^a' => array( 'type' => array( 'string', 'null' ) ) ),
+				),
+			),
+			'allOf branch'      => array(
+				array(
+					'type'  => 'object',
+					'allOf' => array( array( 'type' => array( 'object', 'null' ) ) ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should register a field with nested output properties that are not nullable and a nested input anyOf with a null branch.
+	 */
+	public function test_a_nested_schema_without_type_lists_is_registered(): void {
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'nested',
+				'field'         => 'value',
+				'output_schema' => array(
+					'type'       => 'object',
+					'properties' => array(
+						'tags' => array(
+							'type'  => 'array',
+							'items' => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'integer' ) ) ),
+						),
+					),
+				),
+				'get_callback'  => '__return_null',
+				'input_schema'  => array(
+					'type'       => 'object',
+					'properties' => array( 'note' => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
+				),
+				'set_callback'  => '__return_null',
+			)
+		);
+
+		$this->assertArrayHasKey( 'value', ExtensibleAbilities::get_fields( 'order' )['nested'] ?? array() );
+	}
+
+	/**
 	 * @testdox Should keep the WordPress message for an anyOf under a top-level type whose branches do not each have their own type name.
 	 * @testWith [[{"enum":["small"]},{"enum":["large"]}]]
-	 *           [[{"type":["integer","null"]},{"type":"null"}]]
 	 *           [[{"type":"string","enum":["small"]},{"type":"string","pattern":"^x"}]]
 	 *
 	 * @param array $any_of The anyOf branches.
@@ -1575,12 +1772,12 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_valid_schemas_are_published_as_declared(): void {
 		$input_schemas = array(
-			'nullable'    => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ),
-			'any_of'      => array(
+			'nullable'   => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ),
+			'any_of'     => array(
 				'type'       => 'object',
 				'properties' => array( 'a' => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
 			),
-			'enum_null'   => array(
+			'enum_null'  => array(
 				'anyOf' => array(
 					array(
 						'type' => 'string',
@@ -1589,20 +1786,15 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					array( 'type' => 'null' ),
 				),
 			),
-			'enum_mixed'  => array(
+			'enum_mixed' => array(
 				'type' => 'string',
 				'enum' => array( 'a', 1 ),
 			),
-			'branch'      => array(
+			'branch'     => array(
 				'type'  => 'object',
 				'anyOf' => array( array( 'required' => array( 'a' ) ), array( 'required' => array( 'b' ) ) ),
 			),
-			'nested_null' => array(
-				'type'       => 'object',
-				'properties' => array( 'a' => array( 'type' => array( 'string', 'null' ) ) ),
-				'required'   => array( 'a' ),
-			),
-			'different'   => array(
+			'different'  => array(
 				'type'                 => 'object',
 				'properties'           => array( 'delete' => array( 'type' => 'boolean' ) ),
 				'additionalProperties' => false,
@@ -1947,7 +2139,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					'plain'           => array( 'type' => 'string' ),
 					'nested_declared' => array(
 						'type'       => 'object',
-						'properties' => array( 'a' => array( 'type' => array( 'string', 'null' ) ) ),
+						'properties' => array( 'a' => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
 					),
 					'nested_refused'  => array(
 						'type'       => 'object',
@@ -2048,6 +2240,159 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( '{"flat":[],"of_objects":[],"in_object":{"list":[]}}', wp_json_encode( $output ) );
+	}
+
+	/**
+	 * @testdox Should send an empty array for an object as an empty object under an anyOf or a oneOf with a null branch.
+	 */
+	public function test_an_empty_object_under_an_any_of_or_one_of_is_an_empty_object(): void {
+		$object_or_null = fn( string $keyword ) => array( $keyword => array( array( 'type' => 'object' ), array( 'type' => 'null' ) ) );
+		$output         = $this->read_field_values(
+			array(
+				'any_of_items'    => array(
+					array(
+						'type'  => 'array',
+						'items' => $object_or_null( 'anyOf' ),
+					),
+					array( array(), null ),
+				),
+				'one_of_items'    => array(
+					array(
+						'type'  => 'array',
+						'items' => $object_or_null( 'oneOf' ),
+					),
+					array( array(), null ),
+				),
+				'any_of_property' => array(
+					array(
+						'type'       => 'object',
+						'properties' => array(
+							'empty' => $object_or_null( 'anyOf' ),
+							'null'  => $object_or_null( 'anyOf' ),
+						),
+					),
+					array(
+						'empty' => array(),
+						'null'  => null,
+					),
+				),
+				'any_of_deep'     => array(
+					array(
+						'type'  => 'array',
+						'items' => array(
+							'anyOf' => array(
+								array(
+									'type'       => 'object',
+									'properties' => array( 'inner' => array( 'type' => 'object' ) ),
+								),
+								array( 'type' => 'null' ),
+							),
+						),
+					),
+					array( array( 'inner' => array() ) ),
+				),
+			)
+		);
+
+		$this->assertSame(
+			'{"any_of_items":[{},null],"one_of_items":[{},null],"any_of_property":{"empty":{},"null":null},"any_of_deep":[{"inner":{}}]}',
+			wp_json_encode( $output )
+		);
+	}
+
+	/**
+	 * @testdox Should send an empty array for an object as an empty object when the nested schema is in an anyOf, oneOf or allOf branch, or under patternProperties or additionalProperties.
+	 */
+	public function test_an_empty_object_in_a_branch_or_a_pattern_is_an_empty_object(): void {
+		$object_or_null = fn( string $keyword ) => array( $keyword => array( array( 'type' => 'object' ), array( 'type' => 'null' ) ) );
+		$property       = fn( string $name ) => array( 'properties' => array( $name => array( 'type' => 'object' ) ) );
+		$output         = $this->read_field_values(
+			array(
+				'any_of_branch'  => array(
+					array(
+						'type'  => 'object',
+						'anyOf' => array( $property( 'a' ), $property( 'b' ) ),
+					),
+					array( 'a' => array() ),
+				),
+				'one_of_branch'  => array(
+					array(
+						'type'  => 'object',
+						'oneOf' => array( $property( 'a' ) + array( 'required' => array( 'a' ) ), $property( 'b' ) + array( 'required' => array( 'b' ) ) ),
+					),
+					array( 'a' => array() ),
+				),
+				'one_of_items'   => array(
+					array(
+						'type'  => 'array',
+						'oneOf' => array( array( 'items' => array( 'type' => 'object' ) ), array( 'items' => array( 'type' => 'string' ) ) ),
+					),
+					array( array() ),
+				),
+				'all_of_branch'  => array(
+					array(
+						'type'  => 'object',
+						'allOf' => array( $property( 'a' ) ),
+					),
+					array( 'a' => array() ),
+				),
+				'pattern'        => array(
+					array(
+						'type'              => 'object',
+						'patternProperties' => array( '^x' => $object_or_null( 'anyOf' ) ),
+					),
+					array( 'x1' => array() ),
+				),
+				'additional'     => array(
+					array(
+						'type'                 => 'object',
+						'additionalProperties' => $object_or_null( 'oneOf' ),
+					),
+					array( 'k' => array() ),
+				),
+				'top_properties' => array(
+					array(
+						'type'  => 'object',
+						'anyOf' => array( array( 'required' => array( 'a' ) ) ),
+					) + $property( 'a' ),
+					array( 'a' => array() ),
+				),
+				'untyped_outer'  => array(
+					array(
+						'type'  => 'array',
+						'items' => $object_or_null( 'anyOf' ) + $property( 'inner' ),
+					),
+					array( array( 'inner' => array() ) ),
+				),
+			)
+		);
+
+		$this->assertSame(
+			'{"any_of_branch":{"a":{}},"one_of_branch":{"a":{}},"one_of_items":[{}],"all_of_branch":{"a":{}},"pattern":{"x1":{}},"additional":{"k":{}},"top_properties":{"a":{}},"untyped_outer":[{"inner":{}}]}',
+			wp_json_encode( $output )
+		);
+	}
+
+	/**
+	 * @testdox Should match the sanitized value, so an empty array, whether meant as an object or a list, takes the first anyOf branch and stays as it is under a oneOf.
+	 */
+	public function test_an_empty_object_that_also_fits_an_array_branch_follows_the_sanitized_value(): void {
+		$items  = fn( string $keyword, array $branches ) => array(
+			'type'  => 'array',
+			'items' => array( $keyword => $branches ),
+		);
+		$object = array( 'type' => 'object' );
+		$list   = array( 'type' => 'array' );
+		$output = $this->read_field_values(
+			array(
+				'one_of'                   => array( $items( 'oneOf', array( $object, $list ) ), array( new \stdClass() ) ),
+				'any_of_object_first'      => array( $items( 'anyOf', array( $object, $list ) ), array( new \stdClass() ) ),
+				'any_of_object_first_list' => array( $items( 'anyOf', array( $object, $list ) ), array( array() ) ),
+				'any_of_array_first'       => array( $items( 'anyOf', array( $list, $object ) ), array( new \stdClass() ) ),
+			)
+		);
+
+		$this->assertSame( '{"one_of":[[]],"any_of_object_first":[{}],"any_of_object_first_list":[{}],"any_of_array_first":[[]]}', wp_json_encode( $output ) );
 	}
 
 	/**

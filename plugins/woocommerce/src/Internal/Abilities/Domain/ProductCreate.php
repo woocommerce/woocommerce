@@ -230,9 +230,7 @@ class ProductCreate extends ActionableAbility {
 			return true;
 		}
 
-		$parent_id = $input['parent_id'] ?? 0;
-
-		return $parent_id > 0 && wc_rest_check_post_permissions( 'product', 'edit', $parent_id );
+		return self::check_product_permission( $input['parent_id'] ?? 0, 'edit' );
 	}
 
 	/**

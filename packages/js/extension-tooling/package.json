@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/extension-tooling",
-	"version": "1.0.0",
+	"version": "1.3.0",
 	"description": "Shared build and development tools for WooCommerce extensions.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
@@ -17,6 +17,9 @@
 		"./webpack-dist-minify": "./src/webpack-dist-minify.js",
 		"./webpack-text-includes": "./src/webpack-text-includes.js",
 		"./check-i18n": "./src/check-i18n.js",
+		"./playwright-defaults": "./src/playwright-defaults.js",
+		"./e2e-site-config": "./src/e2e-site-config.js",
+		"./php-warning-filter": "./src/php-warning-filter.js",
 		"./stylelint/legacy-scss": "./configs/stylelint-legacy-scss.json"
 	},
 	"bin": {
@@ -59,7 +62,8 @@
 					"changes": [
 						"package.json",
 						"bin/*",
-						"{src,test}/**/*.js"
+						"{src,test}/**/*.js",
+						"test/fixtures/**/*.php"
 					],
 					"events": [
 						"pull_request",

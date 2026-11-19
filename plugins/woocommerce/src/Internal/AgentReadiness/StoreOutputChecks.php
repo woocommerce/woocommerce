@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
+use Automattic\WooCommerce\Internal\LlmsTxt\LlmsTxt;
 use Automattic\WooCommerce\Internal\StructuredData\ShippingDestinations;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils as UcpUtils;
 
@@ -887,6 +888,35 @@ class StoreOutputChecks {
 	}
 
 	/**
+	 * Whether a served llms.txt holds WooCommerce's guidance, as WooCommerce's own file does.
+	 * Line endings are normalized so a CRLF copy of the section still matches.
+	 *
+	 * @param string $body    Served llms.txt.
+	 * @param string $section Guidance WooCommerce adds, '' when it adds none.
+	 */
+	public static function has_llms_txt_guidance( string $body, string $section ): bool {
+		$section = trim( str_replace( "\r\n", "\n", $section ) );
+		$body    = str_replace( "\r\n", "\n", $body );
+		return '' !== $section && str_contains( $body, $section );
+	}
+
+	/**
+	 * WooCommerce's llms.txt status: disabled, physical_file or unknown, with the guidance it adds.
+	 * Null when reading status fails.
+	 *
+	 * @return array{status:string,section:string}|null
+	 */
+	public static function core_llms_txt_status(): ?array {
+		try {
+			$status = wc_get_container()->get( LlmsTxt::class )->get_status();
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->warning( 'Agent readiness could not read the llms.txt status: ' . $e->getMessage(), array( 'source' => 'agent-readiness' ) );
+			return null;
+		}
+		return is_string( $status['status'] ?? null ) && is_string( $status['section'] ?? null ) ? $status : null;
+	}
+
+	/**
 	 * Whether the first few links in llms.txt to the store's own pages open. Links to other sites
 	 * aren't loaded. Null when one couldn't be loaded and none was broken.
 	 *
@@ -923,15 +953,15 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether a status says the store's request to itself was refused or failed, not that the
-	 * page is missing: a server error, or a firewall or security plugin answering 401 or 403.
-	 * A check then reports couldn't check, as it does when the page times out.
+	 * page is missing: a server error, rate limit (429), or a firewall or security plugin
+	 * answering 401 or 403. A check then reports couldn't check, as it does when the page times out.
 	 *
 	 * @since 11.4.0
 	 *
 	 * @param int $status HTTP status.
 	 */
 	public static function blocked( int $status ): bool {
-		return $status >= 500 || in_array( $status, array( 401, 403 ), true );
+		return $status >= 500 || in_array( $status, array( 401, 403, 429 ), true );
 	}
 
 	/**

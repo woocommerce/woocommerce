@@ -638,6 +638,21 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			$view['declared']['items'],
 			'Every item, found or not'
 		);
+
+		$report             = get_option( 'woocommerce_agent_readiness_report' );
+		$report['declared'] = array(
+			array(
+				'id'    => 'llms-txt-woocommerce-guidance',
+				'name'  => 'WooCommerce store guidance',
+				'found' => false,
+			),
+		);
+		update_option( 'woocommerce_agent_readiness_report', $report );
+		$this->assertStringContainsString(
+			'WooCommerce caches its llms.txt briefly',
+			$this->view()['declared']['text'],
+			'Missing WooCommerce guidance notes the short llms.txt cache'
+		);
 		$this->assertSame(
 			array(
 				'intent' => 'none',

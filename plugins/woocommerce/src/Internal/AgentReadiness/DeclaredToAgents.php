@@ -60,7 +60,45 @@ class DeclaredToAgents {
 				'found' => $line[1],
 			);
 		}
+		$status = $this->llms_txt_status();
+		// In a subdirectory WooCommerce serves llms.txt under the home path, not at the host root read here.
+		if ( null !== $status && '' !== trim( $status['section'] ) && '' === trim( (string) wp_parse_url( home_url(), PHP_URL_PATH ), '/' ) ) {
+			$items[] = array(
+				'id'    => 'llms-txt-woocommerce-guidance',
+				'name'  => __( 'WooCommerce’s store guidance in llms.txt (Store API, UCP, policies)', 'woocommerce' ),
+				'found' => self::has_guidance( $responses, $status['section'] ),
+			);
+		}
 		return $items;
+	}
+
+	/**
+	 * WooCommerce's llms.txt status, null without its llms.txt fallback (woocommerce #70741).
+	 *
+	 * @return array{status:string,section:string}|null
+	 */
+	protected function llms_txt_status(): ?array {
+		return StoreOutputChecks::core_llms_txt_status();
+	}
+
+	/**
+	 * Whether the served llms.txt, from WooCommerce or any other provider, holds WooCommerce's guidance.
+	 * Null when the file couldn't be checked (refused, rate-limited, or truncated before a match).
+	 *
+	 * @param StoreResponses $responses Responses of the scan.
+	 * @param string         $section   Guidance WooCommerce adds.
+	 */
+	private static function has_guidance( StoreResponses $responses, string $section ): ?bool {
+		$served = self::file_served( $responses, '/llms.txt' );
+		if ( true !== $served ) {
+			return $served;
+		}
+		$response = $responses->get( StoreOutputChecks::host_root( '/llms.txt' ) );
+		$body     = (string) ( $response['body'] ?? '' );
+		if ( StoreOutputChecks::has_llms_txt_guidance( $body, $section ) ) {
+			return true;
+		}
+		return ! empty( $response['truncated'] ) ? null : false;
 	}
 
 	/**
@@ -278,6 +316,7 @@ class DeclaredToAgents {
 	/**
 	 * Whether a path answers with a text file. A theme that answers every URL with a page, or a host
 	 * that answers unknown paths with a 200 JSON or HTML error, has no such file.
+	 * Null when a 200 body was cut off before any content, so a blank prefix is not a missing file.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 * @param string         $path      Path from the host root.
@@ -288,6 +327,10 @@ class DeclaredToAgents {
 			return null;
 		}
 		$body = ltrim( $response['body'], " \t\r\n\xEF\xBB\xBF" );
+		// Only a 200 can be a file that was cut off before content; a truncated 404 stays missing.
+		if ( 200 === $response['status'] && '' === $body && ! empty( $response['truncated'] ) ) {
+			return null;
+		}
 		return 200 === $response['status'] && '' !== $body && '<' !== $body[0]
 			&& 0 !== stripos( $response['headers']['content-type'] ?? '', 'text/html' )
 			&& null === json_decode( $body );

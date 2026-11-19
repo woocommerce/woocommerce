@@ -142,6 +142,10 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['sku'] = wc_clean( $input['sku'] );
 		}
 
+		if ( ! empty( $input['global_unique_id'] ) ) {
+			$args['global_unique_id'] = $input['global_unique_id'];
+		}
+
 		if ( isset( $input['type'] ) ) {
 			$args['type'] = $input['type'];
 			$parent_types = self::get_variation_subclass_parent_types()[ $input['type'] ] ?? array();
@@ -155,6 +159,10 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		if ( ! empty( $input['parent_id'] ) ) {
 			$args['parent'] = $input['parent_id'];
 			$args['type']   = $args['type'] ?? ProductType::VARIATION;
+		}
+
+		if ( ! empty( $args['global_unique_id'] ) && ! isset( $args['type'] ) ) {
+			$args['type'] = array_merge( array_keys( wc_get_product_types() ), array( ProductType::VARIATION ) );
 		}
 
 		foreach ( array( 'virtual', 'downloadable' ) as $field ) {
@@ -302,46 +310,56 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'id'           => array(
+				'id'               => array(
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'search'       => array( 'type' => 'string' ),
-				'sku'          => array(
+				'search'           => array( 'type' => 'string' ),
+				'sku'              => array(
 					'type'        => 'string',
 					'description' => __( 'Limit results to products with SKUs that partially match this string. Use * to match products with any non-empty SKU.', 'woocommerce' ),
 				),
-				'status'       => array(
+				'global_unique_id' => array(
+					'type'        => 'array',
+					'description' => __( 'Exact GTINs, UPCs, EANs or ISBNs. Matches any of them. Finds variations too, unless category, tag or brand is also sent.', 'woocommerce' ),
+					'maxItems'    => 100,
+					'items'       => array(
+						'type'      => 'string',
+						'minLength' => 1,
+						'pattern'   => self::get_global_unique_id_input_pattern(),
+					),
+				),
+				'status'           => array(
 					'type' => 'string',
 					'enum' => self::get_product_query_status_slugs(),
 				),
-				'type'         => self::get_product_type_schema( array_values( array_unique( array_merge( array_keys( self::get_supported_product_type_configs() ), array_keys( self::get_variation_subclass_parent_types() ) ) ) ) ),
-				'parent_id'    => array(
+				'type'             => self::get_product_type_schema( array_values( array_unique( array_merge( array_keys( self::get_supported_product_type_configs() ), array_keys( self::get_variation_subclass_parent_types() ) ) ) ) ),
+				'parent_id'        => array(
 					'type'        => 'integer',
 					'description' => __( 'Limit results to the variations of this variable product.', 'woocommerce' ),
 					'minimum'     => 1,
 				),
-				'virtual'      => array(
+				'virtual'          => array(
 					'type'        => 'boolean',
 					'description' => __( 'Limit results to products that are not shipped (true) or that are shipped (false).', 'woocommerce' ),
 				),
-				'downloadable' => array(
+				'downloadable'     => array(
 					'type'        => 'boolean',
 					'description' => __( 'Limit results to products that have files to download (true) or that do not (false).', 'woocommerce' ),
 				),
-				'stock_status' => array(
+				'stock_status'     => array(
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
 				),
-				'category'     => self::get_term_filter_input_schema( __( 'Only products in any of these product category IDs, including their child categories.', 'woocommerce' ) ),
-				'tag'          => self::get_term_filter_input_schema( __( 'Only products with any of these product tag IDs.', 'woocommerce' ) ),
-				'brand'        => self::get_term_filter_input_schema( __( 'Only products of any of these brand IDs, including their child brands.', 'woocommerce' ) ),
-				'page'         => array(
+				'category'         => self::get_term_filter_input_schema( __( 'Only products in any of these product category IDs, including their child categories.', 'woocommerce' ) ),
+				'tag'              => self::get_term_filter_input_schema( __( 'Only products with any of these product tag IDs.', 'woocommerce' ) ),
+				'brand'            => self::get_term_filter_input_schema( __( 'Only products of any of these brand IDs, including their child brands.', 'woocommerce' ) ),
+				'page'             => array(
 					'type'    => 'integer',
 					'default' => 1,
 					'minimum' => 1,
 				),
-				'per_page'     => array(
+				'per_page'         => array(
 					'type'    => 'integer',
 					'default' => 10,
 					'minimum' => 1,

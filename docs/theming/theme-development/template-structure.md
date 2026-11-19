@@ -17,7 +17,7 @@ WooCommerce template files contain the markup and template structure for the fro
 
 ## Template list
 
-The various template files on your WooCommerce site can be found via an FTP client or your hosts file manager, in `/wp-content/plugins/woocommerce/templates/`. Alternatively, you can find the [template files on our repository on GitHub](https://github.com/woocommerce/woocommerce/blob/trunk/docs/theme-development/template-structure.md).
+The various template files on your WooCommerce site can be found via an FTP client or your hosts file manager, in `/wp-content/plugins/woocommerce/templates/`. Alternatively, you can find the [template files on our repository on GitHub](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/templates).
 
 Note: if you are looking for the template files of older versions, you can find them in these paths:
 

@@ -47,7 +47,7 @@ test.describe( 'Mutation Batcher', () => {
 			const unlockKey =
 				'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-			await import( '@woocommerce/stores/woocommerce/cart' );
+			await import( '@woocommerce/stores/woocommerce' );
 			const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
 			await actions.waitForIdle();
 		} );

@@ -248,6 +248,173 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should set and read back the GTIN of a product and of its variations.
+	 */
+	public function test_global_unique_id_round_trips(): void {
+		$created = $this->execute(
+			'woocommerce/product-create',
+			array(
+				'name'             => 'Mug',
+				'global_unique_id' => '4006381333931',
+			)
+		)['product'];
+
+		$this->assertSame( '4006381333931', $this->query_product( $created['id'] )['global_unique_id'] );
+
+		$updated = $this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'               => $created['id'],
+				'global_unique_id' => '978-3-16-148410-X',
+			)
+		)['product'];
+
+		$this->assertSame( '978-3-16-148410-X', $updated['global_unique_id'] );
+
+		$variable = $this->execute(
+			'woocommerce/product-create',
+			array(
+				'name'             => 'Cap',
+				'type'             => 'variable',
+				'global_unique_id' => '0012345678905',
+				'attributes'       => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M' ),
+					),
+				),
+				'variations'       => array(
+					array(
+						'attributes'       => array(
+							array(
+								'name'   => 'Size',
+								'option' => 'S',
+							),
+						),
+						'global_unique_id' => '0012345678912',
+					),
+				),
+			)
+		)['product'];
+
+		$this->assertSame( '0012345678905', $variable['global_unique_id'] );
+		$this->assertSame( '0012345678912', $this->query_product( $variable['variation_ids'][0] )['global_unique_id'] );
+	}
+
+	/**
+	 * @testdox Should refuse a GTIN that another product has, that a variation repeats, or that has letters.
+	 */
+	public function test_rejects_duplicate_or_invalid_global_unique_id(): void {
+		$taken = WC_Helper_Product::create_simple_product();
+		$taken->set_global_unique_id( '4006381333931' );
+		$taken->save();
+		$product = WC_Helper_Product::create_simple_product();
+
+		$duplicate = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'               => $product->get_id(),
+				'global_unique_id' => '4006381333931',
+			)
+		);
+
+		$this->assertWPError( $duplicate );
+		$this->assertSame( 'product_invalid_global_unique_id', $duplicate->get_error_code() );
+		$this->assertSame( '', wc_get_product( $product->get_id() )->get_global_unique_id() );
+
+		$letters = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'               => $product->get_id(),
+				'global_unique_id' => 'ABC123',
+			)
+		);
+
+		$this->assertWPError( $letters );
+
+		$misplaced_x = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'               => $product->get_id(),
+				'global_unique_id' => '08044X2957',
+			)
+		);
+
+		$this->assertWPError( $misplaced_x );
+		$this->assertSame( 'product_invalid_global_unique_id_format', $misplaced_x->get_error_code() );
+
+		$product->set_global_unique_id( '5901234123457' );
+		$product->save();
+		foreach ( array( "\n", "5901234123464\n" ) as $newline ) {
+			$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'               => $product->get_id(),
+					'global_unique_id' => $newline,
+				)
+			);
+
+			$this->assertWPError( $result );
+			$this->assertSame( '5901234123457', wc_get_product( $product->get_id() )->get_global_unique_id() );
+		}
+
+		$size      = static fn( string $option ): array => array(
+			array(
+				'name'   => 'Size',
+				'option' => $option,
+			),
+		);
+		$repeating = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'             => 'Cap',
+				'type'             => 'variable',
+				'global_unique_id' => '0012345678905',
+				'attributes'       => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M' ),
+					),
+				),
+				'variations'       => array(
+					array(
+						'attributes'       => $size( 'S' ),
+						'global_unique_id' => '0012345678912',
+					),
+					array(
+						'attributes'       => $size( 'M' ),
+						'global_unique_id' => '0012345678905',
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $repeating );
+		$this->assertSame( 'woocommerce_product_variation_global_unique_id_duplicate', $repeating->get_error_code() );
+
+		$mixed_case = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'       => 'Book',
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M' ),
+					),
+				),
+				'variations' => array(
+					array(
+						'attributes'       => $size( 'S' ),
+						'global_unique_id' => '080442957X',
+					),
+					array(
+						'attributes'       => $size( 'M' ),
+						'global_unique_id' => '080442957x',
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $mixed_case, 'An ISBN-10 check digit X is the same in either case.' );
+		$this->assertSame( 'woocommerce_product_variation_global_unique_id_duplicate', $mixed_case->get_error_code() );
+	}
+
+	/**
 	 * @testdox Should accept sale dates and the tax status on external products, but not sold individually.
 	 */
 	public function test_external_product_fields(): void {
