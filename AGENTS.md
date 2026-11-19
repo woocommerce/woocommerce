@@ -240,6 +240,22 @@ Database migrations live in `WC_Install::$db_updates`. Read that class for the c
 - To test a migration locally, set the `woocommerce_db_version` and `woocommerce_version` options to the previous release, for example with `wp option update woocommerce_db_version 11.1.0` and the same for `woocommerce_version`. The next page load schedules every callback above that version through Action Scheduler. `wp wc update` runs them immediately instead.
 - Feature flag defaults are persisted, so changing `enabled_by_default` alone doesn't change behavior on existing sites. Ship a migration or remove the flag.
 
+## Workarounds for Older Versions
+
+Code that only exists to support an older WordPress or PHP version, such as a backport or a version check, must say when it can go. Add this sentence to its docblock, with the version that makes it unnecessary:
+
+```php
+/**
+ * Remove when WooCommerce requires WordPress 7.2.
+ */
+```
+
+Start the sentence with the exact phrase `Remove when WooCommerce requires <WordPress|PHP> <version>`, so one search finds every workaround. When other methods go with it, name them in the same sentence: `Remove when WooCommerce requires WordPress 7.2, together with prepare_input().`
+
+When the workaround is for another plugin, name that plugin instead of WooCommerce: `Remove when MCP Adapter requires WordPress 7.2.`
+
+When you raise `Requires at least` or `Requires PHP` in `plugins/woocommerce/woocommerce.php`, search for `Remove when WooCommerce requires` and remove every workaround for the new minimum version or a lower one. Also search for `Remove when` and check whether the plugins those markers name now require a version that makes their workaround unnecessary.
+
 ## Comments and Docblocks
 
 Docblocks are expected on methods, classes, and hooks (see the `woocommerce-backend-dev` skill for exact requirements). Hook docblocks in `src/Blocks` and `src/StoreApi` are published as developer documentation and have to be regenerated after a change — the `woocommerce-backend-dev` skill has the command. Inline comments are the exception, not the default: add one only when the code can't explain itself, for example a non-obvious "why", a hidden constraint, or a workaround for a specific bug. Either way, don't add a comment that just restates what the identifier names already say.
