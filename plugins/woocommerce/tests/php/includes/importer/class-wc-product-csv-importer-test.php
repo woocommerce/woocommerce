@@ -2769,10 +2769,20 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$simple->set_sku( 'IMPORT-40274-SIMPLE' );
 		$simple->save();
 
+		$parent     = WC_Helper_Product::create_variation_product();
 		$missing_id = $simple->get_id() + 1000;
-		$csv        = "ID,Type,SKU,Name\n{$missing_id},variation,IMPORT-40274-SIMPLE,Should stay a simple product\n";
+		$csv        = "ID,Type,SKU,Name,Parent\n{$missing_id},variation,IMPORT-40274-SIMPLE,Should stay a simple product,id:{$parent->get_id()}\n";
 
-		$data = $this->import_csv_rows( $csv );
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'     => 'id',
+				'Type'   => 'type',
+				'SKU'    => 'sku',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			)
+		);
 
 		$this->assertEmpty( $data['updated'], 'A variation row must not update a simple product' );
 		$this->assertCount( 1, $data['failed'], 'A variation row for a simple product fails' );
@@ -3260,6 +3270,31 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertEmpty( $data['updated'], 'The row must not be reported as updated' );
 		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][0]->get_error_code(), 'The row fails on its trashed parent' );
 		$this->assertSame( 'small', wc_get_product( $variation_id )->get_attribute( 'pa_size' ), 'The attributes are unchanged' );
+	}
+
+	/**
+	 * @testdox Should fail a new variation row with a blank Parent cell instead of creating a variation without a parent.
+	 */
+	public function test_import_fails_new_variation_with_blank_parent(): void {
+		$parent       = WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+		$mapping      = array(
+			'ID'     => 'id',
+			'Type'   => 'type',
+			'SKU'    => 'sku',
+			'Name'   => 'name',
+			'Parent' => 'parent_id',
+		);
+
+		$new_rows = $this->import_csv_rows( "ID,Type,SKU,Name,Parent\n,variation,ORPHAN-NEW,No ID,\n999999,variation,ORPHAN-PLACEHOLDER,Unknown ID,\n", $mapping, false );
+		$existing = $this->import_csv_rows( "ID,Type,SKU,Name,Parent\n{$variation_id},variation,,Existing variation,\n", $mapping );
+
+		$this->assertEmpty( $new_rows['imported_variations'], 'No variation without a parent is created' );
+		$this->assertCount( 2, $new_rows['failed'], 'Both new variation rows fail' );
+		$this->assertSame( 'woocommerce_product_importer_missing_variation_parent_id', $new_rows['failed'][0]->get_error_code(), 'A new row without an ID fails on its missing parent' );
+		$this->assertSame( 'woocommerce_product_importer_missing_variation_parent_id', $new_rows['failed'][1]->get_error_code(), 'A new row with an unknown ID fails on its missing parent' );
+		$this->assertSame( array( $variation_id ), $existing['updated'], 'An existing variation with a blank Parent cell is still updated' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $variation_id )->get_parent_id(), 'The existing variation keeps its parent' );
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fail product CSV import rows for new variations with a blank Parent, instead of creating variations without a parent product.
