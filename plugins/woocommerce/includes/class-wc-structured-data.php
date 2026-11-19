@@ -1099,8 +1099,7 @@ class WC_Structured_Data {
 			$match_attributes[ $key ] = wc_clean( wp_unslash( $_GET[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 
-		$data_store = WC_Data_Store::load( 'product' );
-		// @phpstan-ignore-next-line method.notFound (Called via __call() on the underlying product data store instance.)
+		$data_store   = WC_Data_Store::load( 'product' );
 		$variation_id = $data_store->find_matching_product_variation( $product, $match_attributes );
 
 		if ( ! $variation_id ) {
