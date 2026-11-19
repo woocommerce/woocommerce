@@ -639,6 +639,52 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should take the grouped prices from the children when a grouped product goes to variable and back.
+	 */
+	public function test_grouped_to_variable_and_back_syncs_the_grouped_prices(): void {
+		global $wpdb;
+
+		$grouped = WC_Helper_Product::create_grouped_product();
+		$prices  = array_map( static fn( int $id ) => (float) wc_get_product( $id )->get_price(), $grouped->get_children() );
+
+		$this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'         => $grouped->get_id(),
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S' ),
+					),
+				),
+				'variations' => array(
+					array(
+						'attributes'    => array(
+							array(
+								'name'   => 'Size',
+								'option' => 'S',
+							),
+						),
+						'regular_price' => '99',
+					),
+				),
+			)
+		);
+		$this->execute(
+			'woocommerce/product-update',
+			array(
+				'id'   => $grouped->get_id(),
+				'type' => 'grouped',
+			)
+		);
+
+		$lookup = $wpdb->get_row( $wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $grouped->get_id() ), ARRAY_A );
+		$this->assertSame( min( $prices ), (float) $lookup['min_price'] );
+		$this->assertSame( max( $prices ), (float) $lookup['max_price'] );
+	}
+
+	/**
 	 * @testdox Should answer the permission check without an error for a variation ID or a type that is not a string.
 	 */
 	public function test_permission_check_with_a_variation_id_or_a_bad_type(): void {
