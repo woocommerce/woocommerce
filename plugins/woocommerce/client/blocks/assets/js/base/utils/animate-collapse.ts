@@ -48,15 +48,48 @@ const reset = ( element: HTMLElement ) => {
 	}
 };
 
+// Moves the element from `from`, or from its rest position, to open or closed.
+const move = ( element: HTMLElement, isOpen: boolean, from: Values | null ) => {
+	reset( element );
+	const open = readValues( element );
+	const start = from ?? ( isOpen ? CLOSED : open );
+	// Nothing to grow, such as when the content kept its size during the grow.
+	if (
+		isOpen &&
+		PROPERTIES.every(
+			( property ) => start[ property ] === open[ property ]
+		)
+	) {
+		return;
+	}
+
+	Object.assign( element.style, start );
+	// Apply the start values before the transitions exist, so that the transitions start from them.
+	element.getBoundingClientRect();
+	element.setAttribute( ATTRIBUTE, isOpen ? 'in' : 'out' );
+	Object.assign( element.style, isOpen ? open : CLOSED );
+
+	if ( isOpen ) {
+		whenAnimationsEnd( element, () => {
+			// A collapse that started later keeps its styles until the element unmounts. If the content changed size
+			// during the grow, the grow goes on from there to the new size, instead of jumping.
+			if ( element.getAttribute( ATTRIBUTE ) === 'in' ) {
+				move( element, true, readValues( element ) );
+			}
+		} );
+	}
+};
+
 /**
  * Grows an element open or collapses it shut in the real layout, so the content below moves with it. The
  * element also fades. Give the element the `motion-collapse` mixin, which sets the timing and the
  * reduced motion rules. The element must not have its own inline styles for the properties that change.
  *
  * Call it before paint: after the element mounts to grow it, or when it starts to go to collapse it. If the element
- * still moves, the motion turns around from its current position. A grown element has no inline styles when the motion
- * ends. A collapsed element stays collapsed until it unmounts. Nothing changes when the browser has no Web Animations
- * API, such as in Jest.
+ * still moves, the motion turns around from its current position. If the content changes size while the element
+ * grows, the element grows on to the new size. A grown element has no inline styles when the motion ends. A collapsed
+ * element stays collapsed until it unmounts. Nothing changes when the browser has no Web Animations API, such as in
+ * Jest.
  *
  * @param element The element that grows or collapses.
  * @param isOpen  Whether to grow the element (`true`) or collapse it (`false`).
@@ -74,24 +107,9 @@ export const animateCollapse = (
 	const current = element.hasAttribute( ATTRIBUTE )
 		? readValues( element )
 		: null;
-	reset( element );
 	if ( ! animate ) {
+		reset( element );
 		return;
 	}
-	const open = readValues( element );
-
-	Object.assign( element.style, current ?? ( isOpen ? CLOSED : open ) );
-	// Apply the start values before the transitions exist, so that the transitions start from them.
-	element.getBoundingClientRect();
-	element.setAttribute( ATTRIBUTE, isOpen ? 'in' : 'out' );
-	Object.assign( element.style, isOpen ? open : CLOSED );
-
-	if ( isOpen ) {
-		whenAnimationsEnd( element, () => {
-			// A collapse that started later keeps its styles until the element unmounts.
-			if ( element.getAttribute( ATTRIBUTE ) === 'in' ) {
-				reset( element );
-			}
-		} );
-	}
+	move( element, isOpen, current );
 };

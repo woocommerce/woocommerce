@@ -13,11 +13,12 @@ const NATURAL: Record< string, string > = {
 };
 
 // Jest has no layout, transitions, or Web Animations API. In the fake, the computed style is the inline style, or the
-// natural value when there is none. While `inProgress` has values and the element has the attribute of the helper,
+// `natural` value when there is none. While `inProgress` has values and the element has the attribute of the helper,
 // a transition is at those values. `finish` ends the transitions.
 const createElement = () => {
 	const element = document.createElement( 'div' );
 	const inProgress: Record< string, string > = {};
+	const natural = { ...NATURAL };
 	let resolveFinished = () => undefined as void;
 	const transition = {
 		playState: 'running',
@@ -40,7 +41,7 @@ const createElement = () => {
 					( element.style as unknown as Record< string, string > )[
 						property
 					] ||
-					NATURAL[ property ],
+					natural[ property ],
 			} )
 	);
 	const finish = async () => {
@@ -48,7 +49,7 @@ const createElement = () => {
 		resolveFinished();
 		await new Promise( ( resolve ) => setTimeout( resolve ) );
 	};
-	return { element, inProgress, finish };
+	return { element, inProgress, natural, finish };
 };
 
 describe( 'animateCollapse', () => {
@@ -81,6 +82,23 @@ describe( 'animateCollapse', () => {
 		animateCollapse( element, true );
 
 		await finish();
+		expect( element.getAttributeNames() ).toEqual( [] );
+	} );
+
+	it( 'grows on to the new size when the content changes size during the grow', async () => {
+		const { element, natural, finish } = createElement();
+		const setHeight = jest.spyOn( element.style, 'height', 'set' );
+		animateCollapse( element, true );
+		natural.height = '80px';
+		setHeight.mockClear();
+
+		await finish();
+		expect( setHeight.mock.calls ).toEqual( [
+			[ '' ],
+			[ '40px' ],
+			[ '80px' ],
+			[ '' ],
+		] );
 		expect( element.getAttributeNames() ).toEqual( [] );
 	} );
 
