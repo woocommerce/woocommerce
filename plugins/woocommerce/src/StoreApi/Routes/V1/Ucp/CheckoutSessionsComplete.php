@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Orders\OrderAttributionController;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
@@ -149,6 +150,8 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			return $this->ucp_error( Utils::cart_error_code( (string) $e->getErrorCode() ), wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200, '$.line_items' );
 		}
 
+		$this->record_attribution( $order, $request );
+
 		// The payment page only takes an order awaiting payment, which a checkout draft is not.
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
@@ -168,6 +171,105 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		$this->save_checkout_state( $state );
 
 		return $this->checkout_response( $checkout_id, $this->checkout_state() ?? $state, 200, $cart );
+	}
+
+	/**
+	 * Record the order as started by an AI shopper, so its origin is not Unknown.
+	 *
+	 * The payment page records no attribution of its own.
+	 * The source is the host of the `profile` parameter in the `UCP-Agent` header, or `ucp` when that parameter is missing or its host is not a hostname.
+	 * A parameter only counts when its name is exactly `profile` and it is outside a quoted value.
+	 * The header is not verified, so the host is a detail and not part of the origin.
+	 * Saved only with order attribution on, and never over attribution the order already has.
+	 *
+	 * @param \WC_Order        $order   The order being handed off.
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 */
+	private function record_attribution( \WC_Order $order, \WP_REST_Request $request ): void {
+		$attribution = wc_get_container()->get( OrderAttributionController::class );
+
+		if ( $attribution->has_attribution( $order ) ) {
+			return;
+		}
+
+		// Every field is set, because the listener reads each one without checking it exists.
+		$data = array_merge(
+			array_fill_keys( $attribution->get_field_names(), '' ),
+			array(
+				'source_type' => 'ai_shopper',
+				'utm_source'  => $this->agent_profile_host( (string) $request->get_header( 'UCP-Agent' ) ),
+				'utm_medium'  => 'ucp',
+			)
+		);
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in OrderAttributionController.
+		do_action( 'woocommerce_order_save_attribution_data', $order, $data );
+	}
+
+	/**
+	 * Host of the `profile` parameter in a UCP-Agent header, or `ucp` when it is missing or not a hostname.
+	 *
+	 * Only a parameter named exactly `profile`, outside a quoted value, counts.
+	 *
+	 * @param string $header UCP-Agent header value.
+	 * @return string
+	 */
+	private function agent_profile_host( string $header ): string {
+		$profile = $this->quoted_header_parameter( $header, 'profile' );
+		$host    = strtolower( (string) wp_parse_url( $profile, PHP_URL_HOST ) );
+
+		if ( '' === $host ) {
+			return 'ucp';
+		}
+
+		$valid = filter_var( $host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME );
+
+		return is_string( $valid ) ? $valid : 'ucp';
+	}
+
+	/**
+	 * Value of one double-quoted parameter, matched by its exact name.
+	 *
+	 * A match counts only outside quotes, at the start of the header or after whitespace or a semicolon.
+	 *
+	 * @param string $header Header value.
+	 * @param string $name   Parameter name.
+	 * @return string Empty when the parameter is absent.
+	 */
+	private function quoted_header_parameter( string $header, string $name ): string {
+		$prefix = $name . '="';
+		$offset = 0;
+		$length = strlen( $header );
+
+		while ( $offset < $length ) {
+			$start = strpos( $header, $prefix, $offset );
+			if ( false === $start ) {
+				return '';
+			}
+
+			// An even number of quotes before the name means it is outside a value.
+			$outside_quotes = 0 === ( substr_count( substr( $header, 0, $start ), '"' ) % 2 );
+			$is_parameter   = 0 === $start;
+			if ( ! $is_parameter ) {
+				$previous     = substr( $header, $start - 1, 1 );
+				$is_parameter = ' ' === $previous || "\t" === $previous || ';' === $previous;
+			}
+
+			if ( $outside_quotes && $is_parameter ) {
+				$value_start = $start + strlen( $prefix );
+				$end         = strpos( $header, '"', $value_start );
+				if ( false === $end ) {
+					return '';
+				}
+				return substr( $header, $value_start, $end - $value_start );
+			}
+
+			$offset = $start + strlen( $prefix );
+		}
+
+		return '';
 	}
 
 	/**
