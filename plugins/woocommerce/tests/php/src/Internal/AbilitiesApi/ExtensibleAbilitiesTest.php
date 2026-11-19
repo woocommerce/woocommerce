@@ -1017,24 +1017,28 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should call the prime callbacks of each extension once with the full list, in registration order.
+	 * @testdox Should call the $resource_name prime callbacks of each extension once with the full list, in registration order.
+	 * @dataProvider provide_list_abilities
+	 *
+	 * @param string   $resource_name Resource the ability lists.
+	 * @param string   $ability       List ability.
+	 * @param string   $list_key      Output key of the list.
+	 * @param callable $create_input  Creates two objects and returns the ability input that lists them.
 	 */
-	public function test_prime_callbacks_get_the_full_list_once(): void {
-		$first  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen one' ) );
-		$second = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen two' ) );
-		$calls  = array();
-		$cache  = array();
+	public function test_prime_callbacks_get_the_full_list_once( string $resource_name, string $ability, string $list_key, callable $create_input ): void {
+		$calls = array();
+		$cache = array();
 		$this->add_test_action(
 			'woocommerce_extensible_abilities_init',
-			static function () use ( &$cache ) {
+			static function () use ( $resource_name, &$cache ) {
 				ExtensibleAbilities::register_field(
 					array(
-						'resource'      => 'product',
+						'resource'      => $resource_name,
 						'namespace'     => 'test-ext',
 						'field'         => 'primed',
 						'output_schema' => array( 'type' => 'string' ),
-						'get_callback'  => static function ( \WC_Product $product ) use ( &$cache ) {
-							return $cache[ $product->get_id() ] ?? null;
+						'get_callback'  => static function ( $data_object ) use ( &$cache ) {
+							return $cache[ self::prime_object_id( $data_object ) ] ?? null;
 						},
 					)
 				);
@@ -1042,10 +1046,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 		foreach ( array( 'test-ext', 'other_ext' ) as $extension_namespace ) {
 			$this->register_prime(
-				'product',
+				$resource_name,
 				$extension_namespace,
 				static function ( array $objects ) use ( &$calls, &$cache, $extension_namespace ) {
-					$ids     = array_map( static fn( \WC_Product $product ) => $product->get_id(), $objects );
+					$ids     = array_map( array( self::class, 'prime_object_id' ), array_values( $objects ) );
 					$calls[] = array( $extension_namespace, $ids );
 					if ( 'test-ext' === $extension_namespace ) {
 						$cache = array_combine( $ids, array_map( static fn( int $id ) => 'primed-' . $id, $ids ) );
@@ -1054,14 +1058,100 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			);
 		}
 
-		$products = $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen' ) )['products'];
+		$list = $this->run_ability( $ability, $create_input() )[ $list_key ];
 
-		$ids = array_column( $products, 'id' );
+		$ids = array_column( $list, 'id' );
+		$this->assertCount( 2, $ids );
 		$this->assertSame( array( array( 'test-ext', $ids ), array( 'other_ext', $ids ) ), $calls );
-		$this->assertEqualsCanonicalizing( array( $first->get_id(), $second->get_id() ), $ids );
-		foreach ( $products as $product ) {
-			$this->assertSame( 'primed-' . $product['id'], $product['extensions']['test-ext']['primed'] );
+		foreach ( $list as $listed ) {
+			$this->assertSame( 'primed-' . $listed['id'], $listed['extensions']['test-ext']['primed'] );
 		}
+	}
+
+	/**
+	 * List abilities that prime their objects, with a fixture factory for each.
+	 *
+	 * @return array<string, array>
+	 */
+	public function provide_list_abilities(): array {
+		return array(
+			'product'        => array(
+				'product',
+				'woocommerce/products-query',
+				'products',
+				static function (): array {
+					\WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen one' ) );
+					\WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen two' ) );
+					return array( 'search' => 'Pen' );
+				},
+			),
+			'customer'       => array(
+				'customer',
+				'woocommerce/customers-query',
+				'customers',
+				static function (): array {
+					return array( 'include' => self::factory()->user->create_many( 2, array( 'role' => 'customer' ) ) );
+				},
+			),
+			'product_term'   => array(
+				'product_term',
+				'woocommerce/product-terms-query',
+				'terms',
+				static function (): array {
+					return array(
+						'taxonomy'   => 'product_cat',
+						'include'    => self::factory()->term->create_many( 2, array( 'taxonomy' => 'product_cat' ) ),
+						'hide_empty' => false,
+					);
+				},
+			),
+			'product_review' => array(
+				'product_review',
+				'woocommerce/product-reviews-query',
+				'reviews',
+				static function (): array {
+					$product = \WC_Helper_Product::create_simple_product()->get_id();
+					self::factory()->comment->create_many(
+						2,
+						array(
+							'comment_post_ID'  => $product,
+							'comment_type'     => 'review',
+							'comment_approved' => '1',
+						)
+					);
+					return array( 'product_ids' => array( $product ) );
+				},
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should have a prime test for every Core resource.
+	 */
+	public function test_every_core_resource_has_a_prime_test(): void {
+		AbilitiesLoader::register_core_resources();
+		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
+		$resources->setAccessible( true );
+
+		$covered = array_merge( array_keys( $this->provide_list_abilities() ), array( 'order', 'order_item' ) );
+
+		$this->assertEqualsCanonicalizing( array_keys( $resources->getValue() ), $covered, 'Add the new resource to provide_list_abilities().' );
+	}
+
+	/**
+	 * ID of an object a prime callback receives.
+	 *
+	 * @param \WC_Data|\WP_Term|\WP_Comment $data_object Object.
+	 * @return int
+	 */
+	private static function prime_object_id( $data_object ): int {
+		if ( $data_object instanceof \WP_Term ) {
+			return $data_object->term_id;
+		}
+		if ( $data_object instanceof \WP_Comment ) {
+			return (int) $data_object->comment_ID;
+		}
+		return $data_object->get_id();
 	}
 
 	/**
