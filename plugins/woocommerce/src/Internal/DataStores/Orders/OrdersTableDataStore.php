@@ -45,8 +45,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	private static $backfilling_order_ids = array();
 
 	/**
-	 * Keep track of order IDs (as keys) that are being synced on read. This is used to prevent backfilling to posts of an order being updated
-	 * from posts.
+	 * Order IDs (as keys) whose data is coming from the posts table, so changes must not be backfilled there.
+	 * Covers orders being synced on read and orders updated by update_order_from_object().
 	 *
 	 * @var array
 	 */
@@ -825,9 +825,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			$hpos_order->add_meta_data( $meta->key, $meta->value );
 		}
 
-		// The data comes from the other datastore, so don't backfill the meta changes to the posts table.
-		// Otherwise, with sync enabled, each re-added meta is written to wp_postmeta again and duplicated.
-		// Only clear the marker if it was set here, so a nested call for the same order doesn't remove it early.
+		// The meta comes from the posts table, so don't write it back there. Don't clear a marker set by an outer call.
 		$was_syncing_on_read                              = isset( self::$sync_on_read_order_ids[ $order->get_id() ] );
 		self::$sync_on_read_order_ids[ $order->get_id() ] = true;
 		add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );

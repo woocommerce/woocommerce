@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevent the HPOS partial backfill (`wp wc hpos backfill --meta_keys`) from duplicating meta rows in `wp_postmeta` when compatibility sync is on.
+Fix duplicate order meta in the posts table after a partial HPOS backfill with compatibility sync on.
