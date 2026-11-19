@@ -61,7 +61,8 @@
 					"changes": [
 						"package.json",
 						"bin/*",
-						"{src,test}/**/*.js"
+						"{src,test}/**/*.js",
+						"test/fixtures/**/*.php"
 					],
 					"events": [
 						"pull_request",
