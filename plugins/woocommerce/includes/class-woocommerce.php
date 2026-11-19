@@ -21,6 +21,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\LegacyAssets\LegacySelect2UsageTracker;
+use Automattic\WooCommerce\Internal\MCP\McpAdapterVersionNotice;
 use Automattic\WooCommerce\Internal\MCP\McpEndpointRemoval;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesTracking;
@@ -415,6 +416,7 @@ final class WooCommerce {
 		$container->get( AddressProviderController::class );
 		$container->get( AbilitiesLoader::class );
 		$container->get( McpEndpointRemoval::class );
+		$container->get( McpAdapterVersionNotice::class );
 		$container->get( CouponCodeLookupInvalidator::class );
 		$container->get( ProductVersionStringInvalidator::class );
 		$container->get( OrdersVersionStringInvalidator::class );
