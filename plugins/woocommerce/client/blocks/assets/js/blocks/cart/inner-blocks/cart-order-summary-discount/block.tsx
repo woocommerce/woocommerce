@@ -33,25 +33,23 @@ const Block = ( { className }: { className: string } ): JSX.Element => {
 	const { removeCoupon, isRemovingCoupon } = useStoreCartCoupons( 'wc/cart' );
 	const { isLoading } = useOrderSummaryLoadingState();
 
-	// Hide all but the slot/fill if there are no coupons to show.
-	if ( ! cart ) {
-		return <DiscountSlotFill />;
-	}
-
-	const totalsCurrency = getCurrencyFromPriceResponse( cart.cartTotals );
-
 	return (
 		<>
-			<TotalsWrapper className={ className } { ...wrapperProps }>
-				<TotalsDiscount
-					cartCoupons={ cart.cartCoupons }
-					currency={ totalsCurrency }
-					isRemovingCoupon={ isRemovingCoupon }
-					removeCoupon={ removeCoupon }
-					values={ cart.cartTotals }
-					isLoading={ isLoading }
-				/>
-			</TotalsWrapper>
+			{ /* Kept before the slot, so the slot stays mounted and its fills keep their state. */ }
+			{ cart && (
+				<TotalsWrapper className={ className } { ...wrapperProps }>
+					<TotalsDiscount
+						cartCoupons={ cart.cartCoupons }
+						currency={ getCurrencyFromPriceResponse(
+							cart.cartTotals
+						) }
+						isRemovingCoupon={ isRemovingCoupon }
+						removeCoupon={ removeCoupon }
+						values={ cart.cartTotals }
+						isLoading={ isLoading }
+					/>
+				</TotalsWrapper>
+			) }
 			<DiscountSlotFill />
 		</>
 	);
