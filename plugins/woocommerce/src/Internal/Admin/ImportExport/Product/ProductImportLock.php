@@ -94,7 +94,7 @@ final class ProductImportLock {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$acquired = $wpdb->query(
 				$wpdb->prepare(
-					"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND CAST( SUBSTRING_INDEX( option_value, ':', 1 ) AS UNSIGNED ) < %d",
+					"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND CAST( SUBSTRING_INDEX( option_value, ':', 1 ) AS UNSIGNED ) <= %d",
 					$value,
 					self::IMPORT_LOCK_OPTION,
 					time() - $stale_after

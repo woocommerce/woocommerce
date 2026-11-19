@@ -217,6 +217,17 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A lock should be taken over as soon as the time until takeover reaches 0.
+	 */
+	public function test_acquire_succeeds_once_the_time_until_takeover_is_zero(): void {
+		$this->sut->acquire( ProductImportLock::HOLDER_ADMIN );
+		$this->age_lock( 2 * MINUTE_IN_SECONDS );
+
+		$this->assertSame( 0, $this->sut->get_seconds_until_takeover( ProductImportLock::HOLDER_ADMIN ) );
+		$this->assertTrue( ( new ProductImportLock() )->acquire( ProductImportLock::HOLDER_ADMIN ) );
+	}
+
+	/**
 	 * @testdox The time until takeover should be null when no import is running.
 	 */
 	public function test_get_seconds_until_takeover_is_null_when_the_lock_is_free(): void {
