@@ -566,6 +566,8 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	 *           ["portrait-150x150.jpg", "invalid-height", "600/900"]
 	 *           ["portrait-150x150.jpg", "missing-file", "600/900"]
 	 *           ["portrait-150x150.jpg", "cdn", "150/150"]
+	 *           ["portrait-150x150.jpg", "cdn-without-file", "150/150"]
+	 *           ["portrait-150x150.jpg", "missing-full-height", "150/150"]
 	 */
 	public function testItUsesTheSelectedAttachmentSizeForAutomaticCropping( string $source, ?string $variant, string $ratio ): void {
 		$attachment_id = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
@@ -576,7 +578,7 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 			'width'  => 150,
 			'height' => 150,
 		);
-		if ( 'missing-file' !== $variant ) {
+		if ( ! in_array( $variant, array( 'missing-file', 'cdn-without-file' ), true ) ) {
 			$thumbnail['file'] = 'portrait-150x150.jpg';
 		}
 		wp_update_attachment_metadata(
@@ -584,7 +586,7 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 			array(
 				'file'   => 'portrait.jpg',
 				'width'  => 900,
-				'height' => 600,
+				'height' => 'missing-full-height' === $variant ? null : 600,
 				'sizes'  => array( 'thumbnail' => $thumbnail ),
 			)
 		);
@@ -609,8 +611,32 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 		$attachment_url = wp_get_attachment_url( $attachment_id );
 		$this->assertIsString( $attachment_url );
 
-		$dimensions                             = 'cdn' === $variant ? '' : ' width="600" height="900"';
-		$url                                    = trailingslashit( dirname( $attachment_url ) ) . $source;
+		$url = trailingslashit( dirname( $attachment_url ) ) . $source;
+		if ( 'cdn-without-file' === $variant ) {
+			$url = 'https://cdn.example.com/' . $source;
+			add_filter(
+				'image_downsize',
+				static function ( $size, $id ) use ( $attachment_id, $url ) {
+					return $attachment_id === $id ? array( $url, 150, 150, true ) : $size;
+				},
+				10,
+				2
+			);
+		}
+
+		if ( 'missing-full-height' === $variant ) {
+			add_filter(
+				'image_downsize',
+				function ( $size, $id ) use ( $attachment_id ) {
+					$this->assertNotSame( $attachment_id, $id, 'The resize service requires both original dimensions.' );
+					return $size;
+				},
+				10,
+				2
+			);
+		}
+
+		$dimensions                             = in_array( $variant, array( 'cdn', 'cdn-without-file' ), true ) ? '' : ' width="600" height="900"';
 		$gallery                                = $this->build_gallery_with_images( 2, 2 );
 		$gallery['innerBlocks'][0]['attrs']     = array(
 			'id'       => $attachment_id,

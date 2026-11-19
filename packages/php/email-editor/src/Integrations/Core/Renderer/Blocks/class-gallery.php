@@ -204,12 +204,20 @@ class Gallery extends Abstract_Block_Renderer {
 		$stored_file     = $stored['file'] ?? null;
 		$has_full_size   = $full_width > 0 && $full_height > 0;
 		$has_stored_size = is_string( $stored_file ) && '' !== $stored_file && $stored_width > 0 && $stored_height > 0;
-		// A partial intermediate record can make WordPress read missing fields during downsizing.
-		if ( ! $has_stored_size && ( ! empty( $stored ) || ! $has_full_size ) ) {
+		if ( ! $has_full_size && ! $has_stored_size ) {
 			return null;
 		}
 
-		$size = wp_get_attachment_image_src( $id, $slug );
+		$size = false;
+		// Resize services may read the original dimensions even for a stored intermediate size.
+		if ( $has_full_size ) {
+			if ( $has_stored_size || empty( $stored ) ) {
+				$size = wp_get_attachment_image_src( $id, $slug );
+			} elseif ( wp_attachment_is_image( $id ) ) {
+				// Try the resize provider without letting Core read a partial intermediate record.
+				$size = apply_filters( 'image_downsize', false, $id, $slug );
+			}
+		}
 		if ( is_array( $size ) && ( $size[0] ?? null ) === $src ) {
 			$width  = $this->get_positive_dimension( $size[1] ?? null );
 			$height = $this->get_positive_dimension( $size[2] ?? null );
