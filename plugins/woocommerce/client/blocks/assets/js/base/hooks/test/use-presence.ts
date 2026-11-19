@@ -91,4 +91,16 @@ describe( 'usePresence', () => {
 		expect( result.current.value ).toBeNull();
 		expect( result.current.isExiting ).toBe( false );
 	} );
+
+	it( 'removes an exiting value when exit turns false', () => {
+		const { result, rerender } = renderUsePresence( { value: open } );
+		result.current.ref.current = createAnimatingElement().element;
+
+		rerender( { value: null } );
+		expect( result.current.isExiting ).toBe( true );
+
+		rerender( { value: null, exit: false } );
+		expect( result.current.value ).toBeNull();
+		expect( result.current.isExiting ).toBe( false );
+	} );
 } );
