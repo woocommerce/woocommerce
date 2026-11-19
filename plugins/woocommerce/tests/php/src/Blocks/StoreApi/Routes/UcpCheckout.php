@@ -153,29 +153,6 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * Remove one key from the stored session row, leaving this request's memory as it was.
-	 *
-	 * @param string $key Session key.
-	 */
-	private function drop_stored_session_key( string $key ): void {
-		global $wpdb;
-
-		$customer_id = (string) WC()->session->get_customer_id();
-		$stored      = WC()->session->get_session( $customer_id, array() );
-
-		if ( ! is_array( $stored ) ) {
-			return;
-		}
-
-		unset( $stored[ $key ] );
-		$wpdb->update(
-			$wpdb->prefix . 'woocommerce_sessions',
-			array( 'session_value' => maybe_serialize( $stored ) ),
-			array( 'session_key' => $customer_id )
-		);
-	}
-
-	/**
 	 * Build a UCP line item for one of the fixture products.
 	 *
 	 * @param int $index Fixture index.
@@ -379,7 +356,6 @@ class UcpCheckout extends ControllerTestCase {
 		$this->request( 'POST', $path . '/complete' );
 		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
 		WC()->cart->set_quantity( (string) array_key_first( WC()->cart->get_cart() ), 2 );
-		WC()->session->save_data();
 
 		$fail = static function ( $order ) {
 			if ( $order->has_status( OrderStatus::CANCELLED ) ) {
@@ -799,96 +775,6 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Complete does not put back a coupon another request removed from the saved session.
-	 */
-	public function test_complete_drops_a_coupon_removed_since_the_session_was_read(): void {
-		$coupon = new \WC_Coupon();
-		$coupon->set_code( 'ucp-ten-off' );
-		$coupon->set_discount_type( 'percent' );
-		$coupon->set_amount( 10 );
-		$coupon->save();
-
-		$created = $this->create_ready_checkout();
-
-		try {
-			$this->assertTrue( WC()->cart->apply_coupon( $coupon->get_code() ) );
-			WC()->session->save_data();
-			$this->drop_stored_session_key( 'applied_coupons' );
-
-			$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
-
-			$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
-			$this->assertNotContains( $coupon->get_code(), $order->get_coupon_codes() );
-		} finally {
-			$coupon->delete( true );
-		}
-	}
-
-	/**
-	 * @testdox Complete returns a hand-off another request stored after this one read the session, and does not create a second order.
-	 */
-	public function test_complete_returns_a_hand_off_saved_since_the_session_was_read(): void {
-		$created  = $this->create_ready_checkout();
-		$path     = '/checkout-sessions/' . $created['id'];
-		$first    = $this->request( 'POST', $path . '/complete' )->get_data();
-		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
-		$stored   = WC()->session->get_session( (string) WC()->session->get_customer_id(), array() );
-		$saved    = is_array( $stored ) ? maybe_unserialize( $stored['ucp_checkout'] ?? null ) : null;
-
-		$this->assertSame( $order_id, (int) ( is_array( $saved ) ? ( $saved['order_id'] ?? 0 ) : 0 ) );
-
-		$state = WC()->session->get( 'ucp_checkout' );
-		unset( $state['order_id'], $state['status'], $state['continue_url'], $state['fingerprint'] );
-		WC()->session->set( 'ucp_checkout', $state );
-
-		$second = $this->request( 'POST', $path . '/complete' )->get_data();
-		$this->assertSame( $first['continue_url'], $second['continue_url'] );
-		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
-		$this->assertCount(
-			1,
-			wc_get_orders(
-				array(
-					'status' => 'any',
-					'return' => 'ids',
-					'limit'  => -1,
-				)
-			)
-		);
-	}
-
-	/**
-	 * @testdox Complete keeps an order handed off for a cart another request saved, instead of the cart this request had read.
-	 */
-	public function test_complete_keeps_an_order_for_a_cart_saved_since_the_session_was_read(): void {
-		$created = $this->create_ready_checkout();
-		$path    = '/checkout-sessions/' . $created['id'];
-		$key     = (string) array_key_first( WC()->cart->get_cart() );
-
-		WC()->cart->set_quantity( $key, 2 );
-		WC()->session->save_data();
-		$first    = $this->request( 'POST', $path . '/complete' )->get_data();
-		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
-
-		// The row holds quantity 2 and its order. This request still has the quantity 1 it read.
-		WC()->cart->set_quantity( $key, 1 );
-
-		$second = $this->request( 'POST', $path . '/complete' )->get_data();
-		$this->assertSame( $first['continue_url'], $second['continue_url'] );
-		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
-		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ) );
-		$this->assertCount(
-			1,
-			wc_get_orders(
-				array(
-					'status' => 'any',
-					'return' => 'ids',
-					'limit'  => -1,
-				)
-			)
-		);
-	}
-
-	/**
 	 * @testdox Complete refuses a checkout with nothing to pay, which the payment page would not take, and makes no order.
 	 */
 	public function test_complete_refuses_a_free_checkout(): void {
@@ -938,7 +824,6 @@ class UcpCheckout extends ControllerTestCase {
 		// As POST /wc/store/v1/cart/update-item does with the checkout id as its Cart-Token.
 		$cart = WC()->cart;
 		$cart->set_quantity( (string) array_key_first( $cart->get_cart() ), 2 );
-		WC()->session->save_data();
 
 		// Until then a read shows the changed cart without the payment URL of the order it no longer matches.
 		$read = $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data();

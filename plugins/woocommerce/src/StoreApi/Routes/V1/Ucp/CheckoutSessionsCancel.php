@@ -78,11 +78,6 @@ class CheckoutSessionsCancel extends AbstractCheckoutRoute {
 		$state['status'] = CheckoutMapper::STATUS_CANCELED;
 		$this->save_checkout_state( $state );
 
-		// A later request reads the session row. Shutdown can run after that request has already read it.
-		if ( is_callable( array( WC()->session, 'save_data' ) ) ) {
-			WC()->session->save_data();
-		}
-
 		return $this->checkout_response( $this->route_cart_id( $request ), $state );
 	}
 }
