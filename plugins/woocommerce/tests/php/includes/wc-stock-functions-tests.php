@@ -582,4 +582,24 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertSame( 6, $product->get_stock_quantity() );
 		$this->assertGreaterThan( strtotime( $past ), $product->get_date_modified()->getTimestamp() );
 	}
+
+	/**
+	 * @testdox Updating stock returns false when the product that manages the stock cannot be loaded.
+	 */
+	public function test_update_product_stock_returns_false_when_stock_owner_cannot_be_loaded(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_manage_stock( true );
+		$parent->set_stock_quantity( 10 );
+		$parent->save();
+
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$this->assertSame( $parent->get_id(), $variation->get_stock_managed_by_id(), 'The variation should take its stock from the parent' );
+
+		// A post type other than product makes wc_get_product() return false for the parent.
+		$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_type' => 'post' ), array( 'ID' => $parent->get_id() ) );
+		clean_post_cache( $parent->get_id() );
+
+		$this->assertFalse( wc_update_product_stock( $variation, 5 ), 'The update should fail when the parent cannot be loaded' );
+		$this->assertSame( '10', get_post_meta( $parent->get_id(), '_stock', true ), 'The parent stock should not change' );
+	}
 }
