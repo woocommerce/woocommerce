@@ -158,30 +158,28 @@ const test = base.extend<
 		admin.createNewPost = async ( ...args ) => {
 			await createNewPost( ...args );
 			// `createNewPost` waits for `wp.data`, not for the editor to mount.
-			const id = await (
-				await page.waitForFunction( () =>
-					window.wp.data.select( 'core/editor' )?.getCurrentPostId()
-				)
+			const { id, type } = await (
+				await page.waitForFunction( () => {
+					const editorStore = window.wp.data.select( 'core/editor' );
+					const postId = editorStore?.getCurrentPostId();
+					return (
+						postId && {
+							id: postId,
+							type: editorStore.getCurrentPostType(),
+						}
+					);
+				} )
 			).jsonValue();
-			const restBase = await page.evaluate(
-				async () =>
-					(
-						await window.wp.data
-							.resolveSelect( 'core' )
-							.getPostType(
-								window.wp.data
-									.select( 'core/editor' )
-									.getCurrentPostType()
-							)
-					).rest_base
-			);
-			cleanup( () =>
-				requestUtils.rest( {
+			cleanup( async () => {
+				const { rest_base: restBase } = await requestUtils.rest< {
+					rest_base: string;
+				} >( { path: `/wp/v2/types/${ type }` } );
+				await requestUtils.rest( {
 					method: 'DELETE',
 					path: `/wp/v2/${ restBase }/${ id }`,
 					params: { force: true },
-				} )
-			);
+				} );
+			} );
 		};
 		await use( admin );
 	},
