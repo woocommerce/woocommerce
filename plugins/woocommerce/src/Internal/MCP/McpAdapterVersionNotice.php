@@ -15,6 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * MCP Adapter 0.7.2 prepares the ability input before it checks permissions. Older versions pass raw input
  * to the permission callbacks of WooCommerce abilities.
  *
+ * Remove when MCP Adapter requires WordPress 7.2.
+ *
  * @since 11.4.0
  */
 class McpAdapterVersionNotice {
