@@ -212,7 +212,7 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 			$ids[] = $wpdb->insert_id;
 		}
 
-		$this->assertFalse( \wc_update_1130_redact_deferred_customer_passwords() );
+		$this->assertFalse( \wc_update_1131_redact_deferred_customer_passwords() );
 
 		foreach ( $ids as $id ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name uses the current site's trusted prefix.
@@ -266,7 +266,7 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 			$ids[] = $wpdb->insert_id;
 		}
 
-		$this->assertFalse( \wc_update_1130_redact_deferred_customer_passwords() );
+		$this->assertFalse( \wc_update_1131_redact_deferred_customer_passwords() );
 
 		foreach ( $ids as $id ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name uses the current site's trusted prefix.
@@ -306,8 +306,8 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 			$ids[] = $wpdb->insert_id;
 		}
 
-		$this->assertTrue( \wc_update_1130_redact_deferred_customer_passwords() );
-		$this->assertSame( $ids[99], get_option( 'woocommerce_update_1130_last_deferred_email_action_id' ) );
+		$this->assertTrue( \wc_update_1131_redact_deferred_customer_passwords() );
+		$this->assertSame( $ids[99], get_option( 'woocommerce_update_1131_last_deferred_email_action_id' ) );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name uses the current site's trusted prefix.
 		$first = $wpdb->get_var( $wpdb->prepare( "SELECT args FROM {$table} WHERE action_id = %d", $ids[0] ) );
@@ -316,11 +316,11 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'user_pass', json_decode( $first, true )[1][1] );
 		$this->assertArrayHasKey( 'user_pass', json_decode( $last, true )[1][1] );
 
-		$this->assertFalse( \wc_update_1130_redact_deferred_customer_passwords() );
+		$this->assertFalse( \wc_update_1131_redact_deferred_customer_passwords() );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name uses the current site's trusted prefix.
 		$last = $wpdb->get_var( $wpdb->prepare( "SELECT args FROM {$table} WHERE action_id = %d", $ids[100] ) );
 		$this->assertArrayNotHasKey( 'user_pass', json_decode( $last, true )[1][1] );
-		$this->assertFalse( get_option( 'woocommerce_update_1130_last_deferred_email_action_id' ) );
+		$this->assertFalse( get_option( 'woocommerce_update_1131_last_deferred_email_action_id' ) );
 	}
 
 	/**

@@ -1457,9 +1457,9 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox wc_update_11301_invalidate_postcode_match_caches makes ZIP+4 postcodes match zones and tax rates cached before the fix.
+	 * @testdox wc_update_1131_invalidate_postcode_match_caches makes ZIP+4 postcodes match zones and tax rates cached before the fix.
 	 */
-	public function test_wc_update_11301_invalidate_postcode_match_caches(): void {
+	public function test_wc_update_1131_invalidate_postcode_match_caches(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
 
 		$zone = new WC_Shipping_Zone();
@@ -1498,16 +1498,16 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 0, WC_Shipping_Zones::get_zone_matching_package( $package )->get_id(), 'The stale zone match is served before the update.' );
 		$this->assertSame( array(), WC_Tax::find_rates( $tax_location ), 'The stale tax match is served before the update.' );
 
-		wc_update_11301_invalidate_postcode_match_caches();
+		wc_update_1131_invalidate_postcode_match_caches();
 
 		$this->assertSame( $zone->get_id(), WC_Shipping_Zones::get_zone_matching_package( $package )->get_id() );
 		$this->assertArrayHasKey( $rate_id, WC_Tax::find_rates( $tax_location ) );
 	}
 
 	/**
-	 * @testdox wc_update_11301_invalidate_postcode_match_caches makes a cart calculate again the shipping rates it stored before the fix.
+	 * @testdox wc_update_1131_invalidate_postcode_match_caches makes a cart calculate again the shipping rates it stored before the fix.
 	 */
-	public function test_wc_update_11301_invalidate_postcode_match_caches_recalculates_stored_package_rates(): void {
+	public function test_wc_update_1131_invalidate_postcode_match_caches_recalculates_stored_package_rates(): void {
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
 
 		$package = array(
@@ -1527,7 +1527,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'flat_rate:99', WC()->shipping()->calculate_shipping_for_package( $package )['rates'], 'The stored rate is served before the update.' );
 
-		wc_update_11301_invalidate_postcode_match_caches();
+		wc_update_1131_invalidate_postcode_match_caches();
 
 		$this->assertArrayNotHasKey( 'flat_rate:99', WC()->shipping()->calculate_shipping_for_package( $package )['rates'], 'The rates are calculated again after the update.' );
 	}
