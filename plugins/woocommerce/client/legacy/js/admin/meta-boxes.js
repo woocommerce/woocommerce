@@ -140,21 +140,13 @@ jQuery( function ( $ ) {
 				return ( $tab.attr( 'href' ) || '' ).replace( /^#/, '' );
 			};
 
-			const get_tab_panel = function ( $tab, $panel_wrap ) {
+			const get_tab_panel = function ( $tab ) {
 				const target_id = get_tab_target_id( $tab );
 				if ( ! target_id ) {
 					return $();
 				}
 
-				const $panel = $( document.getElementById( target_id ) );
-				if (
-					$panel.length &&
-					$.contains( $panel_wrap.get( 0 ), $panel.get( 0 ) )
-				) {
-					return $panel;
-				}
-
-				return $();
+				return $( document.getElementById( target_id ) );
 			};
 
 			const maybe_update_panel_tabindex = function ( $panel ) {
@@ -197,7 +189,7 @@ jQuery( function ( $ ) {
 							.attr( 'aria-selected', 'false' )
 							.attr( 'tabindex', '-1' );
 
-						const $panel = get_tab_panel( $tab, $panel_wrap );
+						const $panel = get_tab_panel( $tab );
 						if ( $panel.length ) {
 							$panel
 								.attr( 'role', 'tabpanel' )
@@ -212,7 +204,7 @@ jQuery( function ( $ ) {
 					return;
 				}
 				const $panel_wrap = $tab.closest( 'div.panel-wrap' );
-				const $panel = get_tab_panel( $tab, $panel_wrap );
+				const $panel = get_tab_panel( $tab );
 				if ( ! $panel.length ) {
 					return;
 				}
