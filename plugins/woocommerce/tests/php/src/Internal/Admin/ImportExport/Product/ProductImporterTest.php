@@ -120,7 +120,7 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	 */
 	public function test_run_takes_over_a_stale_cli_lock(): void {
 		$this->assertTrue( $this->import_lock->acquire( ProductImportLock::HOLDER_CLI ) );
-		$this->age_lock( 61 * MINUTE_IN_SECONDS );
+		$this->age_lock( 11 * MINUTE_IN_SECONDS );
 
 		$results = $this->sut->run(
 			$this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-STALE-LOCK,Stale Lock Product\n" ),
@@ -195,7 +195,7 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse a mapping with no id, sku or name column, so a wrong delimiter cannot create blank products.
+	 * @testdox Should refuse a mapping with no id, sku, GTIN or name column, so a wrong delimiter cannot create blank products.
 	 */
 	public function test_run_refuses_a_mapping_without_an_identifying_column(): void {
 		$before = wp_count_posts( 'product' )->publish;
@@ -207,7 +207,7 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 			);
 			$this->fail( 'Expected the run to refuse the mapping.' );
 		} catch ( \InvalidArgumentException $exception ) {
-			$this->assertStringContainsString( 'No column maps to id, sku or name', $exception->getMessage() );
+			$this->assertStringContainsString( 'No column maps to id, sku, global_unique_id or name', $exception->getMessage() );
 		}
 
 		$this->assertSame( $before, wp_count_posts( 'product' )->publish );
@@ -308,6 +308,159 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-RUNNER-TAKEOVER' ) );
 		$this->assertTrue( $other_run->refresh(), 'The other run should still hold the lock' );
+	}
+
+	/**
+	 * @testdox Should stop before the next row, and leave the new lock alone, when another import takes the lock over mid-batch.
+	 */
+	public function test_run_stops_mid_batch_when_the_lock_is_taken_over(): void {
+		$other_run = new ProductImportLock();
+		$row       = 0;
+		$take_over = function () use ( $other_run, &$row ): void {
+			if ( 2 === ++$row ) {
+				$this->age_lock( 11 * MINUTE_IN_SECONDS );
+				$this->assertTrue( $other_run->acquire( ProductImportLock::HOLDER_ADMIN ) );
+			}
+		};
+		add_action( 'woocommerce_product_import_before_import', $take_over, 5 );
+
+		try {
+			$this->sut->run(
+				$this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-MID-1,One\nsimple,IMPORT-RUNNER-MID-2,Two\nsimple,IMPORT-RUNNER-MID-3,Three\n" ),
+				array( 'mapping' => $this->get_simple_mapping() )
+			);
+			$this->fail( 'Expected the run to stop once it lost the lock.' );
+		} catch ( ImportLockedException $exception ) {
+			$this->assertStringContainsString( 'took over', $exception->getMessage() );
+		}
+
+		$this->assertGreaterThan( 0, wc_get_product_id_by_sku( 'IMPORT-RUNNER-MID-1' ) );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-RUNNER-MID-2' ) );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-RUNNER-MID-3' ) );
+		$this->assertTrue( $other_run->refresh(), 'The other run should still hold the lock' );
+	}
+
+	/**
+	 * @testdox Should import every row of a file that spans several batches.
+	 */
+	public function test_run_imports_across_several_batches(): void {
+		$batches = 0;
+
+		$results = $this->sut->run(
+			$this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-BATCH-1,One\nsimple,IMPORT-RUNNER-BATCH-2,Two\nsimple,IMPORT-RUNNER-BATCH-3,Three\n" ),
+			array(
+				'mapping'    => $this->get_simple_mapping(),
+				'batch_size' => 1,
+			),
+			static function () use ( &$batches ): void {
+				++$batches;
+			}
+		);
+
+		$this->assertSame( 3, $results['imported'] );
+		$this->assertCount( 3, $results['imported_ids'] );
+		$this->assertGreaterThanOrEqual( 3, $batches );
+	}
+
+	/**
+	 * @testdox Should keep autoloaded options cached after the caches are flushed between batches.
+	 */
+	public function test_run_keeps_autoloaded_options_cached_between_batches(): void {
+		$cached = null;
+		$row    = 0;
+		$check  = static function () use ( &$cached, &$row ): void {
+			if ( 2 === ++$row ) {
+				$cached = false !== wp_cache_get( 'alloptions', 'options' );
+			}
+		};
+		add_action( 'woocommerce_product_import_before_import', $check );
+
+		$this->sut->run(
+			$this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-OPTS-1,One\nsimple,IMPORT-RUNNER-OPTS-2,Two\n" ),
+			array(
+				'mapping'    => $this->get_simple_mapping(),
+				'batch_size' => 1,
+			)
+		);
+
+		$this->assertTrue( $cached );
+	}
+
+	/**
+	 * @testdox Should update the term counts of earlier batches before the run ends.
+	 */
+	public function test_run_updates_term_counts_after_each_batch(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$count = null;
+		$row   = 0;
+		$check = static function () use ( &$count, &$row ): void {
+			if ( 2 === ++$row ) {
+				$count = (int) get_term_by( 'name', 'Batch Count Category', 'product_cat' )->count;
+			}
+		};
+		add_action( 'woocommerce_product_import_before_import', $check );
+
+		$this->sut->run(
+			$this->write_csv( "Type,SKU,Name,Categories\nsimple,IMPORT-RUNNER-TERMS-1,One,Batch Count Category\nsimple,IMPORT-RUNNER-TERMS-2,Two,\n" ),
+			array(
+				'mapping'    => array_merge( $this->get_simple_mapping(), array( 'Categories' => 'category_ids' ) ),
+				'batch_size' => 1,
+			)
+		);
+
+		$this->assertSame( 1, $count );
+	}
+
+	/**
+	 * @testdox Should accept a GTIN column as the only identifying column.
+	 */
+	public function test_run_accepts_a_gtin_column_as_the_identifier(): void {
+		$results = $this->sut->run(
+			$this->write_csv( "Type,GTIN\nsimple,4006381333931\n" ),
+			array(
+				'mapping' => array(
+					'Type' => 'type',
+					'GTIN' => 'global_unique_id',
+				),
+			)
+		);
+
+		$this->assertSame( 1, $results['imported'] );
+	}
+
+	/**
+	 * @testdox Should report row warnings with decoded quotes, without counting them as failures.
+	 */
+	public function test_run_reports_warnings_without_counting_them_as_failures(): void {
+		\WC_Helper_Product::create_simple_product( true, array( 'sku' => 'IMPORT-RUNNER-WARN' ) );
+
+		$results = $this->sut->run(
+			$this->write_csv( "Type,SKU,Name,Upsells\nsimple,IMPORT-RUNNER-WARN,Warned,IMPORT-RUNNER-MISSING\n" ),
+			array(
+				'mapping'         => array_merge( $this->get_simple_mapping(), array( 'Upsells' => 'upsell_ids' ) ),
+				'update_existing' => true,
+			)
+		);
+
+		$this->assertSame( 1, $results['updated'] );
+		$this->assertSame( 0, $results['failed'] );
+		$this->assertCount( 1, $results['errors'] );
+		$this->assertStringContainsString( '"Upsells"', $results['errors'][0]['message'] );
+	}
+
+	/**
+	 * @testdox Should delete placeholders left behind by an earlier import once the run finishes.
+	 */
+	public function test_run_deletes_leftover_placeholders(): void {
+		$placeholder_id = $this->create_placeholder();
+
+		$this->sut->run(
+			$this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-CLEANUP,Cleanup\n" ),
+			array( 'mapping' => $this->get_simple_mapping() )
+		);
+
+		$this->assertNull( get_post( $placeholder_id ) );
 	}
 
 	/**

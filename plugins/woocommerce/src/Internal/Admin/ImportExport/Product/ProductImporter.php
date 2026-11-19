@@ -203,7 +203,11 @@ final class ProductImporter {
 			wp_defer_term_counting( true );
 			wp_suspend_cache_addition( true );
 
-			$refresh_lock = array( $this->import_lock, 'refresh_if_due' );
+			$refresh_lock = function (): void {
+				if ( ! $this->import_lock->refresh_if_due() ) {
+					throw $this->get_lock_lost_exception();
+				}
+			};
 			add_action( 'woocommerce_product_import_before_import', $refresh_lock );
 
 			try {
@@ -228,6 +232,15 @@ final class ProductImporter {
 					}
 
 					$this->memory_manager->flush_caches();
+
+					// Core re-caches autoloaded options with wp_cache_add(), which is a no-op while addition is suspended.
+					wp_suspend_cache_addition( false );
+					wp_load_alloptions();
+					wp_suspend_cache_addition( true );
+
+					// Turning deferral off writes the term counts deferred during this batch.
+					wp_defer_term_counting( false );
+					wp_defer_term_counting( true );
 				} while ( ! $batch['done'] );
 			} finally {
 				remove_action( 'woocommerce_product_import_before_import', $refresh_lock );
@@ -254,8 +267,17 @@ final class ProductImporter {
 	 */
 	private function keep_lock(): void {
 		if ( ! $this->import_lock->refresh() ) {
-			throw new ImportLockedException( esc_html( 'Another product import took over the import lock, so this import stopped.' ) );
+			throw $this->get_lock_lost_exception();
 		}
+	}
+
+	/**
+	 * Get the exception that stops a run which lost the import lock to another import.
+	 *
+	 * @return ImportLockedException
+	 */
+	private function get_lock_lost_exception(): ImportLockedException {
+		return new ImportLockedException( esc_html( 'Another product import took over the import lock, so this import stopped.' ) );
 	}
 
 	/**
@@ -316,7 +338,7 @@ final class ProductImporter {
 		$imported_ids  = array_map( 'absint', (array) $results['imported'] );
 		$updated_ids   = array_map( 'absint', (array) $results['updated'] );
 		$variation_ids = array_map( 'absint', (array) $results['imported_variations'] );
-		$errors        = $this->collect_errors( array_merge( (array) $results['failed'], (array) $results['skipped'] ) );
+		$errors        = $this->collect_errors( array_merge( (array) $results['failed'], (array) $results['skipped'], (array) ( $results['warnings'] ?? array() ) ) );
 
 		return array(
 			'imported'               => count( $imported_ids ),
@@ -337,7 +359,7 @@ final class ProductImporter {
 	 * The importer describes a row by name, ID and SKU (see `WC_Product_CSV_Importer::get_row_id()`)
 	 * rather than by line number, so `row` is that description.
 	 *
-	 * @param WP_Error[] $wp_errors The `WP_Error` objects from the importer's `failed`/`skipped` results.
+	 * @param WP_Error[] $wp_errors The `WP_Error` objects from the importer's `failed`, `skipped` and `warnings` results.
 	 *
 	 * @return array<int, array{row: string, code: string, message: string}>
 	 */
@@ -354,7 +376,7 @@ final class ProductImporter {
 			$errors[] = array(
 				'row'     => (string) ( $data['row'] ?? '' ),
 				'code'    => (string) $wp_error->get_error_code(),
-				'message' => wp_strip_all_tags( (string) $wp_error->get_error_message() ),
+				'message' => wp_specialchars_decode( wp_strip_all_tags( (string) $wp_error->get_error_message() ), ENT_QUOTES ),
 			);
 		}
 
@@ -367,7 +389,7 @@ final class ProductImporter {
 	 *
 	 * @param array<string, string> $mapping Header => target mapping.
 	 *
-	 * @throws InvalidArgumentException When a mapping target is not a valid importer schema key, or no column maps to id, sku or name.
+	 * @throws InvalidArgumentException When a mapping target is not a valid importer schema key, or no column maps to id, sku, GTIN or name.
 	 */
 	private function validate_mapping( array $mapping ): void {
 		$invalid = array();
@@ -383,8 +405,8 @@ final class ProductImporter {
 		}
 
 		// Without one of these, every row would become a new, blank product, which is what a wrong delimiter produces.
-		if ( ! empty( $mapping ) && empty( array_intersect( array( 'id', 'sku', 'name' ), array_values( $mapping ) ) ) ) {
-			throw new InvalidArgumentException( 'No column maps to id, sku or name, so rows cannot be identified. Check the delimiter and the header row.' );
+		if ( ! empty( $mapping ) && empty( array_intersect( array( 'id', 'sku', 'global_unique_id', 'name' ), array_values( $mapping ) ) ) ) {
+			throw new InvalidArgumentException( 'No column maps to id, sku, global_unique_id or name, so rows cannot be identified. Check the delimiter and the header row.' );
 		}
 	}
 

@@ -97,6 +97,15 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return WC_Product_CSV_Importer
 	 */
 	public static function get_importer( $file, $args = array() ) {
+		/**
+		 * Filters the class used to import product CSV rows.
+		 *
+		 * A replacement class must fire `woocommerce_product_import_before_import` before each row, or a long import loses the product import lock.
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param string $importer_class Importer class name.
+		 */
 		$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
 		$args           = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
 		return new $importer_class( $file, $args );
