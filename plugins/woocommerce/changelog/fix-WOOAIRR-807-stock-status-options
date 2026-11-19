@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow edits to sold-out variable products to save when an extension returns invalid stock status options.
