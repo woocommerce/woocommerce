@@ -117,6 +117,7 @@ class TelemetryTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'no', $snapshot['feature_enabled'] );
 		$this->assertSame( '', $snapshot['last_scan'] );
+		$this->assertSame( 'no', $snapshot['truncated'] );
 		$this->assertSame( array(), $snapshot['store_checks'] );
 		$this->assertSame( array(), $snapshot['product_checks'] );
 	}
@@ -129,6 +130,7 @@ class TelemetryTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'yes', $snapshot['feature_enabled'] );
 		$this->assertSame( '', $snapshot['last_scan'] );
+		$this->assertSame( 'no', $snapshot['truncated'] );
 		$this->assertArrayHasKey( 'https', $snapshot['store_checks'] );
 		$this->assertArrayNotHasKey( 'product_schema', $snapshot['store_checks'], 'Output checks only run in the scan' );
 		$this->assertSame( array(), $snapshot['product_checks'] );
@@ -143,6 +145,7 @@ class TelemetryTest extends WC_Unit_Test_Case {
 		$snapshot = $this->sut->snapshot();
 
 		$this->assertSame( '2026-11-14', $snapshot['last_scan'] );
+		$this->assertSame( 'no', $snapshot['truncated'] );
 		$this->assertSame( Telemetry::PASS, $snapshot['store_checks']['robots_allows_agents'] );
 		$this->assertSame( Telemetry::PROBLEM, $snapshot['store_checks']['product_schema'] );
 		$this->assertSame( Telemetry::UNKNOWN, $snapshot['store_checks']['llms_txt'], 'A check that could not run' );
@@ -155,6 +158,20 @@ class TelemetryTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'http', str_replace( '"https"', '', $sent ), 'No URLs' );
 		$this->assertStringNotContainsString( 'Add a brand', $sent, 'No check text' );
 		$this->assertStringNotContainsString( 'product_ids', $sent, 'No product ids' );
+	}
+
+	/**
+	 * @testdox A scan that stopped at the product limit is marked truncated in the snapshot.
+	 */
+	public function test_truncated_scan_is_flagged(): void {
+		$this->store_report();
+		$report              = get_option( AgentReadiness::REPORT_OPTION );
+		$report['truncated'] = true;
+		update_option( AgentReadiness::REPORT_OPTION, $report );
+
+		$snapshot = $this->sut->snapshot();
+
+		$this->assertSame( 'yes', $snapshot['truncated'] );
 	}
 
 	/**

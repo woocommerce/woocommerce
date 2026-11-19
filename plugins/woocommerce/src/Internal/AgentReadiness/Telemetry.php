@@ -72,15 +72,16 @@ class Telemetry implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The feature flag, when the last scan ran, and each check's status. The store
-	 * conditions are read now; output and product checks are as the last scan left them.
+	 * The feature flag, when the last scan ran, whether it stopped at the product limit, and each check's status.
+	 * The store conditions are read now; output and product checks are as the last scan left them.
 	 *
-	 * @return array{feature_enabled:string,last_scan:string,store_checks:array<string,string>,product_checks:array<string,string>}
+	 * @return array{feature_enabled:string,last_scan:string,truncated:string,store_checks:array<string,string>,product_checks:array<string,string>}
 	 */
 	public function snapshot(): array {
 		$snapshot = array(
 			'feature_enabled' => 'no',
 			'last_scan'       => '',
+			'truncated'       => 'no',
 			'store_checks'    => array(),
 			'product_checks'  => array(),
 		);
@@ -94,6 +95,7 @@ class Telemetry implements RegisterHooksInterface {
 		if ( null !== $report ) {
 			$scanned               = strtotime( (string) ( $report['generated_at'] ?? '' ) );
 			$snapshot['last_scan'] = false !== $scanned ? gmdate( 'Y-m-d', $scanned ) : '';
+			$snapshot['truncated'] = empty( $report['truncated'] ) ? 'no' : 'yes';
 		}
 
 		foreach ( (array) ( $report['store_checks'] ?? $this->agent_readiness->get_store_checks( null ) ) as $check ) {

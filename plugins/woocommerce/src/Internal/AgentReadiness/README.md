@@ -227,6 +227,7 @@ With the flag on, the weekly WC Tracker snapshot (sent only by stores that allow
 
 - `feature_enabled`: `yes` or `no`. With the flag off, the other fields stay empty.
 - `last_scan`: the day the stored report was built (`Y-m-d`), or empty before the first scan.
+- `truncated`: `yes` when the last scan stopped at the product limit, otherwise `no` (including before the first scan). On a truncated scan, product check statuses cover only the products that were checked.
 - `store_checks`: each store check id with `pass`, `problem` or `unknown` (couldn't check, or still waiting for a result). Setup steps are read when the snapshot is built, so they are there before the first scan too; output checks come from the stored report.
 - `product_checks`: each product check id with `problem` when any product fails it, otherwise `pass`.
 
