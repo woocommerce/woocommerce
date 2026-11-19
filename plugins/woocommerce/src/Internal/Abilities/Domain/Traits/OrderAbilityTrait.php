@@ -428,11 +428,14 @@ trait OrderAbilityTrait {
 	 * @return array|\WP_Error
 	 */
 	protected static function format_orders_for_response( array $orders, array $includes ) {
+		ExtensibleAbilities::prime( 'order', $orders );
 		if ( in_array( 'line_items', $includes, true ) ) {
 			$product_ids = array();
+			$items       = array();
 			foreach ( $orders as $order ) {
 				foreach ( $order->get_items() as $item ) {
 					if ( $item instanceof \WC_Order_Item_Product ) {
+						$items[]       = $item;
 						$product_ids[] = $item->get_product_id();
 						$product_ids[] = $item->get_variation_id();
 					}
@@ -443,6 +446,7 @@ trait OrderAbilityTrait {
 				// Prime caches to reduce future queries.
 				_prime_post_caches( $product_ids );
 			}
+			ExtensibleAbilities::prime( 'order_item', $items );
 		}
 
 		$formatted = array();

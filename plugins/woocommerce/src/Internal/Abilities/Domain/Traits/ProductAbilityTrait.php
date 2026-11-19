@@ -1812,6 +1812,7 @@ trait ProductAbilityTrait {
 	 * @return array|\WP_Error
 	 */
 	protected static function format_products_for_response( array $products ) {
+		ExtensibleAbilities::prime( 'product', $products );
 		$formatted = array();
 		foreach ( $products as $product ) {
 			$data = self::format_product_for_response( $product );

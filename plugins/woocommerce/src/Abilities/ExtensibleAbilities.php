@@ -63,6 +63,13 @@ class ExtensibleAbilities {
 	private static array $syncs = array();
 
 	/**
+	 * Prime callbacks keyed by resource.
+	 *
+	 * @var array<string, array<int, array<string, mixed>>>
+	 */
+	private static array $primes = array();
+
+	/**
 	 * Whether the store enabled the experimental feature.
 	 *
 	 * @since 11.3.0
@@ -497,10 +504,7 @@ class ExtensibleAbilities {
 				try {
 					$clauses = call_user_func( $args['callback'], $value );
 				} catch ( \Throwable $e ) {
-					wc_get_logger()->error(
-						sprintf( 'Ability filter "%s.%s" of "%s" failed: %s', $namespace, $filter, $resource_name, $e->getMessage() ),
-						array( 'source' => 'extensible-abilities' )
-					);
+					self::log_error( sprintf( 'Ability filter "%s.%s" of "%s" failed: %s', $namespace, $filter, $resource_name, $e->getMessage() ) );
 					$clauses = null;
 				}
 				if ( is_wp_error( $clauses ) ) {
@@ -706,12 +710,90 @@ class ExtensibleAbilities {
 	}
 
 	/**
-	 * Check the arguments of a validator or a sync, and report the first
-	 * problem with wc_doing_it_wrong().
+	 * Register a prime callback on a resource. Before an ability formats a list
+	 * of objects of the resource, Core calls every prime callback of the
+	 * resource once, with the full list. An extension loads the data of its
+	 * fields for the whole list in one query, keeps it in its own cache, and
+	 * its get_callback reads from there.
 	 *
-	 * @param array  $args    Validator or sync arguments.
+	 * Call it inside the `woocommerce_extensible_abilities_init` action. Prime
+	 * callbacks run only when the `extensible_abilities` feature is on, in the
+	 * order they were registered.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $args {
+	 *     Prime arguments.
+	 *
+	 *     @type string   $resource  Resource that an ability formats, such as `product`.
+	 *     @type string   $namespace Slug of the extension that owns the callback, such as `google`.
+	 *     @type callable $callback  Receives `object[] $objects`, every object the ability formats. The
+	 *                               callback skips the objects it does not need. Core ignores the
+	 *                               return value. When it throws, Core logs the error and formats
+	 *                               the objects anyway, so the get_callback must still load its
+	 *                               data for an object that is not in the cache. Core calls prime
+	 *                               callbacks only on reads, not on writes. Key the cache by object ID,
+	 *                               and remove the entry of an object when the object is saved, for
+	 *                               example on `woocommerce_update_product`. Otherwise a write after a
+	 *                               read in the same request returns the old value. Empty the cache at the start of
+	 *                               every call, so a failed load leaves no old entries.
+	 * }
+	 */
+	public static function register_prime( array $args ): void {
+		if ( ! self::check_callback_args( $args, __METHOD__, 'prime callback', '11.4.0' ) ) {
+			return;
+		}
+
+		self::$primes[ $args['resource'] ][] = $args;
+	}
+
+	/**
+	 * Call every prime callback of a resource with the objects that an ability
+	 * is about to format. A callback that throws is logged, and the next one runs.
+	 * An extension that registers its own resource calls it from its list
+	 * abilities before add_fields_to_object(), as Core's abilities do.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string   $resource_name Resource.
+	 * @param object[] $objects       Objects to format.
+	 */
+	public static function prime( string $resource_name, array $objects ): void {
+		if ( empty( self::$primes[ $resource_name ] ) || empty( $objects ) || ! self::is_enabled() ) {
+			return;
+		}
+
+		$objects = array_values( $objects );
+		foreach ( self::$primes[ $resource_name ] as $args ) {
+			try {
+				call_user_func( $args['callback'], $objects );
+			} catch ( \Throwable $e ) {
+				self::log_error( sprintf( 'Ability prime callback of "%s" for "%s" failed: %s', $args['namespace'], $resource_name, $e->getMessage() ) );
+			}
+		}
+	}
+
+	/**
+	 * Log an error from an extension callback. A logger that throws does not
+	 * stop the ability.
+	 *
+	 * @param string $message Message to log.
+	 */
+	private static function log_error( string $message ): void {
+		try {
+			wc_get_logger()->error( $message, array( 'source' => 'extensible-abilities' ) );
+		} catch ( \Throwable $e ) {
+			unset( $e );
+		}
+	}
+
+	/**
+	 * Check the arguments of a validator, a sync or a prime callback, and report
+	 * the first problem with wc_doing_it_wrong().
+	 *
+	 * @param array  $args    Validator, sync or prime arguments.
 	 * @param string $method  Method that registers the callback.
-	 * @param string $kind    `validator` or `sync`, for the message.
+	 * @param string $kind    `validator`, `sync` or `prime callback`, for the message.
 	 * @param string $version Version that added the method.
 	 * @return bool Whether the arguments are valid.
 	 */

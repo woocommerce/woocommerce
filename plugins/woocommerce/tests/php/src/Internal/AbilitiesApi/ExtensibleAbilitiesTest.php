@@ -1017,6 +1017,269 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should call the $resource_name prime callbacks of each extension once with the full list, in registration order.
+	 * @dataProvider provide_list_abilities
+	 *
+	 * @param string   $resource_name Resource the ability lists.
+	 * @param string   $ability       List ability.
+	 * @param string   $list_key      Output key of the list.
+	 * @param callable $create_input  Creates two objects and returns the ability input that lists them.
+	 */
+	public function test_prime_callbacks_get_the_full_list_once( string $resource_name, string $ability, string $list_key, callable $create_input ): void {
+		$calls = array();
+		$cache = array();
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name, &$cache ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => $resource_name,
+						'namespace'     => 'test-ext',
+						'field'         => 'primed',
+						'output_schema' => array( 'type' => 'string' ),
+						'get_callback'  => static function ( $data_object ) use ( &$cache ) {
+							return $cache[ self::prime_object_id( $data_object ) ] ?? null;
+						},
+					)
+				);
+			}
+		);
+		foreach ( array( 'test-ext', 'other_ext' ) as $extension_namespace ) {
+			$this->register_prime(
+				$resource_name,
+				$extension_namespace,
+				static function ( array $objects ) use ( &$calls, &$cache, $extension_namespace ) {
+					$ids     = array_map( array( self::class, 'prime_object_id' ), array_values( $objects ) );
+					$calls[] = array( $extension_namespace, $ids );
+					if ( 'test-ext' === $extension_namespace ) {
+						$cache = array_combine( $ids, array_map( static fn( int $id ) => 'primed-' . $id, $ids ) );
+					}
+				}
+			);
+		}
+
+		$list = $this->run_ability( $ability, $create_input() )[ $list_key ];
+
+		$ids = array_column( $list, 'id' );
+		$this->assertCount( 2, $ids );
+		$this->assertSame( array( array( 'test-ext', $ids ), array( 'other_ext', $ids ) ), $calls );
+		foreach ( $list as $listed ) {
+			$this->assertSame( 'primed-' . $listed['id'], $listed['extensions']['test-ext']['primed'] );
+		}
+	}
+
+	/**
+	 * List abilities that prime their objects, with a fixture factory for each.
+	 *
+	 * @return array<string, array>
+	 */
+	public function provide_list_abilities(): array {
+		return array(
+			'product'        => array(
+				'product',
+				'woocommerce/products-query',
+				'products',
+				static function (): array {
+					\WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen one' ) );
+					\WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen two' ) );
+					return array( 'search' => 'Pen' );
+				},
+			),
+			'customer'       => array(
+				'customer',
+				'woocommerce/customers-query',
+				'customers',
+				static function (): array {
+					return array( 'include' => self::factory()->user->create_many( 2, array( 'role' => 'customer' ) ) );
+				},
+			),
+			'product_term'   => array(
+				'product_term',
+				'woocommerce/product-terms-query',
+				'terms',
+				static function (): array {
+					return array(
+						'taxonomy'   => 'product_cat',
+						'include'    => self::factory()->term->create_many( 2, array( 'taxonomy' => 'product_cat' ) ),
+						'hide_empty' => false,
+					);
+				},
+			),
+			'product_review' => array(
+				'product_review',
+				'woocommerce/product-reviews-query',
+				'reviews',
+				static function (): array {
+					$product = \WC_Helper_Product::create_simple_product()->get_id();
+					self::factory()->comment->create_many(
+						2,
+						array(
+							'comment_post_ID'  => $product,
+							'comment_type'     => 'review',
+							'comment_approved' => '1',
+						)
+					);
+					return array( 'product_ids' => array( $product ) );
+				},
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should have a prime test for every Core resource.
+	 */
+	public function test_every_core_resource_has_a_prime_test(): void {
+		AbilitiesLoader::register_core_resources();
+		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
+		$resources->setAccessible( true );
+
+		$covered = array_merge( array_keys( $this->provide_list_abilities() ), array( 'order', 'order_item' ) );
+
+		$this->assertEqualsCanonicalizing( array_keys( $resources->getValue() ), $covered, 'Add the new resource to provide_list_abilities().' );
+	}
+
+	/**
+	 * ID of an object a prime callback receives.
+	 *
+	 * @param \WC_Data|\WP_Term|\WP_Comment $data_object Object.
+	 * @return int
+	 */
+	private static function prime_object_id( $data_object ): int {
+		if ( $data_object instanceof \WP_Term ) {
+			return $data_object->term_id;
+		}
+		if ( $data_object instanceof \WP_Comment ) {
+			return (int) $data_object->comment_ID;
+		}
+		return $data_object->get_id();
+	}
+
+	/**
+	 * @testdox Should call the order and order item prime callbacks once with every order and every product line.
+	 */
+	public function test_prime_callbacks_get_orders_and_line_items(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$orders  = array( wc_create_order(), wc_create_order() );
+		foreach ( $orders as $order ) {
+			$order->add_product( $product );
+			$order->save();
+		}
+		$calls = array();
+		foreach ( array( 'order', 'order_item' ) as $resource_name ) {
+			$this->register_prime(
+				$resource_name,
+				'test-ext',
+				static function ( array $objects ) use ( &$calls, $resource_name ) {
+					$calls[ $resource_name ][] = array_map( static fn( $data_object ) => $data_object->get_id(), $objects );
+				}
+			);
+		}
+
+		$this->run_ability(
+			'woocommerce/orders-query',
+			array(
+				'per_page'           => 2,
+				'include_line_items' => true,
+			)
+		);
+
+		$item_ids = array_merge( ...array_map( static fn( \WC_Order $order ) => array_keys( $order->get_items() ), $orders ) );
+		$this->assertCount( 2, $item_ids );
+		$this->assertCount( 1, $calls['order'] );
+		$this->assertEqualsCanonicalizing( array_map( static fn( \WC_Order $order ) => $order->get_id(), $orders ), $calls['order'][0] );
+		$this->assertCount( 1, $calls['order_item'] );
+		$this->assertEqualsCanonicalizing( $item_ids, $calls['order_item'][0] );
+	}
+
+	/**
+	 * @testdox Should log a prime callback that throws, run the next one, and still return the fields.
+	 */
+	public function test_a_prime_callback_that_throws_is_logged(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$product->update_meta_data( '_test_code', 'A1' );
+		$product->save();
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->expects( $this->once() )->method( 'error' )->with(
+			'Ability prime callback of "test-ext" for "product" failed: Table is missing',
+			array( 'source' => 'extensible-abilities' )
+		);
+		add_filter( 'woocommerce_logging_class', static fn() => $logger );
+		$calls = 0;
+		$this->register_prime(
+			'product',
+			'test-ext',
+			static function () {
+				throw new \RuntimeException( 'Table is missing' );
+			}
+		);
+		$this->register_prime(
+			'product',
+			'other_ext',
+			static function () use ( &$calls ) {
+				++$calls;
+			}
+		);
+
+		$products = $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen' ) )['products'];
+
+		$this->assertSame( 1, $calls );
+		$this->assertSame( array( 'code' => 'A1' ), $products[0]['extensions']['test-ext'] );
+	}
+
+	/**
+	 * @testdox Should run the next prime callback and return the fields when the logger also throws.
+	 */
+	public function test_a_logger_that_throws_does_not_stop_the_read(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$product->update_meta_data( '_test_code', 'A1' );
+		$product->save();
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->method( 'error' )->willThrowException( new \RuntimeException( 'Logger broke' ) );
+		add_filter( 'woocommerce_logging_class', static fn() => $logger );
+		$calls = 0;
+		$this->register_prime(
+			'product',
+			'test-ext',
+			static function () {
+				throw new \RuntimeException( 'Table is missing' );
+			}
+		);
+		$this->register_prime(
+			'product',
+			'other_ext',
+			static function () use ( &$calls ) {
+				++$calls;
+			}
+		);
+
+		$products = $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen' ) )['products'];
+
+		$this->assertSame( 1, $calls );
+		$this->assertSame( array( 'code' => 'A1' ), $products[0]['extensions']['test-ext'] );
+	}
+
+	/**
+	 * @testdox Should not call prime callbacks with the feature off.
+	 */
+	public function test_prime_callbacks_do_not_run_with_the_feature_off(): void {
+		\WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$calls = 0;
+		$this->register_prime(
+			'product',
+			'test-ext',
+			static function () use ( &$calls ) {
+				++$calls;
+			}
+		);
+		$this->get_output_schema( 'woocommerce/products-query' );
+		$this->set_feature( false );
+
+		$this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen' ) );
+
+		$this->assertSame( 0, $calls );
+	}
+
+	/**
 	 * @testdox Should list the fields of each namespace in the output schemas, and add nothing for a resource with no fields.
 	 */
 	public function test_output_schemas_list_fields_by_namespace(): void {
@@ -6567,6 +6830,28 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Register a prime callback inside woocommerce_extensible_abilities_init, the way an extension does.
+	 *
+	 * @param string   $resource_name       Resource.
+	 * @param string   $extension_namespace Extension namespace.
+	 * @param callable $callback            Prime callback.
+	 */
+	private function register_prime( string $resource_name, string $extension_namespace, callable $callback ): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name, $extension_namespace, $callback ) {
+				ExtensibleAbilities::register_prime(
+					array(
+						'resource'  => $resource_name,
+						'namespace' => $extension_namespace,
+						'callback'  => $callback,
+					)
+				);
+			}
+		);
+	}
+
+	/**
 	 * Register test-ext/order-status, an ActionableAbility of an extension that changes orders.
 	 *
 	 * @param string $ability_class Class of the ability.
@@ -6706,7 +6991,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'validators', 'syncs', 'filters' ) as $property ) {
+		foreach ( array( 'fields', 'validators', 'syncs', 'primes', 'filters' ) as $property ) {
 			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );
