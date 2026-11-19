@@ -234,7 +234,10 @@ export const playSwap = ( snapshot: SwapSnapshot ) => {
 			removeStyle( section, 'translate' );
 		} );
 		if ( removeCopies ) {
-			copies.forEach( ( copy ) => copy.remove() );
+			// Includes the copies of a swap that this one turned around, which still fade out.
+			Array.from( container.children )
+				.filter( ( child ) => child.hasAttribute( COPY ) )
+				.forEach( ( copy ) => copy.remove() );
 			// A slide that still runs would keep moving the sections from where they were, so end it at once.
 			after.forEach( ( section ) =>
 				section
