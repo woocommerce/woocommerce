@@ -69,9 +69,8 @@ const FADE_KEYFRAMES = new Set( [
 ] );
 
 // Helpers from `_motion.scss`. `motion-hold()` jumps at the end (`step-end`), so it never animates any property.
-// `motion-state()` animates, so each property must fade or change colour. Sass variables pass, because the
-// `motion-transition` mixin forwards its `$state` list.
-const isFadeFunction = ( item ) => {
+// `motion-state()` animates, so each property, or the value of each Sass variable, must fade or change colour.
+const isFadeFunction = ( item, decl ) => {
 	if ( ! item.endsWith( ')' ) ) {
 		return false;
 	}
@@ -82,14 +81,72 @@ const isFadeFunction = ( item ) => {
 		return false;
 	}
 	return splitList( item.slice( 'motion-state('.length, -1 ) ).every(
-		( property ) =>
-			property.startsWith( '$' ) ||
-			FADE_PROPERTIES.has( property.toLowerCase() )
+		( property ) => isFadeProperty( property, decl, new Set() )
 	);
 };
 
+// The names of the parameters of a `@mixin`, for example `$state` and `$move` in `motion-transition($state: (), …)`.
+const mixinParameters = ( { params } ) => {
+	const open = params.indexOf( '(' );
+	if ( open === -1 || ! params.endsWith( ')' ) ) {
+		return [];
+	}
+	return splitList( params.slice( open + 1, -1 ) ).map( ( parameter ) =>
+		parameter.split( ':' )[ 0 ].replace( '...', '' ).trim()
+	);
+};
+
+// The items of a Sass list value, for example `opacity` and `color` in `(opacity, color) !default`.
+const listTokens = ( value ) =>
+	[ ...value.replace( '!default', ' ' ) ]
+		.map( ( character ) =>
+			'(),'.includes( character ) || character.trim() === ''
+				? ' '
+				: character
+		)
+		.join( '' )
+		.split( ' ' )
+		.filter( Boolean );
+
+// A property, or a Sass variable whose value lists only fade or color properties. The variable must be declared in
+// the same file, in the root or a rule that encloses `decl`. A parameter of the enclosing mixin passes, because the
+// `motion-transition` mixin forwards its `$state` list. Other variables fail, because their value is unknown.
+const isFadeProperty = ( property, decl, seen ) => {
+	if ( ! property.startsWith( '$' ) ) {
+		return FADE_PROPERTIES.has( property.toLowerCase() );
+	}
+	const name = property.replace( '...', '' );
+	if ( seen.has( name ) ) {
+		return false;
+	}
+	seen.add( name );
+	for ( let node = decl.parent; node; node = node.parent ) {
+		if (
+			node.type === 'atrule' &&
+			node.name === 'mixin' &&
+			mixinParameters( node ).includes( name )
+		) {
+			return true;
+		}
+		const declaration = ( node.nodes || [] ).findLast(
+			( child ) => child.type === 'decl' && child.prop === name
+		);
+		if ( declaration ) {
+			const tokens = listTokens( declaration.value );
+			return (
+				tokens.length > 0 &&
+				tokens.every( ( token ) =>
+					isFadeProperty( token, declaration, seen )
+				)
+			);
+		}
+	}
+	return false;
+};
+
 // A `transition` or `transition-property` that only fades or changes color, or an `animation` that only fades.
-const isFadeOnly = ( prop, value ) => {
+const isFadeOnly = ( prop, decl ) => {
+	const { value } = decl;
 	if ( prop === 'animation' || prop === 'animation-name' ) {
 		return splitList( value ).every( ( item ) =>
 			item.split( ' ' ).some( ( token ) => FADE_KEYFRAMES.has( token ) )
@@ -100,7 +157,7 @@ const isFadeOnly = ( prop, value ) => {
 	}
 	return splitList( value ).every(
 		( item ) =>
-			isFadeFunction( item ) ||
+			isFadeFunction( item, decl ) ||
 			FADE_PROPERTIES.has( item.split( ' ' )[ 0 ].toLowerCase() )
 	);
 };
@@ -126,7 +183,7 @@ const ruleFunction = ( primary ) => ( root, result ) => {
 			( ! prop.startsWith( 'transition' ) &&
 				! prop.startsWith( 'animation' ) ) ||
 			decl.value.trim() === 'none' ||
-			isFadeOnly( prop, decl.value )
+			isFadeOnly( prop, decl )
 		) {
 			return;
 		}
