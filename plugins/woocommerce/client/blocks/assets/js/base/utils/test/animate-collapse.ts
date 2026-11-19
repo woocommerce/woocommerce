@@ -347,6 +347,18 @@ describe( 'collapseCopy', () => {
 			[ '40px' ],
 		] );
 	} );
+
+	it( 'leaves no empty box under reduced motion, but still copies content', () => {
+		window.matchMedia = jest.fn().mockReturnValue( { matches: true } );
+		const { element, parent } = createForm();
+		collapseCopy( element, { empty: true } );
+		expect( parent.children ).toHaveLength( 2 );
+
+		collapseCopy( element );
+		expect( parent.children ).toHaveLength( 3 );
+		// @ts-expect-error The mock is not part of jsdom.
+		delete window.matchMedia;
+	} );
 } );
 
 describe( 'removeCollapseCopies', () => {
