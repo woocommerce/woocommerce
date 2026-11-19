@@ -189,13 +189,10 @@ class Gallery extends Abstract_Block_Renderer {
 		// Require stored dimensions so resize limits cannot stand in for unknown image dimensions.
 		$metadata = wp_get_attachment_metadata( $id, true );
 		$sizes    = $metadata['sizes'] ?? array();
-		if ( ! is_array( $sizes ) ) {
-			return null;
-		}
-		$stored = $sizes[ $slug ] ?? array();
-		if ( ! is_array( $stored ) ) {
-			return null;
-		}
+		$stored   = is_array( $sizes ) ? ( $sizes[ $slug ] ?? array() ) : null;
+		// A malformed intermediate record does not invalidate the original file metadata.
+		$malformed_size = ! is_array( $stored );
+		$stored         = $malformed_size ? array() : $stored;
 
 		$full_width      = $this->get_positive_dimension( $metadata['width'] ?? null );
 		$full_height     = $this->get_positive_dimension( $metadata['height'] ?? null );
@@ -208,9 +205,23 @@ class Gallery extends Abstract_Block_Renderer {
 			return null;
 		}
 
+		// Core can round the reported dimensions to fit the editor while keeping the file URL.
+		$saved_url = $this->get_file_url_for_src( $src );
+		if ( null !== $saved_url ) {
+			$original = wp_get_attachment_url( $id );
+			if ( is_string( $original ) ) {
+				if ( $has_stored_size && path_join( dirname( $original ), $stored_file ) === $saved_url ) {
+					return array( $stored_width, $stored_height );
+				}
+				if ( $has_full_size && $original === $saved_url ) {
+					return array( $full_width, $full_height );
+				}
+			}
+		}
+
 		$size = false;
-		// Resize services may read the original dimensions even for a stored intermediate size.
-		if ( $has_full_size ) {
+		// Resize services may read both the original dimensions and the intermediate record.
+		if ( $has_full_size && ! $malformed_size ) {
 			if ( $has_stored_size || empty( $stored ) ) {
 				$size = wp_get_attachment_image_src( $id, $slug );
 			} elseif ( wp_attachment_is_image( $id ) ) {
@@ -223,20 +234,30 @@ class Gallery extends Abstract_Block_Renderer {
 			$height = $this->get_positive_dimension( $size[2] ?? null );
 			return $width > 0 && $height > 0 ? array( $width, $height ) : null;
 		}
+		return null;
+	}
 
-		// The saved URL can refer to the same file before a CDN rewrite or a width-only resize.
-		if ( ! preg_match( '/^([^?#]+)(?:\?w=[1-9][0-9]*)?\z/', $src, $matches ) ) {
+	/**
+	 * Get the file URL when the saved URL has no query or only sets the width.
+	 *
+	 * @param string $src Saved image URL.
+	 * @return string|null File URL if the source preserves its proportions.
+	 */
+	private function get_file_url_for_src( string $src ): ?string {
+		$parts = explode( '?', $src, 2 );
+		$file  = $parts[0];
+		$query = $parts[1] ?? null;
+		if ( '' === $file || false !== strpos( $src, '#' ) ) {
 			return null;
 		}
-		$saved_url = $matches[1];
-		$original  = wp_get_attachment_url( $id );
-		if ( ! is_string( $original ) ) {
+		if ( null === $query ) {
+			return $file;
+		}
+		if ( 0 !== strpos( $query, 'w=' ) ) {
 			return null;
 		}
-		if ( $has_stored_size && path_join( dirname( $original ), $stored_file ) === $saved_url ) {
-			return array( $stored_width, $stored_height );
-		}
-		return $has_full_size && $original === $saved_url ? array( $full_width, $full_height ) : null;
+		$width = substr( $query, 2 );
+		return ctype_digit( $width ) && '0' !== $width[0] ? $file : null;
 	}
 
 	/**

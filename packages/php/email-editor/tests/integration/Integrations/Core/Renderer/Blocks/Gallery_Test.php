@@ -470,11 +470,16 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItCropsMixedGalleryRowsToFit( array $attrs, array $sizes, array $expected, int $caption_count = 0, ?string $first_image_ratio = null ): void {
 		$gallery          = $this->build_gallery_with_images( count( $sizes ), 2 );
 		$gallery['attrs'] = array_merge( $gallery['attrs'], $attrs );
+		$sources          = array();
 		foreach ( $sizes as $index => $size ) {
-			$gallery['innerBlocks'][ $index ]['attrs']     = array();
-			$gallery['innerBlocks'][ $index ]['innerHTML'] = is_array( $size )
-				? sprintf( '<img src="https://example.com/image%d.jpg" width="%d" height="%d">', $index, $size[0], $size[1] )
-				: $size;
+			$gallery['innerBlocks'][ $index ]['attrs'] = array();
+			if ( is_array( $size ) ) {
+				$src       = "https://example.com/image$index.jpg";
+				$sources[] = $src;
+				$gallery['innerBlocks'][ $index ]['innerHTML'] = sprintf( '<img src="%s" width="%d" height="%d">', $src, $size[0], $size[1] );
+			} else {
+				$gallery['innerBlocks'][ $index ]['innerHTML'] = $size;
+			}
 		}
 		if ( null !== $first_image_ratio ) {
 			$gallery['innerBlocks'][0]['attrs']['aspectRatio'] = $first_image_ratio;
@@ -482,7 +487,7 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 
 		$ratios = array();
 		$filter = function ( $url, $ratio ) use ( &$ratios ) {
-			$ratios[] = $ratio;
+			$ratios[ $url ] = $ratio;
 			return add_query_arg( 'crop', '1', $url );
 		};
 		add_filter( 'woocommerce_email_editor_gallery_cropped_image_url', $filter, 10, 2 );
@@ -492,8 +497,15 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 			remove_filter( 'woocommerce_email_editor_gallery_cropped_image_url', $filter, 10 );
 		}
 
-		$this->assertSame( $expected, $ratios );
-		$this->assertSame( count( $expected ), substr_count( $rendered, 'crop=1' ) );
+		$expected_crops = array_combine( array_slice( $sources, 0, count( $expected ) ), $expected );
+		$this->assertSame( $expected_crops, $ratios );
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		foreach ( $sources as $src ) {
+			$this->assertTrue( $html->next_tag( array( 'tag_name' => 'img' ) ) );
+			$expected_src = isset( $expected_crops[ $src ] ) ? add_query_arg( 'crop', '1', $src ) : $src;
+			$this->assertSame( $expected_src, $html->get_attribute( 'src' ) );
+		}
+		$this->assertFalse( $html->next_tag( array( 'tag_name' => 'img' ) ) );
 		$this->assertSame( $caption_count, substr_count( $rendered, '>Caption</div>' ) );
 	}
 
@@ -565,7 +577,7 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	 *           ["portrait-600x900.jpg", null, "600/900"]
 	 *           ["portrait-150x150.jpg", "invalid-height", "600/900"]
 	 *           ["portrait-150x150.jpg", "missing-file", "600/900"]
-	 *           ["portrait-150x150.jpg", "cdn", "150/150"]
+	 *           ["portrait-150x150.jpg", "cdn", "150/200"]
 	 *           ["portrait-150x150.jpg", "cdn-without-file", "150/150"]
 	 *           ["portrait-150x150.jpg", "missing-full-height", "150/150"]
 	 */
@@ -590,16 +602,17 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 				'sizes'  => array( 'thumbnail' => $thumbnail ),
 			)
 		);
+		$attachment_url = wp_get_attachment_url( $attachment_id );
+		$this->assertIsString( $attachment_url );
+
+		$url = trailingslashit( dirname( $attachment_url ) ) . $source;
 		if ( 'invalid-height' === $variant || 'cdn' === $variant ) {
+			$url = 'https://cdn.example.com/' . $source;
 			add_filter(
 				'wp_get_attachment_image_src',
-				static function ( $size, $id ) use ( $attachment_id, $variant ) {
+				static function ( $size, $id ) use ( $attachment_id, $variant, $url ) {
 					if ( $attachment_id === $id ) {
-						if ( 'cdn' === $variant ) {
-							$size[0] = 'https://cdn.example.com/portrait-150x150.jpg';
-						} else {
-							$size[2] = 'unknown';
-						}
+						return array( $url, 150, 'cdn' === $variant ? 200 : 'unknown', true );
 					}
 					return $size;
 				},
@@ -608,10 +621,6 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 			);
 		}
 
-		$attachment_url = wp_get_attachment_url( $attachment_id );
-		$this->assertIsString( $attachment_url );
-
-		$url = trailingslashit( dirname( $attachment_url ) ) . $source;
 		if ( 'cdn-without-file' === $variant ) {
 			$url = 'https://cdn.example.com/' . $source;
 			add_filter(
@@ -652,15 +661,65 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test the original dimensions are still useful for width-only URLs.
+	 * Test layout rounding does not turn two equal image shapes into a crop.
+	 *
+	 * @testdox Uses file dimensions when WordPress returns rounded display dimensions.
+	 * @param bool $intermediate Whether a stored intermediate file matches the saved source.
+	 * @testWith [false]
+	 *           [true]
+	 */
+	public function testItDoesNotCropEqualImageShapesWhenDisplayDimensionsAreRounded( bool $intermediate ): void {
+		$attachment_id = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+		$this->assertIsInt( $attachment_id );
+		update_attached_file( $attachment_id, 'banner.jpg' );
+		$metadata = array(
+			'file'   => 'banner.jpg',
+			'width'  => $intermediate ? 2400 : 4800,
+			'height' => $intermediate ? 600 : 200,
+		);
+		if ( $intermediate ) {
+			$metadata['sizes']['medium'] = array(
+				'file'   => 'banner-2400x100.jpg',
+				'width'  => 2400,
+				'height' => 100,
+			);
+		}
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+		update_option( 'medium_size_w', 300 );
+		update_option( 'medium_size_h', 300 );
+		$attachment_url = wp_get_attachment_url( $attachment_id );
+		$this->assertIsString( $attachment_url );
+		$url = $intermediate ? path_join( dirname( $attachment_url ), 'banner-2400x100.jpg' ) : $attachment_url;
+		$this->assertSame( array( $url, 300, 13, $intermediate ), wp_get_attachment_image_src( $attachment_id, 'medium' ) );
+
+		$gallery                                = $this->build_gallery_with_images( 2, 2 );
+		$gallery['innerBlocks'][0]['attrs']     = array(
+			'id'       => $attachment_id,
+			'sizeSlug' => 'medium',
+		);
+		$gallery['innerBlocks'][0]['innerHTML'] = '<img src="' . esc_url( $url ) . '">';
+		$gallery['innerBlocks'][1]['attrs']     = array();
+		$gallery['innerBlocks'][1]['innerHTML'] = '<img src="https://example.com/banner.jpg" width="2400" height="100">';
+
+		$rendered = $this->gallery_renderer->render( '', $gallery, $this->rendering_context );
+
+		$this->assertStringNotContainsString( 'aspect-ratio:', $rendered );
+	}
+
+	/**
+	 * Test matching the original file with width-only queries and malformed intermediate metadata.
 	 *
 	 * @testdox Preserves automatic cropping when the same file was saved at a different width.
 	 * @param string $query Query saved on the image URL.
 	 * @param int    $crop_count Number of images expected to crop.
+	 * @param bool   $malformed_size Whether the requested intermediate size is malformed.
 	 * @testWith ["?w=190", 2]
 	 *           ["?w=190&h=190&crop=1", 0]
+	 *           ["?w=0190", 0]
+	 *           ["?w=190#image", 0]
+	 *           ["", 2, true]
 	 */
-	public function testItUsesOriginalDimensionsForWidthOnlyImageUrls( string $query, int $crop_count ): void {
+	public function testItUsesOriginalDimensionsForMatchingImageUrls( string $query, int $crop_count, bool $malformed_size = false ): void {
 		$attachment_id = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
 		$this->assertIsInt( $attachment_id );
 		update_attached_file( $attachment_id, 'portrait.jpg' );
@@ -670,6 +729,7 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 				'file'   => 'portrait.jpg',
 				'width'  => 600,
 				'height' => 900,
+				'sizes'  => $malformed_size ? array( 'large' => 'invalid' ) : array(),
 			)
 		);
 		$attachment_url = wp_get_attachment_url( $attachment_id );
