@@ -64,6 +64,8 @@ trait ProductAbilityTrait {
 		if ( $creating ) {
 			$type_schema['default']      = ProductType::SIMPLE;
 			$type_schema['description'] .= ' ' . __( 'A product without a type is simple.', 'woocommerce' );
+		} else {
+			$type_schema['description'] .= ' ' . __( 'Changing the type of a variable product deletes all its variations for good. Only a change between two variable types can keep them, when the extension that owns one of the types says so. A variation cannot change its type.', 'woocommerce' );
 		}
 
 		$properties = $creating ? array() : array(
@@ -323,7 +325,10 @@ trait ProductAbilityTrait {
 				'type'        => 'boolean',
 				'description' => __( 'Whether the product gives the customer files to download.', 'woocommerce' ),
 			),
-			'manage_stock'       => array( 'type' => 'boolean' ),
+			'manage_stock'       => array(
+				'type'        => 'boolean',
+				'description' => __( 'Whether the product tracks its stock quantity. On a variable product, a variation that does not track its own stock uses the stock of the product.', 'woocommerce' ),
+			),
 			'stock_quantity'     => array(
 				'type'        => self::get_product_stock_quantity_schema_type(),
 				'description' => __( 'Available stock quantity when product-level stock management is used.', 'woocommerce' ),
@@ -517,7 +522,11 @@ trait ProductAbilityTrait {
 				$fields = array_values( array_diff( $fields, array( 'attributes' ) ) );
 			}
 		} elseif ( is_a( $classname, \WC_Product_Variable::class, true ) ) {
-			$fields = array_merge( $fields, array( 'attributes', 'variations', 'tax_status', 'sold_individually', 'weight', 'dimensions', 'shipping_class' ) );
+			$fields        = array_merge( $fields, array( 'attributes', 'variations', 'tax_status', 'sold_individually', 'weight', 'dimensions', 'shipping_class', 'manage_stock', 'stock_quantity' ) );
+			$product_props = array(
+				'date_on_sale_from' => null,
+				'date_on_sale_to'   => null,
+			);
 		} elseif ( is_a( $classname, \WC_Product_External::class, true ) ) {
 			$fields        = array_merge( $fields, $price_fields, array( 'external_url', 'button_text' ) );
 			$product_props = array(
@@ -1455,11 +1464,13 @@ trait ProductAbilityTrait {
 	 */
 	protected static function apply_product_type_config( \WC_Product $product, array $product_config ): void {
 		$prop_setters = array(
-			'virtual'        => 'set_virtual',
-			'downloadable'   => 'set_downloadable',
-			'manage_stock'   => 'set_manage_stock',
-			'stock_quantity' => 'set_stock_quantity',
-			'stock_status'   => 'set_stock_status',
+			'virtual'           => 'set_virtual',
+			'downloadable'      => 'set_downloadable',
+			'manage_stock'      => 'set_manage_stock',
+			'stock_quantity'    => 'set_stock_quantity',
+			'stock_status'      => 'set_stock_status',
+			'date_on_sale_from' => 'set_date_on_sale_from',
+			'date_on_sale_to'   => 'set_date_on_sale_to',
 		);
 
 		foreach ( $product_config['product_props'] as $prop => $value ) {
