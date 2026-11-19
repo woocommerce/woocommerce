@@ -3,6 +3,7 @@
  * `@include motion-safe` or `@keyframes`. Transitions that only fade or change color, including `motion-state()` of
  * those properties and `motion-hold()`, and the shared fade animations, can be anywhere, because they do not move
  * anything. The `$state` of `@include motion-transition` follows the same rule, because it runs with reduced motion.
+ * Times in these declarations must use duration tokens, except in an item that loops (`infinite`).
  * See docs/contributors/motion.md.
  */
 const stylelint = require( 'stylelint' );
@@ -19,6 +20,8 @@ const messages = ruleMessages( ruleName, {
 		`Use a motion mixin, or put "${ prop }" in \`@include motion-safe { … }\`, so that it obeys reduced motion. Only transitions of opacity and colors can be outside it.`,
 	rejectedState: () =>
 		'The `$state` of `motion-transition` runs with reduced motion, so it can list only opacity and colors. Pass movement as `$move`.',
+	rejectedTime: ( time ) =>
+		`Use a WPDS motion duration token instead of "${ time }". Only loops (\`infinite\`) can use literal times.`,
 } );
 
 const VENDOR_PREFIXES = [ '-webkit-', '-moz-', '-ms-', '-o-' ];
@@ -235,6 +238,24 @@ const motionTransitionState = ( { params } ) => {
 	return first && ! isNamed ? first : null;
 };
 
+// A non-zero time such as `100ms`, `.2s` or `-1s`. Durations and delays must use tokens.
+const LITERAL_TIME = /^[+-]?[\d.]*[1-9][\d.]*m?s$/i;
+
+// The first literal time in `value`, at any depth, such as in `calc( var( … ) + 100ms )`. An item that loops
+// (`infinite`) can use literal times.
+const literalTime = ( value ) => {
+	for ( const item of splitList( value ) ) {
+		const tokens = item.split( /[\s(),*/]+/ );
+		if ( ! tokens.includes( 'infinite' ) ) {
+			const time = tokens.find( ( token ) => LITERAL_TIME.test( token ) );
+			if ( time ) {
+				return time;
+			}
+		}
+	}
+	return null;
+};
+
 const ruleFunction = ( primary ) => ( root, result ) => {
 	if (
 		! validateOptions( result, ruleName, {
@@ -247,14 +268,26 @@ const ruleFunction = ( primary ) => ( root, result ) => {
 	root.walkDecls( ( decl ) => {
 		const prop = unprefixed( decl.prop.toLowerCase() );
 		if (
-			( ! prop.startsWith( 'transition' ) &&
-				! prop.startsWith( 'animation' ) ) ||
-			decl.value.trim() === 'none' ||
-			isFadeOnly( prop, decl )
+			! prop.startsWith( 'transition' ) &&
+			! prop.startsWith( 'animation' )
 		) {
 			return;
 		}
-		if ( isGuarded( decl ) ) {
+		const time = literalTime( decl.value );
+		if ( time ) {
+			report( {
+				message: messages.rejectedTime( time ),
+				node: decl,
+				word: time,
+				result,
+				ruleName,
+			} );
+		}
+		if (
+			decl.value.trim() === 'none' ||
+			isFadeOnly( prop, decl ) ||
+			isGuarded( decl )
+		) {
 			return;
 		}
 		report( {
