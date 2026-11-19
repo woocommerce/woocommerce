@@ -80,6 +80,10 @@ module.exports = defineConfig( playwrightDefaults( {
 
 Use the second config to set suite-specific projects, worker limits, storage state, and overrides.
 
+### Filter PHP debug logs
+
+Use `@woocommerce/extension-tooling/php-warning-filter` with the log text and the path fragments for the tested plugins. The filter returns matching PHP errors, warnings, notices and deprecations. The extension reads the log and checks the result in its warnings project.
+
 ## Webpack
 
 Import the helpers from the extension's webpack configuration. Keep the entry paths, output paths and match patterns in that configuration.

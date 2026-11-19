@@ -19,6 +19,7 @@
 		"./check-i18n": "./src/check-i18n.js",
 		"./playwright-defaults": "./src/playwright-defaults.js",
 		"./e2e-site-config": "./src/e2e-site-config.js",
+		"./php-warning-filter": "./src/php-warning-filter.js",
 		"./stylelint/legacy-scss": "./configs/stylelint-legacy-scss.json"
 	},
 	"bin": {
