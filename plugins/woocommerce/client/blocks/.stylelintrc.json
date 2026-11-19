@@ -42,7 +42,7 @@
 						"/^(transition|animation)/": [
 							"/^(?![\\s\\S]*infinite)([\\s\\S]*[\\s,(])?[\\d.]*[1-9][\\d.]*m?s\\b/"
 						],
-						"/^transition/": [ "/(^|,)\\s*all\\b/" ]
+						"/^transition/": [ "/(^|[\\s,])all(?![\\w-])/i" ]
 					},
 					{
 						"message": "Use WPDS motion duration tokens instead of literal times (loops excepted), and list transitioned properties instead of \"all\". See docs/contributors/motion.md."
