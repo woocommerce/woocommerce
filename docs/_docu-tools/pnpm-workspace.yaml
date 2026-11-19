@@ -3,6 +3,6 @@ allowBuilds:
     '@swc/core': false
     core-js: false
 
-# pnpm no longer reads the `pnpm` field in package.json, so overrides live here.
+# Docusaurus requires tinypool 1.x, which has critical advisories (GHSA-5gmw-xhrv-c9v3, GHSA-85c8-ppgw-ccpr). Remove once it depends on tinypool 2.x.
 overrides:
     'tinypool@<2.1.2': ^2.1.2
