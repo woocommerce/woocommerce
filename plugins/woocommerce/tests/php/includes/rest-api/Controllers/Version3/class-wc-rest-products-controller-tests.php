@@ -244,30 +244,6 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Dispatch a product collection request constrained to the given IDs and assert their exact order.
-	 *
-	 * @param int[]       $included_ids Product IDs that constrain the collection.
-	 * @param int[]       $expected_ids Product IDs in the expected response order.
-	 * @param string|null $orderby      REST orderby value, or null to use the default.
-	 * @param string|null $order        REST order value, or null to use the default.
-	 * @param string      $description  Assertion context.
-	 */
-	private function assert_product_collection_order( array $included_ids, array $expected_ids, ?string $orderby, ?string $order, string $description ): void {
-		$query_params = array(
-			'include'  => $included_ids,
-			'per_page' => count( $included_ids ),
-		);
-		if ( null !== $orderby ) {
-			$query_params['orderby'] = $orderby;
-		}
-		if ( null !== $order ) {
-			$query_params['order'] = $order;
-		}
-
-		$this->assert_product_collection( $query_params, $expected_ids, $description );
-	}
-
-	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -829,15 +805,22 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$variable = $products['variable']->get_id();
 		$all      = array( $first, $second, $third, $fourth, $pending, $variable );
 
-		$this->assert_product_collection_order( $all, array( $third, $variable, $pending, $first, $fourth, $second ), null, null, 'Default date DESC ordering' );
-		$this->assert_product_collection_order( $all, array( $second, $fourth, $first, $pending, $variable, $third ), 'date', 'asc', 'Date ASC ordering' );
-		$this->assert_product_collection_order( $all, array( $third, $variable, $pending, $first, $fourth, $second ), 'date', 'desc', 'Date DESC ordering' );
-		$this->assert_product_collection_order( $all, array( $first, $second, $third, $fourth, $pending, $variable ), 'id', 'asc', 'ID ASC ordering' );
-		$this->assert_product_collection_order( $all, array( $variable, $pending, $fourth, $third, $second, $first ), 'id', 'desc', 'ID DESC ordering' );
-		$this->assert_product_collection_order( $all, array( $second, $fourth, $third, $first, $pending, $variable ), 'title', 'asc', 'Title ASC ordering' );
-		$this->assert_product_collection_order( $all, array( $variable, $pending, $first, $third, $fourth, $second ), 'title', 'desc', 'Title DESC ordering' );
-		$this->assert_product_collection_order( $all, array( $pending, $fourth, $second, $first, $third, $variable ), 'slug', 'asc', 'Slug ASC ordering' );
-		$this->assert_product_collection_order( $all, array( $variable, $third, $first, $second, $fourth, $pending ), 'slug', 'desc', 'Slug DESC ordering' );
+		$base_query = array(
+			'include'  => $all,
+			'per_page' => count( $all ),
+		);
+		$ascending  = $base_query + array( 'order' => 'asc' );
+		$descending = $base_query + array( 'order' => 'desc' );
+
+		$this->assert_product_collection( $base_query, array( $third, $variable, $pending, $first, $fourth, $second ), 'Default date DESC ordering' );
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'date' ), array( $second, $fourth, $first, $pending, $variable, $third ), 'Date ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'date' ), array( $third, $variable, $pending, $first, $fourth, $second ), 'Date DESC ordering' );
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'id' ), array( $first, $second, $third, $fourth, $pending, $variable ), 'ID ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'id' ), array( $variable, $pending, $fourth, $third, $second, $first ), 'ID DESC ordering' );
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'title' ), array( $second, $fourth, $third, $first, $pending, $variable ), 'Title ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'title' ), array( $variable, $pending, $first, $third, $fourth, $second ), 'Title DESC ordering' );
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'slug' ), array( $pending, $fourth, $second, $first, $third, $variable ), 'Slug ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'slug' ), array( $variable, $third, $first, $second, $fourth, $pending ), 'Slug DESC ordering' );
 	}
 
 	/**
@@ -853,10 +836,17 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$variable = $products['variable']->get_id();
 		$all      = array( $first, $second, $third, $fourth, $pending, $variable );
 
-		$this->assert_product_collection_order( $all, array( $variable, $third, $second, $pending, $fourth, $first ), 'price', 'asc', 'Price ASC ordering' );
-		$this->assert_product_collection_order( $all, array( $variable, $first, $fourth, $pending, $second, $third ), 'price', 'desc', 'Price DESC ordering' );
-		$this->assert_product_collection_order( $all, array( $variable, $first, $third, $second, $fourth, $pending ), 'rating', 'desc', 'Rating DESC ordering' );
-		$this->assert_product_collection_order( $all, array( $variable, $pending, $fourth, $first, $second, $third ), 'popularity', 'desc', 'Popularity DESC ordering' );
+		$base_query = array(
+			'include'  => $all,
+			'per_page' => count( $all ),
+		);
+		$ascending  = $base_query + array( 'order' => 'asc' );
+		$descending = $base_query + array( 'order' => 'desc' );
+
+		$this->assert_product_collection( $ascending + array( 'orderby' => 'price' ), array( $variable, $third, $second, $pending, $fourth, $first ), 'Price ASC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'price' ), array( $variable, $first, $fourth, $pending, $second, $third ), 'Price DESC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'rating' ), array( $variable, $first, $third, $second, $fourth, $pending ), 'Rating DESC ordering' );
+		$this->assert_product_collection( $descending + array( 'orderby' => 'popularity' ), array( $variable, $pending, $fourth, $first, $second, $third ), 'Popularity DESC ordering' );
 	}
 
 	/**
@@ -873,8 +863,14 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 			$products['second']->get_id(),
 		);
 
-		$this->assert_product_collection_order( $included_ids, $included_ids, 'include', 'asc', 'Include ASC ordering' );
-		$this->assert_product_collection_order( $included_ids, $included_ids, 'include', 'desc', 'Include DESC ordering' );
+		$base_query = array(
+			'include'  => $included_ids,
+			'per_page' => count( $included_ids ),
+			'orderby'  => 'include',
+		);
+
+		$this->assert_product_collection( $base_query + array( 'order' => 'asc' ), $included_ids, 'Include ASC ordering' );
+		$this->assert_product_collection( $base_query + array( 'order' => 'desc' ), $included_ids, 'Include DESC ordering' );
 	}
 
 	/**
@@ -885,7 +881,6 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		foreach ( range( 1, 11 ) as $index ) {
 			$product_ids[] = WC_Helper_Product::create_simple_product( true, array( 'name' => "Pagination {$index}" ) )->get_id();
 		}
-		sort( $product_ids, SORT_NUMERIC );
 
 		$base_query = array(
 			'include' => $product_ids,
@@ -937,8 +932,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$child->set_parent_id( $parent->get_id() );
 		$child->save();
 
-		$all = array( $target->get_id(), $other->get_id(), $parent->get_id(), $child->get_id() );
-		sort( $all, SORT_NUMERIC );
+		$all        = array( $target->get_id(), $other->get_id(), $parent->get_id(), $child->get_id() );
 		$base_query = array(
 			'include'  => $all,
 			'per_page' => count( $all ),
@@ -947,7 +941,6 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		);
 
 		$included = array( $target->get_id(), $child->get_id() );
-		sort( $included, SORT_NUMERIC );
 		$this->assert_product_collection( array_merge( $base_query, array( 'include' => $included ) ), $included, 'Include filtering' );
 
 		// Exclude only applies without include, so constrain the cohort by SKU instead.
@@ -1015,8 +1008,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		WC_Helper_Product::create_product_variation_object( $variable->get_id(), 'STATE HIGH', 40, array() );
 		WC_Product_Variable::sync( $variable->get_id() );
 
-		$all = array( $simple->get_id(), $external->get_id(), $out_of_stock->get_id(), $backorder->get_id(), $pending->get_id(), $variable->get_id() );
-		sort( $all, SORT_NUMERIC );
+		$all        = array( $simple->get_id(), $external->get_id(), $out_of_stock->get_id(), $backorder->get_id(), $pending->get_id(), $variable->get_id() );
 		$base_query = array(
 			'include'  => $all,
 			'per_page' => count( $all ),
@@ -1035,8 +1027,6 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assert_product_collection( array_merge( $sale_query, array( 'on_sale' => true ) ), array( $external->get_id() ), 'On-sale product filtering' );
 		$this->assert_product_collection( array_merge( $sale_query, array( 'on_sale' => false ) ), array( $simple->get_id() ), 'Non-sale product filtering' );
 
-		$price_matches = array( $external->get_id(), $variable->get_id() );
-		sort( $price_matches, SORT_NUMERIC );
 		$this->assert_product_collection(
 			array_merge(
 				$base_query,
@@ -1045,7 +1035,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 					'max_price' => '30',
 				)
 			),
-			$price_matches,
+			array( $external->get_id(), $variable->get_id() ),
 			'Inclusive price filtering'
 		);
 
@@ -1068,8 +1058,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$taxed      = WC_Helper_Product::create_simple_product( true, array( 'tax_class' => $tax_class_slug ) );
 		$untouched  = WC_Helper_Product::create_simple_product();
 
-		$all = array( $in_child->get_id(), $in_sibling->get_id(), $taxed->get_id(), $untouched->get_id() );
-		sort( $all, SORT_NUMERIC );
+		$all        = array( $in_child->get_id(), $in_sibling->get_id(), $taxed->get_id(), $untouched->get_id() );
 		$base_query = array(
 			'include'  => $all,
 			'per_page' => count( $all ),
