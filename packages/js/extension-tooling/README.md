@@ -80,6 +80,10 @@ module.exports = defineConfig( playwrightDefaults( {
 
 Use the second config to set suite-specific projects, worker limits, storage state, and overrides.
 
+### Wait for cart and checkout updates
+
+Call `await waitForCheckoutUpdates( page )` using `@woocommerce/extension-tooling/wait-for-checkout-updates` to wait for active jQuery requests and pending WooCommerce cart and checkout store updates. For actions that schedule a later update, wait for the expected response or UI change in the test.
+
 ### Filter PHP debug logs
 
 Use `@woocommerce/extension-tooling/php-warning-filter` with the log text and the path fragments for the tested plugins. The filter returns matching PHP errors, warnings, notices and deprecations. The extension reads the log and checks the result in its warnings project.
