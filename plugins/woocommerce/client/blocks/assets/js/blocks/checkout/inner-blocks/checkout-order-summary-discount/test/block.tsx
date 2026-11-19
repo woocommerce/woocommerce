@@ -124,4 +124,23 @@ describe( 'Checkout Order Summary Discount Block', () => {
 
 		expect( screen.getByText( 'EXTENSION' ) ).toBeInTheDocument();
 	} );
+
+	it( 'keeps the DiscountsMeta slot mounted when the discount row appears', () => {
+		( applyCheckoutFilter as jest.Mock ).mockImplementation(
+			( { defaultValue } ) => defaultValue
+		);
+		const { rerender } = render( <Block /> );
+		const slot = screen.getByTestId( 'discount-slot' );
+
+		( useStoreCart as jest.Mock ).mockReturnValue( {
+			...mockCartData,
+			cartTotals: {
+				...mockCartData.cartTotals,
+				total_discount: '1000',
+			},
+		} );
+		rerender( <Block /> );
+
+		expect( screen.getByTestId( 'discount-slot' ) ).toBe( slot );
+	} );
 } );
