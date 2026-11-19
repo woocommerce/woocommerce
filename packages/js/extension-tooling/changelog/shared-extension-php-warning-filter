@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Share PHP warning filtering for extension browser test logs.
