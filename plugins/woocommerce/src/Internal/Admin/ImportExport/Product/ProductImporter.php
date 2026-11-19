@@ -105,15 +105,25 @@ final class ProductImporter {
 	}
 
 	/**
-	 * Get how long ago the site-wide product import lock was taken or last refreshed.
+	 * Get how long a CLI run must wait before it may take over the site-wide product import lock.
 	 *
 	 * Lets a caller warn the operator before attempting a run that would otherwise fail
-	 * with `ImportLockedException` once batches are already underway.
+	 * with `ImportLockedException`.
 	 *
-	 * @return int|null Seconds since the lock was taken or last refreshed, or null when no import is running.
+	 * @return array{wait: int, age: int}|null Seconds until takeover (0 when it may take over now) and seconds since
+	 *                                         the lock was last refreshed, or null when no import is running.
 	 */
-	public function get_import_lock_age(): ?int {
-		return $this->import_lock->get_age();
+	public function get_import_lock_wait(): ?array {
+		$wait = $this->import_lock->get_seconds_until_takeover( ProductImportLock::HOLDER_CLI );
+
+		if ( null === $wait ) {
+			return null;
+		}
+
+		return array(
+			'wait' => $wait,
+			'age'  => (int) $this->import_lock->get_age(),
+		);
 	}
 
 	/**
@@ -161,7 +171,7 @@ final class ProductImporter {
 		$this->validate_mapping( (array) ( $options['mapping'] ?? array() ) );
 
 		if ( ! $this->import_lock->acquire( ProductImportLock::HOLDER_CLI ) ) {
-			throw new ImportLockedException( esc_html( 'Another product import is already running.' ) );
+			throw new ImportLockedException( esc_html( 'Another product import is running. Wait for it to finish, or if it has stopped, try again later.' ) );
 		}
 
 		try {

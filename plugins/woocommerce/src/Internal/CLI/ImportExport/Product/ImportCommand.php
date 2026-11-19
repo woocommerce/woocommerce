@@ -137,9 +137,11 @@ final class ImportCommand {
 	 * `--user=<admin>`. `--show-mapping` does not need one.
 	 *
 	 * Cleanup of placeholder products at the end of an import is site-wide, so this
-	 * command takes a lock for the duration of the run and refuses to start while an
-	 * admin CSV import (or another `wp wc product import`) holds it. Do not run this
-	 * command at the same time as an import in **WooCommerce > Products > Import**.
+	 * command takes a lock for the duration of the run. If an admin CSV import (or another
+	 * `wp wc product import`) holds it, this command waits until that import has been inactive
+	 * for 10 minutes, then takes the lock over. To skip that wait when you are sure nothing is
+	 * running, run `wp option delete wc_product_importing`. Do not run this command at the same
+	 * time as an import in **WooCommerce > Products > Import**.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -291,23 +293,47 @@ final class ImportCommand {
 	 * check: `ProductImporter::run()` still takes the actual lock and can throw
 	 * `ImportLockedException` if another run wins the race after this check passes.
 	 *
+	 * A lock that has been inactive long enough is taken over with a warning, as `run()` would.
+	 *
 	 * @return bool Whether the import may proceed.
 	 */
 	private function check_for_concurrent_import(): bool {
-		$lock_age = $this->importer->get_import_lock_age();
+		$lock = $this->importer->get_import_lock_wait();
 
-		if ( null !== $lock_age ) {
+		if ( null === $lock ) {
+			return true;
+		}
+
+		if ( $lock['wait'] > 0 ) {
 			WP_CLI::error(
 				sprintf(
-					'Another product import is already running (last active %d minute(s) ago). Wait for it to finish, or if you are sure nothing is actually running, clear the lock with `wp option delete wc_product_importing`.',
-					(int) ceil( $lock_age / MINUTE_IN_SECONDS )
+					'Another product import is running. Wait for it to finish, or if it has stopped, try again in %s. To skip the wait when you are sure nothing is running, run `wp option delete wc_product_importing`.',
+					$this->format_minutes( max( 1, (int) ceil( $lock['wait'] / MINUTE_IN_SECONDS ) ) )
 				)
 			);
 
 			return false;
 		}
 
+		WP_CLI::warning(
+			sprintf(
+				'Taking over the import lock from a product import that stopped %s ago.',
+				$this->format_minutes( intdiv( $lock['age'], MINUTE_IN_SECONDS ) )
+			)
+		);
+
 		return true;
+	}
+
+	/**
+	 * Format a number of minutes as "1 minute" or "N minutes".
+	 *
+	 * @param int $minutes Number of minutes.
+	 *
+	 * @return string
+	 */
+	private function format_minutes( int $minutes ): string {
+		return sprintf( 1 === $minutes ? '%d minute' : '%d minutes', $minutes );
 	}
 
 	/**

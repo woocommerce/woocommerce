@@ -44,16 +44,16 @@ There is no dry-run mode: the importer cannot parse a row without persisting som
 against a staging site or a database snapshot first.
 
 Cleanup of placeholder products at the end of an import is site-wide, so this command takes a lock
-for the duration of the run and refuses to start while an admin CSV import (or another
-`wp wc product import`) holds it. Do not run this command at the same time as an import in
-**WooCommerce > Products > Import**.
+for the duration of the run. If an admin CSV import (or another `wp wc product import`) holds it,
+this command waits until that import has been inactive for 10 minutes, then takes the lock over.
+Do not run this command at the same time as an import in **WooCommerce > Products > Import**.
 
 Importing requires a user with the `edit_products`, `import`, and `manage_product_terms` capabilities,
 so pass `--user=<admin>`. Without `manage_product_terms` the importer silently drops categories. Rows with downloadable files outside an approved
 directory fail unless that user can manage options. `--show-mapping` does not need a user.
 
-If a run is interrupted or crashes and nothing is running, clear the lock with
-`wp option delete wc_product_importing`. The next run will then offer to clean up leftover
+If a run is interrupted or crashes and you are sure nothing is running, skip that wait with
+`wp option delete wc_product_importing`. Either way, the next run will offer to clean up leftover
 placeholder products. When the CSV is read from STDIN, pass `--yes`, because the confirmation prompt
 cannot be answered while STDIN carries the CSV.
 

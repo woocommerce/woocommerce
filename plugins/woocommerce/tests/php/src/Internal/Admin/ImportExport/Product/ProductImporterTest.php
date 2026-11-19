@@ -116,6 +116,22 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should take over a CLI lock that has been inactive for longer than the stale time, and import.
+	 */
+	public function test_run_takes_over_a_stale_cli_lock(): void {
+		$this->assertTrue( $this->import_lock->acquire( ProductImportLock::HOLDER_CLI ) );
+		$this->age_lock( 61 * MINUTE_IN_SECONDS );
+
+		$results = $this->sut->run(
+			$this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-STALE-LOCK,Stale Lock Product\n" ),
+			array( 'mapping' => $this->get_simple_mapping() )
+		);
+
+		$this->assertSame( 1, $results['imported'] );
+		$this->assertGreaterThan( 0, wc_get_product_id_by_sku( 'IMPORT-RUNNER-STALE-LOCK' ) );
+	}
+
+	/**
 	 * @testdox Should refresh the lock before a row once the refresh interval has passed.
 	 */
 	public function test_run_refreshes_the_lock_during_a_batch_when_due(): void {
@@ -459,19 +475,11 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	 * @return int The lock's age in seconds, as seen while the row is being imported.
 	 */
 	private function get_lock_age_seen_by_first_row( int $lock_age ): int {
-		global $wpdb;
-
 		$hook = 'woocommerce_product_import_before_import';
 		$age  = -1;
 
-		$arrange = function () use ( $wpdb, $lock_age ): void {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->query(
-				$wpdb->prepare(
-					"UPDATE {$wpdb->options} SET option_value = CONCAT( %d, SUBSTRING( option_value, LOCATE( ':', option_value ) ) ) WHERE option_name = 'wc_product_importing'",
-					time() - $lock_age
-				)
-			);
+		$arrange = function () use ( $lock_age ): void {
+			$this->age_lock( $lock_age );
 		};
 		$observe = function () use ( &$age ): void {
 			$age = (int) $this->import_lock->get_age();
@@ -488,6 +496,23 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 		}
 
 		return $age;
+	}
+
+	/**
+	 * Make the import lock look last refreshed the given number of seconds ago, keeping its holder and token.
+	 *
+	 * @param int $seconds How long ago the lock should appear to have been refreshed.
+	 */
+	private function age_lock( int $seconds ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->options} SET option_value = CONCAT( %d, SUBSTRING( option_value, LOCATE( ':', option_value ) ) ) WHERE option_name = 'wc_product_importing'",
+				time() - $seconds
+			)
+		);
 	}
 
 	/**
