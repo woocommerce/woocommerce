@@ -22,8 +22,8 @@ import { useStyleProps } from '@woocommerce/base-hooks';
 import { defaultPlaceOrderButtonLabel } from './constants';
 import { CheckoutOrderSummarySlot } from '../checkout-order-summary-block/slotfills';
 import TermsAndConditions from '../checkout-terms-block/frontend';
+import type { ButtonStyleAttributes } from '../../../cart-checkout-shared/types';
 import './style.scss';
-import type { ButtonStyleAttributes } from '../../../cart-checkout-shared/button-style-attributes';
 
 export type BlockAttributes = ButtonStyleAttributes & {
 	cartPageId: number;

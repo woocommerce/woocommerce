@@ -22,7 +22,7 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
  * Internal dependencies
  */
 import { defaultButtonLabel } from './constants';
-import type { ButtonStyleAttributes } from '../../../cart-checkout-shared/button-style-attributes';
+import type { ButtonStyleAttributes } from '../../../cart-checkout-shared/types';
 
 /**
  * Checkout button rendered in the full cart page.

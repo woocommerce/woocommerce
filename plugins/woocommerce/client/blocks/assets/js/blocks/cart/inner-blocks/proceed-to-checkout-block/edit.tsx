@@ -15,7 +15,7 @@ import clsx from 'clsx';
  * Internal dependencies
  */
 import { defaultButtonLabel } from './constants';
-import type { ButtonStyleAttributes } from '../../../cart-checkout-shared/button-style-attributes';
+import type { ButtonStyleAttributes } from '../../../cart-checkout-shared/types';
 
 export const Edit = ( {
 	attributes,
