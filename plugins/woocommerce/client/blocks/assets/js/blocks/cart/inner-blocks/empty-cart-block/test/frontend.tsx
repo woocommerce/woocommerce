@@ -89,6 +89,37 @@ describe( 'Empty cart entrance', () => {
 		expect( getEmptyCart() ).toHaveAttribute( 'data-wc-entering' );
 	} );
 
+	it( 'shows at once when a cart update empties the cart without a removal', () => {
+		mockCart( { cartItems: [ { key: 'item' } ] } );
+		const { rerender } = render( emptyCartBlock() );
+
+		fireEvent.pointerDown( removeButton );
+		fireEvent.click( removeButton, { detail: 1 } );
+		mockCart( { cartItems: [] } );
+		rerender( emptyCartBlock() );
+
+		expect( getEmptyCart() ).not.toHaveAttribute( 'data-wc-entering' );
+	} );
+
+	it( 'shows at once when a cart update empties the cart after a click removal has finished', () => {
+		mockCart( { cartItems: [ { key: 'item' }, { key: 'other' } ] } );
+		const { rerender } = render( emptyCartBlock() );
+
+		fireEvent.pointerDown( removeButton );
+		fireEvent.click( removeButton, { detail: 1 } );
+		startRemoval( rerender );
+		mockCart( { cartItems: [ { key: 'other' } ] } );
+		rerender( emptyCartBlock() );
+		act( () => {
+			dispatch( cartStore ).itemIsPendingDelete( 'item', false );
+		} );
+
+		mockCart( { cartItems: [] } );
+		rerender( emptyCartBlock() );
+
+		expect( getEmptyCart() ).not.toHaveAttribute( 'data-wc-entering' );
+	} );
+
 	it( 'shows at once when a key press removes the last item, even after a click during the removal', () => {
 		mockCart( { cartItems: [ { key: 'item' } ] } );
 		const { rerender } = render( emptyCartBlock() );
