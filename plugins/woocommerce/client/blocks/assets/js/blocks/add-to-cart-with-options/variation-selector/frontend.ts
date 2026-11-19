@@ -441,13 +441,17 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const variationId = matchedVariation?.id ?? null;
 				const productContext = getContext< {
 					variationId?: number | null;
+					selectedAttributes?: SelectedAttributes[];
 				} >( 'woocommerce/products' );
 
 				// If there is context, update the context. Otherwise, update the state directly.
-				( productContext
-					? productContext
-					: productsState
-				).variationId = variationId;
+				const target = productContext ? productContext : productsState;
+				target.variationId = variationId;
+				// Share the selection with consumers outside this form, which
+				// cannot read its context (e.g. the Back in Stock form).
+				target.selectedAttributes = selectedAttributes.map(
+					( { attribute, value } ) => ( { attribute, value } )
+				);
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );

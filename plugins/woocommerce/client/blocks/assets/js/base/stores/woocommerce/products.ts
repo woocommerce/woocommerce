@@ -21,6 +21,7 @@ import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 type ProductContext = {
 	productId: number;
 	variationId?: number | null;
+	selectedAttributes?: SelectedAttributes[];
 };
 
 /**
@@ -57,6 +58,12 @@ export type ProductsStoreState = {
 	 * The current variation ID from state or per-element context.
 	 */
 	variationId: number | null;
+	/**
+	 * The attributes selected in Add to Cart + Options for the current
+	 * product, from state or per-element context. Unset until the
+	 * variation selector hydrates.
+	 */
+	selectedAttributes?: SelectedAttributes[];
 	/**
 	 * The main product for this page/block. Always the top-level product
 	 * (e.g. the variable product "Hoodie"), never a variation.

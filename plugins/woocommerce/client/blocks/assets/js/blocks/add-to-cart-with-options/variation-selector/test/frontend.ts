@@ -31,7 +31,10 @@ const mockGetConfig = jest.fn();
 const mockGetElement = jest.fn();
 
 let mockContext: VariationContext;
-let mockProductContext: { variationId?: number | null } | null;
+let mockProductContext: {
+	variationId?: number | null;
+	selectedAttributes?: SelectedAttributes[];
+} | null;
 let mockRegisteredStore: RegisteredStore | null;
 let mockAddToCartStore: RegisteredStore;
 
@@ -343,6 +346,9 @@ describe( 'Add to Cart + Options variation selector store', () => {
 		getRegisteredStore().callbacks.validateVariation();
 
 		expect( mockProductContext?.variationId ).toBe( 101 );
+		expect( mockProductContext?.selectedAttributes ).toEqual(
+			selectedAttributes
+		);
 		expect( mockAddError ).toHaveBeenCalledWith( {
 			code: 'variableProductOutOfStock',
 			message: 'Variation unavailable.',
