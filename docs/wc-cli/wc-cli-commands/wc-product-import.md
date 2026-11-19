@@ -19,7 +19,7 @@ Import products from a CSV file, or `-` to read from STDIN.
 
     Default: `UTF-8`
 
-- `--mapping=<spec>` - Column overrides: `Header=target,...`, inline JSON, or `@file.json`. Target `-` skips a column. Headers must match the CSV exactly, including case.
+- `--mapping=<spec>` - Column overrides: `Header=target,...`, inline JSON, or `@file.json`. Target `-` skips a column. Headers must match the CSV exactly, including case. A header that contains a comma needs the JSON form, such as `--mapping='{"Size, cm":"meta:size"}'`.
 - `--map-unknown=<mode>` - What to do with CSV columns that have no known target: `skip` or `meta`.
 
     Default: `skip`

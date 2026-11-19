@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\MappingResolver;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ProductImporter;
 use Automattic\WooCommerce\Internal\CLI\ImportExport\Support\StdinSpooler;
 use InvalidArgumentException;
+use RuntimeException;
 use WP_CLI;
 
 /**
@@ -88,7 +89,7 @@ final class ImportCommand {
 	 * ---
 	 *
 	 * [--mapping=<spec>]
-	 * : Column overrides: `Header=target,...`, inline JSON, or `@file.json`. Target `-` skips a column. Headers must match the CSV exactly, including case.
+	 * : Column overrides: `Header=target,...`, inline JSON, or `@file.json`. Target `-` skips a column. Headers must match the CSV exactly, including case. Use JSON for headers that contain a comma.
 	 *
 	 * [--map-unknown=<mode>]
 	 * : What to do with CSV columns that have no known target.
@@ -232,7 +233,7 @@ final class ImportCommand {
 					'yes'                => (bool) WP_CLI\Utils\get_flag_value( $assoc_args, 'yes', false ),
 				)
 			);
-		} catch ( ImportLockedException | InvalidArgumentException $e ) {
+		} catch ( ImportLockedException | InvalidArgumentException | RuntimeException $e ) {
 			// Engine exceptions are HTML-escaped for any output context; this one is a terminal.
 			WP_CLI::error( wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ) );
 		}
@@ -283,7 +284,7 @@ final class ImportCommand {
 		 *
 		 * @since 3.1.0
 		 */
-		return (int) apply_filters( 'woocommerce_product_import_batch_size', self::DEFAULT_BATCH_SIZE );
+		return min( self::MAX_BATCH_SIZE, (int) apply_filters( 'woocommerce_product_import_batch_size', self::DEFAULT_BATCH_SIZE ) );
 	}
 
 	/**
@@ -431,31 +432,49 @@ final class ImportCommand {
 	 * @param array  $mapping Header => target mapping.
 	 * @param array  $options Parsed command options, see `__invoke()`.
 	 *
-	 * @throws ImportLockedException When another import already holds the site-wide import lock.
+	 * @throws ImportLockedException When another import holds the site-wide import lock, or takes it over mid-run.
 	 */
 	private function run_and_report( string $file, array $mapping, array $options ): void {
 		$progress = $options['porcelain'] ? null : WP_CLI\Utils\make_progress_bar( 'Importing products', (int) filesize( $file ) );
 		$position = 0;
+		$partial  = null;
 
-		$results = $this->importer->run(
-			$file,
-			array(
-				'mapping'            => $mapping,
-				'update_existing'    => $options['update_existing'],
-				'delimiter'          => $options['delimiter'],
-				'character_encoding' => $options['character_encoding'],
-				'batch_size'         => $options['batch_size'],
-			),
-			function ( int $new_position ) use ( $progress, &$position ) {
-				if ( null !== $progress ) {
-					$progress->tick( max( 0, $new_position - $position ) );
+		try {
+			$results = $this->importer->run(
+				$file,
+				array(
+					'mapping'            => $mapping,
+					'update_existing'    => $options['update_existing'],
+					'delimiter'          => $options['delimiter'],
+					'character_encoding' => $options['character_encoding'],
+					'batch_size'         => $options['batch_size'],
+				),
+				function ( int $new_position, array $batch_results ) use ( $progress, &$position, &$partial ) {
+					if ( null !== $progress ) {
+						$progress->tick( max( 0, $new_position - $position ) );
+					}
+					$position = $new_position;
+
+					foreach ( array( 'imported', 'imported_variations', 'updated', 'skipped', 'failed' ) as $count ) {
+						$partial[ $count ] = ( $partial[ $count ] ?? 0 ) + $batch_results[ $count ];
+					}
+				},
+				function ( int $count ) use ( $options ): void {
+					$this->confirm_placeholder_cleanup( $count, $options );
 				}
-				$position = $new_position;
-			},
-			function ( int $count ) use ( $options ): void {
-				$this->confirm_placeholder_cleanup( $count, $options );
+			);
+		} catch ( ImportLockedException $e ) {
+			if ( null !== $partial ) {
+				if ( null !== $progress ) {
+					$progress->finish();
+				}
+
+				// STDERR, so a machine-readable STDOUT stays empty.
+				fwrite( STDERR, 'Batches completed before the import stopped: ' . $this->format_counts( $partial ) . PHP_EOL ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- WP_CLI has no plain STDERR logger.
 			}
-		);
+
+			throw $e;
+		}
 
 		if ( null !== $progress ) {
 			$progress->finish();
@@ -495,14 +514,7 @@ final class ImportCommand {
 	 * @param array $options Parsed command options, see `__invoke()`.
 	 */
 	private function report_summary( array $results, array $options ): void {
-		$summary = sprintf(
-			'imported %d, imported variations %d, updated %d, skipped %d, failed %d.',
-			$results['imported'],
-			$results['imported_variations'],
-			$results['updated'],
-			$results['skipped'],
-			$results['failed']
-		);
+		$summary = $this->format_counts( $results );
 
 		$strict_failure = $options['strict'] && $results['failed'] > 0;
 
@@ -518,5 +530,23 @@ final class ImportCommand {
 		if ( $strict_failure ) {
 			WP_CLI::error( 'Import completed with failures.' );
 		}
+	}
+
+	/**
+	 * Format the row counts of an import result for the summary line.
+	 *
+	 * @param array $results An import result, or the counts of the batches completed so far.
+	 *
+	 * @return string
+	 */
+	private function format_counts( array $results ): string {
+		return sprintf(
+			'imported %d, imported variations %d, updated %d, skipped %d, failed %d.',
+			$results['imported'],
+			$results['imported_variations'],
+			$results['updated'],
+			$results['skipped'],
+			$results['failed']
+		);
 	}
 }
