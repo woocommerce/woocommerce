@@ -214,9 +214,12 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		}
 
 		$hide_out_of_stock = get_option( 'woocommerce_hide_out_of_stock_items' );
-		$download_method   = get_option( 'woocommerce_file_download_method' );
+		$autoload          = self::get_declared_autoload( $input['group'] );
 		foreach ( $changes as $index => $change ) {
 			list( $setting, $value ) = $change;
+			if ( isset( $autoload[ $setting['id'] ] ) ) {
+				$setting['autoload'] = $autoload[ $setting['id'] ];
+			}
 			self::save( $setting, $value );
 			$saved                      = SettingsQuery::get_value( $setting );
 			$results[ $index ]['value'] = true === rest_validate_value_from_schema( $saved, $value_schema ) ? $saved : $value;
@@ -227,8 +230,8 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) !== $hide_out_of_stock ) {
 			wc_recount_all_terms( false );
 		}
-		// The uploads .htaccess must match the download method: redirect needs direct access, the others must deny it.
-		if ( get_option( 'woocommerce_file_download_method' ) !== $download_method ) {
+		// The uploads .htaccess must match the download method. Resending an unchanged method repairs a file an earlier save failed to write.
+		if ( in_array( 'woocommerce_file_download_method', $option_names, true ) ) {
 			\WC_Admin_Settings::check_download_folder_protection();
 		}
 		// Cart sessions keep calculated shipping rates until this version changes, which the shipping and tax admin saves bump.
@@ -273,9 +276,13 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		} elseif ( is_int( $value ) || is_float( $value ) ) {
 			$value = (string) $value;
 		}
-		// The REST checkbox validator saves the default for "0", so it would not turn the checkbox off. An unset checkbox reads as "".
-		if ( 'checkbox' === $type && ! in_array( $value, array( 'yes', 'no', '' ), true ) ) {
-			return $invalid;
+		// The REST checkbox validator saves the default for "" and "0", while the admin save stores an unticked box as "no".
+		// An unset checkbox reads as "", so "" is kept for undo and saved as "no".
+		if ( 'checkbox' === $type ) {
+			if ( ! in_array( $value, array( 'yes', 'no', '' ), true ) ) {
+				return $invalid;
+			}
+			$value = '' === $value ? 'no' : $value;
 		}
 		if ( is_array( $value ) !== ( in_array( $type, self::LIST_TYPES, true ) || 'relative_date_selector' === $type ) ) {
 			return $invalid;
@@ -444,6 +451,31 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		$setting['id'] = $key;
 		unset( $setting['field_name'] );
 		\WC_Admin_Settings::save_fields( array( $setting ), $data );
+	}
+
+	/**
+	 * Autoload flags declared by the group's settings page, keyed by field ID, since registered fields drop them.
+	 *
+	 * @param string $group Settings group ID.
+	 * @return array<string, bool>
+	 */
+	private static function get_declared_autoload( string $group ): array {
+		$autoload = array();
+		foreach ( \WC_Admin_Settings::get_settings_pages() as $page ) {
+			if ( ! $page instanceof \WC_Settings_Page || $page->get_id() !== $group ) {
+				continue;
+			}
+			// Sections and get_settings() as the page registrar reads them, so the same fields are found.
+			$sections = $page->get_sections();
+			foreach ( array_keys( $sections ? $sections : array( '' => '' ) ) as $section ) {
+				foreach ( (array) $page->get_settings( $section ) as $field ) {
+					if ( is_array( $field ) && is_string( $field['id'] ?? null ) && isset( $field['autoload'] ) ) {
+						$autoload[ $field['id'] ] ??= (bool) $field['autoload'];
+					}
+				}
+			}
+		}
+		return $autoload;
 	}
 
 	/**

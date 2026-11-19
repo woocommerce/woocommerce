@@ -316,6 +316,7 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	 *           ["checkbox", false, "no"]
 	 *           ["checkbox", "yes", "yes"]
 	 *           ["checkbox", "no", "no"]
+	 *           ["checkbox", "", "no"]
 	 *           ["number", 15, "15"]
 	 *           ["multiselect", ["live", "sandbox"], ["live", "sandbox"]]
 	 *           ["relative_date_selector", {"number": "3", "unit": "weeks"}, {"number": 3, "unit": "weeks"}]
@@ -339,6 +340,19 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $result );
 		$this->assertSame( $expected, $result['settings'][0]['value'] );
 		$this->assertSame( $expected, get_option( 'extension_field' ) );
+	}
+
+	/**
+	 * @testdox Should turn off a checkbox that defaults to on when sent an empty value.
+	 */
+	public function test_saves_empty_checkbox_as_no(): void {
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+
+		$result = $this->sut->execute( $this->input( 'account', array( 'woocommerce_enable_guest_checkout' => '' ) ) );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'no', $result['settings'][0]['value'] );
+		$this->assertSame( 'no', get_option( 'woocommerce_enable_guest_checkout' ) );
 	}
 
 	/**
@@ -701,24 +715,35 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should rewrite the downloads folder protection when the file download method changes, and only then.
+	 * @testdox Should rewrite the downloads folder protection whenever the file download method is sent, and not on other saves.
 	 */
 	public function test_download_method_change_updates_folder_protection(): void {
-		update_option( 'woocommerce_file_download_method', 'force' );
-		\WC_Admin_Settings::check_download_folder_protection();
 		$htaccess = wp_get_upload_dir()['basedir'] . '/woocommerce_uploads/.htaccess';
+		$original = file_exists( $htaccess ) ? file_get_contents( $htaccess ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
-		$this->sut->execute( $this->input( 'products', array( 'woocommerce_file_download_method' => 'redirect' ) ) );
-		$this->assertSame( 'Options -Indexes', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		try {
+			update_option( 'woocommerce_file_download_method', 'force' );
+			\WC_Admin_Settings::check_download_folder_protection();
 
-		$this->sut->execute( $this->input( 'products', array( 'woocommerce_file_download_method' => 'force' ) ) );
-		$this->assertSame( 'deny from all', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$this->sut->execute( $this->input( 'products', array( 'woocommerce_file_download_method' => 'redirect' ) ) );
+			$this->assertSame( 'Options -Indexes', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
-		file_put_contents( $htaccess, 'stale' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-		$this->sut->execute( $this->input( 'products', array( 'woocommerce_file_download_method' => 'force' ) ) );
-		$this->assertSame( 'stale', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$this->sut->execute( $this->input( 'products', array( 'woocommerce_file_download_method' => 'force' ) ) );
+			$this->assertSame( 'deny from all', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
-		\WC_Admin_Settings::check_download_folder_protection();
+			file_put_contents( $htaccess, 'Options -Indexes' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			$this->sut->execute( $this->input( 'general', array( 'woocommerce_currency' => 'EUR' ) ) );
+			$this->assertSame( 'Options -Indexes', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+			$this->sut->execute( $this->input( 'products', array( 'woocommerce_file_download_method' => 'force' ) ) );
+			$this->assertSame( 'deny from all', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		} finally {
+			if ( null === $original ) {
+				wp_delete_file( $htaccess );
+			} else {
+				file_put_contents( $htaccess, $original ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			}
+		}
 	}
 
 	/**
@@ -763,6 +788,20 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 			),
 			get_option( 'woocommerce_new_order_settings' )
 		);
+	}
+
+	/**
+	 * @testdox Should keep the autoload flag the settings page declares, as the admin save does.
+	 */
+	public function test_keeps_declared_autoload(): void {
+		delete_option( 'woocommerce_enable_guest_checkout' );
+		add_option( 'woocommerce_enable_guest_checkout', 'yes', '', false );
+
+		$result = $this->sut->execute( $this->input( 'account', array( 'woocommerce_enable_guest_checkout' => 'no' ) ) );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'no', get_option( 'woocommerce_enable_guest_checkout' ) );
+		$this->assertArrayNotHasKey( 'woocommerce_enable_guest_checkout', wp_load_alloptions( true ) );
 	}
 
 	/**
