@@ -3,7 +3,13 @@
  */
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { useEffect, useLayoutEffect, useRef } from '@wordpress/element';
-import { dispatchEvent, whenAnimationsEnd } from '@woocommerce/base-utils';
+import { useSelect } from '@wordpress/data';
+import { cartStore } from '@woocommerce/block-data';
+import {
+	dispatchEvent,
+	isKeyboardInput,
+	whenAnimationsEnd,
+} from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -17,26 +23,26 @@ const FrontendBlock = ( {
 	children: JSX.Element;
 	className: string;
 } ): JSX.Element | null => {
-	const { cartItems, cartIsLoading, hasPendingItemsOperations } =
-		useStoreCart();
+	const { cartItems, cartIsLoading } = useStoreCart();
+	const removalCount = useSelect(
+		( select ) => select( cartStore ).getItemsPendingDelete().length,
+		[]
+	);
 	const isEmpty = ! cartIsLoading && cartItems.length === 0;
 	const hasItems = cartItems.length > 0;
 	const ref = useRef< HTMLDivElement >( null );
 	const hasHadItems = useRef( false );
 	const wasKeyPress = useRef( false );
+	const previousRemovalCount = useRef( 0 );
 
-	// A click from a key press, such as Enter on Remove, has no click count. While a removal is in flight, keep the
-	// click that started it, so a later click elsewhere does not change how the empty cart shows.
+	// Read the input when a removal starts, such as Enter on Remove, so a click elsewhere while it is in flight
+	// does not change how the empty cart shows.
 	useEffect( () => {
-		if ( hasPendingItemsOperations ) {
-			return;
+		if ( removalCount > previousRemovalCount.current ) {
+			wasKeyPress.current = isKeyboardInput();
 		}
-		const onClick = ( event: MouseEvent ) => {
-			wasKeyPress.current = event.detail === 0;
-		};
-		document.addEventListener( 'click', onClick, true );
-		return () => document.removeEventListener( 'click', onClick, true );
-	}, [ hasPendingItemsOperations ] );
+		previousRemovalCount.current = removalCount;
+	}, [ removalCount ] );
 
 	// The empty cart rises in only when it replaces the cart after the shopper removes the last item. A cart that
 	// loads empty, or that empties after a key press, shows immediately.
