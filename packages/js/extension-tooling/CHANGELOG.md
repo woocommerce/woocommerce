@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0](https://www.npmjs.com/package/@woocommerce/extension-tooling/v/1.4.0) - 2026-11-19
+
+-   Minor - Share the PHP debug log marker for browser test sites. [#71141]
+-   Minor - Share the Playwright wait for cart and checkout updates. [#71140]
+
 ## [1.3.0](https://www.npmjs.com/package/@woocommerce/extension-tooling/v/1.3.0) - 2026-11-19
 
 -   Minor - Share checkout mode, theme, and page selection in extension browser tests. [#71126]

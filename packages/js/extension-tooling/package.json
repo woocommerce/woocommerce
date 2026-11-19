@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/extension-tooling",
-	"version": "1.3.0",
+	"version": "1.4.0",
 	"description": "Shared build and development tools for WooCommerce extensions.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
