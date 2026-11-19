@@ -3,7 +3,7 @@
  */
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
-import { usePresence } from '@woocommerce/base-hooks';
+import { exitingProps, usePresence } from '@woocommerce/base-hooks';
 import { isKeyboardInput } from '@woocommerce/base-utils';
 import { Icon, cautionFilled } from '@wordpress/icons';
 
@@ -66,8 +66,7 @@ export const ValidationInputError = ( {
 			ref={ presence.ref }
 			className="wc-block-components-validation-error"
 			role="alert"
-			// The error is already gone for the shopper while it collapses. React 18 has no `inert` prop.
-			{ ...( presence.isExiting && { inert: '', 'aria-hidden': true } ) }
+			{ ...exitingProps( presence.isExiting ) }
 		>
 			<p
 				// A new paragraph when the error comes back during its collapse, so the alert announces it again.
