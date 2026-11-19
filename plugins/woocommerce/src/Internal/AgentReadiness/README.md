@@ -92,8 +92,8 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `ucp_profile_version` | With UCP on: the served profile declares the UCP version WooCommerce implements (`UcpUtils::VERSION`). A different version usually means another plugin serves its own profile. |
 | `ucp_checkout` | With UCP on: the served profile declares `dev.ucp.shopping.checkout`. Pending until this WooCommerce serves UCP checkout; not shown while guest checkout is off, since the profile then offers none. |
 | `product_return_policy_schema` | A product offer, or the store's OnlineStore or Organization item, in the product page's JSON-LD has `hasMerchantReturnPolicy`. |
-| `product_shipping_schema` | A product offer has `shippingDetails`. "Couldn't check" for a product that doesn't ship. Pending (WOOPRD-3908). |
-| `product_buy_action_schema` | The product or an offer has a `BuyAction` in `potentialAction`. "Couldn't check" for a variable product without one: WooCommerce links only a chosen variation to checkout (WOOPRD-3946, after the ProductGroup work in WOOPRD-3907). Pending (WOOPRD-3918). |
+| `product_shipping_schema` | A product offer has `shippingDetails`. Without them it fails when no shipping zone has a delivery method (local pickup doesn't count), which the merchant can add, or when WooCommerce would print them. It's "couldn't check" when WooCommerce wouldn't: a product with no price, one that isn't simple (only a chosen variation gets them) or doesn't ship, or a store WooCommerce can't describe the shipping of (shipping off, no shipping countries, or a zone criteria filter). |
+| `product_buy_action_schema` | The product or an offer has a `BuyAction` in `potentialAction`. "Couldn't check" without one for a variable product, or one not purchasable or out of stock: WooCommerce links only a chosen variation, and only a product in stock, to checkout (WOOPRD-3946, after the ProductGroup work in WOOPRD-3907). |
 
 A likely conflict names the page where it was seen (`seen_at`), not a plugin: a list of plugins goes stale, and several plugins can change the same output (WOOAI-1618).
 
@@ -104,7 +104,7 @@ The checks judge what the store returns, whoever provides it. Some things they c
 - Values added in the browser. The page is read as the server sends it, so JSON-LD a script adds after load is missed.
 - Every product. Output checks read one product page; the stored-data checks run on every product.
 
-A check listed in `StoreOutputChecks::PENDING` tests output WooCommerce doesn't build yet. It doesn't run: it's reported with `ok` null and `pending` true, so it reads as coming soon, not as failed or couldn't check. Remove its entry when that output ships.
+`ucp_checkout` tests output WooCommerce doesn't build yet. Until this WooCommerce serves UCP checkout it doesn't run: it's reported with `ok` null and `pending` true, so it reads as coming soon, not as failed or couldn't check.
 
 A check listed in `ReadinessCheckPage::SAME_CAUSE` isn't shown while the setup step it names fails, so one cause shows once: `no_noindex_directives` while "Discourage search engines" is on, `product_return_policy_schema` while no published refund and returns page is chosen, and `ucp_checkout` while guest checkout is off. A stock store creates that page as a draft, so the setup step shows instead.
 

@@ -14,22 +14,12 @@ use WC_Unit_Test_Case;
 class ReadinessCopyTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Checks that wait for output WooCommerce doesn't build yet, so Sales readiness doesn't show them.
-	 *
-	 * @return array<int, string>
-	 */
-	private static function pending(): array {
-		return ( new \ReflectionClassConstant( StoreOutputChecks::class, 'PENDING' ) )->getValue();
-	}
-
-
-	/**
 	 * @testdox Every store check Sales readiness shows has copy, headed by what to do and saying what the scan found.
 	 */
 	public function test_every_store_check_has_copy(): void {
 		$checks = new \ReflectionMethod( StoreOutputChecks::class, 'checks' );
 		$checks->setAccessible( true );
-		$ids = array_diff( array_column( $checks->invoke( wc_get_container()->get( StoreOutputChecks::class ) ), 'id' ), self::pending() );
+		$ids = array_column( $checks->invoke( wc_get_container()->get( StoreOutputChecks::class ) ), 'id' );
 
 		$this->assertNotEmpty( $ids );
 		foreach ( $ids as $id ) {
@@ -71,9 +61,10 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 	public function test_every_store_check_has_a_fix_line(): void {
 		$checks = new \ReflectionMethod( StoreOutputChecks::class, 'checks' );
 		$checks->setAccessible( true );
-		foreach ( array_diff( array_column( $checks->invoke( wc_get_container()->get( StoreOutputChecks::class ) ), 'id' ), self::pending() ) as $id ) {
+		foreach ( array_column( $checks->invoke( wc_get_container()->get( StoreOutputChecks::class ) ), 'id' ) as $id ) {
 			$this->assertNotSame( '', ReadinessCopy::store_check( $id )['fix'] ?? '', $id );
 		}
+		$this->assertStringContainsString( 'tab=shipping', ReadinessCopy::store_check( 'product_shipping_schema' )['url'], 'The shipping fix links to the Shipping settings' );
 	}
 
 	/**

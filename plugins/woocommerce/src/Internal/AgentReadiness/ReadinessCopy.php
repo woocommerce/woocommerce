@@ -341,6 +341,21 @@ final class ReadinessCopy {
 				__( 'AI assistants compare price and availability before they suggest a product. We found a recent product page without one of them.', 'woocommerce' ),
 				__( 'Set a price and stock status on the product. If it has them, look at the schema settings in your SEO plugin or theme.', 'woocommerce' ),
 			),
+			'product_shipping_schema'        => array(
+				__( 'Product structured data gives shipping details', 'woocommerce' ),
+				__( 'Add shipping details to your product structured data', 'woocommerce' ),
+				__( 'Agents tell shoppers the delivery options and cost before they buy.', 'woocommerce' ),
+				__( 'Agents tell shoppers the delivery options and cost before they buy. We found a recent product page without shipping details in its structured data.', 'woocommerce' ),
+				__( 'Add a shipping zone with a delivery method other than local pickup, so WooCommerce can add shipping details to your products. If you already have one, check whether your theme or an SEO plugin replaces WooCommerce\'s structured data.', 'woocommerce' ),
+				admin_url( 'admin.php?page=wc-settings&tab=shipping' ),
+			),
+			'product_buy_action_schema'      => array(
+				__( 'Product structured data says how to buy', 'woocommerce' ),
+				__( 'Add a buy action to your product structured data', 'woocommerce' ),
+				__( 'A BuyAction tells agents where to send a shopper to buy the product.', 'woocommerce' ),
+				__( 'A BuyAction tells agents where to send a shopper to buy the product. We found a recent product page without one in its structured data.', 'woocommerce' ),
+				__( 'Check whether another plugin replaces WooCommerce\'s product structured data.', 'woocommerce' ),
+			),
 			'product_gtin_jsonld'            => array(
 				__( 'Product details have the barcode number', 'woocommerce' ),
 				__( 'Check why product details have no barcode number', 'woocommerce' ),

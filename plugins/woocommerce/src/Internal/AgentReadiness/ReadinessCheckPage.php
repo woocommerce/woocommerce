@@ -56,6 +56,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		'product_jsonld_required_fields' => 'product_jsonld_present',
 		'product_offer_jsonld'           => 'product_jsonld_present',
 		'product_return_policy_schema'   => 'product_jsonld_present',
+		'product_shipping_schema'        => 'product_jsonld_present',
+		'product_buy_action_schema'      => 'product_jsonld_present',
 		'llms_txt_valid'                 => 'llms_txt_present',
 		'llms_txt_links_resolve'         => 'llms_txt_present',
 	);

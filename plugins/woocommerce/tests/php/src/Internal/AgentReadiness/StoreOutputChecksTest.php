@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\AgentReadiness\JsonLd;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
@@ -410,6 +411,47 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
 
 		$this->assertSame( array( true, true, true ), $this->product_results() );
+	}
+
+	/**
+	 * @testdox The shipping and buy action checks match the JSON-LD WooCommerce prints for each product state.
+	 *
+	 * Shipping details, then the buy action. A virtual product still gets a buy action. An out-of-stock
+	 * product still gets shipping details. A variable product page gets neither.
+	 *
+	 * @testWith ["shipped", [true, true]]
+	 *           ["virtual", [null, true]]
+	 *           ["out_of_stock", [true, null]]
+	 *           ["variable", [null, null]]
+	 *
+	 * @param string                $state    Product state.
+	 * @param array<int, bool|null> $expected Shipping check, then the buy action check.
+	 */
+	public function test_core_jsonld_matches_what_woocommerce_prints( string $state, array $expected ): void {
+		$zone = new \WC_Shipping_Zone();
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$zone->add_shipping_method( 'flat_rate' );
+		$product = 'variable' === $state ? WC_Helper_Product::create_variation_product() : WC_Helper_Product::create_simple_product();
+		if ( 'virtual' === $state ) {
+			$product->set_virtual( true );
+		} elseif ( 'out_of_stock' === $state ) {
+			$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		}
+		$product->save();
+		if ( $product instanceof \WC_Product_Variable ) {
+			\WC_Product_Variable::sync( $product );
+		}
+		$product = wc_get_product( $product->get_id() );
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+		$results = $this->results();
+
+		$this->assertSame(
+			$expected,
+			array( $results['product_shipping_schema'], $results['product_buy_action_schema'] ),
+			'These checks disagree with the JSON-LD WooCommerce printed: their copy of the print conditions has drifted from WC_Structured_Data'
+		);
+		$zone->delete();
 	}
 
 	/**
