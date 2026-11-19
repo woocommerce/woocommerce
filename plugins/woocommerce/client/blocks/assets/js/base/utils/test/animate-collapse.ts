@@ -14,22 +14,53 @@ const NATURAL: Record< string, string > = {
 
 // Jest has no layout, transitions, or Web Animations API. In the fake, the computed style is the inline style, or the
 // `natural` value when there is none. While `inProgress` has values and the element has the attribute of the helper,
-// a transition is at those values. `finish` ends the transitions.
+// a transition is at those values. Each time the helper sets its attribute, a new transition starts and replaces the
+// running one, as in a browser. `finish` ends the running transition.
 const createElement = () => {
 	const element = document.createElement( 'div' );
 	const inProgress: Record< string, string > = {};
 	const natural = { ...NATURAL };
-	let resolveFinished = () => undefined as void;
-	const transition = {
-		playState: 'running',
-		finished: new Promise< void >( ( resolve ) => {
-			resolveFinished = resolve;
-		} ),
-		effect: { getComputedTiming: () => ( { endTime: 300 } ) },
+	let transition: {
+		playState: string;
+		finished: Promise< void >;
+		effect: { getComputedTiming: () => { endTime: number } };
+		end: () => void;
+		cancel: () => void;
+	} | null = null;
+	const startTransition = () => {
+		transition?.cancel();
+		let end = () => undefined as void;
+		let cancel = () => undefined as void;
+		const finished = new Promise< void >( ( resolve, reject ) => {
+			end = resolve;
+			cancel = reject;
+		} );
+		const next = {
+			playState: 'running',
+			finished,
+			effect: { getComputedTiming: () => ( { endTime: 300 } ) },
+			end: () => {
+				next.playState = 'finished';
+				end();
+			},
+			cancel: () => {
+				next.playState = 'idle';
+				cancel();
+			},
+		};
+		finished.catch( () => undefined );
+		transition = next;
+	};
+	const setAttribute = element.setAttribute.bind( element );
+	element.setAttribute = ( name: string, value: string ) => {
+		setAttribute( name, value );
+		if ( name === 'data-wc-collapse' ) {
+			startTransition();
+		}
 	};
 	element.getAnimations = () =>
 		element.hasAttribute( 'data-wc-collapse' ) &&
-		transition.playState === 'running'
+		transition?.playState === 'running'
 			? [ transition as unknown as Animation ]
 			: [];
 	jest.spyOn( window, 'getComputedStyle' ).mockImplementation(
@@ -45,8 +76,7 @@ const createElement = () => {
 			} )
 	);
 	const finish = async () => {
-		transition.playState = 'finished';
-		resolveFinished();
+		transition?.end();
 		await new Promise( ( resolve ) => setTimeout( resolve ) );
 	};
 	return { element, inProgress, natural, finish };
@@ -97,8 +127,11 @@ describe( 'animateCollapse', () => {
 			[ '' ],
 			[ '40px' ],
 			[ '80px' ],
-			[ '' ],
 		] );
+		expect( element.style.height ).toBe( '80px' );
+		expect( element.getAttribute( 'data-wc-collapse' ) ).toBe( 'in' );
+
+		await finish();
 		expect( element.getAttributeNames() ).toEqual( [] );
 	} );
 
