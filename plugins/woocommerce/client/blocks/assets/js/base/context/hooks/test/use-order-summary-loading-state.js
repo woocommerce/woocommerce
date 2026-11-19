@@ -23,6 +23,14 @@ jest.mock( '@woocommerce/base-hooks', () => {
 	return { ...actual, usePresence: jest.fn( actual.usePresence ) };
 } );
 
+jest.mock( '@wordpress/compose', () => {
+	const actual = jest.requireActual( '@wordpress/compose' );
+	return {
+		...actual,
+		useReducedMotion: jest.fn( actual.useReducedMotion ),
+	};
+} );
+
 jest.mock( '@woocommerce/base-utils', () => ( {
 	...jest.requireActual( '@woocommerce/base-utils' ),
 	isKeyboardInput: jest.fn( () => false ),
@@ -33,7 +41,8 @@ jest.mock( '@woocommerce/base-utils', () => ( {
  */
 import { usePresence } from '@woocommerce/base-hooks';
 import { isKeyboardInput } from '@woocommerce/base-utils';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
+import { useReducedMotion } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -237,6 +246,35 @@ describe( 'useOrderSummaryRow', () => {
 		mockCart( [ 'fee' ] );
 		rerender();
 		expect( result.current.isStale ).toBe( false );
+	} );
+
+	it( 'stays stale until the skeletons end, with motion', () => {
+		// The global mock reports reduced motion, which ends the skeletons at once.
+		useReducedMotion.mockReturnValue( false );
+		jest.useFakeTimers();
+		try {
+			mockCart( [ 'fee' ] );
+			const { result, rerender } = renderRow();
+
+			mockCart( [ 'new fee' ], true );
+			rerender();
+			mockCart( [ 'new fee' ] );
+			rerender();
+			expect( result.current.cart.cartFees ).toEqual( [ 'fee' ] );
+			expect( result.current.isStale ).toBe( true );
+
+			act( () => jest.advanceTimersByTime( 100 ) );
+			expect( result.current.isStale ).toBe( true );
+
+			act( () => jest.runOnlyPendingTimers() );
+			expect( result.current.cart.cartFees ).toEqual( [ 'new fee' ] );
+			expect( result.current.isStale ).toBe( false );
+		} finally {
+			jest.useRealTimers();
+			useReducedMotion.mockImplementation(
+				jest.requireActual( '@wordpress/compose' ).useReducedMotion
+			);
+		}
 	} );
 
 	it( 'animates after a pointer change, not after a key press', () => {
