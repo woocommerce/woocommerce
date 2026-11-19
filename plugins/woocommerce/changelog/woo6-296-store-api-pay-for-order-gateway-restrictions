@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Apply offline payment gateway shipping method and virtual order restrictions when paying for an existing order through the Store API.
