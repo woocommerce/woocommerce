@@ -64,18 +64,30 @@ export const whenAllAnimationsEnd = (
 	elements: Element[],
 	callback: () => void
 ): ( () => void ) => {
-	let pending = elements.length;
-	if ( pending === 0 ) {
+	if ( elements.length === 0 ) {
 		callback();
 		return () => undefined;
 	}
-	const cancels = elements.map( ( element ) =>
-		whenAnimationsEnd( element, () => {
-			pending--;
-			if ( pending === 0 ) {
-				callback();
-			}
-		} )
-	);
+	let cancels: Array< () => void > = [];
+	const waitForAll = () => {
+		let pending = elements.length;
+		let hasWaited = false;
+		cancels = elements.map( ( element ) =>
+			whenAnimationsEnd( element, () => {
+				pending--;
+				if ( pending > 0 ) {
+					return;
+				}
+				// An element that ended can start a new animation while another still runs, so check them all again.
+				if ( hasWaited ) {
+					waitForAll();
+				} else {
+					callback();
+				}
+			} )
+		);
+		hasWaited = true;
+	};
+	waitForAll();
 	return () => cancels.forEach( ( cancel ) => cancel() );
 };
