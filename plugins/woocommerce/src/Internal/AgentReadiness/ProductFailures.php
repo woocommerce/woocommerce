@@ -47,10 +47,13 @@ class ProductFailures {
 	/**
 	 * Store what a product fails, writing only what changed.
 	 *
-	 * @param int                                                             $product_id Product id.
-	 * @param array<string, array<string, array{field:string,effect:string}>> $failures   Channel map of each failed check, by check id.
+	 * @param int                                                             $product_id   Product id.
+	 * @param array<string, array<string, array{field:string,effect:string}>> $failures     Channel map of each failed check, by check id.
+	 * @param bool                                                            $mark_written Whether to record the write time. A save does, so a scan
+	 *                                                                                      in progress keeps its rows. The scan's own writes don't:
+	 *                                                                                      keep_only() reads the time only for products the scan did not test.
 	 */
-	public static function store( int $product_id, array $failures ): void {
+	public static function store( int $product_id, array $failures, bool $mark_written = true ): void {
 		$values = array_merge( array( self::CHECKED ), array_map( 'strval', array_keys( $failures ) ) );
 		foreach ( ProductScan::statuses( array_values( $failures ) ) as $channel => $status ) {
 			if ( ProductScan::COMPLETE !== $status ) {
@@ -65,8 +68,10 @@ class ProductFailures {
 		foreach ( array_diff( $values, $stored ) as $value ) {
 			add_post_meta( $product_id, self::META_KEY, $value );
 		}
-		// Same values still count as a new write, so a save during a scan is not treated as the old rows.
-		update_post_meta( $product_id, self::WRITTEN_META, sprintf( '%.6F', microtime( true ) ) );
+		if ( $mark_written ) {
+			// Same values still count as a new write, so a save during a scan is not treated as the old rows.
+			update_post_meta( $product_id, self::WRITTEN_META, sprintf( '%.6F', microtime( true ) ) );
+		}
 	}
 
 	/**

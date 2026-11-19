@@ -578,7 +578,7 @@ class AgentReadiness {
 			// ProductScan flushes the runtime cache after the batch; prime again before the store loop.
 			_prime_post_caches( array_map( 'intval', array_keys( $written ) ), true, true );
 			foreach ( $written as $product_id => $failures ) {
-				ProductFailures::store( (int) $product_id, $failures );
+				ProductFailures::store( (int) $product_id, $failures, false );
 			}
 			$state['tested']   = array_values(
 				array_unique(
@@ -589,6 +589,10 @@ class AgentReadiness {
 				)
 			);
 			$state['attempts'] = 0;
+			// A scan that replaced this one while the rows were stored keeps its own progress.
+			if ( ! $this->is_current( $chain ) ) {
+				return false;
+			}
 			update_option( self::SCAN_OPTION, $state, false );
 			return true;
 		}

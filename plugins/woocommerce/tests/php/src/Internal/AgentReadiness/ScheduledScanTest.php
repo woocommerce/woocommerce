@@ -504,6 +504,67 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A scan replaced while its batch stores rows does not write its progress over the new scan.
+	 */
+	public function test_scan_replaced_during_the_store_loop_keeps_the_new_progress(): void {
+		$this->create_products( ProductScan::BATCH_SIZE + 1 );
+		$this->sut->run();
+		$first = get_option( AgentReadiness::SCAN_OPTION )['id'];
+
+		$replaced = false;
+		$replace  = function ( $meta_id, $object_id, $meta_key ) use ( &$replaced ): void {
+			unset( $meta_id, $object_id );
+			if ( $replaced || ProductFailures::META_KEY !== $meta_key ) {
+				return;
+			}
+			$replaced = true;
+			$this->sut->run();
+		};
+		add_action( 'added_post_meta', $replace, 10, 3 );
+		try {
+			$this->sut->run_batch( $first );
+		} finally {
+			remove_action( 'added_post_meta', $replace, 10 );
+		}
+
+		$state = get_option( AgentReadiness::SCAN_OPTION );
+		$this->assertTrue( $replaced );
+		$this->assertNotSame( $first, $state['id'] );
+		$this->assertSame( 0, $state['position'], 'The new scan has not tested a batch yet' );
+	}
+
+	/**
+	 * @testdox A scan that finds nothing changed writes no product meta.
+	 */
+	public function test_unchanged_scan_writes_no_product_meta(): void {
+		$ids = $this->create_products( 2 );
+		$this->sut->run();
+		$this->run_batches();
+		$this->assertSame( '', get_post_meta( $ids[0], ProductFailures::WRITTEN_META, true ), 'The scan records no write time' );
+
+		$writes = 0;
+		$count  = static function ( $meta_id, $object_id, $meta_key ) use ( &$writes ): void {
+			unset( $meta_id, $object_id );
+			if ( in_array( $meta_key, array( ProductFailures::META_KEY, ProductFailures::WRITTEN_META ), true ) ) {
+				++$writes;
+			}
+		};
+		foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+			add_action( $hook, $count, 10, 3 );
+		}
+		try {
+			$this->sut->run();
+			$this->run_batches();
+		} finally {
+			foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+				remove_action( $hook, $count, 10 );
+			}
+		}
+
+		$this->assertSame( 0, $writes );
+	}
+
+	/**
 	 * @testdox A report that fails to store leaves the previous report's failure rows in place.
 	 */
 	public function test_failed_report_write_keeps_the_previous_rows(): void {
@@ -619,6 +680,31 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 			global $wpdb;
 			$wpdb->last_error = '';
 		}
+	}
+
+	/**
+	 * @testdox A failed product list query is not cached, so the next scan lists the products.
+	 */
+	public function test_failed_list_query_is_not_cached(): void {
+		global $wpdb;
+		$ids   = $this->create_products( 1 );
+		$break = static function ( $sql ) {
+			return false !== strpos( (string) $sql, 'LIMIT 0, ' . ( ProductScan::PRODUCT_LIMIT + 1 ) ) ? $sql . ' BROKEN' : $sql;
+		};
+		add_filter( 'query', $break );
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			( new ProductScan() )->start();
+			$this->fail( 'A list query error stops the scan' );
+		} catch ( \RuntimeException $e ) {
+			unset( $e );
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $suppress );
+			$wpdb->last_error = '';
+		}
+
+		$this->assertSame( $ids, ( new ProductScan() )->start() );
 	}
 
 	/**

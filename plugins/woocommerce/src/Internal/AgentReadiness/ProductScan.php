@@ -186,10 +186,12 @@ class ProductScan {
 					'ID'       => 'DESC',
 				),
 				'no_found_rows'  => true,
+				// A failed query would be cached as an empty list, and the next scan would read it without an error.
+				'cache_results'  => false,
 				'tax_query'      => self::count_query( self::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			)
 		);
-		$query_failed     = '' !== self::db_error();
+		$query_failed = '' !== self::db_error();
 
 		$product_ids = array_map(
 			static function ( $post ): int {
