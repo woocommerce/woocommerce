@@ -156,6 +156,8 @@ describe( 'playSwap', () => {
 	} );
 
 	afterEach( () => {
+		// Some tests end while the swap still runs. Stop its frame and timer before the next test.
+		stopSwap( container );
 		jest.restoreAllMocks();
 		jest.useRealTimers();
 		container.remove();
