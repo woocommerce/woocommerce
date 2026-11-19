@@ -28,8 +28,8 @@ class Ability extends \WP_Ability {
 	 *
 	 * Invalid input stays unchanged, so validate_input() refuses it as before.
 	 *
-	 * Remove this override, prepare_input(), sanitize_input(), core_prepares_input() and get_input_error()
-	 * when WooCommerce requires WordPress 7.2.
+	 * Remove when WooCommerce requires WordPress 7.2, together with prepare_input(),
+	 * sanitize_input(), core_prepares_input() and get_input_error().
 	 *
 	 * @since 11.4.0
 	 *
