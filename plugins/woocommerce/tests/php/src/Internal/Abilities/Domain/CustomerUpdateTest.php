@@ -378,6 +378,32 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not save a customer when every sent value matches the saved one.
+	 */
+	public function test_skips_save_without_changes(): void {
+		list( $id, $user_id ) = $this->registered_customer();
+		$saves                = did_action( 'woocommerce_update_customer' );
+
+		$result = $this->execute(
+			array(
+				'id'      => $id,
+				'billing' => array( 'city' => 'Old city' ),
+			)
+		);
+		$this->assertSame( array(), $result['customer']['updated_fields'] );
+		$this->assertSame( $user_id, $result['customer']['user_id'] );
+		$this->assertSame( $saves, did_action( 'woocommerce_update_customer' ), 'An unchanged customer is not saved.' );
+
+		$this->execute(
+			array(
+				'id'      => $id,
+				'billing' => array( 'city' => 'New city' ),
+			)
+		);
+		$this->assertSame( $saves + 1, did_action( 'woocommerce_update_customer' ) );
+	}
+
+	/**
 	 * @testdox Should not leave the cached user meta of a save that a sync refused.
 	 */
 	public function test_refused_sync_leaves_no_cached_address(): void {

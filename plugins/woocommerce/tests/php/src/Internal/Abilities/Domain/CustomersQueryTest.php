@@ -233,6 +233,28 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reuse the report cache for an identical query.
+	 */
+	public function test_reuses_report_cache(): void {
+		$this->registered_customer();
+		$writes = 0;
+		$count  = static function ( $expiration, $key ) use ( &$writes ) {
+			if ( str_starts_with( $key, 'wc_report_customers' ) ) {
+				++$writes;
+			}
+			return $expiration;
+		};
+		add_filter( 'woocommerce_reports_cache_expiration', $count, 10, 2 );
+
+		$this->sut->execute( array() );
+		// The report's default dates carry the UTC offset, so a key built from them would change with it, as it does with the clock.
+		update_option( 'gmt_offset', 5 );
+		$this->sut->execute( array() );
+
+		$this->assertSame( 1, $writes, 'The second query reads the cached result.' );
+	}
+
+	/**
 	 * @testdox Should find customers by name, email and user ID without returning the name or email.
 	 */
 	public function test_search_and_user_id(): void {

@@ -36,6 +36,22 @@ final class CustomerLookup extends CustomersDataStore {
 	}
 
 	/**
+	 * Default query vars without the report's before and after, which the customers data store never reads.
+	 * They default to the current time, so they would change the cache key every second.
+	 *
+	 * @return array
+	 */
+	public function get_default_query_vars() {
+		return array_merge(
+			parent::get_default_query_vars(),
+			array(
+				'before' => null,
+				'after'  => null,
+			)
+		);
+	}
+
+	/**
 	 * Find the WordPress user of a customer.
 	 *
 	 * @param int $customer_id Analytics customer ID.

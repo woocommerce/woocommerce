@@ -52,7 +52,7 @@ class CustomerUpdate extends ActionableAbility {
 		return array(
 			'label'               => __( 'Update customer', 'woocommerce' ),
 			'description'         => __(
-				'Update the first name, last name, billing address and shipping address of a registered customer. Fields that are not sent keep their value. Guest customers have no account to update; their addresses live on their orders. The response lists the changed fields without their values.',
+				'Update the first name, last name, billing address and shipping address of a registered customer. Fields that are not sent keep their value. Guest customers have no account to update; their addresses live on their orders. The response lists the changed fields without their values. Analytics refreshes the name and address it searches only for customer roles; for other roles, woocommerce/customers-query finds the old values until their next order.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
@@ -157,12 +157,7 @@ class CustomerUpdate extends ActionableAbility {
 		$user_id           = CustomerLookup::get_user_id( $input['id'] );
 
 		if ( false === $user_id ) {
-			return new \WP_Error(
-				'woocommerce_ability_customer_not_found',
-				/* translators: %d: customer ID. */
-				sprintf( __( 'Customer %d does not exist. Use the woocommerce/customers-query ability to find the customer ID.', 'woocommerce' ), $input['id'] ),
-				array( 'status' => 404 )
-			);
+			return self::not_found( $input['id'] );
 		}
 
 		if ( null === $user_id ) {
@@ -193,14 +188,19 @@ class CustomerUpdate extends ActionableAbility {
 
 		$customer = new \WC_Customer( $user_id );
 		if ( 0 === $customer->get_id() ) {
-			return new \WP_Error(
-				'woocommerce_ability_customer_not_found',
-				/* translators: %d: customer ID. */
-				sprintf( __( 'Customer %d could not be loaded.', 'woocommerce' ), $input['id'] ),
-				array( 'status' => 404 )
-			);
+			return self::not_found( $input['id'] );
 		}
 		return $customer;
+	}
+
+	/**
+	 * Skip the write when nothing changed, so no update hooks fire and the report cache is kept.
+	 *
+	 * @param \WC_Customer $subject Changed customer.
+	 * @return null|\WP_Error
+	 */
+	protected function save( $subject ) {
+		return empty( $this->updated_fields ) ? null : parent::save( $subject );
 	}
 
 	/**
@@ -257,6 +257,21 @@ class CustomerUpdate extends ActionableAbility {
 				'user_id'        => $subject->get_id(),
 				'updated_fields' => $this->updated_fields,
 			),
+		);
+	}
+
+	/**
+	 * The error for an ID that names no customer, or one whose user no longer loads.
+	 *
+	 * @param int $customer_id Analytics customer ID.
+	 * @return \WP_Error
+	 */
+	private static function not_found( int $customer_id ): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_ability_customer_not_found',
+			/* translators: %d: customer ID. */
+			sprintf( __( 'Customer %d does not exist. Use the woocommerce/customers-query ability to find the customer ID.', 'woocommerce' ), $customer_id ),
+			array( 'status' => 404 )
 		);
 	}
 
