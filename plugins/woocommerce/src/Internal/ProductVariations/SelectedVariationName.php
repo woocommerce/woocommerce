@@ -53,7 +53,6 @@ class SelectedVariationName {
 			return $product_name;
 		}
 
-		// @phpstan-ignore method.notFound (the call is proxied by WC_Data_Store::__call() and guarded by has_callable() above)
 		if ( ! $data_store->should_include_attributes_in_title( $product ) ) {
 			return $product_name;
 		}
