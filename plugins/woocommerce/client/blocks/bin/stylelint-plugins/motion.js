@@ -21,6 +21,14 @@ const messages = ruleMessages( ruleName, {
 		'The `$state` of `motion-transition` runs with reduced motion, so it can list only opacity and colors. Pass movement as `$move`.',
 } );
 
+const VENDOR_PREFIXES = [ '-webkit-', '-moz-', '-ms-', '-o-' ];
+
+// `-webkit-animation` moves things just like `animation`, so check it the same way.
+const unprefixed = ( prop ) => {
+	const prefix = VENDOR_PREFIXES.find( ( p ) => prop.startsWith( p ) );
+	return prefix ? prop.slice( prefix.length ) : prop;
+};
+
 const FADE_PROPERTIES = new Set( [
 	'opacity',
 	'color',
@@ -212,7 +220,7 @@ const ruleFunction = ( primary ) => ( root, result ) => {
 		return;
 	}
 	root.walkDecls( ( decl ) => {
-		const prop = decl.prop.toLowerCase();
+		const prop = unprefixed( decl.prop.toLowerCase() );
 		if (
 			( ! prop.startsWith( 'transition' ) &&
 				! prop.startsWith( 'animation' ) ) ||
