@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Reject checkout before processing hooks when customer registration and guest checkout are disabled.

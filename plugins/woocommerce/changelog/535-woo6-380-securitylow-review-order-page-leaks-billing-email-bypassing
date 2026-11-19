@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Only show the customer name and billing email on the Review Order page when the customer is signed in.

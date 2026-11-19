@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Only show WooCommerce.com install links to users who can install plugins, and tidy up how WooCommerce.com connection requests are verified.
