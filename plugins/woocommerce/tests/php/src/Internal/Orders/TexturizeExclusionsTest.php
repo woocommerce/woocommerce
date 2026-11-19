@@ -195,6 +195,46 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Both Review Order meta lines keep the billing email as entered, and a neighboring paragraph is still texturized.
+	 */
+	public function test_review_order_meta_line_survives_texturize_on_block_themes(): void {
+		$this->open_block_theme_email_page( 'review-order' );
+		$this->sut->skip_address_texturize_on_order_pages();
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_billing_email( "o'neil--shop@48x17.com" );
+		$order->set_billing_first_name( 'Pat' );
+		$order->set_billing_last_name( 'Lee' );
+		$order->save();
+
+		foreach ( $order->get_items() as $item ) {
+			if ( $item instanceof \WC_Order_Item_Product ) {
+				wp_update_post(
+					array(
+						'ID'             => $item->get_product_id(),
+						'comment_status' => 'open',
+					)
+				);
+			}
+		}
+
+		$form  = wc_get_template_html( 'order/customer-review-order.php', array( 'order' => $order ) );
+		$empty = wc_get_template_html(
+			'order/customer-review-order-empty.php',
+			array(
+				'order'          => $order,
+				'reviewed_count' => 1,
+			)
+		);
+
+		$this->assertStringContainsString( '<address class="woocommerce-breadcrumb woocommerce-review-order__meta">', $form, 'The form meta line should be an address element.' );
+		$this->assertStringContainsString( '<address class="woocommerce-breadcrumb woocommerce-review-order__meta">', $empty, 'The empty-state meta line should be an address element.' );
+		$this->assertStringContainsString( 'woocommerce-review-order__form', $form, 'The form template should render the review form.' );
+		$this->assert_literal_email( wp_kses_post( $form ) . '<p>3x4 -- done</p>' );
+		$this->assert_literal_email( wp_kses_post( $empty ) . '<p>3x4 -- done</p>' );
+	}
+
+	/**
 	 * @testdox Withdrawal notes and the email review row keep the email as entered, and another row is still texturized.
 	 */
 	public function test_withdrawal_email_survives_texturize_on_block_themes(): void {

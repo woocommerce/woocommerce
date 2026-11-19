@@ -6,7 +6,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.3.0
+ * @version 11.4.0
  *
  * @var WC_Order $order Order being reviewed.
  */
@@ -92,9 +92,9 @@ $order_key       = (string) $order->get_order_key();
 $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 ?>
 <div class="woocommerce-review-order">
-	<p class="woocommerce-breadcrumb woocommerce-review-order__meta">
+	<address class="woocommerce-breadcrumb woocommerce-review-order__meta">
 		<?php echo esc_html( $meta_line ); ?>
-	</p>
+	</address>
 
 	<?php // Focusable so dismissing the notice can hand focus back. ?>
 	<h1 class="woocommerce-review-order__title" tabindex="-1">
