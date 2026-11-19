@@ -35,17 +35,33 @@ const readValues = ( element: HTMLElement ) => {
 	) as Values;
 };
 
-const reset = ( element: HTMLElement ) => {
-	element.removeAttribute( ATTRIBUTE );
-	PROPERTIES.forEach( ( property ) => {
-		element.style[ property ] = '';
-	} );
-	// Leave nothing behind, not even an empty `style` attribute.
+/**
+ * Removes inline styles from an element, and the `style` attribute too when no styles are left, so that a motion
+ * leaves nothing behind.
+ *
+ * @param element    The element.
+ * @param properties The CSS property names to remove, such as `margin-bottom`.
+ */
+export const clearInlineStyle = (
+	element: HTMLElement,
+	...properties: string[]
+): void => {
+	properties.forEach( ( property ) =>
+		element.style.removeProperty( property )
+	);
 	if ( element.style.length === 0 ) {
 		// Chrome writes the cleared declarations back as `style=""` when nothing has read the attribute since.
 		element.getAttribute( 'style' );
 		element.removeAttribute( 'style' );
 	}
+};
+
+const reset = ( element: HTMLElement ) => {
+	element.removeAttribute( ATTRIBUTE );
+	PROPERTIES.forEach( ( property ) => {
+		element.style[ property ] = '';
+	} );
+	clearInlineStyle( element );
 };
 
 // Moves the element from `from`, or from its rest position, to open or closed.

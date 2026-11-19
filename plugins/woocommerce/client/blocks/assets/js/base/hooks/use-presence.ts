@@ -48,15 +48,14 @@ export function usePresence< T, E extends HTMLElement = HTMLDivElement >(
 	// Grow before paint, so the content never shows at its full size first. This also turns around a collapse. Turning
 	// `animate` off mid-grow stops the grow at once.
 	useLayoutEffect( () => {
-		if ( collapse && isPresent && ! wasPresentRef.current ) {
-			animateCollapse( ref.current, true, animate );
-		} else if (
+		if (
 			collapse &&
 			isPresent &&
-			! animate &&
-			ref.current?.hasAttribute( 'data-wc-collapse' )
+			( ! wasPresentRef.current ||
+				( ! animate &&
+					ref.current?.hasAttribute( 'data-wc-collapse' ) ) )
 		) {
-			animateCollapse( ref.current, true, false );
+			animateCollapse( ref.current, true, animate );
 		}
 		wasPresentRef.current = isPresent;
 	}, [ isPresent, collapse, animate ] );
