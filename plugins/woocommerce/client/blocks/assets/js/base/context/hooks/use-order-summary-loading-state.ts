@@ -51,10 +51,13 @@ export const useSettledOrderSummaryValue = < T >( value: T ): T => {
 	const { isLoading } = useOrderSummaryLoadingState();
 	const showSkeleton = useDelayedSkeleton( isLoading );
 	const settled = useRef( value );
-	if ( ! showSkeleton ) {
-		settled.current = value;
-	}
-	return settled.current;
+	// Recorded after the commit, so a render that React discards never becomes the settled value.
+	useLayoutEffect( () => {
+		if ( ! showSkeleton ) {
+			settled.current = value;
+		}
+	} );
+	return showSkeleton ? settled.current : value;
 };
 
 /**
@@ -74,9 +77,11 @@ export const useOrderSummaryRow = (
 	const cart = useSettledOrderSummaryValue( storeCart );
 	const shown = isShown( cart );
 	const lastShown = useRef( cart );
-	if ( shown ) {
-		lastShown.current = cart;
-	}
+	useLayoutEffect( () => {
+		if ( shown ) {
+			lastShown.current = cart;
+		}
+	} );
 	// Updated after the commit, so the render that settles the first load does not animate.
 	const wasLoaded = useRef( ! cart.cartIsLoading );
 	useLayoutEffect( () => {
@@ -87,8 +92,9 @@ export const useOrderSummaryRow = (
 		animate: wasLoaded.current,
 		collapse: true,
 	} );
+	const rowCart = shown ? cart : lastShown.current;
 	return {
-		cart: presence.value ? lastShown.current : null,
+		cart: presence.value ? rowCart : null,
 		wrapperProps: {
 			elementRef: presence.ref,
 			isExiting: presence.isExiting,
