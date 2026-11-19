@@ -40,6 +40,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneMethodCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneMethodUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusGet;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolRun;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
@@ -97,6 +98,7 @@ class AbilitiesLoader {
 		ReportAbility::class,
 		RunCheckAbility::class,
 		ShippingZonesQuery::class,
+		SystemStatusGet::class,
 		SystemStatusToolsQuery::class,
 		SystemStatusToolRun::class,
 		ShippingZoneCreate::class,
