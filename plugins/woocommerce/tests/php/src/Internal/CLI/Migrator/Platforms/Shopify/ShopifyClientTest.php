@@ -74,9 +74,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 
 		$this->assertNotInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 42, $result->count );
-
-		// Clean up filter.
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**
@@ -109,8 +106,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 
 		$this->assertNotInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 15, $result->count );
-
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**
@@ -160,8 +155,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'api_error', $result->get_error_code() );
 		$this->assertStringContainsString( 'Connection timeout', $result->get_error_message() );
-
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**
@@ -189,8 +182,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 'api_error', $result->get_error_code() );
 		$this->assertStringContainsString( '401', $result->get_error_message() );
 		$this->assertStringContainsString( 'Unauthorized', $result->get_error_message() );
-
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**
@@ -213,8 +204,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'api_error', $result->get_error_code() );
 		$this->assertStringContainsString( 'Failed to decode', $result->get_error_message() );
-
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**
@@ -243,8 +232,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 		);
 
 		$client_no_protocol->rest_request( '/products/count.json' );
-
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**
@@ -273,8 +260,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 
 		$this->assertNotInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 123, $result->product->id );
-
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**
@@ -332,9 +317,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 		$this->assertIsObject( $result );
 		$this->assertEquals( 1, count( $result->products->edges ) );
 		$this->assertEquals( 'Test Product', $result->products->edges[0]->node->title );
-
-		// Clean up filter.
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**
@@ -369,8 +351,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 		$result = $this->client->graphql_request( $query, $variables );
 
 		$this->assertNotInstanceOf( WP_Error::class, $result );
-
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**
@@ -397,8 +377,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'api_error', $result->get_error_code() );
 		$this->assertStringContainsString( '500', $result->get_error_message() );
-
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**
@@ -434,8 +412,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'graphql_error', $result->get_error_code() );
 		$this->assertStringContainsString( 'Field \\"invalidField\\"', $result->get_error_message() );
-
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**
@@ -461,8 +437,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'api_error', $result->get_error_code() );
-
-		remove_all_filters( 'pre_http_request' );
 	}
 
 	/**

@@ -10,12 +10,12 @@ import {
 	useRef,
 	withSyncEvent,
 } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce';
 import '@woocommerce/stores/store-notices';
 import type {
 	Store as WooCommerce,
 	WooCommerceConfig,
-} from '@woocommerce/stores/woocommerce/cart';
+} from '@woocommerce/stores/woocommerce';
 import {
 	formatPriceWithCurrency,
 	normalizeCurrencyResponse,
@@ -26,7 +26,7 @@ import {
  */
 import type { CartItem, Currency } from '@woocommerce/types';
 import { getFocusableElements } from '../../utils/get-focusable-elements';
-import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
+import { translateJQueryEventToNative } from '../../base/stores/woocommerce/cart/legacy-events';
 import {
 	isItemDataEntryVisible,
 	isLastVisibleEntry,

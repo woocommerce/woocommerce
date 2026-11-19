@@ -81,6 +81,13 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 		$variation->set_attributes( array_fill_keys( array_keys( $attributes ), '' ) );
 		$variation->save();
 		$this->assertTrue( $table['variation_attributes_not_set']->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'A variation set to "any"' );
+		$this->assertContains( $variation->get_id(), $table['variation_attributes_not_set']->failing_variations( wc_get_product( $variable->get_id() ), $this->scan ) );
+
+		$variable->set_attributes( array() );
+		$variable->save();
+		$whole = wc_get_product( $variable->get_id() );
+		$this->assertTrue( $table['variation_attributes_not_set']->fails( $whole, $this->scan ), 'No variation attribute on the parent' );
+		$this->assertNull( $table['variation_attributes_not_set']->failing_variations( $whole, $this->scan ), 'The blank child does not shrink a parent-level failure to one variation' );
 	}
 
 	/**
@@ -488,6 +495,7 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 				'search_visible'       => 'listing',
 				'ucp_on'               => 'ucp',
 				'https'                => 'ucp',
+				'ucp_discovery'        => 'ucp',
 				'privacy_page'         => 'checkout',
 				'terms_page'           => 'checkout',
 				'refund_returns_page'  => 'checkout',

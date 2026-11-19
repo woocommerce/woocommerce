@@ -224,7 +224,6 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 		);
 		$this->assertContains( 'store_id', array_keys( $properties ) );
 		$this->assertEquals( $store_id, $properties['store_id'] );
-		delete_option( \WC_Install::STORE_ID_OPTION );
 	}
 
 	/**
@@ -278,9 +277,6 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 		// Third call should get fresh data with the new store ID.
 		$third_call = \WC_Tracks::get_blog_details( get_current_user_id() );
 		$this->assertEquals( $new_store_id, $third_call['store_id'] );
-
-		// Clean up.
-		delete_option( \WC_Install::STORE_ID_OPTION );
 	}
 
 	/**

@@ -15,8 +15,27 @@ pre.has-background {
 	padding: 16px 24px;
 }
 
+/* pre-wrap breaks at spaces, so a long identifier or URL would still widen the block */
 pre {
 	font-family: 'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace;
+	word-break: break-word;
+}
+
+/*
+ * Core breaks words only on fixed-layout tables, where overflow-x scrolls the block instead.
+ * An email has nowhere to scroll, so every table gets both. Equal columns are the only
+ * arrangement that neither overflows, whatever the column count, nor leaves a short label
+ * squeezed beside a long value until it reads one letter per line. The class sits on the
+ * table in the email and on the figure around it in the editor.
+ */
+table.wp-block-table,
+.wp-block-table > table {
+	table-layout: fixed;
+}
+
+.wp-block-table td,
+.wp-block-table th {
+	word-break: break-word;
 }
 
 /* With a light text weight such as 300, the browser's "bolder" gives 400 and looks like normal text. */

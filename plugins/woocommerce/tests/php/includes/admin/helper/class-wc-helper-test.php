@@ -1531,8 +1531,6 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		} catch ( WPDieException $e ) {
 			$this->assertIsArray( $access_token_body, 'The access token request should have been sent' );
 			$this->assertSame( $expected, $access_token_body['funnel_id'] ?? null );
-		} finally {
-			remove_filter( 'pre_http_request', $http_mock, 10 );
 		}
 	}
 }

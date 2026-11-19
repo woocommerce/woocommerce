@@ -13,6 +13,7 @@
  */
 
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -36,6 +37,13 @@ class WC_Structured_Data {
 	 * @var array $_data Array of structured data.
 	 */
 	private $_data = array();
+
+	/**
+	 * Product IDs whose structured data has been stored.
+	 *
+	 * @var array
+	 */
+	private $generated_product_ids = array();
 
 	/**
 	 * Constructor.
@@ -192,6 +200,18 @@ class WC_Structured_Data {
 	 * Hooked into `woocommerce_email_order_details` action hook.
 	 */
 	public function output_structured_data() {
+		if ( 'wp_footer' === current_action() && is_product() && false !== has_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ) ) ) {
+			$product_id       = get_queried_object_id();
+			$has_product_data = isset( $this->generated_product_ids[ $product_id ] );
+
+			if ( ! $has_product_data ) {
+				$product = wc_get_product( $product_id );
+				if ( $product ) {
+					$this->generate_product_data( $product );
+				}
+			}
+		}
+
 		$types = $this->get_data_type_for_page();
 		$data  = $this->get_structured_data( $types );
 
@@ -231,7 +251,7 @@ class WC_Structured_Data {
 			global $product;
 		}
 
-		if ( ! is_a( $product, 'WC_Product' ) ) {
+		if ( ! is_a( $product, 'WC_Product' ) || '' !== $product->get_post_password() ) {
 			return;
 		}
 
@@ -538,7 +558,23 @@ class WC_Structured_Data {
 				}
 			}
 
+			$checkout_url = $this->get_product_checkout_url( $product, $selected_variation );
+			if ( null !== $checkout_url ) {
+				$markup_offer['checkoutPageURLTemplate'] = $checkout_url;
+			}
+
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
+			$offer            = $markup['offers'][0];
+			if ( null !== $checkout_url && is_array( $offer ) && 'Offer' === ( $offer['@type'] ?? null ) && is_string( $offer['checkoutPageURLTemplate'] ?? null ) && '' !== $offer['checkoutPageURLTemplate'] ) {
+				$markup['potentialAction'] = array(
+					'@type'  => 'BuyAction',
+					'target' => array(
+						'@type'          => 'EntryPoint',
+						'urlTemplate'    => $offer['checkoutPageURLTemplate'],
+						'actionPlatform' => array( 'https://schema.org/DesktopWebPlatform', 'https://schema.org/MobileWebPlatform' ),
+					),
+				);
+			}
 		}
 
 		if ( $product->get_rating_count() && wc_review_ratings_enabled() ) {
@@ -661,7 +697,15 @@ class WC_Structured_Data {
 			$markup['subjectOf'] = $videos;
 		}
 
+		/**
+		 * Filters structured data for a product.
+		 *
+		 * @since 3.0.0
+		 * @param array      $markup  Product structured data.
+		 * @param WC_Product $product Product being described.
+		 */
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
+		$this->generated_product_ids[ $product->get_id() ] = true;
 	}
 
 	/**
@@ -1078,6 +1122,43 @@ class WC_Structured_Data {
 		}
 
 		return $variation;
+	}
+
+	/**
+	 * Get a checkout link for a simple product or selected variation.
+	 *
+	 * @param WC_Product                $product   Product shown on the page.
+	 * @param WC_Product_Variation|null $variation Selected variation, if any.
+	 * @return string|null Checkout URL, or null if it cannot be represented.
+	 */
+	private function get_product_checkout_url( $product, $variation ) {
+		if ( ! $variation && ! $product->is_type( ProductType::SIMPLE ) ) {
+			return null;
+		}
+
+		$item = $variation ? $variation : $product;
+		if (
+			( ! $product->is_visible() && CatalogVisibility::SEARCH !== $product->get_catalog_visibility() ) ||
+			( $variation && ! $variation->is_visible() && CatalogVisibility::SEARCH !== $variation->get_catalog_visibility() ) ||
+			! $item->is_publicly_viewable() ||
+			! $item->is_purchasable() ||
+			! $item->is_in_stock() ||
+			! $item->has_enough_stock( 1 )
+		) {
+			return null;
+		}
+
+		if ( $variation && in_array( '', wc_get_product_variation_attributes( $variation->get_id() ), true ) ) {
+			return null;
+		}
+
+		return add_query_arg(
+			array(
+				'checkout-link' => '1',
+				'products'      => rawurlencode( $item->get_id() . ':1' ),
+			),
+			home_url( '/' )
+		);
 	}
 
 	/**

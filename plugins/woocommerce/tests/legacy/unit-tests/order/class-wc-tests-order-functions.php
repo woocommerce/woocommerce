@@ -176,15 +176,11 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_ship_to_billing_address_only() {
 
-		$default = get_option( 'woocommerce_ship_to_destination' );
-
 		update_option( 'woocommerce_ship_to_destination', 'shipping' );
 		$this->assertFalse( wc_ship_to_billing_address_only() );
 
 		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
 		$this->assertTrue( wc_ship_to_billing_address_only() );
-
-		update_option( 'woocommerce_ship_to_destination', $default );
 	}
 
 	/**
@@ -1635,7 +1631,6 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		);
 
 		WC_Tax::_delete_tax_rate( $rate_id );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
@@ -2111,13 +2106,6 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $coupon_data_store->get_tentative_usage_count( $coupon->get_id() ) );
 		$this->assertEquals( 1, $coupon_data_store->get_usage_by_email( $coupon, 'a@b.com' ) );
 		$this->assertEquals( 0, $coupon_data_store->get_tentative_usages_for_user( $coupon->get_id(), array( 'a@b.com' ) ) );
-
-		remove_filter(
-			'woocommerce_coupon_hold_minutes',
-			function () {
-				return 0;
-			}
-		);
 	}
 
 	/**

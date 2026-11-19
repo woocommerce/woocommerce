@@ -69,9 +69,6 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		// Assert.
 		$defaults = DefaultPaymentGateways::get_all();
 		$this->assertEquals( $defaults, $specs );
-
-		// Clean up.
-		remove_all_filters( DataSourcePoller::FILTER_NAME );
 	}
 
 	/**
@@ -326,11 +323,6 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		$this->assertEquals( $stored_specs_in_transient['en_US'], $default_specs );
 		$expires = (int) get_transient( '_transient_timeout_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
 		$this->assertTrue( ( $expires - time() ) <= 3 * HOUR_IN_SECONDS );
-
-		// Clean up.
-		remove_all_filters( PaymentGatewaySuggestionsDataSourcePoller::FILTER_NAME );
-		remove_all_filters( 'pre_http_request' );
-		remove_all_filters( 'woocommerce_admin_payment_gateway_suggestion_specs' );
 	}
 
 	/**
@@ -361,8 +353,5 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertEquals( 'yes', get_option( PaymentGatewaySuggestions::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION ) );
-
-		// Clean up.
-		delete_option( PaymentGatewaySuggestions::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION );
 	}
 }

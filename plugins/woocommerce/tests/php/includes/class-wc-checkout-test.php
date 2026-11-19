@@ -744,7 +744,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$expect_we_dont_ship_error ? 'Unfortunately, <strong>we do not ship to Japan</strong>. Please enter an alternative shipping address.' : '',
 			$errors->get_error_message( 'shipping' )
 		);
-		remove_all_filters( 'woocommerce_countries_allowed_countries' );
 	}
 
 	/**
@@ -1140,6 +1139,39 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'The filter should stop shipping from being calculated.' );
 		$this->assertSame( '', $errors->get_error_message( 'shipping' ), 'Stores that turn off shipping calculation on purpose must still be able to take orders.' );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' names the payment problem: no method on offer, none selected, or one that isn't available.
+	 * @testWith [[], "", "Invalid payment method."]
+	 *           [["cod"], "", "Please select a payment method."]
+	 *           [["cod"], "bacs", "Invalid payment method."]
+	 *
+	 * @param string[] $available Gateway ids available for the cart.
+	 * @param string   $posted    The payment method the shopper submitted.
+	 * @param string   $expected  Expected payment error.
+	 */
+	public function test_validate_checkout_names_the_payment_problem( array $available, string $posted, string $expected ): void {
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		add_filter( 'woocommerce_cart_needs_payment', '__return_true' );
+		add_filter(
+			'woocommerce_available_payment_gateways',
+			function () use ( $available ) {
+				return array_intersect_key( WC()->payment_gateways()->payment_gateways(), array_flip( $available ) );
+			}
+		);
+
+		$data   = array(
+			'ship_to_different_address' => false,
+			'billing_country'           => 'US',
+			'shipping_country'          => 'US',
+			'payment_method'            => $posted,
+		);
+		$errors = new WP_Error();
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame( $expected, $errors->get_error_message( 'payment' ) );
 	}
 
 	/**

@@ -24,6 +24,37 @@ use WPAjaxDieContinueException;
 class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 
 	/**
+	 * IDs of the order the payload tests share; each test's rollback removes the reviews it stored.
+	 *
+	 * @var array{order_id:int, product_id:int, item_id:int}
+	 */
+	private static $shared_order;
+
+	/**
+	 * Build the shared order once; the base class restores product terms only after this runs.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		\WC_Install::create_terms();
+
+		$built              = self::make_order();
+		self::$shared_order = array(
+			'order_id'   => $built['order']->get_id(),
+			'product_id' => $built['product_id'],
+			'item_id'    => $built['item_id'],
+		);
+	}
+
+	/**
+	 * The base class clears orders and posts, but only a product delete clears its lookup rows.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		$product = wc_get_product( self::$shared_order['product_id'] );
+		if ( $product ) {
+			$product->delete( true );
+		}
+	}
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -121,17 +152,26 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Review text payload "$payload" is stored and rendered without executable markup.
+	 * @testdox Review text payload "$payload" is stored and rendered without executable markup or breaking out of the prefilled row.
 	 *
 	 * @dataProvider provide_text_payloads
 	 *
 	 * @param string $payload Review text.
 	 */
 	public function test_text_payload_is_neutralised_on_insert( string $payload ): void {
-		$built   = $this->make_order();
+		$built   = $this->get_shared_order();
 		$comment = $this->submit_single_review( $built, $payload );
 
 		$this->assert_review_is_safe( $comment, $built );
+
+		$baseline = $this->render_row( $built, 'Plain' );
+		$attacked = $this->render_row( $built, (string) $comment->comment_content );
+
+		$this->assertSame(
+			$this->tag_signature( $baseline ),
+			$this->tag_signature( $attacked ),
+			'Stored review text must not add tags or attributes to the prefilled row.'
+		);
 	}
 
 	/**
@@ -146,7 +186,7 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 			$this->markTestSkipped( 'Covered by test_invalid_utf8_edit_leaves_the_review_unchanged.' );
 		}
 
-		$built    = $this->make_order();
+		$built    = $this->get_shared_order();
 		$original = $this->submit_single_review( $built, 'A plain first review.' );
 
 		$updated = $this->submit_single_review( $built, $payload );
@@ -166,27 +206,6 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'update_failed', $response['data']['results'][0]['error'] ?? null );
 		$this->assertSame( 'A plain first review.', get_comment( (int) $original->comment_ID )->comment_content );
-	}
-
-	/**
-	 * @testdox Review text payload "$payload" cannot break out of the prefilled Review Order row.
-	 *
-	 * @dataProvider provide_text_payloads
-	 *
-	 * @param string $payload Review text.
-	 */
-	public function test_text_payload_cannot_break_out_of_the_prefilled_row( string $payload ): void {
-		$built   = $this->make_order();
-		$comment = $this->submit_single_review( $built, $payload );
-
-		$baseline = $this->render_row( $built, 'Plain' );
-		$attacked = $this->render_row( $built, (string) $comment->comment_content );
-
-		$this->assertSame(
-			$this->tag_signature( $baseline ),
-			$this->tag_signature( $attacked ),
-			'Stored review text must not add tags or attributes to the prefilled row.'
-		);
 	}
 
 	/**
@@ -399,7 +418,7 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 	 * @param string|null $expected_meta   Expected stored rating meta.
 	 */
 	public function test_rating_payload_is_cast_or_rejected( $rating, string $expected_status, ?string $expected_meta ): void {
-		$built = $this->make_order();
+		$built = $this->get_shared_order();
 
 		$response = $this->submit_row(
 			$built,
@@ -1210,13 +1229,13 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 	 * @param int   $product_count How many simple products to add.
 	 * @return array{order:WC_Order, product_id:int, item_id:int, product_ids:int[], item_ids:int[]}
 	 */
-	private function make_order( array $overrides = array(), int $product_count = 1 ): array {
+	private static function make_order( array $overrides = array(), int $product_count = 1 ): array {
 		$products = array();
 		for ( $i = 0; $i < $product_count; $i++ ) {
 			$products[] = WC_Helper_Product::create_simple_product();
 		}
 
-		$order = $this->make_order_for_products( $products, $overrides );
+		$order = self::make_order_for_products( $products, $overrides );
 
 		$product_ids = array();
 		$item_ids    = array();
@@ -1235,13 +1254,28 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The shared order in the make_order() shape, loaded fresh so no test sees another's in-memory changes.
+	 *
+	 * @return array{order:WC_Order, product_id:int, item_id:int, product_ids:int[], item_ids:int[]}
+	 */
+	private function get_shared_order(): array {
+		return array(
+			'order'       => wc_get_order( self::$shared_order['order_id'] ),
+			'product_id'  => self::$shared_order['product_id'],
+			'item_id'     => self::$shared_order['item_id'],
+			'product_ids' => array( self::$shared_order['product_id'] ),
+			'item_ids'    => array( self::$shared_order['item_id'] ),
+		);
+	}
+
+	/**
 	 * Build a completed order for the given products.
 	 *
 	 * @param \WC_Product[] $products  Products to add.
 	 * @param array         $overrides Optional first_name, last_name, email, ip, agent and customer_id.
 	 * @return WC_Order
 	 */
-	private function make_order_for_products( array $products, array $overrides = array() ): WC_Order {
+	private static function make_order_for_products( array $products, array $overrides = array() ): WC_Order {
 		$order = new WC_Order();
 		$order->set_customer_id( (int) ( $overrides['customer_id'] ?? 0 ) );
 		$order->set_billing_first_name( $overrides['first_name'] ?? 'Jane' );

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\UcpSwitch;
+use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 
@@ -13,6 +14,13 @@ use WP_REST_Request;
  * Tests for the agent readiness REST endpoints.
  */
 class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
+
+	/**
+	 * Tests fire rest_api_init with the feature both on and off.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
 
 	/**
 	 * Enable the feature after parent::setUp(), so the filter stays out of the hook
@@ -57,6 +65,27 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$report   = wc_get_container()->get( AgentReadiness::class )->refresh_report();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness' ) );
 		$this->assertSame( $report['generated_at'], $response->get_data()['report']['generated_at'] );
+	}
+
+	/**
+	 * @testdox GET view gives the Sales readiness page and the AI tools Overview what they show, as text and badges.
+	 */
+	public function test_get_view(): void {
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/view' ) );
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'Not checked yet', $data['last_checked'] );
+		$this->assertSame( 'Run checks', $data['run']['label'] );
+		$this->assertNull( $data['fix_first'] );
+		$this->assertSame( array(), $data['sections'] );
+		$this->assertSame( 'AI shopping', $data['overview']['shopping']['title'] );
+		$this->assertStringContainsString( 'path=/sales-readiness', $data['overview']['view_all']['href'] );
+
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+		$data = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/view' ) )->get_data();
+		$this->assertSame( 'Check again', $data['run']['label'] );
+		$this->assertSame( array( 'access', 'find', 'understand', 'products', 'buy' ), array_column( $data['sections'], 'id' ) );
+		$this->assertArrayHasKey( 'intent', $data['sections'][0]['badge'] );
 	}
 
 	/**
@@ -110,6 +139,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness' ) )->get_status() );
 		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/scan' ) )->get_status() );
+		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/view' ) )->get_status() );
 		$this->assertFalse( as_has_scheduled_action( ScheduledScan::RUN_NOW_HOOK ) );
 	}
 
@@ -186,6 +216,31 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 'no', get_option( 'woocommerce_feature_ucp_enabled' ) );
+	}
+
+	/**
+	 * @testdox Turning UCP on with Plain permalinks writes the discovery file, so the address is served without a permalink change.
+	 */
+	public function test_turning_ucp_on_writes_the_discovery_file_for_plain_permalinks(): void {
+		global $wp_rewrite;
+		StoreConditionsTest::make_store_ready();
+		$wp_rewrite->set_permalink_structure( '' );
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/ucp';
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+
+		try {
+			$response = $this->dispatch_ucp( true );
+
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertFileExists( $path );
+			$this->assertSame( 'ok', UcpDiscovery::serve_status() );
+		} finally {
+			wp_delete_file( $path );
+			$dir = dirname( $path );
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+			}
+		}
 	}
 
 	/**

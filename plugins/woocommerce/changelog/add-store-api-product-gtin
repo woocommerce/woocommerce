@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Store API: return the product GTIN (UPC, EAN or ISBN) as `global_unique_id` in product responses.

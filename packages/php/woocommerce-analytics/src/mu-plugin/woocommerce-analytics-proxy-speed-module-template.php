@@ -47,6 +47,11 @@ class WooCommerceAnalyticsProxySpeed {
 			return;
 		}
 
+		// The WP Consent API has not loaded yet, so let the REST route apply the stored deny.
+		if ( $this->is_statistics_consent_denied() ) {
+			return;
+		}
+
 		// If autoloader failed, let WordPress continue loading
 		// and fallback to the regular REST API.
 		if ( ! $this->load_autoloader() ) {
@@ -92,6 +97,24 @@ class WooCommerceAnalyticsProxySpeed {
 		}
 
 		return substr( $normalized_path, -strlen( $proxy_suffix ) ) === $proxy_suffix;
+	}
+
+	/**
+	 * Check if the shopper denied statistics consent, as recorded in the WP Consent API consent cookie.
+	 *
+	 * Unlike Consent_Manager, this reads the cookie whatever the consent type, which is not known yet. Only a prefix filter added by an earlier MU-plugin applies this early.
+	 *
+	 * @return bool
+	 */
+	private function is_statistics_consent_denied() {
+		$prefix = apply_filters( 'wp_consent_cookie_prefix', 'wp_consent' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reads a WP Consent API filter.
+		if ( ! is_string( $prefix ) ) {
+			return false;
+		}
+
+		$cookie_name = $prefix . '_statistics';
+
+		return isset( $_COOKIE[ $cookie_name ] ) && 'deny' === $_COOKIE[ $cookie_name ];
 	}
 
 	/**

@@ -296,14 +296,6 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		);
 		// register fields.
 		$this->register_fields();
-		// remove our callbacks.
-		\remove_action(
-			'doing_it_wrong_run',
-			array(
-				$doing_it_wrong_mocker,
-				'doing_it_wrong_run',
-			)
-		);
 	}
 
 	/**
@@ -674,14 +666,6 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 				'location' => 'address',
 				'type'     => 'text',
 				'required' => true,
-			)
-		);
-
-		\remove_action(
-			'doing_it_wrong_run',
-			array(
-				$doing_it_wrong_mocker,
-				'doing_it_wrong_run',
 			)
 		);
 	}
@@ -2556,8 +2540,6 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		$this->assertEquals( 'external-value', ( (array) $data['additional_fields'] )[ $id ], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
-
-		\remove_all_filters( "woocommerce_get_default_value_for_{$id}" );
 	}
 
 	/**
@@ -2629,7 +2611,6 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		$this->assertEquals( 'value', ( (array) $data['additional_fields'] )[ $id ], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
-		\remove_all_filters( "woocommerce_get_default_value_for_{$id}" );
 	}
 
 
@@ -2710,14 +2691,6 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
-
-		\remove_action(
-			'woocommerce_set_additional_field_value',
-			array(
-				$set_value_mocker,
-				'woocommerce_set_additional_field_value',
-			)
-		);
 	}
 
 	/**

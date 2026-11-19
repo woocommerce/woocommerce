@@ -690,8 +690,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->assertEquals( 0, $new_count );
-
-		remove_action( 'woocommerce_new_order', $callback );
 	}
 
 	/**
@@ -733,8 +731,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 				'Failed to trigger new order hook changing status: ' . $current_status . ' -> ' . $status
 			);
 		}
-
-		remove_action( 'woocommerce_new_order', $callback );
 	}
 
 	/**
@@ -760,8 +756,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order_data_store_cpt->update( $order );
 
 		$this->assertEquals( 1, $new_count );
-
-		remove_action( 'woocommerce_new_order', $callback );
 	}
 
 	/**
@@ -865,9 +859,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testdox An order with missing tax-mode metadata uses the filtered setting without writing during the read.
 	 */
 	public function test_reading_order_without_prices_include_tax_metadata_uses_effective_setting(): void {
-		$previous_tax_mode    = get_option( 'woocommerce_prices_include_tax' );
-		$previous_tax_enabled = get_option( 'woocommerce_calc_taxes' );
-		$order                = null;
+		$order = null;
 
 		try {
 			update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -890,8 +882,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			if ( $order ) {
 				$order->delete( true );
 			}
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
-			update_option( 'woocommerce_calc_taxes', $previous_tax_enabled );
 		}
 	}
 
@@ -904,9 +894,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param string $post_status Post status when WooCommerce first loads the order.
 	 */
 	public function test_native_draft_loads_and_persists_store_defaults( string $tax_mode, bool $expected, string $post_status ): void {
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$previous_currency = get_option( 'woocommerce_currency' );
-		$order_id          = 0;
+		$order_id = 0;
 
 		try {
 			update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -949,8 +937,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			if ( $order_id ) {
 				wp_delete_post( $order_id, true );
 			}
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
-			update_option( 'woocommerce_currency', $previous_currency );
 		}
 	}
 
@@ -977,8 +963,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param string $status      Order status.
 	 */
 	public function test_reading_order_preserves_persisted_tax_mode( string $tax_mode, bool $saved_value, string $status ): void {
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$order             = new WC_Order();
+		$order = new WC_Order();
 
 		try {
 			update_option( 'woocommerce_prices_include_tax', $tax_mode );
@@ -994,7 +979,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			if ( $order->get_id() ) {
 				$order->delete( true );
 			}
-			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
 		}
 	}
 

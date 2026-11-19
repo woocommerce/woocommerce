@@ -2807,7 +2807,6 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['refund_reason'], $_POST['line_item_qtys'], $_POST['line_item_totals'], $_POST['line_item_tax_totals'], $_POST['api_refund'] );
 		WC_Tax::_delete_tax_rate( $rate_id );
-		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
