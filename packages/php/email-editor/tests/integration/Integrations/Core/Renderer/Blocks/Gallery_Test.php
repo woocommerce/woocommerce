@@ -712,14 +712,15 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	 * @testdox Preserves automatic cropping when the same file was saved at a different width.
 	 * @param string $query Query saved on the image URL.
 	 * @param int    $crop_count Number of images expected to crop.
-	 * @param bool   $malformed_size Whether the requested intermediate size is malformed.
+	 * @param array  $malformed_sizes Optional malformed intermediate metadata.
 	 * @testWith ["?w=190", 2]
 	 *           ["?w=190&h=190&crop=1", 0]
 	 *           ["?w=0190", 0]
 	 *           ["?w=190#image", 0]
-	 *           ["", 2, true]
+	 *           ["", 2, {"large":"invalid"}]
+	 *           ["?w=190&crop=1", 0, {"large":{"file":["invalid"],"width":150,"height":150}}]
 	 */
-	public function testItUsesOriginalDimensionsForMatchingImageUrls( string $query, int $crop_count, bool $malformed_size = false ): void {
+	public function testItUsesOriginalDimensionsForMatchingImageUrls( string $query, int $crop_count, array $malformed_sizes = array() ): void {
 		$attachment_id = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
 		$this->assertIsInt( $attachment_id );
 		update_attached_file( $attachment_id, 'portrait.jpg' );
@@ -729,7 +730,7 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 				'file'   => 'portrait.jpg',
 				'width'  => 600,
 				'height' => 900,
-				'sizes'  => $malformed_size ? array( 'large' => 'invalid' ) : array(),
+				'sizes'  => $malformed_sizes,
 			)
 		);
 		$attachment_url = wp_get_attachment_url( $attachment_id );
@@ -737,8 +738,12 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 
 		add_filter(
 			'image_downsize',
-			static function ( $size, $id ) use ( $attachment_id, $attachment_url ) {
-				return $attachment_id === $id ? array( $attachment_url . '?w=600', 600, 900, false ) : $size;
+			function ( $size, $id ) use ( $attachment_id, $attachment_url, $malformed_sizes ) {
+				if ( $attachment_id === $id ) {
+					$this->assertEmpty( $malformed_sizes, 'The resize provider should only read valid size metadata.' );
+					return array( $attachment_url . '?w=600', 600, 900, false );
+				}
+				return $size;
 			},
 			10,
 			2

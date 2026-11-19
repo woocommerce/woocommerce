@@ -221,7 +221,7 @@ class Gallery extends Abstract_Block_Renderer {
 
 		$size = false;
 		// Resize services may read both the original dimensions and the intermediate record.
-		if ( $has_full_size && ! $malformed_size ) {
+		if ( $has_full_size && ! $malformed_size && ( null === $stored_file || is_string( $stored_file ) ) ) {
 			if ( $has_stored_size || empty( $stored ) ) {
 				$size = wp_get_attachment_image_src( $id, $slug );
 			} elseif ( wp_attachment_is_image( $id ) ) {
