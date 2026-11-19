@@ -84,6 +84,8 @@ Use the second config to set suite-specific projects, worker limits, storage sta
 
 Use `@woocommerce/extension-tooling/php-warning-filter` with the log text and the path fragments for the tested plugins. The filter returns matching PHP errors, warnings, notices and deprecations. The extension reads the log and checks the result in its warnings project.
 
+For suites that verify the debug log is connected to WordPress, map `./node_modules/@woocommerce/extension-tooling/bin/e2e-log-marker.php` to `wp-content/mu-plugins/e2e-log-marker.php` in the browser test environment. A request with `?e2e_log_marker=test-id` writes `e2e-log-marker-test-id` to the PHP log. Install the marker only on test sites.
+
 ## Webpack
 
 Import the helpers from the extension's webpack configuration. Keep the entry paths, output paths and match patterns in that configuration.
