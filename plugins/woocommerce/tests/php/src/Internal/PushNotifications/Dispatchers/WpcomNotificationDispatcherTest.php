@@ -205,7 +205,7 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 		$this->sut->dispatch( $notification, $tokens );
 
 		$this->assertStringContainsString(
-			WpcomNotificationDispatcher::SEND_ENDPOINT,
+			'/sites/12345/' . WpcomNotificationDispatcher::SEND_ENDPOINT,
 			$this->captured_url
 		);
 
