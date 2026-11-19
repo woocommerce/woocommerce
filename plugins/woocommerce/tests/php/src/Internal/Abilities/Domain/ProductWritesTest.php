@@ -340,6 +340,20 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 		$this->assertWPError( $misplaced_x );
 		$this->assertSame( 'product_invalid_global_unique_id_format', $misplaced_x->get_error_code() );
 
+		$product->set_global_unique_id( '5901234123457' );
+		$product->save();
+		foreach ( array( "\n", "5901234123464\n" ) as $newline ) {
+			$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'               => $product->get_id(),
+					'global_unique_id' => $newline,
+				)
+			);
+
+			$this->assertWPError( $result );
+			$this->assertSame( '5901234123457', wc_get_product( $product->get_id() )->get_global_unique_id() );
+		}
+
 		$size      = static fn( string $option ): array => array(
 			array(
 				'name'   => 'Size',

@@ -1632,12 +1632,12 @@ trait ProductAbilityTrait {
 
 	/**
 	 * Characters a GTIN input may contain. The setter would strip any other character, so the schema
-	 * refuses it instead.
+	 * refuses it instead. The pattern ends with (?![\s\S]) because $ also matches before a final newline.
 	 *
 	 * @return string
 	 */
 	private static function get_global_unique_id_input_pattern(): string {
-		return '^[0-9Xx-]*$';
+		return '^[' . \WC_Product::GLOBAL_UNIQUE_ID_CHARACTERS . ']*(?![\s\S])';
 	}
 
 	/**
