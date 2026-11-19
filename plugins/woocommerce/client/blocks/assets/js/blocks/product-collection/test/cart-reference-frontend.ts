@@ -6,7 +6,7 @@ const mockNavigate = jest.fn();
 const mockGetConfig = jest.fn();
 let mockRefresh: () => Generator;
 
-jest.mock( '@woocommerce/stores/woocommerce/cart', () => ( {} ) );
+jest.mock( '@woocommerce/stores/woocommerce', () => ( {} ) );
 jest.mock( '@wordpress/interactivity', () => ( {
 	getConfig: mockGetConfig,
 	store: (
