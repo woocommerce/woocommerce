@@ -8667,7 +8667,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$message of function wp_die expects string\|WP_Error, int given\.$#'
 			identifier: argument.type
-			count: 40
+			count: 43
 			path: includes/class-wc-ajax.php
 
 		-
@@ -10245,12 +10245,6 @@ parameters:
 		-
 			message: '#^Class WP_Error referenced with incorrect case\: WP_ERROR\.$#'
 			identifier: class.nameCase
-			count: 1
-			path: includes/class-wc-checkout.php
-
-		-
-			message: '#^Left side of && is always true\.$#'
-			identifier: booleanAnd.leftAlwaysTrue
 			count: 1
 			path: includes/class-wc-checkout.php
 
@@ -66487,12 +66481,6 @@ parameters:
 			path: src/StoreApi/Payments/PaymentResult.php
 
 		-
-			message: '#^Expected 2 @param tags, found 3\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/StoreApi/Routes/V1/AbstractCartRoute.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\AbstractCartRoute\:\:cart_updated\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -67267,14 +67255,20 @@ parameters:
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_route_post_response\(\) should return WP_REST_Response but returns WP_Error\.$#'
-			identifier: return.type
+			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:is_authorized\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:is_authorized\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:pay_for_order\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
+			count: 1
+			path: src/StoreApi/Routes/V1/CheckoutOrder.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:pay_for_order\(\) should return WP_REST_Response but returns WP_Error\.$#'
+			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
