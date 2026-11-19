@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Correct order detail template version numbers for WooCommerce 11.3.1.
