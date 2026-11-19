@@ -773,7 +773,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		// Search using CRUD.
 		if ( ! empty( $query_vars['s'] ) ) {
-			$search_term                  = wc_clean( wp_unslash( $query_vars['s'] ) );
+			$search_term                  = sanitize_text_field( wp_unslash( $query_vars['s'] ) );
 			$data_store                   = WC_Data_Store::load( 'product' );
 			$ids                          = $data_store->search_products( $search_term, '', true, true );
 			$query_vars['post__in']       = array_merge( $ids, array( 0 ) );

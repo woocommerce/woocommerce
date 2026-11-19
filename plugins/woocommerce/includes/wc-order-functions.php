@@ -973,7 +973,7 @@ add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
  */
 function wc_order_search( $term ) {
 	$data_store = WC_Data_Store::load( 'order' );
-	return $data_store->search_orders( str_replace( 'Order #', '', wc_clean( $term ) ) );
+	return $data_store->search_orders( str_replace( 'Order #', '', sanitize_text_field( $term ) ) );
 }
 
 /**
