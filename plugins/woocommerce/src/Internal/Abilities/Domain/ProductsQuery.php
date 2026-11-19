@@ -321,10 +321,12 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 				),
 				'global_unique_id' => array(
 					'type'        => 'array',
-					'description' => __( 'Exact GTINs, UPCs, EANs or ISBNs. Matches any of them. Finds variations too.', 'woocommerce' ),
+					'description' => __( 'Exact GTINs, UPCs, EANs or ISBNs. Matches any of them. Finds variations too, unless category, tag or brand is also sent.', 'woocommerce' ),
+					'maxItems'    => 100,
 					'items'       => array(
-						'type'    => 'string',
-						'pattern' => self::get_global_unique_id_input_pattern(),
+						'type'      => 'string',
+						'minLength' => 1,
+						'pattern'   => self::get_global_unique_id_input_pattern(),
 					),
 				),
 				'status'           => array(

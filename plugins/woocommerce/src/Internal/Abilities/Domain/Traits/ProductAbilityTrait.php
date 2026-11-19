@@ -1631,13 +1631,13 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Pattern of a GTIN input: digits and hyphens, and an X only as the ISBN-10 check digit. The setter
-	 * would strip any other character, so the schema refuses it instead.
+	 * Characters a GTIN input may contain. The setter would strip any other character, so the schema
+	 * refuses it instead.
 	 *
 	 * @return string
 	 */
 	private static function get_global_unique_id_input_pattern(): string {
-		return '^[0-9-]*[0-9Xx]?$';
+		return '^[0-9Xx-]*$';
 	}
 
 	/**

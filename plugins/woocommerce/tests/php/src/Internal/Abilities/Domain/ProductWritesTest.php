@@ -330,6 +330,16 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 
 		$this->assertWPError( $letters );
 
+		$misplaced_x = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'               => $product->get_id(),
+				'global_unique_id' => '08044X2957',
+			)
+		);
+
+		$this->assertWPError( $misplaced_x );
+		$this->assertSame( 'product_invalid_global_unique_id_format', $misplaced_x->get_error_code() );
+
 		$size      = static fn( string $option ): array => array(
 			array(
 				'name'   => 'Size',
