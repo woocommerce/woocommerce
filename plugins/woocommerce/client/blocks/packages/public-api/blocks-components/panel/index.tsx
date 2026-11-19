@@ -7,7 +7,7 @@ import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 import type { ReactNode, ReactElement } from 'react';
 import { Button } from '@ariakit/react';
 import deprecated from '@wordpress/deprecated';
-import { usePresence } from '@woocommerce/base-hooks';
+import { exitingProps, usePresence } from '@woocommerce/base-hooks';
 /**
  * Internal dependencies
  */
@@ -88,8 +88,7 @@ const Panel = ( {
 				<div
 					ref={ content.ref }
 					className="wc-block-components-panel__content"
-					// Closing content is already gone for the shopper. React 18 has no `inert` prop.
-					{ ...( content.isExiting && { inert: '' } ) }
+					{ ...exitingProps( content.isExiting ) }
 				>
 					{ children }
 				</div>
