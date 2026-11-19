@@ -3,6 +3,7 @@
  */
 import clsx from 'clsx';
 import { Children } from '@wordpress/element';
+import { exitingProps } from '@woocommerce/base-hooks';
 import type { ReactNode, Ref } from 'react';
 
 /**
@@ -34,8 +35,7 @@ const TotalsWrapper = ( {
 			className={ clsx( className, 'wc-block-components-totals-wrapper', {
 				'slot-wrapper': slotWrapper,
 			} ) }
-			// React 18 has no `inert` prop.
-			{ ...( isExiting && { inert: '', 'aria-hidden': true } ) }
+			{ ...exitingProps( isExiting ) }
 		>
 			{ children }
 		</div>
