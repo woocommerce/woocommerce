@@ -28,5 +28,7 @@ test( 'returns PHP issues for the supplied plugin paths in log order', () => {
 
 	assert.deepEqual( filterPhpWarnings( log, paths ), issues );
 	assert.deepEqual( filterPhpWarnings( log, [] ), [] );
+	assert.deepEqual( filterPhpWarnings( log, [ '' ] ), [] );
+	assert.deepEqual( filterPhpWarnings( log, [ '', ...paths ] ), issues );
 	assert.deepEqual( filterPhpWarnings( '', paths ), [] );
 } );

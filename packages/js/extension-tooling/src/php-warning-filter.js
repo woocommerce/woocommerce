@@ -13,8 +13,9 @@ module.exports = function filterPhpWarnings( log, pluginPaths ) {
 				/PHP (Fatal error|Parse error|Warning|Notice|Deprecated)/.test(
 					line
 				) &&
-				pluginPaths.some( ( pluginPath ) =>
-					line.includes( pluginPath )
+				pluginPaths.some(
+					( pluginPath ) =>
+						pluginPath !== '' && line.includes( pluginPath )
 				)
 		);
 };
