@@ -469,7 +469,7 @@ class StoreOutputChecks {
 				'label'   => __( 'Product structured data has no shipping details', 'woocommerce' ),
 				'why'     => __( 'Agents tell shoppers the delivery options and cost before they buy.', 'woocommerce' ),
 				'fix'     => __( 'Add a shipping zone with a delivery method other than local pickup, so WooCommerce can add shipping details to your products. If you already have one, check whether your theme or an SEO plugin replaces WooCommerce\'s structured data.', 'woocommerce' ),
-				'fix_url' => '',
+				'fix_url' => admin_url( 'admin.php?page=wc-settings&tab=shipping' ),
 			),
 			array(
 				'id'      => 'product_buy_action_schema',

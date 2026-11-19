@@ -64,6 +64,7 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 		foreach ( array_column( $checks->invoke( wc_get_container()->get( StoreOutputChecks::class ) ), 'id' ) as $id ) {
 			$this->assertNotSame( '', ReadinessCopy::store_check( $id )['fix'] ?? '', $id );
 		}
+		$this->assertStringContainsString( 'tab=shipping', ReadinessCopy::store_check( 'product_shipping_schema' )['url'], 'The shipping fix links to the Shipping settings' );
 	}
 
 	/**

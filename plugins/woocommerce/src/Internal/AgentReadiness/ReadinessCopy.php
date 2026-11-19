@@ -347,6 +347,7 @@ final class ReadinessCopy {
 				__( 'Agents tell shoppers the delivery options and cost before they buy.', 'woocommerce' ),
 				__( 'Agents tell shoppers the delivery options and cost before they buy. We found a recent product page without shipping details in its structured data.', 'woocommerce' ),
 				__( 'Add a shipping zone with a delivery method other than local pickup, so WooCommerce can add shipping details to your products. If you already have one, check whether your theme or an SEO plugin replaces WooCommerce\'s structured data.', 'woocommerce' ),
+				admin_url( 'admin.php?page=wc-settings&tab=shipping' ),
 			),
 			'product_buy_action_schema'      => array(
 				__( 'Product structured data says how to buy', 'woocommerce' ),
