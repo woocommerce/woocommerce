@@ -200,6 +200,30 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The time until takeover should follow the same stale rule as acquiring, per holder pairing.
+	 * @testWith ["admin", 90, 30]
+	 *           ["cli", 90, 510]
+	 *           ["admin", 200, 0]
+	 *
+	 * @param string $challenger The holder that wants the admin-held lock.
+	 * @param int    $age        How long ago the lock was last refreshed.
+	 * @param int    $expected   The seconds expected until takeover.
+	 */
+	public function test_get_seconds_until_takeover( string $challenger, int $age, int $expected ): void {
+		$this->sut->acquire( ProductImportLock::HOLDER_ADMIN );
+		$this->age_lock( $age );
+
+		$this->assertEqualsWithDelta( $expected, $this->sut->get_seconds_until_takeover( $challenger ), 5 );
+	}
+
+	/**
+	 * @testdox The time until takeover should be null when no import is running.
+	 */
+	public function test_get_seconds_until_takeover_is_null_when_the_lock_is_free(): void {
+		$this->assertNull( $this->sut->get_seconds_until_takeover( ProductImportLock::HOLDER_CLI ) );
+	}
+
+	/**
 	 * @testdox A due refresh should not create a lock when no import is running.
 	 */
 	public function test_refresh_if_due_does_nothing_without_a_lock(): void {

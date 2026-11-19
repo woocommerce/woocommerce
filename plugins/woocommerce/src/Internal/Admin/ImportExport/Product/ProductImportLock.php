@@ -89,9 +89,7 @@ final class ProductImportLock {
 		}
 
 		if ( ! $acquired ) {
-			$stale_after = self::HOLDER_ADMIN === $holder && self::HOLDER_ADMIN === $this->get_holder()
-				? self::ADMIN_LOCK_STALE_AFTER
-				: self::IMPORT_LOCK_STALE_AFTER;
+			$stale_after = $this->get_stale_after( $holder );
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$acquired = $wpdb->query(
@@ -210,6 +208,34 @@ final class ProductImportLock {
 		}
 
 		return max( 0, time() - (int) $value );
+	}
+
+	/**
+	 * Get how long until an import started by the given holder may take over the current lock.
+	 *
+	 * @param string $holder Who wants the lock, one of the `HOLDER_*` constants.
+	 * @return int|null Seconds left, 0 once the lock is stale, or null when no import is running.
+	 */
+	public function get_seconds_until_takeover( string $holder ): ?int {
+		$age = $this->get_age();
+
+		if ( null === $age ) {
+			return null;
+		}
+
+		return max( 0, $this->get_stale_after( $holder ) - $age );
+	}
+
+	/**
+	 * Get how old the current lock must be before the given holder may take it over.
+	 *
+	 * @param string $holder Who wants the lock, one of the `HOLDER_*` constants.
+	 * @return int Seconds.
+	 */
+	private function get_stale_after( string $holder ): int {
+		return self::HOLDER_ADMIN === $holder && self::HOLDER_ADMIN === $this->get_holder()
+			? self::ADMIN_LOCK_STALE_AFTER
+			: self::IMPORT_LOCK_STALE_AFTER;
 	}
 
 	/**

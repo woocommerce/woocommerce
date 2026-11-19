@@ -403,12 +403,20 @@ class WC_Product_CSV_Importer_Controller {
 
 			// Cleanup is site-wide, so the whole import, including this first batch, needs the lock held.
 			if ( 0 === $start_pos && ! $import_lock->acquire( ProductImportLock::HOLDER_ADMIN ) ) {
+				// Round up, so a retry at the stated time never finds the lock still held.
+				$minutes = max( 1, (int) ceil( ( $import_lock->get_seconds_until_takeover( ProductImportLock::HOLDER_ADMIN ) ?? 0 ) / MINUTE_IN_SECONDS ) );
+
 				throw new \Exception(
 					esc_html(
 						sprintf(
-							/* translators: %d: Number of minutes since the other import was last active. */
-							__( 'Another product import is already running (last active %d minute(s) ago). Please wait for it to finish before starting a new one.', 'woocommerce' ),
-							(int) ceil( ( $import_lock->get_age() ?? 0 ) / MINUTE_IN_SECONDS )
+							/* translators: %d: Minutes until a stopped import's lock can be taken over. */
+							_n(
+								'Another product import is running. Wait for it to finish, or if it has stopped, try again in %d minute.',
+								'Another product import is running. Wait for it to finish, or if it has stopped, try again in %d minutes.',
+								$minutes,
+								'woocommerce'
+							),
+							$minutes
 						)
 					)
 				);

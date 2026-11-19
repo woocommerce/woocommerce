@@ -669,15 +669,19 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An admin import should not start while a CLI import holds the lock.
+	 * @testdox An admin import should not start while a CLI import holds the lock, and should say how long until it can take the lock over.
 	 */
 	public function test_first_batch_is_refused_while_a_cli_import_holds_the_lock(): void {
 		$this->assertTrue( wc_get_container()->get( ProductImportLock::class )->acquire( ProductImportLock::HOLDER_CLI ) );
+		$this->age_import_lock( 3 * MINUTE_IN_SECONDS );
 
 		$response = $this->send_import_request( '0' );
 
 		$this->assertFalse( $response['success'] );
-		$this->assertStringContainsString( 'Another product import is already running', $response['data']['message'] );
+		$this->assertSame(
+			'Another product import is running. Wait for it to finish, or if it has stopped, try again in 7 minutes.',
+			$response['data']['message']
+		);
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'marker-parent' ) );
 		$this->assertNotNull( wc_get_container()->get( ProductImportLock::class )->get_age() );
 	}
@@ -711,12 +715,12 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		$translate = static function ( $translation, $text ) {
 			return 0 === strpos( $text, 'Another product import' ) ? "Can't start" : $translation;
 		};
-		add_filter( 'gettext', $translate, 10, 2 );
+		add_filter( 'ngettext', $translate, 10, 2 );
 
 		try {
 			$response = $this->send_import_request( '0' );
 		} finally {
-			remove_filter( 'gettext', $translate, 10 );
+			remove_filter( 'ngettext', $translate, 10 );
 		}
 
 		$this->assertSame( "Can't start", $response['data']['message'] );
