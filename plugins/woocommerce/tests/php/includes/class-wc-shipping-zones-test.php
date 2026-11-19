@@ -145,6 +145,36 @@ class WC_Shipping_Zones_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A ZIP+4 code lies within its 5-digit ZIP code, so it lands in a zone limited to that ZIP code
+	 * or to a range of 5-digit ZIP codes rather than falling through to a wider zone.
+	 *
+	 * @testdox A ZIP+4 postcode matches zones limited to its 5-digit ZIP code or a range of them.
+	 *
+	 * @testWith ["96701...96898"]
+	 *           ["96801"]
+	 *
+	 * @param string $rule Postcode rule of the zone.
+	 */
+	public function test_a_zip_plus_four_postcode_matches_its_zip_code_zone( string $rule ): void {
+		$this->zone_with( 'Hawaii', $rule, 'postcode' );
+		$this->zone_with( 'United States', 'US', 'country', 2 );
+
+		foreach ( array( '96801', '96801-1234', '968011234' ) as $postcode ) {
+			$this->assertSame(
+				'Hawaii',
+				$this->matched_zone_name(
+					array(
+						'country'  => 'US',
+						'state'    => 'HI',
+						'postcode' => $postcode,
+					)
+				),
+				"{$postcode} should land in the zone limited to {$rule}."
+			);
+		}
+	}
+
+	/**
 	 * A range whose bounds are not plain numbers is compared by turning each into a number, so a
 	 * range written with letters still contains the codes between its ends.
 	 *
