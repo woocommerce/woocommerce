@@ -185,5 +185,24 @@ describe( 'usePresence', () => {
 			);
 			expect( result.current.isExiting ).toBe( false );
 		} );
+
+		it( 'stops a running grow when animate turns false', () => {
+			const { result, rerender } = renderUsePresence( {
+				value: null,
+				collapse: true,
+			} );
+			const { element } = createAnimatingElement();
+			result.current.ref.current = element;
+
+			rerender( { value: open, collapse: true } );
+			element.setAttribute( 'data-wc-collapse', 'in' );
+			jest.mocked( animateCollapse ).mockClear();
+			rerender( { value: open, animate: false, collapse: true } );
+			expect( animateCollapse ).toHaveBeenCalledWith(
+				element,
+				true,
+				false
+			);
+		} );
 	} );
 } );
