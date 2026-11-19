@@ -138,7 +138,7 @@ final class ImportCommand {
 	 *
 	 * Cleanup of placeholder products at the end of an import is site-wide, so this
 	 * command takes a lock for the duration of the run. If an admin CSV import (or another
-	 * `wp wc product import`) holds it, this command waits until that import has been inactive
+	 * `wp wc product import`) holds it, this command refuses to start until that import has been inactive
 	 * for 10 minutes, then takes the lock over. To skip that wait when you are sure nothing is
 	 * running, run `wp option delete wc_product_importing`. Do not run this command at the same
 	 * time as an import in **WooCommerce > Products > Import**.
