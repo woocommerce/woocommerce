@@ -7,6 +7,9 @@ use Automattic\WooCommerce\Internal\OrderReviews\Endpoint;
 use Automattic\WooCommerce\Internal\Orders\TexturizeExclusions;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalEndpoint;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormState;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormView;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use WC_Helper_Order;
 use WC_Order;
@@ -192,6 +195,64 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Withdrawal notes and the email review row keep the email as entered, and another row is still texturized.
+	 */
+	public function test_withdrawal_email_survives_texturize_on_block_themes(): void {
+		$this->open_block_theme_email_page( 'order-withdrawal' );
+		$this->sut->skip_address_texturize_on_order_pages();
+
+		$email = "o'neil--shop@48x17.com";
+		$view  = new OrderWithdrawalFormView();
+		$data  = $this->withdrawal_form_data( $email, '3x4 -- done' );
+
+		$confirmation = wc_get_template_html(
+			'myaccount/form-order-withdrawal.php',
+			$view->get_template_args( new OrderWithdrawalFormState( 'confirmation', $data, array() ), 'https://example.test/withdraw/', 'https://example.test/shop/' )
+		);
+		$review       = wc_get_template_html(
+			'myaccount/form-order-withdrawal.php',
+			$view->get_template_args( new OrderWithdrawalFormState( 'review', $data, array() ), 'https://example.test/withdraw/', 'https://example.test/shop/' )
+		);
+
+		$this->assertStringContainsString( '<address class="woocommerce-order-withdrawal-content__note">', $confirmation, 'The note that contains the email should be an address element.' );
+		$this->assertStringContainsString( '<p class="woocommerce-order-withdrawal-content__note">', $confirmation, 'The note without an email should stay a paragraph.' );
+		$this->assert_literal_email( wp_kses_post( $confirmation ) . '<p>3x4 -- done</p>' );
+
+		$this->assertStringContainsString( '<address>' . esc_html( $email ) . '</address>', $review, 'The email review row should wrap the address element.' );
+		$this->assert_literal_email( wp_kses_post( $review ) );
+	}
+
+	/**
+	 * @testdox A withdrawal review row with no key keeps the escaped text path and is still texturized.
+	 */
+	public function test_withdrawal_review_row_without_a_key_is_texturized(): void {
+		$this->open_block_theme_email_page( 'order-withdrawal' );
+		$this->sut->skip_address_texturize_on_order_pages();
+
+		$html = wc_get_template_html(
+			'myaccount/form-order-withdrawal.php',
+			array(
+				'screen'      => 'review',
+				'data'        => array(
+					'email' => "o'neil--shop@48x17.com",
+				),
+				'review_rows' => array(
+					array(
+						'label' => 'Details',
+						'value' => '3x4 -- done',
+					),
+				),
+			)
+		);
+
+		$text = $this->texturize_to_text( wp_kses_post( $html ) );
+
+		$this->assertStringContainsString( "o'neil--shop@48x17.com", $text, 'The email note should not be texturized.' );
+		$this->assertStringContainsString( '3×4 — done', $text, 'A review row without a key should still be texturized.' );
+		$this->assertStringNotContainsString( '3x4 -- done', $text, 'A review row without a key should still be texturized.' );
+	}
+
+	/**
 	 * @testdox Classic themes still texturize address content when a notice contains an address element.
 	 */
 	public function test_texturizes_address_on_classic_themes_when_a_notice_contains_address_markup(): void {
@@ -224,6 +285,39 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( "o'neil--shop@48x17.com", $text, 'The billing email should not be texturized.' );
 		$this->assertStringContainsString( '12--14 Main St', $text, 'The billing address should not be texturized.' );
+	}
+
+	/**
+	 * Form data for a withdrawal screen.
+	 *
+	 * @param string $email   Customer email.
+	 * @param string $details Additional details.
+	 * @return array<string,string>
+	 */
+	private function withdrawal_form_data( string $email, string $details ): array {
+		return array(
+			OrderWithdrawalFormProcessor::FIELD_FIRST_NAME => 'Pat',
+			OrderWithdrawalFormProcessor::FIELD_LAST_NAME  => 'Lee',
+			OrderWithdrawalFormProcessor::FIELD_EMAIL      => $email,
+			OrderWithdrawalFormProcessor::FIELD_EMAIL_CONFIRMATION => $email,
+			OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '1001',
+			OrderWithdrawalFormProcessor::FIELD_WITHDRAWAL_TYPE => OrderWithdrawalFormProcessor::WITHDRAWAL_TYPE_SPECIFIC,
+			OrderWithdrawalFormProcessor::FIELD_ADDITIONAL_DETAILS => $details,
+		);
+	}
+
+	/**
+	 * Assert an email inside the HTML stays literal and a neighboring 3x4 sentence is texturized.
+	 *
+	 * @param string $html HTML that already includes the neighboring sentence.
+	 */
+	private function assert_literal_email( string $html ): void {
+		$text = $this->texturize_to_text( $html );
+
+		$this->assertStringContainsString( "o'neil--shop@48x17.com", $text, 'The email should not be texturized.' );
+		$this->assertStringNotContainsString( '48×17', $text, 'The email should not gain a multiplication sign.' );
+		$this->assertStringContainsString( '3×4 — done', $text, 'Neighboring text should still be texturized.' );
+		$this->assertStringNotContainsString( '3x4 -- done', $text, 'Neighboring text should still be texturized.' );
 	}
 
 	/**

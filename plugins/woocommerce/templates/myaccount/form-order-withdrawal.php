@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.3.0
+ * @version 11.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -51,7 +51,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 
 	<?php if ( 'confirmation' === $screen ) : ?>
 		<p><strong><?php esc_html_e( 'Your withdrawal has been submitted.', 'woocommerce' ); ?></strong></p>
-		<p class="woocommerce-order-withdrawal-content__note">
+		<address class="woocommerce-order-withdrawal-content__note">
 			<?php
 			printf(
 				/* translators: %s: Email address. */
@@ -59,7 +59,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 				esc_html( $data['email'] ?? '' )
 			);
 			?>
-		</p>
+		</address>
 		<p class="woocommerce-order-withdrawal-content__note"><?php esc_html_e( 'We\'ll review your request and contact you about next steps, including any refund due.', 'woocommerce' ); ?></p>
 		<p><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Back to the shop', 'woocommerce' ); ?></a></p>
 	<?php elseif ( 'review' === $screen ) : ?>
@@ -75,12 +75,21 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 			<?php foreach ( $review_rows as $review_row ) : ?>
 				<div class="woocommerce-order-withdrawal-content__review-row">
 					<dt><?php echo esc_html( $review_row['label'] ?? '' ); ?></dt>
-					<dd><?php echo nl2br( esc_html( $review_row['value'] ?? '' ) ); ?></dd>
+					<dd>
+						<?php
+						$review_row_key = isset( $review_row['key'] ) ? (string) $review_row['key'] : '';
+						if ( \Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor::FIELD_EMAIL === $review_row_key ) {
+							printf( '<address>%s</address>', esc_html( $review_row['value'] ?? '' ) );
+						} else {
+							echo nl2br( esc_html( $review_row['value'] ?? '' ) );
+						}
+						?>
+					</dd>
 				</div>
 			<?php endforeach; ?>
 		</dl>
 
-		<p class="woocommerce-order-withdrawal-content__note">
+		<address class="woocommerce-order-withdrawal-content__note">
 			<?php
 			printf(
 				/* translators: %s: Email address. */
@@ -88,7 +97,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 				esc_html( $data['email'] ?? '' )
 			);
 			?>
-		</p>
+		</address>
 
 		<form class="woocommerce-OrderWithdrawalForm" action="<?php echo esc_url( $form_action_url ); ?>" method="post" novalidate>
 			<?php foreach ( $hidden_fields as $hidden_field ) : ?>
