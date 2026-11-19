@@ -144,8 +144,17 @@ class NotificationManagementService {
 			exit;
 		}
 
-		/* translators: %s user email. */
-		wc_add_notice( sprintf( esc_html__( 'Verification email sent to %s.', 'woocommerce' ), $notification->get_user_email() ), 'success' );
+		wc_add_notice(
+			sprintf(
+				'<address>%s</address>',
+				sprintf(
+					/* translators: %s user email. */
+					esc_html__( 'Verification email sent to %s.', 'woocommerce' ),
+					esc_html( $notification->get_user_email() )
+				)
+			),
+			'success'
+		);
 		wp_safe_redirect( $redirect_url );
 		exit;
 	}

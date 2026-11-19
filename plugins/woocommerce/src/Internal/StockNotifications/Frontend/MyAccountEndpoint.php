@@ -500,7 +500,8 @@ class MyAccountEndpoint {
 			$this->redirect_with_error( $result->get_error_message(), $page );
 		}
 
-		\wc_add_notice( esc_html( $result ) );
+		// resend() returns escaped HTML. cancel() returns plain text, so only that notice is escaped here.
+		\wc_add_notice( self::ACTION_RESEND === $action ? $result : esc_html( $result ) );
 		wp_safe_redirect( self::get_endpoint_url( $page ) );
 		exit;
 	}
@@ -509,7 +510,7 @@ class MyAccountEndpoint {
 	 * Send the verification email again for a pending notification.
 	 *
 	 * @param Notification $notification The notification, already checked to belong to the current user.
-	 * @return string|\WP_Error Success notice text, or the error to show instead.
+	 * @return string|\WP_Error Escaped success notice, or the error to show instead.
 	 */
 	private function resend( Notification $notification ) {
 		$result = $this->notification_management_service->resend_verification_email( $notification );
@@ -517,8 +518,14 @@ class MyAccountEndpoint {
 			return $result;
 		}
 
-		/* translators: %s: email address the verification email was sent to. */
-		return sprintf( __( 'Verification email sent to "%s". Please check your inbox!', 'woocommerce' ), $notification->get_user_email() );
+		return sprintf(
+			'<address>%s</address>',
+			sprintf(
+				/* translators: %s: email address the verification email was sent to. */
+				__( 'Verification email sent to "%s". Please check your inbox!', 'woocommerce' ),
+				esc_html( $notification->get_user_email() )
+			)
+		);
 	}
 
 	/**
