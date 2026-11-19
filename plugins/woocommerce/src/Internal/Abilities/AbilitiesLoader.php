@@ -8,6 +8,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\AbilityResources;
+use Automattic\WooCommerce\Internal\Abilities\Resources\OrderResource;
+use Automattic\WooCommerce\Internal\Abilities\Resources\ProductResource;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
@@ -143,7 +146,6 @@ class AbilitiesLoader {
 		}
 
 		AbilitiesCategories::init();
-		add_action( 'woocommerce_extensible_abilities_resources_init', array( __CLASS__, 'register_core_resources' ), 0 );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
@@ -160,11 +162,19 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function register_core_resources(): void {
-		foreach ( array( 'product', 'order', 'order_item', 'product_term', 'product_review', 'customer' ) as $resource_name ) {
-			ExtensibleAbilities::register_resource( $resource_name );
+		if ( AbilityResources::is_registered( 'order' ) ) {
+			return;
 		}
+		AbilityResources::register_core(
+			array( ProductResource::class, 'register' ),
+			array( OrderResource::class, 'register' ),
+			static function () {
+				AbilityResources::register_resource( 'product_term' );
+				AbilityResources::register_resource( 'product_review' );
+				AbilityResources::register_resource( 'customer' );
+			}
+		);
 	}
-
 	/**
 	 * Add the extension filter clauses of a list ability to its WP_Query arguments.
 	 *
@@ -197,6 +207,7 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function init_extensions(): void {
+		self::register_core_resources();
 		if ( did_action( 'woocommerce_extensible_abilities_init' ) || ! ExtensibleAbilities::is_enabled() ) {
 			return;
 		}
@@ -210,6 +221,7 @@ class AbilitiesLoader {
 		 * @since 11.3.0
 		 */
 		do_action( 'woocommerce_extensible_abilities_resources_init' );
+		AbilityResources::close_root_fields();
 
 		/**
 		 * Fires when extensions can register their fields with ExtensibleAbilities.
@@ -280,6 +292,9 @@ class AbilitiesLoader {
 			}
 
 			$registered_ability = wp_register_ability( $ability_name, $args );
+			if ( $is_core_ability && $registered_ability instanceof Ability ) {
+				$registered_ability->set_output_schema_factory( static fn() => $class_name::get_registration_args()['output_schema'] ?? array() );
+			}
 
 			if ( null !== $registered_ability ) {
 				self::$registered_abilities[ $ability_name ] = $registered_ability;

@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Tests\Abilities\AbilityRegistriesTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -24,6 +25,7 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  */
 class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
+	use AbilityRegistriesTrait;
 	use HPOSToggleTrait;
 
 	/**
@@ -6024,6 +6026,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * Register canonical domain abilities for this test.
 	 */
 	private function register_domain_abilities(): void {
+		// Core resources register once per request. Drop them so the schemas use the current statuses and types.
+		self::reset_ability_resources();
 		$callback = array( AbilitiesLoader::class, 'register_abilities' );
 
 		add_action( 'wp_abilities_api_init', $callback );

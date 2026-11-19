@@ -22,6 +22,45 @@ defined( 'ABSPATH' ) || exit;
 class Ability extends \WP_Ability {
 
 	/**
+	 * Rebuilds Core output schemas after the current user or site changes.
+	 *
+	 * @var callable|null
+	 */
+	private $output_schema_factory;
+
+	/**
+	 * Site and user for the currently stored output schema.
+	 *
+	 * @var string
+	 */
+	private string $output_schema_context = '';
+
+	/**
+	 * Set the factory used to rebuild the schema for a different caller.
+	 *
+	 * @internal
+	 * @param callable $factory Returns the output schema for the current context.
+	 */
+	public function set_output_schema_factory( callable $factory ): void {
+		$this->output_schema_factory = $factory;
+		$this->output_schema_context = get_current_blog_id() . ':' . get_current_user_id();
+	}
+
+	/**
+	 * Return an output schema built for the current site and user.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function get_output_schema(): array {
+		$context = get_current_blog_id() . ':' . get_current_user_id();
+		if ( null !== $this->output_schema_factory && $context !== $this->output_schema_context ) {
+			$this->output_schema         = call_user_func( $this->output_schema_factory );
+			$this->output_schema_context = $context;
+		}
+		return parent::get_output_schema();
+	}
+
+	/**
 	 * Apply the schema default. Before WordPress 7.2, also convert valid input to
 	 * the schema types, as WordPress 7.2 does in execute().
 	 *

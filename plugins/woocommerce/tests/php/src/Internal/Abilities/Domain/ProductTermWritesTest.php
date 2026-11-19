@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Abilities\AbilityResources;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributeCreate;
@@ -56,12 +57,13 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		foreach ( array( 'resources', 'fields' ) as $name ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+		foreach ( array( 'resources', 'fields', 'output_fields' ) as $name ) {
+			$property = new \ReflectionProperty( AbilityResources::class, $name );
 			$property->setAccessible( true );
 			$this->saved_state[ $name ] = $property->getValue();
 			$property->setValue( null, array() );
 		}
+		AbilitiesLoader::register_core_resources();
 		$this->taxonomies_before = get_taxonomies();
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
 		wp_set_current_user( self::$administrator_id );
@@ -74,7 +76,7 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 		global $wc_product_attributes;
 		try {
 			foreach ( $this->saved_state as $name => $value ) {
-				$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+				$property = new \ReflectionProperty( AbilityResources::class, $name );
 				$property->setAccessible( true );
 				$property->setValue( null, $value );
 			}

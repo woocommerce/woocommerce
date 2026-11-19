@@ -1,0 +1,402 @@
+<?php
+/**
+ * PersonalDataTest class file.
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Abilities;
+
+use Automattic\WooCommerce\Abilities\AbilityResources;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+use Automattic\WooCommerce\Abilities\PersonalData;
+use Automattic\WooCommerce\Tests\Internal\Abilities\Domain\DomainAbilityTestCase;
+
+/**
+ * Personal data in Core's order abilities, with the filter on and off.
+ */
+class PersonalDataTest extends DomainAbilityTestCase {
+
+	/**
+	 * @testdox Should use the current user's policy and schema after the registry was built by another user.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $initially_shared Whether the registry is built for the sharing user.
+	 */
+	public function test_user_switch_updates_output_and_schema( bool $initially_shared ): void {
+		$order            = $this->create_order_with_email();
+		$withholding_user = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->add_test_field( 'order_item', static fn() => 'buyer@example.test', array( 'personal_data' => 'email' ) );
+		$this->filter_personal_data( static fn() => get_current_user_id() !== $withholding_user );
+		$first  = $initially_shared ? self::$administrator_id : $withholding_user;
+		$second = $initially_shared ? $withholding_user : self::$administrator_id;
+		wp_set_current_user( $first );
+		$query = wp_get_ability( 'woocommerce/orders-query' );
+		$write = wp_get_ability( 'woocommerce/order-update-status' );
+
+		foreach ( array( $first, $second, $first ) as $index => $user_id ) {
+			wp_set_current_user( $user_id );
+			$result = $query->execute(
+				array(
+					'id'                 => $order->get_id(),
+					'include_line_items' => true,
+				)
+			);
+			$this->assertNotWPError( $result );
+			$shared = $user_id !== $withholding_user;
+			$this->assertSame( $shared, isset( $result['orders'][0]['billing_email'] ) );
+			$this->assertSame( $shared, isset( $result['orders'][0]['line_items'][0]['extensions'] ) );
+			$schema = $query->get_output_schema();
+			$this->assertSame( $shared, isset( $schema['properties']['orders']['items']['properties']['billing_email'] ) );
+			$this->assertTrue( rest_validate_value_from_schema( $result, $schema ) );
+			$updated = $write->execute(
+				array(
+					'id'     => $order->get_id(),
+					'status' => 1 === $index ? 'pending' : 'completed',
+				)
+			);
+			$this->assertNotWPError( $updated );
+			$this->assertSame( $shared, isset( $updated['order']['billing_email'] ) );
+			$this->assertSame( $shared, isset( $write->get_output_schema()['properties']['order']['properties']['billing_email'] ) );
+		}
+	}
+
+	/**
+	 * @testdox Should include statuses and types registered during extension setup in output schemas.
+	 */
+	public function test_order_enums_include_extension_registrations(): void {
+		global $wc_order_types;
+		$original_types = $wc_order_types;
+		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', 'yes' );
+		add_action(
+			'woocommerce_extensible_abilities_resources_init',
+			static function () {
+				register_post_status( 'wc-pii-custom', array( 'public' => true ) );
+				wc_register_order_type( 'pii_custom_order', array( 'class_name' => \WC_Order::class ) );
+			}
+		);
+		try {
+			$ability = wp_get_ability( 'woocommerce/orders-query' );
+			$input   = $ability->get_input_schema()['properties'];
+			$output  = $this->get_order_item_schema()['properties'];
+			$this->assertContains( 'pii-custom', $input['status']['items']['enum'] );
+			$this->assertContains( 'pii-custom', $output['status']['enum'] );
+			$this->assertContains( 'pii_custom_order', $input['type']['enum'] );
+			$this->assertContains( 'pii_custom_order', $output['type']['enum'] );
+			$this->assertNotContains( 'shop_order_refund', $output['type']['enum'] );
+		} finally {
+			$wc_order_types = $original_types; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
+
+	/**
+	 * @testdox Should share personal data by default.
+	 */
+	public function test_is_shared_by_default(): void {
+		$this->assertTrue( PersonalData::is_shared( 'order' ) );
+	}
+
+	/**
+	 * @testdox Should withhold personal data for any filter value other than true.
+	 * @dataProvider provide_values_other_than_true
+	 *
+	 * @param mixed $value Filter value.
+	 */
+	public function test_is_shared_fails_closed( $value ): void {
+		$this->filter_personal_data( static fn() => $value );
+
+		$this->assertFalse( PersonalData::is_shared( 'order' ) );
+	}
+
+	/**
+	 * Truthy values are included, so a bool cast instead of `true ===` fails the test.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function provide_values_other_than_true(): array {
+		return array(
+			'null'        => array( null ),
+			'integer 1'   => array( 1 ),
+			'string 1'    => array( '1' ),
+			'string yes'  => array( 'yes' ),
+			'array true'  => array( array( true ) ),
+			'string true' => array( 'true' ),
+		);
+	}
+
+	/**
+	 * @testdox Should ask the filter once per resource, so the output schema and the output agree.
+	 */
+	public function test_is_shared_asks_once_per_resource(): void {
+		$asked = array();
+		$this->filter_personal_data(
+			static function ( $shared, string $resource_name ) use ( &$asked ) {
+				$asked[] = $resource_name;
+				return $shared;
+			},
+			2
+		);
+		$order = $this->create_order_with_email();
+
+		$this->get_order_item_schema();
+		$this->run_ability( 'woocommerce/orders-query', array( 'id' => $order->get_id() ) );
+		$this->run_ability( 'woocommerce/orders-query', array( 'id' => $order->get_id() ) );
+
+		$this->assertContains( 'order', $asked );
+		$this->assertSame( array_unique( $asked ), $asked, 'Each resource should be asked once.' );
+	}
+
+	/**
+	 * @testdox Should return the billing email of an order while personal data is shared.
+	 */
+	public function test_orders_query_returns_billing_email_by_default(): void {
+		$order = $this->create_order_with_email();
+
+		$result = $this->run_ability( 'woocommerce/orders-query', array( 'id' => $order->get_id() ) );
+
+		$this->assertSame( 'jane@example.com', $result['orders'][0]['billing_email'] );
+		$this->assertSame( $order->get_customer_id(), $result['orders'][0]['customer_id'] );
+		$this->assertSame( $order->get_address( 'shipping' ), $result['orders'][0]['shipping'] );
+		$this->assertArrayHasKey( 'billing_email', $this->get_order_item_schema()['properties'] );
+	}
+
+	/**
+	 * @testdox Should leave personal data fields out of the output and the output schema while personal data is withheld.
+	 */
+	public function test_orders_query_withholds_personal_data(): void {
+		$order = $this->create_order_with_email();
+		$this->add_test_field(
+			'order',
+			static function ( \WC_Order $order ) {
+				return $order->get_billing_phone();
+			},
+			array( 'personal_data' => true )
+		);
+		$this->withhold_personal_data();
+
+		$result = $this->run_ability( 'woocommerce/orders-query', array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+		$this->assertArrayNotHasKey( 'billing_email', $result['orders'][0] );
+		$this->assertArrayNotHasKey( 'extensions', $result['orders'][0], 'A personal extension field should be left out.' );
+		$this->assertStringNotContainsString( 'jane@example.com', (string) wp_json_encode( $result ) );
+		$schema = $this->get_order_item_schema();
+		$this->assertArrayNotHasKey( 'billing_email', $schema['properties'], 'The schema should not tell that the billing email exists.' );
+		$this->assertArrayNotHasKey( 'extensions', $schema['properties'], 'The schema should not tell that the personal extension field exists.' );
+	}
+
+	/**
+	 * @testdox Should keep extension fields that are not personal data while personal data is withheld.
+	 */
+	public function test_orders_query_keeps_other_extension_fields(): void {
+		$order = $this->create_order_with_email();
+		$this->add_test_field(
+			'order',
+			static function () {
+				return 'gift';
+			}
+		);
+		$this->withhold_personal_data();
+
+		$result = $this->run_ability( 'woocommerce/orders-query', array( 'id' => $order->get_id() ) );
+
+		$this->assertSame( 'gift', $result['orders'][0]['extensions']['test-ext']['code'] );
+	}
+
+	/**
+	 * @testdox Should withhold personal data also while the extensible abilities feature is off.
+	 */
+	public function test_withholds_personal_data_while_extensible_abilities_feature_is_off(): void {
+		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', 'no' );
+		$order = $this->create_order_with_email();
+		$this->withhold_personal_data();
+
+		$result = $this->run_ability( 'woocommerce/orders-query', array( 'id' => $order->get_id() ) );
+
+		$this->assertArrayNotHasKey( 'billing_email', $result['orders'][0] );
+		$this->assertArrayNotHasKey( 'billing_email', $this->get_order_item_schema()['properties'] );
+	}
+
+	/**
+	 * @testdox Should withhold the billing email from a write ability that returns an order.
+	 */
+	public function test_order_write_ability_withholds_personal_data(): void {
+		$order = $this->create_order_with_email();
+		$this->withhold_personal_data();
+
+		$result = $this->run_ability(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertArrayNotHasKey( 'billing_email', $result['order'] );
+		$this->assertArrayNotHasKey( 'billing_email', wp_get_ability( 'woocommerce/order-update-status' )->get_output_schema()['properties']['order']['properties'] );
+	}
+
+	/**
+	 * @testdox Should keep a marked extension field writable while withholding its output.
+	 */
+	public function test_withholding_preserves_extension_writes(): void {
+		$this->add_test_field(
+			'product',
+			static fn( \WC_Product $product ) => $product->get_meta( '_test_personal_value' ),
+			array(
+				'personal_data' => true,
+				'input_schema'  => array( 'type' => 'string' ),
+				'set_callback'  => static function ( \WC_Product $product, string $value ) {
+					$product->update_meta_data( '_test_personal_value', $value );
+				},
+			)
+		);
+		$this->withhold_personal_data();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$result = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'test-ext' => array( 'code' => 'private@example.test' ) ),
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertArrayNotHasKey( 'extensions', $result['product'] );
+		$this->assertSame( 'private@example.test', wc_get_product( $product->get_id() )->get_meta( '_test_personal_value' ) );
+		$ability = wp_get_ability( 'woocommerce/product-update' );
+		$this->assertArrayHasKey( 'code', $ability->get_input_schema()['properties']['extensions']['properties']['test-ext']['properties'] );
+		$this->assertArrayNotHasKey( 'extensions', $ability->get_output_schema()['properties']['product']['properties'] );
+	}
+
+	/**
+	 * @testdox Should protect the shipping address and customer ID when only order sharing is disabled.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $extensions_enabled Whether extension support is enabled.
+	 */
+	public function test_order_policy_protects_nested_shipping( bool $extensions_enabled ): void {
+		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', $extensions_enabled ? 'yes' : 'no' );
+		$order = $this->create_order_with_email();
+		$this->filter_personal_data( static fn( $shared, $resource_name ) => 'order' !== $resource_name, 2 );
+
+		$result = $this->run_ability( 'woocommerce/orders-query', array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+		foreach ( array( 'billing_email', 'customer_id', 'shipping' ) as $field ) {
+			$this->assertArrayNotHasKey( $field, $result['orders'][0] );
+			$this->assertArrayNotHasKey( $field, $this->get_order_item_schema()['properties'] );
+		}
+		$this->assertSame( $order->get_id(), $result['orders'][0]['id'] );
+	}
+
+	/**
+	 * @testdox Should classify each shipping attribute and preserve the object shape when all its fields are withheld.
+	 */
+	public function test_shipping_attributes_have_their_own_classification(): void {
+		$order = $this->create_order_with_email();
+		$this->filter_personal_data( static fn( $shared, $resource_name ) => 'order_shipping' !== $resource_name, 2 );
+
+		$result = $this->run_ability( 'woocommerce/orders-query', array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'jane@example.com', $result['orders'][0]['billing_email'] );
+		$this->assertInstanceOf( \stdClass::class, $result['orders'][0]['shipping'] );
+		$this->assertSame( array(), get_object_vars( $result['orders'][0]['shipping'] ) );
+		$schema = $this->get_order_item_schema()['properties']['shipping'];
+		$this->assertArrayNotHasKey( 'properties', $schema );
+		$this->assertSame( 'object', $schema['type'] );
+		$this->assertFalse( $schema['additionalProperties'] );
+		$this->assertStringNotContainsString( '"properties":[]', wp_json_encode( $this->get_order_item_schema() ) );
+		$this->assertTrue( rest_validate_value_from_schema( new \stdClass(), $schema ) );
+		$this->assertWPError( rest_validate_value_from_schema( array( 'email' => 'private@example.test' ), $schema ) );
+	}
+
+	/**
+	 * @testdox Should map exposed order classifications to the existing Core eraser types.
+	 */
+	public function test_classifications_match_core_order_eraser(): void {
+		$eraser_types = array();
+		add_filter(
+			'woocommerce_privacy_remove_order_personal_data_props',
+			static function ( $types ) use ( &$eraser_types ) {
+				$eraser_types = $types;
+				return $types;
+			},
+			PHP_INT_MIN
+		);
+		\WC_Privacy_Erasers::remove_order_personal_data( $this->create_order_with_email() );
+		AbilitiesLoader::register_core_resources();
+		$property = new \ReflectionProperty( AbilityResources::class, 'fields' );
+		$property->setAccessible( true );
+		$fields = $property->getValue();
+
+		foreach ( array( 'billing_email', 'customer_id' ) as $field ) {
+			$this->assertSame( $eraser_types[ $field ], $fields['order'][''][ $field ]['personal_data'] );
+		}
+		$this->assertCount( 10, $fields['order_shipping'][''] );
+		foreach ( $fields['order_shipping'][''] as $field => $args ) {
+			$this->assertSame( $eraser_types[ 'shipping_' . $field ], $args['personal_data'], $field );
+		}
+	}
+
+	/**
+	 * @testdox Should withhold nested personal extensions without changing standalone child output.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $child_first Whether standalone output populates the cache first.
+	 */
+	public function test_order_policy_protects_item_extensions( bool $child_first ): void {
+		$order = $this->create_order_with_email();
+		$this->add_test_field( 'order_item', static fn() => 'buyer@example.test', array( 'personal_data' => 'email' ) );
+		$this->filter_personal_data( static fn( $shared, $resource_name ) => 'order' !== $resource_name, 2 );
+		wp_get_abilities();
+		$item = current( $order->get_items() );
+		if ( $child_first ) {
+			$this->assertSame( 'buyer@example.test', AbilityResources::output_data( 'order_item', $item )['extensions']['test-ext']['code'] );
+		}
+
+		$result = $this->run_ability(
+			'woocommerce/orders-query',
+			array(
+				'id'                 => $order->get_id(),
+				'include_line_items' => true,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertArrayNotHasKey( 'extensions', $result['orders'][0]['line_items'][0] );
+		$this->assertArrayHasKey( 'id', $result['orders'][0]['line_items'][0] );
+		$this->assertArrayNotHasKey( 'extensions', $this->get_order_item_schema()['properties']['line_items']['items']['properties'] );
+		$this->assertSame( 'buyer@example.test', AbilityResources::output_data( 'order_item', $item )['extensions']['test-ext']['code'] );
+		$this->assertArrayHasKey( 'extensions', AbilityResources::output_schema( 'order_item' )['properties'] );
+	}
+
+	/**
+	 * Output schema of one order in woocommerce/orders-query.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function get_order_item_schema(): array {
+		return wp_get_ability( 'woocommerce/orders-query' )->get_output_schema()['properties']['orders']['items'];
+	}
+
+	/**
+	 * Create an order with a billing email.
+	 *
+	 * @return \WC_Order
+	 */
+	private function create_order_with_email(): \WC_Order {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_billing_email( 'jane@example.com' );
+		$order->set_billing_phone( '555-0100' );
+		$order->set_shipping_first_name( 'Jane' );
+		$order->set_shipping_phone( '555-0101' );
+		$order->save();
+
+		return $order;
+	}
+}
