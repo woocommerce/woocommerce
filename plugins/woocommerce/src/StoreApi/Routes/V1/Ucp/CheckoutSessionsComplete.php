@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Orders\OrderAttributionController;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
@@ -72,6 +73,31 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		$release = $this->acquire_checkout_lock( $this->route_cart_id( $request ) );
+
+		if ( $release instanceof \WP_REST_Response ) {
+			return $release;
+		}
+
+		try {
+			$this->reload_persisted_checkout();
+
+			return $this->hand_off_checkout( $request );
+		} finally {
+			$release();
+		}
+	}
+
+	/**
+	 * Hand off the checkout named by the request. The caller holds the checkout lock.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return \WP_REST_Response
+	 */
+	private function hand_off_checkout( \WP_REST_Request $request ) {
 		$state = $this->open_checkout( true );
 
 		if ( $state instanceof \WP_REST_Response ) {
@@ -149,13 +175,14 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			return $this->ucp_error( Utils::cart_error_code( (string) $e->getErrorCode() ), wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200, '$.line_items' );
 		}
 
+		$this->record_attribution( $order, $request );
+
 		// The payment page only takes an order awaiting payment, which a checkout draft is not.
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
-		do_action( 'woocommerce_store_api_checkout_order_processed', $order );
-
+		// Stored before the processed callbacks, which can pay the order. A callback that then
+		// fails must leave this association in place so a retry finds the order.
 		$state = array_merge(
 			$state,
 			array(
@@ -167,7 +194,100 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		);
 		$this->save_checkout_state( $state );
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
+		do_action( 'woocommerce_store_api_checkout_order_processed', $order );
+
 		return $this->checkout_response( $checkout_id, $this->checkout_state() ?? $state, 200, $cart );
+	}
+
+	/**
+	 * Hold the checkout until this completion has stored its order, so a second one waits and then sees it.
+	 *
+	 * The name is a hash of the checkout id: a lock name is limited to 64 characters and the id is not.
+	 *
+	 * @param string $checkout_id Checkout identifier.
+	 * @return \Closure|\WP_REST_Response A release callback, or the error response when the lock was not acquired.
+	 */
+	private function acquire_checkout_lock( string $checkout_id ) {
+		global $wpdb;
+
+		$name     = 'wc_ucp_' . md5( $checkout_id );
+		$acquired = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $name, 15 ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Named lock; it must not be served from a cache.
+
+		if ( '1' !== (string) $acquired ) {
+			return $this->ucp_error( 'TRANSPORT_ERROR', __( 'This checkout is being completed. Please try again.', 'woocommerce' ), 'recoverable', 500 );
+		}
+
+		return static function () use ( $wpdb, $name ): void {
+			$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Releases the named lock acquired above.
+		};
+	}
+
+	/**
+	 * Read the checkout and its draft order from the session row, which another completion may have just written.
+	 */
+	private function reload_persisted_checkout(): void {
+		$session = WC()->session;
+
+		if ( ! $session instanceof \WC_Session || ! is_callable( array( $session, 'get_session' ) ) || '' === (string) $session->get_customer_id() ) {
+			return;
+		}
+
+		$customer_id = (string) $session->get_customer_id();
+
+		// The cookie session caches its row. The Store API handler reads the table directly.
+		if ( $session instanceof \WC_Session_Handler && defined( 'WC_SESSION_CACHE_GROUP' ) ) {
+			wp_cache_delete( \WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP ) . $customer_id, WC_SESSION_CACHE_GROUP );
+		}
+
+		$stored = $session->get_session( $customer_id, false );
+
+		if ( ! is_array( $stored ) ) {
+			return;
+		}
+
+		foreach ( array( self::CHECKOUT_SESSION_KEY, 'store_api_draft_order' ) as $key ) {
+			if ( array_key_exists( $key, $stored ) ) {
+				$session->set( $key, maybe_unserialize( $stored[ $key ] ) );
+			}
+		}
+	}
+
+	/**
+	 * Record the order as started by an AI shopper, so its origin is not Unknown.
+	 *
+	 * The payment page records no attribution of its own.
+	 * The source is the host of the agent profile in the `UCP-Agent` header, or `ucp` without a valid one.
+	 * The header is not verified, so the host is a detail and not part of the origin.
+	 * Saved only with order attribution on, and never over attribution the order already has.
+	 *
+	 * @param \WC_Order        $order   The order being handed off.
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 */
+	private function record_attribution( \WC_Order $order, \WP_REST_Request $request ): void {
+		$attribution = wc_get_container()->get( OrderAttributionController::class );
+
+		if ( $attribution->has_attribution( $order ) ) {
+			return;
+		}
+
+		preg_match( '/profile="([^"]+)"/', (string) $request->get_header( 'UCP-Agent' ), $match );
+		$host = isset( $match[1] ) ? strtolower( (string) wp_parse_url( $match[1], PHP_URL_HOST ) ) : '';
+
+		// Every field is set, because the listener reads each one without checking it exists.
+		$data = array_merge(
+			array_fill_keys( $attribution->get_field_names(), '' ),
+			array(
+				'source_type' => 'ai_shopper',
+				'utm_source'  => preg_match( '/^[a-z0-9.-]+$/', $host ) ? $host : 'ucp',
+				'utm_medium'  => 'ucp',
+			)
+		);
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in OrderAttributionController.
+		do_action( 'woocommerce_order_save_attribution_data', $order, $data );
 	}
 
 	/**

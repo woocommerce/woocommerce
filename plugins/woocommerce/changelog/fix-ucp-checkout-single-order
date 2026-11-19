@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep a UCP checkout on the same order when payment and cancellation overlap.

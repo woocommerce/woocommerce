@@ -411,13 +411,37 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 				'id'            => (string) $order->get_id(),
 				'permalink_url' => $order->get_checkout_order_received_url(),
 			);
-		} elseif ( ! empty( $state['order_id'] ) && ! ( $order instanceof \WC_Order && $order->has_status( array( OrderStatus::PENDING, OrderStatus::FAILED, OrderStatus::ON_HOLD ) ) ) ) {
-			// Status list rather than needs_payment(): that is false for a zero-total order, and
-			// on-hold is a payment the buyer made that the store has yet to confirm.
+		} elseif ( ! empty( $state['order_id'] ) && ! ( $order instanceof \WC_Order && $order->has_status( $this->statuses_keeping_hand_off( $order ) ) ) ) {
+			// needs_payment() is false for a zero-total order, so the hand-off follows the payable
+			// statuses that filter declares, plus on-hold, which is a payment the store has yet to confirm.
 			unset( $state['status'], $state['continue_url'], $state['order_id'] );
 		}
 
 		return $state;
+	}
+
+	/**
+	 * Statuses in which the payment page still takes an order, as `WC_Order::needs_payment()` lists them.
+	 *
+	 * @param \WC_Order $order The order.
+	 * @return array<string>
+	 */
+	protected function payable_statuses( \WC_Order $order ): array {
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core's hook, documented in WC_Order::needs_payment().
+		return (array) apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order );
+	}
+
+	/**
+	 * Statuses for which a handed-off order still belongs to the checkout.
+	 *
+	 * Payable statuses come from the same filter `WC_Order::needs_payment()` uses, so a status an
+	 * extension adds there keeps its payment page. On-hold is a payment already made.
+	 *
+	 * @param \WC_Order $order The order.
+	 * @return array<string>
+	 */
+	private function statuses_keeping_hand_off( \WC_Order $order ): array {
+		return array_merge( $this->payable_statuses( $order ), array( OrderStatus::ON_HOLD ) );
 	}
 
 	/**

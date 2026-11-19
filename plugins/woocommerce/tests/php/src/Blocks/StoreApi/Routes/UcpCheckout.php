@@ -109,10 +109,12 @@ class UcpCheckout extends ControllerTestCase {
 	 * @param string $method HTTP method.
 	 * @param string $path Route path under /wc/ucp/v1.
 	 * @param array  $body Request body.
+	 * @param array  $headers Extra request headers.
 	 * @return \WP_REST_Response
 	 */
-	private function request( string $method, string $path, array $body = array() ) {
+	private function request( string $method, string $path, array $body = array(), array $headers = array() ) {
 		$request = new \WP_REST_Request( $method, '/wc/ucp/v1' . $path );
+		$request->set_headers( $headers );
 		$request->set_header( 'content-type', 'application/json' );
 		// A write needs a key of its own; the key itself is the UcpIdempotency suite's concern.
 		$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
@@ -631,6 +633,213 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertSame( 'completed', $paid['status'] );
 		$this->assertSame( (string) $order->get_id(), $paid['order']['id'] );
 		$this->assertSame( 409, $this->request( 'PUT', '/checkout-sessions/' . $created['id'], array() )->get_status() );
+	}
+
+	/**
+	 * @testdox Complete records the agent named in UCP-Agent as the order's source, or `ucp` without one, and keeps the order a Store API order.
+	 * @testWith ["profile=\"https://Chatgpt.com/.well-known/ucp\"", "chatgpt.com"]
+	 *           ["", "ucp"]
+	 *           ["profile=\"not-a-url\"", "ucp"]
+	 *           ["profile=\"https://evil<b>host/\"", "ucp"]
+	 *
+	 * @param string $agent  The UCP-Agent header.
+	 * @param string $source The expected utm_source.
+	 */
+	public function test_complete_records_the_agent_as_the_source( string $agent, string $source ): void {
+		$created = $this->create_ready_checkout();
+		$headers = '' === $agent ? array() : array( 'UCP-Agent' => $agent );
+
+		$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete', array(), $headers );
+		$this->assertSame( 'requires_escalation', $response->get_data()['status'] );
+
+		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertSame( 'ai_shopper', $order->get_meta( '_wc_order_attribution_source_type' ) );
+		$this->assertSame( $source, $order->get_meta( '_wc_order_attribution_utm_source' ) );
+		$this->assertSame( 'ucp', $order->get_meta( '_wc_order_attribution_utm_medium' ) );
+		$this->assertSame( 'store-api', $order->get_created_via(), 'wc_cancel_unpaid_orders() only cancels checkout and store-api orders.' );
+	}
+
+	/**
+	 * @testdox Complete keeps attribution the order already has.
+	 */
+	public function test_complete_keeps_existing_attribution(): void {
+		$created = $this->create_ready_checkout();
+		add_action(
+			'woocommerce_store_api_checkout_update_order_meta',
+			static function ( \WC_Order $order ) {
+				$order->update_meta_data( '_wc_order_attribution_source_type', 'referral' );
+				$order->save_meta_data();
+			}
+		);
+
+		$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete', array(), array( 'UCP-Agent' => 'profile="https://chatgpt.com/"' ) );
+		$this->assertSame( 'requires_escalation', $response->get_data()['status'] );
+
+		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertSame( 'referral', $order->get_meta( '_wc_order_attribution_source_type' ) );
+		$this->assertSame( '', $order->get_meta( '_wc_order_attribution_utm_source' ) );
+	}
+
+	/**
+	 * @testdox A status an extension adds to the payable list keeps the hand-off, including its payment page.
+	 */
+	public function test_checkout_keeps_an_extension_payable_status(): void {
+		$declare = static function ( $statuses ) {
+			$statuses[] = 'checkout-draft';
+			return $statuses;
+		};
+		add_filter( 'woocommerce_valid_order_statuses_for_payment', $declare );
+
+		try {
+			$created = $this->create_ready_checkout();
+			$path    = '/checkout-sessions/' . $created['id'];
+			$this->request( 'POST', $path . '/complete' );
+			$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+			wc_get_order( $order_id )->update_status( 'checkout-draft' );
+
+			$read = $this->request( 'GET', $path )->get_data();
+			$this->assertSame( 'requires_escalation', $read['status'] );
+			$this->assertArrayHasKey( 'continue_url', $read );
+			$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
+		} finally {
+			remove_filter( 'woocommerce_valid_order_statuses_for_payment', $declare );
+		}
+	}
+
+	/**
+	 * @testdox An update whose cancellation does not land reports the failure while the order is still payable.
+	 */
+	public function test_update_refuses_when_cancellation_leaves_the_order_payable(): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'POST', $path . '/complete' );
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		WC()->cart->set_quantity( (string) array_key_first( WC()->cart->get_cart() ), 2 );
+
+		$fail = static function ( $order ) {
+			if ( $order->has_status( OrderStatus::CANCELLED ) ) {
+				throw new \Exception( 'Save failed.' );
+			}
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		try {
+			$response = $this->request( 'PUT', $path, array() );
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ) );
+		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
+	}
+
+	/**
+	 * @testdox A payment that lands as the cancellation is written is kept, and the checkout reports it.
+	 */
+	public function test_update_keeps_an_order_paid_as_cancellation_is_written(): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'POST', $path . '/complete' );
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		WC()->cart->set_quantity( (string) array_key_first( WC()->cart->get_cart() ), 2 );
+
+		$flipped   = false;
+		$pay_first = static function ( $sql ) use ( &$flipped, $order_id ) {
+			if ( $flipped || ! is_string( $sql ) || false === strpos( $sql, 'wc-cancelled' ) ) {
+				return $sql;
+			}
+
+			$flipped = true;
+			global $wpdb;
+
+			if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+				$table = \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::get_orders_table_name();
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Test sets the row a concurrent payment would have written.
+				$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s WHERE id = %d", 'wc-processing', $order_id ) );
+			} else {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Test sets the row a concurrent payment would have written.
+				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->posts} SET post_status = %s WHERE ID = %d", 'wc-processing', $order_id ) );
+			}
+
+			return $sql;
+		};
+
+		add_filter( 'query', $pay_first, 9 );
+		try {
+			$updated = $this->request( 'PUT', $path, array() );
+		} finally {
+			remove_filter( 'query', $pay_first, 9 );
+		}
+
+		$this->assertTrue( $flipped, 'The cancellation reached the status write.' );
+		$this->assertSame( 'completed', $updated->get_data()['status'] );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PROCESSING ) );
+		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
+	}
+
+	/**
+	 * @testdox A processed callback that pays the order and then fails does not make the retry create another order.
+	 */
+	public function test_complete_remembers_an_order_a_callback_pays_then_fails(): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$fail    = static function ( $order ) {
+			$order->payment_complete();
+			throw new \Exception( 'later callback failed' );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $fail );
+
+		try {
+			$this->request( 'POST', $path . '/complete' );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $fail );
+		}
+
+		$order_id = (int) WC()->session->get( 'ucp_checkout' )['order_id'];
+		$this->assertTrue( wc_get_order( $order_id )->is_paid() );
+
+		$again = $this->request( 'POST', $path . '/complete' );
+		$this->assertSame( 409, $again->get_status() );
+		$this->assertCount(
+			1,
+			wc_get_orders(
+				array(
+					'status' => 'any',
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Complete returns a hand-off another request stored after this one read the session, and does not create a second order.
+	 */
+	public function test_complete_returns_a_hand_off_saved_since_the_session_was_read(): void {
+		$created  = $this->create_ready_checkout();
+		$path     = '/checkout-sessions/' . $created['id'];
+		$first    = $this->request( 'POST', $path . '/complete' )->get_data();
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+
+		WC()->session->save_data();
+
+		$state = WC()->session->get( 'ucp_checkout' );
+		unset( $state['order_id'], $state['status'], $state['continue_url'], $state['fingerprint'] );
+		WC()->session->set( 'ucp_checkout', $state );
+
+		$second = $this->request( 'POST', $path . '/complete' )->get_data();
+		$this->assertSame( $first['continue_url'], $second['continue_url'] );
+		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
+		$this->assertCount(
+			1,
+			wc_get_orders(
+				array(
+					'status' => 'any',
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			)
+		);
 	}
 
 	/**

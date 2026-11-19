@@ -3,10 +3,14 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\OrderSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Shared behaviour of the UCP checkout routes.
@@ -22,6 +26,34 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	 * @var string
 	 */
 	const SCHEMA_TYPE = 'ucp-checkout';
+
+	/**
+	 * True while the conditional status write is running, so that write is not rewritten again.
+	 *
+	 * @var bool
+	 */
+	private bool $writing_conditional_status = false;
+
+	/**
+	 * True once this cancellation has written the status, so a later statement in the same save is left alone.
+	 *
+	 * @var bool
+	 */
+	private bool $conditional_status_written = false;
+
+	/**
+	 * Order whose cancellation is in progress, or 0 when none is.
+	 *
+	 * @var int
+	 */
+	private int $conditional_status_order_id = 0;
+
+	/**
+	 * Unprefixed statuses the in-progress cancellation may replace.
+	 *
+	 * @var array<int, string>
+	 */
+	private array $conditional_status_payable = array();
 
 	/**
 	 * The capability this route answers for.
@@ -100,17 +132,6 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	}
 
 	/**
-	 * The statuses in which the payment page still takes an order, as `WC_Order::needs_payment()` lists them.
-	 *
-	 * @param \WC_Order $order The order.
-	 * @return array<string>
-	 */
-	protected function payable_statuses( \WC_Order $order ): array {
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core's hook, documented in WC_Order::needs_payment().
-		return (array) apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order );
-	}
-
-	/**
 	 * Cancel the order handed to the buyer while its payment page would still take it, and forget the hand-off.
 	 *
 	 * Once the checkout changes or ends, that order no longer matches it and must not be paid.
@@ -130,8 +151,9 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 			}
 
 			// The payment page's own list, so a failed attempt the buyer could retry is closed too.
+			// The status write itself is conditional, so a payment that lands first is not overwritten.
 			// A cancellation that did not save leaves the order payable, so the checkout goes on tracking it.
-			if ( ! $order->update_status( OrderStatus::CANCELLED, $note ) ) {
+			if ( ! $this->cancel_order_if_still_payable( $order, $note ) ) {
 				return $state;
 			}
 
@@ -144,6 +166,170 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 		$this->save_checkout_state( $state );
 
 		return $state;
+	}
+
+	/**
+	 * Cancel an order only when its stored status is still one the payment page accepts.
+	 *
+	 * The status row is updated with that condition in the same statement. A payment that
+	 * committed first does not match, the cancellation stops, and the paid status stays.
+	 *
+	 * @param \WC_Order $order The handed-off order.
+	 * @param string    $note Order note explaining the cancellation.
+	 * @return bool Whether the order was saved as cancelled.
+	 */
+	private function cancel_order_if_still_payable( \WC_Order $order, string $note ): bool {
+		$this->conditional_status_order_id = $order->get_id();
+		$this->conditional_status_payable  = array_values( array_map( 'strval', $this->payable_statuses( $order ) ) );
+		$this->conditional_status_written  = false;
+
+		$guard = function ( $sql ) {
+			return $this->guard_payable_status_write( $sql );
+		};
+		add_filter( 'query', $guard );
+		try {
+			$saved = (bool) $order->update_status( OrderStatus::CANCELLED, $note );
+		} finally {
+			remove_filter( 'query', $guard );
+			$this->conditional_status_order_id = 0;
+			$this->conditional_status_payable  = array();
+			$this->conditional_status_written  = false;
+		}
+
+		if ( ! $saved ) {
+			$this->forget_cached_order( $order->get_id() );
+		}
+
+		return $saved;
+	}
+
+	/**
+	 * Replace an unconditional status write with one that matches only a still-payable order.
+	 *
+	 * @param mixed $sql SQL about to run.
+	 * @return mixed
+	 * @throws \Exception When the stored status is no longer payable.
+	 */
+	private function guard_payable_status_write( $sql ) {
+		if ( $this->conditional_status_written || $this->writing_conditional_status || ! is_string( $sql ) || ! $this->query_cancels_order( $sql ) ) {
+			return $sql;
+		}
+
+		$this->writing_conditional_status = true;
+		$updated                          = $this->write_cancelled_status_if_payable( $this->conditional_status_order_id, $this->conditional_status_payable );
+		$this->writing_conditional_status = false;
+
+		if ( 1 !== $updated ) {
+			throw new \Exception( 'Order is no longer payable.' );
+		}
+
+		$this->conditional_status_written = true;
+
+		// The conditional update already wrote the status. Skip the unconditional write that would follow.
+		return 'SELECT 1';
+	}
+
+	/**
+	 * Whether a statement sets this order's status to cancelled.
+	 *
+	 * @param string $sql SQL about to run.
+	 * @return bool
+	 */
+	private function query_cancels_order( string $sql ): bool {
+		$trimmed = ltrim( $sql );
+		$writes  = 0 === stripos( $trimmed, 'insert' ) || 0 === stripos( $trimmed, 'update' );
+
+		return $writes && false !== strpos( $sql, OrderInternalStatus::CANCELLED ) && $this->sql_mentions_id( $sql, $this->conditional_status_order_id );
+	}
+
+	/**
+	 * Whether the SQL contains the order id as its own token.
+	 *
+	 * @param string $sql SQL about to run.
+	 * @param int    $order_id Order ID.
+	 * @return bool
+	 */
+	private function sql_mentions_id( string $sql, int $order_id ): bool {
+		if ( $order_id < 1 ) {
+			return false;
+		}
+
+		$needle = (string) $order_id;
+		$length = strlen( $sql );
+		$offset = 0;
+		$pos    = strpos( $sql, $needle, $offset );
+
+		while ( false !== $pos ) {
+			$before = $pos > 0 ? $sql[ $pos - 1 ] : ' ';
+			$after  = ( $pos + strlen( $needle ) ) < $length ? $sql[ $pos + strlen( $needle ) ] : ' ';
+
+			if ( ! ctype_digit( $before ) && ! ctype_digit( $after ) ) {
+				return true;
+			}
+
+			$offset = $pos + 1;
+			$pos    = strpos( $sql, $needle, $offset );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Set the order's stored status to cancelled when it is still payable.
+	 *
+	 * @param int           $order_id Order ID.
+	 * @param array<string> $payable Unprefixed statuses the payment page still accepts.
+	 * @return int Rows updated.
+	 */
+	private function write_cancelled_status_if_payable( int $order_id, array $payable ): int {
+		global $wpdb;
+
+		$statuses = array();
+		foreach ( $payable as $status ) {
+			$status = (string) $status;
+			if ( '' === $status ) {
+				continue;
+			}
+			$statuses[] = 0 === strpos( $status, 'wc-' ) ? $status : 'wc-' . $status;
+		}
+		$statuses = array_values( array_unique( $statuses ) );
+
+		if ( array() === $statuses ) {
+			return 0;
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $statuses ), '%s' ) );
+		$params       = array_merge( array( OrderInternalStatus::CANCELLED, $order_id ), $statuses );
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$table = OrdersTableDataStore::get_orders_table_name();
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name is WooCommerce's; placeholders match $statuses.
+			$sql = "UPDATE {$table} SET status = %s WHERE id = %d AND status IN ( {$placeholders} )";
+		} else {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Placeholders match $statuses.
+			$sql = "UPDATE {$wpdb->posts} SET post_status = %s WHERE ID = %d AND post_type = 'shop_order' AND post_status IN ( {$placeholders} )";
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Conditional status write; a cache would hide a concurrent payment.
+		$result = $wpdb->query( $wpdb->prepare( $sql, ...$params ) );
+
+		return (int) $result;
+	}
+
+	/**
+	 * Drop a cached order so the next read sees the status a concurrent payment stored.
+	 *
+	 * @param int $order_id Order ID.
+	 */
+	private function forget_cached_order( int $order_id ): void {
+		wc_get_container()->get( OrderCache::class )->remove( $order_id );
+
+		$store = \WC_Data_Store::load( 'order' );
+		if ( is_callable( array( $store, 'clear_cached_data' ) ) ) {
+			$store->clear_cached_data( array( $order_id ) );
+		}
+
+		clean_post_cache( $order_id );
 	}
 
 	/**
