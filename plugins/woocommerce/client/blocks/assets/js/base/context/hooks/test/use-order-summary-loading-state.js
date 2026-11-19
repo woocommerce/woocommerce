@@ -18,9 +18,21 @@ jest.mock( '@woocommerce/block-data', () => ( {
 	},
 } ) );
 
+jest.mock( '@woocommerce/base-hooks', () => {
+	const actual = jest.requireActual( '@woocommerce/base-hooks' );
+	return { ...actual, usePresence: jest.fn( actual.usePresence ) };
+} );
+
+jest.mock( '@woocommerce/base-utils', () => ( {
+	...jest.requireActual( '@woocommerce/base-utils' ),
+	isKeyboardInput: jest.fn( () => false ),
+} ) );
+
 /**
  * External dependencies
  */
+import { usePresence } from '@woocommerce/base-hooks';
+import { isKeyboardInput } from '@woocommerce/base-utils';
 import { renderHook } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
 
@@ -210,5 +222,20 @@ describe( 'useOrderSummaryRow', () => {
 		mockCart( [ 'fee' ] );
 		rerender();
 		expect( result.current.cart.cartFees ).toEqual( [ 'fee' ] );
+	} );
+
+	it( 'animates after a pointer change, not after a key press', () => {
+		mockCart( [] );
+		const { rerender } = renderRow();
+		const lastAnimate = () => usePresence.mock.lastCall[ 1 ].animate;
+
+		mockCart( [ 'fee' ] );
+		rerender();
+		expect( lastAnimate() ).toBe( true );
+
+		isKeyboardInput.mockReturnValue( true );
+		rerender();
+		expect( lastAnimate() ).toBe( false );
+		isKeyboardInput.mockReturnValue( false );
 	} );
 } );
