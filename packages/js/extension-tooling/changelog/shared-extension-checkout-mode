@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Share checkout mode, theme, and page selection in extension browser tests.

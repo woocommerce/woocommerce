@@ -138,6 +138,12 @@ pnpm run wp-env:e2e run cli bash wp-content/woo-extension-tooling/provision-e2e-
 
 The site needs Storefront, WooCommerce, and the extension's `WC_Docker_Provision_Manager` test mu-plugin. The script configures the block pages, creates the shortcode pages, and calls the mu-plugin's `wp wc docker-e2e provision` importer once. A failed WP-CLI step stops provisioning. Pass `--metric-units` if the suite expects kilograms and centimeters, as Product Bundles does.
 
+### Switch checkout modes in test fixtures
+
+In a test mu-plugin, load `checkout-mode.php` from the tooling bin mount and use the `Automattic\WooCommerce\ExtensionTooling\Checkout_Mode` trait. The fixture defines `THEME_LEGACY` and `THEME_BLOCKS`, registers its filters and decides when a request may switch modes. Add the tooling bin mapping to every test site that loads the fixture.
+
+The package test suite requires a PHP CLI on `PATH` to exercise the checkout fixture.
+
 ## Lint and analysis presets
 
 If your Stylelint config already disables `selector-class-pattern` for legacy SCSS, extend the shared overlay after the WordPress preset. Keep any file-specific rules in your own config.
