@@ -833,12 +833,64 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 				function ( $context, $args ) use ( &$received ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed -- The $context parameter is not used in this test.
 					$received[] = $args['note'] ?? '';
 					return 'https://example.com/value';
-				}
+				},
+				array(),
+				null,
+				array(),
+				Personalization_Tag::VALUE_TYPE_TEXT
 			)
 		);
 
 		$this->personalizer->personalize_content( $content );
 		$this->assertSame( array( 'O\'Brien "Bob" & co' ), $received );
+	}
+
+	/**
+	 * Test that an html value type tag still gets decoded argument values in link targets.
+	 */
+	public function testHtmlValueTypeTagGetsDecodedArgumentsInLinks(): void {
+		$received = array();
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'link',
+				'test/link',
+				'Test',
+				function ( $context, $args ) use ( &$received ) {
+					unset( $context );
+					$received[] = $args['note'] ?? '';
+					return 'https://example.com/value';
+				}
+			)
+		);
+
+		$this->personalizer->personalize_content( '<a data-link-href="[test/link note=&quot;O&amp;#039;Brien &amp;amp; co&quot;]">Link</a>' );
+		$this->assertSame( array( "O'Brien & co" ), $received );
+	}
+
+	/**
+	 * Test that an html value type tag gets its argument values escaped for HTML in HTML content,
+	 * so a callback that outputs an argument as it is shows it as text, and decoded elsewhere.
+	 */
+	public function testHtmlValueTypeTagGetsEscapedArgumentsInHtmlContent(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'echo',
+				'test/echo',
+				'Test',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed -- The $context parameter is not used in this test.
+					return $args['note'] ?? '';
+				}
+			)
+		);
+
+		$this->assertSame(
+			'<p>&lt;b&gt;x&lt;/b&gt; O&#039;Brien</p>',
+			$this->personalizer->personalize_content( '<p><!--[test/echo note="&lt;b&gt;x&lt;/b&gt;"]--> <!--[test/echo note="O&#039;Brien"]--></p>' )
+		);
+		$this->assertSame(
+			"<b>x</b> O'Brien",
+			$this->personalizer->personalize_content( '<!--[test/echo note="&lt;b&gt;x&lt;/b&gt;"]--> <!--[test/echo note="O&#039;Brien"]-->', Personalizer::RENDERING_CONTEXT_TEXT )
+		);
 	}
 
 	/**

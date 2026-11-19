@@ -30,14 +30,18 @@ trait LoggerSpyTrait {
 	private $spy_logger;
 
 	/**
-	 * Set up the spy logger.
+	 * Set up the spy logger once the base set-up has run.
 	 *
-	 * This method is called automatically before each test via the @before annotation.
+	 * WordPress snapshots the hooks in its first set_up() of the process and restores that snapshot
+	 * after every test. Adding the filter after it keeps the spy out of the snapshot, so the
+	 * restore removes it, while it is still in place for the rest of the test's own setUp().
+	 * A set_up() in the using class replaces this one, so override setUp() there instead.
 	 *
-	 * @before
 	 * @return void
 	 */
-	protected function set_up_spy_logger(): void {
+	public function set_up() {
+		parent::set_up();
+
 		$this->captured_logs = array();
 		$this->spy_logger    = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
 
@@ -69,16 +73,26 @@ trait LoggerSpyTrait {
 	}
 
 	/**
-	 * Tear down the spy logger.
+	 * Fail a test that passed without the spy in place.
 	 *
-	 * This method is called automatically after each test via the @after annotation.
+	 * Tests that read $this->captured_logs directly would otherwise pass with nothing captured.
 	 *
-	 * @after
 	 * @return void
 	 */
-	protected function tear_down_spy_logger(): void {
-		remove_filter( 'woocommerce_logging_class', array( $this, 'get_spy_logger' ) );
-		$this->captured_logs = array();
+	protected function assert_post_conditions() {
+		parent::assert_post_conditions();
+		$this->assert_spy_logger_installed();
+	}
+
+	/**
+	 * Fail when the trait's set_up() did not run, so no log was captured.
+	 *
+	 * @return void
+	 */
+	private function assert_spy_logger_installed(): void {
+		if ( null === $this->spy_logger ) {
+			$this->fail( 'LoggerSpyTrait installed no spy logger: a set_up() in the test class replaces the trait\'s. Override setUp() instead.' );
+		}
 	}
 
 	/**
@@ -147,6 +161,8 @@ trait LoggerSpyTrait {
 	 * @return array<array{level: string, message: string, context: array}>
 	 */
 	private function get_logs_by_level( string $level ): array {
+		$this->assert_spy_logger_installed();
+
 		return array_filter(
 			$this->captured_logs,
 			fn( $log ) => $log['level'] === $level

@@ -28,13 +28,6 @@ class ProductFilters extends \WC_Unit_Test_Case {
 	private $product_filters;
 
 	/**
-	 * Tracks dynamically added filters so they can be removed during tearDown.
-	 *
-	 * @var array
-	 */
-	private $registered_filters = [];
-
-	/**
 	 * Reflection method used to invoke the private get_canonical_url_no_pagination method.
 	 *
 	 * @var \ReflectionMethod
@@ -156,22 +149,7 @@ class ProductFilters extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up dynamically added hooks.
-	 *
-	 * @return void
-	 */
-	public function tearDown(): void {
-		foreach ( array_reverse( $this->registered_filters ) as $filter ) {
-			remove_filter( $filter['hook'], $filter['callback'], $filter['priority'] );
-		}
-
-		$this->registered_filters = [];
-
-		parent::tearDown();
-	}
-
-	/**
-	 * Helper to register filters and track them for cleanup.
+	 * Helper to register filters.
 	 *
 	 * @param string   $hook          Filter name.
 	 * @param callable $callback      Callback.
@@ -181,12 +159,6 @@ class ProductFilters extends \WC_Unit_Test_Case {
 	 */
 	private function register_filter( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		add_filter( $hook, $callback, $priority, $accepted_args );
-
-		$this->registered_filters[] = [
-			'hook'     => $hook,
-			'callback' => $callback,
-			'priority' => $priority,
-		];
 	}
 
 	/**

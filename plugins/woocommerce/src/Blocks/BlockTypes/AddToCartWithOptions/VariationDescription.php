@@ -9,7 +9,6 @@ use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
  * VariationDescription class.
  */
 class VariationDescription extends AbstractBlock {
-
 	use EnableBlockJsonAssetsTrait;
 
 	/**

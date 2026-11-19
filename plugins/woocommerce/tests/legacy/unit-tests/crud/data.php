@@ -18,8 +18,6 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		// @codingStandardsIgnoreStart
 		date_default_timezone_set( 'UTC' );
 		// @codingStandardsIgnoreEnd
-		update_option( 'gmt_offset', 0 );
-		update_option( 'timezone_string', '' );
 	}
 
 	/**

@@ -288,6 +288,126 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a site palette color email clients can’t render is left out of the sent email.
+	 *
+	 * Twenty Twenty-Five defines `accent-6` as color-mix(). A block reaches a palette color by its
+	 * slug, by its `has-*` class and by its preset variable, so the test checks the final HTML
+	 * rather than one lookup.
+	 */
+	public function testItLeavesOutSitePaletteColorsEmailClientsCannotRender(): void {
+		add_filter(
+			'woocommerce_email_editor_site_theme',
+			static function () {
+				return new \WP_Theme_JSON(
+					array(
+						'version'  => 3,
+						'settings' => array(
+							'color' => array(
+								'palette' => array(
+									array(
+										'slug'  => 'accent-6',
+										'name'  => 'Accent 6',
+										'color' => 'color-mix(in srgb, currentColor 20%, transparent)',
+									),
+									array(
+										'slug'  => 'accent-1',
+										'name'  => 'Accent 1',
+										'color' => '#ffee58',
+									),
+								),
+							),
+						),
+					),
+					'theme'
+				);
+			}
+		);
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:paragraph {"textColor":"accent-6"} --><p class="text-test has-accent-6-color has-text-color">Text</p><!-- /wp:paragraph -->
+				<!-- wp:paragraph {"backgroundColor":"accent-6"} --><p class="background-test has-accent-6-background-color has-background">Background</p><!-- /wp:paragraph -->
+				<!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|accent-6"}}}}} --><p class="has-link-color"><a class="link-test" href="https://example.com">Link</a></p><!-- /wp:paragraph -->
+				<!-- wp:paragraph {"textColor":"accent-1"} --><p class="control-test has-accent-1-color has-text-color">Control</p><!-- /wp:paragraph -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+
+		$this->assertStringNotContainsString( 'color-mix', $rendered['html'], 'A color email clients cannot render should not be sent.' );
+		$this->assertStringNotContainsString( 'color', $this->extractBlockStyle( $rendered['html'], 'text-test', 'p' ), 'The text should keep the surrounding color.' );
+		$this->assertStringNotContainsString( 'background', $this->extractBlockStyle( $rendered['html'], 'background-test', 'td' ), 'The block should keep the surrounding background.' );
+		$this->assertStringNotContainsString( 'color', $this->extractBlockStyle( $rendered['html'], 'link-test', 'a' ), 'The link should not point at a color the email does not have.' );
+		$this->assertStringContainsString( 'color: #ffee58', $this->extractBlockStyle( $rendered['html'], 'control-test', 'p' ), 'A hex palette color should still be inlined.' );
+	}
+
+	/**
+	 * Test site colors that point at a palette color still reach the sent email.
+	 *
+	 * A palette color can name another one, and a site style can name one of core’s colors, as the
+	 * button text of Twenty Twenty-Four’s Fossil style does.
+	 */
+	public function testItKeepsSiteColorsThatPointAtAPaletteColor(): void {
+		add_filter(
+			'woocommerce_email_editor_site_theme',
+			static function () {
+				return new \WP_Theme_JSON(
+					array(
+						'version'  => 3,
+						'settings' => array(
+							'color' => array(
+								'palette' => array(
+									array(
+										'slug'  => 'contrast',
+										'name'  => 'Contrast',
+										'color' => '#111111',
+									),
+									array(
+										'slug'  => 'primary',
+										'name'  => 'Primary',
+										'color' => 'var(--wp--preset--color--contrast)',
+									),
+								),
+							),
+						),
+						'styles'   => array(
+							'elements' => array(
+								'button' => array(
+									'color' => array(
+										'text'       => 'var(--wp--preset--color--white)',
+										'background' => '#65574e',
+									),
+								),
+							),
+						),
+					),
+					'theme'
+				);
+			}
+		);
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:paragraph {"textColor":"primary"} --><p class="alias-test has-primary-color has-text-color">Text</p><!-- /wp:paragraph -->
+				<!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|primary"}}}}} --><p class="has-link-color"><a class="alias-link-test" href="https://example.com">Link</a></p><!-- /wp:paragraph -->
+				<!-- wp:button --><div class="wp-block-button button-test"><a class="wp-block-button__link wp-element-button">Button</a></div><!-- /wp:button -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+
+		$this->assertStringContainsString( 'color: #111111', $this->extractBlockStyle( $rendered['html'], 'alias-test', 'p' ) );
+		$this->assertStringContainsString( 'color: #111111', $this->extractBlockStyle( $rendered['html'], 'alias-link-test', 'a' ), 'A link color that points at the alias should resolve too.' );
+		$button_style = $this->extractBlockStyle( $rendered['html'], 'button-test', 'td' );
+		$this->assertStringContainsString( 'background-color: #65574e', $button_style );
+		$this->assertStringContainsString( 'color: #ffffff', $button_style );
+	}
+
+	/**
 	 * Extracts the HTML of a block
 	 *
 	 * @param string $html HTML content.

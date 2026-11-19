@@ -103,8 +103,6 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		WC()->session = $this->previous_session;
 
-		remove_filter( 'woocommerce_shipping_legacy_flat_rate_is_available', array( $this, 'disable_legacy_flat_rate_shipping' ), 99999 );
-
 		parent::tearDown();
 	}
 
