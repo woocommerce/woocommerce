@@ -197,9 +197,9 @@ class ProductScan {
 			},
 			is_array( $query->posts ) ? $query->posts : array()
 		);
-		// The count and this query can disagree when the last eligible product is hidden between them.
-		// Only a database error is a failed list. An empty success publishes a scan of what is left.
-		if ( $this->available > 0 && array() === $product_ids && $query_failed ) {
+		// Only a database error is a failed list, whatever the counts say: they read 0 when their own queries fail.
+		// An empty success publishes a scan of what is left.
+		if ( $query_failed ) {
 			throw new \RuntimeException( 'Agent readiness could not list products to scan.' );
 		}
 		$this->truncated = count( $product_ids ) > self::PRODUCT_LIMIT;

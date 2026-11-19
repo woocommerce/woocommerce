@@ -622,6 +622,29 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A product list query error stops the scan even when the counts found no products.
+	 */
+	public function test_list_query_error_stops_the_scan_without_products(): void {
+		$fail = static function ( $posts, $query ) {
+			if ( ProductScan::PRODUCT_LIMIT + 1 !== (int) $query->get( 'posts_per_page' ) ) {
+				return $posts;
+			}
+			global $wpdb;
+			$wpdb->last_error = 'database unavailable';
+			return array();
+		};
+		add_filter( 'posts_pre_query', $fail, 10, 2 );
+		try {
+			$this->expectException( \RuntimeException::class );
+			( new ProductScan() )->start();
+		} finally {
+			remove_filter( 'posts_pre_query', $fail, 10 );
+			global $wpdb;
+			$wpdb->last_error = '';
+		}
+	}
+
+	/**
 	 * Set a product to Catalog visibility Hidden without saving it through the product editor.
 	 *
 	 * @param int $product_id Product id.
