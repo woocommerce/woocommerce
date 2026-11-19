@@ -25,8 +25,9 @@ export function usePresence< T, E extends Element = HTMLDivElement >(
 	const [ previousValue, setPreviousValue ] = useState( value );
 	const [ exitingValue, setExitingValue ] = useState< T | null >( null );
 
-	// Adjust state while rendering, so the exiting content never unmounts for a frame.
-	if ( value !== previousValue ) {
+	// Adjust state while rendering, so the exiting content never unmounts for a frame. Turning `exit` off mid-exit
+	// removes the content at once.
+	if ( value !== previousValue || ( ! exit && exitingValue !== null ) ) {
 		setPreviousValue( value );
 		setExitingValue( value === null && exit ? previousValue : null );
 	}
