@@ -232,3 +232,15 @@ export const collapseCopy = (
 	animateCollapse( copy, false );
 	whenAnimationsEnd( copy, () => copy.remove() );
 };
+
+/**
+ * Removes every copy that `collapseCopy` still collapses inside a container, so that a change that applies
+ * immediately leaves no space behind.
+ *
+ * @param container The element that holds the copies.
+ */
+export const removeCollapseCopies = ( container: HTMLElement | null ): void => {
+	container
+		?.querySelectorAll( `[${ COPY }]` )
+		.forEach( ( copy ) => copy.remove() );
+};
