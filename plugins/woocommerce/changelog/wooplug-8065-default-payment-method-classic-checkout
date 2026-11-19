@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Start the classic checkout and pay-for-order page on a customer's default saved card, and let the default payment method filter leave them unselected.

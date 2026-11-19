@@ -78,6 +78,11 @@ const LaunchStore = lazy(
 		)
 );
 
+const SalesReadiness = lazy(
+	() =>
+		import( /* webpackChunkName: "sales-readiness" */ '../sales-readiness' )
+);
+
 const MobileAppLoginPage = lazy(
 	() =>
 		import(
@@ -210,6 +215,25 @@ export const getPages = ( reports = [] ) => {
 			id: 'woocommerce-marketplace',
 		},
 	} );
+
+	if ( isFeatureEnabled( 'agent_readiness' ) ) {
+		pages.push( {
+			container: SalesReadiness,
+			layout: {
+				header: false,
+			},
+			path: '/sales-readiness',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Sales readiness', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_woocommerce',
+			capability: 'manage_woocommerce',
+			navArgs: {
+				id: 'woocommerce-sales-readiness',
+			},
+		} );
+	}
 
 	pages.push( {
 		container: CoreProfiler,
