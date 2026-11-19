@@ -3,6 +3,8 @@
  */
 import { useEffect, useLayoutEffect, useRef } from '@wordpress/element';
 import {
+	MOTION_SAFETY_TIMEOUT,
+	clearInlineStyle,
 	inertCopy,
 	whenAnimationsEnd,
 	whenAllAnimationsEnd,
@@ -12,10 +14,6 @@ import type { MouseEvent, RefObject } from 'react';
 // The styles in `style.scss` use these attributes.
 const MOVING = 'data-wc-row-removal';
 const COPY = 'data-wc-row-copy';
-
-// The fade takes 200ms and the slide 300ms. After this time, the motion ends even if the browser never reports the end
-// of an animation.
-const SAFETY_TIMEOUT = 1000;
 
 const ROW = 'tr[data-cart-item-key]';
 const ROWS = `:scope > tbody > ${ ROW }`;
@@ -43,15 +41,6 @@ const canAnimate = (
 
 const keyOf = ( row: HTMLTableRowElement ) => row.dataset.cartItemKey as string;
 
-const clearStyle = ( element: HTMLElement, property: string ) => {
-	element.style.removeProperty( property );
-	if ( element.style.length === 0 ) {
-		// Chrome writes the cleared declarations back as `style=""` when nothing has read the attribute since.
-		element.getAttribute( 'style' );
-		element.removeAttribute( 'style' );
-	}
-};
-
 // The bottom margin counts too: a table with collapsed borders holds the space of a removal in its margin.
 const heightOf = ( table: HTMLTableElement ) =>
 	table.getBoundingClientRect().height +
@@ -61,10 +50,18 @@ const measure = (
 	table: HTMLTableElement,
 	keys: string[]
 ): Snapshot | null => {
+	const rows = Array.from(
+		table.querySelectorAll< HTMLTableRowElement >( ROWS )
+	);
+	const kept = new Set( keys );
+	// Most changes add or reorder rows. Only read the layout when a row goes.
+	if ( rows.every( ( row ) => kept.has( keyOf( row ) ) ) ) {
+		return null;
+	}
 	const removed: RemovedRow[] = [];
 	const tops = new Map< string, number >();
-	table.querySelectorAll< HTMLTableRowElement >( ROWS ).forEach( ( row ) => {
-		if ( keys.includes( keyOf( row ) ) ) {
+	rows.forEach( ( row ) => {
+		if ( kept.has( keyOf( row ) ) ) {
 			tops.set( keyOf( row ), row.getBoundingClientRect().top );
 			return;
 		}
@@ -77,7 +74,7 @@ const measure = (
 			),
 		} );
 	} );
-	return removed.length ? { removed, tops, height: heightOf( table ) } : null;
+	return { removed, tops, height: heightOf( table ) };
 };
 
 // An inert copy of the row, in its own table box laid over the place where the row was. Table rows can't be
@@ -164,8 +161,8 @@ const playRemoval = (
 		isStopped = true;
 		cancels.forEach( ( cancel ) => cancel() );
 		table.removeAttribute( MOVING );
-		clearStyle( table, space );
-		moved.forEach( ( row ) => clearStyle( row, 'translate' ) );
+		clearInlineStyle( table, space );
+		moved.forEach( ( row ) => clearInlineStyle( row, 'translate' ) );
 		if ( removeCopies ) {
 			// Includes the copies of a removal that this one took over, which still fade out.
 			table
@@ -176,15 +173,18 @@ const playRemoval = (
 
 	const release = () => {
 		table.setAttribute( MOVING, '' );
-		clearStyle( table, space );
-		moved.forEach( ( row ) => clearStyle( row, 'translate' ) );
+		clearInlineStyle( table, space );
+		moved.forEach( ( row ) => clearInlineStyle( row, 'translate' ) );
 		cancels.push(
 			whenAllAnimationsEnd( [ table, ...moved ], () => stop( false ) )
 		);
 	};
 
 	cancels.push( whenAllAnimationsEnd( copies, release ) );
-	const safety = window.setTimeout( () => stop( true ), SAFETY_TIMEOUT );
+	const safety = window.setTimeout(
+		() => stop( true ),
+		MOTION_SAFETY_TIMEOUT
+	);
 	cancels.push( () => window.clearTimeout( safety ) );
 	return stop;
 };
