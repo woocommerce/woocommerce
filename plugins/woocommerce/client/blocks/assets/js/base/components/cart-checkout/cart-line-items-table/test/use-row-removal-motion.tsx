@@ -9,12 +9,18 @@ import { useRef } from '@wordpress/element';
  */
 import { useRowRemovalMotion } from '../use-row-removal-motion';
 
-const Table = ( { keys }: { keys: string[] } ) => {
+const Table = ( {
+	keys,
+	style,
+}: {
+	keys: string[];
+	style?: Record< string, string >;
+} ) => {
 	const tableRef = useRef< HTMLTableElement >( null );
 	useRowRemovalMotion( tableRef, keys );
 	return (
 		<div className="wp-block-woocommerce-cart">
-			<table ref={ tableRef }>
+			<table ref={ tableRef } style={ style }>
 				<tbody>
 					{ keys.map( ( key ) => (
 						<tr key={ key } data-cart-item-key={ key }>
@@ -70,5 +76,30 @@ describe( 'useRowRemovalMotion', () => {
 			jest.advanceTimersByTime( 1000 );
 		} );
 		expect( copies( container ) ).toHaveLength( 0 );
+	} );
+
+	it( 'puts back the inline spacing of the table after the hold', () => {
+		const rowHeight = 50;
+		const spy = jest
+			.spyOn( HTMLTableElement.prototype, 'getBoundingClientRect' )
+			.mockImplementation( function ( this: HTMLTableElement ) {
+				const height =
+					this.querySelectorAll( 'tr[data-cart-item-key]' ).length *
+					rowHeight;
+				return { top: 0, left: 0, width: 100, height } as DOMRect;
+			} );
+		const style = { paddingBottom: '24px' };
+		const { container, rerender } = render(
+			<Table keys={ [ 'a', 'b' ] } style={ style } />
+		);
+		const table = container.querySelector( 'table' ) as HTMLTableElement;
+		rerender( <Table keys={ [ 'b' ] } style={ style } /> );
+		expect( table.style.paddingBottom ).toBe( '74px' );
+
+		act( () => {
+			jest.advanceTimersByTime( 1000 );
+		} );
+		expect( table.style.paddingBottom ).toBe( '24px' );
+		spy.mockRestore();
 	} );
 } );
