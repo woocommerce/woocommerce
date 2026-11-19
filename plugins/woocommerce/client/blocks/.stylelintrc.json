@@ -39,15 +39,12 @@
 				"woocommerce/motion-safe": true,
 				"declaration-property-value-disallowed-list": [
 					{
-						"/^(-(webkit|moz|ms|o)-)?(transition|animation)/": [
-							"/(?:^|,(?![^()]*\\)))(?!(?:[^,()]|\\([^()]*\\))*\\binfinite\\b)(?:[^,()]|\\([^()]*\\))*?(?:^|[\\s(]|\\([^()]*?[\\s,])[\\d.]*[1-9][\\d.]*m?s\\b/"
-						],
 						"/^(-(webkit|moz|ms|o)-)?transition/": [
 							"/(^|[\\s,])all(?![\\w-])/i"
 						]
 					},
 					{
-						"message": "Use WPDS motion duration tokens instead of literal times (loops excepted), and list transitioned properties instead of \"all\". See docs/contributors/motion.md."
+						"message": "List transitioned properties instead of \"all\". See docs/contributors/motion.md."
 					}
 				]
 			}

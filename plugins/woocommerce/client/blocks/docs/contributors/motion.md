@@ -64,7 +64,7 @@ Movement runs only inside `@include motion-safe` (`@media (prefers-reduced-motio
 - Movement that only adds feel, such as the press scale, has no reduced version.
 - The spinner stops halfway through a turn. The skeleton shimmer stops.
 
-The `woocommerce/motion-safe` stylelint rule checks this. Another rule checks that durations use tokens and that transitions do not use `all`. These rules apply to the blocks that use motion and to the components they share. When a block starts to use motion, add its stylesheets to the `overrides` `files` list in `.stylelintrc.json`.
+The `woocommerce/motion-safe` stylelint rule checks this, and that durations use tokens. Another rule checks that transitions do not use `all`. These rules apply to the blocks that use motion and to the components they share. When a block starts to use motion, add its stylesheets to the `overrides` `files` list in `.stylelintrc.json`.
 
 ## Helpers
 
