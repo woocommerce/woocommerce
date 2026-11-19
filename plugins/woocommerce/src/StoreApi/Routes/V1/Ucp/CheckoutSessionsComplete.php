@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Orders\OrderAttributionController;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
@@ -149,6 +150,8 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			return $this->ucp_error( Utils::cart_error_code( (string) $e->getErrorCode() ), wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200, '$.line_items' );
 		}
 
+		$this->record_attribution( $order, $request );
+
 		// The payment page only takes an order awaiting payment, which a checkout draft is not.
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
@@ -168,6 +171,43 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		$this->save_checkout_state( $state );
 
 		return $this->checkout_response( $checkout_id, $this->checkout_state() ?? $state, 200, $cart );
+	}
+
+	/**
+	 * Record the order as started by an AI shopper, so its origin is not Unknown.
+	 *
+	 * The payment page records no attribution of its own.
+	 * The source is the host of the agent profile in the `UCP-Agent` header, or `ucp` without a valid one.
+	 * The header is not verified, so the host is a detail and not part of the origin.
+	 * Saved only with order attribution on, and never over attribution the order already has.
+	 *
+	 * @param \WC_Order        $order   The order being handed off.
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 */
+	private function record_attribution( \WC_Order $order, \WP_REST_Request $request ): void {
+		$attribution = wc_get_container()->get( OrderAttributionController::class );
+
+		if ( $attribution->has_attribution( $order ) ) {
+			return;
+		}
+
+		preg_match( '/profile="([^"]+)"/', (string) $request->get_header( 'UCP-Agent' ), $match );
+		$host = isset( $match[1] ) ? strtolower( (string) wp_parse_url( $match[1], PHP_URL_HOST ) ) : '';
+
+		// Every field is set, because the listener reads each one without checking it exists.
+		$data = array_merge(
+			array_fill_keys( $attribution->get_field_names(), '' ),
+			array(
+				'source_type' => 'ai_shopper',
+				'utm_source'  => preg_match( '/^[a-z0-9.-]+$/', $host ) ? $host : 'ucp',
+				'utm_medium'  => 'ucp',
+			)
+		);
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in OrderAttributionController.
+		do_action( 'woocommerce_order_save_attribution_data', $order, $data );
 	}
 
 	/**
