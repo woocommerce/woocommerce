@@ -130,9 +130,15 @@ describe( 'fetchExperimentAssignmentWithDefaultVariationName', () => {
 			{ woocommerce_test: 'treatment' },
 		],
 		[
-			'keeps null when there is no assignment',
+			'keeps null when the traffic ramp leaves the store out',
 			{ woocommerce_test: null },
 			{ woocommerce_test: { variation: null } },
+			{ woocommerce_test: null },
+		],
+		[
+			'keeps null when the assignment entry is null',
+			{ woocommerce_test: null },
+			{ woocommerce_test: null },
 			{ woocommerce_test: null },
 		],
 		[ 'keeps the response when the experiment is not running', {}, {}, {} ],
