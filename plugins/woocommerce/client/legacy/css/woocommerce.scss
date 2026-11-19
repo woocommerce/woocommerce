@@ -1938,6 +1938,13 @@ p.demo_store,
 	}
 }
 
+.woocommerce-message address,
+.wc-block-components-notice-banner address {
+	display: inline;
+	margin: 0;
+	font-style: normal;
+}
+
 .woocommerce-info {
 	border-top-color: #1e85be;
 
@@ -2427,6 +2434,11 @@ p.demo_store,
 		line-height: 1.4;
 	}
 
+	address.woocommerce-order-withdrawal-content__note {
+		display: block;
+		font-style: normal;
+	}
+
 	&__field-description,
 	.description {
 		display: block;
@@ -2516,6 +2528,11 @@ p.demo_store,
 
 		dd {
 			font-size: 1em;
+		}
+
+		address {
+			margin: 0;
+			font-style: normal;
 		}
 	}
 

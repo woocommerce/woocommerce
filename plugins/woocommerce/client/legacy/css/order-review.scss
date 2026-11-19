@@ -15,6 +15,12 @@
 		}
 	}
 
+	// Address is italic with a margin in the browser. This line stays one block.
+	&__meta {
+		margin: 0;
+		font-style: normal;
+	}
+
 	// Nested for the weight to beat a theme's own button rules.
 	& &__submit[aria-disabled="true"] {
 		opacity: 0.5;
