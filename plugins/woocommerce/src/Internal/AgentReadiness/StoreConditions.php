@@ -72,9 +72,8 @@ class StoreConditions {
 			'name'    => $name,
 			'label'   => $label,
 			'why'     => $why,
-			// The AI shopping section lands with #70590; until then the tab has one page.
-			'fix'     => __( 'Choose a published page under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
-			'fix_url' => AgenticCommerceSettings::url() . '#' . $option,
+			'fix'     => __( 'Choose a published page under WooCommerce > Settings > AI tools > AI shopping.', 'woocommerce' ),
+			'fix_url' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ) . '#' . $option,
 		);
 
 		$conditions = array(
@@ -111,8 +110,8 @@ class StoreConditions {
 				'name'    => __( 'Universal Commerce Protocol (UCP) is on', 'woocommerce' ),
 				'label'   => __( 'Universal Commerce Protocol (UCP) is off', 'woocommerce' ),
 				'why'     => __( 'Shopping agents that use UCP cannot read your catalog.', 'woocommerce' ),
-				'fix'     => __( 'Turn on "Allow AI assistants to shop your store" under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
-				'fix_url' => AgenticCommerceSettings::url(),
+				'fix'     => __( 'Turn on "Allow AI assistants to shop your store" under WooCommerce > Settings > AI tools > AI shopping.', 'woocommerce' ),
+				'fix_url' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ),
 			),
 			array(
 				'id'      => 'https',

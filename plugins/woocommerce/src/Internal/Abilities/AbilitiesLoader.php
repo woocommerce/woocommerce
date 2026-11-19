@@ -19,6 +19,9 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CustomersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewayUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributeCreate;
@@ -67,6 +70,9 @@ class AbilitiesLoader {
 	 */
 	private const CORE_ABILITY_DEFINITION_CLASSES = array(
 		OrdersQuery::class,
+		CouponsQuery::class,
+		CouponCreate::class,
+		CouponUpdate::class,
 		OrderAddNote::class,
 		OrderCreate::class,
 		OrderNotesQuery::class,
