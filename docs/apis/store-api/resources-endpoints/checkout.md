@@ -75,6 +75,7 @@ Note the `__experimental_calc_totals` parameter. This is used to determine if th
 | `additional_fields` | object |    No    | Name => value pairs of additional fields to update. |
 | `payment_method`    | string |    No    | The ID of the payment method selected.              |
 | `order_notes`       | string |    No    | Order notes.                                        |
+| `regulatory_fields` | object |    No    | Field ID => value pairs of regulatory fields typed so far. See [Regulatory fields](#regulatory-fields). |
 
 ```sh
 curl --header "Nonce: 12345" --request PUT https://example-store.com/wp-json/wc/store/v1/checkout?additional_fields[plugin-namespace/leave-on-porch]=true&additional_fields[plugin-namespace/location-on-porch]=dsdd&payment_method=bacs&order_notes=Please%20leave%20package%20on%20back%20porch
@@ -158,6 +159,7 @@ POST /wc/store/v1/checkout
 | `payment_data`      | array  |    No    | Data to pass through to the payment method when processing payment. |
 | `customer_password` | string |    No    | Optionally define a password for new accounts.                      |
 | `expected_total`    | string |    No    | Total the shopper confirmed, in minor units. See note below.        |
+| `regulatory_fields` | object |    No    | Field ID => value pairs for the regulatory fields the cart lists. See [Regulatory fields](#regulatory-fields). |
 
 `expected_total` is a string in the smallest unit of the store currency (e.g. cents), matching the cart `totals.total_price` format. When provided, the order is rejected with a `409` (`woocommerce_rest_checkout_total_mismatch`) if the total the server calculates for the request no longer matches it, and the refreshed cart is returned so the client can display the updated total. Omit it to skip the check — e.g. for flows that cannot know the final total up front, such as some express payment methods.
 
@@ -246,6 +248,25 @@ curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc
   }
 }
 ```
+
+## Regulatory fields
+
+Some countries require extra information with every order, such as the CPF or CNPJ in Brazil. WooCommerce decides which fields apply from where the order is delivered, and lists them in the `regulatory_fields` property of the [cart response](/docs/apis/store-api/resources-endpoints/cart#cart-response).
+
+Send a value for each listed field in the `regulatory_fields` object, keyed by field ID:
+
+```json
+{
+  "regulatory_fields": {
+    "br_tax_id": "529.982.247-25"
+  }
+}
+```
+
+- When the order is placed (`POST`), a missing required value or a value that is not valid rejects the order with a `400` and the code `woocommerce_rest_invalid_regulatory_field`. The error data names the field in `field`.
+- Values are stored without punctuation and returned that way in the checkout response, for example `52998224725`.
+- Values for fields the cart does not list are ignored.
+- A `PUT` keeps the values as typed for the rest of the session, without validating them, so a checkout page can restore them after a reload.
 
 ## Payment Data
 

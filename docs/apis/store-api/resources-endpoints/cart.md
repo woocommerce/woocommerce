@@ -342,9 +342,24 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 	"cross_sells": [],
 	"errors": [],
 	"payment_methods": [ "bacs", "cod" ],
+	"regulatory_fields": [],
 	"extensions": {}
 }
 ```
+
+`regulatory_fields` lists the fields that the rules of the country the order is delivered to require with the order. The list is empty for most carts. It changes with the shipping address, the billing address and the chosen shipping method, so read it again after each cart update. For an order delivered to Brazil it contains the CPF/CNPJ:
+
+```json
+"regulatory_fields": [
+	{
+		"id": "br_tax_id",
+		"label": "CPF/CNPJ",
+		"required": true
+	}
+]
+```
+
+Send the values with the [checkout request](/docs/apis/store-api/resources-endpoints/checkout#regulatory-fields).
 
 ### Error Response
 
