@@ -19,6 +19,9 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CustomersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewayUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributeCreate;
@@ -37,11 +40,15 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneMethodCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZoneMethodUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusGet;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolRun;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
 use Automattic\WooCommerce\Internal\AgentReadiness\RunCheckAbility;
+use Automattic\WooCommerce\Internal\Abilities\Domain\StoreSettingsGet;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsGroupsQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -64,6 +71,9 @@ class AbilitiesLoader {
 	 */
 	private const CORE_ABILITY_DEFINITION_CLASSES = array(
 		OrdersQuery::class,
+		CouponsQuery::class,
+		CouponCreate::class,
+		CouponUpdate::class,
 		OrderAddNote::class,
 		OrderCreate::class,
 		OrderNotesQuery::class,
@@ -88,6 +98,7 @@ class AbilitiesLoader {
 		ReportAbility::class,
 		RunCheckAbility::class,
 		ShippingZonesQuery::class,
+		SystemStatusGet::class,
 		SystemStatusToolsQuery::class,
 		SystemStatusToolRun::class,
 		ShippingZoneCreate::class,
@@ -95,6 +106,9 @@ class AbilitiesLoader {
 		ShippingZoneMethodUpdate::class,
 		TaxRatesQuery::class,
 		CustomersQuery::class,
+		StoreSettingsGet::class,
+		SettingsQuery::class,
+		SettingsGroupsQuery::class,
 	);
 
 	/**

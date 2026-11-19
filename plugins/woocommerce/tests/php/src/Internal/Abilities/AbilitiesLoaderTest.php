@@ -34,6 +34,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private static $administrator_id;
 
 	private const CANONICAL_ABILITY_IDS = array(
+		'woocommerce/coupons-query',
+		'woocommerce/coupon-create',
+		'woocommerce/coupon-update',
+		'woocommerce/store-settings-get',
+		'woocommerce/settings-groups-query',
+		'woocommerce/settings-query',
 		'woocommerce/product-terms-query',
 		'woocommerce/product-term-create',
 		'woocommerce/product-term-update',
@@ -60,6 +66,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/shipping-zone-create',
 		'woocommerce/shipping-zone-method-create',
 		'woocommerce/shipping-zone-method-update',
+		'woocommerce/system-status-get',
 		'woocommerce/tax-rates-query',
 		'woocommerce/system-status-tools-query',
 		'woocommerce/system-status-tool-run',
@@ -356,6 +363,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'idempotent'  => true,
 				'destructive' => false,
 			),
+			'woocommerce/system-status-get'           => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
 			'woocommerce/customers-query'             => array(
 				'readonly'    => true,
 				'idempotent'  => true,
@@ -461,7 +473,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertArrayHasKey( 'total_pages', $properties );
 			$this->assertArrayHasKey( 'page', $properties );
 			$this->assertArrayHasKey( 'per_page', $properties );
-			$this->assertArrayNotHasKey( 'total', $properties );
+			$this->assertSame( 'integer', $properties['total']['type'] );
+			$this->assertNotEmpty( $properties['total']['description'] );
 			$this->assertNotEmpty( $properties[ $collection_key ]['description'] ?? '' );
 			$this->assertNotEmpty( $properties['total_pages']['description'] ?? '' );
 			$this->assertNotEmpty( $properties['page']['description'] ?? '' );
@@ -1035,6 +1048,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
+			'coupons-query'               => array( 'woocommerce/coupons-query', array() ),
+			'coupon-create'               => array( 'woocommerce/coupon-create', array( 'code' => 'forbidden' ) ),
+			'coupon-update'               => array(
+				'woocommerce/coupon-update',
+				array(
+					'id'     => 1,
+					'amount' => '10',
+				),
+			),
+			'store-settings-get'          => array( 'woocommerce/store-settings-get', array() ),
+			'settings-groups-query'       => array( 'woocommerce/settings-groups-query', array() ),
+			'settings-query'              => array( 'woocommerce/settings-query', array( 'group' => 'general' ) ),
 			'product-terms-query'         => array(
 				'woocommerce/product-terms-query',
 				array(
@@ -1159,6 +1184,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'woocommerce/payment-gateways-query',
 				array(),
 			),
+			'system-status-get'           => array(
+				'woocommerce/system-status-get',
+				array(),
+			),
 			'customers-query'             => array(
 				'woocommerce/customers-query',
 				array(),
@@ -1243,6 +1272,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$missing_id = array( 'id' => PHP_INT_MAX );
 
 		return array(
+			'coupon-create'                  => array( 'woocommerce/coupon-create', array( 'code' => 'granted' ) ),
+			'coupons-query'                  => array( 'woocommerce/coupons-query', array() ),
 			'products-query'                 => array( 'woocommerce/products-query', $missing_id ),
 			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
 			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),
@@ -1255,6 +1286,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'enabled' => true,
 				),
 			),
+			'system-status-get'              => array( 'woocommerce/system-status-get', array() ),
 			'customers-query'                => array( 'woocommerce/customers-query', array() ),
 			'shipping-zones-query'           => array( 'woocommerce/shipping-zones-query', array() ),
 			'shipping-zone-method-update'    => array(
@@ -5779,6 +5811,27 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'Direct bank transfer', array_column( $result['gateways'], 'method_title', 'id' )['bacs'] );
 		$this->assertSame( 1, $result['total_pages'] );
 		$this->assertSame( count( $result['gateways'] ), $result['per_page'] );
+		$this->assertSame( count( $result['gateways'] ), $result['total'] );
+	}
+
+	/**
+	 * @testdox Should return zero totals when no payment gateways are loaded.
+	 */
+	public function test_payment_gateways_query_returns_zero_total_without_gateways(): void {
+		add_filter( 'woocommerce_payment_gateways', '__return_empty_array' );
+		try {
+			self::reload_payment_gateways();
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array() );
+		} finally {
+			remove_filter( 'woocommerce_payment_gateways', '__return_empty_array' );
+			self::reload_payment_gateways();
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( array(), $result['gateways'] );
+		$this->assertSame( 0, $result['total'] );
+		$this->assertSame( 0, $result['per_page'] );
+		$this->assertSame( 0, $result['total_pages'] );
 	}
 
 	/**
@@ -5932,6 +5985,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $result );
 		$this->assertSame( 'bacs', $result['gateways'][0]['id'] );
+		$this->assertSame( 1, $result['total'] );
 	}
 
 	/**

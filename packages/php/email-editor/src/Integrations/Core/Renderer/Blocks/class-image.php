@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
@@ -41,6 +42,7 @@ class Image extends Abstract_Block_Renderer {
 
 		$parsed_block = $this->add_image_size_when_missing( $parsed_block, $image_url );
 		$image        = $this->add_image_dimensions( $image, $parsed_block );
+		$image        = $this->apply_server_crop( $image, $parsed_block );
 
 		$image_with_wrapper = str_replace(
 			array( '{image_content}', '{caption_content}' ),
@@ -356,6 +358,67 @@ class Image extends Abstract_Block_Renderer {
 		}
 
 		return $block_content;
+	}
+
+	/**
+	 * Swap a cropped image for a server-cropped file when an integration provides one.
+	 *
+	 * The block's crop is saved as `aspect-ratio` and `object-fit` CSS, which Gmail and Outlook ignore.
+	 * A file that is already cropped renders the same everywhere once it carries the crop's dimensions.
+	 * Without one the image keeps its own ratio, since a crop height on the full file would squash it.
+	 *
+	 * @param string $block_content Image HTML.
+	 * @param array  $parsed_block Parsed block.
+	 */
+	private function apply_server_crop( string $block_content, array $parsed_block ): string {
+		$attrs        = $parsed_block['attrs'] ?? array();
+		$aspect_ratio = isset( $attrs['aspectRatio'] ) && is_string( $attrs['aspectRatio'] ) ? trim( $attrs['aspectRatio'] ) : '';
+		$ratio_value  = Html_Processing_Helper::parse_aspect_ratio( $aspect_ratio );
+		$block_width  = isset( $attrs['width'] ) && is_scalar( $attrs['width'] ) ? trim( (string) $attrs['width'] ) : '';
+
+		// A contain scale letterboxes instead of cropping, and only a pixel width gives a size to crop to.
+		if ( null === $ratio_value || 'cover' !== ( $attrs['scale'] ?? null ) || ! preg_match( '/^\d+(?:\.\d+)?(?:px)?$/', $block_width ) ) {
+			return $block_content;
+		}
+
+		$html = new \WP_HTML_Tag_Processor( $block_content );
+		if ( ! $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
+			return $block_content;
+		}
+
+		$src       = $html->get_attribute( 'src' );
+		$image_url = is_string( $src ) ? $src : '';
+		$width     = (int) round( Styles_Helper::parse_value( $block_width ) );
+		if ( '' === $image_url || $width <= 0 ) {
+			return $block_content;
+		}
+		$height = Html_Processing_Helper::get_crop_height( $width, $ratio_value );
+
+		/**
+		 * Filters the URL of a cropped image block so an integration can serve a server-cropped file.
+		 *
+		 * Takes the same arguments as `woocommerce_email_editor_gallery_cropped_image_url`, so one
+		 * callback can serve both. Return the URL unchanged to keep the uncropped image.
+		 *
+		 * @since 2.21.0
+		 *
+		 * @param string $image_url    The original image URL.
+		 * @param string $aspect_ratio The block's aspect ratio (e.g. "1", "4/3").
+		 * @param int    $width        Display width of the image in px.
+		 * @param int    $height       Display height the crop gives the image in px.
+		 * @param array  $attrs        Parsed attributes of the core/image block (id, sizeSlug, ...).
+		 */
+		$filtered_url = apply_filters( 'woocommerce_email_editor_image_cropped_image_url', $image_url, $aspect_ratio, $width, $height, $attrs );
+
+		$cropped_url = Html_Processing_Helper::get_server_cropped_url( $filtered_url, $image_url );
+		if ( '' === $cropped_url ) {
+			return $block_content;
+		}
+
+		$html->set_attribute( 'src', $cropped_url );
+		$html->set_attribute( 'width', (string) $width );
+		$html->set_attribute( 'height', (string) $height );
+		return $html->get_updated_html();
 	}
 
 	/**

@@ -48,18 +48,27 @@ final class SimpleCheck extends AbstractReadinessCheck {
 	private \Closure $test;
 
 	/**
+	 * Whether one variation has the problem, for checks a variable product fails through its variations.
+	 *
+	 * @var \Closure(\WC_Product):bool|null
+	 */
+	private ?\Closure $variation_test;
+
+	/**
 	 * Build a check.
 	 *
 	 * @param string                                           $id       Check id.
 	 * @param array{label:string,why:string,fix:string}        $texts    Merchant-facing texts.
 	 * @param array<string, array{field:string,effect:string}> $channels Field and effect by channel.
 	 * @param \Closure                                         $test     Whether a product has the problem: fn( \WC_Product ): bool.
+	 * @param \Closure|null                                    $variation_test Whether one variation has it, for checks a variable product fails through its variations.
 	 */
-	public function __construct( string $id, array $texts, array $channels, \Closure $test ) {
-		$this->id       = $id;
-		$this->texts    = $texts;
-		$this->channels = $channels;
-		$this->test     = $test;
+	public function __construct( string $id, array $texts, array $channels, \Closure $test, ?\Closure $variation_test = null ) {
+		$this->id             = $id;
+		$this->texts          = $texts;
+		$this->channels       = $channels;
+		$this->test           = $test;
+		$this->variation_test = $variation_test;
 	}
 
 	/**
@@ -119,7 +128,8 @@ final class SimpleCheck extends AbstractReadinessCheck {
 					'fix'   => __( 'Set the options on each variation.', 'woocommerce' ),
 				),
 				self::fields( array( 'variant_dict', 'color, size', 'color, sizes' ), self::EFFECT_GAPS ),
-				\Closure::fromCallable( array( self::class, 'has_unset_variation_option' ) )
+				\Closure::fromCallable( array( self::class, 'has_unset_variation_option' ) ),
+				\Closure::fromCallable( array( self::class, 'has_unset_option' ) )
 			),
 			new self(
 				'missing_variation_images',
@@ -131,12 +141,13 @@ final class SimpleCheck extends AbstractReadinessCheck {
 				self::fields( array( 'image_url', 'image_link', 'imageLink' ), self::EFFECT_GAPS ),
 				static function ( \WC_Product $product ): bool {
 					foreach ( ProductFields::variations( $product ) as $variation ) {
-						if ( (int) $variation->get_image_id( 'edit' ) <= 0 ) {
+						if ( self::has_no_own_image( $variation ) ) {
 							return true;
 						}
 					}
 					return false;
-				}
+				},
+				\Closure::fromCallable( array( self::class, 'has_no_own_image' ) )
 			),
 			new self(
 				'title_too_long',
@@ -195,22 +206,65 @@ final class SimpleCheck extends AbstractReadinessCheck {
 	 * @param \WC_Product $product Published product.
 	 */
 	private static function has_unset_variation_option( \WC_Product $product ): bool {
-		if ( ! $product instanceof \WC_Product_Variable ) {
-			return false;
-		}
-		$variation_attributes = array_filter(
-			$product->get_attributes(),
-			static fn( $attribute ): bool => $attribute instanceof \WC_Product_Attribute && $attribute->get_variation()
-		);
-		if ( empty( $variation_attributes ) ) {
-			return true;
+		if ( array() === self::variation_attributes( $product ) ) {
+			return $product instanceof \WC_Product_Variable;
 		}
 		foreach ( ProductFields::variations( $product ) as $variation ) {
-			if ( in_array( '', array_map( 'strval', $variation->get_attributes() ), true ) ) {
+			if ( self::has_unset_option( $variation ) ) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Attributes the parent uses for variations.
+	 *
+	 * @param \WC_Product $product Product.
+	 * @return array<int, \WC_Product_Attribute>
+	 */
+	private static function variation_attributes( \WC_Product $product ): array {
+		if ( ! $product instanceof \WC_Product_Variable ) {
+			return array();
+		}
+		return array_filter(
+			$product->get_attributes(),
+			static fn( $attribute ): bool => $attribute instanceof \WC_Product_Attribute && $attribute->get_variation()
+		);
+	}
+
+	/**
+	 * Whether a variation has an option set to "any".
+	 *
+	 * @param \WC_Product $variation Variation.
+	 */
+	private static function has_unset_option( \WC_Product $variation ): bool {
+		return in_array( '', array_map( 'strval', $variation->get_attributes() ), true );
+	}
+
+	/**
+	 * Whether a variation has no image of its own.
+	 *
+	 * @param \WC_Product $variation Variation.
+	 */
+	private static function has_no_own_image( \WC_Product $variation ): bool {
+		return (int) $variation->get_image_id( 'edit' ) <= 0;
+	}
+
+	/**
+	 * The variations that have the problem, for checks a variable product fails through its variations.
+	 *
+	 * @param \WC_Product $product Product that fails the rule.
+	 * @param ProductScan $scan    Catalog-wide lookups.
+	 * @return array<int, int>|null
+	 */
+	public function failing_variations( \WC_Product $product, ProductScan $scan ): ?array {
+		unset( $scan );
+		// No variation attribute on the parent fails the whole product. A child that still stores a blank option must not shrink that to one variation's sales.
+		if ( null === $this->variation_test || ( 'variation_attributes_not_set' === $this->id && array() === self::variation_attributes( $product ) ) ) {
+			return null;
+		}
+		return self::variation_ids_where( $product, $this->variation_test );
 	}
 
 	/**

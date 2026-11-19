@@ -1,0 +1,76 @@
+{
+	"name": "@woocommerce/extension-tooling",
+	"version": "1.3.0",
+	"description": "Shared build and development tools for WooCommerce extensions.",
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"engines": {
+		"node": "^24.15.0"
+	},
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/extension-tooling/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git",
+		"directory": "packages/js/extension-tooling"
+	},
+	"exports": {
+		"./webpack-dist-minify": "./src/webpack-dist-minify.js",
+		"./webpack-text-includes": "./src/webpack-text-includes.js",
+		"./check-i18n": "./src/check-i18n.js",
+		"./playwright-defaults": "./src/playwright-defaults.js",
+		"./e2e-site-config": "./src/e2e-site-config.js",
+		"./php-warning-filter": "./src/php-warning-filter.js",
+		"./stylelint/legacy-scss": "./configs/stylelint-legacy-scss.json"
+	},
+	"bin": {
+		"woo-extension-config": "./bin/woo-config.sh",
+		"woo-extension-env-start": "./bin/env-start.sh",
+		"woo-extension-env-dev-reset": "./bin/env-dev-reset.sh",
+		"woo-extension-tooling": "./bin/woo-extension-tooling.js"
+	},
+	"files": [
+		"bin",
+		"configs",
+		"src"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"lint": "eslint src test bin/*.js",
+		"test": "node --test"
+	},
+	"dependencies": {
+		"uglify-js": "3.19.3"
+	},
+	"devDependencies": {
+		"@woocommerce/eslint-config": "workspace:*",
+		"eslint": "catalog:tooling",
+		"webpack": "catalog:tooling"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "{bin,src,test}/**/*.js"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test",
+					"changes": [
+						"package.json",
+						"bin/*",
+						"{src,test}/**/*.js",
+						"test/fixtures/**/*.php"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
+		}
+	}
+}

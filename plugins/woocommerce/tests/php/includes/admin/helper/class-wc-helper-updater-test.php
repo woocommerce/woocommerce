@@ -2399,6 +2399,337 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Values the update-check response could report for requires, and what the update item should carry.
+	 *
+	 * @return array
+	 */
+	public function requires_values(): array {
+		return array(
+			'major.minor'       => array( '7.2', '7.2' ),
+			'major.minor.patch' => array( '6.8.1', '6.8.1' ),
+			'padded'            => array( ' 7.0 ', '7.0' ),
+			'number'            => array( 7, '7' ),
+			'missing'           => array( null, null ),
+			'empty string'      => array( '', null ),
+			'pre-release'       => array( '7.2-RC1', '7.2-RC1' ),
+			'empty suffix'      => array( '7.2-', null ),
+			'not a version'     => array( 'latest', null ),
+			'array'             => array( array( '7.0' ), null ),
+		);
+	}
+
+	/**
+	 * @testdox A plugin update item reports the WordPress requirement the update-check response carries: $_dataName.
+	 * @dataProvider requires_values
+	 *
+	 * @param mixed       $requires Raw value the update-check response reports for requires, or null when it reports none.
+	 * @param string|null $expected The requires value the update item should carry, or null for none.
+	 */
+	public function test_transient_update_plugins_passes_requires( $requires, ?string $expected ): void {
+		$filename = $this->mock_local_woo_plugin();
+		$this->mock_update_check_products( 123, false );
+		if ( null !== $requires ) {
+			$this->mocked_updates[123]['requires'] = $requires;
+		}
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			$transient = WC_Helper_Updater::transient_update_plugins(
+				(object) array(
+					'response'  => array(),
+					'no_update' => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$this->assertSame(
+			$expected,
+			( (array) $transient->response[ $filename ] )['requires'] ?? null,
+			'The plugin update item should carry only a valid WordPress requirement'
+		);
+	}
+
+	/**
+	 * @testdox A theme update item reports the WordPress requirement, so core's theme screens can withhold the update.
+	 */
+	public function test_transient_update_themes_passes_requires(): void {
+		$stylesheet = $this->mock_local_woo_theme();
+		$this->mock_update_check_products( 456, false );
+		$this->mocked_updates[456]['requires'] = '7.2';
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			$transient = WC_Helper_Updater::transient_update_themes(
+				(object) array(
+					'response' => array(),
+					'checked'  => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$this->assertSame( '7.2', $transient->response[ $stylesheet ]['requires'] ?? null );
+	}
+
+	/**
+	 * Auto-update decisions for a plugin update offer, and what the filters should leave.
+	 *
+	 * @return array
+	 */
+	public function auto_update_offers(): array {
+		return array(
+			'Woo update needing a newer WordPress'     => array( true, true, '99.0', false ),
+			'Woo update needing a WordPress RC'        => array( true, true, '99.0-RC1', false ),
+			'Woo update the site meets'                => array( true, true, '1.0', true ),
+			'Woo update without a requirement'         => array( true, true, null, true ),
+			'another plugin needing a newer WordPress' => array( false, true, '99.0', true ),
+			'undecided Woo update needing a newer WordPress' => array( true, null, '99.0', null ),
+			'Woo update already turned off'            => array( true, false, '99.0', false ),
+		);
+	}
+
+	/**
+	 * @testdox An auto-update to a WooCommerce.com plugin version that needs a newer WordPress is skipped: $_dataName.
+	 * @dataProvider auto_update_offers
+	 *
+	 * @param bool        $is_woo   Whether the offer is for the local WooCommerce.com plugin.
+	 * @param bool|null   $update   Decision passed into the filter.
+	 * @param string|null $requires WordPress version the offer needs, or null for none.
+	 * @param bool|null   $expected Decision expected after the filters.
+	 */
+	public function test_auto_update_plugin_skips_update_needing_newer_wp( bool $is_woo, ?bool $update, ?string $requires, ?bool $expected ): void {
+		$filename = $this->mock_local_woo_plugin();
+
+		$item = (object) array(
+			'plugin'      => $is_woo ? $filename : 'another-plugin/another-plugin.php',
+			'new_version' => '2.0.0',
+			'autoupdate'  => true,
+		);
+		if ( null !== $requires ) {
+			$item->requires = $requires;
+		}
+
+		$this->assertSame( $expected, WC_Helper_Updater::skip_auto_update_needing_newer_wp( $update, $item ) );
+	}
+
+	/**
+	 * @testdox Another auto_update_plugin callback can't switch back on an update that needs a newer WordPress.
+	 */
+	public function test_auto_update_plugin_skip_runs_after_other_callbacks(): void {
+		$item = (object) array(
+			'plugin'      => $this->mock_local_woo_plugin(),
+			'new_version' => '2.0.0',
+			'requires'    => '99.0',
+			'autoupdate'  => true,
+		);
+
+		add_filter( 'auto_update_plugin', '__return_true', 999 );
+		try {
+			$this->assertFalse( apply_filters( 'auto_update_plugin', true, $item ) );
+		} finally {
+			remove_filter( 'auto_update_plugin', '__return_true', 999 );
+		}
+	}
+
+	/**
+	 * @testdox An auto-update to a WooCommerce.com theme version that needs a newer WordPress is skipped.
+	 */
+	public function test_auto_update_theme_skips_update_needing_newer_wp(): void {
+		$stylesheet = $this->mock_local_woo_theme();
+
+		$item = (object) array(
+			'theme'       => $stylesheet,
+			'new_version' => '2.0.0',
+			'requires'    => '99.0',
+		);
+
+		$this->assertFalse( apply_filters( 'auto_update_theme', true, $item ) );
+	}
+
+	/**
+	 * @testdox The plugin update row explains an update that needs a newer WordPress, with a link for users who can update it.
+	 * @testWith ["administrator", true]
+	 *           ["editor", false]
+	 *
+	 * @param string $role      Role of the current user.
+	 * @param bool   $with_link Whether the Update WordPress link is expected.
+	 */
+	public function test_update_row_explains_update_needing_newer_wp( string $role, bool $with_link ): void {
+		$user_id = self::factory()->user->create( array( 'role' => $role ) );
+		if ( is_multisite() && 'administrator' === $role ) {
+			grant_super_admin( $user_id ); // Only super admins have update_core on multisite.
+		}
+		wp_set_current_user( $user_id );
+
+		ob_start();
+		WC_Helper_Updater::display_notice_for_update_needing_newer_wp( array(), (object) array( 'requires' => '99.0' ) );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'This update needs WordPress 99.0 or later, and this site runs WordPress ' . wp_get_wp_version() . '.', $output );
+		$this->assertSame( $with_link, str_contains( $output, 'update-core.php' ), 'Only users who can update WordPress should get the link' );
+	}
+
+	/**
+	 * @testdox The plugin update row adds nothing when the site meets the update's WordPress requirement.
+	 * @testWith ["1.0"]
+	 *           [""]
+	 *
+	 * @param string $requires WordPress version the update needs.
+	 */
+	public function test_update_row_is_quiet_when_wp_requirement_is_met( string $requires ): void {
+		ob_start();
+		WC_Helper_Updater::display_notice_for_update_needing_newer_wp( array(), (object) array( 'requires' => $requires ) );
+
+		$this->assertSame( '', ob_get_clean() );
+	}
+
+	/**
+	 * Update downloads for a plugin offer, and whether the download should be stopped.
+	 *
+	 * @return array
+	 */
+	public function pre_download_offers(): array {
+		return array(
+			'Woo update needing a newer WordPress'     => array( true, '99.0', true ),
+			'Woo update the site meets'                => array( true, '1.0', false ),
+			'Woo update without a requirement'         => array( true, null, false ),
+			'another plugin needing a newer WordPress' => array( false, '99.0', false ),
+		);
+	}
+
+	/**
+	 * @testdox Downloading a WooCommerce.com plugin update that needs a newer WordPress is stopped, whichever path runs it: $_dataName.
+	 * @dataProvider pre_download_offers
+	 *
+	 * @param bool        $is_woo       Whether the offer is for the local WooCommerce.com plugin.
+	 * @param string|null $requires     WordPress version the offer needs, or null for none.
+	 * @param bool        $expect_error Whether the download should be stopped with an error.
+	 */
+	public function test_pre_download_blocks_plugin_update_needing_newer_wp( bool $is_woo, ?string $requires, bool $expect_error ): void {
+		$woo_filename   = $this->mock_local_woo_plugin();
+		$other_filename = 'another-plugin/another-plugin.php';
+		$this->mock_update_check_products( 123, false );
+		if ( null !== $requires ) {
+			$this->mocked_updates[123]['requires'] = $requires;
+		}
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			set_site_transient(
+				'update_plugins',
+				(object) array(
+					'response'  => array(
+						$other_filename => (object) array(
+							'plugin'      => $other_filename,
+							'new_version' => '2.0.0',
+							'requires'    => $requires,
+						),
+					),
+					'no_update' => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$reply = apply_filters( 'upgrader_pre_download', false, '', null, array( 'plugin' => $is_woo ? $woo_filename : $other_filename ) );
+
+		if ( $expect_error ) {
+			$this->assertWPError( $reply );
+			$this->assertSame( 'woocommerce_update_needs_newer_wp', $reply->get_error_code() );
+			$this->assertStringContainsString( 'This update needs WordPress 99.0 or later', $reply->get_error_message() );
+		} else {
+			$this->assertFalse( $reply );
+		}
+	}
+
+	/**
+	 * @testdox Downloading a WooCommerce.com theme update that needs a newer WordPress is stopped with a plain-text error.
+	 */
+	public function test_pre_download_blocks_theme_update_needing_newer_wp(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		if ( is_multisite() ) {
+			grant_super_admin( $user_id ); // Only super admins have update_core on multisite.
+		}
+		wp_set_current_user( $user_id );
+
+		$stylesheet = $this->mock_local_woo_theme();
+		$this->mock_update_check_products( 456, false );
+		$this->mocked_updates[456]['requires'] = '99.0';
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			set_site_transient(
+				'update_themes',
+				(object) array(
+					'response' => array(),
+					'checked'  => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$reply = apply_filters( 'upgrader_pre_download', false, '', null, array( 'theme' => $stylesheet ) );
+
+		$this->assertWPError( $reply );
+		$this->assertSame( 'woocommerce_update_needs_newer_wp', $reply->get_error_code() );
+		$this->assertSame(
+			sprintf( 'This update needs WordPress 99.0 or later, and this site runs WordPress %s. Update WordPress first.', wp_get_wp_version() ),
+			$reply->get_error_message(),
+			'The error is plain text, since callers may show it as text.'
+		);
+	}
+
+	/**
+	 * @testdox An update that needs a newer WordPress is stopped even when another callback serves the package first.
+	 */
+	public function test_pre_download_blocks_update_before_early_package_callback(): void {
+		$stylesheet = $this->mock_local_woo_theme();
+		$this->mock_update_check_products( 456, false );
+		$this->mocked_updates[456]['requires'] = '99.0';
+
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+		try {
+			set_site_transient(
+				'update_themes',
+				(object) array(
+					'response' => array(),
+					'checked'  => array(),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$serve_package = static function ( $reply ) {
+			return false === $reply ? '/tmp/served-package.zip' : $reply;
+		};
+		add_filter( 'upgrader_pre_download', $serve_package, 5 );
+		try {
+			$reply = apply_filters( 'upgrader_pre_download', false, '', null, array( 'theme' => $stylesheet ) );
+		} finally {
+			remove_filter( 'upgrader_pre_download', $serve_package, 5 );
+		}
+
+		$this->assertWPError( $reply );
+		$this->assertSame( 'woocommerce_update_needs_newer_wp', $reply->get_error_code() );
+	}
+
+	/**
+	 * @testdox A download that isn't a plugin or theme update, or that another callback already answered, is left alone.
+	 */
+	public function test_pre_download_leaves_other_downloads_alone(): void {
+		$earlier_error = new WP_Error( 'earlier', 'Set by another callback.' );
+
+		$this->assertFalse( WC_Helper_Updater::block_update_needing_newer_wp( false, 'https://example.com/package.zip', null, array( 'type' => 'plugin' ) ) );
+		$this->assertSame( $earlier_error, WC_Helper_Updater::block_update_needing_newer_wp( $earlier_error, 'https://example.com/package.zip', null, array( 'plugin' => 'any/any.php' ) ) );
+	}
+
+	/**
 	 * Makes WC_Helper::get_local_woo_plugins() report a single Woo plugin, without touching the filesystem.
 	 *
 	 * @return string The plugin file name.
