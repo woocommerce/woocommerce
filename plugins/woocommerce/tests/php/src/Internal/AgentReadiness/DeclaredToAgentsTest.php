@@ -92,12 +92,20 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 				'/AGENTS.md'               => array( 200, '{"code":"not_found","message":"No route"}' ),
 				'/auth.md'                 => array( 200, 'Not found', array( 'content-type' => 'text/html; charset=UTF-8' ) ),
 				'/sitemap.md'              => array( 200, "\xEF\xBB\xBF<!doctype html><html></html>" ),
+				'/.well-known/security.txt' => array(
+					404,
+					"\n\n",
+					array(
+						'content-type'   => 'text/plain',
+						'content-length' => '999999',
+					),
+				),
 			)
 		);
 
 		$this->assertTrue( $results['ai-txt'] );
 		$this->assertFalse( $results['agents-json'], 'A page is not a JSON document' );
-		$this->assertFalse( $results['security-txt'], 'A 404' );
+		$this->assertFalse( $results['security-txt'], 'A truncated 404 is still missing' );
 		$this->assertFalse( $results['agents-md'], 'A 200 JSON error is not a file' );
 		$this->assertFalse( $results['auth-md'], 'A 200 HTML answer is not a file' );
 		$this->assertFalse( $results['sitemap-md'], 'A page behind a byte order mark is not a file' );
