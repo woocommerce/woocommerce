@@ -149,6 +149,13 @@ const playRemoval = (
 	offsets.forEach( ( { row, offset } ) => {
 		row.style.translate = `0 ${ offset }px`;
 	} );
+	// The table can have its own inline spacing, for example from an extension. Put it back after the hold.
+	const ownSpace = table.style.getPropertyValue( space );
+	const ownPriority = table.style.getPropertyPriority( space );
+	const releaseSpace = () =>
+		ownSpace
+			? table.style.setProperty( space, ownSpace, ownPriority )
+			: clearInlineStyle( table, space );
 	if ( lost >= 1 ) {
 		const current = getComputedStyle( table ).getPropertyValue( space );
 		table.style.setProperty( space, `${ parseFloat( current ) + lost }px` );
@@ -161,7 +168,7 @@ const playRemoval = (
 		isStopped = true;
 		cancels.forEach( ( cancel ) => cancel() );
 		table.removeAttribute( MOVING );
-		clearInlineStyle( table, space );
+		releaseSpace();
 		moved.forEach( ( row ) => clearInlineStyle( row, 'translate' ) );
 		if ( removeCopies ) {
 			// Includes the copies of a removal that this one took over, which still fade out.
@@ -173,7 +180,7 @@ const playRemoval = (
 
 	const release = () => {
 		table.setAttribute( MOVING, '' );
-		clearInlineStyle( table, space );
+		releaseSpace();
 		moved.forEach( ( row ) => clearInlineStyle( row, 'translate' ) );
 		cancels.push(
 			whenAllAnimationsEnd( [ table, ...moved ], () => stop( false ) )
