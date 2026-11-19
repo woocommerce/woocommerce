@@ -287,7 +287,8 @@ class ProductUpdate extends ActionableAbility {
 				return $error;
 			}
 			foreach ( $this->variations['delete'] as $variation ) {
-				if ( ! $variation->delete( true ) || null !== get_post( $variation->get_id() ) ) {
+				$variation_id = $variation->get_id();
+				if ( ! $variation->delete( true ) || null !== get_post( $variation_id ) ) {
 					return new \WP_Error( 'woocommerce_product_update_failed', __( 'Failed to delete a variation.', 'woocommerce' ), array( 'status' => 500 ) );
 				}
 			}

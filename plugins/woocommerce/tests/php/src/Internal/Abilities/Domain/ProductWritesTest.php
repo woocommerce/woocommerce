@@ -769,6 +769,27 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should roll back a type change when WordPress refuses to delete a variation.
+	 */
+	public function test_type_change_rolls_back_when_a_variation_delete_is_refused(): void {
+		$variable   = WC_Helper_Product::create_variation_product();
+		$variations = $variable->get_children();
+		add_filter( 'pre_delete_post', '__return_false' );
+
+		$failed = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $variable->get_id(),
+				'type' => 'simple',
+			)
+		);
+
+		$this->assertWPError( $failed );
+		$this->assertSame( 'woocommerce_product_update_failed', $failed->get_error_code() );
+		$this->assertSame( 'variable', wc_get_product( $variable->get_id() )->get_type() );
+		$this->assertSame( $variations, wc_get_product( $variable->get_id() )->get_children() );
+	}
+
+	/**
 	 * @testdox Should refuse a type change of a variation, variations sent with a change that deletes them, and a simple-product price on a variable product.
 	 */
 	public function test_update_refuses_type_changes_that_cannot_work(): void {
