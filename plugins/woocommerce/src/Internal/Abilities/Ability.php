@@ -136,7 +136,8 @@ class Ability extends \WP_Ability {
 	 *
 	 * WordPress validates the output after the execute callback ran, so the callback
 	 * may already have saved changes. The message says so, because some callers,
-	 * such as MCP clients, receive only the message.
+	 * such as MCP clients, receive only the message. Read-only abilities keep the
+	 * original message, because they saved nothing.
 	 *
 	 * @since 11.4.0
 	 *
@@ -145,7 +146,7 @@ class Ability extends \WP_Ability {
 	 */
 	protected function validate_output( $output ) {
 		$is_valid = parent::validate_output( $output );
-		if ( ! is_wp_error( $is_valid ) ) {
+		if ( ! is_wp_error( $is_valid ) || true === ( $this->get_meta_item( 'annotations' )['readonly'] ?? null ) ) {
 			return $is_valid;
 		}
 
