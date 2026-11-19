@@ -36,11 +36,15 @@ export const useListEntrance = (
 		}
 		hasEntered.current = true;
 		list.setAttribute( 'data-wc-list-entering', '' );
-		cancel.current = whenAnimationsEnd(
-			list,
-			() => list.removeAttribute( 'data-wc-list-entering' ),
-			{ subtree: true }
-		);
+		const end = () => list.removeAttribute( 'data-wc-list-entering' );
+		const stopWaiting = whenAnimationsEnd( list, end, { subtree: true } );
+		// An unmount, or a StrictMode effect replay, stops the wait. Remove the attribute too, so it is not left
+		// behind, and let a remount start again.
+		cancel.current = () => {
+			stopWaiting();
+			end();
+			hasEntered.current = false;
+		};
 	}, [ ref ] );
 
 	// On mount, a child can call `start` before React attaches the ref of a list that wraps it.
