@@ -122,54 +122,125 @@ const listTokens = ( value ) =>
 		.filter( Boolean );
 
 const MIXIN_PARAMETER = Symbol( 'mixin parameter' );
+const UNKNOWN = Symbol( 'unknown' );
 
+// Blocks that can update a variable of the scope around them. Any other block, such as a rule or `@media`, has its
+// own scope, so an assignment inside it is local.
 const FLOW_CONTROL = new Set( [ 'if', 'else', 'each', 'for', 'while' ] );
 
-const isDefault = ( assignment ) => /!default\b/.test( assignment.value );
+const isDefault = ( { value } ) => /!default\b/.test( value );
 
-// The assignments of a Sass variable that can be in effect where `node` uses it, as Sass reads it: only assignments
-// before `node` count, an inner rule overrides the root, and `!default` applies only when the variable has no value
-// yet. An assignment in an earlier `@if` or loop may run or not, so it adds a possible value. The list holds
-// `MIXIN_PARAMETER` for a parameter of the enclosing mixin, and is empty when the variable has no value.
-const resolveAssignments = ( name, node ) => {
+const isNull = ( value ) =>
+	typeof value === 'object' &&
+	value.value.replace( /!default\b/, '' ).trim() === 'null';
+
+// The value that a loop binds to `name`, such as `opacity, color` in `@each $state in opacity, color`. It is null
+// when the loop does not bind `name`, and `UNKNOWN` when the value cannot be read, such as for `@for` or a map.
+const loopBinding = ( name, node ) => {
+	if ( node.type !== 'atrule' ) {
+		return null;
+	}
+	if ( node.name === 'for' ) {
+		return node.params.trim().split( /\s/ )[ 0 ] === name ? UNKNOWN : null;
+	}
+	const match =
+		node.name === 'each' &&
+		/^([\s\S]+?)\s+in\s+([\s\S]+)$/.exec( node.params.trim() );
+	const names = match
+		? match[ 1 ].split( ',' ).map( ( item ) => item.trim() )
+		: [];
+	if ( ! names.includes( name ) ) {
+		return null;
+	}
+	return names.length === 1 ? { value: match[ 2 ], context: node } : UNKNOWN;
+};
+
+// An assignment replaces the possible values. With `!default`, it only replaces a value that is missing or `null`.
+const applyAssignment = ( decl, values ) => {
+	const assigned = { value: decl.value, context: decl };
+	if ( ! isDefault( decl ) ) {
+		return [ assigned ];
+	}
+	const kept = values.filter( ( value ) => ! isNull( value ) );
+	return values.length > 0 && kept.length === values.length
+		? values
+		: [ ...kept, assigned ];
+};
+
+// Applies the assignments in `nodes`, in order, to the possible values of the variable. An `@if` or loop may run or
+// not, so its result adds to the values before it. It only updates a variable that already exists, because an
+// assignment inside it would otherwise be local.
+const applyAssignments = ( name, nodes, values ) =>
+	nodes.reduce( ( current, item ) => {
+		if ( item.type === 'decl' && item.prop === name ) {
+			return applyAssignment( item, current );
+		}
+		if (
+			item.type === 'atrule' &&
+			FLOW_CONTROL.has( item.name ) &&
+			current.length > 0 &&
+			loopBinding( name, item ) === null
+		) {
+			const after = applyAssignments( name, item.nodes || [], current );
+			return [
+				...current,
+				...after.filter( ( value ) => ! current.includes( value ) ),
+			];
+		}
+		return current;
+	}, values );
+
+// A mixin reads the variables around it when it is included, which can be after any of their assignments, so each
+// assignment in the scopes around the mixin is a possible value.
+const includeTimeValues = ( name, mixin ) => {
+	const values = [];
+	const collect = ( nodes ) =>
+		nodes.forEach( ( item ) => {
+			if ( item.type === 'decl' && item.prop === name ) {
+				values.push( { value: item.value, context: item } );
+			} else if (
+				item.type === 'atrule' &&
+				FLOW_CONTROL.has( item.name ) &&
+				loopBinding( name, item ) === null
+			) {
+				collect( item.nodes || [] );
+			}
+		} );
+	for ( let scope = mixin.parent; scope; scope = scope.parent ) {
+		collect( scope.nodes );
+	}
+	return values;
+};
+
+// The values that a Sass variable can have where `node` uses it, read as Sass does. Each value has the node to
+// resolve its own variables from. The list holds `MIXIN_PARAMETER` for a parameter of the enclosing mixin, and
+// `UNKNOWN` for a value that cannot be read. It is empty when the variable has no value.
+const resolveVariable = ( name, node ) => {
 	const scopes = [];
+	let values = [];
 	for ( let child = node; child.parent; child = child.parent ) {
 		const scope = child.parent;
 		scopes.unshift( scope.nodes.slice( 0, scope.nodes.indexOf( child ) ) );
-		if (
-			scope.type === 'atrule' &&
-			scope.name === 'mixin' &&
-			mixinParameters( scope ).includes( name )
-		) {
-			scopes.unshift( [ MIXIN_PARAMETER ] );
+		const binding = loopBinding( name, scope );
+		if ( binding !== null ) {
+			values = [ binding ];
+			break;
+		}
+		if ( scope.type === 'atrule' && scope.name === 'mixin' ) {
+			values = mixinParameters( scope ).includes( name )
+				? [ MIXIN_PARAMETER ]
+				: includeTimeValues( name, scope );
 			break;
 		}
 	}
-	let assignments = [];
-	for ( const item of scopes.flat() ) {
-		if ( item === MIXIN_PARAMETER ) {
-			assignments = [ item ];
-		} else if ( item.type === 'decl' && item.prop === name ) {
-			if ( assignments.length === 0 || ! isDefault( item ) ) {
-				assignments = [ item ];
-			}
-		} else if ( item.type === 'atrule' && FLOW_CONTROL.has( item.name ) ) {
-			const hasValue = assignments.length > 0;
-			item.walkDecls( ( decl ) => {
-				if (
-					decl.prop === name &&
-					! ( hasValue && isDefault( decl ) )
-				) {
-					assignments.push( decl );
-				}
-			} );
-		}
-	}
-	return assignments;
+	return scopes.reduce(
+		( current, nodes ) => applyAssignments( name, nodes, current ),
+		values
+	);
 };
 
 // A property, or a Sass variable whose possible values list only fade or color properties. The variable must be
-// assigned in the same file, in the root or a rule that encloses `node`. A parameter of the enclosing mixin passes,
+// assigned in the same file, in the root or a block that encloses `node`. A parameter of the enclosing mixin passes,
 // because the `motion-transition` mixin forwards its `$state` list. Other variables fail, because their value is
 // unknown.
 const isFadeProperty = ( property, node, seen ) => {
@@ -181,19 +252,19 @@ const isFadeProperty = ( property, node, seen ) => {
 		return false;
 	}
 	seen.add( name );
-	const assignments = resolveAssignments( name, node );
+	const values = resolveVariable( name, node );
 	return (
-		assignments.length > 0 &&
-		assignments.every( ( assignment ) => {
-			if ( assignment === MIXIN_PARAMETER ) {
-				return true;
+		values.length > 0 &&
+		values.every( ( value ) => {
+			if ( value === MIXIN_PARAMETER || value === UNKNOWN ) {
+				return value === MIXIN_PARAMETER;
 			}
-			const tokens = listTokens( assignment.value );
-			const assignmentSeen = new Set( seen );
+			const tokens = listTokens( value.value );
+			const valueSeen = new Set( seen );
 			return (
 				tokens.length > 0 &&
 				tokens.every( ( token ) =>
-					isFadeProperty( token, assignment, assignmentSeen )
+					isFadeProperty( token, value.context, valueSeen )
 				)
 			);
 		} )
