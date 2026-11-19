@@ -170,5 +170,12 @@ export interface CartResponse {
 	errors: Array< CartResponseErrorItem >;
 	payment_methods: string[];
 	payment_requirements: string[];
+	regulatory_fields?: Array< CartResponseRegulatoryField >;
 	extensions: ExtensionsData;
+}
+
+export interface CartResponseRegulatoryField {
+	id: string;
+	label: string;
+	required: boolean;
 }

@@ -20,6 +20,7 @@ export type CheckoutState = {
 	orderNotes: string; // Order notes introduced by the user in the checkout form.
 	prefersCollection?: boolean | undefined; // If customer wants to checkout with a local pickup option.
 	redirectUrl: string; // This is the url that checkout will redirect to when it's ready.
+	regulatoryFields: Record< string, string >; // Values typed into regulatory fields, keyed by field ID.
 	shouldCreateAccount: boolean; // Should a user account be created?
 	status: STATUS; // Status of the checkout
 	useShippingAsBilling: boolean; // Should the billing form be hidden and inherit the shipping address?
@@ -58,6 +59,7 @@ export const defaultState: CheckoutState = {
 	orderNotes: checkoutData.customer_note || '',
 	prefersCollection: undefined,
 	redirectUrl: '',
+	regulatoryFields: checkoutData.regulatory_fields || {},
 	shouldCreateAccount: false,
 	status: STATUS.IDLE,
 	useShippingAsBilling: billingMatchesShipping,

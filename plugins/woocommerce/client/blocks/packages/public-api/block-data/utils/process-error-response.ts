@@ -104,6 +104,8 @@ const getErrorContextFromCode = ( code: string ): string => {
 		case 'woocommerce_rest_missing_email_address':
 		case 'woocommerce_rest_invalid_email_address':
 			return noticeContexts.CONTACT_INFORMATION;
+		case 'woocommerce_rest_invalid_regulatory_field':
+			return noticeContexts.REGULATORY_FIELDS;
 		default:
 			return noticeContexts.CART;
 	}

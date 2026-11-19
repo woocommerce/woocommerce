@@ -76,6 +76,26 @@ describe( 'getNoticeContextFromErrorResponse', () => {
 } );
 
 describe( 'processErrorResponse', () => {
+	it( 'shows a rejected regulatory field in the regulatory fields section', () => {
+		processErrorResponse( {
+			code: 'woocommerce_rest_invalid_regulatory_field',
+			message: 'Please enter a valid CPF or CNPJ.',
+			data: { status: 400, field: 'br_tax_id' },
+		} );
+
+		expect( createNotice ).toHaveBeenCalledWith(
+			'error',
+			'Please enter a valid CPF or CNPJ.',
+			{
+				id: 'woocommerce_rest_invalid_regulatory_field',
+				context: 'wc/checkout/regulatory-fields',
+			}
+		);
+
+		// The next test counts every notice created so far.
+		( createNotice as jest.Mock ).mockClear();
+	} );
+
 	it( 'should dismiss old notices and create new ones', () => {
 		processErrorResponse( errorResponse );
 		expect( createNotice ).toHaveBeenCalledTimes( 2 );

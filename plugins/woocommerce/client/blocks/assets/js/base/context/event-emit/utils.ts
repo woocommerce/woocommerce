@@ -30,6 +30,7 @@ export enum noticeContexts {
 	SHIPPING_METHODS = 'wc/checkout/shipping-methods',
 	CHECKOUT_ACTIONS = 'wc/checkout/checkout-actions',
 	ORDER_INFORMATION = 'wc/checkout/order-information',
+	REGULATORY_FIELDS = 'wc/checkout/regulatory-fields',
 }
 
 export const shouldRetry = ( response: unknown ): boolean => {

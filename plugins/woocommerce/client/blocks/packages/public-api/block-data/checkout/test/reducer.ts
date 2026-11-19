@@ -36,6 +36,18 @@ describe( 'Checkout Store Reducer', () => {
 		).toEqual( expectedState );
 	} );
 
+	it( 'should merge SET_REGULATORY_FIELDS into the values already held', () => {
+		const state = reducer(
+			{ ...defaultState, regulatoryFields: { other_field: 'kept' } },
+			actions.__internalSetRegulatoryFields( { br_tax_id: '529.982' } )
+		);
+
+		expect( state.regulatoryFields ).toEqual( {
+			other_field: 'kept',
+			br_tax_id: '529.982',
+		} );
+	} );
+
 	it( 'should handle SET_COMPLETE', () => {
 		const expectedState = {
 			...defaultState,

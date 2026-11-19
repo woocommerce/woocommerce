@@ -30,6 +30,7 @@ const localState = {
 	checkoutData: {
 		orderNotes: '',
 		additionalFields: {} as OrderFormValues,
+		regulatoryFields: {} as Record< string, string >,
 		activePaymentMethod: '',
 	},
 	hasSession: false,
@@ -46,6 +47,7 @@ const initialize = () => {
 	localState.checkoutData = {
 		orderNotes: store.getOrderNotes(),
 		additionalFields: store.getAdditionalFields(),
+		regulatoryFields: store.getRegulatoryFields(),
 		activePaymentMethod: paymentStore.getActivePaymentMethod(),
 	};
 	localState.hasSession = document.cookie.includes( 'woocommerce_cart_hash' );
@@ -86,6 +88,7 @@ const updateCheckoutData = (): void => {
 	const newCheckoutData = {
 		orderNotes: checkoutStore.getOrderNotes(),
 		additionalFields: checkoutStore.getAdditionalFields(),
+		regulatoryFields: checkoutStore.getRegulatoryFields(),
 		activePaymentMethod: paymentStore.getActivePaymentMethod(),
 	};
 
@@ -141,6 +144,14 @@ const updateCheckoutData = (): void => {
 
 	if ( newCheckoutData.orderNotes !== localState.checkoutData.orderNotes ) {
 		requestData.order_notes = newCheckoutData.orderNotes;
+	}
+
+	// The store replaces this object whenever a value changes, so comparing references is enough.
+	if (
+		newCheckoutData.regulatoryFields !==
+		localState.checkoutData.regulatoryFields
+	) {
+		requestData.regulatory_fields = newCheckoutData.regulatoryFields;
 	}
 
 	// With no method selected there is nothing to send; the server treats a missing payment_method as no change.

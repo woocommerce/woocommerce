@@ -50,6 +50,7 @@ const CheckoutProcessor = () => {
 
 	const {
 		additionalFields,
+		regulatoryFields,
 		customerId,
 		customerPassword,
 		extensionData,
@@ -64,6 +65,7 @@ const CheckoutProcessor = () => {
 		const store = select( checkoutStore );
 		return {
 			additionalFields: store.getAdditionalFields(),
+			regulatoryFields: store.getRegulatoryFields(),
 			customerId: store.getCustomerId(),
 			customerPassword: store.getCustomerPassword(),
 			extensionData: store.getExtensionData(),
@@ -271,6 +273,7 @@ const CheckoutProcessor = () => {
 			customer_note: orderNotes,
 			customer_password: customerPassword,
 			extensions: { ...extensionData },
+			regulatory_fields: regulatoryFields,
 			shipping_address: cartNeedsShipping
 				? shippingAddressData
 				: undefined,
@@ -362,6 +365,7 @@ const CheckoutProcessor = () => {
 		customerPassword,
 		extensionData,
 		additionalFields,
+		regulatoryFields,
 		cartNeedsShipping,
 		receiveCartContents,
 		__internalSetHasError,

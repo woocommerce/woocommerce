@@ -36,5 +36,6 @@ export const checkoutData = {
 	billing_address: {} as BillingAddress,
 	shipping_address: {} as ShippingAddress,
 	additional_fields: {} as OrderFormValues,
+	regulatory_fields: {} as Record< string, string >,
 	...( preloadedCheckoutData || {} ),
 };

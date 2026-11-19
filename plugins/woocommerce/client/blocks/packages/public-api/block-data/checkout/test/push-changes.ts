@@ -38,6 +38,7 @@ describe( 'pushChanges', () => {
 	const state = {
 		orderNotes: '',
 		activePaymentMethod: '',
+		regulatoryFields: {} as Record< string, string >,
 	};
 
 	const mockStores = () => {
@@ -48,6 +49,7 @@ describe( 'pushChanges', () => {
 					...originalStore,
 					getOrderNotes: () => state.orderNotes,
 					getAdditionalFields: () => ( {} ),
+					getRegulatoryFields: () => state.regulatoryFields,
 				};
 			}
 			if ( storeName === PAYMENT_STORE_KEY ) {
@@ -95,6 +97,18 @@ describe( 'pushChanges', () => {
 		pushChanges( false );
 
 		expect( updateDraftOrder ).not.toHaveBeenCalled();
+	} );
+
+	it( 'sends regulatory field values when the shopper changes one, and not again while they stay the same', () => {
+		state.regulatoryFields = { br_tax_id: '529.982' };
+
+		pushChanges( false );
+		pushChanges( false );
+
+		expect( updateDraftOrder ).toHaveBeenCalledTimes( 1 );
+		expect( updateDraftOrder ).toHaveBeenCalledWith( {
+			regulatory_fields: { br_tax_id: '529.982' },
+		} );
 	} );
 
 	it( 'sends the payment method once the shopper selects one', () => {

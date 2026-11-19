@@ -124,6 +124,17 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 				};
 			}
 			break;
+		case types.SET_REGULATORY_FIELDS:
+			if ( action.regulatoryFields !== undefined ) {
+				newState = {
+					...state,
+					regulatoryFields: {
+						...state.regulatoryFields,
+						...action.regulatoryFields,
+					},
+				};
+			}
+			break;
 		case types.SET_USE_SHIPPING_AS_BILLING:
 			if (
 				action.useShippingAsBilling !== undefined &&

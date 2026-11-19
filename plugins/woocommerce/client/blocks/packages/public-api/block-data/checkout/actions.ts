@@ -191,6 +191,13 @@ export const setAdditionalFields = ( additionalFields: OrderFormValues ) =>
 	( { type: types.SET_ADDITIONAL_FIELDS, additionalFields } ) as const;
 
 /**
+ * Sets the values typed into regulatory fields, keyed by field ID. Merged into the values already held.
+ */
+export const __internalSetRegulatoryFields = (
+	regulatoryFields: Record< string, string >
+) => ( { type: types.SET_REGULATORY_FIELDS, regulatoryFields } ) as const;
+
+/**
  * Set the notes for the order
  *
  * @param orderNotes String that represents a note for the order

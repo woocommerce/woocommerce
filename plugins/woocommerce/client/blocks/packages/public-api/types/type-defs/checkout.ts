@@ -21,6 +21,7 @@ export interface CheckoutResponseSuccess {
 		payment_status: 'success' | 'failure' | 'pending' | 'error';
 		redirect_url: string;
 	};
+	regulatory_fields?: Record< string, string >;
 	shipping_address: ShippingAddress;
 	status: string;
 }

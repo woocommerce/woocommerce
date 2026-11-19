@@ -57,6 +57,10 @@ export const getAdditionalFields = ( state: CheckoutState ) => {
 	return state.additionalFields;
 };
 
+export const getRegulatoryFields = ( state: CheckoutState ) => {
+	return state.regulatoryFields;
+};
+
 export const getCheckoutStatus = ( state: CheckoutState ) => {
 	return state.status;
 };

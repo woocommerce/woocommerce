@@ -208,7 +208,14 @@ export interface Cart extends Record< string, unknown > {
 	errors: Array< ApiErrorResponse >;
 	paymentMethods: Array< string >;
 	paymentRequirements: Array< string >;
+	regulatoryFields?: Array< CartRegulatoryField >;
 	extensions: ExtensionsData;
+}
+
+export interface CartRegulatoryField {
+	id: string;
+	label: string;
+	required: boolean;
 }
 export interface CartMeta {
 	updatingCustomerData: boolean;
