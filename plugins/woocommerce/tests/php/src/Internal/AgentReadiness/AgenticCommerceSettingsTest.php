@@ -508,6 +508,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 						)
 					),
 					$row( 'product_offer_jsonld', null ),
+					$row( 'product_shipping_schema', null ),
+					$row( 'product_buy_action_schema', null ),
 					$row( 'sitemap_lists_products', true ),
 				),
 			)
@@ -571,6 +573,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'Yoast SEO', $json, 'No plugin is named, even from an older stored report' );
 		$this->assertStringNotContainsString( 'product_offer_jsonld name', $json, 'Its prerequisite failed' );
 		$this->assertStringNotContainsString( 'product_jsonld_present name', $json );
+		$this->assertStringNotContainsString( 'shipping details', $json, 'The shipping check needs product details too' );
+		$this->assertStringNotContainsString( 'says how to buy', $json, 'and so does the buy action check' );
 		$this->assertStringNotContainsString( 'sitemap_lists_products label', $json, 'A passed check keeps its passing title' );
 		$this->assertSame( array(), $sections['find']['rows'], 'Nothing open under find' );
 		$passed = array_column( $sections['find']['folded'], null, 'title' )['A sitemap lists your products'] ?? null;
