@@ -197,15 +197,34 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 		$rows = $data->data;
 		cache_users( array_filter( array_column( $rows, 'user_id' ) ) );
 
+		$accounts = array();
+		foreach ( $rows as $index => $row ) {
+			if ( empty( $row['user_id'] ) ) {
+				continue;
+			}
+			$account = new \WC_Customer( (int) $row['user_id'] );
+			if ( 0 === $account->get_id() ) {
+				wc_get_logger()->warning(
+					'The customers-query ability skipped a user that does not load as a customer, so total counts more customers than it returns.',
+					array(
+						'source'  => 'woocommerce-abilities',
+						'user_id' => (int) $row['user_id'],
+					)
+				);
+				unset( $rows[ $index ] );
+				continue;
+			}
+			$accounts[ $index ] = $account;
+		}
+		ExtensibleAbilities::prime( 'customer', $accounts );
+
 		$customers = array();
-		foreach ( $rows as $row ) {
-			$formatted = self::format_customer( $row );
+		foreach ( $rows as $index => $row ) {
+			$formatted = self::format_customer( $row, $accounts[ $index ] ?? null );
 			if ( is_wp_error( $formatted ) ) {
 				return $formatted;
 			}
-			if ( null !== $formatted ) {
-				$customers[] = $formatted;
-			}
+			$customers[] = $formatted;
 		}
 
 		return array(
@@ -221,10 +240,12 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 	 * Format a customer row. Every field here must stay free of personal data. Only registered
 	 * customers have a role and extension fields, because extensions read them from WC_Customer.
 	 *
-	 * @param array{id: int, user_id: int, date_registered: ?string, date_last_active: ?string, date_last_order: ?string, orders_count: int, total_spend: float} $row Row of the Analytics customers data store; a guest has user ID 0.
-	 * @return array|\WP_Error|null Null for a registered customer whose user no longer loads.
+	 * @param array             $row      Row of the Analytics customers data store; a guest has user ID 0.
+	 * @param \WC_Customer|null $customer Account of a registered customer, or null for a guest.
+	 * @phpstan-param array{id: int, user_id: int, date_registered: ?string, date_last_active: ?string, date_last_order: ?string, orders_count: int, total_spend: float} $row
+	 * @return array|\WP_Error
 	 */
-	private static function format_customer( array $row ) {
+	private static function format_customer( array $row, ?\WC_Customer $customer ) {
 		$output = array(
 			'id'               => (int) $row['id'],
 			'order_count'      => (int) $row['orders_count'],
@@ -235,20 +256,8 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 		);
 		$output = array_filter( $output, static fn( $value ) => null !== $value );
 
-		if ( empty( $row['user_id'] ) ) {
+		if ( null === $customer ) {
 			return $output;
-		}
-
-		$customer = new \WC_Customer( (int) $row['user_id'] );
-		if ( 0 === $customer->get_id() ) {
-			wc_get_logger()->warning(
-				'The customers-query ability skipped a user that does not load as a customer, so total counts more customers than it returns.',
-				array(
-					'source'  => 'woocommerce-abilities',
-					'user_id' => (int) $row['user_id'],
-				)
-			);
-			return null;
 		}
 
 		$output['user_id'] = $customer->get_id();
