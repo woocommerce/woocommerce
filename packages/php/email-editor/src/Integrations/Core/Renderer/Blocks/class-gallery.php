@@ -165,29 +165,70 @@ class Gallery extends Abstract_Block_Renderer {
 	private function get_gallery_image_size( array $attrs, \WP_HTML_Tag_Processor $html ): ?array {
 		$src = $html->get_attribute( 'src' );
 		if ( is_string( $src ) && isset( $attrs['id'] ) && is_numeric( $attrs['id'] ) && (int) $attrs['id'] > 0 ) {
-			$id   = (int) $attrs['id'];
 			$slug = isset( $attrs['sizeSlug'] ) && is_string( $attrs['sizeSlug'] ) ? $attrs['sizeSlug'] : 'full';
-			// Require stored dimensions so a resize service's configured limits cannot stand in for an unknown image size.
-			$metadata        = wp_get_attachment_metadata( $id, true );
-			$stored          = $metadata['sizes'][ $slug ] ?? null;
-			$has_stored_size = $this->get_positive_dimension( $stored['width'] ?? null ) > 0 && $this->get_positive_dimension( $stored['height'] ?? null ) > 0;
-			$has_full_size   = $this->get_positive_dimension( $metadata['width'] ?? null ) > 0 && $this->get_positive_dimension( $metadata['height'] ?? null ) > 0;
-			if ( $has_stored_size || $has_full_size ) {
-				$size = wp_get_attachment_image_src( $id, $slug );
-				// The selected size may have been regenerated since the gallery saved its URL.
-				if ( is_array( $size ) && ( $size[0] ?? null ) === $src ) {
-					$width  = $this->get_positive_dimension( $size[1] ?? null );
-					$height = $this->get_positive_dimension( $size[2] ?? null );
-					if ( $width > 0 && $height > 0 ) {
-						return array( $width, $height );
-					}
-				}
+			$size = $this->get_attachment_size_for_src( (int) $attrs['id'], $slug, $src );
+			if ( null !== $size ) {
+				return $size;
 			}
 		}
 
 		$width  = $this->get_positive_dimension( $html->get_attribute( 'width' ) );
 		$height = $this->get_positive_dimension( $html->get_attribute( 'height' ) );
 		return $width > 0 && $height > 0 ? array( $width, $height ) : null;
+	}
+
+	/**
+	 * Get attachment dimensions that describe the image URL saved in the gallery.
+	 *
+	 * @param int    $id Attachment ID.
+	 * @param string $slug Selected image size.
+	 * @param string $src Saved image URL.
+	 * @return array{int, int}|null Image width and height if known.
+	 */
+	private function get_attachment_size_for_src( int $id, string $slug, string $src ): ?array {
+		// Require stored dimensions so resize limits cannot stand in for unknown image dimensions.
+		$metadata = wp_get_attachment_metadata( $id, true );
+		$sizes    = $metadata['sizes'] ?? array();
+		if ( ! is_array( $sizes ) ) {
+			return null;
+		}
+		$stored = $sizes[ $slug ] ?? array();
+		if ( ! is_array( $stored ) ) {
+			return null;
+		}
+
+		$full_width      = $this->get_positive_dimension( $metadata['width'] ?? null );
+		$full_height     = $this->get_positive_dimension( $metadata['height'] ?? null );
+		$stored_width    = $this->get_positive_dimension( $stored['width'] ?? null );
+		$stored_height   = $this->get_positive_dimension( $stored['height'] ?? null );
+		$stored_file     = $stored['file'] ?? null;
+		$has_full_size   = $full_width > 0 && $full_height > 0;
+		$has_stored_size = is_string( $stored_file ) && '' !== $stored_file && $stored_width > 0 && $stored_height > 0;
+		// A partial intermediate record can make WordPress read missing fields during downsizing.
+		if ( ! $has_stored_size && ( ! empty( $stored ) || ! $has_full_size ) ) {
+			return null;
+		}
+
+		$size = wp_get_attachment_image_src( $id, $slug );
+		if ( is_array( $size ) && ( $size[0] ?? null ) === $src ) {
+			$width  = $this->get_positive_dimension( $size[1] ?? null );
+			$height = $this->get_positive_dimension( $size[2] ?? null );
+			return $width > 0 && $height > 0 ? array( $width, $height ) : null;
+		}
+
+		// The saved URL can refer to the same file before a CDN rewrite or a width-only resize.
+		if ( ! preg_match( '/^([^?#]+)(?:\?w=[1-9][0-9]*)?\z/', $src, $matches ) ) {
+			return null;
+		}
+		$saved_url = $matches[1];
+		$original  = wp_get_attachment_url( $id );
+		if ( ! is_string( $original ) ) {
+			return null;
+		}
+		if ( $has_stored_size && path_join( dirname( $original ), $stored_file ) === $saved_url ) {
+			return array( $stored_width, $stored_height );
+		}
+		return $has_full_size && $original === $saved_url ? array( $full_width, $full_height ) : null;
 	}
 
 	/**

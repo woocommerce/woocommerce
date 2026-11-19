@@ -558,38 +558,46 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	 *
 	 * @testdox Uses the attachment dimensions when they match the saved gallery image.
 	 *
-	 * @param string $source Image filename saved in the gallery.
-	 * @param bool   $malformed Whether the attachment source filter returns incomplete dimensions.
-	 * @param string $ratio Expected ratio for the row.
-	 * @testWith ["portrait-150x150.jpg", false, "150/150"]
-	 *           ["portrait-600x900.jpg", false, "600/900"]
-	 *           ["portrait-150x150.jpg", true, "600/900"]
+	 * @param string      $source Image filename saved in the gallery.
+	 * @param string|null $variant A change to the thumbnail metadata or filtered source.
+	 * @param string      $ratio Expected ratio for the row.
+	 * @testWith ["portrait-150x150.jpg", null, "150/150"]
+	 *           ["portrait-600x900.jpg", null, "600/900"]
+	 *           ["portrait-150x150.jpg", "invalid-height", "600/900"]
+	 *           ["portrait-150x150.jpg", "missing-file", "600/900"]
+	 *           ["portrait-150x150.jpg", "cdn", "150/150"]
 	 */
-	public function testItUsesTheSelectedAttachmentSizeForAutomaticCropping( string $source, bool $malformed, string $ratio ): void {
+	public function testItUsesTheSelectedAttachmentSizeForAutomaticCropping( string $source, ?string $variant, string $ratio ): void {
 		$attachment_id = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
 		$this->assertIsInt( $attachment_id );
 		update_attached_file( $attachment_id, 'portrait.jpg' );
+
+		$thumbnail = array(
+			'width'  => 150,
+			'height' => 150,
+		);
+		if ( 'missing-file' !== $variant ) {
+			$thumbnail['file'] = 'portrait-150x150.jpg';
+		}
 		wp_update_attachment_metadata(
 			$attachment_id,
 			array(
 				'file'   => 'portrait.jpg',
 				'width'  => 900,
 				'height' => 600,
-				'sizes'  => array(
-					'thumbnail' => array(
-						'file'   => 'portrait-150x150.jpg',
-						'width'  => 150,
-						'height' => 150,
-					),
-				),
+				'sizes'  => array( 'thumbnail' => $thumbnail ),
 			)
 		);
-		if ( $malformed ) {
+		if ( 'invalid-height' === $variant || 'cdn' === $variant ) {
 			add_filter(
 				'wp_get_attachment_image_src',
-				static function ( $size, $id ) use ( $attachment_id ) {
+				static function ( $size, $id ) use ( $attachment_id, $variant ) {
 					if ( $attachment_id === $id ) {
-						$size[2] = 'unknown';
+						if ( 'cdn' === $variant ) {
+							$size[0] = 'https://cdn.example.com/portrait-150x150.jpg';
+						} else {
+							$size[2] = 'unknown';
+						}
 					}
 					return $size;
 				},
@@ -601,19 +609,67 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 		$attachment_url = wp_get_attachment_url( $attachment_id );
 		$this->assertIsString( $attachment_url );
 
+		$dimensions                             = 'cdn' === $variant ? '' : ' width="600" height="900"';
 		$url                                    = trailingslashit( dirname( $attachment_url ) ) . $source;
 		$gallery                                = $this->build_gallery_with_images( 2, 2 );
 		$gallery['innerBlocks'][0]['attrs']     = array(
 			'id'       => $attachment_id,
 			'sizeSlug' => 'thumbnail',
 		);
-		$gallery['innerBlocks'][0]['innerHTML'] = '<img src="' . esc_url( $url ) . '" width="600" height="900">';
+		$gallery['innerBlocks'][0]['innerHTML'] = '<img src="' . esc_url( $url ) . '"' . $dimensions . '>';
 		$gallery['innerBlocks'][1]['attrs']     = array();
 		$gallery['innerBlocks'][1]['innerHTML'] = '<img src="https://example.com/landscape.jpg" width="900" height="600">';
 
 		$rendered = $this->gallery_renderer->render( '', $gallery, $this->rendering_context );
 
 		$this->assertSame( 2, substr_count( $rendered, 'aspect-ratio: ' . $ratio . ';' ) );
+	}
+
+	/**
+	 * Test the original dimensions are still useful for width-only URLs.
+	 *
+	 * @testdox Preserves automatic cropping when the same file was saved at a different width.
+	 * @param string $query Query saved on the image URL.
+	 * @param int    $crop_count Number of images expected to crop.
+	 * @testWith ["?w=190", 2]
+	 *           ["?w=190&h=190&crop=1", 0]
+	 */
+	public function testItUsesOriginalDimensionsForWidthOnlyImageUrls( string $query, int $crop_count ): void {
+		$attachment_id = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+		$this->assertIsInt( $attachment_id );
+		update_attached_file( $attachment_id, 'portrait.jpg' );
+		wp_update_attachment_metadata(
+			$attachment_id,
+			array(
+				'file'   => 'portrait.jpg',
+				'width'  => 600,
+				'height' => 900,
+			)
+		);
+		$attachment_url = wp_get_attachment_url( $attachment_id );
+		$this->assertIsString( $attachment_url );
+
+		add_filter(
+			'image_downsize',
+			static function ( $size, $id ) use ( $attachment_id, $attachment_url ) {
+				return $attachment_id === $id ? array( $attachment_url . '?w=600', 600, 900, false ) : $size;
+			},
+			10,
+			2
+		);
+		$gallery                                = $this->build_gallery_with_images( 2, 2 );
+		$gallery['innerBlocks'][0]['attrs']     = array(
+			'id'       => $attachment_id,
+			'sizeSlug' => 'large',
+		);
+		$gallery['innerBlocks'][0]['innerHTML'] = '<img src="' . esc_url( $attachment_url . $query ) . '">';
+		$gallery['innerBlocks'][1]['attrs']     = array();
+		$gallery['innerBlocks'][1]['innerHTML'] = '<img src="https://example.com/landscape.jpg" width="900" height="600">';
+
+		$rendered = $this->gallery_renderer->render( '', $gallery, $this->rendering_context );
+
+		$this->assertSame( $crop_count, substr_count( $rendered, 'aspect-ratio:' ) );
+		$this->assertSame( $crop_count, substr_count( $rendered, 'aspect-ratio: 600/900;' ) );
 	}
 
 	/**
