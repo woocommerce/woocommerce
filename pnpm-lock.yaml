@@ -2539,6 +2539,8 @@ importers:
         specifier: catalog:tooling
         version: 5.0.5
 
+  packages/php/extension-tooling: {}
+
   packages/php/remote-specs-validation:
     dependencies:
       commander:

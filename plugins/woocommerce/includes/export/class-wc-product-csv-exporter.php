@@ -103,7 +103,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Product category to export
 	 *
-	 * @param string $product_category_to_export Product category slug to export, empty string exports all.
+	 * @param string[] $product_category_to_export Product category slugs to export, empty array exports all.
 	 *
 	 * @since  3.5.0
 	 * @return void

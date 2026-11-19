@@ -110,10 +110,12 @@ class ProductSales {
 
 	/**
 	 * How many orders the store holds since a date, with the statuses Analytics counts. Analytics
-	 * holds fewer while its import of past orders hasn't run or finished. WCPay test-mode orders
-	 * are left out the same way OrdersScheduler skips them (meta `_wcpay_mode=test`). They are
-	 * counted in a second query and subtracted, because the posts order store doesn't support
-	 * `meta_query`. A custom `woocommerce_analytics_is_test_order` callback is not applied.
+	 * holds fewer while its import of past orders hasn't run or finished. Child orders are left
+	 * out (`parent` 0): a multivendor sub-order is not a separate order Analytics imports.
+	 * WCPay test-mode orders are left out the same way OrdersScheduler skips them (meta
+	 * `_wcpay_mode=test`). They are counted in a second query and subtracted, because the posts
+	 * order store doesn't support `meta_query`. A custom `woocommerce_analytics_is_test_order`
+	 * callback is not applied.
 	 *
 	 * @param \DateTimeImmutable $since    Start of the period.
 	 * @param array<int, string> $excluded Statuses Analytics leaves out.
@@ -127,6 +129,7 @@ class ProductSales {
 			$orders = wc_get_orders(
 				array(
 					'type'         => 'shop_order',
+					'parent'       => 0,
 					'status'       => array_values( $statuses ),
 					'date_created' => '>=' . $since->getTimestamp(),
 					'limit'        => 1,

@@ -626,7 +626,7 @@ If these fields were rendered in the "contact" location instead, the code would 
 
 The `required`, `hidden`, and `validation` properties accept an `array` of [JSON Schema](https://json-schema.org/understanding-json-schema/about) to create conditional logic for fields. This allows you to dynamically control field visibility, requirement status, and validation rules based on the values of other fields.
 
-Schema is evaluated in the frontend in real-time, and on the backend at any update. This ensures fast and responsive UI, and consistent results between the client and server.
+Schema is evaluated in the frontend in real-time, and on the backend at any update. This ensures fast and responsive UI, and consistent results between the client and server. The two run different engines, so see [the `pattern` keyword](#the-pattern-keyword) for the one place where they can disagree.
 
 ### JSON Schema Structure
 
@@ -1033,6 +1033,39 @@ Validation can also be against other fields, for example, an alternative email f
 ```
 
 In the example above, we used [format keyword](https://github.com/ajv-validator/ajv-formats) and `$data` to refer to the current field value via [JSON pointers](https://ajv.js.org/guide/combining-schemas.html#data-reference). We also used the `errorMessage` property to provide a custom error message.
+
+##### The `pattern` keyword
+
+`pattern` is compiled in the browser as a JavaScript `RegExp` with the `u` flag, and on the server as a PCRE pattern with the `u` modifier. Use a pattern that both engines accept so the rule can run in both places.
+
+Write patterns in [ECMA-262](https://tc39.es/ecma262/#sec-patterns) syntax. Draft-07 also recommends limiting yourself to a small set of tokens ([§6.3.3](https://json-schema.org/draft-07/draft-handrews-json-schema-validation-01#name-regular-expressions)), which is a good rule of thumb because those behave the same in both engines.
+
+PCRE accepts constructs JavaScript rejects in `u` mode. WooCommerce reports known incompatibilities through `_doing_it_wrong()` during registration for `required`, `hidden` and `validation` rules, including `patternProperties` keys. The field remains registered with its original rules so the server can continue applying them. If the browser cannot compile a rule, it skips that rule for the affected field while valid fields keep their browser validation.
+
+Avoid these constructs:
+
+| Construct | Example |
+| --- | --- |
+| Escaping a literal that is not syntax | `^[0-9]{3}\-[0-9]{4}$` (the `\-` throws outside a character class) |
+| Inline flags | `(?i)^abc$` |
+| PCRE anchors | `\Aabc\z` |
+| Possessive quantifiers | `^a++$` |
+| POSIX character classes | `^[[:alpha:]]+$` |
+| PCRE-only escapes | `\h`, `\R`, `\X`, `\K`, `\N` |
+| Atomic, comment, or PCRE named groups | `(?>a)`, `(?#comment)`, `(?P<name>a)` |
+
+The fix is usually to drop the backslash or rewrite the construct with the syntax both engines share. For example, use `^[0-9]{3}-[0-9]{4}$` instead of `^[0-9]{3}\-[0-9]{4}$`, and `^[0-9]+$` or `^\p{Nd}+$` instead of `^[[:digit:]]+$`.
+
+Even patterns both engines accept can produce different results, because the `u` modifier makes `\d`, `\w` and `\b` match Unicode on the server while JavaScript keeps them ASCII-only:
+
+| Pattern | Input | Browser | Server |
+| --- | --- | --- | --- |
+| `^\w+$` | `José` | no match | match |
+| `^\d+$` | `١٢٣` | no match | match |
+| `^\D+$` | `١٢٣` | match | no match |
+| `^\W+$` | `é` | match | no match |
+
+Where that matters, spell the class out. `[0-9]` is ASCII-only in both engines, and `\p{L}` is Unicode-aware in both once the `u` flag is set.
 
 ##### Date field validation
 

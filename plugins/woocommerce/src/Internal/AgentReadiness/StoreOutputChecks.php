@@ -1903,12 +1903,17 @@ class StoreOutputChecks {
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private function reviews_marked_up( StoreResponses $responses ): ?bool {
+		// The passes below load no page. Without a product page the rest of the card couldn't run, so neither does this.
+		if ( null === $responses->product_page() ) {
+			return null;
+		}
 		// WooCommerce prints a rating only when ratings are on and the product has rated reviews; the rating count is stored per star, the average as a number.
 		if ( ! wc_review_ratings_enabled() ) {
 			return true;
 		}
 		// wc_get_products() ignores meta_query, so the reviewed product is looked up as a post.
-		$ids = get_posts(
+		// The same products the scan checks: Search results only included, Hidden left out.
+		$ids     = get_posts(
 			array(
 				'post_type'        => 'product',
 				'post_status'      => ProductStatus::PUBLISH,
@@ -1919,14 +1924,7 @@ class StoreOutputChecks {
 				'order'            => 'DESC',
 				'suppress_filters' => false,
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Five rows, once per background scan.
-				'tax_query'        => array(
-					array(
-						'taxonomy' => 'product_visibility',
-						'field'    => 'slug',
-						'terms'    => array( 'exclude-from-catalog' ),
-						'operator' => 'NOT IN',
-					),
-				),
+				'tax_query'        => ProductScan::count_query( ProductScan::COUNT_AVAILABLE ),
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Five rows, once per background scan.
 				'meta_query'       => array(
 					array(
@@ -1953,9 +1951,6 @@ class StoreOutputChecks {
 		$sampled = $responses->product();
 		if ( null !== $sampled && $sampled->get_id() === $product->get_id() ) {
 			$page = $responses->product_page();
-			if ( null === $page ) {
-				return null;
-			}
 		} else {
 			$page = $responses->get( (string) $product->get_permalink() );
 			if ( null === $page || 200 !== $page['status'] ) {
