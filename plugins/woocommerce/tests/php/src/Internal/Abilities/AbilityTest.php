@@ -121,6 +121,28 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the message of an error that the execute callback returns.
+	 */
+	public function test_callback_error_has_no_retry_hint(): void {
+		$ability = new Ability(
+			'test/callback-error',
+			array(
+				'label'               => 'Callback error',
+				'description'         => 'Returns its own error.',
+				'category'            => 'woocommerce',
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => fn() => new \WP_Error( 'test_failed', 'The callback failed.' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		$result = $ability->execute();
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'The callback failed.', $result->get_error_message() );
+	}
+
+	/**
 	 * @testdox Should keep every error from the output validation filter when it adds the retry hint.
 	 */
 	public function test_invalid_output_keeps_every_error(): void {

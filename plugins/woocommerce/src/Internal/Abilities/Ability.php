@@ -132,28 +132,29 @@ class Ability extends \WP_Ability {
 	}
 
 	/**
-	 * Validate the output, and tell the caller that the ability ran when the output is invalid.
+	 * Run the ability, and tell the caller that it ran when its output is invalid.
 	 *
 	 * WordPress validates the output after the execute callback ran, so the callback
 	 * may already have saved changes. The message says so, because some callers,
 	 * such as MCP clients, receive only the message. Read-only abilities keep the
 	 * original message, because they saved nothing.
 	 *
+	 * Remove when WooCommerce requires WordPress 7.3.
+	 *
 	 * @since 11.4.0
 	 *
-	 * @param mixed $output The output of the execute callback.
-	 * @return true|\WP_Error True when the output is valid, or a WP_Error.
+	 * @param mixed $input Optional. The input data for the ability. Default `null`.
+	 * @return mixed|\WP_Error The result of the ability execution, or a WP_Error.
 	 */
-	protected function validate_output( $output ) {
-		$is_valid = parent::validate_output( $output );
-		if ( ! is_wp_error( $is_valid ) || true === ( $this->get_meta_item( 'annotations' )['readonly'] ?? null ) ) {
-			return $is_valid;
+	public function execute( $input = null ) {
+		$result = parent::execute( $input );
+		if ( ! is_wp_error( $result ) || 'ability_invalid_output' !== $result->get_error_code() || true === ( $this->get_meta_item( 'annotations' )['readonly'] ?? null ) ) {
+			return $result;
 		}
 
-		$error = clone $is_valid;
-		$code  = $error->get_error_code();
+		$error = clone $result;
 
-		$error->errors[ $code ][0] = sprintf(
+		$error->errors['ability_invalid_output'][0] = sprintf(
 			/* translators: %s: error message. */
 			__( '%s The ability ran, so its changes may already be saved. Check the current state before you run it again.', 'woocommerce' ),
 			$error->get_error_message()
