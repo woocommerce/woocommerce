@@ -298,6 +298,27 @@ describe( 'collapseCopy', () => {
 		expect( copy.style.height ).toBe( '0px' );
 	} );
 
+	it( 'keeps the fields of the copy out of form validation', () => {
+		const { element } = createForm();
+		element.innerHTML = `
+			<input required>
+			<input type="email" value="not-an-email">
+			<input type="checkbox" required>
+			<select required><option value="">Select</option></select>
+			<textarea required></textarea>
+		`;
+		const form = document.createElement( 'form' );
+		element.before( form );
+		form.append( element );
+		collapseCopy( element );
+		element.remove();
+
+		expect(
+			form.querySelector( '[data-wc-collapse-copy]' )
+		).not.toBeNull();
+		expect( form.checkValidity() ).toBe( true );
+	} );
+
 	it( 'turns around when the element grows again before the copy has collapsed', () => {
 		const { element } = createForm();
 		collapseCopy( element );

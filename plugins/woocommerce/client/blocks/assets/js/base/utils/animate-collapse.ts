@@ -153,8 +153,9 @@ export const animateCollapse = (
 
 /**
  * Collapses an inert copy of an element in its place, so that the element itself can unmount at once. Use it for a
- * form that goes, so that its fields stop counting immediately. The copy has no `id`, `name`, or `for` attributes, and
- * it is removed when the collapse ends. Call it just before the element unmounts, while it is still in the page.
+ * form that goes, so that its fields stop counting immediately. The copy has no `id`, `name`, or `for` attributes, its
+ * fields are not validated, and it is removed when the collapse ends. Call it just before the element unmounts, while
+ * it is still in the page.
  *
  * @param element The element that unmounts.
  */
@@ -175,6 +176,12 @@ export const collapseCopy = ( element: HTMLElement | null ): void => {
 	const selects = element.querySelectorAll( 'select' );
 	copy.querySelectorAll( 'select' ).forEach( ( select, index ) => {
 		select.selectedIndex = selects[ index ].selectedIndex;
+	} );
+	// Keeps the fields out of form validation and `:invalid`. Disabled would do it too, but browsers grey it out.
+	// Read-only fields are not validated, and checkboxes, radios, and selects only check `required`.
+	copy.querySelectorAll( 'input, select, textarea' ).forEach( ( control ) => {
+		control.setAttribute( 'readonly', '' );
+		control.removeAttribute( 'required' );
 	} );
 	copy.setAttribute( 'inert', '' );
 	copy.setAttribute( 'aria-hidden', 'true' );
