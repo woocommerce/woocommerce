@@ -742,7 +742,7 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep the variations when the save of a type change fails after WooCommerce deleted them.
+	 * @testdox Should keep the variations when the save of a type change fails.
 	 */
 	public function test_failed_type_change_keeps_the_variations(): void {
 		$variable   = WC_Helper_Product::create_variation_product();

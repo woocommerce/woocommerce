@@ -251,10 +251,11 @@ class ProductUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Save the product, then the variations that the input names. When a type
-	 * change deletes the variations, WooCommerce deletes them in the save of a
-	 * `variable` product. For any other variable type the ability deletes them
-	 * after the save with the same call, then checks that they are gone.
+	 * Save the product, then the variations that the input names. A type change
+	 * saves without the WooCommerce handler that deletes variations, so the
+	 * decision that the permission check and the validators saw is the one that
+	 * runs. When it deletes, the ability deletes only the checked variations,
+	 * and refuses the call when the save hooks added or removed one.
 	 *
 	 * @param \WC_Product $subject Changed product.
 	 * @return null|\WP_Error
@@ -270,29 +271,30 @@ class ProductUpdate extends ActionableAbility {
 			);
 		}
 
-		$planned = array_map( static fn( \WC_Product_Variation $variation ) => $variation->get_id(), $this->variations['delete'] );
-		$current = $this->type_deletes ? self::get_variation_ids( $subject->get_id() ) : $planned;
-		sort( $planned );
-		sort( $current );
-		if ( $planned !== $current ) {
-			return new \WP_Error( 'woocommerce_product_update_conflict', __( 'The variations of the product changed during the call. Try again.', 'woocommerce' ), array( 'status' => 409 ) );
+		$error = $this->get_changed_variations_error( $subject->get_id() );
+		if ( null !== $error ) {
+			return $error;
 		}
 
-		$error = self::save_product( $subject, 'woocommerce_product_update_failed' );
+		$error = $this->changes_type ? self::save_product_keeping_variations( $subject ) : self::save_product( $subject, 'woocommerce_product_update_failed' );
 		if ( is_wp_error( $error ) ) {
 			return $error;
 		}
 
 		if ( $this->type_deletes ) {
-			\WC_Data_Store::load( 'product-variable' )->delete_variations( $subject->get_id(), true ); // @phpstan-ignore method.notFound (WC_Data_Store forwards the call to the variable product data store)
+			$error = $this->get_changed_variations_error( $subject->get_id() );
+			if ( null !== $error ) {
+				return $error;
+			}
 			foreach ( $this->variations['delete'] as $variation ) {
-				if ( null !== get_post( $variation->get_id() ) ) {
+				if ( ! $variation->delete( true ) || null !== get_post( $variation->get_id() ) ) {
 					return new \WP_Error( 'woocommerce_product_update_failed', __( 'Failed to delete a variation.', 'woocommerce' ), array( 'status' => 500 ) );
 				}
 			}
 			$this->variations['delete'] = array();
 			if ( $subject instanceof \WC_Product_Grouped ) {
 				$subject->get_data_store()->sync_price( $subject ); // @phpstan-ignore method.notFound (WC_Data_Store forwards the call to the grouped product data store)
+				$subject->set_price( (string) get_post_meta( $subject->get_id(), '_price', true ) );
 			} elseif ( ! $subject instanceof \WC_Product_Variable ) {
 				delete_post_meta( $subject->get_id(), '_price' );
 				add_post_meta( $subject->get_id(), '_price', $subject->get_price( 'edit' ) );
@@ -316,6 +318,50 @@ class ProductUpdate extends ActionableAbility {
 	}
 
 	/**
+	 * A conflict error when the variations of a product differ from the ones
+	 * that the type change deletes, else null.
+	 *
+	 * @param int $product_id Product ID.
+	 * @return \WP_Error|null
+	 */
+	private function get_changed_variations_error( int $product_id ): ?\WP_Error {
+		if ( ! $this->type_deletes ) {
+			return null;
+		}
+		$planned = array_map( static fn( \WC_Product_Variation $variation ) => $variation->get_id(), $this->variations['delete'] );
+		$current = self::get_variation_ids( $product_id );
+		sort( $planned );
+		sort( $current );
+		if ( $planned === $current ) {
+			return null;
+		}
+
+		return new \WP_Error( 'woocommerce_product_update_conflict', __( 'The variations of the product changed during the call. Try again.', 'woocommerce' ), array( 'status' => 409 ) );
+	}
+
+	/**
+	 * Save a product whose type changes without the WooCommerce handler that
+	 * deletes the variations in the save. The ability deletes them itself.
+	 *
+	 * @param \WC_Product $product Changed product.
+	 * @return null|\WP_Error
+	 */
+	private static function save_product_keeping_variations( \WC_Product $product ) {
+		$handler  = array( \WC_Post_Data::class, 'product_type_changed' );
+		$priority = has_action( 'woocommerce_product_type_changed', $handler );
+		if ( false !== $priority ) {
+			remove_action( 'woocommerce_product_type_changed', $handler, $priority );
+		}
+		try {
+			return self::save_product( $product, 'woocommerce_product_update_failed' );
+		} finally {
+			if ( false !== $priority ) {
+				add_action( 'woocommerce_product_type_changed', $handler, $priority, 3 );
+			}
+		}
+	}
+
+	/**
 	 * The ability output for the saved product.
 	 *
 	 * @param \WC_Product $subject Saved product.
@@ -335,12 +381,14 @@ class ProductUpdate extends ActionableAbility {
 	 */
 	public static function can_update_product( $input = array() ): bool {
 		$product_id = self::get_id_from_input( $input );
-		$product    = is_string( $input['type'] ?? null ) ? wc_get_product( $product_id ) : null;
-		$deletes    = ! empty( array_filter( array_column( $input['variations'] ?? array(), 'delete' ) ) )
+		if ( ! self::check_product_permission( $product_id, 'edit' ) ) {
+			return false;
+		}
+		$product = is_string( $input['type'] ?? null ) ? wc_get_product( $product_id ) : null;
+		$deletes = ! empty( array_filter( array_column( $input['variations'] ?? array(), 'delete' ) ) )
 			|| ( $product instanceof \WC_Product && self::type_change_deletes_variations( $product, $input['type'] ) );
 
-		return self::check_product_permission( $product_id, 'edit' )
-			&& ( ! $deletes || self::check_product_permission( $product_id, 'delete' ) );
+		return ! $deletes || self::check_product_permission( $product_id, 'delete' );
 	}
 
 	/**
@@ -375,7 +423,7 @@ class ProductUpdate extends ActionableAbility {
 	/**
 	 * Whether the WooCommerce filter deletes the variations of a variable
 	 * product that changes into another variable type. The save asks again
-	 * with the changed product, because WooCommerce asks with it too.
+	 * with the changed product, to refuse a call whose other fields change the answer.
 	 *
 	 * @param \WC_Product $target Product with its new type.
 	 * @param string      $from   Old product type.

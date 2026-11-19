@@ -5262,6 +5262,139 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a type change that deletes the variations when a save hook adds a variation, and roll it back.
+	 */
+	public function test_a_type_change_refuses_a_variation_added_during_the_save(): void {
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$id      = $created['product']['id'];
+		$this->add_test_action(
+			'woocommerce_product_type_changed',
+			static function ( \WC_Product $product ) use ( $id ) {
+				if ( $id === $product->get_id() ) {
+					$variation = new \WC_Product_Variation();
+					$variation->set_parent_id( $id );
+					$variation->save();
+				}
+			}
+		);
+
+		$refused  = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $id,
+				'type' => 'simple',
+			)
+		);
+		$children = get_posts(
+			array(
+				'post_parent' => $id,
+				'post_type'   => 'product_variation',
+				'fields'      => 'ids',
+				'post_status' => 'any',
+				'numberposts' => -1,
+			)
+		);
+
+		$this->assertSame( 409, $refused->get_status() );
+		$this->assertSame( 'variable', wc_get_product( $id )->get_type() );
+		$this->assertEqualsCanonicalizing( $created['product']['variation_ids'], $children );
+	}
+
+	/**
+	 * @testdox Should keep the variations that the permission check kept, even when the filter answers otherwise during the save.
+	 */
+	public function test_a_type_change_keeps_the_variations_that_the_permission_check_kept(): void {
+		$this->register_variation_subclass();
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$id      = $created['product']['id'];
+		$this->add_test_action(
+			'woocommerce_delete_variations_on_product_type_change',
+			static fn( $delete, $product ) => has_term( 'test-variable', 'product_type', $product->get_id() ),
+			10,
+			2
+		);
+		$deny = static fn( $caps, $cap ) => 'delete_post' === $cap ? array( 'do_not_allow' ) : $caps;
+
+		add_filter( 'map_meta_cap', $deny, 10, 2 );
+		$changed = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'   => $id,
+				'type' => 'test-variable',
+			)
+		);
+		remove_filter( 'map_meta_cap', $deny, 10 );
+
+		$this->assertSame( 'test-variable', $changed['product']['type'] );
+		$this->assertEqualsCanonicalizing( $created['product']['variation_ids'], $changed['product']['variation_ids'] );
+		foreach ( $created['product']['variation_ids'] as $variation_id ) {
+			$this->assertInstanceOf( \WC_Product_Variation::class, wc_get_product( $variation_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Should write the cleared price to the price lookup when a type change runs again after a sync refused it.
+	 */
+	public function test_a_type_change_after_a_rollback_clears_the_lookup_price(): void {
+		global $wpdb;
+
+		$refuse = true;
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function () use ( &$refuse ) {
+				return $refuse ? new \WP_Error( 'test_refused', 'Refused.' ) : null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '17' ) );
+		$input   = array(
+			'id'   => $product->get_id(),
+			'type' => 'variable',
+		);
+
+		$refused = $this->run_ability_response( 'woocommerce/product-update', $input );
+		$cached  = wp_cache_get( 'lookup_table', 'object_' . $product->get_id() );
+		$refuse  = false;
+		$this->run_ability( 'woocommerce/product-update', $input );
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertFalse( $cached, 'The rollback should drop the cached lookup row that the refused call wrote.' );
+		$lookup = $wpdb->get_row( $wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product->get_id() ), ARRAY_A );
+		$this->assertSame( '0.0000', $lookup['min_price'] );
+		$this->assertSame( '0.0000', $lookup['max_price'] );
+	}
+
+	/**
+	 * @testdox Should give the syncs a grouped product without the variation price when a variable product becomes grouped.
+	 */
+	public function test_a_variable_product_that_becomes_grouped_gives_the_syncs_its_new_price(): void {
+		$price = null;
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $saved ) use ( &$price ) {
+				$price = $saved[0]->get_price( 'edit' );
+				return null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'   => $created['product']['id'],
+				'type' => 'grouped',
+			)
+		);
+
+		$this->assertSame( '', $price );
+	}
+
+	/**
 	 * @testdox Should build a new variation with the class that the parent type asks for, and write a field limited to it.
 	 */
 	public function test_creates_variations_of_a_subclass_with_their_fields(): void {
