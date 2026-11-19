@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid a PHP deprecation notice when importing a product CSV file that contains only blank lines.

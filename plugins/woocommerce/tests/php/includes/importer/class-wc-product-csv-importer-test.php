@@ -343,6 +343,34 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A file with only blank lines is read as having no headers, without a deprecation notice.
+	 */
+	public function test_read_file_with_only_blank_lines(): void {
+		$file = get_temp_dir() . 'product-import-' . wp_generate_uuid4() . '.csv';
+		file_put_contents( $file, "\n\n\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Temporary CSV fixture.
+
+		$notices = array();
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capture deprecation notices, which PHPUnit does not report.
+		set_error_handler(
+			static function ( $errno, $errstr ) use ( &$notices ) {
+				$notices[] = $errstr;
+				return true;
+			},
+			E_DEPRECATED
+		);
+
+		try {
+			$sut = new WC_Product_CSV_Importer( $file );
+		} finally {
+			restore_error_handler();
+			wp_delete_file( $file );
+		}
+
+		$this->assertSame( array(), $notices, 'Reading the file must not raise a deprecation notice' );
+		$this->assertSame( array(), $sut->get_raw_keys(), 'A blank header line yields no headers' );
+	}
+
+	/**
 	 * @testdox Resolved original IDs are reused consistently without repeated lookups
 	 */
 	public function test_original_id_mapping_is_reused_within_an_import() {
