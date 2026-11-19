@@ -449,11 +449,19 @@ final class ImportCommand {
 					'character_encoding' => $options['character_encoding'],
 					'batch_size'         => $options['batch_size'],
 				),
-				function ( int $new_position, array $batch_results ) use ( $progress, &$position, &$partial ) {
+				function ( int $new_position, array $batch_results ) use ( $options, $progress, &$position, &$partial ) {
 					if ( null !== $progress ) {
 						$progress->tick( max( 0, $new_position - $position ) );
 					}
 					$position = $new_position;
+
+					if ( $options['porcelain'] ) {
+						// Printed per batch, so a long run never holds every ID and a stopped run still lists what it saved.
+						// `line()`, not `log()`, so `--quiet` cannot hide the output a script reads.
+						foreach ( array_merge( $batch_results['imported_ids'], $batch_results['imported_variation_ids'], $batch_results['updated_ids'] ) as $id ) {
+							WP_CLI::line( (string) $id );
+						}
+					}
 
 					foreach ( array( 'imported', 'imported_variations', 'updated', 'skipped', 'failed' ) as $count ) {
 						$partial[ $count ] = ( $partial[ $count ] ?? 0 ) + $batch_results[ $count ];
@@ -481,11 +489,6 @@ final class ImportCommand {
 		}
 
 		if ( $options['porcelain'] ) {
-			// `line()`, not `log()`, so `--quiet` cannot hide the output a script reads.
-			foreach ( array_merge( $results['imported_ids'], $results['imported_variation_ids'], $results['updated_ids'] ) as $id ) {
-				WP_CLI::line( (string) $id );
-			}
-
 			if ( $results['failed'] > 0 ) {
 				WP_CLI::warning( sprintf( '%d row(s) failed.', $results['failed'] ) );
 

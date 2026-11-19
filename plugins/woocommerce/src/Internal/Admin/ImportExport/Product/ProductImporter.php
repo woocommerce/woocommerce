@@ -16,6 +16,14 @@ use WP_Error;
  * @phpstan-type ImportResult array{
  *     imported: int,
  *     imported_variations: int,
+ *     updated: int,
+ *     skipped: int,
+ *     failed: int,
+ *     errors: array
+ * }
+ * @phpstan-type BatchResult array{
+ *     imported: int,
+ *     imported_variations: int,
  *     imported_variation_ids: int[],
  *     updated: int,
  *     skipped: int,
@@ -159,6 +167,7 @@ final class ProductImporter {
 	 * @param string        $file     Path to the CSV file.
 	 * @param array         $options  Options: mapping, update_existing, delimiter, character_encoding, batch_size.
 	 * @param callable|null $on_batch Optional callback invoked as `$on_batch( int $position, array $batch_results )` after each batch.
+	 *                                The batch results include the batch's product IDs, which the returned totals leave out.
 	 * @param callable|null $on_pending_placeholders Optional callback invoked as `$on_pending_placeholders( int $count )` while the lock is held,
 	 *                                               when placeholders from an earlier run would be cleaned up. It can throw to abort the import.
 	 *
@@ -187,15 +196,12 @@ final class ProductImporter {
 			}
 
 			$totals = array(
-				'imported'               => 0,
-				'imported_variations'    => 0,
-				'imported_variation_ids' => array(),
-				'updated'                => 0,
-				'skipped'                => 0,
-				'failed'                 => 0,
-				'imported_ids'           => array(),
-				'updated_ids'            => array(),
-				'errors'                 => array(),
+				'imported'            => 0,
+				'imported_variations' => 0,
+				'updated'             => 0,
+				'skipped'             => 0,
+				'failed'              => 0,
+				'errors'              => array(),
 			);
 
 			$term_counting_deferred   = wp_defer_term_counting();
@@ -220,9 +226,7 @@ final class ProductImporter {
 					foreach ( array( 'imported', 'imported_variations', 'updated', 'skipped', 'failed' ) as $count ) {
 						$totals[ $count ] += $batch['results'][ $count ];
 					}
-					foreach ( array( 'imported_ids', 'imported_variation_ids', 'updated_ids', 'errors' ) as $list ) {
-						$totals[ $list ] = array_merge( $totals[ $list ], $batch['results'][ $list ] );
-					}
+					array_push( $totals['errors'], ...$batch['results']['errors'] );
 
 					// A long import can outlast the lock's stale timeout, so keep it fresh between batches.
 					$this->keep_lock();
@@ -290,7 +294,7 @@ final class ProductImporter {
 	 * @param array  $options  Options: mapping, update_existing, delimiter, character_encoding, batch_size.
 	 * @param int    $position Byte position to start reading from, 0 for the first batch.
 	 *
-	 * @return array{results: ImportResult, position: int, done: bool}
+	 * @return array{results: BatchResult, position: int, done: bool}
 	 *
 	 * @throws InvalidArgumentException When a mapping target is not a valid importer schema key.
 	 */
@@ -328,11 +332,11 @@ final class ProductImporter {
 	}
 
 	/**
-	 * Summarize one batch's `WC_Product_CSV_Importer::import()` result into the shape `run()` returns.
+	 * Summarize one batch's `WC_Product_CSV_Importer::import()` result for `run()` and its batch callback.
 	 *
 	 * @param array $results The importer's result for this batch.
 	 *
-	 * @return ImportResult
+	 * @return BatchResult
 	 */
 	private function summarize_batch( array $results ): array {
 		$imported_ids  = array_map( 'absint', (array) $results['imported'] );

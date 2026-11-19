@@ -344,7 +344,8 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	 * @testdox Should import every row of a file that spans several batches.
 	 */
 	public function test_run_imports_across_several_batches(): void {
-		$batches = 0;
+		$batches      = 0;
+		$imported_ids = array();
 
 		$results = $this->sut->run(
 			$this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-BATCH-1,One\nsimple,IMPORT-RUNNER-BATCH-2,Two\nsimple,IMPORT-RUNNER-BATCH-3,Three\n" ),
@@ -352,13 +353,16 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 				'mapping'    => $this->get_simple_mapping(),
 				'batch_size' => 1,
 			),
-			static function () use ( &$batches ): void {
+			static function ( int $position, array $batch_results ) use ( &$batches, &$imported_ids ): void {
+				unset( $position ); // Avoid parameter not used PHPCS errors.
 				++$batches;
+				array_push( $imported_ids, ...$batch_results['imported_ids'] );
 			}
 		);
 
 		$this->assertSame( 3, $results['imported'] );
-		$this->assertCount( 3, $results['imported_ids'] );
+		$this->assertCount( 3, $imported_ids, 'Each batch should pass its imported IDs to the callback' );
+		$this->assertArrayNotHasKey( 'imported_ids', $results, 'The run totals should not keep every ID' );
 		$this->assertGreaterThanOrEqual( 3, $batches );
 	}
 
@@ -557,9 +561,11 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return the IDs of imported variations.
+	 * @testdox Should pass the IDs of imported variations to the batch callback.
 	 */
-	public function test_run_returns_imported_variation_ids(): void {
+	public function test_run_reports_imported_variation_ids_per_batch(): void {
+		$variation_ids = array();
+
 		$file = $this->write_csv(
 			"Type,SKU,Name,Parent\n" .
 			"variable,IMPORT-RUNNER-VAR-PARENT,Variable Parent,\n" .
@@ -575,13 +581,17 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 					'Name'   => 'name',
 					'Parent' => 'parent_id',
 				),
-			)
+			),
+			static function ( int $position, array $batch_results ) use ( &$variation_ids ): void {
+				unset( $position ); // Avoid parameter not used PHPCS errors.
+				array_push( $variation_ids, ...$batch_results['imported_variation_ids'] );
+			}
 		);
 
 		$child_id = wc_get_product_id_by_sku( 'IMPORT-RUNNER-VAR-CHILD' );
 
 		$this->assertSame( 1, $results['imported_variations'] );
-		$this->assertSame( array( $child_id ), $results['imported_variation_ids'] );
+		$this->assertSame( array( $child_id ), $variation_ids );
 	}
 
 	/**
