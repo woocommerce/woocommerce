@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\RegulatoryFields\RegulatoryFields;
 use Automattic\WooCommerce\Internal\RestApi\OrderLineItemValidationTrait;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\OrderLineMetaValidator;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -382,7 +383,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $order ) {
-		$extra_fields   = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds', 'payment_url', 'is_editable', 'needs_payment', 'needs_processing' );
+		$extra_fields   = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds', 'payment_url', 'is_editable', 'needs_payment', 'needs_processing', 'regulatory_fields' );
 		$format_decimal = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
 		$format_date    = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
 		// These fields are dependent on other fields.
@@ -457,6 +458,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				case 'needs_processing':
 					$data['needs_processing'] = $order->needs_processing();
 					break;
+				case 'regulatory_fields':
+					$data['regulatory_fields'] = (object) wc_get_container()->get( RegulatoryFields::class )->get_order_values( $order );
+					break;
 			}
 		}
 
@@ -526,6 +530,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			'is_editable',
 			'needs_payment',
 			'needs_processing',
+			'regulatory_fields',
 		);
 
 		$data = array_intersect_key( $data, array_flip( $allowed_fields ) );
@@ -2169,6 +2174,15 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
+				),
+				'regulatory_fields'    => array(
+					'description'          => __( 'Values collected at checkout because the rules of the country the order is delivered to require them, keyed by field ID. For example br_tax_id holds a Brazilian CPF or CNPJ, without punctuation.', 'woocommerce' ),
+					'type'                 => 'object',
+					'context'              => array( 'view', 'edit' ),
+					'readonly'             => true,
+					'additionalProperties' => array(
+						'type' => 'string',
+					),
 				),
 			),
 		);

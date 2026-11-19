@@ -128,6 +128,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'is_editable',
 			'needs_payment',
 			'needs_processing',
+			'regulatory_fields',
 		);
 
 		if ( $with_cogs_enabled ) {
@@ -163,6 +164,28 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEmpty( array_diff( $expected_response_fields, $response_fields ), 'These fields were expected but not present in API response: ' . print_r( array_diff( $expected_response_fields, $response_fields ), true ) );
 
 		$this->assertEmpty( array_diff( $response_fields, $expected_response_fields ), 'These fields were not expected in the API response: ' . print_r( array_diff( $response_fields, $expected_response_fields ), true ) );
+	}
+
+	/**
+	 * @testdox Should return the regulatory field values stored on the order, or an empty object without any.
+	 *
+	 * @testWith ["52998224725", {"br_tax_id": "52998224725"}]
+	 *           ["", []]
+	 *
+	 * @param string                $stored_value Value stored on the order, or empty for none.
+	 * @param array<string, string> $expected     Expected regulatory fields.
+	 */
+	public function test_orders_get_regulatory_fields( string $stored_value, array $expected ): void {
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+		if ( '' !== $stored_value ) {
+			$order->update_meta_data( '_wc_regulatory_br_tax_id', $stored_value );
+			$order->save();
+		}
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected, (array) $response->get_data()['regulatory_fields'] );
 	}
 
 	/**
