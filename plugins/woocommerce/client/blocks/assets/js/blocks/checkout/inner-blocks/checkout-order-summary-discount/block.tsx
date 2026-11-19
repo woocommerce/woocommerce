@@ -10,7 +10,12 @@ import {
 	useOrderSummaryLoadingState,
 	useOrderSummaryRow,
 } from '@woocommerce/base-context/hooks';
-import { ExperimentalDiscountsMeta } from '@woocommerce/blocks-checkout';
+import {
+	ExperimentalDiscountsMeta,
+	applyCheckoutFilter,
+} from '@woocommerce/blocks-checkout';
+
+const couponsFilterArg = { context: 'summary' };
 
 const DiscountSlotFill = (): JSX.Element => {
 	// Prepare props to pass to the ExperimentalOrderMeta slot fill. We need to pluck out receiveCart.
@@ -28,9 +33,14 @@ const DiscountSlotFill = (): JSX.Element => {
 const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
 	const { cart, wrapperProps } = useOrderSummaryRow(
 		useStoreCart(),
+		// Matches `TotalsDiscount`, so coupons that a `coupons` filter adds still show.
 		( { cartCoupons, cartTotals } ) =>
-			cartCoupons.length > 0 ||
-			!! parseInt( cartTotals.total_discount, 10 )
+			!! parseInt( cartTotals.total_discount, 10 ) ||
+			applyCheckoutFilter( {
+				arg: couponsFilterArg,
+				filterName: 'coupons',
+				defaultValue: cartCoupons,
+			} ).length > 0
 	);
 	const { removeCoupon, isRemovingCoupon } =
 		useStoreCartCoupons( 'wc/checkout' );

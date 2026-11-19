@@ -3,6 +3,7 @@
  */
 import { render, screen } from '@testing-library/react';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
+import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -100,5 +101,27 @@ describe( 'Checkout Order Summary Discount Block', () => {
 		render( <Block className="test-class" /> );
 
 		expect( screen.getByTestId( 'discount-slot' ) ).toBeInTheDocument();
+	} );
+
+	it( 'shows coupons that the coupons filter adds when the cart has none', () => {
+		( applyCheckoutFilter as jest.Mock ).mockImplementation(
+			( { filterName, defaultValue } ) =>
+				filterName === 'coupons'
+					? [
+							{
+								code: 'extension-coupon',
+								label: 'EXTENSION',
+								totals: {
+									total_discount: '0',
+									total_discount_tax: '0',
+								},
+							},
+						]
+					: defaultValue
+		);
+
+		render( <Block /> );
+
+		expect( screen.getByText( 'EXTENSION' ) ).toBeInTheDocument();
 	} );
 } );
