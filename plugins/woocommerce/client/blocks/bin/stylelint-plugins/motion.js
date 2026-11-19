@@ -123,20 +123,19 @@ const listTokens = ( value ) =>
 
 const MIXIN_PARAMETER = Symbol( 'mixin parameter' );
 
-// The assignment of a Sass variable that is in effect where `node` uses it, as Sass reads it: only assignments before
-// `node` count, an inner rule overrides the root, and `!default` applies only when the variable has no value yet.
-// Returns `MIXIN_PARAMETER` for a parameter of the enclosing mixin, or null when the variable has no value.
-const resolveVariable = ( name, node ) => {
+const FLOW_CONTROL = new Set( [ 'if', 'else', 'each', 'for', 'while' ] );
+
+const isDefault = ( assignment ) => /!default\b/.test( assignment.value );
+
+// The assignments of a Sass variable that can be in effect where `node` uses it, as Sass reads it: only assignments
+// before `node` count, an inner rule overrides the root, and `!default` applies only when the variable has no value
+// yet. An assignment in an earlier `@if` or loop may run or not, so it adds a possible value. The list holds
+// `MIXIN_PARAMETER` for a parameter of the enclosing mixin, and is empty when the variable has no value.
+const resolveAssignments = ( name, node ) => {
 	const scopes = [];
 	for ( let child = node; child.parent; child = child.parent ) {
 		const scope = child.parent;
-		scopes.unshift(
-			scope.nodes
-				.slice( 0, scope.nodes.indexOf( child ) )
-				.filter(
-					( item ) => item.type === 'decl' && item.prop === name
-				)
-		);
+		scopes.unshift( scope.nodes.slice( 0, scope.nodes.indexOf( child ) ) );
 		if (
 			scope.type === 'atrule' &&
 			scope.name === 'mixin' &&
@@ -146,22 +145,33 @@ const resolveVariable = ( name, node ) => {
 			break;
 		}
 	}
-	let assignment = null;
-	for ( const candidate of scopes.flat() ) {
-		if (
-			assignment === null ||
-			candidate === MIXIN_PARAMETER ||
-			! /!default\b/.test( candidate.value )
-		) {
-			assignment = candidate;
+	let assignments = [];
+	for ( const item of scopes.flat() ) {
+		if ( item === MIXIN_PARAMETER ) {
+			assignments = [ item ];
+		} else if ( item.type === 'decl' && item.prop === name ) {
+			if ( assignments.length === 0 || ! isDefault( item ) ) {
+				assignments = [ item ];
+			}
+		} else if ( item.type === 'atrule' && FLOW_CONTROL.has( item.name ) ) {
+			const hasValue = assignments.length > 0;
+			item.walkDecls( ( decl ) => {
+				if (
+					decl.prop === name &&
+					! ( hasValue && isDefault( decl ) )
+				) {
+					assignments.push( decl );
+				}
+			} );
 		}
 	}
-	return assignment;
+	return assignments;
 };
 
-// A property, or a Sass variable whose value lists only fade or color properties. The variable must be assigned in
-// the same file, in the root or a rule that encloses `node`. A parameter of the enclosing mixin passes, because the
-// `motion-transition` mixin forwards its `$state` list. Other variables fail, because their value is unknown.
+// A property, or a Sass variable whose possible values list only fade or color properties. The variable must be
+// assigned in the same file, in the root or a rule that encloses `node`. A parameter of the enclosing mixin passes,
+// because the `motion-transition` mixin forwards its `$state` list. Other variables fail, because their value is
+// unknown.
 const isFadeProperty = ( property, node, seen ) => {
 	if ( ! property.startsWith( '$' ) ) {
 		return FADE_PROPERTIES.has( property.toLowerCase() );
@@ -171,14 +181,22 @@ const isFadeProperty = ( property, node, seen ) => {
 		return false;
 	}
 	seen.add( name );
-	const assignment = resolveVariable( name, node );
-	if ( assignment === MIXIN_PARAMETER ) {
-		return true;
-	}
-	const tokens = assignment ? listTokens( assignment.value ) : [];
+	const assignments = resolveAssignments( name, node );
 	return (
-		tokens.length > 0 &&
-		tokens.every( ( token ) => isFadeProperty( token, assignment, seen ) )
+		assignments.length > 0 &&
+		assignments.every( ( assignment ) => {
+			if ( assignment === MIXIN_PARAMETER ) {
+				return true;
+			}
+			const tokens = listTokens( assignment.value );
+			const assignmentSeen = new Set( seen );
+			return (
+				tokens.length > 0 &&
+				tokens.every( ( token ) =>
+					isFadeProperty( token, assignment, assignmentSeen )
+				)
+			);
+		} )
 	);
 };
 
@@ -187,7 +205,7 @@ const isFadeOnly = ( prop, decl ) => {
 	const { value } = decl;
 	if ( prop === 'animation' || prop === 'animation-name' ) {
 		return splitList( value ).every( ( item ) =>
-			item.split( ' ' ).some( ( token ) => FADE_KEYFRAMES.has( token ) )
+			item.split( /\s+/ ).some( ( token ) => FADE_KEYFRAMES.has( token ) )
 		);
 	}
 	if ( prop !== 'transition' && prop !== 'transition-property' ) {
@@ -196,7 +214,7 @@ const isFadeOnly = ( prop, decl ) => {
 	return splitList( value ).every(
 		( item ) =>
 			isFadeFunction( item, decl ) ||
-			FADE_PROPERTIES.has( item.split( ' ' )[ 0 ].toLowerCase() )
+			FADE_PROPERTIES.has( item.split( /\s+/ )[ 0 ].toLowerCase() )
 	);
 };
 
