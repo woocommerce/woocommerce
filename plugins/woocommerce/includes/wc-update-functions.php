@@ -4410,3 +4410,18 @@ function wc_update_1122_remove_objects_from_default_attributes(): void {
 		);
 	}
 }
+
+/**
+ * Clear cached shipping zone and tax rate matches, so ZIP+4 postcodes cached before 11.3.1
+ * are matched again against rules for their 5-digit ZIP code.
+ *
+ * The shipping transient version is bumped too, so shipping rates stored in a cart session
+ * before the update are calculated again.
+ *
+ * @since 11.3.1
+ */
+function wc_update_11301_invalidate_postcode_match_caches(): void {
+	WC_Cache_Helper::invalidate_cache_group( 'shipping_zones' );
+	WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+	WC_Cache_Helper::get_transient_version( 'shipping', true );
+}

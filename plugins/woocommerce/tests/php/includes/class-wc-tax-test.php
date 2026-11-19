@@ -1008,4 +1008,55 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 	}
+
+	/**
+	 * @testdox find_rates applies a rate limited to a 5-digit ZIP code, or a range of them, to a ZIP+4 postcode.
+	 *
+	 * @testWith ["10001"]
+	 *           ["10000...10099"]
+	 *
+	 * @param string $rule Postcode rule of the tax rate.
+	 */
+	public function test_find_rates_matches_zip_plus_four_postcode( string $rule ): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'ZIP code tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, $rule );
+
+		foreach ( array( '10001', '10001-1234' ) as $postcode ) {
+			$rates = WC_Tax::find_rates(
+				array(
+					'country'   => 'US',
+					'state'     => 'NY',
+					'postcode'  => $postcode,
+					'city'      => '',
+					'tax_class' => '',
+				)
+			);
+
+			$this->assertArrayHasKey( $tax_rate_id, $rates, "{$postcode} should get the rate limited to {$rule}." );
+		}
+
+		$rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'US',
+				'state'     => 'NY',
+				'postcode'  => '10101-1234',
+				'city'      => '',
+				'tax_class' => '',
+			)
+		);
+
+		$this->assertArrayNotHasKey( $tax_rate_id, $rates, "A ZIP+4 code outside {$rule} should not get the rate." );
+	}
 }
