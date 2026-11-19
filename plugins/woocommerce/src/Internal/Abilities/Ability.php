@@ -22,6 +22,13 @@ defined( 'ABSPATH' ) || exit;
 class Ability extends \WP_Ability {
 
 	/**
+	 * Whether the execute callback of the current run returned output, so WordPress validated it.
+	 *
+	 * @var bool
+	 */
+	private $callback_returned_output = false;
+
+	/**
 	 * Apply the schema default. Before WordPress 7.2, also convert valid input to
 	 * the schema types, as WordPress 7.2 does in execute().
 	 *
@@ -147,8 +154,11 @@ class Ability extends \WP_Ability {
 	 * @return mixed|\WP_Error The result of the ability execution, or a WP_Error.
 	 */
 	public function execute( $input = null ) {
-		$result = parent::execute( $input );
-		if ( ! is_wp_error( $result ) || 'ability_invalid_output' !== $result->get_error_code() || true === ( $this->get_meta_item( 'annotations' )['readonly'] ?? null ) ) {
+		$result                         = parent::execute( $input );
+		$callback_returned_output       = $this->callback_returned_output;
+		$this->callback_returned_output = false;
+
+		if ( ! $callback_returned_output || ! is_wp_error( $result ) || 'ability_invalid_output' !== $result->get_error_code() || true === ( $this->get_meta_item( 'annotations' )['readonly'] ?? null ) ) {
 			return $result;
 		}
 
@@ -161,5 +171,21 @@ class Ability extends \WP_Ability {
 		);
 
 		return $error;
+	}
+
+	/**
+	 * Run the execute callback, and record whether it returned output instead of an error.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $input Optional. The input data for the ability. Default `null`.
+	 * @return mixed|\WP_Error The result of the execute callback, or a WP_Error.
+	 */
+	protected function do_execute( $input = null ) {
+		$result = parent::do_execute( $input );
+
+		$this->callback_returned_output = ! is_wp_error( $result );
+
+		return $result;
 	}
 }
