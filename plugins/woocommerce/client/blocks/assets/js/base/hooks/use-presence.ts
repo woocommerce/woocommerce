@@ -22,14 +22,20 @@ export function usePresence< T, E extends Element = HTMLDivElement >(
 	{ exit = true }: { exit?: boolean } = {}
 ) {
 	const ref = useRef< E | null >( null );
-	const [ previousValue, setPreviousValue ] = useState( value );
+	// The state setters wrap the content, so that content that is a function is stored, not called.
+	const [ previousValue, setPreviousValue ] = useState( () => value );
 	const [ exitingValue, setExitingValue ] = useState< T | null >( null );
 
 	// Adjust state while rendering, so the exiting content never unmounts for a frame. Turning `exit` off mid-exit
 	// removes the content at once.
-	if ( value !== previousValue || ( ! exit && exitingValue !== null ) ) {
-		setPreviousValue( value );
-		setExitingValue( value === null && exit ? previousValue : null );
+	if (
+		! Object.is( value, previousValue ) ||
+		( ! exit && exitingValue !== null )
+	) {
+		setPreviousValue( () => value );
+		setExitingValue( () =>
+			value === null && exit ? previousValue : null
+		);
 	}
 
 	// A layout effect runs after the exit style is in the DOM, so its transitions have started, and before paint, so

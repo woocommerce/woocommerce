@@ -103,4 +103,27 @@ describe( 'usePresence', () => {
 		expect( result.current.value ).toBeNull();
 		expect( result.current.isExiting ).toBe( false );
 	} );
+
+	it( 'keeps content that is a function without calling it', () => {
+		const renderContent = jest.fn( () => 'content' );
+		const { result, rerender } = renderHook(
+			( { value }: { value: ( () => string ) | null } ) =>
+				usePresence( value ),
+			{ initialProps: { value: null as ( () => string ) | null } }
+		);
+		result.current.ref.current = createAnimatingElement().element;
+
+		rerender( { value: renderContent } );
+		expect( result.current.value ).toBe( renderContent );
+
+		rerender( { value: null } );
+		expect( result.current.value ).toBe( renderContent );
+		expect( result.current.isExiting ).toBe( true );
+		expect( renderContent ).not.toHaveBeenCalled();
+	} );
+
+	it( 'settles when the content is NaN', () => {
+		const { result } = renderHook( () => usePresence( NaN ) );
+		expect( result.current.value ).toBeNaN();
+	} );
 } );
