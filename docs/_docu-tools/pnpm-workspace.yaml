@@ -2,3 +2,7 @@
 allowBuilds:
     '@swc/core': false
     core-js: false
+
+# pnpm no longer reads the `pnpm` field in package.json, so overrides live here.
+overrides:
+    'tinypool@<2.1.2': ^2.1.2
