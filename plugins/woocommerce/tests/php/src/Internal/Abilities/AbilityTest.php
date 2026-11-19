@@ -97,6 +97,30 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the original message when a read-only ability returns invalid output.
+	 */
+	public function test_invalid_output_of_a_read_only_ability_has_no_retry_hint(): void {
+		$ability = new Ability(
+			'test/invalid-output-read-only',
+			array(
+				'label'               => 'Invalid output',
+				'description'         => 'Returns output that does not match its schema.',
+				'category'            => 'woocommerce',
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => fn() => 'not an object',
+				'permission_callback' => '__return_true',
+				'meta'                => array( 'annotations' => array( 'readonly' => true ) ),
+			)
+		);
+
+		$result = $ability->execute();
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_output', $result->get_error_code() );
+		$this->assertStringNotContainsString( 'may already be saved', $result->get_error_message() );
+	}
+
+	/**
 	 * @testdox Should keep every error from the output validation filter when it adds the retry hint.
 	 */
 	public function test_invalid_output_keeps_every_error(): void {
