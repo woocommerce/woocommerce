@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Controllers;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
+use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\WpcomNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
@@ -126,7 +127,19 @@ class PushTokenRestController extends RestApiControllerBase {
 					array(
 						'title'      => 'push_tokens',
 						'properties' => array(
-							'tokens' => array(
+							'id'      => array(
+								'description' => __( 'The ID of the registered token. Only returned when registering a token.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+							),
+							'blog_id' => array(
+								'description' => __( "The store's WordPress.com blog ID, which its push notifications carry. Not the multisite blog ID from get_current_blog_id(). Only returned when registering a token. Null when the store has no WordPress.com blog ID.", 'woocommerce' ),
+								'type'        => array( 'integer', 'null' ),
+								'context'     => array( 'view' ),
+								'readonly'    => true,
+							),
+							'tokens'  => array(
 								'description' => __( 'The push tokens registered on this store.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view' ),
@@ -274,7 +287,8 @@ class PushTokenRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Creates a push token record.
+	 * Creates a push token record and returns its ID and the store's WordPress.com blog ID.
+	 * Apps compare the blog ID with the ID carried by push notifications.
 	 *
 	 * @since 10.6.0
 	 *
@@ -311,7 +325,10 @@ class PushTokenRestController extends RestApiControllerBase {
 		}
 
 		return new WP_REST_Response(
-			array( 'id' => $push_token->get_id() ),
+			array(
+				'id'      => $push_token->get_id(),
+				'blog_id' => wc_get_container()->get( WpcomNotificationDispatcher::class )->get_site_id(),
+			),
 			WP_Http::CREATED
 		);
 	}
