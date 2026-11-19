@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Speed up large product exports from WP-CLI by keeping site options cached between batches.

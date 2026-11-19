@@ -143,6 +143,12 @@ final class ProductExporter {
 				}
 
 				$this->memory_manager->flush_caches();
+
+				// Core re-caches autoloaded options with wp_cache_add(), which is a no-op while addition is suspended.
+				wp_suspend_cache_addition( false );
+				wp_load_alloptions();
+				wp_suspend_cache_addition( true );
+
 				++$page;
 			} while ( $exporter->get_percent_complete() < 100 );
 
