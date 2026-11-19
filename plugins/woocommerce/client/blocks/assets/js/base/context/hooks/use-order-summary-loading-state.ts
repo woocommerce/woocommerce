@@ -69,7 +69,8 @@ export const useSettledOrderSummaryValue = < T >( value: T ): T => {
  * @param storeCart The cart from `useStoreCart`.
  * @param isShown   Whether the row shows for the settled cart.
  * @return The settled cart to render the row from, or `null` when the row is gone. While the row collapses, it is the
- *         last cart that the row showed. Spread `wrapperProps` on the row's `TotalsWrapper`.
+ *         last cart that the row showed. `isStale` is true while that cart is not the current one, so that the row
+ *         can disable its controls. Spread `wrapperProps` on the row's `TotalsWrapper`.
  */
 export const useOrderSummaryRow = (
 	storeCart: StoreCart,
@@ -96,6 +97,7 @@ export const useOrderSummaryRow = (
 	const rowCart = shown ? cart : lastShown.current;
 	return {
 		cart: presence.value ? rowCart : null,
+		isStale: rowCart !== storeCart,
 		wrapperProps: {
 			elementRef: presence.ref,
 			isExiting: presence.isExiting,

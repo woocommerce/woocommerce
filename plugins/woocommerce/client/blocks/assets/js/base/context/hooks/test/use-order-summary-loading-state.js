@@ -224,6 +224,21 @@ describe( 'useOrderSummaryRow', () => {
 		expect( result.current.cart.cartFees ).toEqual( [ 'fee' ] );
 	} );
 
+	it( 'is stale while the row shows a cart that is not the current one', () => {
+		mockCart( [ 'fee' ] );
+		const { result, rerender } = renderRow();
+		expect( result.current.isStale ).toBe( false );
+
+		mockCart( [], true );
+		rerender();
+		expect( result.current.cart.cartFees ).toEqual( [ 'fee' ] );
+		expect( result.current.isStale ).toBe( true );
+
+		mockCart( [ 'fee' ] );
+		rerender();
+		expect( result.current.isStale ).toBe( false );
+	} );
+
 	it( 'animates after a pointer change, not after a key press', () => {
 		mockCart( [] );
 		const { rerender } = renderRow();
