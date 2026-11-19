@@ -5785,6 +5785,26 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox A PUT keeps a typed CPF/CNPJ for the session as typed, without validating it, and placing the order clears it.
+	 */
+	public function test_put_keeps_typed_tax_id_until_order_is_placed() {
+		$put_request = new \WP_REST_Request( 'PUT', '/wc/store/v1/checkout' );
+		$put_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$put_request->set_body_params( array( 'regulatory_fields' => array( 'br_tax_id' => '529.982' ) ) );
+
+		$put_response = rest_get_server()->dispatch( $put_request );
+
+		$this->assertSame( 200, $put_response->get_status(), print_r( $put_response->get_data(), true ) );
+		$this->assertSame( '529.982', $put_response->get_data()['regulatory_fields']->br_tax_id );
+
+		$post_request  = $this->build_brazil_checkout_post_request( array( 'regulatory_fields' => array( 'br_tax_id' => '529.982.247-25' ) ) );
+		$post_response = rest_get_server()->dispatch( $post_request );
+
+		$this->assertSame( 200, $post_response->get_status(), print_r( $post_response->get_data(), true ) );
+		$this->assertNull( WC()->session->get( 'store_api_regulatory_fields' ) );
+	}
+
+	/**
 	 * @testdox An order shipped outside Brazil does not store a submitted CPF/CNPJ.
 	 */
 	public function test_post_outside_brazil_ignores_tax_id() {

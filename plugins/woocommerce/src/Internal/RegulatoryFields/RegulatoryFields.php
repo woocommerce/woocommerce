@@ -28,6 +28,11 @@ class RegulatoryFields {
 	public const META_PREFIX = '_wc_regulatory_';
 
 	/**
+	 * Session key the values typed at checkout are kept under until the order is placed.
+	 */
+	private const SESSION_KEY = 'store_api_regulatory_fields';
+
+	/**
 	 * Field definitions keyed by country code, then by field ID.
 	 *
 	 * @var array<string, array<string, RegulatoryField>>|null
@@ -203,6 +208,47 @@ class RegulatoryFields {
 		}
 
 		return $values;
+	}
+
+	/**
+	 * Keep what the shopper has typed so far in the session, so a checkout page reload does not lose it.
+	 *
+	 * The values are kept as typed and are not validated until the order is placed.
+	 *
+	 * @param mixed $values Typed values keyed by field ID.
+	 */
+	public function set_session_values( $values ): void {
+		if ( ! WC()->session ) {
+			return;
+		}
+
+		$values  = is_array( $values ) ? $values : array();
+		$cleaned = array();
+
+		foreach ( array_keys( $this->get_all_fields() ) as $field_id ) {
+			$value = $values[ $field_id ] ?? '';
+
+			if ( is_scalar( $value ) && '' !== (string) $value ) {
+				$cleaned[ $field_id ] = sanitize_text_field( (string) $value );
+			}
+		}
+
+		WC()->session->set( self::SESSION_KEY, empty( $cleaned ) ? null : $cleaned );
+	}
+
+	/**
+	 * Get what the shopper has typed so far in this session.
+	 *
+	 * @return array<string, string> Typed values keyed by field ID.
+	 */
+	public function get_session_values(): array {
+		$values = WC()->session ? WC()->session->get( self::SESSION_KEY ) : null;
+
+		if ( ! is_array( $values ) ) {
+			return array();
+		}
+
+		return array_filter( array_intersect_key( $values, $this->get_all_fields() ), 'is_string' );
 	}
 
 	/**

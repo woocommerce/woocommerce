@@ -412,6 +412,10 @@ class Checkout extends AbstractCartRoute {
 			return $validation_callback;
 		}
 
+		if ( isset( $request['regulatory_fields'] ) ) {
+			wc_get_container()->get( RegulatoryFields::class )->set_session_values( $request['regulatory_fields'] );
+		}
+
 		/**
 		 * Create (or update) Draft Order and process request data.
 		 */
@@ -658,6 +662,7 @@ class Checkout extends AbstractCartRoute {
 		// Order save-point: 1.
 		wc_log_order_step( '[Store API #4] Created/Updated draft order', array( 'order_object' => $this->order ) );
 		wc_get_container()->get( RegulatoryFields::class )->set_order_values( $this->order, $regulatory_values );
+		wc_get_container()->get( RegulatoryFields::class )->set_session_values( array() );
 		$this->update_order_from_request( $request, false );
 		wc_log_order_step( '[Store API #5] Updated order with posted data', array( 'order_object' => $this->order ) );
 		$this->process_customer( $request );
