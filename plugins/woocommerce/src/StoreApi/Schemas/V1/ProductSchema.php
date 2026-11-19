@@ -628,7 +628,6 @@ class ProductSchema extends AbstractSchema {
 			'variation'             => $this->prepare_html_response( $product->is_type( ProductType::VARIATION ) ? wc_get_formatted_variation( $product, true, true, false ) : '' ),
 			'permalink'             => $product->get_permalink(),
 			'sku'                   => $this->prepare_html_response( $product->get_sku() ),
-			// Identifiers must stay as entered: HtmlFormatter runs wptexturize and would turn `--` into an en dash entity.
 			'global_unique_id'      => (string) $product->get_global_unique_id(),
 			'short_description'     => $short_description,
 			'description'           => $description,

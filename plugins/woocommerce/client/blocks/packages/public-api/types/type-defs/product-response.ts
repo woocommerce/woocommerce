@@ -76,7 +76,6 @@ export interface ProductResponseItem {
 	variation: string;
 	permalink: string;
 	sku: string;
-	// GTIN, UPC, EAN or ISBN. Missing from stores before WooCommerce 11.4.
 	global_unique_id?: string;
 	short_description: string;
 	description: string;
