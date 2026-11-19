@@ -1042,20 +1042,22 @@ class UcpCheckout extends ControllerTestCase {
 	 * @testdox Complete keeps attribution the order already has.
 	 */
 	public function test_complete_keeps_existing_attribution(): void {
-		$created = $this->create_ready_checkout();
-		add_action(
-			'woocommerce_store_api_checkout_update_order_meta',
-			static function ( \WC_Order $order ) {
-				$order->update_meta_data( '_wc_order_attribution_source_type', 'referral' );
-				$order->save_meta_data();
-			}
-		);
+		$created  = $this->create_ready_checkout();
+		$callback = static function ( \WC_Order $order ) {
+			$order->update_meta_data( '_wc_order_attribution_source_type', 'referral' );
+			$order->save_meta_data();
+		};
+		add_action( 'woocommerce_store_api_checkout_update_order_meta', $callback );
 
-		$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete', array(), array( 'UCP-Agent' => 'profile="https://chatgpt.com/"' ) );
-		$this->assertSame( 'requires_escalation', $response->get_data()['status'] );
+		try {
+			$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete', array(), array( 'UCP-Agent' => 'profile="https://chatgpt.com/"' ) );
+			$this->assertSame( 'requires_escalation', $response->get_data()['status'] );
 
-		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
-		$this->assertSame( 'referral', $order->get_meta( '_wc_order_attribution_source_type' ) );
-		$this->assertSame( '', $order->get_meta( '_wc_order_attribution_utm_source' ) );
+			$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+			$this->assertSame( 'referral', $order->get_meta( '_wc_order_attribution_source_type' ) );
+			$this->assertSame( '', $order->get_meta( '_wc_order_attribution_utm_source' ) );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_update_order_meta', $callback );
+		}
 	}
 }
