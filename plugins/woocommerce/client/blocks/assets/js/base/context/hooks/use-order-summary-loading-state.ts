@@ -6,6 +6,7 @@ import { useSelect } from '@wordpress/data';
 import { checkoutStore } from '@woocommerce/block-data';
 import { useDelayedSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 import { usePresence } from '@woocommerce/base-hooks';
+import { isKeyboardInput } from '@woocommerce/base-utils';
 import type { StoreCart } from '@woocommerce/types';
 
 /**
@@ -63,7 +64,7 @@ export const useSettledOrderSummaryValue = < T >( value: T ): T => {
 /**
  * For an order summary row that only shows sometimes, such as Fees. The row appears and goes when the skeletons end,
  * with the other values. It grows in and collapses out, so the rows below and the total move with it. Rows of the
- * cart that loads with the page show immediately.
+ * cart that loads with the page, or that change after a key press, show immediately.
  *
  * @param storeCart The cart from `useStoreCart`.
  * @param isShown   Whether the row shows for the settled cart.
@@ -89,7 +90,7 @@ export const useOrderSummaryRow = (
 	}, [ cart.cartIsLoading ] );
 	// A boolean, so a new cart object never counts as a change of presence.
 	const presence = usePresence( shown || null, {
-		animate: wasLoaded.current,
+		animate: wasLoaded.current && ! isKeyboardInput(),
 		collapse: true,
 	} );
 	const rowCart = shown ? cart : lastShown.current;
