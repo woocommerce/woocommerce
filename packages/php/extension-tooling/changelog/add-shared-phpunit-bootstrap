@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Share the WooCommerce test case loading and container setup for extension PHPUnit suites.
