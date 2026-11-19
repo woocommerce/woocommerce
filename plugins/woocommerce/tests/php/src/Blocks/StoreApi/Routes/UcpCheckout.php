@@ -1146,4 +1146,34 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertSame( 500, $response->get_status() );
 		$this->assertSame( 0, (int) $coupon->get_data_store()->get_tentative_usage_count( $coupon->get_id() ) );
 	}
+
+	/**
+	 * @testdox A coupon removed because coupons were turned off is reported even when the cart has a stock error too.
+	 */
+	public function test_removed_coupon_is_reported_beside_a_stock_error(): void {
+		\WC_Helper_Coupon::create_coupon( 'save1', array( 'coupon_amount' => '1' ) );
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 2,
+			)
+		);
+		$created = $this->create_ready_checkout(
+			array(
+				'item'     => array( 'id' => (string) $product->get_id() ),
+				'quantity' => 2,
+			)
+		);
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'save1' ) ) ) );
+
+		wc_update_product_stock( $product, 1 );
+		update_option( 'woocommerce_enable_coupons', 'no' );
+		$this->simulate_new_request();
+		$codes = array_column( $this->request( 'GET', $path )->get_data()['messages'], 'code' );
+
+		$this->assertContains( 'out_of_stock', $codes );
+		$this->assertContains( 'discount_code_invalid', $codes );
+	}
 }

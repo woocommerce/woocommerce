@@ -139,13 +139,11 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		$inherited_token        = CartTokenUtils::get_request_cart_token();
 		$this->disabled_coupons = array();
 		add_filter( 'woocommerce_coupon_get_usage_count', array( $this, 'usage_count_without_own_order' ), 10, 2 );
-		add_action( 'woocommerce_store_api_cart_errors', array( $this, 'report_disabled_coupons' ) );
 
 		try {
 			return parent::get_response( $request );
 		} finally {
 			remove_filter( 'woocommerce_coupon_get_usage_count', array( $this, 'usage_count_without_own_order' ), 10 );
-			remove_action( 'woocommerce_store_api_cart_errors', array( $this, 'report_disabled_coupons' ) );
 			$this->restore_request_cart_token( $inherited_token );
 			remove_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
 		}
@@ -321,20 +319,6 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		}
 
 		$cart->calculate_totals();
-	}
-
-	/**
-	 * Report the coupons removed above as cart errors, the way the cart reports a coupon it stops accepting.
-	 *
-	 * @internal
-	 *
-	 * @param \WP_Error $errors Cart errors.
-	 */
-	public function report_disabled_coupons( $errors ): void {
-		foreach ( $this->disabled_coupons as $code ) {
-			/* translators: %s: coupon code. */
-			$errors->add( 'woocommerce_rest_cart_coupon_error', sprintf( __( 'The "%s" coupon has been removed from your cart: coupons are disabled.', 'woocommerce' ), $code ) );
-		}
 	}
 
 	/**
@@ -539,7 +523,18 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 */
 	protected function cart_item_response(): array {
 		// Nested values are stdClass; decode through JSON for uniform array access.
-		return (array) json_decode( (string) wp_json_encode( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) ), true );
+		$cart = (array) json_decode( (string) wp_json_encode( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) ), true );
+
+		// Added here, not through cart validation, which stops at the first failing check and would drop them.
+		foreach ( $this->disabled_coupons as $code ) {
+			$cart['errors'][] = array(
+				'code'    => 'woocommerce_rest_cart_coupon_error',
+				/* translators: %s: coupon code. */
+				'message' => sprintf( __( 'The "%s" coupon has been removed from your cart: coupons are disabled.', 'woocommerce' ), $code ),
+			);
+		}
+
+		return $cart;
 	}
 
 	/**
