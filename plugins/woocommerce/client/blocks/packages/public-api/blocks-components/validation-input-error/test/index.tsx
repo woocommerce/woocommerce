@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { dispatch } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
 
@@ -28,6 +28,8 @@ describe( 'ValidationInputError', () => {
 		Element.prototype.getAnimations = () => [
 			animation as unknown as Animation,
 		];
+		// The shopper's last input was a pointer, so changes animate.
+		fireEvent.pointerDown( document );
 	} );
 
 	afterEach( () => {
@@ -109,5 +111,18 @@ describe( 'ValidationInputError', () => {
 		expect( alert.querySelector( 'p' ) ).not.toBe( exitingMessage );
 		expect( alert ).not.toHaveAttribute( 'aria-hidden' );
 		expect( alert ).not.toHaveAttribute( 'inert' );
+	} );
+
+	it( 'removes the message at once after a key press', () => {
+		const { rerender } = render(
+			<ValidationInputError errorMessage="Enter a postcode" />
+		);
+
+		fireEvent.keyDown( document, { key: 'a' } );
+		rerender( <ValidationInputError errorMessage="" /> );
+
+		expect(
+			screen.queryByText( 'Enter a postcode' )
+		).not.toBeInTheDocument();
 	} );
 } );

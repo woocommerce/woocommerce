@@ -4,6 +4,7 @@
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
 import { usePresence } from '@woocommerce/base-hooks';
+import { isKeyboardInput } from '@woocommerce/base-utils';
 import { Icon, cautionFilled } from '@wordpress/icons';
 
 /**
@@ -48,9 +49,11 @@ export const ValidationInputError = ( {
 	}
 
 	// The error grows in and collapses out, so the content below moves with it. Errors that the page shows before the
-	// shopper interacts, such as for invalid saved data, appear immediately.
+	// shopper interacts, such as for invalid saved data, and errors after a key press appear immediately.
 	const presence = usePresence( errorMessage || null, {
-		animate: navigator.userActivation?.hasBeenActive !== false,
+		animate:
+			navigator.userActivation?.hasBeenActive !== false &&
+			! isKeyboardInput(),
 		collapse: true,
 	} );
 
