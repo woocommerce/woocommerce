@@ -212,7 +212,10 @@ jQuery( function ( $ ) {
 				$panel_wrap.find( 'ul.wc-tabs li' ).removeClass( 'active' );
 				$panel_wrap.find( 'ul.wc-tabs a[role="tab"]' )
 					.attr( 'aria-selected', 'false' )
-					.attr( 'tabindex', '-1' );
+					.attr( 'tabindex', '-1' )
+					.each( function () {
+						get_tab_panel( $( this ) ).hide();
+					} );
 
 				$tab.parent().addClass( 'active' );
 				$tab.attr( 'aria-selected', 'true' ).attr( 'tabindex', '0' );
