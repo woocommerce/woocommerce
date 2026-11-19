@@ -185,6 +185,8 @@ describe( 'Choosing an option', () => {
 
 	afterEach( () => {
 		jest.restoreAllMocks();
+		// @ts-expect-error The fake is not part of jsdom.
+		delete HTMLElement.prototype.getAnimations;
 	} );
 
 	it( 'slides the selection the way it moves on the screen, also right to left, and leaves nothing behind', () => {
@@ -216,6 +218,65 @@ describe( 'Choosing an option', () => {
 				'.wc-block-checkout__shipping-method-indicator'
 			)
 		).not.toBeInTheDocument();
+	} );
+
+	it( 'turns the selection around at its current size', () => {
+		const indicatorClass = 'wc-block-checkout__shipping-method-indicator';
+		// The indicator slides until the test ends.
+		HTMLElement.prototype.getAnimations = function ( this: HTMLElement ) {
+			return this.classList.contains( indicatorClass )
+				? [
+						{
+							playState: 'running',
+							finished: new Promise( () => undefined ),
+							effect: {
+								getComputedTiming: () => ( { endTime: 400 } ),
+							},
+						} as unknown as Animation,
+					]
+				: [];
+		};
+		const { container, rerender } = renderWith( {
+			offers: [ deliveryRate, collectionRate ],
+		} );
+		const pickup = pickupOption();
+		jest.spyOn(
+			Element.prototype,
+			'getBoundingClientRect'
+		).mockImplementation( function ( this: Element ) {
+			// Halfway, the indicator is stretched 224px by 40px.
+			if ( this.classList.contains( indicatorClass ) ) {
+				return { left: 88, top: 5, width: 224, height: 40 } as DOMRect;
+			}
+			return {
+				left: this === pickup ? 200 : 0,
+				top: 0,
+				width: 200,
+				height: 50,
+			} as DOMRect;
+		} );
+
+		fireEvent.click( pickup, { detail: 1 } );
+		rerender(
+			<Block
+				localPickupText="backup local pickup text"
+				onChange={ () => void 0 }
+				showIcon={ false }
+				showPrice
+				checked={ 'pickup' }
+				shippingText="backup shipping text"
+			/>
+		);
+		fireEvent.click( shipOption(), { detail: 1 } );
+
+		const indicator = container.querySelector(
+			`.${ indicatorClass }`
+		) as HTMLElement;
+		expect(
+			indicator.style.getPropertyValue(
+				'--wc-shipping-method-indicator-from-scale'
+			)
+		).toBe( '1.12 0.8' );
 	} );
 
 	it( 'applies a key press immediately', () => {

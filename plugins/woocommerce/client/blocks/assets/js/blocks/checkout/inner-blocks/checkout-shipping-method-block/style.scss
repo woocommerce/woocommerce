@@ -100,6 +100,10 @@ $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 }
 
 @keyframes wc-shipping-method-indicator-stretch {
+	from {
+		scale: var(--wc-shipping-method-indicator-from-scale, 1);
+	}
+
 	50% {
 		scale: var(--wc-shipping-method-indicator-stretch);
 	}

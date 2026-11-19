@@ -252,6 +252,10 @@ const Block = ( {
 				width: toRect.width,
 				height: toRect.height,
 				'--wc-shipping-method-indicator-offset': `${ x }px ${ y }px`,
+				// An indicator that turns around keeps its current stretch, so its size does not jump.
+				'--wc-shipping-method-indicator-from-scale': `${
+					fromRect.width / toRect.width
+				} ${ fromRect.height / toRect.height }`,
 			} as CSSProperties,
 		} ) );
 		// The way the selection moves. When the options stack, Pickup counts as to the right of Ship.
