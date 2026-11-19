@@ -1,7 +1,8 @@
 /**
  * `woocommerce/motion-safe`: a `transition*` or `animation*` declaration (other than `none`) must be inside
- * `@include motion-safe` or `@keyframes`. Transitions that only fade or change color, including `motion-state()` and
- * `motion-hold()`, and the shared fade animations, can be anywhere, because they do not move anything.
+ * `@include motion-safe` or `@keyframes`. Transitions that only fade or change color, including `motion-state()` of
+ * those properties and `motion-hold()`, and the shared fade animations, can be anywhere, because they do not move
+ * anything.
  * See docs/contributors/motion.md.
  */
 const stylelint = require( 'stylelint' );
@@ -67,8 +68,25 @@ const FADE_KEYFRAMES = new Set( [
 	'wc-hold-visible',
 ] );
 
-// Helpers from `_motion.scss` that only return fade, colour, or hold transitions.
-const FADE_FUNCTIONS = [ 'motion-state(', 'motion-hold(' ];
+// Helpers from `_motion.scss`. `motion-hold()` jumps at the end (`step-end`), so it never animates any property.
+// `motion-state()` animates, so each property must fade or change colour. Sass variables pass, because the
+// `motion-transition` mixin forwards its `$state` list.
+const isFadeFunction = ( item ) => {
+	if ( ! item.endsWith( ')' ) ) {
+		return false;
+	}
+	if ( item.startsWith( 'motion-hold(' ) ) {
+		return true;
+	}
+	if ( ! item.startsWith( 'motion-state(' ) ) {
+		return false;
+	}
+	return splitList( item.slice( 'motion-state('.length, -1 ) ).every(
+		( property ) =>
+			property.startsWith( '$' ) ||
+			FADE_PROPERTIES.has( property.toLowerCase() )
+	);
+};
 
 // A `transition` or `transition-property` that only fades or changes color, or an `animation` that only fades.
 const isFadeOnly = ( prop, value ) => {
@@ -82,7 +100,7 @@ const isFadeOnly = ( prop, value ) => {
 	}
 	return splitList( value ).every(
 		( item ) =>
-			FADE_FUNCTIONS.some( ( name ) => item.startsWith( name ) ) ||
+			isFadeFunction( item ) ||
 			FADE_PROPERTIES.has( item.split( ' ' )[ 0 ].toLowerCase() )
 	);
 };
