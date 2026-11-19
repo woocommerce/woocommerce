@@ -8,6 +8,7 @@ import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { checkoutStore, paymentStore } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
+import { useDelayedSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 import clsx from 'clsx';
 
 /**
@@ -62,6 +63,11 @@ const CheckoutExpressPayment = () => {
 		registeredExpressPaymentMethods,
 	} );
 
+	// The skeleton ends with the totals skeletons, not as soon as the calculation ends.
+	const isLoading = useDelayedSkeleton(
+		isCalculating || hasRegisteredNotInitializedExpressPaymentMethods
+	);
+
 	if (
 		! hasRegisteredExpressPaymentMethods ||
 		hasNoValidRegisteredExpressPaymentMethods
@@ -91,9 +97,7 @@ const CheckoutExpressPayment = () => {
 	// the express payment method is not active (because they trigger recalculations) and
 	// the checkout is calculating, because it can result in different express payment methods
 	// or when the express payment methods are not initialized
-	const showSkeleton =
-		! isExpressPaymentMethodActive &&
-		( isCalculating || hasRegisteredNotInitializedExpressPaymentMethods );
+	const showSkeleton = ! isExpressPaymentMethodActive && isLoading;
 
 	return (
 		<>

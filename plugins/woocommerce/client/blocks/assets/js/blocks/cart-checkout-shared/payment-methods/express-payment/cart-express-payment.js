@@ -7,6 +7,7 @@ import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { checkoutStore, paymentStore } from '@woocommerce/block-data';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
+import { useDelayedSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 import clsx from 'clsx';
 
 /**
@@ -55,12 +56,14 @@ const CartExpressPayment = () => {
 	// cart items are being added, updated, or deleted, because it can result in different express payment methods
 	// or when the express payment methods are not initialized.
 	// `isCalculating` starts the skeleton when the quantity changes, with the totals skeletons, instead of when the
-	// request starts after the quantity input's delay.
-	const showSkeleton =
-		! isExpressPaymentMethodActive &&
-		( isCalculating ||
+	// request starts after the quantity input's delay. The skeleton ends with the totals skeletons.
+	const isLoading = useDelayedSkeleton(
+		isCalculating ||
 			hasPendingItemsOperations ||
-			hasRegisteredNotInitializedExpressPaymentMethods );
+			hasRegisteredNotInitializedExpressPaymentMethods
+	);
+	// An active express payment method keeps its buttons, even while a held skeleton would still show.
+	const showSkeleton = ! isExpressPaymentMethodActive && isLoading;
 
 	if (
 		! hasRegisteredExpressPaymentMethods ||
