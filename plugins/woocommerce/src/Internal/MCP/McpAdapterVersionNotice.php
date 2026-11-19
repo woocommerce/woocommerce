@@ -42,6 +42,9 @@ class McpAdapterVersionNotice {
 	 */
 	public function handle_admin_notices(): void {
 		$version = defined( 'WP_MCP_VERSION' ) ? (string) WP_MCP_VERSION : null;
+		if ( null === $version && defined( 'WP\MCP\Core\McpAdapter::VERSION' ) ) {
+			$version = (string) constant( 'WP\MCP\Core\McpAdapter::VERSION' );
+		}
 		if ( ! self::is_outdated( $version ) || ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
