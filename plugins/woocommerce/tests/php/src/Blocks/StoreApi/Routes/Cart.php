@@ -211,6 +211,34 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Cart data callbacks receive the failed request when a 409 error response includes the cart.
+	 */
+	public function test_cart_data_callback_receives_the_request_in_a_conflict_error_response(): void {
+		$received_requests = array();
+		$this->mock_extend->register_endpoint_data(
+			array(
+				'endpoint'      => 'cart',
+				'namespace'     => 'test-plugin',
+				'data_callback' => function ( $request ) use ( &$received_requests ) {
+					$received_requests[] = $request;
+					return array();
+				},
+			)
+		);
+		$routes  = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$route   = $routes->get( 'cart-remove-item' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( array( 'key' => 'bad_item_key_123' ) );
+
+		$response = $route->get_response( $request );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertNotEmpty( $received_requests, 'The cart data callback should run while building the error response.' );
+		$this->assertSame( $request, end( $received_requests ), 'The cart data callback should receive the failed request.' );
+	}
+
+	/**
 	 * Test remove cart item.
 	 */
 	public function test_remove_cart_item() {
