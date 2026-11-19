@@ -60,13 +60,13 @@ class WC_WCCOM_Site_Installation_Step_Move_Product_Test extends WC_Unit_Test_Cas
 	 */
 	public function unmet_requirements(): array {
 		return array(
-			'plugin needing a newer WordPress' => array( 'plugin', '99.0', '', 'incompatible_wp_required_version', '/This extension needs WordPress 99\.0 or later, and this site runs WordPress \d/' ),
-			'plugin needing a newer PHP'       => array( 'plugin', '', '99.0', 'incompatible_php_required_version', '/This extension needs PHP 99\.0 or later, and this server runs PHP \d/' ),
-			'theme needing a newer WordPress'  => array( 'theme', '99.0', '', 'incompatible_wp_required_version', '/This extension needs WordPress 99\.0 or later/' ),
-			'theme needing a newer PHP'        => array( 'theme', '', '99.0', 'incompatible_php_required_version', '/This extension needs PHP 99\.0 or later/' ),
+			'plugin needing a newer WordPress' => array( 'plugin', '99.0', '', 'incompatible_wp_required_version' ),
+			'plugin needing a newer PHP'       => array( 'plugin', '', '99.0', 'incompatible_php_required_version' ),
+			'theme needing a newer WordPress'  => array( 'theme', '99.0', '', 'incompatible_wp_required_version' ),
+			'theme needing a newer PHP'        => array( 'theme', '', '99.0', 'incompatible_php_required_version' ),
 			// PHP is reported first, as WordPress core does.
-			'plugin needing both'              => array( 'plugin', '99.0', '99.0', 'incompatible_php_required_version', '/This extension needs PHP 99\.0 or later/' ),
-			'theme needing both'               => array( 'theme', '99.0', '99.0', 'incompatible_php_required_version', '/This extension needs PHP 99\.0 or later/' ),
+			'plugin needing both'              => array( 'plugin', '99.0', '99.0', 'incompatible_php_required_version' ),
+			'theme needing both'               => array( 'theme', '99.0', '99.0', 'incompatible_php_required_version' ),
 		);
 	}
 
@@ -78,9 +78,8 @@ class WC_WCCOM_Site_Installation_Step_Move_Product_Test extends WC_Unit_Test_Cas
 	 * @param string $requires_wp   Requires at least header.
 	 * @param string $requires_php  Requires PHP header.
 	 * @param string $expected_code Expected installer error code.
-	 * @param string $message_regex Pattern the error message should match.
 	 */
-	public function test_stops_install_when_requirements_are_not_met( string $type, string $requires_wp, string $requires_php, string $expected_code, string $message_regex ): void {
+	public function test_stops_install_when_requirements_are_not_met( string $type, string $requires_wp, string $requires_php, string $expected_code ): void {
 		$this->unpack_fixture( $type, $requires_wp, $requires_php );
 
 		$error = null;
@@ -92,7 +91,10 @@ class WC_WCCOM_Site_Installation_Step_Move_Product_Test extends WC_Unit_Test_Cas
 
 		$this->assertNotNull( $error, 'The step should fail' );
 		$this->assertSame( $expected_code, $error->get_error_code() );
-		$this->assertMatchesRegularExpression( $message_regex, $error->get_error_message(), 'The message should name the required and the current version' );
+		$expected_message = 'incompatible_php_required_version' === $expected_code
+			? 'This extension needs PHP 99.0 or later, and this server runs PHP ' . PHP_VERSION . '.'
+			: 'This extension needs WordPress 99.0 or later, and this site runs WordPress ' . wp_get_wp_version() . '.';
+		$this->assertSame( $expected_message, $error->get_error_message(), 'The message should name the required and the current version' );
 		$this->assertDirectoryDoesNotExist( $this->destination( $type ), 'Nothing should be installed' );
 		$this->assertDirectoryDoesNotExist( $this->unpacked_path, 'The unpacked package should be removed' );
 	}
