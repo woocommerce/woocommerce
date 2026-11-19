@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a required CPF/CNPJ field to checkout for orders delivered to Brazil.
