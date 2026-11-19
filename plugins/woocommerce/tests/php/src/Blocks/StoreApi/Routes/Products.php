@@ -108,6 +108,10 @@ class Products extends ControllerTestCase {
 		$this->assertSame( '012345678905', $get( $variation->get_id() )['global_unique_id'] );
 		$this->assertSame( '', $get( $children[1] )['global_unique_id'] );
 
+		$product->set_global_unique_id( '123--456' );
+		$product->save();
+		$this->assertSame( '123--456', $get( $product->get_id() )['global_unique_id'], 'Consecutive hyphens stay as entered' );
+
 		$product->set_global_unique_id( '' );
 		$product->save();
 		$variable->delete( true );
