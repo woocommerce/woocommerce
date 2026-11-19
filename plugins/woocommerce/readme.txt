@@ -170,6 +170,71 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.3.1 2026-XX-XX =
+= 11.3.1 2026-11-19 =
+
+**WooCommerce**
+
+* Fix - Apply offline payment gateway shipping method and virtual order restrictions when paying for an existing order through the Store API.
+* Fix - Apply state shipping zones and state tax rates on the classic checkout when the state is entered by name instead of its code.
+* Fix - Apply the right state tax and shipping rates to block checkout orders, and reject states and postcodes that are not valid for the country.
+* Fix - Calculate shipping at checkout when the address town or state is 0.
+* Fix - Checkout link URLs now carry a token that only copies the cart to another browser, without the shopper's details.
+* Fix - Check that order items match their expected type when updating orders via the REST API.
+* Fix - Correct order detail template version numbers for WooCommerce 11.3.1.
+* Fix - Do not name unpublished products, or their attributes, in add to cart errors
+* Fix - Email confirmation links in My Account now ask for the account password before confirming an address.
+* Fix - Ignore user role, capability, and session keys sent as customer metadata through the REST API.
+* Fix - Improve how coupon usage limits per user are counted at checkout.
+* Fix - Improve how the product page reads variation attribute values.
+* Fix - Improve payment handling for existing orders.
+* Fix - Improve permission checks for some order-related REST API endpoints.
+* Fix - Improve the accuracy of held stock counts during checkout.
+* Fix - Keep an unpaid order's coupons when the cart's coupons change before checkout.
+* Fix - Keep a review a moderator unapproved pending when the customer edits it.
+* Fix - Keep coupon discounts within the price of the items they apply to.
+* Fix - Keep coupon usage counts accurate when a coupon is removed from an order.
+* Fix - Keep coupon usage counts accurate when an order is cancelled, failed or trashed.
+* Fix - Keep names with quotes in a single cell when downloading Analytics reports as CSV.
+* Fix - Keep PayPal shipping destinations consistent and hold captured orders until their delivery address is confirmed.
+* Fix - Keep sold-individually products limited to one per order when added through a checkout link.
+* Fix - Match coupon "Allowed emails" entries exactly, with the asterisk (*) as the only wildcard.
+* Fix - Match ZIP+4 postcodes against shipping zones and tax rates limited to their 5-digit ZIP code or a range of 5-digit ZIP codes.
+* Fix - Normalize global attribute names consistently on save.
+* Fix - Normalize product IDs on grouped add-to-cart before validating them
+* Fix - Omit potentially sensitive call arguments from fatal and Store API error logs.
+* Fix - Only show the customer name and billing email on the Review Order page when the customer is signed in.
+* Fix - Only show WooCommerce.com install links to users who can install plugins, and tidy up how WooCommerce.com connection requests are verified.
+* Fix - Preserve registered customer identity when guest orders are imported, deleted or anonymized.
+* Fix - Preserve the approved permissions and credential recipient throughout application authorization.
+* Fix - Prevent concurrent checkout updates from adding unpaid products to completed orders.
+* Fix - Prevent unpublished products from appearing in certain Product Collections
+* Fix - Protect customer account data from untrusted cross-origin cart requests.
+* Fix - Recalculate cart totals after removing all coupons through the Store API.
+* Fix - Refuse checkout when the billing country is missing or outside the store's selling locations.
+* Fix - Reject checkout before processing hooks when customer registration and guest checkout are disabled.
+* Fix - Remove coupons already applied to a cart when coupon codes are disabled in WooCommerce settings.
+* Fix - Require a click before installing payment gateways or enabling automated taxes from setup tasks.
+* Fix - Require a logged-in browser session to get the WordPress.com connection link during WooPayments setup.
+* Fix - Require an active checkout credential for PayPal Standard shipping updates.
+* Fix - Require permission to edit the parent product when managing its attributes and variations.
+* Fix - Require the manage_woocommerce capability for the legacy wc-admin options REST endpoint.
+* Fix - Resolve shortcodes before generating download paths
+* Fix - Respect disabled customer registration settings on My Account and classic checkout.
+* Fix - Safely display customer names in order customer search results.
+* Fix - Sanitize args before queuing deferred emails
+* Fix - Sanitize the Checkout block's terms and conditions text before it is shown to shoppers.
+* Fix - Sanitize variation descriptions imported from CSV files.
+* Fix - Shared cart links now copy only the cart and coupons, not the sharer's checkout details or in-progress order.
+* Fix - Ship block checkout orders to the billing address when the store forces shipping to the customer billing address.
+* Fix - Store API: stop pay for order from accepting a shipping address in a country the store does not ship to.
+* Fix - Strengthen checks before Store API checkout reuses an order awaiting payment.
+* Fix - Strengthen file type checks for downloadable product files.
+* Fix - Strengthen order status checks when paying for an existing order.
+* Fix - Strengthen order tracking access checks.
+* Fix - Strengthen security checks for Store API cart and checkout requests.
+* Fix - Update a shopper's existing order review instead of adding a duplicate, including for orders whose billing email contains special characters or is missing.
+* Fix - Update REST API key authentication for Store API requests.
+* Fix - Verify customer email ownership only with a password credential bound to its emailed recipient.
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
