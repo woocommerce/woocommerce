@@ -26,7 +26,7 @@ const DiscountSlotFill = (): JSX.Element => {
 };
 
 const Block = ( { className }: { className: string } ): JSX.Element => {
-	const { cart, wrapperProps } = useOrderSummaryRow(
+	const { cart, isStale, wrapperProps } = useOrderSummaryRow(
 		useStoreCart(),
 		( { cartCoupons } ) => cartCoupons.length > 0
 	);
@@ -47,6 +47,7 @@ const Block = ( { className }: { className: string } ): JSX.Element => {
 						removeCoupon={ removeCoupon }
 						values={ cart.cartTotals }
 						isLoading={ isLoading }
+						disabled={ isStale }
 					/>
 				</TotalsWrapper>
 			) }

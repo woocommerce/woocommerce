@@ -31,7 +31,7 @@ const DiscountSlotFill = (): JSX.Element => {
 };
 
 const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
-	const { cart, wrapperProps } = useOrderSummaryRow(
+	const { cart, isStale, wrapperProps } = useOrderSummaryRow(
 		useStoreCart(),
 		// Matches `TotalsDiscount`, so coupons that a `coupons` filter adds still show.
 		( { cartCoupons, cartTotals } ) =>
@@ -60,6 +60,7 @@ const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
 						removeCoupon={ removeCoupon }
 						values={ cart.cartTotals }
 						isLoading={ isLoading }
+						disabled={ isStale }
 					/>
 				</TotalsWrapper>
 			) }
