@@ -488,7 +488,6 @@ class WC_Meta_Box_Product_Data {
 		 */
 		$data_store = $product->get_data_store();
 		if ( $data_store->has_callable( 'refresh_product_lookup_table' ) ) {
-			// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying product data store instance.)
 			$data_store->refresh_product_lookup_table( $product->get_id() );
 		}
 	}
