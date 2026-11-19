@@ -10,6 +10,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
 use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
+use Automattic\WooCommerce\Internal\RegulatoryFields\RegulatoryFields;
 
 /**
  * Checkout class.
@@ -551,6 +552,34 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
+	 * Check the request's values for the regulatory fields that apply to the cart.
+	 *
+	 * Runs after the customer is updated from the request, because the fields depend on the addresses.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @throws RouteException When a required value is missing or a value is not valid.
+	 * @return array<string, string> Normalized values keyed by field ID.
+	 */
+	private function get_valid_regulatory_values( \WP_REST_Request $request ): array {
+		$regulatory_fields = wc_get_container()->get( RegulatoryFields::class );
+		$errors            = new \WP_Error();
+		$values            = $regulatory_fields->get_valid_values( $regulatory_fields->get_fields_for_cart(), $request['regulatory_fields'], $errors );
+
+		if ( $errors->has_errors() ) {
+			throw new RouteException(
+				'woocommerce_rest_invalid_regulatory_field',
+				esc_html( $errors->get_error_message() ),
+				400,
+				array( 'field' => esc_html( (string) $errors->get_error_code() ) )
+			);
+		}
+
+		return $values;
+	}
+
+	/**
 	 * Process an order based on optimistic save approach to minimize the number of order saves.
 	 *
 	 * 1. Obtain Draft Order
@@ -620,12 +649,15 @@ class Checkout extends AbstractCartRoute {
 		 */
 		$this->validate_order_totals( $request );
 
+		$regulatory_values = $this->get_valid_regulatory_values( $request );
+
 		/**
 		 * Create (or update) Draft Order and process request data.
 		 */
 		$this->create_or_update_draft_order( $request );
 		// Order save-point: 1.
 		wc_log_order_step( '[Store API #4] Created/Updated draft order', array( 'order_object' => $this->order ) );
+		wc_get_container()->get( RegulatoryFields::class )->set_order_values( $this->order, $regulatory_values );
 		$this->update_order_from_request( $request, false );
 		wc_log_order_step( '[Store API #5] Updated order with posted data', array( 'order_object' => $this->order ) );
 		$this->process_customer( $request );

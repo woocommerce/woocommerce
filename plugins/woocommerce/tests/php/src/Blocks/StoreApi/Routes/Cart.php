@@ -356,6 +356,27 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox The cart lists the CPF/CNPJ field once the shipping country is Brazil, and no fields for other countries.
+	 *
+	 * @testWith ["BR", ["br_tax_id"]]
+	 *           ["US", []]
+	 *
+	 * @param string   $country            Shipping country.
+	 * @param string[] $expected_field_ids Expected regulatory field IDs.
+	 */
+	public function test_update_customer_returns_regulatory_fields( string $country, array $expected_field_ids ) {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( array( 'shipping_address' => (object) array( 'country' => $country ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected_field_ids, array_column( $data['regulatory_fields'], 'id' ) );
+	}
+
+	/**
 	 * Test shipping address validation.
 	 */
 	public function test_update_customer_address() {

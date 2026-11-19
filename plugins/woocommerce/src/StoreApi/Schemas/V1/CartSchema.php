@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\Enums\WeightUnit;
+use Automattic\WooCommerce\Internal\RegulatoryFields\RegulatoryFields;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\StoreApi\SchemaController;
@@ -323,8 +324,56 @@ class CartSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
+			'regulatory_fields'       => [
+				'description' => __( 'Fields the rules of the country the order is delivered to require with the order, such as the CPF/CNPJ in Brazil. The list changes with the shipping address, the billing address and the chosen shipping method. Send the values with the checkout request.', 'woocommerce' ),
+				'type'        => 'array',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'items'       => [
+					'type'       => 'object',
+					'properties' => [
+						'id'       => [
+							'description' => __( 'Field ID. The key the value is sent under in the checkout request.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'label'    => [
+							'description' => __( 'Field label.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'required' => [
+							'description' => __( 'Whether the order is rejected without a value for the field.', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+					],
+				],
+			],
 			self::EXTENDING_KEY       => $this->get_extended_schema( self::IDENTIFIER ),
 		];
+	}
+
+	/**
+	 * Get the regulatory fields that apply to the current cart.
+	 *
+	 * @return array<int, array{id: string, label: string, required: bool}>
+	 */
+	protected function get_regulatory_fields(): array {
+		$fields = array();
+
+		foreach ( wc_get_container()->get( RegulatoryFields::class )->get_fields_for_cart() as $field_id => $field ) {
+			$fields[] = array(
+				'id'       => $field_id,
+				'label'    => wp_kses_post( $field['label'] ),
+				'required' => $field['required'],
+			);
+		}
+
+		return $fields;
 	}
 
 	/**
@@ -375,6 +424,7 @@ class CartSchema extends AbstractSchema {
 			'cross_sells'             => $this->get_item_responses_from_schema( $this->cross_sells_item_schema, $cross_sells ),
 			'errors'                  => $cart_errors,
 			'payment_methods'         => array_values( wp_list_pluck( WC()->payment_gateways->get_available_payment_gateways(), 'id' ) ),
+			'regulatory_fields'       => $this->get_regulatory_fields(),
 			self::EXTENDING_KEY       => $this->get_extended_data( self::IDENTIFIER ),
 		];
 	}

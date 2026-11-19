@@ -5727,4 +5727,74 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertArrayHasKey( 'payment_result', $data );
 		$this->assertSame( 'success', $data['payment_result']['payment_status'], 'Recovery must still report success on the result the response uses.' );
 	}
+
+	/**
+	 * Builds a place-order request shipped to Brazil but billed to the UK.
+	 *
+	 * @param array<string, mixed> $extra_params Body params to add.
+	 */
+	private function build_brazil_checkout_post_request( array $extra_params = array() ): \WP_REST_Request {
+		$request = $this->build_checkout_post_request();
+		$params  = $request->get_body_params();
+
+		$params['shipping_address'] = (object) array_merge(
+			(array) $params['shipping_address'],
+			array(
+				'city'     => 'São Paulo',
+				'state'    => 'SP',
+				'postcode' => '01310-100',
+				'country'  => 'BR',
+			)
+		);
+		$request->set_body_params( array_merge( $params, $extra_params ) );
+
+		return $request;
+	}
+
+	/**
+	 * @testdox An order shipped to Brazil is rejected without a valid CPF/CNPJ and no order is left placed.
+	 *
+	 * @testWith [null]
+	 *           ["529.982.247-26"]
+	 *
+	 * @param string|null $tax_id Submitted CPF/CNPJ, or null to leave the field out.
+	 */
+	public function test_post_to_brazil_requires_valid_tax_id( ?string $tax_id ) {
+		$extra_params = null === $tax_id ? array() : array( 'regulatory_fields' => array( 'br_tax_id' => $tax_id ) );
+
+		$response = rest_get_server()->dispatch( $this->build_brazil_checkout_post_request( $extra_params ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status(), print_r( $data, true ) );
+		$this->assertSame( 'woocommerce_rest_invalid_regulatory_field', $data['code'] );
+		$this->assertSame( 'br_tax_id', $data['data']['field'] );
+	}
+
+	/**
+	 * @testdox An order shipped to Brazil with a valid CPF stores it without punctuation and returns it.
+	 */
+	public function test_post_to_brazil_stores_tax_id() {
+		$request = $this->build_brazil_checkout_post_request( array( 'regulatory_fields' => array( 'br_tax_id' => '529.982.247-25' ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertSame( '52998224725', wc_get_order( $data['order_id'] )->get_meta( '_wc_regulatory_br_tax_id' ) );
+		$this->assertSame( '52998224725', $data['regulatory_fields']->br_tax_id );
+	}
+
+	/**
+	 * @testdox An order shipped outside Brazil does not store a submitted CPF/CNPJ.
+	 */
+	public function test_post_outside_brazil_ignores_tax_id() {
+		$request = $this->build_checkout_post_request();
+		$request->set_body_params( array_merge( $request->get_body_params(), array( 'regulatory_fields' => array( 'br_tax_id' => '529.982.247-25' ) ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertSame( '', wc_get_order( $data['order_id'] )->get_meta( '_wc_regulatory_br_tax_id' ) );
+	}
 }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Internal\RegulatoryFields\RegulatoryFields;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
@@ -202,6 +203,14 @@ class CheckoutSchema extends AbstractSchema {
 				],
 				'required'    => $this->schema_has_required_property( $additional_field_schema ),
 			],
+			'regulatory_fields' => [
+				'description'          => __( 'Values for the regulatory fields the cart lists, keyed by field ID. Checked when the order is placed: a missing required value or a value that is not valid rejects the order. Stored without punctuation, and returned that way.', 'woocommerce' ),
+				'type'                 => 'object',
+				'context'              => [ 'view', 'edit' ],
+				'additionalProperties' => [
+					'type' => 'string',
+				],
+			],
 			self::EXTENDING_KEY => $this->get_extended_schema( self::IDENTIFIER ),
 		];
 	}
@@ -245,6 +254,7 @@ class CheckoutSchema extends AbstractSchema {
 			'payment_method'     => $order->get_payment_method(),
 			'payment_result'     => $payment_result,
 			'additional_fields'  => (object) $this->get_additional_fields_response( $order ),
+			'regulatory_fields'  => (object) wc_get_container()->get( RegulatoryFields::class )->get_order_values( $order ),
 			'__experimentalCart' => $cart ? (object) $this->cart_schema->get_item_response( $cart ) : null,
 			self::EXTENDING_KEY  => $this->get_extended_data( self::IDENTIFIER ),
 		];
@@ -276,6 +286,7 @@ class CheckoutSchema extends AbstractSchema {
 			'payment_method'     => $payment_method,
 			'payment_result'     => null,
 			'additional_fields'  => (object) $this->get_additional_fields_response( $customer ),
+			'regulatory_fields'  => (object) array(),
 			'__experimentalCart' => (object) $this->cart_schema->get_item_response( $cart ),
 			self::EXTENDING_KEY  => $this->get_extended_data( self::IDENTIFIER ),
 		];
