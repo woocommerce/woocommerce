@@ -222,6 +222,13 @@ export const collapseCopy = (
 	if ( typeof element?.getAnimations !== 'function' ) {
 		return;
 	}
+	// Under reduced motion the space changes at once, so an empty box has nothing to show.
+	if (
+		empty &&
+		window.matchMedia?.( '(prefers-reduced-motion: reduce)' ).matches
+	) {
+		return;
+	}
 	const copy = empty ? emptyBox( element ) : inertCopy( element );
 	copy.setAttribute( COPY, element.className );
 	// A motion that runs continues from its current position.
