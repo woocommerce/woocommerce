@@ -77,14 +77,11 @@
 		border-radius: 20px;
 		right: 0;
 		top: 0;
-		// `translate`, not `transform`, so the badge grows in about its own centre. RTL styles do not flip it.
-		translate: 50% -50%;
+		transform: translate(50%, -50%);
+		// The badge's centre after the translate above, so it grows in about its own centre.
+		transform-origin: top right;
 		white-space: nowrap;
 		z-index: 1;
-
-		&:dir(rtl) {
-			translate: -50% -50%;
-		}
 
 		// The span containing the text should be padded, not the quantity container itself.
 		span {
