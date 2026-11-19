@@ -1012,11 +1012,14 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Complete records the agent named in UCP-Agent as the order's source, or `ucp` without one, and keeps the order a Store API order.
+	 * @testdox Complete records the host of the profile parameter as the order's source, or `ucp` when that host is missing or invalid, and keeps the order a Store API order.
 	 * @testWith ["profile=\"https://Chatgpt.com/.well-known/ucp\"", "chatgpt.com"]
 	 *           ["", "ucp"]
 	 *           ["profile=\"not-a-url\"", "ucp"]
 	 *           ["profile=\"https://evil<b>host/\"", "ucp"]
+	 *           ["notprofile=\"https://example.com/\"", "ucp"]
+	 *           ["profile=\"https://a..example/\"", "ucp"]
+	 *           ["other=\"x\"; profile=\"https://shop.example/.well-known/ucp\"", "shop.example"]
 	 *
 	 * @param string $agent  The UCP-Agent header.
 	 * @param string $source The expected utm_source.

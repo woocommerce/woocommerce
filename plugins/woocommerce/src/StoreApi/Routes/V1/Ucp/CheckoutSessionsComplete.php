@@ -177,7 +177,8 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 * Record the order as started by an AI shopper, so its origin is not Unknown.
 	 *
 	 * The payment page records no attribution of its own.
-	 * The source is the host of the agent profile in the `UCP-Agent` header, or `ucp` without a valid one.
+	 * The source is the host of the `profile` parameter in the `UCP-Agent` header, or `ucp` when that parameter is missing or its host is not a hostname.
+	 * A parameter only counts when its name is exactly `profile`.
 	 * The header is not verified, so the host is a detail and not part of the origin.
 	 * Saved only with order attribution on, and never over attribution the order already has.
 	 *
@@ -193,21 +194,80 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			return;
 		}
 
-		preg_match( '/profile="([^"]+)"/', (string) $request->get_header( 'UCP-Agent' ), $match );
-		$host = isset( $match[1] ) ? strtolower( (string) wp_parse_url( $match[1], PHP_URL_HOST ) ) : '';
-
 		// Every field is set, because the listener reads each one without checking it exists.
 		$data = array_merge(
 			array_fill_keys( $attribution->get_field_names(), '' ),
 			array(
 				'source_type' => 'ai_shopper',
-				'utm_source'  => preg_match( '/^[a-z0-9.-]+$/', $host ) ? $host : 'ucp',
+				'utm_source'  => $this->agent_profile_host( (string) $request->get_header( 'UCP-Agent' ) ),
 				'utm_medium'  => 'ucp',
 			)
 		);
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in OrderAttributionController.
 		do_action( 'woocommerce_order_save_attribution_data', $order, $data );
+	}
+
+	/**
+	 * Host of the `profile` parameter in a UCP-Agent header, or `ucp` when it is missing or not a hostname.
+	 *
+	 * Only a parameter named exactly `profile` counts.
+	 *
+	 * @param string $header UCP-Agent header value.
+	 * @return string
+	 */
+	private function agent_profile_host( string $header ): string {
+		$profile = $this->quoted_header_parameter( $header, 'profile' );
+		$host    = strtolower( (string) wp_parse_url( $profile, PHP_URL_HOST ) );
+
+		if ( '' === $host ) {
+			return 'ucp';
+		}
+
+		$valid = filter_var( $host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME );
+
+		return is_string( $valid ) ? $valid : 'ucp';
+	}
+
+	/**
+	 * Value of one double-quoted parameter, matched by its exact name.
+	 *
+	 * A match counts only at the start of the header or after whitespace or a semicolon.
+	 *
+	 * @param string $header Header value.
+	 * @param string $name   Parameter name.
+	 * @return string Empty when the parameter is absent.
+	 */
+	private function quoted_header_parameter( string $header, string $name ): string {
+		$prefix = $name . '="';
+		$offset = 0;
+		$length = strlen( $header );
+
+		while ( $offset < $length ) {
+			$start = strpos( $header, $prefix, $offset );
+			if ( false === $start ) {
+				return '';
+			}
+
+			$is_parameter = 0 === $start;
+			if ( ! $is_parameter ) {
+				$previous     = substr( $header, $start - 1, 1 );
+				$is_parameter = ' ' === $previous || "\t" === $previous || ';' === $previous;
+			}
+
+			if ( $is_parameter ) {
+				$value_start = $start + strlen( $prefix );
+				$end         = strpos( $header, '"', $value_start );
+				if ( false === $end ) {
+					return '';
+				}
+				return substr( $header, $value_start, $end - $value_start );
+			}
+
+			$offset = $start + 1;
+		}
+
+		return '';
 	}
 
 	/**

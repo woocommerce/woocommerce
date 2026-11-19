@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders\MetaBoxes;
 
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
 use WC_Helper_Order;
+use WC_Order;
 use WP_UnitTestCase;
 
 require_once WC_ABSPATH . '/includes/admin/marketplace-suggestions/class-wc-marketplace-suggestions.php';
@@ -72,7 +73,7 @@ class OrderAttributionTest extends WP_UnitTestCase {
 	 * @testdox An AI shopper order shows "AI shopper" with a sentence explaining it, and keeps the agent and UCP in the details.
 	 */
 	public function test_ai_shopper_origin_is_explained(): void {
-		$order = WC_Helper_Order::create_order();
+		$order = new WC_Order();
 		$order->add_meta_data( '_wc_order_attribution_source_type', 'ai_shopper' );
 		$order->add_meta_data( '_wc_order_attribution_utm_source', 'chatgpt.com' );
 		$order->add_meta_data( '_wc_order_attribution_utm_medium', 'ucp' );
@@ -92,7 +93,7 @@ class OrderAttributionTest extends WP_UnitTestCase {
 	 * @testdox Other origins show no explanation.
 	 */
 	public function test_other_origins_have_no_note(): void {
-		$order = WC_Helper_Order::create_order();
+		$order = new WC_Order();
 		$order->add_meta_data( '_wc_order_attribution_source_type', 'referral' );
 		$order->add_meta_data( '_wc_order_attribution_utm_source', 'woocommerce.com' );
 
