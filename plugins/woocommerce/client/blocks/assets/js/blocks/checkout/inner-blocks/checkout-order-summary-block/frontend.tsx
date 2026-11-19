@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { exitingProps } from '@woocommerce/base-hooks';
 import { TotalsFooterItem } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
@@ -219,8 +220,7 @@ const FrontendBlock = ( {
 						}
 					) }
 					id={ ariaControlsId }
-					// Closing content is already gone for the shopper. React 18 has no `inert` prop.
-					{ ...( isClosing && { inert: '' } ) }
+					{ ...exitingProps( isClosing ) }
 				/>
 			</div>
 			<CheckoutOrderSummaryFill>
