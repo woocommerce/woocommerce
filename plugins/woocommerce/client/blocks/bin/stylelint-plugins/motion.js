@@ -118,10 +118,48 @@ const listTokens = ( value ) =>
 		.split( ' ' )
 		.filter( Boolean );
 
-// A property, or a Sass variable whose value lists only fade or color properties. The variable must be declared in
-// the same file, in the root or a rule that encloses `decl`. A parameter of the enclosing mixin passes, because the
+const MIXIN_PARAMETER = Symbol( 'mixin parameter' );
+
+// The assignment of a Sass variable that is in effect where `node` uses it, as Sass reads it: only assignments before
+// `node` count, an inner rule overrides the root, and `!default` applies only when the variable has no value yet.
+// Returns `MIXIN_PARAMETER` for a parameter of the enclosing mixin, or null when the variable has no value.
+const resolveVariable = ( name, node ) => {
+	const scopes = [];
+	for ( let child = node; child.parent; child = child.parent ) {
+		const scope = child.parent;
+		scopes.unshift(
+			scope.nodes
+				.slice( 0, scope.nodes.indexOf( child ) )
+				.filter(
+					( item ) => item.type === 'decl' && item.prop === name
+				)
+		);
+		if (
+			scope.type === 'atrule' &&
+			scope.name === 'mixin' &&
+			mixinParameters( scope ).includes( name )
+		) {
+			scopes.unshift( [ MIXIN_PARAMETER ] );
+			break;
+		}
+	}
+	let assignment = null;
+	for ( const candidate of scopes.flat() ) {
+		if (
+			assignment === null ||
+			candidate === MIXIN_PARAMETER ||
+			! /!default\b/.test( candidate.value )
+		) {
+			assignment = candidate;
+		}
+	}
+	return assignment;
+};
+
+// A property, or a Sass variable whose value lists only fade or color properties. The variable must be assigned in
+// the same file, in the root or a rule that encloses `node`. A parameter of the enclosing mixin passes, because the
 // `motion-transition` mixin forwards its `$state` list. Other variables fail, because their value is unknown.
-const isFadeProperty = ( property, decl, seen ) => {
+const isFadeProperty = ( property, node, seen ) => {
 	if ( ! property.startsWith( '$' ) ) {
 		return FADE_PROPERTIES.has( property.toLowerCase() );
 	}
@@ -130,28 +168,15 @@ const isFadeProperty = ( property, decl, seen ) => {
 		return false;
 	}
 	seen.add( name );
-	for ( let node = decl.parent; node; node = node.parent ) {
-		if (
-			node.type === 'atrule' &&
-			node.name === 'mixin' &&
-			mixinParameters( node ).includes( name )
-		) {
-			return true;
-		}
-		const declaration = ( node.nodes || [] ).findLast(
-			( child ) => child.type === 'decl' && child.prop === name
-		);
-		if ( declaration ) {
-			const tokens = listTokens( declaration.value );
-			return (
-				tokens.length > 0 &&
-				tokens.every( ( token ) =>
-					isFadeProperty( token, declaration, seen )
-				)
-			);
-		}
+	const assignment = resolveVariable( name, node );
+	if ( assignment === MIXIN_PARAMETER ) {
+		return true;
 	}
-	return false;
+	const tokens = assignment ? listTokens( assignment.value ) : [];
+	return (
+		tokens.length > 0 &&
+		tokens.every( ( token ) => isFadeProperty( token, assignment, seen ) )
+	);
 };
 
 // A `transition` or `transition-property` that only fades or changes color, or an `animation` that only fades.
