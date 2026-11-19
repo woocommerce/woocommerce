@@ -2663,6 +2663,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $direct_options );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $direct_options->get_error_code() );
 		$this->assertStringContainsString( 'attributes', $direct_options->get_error_message() );
+		$this->assertStringContainsString( "update its parent product {$parent_id} and send the variation in the variations input", $direct_options->get_error_message(), 'The refusal names the parent route.' );
 
 		$resized = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(

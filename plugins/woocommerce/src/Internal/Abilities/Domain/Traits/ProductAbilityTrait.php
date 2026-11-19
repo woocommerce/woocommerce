@@ -1498,17 +1498,23 @@ trait ProductAbilityTrait {
 			return null;
 		}
 
-		return new \WP_Error(
-			'woocommerce_product_field_unsupported',
-			sprintf(
-				/* translators: 1: product type, 2: comma-separated list of the fields sent, 3: comma-separated list of the fields the type takes. */
-				__( 'The %1$s product type does not take %2$s. It takes %3$s.', 'woocommerce' ),
-				$product->get_type(),
-				implode( ', ', $unsupported ),
-				implode( ', ', $supported )
-			),
-			array( 'status' => 400 )
+		$message = sprintf(
+			/* translators: 1: product type, 2: comma-separated list of the fields sent, 3: comma-separated list of the fields the type takes. */
+			__( 'The %1$s product type does not take %2$s. It takes %3$s.', 'woocommerce' ),
+			$product->get_type(),
+			implode( ', ', $unsupported ),
+			implode( ', ', $supported )
 		);
+
+		if ( $product instanceof \WC_Product_Variation && in_array( 'attributes', $unsupported, true ) ) {
+			$message .= ' ' . sprintf(
+				/* translators: %d: parent product ID. */
+				__( 'To change the options of a variation, update its parent product %d and send the variation in the variations input, with its id and attributes.', 'woocommerce' ),
+				$product->get_parent_id()
+			);
+		}
+
+		return new \WP_Error( 'woocommerce_product_field_unsupported', $message, array( 'status' => 400 ) );
 	}
 
 	/**
