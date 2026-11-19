@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid preparing ability input twice. Direct check_permissions() callers must first call prepare_input() and handle WP_Error. Starting with WooCommerce 11.4, abilities over MCP require the adapter release that prepares input before permission checks; sites using adapter 0.7.1 must update the adapter first.
