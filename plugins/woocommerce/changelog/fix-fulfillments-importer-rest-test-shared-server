@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Fix a fulfillments importer REST test broken by the shared per-class REST server; no production change.
+

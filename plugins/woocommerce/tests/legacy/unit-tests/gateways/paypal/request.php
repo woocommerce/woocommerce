@@ -25,6 +25,13 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	protected $order;
 
 	/**
+	 * Product for the line item each new order starts with, shared so that every order does not create its own.
+	 *
+	 * @var WC_Product
+	 */
+	protected $order_product;
+
+	/**
 	 * Create $product_count simple products and store them in $this->products.
 	 *
 	 * @param int $product_count Number of products to create.
@@ -89,6 +96,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 
 		$this->paypal_gateway = new WC_Gateway_Paypal();
 		$this->paypal_request = new WC_Gateway_Paypal_Request( $this->paypal_gateway );
+		$this->order_product  = WC_Helper_Product::create_simple_product();
 	}
 
 
@@ -106,7 +114,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		// Create products.
 		$this->create_products( $product_count );
 
-		$this->order = WC_Helper_Order::create_order();
+		$this->order = WC_Helper_Order::create_order( 1, $this->order_product );
 		$this->add_products_to_order( $this->order, $product_prices );
 
 		// Set payment method to Paypal.
@@ -221,7 +229,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	 * @param  bool $testmode Whether to use Paypal sandbox.
 	 */
 	protected function check_product_title_containing_html( $testmode ) {
-		$order = WC_Helper_Order::create_order();
+		$order = WC_Helper_Order::create_order( 1, $this->order_product );
 
 		foreach ( $order->get_items() as $item ) {
 			$order->remove_item( $item->get_id() );
@@ -348,65 +356,60 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test for request_url() method.
+	 * Test for request_url() method on the live PayPal site.
 	 *
 	 * @group timeout
 	 * @throws WC_Data_Exception Exception on failure.
 	 */
-	public function test_request_url() {
-		// User set up.
+	public function test_request_url_without_sandbox() {
 		$this->login_as_administrator();
-
-		// wc_tax_enabled(), wc_prices_include_tax() and WC_Gateway_Paypal_Request::prepare_line_items() determine if
-		// shipping tax should be included, these are the correct options.
-		// Note that prepare_line_items() can return false in 2 cases, tested separately below:
-		// - order totals mismatch and
-		// - item amount < 0.
-		$correct_options = array(
-			// woocommerce_calc_taxes, woocommerce_prices_include_tax, $shipping_tax_included values.
-			array( 'no', 'no', false ),
-			array( 'yes', 'no', false ),
-			// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-			// array( 'no',  'yes',  false ), // this is not a valid option due to definition of wc_prices_include_tax().
-			array( 'yes', 'yes', true ),
-		);
-
-		// One test without sandbox.
-		$testmode = false;
 		update_option( 'woocommerce_calc_taxes', 'no' );
 		update_option( 'woocommerce_prices_include_tax', 'no' );
-		$shipping_tax_included = false;
-		$this->check_small_order( 5, $shipping_tax_included, $testmode );
 
-		// Other tests with sandbox active.
-		$testmode = true;
-		foreach ( $correct_options as $values ) {
-			update_option( 'woocommerce_calc_taxes', $values[0] );
-			update_option( 'woocommerce_prices_include_tax', $values[1] );
-			$shipping_tax_included = $values[2];
-
-			// Test order with < 9 items (URL shorter than limit).
-			$this->check_small_order( 5, $shipping_tax_included, $testmode );
-
-			// Test order with >9 items with URL shorter than limit.
-			$this->check_small_order( 11, $shipping_tax_included, $testmode );
-
-			// Test order with URL longer than limit.
-			// Many items in order -> forced to use one line item -> shipping tax included.
-			$this->check_large_order( true, $testmode );
-
-			// Test removing tags from line item name.
-			$this->check_product_title_containing_html( $testmode );
-
-			// Test amount < 0.
-			$this->check_negative_amount( $testmode );
-
-			// Check order totals mismatch.
-			$this->check_totals_mismatch( $testmode );
-
-		}
-
+		$this->check_small_order( 5, false, false );
 	}
 
+	/**
+	 * Test for request_url() method in the sandbox, for each tax setup.
+	 *
+	 * wc_tax_enabled(), wc_prices_include_tax() and WC_Gateway_Paypal_Request::prepare_line_items() determine if
+	 * shipping tax should be included. Taxes off with prices including tax is not a valid setup, see wc_prices_include_tax().
+	 * prepare_line_items() also returns false on an order totals mismatch or a negative item amount, tested separately below.
+	 *
+	 * @group timeout
+	 * @testWith ["no", "no", false]
+	 *           ["yes", "no", false]
+	 *           ["yes", "yes", true]
+	 *
+	 * @param string $calc_taxes            The woocommerce_calc_taxes option.
+	 * @param string $prices_include_tax    The woocommerce_prices_include_tax option.
+	 * @param bool   $shipping_tax_included Whether the shipping tax should be included.
+	 * @throws WC_Data_Exception Exception on failure.
+	 */
+	public function test_request_url( string $calc_taxes, string $prices_include_tax, bool $shipping_tax_included ) {
+		$this->login_as_administrator();
+		update_option( 'woocommerce_calc_taxes', $calc_taxes );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
+		$testmode = true;
+
+		// Test order with < 9 items (URL shorter than limit).
+		$this->check_small_order( 5, $shipping_tax_included, $testmode );
+
+		// Test order with >9 items with URL shorter than limit.
+		$this->check_small_order( 11, $shipping_tax_included, $testmode );
+
+		// Test order with URL longer than limit.
+		// Many items in order -> forced to use one line item -> shipping tax included.
+		$this->check_large_order( true, $testmode );
+
+		// Test removing tags from line item name.
+		$this->check_product_title_containing_html( $testmode );
+
+		// Test amount < 0.
+		$this->check_negative_amount( $testmode );
+
+		// Check order totals mismatch.
+		$this->check_totals_mismatch( $testmode );
+	}
 }
 

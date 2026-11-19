@@ -570,8 +570,6 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 
 		$actual = wc_get_rounding_precision();
 		$this->assertEquals( $expected, $actual );
-
-		remove_all_filters( 'wc_get_price_decimals' );
 	}
 
 	/**
@@ -603,8 +601,6 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 
 		$actual = wc_add_number_precision( $value, $round );
 		$this->assertFloatEquals( $expected, $actual );
-
-		remove_all_filters( 'wc_get_price_decimals' );
 	}
 
 	/**
@@ -627,8 +623,6 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 
 		$actual = wc_remove_number_precision( $value );
 		$this->assertEquals( $expected, $actual );
-
-		remove_all_filters( 'wc_get_price_decimals' );
 	}
 
 	/**
@@ -728,7 +722,6 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		$result = wc_get_customer_default_location();
 		$this->assertEquals( 'GB', $result['country'] );
 		$this->assertEquals( '', $result['state'] );
-		remove_all_filters( 'woocommerce_geolocate_ip' );
 	}
 
 	/**

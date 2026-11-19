@@ -514,4 +514,325 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'object-fit:cover', (string) $html->get_attribute( 'style' ) );
 		$this->assertStringContainsString( 'aspect-ratio:2', (string) $html->get_attribute( 'style' ) );
 	}
+
+	/**
+	 * Test the saved height is scaled when capping the width shrinks the image.
+	 *
+	 * Outlook sizes from the width and height attributes, so a saved height left beside the capped
+	 * width would stretch the image vertically.
+	 */
+	public function testItScalesTheSavedHeightWhenItCapsTheWidth(): void {
+		$image_content = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="1024" height="555" style="max-width:100%;height:auto;"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] );
+		$parsed_image['email_attrs']['width'] = '660px';
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '660', $this->get_image_attribute( $rendered, 'width' ) );
+		// 555 * ( 660 / 1024 ) = 357.76.
+		$this->assertSame( '358', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test the saved height is scaled to a width set on the block.
+	 */
+	public function testItScalesTheSavedHeightToABlockWidth(): void {
+		$image_content                  = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="1024" height="555" style="max-width:100%;height:auto;"/>
+			</figure>
+		';
+		$parsed_image                   = $this->parsed_image;
+		$parsed_image['attrs']['width'] = '400px';
+		$parsed_image['innerHTML']      = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '400', $this->get_image_attribute( $rendered, 'width' ) );
+		// 555 * ( 400 / 1024 ) = 216.8.
+		$this->assertSame( '217', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test an image narrower than the content column keeps its saved dimensions.
+	 */
+	public function testItKeepsTheSavedHeightWhenTheImageFitsTheColumn(): void {
+		$image_content = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg?w=400" alt="" width="400" height="200" style="max-width:100%;height:auto;"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] );
+		$parsed_image['email_attrs']['width'] = '660px';
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '400', $this->get_image_attribute( $rendered, 'width' ) );
+		$this->assertSame( '200', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test a fixed height in the image's style wins over the scaled height.
+	 */
+	public function testItKeepsAFixedStyleHeight(): void {
+		$image_content = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="1024" height="555" style="max-width:100%;height:300px;"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] );
+		$parsed_image['email_attrs']['width'] = '660px';
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '660', $this->get_image_attribute( $rendered, 'width' ) );
+		$this->assertSame( '300', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test the saved height is kept when the width falls back to a percentage.
+	 *
+	 * There is no pixel width to scale the height against.
+	 */
+	public function testItKeepsTheSavedHeightWhenTheWidthFallsBackToAPercentage(): void {
+		$image_content = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="1024" height="555" style="max-width:100%;height:auto;"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] );
+		unset( $parsed_image['email_attrs']['width'] );
+		$parsed_image['innerHTML'] = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '555', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test the saved height is kept when the image has no saved width to scale it against.
+	 */
+	public function testItKeepsTheSavedHeightWhenTheImageHasNoSavedWidth(): void {
+		$image_content = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" height="555" style="max-width:100%;height:auto;"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] );
+		$parsed_image['email_attrs']['width'] = '660px';
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '660', $this->get_image_attribute( $rendered, 'width' ) );
+		$this->assertSame( '555', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test no height attribute is invented for an image saved without dimensions.
+	 *
+	 * This is how current core saves an image block: the size lives in the style, not in attributes.
+	 */
+	public function testItAddsNoHeightWhenTheImageHasNoSavedDimensions(): void {
+		$image_content = '
+			<figure class="wp-block-image size-large">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" style="max-width:100%;height:auto;"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] );
+		$parsed_image['email_attrs']['width'] = '660px';
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertSame( '660', $this->get_image_attribute( $rendered, 'width' ) );
+		$this->assertNull( $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test a cropped image passes its crop to the filter so an integration can serve a cropped file.
+	 */
+	public function testItPassesTheCropToTheCroppedImageUrlFilter(): void {
+		$parsed_image = $this->get_cropped_image_block( '4/3' );
+
+		$received = array();
+		$filter   = function ( $url, $aspect_ratio, $width, $height, $attrs ) use ( &$received ) {
+			$received = array(
+				'url'          => $url,
+				'aspect_ratio' => $aspect_ratio,
+				'width'        => $width,
+				'height'       => $height,
+				'attrs'        => $attrs,
+			);
+			return $url;
+		};
+		add_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter, 10, 5 );
+		$this->image_renderer->render( $parsed_image['innerHTML'], $parsed_image, $this->rendering_context );
+		remove_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter, 10 );
+
+		$this->assertSame( 'https://test.com/wp-content/uploads/2023/05/image.jpg', $received['url'] );
+		$this->assertSame( '4/3', $received['aspect_ratio'] );
+		$this->assertSame( 580, $received['width'] );
+		$this->assertSame( 435, $received['height'] );
+		$this->assertSame( 1, $received['attrs']['id'] );
+	}
+
+	/**
+	 * Test a server-cropped URL is used with the crop's dimensions.
+	 *
+	 * Gmail and Outlook ignore the saved aspect-ratio CSS, so the cropped file and its height
+	 * attribute are what make the crop show up there.
+	 */
+	public function testItUsesAServerCroppedUrlWithTheCropDimensions(): void {
+		$parsed_image = $this->get_cropped_image_block( '1' );
+
+		$filter = function ( $url, $aspect_ratio, $width, $height ) {
+			return $url . '?resize=' . $width . ',' . $height;
+		};
+		add_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter, 10, 4 );
+		$rendered = $this->image_renderer->render( $parsed_image['innerHTML'], $parsed_image, $this->rendering_context );
+		remove_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter, 10 );
+
+		$this->assertSame( 'https://test.com/wp-content/uploads/2023/05/image.jpg?resize=580,580', $this->get_image_attribute( $rendered, 'src' ) );
+		$this->assertSame( '580', $this->get_image_attribute( $rendered, 'width' ) );
+		$this->assertSame( '580', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Test an uncropped URL leaves the image at its own ratio.
+	 *
+	 * Writing the crop height onto the original file would squash it in Outlook.
+	 */
+	public function testItKeepsTheImageRatioWhenNothingCropsTheUrl(): void {
+		$parsed_image = $this->get_cropped_image_block( '1' );
+
+		$rendered = $this->image_renderer->render( $parsed_image['innerHTML'], $parsed_image, $this->rendering_context );
+
+		$this->assertSame( 'https://test.com/wp-content/uploads/2023/05/image.jpg', $this->get_image_attribute( $rendered, 'src' ) );
+		$this->assertSame( '580', $this->get_image_attribute( $rendered, 'width' ) );
+		$this->assertSame( '467', $this->get_image_attribute( $rendered, 'height' ) );
+		$this->assertStringContainsString( 'aspect-ratio:1', (string) $this->get_image_attribute( $rendered, 'style' ) );
+	}
+
+	/**
+	 * Test the filter is skipped when the block doesn't ask for a cover crop.
+	 *
+	 * A contain scale letterboxes rather than crops, and an unparseable ratio has no size to crop to.
+	 *
+	 * @dataProvider uncroppable_attrs_provider
+	 *
+	 * @param array $attrs Block attributes to apply over the cropped block.
+	 */
+	public function testItSkipsTheFilterWhenTheBlockIsNotCroppable( array $attrs ): void {
+		$parsed_image          = $this->get_cropped_image_block( '1' );
+		$parsed_image['attrs'] = array_merge( $parsed_image['attrs'], $attrs );
+
+		$calls  = 0;
+		$filter = function ( $url ) use ( &$calls ) {
+			++$calls;
+			return $url . '?cropped';
+		};
+		add_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter );
+		$rendered = $this->image_renderer->render( $parsed_image['innerHTML'], $parsed_image, $this->rendering_context );
+		remove_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter );
+
+		$this->assertSame( 0, $calls );
+		$this->assertStringNotContainsString( '?cropped', $rendered );
+	}
+
+	/**
+	 * Block attributes that must not trigger a server crop.
+	 *
+	 * @return array<string, array{0: array}>
+	 */
+	public function uncroppable_attrs_provider(): array {
+		return array(
+			'contain scale'    => array( array( 'scale' => 'contain' ) ),
+			'invalid ratio'    => array( array( 'aspectRatio' => '1;color:red' ) ),
+			'non-string ratio' => array( array( 'aspectRatio' => array( '1' ) ) ),
+			'percentage width' => array( array( 'width' => '50%' ) ),
+			'em width'         => array( array( 'width' => '20em' ) ),
+			'rem width'        => array( array( 'width' => '30rem' ) ),
+			'viewport width'   => array( array( 'width' => '50vw' ) ),
+		);
+	}
+
+	/**
+	 * Test a filter returning something other than a URL leaves the image uncropped.
+	 *
+	 * @dataProvider invalid_filter_result_provider
+	 *
+	 * @param mixed $result Value the filter returns.
+	 */
+	public function testItIgnoresAnInvalidCroppedImageUrl( $result ): void {
+		$parsed_image = $this->get_cropped_image_block( '1' );
+
+		$filter = function () use ( $result ) {
+			return $result;
+		};
+		add_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter );
+		$rendered = $this->image_renderer->render( $parsed_image['innerHTML'], $parsed_image, $this->rendering_context );
+		remove_filter( 'woocommerce_email_editor_image_cropped_image_url', $filter );
+
+		$this->assertSame( 'https://test.com/wp-content/uploads/2023/05/image.jpg', $this->get_image_attribute( $rendered, 'src' ) );
+		$this->assertSame( '467', $this->get_image_attribute( $rendered, 'height' ) );
+	}
+
+	/**
+	 * Filter results that are not a usable cropped URL.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function invalid_filter_result_provider(): array {
+		return array(
+			'null'            => array( null ),
+			'empty string'    => array( '' ),
+			'array'           => array( array( 'https://test.com/cropped.jpg' ) ),
+			'unsafe protocol' => array( 'javascript:alert(1)' ),
+		);
+	}
+
+	/**
+	 * Build an image block cropped from a 1003×807 file, the way core saves an Aspect ratio crop.
+	 *
+	 * @param string $aspect_ratio Saved aspect ratio.
+	 */
+	private function get_cropped_image_block( string $aspect_ratio ): array {
+		$parsed_image                         = $this->parsed_image;
+		$parsed_image['attrs']['aspectRatio'] = $aspect_ratio;
+		$parsed_image['attrs']['width']       = '580px';
+		$parsed_image['innerHTML']            = '
+			<figure class="wp-block-image size-full">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="1003" height="807" style="aspect-ratio:' . $aspect_ratio . ';object-fit:cover"/>
+			</figure>
+		';
+		return $parsed_image;
+	}
+
+	/**
+	 * Read an attribute off the rendered image.
+	 *
+	 * @param string $rendered Rendered block content.
+	 * @param string $attribute Attribute name.
+	 * @return string|null The attribute value, or null when the image doesn't carry it.
+	 */
+	private function get_image_attribute( string $rendered, string $attribute ): ?string {
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'img' ) ), 'The rendered content has no image.' );
+		$value = $html->get_attribute( $attribute );
+		return is_string( $value ) ? $value : null;
+	}
 }

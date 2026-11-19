@@ -803,6 +803,159 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Content with an argument holding the entities &#039;, &quot; and &amp; at each replacement site.
+	 * Tokens in attributes are HTML-encoded once more, as they are serialized in the block markup.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function encodedArgumentSitesProvider(): array {
+		return array(
+			'comment token'  => array( '<p><!--[test/args note="O&#039;Brien &quot;Bob&quot; &amp; co"]--></p>' ),
+			'data-link-href' => array( '<a data-link-href="[test/args note=&quot;O&amp;#039;Brien &amp;quot;Bob&amp;quot; &amp;amp; co&quot;]" href="#">Link</a>' ),
+			// A saved href has been through esc_url(), which drops the quotes around the value.
+			'plain href'     => array( '<a href="https://example.com/?r=%5Btest/args%20note=O&#039;Brien%20&quot;Bob&quot;%20&#038;%20co%5D">Link</a>' ),
+		);
+	}
+
+	/**
+	 * Test that HTML entities in tag argument values reach the callback decoded at every replacement site.
+	 *
+	 * @dataProvider encodedArgumentSitesProvider
+	 * @param string $content The content to personalize.
+	 */
+	public function testArgumentEntitiesAreDecoded( string $content ): void {
+		$received = array();
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'args',
+				'test/args',
+				'Test',
+				function ( $context, $args ) use ( &$received ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed -- The $context parameter is not used in this test.
+					$received[] = $args['note'] ?? '';
+					return 'https://example.com/value';
+				},
+				array(),
+				null,
+				array(),
+				Personalization_Tag::VALUE_TYPE_TEXT
+			)
+		);
+
+		$this->personalizer->personalize_content( $content );
+		$this->assertSame( array( 'O\'Brien "Bob" & co' ), $received );
+	}
+
+	/**
+	 * Test that an html value type tag still gets decoded argument values in link targets.
+	 */
+	public function testHtmlValueTypeTagGetsDecodedArgumentsInLinks(): void {
+		$received = array();
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'link',
+				'test/link',
+				'Test',
+				function ( $context, $args ) use ( &$received ) {
+					unset( $context );
+					$received[] = $args['note'] ?? '';
+					return 'https://example.com/value';
+				}
+			)
+		);
+
+		$this->personalizer->personalize_content( '<a data-link-href="[test/link note=&quot;O&amp;#039;Brien &amp;amp; co&quot;]">Link</a>' );
+		$this->assertSame( array( "O'Brien & co" ), $received );
+	}
+
+	/**
+	 * Test that an html value type tag gets its argument values escaped for HTML in HTML content,
+	 * so a callback that outputs an argument as it is shows it as text, and decoded elsewhere.
+	 */
+	public function testHtmlValueTypeTagGetsEscapedArgumentsInHtmlContent(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'echo',
+				'test/echo',
+				'Test',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed -- The $context parameter is not used in this test.
+					return $args['note'] ?? '';
+				}
+			)
+		);
+
+		$this->assertSame(
+			'<p>&lt;b&gt;x&lt;/b&gt; O&#039;Brien</p>',
+			$this->personalizer->personalize_content( '<p><!--[test/echo note="&lt;b&gt;x&lt;/b&gt;"]--> <!--[test/echo note="O&#039;Brien"]--></p>' )
+		);
+		$this->assertSame(
+			"<b>x</b> O'Brien",
+			$this->personalizer->personalize_content( '<!--[test/echo note="&lt;b&gt;x&lt;/b&gt;"]--> <!--[test/echo note="O&#039;Brien"]-->', Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+	}
+
+	/**
+	 * Test that a "]" inside a quoted argument value does not end a tag inside a link early.
+	 */
+	public function testClosingBracketInQuotedArgumentInLinks(): void {
+		$received = array();
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'campaign',
+				'test/campaign',
+				'Test',
+				function ( $context, $args ) use ( &$received ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed -- The $context parameter is not used in this test.
+					$received[] = $args['note'] ?? '';
+					return 'spring';
+				}
+			)
+		);
+
+		$this->assertSame(
+			'<a  href="http://spring">Link</a>',
+			$this->personalizer->personalize_content( '<a data-link-href="[test/campaign note=&quot;a [2026]&quot;]" href="#">Link</a>' )
+		);
+		$this->assertSame(
+			'<a href="https://example.com/?c=spring&#038;x=1">Link</a>',
+			$this->personalizer->personalize_content( '<a href="https://example.com/?c=[test/campaign note=&quot;a [2026]&quot;]&amp;x=1">Link</a>' )
+		);
+		// An apostrophe in an unquoted value (esc_url() drops the quotes) must not run into the next tag.
+		$this->assertSame(
+			'<a href="https://example.com/?c=spring&#038;d=spring">Link</a>',
+			$this->personalizer->personalize_content( '<a href="https://example.com/?c=[test/campaign note=O&#039;Brien]&amp;d=[test/campaign note=\'x\']">Link</a>' )
+		);
+		$this->assertSame( array( 'a [2026]', 'a [2026]', 'O\'Brien', 'x' ), $received );
+
+		// A quote that is never closed is read as part of an unquoted value, and the token still ends at "]".
+		$this->assertSame(
+			'<a href="https://example.com/?c=spring&#038;x=1">Link</a>',
+			$this->personalizer->personalize_content( '<a href="https://example.com/?c=[test/campaign note=&quot;abc]&amp;x=1">Link</a>' )
+		);
+		$this->assertSame( '"abc', end( $received ) );
+
+		// An unclosed quote must not swallow a second tag in the same link.
+		$this->assertSame(
+			'<a href="https://example.com/?c=spring&#038;d=spring">Link</a>',
+			$this->personalizer->personalize_content( '<a href="https://example.com/?c=[test/campaign note=&quot;abc]&amp;d=[test/campaign note=&quot;x&quot;]">Link</a>' )
+		);
+
+		// A tag used as the whole URL drops the protocol the editor forces in front of it.
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'campaign_url',
+				'test/campaign-url',
+				'Test',
+				function () {
+					return 'https://shop.example/spring';
+				}
+			)
+		);
+		$this->assertSame(
+			'<a href="https://shop.example/spring">Link</a>',
+			$this->personalizer->personalize_content( '<a href="http://[test/campaign-url note=&quot;a [2026]&quot;]">Link</a>' )
+		);
+	}
+
+	/**
 	 * Test that the reserved rendering context key cannot be injected via set_context().
 	 */
 	public function testRenderingContextKeyIsReserved(): void {

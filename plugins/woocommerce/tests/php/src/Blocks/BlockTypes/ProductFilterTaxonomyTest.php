@@ -43,8 +43,6 @@ class ProductFilterTaxonomyTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'woocommerce_pre_product_filter_data', array( $this, 'filter_product_filter_data' ), 10 );
-
 		foreach ( $this->term_ids as $term_id ) {
 			wp_delete_term( $term_id, 'product_cat' );
 		}

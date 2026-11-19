@@ -77,7 +77,6 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
 		$this->restore_stock_notifications_feature_option();
-		remove_all_filters( 'woocommerce_customer_stock_notifications_product_is_valid' );
 		parent::tearDown();
 	}
 

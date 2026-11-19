@@ -13,7 +13,6 @@ use Automattic\WooCommerce\Enums\ProductType;
  * Block type for quantity selector in add to cart with options.
  */
 class QuantitySelector extends AbstractBlock {
-
 	use EnableBlockJsonAssetsTrait;
 
 	/**

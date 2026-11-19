@@ -14,7 +14,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Token, trust window and extend / release flags of one lock. Held by the lock and read by
+ * Token, owner, trust window and extend / release flags of one lock. Held by the lock and read by
  * {@see ContractRepository} through {@see ContractLock::get_state()}; any other caller gets
  * `_doing_it_wrong()`.
  *
@@ -41,6 +41,13 @@ final class ContractLockState {
 	 * @var string
 	 */
 	private $token;
+
+	/**
+	 * Owning extension of the locked contract, as matched when the lock was taken.
+	 *
+	 * @var string
+	 */
+	private $extension_slug;
 
 	/**
 	 * Monotonic moment until which child writes trust the lock.
@@ -73,10 +80,12 @@ final class ContractLockState {
 	/**
 	 * State of a lock just stamped with a full TTL.
 	 *
-	 * @param string $token The stored token.
+	 * @param string $token          The stored token.
+	 * @param string $extension_slug The locked contract's owning extension.
 	 */
-	public function __construct( string $token ) {
-		$this->token = $token;
+	public function __construct( string $token, string $extension_slug ) {
+		$this->token          = $token;
+		$this->extension_slug = $extension_slug;
 		$this->stamp( ContractLock::TTL_SECONDS );
 	}
 
@@ -85,6 +94,14 @@ final class ContractLockState {
 	 */
 	public function get_token(): string {
 		return $this->token;
+	}
+
+	/**
+	 * The locked contract's owning extension. It cannot change while the lock is held: no
+	 * contract write changes `extension_slug`.
+	 */
+	public function get_extension_slug(): string {
+		return $this->extension_slug;
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a checkout link to UCP cart responses so AI shopping agents can hand the cart to the buyer to complete the purchase.

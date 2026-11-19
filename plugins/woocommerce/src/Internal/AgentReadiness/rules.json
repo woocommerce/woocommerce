@@ -1,5 +1,9 @@
 {
-	"version": "1",
+	"version": "2026-11-17",
+	"store_checks": {
+		"search_visible": { "required": true },
+		"payment_method": { "required": true }
+	},
 	"checks": {
 		"missing_regular_price": {
 			"channels": {
@@ -84,6 +88,9 @@
 				"google": { "field": "title", "effect": "gaps" },
 				"copilot": { "field": "title", "effect": "gaps" }
 			}
+		},
+		"image_alt_text": {
+			"channels": {}
 		}
 	}
 }
