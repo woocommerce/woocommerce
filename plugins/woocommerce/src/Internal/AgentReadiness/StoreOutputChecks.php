@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
+use Automattic\WooCommerce\Internal\LlmsTxt\LlmsTxt;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils as UcpUtils;
 
 defined( 'ABSPATH' ) || exit;
@@ -908,18 +909,13 @@ class StoreOutputChecks {
 
 	/**
 	 * WooCommerce's llms.txt status: disabled, physical_file or unknown, with the guidance it adds.
-	 * Null when this WooCommerce has no llms.txt fallback, or it fails.
+	 * Null when reading status fails.
 	 *
 	 * @return array{status:string,section:string}|null
 	 */
 	public static function core_llms_txt_status(): ?array {
-		// Not in every WooCommerce version yet, so the class is named by string.
-		$class = 'Automattic\\WooCommerce\\Internal\\LlmsTxt\\LlmsTxt';
 		try {
-			if ( ! class_exists( $class ) ) {
-				return null;
-			}
-			$status = ( new $class() )->get_status();
+			$status = wc_get_container()->get( LlmsTxt::class )->get_status();
 		} catch ( \Throwable $e ) {
 			wc_get_logger()->warning( 'Agent readiness could not read the llms.txt status: ' . $e->getMessage(), array( 'source' => 'agent-readiness' ) );
 			return null;

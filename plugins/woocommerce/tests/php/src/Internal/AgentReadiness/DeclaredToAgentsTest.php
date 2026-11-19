@@ -87,11 +87,11 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	public function test_files(): void {
 		$results = $this->results(
 			array(
-				'/ai.txt'                  => array( 200, 'User-Agent: *' ),
-				'/.well-known/agents.json' => array( 200, '<!doctype html><html></html>' ),
-				'/AGENTS.md'               => array( 200, '{"code":"not_found","message":"No route"}' ),
-				'/auth.md'                 => array( 200, 'Not found', array( 'content-type' => 'text/html; charset=UTF-8' ) ),
-				'/sitemap.md'              => array( 200, "\xEF\xBB\xBF<!doctype html><html></html>" ),
+				'/ai.txt'                   => array( 200, 'User-Agent: *' ),
+				'/.well-known/agents.json'  => array( 200, '<!doctype html><html></html>' ),
+				'/AGENTS.md'                => array( 200, '{"code":"not_found","message":"No route"}' ),
+				'/auth.md'                  => array( 200, 'Not found', array( 'content-type' => 'text/html; charset=UTF-8' ) ),
+				'/sitemap.md'               => array( 200, "\xEF\xBB\xBF<!doctype html><html></html>" ),
 				'/.well-known/security.txt' => array(
 					404,
 					"\n\n",
