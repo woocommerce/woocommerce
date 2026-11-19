@@ -74,6 +74,46 @@ $this->checkout_fields = apply_filters( 'woocommerce_checkout_fields', $this->ch
 
 That means you have **full control** over checkout fields - you only need to know how to access them.
 
+## Changing address fields: use the country locale
+
+The address fields (`country`, `first_name`, `last_name`, `company`, `address_1`, `address_2`, `city`, `state` and `postcode`) are special. WooCommerce builds them from a set of default fields and then applies the **country locale** on top: the rules for the country the shopper selected, for example that a postcode is optional in some countries. The locale is used in three places:
+
+-   On the server, when the fields are built and when the checkout is validated.
+-   In the browser, every time the shopper changes the country on the shortcode checkout. The locale is applied again and resets the label, placeholder, required status, priority and visibility of these fields.
+-   In the Checkout block, which does not use the `woocommerce_checkout_fields` filter at all.
+
+So if you want to make an address field optional, hide it or change its label, change it in the locale. Use the `woocommerce_get_country_locale` filter for the countries that have their own rules, and the `woocommerce_get_country_locale_default` filter for all other countries. For example, to make the city optional and hide it everywhere:
+
+```php
+// Make the city optional and hidden in every country that has its own locale.
+add_filter( 'woocommerce_get_country_locale', 'custom_make_city_optional' );
+
+function custom_make_city_optional( $locales ) {
+    foreach ( $locales as $country => $locale ) {
+        $locales[ $country ]['city']['required'] = false;
+        $locales[ $country ]['city']['hidden']   = true;
+    }
+
+    return $locales;
+}
+
+// Do the same for the default locale, which is used for all other countries.
+add_filter( 'woocommerce_get_country_locale_default', 'custom_make_city_optional_default' );
+
+function custom_make_city_optional_default( $locale ) {
+    $locale['city']['required'] = false;
+    $locale['city']['hidden']   = true;
+
+    return $locale;
+}
+```
+
+This works for both the shortcode checkout and the Checkout block. To change fields for one country only, see [Removing checkout fields](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/removing-checkout-fields/).
+
+Avoid changing address fields only through `woocommerce_checkout_fields`, `woocommerce_billing_fields` or `woocommerce_shipping_fields`. The locale does not know about those changes, so the checkout can end up with different rules on the server, in the browser and in the Checkout block. In WooCommerce 9.8, removing or making the postcode optional this way allowed shoppers to place orders without paying for shipping when "Hide shipping costs until an address is entered" was enabled ([#57729](https://github.com/woocommerce/woocommerce/issues/57729)).
+
+The fields that are not address fields, such as `billing_email`, `billing_phone`, the account fields and `order_comments`, are not part of the locale. You can change those with `woocommerce_checkout_fields` as shown below.
+
 ## Overriding Core Fields
 
 Hooking into the **`woocommerce_checkout_fields`** filter lets you override any field. As an example, let's change the placeholder on the order_comments fields. Currently, it's set to:
@@ -165,7 +205,7 @@ Each field contains an array of properties:
 -   `label_class` - class for the label element
 -   `options` - for select boxes, array of options (key => value pairs)
 
-In specific cases you need to use the **`woocommerce_default_address_fields`** filter. This filter is applied to all billing and shipping default fields:
+The **`woocommerce_default_address_fields`** filter changes the default address fields, which are used for both billing and shipping:
 
 -   `country`
 -   `first_name`
@@ -190,6 +230,8 @@ function custom_override_default_address_fields( $address_fields ) {
     return $address_fields;
 }
 ```
+
+The default fields are also the base of the default locale. Countries that have their own locale rules for a field still use those rules, so to change a field in every country, use the locale filters described in [Changing address fields: use the country locale](#changing-address-fields-use-the-country-locale).
 
 ### Defining select options
 
