@@ -2061,15 +2061,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				runAction(
 					actions.addCartItem( {
 						id: 99,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 				runAction(
 					actions.addCartItem( {
 						id: 100,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 				runAction(
@@ -2114,11 +2112,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const { events, cleanup } = captureSyncEvents();
 
 			await runAction(
-				actions.addCartItem( {
-					id: 42,
+				actions.updateCartItem( {
 					key: 'quantity-key',
 					quantity: 4,
-					type: 'simple',
 				} )
 			);
 
@@ -2149,16 +2145,14 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				runAction(
 					actions.addCartItem( {
 						id: 501,
-						quantityToAdd: 1,
-						type: 'variation',
+						quantity: 1,
 						variation: selection,
 					} )
 				),
 				runAction(
 					actions.addCartItem( {
 						id: 77,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 			] );
@@ -2215,8 +2209,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				await runAction(
 					actions.addCartItem( {
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				);
 				const orderImmediatelyAfterSettlement = [
