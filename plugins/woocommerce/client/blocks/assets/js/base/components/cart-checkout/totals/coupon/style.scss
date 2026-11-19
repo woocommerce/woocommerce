@@ -53,7 +53,8 @@
 // When a coupon applies, the form closes at the same moment as the totals rows grow. Closing at the same speed keeps
 // the content below moving in one direction.
 :where(.wp-block-woocommerce-cart, .wp-block-woocommerce-checkout) .wc-block-components-totals-coupon {
-	> .wc-block-components-panel__button[aria-expanded="false"] {
+	// Not after a key press, which applies immediately.
+	> .wc-block-components-panel__button[aria-expanded="false"]:not([data-wc-instant]) {
 		@include motion-transition($move: margin-bottom, $easing: balanced);
 	}
 
