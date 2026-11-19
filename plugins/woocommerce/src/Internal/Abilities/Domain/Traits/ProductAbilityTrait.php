@@ -827,6 +827,49 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Check an `edit` or `delete` permission on a product ID, as the REST API does.
+	 * An ID that is not a product or variation passes for users who could act on
+	 * any product and read private ones, so they get the not-found error instead
+	 * of a permission error.
+	 *
+	 * @param int    $product_id Product or variation ID.
+	 * @param string $context    `edit` or `delete`.
+	 * @return bool
+	 */
+	protected static function check_product_permission( int $product_id, string $context ): bool {
+		if ( $product_id <= 0 ) {
+			return false;
+		}
+
+		if ( in_array( get_post_type( $product_id ), array( 'product', 'product_variation' ), true ) ) {
+			return (bool) wc_rest_check_post_permissions( 'product', $context, self::get_product_permission_id( $product_id ) );
+		}
+
+		if ( ! wc_rest_check_post_permissions( 'product', 'read' ) ) {
+			return false;
+		}
+
+		if ( 'edit' === $context ) {
+			return (bool) wc_rest_check_post_permissions( 'product', 'batch' );
+		}
+
+		$type_object = get_post_type_object( 'product' );
+		$permission  = $type_object instanceof \WP_Post_Type && current_user_can( $type_object->cap->delete_others_posts );
+
+		/**
+		 * Filter a REST API permission check, as wc_rest_check_post_permissions() does.
+		 *
+		 * @since 2.6.0
+		 *
+		 * @param bool   $permission Whether the current user has the permission.
+		 * @param string $context    Permission context.
+		 * @param int    $object_id  Object ID, 0 for no object.
+		 * @param string $post_type  Post type.
+		 */
+		return (bool) apply_filters( 'woocommerce_rest_check_permissions', $permission, 'delete', 0, 'product' );
+	}
+
+	/**
 	 * The variable parent of a saved variation. The call syncs and saves it
 	 * after the variation, so it is a secondary object of the call.
 	 *
