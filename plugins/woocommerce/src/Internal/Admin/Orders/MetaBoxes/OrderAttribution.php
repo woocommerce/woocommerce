@@ -80,9 +80,6 @@ class OrderAttribution {
 		$template_data = array(
 			'meta'             => $meta,
 			'has_more_details' => $has_more_details,
-			'origin_note'      => 'ai_shopper' === ( $meta['source_type'] ?? '' )
-				? __( 'This order started with an AI shopping assistant acting on the customer’s behalf.', 'woocommerce' )
-				: '',
 		);
 		wc_get_template( 'order/attribution-details.php', $template_data );
 	}

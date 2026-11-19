@@ -111,12 +111,10 @@ class UcpCheckout extends ControllerTestCase {
 	 * @param string $method HTTP method.
 	 * @param string $path Route path under /wc/ucp/v1.
 	 * @param array  $body Request body.
-	 * @param array  $headers Extra request headers.
 	 * @return \WP_REST_Response
 	 */
-	private function request( string $method, string $path, array $body = array(), array $headers = array() ) {
+	private function request( string $method, string $path, array $body = array() ) {
 		$request = new \WP_REST_Request( $method, '/wc/ucp/v1' . $path );
-		$request->set_headers( $headers );
 		$request->set_header( 'content-type', 'application/json' );
 		// A write needs a key of its own; the key itself is the UcpIdempotency suite's concern.
 		$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
@@ -155,30 +153,6 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * Move the stored modification time into the past so a later save is visible.
-	 *
-	 * @param int $order_id Order ID.
-	 */
-	private function backdate_order_modified( int $order_id ): void {
-		global $wpdb;
-
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$wpdb->update(
-				OrdersTableDataStore::get_orders_table_name(),
-				array( 'date_updated_gmt' => '2000-01-01 00:00:00' ),
-				array( 'id' => $order_id )
-			);
-			return;
-		}
-
-		$wpdb->update(
-			$wpdb->posts,
-			array( 'post_modified_gmt' => '2000-01-01 00:00:00' ),
-			array( 'ID' => $order_id )
-		);
-	}
-
-	/**
 	 * Remove one key from the stored session row, leaving this request's memory as it was.
 	 *
 	 * @param string $key Session key.
@@ -199,42 +173,6 @@ class UcpCheckout extends ControllerTestCase {
 			array( 'session_value' => maybe_serialize( $stored ) ),
 			array( 'session_key' => $customer_id )
 		);
-	}
-
-	/**
-	 * The transaction id stored for an order. On the orders table it sorts after status.
-	 *
-	 * @param int $order_id Order ID.
-	 * @return string
-	 */
-	private function stored_transaction_id( int $order_id ): string {
-		global $wpdb;
-
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$table = OrdersTableDataStore::get_orders_table_name();
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WooCommerce's orders table.
-			return (string) $wpdb->get_var( $wpdb->prepare( "SELECT transaction_id FROM {$table} WHERE id = %d", $order_id ) );
-		}
-
-		return (string) $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s", $order_id, '_transaction_id' ) );
-	}
-
-	/**
-	 * The modification time stored for an order, not the time on the in-memory object.
-	 *
-	 * @param int $order_id Order ID.
-	 * @return string
-	 */
-	private function stored_order_modified_gmt( int $order_id ): string {
-		global $wpdb;
-
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$table = OrdersTableDataStore::get_orders_table_name();
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is WooCommerce's orders table.
-			return (string) $wpdb->get_var( $wpdb->prepare( "SELECT date_updated_gmt FROM {$table} WHERE id = %d", $order_id ) );
-		}
-
-		return (string) $wpdb->get_var( $wpdb->prepare( "SELECT post_modified_gmt FROM {$wpdb->posts} WHERE ID = %d", $order_id ) );
 	}
 
 	/**
@@ -722,51 +660,6 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Complete records the agent named in UCP-Agent as the order's source, or `ucp` without one, and keeps the order a Store API order.
-	 * @testWith ["profile=\"https://Chatgpt.com/.well-known/ucp\"", "chatgpt.com"]
-	 *           ["", "ucp"]
-	 *           ["profile=\"not-a-url\"", "ucp"]
-	 *           ["profile=\"https://evil<b>host/\"", "ucp"]
-	 *
-	 * @param string $agent  The UCP-Agent header.
-	 * @param string $source The expected utm_source.
-	 */
-	public function test_complete_records_the_agent_as_the_source( string $agent, string $source ): void {
-		$created = $this->create_ready_checkout();
-		$headers = '' === $agent ? array() : array( 'UCP-Agent' => $agent );
-
-		$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete', array(), $headers );
-		$this->assertSame( 'requires_escalation', $response->get_data()['status'] );
-
-		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
-		$this->assertSame( 'ai_shopper', $order->get_meta( '_wc_order_attribution_source_type' ) );
-		$this->assertSame( $source, $order->get_meta( '_wc_order_attribution_utm_source' ) );
-		$this->assertSame( 'ucp', $order->get_meta( '_wc_order_attribution_utm_medium' ) );
-		$this->assertSame( 'store-api', $order->get_created_via(), 'wc_cancel_unpaid_orders() only cancels checkout and store-api orders.' );
-	}
-
-	/**
-	 * @testdox Complete keeps attribution the order already has.
-	 */
-	public function test_complete_keeps_existing_attribution(): void {
-		$created = $this->create_ready_checkout();
-		add_action(
-			'woocommerce_store_api_checkout_update_order_meta',
-			static function ( \WC_Order $order ) {
-				$order->update_meta_data( '_wc_order_attribution_source_type', 'referral' );
-				$order->save_meta_data();
-			}
-		);
-
-		$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete', array(), array( 'UCP-Agent' => 'profile="https://chatgpt.com/"' ) );
-		$this->assertSame( 'requires_escalation', $response->get_data()['status'] );
-
-		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
-		$this->assertSame( 'referral', $order->get_meta( '_wc_order_attribution_source_type' ) );
-		$this->assertSame( '', $order->get_meta( '_wc_order_attribution_utm_source' ) );
-	}
-
-	/**
 	 * @testdox A status an extension adds to the payable list keeps the hand-off, including its payment page.
 	 */
 	public function test_checkout_keeps_an_extension_payable_status(): void {
@@ -820,44 +713,28 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox A payment that lands as the cancellation is written is kept, and the checkout reports it.
+	 * @testdox A payment stored after the order was cached is kept, and the checkout reports it.
 	 */
-	public function test_update_keeps_an_order_paid_as_cancellation_is_written(): void {
+	public function test_update_keeps_an_order_paid_behind_the_cache(): void {
+		global $wpdb;
+
 		$created = $this->create_ready_checkout();
 		$path    = '/checkout-sessions/' . $created['id'];
 		$this->request( 'POST', $path . '/complete' );
 		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
 		WC()->cart->set_quantity( (string) array_key_first( WC()->cart->get_cart() ), 2 );
 
-		$flipped   = false;
-		$pay_first = static function ( $sql ) use ( &$flipped, $order_id ) {
-			if ( $flipped || ! is_string( $sql ) || false === strpos( $sql, 'wc-cancelled' ) ) {
-				return $sql;
-			}
-
-			$flipped = true;
-			global $wpdb;
-
-			if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
-				$table = \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::get_orders_table_name();
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Test sets the row a concurrent payment would have written.
-				$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s WHERE id = %d", 'wc-processing', $order_id ) );
-			} else {
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Test sets the row a concurrent payment would have written.
-				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->posts} SET post_status = %s WHERE ID = %d", 'wc-processing', $order_id ) );
-			}
-
-			return $sql;
-		};
-
-		add_filter( 'query', $pay_first, 9 );
-		try {
-			$updated = $this->request( 'PUT', $path, array() );
-		} finally {
-			remove_filter( 'query', $pay_first, 9 );
+		// The row a payment in another request would have written, with this request's cache left as it was.
+		wc_get_order( $order_id );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'status' => 'wc-processing' ), array( 'id' => $order_id ) );
+		} else {
+			$wpdb->update( $wpdb->posts, array( 'post_status' => 'wc-processing' ), array( 'ID' => $order_id ) );
 		}
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ), 'The cached order still reads as pending.' );
 
-		$this->assertTrue( $flipped, 'The cancellation reached the status write.' );
+		$updated = $this->request( 'PUT', $path, array() );
+
 		$this->assertSame( 'completed', $updated->get_data()['status'] );
 		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PROCESSING ) );
 		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
@@ -896,40 +773,6 @@ class UcpCheckout extends ControllerTestCase {
 				)
 			)
 		);
-	}
-
-	/**
-	 * @testdox Cancelling a handed-off order writes the modification time and the other changes from that save.
-	 */
-	public function test_cancel_writes_the_whole_order_row(): void {
-		$created = $this->create_ready_checkout();
-		$path    = '/checkout-sessions/' . $created['id'];
-		$this->request( 'POST', $path . '/complete' );
-		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
-		$this->backdate_order_modified( $order_id );
-
-		$annotate = static function ( $order ) {
-			if ( ! $order instanceof \WC_Order || OrderStatus::CANCELLED !== $order->get_status() ) {
-				return;
-			}
-			$order->set_customer_note( 'kept on cancel' );
-			$order->set_transaction_id( 'ucp-txn' );
-			$order->update_meta_data( 'ucp_cancel_marker', 'wc-cancelled' );
-		};
-		add_action( 'woocommerce_before_order_object_save', $annotate );
-
-		try {
-			$this->request( 'PUT', $path, array( 'line_items' => array( $this->line_item( 1, 2 ) ) ) );
-		} finally {
-			remove_action( 'woocommerce_before_order_object_save', $annotate );
-		}
-
-		$order = wc_get_order( $order_id );
-		$this->assertTrue( $order->has_status( OrderStatus::CANCELLED ) );
-		$this->assertSame( 'kept on cancel', $order->get_customer_note() );
-		$this->assertSame( 'wc-cancelled', $order->get_meta( 'ucp_cancel_marker' ) );
-		$this->assertSame( 'ucp-txn', $this->stored_transaction_id( $order_id ) );
-		$this->assertNotSame( '2000-01-01 00:00:00', $this->stored_order_modified_gmt( $order_id ) );
 	}
 
 	/**

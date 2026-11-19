@@ -69,41 +69,6 @@ class OrderAttributionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox An AI shopper order shows "AI shopper" with a sentence explaining it, and keeps the agent and UCP in the details.
-	 */
-	public function test_ai_shopper_origin_is_explained(): void {
-		$order = WC_Helper_Order::create_order();
-		$order->add_meta_data( '_wc_order_attribution_source_type', 'ai_shopper' );
-		$order->add_meta_data( '_wc_order_attribution_utm_source', 'chatgpt.com' );
-		$order->add_meta_data( '_wc_order_attribution_utm_medium', 'ucp' );
-
-		ob_start();
-		$this->sut->output( $order );
-		$html = (string) ob_get_clean();
-
-		$this->assertStringContainsString( 'AI shopper', $html );
-		$this->assertStringContainsString( 'This order started with an AI shopping assistant acting on the customer’s behalf.', $html );
-		$this->assertStringContainsString( 'chatgpt.com', $html );
-		$this->assertStringContainsString( 'ucp', $html );
-		$this->assertStringContainsString( 'woocommerce-order-attribution-details-toggle', $html );
-	}
-
-	/**
-	 * @testdox Other origins show no explanation.
-	 */
-	public function test_other_origins_have_no_note(): void {
-		$order = WC_Helper_Order::create_order();
-		$order->add_meta_data( '_wc_order_attribution_source_type', 'referral' );
-		$order->add_meta_data( '_wc_order_attribution_utm_source', 'woocommerce.com' );
-
-		ob_start();
-		$this->sut->output( $order );
-		$html = (string) ob_get_clean();
-
-		$this->assertStringNotContainsString( 'order-attribution-origin-note', $html );
-	}
-
-	/**
 	 * Test that additional order meta passed into the output changes `show more details` value.
 	 *
 	 * @return void

@@ -120,11 +120,6 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 				'expected_output' => 'Point of Sale',
 			),
 			array(
-				'source_type'     => 'ai_shopper',
-				'source'          => 'chatgpt.com',
-				'expected_output' => 'AI shopper',
-			),
-			array(
 				'source_type'     => '',
 				'source'          => '',
 				'expected_output' => 'Unknown',
