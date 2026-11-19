@@ -21,6 +21,7 @@ import CheckoutBillingAddressBlock from './checkout-billing-address-block/fronte
 import CheckoutShippingMethodsBlock from './checkout-shipping-methods-block/frontend';
 import CheckoutPaymentBlock from './checkout-payment-block/frontend';
 import CheckoutAdditionalInformationBlock from './checkout-additional-information-block/frontend';
+import CheckoutRegulatoryFieldsBlock from './checkout-regulatory-fields-block/frontend';
 import CheckoutOrderNoteBlock from './checkout-order-note-block/block';
 import CheckoutTermsBlock from './checkout-terms-block/frontend';
 import CheckoutActionsBlock from './checkout-actions-block/frontend';
@@ -83,6 +84,11 @@ registerCheckoutBlock( {
 registerCheckoutBlock( {
 	metadata: metadata.CHECKOUT_PAYMENT,
 	component: CheckoutPaymentBlock,
+} );
+
+registerCheckoutBlock( {
+	metadata: metadata.CHECKOUT_REGULATORY_FIELDS,
+	component: CheckoutRegulatoryFieldsBlock,
 } );
 
 registerCheckoutBlock( {

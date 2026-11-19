@@ -606,6 +606,16 @@ Shows local pickup locations.
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
+## Regulatory fields - woocommerce/checkout-regulatory-fields-block
+
+Render the fields a country's rules require with an order, such as the CPF/CNPJ in Brazil.
+
+- **Name:** woocommerce/checkout-regulatory-fields-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
+- **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
+- **Attributes:** className, lock
+
 ## Shipping Address - woocommerce/checkout-shipping-address-block
 
 Collect your customer's shipping address.

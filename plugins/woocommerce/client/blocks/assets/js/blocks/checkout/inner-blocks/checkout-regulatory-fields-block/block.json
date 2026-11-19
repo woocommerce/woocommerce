@@ -1,0 +1,31 @@
+{
+	"name": "woocommerce/checkout-regulatory-fields-block",
+	"title": "Regulatory fields",
+	"description": "Render the fields a country's rules require with an order, such as the CPF/CNPJ in Brazil.",
+	"category": "woocommerce",
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false
+	},
+	"attributes": {
+		"className": {
+			"type": "string",
+			"default": ""
+		},
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": true,
+				"move": false
+			}
+		}
+	},
+	"parent": [
+		"woocommerce/checkout-fields-block"
+	],
+	"textdomain": "woocommerce",
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3
+}

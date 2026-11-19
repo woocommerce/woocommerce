@@ -211,6 +211,7 @@ final class BlockTypesLazyController {
 			'checkout-order-summary-totals-block'      => \Automattic\WooCommerce\Blocks\BlockTypes\CheckoutOrderSummaryTotalsBlock::class,
 			'checkout-payment-block'                   => \Automattic\WooCommerce\Blocks\BlockTypes\CheckoutPaymentBlock::class,
 			'checkout-pickup-options-block'            => \Automattic\WooCommerce\Blocks\BlockTypes\CheckoutPickupOptionsBlock::class,
+			'checkout-regulatory-fields-block'         => \Automattic\WooCommerce\Blocks\BlockTypes\CheckoutRegulatoryFieldsBlock::class,
 			'checkout-shipping-address-block'          => \Automattic\WooCommerce\Blocks\BlockTypes\CheckoutShippingAddressBlock::class,
 			'checkout-shipping-method-block'           => \Automattic\WooCommerce\Blocks\BlockTypes\CheckoutShippingMethodBlock::class,
 			'checkout-shipping-methods-block'          => \Automattic\WooCommerce\Blocks\BlockTypes\CheckoutShippingMethodsBlock::class,

@@ -257,6 +257,7 @@ class Checkout extends AbstractBlock {
 					<div data-block-name="woocommerce/checkout-shipping-address-block" class="wp-block-woocommerce-checkout-shipping-address-block"></div>
 					<div data-block-name="woocommerce/checkout-billing-address-block" class="wp-block-woocommerce-checkout-billing-address-block"></div>
 					<div data-block-name="woocommerce/checkout-shipping-methods-block" class="wp-block-woocommerce-checkout-shipping-methods-block"></div>
+					<div data-block-name="woocommerce/checkout-regulatory-fields-block" class="wp-block-woocommerce-checkout-regulatory-fields-block"></div>
 					<div data-block-name="woocommerce/checkout-payment-block" class="wp-block-woocommerce-checkout-payment-block"></div>
 					<div data-block-name="woocommerce/checkout-additional-information-block" class="wp-block-woocommerce-checkout-additional-information-block"></div>' .
 					( isset( $attributes['showOrderNotes'] ) && false === $attributes['showOrderNotes'] ? '' : '<div data-block-name="woocommerce/checkout-order-note-block" class="wp-block-woocommerce-checkout-order-note-block"></div>' ) .
@@ -316,6 +317,17 @@ class Checkout extends AbstractBlock {
 		if ( ! $has_additional_information_block ) {
 			$payment_block_regex = '/<div[^<]*?data-block-name="woocommerce\/checkout-payment-block" class="wp-block-woocommerce-checkout-payment-block"[^>]*?><\/div>/mi';
 			$content             = preg_replace( $payment_block_regex, $additional_information_inner_blocks, $content );
+		}
+
+		/**
+		 * Add the Regulatory Fields block, before the payment block, to checkouts missing it.
+		 */
+		$regulatory_fields_inner_blocks = '<div data-block-name="woocommerce/checkout-regulatory-fields-block" class="wp-block-woocommerce-checkout-regulatory-fields-block"></div>' . PHP_EOL . PHP_EOL . '$0';
+		$has_regulatory_fields_regex    = '/<div[^<]*?data-block-name="woocommerce\/checkout-regulatory-fields-block"[^>]*?>/mi';
+
+		if ( ! preg_match( $has_regulatory_fields_regex, $content ) ) {
+			$payment_block_regex = '/<div[^<]*?data-block-name="woocommerce\/checkout-payment-block" class="wp-block-woocommerce-checkout-payment-block"[^>]*?><\/div>/mi';
+			$content             = preg_replace( $payment_block_regex, $regulatory_fields_inner_blocks, $content );
 		}
 
 		return $content;
@@ -663,6 +675,7 @@ class Checkout extends AbstractBlock {
 			'CheckoutShippingMethodsBlock',
 			'CheckoutShippingMethodBlock',
 			'CheckoutPickupOptionsBlock',
+			'CheckoutRegulatoryFieldsBlock',
 			'CheckoutTermsBlock',
 			'CheckoutTotalsBlock',
 		];

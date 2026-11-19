@@ -191,6 +191,35 @@ class Checkout extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A saved Checkout without the Regulatory Fields block gets it right before the payment block, once.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $already_has_block Whether the saved content already has the Regulatory Fields block.
+	 */
+	public function test_render_adds_regulatory_fields_block_before_payment( bool $already_has_block ): void {
+		$regulatory = '<div data-block-name="woocommerce/checkout-regulatory-fields-block" class="wp-block-woocommerce-checkout-regulatory-fields-block"></div>';
+		$payment    = '<div data-block-name="woocommerce/checkout-payment-block" class="wp-block-woocommerce-checkout-payment-block"></div>';
+		$content    = '<div data-block-name="woocommerce/checkout-fields-block" class="wp-block-woocommerce-checkout-fields-block">' . ( $already_has_block ? $regulatory : '' ) . $payment . '</div>';
+
+		$checkout = new class() extends \Automattic\WooCommerce\Blocks\BlockTypes\Checkout {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function __construct() {
+			}
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function render_proxy( string $content ): string {
+				return $this->render( array(), $content, null );
+			}
+		};
+
+		$rendered = $checkout->render_proxy( $content );
+
+		$this->assertSame( 1, substr_count( $rendered, 'data-block-name="woocommerce/checkout-regulatory-fields-block"' ) );
+		$this->assertLessThan( strpos( $rendered, 'checkout-payment-block' ), strpos( $rendered, 'checkout-regulatory-fields-block' ) );
+	}
+
+	/**
 	 * Overrides the WC logger.
 	 *
 	 * @return mixed
