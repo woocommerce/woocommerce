@@ -42,7 +42,8 @@ class McpAdapterVersionNotice {
 	 */
 	public function handle_admin_notices(): void {
 		$version = defined( 'WP_MCP_VERSION' ) ? (string) WP_MCP_VERSION : null;
-		if ( null === $version && defined( 'WP\MCP\Core\McpAdapter::VERSION' ) ) {
+		$bundled = null === $version;
+		if ( $bundled && class_exists( 'WP\MCP\Core\McpAdapter', false ) ) {
 			$version = (string) constant( 'WP\MCP\Core\McpAdapter::VERSION' );
 		}
 		if ( ! self::is_outdated( $version ) || ! current_user_can( 'manage_woocommerce' ) ) {
@@ -50,12 +51,19 @@ class McpAdapterVersionNotice {
 		}
 
 		$message = esc_html(
-			sprintf(
-				/* translators: 1: Required MCP Adapter version, 2: Active MCP Adapter version. */
-				__( 'WooCommerce abilities need MCP Adapter %1$s or later, but version %2$s is active. Update the MCP Adapter plugin so MCP clients can keep using WooCommerce.', 'woocommerce' ),
-				self::MIN_VERSION,
-				$version
-			)
+			$bundled
+				? sprintf(
+					/* translators: 1: Required MCP Adapter version, 2: Active MCP Adapter version. */
+					__( 'WooCommerce abilities need MCP Adapter %1$s or later, but another plugin loads version %2$s. Update the plugin that includes MCP Adapter so MCP clients can keep using WooCommerce.', 'woocommerce' ),
+					self::MIN_VERSION,
+					$version
+				)
+				: sprintf(
+					/* translators: 1: Required MCP Adapter version, 2: Active MCP Adapter version. */
+					__( 'WooCommerce abilities need MCP Adapter %1$s or later, but version %2$s is active. Update the MCP Adapter plugin so MCP clients can keep using WooCommerce.', 'woocommerce' ),
+					self::MIN_VERSION,
+					$version
+				)
 		);
 
 		if ( current_user_can( 'update_plugins' ) ) {
