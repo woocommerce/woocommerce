@@ -4,7 +4,7 @@
 
 	// A margin, not a gap, so that the space closes with the note when it collapses.
 	> .wc-block-components-textarea {
-		margin-top: $gap;
+		margin-block-start: $gap;
 	}
 }
 
