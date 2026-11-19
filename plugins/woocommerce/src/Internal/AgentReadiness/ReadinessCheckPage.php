@@ -898,15 +898,24 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			return null;
 		}
 		$found = array_filter( $items, static fn( array $item ): bool => true === ( $item['found'] ?? null ) );
+		$text  = sprintf(
+			/* translators: %s: how many items were found, such as "Found 4 of 33". */
+			__( 'Optional files that some AI assistants look for. You don’t need to fix anything. %s.', 'woocommerce' ),
+			/* translators: 1: number of items found, 2: number of items looked for. */
+			sprintf( __( 'Found %1$s of %2$s', 'woocommerce' ), number_format_i18n( count( $found ) ), number_format_i18n( count( $items ) ) )
+		);
+		// Served llms.txt caches guidance for a few minutes for anonymous requests, so a fresh
+		// policy/MCP/UCP change can briefly look missing until that cache expires.
+		foreach ( $items as $item ) {
+			if ( 'llms-txt-woocommerce-guidance' === ( $item['id'] ?? '' ) && false === ( $item['found'] ?? null ) ) {
+				$text .= ' ' . __( 'If you just changed policy pages, MCP, or UCP, wait a few minutes and check again. WooCommerce caches its llms.txt briefly.', 'woocommerce' );
+				break;
+			}
+		}
 		return array(
 			'title' => __( 'What does your store share with AI assistants?', 'woocommerce' ),
 			'badge' => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
-			'text'  => sprintf(
-				/* translators: %s: how many items were found, such as "Found 4 of 33". */
-				__( 'Optional files that some AI assistants look for. You don’t need to fix anything. %s.', 'woocommerce' ),
-				/* translators: 1: number of items found, 2: number of items looked for. */
-				sprintf( __( 'Found %1$s of %2$s', 'woocommerce' ), number_format_i18n( count( $found ) ), number_format_i18n( count( $items ) ) )
-			),
+			'text'  => $text,
 			'items' => array_map(
 				static fn( array $item ): array => array(
 					'name'  => (string) ( $item['name'] ?? '' ),
