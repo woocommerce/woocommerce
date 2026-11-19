@@ -197,12 +197,13 @@ CREATE TABLE $meta_table_name (
 			return new \WP_Error( 'db_insert_error', 'Could not insert stock notification into the database.' );
 		}
 
-		ReportsCache::invalidate();
-
 		$notification_id = (int) $wpdb->insert_id;
 		$notification->set_id( $notification_id );
 		$notification->save_meta_data();
 		$notification->apply_changes();
+
+		// After reading insert_id: invalidating can add an option row, which overwrites it.
+		ReportsCache::invalidate();
 
 		/**
 		 * Action: woocommerce_new_stock_notification

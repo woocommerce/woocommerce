@@ -23,6 +23,13 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	use ReportTestTrait;
 
 	/**
+	 * Routes depend on the feature option, so each test needs a fresh server.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * Endpoint.
 	 *
 	 * @var string
@@ -188,7 +195,12 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$before = '2026-02-01 10:00:00';
 		$during = '2026-03-03 10:00:00';
 		// Sign-ups: 1, 3 and 2. Notifications sent: 1, 0 and 1. Unsubscribed: 0, 1 and 2.
-		foreach ( array( 1 => 1, 2 => 3, 3 => 2 ) as $product_id => $signups ) {
+		$signups_by_product = array(
+			1 => 1,
+			2 => 3,
+			3 => 2,
+		);
+		foreach ( $signups_by_product as $product_id => $signups ) {
 			for ( $i = 0; $i < $signups; $i++ ) {
 				$this->insert_row( $product_id, NotificationStatus::ACTIVE, $during, "{$product_id}-{$i}@example.com" );
 			}
