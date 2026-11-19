@@ -2,6 +2,14 @@
 	--wc-separator-color: color-mix(in srgb, currentColor 20%, transparent);
 }
 
+// The stagger step of a row. Registered as an integer, so a `sibling-index()` value is counted on the row that sets it,
+// and its children inherit that number. See `motion-stagger-index`.
+@property --wc-motion-index {
+	syntax: "<integer>";
+	inherits: true;
+	initial-value: 0;
+}
+
 // Shared motion keyframes. Use them through the motion mixins. Fades and movement are separate keyframes, so opacity
 // always uses the state change timing. Movement uses `translate`, `scale`, and `filter`, so it combines with the
 // resting `transform` of an element.
