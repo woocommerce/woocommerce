@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<ruleset name="WooCommerce extension changelog formatter">
+	<file>src</file>
+	<file>tests</file>
+	<config name="testVersion" value="7.4-"/>
+	<rule ref="WooCommerce-Core"/>
+	<rule ref="PHPCompatibility"/>
+
+	<!-- The formatter throws CLI diagnostics outside WordPress. -->
+	<rule ref="WordPress.Security.EscapeOutput.ExceptionNotEscaped">
+		<exclude-pattern>*/src/class-changelog-formatter.php</exclude-pattern>
+	</rule>
+
+	<!-- Unit tests read local changelog fixtures. -->
+	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
+		<exclude-pattern>*/tests/ChangelogFormatterTest.php</exclude-pattern>
+	</rule>
+</ruleset>

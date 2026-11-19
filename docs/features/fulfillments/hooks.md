@@ -133,6 +133,37 @@ The fulfillment email templates expose the standard extension points below.
 | `woocommerce_email_fulfillment_items_args` | Template arguments array | Customize how fulfillment line items are rendered in the email templates. |
 | `woocommerce_get_email_fulfillment_items_table` | `string $html`, `WC_Order $order`, `Fulfillment $fulfillment` | Filter and return the rendered fulfillment items table HTML. |
 
+## Completed order email
+
+An order that ships in parts sends one fulfillment email per shipment, and WooCommerce still sends the order-level "Completed order" email when the order is marked complete. Both are kept on purpose: a fulfillment email covers a single shipment, the "Completed order" email covers the order as a whole. A store that would rather send only the fulfillment emails can opt out of the order-level one.
+
+| Hook | Parameters | Purpose |
+| --- | --- | --- |
+| `woocommerce_fulfillment_suppress_completed_order_email` | `bool $suppress`, `WC_Order $order` | Return true to skip the "Completed order" email for an order whose fulfillment status is `fulfilled`. Defaults to false, which sends both emails. |
+
+Only `true` skips the email, and only a fully fulfilled order is affected: a partially fulfilled order, or one with no fulfillments, still receives it. Only the email that follows the order being marked complete is skipped, so sending the "Completed order" email again, through the REST API or the `woocommerce/order-send-email` ability, still reaches the customer.
+
+The callback owns the decision of whether an order can do without its "Completed order" email, and it receives the order so it can decide per order rather than store-wide. That order is the instance the email carries, which can predate the order's last edit and hold an out-of-date fulfillment status, so a callback that depends on either should re-read the order with `wc_get_order( $order->get_id() )`. The example below skips the email for shipped orders and keeps it whenever the order holds a downloadable item, which is part of the check the email itself uses to decide whether to show download links:
+
+```php
+add_filter(
+    'woocommerce_fulfillment_suppress_completed_order_email',
+    function ( $suppress, $order ) {
+        // Read again, because the instance the email carries can predate the order's last edit.
+        $order = wc_get_order( $order->get_id() );
+
+        return $order && ! $order->has_downloadable_item();
+    },
+    10,
+    2
+);
+```
+
+Two things are worth checking before opting out of the email for every order:
+
+- **A fulfilled order has not necessarily emailed the customer.** Auto-fulfilled items (**Settings > Products > Auto-fulfill items**, on by default for downloadable products), fulfillments saved with the **Fulfillment notification** toggle off, the **Mark as fulfilled** bulk action on the orders list, and imported fulfillments all reach the `fulfilled` status without sending a fulfillment email. An order of downloadable products that goes straight from pending to completed can therefore end up with no email at all: whether its "Completed order" email goes out before or after its items are auto-fulfilled depends on whether the store defers transactional emails.
+- **The "Completed order" email is not always the only one carrying the order totals and the download links.** The "Processing order" email carries them as well, because access to downloads is granted after payment by default, so an order that passes through "Processing" has already sent both. An order that skips it has them in the "Completed order" email alone.
+
 ## Privacy filters
 
 When an order is anonymized, through the WordPress personal-data eraser or the automatic retention cleanup, WooCommerce clears the personal data stored on its fulfillments. This also runs on a store where the fulfillments feature has since been disabled, as long as its tables were created while it was on, since any tracking data they hold is still stored.

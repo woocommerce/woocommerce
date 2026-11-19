@@ -51,7 +51,7 @@ test( 'builds the plugin ZIP without npm and prepares that ZIP through a linked 
 	);
 	fs.writeFileSync(
 		path.join( directory, 'bin/hooks/e2e-prepare.sh' ),
-		'printf "%s/%s" "$WP_VERSION" "$WC_VERSION" > deploy/versions\n'
+		'printf "%s/%s/%s" "$WP_VERSION" "$WC_VERSION" "$E2E_PHP_VERSION" > deploy/versions\n'
 	);
 	fs.writeFileSync(
 		path.join( directory, 'bin/link_plugins.js' ),
@@ -69,14 +69,25 @@ test( 'builds the plugin ZIP without npm and prepares that ZIP through a linked 
 
 	const link = path.join( directory, 'woo-extension-tooling' );
 	fs.symlinkSync( path.join( toolingBin, 'woo-extension-tooling.js' ), link );
+	const invalid = spawnSync( link, [ 'e2e', 'prepare' ], {
+		cwd: directory,
+		env: { ...process.env, E2E_PLUGIN_ZIP: zip, E2E_PHP_VERSION: '8.2.1' },
+		encoding: 'utf8',
+	} );
+	assert.ifError( invalid.error );
+	assert.equal( invalid.status, 1 );
+	assert.match( invalid.stderr, /Invalid E2E_PHP_VERSION/ );
+	assert.ok( ! fs.existsSync( path.join( directory, 'deploy/link-ran' ) ) );
+
 	run( directory, link, [ 'e2e', 'prepare' ], {
 		E2E_PLUGIN_ZIP: zip,
 		E2E_WP_VERSION: '7.0.1',
 		E2E_WC_VERSION: '11.3.0-rc.1',
+		E2E_PHP_VERSION: '8.2',
 	} );
 	assert.equal(
 		fs.readFileSync( path.join( directory, 'deploy/versions' ), 'utf8' ),
-		'7.0.1/11.3.0-rc.1'
+		'7.0.1/11.3.0-rc.1/8.2'
 	);
 	assert.equal(
 		fs.readFileSync(
