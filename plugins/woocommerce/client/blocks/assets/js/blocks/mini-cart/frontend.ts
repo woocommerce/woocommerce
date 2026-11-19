@@ -26,7 +26,7 @@ import {
  */
 import type { CartItem, Currency } from '@woocommerce/types';
 import { getFocusableElements } from '../../utils/get-focusable-elements';
-import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
+import { translateJQueryEventToNative } from '../../base/stores/woocommerce/cart/legacy-events';
 import {
 	isItemDataEntryVisible,
 	isLastVisibleEntry,
