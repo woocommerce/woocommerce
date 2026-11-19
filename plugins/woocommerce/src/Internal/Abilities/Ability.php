@@ -28,7 +28,7 @@ class Ability extends \WP_Ability {
 	 *
 	 * Invalid input stays unchanged, so validate_input() refuses it as before.
 	 *
-	 * Remove this override, prepare_input(), sanitize_input() and get_input_error()
+	 * Remove this override, prepare_input(), sanitize_input(), core_prepares_input() and get_input_error()
 	 * when WooCommerce requires WordPress 7.2.
 	 *
 	 * @since 11.4.0
@@ -38,7 +38,7 @@ class Ability extends \WP_Ability {
 	 */
 	final public function normalize_input( $input = null ) {
 		$input = parent::normalize_input( $input );
-		if ( method_exists( \WP_Ability::class, 'prepare_input' ) || null === $input || is_wp_error( $input ) || is_wp_error( $this->validate_input( $input ) ) ) {
+		if ( self::core_prepares_input() || null === $input || is_wp_error( $input ) || is_wp_error( $this->validate_input( $input ) ) ) {
 			return $input;
 		}
 
@@ -65,7 +65,7 @@ class Ability extends \WP_Ability {
 		}
 
 		// On older Core, this class's normalize_input() override already sanitizes before execute() validates.
-		return method_exists( \WP_Ability::class, 'prepare_input' ) ? $this->sanitize_input( $input ) : $input;
+		return self::core_prepares_input() ? $this->sanitize_input( $input ) : $input;
 	}
 
 	/**
@@ -101,6 +101,15 @@ class Ability extends \WP_Ability {
 		}
 
 		return $sanitized;
+	}
+
+	/**
+	 * Check whether WordPress prepares the ability input itself, as WordPress 7.2 and later do.
+	 *
+	 * @return bool
+	 */
+	private static function core_prepares_input(): bool {
+		return method_exists( \WP_Ability::class, 'prepare_input' );
 	}
 
 	/**
