@@ -40,7 +40,12 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		// Some products (variations) can have their stock managed by their parent. Get the correct object to be updated here.
 		$product_id_with_stock = $product->get_stock_managed_by_id();
 		$product_with_stock    = $product_id_with_stock !== $product->get_id() ? wc_get_product( $product_id_with_stock ) : $product;
-		$data_store            = WC_Data_Store::load( 'product' );
+
+		if ( ! $product_with_stock ) {
+			return false;
+		}
+
+		$data_store = WC_Data_Store::load( 'product' );
 
 		// Fire actions to let 3rd parties know the stock is about to be changed.
 		if ( $product_with_stock->is_type( ProductType::VARIATION ) ) {
