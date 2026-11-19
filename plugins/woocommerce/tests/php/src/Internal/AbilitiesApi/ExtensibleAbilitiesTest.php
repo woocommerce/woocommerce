@@ -2182,7 +2182,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should match the sanitized value, so an empty object that also fits an array branch takes the first anyOf branch and stays as it is under a oneOf.
+	 * @testdox Should match the sanitized value, so an empty array, whether meant as an object or a list, takes the first anyOf branch and stays as it is under a oneOf.
 	 */
 	public function test_an_empty_object_that_also_fits_an_array_branch_follows_the_sanitized_value(): void {
 		$items  = fn( string $keyword, array $branches ) => array(
@@ -2193,13 +2193,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$list   = array( 'type' => 'array' );
 		$output = $this->read_field_values(
 			array(
-				'one_of'              => array( $items( 'oneOf', array( $object, $list ) ), array( new \stdClass() ) ),
-				'any_of_object_first' => array( $items( 'anyOf', array( $object, $list ) ), array( new \stdClass() ) ),
-				'any_of_array_first'  => array( $items( 'anyOf', array( $list, $object ) ), array( new \stdClass() ) ),
+				'one_of'                   => array( $items( 'oneOf', array( $object, $list ) ), array( new \stdClass() ) ),
+				'any_of_object_first'      => array( $items( 'anyOf', array( $object, $list ) ), array( new \stdClass() ) ),
+				'any_of_object_first_list' => array( $items( 'anyOf', array( $object, $list ) ), array( array() ) ),
+				'any_of_array_first'       => array( $items( 'anyOf', array( $list, $object ) ), array( new \stdClass() ) ),
 			)
 		);
 
-		$this->assertSame( '{"one_of":[[]],"any_of_object_first":[{}],"any_of_array_first":[[]]}', wp_json_encode( $output ) );
+		$this->assertSame( '{"one_of":[[]],"any_of_object_first":[{}],"any_of_object_first_list":[{}],"any_of_array_first":[[]]}', wp_json_encode( $output ) );
 	}
 
 	/**
