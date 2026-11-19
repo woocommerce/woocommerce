@@ -4,7 +4,11 @@
 import clsx from 'clsx';
 import { withInstanceId } from '@wordpress/compose';
 import { useLayoutEffect, useMemo, useRef } from '@wordpress/element';
-import { animateCollapse, collapseCopy } from '@woocommerce/base-utils';
+import {
+	animateCollapse,
+	collapseCopy,
+	removeCollapseCopies,
+} from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -46,9 +50,14 @@ const RadioControlAccordion = ( {
 	// After a click or tap, the new content grows in while the space of the old content collapses. The old content
 	// unmounts at once, so its payment handlers stop, and only an empty box takes its place: gateway scripts could
 	// find a copy of their fields. Key presses and changes in code apply immediately.
+	const rootRef = useRef< HTMLDivElement >( null );
 	const contentRef = useRef< HTMLDivElement >( null );
 	const animateRef = useRef( false );
 	useLayoutEffect( () => {
+		// Space that an earlier click still collapses, in any option, goes too.
+		if ( ! animateRef.current ) {
+			removeCollapseCopies( rootRef.current );
+		}
 		animateCollapse( contentRef.current, true, animateRef.current );
 		animateRef.current = false;
 	}, [ selected ] );
@@ -58,6 +67,7 @@ const RadioControlAccordion = ( {
 	}
 	return (
 		<div
+			ref={ rootRef }
 			className={ clsx(
 				'wc-block-components-radio-control',
 				{
