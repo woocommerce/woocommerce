@@ -522,7 +522,7 @@ class MyAccountEndpoint {
 			'<address>%s</address>',
 			sprintf(
 				/* translators: %s: email address the verification email was sent to. */
-				__( 'Verification email sent to "%s". Please check your inbox!', 'woocommerce' ),
+				esc_html__( 'Verification email sent to "%s". Please check your inbox!', 'woocommerce' ),
 				esc_html( $notification->get_user_email() )
 			)
 		);
