@@ -142,133 +142,40 @@ describe( 'woocommerce/motion-safe', () => {
 
 	describe( 'Sass variables in motion-state() and motion-transition', () => {
 		it.each( [
-			[ 'a fade', `$state: opacity;\n${ fade( '$state' ) }` ],
-			[
-				'a fade before a later movement assignment',
-				`$state: opacity;\n${ fade( '$state' ) }\n$state: transform;`,
-			],
-			[
-				'the last assignment before the use',
-				`$state: transform;\n$state: opacity;\n${ fade( '$state' ) }`,
-			],
-			[
-				'!default when unset',
-				`$state: opacity !default;\n${ fade( '$state' ) }`,
-			],
-			[
-				'!default after null',
-				`$state: null;\n$state: opacity !default;\n.a { @include motion-transition($state: $state); }`,
-			],
-			[
-				'!default that keeps an existing fade',
-				`$state: opacity;\n$state: transform !default;\n${ fade( '$state' ) }`,
-			],
-			[
-				'a local fade that shadows the root',
-				`$state: transform;\n.a { $state: opacity; transition: motion-state($state); }`,
-			],
 			[
 				'a mixin parameter',
 				'@mixin m($state: ()) { transition: motion-state($state); }',
 			],
 			[
-				'a mixin parameter with a later !default',
-				'@mixin m($state: ()) { $state: transform !default; transition: motion-state($state); }',
+				'a mixin parameter forwarded to motion-transition',
+				'@mixin m($state: ()) { @include motion-transition($state: $state); }',
 			],
 			[
-				'a mixin that only reads fades',
-				`$state: opacity;\n@mixin m { transition: motion-state($state); }\n@include m;`,
-			],
-			[
-				'a chain of variables',
-				`$a: opacity;\n$b: $a, color;\n${ fade( '$b' ) }`,
-			],
-			[
-				'a fade assigned in @if',
-				`$state: opacity;\n@if true {\n\t$state: color;\n}\n${ fade( '$state' ) }`,
-			],
-			[
-				'!default in @if that keeps the value',
-				`$state: opacity;\n@if true {\n\t$state: transform !default;\n}\n${ fade( '$state' ) }`,
-			],
-			[
-				'an assignment in @if after the use',
-				`$state: opacity;\n${ fade( '$state' ) }\n@if true {\n\t$state: transform;\n}`,
-			],
-			[
-				'a use inside @if after its assignment',
-				`$state: transform;\n@if true {\n\t$state: opacity;\n\t${ fade( '$state' ) }\n}`,
-			],
-			[
-				'a local assignment in a rule inside @if',
-				`$state: opacity;\n@if true {\n\t.other {\n\t\t$state: transform;\n\t}\n}\n${ fade( '$state' ) }`,
-			],
-			[
-				'an @each binding of fades',
-				`@each $state in opacity, color {\n\t${ fade( '$state' ) }\n}`,
+				'a mixin parameter in a nested rule',
+				'@mixin m($state: ()) { .a { transition: motion-state($state...); } }',
 			],
 		] )( 'allows %s', ( _, code ) => {
 			expect( lint( code ) ).toEqual( [] );
 		} );
 
 		it.each( [
-			[ 'a movement', `$state: transform;\n${ fade( '$state' ) }` ],
+			[ 'a root variable', `$state: opacity;\n${ fade( '$state' ) }` ],
 			[
-				'a movement before a later fade assignment',
-				`$state: transform;\n${ fade( '$state' ) }\n$state: opacity;`,
-			],
-			[
-				'!default that keeps an existing movement',
-				`$state: transform;\n$state: opacity !default;\n.a { @include motion-transition($state: $state); }`,
-			],
-			[
-				'a local !default that keeps a root movement',
-				`$state: transform;\n.a { $state: opacity !default; transition: motion-state($state); }`,
-			],
-			[
-				'a local assignment after the use',
-				`$state: transform;\n.a { transition: motion-state($state); $state: opacity; }`,
-			],
-			[
-				'a movement after a mixin parameter',
-				'@mixin m($state: ()) { $state: transform; transition: motion-state($state); }',
-			],
-			[
-				'a movement assigned after a mixin that reads it',
-				`$state: opacity;\n@mixin m { transition: motion-state($state); }\n$state: transform;\n@include m;`,
+				'a root variable in motion-transition',
+				'$state: opacity;\n.a { @include motion-transition($state: $state); }',
 			],
 			[ 'an unknown variable', fade( '$nope' ) ],
 			[
-				'a variable that refers to itself',
-				`$a: $a;\n${ fade( '$a' ) }`,
+				'a variable that is not a parameter of the mixin',
+				'$state: opacity;\n@mixin m { transition: motion-state($state); }',
 			],
 			[
-				'a movement assigned in @if',
-				`$state: opacity;\n@if true {\n\t$state: transform;\n}\n${ fade( '$state' ) }`,
+				'a mixin parameter that the mixin assigns',
+				'@mixin m($state: ()) { $state: transform; transition: motion-state($state); }',
 			],
 			[
-				'a movement assigned in @else',
-				`$state: opacity;\n@if $x {\n\t$state: color;\n} @else {\n\t$state: transform;\n}\n${ fade( '$state' ) }`,
-			],
-			[
-				'a movement assigned in @each',
-				`$state: opacity;\n@each $p in a, b {\n\t$state: transform;\n}\n${ fade( '$state' ) }`,
-			],
-			[
-				'!default after a local assignment in @if',
-				`@if true {\n\t$state: opacity;\n}\n$state: transform !default;\n${ fade( '$state' ) }`,
-			],
-			[
-				'an @each binding of a movement',
-				`$state: opacity;\n@each $state in transform {\n\t.a { transition: motion-state($state); }\n}`,
-			],
-			[
-				'an @each binding of a map',
-				`@each $state, $x in $map {\n\t${ fade( '$state' ) }\n}`,
-			],
-			[
-				'a @for binding',
-				`@for $state from 1 through 2 {\n\t${ fade( '$state' ) }\n}`,
+				'a mixin parameter that a loop rebinds',
+				'@mixin m($state: ()) { @each $state in transform { .a { transition: motion-state($state); } } }',
 			],
 		] )( 'rejects %s', ( _, code ) => {
 			expect( lint( code ) ).toHaveLength( 1 );

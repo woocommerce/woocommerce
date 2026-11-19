@@ -25,21 +25,6 @@
 	}
 }
 
-// Fades the text only. A spinner inside it, drawn with `color`, stays visible.
-@keyframes wc-fade-text-out {
-	to {
-		-webkit-text-fill-color: transparent;
-	}
-}
-
-// Keeps content visible while it fades out, after its parent hides it.
-@keyframes wc-hold-visible {
-	from,
-	to {
-		visibility: visible;
-	}
-}
-
 @keyframes wc-rise {
 	from {
 		translate: 0 4px;

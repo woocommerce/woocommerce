@@ -6,6 +6,7 @@
  * Times in these declarations must use duration tokens, except in an item that loops (`infinite`).
  * See docs/contributors/motion.md.
  */
+const { list } = require( 'postcss' );
 const stylelint = require( 'stylelint' );
 
 const {
@@ -56,33 +57,12 @@ const FADE_PROPERTIES = new Set( [
 ] );
 
 // Splits a comma-separated value. Commas inside parentheses, such as in `cubic-bezier( … )`, do not split it.
-const splitList = ( value ) => {
-	const items = [ '' ];
-	let depth = 0;
-	for ( const character of value ) {
-		if ( character === '(' ) {
-			depth++;
-		} else if ( character === ')' ) {
-			depth--;
-		}
-		if ( character === ',' && depth === 0 ) {
-			items.push( '' );
-		} else {
-			items[ items.length - 1 ] += character;
-		}
-	}
-	return items.map( ( item ) => item.trim() ).filter( Boolean );
-};
+const splitList = ( value ) => list.comma( value ).filter( Boolean );
 
-const FADE_KEYFRAMES = new Set( [
-	'wc-fade-in',
-	'wc-fade-out',
-	'wc-fade-text-out',
-	'wc-hold-visible',
-] );
+const FADE_KEYFRAMES = new Set( [ 'wc-fade-in', 'wc-fade-out' ] );
 
 // Helpers from `_motion.scss`. `motion-hold()` jumps at the end (`step-end`), so it never animates any property.
-// `motion-state()` animates, so each property, or the value of each Sass variable, must fade or change colour.
+// `motion-state()` animates, so each property must fade or change colour.
 const isFadeFunction = ( item, decl ) => {
 	if ( ! item.endsWith( ')' ) ) {
 		return false;
@@ -94,7 +74,7 @@ const isFadeFunction = ( item, decl ) => {
 		return false;
 	}
 	return splitList( item.slice( 'motion-state('.length, -1 ) ).every(
-		( property ) => isFadeProperty( property, decl, new Set() )
+		( property ) => isFadeProperty( property, decl )
 	);
 };
 
@@ -109,9 +89,9 @@ const mixinParameters = ( { params } ) => {
 	);
 };
 
-// The items of a Sass list value, for example `opacity` and `color` in `(opacity, color) !default`.
+// The items of a Sass list value, for example `opacity` and `color` in `(opacity, color)`.
 const listTokens = ( value ) =>
-	[ ...value.replace( '!default', ' ' ) ]
+	[ ...value ]
 		.map( ( character ) =>
 			'(),'.includes( character ) || character.trim() === ''
 				? ' '
@@ -121,154 +101,38 @@ const listTokens = ( value ) =>
 		.split( ' ' )
 		.filter( Boolean );
 
-const MIXIN_PARAMETER = Symbol( 'mixin parameter' );
-const UNKNOWN = Symbol( 'unknown' );
+// Whether `item` assigns the Sass variable `name`, directly or as an `@each` or `@for` loop variable.
+const assigns = ( item, name ) =>
+	( item.type === 'decl' && item.prop === name ) ||
+	( item.type === 'atrule' &&
+		[ 'each', 'for' ].includes( item.name ) &&
+		item.params
+			.split( /\s+(?:in|from)\s+/ )[ 0 ]
+			.split( ',' )
+			.map( ( variable ) => variable.trim() )
+			.includes( name ) );
 
-// Blocks that can update a variable of the scope around them. Any other block, such as a rule or `@media`, has its
-// own scope, so an assignment inside it is local.
-const FLOW_CONTROL = new Set( [ 'if', 'else', 'each', 'for', 'while' ] );
-
-const isDefault = ( { value } ) => /!default\b/.test( value );
-
-const isNull = ( value ) =>
-	typeof value === 'object' &&
-	value.value.replace( /!default\b/, '' ).trim() === 'null';
-
-// The value that a loop binds to `name`, such as `opacity, color` in `@each $state in opacity, color`. It is null
-// when the loop does not bind `name`, and `UNKNOWN` when the value cannot be read, such as for `@for` or a map.
-const loopBinding = ( name, node ) => {
-	if ( node.type !== 'atrule' ) {
-		return null;
-	}
-	if ( node.name === 'for' ) {
-		return node.params.trim().split( /\s/ )[ 0 ] === name ? UNKNOWN : null;
-	}
-	const match =
-		node.name === 'each' &&
-		/^([\s\S]+?)\s+in\s+([\s\S]+)$/.exec( node.params.trim() );
-	const names = match
-		? match[ 1 ].split( ',' ).map( ( item ) => item.trim() )
-		: [];
-	if ( ! names.includes( name ) ) {
-		return null;
-	}
-	return names.length === 1 ? { value: match[ 2 ], context: node } : UNKNOWN;
-};
-
-// An assignment replaces the possible values. With `!default`, it only replaces a value that is missing or `null`.
-const applyAssignment = ( decl, values ) => {
-	const assigned = { value: decl.value, context: decl };
-	if ( ! isDefault( decl ) ) {
-		return [ assigned ];
-	}
-	const kept = values.filter( ( value ) => ! isNull( value ) );
-	return values.length > 0 && kept.length === values.length
-		? values
-		: [ ...kept, assigned ];
-};
-
-// Applies the assignments in `nodes`, in order, to the possible values of the variable. An `@if` or loop may run or
-// not, so its result adds to the values before it. It only updates a variable that already exists, because an
-// assignment inside it would otherwise be local.
-const applyAssignments = ( name, nodes, values ) =>
-	nodes.reduce( ( current, item ) => {
-		if ( item.type === 'decl' && item.prop === name ) {
-			return applyAssignment( item, current );
-		}
-		if (
-			item.type === 'atrule' &&
-			FLOW_CONTROL.has( item.name ) &&
-			current.length > 0 &&
-			loopBinding( name, item ) === null
-		) {
-			const after = applyAssignments( name, item.nodes || [], current );
-			return [
-				...current,
-				...after.filter( ( value ) => ! current.includes( value ) ),
-			];
-		}
-		return current;
-	}, values );
-
-// A mixin reads the variables around it when it is included, which can be after any of their assignments, so each
-// assignment in the scopes around the mixin is a possible value.
-const includeTimeValues = ( name, mixin ) => {
-	const values = [];
-	const collect = ( nodes ) =>
-		nodes.forEach( ( item ) => {
-			if ( item.type === 'decl' && item.prop === name ) {
-				values.push( { value: item.value, context: item } );
-			} else if (
-				item.type === 'atrule' &&
-				FLOW_CONTROL.has( item.name ) &&
-				loopBinding( name, item ) === null
-			) {
-				collect( item.nodes || [] );
-			}
-		} );
-	for ( let scope = mixin.parent; scope; scope = scope.parent ) {
-		collect( scope.nodes );
-	}
-	return values;
-};
-
-// The values that a Sass variable can have where `node` uses it, read as Sass does. Each value has the node to
-// resolve its own variables from. The list holds `MIXIN_PARAMETER` for a parameter of the enclosing mixin, and
-// `UNKNOWN` for a value that cannot be read. It is empty when the variable has no value.
-const resolveVariable = ( name, node ) => {
-	const scopes = [];
-	let values = [];
-	for ( let child = node; child.parent; child = child.parent ) {
-		const scope = child.parent;
-		scopes.unshift( scope.nodes.slice( 0, scope.nodes.indexOf( child ) ) );
-		const binding = loopBinding( name, scope );
-		if ( binding !== null ) {
-			values = [ binding ];
-			break;
-		}
-		if ( scope.type === 'atrule' && scope.name === 'mixin' ) {
-			values = mixinParameters( scope ).includes( name )
-				? [ MIXIN_PARAMETER ]
-				: includeTimeValues( name, scope );
-			break;
-		}
-	}
-	return scopes.reduce(
-		( current, nodes ) => applyAssignments( name, nodes, current ),
-		values
-	);
-};
-
-// A property, or a Sass variable whose possible values list only fade or color properties. The variable must be
-// assigned in the same file, in the root or a block that encloses `node`. A parameter of the enclosing mixin passes,
-// because the `motion-transition` mixin forwards its `$state` list. Other variables fail, because their value is
-// unknown.
-const isFadeProperty = ( property, node, seen ) => {
+// A property that only fades or changes colour, or a parameter of the enclosing mixin that the mixin does not assign,
+// such as the `$state` that `motion-transition` forwards. Other Sass variables fail, because the lint does not work out
+// their value: list the properties instead.
+const isFadeProperty = ( property, node ) => {
 	if ( ! property.startsWith( '$' ) ) {
 		return FADE_PROPERTIES.has( property.toLowerCase() );
 	}
 	const name = property.replace( '...', '' );
-	if ( seen.has( name ) ) {
+	let mixin = node.parent;
+	while ( mixin && ! ( mixin.type === 'atrule' && mixin.name === 'mixin' ) ) {
+		mixin = mixin.parent;
+	}
+	if ( ! mixin || ! mixinParameters( mixin ).includes( name ) ) {
 		return false;
 	}
-	seen.add( name );
-	const values = resolveVariable( name, node );
-	return (
-		values.length > 0 &&
-		values.every( ( value ) => {
-			if ( value === MIXIN_PARAMETER || value === UNKNOWN ) {
-				return value === MIXIN_PARAMETER;
-			}
-			const tokens = listTokens( value.value );
-			const valueSeen = new Set( seen );
-			return (
-				tokens.length > 0 &&
-				tokens.every( ( token ) =>
-					isFadeProperty( token, value.context, valueSeen )
-				)
-			);
-		} )
-	);
+	let isAssigned = false;
+	mixin.walk( ( item ) => {
+		isAssigned = assigns( item, name );
+		return ! isAssigned;
+	} );
+	return ! isAssigned;
 };
 
 // A `transition` or `transition-property` that only fades or changes color, or an `animation` that only fades.
@@ -393,7 +257,7 @@ const ruleFunction = ( primary ) => ( root, result ) => {
 			state === null ||
 			isGuarded( include ) ||
 			listTokens( state ).every( ( token ) =>
-				isFadeProperty( token, include, new Set() )
+				isFadeProperty( token, include )
 			)
 		) {
 			return;

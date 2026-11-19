@@ -73,14 +73,13 @@ Use the helpers in `assets/css/abstracts/_motion.scss`. Do not write `transition
 | Helper | Use | Example |
 |--------|-----|---------|
 | `transition: motion-state( … )` | A state change: 200ms, subtle. | `transition: motion-state( opacity, box-shadow );` |
-| `@include motion-transition( $state, $move, $duration, $easing, $hold )` | A state change and movement. `$move` runs over `$duration` (default `lg`), only when motion is allowed. | `@include motion-transition( $state: opacity, $move: translate );` |
+| `@include motion-transition( $state, $move, $duration, $easing )` | A state change and movement. `$move` runs over `$duration` (default `lg`), only when motion is allowed. | `@include motion-transition( $state: opacity, $move: translate );` |
 | `motion-hold( … )` | Keeps a property, such as `visibility`, at its old value until a fade ends. | `transition: motion-state( opacity ), motion-hold( visibility );` |
 | `@include motion-enter( $keyframes, $duration, $delay )` | Content that appears. It fades in, and plays `$keyframes` (default `wc-rise`). | `@include motion-enter( wc-grow, md );` |
 | `@include motion-exit( $keyframes )` | Content that goes. It fades out over 200ms and keeps the end state until it unmounts. | `@include motion-exit( wc-shrink );` |
 | `@include motion-stagger( $keyframes )` | Sibling rows that enter 50ms apart. It counts rows with `sibling-index()`, and with `nth-child` in browsers that do not have it. | `@include motion-stagger;` |
 | `@include motion-fade-in` / `motion-fade-out` | A fade with no movement. | |
 | `@include motion-dim( $states )` | Dims the element while `$states` matches, such as `".is-disabled"`. | Cart rows, disabled radios |
-| `@include motion-spinner-swap` | A button that loads. The label fades out and the spinner grows in. | Place order, coupon Apply |
 | `@include motion-safe { … }` | Movement that the other helpers do not cover. | |
 
 `assets/css/style.scss` has the shared keyframes. `wc-fade-in` and `wc-fade-out` only fade. `wc-rise`, `wc-grow`, and `wc-shrink` move with `translate`, `scale`, and `filter`, so they combine with a fade and with the resting `transform` of an element.

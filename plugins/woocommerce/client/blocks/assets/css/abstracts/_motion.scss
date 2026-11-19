@@ -6,7 +6,6 @@
 
 // Woo motion constants that WPDS does not have.
 $wc-scale-press: 0.97;
-$wc-scale-pulse-peak: 1.05;
 $wc-scale-icon-from: 0.8;
 $wc-blur-icon: 4px;
 
@@ -52,14 +51,14 @@ $wc-stagger-cap: 7;
 }
 
 // Transitions $state as a state change. When motion is allowed, also transitions $move as movement over $duration.
-// $hold keeps properties at their old value until the fade ends. Empty lists are not written.
-@mixin motion-transition($state: (), $move: (), $duration: lg, $easing: expressive, $hold: ()) {
-	@if list.length($state) > 0 or list.length($hold) > 0 {
-		transition: motion-state($state...), motion-hold($hold...);
+// Empty lists are not written.
+@mixin motion-transition($state: (), $move: (), $duration: lg, $easing: expressive) {
+	@if list.length($state) > 0 {
+		transition: motion-state($state...);
 	}
 	@if list.length($move) > 0 {
 		@include motion-safe {
-			transition: motion-move($move, $duration, $easing), motion-state($state...), motion-hold($hold...);
+			transition: motion-move($move, $duration, $easing), motion-state($state...);
 		}
 	}
 }
@@ -103,20 +102,6 @@ $wc-stagger-cap: 7;
 		animation:
 			wc-fade-out motion-duration(md) motion-easing(subtle) forwards,
 			$keyframes motion-duration(md) motion-easing(expressive) forwards;
-	}
-}
-
-// A button that loads. The label text fades out, and the spinner grows in. The spinner is inside the
-// label, so only the text fill fades, and the label stays visible until the fade ends.
-@mixin motion-spinner-swap() {
-	.wc-block-components-button__text {
-		animation:
-			wc-fade-text-out motion-duration(md) motion-easing(subtle) forwards,
-			wc-hold-visible motion-duration(md);
-	}
-
-	.wc-block-components-spinner {
-		@include motion-enter(wc-grow, md);
 	}
 }
 
