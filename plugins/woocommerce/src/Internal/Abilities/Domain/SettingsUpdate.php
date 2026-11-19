@@ -99,7 +99,11 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 
 		$ids = array_column( $input['settings'], 'id' );
 		if ( count( $ids ) !== count( array_unique( $ids ) ) ) {
-			return self::invalid_value_error( array_values( array_unique( array_diff_assoc( $ids, array_unique( $ids ) ) ) ) );
+			return self::invalid_value_error(
+				array_values( array_unique( array_diff_assoc( $ids, array_unique( $ids ) ) ) ),
+				/* translators: %s: comma-separated setting IDs. */
+				__( 'These settings are named more than once: %s. Send each setting once. Nothing was saved.', 'woocommerce' )
+			);
 		}
 		$malformed = array();
 		foreach ( $input['settings'] as $item ) {
@@ -108,7 +112,11 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 			}
 		}
 		if ( $malformed ) {
-			return self::invalid_value_error( $malformed );
+			return self::invalid_value_error(
+				$malformed,
+				/* translators: %s: comma-separated setting IDs. */
+				__( 'These settings need exactly one of value or values: %s. Nothing was saved.', 'woocommerce' )
+			);
 		}
 
 		$denied = array();
@@ -205,22 +213,23 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 			$results[] = $result;
 		}
 
-		$hide_out_of_stock   = get_option( 'woocommerce_hide_out_of_stock_items' );
-		$flush_rewrite_rules = false;
+		$hide_out_of_stock = get_option( 'woocommerce_hide_out_of_stock_items' );
+		$download_method   = get_option( 'woocommerce_file_download_method' );
 		foreach ( $changes as $index => $change ) {
 			list( $setting, $value ) = $change;
 			self::save( $setting, $value );
 			$saved                      = SettingsQuery::get_value( $setting );
 			$results[ $index ]['value'] = true === rest_validate_value_from_schema( $saved, $value_schema ) ? $saved : $value;
-			$flush_rewrite_rules        = $flush_rewrite_rules || '_endpoint' === substr( $setting['id'], -9 );
 		}
-		// Endpoint slugs are rewrite rules, which the admin save flushes after every change.
-		if ( $flush_rewrite_rules ) {
-			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
-		}
+		// Endpoint slugs and the shop page feed rewrite rules, so like the admin save, queue a flush after every save.
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		// Term counts leave out hidden out-of-stock products, so the products settings save recounts them.
 		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) !== $hide_out_of_stock ) {
 			wc_recount_all_terms( false );
+		}
+		// The uploads .htaccess must match the download method: redirect needs direct access, the others must deny it.
+		if ( get_option( 'woocommerce_file_download_method' ) !== $download_method ) {
+			\WC_Admin_Settings::check_download_folder_protection();
 		}
 		// Cart sessions keep calculated shipping rates until this version changes, which the shipping and tax admin saves bump.
 		if ( in_array( $input['group'], array( 'shipping', 'tax' ), true ) ) {
@@ -263,6 +272,10 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 			$value = $value ? 'yes' : 'no';
 		} elseif ( is_int( $value ) || is_float( $value ) ) {
 			$value = (string) $value;
+		}
+		// The REST checkbox validator saves the default for "0", so it would not turn the checkbox off. An unset checkbox reads as "".
+		if ( 'checkbox' === $type && ! in_array( $value, array( 'yes', 'no', '' ), true ) ) {
+			return $invalid;
 		}
 		if ( is_array( $value ) !== ( in_array( $type, self::LIST_TYPES, true ) || 'relative_date_selector' === $type ) ) {
 			return $invalid;
@@ -436,14 +449,16 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 	/**
 	 * Names every refused ID in the message too, since MCP clients receive only the message.
 	 *
-	 * @param string[] $ids Setting IDs with invalid values.
+	 * @param string[]    $ids    Setting IDs with invalid values.
+	 * @param string|null $format Translated message with one %s for the IDs; defaults to the invalid values message.
 	 * @return \WP_Error
 	 */
-	private static function invalid_value_error( array $ids ): \WP_Error {
+	private static function invalid_value_error( array $ids, ?string $format = null ): \WP_Error {
+		/* translators: %s: comma-separated setting IDs. */
+		$format ??= __( 'These settings have invalid values: %s. Nothing was saved.', 'woocommerce' );
 		return new \WP_Error(
 			'woocommerce_ability_settings_invalid_value',
-			/* translators: %s: comma-separated setting IDs. */
-			sprintf( __( 'These settings have invalid values: %s. Nothing was saved.', 'woocommerce' ), implode( ', ', $ids ) ),
+			sprintf( $format, implode( ', ', $ids ) ),
 			array(
 				'status' => 400,
 				'ids'    => $ids,

@@ -474,10 +474,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					/* Translators: %s URL to tracking info screen. */
 					'desc_tip'      => sprintf( esc_html__( 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: %s.', 'woocommerce' ), $tracking_info_text ),
 					'id'            => 'woocommerce_allow_tracking',
-					'abilities'     => array(
-						'read'  => true,
-						'write' => true,
-					),
+					'abilities'     => array( 'read' => true ),
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',
 					'default'       => 'no',

@@ -198,6 +198,26 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse toggles that enable irreversible personal data removal or share usage data.
+	 * @testWith ["account", "woocommerce_erasure_request_removes_order_data"]
+	 *           ["account", "woocommerce_erasure_request_removes_download_data"]
+	 *           ["account", "woocommerce_allow_bulk_remove_personal_data"]
+	 *           ["advanced", "woocommerce_allow_tracking"]
+	 *
+	 * @param string $group Settings group.
+	 * @param string $id    Setting ID.
+	 */
+	public function test_refuses_privacy_consent_toggles( string $group, string $id ): void {
+		update_option( $id, 'no' );
+
+		$result = $this->sut->execute( $this->input( $group, array( $id => 'yes' ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_settings_not_writable', $result->get_error_code() );
+		$this->assertSame( 'no', get_option( $id ) );
+	}
+
+	/**
 	 * @testdox Should update an extension field registered directly on a custom group.
 	 */
 	public function test_updates_extension_group_field(): void {
@@ -259,6 +279,9 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	 * @testWith ["select", "not-an-option"]
 	 *           ["select", ["sandbox"]]
 	 *           ["checkbox", "maybe"]
+	 *           ["checkbox", 0]
+	 *           ["checkbox", "0"]
+	 *           ["checkbox", 1]
 	 *           ["text", true]
 	 *           ["number", "abc"]
 	 *           ["multiselect", ["sandbox", "unknown"]]
@@ -291,6 +314,8 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	 * @testdox Should save values in the stored form of their field type.
 	 * @testWith ["checkbox", true, "yes"]
 	 *           ["checkbox", false, "no"]
+	 *           ["checkbox", "yes", "yes"]
+	 *           ["checkbox", "no", "no"]
 	 *           ["number", 15, "15"]
 	 *           ["multiselect", ["live", "sandbox"], ["live", "sandbox"]]
 	 *           ["relative_date_selector", {"number": "3", "unit": "weeks"}, {"number": 3, "unit": "weeks"}]
@@ -436,6 +461,7 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_ability_settings_invalid_value', $result->get_error_code() );
 		$this->assertSame( array( 'woocommerce_currency' ), $result->get_error_data()['ids'] );
+		$this->assertSame( 'These settings need exactly one of value or values: woocommerce_currency. Nothing was saved.', $result->get_error_message() );
 		$this->assertSame( 'USD', get_option( 'woocommerce_currency' ) );
 	}
 
@@ -599,19 +625,26 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should queue a rewrite rules flush when an endpoint slug changes, and only then.
+	 * @testdox Should queue a rewrite rules flush after every save, including endpoint slug and shop page changes, but not after a refused one.
 	 */
-	public function test_endpoint_change_queues_rewrite_flush(): void {
+	public function test_save_queues_rewrite_flush(): void {
 		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
-
 		$this->sut->execute( $this->input( 'advanced', array( 'woocommerce_myaccount_orders_endpoint' => 'my-orders' ) ) );
-
 		$this->assertSame( 'my-orders', get_option( 'woocommerce_myaccount_orders_endpoint' ) );
+		$this->assertSame( 'yes', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
+
+		$shop = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+		$this->sut->execute( $this->input( 'products', array( 'woocommerce_shop_page_id' => $shop ) ) );
+		$this->assertSame( $shop, wc_get_page_id( 'shop' ) );
 		$this->assertSame( 'yes', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
 
 		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
 		$this->sut->execute( $this->input( 'general', array( 'woocommerce_currency' => 'EUR' ) ) );
+		$this->assertSame( 'yes', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
 
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+		$this->assertWPError( $this->sut->execute( $this->input( 'general', array( 'missing_field' => 'value' ) ) ) );
 		$this->assertSame( 'no', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
 	}
 
@@ -668,6 +701,27 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should rewrite the downloads folder protection when the file download method changes, and only then.
+	 */
+	public function test_download_method_change_updates_folder_protection(): void {
+		update_option( 'woocommerce_file_download_method', 'force' );
+		\WC_Admin_Settings::check_download_folder_protection();
+		$htaccess = wp_get_upload_dir()['basedir'] . '/woocommerce_uploads/.htaccess';
+
+		$this->sut->execute( $this->input( 'products', array( 'woocommerce_file_download_method' => 'redirect' ) ) );
+		$this->assertSame( 'Options -Indexes', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		$this->sut->execute( $this->input( 'products', array( 'woocommerce_file_download_method' => 'force' ) ) );
+		$this->assertSame( 'deny from all', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		file_put_contents( $htaccess, 'stale' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$this->sut->execute( $this->input( 'products', array( 'woocommerce_file_download_method' => 'force' ) ) );
+		$this->assertSame( 'stale', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+		\WC_Admin_Settings::check_download_folder_protection();
+	}
+
+	/**
 	 * @testdox Should refuse a batch that names the same setting twice.
 	 */
 	public function test_refuses_duplicate_ids(): void {
@@ -682,6 +736,7 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( array( 'woocommerce_currency' ), $result->get_error_data()['ids'] );
+		$this->assertSame( 'These settings are named more than once: woocommerce_currency. Send each setting once. Nothing was saved.', $result->get_error_message() );
 		$this->assertSame( 'USD', get_option( 'woocommerce_currency' ) );
 	}
 

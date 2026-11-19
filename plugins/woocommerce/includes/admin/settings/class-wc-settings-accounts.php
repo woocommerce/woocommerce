@@ -176,10 +176,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				/* Translators: %s URL to erasure request screen. */
 				'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should personal data within orders be retained or removed?', 'woocommerce' ), $erasure_text ),
 				'id'            => 'woocommerce_erasure_request_removes_order_data',
-				'abilities'     => array(
-					'read'  => true,
-					'write' => true,
-				),
+				'abilities'     => array( 'read' => true ),
 				'type'          => 'checkbox',
 				'default'       => 'no',
 				'checkboxgroup' => 'start',
@@ -190,10 +187,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				/* Translators: %s URL to erasure request screen. */
 				'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should access to downloadable files be revoked and download logs cleared?', 'woocommerce' ), $erasure_text ),
 				'id'            => 'woocommerce_erasure_request_removes_download_data',
-				'abilities'     => array(
-					'read'  => true,
-					'write' => true,
-				),
+				'abilities'     => array( 'read' => true ),
 				'type'          => 'checkbox',
 				'default'       => 'no',
 				'checkboxgroup' => '',
@@ -204,10 +198,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'desc'          => __( 'Allow personal data to be removed in bulk from orders', 'woocommerce' ),
 				'desc_tip'      => __( 'Adds an option to the orders screen for removing personal data in bulk. Note that removing personal data cannot be undone.', 'woocommerce' ),
 				'id'            => 'woocommerce_allow_bulk_remove_personal_data',
-				'abilities'     => array(
-					'read'  => true,
-					'write' => true,
-				),
+				'abilities'     => array( 'read' => true ),
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
 				'default'       => 'no',
