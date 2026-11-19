@@ -1,7 +1,11 @@
 /**
  * Internal dependencies
  */
-import { animateCollapse, collapseCopy } from '../animate-collapse';
+import {
+	animateCollapse,
+	collapseCopy,
+	removeCollapseCopies,
+} from '../animate-collapse';
 
 const NATURAL: Record< string, string > = {
 	height: '40px',
@@ -342,5 +346,35 @@ describe( 'collapseCopy', () => {
 			[ '25px' ],
 			[ '40px' ],
 		] );
+	} );
+} );
+
+describe( 'removeCollapseCopies', () => {
+	afterEach( () => {
+		jest.restoreAllMocks();
+		document.body.innerHTML = '';
+		// @ts-expect-error The fake is not part of jsdom.
+		delete HTMLElement.prototype.getAnimations;
+	} );
+
+	it( 'removes every copy that still collapses inside the container', () => {
+		const { element: first } = createElement();
+		const { element: second } = createElement();
+		const firstOption = document.createElement( 'div' );
+		const secondOption = document.createElement( 'div' );
+		firstOption.append( first );
+		secondOption.append( second );
+		const container = document.createElement( 'div' );
+		container.append( firstOption, secondOption );
+		document.body.append( container );
+
+		collapseCopy( first, { empty: true } );
+		collapseCopy( second, { empty: true } );
+		first.remove();
+		second.remove();
+		expect( container.querySelectorAll( '[inert]' ) ).toHaveLength( 2 );
+
+		removeCollapseCopies( container );
+		expect( container.querySelectorAll( '[inert]' ) ).toHaveLength( 0 );
 	} );
 } );
