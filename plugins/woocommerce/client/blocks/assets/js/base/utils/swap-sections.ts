@@ -1,7 +1,11 @@
 /**
  * Internal dependencies
  */
-import { animateCollapse, inertCopy } from './animate-collapse';
+import {
+	animateCollapse,
+	clearInlineStyle,
+	inertCopy,
+} from './animate-collapse';
 import { whenAnimationsEnd } from './when-animations-end';
 
 // The `motion-swap` mixin styles the container, the copies, and the sections by these attributes.
@@ -10,8 +14,8 @@ const COPY = 'data-wc-swap-copy';
 const ENTERING = 'data-wc-swap-in';
 const AFTER = 'data-wc-swap-after';
 
-// The motion takes 400ms. After this time, a swap ends even if the browser never reports the end of an animation.
-const SAFETY_TIMEOUT = 1000;
+// After this time, a motion helper ends even if the browser never reports the end of an animation. A swap takes 400ms.
+export const MOTION_SAFETY_TIMEOUT = 1000;
 
 type Place = { top: number; left: number; width: number; opacity: string };
 
@@ -34,15 +38,6 @@ const sectionsOf = ( container: HTMLElement ) =>
 		( child ): child is HTMLElement =>
 			child instanceof HTMLElement && ! child.hasAttribute( COPY )
 	);
-
-const removeStyle = ( element: HTMLElement, property: string ) => {
-	element.style.removeProperty( property );
-	if ( element.style.length === 0 ) {
-		// Chrome writes the cleared declarations back as `style=""` when nothing has read the attribute since.
-		element.getAttribute( 'style' );
-		element.removeAttribute( 'style' );
-	}
-};
 
 // Runs `callback` when the animations of all `elements` end. Returns a function that cancels it.
 const whenAllAnimationsEnd = (
@@ -231,7 +226,7 @@ export const playSwap = ( snapshot: SwapSnapshot ) => {
 		entering.forEach( ( section ) => section.removeAttribute( ENTERING ) );
 		after.forEach( ( section ) => {
 			section.removeAttribute( AFTER );
-			removeStyle( section, 'translate' );
+			clearInlineStyle( section, 'translate' );
 		} );
 		if ( removeCopies ) {
 			// Includes the copies of a swap that this one turned around, which still fade out.
@@ -260,9 +255,9 @@ export const playSwap = ( snapshot: SwapSnapshot ) => {
 		container.getBoundingClientRect();
 		after.forEach( ( section ) => {
 			section.setAttribute( AFTER, '' );
-			removeStyle( section, 'translate' );
+			clearInlineStyle( section, 'translate' );
 		} );
-		removeStyle( container, 'height' );
+		clearInlineStyle( container, 'height' );
 		animateCollapse( container, true, true, { height } );
 		cancels.push(
 			whenAllAnimationsEnd( [ container, ...entering, ...after ], () =>
@@ -281,7 +276,10 @@ export const playSwap = ( snapshot: SwapSnapshot ) => {
 	copies.forEach( ( copy ) =>
 		whenAnimationsEnd( copy, () => copy.remove() )
 	);
-	const safety = window.setTimeout( () => stop( true ), SAFETY_TIMEOUT );
+	const safety = window.setTimeout(
+		() => stop( true ),
+		MOTION_SAFETY_TIMEOUT
+	);
 	cancels.push( () => window.clearTimeout( safety ) );
 	running.set( container, stop );
 	frame = requestAnimationFrame( keepHolding );
