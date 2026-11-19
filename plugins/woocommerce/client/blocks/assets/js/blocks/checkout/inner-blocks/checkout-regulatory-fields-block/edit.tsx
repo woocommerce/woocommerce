@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
+import { Notice } from '@wordpress/components';
 import { FormStepBlock } from '@woocommerce/blocks/checkout/form-step';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import clsx from 'clsx';
@@ -26,11 +28,6 @@ export const Edit = ( {
 } ) => {
 	const fields = useRegulatoryFields();
 
-	// The editor previews a sample cart, which no regulatory field applies to.
-	if ( fields.length === 0 ) {
-		return null;
-	}
-
 	return (
 		<FormStepBlock
 			setAttributes={ setAttributes }
@@ -40,9 +37,19 @@ export const Edit = ( {
 				attributes?.className
 			) }
 		>
-			<Noninteractive>
-				<Block />
-			</Noninteractive>
+			{ /* The editor previews a sample cart, which no regulatory field applies to, so explain when shoppers see the section. */ }
+			{ fields.length === 0 ? (
+				<Notice status="info" isDismissible={ false }>
+					{ __(
+						'Shoppers see this section only when their order needs extra information by law, such as the CPF/CNPJ for orders delivered to Brazil.',
+						'woocommerce'
+					) }
+				</Notice>
+			) : (
+				<Noninteractive>
+					<Block />
+				</Noninteractive>
+			) }
 		</FormStepBlock>
 	);
 };
