@@ -106,7 +106,7 @@ module.exports = {
 		'@woocommerce/test-utils/msw': 'tests/js/config/msw-setup.js',
 		'^@woocommerce/entities/(.*)$': 'packages/internal/entities/$1',
 		'^@woocommerce/entities$': 'packages/internal/entities',
-		'^@woocommerce/stores/woocommerce/cart$':
+		'^@woocommerce/stores/woocommerce$':
 			'assets/js/base/stores/woocommerce/index',
 		'^@woocommerce/stores/woocommerce/products$':
 			'assets/js/base/stores/products',

@@ -89,21 +89,26 @@ final class DatabaseTransaction {
 		$outermost   = ! self::$watching;
 		$autocommit  = 0 === $level && self::is_autocommit_on();
 		self::$depth = $level;
-		if ( $autocommit ) {
-			self::query( 'SET autocommit = 0' );
-		}
-		self::start();
-		if ( $outermost ) {
-			self::$lost     = false;
-			self::$watching = true;
-			add_filter( 'query', array( self::class, 'watch' ) );
-		}
+		$started     = false;
 		try {
+			if ( $autocommit ) {
+				self::query( 'SET autocommit = 0' );
+			}
+			self::start();
+			$started = true;
+			if ( $outermost ) {
+				self::$lost     = false;
+				self::$watching = true;
+				add_filter( 'query', array( self::class, 'watch' ) );
+			}
 			$result = $callback();
 			self::end( $level, ! is_wp_error( $result ) );
 			$lost = self::$lost;
 		} catch ( \Throwable $e ) {
-			self::end( $level, false );
+			// Rolling back to a savepoint that was never set is itself a database error.
+			if ( $started ) {
+				self::end( $level, false );
+			}
 			throw $e;
 		} finally {
 			if ( $outermost ) {

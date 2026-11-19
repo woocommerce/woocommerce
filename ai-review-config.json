@@ -157,7 +157,8 @@
 		"plugins/*/changelog/*",
 		"plugins/woocommerce/client/blocks/changelog/*",
 		"packages/js/*/changelog/*",
-		"packages/php/*/changelog/*"
+		"packages/php/*/changelog/*",
+		".ai/review/evals/**"
 	],
 	"guidelines": [
 		{
@@ -179,7 +180,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/hook-payload-contract/cases.json"
 		},
 		{
 			"name": "hook-firing-scope",
@@ -211,7 +213,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/hook-firing-scope/cases.json"
 		},
 		{
 			"name": "hook-callback-reentrancy",
@@ -228,7 +231,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/hook-callback-reentrancy/cases.json"
 		},
 		{
 			"name": "php-loose-type-juggling",
@@ -262,7 +266,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/php-loose-type-juggling/cases.json"
 		},
 		{
 			"name": "public-php-api-bc",
@@ -287,7 +292,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/public-php-api-bc/cases.json"
 		},
 		{
 			"name": "upgrade-time-class-load",
@@ -314,7 +320,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/upgrade-time-class-load/cases.json"
 		},
 		{
 			"name": "action-scheduler-lifecycle",
@@ -343,7 +350,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/action-scheduler-lifecycle/cases.json"
 		},
 		{
 			"name": "request-input-validation",
@@ -379,7 +387,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/request-input-validation/cases.json"
 		},
 		{
 			"name": "missing-object-deref",
@@ -415,7 +424,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/missing-object-deref/cases.json"
 		},
 		{
 			"name": "meta-option-value-semantics",
@@ -447,7 +457,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/meta-option-value-semantics/cases.json"
 		},
 		{
 			"name": "hpos-sync-on-read",
@@ -462,7 +473,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/hpos-sync-on-read/cases.json"
 		},
 		{
 			"name": "order-storage-access",
@@ -543,7 +555,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/migration-upgrade-state/cases.json"
 		},
 		{
 			"name": "proxy-predicate-inference",
@@ -571,7 +584,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/proxy-predicate-inference/cases.json"
 		},
 		{
 			"name": "wc-query-shop-front-page",
@@ -586,7 +600,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/wc-query-shop-front-page/cases.json"
 		},
 		{
 			"name": "request-lifecycle-state",
@@ -619,7 +634,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/request-lifecycle-state/cases.json"
 		},
 		{
 			"name": "template-and-js-default",
@@ -645,7 +661,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/template-and-js-default/cases.json"
 		},
 		{
 			"name": "rest-response-contract",
@@ -678,7 +695,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/rest-response-contract/cases.json"
 		},
 		{
 			"name": "session-cart-persistence",
@@ -715,7 +733,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/session-cart-persistence/cases.json"
 		},
 		{
 			"name": "check-then-write-race",
@@ -748,7 +767,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/check-then-write-race/cases.json"
 		},
 		{
 			"name": "order-totals-recalc",
@@ -787,7 +807,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/order-totals-recalc/cases.json"
 		},
 		{
 			"name": "shipping-rate-pipeline",
@@ -824,7 +845,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/shipping-rate-pipeline/cases.json"
 		},
 		{
 			"name": "sql-clause-filter-contract",
@@ -854,7 +876,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/sql-clause-filter-contract/cases.json"
 		},
 		{
 			"name": "cache-invalidation-and-poisoning",
@@ -886,7 +909,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/cache-invalidation-and-poisoning/cases.json"
 		},
 		{
 			"name": "perf-refactor-semantic-drift",
@@ -914,14 +938,16 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/perf-refactor-semantic-drift/cases.json"
 		},
 		{
 			"name": "fix-and-test-verification",
 			"file": ".ai/review/guidelines/fix-and-test-verification.md",
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/fix-and-test-verification/cases.json"
 		},
 		{
 			"name": "perf-sql-query-shape",
@@ -954,7 +980,8 @@
 			],
 			"personas": [
 				"performance"
-			]
+			],
+			"evals": ".ai/review/evals/perf-sql-query-shape/cases.json"
 		},
 		{
 			"name": "perf-cache-option-priming",
@@ -988,7 +1015,8 @@
 			],
 			"personas": [
 				"performance"
-			]
+			],
+			"evals": ".ai/review/evals/perf-cache-option-priming/cases.json"
 		},
 		{
 			"name": "perf-hot-path-eager-work",
@@ -1021,7 +1049,8 @@
 			],
 			"personas": [
 				"performance"
-			]
+			],
+			"evals": ".ai/review/evals/perf-hot-path-eager-work/cases.json"
 		},
 		{
 			"name": "perf-blocking-remote-call",
@@ -1085,7 +1114,8 @@
 			"personas": [
 				"frontend",
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/script-handle-loading-contract/cases.json"
 		},
 		{
 			"name": "classic-jquery-contract",
@@ -1114,7 +1144,8 @@
 			],
 			"personas": [
 				"frontend"
-			]
+			],
+			"evals": ".ai/review/evals/classic-jquery-contract/cases.json"
 		},
 		{
 			"name": "js-public-api-contract",
@@ -1153,7 +1184,8 @@
 			"personas": [
 				"frontend",
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/js-public-api-contract/cases.json"
 		},
 		{
 			"name": "checkout-extensibility-payload",
@@ -1191,7 +1223,8 @@
 			"personas": [
 				"frontend",
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/checkout-extensibility-payload/cases.json"
 		},
 		{
 			"name": "css-layout-regression",
@@ -1205,7 +1238,8 @@
 			],
 			"personas": [
 				"frontend"
-			]
+			],
+			"evals": ".ai/review/evals/css-layout-regression/cases.json"
 		},
 		{
 			"name": "js-request-failure-handling",
@@ -1239,7 +1273,8 @@
 			],
 			"personas": [
 				"frontend"
-			]
+			],
+			"evals": ".ai/review/evals/js-request-failure-handling/cases.json"
 		},
 		{
 			"name": "react-render-and-keyboard",
@@ -1270,7 +1305,8 @@
 			],
 			"personas": [
 				"frontend"
-			]
+			],
+			"evals": ".ai/review/evals/react-render-and-keyboard/cases.json"
 		},
 		{
 			"name": "i18n-string-identity",
@@ -1308,7 +1344,8 @@
 			"personas": [
 				"frontend",
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/i18n-string-identity/cases.json"
 		},
 		{
 			"name": "sec-sql-prepare-and-identifiers",
@@ -1341,7 +1378,8 @@
 			],
 			"personas": [
 				"security"
-			]
+			],
+			"evals": ".ai/review/evals/sec-sql-prepare-and-identifiers/cases.json"
 		},
 		{
 			"name": "sec-rest-and-ajax-permissions",
@@ -1370,7 +1408,8 @@
 			],
 			"personas": [
 				"security"
-			]
+			],
+			"evals": ".ai/review/evals/sec-rest-and-ajax-permissions/cases.json"
 		},
 		{
 			"name": "sec-order-cart-ownership",
@@ -1402,7 +1441,8 @@
 			],
 			"personas": [
 				"security"
-			]
+			],
+			"evals": ".ai/review/evals/sec-order-cart-ownership/cases.json"
 		},
 		{
 			"name": "sec-sanitize-and-escape",
@@ -1440,7 +1480,8 @@
 			],
 			"personas": [
 				"security"
-			]
+			],
+			"evals": ".ai/review/evals/sec-sanitize-and-escape/cases.json"
 		},
 		{
 			"name": "sec-auth-tokens-and-cookies",
@@ -1471,7 +1512,8 @@
 			],
 			"personas": [
 				"security"
-			]
+			],
+			"evals": ".ai/review/evals/sec-auth-tokens-and-cookies/cases.json"
 		}
 	]
 }

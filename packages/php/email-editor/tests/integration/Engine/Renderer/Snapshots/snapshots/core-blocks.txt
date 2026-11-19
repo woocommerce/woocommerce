@@ -23,6 +23,9 @@ A customer
 Product	Price
 T-shirt	$20
 
+Code	Value
+GR-1	EACMP_BREAKING_UNRECOVERABLE_INVARIANT_WITH_A_NAME_FAR_WIDER_THAN_THE_EMAIL
+
 Inside a group
 
 Text on a cover

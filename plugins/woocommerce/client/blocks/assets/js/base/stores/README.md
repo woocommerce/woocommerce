@@ -5,7 +5,7 @@ This folder contains the Interactivity API (iAPI) stores that WooCommerce blocks
 Stores in this folder:
 
 -   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format.
--   [`woocommerce/cart`](#woocommercecart-store) — cart state and actions (with mutation batching for performance). `addCartItem` resolves with a structured per-call outcome (`AddCartItemOutcome`) instead of `void`, and the store's cross-cutting side effects (sync event, legacy event, screen-reader announcement) fire exactly once per batch cycle, not once per request — see below.
+-   [`woocommerce`](#woocommerce-store) — loaded from the `@woocommerce/stores/woocommerce` script module; cart state and actions (with mutation batching for performance). `addCartItem` resolves with a structured per-call outcome (`AddCartItemOutcome`) instead of `void`, and the store's cross-cutting side effects (sync event, legacy event, screen-reader announcement) fire exactly once per batch cycle, not once per request — see below.
 
 ---
 
@@ -22,7 +22,7 @@ A locked, server-populated iAPI store that exposes WooCommerce products and vari
 
 ### When to use it
 
-Use this store when an interactive block needs to read product fields (price, SKU, stock, images, attributes, …) inside a directive, and the surrounding markup implies a single "current" product — a single product page, a product in a product-collection loop, a grouped-product child, a variation inside a variable product, etc.
+Use this store when an interactive block needs to read product fields (price, SKU, stock, attributes, …) inside a directive, and the surrounding markup implies a single "current" product — a single product page, a product in a product-collection loop, a grouped-product child, a variation inside a variable product, etc.
 
 ### Architecture at a glance
 
@@ -173,7 +173,7 @@ $interactive_attributes = $is_interactive
     : '';
 ```
 
-Any `ProductResponseItem` field can be bound the same way, e.g. `state.productInContext.price_html`, `state.productInContext.stock_availability.text`, `state.mainProductInContext.name`.
+Any `ProductResponseItem` field except `images` can be bound the same way, e.g. `state.productInContext.price_html`, `state.productInContext.stock_availability.text`, `state.mainProductInContext.name`. The `images` field is temporarily left out of the store's state, on both the server and the client.
 
 #### From JS (client)
 
@@ -235,9 +235,9 @@ For variable products, `findProduct` returns `null` when no variation matches th
 
 ---
 
-## `woocommerce/cart` store
+## `woocommerce` store
 
-The `woocommerce` Interactivity API store (`base/stores/woocommerce/`) holds cart state and actions, with mutation batching for performance. This section covers the `addCartItem` outcome contract and the once-per-cycle cross-cutting side effects below — it is not a write-up of the store's full state shape, its other actions, or the rest of the mutation batcher's internals.
+The `woocommerce` Interactivity API store (`base/stores/woocommerce/`) is served as the script module `@woocommerce/stores/woocommerce`, and blocks load it from that id. It holds cart state and actions, with mutation batching for performance. This section covers the `addCartItem` outcome contract and the once-per-cycle cross-cutting side effects below — it is not a write-up of the store's full state shape, its other actions, or the rest of the mutation batcher's internals.
 
 ### The `addCartItem` outcome contract
 
@@ -257,10 +257,10 @@ export type AddCartItemOutcome =
 	| { success: false; error: AddCartItemError };
 ```
 
-Both types are exported from the cart store module and reach consumers through the existing type-only import path:
+Both types are exported from the `woocommerce` store's module, `@woocommerce/stores/woocommerce`, and reach consumers through a type-only import:
 
 ```ts
-import type { AddCartItemOutcome } from '@woocommerce/stores/woocommerce/cart';
+import type { AddCartItemOutcome } from '@woocommerce/stores/woocommerce';
 ```
 
 **`addCartItem` stays fire-and-forget.** It never rejects because of a request or server failure — every request path, whether the Store API accepts or rejects it, resolves with an outcome instead of throwing. The action still throws synchronously for its two programmer-error guards (both `quantity` and `quantityToAdd` supplied together, or a keyless call — no `key` — that passes an absolute `quantity` instead of a `quantityToAdd` delta) — those are argument-validation bugs, unrelated to the request outcome below.

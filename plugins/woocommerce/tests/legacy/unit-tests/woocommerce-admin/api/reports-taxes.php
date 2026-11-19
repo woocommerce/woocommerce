@@ -21,13 +21,6 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 	protected $endpoint = '/wc-analytics/reports/taxes';
 
 	/**
-	 * Tax option.
-	 *
-	 * @var string
-	 */
-	protected $original_tax_option;
-
-	/**
 	 * Setup test reports taxes data.
 	 *
 	 * @since 3.5.0
@@ -35,22 +28,12 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->original_tax_option = get_option( 'woocommerce_calc_taxes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
-	}
-
-	/**
-	 * Clean up after each test. DB changes are reverted in parent::tearDown().
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		update_option( 'woocommerce_calc_taxes', $this->original_tax_option );
 	}
 
 	/**

@@ -78,6 +78,11 @@ class CartsCancel extends AbstractCartRoute {
 			)
 		);
 
+		// The cart is emptied below, so a handoff URL would point at nothing.
+		$data = $response->get_data();
+		unset( $data['continue_url'] );
+		$response->set_data( $data );
+
 		$this->cart_controller->empty_cart();
 		WC()->session->set( self::CANCELLED_SESSION_KEY, true );
 

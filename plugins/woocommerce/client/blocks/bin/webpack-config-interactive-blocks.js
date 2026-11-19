@@ -56,7 +56,7 @@ const entries = {
 	'woocommerce/product-collection-cart-reference':
 		'./assets/js/blocks/product-collection/cart-reference-frontend.ts',
 	// Other
-	'@woocommerce/stores/woocommerce/cart':
+	'@woocommerce/stores/woocommerce':
 		'./assets/js/base/stores/woocommerce/index.ts',
 	'@woocommerce/stores/store-notices':
 		'./assets/js/base/stores/store-notices.ts',

@@ -49,7 +49,6 @@ class NotificationEditPageTests extends \WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'wp_redirect', array( $this, 'stop_redirect' ) );
 		$_POST    = array();
 		$_REQUEST = array();
 		delete_option( NotificationsPage::ADMIN_NOTICE_OPTION_NAME );

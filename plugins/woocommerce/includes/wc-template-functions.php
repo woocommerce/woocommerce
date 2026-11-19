@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\SearchEngineVisibility;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
+use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -438,10 +439,10 @@ function wc_get_default_products_per_row() {
 
 	if ( $min_columns && $columns < $min_columns ) {
 		$columns = $min_columns;
-		update_option( 'woocommerce_catalog_columns', $columns );
+		update_option( 'woocommerce_catalog_columns', $columns, true );
 	} elseif ( $max_columns && $columns > $max_columns ) {
 		$columns = $max_columns;
-		update_option( 'woocommerce_catalog_columns', $columns );
+		update_option( 'woocommerce_catalog_columns', $columns, true );
 	}
 
 	if ( has_filter( 'loop_shop_columns' ) ) { // Legacy filter handling.
@@ -467,10 +468,10 @@ function wc_get_default_product_rows_per_page() {
 
 	if ( $min_rows && $rows < $min_rows ) {
 		$rows = $min_rows;
-		update_option( 'woocommerce_catalog_rows', $rows );
+		update_option( 'woocommerce_catalog_rows', $rows, true );
 	} elseif ( $max_rows && $rows > $max_rows ) {
 		$rows = $max_rows;
-		update_option( 'woocommerce_catalog_rows', $rows );
+		update_option( 'woocommerce_catalog_rows', $rows, true );
 	}
 
 	return $rows;
@@ -486,11 +487,11 @@ function wc_reset_product_grid_settings() {
 	$product_grid = wc_get_theme_support( 'product_grid' );
 
 	if ( ! empty( $product_grid['default_rows'] ) ) {
-		update_option( 'woocommerce_catalog_rows', absint( $product_grid['default_rows'] ) );
+		update_option( 'woocommerce_catalog_rows', absint( $product_grid['default_rows'] ), true );
 	}
 
 	if ( ! empty( $product_grid['default_columns'] ) ) {
-		update_option( 'woocommerce_catalog_columns', absint( $product_grid['default_columns'] ) );
+		update_option( 'woocommerce_catalog_columns', absint( $product_grid['default_columns'] ), true );
 	}
 
 	wp_cache_flush(); // Flush any caches which could impact settings or templates.
@@ -1470,7 +1471,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 		}
 
 		$defaults = array(
-			'quantity'              => 1,
+			'quantity'              => wc_get_container()->get( \Automattic\WooCommerce\Internal\Utilities\ProductUtil::class )->get_catalog_add_to_cart_quantity( $product ),
 			'class'                 => implode(
 				' ',
 				array_filter(
@@ -1508,6 +1509,11 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 			$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
 		}
 
+		$button_data = wc_get_container()->get( \Automattic\WooCommerce\Internal\Utilities\ProductUtil::class )->get_catalog_add_to_cart_button_data( $product, $args['quantity'] ?? null );
+		if ( ( $args['attributes']['aria-label'] ?? null ) === wp_strip_all_tags( $button_data['original_description'] ) ) {
+			$args['attributes']['aria-label'] = wp_strip_all_tags( $button_data['description'] );
+		}
+
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
 		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
 
@@ -1524,6 +1530,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 			$args['attributes']['role'] = 'button';
 		}
 
+		$args['button_data'] = $button_data;
 		wc_get_template( 'loop/add-to-cart.php', $args );
 	}
 }
@@ -1677,6 +1684,22 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			return;
 		}
 
+		if ( isset( $attributes['useLabel'] ) ) {
+			$use_label = (bool) $attributes['useLabel'];
+		} else {
+			/**
+			 * Filters whether the product sorting dropdown shows a visible "Sort by" label.
+			 *
+			 * Return true to show the label in classic themes. The Catalog Sorting block
+			 * does not use this filter. It has its own "Show label" setting.
+			 *
+			 * @since 11.4.0
+			 *
+			 * @param bool $show_label Whether to show the label. Default false.
+			 */
+			$use_label = (bool) apply_filters( 'woocommerce_catalog_orderby_show_visual_label', false );
+		}
+
 		/**
 		 * Filter the default catalog orderby.
 		 *
@@ -1686,7 +1709,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 		 */
 		$show_default_orderby = 'menu_order' === apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', 'menu_order' ) );
 
-		if ( isset( $attributes ) && isset( $attributes['useLabel'] ) && $attributes['useLabel'] ) {
+		if ( $use_label ) {
 			/**
 			 * Filters the catalog orderby options.
 			 *
@@ -1752,7 +1775,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 				'catalog_orderby_options' => $catalog_orderby_options,
 				'orderby'                 => $orderby,
 				'show_default_orderby'    => $show_default_orderby,
-				'use_label'               => isset( $attributes['useLabel'] ) ? $attributes['useLabel'] : false,
+				'use_label'               => $use_label,
 			)
 		);
 	}
@@ -2963,6 +2986,7 @@ if ( ! function_exists( 'woocommerce_checkout_payment' ) ) {
 			array(
 				'checkout'           => WC()->checkout(),
 				'available_gateways' => $available_gateways,
+				'has_chosen_gateway' => PaymentUtils::has_chosen_gateway( $available_gateways ),
 				'order_button_text'  => apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woocommerce' ) ),
 			)
 		);

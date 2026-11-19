@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the correct payment method name on an order after its gateway changes during checkout.

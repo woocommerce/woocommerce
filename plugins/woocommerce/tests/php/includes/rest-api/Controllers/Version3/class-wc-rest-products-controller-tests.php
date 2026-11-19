@@ -42,20 +42,12 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	protected static $fixture_user;
 
 	/**
-	 * Saves the `woocommerce_hide_out_of_stock_items` option value for restoration after tests that modify it.
-	 * @var mixed
-	 */
-	protected $original_hid_out_of_stock_value;
-
-	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->clear_rest_server();
 		unset( $this->server, $this->endpoint );
-		$this->disable_cogs_feature();
-		update_option( 'woocommerce_hide_out_of_stock_items', $this->original_hid_out_of_stock_value );
 	}
 
 	/**
@@ -149,8 +141,6 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		);
 		$this->user     = self::$fixture_user;
 		wp_set_current_user( $this->user );
-
-		$this->original_hid_out_of_stock_value = get_option( 'woocommerce_hide_out_of_stock_items' );
 	}
 
 	/**
@@ -509,8 +499,6 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( $response_products[0]['sku'], 'pancake-2' );
 		$this->assertEquals( $response_products[1]['name'], 'Waffle 3' );
 		$this->assertEquals( $response_products[1]['sku'], 'waffle-3' );
-
-		remove_filter( 'wc_product_sku_enabled', '__return_false' );
 	}
 
 	/**

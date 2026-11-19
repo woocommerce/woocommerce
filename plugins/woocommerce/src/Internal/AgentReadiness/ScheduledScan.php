@@ -41,7 +41,7 @@ class ScheduledScan implements RegisterHooksInterface {
 	/**
 	 * How long a daily scan marked running still counts as pending. A process killed mid-scan
 	 * leaves it running until Action Scheduler's cleanup marks it failed (after 5 minutes, on a
-	 * queue run), so this frees Run check even when that cleanup does not run.
+	 * queue run), so this frees Run checks even when that cleanup does not run.
 	 */
 	public const RUNNING_FOR = 10 * MINUTE_IN_SECONDS;
 
@@ -154,7 +154,7 @@ class ScheduledScan implements RegisterHooksInterface {
 	 * @internal
 	 */
 	public function run(): void {
-		if ( ! $this->features_controller->feature_is_enabled( StatusTab::FEATURE_ID ) ) {
+		if ( ! $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ) {
 			return;
 		}
 		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
