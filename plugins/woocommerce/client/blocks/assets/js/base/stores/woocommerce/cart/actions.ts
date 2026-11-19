@@ -24,9 +24,8 @@ import {
 	computeKeylessAddSuppressKeys,
 	generateErrorNotice,
 	getInfoNoticesFromCartUpdates,
-	isCartItem,
-	lineMatchesProduct,
 } from './notices';
+import { isCartItem, lineMatchesProduct } from './utils';
 import type { SelectedAttributes, WooCommerceConfig } from '../types';
 import type {
 	AddCartItemOutcome,
