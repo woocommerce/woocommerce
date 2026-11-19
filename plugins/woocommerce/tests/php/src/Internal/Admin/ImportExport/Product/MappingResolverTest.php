@@ -192,6 +192,53 @@ class MappingResolverTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep a numeric JSON key as a string header.
+	 */
+	public function test_parse_overrides_keeps_numeric_json_keys_as_strings(): void {
+		$this->assertSame( array( '2024' => 'meta:year' ), $this->sut->parse_overrides( '{"2024":"meta:year"}' ) );
+	}
+
+	/**
+	 * @testdox Should pass numeric keys to the mapped columns filter, as the admin importer does.
+	 */
+	public function test_resolve_applies_a_mapped_columns_filter_keyed_by_index(): void {
+		$filter = static function ( array $headers ): array {
+			$headers[0] = 'sku';
+			return $headers;
+		};
+		add_filter( 'woocommerce_csv_product_import_mapped_columns', $filter );
+
+		$result = $this->sut->resolve( array( 'Code' ) );
+
+		$this->assertSame( array( 'Code' => 'sku' ), $result['mapping'] );
+	}
+
+	/**
+	 * @testdox Should treat a non-array mapped columns filter result as no auto-mapping.
+	 */
+	public function test_resolve_ignores_a_non_array_mapped_columns_filter_result(): void {
+		add_filter( 'woocommerce_csv_product_import_mapped_columns', '__return_false' );
+
+		$result = $this->sut->resolve( array( 'SKU' ) );
+
+		$this->assertSame( array( 'SKU' => '' ), $result['mapping'] );
+	}
+
+	/**
+	 * @testdox Should throw InvalidArgumentException when the mapped columns filter returns a non-string target.
+	 */
+	public function test_resolve_throws_for_a_non_string_filtered_target(): void {
+		$filter = static function (): array {
+			return array( 0 => 123 );
+		};
+		add_filter( 'woocommerce_csv_product_import_mapped_columns', $filter );
+
+		$this->expectException( \InvalidArgumentException::class );
+
+		$this->sut->resolve( array( 'SKU' ) );
+	}
+
+	/**
 	 * @testdox Should validate plain, meta, attribute, and download targets.
 	 */
 	public function test_is_valid_target(): void {

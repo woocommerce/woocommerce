@@ -31,7 +31,9 @@ final class CsvImporterController extends WC_Product_CSV_Importer_Controller {
 	 * @return array
 	 */
 	public function get_auto_mapped_columns( array $raw_headers, bool $num_indexes = true ): array {
-		return $this->auto_map_columns( $raw_headers, $num_indexes );
+		$columns = $this->auto_map_columns( $raw_headers, $num_indexes );
+
+		return is_array( $columns ) ? $columns : array();
 	}
 
 	/**
@@ -41,6 +43,8 @@ final class CsvImporterController extends WC_Product_CSV_Importer_Controller {
 	 * @return array
 	 */
 	public function get_column_mapping_options( string $item = '' ): array {
-		return $this->get_mapping_options( $item );
+		$options = $this->get_mapping_options( $item );
+
+		return is_array( $options ) ? $options : array();
 	}
 }

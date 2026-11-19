@@ -70,6 +70,7 @@ final class MappingResolver {
 	 * @return array{mapping: array<string, string>, unknown: string[]}
 	 *
 	 * @throws InvalidArgumentException When an override matches no header, or a header or override resolves to an invalid target.
+	 *                                  Also when a filter maps a header to a non-string target.
 	 */
 	public function resolve( array $raw_headers, array $overrides = array(), string $unknown_mode = self::UNKNOWN_SKIP ): array {
 		$unmatched = array_diff( array_keys( $overrides ), $raw_headers );
@@ -80,13 +81,17 @@ final class MappingResolver {
 		$this->load_importer();
 
 		$controller  = new CsvImporterController();
-		$auto_mapped = $controller->get_auto_mapped_columns( $raw_headers, false );
+		$auto_mapped = $controller->get_auto_mapped_columns( $raw_headers );
 
 		$mapping = array();
 		$unknown = array();
 
-		foreach ( $raw_headers as $header ) {
-			$target = isset( $auto_mapped[ $header ] ) ? $auto_mapped[ $header ] : '';
+		foreach ( $raw_headers as $index => $header ) {
+			$target = $auto_mapped[ $index ] ?? '';
+
+			if ( ! is_string( $target ) ) {
+				throw new InvalidArgumentException( esc_html( "The column mapping filter returned a non-string target for: {$header}" ) );
+			}
 
 			// get_auto_mapped_columns() leaves an unrecognised header as its own lowercased text, unless that text happens to be a valid key such as `sku`.
 			// An empty header, such as from a trailing comma, has no name to report or map to meta, so it stays unmapped.
@@ -210,19 +215,24 @@ final class MappingResolver {
 	 * @throws InvalidArgumentException When the JSON is invalid or not a flat string map.
 	 */
 	private function decode_json_overrides( string $json ): array {
-		$decoded = json_decode( $json, true );
+		$decoded = json_decode( $json );
 
-		if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $decoded ) ) {
+		if ( JSON_ERROR_NONE !== json_last_error() || ! is_object( $decoded ) ) {
 			throw new InvalidArgumentException( 'Mapping overrides JSON is invalid.' );
 		}
 
-		foreach ( $decoded as $key => $value ) {
-			if ( ! is_string( $key ) || ! is_string( $value ) ) {
+		$overrides = array();
+
+		foreach ( get_object_vars( $decoded ) as $key => $value ) {
+			if ( ! is_string( $value ) ) {
 				throw new InvalidArgumentException( 'Mapping overrides JSON must be a flat object of string keys to string values.' );
 			}
+
+			// PHP turns numeric JSON keys, such as a header named "2024", into integers.
+			$overrides[ (string) $key ] = $value;
 		}
 
-		return $decoded;
+		return $overrides;
 	}
 
 	/**
