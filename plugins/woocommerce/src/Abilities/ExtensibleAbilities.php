@@ -455,10 +455,7 @@ class ExtensibleAbilities {
 				try {
 					$clauses = call_user_func( $args['callback'], $value );
 				} catch ( \Throwable $e ) {
-					wc_get_logger()->error(
-						sprintf( 'Ability filter "%s.%s" of "%s" failed: %s', $namespace, $filter, $resource_name, $e->getMessage() ),
-						array( 'source' => 'extensible-abilities' )
-					);
+					self::log_error( sprintf( 'Ability filter "%s.%s" of "%s" failed: %s', $namespace, $filter, $resource_name, $e->getMessage() ) );
 					$clauses = null;
 				}
 				if ( is_wp_error( $clauses ) ) {
@@ -686,10 +683,11 @@ class ExtensibleAbilities {
 	 *                               return value. When it throws, Core logs the error and formats
 	 *                               the objects anyway, so the get_callback must still load its
 	 *                               data for an object that is not in the cache. Core calls prime
-	 *                               callbacks only on reads, not on writes, so key the cache by object
-	 *                               ID and do not keep entries across writes in the same request, for
-	 *                               example by emptying the cache at the start of every call, so a
-	 *                               failed load leaves no old entries.
+	 *                               callbacks only on reads, not on writes. Key the cache by object ID,
+	 *                               and remove the entry of an object when the object is saved, for
+	 *                               example on `woocommerce_update_product`. Otherwise a write after a
+	 *                               read in the same request returns the old value. Empty the cache at the start of
+	 *                               every call, so a failed load leaves no old entries.
 	 * }
 	 */
 	public static function register_prime( array $args ): void {
@@ -721,11 +719,22 @@ class ExtensibleAbilities {
 			try {
 				call_user_func( $args['callback'], $objects );
 			} catch ( \Throwable $e ) {
-				wc_get_logger()->error(
-					sprintf( 'Ability prime callback of "%s" for "%s" failed: %s', $args['namespace'], $resource_name, $e->getMessage() ),
-					array( 'source' => 'extensible-abilities' )
-				);
+				self::log_error( sprintf( 'Ability prime callback of "%s" for "%s" failed: %s', $args['namespace'], $resource_name, $e->getMessage() ) );
 			}
+		}
+	}
+
+	/**
+	 * Log an error from an extension callback. A logger that throws does not
+	 * stop the ability.
+	 *
+	 * @param string $message Message to log.
+	 */
+	private static function log_error( string $message ): void {
+		try {
+			wc_get_logger()->error( $message, array( 'source' => 'extensible-abilities' ) );
+		} catch ( \Throwable $e ) {
+			unset( $e );
 		}
 	}
 

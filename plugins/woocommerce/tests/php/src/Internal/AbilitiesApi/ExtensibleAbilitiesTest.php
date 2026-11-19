@@ -1137,6 +1137,38 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should run the next prime callback and return the fields when the logger also throws.
+	 */
+	public function test_a_logger_that_throws_does_not_stop_the_read(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$product->update_meta_data( '_test_code', 'A1' );
+		$product->save();
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->method( 'error' )->willThrowException( new \RuntimeException( 'Logger broke' ) );
+		add_filter( 'woocommerce_logging_class', static fn() => $logger );
+		$calls = 0;
+		$this->register_prime(
+			'product',
+			'test-ext',
+			static function () {
+				throw new \RuntimeException( 'Table is missing' );
+			}
+		);
+		$this->register_prime(
+			'product',
+			'other_ext',
+			static function () use ( &$calls ) {
+				++$calls;
+			}
+		);
+
+		$products = $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen' ) )['products'];
+
+		$this->assertSame( 1, $calls );
+		$this->assertSame( array( 'code' => 'A1' ), $products[0]['extensions']['test-ext'] );
+	}
+
+	/**
 	 * @testdox Should not call prime callbacks with the feature off.
 	 */
 	public function test_prime_callbacks_do_not_run_with_the_feature_off(): void {
