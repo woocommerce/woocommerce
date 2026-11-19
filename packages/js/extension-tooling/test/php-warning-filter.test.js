@@ -22,7 +22,7 @@ test( 'returns PHP issues for the supplied plugin paths in log order', () => {
 		'PHP Warning: something in /plugins/test-extension-other/a.php',
 		...issues,
 		'Informational message in /plugins/test-extension/a.php',
-		'PHP Warning: something in /wp-includes/core.php',
+		'PHP Warning: undefined value 42 in /wp-includes/core.php',
 		'',
 	].join( '\n' );
 
@@ -30,5 +30,10 @@ test( 'returns PHP issues for the supplied plugin paths in log order', () => {
 	assert.deepEqual( filterPhpWarnings( log, [] ), [] );
 	assert.deepEqual( filterPhpWarnings( log, [ '' ] ), [] );
 	assert.deepEqual( filterPhpWarnings( log, [ '', ...paths ] ), issues );
+	assert.deepEqual( filterPhpWarnings( log, [ undefined, 42, '   ' ] ), [] );
+	assert.deepEqual(
+		filterPhpWarnings( log, [ undefined, ...paths ] ),
+		issues
+	);
 	assert.deepEqual( filterPhpWarnings( '', paths ), [] );
 } );
