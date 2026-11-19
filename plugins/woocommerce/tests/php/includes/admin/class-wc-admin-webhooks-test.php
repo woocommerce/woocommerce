@@ -114,6 +114,94 @@ class WC_Admin_Webhooks_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Valid extension topics remain selected in the editor and can be saved.
+	 * @testWith ["order.status_changed"]
+	 *           ["subscription.created"]
+	 * @param string $topic Extension topic.
+	 */
+	public function test_extension_topic_can_be_edited( string $topic ): void {
+		add_filter(
+			'woocommerce_valid_webhook_events',
+			static function ( $events ) {
+				$events[] = 'status_changed';
+				return $events;
+			}
+		);
+		add_filter(
+			'woocommerce_valid_webhook_resources',
+			static function ( $resources ) {
+				$resources[] = 'subscription';
+				return $resources;
+			}
+		);
+		$webhook = new WC_Webhook();
+		$webhook->set_topic( $topic );
+		$webhook->set_status( 'paused' );
+		$webhook->save();
+
+		ob_start();
+		include WC_ABSPATH . 'includes/admin/settings/views/html-webhooks-edit.php';
+		$html = ob_get_clean();
+		$this->assertStringContainsString( '<option value="' . $topic . '"  selected=\'selected\'>' . $topic . '</option>', $html, 'The saved extension topic should remain selected and use its ID as its label.' );
+
+		$query = $this->submit_form(
+			array(
+				'webhook_id'     => $webhook->get_id(),
+				'webhook_topic'  => $topic,
+				'webhook_status' => 'paused',
+				'webhook_name'   => 'Updated extension webhook',
+			)
+		);
+		$this->assertSame( '1', $query['updated'] );
+		$saved = new WC_Webhook( $webhook->get_id() );
+		$this->assertSame( $topic, $saved->get_topic() );
+		$this->assertSame( 'Updated extension webhook', $saved->get_name() );
+	}
+
+	/**
+	 * @testdox The editor preserves supplied labels and excludes invalid or unsaved topics.
+	 * @testWith ["order.created", true, "order.created", "Custom label"]
+	 *           ["order.unknown", true, "order.unknown", null]
+	 *           ["order.created", false, "order.created", null]
+	 *           ["action.woocommerce_test_event", true, "action", "Action"]
+	 * @param string      $topic Stored topic.
+	 * @param bool        $saved Whether the webhook has been saved.
+	 * @param string      $option Option to inspect.
+	 * @param string|null $label Expected label, or null when the option should be absent.
+	 */
+	public function test_topic_dropdown_preserves_existing_options( string $topic, bool $saved, string $option, ?string $label ): void {
+		add_filter(
+			'woocommerce_webhook_topics',
+			static function ( $topics ) {
+				unset( $topics['order.created'] );
+				return $topics;
+			}
+		);
+		if ( null !== $label && 'order.created' === $topic ) {
+			add_filter(
+				'woocommerce_webhook_topics',
+				static function ( $topics ) {
+					$topics['order.created'] = 'Custom label';
+					return $topics;
+				}
+			);
+		}
+		$webhook = new WC_Webhook();
+		$webhook->set_topic( $topic );
+		if ( $saved ) {
+			$webhook->save();
+		}
+		ob_start();
+		include WC_ABSPATH . 'includes/admin/settings/views/html-webhooks-edit.php';
+		$html = ob_get_clean();
+		if ( null === $label ) {
+			$this->assertStringNotContainsString( '<option value="' . $option . '"', $html );
+		} else {
+			$this->assertStringContainsString( '<option value="' . $option . '"  selected=\'selected\'>' . $label . '</option>', $html );
+		}
+	}
+
+	/**
 	 * Submit the settings form and read the query parameters from its redirect.
 	 *
 	 * @param array $fields Submitted form fields.

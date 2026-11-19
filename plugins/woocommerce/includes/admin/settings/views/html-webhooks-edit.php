@@ -88,6 +88,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 								)
 							);
 
+							$current_topic = $webhook->get_topic();
+							if ( $webhook->get_id() && 'action' !== $topic_data['resource'] && ! isset( $topics[ $current_topic ] ) && wc_is_webhook_valid_topic( $current_topic ) ) {
+								$topics[ $current_topic ] = $current_topic;
+							}
+
 							foreach ( $topics as $topic_slug => $topic_name ) :
 
 								$selected = $topic_slug === $topic_data['topic'] || $topic_slug === $topic_data['resource'] . '.' . $topic_data['event'];
