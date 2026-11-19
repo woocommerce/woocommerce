@@ -97,11 +97,33 @@ class McpAdapterVersionNotice {
 			return null;
 		}
 
-		$slug    = strtok( substr( $file, strlen( $plugins_dir ) ), '/' );
-		$plugins = get_plugins( '/' . $slug );
-		$plugin  = reset( $plugins );
+		$slug = strtok( substr( $file, strlen( $plugins_dir ) ), '/' );
 
-		return empty( $plugin['Name'] ) ? null : $plugin['Name'];
+		return self::get_root_plugin_name( get_plugins( '/' . $slug ) );
+	}
+
+	/**
+	 * Get the name of the only plugin whose main file sits at the root of a plugin folder.
+	 *
+	 * The get_plugins() result also holds plugin headers from subfolders, so those entries are skipped.
+	 *
+	 * @internal
+	 *
+	 * @param array $plugins The result of get_plugins() for one plugin folder, keyed by file path relative to that folder.
+	 * @return string|null The plugin name, or null when the folder does not have exactly one root plugin file.
+	 */
+	public static function get_root_plugin_name( array $plugins ): ?string {
+		$root = array_filter(
+			$plugins,
+			static fn( $path ) => false === strpos( (string) $path, '/' ),
+			ARRAY_FILTER_USE_KEY
+		);
+		if ( 1 !== count( $root ) ) {
+			return null;
+		}
+		$plugin = reset( $root );
+
+		return empty( $plugin['Name'] ) ? null : (string) $plugin['Name'];
 	}
 
 	/**

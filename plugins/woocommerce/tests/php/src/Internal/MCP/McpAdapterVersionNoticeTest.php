@@ -26,4 +26,30 @@ class McpAdapterVersionNoticeTest extends WC_Unit_Test_Case {
 	public function test_is_outdated( ?string $version, bool $expected ): void {
 		$this->assertSame( $expected, McpAdapterVersionNotice::is_outdated( $version ) );
 	}
+
+	/**
+	 * @testdox Should name only the plugin whose main file sits at the root of the plugin folder.
+	 */
+	public function test_get_root_plugin_name_skips_subfolder_plugins(): void {
+		$plugins = array(
+			'examples/example.php' => array( 'Name' => 'A Example' ),
+			'main.php'             => array( 'Name' => 'Z Host' ),
+		);
+
+		$this->assertSame( 'Z Host', McpAdapterVersionNotice::get_root_plugin_name( $plugins ) );
+	}
+
+	/**
+	 * @testdox Should return no plugin name when the plugin folder has no single root plugin file.
+	 */
+	public function test_get_root_plugin_name_returns_null_when_ambiguous(): void {
+		$plugins = array(
+			'one.php'              => array( 'Name' => 'One' ),
+			'two.php'              => array( 'Name' => 'Two' ),
+			'examples/example.php' => array( 'Name' => 'Example' ),
+		);
+
+		$this->assertNull( McpAdapterVersionNotice::get_root_plugin_name( $plugins ) );
+		$this->assertNull( McpAdapterVersionNotice::get_root_plugin_name( array( 'examples/example.php' => array( 'Name' => 'Example' ) ) ) );
+	}
 }
