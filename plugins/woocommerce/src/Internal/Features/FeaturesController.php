@@ -143,6 +143,13 @@ class FeaturesController {
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
+		if ( did_action( 'before_woocommerce_init' ) ) {
+			$this->maybe_init_feature_definitions();
+		} else {
+			// Initialize before plugins declare compatibility, unless an earlier query already did so.
+			add_action( 'before_woocommerce_init', array( $this, 'maybe_init_feature_definitions' ), -9999, 0 );
+		}
+
 		if ( did_action( 'init' ) ) {
 			// Needed for unit tests, where 'init' will have been fired already at this point.
 			$this->start_listening_for_option_changes();
@@ -271,8 +278,11 @@ class FeaturesController {
 
 	/**
 	 * Initialize hardcoded feature definitions if they have not been initialized yet.
+	 *
+	 * @internal
+	 * @since 11.4.0
 	 */
-	private function maybe_init_feature_definitions(): void {
+	public function maybe_init_feature_definitions(): void {
 		if ( $this->initializing_feature_definitions ) {
 			if ( ! $this->issued_feature_definitions_notice ) {
 				// Set this before issuing the notice because wc_doing_it_wrong() invokes gettext callbacks.
