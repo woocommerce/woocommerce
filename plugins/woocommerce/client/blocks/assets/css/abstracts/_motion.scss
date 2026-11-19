@@ -14,7 +14,7 @@ $wc-blur-icon: 4px;
 $wc-stagger-cap: 7;
 
 @mixin motion-safe() {
-	@media not (prefers-reduced-motion) {
+	@media (prefers-reduced-motion: no-preference) {
 		@content;
 	}
 }
@@ -120,15 +120,23 @@ $wc-stagger-cap: 7;
 	}
 }
 
-// Sets --wc-motion-index on sibling rows. Rows after $wc-stagger-cap share the last index.
+// Sets --wc-motion-index on sibling rows. Rows after $wc-stagger-cap share the last index. `--wc-motion-index` is
+// registered as an integer in `assets/css/style.scss`, so `sibling-index()` counts the row, not the child that reads
+// it. Browsers without `sibling-index()` use `nth-child`. The `@supports` tests use a literal time, not `var()`.
 @mixin motion-stagger-index() {
-	@for $i from 1 to $wc-stagger-cap {
-		&:nth-child(#{$i}) {
-			--wc-motion-index: #{$i - 1};
-		}
+	@supports (animation-delay: calc(sibling-index() * 1s)) {
+		--wc-motion-index: min(sibling-index() - 1, #{$wc-stagger-cap - 1});
 	}
-	&:nth-child(n + #{$wc-stagger-cap}) {
-		--wc-motion-index: #{$wc-stagger-cap - 1};
+
+	@supports not (animation-delay: calc(sibling-index() * 1s)) {
+		@for $i from 1 to $wc-stagger-cap {
+			&:nth-child(#{$i}) {
+				--wc-motion-index: #{$i - 1};
+			}
+		}
+		&:nth-child(n + #{$wc-stagger-cap}) {
+			--wc-motion-index: #{$wc-stagger-cap - 1};
+		}
 	}
 }
 

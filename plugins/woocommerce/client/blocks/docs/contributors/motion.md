@@ -58,7 +58,7 @@ Use a token for every duration and easing. Do not write raw values. Do not write
 
 With reduced motion, nothing moves, but changes are still visible. Fades and color changes still run, because they show what changed.
 
-Movement runs only inside `@include motion-safe` (`@media not (prefers-reduced-motion)`). Put the resting values outside it. The helpers do this for you.
+Movement runs only inside `@include motion-safe` (`@media (prefers-reduced-motion: no-preference)`). Put the resting values outside it. The helpers do this for you.
 
 - Content that appears or goes still fades.
 - Movement that only adds feel, such as the press scale, has no reduced version.
@@ -77,7 +77,7 @@ Use the helpers in `assets/css/abstracts/_motion.scss`. Do not write `transition
 | `motion-hold( … )` | Keeps a property, such as `visibility`, at its old value until a fade ends. | `transition: motion-state( opacity ), motion-hold( visibility );` |
 | `@include motion-enter( $keyframes, $duration, $delay )` | Content that appears. It fades in, and plays `$keyframes` (default `wc-rise`). | `@include motion-enter( wc-grow, md );` |
 | `@include motion-exit( $keyframes )` | Content that goes. It fades out over 200ms and keeps the end state until it unmounts. | `@include motion-exit( wc-shrink );` |
-| `@include motion-stagger( $keyframes )` | Sibling rows that enter 50ms apart. | `@include motion-stagger;` |
+| `@include motion-stagger( $keyframes )` | Sibling rows that enter 50ms apart. It counts rows with `sibling-index()`, and with `nth-child` in browsers that do not have it. | `@include motion-stagger;` |
 | `@include motion-fade-in` / `motion-fade-out` | A fade with no movement. | |
 | `@include motion-dim( $states )` | Dims the element while `$states` matches, such as `".is-disabled"`. | Cart rows, disabled radios |
 | `@include motion-spinner-swap` | A button that loads. The label fades out and the spinner grows in. | Place order, coupon Apply |
