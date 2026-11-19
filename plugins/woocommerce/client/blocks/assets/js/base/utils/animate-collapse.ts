@@ -42,6 +42,8 @@ const reset = ( element: HTMLElement ) => {
 	} );
 	// Leave nothing behind, not even an empty `style` attribute.
 	if ( element.style.length === 0 ) {
+		// Chrome writes the cleared declarations back as `style=""` when nothing has read the attribute since.
+		element.getAttribute( 'style' );
 		element.removeAttribute( 'style' );
 	}
 };
