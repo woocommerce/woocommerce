@@ -1798,11 +1798,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Return a list of related products (using data like categories and IDs).
 	 *
 	 * @since 3.0.0
-	 * @param array $cats_array  List of categories IDs.
-	 * @param array $tags_array  List of tags IDs.
-	 * @param array $exclude_ids Excluded IDs.
-	 * @param int   $limit       Limit of results.
-	 * @param int   $product_id  Product ID.
+	 * @param array    $cats_array  List of categories IDs.
+	 * @param array    $tags_array  List of tags IDs.
+	 * @param array    $exclude_ids Excluded IDs.
+	 * @param int      $limit       Limit of results.
+	 * @param int|null $product_id  Product ID. Only passed to the woocommerce_product_related_posts_query filter.
 	 * @return array
 	 */
 	public function get_related_products( $cats_array, $tags_array, $exclude_ids, $limit, $product_id ) {
@@ -2344,7 +2344,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @since 3.0.0
 	 * @param int $product_id Product ID.
-	 * @return bool|string
+	 * @return string|false
 	 */
 	public function get_product_type( $product_id ) {
 		$cache_key    = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . '_type_' . $product_id;

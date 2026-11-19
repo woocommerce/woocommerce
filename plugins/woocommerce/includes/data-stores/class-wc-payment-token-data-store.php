@@ -313,7 +313,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 *
 	 * @since 3.0.0
 	 * @param int $user_id User ID.
-	 * @return object
+	 * @return stdClass|null
 	 */
 	public function get_users_default_token( $user_id ) {
 		global $wpdb;
@@ -331,7 +331,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 *
 	 * @since 3.0.0
 	 * @param int $token_id Token ID.
-	 * @return object
+	 * @return stdClass|null
 	 */
 	public function get_token_by_id( $token_id ) {
 		global $wpdb;

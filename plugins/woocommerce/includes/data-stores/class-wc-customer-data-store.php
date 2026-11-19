@@ -670,7 +670,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Query customers ordered by allowed fields.
 	 *
 	 * @param array $args Query arguments.
-	 * @return object Object containing customers in the requested order, total, and max_num_pages.
+	 * @return stdClass Object containing customers in the requested order, total, and max_num_pages.
 	 */
 	public function query_customers( array $args = array() ) {
 		global $wpdb;

@@ -17299,24 +17299,6 @@ parameters:
 			path: includes/data-stores/class-wc-product-variation-data-store-cpt.php
 
 		-
-			message: '#^@param array \$package does not accept actual type of parameter\: object\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/data-stores/class-wc-shipping-zone-data-store.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$method_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/data-stores/class-wc-shipping-zone-data-store.php
-
-		-
-			message: '#^Cannot access offset ''destination'' on object\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 3
-			path: includes/data-stores/class-wc-shipping-zone-data-store.php
-
-		-
 			message: '#^Method WC_Shipping_Zone_Data_Store\:\:create\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -17426,12 +17408,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$data of function esc_sql expects array\|string, float\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/data-stores/class-wc-webhook-data-store.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, array\|object given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/data-stores/class-wc-webhook-data-store.php
@@ -62791,12 +62767,6 @@ parameters:
 			path: src/Internal/RestockRefundedItemsAdjuster.php
 
 		-
-			message: '#^Binary operation "/" between array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int and int\<1, max\> results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
 			message: '#^Cannot call method set_status\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
 			identifier: method.nonObject
 			count: 2
@@ -62805,12 +62775,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Parameter \#1 \$args of method WP_List_Table\:\:set_pagination_args\(\) expects array\{total_items\?\: int, total_pages\?\: int, per_page\?\: int\}, array\{total_items\: array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int, per_page\: int\<1, max\>, total_pages\: \(float\|false\)\} given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/StockNotifications/Admin/ListTable.php
 
@@ -62853,42 +62817,6 @@ parameters:
 		-
 			message: '#^Possibly invalid array key type array\|string\.$#'
 			identifier: array.invalidKey
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:\$total_active_items \(int\) does not accept array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:\$total_cancelled_items \(int\) does not accept array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:\$total_items \(int\) does not accept array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:\$total_pending_items \(int\) does not accept array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:\$total_sent_items \(int\) does not accept array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
-			message: '#^Property WP_List_Table\:\:\$items \(array\) does not accept array\<Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|int\>\|int\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/StockNotifications/Admin/ListTable.php
 
