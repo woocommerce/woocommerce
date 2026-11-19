@@ -178,7 +178,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 *
 	 * The payment page records no attribution of its own.
 	 * The source is the host of the `profile` parameter in the `UCP-Agent` header, or `ucp` when that parameter is missing or its host is not a hostname.
-	 * A parameter only counts when its name is exactly `profile`.
+	 * A parameter only counts when its name is exactly `profile` and it is outside a quoted value.
 	 * The header is not verified, so the host is a detail and not part of the origin.
 	 * Saved only with order attribution on, and never over attribution the order already has.
 	 *
@@ -211,7 +211,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	/**
 	 * Host of the `profile` parameter in a UCP-Agent header, or `ucp` when it is missing or not a hostname.
 	 *
-	 * Only a parameter named exactly `profile` counts.
+	 * Only a parameter named exactly `profile`, outside a quoted value, counts.
 	 *
 	 * @param string $header UCP-Agent header value.
 	 * @return string
@@ -232,7 +232,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	/**
 	 * Value of one double-quoted parameter, matched by its exact name.
 	 *
-	 * A match counts only at the start of the header or after whitespace or a semicolon.
+	 * A match counts only outside quotes, at the start of the header or after whitespace or a semicolon.
 	 *
 	 * @param string $header Header value.
 	 * @param string $name   Parameter name.
@@ -249,13 +249,15 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 				return '';
 			}
 
-			$is_parameter = 0 === $start;
+			// An even number of quotes before the name means it is outside a value.
+			$outside_quotes = 0 === ( substr_count( substr( $header, 0, $start ), '"' ) % 2 );
+			$is_parameter   = 0 === $start;
 			if ( ! $is_parameter ) {
 				$previous     = substr( $header, $start - 1, 1 );
 				$is_parameter = ' ' === $previous || "\t" === $previous || ';' === $previous;
 			}
 
-			if ( $is_parameter ) {
+			if ( $outside_quotes && $is_parameter ) {
 				$value_start = $start + strlen( $prefix );
 				$end         = strpos( $header, '"', $value_start );
 				if ( false === $end ) {
@@ -264,7 +266,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 				return substr( $header, $value_start, $end - $value_start );
 			}
 
-			$offset = $start + 1;
+			$offset = $start + strlen( $prefix );
 		}
 
 		return '';

@@ -1020,6 +1020,7 @@ class UcpCheckout extends ControllerTestCase {
 	 *           ["notprofile=\"https://example.com/\"", "ucp"]
 	 *           ["profile=\"https://a..example/\"", "ucp"]
 	 *           ["other=\"x\"; profile=\"https://shop.example/.well-known/ucp\"", "shop.example"]
+	 *           ["other=\"x profile=\"; profile=\"https://shop.example/\"", "shop.example"]
 	 *
 	 * @param string $agent  The UCP-Agent header.
 	 * @param string $source The expected utm_source.
