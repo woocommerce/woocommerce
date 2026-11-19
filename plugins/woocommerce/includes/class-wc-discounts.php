@@ -555,6 +555,10 @@ class WC_Discounts {
 	 * Deal with remaining fractional discounts by splitting it over items
 	 * until the amount is expired, discounting 1 cent at a time.
 	 *
+	 * The last slice is capped at what is left. Fractional quantities can leave
+	 * a remainder under one cent, and a full cent would discount more than the
+	 * coupon amount.
+	 *
 	 * @since 3.2.0
 	 * @param  WC_Coupon $coupon Coupon object if applicable. Passed through filters.
 	 * @param  array     $items_to_apply Array of items to apply the coupon to.
@@ -563,6 +567,7 @@ class WC_Discounts {
 	 */
 	protected function apply_coupon_remainder( $coupon, $items_to_apply, $amount ) {
 		$total_discount = 0;
+		$precision      = wc_get_rounding_precision() - wc_get_price_decimals();
 
 		foreach ( $items_to_apply as $item ) {
 			$quantity = NumberUtil::ceil( $item->quantity );
@@ -570,9 +575,18 @@ class WC_Discounts {
 			for ( $i = 0; $i < $quantity; $i++ ) {
 				// Find out how much price is available to discount for the item.
 				$price_to_discount = $this->get_discounted_price_in_cents( $item );
+				$remaining         = NumberUtil::round( $amount - $total_discount, $precision );
 
-				// Run coupon calculations.
-				$discount = min( $price_to_discount, 1 );
+				if ( $remaining <= 0 ) {
+					break 2;
+				}
+
+				// One cent at a time, but never more than the coupon has left.
+				$discount = min( $price_to_discount, 1, $remaining );
+
+				if ( $discount <= 0 ) {
+					continue;
+				}
 
 				// Store totals.
 				$total_discount += $discount;
@@ -580,11 +594,11 @@ class WC_Discounts {
 				// Store code and discount amount per item.
 				$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
 
-				if ( $total_discount >= $amount ) {
+				if ( NumberUtil::round( $total_discount, $precision ) >= $amount ) {
 					break 2;
 				}
 			}
-			if ( $total_discount >= $amount ) {
+			if ( NumberUtil::round( $total_discount, $precision ) >= $amount ) {
 				break;
 			}
 		}
