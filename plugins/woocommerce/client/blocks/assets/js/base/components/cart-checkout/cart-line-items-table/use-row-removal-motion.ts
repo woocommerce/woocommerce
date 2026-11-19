@@ -167,7 +167,10 @@ const playRemoval = (
 		clearStyle( table, space );
 		moved.forEach( ( row ) => clearStyle( row, 'translate' ) );
 		if ( removeCopies ) {
-			copies.forEach( ( copy ) => copy.remove() );
+			// Includes the copies of a removal that this one took over, which still fade out.
+			table
+				.querySelectorAll( `:scope > [${ COPY }]` )
+				.forEach( ( copy ) => copy.remove() );
 		}
 	};
 
