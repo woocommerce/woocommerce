@@ -30,6 +30,7 @@ type Snapshot = {
 	removed: RemovedRow[];
 	// Where the rows that stay are on the screen, including a slide that still runs.
 	tops: Map< string, number >;
+	// The space the table takes, including a space that an earlier removal still holds.
 	height: number;
 };
 
@@ -51,6 +52,11 @@ const clearStyle = ( element: HTMLElement, property: string ) => {
 	}
 };
 
+// The bottom margin counts too: a table with collapsed borders holds the space of a removal in its margin.
+const heightOf = ( table: HTMLTableElement ) =>
+	table.getBoundingClientRect().height +
+	( parseFloat( getComputedStyle( table ).marginBottom ) || 0 );
+
 const measure = (
 	table: HTMLTableElement,
 	keys: string[]
@@ -71,9 +77,7 @@ const measure = (
 			),
 		} );
 	} );
-	return removed.length
-		? { removed, tops, height: table.getBoundingClientRect().height }
-		: null;
+	return removed.length ? { removed, tops, height: heightOf( table ) } : null;
 };
 
 // An inert copy of the row, in its own table box laid over the place where the row was. Table rows can't be
@@ -133,7 +137,7 @@ const playRemoval = (
 		getComputedStyle( table ).borderCollapse === 'collapse'
 			? 'margin-bottom'
 			: 'padding-bottom';
-	const lost = height - table.getBoundingClientRect().height;
+	const lost = height - heightOf( table );
 	// A new row has no old place, so its offset is NaN, and it does not move.
 	const offsets = Array.from(
 		table.querySelectorAll< HTMLTableRowElement >( ROWS ),
