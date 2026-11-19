@@ -280,6 +280,30 @@ describe( 'playSwap', () => {
 		} );
 	} );
 
+	it( 'ends at once after a swap turned around, also for the copies of the first swap', () => {
+		const first = capture( 1 );
+		const pickup = switchToPickup();
+		playSwap( first );
+
+		const second = capture( -1 );
+		const newShipping = section( 'shipping-fields', 200 );
+		const newRates = section( 'shipping-option', 100 );
+		pickup.replaceWith( newShipping, newRates );
+		playSwap( second );
+		stopSwap( container );
+
+		expect( copies() ).toHaveLength( 0 );
+		[ container, method, newShipping, newRates, pay ].forEach(
+			( element ) => {
+				expect(
+					element
+						.getAttributeNames()
+						.filter( ( name ) => name !== 'id' )
+				).toEqual( [] );
+			}
+		);
+	} );
+
 	it( 'turns around from the current position, and leaves nothing behind', async () => {
 		const first = capture( 1 );
 		const pickup = switchToPickup();
