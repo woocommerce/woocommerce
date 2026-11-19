@@ -11,13 +11,63 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Data store class.
+ *
+ * Methods not defined here are forwarded to the wrapped store by __call(). The @mixin tag lets static analysis
+ * see them. DataStoreMap lists the default store for each object type, which load() uses to pick T; filters can
+ * replace a store at runtime, so T describes the default.
+ *
+ * @template-covariant T of object = object
+ * @mixin T
+ *
+ * @phpstan-type DataStoreMap array{
+ *     coupon: WC_Coupon_Data_Store_CPT,
+ *     customer: WC_Customer_Data_Store,
+ *     'customer-download': WC_Customer_Download_Data_Store,
+ *     'customer-download-log': WC_Customer_Download_Log_Data_Store,
+ *     'customer-session': WC_Customer_Data_Store_Session,
+ *     order: WC_Order_Data_Store_CPT,
+ *     'order-refund': WC_Order_Refund_Data_Store_CPT,
+ *     'order-item': WC_Order_Item_Data_Store,
+ *     'order-item-coupon': WC_Order_Item_Coupon_Data_Store,
+ *     'order-item-fee': WC_Order_Item_Fee_Data_Store,
+ *     'order-item-product': WC_Order_Item_Product_Data_Store,
+ *     'order-item-shipping': WC_Order_Item_Shipping_Data_Store,
+ *     'order-item-tax': WC_Order_Item_Tax_Data_Store,
+ *     'payment-token': WC_Payment_Token_Data_Store,
+ *     product: WC_Product_Data_Store_CPT,
+ *     'product-grouped': WC_Product_Grouped_Data_Store_CPT,
+ *     'product-variable': WC_Product_Variable_Data_Store_CPT,
+ *     'product-variation': WC_Product_Variation_Data_Store_CPT,
+ *     'shipping-zone': WC_Shipping_Zone_Data_Store,
+ *     webhook: WC_Webhook_Data_Store,
+ *     'admin-note': \Automattic\WooCommerce\Admin\Notes\DataStore,
+ *     'order-fulfillment': \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore,
+ *     stock_notification: \Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore,
+ *     'report-revenue-stats': \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore,
+ *     'report-orders': \Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore,
+ *     'report-orders-stats': \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore,
+ *     'report-products': \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore,
+ *     'report-variations': \Automattic\WooCommerce\Admin\API\Reports\Variations\DataStore,
+ *     'report-products-stats': \Automattic\WooCommerce\Admin\API\Reports\Products\Stats\DataStore,
+ *     'report-variations-stats': \Automattic\WooCommerce\Admin\API\Reports\Variations\Stats\DataStore,
+ *     'report-categories': \Automattic\WooCommerce\Admin\API\Reports\Categories\DataStore,
+ *     'report-taxes': \Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore,
+ *     'report-taxes-stats': \Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore,
+ *     'report-coupons': \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore,
+ *     'report-coupons-stats': \Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\DataStore,
+ *     'report-downloads': \Automattic\WooCommerce\Admin\API\Reports\Downloads\DataStore,
+ *     'report-downloads-stats': \Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats\DataStore,
+ *     'report-customers': \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore,
+ *     'report-customers-stats': \Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\DataStore,
+ *     'report-stock-stats': \Automattic\WooCommerce\Admin\API\Reports\Stock\Stats\DataStore,
+ * }
  */
 class WC_Data_Store {
 
 	/**
 	 * Contains an instance of the data store class that we are working with.
 	 *
-	 * @var WC_Data_Store
+	 * @var WC_Object_Data_Store_Interface
 	 */
 	private $instance = null;
 
@@ -134,6 +184,10 @@ class WC_Data_Store {
 	 * @since 3.0.0
 	 * @throws Exception When validation fails.
 	 * @return WC_Data_Store
+	 *
+	 * @phpstan-template K of string
+	 * @phpstan-param K $object_type
+	 * @phpstan-return (K is key-of<DataStoreMap> ? WC_Data_Store<DataStoreMap[K]> : WC_Data_Store)
 	 */
 	public static function load( $object_type ) {
 		return new WC_Data_Store( $object_type );
