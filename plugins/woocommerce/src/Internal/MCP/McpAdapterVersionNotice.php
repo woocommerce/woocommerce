@@ -43,6 +43,7 @@ class McpAdapterVersionNotice {
 	public function handle_admin_notices(): void {
 		$version = defined( 'WP_MCP_VERSION' ) ? (string) WP_MCP_VERSION : null;
 		$bundled = null === $version;
+		// A plugin that loads a bundled adapter only on rest_api_init gets no notice, because admin pages never load the class.
 		if ( $bundled && class_exists( 'WP\MCP\Core\McpAdapter', false ) ) {
 			$version = (string) constant( 'WP\MCP\Core\McpAdapter::VERSION' );
 		}
