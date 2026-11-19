@@ -50,27 +50,57 @@ class McpAdapterVersionNotice {
 			return;
 		}
 
-		$message = esc_html(
-			$bundled
-				? sprintf(
-					/* translators: 1: Required MCP Adapter version, 2: Active MCP Adapter version. */
-					__( 'WooCommerce abilities need MCP Adapter %1$s or later, but another plugin loads version %2$s. Update the plugin that includes MCP Adapter so MCP clients can keep using WooCommerce.', 'woocommerce' ),
-					self::MIN_VERSION,
-					$version
-				)
-				: sprintf(
-					/* translators: 1: Required MCP Adapter version, 2: Active MCP Adapter version. */
-					__( 'WooCommerce abilities need MCP Adapter %1$s or later, but version %2$s is active. Update the MCP Adapter plugin so MCP clients can keep using WooCommerce.', 'woocommerce' ),
-					self::MIN_VERSION,
-					$version
-				)
-		);
+		$bundled_by = $bundled ? self::get_bundling_plugin_name() : null;
+		if ( null !== $bundled_by ) {
+			$message = sprintf(
+				/* translators: 1: Required MCP Adapter version, 2: Plugin name, 3: Active MCP Adapter version. */
+				__( 'WooCommerce abilities need MCP Adapter %1$s or later, but %2$s loads version %3$s. Update %2$s so MCP clients can keep using WooCommerce.', 'woocommerce' ),
+				self::MIN_VERSION,
+				$bundled_by,
+				$version
+			);
+		} elseif ( $bundled ) {
+			$message = sprintf(
+				/* translators: 1: Required MCP Adapter version, 2: Active MCP Adapter version. */
+				__( 'WooCommerce abilities need MCP Adapter %1$s or later, but another plugin loads version %2$s. Update the plugin that includes MCP Adapter so MCP clients can keep using WooCommerce.', 'woocommerce' ),
+				self::MIN_VERSION,
+				$version
+			);
+		} else {
+			$message = sprintf(
+				/* translators: 1: Required MCP Adapter version, 2: Active MCP Adapter version. */
+				__( 'WooCommerce abilities need MCP Adapter %1$s or later, but version %2$s is active. Update the MCP Adapter plugin so MCP clients can keep using WooCommerce.', 'woocommerce' ),
+				self::MIN_VERSION,
+				$version
+			);
+		}
+		$message = esc_html( $message );
 
 		if ( current_user_can( 'update_plugins' ) ) {
 			$message .= sprintf( ' <a href="%1$s">%2$s</a>', esc_url( self_admin_url( 'plugins.php' ) ), esc_html__( 'Go to Plugins', 'woocommerce' ) );
 		}
 
 		echo wp_kses_post( '<div class="notice notice-warning"><p>' . $message . '</p></div>' );
+	}
+
+	/**
+	 * Get the name of the plugin that bundles the loaded MCP Adapter class.
+	 *
+	 * @return string|null The plugin name, or null when the class does not load from a regular plugin.
+	 */
+	private static function get_bundling_plugin_name(): ?string {
+		// @phpstan-ignore-next-line class.notFound -- MCP Adapter is an optional plugin, and only a loaded class reaches this method.
+		$file        = wp_normalize_path( (string) ( new \ReflectionClass( \WP\MCP\Core\McpAdapter::class ) )->getFileName() );
+		$plugins_dir = trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) );
+		if ( ! str_starts_with( $file, $plugins_dir ) || ! function_exists( 'get_plugins' ) ) {
+			return null;
+		}
+
+		$slug    = strtok( substr( $file, strlen( $plugins_dir ) ), '/' );
+		$plugins = get_plugins( '/' . $slug );
+		$plugin  = reset( $plugins );
+
+		return empty( $plugin['Name'] ) ? null : $plugin['Name'];
 	}
 
 	/**
