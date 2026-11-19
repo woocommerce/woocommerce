@@ -131,7 +131,7 @@ class AbilityTest extends \WC_Unit_Test_Case {
 				'description'         => 'Returns its own error.',
 				'category'            => 'woocommerce',
 				'output_schema'       => array( 'type' => 'object' ),
-				'execute_callback'    => fn() => new \WP_Error( 'test_failed', 'The callback failed.' ),
+				'execute_callback'    => fn() => new \WP_Error( 'ability_invalid_output', 'The callback failed.' ),
 				'permission_callback' => '__return_true',
 			)
 		);
@@ -140,6 +140,37 @@ class AbilityTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'The callback failed.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should keep the message of an error that the wp_pre_execute_ability filter returns.
+	 */
+	public function test_short_circuit_error_has_no_retry_hint(): void {
+		if ( version_compare( get_bloginfo( 'version' ), '7.1-alpha', '<' ) ) {
+			$this->markTestSkipped( 'The wp_pre_execute_ability filter exists since WordPress 7.1.' );
+		}
+
+		$ability = new Ability(
+			'test/short-circuit-error',
+			array(
+				'label'               => 'Short-circuit error',
+				'description'         => 'Never runs its callback.',
+				'category'            => 'woocommerce',
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => fn() => array(),
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		$short_circuit = fn() => new \WP_Error( 'ability_invalid_output', 'The filter failed.' );
+		add_filter( 'wp_pre_execute_ability', $short_circuit );
+
+		$result = $ability->execute();
+
+		remove_filter( 'wp_pre_execute_ability', $short_circuit );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'The filter failed.', $result->get_error_message() );
 	}
 
 	/**
