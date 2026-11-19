@@ -50,8 +50,8 @@ class ProductSales {
 		$start    = new \DateTimeImmutable( '-' . self::DAYS . ' days', wp_timezone() );
 		$since    = $start->format( 'Y-m-d H:i:s' );
 		$excluded = self::excluded_statuses();
-		$stats  = $wpdb->prefix . 'wc_order_stats';
-		$not_in = self::not_in( $excluded );
+		$stats    = $wpdb->prefix . 'wc_order_stats';
+		$not_in   = self::not_in( $excluded );
 
 		// Count first so an Analytics import that commits between the two reads cannot make
 		// the order total cover revenue that this request never saw.
@@ -97,6 +97,8 @@ class ProductSales {
 	 * @param array<int, string>   $excluded    Order statuses Analytics leaves out.
 	 * @param array<int, int>|null $product_ids Product ids, or null for every product.
 	 * @return array{by_product:array<int,float>,by_variation:array<int,float>}
+	 *
+	 * @throws \RuntimeException When the sales query fails.
 	 */
 	private static function revenue( string $since, array $excluded, ?array $product_ids ): array {
 		global $wpdb;
@@ -125,12 +127,9 @@ class ProductSales {
 			ARRAY_A
 		);
 		// phpcs:enable
-		if ( ! is_array( $rows ) || '' !== $wpdb->last_error ) {
-			throw new \RuntimeException(
-				'' !== $wpdb->last_error
-					? 'Agent readiness sales query failed: ' . $wpdb->last_error
-					: 'Agent readiness sales query failed.'
-			);
+		$error = self::db_error();
+		if ( ! is_array( $rows ) || '' !== $error ) {
+			throw new \RuntimeException( esc_html( rtrim( 'Agent readiness sales query failed. ' . $error ) ) );
 		}
 
 		foreach ( $rows as $row ) {
@@ -231,5 +230,15 @@ class ProductSales {
 			}
 		}
 		return array_values( array_unique( $statuses ) );
+	}
+
+	/**
+	 * The last database error, read fresh after a query.
+	 *
+	 * @phpstan-impure
+	 */
+	private static function db_error(): string {
+		global $wpdb;
+		return is_string( $wpdb->last_error ) ? $wpdb->last_error : '';
 	}
 }

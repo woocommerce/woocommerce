@@ -171,34 +171,26 @@ class ProductScan {
 		$this->available           = self::count_published( self::count_query( self::COUNT_AVAILABLE ) );
 		$this->unsupported_types   = self::count_published( self::count_query( self::COUNT_UNSUPPORTED ) );
 
-		$query_failed = false;
-		$note_failure = static function ( $posts ) use ( &$query_failed ) {
-			global $wpdb;
-			if ( is_string( $wpdb->last_error ) && '' !== $wpdb->last_error ) {
-				$query_failed = true;
-			}
-			return $posts;
-		};
-		add_filter( 'posts_results', $note_failure, PHP_INT_MAX );
-		try {
-			$query = new \WP_Query(
-				array(
-					'post_type'      => 'product',
-					'post_status'    => 'publish',
-					// One more than the limit, to tell a catalog cut short from one that fits.
-					'posts_per_page' => self::PRODUCT_LIMIT + 1,
-					'fields'         => 'ids',
-					'orderby'        => array(
-						'modified' => 'DESC',
-						'ID'       => 'DESC',
-					),
-					'no_found_rows'  => true,
-					'tax_query'      => self::count_query( self::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-				)
-			);
-		} finally {
-			remove_filter( 'posts_results', $note_failure, PHP_INT_MAX );
-		}
+		global $wpdb;
+		// An ids query returns before posts_results runs, so read the error the query left instead.
+		$wpdb->last_error = '';
+		$query            = new \WP_Query(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				// One more than the limit, to tell a catalog cut short from one that fits.
+				'posts_per_page' => self::PRODUCT_LIMIT + 1,
+				'fields'         => 'ids',
+				'orderby'        => array(
+					'modified' => 'DESC',
+					'ID'       => 'DESC',
+				),
+				'no_found_rows'  => true,
+				'tax_query'      => self::count_query( self::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			)
+		);
+		$query_failed     = '' !== self::db_error();
+
 		$product_ids = array_map(
 			static function ( $post ): int {
 				return $post instanceof \WP_Post ? $post->ID : (int) $post;
@@ -691,5 +683,15 @@ class ProductScan {
 		foreach ( self::statuses( array_values( $failures ) ) as $channel => $status ) {
 			$this->statuses[ $channel ][ $status ] = ( $this->statuses[ $channel ][ $status ] ?? 0 ) + 1;
 		}
+	}
+
+	/**
+	 * The last database error, read fresh after a query.
+	 *
+	 * @phpstan-impure
+	 */
+	private static function db_error(): string {
+		global $wpdb;
+		return is_string( $wpdb->last_error ) ? $wpdb->last_error : '';
 	}
 }

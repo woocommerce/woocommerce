@@ -513,11 +513,11 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		update_option( AgentReadiness::REPORT_OPTION, array( 'products' => 4 ) );
 		$this->create_products( 1 );
 		$this->sut->run();
-		$keep_old = static function ( $value, $option, $old ) {
-			unset( $value, $option );
+		$keep_old = static function ( $value, $old ) {
+			unset( $value );
 			return $old;
 		};
-		add_filter( 'pre_update_option_' . AgentReadiness::REPORT_OPTION, $keep_old, 10, 3 );
+		add_filter( 'pre_update_option_' . AgentReadiness::REPORT_OPTION, $keep_old, 10, 2 );
 		try {
 			$this->run_batches();
 		} finally {
@@ -595,11 +595,11 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 			}
 			return array();
 		};
-		add_filter( 'posts_results', $selection, 10, 2 );
+		add_filter( 'posts_pre_query', $selection, 10, 2 );
 		try {
 			$this->assertSame( array(), ( new ProductScan() )->start() );
 		} finally {
-			remove_filter( 'posts_results', $selection, 10 );
+			remove_filter( 'posts_pre_query', $selection, 10 );
 		}
 
 		$fail = static function ( $posts, $query ) {
@@ -610,12 +610,12 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 			$wpdb->last_error = 'database unavailable';
 			return array();
 		};
-		add_filter( 'posts_results', $fail, 10, 2 );
+		add_filter( 'posts_pre_query', $fail, 10, 2 );
 		try {
 			$this->expectException( \RuntimeException::class );
 			( new ProductScan() )->start();
 		} finally {
-			remove_filter( 'posts_results', $fail, 10 );
+			remove_filter( 'posts_pre_query', $fail, 10 );
 			global $wpdb;
 			$wpdb->last_error = '';
 		}
