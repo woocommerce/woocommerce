@@ -1120,4 +1120,30 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertSame( 'requires_escalation', $completed['status'] );
 		$this->assertSame( array(), $order->get_coupon_codes() );
 	}
+
+	/**
+	 * @testdox Complete gives the coupon holds back when holding stock fails for a reason other than stock.
+	 */
+	public function test_complete_releases_coupon_holds_when_the_stock_hold_throws(): void {
+		$coupon  = \WC_Helper_Coupon::create_coupon(
+			'once',
+			array(
+				'coupon_amount' => '1',
+				'usage_limit'   => '1',
+			)
+		);
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'once' ) ) ) );
+
+		$throw = static function () {
+			throw new \RuntimeException( 'Broken filter.' );
+		};
+		add_filter( 'woocommerce_order_hold_stock_minutes', $throw );
+		$response = $this->request( 'POST', $path . '/complete' );
+		remove_filter( 'woocommerce_order_hold_stock_minutes', $throw );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 0, (int) $coupon->get_data_store()->get_tentative_usage_count( $coupon->get_id() ) );
+	}
 }

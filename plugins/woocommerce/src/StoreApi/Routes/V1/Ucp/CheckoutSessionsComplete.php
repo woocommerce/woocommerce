@@ -69,6 +69,8 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
+	 * @throws \Throwable When holding stock fails for a reason other than stock.
+	 *
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
@@ -159,6 +161,11 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			// The hold failed on stock another checkout took since the cart was last checked. The order
 			// stays a draft, which the payment page refuses.
 			return $this->ucp_error( Utils::cart_error_code( (string) $e->getErrorCode() ), wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200, '$.line_items' );
+		} catch ( \Throwable $e ) {
+			// A filter on the way to the hold can throw anything, and the coupon holds must not outlive the attempt.
+			wc_release_coupons_for_order( $order );
+
+			throw $e;
 		}
 
 		// The payment page only takes an order awaiting payment, which a checkout draft is not.
