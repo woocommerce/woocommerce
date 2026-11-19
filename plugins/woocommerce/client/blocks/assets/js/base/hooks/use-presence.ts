@@ -53,3 +53,12 @@ export function usePresence< T, E extends Element = HTMLDivElement >(
 		ref,
 	};
 }
+
+/**
+ * Attributes for content that is exiting. It is already gone for the shopper, so it must not take clicks or be read
+ * out. React 18 has no `inert` prop, so spread these on the element.
+ *
+ * @param isExiting Whether the content is exiting.
+ */
+export const exitingProps = ( isExiting: boolean ) =>
+	isExiting ? { inert: '', 'aria-hidden': true } : {};

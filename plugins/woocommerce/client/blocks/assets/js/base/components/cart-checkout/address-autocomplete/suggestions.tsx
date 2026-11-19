@@ -4,6 +4,7 @@
 import { AddressAutocompleteResult } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
 import { sanitizeHTML } from '@woocommerce/sanitize';
+import { exitingProps } from '@woocommerce/base-hooks';
 
 /**
  * Get highlighted label parts based on matches returned by `search` results.
@@ -91,13 +92,8 @@ export const Suggestions = ( {
 			className="wc-block-components-address-autocomplete-suggestions"
 			role="region"
 			aria-live="polite"
-			// A closing list is already gone for the shopper, so it must not take clicks or be read out. React 18 has
-			// no `inert` prop.
-			{ ...( isExiting && {
-				inert: '',
-				'aria-hidden': true,
-				'data-wc-exiting': '',
-			} ) }
+			{ ...exitingProps( isExiting ) }
+			{ ...( isExiting && { 'data-wc-exiting': '' } ) }
 		>
 			<ul
 				className="suggestions-list"
