@@ -458,6 +458,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\RegulatoryFields\ClassicCheckout::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\RegulatoryFields\OrderAdmin::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\RegulatoryFields\OrderDetails::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\RegulatoryFields\OrderEmails::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
