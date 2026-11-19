@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Share the PHP debug log marker for browser test sites.
