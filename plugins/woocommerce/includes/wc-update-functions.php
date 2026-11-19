@@ -4036,14 +4036,14 @@ function wc_update_1130_set_legacy_variation_price_hash_option() {
  *
  * Scan 100 actions per run, including completed and failed actions.
  *
- * @since 11.3.0
+ * @since 11.3.1
  * @return bool True when another batch remains.
  */
-function wc_update_1130_redact_deferred_customer_passwords() {
+function wc_update_1131_redact_deferred_customer_passwords() {
 	global $wpdb;
 
 	$table          = $wpdb->prefix . 'actionscheduler_actions';
-	$last_id_option = 'woocommerce_update_1130_last_deferred_email_action_id';
+	$last_id_option = 'woocommerce_update_1131_last_deferred_email_action_id';
 	$batch_size     = 100;
 	$hook           = 'woocommerce_send_queued_transactional_email';
 
@@ -4420,7 +4420,7 @@ function wc_update_1122_remove_objects_from_default_attributes(): void {
  *
  * @since 11.3.1
  */
-function wc_update_11301_invalidate_postcode_match_caches(): void {
+function wc_update_1131_invalidate_postcode_match_caches(): void {
 	WC_Cache_Helper::invalidate_cache_group( 'shipping_zones' );
 	WC_Cache_Helper::invalidate_cache_group( 'taxes' );
 	WC_Cache_Helper::get_transient_version( 'shipping', true );

@@ -378,8 +378,10 @@ class WC_Install {
 		'11.3.0-1' => array(
 			// Run again for stores whose database was already at 11.3.0 or later, as they skip the 11.2.2 key.
 			'wc_update_1122_remove_objects_from_default_attributes',
-			'wc_update_1130_redact_deferred_customer_passwords',
-			'wc_update_11301_invalidate_postcode_match_caches',
+		),
+		'11.3.1'   => array(
+			'wc_update_1131_redact_deferred_customer_passwords',
+			'wc_update_1131_invalidate_postcode_match_caches',
 		),
 	);
 
