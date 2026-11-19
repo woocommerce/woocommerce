@@ -425,7 +425,7 @@ class ListTable extends \WP_List_Table {
 			array(
 				'total_items' => $this->total_items, // Total items defined above.
 				'per_page'    => $per_page, // Per page constant defined at top of method.
-				'total_pages' => ceil( $this->total_items / $per_page ), // Calculate pages count.
+				'total_pages' => (int) ceil( $this->total_items / $per_page ), // Calculate pages count.
 			)
 		);
 	}

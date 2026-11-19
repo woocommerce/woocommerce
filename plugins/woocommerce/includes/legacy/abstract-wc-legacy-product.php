@@ -627,6 +627,9 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 	 */
 	public function get_matching_variation( $match_attributes = array() ) {
 		wc_deprecated_function( 'WC_Product::get_matching_variation', '3.0', 'Product data store find_matching_product_variation' );
+		if ( ! $this instanceof WC_Product ) {
+			return 0;
+		}
 		$data_store = WC_Data_Store::load( 'product' );
 		return $data_store->find_matching_product_variation( $this, $match_attributes );
 	}
