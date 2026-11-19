@@ -37,6 +37,6 @@
 
 	// Lets the height reach zero.
 	&[data-wc-collapse] {
-		min-height: 0;
+		min-block-size: 0;
 	}
 }
