@@ -2,7 +2,7 @@
  * `woocommerce/motion-safe`: a `transition*` or `animation*` declaration (other than `none`) must be inside
  * `@include motion-safe` or `@keyframes`. Transitions that only fade or change color, including `motion-state()` of
  * those properties and `motion-hold()`, and the shared fade animations, can be anywhere, because they do not move
- * anything.
+ * anything. The `$state` of `@include motion-transition` follows the same rule, because it runs with reduced motion.
  * See docs/contributors/motion.md.
  */
 const stylelint = require( 'stylelint' );
@@ -17,6 +17,8 @@ const ruleName = 'woocommerce/motion-safe';
 const messages = ruleMessages( ruleName, {
 	rejected: ( prop ) =>
 		`Use a motion mixin, or put "${ prop }" in \`@include motion-safe { … }\`, so that it obeys reduced motion. Only transitions of opacity and colors can be outside it.`,
+	rejectedState: () =>
+		'The `$state` of `motion-transition` runs with reduced motion, so it can list only opacity and colors. Pass movement as `$move`.',
 } );
 
 const FADE_PROPERTIES = new Set( [
@@ -168,6 +170,38 @@ const isGuard = ( { type, name, params } ) =>
 	( name.endsWith( 'keyframes' ) ||
 		( name === 'include' && params.startsWith( 'motion-safe' ) ) );
 
+const isGuarded = ( node ) => {
+	for ( let parent = node.parent; parent; parent = parent.parent ) {
+		if ( isGuard( parent ) ) {
+			return true;
+		}
+	}
+	return false;
+};
+
+// The `$state` argument of `@include motion-transition( … )`, named or first positional, or null when there is none.
+const motionTransitionState = ( { params } ) => {
+	const name = 'motion-transition';
+	const rest = params.slice( name.length ).trim();
+	if ( ! params.startsWith( name ) || ! rest.startsWith( '(' ) ) {
+		return null;
+	}
+	const args = splitList( rest.slice( 1, -1 ) );
+	for ( const arg of args ) {
+		const colon = arg.indexOf( ':' );
+		if ( colon !== -1 && arg.slice( 0, colon ).trim() === '$state' ) {
+			return arg.slice( colon + 1 ).trim();
+		}
+	}
+	const first = args[ 0 ];
+	const colon = first ? first.indexOf( ':' ) : -1;
+	const isNamed =
+		colon !== -1 &&
+		first.startsWith( '$' ) &&
+		! first.slice( 0, colon ).trim().includes( ' ' );
+	return first && ! isNamed ? first : null;
+};
+
 const ruleFunction = ( primary ) => ( root, result ) => {
 	if (
 		! validateOptions( result, ruleName, {
@@ -187,15 +221,32 @@ const ruleFunction = ( primary ) => ( root, result ) => {
 		) {
 			return;
 		}
-		for ( let node = decl.parent; node; node = node.parent ) {
-			if ( isGuard( node ) ) {
-				return;
-			}
+		if ( isGuarded( decl ) ) {
+			return;
 		}
 		report( {
 			message: messages.rejected( decl.prop ),
 			node: decl,
 			word: decl.prop,
+			result,
+			ruleName,
+		} );
+	} );
+	root.walkAtRules( 'include', ( include ) => {
+		const state = motionTransitionState( include );
+		if (
+			state === null ||
+			isGuarded( include ) ||
+			listTokens( state ).every( ( token ) =>
+				isFadeProperty( token, include, new Set() )
+			)
+		) {
+			return;
+		}
+		report( {
+			message: messages.rejectedState(),
+			node: include,
+			word: '$state',
 			result,
 			ruleName,
 		} );
