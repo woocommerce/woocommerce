@@ -38,6 +38,8 @@ const sectionsOf = ( container: HTMLElement ) =>
 const removeStyle = ( element: HTMLElement, property: string ) => {
 	element.style.removeProperty( property );
 	if ( element.style.length === 0 ) {
+		// Chrome writes the cleared declarations back as `style=""` when nothing has read the attribute since.
+		element.getAttribute( 'style' );
 		element.removeAttribute( 'style' );
 	}
 };
