@@ -156,17 +156,21 @@ class Gallery extends Abstract_Block_Renderer {
 	 */
 	private function get_gallery_image_size( array $attrs, \WP_HTML_Tag_Processor $html ): ?array {
 		if ( isset( $attrs['id'] ) && is_numeric( $attrs['id'] ) && (int) $attrs['id'] > 0 ) {
-			$id       = (int) $attrs['id'];
-			$slug     = isset( $attrs['sizeSlug'] ) && is_string( $attrs['sizeSlug'] ) ? $attrs['sizeSlug'] : 'full';
-			$metadata = wp_get_attachment_metadata( $id );
+			$id   = (int) $attrs['id'];
+			$slug = isset( $attrs['sizeSlug'] ) && is_string( $attrs['sizeSlug'] ) ? $attrs['sizeSlug'] : 'full';
+			// Resize services can add generated sizes based on their limits to filtered metadata.
+			$metadata = wp_get_attachment_metadata( $id, true );
 			$stored   = $metadata['sizes'][ $slug ] ?? array();
 			if ( ! empty( $stored['width'] ) && ! empty( $stored['height'] ) && (int) $stored['width'] > 0 && (int) $stored['height'] > 0 ) {
 				return array( (int) $stored['width'], (int) $stored['height'] );
 			}
 
-			$size = wp_get_attachment_image_src( $id, $slug );
-			if ( $size && $size[1] > 0 && $size[2] > 0 ) {
-				return array( (int) $size[1], (int) $size[2] );
+			// Resize services may return their configured size limits when the attachment dimensions are missing.
+			if ( (int) ( $metadata['width'] ?? 0 ) > 0 && (int) ( $metadata['height'] ?? 0 ) > 0 ) {
+				$size = wp_get_attachment_image_src( $id, $slug );
+				if ( $size && $size[1] > 0 && $size[2] > 0 ) {
+					return array( (int) $size[1], (int) $size[2] );
+				}
 			}
 		}
 
