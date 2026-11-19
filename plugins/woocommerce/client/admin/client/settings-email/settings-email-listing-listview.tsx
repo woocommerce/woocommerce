@@ -82,6 +82,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		page: 1,
 		perPage: 20,
 		titleField: 'title',
+		descriptionField: 'description',
 		showTitle: true,
 		layout: {},
 	} );
@@ -122,17 +123,12 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				id: 'title',
 				label: __( 'Title', 'woocommerce' ),
 				enableHiding: false,
-				render: ( row: { item: EmailType } ) => {
-					return (
-						<div className="woocommerce-email-listing-title">
-							{ row.item.title }
-							<br />
-							<span className="woocommerce-email-listing-description">
-								{ row.item.description }
-							</span>
-						</div>
-					);
-				},
+			},
+			{
+				id: 'description',
+				label: __( 'Description', 'woocommerce' ),
+				enableHiding: false,
+				enableSorting: false,
 			},
 			{
 				id: 'recipients',
