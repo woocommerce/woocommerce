@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Sanitize the Checkout block's terms and conditions text before it is shown to shoppers.

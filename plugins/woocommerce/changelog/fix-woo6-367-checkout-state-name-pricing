@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Apply state shipping zones and state tax rates on the classic checkout when the state is entered by name instead of its code.

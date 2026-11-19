@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent concurrent checkout updates from adding unpaid products to completed orders.

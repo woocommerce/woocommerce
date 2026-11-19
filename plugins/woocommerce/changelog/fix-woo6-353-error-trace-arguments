@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Omit potentially sensitive call arguments from fatal and Store API error logs.

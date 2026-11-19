@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ship block checkout orders to the billing address when the store forces shipping to the customer billing address.

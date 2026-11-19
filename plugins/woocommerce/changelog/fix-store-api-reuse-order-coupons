@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep an unpaid order's coupons when the cart's coupons change before checkout.

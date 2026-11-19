@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep PayPal shipping destinations consistent and hold captured orders until their delivery address is confirmed.

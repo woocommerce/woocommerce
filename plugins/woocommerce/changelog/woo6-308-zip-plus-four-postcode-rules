@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Match ZIP+4 postcodes against shipping zones and tax rates limited to their 5-digit ZIP code or a range of 5-digit ZIP codes.

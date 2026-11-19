@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Improve how coupon usage limits per user are counted at checkout.

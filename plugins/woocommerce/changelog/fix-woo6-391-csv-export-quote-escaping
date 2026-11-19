@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep names with quotes in a single cell when downloading Analytics reports as CSV.
