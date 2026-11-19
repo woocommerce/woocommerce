@@ -41914,7 +41914,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method object\:\:get\(\)\.$#'
 			identifier: method.notFound
-			count: 7
+			count: 6
 			path: src/Admin/API/Reports/Stock/Controller.php
 
 		-
@@ -42017,12 +42017,6 @@ parameters:
 			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Stock\\Controller\:\:prepare_links\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\Stock\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Admin/API/Reports/Stock/Controller.php
-
-		-
-			message: '#^Part \$order \(array\|string\) of encapsed string cannot be cast to string\.$#'
-			identifier: encapsedStringPart.nonString
-			count: 6
 			path: src/Admin/API/Reports/Stock/Controller.php
 
 		-
