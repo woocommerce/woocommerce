@@ -450,20 +450,24 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test the default row crop and the opt-out using the existing crop URL filter.
+	 * Test automatic cropping with the existing crop URL filter.
 	 *
-	 * @param array $attrs Additional gallery attributes.
-	 * @param array $sizes Image dimensions or markup for a rejected image.
-	 * @param array $expected Ratios passed to the server crop filter, in render order.
-	 * @param int   $caption_count Number of captions expected in the rendered gallery.
+	 * @testdox Crops mixed rows and respects explicit ratios and crop opt-outs.
+	 *
+	 * @param array       $attrs Additional gallery attributes.
+	 * @param array       $sizes Image dimensions or markup for a rejected image.
+	 * @param array       $expected Ratios passed to the server crop filter, in render order.
+	 * @param int         $caption_count Number of captions expected in the rendered gallery.
+	 * @param string|null $first_image_ratio Explicit ratio for the first image, if any.
 	 * @phpstan-param list<array{int, int}|string> $sizes
 	 * @testWith [{}, [[900,600],[600,900],[900,600]], ["600/900","600/900"]]
 	 *           [{"imageCrop":true,"aspectRatio":"auto"}, [[900,600],"<img alt='No source'>",[600,900],[900,600]], ["600/900","600/900"]]
 	 *           [{"columns":3}, [[900,600],"<img alt='No source'><figcaption>Caption</figcaption>",[600,900]], ["600/900","600/900"], 1]
 	 *           [{"imageCrop":false}, [[900,600],[600,900],[900,600]], []]
 	 *           [{}, [[900,600],[600,400],[900,600]], []]
+	 *           [{}, [[900,600],[900,600]], ["1","1"], 0, "1"]
 	 */
-	public function testItCropsMixedGalleryRowsToFit( array $attrs, array $sizes, array $expected, int $caption_count = 0 ): void {
+	public function testItCropsMixedGalleryRowsToFit( array $attrs, array $sizes, array $expected, int $caption_count = 0, ?string $first_image_ratio = null ): void {
 		$gallery          = $this->build_gallery_with_images( count( $sizes ), 2 );
 		$gallery['attrs'] = array_merge( $gallery['attrs'], $attrs );
 		foreach ( $sizes as $index => $size ) {
@@ -471,6 +475,9 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 			$gallery['innerBlocks'][ $index ]['innerHTML'] = is_array( $size )
 				? sprintf( '<img src="https://example.com/image%d.jpg" width="%d" height="%d">', $index, $size[0], $size[1] )
 				: $size;
+		}
+		if ( null !== $first_image_ratio ) {
+			$gallery['innerBlocks'][0]['attrs']['aspectRatio'] = $first_image_ratio;
 		}
 
 		$ratios = array();
@@ -547,36 +554,66 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that a selected attachment size takes precedence over the full image's shape.
+	 * Test attachment dimensions with current, stale, and malformed source data.
+	 *
+	 * @testdox Uses the attachment dimensions when they match the saved gallery image.
+	 *
+	 * @param string $source Image filename saved in the gallery.
+	 * @param bool   $malformed Whether the attachment source filter returns incomplete dimensions.
+	 * @param string $ratio Expected ratio for the row.
+	 * @testWith ["portrait-150x150.jpg", false, "150/150"]
+	 *           ["portrait-600x900.jpg", false, "600/900"]
+	 *           ["portrait-150x150.jpg", true, "600/900"]
 	 */
-	public function testItUsesTheSelectedAttachmentSizeForAutomaticCropping(): void {
+	public function testItUsesTheSelectedAttachmentSizeForAutomaticCropping( string $source, bool $malformed, string $ratio ): void {
 		$attachment_id = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
 		$this->assertIsInt( $attachment_id );
+		update_attached_file( $attachment_id, 'portrait.jpg' );
 		wp_update_attachment_metadata(
 			$attachment_id,
 			array(
+				'file'   => 'portrait.jpg',
 				'width'  => 900,
 				'height' => 600,
 				'sizes'  => array(
 					'thumbnail' => array(
+						'file'   => 'portrait-150x150.jpg',
 						'width'  => 150,
 						'height' => 150,
 					),
 				),
 			)
 		);
+		if ( $malformed ) {
+			add_filter(
+				'wp_get_attachment_image_src',
+				static function ( $size, $id ) use ( $attachment_id ) {
+					if ( $attachment_id === $id ) {
+						$size[2] = 'unknown';
+					}
+					return $size;
+				},
+				10,
+				2
+			);
+		}
 
+		$attachment_url = wp_get_attachment_url( $attachment_id );
+		$this->assertIsString( $attachment_url );
+
+		$url                                    = trailingslashit( dirname( $attachment_url ) ) . $source;
 		$gallery                                = $this->build_gallery_with_images( 2, 2 );
 		$gallery['innerBlocks'][0]['attrs']     = array(
 			'id'       => $attachment_id,
 			'sizeSlug' => 'thumbnail',
 		);
+		$gallery['innerBlocks'][0]['innerHTML'] = '<img src="' . esc_url( $url ) . '" width="600" height="900">';
 		$gallery['innerBlocks'][1]['attrs']     = array();
 		$gallery['innerBlocks'][1]['innerHTML'] = '<img src="https://example.com/landscape.jpg" width="900" height="600">';
 
 		$rendered = $this->gallery_renderer->render( '', $gallery, $this->rendering_context );
 
-		$this->assertSame( 2, substr_count( $rendered, 'aspect-ratio: 150/150;' ) );
+		$this->assertSame( 2, substr_count( $rendered, 'aspect-ratio: ' . $ratio . ';' ) );
 	}
 
 	/**

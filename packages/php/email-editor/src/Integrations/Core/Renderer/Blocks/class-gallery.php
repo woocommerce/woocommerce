@@ -85,13 +85,17 @@ class Gallery extends Abstract_Block_Renderer {
 				'ratio' => $image_ratio,
 			);
 			if ( $auto_crop && null === $image_ratio && is_numeric( $image_attrs['id'] ?? null ) && (int) $image_attrs['id'] > 0 ) {
-				$attachment_ids[] = (int) $image_attrs['id'];
+				$attachment_ids[ count( $images ) - 1 ] = (int) $image_attrs['id'];
 			}
 		}
 
-		if ( ! empty( $attachment_ids ) && count( $images ) > 1 ) {
+		// A trailing single image never needs a size lookup for automatic cropping.
+		if ( 1 === count( $images ) % $columns ) {
+			unset( $attachment_ids[ count( $images ) - 1 ] );
+		}
+		if ( ! empty( $attachment_ids ) ) {
 			// Prime attachment posts and metadata before looking up image sizes.
-			_prime_post_caches( array_unique( $attachment_ids ) );
+			_prime_post_caches( array_unique( $attachment_ids ), false );
 		}
 
 		$gallery_ratio = is_string( $gallery_aspect_ratio ) ? $gallery_aspect_ratio : null;
@@ -120,13 +124,17 @@ class Gallery extends Abstract_Block_Renderer {
 	private function get_auto_crop_ratio( array $row ): ?string {
 		$ratios = array();
 		foreach ( $row as $image ) {
-			if ( null !== $image['ratio'] ) {
-				continue;
-			}
-
 			$html = new \WP_HTML_Tag_Processor( $image['html'] );
 			if ( ! $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
 				// A caption can survive when its image was rejected.
+				continue;
+			}
+
+			if ( null !== $image['ratio'] ) {
+				$ratio = Html_Processing_Helper::parse_aspect_ratio( $image['ratio'] );
+				if ( null !== $ratio && $ratio > 0 && is_finite( $ratio ) ) {
+					$ratios[ $image['ratio'] ] = $ratio;
+				}
 				continue;
 			}
 
@@ -155,32 +163,44 @@ class Gallery extends Abstract_Block_Renderer {
 	 * @return array{int, int}|null Image width and height if known.
 	 */
 	private function get_gallery_image_size( array $attrs, \WP_HTML_Tag_Processor $html ): ?array {
-		if ( isset( $attrs['id'] ) && is_numeric( $attrs['id'] ) && (int) $attrs['id'] > 0 ) {
+		$src = $html->get_attribute( 'src' );
+		if ( is_string( $src ) && isset( $attrs['id'] ) && is_numeric( $attrs['id'] ) && (int) $attrs['id'] > 0 ) {
 			$id   = (int) $attrs['id'];
 			$slug = isset( $attrs['sizeSlug'] ) && is_string( $attrs['sizeSlug'] ) ? $attrs['sizeSlug'] : 'full';
-			// Resize services can add generated sizes based on their limits to filtered metadata.
-			$metadata = wp_get_attachment_metadata( $id, true );
-			$stored   = $metadata['sizes'][ $slug ] ?? array();
-			if ( ! empty( $stored['width'] ) && ! empty( $stored['height'] ) && (int) $stored['width'] > 0 && (int) $stored['height'] > 0 ) {
-				return array( (int) $stored['width'], (int) $stored['height'] );
-			}
-
-			// Resize services may return their configured size limits when the attachment dimensions are missing.
-			if ( (int) ( $metadata['width'] ?? 0 ) > 0 && (int) ( $metadata['height'] ?? 0 ) > 0 ) {
+			// Require stored dimensions so a resize service's configured limits cannot stand in for an unknown image size.
+			$metadata        = wp_get_attachment_metadata( $id, true );
+			$stored          = $metadata['sizes'][ $slug ] ?? null;
+			$has_stored_size = $this->get_positive_dimension( $stored['width'] ?? null ) > 0 && $this->get_positive_dimension( $stored['height'] ?? null ) > 0;
+			$has_full_size   = $this->get_positive_dimension( $metadata['width'] ?? null ) > 0 && $this->get_positive_dimension( $metadata['height'] ?? null ) > 0;
+			if ( $has_stored_size || $has_full_size ) {
 				$size = wp_get_attachment_image_src( $id, $slug );
-				if ( $size && $size[1] > 0 && $size[2] > 0 ) {
-					return array( (int) $size[1], (int) $size[2] );
+				// The selected size may have been regenerated since the gallery saved its URL.
+				if ( is_array( $size ) && ( $size[0] ?? null ) === $src ) {
+					$width  = $this->get_positive_dimension( $size[1] ?? null );
+					$height = $this->get_positive_dimension( $size[2] ?? null );
+					if ( $width > 0 && $height > 0 ) {
+						return array( $width, $height );
+					}
 				}
 			}
 		}
 
-		$width  = $html->get_attribute( 'width' );
-		$height = $html->get_attribute( 'height' );
-		if ( is_string( $width ) && is_string( $height ) && ctype_digit( $width ) && ctype_digit( $height ) && (int) $width > 0 && (int) $height > 0 ) {
-			return array( (int) $width, (int) $height );
-		}
+		$width  = $this->get_positive_dimension( $html->get_attribute( 'width' ) );
+		$height = $this->get_positive_dimension( $html->get_attribute( 'height' ) );
+		return $width > 0 && $height > 0 ? array( $width, $height ) : null;
+	}
 
-		return null;
+	/**
+	 * Read an integer pixel dimension from image metadata, filters, or markup.
+	 *
+	 * @param mixed $value Candidate dimension.
+	 * @return int Positive dimension, or zero when unknown.
+	 */
+	private function get_positive_dimension( $value ): int {
+		if ( is_int( $value ) || ( is_string( $value ) && ctype_digit( $value ) ) ) {
+			return max( 0, (int) $value );
+		}
+		return 0;
 	}
 
 	/**
