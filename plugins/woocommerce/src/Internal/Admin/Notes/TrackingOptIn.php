@@ -84,9 +84,11 @@ class TrackingOptIn {
 			// Get the previous value of the tracking.
 			$prev_value = get_option( 'woocommerce_allow_tracking', 'no' );
 
-			// Opt in to tracking. Updating the option schedules the Action Scheduler first send
-			// via WC()->handle_tracking_setting_change(); no separate WP-Cron job.
+			// Opt in to tracking via Action Scheduler (not WP-Cron). schedule_tracking_action()
+			// is also called from the option-update hook when it fires; calling it here covers
+			// the add_option path when the option row was missing.
 			update_option( 'woocommerce_allow_tracking', 'yes' );
+			WC()->schedule_tracking_action();
 
 			// Track woocommerce_allow_tracking_toggled in case was set as 'no' before.
 			if ( class_exists( 'WC_Tracks' ) && 'no' === $prev_value ) {

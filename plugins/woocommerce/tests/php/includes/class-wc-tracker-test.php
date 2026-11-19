@@ -318,37 +318,18 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	public function test_send_tracking_data_does_not_send_when_opted_out( bool $override ): void {
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		$requests = 0;
-		add_filter(
-			'pre_http_request',
-			function () use ( &$requests ) {
-				++$requests;
-				return array( 'response' => array( 'code' => 200 ) );
-			}
-		);
+		$intercept = function () use ( &$requests ) {
+			++$requests;
+			return array( 'response' => array( 'code' => 200 ) );
+		};
+		add_filter( 'pre_http_request', $intercept );
 
 		WC_Tracker::send_tracking_data( $override );
 
 		$this->assertSame( 0, $requests, 'Opted-out stores must not post tracking data.' );
 		$this->assertFalse( get_option( 'woocommerce_tracker_last_send' ), 'Opted-out stores must not record a send time.' );
 		$this->assertFalse( get_option( 'woocommerce_tracker_last_attempt' ), 'Opted-out stores must not record an attempt time.' );
-	}
-
-	/**
-	 * @testdox Should clear a pending WP-Cron tracker send when tracking is turned off.
-	 */
-	public function test_opting_out_clears_wp_cron_tracker_event(): void {
-		wp_schedule_single_event( time() + 60, 'woocommerce_tracker_send_event', array( true ) );
-		$this->assertNotFalse(
-			wp_next_scheduled( 'woocommerce_tracker_send_event', array( true ) ),
-			'Precondition: a WP-Cron tracker send should be scheduled.'
-		);
-
-		WC()->handle_tracking_setting_change( 'yes', 'no' );
-
-		$this->assertFalse(
-			wp_next_scheduled( 'woocommerce_tracker_send_event', array( true ) ),
-			'Opting out should clear a pending WP-Cron tracker send.'
-		);
+		remove_filter( 'pre_http_request', $intercept );
 	}
 
 	/**

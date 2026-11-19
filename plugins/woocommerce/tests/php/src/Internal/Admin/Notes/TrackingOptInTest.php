@@ -16,8 +16,9 @@ class TrackingOptInTest extends WC_Unit_Test_Case {
 	 * @testdox Should opt in via Action Scheduler only, without scheduling a WP-Cron first send.
 	 */
 	public function test_opt_in_schedules_action_scheduler_not_wp_cron(): void {
-		update_option( 'woocommerce_allow_tracking', 'no' );
-		wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
+		// Delete so update_option() takes the add_option path and the update_option_* hook does not fire.
+		delete_option( 'woocommerce_allow_tracking' );
+		wp_unschedule_hook( 'woocommerce_tracker_send_event' );
 		as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce' );
 
 		$note = new Note();
@@ -28,7 +29,7 @@ class TrackingOptInTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'yes', get_option( 'woocommerce_allow_tracking' ) );
 		$this->assertTrue(
 			as_has_scheduled_action( 'woocommerce_tracker_send_event_wrapper' ),
-			'Opting in via the inbox note should schedule the Action Scheduler wrapper.'
+			'Opting in via the inbox note should schedule the Action Scheduler wrapper even when the option-update hook does not fire.'
 		);
 		$this->assertFalse(
 			wp_next_scheduled( 'woocommerce_tracker_send_event', array( true ) ),
