@@ -27,6 +27,6 @@ Core ability output types are never nullable. Omit an unavailable field instead 
 
 ## Mark abilities that do not write as read-only
 
-Set `'readonly' => true` in the `annotations` meta of every ability that does not write. `Ability::validate_output()` adds a hint to an invalid output error that the ability may already have saved changes. It leaves out the hint only when `readonly` is `true`.
+Set `'readonly' => true` in the `annotations` meta of every ability that does not write. `Ability::execute()` adds a hint to an invalid output error that the ability may already have saved changes. It leaves out the hint only when `readonly` is `true`.
 
 Do not use `destructive` for this. An ability with `destructive: false`, such as a create or an email send, still changes the store.
