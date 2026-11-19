@@ -14,6 +14,7 @@ test( 'switches checkout pages and themes in either order without reactivating t
 	);
 
 	assert.deepEqual( JSON.parse( result ), [
+		[ '32', '33' ],
 		[ 12, 13 ],
 		[ 'blocks', 'twentytwentyfive', [ '32', '33' ] ],
 		[ 'legacy', 'storefront', [ 12, 13 ] ],

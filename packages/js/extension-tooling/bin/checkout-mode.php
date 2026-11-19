@@ -36,7 +36,10 @@ trait Checkout_Mode {
 	 */
 	public static function filter_cart_page_id( $cart_page_id ) {
 		if ( 'legacy' === get_option( 'e2e_tests_mode', 'legacy' ) ) {
-			return (int) get_option( 'tests_legacy_woocommerce_cart_page_id' );
+			$legacy_page_id = (int) get_option( 'tests_legacy_woocommerce_cart_page_id', 0 );
+			if ( $legacy_page_id > 0 ) {
+				return $legacy_page_id;
+			}
 		}
 
 		return $cart_page_id;
@@ -50,7 +53,10 @@ trait Checkout_Mode {
 	 */
 	public static function filter_checkout_page_id( $checkout_page_id ) {
 		if ( 'legacy' === get_option( 'e2e_tests_mode', 'legacy' ) ) {
-			return (int) get_option( 'tests_legacy_woocommerce_checkout_page_id' );
+			$legacy_page_id = (int) get_option( 'tests_legacy_woocommerce_checkout_page_id', 0 );
+			if ( $legacy_page_id > 0 ) {
+				return $legacy_page_id;
+			}
 		}
 
 		return $checkout_page_id;

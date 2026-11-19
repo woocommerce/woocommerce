@@ -17,10 +17,7 @@ class Checkout_Mode_Fixture {
 	const THEME_BLOCKS = 'twentytwentyfive';
 }
 
-$options = array(
-	'tests_legacy_woocommerce_cart_page_id'     => '12',
-	'tests_legacy_woocommerce_checkout_page_id' => '13',
-);
+$options = array();
 $theme   = 'storefront';
 $changes = array();
 
@@ -56,7 +53,12 @@ $pages = static function () {
 	);
 };
 
-$initial = $pages();
+$unseeded = $pages();
+$options  = array(
+	'tests_legacy_woocommerce_cart_page_id'     => '12',
+	'tests_legacy_woocommerce_checkout_page_id' => '13',
+);
+$initial  = $pages();
 Checkout_Mode_Fixture::switch_test_mode( 'blocks' );
 $blocks = array( get_option( 'e2e_tests_mode' ), $theme, $pages() );
 Checkout_Mode_Fixture::switch_test_mode( 'blocks' );
@@ -65,4 +67,4 @@ $legacy = array( get_option( 'e2e_tests_mode' ), $theme, $pages() );
 Checkout_Mode_Fixture::switch_test_mode( 'unknown' );
 $fallback = array( get_option( 'e2e_tests_mode' ), $theme );
 
-echo json_encode( array( $initial, $blocks, $legacy, $fallback, $changes ) );
+echo json_encode( array( $unseeded, $initial, $blocks, $legacy, $fallback, $changes ) );

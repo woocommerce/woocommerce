@@ -138,6 +138,8 @@ The site needs Storefront, WooCommerce, and the extension's `WC_Docker_Provision
 
 In a test mu-plugin, load `checkout-mode.php` from the tooling bin mount and use the `Automattic\WooCommerce\ExtensionTooling\Checkout_Mode` trait. The fixture defines `THEME_LEGACY` and `THEME_BLOCKS`, registers its filters and decides when a request may switch modes. Add the tooling bin mapping to every test site that loads the fixture.
 
+The package test suite requires a PHP CLI on `PATH` to exercise the checkout fixture.
+
 ## Lint and analysis presets
 
 If your Stylelint config already disables `selector-class-pattern` for legacy SCSS, extend the shared overlay after the WordPress preset. Keep any file-specific rules in your own config.
