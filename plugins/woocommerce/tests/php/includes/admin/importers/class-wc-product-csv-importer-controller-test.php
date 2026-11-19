@@ -669,17 +669,23 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An admin import should not start while a CLI import holds the lock, and should say how long until it can take the lock over.
+	 * @testdox An admin import should not start while a CLI import holds the lock, and should say how long until it can take the lock over, rounded up.
+	 * @testWith [180, "7 minutes"]
+	 *           [250, "6 minutes"]
+	 *           [570, "1 minute"]
+	 *
+	 * @param int    $age  How long ago the CLI lock was last refreshed.
+	 * @param string $wait The wait the message should state.
 	 */
-	public function test_first_batch_is_refused_while_a_cli_import_holds_the_lock(): void {
+	public function test_first_batch_is_refused_while_a_cli_import_holds_the_lock( int $age, string $wait ): void {
 		$this->assertTrue( wc_get_container()->get( ProductImportLock::class )->acquire( ProductImportLock::HOLDER_CLI ) );
-		$this->age_import_lock( 3 * MINUTE_IN_SECONDS );
+		$this->age_import_lock( $age );
 
 		$response = $this->send_import_request( '0' );
 
 		$this->assertFalse( $response['success'] );
 		$this->assertSame(
-			'Another product import is running. Wait for it to finish, or if it has stopped, try again in 7 minutes.',
+			"Another product import is running. Wait for it to finish, or if it has stopped, try again in {$wait}.",
 			$response['data']['message']
 		);
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'marker-parent' ) );
@@ -767,8 +773,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	 * @testdox A batch should refresh the import lock between rows, so a slow batch is not seen as abandoned.
 	 */
 	public function test_batch_refreshes_the_import_lock_between_rows(): void {
-		$import_lock = wc_get_container()->get( ProductImportLock::class );
-		$age_lock    = function (): void {
+		$age_lock = function (): void {
 			$this->age_import_lock( 2 * MINUTE_IN_SECONDS );
 		};
 		add_action( 'woocommerce_product_import_before_import', $age_lock, 5 );
@@ -779,8 +784,8 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			remove_action( 'woocommerce_product_import_before_import', $age_lock, 5 );
 		}
 
-		$this->assertLessThan( MINUTE_IN_SECONDS, $import_lock->get_age() );
-		$this->assertFalse( has_action( 'woocommerce_product_import_before_import', array( $import_lock, 'refresh_if_due' ) ) );
+		$this->assertLessThan( MINUTE_IN_SECONDS, wc_get_container()->get( ProductImportLock::class )->get_age() );
+		$this->assertFalse( has_action( 'woocommerce_product_import_before_import' ) );
 	}
 
 	/**
@@ -857,6 +862,67 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A later batch that fails should release the run's lock, so the merchant can retry straight away.
+	 */
+	public function test_failed_later_batch_releases_the_import_lock(): void {
+		$fail_batch = static function (): void {
+			throw new \Exception( 'Batch failed' );
+		};
+		add_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+
+		try {
+			$response = $this->dispatch_import_request( '0' );
+			add_action( 'woocommerce_product_import_before_import', $fail_batch );
+			$response = $this->send_import_request( (string) $response['data']['position'] );
+		} finally {
+			remove_action( 'woocommerce_product_import_before_import', $fail_batch );
+			remove_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+		}
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'Batch failed', $response['data']['message'] );
+		$this->assertNull( wc_get_container()->get( ProductImportLock::class )->get_age() );
+	}
+
+	/**
+	 * @testdox A batch should stop before its next row once the run's lock is taken over or deleted mid-batch.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $take_over Whether another run takes the lock over, rather than the lock being deleted.
+	 */
+	public function test_batch_stops_when_the_lock_is_lost_mid_batch( bool $take_over ): void {
+		global $wpdb;
+
+		$rows      = 0;
+		$new_value = time() . ':admin:another-run';
+		$lose_lock = static function () use ( &$rows, $take_over, $new_value, $wpdb ): void {
+			if ( 2 !== ++$rows ) {
+				return;
+			}
+
+			if ( $take_over ) {
+				$wpdb->update( $wpdb->options, array( 'option_value' => $new_value ), array( 'option_name' => 'wc_product_importing' ) );
+			} else {
+				$wpdb->delete( $wpdb->options, array( 'option_name' => 'wc_product_importing' ) );
+			}
+		};
+		add_action( 'woocommerce_product_import_before_import', $lose_lock, 5 );
+
+		try {
+			$response = $this->send_import_request( '0' );
+		} finally {
+			remove_action( 'woocommerce_product_import_before_import', $lose_lock, 5 );
+		}
+
+		$this->assertFalse( $response['success'] );
+		$this->assertStringContainsString( 'another product import took over', $response['data']['message'] );
+		$this->assertSame( 'publish', get_post_status( wc_get_product_id_by_sku( 'marker-parent' ) ) );
+		$this->assertSame( 'importing', get_post_status( wc_get_product_id_by_sku( 'marker-variation' ) ), 'The row after the lock was lost should not be imported' );
+		$this->assertSame( $take_over ? $new_value : null, $wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name = 'wc_product_importing'" ) );
+	}
+
+	/**
 	 * @testdox A first batch that hits a PHP error should still release the lock it took.
 	 */
 	public function test_first_batch_error_releases_the_import_lock(): void {
@@ -930,6 +996,9 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	 * @return array
 	 */
 	private function send_import_request( string $position, string $csv = self::MARKER_CSV, bool $update_existing = false ): array {
+		// A fresh lock instance per request, like a real AJAX request, so the run must resume from $_POST['lock'].
+		wc_get_container()->reset_all_resolved();
+
 		$nonce = wp_create_nonce( 'wc-product-import' );
 		$file  = $this->write_import_csv( $csv );
 

@@ -329,11 +329,12 @@ class WC_Product_CSV_Importer_Controller {
 	 * The cursor only ever skips placeholders forward, and the queries it feeds match nothing
 	 * but the importer's own temporary products, so it needs no server-side state of its own.
 	 *
-	 * @param int $cursor Highest placeholder ID earlier cleanup requests have examined.
+	 * @param ProductImportLock $import_lock The run's resumed lock.
+	 * @param int               $cursor      Highest placeholder ID earlier cleanup requests have examined.
+	 * @return array The response for the import screen.
 	 */
-	private static function dispatch_ajax_cleanup( int $cursor ): void {
-		$import_lock = self::resume_import_lock();
-		$cleanup     = wc_get_container()->get( ImportPlaceholders::class );
+	private static function dispatch_ajax_cleanup( ProductImportLock $import_lock, int $cursor ): array {
+		$cleanup = wc_get_container()->get( ImportPlaceholders::class );
 
 		$next_cursor = $cleanup->cleanup_after_import( $cursor );
 
@@ -352,7 +353,7 @@ class WC_Product_CSV_Importer_Controller {
 			$import_lock->release();
 		}
 
-		wp_send_json_success( $response );
+		return $response;
 	}
 
 	/**
@@ -366,10 +367,19 @@ class WC_Product_CSV_Importer_Controller {
 		$token       = isset( $_POST['lock'] ) ? wc_clean( wp_unslash( $_POST['lock'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- dispatch_ajax() checks the nonce.
 
 		if ( ! is_string( $token ) || ! $import_lock->resume( $token ) ) {
-			throw new \Exception( esc_html__( 'This import was stopped because another product import took over. Please start the import again.', 'woocommerce' ) );
+			throw self::get_lock_lost_exception();
 		}
 
 		return $import_lock;
+	}
+
+	/**
+	 * Get the error a run reports once another import has taken its lock over.
+	 *
+	 * @return \Exception
+	 */
+	private static function get_lock_lost_exception(): \Exception {
+		return new \Exception( esc_html__( 'This import was stopped because another product import took over. Please start the import again.', 'woocommerce' ) );
 	}
 
 	/**
@@ -378,21 +388,23 @@ class WC_Product_CSV_Importer_Controller {
 	 * @since 9.3.0
 	 *
 	 * @throws \Exception Caught internally and reported via `wp_send_json_error()`, so it never escapes this method.
-	 * @throws \Throwable PHP errors are rethrown after the first batch releases the lock it took.
+	 * @throws \Throwable PHP errors are rethrown after the request releases the run's lock.
 	 */
 	public static function dispatch_ajax() {
 		check_ajax_referer( 'wc-product-import', 'security' );
 
-		$first_batch_lock = null;
+		$run_lock = null;
 
 		try {
 			$position = wc_clean( wp_unslash( $_POST['position'] ?? '' ) );
 
 			// Cleanup runs in requests of its own so it cannot time out behind the last import batch.
 			if ( is_string( $position ) && preg_match( '/^' . preg_quote( self::CLEANUP_POSITION_PREFIX, '/' ) . '(\\d+)$/', $position, $matches ) ) {
-				self::dispatch_ajax_cleanup( (int) $matches[1] );
+				$run_lock = self::resume_import_lock();
+				$response = self::dispatch_ajax_cleanup( $run_lock, (int) $matches[1] );
+				$run_lock = null;
 
-				return;
+				wp_send_json_success( $response );
 			}
 
 			$file = wc_clean( wp_unslash( $_POST['file'] ?? '' ) ); // PHPCS: input var ok.
@@ -422,9 +434,7 @@ class WC_Product_CSV_Importer_Controller {
 				);
 			}
 
-			if ( 0 === $start_pos ) {
-				$first_batch_lock = $import_lock;
-			}
+			$run_lock = $import_lock;
 
 			$params = array(
 				'delimiter'          => ! empty( $_POST['delimiter'] ) ? wc_clean( wp_unslash( $_POST['delimiter'] ) ) : ',', // PHPCS: input var ok.
@@ -458,7 +468,11 @@ class WC_Product_CSV_Importer_Controller {
 			include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
 
 			$importer     = self::get_importer( $file, $params );
-			$refresh_lock = array( $import_lock, 'refresh_if_due' );
+			$refresh_lock = static function () use ( $import_lock ): void {
+				if ( ! $import_lock->refresh_if_due() ) {
+					throw self::get_lock_lost_exception();
+				}
+			};
 
 			add_action( 'woocommerce_product_import_before_import', $refresh_lock );
 
@@ -481,7 +495,7 @@ class WC_Product_CSV_Importer_Controller {
 			$next_position = 100 === $percent_complete ? self::CLEANUP_POSITION_PREFIX . '0' : $importer->get_file_position();
 
 			// The batch succeeded, so the run keeps its lock for the next request.
-			$first_batch_lock = null;
+			$run_lock = null;
 
 			wp_send_json_success(
 				array(
@@ -496,9 +510,9 @@ class WC_Product_CSV_Importer_Controller {
 				)
 			);
 		} catch ( \Throwable $e ) {
-			// The import screen stops on an error, so nothing else would release a lock taken by this request.
-			if ( null !== $first_batch_lock ) {
-				$first_batch_lock->release();
+			// The import screen stops on an error, so nothing else would release the run's lock.
+			if ( null !== $run_lock ) {
+				$run_lock->release();
 			}
 
 			if ( ! $e instanceof \Exception ) {

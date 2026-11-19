@@ -89,6 +89,7 @@ final class ProductImportLock {
 		}
 
 		if ( ! $acquired ) {
+			$previous    = explode( ':', (string) $this->get_value() );
 			$stale_after = $this->get_stale_after( $holder );
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -100,6 +101,13 @@ final class ProductImportLock {
 					time() - $stale_after
 				)
 			);
+
+			if ( $acquired ) {
+				wc_get_logger()->info(
+					sprintf( 'Product import lock taken over by %s from %s, last active %d seconds ago.', $holder, $previous[1] ?? 'unknown', time() - (int) $previous[0] ),
+					array( 'source' => 'product-import' )
+				);
+			}
 		}
 
 		$this->token = $acquired ? $token : null;
@@ -160,17 +168,21 @@ final class ProductImportLock {
 	}
 
 	/**
-	 * Refresh the lock if its last refresh is old enough.
+	 * Check this run still holds the lock, and refresh it if its last refresh is old enough.
 	 *
 	 * Called before each row, because rows with slow remote images can make one batch outlast the
 	 * lock's stale timeout. The check limits this to one write per `REFRESH_INTERVAL`.
+	 *
+	 * @return bool Whether this run still holds the lock.
 	 */
-	public function refresh_if_due(): void {
-		$age = $this->get_age();
+	public function refresh_if_due(): bool {
+		$parts = explode( ':', (string) $this->get_value() );
 
-		if ( null !== $age && $age >= self::REFRESH_INTERVAL ) {
-			$this->refresh();
+		if ( null === $this->token || ( $parts[2] ?? null ) !== $this->token ) {
+			return false;
 		}
+
+		return self::REFRESH_INTERVAL > time() - (int) $parts[0] || $this->refresh();
 	}
 
 	/**

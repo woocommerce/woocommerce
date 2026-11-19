@@ -148,8 +148,9 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 
 		$this->sut->refresh();
 
-		$this->assertFalse( $this->sut->acquire( ProductImportLock::HOLDER_ADMIN ) );
 		$this->assertLessThan( MINUTE_IN_SECONDS, $this->sut->get_age() );
+		$this->age_lock( 2 * MINUTE_IN_SECONDS + 1 );
+		$this->assertFalse( $this->sut->acquire( ProductImportLock::HOLDER_ADMIN ) );
 	}
 
 	/**
@@ -194,9 +195,34 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 		$this->sut->acquire( ProductImportLock::HOLDER_ADMIN );
 		$this->age_lock( $age );
 
-		$this->sut->refresh_if_due();
+		$this->assertTrue( $this->sut->refresh_if_due() );
 
 		$this->assertEqualsWithDelta( $expected_age, $this->sut->get_age(), 5 );
+	}
+
+	/**
+	 * @testdox A due refresh should report a lost lock on every call, even before a refresh is due.
+	 */
+	public function test_refresh_if_due_reports_a_takeover(): void {
+		$this->sut->acquire( ProductImportLock::HOLDER_ADMIN );
+		$this->age_lock( 2 * MINUTE_IN_SECONDS + 1 );
+
+		$other_run = new ProductImportLock();
+		$this->assertTrue( $other_run->acquire( ProductImportLock::HOLDER_ADMIN ) );
+
+		$this->assertFalse( $this->sut->refresh_if_due() );
+		$this->assertTrue( $other_run->refresh_if_due() );
+	}
+
+	/**
+	 * @testdox A due refresh should report a lost lock when the lock was deleted.
+	 */
+	public function test_refresh_if_due_reports_a_deleted_lock(): void {
+		$this->sut->acquire( ProductImportLock::HOLDER_ADMIN );
+		delete_option( 'wc_product_importing' );
+
+		$this->assertFalse( $this->sut->refresh_if_due() );
+		$this->assertNull( $this->sut->get_age() );
 	}
 
 	/**
@@ -238,7 +264,7 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 	 * @testdox A due refresh should not create a lock when no import is running.
 	 */
 	public function test_refresh_if_due_does_nothing_without_a_lock(): void {
-		$this->sut->refresh_if_due();
+		$this->assertFalse( $this->sut->refresh_if_due() );
 
 		$this->assertNull( $this->sut->get_age() );
 	}
