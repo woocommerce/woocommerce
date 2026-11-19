@@ -42,6 +42,7 @@ export const charts = applyFilters( STOCK_NOTIFICATIONS_REPORT_CHARTS_FILTER, [
 		order: 'desc',
 		orderby: 'unsubscribed',
 		type: 'number',
+		isReverseTrend: true,
 	},
 ] );
 

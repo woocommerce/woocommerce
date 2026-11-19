@@ -137,6 +137,7 @@ class Controller extends GenericStatsController {
 
 		unset( $schema['properties']['totals']['properties']['segments'] );
 		unset( $schema['properties']['intervals']['items']['properties']['subtotals']['properties']['segments'] );
+		unset( $schema['properties']['intervals']['items']['properties']['subtotals']['properties']['products_count'] );
 
 		return $this->add_additional_fields_schema( $schema );
 	}

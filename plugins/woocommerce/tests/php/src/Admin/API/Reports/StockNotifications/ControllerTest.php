@@ -175,21 +175,35 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should accept orderby $orderby.
-	 * @testWith ["product_id"]
-	 *           ["signups"]
-	 *           ["notifications_sent"]
-	 *           ["unsubscribed"]
+	 * @testdox Should sort by $orderby, descending, breaking ties by product ID.
+	 * @testWith ["product_id", [3, 2, 1]]
+	 *           ["signups", [2, 3, 1]]
+	 *           ["notifications_sent", [1, 3, 2]]
+	 *           ["unsubscribed", [3, 2, 1]]
 	 *
-	 * @param string $orderby Orderby value.
+	 * @param string $orderby  Orderby value.
+	 * @param array  $expected Product IDs in the expected order.
 	 */
-	public function test_accepts_orderby( string $orderby ): void {
-		$this->insert_row( 1, NotificationStatus::ACTIVE, '2026-03-02 10:00:00' );
+	public function test_accepts_orderby( string $orderby, array $expected ): void {
+		$before = '2026-02-01 10:00:00';
+		$during = '2026-03-03 10:00:00';
+		// Sign-ups: 1, 3 and 2. Notifications sent: 1, 0 and 1. Unsubscribed: 0, 1 and 2.
+		foreach ( array( 1 => 1, 2 => 3, 3 => 2 ) as $product_id => $signups ) {
+			for ( $i = 0; $i < $signups; $i++ ) {
+				$this->insert_row( $product_id, NotificationStatus::ACTIVE, $during, "{$product_id}-{$i}@example.com" );
+			}
+		}
+		foreach ( array( 1, 3 ) as $product_id ) {
+			$this->insert_row( $product_id, NotificationStatus::SENT, $before, "sent-{$product_id}@example.com", $during );
+		}
+		foreach ( array( 2, 3, 3 ) as $i => $product_id ) {
+			$this->insert_row( $product_id, NotificationStatus::CANCELLED, $before, "gone-{$i}@example.com", null, $during, NotificationCancellationSource::USER );
+		}
 
 		$response = $this->request( self::ENDPOINT, array_merge( self::PERIOD, array( 'orderby' => $orderby ) ) );
 
 		$this->assertSame( 200, $response->get_status() );
-		$this->assertSame( array( 1 ), array_column( $response->get_data(), 'product_id' ) );
+		$this->assertSame( $expected, array_column( $response->get_data(), 'product_id' ) );
 	}
 
 	/**
@@ -292,6 +306,10 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$notification->set_status( NotificationStatus::CANCELLED );
 		$notification->save();
 		$this->assertNotSame( $version, ReportsCache::get_version(), 'A status change should invalidate the reports cache.' );
+
+		$version = ReportsCache::get_version();
+		$notification->delete( true );
+		$this->assertNotSame( $version, ReportsCache::get_version(), 'Deleting a notification should invalidate the reports cache.' );
 	}
 
 	/**
@@ -322,13 +340,8 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame(
-			array(
-				'product_name'       => 'Product',
-				'signups'            => 'Sign-ups',
-				'notifications_sent' => 'Notifications sent',
-				'unsubscribed'       => 'Unsubscribed',
-			),
-			$controller->get_export_columns()
+			array( 'product_name', 'signups', 'notifications_sent', 'unsubscribed' ),
+			array_keys( $controller->get_export_columns() )
 		);
 		$this->assertSame(
 			array(

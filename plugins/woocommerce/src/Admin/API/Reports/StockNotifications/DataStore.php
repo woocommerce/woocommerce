@@ -376,7 +376,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					);
 				} else {
 					$extended_info = array(
-						/* translators: %s is product name */
+						/* translators: %s: product ID, e.g. #123 */
 						'name'      => sprintf( __( '%s (Deleted)', 'woocommerce' ), '#' . $row['product_id'] ),
 						'permalink' => '',
 						'edit_url'  => '',
