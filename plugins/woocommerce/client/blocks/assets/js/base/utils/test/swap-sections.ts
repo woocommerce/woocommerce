@@ -280,6 +280,24 @@ describe( 'playSwap', () => {
 		} );
 	} );
 
+	it( 'only ends the slide of the swap, not other animations of the sections after the group', () => {
+		const slide = { transitionProperty: 'translate', cancel: jest.fn() };
+		const themeAnimation = { animationName: 'pulse', cancel: jest.fn() };
+		const getAnimations = HTMLElement.prototype.getAnimations;
+		HTMLElement.prototype.getAnimations = function ( this: HTMLElement ) {
+			return this === pay
+				? ( [ slide, themeAnimation ] as unknown as Animation[] )
+				: getAnimations.call( this );
+		};
+		const snapshot = capture( 1 );
+		switchToPickup();
+		playSwap( snapshot );
+		stopSwap( container );
+
+		expect( slide.cancel ).toHaveBeenCalled();
+		expect( themeAnimation.cancel ).not.toHaveBeenCalled();
+	} );
+
 	it( 'ends at once after a swap turned around, also for the copies of the first swap', () => {
 		const first = capture( 1 );
 		const pickup = switchToPickup();

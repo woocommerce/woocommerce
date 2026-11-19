@@ -238,10 +238,16 @@ export const playSwap = ( snapshot: SwapSnapshot ) => {
 			Array.from( container.children )
 				.filter( ( child ) => child.hasAttribute( COPY ) )
 				.forEach( ( copy ) => copy.remove() );
-			// A slide that still runs would keep moving the sections from where they were, so end it at once.
+			// A slide that still runs would keep moving the sections from where they were, so end it at once. Other
+			// animations, such as a theme's, keep running.
 			after.forEach( ( section ) =>
 				section
 					.getAnimations()
+					.filter(
+						( animation ) =>
+							( animation as CSSTransition )
+								.transitionProperty === 'translate'
+					)
 					.forEach( ( animation ) => animation.cancel() )
 			);
 		}
