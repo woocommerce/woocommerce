@@ -1019,12 +1019,40 @@ class ExtensibleAbilities {
 	 * Send an empty array for an `object` as an empty object, at any depth.
 	 * rest_sanitize_value_from_schema() turns every object into an array, so a
 	 * callback cannot send `{}` by itself. A part with no schema stays as it is.
+	 * The nested schemas of every `allOf` branch, and of the `anyOf` and `oneOf`
+	 * branch that the sanitized value matches, apply too, after the schema's own.
+	 * A value that matches no branch stays as it is. An empty array fits both an
+	 * `object` and an `array` branch, so it takes the first `anyOf` branch, and
+	 * under a `oneOf` it stays as it is. Only one level of `allOf`, `anyOf` and
+	 * `oneOf` branches is read, so a combinator inside a branch is not followed.
+	 * When more than one branch declares the same property, the first one is used.
 	 *
 	 * @param mixed                $value  Sanitized value.
 	 * @param array<string, mixed> $schema Schema of the value.
 	 * @return mixed The value for the JSON output.
 	 */
 	private static function prepare_json_value( $value, array $schema ) {
+		$branches = (array) ( $schema['allOf'] ?? array() );
+		$finders  = array(
+			'anyOf' => 'rest_find_any_matching_schema',
+			'oneOf' => 'rest_find_one_matching_schema',
+		);
+		foreach ( $finders as $keyword => $find_branch ) {
+			if ( isset( $schema[ $keyword ] ) ) {
+				$branch = $find_branch( $value, $schema, '' );
+				if ( is_wp_error( $branch ) ) {
+					return $value;
+				}
+				$branches[] = $branch;
+			}
+		}
+		foreach ( array_filter( $branches, 'is_array' ) as $branch ) {
+			$schema['type']                 = $schema['type'] ?? $branch['type'] ?? null;
+			$schema['properties']           = (array) ( $schema['properties'] ?? array() ) + (array) ( $branch['properties'] ?? array() );
+			$schema['patternProperties']    = (array) ( $schema['patternProperties'] ?? array() ) + (array) ( $branch['patternProperties'] ?? array() );
+			$schema['items']                = $schema['items'] ?? $branch['items'] ?? null;
+			$schema['additionalProperties'] = $schema['additionalProperties'] ?? $branch['additionalProperties'] ?? null;
+		}
 		$type = rest_get_best_type_for_value( $value, (array) ( $schema['type'] ?? array() ) );
 		if ( 'array' === $type ) {
 			$children = array_fill_keys( array_keys( $value ), $schema['items'] ?? null );
