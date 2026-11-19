@@ -155,7 +155,7 @@ class WC_Order_Item_Data_Store implements WC_Order_Item_Data_Store_Interface {
 	 * Get the order item type based on Item ID.
 	 *
 	 * @since 3.0.0
-	 * @param int $item_id Item ID.
+	 * @param int|string $item_id Item ID, as an integer or a numeric string.
 	 * @return string|null Order item type or null if no order item entry found.
 	 */
 	public function get_order_item_type( $item_id ) {
