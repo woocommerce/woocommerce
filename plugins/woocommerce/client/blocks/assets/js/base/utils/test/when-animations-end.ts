@@ -157,6 +157,32 @@ describe( 'whenAllAnimationsEnd', () => {
 		expect( callback ).toHaveBeenCalledTimes( 1 );
 	} );
 
+	it( 'waits again for an element that starts a new animation while another still runs', async () => {
+		const callback = jest.fn();
+		const first = createAnimation();
+		const second = createAnimation();
+		const restarted = createAnimation();
+		const firstAnimations = [ first.animation ];
+		whenAllAnimationsEnd(
+			[
+				createElement( firstAnimations ),
+				createElement( [ second.animation ] ),
+			],
+			callback
+		);
+
+		first.finish();
+		await flushPromises();
+		firstAnimations.push( restarted.animation );
+		second.finish();
+		await flushPromises();
+		expect( callback ).not.toHaveBeenCalled();
+
+		restarted.finish();
+		await flushPromises();
+		expect( callback ).toHaveBeenCalledTimes( 1 );
+	} );
+
 	it( 'does not call back after it is cancelled', async () => {
 		const callback = jest.fn();
 		const animation = createAnimation();
