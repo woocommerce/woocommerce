@@ -135,7 +135,14 @@ class ExtensibleAbilities {
 	 *     @type array    $output_schema Optional. JSON schema of the value that `get_callback` returns. Required
 	 *                                  with `get_callback`. It needs one `type` other than null, because clients
 	 *                                  expect one type for each field. Core publishes it as declared. Its
-	 *                                  `title` is the label clients show.
+	 *                                  `title` is the label clients show. Leave a nested property out when it has
+	 *                                  no value. Where a nested value must be null, such as an item of a list,
+	 *                                  declare it with an `anyOf` that has a `{"type":"null"}` branch. A list of
+	 *                                  types is refused in every nested schema under `properties`,
+	 *                                  `patternProperties`, `additionalProperties`, `items`, `anyOf` and `oneOf`,
+	 *                                  which are the keywords with a nested schema that WordPress supports (see
+	 *                                  `rest_get_allowed_schema_keywords()`), and under `allOf`, which
+	 *                                  WooCommerce also reads, because some clients refuse it.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
 	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
@@ -154,8 +161,9 @@ class ExtensibleAbilities {
 	 *                                  the whole result.
 	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. It needs
 	 *                                  one `type` name, or an `anyOf` where each branch has one `type` name. A
-	 *                                  list of types is refused at the top level, because some clients refuse it:
-	 *                                  a nullable field uses `[{"type":"string"},{"type":"null"}]` as its `anyOf`.
+	 *                                  list of types is refused, at the top level and in every nested schema under
+	 *                                  the keywords listed for `output_schema`, because some clients refuse it: a
+	 *                                  nullable value uses `[{"type":"string"},{"type":"null"}]` as its `anyOf`.
 	 *                                  Core publishes it as declared. A value can be null only where it declares
 	 *                                  null. Required with `set_callback`.
 	 *     @type callable $set_callback Optional. Receives the object and the value, and changes the object
@@ -239,6 +247,13 @@ class ExtensibleAbilities {
 				return;
 			}
 		}
+		foreach ( array( 'output_schema', 'input_schema' ) as $key ) {
+			$path = isset( $args[ $key ] ) ? self::find_nested_type_list( $args[ $key ] ) : null;
+			if ( null !== $path ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%1$s" argument has a list of types at "%2$s". Use an "anyOf" with a {"type":"null"} branch instead. In an output, prefer to leave the property out when it has no value.', $key, $path ), '11.4.0' );
+				return;
+			}
+		}
 		if ( isset( $args['object_types'] ) && ( ! is_array( $args['object_types'] ) || empty( $args['object_types'] ) || array_filter( $args['object_types'], static fn( $type ) => ! is_string( $type ) ) ) ) {
 			wc_doing_it_wrong( __METHOD__, 'The "object_types" argument must be a list of object types.', '11.4.0' );
 			return;
@@ -282,6 +297,40 @@ class ExtensibleAbilities {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Find the first nested schema under `properties`, `patternProperties`, `additionalProperties`, `items`,
+	 * `anyOf`, `oneOf` or `allOf` whose `type` is a list.
+	 *
+	 * @param array<string, mixed> $schema Field schema.
+	 * @param string               $path   Path of the schema, such as `properties.size`.
+	 * @return string|null Path of the first schema with a list of types, or null when there is none.
+	 */
+	private static function find_nested_type_list( array $schema, string $path = '' ): ?string {
+		foreach ( array( 'properties', 'patternProperties', 'additionalProperties', 'items', 'anyOf', 'oneOf', 'allOf' ) as $keyword ) {
+			$children = $schema[ $keyword ] ?? null;
+			if ( ! is_array( $children ) ) {
+				continue;
+			}
+			if ( 'additionalProperties' === $keyword || ( 'items' === $keyword && ! wp_is_numeric_array( $children ) ) ) {
+				$children = array( '' => $children );
+			}
+			foreach ( $children as $key => $child ) {
+				if ( ! is_array( $child ) ) {
+					continue;
+				}
+				$child_path = trim( "$path.$keyword.$key", '.' );
+				if ( is_array( $child['type'] ?? null ) ) {
+					return $child_path;
+				}
+				$found = self::find_nested_type_list( $child, $child_path );
+				if ( null !== $found ) {
+					return $found;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
