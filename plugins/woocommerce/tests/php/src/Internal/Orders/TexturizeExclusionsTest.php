@@ -60,6 +60,7 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		switch_theme( $this->original_theme );
+		wp_set_current_user( 0 );
 		parent::tearDown();
 	}
 
@@ -210,7 +211,11 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 		$this->open_block_theme_email_page( 'review-order' );
 		$this->sut->skip_address_texturize_on_order_pages();
 
-		$order = WC_Helper_Order::create_order();
+		// The meta line shows the email only to the signed-in customer who owns the order.
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+
+		$order = WC_Helper_Order::create_order( $customer_id );
 		$order->set_billing_email( "o'neil--shop@48x17.com" );
 		$order->set_billing_first_name( 'Pat' );
 		$order->set_billing_last_name( 'Lee' );
