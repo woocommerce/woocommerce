@@ -134,7 +134,7 @@ class PushTokenRestController extends RestApiControllerBase {
 								'readonly'    => true,
 							),
 							'blog_id' => array(
-								'description' => __( "The store's WordPress.com blog ID, which its push notifications carry. Not the multisite blog ID from get_current_blog_id(). Only returned when registering a token. Null when the store has no WordPress.com blog ID.", 'woocommerce' ),
+								'description' => __( "The store's WordPress.com blog ID, which its push notifications carry. Not the multisite blog ID from get_current_blog_id(). Only returned when registering a token.", 'woocommerce' ),
 								'type'        => array( 'integer', 'null' ),
 								'context'     => array( 'view' ),
 								'readonly'    => true,
