@@ -263,7 +263,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		if ( $stalled ) {
 			$message = __( 'Checks can’t start because scheduled actions aren’t running on your site. Your hosting provider can usually turn them back on.', 'woocommerce' );
 		} elseif ( $pending ) {
-			$message = __( 'Checking your store.', 'woocommerce' );
+			$message = __( 'Checking your store', 'woocommerce' );
 		}
 		$truncated = null;
 		if ( null !== $report && ! empty( $report['truncated'] ) ) {
@@ -393,17 +393,21 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * ReadinessCopy, or from the report for a check that has none there.
 	 *
 	 * @param array{id:string,name:string,label?:string,why:string,fix?:string,fix_url:string,conflict?:bool,source?:string,product?:int,seen_at?:string} $check Store check.
-	 * @return array{title:string,text:string,fix:string,url:string,link?:string,tool?:array{href:string,text:string}|null}
+	 * @return array{title:string,text:string,fix:string,url:string,link?:string,sr?:string,tool?:array{href:string,text:string}|null}
 	 */
 	private static function failing_copy( array $check ): array {
 		if ( self::is_setup_step( $check ) ) {
 			$action = self::check_action( $check );
+			// Policy pages share one button text, Edit page or Choose page, as in the Setup checklist, so the
+			// button column stays narrow; screen readers also hear which policy it is for.
+			$button = self::step_button( $check['id'], $action[3] );
 			return array(
 				'title' => $action[0],
 				'text'  => $action[1],
 				'fix'   => $action[4],
 				'url'   => $action[2],
-				'link'  => $action[3],
+				'link'  => '' !== $button[1] ? $button[0] : $action[3],
+				'sr'    => $button[1],
 			);
 		}
 		$copy = ReadinessCopy::store_check( $check['id'], (string) ( $check['source'] ?? '' ), self::product_name( (int) ( $check['product'] ?? 0 ) ), (string) ( $check['seen_at'] ?? '' ) );
@@ -678,7 +682,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'tier'  => $is_required ? 0 : 2,
 				'title' => $copy['title'],
 				'why'   => $copy['text'],
-				'link'  => self::fix_link( $copy['url'], $copy['link'] ?? '' ),
+				'link'  => self::fix_link( $copy['url'], $copy['link'] ?? '', $copy['sr'] ?? '' ),
 				'share' => null,
 				// A store-wide issue affects every product, so it ranks as all sales.
 				'rank'  => 1.0,
@@ -1012,7 +1016,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				: null;
 			$warning  = ! $required && in_array( $check['id'], self::WARNING_SCANNED, true );
 			$badge    = $required ? self::required_badge() : ( $warning ? array( 'warn', __( 'Warning', 'woocommerce' ) ) : null );
-			$rows[]   = self::row( $check['id'], $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'], $failing['link'] ?? '' ), $badge, $seen_at, $failing['tool'] ?? null );
+			$rows[]   = self::row( $check['id'], $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'], $failing['link'] ?? '', $failing['sr'] ?? '' ), $badge, $seen_at, $failing['tool'] ?? null );
 		}
 		return $rows;
 	}
@@ -1022,18 +1026,23 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 *
 	 * @param string $url  Fix URL.
 	 * @param string $text Link text, or '' to name where the URL goes.
-	 * @return array{href:string,text:string}|null
+	 * @param string $sr   What screen readers hear in place of the text, or ''.
+	 * @return array{href:string,text:string,sr?:string}|null
 	 */
-	private static function fix_link( string $url, string $text = '' ): ?array {
+	private static function fix_link( string $url, string $text = '', string $sr = '' ): ?array {
 		// Scanned checks' URLs come from the stored report, so only http(s) and relative links reach the page.
 		$url = esc_url_raw( $url, array( 'http', 'https' ) );
 		if ( '' === $url ) {
 			return null;
 		}
-		return array(
+		$link = array(
 			'href' => $url,
 			'text' => '' !== $text ? $text : self::fix_link_text( $url ),
 		);
+		if ( '' !== $sr ) {
+			$link['sr'] = $sr;
+		}
+		return $link;
 	}
 
 	/**

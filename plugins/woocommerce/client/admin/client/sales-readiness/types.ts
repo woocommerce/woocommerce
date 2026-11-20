@@ -15,6 +15,8 @@ export interface ViewLink {
 	/** Empty when the text is shown without a link. */
 	href: string;
 	text: string;
+	/** What screen readers hear in place of the text, when the text repeats (Edit page). */
+	sr?: string;
 }
 
 export type RowState = 'open' | 'required' | 'unknown' | 'pass';

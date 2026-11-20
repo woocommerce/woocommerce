@@ -517,12 +517,15 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Publish your refund and returns policy page', (string) wp_json_encode( array_column( $view['sections'], null, 'id' )['buy'] ), 'A setup step also shows in the card of the question it answers' );
 		$copy = $this->step_copy( 'refund_returns_page' );
 		$this->assertStringContainsString( 'post=' . $draft . '&action=edit', $copy['url'], 'Readiness check links the step to the page editor' );
-		$this->assertSame( 'Edit refund policy', $copy['link'], 'named for the policy' );
+		$this->assertSame( 'Edit page', $copy['link'], 'One short button text for every policy, as in the design' );
+		$this->assertSame( 'Edit your refund and returns policy page', $copy['sr'], 'screen readers also hear which policy' );
+		$link = array_column( $view['fix_first']['items'], 'link', 'id' )['refund_returns_page'];
+		$this->assertSame( array( 'Edit page', 'Edit your refund and returns policy page' ), array( $link['text'], $link['sr'] ), 'Fix first gets both' );
 		$this->assertSame( 'A refund policy needs to be available for AI assistants to share with shoppers.', $copy['text'], 'The refund draft keeps its own line' );
 	}
 
 	/**
-	 * @testdox Each draft policy page links to its editor with the policy's own link text.
+	 * @testdox Each draft policy page links to its editor with Edit page, and screen readers hear which policy.
 	 */
 	public function test_draft_policy_pages_name_their_edit_link(): void {
 		$this->make_every_step_pass();
@@ -534,9 +537,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			)
 		);
 		$pages = array(
-			AgenticCommerceSettings::PRIVACY_PAGE_OPTION => array( 'Publish your privacy policy page', 'Edit privacy policy', 'privacy_page', 'A privacy policy needs to be published for AI assistants to share it with shoppers.' ),
-			AgenticCommerceSettings::TERMS_PAGE_OPTION   => array( 'Publish your terms and conditions page', 'Edit terms and conditions', 'terms_page', 'Terms and conditions need to be published for AI assistants to share them with shoppers.' ),
-			AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION => array( 'Publish your shipping policy page', 'Edit shipping policy', 'shipping_policy_page', 'A shipping policy needs to be published for AI assistants to share it with shoppers.' ),
+			AgenticCommerceSettings::PRIVACY_PAGE_OPTION => array( 'Publish your privacy policy page', 'Edit your privacy policy page', 'privacy_page', 'A privacy policy needs to be published for AI assistants to share it with shoppers.' ),
+			AgenticCommerceSettings::TERMS_PAGE_OPTION   => array( 'Publish your terms and conditions page', 'Edit your terms and conditions page', 'terms_page', 'Terms and conditions need to be published for AI assistants to share them with shoppers.' ),
+			AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION => array( 'Publish your shipping policy page', 'Edit your shipping policy page', 'shipping_policy_page', 'A shipping policy needs to be published for AI assistants to share it with shoppers.' ),
 		);
 		foreach ( $pages as $option => $copy ) {
 			$draft = self::factory()->post->create(
@@ -549,7 +552,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			$step = $this->step_copy( $copy[2] );
 			$this->assertSame( $copy[0], $step['title'] );
 			$this->assertStringContainsString( 'post=' . $draft . '&action=edit', $step['url'], $copy[1] );
-			$this->assertSame( $copy[1], $step['link'] );
+			$this->assertSame( 'Edit page', $step['link'] );
+			$this->assertSame( $copy[1], $step['sr'] );
 			$this->assertSame( $copy[3], $step['text'], $copy[0] . ' says why it needs publishing, as in the design' );
 			wp_publish_post( $draft );
 		}
@@ -1843,7 +1847,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		wc_get_container()->get( ScheduledScan::class )->queue();
 		$run = $this->view()['run'];
-		$this->assertSame( 'Checking your store.', $run['message'], 'Read out to screen readers; the page shows a spinner' );
+		$this->assertSame( 'Checking your store', $run['message'], 'Shown beside a spinner' );
 		$this->assertTrue( $run['pending'] );
 		$this->assertFalse( $run['stalled'], 'A queued check is not stalled, so the page keeps polling' );
 
