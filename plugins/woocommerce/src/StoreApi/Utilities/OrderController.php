@@ -9,7 +9,6 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
-use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Exception;
 
 /**
@@ -595,17 +594,35 @@ class OrderController {
 		$shipping_country = $order->get_shipping_country();
 
 		if ( $needs_shipping ) {
-			$local_pickup_method_ids                      = LocalPickupUtils::get_local_pickup_method_ids();
-			$selected_shipping_rates                      = ShippingUtil::get_selected_shipping_rates_from_packages( WC()->shipping()->get_packages() );
-			$selected_shipping_rates_are_all_local_pickup = ArrayUtil::array_all(
-				$selected_shipping_rates,
-				function ( $rate ) use ( $local_pickup_method_ids ) {
-					return in_array( $rate->get_method_id(), $local_pickup_method_ids, true );
+			// Read the shipping lines from the order, since the pay-for-order route never calculates the cart. An order
+			// with no shipping line is not local pickup, so its country is still checked.
+			// Use the canonical filter list as well as the registered methods: an existing order can carry a
+			// pickup method that is not registered in this request (e.g. pickup_location is only registered
+			// when the checkout block is the default, and legacy_local_pickup may be deregistered), and
+			// relying on registered methods alone would wrongly reject its shipping country.
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
+			$filtered_local_pickup_ids    = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
+			$local_pickup_method_ids      = array_values(
+				array_unique(
+					array_filter(
+						array_merge(
+							LocalPickupUtils::get_local_pickup_method_ids(),
+							is_array( $filtered_local_pickup_ids ) ? $filtered_local_pickup_ids : array()
+						),
+						'is_string'
+					)
+				)
+			);
+			$shipping_lines               = $order->get_shipping_methods();
+			$shipping_is_all_local_pickup = ! empty( $shipping_lines ) && ArrayUtil::array_all(
+				$shipping_lines,
+				function ( $shipping_line ) use ( $local_pickup_method_ids ) {
+					return in_array( $shipping_line->get_method_id(), $local_pickup_method_ids, true );
 				}
 			);
 
 			// If only local pickup is selected, we don't need to validate the shipping country.
-			if ( ! $selected_shipping_rates_are_all_local_pickup && ! $this->validate_allowed_country( $shipping_country, (array) wc()->countries->get_shipping_countries() ) ) {
+			if ( ! $shipping_is_all_local_pickup && ! $this->validate_allowed_country( $shipping_country, (array) wc()->countries->get_shipping_countries() ) ) {
 				$countries             = WC()->countries->get_countries();
 				$shipping_country_name = $countries[ $shipping_country ] ?? $shipping_country;
 				throw new RouteException(

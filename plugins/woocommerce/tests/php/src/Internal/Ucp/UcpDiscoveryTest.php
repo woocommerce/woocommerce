@@ -202,7 +202,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 			$this->set_permalink_structure( '' );
 			$this->assertSame( 'no_file', UcpDiscovery::serve_status() );
 			$fix = UcpDiscovery::discovery_fix( 'no_file' );
-			$this->assertStringContainsString( 'Settings > Permalinks', $fix );
+			$this->assertStringContainsString( 'except Plain', $fix );
 			$this->assertStringContainsString( 'index.php', $fix );
 			$this->assertStringContainsString( 'writable', $fix );
 			$this->assertStringContainsString( $locked, $fix );
@@ -366,5 +366,26 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
 			}
 		}
+	}
+
+	/**
+	 * @testdox On WordPress.com the fix names its support where other stores are pointed to their hosting provider.
+	 */
+	public function test_discovery_fix_on_wordpress_com(): void {
+		$statuses = array( 'not_readable', 'file_unusable', 'file_in_the_way', 'file_outdated' );
+		if ( ! is_multisite() ) {
+			// On multisite the no_file fix only names the permalink setting, so it names no one to contact.
+			$statuses[] = 'no_file';
+		}
+		foreach ( $statuses as $status ) {
+			$wpcom = UcpDiscovery::discovery_fix( $status, true );
+			$other = UcpDiscovery::discovery_fix( $status, false );
+			$this->assertStringContainsString( 'contact WordPress.com support', $wpcom, $status );
+			$this->assertStringNotContainsString( 'hosting provider', $wpcom, $status );
+			$this->assertStringContainsString( 'ask your hosting provider', $other, $status );
+			$this->assertStringNotContainsString( 'WordPress.com', $other, $status );
+		}
+		$this->assertStringContainsString( '.well-known/ucp', UcpDiscovery::discovery_fix( 'not_readable', true ) );
+		$this->assertSame( '', UcpDiscovery::discovery_fix( 'ok', true ) );
 	}
 }

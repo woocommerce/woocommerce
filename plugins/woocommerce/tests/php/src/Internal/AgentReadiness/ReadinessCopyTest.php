@@ -14,22 +14,12 @@ use WC_Unit_Test_Case;
 class ReadinessCopyTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Checks that wait for output WooCommerce doesn't build yet, so Sales readiness doesn't show them.
-	 *
-	 * @return array<int, string>
-	 */
-	private static function pending(): array {
-		return ( new \ReflectionClassConstant( StoreOutputChecks::class, 'PENDING' ) )->getValue();
-	}
-
-
-	/**
 	 * @testdox Every store check Sales readiness shows has copy, headed by what to do and saying what the scan found.
 	 */
 	public function test_every_store_check_has_copy(): void {
 		$checks = new \ReflectionMethod( StoreOutputChecks::class, 'checks' );
 		$checks->setAccessible( true );
-		$ids = array_diff( array_column( $checks->invoke( wc_get_container()->get( StoreOutputChecks::class ) ), 'id' ), self::pending() );
+		$ids = array_column( $checks->invoke( wc_get_container()->get( StoreOutputChecks::class ) ), 'id' );
 
 		$this->assertNotEmpty( $ids );
 		foreach ( $ids as $id ) {
@@ -43,6 +33,39 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Each found line that names a product is for a check with copy, names the product once, and is used when a name is given.
+	 */
+	public function test_named_found_lines_name_the_product(): void {
+		$named = new \ReflectionMethod( ReadinessCopy::class, 'named_found' );
+		$named->setAccessible( true );
+		$checks = new \ReflectionMethod( StoreOutputChecks::class, 'checks' );
+		$checks->setAccessible( true );
+		$ids = array_column( $checks->invoke( wc_get_container()->get( StoreOutputChecks::class ) ), 'id' );
+
+		$with_names = array_filter( $ids, static fn( string $id ): bool => null !== $named->invoke( null, $id ) );
+		$this->assertGreaterThanOrEqual( 10, count( $with_names ) );
+		foreach ( $with_names as $id ) {
+			$this->assertSame( 1, substr_count( (string) $named->invoke( null, $id ), '%s' ), $id );
+			$this->assertStringContainsString( 'Blue hoodie', ReadinessCopy::store_check( $id, '', 'Blue hoodie' )['found'], $id );
+			$this->assertStringNotContainsString( 'Blue hoodie', ReadinessCopy::store_check( $id )['found'], "{$id} without a name" );
+		}
+	}
+
+	/**
+	 * @testdox A broken llms.txt link is named, and the fix says where to change it for each place the file comes from.
+	 */
+	public function test_broken_llms_txt_link_names_the_link_and_fits_the_fix(): void {
+		$copy = ReadinessCopy::store_check( 'llms_txt_links_resolve', 'file', '', 'https://example.com/old-sale/' );
+		$this->assertStringContainsString( 'doesn’t open: example.com/old-sale/.', $copy['found'] );
+		$this->assertStringContainsString( 'llms.txt file in your site’s root folder', $copy['fix'] );
+		$this->assertStringContainsString( 'plugin that adds your llms.txt file', ReadinessCopy::store_check( 'llms_txt_links_resolve', 'other' )['fix'] );
+		$this->assertStringContainsString( 'WooCommerce adds these links', ReadinessCopy::store_check( 'llms_txt_links_resolve', 'woocommerce' )['fix'] );
+		$general = ReadinessCopy::store_check( 'llms_txt_links_resolve' );
+		$this->assertStringStartsWith( 'Some links in the file', $general['found'], 'Without a link, the general line' );
+		$this->assertSame( 'Update or remove the broken links in the file.', $general['fix'] );
+	}
+
+	/**
 	 * @testdox The checkout check, pending until its output ships, has its copy and is Required.
 	 */
 	public function test_checkout_check_has_copy_and_is_required(): void {
@@ -50,7 +73,8 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Let AI assistants send shoppers to your checkout', $copy['action'] ?? null );
 		$this->assertNotSame( '', $copy['why'] );
 		$this->assertNotSame( '', $copy['found'] );
-		$this->assertSame( 'Turn off AI shopping (also called UCP or agentic commerce) in the other plugin, or deactivate it.', $copy['fix'] );
+		$this->assertSame( 'In the other plugin, turn off any setting for AI shopping, UCP, or agentic commerce. Or deactivate the plugin.', $copy['fix'] );
+		$this->assertSame( admin_url( 'plugins.php' ), $copy['url'], 'View plugins opens the Plugins screen' );
 
 		$required = new \ReflectionMethod( ReadinessCheckPage::class, 'is_required' );
 		$required->setAccessible( true );
@@ -71,9 +95,33 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 	public function test_every_store_check_has_a_fix_line(): void {
 		$checks = new \ReflectionMethod( StoreOutputChecks::class, 'checks' );
 		$checks->setAccessible( true );
-		foreach ( array_diff( array_column( $checks->invoke( wc_get_container()->get( StoreOutputChecks::class ) ), 'id' ), self::pending() ) as $id ) {
+		foreach ( array_column( $checks->invoke( wc_get_container()->get( StoreOutputChecks::class ) ), 'id' ) as $id ) {
 			$this->assertNotSame( '', ReadinessCopy::store_check( $id )['fix'] ?? '', $id );
 		}
+		$this->assertStringContainsString( 'tab=shipping', ReadinessCopy::store_check( 'product_shipping_schema' )['url'], 'The shipping fix links to the Shipping settings' );
+	}
+
+	/**
+	 * @testdox The llms.txt first-line fix names the store, and keeps the generic line when the store has no name.
+	 */
+	public function test_llms_txt_first_line_fix_names_the_store(): void {
+		$name = get_option( 'blogname' );
+		update_option( 'blogname', 'Blue Sky & Co' );
+		try {
+			$this->assertSame( 'Make # Blue Sky & Co the first line of the file. Do this in your SEO plugin’s llms.txt settings, or in the llms.txt file in your site’s root folder.', ReadinessCopy::store_check( 'llms_txt_valid' )['fix'] );
+			update_option( 'blogname', '' );
+			$this->assertSame( 'Add your store’s name as the file’s first heading.', ReadinessCopy::store_check( 'llms_txt_valid' )['fix'] );
+		} finally {
+			update_option( 'blogname', $name );
+		}
+	}
+
+	/**
+	 * @testdox The brand fix says where to find the products only when there are several.
+	 */
+	public function test_brand_fix_only_for_several_products(): void {
+		$this->assertSame( 'Find them in Products, and add a brand to each one.', ReadinessCopy::product_check( 'missing_brand', 3 )['fix'] );
+		$this->assertSame( '', ReadinessCopy::product_check( 'missing_brand', 1 )['fix'] ?? '' );
 	}
 
 	/**
@@ -90,6 +138,16 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '(UCP 2025-01-01)', ReadinessCopy::store_check( 'ucp_profile_version', '2025-01-01' )['found'] );
 		$this->assertStringContainsString( '(UCP).', ReadinessCopy::store_check( 'ucp_profile_version' )['found'] );
 		$this->assertSame( ReadinessCopy::store_check( 'ucp_profile' )['found'], ReadinessCopy::store_check( 'ucp_profile', '2025-01-01' )['found'], 'Other checks ignore the source' );
+		$this->assertSame(
+			array(
+				'href' => 'https://ucpplayground.com/',
+				'text' => 'UCP Playground',
+			),
+			ReadinessCopy::store_check( 'ucp_profile' )['found_link'],
+			'The connection check links UCP Playground where its found line names it'
+		);
+		$this->assertStringContainsString( 'UCP Playground', ReadinessCopy::store_check( 'ucp_profile' )['found'] );
+		$this->assertNull( ReadinessCopy::store_check( 'ucp_checkout' )['found_link'], 'Other checks link nothing in the text' );
 	}
 
 	/**
@@ -125,10 +183,10 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 	 * @testdox The product why lines that name ChatGPT, Google or Copilot match the bundled channel rules.
 	 */
 	public function test_product_why_lines_match_channel_rules(): void {
-		// What each why line says, and what that means per channel; update both when the rules change.
+		// What each why line says, and what that means per channel; update both when the rules change. Lines that name no channel are left out.
 		$said  = array(
 			'missing_regular_price' => array(
-				'AI assistants only list products that have a price.',
+				'AI shopping apps only list products that have a price.',
 				array(
 					'chatgpt' => 'not_listable',
 					'google'  => 'not_listable',
@@ -136,19 +194,11 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 				),
 			),
 			'missing_images'        => array(
-				'AI assistants only list products that have a main image.',
+				'AI shopping apps need a main image to list a product.',
 				array(
 					'chatgpt' => 'not_listable',
 					'google'  => 'not_listable',
 					'copilot' => 'not_listable',
-				),
-			),
-			'missing_product_text'  => array(
-				'ChatGPT only lists products that have a description. In Google and Copilot, a description makes products easier to find.',
-				array(
-					'chatgpt' => 'not_listable',
-					'google'  => 'gaps',
-					'copilot' => 'gaps',
 				),
 			),
 			'missing_brand'         => array(
@@ -156,14 +206,6 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 				array(
 					'chatgpt' => 'not_listable',
 					'google'  => 'gaps',
-					'copilot' => 'gaps',
-				),
-			),
-			'invalid_gtin'          => array(
-				'Google doesn’t list products with a barcode number that isn’t valid. In ChatGPT and Copilot, a valid one makes products easier to find.',
-				array(
-					'chatgpt' => 'gaps',
-					'google'  => 'not_listable',
 					'copilot' => 'gaps',
 				),
 			),
@@ -178,5 +220,19 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 				"The why line of {$id} matches what each channel does in rules.json"
 			);
 		}
+	}
+
+	/**
+	 * @testdox Each llms.txt source has a line for a served file or a fix for a missing one, and an unknown source has none.
+	 */
+	public function test_llms_txt_source_copy(): void {
+		foreach ( array( 'woocommerce', 'file', 'other' ) as $source ) {
+			$this->assertNotEmpty( ReadinessCopy::llms_txt_source( $source )['pass'] ?? '', "{$source} says where llms.txt comes from" );
+		}
+		foreach ( array( 'disabled', 'not_reached' ) as $source ) {
+			$this->assertNotEmpty( ReadinessCopy::llms_txt_source( $source )['fix'] ?? '', "{$source} has its own fix" );
+		}
+		$this->assertNull( ReadinessCopy::llms_txt_source( '' ) );
+		$this->assertNull( ReadinessCopy::llms_txt_source( 'plugin' ) );
 	}
 }

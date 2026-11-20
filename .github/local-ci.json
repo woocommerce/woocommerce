@@ -36,7 +36,7 @@
         ],
         "mirrors": {
           "action": ".github/actions/setup-woocommerce-monorepo/action.yml",
-          "sha256": "9aa17d624c6b2f4e5666763e9354b424c5c988f1b6e506d26ca8df40ad9c0fa0"
+          "sha256": "06c5fa90b22f4093d94d7f07a4f7e37bb82edd762d6fcee0988f25a9f783639f"
         }
       },
       "$comment": "Every test:js is jest, which defaults to cores-1 workers per invocation. gh local-ci sizes {workers} for the machine it runs on, from a budget the jobs share; on a Mac with more than one core tier, from the fastest tier only. A fixed 4 per job oversubscribed an M5 Max's 6 fast cores: the seven jest jobs of one diff took 83 s, against 65 to 73 s sized by the tool.",
@@ -57,7 +57,7 @@
         ],
         "mirrors": {
           "action": ".github/actions/setup-woocommerce-monorepo/action.yml",
-          "sha256": "9aa17d624c6b2f4e5666763e9354b424c5c988f1b6e506d26ca8df40ad9c0fa0"
+          "sha256": "06c5fa90b22f4093d94d7f07a4f7e37bb82edd762d6fcee0988f25a9f783639f"
         }
       },
       "run": [ "pnpm", "--filter={project}", "{command}" ]
@@ -80,7 +80,7 @@
         ],
         "mirrors": {
           "action": ".github/actions/setup-woocommerce-monorepo/action.yml",
-          "sha256": "9aa17d624c6b2f4e5666763e9354b424c5c988f1b6e506d26ca8df40ad9c0fa0"
+          "sha256": "06c5fa90b22f4093d94d7f07a4f7e37bb82edd762d6fcee0988f25a9f783639f"
         }
       },
       "run": [ "pnpm", "--filter={project}", "{command}" ]
@@ -102,7 +102,7 @@
         ],
         "mirrors": {
           "action": ".github/actions/setup-woocommerce-monorepo/action.yml",
-          "sha256": "9aa17d624c6b2f4e5666763e9354b424c5c988f1b6e506d26ca8df40ad9c0fa0"
+          "sha256": "06c5fa90b22f4093d94d7f07a4f7e37bb82edd762d6fcee0988f25a9f783639f"
         }
       },
       "run": [ "pnpm", "--filter={project}", "{command}" ]

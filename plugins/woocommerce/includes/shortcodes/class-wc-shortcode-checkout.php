@@ -260,7 +260,7 @@ class WC_Shortcode_Checkout {
 			$order_key = isset( $_GET['key'] ) && is_string( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flow selectors are cleaned; order access verifies key/ownership.
 			$order     = wc_get_order( $order_id );
 
-			if ( $order && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
+			if ( $order instanceof WC_Order && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
 
 				if ( $order->needs_payment() ) {
 
