@@ -1237,6 +1237,9 @@ final class ContractRepository {
 	 *     @type string|string[] $status Optional status filter: one status or a list of them
 	 *                                   ({@see ContractStatus}). Unregistered values are dropped;
 	 *                                   ignored when none remain.
+	 *     @type string $extension_slug Optional owner filter: only contracts of this extension
+	 *                                  (binary, case-sensitive match, as the lock and write
+	 *                                  guards use). Absent: every extension.
 	 * }
 	 * @return array<int, Contract> Contracts the customer owns, newest first.
 	 */
@@ -1260,14 +1263,21 @@ final class ContractRepository {
 		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$select = self::CONTRACT_SELECT;
 
-		// One query for both shapes: the optional status filter joins the WHERE, and
-		// every value is a placeholder (table names cannot be bound, so the table is
+		// One query for every shape: the optional status and owner filters join the WHERE,
+		// and every value is a placeholder (table names cannot be bound, so the table is
 		// interpolated).
 		$where  = 'customer_id = %d';
 		$params = array( $customer_id );
 		if ( array() !== $statuses ) {
 			$where .= ' AND status IN (' . implode( ', ', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
 			$params = array_merge( $params, $statuses );
+		}
+		// A present key always applies and never widens to every owner: the value binds as a
+		// string, so a non-scalar or false binds '' and matches nothing (no contract can own
+		// an empty slug), and any other scalar binds its string form as an exact owner.
+		if ( array_key_exists( 'extension_slug', $args ) ) {
+			$where   .= ' AND ' . self::OWNER_MATCH;
+			$params[] = Coercion::coerce_string( $args['extension_slug'] );
 		}
 		$params[] = $limit;
 		$params[] = $offset;

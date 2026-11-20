@@ -29,6 +29,7 @@ usage() {
 	Environment:
 	  E2E_PLUGIN_ZIP=<zip>          Test this ZIP instead of building deploy/<name>.zip
 	  E2E_WP_VERSION, E2E_WC_VERSION  latest (default), nightly or a release tag
+	  E2E_PHP_VERSION=X.Y        Select the browser site PHP image
 	  E2E_TARGET=<file>             Spec files to run: a path or part of a file name (run only)
 	  E2E_FILTER=<regex>            Test titles or tags to run, as --grep (run only)
 	  E2E_SHOW_UI=1                 Show the browser, as --headed (run only)
@@ -37,6 +38,11 @@ usage() {
 }
 
 prepare() {
+	if [[ -n "${E2E_PHP_VERSION+x}" && ! "${E2E_PHP_VERSION:-}" =~ ^[0-9]+\.[0-9]+$ ]]; then
+		echo "Invalid E2E_PHP_VERSION (expected major.minor)." >&2
+		exit 1
+	fi
+
 	local zip=${E2E_PLUGIN_ZIP:-}
 	if [[ -z "$zip" ]]; then
 		pnpm run build:zip

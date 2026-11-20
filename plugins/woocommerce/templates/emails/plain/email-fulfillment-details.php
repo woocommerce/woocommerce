@@ -20,15 +20,27 @@ use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 defined( 'ABSPATH' ) || exit;
 
 if ( null === $fulfillment->get_date_deleted() ) {
-	$tracking_number   = $fulfillment->get_meta( '_tracking_number', true );
-	$tracking_url      = $fulfillment->get_meta( '_tracking_url' );
-	$shipment_provider = $fulfillment->get_meta( '_shipment_provider' );
-	if ( ! $tracking_number && ! $tracking_url && ! $shipment_provider ) {
+	// A line is only printed when it has something to show. esc_url_raw() empties a URL WordPress
+	// will not allow, so it also decides about the line, and it prints rather than esc_html()
+	// because the plain text pass drops entities it does not know, taking "&#039;" out of a URL.
+	$tracking_number = trim( (string) $fulfillment->get_tracking_number() );
+	$provider_label  = trim( FulfillmentUtils::get_provider_display_name( $fulfillment ) );
+	$tracking_url    = trim( (string) $fulfillment->get_tracking_url() );
+	$renderable_url  = esc_url_raw( $tracking_url );
+
+	if ( '' === $tracking_number && '' === $provider_label && '' === $renderable_url ) {
 		echo esc_html__( 'No tracking information available for this fulfillment at the moment.', 'woocommerce' ) . "\n\n";
 	} else {
-		echo esc_html__( 'Tracking Number', 'woocommerce' ) . ': ' . esc_attr( $tracking_number ) . "\n";
-		echo esc_html__( 'Shipment Provider', 'woocommerce' ) . ': ' . esc_html( FulfillmentUtils::get_provider_display_name( $fulfillment ) ) . "\n";
-		echo esc_html__( 'Tracking URL', 'woocommerce' ) . ': ' . esc_html( $tracking_url ) . "\n\n";
+		if ( '' !== $tracking_number ) {
+			echo esc_html__( 'Tracking Number', 'woocommerce' ) . ': ' . esc_attr( $tracking_number ) . "\n";
+		}
+		if ( '' !== $provider_label ) {
+			echo esc_html__( 'Shipment Provider', 'woocommerce' ) . ': ' . esc_html( $provider_label ) . "\n";
+		}
+		if ( '' !== $renderable_url ) {
+			echo esc_html__( 'Tracking URL', 'woocommerce' ) . ': ' . esc_url_raw( $tracking_url ) . "\n";
+		}
+		echo "\n";
 	}
 
 	echo esc_html__( 'You can access to more details of your order by visiting My Account > Orders and select the order you wish to see the latest status of the delivery.', 'woocommerce' );
