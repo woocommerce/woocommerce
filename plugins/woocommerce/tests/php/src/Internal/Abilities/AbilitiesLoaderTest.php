@@ -40,6 +40,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/store-settings-get',
 		'woocommerce/settings-groups-query',
 		'woocommerce/settings-query',
+		'woocommerce/settings-update',
 		'woocommerce/product-terms-query',
 		'woocommerce/product-term-create',
 		'woocommerce/product-term-update',
@@ -409,6 +410,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'destructive' => false,
 			),
 			'woocommerce/shipping-zone-method-update' => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => true,
+			),
+			'woocommerce/settings-update'             => array(
 				'readonly'    => false,
 				'idempotent'  => true,
 				'destructive' => true,
@@ -1060,6 +1066,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'store-settings-get'          => array( 'woocommerce/store-settings-get', array() ),
 			'settings-groups-query'       => array( 'woocommerce/settings-groups-query', array() ),
 			'settings-query'              => array( 'woocommerce/settings-query', array( 'group' => 'general' ) ),
+			'settings-update'             => array(
+				'woocommerce/settings-update',
+				array(
+					'group'    => 'general',
+					'settings' => array(
+						array(
+							'id'    => 'woocommerce_currency',
+							'value' => 'EUR',
+						),
+					),
+				),
+			),
 			'product-terms-query'         => array(
 				'woocommerce/product-terms-query',
 				array(
@@ -1297,6 +1315,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				),
 			),
 			'tax-rates-query'                => array( 'woocommerce/tax-rates-query', array() ),
+			'settings-update'                => array(
+				'woocommerce/settings-update',
+				array(
+					'group'    => 'general',
+					'settings' => array(
+						array(
+							'id'    => 'woocommerce_currency',
+							'value' => 'EUR',
+						),
+					),
+				),
+			),
 			'product-attributes-query'       => array( 'woocommerce/product-attributes-query', array() ),
 			'product-attribute-create'       => array( 'woocommerce/product-attribute-create', array( 'name' => 'Size' ) ),
 			'product-terms-query'            => array( 'woocommerce/product-terms-query', array( 'taxonomy' => 'product_cat' ) ),
