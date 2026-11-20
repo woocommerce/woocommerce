@@ -64,7 +64,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'desc'          => __( 'Enable guest checkout (recommended)', 'woocommerce' ),
 				'desc_tip'      => __( 'Allows customers to checkout without an account.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_guest_checkout',
-				'abilities'     => array( 'read' => true ),
+				'abilities'     => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'       => 'yes',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
@@ -74,7 +77,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'         => __( 'Login', 'woocommerce' ),
 				'desc'          => __( 'Enable log-in during checkout', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_checkout_login_reminder',
-				'abilities'     => array( 'read' => true ),
+				'abilities'     => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
@@ -90,7 +96,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'</a>'
 				),
 				'id'                => 'woocommerce_enable_delayed_account_creation',
-				'abilities'         => array( 'read' => true ),
+				'abilities'         => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'           => 'no',
 				'type'              => 'checkbox',
 				'checkboxgroup'     => 'start',
@@ -105,7 +114,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'desc'          => __( 'During checkout', 'woocommerce' ),
 				'desc_tip'      => __( 'Customers can create an account before placing their order.', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_signup_and_login_from_checkout',
-				'abilities'     => array( 'read' => true ),
+				'abilities'     => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
@@ -115,7 +127,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'         => __( 'Account creation', 'woocommerce' ),
 				'desc'          => __( 'On "My account" page', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_myaccount_registration',
-				'abilities'     => array( 'read' => true ),
+				'abilities'     => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'end',
@@ -126,7 +141,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'desc'              => __( 'Send password setup link (recommended)', 'woocommerce' ),
 				'desc_tip'          => __( 'New users receive an email to set up their password.', 'woocommerce' ),
 				'id'                => 'woocommerce_registration_generate_password',
-				'abilities'         => array( 'read' => true ),
+				'abilities'         => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'           => 'yes',
 				'type'              => 'checkbox',
 				'checkboxgroup'     => 'start',
@@ -140,7 +158,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'desc'              => __( 'Generate account login (recommended)', 'woocommerce' ),
 				'desc_tip'          => __( 'Generate a login for the account using first and/or last name. If neither is usable (e.g. invalid or missing) the email address will be used. If this option is unchecked, customers will need to set a username during account creation', 'woocommerce' ),
 				'id'                => 'woocommerce_registration_generate_username',
-				'abilities'         => array( 'read' => true ),
+				'abilities'         => array(
+					'read'  => true,
+					'write' => true,
+				),
 				'default'           => 'yes',
 				'type'              => 'checkbox',
 				'checkboxgroup'     => 'end',
@@ -199,7 +220,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'     => __( 'Registration privacy policy', 'woocommerce' ),
 				'desc_tip'  => __( 'Optionally add some text about your store privacy policy to show on account registration forms.', 'woocommerce' ),
 				'id'        => 'woocommerce_registration_privacy_policy_text',
-				'abilities' => array( 'read' => true ),
+				'abilities' => array(
+					'read'  => true,
+					'write' => true,
+				),
 				/* translators: %s privacy policy page name and link */
 				'default'   => sprintf( __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ),
 				'type'      => 'textarea',
@@ -210,7 +234,10 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'title'     => __( 'Checkout privacy policy', 'woocommerce' ),
 				'desc_tip'  => __( 'Optionally add some text about your store privacy policy to show during checkout.', 'woocommerce' ),
 				'id'        => 'woocommerce_checkout_privacy_policy_text',
-				'abilities' => array( 'read' => true ),
+				'abilities' => array(
+					'read'  => true,
+					'write' => true,
+				),
 				/* translators: %s privacy policy page name and link */
 				'default'   => sprintf( __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ),
 				'type'      => 'textarea',

@@ -6,6 +6,7 @@ import { Badge, Card, Link, Text } from '@wordpress/ui';
 /**
  * Internal dependencies
  */
+import { safeHref } from '../safe-href';
 import type { FixFirst as FixFirstData } from '../types';
 import { trackReadiness, type Surface } from '../tracks';
 import { Row, RowLink } from './check-row';
@@ -117,7 +118,7 @@ export const FixFirstCard = ( { fixFirst }: { fixFirst: FixFirstData } ) => (
 				{ fixFirst.link && (
 					<>
 						{ ' ' }
-						<Link href={ fixFirst.link.href }>
+						<Link href={ safeHref( fixFirst.link.href ) }>
 							{ fixFirst.link.text }
 						</Link>
 					</>

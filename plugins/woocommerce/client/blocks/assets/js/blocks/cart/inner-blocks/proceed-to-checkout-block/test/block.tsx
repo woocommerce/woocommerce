@@ -20,6 +20,43 @@ import Block from '../block';
 import { CartEventsProvider } from '../../../../../base/context/providers';
 
 describe( 'Proceed to checkout block', () => {
+	it.each( [ false, true ] )(
+		'applies button overrides without styling the wrapper (serialized: %s)',
+		( serialized ) => {
+			const style = {
+				color: { background: '#123456', text: '#ffffff' },
+				border: { radius: '12px', width: '2px', style: 'solid' },
+				spacing: { padding: { top: '20px' } },
+				typography: { fontSize: '24px', textAlign: 'right' as const },
+			};
+			const { container } = render(
+				<Block
+					checkoutPageId={ 0 }
+					buttonLabel="Proceed to Checkout"
+					className=""
+					textColor="contrast"
+					style={ serialized ? JSON.stringify( style ) : style }
+				/>
+			);
+			const button = screen.getByRole( 'link' );
+
+			expect( button ).toHaveClass(
+				'has-contrast-color',
+				'has-background'
+			);
+			expect( button ).toHaveStyle( {
+				backgroundColor: '#123456',
+				color: '#ffffff',
+				borderRadius: '12px',
+				borderWidth: '2px',
+				paddingTop: '20px',
+				fontSize: '24px',
+				textAlign: 'right',
+			} );
+			expect( container.firstChild ).not.toHaveAttribute( 'style' );
+		}
+	);
+
 	it( 'allows the text to be filtered', () => {
 		registerCheckoutFilters( 'test-extension', {
 			proceedToCheckoutButtonLabel: () => {

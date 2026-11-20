@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 /**
  * Internal dependencies
  */
+import { safeHref } from '../safe-href';
 import type { CheckRow as CheckRowData, ViewBadge, ViewLink } from '../types';
 import { trackReadiness, type Surface } from '../tracks';
 
@@ -23,12 +24,13 @@ export const RowLink = ( {
 }: {
 	link: ViewLink;
 	onClick?: () => void;
-} ) =>
-	link.href ? (
+} ) => {
+	const href = safeHref( link.href );
+	return href ? (
 		<Button
 			variant="secondary"
 			size="compact"
-			href={ link.href }
+			href={ href }
 			onClick={ onClick }
 		>
 			{ link.text }
@@ -38,6 +40,7 @@ export const RowLink = ( {
 			{ link.text }
 		</Text>
 	);
+};
 
 // The swatch icon, a dashed circle, from the WordPress icons package from version 18 on.
 // This package pins an older version that doesn't have it.
@@ -155,7 +158,7 @@ const TextWithLink = ( {
 	return (
 		<>
 			{ text.slice( 0, at ) }
-			<Link href={ link.href } openInNewTab>
+			<Link href={ safeHref( link.href ) } openInNewTab>
 				{ link.text }
 			</Link>
 			{ text.slice( at + link.text.length ) }
@@ -225,7 +228,9 @@ export const CheckRow = ( {
 							row.seen_at.text
 						),
 						{
-							link: <Link href={ row.seen_at.href } />,
+							link: (
+								<Link href={ safeHref( row.seen_at.href ) } />
+							),
 						}
 					) }
 				</Text>
