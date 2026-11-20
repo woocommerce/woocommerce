@@ -288,7 +288,6 @@ class PushTokenRestController extends RestApiControllerBase {
 
 	/**
 	 * Creates a push token record and returns its ID and the store's WordPress.com blog ID.
-	 * Apps compare the blog ID with the ID carried by push notifications.
 	 *
 	 * @since 10.6.0
 	 *
