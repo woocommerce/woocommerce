@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Mark each Variation Selector attribute row as a list item, so screen readers no longer announce an empty list.
+Add to Cart + Options: Mark each Variation Selector attribute row as a list item, so screen readers no longer announce an empty list.
