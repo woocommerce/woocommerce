@@ -8,6 +8,7 @@
 declare( strict_types=1 );
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 
 /**
  * Tests for the WC_Session_Handler class.
