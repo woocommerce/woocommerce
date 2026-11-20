@@ -78,8 +78,9 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 *
 	 * An unsupported version or a payload the route cannot read is refused before the key is
 	 * claimed, so a 422 or 415 never touches the store. After that the key is settled before
-	 * anything else runs: a replay must not load a session or resolve a cart id, since a retried `cancel` has to return the
-	 * stored response rather than the `not_found` its own first run left behind.
+	 * anything else runs: a replay must not load a session or resolve a cart id, since a
+	 * retried `cancel` has to return the stored response rather than the `not_found` its own
+	 * first run left behind.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
