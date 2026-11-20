@@ -752,7 +752,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 			$this->sut->run_batch( $chain );
 			$this->fail( 'A product load failure stops the batch' );
 		} catch ( \RuntimeException $e ) {
-			unset( $e );
+			$this->assertStringContainsString( (string) $product_id, $e->getMessage() );
 		} finally {
 			remove_filter( 'woocommerce_product_class', $fail, 10 );
 			wc_get_container()->get( ProductCache::class )->remove( $product_id );
@@ -767,6 +767,40 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
 		$this->assertContains( ProductFailures::CHECKED, ProductFailures::stored( $product_id ) );
+	}
+
+	/**
+	 * @testdox On the last attempt, a product that still fails to load is skipped so the scan finishes and its rows stay.
+	 */
+	public function test_product_load_failure_on_last_attempt_skips_and_keeps_rows(): void {
+		$ids = $this->create_products( 2 );
+		ProductFailures::store( $ids[0], array( 'missing_images' => array() ) );
+		$prior = ProductFailures::stored( $ids[0] );
+
+		$fail = static function ( $classname, $product_type, $context, $id ) use ( $ids ) {
+			unset( $product_type, $context );
+			return (int) $id === $ids[0] ? BrokenAgentReadinessProduct::class : $classname;
+		};
+		add_filter( 'woocommerce_product_class', $fail, 10, 4 );
+		wc_get_container()->get( ProductCache::class )->remove( $ids[0] );
+		clean_post_cache( $ids[0] );
+		$this->sut->run();
+		$state             = get_option( AgentReadiness::SCAN_OPTION );
+		$state['attempts'] = AgentReadiness::MAX_ATTEMPTS - 1;
+		update_option( AgentReadiness::SCAN_OPTION, $state, false );
+
+		try {
+			$this->run_batches();
+		} finally {
+			remove_filter( 'woocommerce_product_class', $fail, 10 );
+			wc_get_container()->get( ProductCache::class )->remove( $ids[0] );
+			clean_post_cache( $ids[0] );
+		}
+
+		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
+		$this->assertSame( $prior, ProductFailures::stored( $ids[0] ), 'Rows for the unloadable product stay' );
+		$this->assertContains( ProductFailures::CHECKED, ProductFailures::stored( $ids[1] ) );
+		$this->assertNotNull( wc_get_container()->get( AgentReadiness::class )->get_cached_report() );
 	}
 
 	/**

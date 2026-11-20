@@ -213,15 +213,17 @@ class ProductScan {
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param array<int, int>                                                 $product_ids   Product ids, at most BATCH_SIZE.
-	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
-	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
-	 * @param int                                                             $ids_limit     Product ids kept per rule.
-	 * @param callable|null                                                   $on_tested     Called with each product id and its failures.
+	 * @param array<int, int>                                                 $product_ids         Product ids, at most BATCH_SIZE.
+	 * @param array<string, ReadinessRule>                                    $rules               Rules by id.
+	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules       Channel map by rule id.
+	 * @param int                                                             $ids_limit           Product ids kept per rule.
+	 * @param callable|null                                                   $on_tested           Called with each product id and its failures.
+	 * @param bool                                                            $skip_unloadable     When true, products that fail to load are skipped instead of failing the batch (last scan attempt).
+	 * @param array<int, int>                                                 $skipped_unloadable  Filled with ids skipped when $skip_unloadable is true.
 	 *
-	 * @throws \RuntimeException When a selected product still exists but cannot be loaded.
+	 * @throws \RuntimeException When a selected product still exists but cannot be loaded, and $skip_unloadable is false.
 	 */
-	public function test( array $product_ids, array $rules, array $channel_rules, int $ids_limit, ?callable $on_tested = null ): void {
+	public function test( array $product_ids, array $rules, array $channel_rules, int $ids_limit, ?callable $on_tested = null, bool $skip_unloadable = false, array &$skipped_unloadable = array() ): void {
 		/**
 		 * Fires after one batch of product ids has been read, before those products are tested.
 		 * A product created here is not in this batch, so the scan does not replace its rows.
@@ -244,9 +246,15 @@ class ProductScan {
 					continue;
 				}
 				// Factory returned false. A missing post is gone; a product post that still
-				// exists failed to load, so the batch must retry instead of treating it as tested.
+				// exists failed to load. Retry the batch unless this is the last attempt.
 				if ( 'product' === get_post_type( $product_id ) ) {
-					throw new \RuntimeException( 'Agent readiness could not load a product to scan.' );
+					if ( $skip_unloadable ) {
+						$skipped_unloadable[] = (int) $product_id;
+						continue;
+					}
+					throw new \RuntimeException(
+						sprintf( 'Agent readiness could not load product %d to scan.', (int) $product_id )
+					);
 				}
 			}
 		} finally {

@@ -283,11 +283,13 @@ class AgentReadiness {
 	/**
 	 * Test the next batch of products.
 	 *
-	 * @param array<string, mixed> $scan      What start_scan() or the last batch returned.
-	 * @param callable|null        $on_tested Called with each product id and its failures.
+	 * @param array<string, mixed> $scan               What start_scan() or the last batch returned.
+	 * @param callable|null        $on_tested          Called with each product id and its failures.
+	 * @param bool                 $skip_unloadable    When true, products that fail to load are skipped (last attempt).
+	 * @param array<int, int>      $skipped_unloadable Filled with ids skipped when $skip_unloadable is true.
 	 * @return array<string, mixed> The scan with this batch added.
 	 */
-	private function scan_batch( array $scan, ?callable $on_tested ): array {
+	private function scan_batch( array $scan, ?callable $on_tested, bool $skip_unloadable = false, array &$skipped_unloadable = array() ): array {
 		$active       = $this->get_active_rules();
 		$product_ids  = array_slice( $scan['ids'], $scan['position'], ProductScan::BATCH_SIZE );
 		$product_scan = ProductScan::from_state( $scan['scan'] );
@@ -295,7 +297,7 @@ class AgentReadiness {
 			$sales = $this->product_sales->for_products( $product_ids, $scan['sales']['since'] );
 			$product_scan->use_sales( $sales['by_product'], $sales['by_variation'] );
 		}
-		$product_scan->test( $product_ids, $active['rules'], $active['channel_rules'], self::PRODUCT_IDS_LIMIT, $on_tested );
+		$product_scan->test( $product_ids, $active['rules'], $active['channel_rules'], self::PRODUCT_IDS_LIMIT, $on_tested, $skip_unloadable, $skipped_unloadable );
 		$scan['position'] += count( $product_ids );
 		$scan['scan']      = $product_scan->state();
 		return $scan;
@@ -554,7 +556,7 @@ class AgentReadiness {
 				'rows_as_of' => $rows_as_of,
 				// Taken before the scan. A product saved while it runs is absent here, so its new rows stay.
 				'had_rows'   => ProductFailures::stored_product_ids(),
-				// Product ids actually evaluated; keep_only must not treat a skipped load as tested.
+				// Product ids evaluated, plus unloadable ids skipped on the last attempt so keep_only leaves their rows.
 				'tested'     => array(),
 			)
 		);
@@ -584,12 +586,17 @@ class AgentReadiness {
 
 		if ( $state['position'] < count( $state['ids'] ) ) {
 			// Collect first, then store only if this chain is still current: a replaced scan must not write failure rows.
-			$written = array();
-			$state   = $this->scan_batch(
+			// On the last attempt, skip products that still fail to load so one broken product cannot freeze every scan.
+			$written            = array();
+			$skipped_unloadable = array();
+			$skip_unloadable    = $state['attempts'] >= self::MAX_ATTEMPTS;
+			$state              = $this->scan_batch(
 				$state,
 				static function ( int $product_id, array $failures ) use ( &$written ): void {
 					$written[ $product_id ] = $failures;
-				}
+				},
+				$skip_unloadable,
+				$skipped_unloadable
 			);
 			if ( ! $this->is_current( $chain ) ) {
 				return false;
@@ -599,14 +606,26 @@ class AgentReadiness {
 			foreach ( $written as $product_id => $failures ) {
 				ProductFailures::store( (int) $product_id, $failures, false );
 			}
-			$state['tested']   = array_values(
+			// Skipped unloadable ids count as tested so keep_only() leaves their existing rows alone.
+			$state['tested'] = array_values(
 				array_unique(
 					array_merge(
 						array_map( 'intval', (array) ( $state['tested'] ?? array() ) ),
-						array_map( 'intval', array_keys( $written ) )
+						array_map( 'intval', array_keys( $written ) ),
+						array_map( 'intval', $skipped_unloadable )
 					)
 				)
 			);
+			if ( $skipped_unloadable ) {
+				wc_get_logger()->warning(
+					sprintf(
+						'Agent readiness skipped %d product(s) that failed to load on the last attempt: %s',
+						count( $skipped_unloadable ),
+						implode( ', ', $skipped_unloadable )
+					),
+					array( 'source' => 'agent-readiness' )
+				);
+			}
 			$state['attempts'] = 0;
 			// A scan that replaced this one while the rows were stored keeps its own progress.
 			if ( ! $this->is_current( $chain ) ) {
