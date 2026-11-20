@@ -214,7 +214,7 @@ class AgentReadiness {
 	/**
 	 * Run every check over the catalog.
 	 *
-	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,sales:array{days:int,orders:int,imported:bool}|null}
+	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,pages_best_seller?:bool,sales:array{days:int,orders:int,imported:bool}|null}
 	 */
 	public function get_report(): array {
 		return $this->build_report();
@@ -224,7 +224,7 @@ class AgentReadiness {
 	 * Run every check over the catalog.
 	 *
 	 * @param callable|null $on_tested Called with each product id and its failures.
-	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,sales:array{days:int,orders:int,imported:bool}|null,shared_gtins?:array<int,string>}
+	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,pages_best_seller:bool,sales:array{days:int,orders:int,imported:bool}|null,shared_gtins?:array<int,string>}
 	 */
 	private function build_report( ?callable $on_tested = null ): array {
 		// Rebuild the rules and the scan for each report: a long-running process may have fetched a new rules file or changed GTINs since.
@@ -264,6 +264,10 @@ class AgentReadiness {
 		}
 
 		$responses = $this->store_output_checks->responses();
+		if ( $ranked ) {
+			// Page checks read the best seller's page first.
+			$responses->use_sales( $sales['by_product'] );
+		}
 
 		$report = array(
 			'generated_at'        => gmdate( 'c' ),
@@ -273,6 +277,8 @@ class AgentReadiness {
 			'unsupported_types'   => $scan->unsupported_types(),
 			'store_checks'        => array_merge( $this->store_conditions->all(), $this->store_output_checks->all_for( $responses ) ),
 			'declared'            => $this->declared_to_agents->all( $responses ),
+			// Whether the product pages the page checks read start with the best seller, or with the newest product.
+			'pages_best_seller'   => $responses->starts_with_best_seller(),
 			'channels'            => $scan->channel_totals(),
 			'checks'              => $checks,
 			'truncated'           => $scan->truncated(),
@@ -393,7 +399,7 @@ class AgentReadiness {
 	 *
 	 * @param array<string, mixed>|null                                                                                                               $report Stored report.
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>|null $live   Store conditions already read, or null to read them.
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string,source?:string}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,skipped?:bool,seen_at?:string,source?:string,product?:int}>
 	 */
 	public function get_store_checks( ?array $report, ?array $live = null ): array {
 		$checks   = $live ?? $this->store_conditions->all();
@@ -418,8 +424,11 @@ class AgentReadiness {
 				'fix_url'  => (string) ( $check['fix_url'] ?? '' ),
 				'conflict' => ! empty( $check['conflict'] ),
 				'pending'  => ! empty( $check['pending'] ),
+				'skipped'  => ! empty( $check['skipped'] ),
 				'seen_at'  => (string) ( $check['seen_at'] ?? '' ),
 				'source'   => sanitize_text_field( (string) ( $check['source'] ?? '' ) ),
+				// The product whose page failed, so the found line can name it.
+				'product'  => absint( $check['product'] ?? 0 ),
 			);
 		}
 		return $checks;
