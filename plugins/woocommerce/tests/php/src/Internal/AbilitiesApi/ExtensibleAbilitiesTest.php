@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
@@ -47,13 +49,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @var int|null
 	 */
 	private $original_init_count;
-
-	/**
-	 * Actions that a test added, removed in tearDown.
-	 *
-	 * @var array<int, array{0: string, 1: callable, 2: int}>
-	 */
-	private $test_actions = array();
 
 	/**
 	 * Create immutable class fixtures.
@@ -101,12 +96,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wp_actions;
 
-		remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_test_fields' ) );
-		remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_test_filters' ) );
-		foreach ( $this->test_actions as list( $hook, $callback, $priority ) ) {
-			remove_action( $hook, $callback, $priority );
-		}
-		$this->test_actions = array();
 		$this->set_feature( false );
 		$this->reset_registries();
 		wp_set_current_user( 0 );
@@ -335,6 +324,22 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
+		$beyond = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'search'   => 'Pen',
+				'per_page' => 2,
+				'page'     => 3,
+				'filters'  => $filters,
+			)
+		);
+
+		$this->assertSame( 3, $page_one['total'] );
+		$this->assertSame( 3, $page_two['total'] );
+		$this->assertSame( 3, $beyond['total'] );
+		$this->assertSame( 2, $beyond['total_pages'] );
+		$this->assertSame( array(), $beyond['products'] );
+		$this->assertSame( 1, $plain['total'] );
 		$this->assertSame( 2, $page_one['total_pages'] );
 		$this->assertEqualsCanonicalizing( $with_code, array_merge( array_column( $page_one['products'], 'id' ), array_column( $page_two['products'], 'id' ) ) );
 		$this->assertSame( array( $without_code->get_id() ), array_column( $plain['products'], 'id' ) );
@@ -503,17 +508,28 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 			$this->assertSame( $hpos, OrderUtil::custom_orders_table_usage_is_enabled() );
 			$this->assertSame( $sync, OrderUtil::is_custom_order_tables_in_sync() );
+			$beyond = $this->run_ability(
+				'woocommerce/orders-query',
+				array(
+					'per_page' => 1,
+					'page'     => 3,
+					'filters'  => array( 'extensions' => array( 'test-ext' => array( 'tag' => 'gift' ) ) ),
+				)
+			);
+			$this->assertSame( 2, $output['total'] );
+			$this->assertSame( 2, $beyond['total'] );
+			$this->assertSame( 2, $beyond['total_pages'] );
+			$this->assertSame( array(), $beyond['orders'] );
 			$this->assertSame( 2, $output['total_pages'] );
 			$this->assertContains( $output['orders'][0]['id'], $tagged );
 		} finally {
 			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 			$this->toggle_cot_feature_and_usage( $original );
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
 	}
 
 	/**
-	 * @testdox Should keep the orders whose IDs every filter returns, from data that is not meta, and still apply Core's exclude, with HPOS and with posts storage.
+	 * @testdox Should keep the orders whose IDs every filter returns, from data that is not meta, still apply Core's exclude, and narrow Core's include both ways, with HPOS and with posts storage.
 	 * @testWith [true, false]
 	 *           [true, true]
 	 *           [false, false]
@@ -560,6 +576,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$without  = $this->run_ability( 'woocommerce/orders-query', $filters( array( 'without' => array( $orders['plain'] ) ) ) );
 			$excluded = $this->run_ability( 'woocommerce/orders-query', array( 'exclude' => array( $orders['gift'] ) ) + $filters( array( 'contains_product' => $coffee->get_id() ) ) );
 			$both_out = $this->run_ability( 'woocommerce/orders-query', array( 'exclude' => array( $other->get_id() ) ) + $filters( array( 'without' => array( $orders['plain'] ) ) ) );
+			$narrowed = $this->run_ability( 'woocommerce/orders-query', array( 'include' => array( $orders['gift'], $other->get_id() ) ) + $filters( array( 'contains_product' => $coffee->get_id() ) ) );
+			$disjoint = $this->run_ability( 'woocommerce/orders-query', array( 'include' => array( $other->get_id() ) ) + $filters( array( 'contains_product' => $coffee->get_id() ) ) );
+			$minus    = $this->run_ability( 'woocommerce/orders-query', array( 'include' => array( $orders['gift'], $orders['plain'] ) ) + $filters( array( 'without' => array( $orders['plain'] ) ) ) );
 
 			$this->assertEqualsCanonicalizing( array_values( $orders ), array_column( $contains['orders'], 'id' ) );
 			$this->assertSame( array( $orders['gift'] ), array_column( $both['orders'], 'id' ) );
@@ -567,11 +586,55 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->assertEqualsCanonicalizing( array( $orders['gift'], $other->get_id() ), array_column( $without['orders'], 'id' ) );
 			$this->assertSame( array( $orders['plain'] ), array_column( $excluded['orders'], 'id' ) );
 			$this->assertSame( array( $orders['gift'] ), array_column( $both_out['orders'], 'id' ) );
+			$this->assertSame( array( $orders['gift'] ), array_column( $narrowed['orders'], 'id' ), 'An extension filter should narrow include, not widen it.' );
+			$this->assertSame( array(), $disjoint['orders'], 'An extension filter that shares no ID with include should return no orders.' );
+			$this->assertSame( array( $orders['gift'] ), array_column( $minus['orders'], 'id' ), 'IDs an extension filter excludes should leave include.' );
 		} finally {
 			remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
 			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 			$this->toggle_cot_feature_and_usage( $original );
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * @testdox Should return only the orders that both a search and an extension's ID filter match, with HPOS and with posts storage.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos Whether HPOS is on.
+	 */
+	public function test_search_intersects_with_order_ids_filter( bool $hpos ): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( $hpos );
+		add_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
+
+		try {
+			$coffee = \WC_Helper_Product::create_simple_product();
+			$orders = array();
+			foreach ( array(
+				'jane_coffee' => array( 'Jane', $coffee ),
+				'jane_other'  => array( 'Jane', null ),
+				'john_coffee' => array( 'John', $coffee ),
+			) as $key => list( $first_name, $product ) ) {
+				$order = \WC_Helper_Order::create_order( 0, $product );
+				$order->set_billing_first_name( $first_name );
+				$order->save();
+				$orders[ $key ] = $order->get_id();
+			}
+
+			$result = $this->run_ability(
+				'woocommerce/orders-query',
+				array(
+					'search'  => 'Jane',
+					'filters' => array( 'extensions' => array( 'test-ext' => array( 'contains_product' => $coffee->get_id() ) ) ),
+				)
+			);
+
+			$this->assertSame( array( $orders['jane_coffee'] ), array_column( $result['orders'], 'id' ) );
+		} finally {
+			remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
+			$this->toggle_cot_feature_and_usage( $original );
 		}
 	}
 
@@ -955,6 +1018,276 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should call the $resource_name prime callbacks of each extension once with the full list, in registration order.
+	 * @dataProvider provide_list_abilities
+	 *
+	 * @param string   $resource_name Resource the ability lists.
+	 * @param string   $ability       List ability.
+	 * @param string   $list_key      Output key of the list.
+	 * @param callable $create_input  Creates two objects and returns the ability input that lists them.
+	 */
+	public function test_prime_callbacks_get_the_full_list_once( string $resource_name, string $ability, string $list_key, callable $create_input ): void {
+		$calls = array();
+		$cache = array();
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name, &$cache ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => $resource_name,
+						'namespace'     => 'test-ext',
+						'field'         => 'primed',
+						'output_schema' => array( 'type' => 'string' ),
+						'get_callback'  => static function ( $data_object ) use ( &$cache ) {
+							return $cache[ self::prime_object_id( $data_object ) ] ?? null;
+						},
+					)
+				);
+			}
+		);
+		foreach ( array( 'test-ext', 'other_ext' ) as $extension_namespace ) {
+			$this->register_prime(
+				$resource_name,
+				$extension_namespace,
+				static function ( array $objects ) use ( &$calls, &$cache, $extension_namespace ) {
+					$ids     = array_map( array( self::class, 'prime_object_id' ), array_values( $objects ) );
+					$calls[] = array( $extension_namespace, $ids );
+					if ( 'test-ext' === $extension_namespace ) {
+						$cache = array_combine( $ids, array_map( static fn( int $id ) => 'primed-' . $id, $ids ) );
+					}
+				}
+			);
+		}
+
+		$list = $this->run_ability( $ability, $create_input() )[ $list_key ];
+
+		// A customer's id is its Analytics customer ID; extensions get the WC_Customer of its user.
+		$id_key = 'customer' === $resource_name ? 'user_id' : 'id';
+		$ids    = array_column( $list, $id_key );
+		$this->assertCount( 2, $ids );
+		$this->assertSame( array( array( 'test-ext', $ids ), array( 'other_ext', $ids ) ), $calls );
+		foreach ( $list as $listed ) {
+			$this->assertSame( 'primed-' . $listed[ $id_key ], $listed['extensions']['test-ext']['primed'] );
+		}
+	}
+
+	/**
+	 * List abilities that prime their objects, with a fixture factory for each.
+	 *
+	 * @return array<string, array>
+	 */
+	public function provide_list_abilities(): array {
+		return array(
+			'product'        => array(
+				'product',
+				'woocommerce/products-query',
+				'products',
+				static function (): array {
+					\WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen one' ) );
+					\WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen two' ) );
+					return array( 'search' => 'Pen' );
+				},
+			),
+			'customer'       => array(
+				'customer',
+				'woocommerce/customers-query',
+				'customers',
+				static function (): array {
+					$customer_ids = array();
+					foreach ( self::factory()->user->create_many( 2, array( 'role' => 'customer' ) ) as $user_id ) {
+						CustomersDataStore::update_registered_customer( $user_id );
+						$customer_ids[] = (int) CustomersDataStore::get_customer_id_by_user_id( $user_id );
+					}
+					return array( 'include' => $customer_ids );
+				},
+			),
+			'product_term'   => array(
+				'product_term',
+				'woocommerce/product-terms-query',
+				'terms',
+				static function (): array {
+					return array(
+						'taxonomy'   => 'product_cat',
+						'include'    => self::factory()->term->create_many( 2, array( 'taxonomy' => 'product_cat' ) ),
+						'hide_empty' => false,
+					);
+				},
+			),
+			'product_review' => array(
+				'product_review',
+				'woocommerce/product-reviews-query',
+				'reviews',
+				static function (): array {
+					$product = \WC_Helper_Product::create_simple_product()->get_id();
+					self::factory()->comment->create_many(
+						2,
+						array(
+							'comment_post_ID'  => $product,
+							'comment_type'     => 'review',
+							'comment_approved' => '1',
+						)
+					);
+					return array( 'product_ids' => array( $product ) );
+				},
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should have a prime test for every Core resource.
+	 */
+	public function test_every_core_resource_has_a_prime_test(): void {
+		AbilitiesLoader::register_core_resources();
+		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
+		$resources->setAccessible( true );
+
+		$covered = array_merge( array_keys( $this->provide_list_abilities() ), array( 'order', 'order_item' ) );
+
+		$this->assertEqualsCanonicalizing( array_keys( $resources->getValue() ), $covered, 'Add the new resource to provide_list_abilities().' );
+	}
+
+	/**
+	 * ID of an object a prime callback receives.
+	 *
+	 * @param \WC_Data|\WP_Term|\WP_Comment $data_object Object.
+	 * @return int
+	 */
+	private static function prime_object_id( $data_object ): int {
+		if ( $data_object instanceof \WP_Term ) {
+			return $data_object->term_id;
+		}
+		if ( $data_object instanceof \WP_Comment ) {
+			return (int) $data_object->comment_ID;
+		}
+		return $data_object->get_id();
+	}
+
+	/**
+	 * @testdox Should call the order and order item prime callbacks once with every order and every product line.
+	 */
+	public function test_prime_callbacks_get_orders_and_line_items(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$orders  = array( wc_create_order(), wc_create_order() );
+		foreach ( $orders as $order ) {
+			$order->add_product( $product );
+			$order->save();
+		}
+		$calls = array();
+		foreach ( array( 'order', 'order_item' ) as $resource_name ) {
+			$this->register_prime(
+				$resource_name,
+				'test-ext',
+				static function ( array $objects ) use ( &$calls, $resource_name ) {
+					$calls[ $resource_name ][] = array_map( static fn( $data_object ) => $data_object->get_id(), $objects );
+				}
+			);
+		}
+
+		$this->run_ability(
+			'woocommerce/orders-query',
+			array(
+				'per_page'           => 2,
+				'include_line_items' => true,
+			)
+		);
+
+		$item_ids = array_merge( ...array_map( static fn( \WC_Order $order ) => array_keys( $order->get_items() ), $orders ) );
+		$this->assertCount( 2, $item_ids );
+		$this->assertCount( 1, $calls['order'] );
+		$this->assertEqualsCanonicalizing( array_map( static fn( \WC_Order $order ) => $order->get_id(), $orders ), $calls['order'][0] );
+		$this->assertCount( 1, $calls['order_item'] );
+		$this->assertEqualsCanonicalizing( $item_ids, $calls['order_item'][0] );
+	}
+
+	/**
+	 * @testdox Should log a prime callback that throws, run the next one, and still return the fields.
+	 */
+	public function test_a_prime_callback_that_throws_is_logged(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$product->update_meta_data( '_test_code', 'A1' );
+		$product->save();
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->expects( $this->once() )->method( 'error' )->with(
+			'Ability prime callback of "test-ext" for "product" failed: Table is missing',
+			array( 'source' => 'extensible-abilities' )
+		);
+		add_filter( 'woocommerce_logging_class', static fn() => $logger );
+		$calls = 0;
+		$this->register_prime(
+			'product',
+			'test-ext',
+			static function () {
+				throw new \RuntimeException( 'Table is missing' );
+			}
+		);
+		$this->register_prime(
+			'product',
+			'other_ext',
+			static function () use ( &$calls ) {
+				++$calls;
+			}
+		);
+
+		$products = $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen' ) )['products'];
+
+		$this->assertSame( 1, $calls );
+		$this->assertSame( array( 'code' => 'A1' ), $products[0]['extensions']['test-ext'] );
+	}
+
+	/**
+	 * @testdox Should run the next prime callback and return the fields when the logger also throws.
+	 */
+	public function test_a_logger_that_throws_does_not_stop_the_read(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$product->update_meta_data( '_test_code', 'A1' );
+		$product->save();
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->method( 'error' )->willThrowException( new \RuntimeException( 'Logger broke' ) );
+		add_filter( 'woocommerce_logging_class', static fn() => $logger );
+		$calls = 0;
+		$this->register_prime(
+			'product',
+			'test-ext',
+			static function () {
+				throw new \RuntimeException( 'Table is missing' );
+			}
+		);
+		$this->register_prime(
+			'product',
+			'other_ext',
+			static function () use ( &$calls ) {
+				++$calls;
+			}
+		);
+
+		$products = $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen' ) )['products'];
+
+		$this->assertSame( 1, $calls );
+		$this->assertSame( array( 'code' => 'A1' ), $products[0]['extensions']['test-ext'] );
+	}
+
+	/**
+	 * @testdox Should not call prime callbacks with the feature off.
+	 */
+	public function test_prime_callbacks_do_not_run_with_the_feature_off(): void {
+		\WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$calls = 0;
+		$this->register_prime(
+			'product',
+			'test-ext',
+			static function () use ( &$calls ) {
+				++$calls;
+			}
+		);
+		$this->get_output_schema( 'woocommerce/products-query' );
+		$this->set_feature( false );
+
+		$this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen' ) );
+
+		$this->assertSame( 0, $calls );
+	}
+
+	/**
 	 * @testdox Should list the fields of each namespace in the output schemas, and add nothing for a resource with no fields.
 	 */
 	public function test_output_schemas_list_fields_by_namespace(): void {
@@ -1063,7 +1396,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
 		$resources->setAccessible( true );
-		$this->assertSame( array( 'product', 'order', 'order_item', 'product_term' ), array_keys( $resources->getValue() ) );
+		$this->assertSame( array( 'product', 'order', 'order_item', 'product_term', 'product_review', 'customer' ), array_keys( $resources->getValue() ) );
 	}
 
 	/**
@@ -1344,9 +1677,206 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a field whose output schema has a list of types below the top level.
+	 * @dataProvider provider_nested_type_list_output_schemas
+	 * @param array $schema Output schema.
+	 */
+	public function test_a_nested_type_list_in_an_output_schema_is_refused( array $schema ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'refused',
+				'field'         => 'value',
+				'output_schema' => $schema,
+				'get_callback'  => '__return_null',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+	}
+
+	/**
+	 * Output schemas with a list of types below the top level.
+	 *
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provider_nested_type_list_output_schemas(): array {
+		$object = fn( array $property ) => array(
+			'type'       => 'object',
+			'properties' => array( 'a' => $property ),
+		);
+		return array(
+			'property type list'             => array( $object( array( 'type' => array( 'string', 'null' ) ) ) ),
+			'oneOf branch type list'         => array( $object( array( 'oneOf' => array( array( 'type' => array( 'string', 'null' ) ), array( 'type' => 'integer' ) ) ) ) ),
+			'deep item type list'            => array(
+				$object(
+					array(
+						'type'  => 'array',
+						'items' => $object( array( 'type' => array( 'integer', 'null' ) ) ),
+					)
+				),
+			),
+			'additionalProperties type list' => array(
+				array(
+					'type'                 => 'object',
+					'additionalProperties' => array( 'type' => array( 'string', 'null' ) ),
+				),
+			),
+			'patternProperties type list'    => array(
+				array(
+					'type'              => 'object',
+					'patternProperties' => array( '^a' => array( 'type' => array( 'string', 'null' ) ) ),
+				),
+			),
+			'allOf branch type list'         => array( $object( array( 'allOf' => array( array( 'type' => array( 'string', 'null' ) ) ) ) ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should register a field whose output schema has a null type or a null branch below the top level.
+	 * @dataProvider provider_nested_null_output_schemas
+	 * @param array $schema Output schema.
+	 */
+	public function test_a_nested_null_in_an_output_schema_is_registered( array $schema ): void {
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'nested',
+				'field'         => 'value',
+				'output_schema' => $schema,
+				'get_callback'  => '__return_null',
+			)
+		);
+
+		$this->assertArrayHasKey( 'value', ExtensibleAbilities::get_fields( 'order' )['nested'] ?? array() );
+	}
+
+	/**
+	 * Output schemas with a null type or a null branch below the top level.
+	 *
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provider_nested_null_output_schemas(): array {
+		$object = fn( array $property ) => array(
+			'type'       => 'object',
+			'properties' => array( 'a' => $property ),
+		);
+		return array(
+			'property null type'  => array( $object( array( 'type' => 'null' ) ) ),
+			'anyOf null branch'   => array( $object( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ) ),
+			'oneOf null branch'   => array( $object( array( 'oneOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ) ),
+			'allOf null branch'   => array( $object( array( 'allOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ) ),
+			'nullable list items' => array(
+				array(
+					'type'  => 'array',
+					'items' => array( 'anyOf' => array( array( 'type' => 'number' ), array( 'type' => 'null' ) ) ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should refuse a field whose input schema has a list of types below the top level.
+	 * @dataProvider provider_nested_type_list_input_schemas
+	 * @param array $schema Input schema.
+	 */
+	public function test_a_nested_type_list_in_an_input_schema_is_refused( array $schema ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'     => 'order',
+				'namespace'    => 'refused',
+				'field'        => 'value',
+				'input_schema' => $schema,
+				'set_callback' => '__return_null',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+	}
+
+	/**
+	 * Input schemas with a list of types below the top level.
+	 *
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provider_nested_type_list_input_schemas(): array {
+		return array(
+			'property'          => array(
+				array(
+					'type'       => 'object',
+					'properties' => array( 'a' => array( 'type' => array( 'string', 'null' ) ) ),
+				),
+			),
+			'tuple item'        => array(
+				array(
+					'type'  => 'array',
+					'items' => array( array( 'type' => 'string' ), array( 'type' => array( 'integer', 'null' ) ) ),
+				),
+			),
+			'anyOf branch'      => array(
+				array(
+					'type'  => 'object',
+					'anyOf' => array( array( 'type' => array( 'object', 'null' ) ) ),
+				),
+			),
+			'patternProperties' => array(
+				array(
+					'type'              => 'object',
+					'patternProperties' => array( '^a' => array( 'type' => array( 'string', 'null' ) ) ),
+				),
+			),
+			'allOf branch'      => array(
+				array(
+					'type'  => 'object',
+					'allOf' => array( array( 'type' => array( 'object', 'null' ) ) ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should register a field with nested output properties that are not nullable and a nested input anyOf with a null branch.
+	 */
+	public function test_a_nested_schema_without_type_lists_is_registered(): void {
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'nested',
+				'field'         => 'value',
+				'output_schema' => array(
+					'type'       => 'object',
+					'properties' => array(
+						'tags' => array(
+							'type'  => 'array',
+							'items' => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'integer' ) ) ),
+						),
+					),
+				),
+				'get_callback'  => '__return_null',
+				'input_schema'  => array(
+					'type'       => 'object',
+					'properties' => array( 'note' => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
+				),
+				'set_callback'  => '__return_null',
+			)
+		);
+
+		$this->assertArrayHasKey( 'value', ExtensibleAbilities::get_fields( 'order' )['nested'] ?? array() );
+	}
+
+	/**
 	 * @testdox Should keep the WordPress message for an anyOf under a top-level type whose branches do not each have their own type name.
 	 * @testWith [[{"enum":["small"]},{"enum":["large"]}]]
-	 *           [[{"type":["integer","null"]},{"type":"null"}]]
 	 *           [[{"type":"string","enum":["small"]},{"type":"string","pattern":"^x"}]]
 	 *
 	 * @param array $any_of The anyOf branches.
@@ -1513,12 +2043,12 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_valid_schemas_are_published_as_declared(): void {
 		$input_schemas = array(
-			'nullable'    => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ),
-			'any_of'      => array(
+			'nullable'   => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ),
+			'any_of'     => array(
 				'type'       => 'object',
 				'properties' => array( 'a' => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
 			),
-			'enum_null'   => array(
+			'enum_null'  => array(
 				'anyOf' => array(
 					array(
 						'type' => 'string',
@@ -1527,20 +2057,15 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					array( 'type' => 'null' ),
 				),
 			),
-			'enum_mixed'  => array(
+			'enum_mixed' => array(
 				'type' => 'string',
 				'enum' => array( 'a', 1 ),
 			),
-			'branch'      => array(
+			'branch'     => array(
 				'type'  => 'object',
 				'anyOf' => array( array( 'required' => array( 'a' ) ), array( 'required' => array( 'b' ) ) ),
 			),
-			'nested_null' => array(
-				'type'       => 'object',
-				'properties' => array( 'a' => array( 'type' => array( 'string', 'null' ) ) ),
-				'required'   => array( 'a' ),
-			),
-			'different'   => array(
+			'different'  => array(
 				'type'                 => 'object',
 				'properties'           => array( 'delete' => array( 'type' => 'boolean' ) ),
 				'additionalProperties' => false,
@@ -1885,7 +2410,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					'plain'           => array( 'type' => 'string' ),
 					'nested_declared' => array(
 						'type'       => 'object',
-						'properties' => array( 'a' => array( 'type' => array( 'string', 'null' ) ) ),
+						'properties' => array( 'a' => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
 					),
 					'nested_refused'  => array(
 						'type'       => 'object',
@@ -1986,6 +2511,159 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( '{"flat":[],"of_objects":[],"in_object":{"list":[]}}', wp_json_encode( $output ) );
+	}
+
+	/**
+	 * @testdox Should send an empty array for an object as an empty object under an anyOf or a oneOf with a null branch.
+	 */
+	public function test_an_empty_object_under_an_any_of_or_one_of_is_an_empty_object(): void {
+		$object_or_null = fn( string $keyword ) => array( $keyword => array( array( 'type' => 'object' ), array( 'type' => 'null' ) ) );
+		$output         = $this->read_field_values(
+			array(
+				'any_of_items'    => array(
+					array(
+						'type'  => 'array',
+						'items' => $object_or_null( 'anyOf' ),
+					),
+					array( array(), null ),
+				),
+				'one_of_items'    => array(
+					array(
+						'type'  => 'array',
+						'items' => $object_or_null( 'oneOf' ),
+					),
+					array( array(), null ),
+				),
+				'any_of_property' => array(
+					array(
+						'type'       => 'object',
+						'properties' => array(
+							'empty' => $object_or_null( 'anyOf' ),
+							'null'  => $object_or_null( 'anyOf' ),
+						),
+					),
+					array(
+						'empty' => array(),
+						'null'  => null,
+					),
+				),
+				'any_of_deep'     => array(
+					array(
+						'type'  => 'array',
+						'items' => array(
+							'anyOf' => array(
+								array(
+									'type'       => 'object',
+									'properties' => array( 'inner' => array( 'type' => 'object' ) ),
+								),
+								array( 'type' => 'null' ),
+							),
+						),
+					),
+					array( array( 'inner' => array() ) ),
+				),
+			)
+		);
+
+		$this->assertSame(
+			'{"any_of_items":[{},null],"one_of_items":[{},null],"any_of_property":{"empty":{},"null":null},"any_of_deep":[{"inner":{}}]}',
+			wp_json_encode( $output )
+		);
+	}
+
+	/**
+	 * @testdox Should send an empty array for an object as an empty object when the nested schema is in an anyOf, oneOf or allOf branch, or under patternProperties or additionalProperties.
+	 */
+	public function test_an_empty_object_in_a_branch_or_a_pattern_is_an_empty_object(): void {
+		$object_or_null = fn( string $keyword ) => array( $keyword => array( array( 'type' => 'object' ), array( 'type' => 'null' ) ) );
+		$property       = fn( string $name ) => array( 'properties' => array( $name => array( 'type' => 'object' ) ) );
+		$output         = $this->read_field_values(
+			array(
+				'any_of_branch'  => array(
+					array(
+						'type'  => 'object',
+						'anyOf' => array( $property( 'a' ), $property( 'b' ) ),
+					),
+					array( 'a' => array() ),
+				),
+				'one_of_branch'  => array(
+					array(
+						'type'  => 'object',
+						'oneOf' => array( $property( 'a' ) + array( 'required' => array( 'a' ) ), $property( 'b' ) + array( 'required' => array( 'b' ) ) ),
+					),
+					array( 'a' => array() ),
+				),
+				'one_of_items'   => array(
+					array(
+						'type'  => 'array',
+						'oneOf' => array( array( 'items' => array( 'type' => 'object' ) ), array( 'items' => array( 'type' => 'string' ) ) ),
+					),
+					array( array() ),
+				),
+				'all_of_branch'  => array(
+					array(
+						'type'  => 'object',
+						'allOf' => array( $property( 'a' ) ),
+					),
+					array( 'a' => array() ),
+				),
+				'pattern'        => array(
+					array(
+						'type'              => 'object',
+						'patternProperties' => array( '^x' => $object_or_null( 'anyOf' ) ),
+					),
+					array( 'x1' => array() ),
+				),
+				'additional'     => array(
+					array(
+						'type'                 => 'object',
+						'additionalProperties' => $object_or_null( 'oneOf' ),
+					),
+					array( 'k' => array() ),
+				),
+				'top_properties' => array(
+					array(
+						'type'  => 'object',
+						'anyOf' => array( array( 'required' => array( 'a' ) ) ),
+					) + $property( 'a' ),
+					array( 'a' => array() ),
+				),
+				'untyped_outer'  => array(
+					array(
+						'type'  => 'array',
+						'items' => $object_or_null( 'anyOf' ) + $property( 'inner' ),
+					),
+					array( array( 'inner' => array() ) ),
+				),
+			)
+		);
+
+		$this->assertSame(
+			'{"any_of_branch":{"a":{}},"one_of_branch":{"a":{}},"one_of_items":[{}],"all_of_branch":{"a":{}},"pattern":{"x1":{}},"additional":{"k":{}},"top_properties":{"a":{}},"untyped_outer":[{"inner":{}}]}',
+			wp_json_encode( $output )
+		);
+	}
+
+	/**
+	 * @testdox Should match the sanitized value, so an empty array, whether meant as an object or a list, takes the first anyOf branch and stays as it is under a oneOf.
+	 */
+	public function test_an_empty_object_that_also_fits_an_array_branch_follows_the_sanitized_value(): void {
+		$items  = fn( string $keyword, array $branches ) => array(
+			'type'  => 'array',
+			'items' => array( $keyword => $branches ),
+		);
+		$object = array( 'type' => 'object' );
+		$list   = array( 'type' => 'array' );
+		$output = $this->read_field_values(
+			array(
+				'one_of'                   => array( $items( 'oneOf', array( $object, $list ) ), array( new \stdClass() ) ),
+				'any_of_object_first'      => array( $items( 'anyOf', array( $object, $list ) ), array( new \stdClass() ) ),
+				'any_of_object_first_list' => array( $items( 'anyOf', array( $object, $list ) ), array( array() ) ),
+				'any_of_array_first'       => array( $items( 'anyOf', array( $list, $object ) ), array( new \stdClass() ) ),
+			)
+		);
+
+		$this->assertSame( '{"one_of":[[]],"any_of_object_first":[{}],"any_of_object_first_list":[{}],"any_of_array_first":[[]]}', wp_json_encode( $output ) );
 	}
 
 	/**
@@ -2363,6 +3041,25 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'on-hold', $saved->get_status() );
 		$this->assertSame( 'Happy birthday', $saved->get_meta( '_test_gift_message' ) );
 		$this->assertSame( 'Happy birthday', $updated['order']['extensions']['test-ext']['gift_message'] );
+	}
+
+	/**
+	 * @testdox Should keep backslashes and quotes in the name and descriptions of a created product.
+	 */
+	public function test_product_create_keeps_backslashes_in_post_fields(): void {
+		$created = $this->run_ability(
+			'woocommerce/product-create',
+			array(
+				'name'              => 'Cable 1\\2" it\'s',
+				'description'       => 'Path C:\\temp',
+				'short_description' => 'Short C:\\temp',
+			)
+		);
+		$post    = get_post( $created['product']['id'] );
+
+		$this->assertSame( 'Cable 1\\2" it\'s', $post->post_title, 'The stored name should keep its backslash and quotes.' );
+		$this->assertSame( 'Path C:\\temp', $post->post_content, 'The stored description should keep its backslash.' );
+		$this->assertSame( 'Short C:\\temp', $post->post_excerpt, 'The stored short description should keep its backslash.' );
 	}
 
 	/**
@@ -2862,6 +3559,26 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fail a trash, and keep the product, when a query of the call hits a deadlock.
+	 */
+	public function test_a_deadlock_fails_the_call_and_keeps_the_product(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$this->add_test_action(
+			'trashed_post',
+			static function () {
+				global $wpdb;
+				$wpdb->last_error = 'Deadlock found when trying to get lock; try restarting transaction';
+			}
+		);
+
+		$response = $this->run_ability_response( 'woocommerce/product-delete', array( 'id' => $product->get_id() ) );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'woocommerce_transaction_rolled_back', $response->get_data()['code'] );
+		$this->assertSame( ProductStatus::PUBLISH, get_post_status( $product->get_id() ) );
+	}
+
+	/**
 	 * @testdox Should drop the cache of an order when a sync refuses the change.
 	 */
 	public function test_a_sync_refusal_drops_the_cache_of_the_order(): void {
@@ -2958,7 +3675,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $refused->get_status() );
 		$this->assertStringEndsWith( 'test_keep', $refused->get_data()['code'] );
 		$this->assertInstanceOf( \WC_Product::class, wc_get_product( $kept->get_id() ) );
-		$this->assertTrue( $deleted['deleted'] );
+		$this->assertSame( 'deleted', $deleted['status'] );
 		$this->assertFalse( wc_get_product( $created['product']['id'] ) );
 		$this->assertNull( get_post( $created['product']['variation_ids'][0] ), 'The variations go with the parent.' );
 	}
@@ -3048,6 +3765,55 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should run validators on the variations that a type change deletes, and give them to the syncs as deleted.
+	 */
+	public function test_a_type_change_reports_the_variations_it_deletes(): void {
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$ids     = $created['product']['variation_ids'];
+		$refuse  = true;
+		$seen    = array();
+		$deleted = array();
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse ) {
+				unset( $ability );
+				$seen[ $product->get_id() ] = $context['deleting'];
+				return $refuse && $context['deleting'] ? new \WP_Error( 'test_keep', 'Keep them.' ) : null;
+			}
+		);
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+				unset( $saved, $ability );
+				$deleted = array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] );
+				return null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$input = array(
+			'id'   => $created['product']['id'],
+			'type' => 'simple',
+		);
+
+		$refused = $this->run_ability_response( 'woocommerce/product-update', $input );
+		$kept    = wc_get_product( $created['product']['id'] )->get_children();
+		$refuse  = false;
+		$changed = $this->run_ability( 'woocommerce/product-update', $input );
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertEqualsCanonicalizing( $ids, $kept );
+		$this->assertSame( 'simple', $changed['product']['type'] );
+		$this->assertTrue( $seen[ $ids[0] ] );
+		$this->assertTrue( $seen[ $ids[1] ] );
+		$this->assertFalse( $seen[ $created['product']['id'] ] );
+		$this->assertEqualsCanonicalizing( $ids, $deleted );
+		$this->assertNull( get_post( $ids[0] ) );
+	}
+
+	/**
 	 * @testdox Should run validators on the variations of a deleted parent, and delete nothing when one refuses.
 	 */
 	public function test_a_validator_can_refuse_deleting_a_variable_parent(): void {
@@ -3080,11 +3846,325 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $refused->get_status() );
 		$this->assertSame( 'Keep it.', $refused->get_data()['message'] );
 		$this->assertInstanceOf( \WC_Product_Variable::class, $after );
-		$this->assertTrue( $deleted['deleted'] );
+		$this->assertSame( 'deleted', $deleted['status'] );
 		foreach ( $created['product']['variation_ids'] as $variation_id ) {
 			$this->assertSame( array( 'woocommerce/product-delete', true ), $seen[ $variation_id ] );
 		}
 		$this->assertSame( array( 'woocommerce/product-delete', true ), $seen[ $created['product']['id'] ] );
+	}
+
+	/**
+	 * @testdox Should let an order validator refuse a trash and a permanent delete, and give the syncs the removed order.
+	 */
+	public function test_a_validator_can_refuse_deleting_an_order(): void {
+		$order    = \WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+		$refuse   = true;
+		$seen     = array();
+		$synced   = array();
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse ) {
+				$seen[] = array( $order->get_id(), $ability->get_name(), $context['deleting'] );
+				return $refuse ? new \WP_Error( 'test_cancel_first', 'Cancel it first.' ) : null;
+			}
+		);
+		$this->register_sync(
+			'order',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$synced ) {
+				unset( $ability );
+				$synced[] = array(
+					count( $saved ),
+					array_map( static fn( \WC_Order $order ) => $order->get_id(), $context['trashed'] ),
+					array_map( static fn( \WC_Order $order ) => $order->get_id(), $context['deleted'] ),
+				);
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$refused_trash  = $this->run_ability_response( 'woocommerce/order-delete', array( 'id' => $order_id ) );
+		$refused_delete = $this->run_ability_response(
+			'woocommerce/order-delete',
+			array(
+				'id'    => $order_id,
+				'force' => true,
+			)
+		);
+		$after_refusals = wc_get_order( $order_id )->get_status();
+		$refuse         = false;
+		$trashed        = $this->run_ability( 'woocommerce/order-delete', array( 'id' => $order_id ) );
+		$deleted        = $this->run_ability(
+			'woocommerce/order-delete',
+			array(
+				'id'    => $order_id,
+				'force' => true,
+			)
+		);
+
+		foreach ( array( $refused_trash, $refused_delete ) as $refused ) {
+			$this->assertSame( 400, $refused->get_status() );
+			$this->assertSame( 'test-ext:test_cancel_first', $refused->get_data()['code'] );
+		}
+		$this->assertNotSame( 'trash', $after_refusals, 'A refused call should leave the order where it was.' );
+		$this->assertSame( array( $order_id, 'woocommerce/order-delete', true ), $seen[0] );
+		$this->assertSame( 'trash', $trashed['status'] );
+		$this->assertSame( 'deleted', $deleted['status'] );
+		$this->assertFalse( wc_get_order( $order_id ) );
+		$this->assertSame(
+			array(
+				array( 0, array( $order_id ), array() ),
+				array( 0, array(), array( $order_id ) ),
+			),
+			$synced,
+			'The syncs should see the removed order, with its ID, and no saved object.'
+		);
+	}
+
+	/**
+	 * @testdox Should run validators on the refunds of a force-deleted order, delete nothing when one refuses, and give the syncs the deleted refunds.
+	 */
+	public function test_a_validator_can_refuse_deleting_the_refunds_of_an_order(): void {
+		$order     = \WC_Helper_Order::create_order();
+		$order_id  = $order->get_id();
+		$refund_id = wc_create_refund(
+			array(
+				'order_id' => $order_id,
+				'amount'   => 1,
+			)
+		)->get_id();
+		$refuse    = true;
+		$seen      = array();
+		$deleted   = array();
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Abstract_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $refund_id ) {
+				unset( $ability );
+				$seen[ $order->get_id() ] = $context['deleting'];
+				return $refuse && $refund_id === $order->get_id() ? new \WP_Error( 'test_keep_refund', 'Keep the refund.' ) : null;
+			}
+		);
+		$this->register_sync(
+			'order',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+				unset( $saved, $ability );
+				$deleted = array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $context['deleted'] );
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$input = array(
+			'id'    => $order_id,
+			'force' => true,
+		);
+
+		$refused = $this->run_ability_response( 'woocommerce/order-delete', $input );
+		$kept    = array( wc_get_order( $order_id ), wc_get_order( $refund_id ) );
+		$refuse  = false;
+		$result  = $this->run_ability( 'woocommerce/order-delete', $input );
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'test-ext:test_keep_refund', $refused->get_data()['code'] );
+		$this->assertInstanceOf( \WC_Order::class, $kept[0], 'A refused refund should keep the order.' );
+		$this->assertInstanceOf( \WC_Order_Refund::class, $kept[1] );
+		$this->assertTrue( $seen[ $refund_id ], 'The validators should see the refund as deleted.' );
+		$this->assertSame( 'deleted', $result['status'] );
+		$this->assertSame( array( $order_id, $refund_id ), $deleted );
+	}
+
+	/**
+	 * @testdox Should run validators on a child order and its refund that HPOS deletes with the parent, and delete nothing when one refuses.
+	 */
+	public function test_a_validator_can_refuse_deleting_a_child_order(): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( true );
+
+		try {
+			$order_id = \WC_Helper_Order::create_order()->get_id();
+			$child    = \WC_Helper_Order::create_order();
+			$child->set_parent_id( $order_id );
+			$child->save();
+			$child_id      = $child->get_id();
+			$grandchild_id = wc_create_refund(
+				array(
+					'order_id' => $child_id,
+					'amount'   => 1,
+				)
+			)->get_id();
+			$refuse        = true;
+			$seen          = array();
+			$deleted       = array();
+			$this->register_validator(
+				'order',
+				'test-ext',
+				static function ( \WC_Abstract_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $grandchild_id ) {
+					unset( $ability );
+					$seen[ $order->get_id() ] = $context['deleting'];
+					return $refuse && $grandchild_id === $order->get_id() ? new \WP_Error( 'test_keep_child', 'Keep the refund of the child.' ) : null;
+				}
+			);
+			$this->register_sync(
+				'order',
+				'test-ext',
+				static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted ) {
+					unset( $saved, $ability );
+					$deleted = array_map( static fn( \WC_Abstract_Order $order ) => $order->get_id(), $context['deleted'] );
+				}
+			);
+			$this->reset_registries();
+			AbilitiesLoader::init_extensions();
+			$input = array(
+				'id'    => $order_id,
+				'force' => true,
+			);
+
+			$refused = $this->run_ability_response( 'woocommerce/order-delete', $input );
+			$kept    = array( wc_get_order( $order_id ), wc_get_order( $child_id ), wc_get_order( $grandchild_id ) );
+			$refuse  = false;
+			$result  = $this->run_ability( 'woocommerce/order-delete', $input );
+
+			$this->assertSame( 400, $refused->get_status() );
+			$this->assertSame( 'test-ext:test_keep_child', $refused->get_data()['code'] );
+			$this->assertInstanceOf( \WC_Order::class, $kept[0], 'A refused refund of the child should keep the parent.' );
+			$this->assertInstanceOf( \WC_Order::class, $kept[1] );
+			$this->assertInstanceOf( \WC_Order_Refund::class, $kept[2] );
+			$this->assertTrue( $seen[ $child_id ], 'The validators should see the child as deleted.' );
+			$this->assertTrue( $seen[ $grandchild_id ], 'The validators should see the refund of the child as deleted.' );
+			$this->assertSame( 'deleted', $result['status'] );
+			$this->assertFalse( wc_get_order( $child_id ), 'HPOS should delete the child with its parent.' );
+			$this->assertFalse( wc_get_order( $grandchild_id ), 'HPOS should delete the refund of the child too.' );
+			$this->assertSame( array( $order_id, $child_id, $grandchild_id ), $deleted );
+		} finally {
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * @testdox Should refuse a forced delete and keep everything when a refund appears after the validators ran.
+	 *
+	 * @dataProvider provider_order_storage
+	 *
+	 * @param bool $hpos Whether to use the custom orders table.
+	 */
+	public function test_a_refund_added_after_validation_stops_a_forced_delete( bool $hpos ): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( $hpos );
+
+		try {
+			$order_id  = \WC_Helper_Order::create_order()->get_id();
+			$refund_id = 0;
+			$this->register_validator(
+				'order',
+				'test-ext',
+				static function ( \WC_Abstract_Order $order ) use ( &$refund_id, $order_id ) {
+					if ( 0 === $refund_id && $order_id === $order->get_id() ) {
+						$refund_id = wc_create_refund(
+							array(
+								'order_id' => $order_id,
+								'amount'   => 1,
+							)
+						)->get_id();
+					}
+					return null;
+				}
+			);
+			$this->reset_registries();
+			AbilitiesLoader::init_extensions();
+
+			$result = $this->run_ability_response(
+				'woocommerce/order-delete',
+				array(
+					'id'    => $order_id,
+					'force' => true,
+				)
+			);
+
+			$this->assertSame( 409, $result->get_status() );
+			$this->assertSame( 'woocommerce_ability_order_children_changed', $result->get_data()['code'] );
+			$this->assertInstanceOf( \WC_Order::class, wc_get_order( $order_id ) );
+			$this->assertInstanceOf( \WC_Order_Refund::class, wc_get_order( $refund_id ) );
+		} finally {
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * Order storage modes.
+	 *
+	 * @return array<string, array{0: bool}>
+	 */
+	public function provider_order_storage(): array {
+		return array(
+			'posts storage' => array( false ),
+			'HPOS storage'  => array( true ),
+		);
+	}
+
+	/**
+	 * @testdox Should restore a trashed or deleted order and its refund when a sync refuses, with HPOS and with posts storage, with and without sync.
+	 * @testWith [true, false]
+	 *           [true, true]
+	 *           [false, false]
+	 *           [false, true]
+	 *
+	 * @param bool $hpos Whether HPOS is on.
+	 * @param bool $sync Whether HPOS and posts storage sync.
+	 */
+	public function test_a_sync_refusal_restores_a_removed_order( bool $hpos, bool $sync ): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( $hpos );
+		if ( $sync ) {
+			$this->enable_cot_sync();
+		} else {
+			$this->disable_cot_sync();
+		}
+
+		try {
+			$order  = \WC_Helper_Order::create_order();
+			$status = $order->get_status();
+			$refund = wc_create_refund(
+				array(
+					'order_id' => $order->get_id(),
+					'amount'   => 1,
+				)
+			);
+			$this->register_sync(
+				'order',
+				'test-ext',
+				static fn() => new \WP_Error( 'test_ledger_down', 'Ledger is down.' )
+			);
+			$this->reset_registries();
+			AbilitiesLoader::init_extensions();
+
+			$trash = $this->run_ability_response( 'woocommerce/order-delete', array( 'id' => $order->get_id() ) );
+			$after = wc_get_order( $order->get_id() );
+			$force = $this->run_ability_response(
+				'woocommerce/order-delete',
+				array(
+					'id'    => $order->get_id(),
+					'force' => true,
+				)
+			);
+
+			$this->assertSame( 400, $trash->get_status() );
+			$this->assertSame( $status, $after->get_status(), 'A refused trash should leave the order out of the trash.' );
+			$this->assertSame( 400, $force->get_status() );
+			$this->assertInstanceOf( \WC_Order::class, wc_get_order( $order->get_id() ), 'A refused delete should keep the order.' );
+			$this->assertInstanceOf( \WC_Order_Refund::class, wc_get_order( $refund->get_id() ), 'A refused delete should keep the refund.' );
+		} finally {
+			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
 	}
 
 	/**
@@ -3452,8 +4532,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
 			}
 		}
-
-		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
 	}
 
 	/**
@@ -3554,6 +4632,45 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 500, $response->get_status() );
 		$this->assertSame( 'woocommerce_ability_save_failed', $response->get_data()['code'] );
 		$this->assertStringNotContainsString( 'Storage text.', wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should save nothing when change() returns a WP_Error without errors.
+	 */
+	public function test_an_empty_error_from_change_saves_nothing(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$ability = new class(
+			'test-ext/product-rename',
+			array(
+				'label'               => 'Rename product',
+				'description'         => 'Renames a product.',
+				'category'            => 'woocommerce',
+				'output_schema'       => array( 'type' => 'object' ),
+				'permission_callback' => '__return_true',
+			)
+		) extends TestProductRenameAbility {
+			/**
+			 * Rename the product, then refuse with an empty error.
+			 *
+			 * @param \WC_Product $subject Product.
+			 * @param array       $input   Ability input.
+			 * @return \WP_Error
+			 */
+			protected function change( $subject, array $input ) {
+				parent::change( $subject, $input );
+				return new \WP_Error();
+			}
+		};
+
+		$result = $ability->execute_change(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$this->assertWPError( $result );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 
@@ -3934,24 +5051,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse a type change into or out of a variable product type that an extension registers.
+	 * @testdox Should change a simple product into a variable product type that an extension registers.
 	 */
-	public function test_refuses_a_type_change_into_or_out_of_a_variable_subclass(): void {
+	public function test_a_simple_product_becomes_a_variable_subclass(): void {
 		$this->register_variation_subclass();
+		$simple = \WC_Helper_Product::create_simple_product();
 
-		$input         = $this->get_shirt_input();
-		$input['type'] = 'test-variable';
-		$created       = $this->run_ability( 'woocommerce/product-create', $input );
-		$simple        = \WC_Helper_Product::create_simple_product();
-
-		$out_of = $this->run_ability_response(
-			'woocommerce/product-update',
-			array(
-				'id'   => $created['product']['id'],
-				'type' => 'simple',
-			)
-		);
-		$into   = $this->run_ability_response(
+		$into = $this->run_ability(
 			'woocommerce/product-update',
 			array(
 				'id'   => $simple->get_id(),
@@ -3959,60 +5065,341 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( 'woocommerce_product_type_unsupported', $out_of->get_data()['code'] );
-		$this->assertSame( 'woocommerce_product_type_unsupported', $into->get_data()['code'] );
-		$this->assertInstanceOf( TestVariableProduct::class, wc_get_product( $created['product']['id'] ) );
-		$this->assertCount( 2, wc_get_product( $created['product']['id'] )->get_children() );
-		$this->assertSame( 'simple', wc_get_product( $simple->get_id() )->get_type() );
+		$this->assertSame( 'test-variable', $into['product']['type'] );
+		$this->assertInstanceOf( TestVariableProduct::class, wc_get_product( $simple->get_id() ) );
 	}
 
 	/**
-	 * @testdox Should refuse a type change into a variable class that a class filter returns only for a saved product.
+	 * @testdox Should delete every variation, trashed ones too, when a $type product of an extension becomes simple, with the delete permission and a rollback on refusal.
+	 *
+	 * @testWith ["test-variable"]
+	 *           ["test-plan"]
+	 *
+	 * @param string $type Variable product type that an extension registers.
 	 */
-	public function test_refuses_a_type_change_when_the_class_filter_depends_on_the_product_id(): void {
-		$this->add_test_action(
-			'product_type_selector',
-			static fn( array $types ): array => $types + array( 'test-variable' => 'Test variable' )
-		);
-		$this->add_test_action(
-			'woocommerce_data_stores',
-			static fn( array $stores ): array => $stores + array( 'product-test-variable' => 'WC_Product_Variable_Data_Store_CPT' )
-		);
-		$unsaved_class = get_class(
-			new class() extends \WC_Product_Simple {
+	public function test_a_variable_subclass_becomes_simple_and_loses_its_variations( string $type ): void {
+		$this->register_variation_subclass();
+		$plan_class = get_class(
+			new class() extends \WC_Product_Variable {
 				/**
 				 * Get the product type.
 				 *
 				 * @return string
 				 */
 				public function get_type() {
-					return 'test-variable';
+					return 'test-plan';
 				}
 			}
 		);
-		$this->add_test_action(
-			'woocommerce_product_class',
-			static function ( $classname, $product_type, $post_type, $product_id ) use ( $unsaved_class ) {
-				if ( 'test-variable' !== $product_type ) {
-					return $classname;
-				}
-				return $product_id > 0 ? TestVariableProduct::class : $unsaved_class;
-			},
-			10,
-			4
+		$this->add_test_action( 'product_type_selector', static fn( array $types ): array => $types + array( 'test-plan' => 'Test plan' ) );
+		$this->add_test_action( 'woocommerce_data_stores', static fn( array $stores ): array => $stores + array( 'product-test-plan' => 'WC_Product_Variable_Data_Store_CPT' ) );
+		$this->add_test_action( 'woocommerce_product_class', static fn( $classname, $product_type ) => 'test-plan' === $product_type ? $plan_class : $classname, 10, 2 );
+		$refuse  = false;
+		$deleted = array();
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$deleted, &$refuse ) {
+				unset( $saved, $ability );
+				$deleted = array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] );
+				return $refuse ? new \WP_Error( 'test_refused', 'Refused.' ) : null;
+			}
 		);
-		$simple = \WC_Helper_Product::create_simple_product();
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$input         = $this->get_shirt_input();
+		$input['type'] = $type;
+		$created       = $this->run_ability( 'woocommerce/product-create', $input );
+		$id            = $created['product']['id'];
+		$ids           = $created['product']['variation_ids'];
+		wc_get_product( $ids[0] )->delete();
+		$change = array(
+			'id'   => $id,
+			'type' => 'simple',
+		);
+
+		$deny      = static fn( $caps, $cap ) => 'delete_post' === $cap ? array( 'do_not_allow' ) : $caps;
+		add_filter( 'map_meta_cap', $deny, 10, 2 );
+		$forbidden = $this->run_ability_response( 'woocommerce/product-update', $change );
+		remove_filter( 'map_meta_cap', $deny, 10 );
+		$refuse  = true;
+		$refused = $this->run_ability_response( 'woocommerce/product-update', $change );
+		$kept    = array_map( 'get_post_status', $ids );
+		$type    = wc_get_product( $id )->get_type();
+		$refuse  = false;
+		$changed = $this->run_ability( 'woocommerce/product-update', $change );
+
+		$this->assertSame( 403, $forbidden->get_status() );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( array( 'trash', 'publish' ), $kept );
+		$this->assertSame( $input['type'], $type, 'A rolled back call keeps the old type.' );
+		$this->assertSame( $id, $changed['product']['id'] );
+		$this->assertSame( 'simple', $changed['product']['type'] );
+		$this->assertSame( array(), $changed['product']['variation_ids'] );
+		$this->assertEqualsCanonicalizing( $ids, $deleted );
+		foreach ( $ids as $variation_id ) {
+			$this->assertNull( get_post( $variation_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Should delete the variations on a change from variable to a variable type of an extension, unless the filter keeps them for the new product.
+	 */
+	public function test_a_change_between_two_variable_types_follows_the_filter(): void {
+		$this->register_variation_subclass();
+		$input   = $this->get_shirt_input();
+		$deleted = $this->run_ability( 'woocommerce/product-create', $input );
+
+		$input['variations'][0]['sku'] = 'other-s';
+		$input['variations'][1]['sku'] = 'other-m';
+
+		$kept = $this->run_ability( 'woocommerce/product-create', $input );
+
+		$with_items = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $deleted['product']['id'],
+				'type'       => 'test-variable',
+				'variations' => array(
+					array(
+						'id'            => $deleted['product']['variation_ids'][0],
+						'regular_price' => '9.00',
+					),
+				),
+			)
+		);
+		$changed    = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'   => $deleted['product']['id'],
+				'type' => 'test-variable',
+			)
+		);
+		$this->add_test_action(
+			'woocommerce_delete_variations_on_product_type_change',
+			static fn( $delete, $product ) => $product instanceof TestVariableProduct ? false : $delete,
+			10,
+			2
+		);
+		$kept_change = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $kept['product']['id'],
+				'type'       => 'test-variable',
+				'variations' => array(
+					array(
+						'id'            => $kept['product']['variation_ids'][0],
+						'regular_price' => '9.00',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 400, $with_items->get_status() );
+		$this->assertSame( 'test-variable', $changed['product']['type'] );
+		$this->assertSame( array(), $changed['product']['variation_ids'] );
+		$this->assertNull( get_post( $deleted['product']['variation_ids'][0] ) );
+		$this->assertSame( 'test-variable', $kept_change['product']['type'] );
+		$this->assertEqualsCanonicalizing( $kept['product']['variation_ids'], $kept_change['product']['variation_ids'] );
+		$this->assertSame( '9.00', $kept_change['variations'][0]['regular_price'] );
+	}
+
+	/**
+	 * @testdox Should refuse a type change when the other fields of the call change whether the filter deletes the variations.
+	 */
+	public function test_a_type_change_refuses_fields_that_change_the_delete_decision(): void {
+		$this->register_variation_subclass();
+		$this->add_test_action(
+			'woocommerce_delete_variations_on_product_type_change',
+			static fn( $delete, $product ) => 'Delete' === $product->get_name(),
+			10,
+			2
+		);
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
 
 		$refused = $this->run_ability_response(
 			'woocommerce/product-update',
 			array(
-				'id'   => $simple->get_id(),
+				'id'   => $created['product']['id'],
 				'type' => 'test-variable',
+				'name' => 'Delete',
 			)
 		);
 
-		$this->assertSame( 'woocommerce_product_type_unsupported', $refused->get_data()['code'] ?? null );
-		$this->assertSame( 'simple', wc_get_product( $simple->get_id() )->get_type() );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'variable', wc_get_product( $created['product']['id'] )->get_type() );
+		$this->assertEqualsCanonicalizing( $created['product']['variation_ids'], wc_get_product( $created['product']['id'] )->get_children() );
+	}
+
+	/**
+	 * @testdox Should refuse a type change that deletes the variations when a variation appears after the validators ran.
+	 */
+	public function test_a_type_change_refuses_a_variation_added_during_the_call(): void {
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$id      = $created['product']['id'];
+		$added   = 0;
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function ( \WC_Product $product ) use ( $id, &$added ) {
+				if ( $id === $product->get_id() && ! $added ) {
+					$variation = new \WC_Product_Variation();
+					$variation->set_parent_id( $id );
+					$variation->save();
+					$added = $variation->get_id();
+				}
+				return null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $id,
+				'type' => 'simple',
+			)
+		);
+
+		$this->assertSame( 409, $refused->get_status() );
+		$this->assertSame( 'variable', wc_get_product( $id )->get_type() );
+		$this->assertInstanceOf( \WC_Product_Variation::class, wc_get_product( $added ) );
+		$this->assertInstanceOf( \WC_Product_Variation::class, wc_get_product( $created['product']['variation_ids'][0] ) );
+	}
+
+	/**
+	 * @testdox Should refuse a type change that deletes the variations when a save hook adds a variation, and roll it back.
+	 */
+	public function test_a_type_change_refuses_a_variation_added_during_the_save(): void {
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$id      = $created['product']['id'];
+		$this->add_test_action(
+			'woocommerce_product_type_changed',
+			static function ( \WC_Product $product ) use ( $id ) {
+				if ( $id === $product->get_id() ) {
+					$variation = new \WC_Product_Variation();
+					$variation->set_parent_id( $id );
+					$variation->save();
+				}
+			}
+		);
+
+		$refused  = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $id,
+				'type' => 'simple',
+			)
+		);
+		$children = get_posts(
+			array(
+				'post_parent' => $id,
+				'post_type'   => 'product_variation',
+				'fields'      => 'ids',
+				'post_status' => 'any',
+				'numberposts' => -1,
+			)
+		);
+
+		$this->assertSame( 409, $refused->get_status() );
+		$this->assertSame( 'variable', wc_get_product( $id )->get_type() );
+		$this->assertEqualsCanonicalizing( $created['product']['variation_ids'], $children );
+	}
+
+	/**
+	 * @testdox Should keep the variations that the permission check kept, even when the filter answers otherwise during the save.
+	 */
+	public function test_a_type_change_keeps_the_variations_that_the_permission_check_kept(): void {
+		$this->register_variation_subclass();
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$id      = $created['product']['id'];
+		$this->add_test_action(
+			'woocommerce_delete_variations_on_product_type_change',
+			static fn( $delete, $product ) => has_term( 'test-variable', 'product_type', $product->get_id() ),
+			10,
+			2
+		);
+		$deny = static fn( $caps, $cap ) => 'delete_post' === $cap ? array( 'do_not_allow' ) : $caps;
+
+		add_filter( 'map_meta_cap', $deny, 10, 2 );
+		$changed = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'   => $id,
+				'type' => 'test-variable',
+			)
+		);
+		remove_filter( 'map_meta_cap', $deny, 10 );
+
+		$this->assertSame( 'test-variable', $changed['product']['type'] );
+		$this->assertEqualsCanonicalizing( $created['product']['variation_ids'], $changed['product']['variation_ids'] );
+		foreach ( $created['product']['variation_ids'] as $variation_id ) {
+			$this->assertInstanceOf( \WC_Product_Variation::class, wc_get_product( $variation_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Should write the cleared price to the price lookup when a type change runs again after a sync refused it.
+	 */
+	public function test_a_type_change_after_a_rollback_clears_the_lookup_price(): void {
+		global $wpdb;
+
+		$refuse = true;
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function () use ( &$refuse ) {
+				return $refuse ? new \WP_Error( 'test_refused', 'Refused.' ) : null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '17' ) );
+		$input   = array(
+			'id'   => $product->get_id(),
+			'type' => 'variable',
+		);
+
+		$refused = $this->run_ability_response( 'woocommerce/product-update', $input );
+		$cached  = wp_cache_get( 'lookup_table', 'object_' . $product->get_id() );
+		$refuse  = false;
+		$this->run_ability( 'woocommerce/product-update', $input );
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertFalse( $cached, 'The rollback should drop the cached lookup row that the refused call wrote.' );
+		$lookup = $wpdb->get_row( $wpdb->prepare( "SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product->get_id() ), ARRAY_A );
+		$this->assertSame( '0.0000', $lookup['min_price'] );
+		$this->assertSame( '0.0000', $lookup['max_price'] );
+	}
+
+	/**
+	 * @testdox Should give the syncs a grouped product without the variation price when a variable product becomes grouped.
+	 */
+	public function test_a_variable_product_that_becomes_grouped_gives_the_syncs_its_new_price(): void {
+		$price = null;
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $saved ) use ( &$price ) {
+				$price = $saved[0]->get_price( 'edit' );
+				return null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'   => $created['product']['id'],
+				'type' => 'grouped',
+			)
+		);
+
+		$this->assertSame( '', $price );
 	}
 
 	/**
@@ -4331,6 +5718,158 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'test-ext:test_refused', $refused->get_data()['code'] );
 		$this->assertSame( 'Lisbon', $saved->get_shipping_city() );
 		$this->assertSame( 'high', $saved->get_meta( '_test_priority' ) );
+	}
+
+	/**
+	 * @testdox Should create an order with an extension field in one save, show validators the sent status, and create nothing when a validator refuses.
+	 */
+	public function test_order_create_writes_extension_fields_and_runs_validators(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'order',
+						'namespace'     => 'test-ext',
+						'field'         => 'priority',
+						'output_schema' => array( 'type' => 'string' ),
+						'input_schema'  => array( 'type' => 'string' ),
+						'get_callback'  => static function ( \WC_Order $order ) {
+							return $order->get_meta( '_test_priority' );
+						},
+						'set_callback'  => static function ( \WC_Order $order, $value ) {
+							$order->update_meta_data( '_test_priority', $value );
+						},
+					)
+				);
+			}
+		);
+		$seen = array();
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $order ) use ( &$seen ) {
+				$seen[] = array( $order->get_status(), count( $order->get_items() ), $order->get_total() );
+				return 'Closed' === $order->get_shipping_city() ? new \WP_Error( 'test_refused', 'Refused.' ) : null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '10' ) );
+		$writes  = array(
+			'woocommerce_new_order'    => 0,
+			'woocommerce_update_order' => 0,
+		);
+		foreach ( array_keys( $writes ) as $hook ) {
+			$this->add_test_action(
+				$hook,
+				static function () use ( &$writes, $hook ) {
+					++$writes[ $hook ];
+				}
+			);
+		}
+		$before = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$output  = $this->run_ability(
+			'woocommerce/order-create',
+			array(
+				'status'     => 'processing',
+				'shipping'   => array( 'city' => 'Lisbon' ),
+				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
+				'extensions' => array( 'test-ext' => array( 'priority' => 'high' ) ),
+			)
+		);
+		$refused = $this->run_ability_response(
+			'woocommerce/order-create',
+			array(
+				'shipping'   => array( 'city' => 'Closed' ),
+				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
+				'extensions' => array( 'test-ext' => array( 'priority' => 'low' ) ),
+			)
+		);
+
+		wp_cache_flush();
+		$saved = wc_get_order( $output['order']['id'] );
+		$this->assertSame( 1, $writes['woocommerce_new_order'] );
+		$this->assertSame( 0, $writes['woocommerce_update_order'], 'The order should save once, with its lines, totals and status.' );
+		$this->assertSame( array( 'processing', 1, '10.00' ), $seen[0], 'The validator should see the status and totals that the save writes.' );
+		$this->assertSame( 'high', $output['order']['extensions']['test-ext']['priority'] );
+		$this->assertSame( 'high', $saved->get_meta( '_test_priority' ) );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'test-ext:test_refused', $refused->get_data()['code'] );
+		$this->assertEqualsCanonicalizing(
+			array_merge( $before, array( $saved->get_id() ) ),
+			wc_get_orders(
+				array(
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			),
+			'The refused call should create no order.'
+		);
+	}
+
+	/**
+	 * @testdox Should show an order validator the saved address fields that Core refuses, and save nothing.
+	 */
+	public function test_an_order_validator_sees_the_saved_values_of_refused_address_fields(): void {
+		$seen = array();
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $order ) use ( &$seen ) {
+				$seen[] = array( $order->get_shipping_country(), $order->get_shipping_state(), $order->get_shipping_postcode(), $order->get_shipping_city() );
+				return null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$order = \WC_Helper_Order::create_order();
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_state( 'CA' );
+		$order->set_shipping_postcode( '94110' );
+		$order->set_shipping_city( 'Before' );
+		$order->save();
+
+		$bad_country  = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array(
+					'country'  => 'XX',
+					'state'    => 'ZZ',
+					'postcode' => 'nope',
+					'city'     => 'After',
+				),
+			)
+		);
+		$bad_postcode = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array(
+					'postcode' => 'not a zip',
+					'city'     => 'After',
+				),
+			)
+		);
+
+		$this->assertSame( 400, $bad_country->get_status() );
+		$this->assertSame( 400, $bad_postcode->get_status() );
+		$this->assertSame(
+			array(
+				array( 'US', 'CA', '94110', 'After' ),
+				array( 'US', 'CA', '94110', 'After' ),
+			),
+			$seen
+		);
+		wp_cache_flush();
+		$this->assertSame( 'Before', wc_get_order( $order->get_id() )->get_shipping_city() );
 	}
 
 	/**
@@ -5021,7 +6560,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertSame( 400, $response->get_status() );
 		$this->assertSame( 'first_ext:test_first_refused', $data['code'] );
-		$this->assertSame( 'First refused.', $data['message'] );
+		$this->assertSame( 'First refused. Second refused.', $data['message'] );
 		$this->assertSame( 'first_ext', $data['data']['namespace'] );
 		$this->assertCount( 1, $data['additional_errors'] );
 		$this->assertSame( 'second_ext:test_second_refused', $data['additional_errors'][0]['code'] );
@@ -5055,7 +6594,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		)->get_data();
 
 		$this->assertSame( 'first_ext:test_refused', $data['code'] );
-		$this->assertSame( 'first_ext refused.', $data['message'] );
+		$this->assertSame( 'first_ext refused. second_ext refused.', $data['message'] );
 		$this->assertSame( 'first_ext', $data['data']['namespace'] );
 		$this->assertCount( 1, $data['additional_errors'] );
 		$this->assertSame( 'second_ext:test_refused', $data['additional_errors'][0]['code'] );
@@ -5088,7 +6627,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		)->get_data();
 
 		$this->assertSame( 'ns:test_refused', $data['code'] );
-		$this->assertSame( 'name refused.', $data['message'] );
+		$this->assertSame( 'name refused. price refused.', $data['message'] );
 		$this->assertSame( 'name', $data['data']['field'] );
 		$this->assertCount( 1, $data['additional_errors'] );
 		$this->assertSame( 'ns:test_refused:2', $data['additional_errors'][0]['code'] );
@@ -5327,6 +6866,62 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return every Core refusal with the field and validator refusals in one message, and save nothing.
+	 */
+	public function test_core_refusals_come_with_field_and_validator_refusals(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		\WC_Helper_Product::create_simple_product( true, array( 'sku' => 'TAKEN' ) );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'product',
+						'namespace'     => 'test-ext',
+						'field'         => 'note',
+						'output_schema' => array( 'type' => 'string' ),
+						'input_schema'  => array( 'type' => 'string' ),
+						'get_callback'  => '__return_null',
+						'set_callback'  => static fn() => new \WP_Error( 'test_bad_note', 'Note refused.' ),
+					)
+				);
+			}
+		);
+		$seen_name = null;
+		$this->register_validator(
+			'product',
+			'other_ext',
+			static function ( \WC_Product $subject ) use ( &$seen_name ) {
+				$seen_name = $subject->get_name();
+				return new \WP_Error( 'test_refused', 'Validator refused.' );
+			}
+		);
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'           => $product->get_id(),
+				'name'         => 'Pencil',
+				'sku'          => 'TAKEN',
+				'external_url' => 'https://example.com',
+				'extensions'   => array( 'test-ext' => array( 'note' => 'x' ) ),
+			)
+		);
+
+		$data = $response->get_data();
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame(
+			array( 'woocommerce_product_field_unsupported', 'product_invalid_sku', 'test-ext:test_bad_note', 'other_ext:test_refused' ),
+			array_merge( array( $data['code'] ), array_column( $data['additional_errors'], 'code' ) ),
+			'Core refusals come first, then the field and validator refusals, in run order.'
+		);
+		$this->assertStringStartsWith( 'The simple product type does not take external_url.', $data['message'] );
+		$this->assertStringEndsWith( 'Note refused. Validator refused.', $data['message'], 'The first message names every refusal, because MCP clients show only that one.' );
+		$this->assertSame( 'Pencil', $seen_name, 'The validator sees the values that Core accepted.' );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
 	 * @testdox Should show the data of a refusal once, with no additional_data.
 	 */
 	public function test_refusal_data_is_not_repeated(): void {
@@ -5494,7 +7089,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Add a filter and remove it in tearDown.
+	 * Add a filter.
 	 *
 	 * @param string   $hook          Hook name.
 	 * @param callable $callback      Callback.
@@ -5503,11 +7098,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	private function add_test_filter( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		add_filter( $hook, $callback, $priority, $accepted_args );
-		$this->test_actions[] = array( $hook, $callback, $priority );
 	}
 
 	/**
-	 * Add an action that tearDown removes.
+	 * Add an action.
 	 *
 	 * @param string   $hook     Action name.
 	 * @param callable $callback Callback.
@@ -5516,7 +7110,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	private function add_test_action( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		add_action( $hook, $callback, $priority, $accepted_args );
-		$this->test_actions[] = array( $hook, $callback, $priority );
 	}
 
 	/**
@@ -5553,6 +7146,28 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'woocommerce_extensible_abilities_init',
 			static function () use ( $resource_name, $extension_namespace, $callback ) {
 				ExtensibleAbilities::register_sync(
+					array(
+						'resource'  => $resource_name,
+						'namespace' => $extension_namespace,
+						'callback'  => $callback,
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * Register a prime callback inside woocommerce_extensible_abilities_init, the way an extension does.
+	 *
+	 * @param string   $resource_name       Resource.
+	 * @param string   $extension_namespace Extension namespace.
+	 * @param callable $callback            Prime callback.
+	 */
+	private function register_prime( string $resource_name, string $extension_namespace, callable $callback ): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name, $extension_namespace, $callback ) {
+				ExtensibleAbilities::register_prime(
 					array(
 						'resource'  => $resource_name,
 						'namespace' => $extension_namespace,
@@ -5703,7 +7318,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'validators', 'syncs', 'filters' ) as $property ) {
+		foreach ( array( 'fields', 'validators', 'syncs', 'primes', 'filters' ) as $property ) {
 			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );

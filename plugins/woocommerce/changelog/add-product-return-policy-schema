@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Make the store return policy available to agents on product pages.

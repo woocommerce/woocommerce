@@ -13,6 +13,11 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
+// Only requests from specs that enable this plugin send the cookie.
+if ( ! isset( $_COOKIE['woocommerce-blocks-test-register-product-collection'] ) ) {
+	return;
+}
+
 // Enqueue the JavaScript file.
 function register_product_collections_script()
 {

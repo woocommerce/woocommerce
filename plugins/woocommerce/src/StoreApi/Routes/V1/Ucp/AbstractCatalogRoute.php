@@ -3,10 +3,12 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\ProductFeed\Mapping\UcpProductMapper;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Ucp\UcpProductSchema;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * Shared behaviour of the UCP catalog routes.
@@ -27,7 +29,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	private $mapper;
 
 	/**
-	 * The UCP capability this route serves, one of the UcpUtils::CAPABILITY_* constants.
+	 * The UCP capability this route serves, one of the Utils::CAPABILITY_* constants.
 	 *
 	 * @return string
 	 */
@@ -40,7 +42,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * @return array
 	 */
 	protected function ucp_metadata( string $status ): array {
-		return UcpUtils::response_metadata( $this->get_capability(), $status );
+		return Utils::response_metadata( $this->get_capability(), $status );
 	}
 
 	/**
@@ -58,6 +60,19 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 			),
 			'schema' => array( $this->schema, 'get_public_item_schema' ),
 		);
+	}
+
+	/**
+	 * Refuse a non-JSON payload before the handler reads anything.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_response( \WP_REST_Request $request ) {
+		return Utils::refuse_non_json_payload( $request, $this->get_capability() ) ?? parent::get_response( $request );
 	}
 
 	/**
@@ -112,7 +127,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * @return array
 	 */
 	protected function get_context( \WP_REST_Request $request ): array {
-		$raw = $request->get_param( 'context' );
+		$raw = Utils::json_param( $request, 'context' );
 
 		if ( ! is_array( $raw ) ) {
 			return array();
@@ -139,7 +154,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_error( string $code, string $message, string $severity, int $status ): \WP_REST_Response {
-		return UcpUtils::error_response( $this->get_capability(), $code, $message, $severity, $status );
+		return Utils::error_response( $this->get_capability(), $code, $message, $severity, $status );
 	}
 
 	/**
@@ -165,9 +180,9 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 			$product      = wc_get_product( $product->get_parent_id() );
 		}
 
-		// Catalog visibility as the storefront applies it: published, not hidden
-		// from the catalog, and in stock when the store hides out-of-stock items.
-		if ( ! $product instanceof \WC_Product || ! $product->is_visible() ) {
+		// Visibility as catalog search applies it: published, not "Hidden", and in
+		// stock when the store hides out-of-stock items.
+		if ( ! $product instanceof \WC_Product || ! self::is_reachable( $product ) ) {
 			return null;
 		}
 
@@ -186,6 +201,42 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 			'product'      => $product,
 			'variation_id' => $variation_id,
 		);
+	}
+
+	/**
+	 * Whether an agent can open the product by its ID. is_visible() accepts "Search results
+	 * only" products only on a storefront search page, but catalog search returns them, so
+	 * they are checked as if shown everywhere, keeping the other rules and the filter. The
+	 * filter gets the ID, so a callback that reloads the product sees its saved setting.
+	 *
+	 * Does not call set_catalog_visibility(): an extension can remove `visible` from
+	 * woocommerce_product_visibility_options, and that setter would throw on the temporary value.
+	 *
+	 * @param \WC_Product $product Product, not a variation.
+	 * @return bool
+	 */
+	private static function is_reachable( \WC_Product $product ): bool {
+		if ( CatalogVisibility::SEARCH !== $product->get_catalog_visibility() ) {
+			return $product->is_visible();
+		}
+		// is_viewable() is true for trash when the current user can edit the product.
+		// A catalog lookup is a public read, so an unpublished product is never reachable.
+		if ( ProductStatus::PUBLISH !== $product->get_status() ) {
+			return false;
+		}
+		// Same core rules as a Shop and search results product, then the public visibility filter.
+		$visible = $product->is_viewable();
+		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $product->is_in_stock() ) {
+			$visible = false;
+		}
+		/**
+		 * Filters the product visibility for catalog lookup (same hook as WC_Product::is_visible).
+		 *
+		 * @since 2.1.0 Filter introduced on WC_Product::is_visible.
+		 * @param bool $visible    Whether the product is considered visible.
+		 * @param int  $product_id Product ID.
+		 */
+		return (bool) apply_filters( 'woocommerce_product_is_visible', $visible, $product->get_id() );
 	}
 
 	/**

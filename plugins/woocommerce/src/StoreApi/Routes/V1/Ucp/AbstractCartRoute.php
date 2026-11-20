@@ -3,18 +3,21 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute as StoreApiCartRoute;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpCartMapper;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CartMapper;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyClaim;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * Shared behaviour of the UCP cart routes.
  *
- * Inherits session binding, cart loading and draft order sync from the Store API cart
- * route. Adds the UCP envelope, and keys the session off the path instead of a header.
+ * Inherits session binding and cart loading from the Store API cart route. Adds the UCP
+ * envelope, and keys the session off the path instead of a header.
  *
  * Writes are last-wins, as for every Store API cart: the session row is read when the
  * request starts and written whole at shutdown, with no lock or version check. Two
@@ -37,6 +40,13 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	const CANCELLED_SESSION_KEY = 'ucp_cart_cancelled';
 
 	/**
+	 * Session key holding the checkout state: `created_at`, and once set `status`, `continue_url`, `order_id` and `fingerprint`.
+	 *
+	 * Its presence is what makes a cart session a checkout, so the cart routes read it too.
+	 */
+	const CHECKOUT_SESSION_KEY = 'ucp_checkout';
+
+	/**
 	 * Most lines one request may name.
 	 *
 	 * Each line can cost a product lookup, so an open route needs a ceiling. Matches the
@@ -51,7 +61,48 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return array
 	 */
 	protected function ucp_metadata( string $status ): array {
-		return UcpUtils::response_metadata( UcpUtils::CAPABILITY_CART, $status );
+		return Utils::response_metadata( $this->capability(), $status );
+	}
+
+	/**
+	 * The capability this route answers for, named in every envelope it sends.
+	 *
+	 * @return string One of the Utils::CAPABILITY_* constants.
+	 */
+	protected function capability(): string {
+		return Utils::CAPABILITY_CART;
+	}
+
+	/**
+	 * Answer the request, under the `Idempotency-Key` it carries.
+	 *
+	 * A payload the route cannot read is refused before the key is claimed, so a 415 never
+	 * touches the store. After that the key is settled before anything else runs: a replay
+	 * must not load a session or resolve a cart id, since a retried `cancel` has to return the
+	 * stored response rather than the `not_found` its own first run left behind.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_response( \WP_REST_Request $request ) {
+		$refusal = Utils::refuse_non_json_payload( $request, $this->capability() );
+		if ( null !== $refusal ) {
+			return $this->add_response_headers( $refusal );
+		}
+
+		$claim = IdempotencyClaim::for_request( $request, $this->capability() );
+
+		if ( $claim instanceof \WP_REST_Response ) {
+			// The gate answers without reaching the parent, so it stamps the cache directive itself.
+			return $this->add_response_headers( $claim );
+		}
+
+		$response = $this->dispatch_ucp_request( $request );
+
+		return null === $claim ? $response : $claim->settle( $response );
 	}
 
 	/**
@@ -66,7 +117,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 *
 	 * @return \WP_REST_Response
 	 */
-	public function get_response( \WP_REST_Request $request ) {
+	private function dispatch_ucp_request( \WP_REST_Request $request ): \WP_REST_Response {
 		if ( '' !== $this->route_cart_id( $request ) && '' === $this->validated_cart_id( $request ) ) {
 			return $this->add_response_headers( $this->ucp_not_found() );
 		}
@@ -121,13 +172,24 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * The parent picks the Store API session handler from a `Cart-Token` header. UCP
 	 * carries that token in the path, so it is promoted to the header first.
 	 *
+	 * The parent also lowers each line to the stock left before handling the request. No
+	 * human watches a UCP cart and `complete` carries no expected total, so a shortfall is
+	 * left in place for cart validation to report instead of being absorbed.
+	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
+	 * @throws \RuntimeException When a previous cart session load failed.
+	 * @throws \Throwable When the cart cannot be loaded.
+	 *
 	 * @return void
 	 */
 	protected function load_cart_session( \WP_REST_Request $request ) {
+		if ( WC()->cart instanceof \WC_Cart && ! \WC_Cart_Session::are_updates_enabled_for_cart( WC()->cart ) ) {
+			throw new \RuntimeException( 'The cart is unavailable after its session failed to load.' );
+		}
+
 		$cart_id = $this->validated_cart_id( $request );
 
 		if ( '' === $cart_id ) {
@@ -157,7 +219,16 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			$this->discard_preloaded_cart_session();
 		}
 
-		parent::load_cart_session( $request );
+		try {
+			$this->cart_controller->load_cart();
+		} catch ( \Throwable $error ) {
+			// The parent's flag: a later load in the same process must refuse, not reuse, this cart.
+			if ( WC()->cart instanceof \WC_Cart ) {
+				\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, false );
+			}
+
+			throw $error;
+		}
 	}
 
 	/**
@@ -205,9 +276,10 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Dispatch the request, refusing a cart that was cancelled.
+	 * Dispatch the request, refusing a cart that was cancelled or that a checkout owns.
 	 *
-	 * Runs after the session is bound, so one check covers every id-bearing route.
+	 * Runs after the session is bound, so one check covers every id-bearing route. A live checkout's
+	 * cart is readable but changed only through the checkout routes, which close the buyer's order.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -216,8 +288,20 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_response_by_request_method( \WP_REST_Request $request ) {
-		if ( '' !== $this->route_cart_id( $request ) && $this->cart_is_cancelled() ) {
-			return $this->ucp_not_found();
+		if ( '' !== $this->route_cart_id( $request ) ) {
+			if ( $this->cart_is_cancelled() ) {
+				return $this->ucp_not_found();
+			}
+
+			$checkout = Utils::CAPABILITY_CART === $this->capability() ? $this->checkout_state() : null;
+
+			if ( null !== $checkout && $this->is_terminal( $checkout ) ) {
+				return $this->ucp_not_found();
+			}
+
+			if ( null !== $checkout && 'GET' !== $request->get_method() ) {
+				return $this->ucp_error( 'CONFLICT', __( 'This cart has become a checkout session, which the checkout routes manage.', 'woocommerce' ), 'recoverable', 409, '$.id' );
+			}
 		}
 
 		return parent::get_response_by_request_method( $request );
@@ -282,6 +366,50 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
+	 * The bound session's checkout state, with the order filled in once the buyer has paid it.
+	 *
+	 * Paying happens in the browser, outside this session, so `completed` is read off the
+	 * order rather than stored. An order that can no longer be paid, such as one the hold-stock
+	 * timer cancelled, drops the hand-off so the status derives again.
+	 *
+	 * @return array<string, mixed>|null Null when the session holds no checkout.
+	 */
+	protected function checkout_state(): ?array {
+		$state = WC()->session ? WC()->session->get( self::CHECKOUT_SESSION_KEY ) : null;
+
+		if ( ! is_array( $state ) ) {
+			return null;
+		}
+
+		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
+
+		// Paid once is completed for good: a later refund or cancellation must not reopen the checkout.
+		if ( $order instanceof \WC_Order && ( $order->is_paid() || $order->get_date_paid() || $order->has_status( OrderStatus::REFUNDED ) ) ) {
+			$state['status'] = CheckoutMapper::STATUS_COMPLETED;
+			$state['order']  = array(
+				'id'            => (string) $order->get_id(),
+				'permalink_url' => $order->get_checkout_order_received_url(),
+			);
+		} elseif ( ! empty( $state['order_id'] ) && ! ( $order instanceof \WC_Order && $order->has_status( array( OrderStatus::PENDING, OrderStatus::FAILED, OrderStatus::ON_HOLD ) ) ) ) {
+			// Status list rather than needs_payment(): that is false for a zero-total order, and
+			// on-hold is a payment the buyer made that the store has yet to confirm.
+			unset( $state['status'], $state['continue_url'], $state['order_id'] );
+		}
+
+		return $state;
+	}
+
+	/**
+	 * Whether a checkout is completed or canceled.
+	 *
+	 * @param array<string, mixed> $state Checkout state.
+	 * @return bool
+	 */
+	protected function is_terminal( array $state ): bool {
+		return in_array( $state['status'] ?? '', array( CheckoutMapper::STATUS_COMPLETED, CheckoutMapper::STATUS_CANCELED ), true );
+	}
+
+	/**
 	 * Build a successful cart response.
 	 *
 	 * @param string               $cart_id Cart identifier.
@@ -292,7 +420,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		return new \WP_REST_Response(
 			array_merge(
 				array( 'ucp' => $this->ucp_metadata( 'success' ) ),
-				( new UcpCartMapper() )->build_cart( $this->cart_item_response(), $cart_id, $context )
+				( new CartMapper() )->build_cart( $this->cart_item_response(), $cart_id, $context )
 			),
 			200
 		);
@@ -303,7 +431,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 *
 	 * @return array
 	 */
-	private function cart_item_response(): array {
+	protected function cart_item_response(): array {
 		// Nested values are stdClass; decode through JSON for uniform array access.
 		return (array) json_decode( (string) wp_json_encode( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) ), true );
 	}
@@ -323,7 +451,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_error( string $code, string $message, string $severity, int $status, string $path = '$' ): \WP_REST_Response {
-		return UcpUtils::error_response( UcpUtils::CAPABILITY_CART, $code, $message, $severity, $status, $path );
+		return Utils::error_response( $this->capability(), $code, $message, $severity, $status, $path );
 	}
 
 	/**
@@ -344,7 +472,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		$message = (string) $error->get_error_message();
 
 		return $this->ucp_error(
-			UcpUtils::cart_error_code( (string) $error->get_error_code(), 'TRANSPORT_ERROR' ),
+			Utils::cart_error_code( (string) $error->get_error_code(), 'TRANSPORT_ERROR' ),
 			'' !== $message ? $message : __( 'The cart could not be loaded. Please try again.', 'woocommerce' ),
 			$status >= 500 ? 'unrecoverable' : 'recoverable',
 			$status
@@ -360,7 +488,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_not_found(): \WP_REST_Response {
-		return UcpUtils::error_response( UcpUtils::CAPABILITY_CART, 'not_found', __( 'Cart not found.', 'woocommerce' ), 'unrecoverable', 200, '$.id' );
+		return Utils::error_response( Utils::CAPABILITY_CART, 'not_found', __( 'Cart not found.', 'woocommerce' ), 'unrecoverable', 200, '$.id' );
 	}
 
 	/**
@@ -498,7 +626,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			}
 
 			return $this->ucp_error(
-				UcpUtils::cart_error_code( $error->getErrorCode() ),
+				Utils::cart_error_code( $error->getErrorCode() ),
 				$error->getMessage(),
 				'recoverable',
 				200,

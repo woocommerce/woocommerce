@@ -14,7 +14,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 /**
  * Tests for the /wc/ucp/v1/carts endpoints.
  */
-class UcpCart extends ControllerTestCase {
+class UcpCart extends UcpCartTestCase {
 	/**
 	 * Published product IDs shared by the class, oldest first.
 	 *
@@ -40,9 +40,11 @@ class UcpCart extends ControllerTestCase {
 	);
 
 	/**
-	 * Option behind the `ucp` feature.
+	 * The global size attribute the class fixtures created, or 0 when one already existed.
+	 *
+	 * @var int
 	 */
-	private const FEATURE_OPTION = 'woocommerce_feature_ucp_enabled';
+	private static $size_attribute_id = 0;
 
 	/**
 	 * Create immutable fixtures before route registration starts.
@@ -86,9 +88,14 @@ class UcpCart extends ControllerTestCase {
 
 		self::$limited_stock_id = $limited[0]->get_id();
 
-		$fixtures  = new \Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData();
-		$parent    = $fixtures->get_variable_product( array( 'name' => 'UCP Cart Tee' ), array( $fixtures->get_product_attribute( 'size', array( 'small', 'large' ) ) ) );
-		$variation = $fixtures->get_variation_product(
+		$fixtures             = new \Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData();
+		$attribute_ids_before = array_map( 'intval', wc_get_attribute_taxonomy_ids() );
+		$size                 = $fixtures->get_product_attribute( 'size', array( 'small', 'large' ) );
+		// The helper matches "size" as a label before a slug, so check the ID it returns, not the slug.
+		$size_existed            = in_array( (int) $size['attribute_id'], $attribute_ids_before, true );
+		self::$size_attribute_id = $size_existed ? 0 : $size['attribute_id'];
+		$parent                  = $fixtures->get_variable_product( array( 'name' => 'UCP Cart Tee' ), array( $size ) );
+		$variation               = $fixtures->get_variation_product(
 			$parent->get_id(),
 			array( 'pa_size' => 'small' ),
 			array( 'regular_price' => '12.00' )
@@ -115,72 +122,22 @@ class UcpCart extends ControllerTestCase {
 				array( self::$limited_stock_id, self::$variable['variation'], self::$variable['parent'] )
 			)
 		);
+
+		// Class fixtures are committed, so a created attribute would outlive the class, and a later
+		// fixture asking for a "Size" attribute would get this one with its lowercase label.
+		if ( self::$size_attribute_id ) {
+			wc_delete_attribute( self::$size_attribute_id );
+			self::$size_attribute_id = 0;
+		}
 	}
 
 	/**
-	 * The session, customer and cart the harness set up, so `simulate_new_request()`
-	 * can swap them for a test and tearDown can put them back.
-	 *
-	 * @var array{session: \WC_Session|null, customer: \WC_Customer|null, cart: \WC_Cart|null, loaded: int|null, totals: int|null}
-	 */
-	private $wc_globals_backup = array();
-
-	/**
-	 * Enable the UCP routes and rebuild the REST server so they register.
+	 * Start every test from a fresh request, as a UCP client would.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
 
-		// Inside the per-test transaction, so the rollback turns the flag off again;
-		// the routes register on the rebuilt server.
-		update_option( self::FEATURE_OPTION, 'yes' );
-		$this->initialize_store_api_server();
-
-		// A per-test DB transaction rolls back rows but not the WC() singletons, so a test
-		// that swaps them would leak into the next one. Keep the originals to restore.
-		$this->wc_globals_backup = array(
-			'session'  => WC()->session,
-			'customer' => WC()->customer,
-			'cart'     => WC()->cart,
-			'loaded'   => $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null,
-			'totals'   => $GLOBALS['wp_actions']['woocommerce_after_calculate_totals'] ?? null,
-		);
-
 		$this->simulate_new_request();
-	}
-
-	/**
-	 * Restore the cancellation marker and the WC() singletons.
-	 */
-	protected function tearDown(): void {
-		unset( $_SERVER['HTTP_CART_TOKEN'] );
-
-		if ( WC()->session ) {
-			WC()->session->set( AbstractCartRoute::CANCELLED_SESSION_KEY, null );
-		}
-
-		if ( WC()->cart instanceof \WC_Cart ) {
-			\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, true );
-		}
-
-		// Undo any `simulate_new_request()` swap so the next test gets the cart, session and
-		// customer the harness built, not a bare one left behind here.
-		WC()->session  = $this->wc_globals_backup['session'];
-		WC()->customer = $this->wc_globals_backup['customer'];
-		WC()->cart     = $this->wc_globals_backup['cart'];
-		$markers       = array(
-			'woocommerce_load_cart_from_session' => 'loaded',
-			'woocommerce_after_calculate_totals' => 'totals',
-		);
-		foreach ( $markers as $action => $key ) {
-			if ( null === $this->wc_globals_backup[ $key ] ) {
-				unset( $GLOBALS['wp_actions'][ $action ] );
-			} else {
-				$GLOBALS['wp_actions'][ $action ] = $this->wc_globals_backup[ $key ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restores the per-process markers the harness cleared.
-			}
-		}
-
-		parent::tearDown();
 	}
 
 	/**
@@ -194,6 +151,9 @@ class UcpCart extends ControllerTestCase {
 	private function request( string $method, string $path, array $body = array() ) {
 		$request = new \WP_REST_Request( $method, '/wc/ucp/v1' . $path );
 		$request->set_header( 'content-type', 'application/json' );
+		// A write needs a key of its own, since idempotency is enforced by default. The
+		// key is what these tests are not about: see the UcpIdempotency suite for that.
+		$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
 		$request->set_body( wp_json_encode( $body ) );
 
 		return rest_get_server()->dispatch( $request );
@@ -313,14 +273,10 @@ class UcpCart extends ControllerTestCase {
 		$bind->setAccessible( true );
 		$bind->invoke( $route, new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts' ) );
 
-		try {
-			$this->assertSame(
-				SessionHandler::class,
-				apply_filters( 'woocommerce_session_handler', \WC_Session_Handler::class )
-			);
-		} finally {
-			remove_filter( 'woocommerce_session_handler', array( AbstractCartRoute::class, 'session_handler_class' ) );
-		}
+		$this->assertSame(
+			SessionHandler::class,
+			apply_filters( 'woocommerce_session_handler', \WC_Session_Handler::class )
+		);
 	}
 
 	/**
@@ -470,6 +426,53 @@ class UcpCart extends ControllerTestCase {
 		// `tax` is always present, zero included (schema allows it); a zero `discount` is omitted.
 		$this->assertSame( 0, $this->total( $data['totals'], 'tax' ) );
 		$this->assertNull( $this->total( $data['totals'], 'discount' ) );
+	}
+
+	/**
+	 * The cart hands the buyer a URL that restores the same cart in a browser.
+	 */
+	public function test_continue_url_carries_the_cart_token(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+		$data = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
+
+		$query = array();
+		wp_parse_str( (string) wp_parse_url( $data['continue_url'], PHP_URL_QUERY ), $query );
+
+		// WC_Session_Handler restores or clones the guest session named by this token.
+		$this->assertSame( $data['id'], $query['session'] );
+		$this->assertStringStartsWith( wc_get_cart_url(), $data['continue_url'] );
+	}
+
+	/**
+	 * Line items outside the JSON document do not act.
+	 */
+	public function test_line_items_in_the_query_string_are_ignored(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
+		$request->set_query_params( array( 'line_items' => array( $this->line_item( 0, 2 ) ) ) );
+		$request->set_body( '{}' );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'success', $response->get_data()['ucp']['status'] );
+		$this->assertSame( array(), $response->get_data()['line_items'] );
+	}
+
+	/**
+	 * A payload under any other content type is refused rather than read.
+	 */
+	public function test_a_non_json_payload_is_refused(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts' );
+		$request->set_header( 'content-type', 'application/x-www-form-urlencoded' );
+		$request->set_body_params( array( 'line_items' => array( $this->line_item( 0, 2 ) ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 415, $response->get_status() );
+		$this->assertSame( 'error', $response->get_data()['ucp']['status'] );
+		$this->assertSame( 'VALIDATION_ERROR', $response->get_data()['messages'][0]['code'] );
 	}
 
 	/**
@@ -878,6 +881,7 @@ class UcpCart extends ControllerTestCase {
 		$this->assertCount( 1, $data['line_items'] );
 		$this->assertSame( 2, $data['line_items'][0]['quantity'] );
 		$this->assertSame( 'CANCELED', $data['messages'][0]['code'] );
+		$this->assertArrayNotHasKey( 'continue_url', $data );
 
 		foreach ( array( 'GET', 'PUT' ) as $method ) {
 			$after = $this->request( $method, '/carts/' . $created['id'] )->get_data();
@@ -1076,8 +1080,8 @@ class UcpCart extends ControllerTestCase {
 	/**
 	 * Cancelling a cart must not break a storefront session cloned from it.
 	 *
-	 * The marker lives in the WooCommerce session, which a storefront session cloned
-	 * from this token would carry too, so only the UCP routes may act on it.
+	 * The marker lives in the WooCommerce session, which the buyer's browser can
+	 * reach through `continue_url`, so only the UCP routes may act on it.
 	 */
 	public function test_cancelling_a_cart_leaves_the_storefront_session_usable(): void {
 		$created = $this->create_cart( array( $this->line_item( 0, 1 ) ) );

@@ -9,7 +9,6 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
-use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Exception;
 
 /**
@@ -28,6 +27,48 @@ class OrderController {
 	 * @var string[]
 	 */
 	private const LOCATION_FIELDS = [ 'country', 'state', 'postcode', 'city' ];
+
+	/**
+	 * Prefix of the option name used as a self-expiring mutex around an order. The order ID is appended.
+	 *
+	 * The row holds the lock's release time (a microtime float); its mere existence is the lock. It lives in the
+	 * options table for the reasons given on BatchProcessingController::ENQUEUED_PROCESSORS_LOCK_OPTION.
+	 *
+	 * @since 11.3.0
+	 */
+	const ORDER_LOCK_OPTION_PREFIX = 'wc_store_api_order_lock_';
+
+	/**
+	 * How long (in seconds) a held order lock stays valid before it is considered stale and can be taken over.
+	 *
+	 * Locks are released when the request ends, so this only bounds how long a lock left behind by a request that
+	 * died without running its shutdown hooks keeps the order out of reach. A request that may have outlived its
+	 * lock confirms it with lock_order() before relying on it.
+	 *
+	 * @since 11.3.0
+	 */
+	const ORDER_LOCK_TTL = 60;
+
+	/**
+	 * How long (in seconds) lock_order() waits by default for a lock held by another request.
+	 *
+	 * @since 11.3.0
+	 */
+	const ORDER_LOCK_TIMEOUT = 10;
+
+	/**
+	 * Orders locked by the current request, as order ID => stored release time.
+	 *
+	 * @var array<int, string>
+	 */
+	private static array $order_locks = array();
+
+	/**
+	 * Shutdown callback that releases locks held by this request.
+	 *
+	 * @var \Closure|null
+	 */
+	private static ?\Closure $unlock_orders_on_shutdown = null;
 
 	/**
 	 * Checkout fields controller.
@@ -98,7 +139,10 @@ class OrderController {
 		$order->set_customer_id( get_current_user_id() );
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( wc_get_user_agent() );
-		$order->set_payment_method( PaymentUtils::get_checkout_payment_method() );
+		$payment_method_id   = PaymentUtils::get_checkout_payment_method();
+		$registered_gateways = WC()->payment_gateways()->payment_gateways();
+		$payment_method      = $registered_gateways[ $payment_method_id ] ?? $payment_method_id;
+		$order->set_payment_method( $payment_method );
 		$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( wc()->cart->get_customer()->get_is_vat_exempt() ) );
 		$order->calculate_totals();
 	}
@@ -139,6 +183,154 @@ class OrderController {
 			);
 			$this->additional_fields_controller->sync_customer_additional_fields_with_order( $order, $customer );
 			$customer->save();
+		}
+	}
+
+	/**
+	 * Get the shopper-facing message used when another request holds an order lock.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return string
+	 */
+	public static function get_order_lock_error_message(): string {
+		return __( 'Your order is still being processed by another request. Please try again.', 'woocommerce' );
+	}
+
+	/**
+	 * Give the current request exclusive use of an order until the request ends, or confirm that it still has it.
+	 *
+	 * Checkout flows use this lock to serialize reads and mutations of a shared order. Cart routes may also use it
+	 * for order-specific side effects, such as releasing reserved stock. Callers acquire the lock before relying on
+	 * order state so that another request cannot change the order after validation and before placement or payment.
+	 *
+	 * The claim is an atomic INSERT of an options row (which fails if the row already exists, making it a mutex);
+	 * if the row exists but its stored release time has already passed, a conditional UPDATE takes the stale lock
+	 * over. Modeled on BatchProcessingController::acquire_enqueued_processors_lock(). A request that already holds
+	 * the lock atomically renews the row only while its ownership value still matches, so the call is safe to repeat,
+	 * for instance from every part of a batch request.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int $order_id Order ID. There is nothing to lock when this is 0.
+	 * @param int $timeout  How long (in seconds) to wait for a lock held by another request.
+	 * @return bool True if the lock is held by this request. False if another request holds it, or took it over
+	 *              from this request after the lock went stale.
+	 */
+	public static function lock_order( int $order_id, int $timeout = self::ORDER_LOCK_TIMEOUT ): bool {
+		global $wpdb;
+
+		if ( $order_id <= 0 ) {
+			return true;
+		}
+
+		$option_name = self::ORDER_LOCK_OPTION_PREFIX . $order_id;
+
+		if ( isset( self::$order_locks[ $order_id ] ) ) {
+			$owned_expiry = self::$order_locks[ $order_id ];
+			$time         = microtime( true );
+			$expiry       = number_format( max( $time + self::ORDER_LOCK_TTL, (float) $owned_expiry + 0.000001 ), 6, '.', '' );
+
+			// Renew only if the row still contains this request's ownership value. If an expired lease and its owner
+			// race to update the row, exactly one conditional UPDATE wins.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$renewed = $wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$expiry,
+					$option_name,
+					$owned_expiry
+				)
+			);
+
+			if ( $renewed ) {
+				self::$order_locks[ $order_id ] = $expiry;
+				return true;
+			}
+
+			// The lock went stale and another request took it over, or the row is gone.
+			unset( self::$order_locks[ $order_id ] );
+			return false;
+		}
+
+		$give_up_at = microtime( true ) + max( 0, $timeout );
+
+		// A contended INSERT fails on the duplicate key by design, so silence wpdb error reporting to keep the
+		// expected-failure path from spamming the log in debug mode; restore the prior setting when done.
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			while ( true ) {
+				$time   = microtime( true );
+				$now    = number_format( $time, 6, '.', '' );
+				$expiry = number_format( $time + self::ORDER_LOCK_TTL, 6, '.', '' );
+
+				// The unique option_name key makes this INSERT a mutex: it fails when the lock row already exists.
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$acquired = $wpdb->insert(
+					$wpdb->options,
+					array(
+						'option_name'  => $option_name,
+						'option_value' => $expiry,
+						'autoload'     => 'no',
+					),
+					array( '%s', '%s', '%s' )
+				);
+
+				if ( ! $acquired ) {
+					// The lock row exists; take it over only if its stored release time is already in the past.
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					$acquired = $wpdb->query(
+						$wpdb->prepare(
+							"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+							$expiry,
+							$option_name,
+							$now
+						)
+					);
+				}
+
+				if ( $acquired ) {
+					self::$order_locks[ $order_id ] = $expiry;
+
+					if ( null === self::$unlock_orders_on_shutdown ) {
+						self::$unlock_orders_on_shutdown = static function (): void {
+							global $wpdb;
+
+							$callback = self::$unlock_orders_on_shutdown;
+							foreach ( self::$order_locks as $locked_order_id => $locked_expiry ) {
+								// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+								$wpdb->delete(
+									$wpdb->options,
+									array(
+										'option_name'  => self::ORDER_LOCK_OPTION_PREFIX . $locked_order_id,
+										'option_value' => $locked_expiry,
+									),
+									array( '%s', '%s' )
+								);
+							}
+
+							self::$order_locks               = array();
+							self::$unlock_orders_on_shutdown = null;
+
+							if ( $callback ) {
+								remove_action( 'shutdown', $callback, PHP_INT_MAX );
+							}
+						};
+
+						// Release after the session handlers persist their data at shutdown priority 20.
+						add_action( 'shutdown', self::$unlock_orders_on_shutdown, PHP_INT_MAX );
+					}
+					return true;
+				}
+
+				if ( $time >= $give_up_at ) {
+					return false;
+				}
+
+				usleep( 50000 );
+			}
+		} finally {
+			$wpdb->suppress_errors( $suppress );
 		}
 	}
 
@@ -235,11 +427,67 @@ class OrderController {
 		}
 		$this->restore_state_names( $order, $old_states );
 
+		// Evaluate after setting the addresses so the public filter sees the request data.
 		$needs_shipping = $order->needs_shipping();
+		if ( ! $needs_shipping && empty( $old_shipping_location['country'] ) && ! self::ships_items_without_methods( $order ) ) {
+			// The shipping address of an order that needs no shipping is not validated, but it still sets the tax
+			// when tax is based on the shipping address. Store the billing address as the shipping address instead.
+			$shipping = self::get_billing_address_for_shipping( $order );
+			$order->set_shipping_address( $shipping );
+			$this->restore_state_names( $order, $old_states );
+			$needs_shipping = $order->needs_shipping();
+		}
+
 		$this->validate_addresses( $order, $needs_shipping );
 		$this->validate_location_change( $order, $old_shipping_location, $old_tax_location, $needs_shipping );
 
 		return $shipping;
+	}
+
+	/**
+	 * Checks whether an order still ships physical items while shipping is disabled or no method is registered.
+	 *
+	 * WC_Order::needs_shipping() returns false in either case, so the products are checked directly. An existing
+	 * shipping line means the order still has a destination and its shipping address must be kept.
+	 *
+	 * @param \WC_Order $order Order to check.
+	 * @return bool
+	 */
+	private static function ships_items_without_methods( \WC_Order $order ): bool {
+		if ( wc_shipping_enabled() && 0 < wc_get_shipping_method_count( true ) ) {
+			return false;
+		}
+		if ( ! $order->get_shipping_methods() ) {
+			return false;
+		}
+		foreach ( $order->get_items() as $item ) {
+			$product = $item instanceof \WC_Order_Item_Product ? $item->get_product() : null;
+			if ( $product instanceof \WC_Product && $product->needs_shipping() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Gets the unfiltered billing address fields that can be copied to shipping.
+	 *
+	 * @param \WC_Order $order Order to read.
+	 * @return array
+	 */
+	private static function get_billing_address_for_shipping( \WC_Order $order ): array {
+		return [
+			'first_name' => $order->get_billing_first_name( 'edit' ),
+			'last_name'  => $order->get_billing_last_name( 'edit' ),
+			'company'    => $order->get_billing_company( 'edit' ),
+			'address_1'  => $order->get_billing_address_1( 'edit' ),
+			'address_2'  => $order->get_billing_address_2( 'edit' ),
+			'city'       => $order->get_billing_city( 'edit' ),
+			'state'      => $order->get_billing_state( 'edit' ),
+			'postcode'   => $order->get_billing_postcode( 'edit' ),
+			'country'    => $order->get_billing_country( 'edit' ),
+			'phone'      => $order->get_billing_phone( 'edit' ),
+		];
 	}
 
 	/**
@@ -536,17 +784,35 @@ class OrderController {
 		$shipping_country = $order->get_shipping_country();
 
 		if ( $needs_shipping ) {
-			$local_pickup_method_ids                      = LocalPickupUtils::get_local_pickup_method_ids();
-			$selected_shipping_rates                      = ShippingUtil::get_selected_shipping_rates_from_packages( WC()->shipping()->get_packages() );
-			$selected_shipping_rates_are_all_local_pickup = ArrayUtil::array_all(
-				$selected_shipping_rates,
-				function ( $rate ) use ( $local_pickup_method_ids ) {
-					return in_array( $rate->get_method_id(), $local_pickup_method_ids, true );
+			// Read the shipping lines from the order, since the pay-for-order route never calculates the cart. An order
+			// with no shipping line is not local pickup, so its country is still checked.
+			// Use the canonical filter list as well as the registered methods: an existing order can carry a
+			// pickup method that is not registered in this request (e.g. pickup_location is only registered
+			// when the checkout block is the default, and legacy_local_pickup may be deregistered), and
+			// relying on registered methods alone would wrongly reject its shipping country.
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
+			$filtered_local_pickup_ids    = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
+			$local_pickup_method_ids      = array_values(
+				array_unique(
+					array_filter(
+						array_merge(
+							LocalPickupUtils::get_local_pickup_method_ids(),
+							is_array( $filtered_local_pickup_ids ) ? $filtered_local_pickup_ids : array()
+						),
+						'is_string'
+					)
+				)
+			);
+			$shipping_lines               = $order->get_shipping_methods();
+			$shipping_is_all_local_pickup = ! empty( $shipping_lines ) && ArrayUtil::array_all(
+				$shipping_lines,
+				function ( $shipping_line ) use ( $local_pickup_method_ids ) {
+					return in_array( $shipping_line->get_method_id(), $local_pickup_method_ids, true );
 				}
 			);
 
 			// If only local pickup is selected, we don't need to validate the shipping country.
-			if ( ! $selected_shipping_rates_are_all_local_pickup && ! $this->validate_allowed_country( $shipping_country, (array) wc()->countries->get_shipping_countries() ) ) {
+			if ( ! $shipping_is_all_local_pickup && ! $this->validate_allowed_country( $shipping_country, (array) wc()->countries->get_shipping_countries() ) ) {
 				$countries             = WC()->countries->get_countries();
 				$shipping_country_name = $countries[ $shipping_country ] ?? $shipping_country;
 				throw new RouteException(

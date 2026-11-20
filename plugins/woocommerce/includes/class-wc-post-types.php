@@ -256,75 +256,153 @@ class WC_Post_Types {
 		global $wc_product_attributes;
 
 		$wc_product_attributes = array();
-		$attribute_taxonomies  = wc_get_attribute_taxonomies();
 
-		if ( $attribute_taxonomies ) {
-			foreach ( $attribute_taxonomies as $tax ) {
-				$name = wc_attribute_taxonomy_name( $tax->attribute_name );
-
-				if ( $name ) {
-					$tax->attribute_public          = absint( isset( $tax->attribute_public ) ? $tax->attribute_public : 1 );
-					$label                          = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
-					$wc_product_attributes[ $name ] = $tax;
-					$taxonomy_data                  = array(
-						'hierarchical'          => false,
-						'update_count_callback' => '_update_post_term_count',
-						'labels'                => array(
-							/* translators: %s: attribute name */
-							'name'              => sprintf( _x( 'Product %s', 'Product Attribute', 'woocommerce' ), $label ),
-							'singular_name'     => $label,
-							/* translators: %s: attribute name */
-							'search_items'      => sprintf( __( 'Search %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'all_items'         => sprintf( __( 'All %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'parent_item'       => sprintf( __( 'Parent %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'parent_item_colon' => sprintf( __( 'Parent %s:', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'edit_item'         => sprintf( __( 'Edit %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'update_item'       => sprintf( __( 'Update %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'add_new_item'      => sprintf( __( 'Add new %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'not_found'         => sprintf( __( 'No &quot;%s&quot; found', 'woocommerce' ), $label ),
-							/* translators: %s: attribute name */
-							'back_to_items'     => sprintf( __( '&larr; Back to "%s" attributes', 'woocommerce' ), $label ),
-						),
-						'show_ui'               => true,
-						'show_in_quick_edit'    => false,
-						'show_in_menu'          => false,
-						'meta_box_cb'           => false,
-						'query_var'             => 1 === $tax->attribute_public,
-						'rewrite'               => false,
-						'sort'                  => false,
-						'public'                => 1 === $tax->attribute_public,
-						'show_in_nav_menus'     => 1 === $tax->attribute_public && apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name ),
-						'capabilities'          => array(
-							'manage_terms' => 'manage_product_terms',
-							'edit_terms'   => 'edit_product_terms',
-							'delete_terms' => 'delete_product_terms',
-							'assign_terms' => 'assign_product_terms',
-						),
-					);
-
-					if ( 1 === $tax->attribute_public && sanitize_title( $tax->attribute_name ) ) {
-						$taxonomy_data['rewrite'] = array(
-							'slug'         => trailingslashit( $permalinks['attribute_rewrite_slug'] ) . urldecode( sanitize_title( $tax->attribute_name ) ),
-							'with_front'   => false,
-							'hierarchical' => true,
-						);
-					}
-
-					register_taxonomy( $name, apply_filters( "woocommerce_taxonomy_objects_{$name}", array( 'product' ) ), apply_filters( "woocommerce_taxonomy_args_{$name}", $taxonomy_data ) );
-				}
-			}
+		foreach ( wc_get_attribute_taxonomies() as $tax ) {
+			self::register_attribute_taxonomy( $tax, $permalinks );
 		}
 
+		/**
+		 * Fires after WooCommerce registers its taxonomies, including product attribute taxonomies.
+		 *
+		 * @since 2.1.0
+		 */
 		do_action( 'woocommerce_after_register_taxonomy' );
+	}
+
+	/**
+	 * Register one attribute taxonomy. Init and refresh_attribute_taxonomy() both use this.
+	 *
+	 * @param stdClass   $tax        Attribute row from wc_get_attribute_taxonomies().
+	 * @param array|null $permalinks Permalink structure, so a loop reads it only once.
+	 * @return void
+	 */
+	private static function register_attribute_taxonomy( $tax, ?array $permalinks = null ): void {
+		global $wc_product_attributes;
+
+		$name = wc_attribute_taxonomy_name( $tax->attribute_name );
+
+		if ( ! $name ) {
+			return;
+		}
+
+		$tax->attribute_public          = absint( isset( $tax->attribute_public ) ? $tax->attribute_public : 1 );
+		$label                          = ! empty( $tax->attribute_label ) ? $tax->attribute_label : $tax->attribute_name;
+		$wc_product_attributes[ $name ] = $tax;
+		$taxonomy_data                  = array(
+			'hierarchical'          => false,
+			'update_count_callback' => '_update_post_term_count',
+			'labels'                => array(
+				/* translators: %s: attribute name */
+				'name'              => sprintf( _x( 'Product %s', 'Product Attribute', 'woocommerce' ), $label ),
+				'singular_name'     => $label,
+				/* translators: %s: attribute name */
+				'search_items'      => sprintf( __( 'Search %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'all_items'         => sprintf( __( 'All %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'parent_item'       => sprintf( __( 'Parent %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'parent_item_colon' => sprintf( __( 'Parent %s:', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'edit_item'         => sprintf( __( 'Edit %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'update_item'       => sprintf( __( 'Update %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'add_new_item'      => sprintf( __( 'Add new %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'not_found'         => sprintf( __( 'No &quot;%s&quot; found', 'woocommerce' ), $label ),
+				/* translators: %s: attribute name */
+				'back_to_items'     => sprintf( __( '&larr; Back to "%s" attributes', 'woocommerce' ), $label ),
+			),
+			'show_ui'               => true,
+			'show_in_quick_edit'    => false,
+			'show_in_menu'          => false,
+			'meta_box_cb'           => false,
+			'query_var'             => 1 === $tax->attribute_public,
+			'rewrite'               => false,
+			'sort'                  => false,
+			'public'                => 1 === $tax->attribute_public,
+			/**
+			 * Filters whether a public product attribute taxonomy shows in navigation menus.
+			 *
+			 * @since 2.1.0
+			 * @param bool   $show_in_nav_menus Whether to show the taxonomy in navigation menus.
+			 * @param string $name              Attribute taxonomy name, for example pa_color.
+			 */
+			'show_in_nav_menus'     => 1 === $tax->attribute_public && apply_filters( 'woocommerce_attribute_show_in_nav_menus', false, $name ),
+			'capabilities'          => array(
+				'manage_terms' => 'manage_product_terms',
+				'edit_terms'   => 'edit_product_terms',
+				'delete_terms' => 'delete_product_terms',
+				'assign_terms' => 'assign_product_terms',
+			),
+		);
+
+		if ( 1 === $tax->attribute_public && sanitize_title( $tax->attribute_name ) ) {
+			$taxonomy_data['rewrite'] = array(
+				'slug'         => trailingslashit( ( $permalinks ?? wc_get_permalink_structure() )['attribute_rewrite_slug'] ) . urldecode( sanitize_title( $tax->attribute_name ) ),
+				'with_front'   => false,
+				'hierarchical' => true,
+			);
+		}
+
+		register_taxonomy(
+			$name,
+			/**
+			 * Filters the object types of a product attribute taxonomy.
+			 *
+			 * @since 2.1.0
+			 * @param array $object_types Object types. Default array( 'product' ).
+			 */
+			apply_filters( "woocommerce_taxonomy_objects_{$name}", array( 'product' ) ),
+			/**
+			 * Filters the arguments used to register a product attribute taxonomy.
+			 *
+			 * @since 2.1.0
+			 * @param array $taxonomy_data Taxonomy arguments.
+			 */
+			apply_filters( "woocommerce_taxonomy_args_{$name}", $taxonomy_data )
+		);
+	}
+
+	/**
+	 * Register a saved attribute's taxonomy again in this request. Does nothing before init registers taxonomies.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 * @param int $attribute_id Attribute ID.
+	 * @return void
+	 */
+	public static function refresh_attribute_taxonomy( int $attribute_id ): void {
+		if ( ! did_action( 'woocommerce_after_register_taxonomy' ) ) {
+			return;
+		}
+
+		delete_transient( 'wc_attribute_taxonomies' );
+		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+
+		$tax = wc_get_attribute_taxonomies()[ 'id:' . $attribute_id ] ?? null;
+		if ( ! $tax ) {
+			return;
+		}
+
+		// Unregister first, or the old query var and rewrite rules stay.
+		$name         = wc_attribute_taxonomy_name( $tax->attribute_name );
+		$existing     = get_taxonomy( $name );
+		$object_types = $existing ? $existing->object_type : array();
+		if ( $existing ) {
+			unregister_taxonomy( $name );
+		}
+
+		self::register_attribute_taxonomy( $tax );
+
+		// Keep object types that other code attached during this request.
+		foreach ( $object_types as $object_type ) {
+			register_taxonomy_for_object_type( $name, $object_type );
+		}
 	}
 
 	/**
@@ -337,19 +415,22 @@ class WC_Post_Types {
 
 		do_action( 'woocommerce_register_post_type' );
 
+		$is_installing_wp = wp_installing();
+		$is_cli           = defined( 'WP_CLI' ) && WP_CLI;
+		$is_admin         = is_admin();
+
 		$permalinks = wc_get_permalink_structure();
 		$supports   = array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'publicize', 'wpcom-markdown' );
-
 		if ( 'yes' === get_option( 'woocommerce_enable_reviews', 'yes' ) ) {
 			$supports[] = 'comments';
 		}
 
-		$shop_page_id      = wc_get_page_id( 'shop' );
 		$theme_support     = wc_current_theme_supports_woocommerce_or_fse();
-		$theme_unavailable = self::wp_cli_skips_active_theme() || wp_installing();
-
+		$theme_unavailable = $is_installing_wp || ( $is_cli && self::wp_cli_skips_active_theme() );
 		if ( self::should_register_product_archive( $theme_support, $theme_unavailable ) ) {
-			$has_archive = $shop_page_id && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop';
+			$shop_page_id = wc_get_page_id( 'shop' );
+			$shop_page    = $shop_page_id > 0 ? get_post( $shop_page_id ) : false;
+			$has_archive  = $shop_page ? urldecode( get_page_uri( $shop_page ) ) : 'shop';
 		} else {
 			$has_archive = false;
 		}
@@ -357,7 +438,7 @@ class WC_Post_Types {
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
 		// Skip this check in contexts where themes may not be loaded, which would incorrectly record
 		// theme support as "no" and corrupt rewrite rules on the frontend.
-		if ( ! wp_installing() && ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! wp_doing_cron() ) {
+		if ( ! $is_installing_wp && ! $is_cli && ! wp_doing_cron() ) {
 			$theme_support = $theme_support ? 'yes' : 'no';
 			if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
 				update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
@@ -465,7 +546,7 @@ class WC_Post_Types {
 					'map_meta_cap'        => true,
 					'publicly_queryable'  => false,
 					'exclude_from_search' => true,
-					'show_in_menu'        => current_user_can( 'edit_others_shop_orders' ) ? 'woocommerce' : true,
+					'show_in_menu'        => ( $is_admin && current_user_can( 'edit_others_shop_orders' ) ) ? 'woocommerce' : true,
 					'hierarchical'        => false,
 					'show_in_nav_menus'   => false,
 					'rewrite'             => false,
@@ -528,7 +609,7 @@ class WC_Post_Types {
 						'map_meta_cap'        => true,
 						'publicly_queryable'  => false,
 						'exclude_from_search' => true,
-						'show_in_menu'        => current_user_can( 'edit_others_shop_orders' ) ? 'woocommerce' : true,
+						'show_in_menu'        => ( $is_admin && current_user_can( 'edit_others_shop_orders' ) ) ? 'woocommerce' : true,
 						'hierarchical'        => false,
 						'rewrite'             => false,
 						'query_var'           => false,

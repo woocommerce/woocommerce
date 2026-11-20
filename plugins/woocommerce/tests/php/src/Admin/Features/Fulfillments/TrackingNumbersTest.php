@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsManager;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\TrackingCombinator;
+use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WP_UnitTestCase;
 
 /**
@@ -17,35 +18,20 @@ class TrackingNumbersTest extends WP_UnitTestCase {
 	private $combinator;
 
 	/**
-	 * Original value of the fulfillments feature flag.
-	 *
-	 * @var mixed
+	 * Create the fulfillments tables.
 	 */
-	private $original_fulfillments_flag;
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+		FulfillmentsHelper::create_tables();
+	}
 
 	/**
 	 * Set up the combinator instance.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
+		FulfillmentsHelper::enable_fulfillments();
 		$this->combinator = wc_get_container()->get( FulfillmentsManager::class );
-	}
-
-	/**
-	 * Tear down the test environment.
-	 */
-	public function tearDown(): void {
-		if ( false === $this->original_fulfillments_flag ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', $this->original_fulfillments_flag );
-		}
-		parent::tearDown();
 	}
 
 	/**

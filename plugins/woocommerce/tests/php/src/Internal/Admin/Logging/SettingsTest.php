@@ -179,8 +179,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 
 		$files = $this->file_controller->get_files();
 		$this->assertCount( 0, $files );
-
-		delete_option( 'woocommerce_logs_logging_enabled' );
 	}
 
 	/**
@@ -204,8 +202,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 		Constants::set_constant( 'WC_LOG_HANDLER', 'Fluffernutter' );
 		$handler = $this->sut->get_default_handler();
 		$this->assertEquals( LogHandlerFileV2::class, $handler );
-
-		Constants::clear_single_constant( 'WC_LOG_HANDLER' );
 	}
 
 	/**
@@ -227,8 +223,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_logs_default_handler', 'Smorgasbord' );
 		$handler = $this->sut->get_default_handler();
 		$this->assertEquals( LogHandlerFileV2::class, $handler );
-
-		delete_option( 'woocommerce_logs_default_handler' );
 	}
 
 	/**
@@ -253,7 +247,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_logger_days_to_retain_logs', '__return_zero' );
 		$retention = $this->sut->get_retention_period();
 		$this->assertEquals( 30, $retention );
-		remove_all_filters( 'woocommerce_logger_days_to_retain_logs' );
 	}
 
 	/**
@@ -275,8 +268,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_logs_retention_period_days', 'french toast' );
 		$handler = $this->sut->get_retention_period();
 		$this->assertEquals( 30, $handler );
-
-		delete_option( 'woocommerce_logs_retention_period_days' );
 	}
 
 	/**
@@ -300,8 +291,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 		Constants::set_constant( 'WC_LOG_THRESHOLD', 'mascarpone' );
 		$level = $this->sut->get_level_threshold();
 		$this->assertEquals( 'none', $level );
-
-		Constants::clear_single_constant( 'WC_LOG_THRESHOLD' );
 	}
 
 	/**
@@ -323,8 +312,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_logs_level_threshold', 123 );
 		$level = $this->sut->get_level_threshold();
 		$this->assertEquals( 'none', $level );
-
-		delete_option( 'woocommerce_logs_level_threshold' );
 	}
 
 	/**
@@ -340,8 +327,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'Log storage', $content );
 		$this->assertStringNotContainsString( 'Retention period', $content );
 		$this->assertStringNotContainsString( 'Level threshold', $content );
-
-		delete_option( 'woocommerce_logs_logging_enabled' );
 	}
 
 	/**
@@ -362,8 +347,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 			'This setting cannot be changed here because it is defined in the <code>WC_LOG_HANDLER</code> constant',
 			$content
 		);
-
-		Constants::clear_single_constant( 'WC_LOG_HANDLER' );
 	}
 
 	/**
@@ -385,8 +368,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 			'This setting cannot be changed here because it is being set by a filter on the <code>woocommerce_logger_days_to_retain_logs</code> hook',
 			$content
 		);
-
-		remove_all_filters( 'woocommerce_logger_days_to_retain_logs' );
 	}
 
 	/**
@@ -407,8 +388,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 			'This setting cannot be changed here because it is defined in the <code>WC_LOG_THRESHOLD</code> constant',
 			$content
 		);
-
-		Constants::clear_single_constant( 'WC_LOG_THRESHOLD' );
 	}
 
 	/**

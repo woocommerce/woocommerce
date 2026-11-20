@@ -42,17 +42,6 @@ class I18nUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Do after each test in this class.
-	 *
-	 * @return void
-	 */
-	public function tear_down() {
-		remove_filter( 'gettext', array( __CLASS__, 'filter_gettext' ) );
-
-		parent::tear_down();
-	}
-
-	/**
 	 * Simulate a string getting translated.
 	 *
 	 * @param string $translated The "translated" string before we modify it.

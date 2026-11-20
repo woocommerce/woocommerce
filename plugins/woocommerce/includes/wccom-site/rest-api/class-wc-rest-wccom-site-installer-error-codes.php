@@ -40,6 +40,8 @@ class WC_REST_WCCOM_Site_Installer_Error_Codes {
 	const MISSING_UNPACKED_PATH               = 'missing_unpacked_path';
 	const UNKNOWN_FILENAME                    = 'unknown_filename';
 	const PLUGIN_ACTIVATION_ERROR             = 'plugin_activation_error';
+	const INCOMPATIBLE_WP_REQUIRED_VERSION    = 'incompatible_wp_required_version';
+	const INCOMPATIBLE_PHP_REQUIRED_VERSION   = 'incompatible_php_required_version';
 	const UNEXPECTED_ERROR                    = 'unexpected_error';
 	const FAILED_TO_RESET_INSTALLATION_STATE  = 'failed_to_reset_installation_state';
 
@@ -68,6 +70,8 @@ class WC_REST_WCCOM_Site_Installer_Error_Codes {
 		self::MISSING_UNPACKED_PATH              => 'Unpacked path is missing',
 		self::UNKNOWN_FILENAME                   => 'Unknown product filename',
 		self::PLUGIN_ACTIVATION_ERROR            => 'Plugin activation error',
+		self::INCOMPATIBLE_WP_REQUIRED_VERSION   => 'The product requires a newer version of WordPress',
+		self::INCOMPATIBLE_PHP_REQUIRED_VERSION  => 'The product requires a newer version of PHP',
 		self::UNEXPECTED_ERROR                   => 'Unexpected error',
 		self::FAILED_TO_RESET_INSTALLATION_STATE => 'Failed to reset installation state',
 	);

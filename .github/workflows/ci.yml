@@ -98,7 +98,7 @@ jobs:
               - '.github/workflows/ci.yml'
               - '.github/workflows/phpstan.yml'
             needs-changelog-validation:
-              - '{packages,plugins}/*/!((changelog/*)|(readme.txt))'
+              - '{packages,plugins,themes}/*/!((changelog/*)|(readme.txt))'
             needs-markdown-validation:
               - '*.md'
               - '!(.github/**)/**/*.md'
@@ -107,7 +107,7 @@ jobs:
               - '.github/workflows/scripts/docs-link-check-policy-test.sh'
               - '.github/workflows/scripts/install-lychee.sh'
             needs-syncpack-validation:
-              - '(.syncpackrc)|(pnpm-lock.yaml)|(pnpm-workspace.yaml)|(.nvmrc)'
+              - '(.syncpackrc)|(package.json)|(pnpm-lock.yaml)|(pnpm-workspace.yaml)|(.nvmrc)'
 
   phpstan:
     needs: 'identify-jobs-to-run'
@@ -140,6 +140,11 @@ jobs:
 
       - name: Setup - pnpm
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+      - name: Setup - node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: '.nvmrc'
 
       - name: Setup - spawn linting and testing jobs
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
@@ -325,9 +330,25 @@ jobs:
         with:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
 
+      # Skip install and tests when a `gh local-ci` receipt vouches for this
+      # job on this commit. Off switch: repository variable
+      # LOCAL_CI_RECEIPTS_DISABLED=1. Rollback: revert this step, the four
+      # guards below and the comparison step after the tests. See
+      # .github/actions/local-ci-receipt/README.md.
+      - uses: './.github/actions/local-ci-receipt'
+        name: 'Look for a local CI receipt'
+        id: 'local-ci-receipt'
+        if: ${{ github.event_name == 'pull_request' }}
+        continue-on-error: true
+        with:
+          job-name: ${{ matrix.name }}
+          github-token: ${{ github.token }}
+          disabled: ${{ vars.LOCAL_CI_RECEIPTS_DISABLED }}
+
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Install Monorepo'
         id: 'install-monorepo'
+        if: ${{ steps.local-ci-receipt.outputs.substituted != 'true' }}
         with:
           install: '${{ matrix.projectName }}...'
           build: ${{ ( matrix.usesSharedPluginBuild == true && inputs.artifactName == '' && 'false' ) || matrix.projectName }}
@@ -369,7 +390,7 @@ jobs:
         run: node .github/workflows/scripts/override-wp-env-plugins.js
 
       - name: 'Start Test Environment: increase max-download-attempts'
-        if: ${{ matrix.testEnv.shouldCreate }}
+        if: ${{ matrix.testEnv.shouldCreate && steps.local-ci-receipt.outputs.substituted != 'true' }}
         uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
         with:
           daemon-config: |
@@ -380,7 +401,7 @@ jobs:
 
       - name: 'Start Test Environment: start'
         id: 'prepare-test-environment'
-        if: ${{ matrix.testEnv.shouldCreate }}
+        if: ${{ matrix.testEnv.shouldCreate && steps.local-ci-receipt.outputs.substituted != 'true' }}
         # `wp-env start` fails on transient network timeouts from several subsystems:
         # composer fetching packagist inside the Docker build ("curl error 28"), wp-env's
         # own `got` client downloading WordPress core ("ETIMEDOUT"/"socket hang up"), and
@@ -448,6 +469,8 @@ jobs:
           path: '${{ runner.temp }}/last-run-info'
 
       - name: 'Run tests (${{ matrix.testType }})'
+        id: 'run-tests'
+        if: ${{ steps.local-ci-receipt.outputs.substituted != 'true' }}
         timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && ( github.event.repository.private && 30 || 20 ) ) || ( matrix.testType == 'unit:php' && 25 ) ) ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
@@ -494,6 +517,18 @@ jobs:
 
           # Finally, run the tests
           pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
+
+      # When the lookup ran the job anyway with a receipt in hand (a parity
+      # sample, or a failed receipt), report whether CI agreed with it.
+      - uses: './.github/actions/local-ci-receipt'
+        name: 'Compare with the local CI receipt'
+        if: ${{ always() && steps.local-ci-receipt.outputs.parity != '' }}
+        continue-on-error: true
+        with:
+          job-name: ${{ matrix.name }}
+          github-token: ${{ github.token }}
+          parity: ${{ steps.local-ci-receipt.outputs.parity }}
+          ci-outcome: ${{ steps.run-tests.outcome }}
 
       - name: 'Upload Playwright last run info'
         # always upload the last run info, even if the test run passed
@@ -662,14 +697,14 @@ jobs:
       - name: 'Validate - Node version sources agree'
         run: |
           nvmrc="$(tr -d 'v[:space:]' < .nvmrc)"
-          workspace="$(sed -nE "s/^useNodeVersion:[[:space:]]*['\"]?([^'\"#[:space:]]+).*/\1/p" pnpm-workspace.yaml)"
+          workspace="$(jq -r '.devEngines.runtime.version // empty' package.json)"
           if [ -z "$nvmrc" ] || [ -z "$workspace" ] || [ "$nvmrc" != "$workspace" ]; then
-            echo "::error::.nvmrc ($nvmrc) and useNodeVersion in pnpm-workspace.yaml ($workspace) must name the same Node version."
+            echo "::error::.nvmrc ($nvmrc) and devEngines.runtime.version in package.json ($workspace) must name the same Node version."
             exit 1
           fi
 
       - name: 'Setup - node'
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
 
@@ -795,7 +830,7 @@ jobs:
               - '.github/workflows/scripts/install-lychee.sh'
 
       - name: 'Setup - node'
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
 
@@ -835,6 +870,6 @@ jobs:
         shell: bash
         working-directory: docs/_docu-tools
         run: |
-            pnpm install --ignore-workspace
+            pnpm install
             pnpm run lint:markdown
             pnpm exec docusaurus build --config ./utils/docusaurus-faster.deploy.config.js

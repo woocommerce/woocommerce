@@ -12,6 +12,8 @@
  * @version 3.0.0
  */
 
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
+use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -19,6 +21,8 @@ use Automattic\WooCommerce\Enums\DimensionUnit;
 use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Internal\StructuredData\ShippingDestinations;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -33,6 +37,13 @@ class WC_Structured_Data {
 	 * @var array $_data Array of structured data.
 	 */
 	private $_data = array();
+
+	/**
+	 * Product IDs whose structured data has been stored.
+	 *
+	 * @var array
+	 */
+	private $generated_product_ids = array();
 
 	/**
 	 * Constructor.
@@ -158,7 +169,7 @@ class WC_Structured_Data {
 		$types   = array();
 		$types[] = is_shop() || is_product_category() || is_product() ? 'product' : '';
 		$types[] = is_shop() && is_front_page() ? 'website' : '';
-		$types[] = $policy_page_id > 0 && is_page( $policy_page_id ) && ! doing_action( 'woocommerce_email_order_details' ) ? 'onlinestore' : '';
+		$types[] = $policy_page_id > 0 && ( is_page( $policy_page_id ) || is_product() ) && ! doing_action( 'woocommerce_email_order_details' ) ? 'onlinestore' : '';
 		$types[] = is_product() ? 'review' : '';
 		$types[] = 'breadcrumblist';
 		$types[] = 'order';
@@ -189,6 +200,18 @@ class WC_Structured_Data {
 	 * Hooked into `woocommerce_email_order_details` action hook.
 	 */
 	public function output_structured_data() {
+		if ( 'wp_footer' === current_action() && is_product() && false !== has_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ) ) ) {
+			$product_id       = get_queried_object_id();
+			$has_product_data = isset( $this->generated_product_ids[ $product_id ] );
+
+			if ( ! $has_product_data ) {
+				$product = wc_get_product( $product_id );
+				if ( $product ) {
+					$this->generate_product_data( $product );
+				}
+			}
+		}
+
 		$types = $this->get_data_type_for_page();
 		$data  = $this->get_structured_data( $types );
 
@@ -228,7 +251,7 @@ class WC_Structured_Data {
 			global $product;
 		}
 
-		if ( ! is_a( $product, 'WC_Product' ) ) {
+		if ( ! is_a( $product, 'WC_Product' ) || '' !== $product->get_post_password() ) {
 			return;
 		}
 
@@ -236,7 +259,17 @@ class WC_Structured_Data {
 		$shop_url  = home_url();
 		$currency  = get_woocommerce_currency();
 		$permalink = get_permalink( $product->get_id() );
-		$image     = wp_get_attachment_url( (int) $product->get_image_id() );
+		wc_get_container()->get( ProductUtil::class )->prime_image_caches( array( $product ) );
+		$image   = wp_get_attachment_url( (int) $product->get_image_id() );
+		$gallery = $product->get_gallery_image_ids();
+		$gallery = array_unique( array_filter( array_map( 'intval', $gallery ) ) );
+		$images  = $image ? array( $image ) : array();
+		foreach ( $gallery as $image_id ) {
+			$gallery_image = wp_attachment_is_image( $image_id ) ? wp_get_attachment_url( $image_id ) : false;
+			if ( $gallery_image && ! in_array( $gallery_image, $images, true ) ) {
+				$images[] = $gallery_image;
+			}
+		}
 
 		$markup = array(
 			'@type'       => 'Product',
@@ -246,8 +279,8 @@ class WC_Structured_Data {
 			'description' => wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) ),
 		);
 
-		if ( $image ) {
-			$markup['image'] = $image;
+		if ( $images ) {
+			$markup['image'] = 1 === count( $images ) ? $images[0] : $images;
 		}
 
 		// Declare SKU or fallback to ID.
@@ -460,7 +493,8 @@ class WC_Structured_Data {
 						? wc_get_price_including_tax( $offer_source, array( 'price' => $offer_source->get_sale_price() ) )
 						: wc_get_price_excluding_tax( $offer_source, array( 'price' => $offer_source->get_sale_price() ) );
 					if ( $offer_source->get_date_on_sale_to() ) {
-						$sale_price_valid_until = gmdate( 'Y-m-d', $offer_source->get_date_on_sale_to()->getTimestamp() );
+						$sale_date_to           = clone $offer_source->get_date_on_sale_to();
+						$sale_price_valid_until = (string) $sale_date_to->setTimezone( wp_timezone() )->format( 'Y-m-d' );
 					}
 
 					// We add the sale price to the top of the array so it's the first offer.
@@ -506,7 +540,41 @@ class WC_Structured_Data {
 				$markup_offer['priceCurrency'] = $currency;
 			}
 
+			if ( ( ! $product->is_type( array( ProductType::VARIABLE, ProductType::GROUPED ) ) || $selected_variation ) && ! $offer_source->is_type( ProductType::EXTERNAL ) && $offer_source->needs_shipping() ) {
+				$shipping_details = wc_get_container()->get( ShippingDestinations::class )->get_shipping_details();
+				if ( $shipping_details ) {
+					$markup_offer['shippingDetails'] = $shipping_details;
+				}
+			}
+
+			if ( ( ! $product->is_type( array( ProductType::VARIABLE, ProductType::GROUPED ) ) || $selected_variation ) && $offer_source->is_on_sale() ) {
+				$date_on_sale_from = $offer_source->get_date_on_sale_from();
+				$date_on_sale_to   = $offer_source->get_date_on_sale_to();
+				if ( $date_on_sale_from ) {
+					$markup_offer['validFrom'] = ( clone $date_on_sale_from )->setTimezone( wp_timezone() )->format( DATE_ATOM );
+				}
+				if ( $date_on_sale_to ) {
+					$markup_offer['validThrough'] = ( clone $date_on_sale_to )->setTimezone( wp_timezone() )->format( DATE_ATOM );
+				}
+			}
+
+			$checkout_url = $this->get_product_checkout_url( $product, $selected_variation );
+			if ( null !== $checkout_url ) {
+				$markup_offer['checkoutPageURLTemplate'] = $checkout_url;
+			}
+
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
+			$offer            = $markup['offers'][0];
+			if ( null !== $checkout_url && is_array( $offer ) && 'Offer' === ( $offer['@type'] ?? null ) && is_string( $offer['checkoutPageURLTemplate'] ?? null ) && '' !== $offer['checkoutPageURLTemplate'] ) {
+				$markup['potentialAction'] = array(
+					'@type'  => 'BuyAction',
+					'target' => array(
+						'@type'          => 'EntryPoint',
+						'urlTemplate'    => $offer['checkoutPageURLTemplate'],
+						'actionPlatform' => array( 'https://schema.org/DesktopWebPlatform', 'https://schema.org/MobileWebPlatform' ),
+					),
+				);
+			}
 		}
 
 		if ( $product->get_rating_count() && wc_review_ratings_enabled() ) {
@@ -623,8 +691,96 @@ class WC_Structured_Data {
 				$term = get_term( $term->parent, 'product_cat' );
 			}
 		}
+
+		$videos = $this->get_product_gallery_video_data( $product );
+		if ( $videos ) {
+			$markup['subjectOf'] = $videos;
+		}
+
+		/**
+		 * Filters structured data for a product.
+		 *
+		 * @since 3.0.0
+		 * @param array      $markup  Product structured data.
+		 * @param WC_Product $product Product being described.
+		 */
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
+		$this->generated_product_ids[ $product->get_id() ] = true;
 	}
+
+	/**
+	 * Get structured data for usable uploaded gallery videos.
+	 *
+	 * @param WC_Product $product Product data.
+	 * @return array Video data.
+	 */
+	private function get_product_gallery_video_data( $product ) {
+		if ( ! ProductMediaGallery::is_feature_enabled() ) {
+			return array();
+		}
+
+		$videos = ProductMediaGallery::get_stored_video_gallery_items( $product );
+		if ( ! $videos ) {
+			return array();
+		}
+
+		$ids = array_filter( array_map( 'absint', array_merge( array_column( $videos, 'id' ), array_column( $videos, 'poster_id' ) ) ) );
+		if ( $ids ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( array_unique( $ids ) );
+		}
+
+		$video_data = array();
+		foreach ( ProductMediaGallery::get_product_media_gallery_items( $product ) as $item ) {
+			if ( 'video' !== $item['media_type'] ) {
+				continue;
+			}
+
+			$id         = (int) $item['id'];
+			$attachment = get_post( $id );
+			if ( ! $attachment || 'attachment' !== $attachment->post_type ) {
+				continue;
+			}
+			$url       = wp_get_attachment_url( $id );
+			$date      = get_post_datetime( $attachment, 'date', 'gmt' );
+			$poster_id = (int) ( $item['poster_id'] ?? 0 );
+			$thumbnail = $poster_id ? wp_get_attachment_image_url( $poster_id, 'full' ) : false;
+			if ( ! $thumbnail && $product->get_image_id() ) {
+				$thumbnail = wp_get_attachment_image_url( (int) $product->get_image_id(), 'full' );
+			}
+			$name = trim( wp_strip_all_tags( $attachment->post_title ) );
+			$name = $name ? $name : trim( wp_strip_all_tags( $product->get_name() ) );
+			if ( ! $url || ! $thumbnail || ! $date || ! $name ) {
+				continue;
+			}
+
+			$video       = array(
+				'@type'        => 'VideoObject',
+				'name'         => $name,
+				'contentUrl'   => $url,
+				'thumbnailUrl' => $thumbnail,
+				'uploadDate'   => $date->format( DATE_ATOM ),
+			);
+			$description = trim( wp_strip_all_tags( $attachment->post_content ) );
+			if ( $description ) {
+				$video['description'] = $description;
+			}
+			/**
+			 * Video attachment metadata.
+			 *
+			 * @var array<string, mixed>|false $metadata
+			 */
+			$metadata = wp_get_attachment_metadata( $id );
+			$length   = is_array( $metadata ) ? ( $metadata['length'] ?? null ) : null;
+			if ( is_int( $length ) && 0 < $length ) {
+				$video['duration'] = 'PT' . (int) $length . 'S';
+			}
+			$video_data[] = $video;
+		}
+
+		return $video_data;
+	}
+
 
 	/**
 	 * Generates Review structured data.
@@ -706,7 +862,7 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Generates link-only return-policy data on the selected public policy page.
+	 * Generates link-only return-policy data on product pages and the selected public policy page.
 	 *
 	 * Hooked into `wp_footer` before structured data is output, so it cannot leak into order emails.
 	 *
@@ -714,7 +870,7 @@ class WC_Structured_Data {
 	 */
 	public function generate_online_store_data(): void {
 		$page_id = wc_get_page_id( 'refund_returns' );
-		if ( $page_id <= 0 || ! is_page( $page_id ) ) {
+		if ( $page_id <= 0 || ( ! is_page( $page_id ) && ! is_product() ) ) {
 			return;
 		}
 
@@ -739,7 +895,7 @@ class WC_Structured_Data {
 		);
 
 		/**
-		 * Filters the store and return-policy structured data on the policy page.
+		 * Filters the store and return-policy structured data.
 		 *
 		 * @since 11.3.0
 		 * @param array   $markup Structured data for the online store.
@@ -966,6 +1122,43 @@ class WC_Structured_Data {
 		}
 
 		return $variation;
+	}
+
+	/**
+	 * Get a checkout link for a simple product or selected variation.
+	 *
+	 * @param WC_Product                $product   Product shown on the page.
+	 * @param WC_Product_Variation|null $variation Selected variation, if any.
+	 * @return string|null Checkout URL, or null if it cannot be represented.
+	 */
+	private function get_product_checkout_url( $product, $variation ) {
+		if ( ! $variation && ! $product->is_type( ProductType::SIMPLE ) ) {
+			return null;
+		}
+
+		$item = $variation ? $variation : $product;
+		if (
+			( ! $product->is_visible() && CatalogVisibility::SEARCH !== $product->get_catalog_visibility() ) ||
+			( $variation && ! $variation->is_visible() && CatalogVisibility::SEARCH !== $variation->get_catalog_visibility() ) ||
+			! $item->is_publicly_viewable() ||
+			! $item->is_purchasable() ||
+			! $item->is_in_stock() ||
+			! $item->has_enough_stock( 1 )
+		) {
+			return null;
+		}
+
+		if ( $variation && in_array( '', wc_get_product_variation_attributes( $variation->get_id() ), true ) ) {
+			return null;
+		}
+
+		return add_query_arg(
+			array(
+				'checkout-link' => '1',
+				'products'      => rawurlencode( $item->get_id() . ':1' ),
+			),
+			home_url( '/' )
+		);
 	}
 
 	/**

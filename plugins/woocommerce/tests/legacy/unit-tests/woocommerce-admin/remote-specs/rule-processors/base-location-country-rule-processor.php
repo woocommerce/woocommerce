@@ -84,17 +84,6 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_BaseLocationCountryRuleProcessor
 	}
 
 	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		foreach ( $this->option_filters as $option => $filter ) {
-			remove_filter( 'pre_option_' . $option, $filter );
-		}
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Tests that the processor returns false if the base country is empty.
 	 *
 	 * @group fast

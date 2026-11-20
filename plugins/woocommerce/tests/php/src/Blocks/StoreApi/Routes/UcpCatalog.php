@@ -195,6 +195,100 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * Lookup and product details open what catalog search can return: every product but a
+	 * hidden one, including "Search results only", which is_visible() refuses outside a
+	 * storefront search.
+	 *
+	 * @testWith ["visible", true, true, true]
+	 *           ["search", true, false, true]
+	 *           ["catalog", false, true, true]
+	 *           ["hidden", false, false, false]
+	 *
+	 * @param string $visibility    Catalog visibility.
+	 * @param bool   $found_by_name Whether a search by name returns it.
+	 * @param bool   $browsable     Whether a category search with no query returns it.
+	 * @param bool   $opens         Whether lookup and product details return it.
+	 */
+	public function test_lookup_and_details_open_what_search_can_return( string $visibility, bool $found_by_name, bool $browsable, bool $opens ): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'UCP Zebra ' . $visibility ) );
+		$product->set_catalog_visibility( $visibility );
+		$product->save();
+		$id   = (string) $product->get_id();
+		$term = wp_insert_term( 'UCP Zebras ' . $visibility, 'product_cat' );
+		wp_set_object_terms( $product->get_id(), (int) $term['term_id'], 'product_cat' );
+
+		$found = wp_list_pluck( $this->post( '/catalog/search', array( 'query' => 'UCP Zebra ' . $visibility ) )->get_data()['products'], 'id' );
+		$this->assertSame( $found_by_name, in_array( $id, $found, true ), 'Search by name' );
+
+		$browsed = wp_list_pluck( $this->post( '/catalog/search', array( 'filters' => array( 'categories' => array( (string) $term['term_id'] ) ) ) )->get_data()['products'], 'id' );
+		$this->assertSame( $browsable, in_array( $id, $browsed, true ), 'Search by category with no query' );
+
+		$lookup = $this->post( '/catalog/lookup', array( 'ids' => array( $id ) ) )->get_data();
+		$this->assertSame( $opens ? array( $id ) : array(), wp_list_pluck( $lookup['products'], 'id' ), 'Lookup' );
+
+		$detail = $this->post( '/catalog/product', array( 'id' => $id ) )->get_data();
+		$this->assertSame( $opens ? $id : null, $detail['product']['id'] ?? null, 'Product details' );
+	}
+
+	/**
+	 * A variation ID opens in lookup and product details when its parent is "Search results only".
+	 */
+	public function test_lookup_and_details_open_a_variation_of_a_search_only_product(): void {
+		$product = \WC_Helper_Product::create_variation_product();
+		$product->set_catalog_visibility( 'search' );
+		$product->save();
+		$children     = $product->get_children();
+		$variation_id = (string) end( $children );
+
+		$data = $this->post( '/catalog/lookup', array( 'ids' => array( $variation_id ) ) )->get_data();
+
+		$this->assertSame( array( (string) $product->get_id() ), wp_list_pluck( $data['products'], 'id' ) );
+		$this->assertContains( $variation_id, wp_list_pluck( $data['products'][0]['variants'], 'id' ) );
+
+		$detail = $this->post( '/catalog/product', array( 'id' => $variation_id ) )->get_data();
+		$this->assertSame( $variation_id, $detail['product']['variants'][0]['id'] ?? null, 'Product details' );
+	}
+
+	/**
+	 * A "Search results only" product still follows the hide-out-of-stock setting.
+	 */
+	public function test_lookup_hides_out_of_stock_search_only_products_when_the_store_does(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'stock_status' => 'outofstock' ) );
+		$product->set_catalog_visibility( 'search' );
+		$product->save();
+
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$data = $this->post( '/catalog/lookup', array( 'ids' => array( (string) $product->get_id() ) ) )->get_data();
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+
+		$this->assertSame( array(), $data['products'] );
+	}
+
+	/**
+	 * Lookup still opens a "Search results only" product when an extension removes `visible`
+	 * from the catalog visibility options (the temporary override path must not throw).
+	 */
+	public function test_lookup_opens_search_only_when_visible_option_is_removed(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_catalog_visibility( 'search' );
+		$product->save();
+		$id = (string) $product->get_id();
+
+		$filter = static function ( array $options ): array {
+			unset( $options['visible'] );
+			return $options;
+		};
+		add_filter( 'woocommerce_product_visibility_options', $filter );
+		try {
+			$data = $this->post( '/catalog/lookup', array( 'ids' => array( $id ) ) )->get_data();
+		} finally {
+			remove_filter( 'woocommerce_product_visibility_options', $filter );
+		}
+
+		$this->assertSame( array( $id ), wp_list_pluck( $data['products'], 'id' ) );
+	}
+
+	/**
 	 * A category list resolving to no existing term matches nothing rather than everything.
 	 */
 	public function test_search_unknown_category_returns_no_products(): void {
@@ -230,6 +324,37 @@ class UcpCatalog extends ControllerTestCase {
 		$data     = $response->get_data();
 
 		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'VALIDATION_ERROR', $data['messages'][0]['code'] );
+	}
+
+	/**
+	 * Input outside the JSON document does not act.
+	 */
+	public function test_lookup_ids_in_the_query_string_are_ignored(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/catalog/lookup' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_query_params( array( 'ids' => array( (string) self::$product_ids[0] ) ) );
+		$request->set_body( '{}' );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'VALIDATION_ERROR', $response->get_data()['messages'][0]['code'] );
+	}
+
+	/**
+	 * A payload under any other content type is refused rather than read.
+	 */
+	public function test_a_non_json_payload_is_refused(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/catalog/lookup' );
+		$request->set_header( 'content-type', 'application/x-www-form-urlencoded' );
+		$request->set_body_params( array( 'ids' => array( (string) self::$product_ids[0] ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 415, $response->get_status() );
 		$this->assertSame( 'error', $data['ucp']['status'] );
 		$this->assertSame( 'VALIDATION_ERROR', $data['messages'][0]['code'] );
 	}

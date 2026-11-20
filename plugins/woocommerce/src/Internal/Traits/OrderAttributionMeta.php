@@ -319,6 +319,13 @@ trait OrderAttributionMeta {
 					__( 'Point of Sale', 'woocommerce' )
 					: 'Point of Sale';
 				break;
+			case 'ai_shopper':
+				// The agent named in a UCP request is not verified, so it stays in the details.
+				$label  = '';
+				$source = $translated ?
+					__( 'AI shopper', 'woocommerce' )
+					: 'AI shopper';
+				break;
 
 			default:
 				$label  = '';

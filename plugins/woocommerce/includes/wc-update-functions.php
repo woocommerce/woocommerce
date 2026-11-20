@@ -2374,7 +2374,7 @@ function wc_update_500_fix_product_review_count() {
 		$current_review_count = intval( $product_data['meta_value'] );
 
 		if ( intval( $actual_review_counts[ $product_id ] ) !== $current_review_count ) {
-			WC_Comments::clear_transients( $product_id );
+			WC_Comments::maybe_update_product_average_rating( $product_id );
 		}
 	}
 
@@ -4032,6 +4032,113 @@ function wc_update_1130_set_legacy_variation_price_hash_option() {
 }
 
 /**
+ * Remove customer passwords from previously stored deferred email actions.
+ *
+ * Scan 100 actions per run, including completed and failed actions.
+ *
+ * @since 11.3.1
+ * @return bool True when another batch remains.
+ */
+function wc_update_1131_redact_deferred_customer_passwords() {
+	global $wpdb;
+
+	$table          = $wpdb->prefix . 'actionscheduler_actions';
+	$last_id_option = 'woocommerce_update_1131_last_deferred_email_action_id';
+	$batch_size     = 100;
+	$hook           = 'woocommerce_send_queued_transactional_email';
+
+	$redact_args = static function ( array &$args ) use ( &$redact_args ): bool {
+		$changed = false;
+		foreach ( $args as $key => $value ) {
+			if ( 'user_pass' === $key ) {
+				unset( $args[ $key ] );
+				$changed = true;
+			} elseif ( is_array( $value ) ) {
+				$changed = $redact_args( $args[ $key ] ) || $changed;
+			}
+		}
+		return $changed;
+	};
+
+	$redact_row = static function ( $row ) use ( $wpdb, $table, $hook, $redact_args ): bool {
+		$stored_args = ! empty( $row->extended_args ) ? $row->extended_args : $row->args;
+		$args        = json_decode( $stored_args, true );
+		if ( ! is_array( $args ) ) {
+			return false;
+		}
+		if ( ! $redact_args( $args ) ) {
+			return true;
+		}
+
+		$encoded = wp_json_encode( $args );
+		if ( false === $encoded ) {
+			return false;
+		}
+
+		// Action Scheduler stores long arguments in extended_args and their hash in args.
+		$data = strlen( $encoded ) <= 191
+			? array(
+				'args'          => $encoded,
+				'extended_args' => null,
+			)
+			: array(
+				'args'          => md5( $encoded ),
+				'extended_args' => $encoded,
+			);
+
+		for ( $attempt = 0; $attempt < 3; ++$attempt ) {
+			$updated = $wpdb->update(
+				$table,
+				$data,
+				array(
+					'action_id' => $row->action_id,
+					'hook'      => $hook,
+				)
+			);
+
+			if ( false !== $updated ) {
+				return true;
+			}
+		}
+
+		return false;
+	};
+
+	$rows = $wpdb->get_results(
+		$wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name uses the current site's trusted prefix.
+			"SELECT action_id, args, extended_args FROM {$table} WHERE hook = %s AND action_id > %d ORDER BY action_id ASC LIMIT %d",
+			$hook,
+			(int) get_option( $last_id_option, 0 ),
+			$batch_size
+		)
+	);
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error( sprintf( 'Stopped redacting deferred email passwords: %s', $wpdb->last_error ), array( 'source' => 'wc-updater' ) );
+		return false;
+	}
+
+	foreach ( $rows as $row ) {
+		if ( ! $redact_row( $row ) ) {
+			wc_get_logger()->error( sprintf( 'Could not redact deferred email password from action #%d.', (int) $row->action_id ), array( 'source' => 'wc-updater' ) );
+		}
+	}
+
+	if ( count( $rows ) === $batch_size ) {
+		$last_id = (int) end( $rows )->action_id;
+		if ( (int) get_option( $last_id_option, 0 ) >= $last_id || update_option( $last_id_option, $last_id, false ) ) {
+			return true;
+		}
+		wc_get_logger()->error( 'Stopped redacting deferred email passwords: the progress cursor could not be saved.', array( 'source' => 'wc-updater' ) );
+		return false;
+	}
+
+	delete_option( $last_id_option );
+	return false;
+}
+
+/**
  * Delete the product attributes lookup rows of variations that are not published.
  *
  * Disabled variations (status 'private') used to keep their lookup rows, so attribute filters offered and
@@ -4227,7 +4334,7 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 }
 
 /**
- * Re-enable autoloading for options whose settings definitions reverted it on save after the 10.5.0 migration.
+ * Autoload frequently read options that existing stores may still have as autoload off.
  *
  * @since 11.4.0
  */
@@ -4241,6 +4348,11 @@ function wc_update_1140_re_enable_autoload_options(): void {
 			'woocommerce_show_marketplace_suggestions'    => true,
 			'woocommerce_enable_delayed_account_creation' => true,
 			'woocommerce_logs_logging_enabled'            => true,
+			'woocommerce_catalog_columns'                 => true,
+			'woocommerce_catalog_rows'                    => true,
+			'woocommerce_default_catalog_orderby'         => true,
+			'woocommerce_custom_orders_table_data_sync_enabled' => true,
+			'woocommerce_custom_orders_table_background_sync_mode' => true,
 		)
 	);
 }

@@ -15,18 +15,21 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
  */
 class OrderControllerTests extends \WC_Unit_Test_Case {
 	/**
+	 * Shipping address fields in a country a US-only store does not ship to.
+	 */
+	private const GERMAN_SHIPPING_ADDRESS = array(
+		'country'  => 'DE',
+		'state'    => '',
+		'city'     => 'Berlin',
+		'postcode' => '10115',
+	);
+
+	/**
 	 * The system under test.
 	 *
 	 * @var OrderController
 	 */
 	private $sut;
-
-	/**
-	 * Customer shipping address before the test, restored at teardown.
-	 *
-	 * @var array<string, string>
-	 */
-	private $previous_shipping_address = array();
 
 	/**
 	 * Set up before test.
@@ -43,9 +46,7 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 
 		// The invalid-address tests need a shipping rate, and the flat rate only offers one for a
-		// country the store ships to. The cart ships to WC()->customer, which outlives a test, so
-		// give it a US/CA location here rather than depend on the address it arrives with.
-		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
+		// country the store ships to. The cart ships to WC()->customer, so give it a US/CA location.
 		WC()->customer->set_shipping_location( 'US', 'CA' );
 
 		$this->sut = new class() extends OrderController {
@@ -63,13 +64,15 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Put back the customer shipping location that setUp() replaced.
+	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
+		global $wpdb;
+
 		try {
-			foreach ( $this->previous_shipping_address as $key => $value ) {
-				WC()->customer->{"set_shipping_{$key}"}( $value );
-			}
+			$this->unlock_orders();
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( OrderController::ORDER_LOCK_OPTION_PREFIX ) . '%' ) );
 		} finally {
 			parent::tearDown();
 		}
@@ -302,17 +305,70 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		$order->set_shipping_country( 'Invalid' );
 		$order->save();
 
-		// validate_addresses() inspects the selected shipping rates from the global cart's
-		// packages even for existing orders, so the cart must contain the shippable product
-		// for the shipping country check to run.
-		/** @var \WC_Order_Item_Product $item */
-		$array = $order->get_items();
-		$item  = reset( $array );
-		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
-
-		WC()->cart->add_to_cart( $item->get_product()->get_id() );
-
 		$this->sut->validate_existing_order_before_payment( $order );
+	}
+
+	/**
+	 * @testdox Existing-order validation decides local pickup from the order's shipping lines, not from the cart.
+	 *
+	 * @dataProvider provide_order_shipping_lines
+	 *
+	 * @param string[] $method_ids      Method ids of the shipping lines on the order.
+	 * @param bool     $expect_rejected Whether the shipping country should be rejected.
+	 */
+	public function test_validate_existing_order_shipping_country_uses_order_shipping_lines( array $method_ids, bool $expect_rejected ): void {
+		$order = $this->create_order_for_us_only_store( $method_ids, self::GERMAN_SHIPPING_ADDRESS );
+
+		if ( $expect_rejected ) {
+			$this->expectException( RouteException::class );
+			$this->expectExceptionMessage( 'Sorry, we do not ship orders to the provided country (Germany)' );
+		}
+
+		$this->assertNull( $this->sut->validate_existing_order_before_payment( $order ) );
+	}
+
+	/**
+	 * Shipping lines on an order and whether a country the store does not ship to should be rejected.
+	 *
+	 * @return array<string, array{0: string[], 1: bool}>
+	 */
+	public function provide_order_shipping_lines(): array {
+		return array(
+			'flat rate'                  => array( array( 'flat_rate' ), true ),
+			'no shipping line'           => array( array(), true ),
+			'local pickup and flat rate' => array( array( 'local_pickup', 'flat_rate' ), true ),
+			'local pickup'               => array( array( 'local_pickup' ), false ),
+			'pickup location'            => array( array( 'pickup_location' ), false ),
+			'legacy local pickup'        => array( array( 'legacy_local_pickup' ), false ),
+		);
+	}
+
+	/**
+	 * @testdox Validating an existing order before an update rejects a shipping country the store does not ship to.
+	 */
+	public function test_validate_existing_order_before_update_rejects_shipping_country_the_store_does_not_ship_to(): void {
+		$order = $this->create_order_for_us_only_store( array( 'flat_rate' ), self::GERMAN_SHIPPING_ADDRESS );
+
+		$this->expectException( RouteException::class );
+		$this->expectExceptionMessage( 'Sorry, we do not ship orders to the provided country (Germany)' );
+
+		$this->sut->validate_existing_order_before_update( $order );
+	}
+
+	/**
+	 * @testdox Updating an existing order's addresses rejects a shipping country the store does not ship to.
+	 */
+	public function test_update_existing_order_addresses_rejects_shipping_country_the_store_does_not_ship_to(): void {
+		$order = $this->create_order_for_us_only_store( array( 'flat_rate' ) );
+
+		$this->expectException( RouteException::class );
+		$this->expectExceptionMessage( 'Sorry, we do not ship orders to the provided country (Germany)' );
+
+		$this->sut->update_existing_order_addresses(
+			$order,
+			$order->get_address( 'billing' ),
+			array_merge( $order->get_address( 'shipping' ), self::GERMAN_SHIPPING_ADDRESS )
+		);
 	}
 
 	/**
@@ -468,7 +524,6 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		$errors = new \WP_Error();
 		$this->sut->validate_address_fields( $order, 'shipping', $errors );
 		$this->assertEmpty( $errors->get_error_messages() );
-		remove_filter( 'woocommerce_get_country_locale', $hide_postcode );
 	}
 
 	/**
@@ -537,12 +592,47 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() sets the payment method title alongside the id, matching the gateway's own title.
+	 */
+	public function test_update_order_from_cart_sets_payment_method_title_with_the_session_choice(): void {
+		$order = $this->sync_order_from_cart_with_cod_enabled( 'cod' );
+
+		$this->assertSame( WC()->payment_gateways()->payment_gateways()['cod']->get_title(), $order->get_payment_method_title() );
+	}
+
+	/**
 	 * @testdox update_order_from_cart() writes the filtered default on the order when the shopper has not chosen a method.
 	 */
 	public function test_update_order_from_cart_writes_the_filtered_default_without_a_session_choice(): void {
 		$order = $this->sync_order_from_cart_with_cod_enabled( null );
 
 		$this->assertSame( '', $order->get_payment_method() );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() still pairs the title with the id when the chosen gateway is registered but disabled.
+	 */
+	public function test_update_order_from_cart_sets_payment_method_title_for_a_disabled_registered_gateway(): void {
+		$bacs                = WC()->payment_gateways()->payment_gateways()['bacs'];
+		$bacs_enabled_before = $bacs->enabled;
+		$bacs->enabled       = 'no';
+		WC()->session->set( 'chosen_payment_method', 'bacs' );
+
+		try {
+			WC()->cart->empty_cart();
+			WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+			$order = WC_Helper_Order::create_order();
+			$order->set_payment_method_title( 'Stale Title' );
+
+			$this->sut->update_order_from_cart( $order );
+
+			$this->assertSame( 'bacs', $order->get_payment_method() );
+			$this->assertSame( $bacs->get_title(), $order->get_payment_method_title() );
+		} finally {
+			WC()->cart->empty_cart();
+			$bacs->enabled = $bacs_enabled_before;
+			WC()->session->set( 'chosen_payment_method', null );
+		}
 	}
 
 	/**
@@ -575,6 +665,167 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 			wp_cache_delete( 'woocommerce_cod_settings', 'options' );
 			WC()->payment_gateways()->payment_gateways = $gateways_before;
 			WC()->session->set( 'chosen_payment_method', null );
+		}
+	}
+
+	/**
+	 * Creates a saved order that needs shipping, for a store that only ships to the US and has an empty cart.
+	 *
+	 * @param string[]             $method_ids       Method ids of the shipping lines on the order.
+	 * @param array<string,string> $shipping_address Shipping address fields to override on the order.
+	 * @return \WC_Order
+	 */
+	private function create_order_for_us_only_store( array $method_ids, array $shipping_address = array() ): \WC_Order {
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'US' ) );
+		WC()->cart->empty_cart();
+
+		$order = WC_Helper_Order::create_order();
+		$order->remove_order_items( 'shipping' );
+		foreach ( $method_ids as $method_id ) {
+			$shipping_line = new \WC_Order_Item_Shipping();
+			$shipping_line->set_method_id( $method_id );
+			$order->add_item( $shipping_line );
+		}
+		$this->set_shipping_address( $order, $shipping_address );
+		$order->save();
+		$this->assertTrue( $order->needs_shipping(), 'The order must need shipping for the country check to apply.' );
+
+		return $order;
+	}
+
+	/**
+	 * @testdox Order locks are re-entrant within a request and released by their owner.
+	 */
+	public function test_order_lock_is_reentrant_and_released(): void {
+		global $wpdb;
+
+		$order_id    = 123;
+		$option_name = OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id;
+
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ), 'The first acquisition should lock the order.' );
+		$shutdown_callback = $this->get_order_lock_shutdown_callback();
+		$this->assertInstanceOf( \Closure::class, $shutdown_callback );
+		$this->assertSame( PHP_INT_MAX, has_action( 'shutdown', $shutdown_callback ), 'The lock should be released after session data is persisted.' );
+		$first_expiry = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) );
+
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ), 'The same request should retain ownership.' );
+		$renewed_expiry = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) );
+		$this->assertGreaterThan( (float) $first_expiry, (float) $renewed_expiry, 'Re-entering the lock should renew its lease.' );
+
+		$this->unlock_orders();
+
+		$this->assertNull(
+			$wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ),
+			'Releasing the lock should remove its options-table row.'
+		);
+		$this->assertFalse( has_action( 'shutdown', $shutdown_callback ), 'Manual cleanup should remove the shutdown callback.' );
+	}
+
+	/**
+	 * @testdox A live order lock owned by another request blocks acquisition.
+	 */
+	public function test_order_lock_rejects_another_owner(): void {
+		global $wpdb;
+
+		$order_id = 456;
+		$inserted = $wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id,
+				'option_value' => number_format( microtime( true ) + 60, 6, '.', '' ),
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
+		);
+
+		$this->assertSame( 1, $inserted, 'The competing request lock should be inserted.' );
+		$this->assertFalse( OrderController::lock_order( $order_id, 0 ), 'The active lock should prevent acquisition.' );
+	}
+
+	/**
+	 * @testdox An expired order lock can be taken over and released by the new owner.
+	 */
+	public function test_order_lock_takes_over_expired_lock(): void {
+		global $wpdb;
+
+		$order_id    = 789;
+		$option_name = OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id;
+		$inserted    = $wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => $option_name,
+				'option_value' => number_format( microtime( true ) - 1, 6, '.', '' ),
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
+		);
+
+		$this->assertSame( 1, $inserted, 'The stale lock should be inserted.' );
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ), 'The expired lock should be available for takeover.' );
+		$this->assertGreaterThan(
+			microtime( true ),
+			(float) $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ),
+			'The takeover should store a new future expiry.'
+		);
+
+		$this->unlock_orders();
+
+		$this->assertNull( $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ) );
+	}
+
+	/**
+	 * @testdox Releasing a stale lock does not delete a replacement owner's lock.
+	 */
+	public function test_unlock_does_not_delete_replacement_lock(): void {
+		global $wpdb;
+
+		$order_id          = 987;
+		$option_name       = OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id;
+		$replacement_value = number_format( microtime( true ) + 120, 6, '.', '' );
+
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ) );
+		$this->assertSame(
+			1,
+			$wpdb->update(
+				$wpdb->options,
+				array( 'option_value' => $replacement_value ),
+				array( 'option_name' => $option_name ),
+				array( '%s' ),
+				array( '%s' )
+			),
+			'The replacement request should take ownership of the row.'
+		);
+		$this->assertFalse( OrderController::lock_order( $order_id, 0 ), 'The stale owner should not renew a replacement owner\'s lock.' );
+
+		$this->unlock_orders();
+
+		$this->assertSame(
+			$replacement_value,
+			$wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ),
+			'Releasing the stale owner should preserve the replacement lock.'
+		);
+	}
+
+	/**
+	 * Get the registered order-lock shutdown callback.
+	 *
+	 * @return \Closure|null
+	 */
+	private function get_order_lock_shutdown_callback(): ?\Closure {
+		$property = new \ReflectionProperty( OrderController::class, 'unlock_orders_on_shutdown' );
+		$property->setAccessible( true );
+
+		return $property->getValue();
+	}
+
+	/**
+	 * Release order locks registered by the current test.
+	 */
+	private function unlock_orders(): void {
+		$callback = $this->get_order_lock_shutdown_callback();
+		if ( $callback ) {
+			$callback();
 		}
 	}
 

@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 
 /**
  * Shortcode checkout class.
@@ -245,6 +246,7 @@ class WC_Shortcode_Checkout {
 					array(
 						'order'              => $order,
 						'available_gateways' => $available_gateways,
+						'has_chosen_gateway' => PaymentUtils::has_chosen_gateway( $available_gateways ),
 						'order_button_text'  => $order_button_text,
 					)
 				);
@@ -258,7 +260,7 @@ class WC_Shortcode_Checkout {
 			$order_key = isset( $_GET['key'] ) && is_string( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only flow selectors are cleaned; order access verifies key/ownership.
 			$order     = wc_get_order( $order_id );
 
-			if ( $order && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
+			if ( $order instanceof WC_Order && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
 
 				if ( $order->needs_payment() ) {
 

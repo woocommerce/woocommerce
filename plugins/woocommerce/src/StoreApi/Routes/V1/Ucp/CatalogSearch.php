@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * UCP `POST /catalog/search` route.
@@ -57,7 +57,7 @@ class CatalogSearch extends AbstractCatalogRoute {
 	 * @return string
 	 */
 	protected function get_capability(): string {
-		return UcpUtils::CAPABILITY_CATALOG_SEARCH;
+		return Utils::CAPABILITY_CATALOG_SEARCH;
 	}
 
 	/**
@@ -99,9 +99,9 @@ class CatalogSearch extends AbstractCatalogRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$query      = trim( (string) $request->get_param( 'query' ) );
-		$filters    = (array) ( $request->get_param( 'filters' ) ?? array() );
-		$pagination = (array) ( $request->get_param( 'pagination' ) ?? array() );
+		$query      = trim( (string) Utils::json_param( $request, 'query' ) );
+		$filters    = (array) ( Utils::json_param( $request, 'filters' ) ?? array() );
+		$pagination = (array) ( Utils::json_param( $request, 'pagination' ) ?? array() );
 		$context    = $this->get_context( $request );
 
 		$invalid = $this->validate_search_input( $query, $filters );

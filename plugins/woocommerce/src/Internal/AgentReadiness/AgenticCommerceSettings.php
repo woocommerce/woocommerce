@@ -1,0 +1,177 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Internal\AgentReadiness;
+
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Adds the WooCommerce > Settings > AI tools tab while the
+ * agent_readiness feature is enabled, and names the options it saves.
+ *
+ * @since 11.4.0
+ */
+class AgenticCommerceSettings implements RegisterHooksInterface {
+
+	public const FEATURE_ID = 'agent_readiness';
+
+	public const TAB = 'agentic-commerce';
+
+	/**
+	 * The AI shopping section of the tab, which the landing page's Manage button opens.
+	 */
+	public const SHOPPING_SECTION = 'shopping';
+
+	public const PRIVACY_PAGE_OPTION = 'wp_page_for_privacy_policy';
+
+	public const TERMS_PAGE_OPTION = 'woocommerce_terms_page_id';
+
+	public const REFUND_RETURNS_PAGE_OPTION = 'woocommerce_refund_returns_page_id';
+
+	public const SHIPPING_POLICY_PAGE_OPTION = 'woocommerce_shipping_policy_page_id';
+
+	public const FAQ_PAGE_OPTION = 'woocommerce_faq_page_id';
+
+	/**
+	 * UCP Phase 1 sends it as the warranty_policy link. Not in the settings design yet.
+	 */
+	public const WARRANTY_PAGE_OPTION = 'woocommerce_warranty_page_id';
+
+	/**
+	 * Features controller.
+	 *
+	 * @var FeaturesController
+	 */
+	private FeaturesController $features_controller;
+
+	/**
+	 * Store conditions.
+	 *
+	 * @var StoreConditions
+	 */
+	private StoreConditions $store_conditions;
+
+	/**
+	 * Readiness service.
+	 *
+	 * @var AgentReadiness
+	 */
+	private AgentReadiness $agent_readiness;
+
+	/**
+	 * Sales readiness.
+	 *
+	 * @var ReadinessCheckPage
+	 */
+	private ReadinessCheckPage $readiness_page;
+
+	/**
+	 * Initialize dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param FeaturesController $features_controller Features controller.
+	 * @param StoreConditions    $store_conditions    Store conditions.
+	 * @param AgentReadiness     $agent_readiness     Readiness service.
+	 * @param ReadinessCheckPage $readiness_page      Sales readiness.
+	 */
+	final public function init( FeaturesController $features_controller, StoreConditions $store_conditions, AgentReadiness $agent_readiness, ReadinessCheckPage $readiness_page ): void {
+		$this->features_controller = $features_controller;
+		$this->store_conditions    = $store_conditions;
+		$this->agent_readiness     = $agent_readiness;
+		$this->readiness_page      = $readiness_page;
+	}
+
+	/**
+	 * Link to the AI tools tab: its landing page, or a section of it.
+	 *
+	 * @param string $section Section id, or '' for the landing page.
+	 */
+	public static function url( string $section = '' ): string {
+		return admin_url( 'admin.php?page=wc-settings&tab=' . self::TAB . ( '' === $section ? '' : '&section=' . $section ) );
+	}
+
+	/**
+	 * Register hooks. The feature check waits for init, since feature definitions load translations.
+	 */
+	public function register(): void {
+		add_action( 'init', array( $this, 'handle_init' ) );
+	}
+
+	/**
+	 * Add the settings page when the feature is enabled.
+	 *
+	 * @internal
+	 */
+	public function handle_init(): void {
+		if ( ! is_admin() || ! $this->features_controller->feature_is_enabled( self::FEATURE_ID ) ) {
+			return;
+		}
+		add_filter( 'woocommerce_get_settings_pages', array( $this, 'handle_woocommerce_get_settings_pages' ) );
+		add_filter( 'admin_body_class', array( $this, 'handle_admin_body_class' ), 20 );
+		// After WooCommerce's rating request (priority 1) and version (20).
+		add_filter( 'admin_footer_text', array( $this, 'handle_admin_footer' ), 99 );
+		add_filter( 'update_footer', array( $this, 'handle_admin_footer' ), 99 );
+	}
+
+	/**
+	 * No admin footer on the AI tools tab and on Sales readiness, as in the design: the rating request
+	 * and the version would sit under, or over, the last card.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $text Footer text.
+	 * @return mixed
+	 */
+	public function handle_admin_footer( $text ) {
+		return self::is_own_screen() ? '' : $text;
+	}
+
+	/**
+	 * Whether this request is the AI tools tab or Sales readiness.
+	 */
+	private static function is_own_screen(): bool {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Only picks what the footer shows.
+		$page = isset( $_GET['page'] ) && is_string( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		$tab  = isset( $_GET['tab'] ) && is_string( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+		$path = isset( $_GET['path'] ) && is_string( $_GET['path'] ) ? sanitize_text_field( wp_unslash( $_GET['path'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		return ( 'wc-settings' === $page && self::TAB === $tab ) || ( 'wc-admin' === $page && ReadinessCheckPage::PATH === $path );
+	}
+
+	/**
+	 * Mark the AI tools tab on the body, so its panel can be white like the Payments tab.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $classes Body classes.
+	 * @return mixed
+	 */
+	public function handle_admin_body_class( $classes ) {
+		global $current_tab;
+
+		if ( ! is_string( $classes ) || self::TAB !== $current_tab ) {
+			return $classes;
+		}
+		return "$classes woocommerce-settings-agentic-commerce-tab";
+	}
+
+	/**
+	 * Add the AI tools tab to the settings pages.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $pages Settings pages.
+	 * @return mixed
+	 */
+	public function handle_woocommerce_get_settings_pages( $pages ) {
+		if ( ! is_array( $pages ) || ! class_exists( \WC_Settings_Page::class, false ) ) {
+			return $pages;
+		}
+		$pages[] = new AgenticCommerceSettingsPage( $this->store_conditions, $this->agent_readiness, $this->readiness_page );
+		return $pages;
+	}
+}

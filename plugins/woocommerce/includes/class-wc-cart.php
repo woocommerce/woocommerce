@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
+use Automattic\WooCommerce\Internal\ProductVariations\VariationMatcher;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
@@ -1224,6 +1225,15 @@ class WC_Cart extends WC_Legacy_Cart {
 				return false;
 			}
 
+			if ( ! $product_data->is_viewable() && ! $product_data->is_purchasable() ) {
+				/**
+				 * This filter is documented further down in this method.
+				 *
+				 * @since 3.8.0
+				 */
+				throw new Exception( apply_filters( 'woocommerce_cart_product_cannot_be_purchased_message', __( 'Sorry, this product cannot be purchased.', 'woocommerce' ), $product_data ) );
+			}
+
 			// Variable product cannot be added to cart without a specified variation.
 			if ( ! $variation_id && $product_data->is_type( ProductType::VARIABLE ) ) {
 				/* translators: 1: product link, 2: product name */
@@ -1322,6 +1332,13 @@ class WC_Cart extends WC_Legacy_Cart {
 					/* translators: %s: Attribute name. */
 					throw new Exception( sprintf( _n( '%s is a required field', '%s are required fields', count( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ) );
 				}
+
+				if (
+					$product_data instanceof WC_Product_Variation &&
+					wc_get_container()->get( VariationMatcher::class )->has_earlier_match( $product_data, $variation )
+				) {
+					throw new Exception( __( 'The selected options belong to a different variation of this product.', 'woocommerce' ) );
+				}
 			}
 
 			// Validate variation ID.
@@ -1333,7 +1350,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				)
 			) {
 				$product = wc_get_product( $product_id );
-				if ( ! ( $product instanceof WC_Product ) ) {
+				if ( ! ( $product instanceof WC_Product ) || ! $product->is_viewable() ) {
 					throw new Exception( __( 'The selected product is invalid.', 'woocommerce' ) );
 				}
 

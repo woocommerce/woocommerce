@@ -80,11 +80,10 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			/* translators: %s: webhook name */
 			'delete' => '<a class="submitdelete" aria-label="' . esc_attr( sprintf( __( 'Delete "%s" permanently', 'woocommerce' ), $webhook->get_name() ) ) . '" href="' . esc_url(
 				wp_nonce_url(
-					add_query_arg(
+					WC_Admin_Webhooks::get_list_url(
 						array(
 							'delete' => $webhook->get_id(),
-						),
-						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' )
+						)
 					),
 					'delete-webhook'
 				)
@@ -204,7 +203,10 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 */
 	protected function get_bulk_actions() {
 		return array(
-			'delete' => __( 'Delete permanently', 'woocommerce' ),
+			'activate' => __( 'Activate', 'woocommerce' ),
+			'disable'  => __( 'Disable', 'woocommerce' ),
+			'pause'    => __( 'Pause', 'woocommerce' ),
+			'delete'   => __( 'Delete permanently', 'woocommerce' ),
 		);
 	}
 
@@ -224,6 +226,28 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 			if ( 'delete' === $action ) {
 				WC_Admin_Webhooks::bulk_delete( $webhooks );
+			} else {
+				$statuses = array(
+					'activate' => 'active',
+					'disable'  => 'disabled',
+					'pause'    => 'paused',
+				);
+
+				if ( isset( $statuses[ $action ] ) ) {
+					$updated = WC_Admin_Webhooks::bulk_update_status( $webhooks, $statuses[ $action ] );
+					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce checked above.
+					$status = ! empty( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : false;
+
+					wp_safe_redirect(
+						WC_Admin_Webhooks::get_list_url(
+							array(
+								'status'       => $status,
+								'bulk_updated' => $updated > 0 ? $updated : false,
+							)
+						)
+					);
+					exit();
+				}
 			}
 		}
 	}
@@ -238,7 +262,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		echo '<div class="tablenav ' . esc_attr( $which ) . '">';
 
 		if ( $this->has_items() ) {
-			echo '<div class="alignleft actions bulkactions">';
+			echo '<div class="alignleft actions bulkactions wc-settings-prevent-change-event">';
 			$this->bulk_actions( $which );
 			echo '</div>';
 		}

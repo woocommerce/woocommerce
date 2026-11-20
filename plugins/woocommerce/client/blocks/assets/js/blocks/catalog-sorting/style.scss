@@ -9,23 +9,22 @@
 		vertical-align: middle;
 	}
 
-	select.orderby {
+	.woocommerce-ordering {
+		display: flex;
+		gap: 0.25em;
+		margin: auto;
+	}
+
+	&.has-text-align-center .woocommerce-ordering {
+		justify-content: center;
+	}
+
+	&.has-text-align-right .woocommerce-ordering {
+		justify-content: flex-end;
+	}
+
+	:where(select.orderby) {
 		field-sizing: content;
 		font-size: inherit;
-		font-family: inherit;
-		font-weight: inherit;
-		font-style: inherit;
-		letter-spacing: inherit;
-		vertical-align: middle;
-	}
-
-	&.has-text-color {
-		select.orderby {
-			color: inherit;
-		}
-	}
-
-	.woocommerce-ordering {
-		margin: auto;
 	}
 }
