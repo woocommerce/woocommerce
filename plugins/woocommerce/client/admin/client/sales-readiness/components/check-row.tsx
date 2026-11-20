@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 /**
  * Internal dependencies
  */
+import { safeHref } from '../safe-href';
 import type { CheckRow as CheckRowData, ViewBadge, ViewLink } from '../types';
 import { trackReadiness, type Surface } from '../tracks';
 
@@ -28,7 +29,7 @@ export const RowLink = ( {
 		<Button
 			variant="secondary"
 			size="compact"
-			href={ link.href }
+			href={ safeHref( link.href ) }
 			onClick={ onClick }
 		>
 			{ link.text }
@@ -155,7 +156,7 @@ const TextWithLink = ( {
 	return (
 		<>
 			{ text.slice( 0, at ) }
-			<Link href={ link.href } openInNewTab>
+			<Link href={ safeHref( link.href ) } openInNewTab>
 				{ link.text }
 			</Link>
 			{ text.slice( at + link.text.length ) }
@@ -225,7 +226,9 @@ export const CheckRow = ( {
 							row.seen_at.text
 						),
 						{
-							link: <Link href={ row.seen_at.href } />,
+							link: (
+								<Link href={ safeHref( row.seen_at.href ) } />
+							),
 						}
 					) }
 				</Text>

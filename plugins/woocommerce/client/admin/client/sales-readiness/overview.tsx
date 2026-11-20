@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { safeHref } from './safe-href';
 import './sales-readiness.scss';
 import type { ReadinessView } from './types';
 import { useReadinessView } from './use-readiness-view';
@@ -78,7 +79,7 @@ export default function SalesReadinessOverview( {
 						<Button
 							variant="secondary"
 							size="compact"
-							href={ shopping.button.href }
+							href={ safeHref( shopping.button.href ) }
 							onClick={ () =>
 								trackReadiness( 'link_clicked', {
 									surface: 'overview',
@@ -151,7 +152,7 @@ export default function SalesReadinessOverview( {
 								<Button
 									variant="tertiary"
 									size="compact"
-									href={ viewAll.href }
+									href={ safeHref( viewAll.href ) }
 									onClick={ () =>
 										trackReadiness( 'link_clicked', {
 											surface: 'overview',

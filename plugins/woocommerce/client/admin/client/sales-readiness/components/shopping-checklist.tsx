@@ -10,6 +10,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { safeHref } from '../safe-href';
 import type { ShoppingView } from '../types';
 import { Row } from './check-row';
 
@@ -24,7 +25,7 @@ export const asLink = ( href: string ) => ( {
 	role: 'link',
 	// The Button renders the text into it.
 	// eslint-disable-next-line jsx-a11y/anchor-has-content
-	render: <a href={ href } />,
+	render: <a href={ safeHref( href ) } />,
 } );
 
 /**
