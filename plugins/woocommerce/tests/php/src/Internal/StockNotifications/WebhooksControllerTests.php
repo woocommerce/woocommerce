@@ -134,6 +134,7 @@ class WebhooksControllerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( $notification->get_id(), $payload['id'] );
 		$this->assertSame( NotificationStatus::ACTIVE, $payload['status'] );
 		$this->assertSame( $notification->get_user_email(), $payload['user_email'] );
+		$this->assertSame( '{}', wp_json_encode( $payload['posted_attributes'] ), 'Empty attributes stay a JSON object, as in the REST response.' );
 	}
 
 	/**
