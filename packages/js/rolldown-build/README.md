@@ -44,3 +44,15 @@ Options:
 - `WP_BUNDLE_ANALYZER=1` or `ANALYZE=1`: writes `bundle-report.html` and `bundle-report.json` in the output folder, listing each script and the modules inside it.
 
 Watch mode rebuilds on changes to sources, Sass partials, Interactivity API script modules, the dependency detection script and `block.json` files.
+
+## Hot reload for wc-admin
+
+`client/admin` has a Vite dev server for the `app`, `embed` and `wp-admin-scripts/*` entries. Package entries such as `components` cannot use it: other scripts read their `wc.*` globals when they load, and Vite serves ES modules, which run later.
+
+1. Build admin once: `pnpm --filter=@woocommerce/admin-library build`.
+2. From `client/admin`, point the entries you work on at Vite: `node bin/rolldown/dev-stub.mjs app product-tour`.
+3. In `wp-config.php`, set `define( 'SCRIPT_DEBUG', true );`, and copy `bin/rolldown/mu-plugin-example.php` to `wp-content/mu-plugins/`. It installs the React DevTools hook before React loads, which React Fast Refresh needs.
+4. Start the server: `pnpm --filter=@woocommerce/admin-library dev:hot`. The browser must reach `http://localhost:5173`.
+5. Open the page that loads the entry. Edits to its source files show up without a page reload.
+
+To undo, build admin again and remove the mu-plugin and `SCRIPT_DEBUG`.

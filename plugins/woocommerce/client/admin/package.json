@@ -17,6 +17,7 @@
 		"build:project": "pnpm --stream '/^build:project:.*$/'",
 		"build:project:bundle": "node bin/rolldown/build.mjs",
 		"build:project:feature-config": "php ../../bin/generate-feature-config.php",
+		"dev:hot": "vite --config vite.config.mjs",
 		"example": "node bin/rolldown/example.mjs",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
@@ -157,6 +158,7 @@
 		"@types/wordpress__blocks": "catalog:wp-min",
 		"@typescript-eslint/eslint-plugin": "^8.63.0",
 		"@typescript-eslint/parser": "^8.63.0",
+		"@vitejs/plugin-react": "^6.3.0",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
@@ -202,6 +204,7 @@
 		"stylelint": "catalog:tooling",
 		"ts-jest": "catalog:tooling",
 		"typescript": "catalog:tooling",
+		"vite": "8.3.8",
 		"whatwg-fetch": "^3.6.20"
 	},
 	"engines": {
