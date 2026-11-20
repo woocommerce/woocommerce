@@ -35,14 +35,31 @@ node compare-css.mjs /path/to/webpack/admin /tmp/rolldown-admin
 
 Other `build:blocks` options: `--only=frontend,styles` (names of single configs), `--sass=sass-embedded` (faster, but CSS is not byte-identical to webpack).
 
+### From the normal build
+
+Set `WC_BUNDLER=rolldown` to make the `build:project:bundle` scripts of `client/blocks` and `client/admin` run this prototype instead of webpack. Run `npm install` here first. For example, from the repository root:
+
+```sh
+WC_BUNDLER=rolldown pnpm --filter=@woocommerce/plugin-woocommerce build
+```
+
+Without the variable, nothing changes. The prototype is not a pnpm workspace package: adding it rewrote about 3,200 lines of `pnpm-lock.yaml`, mostly peer changes from `sass-embedded`.
+
+### Other build options
+
+- `--dev`: a development build with source maps, like `NODE_ENV=development`. `npm run build:dev` builds both.
+- `ASSET_CHECK=true`: one `assets.json` file instead of `.asset.php` files, like the webpack `build:check-assets` script.
+- `WP_BUNDLE_ANALYZER=1` (or `ANALYZE=1`): writes `bundle-report.html` and `bundle-report.json` in the output folder, listing each script and the modules inside it, biggest first. It is a static list, not webpack-bundle-analyzer's treemap.
+- Admin scripts get `.LICENSE.txt` files like webpack's. The text matches, but Rolldown removes the leading space on each comment line.
+
 ## Watch
 
 ```sh
-npm run watch:blocks   # no script modules or dependency-detection yet
+npm run watch:blocks
 npm run watch:admin
 ```
 
-These write development builds into the same asset folders. Sass partials (`_*.scss`) are not watched; save the file that imports them.
+These write development builds, with source maps, into the same asset folders. A change to a Sass partial (`_*.scss`) rebuilds the stylesheets that use it. `watch:blocks` also rebuilds the Interactivity API script modules, the dependency detection script and `block.json` files.
 
 ## Hot reload for wc-admin (Vite dev server)
 

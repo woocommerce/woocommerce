@@ -15,7 +15,7 @@
 	"scripts": {
 		"build": "pnpm build:project",
 		"build:project": "pnpm --stream '/^build:project:.*$/'",
-		"build:project:bundle": "NODE_ENV=\"${NODE_ENV:-production}\" WC_ADMIN_PHASE=\"${WC_ADMIN_PHASE:-core}\" webpack",
+		"build:project:bundle": "if [ \"$WC_BUNDLER\" = rolldown ]; then node ../../../../tools/vite-proto/build-admin.mjs; else NODE_ENV=\"${NODE_ENV:-production}\" WC_ADMIN_PHASE=\"${WC_ADMIN_PHASE:-core}\" webpack; fi",
 		"build:project:feature-config": "php ../../bin/generate-feature-config.php",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
