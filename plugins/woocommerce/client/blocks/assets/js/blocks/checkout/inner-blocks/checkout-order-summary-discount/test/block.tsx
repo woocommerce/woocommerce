@@ -3,6 +3,7 @@
  */
 import { render, screen } from '@testing-library/react';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
+import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -16,6 +17,13 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 		isRemovingCoupon: false,
 	} ) ),
 	useOrderSummaryLoadingState: jest.fn( () => ( { isLoading: false } ) ),
+	// Shows the row at once, as without motion.
+	useOrderSummaryRow: jest.fn(
+		( cart: unknown, isShown: ( settledCart: unknown ) => boolean ) => ( {
+			cart: isShown( cart ) ? cart : null,
+			wrapperProps: {},
+		} )
+	),
 } ) );
 
 const mockSlotRender = jest.fn( () => <div data-testid="discount-slot" /> );
@@ -93,5 +101,46 @@ describe( 'Checkout Order Summary Discount Block', () => {
 		render( <Block className="test-class" /> );
 
 		expect( screen.getByTestId( 'discount-slot' ) ).toBeInTheDocument();
+	} );
+
+	it( 'shows coupons that the coupons filter adds when the cart has none', () => {
+		( applyCheckoutFilter as jest.Mock ).mockImplementation(
+			( { filterName, defaultValue } ) =>
+				filterName === 'coupons'
+					? [
+							{
+								code: 'extension-coupon',
+								label: 'EXTENSION',
+								totals: {
+									total_discount: '0',
+									total_discount_tax: '0',
+								},
+							},
+						]
+					: defaultValue
+		);
+
+		render( <Block /> );
+
+		expect( screen.getByText( 'EXTENSION' ) ).toBeInTheDocument();
+	} );
+
+	it( 'keeps the DiscountsMeta slot mounted when the discount row appears', () => {
+		( applyCheckoutFilter as jest.Mock ).mockImplementation(
+			( { defaultValue } ) => defaultValue
+		);
+		const { rerender } = render( <Block /> );
+		const slot = screen.getByTestId( 'discount-slot' );
+
+		( useStoreCart as jest.Mock ).mockReturnValue( {
+			...mockCartData,
+			cartTotals: {
+				...mockCartData.cartTotals,
+				total_discount: '1000',
+			},
+		} );
+		rerender( <Block /> );
+
+		expect( screen.getByTestId( 'discount-slot' ) ).toBe( slot );
 	} );
 } );
