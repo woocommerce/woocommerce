@@ -119,8 +119,8 @@ final class ReadinessCopy {
 		}
 		// These checks also read the home page, which their unnamed line names; a deleted product's page wasn't it.
 		$product_page = array(
-			'viewport_meta'         => __( 'A product page doesn’t tell browsers how to size it, so the layout can break for AI assistants used in browsers.', 'woocommerce' ),
-			'html_lang_and_charset' => __( 'A product page doesn’t say what language or text format it uses, so AI assistants may show garbled text or reply in the wrong language.', 'woocommerce' ),
+			'viewport_meta'         => __( 'On a product page, the code doesn’t tell browsers how to size it, so the layout can break for AI assistants used in browsers.', 'woocommerce' ),
+			'html_lang_and_charset' => __( 'On a product page, the code doesn’t say what language or text format it uses, so AI assistants may show garbled text or reply in the wrong language.', 'woocommerce' ),
 		);
 		if ( $unnamed && '' === $product && isset( $product_page[ $id ] ) ) {
 			$check[3] = $product_page[ $id ];
@@ -465,42 +465,42 @@ final class ReadinessCopy {
 				__( 'AI assistants can read your product details', 'woocommerce' ),
 				__( 'Let AI assistants read your product details', 'woocommerce' ),
 				__( 'WooCommerce adds each product’s name, price, and stock to the page’s code for AI assistants.', 'woocommerce' ),
-				__( 'A product page doesn’t include these details in its code, so AI assistants may get them wrong.', 'woocommerce' ),
+				__( 'On a product page, the name, price, and stock aren’t in the page code, so AI assistants may get them wrong.', 'woocommerce' ),
 				__( 'A theme or plugin may have turned this off. Check their settings for WooCommerce structured data.', 'woocommerce' ),
 			),
 			'product_jsonld_from_core'       => array(
 				__( 'Your product pages have one set of product details', 'woocommerce' ),
 				__( 'Check why product details appear twice', 'woocommerce' ),
 				__( 'This means AI assistants read the same name and price your product shows.', 'woocommerce' ),
-				__( 'A product page has two sets of product details in its code, so AI assistants may read a different name or price.', 'woocommerce' ),
+				__( 'On a product page, product details appear twice in the code, so AI assistants may read a different name or price.', 'woocommerce' ),
 				__( 'Check the schema settings in your SEO plugin or theme. If you set this up on purpose, you can ignore this.', 'woocommerce' ),
 			),
 			'product_jsonld_required_fields' => array(
 				__( 'Product details include a name and image', 'woocommerce' ),
 				__( 'Add a name and image to your product details', 'woocommerce' ),
 				__( 'AI assistants need both to show a product.', 'woocommerce' ),
-				__( 'A product is missing a name or image in its page code, so AI assistants can’t show it.', 'woocommerce' ),
+				__( 'On a product page, the name or image is missing from the page code, so AI assistants can’t show it for sale.', 'woocommerce' ),
 				__( 'Check that the product has a name and image. If it does, a theme or plugin may be removing them from the page code.', 'woocommerce' ),
 			),
 			'product_offer_jsonld'           => array(
 				__( 'Product details include price and stock', 'woocommerce' ),
 				__( 'Add price and stock to your product details', 'woocommerce' ),
 				__( 'AI assistants compare price and stock before they suggest a product.', 'woocommerce' ),
-				__( 'A product is missing a price or stock status in its page code, so AI assistants can’t show it.', 'woocommerce' ),
+				__( 'On a product page, the price or stock status is missing from the page code, so AI assistants may leave it out of suggestions.', 'woocommerce' ),
 				__( 'Check that the product has a price and stock status. If it does, a theme or plugin may be removing them from the page code.', 'woocommerce' ),
 			),
 			'product_gtin_jsonld'            => array(
 				__( 'Product details include barcode numbers', 'woocommerce' ),
 				__( 'Check why barcode numbers are missing from your page code', 'woocommerce' ),
 				__( 'AI assistants use barcode numbers to match your products with what shoppers search for.', 'woocommerce' ),
-				__( 'A product’s barcode number is missing or invalid in its page code, so AI assistants can’t use it.', 'woocommerce' ),
+				__( 'A product has a barcode number, but it’s missing or invalid in its page code, so AI assistants can’t use it.', 'woocommerce' ),
 				__( 'Check the schema settings in your SEO plugin or theme.', 'woocommerce' ),
 			),
 			'product_brand_jsonld'           => array(
 				__( 'Product details include brands', 'woocommerce' ),
 				__( 'Check why brands are missing from your page code', 'woocommerce' ),
 				__( 'AI assistants use brands to match and compare products.', 'woocommerce' ),
-				__( 'A product’s brand is missing from its page code, so AI assistants can’t use it.', 'woocommerce' ),
+				__( 'A product has a brand, but it’s missing from its page code, so AI assistants can’t use it.', 'woocommerce' ),
 				__( 'Check the schema settings in your SEO plugin or theme.', 'woocommerce' ),
 			),
 			'content_in_raw_html'            => array(
@@ -536,7 +536,7 @@ final class ReadinessCopy {
 				__( 'Product pages have one main heading', 'woocommerce' ),
 				__( 'Use one main heading on product pages', 'woocommerce' ),
 				__( 'AI assistants read the main heading as the product’s name.', 'woocommerce' ),
-				__( 'A product page has no main heading or more than one, so AI assistants may read the wrong product name.', 'woocommerce' ),
+				__( 'On a product page, there’s no main heading, or more than one, so AI assistants may read the wrong product name.', 'woocommerce' ),
 				__( 'Check that your product descriptions don’t use the Heading 1 style. If they don’t, check your theme’s product page template, or contact its support team.', 'woocommerce' ),
 			),
 			'schema_matches_product'         => array(
@@ -575,7 +575,7 @@ final class ReadinessCopy {
 				__( 'Product details say where to buy', 'woocommerce' ),
 				__( 'Tell AI assistants where shoppers can buy', 'woocommerce' ),
 				__( 'This tells AI assistants where to send shoppers to buy each product.', 'woocommerce' ),
-				__( 'Your product page code doesn’t say where to buy each product, so AI assistants can’t send shoppers to it.', 'woocommerce' ),
+				__( 'On a product page, the code doesn’t say where to buy it, so AI assistants can’t send shoppers there.', 'woocommerce' ),
 				__( 'WooCommerce adds this for products that are in stock and have a price. If this one has both, check the schema settings in your SEO plugin or theme.', 'woocommerce' ),
 			),
 			'policy_pages_linked'            => array(

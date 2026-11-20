@@ -53,6 +53,27 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Without a product name, a page check's line is its named line about "a product page"; only checks fixed by one store setting, or that also read the home page, say it store-wide.
+	 */
+	public function test_unnamed_lines_follow_the_named_ones(): void {
+		$named = new \ReflectionMethod( ReadinessCopy::class, 'named_found' );
+		$named->setAccessible( true );
+		$store_wide = array( 'product_shipping_schema', 'product_return_policy_schema', 'content_in_raw_html', 'product_review_markup', 'viewport_meta', 'html_lang_and_charset', 'images_have_alt' );
+		$all        = new \ReflectionMethod( ReadinessCopy::class, 'store_checks' );
+		$all->setAccessible( true );
+		$checked = 0;
+		foreach ( array_keys( $all->invoke( null ) ) as $id ) {
+			if ( null === $named->invoke( null, $id ) || in_array( $id, $store_wide, true ) ) {
+				continue;
+			}
+			$line = ReadinessCopy::store_check( $id, '', 'Blue hoodie' )['found'];
+			$this->assertSame( str_replace( array( 'On the Blue hoodie page', 'The Blue hoodie page', 'Blue hoodie has' ), array( 'On a product page', 'A product page', 'A product has' ), $line ), ReadinessCopy::store_check( $id )['found'], $id );
+			++$checked;
+		}
+		$this->assertGreaterThanOrEqual( 10, $checked );
+	}
+
+	/**
 	 * @testdox A broken llms.txt link is named, and the fix says where to change it for each place the file comes from.
 	 */
 	public function test_broken_llms_txt_link_names_the_link_and_fits_the_fix(): void {
