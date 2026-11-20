@@ -35,10 +35,10 @@ Covers the scenarios from the original plugin test plan that have a target in co
   `product_allows_signups()`, so the variation branch of that method — the one
   that walks up to the parent — is only reached on the signup POST, which the
   form's absence makes unreachable from the UI.
-- The plugin's "already signed up for this variation" scenario has no core
-  target: the on-load "already joined" message only resolves against the
-  product whose form is visible on load, never the variation selected on a
-  variable PDP.
+- The plugin's "already signed up for this variation" scenario is covered by
+  PHPUnit: core adds the "already joined" notice to the signed-up variation's
+  data, and `back-in-stock-form.js` shows it in place of the form when that
+  variation is selected.
 
 ## Configuration-branch notes
 
