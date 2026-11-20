@@ -242,19 +242,23 @@ Database migrations live in `WC_Install::$db_updates`. Read that class for the c
 
 ## Workarounds for Older Versions
 
-Code that only exists to support an older WordPress or PHP version, such as a backport or a version check, must say when it can go. Add this sentence to its docblock, with the version that makes it unnecessary:
+Code that only exists to support an older WordPress or PHP version, such as a backport or a version check, must say when it can go. Add a `@remove-when` tag to its docblock, with the WooCommerce minimum version that makes it unnecessary:
 
 ```php
 /**
- * Remove when WooCommerce requires WordPress 7.2.
+ * @remove-when WordPress 7.2
  */
 ```
 
-Start the sentence with the exact phrase `Remove when WooCommerce requires <WordPress|PHP> <version>`, so one search finds every workaround. When other methods go with it, name them in the same sentence: `Remove when WooCommerce requires WordPress 7.2, together with prepare_input().`
+The value is `<WordPress|PHP> <version>` and nothing else, so one search finds every workaround for a platform. Put the tag on every method, class, or constant that belongs to the workaround, not only the main one.
 
-When the workaround is for another plugin, name that plugin instead of WooCommerce: `Remove when MCP Adapter requires WordPress 7.2.`
+When the workaround waits for another plugin to raise its minimum version, name that plugin: `@remove-when MCP Adapter requires WordPress 7.2`.
 
-When you raise `Requires at least` or `Requires PHP` in `plugins/woocommerce/woocommerce.php`, search for `Remove when WooCommerce requires` and remove every workaround for the new minimum version or a lower one. Also search for `Remove when` and check whether the plugins those markers name now require a version that makes their workaround unnecessary.
+When you raise a minimum version in `plugins/woocommerce/woocommerce.php`:
+
+1. Search for the platform of the header you raised: `@remove-when WordPress` for `Requires at least`, `@remove-when PHP` for `Requires PHP`.
+2. Remove each workaround whose version is the new minimum or lower.
+3. Search for `@remove-when` tags that name a plugin, and remove the ones whose plugin now requires the version they name.
 
 ## Comments and Docblocks
 
