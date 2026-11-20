@@ -87,14 +87,19 @@ const renderSalesReadinessOverview = () => {
 	const root = document.getElementById( 'wc-agent-readiness-overview' );
 	if ( root ) {
 		let initialView = null;
+		let connect = null;
 		try {
 			initialView = JSON.parse( root.dataset.view ?? 'null' );
+			connect = JSON.parse( root.dataset.connect ?? 'null' );
 		} catch {
 			// The Overview loads the view itself.
 		}
 		createRoot( root ).render(
 			<Suspense fallback={ null }>
-				<SalesReadinessOverview initialView={ initialView } />
+				<SalesReadinessOverview
+					initialView={ initialView }
+					connect={ connect }
+				/>
 			</Suspense>
 		);
 	}

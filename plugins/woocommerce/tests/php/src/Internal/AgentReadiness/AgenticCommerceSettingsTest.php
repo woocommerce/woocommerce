@@ -137,6 +137,55 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Until the store is connected, the connection card links to the nonce-checked connect action.
+	 */
+	public function test_connect_view_links_to_the_connect_action(): void {
+		remove_all_actions( 'admin_post_' . AgenticCommerceSettings::CONNECT_ACTION );
+		$this->sut->handle_init();
+		$this->assertNotFalse( has_action( 'admin_post_' . AgenticCommerceSettings::CONNECT_ACTION ), 'The tab registers the connect action' );
+
+		$view = AgenticCommerceSettings::connect_view();
+		$this->assertFalse( $view['connected'], 'The test site is not connected to WordPress.com' );
+		$this->assertSame( '', $view['notice'] );
+		$query = array();
+		parse_str( (string) wp_parse_url( $view['url'], PHP_URL_QUERY ), $query );
+		$this->assertStringStartsWith( admin_url( 'admin-post.php' ), $view['url'] );
+		$this->assertSame( AgenticCommerceSettings::CONNECT_ACTION, $query['action'] );
+		$this->assertSame( 1, wp_verify_nonce( $query['_wpnonce'], AgenticCommerceSettings::CONNECT_ACTION ) );
+
+		$this->assertMatchesRegularExpression( '/data-connect="[^"]*admin-post\.php/', $this->render_page( '' ), 'The Overview gets the card data' );
+	}
+
+	/**
+	 * @testdox Coming back from a failed attempt shows the error; a success flag on an unconnected store shows nothing.
+	 *
+	 * @testWith ["error", "error"]
+	 *           ["connected", ""]
+	 *           ["other", ""]
+	 *
+	 * @param string $result What the URL says.
+	 * @param string $notice The notice the card shows.
+	 */
+	public function test_connect_view_notice( string $result, string $notice ): void {
+		$_GET[ AgenticCommerceSettings::CONNECT_RESULT ] = $result;
+		try {
+			$this->assertSame( $notice, AgenticCommerceSettings::connect_view()['notice'] );
+		} finally {
+			unset( $_GET[ AgenticCommerceSettings::CONNECT_RESULT ] );
+		}
+	}
+
+	/**
+	 * @testdox When the site can't register with WordPress.com, connecting returns to the Overview with an error.
+	 */
+	public function test_connect_redirect_returns_with_an_error_when_registration_fails(): void {
+		$this->assertSame(
+			add_query_arg( AgenticCommerceSettings::CONNECT_RESULT, 'error', AgenticCommerceSettings::url() ),
+			AgenticCommerceSettings::connect_redirect()
+		);
+	}
+
+	/**
 	 * @testdox Before the first scan the page asks for one instead of showing counts; dropdowns list published pages only.
 	 */
 	public function test_output_without_report(): void {

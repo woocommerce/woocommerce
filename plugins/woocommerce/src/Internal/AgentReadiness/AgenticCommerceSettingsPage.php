@@ -8,8 +8,8 @@ use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils as UcpUtils;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WooCommerce > Settings > AI tools. It opens on the Overview, a React view with the AI shopping card and the
- * Sales readiness card; Manage opens AI shopping, a React view with the UCP switch, Product visibility, the
+ * WooCommerce > Settings > AI tools. It opens on the Overview, a React view with the WordPress.com connection
+ * card, the AI shopping card and the Sales readiness card; Manage opens AI shopping, a React view with the UCP switch, Product visibility, the
  * Setup checklist, the store policy fields and the connection URL. settings-embed mounts both, from data
  * this class builds. The UCP switch saves on its own through wc/v3/agent-readiness/ucp; the store policy
  * fields save with Save, which posts this settings form. Only created by AgenticCommerceSettings while the
@@ -169,8 +169,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			// Cards only; nothing here saves with Save changes.
 			$GLOBALS['hide_save_button'] = true;
 			printf(
-				'<div class="wc-agentic-commerce"><div id="wc-agent-readiness-overview" class="wc-agent-readiness-overview" data-view="%s"></div></div>',
-				esc_attr( (string) wp_json_encode( $this->readiness_page->view() ) )
+				'<div class="wc-agentic-commerce"><div id="wc-agent-readiness-overview" class="wc-agent-readiness-overview" data-view="%s" data-connect="%s"></div></div>',
+				esc_attr( (string) wp_json_encode( $this->readiness_page->view() ) ),
+				esc_attr( (string) wp_json_encode( AgenticCommerceSettings::connect_view() ) )
 			);
 			return;
 		}

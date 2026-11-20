@@ -12,6 +12,7 @@ import './sales-readiness.scss';
 import type { ReadinessView } from './types';
 import { useReadinessView } from './use-readiness-view';
 import { FixFirstList } from './components/fix-first';
+import { AgentConnect, type ConnectView } from './components/agent-connect';
 import { ErrorNotice } from './components/error-notice';
 import { RunStatus } from './components/run-status';
 import { trackReadiness } from './tracks';
@@ -29,13 +30,15 @@ function everyCheckPassed( view: ReadinessView ): boolean {
 }
 
 /**
- * WooCommerce > Settings > AI tools, the Overview: the AI shopping card, then the Sales readiness
- * card with Fix first and a link to every check.
+ * WooCommerce > Settings > AI tools, the Overview: the WordPress.com connection card, the AI shopping
+ * card, then the Sales readiness card with Fix first and a link to every check.
  */
 export default function SalesReadinessOverview( {
 	initialView = null,
+	connect = null,
 }: {
 	initialView?: ReadinessView | null;
+	connect?: ConnectView | null;
 } ) {
 	const { view, error, reload, running, runCheck } = useReadinessView(
 		'overview',
@@ -54,6 +57,7 @@ export default function SalesReadinessOverview( {
 	return (
 		<div className="wc-sales-readiness wc-sales-readiness--overview">
 			{ error && <ErrorNotice message={ error } reload={ reload } /> }
+			{ connect && <AgentConnect connect={ connect } /> }
 			<Card.Root className="wc-sales-readiness-card">
 				<Card.Header>
 					<div className="wc-sales-readiness-card__head">
