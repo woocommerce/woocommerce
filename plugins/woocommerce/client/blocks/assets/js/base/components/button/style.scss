@@ -11,7 +11,7 @@
 	justify-content: center;
 	text-align: center;
 	position: relative;
-	transition: box-shadow 0.1s linear;
+	transition: motion-state(box-shadow);
 
 	&:focus {
 		box-shadow: 0 0 0 2px $studio-blue;
