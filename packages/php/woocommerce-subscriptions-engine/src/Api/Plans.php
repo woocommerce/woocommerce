@@ -331,10 +331,18 @@ final class Plans {
 			'offset'  => $validator->get_non_negative_int( 'offset', $filtered_args['offset'] ?? 0 ),
 		);
 		if ( array_key_exists( 'extension_slug', $filtered_args ) ) {
-			$extension_slugs = (array) $validator->get_string_list( 'extension_slug', $filtered_args['extension_slug'] );
-			foreach ( $extension_slugs as $index => $slug ) {
-				$field = is_array( $filtered_args['extension_slug'] ) ? ArgumentValidator::get_item_field( 'extension_slug', $index ) : 'extension_slug';
-				$validator->get_extension_slug( $field, $slug );
+			$raw_slugs       = $filtered_args['extension_slug'];
+			$extension_slugs = (array) $validator->get_string_list( 'extension_slug', $raw_slugs );
+			if ( is_array( $raw_slugs ) && array_values( $raw_slugs ) === $raw_slugs ) {
+				// Each non-empty string item gets the format check even when another item failed the
+				// list check; empty and non-string items already carry that check's error.
+				foreach ( $raw_slugs as $index => $slug ) {
+					if ( is_string( $slug ) && '' !== $slug ) {
+						$validator->get_extension_slug( ArgumentValidator::get_item_field( 'extension_slug', $index ), $slug );
+					}
+				}
+			} elseif ( is_string( $raw_slugs ) && '' !== $raw_slugs ) {
+				$validator->get_extension_slug( 'extension_slug', $raw_slugs );
 			}
 			$extension_slugs = array_values( array_unique( $extension_slugs ) );
 			if ( in_array( 'any', $extension_slugs, true ) ) {

@@ -230,6 +230,23 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox Plans::list reports a malformed slug item even when another item has the wrong type.
+	 */
+	public function test_plans_list_reports_every_bad_list_item(): void {
+		try {
+			Plans::list( array( 'extension_slug' => array( 'LITE', 5 ) ) );
+			$this->fail( 'Expected a ValidationException.' );
+		} catch ( ValidationException $e ) {
+			$this->assertSame( array( 'extension_slug.0' ), $this->get_pattern_error_fields( $e ) );
+			$type_fields = array();
+			foreach ( $e->get_errors()->get_all_error_data( ValidationErrorCode::INVALID_TYPE ) as $data ) {
+				$type_fields[] = is_array( $data ) ? ( $data['field'] ?? null ) : null;
+			}
+			$this->assertSame( array( 'extension_slug.1' ), $type_fields );
+		}
+	}
+
+	/**
 	 * Call an entry point with `$slug` as the owner and otherwise valid arguments.
 	 *
 	 * @param string $entry Entry point name.
