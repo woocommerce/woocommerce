@@ -59,4 +59,34 @@ class AdditionalFieldsWrapperTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( $field_id, $data['additionalOrderFields'], 'Order fields must reach the editor.' );
 		$this->assertSame( $data['additionalFields'], $data['additionalOrderFields'], 'The existing setting must remain available.' );
 	}
+
+	/**
+	 * @testdox A CPF/CNPJ gets its own section, shown without any additional fields and only to someone allowed to view the order.
+	 *
+	 * @testWith ["full", true]
+	 *           [false, false]
+	 *
+	 * @param string|false $permission  View permission for the order.
+	 * @param bool         $is_expected Whether the section should be rendered.
+	 */
+	public function test_renders_regulatory_fields_section( $permission, bool $is_expected ): void {
+		$order = new \WC_Order();
+		$order->update_meta_data( '_wc_regulatory_br_tax_id', '52998224725' );
+
+		$block = new class() extends AdditionalFieldsWrapper {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function __construct() {
+			}
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function render_content_proxy( $order, $permission ) {
+				return $this->render_content( $order, $permission, array(), '<h2>Additional information</h2>' );
+			}
+		};
+
+		$expected = $is_expected
+			? '<section class="wc-block-order-confirmation-regulatory-fields"><h2 class="wp-block-heading">Additional required information</h2><dl class="wc-block-components-additional-fields-list"><dt>CPF/CNPJ</dt><dd>529.982.247-25</dd></dl></section>'
+			: '';
+
+		$this->assertSame( $expected, $block->render_content_proxy( $order, $permission ) );
+	}
 }

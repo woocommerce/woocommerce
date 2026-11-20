@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WC_Order;
 
 /**
- * Shows regulatory fields to the customer, below the billing address, on the order confirmation and in My Account.
+ * Shows regulatory fields to the customer, in their own section after the addresses, on the order confirmation and in My Account.
  *
  * @internal Just for internal use.
  *
@@ -37,39 +37,46 @@ class OrderDetails implements RegisterHooksInterface {
 	 * Register hooks and filters.
 	 */
 	public function register(): void {
-		add_action( 'woocommerce_order_details_after_customer_address', array( $this, 'handle_woocommerce_order_details_after_customer_address' ), 10, 2 );
+		// Priority 5 puts the section above "Additional information", which core adds at 10.
+		add_action( 'woocommerce_order_details_after_customer_details', array( $this, 'handle_woocommerce_order_details_after_customer_details' ), 5 );
 	}
 
 	/**
-	 * Output the values below the billing address on the shortcode order confirmation and in My Account.
+	 * Output the section after the addresses on the shortcode order confirmation and in My Account.
 	 *
 	 * @internal
 	 *
-	 * @param mixed $address_type Address being shown: billing or shipping.
-	 * @param mixed $order        Order being shown.
+	 * @param mixed $order Order being shown.
 	 */
-	public function handle_woocommerce_order_details_after_customer_address( $address_type, $order ): void {
-		if ( 'billing' !== $address_type || ! $order instanceof WC_Order ) {
+	public function handle_woocommerce_order_details_after_customer_details( $order ): void {
+		if ( ! $order instanceof WC_Order ) {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in get_html().
-		echo $this->get_html( $order );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in get_section_html().
+		echo $this->get_section_html( $order );
 	}
 
 	/**
-	 * Build the list of labels and values for an order.
+	 * Build the section that lists an order's regulatory fields: a heading and the labels and values.
 	 *
 	 * @param WC_Order $order Order.
 	 * @return string HTML, or an empty string when the order has no values.
 	 */
-	public function get_html( WC_Order $order ): string {
+	public function get_section_html( WC_Order $order ): string {
 		$items = '';
 
 		foreach ( $this->regulatory_fields->get_order_display_values( $order ) as $field ) {
 			$items .= sprintf( '<dt>%1$s</dt><dd>%2$s</dd>', esc_html( $field['label'] ), esc_html( $field['value'] ) );
 		}
 
-		return '' === $items ? '' : '<dl class="wc-block-components-additional-fields-list">' . $items . '</dl>';
+		if ( '' === $items ) {
+			return '';
+		}
+
+		return '<section class="wc-block-order-confirmation-regulatory-fields">'
+			. '<h2 class="wp-block-heading">' . esc_html__( 'Additional required information', 'woocommerce' ) . '</h2>'
+			. '<dl class="wc-block-components-additional-fields-list">' . $items . '</dl>'
+			. '</section>';
 	}
 }

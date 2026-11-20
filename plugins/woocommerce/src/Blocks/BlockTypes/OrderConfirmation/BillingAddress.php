@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
-use Automattic\WooCommerce\Internal\RegulatoryFields\OrderDetails;
 
 /**
  * BillingAddress class.
@@ -50,7 +49,7 @@ class BillingAddress extends AbstractOrderConfirmationBlock {
 			)
 		);
 
-		return $address . $phone . $custom . wc_get_container()->get( OrderDetails::class )->get_html( $order );
+		return $address . $phone . $custom;
 	}
 
 	/**

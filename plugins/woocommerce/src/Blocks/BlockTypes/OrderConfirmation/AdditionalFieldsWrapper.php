@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Internal\RegulatoryFields\OrderDetails;
 
 /**
  * AdditionalFieldsWrapper class.
@@ -40,7 +41,10 @@ class AdditionalFieldsWrapper extends AbstractOrderConfirmationBlock {
 			Package::container()->get( CheckoutFields::class )->get_order_additional_fields_with_values( $order, 'order' )
 		);
 
-		return empty( $additional_field_values ) ? '' : $content;
+		// Regulatory fields get their own section above the additional fields, and show even when there are none of those.
+		$regulatory_section = wc_get_container()->get( OrderDetails::class )->get_section_html( $order );
+
+		return $regulatory_section . ( empty( $additional_field_values ) ? '' : $content );
 	}
 
 	/**

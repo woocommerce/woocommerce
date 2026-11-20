@@ -30,28 +30,34 @@ class OrderDetailsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should output the label and formatted value below the billing address only.
-	 *
-	 * @testWith ["billing", "<dl class=\"wc-block-components-additional-fields-list\"><dt>CPF/CNPJ</dt><dd>529.982.247-25</dd></dl>"]
-	 *           ["shipping", ""]
-	 *
-	 * @param string $address_type Address being shown.
-	 * @param string $expected     Expected output.
+	 * @testdox Should output a section with a heading, the label and the formatted value after the customer details.
 	 */
-	public function test_outputs_value_below_billing_address( string $address_type, string $expected ): void {
+	public function test_outputs_own_section_after_customer_details(): void {
 		$order = new WC_Order();
 		$order->update_meta_data( '_wc_regulatory_br_tax_id', '52998224725' );
 
 		ob_start();
-		$this->sut->handle_woocommerce_order_details_after_customer_address( $address_type, $order );
+		$this->sut->handle_woocommerce_order_details_after_customer_details( $order );
 
-		$this->assertSame( $expected, ob_get_clean() );
+		$this->assertSame(
+			'<section class="wc-block-order-confirmation-regulatory-fields"><h2 class="wp-block-heading">Additional required information</h2><dl class="wc-block-components-additional-fields-list"><dt>CPF/CNPJ</dt><dd>529.982.247-25</dd></dl></section>',
+			ob_get_clean()
+		);
 	}
 
 	/**
-	 * @testdox Should output nothing for an order without a value.
+	 * @testdox Should output nothing, not even the heading, for an order without a value.
 	 */
 	public function test_outputs_nothing_without_value(): void {
-		$this->assertSame( '', $this->sut->get_html( new WC_Order() ) );
+		$this->assertSame( '', $this->sut->get_section_html( new WC_Order() ) );
+	}
+
+	/**
+	 * @testdox Should place the section above the Additional information section on the shortcode order pages.
+	 */
+	public function test_section_comes_before_additional_information(): void {
+		$this->sut->register();
+
+		$this->assertSame( 5, has_action( 'woocommerce_order_details_after_customer_details', array( $this->sut, 'handle_woocommerce_order_details_after_customer_details' ) ) );
 	}
 }

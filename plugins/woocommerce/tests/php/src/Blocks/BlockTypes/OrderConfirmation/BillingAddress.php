@@ -61,17 +61,6 @@ final class BillingAddress extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox A CPF/CNPJ stored on the order is shown formatted below the billing address.
-	 */
-	public function test_shows_regulatory_field_value(): void {
-		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_wc_regulatory_br_tax_id', '52998224725' );
-		$order->save();
-
-		$this->assertStringContainsString( '<dt>CPF/CNPJ</dt><dd>529.982.247-25</dd>', $this->render( $order ) );
-	}
-
-	/**
 	 * Create an order placed via the Store API with a value persisted for the billing group of the test field.
 	 *
 	 * @param string $value Field value.
