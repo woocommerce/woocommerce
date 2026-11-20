@@ -56,10 +56,14 @@ export type ProductFiltersContext = {
 // ----------------------------------------
 export type OverlayMode = 'off' | 'mobile' | 'always';
 
+// `plain`, or the name of a core Button style such as `fill` or `outline`.
+export type OverlayButtonStyle = string;
+
 export type BlockAttributes = {
 	productId?: string;
 	overlayMode?: OverlayMode;
 	overlayPosition?: 'left' | 'right';
+	overlayButtonStyle?: OverlayButtonStyle;
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;

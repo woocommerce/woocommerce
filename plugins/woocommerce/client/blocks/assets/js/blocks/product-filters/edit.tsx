@@ -6,9 +6,16 @@ import {
 	InspectorControls,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
+import {
+	BlockEditProps,
+	InnerBlockTemplate,
+	store as blocksStore,
+} from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
 import type { HTMLAttributes } from 'react';
 import {
+	BaseControl,
+	Button,
 	PanelBody,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
@@ -30,8 +37,16 @@ import './editor.scss';
 import { type BlockAttributes } from './types';
 import { getColorsFromBlockSupports } from './utils/get-colors-from-block-supports';
 import { getOverlayMode, isOverlayMode } from './utils/overlay-mode';
+import {
+	getOverlayButtonStyle,
+	isOverlayButtonStyle,
+} from './utils/overlay-button-style';
 import { presetToCssVariable } from './utils/preset-to-css-variable';
 import { getDefaultAttributeId } from './inner-blocks/attribute-filter/utils';
+
+type ButtonStyle = { name: string; label?: string; isDefault?: boolean };
+
+const NO_BUTTON_STYLES: ButtonStyle[] = [];
 
 const DEFAULT_ATTRIBUTE_ID = getDefaultAttributeId();
 
@@ -66,6 +81,41 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const hasOverlay = overlayMode !== 'off';
 	const overlayPosition =
 		attributes.overlayPosition === 'right' ? 'right' : 'left';
+	const overlayButtonStyle = getOverlayButtonStyle( attributes );
+	const isStyledButton = overlayButtonStyle !== 'plain';
+	// Every core Button style, including the ones the theme adds.
+	const buttonStyles: ButtonStyle[] = useSelect(
+		( select ) =>
+			(
+				select( blocksStore ) as {
+					getBlockStyles: (
+						name: string
+					) => ButtonStyle[] | undefined;
+				}
+			 ).getBlockStyles( 'core/button' ) ?? NO_BUTTON_STYLES,
+		[]
+	);
+	const buttonStyleOptions = [
+		{ value: 'plain', label: __( 'Plain', 'woocommerce' ) },
+		...buttonStyles
+			.filter( ( style: ButtonStyle ) =>
+				isOverlayButtonStyle( style.name )
+			)
+			.map( ( style: ButtonStyle ) => ( {
+				value: style.name,
+				label: style.label || style.name,
+			} ) ),
+	];
+	// Core's Button block does the same. A style from another theme keeps its
+	// saved value, but the button looks like the default style, so the default
+	// tile shows as selected.
+	const activeButtonStyle = buttonStyleOptions.some(
+		( option ) => option.value === overlayButtonStyle
+	)
+		? overlayButtonStyle
+		: ( buttonStyles.find( ( style: ButtonStyle ) => style.isDefault )
+				?.name ?? 'fill' );
+
 	const [ isOpen, setIsOpen ] = useState( false );
 
 	const globalColors = getSetting< { background?: string; text?: string } >(
@@ -87,6 +137,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 			'is-filter-drawer-disabled': ! hasOverlay,
 			'is-mobile-overlay': overlayMode === 'mobile',
 			'is-overlay-right': hasOverlay && overlayPosition === 'right',
+			'has-styled-overlay-button': hasOverlay && isStyledButton,
 		} ),
 		style: {
 			'--wc-product-filters-background-color':
@@ -110,13 +161,32 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	} else if ( hasOverlay ) {
 		filtersContent = (
 			<>
-				<button
-					className="wc-block-product-filters__open-overlay"
-					onClick={ () => setIsOpen( ! isOpen ) }
+				{ /* Same markup as render() in PHP. Styles other than plain use
+				core Button classes, so the theme's Button style applies. */ }
+				<div
+					className={ clsx(
+						'wc-block-product-filters__open-overlay-wrapper',
+						isStyledButton && [
+							'wp-block-button',
+							`is-style-${ overlayButtonStyle }`,
+						]
+					) }
 				>
-					<Icon icon={ filterThreeLines } />
-					<span>{ __( 'Filter products', 'woocommerce' ) }</span>
-				</button>
+					<button
+						type="button"
+						className={ clsx(
+							isStyledButton && [
+								'wp-block-button__link',
+								'wp-element-button',
+							],
+							'wc-block-product-filters__open-overlay'
+						) }
+						onClick={ () => setIsOpen( ! isOpen ) }
+					>
+						<Icon icon={ filterThreeLines } />
+						<span>{ __( 'Filter products', 'woocommerce' ) }</span>
+					</button>
+				</div>
 
 				<div className="wc-block-product-filters__overlay">
 					<div className="wc-block-product-filters__overlay-wrapper">
@@ -215,6 +285,48 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 								label={ __( 'Right', 'woocommerce' ) }
 							/>
 						</ToggleGroupControl>
+					) }
+					{ overlayMode !== 'off' && (
+						// Same tiles as core's block Styles panel, so the
+						// picker looks like the Button block's own.
+						<div
+							role="group"
+							aria-label={ __( 'Button style', 'woocommerce' ) }
+						>
+							<BaseControl.VisualLabel>
+								{ __( 'Button style', 'woocommerce' ) }
+							</BaseControl.VisualLabel>
+							<div className="block-editor-block-styles__variants">
+								{ buttonStyleOptions.map( ( option ) => (
+									<Button
+										__next40pxDefaultSize
+										key={ option.value }
+										variant="secondary"
+										className={ clsx(
+											'block-editor-block-styles__item',
+											{
+												'is-active':
+													option.value ===
+													activeButtonStyle,
+											}
+										) }
+										aria-pressed={
+											option.value === activeButtonStyle
+										}
+										onClick={ () =>
+											setAttributes( {
+												overlayButtonStyle:
+													option.value,
+											} )
+										}
+									>
+										<span className="block-editor-block-styles__item-text">
+											{ option.label }
+										</span>
+									</Button>
+								) ) }
+							</div>
+						</div>
 					) }
 				</PanelBody>
 			</InspectorControls>
