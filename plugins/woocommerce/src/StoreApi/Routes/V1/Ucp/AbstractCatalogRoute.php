@@ -109,12 +109,13 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 
 			$value = $filters['price'][ $bound ];
 
-			if ( ! is_numeric( $value ) || (float) $value < 0 ) {
+			// A fractional or out-of-range bound would be changed by the integer cast below.
+			if ( ! is_numeric( $value ) || (float) $value < 0 || (float) $value >= PHP_INT_MAX || floor( (float) $value ) !== (float) $value ) {
 				return $this->ucp_error(
 					'VALIDATION_ERROR',
 					sprintf(
 						/* translators: %s: price filter bound name, `min` or `max`. */
-						__( 'filters.price.%s must be a non-negative amount in minor units.', 'woocommerce' ),
+						__( 'filters.price.%s must be a non-negative integer amount in minor units.', 'woocommerce' ),
 						$bound
 					),
 					'recoverable',

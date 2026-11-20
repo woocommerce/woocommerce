@@ -317,11 +317,34 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
-	 * A `filters.price` that is not an object is refused rather than ignored.
+	 * Price filters every catalog route refuses.
+	 *
+	 * @return array
 	 */
-	public function test_malformed_price_filter_returns_ucp_validation_error(): void {
+	public function provider_malformed_price_filters(): array {
+		return array(
+			'not an object'             => array( '1000' ),
+			'fractional bound'          => array( array( 'min' => 1000.9 ) ),
+			'beyond the integer range'  => array( array( 'min' => '1e400' ) ),
+			'reversed after truncation' => array(
+				array(
+					'min' => 1000.9,
+					'max' => 1000.1,
+				),
+			),
+		);
+	}
+
+	/**
+	 * A malformed `filters.price` is refused rather than ignored or truncated.
+	 *
+	 * @dataProvider provider_malformed_price_filters
+	 *
+	 * @param mixed $price The `filters.price` value.
+	 */
+	public function test_malformed_price_filter_returns_ucp_validation_error( $price ): void {
 		$id      = (string) self::$product_ids[0];
-		$filters = array( 'filters' => array( 'price' => '1000' ) );
+		$filters = array( 'filters' => array( 'price' => $price ) );
 
 		foreach ( array(
 			'/catalog/product' => array( 'id' => $id ),
@@ -333,6 +356,23 @@ class UcpCatalog extends ControllerTestCase {
 			$this->assertSame( 400, $response->get_status(), $route );
 			$this->assertSame( 'VALIDATION_ERROR', $response->get_data()['messages'][0]['code'], $route );
 		}
+	}
+
+	/**
+	 * Zero and integer-valued bounds are accepted.
+	 */
+	public function test_integral_price_bounds_are_accepted(): void {
+		$body = array(
+			'ids'     => array( (string) self::$product_ids[0] ),
+			'filters' => array(
+				'price' => array(
+					'min' => 0,
+					'max' => '1500.0',
+				),
+			),
+		);
+
+		$this->assertSame( 200, $this->post( '/catalog/lookup', $body )->get_status() );
 	}
 
 	/**
