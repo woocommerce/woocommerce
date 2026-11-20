@@ -51,6 +51,18 @@ export default function SalesReadinessOverview( {
 		);
 	}
 	const { shopping, view_all: viewAll } = view.overview;
+	// A rejected URL is not a link: the button stays, disabled, and does not record a click.
+	const linkProps = ( href: string | undefined, area: string ) =>
+		href
+			? {
+					href,
+					onClick: () =>
+						trackReadiness( 'link_clicked', {
+							surface: 'overview',
+							area,
+						} ),
+				}
+			: { disabled: true, onClick: () => {} };
 
 	return (
 		<div className="wc-sales-readiness wc-sales-readiness--overview">
@@ -79,13 +91,10 @@ export default function SalesReadinessOverview( {
 						<Button
 							variant="secondary"
 							size="compact"
-							href={ safeHref( shopping.button.href ) }
-							onClick={ () =>
-								trackReadiness( 'link_clicked', {
-									surface: 'overview',
-									area: 'shopping',
-								} )
-							}
+							{ ...linkProps(
+								safeHref( shopping.button.href ),
+								'shopping'
+							) }
 						>
 							{ shopping.button.text }
 						</Button>
@@ -152,13 +161,10 @@ export default function SalesReadinessOverview( {
 								<Button
 									variant="tertiary"
 									size="compact"
-									href={ safeHref( viewAll.href ) }
-									onClick={ () =>
-										trackReadiness( 'link_clicked', {
-											surface: 'overview',
-											area: 'view_all',
-										} )
-									}
+									{ ...linkProps(
+										safeHref( viewAll.href ),
+										'view_all'
+									) }
 								>
 									{ viewAll.text }
 								</Button>

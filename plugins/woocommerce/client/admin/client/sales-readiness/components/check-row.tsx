@@ -24,12 +24,13 @@ export const RowLink = ( {
 }: {
 	link: ViewLink;
 	onClick?: () => void;
-} ) =>
-	link.href ? (
+} ) => {
+	const href = safeHref( link.href );
+	return href ? (
 		<Button
 			variant="secondary"
 			size="compact"
-			href={ safeHref( link.href ) }
+			href={ href }
 			onClick={ onClick }
 		>
 			{ link.text }
@@ -39,6 +40,7 @@ export const RowLink = ( {
 			{ link.text }
 		</Text>
 	);
+};
 
 // The swatch icon, a dashed circle, from the WordPress icons package from version 18 on.
 // This package pins an older version that doesn't have it.

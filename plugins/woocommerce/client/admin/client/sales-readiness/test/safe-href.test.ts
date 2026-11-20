@@ -14,8 +14,15 @@ describe( 'safeHref', () => {
 		expect( safeHref( 'admin.php?page=wc-settings' ) ).toBe(
 			'admin.php?page=wc-settings'
 		);
+		expect( safeHref( 'admin.php?foo=a:b' ) ).toBe( 'admin.php?foo=a:b' );
 		expect( safeHref( '/wp-admin/plugins.php' ) ).toBe(
 			'/wp-admin/plugins.php'
+		);
+		expect( safeHref( 'HTTPS://ucpplayground.com/Path' ) ).toBe(
+			'https://ucpplayground.com/Path'
+		);
+		expect( safeHref( 'Http://example.com/' ) ).toBe(
+			'http://example.com/'
 		);
 	} );
 
@@ -23,6 +30,7 @@ describe( 'safeHref', () => {
 		expect( safeHref( 'javascript:alert(1)' ) ).toBeUndefined();
 		expect( safeHref( ' JavaScript:alert(1)' ) ).toBeUndefined();
 		expect( safeHref( 'data:text/html,x' ) ).toBeUndefined();
+		expect( safeHref( 'FTPS://files.example/a' ) ).toBeUndefined();
 		expect( safeHref( '' ) ).toBeUndefined();
 		expect( safeHref( null ) ).toBeUndefined();
 	} );

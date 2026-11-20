@@ -1359,9 +1359,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$html = $this->render_page( '' );
 		$this->assertTrue( $this->save_hidden, 'Nothing on the Overview saves' );
 		$this->assertStringContainsString( '<div id="wc-agent-readiness-overview"', $html, 'The Overview is React, mounted by the settings-embed script' );
-		$this->assertMatchesRegularExpression( '#data-view="([^"]+)"#', $html );
-		preg_match( '#data-view="([^"]+)"#', $html, $match );
-		$this->assertSame( 'Set up AI shopping', json_decode( html_entity_decode( $match[1] ), true )['overview']['shopping']['button']['text'], 'The view comes with the page, so the cards draw without a request' );
+		$this->assertSame( 'Set up AI shopping', json_decode( $this->data_view( $html, 'wc-agent-readiness-overview' ), true )['overview']['shopping']['button']['text'], 'The view comes with the page, so the cards draw without a request' );
 		$this->assertStringNotContainsString( 'No llms.txt file', $html );
 
 		$view = $this->view();
@@ -2229,9 +2227,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			),
 			false
 		);
-		preg_match( '#data-view="([^"]+)"#', $this->render_page( '' ), $match );
-		$this->assertStringNotContainsString( '&amp;', $match[1] ?? '', 'No & from the view is left for the browser to decode' );
-		$overview = json_decode( html_entity_decode( $match[1] ?? '', ENT_QUOTES ), true );
+		$html = $this->render_page( '' );
+		$this->assertStringNotContainsString( '&amp;', $html, 'No & from the view is left for the browser to decode' );
+		$overview = json_decode( $this->data_view( $html, 'wc-agent-readiness-overview' ), true );
 		$this->assertIsArray( $overview, 'The Overview view still reads as JSON' );
 		$products = current( array_filter( $overview['sections'], static fn( array $section ): bool => 'products' === $section['id'] ) );
 		$this->assertIsArray( $products, 'The Overview lists product checks' );
@@ -2427,12 +2425,42 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 * @return array<string, mixed>
 	 */
 	private function shopping( bool $ucp_on = false ): array {
-		$html = $this->render_page( AgenticCommerceSettings::SHOPPING_SECTION, $ucp_on );
-		$this->assertMatchesRegularExpression( '#<div id="wc-ai-shopping" class="wc-ai-shopping-root wc-settings-prevent-change-event" data-view="([^"]+)"></div>#', $html );
-		preg_match( '#data-view="([^"]+)"#', $html, $match );
-		$view = json_decode( html_entity_decode( $match[1], ENT_QUOTES ), true );
+		$html      = $this->render_page( AgenticCommerceSettings::SHOPPING_SECTION, $ucp_on );
+		$processor = new \WP_HTML_Tag_Processor( $html );
+		$this->assertTrue(
+			$processor->next_tag(
+				array(
+					'tag_name'   => 'div',
+					'class_name' => 'wc-ai-shopping-root',
+				)
+			),
+			'AI shopping renders its view root'
+		);
+		$this->assertSame( 'wc-ai-shopping', $processor->get_attribute( 'id' ) );
+		$this->assertStringContainsString( 'wc-settings-prevent-change-event', (string) $processor->get_attribute( 'class' ) );
+		$view = json_decode( (string) $processor->get_attribute( 'data-view' ), true );
 		$this->assertIsArray( $view );
 		return $view;
+	}
+
+	/**
+	 * The data-view attribute on a rendered root, decoded the way the browser reads it.
+	 *
+	 * @param string $html       Rendered markup.
+	 * @param string $root_class Class of the root div.
+	 */
+	private function data_view( string $html, string $root_class ): string {
+		$processor = new \WP_HTML_Tag_Processor( $html );
+		$this->assertTrue(
+			$processor->next_tag(
+				array(
+					'tag_name'   => 'div',
+					'class_name' => $root_class,
+				)
+			),
+			'The page renders its view root'
+		);
+		return (string) $processor->get_attribute( 'data-view' );
 	}
 
 	/**
