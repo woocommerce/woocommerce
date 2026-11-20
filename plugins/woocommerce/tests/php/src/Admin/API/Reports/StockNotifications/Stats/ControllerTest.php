@@ -93,6 +93,10 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$summer = '2026-07-16 07:30:00';
 		$this->insert_row( 1, NotificationStatus::SENT, $winter, 'winter@example.com', $winter );
 		$this->insert_row( 1, NotificationStatus::SENT, $summer, 'summer@example.com', $summer );
+		// Either side of the 2026-11-01 09:00 UTC fall-back: 00:30 PDT and 23:30 PST, both on 2026-11-01.
+		foreach ( array( '2026-11-01 07:30:00', '2026-11-02 07:30:00' ) as $i => $date ) {
+			$this->insert_row( 1, NotificationStatus::SENT, $date, "autumn-{$i}@example.com", $date );
+		}
 
 		$cases = array(
 			'2026-01-15' => array(
@@ -102,6 +106,12 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 			'2026-07-15' => array(
 				'2026-07-15' => 0,
 				'2026-07-16' => 1,
+			),
+			// A range containing the transition: one interval per local day, none stray.
+			'2026-10-31' => array(
+				'2026-10-31' => 0,
+				'2026-11-01' => 2,
+				'2026-11-02' => 0,
 			),
 		);
 		foreach ( $cases as $day => $expected ) {

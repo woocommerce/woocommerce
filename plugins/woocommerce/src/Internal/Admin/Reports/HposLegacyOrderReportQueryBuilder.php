@@ -872,15 +872,28 @@ class HposLegacyOrderReportQueryBuilder {
 	/**
 	 * Build a MySQL expression that converts `orders.date_created_gmt` into site-local time.
 	 *
-	 * Delegates to {@see TimeInterval::local_datetime_sql()}, which honours DST per row. Without a
-	 * caller-supplied range (e.g. the sparklines) the window covers the last year, which spans any
-	 * window such callers use.
+	 * For sites configured with a named timezone the conversion is done per row with
+	 * `CONVERT_TZ()`, so DST is honoured even for rows outside the report window (some legacy
+	 * callers have none). `CONVERT_TZ()` returns NULL when the server's timezone tables are not
+	 * loaded, so it falls back to {@see TimeInterval::local_datetime_sql()}. Without a
+	 * caller-supplied range (e.g. the sparklines) the fallback window covers the last year, which
+	 * spans any window such callers use.
 	 *
 	 * @return string SQL fragment that produces a local DATETIME.
 	 */
 	private function hpos_local_date_expr(): string {
 		list( $window_start, $window_end ) = $this->report_range ?? array( time() - YEAR_IN_SECONDS, time() + DAY_IN_SECONDS );
 
-		return TimeInterval::local_datetime_sql( 'orders.date_created_gmt', (int) $window_start, (int) $window_end );
+		$local = TimeInterval::local_datetime_sql( 'orders.date_created_gmt', (int) $window_start, (int) $window_end );
+
+		$timezone_string = get_option( 'timezone_string' );
+		if ( '' === $timezone_string ) {
+			return $local;
+		}
+
+		global $wpdb;
+		$convert = $wpdb->prepare( 'CONVERT_TZ(orders.date_created_gmt, %s, %s)', '+00:00', $timezone_string );
+
+		return "IFNULL({$convert}, {$local})";
 	}
 }

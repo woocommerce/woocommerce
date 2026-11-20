@@ -153,14 +153,18 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @param string $table_name Table name.
 	 * @param string $column     Date column name.
-	 * @param array  $query_args Query parameters; `after` and `before` bound the DST transitions considered.
+	 * @param array  $query_args Query parameters; `after` and `before` bound the DST transitions considered,
+	 *                           and every query using this expression is limited to that period.
 	 * @return string
 	 */
 	protected function get_local_datetime_sql( $table_name, $column, $query_args ) {
+		$after  = $query_args['after'] ?? null;
+		$before = $query_args['before'] ?? null;
+
 		return TimeInterval::local_datetime_sql(
 			"{$table_name}.`{$column}`",
-			$query_args['after']->getTimestamp(),
-			$query_args['before']->getTimestamp()
+			$after instanceof \DateTimeInterface ? $after->getTimestamp() : time(),
+			$before instanceof \DateTimeInterface ? $before->getTimestamp() : time()
 		);
 	}
 
