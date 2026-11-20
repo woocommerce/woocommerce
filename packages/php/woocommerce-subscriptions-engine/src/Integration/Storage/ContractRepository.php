@@ -42,6 +42,10 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Live contract repository with targeted cycle access.
+ *
+ * @internal Storage behind the `Api\` facades, not a supported extension surface. Arguments are
+ *           validated once, at the public boundary: owner slugs and other values arrive validated
+ *           and are not checked again here.
  */
 final class ContractRepository {
 

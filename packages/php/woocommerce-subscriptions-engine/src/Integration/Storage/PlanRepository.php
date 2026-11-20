@@ -17,6 +17,10 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Plan repository.
+ *
+ * @internal Storage behind the `Api\` facades, not a supported extension surface. Arguments are
+ *           validated once, at the public boundary: owner slugs and other values arrive validated
+ *           and are not checked again here.
  */
 final class PlanRepository {
 
@@ -298,14 +302,13 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Delete a plan and its meta rows by id and (optionally) extension slug.
-	 * Most usages from applications should specify the extension slug
-	 * to guard against cross-application operations.
+	 * Delete a plan and its meta rows by id. With `$extension_slug` the delete is scoped to that
+	 * owner: a plan of another extension is not deleted. Callers pass a validated slug.
 	 *
 	 * A failed delete throws, so a caller's transaction can roll back.
 	 *
 	 * @param int         $id             Plan id.
-	 * @param string|null $extension_slug Extension slug for the plan.
+	 * @param string|null $extension_slug Owner to scope the delete to, or null for any owner.
 	 * @return bool True when a row was removed.
 	 * @throws \RuntimeException If the plan row or its meta rows fail to delete.
 	 */
