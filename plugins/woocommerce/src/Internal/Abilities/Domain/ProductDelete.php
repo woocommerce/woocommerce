@@ -168,6 +168,15 @@ class ProductDelete extends ActionableAbility {
 			);
 		}
 
+		if ( ! $this->force && ProductStatus::TRASH === $product->get_status( 'edit' ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_product_already_trashed',
+				/* translators: %d: product ID. */
+				sprintf( __( 'Product %d is already in the trash. Pass force: true to delete it permanently.', 'woocommerce' ), $product->get_id() ),
+				array( 'status' => 409 )
+			);
+		}
+
 		$this->product_id = $product->get_id();
 
 		return $product;

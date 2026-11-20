@@ -171,6 +171,15 @@ class OrderDelete extends ActionableAbility {
 			);
 		}
 
+		if ( ! $this->force && OrderStatus::TRASH === $order->get_status( 'edit' ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_already_trashed',
+				/* translators: %d: order ID. */
+				sprintf( __( 'Order %d is already in the trash. Pass force: true to delete it permanently.', 'woocommerce' ), $order->get_id() ),
+				array( 'status' => 409 )
+			);
+		}
+
 		$this->order_id = $order->get_id();
 
 		return $order;

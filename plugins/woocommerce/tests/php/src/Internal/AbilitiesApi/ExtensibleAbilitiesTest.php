@@ -4261,6 +4261,43 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse to trash a product or an order that is already in the trash, and run no sync.
+	 */
+	public function test_a_repeat_trash_is_refused_and_runs_no_sync(): void {
+		$synced = array();
+		foreach ( array( 'product', 'order' ) as $resource_name ) {
+			$this->register_sync(
+				$resource_name,
+				'test-ext',
+				static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$synced, $resource_name ) {
+					$synced[] = array( $resource_name, array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['trashed'] ) );
+					return null;
+				}
+			);
+		}
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = OrderHelper::create_order();
+
+		$this->run_ability( 'woocommerce/product-delete', array( 'id' => $product->get_id() ) );
+		$this->run_ability( 'woocommerce/order-delete', array( 'id' => $order->get_id() ) );
+		$product_again = $this->run_ability_response( 'woocommerce/product-delete', array( 'id' => $product->get_id() ) );
+		$order_again   = $this->run_ability_response( 'woocommerce/order-delete', array( 'id' => $order->get_id() ) );
+
+		$this->assertSame( 409, $product_again->get_status() );
+		$this->assertSame( 'woocommerce_ability_product_already_trashed', $product_again->get_data()['code'] );
+		$this->assertSame( 409, $order_again->get_status() );
+		$this->assertSame( 'woocommerce_ability_order_already_trashed', $order_again->get_data()['code'] );
+		$this->assertSame(
+			array(
+				array( 'product', array( $product->get_id() ) ),
+				array( 'order', array( $order->get_id() ) ),
+			),
+			$synced,
+			'Only the first trash of each object should run the syncs.'
+		);
+	}
+
+	/**
 	 * @testdox Should refuse a sync on a resource that is not registered.
 	 */
 	public function test_a_sync_on_an_unregistered_resource_is_refused(): void {
