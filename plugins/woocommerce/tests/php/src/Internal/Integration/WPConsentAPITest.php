@@ -80,6 +80,19 @@ class WPConsentAPITest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should print allowTracking as false when WP Consent API is active, since cached pages are served to every visitor.
+	 */
+	public function test_allow_tracking_is_false_when_wp_consent_api_is_active(): void {
+		$this->wp_consent_api_integration->method( 'is_wp_consent_api_active' )->willReturn( true );
+		$this->get_closure_for_on_init_method()();
+
+		$this->assertFalse(
+			apply_filters( 'wc_order_attribution_allow_tracking', true ),
+			'The cacheable allowTracking flag must not enable tracking before the browser checks consent'
+		);
+	}
+
+	/**
 	 * @testdox Should print the consent category before order-attribution.js, so it waits for the consent integration on load.
 	 */
 	public function test_consent_category_is_printed_before_order_attribution_script(): void {
