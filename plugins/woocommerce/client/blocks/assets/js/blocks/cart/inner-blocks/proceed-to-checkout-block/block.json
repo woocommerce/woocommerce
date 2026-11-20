@@ -4,12 +4,66 @@
 	"description": "Allow customers proceed to Checkout.",
 	"category": "woocommerce",
 	"supports": {
+		"color": {
+			"text": true,
+			"background": true,
+			"gradients": true,
+			"link": false,
+			"__experimentalDefaultControls": {
+				"background": true,
+				"text": true
+			},
+			"__experimentalSkipSerialization": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"textAlign": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalDefaultControls": {
+				"fontSize": true,
+				"textAlign": true
+			},
+			"__experimentalSkipSerialization": true
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true,
+			"__experimentalDefaultControls": {
+				"color": true,
+				"radius": true,
+				"style": true,
+				"width": true
+			},
+			"__experimentalSkipSerialization": true
+		},
+		"spacing": {
+			"padding": true,
+			"__experimentalDefaultControls": {
+				"padding": true
+			},
+			"__experimentalSkipSerialization": true
+		},
 		"align": false,
 		"html": false,
 		"multiple": false,
 		"reusable": false,
 		"inserter": false,
 		"lock": false
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-proceed-to-checkout-block",
+		"color": ".wp-block-woocommerce-proceed-to-checkout-block .wc-block-cart__submit-button",
+		"typography": ".wp-block-woocommerce-proceed-to-checkout-block .wc-block-cart__submit-button",
+		"border": ".wp-block-woocommerce-proceed-to-checkout-block .wc-block-cart__submit-button",
+		"spacing": ".wp-block-woocommerce-proceed-to-checkout-block .wc-block-cart__submit-button"
 	},
 	"attributes": {
 		"lock": {
