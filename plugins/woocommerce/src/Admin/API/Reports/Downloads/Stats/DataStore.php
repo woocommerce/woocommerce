@@ -98,9 +98,13 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 		$where_time = $this->add_time_period_sql_params( $query_args, $table_name );
 		$this->add_intervals_sql_params( $query_args, $table_name );
 
-		$this->interval_query->add_sql_clause( 'select', $this->get_sql_clause( 'select' ) . ' AS time_interval' );
-		$this->interval_query->str_replace_clause( 'select', 'date_created', 'timestamp' );
-		$this->interval_query->str_replace_clause( 'where_time', 'date_created', 'timestamp' );
+		// Download log timestamps are stored in UTC, so bucket them in site time.
+		$local_timestamp = TimeInterval::local_datetime_sql(
+			"{$table_name}.timestamp",
+			$query_args['after']->getTimestamp(),
+			$query_args['before']->getTimestamp()
+		);
+		$this->interval_query->add_sql_clause( 'select', str_replace( "{$table_name}.`date_created`", $local_timestamp, $this->get_sql_clause( 'select' ) ) . ' AS time_interval' );
 
 		$db_intervals = $wpdb->get_col(
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
@@ -110,7 +114,6 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 		$db_records_count = count( $db_intervals );
 
 		$this->update_intervals_sql_params( $query_args, $db_records_count, $expected_interval_count, $table_name );
-		$this->interval_query->str_replace_clause( 'where_time', 'date_created', 'timestamp' );
 		$this->total_query->add_sql_clause( 'select', $selections );
 		$this->total_query->add_sql_clause( 'where', $this->interval_query->get_sql_clause( 'where' ) );
 		if ( $where_time ) {
@@ -127,7 +130,7 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 
 		$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 		$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
-		$this->interval_query->add_sql_clause( 'select', ', MAX(timestamp) AS datetime_anchor' );
+		$this->interval_query->add_sql_clause( 'select', ", MAX({$local_timestamp}) AS datetime_anchor" );
 		if ( '' !== $selections ) {
 			$this->interval_query->add_sql_clause( 'select', ', ' . $selections );
 		}
@@ -156,6 +159,39 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Updates the interval query for pagination, converting the page's date range to UTC.
+	 *
+	 * When ordering by date, the parent writes the page's site-time range against `date_created`.
+	 *
+	 * @override ReportsDataStore::update_intervals_sql_params()
+	 *
+	 * @param array  $query_args              Query arguments.
+	 * @param int    $db_interval_count       Database interval count.
+	 * @param int    $expected_interval_count Expected interval count on the output.
+	 * @param string $table_name              Name of the db table relevant for the date constraint.
+	 * @return void
+	 */
+	protected function update_intervals_sql_params( &$query_args, $db_interval_count, $expected_interval_count, $table_name ) {
+		parent::update_intervals_sql_params( $query_args, $db_interval_count, $expected_interval_count, $table_name );
+
+		if ( $db_interval_count === $expected_interval_count || 'date' !== strtolower( $query_args['orderby'] ) ) {
+			return;
+		}
+
+		$this->interval_query->clear_sql_clause( 'where_time' );
+		$this->interval_query->add_sql_clause(
+			'where_time',
+			$this->add_time_period_sql_params(
+				array(
+					'after'  => $query_args['adj_after'],
+					'before' => $query_args['adj_before'],
+				),
+				$table_name
+			)
+		);
 	}
 
 	/**
