@@ -8,7 +8,8 @@
     "build:admin": "node build-admin.mjs",
     "watch:blocks": "node watch.mjs blocks ../../plugins/woocommerce/assets/client/blocks",
     "watch:admin": "node watch.mjs admin ../../plugins/woocommerce/assets/client/admin",
-    "dev:admin": "vite --config dev/vite.config.mjs"
+    "dev:admin": "vite --config dev/vite.config.mjs",
+    "build:dev": "node build-blocks.mjs --dev && node build-admin.mjs --dev"
   },
   "dependencies": {
     "@jridgewell/remapping": "^2.3.5",

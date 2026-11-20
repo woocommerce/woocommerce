@@ -15,15 +15,18 @@ const started = performance.now();
 const outDir = args.out || OUT;
 const only = args.only ? String( args.only ).split( ',' ) : null;
 const want = ( name ) => ! only || only.includes( name );
-const css = createCss( 'blocks', { minifier: args.minifier || 'cssnano', sass: args.sass || 'sass' } );
+// --dev: a development build, like webpack with NODE_ENV=development.
+const production = ! args.dev;
+const css = createCss( 'blocks', { production, minifier: args.minifier || 'cssnano', sass: args.sass || 'sass' } );
 const jobs = [
 	...[ ...classicConfigs( outDir ), unifiedMainConfig( outDir ) ]
 		.filter( ( c ) => want( c.name ) )
+		.map( ( c ) => ( production ? c : { ...c, mode: 'development' } ) )
 		.map( ( c ) => buildClassic( c ).then( ( { state, ...r } ) => r ) ),
-	want( 'styles' ) && buildBlocksStyles( { outDir, css } )
+	want( 'styles' ) && buildBlocksStyles( { outDir, css, production } )
 		.then( async ( r ) => {
 			// The module asset file hashes the stylesheets, so it goes after them.
-			const modules = want( 'interactivity' ) ? await buildScriptModules( { outDir, css } ) : null;
+			const modules = want( 'interactivity' ) ? await buildScriptModules( { outDir, css, production } ) : null;
 			return { name: 'styles', ...r, modules };
 		} ),
 	want( 'dependency-detection' ) && buildDependencyDetection( { outDir } ),

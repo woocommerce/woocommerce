@@ -24,7 +24,8 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { rolldown, watch } from 'rolldown';
 import { parseAst, parseAstAsync } from 'rolldown/parseAst';
-import MagicString from 'magic-string';
+import MagicString, { Bundle } from 'magic-string';
+import remapping from '@jridgewell/remapping';
 import { styleMark, isStyle } from './css.mjs';
 
 // An external becomes `require( 'wc-g:wp.data' )`; the runtime reads the global.
@@ -651,6 +652,7 @@ async function link( ctx, bundle, config, state ) {
 					? 'var __wcLazy=function(k,t){return Promise.resolve().then(t)};'
 					: 'var __wcLazy=function(k,t){return R.L(k).then(t)};';
 		}
+		const pieces = [];
 		for ( const inlined of inline ) {
 			const item = info.get( inlined );
 			code += `R.f(${ JSON.stringify(
@@ -659,14 +661,54 @@ async function link( ctx, bundle, config, state ) {
 				item.exportHelper
 					? 'var __wcX=function(n,g){Object.defineProperty(exports,n,{enumerable:!0,get:g})};'
 					: ''
-			}${ item.code }\n});`;
+			}`;
+			pieces.push( { start: code.length, file: inlined } );
+			code += `${ item.code }\n});`;
 		}
+		renderedPieces.set( out, pieces );
 		if ( kind === 'entry' ) {
 			code += `R.e(${ JSON.stringify( named ) },${ JSON.stringify( roots[ 0 ] ) });`;
 		}
 		return code + '})();\n';
 	};
 	const rendered = new Map();
+	const renderedPieces = new Map();
+	// The output file's map: our wrapper code maps nowhere, each chunk's
+	// code maps through Rolldown's map of that chunk to the sources.
+	const mapOf = ( out ) => {
+		const code = codeOf( out );
+		const bundle = new Bundle( { separator: '' } );
+		let position = 0;
+		for ( const { start, file } of renderedPieces.get( out ) ) {
+			bundle.addSource( { content: new MagicString( code.slice( position, start ) ) } );
+			const item = info.get( file );
+			bundle.addSource( { filename: file, content: item.ms } );
+			position = start + item.code.length;
+		}
+		bundle.addSource( { content: new MagicString( code.slice( position ) ) } );
+		const linked = bundle.generateMap( { hires: 'boundary' } );
+		const outDir = path.resolve( config.outDir );
+		const map = remapping( linked, ( file ) => {
+			const chunk = info.get( file )?.chunk;
+			if ( ! chunk?.map ) {
+				return null;
+			}
+			// Rolldown's sources are relative to the chunk file.
+			const chunkDir = path.dirname( path.join( outDir, chunk.fileName ) );
+			const json = typeof chunk.map.toString === 'function' ? JSON.parse( chunk.map.toString() ) : chunk.map;
+			return {
+				...json,
+				sources: json.sources.map( ( source ) => path.resolve( chunkDir, source ) ),
+				sourcesContent: json.sourcesContent,
+			};
+		} );
+		const fileDir = path.dirname( path.join( outDir, out ) );
+		map.file = path.posix.basename( out );
+		map.sources = map.sources.map( ( source ) =>
+			source ? path.relative( fileDir, source ).split( path.sep ).join( '/' ) : source
+		);
+		return JSON.stringify( map );
+	};
 	const codeOf = ( out ) => {
 		if ( ! rendered.has( out ) ) {
 			rendered.set( out, render( outputs.get( out ) ) );
@@ -685,7 +727,12 @@ async function link( ctx, bundle, config, state ) {
 		if ( config.cssOnly ) {
 			continue;
 		}
-		emit( out, code );
+		if ( config.sourcemap ) {
+			emit( `${ out }.map`, mapOf( out ) );
+			emit( out, `${ code }//# sourceMappingURL=${ path.posix.basename( out ) }.map\n` );
+		} else {
+			emit( out, code );
+		}
 
 		if ( kind === 'lazy' ) {
 			continue;
@@ -775,6 +822,8 @@ async function link( ctx, bundle, config, state ) {
 
 export function rolldownOptions( config, state ) {
 	const production = config.mode !== 'development';
+	// Like webpack's `devtool: 'source-map'` in development builds.
+	config.sourcemap = config.sourcemap ?? ! production;
 	const input = {
 		cwd: config.cwd,
 		input: Object.fromEntries(
@@ -838,6 +887,7 @@ export function rolldownOptions( config, state ) {
 		dir: config.outDir,
 		format: 'cjs',
 		minify: config.minify ?? production,
+		sourcemap: Boolean( config.sourcemap ),
 		comments: { legal: false, annotation: false, jsdoc: false },
 		entryFileNames: '[name].js',
 		chunkFileNames: '_/[name]-[hash].js',

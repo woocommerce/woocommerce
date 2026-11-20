@@ -7,7 +7,7 @@ const args = Object.fromEntries( process.argv.slice( 2 ).map( ( a ) => {
 	return [ k, v ];
 } ) );
 const started = performance.now();
-const configs = adminConfigs( { outDir: args.out || OUT, sass: args.sass || 'sass', perEntry: args.single !== true } );
+const configs = adminConfigs( { outDir: args.out || OUT, sass: args.sass || 'sass', perEntry: args.single !== true, production: ! args.dev } );
 const results = await Promise.all( configs.map( ( c ) => buildClassic( c ).then( ( { state, ...r } ) => r ) ) );
 await disposeSass();
 const css = configs[ 0 ].css_;
