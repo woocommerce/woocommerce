@@ -70,7 +70,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
-	 * @throws \Throwable When holding stock fails for a reason other than stock.
+	 * @throws \Throwable When holding stock fails for a reason other than stock, or a hook refuses the order.
 	 *
 	 * @return \WP_REST_Response
 	 */
@@ -175,9 +175,6 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
-		do_action( 'woocommerce_store_api_checkout_order_processed', $order );
-
 		$state = array_merge(
 			$state,
 			array(
@@ -187,6 +184,22 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 				'fingerprint'  => $fingerprint,
 			)
 		);
+
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
+			do_action( 'woocommerce_store_api_checkout_order_processed', $order );
+		} catch ( \Throwable $e ) {
+			// The pending order already spent its coupons and holds stock, and must not outlive the refused attempt.
+			$kept = $this->cancel_handed_off_order( $state, __( 'UCP checkout session could not be completed.', 'woocommerce' ) );
+
+			// An order that could not be cancelled, or that the hook had paid, stays tracked.
+			if ( ! empty( $kept['order_id'] ) ) {
+				$this->save_checkout_state( $kept );
+			}
+
+			throw $e;
+		}
+
 		$this->save_checkout_state( $state );
 
 		return $this->checkout_response( $checkout_id, $this->checkout_state() ?? $state, 200, $cart );

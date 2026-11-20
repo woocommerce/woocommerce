@@ -1150,6 +1150,42 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Complete cancels the order a hook refused after it was saved, so a retry keeps the usage-limited coupon.
+	 */
+	public function test_complete_cancels_the_order_when_the_processed_hook_throws(): void {
+		$coupon  = \WC_Helper_Coupon::create_coupon(
+			'once',
+			array(
+				'coupon_amount' => '1',
+				'usage_limit'   => '1',
+			)
+		);
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'PUT', $path, array( 'discounts' => array( 'codes' => array( 'once' ) ) ) );
+
+		$order_id = 0;
+		$throw    = static function ( $order ) use ( &$order_id ) {
+			$order_id = $order->get_id();
+			throw new \RuntimeException( 'Refused.' );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $throw );
+		$response = $this->request( 'POST', $path . '/complete' );
+		remove_action( 'woocommerce_store_api_checkout_order_processed', $throw );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::CANCELLED ) );
+		$this->assertSame( 0, ( new \WC_Coupon( $coupon->get_id() ) )->get_usage_count() );
+
+		$this->simulate_new_request();
+		$retry = $this->request( 'POST', $path . '/complete' )->get_data();
+		$this->assertSame( array( 'once' ), array_column( $retry['discounts']['applied'] ?? array(), 'code' ) );
+		$this->assertNotEmpty( $retry['continue_url'] );
+		$this->assertNotSame( $order_id, (int) WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertSame( 1, ( new \WC_Coupon( $coupon->get_id() ) )->get_usage_count() );
+	}
+
+	/**
 	 * @testdox A coupon removed because coupons were turned off is reported even when the cart has a stock error too.
 	 */
 	public function test_removed_coupon_is_reported_beside_a_stock_error(): void {
