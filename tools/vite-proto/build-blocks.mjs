@@ -1,5 +1,6 @@
 // Full blocks build: every webpack config of client/blocks.
 import { buildClassic } from './lib/classic.mjs';
+import { writeBundleReport } from './lib/analyze.mjs';
 import { execFileSync } from 'node:child_process';
 import { disposeSass, createCss } from './lib/css.mjs';
 import { BLOCKS } from './lib/shared.mjs';
@@ -39,4 +40,8 @@ const jobs = [
 ].filter( Boolean );
 const results = await Promise.all( jobs );
 await disposeSass();
+const report = writeBundleReport( outDir, 'WooCommerce blocks bundle report' );
+if ( report ) {
+	console.error( `Bundle report: ${ report }` );
+}
 console.log( JSON.stringify( { tool: 'rolldown', ms: Math.round( performance.now() - started ), results } ) );

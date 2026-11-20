@@ -350,6 +350,15 @@ async function analyzeChunk( chunk, chunkOfModule, state, licenses ) {
 	return { ms, code: ms.toString(), css, lazy, externals, exportHelper, legal };
 }
 
+// Like DependencyExtractionWebpackPlugin's combineAssets: one assets.json
+// file instead of an .asset.php file per script, for `build:check-assets`.
+const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
+
+// Like WP_BUNDLE_ANALYZER in the webpack builds: build-*.mjs writes a
+// report of what each script holds, from `analysis`.
+const ANALYZE = Boolean( process.env.WP_BUNDLE_ANALYZER || process.env.ANALYZE );
+export const analysis = [];
+
 // Terser's rule for license comments.
 const LEGAL = /^\/[*/]!|@preserve|@license|@cc_on/im;
 
@@ -747,6 +756,7 @@ async function link( ctx, bundle, config, state ) {
 	const versionOf = ( out ) => hash( codeOf( out ) );
 
 	state.outputs = [];
+	const assetCheck = {};
 	const cssByOutput = new Map();
 	for ( const output of outputs.values() ) {
 		const { out, kind, roots, item } = output;
@@ -798,7 +808,9 @@ async function link( ctx, bundle, config, state ) {
 				];
 			}
 		}
-		if ( config.assetFiles !== false ) {
+		if ( config.assetFiles !== false && ASSET_CHECK ) {
+			assetCheck[ out ] = { dependencies, version: hash( code ) };
+		} else if ( config.assetFiles !== false ) {
 			emit(
 				out.replace( /\.js$/, '.asset.php' ),
 				assetPhp( { dependencies, version: hash( code ) } )
@@ -827,6 +839,18 @@ async function link( ctx, bundle, config, state ) {
 			},
 		} );
 	}
+	if ( ANALYZE ) {
+		// What each written script holds, for the bundle report.
+		for ( const [ out, pieces ] of renderedPieces ) {
+			const modules = {};
+			for ( const { file } of pieces ) {
+				for ( const [ id, m ] of Object.entries( info.get( file ).chunk.modules ) ) {
+					modules[ path.relative( config.root, id ) ] = m.renderedLength;
+				}
+			}
+			analysis.push( { build: config.name, out, bytes: files.get( out )?.length ?? 0, modules } );
+		}
+	}
 	if ( process.env.WC_DUMP ) {
 		fs.writeFileSync(
 			process.env.WC_DUMP,
@@ -854,6 +878,13 @@ async function link( ctx, bundle, config, state ) {
 		const target = path.join( config.outDir, file );
 		fs.mkdirSync( path.dirname( target ), { recursive: true } );
 		fs.writeFileSync( target, content );
+	}
+	if ( Object.keys( assetCheck ).length ) {
+		// Every config adds its scripts to the one assets.json file.
+		const target = path.join( config.outDir, 'assets.json' );
+		const existing = fs.existsSync( target ) ? JSON.parse( fs.readFileSync( target, 'utf8' ) ) : {};
+		fs.mkdirSync( config.outDir, { recursive: true } );
+		fs.writeFileSync( target, JSON.stringify( { ...existing, ...assetCheck } ) );
 	}
 	state.files = [ ...files.keys() ];
 }
