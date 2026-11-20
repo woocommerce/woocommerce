@@ -50,6 +50,13 @@ class SubmissionHandler {
 	private const AUTO_REJECTED_META_KEY = '_wc_auto_rejected';
 
 	/**
+	 * Order meta listing the product|variation slots this handler has inserted a
+	 * review for. It answers only "is this the first review for the item?", so it
+	 * still holds after the comment row is trashed, spammed or deleted.
+	 */
+	private const REVIEWED_SLOTS_META_KEY = '_wc_review_submitted_slots';
+
+	/**
 	 * Wire the AJAX endpoints.
 	 *
 	 * Auto-called by the WC dependency container after instantiation.
@@ -297,12 +304,11 @@ class SubmissionHandler {
 				continue;
 			}
 
-			// A moderator's spam/trash verdict for this slot is final.
-			if ( self::has_rejected_review( $order, $line_product_id, $line_variation_id ) ) {
-				$result['error']       = 'update_failed';
-				$results[ $row_index ] = $result;
-				continue;
-			}
+			// A repeat review (the earlier one was removed by the store) gets the same
+			// checks as the product page; only a first review skips them.
+			$reviewed_slots = (array) $order->get_meta( self::REVIEWED_SLOTS_META_KEY );
+			$is_first       = ! in_array( $slot_key, $reviewed_slots, true )
+				&& ! self::has_rejected_review( $order, $line_product_id, $line_variation_id );
 
 			// A row the pipeline auto-rejected earlier is invisible to decide()
 			// (it only looks at approved/held rows). Reuse it instead of storing a
@@ -343,13 +349,18 @@ class SubmissionHandler {
 					'comment_type'         => 'review',
 					'user_id'              => $comment_user_id,
 					'comment_meta'         => $comment_meta,
-				)
+				),
+				$is_first
 			);
 			if ( ! $comment_id || is_wp_error( $comment_id ) ) {
 				$result['error']       = 'insert_failed';
 				$results[ $row_index ] = $result;
 				continue;
 			}
+
+			$reviewed_slots[] = $slot_key;
+			$order->update_meta_data( self::REVIEWED_SLOTS_META_KEY, array_values( array_unique( $reviewed_slots ) ) );
+			$order->save();
 
 			// Tag a row the checks rejected (spam/trash) as an automatic rejection,
 			// so a later valid resubmission is treated as a fresh attempt rather
@@ -488,9 +499,12 @@ class SubmissionHandler {
 	 * spam checks and notifications as a comment posted on the product page.
 	 *
 	 * @param array $comment_data Unslashed comment data.
+	 * @param bool  $is_first     Whether this is the customer's first review of the item. Repeats
+	 *                            skip the three bypass filters, so WordPress decides as it does
+	 *                            on the product page.
 	 * @return int|false|\WP_Error Comment ID, false on failure, or the error from the comment checks.
 	 */
-	private static function insert_review( array $comment_data ) {
+	private static function insert_review( array $comment_data, bool $is_first = true ) {
 		// Sanitize the address as core's pre_comment_author_email chain would, but
 		// keep it un-encoded (sanitize_email preserves `&`) so the eligibility
 		// lookups still match the order's billing email.
@@ -502,13 +516,15 @@ class SubmissionHandler {
 		// These reviews are tied to a real purchased line item, so don't hold them
 		// behind the "commenter must already have an approved comment" gate that
 		// core applies to anonymous blog commenters.
-		add_filter( 'pre_option_comment_previously_approved', '__return_zero' );
-		// Variations share the parent product, so identical text on two of them is not a duplicate.
-		add_filter( 'duplicate_comment_id', '__return_zero' );
+		if ( $is_first ) {
+			add_filter( 'pre_option_comment_previously_approved', '__return_zero' );
+			// Variations share the parent product, so identical text on two of them is not a duplicate.
+			add_filter( 'duplicate_comment_id', '__return_zero' );
+			// Rows are capped at one review per purchased item, and core's flood query matches order notes by IP.
+			add_filter( 'wp_is_comment_flood', '__return_false', PHP_INT_MAX );
+		}
 		// Keep the sanitized address as-is; core's chain would otherwise encode `&`.
 		add_filter( 'pre_comment_author_email', $keep_raw_email, PHP_INT_MAX );
-		// Rows are capped at one review per purchased item, and core's flood query matches order notes by IP.
-		add_filter( 'wp_is_comment_flood', '__return_false', PHP_INT_MAX );
 
 		try {
 			return wp_new_comment( wp_slash( $comment_data ), true );
@@ -522,9 +538,10 @@ class SubmissionHandler {
 
 	/**
 	 * Whether a moderator already marked this exact order/product/variation
-	 * review as spam or trash. Reviews the comment pipeline auto-rejected (tagged
+	 * review as spam or trash. Fallback for reviews stored before
+	 * REVIEWED_SLOTS_META_KEY existed. Reviews the comment pipeline auto-rejected (tagged
 	 * with AUTO_REJECTED_META_KEY) are excluded, so an automatic verdict does not
-	 * lock the customer out of resubmitting a clean review.
+	 * count as an earlier review.
 	 *
 	 * @param WC_Order $order        Order being reviewed.
 	 * @param int      $product_id   Parent product id.
