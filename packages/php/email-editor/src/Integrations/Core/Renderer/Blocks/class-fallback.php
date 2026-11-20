@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
@@ -30,6 +31,11 @@ class Fallback extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		// Content that shows nothing, e.g. only a `<style>` tag, is left unwrapped so the block adds no gap.
+		if ( ! Html_Processing_Helper::has_visible_content( $block_content ) ) {
+			return $block_content;
+		}
+
 		$block_attrs = $parsed_block['attrs'] ?? array();
 
 		$table_attrs = array(

@@ -757,4 +757,34 @@ class Html_Processing_Helper {
 
 		return implode( '; ', $sanitized_styles );
 	}
+
+	/**
+	 * Check whether HTML has anything an email shows: an element or non-whitespace text.
+	 *
+	 * Comments and `<style>`/`<script>` elements don't count, since the email doesn't show them.
+	 *
+	 * @param string $html HTML to check.
+	 * @return bool
+	 */
+	public static function has_visible_content( string $html ): bool {
+		$processor = new \WP_HTML_Tag_Processor( $html );
+		while ( $processor->next_token() ) {
+			$token_type = $processor->get_token_type();
+			if ( '#comment' === $token_type ) {
+				continue;
+			}
+			if ( '#text' === $token_type ) {
+				if ( '' !== trim( $processor->get_modifiable_text() ) ) {
+					return true;
+				}
+				continue;
+			}
+			if ( '#tag' === $token_type && in_array( $processor->get_tag(), array( 'STYLE', 'SCRIPT' ), true ) ) {
+				continue;
+			}
+			return true;
+		}
+		// Keep HTML the processor couldn't finish reading rather than risk dropping content.
+		return $processor->paused_at_incomplete_token();
+	}
 }
