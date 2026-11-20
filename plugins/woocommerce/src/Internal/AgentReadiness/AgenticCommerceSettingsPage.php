@@ -98,6 +98,16 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
+	 * A page title for a dropdown. Tags are removed and entities decoded, so a stored title shows as the merchant wrote it.
+	 *
+	 * @param \WP_Post $page Page.
+	 * @return string
+	 */
+	private static function page_title( \WP_Post $page ): string {
+		return html_entity_decode( wp_strip_all_tags( get_the_title( $page ) ), ENT_QUOTES, 'UTF-8' );
+	}
+
+	/**
 	 * The store policy fields, on AI shopping. The privacy policy page is a WordPress setting, so it is
 	 * listed, and saved, only for users who can manage privacy options.
 	 *
@@ -113,7 +123,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			)
 		);
 		foreach ( is_array( $published ) ? $published : array() as $page ) {
-			$pages[ (string) $page->ID ] = $page->post_title;
+			$pages[ (string) $page->ID ] = self::page_title( $page );
 		}
 		$page_field = static function ( string $option, string $title ) use ( $pages, $store_pages ): array {
 			$options = $pages;
@@ -123,7 +133,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				$status = get_post_status_object( $stored->post_status );
 				$state  = in_array( $stored->ID, $store_pages, true ) ? __( 'Store page', 'woocommerce' ) : ( $status ? $status->label : $stored->post_status );
 				/* translators: 1: page title, 2: page status, such as Draft, or "Store page". */
-				$options[ (string) $stored->ID ] = sprintf( __( '%1$s (%2$s)', 'woocommerce' ), $stored->post_title, $state );
+				$options[ (string) $stored->ID ] = sprintf( __( '%1$s (%2$s)', 'woocommerce' ), self::page_title( $stored ), $state );
 			}
 			return array(
 				'title'              => $title,

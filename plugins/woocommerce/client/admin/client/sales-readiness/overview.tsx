@@ -62,7 +62,7 @@ export default function SalesReadinessOverview( {
 							area,
 						} ),
 				}
-			: { disabled: true, onClick: () => {} };
+			: { disabled: true };
 
 	return (
 		<div className="wc-sales-readiness wc-sales-readiness--overview">

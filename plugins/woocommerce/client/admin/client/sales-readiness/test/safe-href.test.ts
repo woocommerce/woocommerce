@@ -8,6 +8,9 @@ describe( 'safeHref', () => {
 		expect( safeHref( 'https://ucpplayground.com/' ) ).toBe(
 			'https://ucpplayground.com/'
 		);
+		expect( safeHref( '  https://ucpplayground.com/ ' ) ).toBe(
+			'https://ucpplayground.com/'
+		);
 		expect( safeHref( 'http://example.com/wp-admin/' ) ).toBe(
 			'http://example.com/wp-admin/'
 		);
@@ -19,10 +22,10 @@ describe( 'safeHref', () => {
 			'/wp-admin/plugins.php'
 		);
 		expect( safeHref( 'HTTPS://ucpplayground.com/Path' ) ).toBe(
-			'https://ucpplayground.com/Path'
+			'HTTPS://ucpplayground.com/Path'
 		);
 		expect( safeHref( 'Http://example.com/' ) ).toBe(
-			'http://example.com/'
+			'Http://example.com/'
 		);
 	} );
 

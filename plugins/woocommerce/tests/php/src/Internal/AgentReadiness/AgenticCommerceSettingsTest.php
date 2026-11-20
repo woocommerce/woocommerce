@@ -2193,7 +2193,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An entity in a page title or a check label stays inside the JSON, and the attribute leaves no & for the browser to decode.
+	 * @testdox A page title is shown with its entities decoded, and an entity in a check label stays inside the JSON.
 	 */
 	public function test_page_title_with_entities_stays_inside_the_view(): void {
 		$title  = 'Returns &quot;}, &quot;z&quot;: {&quot;a&quot;: &quot; &amp; &lt;b&gt; <i>';
@@ -2209,7 +2209,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$view   = $this->shopping();
 		$labels = array_merge( ...array_map( static fn( array $field ): array => array_column( $field['options'], 'label' ), $view['policies']['fields'] ) );
-		$this->assertContains( self::plain_apostrophes( $stored ), array_map( array( self::class, 'plain_apostrophes' ), $labels ), 'The title is a page name in each policy field' );
+		$shown  = html_entity_decode( wp_strip_all_tags( get_the_title( $id ) ), ENT_QUOTES, 'UTF-8' );
+		$this->assertContains( self::plain_apostrophes( $shown ), array_map( array( self::class, 'plain_apostrophes' ), $labels ), 'The dropdown shows the title with its entities decoded' );
 
 		// ReadinessCopy has no wording for this check, so the stored label is what the Overview shows.
 		$label = 'Blue &quot;}, &amp; Co <i>';

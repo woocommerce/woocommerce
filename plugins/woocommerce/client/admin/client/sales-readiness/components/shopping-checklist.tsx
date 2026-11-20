@@ -17,16 +17,22 @@ import { Row } from './check-row';
 type Checklist = ShoppingView[ 'checklist' ];
 
 /**
- * Props that make a @wordpress/ui Button a link: an anchor that keeps the link role. This
- * version of the package has no ButtonLink.
+ * Props that make a @wordpress/ui Button a link, or that disable it when the URL is rejected.
+ * This version of the package has no ButtonLink.
  */
-export const asLink = ( href: string ) => ( {
-	nativeButton: false,
-	role: 'link',
-	// The Button renders the text into it.
-	// eslint-disable-next-line jsx-a11y/anchor-has-content
-	render: <a href={ safeHref( href ) } />,
-} );
+export const asLink = ( href: string ) => {
+	const safe = safeHref( href );
+	if ( ! safe ) {
+		return { disabled: true };
+	}
+	return {
+		nativeButton: false as const,
+		role: 'link' as const,
+		// The Button renders the text into it.
+		// eslint-disable-next-line jsx-a11y/anchor-has-content
+		render: <a href={ safe } />,
+	};
+};
 
 /**
  * The open setup steps, required ones first, each with a button to where to fix it, then the
