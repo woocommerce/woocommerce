@@ -24,14 +24,14 @@ class DeclaredToAgents {
 	public function all( StoreResponses $responses ): array {
 		$responses->home_page();
 		$items = array();
-		foreach ( $this->files() as $id => $file ) {
+		foreach ( self::files() as $id => $file ) {
 			$items[] = array(
 				'id'    => $id,
 				'name'  => $file[0],
 				'found' => self::file_served( $responses, $file[1] ),
 			);
 		}
-		foreach ( $this->documents() as $id => $document ) {
+		foreach ( self::documents() as $id => $document ) {
 			$items[] = array(
 				'id'    => $id,
 				'name'  => $document[0],
@@ -73,6 +73,25 @@ class DeclaredToAgents {
 	}
 
 	/**
+	 * Where an item lives, for grouping on the page: 'root' for a file in the site's root folder,
+	 * 'address' for one under /.well-known, 'code' for page markup, 'extra' for anything else.
+	 *
+	 * @param string $id Item id.
+	 */
+	public static function group( string $id ): string {
+		foreach ( array_merge( self::files(), self::documents() ) as $key => $item ) {
+			if ( $key === $id ) {
+				return 0 === strpos( $item[1], '/.well-known/' ) ? 'address' : 'root';
+			}
+		}
+		if ( 'mcp-server-card' === $id ) {
+			return 'address';
+		}
+		$code = array( 'sameas-links', 'site-search-action', 'webmcp-forms-schema', 'markdown-alternate-link', 'code-block-language', 'editorial-metadata', 'site-search-autocomplete' );
+		return in_array( $id, $code, true ) ? 'code' : 'extra';
+	}
+
+	/**
 	 * WooCommerce's llms.txt status, null without its llms.txt fallback (woocommerce #70741).
 	 *
 	 * @return array{status:string,section:string}|null
@@ -106,7 +125,7 @@ class DeclaredToAgents {
 	 *
 	 * @return array<string, array{0:string,1:string}> Name and path from the host root.
 	 */
-	private function files(): array {
+	private static function files(): array {
 		return array(
 			'ai-txt'       => array( __( 'ai.txt usage file', 'woocommerce' ), '/ai.txt' ),
 			'sitemap-md'   => array( __( 'Markdown sitemap', 'woocommerce' ), '/sitemap.md' ),
@@ -123,7 +142,7 @@ class DeclaredToAgents {
 	 *
 	 * @return array<string, array{0:string,1:string,2:callable(array<mixed>):bool}> Name, path from the host root, and test.
 	 */
-	private function documents(): array {
+	private static function documents(): array {
 		$has = static fn( string ...$keys ): callable => static fn( array $document ): bool => array() === array_diff( $keys, array_keys( array_filter( $document ) ) );
 		return array(
 			'api-catalog'              => array( __( 'API catalog', 'woocommerce' ), '/.well-known/api-catalog', $has( 'linkset' ) ),

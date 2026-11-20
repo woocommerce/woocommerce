@@ -663,6 +663,21 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 						'name'  => 'TDMRep',
 						'found' => null,
 					),
+					array(
+						'id'    => 'api-catalog',
+						'name'  => 'API catalog',
+						'found' => false,
+					),
+					array(
+						'id'    => 'sameas-links',
+						'name'  => 'sameAs links',
+						'found' => false,
+					),
+					array(
+						'id'    => 'markdown-pages',
+						'name'  => 'Markdown pages',
+						'found' => false,
+					),
 				),
 			)
 		);
@@ -670,26 +685,22 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$view = $this->view();
 
 		$this->assertSame( 'What does your store share with AI assistants?', $view['declared']['title'] );
-		$this->assertSame( 'Optional files that some AI assistants look for. You don’t need to fix anything. Found 1 of 3.', $view['declared']['text'] );
+		$this->assertSame( 'These are other files and code that some AI assistants use to learn about your store. Your store shares 1 of these 5. None are required, so there’s nothing to fix.', $view['declared']['text'] );
 		$this->assertSame( 'Optional', $view['declared']['badge']['text'] );
 		$this->assertSame(
 			array(
-				array(
-					'name'  => 'ai.txt usage file',
-					'found' => true,
-				),
-				array(
-					'name'  => 'AGENTS.md',
-					'found' => false,
-				),
-				array(
-					'name'  => 'TDMRep',
-					'found' => false,
-				),
+				'Files in your root folder'       => array( 'ai.txt usage file', 'AGENTS.md' ),
+				'Files at standard addresses'     => array( 'API catalog' ),
+				'In your page code'               => array( 'sameAs links' ),
+				'Extra details for AI assistants' => array( 'Markdown pages' ),
+				'Not checked yet'                 => array( 'TDMRep' ),
 			),
-			$view['declared']['items'],
-			'Every item, found or not'
+			array_column( array_map( static fn( array $group ): array => array( $group['title'], array_column( $group['items'], 'name' ) ), $view['declared']['groups'] ), 1, 0 ),
+			'Every item, found or not, under where it lives; an item the scan couldn\'t read is under Not checked yet'
 		);
+		$groups = array_column( $view['declared']['groups'], 'items', 'title' );
+		$this->assertSame( array( true, false ), array_column( $groups['Files in your root folder'], 'found' ) );
+		$this->assertNull( $groups['Not checked yet'][0]['found'], 'Not checked is neither found nor missing' );
 
 		$report             = get_option( 'woocommerce_agent_readiness_report' );
 		$report['declared'] = array(
@@ -735,7 +746,23 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertStringContainsString( 'You don’t need to fix anything. Found 0 of 1.', $this->view()['declared']['text'] );
+		$this->assertStringContainsString( 'Your store shares 0 of these 1.', $this->view()['declared']['text'] );
+
+		update_option(
+			'woocommerce_agent_readiness_report',
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+				'declared'     => array(
+					array(
+						'id'    => 'ai-txt',
+						'name'  => 'ai.txt usage file',
+						'found' => null,
+					),
+				),
+			)
+		);
+		$this->assertStringNotContainsString( 'shares', $this->view()['declared']['text'], 'With nothing checked, as in coming soon mode, there is no count' );
 
 		update_option(
 			'woocommerce_agent_readiness_report',
@@ -786,14 +813,14 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$fix_first = $this->view()['fix_first'];
 		$this->assertSame( array( 'missing_images', 'missing_brand' ), array_column( $fix_first['items'], 'id' ), 'An issue whose count changed since the check keeps the rank its sales gave it' );
-		$this->assertStringNotContainsString( 'of your sales', $fix_first['items'][0]['why'], 'Its share is not shown, since it was measured on other products' );
-		$this->assertStringStartsWith( '1% of your sales in the last 90 days.', $fix_first['items'][1]['why'], 'The first share shown says the period' );
+		$this->assertNull( $fix_first['items'][0]['impact'], 'Its share is not shown, since it was measured on other products' );
+		$this->assertSame( 'Affects 1% of your sales.', $fix_first['items'][1]['impact'] );
 
 		$report['checks'][0]['sales_share'] = 0.0;
 		update_option( AgentReadiness::REPORT_OPTION, $report );
 		$fix_first = $this->view()['fix_first'];
 		$this->assertSame( 'Ranked by how many products and AI apps each issue affects.', $fix_first['ranking'], 'No issue on the card sold anything, so sales did not decide the order' );
-		$this->assertStringStartsWith( 'No sales in the last 90 days.', $fix_first['items'][1]['why'] );
+		$this->assertSame( 'These products had no recent sales.', $fix_first['items'][1]['impact'] );
 	}
 
 	/**
@@ -896,9 +923,10 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame( array( 'Required for AI shopping', 'Needed to list products', 'Needed to list products', 'Helps shoppers find products' ), array_column( $fix_first['items'], 'tier' ) );
 		$this->assertSame( array( 'Required', null, null, null ), array_map( static fn( array $item ): ?string => $item['badge']['text'] ?? null, $fix_first['items'] ), 'Only the Required heading has a badge' );
-		$this->assertArrayNotHasKey( 'impact', $fix_first['items'][1], 'The share of sales is in the line, so no badge repeats it' );
-		$this->assertSame( '18% of your sales in the last 90 days. AI shopping apps need a main image to list a product.', $fix_first['items'][1]['why'], 'The first share says over which period, then why the issue matters' );
-		$this->assertSame( '5% of your sales. ChatGPT only lists products that have a brand. In Google and Copilot, a brand makes products easier to find.', $fix_first['items'][2]['why'], 'The next ones give only the share' );
+		$this->assertSame( 'Affects 18% of your sales.', $fix_first['items'][1]['impact'], 'What the issue affects is shown in bold before its line' );
+		$this->assertSame( 'AI shopping apps need a main image to list a product.', $fix_first['items'][1]['why'], 'The line is why the issue matters; the ranking line gives the period' );
+		$this->assertSame( 'Affects 5% of your sales.', $fix_first['items'][2]['impact'] );
+		$this->assertNull( $fix_first['items'][0]['impact'], 'A Required step has its badge instead' );
 		$this->assertNotEmpty( $fix_first['items'][0]['link']['text'] ?? '', 'A setup step links to where to fix it' );
 		$this->assertSame(
 			array(
@@ -912,13 +940,13 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$report['checks'][1]['sales_share'] = 0.0;
 		update_option( AgentReadiness::REPORT_OPTION, $report );
 		$json = wp_json_encode( $this->view() );
-		$this->assertStringContainsString( 'No sales. ChatGPT only lists products that have a brand.', $json, 'Products that sold nothing in the period say so, not 0%' );
+		$this->assertStringContainsString( '"impact":"These products had no recent sales."', $json, 'Products that sold nothing in the period say so, not 0%' );
 		$this->assertStringNotContainsString( '"0% of', $json );
 		$report['checks'][1]['sales_share'] = 0.003;
 		update_option( AgentReadiness::REPORT_OPTION, $report );
 		$view = $this->view();
-		$this->assertStringContainsString( 'under 1% of your sales', wp_json_encode( $view['fix_first'] ), 'A share under 1% is not rounded to 0%' );
-		$this->assertStringNotContainsString( 'under 1%', wp_json_encode( $view['sections'] ), 'Shares are in Fix first only, not on the product card' );
+		$this->assertStringContainsString( 'Affects less than 1% of your sales.', wp_json_encode( $view['fix_first'] ), 'A share under 1% is not rounded to 0%' );
+		$this->assertStringNotContainsString( 'less than 1%', wp_json_encode( $view['sections'] ), 'Shares are in Fix first only, not on the product card' );
 
 		$report['sales'] = null;
 		foreach ( $report['checks'] as &$row ) {
@@ -931,6 +959,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Turn on Analytics to see which fixes affect the most sales.', $fix_first['link']['text'] );
 		$this->assertStringContainsString( 'tab=advanced&section=features', $fix_first['link']['href'], 'The link opens the Features settings, where Analytics is turned on' );
 		$this->assertStringNotContainsString( 'of your sales', wp_json_encode( $fix_first ) );
+		$this->assertStringNotContainsString( 'whole store', wp_json_encode( $fix_first ), 'Without sales to compare, store-wide issues don\'t say so' );
 
 		$report['sales'] = array(
 			'days'   => 90,
@@ -1140,7 +1169,16 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$items = $this->view()['fix_first']['items'];
 		$this->assertSame( 'store_wide label', $items[0]['title'], 'It keeps every product off, so it ranks as all sales' );
-		$this->assertStringStartsWith( '90% of your sales', $items[1]['why'], 'The product issue below it gives its share in the line' );
+		$this->assertSame( 'Affects 90% of your sales.', $items[1]['impact'], 'The product issue below it gives its share' );
+		$this->assertSame( 'Needed to list products', $items[0]['tier'] );
+		$this->assertSame( 'Affects your whole store.', $items[0]['impact'], 'A store-wide issue outside Required says it affects the whole store' );
+
+		$report                             = get_option( AgentReadiness::REPORT_OPTION );
+		$report['checks'][0]['sales_share'] = 0.0;
+		update_option( AgentReadiness::REPORT_OPTION, $report );
+		$fix_first = $this->view()['fix_first'];
+		$this->assertSame( 'Ranked by how many products and AI apps each issue affects.', $fix_first['ranking'], 'No product issue sold anything' );
+		$this->assertNull( $fix_first['items'][0]['impact'], 'so the card does not compare sales, and the store-wide issue says nothing about them' );
 	}
 
 	/**
@@ -1298,14 +1336,14 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$stored['truncated'] = true;
 		update_option( AgentReadiness::REPORT_OPTION, $stored );
 		$this->assertSame(
-			sprintf( 'Checked the %s products you changed most recently.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			sprintf( 'Product checks covered the %s products you updated most recently. Store conditions and discovery checks covered your whole store; Product details still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
 			$this->view()['checked_note'],
 			'A report without the total keeps the short note'
 		);
 		$stored['available'] = 8400;
 		update_option( AgentReadiness::REPORT_OPTION, $stored );
 		$this->assertSame(
-			sprintf( 'Checked the %s products you changed most recently, out of 8,400.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			sprintf( 'Product checks covered the %s products you updated most recently, out of 8,400. Store conditions and discovery checks covered your whole store; Product details still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
 			$this->view()['checked_note'],
 			'With the total from the same scan'
 		);
