@@ -301,7 +301,6 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			 * @since 7.2.0
 			 *
 			 * @param \WC_Order $draft_order Order object.
-			 * @param \WC_Customer $customer Customer object.
 			 * @param \WP_REST_Request $request Full details about the request.
 			 */
 			do_action( 'woocommerce_store_api_cart_update_order_from_request', $draft_order, $request );
