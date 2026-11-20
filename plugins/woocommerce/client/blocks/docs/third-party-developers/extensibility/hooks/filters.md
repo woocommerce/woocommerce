@@ -35,6 +35,7 @@
 - [woocommerce_breadcrumb_product_terms_args](#woocommerce_breadcrumb_product_terms_args)
 - [woocommerce_cart_contents_changed](#woocommerce_cart_contents_changed)
 - [woocommerce_cart_item_permalink](#woocommerce_cart_item_permalink)
+- [woocommerce_checkout_link_sold_individually_cart_item_data](#woocommerce_checkout_link_sold_individually_cart_item_data)
 - [woocommerce_checkout_must_be_logged_in_message](#woocommerce_checkout_must_be_logged_in_message)
 - [woocommerce_checkout_show_terms](#woocommerce_checkout_show_terms)
 - [woocommerce_default_payment_method](#woocommerce_default_payment_method)
@@ -863,6 +864,33 @@ This is a hook taken from the legacy cart/mini-cart templates that allows the pe
 ### Source
 
 - [StoreApi/Schemas/V1/CartItemSchema.php](../../../../../../src/StoreApi/Schemas/V1/CartItemSchema.php)
+
+---
+
+## woocommerce_checkout_link_sold_individually_cart_item_data
+
+
+Filters the cart item data kept for a sold-individually product or variation added via a checkout link.
+
+```php
+apply_filters( 'woocommerce_checkout_link_sold_individually_cart_item_data', array $cart_item_data, array $raw_cart_item_data, \WC_Product $product )
+```
+
+### Description
+
+Empty by default, so repeated adds of the same product share one cart item and the one-per-order limit holds. Returning data lets it vary, so the limit is no longer guaranteed.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $cart_item_data | array | Cart item data to keep. Empty by default. |
+| $raw_cart_item_data | array | Cart item data parsed from the link, before stripping. |
+| $product | \WC_Product | The resolved product or variation. |
+
+### Source
+
+- [Blocks/Domain/Services/CheckoutLink.php](../../../../../../src/Blocks/Domain/Services/CheckoutLink.php)
 
 ---
 
