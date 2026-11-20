@@ -49,7 +49,7 @@ const php = ( value ) => {
 	return `'${ value }'`;
 };
 
-async function buildModule( name, file, outDir, production, css ) {
+async function buildModule( name, file, outDir, production, css, watched ) {
 	const styles = [];
 	const staticDeps = new Set();
 	const dynamicDeps = new Set();
@@ -117,6 +117,10 @@ async function buildModule( name, file, outDir, production, css ) {
 				load: {
 					filter: { id: /\.s[ac]ss$/ },
 					handler( id ) {
+						// On a watch rebuild, compile the style again if it or a partial changed.
+						if ( watched && css?.markOf( id ) !== undefined ) {
+							css.invalidate( id );
+						}
 						styles.push( id );
 						return { code: '', moduleType: 'js' };
 					},
@@ -131,6 +135,17 @@ async function buildModule( name, file, outDir, production, css ) {
 		comments: { legal: false, annotation: false, jsdoc: false },
 		entryFileNames: '[name].js',
 	} );
+	if ( watched ) {
+		for ( const id of await bundle.watchFiles ) {
+			watched.add( id );
+		}
+		for ( const id of css ? styles : [] ) {
+			watched.add( id );
+			for ( const dep of await css.depsOf( id ) ) {
+				watched.add( dep );
+			}
+		}
+	}
 	await bundle.close();
 	const chunk = output[ 0 ];
 	for ( const id of chunk.imports ) {
@@ -163,11 +178,12 @@ async function buildModule( name, file, outDir, production, css ) {
 	];
 }
 
-export async function buildScriptModules( { outDir = OUT, production = true, css } = {} ) {
+// `watched`, when given, collects every source file the modules read, for watch mode.
+export async function buildScriptModules( { outDir = OUT, production = true, css, watched } = {} ) {
 	const started = performance.now();
 	const records = await Promise.all(
 		Object.entries( moduleEntries ).map( ( [ name, file ] ) =>
-			buildModule( name, file, outDir, production, css )
+			buildModule( name, file, outDir, production, css, watched )
 		)
 	);
 	// Webpack also lists the style entries of this config; PHP reads the
@@ -198,7 +214,7 @@ export async function buildScriptModules( { outDir = OUT, production = true, css
 	};
 }
 
-export async function buildDependencyDetection( { outDir = OUT } = {} ) {
+export async function buildDependencyDetection( { outDir = OUT, watched } = {} ) {
 	const started = performance.now();
 	const bundle = await rolldown( {
 		cwd: BLOCKS,
@@ -217,6 +233,9 @@ export async function buildDependencyDetection( { outDir = OUT } = {} ) {
 		comments: { legal: false, annotation: false, jsdoc: false },
 		entryFileNames: '[name].js',
 	} );
+	for ( const id of watched ? await bundle.watchFiles : [] ) {
+		watched.add( id );
+	}
 	await bundle.close();
 	return { name: 'dependency-detection', ms: Math.round( performance.now() - started ), files: 1 };
 }

@@ -160,6 +160,12 @@ export function createCss(
 	const markFor = styleMark;
 	const assets = new Map();
 	const mtimes = new Map();
+	const deps = new Map();
+	// Changes when the file or any partial it loaded is written.
+	const signature = ( file ) =>
+		[ file, ...( deps.get( file ) || [] ) ]
+			.map( ( f ) => ( fs.existsSync( f ) ? fs.statSync( f ).mtimeMs : 0 ) )
+			.join( ',' );
 	const stats = { sassMs: 0, postcssMs: 0, modules: 0 };
 
 	const inlineUrls = ( css, file, outputDir ) =>
@@ -219,6 +225,14 @@ export function createCss(
 				quietDeps: true,
 			} );
 			css = result.css;
+			// The partials and imports this file loaded, for watch mode.
+			deps.set(
+				file,
+				result.loadedUrls
+					.filter( ( url ) => url.protocol === 'file:' )
+					.map( ( url ) => fileURLToPath( url ) )
+					.filter( ( dep ) => dep !== file )
+			);
 		} else {
 			css = fs.readFileSync( file, 'utf8' );
 		}
@@ -237,6 +251,7 @@ export function createCss(
 		}
 		stats.postcssMs += performance.now() - afterSass;
 		stats.modules++;
+		mtimes.set( file, signature( file ) );
 		return css;
 	}
 
@@ -256,25 +271,34 @@ export function createCss(
 		mark( file ) {
 			if ( ! index.has( file ) ) {
 				const id = markFor( file );
-				mtimes.set( file, fs.statSync( file ).mtimeMs );
 				index.set( file, id );
 				files.set( id, file );
 				const promise = compile( file );
-				promise.catch( () => {} );
+				// A failed compile runs again on the next rebuild.
+				promise.catch( () => mtimes.set( file, 'failed' ) );
 				cache.set( file, promise );
 			}
 			return index.get( file );
 		},
 		fileOf: ( mark ) => files.get( mark ),
+		/** The partials a style file loaded, once it has compiled. */
+		async depsOf( file ) {
+			await cache.get( file )?.catch( () => {} );
+			return deps.get( file ) || [];
+		},
 		markOf: ( file ) => index.get( file ),
 		invalidate( file ) {
 			// Rolldown loads every module again on a watch rebuild, so only
 			// compile a file again when it was written since the last time.
-			const mtime = fs.statSync( file ).mtimeMs;
-			if ( index.has( file ) && mtimes.get( file ) !== mtime ) {
-				mtimes.set( file, mtime );
+			// Not compiled yet, or still compiling the first time.
+			if ( ! mtimes.has( file ) ) {
+				return;
+			}
+			if ( mtimes.get( file ) !== signature( file ) ) {
+				mtimes.delete( file );
 				const promise = compile( file );
-				promise.catch( () => {} );
+				// A failed compile runs again on the next rebuild.
+				promise.catch( () => mtimes.set( file, 'failed' ) );
 				cache.set( file, promise );
 			}
 		},
@@ -356,13 +380,16 @@ export function cssMarkPlugin( css ) {
 		name: 'wc-css-marks',
 		load: {
 			filter: { id: /\.(s[ac]ss|css)$/ },
-			handler( id ) {
-				// A reload in watch mode means the file changed. Sass partials
-				// are not watched yet; that needs addWatchFile per loaded URL.
+			async handler( id ) {
+				// A reload in watch mode may mean the file or a partial changed.
 				if ( this.meta.watchMode ) {
-					this.addWatchFile( id );
 					if ( css.markOf( id ) !== undefined ) {
 						css.invalidate( id );
+					}
+					css.mark( id );
+					// A change to a partial reloads this module too.
+					for ( const dep of await css.depsOf( id ) ) {
+						this.addWatchFile( dep );
 					}
 				}
 				return {
