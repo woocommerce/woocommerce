@@ -8,8 +8,10 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Ucp\AbstractCheckoutRoute;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for the /wc/ucp/v1/checkout-sessions endpoints.
@@ -633,6 +635,145 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertSame( 'completed', $paid['status'] );
 		$this->assertSame( (string) $order->get_id(), $paid['order']['id'] );
 		$this->assertSame( 409, $this->request( 'PUT', '/checkout-sessions/' . $created['id'], array() )->get_status() );
+	}
+
+	/**
+	 * @testdox A status an extension adds to the payable list keeps the hand-off, including its payment page.
+	 */
+	public function test_checkout_keeps_an_extension_payable_status(): void {
+		$declare = static function ( $statuses ) {
+			$statuses[] = 'checkout-draft';
+			return $statuses;
+		};
+		add_filter( 'woocommerce_valid_order_statuses_for_payment', $declare );
+
+		try {
+			$created = $this->create_ready_checkout();
+			$path    = '/checkout-sessions/' . $created['id'];
+			$this->request( 'POST', $path . '/complete' );
+			$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+			wc_get_order( $order_id )->update_status( 'checkout-draft' );
+
+			$read = $this->request( 'GET', $path )->get_data();
+			$this->assertSame( 'requires_escalation', $read['status'] );
+			$this->assertArrayHasKey( 'continue_url', $read );
+			$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
+		} finally {
+			remove_filter( 'woocommerce_valid_order_statuses_for_payment', $declare );
+		}
+	}
+
+	/**
+	 * @testdox An update whose cancellation does not land reports the failure while the order is still payable.
+	 */
+	public function test_update_refuses_when_cancellation_leaves_the_order_payable(): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'POST', $path . '/complete' );
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		WC()->cart->set_quantity( (string) array_key_first( WC()->cart->get_cart() ), 2 );
+
+		$fail = static function ( $order ) {
+			if ( $order->has_status( OrderStatus::CANCELLED ) ) {
+				throw new \Exception( 'Save failed.' );
+			}
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		try {
+			$response = $this->request( 'PUT', $path, array() );
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ) );
+		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
+	}
+
+	/**
+	 * @testdox A payment stored after the order was cached is kept, and the checkout reports it.
+	 */
+	public function test_update_keeps_an_order_paid_behind_the_cache(): void {
+		global $wpdb;
+
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'POST', $path . '/complete' );
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		WC()->cart->set_quantity( (string) array_key_first( WC()->cart->get_cart() ), 2 );
+
+		// The row a payment in another request would have written, with this request's cache left as it was.
+		wc_get_order( $order_id );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'status' => 'wc-processing' ), array( 'id' => $order_id ) );
+		} else {
+			$wpdb->update( $wpdb->posts, array( 'post_status' => 'wc-processing' ), array( 'ID' => $order_id ) );
+		}
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ), 'The cached order still reads as pending.' );
+
+		$updated = $this->request( 'PUT', $path, array() );
+
+		$this->assertSame( 'completed', $updated->get_data()['status'] );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PROCESSING ) );
+		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
+	}
+
+	/**
+	 * @testdox A processed callback that pays the order and then fails does not make the retry create another order.
+	 */
+	public function test_complete_remembers_an_order_a_callback_pays_then_fails(): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$fail    = static function ( $order ) {
+			$order->payment_complete();
+			throw new \Exception( 'later callback failed' );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $fail );
+
+		try {
+			$this->request( 'POST', $path . '/complete' );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $fail );
+		}
+
+		$order_id = (int) WC()->session->get( 'ucp_checkout' )['order_id'];
+		$this->assertTrue( wc_get_order( $order_id )->is_paid() );
+
+		$again = $this->request( 'POST', $path . '/complete' );
+		$this->assertSame( 409, $again->get_status() );
+		$this->assertCount(
+			1,
+			wc_get_orders(
+				array(
+					'status' => 'any',
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Cancelling still writes when the payable-status list repeats a status.
+	 */
+	public function test_cancel_accepts_a_repeated_payable_status(): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'POST', $path . '/complete' );
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		$repeat   = static function ( $statuses ) {
+			$statuses[] = OrderStatus::PENDING;
+			return $statuses;
+		};
+
+		add_filter( 'woocommerce_valid_order_statuses_for_payment', $repeat );
+		try {
+			$this->request( 'PUT', $path, array( 'line_items' => array( $this->line_item( 1, 2 ) ) ) );
+		} finally {
+			remove_filter( 'woocommerce_valid_order_statuses_for_payment', $repeat );
+		}
+
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::CANCELLED ) );
 	}
 
 	/**

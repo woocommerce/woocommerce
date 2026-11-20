@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\OrderSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
@@ -100,17 +101,6 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	}
 
 	/**
-	 * The statuses in which the payment page still takes an order, as `WC_Order::needs_payment()` lists them.
-	 *
-	 * @param \WC_Order $order The order.
-	 * @return array<string>
-	 */
-	protected function payable_statuses( \WC_Order $order ): array {
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core's hook, documented in WC_Order::needs_payment().
-		return (array) apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order );
-	}
-
-	/**
 	 * Cancel the order handed to the buyer while its payment page would still take it, and forget the hand-off.
 	 *
 	 * Once the checkout changes or ends, that order no longer matches it and must not be paid.
@@ -130,8 +120,9 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 			}
 
 			// The payment page's own list, so a failed attempt the buyer could retry is closed too.
+			// The order is read again just before, so a payment stored since it was cached is not overwritten.
 			// A cancellation that did not save leaves the order payable, so the checkout goes on tracking it.
-			if ( ! $order->update_status( OrderStatus::CANCELLED, $note ) ) {
+			if ( ! $this->cancel_order_if_still_payable( $order, $note ) ) {
 				return $state;
 			}
 
@@ -144,6 +135,44 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 		$this->save_checkout_state( $state );
 
 		return $state;
+	}
+
+	/**
+	 * Cancel an order only when its stored status is still one the payment page accepts.
+	 *
+	 * The order is read again without the cache first, so a payment already stored is kept.
+	 * A payment that lands after the cancellation still completes, because
+	 * `WC_Order::payment_complete()` accepts a cancelled order.
+	 *
+	 * @param \WC_Order $order The handed-off order.
+	 * @param string    $note Order note explaining the cancellation.
+	 * @return bool Whether the order was saved as cancelled.
+	 */
+	private function cancel_order_if_still_payable( \WC_Order $order, string $note ): bool {
+		$this->forget_cached_order( $order->get_id() );
+		$stored = wc_get_order( $order->get_id() );
+
+		if ( ! $stored instanceof \WC_Order || ! $stored->has_status( $this->payable_statuses( $stored ) ) ) {
+			return false;
+		}
+
+		return (bool) $stored->update_status( OrderStatus::CANCELLED, $note );
+	}
+
+	/**
+	 * Drop a cached order so the next read sees the status a concurrent payment stored.
+	 *
+	 * @param int $order_id Order ID.
+	 */
+	private function forget_cached_order( int $order_id ): void {
+		wc_get_container()->get( OrderCache::class )->remove( $order_id );
+
+		$store = \WC_Data_Store::load( 'order' );
+		if ( is_callable( array( $store, 'clear_cached_data' ) ) ) {
+			$store->clear_cached_data( array( $order_id ) );
+		}
+
+		clean_post_cache( $order_id );
 	}
 
 	/**

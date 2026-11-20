@@ -156,9 +156,10 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
-		do_action( 'woocommerce_store_api_checkout_order_processed', $order );
-
+		// Stored before the processed callbacks, which can pay the order. A callback that then
+		// fails must leave this association in place so a retry finds the order and does not
+		// create another. The hook is not run again on that retry: a callback that already
+		// ran must not run twice, which is also how the Store API checkout behaves.
 		$state = array_merge(
 			$state,
 			array(
@@ -169,6 +170,9 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			)
 		);
 		$this->save_checkout_state( $state );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
+		do_action( 'woocommerce_store_api_checkout_order_processed', $order );
 
 		return $this->checkout_response( $checkout_id, $this->checkout_state() ?? $state, 200, $cart );
 	}
