@@ -33,6 +33,13 @@ class ReportsSync {
 		// The very first save of the option takes the add_option path, so hook both.
 		add_action( 'add_option_woocommerce_date_type', array( ReportsCache::class, 'invalidate' ) );
 		add_action( 'update_option_woocommerce_date_type', array( ReportsCache::class, 'invalidate' ) );
+		// Week Starts On and the excluded statuses are read at query time, and can change outside the
+		// Analytics settings screen (General settings, WP-CLI, update_option), so hook every write path.
+		foreach ( array( 'start_of_week', 'woocommerce_excluded_report_order_statuses' ) as $option ) {
+			add_action( "add_option_{$option}", array( ReportsCache::class, 'invalidate' ) );
+			add_action( "update_option_{$option}", array( ReportsCache::class, 'invalidate' ) );
+			add_action( "delete_option_{$option}", array( ReportsCache::class, 'invalidate' ) );
+		}
 		add_action( 'trashed_post', array( __CLASS__, 'maybe_clear_stock_count_cache_for_post' ) );
 		add_action( 'untrashed_post', array( __CLASS__, 'maybe_clear_stock_count_cache_for_post' ) );
 		add_action( 'delete_post', array( __CLASS__, 'maybe_clear_stock_count_cache_for_post' ) );
