@@ -46,7 +46,6 @@ export default [
 			],
 			'import/resolver': {
 				node: {},
-				webpack: {},
 				typescript: {
 					project: [
 						'plugins/woocommerce/client/admin/tsconfig.json',

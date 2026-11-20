@@ -134,7 +134,7 @@ export const classicConfigs = ( outDir = OUT ) => [
 	},
 ];
 
-// Mirrors bin/webpack-config-block-editor-unified-assets.js.
+// The packages the unified editor bundle loads as externals.
 const editorExternalPackages = [
 	'@woocommerce/block-data',
 	'@woocommerce/blocks-checkout',

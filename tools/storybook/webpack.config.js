@@ -4,13 +4,101 @@
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 
+const webpack = require( 'webpack' );
+
 /**
- * External dependencies
+ * Internal dependencies
  */
-const wcAdminWebpackConfig = require( '../../plugins/woocommerce/client/admin/webpack.config.js' );
 const {
+	webpackConfig: styleConfig,
 	WebpackRTLPlugin,
 } = require( '@woocommerce/internal-build/style-build' );
+
+// The admin build no longer uses webpack, so Storybook keeps the parts of
+// the old admin webpack config that it needs to load admin code.
+const ADMIN_DIR = path.resolve( __dirname, '../../plugins/woocommerce/client/admin' );
+const SETTINGS_UI_DIR = path.resolve( __dirname, '../../packages/js/settings-ui' );
+const packageDir = ( name, from ) =>
+	path.dirname( require.resolve( `${ name }/package.json`, { paths: [ from ] } ) );
+const dataViewsDir = packageDir( '@wordpress/dataviews', SETTINGS_UI_DIR );
+const dataViewsUiDir = packageDir( '@wordpress/ui', dataViewsDir );
+const dataViewsDependencyRoots = [
+	...new Set(
+		[
+			dataViewsDir,
+			packageDir( '@wordpress/components', dataViewsDir ),
+			packageDir( '@wordpress/compose', dataViewsDir ),
+			packageDir( '@wordpress/data', dataViewsDir ),
+			dataViewsUiDir,
+			packageDir( '@wordpress/theme', dataViewsUiDir ),
+		].map( ( dir ) => path.resolve( dir, '../..' ) )
+	),
+];
+const isProduction = process.env.NODE_ENV === 'production';
+
+const wcAdminWebpackConfig = {
+	module: {
+		rules: [
+			{
+				include: path.resolve( SETTINGS_UI_DIR, 'src/dataform-runtime.ts' ),
+				sideEffects: true,
+			},
+			{
+				// DataViews' /wp build leaves its third-party imports external.
+				// Resolve them from the package graph it was built against.
+				include: require.resolve( '@wordpress/dataviews/wp', {
+					paths: [ SETTINGS_UI_DIR ],
+				} ),
+				sideEffects: true,
+				resolve: {
+					modules: [ ...dataViewsDependencyRoots, 'node_modules' ],
+				},
+			},
+			{
+				test: /\.(t|j)sx?$/,
+				parser: { amd: false },
+				exclude: [
+					/[\/\\]node_modules[\/\\]\.pnpm[\/\\]/,
+					/[\/\\](changelog|bin|build|docs|test)[\/\\]/,
+				],
+				use: {
+					loader: 'babel-loader',
+					options: {
+						configFile: false,
+						sourceType: 'unambiguous',
+						presets: [ '@wordpress/babel-preset-default' ],
+						plugins: isProduction
+							? [ require.resolve( 'babel-plugin-transform-react-remove-prop-types' ) ]
+							: [],
+					},
+				},
+			},
+			{ test: /\.md$/, use: 'raw-loader' },
+			{
+				test: /@wordpress[\/\\]theme[\/\\].*\.css$/,
+				sideEffects: true,
+			},
+			{
+				test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/,
+				type: 'asset',
+			},
+			...styleConfig.rules,
+		],
+	},
+	resolve: {
+		alias: {
+			'~': path.join( ADMIN_DIR, 'client' ),
+			'react/jsx-dev-runtime': require.resolve( 'react/jsx-dev-runtime' ),
+			'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),
+		},
+	},
+	plugins: [
+		...styleConfig.plugins,
+		new webpack.DefinePlugin( {
+			__i18n_text_domain__: JSON.stringify( 'woocommerce' ),
+		} ),
+	],
+};
 
 module.exports = ( storybookConfig ) => {
 	storybookConfig.module.rules = [

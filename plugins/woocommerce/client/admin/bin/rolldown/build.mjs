@@ -1,4 +1,4 @@
-// Full admin build: client/admin's webpack config.
+// Full admin build. Usage: node bin/rolldown/build.mjs [--dev] [--out=<dir>]
 import { buildClassic } from '@woocommerce/rolldown-build/classic';
 import { writeBundleReport } from '@woocommerce/rolldown-build/analyze';
 import { disposeSass } from '@woocommerce/rolldown-build/css';

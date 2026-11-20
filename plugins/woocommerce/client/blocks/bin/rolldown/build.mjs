@@ -1,4 +1,4 @@
-// Full blocks build: every webpack config of client/blocks.
+// Full blocks build. Usage: node bin/rolldown/build.mjs [--dev] [--out=<dir>] [--only=<names>]
 import { buildClassic } from '@woocommerce/rolldown-build/classic';
 import { writeBundleReport } from '@woocommerce/rolldown-build/analyze';
 import { execFileSync } from 'node:child_process';
@@ -32,7 +32,7 @@ const jobs = [
 		} ),
 	want( 'dependency-detection' ) && buildDependencyDetection( { outDir } ),
 	want( 'block-json' ) && Promise.resolve( copyBlockJson( { outDir } ) ).then( ( r ) => {
-		// The same manifest step trunk runs after webpack.
+		// blocks-json.php, the manifest PHP reads to register the blocks.
 		const t = performance.now();
 		execFileSync( 'pnpm', [ 'exec', 'wp-scripts', 'build-blocks-manifest', `--input=${ outDir }`, `--output=${ outDir }/blocks-json.php` ], { cwd: BLOCKS, stdio: 'ignore' } );
 		return { ...r, manifestMs: Math.round( performance.now() - t ) };

@@ -1,12 +1,7 @@
-/* eslint-disable no-console */
 /**
  * External dependencies
  */
 const path = require( 'path' );
-const chalk = require( 'chalk' );
-const NODE_ENV = process.env.NODE_ENV || 'development';
-const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
-const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
 
 // See also @woocommerce/dependency-extraction-webpack-plugin/assets/packages and
 // docs/internal-developers/enqueueable-packages/README.md. They should stay in sync with this map.
@@ -146,19 +141,6 @@ const getAlias = ( options = {} ) => {
 	};
 };
 
-// Activates the `"wc-source"` conditional export declared in each
-// `packages/js/*` package.json. Webpack walks the package's exports map and
-// picks `./src/index.ts` directly — eliminating the need to pre-build the few
-// `@woocommerce/*` packages that blocks bundles (i.e. not externalized via
-// `wcDepMap`). The condition is namespaced (`wc-` prefix) so it never collides
-// with third-party packages that publish their own `"source"` conditional
-// export. `'...'` extends the default webpack condition list.
-const getResolve = ( { alias, resolvePlugins = [] } = {} ) => ( {
-	conditionNames: [ 'wc-source', '...' ],
-	plugins: resolvePlugins,
-	...( alias ? { alias } : {} ),
-} );
-
 const requestToExternal = ( request ) => {
 	if ( request in wcDepMap ) {
 		return wcDepMap[ request ];
@@ -183,87 +165,8 @@ const requestToHandle = ( request ) => {
 	}
 };
 
-const getProgressBarPluginConfig = ( name ) => {
-	return {
-		format:
-			chalk.blue( `Building ${ name }` ) +
-			' [:bar] ' +
-			chalk.green( ':percent' ) +
-			' :msg (:elapsed seconds)',
-		summary: false,
-		customSummary: ( time ) => {
-			console.log(
-				chalk.green.bold(
-					`${ name } assets build completed (${ time })`
-				)
-			);
-		},
-	};
-};
-
-const getCacheGroups = () => ( {
-	'base-components': {
-		test: /\/assets\/js\/base\/components\//,
-		name( module, chunks, cacheGroupKey ) {
-			const moduleFileName = module
-				.identifier()
-				.split( '/' )
-				.reduceRight( ( item ) => item );
-			const allChunksNames = chunks
-				.map( ( item ) => item.name )
-				.join( '~' );
-			return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
-		},
-	},
-	'base-context': {
-		test: /\/assets\/js\/base\/context\//,
-		name( module, chunks, cacheGroupKey ) {
-			const moduleFileName = module
-				.identifier()
-				.split( '/' )
-				.reduceRight( ( item ) => item );
-			const allChunksNames = chunks
-				.map( ( item ) => item.name )
-				.join( '~' );
-			return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
-		},
-	},
-	'base-hooks': {
-		test: /\/assets\/js\/base\/hooks\//,
-		name( module, chunks, cacheGroupKey ) {
-			const moduleFileName = module
-				.identifier()
-				.split( '/' )
-				.reduceRight( ( item ) => item );
-			const allChunksNames = chunks
-				.map( ( item ) => item.name )
-				.join( '~' );
-			return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
-		},
-	},
-	'base-utils': {
-		test: /\/assets\/js\/base\/utils\//,
-		name( module, chunks, cacheGroupKey ) {
-			const moduleFileName = module
-				.identifier()
-				.split( '/' )
-				.reduceRight( ( item ) => item );
-			const allChunksNames = chunks
-				.map( ( item ) => item.name )
-				.join( '~' );
-			return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
-		},
-	},
-} );
-
 module.exports = {
-	NODE_ENV,
-	CHECK_CIRCULAR_DEPS,
-	ASSET_CHECK,
 	getAlias,
-	getResolve,
 	requestToHandle,
 	requestToExternal,
-	getProgressBarPluginConfig,
-	getCacheGroups,
 };

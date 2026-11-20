@@ -1,6 +1,6 @@
 /**
  * client/admin: one config with scripts, styles, images and lazy chunks.
- * Mirrors plugins/woocommerce/client/admin/webpack.config.js.
+ * Each package entry sets a `wc.*` global; wp-admin-scripts are leaf scripts.
  */
 import fs from 'node:fs';
 import path from 'node:path';

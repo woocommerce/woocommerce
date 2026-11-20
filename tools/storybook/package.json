@@ -39,6 +39,8 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/base-styles": "catalog:wp-bundled",
+		"babel-plugin-transform-react-remove-prop-types": "catalog:tooling",
+		"raw-loader": "4.0.x",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
 		"storybook": "10.6.5",
