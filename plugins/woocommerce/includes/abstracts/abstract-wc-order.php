@@ -2277,7 +2277,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// Remove the coupon line.
 		foreach ( $coupons as $coupon ) {
 			if ( wc_is_same_coupon( $coupon->get_code(), $code ) ) {
-				$this->remove_item( $this->get_stored_item_key( $coupon ) );
+				$item_key    = $this->get_stored_item_key( $coupon );
+				$stored_item = $this->get_item( $item_key, false );
+				$this->remove_item( $item_key );
 				$coupon_object = new WC_Coupon( $code );
 
 				$staged = isset( $this->staged_coupons[ $coupon_object->get_code() ] );
@@ -2289,18 +2291,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					}
 				}
 
-				if ( $has_recorded ) {
-					// Mirror the stored flag into this instance so clearing it below is tracked as a change and saved.
-					$this->set_recorded_coupon_usage_counts( true );
-
-					if ( ! $staged ) {
-						$this->write_or_defer( 'release_coupon_usage_' . $coupon_object->get_code(), array( $this, 'release_removed_coupon_usage' ), array( $coupon_object, $used_by ) );
-					}
-
-					$remaining_codes = array_filter( $this->get_coupon_codes(), fn( $remaining_code ) => ! StringUtil::is_null_or_whitespace( $remaining_code ) );
-					if ( ! $remaining_codes ) {
-						$this->set_recorded_coupon_usage_counts( false );
-					}
+				if ( $has_recorded && ! $staged ) {
+					$this->write_or_defer( 'release_coupon_usage_' . $coupon_object->get_code(), array( $this, 'release_removed_coupon_usage' ), array( $stored_item, $coupon_object, $used_by ) );
+				} elseif ( $has_recorded ) {
+					$this->clear_recorded_coupon_usage_without_coupons();
 				}
 
 				if ( $this->writing_through ) {
@@ -2319,16 +2313,89 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Lower the usage count of a removed coupon, and forget the identity it was counted under.
+	 * Delete the line of a removed coupon whose use the order counted, and give the use back if this call deleted it.
 	 *
-	 * @param WC_Coupon  $coupon_object Removed coupon.
-	 * @param int|string $used_by       User ID or billing email to use when no identity was stored.
+	 * @param WC_Order_Item|false $stored_item   Removed coupon line, as stored in this order.
+	 * @param WC_Coupon           $coupon_object Removed coupon.
+	 * @param int|string          $used_by       User ID or billing email to use when no identity was stored.
 	 */
-	private function release_removed_coupon_usage( WC_Coupon $coupon_object, $used_by ): void {
-		$identities = $this->get_coupon_usage_identities();
-		$coupon_object->decrease_usage_count( $identities[ $coupon_object->get_id() ] ?? $used_by );
-		unset( $identities[ $coupon_object->get_id() ] );
-		$this->save_coupon_usage_identities( $identities );
+	private function release_removed_coupon_usage( $stored_item, WC_Coupon $coupon_object, $used_by ): void {
+		// Read before the line is deleted: a cancellation running meanwhile deletes the identities.
+		$identities     = $this->get_coupon_usage_identities();
+		$gives_use_back = $this->delete_counted_coupon_line( $stored_item );
+
+		// Null: another call deleted the line, or the delete failed and the use stays counted. Either way the counted flag is left alone.
+		if ( null !== $gives_use_back ) {
+			$this->clear_recorded_coupon_usage_without_coupons();
+		}
+
+		if ( $gives_use_back ) {
+			$coupon_object->decrease_usage_count( $identities[ $coupon_object->get_id() ] ?? $used_by );
+			unset( $identities[ $coupon_object->get_id() ] );
+			$this->save_coupon_usage_identities( $identities );
+		}
+	}
+
+	/**
+	 * Delete the coupon line of an order that counted its use, and tell whether this call should give the use back.
+	 *
+	 * Only the call that deleted the line gives the use back, and only while the stored order is still counted, so
+	 * parallel removals and a parallel cancellation give it back at most once.
+	 * If a cancellation, or a removal that empties the order, runs at the same moment, both can skip it and the count stays one too high.
+	 *
+	 * @param WC_Order_Item|false $stored_item Removed coupon line, as stored in this order.
+	 * @return bool|null True if this call should give the coupon's use back, false if not, null if another call deleted the line or the delete failed.
+	 */
+	private function delete_counted_coupon_line( $stored_item ): ?bool {
+		if ( ! $stored_item instanceof WC_Order_Item_Coupon || ! $stored_item->get_id() ) {
+			return true;
+		}
+
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $item_data_store
+		 */
+		$item_data_store = $stored_item->get_data_store();
+		$deleted         = $item_data_store->delete( $stored_item );
+		if ( false === $deleted ) {
+			// A database error. The delete that remove_item() queued runs again on save.
+			return null;
+		}
+
+		// The row is gone, so the delete that remove_item() queued for save() must not run again.
+		$stored_item->set_id( 0 );
+
+		// No row deleted: another call deleted the line first. Item data stores that return nothing (custom or
+		// overridden) cannot report it, so only the counted check below applies to them.
+		if ( null !== $deleted && ! $deleted ) {
+			return null;
+		}
+
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $order_data_store
+		 */
+		$order_data_store = $this->get_data_store();
+		if ( ! $order_data_store->has_callable( 'get_stored_recorded_coupon_usage_counts' ) ) {
+			return true;
+		}
+
+		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
+		return $order_data_store->get_stored_recorded_coupon_usage_counts( $this );
+	}
+
+	/**
+	 * Clear the counted flag when the order has no coupon left.
+	 */
+	private function clear_recorded_coupon_usage_without_coupons(): void {
+		$remaining_codes = array_filter( $this->get_coupon_codes(), fn( $remaining_code ) => ! StringUtil::is_null_or_whitespace( $remaining_code ) );
+		if ( ! $remaining_codes ) {
+			// Mirror the stored flag into this instance so clearing it is tracked as a change and saved.
+			$this->set_recorded_coupon_usage_counts( true );
+			$this->set_recorded_coupon_usage_counts( false );
+		}
 	}
 
 	/**
