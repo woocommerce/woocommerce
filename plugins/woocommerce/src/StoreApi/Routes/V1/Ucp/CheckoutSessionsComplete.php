@@ -179,6 +179,16 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
+		$error = null;
+
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
+			do_action( 'woocommerce_store_api_checkout_order_processed', $order );
+		} catch ( \Throwable $e ) {
+			$error = $e;
+		}
+
+		// Built after the hook, which may change the order key the URL carries.
 		$state = array_merge(
 			$state,
 			array(
@@ -189,10 +199,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			)
 		);
 
-		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
-			do_action( 'woocommerce_store_api_checkout_order_processed', $order );
-		} catch ( \Throwable $e ) {
+		if ( $error ) {
 			// The pending order already spent its coupons and holds stock, and must not outlive the refused attempt.
 			$kept = $this->cancel_handed_off_order( $state, __( 'UCP checkout session could not be completed.', 'woocommerce' ) );
 
@@ -201,7 +208,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 				$this->save_checkout_state( $kept );
 			}
 
-			throw $e;
+			throw $error;
 		}
 
 		$this->save_checkout_state( $state );
