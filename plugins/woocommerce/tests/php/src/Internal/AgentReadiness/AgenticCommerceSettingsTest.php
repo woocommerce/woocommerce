@@ -214,6 +214,24 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An activation source Jetpack already stored is left as it is.
+	 */
+	public function test_connect_redirect_keeps_an_existing_activation_source(): void {
+		update_option( 'jetpack_activation_source', array( 'woocommerce', 'onboarding' ) );
+		AgenticCommerceSettings::connect_redirect();
+		$this->assertSame( array( 'woocommerce', 'onboarding' ), get_option( 'jetpack_activation_source' ) );
+	}
+
+	/**
+	 * @testdox A source that is not a pair is replaced, because Jetpack unpacks the first two items.
+	 */
+	public function test_connect_redirect_replaces_an_activation_source_that_is_not_a_pair(): void {
+		update_option( 'jetpack_activation_source', array( 'woocommerce' ) );
+		AgenticCommerceSettings::connect_redirect();
+		$this->assertSame( array( 'woocommerce', 'ai-tools' ), get_option( 'jetpack_activation_source' ) );
+	}
+
+	/**
 	 * @testdox Only an https WordPress.com URL can be the connection redirect, and its scheme is lowercased.
 	 *
 	 * @testWith ["https://jetpack.wordpress.com/jetpack.authorize/1/?x=1", "https://jetpack.wordpress.com/jetpack.authorize/1/?x=1"]
