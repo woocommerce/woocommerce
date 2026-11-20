@@ -167,6 +167,20 @@ class Filterer {
 					unset( $tax_query[ $key ] );
 				}
 			}
+
+			// OR selections may be removed, but the attribute archive is a fixed constraint.
+			$main_query = \WC_Query::get_main_query();
+			if ( $main_query && $main_query->is_tax( $taxonomy ) ) {
+				$archive_query      = new \WP_Query();
+				$archive_query_vars = $main_query->query_vars;
+				unset( $archive_query_vars['tax_query'] );
+				$archive_query->parse_tax_query( $archive_query_vars );
+				foreach ( $archive_query->tax_query->queries ?? array() as $archive_clause ) {
+					if ( is_array( $archive_clause ) && ( $archive_clause['taxonomy'] ?? '' ) === $taxonomy ) {
+						$tax_query[] = $archive_clause;
+					}
+				}
+			}
 		}
 
 		$meta_query = new \WP_Meta_Query( $meta_query );
