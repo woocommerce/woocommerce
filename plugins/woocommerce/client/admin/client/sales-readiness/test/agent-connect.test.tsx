@@ -20,6 +20,11 @@ const connect = {
 };
 
 describe( 'AgentConnect', () => {
+	afterEach( () => {
+		jest.restoreAllMocks();
+		document.body.querySelector( 'form' )?.remove();
+	} );
+
 	it( 'posts Connect to WordPress.com to the connect action and tracks the click', () => {
 		const submit = jest
 			.spyOn( window.HTMLFormElement.prototype, 'submit' )
@@ -48,8 +53,6 @@ describe( 'AgentConnect', () => {
 				exact: false,
 			} )
 		).not.toBeInTheDocument();
-		submit.mockRestore();
-		form?.remove();
 	} );
 
 	it( 'shows the success notice once, then the next step, without the button', () => {
