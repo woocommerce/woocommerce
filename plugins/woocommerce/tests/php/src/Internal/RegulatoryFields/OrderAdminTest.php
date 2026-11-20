@@ -28,6 +28,7 @@ class OrderAdminTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		require_once WC_ABSPATH . 'includes/admin/wc-meta-box-functions.php';
 		$this->sut = new OrderAdmin();
 		$this->sut->init( new RegulatoryFields() );
 	}
@@ -44,18 +45,17 @@ class OrderAdminTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add an empty CPF/CNPJ input to an order billed to Brazil that has no value yet.
+	 * @testdox Should output a section with an empty CPF/CNPJ input for an order billed to Brazil that has no value yet.
 	 */
-	public function test_adds_empty_field_for_brazil_order(): void {
+	public function test_outputs_section_with_empty_input_for_brazil_order(): void {
 		$order = new WC_Order();
 		$order->set_billing_country( 'BR' );
 
-		$fields = $this->sut->handle_woocommerce_admin_billing_fields( array(), $order );
+		$html = $this->render_section( $order );
 
-		$this->assertArrayHasKey( self::META_KEY, $fields );
-		$this->assertSame( self::META_KEY, $fields[ self::META_KEY ]['id'] );
-		$this->assertSame( 'CPF/CNPJ', $fields[ self::META_KEY ]['label'] );
-		$this->assertSame( '', $fields[ self::META_KEY ]['value'] );
+		$this->assertStringContainsString( '<strong>Additional required information</strong>', $html );
+		$this->assertStringContainsString( '<label for="' . self::META_KEY . '">CPF/CNPJ:</label>', $html );
+		$this->assertMatchesRegularExpression( '/name="' . self::META_KEY . '"[^>]*value=""/', $html );
 	}
 
 	/**
@@ -66,19 +66,55 @@ class OrderAdminTest extends WC_Unit_Test_Case {
 		$order->set_billing_country( 'US' );
 		$order->update_meta_data( self::META_KEY, '52998224725' );
 
-		$fields = $this->sut->handle_woocommerce_admin_billing_fields( array(), $order );
-
-		$this->assertSame( '529.982.247-25', $fields[ self::META_KEY ]['value'] );
+		$this->assertMatchesRegularExpression( '/name="' . self::META_KEY . '"[^>]*value="529\.982\.247-25"/', $this->render_section( $order ) );
 	}
 
 	/**
-	 * @testdox Should add nothing to an order the fields do not apply to and that has no value.
+	 * @testdox Should output nothing, not even the heading, for an order the fields do not apply to and that has no value.
 	 */
-	public function test_adds_nothing_for_other_orders(): void {
+	public function test_outputs_nothing_for_other_orders(): void {
 		$order = new WC_Order();
 		$order->set_billing_country( 'US' );
 
-		$this->assertSame( array(), $this->sut->handle_woocommerce_admin_billing_fields( array(), $order ) );
+		$this->assertSame( '', $this->render_section( $order ) );
+	}
+
+	/**
+	 * @testdox Should hand the field to the order screen's save routine only while an order is being saved, so it is never listed with the billing details.
+	 */
+	public function test_billing_fields_include_field_only_while_saving(): void {
+		$order = new WC_Order();
+		$order->set_billing_country( 'BR' );
+		$sut = $this->sut;
+
+		$this->assertSame( array(), $sut->handle_woocommerce_admin_billing_fields( array(), $order ), 'Not listed when the screen is shown' );
+
+		$fields_while_saving = null;
+		add_action(
+			'woocommerce_process_shop_order_meta',
+			function () use ( $sut, $order, &$fields_while_saving ) {
+				$fields_while_saving = $sut->handle_woocommerce_admin_billing_fields( array(), $order );
+			}
+		);
+		remove_all_actions( 'woocommerce_process_shop_order_meta', 40 );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Admin_Meta_Boxes::save_meta_boxes().
+		do_action( 'woocommerce_process_shop_order_meta', 0, $order );
+
+		$this->assertArrayHasKey( self::META_KEY, $fields_while_saving );
+		$this->assertSame( array( $sut, 'update_order_value' ), $fields_while_saving[ self::META_KEY ]['update_callback'] );
+	}
+
+	/**
+	 * Render the section for an order.
+	 *
+	 * @param WC_Order $order Order.
+	 * @return string
+	 */
+	private function render_section( WC_Order $order ): string {
+		ob_start();
+		$this->sut->handle_woocommerce_admin_order_data_after_order_details( $order );
+
+		return (string) ob_get_clean();
 	}
 
 	/**

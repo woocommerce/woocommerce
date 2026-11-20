@@ -9,7 +9,7 @@ use WC_Order;
 use WP_Error;
 
 /**
- * Shows regulatory fields on the admin order screen, below the billing details, and lets the merchant edit them.
+ * Shows regulatory fields on the admin order screen, in their own section of the General column, and lets the merchant edit them.
  *
  * @internal Just for internal use.
  *
@@ -39,40 +39,77 @@ class OrderAdmin implements RegisterHooksInterface {
 	 * Register hooks and filters.
 	 */
 	public function register(): void {
+		add_action( 'woocommerce_admin_order_data_after_order_details', array( $this, 'handle_woocommerce_admin_order_data_after_order_details' ) );
 		add_filter( 'woocommerce_admin_billing_fields', array( $this, 'handle_woocommerce_admin_billing_fields' ), 10, 2 );
 	}
 
 	/**
-	 * Add the fields that apply to the order, and any field it already has a value for, to the billing details.
+	 * Output the section at the end of the General column: a heading and one input per field.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $order Order being shown.
+	 */
+	public function handle_woocommerce_admin_order_data_after_order_details( $order ): void {
+		$fields = $order instanceof WC_Order ? $this->get_order_fields( $order ) : array();
+
+		if ( empty( $fields ) ) {
+			return;
+		}
+
+		echo '<p class="form-field form-field-wide wc-order-regulatory-fields-title"><strong>' . esc_html__( 'Additional required information', 'woocommerce' ) . '</strong></p>';
+
+		foreach ( $fields as $field ) {
+			woocommerce_wp_text_input( $field, $order );
+		}
+	}
+
+	/**
+	 * Hand the fields to the order screen's own save routine, so the values are saved with the rest of the order.
+	 *
+	 * The fields are added only while the order is being saved. They are not billing details and are not shown with them.
 	 *
 	 * @internal
 	 *
 	 * @param mixed $fields Billing fields of the order screen.
-	 * @param mixed $order  Order being shown.
+	 * @param mixed $order  Order being saved.
 	 * @return mixed
 	 */
 	public function handle_woocommerce_admin_billing_fields( $fields, $order = null ) {
-		if ( ! is_array( $fields ) || ! $order instanceof WC_Order ) {
+		if ( ! is_array( $fields ) || ! $order instanceof WC_Order || ! doing_action( 'woocommerce_process_shop_order_meta' ) ) {
 			return $fields;
 		}
 
-		$display_values = $this->regulatory_fields->get_order_display_values( $order );
-		$all_fields     = $this->regulatory_fields->get_all_fields();
-		$field_ids      = array_unique( array_merge( array_keys( $this->regulatory_fields->get_fields_for_order( $order ) ), array_keys( $display_values ) ) );
-
-		foreach ( $field_ids as $field_id ) {
-			$fields[ RegulatoryFields::META_PREFIX . $field_id ] = array(
-				'id'              => RegulatoryFields::META_PREFIX . $field_id,
-				'label'           => $all_fields[ $field_id ]['label'],
-				'value'           => $display_values[ $field_id ]['value'] ?? '',
-				'type'            => 'text',
-				'show'            => true,
-				'wrapper_class'   => 'form-field-wide',
-				'update_callback' => array( $this, 'update_order_value' ),
-			);
+		foreach ( $this->get_order_fields( $order ) as $input_id => $field ) {
+			$fields[ $input_id ] = array_merge( $field, array( 'update_callback' => array( $this, 'update_order_value' ) ) );
 		}
 
 		return $fields;
+	}
+
+	/**
+	 * Get the inputs for an order: the fields that apply to it, and any field it already has a value for.
+	 *
+	 * @param WC_Order $order Order.
+	 * @return array<string, array<string, string>> Input definitions keyed by input ID, which is the field's meta key.
+	 */
+	private function get_order_fields( WC_Order $order ): array {
+		$display_values = $this->regulatory_fields->get_order_display_values( $order );
+		$all_fields     = $this->regulatory_fields->get_all_fields();
+		$field_ids      = array_unique( array_merge( array_keys( $this->regulatory_fields->get_fields_for_order( $order ) ), array_keys( $display_values ) ) );
+		$inputs         = array();
+
+		foreach ( $field_ids as $field_id ) {
+			$inputs[ RegulatoryFields::META_PREFIX . $field_id ] = array(
+				'id'            => RegulatoryFields::META_PREFIX . $field_id,
+				'label'         => $all_fields[ $field_id ]['label'] . ':',
+				'value'         => $display_values[ $field_id ]['value'] ?? '',
+				'type'          => 'text',
+				'wrapper_class' => 'form-field-wide',
+			);
+		}
+
+		return $inputs;
 	}
 
 	/**
