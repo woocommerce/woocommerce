@@ -295,14 +295,12 @@ class Filterer {
 			{$in_stock_clause}";
 
 		if ( ! empty( $term_ids ) ) {
-			// In lookup mode, selected attributes are not in the main tax query.
-			// Apply them here too, so counts obey the same restrictions as the product list.
+			// The main tax query does not include selected attributes while the lookup table is in use, so they are added here.
 			$attributes_to_filter_by = \WC_Query::get_layered_nav_chosen_attributes();
 
 			if ( ! empty( $attributes_to_filter_by ) ) {
 				foreach ( $attributes_to_filter_by as $filter_taxonomy => $data ) {
-					// A Color OR count must still offer Blue when Red is selected, but must keep
-					// Size=Small if that is selected too. AND counts retain their own selection.
+					// Skip an attribute's own OR selection so its other terms stay available.
 					if ( 'or' === $data['query_type'] && $filter_taxonomy === $taxonomy && 'or' === $query_type ) {
 						continue;
 					}
@@ -320,13 +318,12 @@ class Filterer {
 					}
 					$terms_count   = count( $selected_term_ids );
 					$term_ids_list = $this->get_term_ids_sql( $selected_term_ids );
+
 					if ( 'or' === $data['query_type'] ) {
-						// Any selected term may match; unlike AND below, no all-terms count is needed.
-						// Return parent IDs and check stock on the matching rows, so an in-stock
-						// Large variation cannot make an out-of-stock Small selection count.
-						// The derived table follows the product query's materializable subquery pattern.
-						// Taxonomy is redundant for correctness, but enables the index whose first
-						// columns are taxonomy and term_id instead of scanning the whole lookup table.
+						// Check stock on these rows so an in-stock row for another term cannot match this selection.
+						// Taxonomy lets the query use the lookup index. Term IDs are unique, so it does not change which rows match.
+						// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
+						// (causes the filtering subquery to be executed only once).
 						$query['where'] .= $wpdb->prepare(
 							"
 							AND product_or_parent_id IN ( SELECT product_or_parent_id FROM (
@@ -340,8 +337,6 @@ class Filterer {
 						continue;
 					}
 
-					// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
-					// (causes the filtering subquery to be executed only once).
 					$query['where'] .= "
 						AND product_or_parent_id IN ( SELECT product_or_parent_id FROM (
 							SELECT product_or_parent_id
