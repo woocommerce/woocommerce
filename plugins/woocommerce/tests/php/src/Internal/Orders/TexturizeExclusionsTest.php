@@ -115,11 +115,10 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox On the Review Order, order withdrawal, and stock notification pages, address content is not texturized, while other text is.
+	 * @testdox On the Review Order and order withdrawal pages, address content is not texturized, while other text is.
 	 *
 	 * @testWith ["review-order"]
 	 *           ["order-withdrawal"]
-	 *           ["stock-notifications"]
 	 *
 	 * @param string $page Email page under test.
 	 */

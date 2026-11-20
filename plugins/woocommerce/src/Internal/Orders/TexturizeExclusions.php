@@ -10,23 +10,15 @@ namespace Automattic\WooCommerce\Internal\Orders;
 use Automattic\WooCommerce\Internal\OrderReviews\Endpoint;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalEndpoint;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 
 /**
  * Stops wptexturize() changing customer details, such as emails like `o'neil--shop@48x17.com`.
- *
- * The tag is `address`. Templates put the email inside that element, and this class decides which block-theme requests skip it.
  *
  * @internal Just for internal use.
  *
  * @since 11.4.0
  */
 class TexturizeExclusions implements RegisterHooksInterface {
-
-	/**
-	 * Tag wptexturize() skips. Customer emails sit inside this element.
-	 */
-	private const ADDRESS_TAG = 'address';
 
 	/**
 	 * Register hooks and filters.
@@ -62,7 +54,7 @@ class TexturizeExclusions implements RegisterHooksInterface {
 			return true;
 		}
 
-		if ( is_wc_endpoint_url( OrderWithdrawalEndpoint::ENDPOINT_KEY ) || is_wc_endpoint_url( MyAccountEndpoint::ENDPOINT ) ) {
+		if ( is_wc_endpoint_url( OrderWithdrawalEndpoint::ENDPOINT_KEY ) ) {
 			return true;
 		}
 
@@ -92,48 +84,16 @@ class TexturizeExclusions implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	private function queued_notices_contain_address_markup(): bool {
-		if ( ! function_exists( 'WC' ) || ! WC()->session ) {
-			return false;
-		}
-
-		$notices = wc_get_notices();
-		if ( ! is_array( $notices ) ) {
-			return false;
-		}
-
-		foreach ( $notices as $group ) {
-			if ( ! is_array( $group ) ) {
-				if ( is_string( $group ) && $this->contains_address_tag( $group ) ) {
-					return true;
-				}
-				continue;
-			}
-
-			foreach ( $group as $notice ) {
-				$message = '';
-				if ( is_string( $notice ) ) {
-					$message = $notice;
-				} elseif ( is_array( $notice ) && isset( $notice['notice'] ) && is_string( $notice['notice'] ) ) {
-					$message = $notice['notice'];
-				}
-
-				if ( $this->contains_address_tag( $message ) ) {
+		foreach ( wc_get_notices() as $group ) {
+			foreach ( (array) $group as $notice ) {
+				$message = $notice['notice'] ?? $notice;
+				if ( is_string( $message ) && false !== strpos( $message, '<address' ) ) {
 					return true;
 				}
 			}
 		}
 
 		return false;
-	}
-
-	/**
-	 * Whether a notice string contains the address tag.
-	 *
-	 * @param string $message Notice HTML.
-	 * @return bool
-	 */
-	private function contains_address_tag( string $message ): bool {
-		return '' !== $message && false !== strpos( $message, '<' . self::ADDRESS_TAG );
 	}
 
 	/**
@@ -145,11 +105,11 @@ class TexturizeExclusions implements RegisterHooksInterface {
 	 * @return mixed
 	 */
 	public function add_address_tag( $tags ) {
-		if ( ! is_array( $tags ) || in_array( self::ADDRESS_TAG, $tags, true ) ) {
+		if ( ! is_array( $tags ) || in_array( 'address', $tags, true ) ) {
 			return $tags;
 		}
 
-		$tags[] = self::ADDRESS_TAG;
+		$tags[] = 'address';
 		return $tags;
 	}
 }
