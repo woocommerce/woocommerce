@@ -325,13 +325,18 @@ class Filterer {
 						// Return parent IDs and check stock on the matching rows, so an in-stock
 						// Large variation cannot make an out-of-stock Small selection count.
 						// The derived table follows the product query's materializable subquery pattern.
-						$query['where'] .= "
+						// Taxonomy is redundant for correctness, but enables the index whose first
+						// columns are taxonomy and term_id instead of scanning the whole lookup table.
+						$query['where'] .= $wpdb->prepare(
+							"
 							AND product_or_parent_id IN ( SELECT product_or_parent_id FROM (
 								SELECT product_or_parent_id
 								FROM {$this->lookup_table_name} lt
-								WHERE term_id IN {$term_ids_list}
+								WHERE taxonomy = %s AND term_id IN {$term_ids_list}
 								{$in_stock_clause}
-							) temp )";
+							) temp )",
+							$filter_taxonomy
+						);
 						continue;
 					}
 

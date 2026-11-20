@@ -609,7 +609,11 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		} finally {
 			remove_filter( 'woocommerce_get_filtered_term_product_counts_query', $scope_to_owned_products );
 		}
-		$this->assertEqualsCanonicalizing( $expected, $term_counts );
+		$this->assertCount( count( $expected ), $term_counts, 'Only the expected terms should be counted.' );
+		foreach ( $expected as $term_id => $count ) {
+			$this->assertArrayHasKey( $term_id, $term_counts, 'The expected term ID must be present.' );
+			$this->assertSame( $count, $term_counts[ $term_id ], 'The count must belong to the expected term ID.' );
+		}
 	}
 
 	/**
