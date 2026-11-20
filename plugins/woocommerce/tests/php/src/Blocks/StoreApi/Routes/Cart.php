@@ -116,7 +116,6 @@ class Cart extends ControllerTestCase {
 		// Draft order.
 		$order = new \WC_Order();
 		$order->set_status( 'checkout-draft' );
-		$order->set_created_via( 'store-api' );
 		$order->save();
 		wc()->session->set( 'store_api_draft_order', $order->get_id() );
 	}

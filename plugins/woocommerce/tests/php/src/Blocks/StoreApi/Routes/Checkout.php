@@ -4995,9 +4995,9 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox cart/update-customer leaves an order awaiting its first address without one, so only checkout, which validates it, can set it.
+	 * @testdox GET checkout keeps an order made outside the Store API that awaits its first address as the session draft, and gives it the customer's address.
 	 */
-	public function test_update_customer_does_not_give_an_order_its_first_address(): void {
+	public function test_get_checkout_reuses_an_order_awaiting_its_first_address(): void {
 		$order = $this->create_pending_order_for_us_customer();
 
 		$address = array();
@@ -5010,36 +5010,37 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$order->set_created_via( 'admin' );
 		$order->save();
 
-		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
-		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
-		$request->set_body_params( array( 'shipping_address' => (object) $this->get_fallback_shipping_address() ) );
-
-		$response = rest_get_server()->dispatch( $request );
+		$response = $this->dispatch_store_api_request( 'POST', '/wc/store/v1/cart/update-customer', array( 'shipping_address' => (object) $this->get_fallback_shipping_address() ) );
 		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->assertTrue( $this->get_draft_order_checker()->is_draft( wc_get_order( $order->get_id() ) ), 'Baseline: the order is still the session draft, so the sync would have reached it.' );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'Baseline: the cart total must not change, so only the address checks decide reuse.' );
 
+		$response = $this->dispatch_store_api_request( 'GET', '/wc/store/v1/checkout' );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $order->get_id(), (int) $response->get_data()['order_id'], 'An order made outside the Store API with no address must stay the session draft, as on the pay-for-order page.' );
 		$order = wc_get_order( $order->get_id() );
-		$this->assertSame( '', $order->get_shipping_country() . $order->get_billing_country(), 'A cart request must not give an order its first address; checkout validates it first.' );
+		$this->assertSame( array( 'GB', 'Oxford' ), array( $order->get_shipping_country(), $order->get_shipping_city() ), 'GET checkout should give the reused order the shipping address the customer entered.' );
 	}
 
 	/**
-	 * @testdox cart/update-customer leaves a placed pending order's address and total alone when the customer moves to another destination.
+	 * @testdox GET checkout does not reuse a placed pending order once the customer moves to another destination, and leaves its address and total alone.
 	 */
-	public function test_update_customer_does_not_readdress_a_placed_order(): void {
+	public function test_get_checkout_does_not_reuse_a_placed_order_after_a_destination_change(): void {
+		update_option( 'woocommerce_calc_taxes', 'no' );
 		$order = $this->create_pending_order_for_us_customer();
 		$total = $order->get_total();
 
-		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
-		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
-		$request->set_body_params( array( 'shipping_address' => (object) $this->get_fallback_shipping_address() ) );
-
-		$response = rest_get_server()->dispatch( $request );
+		$response = $this->dispatch_store_api_request( 'POST', '/wc/store/v1/cart/update-customer', array( 'shipping_address' => (object) $this->get_fallback_shipping_address() ) );
 		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart total must not change, so only the destination check can stop the sync.' );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'Baseline: the cart total must not change, so only the destination check can stop reuse.' );
 
+		$response = $this->dispatch_store_api_request( 'GET', '/wc/store/v1/checkout' );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 0, (int) $response->get_data()['order_id'], 'GET checkout must answer with a draft response, not the placed order.' );
 		$order = wc_get_order( $order->get_id() );
-		$this->assertSame( 'US', $order->get_shipping_country(), 'A cart request must not move a placed order to the new destination.' );
-		$this->assertSame( $total, $order->get_total(), 'A cart request must not change a placed order\'s total.' );
+		$this->assertSame( 'US', $order->get_shipping_country(), 'The placed order must keep the destination it was rated for.' );
+		$this->assertSame( $total, $order->get_total(), 'The placed order\'s total must not change.' );
 	}
 
 	/**
@@ -5080,25 +5081,23 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox A cart request that does not recalculate the cart leaves a placed pending order's billing address alone when the customer's billing tax location moved.
+	 * @testdox GET checkout does not reuse a placed pending order once the customer's billing address moves to another tax location on a store that taxes on billing.
 	 */
-	public function test_cart_route_does_not_readdress_a_placed_order_when_billing_tax_location_changes(): void {
+	public function test_get_checkout_does_not_reuse_a_placed_order_after_a_billing_tax_location_change(): void {
 		$this->set_taxes_based_on( 'billing' );
 		$this->give_customer_us_billing_address();
 		$order = $this->create_pending_order_for_us_customer();
 
 		// Move the customer's billing address the way a My Account address save does: without touching the cart.
 		WC()->customer->set_billing_state( 'NY' );
+		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'Baseline: the cart hash must still match, so only the tax location check can stop reuse.' );
 
-		$request = new \WP_REST_Request( 'DELETE', '/wc/store/v1/cart/coupons' );
-		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$response = $this->dispatch_store_api_request( 'GET', '/wc/store/v1/checkout' );
 
-		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->assertTrue( $order->has_cart_hash( WC()->cart->get_cart_hash() ), 'The cart total must not change, so only the tax location check can stop the sync.' );
-
+		$this->assertSame( 0, (int) $response->get_data()['order_id'], 'GET checkout must answer with a draft response, not the placed order.' );
 		$order = wc_get_order( $order->get_id() );
-		$this->assertSame( 'CA', $order->get_billing_state(), 'A cart request must not move a placed order to a billing address checkout has not validated.' );
+		$this->assertSame( 'CA', $order->get_billing_state(), 'The placed order must keep the billing address it was taxed for.' );
 	}
 
 	/**
@@ -5310,6 +5309,22 @@ class Checkout extends \WP_Test_REST_TestCase {
 		WC()->customer->set_billing_state( 'CA' );
 		WC()->customer->set_billing_postcode( '94016' );
 		WC()->customer->set_billing_country( 'US' );
+	}
+
+	/**
+	 * Dispatches a Store API request with a valid nonce.
+	 *
+	 * @param string $method HTTP method.
+	 * @param string $route  Route path.
+	 * @param array  $body   Body parameters.
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_store_api_request( string $method, string $route, array $body = array() ): \WP_REST_Response {
+		$request = new \WP_REST_Request( $method, $route );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( $body );
+
+		return rest_get_server()->dispatch( $request );
 	}
 
 	/**
