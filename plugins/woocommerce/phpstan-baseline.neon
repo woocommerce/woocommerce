@@ -10369,12 +10369,6 @@ parameters:
 			path: includes/class-wc-checkout.php
 
 		-
-			message: '#^Variable \$order might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/class-wc-checkout.php
-
-		-
 			message: '#^Call to static method add_command\(\) on an unknown class WP_CLI\.$#'
 			identifier: class.notFound
 			count: 1
@@ -64775,12 +64769,6 @@ parameters:
 			path: src/StoreApi/Payments/PaymentResult.php
 
 		-
-			message: '#^Expected 2 @param tags, found 3\.$#'
-			identifier: paramTag.count
-			count: 1
-			path: src/StoreApi/Routes/V1/AbstractCartRoute.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\AbstractCartRoute\:\:cart_updated\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -65255,12 +65243,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^Access to protected property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$status\.$#'
-			identifier: property.protected
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 2
@@ -65485,12 +65467,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Access to protected property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$status\.$#'
-			identifier: property.protected
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 

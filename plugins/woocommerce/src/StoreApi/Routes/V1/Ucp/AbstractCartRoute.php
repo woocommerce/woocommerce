@@ -16,8 +16,8 @@ use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 /**
  * Shared behaviour of the UCP cart routes.
  *
- * Inherits session binding, cart loading and draft order sync from the Store API cart
- * route. Adds the UCP envelope, and keys the session off the path instead of a header.
+ * Inherits session binding and cart loading from the Store API cart route. Adds the UCP
+ * envelope, and keys the session off the path instead of a header.
  *
  * Writes are last-wins, as for every Store API cart: the session row is read when the
  * request starts and written whole at shutdown, with no lock or version check. Two
@@ -148,27 +148,6 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		$response->header( 'Cache-Control', 'no-store' );
 
 		return $response;
-	}
-
-	/**
-	 * Sync the draft order with the cart after a write, unless it was handed off for payment.
-	 *
-	 * The buyer may be paying a pending or failed order, and a save would put this request's copy over theirs.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 *
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
-	 *
-	 * @return void
-	 */
-	protected function cart_updated( \WP_REST_Request $request ) {
-		$order = $this->get_draft_order();
-
-		if ( $order && ! $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
-			return;
-		}
-
-		parent::cart_updated( $request );
 	}
 
 	/**
