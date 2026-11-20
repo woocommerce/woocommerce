@@ -59,6 +59,23 @@ $copyable_from = array(
 	'billing'  => 'shipping',
 	'shipping' => 'billing',
 );
+
+// Whole-sentence link labels for the core address titles, so translators never
+// have to fit a capitalized heading into "Add %s". Filtered titles fall back below.
+$core_link_labels = array(
+	'billing'  => array(
+		'title' => __( 'Billing address', 'woocommerce' ),
+		'add'   => __( 'Add billing address', 'woocommerce' ),
+		'edit'  => __( 'Edit billing address', 'woocommerce' ),
+		'copy'  => __( 'Copy billing address', 'woocommerce' ),
+	),
+	'shipping' => array(
+		'title' => __( 'Shipping address', 'woocommerce' ),
+		'add'   => __( 'Add shipping address', 'woocommerce' ),
+		'edit'  => __( 'Edit shipping address', 'woocommerce' ),
+		'copy'  => __( 'Copy shipping address', 'woocommerce' ),
+	),
+);
 ?>
 
 <?php foreach ( $get_addresses as $name => $address_title ) : ?>
@@ -68,28 +85,29 @@ $copyable_from = array(
 		$can_copy    = ! $address && $copy_source && ! empty( $formatted_addresses[ $copy_source ] );
 		$col         = $col * -1;
 		$oldcol      = $oldcol * -1;
+
+		$has_core_title = isset( $core_link_labels[ $name ] ) && $core_link_labels[ $name ]['title'] === $address_title;
+		/* translators: %s: Address title */
+		$generic_label = $address ? __( 'Edit %s', 'woocommerce' ) : __( 'Add %s', 'woocommerce' );
+		$edit_label    = $has_core_title ? $core_link_labels[ $name ][ $address ? 'edit' : 'add' ] : sprintf( $generic_label, $address_title );
+
+		$copy_title    = $can_copy ? $get_addresses[ $copy_source ] : '';
+		$has_core_copy = $can_copy && isset( $core_link_labels[ $copy_source ] ) && $core_link_labels[ $copy_source ]['title'] === $copy_title;
+		/* translators: %s: Address title of the address being copied, e.g. "Billing address" */
+		$copy_label = $has_core_copy ? $core_link_labels[ $copy_source ]['copy'] : sprintf( __( 'Copy %s', 'woocommerce' ), $copy_title );
 	?>
 
 	<div class="u-column<?php echo $col < 0 ? 1 : 2; ?> col-<?php echo $oldcol < 0 ? 1 : 2; ?> woocommerce-Address">
 		<header class="woocommerce-Address-title title">
 			<h2><?php echo esc_html( $address_title ); ?></h2>
 			<a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', $name ) ); ?>" class="edit">
-				<?php
-					printf(
-						/* translators: %s: Address title */
-						$address ? esc_html__( 'Edit %s', 'woocommerce' ) : esc_html__( 'Add %s', 'woocommerce' ),
-						esc_html( $address_title )
-					);
-				?>
+				<?php echo esc_html( $edit_label ); ?>
 			</a>
 		</header>
 		<?php if ( $can_copy ) : ?>
 			<p class="woocommerce-Address-copy">
 				<a href="<?php echo esc_url( WC_Form_Handler::get_copy_address_url( $name ) ); ?>" class="copy no-prefetch" rel="nofollow">
-					<?php
-						/* translators: %s: Address title of the address being copied, e.g. "Billing address" */
-						printf( esc_html__( 'Copy %s', 'woocommerce' ), esc_html( $get_addresses[ $copy_source ] ) );
-					?>
+					<?php echo esc_html( $copy_label ); ?>
 				</a>
 			</p>
 		<?php endif; ?>
