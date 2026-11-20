@@ -12,7 +12,7 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"name":"Testimonials in two columns","categories":["testimonials","purple"],"patternName":"purple/testimonials-in-two-columns","description":"A section with a heading and a 2 column testimonial grid."},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|140","bottom":"var:preset|spacing|140"},"margin":{"top":"0","bottom":"0"}}},"backgroundColor":"theme-5","layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Testimonials in two columns', 'Pattern title', 'purple' ); ?>","categories":["testimonials","purple"],"patternName":"purple/testimonials-in-two-columns","description":"A section with a heading and a 2 column testimonial grid."},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|140","bottom":"var:preset|spacing|140"},"margin":{"top":"0","bottom":"0"}}},"backgroundColor":"theme-5","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull has-theme-5-background-color has-background" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--140);padding-bottom:var(--wp--preset--spacing--140)"><!-- wp:heading {"style":{"typography":{"textAlign":"center"}}} -->
 <h2 class="wp-block-heading has-text-align-center"><?php esc_html_e( 'What they are saying', 'purple' ); ?></h2>
 <!-- /wp:heading -->

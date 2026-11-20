@@ -12,8 +12,8 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"name":"Reviews: heading on left, two columns of reviews on right","categories":["testimonials","purple"],"patternName":"purple/reviews-heading-left"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
-<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)"><!-- wp:columns {"metadata":{"name":"Items"},"align":"wide"} -->
+<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Reviews: heading on left, two columns of reviews on right', 'Pattern title', 'purple' ); ?>","categories":["testimonials","purple"],"patternName":"purple/reviews-heading-left"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
+<div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)"><!-- wp:columns {"metadata":{"name":"<?php echo esc_attr_x( 'Items', 'Block name', 'purple' ); ?>"},"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column -->
 <div class="wp-block-column"><!-- wp:heading {"style":{"layout":{"selfStretch":"fixed","flexSize":"100%"}}} -->
 <h2 class="wp-block-heading"><?php esc_html_e( 'Reviews', 'purple' ); ?></h2>
@@ -21,7 +21,7 @@
 <!-- /wp:column -->
 
 <!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|50"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"Item"},"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Item', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
 <div class="wp-block-group"><!-- wp:jetpack/rating-star {"rating":5,"className":"is-style-filled"} -->
 <figure class="wp-block-jetpack-rating-star is-style-filled" style="text-align:left"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></figure>
 <!-- /wp:jetpack/rating-star -->
@@ -35,7 +35,7 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"Item"},"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
+<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Item', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
 <div class="wp-block-group"><!-- wp:jetpack/rating-star {"rating":4,"className":"is-style-filled"} -->
 <figure class="wp-block-jetpack-rating-star is-style-filled" style="text-align:left"><span>★</span><span>★</span><span>★</span><span>★</span></figure>
 <!-- /wp:jetpack/rating-star -->
@@ -51,7 +51,7 @@
 <!-- /wp:column -->
 
 <!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|50"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"Item"},"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Item', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
 <div class="wp-block-group"><!-- wp:jetpack/rating-star {"rating":4,"className":"is-style-filled"} -->
 <figure class="wp-block-jetpack-rating-star is-style-filled" style="text-align:left"><span>★</span><span>★</span><span>★</span><span>★</span></figure>
 <!-- /wp:jetpack/rating-star -->
@@ -65,7 +65,7 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"Item"},"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
+<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Item', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
 <div class="wp-block-group"><!-- wp:jetpack/rating-star {"rating":5,"className":"is-style-filled"} -->
 <figure class="wp-block-jetpack-rating-star is-style-filled" style="text-align:left"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></figure>
 <!-- /wp:jetpack/rating-star -->
