@@ -83,7 +83,7 @@ trait ProductAbilityTrait {
 				self::add_product_type_notes(
 					array_merge(
 						self::get_product_mutation_field_schemas_for_fields( $fields, false, $creating ),
-						$creating && in_array( 'attributes', $fields, true ) ? array( 'attributes' => self::get_product_create_attributes_schema() ) : array()
+						in_array( 'attributes', $fields, true ) ? array( 'attributes' => self::get_product_input_attributes_schema() ) : array()
 					),
 					$configs
 				)
@@ -93,15 +93,14 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Get the schema of the `attributes` input of a create. A variable product
-	 * takes attributes with their options, and a variation takes the option it
-	 * picks for each attribute. The ability checks the shape against the type.
-	 * An update takes the parent shape only: a variation's options change
-	 * through the `variations` input of its parent.
+	 * Get the schema of the `attributes` input. A variable product takes
+	 * attributes with their options, and a variation takes the option it picks
+	 * for each attribute. The ability checks the shape against the type. An
+	 * update of a variation refuses `attributes` and names its parent route.
 	 *
 	 * @return array
 	 */
-	private static function get_product_create_attributes_schema(): array {
+	private static function get_product_input_attributes_schema(): array {
 		return array(
 			'type'        => 'array',
 			'description' => __( 'On a variable product, the attributes with their options. On a variation, the option it picks for each attribute of its parent.', 'woocommerce' ),
@@ -1506,15 +1505,30 @@ trait ProductAbilityTrait {
 			implode( ', ', $supported )
 		);
 
-		if ( $product instanceof \WC_Product_Variation && in_array( 'attributes', $unsupported, true ) ) {
+		$parent = in_array( 'attributes', $unsupported, true ) ? self::get_variable_parent( $product ) : null;
+		if ( null !== $parent && self::parent_route_takes_attributes( $product ) ) {
 			$message .= ' ' . sprintf(
 				/* translators: %d: parent product ID. */
 				__( 'To change the options of a variation, update its parent product %d and send the variation in the variations input, with its id and attributes.', 'woocommerce' ),
-				$product->get_parent_id()
+				$parent->get_id()
 			);
 		}
 
 		return new \WP_Error( 'woocommerce_product_field_unsupported', $message, array( 'status' => 400 ) );
+	}
+
+	/**
+	 * Whether an item of the `variations` input of the parent takes
+	 * `attributes` for this variation. That route uses the create fields, so
+	 * when it takes `attributes`, the refusal came from a direct update.
+	 *
+	 * @param \WC_Product $variation Variation.
+	 * @return bool
+	 */
+	private static function parent_route_takes_attributes( \WC_Product $variation ): bool {
+		$config = self::get_product_config_for_product( $variation, true );
+
+		return ! is_wp_error( $config ) && in_array( 'attributes', $config['fields'], true );
 	}
 
 	/**
