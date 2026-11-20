@@ -15,7 +15,7 @@
 	"scripts": {
 		"build": "pnpm build:project",
 		"build:project": "pnpm --stream '/^build:project:.*$/'",
-		"build:project:bundle": "NODE_ENV=\"${NODE_ENV:-production}\" WC_ADMIN_PHASE=\"${WC_ADMIN_PHASE:-core}\" webpack",
+		"build:project:bundle": "NODE_ENV=\"${NODE_ENV:-production}\" WC_ADMIN_PHASE=\"${WC_ADMIN_PHASE:-core}\" rspack build -c rspack.config.js",
 		"build:project:feature-config": "php ../../bin/generate-feature-config.php",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
@@ -138,6 +138,8 @@
 		"@babel/preset-typescript": "catalog:tooling",
 		"@babel/runtime": "catalog:tooling",
 		"@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
+		"@rspack/cli": "catalog:tooling",
+		"@rspack/core": "catalog:tooling",
 		"@statelyai/inspect": "^0.3.1",
 		"@testing-library/dom": "8.11.3",
 		"@testing-library/jest-dom": "^6.x.x",

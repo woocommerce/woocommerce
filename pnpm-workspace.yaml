@@ -81,6 +81,8 @@ catalogs:
         '@babel/runtime': 7.25.7
         # Keep direct Jest packages on 29.5.x; WordPress scripts manages its own test runner.
         '@jest/globals': 29.5.x
+        '@rspack/cli': 2.3.2
+        '@rspack/core': 2.3.2
         '@swc/core': 1.15.24
         '@types/jest': 29.5.x
         '@wordpress/build': 0.24.0

@@ -22,28 +22,37 @@ class AddSplitChunkDependencies {
 							.PROCESS_ASSETS_STAGE_ANALYSE,
 					},
 					() => {
-						const { chunks } = compilation;
+						// Rspack exposes chunks as a Set without array methods.
+						const chunks = [ ...compilation.chunks ];
 
 						const splitChunks = chunks.filter( ( chunk ) => {
 							return chunk?.chunkReason?.includes( 'split' );
 						} );
 
-						// find files that have an asset.php file
+						// Find the asset.php file written next to each chunk's
+						// script. Rspack does not list it in `chunk.files`.
+						const getAssetFile = ( chunk ) => {
+							const scriptFile = [ ...chunk.files ].find(
+								( file ) => file.endsWith( '.js' )
+							);
+							const assetFile = scriptFile?.replace(
+								/\.js$/,
+								'.asset.php'
+							);
+							return assetFile &&
+								compilation.getAsset( assetFile )
+								? assetFile
+								: undefined;
+						};
+
 						const chunksToAddSplitsTo = chunks.filter(
-							( chunk ) => {
-								return (
-									! chunk?.chunkReason?.includes( 'split' ) &&
-									chunk.files.find( ( file ) =>
-										file.endsWith( 'asset.php' )
-									)
-								);
-							}
+							( chunk ) =>
+								! chunk?.chunkReason?.includes( 'split' ) &&
+								getAssetFile( chunk )
 						);
 
 						for ( const chunk of chunksToAddSplitsTo ) {
-							const assetFile = chunk.files.find( ( file ) =>
-								file.endsWith( 'asset.php' )
-							);
+							const assetFile = getAssetFile( chunk );
 
 							const assetFileContent = compilation.assets[
 								assetFile
@@ -51,8 +60,11 @@ class AddSplitChunkDependencies {
 								.source()
 								.toString();
 
+							// Rspack does not keep chunks in a fixed order, so sort
+							// the handles to write the same file on every build.
 							const extraDependencies = splitChunks
 								.map( ( c ) => `'${ c.name }'` )
+								.sort()
 								.join( ', ' );
 
 							const updatedFileContent = assetFileContent.replace(
@@ -60,10 +72,12 @@ class AddSplitChunkDependencies {
 								`$1${ extraDependencies }, $2)`
 							);
 
-							compilation.assets[ assetFile ] = {
-								source: () => updatedFileContent,
-								size: () => updatedFileContent.length,
-							};
+							compilation.updateAsset(
+								assetFile,
+								new compiler.webpack.sources.RawSource(
+									updatedFileContent
+								)
+							);
 						}
 					}
 				);

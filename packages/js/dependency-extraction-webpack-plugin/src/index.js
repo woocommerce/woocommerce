@@ -55,6 +55,48 @@ const wooRequestToHandle = ( request ) => {
 	}
 };
 
+/** @type {WeakMap<object, Map<object, boolean>>} */
+const rspackStaticPathCaches = new WeakMap();
+
+/**
+ * Rspack version of the parent plugin's `hasStaticDependencyPathToRoot()`.
+ * Many compilations can run at once, so each one keeps its own cache.
+ *
+ * @param {Object} compilation The compilation the module belongs to.
+ * @param {Object} module      The module to check.
+ * @return {boolean} True if a chain of static imports reaches an entry.
+ */
+function rspackHasStaticPathToRoot( compilation, module ) {
+	let cache = rspackStaticPathCaches.get( compilation );
+	if ( ! cache ) {
+		cache = new Map();
+		rspackStaticPathCaches.set( compilation, cache );
+	}
+	if ( cache.has( module ) ) {
+		return cache.get( module );
+	}
+	// Seen while still being checked: an import cycle, not a root.
+	cache.set( module, false );
+	// Entry connections have no origin module.
+	const incoming = compilation.moduleGraph
+		.getIncomingConnections( module )
+		.filter( ( connection ) => connection.originModule );
+	const result =
+		incoming.length === 0 ||
+		incoming
+			.filter(
+				( connection ) => connection.dependency?.type !== 'import()'
+			)
+			.some( ( connection ) =>
+				rspackHasStaticPathToRoot(
+					compilation,
+					connection.originModule
+				)
+			);
+	cache.set( module, result );
+	return result;
+}
+
 class DependencyExtractionWebpackPlugin extends WPDependencyExtractionWebpackPlugin {
 	constructor( options ) {
 		const bundledPackages = options?.bundledPackages || [];
@@ -110,6 +152,26 @@ class DependencyExtractionWebpackPlugin extends WPDependencyExtractionWebpackPlu
 
 		this.externalsPlugin.apply( compiler );
 
+		// Rspack's ExternalModule has `userRequest` but no `request`. The parent
+		// plugin reads `request` to name script module dependencies.
+		const { ExternalModule } = compiler.webpack;
+		if ( compiler.rspack && ! ( 'request' in ExternalModule.prototype ) ) {
+			Object.defineProperty( ExternalModule.prototype, 'request', {
+				get() {
+					return this.userRequest;
+				},
+			} );
+		}
+
+		// Rspack has no `moduleGraph.getParentBlock()`, which the parent
+		// plugin uses to tell a dynamic `import()` from a static import.
+		// Rspack exposes that as the dependency type instead, so answer the
+		// same question from the connections of the compilation it passes.
+		if ( compiler.rspack ) {
+			WPDependencyExtractionWebpackPlugin.hasStaticDependencyPathToRoot =
+				rspackHasStaticPathToRoot;
+		}
+
 		compiler.hooks.thisCompilation.tap(
 			this.constructor.name,
 			( compilation ) => {
@@ -127,7 +189,22 @@ class DependencyExtractionWebpackPlugin extends WPDependencyExtractionWebpackPlu
 						stage: compiler.webpack.Compilation
 							.PROCESS_ASSETS_STAGE_ANALYSE,
 					},
-					() => this.addAssets( compilation )
+					() => {
+						// The parent plugin records externalized requests while
+						// modules are resolved. A warm Rspack build restores its
+						// module graph from the persistent cache and never asks
+						// again, so read the requests back from the graph.
+						if ( compiler.rspack ) {
+							for ( const module of compilation.modules ) {
+								if ( module instanceof ExternalModule ) {
+									this.externalizedDeps.add(
+										module.userRequest
+									);
+								}
+							}
+						}
+						this.addAssets( compilation );
+					}
 				);
 			}
 		);
