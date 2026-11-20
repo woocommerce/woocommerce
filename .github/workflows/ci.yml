@@ -107,7 +107,7 @@ jobs:
               - '.github/workflows/scripts/docs-link-check-policy-test.sh'
               - '.github/workflows/scripts/install-lychee.sh'
             needs-syncpack-validation:
-              - '(.syncpackrc)|(pnpm-lock.yaml)|(pnpm-workspace.yaml)|(.nvmrc)'
+              - '(.syncpackrc)|(package.json)|(pnpm-lock.yaml)|(pnpm-workspace.yaml)|(.nvmrc)'
 
   phpstan:
     needs: 'identify-jobs-to-run'
