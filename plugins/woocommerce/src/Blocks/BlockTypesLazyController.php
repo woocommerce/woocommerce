@@ -88,6 +88,7 @@ final class BlockTypesLazyController {
 			$this->get_order_confirmation_blocks(),
 			$this->get_add_to_cart_with_options_blocks(),
 			$this->get_product_display_element_blocks(),
+			$this->get_product_grid_blocks(),
 		);
 		foreach ( $block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
@@ -331,5 +332,28 @@ final class BlockTypesLazyController {
 		}
 
 		return $list;
+	}
+
+	/**
+	 * Side effect free and stateless product grid blocks.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_product_grid_blocks(): array {
+		if ( ! is_admin() ) {
+			// All inherit enqueue_data() from AbstractProductGrid with editor-visible theme support data.
+			return array(
+				'handpicked-products'   => \Automattic\WooCommerce\Blocks\BlockTypes\HandpickedProducts::class,
+				'product-best-sellers'  => \Automattic\WooCommerce\Blocks\BlockTypes\ProductBestSellers::class,
+				'product-new'           => \Automattic\WooCommerce\Blocks\BlockTypes\ProductNew::class,
+				'product-on-sale'       => \Automattic\WooCommerce\Blocks\BlockTypes\ProductOnSale::class,
+				'product-top-rated'     => \Automattic\WooCommerce\Blocks\BlockTypes\ProductTopRated::class,
+				'products-by-attribute' => \Automattic\WooCommerce\Blocks\BlockTypes\ProductsByAttribute::class,
+				'product-category'      => \Automattic\WooCommerce\Blocks\BlockTypes\ProductCategory::class,
+				'product-tag'           => \Automattic\WooCommerce\Blocks\BlockTypes\ProductTag::class,
+			);
+		}
+
+		return array();
 	}
 }
