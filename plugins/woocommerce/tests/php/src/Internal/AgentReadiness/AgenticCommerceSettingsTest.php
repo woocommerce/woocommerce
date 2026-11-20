@@ -1336,14 +1336,14 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$stored['truncated'] = true;
 		update_option( AgentReadiness::REPORT_OPTION, $stored );
 		$this->assertSame(
-			sprintf( 'Product checks covered the %s products you updated most recently. Store conditions and discovery checks covered your whole store; Product details still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			sprintf( 'Product checks covered the %s products you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
 			$this->view()['checked_note'],
 			'A report without the total keeps the short note'
 		);
 		$stored['available'] = 8400;
 		update_option( AgentReadiness::REPORT_OPTION, $stored );
 		$this->assertSame(
-			sprintf( 'Product checks covered the %s products you updated most recently, out of 8,400. Store conditions and discovery checks covered your whole store; Product details still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			sprintf( 'Product checks covered the %s products you updated most recently, out of 8,400. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
 			$this->view()['checked_note'],
 			'With the total from the same scan'
 		);

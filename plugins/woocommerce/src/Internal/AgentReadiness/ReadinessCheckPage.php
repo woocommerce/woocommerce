@@ -270,9 +270,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$available = (int) ( $report['available'] ?? 0 );
 			$truncated = $available > ProductScan::PRODUCT_LIMIT
 				/* translators: 1: number of products checked, 2: number of products in the store. */
-				? sprintf( __( 'Product checks covered the %1$s products you updated most recently, out of %2$s. Store conditions and discovery checks covered your whole store; Product details still sample product pages.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ), number_format_i18n( $available ) )
+				? sprintf( __( 'Product checks covered the %1$s products you updated most recently, out of %2$s. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ), number_format_i18n( $available ) )
 				/* translators: %s: number of products checked. Reports from before the total was stored. */
-				: sprintf( __( 'Product checks covered the %s products you updated most recently. Store conditions and discovery checks covered your whole store; Product details still sample product pages.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
+				: sprintf( __( 'Product checks covered the %s products you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
 		}
 		return array(
 			'title'        => __( 'AI sales readiness', 'woocommerce' ),
