@@ -183,6 +183,14 @@ class ClassicCheckout implements RegisterHooksInterface {
 			);
 		}
 
+		if ( '' !== $html ) {
+			// The same column markup as the billing and shipping forms, so the inputs get the same width.
+			$html = '<div class="col2-set"><div class="col-1">'
+				. '<h3>' . esc_html__( 'Additional required information', 'woocommerce' ) . '</h3>'
+				. '<div class="' . esc_attr( self::WRAPPER_CLASS ) . '__field-wrapper">' . $html . '</div>'
+				. '</div></div>';
+		}
+
 		return '<div class="' . esc_attr( self::WRAPPER_CLASS ) . '">' . $html . '</div>';
 	}
 }

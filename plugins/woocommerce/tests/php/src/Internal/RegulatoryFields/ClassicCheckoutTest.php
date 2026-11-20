@@ -48,7 +48,7 @@ class ClassicCheckoutTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should output the CPF/CNPJ input inside the wrapper when the cart is billed to Brazil.
+	 * @testdox Should output a titled section with the CPF/CNPJ input, in the same column layout as the address forms, when the cart is billed to Brazil.
 	 */
 	public function test_outputs_field_for_brazil(): void {
 		WC()->customer->set_billing_country( 'BR' );
@@ -57,7 +57,7 @@ class ClassicCheckoutTest extends WC_Unit_Test_Case {
 		$this->sut->handle_woocommerce_checkout_after_customer_details();
 		$html = ob_get_clean();
 
-		$this->assertStringContainsString( '<div class="woocommerce-regulatory-fields">', $html );
+		$this->assertStringStartsWith( '<div class="woocommerce-regulatory-fields"><div class="col2-set"><div class="col-1"><h3>Additional required information</h3>', $html );
 		$this->assertStringContainsString( 'name="regulatory_br_tax_id"', $html );
 		$this->assertStringContainsString( 'CPF/CNPJ', $html );
 	}
