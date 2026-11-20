@@ -608,6 +608,10 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	 * @testWith ["woocommerce_checkout_page_id", "woocommerce_cart_page_id"]
 	 *           ["woocommerce_myaccount_page_id", "woocommerce_checkout_page_id"]
 	 *           ["woocommerce_terms_page_id", "woocommerce_checkout_page_id"]
+	 *           ["woocommerce_refund_returns_page_id", "woocommerce_cart_page_id"]
+	 *           ["woocommerce_refund_returns_page_id", "woocommerce_checkout_page_id"]
+	 *           ["woocommerce_refund_returns_page_id", "woocommerce_myaccount_page_id"]
+	 *           ["woocommerce_checkout_page_id", "woocommerce_refund_returns_page_id"]
 	 * @param string $requested Page setting the batch changes.
 	 * @param string $stored    Page setting that already uses the page.
 	 */
@@ -637,6 +641,31 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_ability_settings_page_conflict', $result->get_error_code() );
 		$this->assertSame( $page, get_option( $stored ) );
+	}
+
+	/**
+	 * @testdox Should refuse the shop page as the refund and returns policy, from either the advanced or the products group.
+	 */
+	public function test_refuses_shop_page_as_refund_policy(): void {
+		$page = (string) self::factory()->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_shop_page_id', $page );
+		update_option( 'woocommerce_refund_returns_page_id', '' );
+
+		$result = $this->sut->execute( $this->input( 'advanced', array( 'woocommerce_refund_returns_page_id' => $page ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_settings_page_conflict', $result->get_error_code() );
+		$this->assertSame( array( 'woocommerce_refund_returns_page_id' ), $result->get_error_data()['ids'] );
+		$this->assertSame( '', get_option( 'woocommerce_refund_returns_page_id' ) );
+
+		$refund = (string) self::factory()->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_refund_returns_page_id', $refund );
+
+		$result = $this->sut->execute( $this->input( 'products', array( 'woocommerce_shop_page_id' => $refund ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_settings_page_conflict', $result->get_error_code() );
+		$this->assertSame( $page, get_option( 'woocommerce_shop_page_id' ) );
 	}
 
 	/**

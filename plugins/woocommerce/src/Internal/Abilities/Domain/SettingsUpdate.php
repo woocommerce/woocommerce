@@ -21,13 +21,17 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 	private const LIST_TYPES = array( 'multiselect', 'multi_select_countries' );
 
 	/**
-	 * Page settings that must not share a page, matching the checks the advanced settings tab applies on save.
+	 * Page settings that must not share a page, matching the advanced settings tab's save checks and page picker exclusions.
 	 */
 	private const DISTINCT_PAGES = array(
 		array( 'woocommerce_terms_page_id', 'woocommerce_checkout_page_id' ),
 		array( 'woocommerce_cart_page_id', 'woocommerce_checkout_page_id' ),
 		array( 'woocommerce_cart_page_id', 'woocommerce_myaccount_page_id' ),
 		array( 'woocommerce_checkout_page_id', 'woocommerce_myaccount_page_id' ),
+		array( 'woocommerce_refund_returns_page_id', 'woocommerce_cart_page_id' ),
+		array( 'woocommerce_refund_returns_page_id', 'woocommerce_checkout_page_id' ),
+		array( 'woocommerce_refund_returns_page_id', 'woocommerce_shop_page_id' ),
+		array( 'woocommerce_refund_returns_page_id', 'woocommerce_myaccount_page_id' ),
 	);
 
 	/**
@@ -193,7 +197,7 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 			return new \WP_Error(
 				'woocommerce_ability_settings_page_conflict',
 				/* translators: %s: comma-separated setting IDs. */
-				sprintf( __( 'These settings would share a page: %s. Cart, checkout and My account each need their own page, and terms cannot use the checkout page. Nothing was saved.', 'woocommerce' ), implode( ', ', $conflicts ) ),
+				sprintf( __( 'These settings would share a page: %s. Cart, checkout and My account each need their own page, terms cannot use the checkout page, and the refund and returns policy cannot use the cart, checkout, shop or My account page. Nothing was saved.', 'woocommerce' ), implode( ', ', $conflicts ) ),
 				array(
 					'status' => 400,
 					'ids'    => $conflicts,
