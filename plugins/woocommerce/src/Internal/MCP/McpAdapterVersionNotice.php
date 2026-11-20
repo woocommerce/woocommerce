@@ -29,6 +29,13 @@ class McpAdapterVersionNotice {
 	public const MIN_VERSION = '0.7.2';
 
 	/**
+	 * Name of the admin notice, used for dismissal.
+	 *
+	 * @var string
+	 */
+	public const NOTICE = 'mcp_adapter_outdated';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -47,7 +54,7 @@ class McpAdapterVersionNotice {
 		if ( $bundled && class_exists( 'WP\MCP\Core\McpAdapter', false ) ) {
 			$version = (string) constant( 'WP\MCP\Core\McpAdapter::VERSION' );
 		}
-		if ( ! self::is_outdated( $version ) || ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! self::is_outdated( $version ) || ! current_user_can( 'manage_woocommerce' ) || \WC_Admin_Notices::user_has_dismissed_notice( self::NOTICE ) ) {
 			return;
 		}
 
@@ -81,7 +88,18 @@ class McpAdapterVersionNotice {
 			$message .= sprintf( ' <a href="%1$s">%2$s</a>', esc_url( self_admin_url( 'plugins.php' ) ), esc_html__( 'Go to Plugins', 'woocommerce' ) );
 		}
 
-		echo wp_kses_post( '<div class="notice notice-warning"><p>' . $message . '</p></div>' );
+		$dismiss_url = wp_nonce_url(
+			add_query_arg( 'wc-hide-notice', self::NOTICE ),
+			'woocommerce_hide_notices_nonce',
+			'_wc_notice_nonce'
+		);
+
+		echo wp_kses_post(
+			'<div class="notice notice-warning is-dismissible">'
+			. '<a class="woocommerce-message-close notice-dismiss" style="text-decoration: none;" href="' . esc_url( $dismiss_url ) . '" aria-label="' . esc_attr__( 'Dismiss this notice', 'woocommerce' ) . '"></a>'
+			. '<p>' . $message . '</p>'
+			. '</div>'
+		);
 	}
 
 	/**
