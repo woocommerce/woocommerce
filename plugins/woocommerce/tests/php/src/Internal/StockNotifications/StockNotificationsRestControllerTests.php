@@ -21,6 +21,13 @@ class StockNotificationsRestControllerTests extends WC_REST_Unit_Test_Case {
 	private const ROUTE = '/wc/v3/stock-notifications';
 
 	/**
+	 * The test registers its own routes, so it needs a fresh server each time.
+	 *
+	 * @var bool
+	 */
+	protected static $reuse_rest_server = false;
+
+	/**
 	 * Set up the test.
 	 */
 	public function setUp(): void {
@@ -296,6 +303,26 @@ class StockNotificationsRestControllerTests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( array( $active->get_id() ), $ids( array( 'before' => '2026-01-15T00:00:00' ) ) );
 		$this->assertSame( array( $sent->get_id() ), $ids( array( 'notified_after' => '2026-01-24T00:00:00' ) ) );
 		$this->assertSame( array(), $ids( array( 'notified_before' => '2026-01-24T00:00:00' ) ) );
+	}
+
+	/**
+	 * @testdox Dates without an offset are in the site's timezone, in both the response and the date filters.
+	 */
+	public function test_dates_use_site_timezone(): void {
+		update_option( 'timezone_string', 'Europe/Athens' );
+		$notification = $this->create_notification( array( 'date_created' => '2026-01-10T10:00:00Z' ) );
+
+		$item = $this->get_collection()->get_data()[0];
+		$this->assertSame( '2026-01-10T12:00:00', $item['date_created'] );
+		$this->assertSame( '2026-01-10T10:00:00', $item['date_created_gmt'] );
+
+		$ids = fn( array $params ) => array_column( $this->get_collection( $params )->get_data(), 'id' );
+		$this->assertSame( array( $notification->get_id() ), $ids( array( 'after' => '2026-01-10T12:00:00' ) ) );
+		$this->assertSame( array(), $ids( array( 'after' => '2026-01-10T12:00:01' ) ) );
+		$this->assertSame( array( $notification->get_id() ), $ids( array( 'after' => '2026-01-10T10:00:00Z' ) ) );
+		$this->assertSame( array(), $ids( array( 'after' => '2026-01-10T12:00:01+02:00' ) ) );
+
+		delete_option( 'timezone_string' );
 	}
 
 	/**

@@ -260,6 +260,8 @@ class StockNotificationsRestController extends RestApiControllerBase {
 	/**
 	 * Convert a REST date-time argument to a GMT MySQL datetime for the data store.
 	 *
+	 * Like the dates in the response, a value without a timezone offset is in the site's timezone.
+	 *
 	 * @param mixed $value The argument value.
 	 * @return string Empty when the argument is absent.
 	 */
@@ -268,9 +270,9 @@ class StockNotificationsRestController extends RestApiControllerBase {
 			return '';
 		}
 
-		$timestamp = wc_string_to_timestamp( (string) $value );
+		$date = rest_get_date_with_gmt( (string) $value );
 
-		return $timestamp ? gmdate( 'Y-m-d H:i:s', $timestamp ) : '';
+		return $date ? $date[1] : '';
 	}
 
 	/**
@@ -358,22 +360,22 @@ class StockNotificationsRestController extends RestApiControllerBase {
 				'format'      => 'email',
 			),
 			'after'           => array(
-				'description' => __( 'Limit response to notifications created after a given ISO8601 compliant date.', 'woocommerce' ),
+				'description' => __( 'Limit response to notifications created after a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 			),
 			'before'          => array(
-				'description' => __( 'Limit response to notifications created before a given ISO8601 compliant date.', 'woocommerce' ),
+				'description' => __( 'Limit response to notifications created before a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 			),
 			'notified_after'  => array(
-				'description' => __( 'Limit response to notifications sent after a given ISO8601 compliant date.', 'woocommerce' ),
+				'description' => __( 'Limit response to notifications sent after a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 			),
 			'notified_before' => array(
-				'description' => __( 'Limit response to notifications sent before a given ISO8601 compliant date.', 'woocommerce' ),
+				'description' => __( 'Limit response to notifications sent before a given ISO8601 compliant date. Without a timezone offset, the date is in the site\'s timezone.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
 			),
