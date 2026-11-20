@@ -9,7 +9,7 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Single Product', 'Block name', 'purple' ); ?>"},"align":"wide","style":{"spacing":{"blockGap":"0","margin":{"top":"0","bottom":"0"},"padding":{"bottom":"var:preset|spacing|50"}}},"layout":{"type":"default"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Single Product', 'Block name', 'purple' ) ); ?>},"align":"wide","style":{"spacing":{"blockGap":"0","margin":{"top":"0","bottom":"0"},"padding":{"bottom":"var:preset|spacing|50"}}},"layout":{"type":"default"}} -->
 <div class="wp-block-group alignwide" style="margin-top:0;margin-bottom:0;padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/store-notices /-->
 
 <!-- wp:woocommerce/breadcrumbs /-->
@@ -105,7 +105,7 @@
 
 <!-- wp:pattern {"slug":"purple/categories-on-three-columns"} /-->
 
-<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Product reviews', 'Block name', 'purple' ); ?>"},"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|90","bottom":"0"}}},"layout":{"type":"constrained","contentSize":"48.75rem","wideSize":"48.75rem"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Product reviews', 'Block name', 'purple' ) ); ?>},"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|90","bottom":"0"}}},"layout":{"type":"constrained","contentSize":"48.75rem","wideSize":"48.75rem"}} -->
 <div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--90);margin-bottom:0"><!-- wp:woocommerce/product-reviews -->
 <div class="wp-block-woocommerce-product-reviews"><!-- wp:woocommerce/product-reviews-title {"showProductTitle":false,"showReviewsCount":false,"level":2,"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|50"}}},"fontSize":"x-large"} /-->
 

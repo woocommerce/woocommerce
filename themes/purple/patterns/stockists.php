@@ -12,7 +12,7 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Stockists', 'Pattern title', 'purple' ); ?>","categories":["purple"],"patternName":"purple/stockists"},"align":"full","style":{"spacing":{"padding":{"left":"var:preset|spacing|50","right":"var:preset|spacing|50","top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Stockists', 'Pattern title', 'purple' ) ); ?>,"categories":["purple"],"patternName":"purple/stockists"},"align":"full","style":{"spacing":{"padding":{"left":"var:preset|spacing|50","right":"var:preset|spacing|50","top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--70);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--70);padding-left:var(--wp--preset--spacing--50)"><!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"right":"0","left":"0"}}},"layout":{"type":"constrained","justifyContent":"left"}} -->
 <div class="wp-block-group alignwide" style="padding-right:0;padding-left:0"><!-- wp:heading {"level":1,"style":{"typography":{"textAlign":"left"}}} -->
 <h1 class="wp-block-heading has-text-align-left"><?php esc_html_e( 'Stockists', 'purple' );?></h1>
@@ -26,14 +26,14 @@
 <!-- wp:group {"metadata":{"categories":["purple"],"patternName":"purple/stockists"},"align":"full","style":{"spacing":{"margin":{"top":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="margin-top:var(--wp--preset--spacing--70)"><!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|140"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Europe', 'Block name', 'purple' ); ?>"},"layout":{"type":"default"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Europe', 'Block name', 'purple' ) ); ?>},"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
 <h2 class="wp-block-heading"><?php esc_html_e( 'Europe', 'purple' );?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:columns -->
 <div class="wp-block-columns"><!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -45,7 +45,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -59,7 +59,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:column -->
 
 <!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -71,7 +71,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -86,14 +86,14 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:columns --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Asia & Australia', 'Block name', 'purple' ); ?>"},"layout":{"type":"default"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Asia & Australia', 'Block name', 'purple' ) ); ?>},"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
 <h2 class="wp-block-heading"><?php esc_html_e( 'Asia &amp; Australia', 'purple' );?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:columns -->
 <div class="wp-block-columns"><!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -105,7 +105,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -119,7 +119,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:column -->
 
 <!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -131,7 +131,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -148,14 +148,14 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:column -->
 
 <!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|140"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'North America', 'Block name', 'purple' ); ?>"},"layout":{"type":"default"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'North America', 'Block name', 'purple' ) ); ?>},"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
 <h2 class="wp-block-heading"><?php esc_html_e( 'North America', 'purple' );?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:columns -->
 <div class="wp-block-columns"><!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -167,7 +167,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -181,7 +181,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:column -->
 
 <!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -193,7 +193,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -208,14 +208,14 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:columns --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'South America', 'Block name', 'purple' ); ?>"},"layout":{"type":"default"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'South America', 'Block name', 'purple' ) ); ?>},"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
 <h2 class="wp-block-heading"><?php esc_html_e( 'South America', 'purple' );?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:columns -->
 <div class="wp-block-columns"><!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -227,7 +227,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -241,7 +241,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:column -->
 
 <!-- wp:column {"style":{"spacing":{"blockGap":"var:preset|spacing|70"}}} -->
-<div class="wp-block-column"><!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-column"><!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
@@ -253,7 +253,7 @@ printf( esc_html__( 'Example St. 30%1$sCity, 00001%2$sCountry', 'purple' ), '<br
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"<?php echo esc_attr_x( 'Store', 'Block name', 'purple' ); ?>"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":<?php echo purple_block_attribute_string( _x( 'Store', 'Block name', 'purple' ) ); ?>},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><?php /* Translators: 1. is the start of a 'strong' HTML element, 2. is the end of a 'strong' HTML element */
 printf( esc_html__( '%1$sStore%2$s', 'purple' ), '<strong>', '</strong>' ); ?></p>
