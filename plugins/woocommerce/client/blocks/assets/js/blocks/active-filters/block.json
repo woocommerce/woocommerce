@@ -27,6 +27,10 @@
 			"default": 3
 		}
 	},
+	"style": [
+		"wc-blocks-style",
+		"file:../active-filters.css"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

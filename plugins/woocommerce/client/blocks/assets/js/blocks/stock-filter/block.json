@@ -48,6 +48,11 @@
 			"default": false
 		}
 	},
+	"style": [
+		"wc-blocks-style",
+		"wc-blocks-packages-style",
+		"file:../stock-filter.css"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

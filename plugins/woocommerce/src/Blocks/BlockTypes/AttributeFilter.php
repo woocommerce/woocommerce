@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  * AttributeFilter class.
  */
 class AttributeFilter extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -37,14 +39,5 @@ class AttributeFilter extends AbstractBlock {
 		}
 
 		$this->asset_data_registry->add( 'queryState', $query_state );
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return string[]
-	 */
-	protected function get_block_type_style() {
-		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
 	}
 }

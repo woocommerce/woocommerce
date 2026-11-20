@@ -5,6 +5,10 @@
 	"description": "Let shoppers clear any active filters.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce", "clear filters" ],
+	"style": [
+		"wc-blocks-style",
+		"file:../product-filter-clear-button.css"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"ancestor": [ "woocommerce/product-filter-active" ],
