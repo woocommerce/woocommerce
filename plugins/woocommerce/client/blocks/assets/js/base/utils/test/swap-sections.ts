@@ -102,10 +102,19 @@ describe( 'playSwap', () => {
 	let shipping: HTMLElement;
 	let rates: HTMLElement;
 	let pay: HTMLElement;
+	// The global mock of `matchMedia` reports reduced motion. These tests allow motion, unless a test sets this.
+	let isReducedMotion: boolean;
 
 	beforeEach( () => {
 		copyFade = createAnimation();
 		entrance = createAnimation();
+		isReducedMotion = false;
+		jest.spyOn( window, 'matchMedia' ).mockImplementation(
+			( query ) =>
+				( {
+					matches: isReducedMotion && query.includes( 'reduce' ),
+				} ) as MediaQueryList
+		);
 		const running = ( fake: typeof copyFade ) =>
 			fake.animation.playState === 'running'
 				? [ fake.animation as unknown as Animation ]
@@ -235,6 +244,26 @@ describe( 'playSwap', () => {
 		expect( pay.hasAttribute( 'data-wc-swap-after' ) ).toBe( true );
 		expect( pay.style.translate ).toBe( '' );
 		expect( container.hasAttribute( 'style' ) ).toBe( false );
+	} );
+
+	it( 'changes the layout at once with reduced motion, and only fades the new sections in', async () => {
+		isReducedMotion = true;
+		const snapshot = capture( 1 );
+		const pickup = switchToPickup();
+		playSwap( snapshot );
+
+		expect( copies() ).toHaveLength( 0 );
+		expect( topOf( pay ) ).toBe( 110 );
+		expect( container.hasAttribute( 'style' ) ).toBe( false );
+		expect( pickup.getAttribute( 'data-wc-swap-in' ) ).toBe( 'right' );
+
+		entrance.finish();
+		await flush();
+		[ container, method, pickup, pay ].forEach( ( element ) => {
+			expect(
+				element.getAttributeNames().filter( ( name ) => name !== 'id' )
+			).toEqual( [] );
+		} );
 	} );
 
 	it( 'leaves nothing behind when the motion ends', async () => {
