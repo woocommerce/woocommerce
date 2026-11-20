@@ -1,0 +1,39 @@
+{
+	"name": "woocommerce/extension-changelogger",
+	"description": "Jetpack Changelogger formatter for the WooCommerce extension changelog format",
+	"type": "library",
+	"license": "GPL-3.0-or-later",
+	"require": {
+		"php": ">=7.4",
+		"automattic/jetpack-changelogger": "^6.0"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^9.6",
+		"woocommerce/woocommerce-sniffs": "^1.0"
+	},
+	"autoload": {
+		"classmap": [ "src/" ]
+	},
+	"config": {
+		"platform": {
+			"php": "7.4"
+		},
+		"sort-packages": true,
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"extra": {
+		"changelogger": {
+			"changelog": "CHANGELOG.md",
+			"types": {
+				"add": "Added functionality",
+				"fix": "Fixed behavior",
+				"dev": "Development related task"
+			}
+		}
+	},
+	"scripts": {
+		"test": "phpunit --bootstrap vendor/autoload.php tests"
+	}
+}

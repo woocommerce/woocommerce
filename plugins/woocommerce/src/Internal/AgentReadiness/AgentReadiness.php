@@ -229,7 +229,7 @@ class AgentReadiness {
 	/**
 	 * Run every check over the catalog, in this request, without storing anything.
 	 *
-	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,sales:array{days:int,orders:int,imported:bool}|null}
+	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,pages_best_seller?:bool,sales:array{days:int,orders:int,imported:bool}|null}
 	 */
 	public function get_report(): array {
 		$scan  = $this->start_scan();
@@ -246,7 +246,7 @@ class AgentReadiness {
 	 * Start a scan: the rules, the sales period and the products to test, before any is tested.
 	 * Each later step runs from what this returns, so a scan can go on in another request.
 	 *
-	 * @return array{ids:array<int,int>,position:int,sales:array{days:int,since:string,orders:int,imported:bool,total:float}|null,ranked:bool,scan:array<string,mixed>}
+	 * @return array{ids:array<int,int>,position:int,sales:array{days:int,since:string,orders:int,imported:bool,total:float}|null,ranked:bool,best_seller:int,scan:array<string,mixed>}
 	 */
 	private function start_scan(): array {
 		// Rebuild the rules for each scan: a long-running process may have fetched a new rules file since.
@@ -255,19 +255,28 @@ class AgentReadiness {
 		$sales              = $this->product_sales->last_days();
 		$product_scan       = new ProductScan();
 		$ids                = $product_scan->start();
+		$ranked             = null !== $sales && $sales['imported'] && $sales['orders'] >= ProductSales::MIN_ORDERS && $sales['total'] > 0;
+		// Keep only the best seller id for page checks at finish; the full sales map is not stored between batches.
+		$best_seller = 0;
+		if ( $ranked ) {
+			$by_product = array_filter( $sales['by_product'], static fn( $amount ): bool => $amount > 0 );
+			arsort( $by_product );
+			$best_seller = (int) ( array_key_first( $by_product ) ?? 0 );
+		}
 		return array(
-			'ids'      => $ids,
-			'position' => 0,
+			'ids'         => $ids,
+			'position'    => 0,
 			// The period and totals only: each batch reads its own products' sales, so the whole store's are never kept.
-			'sales'    => null === $sales ? null : array(
+			'sales'       => null === $sales ? null : array(
 				'days'     => $sales['days'],
 				'since'    => $sales['since'],
 				'orders'   => $sales['orders'],
 				'imported' => $sales['imported'],
 				'total'    => $sales['total'],
 			),
-			'ranked'   => null !== $sales && $sales['imported'] && $sales['orders'] >= ProductSales::MIN_ORDERS && $sales['total'] > 0,
-			'scan'     => $product_scan->state(),
+			'ranked'      => $ranked,
+			'best_seller' => $best_seller,
+			'scan'        => $product_scan->state(),
 		);
 	}
 
@@ -296,7 +305,7 @@ class AgentReadiness {
 	 * Build the report once every batch is tested. The store output checks request the store's own pages, so they run here, once.
 	 *
 	 * @param array<string, mixed> $scan The scan after its last batch.
-	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,sales:array{days:int,orders:int,imported:bool}|null,shared_gtins?:array<int,string>}
+	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,pages_best_seller:bool,sales:array{days:int,orders:int,imported:bool}|null,shared_gtins?:array<int,string>}
 	 */
 	private function finish_scan( array $scan ): array {
 		$active       = $this->get_active_rules();
@@ -320,7 +329,12 @@ class AgentReadiness {
 			);
 		}
 
-		$responses = $this->store_output_checks->responses();
+		$responses   = $this->store_output_checks->responses();
+		$best_seller = (int) ( $scan['best_seller'] ?? 0 );
+		if ( $best_seller > 0 ) {
+			// Page checks read the best seller's page first. Only the id is kept from start(); the amount is unused.
+			$responses->use_sales( array( $best_seller => 1.0 ) );
+		}
 
 		$report = array(
 			'generated_at'        => gmdate( 'c' ),
@@ -330,6 +344,8 @@ class AgentReadiness {
 			'unsupported_types'   => $product_scan->unsupported_types(),
 			'store_checks'        => array_merge( $this->store_conditions->all(), $this->store_output_checks->all_for( $responses ) ),
 			'declared'            => $this->declared_to_agents->all( $responses ),
+			// Whether the product pages the page checks read start with the best seller, or with the newest product.
+			'pages_best_seller'   => $responses->starts_with_best_seller(),
 			'channels'            => $product_scan->channel_totals(),
 			'checks'              => $checks,
 			'truncated'           => $product_scan->truncated(),
@@ -450,7 +466,7 @@ class AgentReadiness {
 	 *
 	 * @param array<string, mixed>|null                                                                                                               $report Stored report.
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>|null $live   Store conditions already read, or null to read them.
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string,source?:string}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,skipped?:bool,seen_at?:string,source?:string,product?:int}>
 	 */
 	public function get_store_checks( ?array $report, ?array $live = null ): array {
 		$checks   = $live ?? $this->store_conditions->all();
@@ -475,8 +491,11 @@ class AgentReadiness {
 				'fix_url'  => (string) ( $check['fix_url'] ?? '' ),
 				'conflict' => ! empty( $check['conflict'] ),
 				'pending'  => ! empty( $check['pending'] ),
+				'skipped'  => ! empty( $check['skipped'] ),
 				'seen_at'  => (string) ( $check['seen_at'] ?? '' ),
 				'source'   => sanitize_text_field( (string) ( $check['source'] ?? '' ) ),
+				// The product whose page failed, so the found line can name it.
+				'product'  => absint( $check['product'] ?? 0 ),
 			);
 		}
 		return $checks;

@@ -467,6 +467,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ReadinessCheckPage::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ProductsList::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\Telemetry::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductDownloads\DownloadableFileAttachments::class )->register();
 		$container->get( ProductUtil::class )->register();

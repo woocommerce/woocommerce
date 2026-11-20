@@ -259,7 +259,13 @@ jQuery( function ( $ ) {
 			show_and_hide_panels();
 			change_product_type_tip( get_product_tip_content( select_val ) );
 
-			$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).trigger( 'click' );
+			$( 'ul.wc-tabs li' )
+				.filter( function () {
+					return $( this ).css( 'display' ) !== 'none';
+				} )
+				.eq( 0 )
+				.find( 'a' )
+				.trigger( 'click' );
 
 			$( document.body ).trigger(
 				'woocommerce-product-type-change',
@@ -440,7 +446,15 @@ jQuery( function ( $ ) {
 			$( this ).hide();
 			$wrap.find( '.sale_schedule' ).show();
 			$wrap.find( '.sale_price_dates_fields' ).hide();
-			$wrap.find( '.sale_price_dates_fields' ).find( 'input' ).val( '' );
+			// Only fire change for dates that had a value, so cancelling an empty schedule does not mark the variation as changed.
+			$wrap
+				.find( '.sale_price_dates_fields' )
+				.find( 'input' )
+				.filter( function () {
+					return this.value !== '';
+				} )
+				.val( '' )
+				.trigger( 'change' );
 
 			return false;
 		}
