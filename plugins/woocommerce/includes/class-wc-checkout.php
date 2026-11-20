@@ -465,6 +465,8 @@ class WC_Checkout {
 			return $order_id;
 		}
 
+		$is_order_saved = false;
+
 		try {
 			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
 			$cart_hash          = WC()->cart->get_cart_hash();
@@ -577,7 +579,8 @@ class WC_Checkout {
 			do_action( 'woocommerce_checkout_create_order', $order, $data );
 
 			// Save the order.
-			$order_id = $order->save();
+			$order_id       = $order->save();
+			$is_order_saved = true;
 
 			// Defense-in-depth: if the cart still has items but the persisted order has none,
 			// the save silently dropped every line item (e.g. a $wpdb->insert() returning false
@@ -616,7 +619,9 @@ class WC_Checkout {
 			return $order_id;
 		} catch ( Exception $e ) {
 			if ( $order && $order instanceof WC_Order ) {
-				wc_release_coupons_for_order( $order );
+				// Until it is saved, the order holds this attempt's changes, such as a resumed order's staged item removals.
+				// Saving its meta would write them on HPOS, so release the coupon holds without saving the order.
+				wc_release_coupons_for_order( $order, $is_order_saved );
 				/**
 				 * Action hook fired when an order is discarded due to Exception.
 				 *
