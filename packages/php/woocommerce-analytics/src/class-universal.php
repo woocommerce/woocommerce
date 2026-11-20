@@ -117,6 +117,9 @@ class Universal {
 				// A delay-JS plugin can hold back the consent API script, so the client cannot rely on its functions to know it has to wait.
 				wcAnalytics.consentManaged = <?php echo Consent_Manager::is_consent_managed() ? 'true' : 'false'; ?>;
 
+				// Read in the browser even before a delayed consent API script loads.
+				wcAnalytics.statisticsConsentCookie = <?php echo wp_json_encode( Consent_Manager::get_statistics_consent_cookie_name(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
+
 				wcAnalytics.breadcrumbs = <?php echo wp_json_encode( $this->get_breadcrumb_titles(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
 
 				// Page context flags.

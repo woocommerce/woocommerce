@@ -33,6 +33,9 @@ class CheckoutMapper {
 		$missing  = $placed ? array() : $this->missing_requirements( $cart );
 		$messages = array_merge( $payload['messages'] ?? array(), $missing );
 
+		// A checkout carries its own `continue_url`, the payment page, only at escalation.
+		unset( $payload['continue_url'] );
+
 		if ( '' === $status ) {
 			$status = empty( $cart['items'] ) || ! empty( $cart['errors'] ) || ! empty( $missing ) ? self::STATUS_INCOMPLETE : self::STATUS_READY_FOR_COMPLETE;
 		}

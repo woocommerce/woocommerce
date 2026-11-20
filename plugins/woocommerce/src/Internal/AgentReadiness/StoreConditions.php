@@ -31,10 +31,12 @@ class StoreConditions {
 
 	/**
 	 * Recommended conditions shown as Required, which don't keep AI shopping from being turned on:
-	 * AI assistants read the catalog through the API whatever search engines are told, and with no
-	 * payment method no sale goes through. The rules file's `store_checks` can change any of them (RemoteRules).
+	 * AI assistants read the catalog through the API whatever search engines are told, with no
+	 * payment method no sale goes through, customers learn their order went through from its email,
+	 * and AI assistants share the policy pages with shoppers before they buy. The rules file's
+	 * `store_checks` can change any of them (RemoteRules).
 	 */
-	public const SHOWN_REQUIRED = array( 'search_visible', 'payment_method' );
+	public const SHOWN_REQUIRED = array( 'search_visible', 'payment_method', 'order_emails', 'privacy_page', 'terms_page', 'refund_returns_page' );
 
 	public const LEVEL_RECOMMENDED = 'recommended';
 
@@ -72,9 +74,8 @@ class StoreConditions {
 			'name'    => $name,
 			'label'   => $label,
 			'why'     => $why,
-			// The AI shopping section lands with #70590; until then the tab has one page.
-			'fix'     => __( 'Choose a published page under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
-			'fix_url' => AgenticCommerceSettings::url() . '#' . $option,
+			'fix'     => __( 'Choose a published page under WooCommerce > Settings > AI tools > AI shopping.', 'woocommerce' ),
+			'fix_url' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ) . '#' . $option,
 		);
 
 		$conditions = array(
@@ -94,12 +95,13 @@ class StoreConditions {
 				'id'      => 'search_visible',
 				'ok'      => '0' !== (string) get_option( 'blog_public', '1' ),
 				'blocks'  => 'listing',
-				'group'   => 'find',
+				// In Store access, where the noindex check it causes sits.
+				'group'   => 'access',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Search engines can index the store', 'woocommerce' ),
 				'label'   => __( 'Store is hidden from search engines', 'woocommerce' ),
 				'why'     => __( '"Discourage search engines" asks crawlers, including AI shopping crawlers, to skip your store.', 'woocommerce' ),
-				'fix'     => __( 'Clear "Discourage search engines from indexing this site" under Settings > Reading.', 'woocommerce' ),
+				'fix'     => __( 'Clear “Discourage search engines from indexing this site” under Settings > Reading.', 'woocommerce' ),
 				'fix_url' => admin_url( 'options-reading.php' ),
 			),
 			array(
@@ -111,8 +113,8 @@ class StoreConditions {
 				'name'    => __( 'Universal Commerce Protocol (UCP) is on', 'woocommerce' ),
 				'label'   => __( 'Universal Commerce Protocol (UCP) is off', 'woocommerce' ),
 				'why'     => __( 'Shopping agents that use UCP cannot read your catalog.', 'woocommerce' ),
-				'fix'     => __( 'Turn on "Allow AI assistants to shop your store" under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
-				'fix_url' => AgenticCommerceSettings::url(),
+				'fix'     => __( 'Turn on "Allow AI assistants to shop your store" under WooCommerce > Settings > AI tools > AI shopping.', 'woocommerce' ),
+				'fix_url' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ),
 			),
 			array(
 				'id'      => 'https',
@@ -241,7 +243,7 @@ class StoreConditions {
 			'name'    => __( 'Use a readable permalink structure', 'woocommerce' ),
 			// Without a file in the way, Plain permalinks are why the connection URL doesn't load.
 			'label'   => 'no_file' === $status ? __( 'Use a readable permalink structure', 'woocommerce' ) : __( 'Fix your connection URL', 'woocommerce' ),
-			'why'     => 'no_file' === $status ? __( 'Any structure except Plain lets AI assistants reach your store.', 'woocommerce' ) : __( 'AI assistants use your connection URL to find your products, and it doesn\'t load your store\'s details.', 'woocommerce' ),
+			'why'     => 'no_file' === $status ? __( 'Any structure except Plain lets AI assistants reach your store.', 'woocommerce' ) : __( 'AI assistants use your connection URL to find your products, so it needs to load your store’s details.', 'woocommerce' ),
 			'fix'     => UcpDiscovery::discovery_fix( $status ),
 			// Permalinks are one fix only when nothing is serving the address. A file in the way is removed on disk.
 			'fix_url' => 'no_file' === $status ? admin_url( 'options-permalink.php' ) : '',
