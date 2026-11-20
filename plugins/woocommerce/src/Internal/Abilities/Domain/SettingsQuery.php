@@ -129,6 +129,7 @@ class SettingsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 	/**
 	 * Fields of a registered group that have string `id` and `type` values, without titles and section ends.
+	 * A field's `option_key` is its `field_name` when one is set, as in the admin save.
 	 *
 	 * @since 11.4.0
 	 * @param string $group Settings group ID.
@@ -152,6 +153,9 @@ class SettingsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			}
 			if ( in_array( $setting['type'], array( 'title', 'sectionend' ), true ) ) {
 				continue;
+			}
+			if ( is_string( $setting['option_key'] ?? null ) && is_string( $setting['field_name'] ?? null ) && '' !== $setting['field_name'] ) {
+				$setting['option_key'] = $setting['field_name'];
 			}
 			$fields[] = $setting;
 		}

@@ -276,6 +276,37 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should read and save an extension field under its field name, as the admin save does.
+	 * @testWith ["extension_stored", "extension_stored", null]
+	 *           ["extension_options[mode]", "extension_options", "mode"]
+	 * @param string      $field_name Name the admin form posts the field under.
+	 * @param string      $option     Option the admin save writes.
+	 * @param string|null $member     Member of that option the field is stored in.
+	 */
+	public function test_updates_field_under_field_name( string $field_name, string $option, ?string $member ): void {
+		$stored = static fn( string $value ) => $member ? array(
+			$member => $value,
+			'other' => 'kept',
+		) : $value;
+		update_option( $option, $stored( 'old' ) );
+		$this->add_general_field( array( 'field_name' => $field_name ) );
+
+		$result = $this->sut->execute( $this->input( 'general', array( 'extension_field' => 'new' ) ) );
+
+		$this->assertSame( 'old', $result['settings'][0]['previous'] );
+		$this->assertSame( 'new', $result['settings'][0]['value'] );
+		$this->assertSame( $stored( 'new' ), get_option( $option ) );
+		$this->assertFalse( get_option( 'extension_field' ) );
+		$read = wp_get_ability( 'woocommerce/settings-query' )->execute(
+			array(
+				'group'   => 'general',
+				'include' => array( 'extension_field' ),
+			)
+		);
+		$this->assertSame( 'new', $read['settings'][0]['value'] );
+	}
+
+	/**
 	 * @testdox Should refuse values the REST settings validators or field types reject.
 	 * @testWith ["select", "not-an-option"]
 	 *           ["select", ["sandbox"]]
