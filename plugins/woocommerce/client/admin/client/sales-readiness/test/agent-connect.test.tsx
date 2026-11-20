@@ -43,57 +43,74 @@ describe( 'AgentConnect', () => {
 			surface: 'overview',
 			area: 'agent_connect',
 		} );
-		expect( screen.queryByText( /add WordPress/ ) ).not.toBeInTheDocument();
+		expect(
+			screen.queryByText( 'add WordPress in the AI app', {
+				exact: false,
+			} )
+		).not.toBeInTheDocument();
 		submit.mockRestore();
 		form?.remove();
 	} );
 
-	it( 'shows the success notice and what to do next after connecting, without the button', () => {
+	it( 'shows the success notice once, then the next step, without the button', () => {
+		const connected = {
+			connected: true as const,
+			notice: 'connected' as const,
+			url: '',
+			action: '',
+			nonce: '',
+		};
 		window.history.replaceState(
 			null,
 			'',
 			'?page=wc-settings&wc_ai_connect=connected'
 		);
-		render(
-			<AgentConnect
-				connect={ {
-					connected: true,
-					notice: 'connected',
-					url: '',
-					action: '',
-					nonce: '',
-				} }
-			/>
-		);
+		const { unmount } = render( <AgentConnect connect={ connected } /> );
 
 		expect(
 			screen.getByText( 'Connection successful' )
 		).toBeInTheDocument();
 		expect(
-			screen.getByText( /add WordPress in the AI app/ )
+			screen.getByText( 'add WordPress in the AI app', {
+				exact: false,
+			} )
 		).toBeInTheDocument();
 		expect(
 			screen.queryByRole( 'button', { name: 'Connect to WordPress.com' } )
 		).not.toBeInTheDocument();
 
-		fireEvent.click(
-			screen.getByRole( 'button', { name: /close|dismiss/i } )
-		);
+		fireEvent.click( screen.getByRole( 'button', { name: 'Close' } ) );
 		expect(
 			screen.queryByText( 'Connection successful' )
 		).not.toBeInTheDocument();
 		expect(
-			screen.getByText( /add WordPress in the AI app/ )
+			screen.getByText( 'add WordPress in the AI app', {
+				exact: false,
+			} )
 		).toBeInTheDocument();
-		expect( window.location.search ).not.toContain( 'wc_ai_connect' );
+		expect( window.location.search ).toBe( '?page=wc-settings' );
+
+		unmount();
+		render( <AgentConnect connect={ { ...connected, notice: '' } } /> );
+		expect(
+			screen.queryByText( 'Connection successful' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByText( 'add WordPress in the AI app', {
+				exact: false,
+			} )
+		).toBeInTheDocument();
 	} );
 
 	it( 'keeps the button next to the error when connecting failed', () => {
 		render( <AgentConnect connect={ { ...connect, notice: 'error' } } /> );
 
 		expect(
-			document.querySelector( '.components-notice.is-error' )
-		).toHaveTextContent( /couldn’t connect/ );
+			screen.getByText(
+				'Your store couldn’t connect to WordPress.com. Try again.',
+				{ selector: '.components-notice__content' }
+			)
+		).toBeInTheDocument();
 		expect(
 			screen.getByRole( 'button', { name: 'Connect to WordPress.com' } )
 		).toBeInTheDocument();

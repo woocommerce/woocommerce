@@ -98,6 +98,16 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
+	 * A page title for a dropdown. Tags are removed and entities decoded, so a stored title shows as the merchant wrote it.
+	 *
+	 * @param \WP_Post $page Page.
+	 * @return string
+	 */
+	private static function page_title( \WP_Post $page ): string {
+		return html_entity_decode( wp_strip_all_tags( get_the_title( $page ) ), ENT_QUOTES, 'UTF-8' );
+	}
+
+	/**
 	 * The store policy fields, on AI shopping. The privacy policy page is a WordPress setting, so it is
 	 * listed, and saved, only for users who can manage privacy options.
 	 *
@@ -113,7 +123,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			)
 		);
 		foreach ( is_array( $published ) ? $published : array() as $page ) {
-			$pages[ (string) $page->ID ] = $page->post_title;
+			$pages[ (string) $page->ID ] = self::page_title( $page );
 		}
 		$page_field = static function ( string $option, string $title ) use ( $pages, $store_pages ): array {
 			$options = $pages;
@@ -123,7 +133,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				$status = get_post_status_object( $stored->post_status );
 				$state  = in_array( $stored->ID, $store_pages, true ) ? __( 'Store page', 'woocommerce' ) : ( $status ? $status->label : $stored->post_status );
 				/* translators: 1: page title, 2: page status, such as Draft, or "Store page". */
-				$options[ (string) $stored->ID ] = sprintf( __( '%1$s (%2$s)', 'woocommerce' ), $stored->post_title, $state );
+				$options[ (string) $stored->ID ] = sprintf( __( '%1$s (%2$s)', 'woocommerce' ), self::page_title( $stored ), $state );
 			}
 			return array(
 				'title'              => $title,
@@ -170,8 +180,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			$GLOBALS['hide_save_button'] = true;
 			printf(
 				'<div class="wc-agentic-commerce"><div id="wc-agent-readiness-overview" class="wc-agent-readiness-overview" data-view="%s" data-connect="%s"></div></div>',
-				esc_attr( (string) wp_json_encode( $this->readiness_page->view() ) ),
-				esc_attr( (string) wp_json_encode( AgenticCommerceSettings::connect_view() ) )
+				esc_attr( self::view_json( $this->readiness_page->view() ) ),
+				esc_attr( self::view_json( AgenticCommerceSettings::connect_view() ) )
 			);
 			return;
 		}
@@ -182,8 +192,20 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$GLOBALS['hide_save_button'] = true;
 		printf(
 			'<div id="wc-ai-shopping" class="wc-ai-shopping-root wc-settings-prevent-change-event" data-view="%s"></div>',
-			esc_attr( (string) wp_json_encode( $this->shopping_view() ) )
+			esc_attr( self::view_json( $this->shopping_view() ) )
 		);
+	}
+
+	/**
+	 * A view as JSON for a data attribute. The hex flags encode &, quotes, < and > inside its strings, so
+	 * an entity already in a value, such as &quot;, which esc_attr() leaves as it is, can't decode to a
+	 * quote that ends a JSON string.
+	 *
+	 * @param array<string, mixed> $view View data.
+	 * @return string JSON for the attribute.
+	 */
+	private static function view_json( array $view ): string {
+		return (string) wp_json_encode( $view, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT );
 	}
 
 	/**
