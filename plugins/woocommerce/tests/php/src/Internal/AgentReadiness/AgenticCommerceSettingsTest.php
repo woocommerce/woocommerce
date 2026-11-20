@@ -684,16 +684,15 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$view = $this->view();
 
-		$this->assertSame( 'What does your store share with AI assistants?', $view['declared']['title'] );
+		$this->assertSame( 'Extra details for AI assistants', $view['declared']['title'] );
 		$this->assertSame( 'These are other files and code that some AI assistants use to learn about your store. Your store shares 1 of these 5. None are required, so there’s nothing to fix.', $view['declared']['text'] );
 		$this->assertSame( 'Optional', $view['declared']['badge']['text'] );
 		$this->assertSame(
 			array(
-				'Files in your root folder'       => array( 'ai.txt usage file', 'AGENTS.md' ),
-				'Files at standard addresses'     => array( 'API catalog' ),
-				'In your page code'               => array( 'sameAs links' ),
-				'Extra details for AI assistants' => array( 'Markdown pages' ),
-				'Not checked yet'                 => array( 'TDMRep' ),
+				'Files in your root folder'   => array( 'ai.txt usage file', 'AGENTS.md' ),
+				'Files at standard addresses' => array( 'API catalog' ),
+				'In your page code'           => array( 'sameAs links', 'Markdown pages' ),
+				'Not checked yet'             => array( 'TDMRep' ),
 			),
 			array_column( array_map( static fn( array $group ): array => array( $group['title'], array_column( $group['items'], 'name' ) ), $view['declared']['groups'] ), 1, 0 ),
 			'Every item, found or not, under where it lives; an item the scan couldn\'t read is under Not checked yet'

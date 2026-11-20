@@ -117,7 +117,7 @@ describe( 'DeclaredCard', () => {
 		const { container } = render(
 			<DeclaredCard
 				declared={ {
-					title: 'What does your store share with AI assistants?',
+					title: 'Extra details for AI assistants',
 					badge: { intent: 'none', text: 'Optional' },
 					text: 'These are other files and code that some AI assistants use to learn about your store.',
 					groups: [
@@ -138,16 +138,20 @@ describe( 'DeclaredCard', () => {
 		);
 
 		await userEvent.click(
-			screen.getByText( 'What does your store share with AI assistants?' )
+			screen.getByText( 'Extra details for AI assistants' )
 		);
 
 		const groups = container.querySelectorAll(
-			'.wc-sales-readiness-tier-group'
+			'.wc-sales-readiness-declared__group'
 		);
 		expect( groups ).toHaveLength( 2 );
 		expect( groups[ 0 ] ).toHaveTextContent( 'Files in your root folder' );
 		expect( groups[ 0 ] ).toHaveTextContent( 'Found: ai.txt usage file' );
 		expect( groups[ 0 ] ).toHaveTextContent( 'Not found: AGENTS.md' );
 		expect( groups[ 1 ] ).toHaveTextContent( 'Not checked yet: TDMRep' );
+		// Missing items say so on screen, as in the design; found and not checked ones don't.
+		expect( groups[ 0 ] ).toHaveTextContent( 'AGENTS.md · not found' );
+		expect( groups[ 0 ] ).not.toHaveTextContent( 'ai.txt usage file ·' );
+		expect( groups[ 1 ] ).not.toHaveTextContent( 'not found' );
 	} );
 } );

@@ -198,6 +198,38 @@ body:has(.wc-sales-readiness) {
 	}
 }
 
+// Extra details for AI assistants: a compact list per group, as in the design.
+.wc-sales-readiness-declared {
+	display: grid;
+	gap: 20px;
+	padding-block-start: 12px;
+
+	&__title {
+		display: block;
+		font-weight: 600;
+		margin-block-end: 6px;
+	}
+
+	&__list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	&__item {
+		display: flex;
+		gap: 8px;
+		align-items: flex-start;
+		// wp-admin gives every li a bottom margin.
+		margin: 0;
+		padding-block: 2px;
+
+		> svg {
+			flex: 0 0 20px;
+		}
+	}
+}
+
 // A list that ends the card (Fix first, a passed card) has no line under its last row. An open
 // fold keeps its line, above Hide.
 .wc-sales-readiness-card .wc-sales-readiness-list:last-child:not(.wc-sales-readiness-fold *) > .wc-sales-readiness-row:last-child {

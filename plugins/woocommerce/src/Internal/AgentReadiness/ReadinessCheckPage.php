@@ -908,7 +908,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'root'    => __( 'Files in your root folder', 'woocommerce' ),
 			'address' => __( 'Files at standard addresses', 'woocommerce' ),
 			'code'    => __( 'In your page code', 'woocommerce' ),
-			'extra'   => __( 'Extra details for AI assistants', 'woocommerce' ),
 			'unknown' => __( 'Not checked yet', 'woocommerce' ),
 		);
 		$groups = array_fill_keys( array_keys( $titles ), array() );
@@ -945,7 +944,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			}
 		}
 		return array(
-			'title'  => __( 'What does your store share with AI assistants?', 'woocommerce' ),
+			'title'  => __( 'Extra details for AI assistants', 'woocommerce' ),
 			'badge'  => self::badge_data( array( 'off', __( 'Optional', 'woocommerce' ) ) ),
 			'text'   => $text,
 			'groups' => array_values(
