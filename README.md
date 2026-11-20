@@ -23,7 +23,7 @@ Once you've installed all prerequisites, the following will prepare all of the b
 
 ```bash
 # Install the PHP and Composer dependencies for all of the plugins, packages, and tools.
-# PNPM automatically uses the pinned Node version for every script it runs.
+# PNPM fails with an error when the Node version differs from the pinned one (see Prerequisites).
 pnpm install --frozen-lockfile
 # Build all of the plugins, packages, and tools in the monorepo
 pnpm build

@@ -11,7 +11,7 @@ sidebar_position: 2
 There are some specific software requirements you will need to consider when developing WooCommerce extensions. The necessary software includes:
 
 * [Git](https://git-scm.com/) for version control of your source code  
-* [Node.js](https://nodejs.org/) to run node-based scripts and build processes. PNPM installs and uses the Node version pinned in the repository automatically, so a version manager such as [nvm](https://github.com/nvm-sh/nvm/blob/master/README.md) is optional.  
+* [Node.js](https://nodejs.org/) to run node-based scripts and build processes. Use the Node version pinned in the repository (`devEngines.runtime` in `package.json`, mirrored in `.nvmrc`). PNPM does not install it and fails with an error on a different version, so a version manager such as [nvm](https://github.com/nvm-sh/nvm/blob/master/README.md) is handy.  
 * [Pnpm](https://pnpm.io/) is an npm alternative required if you are building WooCommerce from the repository  
 * [Composer](https://getcomposer.org/) is an optional dependency management tool for PHP-based development  
 * [WP-CLI](http://wp-cli.org/) is the command line interface for WordPress
