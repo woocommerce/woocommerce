@@ -236,10 +236,12 @@ class UcpCheckout extends ControllerTestCase {
 		$profile = 'profile="https://agent.example/profile.json"';
 
 		return array(
-			'supported'  => array( $profile . '; version="' . Utils::VERSION . '"', 201 ),
-			'newer'      => array( $profile . '; version="2099-01-01"', 422 ),
-			'older'      => array( $profile . '; version="2026-01-23"', 422 ),
-			'bare comma' => array( $profile . ',version="2099-01-01"', 422 ),
+			'supported'                => array( $profile . '; version="' . Utils::VERSION . '"', 201 ),
+			'newer'                    => array( $profile . '; version="2099-01-01"', 422 ),
+			'older'                    => array( $profile . '; version="2026-01-23"', 422 ),
+			'bare comma'               => array( $profile . ',version="2099-01-01"', 422 ),
+			'escaped quote, newer'     => array( $profile . ', note="a\\"b", version="2099-01-01"', 422 ),
+			'escaped quote, supported' => array( $profile . ', note="a\\"b", version="' . Utils::VERSION . '"', 201 ),
 		);
 	}
 

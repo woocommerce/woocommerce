@@ -215,7 +215,7 @@ class Utils {
 	}
 
 	/**
-	 * Value of one double-quoted parameter, matched by its exact name.
+	 * Unescaped value of one double-quoted parameter, matched by its exact name.
 	 *
 	 * A match counts only outside quotes, at the start of the header or after whitespace, a semicolon or a comma.
 	 *
@@ -224,34 +224,25 @@ class Utils {
 	 * @return string Empty when the parameter is absent.
 	 */
 	public static function quoted_header_parameter( string $header, string $name ): string {
-		$prefix = $name . '="';
-		$offset = 0;
-		$length = strlen( $header );
+		// Each match is one whole quoted string, `\"` and `\\` escapes included, so text inside a value is never read as a parameter.
+		preg_match_all( '/"((?:[^"\\\\]++|\\\\.)*+)"/', $header, $strings, PREG_SET_ORDER | PREG_OFFSET_CAPTURE );
 
-		while ( $offset < $length ) {
-			$start = strpos( $header, $prefix, $offset );
-			if ( false === $start ) {
-				return '';
+		$prefix = $name . '=';
+		foreach ( $strings as $string ) {
+			$start = $string[0][1] - strlen( $prefix );
+			if ( $start < 0 || substr( $header, $start, strlen( $prefix ) ) !== $prefix ) {
+				continue;
 			}
 
-			// An even number of quotes before the name means it is outside a value.
-			$outside_quotes = 0 === ( substr_count( substr( $header, 0, $start ), '"' ) % 2 );
-			$is_parameter   = 0 === $start;
-			if ( ! $is_parameter ) {
-				$previous     = substr( $header, $start - 1, 1 );
-				$is_parameter = false !== strpos( " \t;,", $previous );
+			if ( 0 === $start || false !== strpos( " \t;,", $header[ $start - 1 ] ) ) {
+				return strtr(
+					$string[1][0],
+					array(
+						'\\"'  => '"',
+						'\\\\' => '\\',
+					)
+				);
 			}
-
-			if ( $outside_quotes && $is_parameter ) {
-				$value_start = $start + strlen( $prefix );
-				$end         = strpos( $header, '"', $value_start );
-				if ( false === $end ) {
-					return '';
-				}
-				return substr( $header, $value_start, $end - $value_start );
-			}
-
-			$offset = $start + strlen( $prefix );
 		}
 
 		return '';
