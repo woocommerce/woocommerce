@@ -152,6 +152,11 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			wc_release_coupons_for_order( $order );
 
 			return $this->ucp_error( 'discount_code_invalid', wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200, '$.discounts.codes' );
+		} catch ( \Throwable $e ) {
+			// The helper saves the holds taken before an Error too, without catching it.
+			wc_release_coupons_for_order( $order );
+
+			throw $e;
 		}
 
 		try {
