@@ -4,10 +4,10 @@ The Core abilities live in `Domain/`. `AbilitiesLoader` registers them with `Abi
 
 ## Keep ExtensibleAbilities to its public API
 
-`Automattic\WooCommerce\Abilities\ExtensibleAbilities` holds only methods that extensions call. Each one is a one-line call to `AbilityExtensions`, which holds the registrations and the code.
+`Automattic\WooCommerce\Abilities\ExtensibleAbilities` is the API that extensions call. Keep the state and the logic in internal classes, and keep `ExtensibleAbilities` a thin layer over them.
 
-- Put a method that only Core calls in `AbilityExtensions`, not in `ExtensibleAbilities`. Do not tag a public method of `ExtensibleAbilities` with `@internal`.
-- Add a method to `ExtensibleAbilities` only when an extension needs it, for example to register something or to format a resource that the extension owns.
+- Put a method that only Core calls in an internal class, not in `ExtensibleAbilities`. Do not tag a public method of `ExtensibleAbilities` with `@internal`.
+- Add a method to `ExtensibleAbilities` only when an extension needs it.
 
 ## Trust the input schema
 
