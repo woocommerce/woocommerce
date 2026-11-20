@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Make owner matching exact on every unreleased subscriptions engine read and throw on failed plan reads; no changelog entry needed.
+
