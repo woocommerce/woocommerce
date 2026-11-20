@@ -10,6 +10,8 @@ import userEvent from '@testing-library/user-event';
 import { SectionCard } from '../components/section-card';
 import type { CheckRow, RowState, Section } from '../types';
 
+jest.mock( '../tracks', () => ( { trackReadiness: jest.fn() } ) );
+
 const row = ( id: string, state: RowState ): CheckRow => ( {
 	id,
 	state,

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a critical error when the checkout payment URL contains a refund ID.

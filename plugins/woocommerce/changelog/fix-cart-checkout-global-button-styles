@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Let Cart and Checkout buttons follow the theme's global button styles, including spacing and interaction states.

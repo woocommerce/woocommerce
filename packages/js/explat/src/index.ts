@@ -12,6 +12,7 @@ import { logError } from './error';
 import {
 	fetchExperimentAssignment,
 	fetchExperimentAssignmentWithAuth,
+	fetchExperimentAssignmentWithDefaultVariationName,
 	canTrack,
 } from './assignment';
 import { getAnonId, initializeAnonId } from './anon';
@@ -47,6 +48,19 @@ export const { loadExperimentAssignment, dangerouslyGetExperimentAssignment } =
 
 export const { useExperiment, Experiment, ProvideExperimentData } =
 	createExPlatClientReactHelpers( exPlatClient );
+
+// A client that returns the default variation by name, so it can be told apart from not being in the experiment.
+// Assignments are cached per experiment name across clients, so read an experiment through one hook only.
+export const { useExperiment: useExperimentWithDefaultVariationName } =
+	createExPlatClientReactHelpers(
+		createExPlatClient( {
+			fetchExperimentAssignment:
+				fetchExperimentAssignmentWithDefaultVariationName,
+			getAnonId,
+			logError,
+			isDevelopmentMode,
+		} )
+	);
 
 // Create another auth client that send request to wpcom as auth user.
 const exPlatClientWithAuth = createExPlatClient( {

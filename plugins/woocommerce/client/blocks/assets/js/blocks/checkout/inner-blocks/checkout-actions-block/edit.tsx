@@ -23,6 +23,7 @@ import {
 } from '@woocommerce/base-components/cart-checkout';
 import clsx from 'clsx';
 import { CheckboxControl } from '@woocommerce/blocks-components';
+import { useStyleProps } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -46,6 +47,7 @@ export const Edit = ( {
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ) => {
 	const blockProps = useBlockProps();
+	const buttonStyleProps = useStyleProps( attributes );
 	const {
 		cartPageId = 0,
 		showReturnToCart = false,
@@ -228,6 +230,7 @@ export const Edit = ( {
 						</ReturnToCartButton>
 					) }
 					<PlaceOrderButton
+						buttonStyleProps={ buttonStyleProps }
 						label={
 							<RichText
 								multiline={ false }

@@ -1944,6 +1944,44 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Customer search escapes HTML in customer names.
+	 *
+	 * @throws Automattic\WooCommerce\Internal\DependencyManagement\ContainerException If the LegacyProxy cannot be retrieved.
+	 */
+	public function test_json_search_customers_escapes_html_in_names(): void {
+		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+
+		try {
+			$legacy_proxy->reset();
+			$legacy_proxy->register_function_mocks(
+				array(
+					'check_ajax_referer' => fn () => true,
+				)
+			);
+
+			$customer = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
+			$customer->set_first_name( 'Test' );
+			$customer->set_last_name( '<img src=x onerror=alert(1)>' );
+			$customer->save();
+
+			wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+			$_GET['term'] = $customer->get_id();
+
+			$response = $this->do_ajax( 'woocommerce_json_search_customers' );
+		} finally {
+			unset( $_GET['term'] );
+			wp_set_current_user( 0 );
+			$legacy_proxy->reset();
+		}
+
+		$this->assertSame(
+			sprintf( 'Test &lt;img src=x onerror=alert(1)&gt; (#%1$d &ndash; test1@example.com)', $customer->get_id() ),
+			$response[ $customer->get_id() ],
+			'Customer search results should contain escaped names.'
+		);
+	}
+
+	/**
 	 * Describe JSON search, particularly as it relates to handling searches for users in a
 	 * multisite context (it should generally not be possible to retrieve information about
 	 * users who have not been added to the current blog).
