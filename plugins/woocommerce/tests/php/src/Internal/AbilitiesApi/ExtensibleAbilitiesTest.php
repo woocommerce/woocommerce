@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
@@ -1060,11 +1061,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$list = $this->run_ability( $ability, $create_input() )[ $list_key ];
 
-		$ids = array_column( $list, 'id' );
+		// A customer's id is its Analytics customer ID; extensions get the WC_Customer of its user.
+		$id_key = 'customer' === $resource_name ? 'user_id' : 'id';
+		$ids    = array_column( $list, $id_key );
 		$this->assertCount( 2, $ids );
 		$this->assertSame( array( array( 'test-ext', $ids ), array( 'other_ext', $ids ) ), $calls );
 		foreach ( $list as $listed ) {
-			$this->assertSame( 'primed-' . $listed['id'], $listed['extensions']['test-ext']['primed'] );
+			$this->assertSame( 'primed-' . $listed[ $id_key ], $listed['extensions']['test-ext']['primed'] );
 		}
 	}
 
@@ -1090,7 +1093,12 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				'woocommerce/customers-query',
 				'customers',
 				static function (): array {
-					return array( 'include' => self::factory()->user->create_many( 2, array( 'role' => 'customer' ) ) );
+					$customer_ids = array();
+					foreach ( self::factory()->user->create_many( 2, array( 'role' => 'customer' ) ) as $user_id ) {
+						CustomersDataStore::update_registered_customer( $user_id );
+						$customer_ids[] = (int) CustomersDataStore::get_customer_id_by_user_id( $user_id );
+					}
+					return array( 'include' => $customer_ids );
 				},
 			),
 			'product_term'   => array(

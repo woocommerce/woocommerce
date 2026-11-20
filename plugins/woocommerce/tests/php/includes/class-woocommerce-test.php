@@ -3,11 +3,137 @@
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
  * Unit tests for the WooCommerce class.
  */
 class WooCommerce_Test extends \WC_Unit_Test_Case {
+	use LoggerSpyTrait;
+
+	/**
+	 * @testdox Should omit arguments from fatal error backtraces while preserving call sites.
+	 * @testWith ["#0 /tmp/gateway.php(12): Processor->charge('378282246310005', '2440')", "#0 /tmp/gateway.php(12): Processor->charge()"]
+	 *           ["#0 /tmp/商店/café.php(12): Paiement\\支付->دفع('378282246310005', '2440')", "#0 /tmp/商店/café.php(12): Paiement\\支付->دفع()"]
+	 *           ["#0 /tmp/gateway.php(12): {closure:/tmp/gateway.php:8}('378282246310005', '2440')", "#0 /tmp/gateway.php(12): {closure:/tmp/gateway.php:8}()"]
+	 *           ["#0 [internal function]: call_user_func('378282246310005', '2440')", "#0 [internal function]: call_user_func()"]
+	 *           ["#0 [internal function]: pay('378282246310005', 'x(1): y(', '2440')", "#0 [internal function]: pay()"]
+	 *           ["#0 /tmp/gateway.php(12): Processor->charge('378282246310005', '2440'", "#0 /tmp/gateway.php(12): Processor->charge()"]
+	 *           ["#0 /tmp/gateway.php(12): Processor->{closure:Processor::charge():8}('378282246310005', '2440')", "#0 /tmp/gateway.php(12): Processor->{closure:Processor::charge():8}()"]
+	 *           ["#0 /tmp/gateway.php(12): Processor->charge('a(1): b', '378282246310005', '2440(')", "#0 /tmp/gateway.php(12): Processor->charge()"]
+	 *           ["#0 C:\\gateway.php(12): Processor->charge('378282246310005', '2440')\r\n#1 {main}", "#0 C:\\gateway.php(12): Processor->charge()"]
+	 *           ["#0 /tmp/gateway.php(12): Processor->charge('378282246310005', '\\n2440')", "#0 /tmp/gateway.php(12): Processor->charge()"]
+	 *           ["#0 /tmp/gateway.php(12): Processor->charge('x\\n#1 a(1): b', '378282246310005', '2440', Object(Foo))", "#0 /tmp/gateway.php(12): Processor->charge()"]
+	 *           ["#0 /tmp/gateway.php(12): Processor->charge('x\\n#1 a', '378282246310005', '(1): foo(', '2440')", "#0 /tmp/gateway.php(12): Processor->charge()"]
+	 *           ["#0 /tmp/gateway.php(12): class@anonymous->charge('378282246310005', '2440')", "#0 /tmp/gateway.php(12): class@anonymous->charge()"]
+	 *           ["#0 /tmp/gateway.php(12) : eval()'d code(1): Processor->charge('378282246310005', '2440')", "#0 /tmp/gateway.php(12) : eval()'d code(1): Processor->charge()"]
+	 *           ["#0 /tmp/gateway.php(12): Processor->{closure:{closure:Processor::charge():8}:9}('378282246310005', '2440')", "#0 /tmp/gateway.php(12): Processor->{closure:{closure:Processor::charge():8}:9}()"]
+	 *           ["#0 /tmp/gateway.php(12): class@anonymous->{closure:class@anonymous('378282246310005', '2440')", "#0 /tmp/gateway.php(12): class@anonymous->{closure:class@anonymous()"]
+	 *           ["#0 /tmp/gateway.php(12): Processor->charge('x\n#1 a(1): {closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}{closure:a}', '378282246310005', '2440')", "#0 /tmp/gateway.php(12): Processor->charge()"]
+	 *           ["#0 /srv/John's \"Store\", Inc/gateway.php(12): {closure:/srv/John's \"Store\", Inc/gateway.php:8}('378282246310005', '2440')", "#0 /srv/John's \"Store\", Inc/gateway.php(12): {closure:/srv/John's \"Store\", Inc/gateway.php:8}()"]
+	 *           ["#0 /tmp/gateway.php(12): Processor->charge('378282246310005', '2440')\nNext Exception: 378282246310005 in /tmp/gateway.php:12\n  thrown in /tmp/gateway.php on line 12", "#0 /tmp/gateway.php(12): Processor->charge()"]
+	 *
+	 * @param string $frame          PHP fatal error trace frame.
+	 * @param string $expected_frame Trace frame without arguments.
+	 */
+	public function test_omits_arguments_from_fatal_error_backtraces( string $frame, string $expected_frame ): void {
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'error_get_last' => static function () use ( $frame ) {
+					return array(
+						'type'    => E_ERROR,
+						'message' => 'Uncaught TypeError: Fixture payment failure.' . PHP_EOL . 'Stack trace:' . PHP_EOL . $frame . PHP_EOL . '#1 {main}',
+						'file'    => '/tmp/gateway.php',
+						'line'    => 12,
+					);
+				},
+			)
+		);
+
+		WC()->log_errors();
+
+		$this->assertLogged( 'critical', 'Fixture payment failure.', array( 'source' => 'fatal-errors' ) );
+		$context = $this->captured_logs[0]['context'];
+		$this->assertContains( $expected_frame, $context['backtrace'], 'Fatal logs must preserve call sites without arguments.' );
+		$this->assertContains( '#1 {main}', $context['backtrace'], 'The final frame must remain available.' );
+		$this->assertStringNotContainsString( '378282246310005', wp_json_encode( $this->captured_logs ), 'Fatal logs must omit card numbers.' );
+		$this->assertStringNotContainsString( '2440', wp_json_encode( $this->captured_logs ), 'Fatal logs must omit CVCs.' );
+	}
+
+	/**
+	 * @testdox Should keep frames from every chained exception when a message contains "Stack trace:".
+	 */
+	public function test_keeps_chained_fatal_error_frames(): void {
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'error_get_last' => static function () {
+					return array(
+						'type'    => E_ERROR,
+						'message' => implode(
+							PHP_EOL,
+							array(
+								'Uncaught RuntimeException: See Stack trace: below.',
+								'Stack trace:',
+								"#0 /tmp/gateway.php(12): Processor->charge('378282246310005')",
+								'#1 {main}',
+								'',
+								'Next Exception: Payment failed.',
+								'Stack trace:',
+								"#0 /tmp/checkout.php(30): Checkout->pay('2440')",
+								'#1 {main}',
+							)
+						),
+						'file'    => '/tmp/checkout.php',
+						'line'    => 30,
+					);
+				},
+			)
+		);
+
+		WC()->log_errors();
+
+		$backtrace = $this->captured_logs[0]['context']['backtrace'];
+		$this->assertContains( '#0 /tmp/gateway.php(12): Processor->charge()', $backtrace, 'Frames after a message that contains "Stack trace:" must be kept.' );
+		$this->assertContains( '#0 /tmp/checkout.php(30): Checkout->pay()', $backtrace, 'Frames of chained exceptions must be kept.' );
+		$this->assertContains( 'Next Exception', $backtrace, 'Chained exception classes must be kept without their messages.' );
+		$this->assertStringNotContainsString( 'Payment failed.', wp_json_encode( $this->captured_logs ), 'Chained exception messages must be omitted.' );
+		$this->assertStringNotContainsString( '378282246310005', wp_json_encode( $this->captured_logs ), 'Fatal logs must omit card numbers.' );
+		$this->assertStringNotContainsString( '2440', wp_json_encode( $this->captured_logs ), 'Fatal logs must omit CVCs.' );
+	}
+
+	/**
+	 * @testdox Should keep the frames after a very long trace line.
+	 */
+	public function test_keeps_frames_after_very_long_trace_line(): void {
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'error_get_last' => static function () {
+					return array(
+						'type'    => E_ERROR,
+						'message' => implode(
+							PHP_EOL,
+							array(
+								'Uncaught Exception: Fixture payment failure.',
+								'Stack trace:',
+								'#0 ' . str_repeat( 'a', 1000000 ),
+								"#1 /tmp/gateway.php(12): Processor->charge('378282246310005')",
+								'#2 {main}',
+							)
+						),
+						'file'    => '/tmp/gateway.php',
+						'line'    => 12,
+					);
+				},
+			)
+		);
+
+		WC()->log_errors();
+
+		$backtrace = $this->captured_logs[0]['context']['backtrace'];
+		$this->assertContains( '#1 /tmp/gateway.php(12): Processor->charge()', $backtrace, 'A very long line must not drop the frames after it.' );
+		$this->assertContains( '#2 {main}', $backtrace, 'The final frame must remain available.' );
+	}
 
 	/**
 	 * Setup test data. Called before every test.
