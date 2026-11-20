@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WC_Order;
 
 /**
- * Shows regulatory fields in order emails, below the billing address.
+ * Shows regulatory fields in order emails, in their own section after the addresses.
  *
  * @internal Just for internal use.
  *
@@ -37,30 +37,41 @@ class OrderEmails implements RegisterHooksInterface {
 	 * Register hooks and filters.
 	 */
 	public function register(): void {
-		add_action( 'woocommerce_email_customer_address_section', array( $this, 'handle_woocommerce_email_customer_address_section' ), 30, 4 );
+		// Priority 25 puts the section after the addresses (20) and above "Additional information" (30).
+		add_action( 'woocommerce_email_customer_details', array( $this, 'handle_woocommerce_email_customer_details' ), 25, 3 );
 	}
 
 	/**
-	 * Output the values below the billing address, in emails to the customer and to the merchant.
+	 * Output the section in emails to the customer and to the merchant.
 	 *
 	 * @internal
 	 *
-	 * @param mixed $address_type  Address being shown: billing or shipping.
 	 * @param mixed $order         Order the email is about.
 	 * @param mixed $sent_to_admin Whether the email goes to the merchant.
 	 * @param mixed $plain_text    Whether the email is plain text.
 	 */
-	public function handle_woocommerce_email_customer_address_section( $address_type, $order, $sent_to_admin = false, $plain_text = false ): void {
-		if ( 'billing' !== $address_type || ! $order instanceof WC_Order ) {
+	public function handle_woocommerce_email_customer_details( $order, $sent_to_admin = false, $plain_text = false ): void {
+		$fields = $order instanceof WC_Order ? $this->regulatory_fields->get_order_display_values( $order ) : array();
+
+		if ( empty( $fields ) ) {
 			return;
 		}
 
-		foreach ( $this->regulatory_fields->get_order_display_values( $order ) as $field ) {
-			if ( $plain_text ) {
+		$heading = __( 'Additional required information', 'woocommerce' );
+
+		if ( $plain_text ) {
+			echo "\n" . esc_html( wc_strtoupper( $heading ) ) . "\n\n";
+			foreach ( $fields as $field ) {
 				printf( "%s: %s\n", esc_html( $field['label'] ), esc_html( $field['value'] ) );
-			} else {
-				printf( '<br><strong>%s</strong>: %s', esc_html( $field['label'] ), esc_html( $field['value'] ) );
 			}
+			return;
 		}
+
+		echo '<h2>' . esc_html( $heading ) . '</h2>';
+		echo '<ul class="additional-fields" style="margin-bottom: 40px;">';
+		foreach ( $fields as $field ) {
+			printf( '<li><strong>%s</strong>: %s</li>', esc_html( $field['label'] ), esc_html( $field['value'] ) );
+		}
+		echo '</ul>';
 	}
 }
