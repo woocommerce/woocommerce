@@ -435,6 +435,7 @@ final class WooCommerce {
 		 */
 		$container->get( Automattic\WooCommerce\Internal\Utilities\PluginInstaller::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Tax\BaseLocationTaxEstimate::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Tax\CartWithoutShipping::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController::class )->register();

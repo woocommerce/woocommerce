@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the billing address for tax when nothing in the cart needs shipping, so cart and checkout show the same tax.
