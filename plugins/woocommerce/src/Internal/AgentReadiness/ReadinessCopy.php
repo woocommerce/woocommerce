@@ -87,7 +87,7 @@ final class ReadinessCopy {
 			/* translators: %s: product name. */
 			'single_h1'                      => __( 'On the %s page, there’s no main heading, or more than one, so AI assistants may read the wrong product name.', 'woocommerce' ),
 			/* translators: %s: product name. */
-			'canonical_url'                  => __( 'On the %s page, the code doesn’t set a main URL. When a page has more than one URL, this tells AI assistants which one to show.', 'woocommerce' ),
+			'canonical_url'                  => __( 'The %s page doesn’t set a main URL. When a page has more than one URL, this tells AI assistants which one to show.', 'woocommerce' ),
 			/* translators: %s: product name. */
 			'product_review_markup'          => __( 'On the %s page, reviews aren’t in the page code, so AI assistants can’t compare its ratings with other stores.', 'woocommerce' ),
 		);
@@ -121,7 +121,7 @@ final class ReadinessCopy {
 		$store_name = trim( wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES ) );
 		if ( 'llms_txt_valid' === $id && '' !== $store_name ) {
 			/* translators: %s: store name. */
-			$check[4] = sprintf( __( 'Make # %s the first line of the file. Do this in your SEO plugin’s llms.txt settings, or in the llms.txt file in your site’s root folder.', 'woocommerce' ), $store_name );
+			$check[4] = sprintf( __( 'Make # %s the first line of the file. Do this in your SEO plugin’s llms.txt settings, or in the llms.txt file in your store’s root folder.', 'woocommerce' ), $store_name );
 		}
 		if ( 'open_graph_tags' === $id && '' !== $source ) {
 			$check[3] = self::open_graph_found( $source, $product );
@@ -132,8 +132,8 @@ final class ReadinessCopy {
 				$check[3] = sprintf( __( 'A link in the file doesn’t open: %s. AI assistants use these links to reach your store’s main pages.', 'woocommerce' ), (string) preg_replace( '#^https?://#i', '', $link ) );
 			}
 			$fixes    = array(
-				'woocommerce' => __( 'WooCommerce adds these links from your store’s settings. Open the link to see why it doesn’t load. A security or caching plugin may be blocking it.', 'woocommerce' ),
-				'file'        => __( 'Update or remove the broken links in the llms.txt file in your site’s root folder.', 'woocommerce' ),
+				'woocommerce' => __( 'WooCommerce adds these links from your store’s settings. Open the link to see why it doesn’t open. A security or caching plugin may be blocking it.', 'woocommerce' ),
+				'file'        => __( 'Update or remove the broken links in the llms.txt file in your store’s root folder.', 'woocommerce' ),
 				'other'       => __( 'Update or remove the broken links in the settings of the plugin that adds your llms.txt file.', 'woocommerce' ),
 			);
 			$check[4] = $fixes[ $source ] ?? $check[4];
@@ -171,7 +171,7 @@ final class ReadinessCopy {
 			case 'woocommerce':
 				return array( 'pass' => __( 'Added by WooCommerce, using your store’s details.', 'woocommerce' ) );
 			case 'file':
-				return array( 'pass' => __( 'Added to your site’s root folder.', 'woocommerce' ) );
+				return array( 'pass' => __( 'Added to your store’s root folder.', 'woocommerce' ) );
 			case 'other':
 				return array( 'pass' => __( 'Added by a plugin.', 'woocommerce' ) );
 			case 'disabled':
@@ -339,7 +339,7 @@ final class ReadinessCopy {
 				__( 'AI assistants can connect to your store', 'woocommerce' ),
 				__( 'Check why AI assistants can’t connect', 'woocommerce' ),
 				__( 'They use your connection URL to find your products.', 'woocommerce' ),
-				__( 'AI assistants can’t reach your connection URL, so they can’t find your products. Test it in UCP Playground, or ask your host.', 'woocommerce' ),
+				__( 'AI assistants can’t reach your connection URL, so they can’t find your products. Test it in UCP Playground, or ask your hosting provider.', 'woocommerce' ),
 				__( 'Save your settings under Settings › Permalinks once. If AI assistants still can’t connect, ask your host whether caching or a firewall blocks your connection URL.', 'woocommerce' ),
 			),
 			'ucp_profile_version'            => array(
@@ -353,7 +353,7 @@ final class ReadinessCopy {
 				__( 'AI assistants can search your catalog', 'woocommerce' ),
 				__( 'Check why AI assistants can’t search your catalog', 'woocommerce' ),
 				__( 'This is how they find products and add them to a shopper’s cart.', 'woocommerce' ),
-				__( 'AI assistants can’t search your products or add them to carts. A firewall or security plugin can cause this. Check those first, or ask your host.', 'woocommerce' ),
+				__( 'AI assistants can’t search your products or add them to carts. A firewall or security plugin can cause this, so check those first or ask your hosting provider.', 'woocommerce' ),
 				__( 'Ask your host or security plugin to allow requests to /wp-json/wc/ucp/.', 'woocommerce' ),
 			),
 			'ucp_checkout'                   => array(
@@ -376,8 +376,8 @@ final class ReadinessCopy {
 				__( 'Your store has a summary file for AI assistants (llms.txt)', 'woocommerce' ),
 				__( 'Add a summary file for AI assistants (llms.txt)', 'woocommerce' ),
 				__( 'This file gives AI assistants a short summary of your store and links to its main pages.', 'woocommerce' ),
-				__( 'Your store doesn’t have one, so AI assistants are unable to get a summary of your store.', 'woocommerce' ),
-				__( 'Some SEO plugins can create one for you. You can also add it to your site’s main folder.', 'woocommerce' ),
+				__( 'Your store doesn’t have an llms.txt file. It gives AI assistants a short summary of your store and links to its main pages.', 'woocommerce' ),
+				__( 'Turn it on in your SEO plugin’s llms.txt settings, or add the file to your store’s root folder.', 'woocommerce' ),
 			),
 			'llms_txt_valid'                 => array(
 				__( 'Your llms.txt file starts with your store’s name', 'woocommerce' ),
@@ -415,11 +415,11 @@ final class ReadinessCopy {
 				__( 'Add one to each page in your SEO plugin, where it’s often called a meta description.', 'woocommerce' ),
 			),
 			'canonical_url'                  => array(
-				__( 'Product pages have a main URL', 'woocommerce' ),
+				__( 'Your product pages have a main URL', 'woocommerce' ),
 				__( 'Set a main URL for your product pages', 'woocommerce' ),
 				__( 'When a page can be reached at more than one URL, this tells AI assistants which one to show. It’s sometimes called a canonical URL.', 'woocommerce' ),
 				__( 'A product page doesn’t set a main URL. When a page has more than one URL, this tells AI assistants which one to show.', 'woocommerce' ),
-				__( 'Most SEO plugins set this for you, where it’s often called a canonical URL.', 'woocommerce' ),
+				__( 'This usually affects every product page. Most SEO plugins set it for you, where it’s often called a canonical URL.', 'woocommerce' ),
 			),
 			'organization_schema'            => array(
 				__( 'Your home page shares your store’s details with AI assistants', 'woocommerce' ),
@@ -447,7 +447,7 @@ final class ReadinessCopy {
 				__( 'Link to a feed from your home page', 'woocommerce' ),
 				__( 'Some AI assistants follow your feed to see what’s new.', 'woocommerce' ),
 				__( 'Your home page doesn’t link to a feed. Some AI assistants follow one to see what’s new in your store.', 'woocommerce' ),
-				__( 'Your theme or a plugin may be hiding the link. Check their settings.', 'woocommerce' ),
+				__( 'WordPress creates a feed for you, so check whether your theme or a plugin is hiding the link.', 'woocommerce' ),
 			),
 			// Product details.
 			'product_jsonld_present'         => array(
@@ -504,14 +504,14 @@ final class ReadinessCopy {
 				__( 'Make your store’s pages fit small screens', 'woocommerce' ),
 				__( 'This helps your page display correctly for AI assistants used in browsers.', 'woocommerce' ),
 				__( 'Your home page doesn’t tell browsers how to size it, so the layout can break for AI assistants used in browsers.', 'woocommerce' ),
-				__( 'Add a “viewport” tag to your theme.', 'woocommerce' ),
+				__( 'Most themes add a ‘viewport’ tag for this. Update your theme, or contact its support team.', 'woocommerce' ),
 			),
 			'html_lang_and_charset'          => array(
 				__( 'Your store’s pages set their language', 'woocommerce' ),
 				__( 'Set the language of your store’s pages', 'woocommerce' ),
 				__( 'This helps AI assistants read your pages correctly and reply to shoppers in the right language.', 'woocommerce' ),
 				__( 'Your home page doesn’t say what language or text format it uses, so AI assistants may show garbled text or reply in the wrong language.', 'woocommerce' ),
-				__( 'Your theme adds these to every page. Update your theme, or ask its developer to add them.', 'woocommerce' ),
+				__( 'Your theme adds the language and text format to every page. Update your theme, or contact its support team.', 'woocommerce' ),
 			),
 			'images_have_alt'                => array(
 				__( 'Your store’s images have alt text', 'woocommerce' ),
@@ -526,7 +526,7 @@ final class ReadinessCopy {
 				__( 'Use one main heading on product pages', 'woocommerce' ),
 				__( 'AI assistants read the main heading as the product’s name.', 'woocommerce' ),
 				__( 'A product page has no main heading or more than one, so AI assistants may read the wrong product name.', 'woocommerce' ),
-				__( 'Check that your product descriptions don’t use the Heading 1 style. If they don’t, check your theme’s product page template, or ask its developer.', 'woocommerce' ),
+				__( 'Check that your product descriptions don’t use the Heading 1 style. If they don’t, check your theme’s product page template, or contact its support team.', 'woocommerce' ),
 			),
 			'schema_matches_product'         => array(
 				__( 'Product details match your product settings', 'woocommerce' ),

@@ -57,7 +57,7 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 	public function test_broken_llms_txt_link_names_the_link_and_fits_the_fix(): void {
 		$copy = ReadinessCopy::store_check( 'llms_txt_links_resolve', 'file', '', 'https://example.com/old-sale/' );
 		$this->assertStringContainsString( 'doesn’t open: example.com/old-sale/.', $copy['found'] );
-		$this->assertStringContainsString( 'llms.txt file in your site’s root folder', $copy['fix'] );
+		$this->assertStringContainsString( 'llms.txt file in your store’s root folder', $copy['fix'] );
 		$this->assertStringContainsString( 'plugin that adds your llms.txt file', ReadinessCopy::store_check( 'llms_txt_links_resolve', 'other' )['fix'] );
 		$this->assertStringContainsString( 'WooCommerce adds these links', ReadinessCopy::store_check( 'llms_txt_links_resolve', 'woocommerce' )['fix'] );
 		$general = ReadinessCopy::store_check( 'llms_txt_links_resolve' );
@@ -108,7 +108,7 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 		$name = get_option( 'blogname' );
 		update_option( 'blogname', 'Blue Sky & Co' );
 		try {
-			$this->assertSame( 'Make # Blue Sky & Co the first line of the file. Do this in your SEO plugin’s llms.txt settings, or in the llms.txt file in your site’s root folder.', ReadinessCopy::store_check( 'llms_txt_valid' )['fix'] );
+			$this->assertSame( 'Make # Blue Sky & Co the first line of the file. Do this in your SEO plugin’s llms.txt settings, or in the llms.txt file in your store’s root folder.', ReadinessCopy::store_check( 'llms_txt_valid' )['fix'] );
 			update_option( 'blogname', '' );
 			$this->assertSame( 'Add your store’s name as the file’s first heading.', ReadinessCopy::store_check( 'llms_txt_valid' )['fix'] );
 		} finally {

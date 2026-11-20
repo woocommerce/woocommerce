@@ -127,7 +127,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			$GLOBALS['submenu'] = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Start from an empty menu; restored below.
 			add_menu_page( 'WooCommerce', 'WooCommerce', 'manage_woocommerce', 'woocommerce' );
 			$page->handle_admin_menu();
-			$this->assertSame( array( 'AI sales readiness', 'manage_woocommerce', 'wc-admin&path=/sales-readiness' ), array_slice( end( $GLOBALS['submenu']['woocommerce'] ), 0, 3 ) );
+			$this->assertSame( array( 'AI shopping health', 'manage_woocommerce', 'wc-admin&path=/sales-readiness' ), array_slice( end( $GLOBALS['submenu']['woocommerce'] ), 0, 3 ) );
 		} finally {
 			foreach ( $saved as $name => $value ) {
 				$GLOBALS[ $name ] = $value; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring what the test changed.
@@ -159,7 +159,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$shopping = $this->shopping();
 		$json     = $this->shopping_json();
 
-		$this->assertSame( 'Product counts show after the first AI sales readiness check.', $shopping['visibility']['empty'] );
+		$this->assertSame( 'Product counts show after the first AI shopping health check.', $shopping['visibility']['empty'] );
 		$this->assertSame( array(), $shopping['visibility']['counts'] );
 		$this->assertStringNotContainsString( 'Sales readiness</a>', $json, 'No Sales readiness row at the end of the checklist' );
 		$labels = array_column( $this->policy( $shopping, AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION )['options'], 'label' );
@@ -334,7 +334,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$shopping = $this->shopping();
 
-		$this->assertSame( 'Your store is in coming soon mode, so AI assistants can’t shop it yet. Make your store live to let them in.', $shopping['coming_soon']['text'] );
+		$this->assertSame( 'Your store is in coming soon mode, so AI assistants can’t find your products yet.', $shopping['coming_soon']['text'] );
 		$this->assertSame( 'Change store visibility', $shopping['coming_soon']['link']['text'], 'As in the content review' );
 		$this->assertStringContainsString( 'site-visibility', $shopping['coming_soon']['link']['href'] );
 		$this->assertTrue( $shopping['ucp']['blocked'], 'A store that is not live can\'t turn AI shopping on' );
@@ -358,7 +358,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$refund   = $this->step( $shopping, 'refund_returns_page' );
 
 		$this->assertSame( 'Publish your refund and returns policy page', $refund['title'] );
-		$this->assertSame( array( 'A refund policy needs to be available for AI assistants to share with shoppers.' ), $refund['lines'], 'The refund page says why it matters, as in the design' );
+		$this->assertSame( array( 'A refund policy needs to be published for AI assistants to share it with shoppers.' ), $refund['lines'], 'The refund page says why it matters, as in the design' );
 		$this->assertStringContainsString( 'post=' . $draft . '&action=edit', $refund['link']['href'], 'Edit page opens the page editor' );
 		$this->assertSame( 'Edit page', $refund['link']['text'] );
 		$this->assertSame( 'Edit your refund and returns policy page', $refund['link']['sr'], 'screen readers also hear which policy' );
@@ -379,7 +379,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$copy = $this->step_copy( 'refund_returns_page' );
 		$this->assertStringContainsString( 'post=' . $draft . '&action=edit', $copy['url'], 'Readiness check links the step to the page editor' );
 		$this->assertSame( 'Edit refund policy', $copy['link'], 'named for the policy' );
-		$this->assertSame( 'A refund policy needs to be available for AI assistants to share with shoppers.', $copy['text'], 'The refund draft keeps its own line' );
+		$this->assertSame( 'A refund policy needs to be published for AI assistants to share it with shoppers.', $copy['text'], 'The refund draft keeps its own line' );
 	}
 
 	/**

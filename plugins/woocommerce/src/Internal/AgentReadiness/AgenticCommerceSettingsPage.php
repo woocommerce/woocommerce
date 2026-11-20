@@ -248,7 +248,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			),
 			// Agents can't shop a store that isn't live.
 			'coming_soon' => $launched && ! $launched['ok'] ? array(
-				'text' => __( 'Your store is in coming soon mode, so AI assistants can’t shop it yet. Make your store live to let them in.', 'woocommerce' ),
+				'text' => __( 'Your store is in coming soon mode, so AI assistants can’t find your products yet.', 'woocommerce' ),
 				'link' => array(
 					'href' => $launched['fix_url'],
 					'text' => __( 'Change store visibility', 'woocommerce' ),
@@ -368,7 +368,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				// The whole catalog, like the other two; `products` stops at PRODUCT_LIMIT. Reports from before `available` have only `products`.
 				array( ProductScan::COUNT_AVAILABLE, __( 'Visible', 'woocommerce' ), (int) ( $report['available'] ?? $report['products'] ?? 0 ), '', '' ),
 				array( ProductScan::COUNT_HIDDEN, __( 'Hidden', 'woocommerce' ), (int) ( $report['hidden_from_catalog'] ?? 0 ), __( 'Products set to Hidden in Catalog visibility.', 'woocommerce' ), __( 'More information about hidden products', 'woocommerce' ) ),
-				array( ProductScan::COUNT_UNSUPPORTED, __( 'Not supported', 'woocommerce' ), (int) ( $report['unsupported_types'] ?? 0 ), __( 'AI assistants can find these products, but shoppers can\'t buy them through an assistant yet. This includes grouped, external, subscription, booking and bundle products.', 'woocommerce' ), __( 'More information about products that aren’t supported', 'woocommerce' ) ),
+				array( ProductScan::COUNT_UNSUPPORTED, __( 'Not supported', 'woocommerce' ), (int) ( $report['unsupported_types'] ?? 0 ), __( 'AI assistants can find these products, but shoppers can\'t buy them through an assistant yet. This includes grouped, external, subscription, booking, and bundle products.', 'woocommerce' ), __( 'More information about products that aren’t supported', 'woocommerce' ) ),
 			);
 			foreach ( $cards as $card ) {
 				$counts[] = array(
@@ -386,8 +386,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		}
 		return array(
 			'title'       => __( 'Product visibility', 'woocommerce' ),
-			'description' => __( 'AI assistants can see the same products as shoppers, as long as they’re simple or variable products.', 'woocommerce' ),
-			'empty'       => null === $report ? __( 'Product counts show after the first AI sales readiness check.', 'woocommerce' ) : null,
+			'description' => __( 'AI assistants can see the same products as shoppers. For now, shoppers can only buy simple and variable products through an assistant.', 'woocommerce' ),
+			'empty'       => null === $report ? __( 'Product counts show after the first AI shopping health check.', 'woocommerce' ) : null,
 			'counts'      => $counts,
 		);
 	}
