@@ -1282,6 +1282,47 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox add_to_cart_action() validates the same product ID it adds for each item of a grouped product form.
+	 *
+	 * @covers WC_Form_Handler::add_to_cart_action()
+	 * @testWith ["%d"]
+	 *           ["-%d"]
+	 *           ["%dabc"]
+	 *
+	 * @param string $key_format Format of the quantity[] key naming the product.
+	 */
+	public function test_add_to_cart_action_rejects_protected_product_in_grouped_form( string $key_format ): void {
+		$grouped   = WC_Helper_Product::create_grouped_product();
+		$protected = WC_Helper_Product::create_simple_product();
+		wp_update_post(
+			array(
+				'ID'            => $protected->get_id(),
+				'post_password' => 'secret',
+			)
+		);
+		WC()->cart->empty_cart();
+
+		$validated_ids = array();
+		$validation    = function ( $passed, $product_id ) use ( &$validated_ids ) {
+			$validated_ids[] = $product_id;
+			return $passed;
+		};
+		add_filter( 'woocommerce_add_to_cart_validation', $validation, 10, 2 );
+
+		$_REQUEST = array(
+			'add-to-cart' => (string) $grouped->get_id(),
+			'quantity'    => array( sprintf( $key_format, $protected->get_id() ) => '1' ),
+		);
+		WC_Form_Handler::add_to_cart_action();
+
+		remove_filter( 'woocommerce_add_to_cart_validation', $validation, 10 );
+
+		$this->assertSame( array( $protected->get_id() ), $validated_ids, 'Validation should see the ID WC_Cart::add_to_cart() would add.' );
+		$this->assertCount( 0, WC()->cart->get_cart(), 'The protected product should not be added to the cart.' );
+		$this->assertSame( 1, wc_notice_count( 'error' ), 'The form should display the protected-product notice.' );
+	}
+
+	/**
 	 * Prepares request globals for the account details handler.
 	 *
 	 * @param array<string,string> $fields Account detail fields.
@@ -1516,6 +1557,47 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		ob_end_clean();
 
 		return $fields;
+	}
+
+	/**
+	 * @testdox pay_action() names the payment problem: no method on offer, none selected, or one that isn't available.
+	 * @testWith [[], "", "Invalid payment method."]
+	 *           [["cod"], "", "Please select a payment method."]
+	 *           [["cod"], "bacs", "Invalid payment method."]
+	 *
+	 * @param string[] $available Gateway ids available for the order.
+	 * @param string   $posted    The payment method the shopper submitted.
+	 * @param string   $expected  Expected error notice.
+	 */
+	public function test_pay_action_names_the_payment_problem( array $available, string $posted, string $expected ): void {
+		global $wp;
+
+		$order = WC_Helper_Order::create_order();
+		add_filter(
+			'woocommerce_available_payment_gateways',
+			function () use ( $available ) {
+				return array_intersect_key( WC()->payment_gateways()->payment_gateways(), array_flip( $available ) );
+			}
+		);
+
+		$_POST['woocommerce_pay']          = '1';
+		$_POST['payment_method']           = $posted;
+		$_REQUEST['woocommerce-pay-nonce'] = wp_create_nonce( 'woocommerce-pay' );
+		$_GET['key']                       = $order->get_order_key();
+		$wp->query_vars['order-pay']       = $order->get_id();
+		$buffer_level                      = ob_get_level();
+
+		try {
+			WC_Form_Handler::pay_action();
+		} finally {
+			// pay_action() opens an output buffer and leaves it to the page render to close.
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			unset( $wp->query_vars['order-pay'] );
+		}
+
+		$this->assertSame( array( $expected ), wp_list_pluck( wc_get_notices( 'error' ), 'notice' ) );
 	}
 
 	/**

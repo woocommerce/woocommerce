@@ -140,6 +140,28 @@ class ProductSalesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Child orders are left out of the import count, so a multivendor sub-order does not ask for an import.
+	 */
+	public function test_last_days_imported_ignores_child_orders(): void {
+		$mug    = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$parent = null;
+		for ( $i = 0; $i < ProductSales::MIN_ORDERS; $i++ ) {
+			$parent = $this->order( array( array( $mug, 1 ) ), OrderStatus::COMPLETED );
+		}
+		// Three unsynced child orders: 20/23 would fail the 90% gate if they counted.
+		for ( $i = 0; $i < 3; $i++ ) {
+			$child = wc_create_order();
+			$child->add_product( $mug, 1 );
+			$child->set_parent_id( $parent->get_id() );
+			$child->set_status( OrderStatus::COMPLETED );
+			$child->calculate_totals();
+			$child->save();
+		}
+
+		$this->assertTrue( $this->sut->last_days()['imported'], '20 parent orders imported; three child orders must not block the gate' );
+	}
+
+	/**
 	 * @testdox With no orders the total is zero; with Analytics off there are no sales to read.
 	 */
 	public function test_last_days_without_sales_or_analytics(): void {

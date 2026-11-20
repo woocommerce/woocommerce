@@ -24,10 +24,11 @@ class CartMapper {
 	 */
 	public function build_cart( array $cart, string $cart_id, array $context = array() ): array {
 		$payload = array(
-			'id'         => $cart_id,
-			'currency'   => (string) $cart['totals']['currency_code'],
-			'line_items' => $this->line_items( (array) $cart['items'] ),
-			'totals'     => $this->totals( (array) $cart['totals'] ),
+			'id'           => $cart_id,
+			'currency'     => (string) $cart['totals']['currency_code'],
+			'line_items'   => $this->line_items( (array) $cart['items'] ),
+			'totals'       => $this->totals( (array) $cart['totals'] ),
+			'continue_url' => $this->continue_url( $cart_id ),
 		);
 
 		$expires_at = $this->expires_at( $cart_id );
@@ -179,6 +180,29 @@ class CartMapper {
 		}
 
 		return $messages;
+	}
+
+	/**
+	 * Build the URL that hands the cart to the buyer's own browser.
+	 *
+	 * `WC_Session_Handler` restores or clones the guest session named by the `session`
+	 * argument, so the shopper lands on checkout holding this cart.
+	 *
+	 * @param string $cart_id Cart identifier.
+	 * @return string
+	 */
+	private function continue_url( string $cart_id ): string {
+		$continue_url = add_query_arg( 'session', $cart_id, wc_get_cart_url() );
+
+		/**
+		 * Filters the URL a UCP cart hands the buyer for completing the purchase.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param string $continue_url Continue URL.
+		 * @param string $cart_id Cart identifier.
+		 */
+		return (string) apply_filters( 'woocommerce_ucp_cart_continue_url', $continue_url, $cart_id );
 	}
 
 	/**

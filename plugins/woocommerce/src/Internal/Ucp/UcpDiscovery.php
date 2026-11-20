@@ -89,32 +89,53 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	/**
 	 * What a merchant should do for a failing serve_status() value. Includes the file path.
 	 *
-	 * @param string $status A status from serve_status().
+	 * On WordPress.com the fix names its support instead of the hosting provider.
+	 *
+	 * @param string    $status        A status from serve_status().
+	 * @param bool|null $wordpress_com Whether the site is on WordPress.com, or null to detect it.
 	 * @return string Empty when the address is already served.
 	 */
-	public static function discovery_fix( string $status ): string {
+	public static function discovery_fix( string $status, ?bool $wordpress_com = null ): string {
 		$path = self::get_file_path();
 		$dir  = dirname( $path );
 
+		// The same test Jetpack uses for a WordPress.com site (Host::is_woa_site()): its support stands in for the hosting provider.
+		$wordpress_com = $wordpress_com ?? ( defined( 'ATOMIC_SITE_ID' ) && ATOMIC_SITE_ID && defined( 'ATOMIC_CLIENT_ID' ) && ATOMIC_CLIENT_ID );
+
 		switch ( $status ) {
 			case 'not_readable':
-				/* translators: 1: discovery file path, 2: folder path. */
-				return sprintf( __( 'WooCommerce can\'t read %1$s. Make that file readable by the web server, or delete it. If you can\'t delete it, make %2$s writable by the web server.', 'woocommerce' ), $path, $dir );
+				return $wordpress_com
+					/* translators: %s: discovery file path. */
+					? sprintf( __( 'WooCommerce can’t read the file at %s. Delete it, or contact WordPress.com support to make it readable.', 'woocommerce' ), $path )
+					/* translators: %s: discovery file path. */
+					: sprintf( __( 'WooCommerce can’t read the file at %s. Delete it, or ask your hosting provider to make it readable.', 'woocommerce' ), $path );
 			case 'file_unusable':
-				/* translators: 1: discovery file path, 2: folder path. */
-				return sprintf( __( 'The %1$s file is incomplete or damaged, so your connection URL can give AI assistants wrong details. Delete it and check the server has free disk space. If you can\'t delete it, make %2$s writable by the web server.', 'woocommerce' ), $path, $dir );
+				return $wordpress_com
+					/* translators: 1: discovery file path, 2: folder path. */
+					? sprintf( __( 'The file at %1$s is incomplete or damaged. Delete it, and check that your server has free disk space. If you can’t delete it, contact WordPress.com support to make %2$s writable.', 'woocommerce' ), $path, $dir )
+					/* translators: 1: discovery file path, 2: folder path. */
+					: sprintf( __( 'The file at %1$s is incomplete or damaged. Delete it, and check that your server has free disk space. If you can’t delete it, ask your hosting provider to make %2$s writable.', 'woocommerce' ), $path, $dir );
 			case 'file_in_the_way':
-				/* translators: 1: discovery file path, 2: folder path. */
-				return sprintf( __( 'Remove the %1$s file that WooCommerce didn\'t write. It loads instead of your store\'s details. If you can\'t remove it, make %2$s writable by the web server.', 'woocommerce' ), $path, $dir );
+				return $wordpress_com
+					/* translators: 1: discovery file path, 2: folder path. */
+					? sprintf( __( 'A file at %1$s that WooCommerce didn’t create is loading instead. Remove it, or contact WordPress.com support to make %2$s writable.', 'woocommerce' ), $path, $dir )
+					/* translators: 1: discovery file path, 2: folder path. */
+					: sprintf( __( 'A file at %1$s that WooCommerce didn’t create is loading instead. Remove it, or ask your hosting provider to make %2$s writable.', 'woocommerce' ), $path, $dir );
 			case 'file_outdated':
-				/* translators: 1: discovery file path, 2: folder path. */
-				return sprintf( __( 'Delete the %1$s file. It has old store details. If you can\'t delete it, make %2$s writable by the web server so WooCommerce can replace it.', 'woocommerce' ), $path, $dir );
+				return $wordpress_com
+					/* translators: 1: discovery file path, 2: folder path. */
+					? sprintf( __( 'The file at %1$s has old store details. Delete it, or contact WordPress.com support to make %2$s writable so WooCommerce can replace it.', 'woocommerce' ), $path, $dir )
+					/* translators: 1: discovery file path, 2: folder path. */
+					: sprintf( __( 'The file at %1$s has old store details. Delete it, or ask your hosting provider to make %2$s writable so WooCommerce can replace it.', 'woocommerce' ), $path, $dir );
 			case 'no_file':
 				if ( is_multisite() ) {
-					return __( 'Choose any structure except Plain under Settings > Permalinks. Structures that start with index.php don\'t work either.', 'woocommerce' );
+					return __( 'Choose any structure except Plain. Structures that start with index.php don’t work either.', 'woocommerce' );
 				}
-				/* translators: %s: folder path. */
-				return sprintf( __( 'Choose any structure except Plain under Settings > Permalinks. Structures that start with index.php don\'t work either. Or make %s writable by the web server so WooCommerce can write the file.', 'woocommerce' ), $dir );
+				return $wordpress_com
+					/* translators: %s: folder path. */
+					? sprintf( __( 'Choose any structure except Plain. Structures that start with index.php don’t work either. If you need to keep your current structure, contact WordPress.com support to make %s writable, so WooCommerce can add your connection file.', 'woocommerce' ), $dir )
+					/* translators: %s: folder path. */
+					: sprintf( __( 'Choose any structure except Plain. Structures that start with index.php don’t work either. If you need to keep your current structure, ask your hosting provider to make %s writable, so WooCommerce can add your connection file.', 'woocommerce' ), $dir );
 			default:
 				return '';
 		}

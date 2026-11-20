@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the product attribute Remove control accessible as a button, supporting Enter and Space keys.

@@ -34,9 +34,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private static $administrator_id;
 
 	private const CANONICAL_ABILITY_IDS = array(
+		'woocommerce/coupons-query',
+		'woocommerce/coupon-create',
+		'woocommerce/coupon-update',
 		'woocommerce/store-settings-get',
 		'woocommerce/settings-groups-query',
 		'woocommerce/settings-query',
+		'woocommerce/settings-update',
 		'woocommerce/product-terms-query',
 		'woocommerce/product-term-create',
 		'woocommerce/product-term-update',
@@ -56,6 +60,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/order-notes-query',
 		'woocommerce/payment-gateways-query',
 		'woocommerce/customers-query',
+		'woocommerce/customer-update',
 		'woocommerce/product-review-update',
 		'woocommerce/product-review-reply',
 		'woocommerce/product-reviews-query',
@@ -63,6 +68,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/shipping-zone-create',
 		'woocommerce/shipping-zone-method-create',
 		'woocommerce/shipping-zone-method-update',
+		'woocommerce/system-status-get',
 		'woocommerce/tax-rates-query',
 		'woocommerce/system-status-tools-query',
 		'woocommerce/system-status-tool-run',
@@ -359,10 +365,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'idempotent'  => true,
 				'destructive' => false,
 			),
+			'woocommerce/system-status-get'           => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
 			'woocommerce/customers-query'             => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
+			),
+			'woocommerce/customer-update'             => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
 			),
 			'woocommerce/product-review-update'       => array(
 				'readonly'    => false,
@@ -400,6 +416,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'destructive' => false,
 			),
 			'woocommerce/shipping-zone-method-update' => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => true,
+			),
+			'woocommerce/settings-update'             => array(
 				'readonly'    => false,
 				'idempotent'  => true,
 				'destructive' => true,
@@ -511,8 +532,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			}
 			$description = $schema['properties']['type']['description'];
 			$this->assertStringContainsString( 'Fields each type takes.', $description );
-			$this->assertStringContainsString( 'external: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, regular_price, sale_price, date_on_sale_from, date_on_sale_to, tax_status, external_url, button_text', $description );
-			$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, grouped_products', $description );
+			$this->assertStringContainsString( 'external: name, sku, global_unique_id, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, regular_price, sale_price, date_on_sale_from, date_on_sale_to, tax_status, external_url, button_text', $description );
+			$this->assertStringContainsString( 'grouped: name, sku, global_unique_id, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, grouped_products', $description );
 			$this->assertStringEndsWith( 'Applies to: grouped.', $schema['properties']['grouped_products']['description'] );
 			$this->assertStringContainsString( 'Applies to: ', $schema['properties']['regular_price']['description'] );
 			$this->assertStringNotContainsString( 'Applies to: ', $schema['properties']['sku']['description'] ?? '' );
@@ -1039,9 +1060,30 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
+			'coupons-query'               => array( 'woocommerce/coupons-query', array() ),
+			'coupon-create'               => array( 'woocommerce/coupon-create', array( 'code' => 'forbidden' ) ),
+			'coupon-update'               => array(
+				'woocommerce/coupon-update',
+				array(
+					'id'     => 1,
+					'amount' => '10',
+				),
+			),
 			'store-settings-get'          => array( 'woocommerce/store-settings-get', array() ),
 			'settings-groups-query'       => array( 'woocommerce/settings-groups-query', array() ),
 			'settings-query'              => array( 'woocommerce/settings-query', array( 'group' => 'general' ) ),
+			'settings-update'             => array(
+				'woocommerce/settings-update',
+				array(
+					'group'    => 'general',
+					'settings' => array(
+						array(
+							'id'    => 'woocommerce_currency',
+							'value' => 'EUR',
+						),
+					),
+				),
+			),
 			'product-terms-query'         => array(
 				'woocommerce/product-terms-query',
 				array(
@@ -1166,6 +1208,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'woocommerce/payment-gateways-query',
 				array(),
 			),
+			'system-status-get'           => array(
+				'woocommerce/system-status-get',
+				array(),
+			),
 			'customers-query'             => array(
 				'woocommerce/customers-query',
 				array(),
@@ -1223,6 +1269,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'enabled' => true,
 				),
 			),
+			'customer-update'             => array(
+				'woocommerce/customer-update',
+				array(
+					'id'         => 1,
+					'first_name' => 'Denied',
+				),
+			),
 		);
 	}
 
@@ -1250,6 +1303,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$missing_id = array( 'id' => PHP_INT_MAX );
 
 		return array(
+			'coupon-create'                  => array( 'woocommerce/coupon-create', array( 'code' => 'granted' ) ),
+			'coupons-query'                  => array( 'woocommerce/coupons-query', array() ),
 			'products-query'                 => array( 'woocommerce/products-query', $missing_id ),
 			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
 			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),
@@ -1262,6 +1317,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'enabled' => true,
 				),
 			),
+			'system-status-get'              => array( 'woocommerce/system-status-get', array() ),
 			'customers-query'                => array( 'woocommerce/customers-query', array() ),
 			'shipping-zones-query'           => array( 'woocommerce/shipping-zones-query', array() ),
 			'shipping-zone-method-update'    => array(
@@ -1272,6 +1328,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				),
 			),
 			'tax-rates-query'                => array( 'woocommerce/tax-rates-query', array() ),
+			'settings-update'                => array(
+				'woocommerce/settings-update',
+				array(
+					'group'    => 'general',
+					'settings' => array(
+						array(
+							'id'    => 'woocommerce_currency',
+							'value' => 'EUR',
+						),
+					),
+				),
+			),
 			'product-attributes-query'       => array( 'woocommerce/product-attributes-query', array() ),
 			'product-attribute-create'       => array( 'woocommerce/product-attribute-create', array( 'name' => 'Size' ) ),
 			'product-terms-query'            => array( 'woocommerce/product-terms-query', array( 'taxonomy' => 'product_cat' ) ),
@@ -2330,7 +2398,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( '9.00', $subscription['product']['regular_price'] );
 		$this->assertWPError( $bundle_price );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $bundle_price->get_error_code() );
-		$this->assertSame( 'The test-bundle product type does not take regular_price. It takes name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, virtual, downloadable, weight, dimensions, shipping_class.', $bundle_price->get_error_message() );
+		$this->assertSame( 'The test-bundle product type does not take regular_price. It takes name, sku, global_unique_id, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, virtual, downloadable, weight, dimensions, shipping_class.', $bundle_price->get_error_message() );
 	}
 
 	/**
@@ -2594,6 +2662,78 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should name the parent route for variation options only when the variation has a variable parent whose route takes variations and attributes.
+	 */
+	public function test_variation_options_hint_needs_a_parent_route(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$parent_id  = $created['product']['id'];
+		$small_id   = $created['product']['variation_ids'][0];
+		$attributes = array(
+			array(
+				'name'   => 'Size',
+				'option' => 'M',
+			),
+		);
+
+		$no_attributes = static fn( $fields, $type ) => 'variation' === $type ? array_values( array_diff( $fields, array( 'attributes' ) ) ) : $fields;
+		add_filter( 'woocommerce_ability_product_type_fields', $no_attributes, 10, 2 );
+		try {
+			$through_parent = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'         => $parent_id,
+					'variations' => array(
+						array(
+							'id'         => $small_id,
+							'attributes' => $attributes,
+						),
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_ability_product_type_fields', $no_attributes, 10 );
+		}
+		$this->assertWPError( $through_parent );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $through_parent->get_error_code() );
+		$this->assertStringNotContainsString( 'parent product', $through_parent->get_error_message(), 'The parent route does not point at itself.' );
+
+		$no_variations = static fn( $fields, $type ) => 'variable' === $type ? array_values( array_diff( $fields, array( 'variations' ) ) ) : $fields;
+		add_filter( 'woocommerce_ability_product_type_fields', $no_variations, 10, 2 );
+		try {
+			$closed_parent = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'         => $small_id,
+					'attributes' => $attributes,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_ability_product_type_fields', $no_variations, 10 );
+		}
+		$this->assertWPError( $closed_parent );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $closed_parent->get_error_code() );
+		$this->assertStringNotContainsString( 'parent product', $closed_parent->get_error_message(), 'A parent that does not take variations is no route.' );
+
+		wp_update_post(
+			array(
+				'ID'          => $small_id,
+				'post_parent' => 0,
+			)
+		);
+		wc_delete_product_transients( $small_id );
+		clean_post_cache( $small_id );
+
+		$orphan = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $small_id,
+				'attributes' => $attributes,
+			)
+		);
+		$this->assertWPError( $orphan );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $orphan->get_error_code() );
+		$this->assertStringNotContainsString( 'parent product', $orphan->get_error_message(), 'An orphan variation has no parent to name.' );
+	}
+
+	/**
 	 * @testdox Should treat a variation as a product in update, create, query and delete.
 	 */
 	public function test_variations_are_products_in_the_other_abilities(): void {
@@ -2624,7 +2764,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertSame( '8.00', wc_get_product( $parent_id )->get_price() );
 
-		$direct_options = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+		$direct_options = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
 				'id'         => $small_id,
 				'attributes' => array(
@@ -2638,6 +2778,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $direct_options );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $direct_options->get_error_code() );
 		$this->assertStringContainsString( 'attributes', $direct_options->get_error_message() );
+		$this->assertStringContainsString( "update its parent product {$parent_id} and send the variation in the variations input", $direct_options->get_error_message(), 'The refusal names the parent route.' );
 
 		$resized = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
@@ -3621,7 +3762,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $result->get_error_code() );
-		$this->assertSame( 'The grouped product type does not take regular_price. It takes name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, grouped_products.', $result->get_error_message() );
+		$this->assertSame( 'The grouped product type does not take regular_price. It takes name, sku, global_unique_id, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, grouped_products.', $result->get_error_message() );
 	}
 
 	/**
@@ -4414,14 +4555,32 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject product mutation unknown IDs without leaking existence.
+	 * @testdox Should return the not-found error for an unknown product ID to users who can act on any product.
+	 *
+	 * @dataProvider provider_product_mutation_unknown_id_inputs
+	 *
+	 * @param string $ability_id Ability ID.
+	 * @param array  $input      Ability input.
+	 * @param string $error_code Expected error code.
+	 */
+	public function test_product_mutations_return_not_found_for_unknown_ids( string $ability_id, array $input, string $error_code ): void {
+		$result = wp_get_ability( $ability_id )->execute( $input );
+
+		$this->assertWPError( $result );
+		$this->assertSame( $error_code, $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should refuse permission for an unknown product ID to users who cannot act on any product.
 	 *
 	 * @dataProvider provider_product_mutation_unknown_id_inputs
 	 *
 	 * @param string $ability_id Ability ID.
 	 * @param array  $input      Ability input.
 	 */
-	public function test_product_mutations_reject_unknown_ids_without_leaking_existence( string $ability_id, array $input ): void {
+	public function test_product_mutations_refuse_unknown_ids_to_users_who_cannot_act_on_any_product( string $ability_id, array $input ): void {
+		wp_set_current_user( $this->create_user_with_caps( array( 'edit_products', 'publish_products', 'delete_products', 'read_private_products' ) ) );
+
 		$result = wp_get_ability( $ability_id )->execute( $input );
 
 		$this->assertWPError( $result );
@@ -4429,26 +4588,117 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse permission for an unknown product ID to users who cannot read private products.
+	 *
+	 * @dataProvider provider_product_mutation_unknown_id_inputs
+	 *
+	 * @param string $ability_id Ability ID.
+	 * @param array  $input      Ability input.
+	 */
+	public function test_product_mutations_refuse_unknown_ids_to_users_who_cannot_read_private_products( string $ability_id, array $input ): void {
+		wp_set_current_user( $this->create_user_with_caps( array( 'edit_products', 'edit_others_products', 'publish_products', 'delete_products', 'delete_others_products' ) ) );
+
+		$result = wp_get_ability( $ability_id )->execute( $input );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should refuse permission to delete a variation whose parent no longer exists.
+	 */
+	public function test_product_delete_refuses_variation_with_missing_parent(): void {
+		global $wpdb;
+
+		$variation_id = $this->create_variation_product_id_for_test();
+		$wpdb->update( $wpdb->posts, array( 'post_parent' => 999999 ), array( 'ID' => $variation_id ) );
+		clean_post_cache( $variation_id );
+
+		$result = wp_get_ability( 'woocommerce/product-delete' )->execute( array( 'id' => $variation_id ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		$this->assertSame( 'publish', get_post_status( $variation_id ) );
+	}
+
+	/**
 	 * Provides product mutation inputs with unknown IDs.
 	 *
-	 * @return array<string, array{0: string, 1: array}>
+	 * @return array<string, array{0: string, 1: array, 2: string}>
 	 */
 	public function provider_product_mutation_unknown_id_inputs(): array {
 		return array(
-			'product-update' => array(
+			'product-update'                  => array(
 				'woocommerce/product-update',
 				array(
 					'id'   => 999999,
 					'name' => 'Unknown Product',
 				),
+				'woocommerce_product_not_found',
 			),
-			'product-delete' => array(
+			'product-update variation delete' => array(
+				'woocommerce/product-update',
+				array(
+					'id'         => 999999,
+					'variations' => array(
+						array(
+							'id'     => 999998,
+							'delete' => true,
+						),
+					),
+				),
+				'woocommerce_product_not_found',
+			),
+			'product-delete'                  => array(
 				'woocommerce/product-delete',
 				array(
 					'id' => 999999,
 				),
+				'woocommerce_product_not_found',
+			),
+			'product-create variation'        => array(
+				'woocommerce/product-create',
+				array(
+					'type'      => 'variation',
+					'parent_id' => 999999,
+				),
+				'woocommerce_product_parent_invalid',
 			),
 		);
+	}
+
+	/**
+	 * @testdox Should return the not-found error for an unknown term ID to users who can edit product terms.
+	 */
+	public function test_product_term_update_returns_not_found_for_unknown_id(): void {
+		$result = wp_get_ability( 'woocommerce/product-term-update' )->execute(
+			array(
+				'taxonomy' => 'product_cat',
+				'id'       => 999999,
+				'name'     => 'Unknown',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_product_term_not_found', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should refuse permission for an unknown term ID to users who cannot edit product terms.
+	 */
+	public function test_product_term_update_refuses_unknown_id_to_users_who_cannot_edit_terms(): void {
+		wp_set_current_user( $this->create_user_with_caps( array( 'manage_product_terms' ) ) );
+
+		$result = wp_get_ability( 'woocommerce/product-term-update' )->execute(
+			array(
+				'taxonomy' => 'product_cat',
+				'id'       => 999999,
+				'name'     => 'Unknown',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
 	}
 
 	/**
