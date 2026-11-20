@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop fulfillment emails showing a tracking link or label that has no value.

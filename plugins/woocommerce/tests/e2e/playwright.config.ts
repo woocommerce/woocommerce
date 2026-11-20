@@ -118,9 +118,11 @@ const serialRunSpecs = [
 	// behavior for every other worker. (`cart.spec.ts` runs in core-parallel — it
 	// scopes its tax rate to a dedicated tax class instead of toggling global tax.)
 	'**/tests/cart/add-to-cart.spec.ts',
-	// Activates a custom-gateway test plugin globally, which would surface its extra
-	// payment button on every other worker's checkout.
+	// Activates a test plugin with WP-CLI, which races other workers on the
+	// `active_plugins` option.
 	'**/tests/checkout/checkout-shortcode-custom-place-order-button.spec.ts',
+	// Changes site visibility and the active plugins while checking llms.txt.
+	'**/tests/llms-txt/*.spec.ts',
 	// Mutate the global onboarding profile/options, site-visibility options and
 	// the active theme.
 	'**/tests/onboarding/**/*.spec.ts',
@@ -214,14 +216,8 @@ const blocksSerialSpecs = [
 	'**/tests/blocks/stock-filter/stock-filter.block_theme.spec.ts',
 	'**/tests/blocks/templates/legacy-templates.block_theme.spec.ts',
 
-	// Activate test plugins that change every cart, checkout or product page, or
-	// race other specs on the `active_plugins` option.
-	'**/tests/blocks/cart/cart-checkout-block-extension-callbacks.shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/checkout-block-custom-place-order-button.block_theme.spec.ts',
-	'**/tests/blocks/checkout/checkout-block-extensibility.shopper.block_theme.spec.ts',
-	'**/tests/blocks/product-button/product-button.block_theme.spec.ts',
-	'**/tests/blocks/product-collection/product-picker.block_theme.spec.ts',
-	'**/tests/blocks/product-collection/register-product-collection.block_theme.spec.ts',
+	// Turn off AJAX add to cart, which every Product Button reads.
+	'**/tests/blocks/product-button/product-button-ajax-disabled.block_theme.spec.ts',
 
 	// Change global settings that cart, checkout and storefront specs read.
 
@@ -248,15 +244,10 @@ const blocksSerialSpecs = [
 	// stops working.
 	'**/tests/blocks/templates/shop-page.block_theme.spec.ts',
 
-	// Place orders, which change the Best Sellers ranking. Some also add to the
-	// cart as the admin user, whose cart all workers share.
-	'**/tests/blocks/cart/cart-checkout-block-coupons.shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.guest-shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.merchant.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/checkout-block-locale-hide-country.block_theme.spec.ts',
-
-	// Create or edit products and categories that catalog specs count.
+	// Creates a visible $10 product with limited stock, which the Product
+	// Collection block needs to show it. While it exists, it changes product
+	// counts that catalog specs check, such as the single product under $10 in
+	// `inspector-controls`.
 	'**/tests/blocks/product-collection/product-collection-errors.block_theme.spec.ts',
 ];
 

@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Fix Sales readiness Prettier lint and polling unit expectation so CI can pass.

@@ -30,6 +30,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PaymentInstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
@@ -132,6 +133,16 @@ final class Contracts {
 		'to_status'      => true,
 		'order_id'       => true,
 		'reason'         => true,
+	);
+
+	/**
+	 * Keys accepted by {@see self::list_for_customer()}, as a key map.
+	 *
+	 * @var array<string, true>
+	 */
+	private const LIST_FOR_CUSTOMER_KEYS = array(
+		'status'         => true,
+		'extension_slug' => true,
 	);
 
 	/**
@@ -613,7 +624,8 @@ final class Contracts {
 	 * and addresses not loaded); a caller needing plan terms resolves `selling_plan_id`
 	 * through {@see Plans::get()}.
 	 *
-	 * The status filter applies before paging, so a page holds `$limit` matching contracts.
+	 * The status and owner filters apply before paging, so a page holds `$limit` matching
+	 * contracts. Unknown keys raise a `_doing_it_wrong()` notice and are ignored.
 	 *
 	 * @param int                  $customer_id Owning customer id.
 	 * @param int                  $limit       Maximum contracts to return.
@@ -621,22 +633,43 @@ final class Contracts {
 	 * @param array<string, mixed> $args {
 	 *     Optional. Query args.
 	 *
-	 *     @type string|string[] $status One status or a list of them ({@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus});
-	 *                                   unregistered values are dropped, and the filter is ignored when none remain.
+	 *     @type string|string[] $status         One status or a list of them ({@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus});
+	 *                                           unregistered values are dropped, and the filter is ignored when none remain.
+	 *     @type string          $extension_slug Owning extension slug (exact, case-sensitive match; `any` is refused).
+	 *                                           Absent: every extension.
 	 * }
 	 * @return array<int, ContractView> The customer's contracts, newest first.
+	 * @throws ValidationException If `extension_slug` is empty, not a string, or `any`.
 	 */
 	public static function list_for_customer( int $customer_id, int $limit = 20, int $offset = 0, array $args = array() ): array {
-		return self::views(
-			( new ContractRepository() )->find_by_customer_id(
-				$customer_id,
-				array(
-					'limit'  => $limit,
-					'offset' => $offset,
-					'status' => $args['status'] ?? array(),
-				)
-			)
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::LIST_FOR_CUSTOMER_KEYS );
+
+		$query = array(
+			'limit'  => $limit,
+			'offset' => $offset,
+			'status' => $filtered_args['status'] ?? array(),
 		);
+		if ( array_key_exists( 'extension_slug', $filtered_args ) ) {
+			$validator      = new ArgumentValidator();
+			$extension_slug = $validator->get_non_empty_string( 'extension_slug', $filtered_args['extension_slug'] );
+			if ( 'any' === $extension_slug ) {
+				$validator->add(
+					new InvalidInputException(
+						ValidationErrorCode::INVALID_VALUE,
+						'extension_slug',
+						'"extension_slug" must not be "any": leave it out to list every extension\'s contracts.'
+					)
+				);
+			}
+			try {
+				$validator->throw_errors();
+			} catch ( InvalidInputException $e ) {
+				throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+			}
+			$query['extension_slug'] = $extension_slug;
+		}
+
+		return self::views( ( new ContractRepository() )->find_by_customer_id( $customer_id, $query ) );
 	}
 
 	/**

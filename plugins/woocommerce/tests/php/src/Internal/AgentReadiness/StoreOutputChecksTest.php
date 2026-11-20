@@ -3,8 +3,11 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\AgentReadiness\JsonLd;
+use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreResponses;
 use WC_Helper_Product;
 use WC_Structured_Data;
 use WC_Unit_Test_Case;
@@ -412,6 +415,47 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The shipping and buy action checks match the JSON-LD WooCommerce prints for each product state.
+	 *
+	 * Shipping details, then the buy action. A virtual product still gets a buy action. An out-of-stock
+	 * product still gets shipping details. A variable product page gets neither.
+	 *
+	 * @testWith ["shipped", [true, true]]
+	 *           ["virtual", [null, true]]
+	 *           ["out_of_stock", [true, null]]
+	 *           ["variable", [null, null]]
+	 *
+	 * @param string                $state    Product state.
+	 * @param array<int, bool|null> $expected Shipping check, then the buy action check.
+	 */
+	public function test_core_jsonld_matches_what_woocommerce_prints( string $state, array $expected ): void {
+		$zone = new \WC_Shipping_Zone();
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$zone->add_shipping_method( 'flat_rate' );
+		$product = 'variable' === $state ? WC_Helper_Product::create_variation_product() : WC_Helper_Product::create_simple_product();
+		if ( 'virtual' === $state ) {
+			$product->set_virtual( true );
+		} elseif ( 'out_of_stock' === $state ) {
+			$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		}
+		$product->save();
+		if ( $product instanceof \WC_Product_Variable ) {
+			\WC_Product_Variable::sync( $product );
+		}
+		$product = wc_get_product( $product->get_id() );
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+		$results = $this->results();
+
+		$this->assertSame(
+			$expected,
+			array( $results['product_shipping_schema'], $results['product_buy_action_schema'] ),
+			'These checks disagree with the JSON-LD WooCommerce printed: their copy of the print conditions has drifted from WC_Structured_Data'
+		);
+		$zone->delete();
+	}
+
+	/**
 	 * @testdox The product page checks skip a newer product of a type the report doesn't check.
 	 */
 	public function test_product_checks_skip_unchecked_types(): void {
@@ -446,26 +490,340 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A shop-only product is sampled. A newer search-only product is not.
+	 * @testdox The sampled product is one the scan checks: a search-only product is sampled before an older shop-only one, a newer Hidden product is not.
 	 */
-	public function test_product_checks_include_shop_only_products(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_catalog_visibility( 'catalog' );
-		$product->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'image.jpg' ) ) );
-		$product->set_date_created( time() - HOUR_IN_SECONDS );
-		$product->save();
-		$product     = wc_get_product( $product->get_id() );
+	public function test_product_checks_sample_checked_products(): void {
+		$shop_only = WC_Helper_Product::create_simple_product();
+		$shop_only->set_catalog_visibility( 'catalog' );
+		$shop_only->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'shop.jpg' ) ) );
+		$shop_only->set_date_created( time() - 2 * HOUR_IN_SECONDS );
+		$shop_only->save();
 		$search_only = WC_Helper_Product::create_simple_product();
 		$search_only->set_catalog_visibility( 'search' );
+		$search_only->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'image.jpg' ) ) );
+		$search_only->set_date_created( time() - HOUR_IN_SECONDS );
 		$search_only->save();
+		$search_only = wc_get_product( $search_only->get_id() );
+		$hidden      = WC_Helper_Product::create_simple_product();
+		$hidden->set_catalog_visibility( 'hidden' );
+		$hidden->save();
+		$shop_only = wc_get_product( $shop_only->get_id() );
 		$this->serve(
 			array(
-				self::path_of( $product )     => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ),
-				self::path_of( $search_only ) => array( 200, self::page_with( array() ) ),
+				self::path_of( $shop_only )   => array( 200, self::page_with( array( self::core_product_jsonld( $shop_only ) ) ) ),
+				self::path_of( $search_only ) => array( 200, self::page_with( array( self::core_product_jsonld( $search_only ) ) ) ),
+				self::path_of( $hidden )      => array( 200, self::page_with( array() ) ),
 			)
 		);
 
-		$this->assertSame( array( true, true, true ), $this->product_results() );
+		$this->assertSame( array( true, true, true ), $this->product_results(), 'The Hidden product\'s page, without JSON-LD, is not read' );
+		$sampled = array_map( static fn( \WC_Product $product ): int => $product->get_id(), $this->sut->responses()->products() );
+		$this->assertSame( array( $search_only->get_id(), $shop_only->get_id() ), $sampled, 'The newest checked product first' );
+	}
+
+	/**
+	 * @testdox A page check reads more than the newest product page, and names the product whose page failed.
+	 */
+	public function test_page_checks_find_a_failure_past_the_newest_product(): void {
+		$older = WC_Helper_Product::create_simple_product();
+		$older->set_date_created( time() - DAY_IN_SECONDS );
+		$older->save();
+		$newest = wc_get_product( WC_Helper_Product::create_simple_product()->get_id() );
+		$this->serve(
+			array(
+				self::path_of( $newest ) => array( 200, self::page_with( array( self::core_product_jsonld( $newest ) ) ) ),
+				self::path_of( $older )  => array( 200, self::page_with( array() ) ),
+			)
+		);
+
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertFalse( $checks['product_jsonld_present']['ok'] );
+		$this->assertSame( $older->get_id(), $checks['product_jsonld_present']['product'] );
+		$this->assertSame( 0, $checks['llms_txt_present']['product'], 'A check that reads no product page names none' );
+	}
+
+	/**
+	 * @testdox With sales, the best seller's page is read first, and a check that fails there names it.
+	 */
+	public function test_page_checks_read_the_best_seller_first_and_stop_at_a_failure(): void {
+		$best = WC_Helper_Product::create_simple_product();
+		$best->set_date_created( time() - DAY_IN_SECONDS );
+		$best->save();
+		$newest    = WC_Helper_Product::create_simple_product();
+		$requested = array();
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args, $url ) use ( &$requested ) {
+				$requested[] = $url;
+				return $pre;
+			},
+			1,
+			3
+		);
+		$this->serve(
+			array(
+				self::path_of( $best )   => array( 200, self::page_with( array() ) ),
+				self::path_of( $newest ) => array( 200, self::page_with( array() ) ),
+			)
+		);
+
+		$responses = $this->sut->responses();
+		$responses->use_sales(
+			array(
+				$newest->get_id() => 10.0,
+				$best->get_id()   => 250.0,
+			)
+		);
+		$checks = array_column( $this->sut->all_for( $responses ), null, 'id' );
+
+		$this->assertFalse( $checks['product_jsonld_present']['ok'] );
+		$this->assertSame( $best->get_id(), $checks['product_jsonld_present']['product'], 'The best seller is read first' );
+		$product_pages = array_values( array_intersect( $requested, array( (string) $best->get_permalink(), (string) $newest->get_permalink() ) ) );
+		$this->assertSame( (string) $best->get_permalink(), $product_pages[0] ?? '', 'The best seller\'s page is loaded before the newest' );
+	}
+
+	/**
+	 * @testdox A check of the home and product pages names the product only when its page failed, not when the home page did.
+	 */
+	public function test_failure_on_the_home_page_names_no_product(): void {
+		$older = WC_Helper_Product::create_simple_product();
+		$older->set_date_created( time() - DAY_IN_SECONDS );
+		$older->save();
+		$newest   = WC_Helper_Product::create_simple_product();
+		$viewport = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>';
+		$bare     = '<!doctype html><html lang="en"><head><meta charset="utf-8"></head><body></body></html>';
+		$this->serve(
+			array(
+				'/'                      => array( 200, $viewport ),
+				self::path_of( $newest ) => array( 200, $viewport ),
+				self::path_of( $older )  => array( 200, $bare ),
+			)
+		);
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertFalse( $checks['viewport_meta']['ok'], 'A product page past the newest is read' );
+		$this->assertSame( $older->get_id(), $checks['viewport_meta']['product'] );
+		$this->assertTrue( $checks['html_lang_and_charset']['ok'] );
+
+		remove_all_filters( 'pre_http_request' );
+		$this->serve(
+			array(
+				'/'                      => array( 200, $bare ),
+				self::path_of( $newest ) => array( 200, $viewport ),
+				self::path_of( $older )  => array( 200, $viewport ),
+			)
+		);
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertFalse( $checks['viewport_meta']['ok'] );
+		$this->assertSame( 0, $checks['viewport_meta']['product'], 'The home page failed, so no product is named' );
+	}
+
+	/**
+	 * @testdox A page check stops at the first product page that fails: the next sampled product is not read.
+	 */
+	public function test_page_check_stops_at_the_first_failure(): void {
+		for ( $i = 0; $i < 3; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_date_created( time() - ( $i + 1 ) * HOUR_IN_SECONDS );
+			$product->save();
+		}
+		$responses = $this->sut->responses();
+		$sample    = array_map( static fn( \WC_Product $product ): int => $product->get_id(), $responses->products() );
+		$read      = array();
+		$test      = static function ( StoreResponses $responses ) use ( &$read, $sample ): ?bool {
+			$product = $responses->product();
+			$read[]  = null === $product ? 0 : $product->get_id();
+			// The second sampled product's page fails; without a product page the check passes.
+			return null === $product || $product->get_id() !== $sample[1];
+		};
+		$on_sample = new \ReflectionMethod( StoreOutputChecks::class, 'on_sample' );
+		$on_sample->setAccessible( true );
+		$failed = null;
+		$ok     = $on_sample->invokeArgs( null, array( $test, $responses, &$failed ) );
+
+		$this->assertFalse( $ok );
+		$this->assertSame( $sample[1], $failed->get_id() );
+		$this->assertSame( array( $sample[0], $sample[1], 0 ), $read, 'The first two pages, then once without a product page; the third is never read' );
+	}
+
+	/**
+	 * @testdox On a larger store the sample is the newest product, then products picked the same way on every scan, not only the newest ones.
+	 */
+	public function test_sample_is_the_newest_product_then_steady_picks(): void {
+		$ids = array();
+		for ( $i = 0; $i < 30; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_date_created( time() - ( $i + 1 ) * HOUR_IN_SECONDS );
+			$product->save();
+			$ids[] = $product->get_id();
+		}
+		$sampled = array_map( static fn( \WC_Product $product ): int => $product->get_id(), $this->sut->responses()->products() );
+
+		$this->assertCount( StoreResponses::PRODUCT_SAMPLE_SIZE, $sampled );
+		$this->assertSame( $ids[0], $sampled[0], 'The newest product first' );
+		$this->assertSame( $sampled, array_map( static fn( \WC_Product $product ): int => $product->get_id(), $this->sut->responses()->products() ), 'The same picks on the next scan' );
+		$this->assertNotSame( array_slice( $ids, 0, StoreResponses::PRODUCT_SAMPLE_SIZE ), $sampled, 'Not only the five newest' );
+	}
+
+	/**
+	 * @testdox The barcode and brand checks are skipped, not couldn't check, when no sampled product has a barcode or brand; one that has it is checked.
+	 */
+	public function test_identifier_checks_skip_when_no_sampled_product_has_one(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product = wc_get_product( $product->get_id() );
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertNull( $checks['product_gtin_jsonld']['ok'] );
+		$this->assertTrue( $checks['product_gtin_jsonld']['skipped'], 'No barcode to look for' );
+		$this->assertTrue( $checks['product_brand_jsonld']['skipped'], 'No brand to look for' );
+		$this->assertFalse( $checks['product_jsonld_present']['skipped'], 'Other checks are never skipped' );
+
+		$product->set_global_unique_id( '4006381333931' );
+		$product->save();
+		$plugin = array(
+			'@type' => 'Product',
+			'name'  => $product->get_name(),
+		);
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( $plugin ) ) ) ) );
+
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertFalse( $checks['product_gtin_jsonld']['ok'], 'The barcode is missing from the page' );
+		$this->assertFalse( $checks['product_gtin_jsonld']['skipped'] );
+	}
+
+	/**
+	 * @testdox The reviews check reads the sampled products that have ratings, the best seller first, and names the one whose page leaves its rating out.
+	 */
+	public function test_reviews_check_reads_the_rated_products_of_the_sample(): void {
+		update_option( 'woocommerce_enable_reviews', 'yes' );
+		update_option( 'woocommerce_enable_review_rating', 'yes' );
+		$best = WC_Helper_Product::create_simple_product();
+		$best->set_date_created( time() - DAY_IN_SECONDS );
+		$best->save();
+		update_post_meta( $best->get_id(), '_wc_average_rating', '4.50' );
+		update_post_meta( $best->get_id(), '_wc_review_count', 2 );
+		$newest = WC_Helper_Product::create_simple_product();
+		$this->serve(
+			array(
+				self::path_of( $best )   => array(
+					200,
+					self::page_with(
+						array(
+							array(
+								'@type' => 'Product',
+								'name'  => $best->get_name(),
+							),
+						)
+					),
+				),
+				self::path_of( $newest ) => array(
+					200,
+					self::page_with(
+						array(
+							array(
+								'@type' => 'Product',
+								'name'  => $newest->get_name(),
+							),
+						)
+					),
+				),
+			)
+		);
+		$responses = $this->sut->responses();
+		$responses->use_sales( array( $best->get_id() => 90.0 ) );
+		$checks = array_column( $this->sut->all_for( $responses ), null, 'id' );
+
+		$this->assertFalse( $checks['product_review_markup']['ok'] );
+		$this->assertSame( $best->get_id(), $checks['product_review_markup']['product'] );
+		$this->assertTrue( $responses->starts_with_best_seller() );
+	}
+
+	/**
+	 * @testdox WooCommerce's own output passes the shipping and buy action checks. Products it gives no link or shipping details are skipped, not failed.
+	 */
+	public function test_shipping_and_buy_action_follow_woocommerce_output(): void {
+		update_option( 'woocommerce_allowed_countries', 'all' );
+		update_option( 'woocommerce_ship_to_countries', '' );
+		$zone = new \WC_Shipping_Zone();
+		$zone->set_zone_name( 'United States' );
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$zone->add_shipping_method( 'flat_rate' );
+		$product = wc_get_product( WC_Helper_Product::create_simple_product()->get_id() );
+		$result  = function () use ( $product ): array {
+			remove_all_filters( 'pre_http_request' );
+			$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+			$checks = array_column( $this->sut->all(), 'ok', 'id' );
+			return array( $checks['product_shipping_schema'], $checks['product_buy_action_schema'] );
+		};
+
+		$this->assertSame( array( true, true ), $result() );
+
+		remove_all_filters( 'pre_http_request' );
+		$this->serve(
+			array(
+				self::path_of( $product ) => array(
+					200,
+					self::page_with(
+						array(
+							array(
+								'@type'  => 'Product',
+								'name'   => $product->get_name(),
+								'offers' => array(
+									'@type'        => 'Offer',
+									'price'        => '10',
+									'availability' => 'https://schema.org/InStock',
+								),
+							),
+						)
+					),
+				),
+			)
+		);
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		$this->assertFalse( $checks['product_shipping_schema']['ok'], 'Product details from elsewhere, without shipping' );
+		$this->assertFalse( $checks['product_buy_action_schema']['ok'] );
+		$this->assertSame( $product->get_id(), $checks['product_buy_action_schema']['product'] );
+
+		$product->set_stock_status( 'outofstock' );
+		$product->save();
+		$this->assertNull( $result()[1], 'WooCommerce gives an out of stock product no link' );
+
+		update_option( 'woocommerce_ship_to_countries', 'disabled' );
+		$this->assertNull( $result()[0], 'Shipping off: there are no shipping details to give' );
+		$zone->delete();
+	}
+
+	/**
+	 * @testdox The shipping check skips a variable product, which WooCommerce gives shipping details only for a selected variation.
+	 */
+	public function test_shipping_check_skips_variable_products(): void {
+		$variable = wc_get_product( WC_Helper_Product::create_variation_product()->get_id() );
+		$this->serve( array( self::path_of( $variable ) => array( 200, self::page_with( array( self::core_product_jsonld( $variable ) ) ) ) ) );
+
+		$this->assertNull( array_column( $this->sut->all(), 'ok', 'id' )['product_shipping_schema'] );
+	}
+
+	/**
+	 * @testdox The sample holds at most five products, each once, with priced products first.
+	 */
+	public function test_product_sample_is_small_and_prefers_priced_products(): void {
+		$unpriced = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '' ) );
+		$unpriced->set_price( '' );
+		$unpriced->save();
+		for ( $i = 0; $i < 7; $i++ ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_date_created( time() - ( $i + 1 ) * HOUR_IN_SECONDS );
+			$product->save();
+		}
+		$responses = $this->sut->responses();
+		$responses->use_sales( array( $unpriced->get_id() => 99.0 ) );
+		$ids = array_map( static fn( \WC_Product $product ): int => $product->get_id(), $responses->products() );
+
+		$this->assertCount( StoreResponses::PRODUCT_SAMPLE_SIZE, $ids );
+		$this->assertSame( $ids, array_values( array_unique( $ids ) ) );
+		$this->assertNotContains( $unpriced->get_id(), $ids, 'Priced products fill the sample before one without a price, even a best seller' );
 	}
 
 	/**
@@ -739,7 +1097,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 		unset( $group['hasVariant'][0]['offers'] );
 		$this->serve( array( $path => array( 200, self::page_with( array( $group ) ) ) ) );
-		$this->assertSame( array( true, false, false ), $this->product_results() );
+		$this->assertSame( array( true, true, false ), $this->product_results(), 'A missing offer fails only the price and stock check' );
 	}
 
 	/**
@@ -846,5 +1204,27 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$this->serve( $responses );
 
 		$this->assertSame( array( true, true, true ), $this->product_results() );
+	}
+
+	/**
+	 * @testdox A check the rules file turns off doesn't run and is left out of the results.
+	 */
+	public function test_a_check_the_rules_file_turns_off_is_left_out(): void {
+		update_option(
+			RemoteRules::OPTION,
+			array(
+				'version'      => '2026-11-15',
+				'checks'       => array(),
+				'store_checks' => array( 'llms_txt_present' => array( 'off' => true ) ),
+			),
+			false
+		);
+		$this->serve( array() );
+
+		$results = $this->results();
+
+		$this->assertArrayNotHasKey( 'llms_txt_present', $results );
+		$this->assertArrayHasKey( 'llms_txt_valid', $results, 'Only the named check is off' );
+		$this->assertArrayHasKey( 'canonical_url', $results );
 	}
 }

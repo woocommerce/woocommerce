@@ -50,6 +50,23 @@ class SubmissionHandler {
 	private const AUTO_REJECTED_META_KEY = '_wc_auto_rejected';
 
 	/**
+	 * Marks a review held by someone other than this handler, so a later edit cannot
+	 * approve it. An untagged hold came from the moderation checks and an edit may lift it.
+	 *
+	 * @since 11.4.0
+	 */
+	private const MODERATOR_HELD_META_KEY = '_wc_moderator_held';
+
+	/**
+	 * The review whose status this handler is changing, so the transition it causes is not
+	 * mistaken for a moderator's. Zero when idle. Scoped to one id so a callback that holds
+	 * a different review during the same call is still recorded.
+	 *
+	 * @var int
+	 */
+	private static int $changing_status_for = 0;
+
+	/**
 	 * Wire the AJAX endpoints.
 	 *
 	 * Auto-called by the WC dependency container after instantiation.
@@ -60,6 +77,7 @@ class SubmissionHandler {
 		add_action( 'wp_ajax_' . self::ACTION, array( $this, 'handle' ) );
 		add_action( 'wp_ajax_nopriv_' . self::ACTION, array( $this, 'handle' ) );
 		add_action( 'transition_comment_status', array( $this, 'clear_auto_rejected_flag' ), 10, 3 );
+		add_action( 'transition_comment_status', array( $this, 'record_moderator_hold' ), 10, 3 );
 	}
 
 	/**
@@ -81,6 +99,41 @@ class SubmissionHandler {
 		}
 		if ( get_comment_meta( (int) $comment->comment_ID, self::AUTO_REJECTED_META_KEY, true ) ) {
 			delete_comment_meta( (int) $comment->comment_ID, self::AUTO_REJECTED_META_KEY );
+		}
+	}
+
+	/**
+	 * Record a hold this handler did not apply, so a resubmission cannot approve it.
+	 *
+	 * Approving a pending review is a staff action. Holds the moderation checks applied
+	 * carry no tag and an edit may still lift them, which also leaves reviews held before
+	 * this tag existed working as they did.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int|string  $new_status New comment status.
+	 * @param int|string  $old_status Old comment status.
+	 * @param \WP_Comment $comment    The comment whose status changed.
+	 */
+	public function record_moderator_hold( $new_status, $old_status, $comment ): void {
+		unset( $old_status );
+		if ( ! $comment instanceof \WP_Comment || 'review' !== $comment->comment_type ) {
+			return;
+		}
+
+		$comment_id = (int) $comment->comment_ID;
+		if ( self::$changing_status_for > 0 && $comment_id === self::$changing_status_for ) {
+			return;
+		}
+
+		if ( 'unapproved' === $new_status ) {
+			update_comment_meta( $comment_id, self::MODERATOR_HELD_META_KEY, 1 );
+			return;
+		}
+
+		// Guarded like the sibling method: delete_metadata() queries even on a cache hit.
+		if ( get_comment_meta( $comment_id, self::MODERATOR_HELD_META_KEY, true ) ) {
+			delete_comment_meta( $comment_id, self::MODERATOR_HELD_META_KEY );
 		}
 	}
 
@@ -429,8 +482,22 @@ class SubmissionHandler {
 			'trash'      => 'trash',
 		);
 		$current_status = $status_vocab[ wp_get_comment_status( $existing_id ) ] ?? '';
+
+		// Hold back only the approval: a spam or trash verdict from the checks must still
+		// apply. The tag outlives those, so a rejected edit cannot launder the hold away
+		// and let the next clean one approve the row. Any staff action clears the tag.
+		if ( 'approve' === $target && get_comment_meta( $existing_id, self::MODERATOR_HELD_META_KEY, true ) ) {
+			$target = 'hold';
+		}
+
 		if ( $target !== $current_status ) {
-			wp_set_comment_status( $existing_id, $target );
+			$previously_changing       = self::$changing_status_for;
+			self::$changing_status_for = $existing_id;
+			try {
+				wp_set_comment_status( $existing_id, $target );
+			} finally {
+				self::$changing_status_for = $previously_changing;
+			}
 		}
 
 		if ( in_array( $approved, array( 'spam', 'trash' ), true ) ) {

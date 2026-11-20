@@ -125,7 +125,7 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Guest checkout off is only recommended, so it doesn't block the switch.
+	 * @testdox Guest checkout off is Optional, so it doesn't block the switch.
 	 */
 	public function test_store_conditions_checks(): void {
 		self::make_store_ready();
@@ -136,6 +136,18 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $this->sut->failing_required() );
 		$this->assertFalse( $checks['guest_checkout']['ok'] );
 		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['guest_checkout']['level'] );
+		$this->assertFalse( StoreConditions::shows_required( $checks['guest_checkout'] ), 'AI assistants can still build carts without guest checkout' );
+	}
+
+	/**
+	 * @testdox The UCP and policy page fixes link to AI shopping's settings, the policy ones to their field.
+	 */
+	public function test_fix_links_open_ai_shopping(): void {
+		$checks   = array_column( $this->sut->all(), 'fix_url', 'id' );
+		$shopping = admin_url( 'admin.php?page=wc-settings&tab=agentic-commerce&section=shopping' );
+
+		$this->assertSame( $shopping, $checks['ucp_on'] );
+		$this->assertSame( $shopping . '#' . AgenticCommerceSettings::TERMS_PAGE_OPTION, $checks['terms_page'] );
 	}
 
 	/**
@@ -176,13 +188,20 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Plain permalinks pass when WooCommerce can write the discovery file, and fail with both fixes when it can't.
+	 * @testdox Plain permalinks pass when WooCommerce can write the discovery file, and fail with both fixes when it can't. On multisite they always fail.
 	 */
 	public function test_plain_permalinks_depend_on_writing_the_discovery_file(): void {
 		global $wp_rewrite;
 		self::make_store_ready();
 		$wp_rewrite->set_permalink_structure( '' );
 
+		if ( is_multisite() ) {
+			// Multisite never writes the file, so plain permalinks fail with only the permalink fix.
+			$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
+			$this->assertStringContainsString( 'except Plain', $this->ucp_discovery_fix() );
+			$this->assertStringNotContainsString( 'writable', $this->ucp_discovery_fix() );
+			return;
+		}
 		$this->assertNotContains( 'ucp_discovery', $this->sut->failing_required() );
 
 		$locked = get_temp_dir() . uniqid( 'wc-ucp-locked-' );
@@ -195,7 +214,8 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 			}
 			$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
 			$fix = $this->ucp_discovery_fix();
-			$this->assertStringContainsString( 'Settings > Permalinks', $fix );
+			$this->assertStringContainsString( 'except Plain', $fix );
+			$this->assertStringContainsString( 'index.php', $fix );
 			$this->assertStringContainsString( 'writable', $fix );
 			$checks = array_column( $this->sut->all(), null, 'id' );
 			$this->assertSame( admin_url( 'options-permalink.php' ), $checks['ucp_discovery']['fix_url'] );
@@ -208,10 +228,10 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox A /.well-known/ucp file in the way fails the UCP address check with the fix for its reason, and deleting it passes the check.
-	 * @testWith ["foreign", "Remove the "]
-	 *           ["outdated", "Delete the "]
-	 *           ["not_json", "The "]
-	 *           ["unreadable", "WooCommerce can't read "]
+	 * @testWith ["foreign", "A file at "]
+	 *           ["outdated", "The file at "]
+	 *           ["not_json", "The file at "]
+	 *           ["unreadable", "WooCommerce can’t read the file at "]
 	 *
 	 * @param string $file   Someone else's file, an old profile, invalid JSON, or a file the web server can't read.
 	 * @param string $prefix How the fix should start.

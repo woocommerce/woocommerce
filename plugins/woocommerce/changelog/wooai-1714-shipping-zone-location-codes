@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Refuse unknown country, state and continent codes when an AI agent creates a shipping zone.

@@ -247,15 +247,14 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 		$with_product       = count( $product_ids ) !== 1;
 		$with_status        = 'all' === $status;
 		$store_reply_counts = self::get_store_reply_counts( wp_list_pluck( $matches->comments, 'comment_ID' ) );
-		foreach ( $matches->comments as $comment ) {
-			$comment = get_comment( $comment );
-			if ( $comment ) {
-				$review = self::format_review( $comment, $with_product, $with_status, $store_reply_counts[ (int) $comment->comment_ID ] ?? 0 );
-				if ( is_wp_error( $review ) ) {
-					return $review;
-				}
-				$reviews[] = $review;
+		$comments           = array_filter( array_map( 'get_comment', $matches->comments ) );
+		ExtensibleAbilities::prime( 'product_review', $comments );
+		foreach ( $comments as $comment ) {
+			$review = self::format_review( $comment, $with_product, $with_status, $store_reply_counts[ (int) $comment->comment_ID ] ?? 0 );
+			if ( is_wp_error( $review ) ) {
+				return $review;
 			}
+			$reviews[] = $review;
 		}
 		$ratings    = self::get_rating_summary( $scope, $total );
 		$by_product = $ratings['by_product'];

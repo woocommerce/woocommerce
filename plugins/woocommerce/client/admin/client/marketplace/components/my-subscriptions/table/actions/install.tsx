@@ -15,6 +15,8 @@ import { SubscriptionsContext } from '../../../../contexts/subscriptions-context
 import {
 	addNotice,
 	getInstallUrl,
+	getRequirementErrorNotice,
+	getWpAjaxErrorData,
 	installProduct,
 	removeNotice,
 } from '../../../../utils/functions';
@@ -58,6 +60,26 @@ export default function Install( props: InstallProps ) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const handleInstallError = ( error: any ) => {
 		void loadSubscriptions( false ).then( () => {
+			const requirementNotice = getRequirementErrorNotice(
+				'install',
+				props.subscription.product_name,
+				error
+			);
+			if ( requirementNotice ) {
+				addNotice(
+					props.subscription.product_key,
+					requirementNotice.message,
+					NoticeStatus.Error,
+					{ actions: requirementNotice.actions }
+				);
+				stopInstall();
+
+				if ( props.onError ) {
+					props.onError();
+				}
+				return;
+			}
+
 			let errorMessage = sprintf(
 				// translators: %s is the product name.
 				__( '%s couldn’t be installed.', 'woocommerce' ),
@@ -95,6 +117,7 @@ export default function Install( props: InstallProps ) {
 			product_id: props.subscription.product_id,
 			product_current_version: props.subscription.version,
 			error_message: error?.data?.message,
+			error_code: getWpAjaxErrorData( error ).code || '',
 		} );
 	};
 

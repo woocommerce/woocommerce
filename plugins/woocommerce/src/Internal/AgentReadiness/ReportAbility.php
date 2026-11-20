@@ -102,13 +102,17 @@ class ReportAbility implements AbilityDefinition {
 							'type'        => 'integer',
 							'description' => __( 'Published simple and variable products checked.', 'woocommerce' ),
 						),
+						'available'           => array(
+							'type'        => 'integer',
+							'description' => __( 'Published products agents can see, including any past the check\'s limit.', 'woocommerce' ),
+						),
 						'hidden_from_catalog' => array(
 							'type'        => 'integer',
-							'description' => __( 'Products not checked because the merchant hid them from the shop catalog.', 'woocommerce' ),
+							'description' => __( 'Products not checked because the merchant set them to Hidden.', 'woocommerce' ),
 						),
 						'unsupported_types'   => array(
 							'type'        => 'integer',
-							'description' => __( 'Products not checked because agents don\'t support their type yet.', 'woocommerce' ),
+							'description' => __( 'Products not checked because agents can\'t buy their type through UCP yet.', 'woocommerce' ),
 						),
 						'store_checks'        => array(
 							'type'  => 'array',
@@ -146,9 +150,21 @@ class ReportAbility implements AbilityDefinition {
 										'type'        => 'boolean',
 										'description' => __( 'On output checks: true for a check of output a coming WooCommerce update builds; it does not run yet.', 'woocommerce' ),
 									),
+									'skipped'  => array(
+										'type'        => 'boolean',
+										'description' => __( 'On output checks: true when none of the products checked has the detail, such as a barcode, so there was nothing to check.', 'woocommerce' ),
+									),
 									'seen_at'  => array(
 										'type'        => 'string',
-										'description' => __( 'On a likely conflict: the address where it was seen.', 'woocommerce' ),
+										'description' => __( 'On a likely conflict: the address where it was seen. On a broken llms.txt link: that link.', 'woocommerce' ),
+									),
+									'source'   => array(
+										'type'        => 'string',
+										'description' => __( 'On a failed UCP version check: the version the store serves. On a failed UCP endpoint check: the status and content type catalog search answered with, such as 403 text/html. On the llms.txt check: woocommerce, file or other when served; disabled or not_reached when not. Otherwise empty.', 'woocommerce' ),
+									),
+									'product'  => array(
+										'type'        => 'integer',
+										'description' => __( 'On a failed check of product pages: the ID of the product whose page failed. The check reads up to five product pages, the best seller first, and stops at the first that fails. Otherwise 0.', 'woocommerce' ),
 									),
 								),
 							),
@@ -182,6 +198,10 @@ class ReportAbility implements AbilityDefinition {
 										'description' => __( 'Up to 10 failing products, most recently modified first.', 'woocommerce' ),
 										'items'       => array( 'type' => 'integer' ),
 									),
+									'sales_share' => array(
+										'type'        => array( 'number', 'null' ),
+										'description' => __( 'Share of the store\'s net sales, from 0 to 1, on the products that fail this check, over the period in sales. Null when Analytics is off or the period has fewer than 20 orders, too few to rank by.', 'woocommerce' ),
+									),
 									'fix_url'     => array( 'type' => 'string' ),
 								),
 							),
@@ -199,6 +219,19 @@ class ReportAbility implements AbilityDefinition {
 							),
 						),
 						'truncated'           => array( 'type' => 'boolean' ),
+						'pages_best_seller'   => array(
+							'type'        => 'boolean',
+							'description' => __( 'Whether the up to five product pages the page checks read start with the best seller. False when they start with the newest product.', 'woocommerce' ),
+						),
+						'sales'               => array(
+							'type'        => array( 'object', 'null' ),
+							'description' => __( 'The sales the shares compare: the last days, from Analytics, how many orders, and whether Analytics has imported the store\'s orders for that period. Null while Analytics is off.', 'woocommerce' ),
+							'properties'  => array(
+								'days'     => array( 'type' => 'integer' ),
+								'orders'   => array( 'type' => 'integer' ),
+								'imported' => array( 'type' => 'boolean' ),
+							),
+						),
 					),
 				),
 				'scan_pending' => array(

@@ -60,7 +60,7 @@ test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
 				.fill( coupon.description );
 			await page.getByLabel( 'Coupon amount' ).fill( coupon.amount );
 			await page
-				.getByRole( 'link', { name: 'Usage restriction' } )
+				.getByRole( 'tab', { name: 'Usage restriction' } )
 				.click();
 			await page
 				.locator( '#usage_restriction_coupon_data p' )
@@ -99,7 +99,7 @@ test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
 				coupon.amount
 			);
 			await page
-				.getByRole( 'link', { name: 'Usage restriction' } )
+				.getByRole( 'tab', { name: 'Usage restriction' } )
 				.click();
 			await expect(
 				page.getByRole( 'listitem', { name: product.name } )

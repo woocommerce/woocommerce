@@ -68,4 +68,82 @@ class WC_Regenerate_Images_Test extends WC_Unit_Test_Case {
 			'Metadata hidden by a wp_get_attachment_metadata filter should survive on-the-fly regeneration'
 		);
 	}
+
+	/**
+	 * @testdox Rendering an image should keep its stored sizes when a site filter skips the WooCommerce size.
+	 */
+	public function test_render_keeps_sizes_when_site_filter_skips_requested_size(): void {
+		$generation_runs = 0;
+
+		// A site that keeps the size registered but never generates it.
+		add_filter(
+			'intermediate_image_sizes_advanced',
+			function ( $sizes ) use ( &$generation_runs ) {
+				++$generation_runs;
+				unset( $sizes['woocommerce_thumbnail'] );
+
+				return $sizes;
+			},
+			20
+		);
+
+		// The image is wide because maybe_resize_image() regenerates only when the aspect ratio does not match.
+		$attachment_id = $this->create_image_attachment( 900, 300, 'wc-regen-skipped-size.jpg' );
+		$stored_sizes  = wp_get_attachment_metadata( $attachment_id, true )['sizes'];
+
+		$this->assertNotEmpty( $stored_sizes, 'The upload should generate the sizes the site allows' );
+		$this->assertArrayNotHasKey( 'woocommerce_thumbnail', $stored_sizes, 'The site filter should stop the WooCommerce size at upload' );
+
+		$runs_after_upload = $generation_runs;
+
+		wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
+
+		$this->assertGreaterThan( $runs_after_upload, $generation_runs, 'Rendering should try to regenerate the missing size' );
+		$this->assertSame(
+			$stored_sizes,
+			wp_get_attachment_metadata( $attachment_id, true )['sizes'],
+			'A regeneration that creates no file should leave the stored sizes as they were'
+		);
+	}
+
+	/**
+	 * @testdox Rendering a large unscaled image should keep its sizes and record both the scaled file and the original.
+	 */
+	public function test_render_of_unscaled_large_image_keeps_file_keys_in_sync(): void {
+		// A site that keeps the size registered but never generates it.
+		add_filter(
+			'intermediate_image_sizes_advanced',
+			function ( $sizes ) {
+				unset( $sizes['woocommerce_thumbnail'] );
+
+				return $sizes;
+			},
+			20
+		);
+
+		// Store the image unscaled, like an upload from before WordPress 5.3 added the big image threshold.
+		add_filter( 'big_image_size_threshold', '__return_false' );
+		$attachment_id = $this->create_image_attachment( 3000, 2000, 'wc-regen-unscaled.jpg' );
+		remove_filter( 'big_image_size_threshold', '__return_false' );
+
+		$original_file = get_attached_file( $attachment_id );
+		$stored_sizes  = wp_get_attachment_metadata( $attachment_id, true )['sizes'];
+
+		// Render twice. The second render regenerates from the scaled file, which WordPress does not scale again.
+		wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
+		wp_get_attachment_image_src( $attachment_id, 'woocommerce_thumbnail' );
+
+		$metadata      = wp_get_attachment_metadata( $attachment_id, true );
+		$attached_file = get_attached_file( $attachment_id );
+
+		$this->assertNotSame( $original_file, $attached_file, 'WordPress should have scaled the attached file down' );
+		$this->assertSame( basename( $attached_file ), basename( $metadata['file'] ), 'The stored file should be the attached file' );
+		$this->assertSame( array( 2560, 1707 ), array( $metadata['width'], $metadata['height'] ), 'The stored dimensions should be those of the scaled file' );
+		$this->assertSame( basename( $original_file ), $metadata['original_image'] ?? null, 'The stored record should point to the uploaded original' );
+		$this->assertSame( $original_file, wp_get_original_image_path( $attachment_id ), 'The original image path should be the uploaded file' );
+
+		foreach ( array_keys( $stored_sizes ) as $size ) {
+			$this->assertArrayHasKey( $size, $metadata['sizes'], "The $size size should be kept" );
+		}
+	}
 }
