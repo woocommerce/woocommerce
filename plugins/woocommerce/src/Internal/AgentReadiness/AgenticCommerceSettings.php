@@ -154,10 +154,24 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 * @since 11.4.0
 	 */
 	public static function connect_redirect(): string {
+		self::ensure_jetpack_activation_source();
 		$result    = JetpackConnection::get_authorization_url( add_query_arg( self::CONNECT_RESULT, 'connected', self::url() ), 'woocommerce-core-profiler' );
 		$candidate = ! empty( $result['success'] ) && is_string( $result['url'] ?? null ) ? $result['url'] : '';
 		$url       = self::wordpress_com_https_url( $candidate );
 		return '' !== $url ? $url : add_query_arg( self::CONNECT_RESULT, 'error', self::url() );
+	}
+
+	/**
+	 * Jetpack unpacks this option with list(). An unset option is false, which PHP 8.5 rejects.
+	 *
+	 * @since 11.4.0
+	 */
+	private static function ensure_jetpack_activation_source(): void {
+		$source = get_option( 'jetpack_activation_source' );
+		if ( is_array( $source ) && isset( $source[0], $source[1] ) ) {
+			return;
+		}
+		update_option( 'jetpack_activation_source', array( 'woocommerce', 'ai-tools' ) );
 	}
 
 	/**

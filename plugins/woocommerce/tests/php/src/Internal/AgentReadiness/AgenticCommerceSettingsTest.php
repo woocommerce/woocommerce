@@ -205,10 +205,12 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 * @testdox When the site can't register with WordPress.com, connecting returns to the Overview with an error.
 	 */
 	public function test_connect_redirect_returns_with_an_error_when_registration_fails(): void {
+		delete_option( 'jetpack_activation_source' );
 		$this->assertSame(
 			add_query_arg( AgenticCommerceSettings::CONNECT_RESULT, 'error', AgenticCommerceSettings::url() ),
 			AgenticCommerceSettings::connect_redirect()
 		);
+		$this->assertSame( array( 'woocommerce', 'ai-tools' ), get_option( 'jetpack_activation_source' ) );
 	}
 
 	/**
@@ -234,6 +236,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 * @testdox An authorization URL that leaves WordPress.com sends the merchant back to the Overview with an error.
 	 */
 	public function test_connect_redirect_rejects_an_offsite_authorization_url(): void {
+		delete_option( 'jetpack_activation_source' );
 		$property = new \ReflectionProperty( \Automattic\Jetpack\Connection\Manager::class, 'is_connected' );
 		$property->setAccessible( true );
 		$property->setValue( null, true );
