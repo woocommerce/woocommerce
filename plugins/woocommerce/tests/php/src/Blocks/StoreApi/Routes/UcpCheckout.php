@@ -233,10 +233,13 @@ class UcpCheckout extends ControllerTestCase {
 	 * @return array<string, array{string, int}>
 	 */
 	public function provider_agent_versions(): array {
+		$profile = 'profile="https://agent.example/profile.json"';
+
 		return array(
-			'supported' => array( Utils::VERSION, 201 ),
-			'newer'     => array( '2099-01-01', 422 ),
-			'older'     => array( '2026-01-23', 422 ),
+			'supported'  => array( $profile . '; version="' . Utils::VERSION . '"', 201 ),
+			'newer'      => array( $profile . '; version="2099-01-01"', 422 ),
+			'older'      => array( $profile . '; version="2026-01-23"', 422 ),
+			'bare comma' => array( $profile . ',version="2099-01-01"', 422 ),
 		);
 	}
 
@@ -245,15 +248,15 @@ class UcpCheckout extends ControllerTestCase {
 	 *
 	 * @dataProvider provider_agent_versions
 	 *
-	 * @param string $version Version in the header.
+	 * @param string $header UCP-Agent header.
 	 * @param int    $status Expected HTTP status.
 	 */
-	public function test_agent_version_is_negotiated( string $version, int $status ): void {
+	public function test_agent_version_is_negotiated( string $header, int $status ): void {
 		$response = $this->request(
 			'POST',
 			'/checkout-sessions',
 			array( 'line_items' => array( $this->line_item( 0, 1 ) ) ),
-			array( 'UCP-Agent' => 'profile="https://agent.example/profile.json"; version="' . $version . '"' )
+			array( 'UCP-Agent' => $header )
 		);
 
 		$this->assertSame( $status, $response->get_status() );

@@ -217,7 +217,7 @@ class Utils {
 	/**
 	 * Value of one double-quoted parameter, matched by its exact name.
 	 *
-	 * A match counts only outside quotes, at the start of the header or after whitespace or a semicolon.
+	 * A match counts only outside quotes, at the start of the header or after whitespace, a semicolon or a comma.
 	 *
 	 * @param string $header Header value.
 	 * @param string $name   Parameter name.
@@ -239,7 +239,7 @@ class Utils {
 			$is_parameter   = 0 === $start;
 			if ( ! $is_parameter ) {
 				$previous     = substr( $header, $start - 1, 1 );
-				$is_parameter = ' ' === $previous || "\t" === $previous || ';' === $previous;
+				$is_parameter = false !== strpos( " \t;,", $previous );
 			}
 
 			if ( $outside_quotes && $is_parameter ) {
