@@ -500,8 +500,7 @@ class MyAccountEndpoint {
 			$this->redirect_with_error( $result->get_error_message(), $page );
 		}
 
-		// resend() returns escaped HTML. cancel() returns plain text, so only that notice is escaped here.
-		\wc_add_notice( self::ACTION_RESEND === $action ? $result : esc_html( $result ) );
+		\wc_add_notice( $result );
 		wp_safe_redirect( self::get_endpoint_url( $page ) );
 		exit;
 	}
@@ -532,7 +531,7 @@ class MyAccountEndpoint {
 	 * Flip a pending or active notification to `cancelled` on the customer's behalf.
 	 *
 	 * @param Notification $notification The notification, already checked to belong to the current user.
-	 * @return string|\WP_Error Success notice text, or the error to show instead.
+	 * @return string|\WP_Error Escaped success notice, or the error to show instead.
 	 */
 	private function cancel( Notification $notification ) {
 		if ( ! self::is_cancellable( $notification ) ) {
@@ -554,11 +553,11 @@ class MyAccountEndpoint {
 
 		$product_name = $notification->get_product_name();
 		if ( '' === $product_name ) {
-			return __( 'Back in stock notification cancelled.', 'woocommerce' );
+			return esc_html__( 'Back in stock notification cancelled.', 'woocommerce' );
 		}
 
 		/* translators: %s: product name */
-		return sprintf( __( 'Back in stock notification for "%s" cancelled.', 'woocommerce' ), $product_name );
+		return sprintf( esc_html__( 'Back in stock notification for "%s" cancelled.', 'woocommerce' ), esc_html( $product_name ) );
 	}
 
 	/**
