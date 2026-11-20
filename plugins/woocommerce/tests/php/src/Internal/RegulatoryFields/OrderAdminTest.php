@@ -45,32 +45,35 @@ class OrderAdminTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should output a section with an empty CPF/CNPJ input for an order billed to Brazil that has no value yet.
+	 * @testdox Should output a column with an Edit link, "Not provided" and an empty input for an order billed to Brazil that has no value yet.
 	 */
-	public function test_outputs_section_with_empty_input_for_brazil_order(): void {
+	public function test_outputs_column_without_value_for_brazil_order(): void {
 		$order = new WC_Order();
 		$order->set_billing_country( 'BR' );
 
 		$html = $this->render_section( $order );
 
-		$this->assertStringContainsString( '<strong>Additional required information</strong>', $html );
-		$this->assertStringContainsString( '<label for="' . self::META_KEY . '">CPF/CNPJ:</label>', $html );
-		$this->assertMatchesRegularExpression( '/name="' . self::META_KEY . '"[^>]*value=""/', $html );
+		$this->assertStringStartsWith( '<div class="order_data_column order_data_column_regulatory"><h3>Additional required information <a href="#" class="edit_address">Edit</a></h3>', $html );
+		$this->assertStringContainsString( '<div class="address"><p class="none_set"><strong>CPF/CNPJ:</strong> Not provided.</p></div>', $html );
+		$this->assertMatchesRegularExpression( '/<div class="edit_address">.*name="' . self::META_KEY . '"[^>]*value=""/s', $html );
 	}
 
 	/**
-	 * @testdox Should show a stored value formatted, even when the field no longer applies to the order.
+	 * @testdox Should show a stored value formatted, as text and in the input, even when the field no longer applies to the order.
 	 */
 	public function test_shows_stored_value_when_field_no_longer_applies(): void {
 		$order = new WC_Order();
 		$order->set_billing_country( 'US' );
 		$order->update_meta_data( self::META_KEY, '52998224725' );
 
-		$this->assertMatchesRegularExpression( '/name="' . self::META_KEY . '"[^>]*value="529\.982\.247-25"/', $this->render_section( $order ) );
+		$html = $this->render_section( $order );
+
+		$this->assertStringContainsString( '<div class="address"><p><strong>CPF/CNPJ:</strong> 529.982.247-25</p></div>', $html );
+		$this->assertMatchesRegularExpression( '/name="' . self::META_KEY . '"[^>]*value="529\.982\.247-25"/', $html );
 	}
 
 	/**
-	 * @testdox Should output nothing, not even the heading, for an order the fields do not apply to and that has no value.
+	 * @testdox Should output nothing, not even the column, for an order the fields do not apply to and that has no value.
 	 */
 	public function test_outputs_nothing_for_other_orders(): void {
 		$order = new WC_Order();
@@ -105,14 +108,14 @@ class OrderAdminTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Render the section for an order.
+	 * Render the column for an order.
 	 *
 	 * @param WC_Order $order Order.
 	 * @return string
 	 */
 	private function render_section( WC_Order $order ): string {
 		ob_start();
-		$this->sut->handle_woocommerce_admin_order_data_after_order_details( $order );
+		$this->sut->render_column( $order );
 
 		return (string) ob_get_clean();
 	}

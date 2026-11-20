@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\RegulatoryFields\OrderAdmin as RegulatoryFieldsOrderAdmin;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -787,6 +788,7 @@ class WC_Meta_Box_Order_Data {
 
 						<?php do_action( 'woocommerce_admin_order_data_after_shipping_address', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
+					<?php wc_get_container()->get( RegulatoryFieldsOrderAdmin::class )->render_column( $order ); ?>
 				</div>
 				<div class="clear"></div>
 			</div>

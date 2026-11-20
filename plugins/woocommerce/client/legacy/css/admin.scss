@@ -7362,6 +7362,17 @@ table.bar_chart {
 }
 
 /**
+  * Order data: make room for a fourth column, for regulatory fields, next to Billing and Shipping.
+  * On small screens the column follows the rules below and sits under them.
+  */
+@media only screen and (min-width: 1281px) {
+
+	#order_data .order_data_column_container:has(.order_data_column_regulatory) .order_data_column {
+		width: 22.75%;
+	}
+}
+
+/**
   * Small screen optimisation
   */
 @media only screen and (max-width: 1280px) {
@@ -7377,6 +7388,17 @@ table.bar_chart {
 				// doesn't render at 103% and overflow at narrow viewports.
 				padding-right: 0;
 			}
+		}
+
+		// Shipping ends the Billing and Shipping row, also when the regulatory fields column follows it.
+		.order_data_column_shipping {
+			padding-right: 0;
+		}
+
+		// The regulatory fields column sits under Billing and Shipping.
+		.order_data_column_regulatory {
+			clear: both;
+			width: 100%;
 		}
 	}
 

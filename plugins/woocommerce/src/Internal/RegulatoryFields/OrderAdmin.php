@@ -9,7 +9,7 @@ use WC_Order;
 use WP_Error;
 
 /**
- * Shows regulatory fields on the admin order screen, in their own section of the General column, and lets the merchant edit them.
+ * Shows regulatory fields on the admin order screen, in their own column next to Billing and Shipping, and lets the merchant edit them.
  *
  * @internal Just for internal use.
  *
@@ -39,29 +39,43 @@ class OrderAdmin implements RegisterHooksInterface {
 	 * Register hooks and filters.
 	 */
 	public function register(): void {
-		add_action( 'woocommerce_admin_order_data_after_order_details', array( $this, 'handle_woocommerce_admin_order_data_after_order_details' ) );
 		add_filter( 'woocommerce_admin_billing_fields', array( $this, 'handle_woocommerce_admin_billing_fields' ), 10, 2 );
 	}
 
 	/**
-	 * Output the section at the end of the General column: a heading and one input per field.
+	 * Output a column next to Billing and Shipping, built the same way: the values, and inputs behind the Edit link.
 	 *
-	 * @internal
+	 * Called by the order data meta box. Outputs nothing when the order has no regulatory fields.
 	 *
-	 * @param mixed $order Order being shown.
+	 * @param WC_Order $order Order being shown.
 	 */
-	public function handle_woocommerce_admin_order_data_after_order_details( $order ): void {
-		$fields = $order instanceof WC_Order ? $this->get_order_fields( $order ) : array();
+	public function render_column( WC_Order $order ): void {
+		$fields = $this->get_order_fields( $order );
 
 		if ( empty( $fields ) ) {
 			return;
 		}
 
-		echo '<p class="form-field form-field-wide wc-order-regulatory-fields-title"><strong>' . esc_html__( 'Additional required information', 'woocommerce' ) . '</strong></p>';
+		echo '<div class="order_data_column order_data_column_regulatory">';
+		echo '<h3>' . esc_html__( 'Additional required information', 'woocommerce' ) . ' <a href="#" class="edit_address">' . esc_html__( 'Edit', 'woocommerce' ) . '</a></h3>';
 
+		echo '<div class="address">';
+		foreach ( $fields as $field ) {
+			if ( '' === $field['value'] ) {
+				echo '<p class="none_set"><strong>' . esc_html( $field['label'] ) . ':</strong> ' . esc_html__( 'Not provided.', 'woocommerce' ) . '</p>';
+			} else {
+				echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . esc_html( $field['value'] ) . '</p>';
+			}
+		}
+		echo '</div>';
+
+		echo '<div class="edit_address">';
 		foreach ( $fields as $field ) {
 			woocommerce_wp_text_input( $field, $order );
 		}
+		echo '</div>';
+
+		echo '</div>';
 	}
 
 	/**
@@ -102,7 +116,7 @@ class OrderAdmin implements RegisterHooksInterface {
 		foreach ( $field_ids as $field_id ) {
 			$inputs[ RegulatoryFields::META_PREFIX . $field_id ] = array(
 				'id'            => RegulatoryFields::META_PREFIX . $field_id,
-				'label'         => $all_fields[ $field_id ]['label'] . ':',
+				'label'         => $all_fields[ $field_id ]['label'],
 				'value'         => $display_values[ $field_id ]['value'] ?? '',
 				'type'          => 'text',
 				'wrapper_class' => 'form-field-wide',

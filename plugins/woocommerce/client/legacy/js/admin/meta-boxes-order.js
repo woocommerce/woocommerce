@@ -222,6 +222,11 @@ jQuery( function ( $ ) {
 
 			$edit_address.show();
 
+			// Other columns reuse the Edit link, and are not address edits.
+			if ( ! $wrapper.is( '.order_data_column_billing, .order_data_column_shipping' ) ) {
+				return;
+			}
+
 			var event_name = is_billing ? 'order_edit_billing_address_click' : 'order_edit_shipping_address_click';
 			window.wcTracks.recordEvent( event_name, {
 				order_id: woocommerce_admin_meta_boxes.post_id,
