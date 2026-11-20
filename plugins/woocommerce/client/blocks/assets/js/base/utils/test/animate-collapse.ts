@@ -1,7 +1,11 @@
 /**
  * Internal dependencies
  */
-import { animateCollapse, collapseCopy } from '../animate-collapse';
+import {
+	animateCollapse,
+	collapseCopy,
+	removeCollapseCopies,
+} from '../animate-collapse';
 
 const NATURAL: Record< string, string > = {
 	height: '40px',
@@ -342,5 +346,47 @@ describe( 'collapseCopy', () => {
 			[ '25px' ],
 			[ '40px' ],
 		] );
+	} );
+
+	it( 'leaves no empty box under reduced motion, but still copies content', () => {
+		window.matchMedia = jest.fn().mockReturnValue( { matches: true } );
+		const { element, parent } = createForm();
+		collapseCopy( element, { empty: true } );
+		expect( parent.children ).toHaveLength( 2 );
+
+		collapseCopy( element );
+		expect( parent.children ).toHaveLength( 3 );
+		// @ts-expect-error The mock is not part of jsdom.
+		delete window.matchMedia;
+	} );
+} );
+
+describe( 'removeCollapseCopies', () => {
+	afterEach( () => {
+		jest.restoreAllMocks();
+		document.body.innerHTML = '';
+		// @ts-expect-error The fake is not part of jsdom.
+		delete HTMLElement.prototype.getAnimations;
+	} );
+
+	it( 'removes every copy that still collapses inside the container', () => {
+		const { element: first } = createElement();
+		const { element: second } = createElement();
+		const firstOption = document.createElement( 'div' );
+		const secondOption = document.createElement( 'div' );
+		firstOption.append( first );
+		secondOption.append( second );
+		const container = document.createElement( 'div' );
+		container.append( firstOption, secondOption );
+		document.body.append( container );
+
+		collapseCopy( first, { empty: true } );
+		collapseCopy( second, { empty: true } );
+		first.remove();
+		second.remove();
+		expect( container.querySelectorAll( '[inert]' ) ).toHaveLength( 2 );
+
+		removeCollapseCopies( container );
+		expect( container.querySelectorAll( '[inert]' ) ).toHaveLength( 0 );
 	} );
 } );

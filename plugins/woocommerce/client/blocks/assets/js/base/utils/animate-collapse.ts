@@ -188,18 +188,48 @@ export const inertCopy = ( element: HTMLElement ): HTMLElement => {
 	return copy;
 };
 
+// An empty, inert box with the size of `element`. It counts as moving, so `animateCollapse` starts from that size.
+const emptyBox = ( element: HTMLElement ): HTMLElement => {
+	const box = document.createElement( 'div' );
+	Object.assign( box.style, readValues( element ), {
+		boxSizing: getComputedStyle( element ).boxSizing,
+		borderStyle: 'solid',
+		borderColor: 'transparent',
+	} );
+	box.setAttribute( ATTRIBUTE, 'out' );
+	box.setAttribute( 'inert', '' );
+	box.setAttribute( 'aria-hidden', 'true' );
+	return box;
+};
+
 /**
  * Collapses an inert copy of an element in its place, so that the element itself can unmount at once. Use it for a
  * form that goes, so that its fields stop counting immediately. The copy has no `id`, `name`, or `for` attributes, and
  * it is removed when the collapse ends. Call it just before the element unmounts, while it is still in the page.
  *
- * @param element The element that unmounts.
+ * With `empty`, the copy is an empty box of the same size, so the content disappears at once and only its space
+ * collapses. Use it for content that other scripts own, such as payment fields: their scripts can find a full copy,
+ * and copied custom elements run their own code.
+ *
+ * @param element       The element that unmounts.
+ * @param options
+ * @param options.empty Collapse an empty box instead of a copy of the content.
  */
-export const collapseCopy = ( element: HTMLElement | null ): void => {
+export const collapseCopy = (
+	element: HTMLElement | null,
+	{ empty = false }: { empty?: boolean } = {}
+): void => {
 	if ( typeof element?.getAnimations !== 'function' ) {
 		return;
 	}
-	const copy = inertCopy( element );
+	// Under reduced motion the space changes at once, so an empty box has nothing to show.
+	if (
+		empty &&
+		window.matchMedia?.( '(prefers-reduced-motion: reduce)' ).matches
+	) {
+		return;
+	}
+	const copy = empty ? emptyBox( element ) : inertCopy( element );
 	copy.setAttribute( COPY, element.className );
 	// A motion that runs continues from its current position.
 	if ( element.hasAttribute( ATTRIBUTE ) ) {
@@ -208,4 +238,16 @@ export const collapseCopy = ( element: HTMLElement | null ): void => {
 	element.after( copy );
 	animateCollapse( copy, false );
 	whenAnimationsEnd( copy, () => copy.remove() );
+};
+
+/**
+ * Removes every copy that `collapseCopy` still collapses inside a container, so that a change that applies
+ * immediately leaves no space behind.
+ *
+ * @param container The element that holds the copies.
+ */
+export const removeCollapseCopies = ( container: HTMLElement | null ): void => {
+	container
+		?.querySelectorAll( `[${ COPY }]` )
+		.forEach( ( copy ) => copy.remove() );
 };
