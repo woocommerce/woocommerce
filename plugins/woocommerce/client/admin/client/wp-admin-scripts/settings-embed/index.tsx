@@ -12,6 +12,7 @@ import { isRTL } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './settings-ui.scss';
+import { readJsonDataset } from './read-json-dataset';
 import { isFeatureEnabled } from '~/utils/features';
 import {
 	SettingsPaymentsBacsWrapper,
@@ -86,14 +87,10 @@ const SalesReadinessOverview = lazy(
 const renderSalesReadinessOverview = () => {
 	const root = document.getElementById( 'wc-agent-readiness-overview' );
 	if ( root ) {
-		let initialView = null;
-		let connect = null;
-		try {
-			initialView = JSON.parse( root.dataset.view ?? 'null' );
-			connect = JSON.parse( root.dataset.connect ?? 'null' );
-		} catch {
-			// The Overview loads the view itself.
-		}
+		// Read each attribute on its own. One try would hide the connection card
+		// when the readiness view does not parse; that view can reload, the card cannot.
+		const initialView = readJsonDataset( root.dataset.view );
+		const connect = readJsonDataset( root.dataset.connect );
 		createRoot( root ).render(
 			<Suspense fallback={ null }>
 				<SalesReadinessOverview
