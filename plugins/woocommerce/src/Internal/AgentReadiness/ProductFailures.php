@@ -18,6 +18,11 @@ class ProductFailures {
 	public const META_KEY = '_wc_agent_readiness_failed';
 
 	/**
+	 * When a product's rows were last written. Hidden from the editor, and not a check value.
+	 */
+	public const WRITTEN_META = '_wc_agent_readiness_written_at';
+
+	/**
 	 * The value every checked product has, passing or not.
 	 */
 	public const CHECKED = 'checked';
@@ -42,10 +47,13 @@ class ProductFailures {
 	/**
 	 * Store what a product fails, writing only what changed.
 	 *
-	 * @param int                                                             $product_id Product id.
-	 * @param array<string, array<string, array{field:string,effect:string}>> $failures   Channel map of each failed check, by check id.
+	 * @param int                                                             $product_id   Product id.
+	 * @param array<string, array<string, array{field:string,effect:string}>> $failures     Channel map of each failed check, by check id.
+	 * @param bool                                                            $mark_written Whether to record the write time. A save does, so a scan
+	 *                                                                                      in progress keeps its rows. The scan's own writes don't:
+	 *                                                                                      keep_only() reads the time only for products the scan did not test.
 	 */
-	public static function store( int $product_id, array $failures ): void {
+	public static function store( int $product_id, array $failures, bool $mark_written = true ): void {
 		$values = array_merge( array( self::CHECKED ), array_map( 'strval', array_keys( $failures ) ) );
 		foreach ( ProductScan::statuses( array_values( $failures ) ) as $channel => $status ) {
 			if ( ProductScan::COMPLETE !== $status ) {
@@ -59,6 +67,10 @@ class ProductFailures {
 		}
 		foreach ( array_diff( $values, $stored ) as $value ) {
 			add_post_meta( $product_id, self::META_KEY, $value );
+		}
+		if ( $mark_written ) {
+			// Same values still count as a new write, so a save during a scan is not treated as the old rows.
+			update_post_meta( $product_id, self::WRITTEN_META, sprintf( '%.6F', microtime( true ) ) );
 		}
 	}
 
@@ -80,6 +92,7 @@ class ProductFailures {
 	public static function forget( int $product_id ): void {
 		unset( self::$counts[ get_current_blog_id() ] );
 		delete_post_meta( $product_id, self::META_KEY );
+		delete_post_meta( $product_id, self::WRITTEN_META );
 	}
 
 	/**
@@ -105,16 +118,38 @@ class ProductFailures {
 
 	/**
 	 * Remove the rows of products a scan didn't test, such as those now hidden from the catalog.
-	 * $had_rows is taken before the scan, so a product that stores rows during the scan keeps them.
+	 * Rows written at or after $written_after stay: a product skipped by its batch can be saved again before the scan finishes.
 	 *
-	 * @param array<int, int> $had_rows Product ids that had rows when the scan started.
-	 * @param array<int, int> $tested   Product ids the scan tested.
+	 * @param array<int, int> $had_rows      Product ids that had rows when the scan started.
+	 * @param array<int, int> $tested        Product ids the scan tested.
+	 * @param float|null      $written_after Unix time the scan started, or null to drop every untested id.
 	 */
-	public static function keep_only( array $had_rows, array $tested ): void {
+	public static function keep_only( array $had_rows, array $tested, ?float $written_after = null ): void {
 		unset( self::$counts[ get_current_blog_id() ] );
-		foreach ( array_diff( $had_rows, $tested ) as $product_id ) {
+		$drop = array_map( 'intval', array_diff( $had_rows, $tested ) );
+		if ( array() === $drop ) {
+			return;
+		}
+		$fresh = null === $written_after ? array() : array_fill_keys( self::ids_written_since( $written_after ), true );
+		foreach ( $drop as $product_id ) {
+			if ( isset( $fresh[ $product_id ] ) ) {
+				continue;
+			}
 			self::forget( $product_id );
 		}
+	}
+
+	/**
+	 * Products whose rows were written at or after a scan started.
+	 *
+	 * @param float $after Unix time.
+	 * @return array<int, int>
+	 */
+	private static function ids_written_since( float $after ): array {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One read of write times, which are not cached with the check rows.
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND CAST(meta_value AS DECIMAL(16,6)) >= %f", self::WRITTEN_META, $after ) );
+		return array_map( 'intval', (array) $ids );
 	}
 
 	/**

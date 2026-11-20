@@ -1135,6 +1135,73 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Add item errors do not name a variable product, or its attributes, when the shopper cannot view it.
+	 * @testWith ["draft"]
+	 *           ["pending"]
+	 *           ["private"]
+	 *           ["future"]
+	 * @param string $status Status of the variable product.
+	 */
+	public function test_add_item_errors_do_not_name_products_the_shopper_cannot_view( string $status ) {
+		wp_set_current_user( 0 );
+		wc_empty_cart();
+
+		$fixtures = new FixtureData();
+
+		$variable_product = $fixtures->get_variable_product(
+			array(
+				'name'          => 'Unreleased Product',
+				'status'        => $status,
+				'date_created'  => 'future' === $status ? time() + DAY_IN_SECONDS : time(),
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+			),
+			array(
+				array(
+					'attribute_id'       => 0,
+					'attribute_taxonomy' => 'Secret Finish',
+					'term_ids'           => array( 'Matte', 'Gloss' ),
+				),
+			)
+		);
+
+		// The variation itself stays published and accepts any value.
+		$variation = $fixtures->get_variation_product( $variable_product->get_id(), array( 'secret-finish' => '' ) );
+
+		$requests = array(
+			'no variation'      => array( $variable_product->get_id(), array() ),
+			'missing attribute' => array( $variation->get_id(), array() ),
+			'invalid attribute' => array( $variation->get_id(), array( 'Secret Finish' => 'Nope' ) ),
+			'valid attribute'   => array( $variation->get_id(), array( 'Secret Finish' => 'Gloss' ) ),
+		);
+
+		foreach ( $requests as $label => list( $id, $attributes ) ) {
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+			$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			$request->set_body_params(
+				array(
+					'id'        => $id,
+					'quantity'  => 1,
+					'variation' => array_map(
+						fn( $attribute, $value ) => array(
+							'attribute' => $attribute,
+							'value'     => $value,
+						),
+						array_keys( $attributes ),
+						$attributes
+					),
+				)
+			);
+
+			$response = rest_get_server()->dispatch( $request );
+
+			$this->assertSame( 400, $response->get_status(), $label );
+			$this->assertSame( 'woocommerce_rest_product_not_purchasable', $response->get_data()['code'], $label );
+			$this->assertSame( 'This item is not available for purchase.', $response->get_data()['message'], $label );
+		}
+	}
+
+	/**
 	 * Test adding item to cart with quantity 0 shows an error.
 	 */
 	public function test_add_item_with_zero_quantity_shows_error() {
