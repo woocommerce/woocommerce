@@ -1832,7 +1832,8 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether every image has an alt attribute. An empty alt marks a decorative image and counts;
-	 * images hidden from assistive technology don't need one.
+	 * images hidden from assistive technology don't need one, nor do templates whose alt a script
+	 * fills in, such as the Mini-Cart block's empty item images.
 	 *
 	 * @param string $html Page HTML.
 	 */
@@ -1850,7 +1851,8 @@ class StoreOutputChecks {
 			// A tracking pixel or an image hidden from assistive technology needs no alt.
 			$pixel  = '1' === (string) $tags->get_attribute( 'width' ) && '1' === (string) $tags->get_attribute( 'height' );
 			$hidden = 'true' === strtolower( (string) $tags->get_attribute( 'aria-hidden' ) ) || in_array( strtolower( (string) $tags->get_attribute( 'role' ) ), array( 'presentation', 'none' ), true );
-			if ( ! $pixel && ! $hidden ) {
+			$bound  = null !== $tags->get_attribute( 'data-wp-bind--alt' );
+			if ( ! $pixel && ! $hidden && ! $bound ) {
 				return false;
 			}
 		}
