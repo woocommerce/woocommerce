@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Frontend;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupService;
@@ -286,6 +287,11 @@ class ProductPageIntegration {
 			return $data;
 		}
 
+		// Skip products that never render the form, so the lookup below only runs where the notice can show.
+		if ( ! $this->eligibility_service->is_product_eligible( $product ) || ! $this->eligibility_service->product_allows_signups( $product ) ) {
+			return $data;
+		}
+
 		if ( $this->eligibility_service->is_stock_status_eligible( $variation->get_stock_status() ) ) {
 			return $data;
 		}
@@ -306,7 +312,10 @@ class ProductPageIntegration {
 	}
 
 	/**
-	 * Get the logged-in shopper's active or pending sign-up for a product, when personalization is enabled.
+	 * Get the logged-in shopper's active sign-up for a product, when personalization is enabled.
+	 *
+	 * A pending sign-up, or one made as a guest with the same email, keeps the form: submitting it activates
+	 * the sign-up or resends its verification e-mail, and only the shopper's own sign-ups are listed in My Account.
 	 *
 	 * @param WC_Product $product Product object.
 	 * @return Notification|null
@@ -316,9 +325,14 @@ class ProductPageIntegration {
 			return null;
 		}
 
-		$user = wp_get_current_user();
+		$user         = wp_get_current_user();
+		$notification = $this->signup_service->is_already_signed_up( $product->get_id(), $user->ID, $user->user_email );
 
-		return $this->signup_service->is_already_signed_up( $product->get_id(), $user->ID, $user->user_email );
+		if ( ! $notification instanceof Notification || NotificationStatus::ACTIVE !== $notification->get_status() || $user->ID !== (int) $notification->get_user_id() ) {
+			return null;
+		}
+
+		return $notification;
 	}
 
 	/**
