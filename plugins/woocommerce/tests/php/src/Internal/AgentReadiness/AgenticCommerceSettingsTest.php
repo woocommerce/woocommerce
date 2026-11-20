@@ -2209,8 +2209,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$view   = $this->shopping();
 		$labels = array_merge( ...array_map( static fn( array $field ): array => array_column( $field['options'], 'label' ), $view['policies']['fields'] ) );
-		$shown  = html_entity_decode( wp_strip_all_tags( get_the_title( $id ) ), ENT_QUOTES, 'UTF-8' );
-		$this->assertContains( self::plain_apostrophes( $shown ), array_map( array( self::class, 'plain_apostrophes' ), $labels ), 'The dropdown shows the title with its entities decoded' );
+		$titles = array_values( array_filter( $labels, static fn( string $label ): bool => str_contains( $label, 'Returns' ) ) );
+		$this->assertNotEmpty( $titles, 'The page is listed in the policy dropdowns' );
+		foreach ( $titles as $label ) {
+			$this->assertSame( 'Returns "}, "z": {"a": " & <b>', $label, 'The dropdown shows the title with its entities decoded' );
+		}
 
 		// ReadinessCopy has no wording for this check, so the stored label is what the Overview shows.
 		$label = 'Blue &quot;}, &amp; Co <i>';
