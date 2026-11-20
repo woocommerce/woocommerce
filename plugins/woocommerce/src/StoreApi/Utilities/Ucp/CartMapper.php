@@ -50,7 +50,7 @@ class CartMapper {
 	/**
 	 * Build the UCP line items.
 	 *
-	 * `item.id` is the variation id for variations, matching the ids catalog hands out.
+	 * `item.id` is the variant id for variations, matching the ids catalog hands out.
 	 *
 	 * @param array $items Store API cart items.
 	 * @return array
@@ -70,7 +70,7 @@ class CartMapper {
 			}
 
 			$item = array(
-				'id'    => (string) $cart_item['id'],
+				'id'    => (string) ( $cart_item['catalog_id'] ?? $cart_item['id'] ),
 				'title' => $title,
 				'price' => (int) $cart_item['prices']['price'],
 			);

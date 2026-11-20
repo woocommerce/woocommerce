@@ -204,6 +204,104 @@ class Utils {
 	}
 
 	/**
+	 * Split a variant id into its product id and the values it carries for "Any" attributes.
+	 *
+	 * A variation leaving an attribute as "Any" is sold once per value, so its variants are
+	 * named `<variation id>:<attribute key>=<value>`, with further pairs joined by `&`.
+	 *
+	 * @param string $id Variant id.
+	 * @return array{0: int, 1: array<string, string>}|null Product id and values by attribute key, or null when malformed.
+	 */
+	public static function parse_variant_id( string $id ): ?array {
+		$parts = explode( ':', $id, 2 );
+
+		if ( ! ctype_digit( $parts[0] ) ) {
+			return null;
+		}
+
+		$values = array();
+
+		foreach ( isset( $parts[1] ) ? explode( '&', $parts[1] ) : array() as $pair ) {
+			$pair = explode( '=', $pair, 2 );
+
+			if ( 2 !== count( $pair ) || '' === $pair[0] || '' === $pair[1] ) {
+				return null;
+			}
+
+			$values[ rawurldecode( $pair[0] ) ] = rawurldecode( $pair[1] );
+		}
+
+		return array( (int) $parts[0], $values );
+	}
+
+	/**
+	 * Build a variant id from a variation id and the values chosen for its "Any" attributes.
+	 *
+	 * @param int                   $variation_id Variation id.
+	 * @param array<string, string> $values Chosen values by attribute key, in the product's attribute order.
+	 * @return string
+	 */
+	public static function build_variant_id( int $variation_id, array $values ): string {
+		$pairs = array();
+
+		foreach ( $values as $key => $value ) {
+			$pairs[] = rawurlencode( (string) $key ) . '=' . rawurlencode( (string) $value );
+		}
+
+		return empty( $pairs ) ? (string) $variation_id : $variation_id . ':' . implode( '&', $pairs );
+	}
+
+	/**
+	 * Build the variant id of a variation holding the given attribute values.
+	 *
+	 * Only the attributes the variation leaves as "Any" enter the id; a value for any other is ignored.
+	 *
+	 * @param \WC_Product_Variation $variation The variation.
+	 * @param array                 $values Attribute values by key, with or without the `attribute_` prefix.
+	 * @return string
+	 */
+	public static function variant_id( \WC_Product_Variation $variation, array $values ): string {
+		$chosen = array();
+
+		foreach ( $variation->get_attributes() as $key => $own_value ) {
+			$value = (string) ( $values[ $key ] ?? $values[ 'attribute_' . $key ] ?? '' );
+
+			if ( '' === (string) $own_value && '' !== $value ) {
+				$chosen[ (string) $key ] = $value;
+			}
+		}
+
+		return self::build_variant_id( (int) $variation->get_id(), $chosen );
+	}
+
+	/**
+	 * Load the product a variant id names, with the id in its canonical form.
+	 *
+	 * @param string $id Product or variant id.
+	 * @return array{product: \WC_Product, id: string}|null Null when malformed, unknown, or carrying a
+	 *                                                      value for something other than an "Any" attribute.
+	 */
+	public static function resolve_variant_id( string $id ): ?array {
+		$parsed  = self::parse_variant_id( $id );
+		$product = null === $parsed ? null : wc_get_product( $parsed[0] );
+
+		if ( ! $product instanceof \WC_Product ) {
+			return null;
+		}
+
+		$canonical = $product instanceof \WC_Product_Variation ? self::variant_id( $product, $parsed[1] ) : (string) $product->get_id();
+
+		if ( count( self::parse_variant_id( $canonical )[1] ) !== count( $parsed[1] ) ) {
+			return null;
+		}
+
+		return array(
+			'product' => $product,
+			'id'      => $canonical,
+		);
+	}
+
+	/**
 	 * Translate a cart error code into the UCP code closest to it.
 	 *
 	 * The cart names more reasons than UCP does, so the ones an agent can act on

@@ -522,8 +522,8 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * A malformed payload is refused at 400, an unsellable id at 200 — see `ucp_error()`.
 	 *
 	 * @param mixed $line_items Raw `line_items` value.
-	 * @return array{by_key: array<string, int>, by_product: array<int, int>}|\WP_REST_Response
-	 *         Quantities per cart item key and per product id, or an error response.
+	 * @return array{by_key: array<string, int>, by_product: array<int|string, int>}|\WP_REST_Response
+	 *         Quantities per cart item key and per catalog item id, or an error response.
 	 */
 	protected function parse_line_items( $line_items ) {
 		if ( ! is_array( $line_items ) ) {
@@ -569,8 +569,8 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 				continue;
 			}
 
-			$item_id = (string) $line_item['item']['id'];
-			$product = $this->get_item_product( $item_id );
+			$resolved = Utils::resolve_variant_id( (string) $line_item['item']['id'] );
+			$product  = $resolved['product'] ?? null;
 
 			// The payload is well formed; the store simply has nothing orderable under that
 			// id. A business outcome, so 200 like every other refusal. An id matching no
@@ -591,27 +591,11 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 
 			// Repeating an id is additive, matching how a cart treats two adds of the
 			// same product.
-			$product_id                           = (int) $product->get_id();
-			$desired['by_product'][ $product_id ] = ( $desired['by_product'][ $product_id ] ?? 0 ) + $quantity;
+			$item_id                           = $resolved['id'];
+			$desired['by_product'][ $item_id ] = ( $desired['by_product'][ $item_id ] ?? 0 ) + $quantity;
 		}
 
 		return $desired;
-	}
-
-	/**
-	 * Load the product an item id names.
-	 *
-	 * Ids only, as the catalog routes resolve them: the catalog hands out no SKU
-	 * identifier, and a SKU fallback would let a numeric SKU resolve as a post id.
-	 *
-	 * @param string $item_id Item identifier.
-	 * @return \WC_Product|null
-	 */
-	private function get_item_product( string $item_id ) {
-		$product_id = ctype_digit( $item_id ) ? (int) $item_id : 0;
-		$product    = $product_id > 0 ? wc_get_product( $product_id ) : null;
-
-		return $product instanceof \WC_Product ? $product : null;
 	}
 
 	/**
@@ -626,7 +610,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * before adds, so the contents are restored first: otherwise replacing a cart with
 	 * something out of stock would empty it.
 	 *
-	 * @param array{by_key: array<string, int>, by_product: array<int, int>} $desired Desired quantities.
+	 * @param array{by_key: array<string, int>, by_product: array<int|string, int>} $desired Desired quantities.
 	 * @return \WP_REST_Response|null An error response, or null when the cart was updated.
 	 * @throws \Throwable Anything other than a cart refusal, after the cart is restored.
 	 */
@@ -661,7 +645,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	/**
 	 * Reconcile the cart to the desired quantities.
 	 *
-	 * @param array{by_key: array<string, int>, by_product: array<int, int>} $desired Desired quantities.
+	 * @param array{by_key: array<string, int>, by_product: array<int|string, int>} $desired Desired quantities.
 	 * @throws RouteException When an item cannot be added or adjusted.
 	 */
 	private function reconcile_line_items( array $desired ): void {
@@ -670,7 +654,9 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 
 		foreach ( $this->cart_controller->get_cart_items() as $key => $cart_item ) {
 			$key        = (string) $key;
-			$product_id = (int) ( $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'] );
+			$product_id = $cart_item['data'] instanceof \WC_Product_Variation
+				? Utils::variant_id( $cart_item['data'], (array) $cart_item['variation'] )
+				: (string) $cart_item['product_id'];
 			$quantity   = (int) $cart_item['quantity'];
 
 			if ( isset( $by_key[ $key ] ) ) {
@@ -690,11 +676,22 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			}
 		}
 
-		foreach ( $by_product as $product_id => $quantity ) {
+		foreach ( $by_product as $item_id => $quantity ) {
+			list( $product_id, $values ) = Utils::parse_variant_id( (string) $item_id );
+
+			$variation = array();
+			foreach ( $values as $attribute => $value ) {
+				$variation[] = array(
+					'attribute' => 'attribute_' . $attribute,
+					'value'     => $value,
+				);
+			}
+
 			$this->cart_controller->add_to_cart(
 				array(
-					'id'       => $product_id,
-					'quantity' => $quantity,
+					'id'        => $product_id,
+					'quantity'  => $quantity,
+					'variation' => $variation,
 				)
 			);
 		}

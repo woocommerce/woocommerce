@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+UCP: Offer a variation that leaves an attribute as "Any" as one variant per value, so AI shopping agents can add it to a cart.

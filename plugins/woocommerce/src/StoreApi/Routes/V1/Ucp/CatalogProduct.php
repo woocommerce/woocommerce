@@ -131,7 +131,7 @@ class CatalogProduct extends AbstractCatalogRoute {
 		}
 
 		$this->mapper()->begin_response();
-		$product = $this->mapper()->map_detail_product( $resolved['product'], $this->normalize_selected( $selected ), (int) $resolved['variation_id'] );
+		$product = $this->mapper()->map_detail_product( $resolved['product'], $this->normalize_selected( $selected ), $resolved['variant_id'] );
 
 		$response = array(
 			'ucp'     => $this->ucp_metadata( 'success' ),
