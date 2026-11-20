@@ -348,7 +348,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 
 		$not_reached = self::llms_present( self::with_llms_status( 'unknown', '## Agentic capabilities' ) );
 		$this->assertSame( 'not_reached', $not_reached['source'] );
-		$this->assertStringContainsString( 'Ask your host', $not_reached['fix'] );
+		$this->assertStringContainsString( 'Ask your hosting provider', $not_reached['fix'] );
 		$this->assertNotSame( $default['fix'], $not_reached['fix'] );
 		$this->assertSame( '', self::llms_present( self::with_llms_status( 'no_rewrite', '## Agentic capabilities' ) )['source'], 'A status it doesn\'t know claims no cause' );
 

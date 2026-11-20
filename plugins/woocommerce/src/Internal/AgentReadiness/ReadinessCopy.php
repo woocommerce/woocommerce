@@ -177,7 +177,7 @@ final class ReadinessCopy {
 			case 'disabled':
 				return array( 'fix' => __( 'WooCommerce’s llms.txt is turned off by code on your store (the woocommerce_enable_llms_txt filter). Remove that code, or turn on llms.txt in your SEO plugin.', 'woocommerce' ) );
 			case 'not_reached':
-				return array( 'fix' => __( 'WooCommerce serves one when nothing else does, so something stops /llms.txt from reaching your store. Ask your host whether a server rule or cache blocks it.', 'woocommerce' ) );
+				return array( 'fix' => __( 'WooCommerce serves one when nothing else does, so something stops /llms.txt from reaching your store. Ask your hosting provider whether a server rule or cache blocks it.', 'woocommerce' ) );
 		}
 		return null;
 	}
@@ -324,7 +324,7 @@ final class ReadinessCopy {
 				__( 'Let search engines and AI assistants show your pages', 'woocommerce' ),
 				__( 'AI assistants follow the same rules as search engines to decide which pages they can show.', 'woocommerce' ),
 				__( 'Your store is set to hide its pages from search engines, so AI assistants can’t find them. Check whether “Discourage search engines from indexing this site” is selected.', 'woocommerce' ),
-				__( 'If it isn’t selected, check the robots settings in your SEO plugin, or ask your host.', 'woocommerce' ),
+				__( 'If it isn’t selected, check the robots settings in your SEO plugin, or ask your hosting provider.', 'woocommerce' ),
 				admin_url( 'options-reading.php' ),
 			),
 			'pages_public'                   => array(
@@ -340,7 +340,7 @@ final class ReadinessCopy {
 				__( 'Check why AI assistants can’t connect', 'woocommerce' ),
 				__( 'They use your connection URL to find your products.', 'woocommerce' ),
 				__( 'AI assistants can’t reach your connection URL, so they can’t find your products. Test it in UCP Playground, or ask your hosting provider.', 'woocommerce' ),
-				__( 'Save your settings under Settings › Permalinks once. If AI assistants still can’t connect, ask your host whether caching or a firewall blocks your connection URL.', 'woocommerce' ),
+				__( 'Save your settings under Settings › Permalinks once. If AI assistants still can’t connect, ask your hosting provider whether caching or a firewall blocks your connection URL.', 'woocommerce' ),
 			),
 			'ucp_profile_version'            => array(
 				__( 'Your store’s connection is up to date', 'woocommerce' ),
@@ -354,7 +354,7 @@ final class ReadinessCopy {
 				__( 'Check why AI assistants can’t search your catalog', 'woocommerce' ),
 				__( 'This is how they find products and add them to a shopper’s cart.', 'woocommerce' ),
 				__( 'AI assistants can’t search your products or add them to carts. A firewall or security plugin can cause this, so check those first or ask your hosting provider.', 'woocommerce' ),
-				__( 'Ask your host or security plugin to allow requests to /wp-json/wc/ucp/.', 'woocommerce' ),
+				__( 'Ask your hosting provider or security plugin to allow requests to /wp-json/wc/ucp/.', 'woocommerce' ),
 			),
 			'ucp_checkout'                   => array(
 				__( 'AI assistants can send shoppers to your checkout', 'woocommerce' ),
