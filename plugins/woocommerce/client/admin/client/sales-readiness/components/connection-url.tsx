@@ -9,6 +9,7 @@ import { Button, InputControl, Link } from '@wordpress/ui';
 /**
  * Internal dependencies
  */
+import { safeHref } from '../safe-href';
 import type { ShoppingView } from '../types';
 
 /**
@@ -51,7 +52,7 @@ export const ConnectionUrl = ( {
 					{ copied ? connection.copied : connection.copy }
 				</Button>
 			</div>
-			<Link href={ connection.test.href } openInNewTab>
+			<Link href={ safeHref( connection.test.href ) } openInNewTab>
 				{ connection.test.text }
 			</Link>
 		</div>

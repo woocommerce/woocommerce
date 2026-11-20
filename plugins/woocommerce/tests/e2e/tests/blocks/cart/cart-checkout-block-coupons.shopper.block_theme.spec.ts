@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { expect, test as base, wpCLI } from '@woocommerce/e2e-utils';
+import { randomUUID } from 'crypto';
+import { expect, test as base, guestFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
-import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
 import { CheckoutPage } from '../checkout/checkout.page';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
@@ -19,42 +19,69 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Coupon', () => {
-	test.beforeEach( async () => {
-		await wpCLI(
-			'wc shop_coupon create --code=single-use-coupon --discount_type=percent --amount=10 --usage_limit=1 --user=1'
-		);
-	} );
+	test.use( { storageState: guestFile } );
 
-	test( 'Logged in user can apply single-use coupon and place order', async ( {
+	let productId: number;
+	let couponCode: string;
+
+	test.beforeEach(
+		async ( { requestUtils, createHiddenProduct, cleanup } ) => {
+			( { id: productId } = await createHiddenProduct( {
+				name: 'Coupon test product',
+				regular_price: '20',
+			} ) );
+			couponCode = `single-use-${ randomUUID().slice( 0, 8 ) }`;
+			const { id: couponId } = await requestUtils.rest< { id: number } >(
+				{
+					method: 'POST',
+					path: 'wc/v3/coupons',
+					data: {
+						code: couponCode,
+						discount_type: 'percent',
+						amount: '10',
+						usage_limit: 1,
+					},
+				}
+			);
+			cleanup( () =>
+				requestUtils.rest( {
+					method: 'DELETE',
+					path: `wc/v3/coupons/${ couponId }`,
+					params: { force: true },
+				} )
+			);
+		}
+	);
+
+	test( 'Shopper can apply single-use coupon and place order', async ( {
 		checkoutPageObject,
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await page.goto( `/?add-to-cart=${ productId }` );
 		await frontendUtils.goToCart();
 
 		await page.getByRole( 'button', { name: 'Add coupons' } ).click();
-		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
+		await page.getByLabel( 'Enter code' ).fill( couponCode );
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
 		await expect(
-			page.getByLabel( 'Remove coupon "single-use-coupon"' )
+			page.getByLabel( `Remove coupon "${ couponCode }"` )
 		).toBeVisible();
 
-		await page.getByLabel( 'Remove coupon "single-use-coupon"' ).click();
+		await page.getByLabel( `Remove coupon "${ couponCode }"` ).click();
 
 		await expect(
-			page.getByLabel( 'Remove coupon "single-use-coupon"' )
+			page.getByLabel( `Remove coupon "${ couponCode }"` )
 		).toBeHidden();
 
 		await frontendUtils.goToCheckout();
 		await page.getByRole( 'button', { name: 'Add coupons' } ).click();
-		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
+		await page.getByLabel( 'Enter code' ).fill( couponCode );
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
 		await expect(
-			page.getByLabel( 'Remove coupon "single-use-coupon"' )
+			page.getByLabel( `Remove coupon "${ couponCode }"` )
 		).toBeVisible();
 
 		await checkoutPageObject.fillInCheckoutWithTestData();
@@ -73,38 +100,36 @@ test.describe( 'Shopper → Coupon', () => {
 		).toBeVisible();
 	} );
 
-	test( 'Logged in user cannot apply single-use coupon twice', async ( {
+	test( 'Shopper cannot apply single-use coupon twice', async ( {
 		checkoutPageObject,
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await page.goto( `/?add-to-cart=${ productId }` );
 		await frontendUtils.goToCheckout();
 
 		await page.getByRole( 'button', { name: 'Add coupons' } ).click();
-		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
+		await page.getByLabel( 'Enter code' ).fill( couponCode );
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
 		await expect(
-			page.getByLabel( 'Remove coupon "single-use-coupon"' )
+			page.getByLabel( `Remove coupon "${ couponCode }"` )
 		).toBeVisible();
 
 		await checkoutPageObject.fillInCheckoutWithTestData();
 		await checkoutPageObject.placeOrder();
 
 		await frontendUtils.emptyCart();
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await page.goto( `/?add-to-cart=${ productId }` );
 		await frontendUtils.goToCheckout();
 
 		await page.getByRole( 'button', { name: 'Add coupons' } ).click();
-		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
+		await page.getByLabel( 'Enter code' ).fill( couponCode );
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
 		await expect(
 			page.getByText(
-				'Usage limit for coupon "SINGLE-USE-COUPON" has been reached.'
+				`Usage limit for coupon "${ couponCode.toUpperCase() }" has been reached.`
 			)
 		).toBeVisible();
 	} );

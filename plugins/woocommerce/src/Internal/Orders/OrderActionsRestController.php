@@ -70,7 +70,7 @@ class OrderActionsRestController extends RestApiControllerBase {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => fn( $request ) => $this->run( $request, 'get_email_templates' ),
-					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request, 'read' ),
 					'args'                => array(),
 				),
 				'schema' => array( $this, 'get_schema_for_email_templates' ),
@@ -90,7 +90,7 @@ class OrderActionsRestController extends RestApiControllerBase {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => fn( $request ) => $this->run( $request, 'send_email' ),
-					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request, 'edit' ),
 					'args'                => $this->get_args_for_order_actions( 'send_email', WP_REST_Server::CREATABLE ),
 				),
 				'schema' => array( $this, 'get_schema_for_order_actions' ),
@@ -110,7 +110,7 @@ class OrderActionsRestController extends RestApiControllerBase {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => fn( $request ) => $this->run( $request, 'send_order_details' ),
-					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request, 'edit' ),
 					'args'                => $this->get_args_for_order_actions( 'send_order_details', WP_REST_Server::CREATABLE ),
 				),
 				'schema' => array( $this, 'get_schema_for_order_actions' ),
@@ -155,19 +155,20 @@ class OrderActionsRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Permission check for REST API endpoint.
+	 * Permission check for an order action endpoint.
 	 *
 	 * @param WP_REST_Request $request The request for which the permission is checked.
-	 * @return bool|WP_Error True if the current user has the capability, otherwise a WP_Error object.
+	 * @param string          $context The request context ('read' or 'edit'), as accepted by wc_rest_check_post_permissions().
+	 * @return bool|WP_Error True if the current user has the required permission, otherwise a WP_Error object.
 	 */
-	private function check_permissions( WP_REST_Request $request ) {
+	private function check_permissions( WP_REST_Request $request, string $context ) {
 		$order_id = $this->validate_order_id( $request );
 
 		if ( is_wp_error( $order_id ) ) {
 			return $order_id;
 		}
 
-		return $this->check_permission( $request, 'read_shop_order', $order_id );
+		return $this->check_post_type_permission( $request, 'shop_order', $context, (int) $order_id );
 	}
 
 	/**
