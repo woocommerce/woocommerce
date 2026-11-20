@@ -78,7 +78,7 @@ class WebhookScheduledActionArgs implements RegisterHooksInterface {
 		}
 
 		if ( 'action' === $resource && ! is_scalar( $arg ) ) {
-			return WebhookPayloadRedactor::redact( $webhook->get_topic(), $arg );
+			return WebhookPayloadRedactor::redact_queued_structure( $webhook->get_topic(), $arg );
 		}
 
 		return WebhookPayloadRedactor::REDACTED;

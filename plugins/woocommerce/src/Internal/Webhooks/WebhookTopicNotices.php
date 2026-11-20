@@ -128,7 +128,7 @@ class WebhookTopicNotices implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	private function is_newly_blocked_topic( string $topic ): bool {
-		return 1 === preg_match( '/^action\.(woocommerce_|wc_)/', $topic ) && ! wc_is_webhook_valid_topic( $topic );
+		return ( 0 === strpos( $topic, 'action.woocommerce_' ) || 0 === strpos( $topic, 'action.wc_' ) ) && ! wc_is_webhook_valid_topic( $topic );
 	}
 
 	/**

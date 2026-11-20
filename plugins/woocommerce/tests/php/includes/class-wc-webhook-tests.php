@@ -804,6 +804,40 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Plugin fields are masked alongside built-in fields before queueing and delivery.
+	 */
+	public function test_redacts_additional_fields_for_a_custom_hook(): void {
+		$hook = 'wc_webhook_redaction_fixture';
+		add_filter( 'woocommerce_webhook_redact_additional_fields', static fn( $fields, $source_hook ) => $hook === $source_hook ? array_merge( $fields, array( 'Gateway_Key' ) ) : $fields, 10, 2 );
+
+		$sut = $this->create_active_webhook( 'action.' . $hook );
+		$sut->save();
+		$sut->enqueue();
+		$argument = array(
+			'gateway'  => array( 'gateway_key' => 'fixture-private' ),
+			'secret'   => 'fixture-private',
+			'currency' => 'USD',
+		);
+
+		$this->assertSame( $argument, apply_filters( $hook, $argument ) );
+		$body = json_decode( $this->run_scheduled_webhook_delivery( $sut, 'fixture-private' ), true );
+		$this->assertSame( '[redacted]', $body['arg']['gateway']['gateway_key'] );
+		$this->assertSame( '[redacted]', $body['arg']['secret'] );
+		$this->assertSame( 'USD', $body['arg']['currency'] );
+	}
+
+	/**
+	 * @testdox Plugin fields in form data are masked while the format and unrelated values are preserved.
+	 */
+	public function test_redacts_additional_form_fields(): void {
+		add_filter( 'woocommerce_webhook_redact_additional_fields', static fn() => array( 'gateway_key' ) );
+		$sut     = $this->create_active_webhook( 'action.woocommerce_checkout_update_order_review' );
+		$payload = $sut->build_payload( '?currency=USD&&Gateway%5FKey=fixture-private&gateway_key=&flag&note=a%3Db' );
+
+		$this->assertSame( '?currency=USD&&Gateway%5FKey=[redacted]&gateway_key=&flag&note=a%3Db', $payload['arg'] );
+	}
+
+	/**
 	 * Provide the checkout hooks that receive a password in their first argument.
 	 *
 	 * @return array

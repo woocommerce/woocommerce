@@ -24,6 +24,18 @@ class WebhookScheduledActionArgsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Masks credentials in a stored query string regardless of the current action topic.
+	 */
+	public function test_redacts_stored_query_parameters_independently_of_topic(): void {
+		$webhook = $this->create_webhook( 'action.wc_webhook_display_fixture' );
+
+		$html = $this->get_args_column( $webhook->get_id(), array( 'query_string' => 'page=2&password=fixture-value' ) );
+
+		$this->assertStringNotContainsString( 'fixture-value', $html );
+		$this->assertStringContainsString( 'page=2&amp;password=[redacted]', $html );
+	}
+
+	/**
 	 * @testdox Should hide the whole argument of deliveries for deleted webhooks.
 	 */
 	public function test_hides_args_of_deleted_webhooks(): void {

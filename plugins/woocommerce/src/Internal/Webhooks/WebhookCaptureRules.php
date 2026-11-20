@@ -40,6 +40,7 @@ final class WebhookCaptureRules {
 		'woocommerce_webhook_loaded',
 		'woocommerce_webhook_payload',
 		'woocommerce_webhook_process_delivery',
+		'woocommerce_webhook_redact_additional_fields',
 		'woocommerce_webhook_secret',
 		'woocommerce_webhook_should_deliver',
 	);

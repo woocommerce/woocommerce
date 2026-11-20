@@ -22,12 +22,33 @@ class WebhookTopicNoticesTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Whether the blocked-topics notice was already in the admin notices cache.
+	 *
+	 * @var bool|null
+	 */
+	private $had_blocked_topics_notice;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->had_blocked_topics_notice = WC_Admin_Notices::has_notice( WebhookTopicNotices::BLOCKED_TOPICS_NOTICE );
 		delete_option( WebhookTopicNotices::TOPIC_CHECK_OPTION );
 		$this->sut = new WebhookTopicNotices();
+	}
+
+	/**
+	 * Restore the notice cache. The parent rolls back the saved option.
+	 */
+	public function tearDown(): void {
+		try {
+			if ( false === $this->had_blocked_topics_notice ) {
+				WC_Admin_Notices::remove_notice( WebhookTopicNotices::BLOCKED_TOPICS_NOTICE );
+			}
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**

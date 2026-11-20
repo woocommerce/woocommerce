@@ -111,51 +111,85 @@ final class WebhookPayloadRedactor {
 
 		$hook = $parts[1] ?? '';
 		if ( is_string( $arg ) ) {
-			return self::redact_string( $hook, $arg );
+			if ( in_array( $hook, self::PASSWORD_HOOKS, true ) ) {
+				return '' === $arg ? $arg : self::REDACTED;
+			}
+			if ( self::FORM_ARGUMENT_HOOK === $hook ) {
+				return self::redact_form_parameters( $arg, self::get_redacted_fields( $hook ) );
+			}
 		}
 
 		if ( is_array( $arg ) || is_object( $arg ) ) {
-			return self::redact_structure( $hook, $arg );
+			return self::redact_structure( $arg, self::get_redacted_fields( $hook ), self::REQUEST_QUERY_HOOK === $hook );
 		}
 
 		return $arg;
 	}
 
 	/**
-	 * Redact a password or form data passed as a string.
+	 * Redact a structured argument for the Scheduled Actions screen.
+	 *
+	 * Older rows may have been queued under a different topic, so check query parameters regardless of the current topic.
+	 *
+	 * @since 11.4.0
+	 * @param string       $topic Current webhook topic.
+	 * @param array|object $arg   Queued argument.
+	 * @return mixed
+	 */
+	public static function redact_queued_structure( string $topic, $arg ) {
+		$parts = explode( '.', $topic, 3 );
+		return self::redact_structure( $arg, self::get_redacted_fields( $parts[1] ?? '' ), true );
+	}
+
+	/**
+	 * Combine Core and plugin field names into a case-insensitive lookup.
 	 *
 	 * @param string $hook Hook name.
-	 * @param string $arg  First hook argument.
-	 * @return string
+	 * @return array<string, bool>
 	 */
-	private static function redact_string( string $hook, string $arg ): string {
-		if ( in_array( $hook, self::PASSWORD_HOOKS, true ) ) {
-			return '' === $arg ? $arg : self::REDACTED;
+	private static function get_redacted_fields( string $hook ): array {
+		/**
+		 * Filters the additional field names to hide from a custom action webhook's argument.
+		 *
+		 * WooCommerce applies these names in addition to its built-in list. Matching is case-insensitive.
+		 *
+		 * @since 11.4.0
+		 * @param string[] $additional_fields Field names to hide from structured data and recognized form or query parameters.
+		 * @param string   $hook              Hook name from the webhook topic.
+		 */
+		$additional_fields = apply_filters( 'woocommerce_webhook_redact_additional_fields', array(), $hook );
+		$fields            = self::REDACTED_FIELDS;
+		if ( is_array( $additional_fields ) ) {
+			foreach ( $additional_fields as $field ) {
+				if ( is_string( $field ) && '' !== $field ) {
+					$fields[ strtolower( $field ) ] = true;
+				}
+			}
 		}
 
-		if ( self::FORM_ARGUMENT_HOOK === $hook ) {
-			return self::redact_form_parameters( $arg );
-		}
-
-		return $arg;
+		return $fields;
 	}
 
 	/**
 	 * Check the data as JSON encodes it. Keep the original when no fields need to change.
 	 *
-	 * @param string       $hook Hook name.
-	 * @param array|object $arg  First hook argument.
+	 * @param array|object        $arg                First hook argument.
+	 * @param array<string, bool> $fields             Field names to hide.
+	 * @param bool                $check_query_string Whether to check the top-level query string.
 	 * @return mixed
 	 */
-	private static function redact_structure( string $hook, $arg ) {
+	private static function redact_structure( $arg, array $fields, bool $check_query_string ) {
 		$json = wp_json_encode( $arg );
 		if ( false === $json ) {
 			return null;
 		}
 
 		$changed = false;
-		$value   = self::redact_request_query( $hook, json_decode( $json ), $changed );
-		$clean   = self::redact_fields( $value, $changed );
+		$value   = json_decode( $json );
+		if ( $check_query_string ) {
+			$value = self::redact_request_query( $value, $fields, $changed );
+		}
+		$clean = self::redact_fields( $value, $fields, $changed );
 
 		if ( ! $changed ) {
 			return $arg;
@@ -165,19 +199,19 @@ final class WebhookPayloadRedactor {
 	}
 
 	/**
-	 * Redact the query string on a copy of a Helper API request.
+	 * Redact the query string on a copy of the argument.
 	 *
-	 * @param string $hook    Hook name.
-	 * @param mixed  $value   Data decoded from JSON.
-	 * @param bool   $changed Whether any field was redacted.
+	 * @param mixed               $value   Data decoded from JSON.
+	 * @param array<string, bool> $fields  Field names to hide.
+	 * @param bool                $changed Whether any field was redacted.
 	 * @return mixed The decoded data with its query string redacted.
 	 */
-	private static function redact_request_query( string $hook, $value, bool &$changed ) {
-		if ( self::REQUEST_QUERY_HOOK !== $hook || ! is_object( $value ) || ! is_string( $value->query_string ?? null ) ) {
+	private static function redact_request_query( $value, array $fields, bool &$changed ) {
+		if ( ! is_object( $value ) || ! is_string( $value->query_string ?? null ) ) {
 			return $value;
 		}
 
-		$query_string = self::redact_form_parameters( $value->query_string );
+		$query_string = self::redact_form_parameters( $value->query_string, $fields );
 		if ( $query_string !== $value->query_string ) {
 			$value->query_string = $query_string;
 			$changed             = true;
@@ -189,45 +223,52 @@ final class WebhookPayloadRedactor {
 	/**
 	 * Redact the listed fields in JSON-shaped data.
 	 *
-	 * @param mixed $value Decoded data.
-	 * @param bool  $changed Whether any field was redacted.
+	 * @param mixed               $value   Decoded data.
+	 * @param array<string, bool> $fields  Field names to hide.
+	 * @param bool                $changed Whether any field was redacted.
 	 * @return mixed
 	 */
-	private static function redact_fields( $value, bool &$changed ) {
+	private static function redact_fields( $value, array $fields, bool &$changed ) {
 		if ( ! is_array( $value ) && ! is_object( $value ) ) {
 			return $value;
 		}
 
-		$fields = (array) $value;
-		foreach ( $fields as $key => $item ) {
-			if ( isset( self::REDACTED_FIELDS[ strtolower( (string) $key ) ] ) && null !== $item && '' !== $item && self::REDACTED !== $item ) {
-				$fields[ $key ] = self::REDACTED;
-				$changed        = true;
+		$items = (array) $value;
+		foreach ( $items as $key => $item ) {
+			if ( isset( $fields[ strtolower( (string) $key ) ] ) && null !== $item && '' !== $item && self::REDACTED !== $item ) {
+				$items[ $key ] = self::REDACTED;
+				$changed       = true;
 			} else {
-				$fields[ $key ] = self::redact_fields( $item, $changed );
+				$items[ $key ] = self::redact_fields( $item, $fields, $changed );
 			}
 		}
 
-		return is_array( $value ) ? $fields : (object) $fields;
+		return is_array( $value ) ? $items : (object) $items;
 	}
 
 	/**
 	 * Redact the listed fields in known form or query parameters.
 	 *
-	 * @param string $form Posted form data.
+	 * @param string              $form   Posted form data or query string.
+	 * @param array<string, bool> $fields Field names to hide.
 	 * @return string
 	 */
-	private static function redact_form_parameters( string $form ): string {
-		return preg_replace_callback(
-			'/(^\??|&)([^=&]+)=([^&]*)/',
-			static function ( array $matches ): string {
-				$key = strtolower( urldecode( $matches[2] ) );
-				if ( isset( self::REDACTED_FIELDS[ $key ] ) && '' !== $matches[3] ) {
-					return $matches[1] . $matches[2] . '=' . self::REDACTED;
-				}
-				return $matches[0];
-			},
-			$form
-		) ?? self::REDACTED;
+	private static function redact_form_parameters( string $form, array $fields ): string {
+		$prefix = '';
+		if ( 0 === strpos( $form, '?' ) ) {
+			$prefix = '?';
+			$form   = substr( $form, 1 );
+		}
+
+		$pairs = explode( '&', $form );
+		foreach ( $pairs as $index => $pair ) {
+			$parts = explode( '=', $pair, 2 );
+			$key   = strtolower( urldecode( $parts[0] ) );
+			if ( isset( $fields[ $key ] ) && '' !== ( $parts[1] ?? '' ) ) {
+				$pairs[ $index ] = $parts[0] . '=' . self::REDACTED;
+			}
+		}
+
+		return $prefix . implode( '&', $pairs );
 	}
 }
