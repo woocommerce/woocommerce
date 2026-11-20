@@ -1203,6 +1203,17 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox list matches the owner exactly: a plan of a slug differing only in case is another extension's.
+	 */
+	public function test_list_matches_the_extension_slug_case_sensitively(): void {
+		$own_id     = $this->create();
+		$variant_id = $this->create( array( 'extension_slug' => strtoupper( self::OWNER ) ) );
+
+		$this->assertSame( array( $own_id ), self::plan_ids( Plans::list( array( 'extension_slug' => self::OWNER ) ) ) );
+		$this->assertSame( array( $variant_id ), self::plan_ids( Plans::list( array( 'extension_slug' => strtoupper( self::OWNER ) ) ) ) );
+	}
+
+	/**
 	 * @testdox list filters by a status or a list of them.
 	 */
 	public function test_list_filters_by_status(): void {

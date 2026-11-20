@@ -76,10 +76,10 @@ final class ContractRepository {
 	private const HOLDS_LOCK = 'lock_token = %s AND locked_until_gmt > UTC_TIMESTAMP()';
 
 	/**
-	 * SQL condition: the row's owner is exactly the bound slug. The binary cast makes the match
-	 * case-sensitive, as the engine's PHP comparisons of the owner are.
+	 * SQL condition: the row's owner is exactly the bound slug. The column's binary collation makes
+	 * the match case-sensitive, as the engine's PHP comparisons of the owner are.
 	 */
-	private const OWNER_MATCH = 'extension_slug = CAST(%s AS BINARY)';
+	private const OWNER_MATCH = 'extension_slug = %s';
 
 	/**
 	 * Contract columns a lock may be conditioned on ({@see self::acquire_lock()}), mapped to the

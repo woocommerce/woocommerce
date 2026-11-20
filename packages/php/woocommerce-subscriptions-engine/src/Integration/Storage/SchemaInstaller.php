@@ -62,13 +62,16 @@ final class SchemaInstaller {
 	 *         a `write_seq` counter bumped by every row write, and a binary-collated
 	 *         `creation_key` with a `creation (extension_slug, creation_key)` UNIQUE index;
 	 *         contracts and cycles drop `claimed_until`. Pre-freeze, recreate the tables.
+	 * 2.9.0 - owner columns compare binary: `extension_slug` on plans, contracts and cycles uses
+	 *         the table charset's `_bin` collation, so every owner match and the `creation`
+	 *         UNIQUE index are exact for case and accents. Pre-freeze, recreate the tables.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	private const VERSION = '2.8.0';
+	private const VERSION = '2.9.0';
 
 	/**
 	 * Option key tracking the installed schema version.
@@ -223,6 +226,11 @@ final class SchemaInstaller {
 		// Mirrors the HPOS orders meta table indexes, including its meta_value prefix length.
 		$meta_value_index_length = max( min( absint( apply_filters( 'woocommerce_database_max_index_length', 191 ) ), 767 ) - 8 - 100 - 1, 20 );
 
+		// Owner columns and the creation key compare binary: values differing only in case or
+		// accents are distinct, as in the engine's PHP comparisons. The collation ignores
+		// trailing spaces.
+		$binary_collate = '' === $charset ? '' : " COLLATE {$charset}_bin";
+
 		// The three policies are opaque JSON payloads of the owning extension; the engine
 		// checks their shape only. `extension_slug` is the owner (nullable while owner
 		// registration semantics are still open). `extension_status` keys owner-scoped
@@ -234,7 +242,7 @@ final class SchemaInstaller {
   delivery_policy JSON NULL,
   pricing_policy JSON NULL,
   status VARCHAR(20) NOT NULL DEFAULT 'active',
-  extension_slug VARCHAR(64) NULL,
+  extension_slug VARCHAR(64){$binary_collate} NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
@@ -267,17 +275,16 @@ final class SchemaInstaller {
 		// write, so a write that matches the row always changes it (zero rows = not matched).
 		// `creation` makes an extension's optional `creation_key` unique (NULL keys never
 		// collide); 64 + 100 characters stay within the 767-byte key limit of older InnoDB
-		// row formats. The key is opaque, so it compares binary: keys differing only in case
-		// or accents are distinct. The collation ignores trailing spaces, so the entity trims keys.
-		$creation_key_collate = '' === $charset ? '' : " COLLATE {$charset}_bin";
-		$contracts_sql        = "CREATE TABLE {$contracts} (
+		// row formats. The key is opaque, so it compares binary, as the owner does; the entity
+		// trims keys because the collation ignores trailing spaces.
+		$contracts_sql = "CREATE TABLE {$contracts} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   status VARCHAR(20) NOT NULL,
   customer_id BIGINT UNSIGNED NULL,
   currency CHAR(3) NULL,
   selling_plan_id BIGINT UNSIGNED NULL,
   origin_order_id BIGINT UNSIGNED NULL,
-  extension_slug VARCHAR(64) NULL,
+  extension_slug VARCHAR(64){$binary_collate} NULL,
   payment_method VARCHAR(100) NULL,
   payment_method_title VARCHAR(200) NULL,
   payment_token_id BIGINT UNSIGNED NULL,
@@ -287,7 +294,7 @@ final class SchemaInstaller {
   locked_until_gmt DATETIME NULL,
   lock_operation VARCHAR(64) NULL,
   write_seq BIGINT UNSIGNED NOT NULL DEFAULT 0,
-  creation_key VARCHAR(100){$creation_key_collate} NULL,
+  creation_key VARCHAR(100){$binary_collate} NULL,
   plan_snapshot_id BIGINT UNSIGNED NULL,
   items_snapshot_id BIGINT UNSIGNED NULL,
   billing_total DECIMAL(26,8) NOT NULL DEFAULT 0,
@@ -376,7 +383,7 @@ final class SchemaInstaller {
   plan_snapshot_id BIGINT UNSIGNED NULL,
   items_snapshot_id BIGINT UNSIGNED NULL,
   order_id BIGINT UNSIGNED NULL,
-  extension_slug VARCHAR(64) NULL,
+  extension_slug VARCHAR(64){$binary_collate} NULL,
   retry_at DATETIME NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,

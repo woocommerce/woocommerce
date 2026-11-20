@@ -238,6 +238,28 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox update_fields writes nothing and returns false when the row's owner differs only in case.
+	 */
+	public function test_update_fields_writes_nothing_to_a_row_of_a_case_variant_owner(): void {
+		global $wpdb;
+
+		$repo = new PlanRepository();
+		$id   = $this->insert_plan( $repo, 'Original' );
+		$plan = $repo->find( $id );
+		$this->assertInstanceOf( Plan::class, $plan );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( $wpdb->prefix . 'wc_selling_plans', array( 'extension_slug' => 'LITE' ), array( 'id' => $id ) );
+
+		$plan->set_name( 'Renamed' );
+		$this->assertFalse( $repo->update_fields( $plan, array( 'name' ) ) );
+
+		$after = $repo->find( $id );
+		$this->assertInstanceOf( Plan::class, $after );
+		$this->assertSame( 'Original', $after->get_name() );
+	}
+
+	/**
 	 * @testdox update_fields refuses a name too long for its column, as insert does, and writes nothing.
 	 */
 	public function test_update_fields_refuses_a_name_too_long_for_its_column(): void {
@@ -260,7 +282,8 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 			$repo->update_fields( $plan, array( 'name' ) );
 			$this->fail( 'Expected update_fields to refuse the name.' );
 		} catch ( \RuntimeException $e ) {
-			$this->assertStringContainsString( 'longer than the column allows', $e->getMessage() );
+			$this->assertStringContainsString( 'Failed to update plan', $e->getMessage() );
+			$this->assertStringContainsString( 'field failed: name', $e->getMessage() );
 		}
 
 		$stored = $repo->find( $id );
@@ -484,6 +507,24 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( $lite_id, $other_id ), array_map( static fn ( Plan $plan ): ?int => $plan->get_id(), $both ) );
 	}
 
+	/**
+	 * @testdox query and count match the owner exactly: a slug differing only in case is another extension.
+	 */
+	public function test_query_extension_slugs_match_the_owner_case_sensitively(): void {
+		$repo = new PlanRepository();
+
+		$lite_id = $this->insert_plan( $repo, 'Lite plan', 'lite' );
+		$this->insert_plan( $repo, 'Case variant plan', 'LITE' );
+		$other_id = $this->insert_plan( $repo, 'Other plan', 'other-extension' );
+
+		$this->assertSame( array( $lite_id ), self::ids( $repo->query( array( 'extension_slugs' => array( 'lite' ) ) ) ) );
+		$this->assertSame( 1, $repo->count( array( 'extension_slugs' => array( 'lite' ) ) ) );
+
+		$both = array( 'extension_slugs' => array( 'lite', 'other-extension' ) );
+		$this->assertSame( array( $lite_id, $other_id ), self::ids( $repo->query( $both ) ) );
+		$this->assertSame( 2, $repo->count( $both ) );
+	}
+
 	public function test_query_singular_extension_slug_arg_is_unknown_and_ignored(): void {
 		$repo = new PlanRepository();
 
@@ -560,5 +601,20 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 
 		$this->assertTrue( $repo->delete( $id ) );
 		$this->assertNull( $repo->find( $id ) );
+	}
+
+	/**
+	 * @testdox delete scoped to a slug differing only in case keeps the plan and its meta.
+	 */
+	public function test_delete_under_a_case_variant_owner_keeps_the_plan(): void {
+		$repo = new PlanRepository();
+
+		$id = $this->insert_plan( $repo, 'Kept' );
+		$repo->add_meta( $id, 'lite', 'note', 'kept' );
+
+		$this->assertFalse( $repo->delete( $id, 'LITE' ) );
+		$this->assertInstanceOf( Plan::class, $repo->find( $id ) );
+		$this->assertSame( array( 'kept' ), $repo->get_meta( $id, 'note' ) );
+		$this->assertTrue( $repo->delete( $id, 'lite' ) );
 	}
 }

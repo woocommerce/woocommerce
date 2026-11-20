@@ -21,10 +21,10 @@ defined( 'ABSPATH' ) || exit;
 final class PlanRepository {
 
 	/**
-	 * SQL condition on the `p` alias: the plan's owner is exactly the bound slug. The binary cast
-	 * makes the match case-sensitive, as the engine's PHP comparisons of the owner are.
+	 * SQL condition on the `p` alias: the plan's owner is exactly the bound slug. The column's
+	 * binary collation makes the match case-sensitive, as the engine's PHP comparisons of the owner are.
 	 */
-	private const OWNER_MATCH = 'p.extension_slug = CAST(%s AS BINARY)';
+	private const OWNER_MATCH = 'p.extension_slug = %s';
 
 	/**
 	 * Policy columns stored as JSON.
@@ -224,40 +224,30 @@ final class PlanRepository {
 			throw new \RuntimeException( 'Cannot update a plan that has no extension slug.' );
 		}
 
-		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 		$row     = $this->get_row_data( $plan );
 		$columns = array();
 		foreach ( $fields as $field ) {
 			if ( 'extension_slug' === $field || ! array_key_exists( $field, $row ) ) {
 				throw new \InvalidArgumentException( esc_html( sprintf( 'Cannot update plan field "%s".', $field ) ) );
 			}
-			if ( is_string( $row[ $field ] ) ) {
-				ColumnFit::assert_fits_column( $table, $field, $row[ $field ] );
-			}
 			$columns[ $field ] = $row[ $field ];
 		}
 
-		$now = gmdate( 'Y-m-d H:i:s' );
+		$now                         = gmdate( 'Y-m-d H:i:s' );
+		$columns['date_updated_gmt'] = $now;
 
-		$set    = array();
-		$values = array();
-		foreach ( array_merge( $columns, array( 'date_updated_gmt' => $now ) ) as $column => $value ) {
-			if ( null === $value ) {
-				$set[] = "`{$column}` = NULL";
-			} else {
-				$set[]    = "`{$column}` = %s";
-				$values[] = $value;
-			}
-		}
-		$values[] = $id;
-		$values[] = $extension_slug;
-
-		$sql = "UPDATE {$table} p SET " . implode( ', ', $set ) . ' WHERE p.id = %d AND ' . self::OWNER_MATCH;
-
-		// Not `$wpdb->update()`: its WHERE cannot express the binary owner match. Column names come
-		// from the plan's own row data; every value is a placeholder.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
-		$updated = $wpdb->query( $wpdb->prepare( $sql, $values ) );
+		// A value that does not fit its column makes `$wpdb->update()` return false, so nothing is written.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$updated = $wpdb->update(
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
+			$columns,
+			array(
+				'id'             => $id,
+				'extension_slug' => $extension_slug,
+			),
+			null,
+			array( '%d', '%s' )
+		);
 
 		if ( false === $updated ) {
 			throw new \RuntimeException( sprintf( 'Failed to update plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );

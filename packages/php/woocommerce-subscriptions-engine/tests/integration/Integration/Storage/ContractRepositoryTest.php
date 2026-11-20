@@ -1117,6 +1117,18 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox find_due matches the owner exactly: a contract of a slug differing only in case is not selected.
+	 */
+	public function test_find_due_skips_a_case_variant_owner(): void {
+		$now     = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$owned   = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$variant = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_ENGINE, CycleStatus::BILLED, null, strtoupper( self::OWNER ) );
+
+		$this->assertSame( array( $owned ), $this->due_ids( $now, 50 ) );
+		$this->assertSame( array( $variant ), $this->due_ids( $now, 50, array( strtoupper( self::OWNER ) ) ) );
+	}
+
+	/**
 	 * @testdox find_due returns nothing when no owner is listed.
 	 */
 	public function test_find_due_returns_nothing_without_owners(): void {
@@ -2571,10 +2583,22 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( '1', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE creation_key = %s AND extension_slug = %s", 'order:42', 'lite' ) ) );
 
 		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'other-ext', 'order:42' ), 'checkout' ), 'Another extension may use the same key.' );
+		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'LITE', 'order:42' ), 'checkout' ), 'An owner differing only in case is another extension.' );
 		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', 'Order:42' ), 'checkout' ), 'Keys differing only in case are distinct.' );
 		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', 'ördér:42' ), 'checkout' ), 'Keys differing only in accents are distinct.' );
 		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', null ), 'checkout' ) );
 		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', null ), 'checkout' ), 'Null keys never collide.' );
+	}
+
+	/**
+	 * @testdox The creation-key fallback read matches the owner exactly.
+	 */
+	public function test_creation_key_fallback_read_matches_the_owner_exactly(): void {
+		$this->insert_released( $this->keyed_contract( 'lite', 'order:43' ) );
+
+		$this->assertTrue( $this->call_private( $this->sut, 'has_creation_key', 'lite', 'order:43' ) );
+		$this->assertFalse( $this->call_private( $this->sut, 'has_creation_key', 'LITE', 'order:43' ) );
+		$this->assertFalse( $this->call_private( $this->sut, 'has_creation_key', 'lite', 'ORDER:43' ) );
 	}
 
 	/**
