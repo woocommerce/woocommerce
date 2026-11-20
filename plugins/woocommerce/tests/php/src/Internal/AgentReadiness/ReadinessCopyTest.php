@@ -49,6 +49,7 @@ class ReadinessCopyTest extends WC_Unit_Test_Case {
 			$this->assertStringContainsString( 'Blue hoodie', ReadinessCopy::store_check( $id, '', 'Blue hoodie' )['found'], $id );
 			$this->assertStringNotContainsString( 'Blue hoodie', ReadinessCopy::store_check( $id )['found'], "{$id} without a name" );
 		}
+		$this->assertSame( 'On the Blue hoodie page, the code doesn’t include your returns policy, so AI assistants can’t tell shoppers whether they can return an item.', ReadinessCopy::store_check( 'product_return_policy_schema', '', 'Blue hoodie' )['found'], 'The returns line names the page, as the shipping and where-to-buy lines do' );
 	}
 
 	/**

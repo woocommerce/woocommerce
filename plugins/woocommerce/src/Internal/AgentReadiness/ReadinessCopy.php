@@ -69,6 +69,8 @@ final class ReadinessCopy {
 			/* translators: %s: product name. */
 			'product_buy_action_schema'      => __( 'On the %s page, the code doesn’t say where to buy it, so AI assistants can’t send shoppers there.', 'woocommerce' ),
 			/* translators: %s: product name. */
+			'product_return_policy_schema'   => __( 'On the %s page, the code doesn’t include your returns policy, so AI assistants can’t tell shoppers whether they can return an item.', 'woocommerce' ),
+			/* translators: %s: product name. */
 			'product_jsonld_from_core'       => __( 'On the %s page, product details appear twice in the code, so AI assistants may read a different name or price.', 'woocommerce' ),
 			/* translators: %s: product name. */
 			'product_jsonld_required_fields' => __( 'On the %s page, the name or image is missing from the page code, so AI assistants can’t show it for sale.', 'woocommerce' ),
