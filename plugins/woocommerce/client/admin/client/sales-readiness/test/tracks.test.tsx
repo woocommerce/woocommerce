@@ -437,6 +437,29 @@ describe( 'Sales readiness tracking', () => {
 	} );
 } );
 
+describe( 'AI tools overview connection card', () => {
+	beforeEach( () => mockedApiFetch.mockReset() );
+
+	it( 'offers Connect while the readiness view is still loading', () => {
+		mockedApiFetch.mockReturnValue( new Promise( () => {} ) );
+		render(
+			<SalesReadinessOverview
+				connect={ {
+					connected: false,
+					notice: '',
+					url: 'https://example.com/wp-admin/admin-post.php',
+					action: 'woocommerce_ai_tools_connect',
+					nonce: 'abc',
+				} }
+			/>
+		);
+
+		expect(
+			screen.getByRole( 'button', { name: 'Connect to WordPress.com' } )
+		).toBeInTheDocument();
+	} );
+} );
+
 describe( 'Sales readiness page', () => {
 	beforeEach( () => mockedApiFetch.mockReset() );
 

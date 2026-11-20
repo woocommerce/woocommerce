@@ -137,6 +137,9 @@ final class ReadinessCopy {
 		if ( 'open_graph_tags' === $id && '' !== $source ) {
 			$check[3] = self::open_graph_found( $source, $product );
 		}
+		if ( 'open_graph_tags' === $id && '' !== $source ) {
+			$check[3] = self::open_graph_found( $source, $product );
+		}
 		if ( 'llms_txt_links_resolve' === $id ) {
 			if ( '' !== $link ) {
 				/* translators: %s: the broken link without https://, such as example.com/old-sale. */

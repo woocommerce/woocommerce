@@ -137,6 +137,145 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Until the store is connected, the connection card posts the nonce-checked connect action.
+	 */
+	public function test_connect_view_posts_the_connect_action(): void {
+		remove_all_actions( 'admin_post_' . AgenticCommerceSettings::CONNECT_ACTION );
+		$this->sut->handle_init();
+		$this->assertNotFalse( has_action( 'admin_post_' . AgenticCommerceSettings::CONNECT_ACTION ), 'The tab registers the connect action' );
+
+		$view = AgenticCommerceSettings::connect_view();
+		$this->assertFalse( $view['connected'], 'The test site is not connected to WordPress.com' );
+		$this->assertSame( '', $view['notice'] );
+		$this->assertSame( admin_url( 'admin-post.php' ), $view['url'] );
+		$this->assertSame( AgenticCommerceSettings::CONNECT_ACTION, $view['action'] );
+		$this->assertStringNotContainsString( '_wpnonce', $view['url'] );
+		$this->assertSame( 1, wp_verify_nonce( $view['nonce'], AgenticCommerceSettings::CONNECT_ACTION ) );
+
+		$processor = new \WP_HTML_Tag_Processor( $this->render_page( '' ) );
+		$this->assertTrue(
+			$processor->next_tag(
+				array(
+					'tag_name'   => 'div',
+					'class_name' => 'wc-agent-readiness-overview',
+				)
+			),
+			'The Overview gets the card data'
+		);
+		$connect = json_decode( (string) $processor->get_attribute( 'data-connect' ), true );
+		$this->assertSame( $view, $connect );
+	}
+
+	/**
+	 * @testdox Coming back from a failed attempt, or a success flag on an unconnected store, shows the error.
+	 *
+	 * @testWith ["error", "error"]
+	 *           ["connected", "error"]
+	 *           ["other", ""]
+	 *
+	 * @param string $result What the URL says.
+	 * @param string $notice The notice the card shows.
+	 */
+	public function test_connect_view_notice( string $result, string $notice ): void {
+		$_GET[ AgenticCommerceSettings::CONNECT_RESULT ] = $result;
+		try {
+			$this->assertSame( $notice, AgenticCommerceSettings::connect_view()['notice'] );
+		} finally {
+			unset( $_GET[ AgenticCommerceSettings::CONNECT_RESULT ] );
+		}
+	}
+
+	/**
+	 * @testdox Only users who can manage WooCommerce can start a connection.
+	 */
+	public function test_connect_needs_manage_woocommerce(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( AgenticCommerceSettings::CONNECT_ACTION );
+		try {
+			$this->sut->handle_connect();
+			$this->fail( 'The connect action stops users who cannot manage WooCommerce' );
+		} catch ( \WPDieException $e ) {
+			$this->assertStringContainsString( 'not allowed to connect', $e->getMessage() );
+		} finally {
+			unset( $_REQUEST['_wpnonce'] );
+		}
+	}
+
+	/**
+	 * @testdox When the site can't register with WordPress.com, connecting returns to the Overview with an error.
+	 */
+	public function test_connect_redirect_returns_with_an_error_when_registration_fails(): void {
+		delete_option( 'jetpack_activation_source' );
+		$this->assertSame(
+			add_query_arg( AgenticCommerceSettings::CONNECT_RESULT, 'error', AgenticCommerceSettings::url() ),
+			AgenticCommerceSettings::connect_redirect()
+		);
+		$this->assertSame( array( 'woocommerce', 'ai-tools' ), get_option( 'jetpack_activation_source' ) );
+	}
+
+	/**
+	 * @testdox An activation source Jetpack already stored is left as it is.
+	 */
+	public function test_connect_redirect_keeps_an_existing_activation_source(): void {
+		update_option( 'jetpack_activation_source', array( 'woocommerce', 'onboarding' ) );
+		AgenticCommerceSettings::connect_redirect();
+		$this->assertSame( array( 'woocommerce', 'onboarding' ), get_option( 'jetpack_activation_source' ) );
+	}
+
+	/**
+	 * @testdox A source that is not a pair is replaced, because Jetpack unpacks the first two items.
+	 */
+	public function test_connect_redirect_replaces_an_activation_source_that_is_not_a_pair(): void {
+		update_option( 'jetpack_activation_source', array( 'woocommerce' ) );
+		AgenticCommerceSettings::connect_redirect();
+		$this->assertSame( array( 'woocommerce', 'ai-tools' ), get_option( 'jetpack_activation_source' ) );
+	}
+
+	/**
+	 * @testdox Only an https WordPress.com URL can be the connection redirect, and its scheme is lowercased.
+	 *
+	 * @testWith ["https://jetpack.wordpress.com/jetpack.authorize/1/?x=1", "https://jetpack.wordpress.com/jetpack.authorize/1/?x=1"]
+	 *           ["HTTPS://jetpack.wordpress.com/path", "https://jetpack.wordpress.com/path"]
+	 *           ["https://wordpress.com/jetpack/connect", "https://wordpress.com/jetpack/connect"]
+	 *           ["http://jetpack.wordpress.com/path", ""]
+	 *           ["https://evil.example/phish", ""]
+	 *           ["https://wordpress.com.evil.example/", ""]
+	 *           ["https://user@jetpack.wordpress.com/path", ""]
+	 *           ["", ""]
+	 *
+	 * @param string $url      Candidate redirect.
+	 * @param string $expected URL that may be followed.
+	 */
+	public function test_wordpress_com_https_url( string $url, string $expected ): void {
+		$this->assertSame( $expected, AgenticCommerceSettings::wordpress_com_https_url( $url ) );
+	}
+
+	/**
+	 * @testdox An authorization URL that leaves WordPress.com sends the merchant back to the Overview with an error.
+	 */
+	public function test_connect_redirect_rejects_an_offsite_authorization_url(): void {
+		delete_option( 'jetpack_activation_source' );
+		$property = new \ReflectionProperty( \Automattic\Jetpack\Connection\Manager::class, 'is_connected' );
+		$property->setAccessible( true );
+		$property->setValue( null, true );
+		add_filter(
+			'jetpack_build_authorize_url',
+			static function () {
+				return 'https://evil.example/phish';
+			}
+		);
+		try {
+			$this->assertSame(
+				add_query_arg( AgenticCommerceSettings::CONNECT_RESULT, 'error', AgenticCommerceSettings::url() ),
+				AgenticCommerceSettings::connect_redirect()
+			);
+		} finally {
+			remove_all_filters( 'jetpack_build_authorize_url' );
+			$property->setValue( null, null );
+		}
+	}
+
+	/**
 	 * @testdox Before the first scan the page asks for one instead of showing counts; dropdowns list published pages only.
 	 */
 	public function test_output_without_report(): void {
@@ -1331,14 +1470,14 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$stored['truncated'] = true;
 		update_option( AgentReadiness::REPORT_OPTION, $stored );
 		$this->assertSame(
-			sprintf( 'Product checks covered the %s products you updated most recently. Store conditions and discovery checks covered your whole store; Product details still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			sprintf( 'Product checks covered the %s products you updated most recently. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
 			$this->view()['checked_note'],
 			'A report without the total keeps the short note'
 		);
 		$stored['available'] = 8400;
 		update_option( AgentReadiness::REPORT_OPTION, $stored );
 		$this->assertSame(
-			sprintf( 'Product checks covered the %s products you updated most recently, out of 8,400. Store conditions and discovery checks covered your whole store; Product details still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			sprintf( 'Product checks covered the %s products you updated most recently, out of 8,400. Store conditions covered your whole store. Product details, and some Search and discovery checks, still sample product pages.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
 			$this->view()['checked_note'],
 			'With the total from the same scan'
 		);

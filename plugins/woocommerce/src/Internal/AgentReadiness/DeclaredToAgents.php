@@ -76,6 +76,8 @@ class DeclaredToAgents {
 	 * Where an item lives, for grouping on the page: 'root' for a file in the site's root folder,
 	 * 'address' for one under /.well-known, 'code' for page markup, headers and Markdown versions.
 	 *
+	 * @since 11.4.0
+	 *
 	 * @param string $id Item id.
 	 */
 	public static function group( string $id ): string {
