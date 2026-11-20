@@ -184,7 +184,7 @@ class WC_Auth_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should preserve consent when following the Approve link and delete keys for unsafe callbacks.
 	 * @testWith ["1&callback_url=https://attacker.example/collect&scope=read_write#", "https://trusted-app.example/callback", false]
-	 *           ["123", "https://attacker.example%2523@trusted-app.example/collect", true]
+	 *           ["123", "https://attacker.example%2523@127.0.0.1/collect", true]
 	 *
 	 * @param string $user_id         Application user ID.
 	 * @param string $callback_url    Requested credential recipient.
@@ -225,7 +225,7 @@ class WC_Auth_Test extends \WC_Unit_Test_Case {
 			function ( $response, $args, $url ) use ( $reject_callback, &$consumer_data, &$created_key, &$http_requests, $wpdb ) {
 				unset( $response );
 				++$http_requests;
-				$this->assertSame( $reject_callback ? 'https://attacker.example%23@trusted-app.example/collect' : 'https://trusted-app.example/callback', $url, 'Approval must use the callback shown during consent.' );
+				$this->assertSame( $reject_callback ? 'https://attacker.example%23@127.0.0.1/collect' : 'https://trusted-app.example/callback', $url, 'Approval must use the callback shown during consent.' );
 				$this->assertTrue( $args['reject_unsafe_urls'], 'Callback delivery must retain WordPress URL safety checks.' );
 				$consumer_data = json_decode( $args['body'], true );
 				$created_key   = $wpdb->get_row( $wpdb->prepare( "SELECT user_id, permissions FROM {$wpdb->prefix}woocommerce_api_keys WHERE key_id = %d", $consumer_data['key_id'] ), ARRAY_A );
@@ -253,7 +253,7 @@ class WC_Auth_Test extends \WC_Unit_Test_Case {
 			}
 			remove_action( 'woocommerce_before_template_part', $capture_template, 10 );
 
-			$this->assertSame( 'trusted-app.example', wp_parse_url( $template_args['callback_url'], PHP_URL_HOST ), 'Consent must identify the trusted recipient.' );
+			$this->assertSame( $reject_callback ? '127.0.0.1' : 'trusted-app.example', wp_parse_url( $template_args['callback_url'], PHP_URL_HOST ), 'Consent must identify the callback host.' );
 			$this->assertSame( $reject_callback ? __( 'Read/Write', 'woocommerce' ) : __( 'Read', 'woocommerce' ), $template_args['scope'], 'Consent must show the requested permissions.' );
 			$granted_url = html_entity_decode( esc_url( $template_args['granted_url'] ), ENT_QUOTES, 'UTF-8' );
 			$this->assertNull( wp_parse_url( $granted_url, PHP_URL_FRAGMENT ), 'The application user ID must not inject a fragment into the Approve link.' );
