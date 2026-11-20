@@ -116,6 +116,105 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The guard exists because an address the cart judges incomplete leaves no packages for
+	 * validate_selected_shipping_methods() to inspect, so without it an order is placed with no
+	 * shipping line. It mirrors WC_Checkout::is_shipping_withheld_for_missing_address().
+	 *
+	 * @testdox validate_order_before_payment() refuses an order whose shipping was withheld.
+	 */
+	public function test_validate_order_before_payment_refuses_withheld_shipping(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone();
+		$this->add_product_to_cart_without_rating_shipping();
+
+		// The message, not just the type: validate_selected_shipping_methods() throws the same
+		// RouteException with the same error code, so only the wording tells the two apart.
+		$this->expectException( RouteException::class );
+		$this->expectExceptionMessage( 'Please enter an address to continue.' );
+		$this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() );
+	}
+
+	/**
+	 * The case that matters most in production: once the cart has rated an address, nothing may
+	 * refuse the order, or every checkout on a store with the option enabled would fail.
+	 *
+	 * @testdox validate_order_before_payment() allows an order whose cart has rated the address.
+	 */
+	public function test_validate_order_before_payment_allows_a_rated_cart(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone( '25.00' );
+
+		// A complete customer address, so the cart rates the package and picks the rate itself.
+		WC()->customer->set_shipping_city( 'San Francisco' );
+		WC()->customer->set_shipping_postcode( '94103' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$this->assertTrue(
+			WC()->cart->has_calculated_shipping(),
+			'The cart must have rated the address, or this test proves nothing.'
+		);
+
+		$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+	}
+
+	/**
+	 * With the option off, shipping is never withheld for the address, so a cart with no rate is
+	 * a store with no method configured, not a shopper slipping past one.
+	 *
+	 * @testdox validate_order_before_payment() allows an unrated cart when the option is off.
+	 */
+	public function test_validate_order_before_payment_allows_an_unrated_cart_when_the_option_is_off(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
+
+		// Deliberately no shipping method: with the option off that is the only way a cart that
+		// needs shipping reaches checkout with nothing rated.
+		$this->add_product_to_cart_without_rating_shipping();
+
+		$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+	}
+
+	/**
+	 * @testdox validate_order_before_payment() allows a cart that does not need shipping.
+	 */
+	public function test_validate_order_before_payment_allows_a_cart_that_does_not_need_shipping(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_virtual( true );
+		$product->save();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$this->assertFalse( WC()->cart->needs_shipping() );
+
+		$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+	}
+
+	/**
+	 * A store that switches shipping calculation off through the filter withholds rates for its
+	 * own reasons, so the order must go through, as it does on the classic checkout.
+	 *
+	 * @testdox validate_order_before_payment() allows an order when the filter stops calculation.
+	 */
+	public function test_validate_order_before_payment_allows_shipping_calculation_disabled_by_filter(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone();
+
+		$filter = function () {
+			return false;
+		};
+		add_filter( 'woocommerce_cart_ready_to_calc_shipping', $filter );
+
+		try {
+			$this->add_product_to_cart_without_rating_shipping();
+			$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+		} finally {
+			remove_filter( 'woocommerce_cart_ready_to_calc_shipping', $filter );
+		}
+	}
+
+	/**
 	 * test_validate_order_before_payment_invalid_coupon_usage_limit.
 	 */
 	public function test_validate_order_before_payment_invalid_coupon_usage_limit() {
@@ -690,6 +789,55 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		$this->set_shipping_address( $order, $shipping_address );
 		$order->save();
 		$this->assertTrue( $order->needs_shipping(), 'The order must need shipping for the country check to apply.' );
+
+		return $order;
+	}
+
+	/**
+	 * Add a flat rate to the catch-all zone, optionally with a cost so it actually offers a rate.
+	 *
+	 * @param string $cost Flat rate cost. The default leaves the rate off, as an unconfigured method is.
+	 */
+	private function add_flat_rate_to_default_zone( string $cost = '' ): void {
+		$default_zone = \WC_Shipping_Zones::get_zone( 0 );
+		$default_zone->add_shipping_method( 'flat_rate' );
+		$default_zone->save();
+
+		if ( '' === $cost ) {
+			return;
+		}
+
+		$zone_methods                         = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
+		$flat_rate                            = reset( $zone_methods );
+		$flat_rate->instance_settings['cost'] = $cost;
+		update_option( $flat_rate->get_instance_option_key(), $flat_rate->instance_settings );
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping()->load_shipping_methods();
+	}
+
+	/**
+	 * Put the cart in the state the bug produced: a shippable product, a method left in the
+	 * session by an earlier request, and no package ever rated, so the shipping-method check has
+	 * nothing to reject.
+	 */
+	private function add_product_to_cart_without_rating_shipping(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->assertFalse( WC()->cart->has_calculated_shipping() );
+
+		// Any value will do: with no packages calculated, only its presence is checked.
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate:1' ) );
+	}
+
+	/**
+	 * An order carrying the complete address validate_addresses() asks for, so the shipping guard
+	 * is the only thing left that can refuse it.
+	 */
+	private function create_order_with_full_shipping_address(): \WC_Order {
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address( $order );
+		$order->save();
 
 		return $order;
 	}

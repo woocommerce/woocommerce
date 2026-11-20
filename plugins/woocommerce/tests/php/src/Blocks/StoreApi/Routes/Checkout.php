@@ -2304,6 +2304,81 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * A town of "0" is a value, so the cart must rate the address and the order must carry a
+	 * shipping line. On trunk this same request stores an order with no shipping line at all.
+	 * The guard is not exercised here, by design: once the address rates, it returns immediately.
+	 *
+	 * @testdox A shipping city of "0" is checked out with shipping charged.
+	 */
+	public function test_checkout_charges_shipping_for_a_city_of_zero() {
+		$fixtures = new FixtureData();
+
+		// Load bearing: setUp() enables pickup, and with it on, show_shipping() returns before it
+		// ever looks at the address, so the cart would rate "0" on trunk too and this regression
+		// test would quietly stop testing anything.
+		$fixtures->shipping_remove_pickup_location();
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+
+		// setUp() adds the rate instance but leaves it free, and a free rate cannot show the
+		// difference between charging shipping and skipping it.
+		$zone_methods = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
+		$flat_rate    = reset( $zone_methods );
+
+		$flat_rate->instance_settings['cost'] = '25.00';
+		update_option( $flat_rate->get_instance_option_key(), $flat_rate->instance_settings );
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping()->load_shipping_methods();
+
+		// Rate a complete address first, so a chosen method sits in the session the way the block
+		// checkout leaves it before the shopper submits.
+		wc()->customer->set_shipping_country( 'US' );
+		wc()->customer->set_shipping_state( 'CA' );
+		wc()->customer->set_shipping_city( 'San Francisco' );
+		wc()->customer->set_shipping_postcode( '94103' );
+		wc()->cart->calculate_totals();
+
+		$packages = wc()->shipping()->get_packages();
+		$rates    = array_keys( $packages[0]['rates'] ?? array() );
+		$this->assertNotEmpty( $rates, 'The store must offer a rate, or this test proves nothing.' );
+		wc()->session->set( 'chosen_shipping_methods', array( $rates[0] ) );
+
+		wc()->session->set_customer_session_cookie( true );
+		wc()->session->save_data();
+
+		$address = array(
+			'first_name' => 'Gina',
+			'last_name'  => 'Guest',
+			'company'    => '',
+			'address_1'  => '17 Private Lane',
+			'address_2'  => '',
+			'city'       => '0',
+			'state'      => 'CA',
+			'postcode'   => '94103',
+			'country'    => 'US',
+			'email'      => 'gina.guest@example.test',
+			'phone'      => '',
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => $address,
+				'shipping_address' => $address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+
+		$order = wc_get_order( $data['order_id'] );
+		$this->assertCount( 1, $order->get_items( 'shipping' ), 'A town of "0" must still be charged shipping.' );
+		$this->assertGreaterThan( 0, (float) $order->get_shipping_total(), 'The shipping total must not be zero.' );
+	}
+
+	/**
 	 * Test deny guest checkout when registration during checkout is disabled,
 	 * guest checkout is disabled and the user is not logged in.
 	 */
