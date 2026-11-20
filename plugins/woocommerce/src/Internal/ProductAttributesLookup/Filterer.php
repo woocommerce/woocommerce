@@ -324,16 +324,14 @@ class Filterer {
 						// Taxonomy lets the query use the lookup index. Term IDs are unique, so it does not change which rows match.
 						// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
 						// (causes the filtering subquery to be executed only once).
-						$query['where'] .= $wpdb->prepare(
-							"
+						$taxonomy_clause = $wpdb->prepare( 'taxonomy = %s', $filter_taxonomy );
+						$query['where'] .= "
 							AND product_or_parent_id IN ( SELECT product_or_parent_id FROM (
 								SELECT product_or_parent_id
 								FROM {$this->lookup_table_name} lt
-								WHERE taxonomy = %s AND term_id IN {$term_ids_list}
+								WHERE {$taxonomy_clause} AND term_id IN {$term_ids_list}
 								{$in_stock_clause}
-							) temp )",
-							$filter_taxonomy
-						);
+							) temp )";
 						continue;
 					}
 
