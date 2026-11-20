@@ -63,7 +63,7 @@
 		"lint:ci": "pnpm run lint:js && pnpm run lint:css",
 		"lint:css": "stylelint '**/*.scss' --cache --cache-location=node_modules/.cache/stylelint",
 		"lint:css-fix": "stylelint '**/*.scss' --fix",
-		"lint:js": "WP_EXPERIMENTAL_MODULES=true wp-scripts lint-js --cache --cache-location=node_modules/.cache/eslint",
+		"lint:js": "wp-scripts lint-js --cache --cache-location=node_modules/.cache/eslint",
 		"lint:js:report": "pnpm run lint:js -- --output-file eslint_report.json --format json",
 		"lint:js-fix": "pnpm lint:js --fix",
 		"lint:md:docs": "wp-scripts lint-md-docs",
@@ -86,7 +86,7 @@
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "node bin/rolldown/watch.mjs",
-		"knip": "WP_EXPERIMENTAL_MODULES=true knip"
+		"knip": "knip"
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "4.0.0",
@@ -313,14 +313,5 @@
 				}
 			]
 		}
-	},
-	"knip": {
-		"entry": [
-			"assets/js/**/index.{ts,tsx,jsx,js}!"
-		],
-		"project": [
-			"assets/js/**/*.{ts,tsx,jsx,js}!",
-			"!assets/js/**/test/**/*.{ts,tsx,jsx,js}"
-		]
 	}
 }

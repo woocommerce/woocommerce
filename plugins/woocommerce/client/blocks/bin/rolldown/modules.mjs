@@ -18,7 +18,7 @@ const { scriptModuleEntries } = blocksRequire(
 );
 const { genericBlocks } = blocksRequire( './bin/entries.js' );
 
-const moduleEntries = {
+export const moduleEntries = {
 	...scriptModuleEntries,
 	'woocommerce/product-elements':
 		'./assets/js/blocks/product-elements-blocks/frontend.ts',
