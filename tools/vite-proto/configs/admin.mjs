@@ -147,7 +147,6 @@ export function adminConfig( { outDir = OUT, production = true, css, only = null
 		target: TARGET,
 		entries: entries().filter( ( entry ) => ! only || only.includes( entry.name ) ),
 		injectPolyfill: false,
-		strict: process.env.WC_STRICT !== '0',
 		publicPath: 'auto',
 		extensions: [ '.json', '.js', '.jsx', '.ts', '.tsx' ],
 		alias: {
@@ -231,6 +230,7 @@ export function adminConfig( { outDir = OUT, production = true, css, only = null
 		],
 		css: {
 			// A lazy chunk with styles gets a stylesheet the loader adds.
+			bytes: async ( marks ) => ( await css.join( marks ) ).length,
 			lazyFile: ( out, hasStyles ) =>
 				hasStyles ? out.replace( /\.js$/, '.style.css' ) : null,
 			async plan( { ctx, info, outputs, closure, emit, rootModules } ) {

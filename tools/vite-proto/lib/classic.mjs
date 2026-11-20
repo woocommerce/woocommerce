@@ -27,6 +27,7 @@ import { parseAst, parseAstAsync } from 'rolldown/parseAst';
 import MagicString, { Bundle } from 'magic-string';
 import remapping from '@jridgewell/remapping';
 import { styleMark, isStyle } from './css.mjs';
+import { propTypesPlugin } from './prop-types.mjs';
 
 // An external becomes `require( 'wc-g:wp.data' )`; the runtime reads the global.
 const EXTERNAL = 'wc-g:';
@@ -431,11 +432,14 @@ async function link( ctx, bundle, config, state ) {
 			}
 			seen.add( current );
 			stack.push( ...item.chunk.imports );
-			if (
-				item.kind === 'common' &&
-				! lazyFile.has( current ) &&
-				item.code.length >= config.splitCommon.minBytes
-			) {
+			// Webpack checks the size of each kind of code on its own, so
+			// shared styles over the limit get their own file too.
+			const big = async () =>
+				item.code.length >= config.splitCommon.minBytes ||
+				( item.css.length > 0 &&
+					config.css?.bytes &&
+					( await config.css.bytes( item.css ) ) >= config.splitCommon.minBytes );
+			if ( item.kind === 'common' && ! lazyFile.has( current ) && ( await big() ) ) {
 				const modules = Object.keys( item.chunk.modules )
 					.map( ( id ) => path.relative( config.root, id ) )
 					.sort();
@@ -513,7 +517,13 @@ async function link( ctx, bundle, config, state ) {
 			if ( ! isRoot && held?.has( current ) && item.kind !== 'named' ) {
 				return;
 			}
-			if ( kind !== 'entry' && ! isRoot && splitFile.has( current ) ) {
+			// A chunk that has its own file (a split file, or another lazy
+			// file) is loaded, not copied, as webpack does.
+			if (
+				kind !== 'entry' &&
+				! isRoot &&
+				( splitFile.has( current ) || lazyFile.has( current ) )
+			) {
 				split.push( current );
 				return;
 			}
@@ -836,7 +846,11 @@ export function rolldownOptions( config, state ) {
 		// turns those into undefined exports; do the same.
 		shimMissingExports: true,
 		preserveEntrySignatures: false,
-		plugins: [ ...( config.plugins || [] ), classicPlugin( config, state ) ],
+		plugins: [
+			...( config.plugins || [] ),
+			production && ! config.cssOnly && propTypesPlugin(),
+			classicPlugin( config, state ),
+		].filter( Boolean ),
 		resolve: {
 			alias: config.alias,
 			conditionNames: [
