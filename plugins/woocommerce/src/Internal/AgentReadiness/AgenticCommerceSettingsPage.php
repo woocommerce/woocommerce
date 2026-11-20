@@ -187,10 +187,11 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 
 	/**
 	 * A view as JSON for a data attribute. The hex flags encode &, quotes, < and > inside its strings, so
-	 * an entity in a page or product name, such as &quot;, which esc_attr() leaves as it is, can't
-	 * decode to a quote that ends a JSON string.
+	 * an entity already in a value, such as &quot;, which esc_attr() leaves as it is, can't decode to a
+	 * quote that ends a JSON string.
 	 *
 	 * @param array<string, mixed> $view View data.
+	 * @return string JSON for the attribute.
 	 */
 	private static function view_json( array $view ): string {
 		return (string) wp_json_encode( $view, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT );

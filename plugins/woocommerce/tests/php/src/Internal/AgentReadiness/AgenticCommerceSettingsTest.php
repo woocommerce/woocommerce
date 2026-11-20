@@ -2195,7 +2195,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A page title with HTML entities stays a page name in the view, and can't end the JSON and add its own data.
+	 * @testdox An entity in a page title or a check label stays inside the JSON, and the attribute leaves no & for the browser to decode.
 	 */
 	public function test_page_title_with_entities_stays_inside_the_view(): void {
 		$title  = 'Returns &quot;}, &quot;z&quot;: {&quot;a&quot;: &quot; &amp; &lt;b&gt; <i>';
@@ -2212,13 +2212,30 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$view   = $this->shopping();
 		$labels = array_merge( ...array_map( static fn( array $field ): array => array_column( $field['options'], 'label' ), $view['policies']['fields'] ) );
 		$this->assertContains( self::plain_apostrophes( $stored ), array_map( array( self::class, 'plain_apostrophes' ), $labels ), 'The title is a page name in each policy field' );
-		$this->assertArrayNotHasKey( 'z', $view, 'It adds nothing to the view' );
 
-		update_option( 'blogname', 'Blue &quot;}, &amp; Co' );
+		// ReadinessCopy has no wording for this check, so the stored label is what the Overview shows.
+		$label = 'Blue &quot;}, &amp; Co <i>';
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'checks'       => array(
+					array(
+						'id'    => 'entity_in_label',
+						'count' => 1,
+						'label' => $label,
+					),
+				),
+			),
+			false
+		);
 		preg_match( '#data-view="([^"]+)"#', $this->render_page( '' ), $match );
+		$this->assertStringNotContainsString( '&amp;', $match[1] ?? '', 'No & from the view is left for the browser to decode' );
 		$overview = json_decode( html_entity_decode( $match[1] ?? '', ENT_QUOTES ), true );
-		$this->assertIsArray( $overview, 'The Overview view still reads as JSON with an entity in a name' );
-		$this->assertStringNotContainsString( '&amp;', $match[1] ?? '', 'No & from the names is left for the browser to decode' );
+		$this->assertIsArray( $overview, 'The Overview view still reads as JSON' );
+		$products = current( array_filter( $overview['sections'], static fn( array $section ): bool => 'products' === $section['id'] ) );
+		$this->assertIsArray( $products, 'The Overview lists product checks' );
+		$this->assertContains( $label, array_column( $products['rows'], 'title' ), 'A check label with entities stays a label in the Overview' );
 	}
 
 	/**
