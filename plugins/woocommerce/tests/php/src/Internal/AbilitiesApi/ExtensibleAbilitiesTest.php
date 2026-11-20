@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
+use Automattic\WooCommerce\Internal\Abilities\ExtensibleAbilitiesRegistry;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
@@ -1138,7 +1139,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_every_core_resource_has_a_prime_test(): void {
 		AbilitiesLoader::register_core_resources();
-		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
+		$resources = new \ReflectionProperty( ExtensibleAbilitiesRegistry::class, 'resources' );
 		$resources->setAccessible( true );
 
 		$covered = array_merge( array_keys( $this->provide_list_abilities() ), array( 'order', 'order_item' ) );
@@ -1394,7 +1395,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		ExtensibleAbilities::register_resource( 'late_resource' );
 
-		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
+		$resources = new \ReflectionProperty( ExtensibleAbilitiesRegistry::class, 'resources' );
 		$resources->setAccessible( true );
 		$this->assertSame( array( 'product', 'order', 'order_item', 'product_term', 'product_review', 'customer' ), array_keys( $resources->getValue() ) );
 	}
@@ -1407,7 +1408,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		ExtensibleAbilities::register_resource( '42' );
 
-		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
+		$resources = new \ReflectionProperty( ExtensibleAbilitiesRegistry::class, 'resources' );
 		$resources->setAccessible( true );
 		$this->assertSame( array(), $resources->getValue() );
 	}
@@ -1572,7 +1573,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilitiesRegistry::get_fields( 'order' ) );
 	}
 
 	/**
@@ -1620,7 +1621,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilitiesRegistry::get_fields( 'order' ) );
 		$this->assertSame(
 			array( 'type' => 'object' ),
 			ExtensibleAbilities::add_query_filters_schema( array( 'type' => 'object' ), 'order' )
@@ -1673,7 +1674,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilitiesRegistry::get_fields( 'order' ) );
 	}
 
 	/**
@@ -1695,7 +1696,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilitiesRegistry::get_fields( 'order' ) );
 	}
 
 	/**
@@ -1753,7 +1754,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertArrayHasKey( 'value', ExtensibleAbilities::get_fields( 'order' )['nested'] ?? array() );
+		$this->assertArrayHasKey( 'value', ExtensibleAbilitiesRegistry::get_fields( 'order' )['nested'] ?? array() );
 	}
 
 	/**
@@ -1799,7 +1800,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilitiesRegistry::get_fields( 'order' ) );
 	}
 
 	/**
@@ -1871,7 +1872,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertArrayHasKey( 'value', ExtensibleAbilities::get_fields( 'order' )['nested'] ?? array() );
+		$this->assertArrayHasKey( 'value', ExtensibleAbilitiesRegistry::get_fields( 'order' )['nested'] ?? array() );
 	}
 
 	/**
@@ -2303,7 +2304,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			ExtensibleAbilities::register_field( $base + $args );
 		}
 
-		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilitiesRegistry::get_fields( 'order' ) );
 	}
 
 	/**
@@ -4237,7 +4238,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertNotEmpty( ExtensibleAbilities::get_syncs( 'product' ) );
+		$this->assertNotEmpty( ExtensibleAbilitiesRegistry::get_syncs( 'product' ) );
 		$this->assertSame( 'Pencil', $output['product']['name'] );
 		$this->assertSame( 0, $fired );
 	}
@@ -4269,7 +4270,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->reset_registries();
 		AbilitiesLoader::init_extensions();
 
-		$this->assertEmpty( ExtensibleAbilities::get_syncs( 'refund' ) );
+		$this->assertEmpty( ExtensibleAbilitiesRegistry::get_syncs( 'refund' ) );
 	}
 
 	/**
@@ -7006,7 +7007,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertNotEmpty( ExtensibleAbilities::get_validators( 'product' ) );
+		$this->assertNotEmpty( ExtensibleAbilitiesRegistry::get_validators( 'product' ) );
 		$this->assertSame( 'Pencil', $output['product']['name'] );
 	}
 
@@ -7041,8 +7042,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->reset_registries();
 		AbilitiesLoader::init_extensions();
 
-		$this->assertEmpty( ExtensibleAbilities::get_validators( 'order' ) );
-		$this->assertEmpty( ExtensibleAbilities::get_validators( 'refund' ) );
+		$this->assertEmpty( ExtensibleAbilitiesRegistry::get_validators( 'order' ) );
+		$this->assertEmpty( ExtensibleAbilitiesRegistry::get_validators( 'refund' ) );
 	}
 
 	/**
@@ -7061,7 +7062,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEmpty( ExtensibleAbilities::get_validators( 'order' ) );
+		$this->assertEmpty( ExtensibleAbilitiesRegistry::get_validators( 'order' ) );
 	}
 
 	/**
@@ -7319,12 +7320,12 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		global $wp_actions;
 
 		foreach ( array( 'fields', 'validators', 'syncs', 'primes', 'filters' ) as $property ) {
-			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
+			$reflection = new \ReflectionProperty( ExtensibleAbilitiesRegistry::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );
 		}
 
-		$reflection = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
+		$reflection = new \ReflectionProperty( ExtensibleAbilitiesRegistry::class, 'resources' );
 		$reflection->setAccessible( true );
 		$reflection->setValue( null, array() );
 

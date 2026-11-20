@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Internal\Abilities\ExtensibleAbilitiesRegistry;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -417,7 +418,7 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	public function test_extension_fields_and_filters(): void {
 		$saved = array();
 		foreach ( array( 'resources', 'fields', 'filters' ) as $name ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property = new \ReflectionProperty( ExtensibleAbilitiesRegistry::class, $name );
 			$property->setAccessible( true );
 			$saved[ $name ] = $property->getValue();
 			$property->setValue( null, array() );
@@ -478,7 +479,7 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 			$this->assertSame( $schema, CustomersQuery::get_registration_args()['output_schema'] );
 		} finally {
 			foreach ( $saved as $name => $value ) {
-				$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+				$property = new \ReflectionProperty( ExtensibleAbilitiesRegistry::class, $name );
 				$property->setAccessible( true );
 				$property->setValue( null, $value );
 			}

@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
+use Automattic\WooCommerce\Internal\Abilities\ExtensibleAbilitiesRegistry;
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
@@ -226,7 +227,7 @@ abstract class ActionableAbility extends Ability {
 		$objects = array( array( $subject, $updates, $this->get_resource() ) );
 		foreach ( (array) $changed as $secondary ) {
 			$resource_name = $secondary[2] ?? $this->get_resource();
-			if ( $enabled && ! ExtensibleAbilities::is_resource_registered( $resource_name ) ) {
+			if ( $enabled && ! ExtensibleAbilitiesRegistry::is_resource_registered( $resource_name ) ) {
 				wc_doing_it_wrong(
 					get_class( $this ) . '::change',
 					sprintf(
@@ -304,7 +305,7 @@ abstract class ActionableAbility extends Ability {
 
 		$response = $this->prepare_response( $subject );
 		if ( is_wp_error( $response ) ) {
-			return ExtensibleAbilities::saved_write_error( $response, $this->get_resource(), $subject->get_id() );
+			return ExtensibleAbilitiesRegistry::saved_write_error( $response, $this->get_resource(), $subject->get_id() );
 		}
 
 		return $response;
@@ -339,7 +340,7 @@ abstract class ActionableAbility extends Ability {
 			'input'   => $input,
 		);
 		foreach ( array_unique( $resources ) as $resource_name ) {
-			foreach ( ExtensibleAbilities::get_syncs( $resource_name ) as $args ) {
+			foreach ( ExtensibleAbilitiesRegistry::get_syncs( $resource_name ) as $args ) {
 				$rejected = self::run_callback( $args['callback'], array( $saved, $this, $context ), array( 'namespace' => $args['namespace'] ) );
 				if ( null !== $rejected ) {
 					return $rejected;
@@ -436,7 +437,7 @@ abstract class ActionableAbility extends Ability {
 	 * @return string[]
 	 */
 	protected static function describe_bad_fields( $values, string $resource_name, ?callable $field_filter = null ): array {
-		$registered = ExtensibleAbilities::get_fields( $resource_name );
+		$registered = ExtensibleAbilitiesRegistry::get_fields( $resource_name );
 		$refusals   = array();
 		foreach ( is_array( $values ) ? $values : array() as $namespace => $fields ) {
 			if ( ! isset( $registered[ $namespace ] ) ) {
@@ -525,7 +526,7 @@ abstract class ActionableAbility extends Ability {
 	 * @return array|\WP_Error A list of field arguments and value pairs, or a WP_Error when a value is rejected.
 	 */
 	private function prepare_fields( array $values, string $resource_name ) {
-		$registered = ExtensibleAbilities::get_fields( $resource_name );
+		$registered = ExtensibleAbilitiesRegistry::get_fields( $resource_name );
 		$updates    = array();
 		foreach ( $values as $namespace => $fields ) {
 			foreach ( (array) $fields as $field => $value ) {
@@ -564,14 +565,14 @@ abstract class ActionableAbility extends Ability {
 	 */
 	private function apply_fields( $subject, array $updates, \WP_Error $refused ): void {
 		foreach ( $updates as $param => list( $args, $value ) ) {
-			if ( ! ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
+			if ( ! ExtensibleAbilitiesRegistry::field_applies_to( $args, $subject ) ) {
 				$rejected = new \WP_Error(
 					'woocommerce_ability_field_object_type',
 					sprintf(
 						/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
 						__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
 						$param,
-						ExtensibleAbilities::get_object_type( $subject ),
+						ExtensibleAbilitiesRegistry::get_object_type( $subject ),
 						implode( ', ', $args['object_types'] )
 					),
 					array( 'status' => 400 )
@@ -595,7 +596,7 @@ abstract class ActionableAbility extends Ability {
 	 * @param \WP_Error $refused       Collects the refusals.
 	 */
 	private function validate( $subject, string $resource_name, array $context, \WP_Error $refused ): void {
-		foreach ( ExtensibleAbilities::get_validators( $resource_name ) as $args ) {
+		foreach ( ExtensibleAbilitiesRegistry::get_validators( $resource_name ) as $args ) {
 			$rejected = self::run_callback( $args['callback'], array( $subject, $this, $context ), array( 'namespace' => $args['namespace'] ) );
 			if ( null !== $rejected ) {
 				self::add_refusal( $rejected, $args['namespace'], $refused );
