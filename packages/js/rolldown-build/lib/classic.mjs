@@ -730,7 +730,13 @@ async function link( ctx, bundle, config, state ) {
 						)
 					);
 					if ( cssFile ) {
-						manifest[ key ].push( [ cssFile, cssFile, 1 ] );
+						// The version makes browsers and CDNs fetch a changed stylesheet.
+						const ver = cssVersion.get( f );
+						manifest[ key ].push( [
+							cssFile,
+							ver ? `${ cssFile }?ver=${ ver }` : cssFile,
+							1,
+						] );
 					}
 				}
 			}
@@ -832,6 +838,26 @@ async function link( ctx, bundle, config, state ) {
 	};
 	const versionOf = ( out ) => hash( codeOf( out ) );
 
+	// The stylesheet version of each lazy or split file, for the lazy file
+	// maps that entries hold. Rendering is synchronous, so compute it first.
+	const cssVersion = new Map();
+	if ( config.css?.version ) {
+		for ( const [ file, item ] of info ) {
+			if (
+				item.kind !== 'entry' &&
+				item.kind !== 'named' &&
+				outFile( item )
+			) {
+				const marks = closure( [ file ] ).inline.flatMap(
+					( c ) => info.get( c ).css
+				);
+				if ( marks.length ) {
+					cssVersion.set( file, await config.css.version( marks ) );
+				}
+			}
+		}
+	}
+
 	// A split file is only needed when an entry's lazy file map lists it.
 	// When every entry that reaches it already carries its code, nothing
 	// loads it, so it is not written.
@@ -840,7 +866,9 @@ async function link( ctx, bundle, config, state ) {
 		.filter( ( output ) => output.kind === 'entry' )
 		.map( ( output ) => codeOf( output.out ) );
 	for ( const out of splitOuts ) {
-		if ( ! entryCode.some( ( code ) => code.includes( `${ out }?ver=` ) ) ) {
+		if (
+			! entryCode.some( ( code ) => code.includes( `${ out }?ver=` ) )
+		) {
 			outputs.delete( out );
 		}
 	}

@@ -309,6 +309,8 @@ export function adminConfig( {
 		css: {
 			// A lazy chunk with styles gets a stylesheet the loader adds.
 			bytes: async ( marks ) => ( await css.join( marks ) ).length,
+			version: async ( marks ) =>
+				version( await css.join( [ ...marks ].sort() ) ),
 			lazyFile: ( out, hasStyles ) =>
 				hasStyles ? out.replace( /\.js$/, '.style.css' ) : null,
 			async plan( { ctx, info, outputs, closure, emit, rootModules } ) {
