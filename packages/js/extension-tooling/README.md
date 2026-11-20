@@ -80,6 +80,16 @@ module.exports = defineConfig( playwrightDefaults( {
 
 Use the second config to set suite-specific projects, worker limits, storage state, and overrides.
 
+### Wait for cart and checkout updates
+
+Call `await waitForCheckoutUpdates( page )` using `@woocommerce/extension-tooling/wait-for-checkout-updates` to wait for active jQuery requests and pending WooCommerce cart and checkout store updates. For actions that schedule a later update, wait for the expected response or UI change in the test.
+
+### Filter PHP debug logs
+
+Use `@woocommerce/extension-tooling/php-warning-filter` with the log text and the path fragments for the tested plugins. The filter returns matching PHP errors, warnings, notices and deprecations. The extension reads the log and checks the result in its warnings project.
+
+For suites that verify the debug log is connected to WordPress, map `./node_modules/@woocommerce/extension-tooling/bin/e2e-log-marker.php` to `wp-content/mu-plugins/e2e-log-marker.php` in the browser test environment. A request with `?e2e_log_marker=test-id` writes `e2e-log-marker-test-id` to the PHP log. Install the marker only on test sites.
+
 ## Webpack
 
 Import the helpers from the extension's webpack configuration. Keep the entry paths, output paths and match patterns in that configuration.
@@ -133,6 +143,12 @@ pnpm run wp-env:e2e run cli bash wp-content/woo-extension-tooling/provision-e2e-
 ```
 
 The site needs Storefront, WooCommerce, and the extension's `WC_Docker_Provision_Manager` test mu-plugin. The script configures the block pages, creates the shortcode pages, and calls the mu-plugin's `wp wc docker-e2e provision` importer once. A failed WP-CLI step stops provisioning. Pass `--metric-units` if the suite expects kilograms and centimeters, as Product Bundles does.
+
+### Switch checkout modes in test fixtures
+
+In a test mu-plugin, load `checkout-mode.php` from the tooling bin mount and use the `Automattic\WooCommerce\ExtensionTooling\Checkout_Mode` trait. The fixture defines `THEME_LEGACY` and `THEME_BLOCKS`, registers its filters and decides when a request may switch modes. Add the tooling bin mapping to every test site that loads the fixture.
+
+The package test suite requires a PHP CLI on `PATH` to exercise the checkout fixture.
 
 ## Lint and analysis presets
 

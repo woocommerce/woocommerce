@@ -3,7 +3,7 @@
  */
 import { store, getContext } from '@wordpress/interactivity';
 import type { ProductResponseItem } from '@woocommerce/types';
-import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import type { SelectedAttributes } from '@woocommerce/stores/woocommerce';
 
 /**
  * Per-element selection for the current product/variation.

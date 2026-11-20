@@ -191,6 +191,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$results = $this->results();
 		$this->assertFalse( $results['llms_txt_valid'] );
 		$this->assertFalse( $results['llms_txt_links_resolve'] );
+		$this->assertSame( home_url( '/old/' ), array_column( $this->sut->all(), 'seen_at', 'id' )['llms_txt_links_resolve'], 'The broken link is kept to name it' );
 
 		$responses['/old/'] = null;
 		$this->serve( $responses );
@@ -213,6 +214,152 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertNull( $results['llms_txt_present'], 'A firewall refusing llms.txt is not a missing llms.txt' );
 		$this->assertNull( $results['llms_txt_valid'] );
 		$this->assertNull( $results['llms_txt_links_resolve'] );
+	}
+
+	/**
+	 * Store output checks that see the given WooCommerce llms.txt status, as woocommerce #70741 reports it.
+	 *
+	 * @param string|null $status  Status, or null without the fallback.
+	 * @param string      $section Guidance WooCommerce adds.
+	 */
+	private static function with_llms_status( ?string $status, string $section = '' ): StoreOutputChecks {
+		$sut         = new class() extends StoreOutputChecks {
+			/**
+			 * The status to report.
+			 *
+			 * @var array{status:string,section:string}|null
+			 */
+			public $status;
+
+			/**
+			 * The status set by the test.
+			 */
+			protected function llms_txt_status(): ?array {
+				return $this->status;
+			}
+		};
+		$sut->status = null === $status ? null : array(
+			'status'  => $status,
+			'section' => $section,
+		);
+		$sut->init( new \Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper() );
+		return $sut;
+	}
+
+	/**
+	 * The llms_txt_present result.
+	 *
+	 * @param StoreOutputChecks $sut Checks.
+	 * @return array<string, mixed>
+	 */
+	private static function llms_present( StoreOutputChecks $sut ): array {
+		return array_column( $sut->all(), null, 'id' )['llms_txt_present'];
+	}
+
+	/**
+	 * @testdox llms.txt names its source from the response header, a file in the site root, or another provider.
+	 */
+	public function test_llms_txt_source_when_served(): void {
+		$section                = "## Agentic capabilities\n\n- [WooCommerce Store API](" . home_url( '/wp-json/wc/store/v1' ) . ')';
+		$responses              = $this->good_store();
+		$responses['/llms.txt'] = array( 200, "# Shop\n\nA customized guide.\n", array( 'X-WooCommerce-LLMs-Txt' => '1' ) );
+		$this->serve( $responses );
+
+		$this->assertSame( 'woocommerce', self::llms_present( self::with_llms_status( 'unknown', $section . "\n" ) )['source'] );
+		$this->assertSame( 'woocommerce', self::llms_present( self::with_llms_status( 'physical_file', $section ) )['source'], 'The served response takes precedence over a local file' );
+
+		$responses['/llms.txt'] = array( 200, "# Shop\n\n" . $section . "\n" );
+		$this->serve( $responses );
+		$this->assertSame( 'other', self::llms_present( self::with_llms_status( 'unknown', $section ) )['source'], 'Copied guidance does not identify the provider' );
+		$this->assertSame( 'file', self::llms_present( self::with_llms_status( 'physical_file', $section ) )['source'] );
+
+		$responses['/llms.txt'] = array( 200, "# Shop\n\n- [About](" . home_url( '/about/' ) . ")\n" );
+		$this->serve( $responses );
+		$this->assertSame( 'file', self::llms_present( self::with_llms_status( 'physical_file', $section ) )['source'] );
+		$this->assertSame( 'other', self::llms_present( self::with_llms_status( 'unknown', $section ) )['source'] );
+		$this->assertSame( 'other', self::llms_present( self::with_llms_status( 'disabled' ) )['source'], 'Served while WooCommerce\'s is off' );
+		$this->assertSame( '', self::llms_present( self::with_llms_status( null ) )['source'], 'Without the fallback, no source' );
+
+		$subdirectory = static fn( string $url ): string => (string) preg_replace( '#^(https?://[^/]+)#', '$1/shop', $url );
+		add_filter( 'home_url', $subdirectory );
+		remove_all_filters( 'pre_http_request' );
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args, $url ) {
+				unset( $pre, $args );
+				$is_llms = '/llms.txt' === wp_parse_url( $url, PHP_URL_PATH );
+				return array(
+					'headers'  => new \WpOrg\Requests\Utility\CaseInsensitiveDictionary( $is_llms ? array( 'X-WooCommerce-LLMs-Txt' => '1' ) : array() ),
+					'body'     => $is_llms ? "# Shop\n" : self::page(),
+					'response' => array(
+						'code'    => 200,
+						'message' => '',
+					),
+					'cookies'  => array(),
+				);
+			},
+			10,
+			3
+		);
+		try {
+			$result = self::llms_present( self::with_llms_status( 'unknown', $section ) );
+			$this->assertTrue( $result['ok'] );
+			$this->assertSame( '', $result['source'], 'A host-root response does not identify the subdirectory store\'s provider' );
+		} finally {
+			remove_filter( 'home_url', $subdirectory );
+		}
+	}
+
+	/**
+	 * @testdox A missing llms.txt says whether WooCommerce's is turned off or doesn't reach the store, and its fix follows; couldn't check has no source.
+	 */
+	public function test_llms_txt_source_when_missing(): void {
+		$responses = $this->good_store();
+		unset( $responses['/llms.txt'] );
+		$this->serve( $responses );
+		$default = self::llms_present( self::with_llms_status( null ) );
+		$this->assertSame( '', $default['source'] );
+
+		$disabled = self::llms_present( self::with_llms_status( 'disabled' ) );
+		$this->assertFalse( $disabled['ok'] );
+		$this->assertSame( 'disabled', $disabled['source'] );
+		$this->assertStringContainsString( 'woocommerce_enable_llms_txt', $disabled['fix'] );
+
+		$not_reached = self::llms_present( self::with_llms_status( 'unknown', '## Agentic capabilities' ) );
+		$this->assertSame( 'not_reached', $not_reached['source'] );
+		$this->assertStringContainsString( 'Ask your host', $not_reached['fix'] );
+		$this->assertNotSame( $default['fix'], $not_reached['fix'] );
+		$this->assertSame( '', self::llms_present( self::with_llms_status( 'no_rewrite', '## Agentic capabilities' ) )['source'], 'A status it doesn\'t know claims no cause' );
+
+		// A root file that isn't reached still blocks WooCommerce's fallback, so keep the default SEO fix.
+		$root_file = self::llms_present( self::with_llms_status( 'physical_file', '## Agentic capabilities' ) );
+		$this->assertSame( '', $root_file['source'], 'A root file that isn\'t served is not "WooCommerce will serve one"' );
+		$this->assertSame( $default['fix'], $root_file['fix'] );
+
+		$subdirectory = static fn( string $url ): string => (string) preg_replace( '#^(https?://[^/]+)#', '$1/shop', $url );
+		add_filter( 'home_url', $subdirectory );
+		try {
+			$this->assertSame( '', self::llms_present( self::with_llms_status( 'unknown', '## Agentic capabilities' ) )['source'], 'In a subdirectory WooCommerce serves it elsewhere' );
+			$subdir_off = self::llms_present( self::with_llms_status( 'disabled' ) );
+			$this->assertSame( '', $subdir_off['source'], 'Turned off in a subdirectory still is not this URL' );
+			$this->assertSame( $default['fix'], $subdir_off['fix'] );
+		} finally {
+			remove_filter( 'home_url', $subdirectory );
+		}
+
+		$responses              = $this->good_store();
+		$responses['/llms.txt'] = array( 403, 'Blocked' );
+		$this->serve( $responses );
+		$this->assertSame( '', self::llms_present( self::with_llms_status( 'disabled' ) )['source'] );
+
+		$responses['/llms.txt'] = array( 200, self::page( '', '', false ) );
+		$this->serve( $responses );
+		$page = self::llms_present( self::with_llms_status( 'unknown', '## Agentic capabilities' ) );
+		$this->assertSame( '', $page['source'], 'A page at /llms.txt reached the store' );
+		$this->assertSame( $default['fix'], $page['fix'] );
+		$page_off = self::llms_present( self::with_llms_status( 'disabled' ) );
+		$this->assertSame( '', $page_off['source'] );
+		$this->assertSame( $default['fix'], $page_off['fix'] );
 	}
 
 	/**
@@ -407,7 +554,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Checks for output WooCommerce doesn't build yet don't run, and are reported as pending.
+	 * @testdox Only the UCP checkout check waits as pending, until this WooCommerce serves UCP checkout; the product structured data checks run.
 	 */
 	public function test_pending_checks(): void {
 		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
@@ -415,14 +562,63 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 
 		$checks = array_column( $this->sut->all(), null, 'id' );
 
-		foreach ( ( new \ReflectionClassConstant( StoreOutputChecks::class, 'PENDING' ) )->getValue() as $id ) {
-			$this->assertNull( $checks[ $id ]['ok'], $id );
-			$this->assertTrue( $checks[ $id ]['pending'], $id );
-		}
-		$this->assertFalse( $checks['open_graph_tags']['pending'] );
-		$this->assertFalse( $checks['product_return_policy_schema']['pending'], 'WooCommerce adds the returns policy since 11.3' );
-		$this->assertContains( 'product_shipping_schema', ( new \ReflectionClassConstant( StoreOutputChecks::class, 'PENDING' ) )->getValue(), 'The list is not empty' );
-		$this->assertSame( ! StoreConditions::serves_ucp_checkout(), $checks['ucp_checkout']['pending'], 'The UCP checkout check runs once this WooCommerce serves UCP checkout' );
+		$this->assertFalse( $checks['product_shipping_schema']['pending'] );
+		$this->assertFalse( $checks['product_buy_action_schema']['pending'] );
+		$this->assertSame(
+			StoreConditions::serves_ucp_checkout() ? array() : array( 'ucp_checkout' ),
+			array_keys( array_filter( array_column( $checks, 'pending', 'id' ) ) ),
+			'The UCP checkout check runs once this WooCommerce serves UCP checkout'
+		);
+	}
+
+	/**
+	 * @testdox The shipping and buy action checks read the product page, and couldn't check a product that can't ship or can't be bought now.
+	 */
+	public function test_shipping_and_buy_action_on_the_page(): void {
+		$ld        = static fn( string $offer ): string => '<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Product","name":"Mug","offers":' . $offer . '}]}</script>';
+		$responses = $this->good_store();
+		$result    = function ( string $offer, string $id ) use ( $responses, $ld ): ?bool {
+			$responses[ $this->product_path() ] = array( 200, self::page( $ld( $offer ) ) );
+			$this->serve( $responses );
+			return array_column( $this->sut->all(), 'ok', 'id' )[ $id ];
+		};
+		$bare      = '{"@type":"Offer","price":"10"}';
+		$zone      = new \WC_Shipping_Zone();
+		$zone->set_zone_name( 'US' );
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$zone->add_shipping_method( 'flat_rate' );
+
+		$this->assertTrue( $result( '{"@type":"Offer","price":"10","shippingDetails":{"@type":"OfferShippingDetails"}}', 'product_shipping_schema' ) );
+		$this->assertFalse( $result( $bare, 'product_shipping_schema' ) );
+		$this->assertFalse( $result( $bare, 'product_buy_action_schema' ), 'An in-stock simple product gets a BuyAction from WooCommerce' );
+		$responses[ $this->product_path() ] = array( 200, self::page( '' ) );
+		$this->serve( $responses );
+		$no_ld = array_column( $this->sut->all(), 'ok', 'id' );
+		$this->assertNull( $no_ld['product_shipping_schema'], 'Without product details it couldn\'t check, as the other product details checks' );
+		$this->assertNull( $no_ld['product_buy_action_schema'] );
+
+		update_option( 'woocommerce_ship_to_countries', 'disabled' );
+		$this->assertNull( $result( $bare, 'product_shipping_schema' ), 'Shipping turned off: no shipping details to give' );
+		delete_option( 'woocommerce_ship_to_countries' );
+		add_filter( 'woocommerce_get_zone_criteria', '__return_empty_array' );
+		$this->assertNull( $result( $bare, 'product_shipping_schema' ), 'A zone criteria filter: WooCommerce prints no shipping details' );
+		remove_filter( 'woocommerce_get_zone_criteria', '__return_empty_array' );
+
+		add_filter( 'woocommerce_countries_shipping_countries', '__return_empty_array' );
+		$this->assertNull( $result( $bare, 'product_shipping_schema' ), 'A zone WooCommerce can\'t describe: it prints no shipping details' );
+		remove_filter( 'woocommerce_countries_shipping_countries', '__return_empty_array' );
+		$zone->delete();
+		$this->assertFalse( $result( $bare, 'product_shipping_schema' ), 'No zone with a delivery method: the merchant can add one' );
+		$this->assertTrue( $result( '{"@type":"Offer","price":"10","shippingDetails":{"@type":"OfferShippingDetails"}}', 'product_shipping_schema' ), 'Printed by another plugin, it still counts' );
+
+		add_filter( 'woocommerce_product_is_visible', '__return_false' );
+		$this->assertNull( $result( $bare, 'product_buy_action_schema' ), 'Hidden by a visibility filter: WooCommerce prints no BuyAction' );
+		remove_filter( 'woocommerce_product_is_visible', '__return_false' );
+
+		$this->product->set_stock_status( 'outofstock' );
+		$this->product->save();
+		$this->assertNull( $result( $bare, 'product_buy_action_schema' ), 'WooCommerce links only a product in stock to checkout' );
 	}
 
 	/**
@@ -445,7 +641,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The pending product checks find a returns policy and shipping details on an offer, and a BuyAction on the product or an offer.
+	 * @testdox The product checks find a returns policy and shipping details on an offer, and a BuyAction on the product or an offer.
 	 */
 	public function test_pending_product_detectors(): void {
 		$offer_has  = new \ReflectionMethod( StoreOutputChecks::class, 'offer_has' );
@@ -530,11 +726,26 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertNull( $buy_action->invoke( null, array( $empty_group ), $variable ), 'A variable product without one' );
 		$this->assertFalse( $buy_action->invoke( null, array( $empty_group ), $this->product ), 'A simple product without one' );
 
+		$variable->delete( true );
+		$this->assertFalse( $ships->invoke( null, new StoreResponses( true ) ), 'No zone with a delivery method' );
+		$zone = new \WC_Shipping_Zone();
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$zone->add_shipping_method( 'local_pickup' );
+		$this->assertFalse( $ships->invoke( null, new StoreResponses( true ) ), 'Local pickup only: WooCommerce describes no delivery' );
+		$zone->add_shipping_method( 'flat_rate' );
 		$this->assertTrue( $ships->invoke( null, new StoreResponses( true ) ) );
+		$this->product->set_regular_price( '' );
+		$this->product->save();
+		$this->assertNull( $ships->invoke( null, new StoreResponses( true ) ), 'Without a price WooCommerce prints no offer' );
+		$this->product->set_regular_price( '10' );
 		$this->product->set_virtual( true );
 		$this->product->save();
-		$variable->delete( true );
-		$this->assertFalse( $ships->invoke( null, new StoreResponses( true ) ), 'A virtual product has no shipping details to give' );
+		$this->assertNull( $ships->invoke( null, new StoreResponses( true ) ), 'A virtual product has no shipping details to give' );
+
+		$this->product->delete( true );
+		WC_Helper_Product::create_variation_product();
+		$this->assertNull( $ships->invoke( null, new StoreResponses( true ) ), 'A variable product: WooCommerce prints shipping details only for a chosen variation' );
 	}
 
 	/**

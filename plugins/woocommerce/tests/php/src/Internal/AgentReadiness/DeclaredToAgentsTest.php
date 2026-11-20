@@ -63,19 +63,21 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A 401 or 403 is not checked: a firewall can refuse a file that exists.
+	 * @testdox A 401, 403 or 429 is not checked: a firewall or rate limit can refuse a file that exists.
 	 */
 	public function test_blocked_response_is_not_checked(): void {
 		$results = $this->results(
 			array(
 				'/ai.txt'                      => array( 403, 'Forbidden' ),
 				'/.well-known/agent-card.json' => array( 401, '' ),
+				'/llms-full.txt'               => array( 429, 'Too Many Requests' ),
 				'markdown /'                   => array( 403, '' ),
 			)
 		);
 
 		$this->assertNull( $results['ai-txt'] );
 		$this->assertNull( $results['a2a-agent-card'] );
+		$this->assertNull( $results['llms-full'] );
 		$this->assertNull( $results['markdown-pages'] );
 	}
 
@@ -85,17 +87,25 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	public function test_files(): void {
 		$results = $this->results(
 			array(
-				'/ai.txt'                  => array( 200, 'User-Agent: *' ),
-				'/.well-known/agents.json' => array( 200, '<!doctype html><html></html>' ),
-				'/AGENTS.md'               => array( 200, '{"code":"not_found","message":"No route"}' ),
-				'/auth.md'                 => array( 200, 'Not found', array( 'content-type' => 'text/html; charset=UTF-8' ) ),
-				'/sitemap.md'              => array( 200, "\xEF\xBB\xBF<!doctype html><html></html>" ),
+				'/ai.txt'                   => array( 200, 'User-Agent: *' ),
+				'/.well-known/agents.json'  => array( 200, '<!doctype html><html></html>' ),
+				'/AGENTS.md'                => array( 200, '{"code":"not_found","message":"No route"}' ),
+				'/auth.md'                  => array( 200, 'Not found', array( 'content-type' => 'text/html; charset=UTF-8' ) ),
+				'/sitemap.md'               => array( 200, "\xEF\xBB\xBF<!doctype html><html></html>" ),
+				'/.well-known/security.txt' => array(
+					404,
+					"\n\n",
+					array(
+						'content-type'   => 'text/plain',
+						'content-length' => '999999',
+					),
+				),
 			)
 		);
 
 		$this->assertTrue( $results['ai-txt'] );
 		$this->assertFalse( $results['agents-json'], 'A page is not a JSON document' );
-		$this->assertFalse( $results['security-txt'], 'A 404' );
+		$this->assertFalse( $results['security-txt'], 'A truncated 404 is still missing' );
 		$this->assertFalse( $results['agents-md'], 'A 200 JSON error is not a file' );
 		$this->assertFalse( $results['auth-md'], 'A 200 HTML answer is not a file' );
 		$this->assertFalse( $results['sitemap-md'], 'A page behind a byte order mark is not a file' );
@@ -487,5 +497,80 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 		foreach ( $this->scan() as $item ) {
 			$this->assertNull( $item['found'], $item['id'] );
 		}
+	}
+
+	/**
+	 * @testdox With WooCommerce's llms.txt fallback, its guidance is found when the served llms.txt holds it, from any provider; without the fallback the item isn't listed.
+	 */
+	public function test_llms_txt_guidance(): void {
+		$section = "## Agentic capabilities\n\n- [WooCommerce Store API](" . home_url( '/wp-json/wc/store/v1' ) . ')';
+		$sut     = new class() extends DeclaredToAgents {
+			/**
+			 * The status to report.
+			 *
+			 * @var array{status:string,section:string}|null
+			 */
+			public $status;
+
+			/**
+			 * The status set by the test.
+			 */
+			protected function llms_txt_status(): ?array {
+				return $this->status;
+			}
+		};
+		$found   = function ( array $responses ) use ( $sut ): array {
+			$this->results( $responses );
+			return array_column( $sut->all( wc_get_container()->get( StoreOutputChecks::class )->responses() ), 'found', 'id' );
+		};
+
+		$this->assertArrayNotHasKey( 'llms-txt-woocommerce-guidance', $found( array() ), 'Not listed without the fallback' );
+
+		$sut->status = array(
+			'status'  => 'unknown',
+			'section' => $section . "\n",
+		);
+		$this->assertTrue( $found( array( '/llms.txt' => array( 200, "# Shop\n\n" . $section . "\n" ) ) )['llms-txt-woocommerce-guidance'] );
+		$this->assertTrue(
+			$found(
+				array(
+					'/llms.txt' => array( 200, "# Shop\r\n\r\n" . str_replace( "\n", "\r\n", $section ) . "\r\n" ),
+				)
+			)['llms-txt-woocommerce-guidance'],
+			'CRLF line endings still match'
+		);
+		$this->assertFalse( $found( array( '/llms.txt' => array( 200, "# Shop\n\n- [About](" . home_url( '/about/' ) . ')' ) ) )['llms-txt-woocommerce-guidance'], 'Another provider\'s file without it' );
+		$this->assertFalse( $found( array() )['llms-txt-woocommerce-guidance'], 'No llms.txt' );
+		$this->assertNull( $found( array( '/llms.txt' => array( 503, '' ) ) )['llms-txt-woocommerce-guidance'], 'Couldn\'t check' );
+		$this->assertNull( $found( array( '/llms.txt' => array( 429, '' ) ) )['llms-txt-woocommerce-guidance'], 'Rate limited' );
+		$this->assertNull(
+			$found(
+				array(
+					'/llms.txt' => array( 200, "# Shop\n", array( 'content-length' => '999999' ) ),
+				)
+			)['llms-txt-woocommerce-guidance'],
+			'Truncated body with no match is couldn\'t check'
+		);
+		$this->assertNull(
+			$found(
+				array(
+					'/llms.txt' => array(
+						200,
+						"\n\n",
+						array(
+							'content-type'   => 'text/plain',
+							'content-length' => '999999',
+						),
+					),
+				)
+			)['llms-txt-woocommerce-guidance'],
+			'A body cut off in leading blank lines is couldn\'t check'
+		);
+
+		$sut->status = array(
+			'status'  => 'disabled',
+			'section' => '',
+		);
+		$this->assertArrayNotHasKey( 'llms-txt-woocommerce-guidance', $found( array() ), 'Not listed while WooCommerce adds no guidance' );
 	}
 }

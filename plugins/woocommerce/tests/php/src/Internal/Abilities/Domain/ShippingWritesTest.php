@@ -506,6 +506,128 @@ class ShippingWritesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a location code WooCommerce does not know, or one that does not fit its type, and save nothing.
+	 * @testWith ["XX", "country"]
+	 *           ["UK", "country"]
+	 *           ["US:ZZ", "state"]
+	 *           ["DE:BY", "state"]
+	 *           ["XX", "continent"]
+	 *           ["US:CA", "country"]
+	 *           ["DE", "state"]
+	 *           ["EU", "country"]
+	 *
+	 * @param string $code Location code.
+	 * @param string $type Location type.
+	 */
+	public function test_refuses_unknown_location_codes( string $code, string $type ): void {
+		$zone_count = count( \WC_Shipping_Zones::get_zones() );
+
+		$result = $this->run_ability(
+			'woocommerce/shipping-zone-create',
+			array(
+				'name'      => 'Nowhere',
+				'locations' => array(
+					array(
+						'code' => $code,
+						'type' => $type,
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_shipping_zone_location_invalid', $result->get_error_code() );
+		$this->assertSame( 400, $result->get_error_data()['status'] );
+		$this->assertStringContainsString( "{$code} ({$type})", $result->get_error_message() );
+		$this->assertCount( $zone_count, \WC_Shipping_Zones::get_zones(), 'No zone should be created.' );
+	}
+
+	/**
+	 * @testdox Should name every bad location code in one error.
+	 */
+	public function test_names_every_bad_location_code_in_one_error(): void {
+		$result = $this->run_ability(
+			'woocommerce/shipping-zone-create',
+			array(
+				'name'      => 'Mixed',
+				'locations' => array(
+					array(
+						'code' => 'UK',
+						'type' => 'country',
+					),
+					array(
+						'code' => 'DE',
+						'type' => 'country',
+					),
+					array(
+						'code' => 'US:ZZ',
+						'type' => 'state',
+					),
+					array(
+						'code' => 'XX',
+						'type' => 'continent',
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$message = $result->get_error_message();
+		foreach ( array( 'UK (country)', 'US:ZZ (state)', 'XX (continent)' ) as $bad ) {
+			$this->assertStringContainsString( $bad, $message );
+		}
+		$this->assertStringNotContainsString( 'DE (country)', $message, 'A valid code should not be named.' );
+	}
+
+	/**
+	 * @testdox Should save known codes of each type in the form WooCommerce stores, so the zone matches an address.
+	 */
+	public function test_saves_known_location_codes_in_stored_form(): void {
+		$result = $this->run_ability(
+			'woocommerce/shipping-zone-create',
+			array(
+				'name'      => 'Known',
+				'locations' => array(
+					array(
+						'code' => 'gb',
+						'type' => 'country',
+					),
+					array(
+						'code' => 'us:ca',
+						'type' => 'state',
+					),
+					array(
+						'code' => 'MA:MAAGD',
+						'type' => 'state',
+					),
+					array(
+						'code' => 'eu',
+						'type' => 'continent',
+					),
+					array(
+						'code' => 'sw1a*',
+						'type' => 'postcode',
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame(
+			array( 'GB', 'US:CA', 'MA:maagd', 'EU', 'SW1A*' ),
+			array_column( $result['zone']['locations'], 'code' )
+		);
+		$package = array(
+			'destination' => array(
+				'country'  => 'GB',
+				'state'    => '',
+				'postcode' => 'SW1A 1AA',
+			),
+		);
+		$this->assertSame( $result['zone']['id'], \WC_Shipping_Zones::get_zone_matching_package( $package )->get_id() );
+	}
+
+	/**
 	 * @testdox Should refuse a zone name with nothing left after cleaning.
 	 */
 	public function test_refuses_an_empty_zone_name(): void {
