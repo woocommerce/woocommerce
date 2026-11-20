@@ -53,6 +53,7 @@
 		"wc-blocks-packages-style",
 		"file:../stock-filter.css"
 	],
+	"viewScript": "file:../stock-filter-frontend.js",
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

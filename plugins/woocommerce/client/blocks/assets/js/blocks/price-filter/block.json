@@ -43,6 +43,7 @@
 		"wc-blocks-style",
 		"file:../price-filter.css"
 	],
+	"viewScript": "file:../price-filter-frontend.js",
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
