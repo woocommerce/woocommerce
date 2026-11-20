@@ -137,9 +137,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Until the store is connected, the connection card links to the nonce-checked connect action.
+	 * @testdox Until the store is connected, the connection card posts the nonce-checked connect action.
 	 */
-	public function test_connect_view_links_to_the_connect_action(): void {
+	public function test_connect_view_posts_the_connect_action(): void {
 		remove_all_actions( 'admin_post_' . AgenticCommerceSettings::CONNECT_ACTION );
 		$this->sut->handle_init();
 		$this->assertNotFalse( has_action( 'admin_post_' . AgenticCommerceSettings::CONNECT_ACTION ), 'The tab registers the connect action' );
@@ -147,20 +147,19 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$view = AgenticCommerceSettings::connect_view();
 		$this->assertFalse( $view['connected'], 'The test site is not connected to WordPress.com' );
 		$this->assertSame( '', $view['notice'] );
-		$query = array();
-		parse_str( (string) wp_parse_url( $view['url'], PHP_URL_QUERY ), $query );
-		$this->assertStringStartsWith( admin_url( 'admin-post.php' ), $view['url'] );
-		$this->assertSame( AgenticCommerceSettings::CONNECT_ACTION, $query['action'] );
-		$this->assertSame( 1, wp_verify_nonce( $query['_wpnonce'], AgenticCommerceSettings::CONNECT_ACTION ) );
+		$this->assertSame( admin_url( 'admin-post.php' ), $view['url'] );
+		$this->assertSame( AgenticCommerceSettings::CONNECT_ACTION, $view['action'] );
+		$this->assertStringNotContainsString( '_wpnonce', $view['url'] );
+		$this->assertSame( 1, wp_verify_nonce( $view['nonce'], AgenticCommerceSettings::CONNECT_ACTION ) );
 
 		$this->assertMatchesRegularExpression( '/data-connect="[^"]*admin-post\.php/', $this->render_page( '' ), 'The Overview gets the card data' );
 	}
 
 	/**
-	 * @testdox Coming back from a failed attempt shows the error; a success flag on an unconnected store shows nothing.
+	 * @testdox Coming back from a failed attempt, or a success flag on an unconnected store, shows the error.
 	 *
 	 * @testWith ["error", "error"]
-	 *           ["connected", ""]
+	 *           ["connected", "error"]
 	 *           ["other", ""]
 	 *
 	 * @param string $result What the URL says.
@@ -199,6 +198,49 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			add_query_arg( AgenticCommerceSettings::CONNECT_RESULT, 'error', AgenticCommerceSettings::url() ),
 			AgenticCommerceSettings::connect_redirect()
 		);
+	}
+
+	/**
+	 * @testdox Only an https WordPress.com URL can be the connection redirect, and its scheme is lowercased.
+	 *
+	 * @testWith ["https://jetpack.wordpress.com/jetpack.authorize/1/?x=1", "https://jetpack.wordpress.com/jetpack.authorize/1/?x=1"]
+	 *           ["HTTPS://jetpack.wordpress.com/path", "https://jetpack.wordpress.com/path"]
+	 *           ["https://wordpress.com/jetpack/connect", "https://wordpress.com/jetpack/connect"]
+	 *           ["http://jetpack.wordpress.com/path", ""]
+	 *           ["https://evil.example/phish", ""]
+	 *           ["https://wordpress.com.evil.example/", ""]
+	 *           ["https://user@jetpack.wordpress.com/path", ""]
+	 *           ["", ""]
+	 *
+	 * @param string $url      Candidate redirect.
+	 * @param string $expected URL that may be followed.
+	 */
+	public function test_wordpress_com_https_url( string $url, string $expected ): void {
+		$this->assertSame( $expected, AgenticCommerceSettings::wordpress_com_https_url( $url ) );
+	}
+
+	/**
+	 * @testdox An authorization URL that leaves WordPress.com sends the merchant back to the Overview with an error.
+	 */
+	public function test_connect_redirect_rejects_an_offsite_authorization_url(): void {
+		$property = new \ReflectionProperty( \Automattic\Jetpack\Connection\Manager::class, 'is_connected' );
+		$property->setAccessible( true );
+		$property->setValue( null, true );
+		add_filter(
+			'jetpack_build_authorize_url',
+			static function () {
+				return 'https://evil.example/phish';
+			}
+		);
+		try {
+			$this->assertSame(
+				add_query_arg( AgenticCommerceSettings::CONNECT_RESULT, 'error', AgenticCommerceSettings::url() ),
+				AgenticCommerceSettings::connect_redirect()
+			);
+		} finally {
+			remove_all_filters( 'jetpack_build_authorize_url' );
+			$property->setValue( null, null );
+		}
 	}
 
 	/**

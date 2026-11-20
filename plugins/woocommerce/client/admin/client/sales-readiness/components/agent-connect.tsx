@@ -16,16 +16,53 @@ export type ConnectView = {
 	connected: boolean;
 	/** After a connection attempt: connected, error, or empty. */
 	notice: '' | 'connected' | 'error';
-	/** Starts the connection; empty once connected. */
+	/** admin-post.php. Empty once connected. */
 	url: string;
+	/** admin-post action. Empty once connected. */
+	action: string;
+	/** Nonce for that action, posted with it. Empty once connected. */
+	nonce: string;
 };
 
 /**
  * Manage your store from your own agent: connects the store to WordPress.com, so AI apps can reach
  * it through MCP, and says what to do next once it is connected.
  */
+const RESULT_ARG = 'wc_ai_connect';
+
+/**
+ * Posts the connect action outside the settings form, which already wraps this card.
+ */
+function postConnect( connect: ConnectView ) {
+	trackReadiness( 'link_clicked', {
+		surface: 'overview',
+		area: 'agent_connect',
+	} );
+	const form = document.createElement( 'form' );
+	form.method = 'post';
+	form.action = connect.url;
+	for ( const [ name, value ] of [
+		[ 'action', connect.action ],
+		[ '_wpnonce', connect.nonce ],
+	] as const ) {
+		const input = document.createElement( 'input' );
+		input.type = 'hidden';
+		input.name = name;
+		input.value = value;
+		form.appendChild( input );
+	}
+	document.body.appendChild( form );
+	form.submit();
+}
+
 export const AgentConnect = ( { connect }: { connect: ConnectView } ) => {
 	const [ notice, setNotice ] = useState( connect.notice );
+	const dismissNotice = () => {
+		setNotice( '' );
+		const next = new URL( window.location.href );
+		next.searchParams.delete( RESULT_ARG );
+		window.history.replaceState( null, '', next );
+	};
 
 	return (
 		<Card.Root className="wc-sales-readiness-card">
@@ -39,7 +76,7 @@ export const AgentConnect = ( { connect }: { connect: ConnectView } ) => {
 			</Card.Header>
 			<Card.Content>
 				{ notice === 'connected' && (
-					<Notice status="success" onRemove={ () => setNotice( '' ) }>
+					<Notice status="success" onRemove={ dismissNotice }>
 						<strong>
 							{ __( 'Connection successful', 'woocommerce' ) }
 						</strong>
@@ -51,7 +88,7 @@ export const AgentConnect = ( { connect }: { connect: ConnectView } ) => {
 					</Notice>
 				) }
 				{ notice === 'error' && (
-					<Notice status="error" onRemove={ () => setNotice( '' ) }>
+					<Notice status="error" onRemove={ dismissNotice }>
 						{ __(
 							'Your store couldn’t connect to WordPress.com. Try again.',
 							'woocommerce'
@@ -82,13 +119,8 @@ export const AgentConnect = ( { connect }: { connect: ConnectView } ) => {
 						<div className="wc-sales-readiness-card__actions">
 							<Button
 								variant="primary"
-								href={ connect.url }
-								onClick={ () =>
-									trackReadiness( 'link_clicked', {
-										surface: 'overview',
-										area: 'agent_connect',
-									} )
-								}
+								type="button"
+								onClick={ () => postConnect( connect ) }
 							>
 								{ __(
 									'Connect to WordPress.com',

@@ -133,6 +133,8 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 * Connect to WordPress.com: registers the site if needed, then sends the user to the Jetpack
 	 * connection screen, which returns to the Overview.
 	 *
+	 * @since 11.4.0
+	 *
 	 * @internal
 	 */
 	public function handle_connect(): void {
@@ -140,44 +142,74 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 			wp_die( esc_html__( 'Sorry, you are not allowed to connect this store.', 'woocommerce' ), 403 );
 		}
 		check_admin_referer( self::CONNECT_ACTION );
-		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- The Jetpack connection screen is on WordPress.com.
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- wordpress_com_https_url() allows only https on wordpress.com.
 		wp_redirect( self::connect_redirect() );
 		exit;
 	}
 
 	/**
 	 * Where Connect to WordPress.com goes: the authorization URL, or back to the Overview with an error
-	 * when the site can't be registered.
+	 * when the site can't be registered or that URL is not https on WordPress.com.
+	 *
+	 * @since 11.4.0
 	 */
 	public static function connect_redirect(): string {
-		$result = JetpackConnection::get_authorization_url( add_query_arg( self::CONNECT_RESULT, 'connected', self::url() ), 'woocommerce-core-profiler' );
-		return ! empty( $result['success'] ) && ! empty( $result['url'] )
-			? (string) $result['url']
-			: add_query_arg( self::CONNECT_RESULT, 'error', self::url() );
+		$result    = JetpackConnection::get_authorization_url( add_query_arg( self::CONNECT_RESULT, 'connected', self::url() ), 'woocommerce-core-profiler' );
+		$candidate = ! empty( $result['success'] ) && is_string( $result['url'] ?? null ) ? $result['url'] : '';
+		$url       = self::wordpress_com_https_url( $candidate );
+		return '' !== $url ? $url : add_query_arg( self::CONNECT_RESULT, 'error', self::url() );
+	}
+
+	/**
+	 * An https WordPress.com URL with a lowercased scheme, or an empty string.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $url Candidate redirect.
+	 * @return string
+	 */
+	public static function wordpress_com_https_url( string $url ): string {
+		$parts = wp_parse_url( $url );
+		if ( ! is_array( $parts ) || isset( $parts['user'] ) || isset( $parts['pass'] ) ) {
+			return '';
+		}
+		$raw_scheme = isset( $parts['scheme'] ) ? $parts['scheme'] : '';
+		$scheme     = strtolower( $raw_scheme );
+		$host       = strtolower( (string) ( $parts['host'] ?? '' ) );
+		$suffix     = '.wordpress.com';
+		$on_wp      = 'wordpress.com' === $host || ( strlen( $host ) > strlen( $suffix ) && substr( $host, -strlen( $suffix ) ) === $suffix );
+		if ( 'https' !== $scheme || ! $on_wp ) {
+			return '';
+		}
+		return 'https' . substr( $url, strlen( $raw_scheme ) );
 	}
 
 	/**
 	 * The Overview's connection card: whether this store and user are connected to WordPress.com, the
-	 * notice to show after a connection attempt, and the link that starts one.
+	 * notice to show after a connection attempt, and the POST that starts one.
 	 *
-	 * @return array{connected: bool, notice: string, url: string}
+	 * @since 11.4.0
+	 *
+	 * @return array{connected: bool, notice: string, url: string, action: string, nonce: string}
 	 */
 	public static function connect_view(): array {
 		$manager = JetpackConnection::get_manager();
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only picks the notice.
 		$result    = isset( $_GET[ self::CONNECT_RESULT ] ) && is_string( $_GET[ self::CONNECT_RESULT ] ) ? sanitize_key( wp_unslash( $_GET[ self::CONNECT_RESULT ] ) ) : '';
 		$connected = $manager->is_connected() && $manager->is_user_connected();
-		$notice    = ( $connected && 'connected' === $result ) || ( ! $connected && 'error' === $result ) ? $result : '';
+		if ( 'connected' === $result ) {
+			$notice = $connected ? 'connected' : 'error';
+		} elseif ( 'error' === $result && ! $connected ) {
+			$notice = 'error';
+		} else {
+			$notice = '';
+		}
 		return array(
 			'connected' => $connected,
 			'notice'    => $notice,
-			'url'       => $connected ? '' : add_query_arg(
-				array(
-					'action'   => self::CONNECT_ACTION,
-					'_wpnonce' => wp_create_nonce( self::CONNECT_ACTION ),
-				),
-				admin_url( 'admin-post.php' )
-			),
+			'url'       => $connected ? '' : admin_url( 'admin-post.php' ),
+			'action'    => $connected ? '' : self::CONNECT_ACTION,
+			'nonce'     => $connected ? '' : wp_create_nonce( self::CONNECT_ACTION ),
 		);
 	}
 

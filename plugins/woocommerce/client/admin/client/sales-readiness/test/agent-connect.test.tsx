@@ -11,31 +11,58 @@ import { trackReadiness } from '../tracks';
 
 jest.mock( '../tracks', () => ( { trackReadiness: jest.fn() } ) );
 
-const url =
-	'https://example.com/wp-admin/admin-post.php?action=woocommerce_ai_tools_connect&_wpnonce=abc';
+const connect = {
+	connected: false as const,
+	notice: '' as const,
+	url: 'https://example.com/wp-admin/admin-post.php',
+	action: 'woocommerce_ai_tools_connect',
+	nonce: 'abc',
+};
 
 describe( 'AgentConnect', () => {
-	it( 'links Connect to WordPress.com to the connect action and tracks the click', () => {
-		render(
-			<AgentConnect connect={ { connected: false, notice: '', url } } />
-		);
+	it( 'posts Connect to WordPress.com to the connect action and tracks the click', () => {
+		const submit = jest
+			.spyOn( window.HTMLFormElement.prototype, 'submit' )
+			.mockImplementation( () => {} );
+		render( <AgentConnect connect={ connect } /> );
 
-		const link = screen.getByRole( 'link', {
-			name: 'Connect to WordPress.com',
-		} );
-		expect( link ).toHaveAttribute( 'href', url );
-		fireEvent.click( link );
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Connect to WordPress.com' } )
+		);
+		const form = document.body.querySelector( 'form' );
+		expect( form ).toHaveAttribute( 'method', 'post' );
+		expect( form ).toHaveAttribute( 'action', connect.url );
+		expect( form?.querySelector( 'input[name="action"]' ) ).toHaveValue(
+			connect.action
+		);
+		expect( form?.querySelector( 'input[name="_wpnonce"]' ) ).toHaveValue(
+			connect.nonce
+		);
+		expect( submit ).toHaveBeenCalled();
 		expect( trackReadiness ).toHaveBeenCalledWith( 'link_clicked', {
 			surface: 'overview',
 			area: 'agent_connect',
 		} );
 		expect( screen.queryByText( /add WordPress/ ) ).not.toBeInTheDocument();
+		submit.mockRestore();
+		form?.remove();
 	} );
 
 	it( 'shows the success notice and what to do next after connecting, without the button', () => {
+		window.history.replaceState(
+			null,
+			'',
+			'?page=wc-settings&wc_ai_connect=connected'
+		);
 		render(
 			<AgentConnect
-				connect={ { connected: true, notice: 'connected', url: '' } }
+				connect={ {
+					connected: true,
+					notice: 'connected',
+					url: '',
+					action: '',
+					nonce: '',
+				} }
 			/>
 		);
 
@@ -46,7 +73,7 @@ describe( 'AgentConnect', () => {
 			screen.getByText( /add WordPress in the AI app/ )
 		).toBeInTheDocument();
 		expect(
-			screen.queryByRole( 'link', { name: 'Connect to WordPress.com' } )
+			screen.queryByRole( 'button', { name: 'Connect to WordPress.com' } )
 		).not.toBeInTheDocument();
 
 		fireEvent.click(
@@ -58,20 +85,17 @@ describe( 'AgentConnect', () => {
 		expect(
 			screen.getByText( /add WordPress in the AI app/ )
 		).toBeInTheDocument();
+		expect( window.location.search ).not.toContain( 'wc_ai_connect' );
 	} );
 
 	it( 'keeps the button next to the error when connecting failed', () => {
-		render(
-			<AgentConnect
-				connect={ { connected: false, notice: 'error', url } }
-			/>
-		);
+		render( <AgentConnect connect={ { ...connect, notice: 'error' } } /> );
 
 		expect(
 			document.querySelector( '.components-notice.is-error' )
 		).toHaveTextContent( /couldn’t connect/ );
 		expect(
-			screen.getByRole( 'link', { name: 'Connect to WordPress.com' } )
+			screen.getByRole( 'button', { name: 'Connect to WordPress.com' } )
 		).toBeInTheDocument();
 	} );
 } );

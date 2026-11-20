@@ -46,10 +46,15 @@ export default function SalesReadinessOverview( {
 	);
 
 	if ( ! view ) {
-		return error ? (
-			<ErrorNotice message={ error } reload={ reload } />
-		) : (
-			<Spinner />
+		return (
+			<div className="wc-sales-readiness wc-sales-readiness--overview">
+				{ error ? (
+					<ErrorNotice message={ error } reload={ reload } />
+				) : (
+					<Spinner />
+				) }
+				{ connect && <AgentConnect connect={ connect } /> }
+			</div>
 		);
 	}
 	const { shopping, view_all: viewAll } = view.overview;
