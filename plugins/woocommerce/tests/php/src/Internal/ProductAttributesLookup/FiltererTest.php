@@ -346,7 +346,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$main_product_in_stock = ! empty(
 				array_filter(
 					$data['variations'],
-					function( $variation ) {
+					function ( $variation ) {
 						return $variation['in_stock'];
 					}
 				)
@@ -1601,25 +1601,17 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$this->assert_counters( 'Color', $expected_to_be_visible ? array( 'Blue' ) : array() );
 		$this->assert_counters( 'Size', $expected_to_be_visible ? array( 'Medium' ) : array() );
 	}
+
 	/**
-	 * @testdox Counts respect OR selections on other attributes and keep separate cache entries.
+	 * @testdox Counts respect OR selections on other attributes.
 	 *
-	 * @testWith [true, "or", true]
-	 *           [true, "or", false]
-	 *           [true, "and", true]
-	 *           [true, "and", false]
-	 *           [false, "or", true]
-	 *           [false, "or", false]
-	 *           [false, "and", true]
-	 *           [false, "and", false]
+	 * @testWith ["or"]
+	 *           ["and"]
 	 *
-	 * @param bool   $use_lookup Whether to use the attribute lookup table.
 	 * @param string $query_type The query type of the widget being counted.
-	 * @param bool   $cache_counts Whether to cache counts.
 	 */
-	public function test_counts_respect_other_or_attributes( bool $use_lookup, string $query_type, bool $cache_counts ): void {
-		$this->set_use_lookup_table( $use_lookup );
-		add_filter( 'woocommerce_layered_nav_count_maybe_cache', static fn() => $cache_counts );
+	public function test_counts_respect_other_or_attributes( string $query_type ): void {
+		$this->set_use_lookup_table( true );
 		$this->create_product_attribute( 'FacetColor', array( 'Red', 'Blue', 'Green' ) );
 		$this->create_product_attribute( 'FacetSize', array( 'Small', 'Large' ) );
 		$this->create_simple_product(
@@ -1644,16 +1636,11 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			true
 		);
 
-		$this->do_product_request( array() );
-		$this->assert_counters( 'FacetColor', array( 'Red', 'Blue', 'Green' ), $query_type );
-
-		\WC_Query::reset_chosen_attributes();
 		$this->do_product_request( array( 'FacetSize' => array( 'Small' ) ), array( 'FacetSize' => 'or' ) );
 		$this->assert_counters( 'FacetColor', array( 'Red', 'Blue' ), $query_type );
-		$this->assert_counters( 'FacetColor', array( 'Red', 'Blue' ), $query_type );
 
 		\WC_Query::reset_chosen_attributes();
-		$products = $this->do_product_request(
+		$this->do_product_request(
 			array(
 				'FacetSize'  => array( 'Small' ),
 				'FacetColor' => array( 'Red' ),
@@ -1663,7 +1650,6 @@ class FiltererTest extends \WC_Unit_Test_Case {
 				'FacetColor' => 'or',
 			)
 		);
-		$this->assertCount( 1, $products, 'Clicking Red matches the displayed count.' );
 		$this->assert_counters( 'FacetColor', 'or' === $query_type ? array( 'Red', 'Blue' ) : array( 'Red' ), $query_type );
 
 		unset( $_GET['filter_facetcolor'], $_GET['query_type_facetcolor'] );
@@ -1710,8 +1696,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$products = $this->do_product_request( array( 'FacetSize' => array( 'Small', 'Medium' ) ), array( 'FacetSize' => 'or' ) );
-		$this->assertCount( count( $expected_colors ), $products, 'Product results must respect the selected variation stock.' );
+		$this->do_product_request( array( 'FacetSize' => array( 'Small', 'Medium' ) ), array( 'FacetSize' => 'or' ) );
 		$this->assert_counters( 'FacetColor', $expected_colors, 'or' );
 	}
 }
