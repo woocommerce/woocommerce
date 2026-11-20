@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Show report table columns that an extension adds after the first render, such as columns added once rows load.
+Show Analytics table columns that extensions add once the report data loads.
