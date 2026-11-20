@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoin
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupService;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use WC_Product;
+use WC_Product_Variation;
 
 /**
  * Class for integrating with the product page.
@@ -61,6 +62,7 @@ class ProductPageIntegration {
 	public function __construct() {
 		add_action( 'woocommerce_simple_add_to_cart', array( $this, 'maybe_render_form' ), 30 );
 		add_action( 'woocommerce_after_add_to_cart_form', array( $this, 'maybe_render_form' ), 30 );
+		add_filter( 'woocommerce_available_variation', array( $this, 'add_variation_already_signed_up_notice' ), 10, 3 );
 	}
 
 	/**
@@ -141,18 +143,67 @@ class ProductPageIntegration {
 			return;
 		}
 
-		// Check if already signed up. Only the form shown on load targets this product: a variable
-		// product's hidden form is pointed at the selected variation by JS.
-		if ( $this->is_visible_on_load( $product ) && $this->is_personalization_enabled() && is_user_logged_in() ) {
-			$user         = \get_user_by( 'id', \get_current_user_id() );
-			$notification = $this->signup_service->is_already_signed_up( $product->get_id(), $user->ID, $user->user_email );
-			if ( $notification instanceof Notification ) {
-				$this->display_already_signed_up( $product, $notification );
-				return;
-			}
+		// Only the form shown on load targets this product: JS points a variable product's hidden form
+		// at the selected variation, whose sign-up is checked in add_variation_already_signed_up_notice().
+		$notification = $this->is_visible_on_load( $product ) ? $this->get_current_user_signup( $product ) : null;
+		if ( $notification instanceof Notification ) {
+			$this->display_already_signed_up( $product, $notification );
+			return;
 		}
 
 		$this->display_form( $product );
+	}
+
+	/**
+	 * Add the "already joined" notice to the data of an out of stock variation the logged-in shopper signed up for.
+	 *
+	 * The form script shows it in place of the form when the shopper selects the variation.
+	 *
+	 * @internal
+	 *
+	 * @param array|mixed $data      Variation data.
+	 * @param WC_Product  $product   Variable product.
+	 * @param WC_Product  $variation Variation.
+	 * @return array|mixed
+	 */
+	public function add_variation_already_signed_up_notice( $data, $product, $variation ) {
+		if ( ! is_array( $data ) || ! $variation instanceof WC_Product_Variation || ! Config::allows_signups() ) {
+			return $data;
+		}
+
+		if ( $this->eligibility_service->is_stock_status_eligible( $variation->get_stock_status() ) ) {
+			return $data;
+		}
+
+		// A sign-up for a variation with 'any' attributes also stores the chosen values, which aren't known yet.
+		if ( in_array( '', $variation->get_variation_attributes(), true ) ) {
+			return $data;
+		}
+
+		$notification = $this->get_current_user_signup( $variation );
+		if ( $notification instanceof Notification ) {
+			ob_start();
+			$this->display_already_signed_up( $variation, $notification );
+			$data['wc_bis_already_signed_up_html'] = ob_get_clean();
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get the logged-in shopper's active or pending sign-up for a product, when personalization is enabled.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return Notification|null
+	 */
+	private function get_current_user_signup( WC_Product $product ): ?Notification {
+		if ( ! is_user_logged_in() || ! self::is_personalization_enabled() ) {
+			return null;
+		}
+
+		$user = wp_get_current_user();
+
+		return $this->signup_service->is_already_signed_up( $product->get_id(), $user->ID, $user->user_email );
 	}
 
 	/**
@@ -213,11 +264,11 @@ class ProductPageIntegration {
 
 		// The endpoint can be switched off from Settings > Advanced, leaving nowhere to link to.
 		if ( '' === MyAccountEndpoint::get_endpoint_slug() ) {
-			wc_print_notice( __( 'You have already joined the waitlist!', 'woocommerce' ), 'notice' );
+			wc_print_notice( __( 'You have already joined this waitlist.', 'woocommerce' ), 'notice' );
 			return;
 		}
 
-		$text = __( 'You have already joined the waitlist! Click {manage_account_link} to manage your notifications.', 'woocommerce' );
+		$text = __( 'You have already joined this waitlist. Click {manage_account_link} to manage your notifications.', 'woocommerce' );
 		$text = str_replace( '{manage_account_link}', '<a href="' . esc_url( wc_get_account_endpoint_url( MyAccountEndpoint::ENDPOINT ) ) . '">' . _x( 'here', 'back in stock form', 'woocommerce' ) . '</a>', $text );
 		wc_print_notice( $text, 'notice' );
 	}

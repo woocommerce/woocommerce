@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Back in Stock Notifications: show logged-in shoppers who already joined the waitlist the "already joined" notice on the product page instead of the sign-up form.
+Show logged-in shoppers who already joined a Back in Stock Notifications waitlist the "already joined" notice on the product page, including for a selected variation, instead of the sign-up form. Sign-up forms submitted by logged-in shoppers now verify the nonce by default; return false from woocommerce_customer_stock_notifications_personalization_enabled on sites that cache pages for logged-in shoppers.

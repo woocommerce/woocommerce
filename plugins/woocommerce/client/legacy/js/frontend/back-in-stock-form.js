@@ -14,6 +14,7 @@
 		self.$formContainer    = $( '.wc_bis_form[data-bis-product-id="' + self.product_id + '"]' );
 		self.$form             = self.$formContainer.find( 'form' );
 		self.$formProductInput = self.$formContainer.find( 'input[name="wc_bis_product_id"]' );
+		self.$signedUpNotice   = $();
 
 		// Variation Events.
 		self.$variationsForm.off( '.wc-bis-form' );
@@ -53,6 +54,8 @@
 	 */
 	BISFormManager.prototype.onShowVariation = function( event, variation ) {
 		var form = event.data.bisForm;
+		form.$signedUpNotice.remove();
+
 		if ( variation.is_in_stock && variation.is_purchasable ) {
 			form.$formContainer.prop( 'hidden', true );
 			return;
@@ -60,6 +63,15 @@
 
 		if ( ! variation.variation_is_active || ! variation.variation_is_visible ) {
 			form.$formContainer.prop( 'hidden', true );
+			return;
+		}
+
+		// The shopper already signed up for this variation.
+		if ( variation.wc_bis_already_signed_up_html ) {
+			form.$formContainer.prop( 'hidden', true );
+			form.$signedUpNotice = $( '<div class="wc_bis_already_signed_up"></div>' )
+				.html( variation.wc_bis_already_signed_up_html )
+				.insertAfter( form.$formContainer );
 			return;
 		}
 
@@ -73,6 +85,7 @@
 	 */
 	BISFormManager.prototype.onAnnounceReset = function( event ) {
 		var form = event.data.bisForm;
+		form.$signedUpNotice.remove();
 		form.$formProductInput.val( form.product_id ).trigger( 'change' );
 		form.$formContainer.prop( 'hidden', true );
 	};

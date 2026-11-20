@@ -160,7 +160,7 @@ test.describe(
 
 				await page.goto( product.permalink );
 				await expect(
-					page.getByText( bisNotice.alreadyJoinedOnLoad )
+					page.getByText( bisNotice.alreadyJoined )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'button', { name: /Notify me/i } )
