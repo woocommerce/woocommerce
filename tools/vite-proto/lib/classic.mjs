@@ -24,6 +24,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { rolldown, watch } from 'rolldown';
 import { parseAst, parseAstAsync } from 'rolldown/parseAst';
+import { parseSync } from 'rolldown/utils';
 import MagicString, { Bundle } from 'magic-string';
 import remapping from '@jridgewell/remapping';
 import { styleMark, isStyle } from './css.mjs';
@@ -283,7 +284,7 @@ export function classicPlugin( config, state ) {
  * - `__wcT( 'translators: …', call )` becomes `( /* translators: … *\/ call )`,
  *   edited on the parsed code so strings that look alike stay untouched.
  */
-async function analyzeChunk( chunk, chunkOfModule, state ) {
+async function analyzeChunk( chunk, chunkOfModule, state, licenses ) {
 	const modules = Object.keys( chunk.modules );
 	const css = modules.filter( isStyle ).map( styleMark );
 	const lazy = new Map();
@@ -300,6 +301,19 @@ async function analyzeChunk( chunk, chunkOfModule, state ) {
 		externals.add( match[ 1 ] );
 	}
 	const ms = new MagicString( chunk.code );
+	// License comments move to a .LICENSE.txt file, like webpack's Terser
+	// plugin does. Only the parser knows which `/*!` text is a comment.
+	const legal = [];
+	if ( licenses && /\/[*/]!|@preserve|@license|@cc_on/.test( chunk.code ) ) {
+		for ( const comment of parseSync( chunk.fileName, chunk.code ).comments ) {
+			const text = chunk.code.slice( comment.start, comment.end );
+			if ( LEGAL.test( text ) ) {
+				legal.push( comment.type === 'Line' ? `/*${ comment.value } */` : text );
+				const end = chunk.code[ comment.end ] === '\n' ? comment.end + 1 : comment.end;
+				ms.remove( comment.start, end );
+			}
+		}
+	}
 	if ( chunk.code.includes( '__wcT(' ) ) {
 		const ast = await parseAstAsync( chunk.code, { lang: 'js' } );
 		walk( ast, ( node ) => {
@@ -333,8 +347,11 @@ async function analyzeChunk( chunk, chunkOfModule, state ) {
 			`__wcX(${ match[ 1 ] },()=>${ match[ 2 ] })`
 		);
 	}
-	return { ms, code: ms.toString(), css, lazy, externals, exportHelper };
+	return { ms, code: ms.toString(), css, lazy, externals, exportHelper, legal };
 }
+
+// Terser's rule for license comments.
+const LEGAL = /^\/[*/]!|@preserve|@license|@cc_on/im;
 
 const EXPORT_GETTER =
 	/Object\.defineProperty\(exports,\s*("[^"\\]+"),\s*\{\s*enumerable:\s*(?:!0|true),\s*get:\s*function\s*\(\)\s*\{\s*return ([\w$]+);?\s*\}\s*\}\)/g;
@@ -369,7 +386,9 @@ async function link( ctx, bundle, config, state ) {
 		}
 	}
 	const rewritten = await Promise.all(
-		chunks.map( ( chunk ) => analyzeChunk( chunk, chunkOfModule, state ) )
+		chunks.map( ( chunk ) =>
+			analyzeChunk( chunk, chunkOfModule, state, config.licenses && config.mode !== 'development' )
+		)
 	);
 	chunks.forEach( ( chunk, index ) => {
 		let kind = 'common';
@@ -741,7 +760,16 @@ async function link( ctx, bundle, config, state ) {
 			emit( `${ out }.map`, mapOf( out ) );
 			emit( out, `${ code }//# sourceMappingURL=${ path.posix.basename( out ) }.map\n` );
 		} else {
-			emit( out, code );
+			const legal = new Set(
+				renderedPieces.get( out ).flatMap( ( { file } ) => info.get( file ).legal )
+			);
+			if ( legal.size ) {
+				const name = `${ path.posix.basename( out ) }.LICENSE.txt`;
+				emit( `${ out }.LICENSE.txt`, `${ [ ...legal ].sort().join( '\n\n' ) }\n` );
+				emit( out, `/*! For license information please see ${ name } */\n${ code }` );
+			} else {
+				emit( out, code );
+			}
 		}
 
 		if ( kind === 'lazy' ) {
@@ -902,7 +930,11 @@ export function rolldownOptions( config, state ) {
 		format: 'cjs',
 		minify: config.minify ?? production,
 		sourcemap: Boolean( config.sourcemap ),
-		comments: { legal: false, annotation: false, jsdoc: false },
+		comments: {
+			legal: Boolean( config.licenses && production ),
+			annotation: false,
+			jsdoc: false,
+		},
 		entryFileNames: '[name].js',
 		chunkFileNames: '_/[name]-[hash].js',
 		strictExecutionOrder: config.strict !== false,

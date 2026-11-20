@@ -147,6 +147,8 @@ export function adminConfig( { outDir = OUT, production = true, css, only = null
 		target: TARGET,
 		entries: entries().filter( ( entry ) => ! only || only.includes( entry.name ) ),
 		injectPolyfill: false,
+		// Webpack's default Terser setup writes .LICENSE.txt files for admin.
+		licenses: true,
 		publicPath: 'auto',
 		extensions: [ '.json', '.js', '.jsx', '.ts', '.tsx' ],
 		alias: {
