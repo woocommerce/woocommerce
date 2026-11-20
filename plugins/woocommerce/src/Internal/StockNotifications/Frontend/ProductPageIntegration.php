@@ -10,7 +10,9 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EligibilityService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupService;
+use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 use WC_Product;
 use WC_Product_Variation;
 
@@ -70,7 +72,6 @@ class ProductPageIntegration {
 		add_action( 'woocommerce_simple_add_to_cart', array( $this, 'maybe_render_form' ), 30 );
 		add_action( 'woocommerce_after_add_to_cart_form', array( $this, 'maybe_render_form' ), 30 );
 		add_filter( 'render_block_' . self::ADD_TO_CART_WITH_OPTIONS_BLOCK, array( $this, 'render_form_after_add_to_cart_with_options' ), 10, 3 );
-		add_filter( 'woocommerce_available_variation', array( $this, 'add_variation_already_signed_up_notice' ), 10, 3 );
 	}
 
 	/**
@@ -259,56 +260,70 @@ class ProductPageIntegration {
 			return;
 		}
 
-		// Only the form shown on load targets this product: JS points a variable product's hidden form
-		// at the selected variation, whose sign-up is checked in add_variation_already_signed_up_notice().
-		$notification = $this->is_visible_on_load( $product ) ? $this->get_current_user_signup( $product ) : null;
-		if ( $notification instanceof Notification ) {
-			$this->display_already_signed_up( $product, $notification );
+		if ( $this->is_visible_on_load( $product ) ) {
+			$notification = $this->get_current_user_signup( $product );
+			if ( $notification instanceof Notification ) {
+				$this->display_already_signed_up( $product, $notification );
+				return;
+			}
+
+			$this->display_form( $product );
 			return;
 		}
 
-		$this->display_form( $product );
+		// JS points a variable product's hidden form at the selected variation, and shows the
+		// "already joined" notice instead for the variations listed on the form.
+		$signups = $this->get_current_user_variation_signups( $product );
+		$this->display_form( $product, array_keys( $signups ) );
+
+		if ( $signups ) {
+			echo '<div class="wc_bis_already_signed_up" data-bis-product-id="' . absint( $product->get_id() ) . '" hidden>';
+			$this->display_already_signed_up( $product, reset( $signups ) );
+			echo '</div>';
+		}
 	}
 
 	/**
-	 * Add the "already joined" notice to the data of an out of stock variation the logged-in shopper signed up for.
+	 * Get the logged-in shopper's active sign-ups for a variable product's variations, keyed by variation ID.
 	 *
-	 * The form script shows it in place of the form when the shopper selects the variation.
+	 * Matches get_current_user_signup() for each variation, with one query for all of them. In stock variations
+	 * and those with 'any' attributes are skipped: a sign-up for 'any' attributes also stores the chosen values,
+	 * which aren't known until the shopper picks them.
 	 *
-	 * @internal
-	 *
-	 * @param array|mixed $data      Variation data.
-	 * @param WC_Product  $product   Variable product.
-	 * @param WC_Product  $variation Variation.
-	 * @return array|mixed
+	 * @param WC_Product $product Variable product.
+	 * @return array<int, Notification>
 	 */
-	public function add_variation_already_signed_up_notice( $data, $product, $variation ) {
-		if ( ! is_array( $data ) || ! $variation instanceof WC_Product_Variation || ! Config::allows_signups() ) {
-			return $data;
+	private function get_current_user_variation_signups( WC_Product $product ): array {
+		$variation_ids = $product->get_children();
+		if ( ! $variation_ids || ! is_user_logged_in() || ! self::is_personalization_enabled() ) {
+			return array();
 		}
 
-		// Skip products that never render the form, so the lookup below only runs where the notice can show.
-		if ( ! $this->eligibility_service->is_product_eligible( $product ) || ! $this->eligibility_service->product_allows_signups( $product ) ) {
-			return $data;
+		$notification_ids = NotificationQuery::get_notifications(
+			array(
+				'status'     => NotificationStatus::ACTIVE,
+				'product_id' => $variation_ids,
+				'user_id'    => get_current_user_id(),
+			)
+		);
+
+		$signups = array();
+		foreach ( $notification_ids as $notification_id ) {
+			$notification = Factory::get_notification( (int) $notification_id );
+			$variation    = $notification instanceof Notification ? wc_get_product( $notification->get_product_id() ) : null;
+			if (
+				! $variation instanceof WC_Product_Variation
+				|| isset( $signups[ $variation->get_id() ] )
+				|| $this->eligibility_service->is_stock_status_eligible( $variation->get_stock_status() )
+				|| in_array( '', $variation->get_variation_attributes(), true )
+			) {
+				continue;
+			}
+
+			$signups[ $variation->get_id() ] = $notification;
 		}
 
-		if ( $this->eligibility_service->is_stock_status_eligible( $variation->get_stock_status() ) ) {
-			return $data;
-		}
-
-		// A sign-up for a variation with 'any' attributes also stores the chosen values, which aren't known yet.
-		if ( in_array( '', $variation->get_variation_attributes(), true ) ) {
-			return $data;
-		}
-
-		$notification = $this->get_current_user_signup( $variation );
-		if ( $notification instanceof Notification ) {
-			ob_start();
-			$this->display_already_signed_up( $variation, $notification );
-			$data['wc_bis_already_signed_up_html'] = ob_get_clean();
-		}
-
-		return $data;
+		return $signups;
 	}
 
 	/**
@@ -405,10 +420,11 @@ class ProductPageIntegration {
 	/**
 	 * Display the form.
 	 *
-	 * @param WC_Product $product Product object.
+	 * @param WC_Product $product                 Product object.
+	 * @param int[]      $signed_up_variation_ids Variations the shopper already joined, listed on the form for JS.
 	 * @return void
 	 */
-	public function display_form( WC_Product $product ): void {
+	public function display_form( WC_Product $product, array $signed_up_variation_ids = array() ): void {
 
 		$button_class = implode(
 			' ',
@@ -421,17 +437,22 @@ class ProductPageIntegration {
 			)
 		);
 
-		wc_get_template(
-			'single-product/back-in-stock-form.php',
-			array(
-				'product_id'       => $product->get_parent_id() ? $product->get_parent_id() : $product->get_id(),
-				// Kept so template overrides that still read it don't raise an undefined-variable warning.
-				'show_checkbox'    => false,
-				'show_email_field' => ! is_user_logged_in() && ! Config::requires_account(),
-				'button_class'     => $button_class,
-				'is_visible'       => $this->is_visible_on_load( $product ),
-			)
+		$args = array(
+			'product_id'       => $product->get_parent_id() ? $product->get_parent_id() : $product->get_id(),
+			// Kept so template overrides that still read it don't raise an undefined-variable warning.
+			'show_checkbox'    => false,
+			'show_email_field' => ! is_user_logged_in() && ! Config::requires_account(),
+			'button_class'     => $button_class,
+			'is_visible'       => $this->is_visible_on_load( $product ),
 		);
+
+		// Added to the rendered markup, so template overrides get it too.
+		$html = new \WP_HTML_Tag_Processor( wc_get_template_html( 'single-product/back-in-stock-form.php', $args ) );
+		if ( $signed_up_variation_ids && $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ) ) {
+			$html->set_attribute( 'data-bis-signed-up-variations', (string) wp_json_encode( $signed_up_variation_ids ) );
+		}
+
+		echo $html->get_updated_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Template markup, the attribute is escaped by the tag processor.
 	}
 
 	/**

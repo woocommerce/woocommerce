@@ -393,27 +393,116 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add the "already joined" notice only to the out of stock variation the logged-in customer signed up for.
+	 * Render a variable product's form and get the variations listed on it as joined.
+	 *
+	 * @param string|null $markup Set to the rendered markup.
+	 * @return array<int>|null The variation IDs, or null without the attribute.
 	 */
-	public function test_already_joined_notice_is_added_to_signed_up_variation_data(): void {
-		$product = wc_get_product( $this->create_and_visit_variable_product() );
-		// The fixture creates the in-stock variation first.
-		list( $in_stock_id, $out_of_stock_id ) = $product->get_children();
+	private function render_signed_up_variation_ids( ?string &$markup = null ): ?array {
+		ob_start();
+		do_action( 'woocommerce_after_add_to_cart_form' );
+		$markup = (string) ob_get_clean();
+
+		$html = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue( $html->next_tag( array( 'class_name' => 'wc_bis_form' ) ), 'The variation form should render.' );
+		$ids = $html->get_attribute( 'data-bis-signed-up-variations' );
+
+		return is_string( $ids ) ? json_decode( $ids, true ) : null;
+	}
+
+	/**
+	 * @testdox Should list the joined out of stock variations on the form and print one hidden "already joined" notice.
+	 */
+	public function test_signed_up_variations_are_listed_on_the_form(): void {
+		$product_id = $this->create_and_visit_variable_product();
+		// The fixture creates the in stock variation first.
+		list( $in_stock_id, $out_of_stock_id ) = wc_get_product( $product_id )->get_children();
+
+		$other_out_of_stock_id = ( new FixtureData() )->get_variation_product( $product_id, array( 'pa_color' => 'red-slug' ), array( 'stock_status' => ProductStockStatus::OUT_OF_STOCK ) )->get_id();
+		$GLOBALS['product']    = wc_get_product( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
 		$this->log_in_customer_signed_up_for( $out_of_stock_id );
-		// Sign up for the in-stock one too: it must not swap its add to cart button for the notice.
+		// Joining an in stock variation must not swap its add to cart button for the notice.
+		foreach ( array( $other_out_of_stock_id, $in_stock_id ) as $variation_id ) {
+			$notification = new Notification();
+			$notification->set_status( NotificationStatus::ACTIVE );
+			$notification->set_product_id( $variation_id );
+			$notification->set_user_id( get_current_user_id() );
+			$notification->save();
+		}
+
+		$ids = $this->render_signed_up_variation_ids( $markup );
+
+		$this->assertEqualsCanonicalizing( array( $out_of_stock_id, $other_out_of_stock_id ), $ids, 'Only the joined out of stock variations should be listed.' );
+		$this->assertSame( 1, substr_count( $markup, 'You have already joined this waitlist.' ), 'The notice should be printed once.' );
+		$this->assertStringContainsString( '<div class="wc_bis_already_signed_up" data-bis-product-id="' . $product_id . '" hidden>', $markup, 'The notice should start hidden and name the product its form is for.' );
+	}
+
+	/**
+	 * @testdox Should not list joined variations when personalization is turned off.
+	 */
+	public function test_signed_up_variations_are_not_listed_without_personalization(): void {
+		$product_id = $this->create_and_visit_variable_product();
+		$this->log_in_customer_signed_up_for( wc_get_product( $product_id )->get_children()[1] );
+		add_filter( 'woocommerce_customer_stock_notifications_personalization_enabled', '__return_false' );
+
+		$this->assertNull( $this->render_signed_up_variation_ids( $markup ) );
+		$this->assertStringNotContainsString( 'wc_bis_already_signed_up', $markup );
+	}
+
+	/**
+	 * @testdox Should not list a variation whose sign-up is $status.
+	 * @testWith ["cancelled"]
+	 *           ["pending"]
+	 *
+	 * @param string $status The sign-up status.
+	 */
+	public function test_inactive_variation_signup_is_not_listed( string $status ): void {
+		$product_id = $this->create_and_visit_variable_product();
+		$this->log_in_customer_signed_up_for( wc_get_product( $product_id )->get_children()[1], $status );
+
+		$this->assertNull( $this->render_signed_up_variation_ids( $markup ), 'A sign-up that is not active should keep the form.' );
+		$this->assertStringNotContainsString( 'wc_bis_already_signed_up', $markup, 'No notice should be printed.' );
+	}
+
+	/**
+	 * @testdox Should not list a variation joined as a guest with the logged-in customer's email.
+	 */
+	public function test_guest_variation_signup_is_not_listed(): void {
+		$product_id = $this->create_and_visit_variable_product();
+		$user_id    = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+
 		$notification = new Notification();
 		$notification->set_status( NotificationStatus::ACTIVE );
-		$notification->set_product_id( $in_stock_id );
-		$notification->set_user_id( get_current_user_id() );
+		$notification->set_product_id( wc_get_product( $product_id )->get_children()[1] );
+		$notification->set_user_email( wp_get_current_user()->user_email );
 		$notification->save();
 
-		$variations = array_column( $product->get_available_variations(), null, 'variation_id' );
+		$this->assertNull( $this->render_signed_up_variation_ids(), 'A guest sign-up should keep the form.' );
+	}
 
-		$this->assertStringContainsString( 'You have already joined this waitlist.', $variations[ $out_of_stock_id ]['wc_bis_already_signed_up_html'] ?? '', 'The signed-up variation should carry the notice.' );
-		$this->assertArrayNotHasKey( 'wc_bis_already_signed_up_html', $variations[ $in_stock_id ], 'An in-stock variation should not carry the notice.' );
+	/**
+	 * @testdox Should not list a joined variation with 'any' attributes, whose chosen values aren't known yet.
+	 */
+	public function test_variation_with_any_attribute_is_not_listed(): void {
+		$product_id         = $this->create_and_visit_variable_product();
+		$any_id             = ( new FixtureData() )->get_variation_product( $product_id, array( 'pa_color' => '' ), array( 'stock_status' => ProductStockStatus::OUT_OF_STOCK ) )->get_id();
+		$GLOBALS['product'] = wc_get_product( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$this->log_in_customer_signed_up_for( $any_id );
 
+		$this->assertNull( $this->render_signed_up_variation_ids() );
+	}
+
+	/**
+	 * @testdox Should not list joined variations for guests.
+	 */
+	public function test_signed_up_variations_are_not_listed_for_guests(): void {
+		$product_id = $this->create_and_visit_variable_product();
+		$this->log_in_customer_signed_up_for( wc_get_product( $product_id )->get_children()[1] );
 		wp_set_current_user( 0 );
-		$variations = array_column( $product->get_available_variations(), null, 'variation_id' );
-		$this->assertArrayNotHasKey( 'wc_bis_already_signed_up_html', $variations[ $out_of_stock_id ], 'Guests should not get the notice.' );
+
+		$this->assertNull( $this->render_signed_up_variation_ids( $markup ) );
+		$this->assertStringNotContainsString( 'wc_bis_already_signed_up', $markup );
 	}
 }
