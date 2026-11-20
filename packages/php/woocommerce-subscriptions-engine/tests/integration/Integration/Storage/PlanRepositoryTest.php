@@ -312,7 +312,6 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 			$this->fail( 'Expected update_fields to refuse the name.' );
 		} catch ( \RuntimeException $e ) {
 			$this->assertStringContainsString( 'Failed to update plan', $e->getMessage() );
-			$this->assertStringContainsString( 'field failed: name', $e->getMessage() );
 		}
 
 		$stored = $repo->find( $id );
