@@ -424,10 +424,14 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 
 		// Update delivery URL.
 		if ( ! empty( $request['delivery_url'] ) ) {
-			if ( wc_is_valid_url( $request['delivery_url'] ) ) {
-				$webhook->set_delivery_url( $request['delivery_url'] );
-			} else {
+			if ( ! wc_is_valid_url( $request['delivery_url'] ) ) {
 				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_delivery_url", __( 'Webhook delivery URL must be a valid URL starting with http:// or https://.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
+			// Clients can send back the filtered URL from the response without editing it.
+			$delivery_url = esc_url_raw( $request['delivery_url'], array( 'http', 'https' ) );
+			if ( esc_url_raw( $webhook->get_delivery_url(), array( 'http', 'https' ) ) !== $delivery_url ) {
+				$webhook->set_delivery_url( $request['delivery_url'] );
 			}
 		}
 

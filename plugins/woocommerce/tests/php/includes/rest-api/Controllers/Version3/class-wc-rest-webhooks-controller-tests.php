@@ -385,6 +385,34 @@ class WC_REST_Webhooks_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Sending back the filtered URL preserves the stored URL and author.
+	 */
+	public function test_filtered_delivery_url_round_trip_keeps_author(): void {
+		$admin_id        = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$shop_manager_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		$stored_url      = self::PING_URL_PREFIX . 'admin-integration';
+		$webhook         = new WC_Webhook();
+		$webhook->set_user_id( $admin_id );
+		$webhook->set_topic( 'customer.created' );
+		$webhook->set_delivery_url( $stored_url );
+		$webhook->save();
+
+		wp_set_current_user( $shop_manager_id );
+		$path = 'webhooks/' . $webhook->get_id();
+		add_filter( 'woocommerce_webhook_delivery_url', static fn( $url ) => add_query_arg( 'source', 'store', $url ) );
+		$read = $this->do_rest_get_request( $path );
+		$this->assertSame( 200, $read->get_status() );
+		$delivery_url = $read->get_data()['delivery_url'];
+		$this->assertSame( $stored_url . '?source=store', $delivery_url );
+
+		$response = $this->do_rest_request( $path, 'PUT', array( 'delivery_url' => $delivery_url ) );
+		$this->assertSame( 200, $response->get_status() );
+		$saved = wc_get_webhook( $webhook->get_id() );
+		$this->assertSame( $stored_url, $saved->get_data()['delivery_url'] );
+		$this->assertSame( $admin_id, $saved->get_user_id() );
+	}
+
+	/**
 	 * @testdox Changing the delivery URL without a logged-in user keeps the existing author.
 	 */
 	public function test_delivery_url_change_without_a_user_keeps_the_author(): void {
