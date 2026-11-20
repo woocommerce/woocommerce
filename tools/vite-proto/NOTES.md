@@ -44,3 +44,25 @@
 - i18n final: blocks 1681 entries both, 0 "Could not parse", comments 117 control vs 119 Rolldown (1 "lost" is a wrong match in control: 'Loading…'). Admin 2334 both, 0 "Could not parse", comments 0 control vs 290 Rolldown.
 - Live final: /home/user/wc-bench/live/full-control vs final-rolldown, 14 pages, 0 page errors both sides; checkout rechecked 4 times alternating, same.
 - Cleanup done: control assets restored (diff -rq = 0), test page 14 deleted, caches flushed, Vite service stopped, mu-plugin and SCRIPT_DEBUG removed, git status clean.
+
+## Production pieces added later
+
+All local commits on `try/vite-rolldown-proto`. Production output is unchanged by each one (same file set, `.asset.php` lists and sizes, checked with `compare.mjs`).
+
+- Requires between chunks resolve at run time from Rolldown's chunk metadata, not by regex. Translator comments are edited on the parsed code.
+- Source maps in development builds (`--dev`, watch).
+- propTypes dropped in production for code outside node_modules. Lazy files load each other instead of copying shared code.
+- Watch: Sass partials, Interactivity API script modules, dependency detection and `block.json`.
+- `.LICENSE.txt` files for admin, like webpack's Terser plugin.
+- `ASSET_CHECK=true` writes `assets.json`. `WP_BUNDLE_ANALYZER=1` writes a static bundle report.
+- `WC_BUNDLER=rolldown` switch in the `build:project:bundle` scripts.
+- Hot reload for `app`, `embed` and every `wp-admin-scripts` entry (`dev/stub.mjs`).
+- Smoke check after all of it: shop, cart, checkout, wc-admin Home and Analytics, 0 page errors and 0 console errors.
+
+Still open:
+
+- Size: JS is about 13% bigger than webpack (blocks 5312 vs 4626 KB raw, admin 9523 vs 8756 KB). Most of it is Rolldown's lazy-init wrappers from `strictExecutionOrder`. Turning it off saves about 7% on blocks but needs browser proof that execution order still holds.
+- CSS order: 22 blocks stylesheets have the same rules in a different order. Needs a visual check.
+- Extension compatibility: not tested with real extensions.
+- pnpm workspace: making this a workspace package rewrote about 3,200 lockfile lines, so it keeps its own `npm install`. A real migration would add Rolldown and sass-embedded to the blocks and admin packages and trim the lockfile.
+- CI, Storybook (uses webpack through Storybook's builder), and replacing the webpack configs are not started. Jest does not use webpack and needs no change.
