@@ -60,6 +60,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/order-notes-query',
 		'woocommerce/payment-gateways-query',
 		'woocommerce/customers-query',
+		'woocommerce/customer-update',
 		'woocommerce/product-review-update',
 		'woocommerce/product-review-reply',
 		'woocommerce/product-reviews-query',
@@ -373,6 +374,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
+			),
+			'woocommerce/customer-update'             => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
 			),
 			'woocommerce/product-review-update'       => array(
 				'readonly'    => false,
@@ -1261,6 +1267,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				array(
 					'id'      => 'bacs',
 					'enabled' => true,
+				),
+			),
+			'customer-update'             => array(
+				'woocommerce/customer-update',
+				array(
+					'id'         => 1,
+					'first_name' => 'Denied',
 				),
 			),
 		);
@@ -2649,6 +2662,78 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should name the parent route for variation options only when the variation has a variable parent whose route takes variations and attributes.
+	 */
+	public function test_variation_options_hint_needs_a_parent_route(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$parent_id  = $created['product']['id'];
+		$small_id   = $created['product']['variation_ids'][0];
+		$attributes = array(
+			array(
+				'name'   => 'Size',
+				'option' => 'M',
+			),
+		);
+
+		$no_attributes = static fn( $fields, $type ) => 'variation' === $type ? array_values( array_diff( $fields, array( 'attributes' ) ) ) : $fields;
+		add_filter( 'woocommerce_ability_product_type_fields', $no_attributes, 10, 2 );
+		try {
+			$through_parent = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'         => $parent_id,
+					'variations' => array(
+						array(
+							'id'         => $small_id,
+							'attributes' => $attributes,
+						),
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_ability_product_type_fields', $no_attributes, 10 );
+		}
+		$this->assertWPError( $through_parent );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $through_parent->get_error_code() );
+		$this->assertStringNotContainsString( 'parent product', $through_parent->get_error_message(), 'The parent route does not point at itself.' );
+
+		$no_variations = static fn( $fields, $type ) => 'variable' === $type ? array_values( array_diff( $fields, array( 'variations' ) ) ) : $fields;
+		add_filter( 'woocommerce_ability_product_type_fields', $no_variations, 10, 2 );
+		try {
+			$closed_parent = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'         => $small_id,
+					'attributes' => $attributes,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_ability_product_type_fields', $no_variations, 10 );
+		}
+		$this->assertWPError( $closed_parent );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $closed_parent->get_error_code() );
+		$this->assertStringNotContainsString( 'parent product', $closed_parent->get_error_message(), 'A parent that does not take variations is no route.' );
+
+		wp_update_post(
+			array(
+				'ID'          => $small_id,
+				'post_parent' => 0,
+			)
+		);
+		wc_delete_product_transients( $small_id );
+		clean_post_cache( $small_id );
+
+		$orphan = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $small_id,
+				'attributes' => $attributes,
+			)
+		);
+		$this->assertWPError( $orphan );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $orphan->get_error_code() );
+		$this->assertStringNotContainsString( 'parent product', $orphan->get_error_message(), 'An orphan variation has no parent to name.' );
+	}
+
+	/**
 	 * @testdox Should treat a variation as a product in update, create, query and delete.
 	 */
 	public function test_variations_are_products_in_the_other_abilities(): void {
@@ -2679,7 +2764,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertSame( '8.00', wc_get_product( $parent_id )->get_price() );
 
-		$direct_options = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+		$direct_options = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
 				'id'         => $small_id,
 				'attributes' => array(
@@ -2693,6 +2778,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $direct_options );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $direct_options->get_error_code() );
 		$this->assertStringContainsString( 'attributes', $direct_options->get_error_message() );
+		$this->assertStringContainsString( "update its parent product {$parent_id} and send the variation in the variations input", $direct_options->get_error_message(), 'The refusal names the parent route.' );
 
 		$resized = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(

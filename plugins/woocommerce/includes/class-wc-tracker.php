@@ -616,7 +616,41 @@ class WC_Tracker {
 			$user_count[ $role ] = $count;
 		}
 
+		$user_count['customer_application_password_users'] = self::get_customer_application_password_user_count();
+
 		return $user_count;
+	}
+
+	/**
+	 * Count current customers with at least one stored Application Password.
+	 *
+	 * @return int
+	 */
+	private static function get_customer_application_password_user_count(): int {
+		global $wpdb;
+
+		$capabilities_meta_key = $wpdb->get_blog_prefix( get_current_blog_id() ) . 'capabilities';
+		// Application Passwords and capabilities are separate rows in user meta, so the query joins them by user ID.
+		// Both values are serialized; these fragments identify an active customer role and a stored credential.
+		$customer_role_pattern = '%' . $wpdb->esc_like( 's:8:"customer";b:1;' ) . '%';
+		$password_data_pattern = '%' . $wpdb->esc_like( 's:4:"uuid";' ) . '%';
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(DISTINCT application_passwords.user_id)
+				FROM {$wpdb->usermeta} AS application_passwords
+				INNER JOIN {$wpdb->usermeta} AS capabilities
+					ON capabilities.user_id = application_passwords.user_id
+					AND capabilities.meta_key = %s
+				WHERE application_passwords.meta_key = %s
+					AND application_passwords.meta_value LIKE %s
+					AND capabilities.meta_value LIKE %s",
+				$capabilities_meta_key,
+				WP_Application_Passwords::USERMETA_KEY_APPLICATION_PASSWORDS,
+				$password_data_pattern,
+				$customer_role_pattern
+			)
+		);
 	}
 
 	/**

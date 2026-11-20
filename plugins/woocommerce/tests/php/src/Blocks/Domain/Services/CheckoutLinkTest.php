@@ -296,7 +296,59 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
 
 		$this->assertStringNotContainsString( 'attribute_pa_size', $url, 'An unpublished product page should not be used as the redirect.' );
-		$this->assertStringContainsString( 'Missing variation data', $query['wc_error'] ?? '', 'The add to cart error should still be shown.' );
+		$this->assertSame( 'This item is not available for purchase.', $query['wc_error'], 'The add to cart error should not name the unpublished product or its attributes.' );
+	}
+
+	/**
+	 * @testdox Strips cart item data for sold-individually products and variations by default, restores it only where the override filter allows, and still blocks a later plain add.
+	 */
+	public function test_cart_item_data_does_not_bypass_sold_individually(): void {
+		$default_product = \WC_Helper_Product::create_simple_product();
+		$default_product->set_sold_individually( true );
+		$default_product->save();
+
+		$overridden_product = \WC_Helper_Product::create_simple_product();
+		$overridden_product->set_sold_individually( true );
+		$overridden_product->save();
+
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		$variable_product->set_sold_individually( true );
+		$variable_product->save();
+
+		$variation_id = wc_get_product_id_by_sku( 'DUMMY SKU VARIABLE SMALL' );
+
+		add_filter(
+			'woocommerce_checkout_link_sold_individually_cart_item_data',
+			function ( $cart_item_data, $raw_cart_item_data, $product ) use ( $overridden_product ) {
+				return $product->get_id() === $overridden_product->get_id() ? $raw_cart_item_data : $cart_item_data;
+			},
+			10,
+			3
+		);
+
+		$_GET['products'] = implode(
+			',',
+			[
+				$default_product->get_id() . ':1::note=a',
+				$default_product->get_id() . ':1::note=b',
+				$overridden_product->get_id() . ':1::nyp=120',
+				$variation_id . ':1:pa_colour=red;pa_number=0:note=a',
+			]
+		);
+
+		$this->get_checkout_link_service()->get_checkout_link_test();
+
+		$cart_items = array_column( WC()->cart->get_cart(), null, 'product_id' );
+
+		$this->assertCount( 3, $cart_items, 'Each sold-individually product and variation should only be added to the cart once.' );
+		$this->assertSame( 1, $cart_items[ $default_product->get_id() ]['quantity'], 'A sold-individually product should keep a quantity of one.' );
+		$this->assertArrayNotHasKey( 'note', $cart_items[ $default_product->get_id() ], 'Cart item data should be dropped by default, even across several entries.' );
+		$this->assertSame( WC()->cart->generate_cart_id( $default_product->get_id() ), $cart_items[ $default_product->get_id() ]['key'], 'A sold-individually product should keep its plain cart item key.' );
+		$this->assertSame( '120', $cart_items[ $overridden_product->get_id() ]['nyp'] ?? null, 'The override filter should restore data only for the product it targets.' );
+		$this->assertArrayNotHasKey( 'note', $cart_items[ $variable_product->get_id() ], 'Cart item data should be dropped for a variation whose parent is sold individually.' );
+
+		$this->assertFalse( WC()->cart->add_to_cart( $default_product->get_id() ), 'A later plain add should not bypass the sold-individually limit either.' );
+		$this->assertCount( 3, WC()->cart->get_cart(), 'The cart should still only contain one line per product.' );
 	}
 
 	/**
