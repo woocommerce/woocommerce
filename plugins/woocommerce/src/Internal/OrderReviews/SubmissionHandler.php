@@ -51,7 +51,7 @@ class SubmissionHandler {
 	 * Marks a review held by someone other than this handler, so a later edit cannot
 	 * approve it. An untagged hold came from the moderation checks and an edit may lift it.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.1
 	 */
 	private const MODERATOR_HELD_META_KEY = '_wc_moderator_held';
 
@@ -107,7 +107,7 @@ class SubmissionHandler {
 	 * carry no tag and an edit may still lift them, which also leaves reviews held before
 	 * this tag existed working as they did.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.1
 	 *
 	 * @param int|string  $new_status New comment status.
 	 * @param int|string  $old_status Old comment status.

@@ -37,7 +37,7 @@ class Authentication {
 	 * Core's /batch/v1 can't run Store API requests. The Store API batch keeps sub-request nonces, which come from
 	 * request data, only when it was sent as JSON or with its own Nonce header. A link or cross-site form can't do either.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.1
 	 * @param mixed            $result  Response to replace the requested version with.
 	 * @param array            $handler Route handler used for the request.
 	 * @param \WP_REST_Request $request Request used to generate the response.

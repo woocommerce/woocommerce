@@ -598,7 +598,7 @@ class WC_Discounts {
 	 * A `woocommerce_coupons_enabled` callback that returns true keeps them valid, as on the apply paths. One that
 	 * returns false while the setting is on (e.g. to hide the coupon form on a page) doesn't remove applied coupons.
 	 *
-	 * @since  11.4.0
+	 * @since  11.3.1
 	 * @throws Exception Error message.
 	 * @return bool
 	 */

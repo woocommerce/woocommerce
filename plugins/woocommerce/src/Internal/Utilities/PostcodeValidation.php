@@ -80,7 +80,7 @@ final class PostcodeValidation {
 	 *
 	 * Covers the countries wc_format_postcode() formats as ZIP+4.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.1
 	 *
 	 * @param string $postcode Postcode, with or without the hyphen.
 	 * @param string $country  Country code.
