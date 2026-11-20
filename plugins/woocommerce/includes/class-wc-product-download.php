@@ -160,7 +160,7 @@ class WC_Product_Download implements ArrayAccess {
 
 		// Shortcodes are allowed, validations should be done by the shortcode provider in this case.
 		if ( 'shortcode' === $file_path_type ) {
-			return true;
+			return 0 === validate_file( $file_path );
 		}
 
 		// Remote paths are allowed.

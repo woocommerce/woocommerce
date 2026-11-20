@@ -311,6 +311,30 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Cart updates do not synchronize an existing draft order.
+	 */
+	public function test_update_item_does_not_synchronize_draft_order(): void {
+		$draft_order_id = wc()->session->get( 'store_api_draft_order' );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key'      => $this->keys[0],
+				'quantity' => 10,
+			)
+		);
+
+		$response    = rest_get_server()->dispatch( $request );
+		$draft_order = wc_get_order( $draft_order_id );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 11, $response->get_data()['items_count'] );
+		$this->assertInstanceOf( \WC_Order::class, $draft_order );
+		$this->assertCount( 0, $draft_order->get_items(), 'Cart routes should leave draft orders unchanged.' );
+	}
+
+	/**
 	 * Test getting updated shipping.
 	 */
 	public function test_update_customer() {
@@ -1699,15 +1723,17 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox A cart change removes the draft order from the session when syncing the change to it fails to save.
+	 * @testdox A cart change does not save or forget the draft order.
 	 */
-	public function test_cart_change_forgets_draft_order_that_fails_to_save(): void {
+	public function test_cart_change_does_not_save_or_forget_draft_order(): void {
 		$draft_order_id = (int) wc()->session->get( 'store_api_draft_order' );
 		$this->assertGreaterThan( 0, $draft_order_id );
 
-		$fail = function ( $order ) use ( $draft_order_id ) {
+		$save_attempted = false;
+		$fail           = function ( $order ) use ( $draft_order_id, &$save_attempted ) {
 			if ( $order->get_id() === $draft_order_id ) {
-				throw new \Exception( 'Forced save failure' );
+				$save_attempted = true;
+				throw new \Exception( 'Cart routes must not save draft orders.' );
 			}
 		};
 		add_action( 'woocommerce_before_order_object_save', $fail );
@@ -1715,9 +1741,15 @@ class Cart extends ControllerTestCase {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params( array( 'key' => $this->keys[0] ) );
-		$response = rest_get_server()->dispatch( $request );
 
-		$this->assertSame( 200, $response->get_status(), 'The cart change itself should still succeed.' );
-		$this->assertEmpty( wc()->session->get( 'store_api_draft_order' ), 'A draft order that failed to save must not stay in the session to be resumed.' );
+		try {
+			$response = rest_get_server()->dispatch( $request );
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+		}
+
+		$this->assertSame( 200, $response->get_status(), 'The cart change itself should succeed.' );
+		$this->assertFalse( $save_attempted, 'Cart routes should not save draft orders.' );
+		$this->assertSame( $draft_order_id, (int) wc()->session->get( 'store_api_draft_order' ), 'Checkout should validate the draft order when it is next used.' );
 	}
 }

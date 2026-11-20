@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\OrderDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CustomersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CustomerUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CouponsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate;
@@ -111,6 +112,7 @@ class AbilitiesLoader {
 		SettingsQuery::class,
 		SettingsUpdate::class,
 		SettingsGroupsQuery::class,
+		CustomerUpdate::class,
 	);
 
 	/**

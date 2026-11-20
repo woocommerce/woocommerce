@@ -29,6 +29,48 @@ class OrderController {
 	private const LOCATION_FIELDS = [ 'country', 'state', 'postcode', 'city' ];
 
 	/**
+	 * Prefix of the option name used as a self-expiring mutex around an order. The order ID is appended.
+	 *
+	 * The row holds the lock's release time (a microtime float); its mere existence is the lock. It lives in the
+	 * options table for the reasons given on BatchProcessingController::ENQUEUED_PROCESSORS_LOCK_OPTION.
+	 *
+	 * @since 11.3.0
+	 */
+	const ORDER_LOCK_OPTION_PREFIX = 'wc_store_api_order_lock_';
+
+	/**
+	 * How long (in seconds) a held order lock stays valid before it is considered stale and can be taken over.
+	 *
+	 * Locks are released when the request ends, so this only bounds how long a lock left behind by a request that
+	 * died without running its shutdown hooks keeps the order out of reach. A request that may have outlived its
+	 * lock confirms it with lock_order() before relying on it.
+	 *
+	 * @since 11.3.0
+	 */
+	const ORDER_LOCK_TTL = 60;
+
+	/**
+	 * How long (in seconds) lock_order() waits by default for a lock held by another request.
+	 *
+	 * @since 11.3.0
+	 */
+	const ORDER_LOCK_TIMEOUT = 10;
+
+	/**
+	 * Orders locked by the current request, as order ID => stored release time.
+	 *
+	 * @var array<int, string>
+	 */
+	private static array $order_locks = array();
+
+	/**
+	 * Shutdown callback that releases locks held by this request.
+	 *
+	 * @var \Closure|null
+	 */
+	private static ?\Closure $unlock_orders_on_shutdown = null;
+
+	/**
 	 * Checkout fields controller.
 	 *
 	 * @var CheckoutFields
@@ -141,6 +183,154 @@ class OrderController {
 			);
 			$this->additional_fields_controller->sync_customer_additional_fields_with_order( $order, $customer );
 			$customer->save();
+		}
+	}
+
+	/**
+	 * Get the shopper-facing message used when another request holds an order lock.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return string
+	 */
+	public static function get_order_lock_error_message(): string {
+		return __( 'Your order is still being processed by another request. Please try again.', 'woocommerce' );
+	}
+
+	/**
+	 * Give the current request exclusive use of an order until the request ends, or confirm that it still has it.
+	 *
+	 * Checkout flows use this lock to serialize reads and mutations of a shared order. Cart routes may also use it
+	 * for order-specific side effects, such as releasing reserved stock. Callers acquire the lock before relying on
+	 * order state so that another request cannot change the order after validation and before placement or payment.
+	 *
+	 * The claim is an atomic INSERT of an options row (which fails if the row already exists, making it a mutex);
+	 * if the row exists but its stored release time has already passed, a conditional UPDATE takes the stale lock
+	 * over. Modeled on BatchProcessingController::acquire_enqueued_processors_lock(). A request that already holds
+	 * the lock atomically renews the row only while its ownership value still matches, so the call is safe to repeat,
+	 * for instance from every part of a batch request.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int $order_id Order ID. There is nothing to lock when this is 0.
+	 * @param int $timeout  How long (in seconds) to wait for a lock held by another request.
+	 * @return bool True if the lock is held by this request. False if another request holds it, or took it over
+	 *              from this request after the lock went stale.
+	 */
+	public static function lock_order( int $order_id, int $timeout = self::ORDER_LOCK_TIMEOUT ): bool {
+		global $wpdb;
+
+		if ( $order_id <= 0 ) {
+			return true;
+		}
+
+		$option_name = self::ORDER_LOCK_OPTION_PREFIX . $order_id;
+
+		if ( isset( self::$order_locks[ $order_id ] ) ) {
+			$owned_expiry = self::$order_locks[ $order_id ];
+			$time         = microtime( true );
+			$expiry       = number_format( max( $time + self::ORDER_LOCK_TTL, (float) $owned_expiry + 0.000001 ), 6, '.', '' );
+
+			// Renew only if the row still contains this request's ownership value. If an expired lease and its owner
+			// race to update the row, exactly one conditional UPDATE wins.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$renewed = $wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$expiry,
+					$option_name,
+					$owned_expiry
+				)
+			);
+
+			if ( $renewed ) {
+				self::$order_locks[ $order_id ] = $expiry;
+				return true;
+			}
+
+			// The lock went stale and another request took it over, or the row is gone.
+			unset( self::$order_locks[ $order_id ] );
+			return false;
+		}
+
+		$give_up_at = microtime( true ) + max( 0, $timeout );
+
+		// A contended INSERT fails on the duplicate key by design, so silence wpdb error reporting to keep the
+		// expected-failure path from spamming the log in debug mode; restore the prior setting when done.
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			while ( true ) {
+				$time   = microtime( true );
+				$now    = number_format( $time, 6, '.', '' );
+				$expiry = number_format( $time + self::ORDER_LOCK_TTL, 6, '.', '' );
+
+				// The unique option_name key makes this INSERT a mutex: it fails when the lock row already exists.
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$acquired = $wpdb->insert(
+					$wpdb->options,
+					array(
+						'option_name'  => $option_name,
+						'option_value' => $expiry,
+						'autoload'     => 'no',
+					),
+					array( '%s', '%s', '%s' )
+				);
+
+				if ( ! $acquired ) {
+					// The lock row exists; take it over only if its stored release time is already in the past.
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					$acquired = $wpdb->query(
+						$wpdb->prepare(
+							"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+							$expiry,
+							$option_name,
+							$now
+						)
+					);
+				}
+
+				if ( $acquired ) {
+					self::$order_locks[ $order_id ] = $expiry;
+
+					if ( null === self::$unlock_orders_on_shutdown ) {
+						self::$unlock_orders_on_shutdown = static function (): void {
+							global $wpdb;
+
+							$callback = self::$unlock_orders_on_shutdown;
+							foreach ( self::$order_locks as $locked_order_id => $locked_expiry ) {
+								// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+								$wpdb->delete(
+									$wpdb->options,
+									array(
+										'option_name'  => self::ORDER_LOCK_OPTION_PREFIX . $locked_order_id,
+										'option_value' => $locked_expiry,
+									),
+									array( '%s', '%s' )
+								);
+							}
+
+							self::$order_locks               = array();
+							self::$unlock_orders_on_shutdown = null;
+
+							if ( $callback ) {
+								remove_action( 'shutdown', $callback, PHP_INT_MAX );
+							}
+						};
+
+						// Release after the session handlers persist their data at shutdown priority 20.
+						add_action( 'shutdown', self::$unlock_orders_on_shutdown, PHP_INT_MAX );
+					}
+					return true;
+				}
+
+				if ( $time >= $give_up_at ) {
+					return false;
+				}
+
+				usleep( 50000 );
+			}
+		} finally {
+			$wpdb->suppress_errors( $suppress );
 		}
 	}
 
