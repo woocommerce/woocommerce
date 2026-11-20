@@ -39,6 +39,7 @@ describe( 'pushChanges', () => {
 		orderNotes: '',
 		activePaymentMethod: '',
 		regulatoryFields: {} as Record< string, string >,
+		isIdle: true,
 	};
 
 	const mockStores = () => {
@@ -50,6 +51,7 @@ describe( 'pushChanges', () => {
 					getOrderNotes: () => state.orderNotes,
 					getAdditionalFields: () => ( {} ),
 					getRegulatoryFields: () => state.regulatoryFields,
+					isIdle: () => state.isIdle,
 				};
 			}
 			if ( storeName === PAYMENT_STORE_KEY ) {
@@ -108,6 +110,25 @@ describe( 'pushChanges', () => {
 		expect( updateDraftOrder ).toHaveBeenCalledTimes( 1 );
 		expect( updateDraftOrder ).toHaveBeenCalledWith( {
 			regulatory_fields: { br_tax_id: '529.982' },
+		} );
+	} );
+
+	it( 'does not send regulatory field values once the order is being placed, and sends them if the form becomes idle again', () => {
+		// The shopper typed a value and placed the order before it was saved.
+		state.regulatoryFields = { br_tax_id: '529.982.247-25' };
+		state.isIdle = false;
+
+		pushChanges( false );
+
+		expect( updateDraftOrder ).not.toHaveBeenCalled();
+
+		// The order failed, so the form is editable again and the value should be kept for a reload.
+		state.isIdle = true;
+
+		pushChanges( false );
+
+		expect( updateDraftOrder ).toHaveBeenCalledWith( {
+			regulatory_fields: { br_tax_id: '529.982.247-25' },
 		} );
 	} );
 

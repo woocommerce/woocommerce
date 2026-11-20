@@ -147,11 +147,18 @@ const updateCheckoutData = (): void => {
 	}
 
 	// The store replaces this object whenever a value changes, so comparing references is enough.
+	// Only saved while the form is idle: the server forgets the values when the order is placed,
+	// and a save sent after that would bring them back for the shopper's next order.
 	if (
 		newCheckoutData.regulatoryFields !==
 		localState.checkoutData.regulatoryFields
 	) {
-		requestData.regulatory_fields = newCheckoutData.regulatoryFields;
+		if ( checkoutStore.isIdle() ) {
+			requestData.regulatory_fields = newCheckoutData.regulatoryFields;
+		} else {
+			newCheckoutData.regulatoryFields =
+				localState.checkoutData.regulatoryFields;
+		}
 	}
 
 	// With no method selected there is nothing to send; the server treats a missing payment_method as no change.
