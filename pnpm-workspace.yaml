@@ -208,10 +208,14 @@ allowBuilds:
 permissions:
     '@wordpress/theme':
         skills: true
+    '@wordpress/theme@https://codeload.github.com/WordPress/gutenberg/tar.gz/8b697acd25594709004c8cab814ae307d0d1b643#path:packages/theme':
+      skills: true
     '@wordpress/theme@https://codeload.github.com/WordPress/gutenberg/tar.gz/b278667cfe04ac7373278bdcfd8a240f5034af11#path:packages/theme':
       skills: true
     '@wordpress/ui':
         skills: true
+    '@wordpress/ui@https://codeload.github.com/WordPress/gutenberg/tar.gz/8b697acd25594709004c8cab814ae307d0d1b643#path:packages/ui':
+      skills: true
     '@wordpress/ui@https://codeload.github.com/WordPress/gutenberg/tar.gz/b278667cfe04ac7373278bdcfd8a240f5034af11#path:packages/ui':
       skills: true
 skills:
