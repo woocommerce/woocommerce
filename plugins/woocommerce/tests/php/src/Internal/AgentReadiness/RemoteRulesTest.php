@@ -663,19 +663,19 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->serve(
 			$channels,
 			array(
-				'refund_returns_page' => array( 'required' => true ),
-				'search_visible'      => array( 'required' => false ),
-				'launched'            => array(
+				'guest_checkout'   => array( 'required' => true ),
+				'search_visible'   => array( 'required' => false ),
+				'launched'         => array(
 					'required' => false,
 					'off'      => true,
 				),
-				'order_emails'        => array(
+				'order_emails'     => array(
 					'off'   => true,
 					'label' => 'Ignored',
 				),
-				'llms_txt_present'    => array( 'off' => true ),
-				'terms_page'          => array( 'required' => 'yes' ),
-				'privacy_page'        => 'required',
+				'llms_txt_present' => array( 'off' => true ),
+				'terms_page'       => array( 'required' => 'yes' ),
+				'privacy_page'     => 'required',
 			)
 		);
 		$this->assertTrue( $this->sut->refresh() );
@@ -683,7 +683,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( 'off' => true ), RemoteRules::store_check( 'order_emails' ), 'Only required and off are kept' );
 		$this->assertSame( array(), RemoteRules::store_check( 'terms_page' ), 'A value that is not true or false is dropped' );
 		$this->assertSame( array(), RemoteRules::store_check( 'privacy_page' ) );
-		$this->assertTrue( StoreConditions::shows_required( $step( 'refund_returns_page' ) ) );
+		$this->assertTrue( StoreConditions::shows_required( $step( 'guest_checkout' ) ) );
 		$this->assertFalse( StoreConditions::shows_required( $step( 'search_visible' ) ), 'The file can drop a bundled Required step' );
 		$this->assertTrue( StoreConditions::shows_required( $step( 'payment_method' ) ), 'A step the map leaves out keeps its bundled level' );
 		$this->assertTrue( StoreConditions::shows_required( $step( 'launched', StoreConditions::LEVEL_REQUIRED ) ), 'A required condition stays Required' );
@@ -714,9 +714,9 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 
 		$this->serve( $channels );
 		$this->assertTrue( $this->sut->refresh() );
-		$this->assertSame( array(), RemoteRules::store_check( 'refund_returns_page' ) );
+		$this->assertSame( array(), RemoteRules::store_check( 'guest_checkout' ) );
 		$this->assertTrue( StoreConditions::shows_required( $step( 'search_visible' ) ), 'Without the map, the bundled list applies' );
-		$this->assertFalse( StoreConditions::shows_required( $step( 'refund_returns_page' ) ) );
+		$this->assertFalse( StoreConditions::shows_required( $step( 'guest_checkout' ) ) );
 		$this->assertContains( 'order_emails', array_column( wc_get_container()->get( StoreConditions::class )->all(), 'id' ) );
 	}
 
@@ -730,9 +730,9 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $file['checks'] );
 		$this->assertMatchesRegularExpression( '/^\d{4}-\d{2}-\d{2}$/', $file['version'], 'The version is the date of the last change' );
 		$this->assertSame(
-			array_fill_keys( StoreConditions::SHOWN_REQUIRED, array( 'required' => true ) ),
+			array_fill_keys( StoreConditions::SHOWN_REQUIRED, array( 'required' => true ) ) + array( 'pages_public' => array( 'required' => false ) ),
 			$file['store_checks'],
-			'The shipped file marks the bundled Required steps and turns nothing off, so the first publish changes nothing'
+			'The shipped file marks the bundled Required steps, and store pages that need a login as not Required, and turns nothing off, so the first publish changes nothing'
 		);
 
 		$rules  = ( new AgentReadiness() )->get_default_rules();
