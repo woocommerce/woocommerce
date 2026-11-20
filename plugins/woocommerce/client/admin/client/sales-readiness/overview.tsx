@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Badge, Card, Text } from '@wordpress/ui';
-import { Button, Spinner } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -43,12 +43,11 @@ export default function SalesReadinessOverview( {
 		initialView
 	);
 
+	// No spinner while the view loads, as on the AI shopping health page.
 	if ( ! view ) {
 		return error ? (
 			<ErrorNotice message={ error } reload={ reload } />
-		) : (
-			<Spinner />
-		);
+		) : null;
 	}
 	const { shopping, view_all: viewAll } = view.overview;
 	// A rejected URL is not a link: the button stays, disabled, and does not record a click.
