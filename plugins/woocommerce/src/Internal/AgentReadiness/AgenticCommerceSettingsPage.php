@@ -170,7 +170,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			$GLOBALS['hide_save_button'] = true;
 			printf(
 				'<div class="wc-agentic-commerce"><div id="wc-agent-readiness-overview" class="wc-agent-readiness-overview" data-view="%s"></div></div>',
-				esc_attr( (string) wp_json_encode( $this->readiness_page->view() ) )
+				esc_attr( self::view_json( $this->readiness_page->view() ) )
 			);
 			return;
 		}
@@ -181,8 +181,19 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$GLOBALS['hide_save_button'] = true;
 		printf(
 			'<div id="wc-ai-shopping" class="wc-ai-shopping-root wc-settings-prevent-change-event" data-view="%s"></div>',
-			esc_attr( (string) wp_json_encode( $this->shopping_view() ) )
+			esc_attr( self::view_json( $this->shopping_view() ) )
 		);
+	}
+
+	/**
+	 * A view as JSON for a data attribute. The hex flags encode &, quotes, < and > inside its strings, so
+	 * an entity in a page or product name, such as &quot;, which esc_attr() leaves as it is, can't
+	 * decode to a quote that ends a JSON string.
+	 *
+	 * @param array<string, mixed> $view View data.
+	 */
+	private static function view_json( array $view ): string {
+		return (string) wp_json_encode( $view, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT );
 	}
 
 	/**

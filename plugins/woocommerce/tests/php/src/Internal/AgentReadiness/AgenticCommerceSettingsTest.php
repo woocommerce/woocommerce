@@ -2195,6 +2195,33 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A page title with HTML entities stays a page name in the view, and can't end the JSON and add its own data.
+	 */
+	public function test_page_title_with_entities_stays_inside_the_view(): void {
+		$title  = 'Returns &quot;}, &quot;z&quot;: {&quot;a&quot;: &quot; &amp; &lt;b&gt; <i>';
+		$id     = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => $title,
+			)
+		);
+		$stored = get_post( $id )->post_title;
+		$this->assertStringContainsString( '&quot;', $stored, 'The title keeps its entities, as one saved without unfiltered_html can' );
+
+		$view   = $this->shopping();
+		$labels = array_merge( ...array_map( static fn( array $field ): array => array_column( $field['options'], 'label' ), $view['policies']['fields'] ) );
+		$this->assertContains( self::plain_apostrophes( $stored ), array_map( array( self::class, 'plain_apostrophes' ), $labels ), 'The title is a page name in each policy field' );
+		$this->assertArrayNotHasKey( 'z', $view, 'It adds nothing to the view' );
+
+		update_option( 'blogname', 'Blue &quot;}, &amp; Co' );
+		preg_match( '#data-view="([^"]+)"#', $this->render_page( '' ), $match );
+		$overview = json_decode( html_entity_decode( $match[1] ?? '', ENT_QUOTES ), true );
+		$this->assertIsArray( $overview, 'The Overview view still reads as JSON with an entity in a name' );
+		$this->assertStringNotContainsString( '&amp;', $match[1] ?? '', 'No & from the names is left for the browser to decode' );
+	}
+
+	/**
 	 * @testdox A stored policy page that no longer exists starts on "Choose a page", as the select did, and no policy field means no pages to list.
 	 */
 	public function test_policy_field_with_a_deleted_page_starts_on_choose_a_page(): void {
