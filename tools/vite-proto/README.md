@@ -63,14 +63,14 @@ These write development builds, with source maps, into the same asset folders. A
 
 ## Hot reload for wc-admin (Vite dev server)
 
-This covers the wc-admin `app` entry only. The rest of the page keeps using built files, from webpack or from this prototype.
+This covers the wc-admin `app` and `embed` entries and the `wp-admin-scripts/*` entries. The rest of the page keeps using built files, from webpack or from this prototype. Package entries such as `components` or `data` cannot come from Vite: they set `wc.*` globals that other scripts read when they load, and Vite serves ES modules, which run later.
 
 1. Build admin once, with webpack or `npm run build:admin`.
-2. Replace the built entry with the stub that loads the app from Vite:
-   `cp dev/stub.js ../../plugins/woocommerce/assets/client/admin/app/index.js`
+2. Replace the built entries you work on with stubs that load them from Vite, for example:
+   `node dev/stub.mjs app product-tour`
 3. In your WordPress site, set `define( 'SCRIPT_DEBUG', true );` in `wp-config.php` and copy `dev/mu-plugin-example.php` to `wp-content/mu-plugins/`. It installs the React DevTools hook before React loads, which React Fast Refresh needs.
 4. Start the server: `npm run dev:admin`. It listens on `http://localhost:5173`; the browser must reach that address.
-5. Open WooCommerce > Home. Edits to files under `client/admin/client` show up without a page reload.
+5. Open the page that loads the entry, such as WooCommerce > Home for `app`. Edits to its source files show up without a page reload.
 
 Undo: rebuild admin, remove the mu-plugin and `SCRIPT_DEBUG`.
 

@@ -1,8 +1,8 @@
 /**
- * Vite dev server for the wc-admin `app` entry.
+ * Vite dev server for the wc-admin `app`, `embed` and wp-admin-scripts entries.
  *
- * WordPress still enqueues app/index.js as a classic script. In dev that file
- * is a stub (dev/stub.js) that adds the Vite client and client/index.tsx as
+ * WordPress still enqueues the built files as classic scripts. In dev those
+ * files are stubs (dev/stub.mjs writes them) that add the Vite client and client/index.tsx as
  * ES modules from this server. WordPress and WooCommerce packages stay window
  * globals, loaded by the scripts PHP already enqueues.
  */
@@ -157,7 +157,7 @@ export default defineConfig( {
 		},
 	},
 	optimizeDeps: {
-		entries: [ 'client/index.tsx' ],
+		entries: [ 'client/index.tsx', 'client/embed.tsx', 'client/wp-admin-scripts/*/index.{js,ts,tsx}' ],
 		rolldownOptions: { plugins: [ wcGlobalsForDeps() ], moduleTypes: { '.js': 'jsx' } },
 	},
 	server: {

@@ -47,7 +47,7 @@ const wcAdminPackages = [
 
 const camel = ( name ) => name.replace( /-([a-z])/g, ( match, letter ) => letter.toUpperCase() );
 
-function entries() {
+export function entries() {
 	const list = [
 		{ name: 'app', files: [ './client/index.tsx' ] },
 		{ name: 'embed', files: [ './client/embed.tsx' ] },
