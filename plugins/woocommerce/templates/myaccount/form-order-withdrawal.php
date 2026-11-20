@@ -77,8 +77,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 					<dt><?php echo esc_html( $review_row['label'] ?? '' ); ?></dt>
 					<dd>
 						<?php
-						$review_row_key = isset( $review_row['key'] ) ? (string) $review_row['key'] : '';
-						if ( \Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor::FIELD_EMAIL === $review_row_key ) {
+						if ( \Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor::FIELD_EMAIL === ( $review_row['key'] ?? '' ) ) {
 							printf( '<address>%s</address>', esc_html( $review_row['value'] ?? '' ) );
 						} else {
 							echo nl2br( esc_html( $review_row['value'] ?? '' ) );
