@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Type the selected item props callback in the select control; no runtime change.
+

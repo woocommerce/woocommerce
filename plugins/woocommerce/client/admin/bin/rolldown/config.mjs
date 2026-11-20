@@ -285,25 +285,6 @@ export function adminConfig( {
 					},
 				},
 			},
-			{
-				// Oxc rejects what Babel lets through: a type that binds
-				// `any` twice. A merge-ready migration fixes the source.
-				name: 'wc-admin-source-fixes',
-				transform: {
-					filter: {
-						id: /experimental-select-control\/selected-items\.tsx$/,
-					},
-					handler( code ) {
-						return {
-							code: code.replace(
-								'( { selectedItem: any, index: any } ) =>',
-								'( args: { selectedItem: any; index: any } ) =>'
-							),
-							map: null,
-						};
-					},
-				},
-			},
 			cssMarkPlugin( css ),
 		],
 		css: {
