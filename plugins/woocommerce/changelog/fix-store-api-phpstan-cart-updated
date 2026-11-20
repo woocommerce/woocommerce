@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Unblock PHPStan after cart_updated became a no-op and PaymentResult status accessed the protected property.
+
