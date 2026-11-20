@@ -34,4 +34,13 @@ class StockFilter extends AbstractBlock {
 	public static function get_stock_status_query_var_values() {
 		return array_keys( wc_get_product_stock_status_options() );
 	}
+
+	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return string[]
+	 */
+	protected function get_block_type_style() {
+		return array_merge( (array) parent::get_block_type_style(), array( 'wc-blocks-packages-style' ) );
+	}
 }
