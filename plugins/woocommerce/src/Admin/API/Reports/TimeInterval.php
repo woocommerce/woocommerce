@@ -720,10 +720,14 @@ class TimeInterval {
 	/**
 	 * Returns SQL that converts a UTC datetime column to site-local time, honouring DST per row.
 	 *
-	 * Sites with a named timezone convert with `CONVERT_TZ()`, so each row is shifted by the
-	 * offset in force when it was created. `CONVERT_TZ()` returns NULL when the server's timezone
-	 * tables are not loaded, so it falls back to {@see self::dst_transition_fallback_sql()}. Sites
-	 * using a manual UTC offset have no DST, so a fixed shift is exact.
+	 * The site timezone's DST transitions inside the window are baked into a CASE, so each row is
+	 * shifted by the offset in force on its date. It relies on PHP's timezone data only, so it
+	 * works without MySQL timezone tables (and on SQLite) and agrees with the interval ids PHP
+	 * builds for the same report. Sites using a manual UTC offset have no DST, so a fixed shift
+	 * is exact.
+	 *
+	 * Rows outside the window get the offset at the nearest window edge, so callers must limit
+	 * the query to the window.
 	 *
 	 * @since 11.4.0
 	 *
@@ -733,32 +737,7 @@ class TimeInterval {
 	 * @return string SQL expression producing a local DATETIME.
 	 */
 	public static function local_datetime_sql( string $column_sql, int $window_start, int $window_end ): string {
-		$timezone_string = get_option( 'timezone_string' );
-		if ( '' === $timezone_string ) {
-			return "DATE_ADD({$column_sql}, INTERVAL " . (int) wc_timezone_offset() . ' SECOND)';
-		}
-
-		global $wpdb;
-		$convert  = $wpdb->prepare( "CONVERT_TZ({$column_sql}, %s, %s)", '+00:00', $timezone_string ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- column is internal.
-		$fallback = self::dst_transition_fallback_sql( $column_sql, $window_start, $window_end );
-
-		return "IFNULL({$convert}, {$fallback})";
-	}
-
-	/**
-	 * Returns the fallback for {@see self::local_datetime_sql()} when `CONVERT_TZ()` is unavailable.
-	 *
-	 * A single shift by the current offset would be wrong for rows created in a different DST
-	 * period, so the site timezone's transitions inside the window are baked into a CASE and each
-	 * row is shifted by the offset in effect when it was created.
-	 *
-	 * @param string $column_sql   Fully qualified UTC datetime column.
-	 * @param int    $window_start Unix timestamp. Start of the range the query reads.
-	 * @param int    $window_end   Unix timestamp. End of the range the query reads.
-	 * @return string SQL expression producing a local DATETIME.
-	 */
-	private static function dst_transition_fallback_sql( string $column_sql, int $window_start, int $window_end ): string {
-		$transitions = wp_timezone()->getTransitions( $window_start, $window_end );
+		$transitions = '' === get_option( 'timezone_string' ) ? false : wp_timezone()->getTransitions( $window_start, $window_end );
 		if ( ! is_array( $transitions ) || array() === $transitions ) {
 			return "DATE_ADD({$column_sql}, INTERVAL " . (int) wc_timezone_offset() . ' SECOND)';
 		}

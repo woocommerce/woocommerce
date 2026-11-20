@@ -18,7 +18,7 @@ use WC_Unit_Test_Case;
 class TimeIntervalTest extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox Should convert a UTC column per row with CONVERT_TZ and a DST-transition-aware CASE fallback.
+	 * @testdox Should convert a UTC column per row with a DST-transition-aware CASE.
 	 */
 	public function test_local_datetime_sql_is_dst_transition_aware(): void {
 		update_option( 'timezone_string', 'Europe/Berlin' );
@@ -28,20 +28,20 @@ class TimeIntervalTest extends WC_Unit_Test_Case {
 		// Range spanning the 2026-03-29 01:00 UTC spring transition: rows are shifted by
 		// the offset in effect when they were created (UTC+1 before, UTC+2 after).
 		$sql = TimeInterval::local_datetime_sql( 't.created_gmt', strtotime( '2026-03-15 00:00:00' ), strtotime( '2026-04-15 00:00:00' ) );
-		$this->assertStringStartsWith( "IFNULL(CONVERT_TZ(t.created_gmt, '+00:00', 'Europe/Berlin'), ", $sql );
-		$this->assertStringContainsString(
+		$this->assertSame(
 			"CASE WHEN t.created_gmt < '2026-03-29 01:00:00' " .
 			'THEN DATE_ADD(t.created_gmt, INTERVAL 3600 SECOND) ' .
 			'ELSE DATE_ADD(t.created_gmt, INTERVAL 7200 SECOND) END',
 			$sql
 		);
 
-		// No transition inside the range: a single shift with the range's offset (winter, UTC+1).
+		// No transition inside the range: a single shift with the range's offset, not the current one.
 		$sql = TimeInterval::local_datetime_sql( 't.created_gmt', strtotime( '2026-01-01 00:00:00' ), strtotime( '2026-01-31 00:00:00' ) );
-		$this->assertStringContainsString( 'DATE_ADD(t.created_gmt, INTERVAL 3600 SECOND)', $sql );
-		$this->assertStringNotContainsString( 'CASE', $sql );
+		$this->assertSame( 'DATE_ADD(t.created_gmt, INTERVAL 3600 SECOND)', $sql );
+		$sql = TimeInterval::local_datetime_sql( 't.created_gmt', strtotime( '2026-07-01 00:00:00' ), strtotime( '2026-07-31 00:00:00' ) );
+		$this->assertSame( 'DATE_ADD(t.created_gmt, INTERVAL 7200 SECOND)', $sql );
 
-		// Manual UTC offset: no DST, so a fixed shift with no CONVERT_TZ.
+		// Manual UTC offset: no DST, so a fixed shift.
 		update_option( 'timezone_string', '' );
 		update_option( 'gmt_offset', 5.5 );
 		$sql = TimeInterval::local_datetime_sql( 't.created_gmt', strtotime( '2026-01-01 00:00:00' ), strtotime( '2026-01-31 00:00:00' ) );
