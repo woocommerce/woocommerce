@@ -154,6 +154,9 @@ class ClassicCheckout implements RegisterHooksInterface {
 		$values = $this->regulatory_fields->get_valid_values( $this->regulatory_fields->get_fields_for_cart(), $data[ self::POSTED_DATA_KEY ] ?? array(), new WP_Error() );
 
 		$this->regulatory_fields->set_order_values( $order, $values );
+
+		// The block checkout keeps typed values in the session. Forget them here too, for a shopper who used both checkouts.
+		$this->regulatory_fields->set_session_values( array() );
 	}
 
 	/**

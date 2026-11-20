@@ -154,4 +154,22 @@ class ClassicCheckoutTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $expected, $order->get_meta( '_wc_regulatory_br_tax_id' ) );
 	}
+
+	/**
+	 * @testdox Should forget a value the block checkout kept in the session once an order is created, whatever country it is for.
+	 *
+	 * @testWith ["BR"]
+	 *           ["DE"]
+	 *
+	 * @param string $billing_country Billing country of the order being placed.
+	 */
+	public function test_create_order_clears_value_kept_by_block_checkout( string $billing_country ): void {
+		$regulatory_fields = new RegulatoryFields();
+		$regulatory_fields->set_session_values( array( 'br_tax_id' => '529.982.247-25' ) );
+		WC()->customer->set_billing_country( $billing_country );
+
+		$this->sut->handle_woocommerce_checkout_create_order( new WC_Order(), array( 'regulatory_fields' => array() ) );
+
+		$this->assertSame( array(), $regulatory_fields->get_session_values() );
+	}
 }
