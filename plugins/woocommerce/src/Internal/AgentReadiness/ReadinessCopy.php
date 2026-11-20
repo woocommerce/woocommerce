@@ -71,7 +71,7 @@ final class ReadinessCopy {
 			/* translators: %s: product name. */
 			'product_return_policy_schema'   => __( 'On the %s page, the code doesn’t include your returns policy, so AI assistants can’t tell shoppers whether they can return an item.', 'woocommerce' ),
 			/* translators: %s: product name. */
-			'product_jsonld_from_core'       => __( 'On the %s page, product details appear twice in the code, so AI assistants may read a different name or price.', 'woocommerce' ),
+			'product_jsonld_from_core'       => __( 'On the %s page, a theme or plugin replaces or repeats the product details in the code, so AI assistants may read a different name or price.', 'woocommerce' ),
 			/* translators: %s: product name. */
 			'product_jsonld_required_fields' => __( 'On the %s page, the name or image is missing from the page code, so AI assistants can’t show it for sale.', 'woocommerce' ),
 			/* translators: %s: product name. */
@@ -473,9 +473,9 @@ final class ReadinessCopy {
 			),
 			'product_jsonld_from_core'       => array(
 				__( 'Your product pages have one set of product details', 'woocommerce' ),
-				__( 'Check why product details appear twice', 'woocommerce' ),
+				__( 'Check where your product details come from', 'woocommerce' ),
 				__( 'This means AI assistants read the same name and price your product shows.', 'woocommerce' ),
-				__( 'On a product page, product details appear twice in the code, so AI assistants may read a different name or price.', 'woocommerce' ),
+				__( 'On a product page, a theme or plugin replaces or repeats the product details in the code, so AI assistants may read a different name or price.', 'woocommerce' ),
 				__( 'Check the schema settings in your SEO plugin or theme. If you set this up on purpose, you can ignore this.', 'woocommerce' ),
 			),
 			'product_jsonld_required_fields' => array(
