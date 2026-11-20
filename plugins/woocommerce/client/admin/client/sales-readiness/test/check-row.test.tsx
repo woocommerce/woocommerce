@@ -48,8 +48,12 @@ describe( 'CheckRow', () => {
 		);
 	} );
 
-	it.each( [ 'Payments', '返品ポリシーのページを公開する' ] )(
-		'keeps the last character with the badge for a title without spaces, so a long one can still wrap: %s',
+	it.each( [
+		'Payments',
+		'返品ポリシーのページを公開する',
+		'AI に商品情報を読み取れるようにする',
+	] )(
+		'keeps the last character with the badge when the last word has no spaces, so a long one can still wrap: %s',
 		( title ) => {
 			const { container } = renderRow(
 				row( {

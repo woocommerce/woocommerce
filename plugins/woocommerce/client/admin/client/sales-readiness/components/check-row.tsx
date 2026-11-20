@@ -105,6 +105,9 @@ interface RowProps {
 	srState?: string;
 }
 
+/** Scripts that wrap between characters rather than at spaces: Chinese, Japanese and Korean. */
+const CJK = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\uf900-\ufaff]/;
+
 /**
  * A title whose badge stays with its last word, so a long title wraps without leaving the badge on a
  * line of its own.
@@ -116,11 +119,14 @@ const TitleWithBadge = ( {
 	title: string;
 	badge: ViewBadge;
 } ) => {
-	// A title without spaces, such as one word or Japanese, can still wrap: only its last character stays
-	// with the badge, so the badge never sits on a line of its own.
+	// The last word stays with the badge. Text after the last space that has no spaces of its own, such
+	// as one word or Japanese, keeps only its last character there, so the rest can still wrap.
+	const afterSpace = title.lastIndexOf( ' ' ) + 1;
+	const lastChar = title.length - ( Array.from( title ).pop()?.length ?? 0 );
 	const split =
-		title.lastIndexOf( ' ' ) + 1 ||
-		title.length - ( Array.from( title ).pop()?.length ?? 0 );
+		afterSpace && ! CJK.test( title.slice( afterSpace ) )
+			? afterSpace
+			: lastChar;
 	return (
 		<>
 			{ title.slice( 0, split ) }
