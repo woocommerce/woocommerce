@@ -1,6 +1,10 @@
 import path from 'node:path';
 import { BLOCKS } from '@woocommerce/rolldown-build/shared';
-import { createCss, cssMarkPlugin, orderedMarks } from '@woocommerce/rolldown-build/css';
+import {
+	createCss,
+	cssMarkPlugin,
+	orderedMarks,
+} from '@woocommerce/rolldown-build/css';
 import { buildClassic } from '@woocommerce/rolldown-build/classic';
 import { OUT, base, getEntryConfig, blocksRequire } from './config.mjs';
 
@@ -11,7 +15,9 @@ const { styleEntries, editorStyleEntries } = blocksRequire(
 // The `editorStyle` cache group: editor.scss files and editor-components.
 const isEditorStyle = ( file ) =>
 	file.endsWith( 'editor.scss' ) ||
-	file.includes( `${ path.sep }assets${ path.sep }js${ path.sep }editor-components${ path.sep }` );
+	file.includes(
+		`${ path.sep }assets${ path.sep }js${ path.sep }editor-components${ path.sep }`
+	);
 
 const unique = ( list ) => [ ...new Set( list ) ];
 
@@ -44,12 +50,14 @@ export async function buildBlocksStyles( {
 		...shared,
 		name: 'styling',
 		registry: '__wcBlocksStyling',
-		entries: Object.entries( getEntryConfig( 'styling' ) ).map( ( [ name, files ] ) => ( {
-			name,
-			files: [].concat( files ),
-			out: `${ name }-style.js`,
-			library: null,
-		} ) ),
+		entries: Object.entries( getEntryConfig( 'styling' ) ).map(
+			( [ name, files ] ) => ( {
+				name,
+				files: [].concat( files ),
+				out: `${ name }-style.js`,
+				library: null,
+			} )
+		),
 		css: {
 			lazyFile: () => null,
 			async plan( { ctx, info, outputs, closure, emit, rootModules } ) {
@@ -63,13 +71,18 @@ export async function buildBlocksStyles( {
 							ctx,
 							css,
 							rootModules( output ),
-							new Set( inline.flatMap( ( f ) => info.get( f ).css ) )
+							new Set(
+								inline.flatMap( ( f ) => info.get( f ).css )
+							)
 						)
 					);
 					for ( const file of inline ) {
 						for ( const target of info.get( file ).lazy.values() ) {
 							for ( const other of outputs.values() ) {
-								if ( other.kind === 'lazy' && other.roots.includes( target ) ) {
+								if (
+									other.kind === 'lazy' &&
+									other.roots.includes( target )
+								) {
 									parents.set( other.out, [
 										...( parents.get( other.out ) || [] ),
 										output.out,
@@ -85,15 +98,24 @@ export async function buildBlocksStyles( {
 					if ( available.has( out ) ) {
 						return available.get( out );
 					}
-					const list = ( parents.get( out ) || [] ).filter( ( p ) => ! trail.has( p ) );
+					const list = ( parents.get( out ) || [] ).filter(
+						( p ) => ! trail.has( p )
+					);
 					let result = null;
 					for ( const parent of list ) {
 						const set = new Set( [
 							...marks.get( parent ),
-							...availableOf( parent, new Set( [ ...trail, out ] ) ),
+							...availableOf(
+								parent,
+								new Set( [ ...trail, out ] )
+							),
 						] );
 						result = result
-							? new Set( [ ...result ].filter( ( m ) => set.has( m ) ) )
+							? new Set(
+									[ ...result ].filter( ( m ) =>
+										set.has( m )
+									)
+								)
 							: set;
 					}
 					available.set( out, result || new Set() );
@@ -101,25 +123,36 @@ export async function buildBlocksStyles( {
 				};
 				const editor = [];
 				for ( const output of outputs.values() ) {
-					const skip = output.kind === 'lazy' ? availableOf( output.out ) : new Set();
+					const skip =
+						output.kind === 'lazy'
+							? availableOf( output.out )
+							: new Set();
 					const own = [];
 					for ( const mark of marks.get( output.out ) ) {
 						if ( skip.has( mark ) ) {
 							continue;
 						}
-						( isEditorStyle( css.fileOf( mark ) ) ? editor : own ).push( mark );
+						( isEditorStyle( css.fileOf( mark ) )
+							? editor
+							: own
+						).push( mark );
 					}
 					const content = await css.join( own );
 					if ( content ) {
-						const name = output.kind === 'entry'
-							? output.item.entry.name
-							: output.out.replace( /\.js$/, '' );
+						const name =
+							output.kind === 'entry'
+								? output.item.entry.name
+								: output.out.replace( /\.js$/, '' );
 						writeWithRtl( emit, `${ name }.css`, content );
 					}
 				}
 				const editorContent = await css.join( unique( editor ) );
 				if ( editorContent ) {
-					writeWithRtl( emit, 'wc-blocks-editor-style.css', editorContent );
+					writeWithRtl(
+						emit,
+						'wc-blocks-editor-style.css',
+						editorContent
+					);
 				}
 			},
 		},
@@ -149,7 +182,9 @@ export async function buildBlocksStyles( {
 					ctx,
 					css,
 					rootModules( [ ...outputs.values() ][ 0 ] ),
-					new Set( [ ...info.values() ].flatMap( ( item ) => item.css ) ),
+					new Set(
+						[ ...info.values() ].flatMap( ( item ) => item.css )
+					),
 					{ dynamic: true }
 				);
 				let content = await css.join( all );
@@ -171,14 +206,22 @@ export async function buildBlocksStyles( {
 	// Interactivity block styles: one stylesheet per style.scss or editor.scss.
 	const direct = async () => {
 		const fs = await import( 'node:fs' );
-		const entries = Object.entries( { ...styleEntries, ...editorStyleEntries } );
+		const entries = Object.entries( {
+			...styleEntries,
+			...editorStyleEntries,
+		} );
 		await Promise.all(
 			entries.map( async ( [ name, file ] ) => {
-				const content = await css.join( [ css.mark( path.resolve( BLOCKS, file ) ) ] );
+				const content = await css.join( [
+					css.mark( path.resolve( BLOCKS, file ) ),
+				] );
 				const target = path.join( outDir, `${ name }.css` );
 				fs.mkdirSync( path.dirname( target ), { recursive: true } );
 				fs.writeFileSync( target, content );
-				fs.writeFileSync( target.replace( /\.css$/, '-rtl.css' ), css.rtl( content ) );
+				fs.writeFileSync(
+					target.replace( /\.css$/, '-rtl.css' ),
+					css.rtl( content )
+				);
 			} )
 		);
 		return { name: 'interactivity-styles', files: entries.length * 2 };

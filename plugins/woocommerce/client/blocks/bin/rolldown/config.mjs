@@ -1,6 +1,13 @@
 import path from 'node:path';
 import { createRequire } from 'node:module';
-import { BLOCKS, ASSETS, REPO, TARGET, externalsFor, paramCase } from '@woocommerce/rolldown-build/shared';
+import {
+	BLOCKS,
+	ASSETS,
+	REPO,
+	TARGET,
+	externalsFor,
+	paramCase,
+} from '@woocommerce/rolldown-build/shared';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 const previousCwd = process.cwd();
@@ -13,7 +20,10 @@ process.chdir( previousCwd );
 
 export const OUT = path.join( ASSETS, 'blocks' );
 const alias = helpers.getAlias();
-const externals = externalsFor( helpers.requestToExternal, helpers.requestToHandle );
+const externals = externalsFor(
+	helpers.requestToExternal,
+	helpers.requestToHandle
+);
 
 const base = {
 	root: REPO,
@@ -90,7 +100,11 @@ export const classicConfigs = ( outDir = OUT ) => [
 			library: ( name ) => [ 'wc', 'blocks', name ],
 		} ),
 		namedChunks: [
-			{ name: 'wc-blocks-vendors', file: 'wc-blocks-vendors.js', test: NODE_MODULES },
+			{
+				name: 'wc-blocks-vendors',
+				file: 'wc-blocks-vendors.js',
+				test: NODE_MODULES,
+			},
 		],
 		lazyFile: ( key ) => `${ key }.js`,
 	},
@@ -155,7 +169,9 @@ const bundleWooPackage = ( request ) =>
 	! editorExternalPackages.includes( request );
 const unifiedExternals = externalsFor(
 	( request ) =>
-		bundleWooPackage( request ) ? false : helpers.requestToExternal( request ),
+		bundleWooPackage( request )
+			? false
+			: helpers.requestToExternal( request ),
 	( request ) =>
 		bundleWooPackage( request ) ? false : helpers.requestToHandle( request )
 );
@@ -169,7 +185,10 @@ export const unifiedMainConfig = ( outDir = OUT ) => ( {
 	extensions: [ '.js', '.jsx', '.ts', '.tsx' ],
 	alias: {
 		'@woocommerce/data': path.join( REPO, 'packages/js/data/src/index.ts' ),
-		'@woocommerce/sanitize': path.join( REPO, 'packages/js/sanitize/src/index.ts' ),
+		'@woocommerce/sanitize': path.join(
+			REPO,
+			'packages/js/sanitize/src/index.ts'
+		),
 		...alias,
 	},
 	entries: [

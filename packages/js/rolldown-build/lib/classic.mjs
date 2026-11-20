@@ -35,7 +35,8 @@ const EXTERNAL = 'wc-g:';
 const ENTRY = '\0wc-entry:';
 const ENTRY_FILE = 'wc-entry-file:';
 const I18N_FUNCTIONS = new Set( [ '__', '_x', '_n', '_nx' ] );
-const TRANSLATORS = /\/\*\s*(translators:[\s\S]*?)\*\/|\/\/\s*(translators:[^\n]*)/gi;
+const TRANSLATORS =
+	/\/\*\s*(translators:[\s\S]*?)\*\/|\/\/\s*(translators:[^\n]*)/gi;
 
 const hash = ( content, length = 20 ) =>
 	createHash( 'sha1' ).update( content ).digest( 'hex' ).slice( 0, length );
@@ -125,7 +126,10 @@ async function rewriteSource( ctx, code, id, config, state ) {
 	if ( wantsLazy ) {
 		for ( const node of imports ) {
 			const source = node.source;
-			if ( source.type !== 'Literal' || typeof source.value !== 'string' ) {
+			if (
+				source.type !== 'Literal' ||
+				typeof source.value !== 'string'
+			) {
 				continue;
 			}
 			const resolved = await ctx.resolve( source.value, id );
@@ -144,7 +148,10 @@ async function rewriteSource( ctx, code, id, config, state ) {
 				state.lazyKeysByModule.set( id, new Set() );
 			}
 			state.lazyKeysByModule.get( id ).add( key );
-			edits.push( [ node.start, `__wcLazy(${ JSON.stringify( key ) }, () => ` ] );
+			edits.push( [
+				node.start,
+				`__wcLazy(${ JSON.stringify( key ) }, () => `,
+			] );
 			edits.push( [ node.end, ')' ] );
 		}
 	}
@@ -193,9 +200,16 @@ export function classicPlugin( config, state ) {
 				if ( source.startsWith( ENTRY_FILE ) ) {
 					// Webpack always runs an entry module, whatever the
 					// package's sideEffects list says.
-					return this.resolve( source.slice( ENTRY_FILE.length ), undefined, {
-						skipSelf: true,
-					} ).then( ( resolved ) => ( { ...resolved, moduleSideEffects: true } ) );
+					return this.resolve(
+						source.slice( ENTRY_FILE.length ),
+						undefined,
+						{
+							skipSelf: true,
+						}
+					).then( ( resolved ) => ( {
+						...resolved,
+						moduleSideEffects: true,
+					} ) );
 				}
 				const external = config.toGlobal( source );
 				if ( ! external ) {
@@ -214,7 +228,11 @@ export function classicPlugin( config, state ) {
 					state.externalRequests.set( externalId, new Set() );
 				}
 				state.externalRequests.get( externalId ).add( source );
-				return { id: externalId, external: true, moduleSideEffects: false };
+				return {
+					id: externalId,
+					external: true,
+					moduleSideEffects: false,
+				};
 			},
 		},
 		load: {
@@ -223,7 +241,9 @@ export function classicPlugin( config, state ) {
 				if ( id.startsWith( ENTRY ) ) {
 					const entry = entryByName.get( id.slice( ENTRY.length ) );
 					const files = entry.files.map( ( f ) =>
-						JSON.stringify( ENTRY_FILE + path.resolve( config.cwd, f ) )
+						JSON.stringify(
+							ENTRY_FILE + path.resolve( config.cwd, f )
+						)
 					);
 					const lines = files
 						.slice( 0, -1 )
@@ -305,11 +325,17 @@ async function analyzeChunk( chunk, chunkOfModule, state, licenses ) {
 	// plugin does. Only the parser knows which `/*!` text is a comment.
 	const legal = [];
 	if ( licenses && /\/[*/]!|@preserve|@license|@cc_on/.test( chunk.code ) ) {
-		for ( const comment of parseSync( chunk.fileName, chunk.code ).comments ) {
+		for ( const comment of parseSync( chunk.fileName, chunk.code )
+			.comments ) {
 			const text = chunk.code.slice( comment.start, comment.end );
 			if ( LEGAL.test( text ) ) {
-				legal.push( comment.type === 'Line' ? `/*${ comment.value } */` : text );
-				const end = chunk.code[ comment.end ] === '\n' ? comment.end + 1 : comment.end;
+				legal.push(
+					comment.type === 'Line' ? `/*${ comment.value } */` : text
+				);
+				const end =
+					chunk.code[ comment.end ] === '\n'
+						? comment.end + 1
+						: comment.end;
 				ms.remove( comment.start, end );
 			}
 		}
@@ -347,7 +373,15 @@ async function analyzeChunk( chunk, chunkOfModule, state, licenses ) {
 			`__wcX(${ match[ 1 ] },()=>${ match[ 2 ] })`
 		);
 	}
-	return { ms, code: ms.toString(), css, lazy, externals, exportHelper, legal };
+	return {
+		ms,
+		code: ms.toString(),
+		css,
+		lazy,
+		externals,
+		exportHelper,
+		legal,
+	};
 }
 
 // Like DependencyExtractionWebpackPlugin's combineAssets: one assets.json
@@ -356,7 +390,9 @@ const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
 
 // Like WP_BUNDLE_ANALYZER in the webpack builds: build-*.mjs writes a
 // report of what each script holds, from `analysis`.
-const ANALYZE = Boolean( process.env.WP_BUNDLE_ANALYZER || process.env.ANALYZE );
+const ANALYZE = Boolean(
+	process.env.WP_BUNDLE_ANALYZER || process.env.ANALYZE
+);
 export const analysis = [];
 
 // Terser's rule for license comments.
@@ -380,7 +416,9 @@ function stringOf( node ) {
  * Turn Rolldown's chunks into the files PHP expects.
  */
 async function link( ctx, bundle, config, state ) {
-	const chunks = Object.values( bundle ).filter( ( o ) => o.type === 'chunk' );
+	const chunks = Object.values( bundle ).filter(
+		( o ) => o.type === 'chunk'
+	);
 	const byFile = new Map( chunks.map( ( c ) => [ c.fileName, c ] ) );
 	const entryByName = new Map( config.entries.map( ( e ) => [ e.name, e ] ) );
 	const files = new Map();
@@ -396,7 +434,12 @@ async function link( ctx, bundle, config, state ) {
 	}
 	const rewritten = await Promise.all(
 		chunks.map( ( chunk ) =>
-			analyzeChunk( chunk, chunkOfModule, state, config.licenses && config.mode !== 'development' )
+			analyzeChunk(
+				chunk,
+				chunkOfModule,
+				state,
+				config.licenses && config.mode !== 'development'
+			)
 		)
 	);
 	chunks.forEach( ( chunk, index ) => {
@@ -419,7 +462,13 @@ async function link( ctx, bundle, config, state ) {
 		} else if ( chunk.isDynamicEntry ) {
 			kind = 'lazy';
 		}
-		info.set( chunk.fileName, { chunk, ...rewritten[ index ], kind, entry, named } );
+		info.set( chunk.fileName, {
+			chunk,
+			...rewritten[ index ],
+			kind,
+			entry,
+			named,
+		} );
 	} );
 
 	// Name the lazy files after the first key that points at them.
@@ -466,8 +515,13 @@ async function link( ctx, bundle, config, state ) {
 				item.code.length >= config.splitCommon.minBytes ||
 				( item.css.length > 0 &&
 					config.css?.bytes &&
-					( await config.css.bytes( item.css ) ) >= config.splitCommon.minBytes );
-			if ( item.kind === 'common' && ! lazyFile.has( current ) && ( await big() ) ) {
+					( await config.css.bytes( item.css ) ) >=
+						config.splitCommon.minBytes );
+			if (
+				item.kind === 'common' &&
+				! lazyFile.has( current ) &&
+				( await big() )
+			) {
 				const modules = Object.keys( item.chunk.modules )
 					.map( ( id ) => path.relative( config.root, id ) )
 					.sort();
@@ -519,7 +573,9 @@ async function link( ctx, bundle, config, state ) {
 				continue;
 			}
 			held = held
-				? new Set( [ ...held ].filter( ( f ) => parent.carried.has( f ) ) )
+				? new Set(
+						[ ...held ].filter( ( f ) => parent.carried.has( f ) )
+					)
 				: new Set( parent.carried );
 		}
 		return held || new Set();
@@ -611,7 +667,12 @@ async function link( ctx, bundle, config, state ) {
 	for ( const n of config.namedChunks || [] ) {
 		// Webpack writes a named chunk even when nothing lands in it.
 		if ( ! outputs.has( n.file ) ) {
-			outputs.set( n.file, { out: n.file, kind: 'named', roots: [], item: null } );
+			outputs.set( n.file, {
+				out: n.file,
+				kind: 'named',
+				roots: [],
+				item: null,
+			} );
 		}
 	}
 	const core =
@@ -651,7 +712,8 @@ async function link( ctx, bundle, config, state ) {
 				if ( ! targetOut || targetInfo.kind === 'entry' ) {
 					continue;
 				}
-				const own = targetInfo.kind === 'named' ? [] : withSplits( target );
+				const own =
+					targetInfo.kind === 'named' ? [] : withSplits( target );
 				const needed = new Set( [ target, ...own ] );
 				for ( const f of own ) {
 					closure( [ f ] ).named.forEach( ( n ) => needed.add( n ) );
@@ -684,7 +746,9 @@ async function link( ctx, bundle, config, state ) {
 		}
 		if ( hasLazy ) {
 			code += `${ loader }Object.assign(R.z,${ JSON.stringify( manifest ) });`;
-		} else if ( inline.some( ( f ) => info.get( f ).code.includes( '__wcLazy(' ) ) ) {
+		} else if (
+			inline.some( ( f ) => info.get( f ).code.includes( '__wcLazy(' ) )
+		) {
 			code +=
 				kind === 'entry'
 					? 'var __wcLazy=function(k,t){return Promise.resolve().then(t)};'
@@ -718,12 +782,16 @@ async function link( ctx, bundle, config, state ) {
 		const bundle = new Bundle( { separator: '' } );
 		let position = 0;
 		for ( const { start, file } of renderedPieces.get( out ) ) {
-			bundle.addSource( { content: new MagicString( code.slice( position, start ) ) } );
+			bundle.addSource( {
+				content: new MagicString( code.slice( position, start ) ),
+			} );
 			const item = info.get( file );
 			bundle.addSource( { filename: file, content: item.ms } );
 			position = start + item.code.length;
 		}
-		bundle.addSource( { content: new MagicString( code.slice( position ) ) } );
+		bundle.addSource( {
+			content: new MagicString( code.slice( position ) ),
+		} );
 		const linked = bundle.generateMap( { hires: 'boundary' } );
 		const outDir = path.resolve( config.outDir );
 		const map = remapping( linked, ( file ) => {
@@ -732,18 +800,27 @@ async function link( ctx, bundle, config, state ) {
 				return null;
 			}
 			// Rolldown's sources are relative to the chunk file.
-			const chunkDir = path.dirname( path.join( outDir, chunk.fileName ) );
-			const json = typeof chunk.map.toString === 'function' ? JSON.parse( chunk.map.toString() ) : chunk.map;
+			const chunkDir = path.dirname(
+				path.join( outDir, chunk.fileName )
+			);
+			const json =
+				typeof chunk.map.toString === 'function'
+					? JSON.parse( chunk.map.toString() )
+					: chunk.map;
 			return {
 				...json,
-				sources: json.sources.map( ( source ) => path.resolve( chunkDir, source ) ),
+				sources: json.sources.map( ( source ) =>
+					path.resolve( chunkDir, source )
+				),
 				sourcesContent: json.sourcesContent,
 			};
 		} );
 		const fileDir = path.dirname( path.join( outDir, out ) );
 		map.file = path.posix.basename( out );
 		map.sources = map.sources.map( ( source ) =>
-			source ? path.relative( fileDir, source ).split( path.sep ).join( '/' ) : source
+			source
+				? path.relative( fileDir, source ).split( path.sep ).join( '/' )
+				: source
 		);
 		return JSON.stringify( map );
 	};
@@ -768,15 +845,26 @@ async function link( ctx, bundle, config, state ) {
 		}
 		if ( config.sourcemap ) {
 			emit( `${ out }.map`, mapOf( out ) );
-			emit( out, `${ code }//# sourceMappingURL=${ path.posix.basename( out ) }.map\n` );
+			emit(
+				out,
+				`${ code }//# sourceMappingURL=${ path.posix.basename( out ) }.map\n`
+			);
 		} else {
 			const legal = new Set(
-				renderedPieces.get( out ).flatMap( ( { file } ) => info.get( file ).legal )
+				renderedPieces
+					.get( out )
+					.flatMap( ( { file } ) => info.get( file ).legal )
 			);
 			if ( legal.size ) {
 				const name = `${ path.posix.basename( out ) }.LICENSE.txt`;
-				emit( `${ out }.LICENSE.txt`, `${ [ ...legal ].sort().join( '\n\n' ) }\n` );
-				emit( out, `/*! For license information please see ${ name } */\n${ code }` );
+				emit(
+					`${ out }.LICENSE.txt`,
+					`${ [ ...legal ].sort().join( '\n\n' ) }\n`
+				);
+				emit(
+					out,
+					`/*! For license information please see ${ name } */\n${ code }`
+				);
 			} else {
 				emit( out, code );
 			}
@@ -795,7 +883,8 @@ async function link( ctx, bundle, config, state ) {
 					}
 				}
 				for ( const id of info.get( file ).externals ) {
-					for ( const request of state.externalRequests.get( id ) || [] ) {
+					for ( const request of state.externalRequests.get( id ) ||
+						[] ) {
 						handles.add( config.toHandle( request ) );
 					}
 				}
@@ -844,11 +933,19 @@ async function link( ctx, bundle, config, state ) {
 		for ( const [ out, pieces ] of renderedPieces ) {
 			const modules = {};
 			for ( const { file } of pieces ) {
-				for ( const [ id, m ] of Object.entries( info.get( file ).chunk.modules ) ) {
-					modules[ path.relative( config.root, id ) ] = m.renderedLength;
+				for ( const [ id, m ] of Object.entries(
+					info.get( file ).chunk.modules
+				) ) {
+					modules[ path.relative( config.root, id ) ] =
+						m.renderedLength;
 				}
 			}
-			analysis.push( { build: config.name, out, bytes: files.get( out )?.length ?? 0, modules } );
+			analysis.push( {
+				build: config.name,
+				out,
+				bytes: files.get( out )?.length ?? 0,
+				modules,
+			} );
 		}
 	}
 	if ( process.env.WC_DUMP ) {
@@ -862,10 +959,12 @@ async function link( ctx, bundle, config, state ) {
 					bytes: item.code.length,
 					imports: item.chunk.imports,
 					modules: Object.fromEntries(
-						Object.entries( item.chunk.modules ).map( ( [ id, m ] ) => [
-							path.relative( config.root, id ),
-							m.renderedLength,
-						] )
+						Object.entries( item.chunk.modules ).map(
+							( [ id, m ] ) => [
+								path.relative( config.root, id ),
+								m.renderedLength,
+							]
+						)
 					),
 				} ) )
 			)
@@ -882,9 +981,14 @@ async function link( ctx, bundle, config, state ) {
 	if ( Object.keys( assetCheck ).length ) {
 		// Every config adds its scripts to the one assets.json file.
 		const target = path.join( config.outDir, 'assets.json' );
-		const existing = fs.existsSync( target ) ? JSON.parse( fs.readFileSync( target, 'utf8' ) ) : {};
+		const existing = fs.existsSync( target )
+			? JSON.parse( fs.readFileSync( target, 'utf8' ) )
+			: {};
 		fs.mkdirSync( config.outDir, { recursive: true } );
-		fs.writeFileSync( target, JSON.stringify( { ...existing, ...assetCheck } ) );
+		fs.writeFileSync(
+			target,
+			JSON.stringify( { ...existing, ...assetCheck } )
+		);
 	}
 	state.files = [ ...files.keys() ];
 }
@@ -940,7 +1044,9 @@ export function rolldownOptions( config, state ) {
 		},
 		logLevel: 'warn',
 		checks: { pluginTimings: false },
-		...( process.env.WC_INCREMENTAL ? { experimental: { incrementalBuild: true } } : {} ),
+		...( process.env.WC_INCREMENTAL
+			? { experimental: { incrementalBuild: true } }
+			: {} ),
 		onLog( level, log, handler ) {
 			if (
 				[
@@ -950,7 +1056,8 @@ export function rolldownOptions( config, state ) {
 					'IMPORT_IS_UNDEFINED',
 				].includes( log.code )
 			) {
-				state.logCounts[ log.code ] = ( state.logCounts[ log.code ] || 0 ) + 1;
+				state.logCounts[ log.code ] =
+					( state.logCounts[ log.code ] || 0 ) + 1;
 				return;
 			}
 			handler( level, log );
@@ -973,19 +1080,19 @@ export function rolldownOptions( config, state ) {
 		codeSplitting: config.single
 			? false
 			: config.namedChunks?.length
-			? {
-					groups: config.namedChunks.map( ( n ) => ( {
-						name: n.name,
-						test: n.test,
-						// One chunk per set of entries, so a chunk only holds what
-						// its entries use. The linker puts them all in one file.
-						entriesAware: true,
-						entriesAwareMergeThreshold: 0,
-						includeDependenciesRecursively: false,
-						...( n.group || {} ),
-					} ) ),
-			  }
-			: undefined,
+				? {
+						groups: config.namedChunks.map( ( n ) => ( {
+							name: n.name,
+							test: n.test,
+							// One chunk per set of entries, so a chunk only holds what
+							// its entries use. The linker puts them all in one file.
+							entriesAware: true,
+							entriesAwareMergeThreshold: 0,
+							includeDependenciesRecursively: false,
+							...( n.group || {} ),
+						} ) ),
+					}
+				: undefined,
 	};
 	return { input, output };
 }

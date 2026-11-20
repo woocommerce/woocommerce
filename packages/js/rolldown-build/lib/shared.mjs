@@ -75,7 +75,13 @@ export const externalsFor = ( userToExternal, userToHandle ) => ( {
 export const wpModuleExternal = wpUtil.defaultRequestToExternalModule;
 
 // From `extends @wordpress/browserslist-config` on this checkout.
-export const TARGET = [ 'chrome151', 'edge152', 'firefox158', 'safari18.5', 'ios18.5' ];
+export const TARGET = [
+	'chrome151',
+	'edge152',
+	'firefox158',
+	'safari18.5',
+	'ios18.5',
+];
 
 export const paramCase = ( name ) =>
 	name.replace( /([a-z0-9])([A-Z])/g, '$1-$2' ).toLowerCase();

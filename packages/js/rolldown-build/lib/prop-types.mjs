@@ -38,7 +38,9 @@ export function removePropTypes( code, id ) {
 	const ext = path.extname( id );
 	let ast;
 	try {
-		ast = parseAst( code, { lang: { '.ts': 'ts', '.tsx': 'tsx' }[ ext ] || 'jsx' } );
+		ast = parseAst( code, {
+			lang: { '.ts': 'ts', '.tsx': 'tsx' }[ ext ] || 'jsx',
+		} );
 	} catch {
 		return null;
 	}
@@ -53,13 +55,22 @@ export function removePropTypes( code, id ) {
 			ms.remove( node.start, node.end );
 			return false;
 		}
-		if ( node.type === 'PropertyDefinition' && node.static && isPropTypes( node ) ) {
+		if (
+			node.type === 'PropertyDefinition' &&
+			node.static &&
+			isPropTypes( node )
+		) {
 			ms.remove( node.start, node.end );
 			return false;
 		}
 		return true;
 	} );
-	return ms.hasChanged() ? { code: ms.toString(), map: ms.generateMap( { hires: 'boundary', source: id } ) } : null;
+	return ms.hasChanged()
+		? {
+				code: ms.toString(),
+				map: ms.generateMap( { hires: 'boundary', source: id } ),
+			}
+		: null;
 }
 
 export const propTypesPlugin = () => ( {

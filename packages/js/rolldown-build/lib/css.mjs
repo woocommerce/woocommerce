@@ -33,7 +33,9 @@ let sassCompiler;
 function getSass( flavor ) {
 	if ( ! sassCompiler ) {
 		if ( flavor === 'sass-embedded' ) {
-			sassModule = rootRequire( path.join( pnpmDir( 'sass-embedded@' ), 'sass-embedded' ) );
+			sassModule = rootRequire(
+				path.join( pnpmDir( 'sass-embedded@' ), 'sass-embedded' )
+			);
 			sassCompiler = sassModule.initAsyncCompiler();
 		} else {
 			sassModule = sassBlocksRequire( 'sass' );
@@ -63,20 +65,29 @@ const nodeModulesImporter = {
 		}
 		const request = url.replace( /^~/, '' );
 		const parts = request.split( '/' );
-		const name = request.startsWith( '@' ) ? parts.slice( 0, 2 ).join( '/' ) : parts[ 0 ];
+		const name = request.startsWith( '@' )
+			? parts.slice( 0, 2 ).join( '/' )
+			: parts[ 0 ];
 		const rest = request.slice( name.length + 1 );
-		let dir = containingUrl ? path.dirname( fileURLToPath( containingUrl ) ) : REPO;
-		for ( ;; ) {
+		let dir = containingUrl
+			? path.dirname( fileURLToPath( containingUrl ) )
+			: REPO;
+		for (;;) {
 			const candidate = path.join( dir, 'node_modules', name );
 			if ( fs.existsSync( candidate ) ) {
 				if ( rest ) {
 					return pathToFileURL( path.join( candidate, rest ) );
 				}
 				const pkg = JSON.parse(
-					fs.readFileSync( path.join( candidate, 'package.json' ), 'utf8' )
+					fs.readFileSync(
+						path.join( candidate, 'package.json' ),
+						'utf8'
+					)
 				);
 				const main = pkg.sass || pkg.style || pkg.main;
-				return main ? pathToFileURL( path.join( candidate, main ) ) : null;
+				return main
+					? pathToFileURL( path.join( candidate, main ) )
+					: null;
 			}
 			const parent = path.dirname( dir );
 			if ( parent === dir ) {
@@ -111,7 +122,9 @@ const profiles = {
 			// The legacy Sass API that sass-loader uses also looks in the working directory.
 			loadPaths: [ path.join( BLOCKS, 'assets/css/abstracts' ), BLOCKS ],
 			prelude: ( file ) =>
-				path.relative( BLOCKS, file ).startsWith( 'assets/css/abstracts/' )
+				path
+					.relative( BLOCKS, file )
+					.startsWith( 'assets/css/abstracts/' )
 					? ''
 					: BLOCKS_PRELUDE,
 			lightning: production && minifier === 'lightningcss',
@@ -128,11 +141,13 @@ const profiles = {
 			postcss,
 			plugins: [
 				...preset,
-				require( '@wordpress/theme/postcss-plugins/postcss-ds-token-fallbacks' ).default,
+				require( '@wordpress/theme/postcss-plugins/postcss-ds-token-fallbacks' )
+					.default,
 			],
 			rtlcss: require( 'rtlcss' ),
 			loadPaths: [ path.join( build, 'styles' ), ADMIN ],
-			prelude: ( file ) => ( file.includes( '@automattic+' ) ? '' : ADMIN_PRELUDE ),
+			prelude: ( file ) =>
+				file.includes( '@automattic+' ) ? '' : ADMIN_PRELUDE,
 			assets: true,
 			cssThroughSass: true,
 			root: ADMIN,
@@ -142,7 +157,10 @@ const profiles = {
 
 /** A style file's mark: a short hash of its path, stable across builds. */
 export const styleMark = ( file ) =>
-	createHash( 'sha1' ).update( path.relative( REPO, file ) ).digest( 'hex' ).slice( 0, 12 );
+	createHash( 'sha1' )
+		.update( path.relative( REPO, file ) )
+		.digest( 'hex' )
+		.slice( 0, 12 );
 
 export const isStyle = ( id ) => /\.(s[ac]ss|css)$/.test( id );
 
@@ -164,21 +182,32 @@ export function createCss(
 	// Changes when the file or any partial it loaded is written.
 	const signature = ( file ) =>
 		[ file, ...( deps.get( file ) || [] ) ]
-			.map( ( f ) => ( fs.existsSync( f ) ? fs.statSync( f ).mtimeMs : 0 ) )
+			.map( ( f ) =>
+				fs.existsSync( f ) ? fs.statSync( f ).mtimeMs : 0
+			)
 			.join( ',' );
 	const stats = { sassMs: 0, postcssMs: 0, modules: 0 };
 
 	const inlineUrls = ( css, file, outputDir ) =>
-		css.replace( /url\(\s*(["']?)([^"')]+)\1\s*\)/g, ( match, quote, url ) => {
-			if ( /^(data:|https?:|\/\/|#|\/)/i.test( url ) ) {
-				return match;
+		css.replace(
+			/url\(\s*(["']?)([^"')]+)\1\s*\)/g,
+			( match, quote, url ) => {
+				if ( /^(data:|https?:|\/\/|#|\/)/i.test( url ) ) {
+					return match;
+				}
+				const source = path.resolve(
+					path.dirname( file ),
+					url.split( /[?#]/ )[ 0 ]
+				);
+				if (
+					! fs.existsSync( source ) ||
+					! fs.statSync( source ).isFile()
+				) {
+					return match;
+				}
+				return `url(${ assetUrl( source, outputDir ) })`;
 			}
-			const source = path.resolve( path.dirname( file ), url.split( /[?#]/ )[ 0 ] );
-			if ( ! fs.existsSync( source ) || ! fs.statSync( source ).isFile() ) {
-				return match;
-			}
-			return `url(${ assetUrl( source, outputDir ) })`;
-		} );
+		);
 
 	// Webpack's `type: 'asset'`: inline below 8 KB, else a hashed file.
 	const mime = {
@@ -201,7 +230,10 @@ export function createCss(
 			) }`;
 		}
 		const name =
-			createHash( 'sha1' ).update( content ).digest( 'hex' ).slice( 0, 20 ) + ext;
+			createHash( 'sha1' )
+				.update( content )
+				.digest( 'hex' )
+				.slice( 0, 20 ) + ext;
 		assets.set( name, content );
 		return relativeTo === null ? name : path.posix.join( relativeTo, name );
 	}
@@ -213,17 +245,20 @@ export function createCss(
 		if ( /\.s[ac]ss$/.test( file ) || profile.cssThroughSass ) {
 			const sass = await getSass( sassFlavor );
 			const source = fs.readFileSync( file, 'utf8' );
-			const result = await sass.compileStringAsync( profile.prelude( file ) + source, {
-				url: pathToFileURL( file ),
-				syntax: file.endsWith( '.sass' ) ? 'indented' : 'scss',
-				loadPaths: profile.loadPaths,
-				importers: [ nodeModulesImporter ],
-				style: production ? 'compressed' : 'expanded',
-				// sass-loader's output has no byte order mark.
-				charset: false,
-				logger: sassModule.Logger.silent,
-				quietDeps: true,
-			} );
+			const result = await sass.compileStringAsync(
+				profile.prelude( file ) + source,
+				{
+					url: pathToFileURL( file ),
+					syntax: file.endsWith( '.sass' ) ? 'indented' : 'scss',
+					loadPaths: profile.loadPaths,
+					importers: [ nodeModulesImporter ],
+					style: production ? 'compressed' : 'expanded',
+					// sass-loader's output has no byte order mark.
+					charset: false,
+					logger: sassModule.Logger.silent,
+					quietDeps: true,
+				}
+			);
 			css = result.css;
 			// The partials and imports this file loaded, for watch mode.
 			deps.set(
@@ -239,7 +274,8 @@ export function createCss(
 		const afterSass = performance.now();
 		stats.sassMs += afterSass - started;
 		if ( css.trim() ) {
-			css = ( await processor.process( css, { from: file, map: false } ) ).css;
+			css = ( await processor.process( css, { from: file, map: false } ) )
+				.css;
 			// css-loader writes quoted URLs with double quotes.
 			css = css.replace(
 				/url\('([^']*"[^']*)'\)/g,
@@ -259,7 +295,11 @@ export function createCss(
 	async function lightningMinify( css, file ) {
 		lightning = lightning || ( await import( 'lightningcss' ) );
 		return lightning
-			.transform( { filename: file, code: Buffer.from( css ), minify: true } )
+			.transform( {
+				filename: file,
+				code: Buffer.from( css ),
+				minify: true,
+			} )
 			.code.toString();
 	}
 
@@ -321,10 +361,12 @@ export function createCss(
 			if ( minifier === 'lightningcss' ) {
 				return lightningMinify( css, 'whole.css' );
 			}
-			return ( await profile.postcss( [ profile.cssnano ] ).process( css, {
-				from: undefined,
-				map: false,
-			} ) ).css;
+			return (
+				await profile.postcss( [ profile.cssnano ] ).process( css, {
+					from: undefined,
+					map: false,
+				} )
+			).css;
 		},
 	};
 }
@@ -333,7 +375,13 @@ export function createCss(
  * Style marks in the order MiniCssExtractPlugin writes them: depth first
  * through the imports, a module's styles after the styles it imports.
  */
-export function orderedMarks( ctx, css, roots, allowed, { dynamic = false } = {} ) {
+export function orderedMarks(
+	ctx,
+	css,
+	roots,
+	allowed,
+	{ dynamic = false } = {}
+) {
 	const seen = new Set();
 	const out = [];
 	const later = [];

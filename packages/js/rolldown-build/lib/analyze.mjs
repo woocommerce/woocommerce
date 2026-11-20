@@ -17,7 +17,10 @@ export function writeBundleReport( outDir, title ) {
 		.map( ( script ) => {
 			const modules = Object.entries( script.modules )
 				.sort( ( a, b ) => b[ 1 ] - a[ 1 ] )
-				.map( ( [ id, bytes ] ) => `<tr><td>${ escape( id ) }</td><td>${ kb( bytes ) }</td></tr>` )
+				.map(
+					( [ id, bytes ] ) =>
+						`<tr><td>${ escape( id ) }</td><td>${ kb( bytes ) }</td></tr>`
+				)
 				.join( '' );
 			return `<details><summary>${ escape( script.out ) } — ${ kb( script.bytes ) } (${ escape(
 				script.build
@@ -30,6 +33,9 @@ export function writeBundleReport( outDir, title ) {
 ${ rows }`;
 	const file = path.join( outDir, 'bundle-report.html' );
 	fs.writeFileSync( file, html );
-	fs.writeFileSync( path.join( outDir, 'bundle-report.json' ), JSON.stringify( scripts ) );
+	fs.writeFileSync(
+		path.join( outDir, 'bundle-report.json' ),
+		JSON.stringify( scripts )
+	);
 	return file;
 }
