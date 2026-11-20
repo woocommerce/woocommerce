@@ -195,7 +195,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 				data-wp-watch="callbacks.watchViewerScroll"
 				aria-label="<?php esc_attr_e( 'Product gallery', 'woocommerce' ); ?>"
 				tabindex="0"
-				aria-roledescription="carousel"
+				aria-roledescription="<?php echo esc_attr_x( 'carousel', 'ARIA role description of the product image slider', 'woocommerce' ); ?>"
 			>
 				<?php foreach ( $media_data as $index => $media ) : ?>
 					<li

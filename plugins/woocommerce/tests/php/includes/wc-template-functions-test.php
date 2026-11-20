@@ -812,4 +812,28 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		);
 		$this->assertStringContainsString( 'Your cart is currently empty.', $markup );
 	}
+
+	/**
+	 * @testdox The breadcrumb navigation label goes through the woocommerce text domain.
+	 */
+	public function test_breadcrumb_navigation_label_is_translatable(): void {
+		add_filter(
+			'gettext_woocommerce',
+			static function ( $translation, $text ) {
+				return 'Breadcrumb' === $text ? 'Trilha "de" navegação' : $translation;
+			},
+			10,
+			2
+		);
+
+		ob_start();
+		woocommerce_breadcrumb();
+		$markup = ob_get_clean();
+
+		$this->assertStringContainsString(
+			'<nav class="woocommerce-breadcrumb" aria-label="Trilha &quot;de&quot; navegação">',
+			$markup,
+			'The breadcrumb aria-label should be translated and attribute-escaped.'
+		);
+	}
 }
