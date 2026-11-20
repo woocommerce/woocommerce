@@ -130,14 +130,10 @@ class WC_Widget_Top_Rated_Products_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_top_rated_products_widget_args', $order_by_id );
 
-		try {
-			$this->assertSame(
-				array( $ids[2], $ids[1], $ids[0] ),
-				$this->rating_ordered_ids(),
-				'A filter that changes orderby should decide the ordering.'
-			);
-		} finally {
-			remove_filter( 'woocommerce_top_rated_products_widget_args', $order_by_id );
-		}
+		$this->assertSame(
+			array( $ids[2], $ids[1], $ids[0] ),
+			$this->rating_ordered_ids(),
+			'A filter that changes orderby should decide the ordering.'
+		);
 	}
 }

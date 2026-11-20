@@ -180,8 +180,6 @@ class FileControllerTest extends WC_Unit_Test_Case {
 					break;
 			}
 		}
-
-		remove_filter( 'woocommerce_log_file_size_limit', $filter_callback );
 	}
 
 	/**

@@ -75,7 +75,6 @@ class ParamsTest extends AbstractProductFiltersTest {
 	public function tearDown(): void {
 		try {
 			if ( null !== $this->taxonomy_params_filter ) {
-				remove_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
 				$this->taxonomy_params_filter = null;
 			}
 		} finally {

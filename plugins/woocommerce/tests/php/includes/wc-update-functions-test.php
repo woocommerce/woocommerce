@@ -135,8 +135,6 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		wc_update_920_add_wc_hooked_blocks_version_option();
 
 		$this->assertEquals( 'no', get_option( 'woocommerce_hooked_blocks_version' ) );
-
-		remove_filter( 'woocommerce_hooked_blocks_theme_include_list', '__return_empty_array', 999, 1 );
 	}
 
 	/**
@@ -1221,8 +1219,6 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_use_legacy_get_variations_price_hash', 'no' );
 		wc_update_1130_set_legacy_variation_price_hash_option();
 		$this->assertSame( 'no', get_option( 'woocommerce_use_legacy_get_variations_price_hash' ), 'Migration must not overwrite an existing option.' );
-
-		delete_option( 'woocommerce_use_legacy_get_variations_price_hash' );
 	}
 
 	/**

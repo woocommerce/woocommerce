@@ -86,7 +86,6 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_OptionRuleProcessor extends WC_U
 		$rule->value = 'not_included';
 		$result      = $processor->process( $rule, null );
 		$this->assertEquals( false, $result );
-		delete_option( 'array_contain_item' );
 	}
 
 	/**
@@ -115,7 +114,6 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_OptionRuleProcessor extends WC_U
 		$rule->value = 'not_included';
 		$result      = $processor->process( $rule, null );
 		$this->assertEquals( false, $result );
-		delete_option( 'string_contain_substring' );
 	}
 
 	/**
@@ -153,6 +151,5 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_OptionRuleProcessor extends WC_U
 		$rule->operation = '!contains';
 		$result          = $processor->process( $rule, null );
 		$this->assertEquals( true, $result );
-		delete_option( 'contain_item' );
 	}
 }

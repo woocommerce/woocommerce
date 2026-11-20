@@ -108,8 +108,6 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 		add_filter( 'filesystem_method', $callback );
 
 		$this->assertInstanceOf( WP_Filesystem_Base::class, FilesystemUtil::get_wp_filesystem() );
-
-		remove_filter( 'filesystem_method', $callback );
 	}
 
 	/**
@@ -122,8 +120,6 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 		add_filter( 'filesystem_method', $callback );
 
 		FilesystemUtil::get_wp_filesystem();
-
-		remove_filter( 'filesystem_method', $callback );
 	}
 
 	/**
@@ -598,7 +594,6 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 			);
 		} finally {
 			$this->delete_test_dir( $dir );
-			remove_filter( 'filesystem_method', $callback );
 		}
 	}
 
@@ -623,7 +618,6 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 			);
 		} finally {
 			$this->delete_test_dir( $dir );
-			remove_filter( 'filesystem_method', $callback );
 		}
 	}
 
@@ -652,7 +646,6 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 			);
 		} finally {
 			$this->delete_test_dir( $dir );
-			remove_filter( 'filesystem_method', $callback );
 		}
 	}
 

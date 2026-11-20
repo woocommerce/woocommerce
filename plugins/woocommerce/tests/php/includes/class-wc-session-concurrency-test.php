@@ -163,7 +163,6 @@ class WC_Session_Concurrency_Test extends WC_Unit_Test_Case {
 			$this->assertArrayNotHasKey( $cookie_name, $_COOKIE, 'The unverifiable cookie should be removed from the request' );
 			$this->assertFalse( $handler->has_session(), 'An unverifiable cookie should not count as a session' );
 		} finally {
-			remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
 			unset( $_COOKIE[ $cookie_name ] );
 		}
 	}
@@ -191,7 +190,6 @@ class WC_Session_Concurrency_Test extends WC_Unit_Test_Case {
 			$this->assertArrayHasKey( $cookie_name, $_COOKIE, 'A verifiable cookie should stay in the request' );
 			$this->assertTrue( $handler->has_session(), 'A verifiable cookie should count as a session' );
 		} finally {
-			remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
 			unset( $_COOKIE[ $cookie_name ] );
 		}
 	}
@@ -213,7 +211,6 @@ class WC_Session_Concurrency_Test extends WC_Unit_Test_Case {
 			$this->assertArrayNotHasKey( $cookie_name, $_COOKIE, 'The malformed cookie should be removed from the request' );
 			$this->assertFalse( $handler->has_session(), 'A malformed cookie should not count as a session' );
 		} finally {
-			remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
 			unset( $_COOKIE[ $cookie_name ] );
 		}
 	}

@@ -134,6 +134,7 @@ const test = base.extend<
 		localPickupUtils: LocalPickupUtils;
 		miniCartUtils: MiniCartUtils;
 		resetDatabaseAfterEachTest: boolean;
+		cleanup: ( callback: () => Promise< unknown > ) => void;
 		createProductTemplate: (
 			sourceProductSlug: string,
 			options?: { content?: string }
@@ -144,8 +145,43 @@ const test = base.extend<
 		wpCoreVersion: number;
 	}
 >( {
-	admin: async ( { page, pageUtils, editor, wpCoreVersion }, use ) => {
-		await use( new Admin( { page, pageUtils, editor, wpCoreVersion } ) );
+	// Deletes each post that `createNewPost` opens, drafts included, because
+	// `blocks-parallel` never resets the database. In `blocks-serial`, the
+	// delete runs before the database reset only when `page` is set up before
+	// `cleanup`; otherwise it fails with a 404 and only logs a warning.
+	admin: async (
+		{ page, pageUtils, editor, wpCoreVersion, requestUtils, cleanup },
+		use
+	) => {
+		const admin = new Admin( { page, pageUtils, editor, wpCoreVersion } );
+		const createNewPost = admin.createNewPost.bind( admin );
+		admin.createNewPost = async ( ...args ) => {
+			await createNewPost( ...args );
+			// `createNewPost` waits for `wp.data`, not for the editor to mount.
+			const { id, type } = await (
+				await page.waitForFunction( () => {
+					const editorStore = window.wp.data.select( 'core/editor' );
+					const postId = editorStore?.getCurrentPostId();
+					return (
+						postId && {
+							id: postId,
+							type: editorStore.getCurrentPostType(),
+						}
+					);
+				} )
+			).jsonValue();
+			cleanup( async () => {
+				const { rest_base: restBase } = await requestUtils.rest< {
+					rest_base: string;
+				} >( { path: `/wp/v2/types/${ type }` } );
+				await requestUtils.rest( {
+					method: 'DELETE',
+					path: `/wp/v2/${ restBase }/${ id }`,
+					params: { force: true },
+				} );
+			} );
+		};
+		await use( admin );
 	},
 	editor: async ( { page, wpCoreVersion }, use ) => {
 		await use( new Editor( { page, wpCoreVersion } ) );
@@ -210,6 +246,26 @@ const test = base.extend<
 	},
 	miniCartUtils: async ( { page, frontendUtils }, use ) => {
 		await use( new MiniCartUtils( page, frontendUtils ) );
+	},
+	// Registers a callback that runs after the test, even after a timeout,
+	// when code after the timed-out step in the test body does not run.
+	// The page may already be closed then, so use `requestUtils` or `wpCLI`.
+	cleanup: async ( {}, use ) => {
+		const callbacks: ( () => Promise< unknown > )[] = [];
+
+		await use( ( callback ) => {
+			callbacks.push( callback );
+		} );
+
+		const results = await Promise.allSettled(
+			callbacks.map( ( callback ) => Promise.resolve().then( callback ) )
+		);
+		for ( const result of results ) {
+			if ( result.status === 'rejected' ) {
+				// eslint-disable-next-line no-console
+				console.warn( 'Test cleanup failed:', result.reason );
+			}
+		}
 	},
 	// Copies a sample product and creates a `single-product-<slug>` template
 	// for the copy, so a spec can save a Single Product template without

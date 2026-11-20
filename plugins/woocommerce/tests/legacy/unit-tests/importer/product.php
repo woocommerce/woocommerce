@@ -57,7 +57,6 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 * Remove physical files for attachments created by the current test.
 	 */
 	public function tearDown(): void {
-		remove_action( 'add_attachment', array( $this, 'track_created_attachment' ) );
 		foreach ( array_unique( $this->created_attachment_ids ) as $attachment_id ) {
 			wp_delete_attachment( $attachment_id, true );
 		}

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Only offer font weights and styles in the email editor Appearance list that the selected font can show.

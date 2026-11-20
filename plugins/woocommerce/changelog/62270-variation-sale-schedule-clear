@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Save cleared sale schedule dates when "Cancel schedule" is clicked on a variation.

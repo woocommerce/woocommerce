@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve compatibility with extensions that expect product-grid button quantities as strings.

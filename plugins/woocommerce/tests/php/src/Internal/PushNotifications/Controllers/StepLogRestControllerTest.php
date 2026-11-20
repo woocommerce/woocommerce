@@ -89,8 +89,6 @@ class StepLogRestControllerTest extends WC_Unit_Test_Case {
 		$server = $this->create_rest_server_with_routes( array( array( $this->sut, 'register_routes' ) ), true );
 
 		$this->assertContains( '/wc-push-notifications/step-logs/site', array_keys( $server->get_routes( 'wc-push-notifications' ) ) );
-
-		remove_filter( 'pre_option_woocommerce_feature_push_notifications_enabled', fn() => 'no' );
 	}
 
 	/**
