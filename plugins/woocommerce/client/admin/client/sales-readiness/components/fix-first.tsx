@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import { Badge, Card, Text } from '@wordpress/ui';
+import { Badge, Card, Link, Text } from '@wordpress/ui';
 
 /**
  * Internal dependencies
  */
 import type { FixFirst as FixFirstData } from '../types';
+import { trackReadiness, type Surface } from '../tracks';
 import { Row, RowLink } from './check-row';
 
 type FixFirstItem = FixFirstData[ 'items' ][ number ];
@@ -40,8 +41,10 @@ function groupByTier( items: FixFirstData[ 'items' ] ): TierGroup[] {
  */
 export const FixFirstList = ( {
 	items,
+	surface,
 }: {
 	items: FixFirstData[ 'items' ];
+	surface: Surface;
 } ) => (
 	<div className="wc-sales-readiness-fix-first-groups">
 		{ groupByTier( items ).map( ( group ) => (
@@ -65,7 +68,20 @@ export const FixFirstList = ( {
 							key={ item.id }
 							title={ item.title }
 							action={
-								item.link && <RowLink link={ item.link } />
+								item.link && (
+									<RowLink
+										link={ item.link }
+										onClick={ () =>
+											trackReadiness( 'link_clicked', {
+												surface,
+												area: 'fix_first',
+												check_id: item.id,
+												position:
+													items.indexOf( item ) + 1,
+											} )
+										}
+									/>
+								)
 							}
 							srState={ item.tier + ':' }
 						>
@@ -98,8 +114,16 @@ export const FixFirstCard = ( { fixFirst }: { fixFirst: FixFirstData } ) => (
 		<Card.Content>
 			<Text variant="body-md" className="wc-sales-readiness__muted">
 				{ fixFirst.ranking }
+				{ fixFirst.link && (
+					<>
+						{ ' ' }
+						<Link href={ fixFirst.link.href }>
+							{ fixFirst.link.text }
+						</Link>
+					</>
+				) }
 			</Text>
-			<FixFirstList items={ fixFirst.items } />
+			<FixFirstList items={ fixFirst.items } surface="page" />
 		</Card.Content>
 	</Card.Root>
 );

@@ -12,6 +12,7 @@ import type { ReactNode } from 'react';
  * Internal dependencies
  */
 import type { CheckRow as CheckRowData, ViewBadge, ViewLink } from '../types';
+import { trackReadiness, type Surface } from '../tracks';
 
 /**
  * Where to fix it: an outline button when it has a URL, plain text otherwise.
@@ -138,10 +139,43 @@ export const Row = ( {
 );
 
 /**
+ * The text, with the link's name in it turned into the link.
+ */
+const TextWithLink = ( {
+	text,
+	link,
+}: {
+	text: string;
+	link?: ViewLink | null;
+} ) => {
+	const at = link?.text ? text.indexOf( link.text ) : -1;
+	if ( ! link || at < 0 ) {
+		return <>{ text }</>;
+	}
+	return (
+		<>
+			{ text.slice( 0, at ) }
+			<Link href={ link.href } openInNewTab>
+				{ link.text }
+			</Link>
+			{ text.slice( at + link.text.length ) }
+		</>
+	);
+};
+
+/**
  * One check. Failing: what to do, why it matters and what was found, the fix line when there is
  * one, and where to fix it. Passed: its title and why it matters.
  */
-export const CheckRow = ( { row }: { row: CheckRowData } ) => {
+export const CheckRow = ( {
+	row,
+	section,
+	surface = 'page',
+}: {
+	row: CheckRowData;
+	section: string;
+	surface?: Surface;
+} ) => {
 	const states: Record< CheckRowData[ 'state' ], string > = {
 		open: __( 'Issue:', 'woocommerce' ),
 		required: __( 'Issue:', 'woocommerce' ),
@@ -155,11 +189,26 @@ export const CheckRow = ( { row }: { row: CheckRowData } ) => {
 			title={ row.title }
 			srState={ states[ row.state ] }
 			badge={ row.badge }
-			action={ row.link && <RowLink link={ row.link } /> }
+			action={
+				row.link && (
+					<RowLink
+						link={ row.link }
+						onClick={ () =>
+							trackReadiness( 'link_clicked', {
+								surface,
+								area: 'section',
+								section,
+								check_id: row.id,
+								state: row.state,
+							} )
+						}
+					/>
+				)
+			}
 		>
 			{ row.text && (
 				<Text variant="body-sm" className="wc-sales-readiness__muted">
-					{ row.text }
+					<TextWithLink text={ row.text } link={ row.text_link } />
 				</Text>
 			) }
 			{ row.fix && (

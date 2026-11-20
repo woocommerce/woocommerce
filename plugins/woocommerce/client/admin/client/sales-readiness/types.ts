@@ -25,7 +25,7 @@ export interface CheckRow {
 	state: RowState;
 	/** What to do while the check fails, its passing title once it passes. */
 	title: string;
-	/** Required, or Likely conflict. */
+	/** Required. */
 	badge: ViewBadge | null;
 	/** Why it matters, and what the check found while it fails. */
 	text: string;
@@ -33,6 +33,8 @@ export interface CheckRow {
 	fix: string;
 	link: ViewLink | null;
 	seen_at: ViewLink | null;
+	/** A name in the text to link, such as a tool to test with. */
+	text_link?: ViewLink | null;
 }
 
 export interface FixFirstItem {
@@ -49,6 +51,8 @@ export interface FixFirstItem {
 export interface FixFirst {
 	title: string;
 	ranking: string;
+	/** Where to turn on Analytics, while it is off. */
+	link: ViewLink | null;
 	items: FixFirstItem[];
 }
 
@@ -99,6 +103,7 @@ export interface ReadinessView {
 		/** Scheduled Actions, when the check can't start. */
 		link: ViewLink | null;
 	};
+	/** Null before the first check, and when there is nothing to fix. */
 	fix_first: FixFirst | null;
 	sections: Section[];
 	declared: Declared | null;
@@ -107,5 +112,96 @@ export interface ReadinessView {
 		view_all: ViewLink;
 		/** "Based on your 5,000 most recently changed products.", when the check stopped at the limit. */
 		based_on: string | null;
+	};
+}
+
+/**
+ * What WooCommerce > Settings > AI tools > AI shopping shows, built by
+ * AgenticCommerceSettingsPage in PHP and handed to the page on its root.
+ */
+export interface ShoppingStep {
+	/** The store condition's id. */
+	id: string;
+	state: 'required' | 'open';
+	title: string;
+	/** Required, for a step AI shopping needs. */
+	badge: ViewBadge | null;
+	/** Why it matters, then the fix line when there is one. */
+	lines: string[];
+	/** Where to fix it; `sr` names the policy for screen readers, or is ''. */
+	link: ( ViewLink & { sr: string } ) | null;
+}
+
+export interface ShoppingCount {
+	id: string;
+	label: string;
+	/** Already formatted for the store's locale. */
+	count: string;
+	/** What the count means, shown in a popover, or ''. */
+	tip: string;
+	/** The accessible name of the popover's button. */
+	tip_label: string;
+	link: ViewLink;
+}
+
+export interface PolicyField {
+	/** The option the settings form saves. */
+	id: string;
+	/** The input name the settings form reads the value from. */
+	name: string;
+	label: string;
+	value: string;
+	options: { value: string; label: string }[];
+}
+
+export interface ShoppingView {
+	parent: ViewLink;
+	title: string;
+	description: string;
+	ucp: {
+		enabled: boolean;
+		/** Off, and a required step fails, so it can't be turned on. */
+		blocked: boolean;
+		title: string;
+		description: string;
+		learn_more: ViewLink;
+		/** What the switch says under it: that AI shopping is on, or ''. */
+		message: string;
+		path: string;
+		/** Said when turning AI shopping on didn't save, unless required steps are the reason. */
+		error_on: string;
+		/** Said when turning AI shopping off didn't save. */
+		error_off: string;
+		unsaved: string;
+	};
+	coming_soon: { text: string; link: ViewLink } | null;
+	visibility: {
+		title: string;
+		description: string;
+		/** Said instead of the counts before the first check. */
+		empty: string | null;
+		counts: ShoppingCount[];
+	};
+	checklist: {
+		title: string;
+		badge: ViewBadge | null;
+		summary: string;
+		steps: ShoppingStep[];
+		done: { id: string; title: string; text: string }[];
+		show_done: string;
+		hide_done: string;
+	};
+	policies: {
+		title: string;
+		description: string;
+		fields: PolicyField[];
+	};
+	connection: {
+		title: string;
+		description: string;
+		url: string;
+		copy: string;
+		copied: string;
+		test: ViewLink;
 	};
 }
