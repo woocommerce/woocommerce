@@ -202,6 +202,28 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A check that reads the home and product pages names the product only when its page failed; a failing home page isn't put on the product.
+	 */
+	public function test_page_check_names_the_product_only_when_its_page_failed(): void {
+		$store    = $this->good_store();
+		$viewport = '<meta name="viewport" content="width=device-width">';
+		$product  = '<h1>Blue &amp; Gold Mug</h1>';
+		$cases    = array(
+			'home'    => array( self::page(), self::page( $viewport, $product ), 0 ),
+			'product' => array( self::page( $viewport ), self::page( '', $product ), $this->product->get_id() ),
+			'both'    => array( self::page(), self::page( '', $product ), 0 ),
+		);
+		foreach ( $cases as $failed => $pages ) {
+			$store['/']                     = array( 200, $pages[0] );
+			$store[ $this->product_path() ] = array( 200, $pages[1] );
+			$this->serve( $store );
+			$check = array_column( $this->sut->all(), null, 'id' )['viewport_meta'];
+			$this->assertFalse( $check['ok'], $failed );
+			$this->assertSame( $pages[2], $check['product'], 'Named only when the product page alone failed: ' . $failed );
+		}
+	}
+
+	/**
 	 * @testdox llms.txt without a heading fails the format check; a broken store link fails, an unreachable or blocked one is couldn't check, and a blocked llms.txt is too.
 	 */
 	public function test_llms_txt(): void {

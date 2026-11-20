@@ -103,9 +103,10 @@ final class ReadinessCopy {
 	 * @param string $source  What the store serves for the check (the report's source), or ''.
 	 * @param string $product Name of the product whose page failed (the report's product), or ''.
 	 * @param string $link    The broken llms.txt link (the report's seen_at), or ''.
+	 * @param bool   $unnamed Whether the check failed on a product page whose product no longer exists.
 	 * @return array{title:string,action:string,why:string,found:string,fix:string,url:string,found_link:array{href:string,text:string}|null}|null Passed title, failing title, why it matters (shown when passed), why and what was found (shown when failing), the fix line or '', where to fix it or '', and an optional tool name linked in the found line. Null for a check without copy here.
 	 */
-	public static function store_check( string $id, string $source = '', string $product = '', string $link = '' ): ?array {
+	public static function store_check( string $id, string $source = '', string $product = '', string $link = '', bool $unnamed = false ): ?array {
 		$checks = self::store_checks();
 		if ( ! isset( $checks[ $id ] ) ) {
 			return null;
@@ -115,6 +116,14 @@ final class ReadinessCopy {
 		$named = '' === $product ? null : self::named_found( $id );
 		if ( null !== $named ) {
 			$check[3] = sprintf( $named, $product );
+		}
+		// These checks also read the home page, which their unnamed line names; a deleted product's page wasn't it.
+		$product_page = array(
+			'viewport_meta'         => __( 'A product page doesn’t tell browsers how to size it, so the layout can break for AI assistants used in browsers.', 'woocommerce' ),
+			'html_lang_and_charset' => __( 'A product page doesn’t say what language or text format it uses, so AI assistants may show garbled text or reply in the wrong language.', 'woocommerce' ),
+		);
+		if ( $unnamed && '' === $product && isset( $product_page[ $id ] ) ) {
+			$check[3] = $product_page[ $id ];
 		}
 		if ( 'ucp_profile_version' === $id && '' !== $source ) {
 			/* translators: %s: UCP version the store serves, a date such as 2026-04-08. */

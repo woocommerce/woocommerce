@@ -397,7 +397,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'link'  => $action[3],
 			);
 		}
-		$copy = ReadinessCopy::store_check( $check['id'], (string) ( $check['source'] ?? '' ), self::product_name( (int) ( $check['product'] ?? 0 ) ), (string) ( $check['seen_at'] ?? '' ) );
+		$product_id = (int) ( $check['product'] ?? 0 );
+		$copy       = ReadinessCopy::store_check( $check['id'], (string) ( $check['source'] ?? '' ), self::product_name( $product_id ), (string) ( $check['seen_at'] ?? '' ), $product_id > 0 );
 		if ( null !== $copy ) {
 			return array(
 				'title' => $copy['action'],
