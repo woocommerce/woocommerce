@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
-export const REPO = path.resolve( import.meta.dirname, '../../..' );
+export const REPO = path.resolve( import.meta.dirname, '../../../..' );
 export const BLOCKS = path.join( REPO, 'plugins/woocommerce/client/blocks' );
 export const ADMIN = path.join( REPO, 'plugins/woocommerce/client/admin' );
 export const PACKAGES = path.join( REPO, 'packages/js' );

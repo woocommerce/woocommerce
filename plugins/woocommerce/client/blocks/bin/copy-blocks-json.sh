@@ -21,7 +21,7 @@ const path = require( 'node:path' );
 
 const sourceDirectory = path.resolve( 'plugins/woocommerce/client/blocks/assets/js' );
 const targetDirectory = path.resolve( 'plugins/woocommerce/assets/client/blocks' );
-// Keep in sync with genericBlocks in webpack-entries.js.
+// Keep in sync with genericBlocks in bin/entries.js.
 const genericBlocks = new Set( [
 	'accordion-group',
 	'accordion-header',

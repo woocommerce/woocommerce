@@ -166,7 +166,7 @@ extension contracts live in `packages/public-api/`; runtime-only packages live
 in `packages/internal/`. Both kinds may be built as webpack externals and
 exposed on `window.wc`.
 
-The mapping lives in `bin/webpack-helpers.js` (`wcDepMap`):
+The mapping lives in `bin/build-helpers.js` (`wcDepMap`):
 
 | Import | Global | Script handle |
 | ------ | ------ | ------------- |

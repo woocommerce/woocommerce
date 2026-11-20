@@ -1,11 +1,11 @@
 import path from 'node:path';
-import { BLOCKS } from '../lib/shared.mjs';
-import { createCss, cssMarkPlugin, orderedMarks } from '../lib/css.mjs';
-import { buildClassic } from '../lib/classic.mjs';
-import { OUT, base, getEntryConfig, blocksRequire } from './blocks.mjs';
+import { BLOCKS } from '@woocommerce/rolldown-build/shared';
+import { createCss, cssMarkPlugin, orderedMarks } from '@woocommerce/rolldown-build/css';
+import { buildClassic } from '@woocommerce/rolldown-build/classic';
+import { OUT, base, getEntryConfig, blocksRequire } from './config.mjs';
 
 const { styleEntries, editorStyleEntries } = blocksRequire(
-	'./bin/webpack-interactivity-entries.js'
+	'./bin/interactivity-entries.js'
 );
 
 // The `editorStyle` cache group: editor.scss files and editor-components.

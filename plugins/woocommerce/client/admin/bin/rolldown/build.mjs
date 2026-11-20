@@ -1,14 +1,14 @@
 // Full admin build: client/admin's webpack config.
-import { buildClassic } from './lib/classic.mjs';
-import { writeBundleReport } from './lib/analyze.mjs';
-import { disposeSass } from './lib/css.mjs';
-import { adminConfigs, OUT } from './configs/admin.mjs';
+import { buildClassic } from '@woocommerce/rolldown-build/classic';
+import { writeBundleReport } from '@woocommerce/rolldown-build/analyze';
+import { disposeSass } from '@woocommerce/rolldown-build/css';
+import { adminConfigs, OUT } from './config.mjs';
 const args = Object.fromEntries( process.argv.slice( 2 ).map( ( a ) => {
 	const [ k, v = true ] = a.replace( /^--/, '' ).split( '=' );
 	return [ k, v ];
 } ) );
 const started = performance.now();
-const configs = adminConfigs( { outDir: args.out || OUT, sass: args.sass || 'sass', perEntry: args.single !== true, production: ! args.dev } );
+const configs = adminConfigs( { outDir: args.out || OUT, sass: args.sass || 'sass', perEntry: args.single !== true, production: ! args.dev && process.env.NODE_ENV !== 'development' } );
 const results = await Promise.all( configs.map( ( c ) => buildClassic( c ).then( ( { state, ...r } ) => r ) ) );
 await disposeSass();
 const report = writeBundleReport( args.out || OUT, 'WooCommerce admin bundle report' );

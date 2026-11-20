@@ -3,7 +3,7 @@
  */
 const { omit } = require( 'lodash' );
 const glob = require( 'glob' );
-const { scriptModuleEntries } = require( './webpack-interactivity-entries' );
+const { scriptModuleEntries } = require( './interactivity-entries' );
 
 // List of blocks that should be used as webpack entry points. They are expected
 // to be in `/assets/js/blocks/[BLOCK_NAME]`. If they are not, their relative

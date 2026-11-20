@@ -1022,3 +1022,16 @@ export function watchClassic( config, onEvent ) {
 	watcher.on( 'event', ( event ) => onEvent( event, state ) );
 	return watcher;
 }
+
+/** Watch a config and print one line per rebuild or error. */
+export function watchAndLog( config ) {
+	watchClassic( config, ( event ) => {
+		if ( event.code === 'BUNDLE_END' ) {
+			console.log( `Built ${ config.name } in ${ event.duration } ms` );
+			event.result?.close();
+		} else if ( event.code === 'ERROR' ) {
+			console.error( `Error in ${ config.name }: ${ event.error }` );
+		}
+	} );
+	return { name: config.name };
+}

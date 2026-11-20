@@ -1,12 +1,12 @@
 // Full blocks build: every webpack config of client/blocks.
-import { buildClassic } from './lib/classic.mjs';
-import { writeBundleReport } from './lib/analyze.mjs';
+import { buildClassic } from '@woocommerce/rolldown-build/classic';
+import { writeBundleReport } from '@woocommerce/rolldown-build/analyze';
 import { execFileSync } from 'node:child_process';
-import { disposeSass, createCss } from './lib/css.mjs';
-import { BLOCKS } from './lib/shared.mjs';
-import { classicConfigs, unifiedMainConfig, OUT } from './configs/blocks.mjs';
-import { buildBlocksStyles } from './configs/blocks-styles.mjs';
-import { buildScriptModules, buildDependencyDetection, copyBlockJson } from './configs/blocks-modules.mjs';
+import { disposeSass, createCss } from '@woocommerce/rolldown-build/css';
+import { BLOCKS } from '@woocommerce/rolldown-build/shared';
+import { classicConfigs, unifiedMainConfig, OUT } from './config.mjs';
+import { buildBlocksStyles } from './styles.mjs';
+import { buildScriptModules, buildDependencyDetection, copyBlockJson } from './modules.mjs';
 
 const args = Object.fromEntries( process.argv.slice( 2 ).map( ( a ) => {
 	const [ k, v = true ] = a.replace( /^--/, '' ).split( '=' );
@@ -16,8 +16,8 @@ const started = performance.now();
 const outDir = args.out || OUT;
 const only = args.only ? String( args.only ).split( ',' ) : null;
 const want = ( name ) => ! only || only.includes( name );
-// --dev: a development build, like webpack with NODE_ENV=development.
-const production = ! args.dev;
+// --dev or NODE_ENV=development: a development build with source maps.
+const production = ! args.dev && process.env.NODE_ENV !== 'development';
 const css = createCss( 'blocks', { production, minifier: args.minifier || 'cssnano', sass: args.sass || 'sass' } );
 const jobs = [
 	...[ ...classicConfigs( outDir ), unifiedMainConfig( outDir ) ]

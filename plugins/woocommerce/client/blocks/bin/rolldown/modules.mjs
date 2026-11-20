@@ -6,11 +6,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { rolldown } from 'rolldown';
-import { BLOCKS, TARGET, wpModuleExternal } from '../lib/shared.mjs';
-import { OUT, alias, blocksRequire } from './blocks.mjs';
+import { BLOCKS, TARGET, wpModuleExternal } from '@woocommerce/rolldown-build/shared';
+import { OUT, alias, blocksRequire } from './config.mjs';
 
-const { scriptModuleEntries } = blocksRequire( './bin/webpack-interactivity-entries.js' );
-const { genericBlocks } = blocksRequire( './bin/webpack-entries.js' );
+const { scriptModuleEntries } = blocksRequire( './bin/interactivity-entries.js' );
+const { genericBlocks } = blocksRequire( './bin/entries.js' );
 
 const moduleEntries = {
 	...scriptModuleEntries,
@@ -189,7 +189,7 @@ export async function buildScriptModules( { outDir = OUT, production = true, css
 	// Webpack also lists the style entries of this config; PHP reads the
 	// versions for the stylesheets.
 	const { styleEntries, editorStyleEntries } = blocksRequire(
-		'./bin/webpack-interactivity-entries.js'
+		'./bin/interactivity-entries.js'
 	);
 	for ( const name of Object.keys( { ...styleEntries, ...editorStyleEntries } ) ) {
 		const cssFile = path.join( outDir, `${ name }.css` );

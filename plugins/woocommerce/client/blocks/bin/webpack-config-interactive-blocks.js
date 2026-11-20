@@ -21,14 +21,14 @@ const {
  * Internal dependencies
  */
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
-const { getAlias, getResolve } = require( './webpack-helpers' );
+const { getAlias, getResolve } = require( './build-helpers' );
 const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const {
 	scriptModuleEntries,
 	styleEntries,
 	editorStyleEntries,
-} = require( './webpack-interactivity-entries' );
+} = require( './interactivity-entries' );
 
 // Blocks' webpack writes directly to the WooCommerce plugin's
 // `assets/client/blocks/` so PHP can enqueue files from their final location

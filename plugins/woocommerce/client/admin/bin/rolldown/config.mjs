@@ -6,9 +6,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
-import { ADMIN, ASSETS, PACKAGES, REPO, TARGET, externalsFor } from '../lib/shared.mjs';
-import { createCss, cssMarkPlugin, orderedMarks } from '../lib/css.mjs';
-import { assetPhp } from '../lib/classic.mjs';
+import { ADMIN, ASSETS, PACKAGES, REPO, TARGET, externalsFor } from '@woocommerce/rolldown-build/shared';
+import { createCss, cssMarkPlugin, orderedMarks } from '@woocommerce/rolldown-build/css';
+import { assetPhp } from '@woocommerce/rolldown-build/classic';
 
 export const OUT = path.join( ASSETS, 'admin' );
 const adminRequire = createRequire( path.join( ADMIN, 'package.json' ) );

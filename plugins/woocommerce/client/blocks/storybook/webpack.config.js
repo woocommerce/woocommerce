@@ -7,7 +7,7 @@ const path = require( 'path' );
 /**
  * Internal dependencies
  */
-const { getAlias } = require( '../bin/webpack-helpers.js' );
+const { getAlias } = require( '../bin/build-helpers.js' );
 const {
 	getMainConfig,
 	getStylingConfig,

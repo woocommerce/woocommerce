@@ -15,7 +15,7 @@
 	"scripts": {
 		"build": "pnpm build:project",
 		"build:project": "pnpm --stream '/^build:project:.*$/'",
-		"build:project:bundle": "if [ \"$WC_BUNDLER\" = rolldown ]; then node ../../../../tools/vite-proto/build-admin.mjs; else NODE_ENV=\"${NODE_ENV:-production}\" WC_ADMIN_PHASE=\"${WC_ADMIN_PHASE:-core}\" webpack; fi",
+		"build:project:bundle": "node bin/rolldown/build.mjs",
 		"build:project:feature-config": "php ../../bin/generate-feature-config.php",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
@@ -32,7 +32,7 @@
 		"ts:check": "tsc --build",
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
-		"watch:build:project:bundle": "webpack --watch",
+		"watch:build:project:bundle": "node bin/rolldown/watch.mjs",
 		"watch:build:project:feature-config": "WC_ADMIN_PHASE=development php ../../bin/generate-feature-config.php"
 	},
 	"lint-staged": {
@@ -164,6 +164,7 @@
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/notices": "workspace:*",
+		"@woocommerce/rolldown-build": "workspace:*",
 		"@wordpress/babel-preset-default": "next",
 		"@wordpress/block-editor": "catalog:wp-min",
 		"@wordpress/browserslist-config": "next",
@@ -204,6 +205,7 @@
 		"readline-sync": "^1.4.10",
 		"replace": "^1.2.2",
 		"rimraf": "catalog:tooling",
+		"rolldown": "1.2.19",
 		"rtlcss": "4.3.x",
 		"sass": "^1.69.5",
 		"sass-loader": "catalog:tooling",

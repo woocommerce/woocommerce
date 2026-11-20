@@ -20,7 +20,7 @@ const {
 } = require( '@woocommerce/internal-build/style-build' );
 const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
-const { getEntryConfig, genericBlocks } = require( './webpack-entries' );
+const { getEntryConfig, genericBlocks } = require( './entries' );
 const {
 	ASSET_CHECK,
 	NODE_ENV,
@@ -30,7 +30,7 @@ const {
 	getProgressBarPluginConfig,
 	getCacheGroups,
 	getResolve,
-} = require( './webpack-helpers' );
+} = require( './build-helpers' );
 const AddSplitChunkDependencies = require( './add-split-chunk-dependencies' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 

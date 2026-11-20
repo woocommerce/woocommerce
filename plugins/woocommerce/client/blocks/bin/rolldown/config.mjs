@@ -1,14 +1,14 @@
 import path from 'node:path';
 import { createRequire } from 'node:module';
-import { BLOCKS, ASSETS, REPO, TARGET, externalsFor, paramCase } from '../lib/shared.mjs';
+import { BLOCKS, ASSETS, REPO, TARGET, externalsFor, paramCase } from '@woocommerce/rolldown-build/shared';
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 const previousCwd = process.cwd();
 // The entry lists use globs relative to the blocks package.
 process.chdir( BLOCKS );
 const blocksRequire = createRequire( path.join( BLOCKS, 'package.json' ) );
-const helpers = blocksRequire( './bin/webpack-helpers.js' );
-const { getEntryConfig } = blocksRequire( './bin/webpack-entries.js' );
+const helpers = blocksRequire( './bin/build-helpers.js' );
+const { getEntryConfig } = blocksRequire( './bin/entries.js' );
 process.chdir( previousCwd );
 
 export const OUT = path.join( ASSETS, 'blocks' );

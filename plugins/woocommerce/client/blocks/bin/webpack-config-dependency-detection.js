@@ -12,7 +12,7 @@ const TerserPlugin = require( 'terser-webpack-plugin' );
  * Internal dependencies
  */
 const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
-const { getProgressBarPluginConfig } = require( './webpack-helpers' );
+const { getProgressBarPluginConfig } = require( './build-helpers' );
 
 const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
 // Blocks' webpack writes directly to the WooCommerce plugin's

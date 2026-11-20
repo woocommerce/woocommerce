@@ -11,18 +11,18 @@ const webpack = require( 'webpack' );
 /**
  * Internal dependencies
  */
-const { getEntryConfig } = require( './webpack-entries' );
+const { getEntryConfig } = require( './entries' );
 const {
 	editorStyleEntries,
 	styleEntries,
-} = require( './webpack-interactivity-entries' );
+} = require( './interactivity-entries' );
 const {
 	NODE_ENV,
 	getProgressBarPluginConfig,
 	getResolve,
 	requestToExternal,
 	requestToHandle,
-} = require( './webpack-helpers' );
+} = require( './build-helpers' );
 const { getSharedPlugins, getStylingConfig } = require( './webpack-configs' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 
