@@ -87,10 +87,6 @@ $min-product-width: 150px;
 /**
  * Carousel layout
  */
-// Each column count fills a share of the container. Product width is that share
-// divided by the count, so the next product still peeks into view. Markup with
-// no columns class follows the shrink steps, starting at two columns. A step can
-// repeat a count with its own share: at 782px, three columns fill 87% instead of 85.5%.
 $carousel-columns: (
 	1: (
 		span: 85%,
@@ -119,57 +115,22 @@ $carousel-columns: (
 	),
 	6: (
 		span: 90%,
-		padding: 3%,
+		padding: 1.7%,
 		align: start,
 	),
 );
+// Breakpoint at which the responsive layout first shows each column count.
+// Below 600px it shows two.
 $carousel-shrink-steps: (
-	600px: (
-		columns: 3,
-	),
-	782px: (
-		columns: 3,
-		span: 87%,
-	),
-	960px: (
-		columns: 4,
-	),
-	1280px: (
-		columns: 5,
-	),
-	1440px: (
-		columns: 6,
-	),
+	600px: 3,
+	960px: 4,
+	1280px: 5,
+	1440px: 6,
 );
 $carousel-narrow-columns: 2;
-// First breakpoint at which the responsive layout shows each column count.
-// Later steps that repeat a count are skipped.
-$carousel-visible-counts: ();
-$carousel-seen-counts: ();
 
-@each $breakpoint, $step in $carousel-shrink-steps {
-	$step-columns: map.get($step, columns);
-
-	@if not map.has-key($carousel-seen-counts, $step-columns) {
-		$carousel-visible-counts: map.set(
-			$carousel-visible-counts,
-			$breakpoint,
-			$step-columns
-		);
-		$carousel-seen-counts: map.set(
-			$carousel-seen-counts,
-			$step-columns,
-			true
-		);
-	}
-}
-
-@function carousel-product-width($columns, $span: null) {
-	$share: if(
-		$span,
-		$span,
-		map.get(map.get($carousel-columns, $columns), span)
-	);
+@function carousel-product-width($columns) {
+	$share: map.get(map.get($carousel-columns, $columns), span);
 
 	@return math.div($share, $columns);
 }
@@ -184,108 +145,71 @@ $carousel-seen-counts: ();
 	}
 }
 
-// The carousel element is the container named carousel, so a query there cannot
-// set its own scroll-padding. The collection is the ancestor query for snap styles.
-.wp-block-woocommerce-product-collection:has(.is-product-collection-layout-carousel) {
-	container-type: inline-size;
-	container-name: carousel-layout;
-}
-
 .is-product-collection-layout-carousel {
-	// Carousels with no columns class keep the centered snap used for three columns.
-	$legacy-snap: map.get($carousel-columns, 3);
-
 	overflow-x: auto;
 	scrollbar-width: none;
 	scroll-snap-type: x mandatory;
-	scroll-padding: 0 #{ map.get($legacy-snap, padding) };
+	scroll-padding: 0 30%;
 	position: relative; // Create new stacking context
 	container-type: inline-size;
 	container-name: carousel;
-
-	&.wc-block-product-template__carousel-responsive {
-		display: flex;
-		flex-wrap: nowrap;
-	}
 
 	.wc-block-product {
 		box-sizing: border-box;
 		// Padding to prevent focus outline from being clipped.
 		padding: 4px;
-		scroll-snap-align: map.get($legacy-snap, align);
 		flex-basis: 0;
 		min-width: carousel-product-width($carousel-narrow-columns);
 		max-width: 400px;
 
-		@each $breakpoint, $step in $carousel-shrink-steps {
+		@each $breakpoint, $step-columns in $carousel-shrink-steps {
 			@container carousel (min-width: #{$breakpoint}) {
-				min-width: carousel-product-width(
-					map.get($step, columns),
-					map.get($step, span)
-				);
+				min-width: carousel-product-width($step-columns);
+			}
+		}
+	}
+
+	&[class*="columns-"] {
+		.wc-block-product {
+			flex-basis: var(--carousel-column-width);
+			flex-grow: 0;
+			flex-shrink: 0;
+			min-width: var(--carousel-column-width);
+			max-width: var(--carousel-column-width);
+		}
+	}
+
+	&.wc-block-product-template__carousel-responsive {
+		display: flex;
+		flex-wrap: nowrap;
+		// Inherited by products. A container query cannot set this on the
+		// carousel itself, so the wider steps below target each product.
+		--carousel-visible-width: #{carousel-product-width($carousel-narrow-columns)};
+
+		.wc-block-product {
+			flex-shrink: 1;
+			min-width: max(
+				var(--carousel-visible-width),
+				var(--carousel-column-width)
+			);
+		}
+
+		@each $breakpoint, $step-columns in $carousel-shrink-steps {
+			@container carousel (min-width: #{$breakpoint}) {
+				@include carousel-scroll-for-count($step-columns);
+
+				.wc-block-product {
+					--carousel-visible-width: #{carousel-product-width($step-columns)};
+				}
 			}
 		}
 	}
 
 	@each $columns in map.keys($carousel-columns) {
-		$width: carousel-product-width($columns);
-
 		&.columns-#{ $columns } {
+			--carousel-column-width: #{carousel-product-width($columns)};
 			@include carousel-scroll-for-count($columns);
 
-			.wc-block-product {
-				flex-basis: $width;
-				flex-grow: 0;
-				flex-shrink: 0;
-				min-width: $width;
-				max-width: $width;
-			}
-
-			// Narrow screens use the responsive floors below, skipping steps that
-			// would show more products than this setting. The column width stays
-			// the maximum, so a wide screen cannot fit extra products.
-			@if $columns > 1 {
-				&.wc-block-product-template__carousel-responsive .wc-block-product {
-					flex-basis: $width;
-					flex-grow: 0;
-					flex-shrink: 1;
-					min-width: carousel-product-width($carousel-narrow-columns);
-					max-width: $width;
-
-					@each $breakpoint, $step in $carousel-shrink-steps {
-						@if map.get($step, columns) <= $columns {
-							@container carousel (min-width: #{$breakpoint}) {
-								min-width: carousel-product-width(
-									map.get($step, columns),
-									map.get($step, span)
-								);
-							}
-						}
-					}
-				}
-			}
-
-			// Responsive mode shows fewer products until the container is wide
-			// enough for this column count. Snap to that visible count.
-			@if $columns > 2 {
-				&.wc-block-product-template__carousel-responsive {
-					@include carousel-scroll-for-count($carousel-narrow-columns);
-
-					$previous-visible-count: $carousel-narrow-columns;
-					@each $breakpoint, $visible-count in $carousel-visible-counts {
-						$shown: $visible-count;
-						@if $shown > $columns {
-							$shown: $columns;
-						}
-						@if $shown != $previous-visible-count {
-							@container carousel-layout (min-width: #{$breakpoint}) {
-								@include carousel-scroll-for-count($shown);
-							}
-							$previous-visible-count: $shown;
-						}
-					}
-				}
-			}
 		}
 	}
 }
