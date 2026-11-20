@@ -393,7 +393,7 @@ importers:
         version: 1.15.0
       postcss-loader:
         specifier: catalog:tooling
-        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       prettier:
         specifier: catalog:tooling
         version: wp-prettier@3.9.6
@@ -408,7 +408,7 @@ importers:
         version: 1.69.5
       sass-loader:
         specifier: catalog:tooling
-        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       stylelint:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
@@ -3743,6 +3743,9 @@ importers:
       babel-jest:
         specifier: catalog:tooling
         version: 29.5.0(@babel/core@7.29.7)
+      babel-loader:
+        specifier: catalog:tooling
+        version: 9.2.1(@babel/core@7.29.7)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       babel-plugin-react-docgen:
         specifier: 4.2.1
         version: 4.2.1
@@ -3755,6 +3758,9 @@ importers:
       core-js:
         specifier: 3.25.0
         version: 3.25.0
+      css-loader:
+        specifier: catalog:tooling
+        version: 6.11.0(webpack@5.112.2)
       cssnano:
         specifier: 5.1.12
         version: 5.1.12(postcss@8.5.26)
@@ -3794,6 +3800,9 @@ importers:
       handlebars:
         specifier: ^4.7.8
         version: 4.7.10
+      ignore-loader:
+        specifier: 0.1.x
+        version: 0.1.2
       jest:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
@@ -3815,6 +3824,9 @@ importers:
       lodash:
         specifier: 4.18.1
         version: 4.18.1
+      mini-css-extract-plugin:
+        specifier: catalog:tooling
+        version: 2.9.4(webpack@5.112.2)
       msw:
         specifier: 2.10.4
         version: 2.10.4(@types/node@24.12.2)(typescript@5.7.3)
@@ -3824,6 +3836,9 @@ importers:
       postcss:
         specifier: catalog:tooling
         version: 8.5.26
+      postcss-loader:
+        specifier: catalog:tooling
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
       prettier:
         specifier: catalog:tooling
         version: wp-prettier@3.9.6
@@ -3851,6 +3866,9 @@ importers:
       sass:
         specifier: 1.69.5
         version: 1.69.5
+      sass-loader:
+        specifier: catalog:tooling
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
       storybook:
         specifier: 10.6.5
         version: 10.6.5(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
@@ -14842,6 +14860,9 @@ packages:
 
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
+
+  ignore-loader@0.1.2:
+    resolution: {integrity: sha512-yOJQEKrNwoYqrWLS4DcnzM7SEQhRKis5mB+LdKKh4cPmGYlLPR0ozRzHV5jmEk2IxptqJNQA5Cc0gw8Fj12bXA==}
 
   ignore-walk@4.0.1:
     resolution: {integrity: sha512-rzDQLaW4jQbh2YrOFlJdCtX8qgJTehFRYiUB2r1osqTeDzV/3+Jh8fz1oAPzUThf3iku8Ds4IDqawI5d8mUiQw==}
@@ -35053,7 +35074,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.29.7
       find-cache-dir: 4.0.0
-      schema-utils: 4.3.3
+      schema-utils: 4.8.1(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
 
   babel-plugin-istanbul@6.1.1:
@@ -38480,6 +38501,8 @@ snapshots:
 
   ieee754@1.2.1: {}
 
+  ignore-loader@0.1.2: {}
+
   ignore-walk@4.0.1:
     dependencies:
       minimatch: 3.1.5
@@ -41542,6 +41565,16 @@ snapshots:
       read-cache: 1.0.0
       resolve: 1.22.12
 
+  postcss-loader@4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)):
+    dependencies:
+      cosmiconfig: 7.1.0
+      klona: 2.0.6
+      loader-utils: 2.0.4
+      postcss: 8.5.26
+      schema-utils: 3.3.0
+      semver: 7.8.5
+      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
+
   postcss-loader@4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26)):
     dependencies:
       cosmiconfig: 7.1.0
@@ -41560,7 +41593,7 @@ snapshots:
       postcss: 8.5.26
       schema-utils: 3.3.0
       semver: 7.8.5
-      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
+      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@5.1.12(postcss@8.5.26))(esbuild@0.27.7)(postcss@8.5.26)
 
   postcss-loader@6.2.1(postcss@8.5.26)(webpack@5.112.2):
     dependencies:
@@ -42957,6 +42990,17 @@ snapshots:
       sass-embedded-win32-arm64: 1.100.0
       sass-embedded-win32-x64: 1.100.0
 
+  sass-loader@10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)):
+    dependencies:
+      klona: 2.0.6
+      loader-utils: 2.0.4
+      neo-async: 2.6.2
+      schema-utils: 3.3.0
+      semver: 7.8.5
+      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
+    optionalDependencies:
+      sass: 1.69.5
+
   sass-loader@10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.28.2)(postcss@8.5.26)):
     dependencies:
       klona: 2.0.6
@@ -42975,7 +43019,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.3.0
       semver: 7.8.5
-      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
+      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@5.1.12(postcss@8.5.26))(esbuild@0.27.7)(postcss@8.5.26)
     optionalDependencies:
       sass: 1.69.5
 
