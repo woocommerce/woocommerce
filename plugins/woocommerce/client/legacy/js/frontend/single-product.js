@@ -288,6 +288,8 @@ jQuery( function( $ ) {
 		}, args );
 
 		$target.flexslider( options );
+		// Thumbnails repeat the slides and can't take keyboard focus, so screen readers skip them.
+		$target.find( '.flex-control-thumbs' ).attr( 'aria-hidden', 'true' );
 		gallery.initVideoThumbnailPreviews();
 		$target
 			.off( 'click.wcProductGalleryVideoThumbs', '.flex-control-thumbs img' )
