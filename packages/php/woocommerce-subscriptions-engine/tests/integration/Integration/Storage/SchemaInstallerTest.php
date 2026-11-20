@@ -291,10 +291,10 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The schema version is 2.8.0 (contract lock).
+	 * @testdox The schema version is 2.9.0 (binary owner columns).
 	 */
-	public function test_schema_version_is_2_8_0(): void {
-		$this->assertSame( '2.8.0', SchemaInstaller::get_version() );
+	public function test_schema_version_is_2_9_0(): void {
+		$this->assertSame( '2.9.0', SchemaInstaller::get_version() );
 	}
 
 	/**
@@ -380,6 +380,34 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 
 		$this->assertIsArray( $row );
 		$this->assertSame( $wpdb->charset . '_bin', $row['Collation'] ?? null );
+	}
+
+	/**
+	 * @testdox The owner column of the $logical table compares binary, in the table charset.
+	 * @dataProvider provide_owner_tables
+	 *
+	 * @param string $logical Logical table identifier.
+	 */
+	public function test_owner_column_is_binary_collated( string $logical ): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( $logical );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW FULL COLUMNS FROM {$table} LIKE %s", 'extension_slug' ), ARRAY_A );
+
+		$this->assertIsArray( $row );
+		$this->assertSame( $wpdb->charset . '_bin', $row['Collation'] ?? null );
+	}
+
+	/**
+	 * @return array<string, array{0: string}>
+	 */
+	public function provide_owner_tables(): array {
+		return array(
+			'plans'     => array( SchemaInstaller::TABLE_PLANS ),
+			'contracts' => array( SchemaInstaller::TABLE_CONTRACTS ),
+			'cycles'    => array( SchemaInstaller::TABLE_CYCLES ),
+		);
 	}
 
 	/**
