@@ -118,6 +118,54 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox With plain permalinks, /robots.txt answers with a page and the sitemap is at /?sitemap=index: both checks still run.
+	 */
+	public function test_plain_permalinks(): void {
+		$this->set_permalink_structure( '' );
+		$product = \WC_Helper_Product::create_simple_product();
+		$shop    = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Shop',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop );
+		$page = array( 200, '<!doctype html><title>Shop</title>' );
+		$this->serve(
+			array(
+				'/robots.txt'             => $page,
+				'/'                       => $page,
+				'/?post_type=product'     => $page,
+				self::path_of( $product ) => $page,
+				'/?sitemap=index'         => array( 200, '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=posts&amp;sitemap-subtype=product_cat&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ),
+				'/?sitemap=posts&sitemap-subtype=product_cat&paged=1' => array( 200, '<urlset><url><loc>' . home_url( '/?product=beanie' ) . '</loc><lastmod>2026-11-01</lastmod></url></urlset>' ),
+				"/?page_id=$shop"         => array( 302, '' ),
+			)
+		);
+
+		$results = $this->results();
+		$this->assertTrue( $results['sitemap_lists_products'] );
+		$this->assertTrue( $results['sitemap_lastmod'] );
+		$this->assertTrue( $results['pages_public'] );
+
+		$this->assertFalse( $this->names_products_in( '<urlset><url><loc>' . home_url( '/?product_cat=hats' ) . '</loc></url></urlset>' ) );
+		$this->assertTrue( $this->names_products_in( '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=posts&amp;sitemap-subtype=product&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ) );
+		$this->assertFalse( $this->names_products_in( '<sitemapindex><sitemap><loc>' . home_url( '/?sitemap=taxonomies&amp;sitemap-subtype=product_brand&amp;paged=1' ) . '</loc></sitemap></sitemapindex>' ) );
+	}
+
+	/**
+	 * Whether the sitemap check passes when /?sitemap=index serves this XML and nothing else answers.
+	 *
+	 * @param string $xml Sitemap XML.
+	 */
+	private function names_products_in( string $xml ): bool {
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( '/?sitemap=index' => array( 200, $xml ) ) );
+		return true === $this->results()['sitemap_lists_products'];
+	}
+
+	/**
 	 * @testdox With the WordPress sitemap off, a product sitemap listed in robots.txt or at /sitemap_index.xml passes.
 	 */
 	public function test_seo_plugin_sitemap(): void {

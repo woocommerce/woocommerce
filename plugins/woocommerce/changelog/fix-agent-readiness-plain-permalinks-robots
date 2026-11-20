@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Agent readiness: with plain permalinks, read the WordPress sitemap at its query-string address, treat the home page served at /robots.txt as no rules, and check the product archive for the shop page.
