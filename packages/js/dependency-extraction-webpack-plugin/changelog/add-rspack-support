@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Write the same dependency lists when the plugin runs under Rspack.

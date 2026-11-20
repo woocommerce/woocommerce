@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Build the admin and blocks bundles with Rspack instead of webpack; built assets behave the same.
+
