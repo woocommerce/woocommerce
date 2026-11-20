@@ -340,6 +340,7 @@ class CheckoutReuseOrderCoupons extends \WP_Test_REST_TestCase {
 		$this->apply_coupon( 'reuse-full-fixed' );
 
 		$this->assertTrue( wc_get_order( $order->get_id() )->has_cart_hash( WC()->cart->get_cart_hash() ), 'The swap must keep the cart hash, which is the case this test covers.' );
+		$this->assertNotSame( $order->get_id(), (int) $this->checkout()->get_data()['order_id'], 'Checkout should place a new order.' );
 		$this->assertSame( array( 'reuse-full-percent' ), wc_get_order( $order->get_id() )->get_coupon_codes() );
 	}
 
