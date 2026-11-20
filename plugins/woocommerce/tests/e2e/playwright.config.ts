@@ -244,15 +244,10 @@ const blocksSerialSpecs = [
 	// stops working.
 	'**/tests/blocks/templates/shop-page.block_theme.spec.ts',
 
-	// Place orders, which change the Best Sellers ranking. Some also add to the
-	// cart as the admin user, whose cart all workers share.
-	'**/tests/blocks/cart/cart-checkout-block-coupons.shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.guest-shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.merchant.block_theme.spec.ts',
-	'**/tests/blocks/checkout/additional-fields.shopper.block_theme.spec.ts',
-	'**/tests/blocks/checkout/checkout-block-locale-hide-country.block_theme.spec.ts',
-
-	// Create or edit products and categories that catalog specs count.
+	// Creates a visible $10 product with limited stock, which the Product
+	// Collection block needs to show it. While it exists, it changes product
+	// counts that catalog specs check, such as the single product under $10 in
+	// `inspector-controls`.
 	'**/tests/blocks/product-collection/product-collection-errors.block_theme.spec.ts',
 ];
 
