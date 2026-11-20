@@ -105,7 +105,7 @@ class ProductDelete extends ActionableAbility {
 				),
 				'annotations'  => array(
 					'readonly'    => false,
-					'idempotent'  => true,
+					'idempotent'  => false,
 					'destructive' => true,
 				),
 			),

@@ -317,7 +317,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			),
 			'woocommerce/product-delete'              => array(
 				'readonly'    => false,
-				'idempotent'  => true,
+				'idempotent'  => false,
 				'destructive' => true,
 			),
 			'woocommerce/orders-query'                => array(
@@ -337,7 +337,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			),
 			'woocommerce/order-delete'                => array(
 				'readonly'    => false,
-				'idempotent'  => true,
+				'idempotent'  => false,
 				'destructive' => true,
 			),
 			'woocommerce/order-update'                => array(
