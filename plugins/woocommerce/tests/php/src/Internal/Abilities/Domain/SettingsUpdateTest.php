@@ -198,11 +198,12 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse toggles that enable irreversible personal data removal or share usage data.
+	 * @testdox Should refuse toggles that enable irreversible personal data removal or share usage or shopper data.
 	 * @testWith ["account", "woocommerce_erasure_request_removes_order_data"]
 	 *           ["account", "woocommerce_erasure_request_removes_download_data"]
 	 *           ["account", "woocommerce_allow_bulk_remove_personal_data"]
 	 *           ["advanced", "woocommerce_allow_tracking"]
+	 *           ["general", "woocommerce_address_autocomplete_enabled"]
 	 *
 	 * @param string $group Settings group.
 	 * @param string $id    Setting ID.

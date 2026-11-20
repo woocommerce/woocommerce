@@ -86,10 +86,7 @@ class WC_Settings_General extends WC_Settings_Page {
 
 			$enable_address_autocomplete_setting = array(
 				'id'        => 'woocommerce_address_autocomplete_enabled',
-				'abilities' => array(
-					'read'  => true,
-					'write' => true,
-				),
+				'abilities' => array( 'read' => true ),
 				'desc'      => __( 'Enable predictive address search', 'woocommerce' ),
 				'name'      => __( 'Address autocomplete', 'woocommerce' ),
 				'type'      => 'checkbox',
@@ -110,10 +107,7 @@ class WC_Settings_General extends WC_Settings_Page {
 				}
 				$address_autocomplete_preferred_provider_setting = array(
 					'id'        => 'woocommerce_address_autocomplete_provider',
-					'abilities' => array(
-						'read'  => true,
-						'write' => true,
-					),
+					'abilities' => array( 'read' => true ),
 					'name'      => __( 'Preferred address autocomplete provider', 'woocommerce' ),
 					'type'      => 'select',
 					'class'     => 'wc-enhanced-select',
