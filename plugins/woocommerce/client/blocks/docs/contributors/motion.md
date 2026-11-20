@@ -81,7 +81,7 @@ Use the helpers in `assets/css/abstracts/_motion.scss`. Do not write `transition
 | `@include motion-fade-in` / `motion-fade-out` | A fade with no movement. | |
 | `@include motion-dim( $states )` | Dims the element while `$states` matches, such as `".is-disabled"`. | Cart rows, disabled radios |
 | `@include motion-collapse` | The timing for `animateCollapse`. The content grows over 300ms and collapses over 200ms, and fades. With reduced motion, it only fades. | `Panel` content |
-| `@include motion-swap` | The timing for `playSwap`, on the element whose children are the sections. Old sections fade out over 100ms, and new sections fade in and slide in after them. With reduced motion, they only fade. Use it with `motion-collapse`. | The Checkout form |
+| `@include motion-swap` | The timing for `playSwap`, on the element whose children are the sections. Old sections fade out over 100ms, and new sections fade in and slide in after them. With reduced motion, the layout changes at once and the new sections fade in. Use it with `motion-collapse`. | The Checkout form |
 | `@include motion-safe { … }` | Movement that the other helpers do not cover. | |
 
 `assets/css/style.scss` has the shared keyframes. `wc-fade-in` and `wc-fade-out` only fade. `wc-rise`, `wc-grow`, and `wc-shrink` move with `translate`, `scale`, and `filter`, so they combine with a fade and with the resting `transform` of an element.
@@ -119,7 +119,7 @@ Find the change in this table, and use the helpers above.
 | Content appears or goes and moves the content below, such as a panel, notice, field error, or section | It grows and collapses in the real layout. It stays mounted while it goes. |
 | A form or its fields go | The real form unmounts at once, so its fields stop counting. An inert copy collapses in its place. |
 | The selection moves to another option, such as Ship or Pickup | A copy of the selected style slides to the new option, and stretches a little on the way. |
-| A choice swaps a group of sections, such as Ship or Pickup | The old sections fade out and move 24px the way that the selection moved. Then the new sections fade in and slide in from the other side. The sections after them hold their place until the old sections have gone, then move one time. |
+| A choice swaps a group of sections, such as Ship or Pickup | The old sections fade out and move 24px the way that the selection moved. Then the new sections fade in and slide in from the other side. The sections after them hold their place until the old sections have gone, then move one time. With reduced motion, the layout changes at once, and the new sections fade in. |
 | An element becomes a different view of itself, such as an address card that becomes its form | The two views crossfade while the height changes. |
 | A table row goes | It fades in place, and the rows below slide up. |
 

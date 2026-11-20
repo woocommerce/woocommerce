@@ -152,7 +152,8 @@ export const stopSwap = ( container: Element | null ) => {
  * so a form that goes stops counting at once. The sections after the group hold their old position until the copies
  * have gone, so content that loads meanwhile is in place before anything moves. Then they slide to their new position,
  * the height of the container changes once, and the new sections fade in and slide in from the other side. A new swap
- * continues from the current position. With reduced motion, the sections only fade.
+ * continues from the current position. With reduced motion, nothing moves: the layout changes at once, with the choice,
+ * and the new sections fade in.
  *
  * @param snapshot The snapshot from `captureSwap`.
  */
@@ -170,9 +171,14 @@ export const playSwap = ( snapshot: SwapSnapshot ) => {
 	let frame = 0;
 	let isStopped = false;
 	const cancels: Array< () => void > = [];
+	// Without movement, a hold would only delay the change of the layout until after the fade. Copies of the old
+	// sections would then cover the content that takes their place, so they are left out too.
+	const isReduced = window.matchMedia(
+		'(prefers-reduced-motion: reduce)'
+	).matches;
 
 	// Each copy shows where its section was, above the content that now takes its place.
-	const copies = leaving.map( ( section ) => {
+	const copies = ( isReduced ? [] : leaving ).map( ( section ) => {
 		const { top, left, width, opacity } = places.get( section ) as Place;
 		const copy = inertCopy( section );
 		copy.setAttribute( COPY, direction );
@@ -267,9 +273,14 @@ export const playSwap = ( snapshot: SwapSnapshot ) => {
 	};
 
 	container.setAttribute( SWAPPING, '' );
-	container.style.height = height;
-	container.append( ...copies );
-	hold();
+	if ( isReduced ) {
+		// Applies the styles that changed before, so entrances that the last swap started can start again.
+		container.getBoundingClientRect();
+	} else {
+		container.style.height = height;
+		container.append( ...copies );
+		hold();
+	}
 	entering.forEach( ( section ) =>
 		section.setAttribute( ENTERING, direction )
 	);
@@ -282,6 +293,10 @@ export const playSwap = ( snapshot: SwapSnapshot ) => {
 	);
 	cancels.push( () => window.clearTimeout( safety ) );
 	running.set( container, stop );
+	if ( isReduced ) {
+		cancels.push( whenAllAnimationsEnd( entering, () => stop( true ) ) );
+		return;
+	}
 	frame = requestAnimationFrame( keepHolding );
 	cancels.push( whenAllAnimationsEnd( copies, release ) );
 };

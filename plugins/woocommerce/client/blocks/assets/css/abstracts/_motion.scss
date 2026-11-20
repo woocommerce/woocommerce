@@ -133,7 +133,8 @@ $wc-stagger-cap: 7;
 
 // The timing for `playSwap` in base-utils, on the element whose children are the sections. Copies of the old
 // sections fade out over `sm` and move the way the selection moved. Then the new sections fade in and slide in from the
-// other side, and the sections after them slide to their new position. With reduced motion, the sections only fade.
+// other side, and the sections after them slide to their new position. With reduced motion, the layout changes at once
+// and the new sections fade in.
 // Give the element `motion-collapse` too, for its height.
 @mixin motion-swap() {
 	&[data-wc-swapping] {
@@ -154,8 +155,13 @@ $wc-stagger-cap: 7;
 		@include motion-exit(wc-swap-out, sm);
 	}
 
+	// With reduced motion, the old sections have no copies to wait for, so the new sections fade in at once.
 	> [data-wc-swap-in] {
-		@include motion-enter(wc-swap-in, lg, motion-duration(sm));
+		@include motion-enter(wc-swap-in, lg);
+
+		@include motion-safe {
+			animation-delay: motion-duration(sm);
+		}
 	}
 
 	> [data-wc-swap-after] {
