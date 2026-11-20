@@ -219,6 +219,27 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse settings that open paid downloads to anyone with the file URL.
+	 * @testWith ["woocommerce_file_download_method", "force", "redirect"]
+	 *           ["woocommerce_downloads_redirect_fallback_allowed", "no", "yes"]
+	 *           ["woocommerce_downloads_require_login", "yes", "no"]
+	 *           ["woocommerce_downloads_add_hash_to_filename", "yes", "no"]
+	 *
+	 * @param string $id     Setting ID.
+	 * @param string $stored Stored value.
+	 * @param string $sent   Requested value.
+	 */
+	public function test_refuses_download_protection_settings( string $id, string $stored, string $sent ): void {
+		update_option( $id, $stored );
+
+		$result = $this->sut->execute( $this->input( 'products', array( $id => $sent ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_settings_not_writable', $result->get_error_code() );
+		$this->assertSame( $stored, get_option( $id ) );
+	}
+
+	/**
 	 * @testdox Should update an extension field registered directly on a custom group.
 	 */
 	public function test_updates_extension_group_field(): void {
@@ -773,38 +794,6 @@ class SettingsUpdateTest extends \WC_Unit_Test_Case {
 		$this->sut->execute( $this->input( 'general', array( 'woocommerce_currency' => 'EUR' ) ) );
 
 		$this->assertSame( 'stale', \WC_Cache_Helper::get_transient_version( 'shipping' ) );
-	}
-
-	/**
-	 * @testdox Should rewrite the downloads folder protection whenever the file download method is sent, and not on other saves.
-	 */
-	public function test_download_method_change_updates_folder_protection(): void {
-		$htaccess = wp_get_upload_dir()['basedir'] . '/woocommerce_uploads/.htaccess';
-		$original = file_exists( $htaccess ) ? file_get_contents( $htaccess ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-
-		try {
-			update_option( 'woocommerce_file_download_method', 'force' );
-			\WC_Admin_Settings::check_download_folder_protection();
-
-			$this->sut->execute( $this->input( 'products', array( 'woocommerce_file_download_method' => 'redirect' ) ) );
-			$this->assertSame( 'Options -Indexes', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-
-			$this->sut->execute( $this->input( 'products', array( 'woocommerce_file_download_method' => 'force' ) ) );
-			$this->assertSame( 'deny from all', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-
-			file_put_contents( $htaccess, 'Options -Indexes' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			$this->sut->execute( $this->input( 'general', array( 'woocommerce_currency' => 'EUR' ) ) );
-			$this->assertSame( 'Options -Indexes', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-
-			$this->sut->execute( $this->input( 'products', array( 'woocommerce_file_download_method' => 'force' ) ) );
-			$this->assertSame( 'deny from all', file_get_contents( $htaccess ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		} finally {
-			if ( null === $original ) {
-				wp_delete_file( $htaccess );
-			} else {
-				file_put_contents( $htaccess, $original ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			}
-		}
 	}
 
 	/**

@@ -234,10 +234,6 @@ class SettingsUpdate extends AbstractDomainAbility implements AbilityDefinition 
 		if ( get_option( 'woocommerce_hide_out_of_stock_items' ) !== $hide_out_of_stock ) {
 			wc_recount_all_terms( false );
 		}
-		// The uploads .htaccess must match the download method. Resending an unchanged method repairs a file an earlier save failed to write.
-		if ( in_array( 'woocommerce_file_download_method', $option_names, true ) ) {
-			\WC_Admin_Settings::check_download_folder_protection();
-		}
 		// Cart sessions keep calculated shipping rates until this version changes, which the shipping and tax admin saves bump.
 		if ( in_array( $input['group'], array( 'shipping', 'tax' ), true ) ) {
 			\WC_Cache_Helper::get_transient_version( 'shipping', true );

@@ -488,10 +488,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'<code>mod_xsendfile</code>'
 					),
 					'id'        => 'woocommerce_file_download_method',
-					'abilities' => array(
-						'read'  => true,
-						'write' => true,
-					),
+					'abilities' => array( 'read' => true ),
 					'type'      => 'select',
 					'class'     => 'wc-enhanced-select',
 					'css'       => 'min-width:300px;',
@@ -512,10 +509,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'desc'          => __( 'Allow using redirect mode (insecure) as a last resort', 'woocommerce' ),
 					'id'            => 'woocommerce_downloads_redirect_fallback_allowed',
-					'abilities'     => array(
-						'read'  => true,
-						'write' => true,
-					),
+					'abilities'     => array( 'read' => true ),
 					'type'          => 'checkbox',
 					'default'       => 'no',
 					'desc_tip'      => sprintf(
@@ -531,10 +525,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'         => __( 'Access restriction', 'woocommerce' ),
 					'desc'          => __( 'Downloads require login', 'woocommerce' ),
 					'id'            => 'woocommerce_downloads_require_login',
-					'abilities'     => array(
-						'read'  => true,
-						'write' => true,
-					),
+					'abilities'     => array( 'read' => true ),
 					'type'          => 'checkbox',
 					'default'       => 'no',
 					'desc_tip'      => __( 'This setting does not apply to guest purchases.', 'woocommerce' ),
@@ -574,10 +565,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'title'     => __( 'Filename', 'woocommerce' ),
 					'desc'      => __( 'Append a unique string to filename for security', 'woocommerce' ),
 					'id'        => 'woocommerce_downloads_add_hash_to_filename',
-					'abilities' => array(
-						'read'  => true,
-						'write' => true,
-					),
+					'abilities' => array( 'read' => true ),
 					'type'      => 'checkbox',
 					'default'   => 'yes',
 					'desc_tip'  => sprintf(
