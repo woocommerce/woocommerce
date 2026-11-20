@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Keep the admin Storybook rules it took from the removed admin webpack config; no production change.
+
