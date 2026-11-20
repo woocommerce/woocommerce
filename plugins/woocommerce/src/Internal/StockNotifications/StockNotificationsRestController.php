@@ -59,7 +59,7 @@ class StockNotificationsRestController extends RestApiControllerBase {
 	/**
 	 * Register the routes.
 	 */
-	public function register_routes() {
+	public function register_routes(): void {
 		register_rest_route(
 			$this->route_namespace,
 			'/' . $this->rest_base,
@@ -100,6 +100,8 @@ class StockNotificationsRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request The request.
 	 * @return WP_REST_Response
+	 *
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 */
 	protected function get_items( WP_REST_Request $request ): WP_REST_Response {
 		$per_page = (int) $request['per_page'];
@@ -162,6 +164,8 @@ class StockNotificationsRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request The request.
 	 * @return WP_REST_Response|WP_Error
+	 *
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 */
 	protected function get_item( WP_REST_Request $request ) {
 		$id = (int) $request['id'];
@@ -186,6 +190,8 @@ class StockNotificationsRestController extends RestApiControllerBase {
 	 * @param Notification    $notification The notification.
 	 * @param WP_REST_Request $request      The request.
 	 * @return WP_REST_Response
+	 *
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 */
 	protected function prepare_item_for_response( Notification $notification, WP_REST_Request $request ): WP_REST_Response {
 		$product           = $notification->get_product();
@@ -219,7 +225,7 @@ class StockNotificationsRestController extends RestApiControllerBase {
 		/**
 		 * Filter the response for a single stock notification.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param WP_REST_Response $response     The response.
 		 * @param Notification     $notification The notification.
