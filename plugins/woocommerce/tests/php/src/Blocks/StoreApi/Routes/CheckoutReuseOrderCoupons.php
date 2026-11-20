@@ -297,6 +297,7 @@ class CheckoutReuseOrderCoupons extends \WP_Test_REST_TestCase {
 		$this->remove_coupon( 'reuse-free-shipping' );
 
 		$this->assertTrue( wc_get_order( $order_id )->has_cart_hash( WC()->cart->get_cart_hash() ), 'The removal must keep the cart hash, which is the case this test covers.' );
+		$this->assertNotSame( $order_id, (int) $this->checkout()->get_data()['order_id'], 'Checkout should place a new order.' );
 		$this->assertSame( array( 'reuse-free-shipping' ), wc_get_order( $order_id )->get_coupon_codes() );
 
 		wc_get_order( $order_id )->update_status( OrderStatus::CANCELLED );
@@ -316,6 +317,7 @@ class CheckoutReuseOrderCoupons extends \WP_Test_REST_TestCase {
 
 		$this->remove_coupon( '0' );
 
+		$this->assertNotSame( $order_id, (int) $this->checkout()->get_data()['order_id'], 'Checkout should place a new order.' );
 		$this->assertSame( array( '0' ), wc_get_order( $order_id )->get_coupon_codes() );
 	}
 
@@ -355,6 +357,7 @@ class CheckoutReuseOrderCoupons extends \WP_Test_REST_TestCase {
 		$this->remove_coupon( 'reuse-failed-placed' );
 		$this->apply_coupon( 'reuse-failed-swapped' );
 
+		$this->assertSame( $order_id, (int) $this->checkout()->get_data()['order_id'], 'Checkout should reuse the failed order.' );
 		$this->assertSame( array( 'reuse-failed-swapped' ), wc_get_order( $order_id )->get_coupon_codes(), 'The failed order should follow the cart.' );
 	}
 
@@ -385,6 +388,7 @@ class CheckoutReuseOrderCoupons extends \WP_Test_REST_TestCase {
 		$this->apply_coupon( 'extension_discount' );
 
 		$this->assertTrue( wc_get_order( $order_id )->has_cart_hash( WC()->cart->get_cart_hash() ), 'The swap must keep the cart hash, which is the case this test covers.' );
+		$this->assertSame( $order_id, (int) $this->checkout()->get_data()['order_id'], 'Checkout should reuse the order.' );
 		$this->assertSame( array( 'extension_discount' ), wc_get_order( $order_id )->get_coupon_codes(), 'The order should follow the cart, as before.' );
 	}
 
@@ -417,6 +421,7 @@ class CheckoutReuseOrderCoupons extends \WP_Test_REST_TestCase {
 		$this->apply_coupon( 'reuse-added-one' );
 
 		$this->assertTrue( wc_get_order( $order_id )->has_cart_hash( WC()->cart->get_cart_hash() ), 'The change must keep the cart hash, which is the case this test covers.' );
+		$this->assertNotSame( $order_id, (int) $this->checkout()->get_data()['order_id'], 'Checkout should place a new order.' );
 		$this->assertSame( array( 'reuse-placed-five' ), wc_get_order( $order_id )->get_coupon_codes() );
 	}
 
