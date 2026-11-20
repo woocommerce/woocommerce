@@ -64,6 +64,7 @@ class Chart extends Component {
 		this.updateDimensions = this.updateDimensions.bind( this );
 		this.getVisibleData = memoize( this.getVisibleData );
 		this.getOrderedKeys = memoize( this.getOrderedKeys );
+		this.setD3DefaultFormat = memoize( this.setD3DefaultFormat, isEqual );
 		this.setInterval = this.setInterval.bind( this );
 	}
 
@@ -99,7 +100,6 @@ class Chart extends Component {
 
 	componentDidMount() {
 		this.updateDimensions();
-		this.setD3DefaultFormat();
 		window.addEventListener( 'resize', this.updateDimensions );
 	}
 
@@ -107,13 +107,13 @@ class Chart extends Component {
 		window.removeEventListener( 'resize', this.updateDimensions );
 	}
 
-	setD3DefaultFormat() {
+	setD3DefaultFormat( currency ) {
 		const {
 			symbol: currencySymbol,
 			symbolPosition,
 			decimalSeparator: decimal,
 			thousandSeparator: thousands,
-		} = this.props.currency;
+		} = currency;
 		d3FormatDefaultLocale( {
 			decimal,
 			thousands,
@@ -294,6 +294,7 @@ class Chart extends Component {
 		const {
 			baseValue,
 			chartType,
+			currency,
 			data,
 			dateParser,
 			emptyMessage,
@@ -317,6 +318,7 @@ class Chart extends Component {
 			yBelow1Format,
 			yFormat,
 		} = this.props;
+		this.setD3DefaultFormat( currency );
 		const selectedIds = filterParam
 			? getIdsFromQuery( query[ filterParam ] )
 			: [];
@@ -451,6 +453,7 @@ class Chart extends Component {
 						) }
 						{ ! isRequesting && width > 0 && (
 							<D3Chart
+								key={ JSON.stringify( currency ) }
 								baseValue={ baseValue }
 								chartType={ chartType }
 								colorScheme={ d3InterpolateViridis }
