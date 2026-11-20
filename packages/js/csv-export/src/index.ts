@@ -38,7 +38,7 @@ function escapeCSVValue( value: string | number ) {
 			String.fromCharCode( 0x0d ), // carriage return
 		].includes( stringValue.charAt( 0 ) )
 	) {
-		stringValue = '"\'' + stringValue + '"';
+		stringValue = '"\'' + stringValue.replace( /"/g, '""' ) + '"';
 	} else if ( stringValue.match( /[,"\s]/ ) ) {
 		stringValue = '"' + stringValue.replace( /"/g, '""' ) + '"';
 	}

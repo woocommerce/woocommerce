@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\OrderDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CustomersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CustomerUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CouponsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate;
@@ -48,6 +49,7 @@ use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
 use Automattic\WooCommerce\Internal\AgentReadiness\RunCheckAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\StoreSettingsGet;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsGroupsQuery;
 
 defined( 'ABSPATH' ) || exit;
@@ -108,7 +110,9 @@ class AbilitiesLoader {
 		CustomersQuery::class,
 		StoreSettingsGet::class,
 		SettingsQuery::class,
+		SettingsUpdate::class,
 		SettingsGroupsQuery::class,
+		CustomerUpdate::class,
 	);
 
 	/**

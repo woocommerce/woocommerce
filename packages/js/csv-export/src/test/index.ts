@@ -47,6 +47,11 @@ describe( 'generateCSVDataFromTable', () => {
 				input: String.fromCharCode( 0x0d ) + 'danger',
 				expected: `"'${ String.fromCharCode( 0x0d ) }danger"`,
 			},
+			// Embedded quotes must be doubled so they cannot end the escaped cell early.
+			{
+				input: '=1",=HYPERLINK("http://example.com"),"',
+				expected: `"'=1"",=HYPERLINK(""http://example.com""),"""`,
+			},
 
 			// The values below should not be escaped since they are pure numeric values.
 			{ input: 12, expected: '12' },

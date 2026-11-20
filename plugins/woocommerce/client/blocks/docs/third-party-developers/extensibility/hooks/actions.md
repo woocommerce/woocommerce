@@ -44,7 +44,6 @@
 - [woocommerce_store_api_cart_errors](#woocommerce_store_api_cart_errors)
 - [woocommerce_store_api_cart_select_shipping_rate](#woocommerce_store_api_cart_select_shipping_rate)
 - [woocommerce_store_api_cart_update_customer_from_request](#woocommerce_store_api_cart_update_customer_from_request)
-- [woocommerce_store_api_cart_update_order_from_request](#woocommerce_store_api_cart_update_order_from_request)
 - [woocommerce_store_api_checkout_order_created](#woocommerce_store_api_checkout_order_created)
 - [woocommerce_store_api_checkout_order_processed](#woocommerce_store_api_checkout_order_processed)
 - [woocommerce_store_api_checkout_update_customer_from_request](#woocommerce_store_api_checkout_update_customer_from_request)
@@ -805,29 +804,6 @@ do_action( 'woocommerce_store_api_cart_update_customer_from_request', \WC_Custom
 ### Source
 
 - [StoreApi/Routes/V1/CartUpdateCustomer.php](../../../../../../src/StoreApi/Routes/V1/CartUpdateCustomer.php)
-
----
-
-## woocommerce_store_api_cart_update_order_from_request
-
-
-Fires when the order is synced with cart data from a cart route.
-
-```php
-do_action( 'woocommerce_store_api_cart_update_order_from_request', \WC_Order $draft_order, \WC_Customer $customer, \WP_REST_Request $request )
-```
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $draft_order | \WC_Order | Order object. |
-| $customer | \WC_Customer | Customer object. |
-| $request | \WP_REST_Request | Full details about the request. |
-
-### Source
-
-- [StoreApi/Routes/V1/AbstractCartRoute.php](../../../../../../src/StoreApi/Routes/V1/AbstractCartRoute.php)
 
 ---
 

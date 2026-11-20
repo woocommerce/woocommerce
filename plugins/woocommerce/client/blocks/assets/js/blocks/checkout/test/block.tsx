@@ -33,6 +33,7 @@ import OrderNote from '../inner-blocks/checkout-order-note-block/block';
 import Terms from '../inner-blocks/checkout-terms-block/frontend';
 import { termsCheckboxDefaultText } from '../inner-blocks/checkout-terms-block/constants';
 import Actions from '../inner-blocks/checkout-actions-block/frontend';
+import type { BlockAttributes as ActionsAttributes } from '../inner-blocks/checkout-actions-block/block';
 import Totals from '../inner-blocks/checkout-totals-block/frontend';
 import OrderSummary from '../inner-blocks/checkout-order-summary-block/frontend';
 import CartItems from '../inner-blocks/checkout-order-summary-cart-items/frontend';
@@ -97,7 +98,11 @@ jest.mock( '../context', () => {
 const useCheckoutBlockContext =
 	jest.requireMock( '../context' ).useCheckoutBlockContext;
 
-const CheckoutBlock = () => {
+const CheckoutBlock = ( {
+	actionAttributes = {},
+}: {
+	actionAttributes?: Partial< ActionsAttributes >;
+} ) => {
 	return (
 		<Checkout attributes={ {} }>
 			<Fields>
@@ -116,7 +121,7 @@ const CheckoutBlock = () => {
 					showSeparator={ false }
 					text={ termsCheckboxDefaultText }
 				/>
-				<Actions />
+				<Actions { ...actionAttributes } />
 			</Fields>
 			<Totals>
 				<OrderSummary>
@@ -186,6 +191,45 @@ describe( 'Testing Checkout', () => {
 		await waitFor( () =>
 			expect( screen.getByText( /Place Order/i ) ).toBeVisible()
 		);
+	} );
+
+	it( 'applies and clears Place Order button overrides without styling the terms', async () => {
+		const { rerender } = render(
+			<CheckoutBlock
+				actionAttributes={ {
+					textColor: 'contrast',
+					style: JSON.stringify( {
+						color: { background: '#123456' },
+						border: { radius: '12px' },
+						spacing: { padding: { top: '20px' } },
+						typography: { fontSize: '24px', textAlign: 'right' },
+					} ),
+				} }
+			/>
+		);
+		const button = await screen.findByRole( 'button', {
+			name: /Place Order/i,
+		} );
+
+		expect( button ).toHaveClass( 'has-contrast-color' );
+		expect( button ).toHaveStyle( {
+			backgroundColor: '#123456',
+			borderRadius: '12px',
+			paddingTop: '20px',
+			fontSize: '24px',
+			textAlign: 'right',
+		} );
+		expect(
+			button.closest( '.wc-block-checkout__actions' )
+		).not.toHaveAttribute( 'style' );
+		expect( screen.getByText( /You must accept our/i ) ).not.toHaveClass(
+			'has-contrast-color'
+		);
+
+		rerender( <CheckoutBlock /> );
+
+		expect( button ).not.toHaveClass( 'has-contrast-color' );
+		expect( button ).not.toHaveStyle( { backgroundColor: '#123456' } );
 	} );
 
 	it( 'Allows saving payment method if the customer is creating an account or has already logged in', async () => {

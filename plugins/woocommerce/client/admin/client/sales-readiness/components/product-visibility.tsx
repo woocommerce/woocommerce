@@ -10,6 +10,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { safeHref } from '../safe-href';
 import type { ShoppingView } from '../types';
 
 /**
@@ -67,7 +68,7 @@ export const ProductVisibility = ( {
 							{ count.count }
 						</Text>
 						<Text variant="body-sm">
-							<Link href={ count.link.href }>
+							<Link href={ safeHref( count.link.href ) }>
 								{ count.link.text }
 							</Link>
 						</Text>
