@@ -832,6 +832,19 @@ async function link( ctx, bundle, config, state ) {
 	};
 	const versionOf = ( out ) => hash( codeOf( out ) );
 
+	// A split file is only needed when an entry's lazy file map lists it.
+	// When every entry that reaches it already carries its code, nothing
+	// loads it, so it is not written.
+	const splitOuts = new Set( splitFile.values() );
+	const entryCode = [ ...outputs.values() ]
+		.filter( ( output ) => output.kind === 'entry' )
+		.map( ( output ) => codeOf( output.out ) );
+	for ( const out of splitOuts ) {
+		if ( ! entryCode.some( ( code ) => code.includes( `${ out }?ver=` ) ) ) {
+			outputs.delete( out );
+		}
+	}
+
 	state.outputs = [];
 	const assetCheck = {};
 	const cssByOutput = new Map();
