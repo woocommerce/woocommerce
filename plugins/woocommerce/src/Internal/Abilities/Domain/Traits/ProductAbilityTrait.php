@@ -1506,7 +1506,7 @@ trait ProductAbilityTrait {
 		);
 
 		$parent = in_array( 'attributes', $unsupported, true ) ? self::get_variable_parent( $product ) : null;
-		if ( null !== $parent && self::parent_route_takes_attributes( $product ) ) {
+		if ( null !== $parent && self::parent_route_takes_attributes( $parent, $product ) ) {
 			$message .= ' ' . sprintf(
 				/* translators: %d: parent product ID. */
 				__( 'To change the options of a variation, update its parent product %d and send the variation in the variations input, with its id and attributes.', 'woocommerce' ),
@@ -1518,17 +1518,20 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Whether an item of the `variations` input of the parent takes
-	 * `attributes` for this variation. That route uses the create fields, so
-	 * when it takes `attributes`, the refusal came from a direct update.
+	 * Whether an update of the parent takes `variations`, and an item of that
+	 * input takes `attributes` for this variation. That item uses the create
+	 * fields, so when it takes `attributes`, the refusal came from a direct update.
 	 *
-	 * @param \WC_Product $variation Variation.
+	 * @param \WC_Product_Variable $parent_product Parent.
+	 * @param \WC_Product          $variation      Variation.
 	 * @return bool
 	 */
-	private static function parent_route_takes_attributes( \WC_Product $variation ): bool {
-		$config = self::get_product_config_for_product( $variation, true );
+	private static function parent_route_takes_attributes( \WC_Product_Variable $parent_product, \WC_Product $variation ): bool {
+		$parent_config    = self::get_product_config_for_product( $parent_product );
+		$variation_config = self::get_product_config_for_product( $variation, true );
 
-		return ! is_wp_error( $config ) && in_array( 'attributes', $config['fields'], true );
+		return ! is_wp_error( $parent_config ) && in_array( 'variations', $parent_config['fields'], true )
+			&& ! is_wp_error( $variation_config ) && in_array( 'attributes', $variation_config['fields'], true );
 	}
 
 	/**

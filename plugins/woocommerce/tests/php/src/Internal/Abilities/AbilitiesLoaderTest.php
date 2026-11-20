@@ -2619,7 +2619,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should name the parent route for variation options only when the variation has a variable parent whose route takes attributes.
+	 * @testdox Should name the parent route for variation options only when the variation has a variable parent whose route takes variations and attributes.
 	 */
 	public function test_variation_options_hint_needs_a_parent_route(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
@@ -2653,6 +2653,22 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $through_parent );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $through_parent->get_error_code() );
 		$this->assertStringNotContainsString( 'parent product', $through_parent->get_error_message(), 'The parent route does not point at itself.' );
+
+		$no_variations = static fn( $fields, $type ) => 'variable' === $type ? array_values( array_diff( $fields, array( 'variations' ) ) ) : $fields;
+		add_filter( 'woocommerce_ability_product_type_fields', $no_variations, 10, 2 );
+		try {
+			$closed_parent = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'         => $small_id,
+					'attributes' => $attributes,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_ability_product_type_fields', $no_variations, 10 );
+		}
+		$this->assertWPError( $closed_parent );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $closed_parent->get_error_code() );
+		$this->assertStringNotContainsString( 'parent product', $closed_parent->get_error_message(), 'A parent that does not take variations is no route.' );
 
 		wp_update_post(
 			array(
