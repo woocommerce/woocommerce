@@ -218,6 +218,8 @@ class ProductScan {
 	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
 	 * @param int                                                             $ids_limit     Product ids kept per rule.
 	 * @param callable|null                                                   $on_tested     Called with each product id and its failures.
+	 *
+	 * @throws \RuntimeException When a selected product still exists but cannot be loaded.
 	 */
 	public function test( array $product_ids, array $rules, array $channel_rules, int $ids_limit, ?callable $on_tested = null ): void {
 		/**
@@ -234,9 +236,17 @@ class ProductScan {
 		try {
 			foreach ( $product_ids as $product_id ) {
 				$product = wc_get_product( $product_id );
-				// Skip products that left the eligible set between start() and this batch.
-				if ( $product && self::covers( $product ) ) {
-					$this->record( $product, $rules, $channel_rules, $ids_limit );
+				if ( $product instanceof \WC_Product ) {
+					// Skip products that left the eligible set between start() and this batch.
+					if ( self::covers( $product ) ) {
+						$this->record( $product, $rules, $channel_rules, $ids_limit );
+					}
+					continue;
+				}
+				// Factory returned false. A missing post is gone; a product post that still
+				// exists failed to load, so the batch must retry instead of treating it as tested.
+				if ( 'product' === get_post_type( $product_id ) ) {
+					throw new \RuntimeException( 'Agent readiness could not load a product to scan.' );
 				}
 			}
 		} finally {

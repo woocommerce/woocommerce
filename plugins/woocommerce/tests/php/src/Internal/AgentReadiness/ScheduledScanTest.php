@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\AgentReadiness\ProductFailures;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -731,6 +732,62 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A selected product that still exists but fails to load stops the batch so prior rows stay, and a later batch can finish.
+	 */
+	public function test_product_load_failure_retries_and_keeps_prior_rows(): void {
+		$product_id = $this->create_products( 1 )[0];
+		ProductFailures::store( $product_id, array( 'missing_images' => array() ) );
+		$prior = ProductFailures::stored( $product_id );
+
+		$fail = static function ( $classname, $product_type, $context, $id ) use ( $product_id ) {
+			unset( $product_type, $context );
+			return (int) $id === $product_id ? BrokenAgentReadinessProduct::class : $classname;
+		};
+		add_filter( 'woocommerce_product_class', $fail, 10, 4 );
+		wc_get_container()->get( ProductCache::class )->remove( $product_id );
+		clean_post_cache( $product_id );
+		$this->sut->run();
+		$chain = get_option( AgentReadiness::SCAN_OPTION )['id'];
+		try {
+			$this->sut->run_batch( $chain );
+			$this->fail( 'A product load failure stops the batch' );
+		} catch ( \RuntimeException $e ) {
+			unset( $e );
+		} finally {
+			remove_filter( 'woocommerce_product_class', $fail, 10 );
+			wc_get_container()->get( ProductCache::class )->remove( $product_id );
+			clean_post_cache( $product_id );
+		}
+
+		$state = get_option( AgentReadiness::SCAN_OPTION );
+		$this->assertSame( 0, $state['position'], 'The batch must not advance past a load failure' );
+		$this->assertSame( $prior, ProductFailures::stored( $product_id ), 'Prior rows stay until a successful test' );
+
+		$this->run_batches();
+
+		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
+		$this->assertContains( ProductFailures::CHECKED, ProductFailures::stored( $product_id ) );
+	}
+
+	/**
+	 * @testdox A product deleted between listing and its batch is skipped without retrying the batch.
+	 */
+	public function test_deleted_product_is_skipped_without_retry(): void {
+		$ids = $this->create_products( 2 );
+		ProductFailures::store( $ids[0], array() );
+		$this->sut->run();
+		$chain = get_option( AgentReadiness::SCAN_OPTION )['id'];
+		wp_delete_post( $ids[0], true );
+
+		$this->sut->run_batch( $chain );
+		$this->run_batches();
+
+		$this->assertFalse( get_option( AgentReadiness::SCAN_OPTION ) );
+		$this->assertSame( array(), ProductFailures::stored( $ids[0] ), 'Rows for a deleted product are removed at finish' );
+		$this->assertContains( ProductFailures::CHECKED, ProductFailures::stored( $ids[1] ) );
+	}
+
+	/**
 	 * Set a product to Catalog visibility Hidden without saving it through the product editor.
 	 *
 	 * @param int $product_id Product id.
@@ -766,3 +823,24 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}actionscheduler_actions SET last_attempt_gmt = %s WHERE status IN ( 'complete', 'failed', 'in-progress' )", gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ) );
 	}
 }
+
+/**
+ * Product class that fails to construct, so wc_get_product() returns false while the post remains.
+ *
+ * phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
+ * phpcs:disable Squiz.Classes.ClassFileName.NoMatch
+ * phpcs:disable SlevomatCodingStandard.Files.TypeNameMatchesFileName.NoMatchBetweenTypeNameAndFileName
+ * phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+ */
+class BrokenAgentReadinessProduct extends \WC_Product_Simple {
+
+	/**
+	 * @param mixed $data Product id or data ignored; construction always fails.
+	 * @param array $args Unused factory args.
+	 */
+	public function __construct( $data = 0, $args = array() ) {
+		unset( $data, $args );
+		throw new \Exception( 'forced product load failure' );
+	}
+}
+// phpcs:enable
