@@ -1,0 +1,17 @@
+{
+	"name": "woocommerce/cart-order-summary-coupon-form-input-block",
+	"title": "Coupon form input",
+	"description": "Let shoppers enter a coupon code.",
+	"category": "woocommerce",
+	"attributes": {},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false
+	},
+	"parent": [ "woocommerce/cart-order-summary-coupon-form-block" ],
+	"textdomain": "woocommerce",
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3
+}

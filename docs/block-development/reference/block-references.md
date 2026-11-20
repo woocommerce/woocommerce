@@ -271,6 +271,24 @@ Shows the apply coupon form.
 - **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
+## Coupon form button - woocommerce/cart-order-summary-coupon-form-button-block
+
+Let shoppers apply a coupon code.
+
+- **Name:** woocommerce/cart-order-summary-coupon-form-button-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-order-summary-coupon-form-block
+- **Supports:** color (background, gradients, text, ~~link~~), spacing (padding), typography (fontSize, lineHeight, textAlign), ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
+
+## Coupon form input - woocommerce/cart-order-summary-coupon-form-input-block
+
+Let shoppers enter a coupon code.
+
+- **Name:** woocommerce/cart-order-summary-coupon-form-input-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-order-summary-coupon-form-block
+- **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
+
 ## Discount - woocommerce/cart-order-summary-discount-block
 
 Shows the cart discount row.

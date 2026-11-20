@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { Icon, tag } from '@wordpress/icons';
-import { registerBlockType } from '@wordpress/blocks';
+import { registerBlockType, type BlockConfiguration } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -13,16 +12,11 @@ import metadata from './block.json';
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
+import deprecated from './deprecated';
 
-registerBlockType( metadata, {
-	icon: {
-		src: (
-			<Icon
-				icon={ tag }
-				className="wc-block-editor-components-block-icon"
-			/>
-		),
-	},
+registerBlockType( metadata as BlockConfiguration, {
+	icon: 'tag',
 	edit: Edit,
 	save: Save,
+	deprecated,
 } );

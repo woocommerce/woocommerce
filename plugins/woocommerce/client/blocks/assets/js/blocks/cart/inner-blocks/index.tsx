@@ -18,5 +18,7 @@ import './cart-order-summary-fee';
 import './cart-order-summary-discount';
 import './cart-order-summary-shipping';
 import './cart-order-summary-coupon-form';
+import './cart-order-summary-coupon-form-input';
+import './cart-order-summary-coupon-form-button';
 import './cart-order-summary-taxes';
 import './cart-order-summary-heading';

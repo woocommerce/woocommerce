@@ -1,0 +1,22 @@
+.wp-block-woocommerce-cart-order-summary-coupon-form-block {
+	.wc-block-components-totals-coupon__form > .block-editor-inner-blocks {
+		width: 100%;
+
+		> .block-editor-block-list__layout {
+			display: flex;
+			flex-wrap: wrap;
+			gap: $gap-smaller;
+		}
+	}
+
+	.wp-block-woocommerce-cart-order-summary-coupon-form-input-block {
+		flex: 3 1 120px;
+		margin: 0;
+	}
+
+	.wp-block-woocommerce-cart-order-summary-coupon-form-button-block {
+		display: flex;
+		flex: 1 1 auto;
+		margin: 0;
+	}
+}

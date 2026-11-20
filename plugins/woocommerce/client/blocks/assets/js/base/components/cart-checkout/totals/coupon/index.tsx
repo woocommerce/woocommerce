@@ -3,7 +3,12 @@
  */
 import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
-import { useState, useRef } from '@wordpress/element';
+import {
+	createContext,
+	useContext,
+	useState,
+	useRef,
+} from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import {
@@ -15,14 +20,84 @@ import {
 } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
-import type { MouseEvent, MouseEventHandler } from 'react';
+import type { FormEventHandler, JSX, ReactNode, RefObject } from 'react';
+import type { StyleProps } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
+const CouponContext = createContext< {
+	couponValue: string;
+	setCouponValue: ( value: string ) => void;
+	isLoading: boolean;
+	instanceId: string;
+	validationErrorId?: string;
+	inputRef: RefObject< ValidatedTextInputHandle >;
+} | null >( null );
+
+export const CouponInput = (): JSX.Element | null => {
+	const context = useContext( CouponContext );
+	if ( ! context ) {
+		return null;
+	}
+	const {
+		couponValue,
+		setCouponValue,
+		instanceId,
+		validationErrorId,
+		inputRef,
+	} = context;
+	return (
+		<ValidatedTextInput
+			id={ `wc-block-components-totals-coupon__input-${ instanceId }` }
+			errorId="coupon"
+			className="wc-block-components-totals-coupon__input"
+			label={ __( 'Enter code', 'woocommerce' ) }
+			value={ couponValue }
+			ariaDescribedBy={ validationErrorId || '' }
+			onChange={ setCouponValue }
+			focusOnMount={ true }
+			validateOnMount={ false }
+			showError={ false }
+			ref={ inputRef }
+		/>
+	);
+};
+
+export const CouponButton = ( {
+	buttonStyleProps,
+}: {
+	buttonStyleProps?: StyleProps;
+} ): JSX.Element | null => {
+	const context = useContext( CouponContext );
+	if ( ! context ) {
+		return null;
+	}
+	const { couponValue, isLoading } = context;
+	return (
+		<Button
+			className={ clsx(
+				'wc-block-components-totals-coupon__button',
+				buttonStyleProps?.className,
+				{
+					'wc-block-components-totals-coupon__button--loading':
+						isLoading,
+				}
+			) }
+			style={ buttonStyleProps?.style }
+			disabled={ isLoading || ! couponValue }
+			type="submit"
+		>
+			{ isLoading && <Spinner /> }
+			{ __( 'Apply', 'woocommerce' ) }
+		</Button>
+	);
+};
+
 export interface TotalsCouponProps {
+	children?: ReactNode;
 	/**
 	 * Instance id of the input
 	 */
@@ -46,11 +121,11 @@ export const TotalsCoupon = ( {
 	isLoading = false,
 	onSubmit,
 	displayCouponForm = false,
+	children,
 }: TotalsCouponProps ): JSX.Element => {
 	const [ couponValue, setCouponValue ] = useState( '' );
 	const [ isCouponFormVisible, setIsCouponFormVisible ] =
 		useState( displayCouponForm );
-	const textInputId = `wc-block-components-totals-coupon__input-${ instanceId }`;
 	const { validationErrorId } = useSelect(
 		( select ) => {
 			const store = select( validationStore );
@@ -62,10 +137,11 @@ export const TotalsCoupon = ( {
 	);
 	const inputRef = useRef< ValidatedTextInputHandle >( null );
 
-	const handleCouponSubmit: MouseEventHandler< HTMLButtonElement > = (
-		e: MouseEvent< HTMLButtonElement >
-	) => {
+	const handleCouponSubmit: FormEventHandler< HTMLFormElement > = ( e ) => {
 		e.preventDefault();
+		if ( isLoading || ! couponValue ) {
+			return;
+		}
 		if ( typeof onSubmit !== 'undefined' ) {
 			void onSubmit( couponValue )?.then( ( result ) => {
 				if ( result ) {
@@ -96,41 +172,29 @@ export const TotalsCoupon = ( {
 				showSpinner={ false }
 			>
 				<div className="wc-block-components-totals-coupon__content">
-					<form
-						className="wc-block-components-totals-coupon__form"
-						id="wc-block-components-totals-coupon__form"
+					<CouponContext.Provider
+						value={ {
+							couponValue,
+							setCouponValue,
+							isLoading,
+							instanceId,
+							validationErrorId,
+							inputRef,
+						} }
 					>
-						<ValidatedTextInput
-							id={ textInputId }
-							errorId="coupon"
-							className="wc-block-components-totals-coupon__input"
-							label={ __( 'Enter code', 'woocommerce' ) }
-							value={ couponValue }
-							ariaDescribedBy={ validationErrorId || '' }
-							onChange={ ( newCouponValue ) => {
-								setCouponValue( newCouponValue );
-							} }
-							focusOnMount={ true }
-							validateOnMount={ false }
-							showError={ false }
-							ref={ inputRef }
-						/>
-						<Button
-							className={ clsx(
-								'wc-block-components-totals-coupon__button',
-								{
-									'wc-block-components-totals-coupon__button--loading':
-										isLoading,
-								}
-							) }
-							disabled={ isLoading || ! couponValue }
-							onClick={ handleCouponSubmit }
-							type="submit"
+						<form
+							className="wc-block-components-totals-coupon__form"
+							id="wc-block-components-totals-coupon__form"
+							onSubmit={ handleCouponSubmit }
 						>
-							{ isLoading && <Spinner /> }
-							{ __( 'Apply', 'woocommerce' ) }
-						</Button>
-					</form>
+							{ children ?? (
+								<>
+									<CouponInput />
+									<CouponButton />
+								</>
+							) }
+						</form>
+					</CouponContext.Provider>
 					<ValidationInputError
 						propertyName="coupon"
 						elementId={ instanceId }

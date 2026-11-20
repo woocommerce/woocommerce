@@ -24,6 +24,8 @@ import CartOrderSummarySubtotalFrontend from './cart-order-summary-subtotal/fron
 import CartOrderSummaryFeeFrontend from './cart-order-summary-fee/frontend';
 import CartOrderSummaryDiscountFrontend from './cart-order-summary-discount/frontend';
 import CartOrderSummaryCouponFormFrontend from './cart-order-summary-coupon-form/frontend';
+import CartOrderSummaryCouponFormInputFrontend from './cart-order-summary-coupon-form-input/frontend';
+import CartOrderSummaryCouponFormButtonFrontend from './cart-order-summary-coupon-form-button/frontend';
 import CartOrderSummaryShippingFrontend from './cart-order-summary-shipping/frontend';
 import CartOrderSummaryTotalsFrontend from './cart-order-summary-totals/frontend';
 import CartOrderSummaryTaxesFrontend from './cart-order-summary-taxes/frontend';
@@ -110,6 +112,16 @@ registerCheckoutBlock( {
 registerCheckoutBlock( {
 	metadata: metadata.CART_ORDER_SUMMARY_COUPON_FORM,
 	component: CartOrderSummaryCouponFormFrontend,
+} );
+
+registerCheckoutBlock( {
+	metadata: metadata.CART_ORDER_SUMMARY_COUPON_FORM_INPUT,
+	component: CartOrderSummaryCouponFormInputFrontend,
+} );
+
+registerCheckoutBlock( {
+	metadata: metadata.CART_ORDER_SUMMARY_COUPON_FORM_BUTTON,
+	component: CartOrderSummaryCouponFormButtonFrontend,
 } );
 
 registerCheckoutBlock( {
