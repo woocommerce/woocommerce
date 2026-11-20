@@ -194,17 +194,7 @@ class CustomerUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Skip the write when nothing changed, so no update hooks fire and the report cache is kept.
-	 *
-	 * @param \WC_Customer $subject Changed customer.
-	 * @return null|\WP_Error
-	 */
-	protected function save( $subject ) {
-		return empty( $this->updated_fields ) ? null : parent::save( $subject );
-	}
-
-	/**
-	 * Change the customer in memory. Every refused address field comes back in one error.
+	 * Change the customer in memory. Every refused address field comes back in one error, and a call that changes nothing is refused.
 	 *
 	 * @param \WC_Customer $subject Customer.
 	 * @param array        $input   Ability input.
@@ -241,7 +231,19 @@ class CustomerUpdate extends ActionableAbility {
 			}
 		}
 
-		return $refused->has_errors() ? $refused : null;
+		if ( $refused->has_errors() ) {
+			return $refused;
+		}
+
+		if ( empty( $this->updated_fields ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_customer_unchanged',
+				__( 'The customer already has every value sent, so nothing was changed.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return null;
 	}
 
 	/**

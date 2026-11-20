@@ -378,11 +378,11 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not save a customer when every sent value matches the saved one.
+	 * @testdox Should refuse, without saving, a call whose every sent value matches the saved one.
 	 */
-	public function test_skips_save_without_changes(): void {
-		list( $id, $user_id ) = $this->registered_customer();
-		$saves                = did_action( 'woocommerce_update_customer' );
+	public function test_refuses_unchanged_customer(): void {
+		list( $id ) = $this->registered_customer();
+		$saves      = did_action( 'woocommerce_update_customer' );
 
 		$result = $this->execute(
 			array(
@@ -390,8 +390,9 @@ class CustomerUpdateTest extends \WC_Unit_Test_Case {
 				'billing' => array( 'city' => 'Old city' ),
 			)
 		);
-		$this->assertSame( array(), $result['customer']['updated_fields'] );
-		$this->assertSame( $user_id, $result['customer']['user_id'] );
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_customer_unchanged', $result->get_error_code() );
+		$this->assertSame( 400, $result->get_error_data()['status'] );
 		$this->assertSame( $saves, did_action( 'woocommerce_update_customer' ), 'An unchanged customer is not saved.' );
 
 		$this->execute(
