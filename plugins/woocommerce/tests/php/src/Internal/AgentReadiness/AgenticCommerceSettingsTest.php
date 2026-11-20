@@ -176,6 +176,22 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Only users who can manage WooCommerce can start a connection.
+	 */
+	public function test_connect_needs_manage_woocommerce(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( AgenticCommerceSettings::CONNECT_ACTION );
+		try {
+			$this->sut->handle_connect();
+			$this->fail( 'The connect action stops users who cannot manage WooCommerce' );
+		} catch ( \WPDieException $e ) {
+			$this->assertStringContainsString( 'not allowed to connect', $e->getMessage() );
+		} finally {
+			unset( $_REQUEST['_wpnonce'] );
+		}
+	}
+
+	/**
 	 * @testdox When the site can't register with WordPress.com, connecting returns to the Overview with an error.
 	 */
 	public function test_connect_redirect_returns_with_an_error_when_registration_fails(): void {
