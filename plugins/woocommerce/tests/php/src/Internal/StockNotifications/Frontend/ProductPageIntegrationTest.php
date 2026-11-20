@@ -263,17 +263,21 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should show the form again to a logged-in customer whose sign-up was cancelled.
+	 * @testdox Should keep the form for a logged-in customer whose sign-up is $status.
+	 * @testWith ["cancelled"]
+	 *           ["pending"]
+	 *
+	 * @param string $status The sign-up status.
 	 */
-	public function test_form_is_rendered_for_customer_with_cancelled_signup(): void {
+	public function test_form_is_rendered_for_customer_with_inactive_signup( string $status ): void {
 		$product_id = $this->create_and_visit_out_of_stock_simple_product();
-		$this->log_in_customer_signed_up_for( $product_id, NotificationStatus::CANCELLED );
+		$this->log_in_customer_signed_up_for( $product_id, $status );
 
 		ob_start();
 		do_action( 'woocommerce_simple_add_to_cart' );
 		$markup = ob_get_clean();
 
-		$this->assertStringContainsString( 'wc_bis_form', $markup, 'A cancelled sign-up should not hide the form.' );
+		$this->assertStringContainsString( 'wc_bis_form', $markup, 'A sign-up that is not active should keep the form, so submitting it can activate or resend it.' );
 	}
 
 	/**
