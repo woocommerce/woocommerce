@@ -172,12 +172,13 @@ class Filterer {
 			// this attribute's filter clauses. It also removes the archive clause, which must
 			// stay: links from a Model=Alpha archive still require products to have Alpha.
 			$main_query = \WC_Query::get_main_query();
-			if ( $main_query && $main_query->is_tax( $taxonomy ) ) {
-				// Rebuild from the archive variables, excluding the shopper's tax_query selections.
-				// get_queried_object() can resolve a selected filter term instead of the archive term.
+			if ( $main_query && $main_query->is_tax() ) {
+				// Use the original request: query_vars may contain taxonomy/term aliases generated
+				// from a selected filter. Neither is_tax( $taxonomy ) nor get_queried_object()
+				// can identify the archive reliably after those filter clauses have been added.
 				// parse_tax_query() builds clauses only; it does not fetch products.
 				$archive_query      = new \WP_Query();
-				$archive_query_vars = $main_query->query_vars;
+				$archive_query_vars = $archive_query->fill_query_vars( $main_query->query );
 				unset( $archive_query_vars['tax_query'] );
 				$archive_query->parse_tax_query( $archive_query_vars );
 				foreach ( $archive_query->tax_query->queries ?? array() as $archive_clause ) {

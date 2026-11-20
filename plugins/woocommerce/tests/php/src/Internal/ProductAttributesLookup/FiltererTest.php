@@ -195,6 +195,78 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Archive counts use the original request rather than generated filter aliases.
+	 *
+	 * @testWith [true, true]
+	 *           [true, false]
+	 *           [false, true]
+	 *           [false, false]
+	 *
+	 * @param bool $use_lookup Whether to use the attribute lookup table.
+	 * @param bool $use_attribute_var Whether the archive uses its attribute query variable.
+	 */
+	public function test_or_archive_counts_ignore_generated_filter_aliases( bool $use_lookup, bool $use_attribute_var ): void {
+		global $wp_the_query;
+
+		$this->set_use_lookup_table( $use_lookup );
+		$this->create_product_attribute( 'FacetModel', array( 'Alpha', 'Beta', 'Shared', 'Other' ) );
+		$this->create_product_attribute( 'FacetColor', array( 'Blue' ) );
+		$this->create_simple_product(
+			array(
+				'FacetModel' => array( 'Alpha', 'Other' ),
+				'FacetColor' => array( 'Blue' ),
+			),
+			true
+		);
+		$this->create_simple_product(
+			array(
+				'FacetModel' => array( 'Alpha', 'Shared' ),
+				'FacetColor' => array( 'Blue' ),
+			),
+			true
+		);
+		$this->create_simple_product(
+			array(
+				'FacetModel' => array( 'Beta', 'Shared' ),
+				'FacetColor' => array( 'Blue' ),
+			),
+			true
+		);
+
+		if ( $use_attribute_var ) {
+			$_GET['filter_facetmodel']     = 'shared';
+			$_GET['query_type_facetmodel'] = 'or';
+			$query                         = array( 'pa_facetmodel' => 'alpha' );
+		} else {
+			$_GET['filter_facetcolor']     = 'blue';
+			$_GET['query_type_facetcolor'] = 'or';
+			$query                         = array(
+				'taxonomy' => 'pa_facetmodel',
+				'term'     => 'alpha',
+			);
+		}
+		\WC_Query::reset_chosen_attributes();
+		$wp_the_query->query( array_merge( array( 'post_type' => 'product' ), $query ) );
+
+		$terms  = wp_list_pluck(
+			get_terms(
+				array(
+					'taxonomy'   => 'pa_facetmodel',
+					'hide_empty' => false,
+				)
+			),
+			'term_id',
+			'name'
+		);
+		$sut    = wc_get_container()->get( Filterer::class );
+		$counts = $sut->get_filtered_term_product_counts( array_values( $terms ), 'pa_facetmodel', 'or' );
+		$this->assertSame( 2, $counts[ $terms['Alpha'] ], 'The archive must not inherit the selected model constraint.' );
+		$this->assertSame( 1, $counts[ $terms['Other'] ], 'An unselected model in the archive remains an alternative.' );
+		$this->assertSame( 1, $counts[ $terms['Shared'] ], 'Shared must only count products in Alpha.' );
+		$this->assertSame( 0, $counts[ $terms['Beta'] ] ?? 0, 'Another selected taxonomy must not disable archive scoping.' );
+	}
+
+	/**
 	 * Save a product and delete any lookup table data that may have been automatically inserted
 	 * (for the purposes of unit testing we want to insert this data manually)
 	 *
