@@ -67,6 +67,8 @@ body:has(.wc-sales-readiness) {
 	--wc-sr-link: var(--wpds-color-foreground-interactive-brand);
 
 	color: var(--wpds-color-foreground-content-neutral);
+	// The page's background reaches the bottom of the screen, also when the cards are short.
+	min-height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
 
 	&__content {
 		box-sizing: border-box;
@@ -386,9 +388,14 @@ body:has(.wc-sales-readiness) {
 		gap: 2px;
 	}
 
-	&__intro {
-		display: block;
-		margin-block-end: var(--wpds-dimension-gap-md);
+	> .wc-sales-readiness-checked__running {
+		flex-direction: row;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-md);
+
+		.components-spinner {
+			margin: 0;
+		}
 	}
 
 	// Check again: an outline button.

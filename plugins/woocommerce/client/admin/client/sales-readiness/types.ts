@@ -15,6 +15,8 @@ export interface ViewLink {
 	/** Empty when the text is shown without a link. */
 	href: string;
 	text: string;
+	/** What screen readers hear in place of the text, when the text repeats (Edit page). */
+	sr?: string;
 }
 
 export type RowState = 'open' | 'required' | 'unknown' | 'pass';
@@ -172,8 +174,9 @@ export interface ShoppingView {
 		title: string;
 		description: string;
 		learn_more: ViewLink;
-		/** What the switch says under it: that AI shopping is on, or ''. */
-		message: string;
+		/** The snackbar after the switch saves, turned on and turned off. */
+		turned_on: string;
+		turned_off: string;
 		path: string;
 		/** Said when turning AI shopping on didn't save, unless required steps are the reason. */
 		error_on: string;

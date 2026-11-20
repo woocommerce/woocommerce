@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Agent readiness: the AI shopping health page fills the screen, shows a spinner while a check runs, and draft policy pages offer Edit page. The AI shopping switch confirms a change in a snackbar.

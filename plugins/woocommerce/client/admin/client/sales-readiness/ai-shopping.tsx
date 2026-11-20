@@ -10,6 +10,8 @@ import {
 } from '@wordpress/element';
 import type { RefObject } from 'react';
 import apiFetch from '@wordpress/api-fetch';
+import { dispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
 import { speak } from '@wordpress/a11y';
 import { __ } from '@wordpress/i18n';
 import { Page } from '@wordpress/admin-ui';
@@ -140,6 +142,15 @@ const useHashTarget = (
 	}, [] );
 };
 
+// The switch reloads the page after it saves, so its snackbar is shown by the page that loads next.
+const SNACKBAR_KEY = 'wc-ai-shopping-snackbar';
+
+const showSnackbar = ( text: string ) => {
+	void dispatch( noticesStore ).createSuccessNotice( text, {
+		type: 'snackbar',
+	} );
+};
+
 /**
  * WooCommerce > Settings > AI tools > AI shopping. The switch saves on its own; Save posts the
  * settings form around this page, with the store policy fields as hidden inputs, so they save and
@@ -155,12 +166,23 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 	} ) );
 	const [ dirty, setDirty ] = useState( false );
 	const [ busy, setBusy ] = useState( false );
-	const [ message, setMessage ] = useState( ucp.message );
+	const [ message, setMessage ] = useState( '' );
 	const dirtyRef = useRef( false );
 	// Only clear the handler this page installed, so Save does not drop another unload listener.
 	const unloadHandler = useRef< ( () => string ) | null >( null );
 	const root = useRef< HTMLDivElement >( null );
 	useHashTarget( root, view );
+
+	useEffect( () => {
+		// Storage can be blocked; the switch's state still shows.
+		try {
+			const text = window.sessionStorage.getItem( SNACKBAR_KEY );
+			if ( text ) {
+				window.sessionStorage.removeItem( SNACKBAR_KEY );
+				showSnackbar( text );
+			}
+		} catch {}
+	}, [] );
 
 	useEffect( () => {
 		return () => {
@@ -199,13 +221,18 @@ export default function AiShopping( { view }: { view: ShoppingView } ) {
 					...current,
 					enabled: response.enabled,
 				} ) );
+				const done = response.enabled ? ucp.turned_on : ucp.turned_off;
 				// The checklist and the other cards depend on the switch, so the page reloads,
 				// unless that would lose unsaved fields.
 				if ( dirtyRef.current ) {
+					showSnackbar( done );
 					say( ucp.unsaved );
 					setBusy( false );
 					return;
 				}
+				try {
+					window.sessionStorage.setItem( SNACKBAR_KEY, done );
+				} catch {}
 				// Not reload(): after Save, that would post the settings form again.
 				window.location.assign(
 					window.location.href.split( '#' )[ 0 ]

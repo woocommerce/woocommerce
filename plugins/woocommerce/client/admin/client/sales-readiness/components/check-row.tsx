@@ -32,6 +32,7 @@ export const RowLink = ( {
 			size="compact"
 			href={ href }
 			onClick={ onClick }
+			aria-label={ link.sr || undefined }
 		>
 			{ link.text }
 		</Button>
