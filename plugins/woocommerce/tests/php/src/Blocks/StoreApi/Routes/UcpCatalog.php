@@ -317,6 +317,25 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * A `filters.price` that is not an object is refused rather than ignored.
+	 */
+	public function test_malformed_price_filter_returns_ucp_validation_error(): void {
+		$id      = (string) self::$product_ids[0];
+		$filters = array( 'filters' => array( 'price' => '1000' ) );
+
+		foreach ( array(
+			'/catalog/product' => array( 'id' => $id ),
+			'/catalog/lookup'  => array( 'ids' => array( $id ) ),
+			'/catalog/search'  => array( 'query' => 'product' ),
+		) as $route => $body ) {
+			$response = $this->post( $route, $filters + $body );
+
+			$this->assertSame( 400, $response->get_status(), $route );
+			$this->assertSame( 'VALIDATION_ERROR', $response->get_data()['messages'][0]['code'], $route );
+		}
+	}
+
+	/**
 	 * A missing `ids` list is a UCP validation error, not a WordPress one.
 	 */
 	public function test_lookup_without_ids_returns_ucp_validation_error(): void {

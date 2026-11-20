@@ -96,10 +96,14 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * @return \WP_REST_Response|null Error response, or null when the input is acceptable.
 	 */
 	protected function validate_price_filter( array $filters ) {
+		if ( isset( $filters['price'] ) && ! is_array( $filters['price'] ) ) {
+			return $this->ucp_error( 'VALIDATION_ERROR', __( 'filters.price must be an object.', 'woocommerce' ), 'recoverable', 400 );
+		}
+
 		$bounds = array();
 
 		foreach ( array( 'min', 'max' ) as $bound ) {
-			if ( ! is_array( $filters['price'] ?? null ) || ! isset( $filters['price'][ $bound ] ) ) {
+			if ( ! isset( $filters['price'][ $bound ] ) ) {
 				continue;
 			}
 
