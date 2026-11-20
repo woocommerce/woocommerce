@@ -4270,6 +4270,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				$resource_name,
 				'test-ext',
 				static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$synced, $resource_name ) {
+					unset( $saved, $ability );
 					$synced[] = array( $resource_name, array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['trashed'] ) );
 					return null;
 				}
