@@ -331,8 +331,10 @@ class WC_Customer extends WC_Legacy_Customer {
 		 * considered optional and therefore valid, even if empty.
 		 */
 		foreach ( $shipping_address as $key => $value ) {
-			// Skip further checks if the field has a value. From this point on $value is empty.
-			if ( ! empty( $value ) ) {
+			// Skip further checks if the field has a value. From this point on it is blank or not
+			// an address. Must agree with OrderController::validate_address_fields(), which counts
+			// "0" as a value; a getter filter can return any type, and non-scalars are not an address.
+			if ( is_scalar( $value ) && '' !== trim( (string) $value ) ) {
 				continue;
 			}
 

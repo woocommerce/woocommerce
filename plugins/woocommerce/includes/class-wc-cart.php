@@ -1225,6 +1225,15 @@ class WC_Cart extends WC_Legacy_Cart {
 				return false;
 			}
 
+			if ( ! $product_data->is_viewable() && ! $product_data->is_purchasable() ) {
+				/**
+				 * This filter is documented further down in this method.
+				 *
+				 * @since 3.8.0
+				 */
+				throw new Exception( apply_filters( 'woocommerce_cart_product_cannot_be_purchased_message', __( 'Sorry, this product cannot be purchased.', 'woocommerce' ), $product_data ) );
+			}
+
 			// Variable product cannot be added to cart without a specified variation.
 			if ( ! $variation_id && $product_data->is_type( ProductType::VARIABLE ) ) {
 				/* translators: 1: product link, 2: product name */
@@ -1341,7 +1350,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				)
 			) {
 				$product = wc_get_product( $product_id );
-				if ( ! ( $product instanceof WC_Product ) ) {
+				if ( ! ( $product instanceof WC_Product ) || ! $product->is_viewable() ) {
 					throw new Exception( __( 'The selected product is invalid.', 'woocommerce' ) );
 				}
 
