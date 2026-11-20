@@ -22,6 +22,22 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	private $received = array();
 
 	/**
+	 * Assert that the message has the retry hint once: from WordPress since 7.2, from WooCommerce before.
+	 *
+	 * @param string $message The error message.
+	 */
+	private function assert_retry_hint_once( string $message ): void {
+		$core_hint = 'Check the outcome before retrying';
+		$woo_hint  = 'Check the current state before you run it again';
+		if ( is_wp_version_compatible( '7.2' ) ) {
+			$this->assertStringContainsString( $core_hint, $message );
+			$this->assertStringNotContainsString( $woo_hint, $message );
+		} else {
+			$this->assertStringContainsString( $woo_hint, $message );
+		}
+	}
+
+	/**
 	 * Build a test ability with a boolean, an integer, a list of unique integers and a nested boolean field.
 	 *
 	 * @return Ability
@@ -93,7 +109,7 @@ class AbilityTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $runs );
 		$this->assertWPError( $result );
 		$this->assertSame( 'ability_invalid_output', $result->get_error_code() );
-		$this->assertStringContainsString( 'Check the current state before you run it again', $result->get_error_message() );
+		$this->assert_retry_hint_once( $result->get_error_message() );
 	}
 
 	/**
@@ -204,7 +220,7 @@ class AbilityTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( array( 'ability_invalid_output', 'output_policy' ), $result->get_error_codes() );
-		$this->assertStringContainsString( 'Check the current state before you run it again', $result->get_error_message() );
+		$this->assert_retry_hint_once( $result->get_error_message() );
 		$this->assertSame( 'The output breaks a policy.', $result->get_error_message( 'output_policy' ) );
 		$data = $result->get_error_data( 'output_policy' );
 		$this->assertArrayHasKey( 'field', $data );

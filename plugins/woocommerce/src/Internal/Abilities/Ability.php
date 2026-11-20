@@ -146,7 +146,9 @@ class Ability extends \WP_Ability {
 	 * such as MCP clients, receive only the message. Read-only abilities keep the
 	 * original message, because they saved nothing.
 	 *
-	 * Remove when WooCommerce requires WordPress 7.3.
+	 * WordPress 7.2 adds this hint itself, so this override returns the result unchanged there.
+	 * Remove this override, do_execute() and $callback_returned_output when WooCommerce
+	 * requires WordPress 7.2.
 	 *
 	 * @since 11.4.0
 	 *
@@ -158,7 +160,7 @@ class Ability extends \WP_Ability {
 		$callback_returned_output       = $this->callback_returned_output;
 		$this->callback_returned_output = false;
 
-		if ( ! $callback_returned_output || ! is_wp_error( $result ) || 'ability_invalid_output' !== $result->get_error_code() || true === ( $this->get_meta_item( 'annotations' )['readonly'] ?? null ) ) {
+		if ( is_wp_version_compatible( '7.2' ) || ! $callback_returned_output || ! is_wp_error( $result ) || 'ability_invalid_output' !== $result->get_error_code() || true === ( $this->get_meta_item( 'annotations' )['readonly'] ?? null ) ) {
 			return $result;
 		}
 
