@@ -111,7 +111,7 @@ class CheckoutLink {
 			$segments           = $this->split_escaped( $raw_product, ':', 4 );
 			$product_identifier = $segments[0] ?? '';
 			$quantity           = '' !== ( $segments[1] ?? '' ) ? absint( $segments[1] ) : 1;
-			$variation_data     = $this->parse_product_data( $segments[2] ?? '' );
+			$variation_data     = $this->parse_key_value_pairs( $segments[2] ?? '', true );
 			$cart_item_data     = $this->parse_product_data( $segments[3] ?? '' );
 
 			if ( ! $product_identifier || ! $quantity ) {
@@ -161,6 +161,20 @@ class CheckoutLink {
 	 * @return array<string, string> Sanitized product data.
 	 */
 	protected function parse_product_data( $raw_data ) {
+		return $this->parse_key_value_pairs( $raw_data, false );
+	}
+
+	/**
+	 * Parse a semicolon-separated list of key-value pairs.
+	 *
+	 * Variation keys are matched against attribute names and labels, which may contain non-ASCII characters, so they
+	 * are not passed through sanitize_key(). Cart item data keys keep using sanitize_key().
+	 *
+	 * @param string $raw_data     Raw data from the checkout link.
+	 * @param bool   $is_variation Whether the data holds variation attributes.
+	 * @return array<string, string> Sanitized data.
+	 */
+	private function parse_key_value_pairs( $raw_data, bool $is_variation ) {
 		$data = [];
 
 		foreach ( $this->split_escaped( $raw_data, ';' ) as $pair ) {
@@ -169,7 +183,7 @@ class CheckoutLink {
 			}
 
 			list( $key, $value ) = explode( '=', $pair, 2 );
-			$key                 = sanitize_key( $key );
+			$key                 = $is_variation ? $this->sanitize_variation_attribute_key( $key ) : sanitize_key( $key );
 
 			if ( '' !== $key ) {
 				$data[ $key ] = sanitize_text_field( $value );
@@ -177,6 +191,25 @@ class CheckoutLink {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Normalize a variation attribute key from a checkout link.
+	 *
+	 * Keys with the `attribute_` prefix are converted to the attribute's variation name, e.g. `attribute_尺寸` becomes
+	 * `attribute_%e5%b0%ba%e5%af%b8`. Other keys are kept so CartController can match them to attribute names or labels.
+	 *
+	 * @param string $key Raw key from the checkout link.
+	 * @return string Normalized key.
+	 */
+	private function sanitize_variation_attribute_key( $key ) {
+		$key = strtolower( trim( $key ) );
+
+		if ( 0 === strpos( $key, 'attribute_' ) ) {
+			$key = wc_variation_attribute_name( substr( $key, strlen( 'attribute_' ) ) );
+		}
+
+		return $key;
 	}
 
 	/**

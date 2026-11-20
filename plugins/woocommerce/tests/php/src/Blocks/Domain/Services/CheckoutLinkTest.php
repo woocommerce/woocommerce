@@ -300,6 +300,91 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Custom attribute names and the checkout link keys that should select them.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function non_ascii_attribute_provider(): array {
+		return [
+			'Chinese name'          => [ '尺寸', '尺寸' ],
+			'Chinese prefixed name' => [ '尺寸', 'attribute_尺寸' ],
+			'Cyrillic name'         => [ 'Размер', 'Размер' ],
+			'German name'           => [ 'Größe', 'Größe' ],
+			'German prefixed name'  => [ 'Größe', 'attribute_Größe' ],
+			'Spanish name'          => [ 'Tamaño', 'Tamaño' ],
+			'Name with a space'     => [ 'Color Name', 'Color Name' ],
+			'Lowercase ASCII label' => [ 'Color Name', 'color name' ],
+		];
+	}
+
+	/**
+	 * @testdox Adds the variation when the checkout link uses the "$link_key" key for the "$attribute_name" attribute.
+	 * @dataProvider non_ascii_attribute_provider
+	 *
+	 * @param string $attribute_name Custom attribute name.
+	 * @param string $link_key       Variation key used in the checkout link.
+	 */
+	public function test_variation_with_non_ascii_attribute_name_is_added( string $attribute_name, string $link_key ): void {
+		list( $product, $variation ) = $this->create_custom_attribute_variation( $attribute_name, 'L' );
+
+		$_GET['products'] = $product->get_id() . ':1:' . $link_key . '=L';
+
+		$url   = $this->get_checkout_link_service()->get_checkout_link_test();
+		$items = array_values( WC()->cart->get_cart() );
+
+		$this->assertCount( 1, $items, 'The variation should be added to the cart.' );
+		$this->assertSame( $variation->get_id(), $items[0]['variation_id'], 'The matching variation should be added.' );
+		$this->assertSame( [ wc_variation_attribute_name( $attribute_name ) => 'L' ], $items[0]['variation'], 'The cart item should store the attribute under its variation name.' );
+		$this->assertStringStartsWith( wc_get_checkout_url(), $url, 'The shopper should continue to checkout.' );
+	}
+
+	/**
+	 * @testdox Adds an "Any" variation when the checkout link uses a non-ASCII attribute name.
+	 */
+	public function test_any_variation_with_non_ascii_attribute_name_is_added(): void {
+		list( , $variation ) = $this->create_custom_attribute_variation( '尺寸', '' );
+
+		$_GET['products'] = $variation->get_id() . ':1:尺寸=L';
+
+		$this->get_checkout_link_service()->get_checkout_link_test();
+		$items = array_values( WC()->cart->get_cart() );
+
+		$this->assertCount( 1, $items, 'The "Any" variation should be added to the cart.' );
+		$this->assertSame( $variation->get_id(), $items[0]['variation_id'], 'The "Any" variation should be added.' );
+		$this->assertSame( [ wc_variation_attribute_name( '尺寸' ) => 'L' ], $items[0]['variation'], 'The chosen value should be stored for the "Any" attribute.' );
+	}
+
+	/**
+	 * Create a published variable product with one custom variation attribute and one variation.
+	 *
+	 * @param string $attribute_name  Custom attribute name.
+	 * @param string $variation_value Attribute value of the variation, or an empty string for "Any".
+	 * @return array{\WC_Product_Variable, \WC_Product_Variation}
+	 */
+	private function create_custom_attribute_variation( string $attribute_name, string $variation_value ): array {
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( $attribute_name );
+		$attribute->set_options( [ 'L', 'M' ] );
+		$attribute->set_variation( true );
+
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Shirt' );
+		$product->set_status( ProductStatus::PUBLISH );
+		$product->set_attributes( [ $attribute ] );
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( [ sanitize_title( $attribute_name ) => $variation_value ] );
+		$variation->set_regular_price( '20' );
+		$variation->set_status( ProductStatus::PUBLISH );
+		$variation->save();
+		\WC_Product_Variable::sync( $product->get_id() );
+
+		return [ wc_get_product( $product->get_id() ), wc_get_product( $variation->get_id() ) ];
+	}
+
+	/**
 	 * Get a checkout link service that exposes the checkout link for testing.
 	 *
 	 * @return CheckoutLink
