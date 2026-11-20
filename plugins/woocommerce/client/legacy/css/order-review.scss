@@ -15,9 +15,8 @@
 		}
 	}
 
-	// Address is italic with a margin in the browser. This line stays one block.
+	// Browsers show address in italics.
 	&__meta {
-		margin: 0;
 		font-style: normal;
 	}
 
