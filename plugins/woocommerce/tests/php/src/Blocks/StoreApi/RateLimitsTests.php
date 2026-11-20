@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi;
 
 use Automattic\WooCommerce\StoreApi\Authentication;
+use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\StoreApi\Utilities\RateLimits;
 use ReflectionClass;
 use ReflectionException;
@@ -26,18 +27,27 @@ class RateLimitsTests extends \WC_Unit_Test_Case {
 		global $wp_rest_server;
 		$wp_rest_server = new Spy_REST_Server();
 
-		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/cart';
-		$_SERVER['REMOTE_ADDR']                  = '76.45.67.179';
-
-		do_action( 'rest_api_init', $wp_rest_server );
+		$_SERVER['REMOTE_ADDR'] = '76.45.67.179';
 	}
 
 	/**
-	 * Discard the REST server installed for the test.
+	 * Run REST API init as a request to the given route would.
+	 *
+	 * @param string $route Requested REST route.
+	 */
+	private function init_rest_api( string $route ): void {
+		$GLOBALS['wp']->query_vars['rest_route'] = $route;
+
+		do_action( 'rest_api_init', rest_get_server() );
+	}
+
+	/**
+	 * Discard the REST server and route installed for the test.
 	 */
 	public function tearDown(): void {
 		global $wp_rest_server;
 		$wp_rest_server = null;
+		unset( $GLOBALS['wp']->query_vars['rest_route'] );
 
 		parent::tearDown();
 	}
@@ -49,6 +59,8 @@ class RateLimitsTests extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_rate_limits_response_headers() {
+		$this->init_rest_api( '/wc/store/cart' );
+
 		add_filter(
 			'woocommerce_store_api_rate_limit_options',
 			function () {
@@ -100,9 +112,14 @@ class RateLimitsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that UCP requests are rate limited without the Store API authentication bypass.
+	 * @testdox UCP requests are rate limited, however the route is cased.
+	 *
+	 * @testWith ["/wc/ucp/v1/catalog/search"]
+	 *           ["/WC/UCP/v1/catalog/search"]
+	 *
+	 * @param string $route Requested REST route.
 	 */
-	public function test_ucp_requests_are_rate_limited() {
+	public function test_ucp_requests_are_rate_limited( string $route ) {
 		add_filter(
 			'woocommerce_store_api_rate_limit_options',
 			function () {
@@ -113,17 +130,14 @@ class RateLimitsTests extends \WC_Unit_Test_Case {
 			}
 		);
 
-		remove_all_filters( 'rest_authentication_errors' );
-		$GLOBALS['wp']->query_vars['rest_route'] = '/WC/UCP/v1/catalog/search';
-		$authentication                          = new Authentication();
-		$authentication->init();
-
-		// Uses up the one allowed request.
-		$this->assertNull( apply_filters( 'rest_authentication_errors', null ), 'UCP requests must not be marked as authenticated.' );
+		$this->init_rest_api( $route );
 
 		/** @var Spy_REST_Server $spy_rest_server */
 		$spy_rest_server = rest_get_server();
-		$spy_rest_server->serve_request( '/wc/ucp/v1/catalog/search' );
+		$spy_rest_server->serve_request( $route );
+		$this->assertArrayNotHasKey( 'RateLimit-Retry-After', $spy_rest_server->sent_headers, 'The first request is within the limit.' );
+
+		$spy_rest_server->serve_request( $route );
 
 		$body = json_decode( $spy_rest_server->sent_body );
 		$this->assertEquals( 429, $body->data->status );
@@ -131,9 +145,25 @@ class RateLimitsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that the checkout rate limit covers the UCP route that places an order, and no other UCP route.
+	 * @testdox UCP requests get rate limiting without the Store API authentication bypass and CORS handling.
+	 */
+	public function test_ucp_requests_skip_store_api_only_hooks() {
+		$this->init_rest_api( '/wc/ucp/v1/catalog/search' );
+
+		$authentication = StoreApi::container()->get( Authentication::class );
+
+		$this->assertSame( 10, has_filter( 'rest_authentication_errors', array( $authentication, 'rate_limit_ucp_request' ) ) );
+		$this->assertFalse( has_filter( 'rest_authentication_errors', array( $authentication, 'check_authentication' ) ) );
+		$this->assertFalse( has_filter( 'rest_pre_serve_request', array( $authentication, 'send_cors_headers' ) ) );
+		$this->assertSame( 10, has_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' ), 'The default CORS handling stays in place.' );
+	}
+
+	/**
+	 * @testdox The checkout rate limit covers the UCP route that places an order, and no other UCP route.
 	 *
-	 * @dataProvider provider_ucp_checkout_rate_limit
+	 * @testWith ["/wc/ucp/v1/checkout-sessions/abc-123/complete", true]
+	 *           ["/wc/ucp/v1/checkout-sessions", false]
+	 *           ["/wc/ucp/v1/checkout-sessions/abc-123/cancel", false]
 	 *
 	 * @param string $route    Requested REST route.
 	 * @param bool   $expected Whether the checkout rate limit should apply.
@@ -142,28 +172,12 @@ class RateLimitsTests extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_feature_rate_limit_checkout_enabled', 'yes' );
 		$_SERVER['REQUEST_METHOD'] = 'POST';
 
-		remove_all_filters( 'rest_authentication_errors' );
-		$GLOBALS['wp']->query_vars['rest_route'] = $route;
-		$authentication                          = new Authentication();
-		$authentication->init();
+		$this->init_rest_api( $route );
 		apply_filters( 'rest_authentication_errors', null );
 
 		$options = RateLimits::get_options();
 		$this->assertSame( $expected, $options->enabled );
 		$this->assertSame( $expected ? 3 : RateLimits::LIMIT, $options->limit );
-	}
-
-	/**
-	 * Data provider for test_ucp_complete_opts_in_to_checkout_rate_limit.
-	 *
-	 * @return array
-	 */
-	public function provider_ucp_checkout_rate_limit(): array {
-		return array(
-			'complete' => array( '/wc/ucp/v1/checkout-sessions/abc-123/complete', true ),
-			'create'   => array( '/wc/ucp/v1/checkout-sessions', false ),
-			'cancel'   => array( '/wc/ucp/v1/checkout-sessions/abc-123/cancel', false ),
-		);
 	}
 
 	/**
