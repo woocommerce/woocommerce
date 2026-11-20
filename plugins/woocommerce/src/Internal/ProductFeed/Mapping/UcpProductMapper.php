@@ -372,10 +372,12 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 		$defaults = $this->default_selection( $product, $item );
 		$in_range = $this->filter_by_price( $product, array_map( 'intval', array_column( (array) $item['variations'], 'id' ) ) );
 		$matching = array_values( array_intersect( $this->match_selection( $item, $defaults ), $in_range ) );
-		$featured = (int) ( $matching[0] ?? $in_range[0] ?? 0 );
 
+		// Default matches go first; the returned prices may still drop some, so the first variant built is featured.
+		$mapped   = $this->map_item( $product, $item, array(), false, array_merge( $matching, array_diff( $in_range, $matching ) ) );
+		$featured = (int) ( $mapped['variants'][0]['id'] ?? 0 );
 		if ( $featured <= 0 ) {
-			return $this->map_item( $product, $item, array(), false );
+			return $mapped;
 		}
 
 		$selected = $this->variation_options_by_id( $item )[ $featured ] ?? array();
@@ -388,7 +390,6 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			}
 		}
 
-		$mapped             = $this->map_item( $product, $item, array( $featured ), false );
 		$mapped['selected'] = $selected;
 
 		return $mapped;

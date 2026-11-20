@@ -263,6 +263,47 @@ class UcpProductMapperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The featured variation should come from the variants left after the returned prices are filtered.
+	 */
+	public function test_detail_features_a_variation_the_returned_prices_keep(): void {
+		$variable = new \WC_Product_Variable();
+		$variable->set_name( 'Featured In Range' );
+		$variable->set_status( 'publish' );
+		$variable->set_attributes( array( WC_Helper_Product::create_product_attribute_object( 'size', array( 'small', 'large' ) ) ) );
+		$parent_id = $variable->save();
+
+		$ids = array();
+		foreach ( array(
+			'small' => '10',
+			'large' => '12',
+		) as $size => $price ) {
+			$variation = new \WC_Product_Variation();
+			$variation->set_parent_id( $parent_id );
+			$variation->set_attributes( array( 'pa_size' => $size ) );
+			$variation->set_regular_price( $price );
+			$variation->set_status( 'publish' );
+			$ids[ $size ] = $variation->save();
+		}
+
+		\WC_Product_Variable::sync( $parent_id );
+
+		// The cached price list keeps small at 10; its returned price is 20.
+		$raise_small = function ( $price, $variation ) use ( $ids ) {
+			return $variation->get_id() === $ids['small'] ? '20' : $price;
+		};
+		add_filter( 'woocommerce_product_variation_get_price', $raise_small, 10, 2 );
+
+		$mapper = new UcpProductMapper( 'USD' );
+		$mapper->begin_response( array( 'max' => 1500 ) );
+		$mapped = $mapper->map_detail_product( wc_get_product( $parent_id ) );
+
+		remove_filter( 'woocommerce_product_variation_get_price', $raise_small, 10 );
+
+		$this->assertSame( array( (string) $ids['large'] ), array_column( $mapped['variants'], 'id' ) );
+		$this->assertSame( 'large', $mapped['selected'][0]['label'] );
+	}
+
+	/**
 	 * The storefront treats an "Any" variation attribute as a wildcard and
 	 * `options` advertises every term for it, so a selection must match it too.
 	 *
