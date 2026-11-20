@@ -30,6 +30,13 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->comment_registration = get_option( 'comment_registration' );
 		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
+
+		// The container wires this in production via init(); the test dispatches the
+		// handler directly, so register the moderation-transition hooks here to exercise
+		// the tag lifecycle. WP_UnitTestCase restores hooks on tearDown.
+		$handler = new SubmissionHandler();
+		add_action( 'transition_comment_status', array( $handler, 'clear_auto_rejected_flag' ), 10, 3 );
+		add_action( 'transition_comment_status', array( $handler, 'record_moderator_hold' ), 10, 3 );
 	}
 
 	/**
@@ -1634,6 +1641,206 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 3, (float) $product->get_average_rating() );
 		$this->assertSame( array( 3 => 1 ), $product->get_rating_counts() );
 		$this->assertSame( 1, $product->get_review_count() );
+	}
+
+	/**
+	 * @testdox An edit does not lift a hold a moderator set with Unapprove.
+	 */
+	public function test_edit_does_not_lift_a_moderators_unapprove(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Never arrived. Scam shop.' );
+		$this->assertSame( 'ok', $first['status'] );
+
+		// What the Unapprove row action under Products > Reviews does.
+		wp_set_comment_status( (int) $first['comment_id'], 'hold' );
+
+		$edit = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Never arrived. Scam shop!' );
+
+		$this->assertSame( $first['comment_id'], $edit['comment_id'], 'The edit must still reuse the row.' );
+		$this->assertSame( 'pending_moderation', $edit['status'] );
+		$this->assertSame(
+			'unapproved',
+			wp_get_comment_status( (int) $first['comment_id'] ),
+			'Approving a pending review is a staff action; an edit must not do it.'
+		);
+		$this->assertStringContainsString(
+			'Scam shop!',
+			get_comment( (int) $first['comment_id'] )->comment_content,
+			'The edit itself still applies; only the status is held back.'
+		);
+	}
+
+	/**
+	 * @testdox A disallowed-keys verdict still applies to a review a moderator put on hold.
+	 */
+	public function test_disallowed_edit_of_a_moderator_held_review_is_still_rejected(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Fine at first.' );
+		wp_set_comment_status( (int) $first['comment_id'], 'hold' );
+
+		update_option( 'disallowed_keys', 'casino-bonus' );
+		$this->submit_review( $built['order'], $product_id, $item_id, 5, 'Try my casino-bonus link.' );
+
+		$this->assertContains(
+			wp_get_comment_status( (int) $first['comment_id'] ),
+			array( 'trash', 'spam' ),
+			"A moderator's hold must not shield content the disallowed list rejects."
+		);
+	}
+
+	/**
+	 * @testdox A hold this handler applied is still lifted by a corrected edit.
+	 */
+	public function test_handlers_own_hold_stays_liftable(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$this->submit_review( $built['order'], $product_id, $item_id, 5, 'Clean to start.' );
+
+		update_option( 'moderation_keys', 'hold-this' );
+		$held = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Now with hold-this in it.' );
+		$this->assertSame( 'pending_moderation', $held['status'] );
+
+		update_option( 'moderation_keys', '' );
+		$clean = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Clean again.' );
+
+		$this->assertSame( 'ok', $clean['status'], "The handler's own hold must not read as a moderator's." );
+	}
+
+	/**
+	 * @testdox An Unapprove is recorded on the review; a hold the checks applied is not.
+	 */
+	public function test_only_a_moderators_hold_is_recorded(): void {
+		$built = $this->make_order( 2 );
+
+		$approved = $this->submit_review( $built['order'], $built['product_ids'][0], $built['item_ids'][0], 5, 'Clean enough.' );
+		wp_set_comment_status( (int) $approved['comment_id'], 'hold' );
+
+		update_option( 'moderation_keys', 'hold-this' );
+		$auto = $this->submit_review( $built['order'], $built['product_ids'][1], $built['item_ids'][1], 5, 'Please hold-this one.' );
+
+		$this->assertNotEmpty(
+			get_comment_meta( (int) $approved['comment_id'], '_wc_moderator_held', true ),
+			"A moderator's Unapprove must be recorded."
+		);
+		$this->assertEmpty(
+			get_comment_meta( (int) $auto['comment_id'], '_wc_moderator_held', true ),
+			'An automatic hold must stay unrecorded so an edit can lift it.'
+		);
+	}
+
+	/**
+	 * @testdox An ordinary comment a moderator unapproves is left alone.
+	 */
+	public function test_moderator_hold_is_not_recorded_on_other_comment_types(): void {
+		$comment_id = (int) self::factory()->comment->create(
+			array(
+				'comment_post_ID'  => self::factory()->post->create(),
+				'comment_approved' => 1,
+			)
+		);
+
+		wp_set_comment_status( $comment_id, 'hold' );
+
+		$this->assertEmpty(
+			get_comment_meta( $comment_id, '_wc_moderator_held', true ),
+			'The listener runs for every comment on the site; it must only touch reviews.'
+		);
+	}
+
+	/**
+	 * @testdox A review held before this tag existed can still be lifted by an edit.
+	 */
+	public function test_untagged_hold_is_still_liftable(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		// Stand in for a row held on a site that upgraded into this change.
+		$comment_id = (int) wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product_id,
+				'comment_author'       => 'Jane',
+				'comment_author_email' => $built['order']->get_billing_email(),
+				'comment_content'      => 'Held before the tag existed.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 0,
+			)
+		);
+		add_comment_meta( $comment_id, 'rating', 4, true );
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $built['order']->get_id(), true );
+		add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, 0, true );
+
+		$edit = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Corrected text.' );
+
+		$this->assertSame( $comment_id, (int) $edit['comment_id'], 'The edit must reuse the existing row.' );
+		$this->assertSame( 'ok', $edit['status'], 'An untagged hold predates the tag and stays liftable.' );
+
+		// Staff acting on it afterwards is what records the hold for the future.
+		wp_set_comment_status( $comment_id, 'hold' );
+
+		$this->assertNotEmpty(
+			get_comment_meta( $comment_id, '_wc_moderator_held', true ),
+			'The next staff action records the hold, so a later edit cannot lift it.'
+		);
+	}
+
+	/**
+	 * @testdox A rejected edit does not launder away a moderator's hold.
+	 */
+	public function test_auto_rejected_detour_does_not_lift_a_moderators_unapprove(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Fine at first.' );
+		wp_set_comment_status( (int) $first['comment_id'], 'hold' );
+
+		// A deliberately rejected edit moves the row out of hold and tags it auto-rejected.
+		update_option( 'disallowed_keys', 'casino-bonus' );
+		$this->submit_review( $built['order'], $product_id, $item_id, 5, 'Try my casino-bonus link.' );
+
+		// Clean text now reuses that rejected row, which must not come back approved.
+		update_option( 'disallowed_keys', '' );
+		$third = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Perfectly ordinary text.' );
+
+		$this->assertNotSame(
+			'approved',
+			wp_get_comment_status( (int) $first['comment_id'] ),
+			"A rejected edit must not clear the moderator's hold."
+		);
+		$this->assertSame( 'pending_moderation', $third['status'] );
+	}
+
+	/**
+	 * @testdox Once a moderator has acted on an automatically held review, a later edit cannot approve it.
+	 */
+	public function test_edit_does_not_lift_an_unapprove_that_followed_an_automatic_hold(): void {
+		update_option( 'moderation_keys', 'hold-this' );
+
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$held = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Please hold-this review.' );
+		$this->assertSame( 'pending_moderation', $held['status'] );
+
+		// The moderator approves it, then changes their mind. The second transition
+		// leaves a hold that is theirs, not one the checks applied.
+		wp_set_comment_status( (int) $held['comment_id'], 'approve' );
+		wp_set_comment_status( (int) $held['comment_id'], 'hold' );
+
+		$edit = $this->submit_review( $built['order'], $product_id, $item_id, 4, 'Clean text now.' );
+
+		$this->assertSame( 'pending_moderation', $edit['status'] );
+		$this->assertSame( 'unapproved', wp_get_comment_status( (int) $held['comment_id'] ) );
 	}
 
 	/**
