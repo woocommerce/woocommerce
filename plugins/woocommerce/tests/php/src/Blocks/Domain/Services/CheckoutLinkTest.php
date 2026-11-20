@@ -300,20 +300,23 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Custom attribute names and the checkout link keys that should select them.
+	 * Custom attribute names, the checkout link keys that should select them, and the cart item key they are stored under.
 	 *
-	 * @return array<string, array{string, string}>
+	 * The German key is null because its slug depends on the site locale ("grose" in en_US, "groesse" in de_DE),
+	 * so the test derives it from the current locale instead of hardcoding it.
+	 *
+	 * @return array<string, array{string, string, string|null}>
 	 */
 	public function non_ascii_attribute_provider(): array {
 		return [
-			'Chinese name'          => [ '尺寸', '尺寸' ],
-			'Chinese prefixed name' => [ '尺寸', 'attribute_尺寸' ],
-			'Cyrillic name'         => [ 'Размер', 'Размер' ],
-			'German name'           => [ 'Größe', 'Größe' ],
-			'German prefixed name'  => [ 'Größe', 'attribute_Größe' ],
-			'Spanish name'          => [ 'Tamaño', 'Tamaño' ],
-			'Name with a space'     => [ 'Color Name', 'Color Name' ],
-			'Lowercase ASCII label' => [ 'Color Name', 'color name' ],
+			'Chinese name'          => [ '尺寸', '尺寸', 'attribute_%e5%b0%ba%e5%af%b8' ],
+			'Chinese prefixed name' => [ '尺寸', 'attribute_尺寸', 'attribute_%e5%b0%ba%e5%af%b8' ],
+			'Cyrillic name'         => [ 'Размер', 'Размер', 'attribute_%d1%80%d0%b0%d0%b7%d0%bc%d0%b5%d1%80' ],
+			'German name'           => [ 'Größe', 'Größe', null ],
+			'German prefixed name'  => [ 'Größe', 'attribute_Größe', null ],
+			'Spanish name'          => [ 'Tamaño', 'Tamaño', 'attribute_tamano' ],
+			'Name with a space'     => [ 'Color Name', 'Color Name', 'attribute_color-name' ],
+			'Lowercase ASCII label' => [ 'Color Name', 'color name', 'attribute_color-name' ],
 		];
 	}
 
@@ -321,10 +324,13 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	 * @testdox Adds the variation when the checkout link uses the "$link_key" key for the "$attribute_name" attribute.
 	 * @dataProvider non_ascii_attribute_provider
 	 *
-	 * @param string $attribute_name Custom attribute name.
-	 * @param string $link_key       Variation key used in the checkout link.
+	 * @param string      $attribute_name Custom attribute name.
+	 * @param string      $link_key       Variation key used in the checkout link.
+	 * @param string|null $expected_key   Expected cart item variation key, or null when it depends on the site locale.
 	 */
-	public function test_variation_with_non_ascii_attribute_name_is_added( string $attribute_name, string $link_key ): void {
+	public function test_variation_with_non_ascii_attribute_name_is_added( string $attribute_name, string $link_key, ?string $expected_key ): void {
+		$expected_key = $expected_key ?? wc_variation_attribute_name( $attribute_name );
+
 		list( $product, $variation ) = $this->create_custom_attribute_variation( $attribute_name, 'L' );
 
 		$_GET['products'] = $product->get_id() . ':1:' . $link_key . '=L';
@@ -334,7 +340,8 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $items, 'The variation should be added to the cart.' );
 		$this->assertSame( $variation->get_id(), $items[0]['variation_id'], 'The matching variation should be added.' );
-		$this->assertSame( [ wc_variation_attribute_name( $attribute_name ) => 'L' ], $items[0]['variation'], 'The cart item should store the attribute under its variation name.' );
+		$this->assertArrayHasKey( $expected_key, $items[0]['variation'], 'The cart item should store the attribute under its variation name.' );
+		$this->assertSame( 'L', $items[0]['variation'][ $expected_key ], 'The cart item should store the chosen value.' );
 		$this->assertStringStartsWith( wc_get_checkout_url(), $url, 'The shopper should continue to checkout.' );
 	}
 
@@ -351,7 +358,8 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $items, 'The "Any" variation should be added to the cart.' );
 		$this->assertSame( $variation->get_id(), $items[0]['variation_id'], 'The "Any" variation should be added.' );
-		$this->assertSame( [ wc_variation_attribute_name( '尺寸' ) => 'L' ], $items[0]['variation'], 'The chosen value should be stored for the "Any" attribute.' );
+		$this->assertArrayHasKey( 'attribute_%e5%b0%ba%e5%af%b8', $items[0]['variation'], 'The "Any" attribute should be stored under its variation name.' );
+		$this->assertSame( 'L', $items[0]['variation']['attribute_%e5%b0%ba%e5%af%b8'], 'The chosen value should be stored for the "Any" attribute.' );
 	}
 
 	/**
