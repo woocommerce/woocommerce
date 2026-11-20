@@ -280,7 +280,11 @@ final class PlansController extends WP_REST_Controller {
 			return $extension_slug;
 		}
 
-		$plan = Plans::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
+		try {
+			$plan = Plans::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
+		} catch ( RuntimeException $e ) {
+			return $this->read_failed_error( $e );
+		}
 		if ( null === $plan || $extension_slug !== $plan->get_extension_slug() ) {
 			return $this->not_found_error();
 		}
@@ -549,6 +553,24 @@ final class PlansController extends WP_REST_Controller {
 		}
 
 		return $map;
+	}
+
+	/**
+	 * Error for a failed plan read: logged, then a generic 500 so database details stay out of the response.
+	 *
+	 * @param RuntimeException $e Failure.
+	 */
+	private function read_failed_error( RuntimeException $e ): WP_Error {
+		wc_get_logger()->error(
+			sprintf( 'PlansController: the plan read failed: %s', $e->getMessage() ),
+			array( 'source' => self::LOG_SOURCE )
+		);
+
+		return new WP_Error(
+			'woocommerce_subscriptions_engine_plan_read_failed',
+			__( 'The plan could not be read.', 'woocommerce' ),
+			array( 'status' => 500 )
+		);
 	}
 
 	/**

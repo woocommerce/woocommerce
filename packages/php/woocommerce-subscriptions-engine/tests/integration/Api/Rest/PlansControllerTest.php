@@ -1478,6 +1478,19 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		}
 	}
 
+	public function test_get_item_answers_a_failed_plan_read_with_a_500(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$id = $this->create_plan( 'Stored' );
+		$this->fail_next_query( '/^\s*SELECT \* FROM \S*selling_plans WHERE id/' );
+
+		$response = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_plan_read_failed', $this->response_data( $response )['code'] );
+		$this->assertStringNotContainsString( 'table_that_does_not_exist', (string) wp_json_encode( $response->get_data() ), 'Database details stay out of the response.' );
+	}
+
 	public function test_single_plan_routes_404_a_plan_of_another_extension_slug_or_an_unknown_id(): void {
 		wp_set_current_user( $this->admin_id );
 
