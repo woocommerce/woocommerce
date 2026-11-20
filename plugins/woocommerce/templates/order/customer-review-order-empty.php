@@ -19,11 +19,13 @@ if ( ! $order instanceof WC_Order ) {
 }
 
 $meta_line = \Automattic\WooCommerce\Internal\OrderReviews\Meta::line_for_order( $order );
+// Block themes texturize the whole page, but skip address elements, so the email goes in one there.
+$meta_tag = wp_is_block_theme() ? 'address' : 'p';
 ?>
 <div class="woocommerce-review-order woocommerce-review-order--empty">
-	<address class="woocommerce-breadcrumb woocommerce-review-order__meta">
+	<<?php echo tag_escape( $meta_tag ); ?> class="woocommerce-breadcrumb woocommerce-review-order__meta">
 		<?php echo esc_html( $meta_line ); ?>
-	</address>
+	</<?php echo tag_escape( $meta_tag ); ?>>
 
 	<h1 class="woocommerce-review-order__empty-title">
 		<?php

@@ -44,6 +44,9 @@ if ( $theme_button_class ) {
 
 $button_class           = implode( ' ', $button_classes );
 $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'woocommerce-order-withdrawal-content__button--secondary' ) ) );
+// Block themes texturize the whole page, but skip address elements, so the email goes in one there.
+$is_block_theme = wp_is_block_theme();
+$email_note_tag = $is_block_theme ? 'address' : 'p';
 ?>
 
 <div class="woocommerce-order-withdrawal-content">
@@ -51,7 +54,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 
 	<?php if ( 'confirmation' === $screen ) : ?>
 		<p><strong><?php esc_html_e( 'Your withdrawal has been submitted.', 'woocommerce' ); ?></strong></p>
-		<address class="woocommerce-order-withdrawal-content__note">
+		<<?php echo tag_escape( $email_note_tag ); ?> class="woocommerce-order-withdrawal-content__note">
 			<?php
 			printf(
 				/* translators: %s: Email address. */
@@ -59,7 +62,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 				esc_html( $data['email'] ?? '' )
 			);
 			?>
-		</address>
+		</<?php echo tag_escape( $email_note_tag ); ?>>
 		<p class="woocommerce-order-withdrawal-content__note"><?php esc_html_e( 'We\'ll review your request and contact you about next steps, including any refund due.', 'woocommerce' ); ?></p>
 		<p><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Back to the shop', 'woocommerce' ); ?></a></p>
 	<?php elseif ( 'review' === $screen ) : ?>
@@ -77,7 +80,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 					<dt><?php echo esc_html( $review_row['label'] ?? '' ); ?></dt>
 					<dd>
 						<?php
-						if ( \Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor::FIELD_EMAIL === ( $review_row['key'] ?? '' ) ) {
+						if ( $is_block_theme && \Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor::FIELD_EMAIL === ( $review_row['key'] ?? '' ) ) {
 							printf( '<address>%s</address>', esc_html( $review_row['value'] ?? '' ) );
 						} else {
 							echo nl2br( esc_html( $review_row['value'] ?? '' ) );
@@ -88,7 +91,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 			<?php endforeach; ?>
 		</dl>
 
-		<address class="woocommerce-order-withdrawal-content__note">
+		<<?php echo tag_escape( $email_note_tag ); ?> class="woocommerce-order-withdrawal-content__note">
 			<?php
 			printf(
 				/* translators: %s: Email address. */
@@ -96,7 +99,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 				esc_html( $data['email'] ?? '' )
 			);
 			?>
-		</address>
+		</<?php echo tag_escape( $email_note_tag ); ?>>
 
 		<form class="woocommerce-OrderWithdrawalForm" action="<?php echo esc_url( $form_action_url ); ?>" method="post" novalidate>
 			<?php foreach ( $hidden_fields as $hidden_field ) : ?>

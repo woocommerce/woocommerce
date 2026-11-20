@@ -144,17 +144,14 @@ class NotificationManagementService {
 			exit;
 		}
 
-		wc_add_notice(
-			sprintf(
-				'<address>%s</address>',
-				sprintf(
-					/* translators: %s user email. */
-					esc_html__( 'Verification email sent to %s.', 'woocommerce' ),
-					esc_html( $notification->get_user_email() )
-				)
-			),
-			'success'
+		$notice = sprintf(
+			/* translators: %s user email. */
+			esc_html__( 'Verification email sent to %s.', 'woocommerce' ),
+			esc_html( $notification->get_user_email() )
 		);
+
+		// Block themes texturize the whole page, but skip address elements.
+		wc_add_notice( wp_is_block_theme() ? '<address>' . $notice . '</address>' : $notice, 'success' );
 		wp_safe_redirect( $redirect_url );
 		exit;
 	}

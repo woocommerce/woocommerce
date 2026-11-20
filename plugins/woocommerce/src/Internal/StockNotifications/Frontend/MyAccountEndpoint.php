@@ -517,14 +517,14 @@ class MyAccountEndpoint {
 			return $result;
 		}
 
-		return sprintf(
-			'<address>%s</address>',
-			sprintf(
-				/* translators: %s: email address the verification email was sent to. */
-				esc_html__( 'Verification email sent to "%s". Please check your inbox!', 'woocommerce' ),
-				esc_html( $notification->get_user_email() )
-			)
+		$notice = sprintf(
+			/* translators: %s: email address the verification email was sent to. */
+			esc_html__( 'Verification email sent to "%s". Please check your inbox!', 'woocommerce' ),
+			esc_html( $notification->get_user_email() )
 		);
+
+		// Block themes texturize the whole page, but skip address elements.
+		return wp_is_block_theme() ? '<address>' . $notice . '</address>' : $notice;
 	}
 
 	/**

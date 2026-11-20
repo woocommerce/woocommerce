@@ -251,112 +251,80 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 	 * @testdox The My Account verification notice keeps the email and the quotes around it, and neighboring text is still texturized.
 	 */
 	public function test_account_verification_notice_survives_texturize_on_block_themes(): void {
-		$this->enable_stock_notifications_feature();
-		$capture = static function () {
-			throw new \RuntimeException( 'Redirected.' );
-		};
-		add_filter( 'wp_redirect', $capture );
+		$notice = $this->resend_as_customer();
 
-		try {
-			$this->open_block_theme_email_page( 'stock-notifications' );
-
-			$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
-			wp_set_current_user( $user_id );
-
-			$product      = WC_Helper_Product::create_simple_product();
-			$notification = new Notification();
-			$notification->set_product_id( $product->get_id() );
-			$notification->set_user_id( $user_id );
-			$notification->set_user_email( "o'neil--shop@48x17.com" );
-			$notification->set_status( NotificationStatus::PENDING );
-			$notification->save();
-
-			$service = $this->createMock( NotificationManagementService::class );
-			$service->method( 'resend_verification_email' )->willReturn( true );
-
-			$endpoint = new MyAccountEndpoint();
-			$endpoint->init( $service, new MyAccountView() );
-
-			// phpcs:disable WordPress.Security.NonceVerification.Recommended
-			$_GET = array(
-				MyAccountEndpoint::ACTION_FIELD => MyAccountEndpoint::ACTION_RESEND,
-				'notification_id'               => (string) $notification->get_id(),
-				'_wpnonce'                      => wp_create_nonce( MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_RESEND, $notification->get_id() ) ),
-			);
-			// phpcs:enable WordPress.Security.NonceVerification.Recommended
-
-			try {
-				$endpoint->maybe_handle_action();
-				$this->fail( 'Expected the resend action to redirect.' );
-			} catch ( \RuntimeException $exception ) {
-				$this->assertSame( 'Redirected.', $exception->getMessage() );
-			}
-
-			$this->sut->skip_address_texturize_on_order_pages();
-			$notices = wc_get_notices( 'success' );
-			$this->assertCount( 1, $notices, 'The resend should queue one success notice.' );
-
-			$html = wc_kses_notice( $notices[0]['notice'] ) . '<p>3x4 -- done</p>';
-			$this->assert_literal_email( $html );
-			$this->assertStringContainsString( 'to "o\'neil--shop@48x17.com"', $this->texturize_to_text( $html ), 'The quote after the email should stay straight.' );
-		} finally {
-			remove_filter( 'wp_redirect', $capture );
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$_GET = array();
-			wp_set_current_user( 0 );
-			$this->restore_stock_notifications_feature_option();
-		}
+		$this->sut->skip_address_texturize_on_order_pages();
+		$html = wc_kses_notice( $notice ) . '<p>3x4 -- done</p>';
+		$this->assert_literal_email( $html );
+		$this->assertStringContainsString( 'to "o\'neil--shop@48x17.com"', $this->texturize_to_text( $html ), 'The quote after the email should stay straight.' );
 	}
 
 	/**
 	 * @testdox The guest verification notice keeps the email on the product page it redirects to, and neighboring text is still texturized.
 	 */
 	public function test_guest_verification_notice_survives_texturize_on_block_themes(): void {
-		$this->enable_stock_notifications_feature();
-		$capture = static function () {
-			throw new \RuntimeException( 'Redirected.' );
-		};
-		add_filter( 'wp_redirect', $capture );
+		$notice = $this->resend_as_guest();
 
-		try {
-			$this->go_to( get_permalink( self::factory()->post->create( array( 'post_type' => 'page' ) ) ) );
+		$this->sut->skip_address_texturize_on_order_pages();
+		$this->assertStringContainsString( '<address>', $notice, 'The guest notice should wrap the sentence in an address element.' );
+		$this->assert_literal_email( wc_kses_notice( $notice ) . '<p>3x4 -- done</p>' );
+	}
 
-			$product      = WC_Helper_Product::create_simple_product();
-			$notification = new Notification();
-			$notification->set_product_id( $product->get_id() );
-			$notification->set_user_email( "o'neil--shop@48x17.com" );
-			$notification->set_status( NotificationStatus::PENDING );
-			$notification->save();
+	/**
+	 * @testdox Classic themes get verification notices without an address element, since they do not texturize notices.
+	 */
+	public function test_classic_themes_get_verification_notices_without_address(): void {
+		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test requires a classic theme.' );
 
-			// phpcs:disable WordPress.Security.NonceVerification.Recommended
-			$_GET[ NotificationManagementService::RESEND_QUERY_ARG ] = (string) $notification->get_id();
-			$_GET['_wpnonce']                                        = wp_create_nonce( NotificationManagementService::RESEND_NONCE_ACTION . '_' . $notification->get_id() );
-			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		$this->assertStringNotContainsString( '<address', $this->resend_as_customer(), 'The account notice should not use an address element.' );
+		wc_clear_notices();
+		$this->assertStringNotContainsString( '<address', $this->resend_as_guest(), 'The guest notice should not use an address element.' );
+	}
 
-			$email_manager = $this->createMock( EmailManager::class );
-			$email_manager->expects( $this->once() )->method( 'send_verify_email' );
-			$service = new NotificationManagementService();
-			$service->init( $email_manager );
+	/**
+	 * @testdox Classic themes get the withdrawal and Review Order templates without an address element.
+	 */
+	public function test_classic_themes_get_templates_without_address(): void {
+		switch_theme( 'storefront' );
+		$this->assertFalse( wp_is_block_theme(), 'The test requires a classic theme.' );
 
-			try {
-				$service->maybe_process_resend_request();
-				$this->fail( 'Expected the guest resend to redirect.' );
-			} catch ( \RuntimeException $exception ) {
-				$this->assertSame( 'Redirected.', $exception->getMessage() );
-			}
+		$email = "o'neil--shop@48x17.com";
+		$view  = new OrderWithdrawalFormView();
+		$data  = $this->withdrawal_form_data( $email, 'None' );
+		$order = WC_Helper_Order::create_order();
 
-			$this->sut->skip_address_texturize_on_order_pages();
-			$notices = wc_get_notices( 'success' );
-			$this->assertCount( 1, $notices, 'The guest resend should queue one success notice.' );
-			$this->assertStringContainsString( '<address>', $notices[0]['notice'], 'The guest notice should wrap the sentence in an address element.' );
-			$this->assert_literal_email( wc_kses_notice( $notices[0]['notice'] ) . '<p>3x4 -- done</p>' );
-		} finally {
-			remove_filter( 'wp_redirect', $capture );
-			// phpcs:disable WordPress.Security.NonceVerification.Recommended
-			unset( $_GET[ NotificationManagementService::RESEND_QUERY_ARG ], $_GET['_wpnonce'] );
-			// phpcs:enable WordPress.Security.NonceVerification.Recommended
-			$this->restore_stock_notifications_feature_option();
+		$templates = array(
+			'withdrawal confirmation' => wc_get_template_html(
+				'myaccount/form-order-withdrawal.php',
+				$view->get_template_args( new OrderWithdrawalFormState( 'confirmation', $data, array() ), 'https://example.test/withdraw/', 'https://example.test/shop/' )
+			),
+			'withdrawal review'       => wc_get_template_html(
+				'myaccount/form-order-withdrawal.php',
+				$view->get_template_args( new OrderWithdrawalFormState( 'review', $data, array() ), 'https://example.test/withdraw/', 'https://example.test/shop/' )
+			),
+			'review order'            => wc_get_template_html( 'order/customer-review-order.php', array( 'order' => $order ) ),
+			'review order empty'      => wc_get_template_html(
+				'order/customer-review-order-empty.php',
+				array(
+					'order'          => $order,
+					'reviewed_count' => 1,
+				)
+			),
+		);
+
+		foreach ( $templates as $name => $html ) {
+			$this->assertStringNotContainsString( '<address', $html, "The {$name} template should not use an address element." );
 		}
+		// Each withdrawal screen has one note without the email, so the email note makes two paragraphs.
+		$note = '<p class="woocommerce-order-withdrawal-content__note">';
+		$this->assertSame( 2, substr_count( $templates['withdrawal confirmation'], $note ), 'The confirmation email note should stay a paragraph.' );
+		$this->assertSame( 2, substr_count( $templates['withdrawal review'], $note ), 'The review email note should stay a paragraph.' );
+		$this->assertStringContainsString( esc_html( $email ), $templates['withdrawal review'], 'The review rows should still show the email.' );
+
+		$meta = '<p class="woocommerce-breadcrumb woocommerce-review-order__meta">';
+		$this->assertStringContainsString( $meta, $templates['review order'], 'The form meta line should stay a paragraph.' );
+		$this->assertStringContainsString( $meta, $templates['review order empty'], 'The empty-state meta line should stay a paragraph.' );
 	}
 
 	/**
@@ -450,6 +418,118 @@ class TexturizeExclusionsTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( "o'neil--shop@48x17.com", $text, 'The billing email should not be texturized.' );
 		$this->assertStringContainsString( '12--14 Main St', $text, 'The billing address should not be texturized.' );
+	}
+
+	/**
+	 * Resend a pending verification as the signed-in customer and return the queued success notice.
+	 *
+	 * @return string
+	 */
+	private function resend_as_customer(): string {
+		$this->enable_stock_notifications_feature();
+		$capture = static function () {
+			throw new \RuntimeException( 'Redirected.' );
+		};
+		add_filter( 'wp_redirect', $capture );
+
+		try {
+			$this->open_block_theme_email_page( 'stock-notifications' );
+
+			$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+			wp_set_current_user( $user_id );
+
+			$product      = WC_Helper_Product::create_simple_product();
+			$notification = new Notification();
+			$notification->set_product_id( $product->get_id() );
+			$notification->set_user_id( $user_id );
+			$notification->set_user_email( "o'neil--shop@48x17.com" );
+			$notification->set_status( NotificationStatus::PENDING );
+			$notification->save();
+
+			$service = $this->createMock( NotificationManagementService::class );
+			$service->method( 'resend_verification_email' )->willReturn( true );
+
+			$endpoint = new MyAccountEndpoint();
+			$endpoint->init( $service, new MyAccountView() );
+
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			$_GET = array(
+				MyAccountEndpoint::ACTION_FIELD => MyAccountEndpoint::ACTION_RESEND,
+				'notification_id'               => (string) $notification->get_id(),
+				'_wpnonce'                      => wp_create_nonce( MyAccountEndpoint::get_nonce_action( MyAccountEndpoint::ACTION_RESEND, $notification->get_id() ) ),
+			);
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+			try {
+				$endpoint->maybe_handle_action();
+				$this->fail( 'Expected the resend action to redirect.' );
+			} catch ( \RuntimeException $exception ) {
+				$this->assertSame( 'Redirected.', $exception->getMessage() );
+			}
+
+			$notices = wc_get_notices( 'success' );
+			$this->assertCount( 1, $notices, 'The resend should queue one success notice.' );
+
+			return $notices[0]['notice'];
+		} finally {
+			remove_filter( 'wp_redirect', $capture );
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$_GET = array();
+			$this->restore_stock_notifications_feature_option();
+		}
+	}
+
+	/**
+	 * Resend a pending verification as a guest and return the queued success notice.
+	 *
+	 * @return string
+	 */
+	private function resend_as_guest(): string {
+		wp_set_current_user( 0 );
+		$this->enable_stock_notifications_feature();
+		$capture = static function () {
+			throw new \RuntimeException( 'Redirected.' );
+		};
+		add_filter( 'wp_redirect', $capture );
+
+		try {
+			$this->go_to( get_permalink( self::factory()->post->create( array( 'post_type' => 'page' ) ) ) );
+
+			$product      = WC_Helper_Product::create_simple_product();
+			$notification = new Notification();
+			$notification->set_product_id( $product->get_id() );
+			$notification->set_user_email( "o'neil--shop@48x17.com" );
+			$notification->set_status( NotificationStatus::PENDING );
+			$notification->save();
+
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			$_GET[ NotificationManagementService::RESEND_QUERY_ARG ] = (string) $notification->get_id();
+			$_GET['_wpnonce']                                        = wp_create_nonce( NotificationManagementService::RESEND_NONCE_ACTION . '_' . $notification->get_id() );
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+			$email_manager = $this->createMock( EmailManager::class );
+			$email_manager->expects( $this->once() )->method( 'send_verify_email' );
+			$service = new NotificationManagementService();
+			$service->init( $email_manager );
+
+			try {
+				$service->maybe_process_resend_request();
+				$this->fail( 'Expected the guest resend to redirect.' );
+			} catch ( \RuntimeException $exception ) {
+				$this->assertSame( 'Redirected.', $exception->getMessage() );
+			}
+
+			$notices = wc_get_notices( 'success' );
+			$this->assertCount( 1, $notices, 'The guest resend should queue one success notice.' );
+
+			return $notices[0]['notice'];
+		} finally {
+			remove_filter( 'wp_redirect', $capture );
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			unset( $_GET[ NotificationManagementService::RESEND_QUERY_ARG ], $_GET['_wpnonce'] );
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+			$this->restore_stock_notifications_feature_option();
+		}
 	}
 
 	/**
