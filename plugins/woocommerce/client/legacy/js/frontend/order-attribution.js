@@ -116,6 +116,13 @@
 				fields: params.cookieFields,
 			} );
 		}
+		updateAttributionData();
+	}
+
+	/**
+	 * Update the classic checkout inputs and the Checkout block with the current attribution data.
+	 */
+	function updateAttributionData() {
 		const values = wc_order_attribution.getAttributionData();
 		updateFormValues( values );
 		updateCheckoutBlockData( values );
