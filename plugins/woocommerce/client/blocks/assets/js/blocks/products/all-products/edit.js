@@ -11,9 +11,9 @@ import { createBlock } from '@wordpress/blocks';
 import {
 	Button,
 	Disabled,
+	Notice,
 	PanelBody,
 	Placeholder,
-	Tip,
 	ToolbarGroup,
 	withSpokenMessages,
 } from '@wordpress/components';
@@ -173,12 +173,17 @@ const Edit = ( {
 					'woocommerce'
 				) }
 				<div className="wc-block-all-products-grid-item-template">
-					<Tip>
+					<Notice
+						className="wc-block-all-products__layout-notice"
+						status="info"
+						isDismissible={ false }
+						spokenMessage=""
+					>
 						{ __(
 							'Edit the blocks inside the example below to change the content displayed for all products within the product grid.',
 							'woocommerce'
 						) }
-					</Tip>
+					</Notice>
 					<InnerBlockLayoutContextProvider
 						parentName="woocommerce/all-products"
 						parentClassName="wc-block-grid"
