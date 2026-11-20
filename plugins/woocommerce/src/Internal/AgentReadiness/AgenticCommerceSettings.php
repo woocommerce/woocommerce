@@ -112,6 +112,34 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 		}
 		add_filter( 'woocommerce_get_settings_pages', array( $this, 'handle_woocommerce_get_settings_pages' ) );
 		add_filter( 'admin_body_class', array( $this, 'handle_admin_body_class' ), 20 );
+		// After WooCommerce's rating request (priority 1) and version (20).
+		add_filter( 'admin_footer_text', array( $this, 'handle_admin_footer' ), 99 );
+		add_filter( 'update_footer', array( $this, 'handle_admin_footer' ), 99 );
+	}
+
+	/**
+	 * No admin footer on the AI tools tab and on Sales readiness, as in the design: the rating request
+	 * and the version would sit under, or over, the last card.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $text Footer text.
+	 * @return mixed
+	 */
+	public function handle_admin_footer( $text ) {
+		return self::is_own_screen() ? '' : $text;
+	}
+
+	/**
+	 * Whether this request is the AI tools tab or Sales readiness.
+	 */
+	private static function is_own_screen(): bool {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Only picks what the footer shows.
+		$page = isset( $_GET['page'] ) && is_string( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		$tab  = isset( $_GET['tab'] ) && is_string( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+		$path = isset( $_GET['path'] ) && is_string( $_GET['path'] ) ? sanitize_text_field( wp_unslash( $_GET['path'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		return ( 'wc-settings' === $page && self::TAB === $tab ) || ( 'wc-admin' === $page && ReadinessCheckPage::PATH === $path );
 	}
 
 	/**

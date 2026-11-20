@@ -2317,6 +2317,25 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Saving a sold-out variable product preserves its stock status when the stock options filter returns null.
+	 */
+	public function test_save_with_invalid_stock_status_options(): void {
+		$product = $this->create_variable_product_with_child_stock_statuses(
+			array( ProductStockStatus::OUT_OF_STOCK, ProductStockStatus::OUT_OF_STOCK )
+		);
+		$product->set_name( 'Renamed sold-out product' );
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+
+		add_filter( 'woocommerce_product_stock_status_options', '__return_null' );
+		$product->save();
+		remove_filter( 'woocommerce_product_stock_status_options', '__return_null' );
+
+		$saved = new WC_Product_Variable( $product->get_id() );
+		$this->assertSame( 'Renamed sold-out product', $saved->get_name() );
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $saved->get_stock_status() );
+	}
+
+	/**
 	 * @testdox sync_stock_status sets outofstock when the product has no children.
 	 */
 	public function test_sync_stock_status_sets_outofstock_when_no_children(): void {

@@ -1,10 +1,11 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TaskType } from '@woocommerce/data';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { setLocaleData, resetLocaleData } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -14,6 +15,7 @@ import { Tax } from '..';
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
+	useDispatch: jest.fn(),
 } ) );
 
 jest.mock( '@woocommerce/tracks', () => ( {
@@ -37,11 +39,19 @@ beforeEach( () => {
 		woocommerceTaxCountries: [ 'US' ],
 	};
 
-	( useSelect as jest.Mock ).mockImplementation( () => ( {
+	( useSelect as jest.Mock ).mockReturnValue( {
 		generalSettings: {
 			woocommerce_default_country: 'US',
 		},
-	} ) );
+	} );
+	( useDispatch as jest.Mock ).mockReturnValue( {
+		updateAndPersistSettingsForGroup: jest.fn().mockResolvedValue( {} ),
+		createNotice: jest.fn(),
+	} );
+} );
+
+afterEach( () => {
+	resetLocaleData( {}, 'woocommerce' );
 } );
 
 const assertWooCommerceTaxIsNotRecommended = () => {
@@ -55,6 +65,49 @@ const assertWooCommerceTaxIsNotRecommended = () => {
 		)
 	).toBeInTheDocument();
 };
+
+it.each( [ 'Yes please', 'نعم من فضلك 日本語 🛒' ] )(
+	'requires a click to enable automated taxes with button text %s',
+	async ( buttonText ) => {
+		setLocaleData( { 'Yes please': [ buttonText ] }, 'woocommerce' );
+		const updateSettings = jest.fn().mockResolvedValue( {} );
+		const onComplete = jest.fn();
+		( useSelect as jest.Mock ).mockReturnValue( {
+			generalSettings: {
+				woocommerce_default_country: 'US',
+				woocommerce_store_address: 'Žltá ulica 123 العربية 日本語 🛒',
+				woocommerce_store_postcode: '90210',
+			},
+			isJetpackConnected: true,
+			pluginsToActivate: [],
+		} );
+		( useDispatch as jest.Mock ).mockReturnValue( {
+			updateAndPersistSettingsForGroup: updateSettings,
+			createNotice: jest.fn(),
+		} );
+
+		render(
+			<Tax
+				onComplete={ onComplete }
+				query={ { auto: 'true', partner: 'woocommerce-tax' } }
+				task={ fakeTask as TaskType }
+			/>
+		);
+
+		expect( updateSettings ).not.toHaveBeenCalled();
+		fireEvent.click( screen.getByRole( 'button', { name: buttonText } ) );
+		await waitFor( () => expect( onComplete ).toHaveBeenCalledTimes( 1 ) );
+		expect( updateSettings ).toHaveBeenCalledTimes( 2 );
+		expect( updateSettings ).toHaveBeenCalledWith( 'general', {
+			general: expect.objectContaining( {
+				woocommerce_calc_taxes: 'yes',
+			} ),
+		} );
+		expect( updateSettings ).toHaveBeenCalledWith( 'tax', {
+			tax: { wc_connect_taxes_enabled: 'yes' },
+		} );
+	}
+);
 
 it( 'renders WooCommerce Tax (powered by WCS&T)', () => {
 	render(
