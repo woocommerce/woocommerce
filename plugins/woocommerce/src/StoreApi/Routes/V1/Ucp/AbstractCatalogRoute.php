@@ -90,6 +90,68 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	}
 
 	/**
+	 * Validate `filters.price`, refusing values that would silently degrade to something meaningless.
+	 *
+	 * @param array $filters Request filters.
+	 * @return \WP_REST_Response|null Error response, or null when the input is acceptable.
+	 */
+	protected function validate_price_filter( array $filters ) {
+		$bounds = array();
+
+		foreach ( array( 'min', 'max' ) as $bound ) {
+			if ( ! is_array( $filters['price'] ?? null ) || ! isset( $filters['price'][ $bound ] ) ) {
+				continue;
+			}
+
+			$value = $filters['price'][ $bound ];
+
+			if ( ! is_numeric( $value ) || (float) $value < 0 ) {
+				return $this->ucp_error(
+					'VALIDATION_ERROR',
+					sprintf(
+						/* translators: %s: price filter bound name, `min` or `max`. */
+						__( 'filters.price.%s must be a non-negative amount in minor units.', 'woocommerce' ),
+						$bound
+					),
+					'recoverable',
+					400
+				);
+			}
+
+			$bounds[ $bound ] = (int) $value;
+		}
+
+		if ( isset( $bounds['min'], $bounds['max'] ) && $bounds['min'] > $bounds['max'] ) {
+			return $this->ucp_error(
+				'VALIDATION_ERROR',
+				__( 'filters.price.min must not exceed filters.price.max.', 'woocommerce' ),
+				'recoverable',
+				400
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Read the validated `filters.price` bounds, in minor units.
+	 *
+	 * @param array $filters Request filters.
+	 * @return array Optional `min` and `max` keys.
+	 */
+	protected function price_bounds( array $filters ): array {
+		$bounds = array();
+
+		foreach ( array( 'min', 'max' ) as $bound ) {
+			if ( is_array( $filters['price'] ?? null ) && isset( $filters['price'][ $bound ] ) ) {
+				$bounds[ $bound ] = (int) $filters['price'][ $bound ];
+			}
+		}
+
+		return $bounds;
+	}
+
+	/**
 	 * Get the product mapper for the response being built.
 	 *
 	 * @return UcpProductMapper

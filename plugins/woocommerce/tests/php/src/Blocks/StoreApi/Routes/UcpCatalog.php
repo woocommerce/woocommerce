@@ -383,6 +383,60 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * Price filters for the helper's variations, priced 10, 15, 16, 17, 18 and 19.
+	 *
+	 * @return array
+	 */
+	public function provider_variant_price_filters(): array {
+		return array(
+			'max is inclusive'                 => array( array( 'max' => 1500 ), array( 1000, 1500 ) ),
+			'min skips the default first pick' => array(
+				array(
+					'min' => 1600,
+					'max' => 1700,
+				),
+				array( 1600, 1700 ),
+			),
+			'nothing in range'                 => array( array( 'max' => 999 ), array() ),
+		);
+	}
+
+	/**
+	 * @testdox Lookup and product detail should return only the variants inside the price filter.
+	 *
+	 * @dataProvider provider_variant_price_filters
+	 *
+	 * @param array $price Price filter bounds in minor units.
+	 * @param array $expected Variant amounts expected back, or none when the product is excluded.
+	 */
+	public function test_lookup_and_detail_apply_the_price_filter( array $price, array $expected ): void {
+		$id   = (string) \WC_Helper_Product::create_variation_product()->get_id();
+		$body = array( 'filters' => array( 'price' => $price ) );
+
+		$detail = $this->post( '/catalog/product', $body + array( 'id' => $id ) )->get_data();
+		$lookup = $this->post( '/catalog/lookup', $body + array( 'ids' => array( $id ) ) )->get_data();
+
+		if ( empty( $expected ) ) {
+			$this->assertSame( 'error', $detail['ucp']['status'] );
+			$this->assertSame( array(), $lookup['products'] );
+			return;
+		}
+
+		$amounts = static function ( array $product ): array {
+			return array_map(
+				static function ( array $variant ): int {
+					return $variant['price']['amount'];
+				},
+				$product['variants']
+			);
+		};
+
+		$this->assertSame( $expected, $amounts( $detail['product'] ) );
+		$this->assertSame( $expected, $amounts( $lookup['products'][0] ) );
+		$this->assertSame( $detail['product']['variants'][0]['options'], $detail['product']['selected'] );
+	}
+
+	/**
 	 * A variant id puts that variation first, takes its options as the selection,
 	 * and overrides a conflicting request selection.
 	 */
