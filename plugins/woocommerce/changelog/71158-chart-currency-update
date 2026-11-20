@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update the Analytics chart Y axis to the new currency when an extension changes the report currency.
