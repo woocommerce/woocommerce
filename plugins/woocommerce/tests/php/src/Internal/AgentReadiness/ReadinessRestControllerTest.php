@@ -75,7 +75,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertSame( 'Not checked yet', $data['last_checked'] );
-		$this->assertSame( 'Run checks', $data['run']['label'] );
+		$this->assertSame( 'Check your store', $data['run']['label'] );
 		$this->assertNull( $data['fix_first'] );
 		$this->assertSame( array(), $data['sections'] );
 		$this->assertSame( 'AI shopping', $data['overview']['shopping']['title'] );
@@ -219,7 +219,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Turning UCP on with Plain permalinks writes the discovery file, so the address is served without a permalink change.
+	 * @testdox Turning UCP on with Plain permalinks writes the discovery file, so the address is served without a permalink change. Multisite refuses it.
 	 */
 	public function test_turning_ucp_on_writes_the_discovery_file_for_plain_permalinks(): void {
 		global $wp_rewrite;
@@ -231,6 +231,12 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		try {
 			$response = $this->dispatch_ucp( true );
 
+			if ( is_multisite() ) {
+				// Multisite never writes the file, so plain permalinks keep the switch off.
+				$this->assertSame( 409, $response->get_status() );
+				$this->assertFileDoesNotExist( $path );
+				return;
+			}
 			$this->assertSame( 200, $response->get_status() );
 			$this->assertFileExists( $path );
 			$this->assertSame( 'ok', UcpDiscovery::serve_status() );

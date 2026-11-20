@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Badge, Card, Text } from '@wordpress/ui';
-import { Button, Notice, Spinner } from '@wordpress/components';
+import { Button, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -12,7 +12,21 @@ import './sales-readiness.scss';
 import type { ReadinessView } from './types';
 import { useReadinessView } from './use-readiness-view';
 import { FixFirstList } from './components/fix-first';
+import { ErrorNotice } from './components/error-notice';
 import { RunStatus } from './components/run-status';
+import { trackReadiness } from './tracks';
+
+/**
+ * Whether every check on the view passed. Empty sections (no products yet) and unknown or
+ * open checks must not claim full readiness.
+ */
+function everyCheckPassed( view: ReadinessView ): boolean {
+	const rows = view.sections.flatMap( ( section ) => [
+		...section.rows,
+		...section.folded,
+	] );
+	return rows.length > 0 && rows.every( ( row ) => row.state === 'pass' );
+}
 
 /**
  * WooCommerce > Settings > AI tools, the Overview: the AI shopping card, then the Sales readiness
@@ -23,13 +37,14 @@ export default function SalesReadinessOverview( {
 }: {
 	initialView?: ReadinessView | null;
 } ) {
-	const { view, error, running, runCheck } = useReadinessView( initialView );
+	const { view, error, reload, running, runCheck } = useReadinessView(
+		'overview',
+		initialView
+	);
 
 	if ( ! view ) {
 		return error ? (
-			<Notice status="error" isDismissible={ false }>
-				{ error }
-			</Notice>
+			<ErrorNotice message={ error } reload={ reload } />
 		) : (
 			<Spinner />
 		);
@@ -38,11 +53,7 @@ export default function SalesReadinessOverview( {
 
 	return (
 		<div className="wc-sales-readiness wc-sales-readiness--overview">
-			{ error && (
-				<Notice status="error" isDismissible={ false }>
-					{ error }
-				</Notice>
-			) }
+			{ error && <ErrorNotice message={ error } reload={ reload } /> }
 			<Card.Root className="wc-sales-readiness-card">
 				<Card.Header>
 					<div className="wc-sales-readiness-card__head">
@@ -68,6 +79,12 @@ export default function SalesReadinessOverview( {
 							variant="secondary"
 							size="compact"
 							href={ shopping.button.href }
+							onClick={ () =>
+								trackReadiness( 'link_clicked', {
+									surface: 'overview',
+									area: 'shopping',
+								} )
+							}
 						>
 							{ shopping.button.text }
 						</Button>
@@ -112,14 +129,22 @@ export default function SalesReadinessOverview( {
 						</>
 					) : (
 						<>
-							{ view.fix_first ? (
-								<FixFirstList items={ view.fix_first.items } />
+							{ view.fix_first?.items.length ? (
+								<FixFirstList
+									items={ view.fix_first.items }
+									surface="overview"
+								/>
 							) : (
 								<Text variant="body-md">
-									{ __(
-										'Nothing to fix first.',
-										'woocommerce'
-									) }
+									{ everyCheckPassed( view )
+										? __(
+												'Nothing to fix right now. Your store has everything AI assistants need to find and shop your products.',
+												'woocommerce'
+											)
+										: __(
+												'Nothing ranked to fix right now. View all checks for the full results.',
+												'woocommerce'
+											) }
 								</Text>
 							) }
 							<div className="wc-sales-readiness-card__actions wc-sales-readiness-card__actions--link">
@@ -127,6 +152,12 @@ export default function SalesReadinessOverview( {
 									variant="tertiary"
 									size="compact"
 									href={ viewAll.href }
+									onClick={ () =>
+										trackReadiness( 'link_clicked', {
+											surface: 'overview',
+											area: 'view_all',
+										} )
+									}
 								>
 									{ viewAll.text }
 								</Button>
