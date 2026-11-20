@@ -150,7 +150,7 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 * when the site can't be registered.
 	 */
 	public static function connect_redirect(): string {
-		$result = JetpackConnection::get_authorization_url( add_query_arg( self::CONNECT_RESULT, 'connected', self::url() ) );
+		$result = JetpackConnection::get_authorization_url( add_query_arg( self::CONNECT_RESULT, 'connected', self::url() ), 'woocommerce-core-profiler' );
 		return ! empty( $result['success'] ) && ! empty( $result['url'] )
 			? (string) $result['url']
 			: add_query_arg( self::CONNECT_RESULT, 'error', self::url() );
