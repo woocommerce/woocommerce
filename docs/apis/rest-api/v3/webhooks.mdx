@@ -30,6 +30,7 @@ Core topics are:
 -   Customers: `customer.created`, `customer.updated` and `customer.deleted`.
 -   Orders: `order.created`, `order.updated` and `order.deleted`.
 -   Products: `product.created`, `product.updated` and `product.deleted`.
+-   Stock notifications (when the Back in Stock Notifications feature is enabled): `stock_notification.created`, `stock_notification.verified`, `stock_notification.sent`, `stock_notification.cancelled` and `stock_notification.deleted`.
 
 Custom topics can also be used which map to a single hook name, for example you could add a webhook with topic `action.woocommerce_add_to_cart` that is triggered on that event. Custom topics pass the first hook argument to the payload, so in this example the `cart_item_key` would be included in the payload.
 
