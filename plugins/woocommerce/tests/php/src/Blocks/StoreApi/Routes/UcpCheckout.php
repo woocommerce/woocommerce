@@ -109,14 +109,17 @@ class UcpCheckout extends ControllerTestCase {
 	 * @param string $method HTTP method.
 	 * @param string $path Route path under /wc/ucp/v1.
 	 * @param array  $body Request body.
-	 * @param string $key Idempotency key, or '' for a fresh one.
+	 * @param array  $headers Extra request headers; an `Idempotency-Key` replaces the fresh one.
 	 * @return \WP_REST_Response
 	 */
-	private function request( string $method, string $path, array $body = array(), string $key = '' ) {
+	private function request( string $method, string $path, array $body = array(), array $headers = array() ) {
 		$request = new \WP_REST_Request( $method, '/wc/ucp/v1' . $path );
+		$request->set_headers( $headers );
 		$request->set_header( 'content-type', 'application/json' );
 		// A write needs a key of its own; the key itself is the UcpIdempotency suite's concern.
-		$request->set_header( 'Idempotency-Key', '' === $key ? wp_generate_uuid4() : $key );
+		if ( null === $request->get_header( 'Idempotency-Key' ) ) {
+			$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
+		}
 		$request->set_body( wp_json_encode( $body ) );
 
 		return rest_get_server()->dispatch( $request );
@@ -232,10 +235,10 @@ class UcpCheckout extends ControllerTestCase {
 	public function test_replay_keeps_the_empty_payment_handlers_object(): void {
 		$key   = wp_generate_uuid4();
 		$body  = array( 'line_items' => array( $this->line_item( 0, 1 ) ) );
-		$first = $this->request( 'POST', '/checkout-sessions', $body, $key );
+		$first = $this->request( 'POST', '/checkout-sessions', $body, array( 'Idempotency-Key' => $key ) );
 		$this->assertSame( 201, $first->get_status() );
 		$this->simulate_new_request();
-		$replay = $this->request( 'POST', '/checkout-sessions', $body, $key );
+		$replay = $this->request( 'POST', '/checkout-sessions', $body, array( 'Idempotency-Key' => $key ) );
 
 		$this->assertSame( 'true', $replay->get_headers()['Idempotency-Replayed'] ?? '' );
 		$this->assertInstanceOf( \stdClass::class, $replay->get_data()['ucp']['payment_handlers'] );
@@ -1024,5 +1027,56 @@ class UcpCheckout extends ControllerTestCase {
 			$this->assertSame( 409, $this->request( 'POST', '/checkout-sessions/' . $created['id'] . $action )->get_status(), $action );
 		}
 		$this->assertSame( 409, $this->request( 'POST', '/checkout-sessions', array( 'cart_id' => $created['id'] ) )->get_status() );
+	}
+
+	/**
+	 * @testdox Complete records the host of the profile parameter as the order's source, or `ucp` when that host is missing or invalid, and keeps the order a Store API order.
+	 * @testWith ["profile=\"https://Chatgpt.com/.well-known/ucp\"", "chatgpt.com"]
+	 *           ["", "ucp"]
+	 *           ["profile=\"not-a-url\"", "ucp"]
+	 *           ["profile=\"https://evil<b>host/\"", "ucp"]
+	 *           ["notprofile=\"https://example.com/\"", "ucp"]
+	 *           ["profile=\"https://a..example/\"", "ucp"]
+	 *           ["other=\"x\"; profile=\"https://shop.example/.well-known/ucp\"", "shop.example"]
+	 *           ["other=\"x profile=\"; profile=\"https://shop.example/\"", "shop.example"]
+	 *
+	 * @param string $agent  The UCP-Agent header.
+	 * @param string $source The expected utm_source.
+	 */
+	public function test_complete_records_the_agent_as_the_source( string $agent, string $source ): void {
+		$created = $this->create_ready_checkout();
+		$headers = '' === $agent ? array() : array( 'UCP-Agent' => $agent );
+
+		$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete', array(), $headers );
+		$this->assertSame( 'requires_escalation', $response->get_data()['status'] );
+
+		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertSame( 'ai_shopper', $order->get_meta( '_wc_order_attribution_source_type' ) );
+		$this->assertSame( $source, $order->get_meta( '_wc_order_attribution_utm_source' ) );
+		$this->assertSame( 'ucp', $order->get_meta( '_wc_order_attribution_utm_medium' ) );
+		$this->assertSame( 'store-api', $order->get_created_via(), 'wc_cancel_unpaid_orders() only cancels checkout and store-api orders.' );
+	}
+
+	/**
+	 * @testdox Complete keeps attribution the order already has.
+	 */
+	public function test_complete_keeps_existing_attribution(): void {
+		$created  = $this->create_ready_checkout();
+		$callback = static function ( \WC_Order $order ) {
+			$order->update_meta_data( '_wc_order_attribution_source_type', 'referral' );
+			$order->save_meta_data();
+		};
+		add_action( 'woocommerce_store_api_checkout_update_order_meta', $callback );
+
+		try {
+			$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete', array(), array( 'UCP-Agent' => 'profile="https://chatgpt.com/"' ) );
+			$this->assertSame( 'requires_escalation', $response->get_data()['status'] );
+
+			$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+			$this->assertSame( 'referral', $order->get_meta( '_wc_order_attribution_source_type' ) );
+			$this->assertSame( '', $order->get_meta( '_wc_order_attribution_utm_source' ) );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_update_order_meta', $callback );
+		}
 	}
 }
