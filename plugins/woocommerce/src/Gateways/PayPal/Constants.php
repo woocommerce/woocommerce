@@ -436,7 +436,7 @@ class Constants {
 	/**
 	 * Address policy and priced destination for the current PayPal attempt.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.1
 	 * @var string
 	 */
 	public const PAYPAL_ORDER_META_ADDRESS_CONTEXT = '_paypal_address_context';
@@ -444,7 +444,7 @@ class Constants {
 	/**
 	 * Whether the PayPal destination requires merchant review.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.1
 	 * @var string
 	 */
 	public const PAYPAL_ORDER_META_ADDRESS_REVIEW = '_paypal_address_review';
@@ -452,7 +452,7 @@ class Constants {
 	/**
 	 * Whether an automatic capture hold awaits address confirmation.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.1
 	 * @var string
 	 */
 	public const PAYPAL_ORDER_META_CAPTURE_AWAITING_ADDRESS = '_paypal_capture_awaiting_address';

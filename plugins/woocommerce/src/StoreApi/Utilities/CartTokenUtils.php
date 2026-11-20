@@ -37,7 +37,7 @@ class CartTokenUtils {
 	 * Unlike a cart token, a link token can't be used as a Store API `Cart-Token`. It only lets another browser copy the
 	 * cart through the `session` query arg, without the customer's details.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.1
 	 * @param string $customer_id The customer ID.
 	 * @return string
 	 */
@@ -57,7 +57,7 @@ class CartTokenUtils {
 	 *
 	 * Accepts cart link tokens and cart tokens, so integrations that pass a cart token in the query arg keep working.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.1
 	 * @param string $token The cart link token or cart token.
 	 * @return string The customer ID, or an empty string if the token is not valid.
 	 */
@@ -84,7 +84,7 @@ class CartTokenUtils {
 	/**
 	 * Validate the cart token.
 	 *
-	 * @since 11.4.0 Rejects tokens not issued by the Store API, such as cart link tokens.
+	 * @since 11.3.1 Rejects tokens not issued by the Store API, such as cart link tokens.
 	 * @param string $cart_token The cart token.
 	 * @return bool
 	 */

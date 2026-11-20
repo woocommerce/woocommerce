@@ -1110,7 +1110,7 @@ class OrderController {
 	 * WC_Checkout::is_shipping_withheld_for_missing_address(), including its exemption for stores
 	 * that switch shipping calculation off through the filter.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.1
 	 *
 	 * @throws RouteException If shipping was withheld.
 	 * @param bool $needs_shipping Whether the order needs shipping.

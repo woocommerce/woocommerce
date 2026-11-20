@@ -54,7 +54,7 @@ class Meta {
 	 * order-received page ask for on top of the key, so the page must not print it to
 	 * everyone holding one.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.1
 	 *
 	 * @param WC_Order $order Order being reviewed.
 	 * @return bool
