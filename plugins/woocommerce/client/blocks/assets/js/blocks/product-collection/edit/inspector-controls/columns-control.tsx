@@ -57,9 +57,8 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 		props.setAttributes( {
 			displayLayout: sanitizeDisplayLayout( {
 				...props.displayLayout,
-				columns: isCarouselLayout
-					? DEFAULT_CAROUSEL_COLUMNS
-					: defaultLayout.columns,
+				columns: defaultLayout.columns,
+				carouselColumns: DEFAULT_CAROUSEL_COLUMNS,
 			} ),
 		} );
 	};
