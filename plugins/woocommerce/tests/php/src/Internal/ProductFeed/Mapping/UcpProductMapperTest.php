@@ -226,6 +226,43 @@ class UcpProductMapperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A request with no selection should report the featured variation's options as selected.
+	 */
+	public function test_detail_without_selection_reports_the_featured_variation(): void {
+		$variable = new \WC_Product_Variable();
+		$variable->set_name( 'Default Selection' );
+		$variable->set_status( 'publish' );
+		$variable->set_attributes( array( WC_Helper_Product::create_product_attribute_object( 'size', array( 'small', 'large' ) ) ) );
+		$parent_id = $variable->save();
+
+		$ids = array();
+		foreach ( array( 'small', 'large' ) as $size ) {
+			$variation = new \WC_Product_Variation();
+			$variation->set_parent_id( $parent_id );
+			$variation->set_attributes( array( 'pa_size' => $size ) );
+			$variation->set_regular_price( '10' );
+			$variation->set_status( 'publish' );
+			$ids[ $size ] = $variation->save();
+		}
+
+		\WC_Product_Variable::sync( $parent_id );
+		$mapper = new UcpProductMapper( 'USD' );
+
+		$mapped = $mapper->map_detail_product( wc_get_product( $parent_id ) );
+		$this->assertSame( 'small', $mapped['selected'][0]['label'] );
+		$this->assertSame( (string) $ids['small'], $mapped['variants'][0]['id'] );
+
+		$product = wc_get_product( $parent_id );
+		$product->set_default_attributes( array( 'pa_size' => 'large' ) );
+		$product->save();
+
+		$mapped = $mapper->map_detail_product( wc_get_product( $parent_id ) );
+		$this->assertSame( 'large', $mapped['selected'][0]['label'] );
+		$this->assertSame( (string) $ids['large'], $mapped['variants'][0]['id'] );
+		$this->assertCount( 2, $mapped['variants'] );
+	}
+
+	/**
 	 * The storefront treats an "Any" variation attribute as a wildcard and
 	 * `options` advertises every term for it, so a selection must match it too.
 	 *

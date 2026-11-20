@@ -223,7 +223,8 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * A selection narrows the variants to those matching every selected option.
 	 * One matching no variation is relaxed from its last option until one does,
 	 * and `selected` reports the options kept, as UCP requires. A request naming
-	 * a variation returns it first, with its own options as the selection.
+	 * a variation returns it first, with its own options as the selection. A
+	 * request naming neither gets the featured variation first, and its options.
 	 *
 	 * @param \WC_Product $product WooCommerce product.
 	 * @param array       $selected Selected option values, each `{ name, label, id? }`.
@@ -231,11 +232,15 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * @return array
 	 */
 	public function map_detail_product( \WC_Product $product, array $selected = array(), int $variation_id = 0 ): array {
-		if ( ! $product instanceof \WC_Product_Variable || ( empty( $selected ) && $variation_id <= 0 ) ) {
+		if ( ! $product instanceof \WC_Product_Variable ) {
 			return $this->map_product( $product );
 		}
 
 		$item = $this->item( $product );
+
+		if ( empty( $selected ) && $variation_id <= 0 ) {
+			return $this->map_featured_selection( $product, $item );
+		}
 
 		// UCP: a variant id fully determines the selection state, so the
 		// request's `selected` is ignored rather than merged.
@@ -295,6 +300,71 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 		}
 
 		return $this->schema;
+	}
+
+	/**
+	 * Map a variable product with its featured variation first and `selected` set to its options.
+	 *
+	 * The featured variation is the first one matching the product's default
+	 * attributes, or the first visible one when they are unset or match nothing.
+	 *
+	 * @param \WC_Product_Variable $product The variable product.
+	 * @param array                $item Its Store API item response.
+	 * @return array
+	 */
+	private function map_featured_selection( \WC_Product_Variable $product, array $item ): array {
+		$defaults = $this->default_selection( $product, $item );
+		$featured = (int) ( $this->match_selection( $item, $defaults )[0] ?? $item['variations'][0]['id'] ?? 0 );
+
+		if ( $featured <= 0 ) {
+			return $this->map_item( $product, $item, array(), false );
+		}
+
+		$selected = $this->variation_options_by_id( $item )[ $featured ] ?? array();
+
+		// An attribute the featured variation leaves as "Any" takes the default.
+		$fixed = array_column( $selected, 'name' );
+		foreach ( $defaults as $default ) {
+			if ( ! in_array( $default['name'], $fixed, true ) ) {
+				$selected[] = $default;
+			}
+		}
+
+		$mapped             = $this->map_item( $product, $item, array( $featured ), false );
+		$mapped['selected'] = $selected;
+
+		return $mapped;
+	}
+
+	/**
+	 * Read the product's default attributes as selected options.
+	 *
+	 * Read from the product, not the item's `default` term flags: those are
+	 * missing for custom attributes whose name has more than one word.
+	 *
+	 * @param \WC_Product_Variable $product The variable product.
+	 * @param array                $item Its Store API item response.
+	 * @return array List of `{ name, label }`.
+	 */
+	private function default_selection( \WC_Product_Variable $product, array $item ): array {
+		$attributes = $product->get_attributes();
+		$names      = $this->term_names( $item );
+		$defaults   = array();
+
+		foreach ( $product->get_default_attributes() as $key => $value ) {
+			$attribute = $attributes[ $key ] ?? null;
+			if ( '' === (string) $value || ! $attribute instanceof \WC_Product_Attribute || ! $attribute->get_variation() ) {
+				continue;
+			}
+
+			$name       = wc_attribute_label( $attribute->get_name(), $product );
+			$defaults[] = array(
+				'name'  => $name,
+				'label' => $names[ $name ][ (string) $value ] ?? (string) $value,
+			);
+		}
+
+		return $defaults;
 	}
 
 	/**
