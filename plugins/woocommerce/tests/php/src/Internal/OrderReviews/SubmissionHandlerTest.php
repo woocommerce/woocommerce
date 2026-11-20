@@ -30,6 +30,13 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->comment_registration = get_option( 'comment_registration' );
 		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
+
+		// The container wires this in production via init(); the test dispatches the
+		// handler directly, so register the moderation-transition hooks here to exercise
+		// the tag lifecycle. WP_UnitTestCase restores hooks on tearDown.
+		$handler = new SubmissionHandler();
+		add_action( 'transition_comment_status', array( $handler, 'clear_auto_rejected_flag' ), 10, 3 );
+		add_action( 'transition_comment_status', array( $handler, 'record_moderator_hold' ), 10, 3 );
 	}
 
 	/**
@@ -130,6 +137,20 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 			'product_ids' => $product_ids,
 			'item_ids'    => $item_ids,
 		);
+	}
+
+	/**
+	 * Build a completed order with one product and the given billing email.
+	 *
+	 * @param string $email Billing email.
+	 * @return array{order:WC_Order, product_ids:int[], item_ids:int[]}
+	 */
+	private function make_order_with_email( string $email ): array {
+		$built = $this->make_order( 1 );
+		$built['order']->set_billing_email( $email );
+		$built['order']->save();
+
+		return $built;
 	}
 
 	/**
@@ -1358,6 +1379,207 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A moderator's trash verdict still blocks resubmission after the shopper has edited the review.
+	 * @testWith ["a+b@example.test"]
+	 *           ["a&b@example.test"]
+	 *           ["o'neil&b@example.test"]
+	 *
+	 * @param string $email Billing email to run the flow with.
+	 */
+	public function test_trash_verdict_survives_an_edit( string $email ): void {
+		$built   = $this->make_order_with_email( $email );
+		$order   = $built['order'];
+		$product = $built['product_ids'][0];
+		$item    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $order, $product, $item, 4, 'First take.' );
+
+		// The edit is the step that used to re-encode the stored address.
+		$second = $this->submit_review( $order, $product, $item, 5, 'Second take.' );
+		$this->assertSame( (int) $first['comment_id'], (int) $second['comment_id'], 'The edit must reuse the row.' );
+
+		wp_trash_comment( (int) $first['comment_id'] );
+
+		$third = $this->submit_review( $order, $product, $item, 5, 'Third take.' );
+
+		$this->assertSame( 'error', $third['status'], 'A trashed review must block resubmission.' );
+		$this->assertSame( 'update_failed', $third['error'] );
+		$this->assertCount(
+			1,
+			get_comments(
+				array(
+					'post_id' => $product,
+					'type'    => 'review',
+					'status'  => 'any',
+				)
+			),
+			'The refusal must not leave a second review behind.'
+		);
+	}
+
+	/**
+	 * @testdox Editing a review leaves an ampersand in the stored author email unencoded.
+	 */
+	public function test_edit_does_not_encode_the_stored_author_email(): void {
+		$built   = $this->make_order_with_email( 'a&b@example.test' );
+		$order   = $built['order'];
+		$product = $built['product_ids'][0];
+		$item    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $order, $product, $item, 4, 'First take.' );
+		$this->submit_review( $order, $product, $item, 5, 'Second take.' );
+
+		$comment = get_comment( (int) $first['comment_id'] );
+
+		$this->assertSame( 'a&b@example.test', $comment->comment_author_email );
+	}
+
+	/**
+	 * @testdox A trashed review is found whatever the stored author email says.
+	 */
+	public function test_trash_verdict_is_found_whatever_the_stored_email(): void {
+		global $wpdb;
+
+		$stored = 'drifted-past-recognition@example.test';
+
+		$built   = $this->make_order_with_email( 'a&b@example.test' );
+		$order   = $built['order'];
+		$product = $built['product_ids'][0];
+		$item    = $built['item_ids'][0];
+
+		$first      = $this->submit_review( $order, $product, $item, 4, 'First take.' );
+		$comment_id = (int) $first['comment_id'];
+
+		// Stand in for a row another wp_update_comment() caller has drifted. Each write adds
+		// another step, so the lookups key on the order instead of chasing the address.
+		$wpdb->update(
+			$wpdb->comments,
+			array( 'comment_author_email' => $stored ),
+			array( 'comment_ID' => $comment_id )
+		);
+		clean_comment_cache( $comment_id );
+		$this->assertSame(
+			$stored,
+			get_comment( $comment_id )->comment_author_email,
+			'The simulated drifted row must actually be encoded, or this proves nothing.'
+		);
+
+		wp_trash_comment( $comment_id );
+
+		$second = $this->submit_review( $order, $product, $item, 5, 'Second take.' );
+
+		$this->assertSame( 'error', $second['status'], 'A drifted row must still be found.' );
+		$this->assertSame( 'update_failed', $second['error'] );
+		$this->assertCount(
+			1,
+			get_comments(
+				array(
+					'post_id' => $product,
+					'type'    => 'review',
+					'status'  => 'any',
+				)
+			),
+			'The refusal must not leave a second review behind.'
+		);
+	}
+
+	/**
+	 * @testdox A trashed review still blocks resubmission on an order with no billing email.
+	 */
+	public function test_trash_verdict_holds_for_an_order_without_a_billing_email(): void {
+		// Built without an address rather than by clearing one: WC_Order keeps the stored
+		// value when an existing billing email is set back to an empty string.
+		$order = new WC_Order();
+		$order->set_billing_first_name( 'Phone' );
+		$order->set_billing_last_name( 'Order' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$wc_product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $wc_product, 1 );
+		$order->save();
+
+		$items   = array_values( $order->get_items() );
+		$product = $wc_product->get_id();
+		$item    = $items[0]->get_id();
+
+		$this->assertSame(
+			'',
+			wc_get_order( $order->get_id() )->get_billing_email(),
+			'The order must really have no billing email, or this proves nothing.'
+		);
+
+		$first = $this->submit_review( $order, $product, $item, 4, 'First take.' );
+		wp_trash_comment( (int) $first['comment_id'] );
+
+		$second = $this->submit_review( $order, $product, $item, 5, 'Second take.' );
+
+		$this->assertSame( 'error', $second['status'], 'The guard must not depend on a billing email.' );
+		$this->assertSame( 'update_failed', $second['error'] );
+		$this->assertCount(
+			1,
+			get_comments(
+				array(
+					'post_id' => $product,
+					'type'    => 'review',
+					'status'  => 'any',
+				)
+			),
+			'The refusal must not leave a second review behind.'
+		);
+	}
+
+	/**
+	 * @testdox Editing a review leaves another comment's author email alone.
+	 */
+	public function test_edit_does_not_rewrite_another_comments_author_email(): void {
+		$built   = $this->make_order_with_email( 'a&b@example.test' );
+		$order   = $built['order'];
+		$product = $built['product_ids'][0];
+		$item    = $built['item_ids'][0];
+
+		$this->submit_review( $order, $product, $item, 4, 'First take.' );
+
+		$bystander_id = (int) self::factory()->comment->create(
+			array(
+				'comment_post_ID'      => $product,
+				'comment_author_email' => 'bystander@example.test',
+			)
+		);
+
+		// Stand in for a plugin that updates a different comment from inside this update.
+		$meddle = function ( $data, $comment ) use ( $bystander_id ) {
+			if ( (int) $comment['comment_ID'] !== $bystander_id ) {
+				wp_update_comment(
+					array(
+						'comment_ID'      => $bystander_id,
+						'comment_content' => 'Touched.',
+					)
+				);
+			}
+
+			return $data;
+		};
+		add_filter( 'wp_update_comment_data', $meddle, 10, 2 );
+		try {
+			$this->submit_review( $order, $product, $item, 5, 'Second take.' );
+		} finally {
+			remove_filter( 'wp_update_comment_data', $meddle, 10 );
+		}
+
+		$this->assertSame(
+			'Touched.',
+			get_comment( $bystander_id )->comment_content,
+			'The nested update must actually have run, or this proves nothing.'
+		);
+		$this->assertSame(
+			'bystander@example.test',
+			get_comment( $bystander_id )->comment_author_email,
+			'The override must apply to the review being edited, not to every comment update.'
+		);
+	}
+
+	/**
 	 * @testdox A logged-in admin who owns the order resubmitting disallowed markup gets it stripped on update too.
 	 */
 	public function test_resubmit_by_owning_admin_strips_disallowed_markup_on_update(): void {
@@ -1634,6 +1856,206 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 3, (float) $product->get_average_rating() );
 		$this->assertSame( array( 3 => 1 ), $product->get_rating_counts() );
 		$this->assertSame( 1, $product->get_review_count() );
+	}
+
+	/**
+	 * @testdox An edit does not lift a hold a moderator set with Unapprove.
+	 */
+	public function test_edit_does_not_lift_a_moderators_unapprove(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Never arrived. Scam shop.' );
+		$this->assertSame( 'ok', $first['status'] );
+
+		// What the Unapprove row action under Products > Reviews does.
+		wp_set_comment_status( (int) $first['comment_id'], 'hold' );
+
+		$edit = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Never arrived. Scam shop!' );
+
+		$this->assertSame( $first['comment_id'], $edit['comment_id'], 'The edit must still reuse the row.' );
+		$this->assertSame( 'pending_moderation', $edit['status'] );
+		$this->assertSame(
+			'unapproved',
+			wp_get_comment_status( (int) $first['comment_id'] ),
+			'Approving a pending review is a staff action; an edit must not do it.'
+		);
+		$this->assertStringContainsString(
+			'Scam shop!',
+			get_comment( (int) $first['comment_id'] )->comment_content,
+			'The edit itself still applies; only the status is held back.'
+		);
+	}
+
+	/**
+	 * @testdox A disallowed-keys verdict still applies to a review a moderator put on hold.
+	 */
+	public function test_disallowed_edit_of_a_moderator_held_review_is_still_rejected(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Fine at first.' );
+		wp_set_comment_status( (int) $first['comment_id'], 'hold' );
+
+		update_option( 'disallowed_keys', 'casino-bonus' );
+		$this->submit_review( $built['order'], $product_id, $item_id, 5, 'Try my casino-bonus link.' );
+
+		$this->assertContains(
+			wp_get_comment_status( (int) $first['comment_id'] ),
+			array( 'trash', 'spam' ),
+			"A moderator's hold must not shield content the disallowed list rejects."
+		);
+	}
+
+	/**
+	 * @testdox A hold this handler applied is still lifted by a corrected edit.
+	 */
+	public function test_handlers_own_hold_stays_liftable(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$this->submit_review( $built['order'], $product_id, $item_id, 5, 'Clean to start.' );
+
+		update_option( 'moderation_keys', 'hold-this' );
+		$held = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Now with hold-this in it.' );
+		$this->assertSame( 'pending_moderation', $held['status'] );
+
+		update_option( 'moderation_keys', '' );
+		$clean = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Clean again.' );
+
+		$this->assertSame( 'ok', $clean['status'], "The handler's own hold must not read as a moderator's." );
+	}
+
+	/**
+	 * @testdox An Unapprove is recorded on the review; a hold the checks applied is not.
+	 */
+	public function test_only_a_moderators_hold_is_recorded(): void {
+		$built = $this->make_order( 2 );
+
+		$approved = $this->submit_review( $built['order'], $built['product_ids'][0], $built['item_ids'][0], 5, 'Clean enough.' );
+		wp_set_comment_status( (int) $approved['comment_id'], 'hold' );
+
+		update_option( 'moderation_keys', 'hold-this' );
+		$auto = $this->submit_review( $built['order'], $built['product_ids'][1], $built['item_ids'][1], 5, 'Please hold-this one.' );
+
+		$this->assertNotEmpty(
+			get_comment_meta( (int) $approved['comment_id'], '_wc_moderator_held', true ),
+			"A moderator's Unapprove must be recorded."
+		);
+		$this->assertEmpty(
+			get_comment_meta( (int) $auto['comment_id'], '_wc_moderator_held', true ),
+			'An automatic hold must stay unrecorded so an edit can lift it.'
+		);
+	}
+
+	/**
+	 * @testdox An ordinary comment a moderator unapproves is left alone.
+	 */
+	public function test_moderator_hold_is_not_recorded_on_other_comment_types(): void {
+		$comment_id = (int) self::factory()->comment->create(
+			array(
+				'comment_post_ID'  => self::factory()->post->create(),
+				'comment_approved' => 1,
+			)
+		);
+
+		wp_set_comment_status( $comment_id, 'hold' );
+
+		$this->assertEmpty(
+			get_comment_meta( $comment_id, '_wc_moderator_held', true ),
+			'The listener runs for every comment on the site; it must only touch reviews.'
+		);
+	}
+
+	/**
+	 * @testdox A review held before this tag existed can still be lifted by an edit.
+	 */
+	public function test_untagged_hold_is_still_liftable(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		// Stand in for a row held on a site that upgraded into this change.
+		$comment_id = (int) wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product_id,
+				'comment_author'       => 'Jane',
+				'comment_author_email' => $built['order']->get_billing_email(),
+				'comment_content'      => 'Held before the tag existed.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 0,
+			)
+		);
+		add_comment_meta( $comment_id, 'rating', 4, true );
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $built['order']->get_id(), true );
+		add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, 0, true );
+
+		$edit = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Corrected text.' );
+
+		$this->assertSame( $comment_id, (int) $edit['comment_id'], 'The edit must reuse the existing row.' );
+		$this->assertSame( 'ok', $edit['status'], 'An untagged hold predates the tag and stays liftable.' );
+
+		// Staff acting on it afterwards is what records the hold for the future.
+		wp_set_comment_status( $comment_id, 'hold' );
+
+		$this->assertNotEmpty(
+			get_comment_meta( $comment_id, '_wc_moderator_held', true ),
+			'The next staff action records the hold, so a later edit cannot lift it.'
+		);
+	}
+
+	/**
+	 * @testdox A rejected edit does not launder away a moderator's hold.
+	 */
+	public function test_auto_rejected_detour_does_not_lift_a_moderators_unapprove(): void {
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Fine at first.' );
+		wp_set_comment_status( (int) $first['comment_id'], 'hold' );
+
+		// A deliberately rejected edit moves the row out of hold and tags it auto-rejected.
+		update_option( 'disallowed_keys', 'casino-bonus' );
+		$this->submit_review( $built['order'], $product_id, $item_id, 5, 'Try my casino-bonus link.' );
+
+		// Clean text now reuses that rejected row, which must not come back approved.
+		update_option( 'disallowed_keys', '' );
+		$third = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Perfectly ordinary text.' );
+
+		$this->assertNotSame(
+			'approved',
+			wp_get_comment_status( (int) $first['comment_id'] ),
+			"A rejected edit must not clear the moderator's hold."
+		);
+		$this->assertSame( 'pending_moderation', $third['status'] );
+	}
+
+	/**
+	 * @testdox Once a moderator has acted on an automatically held review, a later edit cannot approve it.
+	 */
+	public function test_edit_does_not_lift_an_unapprove_that_followed_an_automatic_hold(): void {
+		update_option( 'moderation_keys', 'hold-this' );
+
+		$built      = $this->make_order( 1 );
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$held = $this->submit_review( $built['order'], $product_id, $item_id, 5, 'Please hold-this review.' );
+		$this->assertSame( 'pending_moderation', $held['status'] );
+
+		// The moderator approves it, then changes their mind. The second transition
+		// leaves a hold that is theirs, not one the checks applied.
+		wp_set_comment_status( (int) $held['comment_id'], 'approve' );
+		wp_set_comment_status( (int) $held['comment_id'], 'hold' );
+
+		$edit = $this->submit_review( $built['order'], $product_id, $item_id, 4, 'Clean text now.' );
+
+		$this->assertSame( 'pending_moderation', $edit['status'] );
+		$this->assertSame( 'unapproved', wp_get_comment_status( (int) $held['comment_id'] ) );
 	}
 
 	/**

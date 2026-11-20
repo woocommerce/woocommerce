@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useMemo } from '@wordpress/element';
 import {
 	CheckboxControl,
 	ValidationInputError,
@@ -12,11 +12,29 @@ import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { withInstanceId } from '@wordpress/compose';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
+import {
+	sanitizeHTML,
+	DEFAULT_ALLOWED_TAGS,
+	DEFAULT_ALLOWED_ATTR,
+} from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
  */
 import { termsConsentDefaultText, termsCheckboxDefaultText } from './constants';
+
+// The text can come from a `data-text` attribute in the saved block HTML, which kses doesn't sanitize as HTML.
+// Allow the inline formats the editor's RichText toolbar produces.
+const ALLOWED_TAGS = [
+	...DEFAULT_ALLOWED_TAGS,
+	's',
+	'code',
+	'sub',
+	'sup',
+	'kbd',
+	'mark',
+];
+const ALLOWED_ATTR = [ ...DEFAULT_ALLOWED_ATTR, 'class' ];
 
 const FrontendBlock = ( {
 	text,
@@ -32,6 +50,18 @@ const FrontendBlock = ( {
 	className?: string;
 } ): JSX.Element => {
 	const [ checked, setChecked ] = useState( false );
+
+	const textHtml = useMemo(
+		() =>
+			sanitizeHTML(
+				text ||
+					( checkbox
+						? termsCheckboxDefaultText
+						: termsConsentDefaultText ),
+				{ tags: ALLOWED_TAGS, attr: ALLOWED_ATTR }
+			),
+		[ text, checkbox ]
+	);
 
 	const { isDisabled } = useCheckoutSubmit();
 
@@ -112,9 +142,7 @@ const FrontendBlock = ( {
 						>
 							<span
 								className="wc-block-components-checkbox__label"
-								dangerouslySetInnerHTML={ {
-									__html: text || termsCheckboxDefaultText,
-								} }
+								dangerouslySetInnerHTML={ { __html: textHtml } }
 							/>
 						</CheckboxControl>
 						<ValidationInputError
@@ -125,9 +153,7 @@ const FrontendBlock = ( {
 				) : (
 					<span
 						className="wc-block-components-checkbox__label"
-						dangerouslySetInnerHTML={ {
-							__html: text || termsConsentDefaultText,
-						} }
+						dangerouslySetInnerHTML={ { __html: textHtml } }
 					/>
 				) }
 			</div>

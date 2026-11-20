@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Session\SessionDataWriter;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\SessionConcurrencyGuard;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -58,6 +59,16 @@ class WC_Session_Handler extends WC_Session {
 	 * @var string Custom session table name
 	 */
 	protected $_table = ''; // phpcs:ignore PSR2.Classes.PropertyDeclaration.Underscore
+
+	/**
+	 * Whether the current core session read should bypass and refresh the object cache.
+	 *
+	 * This is enabled temporarily by get_session_data_from_storage() for checkout concurrency validation. Normal
+	 * session initialization and other reads continue using the cache.
+	 *
+	 * @var bool
+	 */
+	private bool $bypass_session_cache = false;
 
 	/**
 	 * Constructor for the session class.
@@ -177,6 +188,7 @@ class WC_Session_Handler extends WC_Session {
 			$this->_customer_id = $this->generate_customer_id();
 			$this->_data        = $this->get_session_data();
 			$this->set_loaded_session_snapshot( $this->_data );
+			SessionConcurrencyGuard::capture( $this, $this->_data );
 			return;
 		}
 
@@ -208,14 +220,21 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Clones a session to the current session. Exclude customer details for privacy reasons.
+	 * Clones the cart and applied coupons from a shared session into the current session.
+	 *
+	 * Other keys stay with the sharer: they can hold customer details, order IDs whose keys the sharer knows, or extension data.
 	 *
 	 * @param string $clone_from_customer_id The customer ID to clone from.
 	 */
 	private function clone_session_data( string $clone_from_customer_id ) {
-		$session_data                         = (array) $this->get_session( $clone_from_customer_id, array() );
+		$session_data                         = array_intersect_key(
+			(array) $this->get_session( $clone_from_customer_id, array() ),
+			array(
+				'cart'            => true,
+				'applied_coupons' => true,
+			)
+		);
 		$session_data['previous_customer_id'] = $clone_from_customer_id;
-		$session_data                         = array_diff_key( $session_data, array( 'customer' => true ) );
 		$this->_data                          = $session_data;
 		$this->_dirty                         = true;
 		$this->replace_session_on_save();
@@ -262,6 +281,7 @@ class WC_Session_Handler extends WC_Session {
 	 */
 	private function restore_session_data() {
 		$session_data = $this->get_session_data();
+		SessionConcurrencyGuard::capture( $this, $session_data );
 
 		/**
 		 * Filters the session data when restoring from storage during initialization.
@@ -535,15 +555,35 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Get session data fresh from storage.
+	 * Get persisted session data through the normal cache-aware read path.
 	 *
-	 * This re-reads session data from the database rather than returning
-	 * in-memory data, ensuring the latest persisted state is returned.
+	 * The core handler may satisfy this read from the object cache. This is the normal path used when initializing
+	 * cookie sessions and by callers that do not require a fresh database value.
 	 *
 	 * @return array
 	 */
 	public function get_session_data() {
 		return $this->has_session() ? (array) $this->get_session( $this->get_customer_id(), array() ) : array();
+	}
+
+	/**
+	 * Get the latest persisted session data for checkout concurrency validation.
+	 *
+	 * Core reads temporarily bypass and refresh the object cache for this call. Normal method dispatch is preserved,
+	 * so custom handlers continue using their own storage implementation.
+	 *
+	 * @since 11.3.0
+	 * @return array
+	 */
+	public function get_session_data_from_storage(): array {
+		$previous_bypass_state      = $this->bypass_session_cache;
+		$this->bypass_session_cache = true;
+
+		try {
+			return $this->get_session_data();
+		} finally {
+			$this->bypass_session_cache = $previous_bypass_state;
+		}
 	}
 
 	/**
@@ -578,6 +618,7 @@ class WC_Session_Handler extends WC_Session {
 
 			// Later saves in this request compare against this request's own data, so they merge again.
 			$this->set_loaded_session_snapshot( $this->_data );
+			SessionConcurrencyGuard::capture( $this, $this->_data );
 			$this->_dirty = false;
 
 			/**
@@ -616,6 +657,7 @@ class WC_Session_Handler extends WC_Session {
 		$this->_customer_id = $this->generate_customer_id();
 		$this->_has_cookie  = false;
 		$this->replace_session_on_save();
+		SessionConcurrencyGuard::capture( $this, array() );
 	}
 
 	/**
@@ -675,8 +717,8 @@ class WC_Session_Handler extends WC_Session {
 			return $default_value;
 		}
 
-		// Try to get it from the cache, it will return false if not present or if object cache not in use.
-		$value = wp_cache_get( $this->get_cache_prefix() . $customer_id, WC_SESSION_CACHE_GROUP );
+		// Normal reads use the cache. Checkout concurrency validation temporarily bypasses it to compare fresh persisted data.
+		$value = $this->bypass_session_cache ? false : wp_cache_get( $this->get_cache_prefix() . $customer_id, WC_SESSION_CACHE_GROUP );
 
 		if ( false === $value ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
@@ -688,7 +730,12 @@ class WC_Session_Handler extends WC_Session {
 
 			$cache_duration = $this->_session_expiration - time();
 			if ( 0 < $cache_duration ) {
-				wp_cache_add( $this->get_cache_prefix() . $customer_id, $value, WC_SESSION_CACHE_GROUP, $cache_duration );
+				$cache_key = $this->get_cache_prefix() . $customer_id;
+				if ( $this->bypass_session_cache ) {
+					wp_cache_set( $cache_key, $value, WC_SESSION_CACHE_GROUP, $cache_duration );
+				} else {
+					wp_cache_add( $cache_key, $value, WC_SESSION_CACHE_GROUP, $cache_duration );
+				}
 			}
 		}
 

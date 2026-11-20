@@ -198,6 +198,40 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 			return true;
 		}
 
+		return $this->get_permission_denied_error( $request );
+	}
+
+	/**
+	 * Permission check for REST API endpoints that act on a post type object.
+	 *
+	 * Resolves the capability through wc_rest_check_post_permissions(), so the endpoint
+	 * uses the same rules and filters as the post type's own REST API controller.
+	 *
+	 * @since 11.3.1
+	 *
+	 * @param WP_REST_Request $request   The request for which the permission is checked.
+	 * @param string          $post_type The post type the endpoint acts on.
+	 * @param string          $context   The request context, one of the contexts accepted by wc_rest_check_post_permissions().
+	 * @param int             $object_id The ID of the object the endpoint acts on.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return bool|WP_Error True if the current user has the required permission, otherwise a WP_Error object.
+	 */
+	protected function check_post_type_permission( WP_REST_Request $request, string $post_type, string $context, int $object_id = 0 ) {
+		if ( wc_rest_check_post_permissions( $post_type, $context, $object_id ) ) {
+			return true;
+		}
+
+		return $this->get_permission_denied_error( $request );
+	}
+
+	/**
+	 * Build the error returned when a permission check fails.
+	 *
+	 * @param WP_REST_Request $request The request that failed the permission check.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return bool|WP_Error A WP_Error object, or false if the request method has no registered error message.
+	 */
+	private function get_permission_denied_error( WP_REST_Request $request ) {
 		$error_information = $this->get_authentication_error_by_method( $request->get_method() );
 		if ( is_null( $error_information ) ) {
 			return false;
