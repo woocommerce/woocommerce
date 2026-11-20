@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Internal\Abilities\ExtensibleAbilitiesRegistry;
+use Automattic\WooCommerce\Internal\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Ability;
@@ -58,7 +58,7 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		foreach ( array( 'resources', 'fields' ) as $name ) {
-			$property = new \ReflectionProperty( ExtensibleAbilitiesRegistry::class, $name );
+			$property = new \ReflectionProperty( AbilityExtensions::class, $name );
 			$property->setAccessible( true );
 			$this->saved_state[ $name ] = $property->getValue();
 			$property->setValue( null, array() );
@@ -75,7 +75,7 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 		global $wc_product_attributes;
 		try {
 			foreach ( $this->saved_state as $name => $value ) {
-				$property = new \ReflectionProperty( ExtensibleAbilitiesRegistry::class, $name );
+				$property = new \ReflectionProperty( AbilityExtensions::class, $name );
 				$property->setAccessible( true );
 				$property->setValue( null, $value );
 			}

@@ -1,6 +1,6 @@
 <?php
 /**
- * ExtensibleAbilitiesRegistry class file.
+ * AbilityExtensions class file.
  */
 
 declare( strict_types=1 );
@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since 11.4.0
  */
-class ExtensibleAbilitiesRegistry {
+class AbilityExtensions {
 
 	/**
 	 * Fields keyed by resource, then namespace, then field name.

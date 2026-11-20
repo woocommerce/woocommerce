@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Internal\Abilities\ExtensibleAbilitiesRegistry;
+use Automattic\WooCommerce\Internal\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductTermAbilityTrait;
 
@@ -137,7 +137,7 @@ class ProductTermUpdate extends AbstractDomainAbility implements AbilityDefiniti
 
 		$output = self::format_term( $term );
 		if ( is_wp_error( $output ) ) {
-			return ExtensibleAbilitiesRegistry::saved_write_error( $output, 'product_term', $term->term_id );
+			return AbilityExtensions::saved_write_error( $output, 'product_term', $term->term_id );
 		}
 
 		return array( 'term' => $output );

@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
-use Automattic\WooCommerce\Internal\Abilities\ExtensibleAbilitiesRegistry;
+use Automattic\WooCommerce\Internal\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Internal\Utilities\StagedMethod;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -60,7 +60,7 @@ class ExtensibleAbilities {
 	 * @param string $resource_name Slug of the resource, such as `ticket`.
 	 */
 	public static function register_resource( string $resource_name ): void {
-		ExtensibleAbilitiesRegistry::register_resource( $resource_name );
+		AbilityExtensions::register_resource( $resource_name );
 	}
 
 	/**
@@ -132,7 +132,7 @@ class ExtensibleAbilities {
 	 * }
 	 */
 	public static function register_field( array $args ): void {
-		ExtensibleAbilitiesRegistry::register_field( $args );
+		AbilityExtensions::register_field( $args );
 	}
 
 	/**
@@ -168,7 +168,7 @@ class ExtensibleAbilities {
 	 * }
 	 */
 	public static function register_query_filter( array $args ): void {
-		ExtensibleAbilitiesRegistry::register_query_filter( $args );
+		AbilityExtensions::register_query_filter( $args );
 	}
 
 	/**
@@ -184,7 +184,7 @@ class ExtensibleAbilities {
 	 * @return array<string, mixed>
 	 */
 	public static function add_query_filters_schema( array $schema, string $resource_name ): array {
-		return ExtensibleAbilitiesRegistry::add_query_filters_schema( $schema, $resource_name );
+		return AbilityExtensions::add_query_filters_schema( $schema, $resource_name );
 	}
 
 	/**
@@ -203,7 +203,7 @@ class ExtensibleAbilities {
 	 * @return array<string, array>|\WP_Error The error of a value that fails its schema, or of a filter that refused its value or failed.
 	 */
 	public static function get_query_args( string $resource_name, array $input ) {
-		return ExtensibleAbilitiesRegistry::get_query_args( $resource_name, $input );
+		return AbilityExtensions::get_query_args( $resource_name, $input );
 	}
 
 	/**
@@ -281,7 +281,7 @@ class ExtensibleAbilities {
 	 * }
 	 */
 	public static function register_validator( array $args ): void {
-		ExtensibleAbilitiesRegistry::register_validator( $args );
+		AbilityExtensions::register_validator( $args );
 	}
 
 	/**
@@ -323,7 +323,7 @@ class ExtensibleAbilities {
 	 * }
 	 */
 	public static function register_sync( array $args ): void {
-		ExtensibleAbilitiesRegistry::register_sync( $args );
+		AbilityExtensions::register_sync( $args );
 	}
 
 	/**
@@ -357,7 +357,7 @@ class ExtensibleAbilities {
 	 * }
 	 */
 	public static function register_prime( array $args ): void {
-		ExtensibleAbilitiesRegistry::register_prime( $args );
+		AbilityExtensions::register_prime( $args );
 	}
 
 	/**
@@ -372,7 +372,7 @@ class ExtensibleAbilities {
 	 * @param object[] $objects       Objects to format.
 	 */
 	public static function prime( string $resource_name, array $objects ): void {
-		ExtensibleAbilitiesRegistry::prime( $resource_name, $objects );
+		AbilityExtensions::prime( $resource_name, $objects );
 	}
 
 	/**
@@ -394,7 +394,7 @@ class ExtensibleAbilities {
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public static function add_fields_to_object( array $output, string $resource_name, $subject ) {
-		return ExtensibleAbilitiesRegistry::add_fields_to_object( $output, $resource_name, $subject );
+		return AbilityExtensions::add_fields_to_object( $output, $resource_name, $subject );
 	}
 
 	/**
@@ -411,7 +411,7 @@ class ExtensibleAbilities {
 	 * @return array<string, mixed>
 	 */
 	public static function add_fields_schema( array $schema, string $resource_name, ?callable $field_filter = null ): array {
-		return ExtensibleAbilitiesRegistry::add_fields_schema( $schema, $resource_name, $field_filter );
+		return AbilityExtensions::add_fields_schema( $schema, $resource_name, $field_filter );
 	}
 
 	/**
@@ -428,6 +428,6 @@ class ExtensibleAbilities {
 	 * @return array<string, mixed>
 	 */
 	public static function get_input_schema( string $resource_name, ?callable $field_filter = null ): array {
-		return ExtensibleAbilitiesRegistry::get_input_schema( $resource_name, $field_filter );
+		return AbilityExtensions::get_input_schema( $resource_name, $field_filter );
 	}
 }

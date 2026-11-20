@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Internal\Abilities\ExtensibleAbilitiesRegistry;
+use Automattic\WooCommerce\Internal\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 
@@ -106,7 +106,7 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 
 		$formatted = self::format_saved_order_for_response( $order );
 		if ( is_wp_error( $formatted ) ) {
-			return ExtensibleAbilitiesRegistry::saved_write_error( $formatted, 'order', $order->get_id(), array( 'note_id' => (int) $note_id ) );
+			return AbilityExtensions::saved_write_error( $formatted, 'order', $order->get_id(), array( 'note_id' => (int) $note_id ) );
 		}
 
 		return array(
