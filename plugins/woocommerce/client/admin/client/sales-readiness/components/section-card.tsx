@@ -12,6 +12,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
  */
 import type { Declared, Section } from '../types';
 import { CheckRow, Row, RowLink } from './check-row';
+import { trackReadiness } from '../tracks';
 
 /**
  * "Show N more checks" under what it folds, and what to say once open.
@@ -19,17 +20,26 @@ import { CheckRow, Row, RowLink } from './check-row';
 export const Fold = ( {
 	label,
 	hideLabel,
+	section,
 	children,
 }: {
 	label: string;
 	hideLabel: string;
+	section: string;
 	children: ReactNode;
 } ) => {
 	const [ open, setOpen ] = useState( false );
 	return (
 		<Collapsible.Root
 			open={ open }
-			onOpenChange={ setOpen }
+			onOpenChange={ ( next: boolean ) => {
+				trackReadiness( 'fold_toggle', {
+					surface: 'page',
+					section,
+					open: next,
+				} );
+				setOpen( next );
+			} }
 			className="wc-sales-readiness-fold"
 		>
 			<Collapsible.Panel>{ children }</Collapsible.Panel>
@@ -72,7 +82,12 @@ export const SectionCard = ( { section }: { section: Section } ) => {
 	const list = ( rows: Section[ 'rows' ] ) => (
 		<ul className="wc-sales-readiness-list">
 			{ rows.map( ( row ) => (
-				<CheckRow key={ row.id } row={ row } />
+				<CheckRow
+					key={ row.id }
+					row={ row }
+					section={ section.id }
+					surface="page"
+				/>
 			) ) }
 		</ul>
 	);
@@ -82,6 +97,13 @@ export const SectionCard = ( { section }: { section: Section } ) => {
 			<CollapsibleCard.Root
 				className="wc-sales-readiness-card"
 				id={ 'wc-sales-readiness-' + section.id }
+				onOpenChange={ ( open: boolean ) =>
+					trackReadiness( 'fold_toggle', {
+						surface: 'page',
+						section: section.id,
+						open,
+					} )
+				}
 			>
 				<CollapsibleCard.Header>{ head }</CollapsibleCard.Header>
 				<CollapsibleCard.Content>
@@ -155,6 +177,7 @@ export const SectionCard = ( { section }: { section: Section } ) => {
 				{ section.rows.length > 0 && list( section.rows ) }
 				{ section.folded.length > 0 && (
 					<Fold
+						section={ section.id }
 						hideLabel={ __( 'Hide', 'woocommerce' ) }
 						label={ sprintf(
 							/* translators: %d: number of checks. */
@@ -183,6 +206,13 @@ export const DeclaredCard = ( { declared }: { declared: Declared } ) => (
 	<CollapsibleCard.Root
 		className="wc-sales-readiness-card"
 		id="wc-sales-readiness-declared"
+		onOpenChange={ ( open: boolean ) =>
+			trackReadiness( 'fold_toggle', {
+				surface: 'page',
+				section: 'declared',
+				open,
+			} )
+		}
 	>
 		<CollapsibleCard.Header>
 			<div className="wc-sales-readiness-card__head">

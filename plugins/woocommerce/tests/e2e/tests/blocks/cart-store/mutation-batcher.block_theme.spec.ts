@@ -3,7 +3,7 @@
  *
  * Request grouping, state reconciliation and the per-cycle cross-cutting
  * effects are covered by Jest unit tests in
- * `client/blocks/assets/js/base/stores/woocommerce/test/`. What is left here
+ * `client/blocks/assets/js/base/stores/woocommerce/cart/test/`. What is left here
  * is the one behaviour those cannot reach: a real Interactivity API rollback
  * repainting rendered block markup after a whole batch fails.
  */

@@ -24,11 +24,44 @@ const row = ( fields: Partial< CheckRowData > ): CheckRowData => ( {
 const renderRow = ( data: CheckRowData ) =>
 	render(
 		<ul>
-			<CheckRow row={ data } />
+			<CheckRow row={ data } section="find" />
 		</ul>
 	);
 
 describe( 'CheckRow', () => {
+	it( 'links the name of a tool in the found line, and keeps the text around it', () => {
+		const { container } = renderRow(
+			row( {
+				id: 'ucp_profile',
+				text: 'Test it in UCP Playground, or ask your host.',
+				text_link: {
+					href: 'https://ucpplayground.com/',
+					text: 'UCP Playground',
+				},
+			} )
+		);
+
+		expect(
+			screen.getByRole( 'link', { name: /UCP Playground/ } )
+		).toHaveAttribute( 'href', 'https://ucpplayground.com/' );
+		expect( container ).toHaveTextContent(
+			'Test it in UCP Playground, or ask your host.'
+		);
+	} );
+
+	it( 'shows the text unlinked when the name is not in it', () => {
+		renderRow(
+			row( {
+				text_link: {
+					href: 'https://ucpplayground.com/',
+					text: 'Elsewhere',
+				},
+			} )
+		);
+
+		expect( screen.queryByRole( 'link' ) ).not.toBeInTheDocument();
+	} );
+
 	it( 'shows a failing check as what to do, what was found, and no fix line when there is none', () => {
 		const { container } = renderRow( row( {} ) );
 

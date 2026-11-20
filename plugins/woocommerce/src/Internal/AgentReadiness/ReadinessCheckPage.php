@@ -46,7 +46,19 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * with AI shopping on, AI assistants can't connect, search or check out without them. These checks
 	 * are only shown while AI shopping is on. The rules file's `store_checks` can change any scanned check's level.
 	 */
-	private const REQUIRED_SCANNED = array( 'ucp_profile', 'ucp_endpoints_live', 'ucp_checkout' );
+	private const REQUIRED_SCANNED = array( 'ucp_profile', 'ucp_checkout' );
+
+	/**
+	 * Scanned checks shown with a Warning instead of as Required when they fail: catalog search can fail
+	 * now and then with nothing changed on the store, usually because of something in front of it.
+	 */
+	private const WARNING_SCANNED = array( 'ucp_endpoints_live' );
+
+	/**
+	 * Scanned checks that keep products from being listed but aren't Required: a store whose pages all
+	 * need a login, such as a members-only store, chose that, and can still be ready for AI assistants that sign in.
+	 */
+	private const OPTIONAL_SCANNED = array( 'pages_public' );
 
 	/**
 	 * Checks that can only run when the check they name passed, so aren't shown when it failed.
@@ -56,20 +68,33 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		'product_jsonld_required_fields' => 'product_jsonld_present',
 		'product_offer_jsonld'           => 'product_jsonld_present',
 		'product_return_policy_schema'   => 'product_jsonld_present',
+		'product_shipping_schema'        => 'product_jsonld_present',
+		'product_buy_action_schema'      => 'product_jsonld_present',
 		'llms_txt_valid'                 => 'llms_txt_present',
 		'llms_txt_links_resolve'         => 'llms_txt_present',
 	);
 
 	/**
 	 * Scanned checks left out while a setup step with the same cause fails, so it shows once: WordPress
-	 * prints noindex while "Discourage search engines" is on, WooCommerce adds no returns policy
+	 * prints noindex and turns its own sitemap off while "Discourage search engines" is on, WooCommerce adds no returns policy
 	 * to product pages until a refund and returns page is chosen, and UCP offers no checkout while
 	 * guest checkout is off.
 	 */
 	private const SAME_CAUSE = array(
 		'no_noindex_directives'        => 'search_visible',
+		'sitemap_lists_products'       => 'search_visible',
+		'sitemap_lastmod'              => 'search_visible',
 		'product_return_policy_schema' => 'refund_returns_page',
 		'ucp_checkout'                 => 'guest_checkout',
+	);
+
+	/**
+	 * Checks that also show in another question's card, counted in each card's badge (Tracks counts them
+	 * once): "Discourage search engines"
+	 * keeps AI assistants from the store's pages (Store access, its group) and from finding it.
+	 */
+	private const ALSO_IN = array(
+		'search_visible' => array( 'find' ),
 	);
 
 	/**
@@ -81,6 +106,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		'pass'  => 'stable',
 		'off'   => 'none',
 		'fix'   => 'low',
+		'warn'  => 'medium',
 	);
 
 	/**
@@ -161,7 +187,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			array(
 				'id'         => self::PAGE_ID,
 				'parent'     => 'woocommerce',
-				'title'      => __( 'Sales readiness', 'woocommerce' ),
+				'title'      => __( 'AI sales readiness', 'woocommerce' ),
 				'path'       => self::PATH,
 				'capability' => 'manage_woocommerce',
 			)
@@ -173,23 +199,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 */
 	public static function url(): string {
 		return admin_url( 'admin.php?page=wc-admin&path=' . self::PATH );
-	}
-
-	/**
-	 * The badge for Sales readiness as a whole, as AI shopping's Status card links to it: how many store and
-	 * product checks fail, each failing product check counting as one issue.
-	 *
-	 * @param array<string, mixed>|null                                                                                                     $report Stored report, or null before the first scan.
-	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
-	 * @return array{0:string,1:string} Badge class and text.
-	 */
-	public function badge( ?array $report, array $checks ): array {
-		if ( null === $report ) {
-			return array( 'off', __( 'Not checked yet', 'woocommerce' ) );
-		}
-		// Only what the page shows: setup steps that don't join Fix first live in the Setup checklist.
-		$shown = array_filter( $this->visible_store_checks( $report, $checks ), static fn( array $check ): bool => ! self::is_setup_step( $check ) || self::joins_fix_first( $check ) );
-		return self::group_badge( array_merge( $shown, array_fill( 0, count( self::failing_product_checks( $report ) ), array( 'ok' => false ) ) ) );
 	}
 
 	/**
@@ -252,7 +261,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		$visible  = $this->visible_store_checks( $report, $checks );
 		$message  = '';
 		if ( $stalled ) {
-			$message = __( 'The check can’t start because scheduled actions aren’t running on this site.', 'woocommerce' );
+			$message = __( 'Checks can’t start because scheduled actions aren’t running on your site. Your hosting provider can usually turn them back on.', 'woocommerce' );
 		} elseif ( $pending ) {
 			$message = __( 'Checking your store.', 'woocommerce' );
 		}
@@ -266,24 +275,24 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				: sprintf( __( 'Checked the %s products you changed most recently.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
 		}
 		return array(
-			'title'        => __( 'Sales readiness', 'woocommerce' ),
+			'title'        => __( 'AI sales readiness', 'woocommerce' ),
 			'description'  => __( 'Check how well AI assistants can find and shop your store, and what to improve first.', 'woocommerce' ),
 			'last_checked' => self::last_checked( $report ),
 			'checked_note' => $truncated,
 			'intro'        => null === $report ? __( 'Run a check to see what AI assistants get when they visit your store and read your products.', 'woocommerce' ) : null,
 			'run'          => array(
-				'label'   => null === $report ? __( 'Run checks', 'woocommerce' ) : __( 'Check again', 'woocommerce' ),
+				'label'   => null === $report ? __( 'Check your store', 'woocommerce' ) : __( 'Check again', 'woocommerce' ),
 				'pending' => $pending,
 				'stalled' => $stalled,
 				'message' => $message,
 				'link'    => $stalled ? array(
 					'href' => admin_url( 'admin.php?page=wc-status&tab=action-scheduler&status=pending' ),
-					'text' => __( 'Go to Scheduled Actions', 'woocommerce' ),
+					'text' => __( 'View Scheduled Actions', 'woocommerce' ),
 				) : null,
 			),
 			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
-			// Setup steps belong to the Setup checklist, so the question cards show only scanned checks.
-			'sections'     => null === $report ? array() : $this->sections( array_values( array_filter( $visible, static fn( array $check ): bool => ! self::is_setup_step( $check ) ) ), $launched, $report ),
+			// Setup steps also show in the Setup checklist; here they sit in the card of the question they answer.
+			'sections'     => null === $report ? array() : $this->sections( $visible, $launched, $report ),
 			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ),
 			'overview'     => array(
 				'shopping' => $this->shopping_card( $checks ),
@@ -303,7 +312,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * The Overview's AI shopping card: its badge once AI shopping is on, whether AI assistants can shop the store and how
-	 * many setup steps are left, and Manage. Before the UCP setting is first saved, it invites the merchant to set up AI
+	 * many setup steps are left, and a button to the settings. Before the UCP setting is first saved, it invites the merchant to set up AI
 	 * shopping instead; once it has been turned off, it says so.
 	 *
 	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
@@ -313,10 +322,14 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		$enabled  = UcpUtils::is_enabled();
 		$left     = count( self::open_steps( $checks ) );
 		$badge    = $this->shopping_badge( $checks );
-		$can_shop = $enabled && array() === $this->store_conditions->failing_required( $checks );
-		$set_up   = $enabled || false !== get_option( $this->features_controller->feature_enable_option_name( UcpUtils::FEATURE_ID ) );
+		$blocked  = array() !== $this->store_conditions->failing_required( $checks );
+		$can_shop = $enabled && ! $blocked;
+		// As in the design: Continue setup while a required step is left, as the Setup checklist counts them, otherwise View settings.
+		$button = array() !== array_filter( self::open_steps( $checks ), array( StoreConditions::class, 'shows_required' ) ) ? __( 'Continue setup', 'woocommerce' ) : __( 'View settings', 'woocommerce' );
+		$set_up = $enabled || false !== get_option( $this->features_controller->feature_enable_option_name( UcpUtils::FEATURE_ID ) );
 		if ( ! $set_up ) {
-			$text = __( 'Let shoppers find and buy your products through AI assistants.', 'woocommerce' );
+			$text   = __( 'Let shoppers find and buy your products through AI assistants.', 'woocommerce' );
+			$button = __( 'Set up AI shopping', 'woocommerce' );
 		} elseif ( ! $enabled ) {
 			$text = __( 'AI shopping is off.', 'woocommerce' );
 		} elseif ( 0 === $left ) {
@@ -334,7 +347,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'text'   => $text,
 			'button' => array(
 				'href' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ),
-				'text' => $set_up ? __( 'Manage', 'woocommerce' ) : __( 'Set up AI shopping', 'woocommerce' ),
+				'text' => $button,
 			),
 		);
 	}
@@ -365,12 +378,22 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
+	 * The name of the product a page check failed on, '' when there is none or it no longer exists.
+	 *
+	 * @param int $product_id Product ID from the report.
+	 */
+	private static function product_name( int $product_id ): string {
+		$product = $product_id > 0 ? wc_get_product( $product_id ) : null;
+		return $product instanceof \WC_Product ? wp_strip_all_tags( html_entity_decode( $product->get_name(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) : '';
+	}
+
+	/**
 	 * What a failing store check says: what to do, why it matters and what was found, the fix line,
 	 * and where to fix it. A setup step is worded as in Status; a scanned check takes its copy from
 	 * ReadinessCopy, or from the report for a check that has none there.
 	 *
-	 * @param array{id:string,name:string,label?:string,why:string,fix?:string,fix_url:string,conflict?:bool} $check Store check.
-	 * @return array{title:string,text:string,fix:string,url:string,link?:string}
+	 * @param array{id:string,name:string,label?:string,why:string,fix?:string,fix_url:string,conflict?:bool,source?:string,product?:int,seen_at?:string} $check Store check.
+	 * @return array{title:string,text:string,fix:string,url:string,link?:string,tool?:array{href:string,text:string}|null}
 	 */
 	private static function failing_copy( array $check ): array {
 		if ( self::is_setup_step( $check ) ) {
@@ -383,13 +406,14 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'link'  => $action[3],
 			);
 		}
-		$copy = ReadinessCopy::store_check( $check['id'], (string) ( $check['source'] ?? '' ) );
+		$copy = ReadinessCopy::store_check( $check['id'], (string) ( $check['source'] ?? '' ), self::product_name( (int) ( $check['product'] ?? 0 ) ), (string) ( $check['seen_at'] ?? '' ) );
 		if ( null !== $copy ) {
 			return array(
 				'title' => $copy['action'],
 				'text'  => $copy['found'],
-				'fix'   => $copy['fix'],
+				'fix'   => ReadinessCopy::llms_txt_source( (string) ( $check['source'] ?? '' ) )['fix'] ?? $copy['fix'],
 				'url'   => '' !== $copy['url'] ? $copy['url'] : $check['fix_url'],
+				'tool'  => $copy['found_link'],
 			);
 		}
 		return array(
@@ -410,7 +434,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		if ( self::is_setup_step( $check ) ) {
 			return StoreConditions::shows_required( $check );
 		}
-		return RemoteRules::store_check( $check['id'] )['required'] ?? ( in_array( $check['id'], self::REQUIRED_SCANNED, true ) || ( 'listing' === $check['blocks'] && 'access' === ( $check['group'] ?? '' ) ) );
+		return RemoteRules::store_check( $check['id'] )['required'] ?? ( in_array( $check['id'], self::REQUIRED_SCANNED, true ) || ( 'listing' === $check['blocks'] && 'access' === ( $check['group'] ?? '' ) && ! in_array( $check['id'], self::OPTIONAL_SCANNED, true ) ) );
 	}
 
 	/**
@@ -471,7 +495,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			array_filter(
 				$scanned,
 				static function ( array $check ) use ( $results, $steps ): bool {
-					if ( ! empty( $check['pending'] ) || ( ! UcpUtils::is_enabled() && 'ucp' === $check['blocks'] ) ) {
+					if ( ! empty( $check['pending'] ) || ! empty( $check['skipped'] ) || ( ! UcpUtils::is_enabled() && 'ucp' === $check['blocks'] ) ) {
 						return false;
 					}
 					if ( false === ( $steps[ self::SAME_CAUSE[ $check['id'] ] ?? '' ] ?? null ) ) {
@@ -566,7 +590,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				),
 			) : array(
 				'title' => __( 'You don’t have any products yet', 'woocommerce' ),
-				'text'  => __( 'Product checks start once you add products.', 'woocommerce' ),
+				'text'  => __( 'These checks start once you add a product.', 'woocommerce' ),
 				'link'  => array(
 					'href' => admin_url( 'post-new.php?post_type=product' ),
 					'text' => __( 'Add a product', 'woocommerce' ),
@@ -595,8 +619,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		return self::row(
 			'cant_check',
 			'unknown',
-			__( 'We couldn’t check your pages', 'woocommerce' ),
-			$launched ? __( 'Your host stopped the store from opening its own pages. Try again later, or ask your host.', 'woocommerce' ) : __( 'They show your coming soon page until the store is live.', 'woocommerce' )
+			$launched ? __( 'We couldn’t check your pages', 'woocommerce' ) : __( 'Your store is in coming soon mode', 'woocommerce' ),
+			$launched ? __( 'Your hosting setup blocked the check from opening them. Try again later, or contact your hosting provider.', 'woocommerce' ) : __( 'These checks run once your store is live.', 'woocommerce' )
 		);
 	}
 
@@ -609,20 +633,22 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @param string                              $text    Why it matters, and what was found while it fails.
 	 * @param string                              $fix     What to do, or '' when the title says it.
 	 * @param array{href:string,text:string}|null $link    Where to fix it, or the products it affects.
-	 * @param array{0:string,1:string}|null       $badge   Badge class and text: Required, or Likely conflict.
+	 * @param array{0:string,1:string}|null       $badge   Badge class and text: Required.
 	 * @param array{href:string,text:string}|null $seen_at The page a conflict was seen on.
+	 * @param array{href:string,text:string}|null $text_link A name in the text to link, such as a tool to test with.
 	 * @return array<string, mixed>
 	 */
-	private static function row( string $id, string $state, string $title, string $text, string $fix = '', ?array $link = null, ?array $badge = null, ?array $seen_at = null ): array {
+	private static function row( string $id, string $state, string $title, string $text, string $fix = '', ?array $link = null, ?array $badge = null, ?array $seen_at = null, ?array $text_link = null ): array {
 		return array(
-			'id'      => $id,
-			'state'   => $state,
-			'title'   => $title,
-			'badge'   => null === $badge ? null : self::badge_data( $badge ),
-			'text'    => trim( $text ),
-			'fix'     => trim( $fix ),
-			'link'    => $link,
-			'seen_at' => $seen_at,
+			'id'        => $id,
+			'state'     => $state,
+			'title'     => $title,
+			'badge'     => null === $badge ? null : self::badge_data( $badge ),
+			'text'      => trim( $text ),
+			'fix'       => trim( $fix ),
+			'link'      => $link,
+			'seen_at'   => $seen_at,
+			'text_link' => $text_link,
 		);
 	}
 
@@ -669,9 +695,11 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$blocks_listing = in_array( ReadinessRule::EFFECT_NOT_LISTABLE, array_column( (array) ( $check['channels'] ?? array() ), 'effect' ), true );
 			$share          = is_numeric( $check['sales_share'] ?? null ) ? (float) $check['sales_share'] : null;
 			// A share dropped because the count changed since the scan still ranks, so fixing one product doesn't move the issue down.
-			$rank     = $share ?? ( is_numeric( $check['ranked_share'] ?? null ) ? (float) $check['ranked_share'] : 0.0 );
-			$count    = (int) $check['count'];
-			$issue    = self::product_issue( $check, $linked );
+			$rank  = $share ?? ( is_numeric( $check['ranked_share'] ?? null ) ? (float) $check['ranked_share'] : 0.0 );
+			$count = (int) $check['count'];
+			$issue = self::product_issue( $check, $linked );
+			// Without sales to compare, an issue that keeps products out of more AI apps ranks higher.
+			$apps     = count( array_filter( (array) ( $check['channels'] ?? array() ), static fn( $channel ): bool => in_array( $channel['effect'] ?? '', array( ReadinessRule::EFFECT_NOT_LISTABLE, ReadinessRule::EFFECT_GAPS ), true ) ) );
 			$issues[] = array(
 				'id'    => (string) ( $check['id'] ?? '' ),
 				'tier'  => $blocks_listing ? 2 : 3,
@@ -680,7 +708,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'link'  => self::products_link( $count, (string) ( $check['id'] ?? '' ), $linked ),
 				'share' => $share,
 				'rank'  => $rank,
-				'count' => $count,
+				'count' => 0.0 < $rank ? $count : $count * max( 1, $apps ),
 			);
 		}
 		// Tier first, then the larger share of sales, then more products, then page order (usort isn't stable before PHP 8).
@@ -691,12 +719,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * The Fix first card: items under a heading for what each group of issues stops, with a line on
-	 * how it is ranked. A product issue's line starts with its share of sales. Null when there is
-	 * nothing to fix.
+	 * how it is ranked. A product issue's line starts with its share of sales. With nothing to fix,
+	 * there is no card, as in the design.
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks Store checks shown on the page.
 	 * @param array<string, mixed>                                                                                                                                                                           $report Stored report.
-	 * @return array{title:string,ranking:string,items:array<int, array{id:string,tier:string,badge:array{intent:string,text:string}|null,title:string,why:string,link:array{href:string,text:string}|null}>}|null
+	 * @return array{title:string,ranking:string,link:array{href:string,text:string}|null,items:array<int, array{id:string,tier:string,badge:array{intent:string,text:string}|null,title:string,why:string,link:array{href:string,text:string}|null}>}|null
 	 */
 	private function fix_first( array $checks, array $report ): ?array {
 		$items = $this->fix_first_items( $checks, $report );
@@ -721,6 +749,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$list[] = array(
 				'id'    => $item['id'],
 				'tier'  => $tiers[ $item['tier'] ],
+				// The same Required badge as the AI shopping Setup checklist, so this tier stands out.
 				'badge' => 0 === $item['tier'] ? self::badge_data( self::required_badge() ) : null,
 				'title' => $item['title'],
 				'why'   => $why,
@@ -730,6 +759,11 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		return array(
 			'title'   => __( 'Fix first', 'woocommerce' ),
 			'ranking' => self::ranking_text( $report, $items ),
+			// With Analytics off, where to turn it on: a report with a null `sales` key was read without it.
+			'link'    => array_key_exists( 'sales', $report ) && null === $report['sales'] ? array(
+				'href' => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ),
+				'text' => __( 'Turn on Analytics to see which fixes affect the most sales.', 'woocommerce' ),
+			) : null,
 			'items'   => $list,
 		);
 	}
@@ -744,32 +778,24 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	private static function ranking_text( array $report, array $items ): string {
 		// A report from before sales were read has no `sales` key; the next check fills it in.
 		if ( ! array_key_exists( 'sales', $report ) ) {
-			return __( 'Ranked by how many products each issue affects.', 'woocommerce' );
+			return __( 'Start with the fixes that affect the most products. Check again to rank them by sales.', 'woocommerce' );
 		}
 		$sales = is_array( $report['sales'] ) ? $report['sales'] : null;
 		if ( null === $sales ) {
-			return __( 'Ranked by how many products each issue affects. Turn on Analytics to rank by sales instead.', 'woocommerce' );
+			return __( 'Start with the fixes that affect the most products.', 'woocommerce' );
 		}
 		if ( false === ( $sales['imported'] ?? true ) ) {
-			return __( 'Analytics hasn\'t imported all your past orders yet, so issues are ranked by how many products they affect. Import them in Analytics > Settings.', 'woocommerce' );
+			return __( 'Analytics hasn\'t imported all your past orders yet, so issues are ranked by how many products and AI apps they affect. Import them in Analytics > Settings.', 'woocommerce' );
 		}
 		$orders = (int) ( $sales['orders'] ?? 0 );
 		$days   = (int) ( $sales['days'] ?? 0 );
-		if ( 0 === $orders ) {
-			/* translators: %d: number of days. */
-			return sprintf( _n( 'No sales in the last %d day, so issues are ranked by how many products they affect.', 'No sales in the last %d days, so issues are ranked by how many products they affect.', $days, 'woocommerce' ), $days );
-		}
+		// No sales, or too few to rank by.
 		if ( $orders < ProductSales::MIN_ORDERS ) {
-			return sprintf(
-				/* translators: 1: number of orders, 2: number of days. */
-				_n( 'Only %1$s order in the last %2$d days, too few to rank by sales, so issues are ranked by how many products they affect.', 'Only %1$s orders in the last %2$d days, too few to rank by sales, so issues are ranked by how many products they affect.', $orders, 'woocommerce' ),
-				number_format_i18n( $orders ),
-				$days
-			);
+			return __( 'Start with the fixes that affect the most products. Sales rankings start once your store has enough sales.', 'woocommerce' );
 		}
 		// No issue on the card with sales: the products sold nothing, store-wide issues filled the card, or counts changed since the check.
 		if ( array() === array_filter( $items, static fn( array $item ): bool => ( $item['share'] ?? 0.0 ) > 0.0 ) ) {
-			return __( 'Ranked by how many products each issue affects.', 'woocommerce' );
+			return __( 'Ranked by how many products and AI apps each issue affects.', 'woocommerce' );
 		}
 		/* translators: %d: number of days. */
 		return sprintf( _n( 'Start with the fixes that affect the most sales. Sales figures are from the last %d day.', 'Start with the fixes that affect the most sales. Sales figures are from the last %d days.', $days, 'woocommerce' ), $days );
@@ -828,7 +854,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		return array(
 			'href' => ProductsList::url( $value ),
 			/* translators: %s: number of products. */
-			'text' => sprintf( _n( 'View %s product', 'View %s products', $count, 'woocommerce' ), number_format_i18n( $count ) ),
+			'text' => 1 === $count ? __( 'View product', 'woocommerce' ) : sprintf( _n( 'View %s product', 'View %s products', $count, 'woocommerce' ), number_format_i18n( $count ) ),
 		);
 	}
 
@@ -952,21 +978,25 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * that blocks every sale is marked Required. One that couldn't run says why; a passed one keeps its
 	 * passing title and why it matters.
 	 *
-	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,seen_at?:string}> $checks   Checks.
-	 * @param bool|null                                                                                                                                                          $launched Whether the store is launched.
+	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,seen_at?:string,source?:string}> $checks   Checks.
+	 * @param bool|null                                                                                                                                                                         $launched Whether the store is launched.
 	 * @return array<int, array<string, mixed>>
 	 */
 	private static function check_rows( array $checks, ?bool $launched ): array {
 		$rows = array();
 		foreach ( $checks as $check ) {
-			$copy = self::is_setup_step( $check ) ? null : ReadinessCopy::store_check( $check['id'] );
+			$step = self::is_setup_step( $check ) ? self::passed_step( $check ) : null;
+			$copy = null !== $step ? array(
+				'title' => $step[0],
+				'why'   => $step[1],
+			) : ReadinessCopy::store_check( $check['id'] );
 			if ( null === $check['ok'] ) {
 				$rows[] = self::row( $check['id'], 'unknown', $copy['title'] ?? $check['name'], $launched ? __( 'This couldn\'t be checked. The next check tries again.', 'woocommerce' ) : __( 'Launch your store to run this check.', 'woocommerce' ) );
 				continue;
 			}
 			if ( $check['ok'] ) {
-				// A setup step's why describes the failure, so a passed one shows only its name, as in Status.
-				$rows[] = self::row( $check['id'], 'pass', $copy['title'] ?? $check['name'], $copy['why'] ?? '' );
+				$source = ReadinessCopy::llms_txt_source( (string) ( $check['source'] ?? '' ) )['pass'] ?? '';
+				$rows[] = self::row( $check['id'], 'pass', $copy['title'] ?? $check['name'], trim( ( $copy['why'] ?? '' ) . ' ' . $source ) );
 				continue;
 			}
 			$failing  = self::failing_copy( $check );
@@ -980,8 +1010,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 					'text' => (string) $check['seen_at'],
 				)
 				: null;
-			$badge    = $required ? self::required_badge() : ( $conflict ? array( 'off', __( 'Likely conflict', 'woocommerce' ) ) : null );
-			$rows[]   = self::row( $check['id'], $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'], $failing['link'] ?? '' ), $badge, $seen_at );
+			$warning  = ! $required && in_array( $check['id'], self::WARNING_SCANNED, true );
+			$badge    = $required ? self::required_badge() : ( $warning ? array( 'warn', __( 'Warning', 'woocommerce' ) ) : null );
+			$rows[]   = self::row( $check['id'], $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'], $failing['link'] ?? '' ), $badge, $seen_at, $failing['tool'] ?? null );
 		}
 		return $rows;
 	}
@@ -1012,13 +1043,15 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 */
 	private static function fix_link_text( string $url ): string {
 		$targets = array(
-			'upload.php'                              => __( 'Go to Media library', 'woocommerce' ),
+			'upload.php'                              => __( 'View images', 'woocommerce' ),
 			'post.php'                                => __( 'Edit page', 'woocommerce' ),
 			'admin.php?page=wc-settings&tab=site-visibility' => __( 'Change site visibility', 'woocommerce' ),
 			'options-reading.php'                     => __( 'Change Reading settings', 'woocommerce' ),
-			'admin.php?page=wc-settings&tab=account'  => __( 'Go to Accounts & Privacy', 'woocommerce' ),
-			'admin.php?page=wc-settings&tab=checkout' => __( 'Go to Payments', 'woocommerce' ),
-			'admin.php?page=wc-settings&tab=email'    => __( 'Go to Emails', 'woocommerce' ),
+			'admin.php?page=wc-settings&tab=account'  => __( 'View account settings', 'woocommerce' ),
+			'admin.php?page=wc-settings&tab=checkout' => __( 'View payment settings', 'woocommerce' ),
+			'admin.php?page=wc-settings&tab=email'    => __( 'View email settings', 'woocommerce' ),
+			'admin.php?page=wc-settings&tab=shipping' => __( 'View shipping settings', 'woocommerce' ),
+			'admin.php?page=wc-settings&tab=products' => __( 'View product settings', 'woocommerce' ),
 			'site-health.php'                         => __( 'View Site Health', 'woocommerce' ),
 			'plugins.php'                             => __( 'View plugins', 'woocommerce' ),
 		);
@@ -1028,7 +1061,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			}
 		}
 		if ( str_starts_with( $url, AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ) . '#' ) ) {
-			return __( 'Choose a page', 'woocommerce' );
+			return __( 'Choose page', 'woocommerce' );
 		}
 		return str_starts_with( $url, admin_url() ) ? __( 'Open settings', 'woocommerce' ) : __( 'Learn how', 'woocommerce' );
 	}
@@ -1066,7 +1099,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'id'       => $id,
 				'title'    => $group[0],
 				'badge'    => self::badge_data( $cant && array() === $rows ? array( 'off', __( 'Couldn’t check', 'woocommerce' ) ) : self::group_badge( $checks ) ),
-				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? __( 'AI shopping is off, so we didn’t check your connection URL.', 'woocommerce' ) : null,
+				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? __( 'Some checks only run when AI shopping is on, like whether AI assistants can connect to your store and send shoppers to your checkout.', 'woocommerce' ) : ( 'understand' === $id ? self::sample_note( $report ) : null ),
 				'channels' => array(),
 				'rows'     => $cant ? array_merge( $rows, array( self::cant_check_row( $launched ) ) ) : $rows,
 				'folded'   => self::check_rows( array_values( $folded ), $launched ),
@@ -1074,6 +1107,20 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			);
 		}
 		return $sections;
+	}
+
+	/**
+	 * Which product pages the Product details checks read. Null for a report from before they read several.
+	 *
+	 * @param array<string, mixed> $report Stored report.
+	 */
+	private static function sample_note( array $report ): ?string {
+		if ( ! array_key_exists( 'pages_best_seller', $report ) ) {
+			return null;
+		}
+		return $report['pages_best_seller']
+			? __( 'These checks look at a selection of your products, including your bestsellers and newest additions. If one product has an issue, others may too.', 'woocommerce' )
+			: __( 'These checks look at a selection of your products, including your newest additions. If one product has an issue, others may too.', 'woocommerce' );
 	}
 
 	/**
@@ -1085,14 +1132,16 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	private static function question_groups( array $checks ): array {
 		$groups = array(
 			'access'     => array( __( 'Store access', 'woocommerce' ), array() ),
-			'find'       => array( __( 'Can AI assistants find your store?', 'woocommerce' ), array() ),
-			'understand' => array( __( 'Can AI assistants read your product details?', 'woocommerce' ), array() ),
-			'buy'        => array( __( 'Can shoppers buy through AI assistants?', 'woocommerce' ), array() ),
+			'find'       => array( __( 'Search and discovery', 'woocommerce' ), array() ),
+			'understand' => array( __( 'Product details', 'woocommerce' ), array() ),
+			'buy'        => array( __( 'Buying through AI assistants', 'woocommerce' ), array() ),
 		);
 		foreach ( $checks as $check ) {
 			// A report from before checks named their question has no group; the next scan fills it in.
-			if ( isset( $groups[ $check['group'] ?? '' ] ) ) {
-				$groups[ $check['group'] ][1][] = $check;
+			foreach ( array_merge( array( $check['group'] ?? '' ), self::ALSO_IN[ $check['id'] ] ?? array() ) as $group ) {
+				if ( isset( $groups[ $group ] ) ) {
+					$groups[ $group ][1][] = $check;
+				}
 			}
 		}
 		return $groups;
@@ -1102,6 +1151,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * The product question's title.
 	 */
 	private static function products_question(): string {
-		return __( 'Can AI assistants list your products?', 'woocommerce' );
+		return __( 'Listings in AI shopping apps', 'woocommerce' );
 	}
 }

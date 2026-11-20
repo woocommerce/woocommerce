@@ -45,6 +45,19 @@
 	// The page title is semibold in the design; the admin-ui Page header sets medium.
 	.wc-sales-readiness h1 {
 		font-weight: 600;
+		line-height: 20px;
+	}
+}
+
+// Sales readiness and the AI tools tab have no admin footer (AgenticCommerceSettings empties its
+// text), so the 24px under the last card is the page's own.
+body:has(.wc-sales-readiness) {
+	#wpfooter {
+		display: none;
+	}
+
+	#wpbody-content {
+		padding-block-end: 0;
 	}
 }
 
@@ -84,8 +97,8 @@
 		gap: var(--wpds-dimension-gap-lg);
 		max-width: 632px;
 		margin: 0 auto;
-		// The settings form already leaves a gap under the tabs.
-		padding-block: 0 var(--wpds-dimension-padding-3xl);
+		// The settings form already leaves a gap under the tabs. 24px under the last card, as on Sales readiness.
+		padding-block: 0 var(--wpds-dimension-padding-2xl);
 	}
 }
 
@@ -136,8 +149,14 @@
 		padding-block-start: var(--wpds-dimension-padding-xs);
 	}
 
-	:is(&__description, .wc-sales-readiness-channels) + .wc-sales-readiness-list > .wc-sales-readiness-row:first-child {
+	&__description + .wc-sales-readiness-list > .wc-sales-readiness-row:first-child {
 		padding-block-start: 0;
+	}
+
+	// Listings: a line between the channel counts and the first check, as between checks.
+	.wc-sales-readiness-channels + .wc-sales-readiness-list > .wc-sales-readiness-row:first-child {
+		border-block-start: 1px solid var(--wc-sr-stroke);
+		padding-block-start: var(--wpds-dimension-padding-md);
 	}
 
 	// An open fold continues the list above it, under that list's last line.
@@ -173,8 +192,9 @@
 	}
 }
 
-// A list that ends the card (Fix first, an open fold, a passed card) has no line under its last row.
-.wc-sales-readiness-card .wc-sales-readiness-list:last-child > .wc-sales-readiness-row:last-child {
+// A list that ends the card (Fix first, a passed card) has no line under its last row. An open
+// fold keeps its line, above Hide.
+.wc-sales-readiness-card .wc-sales-readiness-list:last-child:not(.wc-sales-readiness-fold *) > .wc-sales-readiness-row:last-child {
 	border-block-end: 0;
 }
 
@@ -253,13 +273,17 @@
 		gap: var(--wpds-dimension-gap-xs);
 	}
 
+	// The badge follows the title's last word, so a long title wraps without leaving it on a line of its own.
 	&__title {
-		display: inline-flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: var(--wpds-dimension-gap-sm);
+		display: block;
 		margin-block-end: -2px;
 		font-weight: 600;
+
+		> span {
+			display: inline-flex;
+			margin-inline-start: var(--wpds-dimension-gap-sm);
+			vertical-align: middle;
+		}
 	}
 
 	// The fix line reads as an instruction, so it keeps the text color.
@@ -299,11 +323,10 @@
 }
 
 .wc-sales-readiness-fold {
-	padding-block-start: var(--wpds-dimension-padding-sm);
-
-	// "Show more" and "Hide": a minimal button whose text lines up with the card text, while its
-	// hover background reaches past it.
+	// "Show more" and "Hide": 16px under the line above, a minimal button whose text lines up
+	// with the card text, while its hover background reaches past it.
 	> .components-button {
+		margin-block-start: var(--wpds-dimension-gap-lg);
 		@include sales-readiness-button(var(--wpds-dimension-padding-sm));
 		margin-inline-start: calc(-1 * var(--wpds-dimension-padding-sm));
 		border-color: transparent;
