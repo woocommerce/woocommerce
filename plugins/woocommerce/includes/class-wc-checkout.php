@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
+use Automattic\WooCommerce\Internal\Tax\ShippingTaxSplit;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
@@ -927,6 +928,8 @@ class WC_Checkout {
 			// Add item to order and save.
 			$order->add_item( $item );
 		}
+
+		wc_get_container()->get( ShippingTaxSplit::class )->save_checkout_values_on_shipping_lines( $order );
 	}
 
 	/**
@@ -995,6 +998,8 @@ class WC_Checkout {
 				foreach ( $shipping_rate->get_meta_data() as $key => $value ) {
 					$item->add_meta_data( $key, $value, true );
 				}
+
+				wc_get_container()->get( ShippingTaxSplit::class )->save_checkout_values( $item, $order );
 
 				/**
 				 * Action hook to adjust item before save.

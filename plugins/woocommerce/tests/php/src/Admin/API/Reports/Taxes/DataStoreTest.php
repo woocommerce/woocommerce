@@ -730,6 +730,73 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Shipping split across tax classes books each rate's share of the shipping, and a full refund nets it to zero.
+	 */
+	public function test_split_shipping_books_each_rate_its_share(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+		update_option( 'woocommerce_split_shipping_tax_by_item_value', 'yes' );
+
+		$standard_rate_id = $this->insert_tax_rate( '20' );
+		$zero_rate_id     = (int) WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'DE',
+				'tax_rate'          => '0',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_shipping' => 1,
+				'tax_rate_class'    => 'zero-rate',
+			)
+		);
+
+		$order = wc_create_order();
+		$order->set_billing_country( 'DE' );
+		$order->set_shipping_country( 'DE' );
+		foreach ( array(
+			''          => '10',
+			'zero-rate' => '90',
+		) as $tax_class => $price ) {
+			$product = new WC_Product_Simple();
+			$product->set_props(
+				array(
+					'regular_price' => $price,
+					'tax_class'     => $tax_class,
+				)
+			);
+			$product->save();
+			$order->add_product( $product );
+		}
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_method_id( 'flat_rate' );
+		$shipping->set_total( '10' );
+		$order->add_item( $shipping );
+		$order->calculate_totals();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$refund = $this->refund_order_in_full( $order );
+
+		DataStore::sync_order_taxes( $order->get_id() );
+		DataStore::sync_order_taxes( $refund->get_id() );
+
+		$amounts = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT tax_rate_id, SUM(IF(order_id = %d, shipping_taxable_amount, 0)) AS shipping_part, SUM(shipping_taxable_amount) AS net_shipping_part FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id IN (%d, %d) GROUP BY tax_rate_id",
+				$order->get_id(),
+				$order->get_id(),
+				$refund->get_id()
+			),
+			OBJECT_K
+		);
+
+		// 10 of the 100 of items is standard rate, so 1.00 of the 10.00 shipping is.
+		$this->assertSame( 1.0, (float) $amounts[ $standard_rate_id ]->shipping_part, 'The standard rate should book its share of the shipping.' );
+		$this->assertSame( 9.0, (float) $amounts[ $zero_rate_id ]->shipping_part, 'The zero rate should book its share of the shipping.' );
+		$this->assertSame( 0.0, (float) $amounts[ $standard_rate_id ]->net_shipping_part, 'A full refund should net the standard rate share to zero.' );
+		$this->assertSame( 0.0, (float) $amounts[ $zero_rate_id ]->net_shipping_part, 'A full refund should net the zero rate share to zero.' );
+	}
+
+	/**
 	 * @testdox While the split columns are missing, syncing still writes rows and the report still returns data.
 	 */
 	public function test_guards_apply_while_taxable_amount_split_columns_are_missing(): void {

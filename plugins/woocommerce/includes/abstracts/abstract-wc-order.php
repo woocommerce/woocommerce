@@ -19,6 +19,7 @@ use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Customers\SearchService as CustomersSearchService;
 use Automattic\WooCommerce\Internal\Orders\PaymentInfo;
+use Automattic\WooCommerce\Internal\Tax\ShippingTaxSplit;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -2998,7 +2999,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
 			if ( false !== $shipping_tax_class && ! $is_vat_exempt ) {
-				$item->calculate_taxes( array_merge( $calculate_tax_for, array( 'tax_class' => $shipping_tax_class ) ) );
+				$item_tax_for    = array_merge( $calculate_tax_for, array( 'tax_class' => $shipping_tax_class ) );
+				$tax_class_costs = wc_get_container()->get( ShippingTaxSplit::class )->split_shipping_line( $item, $this );
+
+				if ( null !== $tax_class_costs ) {
+					$item_tax_for['tax_class_costs'] = $tax_class_costs;
+				}
+
+				$item->calculate_taxes( $item_tax_for );
 			} else {
 				$item->set_taxes( false );
 			}
