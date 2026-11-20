@@ -99,6 +99,8 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( 'woocommerce_calc_taxes' );
+		delete_option( 'woocommerce_allowed_countries' );
+		delete_option( 'woocommerce_specific_allowed_countries' );
 
 		if ( $this->original_session ) {
 			WC()->session           = $this->original_session;
@@ -110,6 +112,22 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		WC_Helper_Shipping::delete_simple_flat_rate();
 
 		parent::tearDown();
+	}
+
+	/**
+	 * Re-type the billing country field, the way a checkout field editor plugin can.
+	 *
+	 * The filter is tracked with the extra field filters, so tear down removes it.
+	 */
+	private function retype_billing_country_field(): void {
+		$filter = function ( $fields ) {
+			$fields['billing']['billing_country']['type'] = 'select';
+			return $fields;
+		};
+
+		$this->extra_field_filters[] = $filter;
+
+		add_filter( 'woocommerce_checkout_fields', $filter );
 	}
 
 	/**
@@ -3219,5 +3237,490 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $variation->get_id(), $attributes );
 		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
 		WC()->cart->calculate_totals();
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses a billing country the store doesn't sell to.
+	 */
+	public function test_validate_checkout_refuses_a_billing_country_the_store_does_not_sell_to() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$data   = array(
+			'billing_country'           => 'DE',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertEquals(
+			'Sorry, we do not allow orders from the provided country (Germany)',
+			$errors->get_error_message( 'billing_country_not_allowed' )
+		);
+		$this->assertEquals( array( 'id' => 'billing_country' ), $errors->get_error_data( 'billing_country_not_allowed' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' accepts a billing country the store sells to.
+	 *
+	 * @testWith ["specific", "US"]
+	 *           ["all", "DE"]
+	 *
+	 * @param string $allowed_countries Value of the 'woocommerce_allowed_countries' option.
+	 * @param string $billing_country   Posted billing country.
+	 */
+	public function test_validate_checkout_accepts_a_billing_country_the_store_sells_to( $allowed_countries, $billing_country ) {
+		update_option( 'woocommerce_allowed_countries', $allowed_countries );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$data   = array(
+			'billing_country'           => $billing_country,
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertEquals( '', $errors->get_error_message( 'billing_country_not_allowed' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' checks the customer's billing country when the field isn't posted.
+	 */
+	public function test_validate_checkout_falls_back_to_the_customers_billing_country() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$original_billing_country = WC()->customer->get_billing_country();
+
+		// A store that removes the field posts no value, and the session country is what calculates tax.
+		WC()->customer->set_billing_country( 'DE' );
+
+		$data   = array( 'ship_to_different_address' => false );
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			WC()->customer->set_billing_country( $original_billing_country );
+		}
+
+		$this->assertEquals(
+			'Sorry, we do not allow orders from the provided country (Germany)',
+			$errors->get_error_message( 'billing_country_not_allowed' )
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses the order when the customer object isn't set up yet.
+	 */
+	public function test_validate_checkout_refuses_without_a_customer_object() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$original_customer = WC()->customer;
+
+		WC()->customer = null;
+
+		$data   = array( 'ship_to_different_address' => false );
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			WC()->customer = $original_customer;
+		}
+
+		$this->assertSame(
+			array( 'Please enter a billing country.' ),
+			$errors->get_error_messages( 'billing_country_validation' ),
+			'Without a customer object there is no billing country, so the order cannot be taxed or placed.'
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' still checks a billing country field a plugin has re-typed.
+	 *
+	 * 'validate_posted_data' only checks a field it still recognises as a country, so the selling location
+	 * check can't assume it has already run.
+	 */
+	public function test_validate_checkout_checks_a_retyped_billing_country_field() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$this->retype_billing_country_field();
+
+		$data   = array(
+			'billing_country'           => 'ZZ',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame( array( "'ZZ' is not a valid country code." ), $errors->get_error_messages( 'billing_country_validation' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses a billing country that isn't a string.
+	 *
+	 * 'wc_clean' maps over arrays, so 'billing_country[]=DE' arrives as one. Reaching 'country_exists' with it
+	 * would be a TypeError, and letting it through would leave the order with no taxable country.
+	 */
+	public function test_validate_checkout_refuses_a_non_string_billing_country() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$this->retype_billing_country_field();
+
+		$data   = array(
+			'billing_country'           => array( 'DE' ),
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame( array( 'Please enter a billing country.' ), $errors->get_error_messages( 'billing_country_validation' ) );
+		$this->assertSame( array(), $errors->get_error_messages( 'billing_country_not_allowed' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses an empty billing country a plugin left unvalidated.
+	 *
+	 * 'WC_AJAX::update_order_review' writes whatever country it is sent onto the session customer, so a store
+	 * whose checkout no longer has the field can reach 'validate_checkout' with nothing to tax.
+	 */
+	public function test_validate_checkout_refuses_an_empty_billing_country() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$remove_billing_country = function ( $fields ) {
+			unset( $fields['billing']['billing_country'] );
+			return $fields;
+		};
+
+		$this->extra_field_filters[] = $remove_billing_country;
+
+		add_filter( 'woocommerce_checkout_fields', $remove_billing_country );
+
+		$original_country = WC()->customer->get_billing_country();
+
+		WC()->customer->set_billing_country( '' );
+
+		$data   = array( 'ship_to_different_address' => false );
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			WC()->customer->set_billing_country( $original_country );
+		}
+
+		$this->assertSame(
+			array( 'This store cannot accept your order without a billing country.' ),
+			$errors->get_error_messages( 'billing_country_validation' ),
+			'With no field on the form the shopper cannot act on a notice asking for the country.'
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' leaves the required-field notice alone for an empty billing country.
+	 */
+	public function test_validate_checkout_does_not_duplicate_the_required_billing_country_notice() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$data   = array(
+			'billing_country'           => '',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame( array(), $errors->get_error_messages( 'billing_country_validation' ) );
+		$this->assertNotEmpty(
+			$errors->get_error_messages( 'billing_country_required' ),
+			"'validate_posted_data' reports the empty field, so the shopper should only see that one notice."
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' prefers the posted billing country over the one stored on the customer.
+	 */
+	public function test_validate_checkout_prefers_the_posted_billing_country() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$original_billing_country = WC()->customer->get_billing_country();
+
+		WC()->customer->set_billing_country( 'DE' );
+
+		$data   = array(
+			'billing_country'           => 'US',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			WC()->customer->set_billing_country( $original_billing_country );
+		}
+
+		$this->assertEquals( '', $errors->get_error_message( 'billing_country_not_allowed' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' reports an unknown billing country left on the customer.
+	 */
+	public function test_validate_checkout_reports_an_unknown_billing_country_left_on_the_customer() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$original_billing_country = WC()->customer->get_billing_country();
+
+		// update_order_review() stores whatever country it is sent, so an unposted one is never checked elsewhere.
+		WC()->customer->set_billing_country( 'XX' );
+
+		$data   = array( 'ship_to_different_address' => false );
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			WC()->customer->set_billing_country( $original_billing_country );
+		}
+
+		// An unknown code is not a selling-location refusal, so it gets the same message a posted one gets.
+		$this->assertSame( array( "'XX' is not a valid country code." ), $errors->get_error_messages( 'billing_country_validation' ) );
+		$this->assertSame( array(), $errors->get_error_messages( 'billing_country_not_allowed' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' leaves a non-existing billing country to 'validate_posted_data'.
+	 */
+	public function test_validate_checkout_leaves_a_non_existing_billing_country_alone() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$data   = array(
+			'billing_country'           => 'XX',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame( array( "'XX' is not a valid country code." ), $errors->get_error_messages( 'billing_country_validation' ) );
+		$this->assertSame( array(), $errors->get_error_messages( 'billing_country_not_allowed' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses a posted foreign billing address on a store with a physical product.
+	 *
+	 * Drives the real request path so the check is exercised against the shape 'get_posted_data' produces, and
+	 * alongside the shipping check: both fieldsets hold the refused country, so both notices are expected.
+	 */
+	public function test_validate_checkout_refuses_a_posted_foreign_billing_country_with_shipping() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+		add_filter( 'wc_shipping_enabled', '__return_true' );
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'wc_get_shipping_method_count' => function () {
+					return 1;
+				},
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'billing_first_name' => 'Test',
+			'billing_last_name'  => 'Shopper',
+			'billing_address_1'  => 'Unter den Linden 1',
+			'billing_city'       => 'Berlin',
+			'billing_postcode'   => '10117',
+			'billing_phone'      => '5555555555',
+			'billing_email'      => 'shopper@example.com',
+			'billing_country'    => 'DE',
+			'billing_state'      => 'DE-BE',
+			'payment_method'     => 'cod',
+		);
+
+		$errors            = new WP_Error();
+		$original_billing  = WC()->customer->get_billing( 'edit' );
+		$original_shipping = WC()->customer->get_shipping( 'edit' );
+
+		try {
+			$data           = $this->sut->get_posted_data();
+			$needs_shipping = WC()->cart->needs_shipping();
+
+			// Writes the posted address onto the shared customer singleton, so it is restored below.
+			$this->sut->update_session( $data );
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			$_POST = $original_post;
+			remove_filter( 'wc_shipping_enabled', '__return_true' );
+
+			foreach ( $original_billing as $key => $value ) {
+				WC()->customer->{"set_billing_$key"}( $value );
+			}
+
+			foreach ( $original_shipping as $key => $value ) {
+				WC()->customer->{"set_shipping_$key"}( $value );
+			}
+
+			WC()->customer->save();
+		}
+
+		$this->assertTrue( $needs_shipping, 'The shipping check should have run alongside the billing one.' );
+		$this->assertSame( 'DE', $data['shipping_country'], "'get_posted_data' copies the billing country when there is no separate shipping address." );
+		$this->assertSame(
+			array( 'Sorry, we do not allow orders from the provided country (Germany)' ),
+			$errors->get_error_messages( 'billing_country_not_allowed' )
+		);
+		$this->assertSame(
+			array( 'Unfortunately, <strong>we do not ship to Germany</strong>. Please enter an alternative shipping address.' ),
+			$errors->get_error_messages( 'shipping' ),
+			'Shipping countries default to the selling countries, so the copied shipping address is refused too.'
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses a blank billing country the store made optional.
+	 *
+	 * 'validate_posted_data' skips the required check for an optional or hidden field, and 'update_session'
+	 * copies the blank onto the customer, so the order would be placed with no taxable country.
+	 *
+	 * @testWith ["required", false, "Please enter a billing country."]
+	 *           ["hidden", true, "This store cannot accept your order without a billing country."]
+	 *
+	 * @param string $property Field property a store commonly overrides.
+	 * @param bool   $value    Value it is set to.
+	 * @param string $message  Notice the shopper sees, which asks for the country only when the field is visible.
+	 */
+	public function test_validate_checkout_refuses_a_blank_billing_country_the_store_made_optional( $property, $value, $message ) {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$relax_billing_country = function ( $fields ) use ( $property, $value ) {
+			$fields['billing']['billing_country'][ $property ] = $value;
+			return $fields;
+		};
+
+		$this->extra_field_filters[] = $relax_billing_country;
+
+		add_filter( 'woocommerce_checkout_fields', $relax_billing_country );
+
+		$data   = array(
+			'billing_country'           => '',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame( array(), $errors->get_error_messages( 'billing_country_required' ), "The store's own setting should keep 'validate_posted_data' quiet." );
+		$this->assertSame( array( $message ), $errors->get_error_messages( 'billing_country_validation' ) );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' doesn't ask for a billing country the store renders as a hidden input.
+	 *
+	 * 'validate_posted_data' keys its required check on the 'hidden' flag, so a field hidden by its type alone
+	 * has to be recognised here.
+	 */
+	public function test_validate_checkout_refuses_a_blank_billing_country_in_a_hidden_input() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+
+		$hide_billing_country = function ( $fields ) {
+			$fields['billing']['billing_country']['type']     = 'hidden';
+			$fields['billing']['billing_country']['required'] = false;
+			return $fields;
+		};
+
+		$this->extra_field_filters[] = $hide_billing_country;
+
+		add_filter( 'woocommerce_checkout_fields', $hide_billing_country );
+
+		$data   = array(
+			'billing_country'           => '',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_checkout( $data, $errors );
+
+		$this->assertSame(
+			array( 'This store cannot accept your order without a billing country.' ),
+			$errors->get_error_messages( 'billing_country_validation' )
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' reports a missing billing country once when the order needs shipping.
+	 *
+	 * 'get_posted_data' copies the billing country onto the shipping address, so one blank would otherwise
+	 * raise the shipping notice as well.
+	 */
+	public function test_validate_checkout_does_not_add_the_shipping_notice_for_a_missing_billing_country() {
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'US' ) );
+		add_filter( 'wc_shipping_enabled', '__return_true' );
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'wc_get_shipping_method_count' => function () {
+					return 1;
+				},
+			)
+		);
+
+		$remove_billing_country = function ( $fields ) {
+			unset( $fields['billing']['billing_country'] );
+			return $fields;
+		};
+
+		$this->extra_field_filters[] = $remove_billing_country;
+
+		add_filter( 'woocommerce_checkout_fields', $remove_billing_country );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$original_billing_country  = WC()->customer->get_billing_country();
+		$original_shipping_country = WC()->customer->get_shipping_country();
+
+		WC()->customer->set_billing_country( '' );
+		WC()->customer->set_shipping_country( '' );
+
+		$data   = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => 'cod',
+		);
+		$errors = new WP_Error();
+
+		try {
+			$needs_shipping = WC()->cart->needs_shipping();
+
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			remove_filter( 'wc_shipping_enabled', '__return_true' );
+			WC()->customer->set_billing_country( $original_billing_country );
+			WC()->customer->set_shipping_country( $original_shipping_country );
+		}
+
+		$this->assertTrue( $needs_shipping, 'The shipping check should have run alongside the billing one.' );
+		$this->assertSame(
+			array( 'This store cannot accept your order without a billing country.' ),
+			$errors->get_error_messages( 'billing_country_validation' )
+		);
+		$this->assertSame( array(), $errors->get_error_messages( 'shipping' ), 'One missing country should raise one notice.' );
 	}
 }
