@@ -164,6 +164,32 @@ export const styleMark = ( file ) =>
 
 export const isStyle = ( id ) => /\.(s[ac]ss|css)$/.test( id );
 
+/**
+ * Vite `css` options with the same Sass and PostCSS setup as the build,
+ * for Storybook. `rtl` flips the styles in place, like `storybook-rtl`.
+ */
+export function viteCss( kind, { rtl = false } = {} ) {
+	const profile = profiles[ kind ]( false );
+	return {
+		preprocessorOptions: {
+			scss: {
+				loadPaths: profile.loadPaths,
+				importers: [ nodeModulesImporter ],
+				additionalData: ( source, file ) =>
+					profile.prelude( file ) + source,
+				quietDeps: true,
+				silenceDeprecations: [ 'import', 'global-builtin' ],
+			},
+		},
+		postcss: {
+			plugins: [
+				...profile.plugins,
+				...( rtl ? [ profile.rtlcss() ] : [] ),
+			],
+		},
+	};
+}
+
 export function createCss(
 	kind,
 	{ production = true, minifier = 'cssnano', sass: sassFlavor = 'sass' } = {}

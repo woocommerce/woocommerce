@@ -1,5 +1,5 @@
-// @woocommerce/settings mocked module for storybook webpack resolve.alias config
-// see ./webpack.config.js
+// @woocommerce/settings mocked module for Storybook, see the resolve.alias
+// setting in ./.storybook/main.mjs
 
 export function getSetting() {
 	return {};

@@ -13,7 +13,8 @@
 		"./classic": "./lib/classic.mjs",
 		"./css": "./lib/css.mjs",
 		"./shared": "./lib/shared.mjs",
-		"./analyze": "./lib/analyze.mjs"
+		"./analyze": "./lib/analyze.mjs",
+		"./storybook": "./lib/storybook.mjs"
 	},
 	"dependencies": {
 		"@jridgewell/remapping": "^2.3.5",

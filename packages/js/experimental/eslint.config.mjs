@@ -10,7 +10,7 @@ export default [
 		settings: {
 			'import/core-modules': [
 				...coreModules,
-				'@storybook/react-webpack5',
+				'@storybook/react-vite',
 				'react-transition-group/CSSTransition',
 				'dompurify',
 			],
