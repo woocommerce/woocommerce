@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotificationsRestController;
 use Automattic\WooCommerce\Internal\StockNotifications\WebhooksController;
 use WC_Webhook;
@@ -33,33 +34,35 @@ class WebhooksControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->restore_stock_notifications_feature_option();
+		$this->clear_rest_server();
 		parent::tearDown();
 	}
 
 	/**
-	 * Every topic validates when the feature is on.
+	 * @testdox Every topic validates when the feature is on.
 	 */
-	public function test_topics_are_valid_when_feature_is_enabled() {
+	public function test_topics_are_valid_when_feature_is_enabled(): void {
 		foreach ( array_keys( WebhooksController::get_topic_hooks() ) as $topic ) {
 			$this->assertTrue( wc_is_webhook_valid_topic( $topic ), $topic );
 		}
 	}
 
 	/**
-	 * Nothing is registered when the feature is off.
+	 * @testdox Nothing is registered when the feature is off.
 	 */
-	public function test_nothing_is_registered_when_feature_is_disabled() {
-		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'no' );
+	public function test_nothing_is_registered_when_feature_is_disabled(): void {
+		update_option( StockNotifications::ENABLE_OPTION_NAME, 'no' );
 
 		$this->assertFalse( wc_is_webhook_valid_topic( 'stock_notification.created' ) );
+		$this->assertFalse( wc_is_webhook_valid_topic( 'order.sent' ), 'The extra events are not registered either' );
 		$this->assertArrayNotHasKey( 'stock_notification.created', WC_Webhook::get_default_topic_hooks() );
 		$this->assertArrayNotHasKey( 'stock_notification.created', apply_filters( 'woocommerce_webhook_topics', array( 'action' => 'Action' ) ) );
 	}
 
 	/**
-	 * Each topic maps to one ID-first lifecycle action.
+	 * @testdox Each topic maps to one ID-first lifecycle action.
 	 */
-	public function test_topic_hooks_are_registered() {
+	public function test_topic_hooks_are_registered(): void {
 		$topic_hooks = WC_Webhook::get_default_topic_hooks();
 
 		$this->assertSame( array( 'woocommerce_new_stock_notification' ), $topic_hooks['stock_notification.created'] );
@@ -71,9 +74,9 @@ class WebhooksControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The dropdown labels are added before the custom-action entry.
+	 * @testdox The dropdown labels are added before the custom-action entry.
 	 */
-	public function test_topic_labels_keep_action_last() {
+	public function test_topic_labels_keep_action_last(): void {
 		$topics = apply_filters(
 			'woocommerce_webhook_topics',
 			array(
@@ -91,9 +94,9 @@ class WebhooksControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The payload is fetched from the v3 route whatever API version the webhook uses.
+	 * @testdox The payload is fetched from the v3 route whatever API version the webhook uses.
 	 */
-	public function test_payload_is_requested_from_v3_route() {
+	public function test_payload_is_requested_from_v3_route(): void {
 		$routes = array();
 		add_filter(
 			'rest_pre_dispatch',
@@ -115,18 +118,10 @@ class WebhooksControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The payload of a created notification is its REST representation, built as the webhook's user.
+	 * @testdox The payload of a created notification is its REST representation, built as the webhook's user.
 	 */
-	public function test_payload_is_the_rest_representation() {
-		// WC_Unit_Test_Case keeps a server from an earlier test; rebuild it so `rest_api_init` fires again.
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Rebuilt for this test only; the next setUp resets it again.
-		$GLOBALS['wp_rest_server'] = null;
-		add_action(
-			'rest_api_init',
-			function () {
-				( new StockNotificationsRestController() )->register_routes();
-			}
-		);
+	public function test_payload_is_the_rest_representation(): void {
+		$this->create_rest_server_with_routes( array( array( new StockNotificationsRestController(), 'register_routes' ) ) );
 		$notification = $this->create_notification( NotificationStatus::ACTIVE );
 
 		$webhook = new WC_Webhook();
@@ -142,9 +137,9 @@ class WebhooksControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A deleted notification's payload is just its ID, without a REST lookup.
+	 * @testdox A deleted notification's payload is just its ID, without a REST lookup.
 	 */
-	public function test_deleted_payload_is_the_id() {
+	public function test_deleted_payload_is_the_id(): void {
 		$webhook = new WC_Webhook();
 		$webhook->set_topic( 'stock_notification.deleted' );
 		$webhook->set_api_version( 3 );
@@ -154,14 +149,18 @@ class WebhooksControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Only a pending -> active transition is a verification.
+	 * @testdox Only a pending -> active transition is a verification.
 	 */
-	public function test_verified_fires_only_for_pending_to_active() {
+	public function test_verified_fires_only_for_pending_to_active(): void {
 		$fired = $this->record_action( 'woocommerce_stock_notification_verified' );
 
 		$notification = $this->create_notification( NotificationStatus::PENDING );
 		$this->set_status( $notification, NotificationStatus::ACTIVE );
 		$this->assertSame( array( $notification->get_id() ), $fired() );
+
+		// Fired by third-party code without the notification object.
+		do_action( 'woocommerce_stock_notification_status_changed', 5, NotificationStatus::PENDING, NotificationStatus::ACTIVE );
+		$this->assertCount( 1, $fired() );
 
 		$this->set_status( $notification, NotificationStatus::CANCELLED );
 		$this->set_status( $notification, NotificationStatus::ACTIVE );
@@ -169,9 +168,9 @@ class WebhooksControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Sent and cancelled fire once per transition, with the ID first; creating fires neither.
+	 * @testdox Sent and cancelled fire once per transition, with the ID first; creating fires neither.
 	 */
-	public function test_sent_and_cancelled_fire_once_per_transition() {
+	public function test_sent_and_cancelled_fire_once_per_transition(): void {
 		$sent      = $this->record_action( 'woocommerce_stock_notification_sent' );
 		$cancelled = $this->record_action( 'woocommerce_stock_notification_cancelled' );
 
@@ -188,13 +187,13 @@ class WebhooksControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * An active webhook on a topic is queued with the notification ID when the event happens.
+	 * @testdox An active webhook on a topic is queued with the notification ID when the event happens.
 	 */
-	public function test_webhook_is_queued_with_the_notification_id() {
+	public function test_webhook_is_queued_with_the_notification_id(): void {
 		$delivered = array();
 		$webhook   = new WC_Webhook();
 		$webhook->set_status( 'active' );
-		$webhook->set_topic( 'stock_notification.created' );
+		$webhook->set_topic( 'stock_notification.sent' );
 		$webhook->set_delivery_url( 'https://example.com/webhook' );
 
 		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
@@ -211,8 +210,9 @@ class WebhooksControllerTests extends \WC_Unit_Test_Case {
 		$webhook->enqueue();
 
 		$notification = $this->create_notification( NotificationStatus::ACTIVE );
-		$this->set_status( $notification, NotificationStatus::SENT );
+		$this->assertSame( array(), $delivered );
 
+		$this->set_status( $notification, NotificationStatus::SENT );
 		$this->assertSame( array( $notification->get_id() ), $delivered );
 	}
 
@@ -244,18 +244,21 @@ class WebhooksControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Record the first argument of every call to an action.
+	 * Record the ID of every call to an action, checking that the notification comes second.
 	 *
 	 * @param string $action The action name.
-	 * @return callable Returns the recorded arguments.
+	 * @return callable Returns the recorded IDs.
 	 */
 	private function record_action( string $action ): callable {
 		$args = array();
 		add_action(
 			$action,
-			function ( $id ) use ( &$args ) {
+			function ( $id, $notification = null ) use ( &$args ) {
+				$this->assertInstanceOf( Notification::class, $notification );
 				$args[] = $id;
-			}
+			},
+			10,
+			2
 		);
 
 		return function () use ( &$args ) {

@@ -229,7 +229,8 @@ class WebhooksController {
 			 *
 			 * Fires when a stock notification is cancelled, whatever cancelled it: the shopper
 			 * unsubscribed, an admin cancelled it, the send failed, or a privacy erasure request
-			 * anonymized it. Read `$notification->get_cancellation_source()` to tell them apart.
+			 * anonymized it. `$notification->get_cancellation_source()` tells them apart when the
+			 * canceller recorded one.
 			 * After a privacy erasure the notification no longer identifies the shopper.
 			 *
 			 * @since 11.4.0
