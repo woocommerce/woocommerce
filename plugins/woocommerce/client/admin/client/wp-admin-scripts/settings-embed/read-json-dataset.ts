@@ -4,9 +4,11 @@
  *
  * @param value Attribute value, missing when the attribute is absent.
  */
-export function readJsonDataset( value: string | undefined ): unknown {
+export function readJsonDataset< T = unknown >(
+	value: string | undefined
+): T | null {
 	try {
-		return JSON.parse( value ?? 'null' );
+		return JSON.parse( value ?? 'null' ) as T;
 	} catch {
 		return null;
 	}

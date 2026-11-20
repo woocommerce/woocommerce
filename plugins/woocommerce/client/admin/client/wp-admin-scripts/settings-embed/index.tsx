@@ -13,6 +13,8 @@ import { isRTL } from '@wordpress/i18n';
  */
 import './settings-ui.scss';
 import { readJsonDataset } from './read-json-dataset';
+import type { ConnectView } from '~/sales-readiness/components/agent-connect';
+import type { ReadinessView } from '~/sales-readiness/types';
 import { isFeatureEnabled } from '~/utils/features';
 import {
 	SettingsPaymentsBacsWrapper,
@@ -89,8 +91,10 @@ const renderSalesReadinessOverview = () => {
 	if ( root ) {
 		// Read each attribute on its own. One try would hide the connection card
 		// when the readiness view does not parse; that view can reload, the card cannot.
-		const initialView = readJsonDataset( root.dataset.view );
-		const connect = readJsonDataset( root.dataset.connect );
+		const initialView = readJsonDataset< ReadinessView >(
+			root.dataset.view
+		);
+		const connect = readJsonDataset< ConnectView >( root.dataset.connect );
 		createRoot( root ).render(
 			<Suspense fallback={ null }>
 				<SalesReadinessOverview
