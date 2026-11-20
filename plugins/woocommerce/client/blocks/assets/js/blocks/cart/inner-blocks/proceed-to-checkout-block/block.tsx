@@ -5,7 +5,10 @@ import clsx from 'clsx';
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
-import { usePositionRelativeToViewport } from '@woocommerce/base-hooks';
+import {
+	usePositionRelativeToViewport,
+	useStyleProps,
+} from '@woocommerce/base-hooks';
 import { getSetting } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { cartStore, checkoutStore } from '@woocommerce/block-data';
@@ -19,6 +22,7 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
  * Internal dependencies
  */
 import { defaultButtonLabel } from './constants';
+import type { ButtonStyleAttributes } from '../../../cart-checkout-shared/types';
 
 /**
  * Checkout button rendered in the full cart page.
@@ -27,11 +31,13 @@ const Block = ( {
 	checkoutPageId,
 	className,
 	buttonLabel,
-}: {
+	...styleAttributes
+}: ButtonStyleAttributes & {
 	checkoutPageId: number;
 	className: string;
 	buttonLabel: string;
 } ): JSX.Element => {
+	const buttonStyleProps = useStyleProps( styleAttributes );
 	const link = getSetting< string >( 'page-' + checkoutPageId, false );
 	const { cartIsLoading } = useStoreCart();
 	const isCalculating = useSelect(
@@ -84,9 +90,12 @@ const Block = ( {
 
 	const submitContainerContents = (
 		<Button
-			className={ clsx( 'wc-block-cart__submit-button', {
-				'wc-block-cart__submit-button--loading': showSpinner,
-			} ) }
+			className={ clsx(
+				'wc-block-cart__submit-button',
+				buttonStyleProps.className,
+				{ 'wc-block-cart__submit-button--loading': showSpinner }
+			) }
+			style={ buttonStyleProps.style }
 			href={ filteredLink }
 			disabled={ isCalculating || cartIsLoading }
 			onClick={ ( e ) => {
