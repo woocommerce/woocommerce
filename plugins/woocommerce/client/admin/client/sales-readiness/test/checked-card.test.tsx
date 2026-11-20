@@ -26,7 +26,11 @@ const firstVisit = {
 describe( 'CheckedCard', () => {
 	it( 'shows Not checked yet and Check your store on the first visit, without the intro', () => {
 		render(
-			<CheckedCard view={ firstVisit } running={ false } onRun={ jest.fn() } />
+			<CheckedCard
+				view={ firstVisit }
+				running={ false }
+				onRun={ jest.fn() }
+			/>
 		);
 		expect( screen.getByText( 'Not checked yet' ) ).toBeInTheDocument();
 		expect(
@@ -47,9 +51,15 @@ describe( 'CheckedCard', () => {
 			},
 		};
 		const { container } = render(
-			<CheckedCard view={ running } running={ false } onRun={ jest.fn() } />
+			<CheckedCard
+				view={ running }
+				running={ false }
+				onRun={ jest.fn() }
+			/>
 		);
-		expect( container.querySelector( '.components-spinner' ) ).not.toBeNull();
+		expect(
+			container.querySelector( '.components-spinner' )
+		).not.toBeNull();
 		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
 			'Checking your store'
 		);
@@ -61,7 +71,11 @@ describe( 'CheckedCard', () => {
 
 	it( 'shows the running state as soon as Check your store is clicked', () => {
 		render(
-			<CheckedCard view={ firstVisit } running={ true } onRun={ jest.fn() } />
+			<CheckedCard
+				view={ firstVisit }
+				running={ true }
+				onRun={ jest.fn() }
+			/>
 		);
 		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
 			'Checking your store'

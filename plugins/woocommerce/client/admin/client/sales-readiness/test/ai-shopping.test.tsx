@@ -18,6 +18,11 @@ import type { ShoppingView } from '../types';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 jest.mock( '@wordpress/a11y', () => ( { speak: jest.fn() } ) );
+const mockCreateSuccessNotice = jest.fn();
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
+	dispatch: () => ( { createSuccessNotice: mockCreateSuccessNotice } ),
+} ) );
 
 const mockedFetch = apiFetch as unknown as jest.Mock;
 
@@ -55,7 +60,8 @@ const view = ( fields: Partial< ShoppingView > = {} ): ShoppingView => ( {
 		title: 'Allow AI assistants to shop your store',
 		description: 'Your products can be found by AI assistants.',
 		learn_more: { href: 'https://ucp.dev/', text: 'Learn how it works' },
-		message: '',
+		turned_on: 'AI assistants can now shop your store.',
+		turned_off: 'AI assistants can no longer shop your store.',
 		path: '/wc/v3/agent-readiness/ucp',
 		error_on:
 			'AI shopping wasn’t turned on. Reload the page and try again.',
@@ -161,6 +167,8 @@ describe( 'AiShopping', () => {
 
 	beforeEach( () => {
 		mockedFetch.mockReset();
+		mockCreateSuccessNotice.mockReset();
+		window.sessionStorage.clear();
 		Object.defineProperty( window, 'location', {
 			configurable: true,
 			value: {
@@ -273,8 +281,6 @@ describe( 'AiShopping', () => {
 					...view().ucp,
 					enabled: true,
 					blocked: false,
-					message:
-						'AI shopping is on. AI assistants can now find and shop your store.',
 				},
 				checklist: {
 					...view().checklist,
@@ -287,11 +293,7 @@ describe( 'AiShopping', () => {
 
 		expect( toggle() ).toBeChecked();
 		expect( toggle() ).not.toBeDisabled();
-		expect(
-			screen.getByText(
-				'AI shopping is on. AI assistants can now find and shop your store.'
-			)
-		).toBeInTheDocument();
+		expect( screen.queryByText( /can now shop/ ) ).toBeNull();
 		expect( screen.queryByText( /step left/ ) ).toBeNull();
 
 		fireEvent.click(
@@ -414,6 +416,25 @@ describe( 'AiShopping', () => {
 		expect( window.location.assign ).toHaveBeenCalledWith(
 			'https://example.com/wp-admin/admin.php?page=wc-settings'
 		);
+		expect(
+			window.sessionStorage.getItem( 'wc-ai-shopping-snackbar' )
+		).toBe( 'AI assistants can now shop your store.' );
+	} );
+
+	it( 'shows the switch’s snackbar on the page that loads after it saves, once', () => {
+		window.sessionStorage.setItem(
+			'wc-ai-shopping-snackbar',
+			'AI assistants can no longer shop your store.'
+		);
+		renderPage( view() );
+
+		expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
+			'AI assistants can no longer shop your store.',
+			{ type: 'snackbar' }
+		);
+		expect(
+			window.sessionStorage.getItem( 'wc-ai-shopping-snackbar' )
+		).toBeNull();
 	} );
 
 	it( 'does not reload over unsaved fields, and says to save them', async () => {
@@ -434,6 +455,10 @@ describe( 'AiShopping', () => {
 
 		expect( window.location.assign ).not.toHaveBeenCalled();
 		expect( toggle() ).not.toBeChecked();
+		expect( mockCreateSuccessNotice ).toHaveBeenCalledWith(
+			'AI assistants can no longer shop your store.',
+			{ type: 'snackbar' }
+		);
 		expect(
 			screen.getByText( 'Save your changes to see the updated status.' )
 		).toBeInTheDocument();

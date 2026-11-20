@@ -640,7 +640,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With UCP already on and a required check failing, the switch stays on and the checklist asks for the required steps, without saying assistants can shop.
+	 * @testdox With UCP already on and a required check failing, the switch stays on and the checklist asks for the required steps.
 	 */
 	public function test_output_switch_on_with_failing_checks(): void {
 		remove_all_filters( 'pre_option_home' );
@@ -650,7 +650,6 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $page['ucp']['enabled'] );
 		$this->assertFalse( $page['ucp']['blocked'], 'It can always be turned off' );
-		$this->assertSame( '', $page['ucp']['message'], 'It doesn\'t say AI assistants can shop' );
 		$this->assertMatchesRegularExpression( '#^Finish \d+ required steps? to get your store ready for AI shopping\.$#', $page['checklist']['summary'] );
 
 		$shopping = $this->view()['overview']['shopping'];
@@ -666,8 +665,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Continue setup', $shopping['button']['text'], 'and Continue setup opens AI shopping while a required step is left' );
 		$this->assertStringContainsString( 'section=shopping', $shopping['button']['href'] );
 
-		$this->make_every_step_pass();
-		$this->assertSame( 'AI shopping is on. AI assistants can now find and shop your store.', $this->shopping( true )['ucp']['message'], 'Once nothing required fails, it does' );
+		$this->assertArrayNotHasKey( 'message', $page['ucp'], 'The switch says nothing under it; it confirms a change in a snackbar' );
+		$this->assertSame( array( 'AI assistants can now shop your store.', 'AI assistants can no longer shop your store.' ), array( $page['ucp']['turned_on'], $page['ucp']['turned_off'] ), 'As in the design' );
 	}
 
 	/**
