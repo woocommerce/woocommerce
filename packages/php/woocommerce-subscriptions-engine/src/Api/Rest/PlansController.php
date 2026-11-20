@@ -16,6 +16,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\ValidationException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
@@ -811,9 +812,14 @@ final class PlansController extends WP_REST_Controller {
 
 		$slugs = array();
 		foreach ( explode( ',', $raw_string ) as $possible_slug ) {
+			// Spaces around the commas are list formatting, not part of a slug.
 			$slug = trim( $possible_slug );
-			if ( '' === $slug || 'any' === $slug || ! $this->is_valid_extension_slug( $slug ) ) {
+			if ( '' === $slug || 'any' === $slug ) {
 				return $this->get_extension_slug_error( ValidationErrorCode::INVALID_VALUE, 'extension_slug must be "any" or a comma-separated list of extension slugs.' );
+			}
+			$slug_error = $this->get_extension_slug_pattern_error( $slug );
+			if ( null !== $slug_error ) {
+				return $slug_error;
 			}
 
 			$slugs[ $slug ] = $slug;
@@ -841,11 +847,11 @@ final class PlansController extends WP_REST_Controller {
 			return $this->get_extension_slug_error( ValidationErrorCode::REQUIRED, 'extension_slug is required.' );
 		}
 
-		if ( 'any' === $raw_string || false !== strpos( $raw_string, ',' ) || ! $this->is_valid_extension_slug( $raw_string ) ) {
+		if ( 'any' === $raw_string || false !== strpos( $raw_string, ',' ) ) {
 			return $this->get_extension_slug_error( ValidationErrorCode::INVALID_VALUE, 'extension_slug must be a concrete extension slug.' );
 		}
 
-		return $raw_string;
+		return $this->get_extension_slug_pattern_error( $raw_string ) ?? $raw_string;
 	}
 
 	/**
@@ -862,12 +868,18 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Whether a value is a valid extension slug.
+	 * The validation error for a slug that is not a valid extension slug, or null for a valid one.
 	 *
 	 * @param string $slug Possible extension slug.
 	 */
-	private function is_valid_extension_slug( string $slug ): bool {
-		return '' !== $slug && sanitize_key( $slug ) === $slug;
+	private function get_extension_slug_pattern_error( string $slug ): ?WP_Error {
+		try {
+			ArgumentValidator::validate_extension_slug( 'extension_slug', $slug );
+		} catch ( InvalidInputException $e ) {
+			return $this->get_validation_error( ValidationException::from_core( $e ) );
+		}
+
+		return null;
 	}
 
 	/**

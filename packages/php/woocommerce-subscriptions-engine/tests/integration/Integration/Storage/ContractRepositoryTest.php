@@ -1120,9 +1120,14 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox find_due matches the owner exactly: a contract of a slug differing only in case is not selected.
 	 */
 	public function test_find_due_skips_a_case_variant_owner(): void {
+		global $wpdb;
+
 		$now     = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 		$owned   = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$variant = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_ENGINE, CycleStatus::BILLED, null, strtoupper( self::OWNER ) );
+		$variant = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		// The facades refuse such a slug; the row stands for data written around them.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'extension_slug' => strtoupper( self::OWNER ) ), array( 'id' => $variant ) );
 
 		$this->assertSame( array( $owned ), $this->due_ids( $now, 50 ) );
 		$this->assertSame( array( $variant ), $this->due_ids( $now, 50, array( strtoupper( self::OWNER ) ) ) );
@@ -2588,6 +2593,20 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', 'ördér:42' ), 'checkout' ), 'Keys differing only in accents are distinct.' );
 		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', null ), 'checkout' ) );
 		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', null ), 'checkout' ), 'Null keys never collide.' );
+	}
+
+	/**
+	 * @testdox acquire_lock matches the owner exactly: a slug differing only in case takes no lock.
+	 */
+	public function test_acquire_lock_matches_the_owner_exactly(): void {
+		$id = $this->insert_released( $this->keyed_contract( 'lite', null ) );
+
+		$this->assertNull( $this->sut->acquire_lock( $id, 'LITE', 'test' ) );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'] );
+
+		$lock = $this->sut->acquire_lock( $id, 'lite', 'test' );
+		$this->assertNotNull( $lock );
+		$lock->release();
 	}
 
 	/**

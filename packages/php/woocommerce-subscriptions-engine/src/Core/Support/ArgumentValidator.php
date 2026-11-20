@@ -30,6 +30,13 @@ defined( 'ABSPATH' ) || exit;
 final class ArgumentValidator {
 
 	/**
+	 * Format of an extension slug, the owner of engine records: 1-64 lowercase letters, digits,
+	 * hyphens or underscores (a plugin slug that fits the `extension_slug` columns), in
+	 * JSON-schema syntax.
+	 */
+	public const EXTENSION_SLUG_PATTERN = '^[a-z0-9_-]{1,64}$';
+
+	/**
 	 * Errors recorded by the collecting form, in recording order.
 	 *
 	 * @var list<InvalidInputException>
@@ -96,6 +103,21 @@ final class ArgumentValidator {
 	public function get_non_empty_string( string $key, $value ): ?string {
 		try {
 			return self::validate_non_empty_string( $key, $value );
+		} catch ( InvalidInputException $e ) {
+			$this->add( $e );
+			return null;
+		}
+	}
+
+	/**
+	 * Collecting {@see self::validate_extension_slug()}: the slug, or null when refused.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 */
+	public function get_extension_slug( string $key, $value ): ?string {
+		try {
+			return self::validate_extension_slug( $key, $value );
 		} catch ( InvalidInputException $e ) {
 			$this->add( $e );
 			return null;
@@ -317,6 +339,33 @@ final class ArgumentValidator {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Validate and return an extension slug: a non-empty string matching
+	 * {@see self::EXTENSION_SLUG_PATTERN}. No trimming or case folding: a slug that differs is
+	 * refused, so one owner has one spelling.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @throws InvalidInputException If the value is missing, empty, not a string or not a valid slug.
+	 */
+	public static function validate_extension_slug( string $key, $value ): string {
+		$slug = self::validate_non_empty_string( $key, $value );
+		if ( ! self::is_extension_slug( $slug ) ) {
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_PATTERN, $key, 'must be 1-64 lowercase letters, digits, hyphens or underscores', array( 'pattern' => self::EXTENSION_SLUG_PATTERN ) );
+		}
+
+		return $slug;
+	}
+
+	/**
+	 * Whether a string is a valid extension slug ({@see self::EXTENSION_SLUG_PATTERN}).
+	 *
+	 * @param string $slug Possible extension slug.
+	 */
+	public static function is_extension_slug( string $slug ): bool {
+		return 1 === preg_match( '/' . self::EXTENSION_SLUG_PATTERN . '/D', $slug );
 	}
 
 	/**

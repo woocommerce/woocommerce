@@ -1455,6 +1455,29 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		}
 	}
 
+	public function test_extension_slugs_outside_the_slug_format_are_refused_with_invalid_pattern(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$id = $this->create_plan( 'Scoped' );
+
+		foreach ( array( 'LITE', 'li te', str_repeat( 'a', 65 ) ) as $extension_slug ) {
+			$this->assert_invalid_param( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => $extension_slug ) ), 'extension_slug', 'invalid_pattern' );
+			$this->assert_invalid_param( $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG . ',' . $extension_slug ) ), 'extension_slug', 'invalid_pattern' );
+			$this->assert_invalid_param(
+				$this->request(
+					'POST',
+					self::BASE,
+					array(
+						'extension_slug' => $extension_slug,
+						'name'           => 'Invalid owner',
+					)
+				),
+				'extension_slug',
+				'invalid_pattern'
+			);
+		}
+	}
+
 	public function test_single_plan_routes_404_a_plan_of_another_extension_slug_or_an_unknown_id(): void {
 		wp_set_current_user( $this->admin_id );
 

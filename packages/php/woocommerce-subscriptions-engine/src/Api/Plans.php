@@ -109,7 +109,10 @@ final class Plans {
 
 		$validator      = new ArgumentValidator();
 		$extension_slug = $validator->get_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
-		$fields         = self::get_plan_fields( $validator, $filtered_args + array( 'name' => '' ) );
+		if ( null !== $extension_slug && '' !== $extension_slug ) {
+			$validator->get_extension_slug( 'extension_slug', $extension_slug );
+		}
+		$fields = self::get_plan_fields( $validator, $filtered_args + array( 'name' => '' ) );
 		try {
 			$validator->throw_errors();
 		} catch ( InvalidInputException $e ) {
@@ -166,7 +169,7 @@ final class Plans {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
 
 		$validator      = new ArgumentValidator();
-		$extension_slug = $validator->get_non_empty_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		$extension_slug = $validator->get_extension_slug( 'extension_slug', $filtered_args['extension_slug'] ?? null );
 		$changes        = self::get_plan_fields( $validator, $filtered_args );
 		try {
 			$validator->throw_errors();
@@ -215,7 +218,7 @@ final class Plans {
 	 * @param bool   $unique         When true, add nothing if the key already exists. Advisory: no
 	 *                               unique index, so concurrent adds can both write.
 	 * @return int|null The meta row id; null when `$unique` and the key exists.
-	 * @throws ValidationException If `$extension_slug` or `$key` is empty, with both reported.
+	 * @throws ValidationException If `$extension_slug` is not a valid extension slug or `$key` is empty, with both reported.
 	 * @throws InvalidArgumentException If no plan of that extension has the id.
 	 * @throws RuntimeException If the key is longer than the meta_key column (255 characters).
 	 */
@@ -237,7 +240,7 @@ final class Plans {
 	 * @param mixed  $prev_value     Only update values equal to this; null updates all. Any other
 	 *                               value ('' and false included) matches literally.
 	 * @return bool True when a value was added or changed; false when nothing changed.
-	 * @throws ValidationException If `$extension_slug` or `$key` is empty, with both reported.
+	 * @throws ValidationException If `$extension_slug` is not a valid extension slug or `$key` is empty, with both reported.
 	 * @throws InvalidArgumentException If no plan of that extension has the id.
 	 * @throws RuntimeException If the key is longer than the meta_key column (255 characters).
 	 */
@@ -258,7 +261,7 @@ final class Plans {
 	 * @param mixed  $value          Only delete values equal to this; null deletes every value for the key.
 	 *                               Any other value ('' and false included) matches literally.
 	 * @return bool True when at least one value was deleted; false also when no plan of that extension has the id.
-	 * @throws ValidationException If `$extension_slug` or `$key` is empty, with both reported.
+	 * @throws ValidationException If `$extension_slug` is not a valid extension slug or `$key` is empty, with both reported.
 	 */
 	public static function delete_meta( int $plan_id, string $extension_slug, string $key, $value = null ): bool {
 		self::assert_scope( $extension_slug, $key );
@@ -326,7 +329,11 @@ final class Plans {
 			'offset'  => $validator->get_non_negative_int( 'offset', $filtered_args['offset'] ?? 0 ),
 		);
 		if ( array_key_exists( 'extension_slug', $filtered_args ) ) {
-			$extension_slugs = array_values( array_unique( (array) $validator->get_string_list( 'extension_slug', $filtered_args['extension_slug'] ) ) );
+			$extension_slugs = (array) $validator->get_string_list( 'extension_slug', $filtered_args['extension_slug'] );
+			foreach ( $extension_slugs as $index => $slug ) {
+				$validator->get_extension_slug( is_array( $filtered_args['extension_slug'] ) ? 'extension_slug.' . $index : 'extension_slug', $slug );
+			}
+			$extension_slugs = array_values( array_unique( $extension_slugs ) );
 			if ( in_array( 'any', $extension_slugs, true ) ) {
 				$validator->add(
 					new InvalidInputException(
@@ -364,11 +371,11 @@ final class Plans {
 	 *
 	 * @param string $extension_slug The expected owner.
 	 * @param string $key            Meta key.
-	 * @throws ValidationException If the owner or the key is empty.
+	 * @throws ValidationException If the owner is not a valid extension slug or the key is empty.
 	 */
 	private static function assert_scope( string $extension_slug, string $key ): void {
 		$validator = new ArgumentValidator();
-		$validator->get_non_empty_string( 'extension_slug', $extension_slug );
+		$validator->get_extension_slug( 'extension_slug', $extension_slug );
 		$validator->get_non_empty_string( 'key', $key );
 		try {
 			$validator->throw_errors();

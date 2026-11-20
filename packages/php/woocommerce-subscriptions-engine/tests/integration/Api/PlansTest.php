@@ -547,15 +547,17 @@ class PlansTest extends EngineIntegrationTestCase {
 			)
 		);
 		$this->assertNull( Plans::update( $id, array( 'extension_slug' => 'other-extension' ) ), 'A fieldless update is scoped too.' );
-		$this->assertNull(
-			Plans::update(
-				$id,
-				array(
-					'extension_slug' => strtoupper( self::OWNER ),
-					'name'           => 'Hijacked',
-				)
-			),
-			'The owner matches exactly: a case variant is another extension.'
+		$this->assert_validation_errors(
+			function () use ( $id ): void {
+				Plans::update(
+					$id,
+					array(
+						'extension_slug' => strtoupper( self::OWNER ),
+						'name'           => 'Hijacked',
+					)
+				);
+			},
+			array( array( ValidationErrorCode::INVALID_PATTERN, 'extension_slug' ) )
 		);
 
 		$this->assertSame( 0, $validated, 'The validate action never sees a plan of another extension.' );
@@ -1231,17 +1233,6 @@ class PlansTest extends EngineIntegrationTestCase {
 			self::plan_ids( Plans::list( array( 'extension_slug' => array( self::OWNER, 'other-extension' ) ) ) )
 		);
 		$this->assertSame( array( $own_id ), self::plan_ids( Plans::list( array( 'extension_slug' => array( self::OWNER, self::OWNER ) ) ) ) );
-	}
-
-	/**
-	 * @testdox list matches the owner exactly: a plan of a slug differing only in case is another extension's.
-	 */
-	public function test_list_matches_the_extension_slug_case_sensitively(): void {
-		$own_id     = $this->create();
-		$variant_id = $this->create( array( 'extension_slug' => strtoupper( self::OWNER ) ) );
-
-		$this->assertSame( array( $own_id ), self::plan_ids( Plans::list( array( 'extension_slug' => self::OWNER ) ) ) );
-		$this->assertSame( array( $variant_id ), self::plan_ids( Plans::list( array( 'extension_slug' => strtoupper( self::OWNER ) ) ) ) );
 	}
 
 	/**

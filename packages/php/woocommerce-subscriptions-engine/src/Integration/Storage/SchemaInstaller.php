@@ -227,8 +227,10 @@ final class SchemaInstaller {
 		$meta_value_index_length = max( min( absint( apply_filters( 'woocommerce_database_max_index_length', 191 ) ), 767 ) - 8 - 100 - 1, 20 );
 
 		// Owner columns and the creation key compare binary: values differing only in case or
-		// accents are distinct, as in the engine's PHP comparisons. The collation ignores
-		// trailing spaces.
+		// accents are distinct, as in the engine's PHP comparisons. For owners this backs up the
+		// facades, which refuse any slug outside `[a-z0-9_-]{1,64}`. The collation ignores trailing
+		// spaces, so they are refused at the boundary: in owner slugs by the facades, and creation
+		// keys are trimmed by the entity.
 		$binary_collate = '' === $charset ? '' : " COLLATE {$charset}_bin";
 
 		// The three policies are opaque JSON payloads of the owning extension; the engine

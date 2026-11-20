@@ -114,25 +114,51 @@ class ConsumerRegistryTest extends EngineIntegrationTestCase {
 
 		ConsumerRegistry::register( 'lite', array( 'contract_due_handler' => $first ) );
 		ConsumerRegistry::register( 'lite', array( 'contract_due_handler' => static function (): void {} ) );
-		ConsumerRegistry::register( ' lite ' );
 
 		$this->assertSame( $first, ConsumerRegistry::get_contract_due_handler( 'lite' ) );
 		$this->assertSame( array( 'lite' ), ConsumerRegistry::get_slugs_with_contract_due_handler() );
 	}
 
 	/**
-	 * @testdox An empty or whitespace-only slug is ignored and a slug is stored trimmed.
+	 * @testdox A slug that is not 1-64 lowercase letters, digits, hyphens or underscores raises a notice and registers nothing.
+	 * @dataProvider provide_invalid_slugs
+	 *
+	 * @param string $slug Invalid slug.
 	 */
-	public function test_register_ignores_blank_slugs_and_trims(): void {
+	public function test_register_refuses_an_invalid_slug( string $slug ): void {
+		$this->setExpectedIncorrectUsage( self::REGISTER );
+
+		ConsumerRegistry::register( $slug, array( 'contract_due_handler' => static function (): void {} ) );
+
+		$this->assertSame( array(), ConsumerRegistry::get_slugs_with_contract_due_handler() );
+	}
+
+	/**
+	 * @return array<string, array{0: string}>
+	 */
+	public function provide_invalid_slugs(): array {
+		return array(
+			'empty'          => array( '' ),
+			'whitespace'     => array( "  \t\n" ),
+			'trailing space' => array( 'lite ' ),
+			'surrounded'     => array( '  woocommerce-subscriptions-lite  ' ),
+			'capitals'       => array( 'LITE' ),
+			'inner space'    => array( 'li te' ),
+			'65 characters'  => array( str_repeat( 'a', 65 ) ),
+		);
+	}
+
+	/**
+	 * @testdox A valid slug is stored and looked up exactly as given.
+	 */
+	public function test_register_stores_the_slug_as_given(): void {
 		$handler = static function (): void {};
 
-		ConsumerRegistry::register( '' );
-		ConsumerRegistry::register( "  \t\n", array( 'contract_due_handler' => $handler ) );
-		$this->assertSame( array(), ConsumerRegistry::get_slugs_with_contract_due_handler(), 'A blank slug must not register.' );
+		ConsumerRegistry::register( 'woocommerce-subscriptions-lite', array( 'contract_due_handler' => $handler ) );
 
-		ConsumerRegistry::register( '  woocommerce-subscriptions-lite  ', array( 'contract_due_handler' => $handler ) );
-		$this->assertSame( array( 'woocommerce-subscriptions-lite' ), ConsumerRegistry::get_slugs_with_contract_due_handler(), 'The slug is stored trimmed.' );
-		$this->assertSame( $handler, ConsumerRegistry::get_contract_due_handler( ' woocommerce-subscriptions-lite ' ) );
+		$this->assertSame( array( 'woocommerce-subscriptions-lite' ), ConsumerRegistry::get_slugs_with_contract_due_handler() );
+		$this->assertSame( $handler, ConsumerRegistry::get_contract_due_handler( 'woocommerce-subscriptions-lite' ) );
+		$this->assertNull( ConsumerRegistry::get_contract_due_handler( ' woocommerce-subscriptions-lite ' ), 'Lookups are exact.' );
 	}
 
 	/**
@@ -150,7 +176,10 @@ class ConsumerRegistryTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'premium' ), ConsumerRegistry::get_slugs_with_contract_due_handler(), 'An unknown slug is a no-op.' );
 
 		ConsumerRegistry::unregister( ' premium ' );
-		$this->assertSame( array(), ConsumerRegistry::get_slugs_with_contract_due_handler(), 'The slug is trimmed, matching register().' );
+		$this->assertSame( array( 'premium' ), ConsumerRegistry::get_slugs_with_contract_due_handler(), 'The slug matches exactly, as register() stores it.' );
+
+		ConsumerRegistry::unregister( 'premium' );
+		$this->assertSame( array(), ConsumerRegistry::get_slugs_with_contract_due_handler() );
 	}
 
 	/**

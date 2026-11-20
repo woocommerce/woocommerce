@@ -17,6 +17,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership;
 
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch\DueDispatcher;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentFilter;
 
@@ -42,9 +43,10 @@ final class ConsumerRegistry {
 	private static $consumers = array();
 
 	/**
-	 * Register a consumer extension by its (trimmed, non-empty) slug. A repeat registration, an
-	 * unknown key or a non-callable handler gets `_doing_it_wrong()`: the first registration is
-	 * kept and an invalid key is dropped. Register by `init`; a handler registered after
+	 * Register a consumer extension by its slug (1-64 lowercase letters, digits, hyphens or
+	 * underscores, as every engine owner slug). An invalid slug, a repeat registration, an unknown key
+	 * or a non-callable handler gets `_doing_it_wrong()`: an invalid slug registers nothing, the first
+	 * registration is kept and an invalid key is dropped. Register by `init`; a handler registered after
 	 * `wp_loaded` schedules the recurring due scan right away.
 	 *
 	 * @param string               $slug   The consumer extension's registered slug.
@@ -62,8 +64,8 @@ final class ConsumerRegistry {
 	 *                                     the due moment stops that.
 	 */
 	public static function register( string $slug, array $config = array() ): void {
-		$slug = trim( $slug );
-		if ( '' === $slug ) {
+		if ( ! ArgumentValidator::is_extension_slug( $slug ) ) {
+			self::reject( sprintf( 'Consumer slug "%s" must be 1-64 lowercase letters, digits, hyphens or underscores; nothing is registered.', $slug ) );
 			return;
 		}
 
@@ -99,7 +101,6 @@ final class ConsumerRegistry {
 	 * @param string $slug The consumer extension's registered slug.
 	 */
 	public static function unregister( string $slug ): void {
-		$slug        = trim( $slug );
 		$had_handler = isset( self::$consumers[ $slug ]['contract_due_handler'] );
 		unset( self::$consumers[ $slug ] );
 
@@ -114,7 +115,7 @@ final class ConsumerRegistry {
 	 * @param string $slug The consumer extension's registered slug.
 	 */
 	public static function get_contract_due_handler( string $slug ): ?callable {
-		return self::$consumers[ trim( $slug ) ]['contract_due_handler'] ?? null;
+		return self::$consumers[ $slug ]['contract_due_handler'] ?? null;
 	}
 
 	/**
