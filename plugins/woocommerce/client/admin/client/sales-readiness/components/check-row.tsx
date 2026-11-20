@@ -106,6 +106,30 @@ interface RowProps {
 }
 
 /**
+ * A title whose badge stays with its last word, so a long title wraps without leaving the badge on a
+ * line of its own.
+ */
+const TitleWithBadge = ( {
+	title,
+	badge,
+}: {
+	title: string;
+	badge: ViewBadge;
+} ) => {
+	// A title without spaces, such as one word or Japanese, wraps as usual: only the badge stays together.
+	const split = title.lastIndexOf( ' ' ) + 1 || title.length;
+	return (
+		<>
+			{ title.slice( 0, split ) }
+			<span className="wc-sales-readiness-row__title-end">
+				{ title.slice( split ) }
+				<Badge intent={ badge.intent }>{ badge.text }</Badge>
+			</span>
+		</>
+	);
+};
+
+/**
  * A row's frame: marker, title with its badge, whatever goes under the title, then the action.
  */
 export const Row = ( {
@@ -128,9 +152,10 @@ export const Row = ( {
 		<Stack direction="column" className="wc-sales-readiness-row__body">
 			<Text variant="body-md" className="wc-sales-readiness-row__title">
 				{ srState && <VisuallyHidden>{ srState } </VisuallyHidden> }
-				{ title }
-				{ badge && (
-					<Badge intent={ badge.intent }>{ badge.text }</Badge>
+				{ badge ? (
+					<TitleWithBadge title={ title } badge={ badge } />
+				) : (
+					title
 				) }
 			</Text>
 			{ children }

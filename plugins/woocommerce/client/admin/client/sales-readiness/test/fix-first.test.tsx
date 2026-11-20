@@ -44,6 +44,27 @@ describe( 'FixFirstList', () => {
 		);
 		expect( screen.getAllByText( 'Required' ) ).toHaveLength( 1 );
 	} );
+
+	it( 'starts an item’s line with what it affects, in bold', () => {
+		render(
+			<FixFirstList
+				items={ [
+					{
+						...item( 'missing_images', 'Needed to list products' ),
+						impact: 'Affects 38% of your sales.',
+						why: 'AI shopping apps need a main image to list a product.',
+					},
+				] }
+				surface="page"
+			/>
+		);
+
+		const impact = screen.getByText( 'Affects 38% of your sales.' );
+		expect( impact.tagName ).toBe( 'STRONG' );
+		expect( impact.parentElement ).toHaveTextContent(
+			'Affects 38% of your sales. AI shopping apps need a main image to list a product.'
+		);
+	} );
 } );
 
 describe( 'FixFirstCard', () => {

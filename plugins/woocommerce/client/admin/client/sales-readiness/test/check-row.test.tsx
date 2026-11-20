@@ -29,6 +29,44 @@ const renderRow = ( data: CheckRowData ) =>
 	);
 
 describe( 'CheckRow', () => {
+	it( 'keeps the badge with the title’s last word, so it never wraps onto a line of its own', () => {
+		const { container } = renderRow(
+			row( {
+				title: 'Publish your refund and returns policy page',
+				badge: { intent: 'low', text: 'Required' },
+			} )
+		);
+
+		const end = container.querySelector(
+			'.wc-sales-readiness-row__title-end'
+		);
+		expect( end ).toHaveTextContent( 'pageRequired' );
+		expect(
+			container.querySelector( '.wc-sales-readiness-row__title' )
+		).toHaveTextContent(
+			'Publish your refund and returns policy pageRequired'
+		);
+	} );
+
+	it.each( [ 'Payments', '返品ポリシーのページを公開する' ] )(
+		'keeps only the badge together for a title without spaces, so a long one can still wrap: %s',
+		( title ) => {
+			const { container } = renderRow(
+				row( {
+					title,
+					badge: { intent: 'low', text: 'Required' },
+				} )
+			);
+
+			expect(
+				container.querySelector( '.wc-sales-readiness-row__title-end' )
+			).toHaveTextContent( /^Required$/ );
+			expect(
+				container.querySelector( '.wc-sales-readiness-row__title' )
+			).toHaveTextContent( title + 'Required' );
+		}
+	);
+
 	it( 'links the name of a tool in the found line, and keeps the text around it', () => {
 		const { container } = renderRow(
 			row( {

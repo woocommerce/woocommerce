@@ -198,6 +198,15 @@ export const SectionCard = ( { section }: { section: Section } ) => {
 	);
 };
 
+const declaredState = ( found: boolean | null ) => {
+	if ( found === null ) {
+		return __( 'Not checked yet:', 'woocommerce' );
+	}
+	return found
+		? __( 'Found:', 'woocommerce' )
+		: __( 'Not found:', 'woocommerce' );
+};
+
 /**
  * Protocols and files the store serves to agents: information, never pass or fail, so the card
  * starts closed and opens on its header to list them.
@@ -231,20 +240,33 @@ export const DeclaredCard = ( { declared }: { declared: Declared } ) => (
 			>
 				{ declared.text }
 			</Text>
-			<ul className="wc-sales-readiness-list">
-				{ declared.items.map( ( item ) => (
-					<Row
-						key={ item.name }
-						done={ item.found }
-						title={ item.name }
-						srState={
-							item.found
-								? __( 'Found:', 'woocommerce' )
-								: __( 'Not found:', 'woocommerce' )
-						}
-					/>
+			<div className="wc-sales-readiness-fix-first-groups">
+				{ declared.groups.map( ( group ) => (
+					<div
+						key={ group.title }
+						className="wc-sales-readiness-tier-group"
+					>
+						<div className="wc-sales-readiness-tier">
+							<Text
+								variant="heading-sm"
+								className="wc-sales-readiness-card__label"
+							>
+								{ group.title }
+							</Text>
+						</div>
+						<ul className="wc-sales-readiness-list">
+							{ group.items.map( ( item ) => (
+								<Row
+									key={ item.name }
+									done={ item.found === true }
+									title={ item.name }
+									srState={ declaredState( item.found ) }
+								/>
+							) ) }
+						</ul>
+					</div>
 				) ) }
-			</ul>
+			</div>
 		</CollapsibleCard.Content>
 	</CollapsibleCard.Root>
 );

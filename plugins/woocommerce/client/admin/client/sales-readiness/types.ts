@@ -44,6 +44,8 @@ export interface FixFirstItem {
 	/** Shown beside the tier heading: Required for the Required tier. */
 	badge: ViewBadge | null;
 	title: string;
+	/** Shown in bold before `why`: "Affects 38% of your sales.", or "Affects your whole store.". */
+	impact?: string | null;
 	why: string;
 	link: ViewLink | null;
 }
@@ -79,7 +81,12 @@ export interface Declared {
 	title: string;
 	badge: ViewBadge;
 	text: string;
-	items: { name: string; found: boolean }[];
+	/** Items under where they live: root folder, standard addresses, page code, extra details, not checked yet. */
+	groups: {
+		title: string;
+		/** `found` is null for an item the scan couldn't read. */
+		items: { name: string; found: boolean | null }[];
+	}[];
 }
 
 export interface ShoppingCard {
