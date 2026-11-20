@@ -61,7 +61,7 @@ final class ContractActions {
 		$action_args   = $filtered_args['args'] ?? array();
 		$is_available  = $filtered_args['is_available'] ?? null;
 
-		if ( ! ArgumentValidator::is_extension_slug( $extension_slug ) ) {
+		if ( ! ArgumentValidator::is_slug( $extension_slug ) ) {
 			self::reject( sprintf( 'The extension slug "%s" must be 1-64 lowercase letters, digits, hyphens or underscores.', $extension_slug ) );
 			return;
 		}

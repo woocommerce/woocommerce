@@ -31,6 +31,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
@@ -1143,7 +1144,7 @@ final class ContractRepository {
 	 * @throws \InvalidArgumentException If the label is not a valid slug.
 	 */
 	private static function assert_operation( string $operation ): void {
-		if ( 1 !== preg_match( '/^[a-z0-9_-]{1,64}$/D', $operation ) ) {
+		if ( ! ArgumentValidator::is_slug( $operation ) ) {
 			throw new \InvalidArgumentException( 'A lock operation label must be 1-64 lowercase letters, digits, underscores or hyphens.' );
 		}
 	}

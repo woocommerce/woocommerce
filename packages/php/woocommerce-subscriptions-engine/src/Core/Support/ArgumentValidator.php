@@ -30,11 +30,11 @@ defined( 'ABSPATH' ) || exit;
 final class ArgumentValidator {
 
 	/**
-	 * Format of an extension slug, the owner of engine records: 1-64 lowercase letters, digits,
-	 * hyphens or underscores (a plugin slug that fits the `extension_slug` columns), in
-	 * JSON-schema syntax.
+	 * Format of an engine slug, in JSON-schema syntax: 1-64 lowercase letters, digits, hyphens or
+	 * underscores. Extension slugs (the owner), schedule sources and lock operation labels share it;
+	 * 64 is the width of their columns.
 	 */
-	public const EXTENSION_SLUG_PATTERN = '^[a-z0-9_-]{1,64}$';
+	public const SLUG_PATTERN = '^[a-z0-9_-]{1,64}$';
 
 	/**
 	 * Errors recorded by the collecting form, in recording order.
@@ -343,7 +343,7 @@ final class ArgumentValidator {
 
 	/**
 	 * Validate and return an extension slug: a non-empty string matching
-	 * {@see self::EXTENSION_SLUG_PATTERN}. No trimming or case folding: a slug that differs is
+	 * {@see self::SLUG_PATTERN}. No trimming or case folding: a slug that differs is
 	 * refused, so one owner has one spelling.
 	 *
 	 * @param string $key   Field name.
@@ -352,20 +352,20 @@ final class ArgumentValidator {
 	 */
 	public static function validate_extension_slug( string $key, $value ): string {
 		$slug = self::validate_non_empty_string( $key, $value );
-		if ( ! self::is_extension_slug( $slug ) ) {
-			throw self::get_invalid_input( ValidationErrorCode::INVALID_PATTERN, $key, 'must be 1-64 lowercase letters, digits, hyphens or underscores', array( 'pattern' => self::EXTENSION_SLUG_PATTERN ) );
+		if ( ! self::is_slug( $slug ) ) {
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_PATTERN, $key, 'must be 1-64 lowercase letters, digits, hyphens or underscores', array( 'pattern' => self::SLUG_PATTERN ) );
 		}
 
 		return $slug;
 	}
 
 	/**
-	 * Whether a string is a valid extension slug ({@see self::EXTENSION_SLUG_PATTERN}).
+	 * Whether a string matches {@see self::SLUG_PATTERN}.
 	 *
-	 * @param string $slug Possible extension slug.
+	 * @param string $slug Possible slug.
 	 */
-	public static function is_extension_slug( string $slug ): bool {
-		return 1 === preg_match( '/' . self::EXTENSION_SLUG_PATTERN . '/D', $slug );
+	public static function is_slug( string $slug ): bool {
+		return 1 === preg_match( '/' . self::SLUG_PATTERN . '/D', $slug );
 	}
 
 	/**
@@ -630,7 +630,7 @@ final class ArgumentValidator {
 	 * @param string     $key   Field name.
 	 * @param int|string $index Item index or map key.
 	 */
-	private static function get_item_field( string $key, $index ): string {
+	public static function get_item_field( string $key, $index ): string {
 		return $key . '.' . $index;
 	}
 

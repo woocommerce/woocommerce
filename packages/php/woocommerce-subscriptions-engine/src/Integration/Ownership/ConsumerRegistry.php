@@ -64,7 +64,7 @@ final class ConsumerRegistry {
 	 *                                     the due moment stops that.
 	 */
 	public static function register( string $slug, array $config = array() ): void {
-		if ( ! ArgumentValidator::is_extension_slug( $slug ) ) {
+		if ( ! ArgumentValidator::is_slug( $slug ) ) {
 			self::reject( sprintf( 'Consumer slug "%s" must be 1-64 lowercase letters, digits, hyphens or underscores; nothing is registered.', $slug ) );
 			return;
 		}
