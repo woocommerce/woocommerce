@@ -15,6 +15,16 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
  */
 class OrderControllerTests extends \WC_Unit_Test_Case {
 	/**
+	 * Shipping address fields in a country a US-only store does not ship to.
+	 */
+	private const GERMAN_SHIPPING_ADDRESS = array(
+		'country'  => 'DE',
+		'state'    => '',
+		'city'     => 'Berlin',
+		'postcode' => '10115',
+	);
+
+	/**
 	 * The system under test.
 	 *
 	 * @var OrderController
@@ -54,6 +64,21 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		global $wpdb;
+
+		try {
+			$this->unlock_orders();
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( OrderController::ORDER_LOCK_OPTION_PREFIX ) . '%' ) );
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
 	 * test_validate_existing_order_before_payment_valid_data.
 	 */
 	public function test_validate_existing_order_before_payment_valid_data() {
@@ -88,6 +113,105 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 
 		$this->assertNull( $this->sut->validate_selected_shipping_methods( true, array( $valid_method->id . ':' . $valid_method->instance_id ) ) );
 		$this->assertNull( $this->sut->validate_selected_shipping_methods( false, array( 'free-shipping' ) ) );
+	}
+
+	/**
+	 * The guard exists because an address the cart judges incomplete leaves no packages for
+	 * validate_selected_shipping_methods() to inspect, so without it an order is placed with no
+	 * shipping line. It mirrors WC_Checkout::is_shipping_withheld_for_missing_address().
+	 *
+	 * @testdox validate_order_before_payment() refuses an order whose shipping was withheld.
+	 */
+	public function test_validate_order_before_payment_refuses_withheld_shipping(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone();
+		$this->add_product_to_cart_without_rating_shipping();
+
+		// The message, not just the type: validate_selected_shipping_methods() throws the same
+		// RouteException with the same error code, so only the wording tells the two apart.
+		$this->expectException( RouteException::class );
+		$this->expectExceptionMessage( 'Please enter an address to continue.' );
+		$this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() );
+	}
+
+	/**
+	 * The case that matters most in production: once the cart has rated an address, nothing may
+	 * refuse the order, or every checkout on a store with the option enabled would fail.
+	 *
+	 * @testdox validate_order_before_payment() allows an order whose cart has rated the address.
+	 */
+	public function test_validate_order_before_payment_allows_a_rated_cart(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone( '25.00' );
+
+		// A complete customer address, so the cart rates the package and picks the rate itself.
+		WC()->customer->set_shipping_city( 'San Francisco' );
+		WC()->customer->set_shipping_postcode( '94103' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$this->assertTrue(
+			WC()->cart->has_calculated_shipping(),
+			'The cart must have rated the address, or this test proves nothing.'
+		);
+
+		$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+	}
+
+	/**
+	 * With the option off, shipping is never withheld for the address, so a cart with no rate is
+	 * a store with no method configured, not a shopper slipping past one.
+	 *
+	 * @testdox validate_order_before_payment() allows an unrated cart when the option is off.
+	 */
+	public function test_validate_order_before_payment_allows_an_unrated_cart_when_the_option_is_off(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
+
+		// Deliberately no shipping method: with the option off that is the only way a cart that
+		// needs shipping reaches checkout with nothing rated.
+		$this->add_product_to_cart_without_rating_shipping();
+
+		$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+	}
+
+	/**
+	 * @testdox validate_order_before_payment() allows a cart that does not need shipping.
+	 */
+	public function test_validate_order_before_payment_allows_a_cart_that_does_not_need_shipping(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_virtual( true );
+		$product->save();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$this->assertFalse( WC()->cart->needs_shipping() );
+
+		$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+	}
+
+	/**
+	 * A store that switches shipping calculation off through the filter withholds rates for its
+	 * own reasons, so the order must go through, as it does on the classic checkout.
+	 *
+	 * @testdox validate_order_before_payment() allows an order when the filter stops calculation.
+	 */
+	public function test_validate_order_before_payment_allows_shipping_calculation_disabled_by_filter(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$this->add_flat_rate_to_default_zone();
+
+		$filter = function () {
+			return false;
+		};
+		add_filter( 'woocommerce_cart_ready_to_calc_shipping', $filter );
+
+		try {
+			$this->add_product_to_cart_without_rating_shipping();
+			$this->assertNull( $this->sut->validate_order_before_payment( $this->create_order_with_full_shipping_address() ) );
+		} finally {
+			remove_filter( 'woocommerce_cart_ready_to_calc_shipping', $filter );
+		}
 	}
 
 	/**
@@ -280,17 +404,70 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		$order->set_shipping_country( 'Invalid' );
 		$order->save();
 
-		// validate_addresses() inspects the selected shipping rates from the global cart's
-		// packages even for existing orders, so the cart must contain the shippable product
-		// for the shipping country check to run.
-		/** @var \WC_Order_Item_Product $item */
-		$array = $order->get_items();
-		$item  = reset( $array );
-		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
-
-		WC()->cart->add_to_cart( $item->get_product()->get_id() );
-
 		$this->sut->validate_existing_order_before_payment( $order );
+	}
+
+	/**
+	 * @testdox Existing-order validation decides local pickup from the order's shipping lines, not from the cart.
+	 *
+	 * @dataProvider provide_order_shipping_lines
+	 *
+	 * @param string[] $method_ids      Method ids of the shipping lines on the order.
+	 * @param bool     $expect_rejected Whether the shipping country should be rejected.
+	 */
+	public function test_validate_existing_order_shipping_country_uses_order_shipping_lines( array $method_ids, bool $expect_rejected ): void {
+		$order = $this->create_order_for_us_only_store( $method_ids, self::GERMAN_SHIPPING_ADDRESS );
+
+		if ( $expect_rejected ) {
+			$this->expectException( RouteException::class );
+			$this->expectExceptionMessage( 'Sorry, we do not ship orders to the provided country (Germany)' );
+		}
+
+		$this->assertNull( $this->sut->validate_existing_order_before_payment( $order ) );
+	}
+
+	/**
+	 * Shipping lines on an order and whether a country the store does not ship to should be rejected.
+	 *
+	 * @return array<string, array{0: string[], 1: bool}>
+	 */
+	public function provide_order_shipping_lines(): array {
+		return array(
+			'flat rate'                  => array( array( 'flat_rate' ), true ),
+			'no shipping line'           => array( array(), true ),
+			'local pickup and flat rate' => array( array( 'local_pickup', 'flat_rate' ), true ),
+			'local pickup'               => array( array( 'local_pickup' ), false ),
+			'pickup location'            => array( array( 'pickup_location' ), false ),
+			'legacy local pickup'        => array( array( 'legacy_local_pickup' ), false ),
+		);
+	}
+
+	/**
+	 * @testdox Validating an existing order before an update rejects a shipping country the store does not ship to.
+	 */
+	public function test_validate_existing_order_before_update_rejects_shipping_country_the_store_does_not_ship_to(): void {
+		$order = $this->create_order_for_us_only_store( array( 'flat_rate' ), self::GERMAN_SHIPPING_ADDRESS );
+
+		$this->expectException( RouteException::class );
+		$this->expectExceptionMessage( 'Sorry, we do not ship orders to the provided country (Germany)' );
+
+		$this->sut->validate_existing_order_before_update( $order );
+	}
+
+	/**
+	 * @testdox Updating an existing order's addresses rejects a shipping country the store does not ship to.
+	 */
+	public function test_update_existing_order_addresses_rejects_shipping_country_the_store_does_not_ship_to(): void {
+		$order = $this->create_order_for_us_only_store( array( 'flat_rate' ) );
+
+		$this->expectException( RouteException::class );
+		$this->expectExceptionMessage( 'Sorry, we do not ship orders to the provided country (Germany)' );
+
+		$this->sut->update_existing_order_addresses(
+			$order,
+			$order->get_address( 'billing' ),
+			array_merge( $order->get_address( 'shipping' ), self::GERMAN_SHIPPING_ADDRESS )
+		);
 	}
 
 	/**
@@ -587,6 +764,216 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 			wp_cache_delete( 'woocommerce_cod_settings', 'options' );
 			WC()->payment_gateways()->payment_gateways = $gateways_before;
 			WC()->session->set( 'chosen_payment_method', null );
+		}
+	}
+
+	/**
+	 * Creates a saved order that needs shipping, for a store that only ships to the US and has an empty cart.
+	 *
+	 * @param string[]             $method_ids       Method ids of the shipping lines on the order.
+	 * @param array<string,string> $shipping_address Shipping address fields to override on the order.
+	 * @return \WC_Order
+	 */
+	private function create_order_for_us_only_store( array $method_ids, array $shipping_address = array() ): \WC_Order {
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'US' ) );
+		WC()->cart->empty_cart();
+
+		$order = WC_Helper_Order::create_order();
+		$order->remove_order_items( 'shipping' );
+		foreach ( $method_ids as $method_id ) {
+			$shipping_line = new \WC_Order_Item_Shipping();
+			$shipping_line->set_method_id( $method_id );
+			$order->add_item( $shipping_line );
+		}
+		$this->set_shipping_address( $order, $shipping_address );
+		$order->save();
+		$this->assertTrue( $order->needs_shipping(), 'The order must need shipping for the country check to apply.' );
+
+		return $order;
+	}
+
+	/**
+	 * Add a flat rate to the catch-all zone, optionally with a cost so it actually offers a rate.
+	 *
+	 * @param string $cost Flat rate cost. The default leaves the rate off, as an unconfigured method is.
+	 */
+	private function add_flat_rate_to_default_zone( string $cost = '' ): void {
+		$default_zone = \WC_Shipping_Zones::get_zone( 0 );
+		$default_zone->add_shipping_method( 'flat_rate' );
+		$default_zone->save();
+
+		if ( '' === $cost ) {
+			return;
+		}
+
+		$zone_methods                         = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
+		$flat_rate                            = reset( $zone_methods );
+		$flat_rate->instance_settings['cost'] = $cost;
+		update_option( $flat_rate->get_instance_option_key(), $flat_rate->instance_settings );
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping()->load_shipping_methods();
+	}
+
+	/**
+	 * Put the cart in the state the bug produced: a shippable product, a method left in the
+	 * session by an earlier request, and no package ever rated, so the shipping-method check has
+	 * nothing to reject.
+	 */
+	private function add_product_to_cart_without_rating_shipping(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->assertFalse( WC()->cart->has_calculated_shipping() );
+
+		// Any value will do: with no packages calculated, only its presence is checked.
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate:1' ) );
+	}
+
+	/**
+	 * An order carrying the complete address validate_addresses() asks for, so the shipping guard
+	 * is the only thing left that can refuse it.
+	 */
+	private function create_order_with_full_shipping_address(): \WC_Order {
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address( $order );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * @testdox Order locks are re-entrant within a request and released by their owner.
+	 */
+	public function test_order_lock_is_reentrant_and_released(): void {
+		global $wpdb;
+
+		$order_id    = 123;
+		$option_name = OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id;
+
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ), 'The first acquisition should lock the order.' );
+		$shutdown_callback = $this->get_order_lock_shutdown_callback();
+		$this->assertInstanceOf( \Closure::class, $shutdown_callback );
+		$this->assertSame( PHP_INT_MAX, has_action( 'shutdown', $shutdown_callback ), 'The lock should be released after session data is persisted.' );
+		$first_expiry = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) );
+
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ), 'The same request should retain ownership.' );
+		$renewed_expiry = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) );
+		$this->assertGreaterThan( (float) $first_expiry, (float) $renewed_expiry, 'Re-entering the lock should renew its lease.' );
+
+		$this->unlock_orders();
+
+		$this->assertNull(
+			$wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ),
+			'Releasing the lock should remove its options-table row.'
+		);
+		$this->assertFalse( has_action( 'shutdown', $shutdown_callback ), 'Manual cleanup should remove the shutdown callback.' );
+	}
+
+	/**
+	 * @testdox A live order lock owned by another request blocks acquisition.
+	 */
+	public function test_order_lock_rejects_another_owner(): void {
+		global $wpdb;
+
+		$order_id = 456;
+		$inserted = $wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id,
+				'option_value' => number_format( microtime( true ) + 60, 6, '.', '' ),
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
+		);
+
+		$this->assertSame( 1, $inserted, 'The competing request lock should be inserted.' );
+		$this->assertFalse( OrderController::lock_order( $order_id, 0 ), 'The active lock should prevent acquisition.' );
+	}
+
+	/**
+	 * @testdox An expired order lock can be taken over and released by the new owner.
+	 */
+	public function test_order_lock_takes_over_expired_lock(): void {
+		global $wpdb;
+
+		$order_id    = 789;
+		$option_name = OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id;
+		$inserted    = $wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => $option_name,
+				'option_value' => number_format( microtime( true ) - 1, 6, '.', '' ),
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
+		);
+
+		$this->assertSame( 1, $inserted, 'The stale lock should be inserted.' );
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ), 'The expired lock should be available for takeover.' );
+		$this->assertGreaterThan(
+			microtime( true ),
+			(float) $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ),
+			'The takeover should store a new future expiry.'
+		);
+
+		$this->unlock_orders();
+
+		$this->assertNull( $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ) );
+	}
+
+	/**
+	 * @testdox Releasing a stale lock does not delete a replacement owner's lock.
+	 */
+	public function test_unlock_does_not_delete_replacement_lock(): void {
+		global $wpdb;
+
+		$order_id          = 987;
+		$option_name       = OrderController::ORDER_LOCK_OPTION_PREFIX . $order_id;
+		$replacement_value = number_format( microtime( true ) + 120, 6, '.', '' );
+
+		$this->assertTrue( OrderController::lock_order( $order_id, 0 ) );
+		$this->assertSame(
+			1,
+			$wpdb->update(
+				$wpdb->options,
+				array( 'option_value' => $replacement_value ),
+				array( 'option_name' => $option_name ),
+				array( '%s' ),
+				array( '%s' )
+			),
+			'The replacement request should take ownership of the row.'
+		);
+		$this->assertFalse( OrderController::lock_order( $order_id, 0 ), 'The stale owner should not renew a replacement owner\'s lock.' );
+
+		$this->unlock_orders();
+
+		$this->assertSame(
+			$replacement_value,
+			$wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option_name ) ),
+			'Releasing the stale owner should preserve the replacement lock.'
+		);
+	}
+
+	/**
+	 * Get the registered order-lock shutdown callback.
+	 *
+	 * @return \Closure|null
+	 */
+	private function get_order_lock_shutdown_callback(): ?\Closure {
+		$property = new \ReflectionProperty( OrderController::class, 'unlock_orders_on_shutdown' );
+		$property->setAccessible( true );
+
+		return $property->getValue();
+	}
+
+	/**
+	 * Release order locks registered by the current test.
+	 */
+	private function unlock_orders(): void {
+		$callback = $this->get_order_lock_shutdown_callback();
+		if ( $callback ) {
+			$callback();
 		}
 	}
 

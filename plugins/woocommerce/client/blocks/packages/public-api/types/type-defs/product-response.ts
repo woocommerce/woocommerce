@@ -76,6 +76,7 @@ export interface ProductResponseItem {
 	variation: string;
 	permalink: string;
 	sku: string;
+	global_unique_id?: string;
 	short_description: string;
 	description: string;
 	on_sale: boolean;

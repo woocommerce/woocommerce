@@ -34,9 +34,10 @@ class ProductSales {
 
 	/**
 	 * Net sales by product id and by variation id, their total, the number of orders, and whether
-	 * Analytics holds the store's orders for the period, or null while Analytics is off.
+	 * Analytics holds the store's orders for the period, or null while Analytics is off. `since` is
+	 * the period's start, for reading the same period again for some products with for_products().
 	 *
-	 * @return array{days:int,orders:int,imported:bool,total:float,by_product:array<int,float>,by_variation:array<int,float>}|null
+	 * @return array{days:int,since:string,orders:int,imported:bool,total:float,by_product:array<int,float>,by_variation:array<int,float>}|null
 	 */
 	public function last_days(): ?array {
 		global $wpdb;
@@ -49,14 +50,12 @@ class ProductSales {
 		$start    = new \DateTimeImmutable( '-' . self::DAYS . ' days', wp_timezone() );
 		$since    = $start->format( 'Y-m-d H:i:s' );
 		$excluded = self::excluded_statuses();
-		// A filter may leave nothing to exclude, and `NOT IN ()` is not valid SQL.
-		$not_in = array() === $excluded ? '' : 'AND stats.status NOT IN ( ' . implode( ', ', array_fill( 0, count( $excluded ), '%s' ) ) . ' )';
-		$lookup = $wpdb->prefix . 'wc_order_product_lookup';
-		$stats  = $wpdb->prefix . 'wc_order_stats';
+		$stats    = $wpdb->prefix . 'wc_order_stats';
+		$not_in   = self::not_in( $excluded );
 
 		// Count first so an Analytics import that commits between the two reads cannot make
 		// the order total cover revenue that this request never saw.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table names from $wpdb, placeholders built for the excluded statuses; the scan runs this once, in the background.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name from $wpdb, placeholders built for the excluded statuses; the scan runs this once, in the background.
 		$orders = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT( DISTINCT stats.order_id )
@@ -65,36 +64,92 @@ class ProductSales {
 				array_merge( array( $since ), $excluded )
 			)
 		);
-		$rows   = $wpdb->get_results(
+		// phpcs:enable
+		$sales = self::revenue( $since, $excluded, null );
+
+		return array(
+			'days'         => self::DAYS,
+			'since'        => $since,
+			'orders'       => $orders,
+			'imported'     => self::is_imported( $orders, self::store_orders( $start, $excluded ) ),
+			'total'        => max( 0.0, array_sum( $sales['by_product'] ) ),
+			'by_product'   => $sales['by_product'],
+			'by_variation' => $sales['by_variation'],
+		);
+	}
+
+	/**
+	 * Net sales of some products and their variations since a date from last_days(), so a scan
+	 * in batches reads one batch's sales instead of keeping the whole store's.
+	 *
+	 * @param array<int, int> $product_ids Product ids.
+	 * @param string          $since       Period start, as last_days() gave it.
+	 * @return array{by_product:array<int,float>,by_variation:array<int,float>}
+	 */
+	public function for_products( array $product_ids, string $since ): array {
+		return self::revenue( $since, self::excluded_statuses(), $product_ids );
+	}
+
+	/**
+	 * Net sales by product and by variation since a date, for every product or only some.
+	 *
+	 * @param string               $since       Period start, in the site's time zone.
+	 * @param array<int, string>   $excluded    Order statuses Analytics leaves out.
+	 * @param array<int, int>|null $product_ids Product ids, or null for every product.
+	 * @return array{by_product:array<int,float>,by_variation:array<int,float>}
+	 *
+	 * @throws \RuntimeException When the sales query fails.
+	 */
+	private static function revenue( string $since, array $excluded, ?array $product_ids ): array {
+		global $wpdb;
+
+		$by_product   = array();
+		$by_variation = array();
+		if ( array() === $product_ids ) {
+			return compact( 'by_product', 'by_variation' );
+		}
+		$lookup   = $wpdb->prefix . 'wc_order_product_lookup';
+		$stats    = $wpdb->prefix . 'wc_order_stats';
+		$not_in   = self::not_in( $excluded );
+		$products = null === $product_ids ? '' : 'AND lookup.product_id IN ( ' . implode( ', ', array_fill( 0, count( $product_ids ), '%d' ) ) . ' )';
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table names from $wpdb, placeholders built for the statuses and product ids; the scan reads this in the background.
+		$wpdb->last_error = '';
+		$rows             = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT lookup.product_id, lookup.variation_id, SUM( lookup.product_net_revenue ) AS revenue
 				FROM {$lookup} AS lookup
 				INNER JOIN {$stats} AS stats ON stats.order_id = lookup.order_id
-				WHERE lookup.date_created >= %s {$not_in}
+				WHERE lookup.date_created >= %s {$not_in} {$products}
 				GROUP BY lookup.product_id, lookup.variation_id",
-				array_merge( array( $since ), $excluded )
+				array_merge( array( $since ), $excluded, array_map( 'intval', $product_ids ?? array() ) )
 			),
 			ARRAY_A
 		);
 		// phpcs:enable
+		$error = self::db_error();
+		if ( ! is_array( $rows ) || '' !== $error ) {
+			throw new \RuntimeException( esc_html( rtrim( 'Agent readiness sales query failed. ' . $error ) ) );
+		}
 
-		$by_product   = array();
-		$by_variation = array();
-		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+		foreach ( $rows as $row ) {
 			$product_id                = (int) $row['product_id'];
 			$by_product[ $product_id ] = ( $by_product[ $product_id ] ?? 0.0 ) + (float) $row['revenue'];
 			if ( (int) $row['variation_id'] > 0 ) {
 				$by_variation[ (int) $row['variation_id'] ] = (float) $row['revenue'];
 			}
 		}
-		return array(
-			'days'         => self::DAYS,
-			'orders'       => $orders,
-			'imported'     => self::is_imported( $orders, self::store_orders( $start, $excluded ) ),
-			'total'        => max( 0.0, array_sum( $by_product ) ),
-			'by_product'   => $by_product,
-			'by_variation' => $by_variation,
-		);
+		return compact( 'by_product', 'by_variation' );
+	}
+
+	/**
+	 * The status filter, with one placeholder per excluded status. Empty when a filter leaves
+	 * nothing to exclude, since `NOT IN ()` is not valid SQL.
+	 *
+	 * @param array<int, string> $excluded Order statuses Analytics leaves out.
+	 */
+	private static function not_in( array $excluded ): string {
+		return array() === $excluded ? '' : 'AND stats.status NOT IN ( ' . implode( ', ', array_fill( 0, count( $excluded ), '%s' ) ) . ' )';
 	}
 
 	/**
@@ -110,10 +165,12 @@ class ProductSales {
 
 	/**
 	 * How many orders the store holds since a date, with the statuses Analytics counts. Analytics
-	 * holds fewer while its import of past orders hasn't run or finished. WCPay test-mode orders
-	 * are left out the same way OrdersScheduler skips them (meta `_wcpay_mode=test`). They are
-	 * counted in a second query and subtracted, because the posts order store doesn't support
-	 * `meta_query`. A custom `woocommerce_analytics_is_test_order` callback is not applied.
+	 * holds fewer while its import of past orders hasn't run or finished. Child orders are left
+	 * out (`parent` 0): a multivendor sub-order is not a separate order Analytics imports.
+	 * WCPay test-mode orders are left out the same way OrdersScheduler skips them (meta
+	 * `_wcpay_mode=test`). They are counted in a second query and subtracted, because the posts
+	 * order store doesn't support `meta_query`. A custom `woocommerce_analytics_is_test_order`
+	 * callback is not applied.
 	 *
 	 * @param \DateTimeImmutable $since    Start of the period.
 	 * @param array<int, string> $excluded Statuses Analytics leaves out.
@@ -127,6 +184,7 @@ class ProductSales {
 			$orders = wc_get_orders(
 				array(
 					'type'         => 'shop_order',
+					'parent'       => 0,
 					'status'       => array_values( $statuses ),
 					'date_created' => '>=' . $since->getTimestamp(),
 					'limit'        => 1,
@@ -172,5 +230,15 @@ class ProductSales {
 			}
 		}
 		return array_values( array_unique( $statuses ) );
+	}
+
+	/**
+	 * The last database error, read fresh after a query.
+	 *
+	 * @phpstan-impure
+	 */
+	private static function db_error(): string {
+		global $wpdb;
+		return is_string( $wpdb->last_error ) ? $wpdb->last_error : '';
 	}
 }

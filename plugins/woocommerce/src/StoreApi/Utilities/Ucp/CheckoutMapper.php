@@ -23,14 +23,18 @@ class CheckoutMapper {
 	 * @param array                $cart Store API cart response, as nested arrays.
 	 * @param string               $checkout_id Checkout identifier (a Store API cart token).
 	 * @param array<string, mixed> $state Stored `status` and `continue_url`, and the `order` once paid.
+	 * @param array<string, mixed> $context Optional `messages` and `discount_codes`, as {@see CartMapper::build_cart()} takes them.
 	 * @return array
 	 */
-	public function build_checkout( array $cart, string $checkout_id, array $state ): array {
-		$payload  = ( new CartMapper() )->build_cart( $cart, $checkout_id );
+	public function build_checkout( array $cart, string $checkout_id, array $state, array $context = array() ): array {
+		$payload  = ( new CartMapper() )->build_cart( $cart, $checkout_id, $context );
 		$status   = (string) ( $state['status'] ?? '' );
 		$placed   = ! empty( $state['order'] ) || self::STATUS_COMPLETE_IN_PROGRESS === $status;
 		$missing  = $placed ? array() : $this->missing_requirements( $cart );
 		$messages = array_merge( $payload['messages'] ?? array(), $missing );
+
+		// A checkout carries its own `continue_url`, the payment page, only at escalation.
+		unset( $payload['continue_url'] );
 
 		if ( '' === $status ) {
 			$status = empty( $cart['items'] ) || ! empty( $cart['errors'] ) || ! empty( $missing ) ? self::STATUS_INCOMPLETE : self::STATUS_READY_FOR_COMPLETE;

@@ -87,7 +87,7 @@ class Authentication {
 	 * Allowed origins can be changed using the WordPress `allowed_http_origins` or `allowed_http_origin` filters if
 	 * access needs to be granted to other domains.
 	 *
-	 * Users of valid Cart Tokens are also allowed access from any origin.
+	 * Users of valid Cart Tokens are also allowed access from any origin, without browser credentials unless the origin is allowed.
 	 *
 	 * @param bool              $served Whether the request has already been served.
 	 * @param \WP_REST_Response $result The response object.
@@ -101,15 +101,18 @@ class Authentication {
 		if ( 'null' !== $origin ) {
 			$origin = esc_url_raw( $origin );
 		}
+		$allowed_origin = is_allowed_http_origin( $origin );
 
 		// Send standard CORS headers.
 		$server->send_header( 'Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE' );
-		$server->send_header( 'Access-Control-Allow-Credentials', 'true' );
+		if ( $allowed_origin ) {
+			$server->send_header( 'Access-Control-Allow-Credentials', 'true' );
+		}
 		$server->send_header( 'Vary', 'Origin', false );
 
 		// Allow preflight requests, certain http origins, and any origin if a cart token is present. Preflight requests
 		// are allowed because we'll be unable to validate cart token headers at that point.
-		if ( $this->is_preflight() || CartTokenUtils::validate_cart_token( $this->get_cart_token( $request ) ) || is_allowed_http_origin( $origin ) ) {
+		if ( $this->is_preflight() || CartTokenUtils::validate_cart_token( $this->get_cart_token( $request ) ) || $allowed_origin ) {
 			$server->send_header( 'Access-Control-Allow-Origin', $origin );
 		}
 

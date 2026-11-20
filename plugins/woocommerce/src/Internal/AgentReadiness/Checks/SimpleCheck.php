@@ -206,15 +206,8 @@ final class SimpleCheck extends AbstractReadinessCheck {
 	 * @param \WC_Product $product Published product.
 	 */
 	private static function has_unset_variation_option( \WC_Product $product ): bool {
-		if ( ! $product instanceof \WC_Product_Variable ) {
-			return false;
-		}
-		$variation_attributes = array_filter(
-			$product->get_attributes(),
-			static fn( $attribute ): bool => $attribute instanceof \WC_Product_Attribute && $attribute->get_variation()
-		);
-		if ( empty( $variation_attributes ) ) {
-			return true;
+		if ( array() === self::variation_attributes( $product ) ) {
+			return $product instanceof \WC_Product_Variable;
 		}
 		foreach ( ProductFields::variations( $product ) as $variation ) {
 			if ( self::has_unset_option( $variation ) ) {
@@ -222,6 +215,22 @@ final class SimpleCheck extends AbstractReadinessCheck {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Attributes the parent uses for variations.
+	 *
+	 * @param \WC_Product $product Product.
+	 * @return array<int, \WC_Product_Attribute>
+	 */
+	private static function variation_attributes( \WC_Product $product ): array {
+		if ( ! $product instanceof \WC_Product_Variable ) {
+			return array();
+		}
+		return array_filter(
+			$product->get_attributes(),
+			static fn( $attribute ): bool => $attribute instanceof \WC_Product_Attribute && $attribute->get_variation()
+		);
 	}
 
 	/**
@@ -251,7 +260,11 @@ final class SimpleCheck extends AbstractReadinessCheck {
 	 */
 	public function failing_variations( \WC_Product $product, ProductScan $scan ): ?array {
 		unset( $scan );
-		return null === $this->variation_test ? null : self::variation_ids_where( $product, $this->variation_test );
+		// No variation attribute on the parent fails the whole product. A child that still stores a blank option must not shrink that to one variation's sales.
+		if ( null === $this->variation_test || ( 'variation_attributes_not_set' === $this->id && array() === self::variation_attributes( $product ) ) ) {
+			return null;
+		}
+		return self::variation_ids_where( $product, $this->variation_test );
 	}
 
 	/**
