@@ -173,7 +173,7 @@ class Filterer {
 		$tax_query  = new TaxQuery( $tax_query );
 
 		if ( $this->filtering_via_lookup_table_is_active() ) {
-			$query = $this->get_product_counts_query_using_lookup_table( $tax_query, $meta_query, $taxonomy, $term_ids );
+			$query = $this->get_product_counts_query_using_lookup_table( $tax_query, $meta_query, $taxonomy, $term_ids, $query_type );
 		} else {
 			$query = $this->get_product_counts_query_not_using_lookup_table( $tax_query, $meta_query, $term_ids );
 		}
@@ -257,9 +257,10 @@ class Filterer {
 	 * @param \WP_Meta_Query $meta_query The current main meta query.
 	 * @param string         $taxonomy The attribute name to get the term counts for.
 	 * @param string         $term_ids The term ids to include in the search.
+	 * @param string         $query_type The query type for the attribute being counted.
 	 * @return array An array of SQL query parts.
 	 */
-	private function get_product_counts_query_using_lookup_table( $tax_query, $meta_query, $taxonomy, $term_ids ) {
+	private function get_product_counts_query_using_lookup_table( $tax_query, $meta_query, $taxonomy, $term_ids, $query_type ) {
 		global $wpdb;
 
 		$meta_query_sql = $meta_query->get_sql( 'post', $this->lookup_table_name, 'product_or_parent_id' );
@@ -297,24 +298,35 @@ class Filterer {
 			$attributes_to_filter_by = \WC_Query::get_layered_nav_chosen_attributes();
 
 			if ( ! empty( $attributes_to_filter_by ) ) {
-				foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
-					if ( 'and' !== $data['query_type'] ) {
+				foreach ( $attributes_to_filter_by as $filter_taxonomy => $data ) {
+					if ( 'or' === $data['query_type'] && $filter_taxonomy === $taxonomy && 'or' === $query_type ) {
 						continue;
 					}
-					$all_terms        = get_terms(
+					$all_terms         = get_terms(
 						array(
-							'taxonomy'   => $taxonomy,
+							'taxonomy'   => $filter_taxonomy,
 							'hide_empty' => false,
 						)
 					);
-					$term_ids_by_slug = wp_list_pluck( $all_terms, 'term_id', 'slug' );
-					$and_term_ids     = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
+					$term_ids_by_slug  = wp_list_pluck( $all_terms, 'term_id', 'slug' );
+					$selected_term_ids = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 
-					if ( empty( $and_term_ids ) ) {
+					if ( empty( $selected_term_ids ) ) {
 						continue;
 					}
-					$terms_count   = count( $and_term_ids );
-					$term_ids_list = '(' . join( ',', $and_term_ids ) . ')';
+					$terms_count   = count( $selected_term_ids );
+					$term_ids_list = $this->get_term_ids_sql( $selected_term_ids );
+					if ( 'or' === $data['query_type'] ) {
+						$query['where'] .= "
+							AND product_or_parent_id IN ( SELECT product_or_parent_id FROM (
+								SELECT product_or_parent_id
+								FROM {$this->lookup_table_name} lt
+								WHERE term_id IN {$term_ids_list}
+								{$in_stock_clause}
+							) temp )";
+						continue;
+					}
+
 					// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
 					// (causes the filtering subquery to be executed only once).
 					$query['where'] .= "
