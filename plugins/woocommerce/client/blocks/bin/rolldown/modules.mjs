@@ -28,14 +28,14 @@ export const moduleEntries = {
 		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
 	'woocommerce/product-collection-cart-reference':
 		'./assets/js/blocks/product-collection/cart-reference-frontend.ts',
-	'@woocommerce/stores/woocommerce/cart':
-		'./assets/js/base/stores/woocommerce/cart.ts',
+	'@woocommerce/stores/woocommerce':
+		'./assets/js/base/stores/woocommerce/index.ts',
 	'@woocommerce/stores/store-notices':
 		'./assets/js/base/stores/store-notices.ts',
 	'@woocommerce/stores/woocommerce/products':
-		'./assets/js/base/stores/woocommerce/products.ts',
+		'./assets/js/base/stores/products.ts',
 	'@woocommerce/stores/woocommerce/shopper-lists':
-		'./assets/js/base/stores/woocommerce/shopper-lists.ts',
+		'./assets/js/base/stores/shopper-lists.ts',
 };
 
 // Webpack's `module` externals are always static imports; `import` ones stay dynamic.

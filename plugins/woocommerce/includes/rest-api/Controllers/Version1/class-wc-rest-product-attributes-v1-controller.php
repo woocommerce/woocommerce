@@ -237,7 +237,7 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 	 * Get all attributes.
 	 *
 	 * @param WP_REST_Request $request The request to get the attributes from.
-	 * @return array
+	 * @return WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$attributes = wc_get_attribute_taxonomies();

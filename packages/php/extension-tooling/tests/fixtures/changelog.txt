@@ -1,0 +1,8 @@
+*** Extension Changelog ***
+
+= 1.5.1 - 2026-09-17 =
+* Fix - Prevented a shipping warning.
+* Tweak - Updated support for WooCommerce.
+
+= 1.0.0 - 2021-10-25 =
+* Initial release.

@@ -63,6 +63,13 @@ class ExtensibleAbilities {
 	private static array $syncs = array();
 
 	/**
+	 * Prime callbacks keyed by resource.
+	 *
+	 * @var array<string, array<int, array<string, mixed>>>
+	 */
+	private static array $primes = array();
+
+	/**
 	 * Whether the store enabled the experimental feature.
 	 *
 	 * @since 11.3.0
@@ -135,7 +142,14 @@ class ExtensibleAbilities {
 	 *     @type array    $output_schema Optional. JSON schema of the value that `get_callback` returns. Required
 	 *                                  with `get_callback`. It needs one `type` other than null, because clients
 	 *                                  expect one type for each field. Core publishes it as declared. Its
-	 *                                  `title` is the label clients show.
+	 *                                  `title` is the label clients show. Leave a nested property out when it has
+	 *                                  no value. Where a nested value must be null, such as an item of a list,
+	 *                                  declare it with an `anyOf` that has a `{"type":"null"}` branch. A list of
+	 *                                  types is refused in every nested schema under `properties`,
+	 *                                  `patternProperties`, `additionalProperties`, `items`, `anyOf` and `oneOf`,
+	 *                                  which are the keywords with a nested schema that WordPress supports (see
+	 *                                  `rest_get_allowed_schema_keywords()`), and under `allOf`, which
+	 *                                  WooCommerce also reads, because some clients refuse it.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
 	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
@@ -154,8 +168,9 @@ class ExtensibleAbilities {
 	 *                                  the whole result.
 	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. It needs
 	 *                                  one `type` name, or an `anyOf` where each branch has one `type` name. A
-	 *                                  list of types is refused at the top level, because some clients refuse it:
-	 *                                  a nullable field uses `[{"type":"string"},{"type":"null"}]` as its `anyOf`.
+	 *                                  list of types is refused, at the top level and in every nested schema under
+	 *                                  the keywords listed for `output_schema`, because some clients refuse it: a
+	 *                                  nullable value uses `[{"type":"string"},{"type":"null"}]` as its `anyOf`.
 	 *                                  Core publishes it as declared. A value can be null only where it declares
 	 *                                  null. Required with `set_callback`.
 	 *     @type callable $set_callback Optional. Receives the object and the value, and changes the object
@@ -239,6 +254,13 @@ class ExtensibleAbilities {
 				return;
 			}
 		}
+		foreach ( array( 'output_schema', 'input_schema' ) as $key ) {
+			$path = isset( $args[ $key ] ) ? self::find_nested_type_list( $args[ $key ] ) : null;
+			if ( null !== $path ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%1$s" argument has a list of types at "%2$s". Use an "anyOf" with a {"type":"null"} branch instead. In an output, prefer to leave the property out when it has no value.', $key, $path ), '11.4.0' );
+				return;
+			}
+		}
 		if ( isset( $args['object_types'] ) && ( ! is_array( $args['object_types'] ) || empty( $args['object_types'] ) || array_filter( $args['object_types'], static fn( $type ) => ! is_string( $type ) ) ) ) {
 			wc_doing_it_wrong( __METHOD__, 'The "object_types" argument must be a list of object types.', '11.4.0' );
 			return;
@@ -282,6 +304,40 @@ class ExtensibleAbilities {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Find the first nested schema under `properties`, `patternProperties`, `additionalProperties`, `items`,
+	 * `anyOf`, `oneOf` or `allOf` whose `type` is a list.
+	 *
+	 * @param array<string, mixed> $schema Field schema.
+	 * @param string               $path   Path of the schema, such as `properties.size`.
+	 * @return string|null Path of the first schema with a list of types, or null when there is none.
+	 */
+	private static function find_nested_type_list( array $schema, string $path = '' ): ?string {
+		foreach ( array( 'properties', 'patternProperties', 'additionalProperties', 'items', 'anyOf', 'oneOf', 'allOf' ) as $keyword ) {
+			$children = $schema[ $keyword ] ?? null;
+			if ( ! is_array( $children ) ) {
+				continue;
+			}
+			if ( 'additionalProperties' === $keyword || ( 'items' === $keyword && ! wp_is_numeric_array( $children ) ) ) {
+				$children = array( '' => $children );
+			}
+			foreach ( $children as $key => $child ) {
+				if ( ! is_array( $child ) ) {
+					continue;
+				}
+				$child_path = trim( "$path.$keyword.$key", '.' );
+				if ( is_array( $child['type'] ?? null ) ) {
+					return $child_path;
+				}
+				$found = self::find_nested_type_list( $child, $child_path );
+				if ( null !== $found ) {
+					return $found;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -448,10 +504,7 @@ class ExtensibleAbilities {
 				try {
 					$clauses = call_user_func( $args['callback'], $value );
 				} catch ( \Throwable $e ) {
-					wc_get_logger()->error(
-						sprintf( 'Ability filter "%s.%s" of "%s" failed: %s', $namespace, $filter, $resource_name, $e->getMessage() ),
-						array( 'source' => 'extensible-abilities' )
-					);
+					self::log_error( sprintf( 'Ability filter "%s.%s" of "%s" failed: %s', $namespace, $filter, $resource_name, $e->getMessage() ) );
 					$clauses = null;
 				}
 				if ( is_wp_error( $clauses ) ) {
@@ -657,12 +710,90 @@ class ExtensibleAbilities {
 	}
 
 	/**
-	 * Check the arguments of a validator or a sync, and report the first
-	 * problem with wc_doing_it_wrong().
+	 * Register a prime callback on a resource. Before an ability formats a list
+	 * of objects of the resource, Core calls every prime callback of the
+	 * resource once, with the full list. An extension loads the data of its
+	 * fields for the whole list in one query, keeps it in its own cache, and
+	 * its get_callback reads from there.
 	 *
-	 * @param array  $args    Validator or sync arguments.
+	 * Call it inside the `woocommerce_extensible_abilities_init` action. Prime
+	 * callbacks run only when the `extensible_abilities` feature is on, in the
+	 * order they were registered.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $args {
+	 *     Prime arguments.
+	 *
+	 *     @type string   $resource  Resource that an ability formats, such as `product`.
+	 *     @type string   $namespace Slug of the extension that owns the callback, such as `google`.
+	 *     @type callable $callback  Receives `object[] $objects`, every object the ability formats. The
+	 *                               callback skips the objects it does not need. Core ignores the
+	 *                               return value. When it throws, Core logs the error and formats
+	 *                               the objects anyway, so the get_callback must still load its
+	 *                               data for an object that is not in the cache. Core calls prime
+	 *                               callbacks only on reads, not on writes. Key the cache by object ID,
+	 *                               and remove the entry of an object when the object is saved, for
+	 *                               example on `woocommerce_update_product`. Otherwise a write after a
+	 *                               read in the same request returns the old value. Empty the cache at the start of
+	 *                               every call, so a failed load leaves no old entries.
+	 * }
+	 */
+	public static function register_prime( array $args ): void {
+		if ( ! self::check_callback_args( $args, __METHOD__, 'prime callback', '11.4.0' ) ) {
+			return;
+		}
+
+		self::$primes[ $args['resource'] ][] = $args;
+	}
+
+	/**
+	 * Call every prime callback of a resource with the objects that an ability
+	 * is about to format. A callback that throws is logged, and the next one runs.
+	 * An extension that registers its own resource calls it from its list
+	 * abilities before add_fields_to_object(), as Core's abilities do.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string   $resource_name Resource.
+	 * @param object[] $objects       Objects to format.
+	 */
+	public static function prime( string $resource_name, array $objects ): void {
+		if ( empty( self::$primes[ $resource_name ] ) || empty( $objects ) || ! self::is_enabled() ) {
+			return;
+		}
+
+		$objects = array_values( $objects );
+		foreach ( self::$primes[ $resource_name ] as $args ) {
+			try {
+				call_user_func( $args['callback'], $objects );
+			} catch ( \Throwable $e ) {
+				self::log_error( sprintf( 'Ability prime callback of "%s" for "%s" failed: %s', $args['namespace'], $resource_name, $e->getMessage() ) );
+			}
+		}
+	}
+
+	/**
+	 * Log an error from an extension callback. A logger that throws does not
+	 * stop the ability.
+	 *
+	 * @param string $message Message to log.
+	 */
+	private static function log_error( string $message ): void {
+		try {
+			wc_get_logger()->error( $message, array( 'source' => 'extensible-abilities' ) );
+		} catch ( \Throwable $e ) {
+			unset( $e );
+		}
+	}
+
+	/**
+	 * Check the arguments of a validator, a sync or a prime callback, and report
+	 * the first problem with wc_doing_it_wrong().
+	 *
+	 * @param array  $args    Validator, sync or prime arguments.
 	 * @param string $method  Method that registers the callback.
-	 * @param string $kind    `validator` or `sync`, for the message.
+	 * @param string $kind    `validator`, `sync` or `prime callback`, for the message.
 	 * @param string $version Version that added the method.
 	 * @return bool Whether the arguments are valid.
 	 */
@@ -1019,12 +1150,40 @@ class ExtensibleAbilities {
 	 * Send an empty array for an `object` as an empty object, at any depth.
 	 * rest_sanitize_value_from_schema() turns every object into an array, so a
 	 * callback cannot send `{}` by itself. A part with no schema stays as it is.
+	 * The nested schemas of every `allOf` branch, and of the `anyOf` and `oneOf`
+	 * branch that the sanitized value matches, apply too, after the schema's own.
+	 * A value that matches no branch stays as it is. An empty array fits both an
+	 * `object` and an `array` branch, so it takes the first `anyOf` branch, and
+	 * under a `oneOf` it stays as it is. Only one level of `allOf`, `anyOf` and
+	 * `oneOf` branches is read, so a combinator inside a branch is not followed.
+	 * When more than one branch declares the same property, the first one is used.
 	 *
 	 * @param mixed                $value  Sanitized value.
 	 * @param array<string, mixed> $schema Schema of the value.
 	 * @return mixed The value for the JSON output.
 	 */
 	private static function prepare_json_value( $value, array $schema ) {
+		$branches = (array) ( $schema['allOf'] ?? array() );
+		$finders  = array(
+			'anyOf' => 'rest_find_any_matching_schema',
+			'oneOf' => 'rest_find_one_matching_schema',
+		);
+		foreach ( $finders as $keyword => $find_branch ) {
+			if ( isset( $schema[ $keyword ] ) ) {
+				$branch = $find_branch( $value, $schema, '' );
+				if ( is_wp_error( $branch ) ) {
+					return $value;
+				}
+				$branches[] = $branch;
+			}
+		}
+		foreach ( array_filter( $branches, 'is_array' ) as $branch ) {
+			$schema['type']                 = $schema['type'] ?? $branch['type'] ?? null;
+			$schema['properties']           = (array) ( $schema['properties'] ?? array() ) + (array) ( $branch['properties'] ?? array() );
+			$schema['patternProperties']    = (array) ( $schema['patternProperties'] ?? array() ) + (array) ( $branch['patternProperties'] ?? array() );
+			$schema['items']                = $schema['items'] ?? $branch['items'] ?? null;
+			$schema['additionalProperties'] = $schema['additionalProperties'] ?? $branch['additionalProperties'] ?? null;
+		}
 		$type = rest_get_best_type_for_value( $value, (array) ( $schema['type'] ?? array() ) );
 		if ( 'array' === $type ) {
 			$children = array_fill_keys( array_keys( $value ), $schema['items'] ?? null );

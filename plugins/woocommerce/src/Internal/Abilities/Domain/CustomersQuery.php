@@ -141,11 +141,15 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 				);
 				continue;
 			}
+			$customers[] = $customer;
+		}
+		ExtensibleAbilities::prime( 'customer', $customers );
+		foreach ( $customers as $index => $customer ) {
 			$formatted = self::format_customer( $customer );
 			if ( is_wp_error( $formatted ) ) {
 				return $formatted;
 			}
-			$customers[] = $formatted;
+			$customers[ $index ] = $formatted;
 		}
 
 		$total = (int) $query->get_total();

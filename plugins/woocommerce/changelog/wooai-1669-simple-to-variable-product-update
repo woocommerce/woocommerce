@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Let the product-update ability change a product into a variable product and back, keeping its ID. A variable product loses its variations.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Let the product abilities set the stock of a variable product, which its variations use when they do not track their own stock.

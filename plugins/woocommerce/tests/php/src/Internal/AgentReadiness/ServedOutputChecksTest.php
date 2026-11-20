@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreResponses;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils as UcpUtils;
@@ -298,7 +299,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With UCP on, the profile check reads the served profile, and the endpoint check POSTs to catalog search.
+	 * @testdox With UCP on, the profile check reads the served profile, and the endpoint check POSTs to catalog search, once more when it fails, and keeps what a failed one answered.
 	 */
 	public function test_ucp_checks(): void {
 		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
@@ -327,6 +328,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $results['ucp_profile'] );
 		$this->assertTrue( $results['ucp_profile_version'] );
 		$this->assertTrue( $results['ucp_endpoints_live'], 'Catalog search answers even when a GET of the endpoint base does not' );
+		$this->assertSame( '', array_column( $this->sut->all(), 'source', 'id' )['ucp_endpoints_live'], 'A passing check names nothing' );
 		$this->assertContains( 'POST ' . $search, $this->requested );
 
 		$responses[ 'POST ' . $search ] = array( 400, '{"ucp":{"status":"error"},"messages":[{"code":"VALIDATION_ERROR","content":"A query or at least one supported filter is required."}]}' );
@@ -336,10 +338,22 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$responses[ 'POST ' . $search ] = array( 400, '<html>Bad request</html>' );
 		$this->serve( $responses );
 		$this->assertFalse( $this->results()['ucp_endpoints_live'], 'A 400 page is not the endpoint' );
+		$this->assertSame( '', array_column( $this->sut->all(), 'source', 'id' )['ucp_profile_version'], 'A matching version names none' );
 
 		$responses['/.well-known/ucp'] = array( 200, (string) str_replace( UcpUtils::VERSION, '2025-01-01', (string) $profile ) );
 		$this->serve( $responses );
 		$this->assertFalse( $this->results()['ucp_profile_version'], 'A profile for another UCP version is likely another plugin\'s' );
+		$this->assertSame( '2025-01-01', array_column( $this->sut->all(), 'source', 'id' )['ucp_profile_version'], 'The served version is kept for the message' );
+
+		$responses['/.well-known/ucp'] = array( 200, (string) str_replace( '"' . UcpUtils::VERSION . '"', '"<b>x</b>"', (string) $profile ) );
+		$this->serve( $responses );
+		$this->assertFalse( $this->results()['ucp_profile_version'] );
+		$this->assertSame( '', array_column( $this->sut->all(), 'source', 'id' )['ucp_profile_version'], 'A version that isn\'t a date is not shown' );
+
+		$responses['/.well-known/ucp'] = array( 200, (string) str_replace( UcpUtils::VERSION, '2099-01-01', (string) $profile ) );
+		$this->serve( $responses );
+		$this->assertFalse( $this->results()['ucp_profile_version'] );
+		$this->assertSame( '', array_column( $this->sut->all(), 'source', 'id' )['ucp_profile_version'], 'A newer version is not called older' );
 
 		$responses['/.well-known/ucp']  = array( 404, '' );
 		$responses[ 'POST ' . $search ] = array( 403, '<html>Blocked</html>' );
@@ -350,6 +364,13 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $results['ucp_endpoints_live'], 'Without a profile, WooCommerce\'s catalog search is tried' );
 		$this->assertContains( 'POST ' . $search, $this->requested );
 
+		$responses[ 'POST ' . $search ] = array( 403, '<html>Blocked</html>', array( 'content-type' => 'text/HTML; charset=UTF-8' ) );
+		$this->serve( $responses );
+		$this->assertSame( '403 text/html', array_column( $this->sut->all(), 'source', 'id' )['ucp_endpoints_live'], 'A failed check keeps what came back' );
+		$responses[ 'POST ' . $search ] = null;
+		$this->serve( $responses );
+		$this->assertSame( '', array_column( $this->sut->all(), 'source', 'id' )['ucp_endpoints_live'], 'No answer leaves nothing to show' );
+
 		$responses[ $path ]             = array( 200, '{"namespace":"wc/ucp/v1","routes":{}}' );
 		$responses[ 'POST ' . $search ] = array( 404, '' );
 		$this->serve( $responses );
@@ -358,10 +379,35 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$responses[ 'POST ' . $search ] = array( 200, '<html>Checking your browser</html>' );
 		$this->serve( $responses );
 		$this->assertFalse( $this->results()['ucp_endpoints_live'], 'A challenge page is not the endpoint' );
+		$this->assertSame( 2, count( array_keys( $this->requested, 'POST ' . $search, true ) ), 'A failed search is asked once more' );
+
+		$this->serve( $responses );
+		$answers = array( array( 403, '<html>Blocked</html>' ), array( 200, '{"ucp":{"status":"success"},"products":[]}' ) );
+		add_filter(
+			'pre_http_request',
+			function ( $pre, $args, $url ) use ( $search, &$answers ) {
+				if ( 'POST' !== $args['method'] || substr( $url, strlen( untrailingslashit( home_url() ) ) ) !== $search ) {
+					return $pre;
+				}
+				$answer = array_shift( $answers );
+				return array(
+					'headers'  => new \WpOrg\Requests\Utility\CaseInsensitiveDictionary( array() ),
+					'body'     => $answer[1],
+					'response' => array(
+						'code'    => $answer[0],
+						'message' => '',
+					),
+					'cookies'  => array(),
+				);
+			},
+			20,
+			3
+		);
+		$this->assertTrue( $this->results()['ucp_endpoints_live'], 'A refusal followed by the endpoint passes' );
 	}
 
 	/**
-	 * @testdox Checks for output WooCommerce doesn't build yet don't run, and are reported as pending.
+	 * @testdox Only the UCP checkout check waits as pending, until this WooCommerce serves UCP checkout; the product structured data checks run.
 	 */
 	public function test_pending_checks(): void {
 		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
@@ -369,15 +415,83 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 
 		$checks = array_column( $this->sut->all(), null, 'id' );
 
-		foreach ( array( 'product_return_policy_schema', 'product_shipping_schema', 'product_buy_action_schema', 'ucp_checkout' ) as $id ) {
-			$this->assertNull( $checks[ $id ]['ok'], $id );
-			$this->assertTrue( $checks[ $id ]['pending'], $id );
+		foreach ( array( 'open_graph_tags', 'product_return_policy_schema', 'product_shipping_schema', 'product_buy_action_schema' ) as $id ) {
+			$this->assertFalse( $checks[ $id ]['pending'], $id . ' runs: WooCommerce prints its output' );
 		}
-		$this->assertFalse( $checks['open_graph_tags']['pending'] );
+		$this->assertSame( ! StoreConditions::serves_ucp_checkout(), $checks['ucp_checkout']['pending'], 'The UCP checkout check runs once this WooCommerce serves UCP checkout' );
 	}
 
 	/**
-	 * @testdox The pending product checks find a returns policy and shipping details on an offer, and a BuyAction on the product or an offer.
+	 * @testdox The shipping and buy action checks read the product page, and couldn't check a product that can't ship or can't be bought now.
+	 */
+	public function test_shipping_and_buy_action_on_the_page(): void {
+		$ld        = static fn( string $offer ): string => '<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Product","name":"Mug","offers":' . $offer . '}]}</script>';
+		$responses = $this->good_store();
+		$result    = function ( string $offer, string $id ) use ( $responses, $ld ): ?bool {
+			$responses[ $this->product_path() ] = array( 200, self::page( $ld( $offer ) ) );
+			$this->serve( $responses );
+			return array_column( $this->sut->all(), 'ok', 'id' )[ $id ];
+		};
+		$bare      = '{"@type":"Offer","price":"10"}';
+		$zone      = new \WC_Shipping_Zone();
+		$zone->set_zone_name( 'US' );
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$zone->add_shipping_method( 'flat_rate' );
+
+		$this->assertTrue( $result( '{"@type":"Offer","price":"10","shippingDetails":{"@type":"OfferShippingDetails"}}', 'product_shipping_schema' ) );
+		$this->assertFalse( $result( $bare, 'product_shipping_schema' ) );
+		$this->assertFalse( $result( $bare, 'product_buy_action_schema' ), 'An in-stock simple product gets a BuyAction from WooCommerce' );
+		$responses[ $this->product_path() ] = array( 200, self::page( '' ) );
+		$this->serve( $responses );
+		$no_ld = array_column( $this->sut->all(), 'ok', 'id' );
+		$this->assertNull( $no_ld['product_shipping_schema'], 'Without product details it couldn\'t check, as the other product details checks' );
+		$this->assertNull( $no_ld['product_buy_action_schema'] );
+
+		update_option( 'woocommerce_ship_to_countries', 'disabled' );
+		$this->assertNull( $result( $bare, 'product_shipping_schema' ), 'Shipping turned off: no shipping details to give' );
+		delete_option( 'woocommerce_ship_to_countries' );
+		add_filter( 'woocommerce_get_zone_criteria', '__return_empty_array' );
+		$this->assertNull( $result( $bare, 'product_shipping_schema' ), 'A zone criteria filter: WooCommerce prints no shipping details' );
+		remove_filter( 'woocommerce_get_zone_criteria', '__return_empty_array' );
+
+		add_filter( 'woocommerce_countries_shipping_countries', '__return_empty_array' );
+		$this->assertNull( $result( $bare, 'product_shipping_schema' ), 'A zone WooCommerce can\'t describe: it prints no shipping details' );
+		remove_filter( 'woocommerce_countries_shipping_countries', '__return_empty_array' );
+		$zone->delete();
+		$this->assertFalse( $result( $bare, 'product_shipping_schema' ), 'No zone with a delivery method: the merchant can add one' );
+		$this->assertTrue( $result( '{"@type":"Offer","price":"10","shippingDetails":{"@type":"OfferShippingDetails"}}', 'product_shipping_schema' ), 'Printed by another plugin, it still counts' );
+
+		add_filter( 'woocommerce_product_is_visible', '__return_false' );
+		$this->assertNull( $result( $bare, 'product_buy_action_schema' ), 'Hidden by a visibility filter: WooCommerce prints no BuyAction' );
+		remove_filter( 'woocommerce_product_is_visible', '__return_false' );
+
+		$this->product->set_stock_status( 'outofstock' );
+		$this->product->save();
+		$this->assertNull( $result( $bare, 'product_buy_action_schema' ), 'WooCommerce links only a product in stock to checkout' );
+	}
+
+	/**
+	 * @testdox The returns policy check passes for a policy on an offer or on the store's item, as WooCommerce adds it, fails without one, and couldn't check without product details.
+	 */
+	public function test_return_policy_on_offer_or_store(): void {
+		$returns   = '{"@type":"MerchantReturnPolicy","merchantReturnLink":"' . home_url( '/refund_returns/' ) . '"}';
+		$ld        = static fn( string $graph ): string => '<script type="application/ld+json">{"@context":"https://schema.org","@graph":[' . $graph . ']}</script>';
+		$responses = $this->good_store();
+		$result    = function ( string $graph ) use ( $responses, $ld ): ?bool {
+			$responses[ $this->product_path() ] = array( 200, self::page( $ld( $graph ) ) );
+			$this->serve( $responses );
+			return array_column( $this->sut->all(), 'ok', 'id' )['product_return_policy_schema'];
+		};
+
+		$this->assertTrue( $result( '{"@type":"Product","name":"Mug","offers":{"@type":"Offer","price":"10"}},{"@type":"OnlineStore","name":"Shop","hasMerchantReturnPolicy":' . $returns . '}' ), 'WooCommerce adds it to the OnlineStore item' );
+		$this->assertTrue( $result( '{"@type":"Product","name":"Mug","offers":{"@type":"Offer","price":"10","hasMerchantReturnPolicy":' . $returns . '}}' ), 'On the offer' );
+		$this->assertFalse( $result( '{"@type":"Product","name":"Mug","offers":{"@type":"Offer","price":"10"}},{"@type":"OnlineStore","name":"Shop"}' ) );
+		$this->assertNull( $result( '{"@type":"OnlineStore","name":"Shop"}' ), 'Without product details it couldn\'t check, as the other product details checks' );
+	}
+
+	/**
+	 * @testdox The product checks find a returns policy and shipping details on an offer, and a BuyAction on the product or an offer.
 	 */
 	public function test_pending_product_detectors(): void {
 		$offer_has  = new \ReflectionMethod( StoreOutputChecks::class, 'offer_has' );
@@ -400,6 +514,18 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $buy_action->invoke( null, array( $product ) ) );
 		$this->assertTrue( $buy_action->invoke( null, array( array( 'potentialAction' => array( array( '@type' => array( 'BuyAction' ) ) ) ) ) ) );
 		$this->assertFalse( $buy_action->invoke( null, array( array( 'potentialAction' => array( '@type' => 'ViewAction' ) ) ) ) );
+
+		$nested = array(
+			'@type'  => 'Product',
+			'offers' => array(
+				'@type'  => 'AggregateOffer',
+				'offers' => array(
+					'@type'                   => 'Offer',
+					'hasMerchantReturnPolicy' => array( '@type' => 'MerchantReturnPolicy' ),
+				),
+			),
+		);
+		$this->assertTrue( $offer_has->invoke( null, array( $nested ), 'hasMerchantReturnPolicy' ), 'Policy on a nested Offer inside AggregateOffer' );
 	}
 
 	/**
@@ -450,11 +576,26 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertNull( $buy_action->invoke( null, array( $empty_group ), $variable ), 'A variable product without one' );
 		$this->assertFalse( $buy_action->invoke( null, array( $empty_group ), $this->product ), 'A simple product without one' );
 
+		$variable->delete( true );
+		$this->assertFalse( $ships->invoke( null, new StoreResponses( true ) ), 'No zone with a delivery method' );
+		$zone = new \WC_Shipping_Zone();
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$zone->add_shipping_method( 'local_pickup' );
+		$this->assertFalse( $ships->invoke( null, new StoreResponses( true ) ), 'Local pickup only: WooCommerce describes no delivery' );
+		$zone->add_shipping_method( 'flat_rate' );
 		$this->assertTrue( $ships->invoke( null, new StoreResponses( true ) ) );
+		$this->product->set_regular_price( '' );
+		$this->product->save();
+		$this->assertNull( $ships->invoke( null, new StoreResponses( true ) ), 'Without a price WooCommerce prints no offer' );
+		$this->product->set_regular_price( '10' );
 		$this->product->set_virtual( true );
 		$this->product->save();
-		$variable->delete( true );
-		$this->assertFalse( $ships->invoke( null, new StoreResponses( true ) ), 'A virtual product has no shipping details to give' );
+		$this->assertNull( $ships->invoke( null, new StoreResponses( true ) ), 'A virtual product has no shipping details to give' );
+
+		$this->product->delete( true );
+		WC_Helper_Product::create_variation_product();
+		$this->assertNull( $ships->invoke( null, new StoreResponses( true ) ), 'A variable product: WooCommerce prints shipping details only for a chosen variation' );
 	}
 
 	/**

@@ -23,10 +23,18 @@ type DataViewsAction = {
 
 // Captured on each render so tests can drive the actions directly.
 let capturedActions: DataViewsAction[] = [];
+let capturedOnClickItem: ( ( item: EmailType ) => unknown ) | undefined;
 
 jest.mock( '@wordpress/dataviews/wp', () => ( {
-	DataViews: ( { actions }: { actions: DataViewsAction[] } ) => {
+	DataViews: ( {
+		actions,
+		onClickItem,
+	}: {
+		actions: DataViewsAction[];
+		onClickItem?: ( item: EmailType ) => unknown;
+	} ) => {
 		capturedActions = actions;
+		capturedOnClickItem = onClickItem;
 		return null;
 	},
 } ) );
@@ -111,6 +119,7 @@ describe( 'ListView', () => {
 
 	beforeEach( () => {
 		capturedActions = [];
+		capturedOnClickItem = undefined;
 		useSendTestEmailMock.mockClear();
 		mockRecreateEmailPost.mockReset();
 
@@ -197,6 +206,38 @@ describe( 'ListView', () => {
 			expect( mockRecreateEmailPost ).toHaveBeenCalledWith( 'new_order' );
 			expect( window.location.href ).toBe( '' );
 			expect( mockCreateErrorNotice ).toHaveBeenCalled();
+		} );
+	} );
+
+	describe( 'title click', () => {
+		it( 'opens the editor like the edit action', async () => {
+			render( <ListView emailTypes={ [ emailType ] } /> );
+
+			await capturedOnClickItem?.( emailType );
+
+			expect( window.location.href ).toBe(
+				'https://example.test/wp-admin/post.php?post=123&action=edit'
+			);
+		} );
+
+		it( 'lazily creates the post when no post exists', async () => {
+			mockRecreateEmailPost.mockResolvedValue( {
+				message: 'ok',
+				post_id: '456',
+			} );
+			const emailWithoutPost = {
+				...emailType,
+				post_id: '',
+				postStatus: null,
+			};
+			render( <ListView emailTypes={ [ emailWithoutPost ] } /> );
+
+			await capturedOnClickItem?.( emailWithoutPost );
+
+			expect( mockRecreateEmailPost ).toHaveBeenCalledWith( 'new_order' );
+			expect( window.location.href ).toBe(
+				'https://example.test/wp-admin/post.php?post=456&action=edit'
+			);
 		} );
 	} );
 
