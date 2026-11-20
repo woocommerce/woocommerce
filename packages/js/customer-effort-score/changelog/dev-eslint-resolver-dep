@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Declare the ESLint webpack resolver this package's lint config uses; no production change.
+
+
