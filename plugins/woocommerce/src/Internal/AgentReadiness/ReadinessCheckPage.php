@@ -927,7 +927,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			? __( 'These are other files and code that some AI assistants use to learn about your store. None are required, so there’s nothing to fix.', 'woocommerce' )
 			: sprintf(
 				/* translators: 1: number of items found, 2: number of items checked. */
-				__( 'These are other files and code that some AI assistants use to learn about your store. Your store shares %1$s of these %2$s. None are required, so there’s nothing to fix.', 'woocommerce' ),
+				_n(
+					'These are other files and code that some AI assistants use to learn about your store. Your store shares %1$s of %2$s. None are required, so there’s nothing to fix.',
+					'These are other files and code that some AI assistants use to learn about your store. Your store shares %1$s of these %2$s. None are required, so there’s nothing to fix.',
+					$checked,
+					'woocommerce'
+				),
 				number_format_i18n( $found ),
 				number_format_i18n( $checked )
 			);

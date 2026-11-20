@@ -49,7 +49,7 @@ describe( 'CheckRow', () => {
 	} );
 
 	it.each( [ 'Payments', '返品ポリシーのページを公開する' ] )(
-		'keeps only the badge together for a title without spaces, so a long one can still wrap: %s',
+		'keeps the last character with the badge for a title without spaces, so a long one can still wrap: %s',
 		( title ) => {
 			const { container } = renderRow(
 				row( {
@@ -60,7 +60,9 @@ describe( 'CheckRow', () => {
 
 			expect(
 				container.querySelector( '.wc-sales-readiness-row__title-end' )
-			).toHaveTextContent( /^Required$/ );
+			).toHaveTextContent(
+				new RegExp( '^' + Array.from( title ).pop() + 'Required$' )
+			);
 			expect(
 				container.querySelector( '.wc-sales-readiness-row__title' )
 			).toHaveTextContent( title + 'Required' );

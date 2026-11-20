@@ -116,8 +116,11 @@ const TitleWithBadge = ( {
 	title: string;
 	badge: ViewBadge;
 } ) => {
-	// A title without spaces, such as one word or Japanese, wraps as usual: only the badge stays together.
-	const split = title.lastIndexOf( ' ' ) + 1 || title.length;
+	// A title without spaces, such as one word or Japanese, can still wrap: only its last character stays
+	// with the badge, so the badge never sits on a line of its own.
+	const split =
+		title.lastIndexOf( ' ' ) + 1 ||
+		title.length - ( Array.from( title ).pop()?.length ?? 0 );
 	return (
 		<>
 			{ title.slice( 0, split ) }

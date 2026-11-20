@@ -746,7 +746,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertStringContainsString( 'Your store shares 0 of these 1.', $this->view()['declared']['text'] );
+		$this->assertStringContainsString( 'Your store shares 0 of 1.', $this->view()['declared']['text'] );
 
 		update_option(
 			'woocommerce_agent_readiness_report',
