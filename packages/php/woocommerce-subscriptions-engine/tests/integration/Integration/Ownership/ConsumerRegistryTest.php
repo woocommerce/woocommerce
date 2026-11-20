@@ -144,6 +144,7 @@ class ConsumerRegistryTest extends EngineIntegrationTestCase {
 			'surrounded'     => array( '  woocommerce-subscriptions-lite  ' ),
 			'capitals'       => array( 'LITE' ),
 			'inner space'    => array( 'li te' ),
+			'accent'         => array( 'lité' ),
 			'65 characters'  => array( str_repeat( 'a', 65 ) ),
 		);
 	}

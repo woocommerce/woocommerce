@@ -14,6 +14,9 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ValidationException;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 
@@ -31,6 +34,11 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 	 * A valid owner slug.
 	 */
 	private const OWNER = 'acme-subs';
+
+	/**
+	 * Customer of the contract.
+	 */
+	private const CUSTOMER_ID = 41;
 
 	/**
 	 * Id of a contract of {@see self::OWNER}.
@@ -66,7 +74,12 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 	public function setUp(): void {
 		parent::setUp();
 
-		$created = Contracts::create( array( 'extension_slug' => self::OWNER ) );
+		$created = Contracts::create(
+			array(
+				'extension_slug' => self::OWNER,
+				'customer_id'    => self::CUSTOMER_ID,
+			)
+		);
 		$this->assertIsArray( $created );
 		$this->contract_id = (int) $created['contract']->get_id();
 		$this->lock        = $created['lock'];
@@ -106,19 +119,69 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox $entry accepts a valid owner slug.
+	 * @testdox $entry accepts a valid owner slug and does its work.
 	 * @dataProvider provide_entry_points
 	 *
 	 * @param string $entry Entry point name.
 	 */
 	public function test_a_valid_owner_slug_is_accepted( string $entry ): void {
-		try {
-			$this->call( $entry, self::OWNER );
-		} catch ( ValidationException $e ) {
-			$this->fail( sprintf( '%s refused a valid owner slug: %s', $entry, $e->getMessage() ) );
+		if ( 'Contracts::lock' === $entry ) {
+			$this->lock->release();
+		}
+		if ( 'Contracts::delete_meta' === $entry ) {
+			Contracts::add_meta( $this->contract_id, self::OWNER, 'note', 'x', false, $this->lock );
+		}
+		if ( 'Plans::delete_meta' === $entry ) {
+			Plans::add_meta( $this->plan_id, self::OWNER, 'note', 'x' );
 		}
 
-		$this->addToAssertionCount( 1 );
+		$result = $this->call( $entry, self::OWNER );
+
+		switch ( $entry ) {
+			case 'Contracts::lock':
+				$this->assertInstanceOf( ContractLock::class, $result );
+				$this->lock = $result;
+				return;
+			case 'Contracts::create':
+				$this->assertIsArray( $result );
+				$this->assertInstanceOf( ContractView::class, $result['contract'] );
+				$this->assertInstanceOf( ContractLock::class, $result['lock'] );
+				$this->assertSame( self::OWNER, $result['contract']->get_extension_slug() );
+				$result['lock']->release();
+				return;
+			case 'Contracts::update':
+				$this->assertInstanceOf( ContractView::class, $result );
+				$this->assertSame( 'EUR', $result->get_currency() );
+				return;
+			case 'Contracts::add_cycle':
+				$this->assertInstanceOf( CycleView::class, $result );
+				return;
+			case 'Contracts::add_meta':
+				$this->assertIsInt( $result );
+				$this->assertSame( 'x', Contracts::get_meta( $this->contract_id, 'note', true ) );
+				return;
+			case 'Contracts::list_for_customer':
+				$this->assertSame( array( $this->contract_id ), self::get_ids( $result ) );
+				return;
+			case 'Plans::create':
+				$this->assertInstanceOf( PlanView::class, $result );
+				$this->assertSame( self::OWNER, $result->get_extension_slug() );
+				return;
+			case 'Plans::update':
+				$this->assertInstanceOf( PlanView::class, $result );
+				$this->assertSame( 'Renamed', $result->get_name() );
+				return;
+			case 'Plans::add_meta':
+				$this->assertIsInt( $result );
+				$this->assertSame( 'x', Plans::get_meta( $this->plan_id, 'note', true ) );
+				return;
+			case 'Plans::list':
+				$this->assertSame( array( $this->plan_id ), self::get_ids( $result ) );
+				return;
+		}
+
+		// transition_cycle, update_meta and delete_meta report a write with true.
+		$this->assertTrue( $result );
 	}
 
 	/**
@@ -171,23 +234,16 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 	 *
 	 * @param string $entry Entry point name.
 	 * @param string $slug  Owner slug.
+	 * @return mixed The entry point's return value.
 	 */
-	private function call( string $entry, string $slug ): void {
+	private function call( string $entry, string $slug ) {
 		switch ( $entry ) {
 			case 'Contracts::lock':
-				$lock = Contracts::lock( $this->contract_id, $slug, 'test' );
-				if ( null !== $lock ) {
-					$lock->release();
-				}
-				return;
+				return Contracts::lock( $this->contract_id, $slug, 'test' );
 			case 'Contracts::create':
-				$created = Contracts::create( array( 'extension_slug' => $slug ) );
-				if ( is_array( $created ) ) {
-					$created['lock']->release();
-				}
-				return;
+				return Contracts::create( array( 'extension_slug' => $slug ) );
 			case 'Contracts::update':
-				Contracts::update(
+				return Contracts::update(
 					$this->contract_id,
 					array(
 						'extension_slug' => $slug,
@@ -195,16 +251,10 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 					),
 					$this->lock
 				);
-				return;
 			case 'Contracts::add_cycle':
-				Contracts::add_cycle(
-					$this->contract_id,
-					$this->cycle_args( $slug ),
-					$this->lock
-				);
-				return;
+				return Contracts::add_cycle( $this->contract_id, $this->cycle_args( $slug ), $this->lock );
 			case 'Contracts::transition_cycle':
-				Contracts::transition_cycle(
+				return Contracts::transition_cycle(
 					$this->cycle_id,
 					array(
 						'extension_slug' => $slug,
@@ -213,48 +263,37 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 					),
 					$this->lock
 				);
-				return;
 			case 'Contracts::add_meta':
-				Contracts::add_meta( $this->contract_id, $slug, 'note', 'x', false, $this->lock );
-				return;
+				return Contracts::add_meta( $this->contract_id, $slug, 'note', 'x', false, $this->lock );
 			case 'Contracts::update_meta':
-				Contracts::update_meta( $this->contract_id, $slug, 'note', 'x', null, $this->lock );
-				return;
+				return Contracts::update_meta( $this->contract_id, $slug, 'note', 'x', null, $this->lock );
 			case 'Contracts::delete_meta':
-				Contracts::delete_meta( $this->contract_id, $slug, 'note', null, $this->lock );
-				return;
+				return Contracts::delete_meta( $this->contract_id, $slug, 'note', null, $this->lock );
 			case 'Contracts::list_for_customer':
-				Contracts::list_for_customer( 1, 20, 0, array( 'extension_slug' => $slug ) );
-				return;
+				return Contracts::list_for_customer( self::CUSTOMER_ID, 20, 0, array( 'extension_slug' => $slug ) );
 			case 'Plans::create':
-				Plans::create(
+				return Plans::create(
 					array(
 						'extension_slug' => $slug,
 						'name'           => 'Monthly',
 					)
 				);
-				return;
 			case 'Plans::update':
-				Plans::update(
+				return Plans::update(
 					$this->plan_id,
 					array(
 						'extension_slug' => $slug,
 						'name'           => 'Renamed',
 					)
 				);
-				return;
 			case 'Plans::add_meta':
-				Plans::add_meta( $this->plan_id, $slug, 'note', 'x' );
-				return;
+				return Plans::add_meta( $this->plan_id, $slug, 'note', 'x' );
 			case 'Plans::update_meta':
-				Plans::update_meta( $this->plan_id, $slug, 'note', 'x' );
-				return;
+				return Plans::update_meta( $this->plan_id, $slug, 'note', 'x' );
 			case 'Plans::delete_meta':
-				Plans::delete_meta( $this->plan_id, $slug, 'note' );
-				return;
+				return Plans::delete_meta( $this->plan_id, $slug, 'note' );
 			case 'Plans::list':
-				Plans::list( array( 'extension_slug' => $slug ) );
-				return;
+				return Plans::list( array( 'extension_slug' => $slug ) );
 		}
 
 		$this->fail( sprintf( 'Unknown entry point %s.', $entry ) );
@@ -291,6 +330,23 @@ class OwnerSlugValidationTest extends EngineIntegrationTestCase {
 		}
 
 		$this->fail( sprintf( '%s accepted "%s".', $entry, $slug ) );
+	}
+
+	/**
+	 * Ids of a list of views.
+	 *
+	 * @param mixed $views Contract or plan views.
+	 * @return array<int, int|null>
+	 */
+	private static function get_ids( $views ): array {
+		self::assertIsArray( $views );
+
+		return array_map(
+			static function ( $view ): ?int {
+				return $view instanceof ContractView || $view instanceof PlanView ? $view->get_id() : null;
+			},
+			$views
+		);
 	}
 
 	/**

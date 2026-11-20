@@ -823,7 +823,7 @@ final class PlansController extends WP_REST_Controller {
 		if ( null === $raw ) {
 			return $this->get_extension_slug_error( ValidationErrorCode::REQUIRED, 'extension_slug is required.' );
 		}
-		$raw_string = trim( Coercion::coerce_string( $raw ) );
+		$raw_string = Coercion::coerce_string( $raw );
 		if ( '' === $raw_string ) {
 			return $this->get_extension_slug_error( ValidationErrorCode::REQUIRED, 'extension_slug is required.' );
 		}
@@ -833,9 +833,10 @@ final class PlansController extends WP_REST_Controller {
 		}
 
 		$slugs = array();
-		foreach ( explode( ',', $raw_string ) as $possible_slug ) {
-			// Spaces around the commas are list formatting, not part of a slug.
-			$slug = trim( $possible_slug );
+		// Whitespace next to a comma is list formatting (`a, b`) and is dropped; any other
+		// whitespace stays part of the slug and is refused, as at the facades.
+		foreach ( (array) preg_split( '/\s*,\s*/', $raw_string ) as $slug ) {
+			$slug = (string) $slug;
 			if ( '' === $slug || 'any' === $slug ) {
 				return $this->get_extension_slug_error( ValidationErrorCode::INVALID_VALUE, 'extension_slug must be "any" or a comma-separated list of extension slugs.' );
 			}
@@ -864,16 +865,15 @@ final class PlansController extends WP_REST_Controller {
 		if ( ! is_string( $raw ) ) {
 			return $this->get_extension_slug_error( ValidationErrorCode::INVALID_TYPE, 'extension_slug must be a string.', array( 'type' => 'string' ) );
 		}
-		$raw_string = trim( $raw );
-		if ( '' === $raw_string ) {
+		if ( '' === $raw ) {
 			return $this->get_extension_slug_error( ValidationErrorCode::REQUIRED, 'extension_slug is required.' );
 		}
 
-		if ( 'any' === $raw_string || false !== strpos( $raw_string, ',' ) ) {
+		if ( 'any' === $raw || false !== strpos( $raw, ',' ) ) {
 			return $this->get_extension_slug_error( ValidationErrorCode::INVALID_VALUE, 'extension_slug must be a concrete extension slug.' );
 		}
 
-		return $this->get_extension_slug_pattern_error( $raw_string ) ?? $raw_string;
+		return $this->get_extension_slug_pattern_error( $raw ) ?? $raw;
 	}
 
 	/**

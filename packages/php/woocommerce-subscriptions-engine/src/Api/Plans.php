@@ -305,8 +305,9 @@ final class Plans {
 	 * @param array<string, mixed> $args {
 	 *     Optional. Query args.
 	 *
-	 *     @type string|string[] $extension_slug Owning extension slug, or a list of them (duplicates are
-	 *                                           ignored; `any` is refused). Absent: every extension.
+	 *     @type string|string[] $extension_slug Owning extension slug, or a list of them, each 1-64 of
+	 *                                           `[a-z0-9_-]` (duplicates are ignored; `any` is refused).
+	 *                                           Absent: every extension.
 	 *     @type string|string[] $status         Plan status, or a list of them. Absent: every status.
 	 *     @type int[]           $ids            Only these plan ids: a list of positive integers (digit
 	 *                                           strings are cast). A non-list or a non-positive id throws.
@@ -315,7 +316,8 @@ final class Plans {
 	 * }
 	 * @return array<int, PlanView>
 	 * @throws ValidationException If a value is invalid, with every invalid value reported: an empty
-	 *                             or non-string slug or status, `any` as a slug, a non-positive or
+	 *                             or non-string slug or status, a slug that is not a valid extension
+	 *                             slug (1-64 of `[a-z0-9_-]`), `any` as a slug, a non-positive or
 	 *                             non-integer id or limit, a negative or non-integer offset.
 	 */
 	public static function list( array $args = array() ): array {
@@ -331,7 +333,8 @@ final class Plans {
 		if ( array_key_exists( 'extension_slug', $filtered_args ) ) {
 			$extension_slugs = (array) $validator->get_string_list( 'extension_slug', $filtered_args['extension_slug'] );
 			foreach ( $extension_slugs as $index => $slug ) {
-				$validator->get_extension_slug( is_array( $filtered_args['extension_slug'] ) ? 'extension_slug.' . $index : 'extension_slug', $slug );
+				$field = is_array( $filtered_args['extension_slug'] ) ? ArgumentValidator::get_item_field( 'extension_slug', $index ) : 'extension_slug';
+				$validator->get_extension_slug( $field, $slug );
 			}
 			$extension_slugs = array_values( array_unique( $extension_slugs ) );
 			if ( in_array( 'any', $extension_slugs, true ) ) {

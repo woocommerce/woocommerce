@@ -1296,11 +1296,14 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		foreach ( array( 'any,' . self::EXTENSION_SLUG, self::EXTENSION_SLUG . ',', ',' . self::EXTENSION_SLUG, 'lite,,test' ) as $extension_slug ) {
 			$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => $extension_slug ) );
 
-			$this->assert_invalid_param( $list, 'extension_slug', 'invalid_value' );
+			$this->assert_invalid_param( $list, 'extension_slug', 'invalid_value', sprintf( 'extension_slug "%s"', $extension_slug ) );
 		}
 
+		$empty = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => '' ) );
+		$this->assert_invalid_param( $empty, 'extension_slug', 'required' );
+
 		$blank = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => ' ' ) );
-		$this->assert_invalid_param( $blank, 'extension_slug', 'required' );
+		$this->assert_invalid_param( $blank, 'extension_slug', 'invalid_pattern', 'Whitespace is refused, not trimmed away.' );
 	}
 
 	public function test_list_with_any_extension_slug_returns_all_plans(): void {
@@ -1460,9 +1463,13 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 
 		$id = $this->create_plan( 'Scoped' );
 
-		foreach ( array( 'LITE', 'li te', str_repeat( 'a', 65 ) ) as $extension_slug ) {
-			$this->assert_invalid_param( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => $extension_slug ) ), 'extension_slug', 'invalid_pattern' );
-			$this->assert_invalid_param( $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG . ',' . $extension_slug ) ), 'extension_slug', 'invalid_pattern' );
+		foreach ( array( 'LITE', 'li te', ' ' . self::EXTENSION_SLUG . ' ', str_repeat( 'a', 65 ) ) as $extension_slug ) {
+			$this->assert_invalid_param( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => $extension_slug ) ), 'extension_slug', 'invalid_pattern', sprintf( 'GET item, "%s"', $extension_slug ) );
+			$this->assert_invalid_param( $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => $extension_slug ) ), 'extension_slug', 'invalid_pattern', sprintf( 'GET list, "%s"', $extension_slug ) );
+			// Inside a comma list, spaces next to a comma are list formatting, so only unpadded slugs are refused there.
+			if ( trim( $extension_slug ) === $extension_slug ) {
+				$this->assert_invalid_param( $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG . ',' . $extension_slug . ',woocommerce-subscriptions-test' ) ), 'extension_slug', 'invalid_pattern', sprintf( 'GET list item, "%s"', $extension_slug ) );
+			}
 			$this->assert_invalid_param(
 				$this->request(
 					'POST',
@@ -1473,9 +1480,27 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 					)
 				),
 				'extension_slug',
-				'invalid_pattern'
+				'invalid_pattern',
+				sprintf( 'POST, "%s"', $extension_slug )
+			);
+			$this->assert_invalid_param(
+				$this->request(
+					'PATCH',
+					self::BASE . '/' . $id,
+					array(
+						'extension_slug' => $extension_slug,
+						'name'           => 'Invalid owner',
+					)
+				),
+				'extension_slug',
+				'invalid_pattern',
+				sprintf( 'PATCH, "%s"', $extension_slug )
 			);
 		}
+
+		$stored = Plans::get( $id );
+		$this->assertNotNull( $stored );
+		$this->assertSame( 'Scoped', $stored->get_name(), 'A refused PATCH writes nothing.' );
 	}
 
 	public function test_get_item_answers_a_failed_plan_read_with_a_500(): void {
@@ -1692,15 +1717,16 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	 * @param WP_REST_Response $response Response.
 	 * @param string           $arg      Top-level arg.
 	 * @param string           $code     Expected detail error code.
+	 * @param string           $message  Failure message naming the case.
 	 * @return array<array-key, mixed> The response data.
 	 */
-	private function assert_invalid_param( WP_REST_Response $response, string $arg, string $code ): array {
-		$this->assertSame( 400, $response->get_status() );
+	private function assert_invalid_param( WP_REST_Response $response, string $arg, string $code, string $message = '' ): array {
+		$this->assertSame( 400, $response->get_status(), $message );
 		$data = $this->response_data( $response );
 		$this->assertSame( 'rest_invalid_param', $data['code'] );
 		$this->assertIsString( $this->nested( $data, array( 'data', 'params', $arg ) ) );
 		$this->assertNotSame( '', $this->nested( $data, array( 'data', 'params', $arg ) ) );
-		$this->assertSame( $code, $this->nested( $data, array( 'data', 'details', $arg, 'code' ) ) );
+		$this->assertSame( $code, $this->nested( $data, array( 'data', 'details', $arg, 'code' ) ), $message );
 
 		return $data;
 	}

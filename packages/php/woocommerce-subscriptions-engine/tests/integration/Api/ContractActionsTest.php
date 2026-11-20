@@ -138,6 +138,8 @@ class ContractActionsTest extends EngineIntegrationTestCase {
 			'slug trailing space'       => array( 'lite ', 'pause', array() ),
 			'slug with capitals'        => array( 'LITE', 'pause', array() ),
 			'slug inner space'          => array( 'li te', 'pause', array() ),
+			'slug with an accent'       => array( 'lité', 'pause', array() ),
+			'slug empty'                => array( '', 'pause', array() ),
 			'slug 65 characters'        => array( str_repeat( 'a', 65 ), 'pause', array() ),
 			'action with capitals'      => array( self::EXTENSION_SLUG, 'Pause', array() ),
 			'action with a slash'       => array( self::EXTENSION_SLUG, 'pause/now', array() ),
