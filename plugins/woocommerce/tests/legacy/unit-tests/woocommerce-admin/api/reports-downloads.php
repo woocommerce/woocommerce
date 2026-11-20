@@ -214,6 +214,46 @@ class WC_Admin_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the date filter reads site-time bounds against download log timestamps stored in UTC.
+	 */
+	public function test_get_report_with_date_filter_in_site_timezone() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+		update_option( 'timezone_string', 'America/Los_Angeles' );
+
+		$download = new WC_Customer_Download();
+		$download->set_user_id( $this->user );
+		$download->set_order_id( 1 );
+		$download->set_product_id( 1 );
+		$download->set_download_id( '1' );
+		$download->save();
+
+		// 2026-01-13 23:30, 2026-01-14 19:00 and 2026-01-15 23:30 in site time (UTC-8).
+		foreach ( array( '2026-01-14 07:30:00', '2026-01-15 03:00:00', '2026-01-16 07:30:00' ) as $timestamp ) {
+			$log = new WC_Customer_Download_Log();
+			$log->set_permission_id( $download->get_id() );
+			$log->set_timestamp( strtotime( $timestamp . ' UTC' ) );
+			$log->save();
+		}
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'after'   => '2026-01-14T00:00:00',
+				'before'  => '2026-01-15T23:59:59',
+				'orderby' => 'date',
+				'order'   => 'asc',
+			)
+		);
+		$reports = $this->server->dispatch( $request )->get_data();
+
+		$this->assertEquals(
+			array( '2026-01-15 03:00:00', '2026-01-16 07:30:00' ),
+			array_column( $reports, 'date_gmt' )
+		);
+	}
+
+	/**
 	 * Test getting report with product filter.
 	 */
 	public function test_get_report_with_product_filter() {

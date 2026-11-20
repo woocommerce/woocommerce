@@ -328,6 +328,66 @@ class WC_Admin_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * Test that date filters and interval buckets use the site timezone, while download log timestamps are stored in UTC.
+	 */
+	public function test_get_report_uses_site_timezone() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+		update_option( 'timezone_string', 'America/Los_Angeles' );
+
+		$download = new WC_Customer_Download();
+		$download->set_user_id( $this->user );
+		$download->set_order_id( 1 );
+		$download->set_product_id( 1 );
+		$download->set_download_id( '1' );
+		$download->save();
+
+		// 2026-01-14 19:00 and 2026-01-15 23:30 in site time (UTC-8).
+		foreach ( array( '2026-01-15 03:00:00', '2026-01-16 07:30:00' ) as $timestamp ) {
+			$log = new WC_Customer_Download_Log();
+			$log->set_permission_id( $download->get_id() );
+			$log->set_timestamp( strtotime( $timestamp . ' UTC' ) );
+			$log->save();
+		}
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'after'    => '2026-01-13T00:00:00',
+				'before'   => '2026-01-15T23:59:59',
+				'interval' => 'day',
+			)
+		);
+		$reports = $this->server->dispatch( $request )->get_data();
+
+		$this->assertEquals( 2, $reports['totals']['download_count'] );
+		$this->assertEquals(
+			array(
+				'2026-01-15' => 1,
+				'2026-01-14' => 1,
+				'2026-01-13' => 0,
+			),
+			array_combine(
+				array_column( $reports['intervals'], 'interval' ),
+				array_map(
+					function ( $interval ) {
+						return $interval['subtotals']->download_count;
+					},
+					$reports['intervals']
+				)
+			)
+		);
+
+		// A page of a date-ordered report with empty intervals reads its own date range.
+		$request->set_param( 'per_page', 1 );
+		$request->set_param( 'page', 2 );
+		$reports = $this->server->dispatch( $request )->get_data();
+
+		$this->assertEquals( '2026-01-14', $reports['intervals'][0]['interval'] );
+		$this->assertEquals( 1, $reports['intervals'][0]['subtotals']->download_count );
+	}
+
+	/**
 	 * Test getting reports without valid permissions.
 	 */
 	public function test_get_reports_without_permission() {
