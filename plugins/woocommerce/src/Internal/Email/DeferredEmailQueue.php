@@ -34,6 +34,11 @@ final class DeferredEmailQueue {
 	private const QUEUED_OBJECT_KEY = '__woocommerce_deferred_email_object';
 
 	/**
+	 * Argument keys whose values must never be persisted in the email queue.
+	 */
+	private const SENSITIVE_ARG_KEYS = array( 'user_pass' );
+
+	/**
 	 * Queue of email callbacks collected during the current request.
 	 *
 	 * @var array<int, array{filter: string, args: array, locale: string}>
@@ -236,6 +241,8 @@ final class DeferredEmailQueue {
 	 */
 	private function prepare_arg_for_queue( $arg ) {
 		if ( is_array( $arg ) ) {
+			$arg = $this->sanitize_args_for_queue( $arg );
+
 			foreach ( $arg as $key => $value ) {
 				$arg[ $key ] = $this->prepare_arg_for_queue( $value );
 			}
@@ -267,6 +274,20 @@ final class DeferredEmailQueue {
 		}
 
 		return $arg;
+	}
+
+	/**
+	 * Remove known sensitive fields before persisting email arguments.
+	 *
+	 * @param array $args Arguments at the current array depth.
+	 * @return array
+	 */
+	private function sanitize_args_for_queue( array $args ): array {
+		foreach ( self::SENSITIVE_ARG_KEYS as $key ) {
+			unset( $args[ $key ] );
+		}
+
+		return $args;
 	}
 
 	/**

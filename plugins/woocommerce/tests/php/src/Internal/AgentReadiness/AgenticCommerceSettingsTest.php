@@ -1359,9 +1359,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$html = $this->render_page( '' );
 		$this->assertTrue( $this->save_hidden, 'Nothing on the Overview saves' );
 		$this->assertStringContainsString( '<div id="wc-agent-readiness-overview"', $html, 'The Overview is React, mounted by the settings-embed script' );
-		$this->assertMatchesRegularExpression( '#data-view="([^"]+)"#', $html );
-		preg_match( '#data-view="([^"]+)"#', $html, $match );
-		$this->assertSame( 'Set up AI shopping', json_decode( html_entity_decode( $match[1] ), true )['overview']['shopping']['button']['text'], 'The view comes with the page, so the cards draw without a request' );
+		$this->assertSame( 'Set up AI shopping', json_decode( $this->data_view( $html, 'wc-agent-readiness-overview' ), true )['overview']['shopping']['button']['text'], 'The view comes with the page, so the cards draw without a request' );
 		$this->assertStringNotContainsString( 'No llms.txt file', $html );
 
 		$view = $this->view();
@@ -2195,6 +2193,54 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A page title is shown with its entities decoded, and an entity in a check label stays inside the JSON.
+	 */
+	public function test_page_title_with_entities_stays_inside_the_view(): void {
+		$title  = 'Returns &quot;}, &quot;z&quot;: {&quot;a&quot;: &quot; &amp; &lt;b&gt; <i>';
+		$id     = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => $title,
+			)
+		);
+		$stored = get_post( $id )->post_title;
+		$this->assertStringContainsString( '&quot;', $stored, 'The title keeps its entities, as one saved without unfiltered_html can' );
+
+		$view   = $this->shopping();
+		$labels = array_merge( ...array_map( static fn( array $field ): array => array_column( $field['options'], 'label' ), $view['policies']['fields'] ) );
+		$titles = array_values( array_filter( $labels, static fn( string $label ): bool => str_contains( $label, 'Returns' ) ) );
+		$this->assertNotEmpty( $titles, 'The page is listed in the policy dropdowns' );
+		foreach ( $titles as $label ) {
+			$this->assertSame( 'Returns "}, "z": {"a": " & <b>', $label, 'The dropdown shows the title with its entities decoded' );
+		}
+
+		// ReadinessCopy has no wording for this check, so the stored label is what the Overview shows.
+		$label = 'Blue &quot;}, &amp; Co <i>';
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'checks'       => array(
+					array(
+						'id'    => 'entity_in_label',
+						'count' => 1,
+						'label' => $label,
+					),
+				),
+			),
+			false
+		);
+		$html = $this->render_page( '' );
+		$this->assertStringNotContainsString( '&amp;', $html, 'No & from the view is left for the browser to decode' );
+		$overview = json_decode( $this->data_view( $html, 'wc-agent-readiness-overview' ), true );
+		$this->assertIsArray( $overview, 'The Overview view still reads as JSON' );
+		$products = current( array_filter( $overview['sections'], static fn( array $section ): bool => 'products' === $section['id'] ) );
+		$this->assertIsArray( $products, 'The Overview lists product checks' );
+		$this->assertContains( $label, array_column( $products['rows'], 'title' ), 'A check label with entities stays a label in the Overview' );
+	}
+
+	/**
 	 * @testdox A stored policy page that no longer exists starts on "Choose a page", as the select did, and no policy field means no pages to list.
 	 */
 	public function test_policy_field_with_a_deleted_page_starts_on_choose_a_page(): void {
@@ -2383,12 +2429,42 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 * @return array<string, mixed>
 	 */
 	private function shopping( bool $ucp_on = false ): array {
-		$html = $this->render_page( AgenticCommerceSettings::SHOPPING_SECTION, $ucp_on );
-		$this->assertMatchesRegularExpression( '#<div id="wc-ai-shopping" class="wc-ai-shopping-root wc-settings-prevent-change-event" data-view="([^"]+)"></div>#', $html );
-		preg_match( '#data-view="([^"]+)"#', $html, $match );
-		$view = json_decode( html_entity_decode( $match[1], ENT_QUOTES ), true );
+		$html      = $this->render_page( AgenticCommerceSettings::SHOPPING_SECTION, $ucp_on );
+		$processor = new \WP_HTML_Tag_Processor( $html );
+		$this->assertTrue(
+			$processor->next_tag(
+				array(
+					'tag_name'   => 'div',
+					'class_name' => 'wc-ai-shopping-root',
+				)
+			),
+			'AI shopping renders its view root'
+		);
+		$this->assertSame( 'wc-ai-shopping', $processor->get_attribute( 'id' ) );
+		$this->assertStringContainsString( 'wc-settings-prevent-change-event', (string) $processor->get_attribute( 'class' ) );
+		$view = json_decode( (string) $processor->get_attribute( 'data-view' ), true );
 		$this->assertIsArray( $view );
 		return $view;
+	}
+
+	/**
+	 * The data-view attribute on a rendered root, decoded the way the browser reads it.
+	 *
+	 * @param string $html       Rendered markup.
+	 * @param string $root_class Class of the root div.
+	 */
+	private function data_view( string $html, string $root_class ): string {
+		$processor = new \WP_HTML_Tag_Processor( $html );
+		$this->assertTrue(
+			$processor->next_tag(
+				array(
+					'tag_name'   => 'div',
+					'class_name' => $root_class,
+				)
+			),
+			'The page renders its view root'
+		);
+		return (string) $processor->get_attribute( 'data-view' );
 	}
 
 	/**
