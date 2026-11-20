@@ -92,6 +92,7 @@ final class PlanRepository {
 	 * @param int         $id             Plan id.
 	 * @param string|null $extension_slug Owning extension slug to scope the read to; null reads any extension.
 	 * @return Plan|null Hydrated plan, or null if not found (also when it belongs to another extension).
+	 * @throws \RuntimeException If the read fails: a failed read must not look like a missing plan.
 	 */
 	public function find( int $id, ?string $extension_slug = null ): ?Plan {
 		global $wpdb;
@@ -109,6 +110,9 @@ final class PlanRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 		$row = $wpdb->get_row( $sql, ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( sprintf( 'Failed to read plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
+		}
 
 		if ( null === $row ) {
 			return null;

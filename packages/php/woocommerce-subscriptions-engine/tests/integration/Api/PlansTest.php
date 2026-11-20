@@ -1173,6 +1173,37 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox update and get throw on a failed plan read instead of reporting the plan missing.
+	 */
+	public function test_update_and_get_throw_on_a_failed_plan_read(): void {
+		$id = $this->create();
+
+		$this->fail_next_query( '/^\s*SELECT p\.\* FROM \S*selling_plans p /' );
+		try {
+			Plans::update(
+				$id,
+				array(
+					'extension_slug' => self::OWNER,
+					'name'           => 'Renamed',
+				)
+			);
+			$this->fail( 'Expected update() to throw.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( "Failed to read plan {$id}", $e->getMessage() );
+		}
+
+		$this->fail_next_query( '/^\s*SELECT \* FROM \S*selling_plans WHERE id/' );
+		try {
+			Plans::get( $id );
+			$this->fail( 'Expected get() to throw.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertStringContainsString( "Failed to read plan {$id}", $e->getMessage() );
+		}
+
+		$this->assertSame( 'Monthly', $this->stored( $id )->get_name() );
+	}
+
+	/**
 	 * @testdox list without args returns every extension's plans in every status, oldest id first.
 	 */
 	public function test_list_without_args_returns_every_plan_in_id_order(): void {

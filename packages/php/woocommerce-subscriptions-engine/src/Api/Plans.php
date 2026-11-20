@@ -159,7 +159,8 @@ final class Plans {
 	 *                             with the engine code, `field` and `params`), or the owning extension
 	 *                             refuses the plan; entity and extension refusals arrive in one exception.
 	 * @throws RuntimeException If a validation callback throws (the callback's throwable is chained
-	 *                          as the previous exception) or the update fails (no previous exception).
+	 *                          as the previous exception), or the plan read or the update fails (no
+	 *                          previous exception).
 	 */
 	public static function update( int $plan_id, array $args ): ?PlanView {
 		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
@@ -283,6 +284,7 @@ final class Plans {
 	 *
 	 * @param int $plan_id Plan id.
 	 * @return PlanView|null The plan, or null when none exists.
+	 * @throws RuntimeException If the read fails.
 	 */
 	public static function get( int $plan_id ): ?PlanView {
 		$plan = ( new PlanRepository() )->find( $plan_id );

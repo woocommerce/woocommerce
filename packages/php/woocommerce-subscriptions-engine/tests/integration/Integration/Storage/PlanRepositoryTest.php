@@ -210,6 +210,35 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox find throws on a failed read, scoped or not, instead of reading the plan as missing.
+	 * @dataProvider provide_failing_find_reads
+	 *
+	 * @param string      $pattern        Regex of the read to break.
+	 * @param string|null $extension_slug Owner to scope the read to, or null.
+	 */
+	public function test_find_throws_on_a_failed_read( string $pattern, ?string $extension_slug ): void {
+		$repo = new PlanRepository();
+		$id   = $this->insert_plan( $repo, 'Stored' );
+
+		$this->fail_next_query( $pattern );
+
+		$this->expectException( \RuntimeException::class );
+		$this->expectExceptionMessage( "Failed to read plan {$id}" );
+
+		$repo->find( $id, $extension_slug );
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: string|null}>
+	 */
+	public function provide_failing_find_reads(): array {
+		return array(
+			'unscoped' => array( '/^\s*SELECT \* FROM \S*selling_plans WHERE id/', null ),
+			'scoped'   => array( '/^\s*SELECT p\.\* FROM \S*selling_plans p /', 'lite' ),
+		);
+	}
+
+	/**
 	 * @testdox update_fields writes nothing and returns false when the row belongs to another extension.
 	 */
 	public function test_update_fields_writes_nothing_to_a_row_of_another_extension(): void {
