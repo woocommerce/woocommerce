@@ -359,11 +359,11 @@ final class BlockTypesLazyController {
 		if ( ! is_admin() ) {
 			// These blocks override enqueue_data() with editor-visible data, hence load eagerly in admin.
 			$list['attribute-filter']      = \Automattic\WooCommerce\Blocks\BlockTypes\AttributeFilter::class;
-			$list['price-filter']          = \Automattic\WooCommerce\Blocks\BlockTypes\PriceFilter::class;
-			$list['rating-filter']         = \Automattic\WooCommerce\Blocks\BlockTypes\RatingFilter::class;
-			$list['stock-filter']          = \Automattic\WooCommerce\Blocks\BlockTypes\StockFilter::class;
-			$list['product-filters']       = \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilters::class;
-			$list['product-filter-chips']  = \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterChips::class;
+			$list['price-filter']         = \Automattic\WooCommerce\Blocks\BlockTypes\PriceFilter::class;
+			$list['rating-filter']        = \Automattic\WooCommerce\Blocks\BlockTypes\RatingFilter::class;
+			$list['stock-filter']         = \Automattic\WooCommerce\Blocks\BlockTypes\StockFilter::class;
+			$list['product-filters']      = \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilters::class;
+			$list['product-filter-chips'] = \Automattic\WooCommerce\Blocks\BlockTypes\ProductFilterChips::class;
 		}
 
 		return $list;
